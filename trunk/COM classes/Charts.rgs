@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Charts.1 = s 'Charts Class'
+	{
+		CLSID = s '{1176C871-4C0B-48CF-85B6-926A7948E0F7}'
+	}
+	MapWinGIS.Charts = s 'Charts Class'
+	{
+		CLSID = s '{1176C871-4C0B-48CF-85B6-926A7948E0F7}'
+		CurVer = s 'MapWinGIS.Charts.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {1176C871-4C0B-48CF-85B6-926A7948E0F7} = s 'Charts Class'
+		{
+			ProgID = s 'MapWinGIS.Charts.1'
+			VersionIndependentProgID = s 'MapWinGIS.Charts'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

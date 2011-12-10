@@ -1,0 +1,4 @@
+directory: fips123/f123src
+
+This subdirectory contains the entire FIPS PUB 123 Function Library 
+source code written in the ANSI C programming language.

@@ -1,0 +1,25 @@
+HKCR
+{
+	MapWinGIS.ShapeDrawingOptions.1 = s 'ShapeDrawingOptions Class'
+	{
+		CLSID = s '{58804A7F-2C75-41AF-9D32-5BD08DB1BAF6}'
+	}
+	MapWinGIS.ShapeDrawingOptions = s 'ShapeDrawingOptions Class'
+	{
+		CLSID = s '{58804A7F-2C75-41AF-9D32-5BD08DB1BAF6}'
+		CurVer = s 'MapWinGIS.ShapeDrawingOptions.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {58804A7F-2C75-41AF-9D32-5BD08DB1BAF6} = s 'ShapeDrawingOptions Class'
+		{
+			ProgID = s 'MapWinGIS.ShapeDrawingOptions.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapeDrawingOptions'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

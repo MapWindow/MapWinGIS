@@ -1,0 +1,18 @@
+When releasing a new version version numbers need to be updated on several locations:
+MapWinGIS.rc lines: 56, 57, 75, 71
+MapWinGIS.cpp lines: 21, 22
+MapWinGIS.odl line: 1835 (helpfile("MapWinGIS.chm"))
+                  , 1848 (helpstring("Dispatch interface for Map Control"))
+
+If you want to update AxInterop.MapWinGIS.dll and Interop.MapWinGIS.dll
+just delete them, unregister the ocx using
+regsvr32 /u /s MapWinGIS.ocx
+Rebuild the MapWinGIS solution.
+register the ocx again using regMapWinGIS.cmd
+Start a new project in VS2008.
+Add a reference to the MapWinGIS Components (using the COM tab of the reference form)
+Compile and in the bin folder of this temp project a new Interop.MapWinGIS.dll is created.
+Add a form to your project and drag the MapWinGIS component on your form.
+Recompile and a new AxInterop.MapWinGIS.dll is also created.
+
+Copy these two interop dll to the bin folder and you're ready to go.

@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.LineSegment.1 = s 'LineSegment Class'
+	{
+		CLSID = s '{03A98C90-70FF-40C7-AD93-6BF8B41B170F}'
+	}
+	MapWinGIS.LineSegment = s 'LineSegment Class'
+	{
+		CLSID = s '{03A98C90-70FF-40C7-AD93-6BF8B41B170F}'
+		CurVer = s 'MapWinGIS.LineSegment.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {03A98C90-70FF-40C7-AD93-6BF8B41B170F} = s 'LineSegment Class'
+		{
+			ProgID = s 'MapWinGIS.LineSegment.1'
+			VersionIndependentProgID = s 'MapWinGIS.LineSegment'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,17 @@
+// Optimize
+# include "Timer.h"
+//-Optimize
+
+			// Optimize
+AfxMessageBox("Starting timer");
+			ofstream out("C:\\profile.txt",ios::app);
+			Init_Timer();
+			Start_Timer();
+			//-Optimize
+
+		// Optimize
+		Stop_Timer();
+		Print_Timer(out,"fread : Disk");
+AfxMessageBox("Stopping timer");
+		out.close();
+		//-Optimize

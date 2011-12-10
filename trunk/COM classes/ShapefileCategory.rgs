@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ShapefileCategory.1 = s 'ShapefileCategory Class'
+	{
+		CLSID = s '{51464A2A-69F7-4CAD-8728-9608580210A3}'
+	}
+	MapWinGIS.ShapefileCategory = s 'ShapefileCategory Class'
+	{
+		CLSID = s '{51464A2A-69F7-4CAD-8728-9608580210A3}'
+		CurVer = s 'MapWinGIS.ShapefileCategory.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {51464A2A-69F7-4CAD-8728-9608580210A3} = s 'ShapefileCategory Class'
+		{
+			ProgID = s 'MapWinGIS.ShapefileCategory.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapefileCategory'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

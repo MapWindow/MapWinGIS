@@ -1,0 +1,27 @@
+HKCR
+{
+	MapWinGIS.Vector.1 = s 'Vector Class'
+	{
+		CLSID = s '{D226C4B1-C97C-469D-8CBC-8E3DF2139612}'
+	}
+	MapWinGIS.Vector = s 'Vector Class'
+	{
+		CLSID = s '{D226C4B1-C97C-469D-8CBC-8E3DF2139612}'
+		CurVer = s 'MapWinGIS.Vector.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {D226C4B1-C97C-469D-8CBC-8E3DF2139612} = s 'Vector Class'
+		{
+			ProgID = s 'MapWinGIS.Vector.1'
+			VersionIndependentProgID = s 'MapWinGIS.Vector'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			val AppID = s '{882849F0-12B0-486F-9496-B34042DBCD11}'
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}
