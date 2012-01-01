@@ -133,7 +133,7 @@ END
 // Bitmap
 //
 
-IDB_MAP                 BITMAP                  "Resources\\Map.bmp"
+IDB_MAP                 BITMAP                  "Resource\\Map.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -172,10 +172,10 @@ END
 // Cursor
 //
 
-IDC_ZOOMIN              CURSOR                  "Resources/cursor4.cur"
-IDC_PAN                 CURSOR                  "Resources/cursor1.cur"
-IDC_SELECT              CURSOR                  "Resources/cursor2.cur"
-IDC_ZOOMOUT             CURSOR                  "Resources/cursor3.cur"
+IDC_ZOOMIN              CURSOR                  "Resource/cursor4.cur"
+IDC_PAN                 CURSOR                  "Resource/cursor1.cur"
+IDC_SELECT              CURSOR                  "Resource/cursor2.cur"
+IDC_ZOOMOUT             CURSOR                  "Resource/cursor3.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -184,7 +184,7 @@ IDC_ZOOMOUT             CURSOR                  "Resources/cursor3.cur"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON1               ICON                    "Resources/zoom_in_16_2.ico"
+IDI_ICON1               ICON                    "Resource/zoom_in_16_2.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
