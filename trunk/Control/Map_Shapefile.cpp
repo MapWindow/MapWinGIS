@@ -11,10 +11,9 @@
 #include "Map.h"
 #include <vector>
 #include "Enumerations.h"
-//#include "UtilityFunctions.h"
 #include "ShapeDrawingOptions.h"
 
-// TODO: the following propoerties for the new symbology must be implemented
+// TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
 // ShapeLayerFillStipple
 // ShapeLayerPointType
@@ -45,6 +44,34 @@ CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 					options->Release();
 					return retVal;
 				}
+			}
+		}
+		else
+		{
+			this->ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
+		}
+	}
+	else
+	{
+		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+	}
+	return NULL;
+}
+
+IShapeDrawingOptions* CMapView::get_ShapeDrawingOptions(long layerHandle)
+{
+	if (layerHandle >= 0 && layerHandle < (long)m_allLayers.size())
+	{
+		Layer * layer = m_allLayers[layerHandle];
+		if( layer->type == ShapefileLayer )
+		{
+			IShapefile* sf = NULL;
+			layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			if (sf)
+			{
+				IShapeDrawingOptions* options = NULL;
+				sf->get_DefaultDrawingOptions(&options);
+				return options;
 			}
 		}
 		else
@@ -383,10 +410,48 @@ void CMapView::SetShapeLayerPointType(long LayerHandle, short nNewValue)
 {
 	if (m_ShapeDrawingMethod == dmNewSymbology)
 	{
-		CDrawingOptionsEx* options = get_ShapefileDrawingOptions(LayerHandle);
+		IShapeDrawingOptions* options = get_ShapeDrawingOptions(LayerHandle);
 		if (options)
 		{
-			ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);	// TODO: write conversions between point types	
+			switch (nNewValue)
+			{
+				case ptSquare:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsSquare);
+					break;
+				case ptCircle:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsCircle);
+					break;
+				case ptDiamond:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsDiamond);
+					break;
+				case ptTriangleUp:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsTriangleUp);
+					break;
+				case ptTriangleDown:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsTriangleDown);
+					break;
+				case ptTriangleLeft:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsTriangleLeft);
+					break;
+				case ptTriangleRight:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsTriangleRight);
+					break;
+				case ptUserDefined:
+					options->put_PointType(tkPointSymbolType::ptSymbolPicture);
+					break;
+				case ptImageList:
+					options->put_PointType(tkPointSymbolType::ptSymbolPicture);
+					break;
+				case ptFontChar:
+					options->put_PointType(tkPointSymbolType::ptSymbolFontCharacter);
+					break;
+				default:
+					options->SetDefaultPointSymbol(tkDefaultPointSymbol::dpsDiamond);
+					break;
+			}
+
+			//ErrorMessage(tkPROPERTY_NOT_IMPLEMENTED);	// TODO: write conversions between point types	
+			options->Release();
 		}
 	}
 	else
@@ -566,8 +631,8 @@ void CMapView::SetUDPointType(long LayerHandle, LPDISPATCH newValue)
 					sli->udDC->DeleteDC();
 				sli->udDC=NULL;
 
-				iimg->get_Width(&(sli->udPointTypeWidth));
-				iimg->get_Height(&(sli->udPointTypeHeight));
+				iimg->get_OriginalWidth(&(sli->udPointTypeWidth));
+				iimg->get_OriginalHeight(&(sli->udPointTypeHeight));
 
 				if( sli->udPointTypeWidth > 0 && sli->udPointTypeHeight > 0 )
 				{

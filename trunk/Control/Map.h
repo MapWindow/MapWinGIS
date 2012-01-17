@@ -944,6 +944,7 @@ protected:
 	void SetPixelsPerDegree(DOUBLE newVal);
 	BSTR GetLayerFilename(LONG layerHandle);
 	VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
+	IShapeDrawingOptions* CMapView::get_ShapeDrawingOptions(long layerHandle);
 };
 
 //{{AFX_INSERT_LOCATION}}

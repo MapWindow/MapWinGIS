@@ -176,7 +176,7 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 {
 	USES_CONVERSION;
 	CString ImageFile = OLE2CA(ImageFileName);
-	fileName = Utility::ConvertBSTRToLPSTR ( ImageFileName ); //For ReadRaster	
+	fileName = OLE2A(ImageFileName); //  Utility::ConvertBSTRToLPSTR ( ImageFileName ); //For ReadRaster	
 	inRam = (InRam == VARIANT_TRUE)?true:false;
 	
 	// child classes will be deleted here
