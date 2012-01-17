@@ -1043,14 +1043,14 @@ STDMETHODIMP CShapeDrawingOptions::put_LineColor (OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_DrawingMode (tkVectorDrawingMode *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.drawingMode;
+	*pVal = m_options.drawingModeSet;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)	
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	// It's no longer allowed to change drawing mode
-	//m_options.drawingMode = newVal;
+	m_options.drawingModeSet = newVal;
 	return S_OK;
 }
 

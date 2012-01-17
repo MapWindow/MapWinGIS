@@ -73,6 +73,7 @@ public:
 	tkPointSymbolType pointSymbolType;
 	tkPointShapeType pointShapeType;
 	tkVectorDrawingMode drawingMode;
+	tkVectorDrawingMode drawingModeSet;
 	tkGradientBounds fillGradientBounds;
 	tkGradientType fillGradientType;
 	
@@ -110,6 +111,7 @@ public:
 		//selectionTransparency = 180;
 				
 		drawingMode = vdmGDIMixed;
+		drawingModeSet = vdmGDIMixed;
 
 		visible = true;
 		fillVisible = true;

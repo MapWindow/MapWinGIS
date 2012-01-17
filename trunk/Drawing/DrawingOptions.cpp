@@ -44,6 +44,7 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 		return *this;
 	
 	this->drawingMode = opt.drawingMode;
+	this->drawingModeSet = opt.drawingModeSet;
 	
 	this->fillBgColor = opt.fillBgColor;
 	this->fillBgTransparent = opt.fillBgTransparent;

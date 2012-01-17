@@ -561,7 +561,7 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 		options->drawingMode = vdmGDIPlus;
 	}
 
-	if (_forceGdiplus)
+	if (_forceGdiplus || options->drawingModeSet == vdmGDIPlus )
 	{
 		options->drawingMode = vdmGDIPlus;
 	}
@@ -587,17 +587,17 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 	{
 		if (_shptype == SHP_POLYLINE && options->useLinePattern && options->CanUseLinePattern())
 		{
-			DrawPolylinePatternCategory(options, indices, drawSelection);
+			this->DrawPolylinePatternCategory(options, indices, drawSelection);
 		}
 		else
 		{
 			if ( options->drawingMode == vdmGDIMixed && _shptype == SHP_POLYLINE )
 			{
-				DrawPolyCategoryGDI( options, indices, drawSelection );	// only lines are drawn here
+				this->DrawPolyCategoryGDI( options, indices, drawSelection );	// only lines are drawn here
 			}
 			else
 			{
-				DrawPolyCategoryGDIPlus( options, indices, drawSelection );
+				this->DrawPolyCategoryGDIPlus( options, indices, drawSelection );
 			}
 		}
 	}
