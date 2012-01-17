@@ -24,7 +24,7 @@
 #include "GeometryConverter.h"
 #include <map>
 #include "Varh.h"
-//#include "UtilityFunctions.h"
+
 #include "Extents.h"
 #include "clipper.h"
 
@@ -1029,44 +1029,57 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 		globalCallback->QueryInterface(IID_IStopExecution,(void**)&_stopExecution);
 	}
 
-	// do calculation
+	// do calculation by Clipper
+	if (useClipper)
+	{
+		switch (operation)
+		{
+			case clDifference:
+				this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+				break;
+			case clIntersection:
+				this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
+				break;
+			case clClip:
+				this->ClipClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+				break;
+			case clSymDifference:
+				this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+				this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);
+				break;
+			case clUnion:
+				std::set<int> shapesToSkipSubject;
+				std::set<int> shapesToSkipClipping;
+				this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap, &shapesToSkipSubject, &shapesToSkipClipping);
+				this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, NULL, &shapesToSkipSubject);
+				this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap, &shapesToSkipClipping);
+		}
+	}
+
+	// do calculation by GEOS
 	switch (operation)
 	{	
 		case clDifference:
-			if (useClipper) this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-			else			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
 			break;
 		case clIntersection:
-			if (useClipper) this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
-			else			this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
+			this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap);
 			break;
 		case clClip:
-			if (useClipper) this->ClipClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-			else			this->ClipGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+			this->ClipGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
 			break;
 		case clSymDifference:
 			// 2 differences
-			if (useClipper) this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-			else			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
-
-			if (useClipper) this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);
-			else			this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);	
+			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval);
+			this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap);	
 			break;
 		case clUnion:
+			// intersection + symmetrical difference
 			std::set<int> shapesToSkipSubject;
 			std::set<int> shapesToSkipClipping;
-			
-			// intersection + symmetrical difference
-			if (useClipper) this->IntersectionClipper(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap, 
-													 &shapesToSkipSubject, &shapesToSkipClipping);
-			else			this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap, 
-													&shapesToSkipSubject, &shapesToSkipClipping );
-			
-			if (useClipper) this->DifferenceClipper(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, NULL, &shapesToSkipSubject);
-			else			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, NULL, &shapesToSkipSubject);
-
-			if (useClipper) this->DifferenceClipper(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap, &shapesToSkipClipping);
-			else 			this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap, &shapesToSkipClipping);	
+			this->IntersectionGEOS(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, &fieldMap, &shapesToSkipSubject, &shapesToSkipClipping );
+			this->DifferenceGEOS(this, SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, *retval, NULL, &shapesToSkipSubject);
+			this->DifferenceGEOS(sfOverlay, SelectedOnlyOverlay, this, SelectedOnlySubject, *retval, &fieldMap, &shapesToSkipClipping);	
 			break;
 	}
 
@@ -1191,7 +1204,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 						gsGeom2 = vGeometries[clipId];
 					}
 					
-					if (GEOSIntersects(gsGeom1, gsGeom2))
+					if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
 					{
 						vUnion.push_back(gsGeom2);
 					}
@@ -1350,8 +1363,9 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 					{
 						poly2 = vPolygons[clipId];
 					}
-
-					clp.AddPolyPolygon(*poly2, ptClip);
+					
+					if (poly2)
+						clp.AddPolyPolygon(*poly2, ptClip);
 				}
 				
 				// in case there are several input polygons, they should be merged before clipping
@@ -1364,7 +1378,8 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 				}
 				
 				// adding subject polygon
-				clp.AddPolyPolygon(*poly1, ptSubject);
+				if (poly1)
+					clp.AddPolyPolygon(*poly1, ptSubject);
 
 				// do clipping
 				TPolyPolygon polyResult;
@@ -1463,7 +1478,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 		if (SelectedOnlySubject && !_shapeData[subjectId]->selected)
 			continue;
 		
-		IExtents* box;
+		IExtents* box = NULL;
 		vector<int> shapeIds;
 		double xMin, xMax, yMin, yMax, zMin, zMax;
 		this->QuickExtents(subjectId, &box);			// extracting subject extents
@@ -1748,8 +1763,10 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 				
 					if (poly2)
 					{
-						clp.AddPolyPolygon(*poly1, ptSubject);
-						clp.AddPolyPolygon(*poly2, ptClip);
+						if (poly1)
+							clp.AddPolyPolygon(*poly1, ptSubject);
+						if (poly2)
+							clp.AddPolyPolygon(*poly2, ptClip);
 
 						// do clipping
 						TPolyPolygon polyResult;
@@ -1921,7 +1938,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 						gsGeom2 = vGeometries[clipId];
 					}
 					
-					if (GEOSIntersects(gsGeom1, gsGeom2))
+					if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
 					{
 						vClip.push_back(gsGeom2);
 					}
@@ -2135,15 +2152,17 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 					{
 						poly2 = vPolygons[clipId];
 					}
-
-					clp->AddPolyPolygon(*poly2, ptClip);
+					
+					if (poly2)
+						clp->AddPolyPolygon(*poly2, ptClip);
 					
 					#ifdef SERIALIZE_POLYGONS
 					SerializePolygon(out, poly2);
 					#endif
 				}
-
-				clp->AddPolyPolygon(*poly1, ptSubject);
+				
+				if (poly1)
+					clp->AddPolyPolygon(*poly1, ptSubject);
 
 				#ifdef SERIALIZE_POLYGONS
 				SerializePolygon(out, poly1);

@@ -23,7 +23,7 @@
 #include "stdafx.h"
 #include "Shapefile.h"
 #include "ShapefileReader.h"
-//#include "UtilityFunctions.h"
+
 
 #pragma region FastMode
 // ************************************************************
@@ -666,7 +666,9 @@ STDMETHODIMP CShapefile::QuickExtents(long ShapeIndex, IExtents **retval)
 
 					if( shapetype == SHP_NULLSHAPE )
 					{
-						*retval = NULL;				
+						//*retval = NULL;					
+						(*retval)->SetBounds(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);		// client code commonly doesn't chec the refernce
+																				// so it will safer this way
 					}
 					else if( shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM )
 					{	

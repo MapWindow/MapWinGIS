@@ -1113,8 +1113,8 @@ int CShapeWrapper::get_ContentLength()
 int CShapeWrapper::get_ContentLength(ShpfileType shptype,  int numPoints, int numParts)
 {
 	int contentLength;
-	if( shptype == SHP_NULLSHAPE )
-			contentLength = 0;
+		if( shptype == SHP_NULLSHAPE )
+			contentLength = sizeof(int);		// type is stored
 		else if( shptype == SHP_POINT )
 		{	
 			contentLength = sizeof(int) +

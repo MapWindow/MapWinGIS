@@ -234,7 +234,7 @@
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.lib;NCSUtil4.lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\MapWindow4Dev\Bin\MapWinGIS.pdb"
+				ProgramDatabaseFile="..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
