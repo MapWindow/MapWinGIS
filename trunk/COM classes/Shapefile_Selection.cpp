@@ -146,7 +146,7 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 					shapeVal = i;
 				}
 
-				if( pointInPolygon( shapeVal, b_minX, b_minY ) )
+				if( this->pointInPolygon( shapeVal, b_minX, b_minY ) )
 				{	
 					selectResult.push_back( shapeVal );
 					continue;														

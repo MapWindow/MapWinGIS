@@ -2385,7 +2385,7 @@ STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 BOOL CShapefile::pointInPolygon( long ShapeIndex, double x, double y )
 {
 	VARIANT_BOOL InPolygon;
-	PointInShape(ShapeIndex, x, y, &InPolygon);
+	this->PointInShape(ShapeIndex, x, y, &InPolygon);
 	return -InPolygon;
 }
 
@@ -2409,7 +2409,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 	
 	if (_isEditingShapes)
 	{	
-		if(_shpfiletype != SHP_POLYGON)
+		if(_shpfiletype != SHP_POLYGON && _shpfiletype != SHP_POLYGONM && _shpfiletype != SHP_POLYGONZ)
 		{
 			*retval = VARIANT_FALSE;
 			return S_OK;
@@ -2419,6 +2419,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 		QuickExtents(ShapeIndex, &ext);
 		double xMin, yMin, xMax, yMax,zMin, zMax;
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		ext->Release();
 		if(x < xMin || y < yMin || x > xMax || y > yMax)
 		{	
 			*retval = VARIANT_FALSE;
@@ -2451,6 +2452,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 		fseek(_shpfile, shpOffsets[ShapeIndex] + sizeof(int)*2, SEEK_SET);
 		fread(&shpType, sizeof(int), 1, _shpfile);
 
+		shpType = Utility::ShapeTypeConvert2D((ShpfileType)shpType);
 		if(shpType != SHP_POLYGON)
 		{
 			*retval = VARIANT_FALSE;
