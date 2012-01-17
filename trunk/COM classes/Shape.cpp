@@ -334,10 +334,9 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 		return S_OK;
 	}
 	
-	ShpfileType shptype = _shp->get_ShapeType();
+	ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
 
-	if (shptype == SHP_POLYGON || shptype == SHP_POLYGONM || shptype == SHP_POLYGONZ || 
-		shptype == SHP_POLYLINE || shptype == SHP_POLYLINEM || shptype == SHP_POLYLINEZ)
+	if (shptype == SHP_POLYGON || shptype == SHP_POLYLINE)
 	{
 		if (_shp->get_PartCount() == 0)
 		{
@@ -346,7 +345,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 		}
 	}
 	
-	if (shptype == SHP_POLYGON || shptype == SHP_POLYGONM || shptype == SHP_POLYGONZ)
+	if (shptype == SHP_POLYGON)
 	{
 		int beg_part, end_part;
 		double x1, x2, y1, y2;
@@ -370,13 +369,63 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// -----------------------------------------------
 	//  check through GEOS (common for both modes)
 	// -----------------------------------------------
-	OGRGeometry* oGeom = NULL;
-
-	oGeom = GeometryConverter::ShapeToGeometry(this);
+	OGRGeometry* oGeom = GeometryConverter::ShapeToGeometry(this);
 	if (oGeom == NULL) 
 	{
 		_isValidReason = "Failed to convert to OGR geometry";
 		return S_OK;
+	}
+	
+	// checking the clockwise-order
+	if (shptype == SHP_POLYGON)
+	{
+		VARIANT_BOOL isClockwise;
+		int partCount = _shp->get_PartCount();
+		if (partCount == 1)
+		{
+			this->get_PartIsClockWise(0, &isClockwise);
+			if (!isClockwise)
+			{
+				_isValidReason = "Single-part polygon must have clockwise order of points";
+				delete oGeom;
+				return S_OK;
+			}
+		}
+		
+		// checks for multipart polygons; seem to be no need - geos catch all the errors;
+
+		//OGRGeometryCollection* col = (OGRGeometryCollection*)oGeom;
+		//if (false)
+		//{
+		//	// there are several polygons, some of them may have holes
+		//	int count = 0;
+		//	for (int i = 0; i < partCount; i++)
+		//	{
+		//		this->get_PartIsClockWise(i, &isClockwise);
+		//		if (isClockwise)
+		//			count++;
+		//	}
+
+		//	if (count != col->getNumGeometries())
+		//	{
+		//		_isValidReason = "Wrong clockwise order for the parts of the polygon";
+		//		delete oGeom;
+		//		return S_OK;
+		//	}
+		//}
+		//{
+		//	// it's a polygon with holes 
+		//	OGRPolygon* poly = (OGRPolygon*)oGeom;
+		//	if (poly)
+		//	{
+		//		if (poly->getNumInteriorRings() != partCount - 1)
+		//		{
+		//			_isValidReason = "Wrong clockwise order for the parts of the polygon";
+		//			delete oGeom;
+		//			return S_OK;
+		//		}
+		//	}
+		//}
 	}
 
 	// added code
