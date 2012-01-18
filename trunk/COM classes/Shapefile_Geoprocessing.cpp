@@ -688,9 +688,12 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				else
 				{
 					IShape* shp = GeometryConverter::GeometryToShape(oGeom);
-					(*sf)->EditInsertShape(shp, &count, &vbretval);	
-					shp->Release();
-					count++;
+					if (shp)
+					{
+						(*sf)->EditInsertShape(shp, &count, &vbretval);	
+						shp->Release();
+						count++;
+					}
 				}
 				delete oGeom;
 			}
