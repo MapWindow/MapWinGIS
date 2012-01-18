@@ -1268,14 +1268,30 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 	
 	switch (Relation)
 	{
-		case srContains:	res = oGeom1->Contains(oGeom2);
-		case srCrosses:		res = oGeom1->Crosses(oGeom2);
-		case srDisjoint:	res = oGeom1->Disjoint(oGeom2);
-		case srEquals:		res = oGeom1->Equal(oGeom2);
-		case srIntersects:	res = oGeom1->Intersect(oGeom2);
-		case srOverlaps:	res = oGeom1->Overlaps(oGeom2);
-		case srTouches:		res = oGeom1->Touches(oGeom2);
-		case srWithin:		res = oGeom1->Within(oGeom2);
+		case srContains:	
+			res = oGeom1->Contains(oGeom2);
+			break;
+		case srCrosses:		
+			res = oGeom1->Crosses(oGeom2);
+			break;
+		case srDisjoint:	
+			res = oGeom1->Disjoint(oGeom2);
+			break;
+		case srEquals:		
+			res = oGeom1->Equal(oGeom2);
+			break;
+		case srIntersects:	
+			res = oGeom1->Intersect(oGeom2);
+			break;
+		case srOverlaps:	
+			res = oGeom1->Overlaps(oGeom2);
+			break;
+		case srTouches:		
+			res = oGeom1->Touches(oGeom2);
+			break;
+		case srWithin:		
+			res = oGeom1->Within(oGeom2);
+			break;
 	}
 	
 	delete oGeom1;
