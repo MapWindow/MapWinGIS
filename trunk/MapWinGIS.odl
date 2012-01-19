@@ -2446,6 +2446,10 @@ interface IShapefile : IDispatch{
 	[id(98), helpstring("method ReprojectInPlace")] HRESULT ReprojectInPlace([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out,retval] VARIANT_BOOL* retVal);
 	[id(99), helpstring("method SimplifyLines")] HRESULT SimplifyLines([in] DOUBLE Tolerance, [in]VARIANT_BOOL SelectedOnly, [out,retval] IShapefile** retVal);
 	[id(100), helpstring("method FixUpShapes")] HRESULT FixUpShapes([out]IShapefile** retVal, [out, retval]VARIANT_BOOL* fixed);
+
+	[id(101), helpstring("method EditAddShape")] HRESULT EditAddShape([in]IShape* shape, [out, retval]long* shapeIndex);
+	[id(102), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
+																	  [in]int width, [out, retval]long* fieldIndex);
 };
 
 /****************************  Shape Interface ***********************/
@@ -2518,6 +2522,9 @@ interface IShape : IDispatch{
 	[id(50), helpstring("method ExportToBinary")] HRESULT ExportToBinary([in,out] VARIANT* bytesArray, [out,retval] VARIANT_BOOL* retVal);
 	[id(51), helpstring("method ImportFromBinary")] HRESULT ImportFromBinary([in] VARIANT bytesArray, [out,retval] VARIANT_BOOL* retVal);
 	[id(52), helpstring("method Fixup")] HRESULT FixUp([out]IShape** retval);
+	
+	[id(53), helpstring("method AddPoint")] HRESULT AddPoint([in]double x, [in]double y, [out,retval]long* pointIndex);
+
 };
 
 /****************************  Extents Interface ***********************/
@@ -2620,6 +2627,9 @@ interface ITable : IDispatch{
 	[id(32), helpstring("method TestExpression")] HRESULT TestExpression([in] BSTR Expression, [in] tkValueType ReturnType, [in,out] BSTR* ErrorString, [out,retval] VARIANT_BOOL* retVal);
 	[id(33), helpstring("method Calculate")] HRESULT Calculate([in] BSTR Expression, [in] LONG RowIndex, [out] VARIANT* Result, [out] BSTR* ErrorString, [out,retval] VARIANT_BOOL* retVal);
 	//[id(34), helpstring("method CalculateStat")] HRESULT CalculateStat([in] LONG FieldIndex, [in] tkGroupOperation Statistic, [in] BSTR Expression, [out] VARIANT* Result, VARIANT_BOOL* retVal);
+
+	[id(34), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
+																	  [in]int width, [out, retval]long* fieldIndex);
 };
 
 

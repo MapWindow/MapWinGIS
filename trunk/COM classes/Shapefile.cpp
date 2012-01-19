@@ -2399,3 +2399,34 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 
 	return S_OK;
 }
+
+// *****************************************************************
+//		EditAddField()
+// *****************************************************************
+STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, int width, long *fieldIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!this->dbf)
+	{
+		this->ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
+	}
+	else
+	{
+		dbf->EditAddField(name, type, precision, width, fieldIndex);
+	}
+	return S_OK;
+}
+
+// *****************************************************************
+//		EditAddShape()
+// *****************************************************************
+STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	VARIANT_BOOL retval;
+	*shapeIndex = _shapeData.size();
+	this->EditInsertShape(shape, shapeIndex, &retval);
+	if (retval == VARIANT_FALSE)
+		*shapeIndex = -1;
+	return S_OK;
+}

@@ -170,6 +170,7 @@ public:
 	STDMETHOD(ExportToBinary)(VARIANT* bytesArray, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromBinary)(VARIANT bytesArray, VARIANT_BOOL* retVal);
 	STDMETHOD(FixUp)(IShape** retval);
+	STDMETHOD(AddPoint)(double x, double y, long* pointIndex);
 	
 	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
 	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);

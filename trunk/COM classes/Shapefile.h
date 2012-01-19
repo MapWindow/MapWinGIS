@@ -408,6 +408,9 @@ public:
 	STDMETHOD(SimplifyLines)(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal);
 	STDMETHOD(FixUpShapes)(IShapefile** retVal, VARIANT_BOOL* fixed);
 
+	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
+	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
+
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
 	

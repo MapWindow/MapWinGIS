@@ -2570,6 +2570,26 @@ bool CTableClass::set_IndexValue(int rowIndex)
 }
 
 // *****************************************************************
+//		EditAddField()
+// *****************************************************************
+STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision, int width, long* fieldIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	IField* field = NULL;
+	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
+	field->put_Name(name);
+	field->put_Width(width);
+	field->put_Precision(precision);
+	field->put_Type(type);
+	*fieldIndex = (long)_fields.size();
+	VARIANT_BOOL vbretval;
+	this->EditInsertField(field, fieldIndex, NULL, &vbretval);
+	if (vbretval == VARIANT_FALSE)
+		*fieldIndex = -1;
+	return S_OK;
+}
+
+// *****************************************************************
 //		CalculateStat()
 // *****************************************************************
 //STDMETHODIMP CTableClass::CalculateStat(LONG FieldIndex, tkGroupOperation Statistic, BSTR Expression, VARIANT* Result, VARIANT_BOOL* retVal)

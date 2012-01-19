@@ -2607,3 +2607,14 @@ STDMETHODIMP CShape::FixUp(IShape** retval)
 	}
 	return S_OK;
 }
+
+//*****************************************************************
+//*		AddPoint()
+//*****************************************************************
+STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
+	*pointIndex = success ? _shp->get_PointCount() - 1 : -1;
+	return S_OK;
+}
