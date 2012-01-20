@@ -442,12 +442,8 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	if (!GEOSisValid( hGeosGeom ))
 	{
 		char* buffer = GEOSisValidReason(hGeosGeom);
-		CString s;
-		s.Append(buffer);
-		_isValidReason = s.GetBuffer();
+		_isValidReason = buffer;
 		CPLFree(buffer);
-		//_isValidReason = _strdup(buffer);
-		
 	}
 	else
 	{

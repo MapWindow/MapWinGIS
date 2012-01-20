@@ -181,7 +181,7 @@ private:
 	BSTR _key;
 	long _lastErrorCode;
 	ICallback * _globalCallback;
-	char* _isValidReason;
+	CString _isValidReason;
 
 	// either CShapeWrapper or CShapeWrapperCOM
 	IShapeWrapper* _shp;

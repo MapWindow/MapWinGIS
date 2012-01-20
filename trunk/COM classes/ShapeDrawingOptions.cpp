@@ -1468,7 +1468,7 @@ STDMETHODIMP CShapeDrawingOptions::Serialize(BSTR* retVal)
 	{
 		CString str;
 		char* buffer = CPLSerializeXMLTree(node);	
-		str.Append(buffer);
+		str = buffer;
 		CPLFree(buffer);
 		*retVal = A2BSTR(str);
 		CPLDestroyXMLNode(node);
