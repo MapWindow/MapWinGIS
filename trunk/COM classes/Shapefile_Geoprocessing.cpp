@@ -3462,6 +3462,43 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 #pragma endregion
 
 // **********************************************************************
+//		InsertShapes()
+// **********************************************************************
+// A utility function to adding geometry produced by simplification routine to the sfTarget shapefile,
+// with copying of attributes from source shapefile.
+// initShapeIndex - the index of shape to copy the attribute from
+void InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSouce, int initShapeIndex )
+{
+	if (gsNew)
+	{
+		std::vector<IShape*> shapes;
+		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes))
+		{
+			long index, numFields;
+			VARIANT_BOOL vbretval;
+			sfTarget->get_NumFields(&numFields);
+
+			for (unsigned int j = 0; j < shapes.size(); j++)
+			{
+				sfTarget->get_NumShapes(&index);
+				sfTarget->EditInsertShape(shapes[j], &index, &vbretval);
+				
+				if (vbretval)
+				{
+					CComVariant val;
+					for (int f = 0; f < numFields; f++)
+					{
+						sfSouce->get_CellValue(f, initShapeIndex, &val);
+						sfTarget->EditCellValue(f, index, val, &vbretval);
+					}
+				}
+			}
+		}
+	}
+}
+
+
+// **********************************************************************
 //		SimplifyLines()
 // **********************************************************************
 STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal)
@@ -3469,6 +3506,8 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 	
+	(*retVal) = NULL;
+
 	// do we have enough shapes, are they selected?
 	long numShapes = _shapeData.size();		
 	if (numShapes == 0) 
@@ -3477,24 +3516,22 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	LONG numFields;
 	this->get_NumFields(&numFields);
 
-	// creation of resulting shapefile
-	VARIANT_BOOL vbretval;
-	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)retVal);
-	(*retVal)->CreateNew(A2BSTR(""), _shpfiletype, &vbretval);
-	
-	CopyFields(this, *retVal);
-
-	// copying the projection string
-	BSTR pVal;
-	this->get_Projection(&pVal);
-	if (pVal != NULL)
+	ShpfileType shpType = Utility::ShapeTypeConvert2D(_shpfiletype);
+	if (shpType != SHP_POLYLINE && shpType != SHP_POLYGON)
 	{
-		(*retVal)->put_Projection(pVal);
-		SysFreeString(pVal);
+		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+		return S_OK;
 	}
-	
+
+	IShapefile* sfNew = NULL;
+	this->Clone(&sfNew);
+
+	if (!sfNew)
+		return S_OK;
+
+	VARIANT_BOOL vbretval;
 	long index = 0, percent = 0;
-	CComVariant val;
+	
 	for (int i = 0; i < numShapes; i++)
 	{
 		if( globalCallback != NULL )
@@ -3503,7 +3540,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Sorting..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
 			}
 		}
 
@@ -3515,45 +3552,66 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 		GEOSGeometry* gsGeom = GeometryConverter::Shape2GEOSGeom(shp);
 		shp->Release();
 		if (gsGeom == NULL) continue;
-		
-		GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
-		GEOSGeom_destroy(gsGeom);
-		
-		if (gsNew) 
+
+		int numGeom = GEOSGetNumGeometries(gsGeom);
+			
+		/*	int numRings = 0;
+			if (type == "Polygon")
+				numRings = GEOSGetNumInteriorRings(gsGeom);*/
+
+		if (shpType == SHP_POLYLINE)
 		{
-			if (GEOSisValid(gsNew))
+			GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
+			if (gsNew)
 			{
-				std::vector<IShape*> shapes;
-				if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes))
+				InsertGeosGeometry(sfNew, gsNew, this, i);
+				GEOSGeom_destroy(gsNew);
+			}
+		}
+		else
+		{
+			char* val = GEOSGeomType(gsGeom);
+			CString type = val;
+			CPLFree(val);
+
+			if (type != "MultiPolygon")
+			{
+				GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsGeom, Tolerance);
+				if (gsNew)
 				{
-					for (unsigned int j = 0; j < shapes.size(); j++)
+					InsertGeosGeometry(sfNew, gsNew, this, i);
+					GEOSGeom_destroy(gsNew);
+				}
+			}
+			else
+			{
+				for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
+				{
+					const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
+					GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsPart, Tolerance);
+					if (gsPart)
 					{
-						(*retVal)->get_NumShapes(&index);
-						(*retVal)->EditInsertShape(shapes[j], &index, &vbretval);
-						
-						if (vbretval)
-						{
-							for (int f = 0; f < numFields; f++)
-							{
-								this->get_CellValue(f, i, &val);
-								(*retVal)->EditCellValue(f, index, val, &vbretval);
-							}
-						}
+						InsertGeosGeometry(sfNew, gsNew, this, i);
+						GEOSGeom_destroy(gsNew);
 					}
 				}
 			}
-			GEOSGeom_destroy(gsNew);
 		}
+		GEOSGeom_destroy(gsGeom);
 	}
 
 	globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 
-	(*retVal)->get_NumShapes(&numShapes);
+	sfNew->get_NumShapes(&numShapes);
 	if (numShapes == 0)
 	{
-		(*retVal)->Close(&vbretval);
-		(*retVal)->Release();
-		(*retVal) = NULL;
+		sfNew->Close(&vbretval);
+		sfNew->Release();
+	}
+	else
+	{
+		(*retVal) = sfNew;
 	}
 	return S_OK;
 }
+

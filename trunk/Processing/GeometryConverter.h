@@ -25,8 +25,8 @@ using namespace clipper;
 class GeometryConverter
 {
 	public:
-		static IShape * GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType = wkbNone);
-		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes);
+		static IShape * GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
+		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, OGRwkbGeometryType oForceType = wkbNone);
 		static OGRGeometry* ShapeToGeometry(IShape* shp);
 		static IShapefile* Read_OGR_Layer(BSTR Filename, ShpfileType shpType = SHP_NULLSHAPE);
 		static bool Write_OGR_Layer(IShapefile* sf, BSTR Filename);
@@ -36,6 +36,7 @@ class GeometryConverter
 		static IShape* ClipPolygon(IShape* shapeClip, IShape* shapeSubject, PolygonOperation operation);
 		static bool MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>* results);
 		static GEOSGeometry* MergeGeosGeometries( std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput = true );
+		static GEOSGeometry* SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance);
 		
 		// coordinates for clipper are multiplied in case of geographic coordinate systems
 		double conversionFactor;

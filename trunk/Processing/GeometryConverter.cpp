@@ -34,21 +34,62 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 		return NULL;
 }
 
+GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
+{
+	__try
+	{
+		 return GEOSBuffer( gsGeom, distance, nQuadSegments );
+	}
+	__except(1)
+	{
+		return NULL;
+	}
+}
+
 // *********************************************************************
 //		GEOSGeom2Shape()
 // *********************************************************************
 // Converts GEOSGeom to MapWinGIS shapes
 bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes)
 {
+	bool substitute = false;
+	if (!GEOSisValid(gsGeom))
+	{
+		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
+		if (gsNew && GEOSisValid(gsNew))
+		{
+			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
+			gsGeom = gsNew;
+			substitute = true;
+		}
+	}
+	
 	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(gsGeom);
+
 	if (oGeom)
 	{
-		bool result = GeometryToShapes(oGeom, vShapes);
+		char* type = GEOSGeomType(gsGeom);
+		CString s = type;
+		GEOSFree(type);
+		
+		OGRwkbGeometryType oForceType = wkbNone;
+		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
+			oForceType = wkbLinearRing;
+
+		bool result = GeometryToShapes(oGeom, vShapes, oForceType );
 		delete oGeom;
+
+		if (substitute)
+			GEOSGeom_destroy(gsGeom);
+
 		return result;
+		
 	}
 	else
 	{
+		if (substitute)
+			GEOSGeom_destroy(gsGeom);
+
 		return false;
 	}
 }
@@ -274,7 +315,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shp)
  *
  *  @return true when at least one shape was created, and false otherwise
  */
-bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes)
+bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, OGRwkbGeometryType oForceType )
 {
 	IShape* shp;
 	if (!vShapes->empty()) vShapes->clear();
@@ -335,7 +376,7 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
 	}
 	else
 	{
-		shp = GeometryConverter::GeometryToShape(oGeom);
+		shp = GeometryConverter::GeometryToShape(oGeom, wkbNone, oForceType);
 		if (shp != NULL) vShapes->push_back(shp);
 	}
 	if (vShapes->size() > 0)	return true;
@@ -356,7 +397,7 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
  *
  *  @return pointer to shape on succes, or NULL otherwise
  */
-IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType)
+IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
 {
 	if (oGeom == NULL)
 		return NULL;
@@ -385,6 +426,9 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 			return NULL;	
 		}
 	}
+
+	if (oForceType != wkbNone)
+		oType = oForceType;
 
 	if (oType == wkbPoint || oType == wkbPoint25D) 
 	{
@@ -1138,4 +1182,55 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 		depth++;
 	}
 	return g1;
+}
+
+
+// *****************************************************
+//		SimplifyPolygon()
+// *****************************************************
+// A polygon is expected as input 
+// (mutipolygons shoud be split into parts before treating with this routine)
+GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
+{
+	const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
+	GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
+
+	if (!gsPoly)
+		return NULL;
+	
+	std::vector<GEOSGeom> holes;
+	for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
+	{
+		gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
+		if (gsRing)
+		{
+			GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
+			if (gsOut)
+			{
+				char* type = GEOSGeomType(gsOut);
+				CString s = type;
+				GEOSFree(type);
+				if (s == "LinearRing")
+					holes.push_back(gsOut);
+			}
+		}
+	}
+	
+	GEOSGeometry *gsNew = NULL;
+	if (holes.size() > 0)
+	{
+		gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
+	}
+	else
+	{
+		gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
+	}
+	
+	// cleaning
+	/*GEOSGeom_destroy(gsPoly);
+	for (size_t i = 0; i < holes.size(); i++)
+		GEOSGeom_destroy(holes[i]);*/
+
+	return gsNew;
+	
 }

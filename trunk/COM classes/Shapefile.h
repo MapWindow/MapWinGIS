@@ -41,6 +41,7 @@
 #include "ShapeData.h"
 #include "ogr_spatialref.h"
 #include "cpl_minixml.h"
+#include "geos_c.h"
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
