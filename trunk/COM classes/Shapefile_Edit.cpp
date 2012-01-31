@@ -566,14 +566,13 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 			}			
 			else
 			{	
+				VARIANT_BOOL bSynchronized;
+				m_labels->get_Synchronized(&bSynchronized);
+				if (bSynchronized)
+					m_labels->RemoveLabel(ShapeIndex, &vbretval);
+				
 				delete _shapeData[ShapeIndex];
 				_shapeData.erase( _shapeData.begin() + ShapeIndex );
-				//_numShapes--;	// todo: remove
-				
-				// TODO: rewrite
-				VARIANT_BOOL bSynchronized;
-				if(m_labels->get_Synchronized(&bSynchronized))
-					m_labels->RemoveLabel(ShapeIndex, &vbretval);
 				
 				*retval = VARIANT_TRUE;
 			}

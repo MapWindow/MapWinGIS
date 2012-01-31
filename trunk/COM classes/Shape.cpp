@@ -386,7 +386,11 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 			this->get_PartIsClockWise(0, &isClockwise);
 			if (!isClockwise)
 			{
-				_isValidReason = "Single-part polygon must have clockwise order of points";
+				VARIANT_BOOL ret;
+				double x, y;
+				this->get_XY(0, &x, &y, &ret);
+				_isValidReason.Format("Polygon must be clockwise [%f %f]", x, y);
+				//_isValidReason = "";
 				delete oGeom;
 				return S_OK;
 			}
