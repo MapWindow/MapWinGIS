@@ -464,40 +464,44 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			for (int j = 0; j < numBars; j++)
 			{
 				sweepAngle = (Gdiplus::REAL)(values[i][j]/sum * 360.0);
-
-				graphics.FillPie(brushes[j] , xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
-				path.AddPie(xStart, yStart, pieWidth, (Gdiplus::REAL)pieHeight, startAngle, sweepAngle);
 				
-				// 3D mode
-				if ( startAngle < 180.0 && _options->use3Dmode)
+				if (sweepAngle > 0.0)
 				{
-					Gdiplus::GraphicsPath pathBottom;
-					if (startAngle + sweepAngle > 180.0)
-						pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, 180.0f - startAngle);
-					else
-						pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, sweepAngle);
+					graphics.FillPie(brushes[j] , xStart, yStart, pieWidth, pieHeight, startAngle, sweepAngle);
+					path.AddPie(xStart, yStart, pieWidth, (Gdiplus::REAL)pieHeight, startAngle, sweepAngle);
 					
-					Gdiplus::PathData pathData;
-					pathBottom.GetPathData(&pathData);
-					Gdiplus::PointF* pntStart, *pntEnd;
-					if (pathData.Count > 0)
+					// 3D mode
+					if ( startAngle < 180.0 && _options->use3Dmode)
 					{
-						pntStart = &(pathData.Points[0]);
-						pntEnd = &(pathData.Points[pathData.Count - 1]);
-					}
-					pathBottom.AddLine(pntEnd->X, pntEnd->Y - (Gdiplus::REAL)pieThickness, pntEnd->X, pntEnd->Y);
+						Gdiplus::GraphicsPath pathBottom;
+						if (startAngle + sweepAngle > 180.0)
+							pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, 180.0f - startAngle);
+						else
+							pathBottom.AddArc(xStart, yStart + pieThickness, pieWidth, pieHeight, startAngle, sweepAngle);
+						
+						Gdiplus::PathData pathData;
+						pathBottom.GetPathData(&pathData);
+						Gdiplus::PointF* pntStart, *pntEnd;
+						if (pathData.Count > 0)
+						{
+							pntStart = &(pathData.Points[0]);
+							pntEnd = &(pathData.Points[pathData.Count - 1]);
+						
+							pathBottom.AddLine(pntEnd->X, pntEnd->Y - (Gdiplus::REAL)pieThickness, pntEnd->X, pntEnd->Y);
 
-					if (startAngle + sweepAngle > 180.0)
-					{
-						pathBottom.AddArc(xStart, yStart, pieWidth, pieHeight, 180.0f, -(180.0f - startAngle));
+							if (startAngle + sweepAngle > 180.0)
+							{
+								pathBottom.AddArc(xStart, yStart, pieWidth, pieHeight, 180.0f, -(180.0f - startAngle));
+							}
+							else
+								pathBottom.AddArc(xStart, yStart, pieWidth, pieHeight, startAngle + sweepAngle, -sweepAngle);
+
+							pathBottom.AddLine(pntStart->X, pntStart->Y - pieThickness, pntStart->X, pntStart->Y);
+						
+							graphics.FillPath(brushesDimmed[j], &pathBottom);
+							graphics.DrawPath(&pen, &pathBottom);
+						}
 					}
-					else
-						pathBottom.AddArc(xStart, yStart, pieWidth, pieHeight, startAngle + sweepAngle, -sweepAngle);
-					
-					pathBottom.AddLine(pntStart->X, pntStart->Y - pieThickness, pntStart->X, pntStart->Y);
-					
-					graphics.FillPath(brushesDimmed[j], &pathBottom);
-					graphics.DrawPath(&pen, &pathBottom);
 				}
 				startAngle += sweepAngle;
 			}
