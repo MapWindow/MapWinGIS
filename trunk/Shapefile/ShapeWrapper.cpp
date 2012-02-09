@@ -534,8 +534,8 @@ void CShapeWrapper::RefreshBounds()
 		{
 			_xMin = _points[0].X;
 			_yMin = _points[0].Y;
-			_zMin = _pointsZ[0];
-			_mMin = _pointsM[0];
+			_zMin = _pointsZ.size() == 1 ? _pointsZ[0] : 0.0;
+			_mMin = _pointsM.size() == 1 ? _pointsM[0] : 0.0;
 			_xMax = _xMin;
 			_yMax = _yMin;
 			_zMax = _zMin;

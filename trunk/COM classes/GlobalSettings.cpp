@@ -201,7 +201,6 @@ STDMETHODIMP CGlobalSettings::get_GdalReprojectionErrorMsg(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = A2BSTR(m_globalSettings.gdalErrorMessage);
-	m_globalSettings.gdalErrorMessage;
 	return S_OK;
 }
 

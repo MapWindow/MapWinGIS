@@ -1400,6 +1400,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 			oGeom3 = oGeom1->Difference(oGeom2);
 			break;
 		case clIntersection:
+		case clClip:
 			oGeom3 = oGeom1->Intersection(oGeom2);
 			break;
 		case clSymDifference:
