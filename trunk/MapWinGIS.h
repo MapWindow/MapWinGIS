@@ -116,6 +116,8 @@ struct GlobalSettingsInfo
 extern GlobalSettingsInfo m_globalSettings;
 extern GlobalClassFactory m_factory;
 extern bool m_gdalInitialized;
+extern IUtils* m_utils;
+
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

@@ -1865,7 +1865,13 @@ STDMETHODIMP CShape::CreateFromString(BSTR Serialized, VARIANT_BOOL *retval)
 STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	bool result;
+	if (!m_utils)
+		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&m_utils);
+	
+	if (m_utils)
+		m_utils->PointInPolygon(this, pt, retval);
+
+	/*bool result;
 	if (_useFastMode)
 	{
 		result = PointInThisPolyFast(pt);
@@ -1874,249 +1880,249 @@ STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 	{
 		result = PointInThisPolyRegular(pt);
 	}
-	*retval = result?VARIANT_TRUE:VARIANT_FALSE;
+	*retval = result?VARIANT_TRUE:VARIANT_FALSE;*/
 	return S_OK;
 }
 
 // *****************************************************************
 //		PointInThisPolyFast()
 // *****************************************************************
-bool CShape::PointInThisPolyFast(IPoint * pt)
-{
-	if (!_useFastMode)
-	{
-		AfxMessageBox("Wrong shape fast edit mode usage");
-		return false;
-	}
-
-	ShpfileType shptype = _shp->get_ShapeType();
-	
-	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
-	{
-		return false;
-	}
-
-	double x;
-	double y;
-	pt->get_X(&x);
-	pt->get_Y(&y);
-
-	double dbuf, dbuf1;
-
-	static double minx = -1;
-	static double miny = -1;
-	static double maxx = -1;
-	static double maxy = -1;
-	static bool foundMinsMaxs = false;
-	
-	if (!foundMinsMaxs)
-	{
-		if (_shp->get_PointCount() > 0)
-		{
-			_shp->get_PointXY(0, dbuf, dbuf1);
-			minx = maxx = dbuf;
-			miny = maxy = dbuf1;
-			
-			for (int i = 1; i < _shp->get_PointCount(); i++)
-			{
-				_shp->get_PointXY(i, dbuf, dbuf1);
-				if (dbuf > maxx) maxx = dbuf;
-				if (dbuf < minx) minx = dbuf;
-				
-				if (dbuf1 > maxy) maxy = dbuf1;
-				if (dbuf1 < miny) miny = dbuf1;
-			}
-		}
-		else
-		{
-			return false;
-		}
-		foundMinsMaxs = true;
-	}
-
-	if(x < minx || y < miny || x > maxx || y > maxy)
-	{
-		return false;
-	}
-
-	int CrossCount = 0;
-
-	double x1, y1, x2, y2;
-	
-	for(int nPart = 0; nPart < _shp->get_PartCount(); nPart++)
-	{
-		int nPointMax = _shp->get_PointCount() - 1;
-		
-		if (_shp->get_PartCount() - 1 > nPart)
-			nPointMax = _shp->get_PartStartPoint(nPart+1) - 1;
-		
-		for(int nPoint = _shp->get_PartStartPoint(nPart); nPoint < nPointMax; nPoint++)
-		{
-			_shp->get_PointXY(nPoint, x1, y1);
-			x1 -= x;
-			y1 -= y;
-
-			_shp->get_PointXY(nPoint + 1, x2, y2);
-			x2 -= x;
-			y2 -= y;
-
-			register double y1y2 = y1*y2;
-
-			if(y1y2 > 0.0) // If the signs are the same
-			{
-				// Then it does not cross
-				continue;
-			}
-			else if(y1y2 == 0.0) // Then it has intesected a vertex
-			{
-				if(y1 == 0.0)
-				{
-					if( y2 > 0.0 )
-						continue;
-				}
-				else if( y1 > 0.0 )
-					continue;
-			}
-
-			if( x1 > 0.0 && x2 > 0.0 )
-			{
-				CrossCount++;
-				continue;
-			}
-
-			// Calculate Intersection
-			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
-				CrossCount++;
-		}
-	}
-
-	return (CrossCount&1);
-}
+//bool CShape::PointInThisPolyFast(IPoint * pt)
+//{
+//	if (!_useFastMode)
+//	{
+//		AfxMessageBox("Wrong shape fast edit mode usage");
+//		return false;
+//	}
+//
+//	ShpfileType shptype = _shp->get_ShapeType();
+//	
+//	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
+//	{
+//		return false;
+//	}
+//
+//	double x;
+//	double y;
+//	pt->get_X(&x);
+//	pt->get_Y(&y);
+//
+//	double dbuf, dbuf1;
+//
+//	static double minx = -1;
+//	static double miny = -1;
+//	static double maxx = -1;
+//	static double maxy = -1;
+//	static bool foundMinsMaxs = false;
+//	
+//	if (!foundMinsMaxs)
+//	{
+//		if (_shp->get_PointCount() > 0)
+//		{
+//			_shp->get_PointXY(0, dbuf, dbuf1);
+//			minx = maxx = dbuf;
+//			miny = maxy = dbuf1;
+//			
+//			for (int i = 1; i < _shp->get_PointCount(); i++)
+//			{
+//				_shp->get_PointXY(i, dbuf, dbuf1);
+//				if (dbuf > maxx) maxx = dbuf;
+//				if (dbuf < minx) minx = dbuf;
+//				
+//				if (dbuf1 > maxy) maxy = dbuf1;
+//				if (dbuf1 < miny) miny = dbuf1;
+//			}
+//		}
+//		else
+//		{
+//			return false;
+//		}
+//		foundMinsMaxs = true;
+//	}
+//
+//	if(x < minx || y < miny || x > maxx || y > maxy)
+//	{
+//		return false;
+//	}
+//
+//	int CrossCount = 0;
+//
+//	double x1, y1, x2, y2;
+//	
+//	for(int nPart = 0; nPart < _shp->get_PartCount(); nPart++)
+//	{
+//		int nPointMax = _shp->get_PointCount() - 1;
+//		
+//		if (_shp->get_PartCount() - 1 > nPart)
+//			nPointMax = _shp->get_PartStartPoint(nPart+1) - 1;
+//		
+//		for(int nPoint = _shp->get_PartStartPoint(nPart); nPoint < nPointMax; nPoint++)
+//		{
+//			_shp->get_PointXY(nPoint, x1, y1);
+//			x1 -= x;
+//			y1 -= y;
+//
+//			_shp->get_PointXY(nPoint + 1, x2, y2);
+//			x2 -= x;
+//			y2 -= y;
+//
+//			register double y1y2 = y1*y2;
+//
+//			if(y1y2 > 0.0) // If the signs are the same
+//			{
+//				// Then it does not cross
+//				continue;
+//			}
+//			else if(y1y2 == 0.0) // Then it has intesected a vertex
+//			{
+//				if(y1 == 0.0)
+//				{
+//					if( y2 > 0.0 )
+//						continue;
+//				}
+//				else if( y1 > 0.0 )
+//					continue;
+//			}
+//
+//			if( x1 > 0.0 && x2 > 0.0 )
+//			{
+//				CrossCount++;
+//				continue;
+//			}
+//
+//			// Calculate Intersection
+//			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
+//				CrossCount++;
+//		}
+//	}
+//
+//	return (CrossCount&1);
+//}
 
 // *************************************************************
 //		PointInThisPolyRegular()
 // *************************************************************
-bool CShape::PointInThisPolyRegular(IPoint * pt)
-{
-	ASSERT(_useFastMode == false);
-	
-	ShpfileType shptype = _shp->get_ShapeType();
-
-	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
-	{
-		return false;
-	}
-
-	double x;
-	double y;
-	pt->get_X(&x);
-	pt->get_Y(&y);
-
-	double dbuf;
-
-	static double minx = -1;
-	static double miny = -1;
-	static double maxx = -1;
-	static double maxy = -1;
-	static bool foundMinsMaxs = false;
-	
-	CShapeWrapperCOM* shp = (CShapeWrapperCOM*)_shp;
-	std::deque<IPoint*> allPoints = shp->_allPoints;
-	std::deque<long> allParts = shp->_allParts;
-
-	if (!foundMinsMaxs)
-	{
-		if (allPoints.size() > 0)
-		{
-			allPoints[0]->get_X(&dbuf);
-			minx = dbuf;
-			maxx = dbuf;
-			allPoints[0]->get_Y(&dbuf);
-			miny = dbuf;
-			maxy = dbuf;
-			for (register unsigned int i = 1; i < allPoints.size(); i++)
-			{
-				allPoints[i]->get_X(&dbuf);
-				if (dbuf > maxx) maxx = dbuf;
-				if (dbuf < minx) minx = dbuf;
-				allPoints[i]->get_Y(&dbuf);
-				if (dbuf > maxy) maxy = dbuf;
-				if (dbuf < miny) miny = dbuf;
-			}
-		}
-		else
-		{
-			return false;
-		}
-		foundMinsMaxs = true;
-	}
-
-	if(x < minx || y < miny || x > maxx || y > maxy)
-	{
-		return false;
-	}
-
-	register int CrossCount = 0;
-
-	for(register unsigned int nPart = 0; nPart < allParts.size(); nPart++)
-	{
-		int nPointMax = allPoints.size() - 1;
-		if (allParts.size() - 1 > nPart)
-		{
-			nPointMax = allParts[nPart+1] - 1;
-		}
-		for(register int nPoint = allParts[nPart]; nPoint < nPointMax; nPoint++)
-		{
-			register double x1;
-			register double y1;
-			register double x2;
-			register double y2;
-			allPoints[nPoint]->get_X(&x1);
-			x1 -= x;
-			allPoints[nPoint]->get_Y(&y1);
-			y1 -= y;
-			allPoints[nPoint+1]->get_X(&x2);
-			x2 -= x;
-			allPoints[nPoint+1]->get_Y(&y2);
-			y2 -= y;
-
-			register double y1y2 = y1*y2;
-
-			if(y1y2 > 0.0) // If the signs are the same
-			{
-				// Then it does not cross
-				continue;
-			}
-			else if(y1y2 == 0.0) // Then it has intesected a vertex
-			{
-				if(y1 == 0.0)
-				{
-					if( y2 > 0.0 )
-						continue;
-				}
-				else if( y1 > 0.0 )
-					continue;
-			}
-
-			if( x1 > 0.0 && x2 > 0.0 )
-			{
-				CrossCount++;
-				continue;
-			}
-
-			// Calculate Intersection
-			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
-				CrossCount++;
-		}
-	}
-
-	if(CrossCount&1)
-	{
-		return true;
-	}
-
-	return false;
-}
+//bool CShape::PointInThisPolyRegular(IPoint * pt)
+//{
+//	ASSERT(_useFastMode == false);
+//	
+//	ShpfileType shptype = _shp->get_ShapeType();
+//
+//	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
+//	{
+//		return false;
+//	}
+//
+//	double x;
+//	double y;
+//	pt->get_X(&x);
+//	pt->get_Y(&y);
+//
+//	double dbuf;
+//
+//	static double minx = -1;
+//	static double miny = -1;
+//	static double maxx = -1;
+//	static double maxy = -1;
+//	static bool foundMinsMaxs = false;
+//	
+//	CShapeWrapperCOM* shp = (CShapeWrapperCOM*)_shp;
+//	std::deque<IPoint*> allPoints = shp->_allPoints;
+//	std::deque<long> allParts = shp->_allParts;
+//
+//	if (!foundMinsMaxs)
+//	{
+//		if (allPoints.size() > 0)
+//		{
+//			allPoints[0]->get_X(&dbuf);
+//			minx = dbuf;
+//			maxx = dbuf;
+//			allPoints[0]->get_Y(&dbuf);
+//			miny = dbuf;
+//			maxy = dbuf;
+//			for (register unsigned int i = 1; i < allPoints.size(); i++)
+//			{
+//				allPoints[i]->get_X(&dbuf);
+//				if (dbuf > maxx) maxx = dbuf;
+//				if (dbuf < minx) minx = dbuf;
+//				allPoints[i]->get_Y(&dbuf);
+//				if (dbuf > maxy) maxy = dbuf;
+//				if (dbuf < miny) miny = dbuf;
+//			}
+//		}
+//		else
+//		{
+//			return false;
+//		}
+//		foundMinsMaxs = true;
+//	}
+//
+//	if(x < minx || y < miny || x > maxx || y > maxy)
+//	{
+//		return false;
+//	}
+//
+//	register int CrossCount = 0;
+//
+//	for(register unsigned int nPart = 0; nPart < allParts.size(); nPart++)
+//	{
+//		int nPointMax = allPoints.size() - 1;
+//		if (allParts.size() - 1 > nPart)
+//		{
+//			nPointMax = allParts[nPart+1] - 1;
+//		}
+//		for(register int nPoint = allParts[nPart]; nPoint < nPointMax; nPoint++)
+//		{
+//			register double x1;
+//			register double y1;
+//			register double x2;
+//			register double y2;
+//			allPoints[nPoint]->get_X(&x1);
+//			x1 -= x;
+//			allPoints[nPoint]->get_Y(&y1);
+//			y1 -= y;
+//			allPoints[nPoint+1]->get_X(&x2);
+//			x2 -= x;
+//			allPoints[nPoint+1]->get_Y(&y2);
+//			y2 -= y;
+//
+//			register double y1y2 = y1*y2;
+//
+//			if(y1y2 > 0.0) // If the signs are the same
+//			{
+//				// Then it does not cross
+//				continue;
+//			}
+//			else if(y1y2 == 0.0) // Then it has intesected a vertex
+//			{
+//				if(y1 == 0.0)
+//				{
+//					if( y2 > 0.0 )
+//						continue;
+//				}
+//				else if( y1 > 0.0 )
+//					continue;
+//			}
+//
+//			if( x1 > 0.0 && x2 > 0.0 )
+//			{
+//				CrossCount++;
+//				continue;
+//			}
+//
+//			// Calculate Intersection
+//			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
+//				CrossCount++;
+//		}
+//	}
+//
+//	if(CrossCount&1)
+//	{
+//		return true;
+//	}
+//
+//	return false;
+//}
 #pragma endregion
 
 //*******************************************************************

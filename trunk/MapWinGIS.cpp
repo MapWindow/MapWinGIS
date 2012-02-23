@@ -55,6 +55,8 @@ BOOL CMapWinGISApp::InitInstance()
 	
 	return COleControlModule::InitInstance() && InitATL();
 	// NB: GdiplusStartup was here. Please see Map.cpp for more explanation.
+
+	m_utils = NULL;
 }
 
 
@@ -63,6 +65,12 @@ BOOL CMapWinGISApp::InitInstance()
 
 int CMapWinGISApp::ExitInstance()
 {
+	if (m_utils)
+	{
+		m_utils->Release();
+		m_utils = NULL;
+	}
+
 	// NB: GdiplusShutdown was here. Please see Map.cpp for more explanation.
 	_Module.Term();
 	return COleControlModule::ExitInstance();
@@ -193,3 +201,4 @@ CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent,
 GlobalSettingsInfo m_globalSettings;
 GlobalClassFactory m_factory;
 bool m_gdalInitialized;
+IUtils* m_utils;

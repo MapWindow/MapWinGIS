@@ -83,10 +83,8 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 
 		if(shptype != SHP_POLYGON && shptype != SHP_POLYGONZ && shptype != SHP_POLYGONM )
 		{	
+			this->ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
 			*retval = FALSE;
-			lastErrorCode = tkINCOMPATIBLE_SHAPE_TYPE;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
 			return S_OK;
 		}
 
@@ -115,17 +113,22 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 			}
 		}
 		
+		VARIANT_BOOL ret;
 		double pointX = 0.0;
 		double pointY = 0.0;
 		for( int i = 0; i < numPoints; i++ )
 		{	
-			IPoint * ipnt = NULL;
+			/*IPoint * ipnt = NULL;
 			Shape->get_Point(i,&ipnt);
 			ipnt->get_X(&pointX);
 			ipnt->get_Y(&pointY);
 			pip_cache_pointsX.push_back(pointX);
 			pip_cache_pointsY.push_back(pointY);
-			ipnt->Release();
+			ipnt->Release();*/
+			
+			Shape->get_XY(i, &pointX, &pointY, &ret);
+			pip_cache_pointsX.push_back(pointX);
+			pip_cache_pointsY.push_back(pointY);
 		}
 	}
 	
