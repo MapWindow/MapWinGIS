@@ -58,6 +58,7 @@
 //          3. Fix the problem when using Chinese path, following by http://www.mapwindow.org/phorum/read.php?7,12162 by gischai
 //08-24-2009 (sm) Fixes to performance issues with the spatial index trees as per http://www.mapwindow.org/phorum/read.php?5,13738
 //27 aug 2009 lsu Modified DrawShapefile function. Support for bitmap fill patterns.
+//02 aug 2012 Brad Hester - DC is released when the map is resized.
 //          
 //********************************************************************************************************
 #include "stdafx.h"
@@ -5781,10 +5782,10 @@ void CMapView::Resize(long Width, long Height)
 	CSize size;
 	size.cx = pl.x;
 	size.cy = pl.y;
-	GetDC()->HIMETRICtoDP( &size );
 
-	//size.cx -= 8;
-	//size.cy -= 27;
+	CDC *dc = GetDC();
+	dc->HIMETRICtoDP( &size );
+	ReleaseDC( dc );
 
 	CRect rect;
 	GetRectInContainer( rect );
