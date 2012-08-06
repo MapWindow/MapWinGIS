@@ -799,7 +799,10 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				
 				if ((double)val == noDataValue)
 				{
-					memcpy(dst, &transColor, sizeof(colour));
+					dst->blue = transColor.b;
+					dst->green = transColor.g;
+					dst->red = transColor.r;
+					//memcpy(dst, &transColor, sizeof(colour));
 				}
 				else
 				{
@@ -839,7 +842,10 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						memcpy(dst, &transColor, sizeof(colour));
+						dst->blue = transColor.b;
+						dst->green = transColor.g;
+						dst->red = transColor.r;
+						//memcpy(dst, &transColor, sizeof(colour));
 					}
 					else
 					{
@@ -880,7 +886,10 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						memcpy(dst, &transColor, sizeof(colour));
+						dst->blue = transColor.b;
+						dst->green = transColor.g;
+						dst->red = transColor.r;
+						//memcpy(dst, &transColor, sizeof(colour));
 					}
 					else
 					{
