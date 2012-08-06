@@ -58,6 +58,7 @@
 #include "GridInterpolate.h"
 #include "PointInPolygon.h"
 #include "Grid.h"
+#include "Extents.h"
 
 #pragma warning(disable:4996)
 
@@ -5998,10 +5999,10 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 	poly->get_Extents(&ext1);
 	
 	IExtents* ext2 = NULL;
-	grid->get_Extents(&ext2);
+	((CGrid*)grid)->get_Extents(&ext2);
 	
 	IExtents* bounds = NULL;
-	ext1->GetIntersection(ext2, &bounds);
+	((CExtents*)ext1)->GetIntersection(ext2, &bounds);
 	
 	ext1->Release();
 	ext2->Release();

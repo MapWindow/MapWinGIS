@@ -252,7 +252,7 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 
 	IShape* temp = NULL;
 	OGRGeometry* oBox;
-	BoundBox->ToShape(&temp);
+	((CExtents*)BoundBox)->ToShape(&temp);
 	oBox = GeometryConverter::ShapeToGeometry(temp);
 	temp->Release();
 
