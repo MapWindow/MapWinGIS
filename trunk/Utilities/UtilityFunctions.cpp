@@ -698,4 +698,20 @@ namespace Utility
 
 		return (status == Gdiplus::Ok);
 	}
+
+}
+
+namespace Debug
+{
+	void WriteLine(CString format, ...)
+	{
+		TCHAR buffer[1024];
+ 		va_list args;
+		va_start( args, format);
+		vsprintf( buffer, format, args );
+		CString s = buffer;
+		format = "OCX: " + s + "\n";
+		OutputDebugStringA(format);
+		//return _CrtDbgReport(_CRT_WARN,NULL,NULL,NULL,buffer);
+	}
 }

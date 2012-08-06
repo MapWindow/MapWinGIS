@@ -235,43 +235,6 @@ STDMETHODIMP CLabels::get_Label(long Index, long Part, ILabel** pVal)
 	}
 	return S_OK;
 };
-// ************************************************************
-//		put_Label
-// ************************************************************
-//STDMETHODIMP CLabels::put_Label(long Index, long Part, ILabel* newVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	if( Index < 0 || Index >= (long)m_labels.size() )
-//	{	
-//		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-//	}
-//	else
-//	{
-//		std::vector<CLabelInfo*>* parts = m_labels[Index];
-//		if (Part < 0 || Part >= (long)parts->size())
-//		{
-//			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-//		}		
-//		else
-//		{
-//			char* data = ((CLabelClass*)newVal)->get_LabelData();
-//			CLabelInfo* newData = reinterpret_cast<CLabelInfo*>(data);
-//			
-//			CLabelInfo* oldData = parts->at(Part);
-//			
-//			if (oldData == newData && newData != NULL)
-//			{
-//				AfxMessageBox("The same pointer");
-//			}
-//			else
-//			{
-//				delete oldData;
-//				parts->at(Part) = newData;
-//			}
-//		}
-//	}
-//	return S_OK;
-//};
 
 //***********************************************************************/
 //*			get_NumCategories()
@@ -1610,10 +1573,10 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 			s = CPLGetXMLValue( node, "TextSaved", NULL );
 			if (s != "") loadText = atoi(s.GetString()) ? true : false;
 			
-			node = CPLGetXMLNode( node, "Labels" );
-			if (node)
+			CPLXMLNode* nodeData = CPLGetXMLNode( node, "Labels" );
+			if (nodeData)
 			{
-				DeserializeLabelData(node, loadRotation, loadText);
+				DeserializeLabelData(nodeData, loadRotation, loadText);
 			}
 		}
 		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
@@ -1685,7 +1648,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	m_dynamicVisibility = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
 
 	s = CPLGetXMLValue( node, "AvoidCollisions", NULL );
-	m_autoOffset = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
+	m_avoidCollisions = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
 	
 	s = CPLGetXMLValue( node, "UseWidthLimits", NULL );
 	m_useWidthLimits = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
@@ -1712,11 +1675,8 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	}
 
 	// restoring new line sequences
-	//if (s != "") 
-	//{
-		s.Replace("&#xA;", "\r\n");
-		this->put_Expression(A2BSTR(s));
-	//}
+	s.Replace("&#xA;", "\r\n");
+	this->put_Expression(A2BSTR(s));
 
 	return true;
 }
@@ -1776,41 +1736,38 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 		{
 			CString str = OLE2CA(newVal);
 
-			//if (str != m_labelExpression)		// 
-			//{
-				// analyses expression
-				CString strError;
-				std::vector<CString> results;
-				if (((CTableClass*)table)->Calculate_(str, results, strError))
+			// analyses expression
+			CString strError;
+			std::vector<CString> results;
+			if (((CTableClass*)table)->Calculate_(str, results, strError))
+			{
+				// updating labels
+				if (results.size() == m_labels.size())
 				{
-					// updating labels
-					if (results.size() == m_labels.size())
+					for (unsigned int i = 0; i < m_labels.size(); i++)
 					{
-						for (unsigned int i = 0; i < m_labels.size(); i++)
-						{
-							(*m_labels[i])[0]->text = results[i];
-						}
-						
-						// finally saves the expression
-						m_labelExpression = str;
+						(*m_labels[i])[0]->text = results[i];
 					}
+					
+					// finally saves the expression
+					m_labelExpression = str;
+				}
+			}
+			else
+			{
+				if (str == "")
+				{
+					for (unsigned int i = 0; i < m_labels.size(); i++)
+					{
+						(*m_labels[i])[0]->text = "";
+					}
+					m_labelExpression = str;
 				}
 				else
 				{
-					if (str == "")
-					{
-						for (unsigned int i = 0; i < m_labels.size(); i++)
-						{
-							(*m_labels[i])[0]->text = "";
-						}
-						m_labelExpression = str;
-					}
-					else
-					{
-						//TODO: return error - uncorrect expression
-					}
+					//TODO: return error - uncorrect expression
 				}
-			//}
+			}
 			table->Release();
 		}
 	}
@@ -2539,6 +2496,4 @@ STDMETHODIMP CLabels::put_TextRenderingHint(tkTextRenderingHint newVal)
 		m_textRenderingHint = newVal;
 	return S_OK;
 }
-
-
 #pragma endregion

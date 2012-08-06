@@ -421,7 +421,7 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	}
 	else
 	{
-		bool projected = projSource->IsProjected() != 0;
+		bool projected = projSource->IsProjected();
 		
 		*pVal = VARIANT_TRUE;
 		double* xs = new double[4];

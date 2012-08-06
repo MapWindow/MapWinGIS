@@ -55,17 +55,17 @@
 # define TRACE_BORDER       -2228
 # define CURRENT_POLYGON	-2229
 
-	enum DIRECTION
-	{ NONE,
-	  RIGHT,
-	  UPRIGHT,
-	  UP,
-	  UPLEFT,
-	  LEFT,
-	  DOWNLEFT,
-	  DOWN,
-	  DOWNRIGHT
-	};
+	//enum DIRECTION
+	//{ NONE,
+	//  RIGHT,
+	//  UPRIGHT,
+	//  UP,
+	//  UPLEFT,
+	//  LEFT,
+	//  DOWNLEFT,
+	//  DOWN,
+	//  DOWNRIGHT
+	//};
 
 # endif
 

@@ -99,6 +99,10 @@ public:
 	STDMETHOD(PutFloatWindow)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ float * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(SetInvalidValuesToNodata)(/*[in*/ double MinThresholdValue, /*[in*/ double MaxThresholdValue, /*out, retval*/ VARIANT_BOOL * retval);
 	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(get_Extents)(IExtents** retVal);
+	
+	IGrid* CGrid::Clone(BSTR newFilename);
+	IGrid* CGrid::Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow, long lastRow);
 
 private:
 	dGrid * dgrid;

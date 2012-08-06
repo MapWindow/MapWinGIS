@@ -90,6 +90,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to delete a file";
 		case tkINVALID_EXPRESSION:
 			return "Invalid expression";
+		case tkFILE_EXISTS:
+			return "File to be written already exists.";
 
 		//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:

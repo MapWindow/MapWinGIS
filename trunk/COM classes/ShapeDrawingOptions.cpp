@@ -1530,6 +1530,9 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	
 	if (opt->lineColor != m_options.lineColor)
 		CPLCreateXMLAttributeAndValue(psTree, "LineColor", CPLString().Printf("%d", m_options.lineColor));
+
+	if (opt->lineTransparency != m_options.lineTransparency)
+		CPLCreateXMLAttributeAndValue(psTree, "LineTransparency", CPLString().Printf("%f", m_options.lineTransparency));
 	
 	if (opt->lineStipple != m_options.lineStipple)
 		CPLCreateXMLAttributeAndValue(psTree, "LineStipple", CPLString().Printf("%d", (int)m_options.lineStipple));
@@ -1667,6 +1670,9 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue( node, "LineStipple", NULL );
 	m_options.lineStipple = (s == "") ? opt->lineStipple : (tkDashStyle)atoi(s.GetString());
+
+	s = CPLGetXMLValue( node, "LineTransparency", NULL );
+	m_options.lineTransparency = (s == "") ? opt->lineTransparency : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "LinesVisible", NULL );
 	m_options.linesVisible = (s == "") ? opt->linesVisible : atoi(s.GetString()) == 0 ? false : true;

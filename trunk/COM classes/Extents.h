@@ -78,7 +78,10 @@ public:
 	STDMETHOD(get_xMin)(/*[out, retval]*/ double *pVal);
 	STDMETHOD(SetBounds)(/*[in]*/ double xMin, /*[in]*/ double yMin, /*[in]*/ double zMin, /*[in]*/ double xMax, /*[in]*/ double yMax, /*[in]*/ double zMax);
 	STDMETHOD(GetBounds)(/*[out]*/ double * xMout, /*[out]*/ double * yMout, /*[out]*/ double * zMout, /*[out]*/ double * xMax, /*[out]*/ double * yMax, /*[out]*/ double * zMax);
-	IShape*	ToShape();
+	STDMETHOD(ToShape)(IShape** retVal);
+	STDMETHOD(Disjoint)(IExtents* ext, VARIANT_BOOL* retVal);
+	STDMETHOD(GetIntersection)(IExtents* ext, IExtents** retVal);
+	STDMETHOD(Union)(IExtents* ext);
 private:
 	double xmin;
 	double xmax;

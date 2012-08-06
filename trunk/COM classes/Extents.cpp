@@ -181,11 +181,9 @@ STDMETHODIMP CExtents::SetMeasureBounds(double mMin, double mMax)
 //*********************************************************************
 // Creates polygon shape which is equivalent to the input extents
 // return shape pointer on success, or NULL otherwise
- IShape* CExtents::ToShape()
+ 
+STDMETHODIMP CExtents::ToShape(IShape** retVal)
 {
-	double xMin, xMax, yMin, yMax, zMin, zMax;
-	this->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
-	
 	IShape* shp = NULL;
 	long PartIndex = 0;
 	VARIANT_BOOL vbretval;
@@ -199,31 +197,83 @@ STDMETHODIMP CExtents::SetMeasureBounds(double mMin, double mMax)
 	for (long i = 0; i<=4; i++)
 	{
 		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
 
 		if (i == 0 || i ==4)
 		{	
-			pnt->put_X(xMin);
-			pnt->put_Y(yMin);
+			pnt->put_X(this->xmin);
+			pnt->put_Y(this->ymin);
 		}
 		else if (i ==1)
 		{
-			pnt->put_X(xMax);
-			pnt->put_Y(yMin);
+			pnt->put_X(this->xmax);
+			pnt->put_Y(this->ymin);
 		}
 		else if (i ==2)
 		{
-			pnt->put_X(xMax);
-			pnt->put_Y(yMax);
+			pnt->put_X(this->xmax);
+			pnt->put_Y(this->ymax);
 		}
 		else if (i ==3)
 		{
-			pnt->put_X(xMin);
-			pnt->put_Y(yMax);
+			pnt->put_X(this->xmin);
+			pnt->put_Y(this->ymax);
 		}
 
 		shp->InsertPoint(pnt, &i, &vbretval);
 		pnt->Release();
 	}
-	return shp;
+
+	*retVal = shp;
+	return S_OK;
+}
+
+STDMETHODIMP CExtents::Disjoint(IExtents* ext, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = VARIANT_TRUE;
+	if (ext) {
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		*retVal = (this->xmax < xMin || this->xmin > xMax || this->ymax < yMax || this->ymin > yMax);
+	}
+	return S_OK;
+}
+
+STDMETHODIMP CExtents::Union(IExtents* ext)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (ext) {
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		this->xmin = MIN(xMin, this->xmin);
+		this->ymin = MIN(yMin, this->ymin);
+		this->zmin = MIN(zMin, this->zmin);
+		this->xmax = MAX(xMax, this->xmax);
+		this->ymax = MAX(yMax, this->ymax);
+		this->zmax = MAX(zMax, this->zmax);
+	}
+	return S_OK;
+}
+
+STDMETHODIMP CExtents::GetIntersection(IExtents* ext, IExtents** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	if (ext) {
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		xMin = MAX(xMin, this->xmin);
+		yMin = MAX(yMin, this->ymin);
+		zMin = MAX(zMin, this->zmin);
+		xMax = MIN(xMax, this->xmax);
+		yMax = MIN(yMax, this->ymax);
+		zMax = MIN(zMax, this->zmax);
+		
+		if (xMin <= xMax && yMin <= yMax && zMin <= zMax)
+		{
+			CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)retVal);
+			(*retVal)->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
+		}
+	}
+	return S_OK;
 }

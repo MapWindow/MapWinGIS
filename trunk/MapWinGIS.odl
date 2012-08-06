@@ -16,6 +16,7 @@ import "ocidl.idl";
 
 //forward declarations of interfaces
 interface IShapefileColorBreak;
+interface IGrid;
 interface IGridHeader;
 interface IShape;
 interface IPoint;
@@ -49,7 +50,7 @@ interface ITiles;
 
 /****************************  MapGDI Enumerations ***********************/
 
-	typedef 
+	typedef
 	[
 		uuid(FD17FF91-8B93-47a2-A517-B4039579B549),
 		helpstring("Enumerated Cursor Types"),
@@ -2093,8 +2094,6 @@ interface ITiles;
 	pointer_default(unique)
 ]
 
-	
-
 interface IGrid : IDispatch{
 		[propget, id(1), helpstring("property Header")] HRESULT Header([out, retval] IGridHeader * *pVal);
 		[propget, id(2), helpstring("property Value")] HRESULT Value([in] long Column, [in] long Row, [out, retval] VARIANT *pVal);
@@ -2126,6 +2125,7 @@ interface IGrid : IDispatch{
 		[id(25), helpstring("property PutFloatWindow")] HRESULT PutFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(26), helpstring("method SetInvalidValuesToNodata")] HRESULT SetInvalidValuesToNodata([in] double MinThresholdValue, [in] double MaxThresholdValue, [out, retval] VARIANT_BOOL * retval);
 		[id(27), helpstring("method Resource")] HRESULT Resource([in] BSTR newSrcPath, [out, retval] VARIANT_BOOL *pVal);
+		[propget, id(28), helpstring("")] HRESULT Extents([out, retval]IExtents** retVal);
 };
 
 /****************************  GridHeader Interface ***********************/
@@ -2551,6 +2551,10 @@ interface IExtents : IDispatch{
 		//[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([in, out] double * mMin, [in, out] double * mMax);
 		[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([out] double * mMin, [out] double * mMax);
 		[id(12), helpstring("method SetMeasureBounds")] HRESULT SetMeasureBounds([in]double mMin, [in]double mMax);
+		[id(13), helpstring("method Disjoint")] HRESULT Disjoint([in]IExtents* ext, [out, retval]VARIANT_BOOL* retVal);
+		[id(14), helpstring("method ToShape")] HRESULT ToShape([out, retval]IShape** retVal);
+		[id(15), helpstring("method Union")] HRESULT Union([in]IExtents* ext);
+		[id(16), helpstring("method GetIntersection")] HRESULT GetIntersection([in]IExtents* ext, [out, retval]IExtents** retVal);
 };
 
 /****************************  Point Interface ***********************/
@@ -2630,6 +2634,8 @@ interface ITable : IDispatch{
 
 	[id(34), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
 																	  [in]int width, [out, retval]long* fieldIndex);
+
+	
 };
 
 
@@ -2766,6 +2772,8 @@ interface IUtils : IDispatch{
 	[id(26), helpstring("method MergeImages")] HRESULT MergeImages([in]SAFEARRAY(BSTR) InputNames, [in] BSTR OutputName, [out, retval]VARIANT_BOOL* retVal);
 	[id(27), helpstring("method ReprojectShapefile")] HRESULT ReprojectShapefile([in] IShapefile* sf, [in] IGeoProjection* source, [in] IGeoProjection* target, [out,retval] IShapefile** result);
 	[id(28), helpstring("method ColorByName")] HRESULT ColorByName([in] tkMapColor name, [out,retval] OLE_COLOR* retVal);
+	[id(29), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
+	[id(30), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* grid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/

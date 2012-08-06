@@ -40,4 +40,11 @@ namespace Utility
 	double FloatRound(double doValue, int nPrecision);
 	int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
 	bool SaveBitmap(int width, int height, unsigned char* pixels, BSTR outputName);
+
+	
+}
+
+namespace Debug
+{
+	void WriteLine(CString format, ...);
 }

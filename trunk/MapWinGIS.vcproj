@@ -352,7 +352,7 @@
 				IgnoreDefaultLibraryNames="LIBC.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.lib;NCSUtil4.lib"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -2520,6 +2520,10 @@
 				</File>
 				<File
 					RelativePath=".\Processing\JenksBreaks.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Processing\PointInPolygon.h"
 					>
 				</File>
 				<File

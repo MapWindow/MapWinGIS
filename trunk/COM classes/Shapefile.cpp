@@ -2044,50 +2044,6 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 		m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
 	}
 	return S_OK;
-
-	//if( m_sourceType == sstDiskBased ) //&& _shpfileName != "")
-	//{
-	//	CString s = W2A(proj4Projection);
-	//	if (s == "")
-	//		return S_FALSE;		// we won't write empty file
-	//	
-	//	try
-	//	{
-	//		if (_prjfileName.CompareNoCase("") == 0)
-	//			return S_FALSE;
-
-	//		FILE * prjFile;
-	//		char * buffer = NULL;
-	//		prjFile = fopen(_prjfileName, "wb");
-	//		if (prjFile)
-	//		{
-	//			char * wkt = NULL;
-	//			ProjectionTools * p = new ProjectionTools();
-	//			p->ToESRIWKTFromProj4(&wkt, W2A(proj4Projection));
-
-	//			if (wkt != NULL)
-	//			{		// copy into the buffer
-	//				fprintf(prjFile, "%s", wkt);
-	//			}
-
-	//			fclose(prjFile);
-	//			prjFile = NULL;
-	//			delete p;
-	//			p = NULL;
-	//		}
-	//		return S_OK;
-	//	}
-	//	catch(...)
-	//	{
-	//		return S_FALSE;
-	//	}
-	//}
-	//else
-	//{
-	//	// in-memory shapefile
-	//	m_projection = W2A(proj4Projection);
-	//	return S_OK;
-	//}
 }
 
 // *****************************************************************

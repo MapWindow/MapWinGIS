@@ -56,8 +56,8 @@
 
 #include "varH.h"
 #include "GridInterpolate.h"
-
-
+#include "PointInPolygon.h"
+#include "Grid.h"
 
 #pragma warning(disable:4996)
 
@@ -118,14 +118,6 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 		double pointY = 0.0;
 		for( int i = 0; i < numPoints; i++ )
 		{	
-			/*IPoint * ipnt = NULL;
-			Shape->get_Point(i,&ipnt);
-			ipnt->get_X(&pointX);
-			ipnt->get_Y(&pointY);
-			pip_cache_pointsX.push_back(pointX);
-			pip_cache_pointsY.push_back(pointY);
-			ipnt->Release();*/
-			
 			Shape->get_XY(i, &pointX, &pointY, &ret);
 			pip_cache_pointsX.push_back(pointX);
 			pip_cache_pointsY.push_back(pointY);
@@ -589,7 +581,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				{	
 					IPoint * pnt = NULL;
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					
 					pnt->put_X( PointsToKeep[i].x );
 					pnt->put_Y( PointsToKeep[i].y );
 					long pntpos = i;
@@ -2403,7 +2395,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 # define TRACE_BORDER       -2228
 # define CURRENT_POLYGON	-2229
 
-	enum DIRECTION
+	enum UTILS_DIRECTION
 	{ NONE,
 	  RIGHT,
 	  UPRIGHT,
@@ -5921,8 +5913,6 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		}
 	}
 
-	// TODO: set projection string for the resulting shapefile
-
 	if( globalCallback != NULL )
 	{
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
@@ -5945,5 +5935,171 @@ STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = BGR_TO_RGB(name);
+	return S_OK;
+}
+
+// **************************************************************
+//		ClipGridWithPolygon()
+// **************************************************************
+STDMETHODIMP CUtils::ClipGridWithPolygon(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	//bForceCachedIO =  CSLTestBoolean( 
+    // CPLGetConfigOption( "GDAL_FORCE_CACHING", "NO") );
+
+	*retVal = VARIANT_FALSE;
+
+	if (!Utility::fileExistsUnicode(inputGridfile))
+	{
+		ErrorMessage(tkINVALID_FILENAME);
+		return S_FALSE;
+	}
+
+	IGrid* grid = NULL;
+	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)&grid);
+	
+	if (grid) 
+	{
+		bool inRam = false;
+		VARIANT_BOOL vb;
+		grid->Open(inputGridfile, GridDataType::UnknownDataType, inRam, GridFileType::UseExtension, NULL, &vb);
+		if (vb) {
+			this->ClipGridWithPolygon2(grid, poly, resultGridfile, keepExtents, retVal);
+			grid->Close(&vb);
+		}
+		grid->Release();
+	}
+	return S_OK;
+}
+
+// ********************************************************
+//		ClipGridWithPolygon2()
+// ********************************************************
+STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!poly || !grid) {
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_FALSE;
+	}
+
+	if (Utility::fileExistsUnicode(resultGridfile))
+	{
+		ErrorMessage(tkFILE_EXISTS);
+		return S_FALSE;
+	}
+	
+	VARIANT_BOOL vb;
+
+	// find cell bounds
+	IExtents* ext1 = NULL;
+	poly->get_Extents(&ext1);
+	
+	IExtents* ext2 = NULL;
+	grid->get_Extents(&ext2);
+	
+	IExtents* bounds = NULL;
+	ext1->GetIntersection(ext2, &bounds);
+	
+	ext1->Release();
+	ext2->Release();
+
+	if (bounds) {
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		bounds->Release();
+		
+		long firstCol, firstRow, lastCol, lastRow;
+		grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
+		grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
+		
+		IGrid* newGrid = NULL;
+
+		if (!keepExtents) {
+			newGrid = ((CGrid*)grid)->Clip(resultGridfile, firstCol, lastCol, firstRow, lastRow);
+		}
+		else {
+			newGrid = ((CGrid*)grid)->Clone(resultGridfile);
+		}
+
+		// copy data
+		if (newGrid)
+		{
+			double dx, dy, xll, yll;
+			IGridHeader* header = NULL;
+			newGrid->get_Header(&header);
+			header->get_dX(&dx);
+			header->get_dY(&dy);
+			header->get_XllCenter(&xll);
+			header->get_YllCenter(&yll);
+			
+			CComVariant var;
+			header->get_NodataValue(&var);
+			float noData;
+			fVal(var, noData);
+
+			long minRow = MIN(firstRow, lastRow);
+			long maxRow = MAX(firstRow, lastRow);
+			
+			int cmnCount = lastCol - firstCol + 1;
+			int rowCount = maxRow - minRow + 1;
+
+			if (keepExtents)
+			{
+				long rowCount;
+				header->get_NumberRows(&rowCount);
+				
+				xll += dx * firstCol;
+				yll += dy * (rowCount - maxRow -1);
+			}
+			header->Release();
+
+			if (cmnCount > 0 && rowCount > 0) 
+			{
+				float* vals = new float[cmnCount];
+				long row = 0;
+
+				CPointInPolygon pip;
+				if (pip.SetPolygon(poly))
+				{
+					for (long i = minRow; i <= maxRow; i++ ) {
+						grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+						
+						if (vb) {
+							
+							double y = yll + dy * (rowCount - row - 1.5);	// (rowCount - 1) - row;  -0.5 - center of cell
+							pip.PrepareScanLine(y);
+							
+							// set values outside polygon to nodata
+							for (long j = 0; j < cmnCount; j++)
+							{
+								double x = xll + dx * (j + 0.5);
+								
+								if (!pip.ScanPoint(x))
+								{
+									vals[j] = noData;
+								}
+							}
+							
+							if (keepExtents) {
+								newGrid->PutFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+								row++;
+							}
+							else {
+								newGrid->PutRow(row++, vals, &vb);
+							}
+						}
+					}
+				}
+				delete[] vals;
+			}
+
+			newGrid->Save(resultGridfile, GridFileType::UseExtension, NULL, &vb);
+			newGrid->Close(&vb);
+			newGrid->Release();
+		}
+	}
 	return S_OK;
 }

@@ -175,6 +175,7 @@ public:
 	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
 	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);
 	CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld);
+	double CShape::getInscribedCircleRadius(double& xCenter, double& yCenter);
 
 private:
 	// members

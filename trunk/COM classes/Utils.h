@@ -154,6 +154,10 @@ public:
 	STDMETHOD(OGRLayerToShapefile)(/*[in]*/BSTR Filename, /*[in, optional, defaultvalue(SHP_NULLSHAPE)]*/ ShpfileType shpType, /*[in, optional, defaultvalue(NULL)]*/ICallback *cBack, /*[out, retval]*/IShapefile** sf);
 	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR OutputName, VARIANT_BOOL* retVal);
 	STDMETHOD(ReprojectShapefile)(IShapefile* sf, IGeoProjection* source, IGeoProjection* target, IShapefile** result);
+
+	STDMETHOD(ClipGridWithPolygon)(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
+	STDMETHOD(ClipGridWithPolygon2)(IGrid* grid, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
+
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
@@ -217,6 +221,8 @@ private:
 	GDALRasterBand * poBand_G;
 	GDALRasterBand * poBand_B;
 	GDALDataset * rasterDataset;
+	vector<double> pip_xs;
+	vector<double> pip_xs_parts;
 	std::deque<long> pip_cache_parts;
 	std::deque<double> pip_cache_pointsX;
 	std::deque<double> pip_cache_pointsY;

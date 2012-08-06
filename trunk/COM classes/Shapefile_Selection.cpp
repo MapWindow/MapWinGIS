@@ -264,13 +264,13 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 							if( fabs( dy ) <= Tolerance )
 							{
 								addShape = true;
-								continue;
+								break;
 							}
 							//Check for horizontal lines
 							if( fabs( dx ) <= Tolerance )
 							{
 								addShape = true;
-								continue;
+								break;
 							}
 
 							//Generate the equation of the line							

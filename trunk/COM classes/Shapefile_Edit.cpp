@@ -490,34 +490,6 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 					
 					((CTableClass*)dbf)->set_IndexValue(*ShapeIndex);
 				
-					// lsu: 11 aug 2011: substituted by the line above
-
-					//long nFields = 0;
-					//dbf->get_NumFields(&nFields);
-					//for (int z = 0; z < nFields; z++)
-					//{
-					//	IField * fld;
-					//	BSTR fldName;
-
-					//	dbf->get_Field(z, &fld);
-					//	fld->get_Name(&fldName);
-					//	fld->Release();
-					//	
-					//	USES_CONVERSION;
-					//	if (_stricmp(W2A(fldName), "MWShapeID") == 0)
-					//	{
-					//		VARIANT_BOOL rt;
-					//		VARIANT val;
-					//		VariantInit(&val);
-					//		val.vt = VT_I4;
-					//		val.lVal = FindNewShapeID(z);
-					//		EditCellValue(z, *ShapeIndex, val, &rt);
-					//		VariantClear(&val);
-					//		SysFreeString(fldName); // tws 6/6/7
-					//		break;
-					//	}
-					//	SysFreeString(fldName);		// tws 6/6/7
-					//}
 				}
 			}
 		}

@@ -2127,3 +2127,121 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 	*retval = TRUE;
 	return S_OK;
 }
+
+// ******************************************************************
+//		get_Extents()
+// ******************************************************************
+STDMETHODIMP CGrid::get_Extents(IExtents** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+
+	IGridHeader* header = NULL;
+	this->get_Header(&header);
+
+	if (header) {
+		long cols, rows;
+		double cellWidth, cellHeight, xll, yll;
+		header->get_NumberCols(&cols);
+		header->get_NumberRows(&rows);
+		header->get_dX(&cellWidth);
+		header->get_dY(&cellHeight);
+		header->get_XllCenter(&xll);
+		header->get_YllCenter(&yll);
+		header->Release();
+		
+		double minX = xll - (cellWidth / 2);
+		double maxX = xll + (cellWidth * (cols - 1)) + (cellWidth / 2);
+		double minY = yll - (cellHeight / 2);
+		double maxY = yll + (cellHeight * (rows - 1)) + (cellHeight / 2);
+
+		IExtents* ext = NULL;
+		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+		ext->SetBounds(minX, minY, 0.0, maxX, maxY, 0.0);
+
+		*retVal = ext;
+	}
+	return S_OK;
+}
+
+
+
+// ******************************************************
+//		Clone()
+// ******************************************************
+IGrid* CGrid::Clone(BSTR newFilename)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	IGridHeader* newHeader = NULL;
+	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&newHeader);
+	
+	IGridHeader* header = NULL;
+	this->get_Header(&header);
+	newHeader->CopyFrom(header);
+
+	CComVariant noDataValue;
+	header->get_NodataValue(&noDataValue);
+
+	IGrid* newGrid = NULL;
+	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)&newGrid);
+	
+	GridDataType dataType;
+	this->get_DataType(&dataType);
+
+	VARIANT_BOOL vb;
+	newGrid->CreateNew(newFilename, newHeader, dataType, noDataValue, false, GridFileType::UseExtension, NULL, &vb);
+	if (!vb) {
+		newGrid->Close(&vb);
+		newGrid->Release();
+		newGrid = NULL;
+	}
+
+	header->Release();
+	newHeader->Release();
+	
+	return newGrid;
+}
+
+// **************************************************************
+//		Clip()
+// **************************************************************
+IGrid* CGrid::Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow, long lastRow)
+{
+	IGridHeader* newHeader = NULL;
+	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&newHeader);
+	
+	IGridHeader* header = NULL;
+	this->get_Header(&header);
+	newHeader->CopyFrom(header);
+
+	double x, y, x2, y2;
+	this->CellToProj(firstCol, firstRow, &x, &y);
+	this->CellToProj(firstCol, lastRow, &x2, &y2);
+	newHeader->put_XllCenter(x);
+	newHeader->put_YllCenter(MIN(y, y2));
+	newHeader->put_NumberCols(lastCol - firstCol + 1);
+	newHeader->put_NumberRows(abs(lastRow - firstRow) + 1);
+
+	CComVariant noDataValue;
+	header->get_NodataValue(&noDataValue);
+
+	IGrid* newGrid = NULL;
+	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)&newGrid);
+	
+	GridDataType dataType;
+	this->get_DataType(&dataType);
+
+	VARIANT_BOOL vb;
+	newGrid->CreateNew(newFilename, newHeader, dataType, noDataValue, false, GridFileType::UseExtension, NULL, &vb);
+	if (!vb) {
+		newGrid->Close(&vb);
+		newGrid->Release();
+		newGrid = NULL;
+	}
+
+	header->Release();
+	newHeader->Release();
+	
+	return newGrid;
+}

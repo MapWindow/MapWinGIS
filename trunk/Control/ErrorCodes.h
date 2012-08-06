@@ -45,6 +45,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_FOR_INMEMORY_OBJECT 23
 # define tkCANT_DELETE_FILE 24
 # define tkINVALID_EXPRESSION 25
+# define tkFILE_EXISTS 26
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201

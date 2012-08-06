@@ -23,7 +23,6 @@
 #include "stdafx.h"
 #include "Shape.h"
 #include "GeometryOperations.h"
-//#include "UtilityFunctions.h"
 
 #ifdef MY_DEBUG
 #include <fstream>
@@ -395,41 +394,6 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 				return S_OK;
 			}
 		}
-		
-		// checks for multipart polygons; seem to be no need - geos catch all the errors;
-
-		//OGRGeometryCollection* col = (OGRGeometryCollection*)oGeom;
-		//if (false)
-		//{
-		//	// there are several polygons, some of them may have holes
-		//	int count = 0;
-		//	for (int i = 0; i < partCount; i++)
-		//	{
-		//		this->get_PartIsClockWise(i, &isClockwise);
-		//		if (isClockwise)
-		//			count++;
-		//	}
-
-		//	if (count != col->getNumGeometries())
-		//	{
-		//		_isValidReason = "Wrong clockwise order for the parts of the polygon";
-		//		delete oGeom;
-		//		return S_OK;
-		//	}
-		//}
-		//{
-		//	// it's a polygon with holes 
-		//	OGRPolygon* poly = (OGRPolygon*)oGeom;
-		//	if (poly)
-		//	{
-		//		if (poly->getNumInteriorRings() != partCount - 1)
-		//		{
-		//			_isValidReason = "Wrong clockwise order for the parts of the polygon";
-		//			delete oGeom;
-		//			return S_OK;
-		//		}
-		//	}
-		//}
 	}
 
 	// added code
@@ -700,6 +664,7 @@ STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
 		pntOld->Clone(&pntNew);
 		shp->InsertPoint(pntNew, &cnt, &vbretval);
 		pntOld->Release();
+		pntNew->Release();
 		cnt++;
 	}
 	*pVal = shp;
@@ -1871,16 +1836,7 @@ STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 	if (m_utils)
 		m_utils->PointInPolygon(this, pt, retval);
 
-	/*bool result;
-	if (_useFastMode)
-	{
-		result = PointInThisPolyFast(pt);
-	}
-	else
-	{
-		result = PointInThisPolyRegular(pt);
-	}
-	*retval = result?VARIANT_TRUE:VARIANT_FALSE;*/
+	//bool result = _useFastMode ? PointInThisPolyFast(pt) : PointInThisPolyRegular(pt);
 	return S_OK;
 }
 
@@ -2624,4 +2580,52 @@ STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
 	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
 	*pointIndex = success ? _shp->get_PointCount() - 1 : -1;
 	return S_OK;
+}
+
+double CShape::getInscribedCircleRadius(double& xCenter, double& yCenter)
+{
+	IPoint* pnt1 = NULL;
+	IPoint* pnt2 = NULL;
+	
+	double x1, x2, y1, y2;
+	this->get_Centroid(&pnt1);
+	this->get_InteriorPoint(&pnt2);
+	pnt1->get_X(&x1);
+	pnt1->get_Y(&y1);
+	pnt2->get_X(&x2);
+	pnt2->get_Y(&y2);
+
+	long count;
+	this->get_NumPoints(&count);
+
+	double minDist1 = DBL_MAX;
+	double minDist2 = DBL_MAX;
+
+	double x, y;
+	VARIANT_BOOL vb;
+	for (long i = 0; i < count; i++ )
+	{
+		this->get_XY(i, &x, &y, &vb);
+		double dist1 = sqrt(pow((x - x1), 2.0) + pow((y - y1), 2.0));
+		double dist2 = sqrt(pow((x - x2), 2.0) + pow((y - y2), 2.0));
+		
+		if (dist1 < minDist1)
+			minDist1 = dist1;
+
+		if (dist2 < minDist2)
+			minDist2 = dist2;
+	}
+
+	if (minDist1 < minDist2 )
+	{
+		xCenter = x1;
+		yCenter = y1;
+		return minDist1;
+	}
+	else
+	{
+		xCenter = x2;
+		yCenter = y2;
+		return minDist2;
+	}
 }

@@ -66,7 +66,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	} 
 
 	long _numShapes1, _numShapes2;		
-	_numShapes1 = _shapeData.size(); //_numShapes;
+	_numShapes1 = _shapeData.size();
 	sf->get_NumShapes(&_numShapes2);		
 	if (_numShapes1 == 0)return NULL;
 	if (_numShapes2 == 0) return NULL;
@@ -252,7 +252,7 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 
 	IShape* temp = NULL;
 	OGRGeometry* oBox;
-	temp = ((CExtents*)BoundBox)->ToShape();
+	BoundBox->ToShape(&temp);
 	oBox = GeometryConverter::ShapeToGeometry(temp);
 	temp->Release();
 
@@ -3464,7 +3464,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 // **********************************************************************
 //		InsertShapes()
 // **********************************************************************
-// A utility function to adding geometry produced by simplification routine to the sfTarget shapefile,
+// A utility function to add geometry produced by simplification routine to the sfTarget shapefile,
 // with copying of attributes from source shapefile.
 // initShapeIndex - the index of shape to copy the attribute from
 void InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSouce, int initShapeIndex )
