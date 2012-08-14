@@ -82,6 +82,7 @@ public:
 	STDMETHOD(Disjoint)(IExtents* ext, VARIANT_BOOL* retVal);
 	STDMETHOD(GetIntersection)(IExtents* ext, IExtents** retVal);
 	STDMETHOD(Union)(IExtents* ext);
+	STDMETHOD(Intersects)(IExtents* ext, VARIANT_BOOL* retVal);
 private:
 	double xmin;
 	double xmax;

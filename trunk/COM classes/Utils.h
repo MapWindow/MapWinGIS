@@ -157,7 +157,7 @@ public:
 
 	STDMETHOD(ClipGridWithPolygon)(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
 	STDMETHOD(ClipGridWithPolygon2)(IGrid* grid, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
-
+	STDMETHOD(GridStatisticsToShapefile)(IGrid* grid, IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL* retVal) ;
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);

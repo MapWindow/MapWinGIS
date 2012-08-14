@@ -277,3 +277,21 @@ STDMETHODIMP CExtents::GetIntersection(IExtents* ext, IExtents** retVal)
 	}
 	return S_OK;
 }
+
+STDMETHODIMP CExtents::Intersects(IExtents* ext, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = VARIANT_FALSE;
+	if (ext) {
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		xMin = MAX(xMin, this->xmin);
+		yMin = MAX(yMin, this->ymin);
+		zMin = MAX(zMin, this->zmin);
+		xMax = MIN(xMax, this->xmax);
+		yMax = MIN(yMax, this->ymax);
+		zMax = MIN(zMax, this->zmax);
+		*retVal = (xMin <= xMax && yMin <= yMax && zMin <= zMax) ? VARIANT_TRUE : VARIANT_FALSE;
+	}
+	return S_OK;
+}

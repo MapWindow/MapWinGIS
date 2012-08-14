@@ -2773,6 +2773,7 @@ interface IUtils : IDispatch{
 	[id(28), helpstring("method ColorByName")] HRESULT ColorByName([in] tkMapColor name, [out,retval] OLE_COLOR* retVal);
 	[id(29), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
 	[id(30), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* inputGrid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
+	[id(31), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/

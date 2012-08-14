@@ -1455,21 +1455,20 @@ STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 //*********************************************************************
 //*						UniqueFieldNames()				              
 //*********************************************************************
-// Makes name of fields in dbf table unique.	 
-// In case of duplicated names adds _# to them	 
-bool CShapefile::UniqueFieldNames(IShapefile* sf)
+// Makes name of fields in dbf table unique. In case of duplicated names adds _# to them	 
+bool CShapefile::MakeUniqueFieldNames()
 {
 	VARIANT_BOOL editing;
 	USES_CONVERSION;
 
 	// Do we need edit mode for editing of the field names?
 	// Yes we do, shapelib doesn't allow it otherwise ;)
-	sf->get_EditingShapes(&editing);	
+	this->get_EditingTable(&editing);	
 	if (!editing) 
 		return false;
 	
 	long numFields;
-	sf->get_NumFields(&numFields);
+	this->get_NumFields(&numFields);
 	
 	set<CString> fields;
 
@@ -1477,7 +1476,7 @@ bool CShapefile::UniqueFieldNames(IShapefile* sf)
 	{
 		BSTR name;
 		IField* fld;
-		sf->get_Field(i, &fld);
+		this->get_Field(i, &fld);
 		fld->get_Name(&name);
 
 		if (fields.find(OLE2CA(name)) == fields.end())
@@ -1487,7 +1486,7 @@ bool CShapefile::UniqueFieldNames(IShapefile* sf)
 		else
 		{	
 			bool found = false;
-			for(int j =0; !found ;j++)
+			for(int j =1; !found ;j++)
 			{
 				CString temp = OLE2CA(name);
 				temp.AppendFormat("_%d", j);

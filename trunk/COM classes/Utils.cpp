@@ -6104,3 +6104,303 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 	}
 	return S_OK;
 }
+
+// ********************************************************
+//		CreateStatisticsFields()
+// ********************************************************
+void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bool overwrite) {
+	ITable* tbl = NULL;
+	sf->get_Table(&tbl);
+	
+	VARIANT_BOOL vb;
+	long index = -1; 
+	CString fields[11] = {"Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", "Range", "StD", "Sum", "Variety", "Count" };
+
+	if (overwrite) {
+		for (int i = 0; i < 11; i++) {
+			tbl->get_FieldIndexByName(A2BSTR(fields[i]), &index);
+			if (index != -1) {
+				tbl->EditDeleteField(index, NULL, &vb);
+			}
+		}
+	}
+	
+	for (int i = 0; i < 9; i++) {
+		sf->EditAddField(A2BSTR(fields[i]), FieldType::DOUBLE_FIELD, 12, 18, &index);
+		resultIndices.push_back(index);
+	}
+	
+	for (int i = 9; i < 11; i++) {
+		sf->EditAddField(A2BSTR(fields[i]), FieldType::INTEGER_FIELD, 0, 18, &index);
+		resultIndices.push_back(index);
+	}
+	
+	((CShapefile*)sf)->MakeUniqueFieldNames();
+	tbl->Release();
+}
+
+// ********************************************************
+//		GridStatisticsToShapefile()
+// ********************************************************
+STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL* retVal) 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (!grid || !sf) {
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_FALSE;
+	}
+	
+	ShpfileType type;
+	sf->get_ShapefileType(&type);
+	if (type != SHP_POLYGON && type != SHP_POLYGONM && type != SHP_POLYGONZ) {
+		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+		return S_FALSE;
+	}
+
+	IExtents* extSf = NULL;
+	sf->get_Extents(&extSf);
+
+	IExtents* extGrid = NULL;
+	((CGrid*)grid)->get_Extents(&extGrid);
+	
+	VARIANT_BOOL vb;
+	IExtents* bounds = NULL;
+	((CExtents*)extGrid)->Intersects(extSf, &vb);
+	extSf->Release();
+	
+	if (!vb) {
+		ErrorMessage(tkBOUNDS_NOT_INTERSECT);
+		return S_FALSE;
+	}
+	else {
+		VARIANT_BOOL editing;
+		sf->get_EditingTable(&editing);
+		
+		if (!editing) {
+			sf->StartEditingTable(this->globalCallback, &vb);	// it's safe enough not to check the result
+		}
+
+		std::vector<long> fieldIndices;
+		CreateStatisticsFields(sf, fieldIndices, overwriteFields ? true: false);
+		
+		double dx, dy, xll, yll;
+		IGridHeader* header = NULL;
+		grid->get_Header(&header);
+		header->get_dX(&dx);
+		header->get_dY(&dy);
+		header->get_XllCenter(&xll);
+		header->get_YllCenter(&yll);
+
+		long gridRowCount;
+		header->get_NumberRows(&gridRowCount);
+
+		// no data values - must not be used in calculations
+		CComVariant var;
+		header->get_NodataValue(&var);
+		float noData;
+		fVal(var, noData);
+
+		header->Release();
+
+		long percent = -1;
+		long numShapes;
+		sf->get_NumShapes(&numShapes);
+
+		for (long n = 0; n < numShapes; n++) 
+		{
+			if( globalCallback != NULL )
+			{
+				long newpercent = (long)(((double)(n + 1)/numShapes)*100);
+				if( newpercent > percent )
+				{	
+					percent = newpercent;
+					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
+				}
+			}
+			
+			sf->get_ShapeSelected(n, &vb);
+			if (selectedOnly && !vb)
+				continue;
+			
+			IShape* poly = NULL;
+			sf->get_Shape(n, &poly);
+			
+			IExtents* bounds = NULL;
+			poly->get_Extents(&extSf);
+			((CExtents*)extGrid)->GetIntersection(extSf, &bounds);
+			extSf->Release();
+
+			if (bounds != NULL) 
+			{
+				// determine rows & cols which correspond to a poly
+				double xMin, yMin, zMin, xMax, yMax, zMax;
+				bounds->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+				bounds->Release();	
+
+				long firstCol, firstRow, lastCol, lastRow;
+				grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
+				grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
+				
+				long minRow = MIN(firstRow, lastRow);
+				long maxRow = MAX(firstRow, lastRow);
+
+				int cmnCount = lastCol - firstCol + 1;
+				int rowCount = maxRow - minRow + 1;
+
+				// now find the pixels inside poly and calculate stats
+				if (cmnCount > 0 && rowCount > 0) 
+				{
+					float* vals = new float[cmnCount];
+					int row = 0;
+
+					CPointInPolygon pip;
+					if (pip.SetPolygon(poly))
+					{
+						int count = 0;
+						float sum = 0.0;
+						float squares = 0.0;
+						float max = FLT_MIN;
+						float min = FLT_MAX;
+						std::map<float, int> values;	// value; count
+						
+						double yllWindow = yll + ((gridRowCount - 1) - maxRow) * dy;
+						double xllWindow = xll + firstCol * dx;
+
+						for (long i = minRow; i <= maxRow; i++ ) 
+						{
+							grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+							
+							if (vb) {
+								double y = yllWindow + dy * (rowCount - row - 1.5);	  // (rowCount - 1) - row;  -0.5 - center of cell
+								pip.PrepareScanLine(y);
+								
+								// checking values within row
+								for (long j = 0; j < cmnCount; j++)
+								{
+									if (vals[j] == noData)
+										continue;
+
+									double x = xllWindow + dx * (j + 0.5);
+									if (pip.ScanPoint(x))
+									{
+										if (vals[j] < min) min = vals[j];
+										if (vals[j] > max) max = vals[j];
+										sum += vals[j];
+										squares += vals[j] * vals[j];
+										count++;
+										
+										// counting unique values
+										if (values.find(vals[j]) == values.end()) 
+											values[vals[j]] = 1;
+										else 
+											values[vals[j]] += 1;
+									}
+								}
+							}
+							row++;
+						}
+						
+						if (count > 0) 
+						{
+							// 0 - "Mean"
+							CComVariant vMean(sum/count);
+							sf->EditCellValue(fieldIndices[0], n, vMean, &vb);
+
+							if (values.size() > 0) 
+							{
+								// 1 - "Median"
+								int half = count/2;
+								int subCount = 0;
+								std::map<float, int>::iterator it = values.begin();
+								while (it != values.end()) 
+								{
+									subCount += it->second;
+									if (subCount > half)
+									{
+										CComVariant vMedian(it->first);
+										sf->EditCellValue(fieldIndices[1], n, vMedian, &vb);
+										break;
+									}
+									it++;
+								}
+								
+								int maxCount = INT_MIN;
+								int minCount = INT_MAX;
+								float major, minor;
+								it = values.begin();
+								while (it != values.end()) 
+								{
+									if (it->second > maxCount) {
+										maxCount = it->second;
+										major = it->first;
+									}
+									if (it->second < minCount) 
+									{
+										minCount = it->second;
+										minor = it->first;
+									}
+									it++;
+								}
+
+								// 2 - "Majority"
+								CComVariant vMajor(major);
+								sf->EditCellValue(fieldIndices[2], n, vMajor, &vb);
+								
+								// 3 - "Minority"
+								CComVariant vMinor(minor);
+								sf->EditCellValue(fieldIndices[3], n, vMinor, &vb);
+							}
+
+							// 4 - "Minimum"
+							CComVariant vMin(min);
+							sf->EditCellValue(fieldIndices[4], n, vMin, &vb);
+
+							// 5 - "Maximum"
+							CComVariant vMax(max);
+							sf->EditCellValue(fieldIndices[5], n, vMax, &vb);
+
+							// 6 - "Range"
+							CComVariant vRange(max - min);
+							sf->EditCellValue(fieldIndices[6], n, vRange, &vb);
+
+							// 7 - "StD"
+							float stddev = sqrt(squares/count - pow(sum/count, 2));
+							CComVariant vStd(stddev);
+							sf->EditCellValue(fieldIndices[7], n, vStd, &vb);
+
+							// 8 - "Sum"
+							CComVariant vSum(sum);
+							sf->EditCellValue(fieldIndices[8], n, vSum, &vb);
+
+							// 9 - "Variety"
+							int variety = values.size();
+							CComVariant vVar(variety);
+							sf->EditCellValue(fieldIndices[9], n, vVar, &vb);
+
+							// 10 - "Count"
+							CComVariant vCount(count);
+							sf->EditCellValue(fieldIndices[10], n, vCount, &vb);
+						}
+					}
+					delete[] vals;
+				}
+			}
+			poly->Release();
+		}
+		extGrid->Release();
+
+		if (!editing) {
+			sf->StopEditingTable(VARIANT_TRUE, this->globalCallback, &vb);
+			if (!vb) {
+				long code;
+				sf->get_LastErrorCode(&code);
+				this->ErrorMessage(code);	
+				return S_FALSE;
+			}
+		}
+		
+		*retVal = VARIANT_TRUE;
+	}
+	return S_OK;
+}

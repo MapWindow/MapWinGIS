@@ -937,7 +937,7 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 			}
 			field1->Release();
 		}
-		UniqueFieldNames(sfResult);
+		((CShapefile*)sfResult)->MakeUniqueFieldNames();
 	}
 }
 

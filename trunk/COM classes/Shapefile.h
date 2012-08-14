@@ -603,8 +603,6 @@ private:
 	void GenerateQTree();
 	void TrimMemShapes();
 	
-	bool UniqueFieldNames(IShapefile* sf);
-	
 	QTree* GenerateLocalQTree(IShapefile* sf, bool SelectedOnly);
 	VARIANT_BOOL SelectShapesAlt(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr);
 	//void CShapefile::get_LabelPosition(IShape* shp, tkLabelPositioning method, double& x, double& y, double& rotation);
@@ -614,9 +612,8 @@ private:
 	int get_OuterRingIndex(int ShapeIndex, int PartIndex);
 	
 public:
-	// -----------------------------------------------------------------
-	//	public functions
-	// -----------------------------------------------------------------
+	bool MakeUniqueFieldNames();
+	
 	void ErrorMessage(long ErrorCode);
 	void ErrorMessage(long ErrorCode, ICallback* cBack);
 	int get_ShapeCategory(int ShapeIndex);
