@@ -44,10 +44,12 @@ struct FieldWrapper
 {
     IField* field;
     long oldIndex;
+	bool joined;
 
 	FieldWrapper()		// do we need to add destructor here?
 	{
 		field = NULL;
+		joined = false;
 	}
 
 	~FieldWrapper()
@@ -181,6 +183,11 @@ public:
 	STDMETHOD(Calculate)(BSTR Expression, LONG RowIndex, VARIANT* Result, BSTR* ErrorString, VARIANT_BOOL* retVal);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 
+	STDMETHOD(Join)(ITable* table2, BSTR field1, BSTR field2, VARIANT_BOOL* retVal);
+	STDMETHOD(StopJoin)();
+	STDMETHOD(get_IsJoined)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_FieldIsJoined)(int fieldIndex, VARIANT_BOOL* retVal);
+
 	void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal);
 	
 	std::vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
@@ -195,7 +202,15 @@ public:
 	bool get_FieldValuesString(int FieldIndex, std::vector<CString>& values);
 
 	bool set_IndexValue(int rowIndex);
-	
+
+	struct FieldMapping
+	{
+		int srcIndex;
+		int destIndex;
+	};
+
+	bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping);
+
 public:	
 	bool needToSaveAsNewFile;
 	int m_maxRowId;	// maximum value in the MWShapeId field
@@ -210,7 +225,6 @@ private:
 	ICallback * globalCallback;
 	BOOL isEditingTable;
 	CString filename;
-    
 	
 	bool SaveToFile(const CString& dbfFilename, bool updateFileInPlace, ICallback* cBack);
 	void LoadDefault_fields();

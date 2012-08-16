@@ -6114,10 +6114,10 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 	
 	VARIANT_BOOL vb;
 	long index = -1; 
-	CString fields[11] = {"Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", "Range", "StD", "Sum", "Variety", "Count" };
+	CString fields[13] = {"Mean", "Median", "Majority", "Minority", "Minimum", "Maximum", "Range", "StD", "Sum", "MinX", "MinY", "Variety", "Count" };
 
 	if (overwrite) {
-		for (int i = 0; i < 11; i++) {
+		for (int i = 0; i < 13; i++) {
 			tbl->get_FieldIndexByName(A2BSTR(fields[i]), &index);
 			if (index != -1) {
 				tbl->EditDeleteField(index, NULL, &vb);
@@ -6125,12 +6125,12 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 		}
 	}
 	
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 11; i++) {
 		sf->EditAddField(A2BSTR(fields[i]), FieldType::DOUBLE_FIELD, 12, 18, &index);
 		resultIndices.push_back(index);
 	}
 	
-	for (int i = 9; i < 11; i++) {
+	for (int i = 11; i < 13; i++) {
 		sf->EditAddField(A2BSTR(fields[i]), FieldType::INTEGER_FIELD, 0, 18, &index);
 		resultIndices.push_back(index);
 	}
@@ -6262,6 +6262,8 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 						float squares = 0.0;
 						float max = FLT_MIN;
 						float min = FLT_MAX;
+						double minX = 0.0;
+						double minY = 0.0;
 						std::map<float, int> values;	// value; count
 						
 						double yllWindow = yll + ((gridRowCount - 1) - maxRow) * dy;
@@ -6284,7 +6286,11 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 									double x = xllWindow + dx * (j + 0.5);
 									if (pip.ScanPoint(x))
 									{
-										if (vals[j] < min) min = vals[j];
+										if (vals[j] < min) {
+											min = vals[j];
+											minX = x;
+											minY = y;
+										}
 										if (vals[j] > max) max = vals[j];
 										sum += vals[j];
 										squares += vals[j] * vals[j];
@@ -6373,14 +6379,22 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 							CComVariant vSum(sum);
 							sf->EditCellValue(fieldIndices[8], n, vSum, &vb);
 
-							// 9 - "Variety"
+							// 9 - "MinX"
+							CComVariant vMinX(minX);
+							sf->EditCellValue(fieldIndices[9], n, vMinX, &vb);
+
+							// 10 - "MinY"
+							CComVariant vMinY(minY);
+							sf->EditCellValue(fieldIndices[10], n, vMinY, &vb);
+
+							// 11 - "Variety"
 							int variety = values.size();
 							CComVariant vVar(variety);
-							sf->EditCellValue(fieldIndices[9], n, vVar, &vb);
+							sf->EditCellValue(fieldIndices[11], n, vVar, &vb);
 
-							// 10 - "Count"
+							// 12 - "Count"
 							CComVariant vCount(count);
-							sf->EditCellValue(fieldIndices[10], n, vCount, &vb);
+							sf->EditCellValue(fieldIndices[12], n, vCount, &vb);
 						}
 					}
 					delete[] vals;

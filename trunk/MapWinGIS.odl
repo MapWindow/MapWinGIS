@@ -2634,7 +2634,10 @@ interface ITable : IDispatch{
 	[id(34), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
 																	  [in]int width, [out, retval]long* fieldIndex);
 
-	
+	[id(35), helpstring("method Join")] HRESULT Join([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [out, retval]VARIANT_BOOL* retVal);	
+	[id(36), helpstring("method StopJoin")] HRESULT StopJoin();	
+	[id(37), helpstring("method get_IsJoined")] HRESULT get_IsJoined([out, retval]VARIANT_BOOL* retVal);	
+	[id(38), helpstring("method get_FieldIsJoined")] HRESULT get_FieldIsJoined([in]int fieldIndex, [out, retval]VARIANT_BOOL* retVal);	
 };
 
 

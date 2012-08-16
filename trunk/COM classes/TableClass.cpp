@@ -37,7 +37,7 @@
 #include <iterator>
 
 #include "VarH.h"
-//#include "UtilityFunctions.h"
+#include "UtilityFunctions.h"
 #include "JenksBreaks.h"
 
 #pragma warning(disable:4996)
@@ -47,6 +47,8 @@
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
 
 // *****************************************************
 //	ParseExpressionCore()
@@ -783,6 +785,10 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 		return false;		
 	}
 
+	// TODO: it's the easiest way to make it work so far
+	// table actually closed and opened anew in each save operation
+	//this->StopJoin();
+
 	DBFInfo * newdbfHandle;
 	if(updateFileInPlace)
 	{
@@ -889,10 +895,12 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 		    return false;
         }
 
-		if (updateFileInPlace)
+		if (updateFileInPlace) {
 			_rows[rowIndex].row->SetDirty(TableRow::DATA_CLEAN);
-		else
-			ClearRow(rowIndex);
+		}
+		else {
+			ClearRow(rowIndex);		// it will break join
+		}
 	}
 
 	//Flush all of the records
@@ -1645,7 +1653,8 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
     // StartEditingTable now just simplly set the editing flag, not read all records into memory
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-
+	
+	// ATTENTION: must be changed for join operations
 	if( dbfHandle == NULL )
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
@@ -1671,6 +1680,10 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
+	
+	// TODO: it's the easiest way to make it work so far
+	// table actually closed and opened anew in each save operation
+	//this->StopJoin();
 
 	if (globalCallback == NULL && cBack != NULL)
 	{
@@ -1697,8 +1710,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
 	if( isEditingTable == FALSE )
 	{	
-		//ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);		// lsu: user wants to close edit mode, it's already closed
-		*retval = VARIANT_TRUE;						// so what's the problem? let's return success
+		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
@@ -1746,8 +1758,9 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	        	ErrorMessage(tkCANT_CREATE_DBF);
             }
         }
-        else //can edit the file inplace, no need to save to a temporary file
+        else 
         {
+			// can edit the file inplace, no need to save to a temporary file
 			if (!SaveToFile(filename, true, cBack))
             {
 	        	ErrorMessage(tkCANT_CREATE_DBF);
@@ -2705,3 +2718,213 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 //	*retVal = VARIANT_TRUE;
 //	return S_OK;
 //}
+
+// All the field names that aren't present in src should be copied
+bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping)
+{
+	long numFields;
+	this->get_NumFields(&numFields);
+	std::set<CComBSTR> names;
+	
+	CComBSTR name;
+	IField* fld = NULL;
+
+	for (long i = 0; i < numFields; i++)
+	{
+		this->get_Field(i, &fld);
+		fld->get_Name(&name);
+		fld->Release();
+		names.insert(name);
+	}
+
+	table2->get_NumFields(&numFields);
+	for (long i = 0; i < numFields; i++)
+	{
+		CComVariant v;
+		table2->get_Field(i, &fld);
+		fld->get_Name(&name);
+
+		if (names.find(name) == names.end())	// doesn't exists in the source
+		{
+			IField* fldNew;
+			fld->Clone(&fldNew);
+			
+			long index;
+			VARIANT_BOOL vbretval;
+			this->get_NumFields(&index);
+			this->EditInsertField(fldNew, &index, NULL, &vbretval);
+			_fields[index].joined = true;
+			fldNew->Release();
+
+			FieldMapping* fm = new FieldMapping();
+			fm->srcIndex = i;
+			fm->destIndex = index;
+			mapping.push_back(fm);
+		}
+		
+		fld->Release();
+	}
+	return true;
+}
+
+// *****************************************************
+//		Join()
+// *****************************************************
+STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!table2) 
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_FALSE;
+	}
+	
+	long index1;
+	this->get_FieldIndexByName(field1, &index1 );
+
+	long index2;
+	table2->get_FieldIndexByName(field2, &index2 );
+	
+	if (index1 == -1 || index2 == -1)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_FALSE;
+	}
+
+	IField* fld1 = NULL;
+	this->get_Field(index1, &fld1 );
+
+	IField* fld2 = NULL;
+	this->get_Field(index2, &fld2 );
+
+	FieldType type1;
+	FieldType type2;
+	fld1->get_Type(&type1);
+	fld2->get_Type(&type2);
+	fld1->Release();
+	fld2->Release();
+
+	if (type1 != type2)
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);  // TODO: add specific message
+		return S_FALSE;
+	}
+	
+	// if edit mode isn't open, will use this hack to get through; rather that calling Table.StartEditMode
+	VARIANT_BOOL editing;
+	this->get_EditingTable(&editing);
+	if (!editing) {
+		this->isEditingTable = TRUE;
+	}
+
+	std::vector<FieldMapping*> mapping;
+	this->CopyFields(table2, mapping);
+	Debug::WriteLine("Number of fields mapped: %d", mapping.size());
+
+	// building a maps for field of target table
+	std::map<CComVariant, int> vals;
+	long numRows;
+	table2->get_NumRows(&numRows);
+	for (long i = 0; i < numRows; i++)
+	{
+		CComVariant v;
+		table2->get_CellValue(index2, i, &v);
+		vals[v] = i;
+	}
+	
+	int count = 0;
+	VARIANT_BOOL vb;
+	for (size_t i = 0; i < _rows.size(); i++)
+	{
+		CComVariant v;
+		this->get_CellValue(index1, i, &v);
+
+		std::map<CComVariant, int>::iterator it = vals.find(v);
+		if (it != vals.end())
+		{
+			Debug::WriteLine("%d mapped to %d", i, it->second);
+			for (size_t j = 0; j < mapping.size(); j++)
+			{
+				table2->get_CellValue(mapping[j]->srcIndex, it->second, &v );
+				this->EditCellValue(mapping[j]->destIndex, i, v, &vb);
+				if (vb) {
+					count++;
+				}
+			}
+		}
+	}
+
+	for (size_t i = 0; i < mapping.size(); i++ ) {
+		delete mapping[i];
+	}
+	Debug::WriteLine("Values copied: {%d}", count);
+
+	if (!editing) {
+		this->isEditingTable = FALSE;
+	}
+
+	USES_CONVERSION;
+	this->SaveAs(A2BSTR("F:\\temp.dbf"), NULL, &vb);
+
+	return S_OK;
+}
+
+// *****************************************************
+//		StopJoin()
+// *****************************************************
+STDMETHODIMP CTableClass::StopJoin()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	VARIANT_BOOL editing;
+	if (this->get_EditingTable(&editing)) {
+		this->isEditingTable = TRUE;
+	}
+	
+	VARIANT_BOOL vb;
+	for (size_t i =_fields.size() - 1; i >= 0 ; i-- )
+	{
+		if (_fields[i].joined) {
+			this->EditDeleteField(i, NULL, &vb);
+		}
+	}
+
+	if (!editing) {
+		this->isEditingTable = FALSE;
+	}
+	return S_OK;
+}
+
+// *****************************************************
+//		get_IsJoined()
+// *****************************************************
+STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	for (size_t i =_fields.size() - 1; i >= 0 ; i-- )
+	{
+		if (_fields[i].joined) {
+			*retVal = VARIANT_TRUE;
+			return S_OK;
+		}
+	}
+	*retVal = VARIANT_FALSE;
+	return S_OK;
+}
+
+// *****************************************************
+//		get_FieldIsJoined()
+// *****************************************************
+STDMETHODIMP CTableClass::get_FieldIsJoined(int fieldIndex, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = VARIANT_FALSE;
+	}
+	else {
+		*retVal = _fields[fieldIndex].joined ? VARIANT_TRUE: VARIANT_FALSE;
+	}
+	return S_OK;
+}
