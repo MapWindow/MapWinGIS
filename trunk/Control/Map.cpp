@@ -4994,7 +4994,7 @@ LPDISPATCH CMapView::SnapShot(LPDISPATCH BoundBox)
 		else
 		{
 			createdDC = true;
-			cdc = GetDC();
+			cdc = new CDC();
 			cdc->CreateCompatibleDC(GetDC());
 			CBitmap * bmp = new CBitmap();
 			CBitmap * oldBmp = NULL;
@@ -5029,7 +5029,7 @@ LPDISPATCH CMapView::SnapShot(LPDISPATCH BoundBox)
 
 		if( createdDC )
 		{	
-			cdc->DeleteDC();
+			ReleaseDC(cdc);
 			delete cdc;
 		}
 	}
