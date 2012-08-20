@@ -1303,7 +1303,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			dhdr.setYllcenter(yllcenter);
 
-			if( dgrid->initialize(OLE2CA(Filename),dhdr,value,bInRam?true:false) == true )
+			if( dgrid->initialize(OLE2CA(Filename),dhdr,value,boolInRam) == true )
 			{	::SysFreeString(filename);
 				filename = OLE2BSTR(Filename);
 				*retval = VARIANT_TRUE;
@@ -1356,7 +1356,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			fhdr.setYllcenter(yllcenter);
 
-			if( fgrid->initialize(OLE2CA(Filename),fhdr,(float)value,bInRam?true:false) == true )
+			if( fgrid->initialize(OLE2CA(Filename),fhdr,(float)value,boolInRam) == true )
 			{	::SysFreeString(filename);
 				filename = OLE2BSTR(Filename);
 				*retval = VARIANT_TRUE;
@@ -1407,7 +1407,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			lhdr.setYllcenter(yllcenter);
 
-			if( lgrid->initialize(OLE2CA(Filename),lhdr,(long)value,bInRam?true:false) == true )
+			if( lgrid->initialize(OLE2CA(Filename),lhdr,(long)value,boolInRam) == true )
 			{	::SysFreeString(filename);
 				filename = OLE2BSTR(Filename);
 				*retval = VARIANT_TRUE;
@@ -1458,7 +1458,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			shdr.setYllcenter(yllcenter);
 
-			if( sgrid->initialize(OLE2CA(Filename),shdr,(short)value,bInRam?true:false) == true )
+			if( sgrid->initialize(OLE2CA(Filename),shdr,(short)value,boolInRam) == true )
 			{	::SysFreeString(filename);
 				filename = OLE2BSTR(Filename);
 				*retval = VARIANT_TRUE;
@@ -1751,7 +1751,10 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	else
 	{	lastErrorCode = tkGRID_NOT_INITIALIZED;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+
+        // No reason to continue.
+		return S_OK;
 	}
 
 	try

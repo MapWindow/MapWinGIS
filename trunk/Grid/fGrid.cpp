@@ -1550,48 +1550,58 @@ GRID_TYPE fGrid::getGridType( const char * filename )
 
 	bool fGrid::binarySaveAs( CString filename, void(*callback)(int number, const char * message) )
 	{	
-		// Darrel Brown, 10/22/2003, changed the flags from r+b to w+b to support non-preexisting files.
-		
-		FILE * out = fopen( filename, "r+b" );
-		if( !out )
-			out = fopen( filename, "w+b" );
+		// Write to a temporary file first.
+		char tempName[ FILENAME_MAX ] = {0};
+		tmpnam(tempName);
+		FILE * out = fopen( tempName, "wb" );
 
 		if( !out )
 			return false;
+
+		binaryWriteHeader(out);
+
+		double total = gridHeader.getNumberRows() * gridHeader.getNumberCols();
+		int percent = 0;
+		long num_written = 0;
+		float value;
+
+		for( int j = 0; j < gridHeader.getNumberRows(); j++ )
+		{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
+			{	num_written++;
+				value = getValue( i, j );
+				fwrite( &value,sizeof(float),1,out);
+
+				if( callback != NULL )
+				{
+					int newpercent = (int)((num_written/total)*100);
+					if( newpercent > percent )
+					{	percent = newpercent;
+						callback( percent, "Binary Grid Write");
+					}											
+				}
+			}				
+		}
+		fclose( out );
+
+		if( isInRam == true )
+		{
+			if( !MoveFileEx(tempName, filename,
+				MOVEFILE_REPLACE_EXISTING |
+				MOVEFILE_COPY_ALLOWED) )
+				return false;
+
+			return true;
+		}
 		else
-		{	
-			binaryWriteHeader(out);
-			//long temp_file_position_beg_of_data = ftell( file_in_out);
+		{	close();
 
-			double total = gridHeader.getNumberRows() * gridHeader.getNumberCols();
-			int percent = 0;
-			long num_written = 0;
-			float value;
+			if( !MoveFileEx(tempName, filename,
+				MOVEFILE_REPLACE_EXISTING |
+				MOVEFILE_COPY_ALLOWED) )
+				return false;
 
-			for( int j = 0; j < gridHeader.getNumberRows(); j++ )
-			{	for( int i = 0; i < gridHeader.getNumberCols(); i++ )
-				{	num_written++;
-					value = getValue( i, j );
-					fwrite( &value,sizeof(float),1,out);
-
-					if( callback != NULL )
-					{
-						int newpercent = (int)((num_written/total)*100);
-						if( newpercent > percent )
-						{	percent = newpercent;
-							callback( percent, "Binary Grid Write");
-						}											
-					}
-				}				
-			}
-			fclose( out );	
-			if( isInRam == true )
-				return true;
-			else
-			{	close();						
-				return open( filename, false, BINARY_GRID, callback );
-			}
-		}		
+			return open( filename, false, BINARY_GRID, callback );
+		}
 	}
 
 ///\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/

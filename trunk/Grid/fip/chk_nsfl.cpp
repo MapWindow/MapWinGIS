@@ -274,6 +274,7 @@ int chk123nsfld(FILE *fp,char *tag,char *descr,char *frmt)
    /* INITIALIZE VARIABLES */
    option = 1;
    status = 1;
+   leadid = 0;
    glb_str[0] = NC;
    *descr = NC;
    *frmt = NC;
