@@ -35,6 +35,9 @@
 #include "TableRow.h"
 #include "dbf.h"
 #include "Expression.h"
+#include "MapWinGIS_i.h"
+#include "_ITableEvents_CP.H"
+
 
 using namespace std;
 
@@ -44,18 +47,24 @@ struct FieldWrapper
 {
     IField* field;
     long oldIndex;
-	bool joined;
+	long joinId;		// from which join operation a field originates
+
+	bool Joined() {
+		return joinId >= 0;
+	}
 
 	FieldWrapper()		// do we need to add destructor here?
 	{
 		field = NULL;
-		joined = false;
+		joinId = -1;
 	}
 
 	~FieldWrapper()
 	{
-		//field->Release();
-		field = NULL;
+		if (field) {
+			field->Release();
+			field = NULL;
+		}
 	}
 };
 
@@ -85,7 +94,9 @@ public:
 class ATL_NO_VTABLE CTableClass : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CTableClass, &CLSID_Table>,
-	public IDispatchImpl<ITable, &IID_ITable, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
+	public IDispatchImpl<ITable, &IID_ITable, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>,
+	public IConnectionPointContainerImpl<CTableClass>,
+	public CProxy_ITableEvents<CTableClass>
 {
 public:
 	CTableClass()
@@ -97,6 +108,7 @@ public:
 		isEditingTable = FALSE;
 		dbfHandle = NULL;
 		m_maxRowId = -1;
+		_lastJoinId = -1;
 	}
 	~CTableClass()
 	{
@@ -140,8 +152,8 @@ public:
 	BEGIN_COM_MAP(CTableClass)
 		COM_INTERFACE_ENTRY(ITable)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY(IConnectionPointContainer)
 	END_COM_MAP()
-
 
 // ITable
 public:
@@ -183,10 +195,28 @@ public:
 	STDMETHOD(Calculate)(BSTR Expression, LONG RowIndex, VARIANT* Result, BSTR* ErrorString, VARIANT_BOOL* retVal);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 
-	STDMETHOD(Join)(ITable* table2, BSTR field1, BSTR field2, VARIANT_BOOL* retVal);
-	STDMETHOD(StopJoin)();
+	STDMETHOD(StopJoin)(int joinIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(StopAllJoins)();
+
 	STDMETHOD(get_IsJoined)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_FieldIsJoined)(int fieldIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(get_JoinCount)(int* retVal);
+
+	STDMETHOD(get_JoinFilename)(int joinIndex, BSTR* retVal);
+	STDMETHOD(get_JoinFromField)(int joinIndex, BSTR* retVal);
+	STDMETHOD(get_JoinToField)(int joinIndex, BSTR* retVal);
+
+	STDMETHOD(get_FieldIsJoined)(int FieldIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(get_FieldJoinIndex)(int FieldIndex, int* retVal);
+
+	STDMETHOD(Serialize)(BSTR* retVal);
+	STDMETHOD(Deserialize)(BSTR newVal);
+
+	STDMETHOD(TryJoin)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, int* rowCount, int* joinRowCount, VARIANT_BOOL* retVal);
+
+	STDMETHOD(Join)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, VARIANT_BOOL* retVal);
+	STDMETHOD(Join2)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, VARIANT_BOOL* retVal);
+	STDMETHOD(Join3)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, SAFEARRAY* filedList, VARIANT_BOOL* retVal);
+
 
 	void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal);
 	
@@ -202,6 +232,10 @@ public:
 	bool get_FieldValuesString(int FieldIndex, std::vector<CString>& values);
 
 	bool set_IndexValue(int rowIndex);
+	
+	bool MakeUniqueFieldNames();
+
+	bool CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2);
 
 	struct FieldMapping
 	{
@@ -209,15 +243,20 @@ public:
 		int destIndex;
 	};
 
-	bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping);
+	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
+	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CString filenameToReopen, CString options, set<CString>& fieldList);
+	void CTableClass::RemoveJoinedFields();
 
 public:	
 	bool needToSaveAsNewFile;
 	int m_maxRowId;	// maximum value in the MWShapeId field
 	
+	bool DeserializeCore(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(CString ElementName);
+
 private:
     DBFInfo * dbfHandle;	// underlying data structure
-	std::vector<FieldWrapper> _fields;
+	std::vector<FieldWrapper*> _fields;
 	std::vector<RecordWrapper> _rows;
 	std::deque<CString *> tempFiles;
 	BSTR key;
@@ -239,10 +278,22 @@ private:
 	inline void ErrorMessage(long ErrorCode);
 	std::vector<CString>* get_FieldNames();
 	
-	
+	struct JoinInfo
+	{
+		CString filename;
+		CString fieldFrom;
+		CString fieldTo;
+		CString options;
+		int joinId;
+		CString fields; // comma separated list
+	};
+	vector<JoinInfo*> _joins;
+	int _lastJoinId;
 public:
 	
-	//STDMETHOD(CalculateStat)(LONG FieldIndex, tkGroupOperation Statistic, BSTR Expression, VARIANT* Result, VARIANT_BOOL* retVal);
+	BEGIN_CONNECTION_POINT_MAP(CTableClass)
+		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
+	END_CONNECTION_POINT_MAP()
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

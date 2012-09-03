@@ -26,6 +26,7 @@
 #include "Varh.h"
 
 #include "Extents.h"
+#include "TableClass.h"
 #include "clipper.h"
 
 #include "ogr_spatialref.h"
@@ -896,7 +897,7 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 	VARIANT_BOOL vbretval;
 	sfSubject->get_NumFields(&numFields);
 
-	CopyFields(sfSubject, sfResult);
+	this->CopyFields(sfSubject, sfResult);
 	
 	// passing the fields of overlay shapefile
 	if ( sfOverlay )
@@ -916,7 +917,7 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 				{
 					IField * field2 = NULL;
 					sfResult->get_Field(j,&field2);
-					if (FieldsAreEqual(field1, field2))
+					if (this->FieldsAreEqual(field1, field2))
 					{
 						fieldMap[i] = j;
 						found = true;
@@ -937,7 +938,13 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 			}
 			field1->Release();
 		}
-		((CShapefile*)sfResult)->MakeUniqueFieldNames();
+		ITable* tbl = NULL;
+		sfResult->get_Table(&tbl);
+		if (tbl) {
+			((CTableClass*)tbl)->MakeUniqueFieldNames();
+			tbl->Release();
+		}
+		//((CShapefile*)sfResult)->MakeUniqueFieldNames();
 	}
 }
 

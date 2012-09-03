@@ -532,9 +532,9 @@ STDMETHODIMP CTableClass::get_Field(long FieldIndex, IField **pVal)
 	}
 	else
 	{
-		((CField*)_fields[FieldIndex].field)->_table = this;
-		*pVal = _fields[FieldIndex].field;
-		_fields[FieldIndex].field->AddRef();
+		((CField*)_fields[FieldIndex]->field)->_table = this;
+		*pVal = _fields[FieldIndex]->field;
+		(*pVal)->AddRef();
 	}
 	return S_OK;
 }
@@ -577,19 +577,21 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 		}
 		else
 		{
-			/*VARIANT var;
+			// lsu 31 aug - 2012; was uncommented, test furtheê
+			VARIANT var;
 			VariantInit(&var);
 			var.vt = VT_EMPTY;
-			pVal = &var;*/
+			pVal = &var;
 			pVal = NULL;
 		}
 	}
 	else
 	{
-		/*VARIANT var;
+		// lsu 31 aug - 2012; was uncommented, test furtheê		
+		VARIANT var;
 		VariantInit(&var);
 		var.vt = VT_EMPTY;
-		pVal = &var;*/
+		pVal = &var;
 		pVal = NULL;
 	}
 	return S_OK;
@@ -728,8 +730,8 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 	
 		//After open the dbf file, load all _fields info and create spatial row indices 
 		//with FieldWrapper and RecordWrapper help classes.
-		LoadDefault_fields();
-		LoadDefault_rows();
+		this->LoadDefault_fields();
+		this->LoadDefault_rows();
 	}
 	return S_OK;
 }
@@ -743,7 +745,7 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 	USES_CONVERSION;
 	
 	// closing the existing table
-	Close(retval);
+	this->Close(retval);
 	
 	if( *retval == VARIANT_FALSE )
 	{	
@@ -784,10 +786,6 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 		ErrorMessage(lastErrorCode);
 		return false;		
 	}
-
-	// TODO: it's the easiest way to make it work so far
-	// table actually closed and opened anew in each save operation
-	//this->StopJoin();
 
 	DBFInfo * newdbfHandle;
 	if(updateFileInPlace)
@@ -842,10 +840,14 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 			return false;
 		}
 	
+		// joined fields must be removed; they will be restored in the process of reopening table
+		// after saving operation
+		this->RemoveJoinedFields();
+
 		for( int i = 0; i < FieldCount(); i++ )
 		{	
 			IField * field = NULL;
-			get_Field(i,&field);
+			this->get_Field(i,&field);
 			BSTR fname;
 			FieldType type;
 			long width, precision;
@@ -921,14 +923,13 @@ STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOO
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
+	
+	BSTR state;
+	this->Serialize(&state);
+	this->Open(dbfFilename,cBack,retval);		
+	this->Deserialize(state);
 
-	if( dbfHandle != NULL )
-		DBFClose(dbfHandle);
-	dbfHandle = NULL;
-
-	Open(dbfFilename,cBack,retval);		
 	*retval = VARIANT_TRUE;
-
 	return S_OK;
 }
 
@@ -940,14 +941,16 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_TRUE;
 
+	this->StopAllJoins();
+
 	for( int i = 0; i < FieldCount(); i++ )
 	{	
-        if (_fields[i].field != NULL)
+        if (_fields[i]->field != NULL)
         {
-			((CField*)_fields[i].field)->_table = NULL; // lsu: if the field is used somewhere else, we must not refer to this table
-			_fields[i].field->Release();
-		    _fields[i].field = NULL;
+			// if the field is used somewhere else, we must not refer to this table - is it really needed ?
+			((CField*)_fields[i]->field)->_table = NULL;  
         }
+		delete _fields[i];
 	}
 	_fields.clear();
 
@@ -957,7 +960,7 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
             delete _rows[j].row;
 	}
 	_rows.clear();
-	
+
 	filename = "";
 	if( dbfHandle != NULL )
 	{
@@ -966,32 +969,19 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	}
 	
 	*retval = VARIANT_TRUE;
-	/*if( !isEditingTable )
-		ErrorMessage(tkDBF_IN_EDIT_MODE);
-
-	*retval = !isEditingTable ? VARIANT_FALSE : VARIANT_TRUE;*/
-	
 	return S_OK;
 }
 
 // **************************************************************
-//	  Close()
+//	  LoadDefault_fields()
 // **************************************************************
 void CTableClass::LoadDefault_fields()
 {
     USES_CONVERSION;
-    if (!_fields.empty())
-    {
-        for (std::vector<FieldWrapper>::iterator i = _fields.begin(); i!= _fields.end(); i++)
-        {
-			if ((*i).field != NULL)
-			{
-				((CField*)(*i).field)->_table = NULL;
-				(*i).field->Release();
-			}
-        }
-        _fields.clear();
-    }
+
+	for (size_t i = 0; i < _fields.size(); i++ )
+		delete _fields[i];
+	_fields.clear();
     
 	if (dbfHandle == NULL) return;
     long num_fields = DBFGetFieldCount(dbfHandle);
@@ -1011,9 +1001,9 @@ void CTableClass::LoadDefault_fields()
 		field->put_Precision(fdecimals);
 		field->put_Type((FieldType)type);
 		
-		FieldWrapper fw;
-        fw.oldIndex = i;
-        fw.field = field;
+		FieldWrapper* fw = new FieldWrapper();
+        fw->oldIndex = i;
+        fw->field = field;
 		_fields.push_back(fw);
 		((CField*)field)->_table = this;
 	}
@@ -1023,7 +1013,7 @@ void CTableClass::LoadDefault_fields()
 }
 
 // **************************************************************
-//	  Close()
+//	  LoadDefault_rows()
 // **************************************************************
 //Initialize RecordWrapper array and set the TableRow pointer to NULL
 void CTableClass::LoadDefault_rows()
@@ -1056,8 +1046,8 @@ STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
     //Reset all editing bits and reload original _fields info and reinitialize the RowWrapper array
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-    LoadDefault_fields();
-    LoadDefault_rows();
+    this->LoadDefault_fields();
+    this->LoadDefault_rows();
 
     needToSaveAsNewFile = false;
 	*retval = VARIANT_TRUE;
@@ -1119,16 +1109,16 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 		_rows[i].row->values.insert( _rows[i].row->values.begin() + *FieldIndex, val);
     }
 
-    FieldWrapper fw;
-    fw.oldIndex = -1;
-    fw.field = Field;
+	FieldWrapper* fw = new FieldWrapper();
+    fw->oldIndex = -1;
+    fw->field = Field;
     
 	_fields.insert( _fields.begin() + *FieldIndex, fw );
-    _fields[*FieldIndex].field->AddRef();	
+    _fields[*FieldIndex]->field->AddRef();	
 	*retval = VARIANT_TRUE;	  
 	
 	// in the field class we should know about table editing state
-	((CField*)_fields[*FieldIndex].field)->_table = this;
+	((CField*)_fields[*FieldIndex]->field)->_table = this;
 
     needToSaveAsNewFile = true;
 	return S_OK;
@@ -1147,7 +1137,7 @@ STDMETHODIMP CTableClass::EditReplaceField(long FieldIndex, IField *newField, IC
 		return S_OK;
 	}
 	
-	if (_fields[FieldIndex].field == newField)
+	if (_fields[FieldIndex]->field == newField)
 	{
 		// it's the same field; no need to do anything
 		return S_OK;
@@ -1201,8 +1191,7 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
         }
 	}
 
-	_fields[FieldIndex].field->Release();
-    _fields[FieldIndex].field = NULL;
+	delete _fields[FieldIndex];
 	_fields.erase( _fields.begin() + FieldIndex );
 
 	//DeleteField operation can't be saved into the original dbf file.
@@ -1295,14 +1284,14 @@ bool CTableClass::ReadRecord(long RowIndex)
         FieldType type = GetFieldType(i);
 		VARIANT * val = NULL;
         
-        if (_fields[i].oldIndex != -1)
+        if (_fields[i]->oldIndex != -1)
         {
             val = new VARIANT;
 		    VariantInit(val);
 		    bool isNull = false;
 		
     		//Rob Cairns 14/2/2006
-            if (DBFIsAttributeNULL(dbfHandle,_rows[RowIndex].oldIndex,_fields[i].oldIndex) == 1)
+            if (DBFIsAttributeNULL(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) == 1)
 		    {	
 				isNull = true;
 		    }			
@@ -1317,7 +1306,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 			    else
 			    {	
 					val->vt = VT_BSTR;
-				    val->bstrVal = A2BSTR( DBFReadStringAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i].oldIndex) );
+				    val->bstrVal = A2BSTR( DBFReadStringAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) );
 			    }
 		    }
 		    else if( type == INTEGER_FIELD )
@@ -1328,7 +1317,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 				}
 			    else
 			    {	
-					int res = DBFReadIntegerAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i].oldIndex);
+					int res = DBFReadIntegerAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
 				    val->vt = VT_I4;
 				    val->lVal = res;
 			    }
@@ -1341,7 +1330,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 				}
 			    else
 			    {	
-					double res = DBFReadDoubleAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i].oldIndex);
+					double res = DBFReadDoubleAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
 				    val->vt = VT_R8;
 				    val->dblVal = res;
 			    }
@@ -1606,7 +1595,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 
 		    //Change the width of the field
 		    IField * field = NULL;
-		    get_Field(FieldIndex,&field);
+		    this->get_Field(FieldIndex,&field);
 		    FieldType type;
 		    long precision, width;
 		    field->get_Type(&type);
@@ -1645,6 +1634,8 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 	return S_OK;
 }
 
+
+
 // *********************************************************
 //		StartEditingTable ()
 // *********************************************************
@@ -1654,7 +1645,7 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	
-	// ATTENTION: must be changed for join operations
+	
 	if( dbfHandle == NULL )
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
@@ -1672,6 +1663,8 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 	return S_OK;
 }
 
+
+
 // *****************************************************************
 //		StopEditingTable()
 // *****************************************************************
@@ -1681,10 +1674,6 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
 	
-	// TODO: it's the easiest way to make it work so far
-	// table actually closed and opened anew in each save operation
-	//this->StopJoin();
-
 	if (globalCallback == NULL && cBack != NULL)
 	{
 		globalCallback = cBack;
@@ -1721,7 +1710,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 		{
 			for(int i =0; i < (int)_fields.size(); i++)
 			{
-				CField* fld  = (CField*)_fields[i].field;
+				CField* fld  = (CField*)_fields[i]->field;
 				if (fld->isUpdated)
 				{
 					needToSaveAsNewFile = true;
@@ -1771,12 +1760,17 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	// Mark _fields as unchnaged
 	for(int i = 0; i < (int)_fields.size(); i++)
 	{
-		CField* fld  = (CField*)_fields[i].field;
+		CField* fld  = (CField*)_fields[i]->field;
 		fld->isUpdated = false;
 	}
 
     isEditingTable = FALSE;
-    return Open(A2BSTR(filename), cBack, retval);
+
+	BSTR state;
+	this->Serialize(&state);
+    this->Open(A2BSTR(filename), cBack, retval);
+	this->Deserialize(state);	// restores joins
+	return S_OK;
 }
 
 // *******************************************************************
@@ -1926,7 +1920,7 @@ STDMETHODIMP CTableClass::get_MeanValue(long FieldIndex, double* retval)
 	else	
 	{
 		FieldType type;
-		_fields[FieldIndex].field->get_Type(&type);
+		_fields[FieldIndex]->field->get_Type(&type);
 		if (type == DOUBLE_FIELD || type == INTEGER_FIELD)
 		{
 			double sum = 0;
@@ -1962,7 +1956,7 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 	else	
 	{
 		FieldType type;
-		_fields[FieldIndex].field->get_Type(&type);
+		_fields[FieldIndex]->field->get_Type(&type);
 		if (type == DOUBLE_FIELD || type == INTEGER_FIELD)
 		{
 			double mean;
@@ -2365,7 +2359,7 @@ std::vector<CString>* CTableClass::get_FieldNames()
 	for (unsigned  int i = 0; i < _fields.size(); i++ )
 	{
 		BSTR s;
-		_fields[i].field->get_Name(&s);
+		_fields[i]->field->get_Name(&s);
 		USES_CONVERSION;
 		CString str = OLE2CA(s);
 		SysFreeString(s);
@@ -2386,7 +2380,7 @@ STDMETHODIMP CTableClass::get_FieldIndexByName(BSTR FieldName, long* retval)
 	CString searchName = OLE2CA(FieldName);
 	for (unsigned int i = 0; i < _fields.size(); i++)
 	{	
-		IField* field =_fields[i].field;
+		IField* field =_fields[i]->field;
 		if (field)
 		{
 			BSTR name;
@@ -2416,9 +2410,9 @@ bool CTableClass::get_FieldValuesDouble(int FieldIndex, std::vector<double>& val
 	}
 	
 	FieldType type;
-	_fields[FieldIndex].field->get_Type(&type);
+	_fields[FieldIndex]->field->get_Type(&type);
 	
-	int index = _fields[FieldIndex].oldIndex;	// real index of the field
+	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
 
 	values.reserve(_rows.size());
 	for (unsigned int i = 0; i < _rows.size(); i++)
@@ -2456,9 +2450,9 @@ bool CTableClass::get_FieldValuesInteger(int FieldIndex, std::vector<int>& value
 	}
 	
 	FieldType type;
-	_fields[FieldIndex].field->get_Type(&type);
+	_fields[FieldIndex]->field->get_Type(&type);
 	
-	int index = _fields[FieldIndex].oldIndex;	// real index of the field
+	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
 
 	values.reserve(_rows.size());
 	for (unsigned int i = 0; i < _rows.size(); i++)
@@ -2498,9 +2492,9 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 	}
 	
 	FieldType type;
-	_fields[FieldIndex].field->get_Type(&type);
+	_fields[FieldIndex]->field->get_Type(&type);
 	
-	int index = _fields[FieldIndex].oldIndex;	// real index of the field
+	int index = _fields[FieldIndex]->oldIndex;	// real index of the field
 	
 	values.reserve(_rows.size());
 	for (unsigned int i = 0; i < _rows.size(); i++)
@@ -2602,149 +2596,83 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 	return S_OK;
 }
 
-// *****************************************************************
-//		CalculateStat()
-// *****************************************************************
-//STDMETHODIMP CTableClass::CalculateStat(LONG FieldIndex, tkGroupOperation Statistic, BSTR Expression, VARIANT* Result, VARIANT_BOOL* retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	*retVal = VARIANT_FALSE;
-//
-//	if( FieldIndex < 0 || FieldIndex >= (long)_fields.size())
-//	{
-//		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-//		return S_OK;
-//	}
-//
-//	USES_CONVERSION;
-//	CString expr =  OLE2CA(Expression);
-//	CString errString;
-//	std::vector<long> indices;
-//	if (expr != "")
-//	{
-//		if (!this->Query_(Expression, indices, errString))
-//		{
-//			ErrorMessage(tkINVALID_EXPRESSION);
-//			return S_OK;
-//		}
-//	}
-//	else
-//	{
-//		for (long i = 0; i < RowCount(); i++)
-//		{
-//			indices.push_back(i);
-//		}
-//	}
-//
-//	CComVariant var;
-//	CComVariant min, max, sum;
-//	switch(Statistic)
-//	{
-//		case operMin:
-//			for (unsigned int i = 0; i < indices.size(); i++)
-//			{
-//				if (i == 0)
-//				{
-//					this->get_CellValue(FieldIndex, indices[i], &min);
-//				}
-//				else
-//				{
-//					this->get_CellValue(FieldIndex, indices[i], &var);
-//					if (min > var)
-//					{
-//						min = var;
-//					}
-//				}
-//			}
-//			var = min;
-//			break;
-//		case operMax:
-//			for (unsigned int i = 0; i < indices.size(); i++)
-//			{
-//				if (i == 0)
-//				{
-//					this->get_CellValue(FieldIndex, indices[i], &max);
-//				}
-//				else
-//				{
-//					this->get_CellValue(FieldIndex, indices[i], &var);
-//					if (max < var)
-//					{
-//						max = var;
-//					}
-//				}
-//			}
-//			var = max;
-//			break;
-//		case operCount:
-//			var = indices.size();
-//			break;
-//		case operAverage:
-//		case operSum:
-//			var = "Unsupported";
-//			
-//			// TODO: write type specific code
-//			/*if (_fields[FieldIndex].field )
-//			{
-//				FieldType type;
-//				_fields[FieldIndex].field->get_Type(&type);
-//				if (type == STRING_FIELD)
-//				{
-//					var = "Unsupported";
-//				}
-//				else
-//				{
-//					for (unsigned int i = 0; i < indices.size(); i++)
-//					{
-//						this->get_CellValue(FieldIndex, indices[i], &var);
-//						sum = sum + var;
-//					}
-//					
-//					if (operAverage)
-//					{
-//						var = sum/indices.size();
-//					}
-//					else
-//					{
-//						var = sum;
-//					}
-//				}
-//			}*/
-//			break;
-//	}
-//
-//	*Result = var;
-//	
-//	*retVal = VARIANT_TRUE;
-//	return S_OK;
-//}
-
-// All the field names that aren't present in src should be copied
-bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping)
+//*********************************************************************
+//*						UniqueFieldNames()				              
+//*********************************************************************
+// Makes name of fields in dbf table unique. In case of duplicated names adds _# to them	 
+bool CTableClass::MakeUniqueFieldNames()
 {
+	VARIANT_BOOL editing;
+	USES_CONVERSION;
+
+	// Do we need edit mode for editing of the field names?
+	// Yes we do, shapelib doesn't allow it otherwise ;)
+	this->get_EditingTable(&editing);	
+	if (!editing) 
+		return false;
+	
 	long numFields;
 	this->get_NumFields(&numFields);
-	std::set<CComBSTR> names;
 	
-	CComBSTR name;
-	IField* fld = NULL;
+	set<CString> fields;
 
-	for (long i = 0; i < numFields; i++)
+	for(long i = 0; i< numFields; i++)
 	{
+		BSTR name;
+		IField* fld;
 		this->get_Field(i, &fld);
 		fld->get_Name(&name);
-		fld->Release();
-		names.insert(name);
-	}
 
+		if (fields.find(OLE2CA(name)) == fields.end())
+		{
+			fields.insert(OLE2CA(name));
+		}
+		else
+		{	
+			bool found = false;
+			for(int j =1; !found ;j++)
+			{
+				CString temp = OLE2CA(name);
+				
+				int maxLength = j > 10? 7 : 8;		//ensure that length of name is not longer than 10 characters
+				if (temp.GetLength() > maxLength) {
+					temp = temp.Left(maxLength);
+				}
+
+				temp.AppendFormat("_%d", j);
+				if (fields.find(temp) == fields.end())
+				{	
+					fields.insert(temp);
+					name = temp.AllocSysString();
+					fld->put_Name(name);
+					found = true;
+				}
+			}
+		}
+		fld->Release();
+	}
+	fields.clear();
+	return true;
+}
+
+// *************************************************************
+//		JoinFields()
+// *************************************************************
+bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList)
+{
+	USES_CONVERSION;
+	
+	long numFields;
 	table2->get_NumFields(&numFields);
 	for (long i = 0; i < numFields; i++)
 	{
-		CComVariant v;
+		IField* fld = NULL;
 		table2->get_Field(i, &fld);
+		CComBSTR name;
 		fld->get_Name(&name);
-
-		if (names.find(name) == names.end())	// doesn't exists in the source
+		
+		// either take all or take those that are in the list provided by user; comparison is case sensitive
+		if (fieldList.size() == 0 || fieldList.find(OLE2A(name)) != fieldList.end())
 		{
 			IField* fldNew;
 			fld->Clone(&fldNew);
@@ -2753,7 +2681,7 @@ bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping
 			VARIANT_BOOL vbretval;
 			this->get_NumFields(&index);
 			this->EditInsertField(fldNew, &index, NULL, &vbretval);
-			_fields[index].joined = true;
+			_fields[index]->joinId = _lastJoinId;
 			fldNew->Release();
 
 			FieldMapping* fm = new FieldMapping();
@@ -2764,38 +2692,147 @@ bool CTableClass::CopyFields(ITable* table2, std::vector<FieldMapping*>& mapping
 		
 		fld->Release();
 	}
+
+	this->MakeUniqueFieldNames();
 	return true;
 }
+
 
 // *****************************************************
 //		Join()
 // *****************************************************
-STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT_BOOL* retVal)
+STDMETHODIMP CTableClass::Join(ITable* table2, BSTR fieldTo, BSTR fieldFrom, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	set<CString> fields;
+	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), "", "", fields);
+	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+// *****************************************************
+//		Join2()
+// *****************************************************
+STDMETHODIMP CTableClass::Join2(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	set<CString> fields;
+	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2A(filenameToReopen), OLE2A(joinOptions), fields);
+	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+// *****************************************************
+//		Join3()
+// *****************************************************
+STDMETHODIMP CTableClass::Join3(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, SAFEARRAY* filedList, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+
+	// Check dimensions of the array.
+    set<CString> fields;
+	if (SafeArrayGetDim(filedList) == 1)
+	{
+		LONG lLBound, lUBound;
+		BSTR HUGEP *pbstr;
+		HRESULT hr1 = SafeArrayGetLBound(filedList, 1, &lLBound);
+		HRESULT hr2 = SafeArrayGetUBound(filedList, 1, &lUBound);
+		HRESULT hr3 = SafeArrayAccessData(filedList, (void HUGEP* FAR*)&pbstr);
+		if (!FAILED(hr1) && !FAILED(hr2) && !FAILED(hr3))
+		{
+			LONG count = lUBound-lLBound + 1;
+			for (int i = 0; i < count; i++){
+				fields.insert(OLE2A(pbstr[i]));
+			}		
+		}
+	}
+
+	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2A(filenameToReopen), OLE2A(joinOptions), fields);
+	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+// *****************************************************
+//		TryJoin()
+// *****************************************************
+STDMETHODIMP CTableClass::TryJoin(ITable* table2, BSTR fieldTo, BSTR fieldFrom, int* rowCount, int* joinRowCount, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	*rowCount = -1;
+	*joinRowCount = -1;
+
+	long index1, index2;
+
+	USES_CONVERSION;
+	if (this->CheckJoinInput(table2, OLE2A(fieldTo), OLE2A(fieldFrom), index1, index2))
+	{
+		// building a maps for field of target table
+		std::map<CComVariant, int> vals;
+		long numRows;
+		table2->get_NumRows(&numRows);
+		for (long i = 0; i < numRows; i++)
+		{
+			CComVariant v;
+			table2->get_CellValue(index2, i, &v);
+			vals[v] = 0;
+		}
+
+		int count = 0;
+		int countJoin = 0;	// number of unique rows from the external table
+		for (size_t i = 0; i < _rows.size(); i++)
+		{
+			CComVariant v;
+			this->get_CellValue(index1, i, &v);
+
+			std::map<CComVariant, int>::iterator it = vals.find(v);
+			if (it != vals.end())
+			{
+				if (it->second == 0 )
+				{
+					countJoin++;
+					it->second = 1;
+				}
+				count++;
+			}
+		}
+		*rowCount = count;
+		*joinRowCount = countJoin;
+		*retVal = VARIANT_TRUE;
+	}
+	return S_OK;
+}
+
+// *****************************************************
+//		CheckJoinInput()
+// *****************************************************
+bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2)
+{
 	if (!table2) 
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return false;
 	}
 	
-	long index1;
-	this->get_FieldIndexByName(field1, &index1 );
+	USES_CONVERSION;
 
-	long index2;
-	table2->get_FieldIndexByName(field2, &index2 );
+	this->get_FieldIndexByName(A2BSTR(fieldTo), &index1 );
+	table2->get_FieldIndexByName(A2BSTR(fieldFrom), &index2 );
 	
 	if (index1 == -1 || index2 == -1)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return false;
 	}
 
 	IField* fld1 = NULL;
 	this->get_Field(index1, &fld1 );
 
 	IField* fld2 = NULL;
-	this->get_Field(index2, &fld2 );
+	table2->get_Field(index2, &fld2 );
 
 	FieldType type1;
 	FieldType type2;
@@ -2806,9 +2843,20 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT
 
 	if (type1 != type2)
 	{
-		ErrorMessage(tkINVALID_PARAMETER_VALUE);  // TODO: add specific message
-		return S_FALSE;
+		ErrorMessage(tkSAME_FIELD_TYPE_EXPECTED);
+		return false;
 	}
+	return true;
+}
+
+// *****************************************************
+//		JoinInternal()
+// *****************************************************
+bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CString filenameToReopen, CString options, set<CString>& fieldList)
+{
+	long index1, index2;
+	if (!this->CheckJoinInput(table2, fieldTo, fieldFrom, index1, index2))
+		return false;
 	
 	// if edit mode isn't open, will use this hack to get through; rather that calling Table.StartEditMode
 	VARIANT_BOOL editing;
@@ -2816,9 +2864,32 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT
 	if (!editing) {
 		this->isEditingTable = TRUE;
 	}
+	
+	// reading list of fields specified by user
+	CString csvFields;
+	set<CString>::iterator it = fieldList.begin();
+	while(it != fieldList.end())
+	{
+		csvFields += *it + ",";
+		it++;
+	}
+	if (csvFields.GetLength() > 0) {
+		csvFields = csvFields.Left(csvFields.GetLength() - 1);
+	}
 
+	// saving the info about join operation to be able to restore it later
+	JoinInfo* info = new JoinInfo();
+	info->filename = filenameToReopen;
+	info->fieldTo = fieldTo;
+	info->fieldFrom = fieldFrom;
+	info->options = options;
+	info->fields = csvFields;
+	info->joinId = ++_lastJoinId;
+	_joins.push_back(info);
+
+	// joining fields
 	std::vector<FieldMapping*> mapping;
-	this->CopyFields(table2, mapping);
+	this->JoinFields(table2, mapping, fieldList);
 	Debug::WriteLine("Number of fields mapped: %d", mapping.size());
 
 	// building a maps for field of target table
@@ -2842,7 +2913,7 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT
 		std::map<CComVariant, int>::iterator it = vals.find(v);
 		if (it != vals.end())
 		{
-			Debug::WriteLine("%d mapped to %d", i, it->second);
+			//Debug::WriteLine("%d mapped to %d", i, it->second);
 			for (size_t j = 0; j < mapping.size(); j++)
 			{
 				table2->get_CellValue(mapping[j]->srcIndex, it->second, &v );
@@ -2857,40 +2928,93 @@ STDMETHODIMP CTableClass::Join(ITable* table2, BSTR field1, BSTR field2, VARIANT
 	for (size_t i = 0; i < mapping.size(); i++ ) {
 		delete mapping[i];
 	}
-	Debug::WriteLine("Values copied: {%d}", count);
+	Debug::WriteLine("Values copied: %d", count);
 
 	if (!editing) {
 		this->isEditingTable = FALSE;
 	}
-
-	USES_CONVERSION;
-	this->SaveAs(A2BSTR("F:\\temp.dbf"), NULL, &vb);
-
-	return S_OK;
+	
+	return true;
 }
 
 // *****************************************************
-//		StopJoin()
+//		RemoveJoinedFields()
 // *****************************************************
-STDMETHODIMP CTableClass::StopJoin()
+// Should be used before saving takes place, while _joins remain untouched so that 
+// they can be restored via serialization/deserialization
+void CTableClass::RemoveJoinedFields()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	VARIANT_BOOL editing;
-	if (this->get_EditingTable(&editing)) {
+	this->get_EditingTable(&editing);
+	if (!editing) {
 		this->isEditingTable = TRUE;
 	}
 	
 	VARIANT_BOOL vb;
-	for (size_t i =_fields.size() - 1; i >= 0 ; i-- )
+	for (int i =_fields.size() - 1; i >= 0 ; i-- )
 	{
-		if (_fields[i].joined) {
+		if (_fields[i]->Joined()) {
 			this->EditDeleteField(i, NULL, &vb);
 		}
 	}
 
 	if (!editing) {
 		this->isEditingTable = FALSE;
+	}
+}
+
+// *****************************************************
+//		StopAllJoins()
+// *****************************************************
+STDMETHODIMP CTableClass::StopAllJoins()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	this->RemoveJoinedFields();
+
+	for (size_t i = 0; i < _joins.size(); i++) {
+		delete _joins[i];
+	}
+	_joins.clear();
+	return S_OK;
+}
+
+// *****************************************************
+//		StopJoin()
+// *****************************************************
+STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (joinIndex < 0 || joinIndex >= _joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = VARIANT_FALSE;
+	}
+	else 
+	{
+		int id = _joins[joinIndex]->joinId;
+
+		VARIANT_BOOL editing;
+		this->get_EditingTable(&editing);
+		if (!editing)	 {
+			this->isEditingTable = TRUE;
+		}
+		
+		// remove all fields which belong to this join
+		VARIANT_BOOL vb;
+		for (int i =_fields.size() - 1; i >= 0 ; i-- )
+		{
+			if (_fields[i]->joinId == id)
+				this->EditDeleteField(i, NULL, &vb);
+		}
+
+		if (!editing)
+			this->isEditingTable = FALSE;
+
+		delete _joins[joinIndex];
+		_joins.erase(_joins.begin() + joinIndex);
+
+		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -2903,7 +3027,7 @@ STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	for (size_t i =_fields.size() - 1; i >= 0 ; i-- )
 	{
-		if (_fields[i].joined) {
+		if (_fields[i]->Joined()) {
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -2911,6 +3035,17 @@ STDMETHODIMP CTableClass::get_IsJoined(VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 	return S_OK;
 }
+
+// *****************************************************
+//		get_JoinCount()
+// *****************************************************
+STDMETHODIMP CTableClass::get_JoinCount(int* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = _joins.size();
+	return S_OK;
+}
+
 
 // *****************************************************
 //		get_FieldIsJoined()
@@ -2924,7 +3059,218 @@ STDMETHODIMP CTableClass::get_FieldIsJoined(int fieldIndex, VARIANT_BOOL* retVal
 		*retVal = VARIANT_FALSE;
 	}
 	else {
-		*retVal = _fields[fieldIndex].joined ? VARIANT_TRUE: VARIANT_FALSE;
+		*retVal = _fields[fieldIndex]->Joined() ? VARIANT_TRUE: VARIANT_FALSE;
 	}
 	return S_OK;
+}
+
+// *****************************************************
+//		get_FieldJoinIndex()
+// *****************************************************
+STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = -1;
+	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else 
+	{
+		int id = _fields[fieldIndex]->joinId;
+		for (size_t i = 0; i < _joins.size(); i++) 
+		{
+			if (_joins[i]->joinId == id)
+			{
+				*retVal = i;
+				break;
+			}
+		}
+	}
+	return S_OK;
+}
+	
+// *****************************************************
+//		get_JoinFilename()
+// *****************************************************
+STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (joinIndex < 0 || joinIndex >= _joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = A2BSTR("");
+	}
+	else 
+	{
+		*retVal = A2BSTR(_joins[joinIndex]->filename);
+	}
+	return S_OK;
+}
+	
+// *****************************************************
+//		get_JoinFromField()
+// *****************************************************
+STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (joinIndex < 0 || joinIndex >= _joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = A2BSTR("");
+	}
+	else 
+	{
+		*retVal = A2BSTR(_joins[joinIndex]->fieldFrom);
+	}
+	return S_OK;
+}
+
+
+// *****************************************************
+//		get_JoinToField()
+// *****************************************************
+STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (joinIndex < 0 || joinIndex >= _joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = A2BSTR("");
+	}
+	else 
+	{
+		*retVal = A2BSTR(_joins[joinIndex]->fieldTo);
+	}
+	return S_OK;
+}
+
+// *****************************************************
+//		Serialize()
+// *****************************************************
+STDMETHODIMP CTableClass::Serialize(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	CPLXMLNode* psTree = this->SerializeCore("TableClass");
+	*retVal = A2BSTR(psTree ? CPLSerializeXMLTree(psTree) : "");
+	return S_OK;
+}
+
+// *****************************************************
+//		Deserialize()
+// *****************************************************
+STDMETHODIMP CTableClass::Deserialize(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+
+	CString s = OLE2CA(newVal);
+	CPLXMLNode* node = CPLParseXMLString(s.GetString());
+	if (node)
+	{
+		node = CPLGetXMLNode(node, "=TableClass");
+		if (node)
+		{
+			this->DeserializeCore(node);
+		}
+	}
+	return S_OK;
+}
+
+// ********************************************************
+//     SerializeCore()
+// ********************************************************
+CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (_joins.size() > 0)
+	{
+		CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+
+		CPLXMLNode* psJoins = CPLCreateXMLNode(psTree, CXT_Element, "Joins");
+		if (psJoins)
+		{
+			for (size_t i = 0; i < _joins.size(); i++)
+			{
+				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
+				CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(_joins[i]->filename));
+				CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
+				CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
+				CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
+				CPLCreateXMLAttributeAndValue(psNode, "Options", CPLString().Printf(_joins[i]->options));
+			}
+		}
+		return psTree;
+	}
+	return NULL;
+}
+
+// ********************************************************
+//     DeserializeCore()
+// ********************************************************
+bool CTableClass::DeserializeCore(CPLXMLNode* node)
+{
+	if (!node)
+		return false;
+
+	this->StopAllJoins();	// joins are stored in the serialized state, so they would be replicated here
+
+	node = CPLGetXMLNode(node, "Joins");
+	if (node)
+	{
+		node = node->psChild;
+		while (node)
+		{
+			if (strcmp(node->pszValue, "Join") == 0)
+			{
+				CString filename = CPLGetXMLValue( node, "Filename", NULL );
+				CString fieldTo = CPLGetXMLValue( node, "FieldTo", NULL );
+				CString fieldFrom = CPLGetXMLValue( node, "FieldFrom", NULL );
+				CString fields = CPLGetXMLValue( node, "Fields", NULL );
+				CString options = CPLGetXMLValue( node, "Options", NULL );
+				
+				if (filename.GetLength() > 0 && fieldTo.GetLength() > 0 && fieldFrom.GetLength() > 0)
+				{
+					// ask client to provide the data once more
+					VARIANT_BOOL vb;
+					ITable* tableToFill = NULL;
+					CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&tableToFill);
+					
+					if (filename.GetLength() > 4 && filename.Right(4) == ".dbf")
+					{
+						tableToFill->Open(A2BSTR(filename), NULL, &vb);
+					}
+					else
+					{
+						// let the client handle all the rest formats
+						tableToFill->CreateNew(A2BSTR(""), &vb);
+						Fire_OnUpdateJoin(A2BSTR(filename), A2BSTR(fields), A2BSTR(options), tableToFill);
+					}
+					
+					long numRows, numCols;
+					tableToFill->get_NumRows(&numRows);
+					tableToFill->get_NumFields(&numCols);
+
+					if (numRows > 0 && numCols > 0)
+					{
+						set<CString> fieldList;
+						int pos = 0;
+						CString field = fields.Tokenize(",", pos);
+						while (field.GetLength() != 0)
+						{
+							fieldList.insert(field);
+							field = fields.Tokenize(",", pos);
+						}
+						this->JoinInternal(tableToFill, A2BSTR(fieldTo), A2BSTR(fieldFrom), A2BSTR(filename), A2BSTR(options), fieldList);
+					}
+					tableToFill->Close(&vb);
+					tableToFill->Release();
+				}
+			}
+			node = node->psNext;
+		}
+		return true;
+	}
+	return false;
 }

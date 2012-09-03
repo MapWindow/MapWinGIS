@@ -45,7 +45,6 @@ interface ILinePattern;
 interface IStopExecution;
 interface IGeoProjection;
 interface IGlobalSettings;
-interface ITiles;
 
 /****************************  MapGDI Enumerations ***********************/
 
@@ -1014,21 +1013,7 @@ interface ITiles;
 		AngularUnit = 4,
 	} tkGeogCSParameter;
 
-	/************************* tkGroupOperation **************************/
-	typedef
-	[
-		uuid(AF13E014-9E40-4ee2-9641-3BA4BE865DBA),
-		helpstring("Enumerated tkGroupOperation Types"),
-	]
-	enum tkGroupOperation
-	{		
-		operMin = 0,
-		operMax = 1,
-		operCount = 2,
-		operSum = 3, 
-		operAverage = 4,
-	} tkGroupOperation;
-
+	
 	/************************* tkGdalErrorType **************************/
 	typedef
 	[
@@ -2536,8 +2521,7 @@ interface IShape : IDispatch{
 	pointer_default(unique)
 ]
 interface IExtents : IDispatch{
-	[id(1), helpstring("method SetBounds")] HRESULT SetBounds([in] double xMin, [in] double yMin, [in] double zMin, [in] double xMax, [in] double yMax, [in] double zMax);		
-//		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([in, out] double * xMin, [in, out] double * yMin, [in, out] double * zMin, [in, out] double * xMax, [in, out] double * yMax, [in, out] double * zMax);
+		[id(1), helpstring("method SetBounds")] HRESULT SetBounds([in] double xMin, [in] double yMin, [in] double zMin, [in] double xMax, [in] double yMax, [in] double zMax);		
 		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([out] double * xMin, [out] double * yMin, [out] double * zMin, [out] double * xMax, [out] double * yMax, [out] double * zMax);
 		[propget, id(3), helpstring("property xMin")] HRESULT xMin([out, retval] double *pVal);
 		[propget, id(4), helpstring("property xMax")] HRESULT xMax([out, retval] double *pVal);
@@ -2547,7 +2531,6 @@ interface IExtents : IDispatch{
 		[propget, id(8), helpstring("property zMax")] HRESULT zMax([out, retval] double *pVal);
 		[propget, id(9), helpstring("property mMin")] HRESULT mMin([out, retval] double *pVal);
 		[propget, id(10), helpstring("property mMax")] HRESULT mMax([out, retval] double *pVal);
-		//[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([in, out] double * mMin, [in, out] double * mMax);
 		[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([out] double * mMin, [out] double * mMax);
 		[id(12), helpstring("method SetMeasureBounds")] HRESULT SetMeasureBounds([in]double mMin, [in]double mMax);
 		//[id(13), helpstring("method Disjoint")] HRESULT Disjoint([in]IExtents* ext, [out, retval]VARIANT_BOOL* retval);
@@ -2582,6 +2565,9 @@ interface IPoint : IDispatch{
 	[propput, id(8), helpstring("property M")] HRESULT M([in] double newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IPoint** retVal);
 };
+
+
+
 
 /****************************  Table Interface ***********************/
 [
@@ -2634,10 +2620,26 @@ interface ITable : IDispatch{
 	[id(34), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
 																	  [in]int width, [out, retval]long* fieldIndex);
 
-	[id(35), helpstring("method Join")] HRESULT Join([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [out, retval]VARIANT_BOOL* retVal);	
-	[id(36), helpstring("method StopJoin")] HRESULT StopJoin();	
-	[id(37), helpstring("method get_IsJoined")] HRESULT get_IsJoined([out, retval]VARIANT_BOOL* retVal);	
-	[id(38), helpstring("method get_FieldIsJoined")] HRESULT get_FieldIsJoined([in]int fieldIndex, [out, retval]VARIANT_BOOL* retVal);	
+	[id(35), helpstring("")] HRESULT Join([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [out, retval]VARIANT_BOOL* retVal);	
+	[id(36), helpstring("")] HRESULT Join2([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [in]BSTR filenameToReopen, [in]BSTR joinOptions, [out, retval]VARIANT_BOOL* retVal);	
+	
+	[id(37), helpstring("")] HRESULT StopJoin([in]int joinIndex, [out, retval]VARIANT_BOOL* retVal);	
+	[id(38), helpstring("")] HRESULT StopAllJoins();	
+
+	[propget, id(39), helpstring("")] HRESULT IsJoined([out, retval]VARIANT_BOOL* retVal);	
+	[propget, id(40), helpstring("")] HRESULT JoinCount([out, retval]int* retVal);	
+
+	[propget, id(41), helpstring("")] HRESULT JoinFilename([in]int joinIndex, [out, retval]BSTR* retVal);	
+	[propget, id(42), helpstring("")] HRESULT JoinFromField([in]int joinIndex, [out, retval]BSTR* retVal);	
+	[propget, id(43), helpstring("")] HRESULT JoinToField([in]int joinIndex, [out, retval]BSTR* retVal);	
+
+	[propget, id(44), helpstring("")] HRESULT FieldIsJoined([in]int fieldIndex, [out, retval]VARIANT_BOOL* retVal);	
+	[propget, id(45), helpstring("")] HRESULT FieldJoinIndex([in]int fieldIndex, [out, retval]int* retVal);	
+	
+	[id(46), helpstring("")] HRESULT Serialize([out, retval]BSTR* retVal);	
+	[id(47), helpstring("")] HRESULT Deserialize([in]BSTR newVal);	
+	[id(48), helpstring("")] HRESULT TryJoin([in]ITable* table2, [in]BSTR fieldTo, [in]BSTR fieldFrom, [out]int* rowCount, [out]int* joinRowCount, [out, retval]VARIANT_BOOL* retVal);	
+	[id(49), helpstring("")] HRESULT Join3([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [in]BSTR filenameToReopen, [in]BSTR joinOptions, [in]SAFEARRAY(BSTR) fieldList, [out, retval]VARIANT_BOOL* retVal);	
 };
 
 
@@ -2774,9 +2776,9 @@ interface IUtils : IDispatch{
 	[id(26), helpstring("method MergeImages")] HRESULT MergeImages([in]SAFEARRAY(BSTR) InputNames, [in] BSTR OutputName, [out, retval]VARIANT_BOOL* retVal);
 	[id(27), helpstring("method ReprojectShapefile")] HRESULT ReprojectShapefile([in] IShapefile* sf, [in] IGeoProjection* source, [in] IGeoProjection* target, [out,retval] IShapefile** result);
 	[id(28), helpstring("method ColorByName")] HRESULT ColorByName([in] tkMapColor name, [out,retval] OLE_COLOR* retVal);
-	[id(29), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
-	[id(30), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* inputGrid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
-	[id(31), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [out, retval]VARIANT_BOOL* retVal);
+	[id(30), helpstring("method ClipGridWithPolygon")] HRESULT ClipGridWithPolygon([in]BSTR inputGridfile, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
+	[id(31), helpstring("method ClipGridWithPolygon2")] HRESULT ClipGridWithPolygon2([in]IGrid* inputGrid, [in]IShape* poly, [in]BSTR resultGridfile, [in]VARIANT_BOOL keepExtents, [out, retval]VARIANT_BOOL* retVal);
+	[id(32), helpstring("method GridStatisticsToShapefile")] HRESULT GridStatisticsToShapefile([in]IGrid* grid, [in]IShapefile* sf, [in]VARIANT_BOOL selectedOnly, [in]VARIANT_BOOL overwriteFields, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/
@@ -3889,21 +3891,7 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(12), helpstring("property LabelsCompositingQuality")] HRESULT LabelsCompositingQuality([in] tkCompositingQuality newVal);
 };
 
-[
-	object,
-	uuid(6BC1A3D4-74B0-426E-8BE8-01AE26A4F470),
-	dual,
-	nonextensible,
-	helpstring("ITiles Interface"),
-	pointer_default(unique)
-]
-interface ITiles : IDispatch{
-	[id(1), helpstring("method Clear")] HRESULT Clear(void);
-	[propget, id(2), helpstring("property Count")] HRESULT Count([out, retval] LONG* pVal);
-	[propget, id(3), helpstring("property Visible")] HRESULT Visible([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(3), helpstring("property Visible")] HRESULT Visible([in] VARIANT_BOOL newVal);
-	[id(4), helpstring("method Add")] HRESULT Add([in] VARIANT bytesArray, [in]double xLon, [in]double yLat, [in]double widthLon, [in]double heightLat);
-};
+
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.8),
 	helpfile("MapWinGIS.chm"),
@@ -3960,7 +3948,7 @@ library MapWinGIS
 			[id(173), helpstring("property ShowVersionNumber")] VARIANT_BOOL ShowVersionNumber;
 			[id(187), helpstring("property MaxExtents")] IExtents* MaxExtents;
 			[id(188), helpstring("property PixelsPerDegree")] DOUBLE PixelsPerDegree;
-			/*[id(190), helpstring("property Tiles")] ITiles* Tiles;*/
+			
 			
 			//}}AFX_ODL_PROP
 
@@ -4195,7 +4183,17 @@ library MapWinGIS
 			[id(190), helpstring("method ZoomToSelected")] VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 };
 			//}}AFX_ODL_METHOD
+	
+	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),
+	 helpstring("Event interface for Table class") ]
+	dispinterface _ITableEvents 
+	{
+			properties:
+			//  Event interface has no properties
 
+			methods:
+				[id(1)]void OnUpdateJoin(BSTR filename, BSTR fieldList, BSTR joinOptions, ITable* joinSource);	
+	};
 
 	//  Event dispatch interface for CMap
 
@@ -4370,6 +4368,7 @@ library MapWinGIS
 	coclass Table
 	{
 		[default] interface ITable;
+		[default, source] dispinterface _ITableEvents;
 	};
 	[
 		uuid(C2C71E09-3DEB-4E6C-B54A-D5613986BFFE),
@@ -4540,13 +4539,5 @@ library MapWinGIS
 	coclass GlobalSettings
 	{
 		[default] interface IGlobalSettings;
-	};
-	[
-		uuid(9C7B823D-B1BE-4C39-A552-8B148C008FC5),
-		helpstring("Tiles Class")
-	]
-	coclass Tiles
-	{
-		[default] interface ITiles;
 	};
 };

@@ -612,7 +612,7 @@ private:
 	int get_OuterRingIndex(int ShapeIndex, int PartIndex);
 	
 public:
-	bool MakeUniqueFieldNames();
+	
 	
 	void ErrorMessage(long ErrorCode);
 	void ErrorMessage(long ErrorCode, ICallback* cBack);

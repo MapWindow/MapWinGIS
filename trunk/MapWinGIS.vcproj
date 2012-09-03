@@ -1147,10 +1147,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\COM classes\Tiles.h"
-					>
-				</File>
-				<File
 					RelativePath=".\COM classes\Tin.h"
 					>
 				</File>
@@ -1308,10 +1304,6 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\TableClass.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\COM classes\Tiles.cpp"
 					>
 				</File>
 				<File
@@ -2576,6 +2568,10 @@
 				</File>
 			</Filter>
 		</Filter>
+		<File
+			RelativePath=".\_ITableEvents_CP.H"
+			>
+		</File>
 		<File
 			RelativePath=".\Resources\cursor1.cur"
 			>

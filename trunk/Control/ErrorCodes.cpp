@@ -208,6 +208,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Couldn't add a field to the .dbf file";
 		case tkCANT_CHANGE_FIELD_TYPE:
 			return "Can't change field type for the file that was added to the table";
+		case tkSAME_FIELD_TYPE_EXPECTED:
+			return "Fields of the same type are expected for this operation";
 
 		//1001-1200 = tkutils
 		case tkOUT_OF_RANGE_0_TO_180:

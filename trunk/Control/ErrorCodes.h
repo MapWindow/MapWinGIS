@@ -110,6 +110,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkCANT_CREATE_DBF 806
 # define tkDBF_CANT_ADD_DBF_FIELD 807
 # define tkCANT_CHANGE_FIELD_TYPE 808
+# define tkSAME_FIELD_TYPE_EXPECTED 809
 
 //1001-1200 = tkutils
 # define tkOUT_OF_RANGE_0_TO_180 1001

@@ -59,6 +59,7 @@
 #include "PointInPolygon.h"
 #include "Grid.h"
 #include "Extents.h"
+#include "TableClass.h"
 
 #pragma warning(disable:4996)
 
@@ -5946,9 +5947,6 @@ STDMETHODIMP CUtils::ClipGridWithPolygon(BSTR inputGridfile, IShape* poly, BSTR 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	//bForceCachedIO =  CSLTestBoolean( 
-    // CPLGetConfigOption( "GDAL_FORCE_CACHING", "NO") );
-
 	*retVal = VARIANT_FALSE;
 
 	if (!Utility::fileExistsUnicode(inputGridfile))
@@ -6135,7 +6133,8 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 		resultIndices.push_back(index);
 	}
 	
-	((CShapefile*)sf)->MakeUniqueFieldNames();
+	((CTableClass*)tbl)->MakeUniqueFieldNames();
+	//((CShapefile*)sf)->MakeUniqueFieldNames();
 	tbl->Release();
 }
 

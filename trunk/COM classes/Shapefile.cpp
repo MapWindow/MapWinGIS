@@ -40,10 +40,10 @@
 #include "Shapefile.h"
 #include "Varh.h"
 #include "Projections.h"		// ProjectionTools
-//#include "UtilityFunctions.h"
 #include "Labels.h"
 #include "Charts.h"
 #include "GeoProjection.h"
+#include "TableClass.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -1452,58 +1452,7 @@ STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 	return S_OK;
 }
 
-//*********************************************************************
-//*						UniqueFieldNames()				              
-//*********************************************************************
-// Makes name of fields in dbf table unique. In case of duplicated names adds _# to them	 
-bool CShapefile::MakeUniqueFieldNames()
-{
-	VARIANT_BOOL editing;
-	USES_CONVERSION;
 
-	// Do we need edit mode for editing of the field names?
-	// Yes we do, shapelib doesn't allow it otherwise ;)
-	this->get_EditingTable(&editing);	
-	if (!editing) 
-		return false;
-	
-	long numFields;
-	this->get_NumFields(&numFields);
-	
-	set<CString> fields;
-
-	for(long i = 0; i< numFields; i++)
-	{
-		BSTR name;
-		IField* fld;
-		this->get_Field(i, &fld);
-		fld->get_Name(&name);
-
-		if (fields.find(OLE2CA(name)) == fields.end())
-		{
-			fields.insert(OLE2CA(name));
-		}
-		else
-		{	
-			bool found = false;
-			for(int j =1; !found ;j++)
-			{
-				CString temp = OLE2CA(name);
-				temp.AppendFormat("_%d", j);
-				if (fields.find(temp) == fields.end())
-				{	
-					fields.insert(temp);
-					name = temp.AllocSysString();
-					fld->put_Name(name);
-					found = true;
-				}
-			}
-		}
-		fld->Release();
-	}
-	fields.clear();
-	return true;
-}
 #pragma endregion
 
 #pragma region DrawingOptions
@@ -1712,7 +1661,7 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 // ********************************************************
 //     SerializeCore()
 // ********************************************************
- CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName)
+CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
@@ -1803,6 +1752,14 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 				CPLCreateXMLAttributeAndValue(nodeSelection, "SelectedCount", CPLString().Printf("%d", numSelected));
 			}
 			delete[] selection;
+		}
+
+		// table
+		if (dbf) {
+			CPLXMLNode* psTable = ((CTableClass*)dbf)->SerializeCore("TableClass");
+			if (psTable) {
+				CPLAddXMLChild(psTree, psTable);
+			}
 		}
 	}
 	return psTree;
@@ -1927,6 +1884,16 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 					_shapeData[i]->selected =  true;
 				}
 			}
+		}
+	}
+
+	// table
+	if (dbf) 
+	{
+		psChild = CPLGetXMLNode(node, "TableClass");
+		if (psChild)
+		{
+			((CTableClass*)dbf)->DeserializeCore(psChild);
 		}
 	}
 	return true;
