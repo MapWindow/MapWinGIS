@@ -715,7 +715,13 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 
 		// opening
 		if (!readOnly)
+		{
 			dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb+");
+
+			// failed to open? try read only
+			if( dbfHandle == NULL )
+				dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb");
+		}
 		else
 			dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb");
 		
@@ -2985,7 +2991,7 @@ STDMETHODIMP CTableClass::StopAllJoins()
 STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -3053,7 +3059,7 @@ STDMETHODIMP CTableClass::get_JoinCount(int* retVal)
 STDMETHODIMP CTableClass::get_FieldIsJoined(int fieldIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	if (fieldIndex < 0 || fieldIndex >= (int)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -3071,7 +3077,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = -1;
-	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	if (fieldIndex < 0 || fieldIndex >= (int)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -3096,7 +3102,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
@@ -3114,7 +3120,7 @@ STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
@@ -3133,7 +3139,7 @@ STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
