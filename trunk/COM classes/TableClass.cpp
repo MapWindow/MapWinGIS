@@ -2991,7 +2991,7 @@ STDMETHODIMP CTableClass::StopAllJoins()
 STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
+	if (joinIndex < 0 || joinIndex >= _joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -3199,8 +3199,14 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 		{
 			for (size_t i = 0; i < _joins.size(); i++)
 			{
+				CString name = _joins[i]->filename;
+				if (this->filename != "")
+				{
+					name = Utility::GetRelativePath(this->filename, name);
+				}
+				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
-				CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(_joins[i]->filename));
+				CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(name));
 				CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
 				CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
 				CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
@@ -3225,6 +3231,17 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 	node = CPLGetXMLNode(node, "Joins");
 	if (node)
 	{
+		CString folderName = "";
+		char* cwd = NULL;
+		if (this->filename != "")
+		{
+			cwd = new char[4096];
+			_getcwd(cwd,4096);
+			
+			folderName = Utility::GetFolderFromPath(this->filename);
+			_chdir(folderName);
+		}
+		
 		node = node->psChild;
 		while (node)
 		{
@@ -3275,7 +3292,14 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 				}
 			}
 			node = node->psNext;
+		
 		}
+
+		if (this->filename != "")
+		{
+			_chdir(cwd);
+		}
+
 		return true;
 	}
 	return false;
