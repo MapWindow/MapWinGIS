@@ -24,7 +24,7 @@
 //
 #pragma once
 #pragma warning( disable : 4290 )
-#include <SpatialIndex.h>
+#include <spatialindex/SpatialIndex.h>
 #include <ios>
 
 using namespace std;
@@ -86,7 +86,7 @@ namespace IndexSearching
 			  return (m_pShpNext != 0);
 			}
 
-		  virtual size_t size() throw (Tools::NotSupportedException)
+		  virtual uint32_t size() throw (Tools::NotSupportedException)
 			{
 			  throw Tools::NotSupportedException("Operation not supported.");
   		  }

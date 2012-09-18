@@ -23,7 +23,7 @@
 //
 //
 #pragma once
-#include "SpatialIndex.h"
+#include "spatialindex/SpatialIndex.h"
 #include "IndexSearching.h"
 #include <string>
 #include <list>
