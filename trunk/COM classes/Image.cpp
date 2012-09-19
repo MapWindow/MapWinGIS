@@ -2534,7 +2534,7 @@ STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Im
 	if (gdalImage)
 	{
 		*ImageX = Utility::Rint((ProjX - _rasterImage->orig_XllCenter)/_rasterImage->orig_dX);
-		*ImageY = Utility::Rint((double)Height - 1 - (((ProjY - _rasterImage->orig_YllCenter)/_rasterImage->orig_dY)));
+		*ImageY = Utility::Rint((double)_rasterImage->orig_Height - 1 - (((ProjY - _rasterImage->orig_YllCenter)/_rasterImage->orig_dY)));
 	}
 	else
 	{
@@ -2555,7 +2555,7 @@ STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* Pr
 	if (gdalImage)
 	{
 		*ProjX = _rasterImage->orig_XllCenter + (ImageX - 0.5) * _rasterImage->orig_dX;
-		*ProjY = _rasterImage->orig_YllCenter + (Height - 1 - ImageY + 0.5) * _rasterImage->orig_dY;
+		*ProjY = _rasterImage->orig_YllCenter + (_rasterImage->orig_Height - 1 - ImageY + 0.5) * _rasterImage->orig_dY;
 	}
 	else
 	{
