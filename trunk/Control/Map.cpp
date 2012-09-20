@@ -3198,7 +3198,7 @@ BSTR CMapView::GetMapState()
 }
 
 // ******************************************************************
-//	   DeserializeMapStateCore()
+//	   DeserializeMapState()
 // ******************************************************************
 VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath)
 {
@@ -3221,20 +3221,38 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VA
 		ErrorMessage(tkINVALID_FILE);
 		return false;
 	}
-	
+
 	if (_stricmp( node->pszValue, "MapWinGIS") != 0)
 	{
-		// it can be MW4 project file, then MapWinGis should be the first child node
-		CPLXMLNode* nodeChild = node->psChild;
-		while (nodeChild)
+		bool found = false;
+
+		// probably it was serialized externally, than we need to skip this node: <?xml version="1.0" encoding="utf-8"?>
+		CPLXMLNode* nodeNext = node->psNext;
+		while(nodeNext)
 		{
-			if (_stricmp( nodeChild->pszValue, "MapWinGIS") == 0)
+			if (_stricmp( node->psNext->pszValue, "MapWinGIS") == 0)
 			{
-				// we got it
-				node = nodeChild;
+				node = nodeNext;
+				found = true;
 				break;
 			}
-			nodeChild = nodeChild->psNext;
+			nodeNext = nodeNext->psNext;
+		}
+		
+		if (!found)
+		{
+			// it still can be MW4 project file, then MapWinGis should be the first child node
+			CPLXMLNode* nodeChild = node->psChild;
+			while (nodeChild)
+			{
+				if (_stricmp( nodeChild->pszValue, "MapWinGIS") == 0)
+				{
+					// we got it
+					node = nodeChild;
+					break;
+				}
+				nodeChild = nodeChild->psNext;
+			}
 		}
 		
 		// check once again, if it wasn't find - abandon it
@@ -3243,6 +3261,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VA
 			ErrorMessage(tkINVALID_FILE);
 			return false;
 		}
+		
 	}
 	
 	CPLXMLNode* nodeState = CPLGetXMLNode(node, "MapState");
