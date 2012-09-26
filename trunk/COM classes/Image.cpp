@@ -837,7 +837,7 @@ STDMETHODIMP CImageClass::get_CdlgFilter(BSTR *pVal)
 
 	// NOTE: These need to match the grid filter for any duplicates.
 	//"ECW Images (*.ecw)|*.ecw|" 
-	*pVal = A2BSTR( "All Supported Image Types|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.tif|" \
+	*pVal = A2BSTR( "All Supported Image Types|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.vrt;*.tif|" \
 					"ArcInfo Grid Images (hdr.adf)|hdr.adf|" \
 					"ASCII Grid Images (*.asc)|*.asc|" \
 					"Binary Terrain Images (*.bt)|*.bt|" \
@@ -854,6 +854,7 @@ STDMETHODIMP CImageClass::get_CdlgFilter(BSTR *pVal)
 					"PNG Images (*.png)|*.pgm;*.pnm;*.png;*.ppm|" \
 					"CADRG (*.LF2)|*.lf2|" \
 					"BSB/KAP (*.kap)|*.kap|" \
+					"GDAL Virtual Dataset (*.vrt)|*.vrt|" \
 					"Tagged Image File Format (*.tif)|*.tif"); 
 	return S_OK;
 }
