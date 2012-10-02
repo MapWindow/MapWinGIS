@@ -270,8 +270,13 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* iimg, bool
 					
 					Gdiplus::Bitmap imgPlus(bi, (void*)data);
 					Gdiplus::RectF rect((Gdiplus::REAL)dstL, (Gdiplus::REAL)dstT, (Gdiplus::REAL)dstR - dstL, (Gdiplus::REAL)dstB - dstT);
-					gr->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX - 0.5), (Gdiplus::REAL)(imgY -0.5), 
+					// Start - Wasim Sabir
+					// Mantis issue #2203 - Some of Esri ASCII grid cells are not square
+					//gr->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX - 0.5), (Gdiplus::REAL)(imgY -0.5), 
+					//												(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
+					gr->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX), (Gdiplus::REAL)(imgY), 
 																	(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
+					// End - Wasim Sabir
 				}
 				else
 				{
