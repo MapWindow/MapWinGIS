@@ -1568,10 +1568,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\MapWinGIS.rgs"
-				>
-			</File>
-			<File
 				RelativePath=".\Resource.h"
 				>
 			</File>

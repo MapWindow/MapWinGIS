@@ -5,7 +5,6 @@
 #define IDS_MAP                         1
 #define IDB_MAP                         1
 #define IDS_MAP_PPG                     2
-#define IDR_MAPWINGIS                   102
 #define IDR_SHAPEFILELEGEND             103
 #define IDR_SHAPEFILELEGENDBREAK        104
 #define IDC_TTBTN                       105

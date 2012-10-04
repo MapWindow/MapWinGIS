@@ -26,7 +26,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // REGISTRY
 //
 
-IDR_MAPWINGIS           REGISTRY                "MapWinGIS.rgs"
 IDR_SHAPEFILELEGEND     REGISTRY                "COM Classes/ShapefileColorScheme.rgs"
 IDR_SHAPEFILELEGENDBREAK REGISTRY                "COM Classes/ShapefileColorBreak.rgs"
 IDR_GRID                REGISTRY                "COM Classes/Grid.rgs"
