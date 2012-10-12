@@ -321,13 +321,21 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		{
 			// searching the index
 			bool stop = false;
-			while(arr[k] < offset)
+
+			//empty list?
+			if (arr.size() <= 0)
+				stop = true;
+			else
 			{
-				k++;
-				if (k >= arr.size())
+				//determine if the shape is visible
+				while(arr[k] < offset)
 				{
-					stop = true;
-					break;
+					k++;
+					if (k >= arr.size())
+					{
+						stop = true;
+						break;
+					}
 				}
 			}
 			
@@ -346,7 +354,6 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		
 		// marking shape as visible; it may still fall out of extents but it is inefficient to test it here
 		(*_shapeData)[offset]->isVisible = true;
-		
 		
 		bool selected = (*_shapeData)[offset]->selected;
 		if (selected)
