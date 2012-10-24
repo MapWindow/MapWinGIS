@@ -1549,9 +1549,9 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	return S_OK;
 };
 
-/***********************************************************************/
-/*		CShape::GetIntersection()
-/***********************************************************************/
+// **********************************************************************
+//		CShape::GetIntersection()
+// **********************************************************************
 //  Returns intersection of 2 shapes as an safearray of shapes
  STDMETHODIMP CShape::GetIntersection(IShape* Shape, VARIANT* Results, VARIANT_BOOL* retval)
 {

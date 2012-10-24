@@ -1257,7 +1257,7 @@ STDMETHODIMP CShapefile::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retva
 }
 
 // ****************************************************************
-//	  EditCellValue()
+//	  StopEditingTable()
 // ****************************************************************
 STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback *cBack, VARIANT_BOOL *retval)
 {

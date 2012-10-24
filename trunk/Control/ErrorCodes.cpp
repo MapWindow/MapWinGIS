@@ -138,6 +138,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Unexpected shape type";
 		case tkBOUNDS_NOT_INTERSECT:
 			return "Bounds of input data don't intersect";
+      case tkINVALID_RETURN_TYPE:
+         return "Invalid Shapefile type specified as return value";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

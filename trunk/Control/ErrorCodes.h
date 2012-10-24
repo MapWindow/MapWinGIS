@@ -70,6 +70,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkSELECTION_EMPTY 219
 # define tkINVALID_SHAPE 220
 # define tkUNEXPECTED_SHAPE_TYPE 221
+# define tkINVALID_RETURN_TYPE 222
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

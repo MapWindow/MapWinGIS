@@ -994,21 +994,61 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	bool canUseClipper = (type1 == SHP_POLYGON && type2 == SHP_POLYGON);
 	
 	// autochoosing the resulting type for intersection
-	if (operation == clIntersection && 
-		returnType == SHP_NULLSHAPE)
+	if (operation == clIntersection)
 	{
-		if (type1 == SHP_POINT || type2 == SHP_POINT ||
-			type1 == SHP_MULTIPOINT || type2 == SHP_MULTIPOINT)
+		if (returnType == SHP_NULLSHAPE)
 		{
-			type1 = SHP_POINT;
-		}
-		else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
-		{
-			type1 = SHP_POLYLINE;
+			if (type1 == SHP_POINT || type2 == SHP_POINT ||
+				type1 == SHP_MULTIPOINT || type2 == SHP_MULTIPOINT)
+			{
+				type1 = SHP_POINT;
+			}
+			else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
+			{
+				type1 = SHP_POLYLINE;
+			}
+			else
+			{
+				type1 = SHP_POLYGON;
+			}
 		}
 		else
 		{
-			type1 = SHP_POLYGON;
+			// is the specified return type not compatible?
+			if (type1 == SHP_POLYGON && type2 == SHP_POLYGON &&
+				(returnType == SHP_POLYLINE || returnType == SHP_POINT))
+			{
+				ErrorMessage(tkINVALID_RETURN_TYPE);
+				return;
+			}
+			else if (type1 == SHP_POLYGON && type2 == SHP_POLYLINE &&
+				returnType == SHP_POINT)
+			{
+				ErrorMessage(tkINVALID_RETURN_TYPE);
+				return;
+			}
+			else if (type2 == SHP_POLYGON && type1 == SHP_POLYLINE &&
+				returnType == SHP_POINT)
+			{
+				ErrorMessage(tkINVALID_RETURN_TYPE);
+				return;
+			}
+			else if (returnType == SHP_POLYGON && (type1 == SHP_POLYLINE ||
+				type2 == SHP_POLYLINE))
+			{
+				ErrorMessage(tkINVALID_RETURN_TYPE);
+				return;
+			}
+			else if (returnType != SHP_POINT && (type1 == SHP_POINT ||
+				type2 == SHP_POINT))
+			{
+				ErrorMessage(tkINVALID_RETURN_TYPE);
+				return;
+			}
+			else
+			{
+				type1 = returnType;
+			}
 		}
 	}
 
