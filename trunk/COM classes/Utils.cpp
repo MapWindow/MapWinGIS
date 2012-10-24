@@ -6417,3 +6417,152 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 	}
 	return S_OK;
 }
+
+// Generate Polygon
+/******************************************************************************
+ * $Id: gdal_polygonize.py 15700 2008-11-10 15:29:13Z warmerdam $
+ *
+ * Project:  GDAL Python Interface
+ * Purpose:  Application for converting raster data to a vector polygon layer.
+ * Author:   Frank Warmerdam, warmerdam@pobox.com
+ *
+ ******************************************************************************
+ * Copyright (c) 2008, Frank Warmerdam
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ ******************************************************************************/
+STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
+								int iSrcBand, VARIANT_BOOL NoMask,
+								BSTR pszMaskFilename, BSTR pszOGRFormat,
+								BSTR pszDstLayerName, BSTR pszPixValFieldName,
+								ICallback * cBack, VARIANT_BOOL * retval)
+{
+	USES_CONVERSION;
+
+	GDALAllRegister();
+	OGRRegisterAll();
+
+/* -------------------------------------------------------------------- */
+/*      Open source file.                                               */
+/* -------------------------------------------------------------------- */
+	GDALDatasetH hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
+	if( hSrcDS == NULL )
+	{
+		(*retval) = VARIANT_FALSE;
+		return S_FALSE;
+	}
+
+	GDALRasterBandH hSrcBand = GDALGetRasterBand( hSrcDS, iSrcBand );
+	if( hSrcBand == NULL )
+    {
+        CPLError( CE_Failure, CPLE_AppDefined,
+			      "Band %d does not exist on dataset.", iSrcBand );
+		(*retval) = VARIANT_FALSE;
+		return S_FALSE;
+    }
+
+	GDALRasterBandH hMaskBand;
+	GDALDatasetH hMaskDS = NULL;
+	if( NoMask )
+	{
+		hMaskBand = NULL;
+	}
+	else if( pszMaskFilename == NULL) // default mask
+	{
+		hMaskBand = GDALGetMaskBand( hSrcBand );
+	}
+	else
+	{
+		hMaskDS = GDALOpen( OLE2A(pszMaskFilename), GA_ReadOnly );
+		hMaskBand = GDALGetRasterBand( hMaskDS, 1 );
+	}
+
+/* -------------------------------------------------------------------- */
+/*      Try opening the destination file as an existing file.           */
+/* -------------------------------------------------------------------- */
+	CPLPushErrorHandler(CPLQuietErrorHandler);
+	OGRDataSourceH hDstDS =  OGROpen( OLE2A(pszDstFilename), TRUE, NULL );
+	CPLPopErrorHandler();
+
+/* -------------------------------------------------------------------- */
+/*      Create output file.                                             */
+/* -------------------------------------------------------------------- */
+	if( hDstDS == NULL )
+	{
+		OGRSFDriverH hDriver = OGRGetDriverByName( OLE2A(pszOGRFormat) );
+		if( hDriver == NULL )
+		{
+			(*retval) = VARIANT_FALSE;
+			return S_FALSE;
+		}
+
+		hDstDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename),
+										  NULL );
+		if( hDstDS == NULL )
+		{
+			(*retval) = VARIANT_FALSE;
+			return S_FALSE;
+		}
+	}
+
+/* -------------------------------------------------------------------- */
+/*      Find or create destination layer.                               */
+/* -------------------------------------------------------------------- */
+	__int8 dst_field = -1;
+
+	OGRLayerH hDstLayer = OGR_DS_GetLayerByName( hDstDS,
+												 OLE2A(pszDstLayerName) );
+	if( hDstLayer == NULL )
+	{
+		OGRSpatialReferenceH hSRS = NULL;
+		const char *pszWkt = GDALGetProjectionRef(hSrcDS);
+		if( pszWkt != NULL && _tcslen(pszWkt) != 0 )
+		{
+			hSRS = OSRNewSpatialReference( pszWkt );
+		}
+
+		hDstLayer = OGR_DS_CreateLayer( hDstDS, OLE2A(pszDstLayerName), hSRS,
+										wkbUnknown, NULL );
+		if( hDstLayer == NULL )
+		{
+			(*retval) = VARIANT_FALSE;
+			return S_FALSE;
+		}
+
+		OGRFieldDefnH hFld = OGR_Fld_Create( OLE2A(pszPixValFieldName),
+											 OFTInteger );
+		OGR_Fld_SetWidth( hFld, 8 );
+		OGR_L_CreateField( hDstLayer, hFld, TRUE );
+		OGR_Fld_Destroy( hFld );
+		dst_field = 0;
+	}
+
+/* -------------------------------------------------------------------- */
+/*      Invoke algorithm.                                               */
+/* -------------------------------------------------------------------- */
+	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, NULL,
+					GDALTermProgress, NULL );
+
+	OGR_DS_Destroy( hDstDS );
+	GDALClose( hMaskDS );
+	GDALClose( hSrcDS );
+
+	(*retval) = VARIANT_TRUE;
+	return S_OK;
+}

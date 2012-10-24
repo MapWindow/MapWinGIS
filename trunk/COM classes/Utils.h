@@ -158,6 +158,7 @@ public:
 	STDMETHOD(ClipGridWithPolygon)(BSTR inputGridfile, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
 	STDMETHOD(ClipGridWithPolygon2)(IGrid* grid, IShape* poly, BSTR resultGridfile, VARIANT_BOOL keepExtents, VARIANT_BOOL* retVal);
 	STDMETHOD(GridStatisticsToShapefile)(IGrid* grid, IShapefile* sf, VARIANT_BOOL selectedOnly, VARIANT_BOOL overwriteFields, VARIANT_BOOL* retVal) ;
+	STDMETHOD(Polygonize)(/*[in]*/ BSTR pszSrcFilename, /*[in]*/ BSTR pszDstFilename, /*[in, optional, defaultvalue(1)]*/ int iSrcBand, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL NoMask, /*[in, optional, defaultvalue(NULL)]*/ BSTR pszMaskFilename, /*[in, optional, defaultvalue("GML")]*/ BSTR pszOGRFormat, /*[in, optional, defaultvalue("out")]*/ BSTR pszDstLayerName, /*[in, optional, defaultvalue("DN")]*/ BSTR pszPixValFieldName, /*[in, optional, defaultvalue(NULL)]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
