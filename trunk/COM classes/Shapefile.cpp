@@ -2264,7 +2264,6 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 	*fixed = VARIANT_FALSE;
 	this->Clone(retVal);
 	
-	VARIANT_BOOL vbretval;
 	if (*retVal)
 	{
 		long numFields;
@@ -2287,31 +2286,32 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
-			if (shp)
+			if (!shp)
+				continue;
+
+			IShape* shpNew = NULL;
+			shp->FixUp(&shpNew);
+			shp->Release();
+
+			// failed to fix the shape? skip it.
+			if (!shpNew)
+				continue;
+			
+			long shapeIndex = 0;
+			(*retVal)->get_NumShapes(&shapeIndex);
+
+			VARIANT_BOOL vbretval = VARIANT_FALSE;
+			(*retVal)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
+			
+			if (vbretval)
 			{
-				IShape* shpNew = NULL;
-				shp->FixUp(&shpNew);
-				if (!shpNew)
-				{
-					shp->Clone(&shpNew);
-					*fixed = VARIANT_FALSE;	// if at least one shape isn't fixed, false will be returned.
+				// copy attributes
+				CComVariant var;
+				for (int iFld = 0; iFld < numFields; iFld++)
+				{	
+					this->get_CellValue(iFld, i, &var);
+					(*retVal)->EditCellValue(iFld, shapeIndex, var, &vbretval);
 				}
-				
-				long shapeIndex;
-				(*retVal)->get_NumShapes(&shapeIndex);
-				(*retVal)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
-				
-				if (vbretval)
-				{
-					// copy attributes
-					CComVariant var;
-					for (int iFld = 0; iFld < numFields; iFld++)
-					{	
-						this->get_CellValue(iFld, i, &var);
-						(*retVal)->EditCellValue(iFld, shapeIndex, var, &vbretval);
-					}
-				}
-				shp->Release();
 			}
 		}
 	}

@@ -389,7 +389,6 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 				double x, y;
 				this->get_XY(0, &x, &y, &ret);
 				_isValidReason.Format("Polygon must be clockwise [%f %f]", x, y);
-				//_isValidReason = "";
 				delete oGeom;
 				return S_OK;
 			}
@@ -2548,7 +2547,35 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 STDMETHODIMP CShape::FixUp(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	VARIANT_BOOL vbretval;
+	VARIANT_BOOL vbretval = VARIANT_FALSE;
+
+	// no points? nothing we can do.
+	if (this->_shp->get_PointCount() <= 0)
+	{
+		return S_OK;
+	}
+
+	// polygon or polyline?
+	ShpfileType ShapeType = this->_shp->get_ShapeType2D();
+	if (ShapeType == SHP_POLYGON || ShapeType == SHP_POLYLINE)
+	{
+		// no parts? add one part.
+		if (this->_shp->get_PartCount() <= 0)
+		{
+			IShape* TempShape = NULL;
+			this->Clone(&TempShape);
+
+			long PartIndex = 0;
+			TempShape->InsertPart(0, &PartIndex, &vbretval);
+
+            // ensure the new shape is completed fixed.
+			TempShape->FixUp(retval);
+			TempShape->Release();
+			return S_OK;
+		}
+	}
+
+	// valid shape? just copy it.
 	this->get_IsValid(&vbretval);
 	if (vbretval)
 	{
@@ -2559,6 +2586,7 @@ STDMETHODIMP CShape::FixUp(IShape** retval)
 		this->Buffer(m_globalSettings.invalidShapesBufferDistance, 30, retval);
 	}
 
+    // did we allocate memory for the fixed shape?
 	if (*retval)
 	{
 		(*retval)->get_IsValid(&vbretval);
