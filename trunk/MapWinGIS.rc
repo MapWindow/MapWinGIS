@@ -58,7 +58,6 @@ IDR_LINEPATTERN         REGISTRY                "COM Classes/LinePattern.rgs"
 IDR_LINESEGMENT         REGISTRY                "COM Classes/LineSegment.rgs"
 IDR_GEOPROJECTION       REGISTRY                "COM Classes/GeoProjection.rgs"
 IDR_GLOBALSETTINGS      REGISTRY                "COM Classes/GlobalSettings.rgs"
-IDR_TILES           REGISTRY					"COM Classes/Tiles.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

@@ -38,7 +38,6 @@
 #define IDR_LINESEGMENT                 133
 #define IDR_GEOPROJECTION               134
 #define IDR_GLOBALSETTINGS              135
-#define IDR_TILES	                    136
 #define IDS_MAP_PPG_CAPTION             200
 #define IDD_PROPPAGE_MAP                200
 #define IDC_ZOOMIN                      203

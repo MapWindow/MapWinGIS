@@ -1011,10 +1011,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\COM classes\Tiles.rgs"
-					>
-				</File>
-				<File
 					RelativePath=".\COM classes\Tin.rgs"
 					>
 				</File>
@@ -2569,23 +2565,23 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\cursor1.cur"
+			RelativePath=".\Resource\cursor1.cur"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\cursor2.cur"
+			RelativePath=".\Resource\cursor2.cur"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\cursor3.cur"
+			RelativePath=".\Resource\cursor3.cur"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\cursor4.cur"
+			RelativePath=".\Resource\cursor4.cur"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\Map.bmp"
+			RelativePath=".\Resource\Map.bmp"
 			>
 		</File>
 		<File
