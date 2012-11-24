@@ -2352,3 +2352,25 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 		*shapeIndex = -1;
 	return S_OK;
 }
+// *****************************************************************
+//		HasInvalidShapes()
+// *****************************************************************
+bool CShapefile::HasInvalidShapes()
+{
+	int numShapes = _shapeData.size();
+
+	for (int i = 0; i < numShapes; i++)
+	{
+		IShape* shp = NULL;
+		this->get_Shape(i, &shp);
+		if (!shp)
+			continue;
+
+		VARIANT_BOOL retval = VARIANT_TRUE;
+		shp->get_IsValid(&retval);
+		if (retval == VARIANT_FALSE)
+			return true;
+	}
+
+	return false;
+}

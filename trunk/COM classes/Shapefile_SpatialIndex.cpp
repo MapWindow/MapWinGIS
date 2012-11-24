@@ -314,9 +314,13 @@ void CShapefile::GenerateQTree()
 	}
 	
 	//generate QTree
-	IExtents* ext;
+	IExtents* ext = NULL;
 	double xm,xM,ym,yM,zm,zM;
 	this->get_Extents(&ext);
+
+	if (!ext)
+		return;
+
 	ext->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
 	ext->Release();
 	qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
@@ -331,7 +335,12 @@ void CShapefile::GenerateQTree()
 		}
 		else
 		{
+			ext = NULL;
 			_shapeData[i]->shape->get_Extents(&ext);
+
+			if (!ext)
+				continue;
+
 			ext->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
 			ext->Release();
 		}
@@ -380,9 +389,13 @@ QTree* CShapefile::GenerateLocalQTree(IShapefile* sf, bool SelectedOnly)
 	if (_numShapes == 0) 
 		return NULL;
 	
-	IExtents* ext;
+	IExtents* ext = NULL;
 	double xMin,xMax,yMin,yMax,zMin,zMax;
 	sf->get_Extents(&ext);
+
+	if (!ext)
+		return NULL;
+
 	ext->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
 	ext->Release();
 	QTree* qtree = new QTree(QTreeExtent(xMin,xMax,yMax,yMin));
@@ -396,6 +409,10 @@ QTree* CShapefile::GenerateLocalQTree(IShapefile* sf, bool SelectedOnly)
 
 		IExtents* box = NULL;
 		sf->QuickExtents(i, &box);
+
+		if (!box)
+			continue;
+
 		box->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
 		box->Release();
 		

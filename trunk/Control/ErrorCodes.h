@@ -71,6 +71,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_SHAPE 220
 # define tkUNEXPECTED_SHAPE_TYPE 221
 # define tkINVALID_RETURN_TYPE 222
+# define tkSHPFILE_WITH_INVALID_SHAPES 223
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

@@ -768,6 +768,19 @@ STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShape
 STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if( sfOverlay == NULL)
+	{	
+		ErrorMessage( tkUNEXPECTED_NULL_PARAMETER );
+		return S_OK;
+	} 
+
+	if (HasInvalidShapes() || ((CShapefile*)sfOverlay)->HasInvalidShapes())
+	{
+		ErrorMessage( tkSHPFILE_WITH_INVALID_SHAPES );
+		return S_OK;
+	}
+
 	DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);	// enumeration should be repaired
 	return S_OK;
 }

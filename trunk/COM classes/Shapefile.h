@@ -465,6 +465,8 @@ private:
 
 	bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace);
 	
+	bool CShapefile::HasInvalidShapes();
+
 	// MEMBER VARIABLES
 	IGeoProjection* m_geoProjection;
 	
