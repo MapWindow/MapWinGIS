@@ -408,6 +408,7 @@ public:
 	STDMETHOD(ReprojectInPlace)(IGeoProjection* newProjection, LONG* reprojectedCount, VARIANT_BOOL* retVal);
 	STDMETHOD(SimplifyLines)(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal);
 	STDMETHOD(FixUpShapes)(IShapefile** retVal, VARIANT_BOOL* fixed);
+	STDMETHOD(HasInvalidShapes)(VARIANT_BOOL* result);
 
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
@@ -465,8 +466,6 @@ private:
 
 	bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace);
 	
-	bool CShapefile::HasInvalidShapes();
-
 	// MEMBER VARIABLES
 	IGeoProjection* m_geoProjection;
 	

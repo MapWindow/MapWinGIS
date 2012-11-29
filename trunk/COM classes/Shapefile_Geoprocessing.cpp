@@ -769,18 +769,32 @@ STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfO
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	// no overlay shapefile specified?
 	if( sfOverlay == NULL)
 	{	
 		ErrorMessage( tkUNEXPECTED_NULL_PARAMETER );
 		return S_OK;
 	} 
 
-	if (HasInvalidShapes() || ((CShapefile*)sfOverlay)->HasInvalidShapes())
+	// does this shapefile have invalid shapes?
+	VARIANT_BOOL invalid = VARIANT_FALSE;
+	this->HasInvalidShapes(&invalid);
+	if (invalid)
 	{
 		ErrorMessage( tkSHPFILE_WITH_INVALID_SHAPES );
 		return S_OK;
 	}
 
+	// does the overlay shapefile have invalid shapes?
+	invalid = VARIANT_FALSE;
+	((CShapefile*)sfOverlay)->HasInvalidShapes(&invalid);
+	if (invalid)
+	{
+		ErrorMessage( tkSHPFILE_WITH_INVALID_SHAPES );
+		return S_OK;
+	}
+
+	// find the union.
 	DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);	// enumeration should be repaired
 	return S_OK;
 }

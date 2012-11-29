@@ -2434,6 +2434,8 @@ interface IShapefile : IDispatch{
 	[id(101), helpstring("method EditAddShape")] HRESULT EditAddShape([in]IShape* shape, [out, retval]long* shapeIndex);
 	[id(102), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision, 
 																	  [in]int width, [out, retval]long* fieldIndex);
+	[id(109), helpstring("method HasInvalidShapes")] HRESULT HasInvalidShapes([out, retval]VARIANT_BOOL* result);
+
 };
 
 /****************************  Shape Interface ***********************/

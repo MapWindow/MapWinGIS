@@ -2352,11 +2352,14 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 		*shapeIndex = -1;
 	return S_OK;
 }
+
 // *****************************************************************
 //		HasInvalidShapes()
 // *****************************************************************
-bool CShapefile::HasInvalidShapes()
+STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*result = VARIANT_FALSE;
 	int numShapes = _shapeData.size();
 
 	for (int i = 0; i < numShapes; i++)
@@ -2369,8 +2372,11 @@ bool CShapefile::HasInvalidShapes()
 		VARIANT_BOOL retval = VARIANT_TRUE;
 		shp->get_IsValid(&retval);
 		if (retval == VARIANT_FALSE)
-			return true;
+		{
+			*result = VARIANT_TRUE;
+			break;			
+		}
 	}
 
-	return false;
+	return S_OK;
 }
