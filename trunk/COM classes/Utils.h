@@ -96,6 +96,8 @@ public:
 		BufferANum = -1;
 		BufferBNum = -1;
 		rasterDataset = NULL;
+
+		bSubCall = false;
 	}
 	~CUtils()
 	{
@@ -235,14 +237,19 @@ private:
 	ICallback * globalCallback;
 	BSTR key;
 
-	//For TranslateRaster
+	// Utility calls for GDAL functions
 	bool CUtils::ArgIsNumeric( const char *pszArg );
 	void CUtils::AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions );
-	void Usage(CString additional);
 	void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts);
+
+	// For TranslateRaster
+	void CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
+		int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData);
+	void Usage(CString additional);
+
 	bool bSubCall;
 	CStringArray sArr;
-	
+
 	void CUtils::ErrorMessage(long ErrorCode);
 private:
 // lsu 4-march-2010
@@ -253,7 +260,7 @@ private:
 	//IShape * GPCPolygonToShape(gpc_polygon * gpc,ShpfileType shptype);
 	//bool is_clockwise(gpc_vertex_list *contour);//ah 6/3/05
 public:
-	
+
 	
 	
 	STDMETHOD(ColorByName)(tkMapColor name, OLE_COLOR* retVal);

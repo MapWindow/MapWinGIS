@@ -20,6 +20,7 @@
 //********************************************************************************************************
 # include "stdafx.h"
 # include "ErrorCodes.h"
+# include "gdal.h"
 
 #ifdef _AFX // Use MFC mem leak facilities for operator new (but only if compiled with MFC :-))
 
@@ -92,6 +93,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Invalid expression";
 		case tkFILE_EXISTS:
 			return "File to be written already exists.";
+		case tkGDAL_ERROR:
+			return CPLGetLastErrorMsg();
 
 		//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:

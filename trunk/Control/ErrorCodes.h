@@ -47,6 +47,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_EXPRESSION 25
 # define tkFILE_EXISTS 26
 # define tkBOUNDS_NOT_INTERSECT 27
+# define tkGDAL_ERROR 28
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201
@@ -101,7 +102,6 @@ const char * ErrorMsg( long ErrorCode );
 # define tkICON_OR_TEXTURE_TOO_BIG 610
 # define tkFAILED_TO_OBTAIN_DC 611
 # define tkIMAGE_UNINITIALIZED 612
-
 
 //801-1000 = tkdbf
 # define tkCANT_OPEN_DBF 801

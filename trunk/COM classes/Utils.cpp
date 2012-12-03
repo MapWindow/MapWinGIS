@@ -4586,6 +4586,16 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 	return S_OK;
 }
 
+int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage, void *pData)
+{
+	if( pData != NULL )
+	{
+		long percent = long(dfComplete * 100.0);
+		ICallback* cback = (ICallback*)pData;
+			cback->Progress(NULL,percent, NULL);
+	}
+	return TRUE;
+}
 
 /* ****************************************************************************
  * $Id: gdal_translate.cpp,v 1.32 2005/05/17 19:04:47 fwarmerdam Exp $
@@ -4616,848 +4626,1190 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
  * DEALINGS IN THE SOFTWARE.
  * ****************************************************************************/
 
-STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename, BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
+STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
+									 BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-    GDALDatasetH	hDataset, hOutDS;
-    int				i;
-    int				nRasterXSize, nRasterYSize;
-    const char		*pszSource=NULL, *pszDest=NULL, *pszFormat = "GTiff";
-    GDALDriverH		hDriver;
-    int				*panBandList = NULL, nBandCount = 0, bDefBands = TRUE;
-    double			adfGeoTransform[6];
-    GDALDataType	eOutputType = GDT_Unknown;
-    int				nOXSize = 0, nOYSize = 0;
-    char			*pszOXSize=NULL, *pszOYSize=NULL;
-    char            **papszCreateOptions = NULL;
-    int             anSrcWin[4], bStrict = TRUE;
-    const char      *pszProjection;
-    int             bScale = FALSE, bHaveScaleSrc = FALSE;
-    double	        dfScaleSrcMin=0.0, dfScaleSrcMax=255.0;
-    double          dfScaleDstMin=0.0, dfScaleDstMax=255.0;
-    double          dfULX, dfULY, dfLRX, dfLRY;
-    char            **papszMetadataOptions = NULL;
-    char            *pszOutputSRS = NULL;
-    int             bQuiet = FALSE, bGotBounds = FALSE;
-	GDALProgressFunc    pfnProgress = GDALTermProgress;
-    int             nGCPCount = 0;
-    GDAL_GCP        *pasGCPs = NULL;
-    int             iSrcFileArg = -1, iDstFileArg = -1;
-    int             bCopySubDatasets = FALSE;
-    double          adfULLR[4];
-    int             bSetNoData = FALSE;
-    double			dfNoDataReal = 0.0;
-	int				opts=0;
 
-	
-	(*retval) = VARIANT_FALSE;
-	try
+	enum
 	{
-		anSrcWin[0] = 0;
-		anSrcWin[1] = 0;
-		anSrcWin[2] = 0;
-		anSrcWin[3] = 0;
+		MASK_DISABLED,
+		MASK_AUTO,
+		MASK_USER
+	};
 
-		dfULX = dfULY = dfLRX = dfLRY = 0.0;
+	int				opts = 0;
+	GDALDatasetH	hDataset, hOutDS;
+	int				nRasterXSize, nRasterYSize;
+	const char		*pszSource=NULL, *pszDest=NULL, *pszFormat = "GTiff";
+	int				bFormatExplicitlySet = FALSE;
+	GDALDriverH		hDriver;
+	int				*panBandList = NULL; /* negative value of panBandList[i] means mask band of ABS(panBandList[i]) */
+	int				nBandCount = 0, bDefBands = TRUE;
+	double			adfGeoTransform[6];
+	GDALDataType	eOutputType = GDT_Unknown;
+	int				nOXSize = 0, nOYSize = 0;
+	char			*pszOXSize=NULL, *pszOYSize=NULL;
+	char			**papszCreateOptions = NULL;
+	int				anSrcWin[4] = {0}, bStrict = FALSE;
+	const char		*pszProjection;
+	int				bScale = FALSE, bHaveScaleSrc = FALSE, bUnscale = FALSE;
+	double			dfScaleSrcMin=0.0, dfScaleSrcMax=255.0;
+	double			dfScaleDstMin=0.0, dfScaleDstMax=255.0;
+	double			dfULX = 0.0, dfULY = 0.0, dfLRX = 0.0, dfLRY = 0.0;
+	char			**papszMetadataOptions = NULL;
+	char			*pszOutputSRS = NULL;
+	int				bGotBounds = FALSE;
+	int				nGCPCount = 0;
+	GDAL_GCP		*pasGCPs = NULL;
+	int				bCopySubDatasets = FALSE;
+	double			adfULLR[4] = {0.0};
+	int				bSetNoData = FALSE;
+	int				bUnsetNoData = FALSE;
+	double			dfNoDataReal = 0.0;
+	int				nRGBExpand = 0;
+	int				bParsedMaskArgument = FALSE;
+	int				eMaskMode = MASK_AUTO;
+	int				nMaskBand = 0; /* negative value means mask band of ABS(nMaskBand) */
+	int				bStats = FALSE, bApproxStats = FALSE;
+
+	(*retval) = VARIANT_FALSE;
+
+	pszSource = OLE2CA(bstrSrcFilename);
+	pszDest = OLE2CA(bstrDstFilename);
+
+	if (!bSubCall)
+		Parse(OLE2CA(bstrOptions), pszSource, pszDest, &opts);
+	else
+		opts = sArr.GetSize();
 
 	/* -------------------------------------------------------------------- */
-	/*      Register standard GDAL drivers, and process generic GDAL        */
-	/*      command options.                                                */
+	/*		Register standard GDAL drivers.									*/
 	/* -------------------------------------------------------------------- */
-		GDALAllRegister();
-	    
-		Parse(OLE2CA(bstrOptions), OLE2CA(bstrSrcFilename), OLE2CA(bstrDstFilename), &opts);
+	GDALAllRegister();
 
-		if( opts < 1 )
-		{	(*retval) = VARIANT_FALSE;
-			return S_OK;
-		}
-	 
 	/* -------------------------------------------------------------------- */
-	/*      Handle command line arguments.                                  */
+	/*		Handle command line arguments.									*/
 	/* -------------------------------------------------------------------- */
-		for( i = 1; i < opts; i++ )
+	for (int i = 0; i < opts; i++)
+	{
+		if (sArr[i] == "-of" && i < opts-1)
 		{
-       		if( _stricmp(sArr[i],"-of")==0 && i < opts-1 )
-				pszFormat = sArr[++i];
-
-			else if( _stricmp(sArr[i],"-quiet")==0 )
+			pszFormat = sArr[++i].GetBuffer (0);
+			bFormatExplicitlySet = TRUE;
+		}
+		else if (sArr[i] == "-ot" && i < opts-1)
+		{
+			for (int iType = 1; iType < GDT_TypeCount; iType++)
 			{
-				bQuiet = TRUE;
-				pfnProgress = GDALDummyProgress;
+				if (GDALGetDataTypeName((GDALDataType)iType) != NULL &&
+					sArr[i+1] == GDALGetDataTypeName((GDALDataType)iType))
+				{
+					eOutputType = (GDALDataType) iType;
+				}
 			}
 
-			else if( _stricmp(sArr[i],"-ot")==0 && i < opts-1 )
+			if (eOutputType == GDT_Unknown)
 			{
-				int	iType;
-	            
-				for( iType = 1; iType < GDT_TypeCount; iType++ )
-				{
-					if( GDALGetDataTypeName((GDALDataType)iType) != NULL
-						&& _stricmp(GDALGetDataTypeName((GDALDataType)iType),
-								sArr[i+1])==0 )
-					{
-						eOutputType = (GDALDataType) iType;
-					}
-				}
-
-				if( eOutputType == GDT_Unknown )
-				{
-					CString tmpCstr = "Unknown output pixel type: " + sArr[i+1] +"\n";
-					if (!bQuiet)
-						Usage(tmpCstr);
-					GDALDestroyDriverManager();
-					(*retval) = VARIANT_FALSE;
-					return S_OK;
-				}
-				i++;
-			}
-			else if( _stricmp(sArr[i],"-b")==0 && i < opts-1 )
-			{
-				if( atoi(sArr[i+1]) < 1 )
-				{
-					CString tmpCstr = "Unrecognizable band number: " + sArr[i+1] + "\n";
-					if (!bQuiet)
-						Usage(tmpCstr);
-					GDALDestroyDriverManager();
-					(*retval) = VARIANT_FALSE;
-					return S_OK;
-				}
-
-				nBandCount++;
-				panBandList = (int *) 
-					CPLRealloc(panBandList, sizeof(int) * nBandCount);
-				panBandList[nBandCount-1] = atoi(sArr[++i]);
-
-				if( panBandList[nBandCount-1] != nBandCount )
-					bDefBands = FALSE;
-			}
-			else if( _stricmp(sArr[i],"-not_strict")==0  )
-				bStrict = FALSE;
-	            
-			else if( _stricmp(sArr[i],"-sds")==0  )
-				bCopySubDatasets = TRUE;
-	            
-			else if( _stricmp(sArr[i],"-gcp")==0 && i < opts - 4 )
-			{
-				/* -gcp pixel line easting northing [elev] */
-
-				nGCPCount++;
-				pasGCPs = (GDAL_GCP *) 
-					CPLRealloc( pasGCPs, sizeof(GDAL_GCP) * nGCPCount );
-				GDALInitGCPs( 1, pasGCPs + nGCPCount - 1 );
-
-				pasGCPs[nGCPCount-1].dfGCPPixel = atof(sArr[++i]);
-				pasGCPs[nGCPCount-1].dfGCPLine = atof(sArr[++i]);
-				pasGCPs[nGCPCount-1].dfGCPX = atof(sArr[++i]);
-				pasGCPs[nGCPCount-1].dfGCPY = atof(sArr[++i]);
-				char * tmpStr = (char *)(LPCTSTR) sArr[i+1];
-				if( tmpStr != NULL 
-					&& (atof(tmpStr) != 0.0 || tmpStr[0] == '0') )
-					pasGCPs[nGCPCount-1].dfGCPZ = atof(tmpStr);
-				//if( sArr[i+1] != NULL 
-				//    && (atof(sArr[i+1]) != 0.0 || sArr[i+1][0] == '0') )
-				//    pasGCPs[nGCPCount-1].dfGCPZ = atof(sArr[++i]);
-
-				/* should set id and info? */
-			}   
-
-			else if( _stricmp(sArr[i],"-a_nodata")==0 && i < opts - 1 )
-			{
-				bSetNoData = TRUE;
-				dfNoDataReal = atof(sArr[i+1]);
-				i += 1;
-			}   
-
-			else if( _stricmp(sArr[i],"-a_ullr")==0 && i < opts - 4 )
-			{
-				adfULLR[0] = atof(sArr[i+1]);
-				adfULLR[1] = atof(sArr[i+2]);
-				adfULLR[2] = atof(sArr[i+3]);
-				adfULLR[3] = atof(sArr[i+4]);
-
-				bGotBounds = TRUE;
-	            
-				i += 4;
-			}   
-
-			else if( _stricmp(sArr[i],"-co")==0 && i < opts-1 )
-			{
-				papszCreateOptions = CSLAddString( papszCreateOptions, sArr[++i] );
-			}   
-
-			else if( _stricmp(sArr[i],"-scale")==0 )
-			{
-				bScale = TRUE;
-				if( i < opts-2 && ArgIsNumeric(sArr[i+1]) )
-				{
-					bHaveScaleSrc = TRUE;
-					dfScaleSrcMin = atof(sArr[i+1]);
-					dfScaleSrcMax = atof(sArr[i+2]);
-					i += 2;
-				}
-				if( i < opts-2 && bHaveScaleSrc && ArgIsNumeric(sArr[i+1]) )
-				{
-					dfScaleDstMin = atof(sArr[i+1]);
-					dfScaleDstMax = atof(sArr[i+2]);
-					i += 2;
-				}
-				else
-				{
-					dfScaleDstMin = 0.0;
-					dfScaleDstMax = 255.999;
-				}
-			}   
-
-			else if( _stricmp(sArr[i],"-mo")==0 && i < opts-1 )
-			{
-				papszMetadataOptions = CSLAddString( papszMetadataOptions,
-													sArr[++i] );
-			}
-
-			else if( _stricmp(sArr[i],"-outsize")==0 && i < opts-2 )
-			{
-				pszOXSize = (char *) (LPCTSTR) sArr[++i];
-				pszOYSize = (char *) (LPCTSTR) sArr[++i];
-			}   
-
-			else if( _stricmp(sArr[i],"-srcwin")==0 && i < opts-4 )
-			{
-				anSrcWin[0] = atoi(sArr[++i]);
-				anSrcWin[1] = atoi(sArr[++i]);
-				anSrcWin[2] = atoi(sArr[++i]);
-				anSrcWin[3] = atoi(sArr[++i]);
-			}   
-
-			else if( _stricmp(sArr[i],"-projwin")==0 && i < opts-4 )
-			{
-				dfULX = atof(sArr[++i]);
-				dfULY = atof(sArr[++i]);
-				dfLRX = atof(sArr[++i]);
-				dfLRY = atof(sArr[++i]);
-			}   
-
-			else if( _stricmp(sArr[i],"-a_srs")==0 && i < opts-1 )
-			{
-				OGRSpatialReference oOutputSRS;
-
-				if( oOutputSRS.SetFromUserInput( sArr[i+1] ) != OGRERR_NONE )
-				{
-					fprintf( stderr, "Failed to process SRS definition: %s\n", 
-							sArr[i+1] );
-					GDALDestroyDriverManager();
-					(*retval) = VARIANT_FALSE;
-					return S_OK;
-				}
-
-				oOutputSRS.exportToWkt( &pszOutputSRS );
-				i++;
-			}   
-
-			else if( sArr[i][0] == '-' )
-			{
-				CString tmpCstr = "Option " + sArr[i] + "incomplete, or not recognised.\n";
-				if (!bQuiet)
-					Usage(tmpCstr);
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError(CE_Failure,0,"Unknown output pixel type: %s", sArr[i+1]);
 				GDALDestroyDriverManager();
-				(*retval) = VARIANT_FALSE;
 				return S_OK;
 			}
-			else if( pszSource == NULL )
+			i++;
+		}
+		else if (sArr[i] == "-b" && i < opts-1 )
+		{
+			const char* pszBand = sArr[i+1].GetBuffer (0);
+			int bMask = FALSE;
+			if (EQUAL(pszBand, "mask"))
+				pszBand = "mask,1";
+			if (EQUALN(pszBand, "mask,", 5))
 			{
-				iSrcFileArg = i;
-				pszSource = (char *) (LPCTSTR) sArr[i];
+				bMask = TRUE;
+				pszBand += 5;
+				/* If we use tha source mask band as a regular band */
+				/* don't create a target mask band by default */
+				if( !bParsedMaskArgument )
+					eMaskMode = MASK_DISABLED;
 			}
-			else if( pszDest == NULL )
+			int nBand = atoi(pszBand);
+			if( nBand < 1 )
 			{
- 				pszDest = (char *) (LPCTSTR) sArr[i];
-				iDstFileArg = i;
-			}
-
-			else
-			{
-				CString tmpCstr = "Too many command options.\n";
-				if (!bQuiet)
-					Usage(tmpCstr);
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", sArr[i+1]);
+				// TODO: Usage();
 				GDALDestroyDriverManager();
-				(*retval) = VARIANT_FALSE;
 				return S_OK;
 			}
-		}
+			i++;
 
-		if( pszDest == NULL )
-		{
- 			if (!bQuiet)
-				Usage("Destination file name is missing\n");
-			GDALDestroyDriverManager();
-			(*retval) = VARIANT_FALSE;
-			return S_OK;
-		}
+			nBandCount++;
+			panBandList = (int *)
+				CPLRealloc(panBandList, sizeof(int) * nBandCount);
+			panBandList[nBandCount-1] = nBand;
+			if (bMask)
+				panBandList[nBandCount-1] *= -1;
 
-	/* -------------------------------------------------------------------- */
-	/*      Attempt to open source file.                                    */
-	/* -------------------------------------------------------------------- */
-
-		hDataset = GDALOpenShared( pszSource, GA_ReadOnly );
-	    
-		if( hDataset == NULL )
-		{
-			fprintf( stderr,
-					"GDALOpen failed - %d\n%s\n",
-					CPLGetLastErrorNo(), CPLGetLastErrorMsg() );
-			GDALDestroyDriverManager();
-			(*retval) = VARIANT_FALSE;
-			return S_OK;
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*      Handle subdatasets.                                             */
-	/* -------------------------------------------------------------------- */
-		if( CSLCount(GDALGetMetadata( hDataset, "SUBDATASETS" )) > 0 )
-		{
-			if( !bCopySubDatasets )
-			{
-				fprintf( stderr,
-						"Input file contains subdatasets. Please, select one of them for reading.\n" );
-			}
-			else
-			{
-				char **papszSubdatasets = GDALGetMetadata(hDataset,"SUBDATASETS");
-				char *pszSubDest = (char *) CPLMalloc(_tcslen(pszDest)+32);
-				int i;
-				bool bOldSubCall = bSubCall;
-
-				//sArr[iDstFileArg] = pszSubDest;
-				sArr.RemoveAt(iDstFileArg);
-				bstrDstFilename = (_bstr_t) pszSubDest;
-
-				bSubCall = TRUE;
-				for( i = 0; papszSubdatasets[i] != NULL; i += 2 )
-				{
-					//sArr.[iSrcFileArg] = strstr(papszSubdatasets[i],"=")+1;
-            		sArr.RemoveAt(iSrcFileArg);
-					char * tmpChar = strstr(papszSubdatasets[i],"=")+1;
-					bstrSrcFilename = _bstr_t( tmpChar);
-				
-					sprintf( pszSubDest, "%s%d", pszDest, i/2 + 1 );
-					VARIANT_BOOL * tmpBool = 0;
-					TranslateRaster(bstrSrcFilename, bstrDstFilename, bstrOptions, NULL, tmpBool );
-					if (tmpBool != 0 )
-						break;
-				}
-
-				bSubCall = bOldSubCall;
-				CPLFree( pszSubDest );
-			}
-
-			GDALClose( hDataset );
-
-			if( !bSubCall )
-			{
-				GDALDumpOpenDatasets( stderr );
-				GDALDestroyDriverManager();
-			}
-			return 1;
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*      Collect some information from the source file.                  */
-	/* -------------------------------------------------------------------- */
-		nRasterXSize = GDALGetRasterXSize( hDataset );
-		nRasterYSize = GDALGetRasterYSize( hDataset );
-
-		if( !bQuiet )
-			printf( "Input file size is %d, %d\n", nRasterXSize, nRasterYSize );
-
-		if( anSrcWin[2] == 0 && anSrcWin[3] == 0 )
-		{
-			anSrcWin[2] = nRasterXSize;
-			anSrcWin[3] = nRasterYSize;
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*	Build band list to translate					*/
-	/* -------------------------------------------------------------------- */
-		if( nBandCount == 0 )
-		{
-			nBandCount = GDALGetRasterCount( hDataset );
-			panBandList = (int *) CPLMalloc(sizeof(int)*nBandCount);
-			for( i = 0; i < nBandCount; i++ )
-				panBandList[i] = i+1;
-		}
-		else
-		{
-			for( i = 0; i < nBandCount; i++ )
-			{
-				if( panBandList[i] < 1 || panBandList[i] > GDALGetRasterCount(hDataset) )
-				{
-					fprintf( stderr, 
-							"Band %d requested, but only bands 1 to %d available.\n",
-							panBandList[i], GDALGetRasterCount(hDataset) );
-					GDALDestroyDriverManager();
-					(*retval) = VARIANT_FALSE;
-					return S_OK;
-				}
-			}
-
-			if( nBandCount != GDALGetRasterCount( hDataset ) )
+			if( panBandList[nBandCount-1] != nBandCount )
 				bDefBands = FALSE;
 		}
-
-	/* -------------------------------------------------------------------- */
-	/*      Compute the source window from the projected source window      */
-	/*      if the projected coordinates were provided.  Note that the      */
-	/*      projected coordinates are in ulx, uly, lrx, lry format,         */
-	/*      while the anSrcWin is xoff, yoff, xsize, ysize with the         */
-	/*      xoff,yoff being the ulx, uly in pixel/line.                     */
-	/* -------------------------------------------------------------------- */
-		if( dfULX != 0.0 || dfULY != 0.0 
-			|| dfLRX != 0.0 || dfLRY != 0.0 )
+		else if (sArr[i] == "-mask" && i < opts-1)
 		{
-			double	adfGeoTransform[6];
-
-			GDALGetGeoTransform( hDataset, adfGeoTransform );
-
-			if( adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0 )
+			bParsedMaskArgument = TRUE;
+			const char* pszBand = sArr[i+1].GetBuffer (0);
+			if (EQUAL(pszBand, "none"))
 			{
-				fprintf( stderr, 
-						"The -projwin option was used, but the geotransform is\n"
-						"rotated.  This configuration is not supported.\n" );
-				GDALClose( hDataset );
-				CPLFree( panBandList );
-				GDALDestroyDriverManager();
-				(*retval) = VARIANT_FALSE;
-				return S_OK;
+				eMaskMode = MASK_DISABLED;
 			}
-
-			anSrcWin[0] = (int) 
-				((dfULX - adfGeoTransform[0]) / adfGeoTransform[1] + 0.001);
-			anSrcWin[1] = (int) 
-				((dfULY - adfGeoTransform[3]) / adfGeoTransform[5] + 0.001);
-
-			anSrcWin[2] = (int) ((dfLRX - dfULX) / adfGeoTransform[1] + 0.5);
-			anSrcWin[3] = (int) ((dfLRY - dfULY) / adfGeoTransform[5] + 0.5);
-
-			if( !bQuiet )
-				fprintf( stdout, 
-						"Computed -srcwin %d %d %d %d from projected window.\n",
-						anSrcWin[0], 
-						anSrcWin[1], 
-						anSrcWin[2], 
-						anSrcWin[3] );
-	        
-			if( anSrcWin[0] < 0 || anSrcWin[1] < 0 
-				|| anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset) 
-				|| anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset) )
+			else if (EQUAL(pszBand, "auto"))
 			{
-				fprintf( stderr, 
-						"Computed -srcwin falls outside raster size of %dx%d.\n",
-						GDALGetRasterXSize(hDataset), 
-						GDALGetRasterYSize(hDataset) );
-				(*retval) = VARIANT_FALSE;
-				return S_OK;
-			}
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*      Verify source window.                                           */
-	/* -------------------------------------------------------------------- */
-		if( anSrcWin[0] < 0 || anSrcWin[1] < 0 
-			|| anSrcWin[2] <= 0 || anSrcWin[3] <= 0
-			|| anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset) 
-			|| anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset) )
-		{
-			fprintf( stderr, 
-					"-srcwin %d %d %d %d falls outside raster size of %dx%d\n"
-					"or is otherwise illegal.\n",
-					anSrcWin[0],
-					anSrcWin[1],
-					anSrcWin[2],
-					anSrcWin[3],
-					GDALGetRasterXSize(hDataset), 
-					GDALGetRasterYSize(hDataset) );
-		(*retval) = VARIANT_FALSE;
-			return S_OK;
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*      Find the output driver.                                         */
-	/* -------------------------------------------------------------------- */
-		hDriver = GDALGetDriverByName( pszFormat );
-		if( hDriver == NULL )
-		{
-			int	iDr;
-	        
-			printf( "Output driver `%s' not recognised.\n", pszFormat );
-			printf( "The following format drivers are configured and support output:\n" );
-			for( iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
-			{
-				GDALDriverH hDriver = GDALGetDriver(iDr);
-
-				if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) != NULL
-					|| GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATECOPY,
-											NULL ) != NULL )
-				{
-					printf( "  %s: %s\n",
-							GDALGetDriverShortName( hDriver  ),
-							GDALGetDriverLongName( hDriver ) );
-				}
-			}
-			printf( "\n" );
-			if (!bQuiet)
-				Usage("Output driver not recognised\n");
-	        
-			GDALClose( hDataset );
-			CPLFree( panBandList );
-			GDALDestroyDriverManager();
-			//CSLDestroy( sArr );
-			int j = 0;
-			while (j < sArr.GetSize() )
-			{
-				delete sArr.GetAt( j++ );
-			}
-			sArr.RemoveAll();
-
-			CSLDestroy( papszCreateOptions );
-			(*retval) = VARIANT_FALSE;
-			return S_OK;
-		}
-
-	/* -------------------------------------------------------------------- */
-	/*      The short form is to CreateCopy().  We use this if the input    */
-	/*      matches the whole dataset.  Eventually we should rewrite        */
-	/*      this entire program to use virtual datasets to construct a      */
-	/*      virtual input source to copy from.                              */
-	/* -------------------------------------------------------------------- */
-		if( eOutputType == GDT_Unknown 
-			&& !bScale && CSLCount(papszMetadataOptions) == 0 && bDefBands 
-			&& anSrcWin[0] == 0 && anSrcWin[1] == 0 
-			&& anSrcWin[2] == GDALGetRasterXSize(hDataset)
-			&& anSrcWin[3] == GDALGetRasterYSize(hDataset) 
-			&& pszOXSize == NULL && pszOYSize == NULL 
-			&& nGCPCount == 0 && !bGotBounds
-			&& pszOutputSRS == NULL && !bSetNoData )
-		{
-	        
-			hOutDS = GDALCreateCopy( hDriver, pszDest, hDataset, 
-									bStrict, papszCreateOptions, 
-									pfnProgress, NULL );
-
-			if( hOutDS != NULL )
-			{
-				GDALClose( hOutDS );
-				(*retval) = VARIANT_TRUE;
+				eMaskMode = MASK_AUTO;
 			}
 			else
 			{
-				(*retval) = VARIANT_FALSE;
+				int bMask = FALSE;
+				if (EQUAL(pszBand, "mask"))
+					pszBand = "mask,1";
+				if (EQUALN(pszBand, "mask,", 5))
+				{
+					bMask = TRUE;
+					pszBand += 5;
+				}
+				int nBand = atoi(pszBand);
+				if( nBand < 1 )
+				{
+					lastErrorCode = tkGDAL_ERROR;
+					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", sArr[i+1]);
+					// TODO: Usage();
+					GDALDestroyDriverManager();
+					return S_OK;
+				}
+
+				eMaskMode = MASK_USER;
+				nMaskBand = nBand;
+				if (bMask)
+					nMaskBand *= -1;
 			}
-	        
-			GDALClose( hDataset );
+			i ++;
+		}
+		else if( sArr[i] == "-not_strict"  )
+			bStrict = FALSE;
 
-			CPLFree( panBandList );
+		else if(sArr[i] == "-strict" )
+			bStrict = TRUE;
 
-			if( !bSubCall )
+		else if( sArr[i] == "-sds"  )
+			bCopySubDatasets = TRUE;
+
+		else if( sArr[i] == "-gcp" && i < opts - 4 )
+		{
+			char* endptr = NULL;
+			/* -gcp pixel line easting northing [elev] */
+
+			nGCPCount++;
+			pasGCPs = (GDAL_GCP *) 
+				CPLRealloc( pasGCPs, sizeof(GDAL_GCP) * nGCPCount );
+			GDALInitGCPs( 1, pasGCPs + nGCPCount - 1 );
+
+			pasGCPs[nGCPCount-1].dfGCPPixel = CPLAtofM(sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPLine = CPLAtofM(sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPX = CPLAtofM(sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPY = CPLAtofM(sArr[++i].GetBuffer (0));
+			if( opts > i+1 && // TODO: Is this valid?
+				(CPLStrtod(sArr[i+1].GetBuffer (0), &endptr) != 0.0 || sArr[i+1][0] == '0') )
 			{
-				GDALDumpOpenDatasets( stderr );
+				/* Check that last argument is really a number and not a filename */
+				/* looking like a number (see ticket #863) */
+				if (endptr && *endptr == 0)
+					pasGCPs[nGCPCount-1].dfGCPZ = CPLAtofM(sArr[++i].GetBuffer (0));
+			}
+
+			/* should set id and info? */
+		}   
+
+		else if( sArr[i] == "-a_nodata" && i < opts - 1 )
+		{
+			if (sArr[i+1]== "none")
+			{
+				bUnsetNoData = TRUE;
+			}
+			else
+			{
+				bSetNoData = TRUE;
+				dfNoDataReal = CPLAtofM(sArr[i+1].GetBuffer (0));
+			}
+			i += 1;
+		}   
+
+		else if( sArr[i] == "-a_ullr" && i < opts - 4 )
+		{
+			adfULLR[0] = CPLAtofM(sArr[i+1].GetBuffer (0));
+			adfULLR[1] = CPLAtofM(sArr[i+2].GetBuffer (0));
+			adfULLR[2] = CPLAtofM(sArr[i+3].GetBuffer (0));
+			adfULLR[3] = CPLAtofM(sArr[i+4].GetBuffer (0));
+
+			bGotBounds = TRUE;
+
+			i += 4;
+		} 
+
+		else if (sArr[i] == "-co" && i < opts-1)
+		{
+			papszCreateOptions = CSLAddString(papszCreateOptions, sArr[++i].GetBuffer(0));
+		}
+
+		else if( sArr[i] =="-scale" )
+		{
+			bScale = TRUE;
+			if( i < opts-2 && ArgIsNumeric(sArr[i+1].GetBuffer (0)) )
+			{
+				bHaveScaleSrc = TRUE;
+				dfScaleSrcMin = CPLAtofM(sArr[i+1].GetBuffer (0));
+				dfScaleSrcMax = CPLAtofM(sArr[i+2].GetBuffer (0));
+				i += 2;
+			}
+			if( i < opts-2 && bHaveScaleSrc && ArgIsNumeric(sArr[i+1].GetBuffer (0)) )
+			{
+				dfScaleDstMin = CPLAtofM(sArr[i+1].GetBuffer (0));
+				dfScaleDstMax = CPLAtofM(sArr[i+2].GetBuffer (0));
+				i += 2;
+			}
+			else
+			{
+				dfScaleDstMin = 0.0;
+				dfScaleDstMax = 255.999;
+			}
+		}   
+
+		else if( sArr[i] == "-unscale" )
+		{
+			bUnscale = TRUE;
+		}
+
+		else if( sArr[i] =="-mo" && i < opts-1 )
+		{
+			papszMetadataOptions = CSLAddString( papszMetadataOptions,
+				sArr[++i].GetBuffer (0) );
+		}
+
+		else if( sArr[i] =="-outsize" && i < opts-2 )
+		{
+			pszOXSize = sArr[++i].GetBuffer (0);
+			pszOYSize = sArr[++i].GetBuffer (0);
+		}   
+
+		else if( sArr[i] =="-srcwin" && i < opts-4 )
+		{
+			anSrcWin[0] = atoi(sArr[++i].GetBuffer (0));
+			anSrcWin[1] = atoi(sArr[++i].GetBuffer (0));
+			anSrcWin[2] = atoi(sArr[++i].GetBuffer (0));
+			anSrcWin[3] = atoi(sArr[++i].GetBuffer (0));
+		}   
+
+		else if( sArr[i] =="-projwin" && i < opts-4 )
+		{
+			dfULX = CPLAtofM(sArr[++i].GetBuffer (0));
+			dfULY = CPLAtofM(sArr[++i].GetBuffer (0));
+			dfLRX = CPLAtofM(sArr[++i].GetBuffer (0));
+			dfLRY = CPLAtofM(sArr[++i].GetBuffer (0));
+		}   
+
+		else if( sArr[i] =="-a_srs" && i < opts-1 )
+		{
+			OGRSpatialReference oOutputSRS;
+
+			if( oOutputSRS.SetFromUserInput( sArr[i+1].GetBuffer (0) ) != OGRERR_NONE )
+			{
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", sArr[i+1] );
 				GDALDestroyDriverManager();
+				return S_OK;
 			}
 
-			//CSLDestroy( sArr );
-			int j = 0;
-			while (j < sArr.GetSize() )
+			oOutputSRS.exportToWkt( &pszOutputSRS );
+			i++;
+		}   
+
+		else if( sArr[i] =="-expand" && i < opts-1 )
+		{
+			if (sArr[i+1] =="gray")
+				nRGBExpand = 1;
+			else if (sArr[i+1] =="rgb")
+				nRGBExpand = 3;
+			else if (sArr[i+1] == "rgba")
+				nRGBExpand = 4;
+			else
 			{
-				delete sArr.GetAt( j++ );
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", sArr[i+1] );
+				// TODO: Usage();
+				GDALDestroyDriverManager();
+				return S_OK;
 			}
-			sArr.RemoveAll();
+			i++;
+		}
 
-			CSLDestroy( papszCreateOptions );
-			
+		else if( sArr[i] == "-stats" )
+		{
+			bStats = TRUE;
+			bApproxStats = FALSE;
+		}
+		else if( sArr[i] == "-approx_stats" )
+		{
+			bStats = TRUE;
+			bApproxStats = TRUE;
+		}
+
+		else if( sArr[i][0] == '-' )
+		{
+			lastErrorCode = tkGDAL_ERROR;
+			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", sArr[i] );
+			// TODO: Usage();
+			GDALDestroyDriverManager();
+			return S_OK;
+		}
+	}
+
+	if (pszDest == NULL)
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, 0, "No destination dataset specified.");
+		GDALDestroyDriverManager();
+		return S_OK;
+	}
+
+	if (strcmp (pszSource, pszDest) == 0)
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, 0, "Source and destination datasets must be different.");
+		GDALDestroyDriverManager();
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Attempt to open source file.									*/
+	/* -------------------------------------------------------------------- */
+	hDataset = GDALOpenShared(pszSource, GA_ReadOnly);
+
+	if (hDataset == NULL)
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		GDALDestroyDriverManager();
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Handle subdatasets.												*/
+	/* -------------------------------------------------------------------- */
+	if (!bCopySubDatasets &&
+		CSLCount(GDALGetMetadata(hDataset, "SUBDATASETS")) > 0 &&
+		GDALGetRasterCount(hDataset) == 0)
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, 0,
+			"Input file contains subdatasets. Please, select one of them for reading." );
+		GDALClose(hDataset);
+		GDALDestroyDriverManager();
+		return S_OK;
+	}
+
+	if (CSLCount(GDALGetMetadata(hDataset, "SUBDATASETS")) > 0 &&
+		bCopySubDatasets)
+	{
+		char **papszSubdatasets = GDALGetMetadata(hDataset, "SUBDATASETS");
+		char *pszSubDest = (char *) CPLMalloc (strlen (pszDest)+32);
+		bool bOldSubCall = bSubCall;
+
+		(*retval) = VARIANT_TRUE;
+
+		bSubCall = true;
+		for (int i = 0; papszSubdatasets[i] != NULL; i += 2)
+		{
+			sprintf (pszSubDest, "%s%d", pszDest, i/2 + 1);
+
+			BSTR bstrSubDest = SysAllocString(CT2W(pszSubDest));
+			BSTR bstrSubSrc = SysAllocString(CT2W(strstr(papszSubdatasets[i],"=")+1));
+
+			VARIANT_BOOL subret = VARIANT_FALSE;
+			this->TranslateRaster(bstrSubSrc,bstrSubDest,NULL,cBack,&subret);
+
+			SysFreeString(bstrSubDest);
+			SysFreeString(bstrSubSrc);
+
+			if (subret == VARIANT_FALSE)
+			{
+				(*retval) = VARIANT_FALSE;
+				break;
+			}
+		}
+
+		bSubCall = bOldSubCall;
+
+		GDALClose(hDataset);
+
+		if (!bSubCall)
+		{
+			GDALDumpOpenDatasets(stderr); // TODO: what does this do?
+			GDALDestroyDriverManager();
+		}
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Collect some information from the source file.					*/
+	/* -------------------------------------------------------------------- */
+	nRasterXSize = GDALGetRasterXSize(hDataset);
+	nRasterYSize = GDALGetRasterYSize(hDataset);
+
+	if (anSrcWin[2] == 0 && anSrcWin[3] == 0)
+	{
+		anSrcWin[2] = nRasterXSize;
+		anSrcWin[3] = nRasterYSize;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Build band list to translate.									*/
+	/* -------------------------------------------------------------------- */
+	if (nBandCount == 0)
+	{
+		nBandCount = GDALGetRasterCount (hDataset);
+		if (nBandCount == 0)
+		{
+			lastErrorCode = tkGDAL_ERROR;
+			CPLError(CE_Failure, 0, "Input file has no bands, and so cannot be translated." );
+			GDALDestroyDriverManager();
 			return S_OK;
 		}
 
-	/* -------------------------------------------------------------------- */
-	/*      Establish some parameters.                                      */
-	/* -------------------------------------------------------------------- */
-		if( pszOXSize == NULL )
+		panBandList = (int *) CPLMalloc (sizeof(int)*nBandCount);
+		for (int i = 0; i < nBandCount; i++)
+			panBandList[i] = i+1;
+	}
+	else
+	{
+		for (int i = 0; i < nBandCount; i++)
 		{
-			nOXSize = anSrcWin[2];
-			nOYSize = anSrcWin[3];
+			if (ABS(panBandList[i]) > GDALGetRasterCount (hDataset))
+			{
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError(CE_Failure, 0,
+					"Band %d requested, but only bands 1 to %d available.",
+					ABS(panBandList[i]), GDALGetRasterCount(hDataset) );
+				GDALDestroyDriverManager();
+				return S_OK;
+			}
+		}
+
+		if (nBandCount != GDALGetRasterCount (hDataset))
+			bDefBands = FALSE;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Compute the source window from the projected source window		*/
+	/*		if the projected coordinates were provided. Note that the		*/
+	/*		projected coordinates are in ulx, uly, lrx, lry format,			*/
+	/*		while the anSrcWin is xoff, yoff, xsize, ysize with the			*/
+	/*		xoff, yoff being the ulx, uly in pixel/line.					*/
+	/* -------------------------------------------------------------------- */
+	if (dfULX != 0.0 || dfULY != 0.0 ||
+		dfLRX != 0.0 || dfLRY != 0.0)
+	{
+		double adfGeoTransform[6] = {0.0};
+
+		GDALGetGeoTransform (hDataset, adfGeoTransform);
+
+		if (adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0)
+		{
+			lastErrorCode = tkGDAL_ERROR;
+			CPLError(CE_Failure, 0,
+				"The -projwin option was used, but the geotransform is "
+				"rotated. This configuration is not supported." );
+			GDALClose (hDataset);
+			CPLFree (panBandList);
+			GDALDestroyDriverManager();
+			return S_OK;
+		}
+
+		anSrcWin[0] = (int)
+			((dfULX - adfGeoTransform[0]) / adfGeoTransform[1] + 0.001);
+		anSrcWin[1] = (int)
+			((dfULY - adfGeoTransform[3]) / adfGeoTransform[5] + 0.001);
+
+		anSrcWin[2] = (int) ((dfLRX - dfULX) / adfGeoTransform[1] + 0.5);
+		anSrcWin[3] = (int) ((dfLRY - dfULY) / adfGeoTransform[5] + 0.5);
+
+		if (anSrcWin[0] < 0 || anSrcWin[1] < 0 ||
+			anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset) ||
+			anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset))
+		{
+			lastErrorCode = tkGDAL_ERROR;
+			CPLError(CE_Failure, 0,
+				"Computed -srcwin falls outside raster size of %dx%d.",
+				GDALGetRasterXSize(hDataset), 
+				GDALGetRasterYSize(hDataset) );
+			return S_OK;
+		}
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Verify source window.											*/
+	/* -------------------------------------------------------------------- */
+	if (anSrcWin[0] < 0 || anSrcWin[1] < 0 ||
+		anSrcWin[2] <= 0 || anSrcWin[3] <= 0 ||
+		anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset) ||
+		anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset))
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure,0,
+			"-srcwin %d %d %d %d falls outside raster size of %dx%d "
+			"or is otherwise illegal.",
+			anSrcWin[0],
+			anSrcWin[1],
+			anSrcWin[2],
+			anSrcWin[3],
+			GDALGetRasterXSize(hDataset), 
+			GDALGetRasterYSize(hDataset));
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Find the output driver.											*/
+	/* -------------------------------------------------------------------- */
+	hDriver = GDALGetDriverByName (pszFormat);
+	if (hDriver == NULL)
+	{
+		lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure,0, "Output driver `%s' not recognised.", pszFormat );
+
+		GDALClose (hDataset);
+		CPLFree (panBandList);
+		GDALDestroyDriverManager();
+		CSLDestroy (papszCreateOptions);
+
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		The short form is to CreateCopy(). We use this if the input		*/
+	/*		matches the whole dataset. Eventually we should rewrite			*/
+	/*		this entire program to use virtual datasets to construct a		*/
+	/*		virtual input source to copy from.								*/
+	/* -------------------------------------------------------------------- */
+	int bSpatialArrangementPreserved = (
+		anSrcWin[0] == 0 && anSrcWin[1] == 0 &&
+		anSrcWin[2] == GDALGetRasterXSize (hDataset) &&
+		anSrcWin[3] == GDALGetRasterYSize (hDataset) &&
+		pszOXSize == NULL && pszOYSize == NULL);
+
+	if (eOutputType == GDT_Unknown &&
+		!bScale && !bUnscale &&
+		CSLCount (papszMetadataOptions) == 0 && bDefBands &&
+		eMaskMode == MASK_AUTO &&
+		bSpatialArrangementPreserved &&
+		nGCPCount == 0 && !bGotBounds &&
+		pszOutputSRS == NULL && !bSetNoData && !bUnsetNoData &&
+		nRGBExpand == 0 && !bStats)
+	{
+		hOutDS = GDALCreateCopy (hDriver, pszDest, hDataset,
+			bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, cBack);
+
+		if (hOutDS != NULL)
+		{
+			(*retval) = VARIANT_TRUE;
+			GDALClose (hOutDS);
 		}
 		else
 		{
-			nOXSize = (int) ((pszOXSize[_tcslen(pszOXSize)-1]=='%' 
-							? atof(pszOXSize)/100*anSrcWin[2] : atoi(pszOXSize)));
-			nOYSize = (int) ((pszOYSize[_tcslen(pszOYSize)-1]=='%' 
-							? atof(pszOYSize)/100*anSrcWin[3] : atoi(pszOYSize)));
+			lastErrorCode = tkGDAL_ERROR;
 		}
-	    
-	/* ==================================================================== */
-	/*      Create a virtual dataset.                                       */
-	/* ==================================================================== */
-		VRTDataset *poVDS;
-	        
-	/* -------------------------------------------------------------------- */
-	/*      Make a virtual clone.                                           */
-	/* -------------------------------------------------------------------- */
-		poVDS = new VRTDataset( nOXSize, nOYSize );
 
-		if( nGCPCount == 0 )
+		GDALClose (hDataset);
+
+		CPLFree (panBandList);
+
+		if (!bSubCall)
 		{
-			if( pszOutputSRS != NULL )
+			GDALDumpOpenDatasets (stderr);
+			GDALDestroyDriverManager();
+		}
+
+		CSLDestroy (papszCreateOptions);
+
+		return S_OK;
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Establish some parameters.										*/
+	/* -------------------------------------------------------------------- */
+	if (pszOXSize == NULL)
+	{
+		nOXSize = anSrcWin[2];
+		nOYSize = anSrcWin[3];
+	}
+	else
+	{
+		nOXSize = (int) ((pszOXSize[strlen(pszOXSize)-1]=='%'
+			? CPLAtofM(pszOXSize)/100*anSrcWin[2] : atoi(pszOXSize)));
+		nOYSize = (int) ((pszOYSize[strlen(pszOYSize)-1]=='%'
+			? CPLAtofM(pszOYSize)/100*anSrcWin[3] : atoi(pszOYSize)));
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*		Make a virtual clone.											*/
+	/* -------------------------------------------------------------------- */
+	VRTDataset *poVDS = (VRTDataset *) VRTCreate(nOXSize, nOYSize);
+
+	if (nGCPCount == 0)
+	{
+		if (pszOutputSRS != NULL)
+		{
+			poVDS->SetProjection (pszOutputSRS);
+		}
+		else
+		{
+			pszProjection = GDALGetProjectionRef (hDataset);
+			if (pszProjection != NULL && strlen (pszProjection) > 0)
+				poVDS->SetProjection (pszProjection);
+		}
+	}
+
+	if (bGotBounds)
+	{
+		adfGeoTransform[0] = adfULLR[0];
+		adfGeoTransform[1] = (adfULLR[2] - adfULLR[0]) / nOXSize;
+		adfGeoTransform[2] = 0.0;
+		adfGeoTransform[3] = adfULLR[1];
+		adfGeoTransform[4] = 0.0;
+		adfGeoTransform[5] = (adfULLR[3] - adfULLR[1]) / nOYSize;
+
+		poVDS->SetGeoTransform (adfGeoTransform);
+	}
+
+	else if (GDALGetGeoTransform (hDataset, adfGeoTransform) == CE_None &&
+		nGCPCount == 0)
+	{
+		adfGeoTransform[0] += anSrcWin[0] * adfGeoTransform[1] +
+			anSrcWin[1] * adfGeoTransform[2];
+		adfGeoTransform[3] += anSrcWin[0] * adfGeoTransform[4] +
+			anSrcWin[1] * adfGeoTransform[5];
+
+		adfGeoTransform[1] *= anSrcWin[2] / (double) nOXSize;
+		adfGeoTransform[2] *= anSrcWin[3] / (double) nOYSize;
+		adfGeoTransform[4] *= anSrcWin[2] / (double) nOXSize;
+		adfGeoTransform[5] *= anSrcWin[3] / (double) nOYSize;
+
+		poVDS->SetGeoTransform( adfGeoTransform );
+	}
+
+	if( nGCPCount != 0 )
+	{
+		const char *pszGCPProjection = pszOutputSRS;
+
+		if( pszGCPProjection == NULL )
+			pszGCPProjection = GDALGetGCPProjection( hDataset );
+		if( pszGCPProjection == NULL )
+			pszGCPProjection = "";
+
+		poVDS->SetGCPs( nGCPCount, pasGCPs, pszGCPProjection );
+
+		GDALDeinitGCPs( nGCPCount, pasGCPs );
+		CPLFree( pasGCPs );
+	}
+
+	else if( GDALGetGCPCount( hDataset ) > 0 )
+	{
+		GDAL_GCP *pasGCPs;
+		int       nGCPs = GDALGetGCPCount( hDataset );
+
+		pasGCPs = GDALDuplicateGCPs( nGCPs, GDALGetGCPs( hDataset ) );
+
+		for( int i = 0; i < nGCPs; i++ )
+		{
+			pasGCPs[i].dfGCPPixel -= anSrcWin[0];
+			pasGCPs[i].dfGCPLine  -= anSrcWin[1];
+			pasGCPs[i].dfGCPPixel *= (nOXSize / (double) anSrcWin[2] );
+			pasGCPs[i].dfGCPLine  *= (nOYSize / (double) anSrcWin[3] );
+		}
+
+		poVDS->SetGCPs( nGCPs, pasGCPs,
+			GDALGetGCPProjection( hDataset ) );
+
+		GDALDeinitGCPs( nGCPs, pasGCPs );
+		CPLFree( pasGCPs );
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*      Transfer generally applicable metadata.                         */
+	/* -------------------------------------------------------------------- */
+	char** papszMetadata = CSLDuplicate(((GDALDataset*)hDataset)->GetMetadata());
+	if ( bScale || bUnscale || eOutputType != GDT_Unknown )
+	{
+		/* Remove TIFFTAG_MINSAMPLEVALUE and TIFFTAG_MAXSAMPLEVALUE */
+		/* if the data range may change because of options */
+		char** papszIter = papszMetadata;
+		while(papszIter && *papszIter)
+		{
+			if (EQUALN(*papszIter, "TIFFTAG_MINSAMPLEVALUE=", 23) ||
+				EQUALN(*papszIter, "TIFFTAG_MAXSAMPLEVALUE=", 23))
 			{
-				poVDS->SetProjection( pszOutputSRS );
+				CPLFree(*papszIter);
+				memmove(papszIter, papszIter+1, sizeof(char*) * (CSLCount(papszIter+1)+1));
 			}
 			else
+				papszIter++;
+		}
+	}
+	poVDS->SetMetadata( papszMetadata );
+	CSLDestroy( papszMetadata );
+	AttachMetadata( (GDALDatasetH) poVDS, papszMetadataOptions );
+
+	const char* pszInterleave = GDALGetMetadataItem(hDataset, "INTERLEAVE", "IMAGE_STRUCTURE");
+	if (pszInterleave)
+		poVDS->SetMetadataItem("INTERLEAVE", pszInterleave, "IMAGE_STRUCTURE");
+
+	/* -------------------------------------------------------------------- */
+	/*      Transfer metadata that remains valid if the spatial             */
+	/*      arrangement of the data is unaltered.                           */
+	/* -------------------------------------------------------------------- */
+	if( bSpatialArrangementPreserved )
+	{
+		char **papszMD;
+
+		papszMD = ((GDALDataset*)hDataset)->GetMetadata("RPC");
+		if( papszMD != NULL )
+			poVDS->SetMetadata( papszMD, "RPC" );
+
+		papszMD = ((GDALDataset*)hDataset)->GetMetadata("GEOLOCATION");
+		if( papszMD != NULL )
+			poVDS->SetMetadata( papszMD, "GEOLOCATION" );
+	}
+
+	int nSrcBandCount = nBandCount;
+
+	if (nRGBExpand != 0)
+	{
+		GDALRasterBand  *poSrcBand;
+		poSrcBand = ((GDALDataset *) 
+			hDataset)->GetRasterBand(ABS(panBandList[0]));
+		if (panBandList[0] < 0)
+			poSrcBand = poSrcBand->GetMaskBand();
+		GDALColorTable* poColorTable = poSrcBand->GetColorTable();
+		if (poColorTable == NULL)
+		{
+			CPLError(CE_Failure,0,"Error : band %d has no color table", ABS(panBandList[0]));
+			GDALClose( hDataset );
+			CPLFree( panBandList );
+			GDALDestroyDriverManager();
+			CSLDestroy( papszCreateOptions );
+			return S_OK;
+		}
+
+		/* Check that the color table only contains gray levels */
+		/* when using -expand gray */
+		if (nRGBExpand == 1)
+		{
+			int nColorCount = poColorTable->GetColorEntryCount();
+			int nColor;
+			for( nColor = 0; nColor < nColorCount; nColor++ )
 			{
-				pszProjection = GDALGetProjectionRef( hDataset );
-				if( pszProjection != NULL && _tcslen(pszProjection) > 0 )
-					poVDS->SetProjection( pszProjection );
+				const GDALColorEntry* poEntry = poColorTable->GetColorEntry(nColor);
+				if (poEntry->c1 != poEntry->c2 || poEntry->c1 != poEntry->c2)
+				{
+					CPLError(CE_Warning,0,"Warning : color table contains non gray levels colors");
+					break;
+				}
 			}
 		}
 
-		if( bGotBounds )
+		if (nBandCount == 1)
+			nBandCount = nRGBExpand;
+		else if (nBandCount == 2 && (nRGBExpand == 3 || nRGBExpand == 4))
+			nBandCount = nRGBExpand;
+		else
 		{
-			adfGeoTransform[0] = adfULLR[0];
-			adfGeoTransform[1] = (adfULLR[2] - adfULLR[0]) / nOXSize;
-			adfGeoTransform[2] = 0.0;
-			adfGeoTransform[3] = adfULLR[1];
-			adfGeoTransform[4] = 0.0;
-			adfGeoTransform[5] = (adfULLR[3] - adfULLR[1]) / nOYSize;
-
-			poVDS->SetGeoTransform( adfGeoTransform );
+			CPLError(CE_Failure,0,"Error : invalid use of -expand option.");
+			return S_OK;
 		}
+	}
 
-		else if( GDALGetGeoTransform( hDataset, adfGeoTransform ) == CE_None 
-			&& nGCPCount == 0 )
+	int bFilterOutStatsMetadata =
+		(bScale || bUnscale || !bSpatialArrangementPreserved || nRGBExpand != 0);
+
+	/* ==================================================================== */
+	/*      Process all bands.                                              */
+	/* ==================================================================== */
+	for( int i = 0; i < nBandCount; i++ )
+	{
+		VRTSourcedRasterBand   *poVRTBand;
+		GDALRasterBand  *poSrcBand;
+		GDALDataType    eBandType;
+		int             nComponent = 0;
+
+		int nSrcBand;
+		if (nRGBExpand != 0)
 		{
-			adfGeoTransform[0] += anSrcWin[0] * adfGeoTransform[1]
-				+ anSrcWin[1] * adfGeoTransform[2];
-			adfGeoTransform[3] += anSrcWin[0] * adfGeoTransform[4]
-				+ anSrcWin[1] * adfGeoTransform[5];
-	        
-			adfGeoTransform[1] *= anSrcWin[2] / (double) nOXSize;
-			adfGeoTransform[2] *= anSrcWin[3] / (double) nOYSize;
-			adfGeoTransform[4] *= anSrcWin[2] / (double) nOXSize;
-			adfGeoTransform[5] *= anSrcWin[3] / (double) nOYSize;
-	        
-			poVDS->SetGeoTransform( adfGeoTransform );
-		}
-
-		if( nGCPCount != 0 )
-		{
-			const char *pszGCPProjection = pszOutputSRS;
-
-			if( pszGCPProjection == NULL )
-				pszGCPProjection = GDALGetGCPProjection( hDataset );
-			if( pszGCPProjection == NULL )
-				pszGCPProjection = "";
-
-			poVDS->SetGCPs( nGCPCount, pasGCPs, pszGCPProjection );
-
-			GDALDeinitGCPs( nGCPCount, pasGCPs );
-			CPLFree( pasGCPs );
-		}
-
-		else if( GDALGetGCPCount( hDataset ) > 0 )
-		{
-			GDAL_GCP *pasGCPs;
-			int       nGCPs = GDALGetGCPCount( hDataset );
-
-			pasGCPs = GDALDuplicateGCPs( nGCPs, GDALGetGCPs( hDataset ) );
-
-			for( i = 0; i < nGCPs; i++ )
-			{
-				pasGCPs[i].dfGCPPixel -= anSrcWin[0];
-				pasGCPs[i].dfGCPLine  -= anSrcWin[1];
-				pasGCPs[i].dfGCPPixel *= (nOXSize / (double) anSrcWin[2] );
-				pasGCPs[i].dfGCPLine  *= (nOYSize / (double) anSrcWin[3] );
-			}
-	            
-			poVDS->SetGCPs( nGCPs, pasGCPs,
-							GDALGetGCPProjection( hDataset ) );
-
-			GDALDeinitGCPs( nGCPs, pasGCPs );
-			CPLFree( pasGCPs );
-		}
-
-		poVDS->SetMetadata( ((GDALDataset*)hDataset)->GetMetadata() );
-		AttachMetadata( (GDALDatasetH) poVDS, papszMetadataOptions );
-
-		for( i = 0; i < nBandCount; i++ )
-		{
-			VRTSourcedRasterBand   *poVRTBand;
-			GDALRasterBand  *poSrcBand;
-			GDALDataType    eBandType;
-
-			poSrcBand = ((GDALDataset *) 
-						hDataset)->GetRasterBand(panBandList[i]);
-
-	/* -------------------------------------------------------------------- */
-	/*      Select output data type to match source.                        */
-	/* -------------------------------------------------------------------- */
-			if( eOutputType == GDT_Unknown )
-				eBandType = poSrcBand->GetRasterDataType();
+			if (nSrcBandCount == 2 && nRGBExpand == 4 && i == 3)
+				nSrcBand = panBandList[1];
 			else
-				eBandType = eOutputType;
-
-	/* -------------------------------------------------------------------- */
-	/*      Create this band.                                               */
-	/* -------------------------------------------------------------------- */
-			poVDS->AddBand( eBandType, NULL );
-			poVRTBand = (VRTSourcedRasterBand *) poVDS->GetRasterBand( i+1 );
-	            
-	/* -------------------------------------------------------------------- */
-	/*      Do we need to collect scaling information?                      */
-	/* -------------------------------------------------------------------- */
-			double dfScale=1.0, dfOffset=0.0;
-
-			if( bScale && !bHaveScaleSrc )
 			{
-				double	adfCMinMax[2];
-				GDALComputeRasterMinMax( poSrcBand, TRUE, adfCMinMax );
-				dfScaleSrcMin = adfCMinMax[0];
-				dfScaleSrcMax = adfCMinMax[1];
+				nSrcBand = panBandList[0];
+				nComponent = i + 1;
 			}
-
-			if( bScale )
-			{
-				if( dfScaleSrcMax == dfScaleSrcMin )
-					dfScaleSrcMax += 0.1;
-				if( dfScaleDstMax == dfScaleDstMin )
-					dfScaleDstMax += 0.1;
-
-				dfScale = (dfScaleDstMax - dfScaleDstMin) 
-					/ (dfScaleSrcMax - dfScaleSrcMin);
-				dfOffset = -1 * dfScaleSrcMin * dfScale + dfScaleDstMin;
-			}
-
-	/* -------------------------------------------------------------------- */
-	/*      Create a simple or complex data source depending on the         */
-	/*      translation type required.                                      */
-	/* -------------------------------------------------------------------- */
-				poVRTBand->AddSimpleSource( poSrcBand,
-											anSrcWin[0], anSrcWin[1], 
-											anSrcWin[2], anSrcWin[3], 
-											0, 0, nOXSize, nOYSize );
-
-	/* -------------------------------------------------------------------- */
-	/*      copy over some other information of interest.                   */
-	/* -------------------------------------------------------------------- */
-			poVRTBand->CopyCommonInfoFrom( poSrcBand );
-
-	/* -------------------------------------------------------------------- */
-	/*      Set a forcable nodata value?                                    */
-	/* -------------------------------------------------------------------- */
-			if( bSetNoData )
-				poVRTBand->SetNoDataValue( dfNoDataReal );
 		}
+		else
+			nSrcBand = panBandList[i];
+
+		poSrcBand = ((GDALDataset *) hDataset)->GetRasterBand(ABS(nSrcBand));
+
+		/* -------------------------------------------------------------------- */
+		/*      Select output data type to match source.                        */
+		/* -------------------------------------------------------------------- */
+		if( eOutputType == GDT_Unknown )
+			eBandType = poSrcBand->GetRasterDataType();
+		else
+			eBandType = eOutputType;
+
+		/* -------------------------------------------------------------------- */
+		/*      Create this band.                                               */
+		/* -------------------------------------------------------------------- */
+		poVDS->AddBand( eBandType, NULL );
+		poVRTBand = (VRTSourcedRasterBand *) poVDS->GetRasterBand( i+1 );
+		if (nSrcBand < 0)
+		{
+			poVRTBand->AddMaskBandSource(poSrcBand);
+			continue;
+		}
+
+		/* -------------------------------------------------------------------- */
+		/*      Do we need to collect scaling information?                      */
+		/* -------------------------------------------------------------------- */
+		double dfScale=1.0, dfOffset=0.0;
+
+		if( bScale && !bHaveScaleSrc )
+		{
+			double	adfCMinMax[2];
+			GDALComputeRasterMinMax( poSrcBand, TRUE, adfCMinMax );
+			dfScaleSrcMin = adfCMinMax[0];
+			dfScaleSrcMax = adfCMinMax[1];
+		}
+
+		if( bScale )
+		{
+			if( dfScaleSrcMax == dfScaleSrcMin )
+				dfScaleSrcMax += 0.1;
+			if( dfScaleDstMax == dfScaleDstMin )
+				dfScaleDstMax += 0.1;
+
+			dfScale = (dfScaleDstMax - dfScaleDstMin) 
+				/ (dfScaleSrcMax - dfScaleSrcMin);
+			dfOffset = -1 * dfScaleSrcMin * dfScale + dfScaleDstMin;
+		}
+
+		if( bUnscale )
+		{
+			dfScale = poSrcBand->GetScale();
+			dfOffset = poSrcBand->GetOffset();
+		}
+
+		/* -------------------------------------------------------------------- */
+		/*      Create a simple or complex data source depending on the         */
+		/*      translation type required.                                      */
+		/* -------------------------------------------------------------------- */
+		if( bUnscale || bScale || (nRGBExpand != 0 && i < nRGBExpand) )
+		{
+			poVRTBand->AddComplexSource( poSrcBand,
+				anSrcWin[0], anSrcWin[1], 
+				anSrcWin[2], anSrcWin[3], 
+				0, 0, nOXSize, nOYSize,
+				dfOffset, dfScale,
+				VRT_NODATA_UNSET,
+				nComponent );
+		}
+		else
+			poVRTBand->AddSimpleSource( poSrcBand,
+			anSrcWin[0], anSrcWin[1], 
+			anSrcWin[2], anSrcWin[3], 
+			0, 0, nOXSize, nOYSize );
+
+		/* -------------------------------------------------------------------- */
+		/*      In case of color table translate, we only set the color         */
+		/*      interpretation other info copied by CopyBandInfo are            */
+		/*      not relevant in RGB expansion.                                  */
+		/* -------------------------------------------------------------------- */
+		if (nRGBExpand == 1)
+		{
+			poVRTBand->SetColorInterpretation( GCI_GrayIndex );
+		}
+		else if (nRGBExpand != 0 && i < nRGBExpand)
+		{
+			poVRTBand->SetColorInterpretation( (GDALColorInterp) (GCI_RedBand + i) );
+		}
+
+		/* -------------------------------------------------------------------- */
+		/*      copy over some other information of interest.                   */
+		/* -------------------------------------------------------------------- */
+		else
+		{
+			CopyBandInfo( poSrcBand, poVRTBand,
+				!bStats && !bFilterOutStatsMetadata,
+				!bUnscale,
+				!bSetNoData && !bUnsetNoData );
+		}
+
+		/* -------------------------------------------------------------------- */
+		/*      Set a forcable nodata value?                                    */
+		/* -------------------------------------------------------------------- */
+		if( bSetNoData )
+		{
+			double dfVal = dfNoDataReal;
+			int bClamped = FALSE, bRounded = FALSE;
+
+#define CLAMP(val,type,minval,maxval) \
+	do { if (val < minval) { bClamped = TRUE; val = minval; } \
+		else if (val > maxval) { bClamped = TRUE; val = maxval; } \
+		else if (val != (type)val) { bRounded = TRUE; val = (type)(val + 0.5); } } \
+		while(0)
+
+			switch(eBandType)
+			{
+			case GDT_Byte:
+				CLAMP(dfVal, GByte, 0.0, 255.0);
+				break;
+			case GDT_Int16:
+				CLAMP(dfVal, GInt16, -32768.0, 32767.0);
+				break;
+			case GDT_UInt16:
+				CLAMP(dfVal, GUInt16, 0.0, 65535.0);
+				break;
+			case GDT_Int32:
+				CLAMP(dfVal, GInt32, -2147483648.0, 2147483647.0);
+				break;
+			case GDT_UInt32:
+				CLAMP(dfVal, GUInt32, 0.0, 4294967295.0);
+				break;
+			default:
+				break;
+			}
+
+			if (bClamped)
+			{
+				printf( "for band %d, nodata value has been clamped "
+					"to %.0f, the original value being out of range.",
+					i + 1, dfVal);
+			}
+			else if(bRounded)
+			{
+				printf("for band %d, nodata value has been rounded "
+					"to %.0f, %s being an integer datatype.",
+					i + 1, dfVal,
+					GDALGetDataTypeName(eBandType));
+			}
+
+			poVRTBand->SetNoDataValue( dfVal );
+		}
+
+		if (eMaskMode == MASK_AUTO &&
+			(GDALGetMaskFlags(GDALGetRasterBand(hDataset, 1)) & GMF_PER_DATASET) == 0 &&
+			(poSrcBand->GetMaskFlags() & (GMF_ALL_VALID | GMF_NODATA)) == 0)
+		{
+			if (poVRTBand->CreateMaskBand(poSrcBand->GetMaskFlags()) == CE_None)
+			{
+				VRTSourcedRasterBand* hMaskVRTBand =
+					(VRTSourcedRasterBand*)poVRTBand->GetMaskBand();
+				hMaskVRTBand->AddMaskBandSource(poSrcBand,
+					anSrcWin[0], anSrcWin[1],
+					anSrcWin[2], anSrcWin[3],
+					0, 0, nOXSize, nOYSize );
+			}
+		}
+	}
+
+	if (eMaskMode == MASK_USER)
+	{
+		GDALRasterBand *poSrcBand =
+			(GDALRasterBand*)GDALGetRasterBand(hDataset, ABS(nMaskBand));
+		if (poSrcBand && poVDS->CreateMaskBand(GMF_PER_DATASET) == CE_None)
+		{
+			VRTSourcedRasterBand* hMaskVRTBand = (VRTSourcedRasterBand*)
+				GDALGetMaskBand(GDALGetRasterBand((GDALDatasetH)poVDS, 1));
+			if (nMaskBand > 0)
+				hMaskVRTBand->AddSimpleSource(poSrcBand,
+				anSrcWin[0], anSrcWin[1],
+				anSrcWin[2], anSrcWin[3],
+				0, 0, nOXSize, nOYSize );
+			else
+				hMaskVRTBand->AddMaskBandSource(poSrcBand,
+				anSrcWin[0], anSrcWin[1],
+				anSrcWin[2], anSrcWin[3],
+				0, 0, nOXSize, nOYSize );
+		}
+	}
+	else
+	{
+		if (eMaskMode == MASK_AUTO && nSrcBandCount > 0 &&
+			GDALGetMaskFlags(GDALGetRasterBand(hDataset, 1)) == GMF_PER_DATASET)
+		{
+			if (poVDS->CreateMaskBand(GMF_PER_DATASET) == CE_None)
+			{
+				VRTSourcedRasterBand* hMaskVRTBand = (VRTSourcedRasterBand*)
+					GDALGetMaskBand(GDALGetRasterBand((GDALDatasetH)poVDS, 1));
+				hMaskVRTBand->AddMaskBandSource((GDALRasterBand*)GDALGetRasterBand(hDataset, 1),
+					anSrcWin[0], anSrcWin[1],
+					anSrcWin[2], anSrcWin[3],
+					0, 0, nOXSize, nOYSize );
+			}
+		}
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*      Compute stats if required.                                      */
+	/* -------------------------------------------------------------------- */
+	if (bStats)
+	{
+		for( int i = 0; i < poVDS->GetRasterCount(); i++ )
+		{
+			double dfMin, dfMax, dfMean, dfStdDev;
+			poVDS->GetRasterBand(i+1)->ComputeStatistics( bApproxStats,
+				&dfMin, &dfMax, &dfMean, &dfStdDev, GDALDummyProgress, NULL );
+		}
+	}
 
 	/* -------------------------------------------------------------------- */
 	/*      Write to the output file using CopyCreate().                    */
 	/* -------------------------------------------------------------------- */
-		hOutDS = GDALCreateCopy( hDriver, pszDest, (GDALDatasetH) poVDS,
-								bStrict, papszCreateOptions, 
-								pfnProgress, NULL );
-		if( hOutDS != NULL )
-		{
-			GDALClose( hOutDS );
-			(*retval) = VARIANT_TRUE;
-		}
-		else
-		{
-			(*retval) = VARIANT_FALSE;
-		}
-		GDALClose( (GDALDatasetH) poVDS );
-	        
-		GDALClose( hDataset );
+	hOutDS = GDALCreateCopy( hDriver, pszDest, (GDALDatasetH) poVDS,
+		bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, NULL );
 
-		CPLFree( panBandList );
-
-		if( !bSubCall )
-		{
-			GDALDumpOpenDatasets( stderr );
-			GDALDestroyDriverManager();
-		}
-
-		//CSLDestroy( sArr );
-		int j = 0;
-		while (j < sArr.GetSize() )
-		{
-			delete sArr.GetAt( j++ );
-		}
-		sArr.RemoveAll();
-
-		CSLDestroy( papszCreateOptions );
-		return S_OK;
-	}
-	catch(exception e)
+	if( hOutDS != NULL )
 	{
-		if( hOutDS != NULL )
-			GDALClose( hOutDS );
-		if( hDataset != NULL )
-			GDALClose( hDataset );
-		CPLFree( panBandList );
-		if( !bSubCall )
-		{
-			GDALDumpOpenDatasets( stderr );
-			GDALDestroyDriverManager();
-		}
-		int j = 0;
-		while (j < sArr.GetSize() )
-		{
-			delete sArr.GetAt( j++ );
-		}
-		sArr.RemoveAll();
-		(*retval) = VARIANT_FALSE;
-		return S_OK;
+		int bHasGotErr = FALSE;
+		CPLErrorReset();
+		GDALFlushCache( hOutDS );
+
+		if (CPLGetLastErrorType() != CE_None)
+			bHasGotErr = TRUE;
+		else
+			(*retval) = VARIANT_TRUE;
+
+		GDALClose( hOutDS );
+		if (bHasGotErr)
+			hOutDS = NULL;
 	}
 
+	GDALClose( (GDALDatasetH) poVDS );
+
+	GDALClose(hDataset);
+
+	CPLFree( panBandList );
+
+	CPLFree( pszOutputSRS );
+
+	if( !bSubCall )
+	{
+		GDALDumpOpenDatasets( stderr );
+		GDALDestroyDriverManager();
+	}
+
+	CSLDestroy( papszCreateOptions );
+
+	return S_OK;
 }
 
 /************************************************************************/
 /*                            ArgIsNumeric()                            */
 /************************************************************************/
-
 bool CUtils::ArgIsNumeric( const char *pszArg )
 
 {
-    if( pszArg[0] == '-' )
-        pszArg++;
+	if( pszArg[0] == '-' )
+		pszArg++;
 
-    if( *pszArg == '\0' )
-        return false;
+	if( *pszArg == '\0' )
+		return false;
 
-    while( *pszArg != '\0' )
-    {
-        if( (*pszArg < '0' || *pszArg > '9') && *pszArg != '.' )
-            return false;
-        pszArg++;
-    }
-        
-    return true;
+	while( *pszArg != '\0' )
+	{
+		if( (*pszArg < '0' || *pszArg > '9') && *pszArg != '.' )
+			return false;
+		pszArg++;
+	}
+
+	return true;
 }
 
 /************************************************************************/
 /*                           AttachMetadata()                           */
 /************************************************************************/
-
 void CUtils::AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions )
 {
-    int nCount = CSLCount(papszMetadataOptions);
-    int i;
+	int nCount = CSLCount(papszMetadataOptions);
+	int i;
 
-    for( i = 0; i < nCount; i++ )
-    {
-        char    *pszKey = NULL;
-        const char *pszValue;
-        
-        pszValue = CPLParseNameValue( papszMetadataOptions[i], &pszKey );
-        GDALSetMetadataItem(hDS,pszKey,pszValue,NULL);
-        CPLFree( pszKey );
-    }
+	for( i = 0; i < nCount; i++ )
+	{
+		char    *pszKey = NULL;
+		const char *pszValue;
 
-    CSLDestroy( papszMetadataOptions );
+		pszValue = CPLParseNameValue( papszMetadataOptions[i], &pszKey );
+		GDALSetMetadataItem(hDS,pszKey,pszValue,NULL);
+		CPLFree( pszKey );
+	}
+
+	CSLDestroy( papszMetadataOptions );
+}
+
+/************************************************************************/
+/*                           CopyBandInfo()                            */
+/************************************************************************/
+
+/* A bit of a clone of VRTRasterBand::CopyCommonInfoFrom(), but we need */
+/* more and more custom behaviour in the context of gdal_translate ... */
+
+void CUtils::CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
+						  int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData)
+{
+	int bSuccess;
+	double dfNoData;
+
+	if (bCanCopyStatsMetadata)
+	{
+		poDstBand->SetMetadata( poSrcBand->GetMetadata() );
+	}
+	else
+	{
+		char** papszMetadata = poSrcBand->GetMetadata();
+		char** papszMetadataNew = NULL;
+		for( int i = 0; papszMetadata != NULL && papszMetadata[i] != NULL; i++ )
+		{
+			if (strncmp(papszMetadata[i], "STATISTICS_", 11) != 0)
+				papszMetadataNew = CSLAddString(papszMetadataNew, papszMetadata[i]);
+		}
+		poDstBand->SetMetadata( papszMetadataNew );
+		CSLDestroy(papszMetadataNew);
+	}
+
+	poDstBand->SetColorTable( poSrcBand->GetColorTable() );
+	poDstBand->SetColorInterpretation(poSrcBand->GetColorInterpretation());
+	if( strlen(poSrcBand->GetDescription()) > 0 )
+		poDstBand->SetDescription( poSrcBand->GetDescription() );
+
+	if (bCopyNoData)
+	{
+		dfNoData = poSrcBand->GetNoDataValue( &bSuccess );
+		if( bSuccess )
+			poDstBand->SetNoDataValue( dfNoData );
+	}
+
+	if (bCopyScale)
+	{
+		poDstBand->SetOffset( poSrcBand->GetOffset() );
+		poDstBand->SetScale( poSrcBand->GetScale() );
+	}
+
+	poDstBand->SetCategoryNames( poSrcBand->GetCategoryNames() );
+	if( !EQUAL(poSrcBand->GetUnitType(),"") )
+		poDstBand->SetUnitType( poSrcBand->GetUnitType() );
 }
 
 /************************************************************************/
@@ -5466,9 +5818,9 @@ void CUtils::AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions )
 void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts)
 {
 	CString sTemp, sTrans, sStore;
-	int m, i; 
+	int m, i, length;
 	char chSeps[] = " ";
-	
+
 	//set an initial max array size
 	sArr.SetSize(sOrig.GetLength(),25);
 	sArr[0] = "Dummy value at 0";
@@ -5495,13 +5847,18 @@ void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts)
 	sArr.SetSize(i+3,25);
 	sArr.FreeExtra();
 
+	for (int i = 0; i < sArr.GetSize(); i++)
+	{
+		sTemp = sArr[i];
+		length = sTemp.GetLength ();
+
+		if (length < 2 || sTemp[0] != '"' || sTemp[length - 1] != '"')
+			continue;
+
+		sArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
+	}
+
 	*opts = (int) sArr.GetSize();
-	
-	//for (i = 0; i < sArr.GetSize() ;i++)
-	//{
-	//	//cArr[i+1] = (char *)(LPCTSTR) sArr[i].GetString(); 
-	//	AfxMessageBox((LPCTSTR)sArr[i]);
-	//}
 }
 /*  ******************************************************************* */
 /*                               Usage()                                */
