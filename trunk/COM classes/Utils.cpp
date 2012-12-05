@@ -35,6 +35,7 @@
 #include "gdal.h"
 #include "gdal_alg.h"
 #include "cpl_conv.h"
+#include "cpl_multiproc.h"
 #include "ogr_spatialref.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
@@ -4597,6 +4598,817 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 	return TRUE;
 }
 
+
+STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
+							  ICallback * cBack, BSTR *bstrInfo)
+{
+	USES_CONVERSION;
+
+	int				opts = 0;
+	CString			sOutput = "", sTemp = "";
+	GDALDatasetH	hDataset;
+	GDALRasterBandH	hBand;
+	int				iBand;
+	double			adfGeoTransform[6];
+	GDALDriverH		hDriver;
+	char			**papszMetadata;
+	int				bComputeMinMax = FALSE, bSample = FALSE;
+	int				bShowGCPs = TRUE, bShowMetadata = TRUE, bShowRAT = TRUE;
+	int				bStats = FALSE, bApproxStats = TRUE, iMDD;
+	int				bShowColorTable = TRUE, bComputeChecksum = FALSE;
+	int				bReportHistograms = FALSE;
+	int				bReportProj4 = FALSE;
+	int				nSubdataset = -1;
+	const char		*pszFilename = NULL;
+	char			**papszExtraMDDomains = NULL, **papszFileList;
+	const char		*pszProjection = NULL;
+	OGRCoordinateTransformationH hTransform = NULL;
+	int				bShowFileList = TRUE;
+
+	*bstrInfo = L"";
+
+	pszFilename = OLE2CA(bstrSrcFilename);
+
+	GDALAllRegister();
+
+	Parse(OLE2CA(bstrOptions), &opts);
+
+	for (int i = 1; i < opts; i++)
+	{
+		if( sArr[i] == "-mm" )
+            bComputeMinMax = TRUE;
+        else if( sArr[i] == "-hist" )
+            bReportHistograms = TRUE;
+        else if( sArr[i] == "-proj4" )
+            bReportProj4 = TRUE;
+        else if( sArr[i] == "-stats" )
+        {
+            bStats = TRUE;
+            bApproxStats = FALSE;
+        }
+        else if( sArr[i] == "-approx_stats" )
+        {
+            bStats = TRUE;
+            bApproxStats = TRUE;
+        }
+        else if( sArr[i] == "-sample" )
+            bSample = TRUE;
+        else if( sArr[i] == "-checksum" )
+            bComputeChecksum = TRUE;
+        else if( sArr[i] == "-nogcp" )
+            bShowGCPs = FALSE;
+        else if( sArr[i] == "-nomd" )
+            bShowMetadata = FALSE;
+        else if( sArr[i] == "-norat" )
+            bShowRAT = FALSE;
+        else if( sArr[i] == "-noct" )
+            bShowColorTable = FALSE;
+        else if( sArr[i] == "-mdd" && i < opts-1 )
+            papszExtraMDDomains = CSLAddString( papszExtraMDDomains,
+                                                sArr[++i].GetBuffer(0) );
+        else if( sArr[i] == "-nofl" )
+            bShowFileList = FALSE;
+        else if( sArr[i] == "-sd" && i < opts-1 )
+            nSubdataset = atoi(sArr[++i].GetBuffer (0));
+	}
+
+	/* -------------------------------------------------------------------- */
+	/*      Open dataset.                                                   */
+	/* -------------------------------------------------------------------- */
+    hDataset = GDALOpen( pszFilename, GA_ReadOnly );
+    
+    if( hDataset == NULL )
+    {
+        CPLError(CE_Failure,0,
+                 "gdalinfo failed - unable to open '%s'.\n",
+                 pszFilename );
+
+        CSLDestroy( papszExtraMDDomains );
+    
+        GDALDumpOpenDatasets( stderr );
+
+        GDALDestroyDriverManager();
+
+        CPLDumpSharedList( NULL );
+
+        return S_OK;
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Read specified subdataset if requested.                         */
+	/* -------------------------------------------------------------------- */
+    if ( nSubdataset > 0 )
+    {
+        char **papszSubdatasets = GDALGetMetadata( hDataset, "SUBDATASETS" );
+        int nSubdatasets = CSLCount( papszSubdatasets );
+
+        if ( nSubdatasets > 0 && nSubdataset <= nSubdatasets )
+        {
+            char szKeyName[1024];
+            char *pszSubdatasetName;
+
+            snprintf( szKeyName, sizeof(szKeyName),
+                      "SUBDATASET_%d_NAME", nSubdataset );
+            szKeyName[sizeof(szKeyName) - 1] = '\0';
+            pszSubdatasetName =
+                CPLStrdup( CSLFetchNameValue( papszSubdatasets, szKeyName ) );
+            GDALClose( hDataset );
+            hDataset = GDALOpen( pszSubdatasetName, GA_ReadOnly );
+            CPLFree( pszSubdatasetName );
+        }
+        else
+        {
+            CPLError(CE_Failure,0,
+                     "gdalinfo warning: subdataset %d of %d requested. "
+                     "Reading the main dataset.\n",
+                     nSubdataset, nSubdatasets );
+			return S_OK;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report general info.                                            */
+	/* -------------------------------------------------------------------- */
+    hDriver = GDALGetDatasetDriver( hDataset );
+    sTemp.Format( "Driver: %s/%s\n",
+            GDALGetDriverShortName( hDriver ),
+            GDALGetDriverLongName( hDriver ) );
+	sOutput += sTemp;
+
+    papszFileList = GDALGetFileList( hDataset );
+    if( CSLCount(papszFileList) == 0 )
+    {
+        sOutput += "Files: none associated\n";
+    }
+    else
+    {
+        sTemp.Format( "Files: %s\n", papszFileList[0] );
+		sOutput += sTemp;
+        if( bShowFileList )
+        {
+            for( int i = 1; papszFileList[i] != NULL; i++ )
+			{
+                sTemp.Format( "       %s\n", papszFileList[i] );
+				sOutput += sTemp;
+			}
+        }
+    }
+    CSLDestroy( papszFileList );
+
+    sTemp.Format( "Size is %d, %d\n",
+            GDALGetRasterXSize( hDataset ), 
+            GDALGetRasterYSize( hDataset ) );
+	sOutput += sTemp;
+
+	/* -------------------------------------------------------------------- */
+	/*      Report projection.                                              */
+	/* -------------------------------------------------------------------- */
+    if( GDALGetProjectionRef( hDataset ) != NULL )
+    {
+        OGRSpatialReferenceH  hSRS;
+        char		      *pszProjection;
+
+        pszProjection = (char *) GDALGetProjectionRef( hDataset );
+
+        hSRS = OSRNewSpatialReference(NULL);
+        if( OSRImportFromWkt( hSRS, &pszProjection ) == CE_None )
+        {
+            char	*pszPrettyWkt = NULL;
+
+            OSRExportToPrettyWkt( hSRS, &pszPrettyWkt, FALSE );
+            sTemp.Format( "Coordinate System is:\n%s\n", pszPrettyWkt );
+			sOutput += sTemp;
+            CPLFree( pszPrettyWkt );
+        }
+        else
+		{
+            sTemp.Format( "Coordinate System is `%s'\n",
+                    GDALGetProjectionRef( hDataset ) );
+			sOutput += sTemp;
+		}
+
+        if ( bReportProj4 ) 
+        {
+            char *pszProj4 = NULL;
+            OSRExportToProj4( hSRS, &pszProj4 );
+            sTemp.Format("PROJ.4 string is:\n\'%s\'\n",pszProj4);
+			sOutput += sTemp;
+            CPLFree( pszProj4 ); 
+        }
+
+        OSRDestroySpatialReference( hSRS );
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report Geotransform.                                            */
+	/* -------------------------------------------------------------------- */
+    if( GDALGetGeoTransform( hDataset, adfGeoTransform ) == CE_None )
+    {
+        if( adfGeoTransform[2] == 0.0 && adfGeoTransform[4] == 0.0 )
+        {
+            sTemp.Format( "Origin = (%.15f,%.15f)\n",
+                    adfGeoTransform[0], adfGeoTransform[3] );
+			sOutput += sTemp;
+
+            sTemp.Format( "Pixel Size = (%.15f,%.15f)\n",
+                    adfGeoTransform[1], adfGeoTransform[5] );
+			sOutput += sTemp;
+        }
+        else
+		{
+            sTemp.Format( "GeoTransform =\n"
+                    "  %.16g, %.16g, %.16g\n"
+                    "  %.16g, %.16g, %.16g\n", 
+                    adfGeoTransform[0],
+                    adfGeoTransform[1],
+                    adfGeoTransform[2],
+                    adfGeoTransform[3],
+                    adfGeoTransform[4],
+                    adfGeoTransform[5] );
+			sOutput += sTemp;
+		}
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report GCPs.                                                    */
+	/* -------------------------------------------------------------------- */
+    if( bShowGCPs && GDALGetGCPCount( hDataset ) > 0 )
+    {
+        if (GDALGetGCPProjection(hDataset) != NULL)
+        {
+            OGRSpatialReferenceH  hSRS;
+            char		      *pszProjection;
+
+            pszProjection = (char *) GDALGetGCPProjection( hDataset );
+
+            hSRS = OSRNewSpatialReference(NULL);
+            if( OSRImportFromWkt( hSRS, &pszProjection ) == CE_None )
+            {
+                char	*pszPrettyWkt = NULL;
+
+                OSRExportToPrettyWkt( hSRS, &pszPrettyWkt, FALSE );
+                sTemp.Format( "GCP Projection = \n%s\n", pszPrettyWkt );
+				sOutput += sTemp;
+                CPLFree( pszPrettyWkt );
+            }
+            else
+			{
+                sTemp.Format( "GCP Projection = %s\n",
+                        GDALGetGCPProjection( hDataset ) );
+				sOutput += sTemp;
+			}
+
+            OSRDestroySpatialReference( hSRS );
+        }
+
+        for( int i = 0; i < GDALGetGCPCount(hDataset); i++ )
+        {
+            const GDAL_GCP	*psGCP;
+            
+            psGCP = GDALGetGCPs( hDataset ) + i;
+
+            sTemp.Format( "GCP[%3d]: Id=%s, Info=%s\n"
+                    "          (%.15g,%.15g) -> (%.15g,%.15g,%.15g)\n", 
+                    i, psGCP->pszId, psGCP->pszInfo, 
+                    psGCP->dfGCPPixel, psGCP->dfGCPLine, 
+                    psGCP->dfGCPX, psGCP->dfGCPY, psGCP->dfGCPZ );
+			sOutput += sTemp;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report metadata.                                                */
+	/* -------------------------------------------------------------------- */
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, NULL ) : NULL;
+    if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+    {
+        sOutput += "Metadata:\n";
+        for( int i = 0; papszMetadata[i] != NULL; i++ )
+        {
+            sTemp.Format( "  %s\n", papszMetadata[i] );
+			sOutput += sTemp;
+        }
+    }
+
+    for( iMDD = 0; bShowMetadata && iMDD < CSLCount(papszExtraMDDomains); iMDD++ )
+    {
+        papszMetadata = GDALGetMetadata( hDataset, papszExtraMDDomains[iMDD] );
+        if( CSLCount(papszMetadata) > 0 )
+        {
+            sTemp.Format( "Metadata (%s):\n", papszExtraMDDomains[iMDD]);
+			sOutput += sTemp;
+            for( int i = 0; papszMetadata[i] != NULL; i++ )
+            {
+                if (EQUALN(papszExtraMDDomains[iMDD], "xml:", 4))
+                    sTemp.Format( "%s\n", papszMetadata[i] );
+                else
+                    sTemp.Format( "  %s\n", papszMetadata[i] );
+
+				sOutput += sTemp;
+            }
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report "IMAGE_STRUCTURE" metadata.                              */
+	/* -------------------------------------------------------------------- */
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "IMAGE_STRUCTURE" ) : NULL;
+    if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+    {
+        sOutput += "Image Structure Metadata:\n";
+        for( int i = 0; papszMetadata[i] != NULL; i++ )
+        {
+            sTemp.Format( "  %s\n", papszMetadata[i] );
+			sOutput += sTemp;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report subdatasets.                                             */
+	/* -------------------------------------------------------------------- */
+    papszMetadata = GDALGetMetadata( hDataset, "SUBDATASETS" );
+    if( CSLCount(papszMetadata) > 0 )
+    {
+        sOutput += "Subdatasets:\n";
+        for( int i = 0; papszMetadata[i] != NULL; i++ )
+        {
+            sTemp.Format( "  %s\n", papszMetadata[i] );
+			sOutput += sTemp;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report geolocation.                                             */
+	/* -------------------------------------------------------------------- */
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "GEOLOCATION" ) : NULL;
+    if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+    {
+        sOutput += "Geolocation:\n";
+        for( int i = 0; papszMetadata[i] != NULL; i++ )
+        {
+            sTemp.Format( "  %s\n", papszMetadata[i] );
+			sOutput += sTemp;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report RPCs                                                     */
+	/* -------------------------------------------------------------------- */
+    papszMetadata = (bShowMetadata) ? GDALGetMetadata( hDataset, "RPC" ) : NULL;
+    if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+    {
+        sOutput += "RPC Metadata:\n";
+        for( int i = 0; papszMetadata[i] != NULL; i++ )
+        {
+            sTemp.Format( "  %s\n", papszMetadata[i] );
+			sOutput += sTemp;
+        }
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Setup projected to lat/long transform if appropriate.           */
+	/* -------------------------------------------------------------------- */
+    if( GDALGetGeoTransform( hDataset, adfGeoTransform ) == CE_None )
+        pszProjection = GDALGetProjectionRef(hDataset);
+
+    if( pszProjection != NULL && strlen(pszProjection) > 0 )
+    {
+        OGRSpatialReferenceH hProj, hLatLong = NULL;
+
+        hProj = OSRNewSpatialReference( pszProjection );
+        if( hProj != NULL )
+            hLatLong = OSRCloneGeogCS( hProj );
+
+        if( hLatLong != NULL )
+        {
+            CPLPushErrorHandler( CPLQuietErrorHandler );
+            hTransform = OCTNewCoordinateTransformation( hProj, hLatLong );
+            CPLPopErrorHandler();
+            
+            OSRDestroySpatialReference( hLatLong );
+        }
+
+        if( hProj != NULL )
+            OSRDestroySpatialReference( hProj );
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report corners.                                                 */
+	/* -------------------------------------------------------------------- */
+    sOutput += "Corner Coordinates:\n";
+    sOutput += GDALInfoReportCorner( hDataset, hTransform, "Upper Left", 
+                          0.0, 0.0 );
+    sOutput += GDALInfoReportCorner( hDataset, hTransform, "Lower Left", 
+                          0.0, GDALGetRasterYSize(hDataset));
+    sOutput += GDALInfoReportCorner( hDataset, hTransform, "Upper Right", 
+                          GDALGetRasterXSize(hDataset), 0.0 );
+    sOutput += GDALInfoReportCorner( hDataset, hTransform, "Lower Right", 
+                          GDALGetRasterXSize(hDataset), 
+                          GDALGetRasterYSize(hDataset) );
+    sOutput += GDALInfoReportCorner( hDataset, hTransform, "Center", 
+                          GDALGetRasterXSize(hDataset)/2.0, 
+                          GDALGetRasterYSize(hDataset)/2.0 );
+
+    if( hTransform != NULL )
+    {
+        OCTDestroyCoordinateTransformation( hTransform );
+        hTransform = NULL;
+    }
+
+	/* ==================================================================== */
+	/*      Loop over bands.                                                */
+	/* ==================================================================== */
+    for( iBand = 0; iBand < GDALGetRasterCount( hDataset ); iBand++ )
+    {
+        double      dfMin, dfMax, adfCMinMax[2], dfNoData;
+        int         bGotMin, bGotMax, bGotNodata, bSuccess;
+        int         nBlockXSize, nBlockYSize, nMaskFlags;
+        double      dfMean, dfStdDev;
+        GDALColorTableH	hTable;
+        CPLErr      eErr;
+
+        hBand = GDALGetRasterBand( hDataset, iBand+1 );
+
+        if( bSample )
+        {
+            float afSample[10000];
+            int   nCount;
+
+            nCount = GDALGetRandomRasterSample( hBand, 10000, afSample );
+            sTemp.Format( "Got %d samples.\n", nCount );
+			sOutput + sTemp;
+        }
+        
+        GDALGetBlockSize( hBand, &nBlockXSize, &nBlockYSize );
+        sTemp.Format( "Band %d Block=%dx%d Type=%s, ColorInterp=%s\n", iBand+1,
+                nBlockXSize, nBlockYSize,
+                GDALGetDataTypeName(
+                    GDALGetRasterDataType(hBand)),
+                GDALGetColorInterpretationName(
+                    GDALGetRasterColorInterpretation(hBand)) );
+		sOutput += sTemp;
+
+        if( GDALGetDescription( hBand ) != NULL 
+            && strlen(GDALGetDescription( hBand )) > 0 )
+		{
+            sTemp.Format( "  Description = %s\n", GDALGetDescription(hBand) );
+			sOutput += sTemp;
+		}
+
+        dfMin = GDALGetRasterMinimum( hBand, &bGotMin );
+        dfMax = GDALGetRasterMaximum( hBand, &bGotMax );
+        if( bGotMin || bGotMax || bComputeMinMax )
+        {
+            sOutput += "  " ;
+            if( bGotMin )
+			{
+                sTemp.Format( "Min=%.3f ", dfMin );
+				sOutput += sTemp;
+			}
+            if( bGotMax )
+			{
+                sTemp.Format( "Max=%.3f ", dfMax );
+				sOutput += sTemp;
+			}
+        
+            if( bComputeMinMax )
+            {
+                CPLErrorReset();
+                GDALComputeRasterMinMax( hBand, FALSE, adfCMinMax );
+                if (CPLGetLastErrorType() == CE_None)
+                {
+                  sTemp.Format( "  Computed Min/Max=%.3f,%.3f", 
+                          adfCMinMax[0], adfCMinMax[1] );
+				  sOutput += sTemp;
+                }
+            }
+
+            sOutput += "\n" ;
+        }
+
+        eErr = GDALGetRasterStatistics( hBand, bApproxStats, bStats, 
+                                        &dfMin, &dfMax, &dfMean, &dfStdDev );
+        if( eErr == CE_None )
+        {
+            sTemp.Format( "  Minimum=%.3f, Maximum=%.3f, Mean=%.3f, StdDev=%.3f\n",
+                    dfMin, dfMax, dfMean, dfStdDev );
+			sOutput += sTemp;
+        }
+
+        if( bReportHistograms )
+        {
+            int nBucketCount, *panHistogram = NULL;
+
+            eErr = GDALGetDefaultHistogram( hBand, &dfMin, &dfMax, 
+                                            &nBucketCount, &panHistogram, 
+                                            TRUE, (GDALProgressFunc) GDALProgressCallback, cBack );
+            if( eErr == CE_None )
+            {
+                int iBucket;
+
+                sTemp.Format( "  %d buckets from %g to %g:\n  ",
+                        nBucketCount, dfMin, dfMax );
+				sOutput += sTemp;
+
+                for( iBucket = 0; iBucket < nBucketCount; iBucket++ )
+				{
+                    sTemp.Format( "%d ", panHistogram[iBucket] );
+					sOutput += sTemp;
+				}
+                sOutput += "\n" ;
+                CPLFree( panHistogram );
+            }
+        }
+
+        if ( bComputeChecksum)
+        {
+            sTemp.Format( "  Checksum=%d\n",
+                    GDALChecksumImage(hBand, 0, 0,
+                                      GDALGetRasterXSize(hDataset),
+                                      GDALGetRasterYSize(hDataset)));
+			sOutput += sTemp;
+        }
+
+        dfNoData = GDALGetRasterNoDataValue( hBand, &bGotNodata );
+        if( bGotNodata )
+        {
+            if (CPLIsNan(dfNoData))
+                sTemp.Format( "  NoData Value=nan\n" );
+            else
+                sTemp.Format( "  NoData Value=%.18g\n", dfNoData );
+			sOutput += sTemp;
+        }
+
+        if( GDALGetOverviewCount(hBand) > 0 )
+        {
+            int		iOverview;
+
+            sOutput += "  Overviews: ";
+            for( iOverview = 0; 
+                 iOverview < GDALGetOverviewCount(hBand);
+                 iOverview++ )
+            {
+                GDALRasterBandH	hOverview;
+                const char *pszResampling = NULL;
+
+                if( iOverview != 0 )
+                    sOutput += ", " ;
+
+                hOverview = GDALGetOverview( hBand, iOverview );
+                if (hOverview != NULL)
+                {
+                    sTemp.Format( "%dx%d", 
+                            GDALGetRasterBandXSize( hOverview ),
+                            GDALGetRasterBandYSize( hOverview ) );
+					sOutput += sTemp;
+
+                    pszResampling = 
+                        GDALGetMetadataItem( hOverview, "RESAMPLING", "" );
+
+                    if( pszResampling != NULL 
+                        && EQUALN(pszResampling,"AVERAGE_BIT2",12) )
+                        sOutput += "*" ;
+                }
+                else
+                    sOutput += "(null)";
+            }
+            sOutput += "\n" ;
+
+            if ( bComputeChecksum)
+            {
+                sOutput += "  Overviews checksum: ";
+                for( iOverview = 0; 
+                    iOverview < GDALGetOverviewCount(hBand);
+                    iOverview++ )
+                {
+                    GDALRasterBandH	hOverview;
+
+                    if( iOverview != 0 )
+                        sOutput += ", ";
+
+                    hOverview = GDALGetOverview( hBand, iOverview );
+                    if (hOverview)
+					{
+                        sTemp.Format( "%d",
+                                GDALChecksumImage(hOverview, 0, 0,
+                                        GDALGetRasterBandXSize(hOverview),
+                                        GDALGetRasterBandYSize(hOverview)));
+						sOutput += sTemp;
+					}
+                    else
+                        sOutput += "(null)";
+                }
+                sOutput += "\n";
+            }
+        }
+
+        if( GDALHasArbitraryOverviews( hBand ) )
+        {
+            sOutput += "  Overviews: arbitrary\n";
+        }
+        
+        nMaskFlags = GDALGetMaskFlags( hBand );
+        if( (nMaskFlags & (GMF_NODATA|GMF_ALL_VALID)) == 0 )
+        {
+            GDALRasterBandH hMaskBand = GDALGetMaskBand(hBand) ;
+
+            sOutput += "  Mask Flags: ";
+            if( nMaskFlags & GMF_PER_DATASET )
+                sOutput += "PER_DATASET ";
+            if( nMaskFlags & GMF_ALPHA )
+                sOutput += "ALPHA ";
+            if( nMaskFlags & GMF_NODATA )
+                sOutput += "NODATA ";
+            if( nMaskFlags & GMF_ALL_VALID )
+                sOutput += "ALL_VALID ";
+            sOutput += "\n";
+
+            if( hMaskBand != NULL &&
+                GDALGetOverviewCount(hMaskBand) > 0 )
+            {
+                int		iOverview;
+
+                sOutput += "  Overviews of mask band: ";
+                for( iOverview = 0; 
+                     iOverview < GDALGetOverviewCount(hMaskBand);
+                     iOverview++ )
+                {
+                    GDALRasterBandH	hOverview;
+
+                    if( iOverview != 0 )
+                        sOutput += ", ";
+
+                    hOverview = GDALGetOverview( hMaskBand, iOverview );
+                    sTemp.Format( "%dx%d", 
+                            GDALGetRasterBandXSize( hOverview ),
+                            GDALGetRasterBandYSize( hOverview ) );
+					sOutput += sTemp;
+                }
+                sOutput += "\n";
+            }
+        }
+
+        if( strlen(GDALGetRasterUnitType(hBand)) > 0 )
+        {
+            sTemp.Format( "  Unit Type: %s\n", GDALGetRasterUnitType(hBand) );
+			sOutput += sTemp;
+        }
+
+        if( GDALGetRasterCategoryNames(hBand) != NULL )
+        {
+            char **papszCategories = GDALGetRasterCategoryNames(hBand);
+            int i;
+
+            sOutput += "  Categories:\n";
+            for( i = 0; papszCategories[i] != NULL; i++ )
+			{
+                sTemp.Format( "    %3d: %s\n", i, papszCategories[i] );
+				sOutput += sTemp;
+			}
+        }
+
+        if( GDALGetRasterScale( hBand, &bSuccess ) != 1.0 
+            || GDALGetRasterOffset( hBand, &bSuccess ) != 0.0 )
+		{
+            sTemp.Format( "  Offset: %.15g,   Scale:%.15g\n",
+                    GDALGetRasterOffset( hBand, &bSuccess ),
+                    GDALGetRasterScale( hBand, &bSuccess ) );
+			sOutput += sTemp;
+		}
+
+        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, NULL ) : NULL;
+        if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+        {
+            sOutput += "  Metadata:\n";
+            for( int i = 0; papszMetadata[i] != NULL; i++ )
+            {
+                sTemp.Format( "    %s\n", papszMetadata[i] );
+				sOutput += sTemp;
+            }
+        }
+
+        papszMetadata = (bShowMetadata) ? GDALGetMetadata( hBand, "IMAGE_STRUCTURE" ) : NULL;
+        if( bShowMetadata && CSLCount(papszMetadata) > 0 )
+        {
+            sOutput += "  Image Structure Metadata:\n";
+            for( int i = 0; papszMetadata[i] != NULL; i++ )
+            {
+                sTemp.Format( "    %s\n", papszMetadata[i] );
+				sOutput += sTemp;
+            }
+        }
+
+        if( GDALGetRasterColorInterpretation(hBand) == GCI_PaletteIndex 
+            && (hTable = GDALGetRasterColorTable( hBand )) != NULL )
+        {
+            sTemp.Format( "  Color Table (%s with %d entries)\n", 
+                    GDALGetPaletteInterpretationName(
+                        GDALGetPaletteInterpretation( hTable )), 
+                    GDALGetColorEntryCount( hTable ) );
+			sOutput += sTemp;
+
+            if (bShowColorTable)
+            {
+                for( int i = 0; i < GDALGetColorEntryCount( hTable ); i++ )
+                {
+                    GDALColorEntry	sEntry;
+    
+                    GDALGetColorEntryAsRGB( hTable, i, &sEntry );
+                    sTemp.Format( "  %3d: %d,%d,%d,%d\n", 
+                            i, 
+                            sEntry.c1,
+                            sEntry.c2,
+                            sEntry.c3,
+                            sEntry.c4 );
+					sOutput += sTemp;
+                }
+            }
+        }
+
+        if( bShowRAT && GDALGetDefaultRAT( hBand ) != NULL )
+        {
+            GDALRasterAttributeTableH hRAT = GDALGetDefaultRAT( hBand );
+            
+            GDALRATDumpReadable( hRAT, NULL );
+        }
+    }
+
+    GDALClose( hDataset );
+    
+    CSLDestroy( papszExtraMDDomains );
+    
+    GDALDumpOpenDatasets( stderr );
+
+    GDALDestroyDriverManager();
+
+    CPLDumpSharedList( NULL );
+    CPLCleanupTLS();
+
+	*bstrInfo = sOutput.AllocSysString();
+
+	return S_OK;
+}
+
+CString CUtils::GDALInfoReportCorner(GDALDatasetH hDataset,
+		OGRCoordinateTransformationH hTransform,
+		const char * corner_name, double x, double y)
+{
+	CString sOutput = "", sTemp = "";
+	double	dfGeoX, dfGeoY;
+    double	adfGeoTransform[6];
+        
+    sTemp.Format( "%-11s ", corner_name );
+	sOutput += sTemp;
+    
+/* -------------------------------------------------------------------- */
+/*      Transform the point into georeferenced coordinates.             */
+/* -------------------------------------------------------------------- */
+    if( GDALGetGeoTransform( hDataset, adfGeoTransform ) == CE_None )
+    {
+        dfGeoX = adfGeoTransform[0] + adfGeoTransform[1] * x
+            + adfGeoTransform[2] * y;
+        dfGeoY = adfGeoTransform[3] + adfGeoTransform[4] * x
+            + adfGeoTransform[5] * y;
+    }
+
+    else
+    {
+        sTemp.Format( "(%7.1f,%7.1f)\n", x, y );
+		sOutput += sTemp;
+        return sOutput;
+    }
+
+	/* -------------------------------------------------------------------- */
+	/*      Report the georeferenced coordinates.                           */
+	/* -------------------------------------------------------------------- */
+    if( ABS(dfGeoX) < 181 && ABS(dfGeoY) < 91 )
+    {
+        sTemp.Format( "(%12.7f,%12.7f) ", dfGeoX, dfGeoY );
+    }
+    else
+    {
+        sTemp.Format( "(%12.3f,%12.3f) ", dfGeoX, dfGeoY );
+    }
+	sOutput += sTemp;
+
+	/* -------------------------------------------------------------------- */
+	/*      Transform to latlong and report.                                */
+	/* -------------------------------------------------------------------- */
+    if( hTransform != NULL 
+        && OCTTransform(hTransform,1,&dfGeoX,&dfGeoY,NULL) )
+    {
+        
+        sTemp.Format( "(%s,", GDALDecToDMS( dfGeoX, "Long", 2 ) );
+		sOutput += sTemp;
+        sTemp.Format( "%s)", GDALDecToDMS( dfGeoY, "Lat", 2 ) );
+		sOutput += sTemp;
+    }
+
+    sOutput += "\n" ;
+
+    return sOutput;
+}
+
 /* ****************************************************************************
  * $Id: gdal_translate.cpp,v 1.32 2005/05/17 19:04:47 fwarmerdam Exp $
  *
@@ -4679,7 +5491,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	pszDest = OLE2CA(bstrDstFilename);
 
 	if (!bSubCall)
-		Parse(OLE2CA(bstrOptions), pszSource, pszDest, &opts);
+		Parse(OLE2CA(bstrOptions), &opts);
 	else
 		opts = sArr.GetSize();
 
@@ -5181,6 +5993,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	{
 		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure,0, "Output driver `%s' not recognised.", pszFormat );
+
+		// TODO: List valid drivers?
 
 		GDALClose (hDataset);
 		CPLFree (panBandList);
@@ -5815,8 +6629,15 @@ void CUtils::CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand
 /************************************************************************/
 /*                           Parse()                                    */
 /************************************************************************/
-void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts)
+void CUtils::Parse(CString sOrig, int * opts)
 {
+	if (sOrig.IsEmpty())
+	{
+		sArr.RemoveAll();
+		*opts = 0;
+		return;
+	}
+
 	CString sTemp, sTrans, sStore;
 	int m, i, length;
 	char chSeps[] = " ";
@@ -5842,9 +6663,6 @@ void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts)
 			break;	
 		}
 	}
-	sArr[i+1]=inFile;
-	sArr[i+2]=outFile;
-	sArr.SetSize(i+3,25);
 	sArr.FreeExtra();
 
 	for (int i = 0; i < sArr.GetSize(); i++)

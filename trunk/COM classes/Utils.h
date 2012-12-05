@@ -28,6 +28,7 @@
 #include <math.h>
 
 #include "gdal_priv.h"
+#include "ogr_srs_api.h"
 #include "Vector.h"
 
 struct BreakVal
@@ -153,6 +154,7 @@ public:
 	STDMETHOD(GenerateHillShade)(/*[in]*/ BSTR bstrGridFilename, /*[in]*/ BSTR bstrShadeFilename, /*[in, optional, defaultvalue(1)]*/ float z, /*[in, optional, defaultvalue(1)]*/ float scale, /*[in, optional, defaultvalue(315)]*/ float az, /*[in, optional, defaultvalue(45)]*/ float alt, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GenerateContour)(/*[in]*/ BSTR pszSrcFilename, /*[in]*/ BSTR pszDstFilename, /*[in]*/ double dfInterval, /*[in, optional, defaultvalue(0)]*/ double dfNoData, /*[in, optional, defaultvalue(FALSE)]*/ VARIANT_BOOL Is3D, /* [in, optional, defaultvalue(NULL)] */ VARIANT dblFLArray, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(TranslateRaster)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(GDALInfo)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ BSTR * bstrInfo);
 	STDMETHOD(OGRLayerToShapefile)(/*[in]*/BSTR Filename, /*[in, optional, defaultvalue(SHP_NULLSHAPE)]*/ ShpfileType shpType, /*[in, optional, defaultvalue(NULL)]*/ICallback *cBack, /*[out, retval]*/IShapefile** sf);
 	STDMETHOD(MergeImages)(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR OutputName, VARIANT_BOOL* retVal);
 	STDMETHOD(ReprojectShapefile)(IShapefile* sf, IGeoProjection* source, IGeoProjection* target, IShapefile** result);
@@ -240,12 +242,17 @@ private:
 	// Utility calls for GDAL functions
 	bool CUtils::ArgIsNumeric( const char *pszArg );
 	void CUtils::AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions );
-	void CUtils::Parse(CString sOrig, CString inFile, CString outFile, int * opts);
+	void Parse(CString sOrig, int * opts);
 
 	// For TranslateRaster
 	void CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
 		int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData);
 	void Usage(CString additional);
+
+	// For GDALInfo
+	CString GDALInfoReportCorner(GDALDatasetH hDataset,
+		OGRCoordinateTransformationH hTransform,
+		const char * corner_name, double x, double y);
 
 	bool bSubCall;
 	CStringArray sArr;
