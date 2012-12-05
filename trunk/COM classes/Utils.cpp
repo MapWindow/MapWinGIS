@@ -7732,7 +7732,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /*      Invoke algorithm.                                               */
 /* -------------------------------------------------------------------- */
 	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, NULL,
-					GDALTermProgress, NULL );
+					(GDALProgressFunc) GDALProgressCallback, cBack );
 
 	OGR_DS_Destroy( hDstDS );
 	GDALClose( hMaskDS );
