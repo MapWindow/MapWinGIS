@@ -70,6 +70,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+struct CallbackParams
+{
+	ICallback *cBack;
+	const char *sMsg;
+};
+
 // CUtils
 STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BOOL *retval)
 {
@@ -4589,11 +4595,16 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 
 int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage, void *pData)
 {
+	CallbackParams* params = (CallbackParams*)pData;
+
 	if( pData != NULL )
 	{
 		long percent = long(dfComplete * 100.0);
-		ICallback* cback = (ICallback*)pData;
-			cback->Progress(NULL,percent, NULL);
+
+		if (params->sMsg != NULL)
+			params->cBack->Progress(NULL,percent,A2BSTR(params->sMsg));
+		else
+			params->cBack->Progress(NULL,percent,NULL);
 	}
 	return TRUE;
 }
@@ -5098,10 +5109,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         if( bReportHistograms )
         {
             int nBucketCount, *panHistogram = NULL;
+			struct CallbackParams params = { cBack, NULL };
 
             eErr = GDALGetDefaultHistogram( hBand, &dfMin, &dfMax, 
                                             &nBucketCount, &panHistogram, 
-                                            TRUE, (GDALProgressFunc) GDALProgressCallback, cBack );
+                                            TRUE, (GDALProgressFunc) GDALProgressCallback, &params );
             if( eErr == CE_None )
             {
                 int iBucket;
@@ -6025,8 +6037,10 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		pszOutputSRS == NULL && !bSetNoData && !bUnsetNoData &&
 		nRGBExpand == 0 && !bStats)
 	{
+		struct CallbackParams params = { cBack, "Translating" };
+
 		hOutDS = GDALCreateCopy (hDriver, pszDest, hDataset,
-			bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, cBack);
+			bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, &params);
 
 		if (hOutDS != NULL)
 		{
@@ -6492,8 +6506,10 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	/* -------------------------------------------------------------------- */
 	/*      Write to the output file using CopyCreate().                    */
 	/* -------------------------------------------------------------------- */
+	struct CallbackParams params = { cBack, "Translating" };
+
 	hOutDS = GDALCreateCopy( hDriver, pszDest, (GDALDatasetH) poVDS,
-		bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, NULL );
+		bStrict, papszCreateOptions, (GDALProgressFunc)GDALProgressCallback, &params );
 
 	if( hOutDS != NULL )
 	{
@@ -7731,8 +7747,10 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Invoke algorithm.                                               */
 /* -------------------------------------------------------------------- */
+	struct CallbackParams params = { cBack, "Polygonizing" };
+
 	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, NULL,
-					(GDALProgressFunc) GDALProgressCallback, cBack );
+					(GDALProgressFunc) GDALProgressCallback, &params );
 
 	OGR_DS_Destroy( hDstDS );
 	GDALClose( hMaskDS );

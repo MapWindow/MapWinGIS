@@ -3614,7 +3614,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Simplifying"));
 			}
 		}
 
