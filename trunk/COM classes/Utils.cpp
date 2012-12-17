@@ -4681,6 +4681,120 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
             bShowFileList = FALSE;
         else if( sArr[i] == "-sd" && i < opts-1 )
             nSubdataset = atoi(sArr[++i].GetBuffer (0));
+		else if( sArr[i] == "--version" )
+		{
+			sOutput += GDALVersionInfo( "--version" );
+
+			*bstrInfo = sOutput.AllocSysString();
+			return S_OK;
+		}
+		else if( sArr[i] == "--formats" )
+		{
+			sOutput += "Supported Formats:\n";
+			for( int iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
+			{
+				GDALDriverH hDriver = GDALGetDriver(iDr);
+				const char *pszRWFlag;
+
+				if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) )
+					pszRWFlag = "rw+";
+				else if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATECOPY, 
+					NULL ) )
+					pszRWFlag = "rw";
+				else
+					pszRWFlag = "ro";
+
+				sTemp.Format( "  %s (%s): %s\n",
+					GDALGetDriverShortName( hDriver ),
+					pszRWFlag,
+					GDALGetDriverLongName( hDriver ) );
+				sOutput += sTemp;
+			}
+
+			*bstrInfo = sOutput.AllocSysString();
+			return S_OK;
+		}
+		else if( sArr[i] == "--format" )
+		{
+			GDALDriverH hDriver;
+			char **papszMD;
+
+			if( i + 1 >= opts )
+			{
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError( CE_Failure, CPLE_AppDefined, 
+					"--format option given without a format code." );
+				return S_OK;
+			}
+
+			hDriver = GDALGetDriverByName( sArr[i+1].GetBuffer(0) );
+			if( hDriver == NULL )
+			{
+				lastErrorCode = tkGDAL_ERROR;
+				CPLError( CE_Failure, CPLE_AppDefined, 
+					"--format option given with format '%s', but that format not\n"
+					"recognised.  Use the --formats option to get a list of available formats,\n"
+					"and use the short code (ie. GTiff or HFA) as the format identifier.\n", 
+					sArr[i+1].GetBuffer(0) );
+				return S_OK;
+			}
+
+			sOutput += "Format Details:\n";
+			sTemp.Format( "  Short Name: %s\n", GDALGetDriverShortName( hDriver ) );
+			sOutput += sTemp;
+			sTemp.Format( "  Long Name: %s\n", GDALGetDriverLongName( hDriver ) );
+			sOutput += sTemp;
+
+			papszMD = GDALGetMetadata( hDriver, NULL );
+
+			if( CSLFetchNameValue( papszMD, GDAL_DMD_EXTENSION ) )
+			{
+				sTemp.Format( "  Extension: %s\n", 
+					CSLFetchNameValue( papszMD, GDAL_DMD_EXTENSION ) );
+				sOutput += sTemp;
+			}
+			if( CSLFetchNameValue( papszMD, GDAL_DMD_MIMETYPE ) )
+			{
+				sTemp.Format( "  Mime Type: %s\n", 
+					CSLFetchNameValue( papszMD, GDAL_DMD_MIMETYPE ) );
+				sOutput += sTemp;
+			}
+			if( CSLFetchNameValue( papszMD, GDAL_DMD_HELPTOPIC ) )
+			{
+				sTemp.Format( "  Help Topic: %s\n", 
+					CSLFetchNameValue( papszMD, GDAL_DMD_HELPTOPIC ) );
+				sOutput += sTemp;
+			}
+
+			if( CSLFetchNameValue( papszMD, GDAL_DCAP_CREATE ) )
+				sOutput += "  Supports: Create() - Create writeable dataset.\n";
+			if( CSLFetchNameValue( papszMD, GDAL_DCAP_CREATECOPY ) )
+				sOutput += "  Supports: CreateCopy() - Create dataset by copying another.\n";
+			if( CSLFetchNameValue( papszMD, GDAL_DMD_CREATIONDATATYPES ) )
+			{
+				sTemp.Format( "  Creation Datatypes: %s\n",
+					CSLFetchNameValue( papszMD, GDAL_DMD_CREATIONDATATYPES ) );
+				sOutput += sTemp;
+			}
+			if( CSLFetchNameValue( papszMD, GDAL_DMD_CREATIONOPTIONLIST ) )
+			{
+				CPLXMLNode *psCOL = 
+					CPLParseXMLString( 
+					CSLFetchNameValue( papszMD, 
+					GDAL_DMD_CREATIONOPTIONLIST ) );
+				char *pszFormattedXML = 
+					CPLSerializeXMLTree( psCOL );
+
+				CPLDestroyXMLNode( psCOL );
+
+				sTemp.Format( "\n%s\n", pszFormattedXML );
+				sOutput += sTemp;
+				CPLFree( pszFormattedXML );
+			}
+
+			*bstrInfo = sOutput.AllocSysString();
+			return S_OK;
+		}
 	}
 
 	/* -------------------------------------------------------------------- */
@@ -4690,6 +4804,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
     if( hDataset == NULL )
     {
+		lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,
                  "gdalinfo failed - unable to open '%s'.\n",
                  pszFilename );
@@ -4729,6 +4844,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         }
         else
         {
+			lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,
                      "gdalinfo warning: subdataset %d of %d requested. "
                      "Reading the main dataset.\n",
