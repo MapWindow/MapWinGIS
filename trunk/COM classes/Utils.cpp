@@ -4813,8 +4813,6 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
         GDALDumpOpenDatasets( stderr );
 
-        GDALDestroyDriverManager();
-
         CPLDumpSharedList( NULL );
 
         return S_OK;
@@ -5467,8 +5465,6 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
     GDALDumpOpenDatasets( stderr );
 
-    GDALDestroyDriverManager();
-
     CPLDumpSharedList( NULL );
     CPLCleanupTLS();
 
@@ -5653,7 +5649,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unknown output pixel type: %s", sArr[i+1]);
-				GDALDestroyDriverManager();
 				return S_OK;
 			}
 			i++;
@@ -5679,7 +5674,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", sArr[i+1]);
 				// TODO: Usage();
-				GDALDestroyDriverManager();
 				return S_OK;
 			}
 			i++;
@@ -5722,7 +5716,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 					lastErrorCode = tkGDAL_ERROR;
 					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", sArr[i+1]);
 					// TODO: Usage();
-					GDALDestroyDriverManager();
 					return S_OK;
 				}
 
@@ -5863,7 +5856,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", sArr[i+1] );
-				GDALDestroyDriverManager();
 				return S_OK;
 			}
 
@@ -5884,7 +5876,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", sArr[i+1] );
 				// TODO: Usage();
-				GDALDestroyDriverManager();
 				return S_OK;
 			}
 			i++;
@@ -5906,7 +5897,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", sArr[i] );
 			// TODO: Usage();
-			GDALDestroyDriverManager();
 			return S_OK;
 		}
 	}
@@ -5915,7 +5905,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	{
 		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "No destination dataset specified.");
-		GDALDestroyDriverManager();
 		return S_OK;
 	}
 
@@ -5923,7 +5912,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	{
 		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "Source and destination datasets must be different.");
-		GDALDestroyDriverManager();
 		return S_OK;
 	}
 
@@ -5935,7 +5923,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	if (hDataset == NULL)
 	{
 		lastErrorCode = tkGDAL_ERROR;
-		GDALDestroyDriverManager();
 		return S_OK;
 	}
 
@@ -5950,7 +5937,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		CPLError(CE_Failure, 0,
 			"Input file contains subdatasets. Please, select one of them for reading." );
 		GDALClose(hDataset);
-		GDALDestroyDriverManager();
 		return S_OK;
 	}
 
@@ -5991,7 +5977,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		if (!bSubCall)
 		{
 			GDALDumpOpenDatasets(stderr); // TODO: what does this do?
-			GDALDestroyDriverManager();
 		}
 		return S_OK;
 	}
@@ -6018,7 +6003,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Input file has no bands, and so cannot be translated." );
-			GDALDestroyDriverManager();
 			return S_OK;
 		}
 
@@ -6036,7 +6020,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				CPLError(CE_Failure, 0,
 					"Band %d requested, but only bands 1 to %d available.",
 					ABS(panBandList[i]), GDALGetRasterCount(hDataset) );
-				GDALDestroyDriverManager();
 				return S_OK;
 			}
 		}
@@ -6067,7 +6050,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				"rotated. This configuration is not supported." );
 			GDALClose (hDataset);
 			CPLFree (panBandList);
-			GDALDestroyDriverManager();
 			return S_OK;
 		}
 
@@ -6126,7 +6108,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		GDALClose (hDataset);
 		CPLFree (panBandList);
-		GDALDestroyDriverManager();
 		CSLDestroy (papszCreateOptions);
 
 		return S_OK;
@@ -6175,7 +6156,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		if (!bSubCall)
 		{
 			GDALDumpOpenDatasets (stderr);
-			GDALDestroyDriverManager();
 		}
 
 		CSLDestroy (papszCreateOptions);
@@ -6344,7 +6324,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			CPLError(CE_Failure,0,"Error : band %d has no color table", ABS(panBandList[0]));
 			GDALClose( hDataset );
 			CPLFree( panBandList );
-			GDALDestroyDriverManager();
 			CSLDestroy( papszCreateOptions );
 			return S_OK;
 		}
@@ -6654,7 +6633,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	if( !bSubCall )
 	{
 		GDALDumpOpenDatasets( stderr );
-		GDALDestroyDriverManager();
 	}
 
 	CSLDestroy( papszCreateOptions );
