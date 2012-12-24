@@ -4637,8 +4637,6 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	OGRCoordinateTransformationH hTransform = NULL;
 	int				bShowFileList = TRUE;
 
-	*bstrInfo = L"";
-
 	pszFilename = OLE2CA(bstrSrcFilename);
 
 	GDALAllRegister();
@@ -7904,7 +7902,9 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 {
 	USES_CONVERSION;
 
-	*bstrInfo = L"";
+	CString sOutput = "";
+
+	*bstrInfo = sOutput.AllocSysString();
 	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
 
 	return S_OK;
