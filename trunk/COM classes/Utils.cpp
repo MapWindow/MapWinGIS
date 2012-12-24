@@ -2172,20 +2172,23 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 		shape->get_NumPoints(&numPoints);
 		int p = 0;
 		for( p = 0; p < numPoints; p++ )
-		{	IPoint * point = NULL;
-			shape->get_Point(p,&point);
-			long col = 0, row = 0;
+		{
 			double x = 0, y = 0;
+			double z = 0;
+
+			IPoint * point = NULL;
+			shape->get_Point(p,&point);
 			point->get_X(&x);
 			point->get_Y(&y);
+			point->put_Z(z);
+			point->Release();
+
+			long col = 0, row = 0;
 			Grid->ProjToCell(x,y,&col,&row);
 			VARIANT val;
 			VariantInit(&val); //added by Rob Cairns 4-Jan-06
 			Grid->get_Value(col,row,&val);
-			double z = 0;
 			dVal(val,z);
-			point->put_Z(z);			
-			point->Release();
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 		}
 		long spos = p;
@@ -3716,7 +3719,6 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
 		
 		return S_OK;
-
 	}
 	
 	VARIANT_BOOL result = VARIANT_FALSE;
@@ -4597,7 +4599,7 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 {
 	CallbackParams* params = (CallbackParams*)pData;
 
-	if( pData != NULL )
+	if( params != NULL && params->cBack != NULL )
 	{
 		long percent = long(dfComplete * 100.0);
 
@@ -4608,7 +4610,6 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 	}
 	return TRUE;
 }
-
 
 STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 							  ICallback * cBack, BSTR *bstrInfo)
@@ -6789,10 +6790,10 @@ void CUtils::Parse(CString sOrig, int * opts)
 	*opts = (int) sArr.GetSize();
 }
 /*  ******************************************************************* */
-/*                               Usage()                                */
+/*                TranslateRasterUsage()                                */
 /* ******************************************************************** */
 
-void CUtils::Usage(CString additional)
+void CUtils::TranslateRasterUsage(CString additional)
 
 {
 	additional = additional + "\nUsage: TranslateRaster - MapWinGIS wrapper for gdal_translate\n" 
@@ -7851,5 +7852,71 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 	GDALClose( hSrcDS );
 
 	(*retval) = VARIANT_TRUE;
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR pszDstFilename, BSTR bstrOptions,
+							 ICallback * cBack, VARIANT_BOOL *retval)
+{
+	USES_CONVERSION;
+
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+	(*retval) = VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrSrcFilename, BSTR pszDstFilename,
+								  BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
+{
+	USES_CONVERSION;
+
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+	(*retval) = VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR pszDstFilename,
+									  BSTR bstrLevels, ICallback * cBack, VARIANT_BOOL *retval)
+{
+	USES_CONVERSION;
+
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+	(*retval) = VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR pszDstFilename,
+								   BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
+{
+	USES_CONVERSION;
+
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+	(*retval) = VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
+							 ICallback * cBack, BSTR *bstrInfo)
+{
+	USES_CONVERSION;
+
+	*bstrInfo = L"";
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+
+	return S_OK;
+}
+
+STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR pszDstFilename,
+							 BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
+{
+	USES_CONVERSION;
+
+	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
+	(*retval) = VARIANT_FALSE;
+
 	return S_OK;
 }

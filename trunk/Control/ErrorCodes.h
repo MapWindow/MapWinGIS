@@ -48,6 +48,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkFILE_EXISTS 26
 # define tkBOUNDS_NOT_INTERSECT 27
 # define tkGDAL_ERROR 28
+# define tkMETHOD_NOT_IMPLEMENTED 29
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201

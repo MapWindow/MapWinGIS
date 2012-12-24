@@ -95,6 +95,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "File to be written already exists.";
 		case tkGDAL_ERROR:
 			return CPLGetLastErrorMsg();
+		case tkMETHOD_NOT_IMPLEMENTED:
+			return "The method you called is not implemented";
 
 		//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
