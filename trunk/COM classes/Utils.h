@@ -29,6 +29,7 @@
 
 #include "gdal_priv.h"
 #include "ogr_srs_api.h"
+#include "ogrsf_frmts.h"
 #include "Vector.h"
 
 struct BreakVal
@@ -261,6 +262,11 @@ private:
 	CString GDALInfoReportCorner(GDALDatasetH hDataset,
 		OGRCoordinateTransformationH hTransform,
 		const char * corner_name, double x, double y);
+
+	// For OGRInfo
+	CString CUtils::OGRReportOnLayer(OGRLayer * poLayer, const char *pszWHERE, 
+		OGRGeometry *poSpatialFilter, int bVerbose, int bSummaryOnly,
+		int nFetchFID, char** papszOptions);
 
 	bool bSubCall;
 	CStringArray sArr;

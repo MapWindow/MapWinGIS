@@ -7907,12 +7907,14 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 	int nArgc = 0;
 	const char *	pszWHERE = NULL;
 	const char *	pszDataSource = NULL;
+	char**			papszLayers = NULL;
 	OGRGeometry *	poSpatialFilter = NULL;
 	int				nRepeatCount = 1, bAllLayers = FALSE;
     const char  *	pszSQLStatement = NULL;
     const char  *	pszDialect = NULL;
-	int				bReadOnly = 0;
-	int				bSummaryOnly = 0;
+	int				bReadOnly = FALSE;
+	int				bVerbose = TRUE;
+	int				bSummaryOnly = FALSE;
 	int				nFetchFID = OGRNullFID;
 	char**			papszOptions = NULL;
 
@@ -7943,6 +7945,8 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
         }
 		else if( EQUAL(sArr[iArg],"-ro") )
             bReadOnly = TRUE;
+		else if( EQUAL(sArr[iArg],"-q") || EQUAL(sArr[iArg],"-quiet"))
+            bVerbose = FALSE;
         else if( EQUAL(sArr[iArg],"-fid") && iArg < nArgc-1 )
             nFetchFID = atoi(sArr[++iArg]);
         else if( EQUAL(sArr[iArg],"-spat") && iArg < nArgc-4 )
@@ -8000,13 +8004,198 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
         }
 	}
 
+	if( bstrLayers != NULL && SysStringLen(bstrLayers) > 0 )
+	{
+		CString sLayers = OLE2CA(bstrLayers);
+		CString sLayerToken = "";
+		int curPos = 0;
+
+		sLayerToken = sLayers.Tokenize(" ", curPos);
+
+		while( !sLayerToken.IsEmpty() )
+		{
+			papszLayers = CSLAddString( papszLayers, sLayerToken.GetBuffer(0) );
+			sLayerToken = sLayers.Tokenize(" ", curPos);
+            bAllLayers = FALSE;
+		}
+	}
+
+/* -------------------------------------------------------------------- */
+/*      Open data source.                                               */
+/* -------------------------------------------------------------------- */
+    OGRDataSource       *poDS = NULL;
+    OGRSFDriver         *poDriver = NULL;
+
+    poDS = OGRSFDriverRegistrar::Open( pszDataSource, !bReadOnly, &poDriver );
+    if( poDS == NULL && !bReadOnly )
+    {
+        poDS = OGRSFDriverRegistrar::Open( pszDataSource, FALSE, &poDriver );
+        if( poDS != NULL && bVerbose )
+        {
+            sOutput += "Had to open data source read-only.\n";
+            bReadOnly = TRUE;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Report failure                                                  */
+/* -------------------------------------------------------------------- */
+    if( poDS == NULL )
+    {
+        OGRSFDriverRegistrar    *poR = OGRSFDriverRegistrar::GetRegistrar();
+        
+        sTemp.Format( "FAILURE:\n"
+                "Unable to open datasource `%s' with the following drivers.\n",
+                pszDataSource );
+		sOutput += sTemp;
+
+        for( int iDriver = 0; iDriver < poR->GetDriverCount(); iDriver++ )
+        {
+            sTemp.Format( "  -> %s\n", poR->GetDriver(iDriver)->GetName() );
+			sOutput += sTemp;
+        }
+
+        goto end;
+    }
+
+    CPLAssert( poDriver != NULL);
+
+/* -------------------------------------------------------------------- */
+/*      Some information messages.                                      */
+/* -------------------------------------------------------------------- */
+    if( bVerbose )
+	{
+        sTemp.Format( "INFO: Open of `%s'\n"
+                "      using driver `%s' successful.\n",
+                pszDataSource, poDriver->GetName() );
+		sOutput += sTemp;
+	}
+
+    if( bVerbose && !EQUAL(pszDataSource,poDS->GetName()) )
+    {
+        sTemp.Format( "INFO: Internal data source name `%s'\n"
+                "      different from user name `%s'.\n",
+                poDS->GetName(), pszDataSource );
+		sOutput += sTemp;
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Special case for -sql clause.  No source layers required.       */
+/* -------------------------------------------------------------------- */
+    if( pszSQLStatement != NULL )
+    {
+        OGRLayer *poResultSet = NULL;
+
+        nRepeatCount = 0;  // skip layer reporting.
+
+        if( CSLCount(papszLayers) > 0 )
+            sOutput += "layer names ignored in combination with -sql.\n";
+        
+        poResultSet = poDS->ExecuteSQL( pszSQLStatement, poSpatialFilter, 
+                                        pszDialect );
+
+        if( poResultSet != NULL )
+        {
+            if( pszWHERE != NULL )
+            {
+                if (poResultSet->SetAttributeFilter( pszWHERE ) != OGRERR_NONE )
+                {
+                    sTemp.Format( "FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
+					sOutput += sTemp;
+
+					poDS->ReleaseResultSet( poResultSet );
+					goto end;
+                }
+            }
+
+            sOutput += OGRReportOnLayer( poResultSet, NULL, NULL, bVerbose,
+				bSummaryOnly, nFetchFID, papszOptions );
+            poDS->ReleaseResultSet( poResultSet );
+        }
+    }
+
+    CPLDebug( "OGR", "GetLayerCount() = %d\n", poDS->GetLayerCount() );
+
+	for( int iRepeat = 0; iRepeat < nRepeatCount; iRepeat++ )
+    {
+        if ( CSLCount(papszLayers) == 0 )
+        {
+/* -------------------------------------------------------------------- */ 
+/*      Process each data source layer.                                 */ 
+/* -------------------------------------------------------------------- */ 
+            for( int iLayer = 0; iLayer < poDS->GetLayerCount(); iLayer++ )
+            {
+                OGRLayer        *poLayer = poDS->GetLayer(iLayer);
+
+                if( poLayer == NULL )
+                {
+                    sTemp.Format( "FAILURE: Couldn't fetch advertised layer %d!\n",
+                            iLayer );
+					sOutput += sTemp;
+                    goto end;
+                }
+
+                if (!bAllLayers)
+                {
+                    sTemp.Format( "%d: %s",
+                            iLayer+1,
+                            poLayer->GetName() );
+					sOutput += sTemp;
+
+                    if( poLayer->GetGeomType() != wkbUnknown )
+					{
+                        sTemp.Format( " (%s)", 
+                                OGRGeometryTypeToName( 
+                                    poLayer->GetGeomType() ) );
+						sOutput += sTemp;
+					}
+
+                    sOutput += "\n";
+                }
+                else
+                {
+                    if( iRepeat != 0 )
+                        poLayer->ResetReading();
+
+                    sOutput += OGRReportOnLayer( poLayer, pszWHERE, poSpatialFilter,
+						bVerbose, bSummaryOnly, nFetchFID, papszOptions);
+                }
+            }
+        }
+        else
+        {
+/* -------------------------------------------------------------------- */ 
+/*      Process specified data source layers.                           */ 
+/* -------------------------------------------------------------------- */ 
+            char** papszIter = papszLayers;
+            for( ; *papszIter != NULL; papszIter++ )
+            {
+                OGRLayer        *poLayer = poDS->GetLayerByName(*papszIter);
+
+                if( poLayer == NULL )
+                {
+                    sTemp.Format( "FAILURE: Couldn't fetch requested layer %s!\n",
+                            *papszIter );
+					sOutput += sTemp;
+                    goto end;
+                }
+
+                if( iRepeat != 0 )
+                    poLayer->ResetReading();
+
+                sOutput += OGRReportOnLayer( poLayer, pszWHERE, poSpatialFilter,
+					bVerbose, bSummaryOnly, nFetchFID, papszOptions );
+            }
+        }
+    }
+
 /* -------------------------------------------------------------------- */
 /*      Close down.                                                     */
 /* -------------------------------------------------------------------- */
 end:
-    //CSLDestroy( papszLayers );
+    CSLDestroy( papszLayers );
     CSLDestroy( papszOptions );
-    //OGRDataSource::DestroyDataSource( poDS );
+    OGRDataSource::DestroyDataSource( poDS );
     if (poSpatialFilter)
         OGRGeometryFactory::destroyGeometry( poSpatialFilter );
 
@@ -8016,6 +8205,124 @@ end:
 	*bstrInfo = sOutput.AllocSysString();
 
 	return S_OK;
+}
+
+CString CUtils::OGRReportOnLayer(OGRLayer * poLayer, const char *pszWHERE, 
+							  OGRGeometry *poSpatialFilter, int bVerbose,
+							  int bSummaryOnly, int nFetchFID,
+							  char** papszOptions)
+{
+	CString sOutput = "", sTemp = "";
+    OGRFeatureDefn      *poDefn = poLayer->GetLayerDefn();
+
+/* -------------------------------------------------------------------- */
+/*      Set filters if provided.                                        */
+/* -------------------------------------------------------------------- */
+    if( pszWHERE != NULL )
+    {
+        if (poLayer->SetAttributeFilter( pszWHERE ) != OGRERR_NONE )
+        {
+            sOutput.Format( "FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
+            return sOutput;
+        }
+    }
+
+    if( poSpatialFilter != NULL )
+        poLayer->SetSpatialFilter( poSpatialFilter );
+
+/* -------------------------------------------------------------------- */
+/*      Report various overall information.                             */
+/* -------------------------------------------------------------------- */
+    sTemp.Format( "\nLayer name: %s\n", poLayer->GetName() );
+	sOutput += sTemp;
+
+    if( bVerbose )
+    {
+        sTemp.Format( "Geometry: %s\n", 
+                OGRGeometryTypeToName( poLayer->GetGeomType() ) );
+		sOutput += sTemp;
+        
+        sTemp.Format( "Feature Count: %d\n", poLayer->GetFeatureCount() );
+		sOutput += sTemp;
+        
+        OGREnvelope oExt;
+        if (poLayer->GetExtent(&oExt, TRUE) == OGRERR_NONE)
+        {
+            sTemp.Format("Extent: (%f, %f) - (%f, %f)\n", 
+                   oExt.MinX, oExt.MinY, oExt.MaxX, oExt.MaxY);
+			sOutput += sTemp;
+        }
+
+        char    *pszWKT;
+        
+        if( poLayer->GetSpatialRef() == NULL )
+            pszWKT = CPLStrdup( "(unknown)" );
+        else
+        {
+            poLayer->GetSpatialRef()->exportToPrettyWkt( &pszWKT );
+        }            
+
+        sTemp.Format( "Layer SRS WKT:\n%s\n", pszWKT );
+		sOutput += sTemp;
+        CPLFree( pszWKT );
+    
+        if( strlen(poLayer->GetFIDColumn()) > 0 )
+		{
+            sTemp.Format( "FID Column = %s\n", 
+                    poLayer->GetFIDColumn() );
+			sOutput += sTemp;
+		}
+    
+        if( strlen(poLayer->GetGeometryColumn()) > 0 )
+		{
+            sTemp.Format( "Geometry Column = %s\n", 
+                    poLayer->GetGeometryColumn() );
+			sOutput += sTemp;
+		}
+
+        for( int iAttr = 0; iAttr < poDefn->GetFieldCount(); iAttr++ )
+        {
+            OGRFieldDefn    *poField = poDefn->GetFieldDefn( iAttr );
+            
+            sTemp.Format( "%s: %s (%d.%d)\n",
+                    poField->GetNameRef(),
+                    poField->GetFieldTypeName( poField->GetType() ),
+                    poField->GetWidth(),
+                    poField->GetPrecision() );
+			sOutput += sTemp;
+        }
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Read, and dump features.                                        */
+/* -------------------------------------------------------------------- */
+    OGRFeature  *poFeature = NULL;
+
+    if( nFetchFID == OGRNullFID && !bSummaryOnly )
+    {
+        while( (poFeature = poLayer->GetNextFeature()) != NULL )
+        {
+            poFeature->DumpReadable( NULL, papszOptions );
+            OGRFeature::DestroyFeature( poFeature );
+        }
+    }
+    else if( nFetchFID != OGRNullFID )
+    {
+        poFeature = poLayer->GetFeature( nFetchFID );
+        if( poFeature == NULL )
+        {
+            sTemp.Format( "Unable to locate feature id %d on this layer.\n", 
+                    nFetchFID );
+			sOutput += sTemp;
+        }
+        else
+        {
+            poFeature->DumpReadable( NULL, papszOptions );
+            OGRFeature::DestroyFeature( poFeature );
+        }
+    }
+
+	return sOutput;
 }
 
 STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR pszDstFilename,
