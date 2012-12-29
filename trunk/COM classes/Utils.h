@@ -160,7 +160,7 @@ public:
 	STDMETHOD(GDALBuildVrt)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GDALAddOverviews)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrLevels, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GDALRasterize)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-	STDMETHOD(OGRInfo)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ BSTR * bstrInfo);
+	STDMETHOD(OGRInfo)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ BSTR bstrLayers, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ BSTR * bstrInfo);
 	STDMETHOD(OGR2OGR)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 
 	STDMETHOD(OGRLayerToShapefile)(/*[in]*/BSTR Filename, /*[in, optional, defaultvalue(SHP_NULLSHAPE)]*/ ShpfileType shpType, /*[in, optional, defaultvalue(NULL)]*/ICallback *cBack, /*[out, retval]*/IShapefile** sf);

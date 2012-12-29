@@ -7897,15 +7897,123 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR pszDstFilename,
 	return S_OK;
 }
 
-STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
+STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLayers,
 							 ICallback * cBack, BSTR *bstrInfo)
 {
 	USES_CONVERSION;
 
 	CString sOutput = "";
+	CString sTemp = "";
+	int nArgc = 0;
+	const char *	pszWHERE = NULL;
+	const char *	pszDataSource = NULL;
+	OGRGeometry *	poSpatialFilter = NULL;
+	int				nRepeatCount = 1, bAllLayers = FALSE;
+    const char  *	pszSQLStatement = NULL;
+    const char  *	pszDialect = NULL;
+	int				bReadOnly = 0;
+	int				bSummaryOnly = 0;
+	int				nFetchFID = OGRNullFID;
+	char**			papszOptions = NULL;
 
+	pszDataSource = OLE2CA(bstrSrcFilename);
+
+	OGRRegisterAll();
+
+	Parse(OLE2CA(bstrOptions), &nArgc);
+
+	for (int iArg = 1; iArg < nArgc; iArg++)
+	{
+        if( EQUAL(sArr[iArg],"--formats") )
+        {
+            int iDr;
+
+            sOutput +=  "Supported Formats:\n";
+
+            OGRSFDriverRegistrar *poR = OGRSFDriverRegistrar::GetRegistrar();
+        
+            for( iDr = 0; iDr < poR->GetDriverCount(); iDr++ )
+            {
+                OGRSFDriver *poDriver = poR->GetDriver(iDr);
+				sTemp.Format( "  %s\n", poDriver->GetName());
+				sOutput += sTemp;
+            }
+
+			goto end;
+        }
+		else if( EQUAL(sArr[iArg],"-ro") )
+            bReadOnly = TRUE;
+        else if( EQUAL(sArr[iArg],"-fid") && iArg < nArgc-1 )
+            nFetchFID = atoi(sArr[++iArg]);
+        else if( EQUAL(sArr[iArg],"-spat") && iArg < nArgc-4 )
+        {
+            OGRLinearRing  oRing;
+
+            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+2]) );
+            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+4]) );
+            oRing.addPoint( atof(sArr[iArg+3]), atof(sArr[iArg+4]) );
+            oRing.addPoint( atof(sArr[iArg+3]), atof(sArr[iArg+2]) );
+            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+2]) );
+
+            poSpatialFilter = new OGRPolygon();
+            ((OGRPolygon *) poSpatialFilter)->addRing( &oRing );
+            iArg += 4;
+        }
+        else if( EQUAL(sArr[iArg],"-where") && iArg < nArgc-1 )
+        {
+            pszWHERE = sArr[++iArg];
+        }
+        else if( EQUAL(sArr[iArg],"-sql") && iArg < nArgc-1 )
+        {
+            pszSQLStatement = sArr[++iArg];
+        }
+        else if( EQUAL(sArr[iArg],"-dialect") && iArg < nArgc-1 )
+        {
+            pszDialect = sArr[++iArg];
+        }
+        else if( EQUAL(sArr[iArg],"-rc") && iArg < nArgc-1 )
+        {
+            nRepeatCount = atoi(sArr[++iArg]);
+        }
+        else if( EQUAL(sArr[iArg],"-al") )
+        {
+            bAllLayers = TRUE;
+        }
+        else if( EQUAL(sArr[iArg],"-so") 
+                 || EQUAL(sArr[iArg],"-summary")  )
+        {
+            bSummaryOnly = TRUE;
+        }
+        else if( EQUALN(sArr[iArg],"-fields=", strlen("-fields=")) )
+        {
+            char* pszTemp = (char*)CPLMalloc(32 + strlen(sArr[iArg]));
+            sprintf(pszTemp, "DISPLAY_FIELDS=%s", sArr[iArg].GetBuffer(0) + strlen("-fields="));
+            papszOptions = CSLAddString(papszOptions, pszTemp);
+            CPLFree(pszTemp);
+        }
+        else if( EQUALN(sArr[iArg],"-geom=", strlen("-geom=")) )
+        {
+            char* pszTemp = (char*)CPLMalloc(32 + strlen(sArr[iArg]));
+            sprintf(pszTemp, "DISPLAY_GEOMETRY=%s", sArr[iArg].GetBuffer(0) + strlen("-geom="));
+            papszOptions = CSLAddString(papszOptions, pszTemp);
+            CPLFree(pszTemp);
+        }
+	}
+
+/* -------------------------------------------------------------------- */
+/*      Close down.                                                     */
+/* -------------------------------------------------------------------- */
+end:
+    //CSLDestroy( papszLayers );
+    CSLDestroy( papszOptions );
+    //OGRDataSource::DestroyDataSource( poDS );
+    if (poSpatialFilter)
+        OGRGeometryFactory::destroyGeometry( poSpatialFilter );
+
+/* -------------------------------------------------------------------- */
+/*      Return the output.                                              */
+/* -------------------------------------------------------------------- */
 	*bstrInfo = sOutput.AllocSysString();
-	this->lastErrorCode = tkMETHOD_NOT_IMPLEMENTED;
 
 	return S_OK;
 }
