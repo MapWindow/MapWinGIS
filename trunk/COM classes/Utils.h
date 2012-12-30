@@ -248,26 +248,10 @@ private:
 	ICallback * globalCallback;
 	BSTR key;
 
-	// Utility calls for GDAL functions
-	bool CUtils::ArgIsNumeric( const char *pszArg );
-	void CUtils::AttachMetadata( GDALDatasetH hDS, char **papszMetadataOptions );
+	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);
 
-	// For TranslateRaster
-	void CopyBandInfo(GDALRasterBand * poSrcBand, GDALRasterBand * poDstBand,
-		int bCanCopyStatsMetadata, int bCopyScale, int bCopyNoData);
-	void TranslateRasterUsage(CString additional);
-
-	// For GDALInfo
-	CString GDALInfoReportCorner(GDALDatasetH hDataset,
-		OGRCoordinateTransformationH hTransform,
-		const char * corner_name, double x, double y);
-
-	// For OGRInfo
-	CString CUtils::OGRReportOnLayer(OGRLayer * poLayer, const char *pszWHERE, 
-		OGRGeometry *poSpatialFilter, int bVerbose, int bSummaryOnly,
-		int nFetchFID, char** papszOptions);
-
+	/* GDAL/OGR variables */
 	bool bSubCall;
 	CStringArray sArr;
 
