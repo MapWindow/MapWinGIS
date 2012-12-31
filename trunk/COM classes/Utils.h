@@ -99,7 +99,7 @@ public:
 		BufferBNum = -1;
 		rasterDataset = NULL;
 
-		bSubCall = false;
+		bSubCall = FALSE;
 	}
 	~CUtils()
 	{
@@ -158,7 +158,7 @@ public:
 	STDMETHOD(GDALInfo)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ BSTR * bstrInfo);
 
 	STDMETHOD(GDALWarp)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-	STDMETHOD(GDALBuildVrt)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(GDALBuildVrt)(/*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GDALAddOverviews)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrLevels, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GDALRasterize)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrDstFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(OGRInfo)(/*[in]*/ BSTR bstrSrcFilename, /*[in]*/ BSTR bstrOptions, /*[in, optional]*/ BSTR bstrLayers, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ BSTR * bstrInfo);
@@ -252,7 +252,7 @@ private:
 	void Parse(CString sOrig, int * opts);
 
 	/* GDAL/OGR variables */
-	bool bSubCall;
+	int bSubCall;
 	CStringArray sArr;
 
 	void CUtils::ErrorMessage(long ErrorCode);
