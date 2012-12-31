@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="MapWinGIS"
 	ProjectGUID="{1AB93398-2DE6-4043-BF6D-D438A794FB86}"
 	RootNamespace="MapWinGIS"
@@ -1308,6 +1308,14 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\Utils.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\Utils_GDAL.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\Utils_OGR.cpp"
 					>
 				</File>
 				<File
