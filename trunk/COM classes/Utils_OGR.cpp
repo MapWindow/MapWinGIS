@@ -2330,6 +2330,8 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 	int				bSummaryOnly = FALSE;
 	int				nFetchFID = OGRNullFID;
 	char**			papszOptions = NULL;
+	OGRDataSource       *poDS = NULL;
+    OGRSFDriver         *poDriver = NULL;
 
 	pszDataSource = OLE2CA(bstrSrcFilename);
 /* -------------------------------------------------------------------- */
@@ -2441,9 +2443,6 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 /* -------------------------------------------------------------------- */
 /*      Open data source.                                               */
 /* -------------------------------------------------------------------- */
-    OGRDataSource       *poDS = NULL;
-    OGRSFDriver         *poDriver = NULL;
-
     poDS = OGRSFDriverRegistrar::Open( pszDataSource, !bReadOnly, &poDriver );
     if( poDS == NULL && !bReadOnly )
     {
