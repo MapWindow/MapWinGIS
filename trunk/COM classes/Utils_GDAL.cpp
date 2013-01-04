@@ -104,6 +104,120 @@ void CheckExtensionConsistency(const char* pszDestFilename,
     CPLFree(pszDestExtension);
 }
 
+BOOL CUtils::ProcessGeneralOptions(int * opts)
+{
+    int  iArg;
+
+/* -------------------------------------------------------------------- */
+/*      Clear any existing options.                                     */
+/* -------------------------------------------------------------------- */
+	ResetConfigOptions();
+
+/* ==================================================================== */
+/*      Loop over all arguments.                                        */
+/* ==================================================================== */
+    for( iArg = 1; iArg < sArr.GetCount(); iArg++ )
+    {
+/* -------------------------------------------------------------------- */
+/*      --config                                                        */
+/* -------------------------------------------------------------------- */
+        if( EQUAL(sArr[iArg],"--config") )
+        {
+            if( iArg + 2 >= sArr.GetCount() )
+            {
+                CPLError( CE_Failure, CPLE_AppDefined, 
+                          "--config option given without a key and value argument." );
+                return FALSE;
+            }
+
+            CPLSetConfigOption( sArr[iArg+1], sArr[iArg+2] );
+
+			sConfig.Add( sArr[iArg+1] );
+			sArr.RemoveAt( iArg, 3 );
+            iArg--;
+        }
+
+/* -------------------------------------------------------------------- */
+/*      --debug                                                         */
+/* -------------------------------------------------------------------- */
+        else if( EQUAL(sArr[iArg],"--debug") )
+        {
+            if( iArg + 1 >= sArr.GetCount() )
+            {
+                CPLError( CE_Failure, CPLE_AppDefined, 
+                          "--debug option given without debug level." );
+                return FALSE;
+            }
+
+            CPLSetConfigOption( "CPL_DEBUG", sArr[iArg+1] );
+
+			sConfig.Add( "CPL_DEBUG" );
+			sArr.RemoveAt( iArg, 2 );
+            iArg--;
+        }
+
+/* -------------------------------------------------------------------- */
+/*      --optfile                                                       */
+/* -------------------------------------------------------------------- */
+        else if( EQUAL(sArr[iArg],"--optfile") )
+        {
+            const char *pszLine;
+            FILE *fpOptFile;
+
+            if( iArg + 1 >= sArr.GetCount() )
+            {
+                CPLError( CE_Failure, CPLE_AppDefined, 
+                          "--optfile option given without filename." );
+                return FALSE;
+            }
+
+			CString sFileName = sArr[iArg+1];
+			sArr.RemoveAt( iArg, 2 );
+            iArg--;
+
+            fpOptFile = VSIFOpen( sFileName, "rb" );
+
+            if( fpOptFile == NULL )
+            {
+                CPLError( CE_Failure, CPLE_AppDefined, 
+                          "Unable to open optfile '%s'.\n%s",
+                          sFileName, VSIStrerror( errno ) );
+                return FALSE;
+            }
+            
+            while( (pszLine = CPLReadLine( fpOptFile )) != NULL )
+            {
+                char **papszTokens;
+                int i;
+
+                if( pszLine[0] == '#' || strlen(pszLine) == 0 )
+                    continue;
+
+                papszTokens = CSLTokenizeString( pszLine );
+                for( i = 0; papszTokens != NULL && papszTokens[i] != NULL; i++)
+                    sArr.Add( papszTokens[i] );
+                CSLDestroy( papszTokens );
+            }
+
+            VSIFClose( fpOptFile );
+        }
+	}
+
+	*opts = sArr.GetCount();
+
+	return TRUE;
+}
+
+HRESULT CUtils::ResetConfigOptions()
+{
+	for( int i = 0; i < sConfig.GetCount(); i++ )
+		CPLSetConfigOption( sConfig[i].GetBuffer(0), NULL);
+
+	sConfig.RemoveAll();
+
+	return 0L;
+}
+
 #pragma endregion
 
 #pragma region gdalinfo
@@ -150,6 +264,12 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 	Parse(OLE2CA(bstrOptions), &argc);
 
+	if (!ProcessGeneralOptions(&argc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 /* -------------------------------------------------------------------- */
 /*      Parse arguments.                                                */
 /* -------------------------------------------------------------------- */
@@ -195,7 +315,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 			sOutput += GDALVersionInfo( "--version" );
 
 			*bstrInfo = sOutput.AllocSysString();
-			return S_OK;
+			return ResetConfigOptions();
 		}
 		else if( EQUAL(sArr[i], "--formats") )
 		{
@@ -220,7 +340,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 			}
 
 			*bstrInfo = sOutput.AllocSysString();
-			return S_OK;
+			return ResetConfigOptions();
 		}
 		else if( EQUAL(sArr[i], "--format") )
 		{
@@ -232,7 +352,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError( CE_Failure, CPLE_AppDefined, 
 					"--format option given without a format code." );
-				return S_OK;
+				return ResetConfigOptions();
 			}
 
 			hDriver = GDALGetDriverByName( sArr[i+1].GetBuffer(0) );
@@ -244,7 +364,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 					"recognised.  Use the --formats option to get a list of available formats,\n"
 					"and use the short code (ie. GTiff or HFA) as the format identifier.\n", 
 					sArr[i+1].GetBuffer(0) );
-				return S_OK;
+				return ResetConfigOptions();
 			}
 
 			sOutput += "Format Details:\n";
@@ -294,7 +414,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 			}
 
 			*bstrInfo = sOutput.AllocSysString();
-			return S_OK;
+			return ResetConfigOptions();
 		}
 	}
 
@@ -316,7 +436,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
         CPLDumpSharedList( NULL );
 
-        return S_OK;
+        return ResetConfigOptions();
     }
 
 	/* -------------------------------------------------------------------- */
@@ -348,7 +468,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
                      "gdalinfo warning: subdataset %d of %d requested. "
                      "Reading the main dataset.\n",
                      nSubdataset, nSubdatasets );
-			return S_OK;
+			return ResetConfigOptions();
         }
     }
 
@@ -908,7 +1028,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 	*bstrInfo = sOutput.AllocSysString();
 
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 /************************************************************************/
@@ -975,7 +1095,6 @@ GDALInfoReportCorner(GDALDatasetH hDataset,
 
     return sOutput;
 }
-
 
 #pragma endregion
 
@@ -1081,21 +1200,29 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	pszSource = OLE2CA(bstrSrcFilename);
 	pszDest = OLE2CA(bstrDstFilename);
 
-	if (!bSubCall)
-		Parse(OLE2CA(bstrOptions), &argc);
-	else
-		argc = sArr.GetSize();
-
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */
 /*      command options.                                                */
 /* -------------------------------------------------------------------- */
 	GDALAllRegister();
 
-	/* -------------------------------------------------------------------- */
-	/*		Handle command line arguments.									*/
-	/* -------------------------------------------------------------------- */
-	for( i = 0; i < argc; i++ )
+	if (!bSubCall)
+	{
+		Parse(OLE2CA(bstrOptions), &argc);
+
+		if (!ProcessGeneralOptions(&argc))
+		{
+			this->lastErrorCode = tkGDAL_ERROR;
+			return ResetConfigOptions();
+		}
+	}
+	else
+		argc = sArr.GetCount();
+
+/* -------------------------------------------------------------------- */
+/*		Handle command line arguments.									*/
+/* -------------------------------------------------------------------- */
+	for( i = 1; i < argc; i++ )
 	{
 		if( EQUAL(sArr[i],"-of") && i < argc-1 )
 		{
@@ -1120,7 +1247,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unknown output pixel type: %s", sArr[i+1]);
-				return S_OK;
+				return ResetConfigOptions();
 			}
 			i++;
 		}
@@ -1145,7 +1272,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", sArr[i+1]);
 				// TODO: Usage();
-				return S_OK;
+				return ResetConfigOptions();
 			}
 			i++;
 
@@ -1187,7 +1314,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 					lastErrorCode = tkGDAL_ERROR;
 					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", sArr[i+1]);
 					// TODO: Usage();
-					return S_OK;
+					return ResetConfigOptions();
 				}
 
 				eMaskMode = MASK_USER;
@@ -1327,7 +1454,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", sArr[i+1] );
-				return S_OK;
+				return ResetConfigOptions();
 			}
 
 			oOutputSRS.exportToWkt( &pszOutputSRS );
@@ -1347,7 +1474,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", sArr[i+1] );
 				// TODO: Usage();
-				return S_OK;
+				return ResetConfigOptions();
 			}
 			i++;
 		}
@@ -1368,7 +1495,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", sArr[i] );
 			// TODO: Usage();
-			return S_OK;
+			return ResetConfigOptions();
 		}
 	}
 
@@ -1376,14 +1503,14 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	{
 		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "No destination dataset specified.");
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 	if (strcmp (pszSource, pszDest) == 0)
 	{
 		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "Source and destination datasets must be different.");
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1395,7 +1522,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	if (hDataset == NULL)
 	{
 		lastErrorCode = tkGDAL_ERROR;
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1409,7 +1536,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		CPLError(CE_Failure, 0,
 			"Input file contains subdatasets. Please, select one of them for reading." );
 		GDALClose(hDataset);
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 	if (CSLCount(GDALGetMetadata(hDataset, "SUBDATASETS")) > 0
@@ -1451,7 +1578,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			GDALDumpOpenDatasets(stderr); // TODO: what does this do?
 		}
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 	/* -------------------------------------------------------------------- */
@@ -1476,7 +1603,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Input file has no bands, and so cannot be translated." );
-			return S_OK;
+			return ResetConfigOptions();
 		}
 
 		panBandList = (int *) CPLMalloc (sizeof(int)*nBandCount);
@@ -1493,7 +1620,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				CPLError(CE_Failure, 0,
 					"Band %d requested, but only bands 1 to %d available.",
 					ABS(panBandList[i]), GDALGetRasterCount(hDataset) );
-				return S_OK;
+				return ResetConfigOptions();
 			}
 		}
 
@@ -1523,7 +1650,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				"rotated. This configuration is not supported." );
 			GDALClose (hDataset);
 			CPLFree (panBandList);
-			return S_OK;
+			return ResetConfigOptions();
 		}
 
 		anSrcWin[0] = (int)
@@ -1543,7 +1670,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				"Computed -srcwin falls outside raster size of %dx%d.",
 				GDALGetRasterXSize(hDataset), 
 				GDALGetRasterYSize(hDataset) );
-			return S_OK;
+			return ResetConfigOptions();
 		}
 	}
 
@@ -1565,7 +1692,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			anSrcWin[3],
 			GDALGetRasterXSize(hDataset), 
 			GDALGetRasterYSize(hDataset));
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1583,7 +1710,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		CPLFree (panBandList);
 		CSLDestroy (papszCreateOptions);
 
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 	/* -------------------------------------------------------------------- */
@@ -1636,7 +1763,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		CSLDestroy (papszCreateOptions);
 
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1806,7 +1933,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			GDALClose( hDataset );
 			CPLFree( panBandList );
 			CSLDestroy( papszCreateOptions );
-			return S_OK;
+			return ResetConfigOptions();
 		}
 
 		/* Check that the color table only contains gray levels */
@@ -1833,7 +1960,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		else
 		{
 			CPLError(CE_Failure, 0, "Error : invalid use of -expand option.");
-			return S_OK;
+			return ResetConfigOptions();
 		}
 	}
 
@@ -2115,7 +2242,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	CSLDestroy( papszCreateOptions );
 
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 
@@ -2647,6 +2774,12 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	Parse(OLE2CA(bstrOptions), &argc);
 
+	if (!ProcessGeneralOptions(&argc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 /* -------------------------------------------------------------------- */
 /*      Parse arguments.                                                */
 /* -------------------------------------------------------------------- */
@@ -2991,7 +3124,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             printf( "\n" );
             //Usage();
 			// TODO: clean up memory...set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
 
         if (!bQuiet && !bFormatExplicitelySet)
@@ -3111,7 +3244,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     CSLDestroy( papszLayers );
     CSLDestroy( papszCreateOptions );
     
-    return S_OK;
+    return ResetConfigOptions();
 }
 
 #pragma endregion
@@ -3218,6 +3351,12 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	Parse(bstrOptions, &argc);
 
+	if (!ProcessGeneralOptions(&argc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 /* -------------------------------------------------------------------- */
 /*      Parse arguments.                                                */
 /* -------------------------------------------------------------------- */
@@ -3275,7 +3414,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			if (pszSRS == NULL)
 			{
 				// TODO: set error code?
-				return S_OK;
+				return ResetConfigOptions();
 			}
 
             papszTO = CSLSetNameValue( papszTO, "DST_SRS", pszSRS );
@@ -3288,7 +3427,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			if (pszSRS == NULL)
 			{
 				// TODO: set error code?
-				return S_OK;
+				return ResetConfigOptions();
 			}
 
             papszTO = CSLSetNameValue( papszTO, "SRC_SRS", pszSRS );
@@ -3558,7 +3697,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     {
         fprintf(stderr, "Source and destination datasets must be different.\n");
         // TODO: clean up memory...set error code?
-		return S_OK;
+		return ResetConfigOptions();
     }
 
     CPLPushErrorHandler( CPLQuietErrorHandler );
@@ -3579,7 +3718,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                  "should be created.  Please delete existing dataset and run again.\n",
                  pszDstFilename );
         // TODO: clean up memory...set error code?
-		return S_OK;
+		return ResetConfigOptions();
     }
 
     /* Avoid overwriting an existing destination file that cannot be opened in */
@@ -3597,7 +3736,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                      pszDstFilename );
             GDALClose(hDstDS);
             // TODO: clean up memory...set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
     }
 
@@ -3745,7 +3884,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
  
     if( hDstDS == NULL )
         // TODO: clean up memory...set error code?
-		return S_OK;
+		return ResetConfigOptions();
 
 /* -------------------------------------------------------------------- */
 /*      Loop over all source files, processing each in turn.            */
@@ -3766,7 +3905,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     
         if( hSrcDS == NULL )
             // TODO: clean up memory...set error code?
-			return S_OK;
+			return ResetConfigOptions();
 
 /* -------------------------------------------------------------------- */
 /*      Check that there's at least one raster band                     */
@@ -3775,7 +3914,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {     
             fprintf(stderr, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc] );
             // TODO: clean up memory...set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
 
         if( !bQuiet )
@@ -3822,7 +3961,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         
         if( hTransformArg == NULL )
             // TODO: clean up memory...set error code?
-			return S_OK;
+			return ResetConfigOptions();
         
         pfnTransformer = GDALGenImgProjTransform;
 
@@ -4098,7 +4237,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             if( GDALInitializeWarpedVRT( hDstDS, psWO ) != CE_None )
                 // TODO: clean up memory...set error code?
-				return S_OK;
+				return ResetConfigOptions();
 
             GDALClose( hDstDS );
             GDALClose( hSrcDS );
@@ -4181,7 +4320,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	(*retval) = (bHasGotErr) ? VARIANT_FALSE : VARIANT_TRUE;
 
-    return S_OK;
+    return ResetConfigOptions();
 }
 
 /************************************************************************/
@@ -4247,7 +4386,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         }
         printf( "\n" );
         // TODO: free up memory...set error code?
-		return S_OK;
+		return NULL;
     }
 
 /* -------------------------------------------------------------------- */
@@ -4275,7 +4414,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );
         if( hSrcDS == NULL )
 			// TODO: free up memory...set error code?
-			return S_OK;
+			return NULL;
 
 /* -------------------------------------------------------------------- */
 /*      Check that there's at least one raster band                     */
@@ -4284,7 +4423,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         {
             fprintf(stderr, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc] );
             // TODO: free up memory...set error code?
-			return S_OK;
+			return NULL;
         }
 
         if( eDT == GDT_Unknown )
@@ -6102,6 +6241,12 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
     Parse(bstrOptions, &nArgc);
 
+	if (!ProcessGeneralOptions(&nArgc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 /* -------------------------------------------------------------------- */
 /*      Parse commandline.                                              */
 /* -------------------------------------------------------------------- */
@@ -6292,7 +6437,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
     GDALDumpOpenDatasets( stderr );
 
-    return S_OK;
+    return ResetConfigOptions();
 }
 
 #pragma endregion
@@ -6318,13 +6463,20 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
     int              nResultStatus = 0;
     int              bReadOnly = FALSE;
     int              bClean = FALSE;
-    GDALProgressFunc pfnProgress = GDALTermProgress; 
+    GDALProgressFunc pfnProgress = (GDALProgressFunc) GDALProgressCallback;
+	struct CallbackParams params = { cBack, "Adding Overviews" };
 
     GDALAllRegister();
 
 	(*retval) = VARIANT_FALSE;
 
 	Parse(bstrOptions, &nArgc);
+
+	if (!ProcessGeneralOptions(&nArgc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
 
 /* -------------------------------------------------------------------- */
 /*      Parse commandline.                                              */
@@ -6336,9 +6488,10 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         else if( EQUAL(sArr[iArg],"-ro"))
             bReadOnly = TRUE;
         else if( EQUAL(sArr[iArg],"-clean"))
+		{
             bClean = TRUE;
-        else if( EQUAL(sArr[iArg],"-q") || EQUAL(sArr[iArg],"-quiet") ) 
-            pfnProgress = GDALDummyProgress; 
+			params.sMsg = "Cleaning overviews";
+		}
         else if( atoi(sArr[iArg]) > 0 )
             anLevels[nLevelCount++] = atoi(sArr[iArg]);
     }
@@ -6349,7 +6502,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 	{
         //Usage();
 		// TODO: set error code?
-		return S_OK;
+		return ResetConfigOptions();
 	}
 
 /* -------------------------------------------------------------------- */
@@ -6368,14 +6521,15 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         hDataset = GDALOpen( pszFilename, GA_ReadOnly );
 
     if( hDataset == NULL )
-        exit( 2 );
+        // TODO: set error code?
+		return ResetConfigOptions();
 
 /* -------------------------------------------------------------------- */
 /*      Clean overviews.                                                */
 /* -------------------------------------------------------------------- */
     if ( bClean &&
         GDALBuildOverviews( hDataset,pszResampling, 0, 0, 
-                             0, NULL, pfnProgress, NULL ) != CE_None )
+                             0, NULL, pfnProgress, &params ) != CE_None )
     {
         printf( "Cleaning overviews failed.\n" );
         nResultStatus = 200;
@@ -6386,7 +6540,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
     if (nLevelCount > 0 && nResultStatus == 0 &&
         GDALBuildOverviews( hDataset,pszResampling, nLevelCount, anLevels,
-                             0, NULL, pfnProgress, NULL ) != CE_None )
+                             0, NULL, pfnProgress, &params ) != CE_None )
     {
         printf( "Overview building failed.\n" );
         nResultStatus = 100;
@@ -6400,7 +6554,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 	if (nResultStatus == 0)
 		(*retval) = VARIANT_TRUE;
 
-    return S_OK;
+    return ResetConfigOptions();
 }
 
 #pragma endregion
@@ -6554,7 +6708,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 	GDALClose( hSrcDS );
 
 	(*retval) = VARIANT_TRUE;
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 #pragma endregion
@@ -6740,7 +6894,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     GDALClose( hSrcDS );
 
 	(*retval) = VARIANT_TRUE;
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 #pragma endregion

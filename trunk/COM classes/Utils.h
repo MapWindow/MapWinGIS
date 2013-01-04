@@ -250,10 +250,13 @@ private:
 
 	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);
+	BOOL ProcessGeneralOptions(int * opts);
+	HRESULT ResetConfigOptions();
 
 	/* GDAL/OGR variables */
 	int bSubCall;
 	CStringArray sArr;
+	CStringArray sConfig;
 
 	void CUtils::ErrorMessage(long ErrorCode);
 private:

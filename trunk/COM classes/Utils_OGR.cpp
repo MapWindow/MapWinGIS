@@ -661,6 +661,12 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
 	Parse(OLE2CA(bstrOptions), &nArgc);
 
+	if (!ProcessGeneralOptions(&nArgc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 	for (int iArg = 1; iArg < nArgc; iArg++)
 	{
 		if( EQUAL(sArr[iArg],"-q") || EQUAL(sArr[iArg],"-quiet") )
@@ -741,7 +747,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     fprintf( stderr, "-nlt %s: type not recognised.\n",
                             sArr[iArg+1] );
 					// TODO: set error code?
-                    return S_OK;
+                    return ResetConfigOptions();
                 }
             }
             if (eGType != wkbNone && bIs3D)
@@ -1054,7 +1060,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         }
 
 		// TODO: set error code?
-        return S_OK;
+        return ResetConfigOptions();
     }
 
 /* -------------------------------------------------------------------- */
@@ -1093,7 +1099,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                              "a single source layer name,\nor a -sql statement, and "
                              "name must be different from an existing layer.\n");
                     // TODO: set error code?
-					return S_OK;
+					return ResetConfigOptions();
                 }
             }
         }
@@ -1123,7 +1129,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                         "Unable to open existing output datasource `%s'.\n",
                         pszDestDataSource );
                 // TODO: set error code?
-				return S_OK;
+				return ResetConfigOptions();
             }
         }
         else if( CSLCount(papszDSCO) > 0 )
@@ -1155,7 +1161,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 fprintf( stderr,  "  -> `%s'\n", poR->GetDriver(iDriver)->GetName() );
             }
             // TODO: set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
 
         if( !poDriver->TestCapability( ODrCCreateDataSource ) )
@@ -1163,7 +1169,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             fprintf( stderr,  "%s driver does not support data source creation.\n",
                     pszFormat );
             // TODO: set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
 
 /* -------------------------------------------------------------------- */
@@ -1190,7 +1196,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                       "for shapefile datastore.\n",
                       pszDestDataSource );
                 // TODO: set error code?
-				return S_OK;
+				return ResetConfigOptions();
             }
         }
 
@@ -1203,7 +1209,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             fprintf( stderr,  "%s driver failed to create %s\n", 
                     pszFormat, pszDestDataSource );
             // TODO: set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
     }
 
@@ -1218,7 +1224,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             fprintf( stderr,  "Failed to process SRS definition: %s\n", 
                     pszOutputSRSDef );
             // TODO: set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
     }
 
@@ -1233,7 +1239,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             fprintf( stderr,  "Failed to process SRS definition: %s\n", 
                     pszSourceSRSDef );
             // TODO: set error code?
-			return S_OK;
+			return ResetConfigOptions();
         }
     }
 
@@ -1307,7 +1313,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                           "translation from sql statement." );
 
                 // TODO: set error code?
-				return S_OK;
+				return ResetConfigOptions();
             }
 
             if (poPassedLayer != poResultSet)
@@ -1341,7 +1347,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     fprintf( stderr, "FAILURE: Couldn't fetch advertised layer %d!\n",
                             iLayer );
                     // TODO: set error code?
-					return S_OK;
+					return ResetConfigOptions();
                 }
 
                 papoLayers[iLayer] = poLayer;
@@ -1368,7 +1374,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     if (!bSkipFailures)
 					{
                         // TODO: set error code?
-						return S_OK;
+						return ResetConfigOptions();
 					}
                 }
 
@@ -1411,7 +1417,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     if (!bSkipFailures)
 					{
                         // TODO: set error code?
-						return S_OK;
+						return ResetConfigOptions();
 					}
                 }
             }
@@ -1506,7 +1512,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                         poLayer->GetName() );
 
 				// TODO: set error code?
-                return S_OK;
+                return ResetConfigOptions();
             }
 
             if (poPassedLayer != poLayer)
@@ -1546,7 +1552,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	(*retval) = VARIANT_TRUE;
 
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 /************************************************************************/
@@ -1667,7 +1673,7 @@ static int TranslateLayer( OGRDataSource *poSrcDS,
             fprintf( stderr, "Can't transform coordinates, source layer has no\n"
                     "coordinate system.  Use -s_srs to set one.\n" );
             // TODO: set error code?
-			return S_OK;
+			return FALSE;
         }
 
         CPLAssert( NULL != poSourceSRS );
@@ -1689,7 +1695,7 @@ static int TranslateLayer( OGRDataSource *poSrcDS,
             poOutputSRS->exportToPrettyWkt( &pszWKT, FALSE );
             fprintf( stderr,  "Target:\n%s\n", pszWKT );
             // TODO: set error code?
-			return S_OK;
+			return FALSE;
         }
     }
     
@@ -2344,6 +2350,12 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 /* -------------------------------------------------------------------- */
 	Parse(OLE2CA(bstrOptions), &nArgc);
 
+	if (!ProcessGeneralOptions(&nArgc))
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		return ResetConfigOptions();
+	}
+
 	for (int iArg = 1; iArg < nArgc; iArg++)
 	{
         if( EQUAL(sArr[iArg],"--formats") )
@@ -2621,7 +2633,7 @@ end:
 /* -------------------------------------------------------------------- */
 	*bstrInfo = sOutput.AllocSysString();
 
-	return S_OK;
+	return ResetConfigOptions();
 }
 
 /************************************************************************/
