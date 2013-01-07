@@ -802,7 +802,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         if( bReportHistograms )
         {
             int nBucketCount, *panHistogram = NULL;
-			struct CallbackParams params = { cBack, NULL };
+			struct CallbackParams params = { cBack, "Analyzing" };
 
             eErr = GDALGetDefaultHistogram( hBand, &dfMin, &dfMax, 
                                             &nBucketCount, &panHistogram, 
