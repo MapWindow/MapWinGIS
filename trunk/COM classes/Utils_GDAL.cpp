@@ -6492,16 +6492,24 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
             bClean = TRUE;
 			params.sMsg = "Cleaning overviews";
 		}
-        else if( atoi(sArr[iArg]) > 0 )
-            anLevels[nLevelCount++] = atoi(sArr[iArg]);
     }
 
 	pszFilename = OLE2CA(bstrSrcFilename);
 
+	CString sLevels = OLE2CA(bstrLevels);
+	CString sLevelToken = "";
+	int curPos = 0;
+
+	sLevelToken = sLevels.Tokenize(" ", curPos);
+
+	while( !sLevelToken.IsEmpty() )
+	{
+		anLevels[nLevelCount++] = atoi( sLevelToken );
+		sLevelToken = sLevels.Tokenize(" ", curPos);
+	}
+
     if( pszFilename == NULL || (nLevelCount == 0 && !bClean) )
 	{
-        //Usage();
-		// TODO: set error code?
 		return ResetConfigOptions();
 	}
 
@@ -6521,8 +6529,10 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         hDataset = GDALOpen( pszFilename, GA_ReadOnly );
 
     if( hDataset == NULL )
-        // TODO: set error code?
+	{
+        this->lastErrorCode = tkGDAL_ERROR;
 		return ResetConfigOptions();
+	}
 
 /* -------------------------------------------------------------------- */
 /*      Clean overviews.                                                */
@@ -6531,7 +6541,8 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         GDALBuildOverviews( hDataset,pszResampling, 0, 0, 
                              0, NULL, pfnProgress, &params ) != CE_None )
     {
-        printf( "Cleaning overviews failed.\n" );
+		this->lastErrorCode = tkGDAL_ERROR;
+        CPLError(CE_Failure,0,"Cleaning overviews failed.");
         nResultStatus = 200;
     }
 
@@ -6542,7 +6553,8 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         GDALBuildOverviews( hDataset,pszResampling, nLevelCount, anLevels,
                              0, NULL, pfnProgress, &params ) != CE_None )
     {
-        printf( "Overview building failed.\n" );
+		this->lastErrorCode = tkGDAL_ERROR;
+        CPLError(CE_Failure,0,"Overview building failed.");
         nResultStatus = 100;
     }
 
