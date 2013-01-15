@@ -38,6 +38,12 @@ struct BreakVal
 	double highVal;
 };
 
+struct CallbackParams
+{
+	ICallback *cBack;
+	const char *sMsg;
+};
+
 struct RasterPoint
 {	
 public:

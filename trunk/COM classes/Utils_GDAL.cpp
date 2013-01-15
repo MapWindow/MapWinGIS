@@ -27,13 +27,7 @@
 
 #pragma region common
 
-struct CallbackParams
-{
-	ICallback *cBack;
-	const char *sMsg;
-};
-
-static int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage, void *pData)
+int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage, void *pData)
 {
 	CallbackParams* params = (CallbackParams*)pData;
 

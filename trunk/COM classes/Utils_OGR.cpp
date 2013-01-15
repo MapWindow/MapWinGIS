@@ -23,6 +23,8 @@
 
 #pragma warning(disable:4996)
 
+int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage, void *pData);
+
 #pragma region ogr2ogr
 
 typedef enum
@@ -599,6 +601,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 {
 	USES_CONVERSION;
 
+	struct CallbackParams params = { cBack, "Converting" };
 	int			nArgc = 0;
 	int			bQuiet = FALSE;
 	int			bFormatExplicitelySet = FALSE;
@@ -625,7 +628,6 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     GeomOperation eGeomOp = NONE;
     double       dfGeomOpParam = 0;
     char        **papszFieldTypesToString = NULL;
-    int          bDisplayProgress = FALSE;
     GDALProgressFunc pfnProgress = NULL;
     void        *pProgressArg = NULL;
     int          bWrapDateline = FALSE;
@@ -648,6 +650,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	int nGroupTransactions = 200;
 	int bPreserveFID = FALSE;
 	int nFIDToFetch = OGRNullFID;
+
+	(*retval) = VARIANT_FALSE;
 
 	pszDataSource = OLE2CA(bstrSrcFilename);
 	pszDestDataSource = OLE2CA(bstrDstFilename);
@@ -744,9 +748,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 eGType = OGRFromOGCGeomType(osGeomName);
                 if (eGType == wkbUnknown)
                 {
-                    fprintf( stderr, "-nlt %s: type not recognised.\n",
+					this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,"-nlt %s: type not recognised.\n",
                             sArr[iArg+1] );
-					// TODO: set error code?
                     return ResetConfigOptions();
                 }
             }
@@ -843,17 +847,13 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 }
                 else
                 {
-                    fprintf(stderr, "Unhandled type for fieldtypeasstring option : %s\n",
+					this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,"Unhandled type for fieldtypeasstring option : %s\n",
                             *iter);
-					// TODO: set error code?
-                    //Usage();
+					return ResetConfigOptions();
                 }
                 iter ++;
             }
-        }
-        else if( EQUAL(sArr[iArg],"-progress") )
-        {
-            bDisplayProgress = TRUE;
         }
         else if( EQUAL(sArr[iArg],"-wrapdateline") )
         {
@@ -885,9 +885,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 OGRGeometryFactory::createFromWkt(&pszTmp, NULL, &poClipSrc);
                 if (poClipSrc == NULL)
                 {
-                    fprintf( stderr, "FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
-					// TODO: set error code
-                    //Usage();
+                    this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,"FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
+					return ResetConfigOptions();
                 }
                 iArg ++;
             }
@@ -941,9 +941,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 OGRGeometryFactory::createFromWkt(&pszTmp, NULL, &poClipDst);
                 if (poClipDst == NULL)
                 {
-                    fprintf( stderr, "FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
-					// TODO: set error code
-                    //Usage();
+                    this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,"FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
+					return ResetConfigOptions();
                 }
                 iArg ++;
             }
@@ -997,9 +997,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if( bPreserveFID && bExplodeCollections )
     {
-        fprintf( stderr, "FAILURE: cannot use -preserve_fid and -explodecollections at the same time\n\n" );
-		// TODO: set error code?
-        //Usage();
+        this->lastErrorCode = tkGDAL_ERROR;
+        CPLError(CE_Failure,0,"FAILURE: cannot use -preserve_fid and -explodecollections at the same time\n\n" );
+		return ResetConfigOptions();
     }
 
     if( bClipSrc && pszClipSrcDS != NULL)
@@ -1007,9 +1007,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poClipSrc = LoadGeometry(pszClipSrcDS, pszClipSrcSQL, pszClipSrcLayer, pszClipSrcWhere);
         if (poClipSrc == NULL)
         {
-            fprintf( stderr, "FAILURE: cannot load source clip geometry\n\n" );
-			// TODO: set error code?
-            //Usage();
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"FAILURE: cannot load source clip geometry\n\n" );
+			return ResetConfigOptions();
         }
     }
     else if( bClipSrc && poClipSrc == NULL )
@@ -1018,10 +1018,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             poClipSrc = poSpatialFilter->clone();
         if (poClipSrc == NULL)
         {
-            fprintf( stderr, "FAILURE: -clipsrc must be used with -spat option or a\n"
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"FAILURE: -clipsrc must be used with -spat option or a\n"
                              "bounding box, WKT string or datasource must be specified\n\n");
-			// TODO: set error code?
-            //Usage();
+			return ResetConfigOptions();
         }
     }
     
@@ -1030,9 +1030,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poClipDst = LoadGeometry(pszClipDstDS, pszClipDstSQL, pszClipDstLayer, pszClipDstWhere);
         if (poClipDst == NULL)
         {
-            fprintf( stderr, "FAILURE: cannot load dest clip geometry\n\n" );
-			// TODO: set error code?
-            //Usage();
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"FAILURE: cannot load dest clip geometry\n\n" );
+			return ResetConfigOptions();
         }
     }
 
@@ -1050,16 +1050,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     {
         OGRSFDriverRegistrar    *poR = OGRSFDriverRegistrar::GetRegistrar();
         
-        fprintf( stderr, "FAILURE:\n"
-                "Unable to open datasource `%s' with the following drivers.\n",
-                pszDataSource );
+        this->lastErrorCode = tkGDAL_ERROR;
+        CPLError(CE_Failure,0,"FAILURE:\nUnable to open datasource `%s'.",
+			pszDataSource );
 
-        for( int iDriver = 0; iDriver < poR->GetDriverCount(); iDriver++ )
-        {
-            fprintf( stderr, "  -> %s\n", poR->GetDriver(iDriver)->GetName() );
-        }
-
-		// TODO: set error code?
         return ResetConfigOptions();
     }
 
@@ -1094,11 +1088,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     bError = TRUE;
                 if (bError)
                 {
-                    fprintf( stderr,
+                    this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,
                              "ERROR: -nln name must be specified combined with "
                              "a single source layer name,\nor a -sql statement, and "
                              "name must be different from an existing layer.\n");
-                    // TODO: set error code?
 					return ResetConfigOptions();
                 }
             }
@@ -1125,10 +1119,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if (bUpdate)
             {
-                fprintf( stderr, "FAILURE:\n"
+                this->lastErrorCode = tkGDAL_ERROR;
+                CPLError(CE_Failure,0,"FAILURE:\n"
                         "Unable to open existing output datasource `%s'.\n",
                         pszDestDataSource );
-                // TODO: set error code?
 				return ResetConfigOptions();
             }
         }
@@ -1148,27 +1142,20 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             CheckDestDataSourceNameConsistency(pszDestDataSource, pszFormat);
 
         OGRSFDriverRegistrar *poR = OGRSFDriverRegistrar::GetRegistrar();
-        int                  iDriver;
 
         poDriver = poR->GetDriverByName(pszFormat);
         if( poDriver == NULL )
         {
-            fprintf( stderr, "Unable to find driver `%s'.\n", pszFormat );
-            fprintf( stderr,  "The following drivers are available:\n" );
-        
-            for( iDriver = 0; iDriver < poR->GetDriverCount(); iDriver++ )
-            {
-                fprintf( stderr,  "  -> `%s'\n", poR->GetDriver(iDriver)->GetName() );
-            }
-            // TODO: set error code?
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"Unable to find driver `%s'.\n", pszFormat );
 			return ResetConfigOptions();
         }
 
         if( !poDriver->TestCapability( ODrCCreateDataSource ) )
         {
-            fprintf( stderr,  "%s driver does not support data source creation.\n",
-                    pszFormat );
-            // TODO: set error code?
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"%s driver does not support data source creation.\n",
+				pszFormat );
 			return ResetConfigOptions();
         }
 
@@ -1191,11 +1178,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             if (VSIMkdir(pszDestDataSource, 0755) != 0)
             {
+				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined,
                       "Failed to create directory %s\n"
                       "for shapefile datastore.\n",
                       pszDestDataSource );
-                // TODO: set error code?
 				return ResetConfigOptions();
             }
         }
@@ -1206,9 +1193,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poODS = poDriver->CreateDataSource( pszDestDataSource, papszDSCO );
         if( poODS == NULL )
         {
-            fprintf( stderr,  "%s driver failed to create %s\n", 
-                    pszFormat, pszDestDataSource );
-            // TODO: set error code?
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"%s driver failed to create %s\n", 
+				pszFormat, pszDestDataSource );
 			return ResetConfigOptions();
         }
     }
@@ -1221,9 +1208,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poOutputSRS = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
         if( poOutputSRS->SetFromUserInput( pszOutputSRSDef ) != OGRERR_NONE )
         {
-            fprintf( stderr,  "Failed to process SRS definition: %s\n", 
-                    pszOutputSRSDef );
-            // TODO: set error code?
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"Failed to process SRS definition: %s\n", 
+				pszOutputSRSDef );
 			return ResetConfigOptions();
         }
     }
@@ -1236,9 +1223,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poSourceSRS = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
         if( poSourceSRS->SetFromUserInput( pszSourceSRSDef ) != OGRERR_NONE )
         {
-            fprintf( stderr,  "Failed to process SRS definition: %s\n", 
-                    pszSourceSRSDef );
-            // TODO: set error code?
+            this->lastErrorCode = tkGDAL_ERROR;
+            CPLError(CE_Failure,0,"Failed to process SRS definition: %s\n", 
+				pszSourceSRSDef );
 			return ResetConfigOptions();
         }
     }
@@ -1261,18 +1248,14 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         if( poResultSet != NULL )
         {
             long nCountLayerFeatures = 0;
-            if (bDisplayProgress)
+            if (!poResultSet->TestCapability(OLCFastFeatureCount))
             {
-                if (!poResultSet->TestCapability(OLCFastFeatureCount))
-                {
-                    fprintf( stderr, "Progress turned off as fast feature count is not available.\n");
-                    bDisplayProgress = FALSE;
-                }
-                else
-                {
-                    nCountLayerFeatures = poResultSet->GetFeatureCount();
-                    pfnProgress = GDALTermProgress;
-                }
+                fprintf( stderr, "Progress turned off as fast feature count is not available.\n");
+            }
+            else
+            {
+                nCountLayerFeatures = poResultSet->GetFeatureCount();
+                pfnProgress = GDALProgressCallback;
             }
 
             OGRLayer* poPassedLayer = poResultSet;
@@ -1305,14 +1288,14 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                                  poSourceSRS, papszSelFields, bAppend, eGType,
                                  bOverwrite, eGeomOp, dfGeomOpParam, papszFieldTypesToString,
                                  nCountLayerFeatures, bWrapDateline, poClipSrc, poClipDst,
-                                 bExplodeCollections, pszZField, pszWHERE, pfnProgress, pProgressArg,
+                                 bExplodeCollections, pszZField, pszWHERE, pfnProgress, &params,
 								 bSkipFailures, nGroupTransactions, nFIDToFetch, bPreserveFID))
             {
+				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "Terminating translation prematurely after failed\n"
                           "translation from sql statement." );
 
-                // TODO: set error code?
 				return ResetConfigOptions();
             }
 
@@ -1344,9 +1327,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
                 if( poLayer == NULL )
                 {
-                    fprintf( stderr, "FAILURE: Couldn't fetch advertised layer %d!\n",
+                    this->lastErrorCode = tkGDAL_ERROR;
+                    CPLError(CE_Failure,0,"FAILURE: Couldn't fetch advertised layer %d!\n",
                             iLayer );
-                    // TODO: set error code?
 					return ResetConfigOptions();
                 }
 
@@ -1369,11 +1352,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
                 if( poLayer == NULL )
                 {
-                    fprintf( stderr, "FAILURE: Couldn't fetch requested layer '%s'!\n",
+                    CPLError(CE_Failure,0,"FAILURE: Couldn't fetch requested layer '%s'!\n",
                              papszLayers[iLayer] );
                     if (!bSkipFailures)
 					{
-                        // TODO: set error code?
+                        this->lastErrorCode = tkGDAL_ERROR;
 						return ResetConfigOptions();
 					}
                 }
@@ -1413,10 +1396,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             {
                 if( poLayer->SetAttributeFilter( pszWHERE ) != OGRERR_NONE )
                 {
-                    fprintf( stderr, "FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
+                    CPLError(CE_Failure,0,"FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
                     if (!bSkipFailures)
 					{
-                        // TODO: set error code?
+						this->lastErrorCode = tkGDAL_ERROR;
 						return ResetConfigOptions();
 					}
                 }
@@ -1425,18 +1408,14 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             if( poSpatialFilter != NULL )
                 poLayer->SetSpatialFilter( poSpatialFilter );
 
-            if (bDisplayProgress)
+            if (!poLayer->TestCapability(OLCFastFeatureCount))
             {
-                if (!poLayer->TestCapability(OLCFastFeatureCount))
-                {
-                    fprintf( stderr, "Progress turned off as fast feature count is not available.\n");
-                    bDisplayProgress = FALSE;
-                }
-                else
-                {
-                    panLayerCountFeatures[iLayer] = poLayer->GetFeatureCount();
-                    nCountLayersFeatures += panLayerCountFeatures[iLayer];
-                }
+                fprintf( stderr, "Progress turned off as fast feature count is not available.\n");
+            }
+            else
+            {
+                panLayerCountFeatures[iLayer] = poLayer->GetFeatureCount();
+                nCountLayersFeatures += panLayerCountFeatures[iLayer];
             }
         }
 
@@ -1455,14 +1434,14 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             {
                 poPassedLayer = new OGRSplitListFieldLayer(poPassedLayer, nMaxSplitListSubFields);
 
-                if (bDisplayProgress && nMaxSplitListSubFields != 1)
+                if (nMaxSplitListSubFields != 1)
                 {
                     pfnProgress = GDALScaledProgress;
                     pProgressArg = 
                         GDALCreateScaledProgress(nAccCountFeatures * 1.0 / nCountLayersFeatures,
                                                 (nAccCountFeatures + panLayerCountFeatures[iLayer] / 2) * 1.0 / nCountLayersFeatures,
-                                                GDALTermProgress,
-                                                NULL);
+                                                GDALProgressCallback,
+                                                &params);
                 }
                 else
                 {
@@ -1477,23 +1456,18 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     poPassedLayer = poLayer;
                 }
 
-                if (bDisplayProgress)
-                    GDALDestroyScaledProgress(pProgressArg);
+                GDALDestroyScaledProgress(pProgressArg);
             }
 
-
-            if (bDisplayProgress)
-            {
-                pfnProgress = GDALScaledProgress;
-                int nStart = 0;
-                if (poPassedLayer != poLayer && nMaxSplitListSubFields != 1)
-                    nStart = panLayerCountFeatures[iLayer] / 2;
-                pProgressArg = 
-                    GDALCreateScaledProgress((nAccCountFeatures + nStart) * 1.0 / nCountLayersFeatures,
-                                            (nAccCountFeatures + panLayerCountFeatures[iLayer]) * 1.0 / nCountLayersFeatures,
-                                            GDALTermProgress,
-                                            NULL);
-            }
+            pfnProgress = GDALScaledProgress;
+            int nStart = 0;
+            if (poPassedLayer != poLayer && nMaxSplitListSubFields != 1)
+                nStart = panLayerCountFeatures[iLayer] / 2;
+            pProgressArg = 
+                GDALCreateScaledProgress((nAccCountFeatures + nStart) * 1.0 / nCountLayersFeatures,
+                                        (nAccCountFeatures + panLayerCountFeatures[iLayer]) * 1.0 / nCountLayersFeatures,
+                                        GDALProgressCallback,
+                                        &params);
 
             nAccCountFeatures += panLayerCountFeatures[iLayer];
 
@@ -1506,20 +1480,19 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 								bSkipFailures, nGroupTransactions, nFIDToFetch, bPreserveFID)
                 && !bSkipFailures )
             {
+				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined, 
                         "Terminating translation prematurely after failed\n"
                         "translation of layer %s (use -skipfailures to skip errors)\n", 
                         poLayer->GetName() );
 
-				// TODO: set error code?
                 return ResetConfigOptions();
             }
 
             if (poPassedLayer != poLayer)
                 delete poPassedLayer;
 
-            if (bDisplayProgress)
-                GDALDestroyScaledProgress(pProgressArg);
+            GDALDestroyScaledProgress(pProgressArg);
         }
 
         CPLFree(panLayerCountFeatures);
