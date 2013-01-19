@@ -1996,200 +1996,197 @@ void CMapView::DrawNextFrame(const CRect & rcBounds, CDC * dc)
 		//str.Format("Drawing layer %d", i);
 		//timer.PrintTime(str.GetBuffer());
 		
-		if( isConcealed[i] == false )
+		if( isConcealed[i] )
+			continue;
+
+		Layer * l = m_allLayers[m_activeLayers[i]];
+		if( l == NULL || l->IsVisible(scale) == false)
+			continue;
+
+		if(l->type == ImageLayer)
 		{
-			Layer * l = m_allLayers[m_activeLayers[i]];
-			if( l != NULL )
-			{	
-				if (l->IsVisible(scale))
+			if(l->object == NULL ) continue;
+			IImage * iimg = NULL;
+			l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			if( iimg == NULL ) continue;
+			
+			CImageClass* img = (CImageClass*)iimg;
+			
+			if (_canUseImageGrouping && img->m_groupID != -1)
+			{
+				// this is grouped image, if this is the first image of group, we shall draw the whole group
+				if (!(*m_imageGroups)[img->m_groupID]->wasDrawn)
 				{
-					if(l->type == ImageLayer)
+					DrawImageGroups(rcBounds, dc, img->m_groupID);
+					(*m_imageGroups)[img->m_groupID]->wasDrawn = true;
+				}
+			}
+			else
+			{
+				bool saveBitmap = true;
+				
+				if (saveBitmap)
+				{
+					CImageClass* img = (CImageClass*)iimg;
+					ScreenBitmap* bmp = img->_screenBitmap;
+					bool wasDrawn = false;
+
+					// in case we have saved bitmap and map position is the same we shall draw it
+					if (bmp)
 					{
-						if(l->object == NULL ) continue;
-						IImage * iimg = NULL;
-						l->object->QueryInterface(IID_IImage,(void**)&iimg);
-						if( iimg == NULL ) continue;
-						
-						CImageClass* img = (CImageClass*)iimg;
-						
-						if (_canUseImageGrouping && img->m_groupID != -1)
+						if (bmp->extents == extents &&
+							bmp->pixelPerProjectionX == m_pixelPerProjectionX &&
+							bmp->pixelPerProjectionY == m_pixelPerProjectionY &&
+							bmp->viewWidth == m_viewWidth &&
+							bmp->viewHeight == m_viewHeight && !((CImageClass*)iimg)->_imageChanged
+							)
 						{
-							// this is grouped image, if this is the first image of group, we shall draw the whole group
-							if (!(*m_imageGroups)[img->m_groupID]->wasDrawn)
-							{
-								DrawImageGroups(rcBounds, dc, img->m_groupID);
-								(*m_imageGroups)[img->m_groupID]->wasDrawn = true;
-							}
+							Gdiplus::Graphics g(dc->m_hDC);
+							g.SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
+							
+							// TODO: choose interpolation mode more precisely
+							// TODO: set image attributes
+							
+							g.SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);	
+							g.SetSmoothingMode(Gdiplus::SmoothingModeDefault);
+							g.SetCompositingQuality(Gdiplus::CompositingQualityHighSpeed);
+							g.DrawImage(bmp->bitmap, Gdiplus::REAL(bmp->left), Gdiplus::REAL(bmp->top));
+							wasDrawn = true;
+						}
+					}
+					
+					if (!wasDrawn)
+					{
+						long width, height;
+						iimg->get_OriginalWidth(&width);
+						iimg->get_OriginalHeight(&height);
+
+						if ((width == 256 && height == 256) || m_forceBounds)
+						{
+							// it's tiles, I don't want to cache bitmap here to avoid seams
+							// the same thing with Snapshot calls
+							bmp = imgDrawer.DrawImage(rcBounds, iimg);
 						}
 						else
 						{
-							bool saveBitmap = true;
+							// image hasn't been saved so far
+							bmp = imgDrawer.DrawImage(rcBounds, iimg, true);
 							
-							if (saveBitmap)
+							if (img->_screenBitmap)
 							{
-								CImageClass* img = (CImageClass*)iimg;
-								ScreenBitmap* bmp = img->_screenBitmap;
-								bool wasDrawn = false;
-
-								// in case we have saved bitmap and map position is the same we shall draw it
-								if (bmp)
-								{
-									if (bmp->extents == extents &&
-										bmp->pixelPerProjectionX == m_pixelPerProjectionX &&
-										bmp->pixelPerProjectionY == m_pixelPerProjectionY &&
-										bmp->viewWidth == m_viewWidth &&
-										bmp->viewHeight == m_viewHeight && !((CImageClass*)iimg)->_imageChanged
-										)
-									{
-										Gdiplus::Graphics g(dc->m_hDC);
-										g.SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
-										
-										// TODO: choose interpolation mode more precisely
-										// TODO: set image attributes
-										
-										g.SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);	
-										g.SetSmoothingMode(Gdiplus::SmoothingModeDefault);
-										g.SetCompositingQuality(Gdiplus::CompositingQualityHighSpeed);
-										g.DrawImage(bmp->bitmap, Gdiplus::REAL(bmp->left), Gdiplus::REAL(bmp->top));
-										wasDrawn = true;
-									}
-								}
-								
-								if (!wasDrawn)
-								{
-									long width, height;
-									iimg->get_OriginalWidth(&width);
-									iimg->get_OriginalHeight(&height);
-
-									if ((width == 256 && height == 256) || m_forceBounds)
-									{
-										// it's tiles, I don't want to cache bitmap here to avoid seams
-										// the same thing with Snapshot calls
-										bmp = imgDrawer.DrawImage(rcBounds, iimg);
-									}
-									else
-									{
-										// image hasn't been saved so far
-										bmp = imgDrawer.DrawImage(rcBounds, iimg, true);
-										
-										if (img->_screenBitmap)
-										{
-											delete img->_screenBitmap;
-											img->_screenBitmap = NULL;
-										}
-
-										img->_screenBitmap = bmp;
-									}
-								}
-							}
-							else
-							{
-								imgDrawer.DrawImage(rcBounds, iimg);
-							}
-						}
-
-						img->Release();
-						
-						// drawing labels for images
-						ILabels* labels = l->get_Labels();
-						if(labels != NULL)
-						{
-							tkVerticalPosition vertPos;
-							labels->get_VerticalPosition(&vertPos);
-							if (vertPos == vpAboveParentLayer)		
-							{
-								lblDrawer.DrawLabels(labels);
-							}
-							labels->Release();
-							labels = NULL;
-						}
-					}
-					else if( l->type == ShapefileLayer )
-					{
-						// grab extents from shapefile in case they've changed
-						AdjustLayerExtents(m_activeLayers[i]);
-
-						if( l->extents.left   < extents.left   && l->extents.right < extents.left )		continue;
-						if( l->extents.left   > extents.right  && l->extents.right > extents.right )	continue;
-						if( l->extents.bottom < extents.bottom && l->extents.top   < extents.bottom )	continue;
-						if( l->extents.bottom > extents.top    && l->extents.top   > extents.top )		continue;
-					
-						if( l->object == NULL )
-						{
-							continue;	// TODO: report the error?
-						}
-						
-						IShapefile* sf = NULL;
-						l->object->QueryInterface(IID_IShapefile,(void**)&sf);
-						
-						if( sf )
-						{
-							// shapes
-							if (m_ShapeDrawingMethod == dmStandard)
-							{
-								DrawShapefile( rcBounds, dc, l );
-							}
-							else if (m_ShapeDrawingMethod == dmNewWithSelection || m_ShapeDrawingMethod == dmNewWithLabels)
-							{
-								DrawShapefileAlt( rcBounds, dc, l );
-							}
-							else // if (m_ShapeDrawingMethod == dmNewWithSymbology)
-							{
-								sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
-							}
-							
-							// for old modes we shall mark all the shapes of shapefile as visible as no visiblity expressions were analyzed
-							if (m_ShapeDrawingMethod != dmNewSymbology)
-							{
-								std::vector<ShapeData*>* shapeData = ((CShapefile*)sf)->get_ShapeVector();
-								if (shapeData)
-								{
-									for (int n = 0; n < shapeData->size(); n++)
-									{
-										(*shapeData)[n]->isVisible = true;
-									}
-								}
+								delete img->_screenBitmap;
+								img->_screenBitmap = NULL;
 							}
 
-							// labels
-							if ((m_ShapeDrawingMethod == dmStandard || m_ShapeDrawingMethod == dmNewWithSelection) && !FORCE_NEW_LABELS)
-							{
-								m_labelsToDraw.push(l);
-							}
-							else //(m_ShapeDrawingMethod == dmNewWithLabels || m_ShapeDrawingMethod == dmNewSymbology)
-							{
-								ILabels* labels = l->get_Labels();
-								if(labels != NULL)
-								{
-									tkVerticalPosition vertPos;
-									labels->get_VerticalPosition(&vertPos);
-									if (vertPos == vpAboveParentLayer)		
-									{
-										lblDrawer.DrawLabels(labels);
-									}
-									labels->Release();
-									labels = NULL;
-								}
-							}
-
-							// charts: available for all modes
-							ICharts* charts = NULL;
-							sf->get_Charts(&charts);
-							if (charts)
-							{
-								tkVerticalPosition vertPosition;
-								charts->get_VerticalPosition(&vertPosition);
-								if (vertPosition == vpAboveParentLayer )
-								{
-									chartDrawer.DrawCharts(sf);
-								}
-								charts->Release();
-								charts = NULL;
-							}
-							sf->Release();
+							img->_screenBitmap = bmp;
 						}
 					}
 				}
+				else
+				{
+					imgDrawer.DrawImage(rcBounds, iimg);
+				}
+			}
+
+			img->Release();
+			
+			// drawing labels for images
+			ILabels* labels = l->get_Labels();
+			if(labels != NULL)
+			{
+				tkVerticalPosition vertPos;
+				labels->get_VerticalPosition(&vertPos);
+				if (vertPos == vpAboveParentLayer)		
+				{
+					lblDrawer.DrawLabels(labels);
+				}
+				labels->Release();
+				labels = NULL;
+			}
+		}
+		else if( l->type == ShapefileLayer )
+		{
+			// grab extents from shapefile in case they've changed
+			AdjustLayerExtents(m_activeLayers[i]);
+
+			if( l->extents.left   < extents.left   && l->extents.right < extents.left )		continue;
+			if( l->extents.left   > extents.right  && l->extents.right > extents.right )	continue;
+			if( l->extents.bottom < extents.bottom && l->extents.top   < extents.bottom )	continue;
+			if( l->extents.bottom > extents.top    && l->extents.top   > extents.top )		continue;
+		
+			if( l->object == NULL )
+			{
+				continue;	// TODO: report the error?
+			}
+			
+			IShapefile* sf = NULL;
+			l->object->QueryInterface(IID_IShapefile,(void**)&sf);
+			
+			if( sf )
+			{
+				// shapes
+				if (m_ShapeDrawingMethod == dmStandard)
+				{
+					DrawShapefile( rcBounds, dc, l );
+				}
+				else if (m_ShapeDrawingMethod == dmNewWithSelection || m_ShapeDrawingMethod == dmNewWithLabels)
+				{
+					DrawShapefileAlt( rcBounds, dc, l );
+				}
+				else // if (m_ShapeDrawingMethod == dmNewWithSymbology)
+				{
+					sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
+				}
+				
+				// for old modes we shall mark all the shapes of shapefile as visible as no visiblity expressions were analyzed
+				if (m_ShapeDrawingMethod != dmNewSymbology)
+				{
+					std::vector<ShapeData*>* shapeData = ((CShapefile*)sf)->get_ShapeVector();
+					if (shapeData)
+					{
+						for (int n = 0; n < shapeData->size(); n++)
+						{
+							(*shapeData)[n]->isVisible = true;
+						}
+					}
+				}
+
+				// labels
+				if ((m_ShapeDrawingMethod == dmStandard || m_ShapeDrawingMethod == dmNewWithSelection) && !FORCE_NEW_LABELS)
+				{
+					m_labelsToDraw.push(l);
+				}
+				else //(m_ShapeDrawingMethod == dmNewWithLabels || m_ShapeDrawingMethod == dmNewSymbology)
+				{
+					ILabels* labels = l->get_Labels();
+					if(labels != NULL)
+					{
+						tkVerticalPosition vertPos;
+						labels->get_VerticalPosition(&vertPos);
+						if (vertPos == vpAboveParentLayer)		
+						{
+							lblDrawer.DrawLabels(labels);
+						}
+						labels->Release();
+						labels = NULL;
+					}
+				}
+
+				// charts: available for all modes
+				ICharts* charts = NULL;
+				sf->get_Charts(&charts);
+				if (charts)
+				{
+					tkVerticalPosition vertPosition;
+					charts->get_VerticalPosition(&vertPosition);
+					if (vertPosition == vpAboveParentLayer )
+					{
+						chartDrawer.DrawCharts(sf);
+					}
+					charts->Release();
+					charts = NULL;
+				}
+				sf->Release();
 			}
 		}
 	}

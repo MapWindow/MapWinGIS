@@ -493,7 +493,7 @@ clear_bmp:
 				double dstW = imgW * dx * _pixelPerProjectionX;
 				double dstH = imgH * dy * _pixelPerProjectionY;
 				
-				gr->SetPixelOffsetMode(Gdiplus::PixelOffsetModeDefault);
+				gr->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
 				
 				// -------------------------------------------------------
 				//  preparing structure to receive the data
@@ -550,33 +550,32 @@ clear_bmp:
 					if (returnBitmap)
 					{
 						screenBitmap = new ScreenBitmap();
-						screenBitmap->left = dstL;
-						screenBitmap->top = dstT;
+						screenBitmap->left = int(dstL);
+						screenBitmap->top = int(dstT);
 						screenBitmap->pixelPerProjectionX = _pixelPerProjectionX;
 						screenBitmap->pixelPerProjectionY = _pixelPerProjectionY;
 						screenBitmap->viewHeight = _viewHeight;
 						screenBitmap->viewWidth = _viewWidth;
 						screenBitmap->extents = *_extents;
-						screenBitmap->bitmap = new Gdiplus::Bitmap((INT)dstW, (INT)dstH);
+						screenBitmap->bitmap = new Gdiplus::Bitmap((INT)(dstW+1.0), (INT)(dstH+1.0));
 
 						Gdiplus::Graphics g(screenBitmap->bitmap);
 
 						if ( downsampling )
-							g.SetInterpolationMode((Gdiplus::InterpolationMode)downsamplingMode);	
+							g.SetInterpolationMode((Gdiplus::InterpolationMode)downsamplingMode);
 						else
 							g.SetInterpolationMode((Gdiplus::InterpolationMode)upsamplingMode);	
 
-						Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)(dstW), (Gdiplus::REAL)(dstH));
-						g.DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX - 0.5), (Gdiplus::REAL)(imgY -0.5), 
+						Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)int(dstW+1.0), (Gdiplus::REAL)int(dstH+1.0));
+						g.DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX), (Gdiplus::REAL)(imgY), 
 																		(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
 						
-						gr->DrawImage(screenBitmap->bitmap, (Gdiplus::REAL)(dstL), (Gdiplus::REAL)(dstT));
-
+						gr->DrawImage(screenBitmap->bitmap, (Gdiplus::REAL)screenBitmap->left, (Gdiplus::REAL)screenBitmap->top);
 					}
 					else
 					{
-						Gdiplus::RectF rect((Gdiplus::REAL)dstL, (Gdiplus::REAL)dstT, (Gdiplus::REAL)(dstW), (Gdiplus::REAL)(dstH));
-						gr->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX - 0.5), (Gdiplus::REAL)(imgY -0.5), 
+						Gdiplus::RectF rect((Gdiplus::REAL)int(dstL), (Gdiplus::REAL)int(dstT), (Gdiplus::REAL)int(dstW+1.0), (Gdiplus::REAL)int(dstH+1.0));
+						gr->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX), (Gdiplus::REAL)(imgY), 
 																		(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
 					}
 					if (pad!= 0)
