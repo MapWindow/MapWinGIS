@@ -128,9 +128,11 @@ BEGIN_MESSAGE_MAP(CMapView, COleControl)
 	ON_WM_SIZE()
 	ON_WM_DROPFILES()
 	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_RBUTTONDBLCLK()
 	ON_WM_RBUTTONUP()
 	ON_WM_SETCURSOR()
 	ON_WM_TIMER()
@@ -467,6 +469,7 @@ CMapView::CMapView():vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"), valsLen(39
 	MultilineLabeling = true;
 
 	m_canbitblt = FALSE;
+	m_leftButtonDown = FALSE;
 	m_bitbltClickMove = CPoint(0,0);
 	m_bitbltClickDown = CPoint(0,0);
 
@@ -815,6 +818,8 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	m_leftButtonDown = TRUE;
+
 	CPoint rotPoint = point;
 	if (m_Rotate != NULL && m_RotateAngle != 0)
 	{
@@ -823,6 +828,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
     }
 	else
 		m_clickDown = point;
+
+	m_clickDownExtents = extents;
 
 	long vbflags = 0;
 	if( nFlags & MK_SHIFT )
@@ -1097,6 +1104,14 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 // ************************************************************
+//		OnLButtonDblClick
+// ************************************************************
+void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+   OnLButtonDown(nFlags, point);
+}
+
+// ************************************************************
 //		OnLButtonUp
 // ************************************************************
 void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
@@ -1114,11 +1129,10 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		point = rotPoint;
 	}
 
-	m_clickMove = point;
-	m_clickUp = point;
-
-	if( m_sendMouseUp == TRUE )
+	if( m_sendMouseUp == TRUE && m_leftButtonDown )
 		FireMouseUp( MK_LBUTTON, vbflags, point.x, point.y - 1 );
+
+	m_leftButtonDown = FALSE;
 
 	ReleaseCapture();
 
@@ -1172,10 +1186,10 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if( nFlags & MK_CONTROL )
 		vbflags |= 2;
 
+	CPoint movePnt = point;
+
 	if (m_Rotate != NULL && m_RotateAngle != 0)
-		m_clickMove = rotPoint;
-	else
-		m_clickMove = point;
+		movePnt = rotPoint;
 
 	if( m_sendMouseMove == TRUE )
 	{	
@@ -1214,15 +1228,13 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			double zmx = 0, zmy = 0;
 			double zpx = 0, zpy = 0;
 
-			double xAmount = (m_clickDown.x - m_clickMove.x)*m_inversePixelPerProjectionX;
-			double yAmount = (m_clickMove.y - m_clickDown.y)*m_inversePixelPerProjectionY;
+			double xAmount = (m_clickDown.x - movePnt.x)*m_inversePixelPerProjectionX;
+			double yAmount = (movePnt.y - m_clickDown.y)*m_inversePixelPerProjectionY;
 
-			m_clickDown = m_clickMove;
-
-			extents.left += xAmount;
-			extents.right += xAmount;
-			extents.bottom += yAmount;
-			extents.top += yAmount;
+			extents.left = m_clickDownExtents.left + xAmount;
+			extents.right = m_clickDownExtents.right + xAmount;
+			extents.bottom = m_clickDownExtents.bottom + yAmount;
+			extents.top = m_clickDownExtents.top + yAmount;
 
 			if (m_UseSeamlessPan)
 			{
@@ -1236,9 +1248,14 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				InvalidateControl();
 		}
 	}
-	else if( m_cursorMode == cmSelection )
-	{
-	}
+}
+
+// ************************************************************
+//		OnRButtonDblClick
+// ************************************************************
+void CMapView::OnRButtonDblClk(UINT nFlags, CPoint point)
+{
+   OnRButtonDown(nFlags, point);
 }
 
 // ************************************************************
@@ -1256,6 +1273,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		vbflags |= 2;
 
 	m_clickDown = point;
+	m_clickDownExtents = extents;
 
 	if( m_sendMouseDown == TRUE )
 		FireMouseDown( MK_RBUTTON, vbflags, point.x, point.y - 1 );
@@ -1438,99 +1456,107 @@ void CMapView::OnMapCursorChanged()
 // *******************************************************
 BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 {
-	//crsMapDefault
-	if( m_mapCursor == 0 )
+	HCURSOR NewCursor = NULL;
+
+	if( nHitTest != HTCLIENT )
 	{
-		CPoint cpos;
-		GetCursorPos(&cpos);
-		CRect wrect;
-		GetWindowRect(&wrect);
-		
-		// prevents changing the cursor outside contrls window
-		HWND wndActive = ::GetActiveWindow();
-		if ((wndActive == this->GetSafeHwnd()) || (wndActive == this->GetParentOwner()->GetSafeHwnd()))
-		{
-			if( wrect.PtInRect(cpos)) //&& (m_mapCursor != crsrUserDefined))
+		COleControl::OnSetCursor( pWnd, nHitTest, message );
+		return TRUE;
+	}
+
+	switch( m_mapCursor )
+	{
+		case crsrMapDefault:
+
+			switch( m_cursorMode )
 			{
-				if( m_cursorMode == cmZoomIn )
-					::SetCursor( m_cursorZoomin );
-				else if( m_cursorMode == cmZoomOut )
-					::SetCursor( m_cursorZoomout );
-				else if( m_cursorMode == cmPan )
-					::SetCursor( m_cursorPan );
-				else if( m_cursorMode == cmSelection )
-					::SetCursor( m_cursorSelect );
-				else if( m_cursorMode == cmNone )
-				{	
-					if( m_uDCursorHandle != NULL )
-					{
-						::SetCursor( (HCURSOR)m_uDCursorHandle );
-					}
-					else
-					{
-						COleControl::OnSetCursor(pWnd, nHitTest, message);
-					}
-				}
+				case cmZoomIn:
+					NewCursor = m_cursorZoomin;
+					break;
+
+				case cmZoomOut:
+					NewCursor = m_cursorZoomout;
+					break;
+
+				case cmPan:
+					NewCursor = m_cursorPan;
+					break;
+
+				case cmSelection:
+					NewCursor = m_cursorSelect;
+					break;
+
+				case cmNone:
+					NewCursor = (HCURSOR)m_uDCursorHandle;
+					break;
 			}
-		}
-	}
-	else
-	{
-		//crsrAppStarting
-		if( m_mapCursor == 1 )
-			::SetCursor(LoadCursor(NULL, IDC_APPSTARTING) );
-		//crsrArrow
-		else if( m_mapCursor == 2 )
-			::SetCursor(LoadCursor(NULL, IDC_ARROW) );
-		//crsrCross
-		else if( m_mapCursor == 3 )
-			::SetCursor(LoadCursor(NULL, IDC_CROSS) );
-		//crsrHelp
-		else if( m_mapCursor == 4 )
-			::SetCursor(LoadCursor(NULL, IDC_HELP) );
-		//crsrIBeam
-		else if( m_mapCursor == 5 )
-			::SetCursor(LoadCursor(NULL, IDC_IBEAM) );
-		//crsrNo
-		else if( m_mapCursor == 6 )
-			::SetCursor(LoadCursor(NULL, IDC_NO) );
-		//crsrSizeAll
-		else if( m_mapCursor == 7 )
-			::SetCursor(LoadCursor(NULL, IDC_SIZEALL) );
-		//crsrSizeNESW
-		else if( m_mapCursor == 8 )
-			::SetCursor(LoadCursor(NULL, IDC_SIZENESW) );
-		//crsrSizeNS
-		else if( m_mapCursor == 9 )
-			::SetCursor(LoadCursor(NULL, IDC_SIZENS) );
-		//crsrSizeNWSE
-		else if( m_mapCursor == 10 )
-			::SetCursor(LoadCursor(NULL, IDC_SIZENWSE) );
-		//crsrSizeWE
-		else if( m_mapCursor == 11 )
-			::SetCursor(LoadCursor(NULL, IDC_SIZEWE) );
-		//crsrUpArrow
-		else if( m_mapCursor == 12 )
-			::SetCursor(LoadCursor(NULL, IDC_UPARROW) );
-		//crsrWait
-		else if( m_mapCursor == 13 )
-		{
+			break;
+	
+		case crsrAppStarting:
+			NewCursor = LoadCursor(NULL, IDC_APPSTARTING);
+			break;
+
+		case crsrArrow:
+			NewCursor = LoadCursor(NULL, IDC_ARROW);
+			break;
+
+		case crsrCross:
+			NewCursor = LoadCursor(NULL, IDC_CROSS);
+			break;
+
+		case crsrHelp:
+			NewCursor = LoadCursor(NULL, IDC_HELP);
+			break;
+
+		case crsrIBeam:
+			NewCursor = LoadCursor(NULL, IDC_IBEAM);
+			break;
+
+		case crsrNo:
+			NewCursor = LoadCursor(NULL, IDC_NO);
+			break;
+
+		case crsrSizeAll:
+			NewCursor = LoadCursor(NULL, IDC_SIZEALL);
+			break;
+
+		case crsrSizeNESW:
+			NewCursor = LoadCursor(NULL, IDC_SIZENESW);
+			break;
+
+		case crsrSizeNS:
+			NewCursor = LoadCursor(NULL, IDC_SIZENS);
+			break;
+
+		case crsrSizeNWSE:
+			NewCursor = LoadCursor(NULL, IDC_SIZENWSE);
+			break;
+
+		case crsrSizeWE:
+			NewCursor = LoadCursor(NULL, IDC_SIZEWE);
+			break;
+
+		case crsrUpArrow:
+			NewCursor = LoadCursor(NULL, IDC_UPARROW);
+			break;
+		
+		case crsrWait:
+
 			if (!m_DisableWaitCursor)
-				::SetCursor(LoadCursor(NULL, IDC_WAIT) );
-		}
-		//crsrUserDefined
-		else if( m_mapCursor == 14 )
-		{	if( m_uDCursorHandle != NULL )
-		::SetCursor( (HCURSOR)m_uDCursorHandle );
-		else
-			COleControl::OnSetCursor(pWnd, nHitTest, message);
-		}
-		else
-			COleControl::OnSetCursor(pWnd, nHitTest, message);
+				NewCursor = LoadCursor(NULL, IDC_WAIT);
+			break;
+
+		case crsrUserDefined:
+			NewCursor = (HCURSOR)m_uDCursorHandle;
+			break;
 	}
+
+	if (NewCursor != NULL)
+		::SetCursor( NewCursor );
+	else
+		COleControl::OnSetCursor( pWnd, nHitTest, message );
 
 	return TRUE;
-
 }
 
 // *************************************************************
