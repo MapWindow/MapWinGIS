@@ -667,8 +667,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if (!ProcessGeneralOptions(&nArgc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 	for (int iArg = 1; iArg < nArgc; iArg++)
@@ -748,10 +747,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 eGType = OGRFromOGCGeomType(osGeomName);
                 if (eGType == wkbUnknown)
                 {
-					this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,"-nlt %s: type not recognised.\n",
                             sArr[iArg+1] );
-                    return ResetConfigOptions();
+                    return ResetConfigOptions(tkGDAL_ERROR);
                 }
             }
             if (eGType != wkbNone && bIs3D)
@@ -847,10 +845,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 }
                 else
                 {
-					this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,"Unhandled type for fieldtypeasstring option : %s\n",
                             *iter);
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
                 }
                 iter ++;
             }
@@ -885,9 +882,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 OGRGeometryFactory::createFromWkt(&pszTmp, NULL, &poClipSrc);
                 if (poClipSrc == NULL)
                 {
-                    this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,"FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
                 }
                 iArg ++;
             }
@@ -941,9 +937,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 OGRGeometryFactory::createFromWkt(&pszTmp, NULL, &poClipDst);
                 if (poClipDst == NULL)
                 {
-                    this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,"FAILURE: Invalid geometry. Must be a valid POLYGON or MULTIPOLYGON WKT\n\n");
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
                 }
                 iArg ++;
             }
@@ -997,9 +992,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if( bPreserveFID && bExplodeCollections )
     {
-        this->lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"FAILURE: cannot use -preserve_fid and -explodecollections at the same time\n\n" );
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     if( bClipSrc && pszClipSrcDS != NULL)
@@ -1007,9 +1001,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poClipSrc = LoadGeometry(pszClipSrcDS, pszClipSrcSQL, pszClipSrcLayer, pszClipSrcWhere);
         if (poClipSrc == NULL)
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"FAILURE: cannot load source clip geometry\n\n" );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
     else if( bClipSrc && poClipSrc == NULL )
@@ -1018,10 +1011,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             poClipSrc = poSpatialFilter->clone();
         if (poClipSrc == NULL)
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"FAILURE: -clipsrc must be used with -spat option or a\n"
                              "bounding box, WKT string or datasource must be specified\n\n");
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
     
@@ -1030,9 +1022,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poClipDst = LoadGeometry(pszClipDstDS, pszClipDstSQL, pszClipDstLayer, pszClipDstWhere);
         if (poClipDst == NULL)
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"FAILURE: cannot load dest clip geometry\n\n" );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -1050,11 +1041,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     {
         OGRSFDriverRegistrar    *poR = OGRSFDriverRegistrar::GetRegistrar();
         
-        this->lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"FAILURE:\nUnable to open datasource `%s'.",
 			pszDataSource );
 
-        return ResetConfigOptions();
+        return ResetConfigOptions(tkGDAL_ERROR);
     }
 
 /* -------------------------------------------------------------------- */
@@ -1088,12 +1078,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     bError = TRUE;
                 if (bError)
                 {
-                    this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,
                              "ERROR: -nln name must be specified combined with "
                              "a single source layer name,\nor a -sql statement, and "
                              "name must be different from an existing layer.\n");
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
                 }
             }
         }
@@ -1119,11 +1108,10 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if (bUpdate)
             {
-                this->lastErrorCode = tkGDAL_ERROR;
                 CPLError(CE_Failure,0,"FAILURE:\n"
                         "Unable to open existing output datasource `%s'.\n",
                         pszDestDataSource );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
         }
         else if( CSLCount(papszDSCO) > 0 )
@@ -1146,17 +1134,15 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poDriver = poR->GetDriverByName(pszFormat);
         if( poDriver == NULL )
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"Unable to find driver `%s'.\n", pszFormat );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
 
         if( !poDriver->TestCapability( ODrCCreateDataSource ) )
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"%s driver does not support data source creation.\n",
 				pszFormat );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
 
 /* -------------------------------------------------------------------- */
@@ -1178,12 +1164,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             if (VSIMkdir(pszDestDataSource, 0755) != 0)
             {
-				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined,
                       "Failed to create directory %s\n"
                       "for shapefile datastore.\n",
                       pszDestDataSource );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
         }
 
@@ -1193,10 +1178,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poODS = poDriver->CreateDataSource( pszDestDataSource, papszDSCO );
         if( poODS == NULL )
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"%s driver failed to create %s\n", 
 				pszFormat, pszDestDataSource );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -1208,10 +1192,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poOutputSRS = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
         if( poOutputSRS->SetFromUserInput( pszOutputSRSDef ) != OGRERR_NONE )
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"Failed to process SRS definition: %s\n", 
 				pszOutputSRSDef );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -1223,10 +1206,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         poSourceSRS = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
         if( poSourceSRS->SetFromUserInput( pszSourceSRSDef ) != OGRERR_NONE )
         {
-            this->lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,"Failed to process SRS definition: %s\n", 
 				pszSourceSRSDef );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -1291,12 +1273,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                                  bExplodeCollections, pszZField, pszWHERE, pfnProgress, &params,
 								 bSkipFailures, nGroupTransactions, nFIDToFetch, bPreserveFID))
             {
-				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "Terminating translation prematurely after failed\n"
                           "translation from sql statement." );
 
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
 
             if (poPassedLayer != poResultSet)
@@ -1327,10 +1308,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
                 if( poLayer == NULL )
                 {
-                    this->lastErrorCode = tkGDAL_ERROR;
                     CPLError(CE_Failure,0,"FAILURE: Couldn't fetch advertised layer %d!\n",
                             iLayer );
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
                 }
 
                 papoLayers[iLayer] = poLayer;
@@ -1356,8 +1336,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                              papszLayers[iLayer] );
                     if (!bSkipFailures)
 					{
-                        this->lastErrorCode = tkGDAL_ERROR;
-						return ResetConfigOptions();
+						return ResetConfigOptions(tkGDAL_ERROR);
 					}
                 }
 
@@ -1399,8 +1378,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     CPLError(CE_Failure,0,"FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
                     if (!bSkipFailures)
 					{
-						this->lastErrorCode = tkGDAL_ERROR;
-						return ResetConfigOptions();
+						return ResetConfigOptions(tkGDAL_ERROR);
 					}
                 }
             }
@@ -1480,13 +1458,12 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 								bSkipFailures, nGroupTransactions, nFIDToFetch, bPreserveFID)
                 && !bSkipFailures )
             {
-				this->lastErrorCode = tkGDAL_ERROR;
                 CPLError( CE_Failure, CPLE_AppDefined, 
                         "Terminating translation prematurely after failed\n"
                         "translation of layer %s (use -skipfailures to skip errors)\n", 
                         poLayer->GetName() );
 
-                return ResetConfigOptions();
+                return ResetConfigOptions(tkGDAL_ERROR);
             }
 
             if (poPassedLayer != poLayer)
@@ -2325,8 +2302,7 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 
 	if (!ProcessGeneralOptions(&nArgc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 	for (int iArg = 1; iArg < nArgc; iArg++)

@@ -85,7 +85,7 @@ void CheckExtensionConsistency(const char* pszDestFilename,
         }
         if (osConflictingDriverList.size())
         {
-            fprintf(stderr,
+            CPLError( CE_Warning, CPLE_AppDefined,
                     "Warning: The target file has a '%s' extension, which is normally used by the %s driver%s,\n"
                     "but the requested output driver is %s. Is it really what you want ?\n",
                     pszDestExtension,
@@ -202,12 +202,15 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
 	return TRUE;
 }
 
-HRESULT CUtils::ResetConfigOptions()
+HRESULT CUtils::ResetConfigOptions(long ErrorCode)
 {
 	for( int i = 0; i < sConfig.GetCount(); i++ )
 		CPLSetConfigOption( sConfig[i].GetBuffer(0), NULL);
 
 	sConfig.RemoveAll();
+
+	if (ErrorCode > 0)
+		this->lastErrorCode = ErrorCode;
 
 	return 0L;
 }
@@ -260,8 +263,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 	if (!ProcessGeneralOptions(&argc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -343,22 +345,20 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 			if( i + 1 >= argc )
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError( CE_Failure, CPLE_AppDefined, 
 					"--format option given without a format code." );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
 			hDriver = GDALGetDriverByName( sArr[i+1].GetBuffer(0) );
 			if( hDriver == NULL )
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError( CE_Failure, CPLE_AppDefined, 
 					"--format option given with format '%s', but that format not\n"
 					"recognised.  Use the --formats option to get a list of available formats,\n"
 					"and use the short code (ie. GTiff or HFA) as the format identifier.\n", 
 					sArr[i+1].GetBuffer(0) );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
 			sOutput += "Format Details:\n";
@@ -419,7 +419,6 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
     
     if( hDataset == NULL )
     {
-		lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,
                  "gdalinfo failed - unable to open '%s'.\n",
                  pszFilename );
@@ -430,7 +429,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 
         CPLDumpSharedList( NULL );
 
-        return ResetConfigOptions();
+        return ResetConfigOptions(tkGDAL_ERROR);
     }
 
 	/* -------------------------------------------------------------------- */
@@ -457,12 +456,11 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         }
         else
         {
-			lastErrorCode = tkGDAL_ERROR;
             CPLError(CE_Failure,0,
                      "gdalinfo warning: subdataset %d of %d requested. "
                      "Reading the main dataset.\n",
                      nSubdataset, nSubdatasets );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -1206,8 +1204,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		if (!ProcessGeneralOptions(&argc))
 		{
-			this->lastErrorCode = tkGDAL_ERROR;
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 	}
 	else
@@ -1239,9 +1236,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if (eOutputType == GDT_Unknown)
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unknown output pixel type: %s", sArr[i+1]);
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
 		}
@@ -1263,10 +1259,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			int nBand = atoi(pszBand);
 			if( nBand < 1 )
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", sArr[i+1]);
-				// TODO: Usage();
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
 
@@ -1305,10 +1299,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				int nBand = atoi(pszBand);
 				if( nBand < 1 )
 				{
-					lastErrorCode = tkGDAL_ERROR;
 					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", sArr[i+1]);
-					// TODO: Usage();
-					return ResetConfigOptions();
+					return ResetConfigOptions(tkGDAL_ERROR);
 				}
 
 				eMaskMode = MASK_USER;
@@ -1446,9 +1438,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if( oOutputSRS.SetFromUserInput( sArr[i+1].GetBuffer (0) ) != OGRERR_NONE )
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", sArr[i+1] );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
 			oOutputSRS.exportToWkt( &pszOutputSRS );
@@ -1465,10 +1456,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				nRGBExpand = 4;
 			else
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", sArr[i+1] );
-				// TODO: Usage();
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
 		}
@@ -1486,25 +1475,21 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		else if( sArr[i][0] == '-' )
 		{
-			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", sArr[i] );
-			// TODO: Usage();
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 	}
 
 	if (pszDest == NULL)
 	{
-		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "No destination dataset specified.");
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 	if (strcmp (pszSource, pszDest) == 0)
 	{
-		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0, "Source and destination datasets must be different.");
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1515,8 +1500,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if (hDataset == NULL)
 	{
-		lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1526,11 +1510,10 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		&& CSLCount(GDALGetMetadata(hDataset, "SUBDATASETS")) > 0
 		&& GDALGetRasterCount(hDataset) == 0)
 	{
-		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, 0,
 			"Input file contains subdatasets. Please, select one of them for reading." );
 		GDALClose(hDataset);
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 	if (CSLCount(GDALGetMetadata(hDataset, "SUBDATASETS")) > 0
@@ -1595,9 +1578,8 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		nBandCount = GDALGetRasterCount (hDataset);
 		if (nBandCount == 0)
 		{
-			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0, "Input file has no bands, and so cannot be translated." );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 
 		panBandList = (int *) CPLMalloc (sizeof(int)*nBandCount);
@@ -1610,11 +1592,10 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
 			if (ABS(panBandList[i]) > GDALGetRasterCount (hDataset))
 			{
-				lastErrorCode = tkGDAL_ERROR;
 				CPLError(CE_Failure, 0,
 					"Band %d requested, but only bands 1 to %d available.",
 					ABS(panBandList[i]), GDALGetRasterCount(hDataset) );
-				return ResetConfigOptions();
+				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 		}
 
@@ -1638,13 +1619,12 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 		if (adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0)
 		{
-			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0,
 				"The -projwin option was used, but the geotransform is "
 				"rotated. This configuration is not supported." );
 			GDALClose (hDataset);
 			CPLFree (panBandList);
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 
 		anSrcWin[0] = (int)
@@ -1659,12 +1639,11 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			||anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset)
 			|| anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset))
 		{
-			lastErrorCode = tkGDAL_ERROR;
 			CPLError(CE_Failure, 0,
 				"Computed -srcwin falls outside raster size of %dx%d.",
 				GDALGetRasterXSize(hDataset), 
 				GDALGetRasterYSize(hDataset) );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 	}
 
@@ -1676,7 +1655,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		|| anSrcWin[0] + anSrcWin[2] > GDALGetRasterXSize(hDataset)
 		|| anSrcWin[1] + anSrcWin[3] > GDALGetRasterYSize(hDataset))
 	{
-		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure,0,
 			"-srcwin %d %d %d %d falls outside raster size of %dx%d "
 			"or is otherwise illegal.",
@@ -1686,7 +1664,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			anSrcWin[3],
 			GDALGetRasterXSize(hDataset), 
 			GDALGetRasterYSize(hDataset));
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -1695,7 +1673,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	hDriver = GDALGetDriverByName (pszFormat);
 	if (hDriver == NULL)
 	{
-		lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure,0, "Output driver `%s' not recognised.", pszFormat );
 
 		// TODO: List valid drivers?
@@ -1704,7 +1681,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		CPLFree (panBandList);
 		CSLDestroy (papszCreateOptions);
 
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 	/* -------------------------------------------------------------------- */
@@ -1927,7 +1904,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			GDALClose( hDataset );
 			CPLFree( panBandList );
 			CSLDestroy( papszCreateOptions );
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 
 		/* Check that the color table only contains gray levels */
@@ -1954,7 +1931,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		else
 		{
 			CPLError(CE_Failure, 0, "Error : invalid use of -expand option.");
-			return ResetConfigOptions();
+			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 	}
 
@@ -2239,7 +2216,6 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	return ResetConfigOptions();
 }
 
-
 /************************************************************************/
 /*                            ArgIsNumeric()                            */
 /************************************************************************/
@@ -2450,20 +2426,20 @@ static void ProcessLayer(
         {
             if( OSRIsSame(hSrcSRS, hDstSRS) == FALSE )
             {
-                fprintf(stderr,
+                CPLError( CE_Warning, CPLE_AppDefined,
                         "Warning : the output raster dataset and the input vector layer do not have the same SRS.\n"
                         "Results might be incorrect (no on-the-fly reprojection of input data).\n");
             }
         }
         else if( hDstSRS != NULL && hSrcSRS == NULL )
         {
-            fprintf(stderr,
+            CPLError( CE_Warning, CPLE_AppDefined,
                     "Warning : the output raster dataset has a SRS, but the input vector layer SRS is unknown.\n"
                     "Ensure input vector has the same SRS, otherwise results might be incorrect.\n");
         }
         else if( hDstSRS == NULL && hSrcSRS != NULL )
         {
-            fprintf(stderr,
+            CPLError( CE_Warning, CPLE_AppDefined,
                     "Warning : the input vector layer has a SRS, but the output raster dataset SRS is unknown.\n"
                     "Ensure output raster dataset has the same SRS, otherwise results might be incorrect.\n");
         }
@@ -2485,7 +2461,8 @@ static void ProcessLayer(
                                            pszBurnAttribute );
         if( iBurnField == -1 )
         {
-            printf( "Failed to find field %s on layer %s, skipping.\n",
+            CPLError( CE_Failure, CPLE_AppDefined,
+				"Failed to find field %s on layer %s, skipping.\n",
                     pszBurnAttribute, 
                     OGR_FD_GetName( OGR_L_GetLayerDefn( hSrcLayer ) ) );
             return;
@@ -2599,8 +2576,8 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
 
             if (OGR_L_GetExtent(hLayer, &sLayerEnvelop, TRUE) != OGRERR_NONE)
             {
-                fprintf(stderr, "Cannot get layer extent\n");
-                exit(2);
+                CPLError( CE_Failure, CPLE_AppDefined, "Cannot get layer extent\n");
+                return NULL;
             }
 
             /* When rasterizing point layers and that the bounds have */
@@ -2678,8 +2655,8 @@ GDALDatasetH CreateOutputDataset(std::vector<OGRLayerH> ahLayers,
                         nBandCount, eOutputType, papszCreateOptions);
     if (hDstDS == NULL)
     {
-        fprintf(stderr, "Cannot create %s\n", pszDstFilename);
-        exit(2);
+        CPLError( CE_Failure, CPLE_AppDefined, "Cannot create %s\n", pszDstFilename);
+        return NULL;
     }
 
     GDALSetGeoTransform(hDstDS, adfProjection);
@@ -2757,9 +2734,10 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int bGotBounds = FALSE;
     int nXSize = 0, nYSize = 0;
     int bQuiet = FALSE;
-    GDALProgressFunc pfnProgress = GDALTermProgress;
+    GDALProgressFunc pfnProgress = GDALProgressCallback;
     OGRSpatialReferenceH hSRS = NULL;
     int bTargetAlignedPixels = FALSE;
+	struct CallbackParams params = { cBack, "Rasterizing" };
     
 	(*retval) = VARIANT_FALSE;
 
@@ -2770,8 +2748,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if (!ProcessGeneralOptions(&argc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -2779,12 +2756,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     for( i = 1; i < argc; i++ )
     {
-		if( EQUAL(sArr[i],"-q") || EQUAL(sArr[i],"-quiet") )
-        {
-            bQuiet = TRUE;
-            pfnProgress = GDALDummyProgress;
-        }
-        else if( EQUAL(sArr[i],"-a") && i < argc-1 )
+		if( EQUAL(sArr[i],"-a") && i < argc-1 )
         {
             pszBurnAttribute = sArr[++i];
         }
@@ -2904,9 +2876,9 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( OSRSetFromUserInput(hSRS, sArr[i+1]) != OGRERR_NONE )
             {
-                fprintf( stderr, "Failed to process SRS definition: %s\n", 
+                CPLError( CE_Failure, CPLE_AppDefined, "Failed to process SRS definition: %s\n", 
                          sArr[i+1] );
-                exit( 1 );
+                return ResetConfigOptions(tkGDAL_ERROR);
             }
 
             i++;
@@ -2952,9 +2924,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eOutputType == GDT_Unknown )
             {
-                printf( "Unknown output pixel type: %s\n", sArr[i+1] );
-                //Usage();
-				// TODO: set error code?
+                CPLError( CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
             bCreateOutput = TRUE;
@@ -2965,9 +2936,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             nYSize = atoi(sArr[++i]);
             if (nXSize <= 0 || nYSize <= 0)
             {
-                printf( "Wrong value for -outsize parameters\n");
-                //Usage();
-				// TODO: set error code?
+                CPLError( CE_Failure, CPLE_AppDefined, "Wrong value for -outsize parameters\n");
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             bCreateOutput = TRUE;
         }
@@ -2977,9 +2947,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             dfYRes = fabs(atof(sArr[++i]));
             if( dfXRes == 0 || dfYRes == 0 )
             {
-                printf( "Wrong value for -tr parameters\n");
-                //Usage();
-				// TODO: set error code?
+                CPLError( CE_Failure, CPLE_AppDefined, "Wrong value for -tr parameters\n");
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             bCreateOutput = TRUE;
         }
@@ -2995,39 +2964,34 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     if( pszSrcFilename == NULL || pszDstFilename == NULL )
     {
-        fprintf( stderr, "Missing source or destination.\n\n" );
-        //Usage();
-		// TODO: set error code?
+        CPLError( CE_Failure, CPLE_AppDefined, "Missing source or destination.\n\n" );
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     if( adfBurnValues.size() == 0 && pszBurnAttribute == NULL && !b3D )
     {
-        fprintf( stderr, "At least one of -3d, -burn or -a required.\n\n" );
-        //Usage();
-		// TODO: set error code?
+        CPLError( CE_Failure, CPLE_AppDefined, "At least one of -3d, -burn or -a required.\n\n" );
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     if( bCreateOutput )
     {
         if( dfXRes == 0 && dfYRes == 0 && nXSize == 0 && nYSize == 0 )
         {
-            fprintf( stderr, "'-tr xres yes' or '-ts xsize ysize' is required.\n\n" );
-            //Usage();
-			// TODO: set error code?
+            CPLError( CE_Failure, CPLE_AppDefined, "'-tr xres yes' or '-ts xsize ysize' is required.\n\n" );
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     
         if (bTargetAlignedPixels && dfXRes == 0 && dfYRes == 0)
         {
-            fprintf( stderr, "-tap option cannot be used without using -tr\n");
-            //Usage();
-			// TODO: set error code?
+            CPLError( CE_Failure, CPLE_AppDefined, "-tap option cannot be used without using -tr\n");
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
 
         if( anBandList.size() != 0 )
         {
-            fprintf( stderr, "-b option cannot be used when creating a GDAL dataset.\n\n" );
-            //Usage();
-			// TODO: set error code?
+            CPLError( CE_Failure, CPLE_AppDefined, "-b option cannot be used when creating a GDAL dataset.\n\n" );
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
 
         int nBandCount = 1;
@@ -3062,10 +3026,9 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     hSrcDS = OGROpen( pszSrcFilename, FALSE, NULL );
     if( hSrcDS == NULL )
     {
-        fprintf( stderr, "Failed to open feature source: %s\n", 
+        CPLError( CE_Failure, CPLE_AppDefined, "Failed to open feature source: %s\n", 
                  pszSrcFilename);
-        //Usage();
-		// TODO: set error code?
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     if( pszSQL == NULL && papszLayers == NULL )
@@ -3076,10 +3039,9 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         }
         else
         {
-            fprintf( stderr, "At least one of -l or -sql required.\n\n" );
-            //Usage();
-			// TODO: set error code?
-        }
+            CPLError( CE_Failure, CPLE_AppDefined, "At least one of -l or -sql required.\n\n" );
+			return ResetConfigOptions(tkGDAL_ERROR);
+         }
     }
 
 /* -------------------------------------------------------------------- */
@@ -3116,7 +3078,6 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 }
             }
             printf( "\n" );
-            //Usage();
 			// TODO: clean up memory...set error code?
 			return ResetConfigOptions();
         }
@@ -3128,7 +3089,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     {
         hDstDS = GDALOpen( pszDstFilename, GA_Update );
         if( hDstDS == NULL )
-            exit( 2 );
+            return ResetConfigOptions();
     }
 
 /* -------------------------------------------------------------------- */
@@ -3158,7 +3119,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             ProcessLayer( hLayer, hSRS != NULL, hDstDS, anBandList, 
                           adfBurnValues, b3D, bInverse, pszBurnAttribute,
-                          papszRasterizeOptions, pfnProgress, NULL );
+                          papszRasterizeOptions, pfnProgress, &params );
 
             OGR_DS_ReleaseResultSet( hSrcDS, hLayer );
         }
@@ -3202,7 +3163,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         OGRLayerH hLayer = OGR_DS_GetLayerByName( hSrcDS, papszLayers[i] );
         if( hLayer == NULL )
         {
-            fprintf( stderr, "Unable to find layer %s, skipping.\n", 
+            CPLError( CE_Warning, CPLE_AppDefined, "Unable to find layer %s, skipping.\n", 
                       papszLayers[i] );
             continue;
         }
@@ -3216,7 +3177,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         void *pScaledProgress;
         pScaledProgress =
             GDALCreateScaledProgress( 0.0, 1.0 * (i + 1) / nLayerCount,
-                                      pfnProgress, NULL );
+                                      pfnProgress, &params );
 
         ProcessLayer( hLayer, hSRS != NULL, hDstDS, anBandList, 
                       adfBurnValues, b3D, bInverse, pszBurnAttribute,
@@ -3224,6 +3185,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
         GDALDestroyScaledProgress( pScaledProgress );
     }
+
+	(*retval) = VARIANT_TRUE;
 
 /* -------------------------------------------------------------------- */
 /*      Cleanup                                                         */
@@ -3307,7 +3270,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	double	       dfMinX=0.0, dfMinY=0.0, dfMaxX=0.0, dfMaxY=0.0;
 	double	       dfXRes=0.0, dfYRes=0.0;
 	int             bTargetAlignedPixels = FALSE;
-	int             nForcePixels=0, nForceLines=0, bQuiet = FALSE;
+	int             nForcePixels=0, nForceLines=0;
 	int             bEnableDstAlpha = FALSE, bEnableSrcAlpha = FALSE;
 	int             bVRT = FALSE;
     GDALDatasetH	hDstDS;
@@ -3334,6 +3297,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int                  bHasGotErr = FALSE;
     int                  bCropToCutline = FALSE;
     int                  bOverwrite = FALSE;
+	struct CallbackParams params = { cBack, "Warping" };
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */
@@ -3347,8 +3311,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	if (!ProcessGeneralOptions(&argc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -3360,11 +3323,11 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             const char* pszMethod = CSLFetchNameValue(papszTO, "METHOD");
             if (pszMethod)
-                fprintf(stderr, "Warning: only one METHOD can be used. Method %s is already defined.\n",
+                CPLError( CE_Warning, CPLE_AppDefined, "Warning: only one METHOD can be used. Method %s is already defined.\n",
                         pszMethod);
             const char* pszMAX_GCP_ORDER = CSLFetchNameValue(papszTO, "MAX_GCP_ORDER");
             if (pszMAX_GCP_ORDER)
-                fprintf(stderr, "Warning: only one METHOD can be used. -order %s option was specified, so it is likely that GCP_POLYNOMIAL was implied.\n",
+                CPLError( CE_Warning, CPLE_AppDefined, "Warning: only one METHOD can be used. -order %s option was specified, so it is likely that GCP_POLYNOMIAL was implied.\n",
                         pszMAX_GCP_ORDER);
         }
 
@@ -3380,10 +3343,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         else if( EQUAL(sArr[i],"-multi") )
         {
             bMulti = TRUE;
-        }   
-        else if( EQUAL(sArr[i],"-q") || EQUAL(sArr[i],"-quiet"))
-        {
-            bQuiet = TRUE;
         }   
         else if( EQUAL(sArr[i],"-dstalpha") )
         {
@@ -3431,7 +3390,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             const char* pszMethod = CSLFetchNameValue(papszTO, "METHOD");
             if (pszMethod)
-                fprintf(stderr, "Warning: only one METHOD can be used. Method %s is already defined\n",
+                CPLError( CE_Warning, CPLE_AppDefined, "Warning: only one METHOD can be used. Method %s is already defined\n",
                         pszMethod);
             papszTO = CSLSetNameValue( papszTO, "MAX_GCP_ORDER", sArr[++i] );
         }
@@ -3440,9 +3399,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             papszTO = CSLSetNameValue( papszTO, "REFINE_TOLERANCE", sArr[++i] );
             if(atof(sArr[i]) < 0)
             {
-                printf( "The tolerance for -refine_gcps may not be negative\n");
-				// TODO: set error code?
-                //Usage();
+                CPLError(CE_Failure, CPLE_AppDefined, "The tolerance for -refine_gcps may not be negative\n");
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             if (i < argc-1 && atoi(sArr[i+1]) >= 0 && isdigit(sArr[i+1][0]))
             {
@@ -3495,9 +3453,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             dfYRes = fabs(CPLAtofM(sArr[++i]));
             if( dfXRes == 0 || dfYRes == 0 )
             {
-                printf( "Wrong value for -tr parameters\n");
-                //Usage();
-				// TODO: set error code?
+                CPLError(CE_Failure, CPLE_AppDefined, "Wrong value for -tr parameters\n");
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             bCreateOutput = TRUE;
         }
@@ -3521,9 +3478,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eOutputType == GDT_Unknown )
             {
-                printf( "Unknown output pixel type: %s\n", sArr[i+1] );
-                //Usage();
-				// TODO: set error code?
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
             bCreateOutput = TRUE;
@@ -3544,9 +3500,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eWorkingType == GDT_Unknown )
             {
-                printf( "Unknown output pixel type: %s\n", sArr[i+1] );
-                //Usage();
-				// TODO: set error code?
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
         }
@@ -3590,9 +3545,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 eResampleAlg = GRA_Lanczos;
             else
             {
-                printf( "Unknown resampling method: \"%s\".\n", sArr[i] );
-                //Usage();
-				// TODO: set error code?
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown resampling method: \"%s\".\n", sArr[i] );
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
         }
 
@@ -3628,8 +3582,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
         else if( sArr[i][0] == '-' )
 		{
-            //Usage();
-			// TODO: log invalid argument?
+            // Skip it.
 		}
 
         else 
@@ -3642,16 +3595,14 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     if ((nForcePixels != 0 || nForceLines != 0) && 
         (dfXRes != 0 && dfYRes != 0))
     {
-        printf( "-tr and -ts options cannot be used at the same time\n");
-        //Usage();
-		// TODO: set error code?
+        CPLError(CE_Failure, CPLE_AppDefined, "-tr and -ts options cannot be used at the same time\n");
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
     
     if (bTargetAlignedPixels && dfXRes == 0 && dfYRes == 0)
     {
-        printf( "-tap option cannot be used without using -tr\n");
-        //Usage();
-		// TODO: set error code?
+        CPLError(CE_Failure, CPLE_AppDefined, "-tap option cannot be used without using -tr\n");
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
 /* -------------------------------------------------------------------- */
@@ -3666,13 +3617,12 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     if( pszDstFilename == NULL )
 	{
-        //Usage();
 		// TODO: set error code?
 	}
         
     if( bVRT && CSLCount(papszSrcFiles) > 1 )
     {
-        fprintf(stderr, "Warning: gdalwarp -of VRT just takes into account "
+        CPLError( CE_Warning, CPLE_AppDefined, "Warning: gdalwarp -of VRT just takes into account "
                         "the first source dataset.\nIf all source datasets "
                         "are in the same projection, try making a mosaic of\n"
                         "them with gdalbuildvrt, and use the resulting "
@@ -3689,9 +3639,9 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     if ( CSLCount(papszSrcFiles) == 1 &&
          strcmp(papszSrcFiles[0], pszDstFilename) == 0 && bOverwrite)
     {
-        fprintf(stderr, "Source and destination datasets must be different.\n");
-        // TODO: clean up memory...set error code?
-		return ResetConfigOptions();
+        CPLError( CE_Failure, CPLE_AppDefined, "Source and destination datasets must be different.\n");
+        // TODO: clean up memory?
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     CPLPushErrorHandler( CPLQuietErrorHandler );
@@ -3706,13 +3656,13 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     if( hDstDS != NULL && bCreateOutput )
     {
-        fprintf( stderr, 
+        CPLError( CE_Failure, CPLE_AppDefined,
                  "Output dataset %s exists,\n"
                  "but some commandline options were provided indicating a new dataset\n"
                  "should be created.  Please delete existing dataset and run again.\n",
                  pszDstFilename );
-        // TODO: clean up memory...set error code?
-		return ResetConfigOptions();
+        // TODO: clean up memory?
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
     /* Avoid overwriting an existing destination file that cannot be opened in */
@@ -3725,12 +3675,12 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         
         if (hDstDS)
         {
-            fprintf( stderr, 
+            CPLError( CE_Failure, CPLE_AppDefined, 
                      "Output dataset %s exists, but cannot be opened in update mode\n",
                      pszDstFilename );
             GDALClose(hDstDS);
-            // TODO: clean up memory...set error code?
-			return ResetConfigOptions();
+            // TODO: clean up memory?
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
 
@@ -3843,14 +3793,14 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     if( hDstDS == NULL )
     {
-        if (!bQuiet && !bFormatExplicitelySet)
+        if (!bFormatExplicitelySet)
             CheckExtensionConsistency(pszDstFilename, pszFormat);
 
         hDstDS = GDALWarpCreateOutput( papszSrcFiles, pszDstFilename,pszFormat,
                                        papszTO, &papszCreateOptions, 
                                        eOutputType, &hUniqueTransformArg,
                                        &hUniqueSrcDS,
-									   bVRT, bQuiet, bTargetAlignedPixels,
+									   bVRT, FALSE, bTargetAlignedPixels,
 									   dfXRes, dfYRes,
 									   dfMinX, dfMaxX,
 									   dfMinY, dfMaxY,
@@ -3898,21 +3848,18 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );
     
         if( hSrcDS == NULL )
-            // TODO: clean up memory...set error code?
+            // TODO: clean up memory?
 			return ResetConfigOptions();
 
 /* -------------------------------------------------------------------- */
 /*      Check that there's at least one raster band                     */
 /* -------------------------------------------------------------------- */
         if ( GDALGetRasterCount(hSrcDS) == 0 )
-        {     
-            fprintf(stderr, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc] );
-            // TODO: clean up memory...set error code?
-			return ResetConfigOptions();
+        {
+            CPLError( CE_Failure, CPLE_AppDefined, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc] );
+            // TODO: clean up memory?
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
-
-        if( !bQuiet )
-            printf( "Processing input file %s.\n", papszSrcFiles[iSrc] );
 
 /* -------------------------------------------------------------------- */
 /*      Warns if the file has a color table and something more          */
@@ -3922,11 +3869,10 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         if ( eResampleAlg != GRA_NearestNeighbour &&
              GDALGetRasterColorTable(GDALGetRasterBand(hSrcDS, 1)) != NULL)
         {
-            if( !bQuiet )
-                fprintf( stderr, "Warning: Input file %s has a color table, which will likely lead to "
-                        "bad results when using a resampling method other than "
-                        "nearest neighbour. Converting the dataset prior to 24/32 bit "
-                        "is advised.\n", papszSrcFiles[iSrc] );
+            CPLError( CE_Warning, CPLE_AppDefined, "Warning: Input file %s has a color table, which will likely lead to "
+                    "bad results when using a resampling method other than "
+                    "nearest neighbour. Converting the dataset prior to 24/32 bit "
+                    "is advised.\n", papszSrcFiles[iSrc] );
         }
 
 /* -------------------------------------------------------------------- */
@@ -3938,9 +3884,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             && !bEnableSrcAlpha )
         {
             bEnableSrcAlpha = TRUE;
-            if( !bQuiet )
-                printf( "Using band %d of source image as alpha.\n", 
-                        GDALGetRasterCount(hSrcDS) );
         }
 
 /* -------------------------------------------------------------------- */
@@ -3954,7 +3897,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 GDALCreateGenImgProjTransformer2( hSrcDS, hDstDS, papszTO );
         
         if( hTransformArg == NULL )
-            // TODO: clean up memory...set error code?
+            // TODO: clean up memory?
 			return ResetConfigOptions();
         
         pfnTransformer = GDALGenImgProjTransform;
@@ -3992,9 +3935,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
         psWO->pfnTransformer = pfnTransformer;
         psWO->pTransformerArg = hTransformArg;
-
-        if( !bQuiet )
-            psWO->pfnProgress = GDALTermProgress;
+        psWO->pfnProgress = GDALProgressCallback;
+		psWO->pProgressArg = &params;
 
         if( dfWarpMemoryLimit != 0.0 )
             psWO->dfWarpMemoryLimit = dfWarpMemoryLimit;
@@ -4028,10 +3970,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                 GDALGetRasterBand(hDstDS,GDALGetRasterCount(hDstDS))) 
             == GCI_AlphaBand )
         {
-            if( !bQuiet )
-                printf( "Using band %d of destination image as alpha.\n", 
-                        GDALGetRasterCount(hDstDS) );
-                
             bEnableDstAlpha = TRUE;
         }
 
@@ -4089,15 +4027,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( bHaveNodata )
             {
-                if( !bQuiet )
-                {
-                    if (CPLIsNan(dfReal))
-                        printf( "Using internal nodata values (eg. nan) for image %s.\n",
-                                papszSrcFiles[iSrc] );
-                    else
-                        printf( "Using internal nodata values (eg. %g) for image %s.\n",
-                                dfReal, papszSrcFiles[iSrc] );
-                }
                 psWO->padfSrcNoDataReal = (double *) 
                     CPLMalloc(psWO->nBandCount*sizeof(double));
                 psWO->padfSrcNoDataImag = (double *) 
@@ -4862,9 +4791,8 @@ LoadCutline( const char *pszCutlineDSName, const char *pszCLayer,
 
 {
 #ifndef OGR_ENABLED
-    CPLError( CE_Failure, CPLE_AppDefined, 
+	CPLError( CE_Failure, CPLE_AppDefined, 
               "Request to load a cutline failed, this build does not support OGR features.\n" );
-    // TODO: free up memory...set error code?
 	return;
 #else // def OGR_ENABLED
     OGRRegisterAll();
@@ -5123,40 +5051,6 @@ typedef struct
     int                    bHasNoData;
     double                 noDataValue;
 } BandProperty;
-
-/************************************************************************/
-/*                               Usage()                                */
-/************************************************************************/
-
-static void Usage()
-
-{
-    fprintf(stdout, "%s", 
-            "Usage: gdalbuildvrt [-tileindex field_name] [-resolution {highest|lowest|average|user}]\n"
-            "                    [-tr xres yres] [-tap] [-separate] [-allow_projection_difference] [-q]\n"
-            "                    [-te xmin ymin xmax ymax] [-addalpha] [-hidenodata] \n"
-            "                    [-srcnodata \"value [value...]\"] [-vrtnodata \"value [value...]\"] \n"
-            "                    [-input_file_list my_liste.txt] [-overwrite] output.vrt [gdalfile]*\n"
-            "\n"
-            "eg.\n"
-            "  % gdalbuildvrt doq_index.vrt doq/*.tif\n"
-            "  % gdalbuildvrt -input_file_list my_liste.txt doq_index.vrt\n"
-            "\n"
-            "NOTES:\n"
-            "  o With -separate, each files goes into a separate band in the VRT band. Otherwise,\n"
-            "    the files are considered as tiles of a larger mosaic.\n"
-            "  o The default tile index field is 'location' unless otherwise specified by -tileindex.\n"
-            "  o In case the resolution of all input files is not the same, the -resolution flag.\n"
-            "    enable the user to control the way the output resolution is computed. average is the default.\n"
-            "  o Input files may be any valid GDAL dataset or a GDAL raster tile index.\n"
-            "  o For a GDAL raster tile index, all entries will be added to the VRT.\n"
-            "  o If one GDAL dataset is made of several subdatasets and has 0 raster bands, its\n"
-            "    datasets will be added to the VRT rather than the dataset itself.\n"
-            "  o By default, only datasets of same projection and band characteristics may be added to the VRT.\n"
-            );
-    exit( 1 );
-}
-
 
 /************************************************************************/
 /*                         GetSrcDstWin()                               */
@@ -6046,7 +5940,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
     }
 
     if (nCountValid == 0)
-        return CE_None;
+        return CE_Failure;
 
     if (bHasGeoTransform)
     {
@@ -6201,7 +6095,7 @@ static void add_file_to_list(const char* filename, const char* tile_index,
 }
 
 /************************************************************************/
-/*                                main()                                */
+/*                                GDALBuildVrt()                        */
 /************************************************************************/
 
 STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
@@ -6219,7 +6113,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     int bSeparate = FALSE;
     int bAllowProjectionDifference = FALSE;
     int bQuiet = FALSE;
-    GDALProgressFunc pfnProgress = NULL;
+    GDALProgressFunc pfnProgress = GDALProgressCallback;
     double we_res = 0, ns_res = 0;
     int bTargetAlignedPixels = FALSE;
     double xmin = 0, ymin = 0, xmax = 0, ymax = 0;
@@ -6228,6 +6122,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     int bHideNoData = FALSE;
     const char* pszSrcNoData = NULL;
     const char* pszVRTNoData = NULL;
+	CallbackParams params = { cBack, "Building Virtual Dataset" };
 
     GDALAllRegister();
 
@@ -6237,8 +6132,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
 	if (!ProcessGeneralOptions(&nArgc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -6330,8 +6224,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
         }
         else if ( sArr[iArg][0] == '-' )
         {
-            printf("Unrecognized option : %s\n", sArr[iArg]);
-            // TODO: set error code?
+            CPLError(CE_Warning, CPLE_AppDefined,"Unrecognized option : %s\n", sArr[iArg]);
         }
         else
         {
@@ -6343,11 +6236,8 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 	pszOutputFilename = OLE2CA(bstrDstFilename);
 
     if( pszOutputFilename == NULL || nInputFiles == 0 )
-        Usage();
+        return ResetConfigOptions();
 
-    if (!bQuiet)
-        pfnProgress = GDALTermProgress;
-       
     /* Avoid overwriting a non VRT dataset if the user did not put the */
     /* filenames in the right order */
     VSIStatBuf sBuf;
@@ -6359,12 +6249,12 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
             GDALDriverH hDriver = GDALIdentifyDriver( pszOutputFilename, NULL );
             if (hDriver && !EQUAL(GDALGetDriverShortName(hDriver), "VRT"))
             {
-                fprintf(stderr,
+                CPLError(CE_Failure, CPLE_AppDefined,
                         "'%s' is an existing GDAL dataset managed by %s driver.\n"
                         "There is an high chance you did not put filenames in the right order.\n"
                         "If you want to overwrite %s, add -overwrite option to the command line.\n\n",
                         pszOutputFilename, GDALGetDriverShortName(hDriver), pszOutputFilename);
-                Usage();
+				return ResetConfigOptions(tkGDAL_ERROR);
             }
         }
     }
@@ -6372,20 +6262,20 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     if (we_res != 0 && ns_res != 0 &&
         resolution != NULL && !EQUAL(resolution, "user"))
     {
-        fprintf(stderr, "-tr option is not compatible with -resolution %s\n", resolution);
-        Usage();
+        CPLError(CE_Failure, CPLE_AppDefined, "-tr option is not compatible with -resolution %s\n", resolution);
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
     
     if (bTargetAlignedPixels && we_res == 0 && ns_res == 0)
     {
-        fprintf( stderr, "-tap option cannot be used without using -tr\n");
-        Usage();
+        CPLError(CE_Failure, CPLE_AppDefined, "-tap option cannot be used without using -tr\n");
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
     
     if (bAddAlpha && bSeparate)
     {
-        fprintf(stderr, "-addalpha option is not compatible with -separate\n");
-        Usage();
+        CPLError(CE_Failure, CPLE_AppDefined, "-addalpha option is not compatible with -separate\n");
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
         
     ResolutionStrategy eStrategy = AVERAGE_RESOLUTION;
@@ -6395,8 +6285,8 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
             eStrategy = USER_RESOLUTION;
         else if ( resolution != NULL && EQUAL(resolution, "user") )
         {
-            fprintf(stderr, "-tr option must be used with -resolution user\n");
-            Usage();
+            CPLError(CE_Failure, CPLE_AppDefined, "-tr option must be used with -resolution user\n");
+			return ResetConfigOptions(tkGDAL_ERROR);
         }
     }
     else if ( EQUAL(resolution, "average") )
@@ -6407,8 +6297,8 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
         eStrategy = LOWEST_RESOLUTION;
     else
     {
-        fprintf(stderr, "invalid value (%s) for -resolution\n", resolution);
-        Usage();
+        CPLError(CE_Failure, CPLE_AppDefined, "invalid value (%s) for -resolution\n", resolution);
+		return ResetConfigOptions(tkGDAL_ERROR);
     }
     
     /* If -srcnodata is specified, use it as the -vrtnodata if the latter is not */
@@ -6421,8 +6311,9 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
                         bSeparate, bAllowProjectionDifference, bAddAlpha, bHideNoData,
                         pszSrcNoData, pszVRTNoData);
 
-    oBuilder.Build(pfnProgress, NULL);
-    
+    if (CE_None == oBuilder.Build(pfnProgress, &params))
+		(*retval) = VARIANT_TRUE;
+
     for(i=0;i<nInputFiles;i++)
     {
         CPLFree(ppszInputFilenames[i]);
@@ -6468,8 +6359,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 	if (!ProcessGeneralOptions(&nArgc))
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -6524,8 +6414,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 
     if( hDataset == NULL )
 	{
-        this->lastErrorCode = tkGDAL_ERROR;
-		return ResetConfigOptions();
+		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
 /* -------------------------------------------------------------------- */
@@ -6762,6 +6651,8 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     const char *pszFormat = "ESRI Shapefile";
     double adfFixedLevels[1000];
     int    nFixedLevelCount = 0;
+	GDALProgressFunc pfnProgress = (GDALProgressFunc) GDALProgressCallback;
+	struct CallbackParams params = { cBack, "Generating Contour" };
 
 	if (Is3D == VARIANT_TRUE)
 		b3D = TRUE;
@@ -6813,6 +6704,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     hBand = GDALGetRasterBand( hSrcDS, nBandIn );
     if( hBand == NULL )
     {
+		this->lastErrorCode = tkGDAL_ERROR;
         CPLError( CE_Failure, CPLE_AppDefined, 
                   "Band %d does not exist on dataset.", 
                   nBandIn );
@@ -6847,8 +6739,9 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 
     if( hDriver == NULL )
     {
-        //fprintf( stderr, "Unable to find format driver named %s.\n", 
-        //         pszFormat );
+		this->lastErrorCode = tkGDAL_ERROR;
+        CPLError( CE_Failure, CPLE_AppDefined, "Unable to find format driver named %s.\n", 
+                 pszFormat );
 		(*retval) = VARIANT_FALSE;
         return S_FALSE;
     }
@@ -6856,6 +6749,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     hDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename), NULL );
     if( hDS == NULL )
 	{
+		this->lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
         return S_FALSE;
 	}
@@ -6865,6 +6759,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
                                  NULL );
     if( hLayer == NULL )
 	{
+		this->lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
         return S_FALSE;
 	}
@@ -6894,7 +6789,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
                                 nFixedLevelCount, adfFixedLevels,
                                 bNoDataSet, dfNoData, 
                                 hLayer, 0, nElevField,
-                                GDALTermProgress, NULL );
+                                pfnProgress, &params );
 
     OGR_DS_Destroy( hDS );
     GDALClose( hSrcDS );

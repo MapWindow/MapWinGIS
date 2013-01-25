@@ -257,7 +257,7 @@ private:
 	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);
 	BOOL ProcessGeneralOptions(int * opts);
-	HRESULT ResetConfigOptions();
+	HRESULT ResetConfigOptions(long ErrorCode = 0);
 
 	/* GDAL/OGR variables */
 	int bSubCall;
