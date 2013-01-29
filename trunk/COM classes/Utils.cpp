@@ -4406,29 +4406,40 @@ void CUtils::Parse(CString sOrig, int * opts)
 	}
 
 	CString sTemp, sTrans, sStore;
-	int m, i, length;
+	int m, length;
 	char chSeps[] = " ";
 
 	//set an initial max array size
 	sArr.RemoveAll();
+	sOrig.TrimRight();
 	sArr.Add( "Dummy value at 0" );
-	i=0;
 	while(1)
-	{	
-		i++;
-		m = sOrig.FindOneOf( (LPCTSTR)chSeps );
-		if (m != -1)
+	{
+		if (sOrig.GetLength() <= 0)
+			break;
+
+		sOrig.TrimLeft();
+
+		if (sOrig[0] == '"')
 		{
-			sTemp = sOrig.Mid(0, m);
-			sArr.Add( sTemp );
-			sTrans = sOrig.Mid(m+1, sOrig.GetLength());
-			sOrig = sTrans;
+			sOrig.Delete(0);
+			m = sOrig.Find("\"", 0);
 		}
 		else
 		{
-			sArr.Add( sOrig );
-			break;	
+			m = sOrig.FindOneOf( (LPCTSTR)chSeps );
 		}
+
+		if (m == -1)
+		{
+			sArr.Add( sOrig );
+			break;
+		}
+
+		sTemp = sOrig.Mid(0, m);
+		sArr.Add( sTemp );
+		sTrans = sOrig.Mid(m+1, sOrig.GetLength());
+		sOrig = sTrans;
 	}
 
 	for (int i = 0; i < sArr.GetCount(); i++)

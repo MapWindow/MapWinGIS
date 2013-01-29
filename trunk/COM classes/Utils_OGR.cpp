@@ -2272,7 +2272,6 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 	USES_CONVERSION;
 
 	CString			sOutput = "";
-	CString			sTemp = "";
 	int				nArgc = 0;
 	const char *	pszWHERE = NULL;
 	const char *	pszDataSource = NULL;
@@ -2311,15 +2310,20 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
         {
             int iDr;
 
-            sOutput +=  "Supported Formats:\n";
+            sOutput.Append( "Supported Formats:\n" );
 
             OGRSFDriverRegistrar *poR = OGRSFDriverRegistrar::GetRegistrar();
         
             for( iDr = 0; iDr < poR->GetDriverCount(); iDr++ )
             {
                 OGRSFDriver *poDriver = poR->GetDriver(iDr);
-				sTemp.Format( "  %s\n", poDriver->GetName());
-				sOutput += sTemp;
+
+                if( poDriver->TestCapability( ODrCCreateDataSource ) )
+                    sOutput.AppendFormat( "  -> \"%s\" (read/write)\n", 
+                            poDriver->GetName() );
+                else
+                    sOutput.AppendFormat( "  -> \"%s\" (readonly)\n", 
+                            poDriver->GetName() );
             }
 
 			goto end;
@@ -2410,7 +2414,7 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
         poDS = OGRSFDriverRegistrar::Open( pszDataSource, FALSE, &poDriver );
         if( poDS != NULL && bVerbose )
         {
-            sOutput += "Had to open data source read-only.\n";
+            sOutput.Append( "Had to open data source read-only.\n" );
             bReadOnly = TRUE;
         }
     }
@@ -2422,15 +2426,13 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
     {
         OGRSFDriverRegistrar    *poR = OGRSFDriverRegistrar::GetRegistrar();
         
-        sTemp.Format( "FAILURE:\n"
+        sOutput.AppendFormat( "FAILURE:\n"
                 "Unable to open datasource `%s' with the following drivers.\n",
                 pszDataSource );
-		sOutput += sTemp;
 
         for( int iDriver = 0; iDriver < poR->GetDriverCount(); iDriver++ )
         {
-            sTemp.Format( "  -> %s\n", poR->GetDriver(iDriver)->GetName() );
-			sOutput += sTemp;
+            sOutput.AppendFormat( "  -> %s\n", poR->GetDriver(iDriver)->GetName() );
         }
 
         goto end;
@@ -2443,18 +2445,16 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 /* -------------------------------------------------------------------- */
     if( bVerbose )
 	{
-        sTemp.Format( "INFO: Open of `%s'\n"
+        sOutput.AppendFormat( "INFO: Open of `%s'\n"
                 "      using driver `%s' successful.\n",
                 pszDataSource, poDriver->GetName() );
-		sOutput += sTemp;
 	}
 
     if( bVerbose && !EQUAL(pszDataSource,poDS->GetName()) )
     {
-        sTemp.Format( "INFO: Internal data source name `%s'\n"
+        sOutput.AppendFormat( "INFO: Internal data source name `%s'\n"
                 "      different from user name `%s'.\n",
                 poDS->GetName(), pszDataSource );
-		sOutput += sTemp;
     }
 
 /* -------------------------------------------------------------------- */
@@ -2467,7 +2467,7 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
         nRepeatCount = 0;  // skip layer reporting.
 
         if( CSLCount(papszLayers) > 0 )
-            sOutput += "layer names ignored in combination with -sql.\n";
+            sOutput.Append( "layer names ignored in combination with -sql.\n" );
         
         poResultSet = poDS->ExecuteSQL( pszSQLStatement, poSpatialFilter, 
                                         pszDialect );
@@ -2478,8 +2478,7 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
             {
                 if (poResultSet->SetAttributeFilter( pszWHERE ) != OGRERR_NONE )
                 {
-                    sTemp.Format( "FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
-					sOutput += sTemp;
+                    sOutput.AppendFormat( "FAILURE: SetAttributeFilter(%s) failed.\n", pszWHERE );
 
 					poDS->ReleaseResultSet( poResultSet );
 					goto end;
@@ -2507,28 +2506,25 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 
                 if( poLayer == NULL )
                 {
-                    sTemp.Format( "FAILURE: Couldn't fetch advertised layer %d!\n",
+                    sOutput.AppendFormat( "FAILURE: Couldn't fetch advertised layer %d!\n",
                             iLayer );
-					sOutput += sTemp;
                     goto end;
                 }
 
                 if (!bAllLayers)
                 {
-                    sTemp.Format( "%d: %s",
+                    sOutput.AppendFormat( "%d: %s",
                             iLayer+1,
                             poLayer->GetName() );
-					sOutput += sTemp;
 
                     if( poLayer->GetGeomType() != wkbUnknown )
 					{
-                        sTemp.Format( " (%s)", 
+                        sOutput.AppendFormat( " (%s)", 
                                 OGRGeometryTypeToName( 
                                     poLayer->GetGeomType() ) );
-						sOutput += sTemp;
 					}
 
-                    sOutput += "\n";
+                    sOutput.Append( "\n" );
                 }
                 else
                 {
@@ -2552,9 +2548,8 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 
                 if( poLayer == NULL )
                 {
-                    sTemp.Format( "FAILURE: Couldn't fetch requested layer %s!\n",
+                    sOutput.AppendFormat( "FAILURE: Couldn't fetch requested layer %s!\n",
                             *papszIter );
-					sOutput += sTemp;
                     goto end;
                 }
 
@@ -2594,7 +2589,7 @@ static CString ReportOnLayer(OGRLayer * poLayer, const char *pszWHERE,
 							  int bSummaryOnly, int nFetchFID,
 							  char** papszOptions)
 {
-	CString sOutput = "", sTemp = "";
+	CString sOutput = "";
     OGRFeatureDefn      *poDefn = poLayer->GetLayerDefn();
 
 /* -------------------------------------------------------------------- */
@@ -2615,24 +2610,20 @@ static CString ReportOnLayer(OGRLayer * poLayer, const char *pszWHERE,
 /* -------------------------------------------------------------------- */
 /*      Report various overall information.                             */
 /* -------------------------------------------------------------------- */
-    sTemp.Format( "\nLayer name: %s\n", poLayer->GetName() );
-	sOutput += sTemp;
+    sOutput.AppendFormat( "\nLayer name: %s\n", poLayer->GetName() );
 
     if( bVerbose )
     {
-        sTemp.Format( "Geometry: %s\n", 
+        sOutput.AppendFormat( "Geometry: %s\n", 
                 OGRGeometryTypeToName( poLayer->GetGeomType() ) );
-		sOutput += sTemp;
         
-        sTemp.Format( "Feature Count: %d\n", poLayer->GetFeatureCount() );
-		sOutput += sTemp;
+        sOutput.AppendFormat( "Feature Count: %d\n", poLayer->GetFeatureCount() );
         
         OGREnvelope oExt;
         if (poLayer->GetExtent(&oExt, TRUE) == OGRERR_NONE)
         {
-            sTemp.Format("Extent: (%f, %f) - (%f, %f)\n", 
+            sOutput.AppendFormat("Extent: (%f, %f) - (%f, %f)\n", 
                    oExt.MinX, oExt.MinY, oExt.MaxX, oExt.MaxY);
-			sOutput += sTemp;
         }
 
         char    *pszWKT;
@@ -2644,34 +2635,30 @@ static CString ReportOnLayer(OGRLayer * poLayer, const char *pszWHERE,
             poLayer->GetSpatialRef()->exportToPrettyWkt( &pszWKT );
         }            
 
-        sTemp.Format( "Layer SRS WKT:\n%s\n", pszWKT );
-		sOutput += sTemp;
+        sOutput.AppendFormat( "Layer SRS WKT:\n%s\n", pszWKT );
         CPLFree( pszWKT );
     
         if( strlen(poLayer->GetFIDColumn()) > 0 )
 		{
-            sTemp.Format( "FID Column = %s\n", 
+            sOutput.AppendFormat( "FID Column = %s\n", 
                     poLayer->GetFIDColumn() );
-			sOutput += sTemp;
 		}
     
         if( strlen(poLayer->GetGeometryColumn()) > 0 )
 		{
-            sTemp.Format( "Geometry Column = %s\n", 
+            sOutput.AppendFormat( "Geometry Column = %s\n", 
                     poLayer->GetGeometryColumn() );
-			sOutput += sTemp;
 		}
 
         for( int iAttr = 0; iAttr < poDefn->GetFieldCount(); iAttr++ )
         {
             OGRFieldDefn    *poField = poDefn->GetFieldDefn( iAttr );
             
-            sTemp.Format( "%s: %s (%d.%d)\n",
+            sOutput.AppendFormat( "%s: %s (%d.%d)\n",
                     poField->GetNameRef(),
                     poField->GetFieldTypeName( poField->GetType() ),
                     poField->GetWidth(),
                     poField->GetPrecision() );
-			sOutput += sTemp;
         }
     }
 
@@ -2693,9 +2680,8 @@ static CString ReportOnLayer(OGRLayer * poLayer, const char *pszWHERE,
         poFeature = poLayer->GetFeature( nFetchFID );
         if( poFeature == NULL )
         {
-            sTemp.Format( "Unable to locate feature id %d on this layer.\n", 
+            sOutput.AppendFormat( "Unable to locate feature id %d on this layer.\n", 
                     nFetchFID );
-			sOutput += sTemp;
         }
         else
         {
