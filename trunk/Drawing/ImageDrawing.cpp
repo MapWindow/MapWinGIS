@@ -560,6 +560,7 @@ clear_bmp:
 						screenBitmap->bitmap = new Gdiplus::Bitmap((INT)(dstW+1.0), (INT)(dstH+1.0));
 
 						Gdiplus::Graphics g(screenBitmap->bitmap);
+						g.SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
 
 						if ( downsampling )
 							g.SetInterpolationMode((Gdiplus::InterpolationMode)downsamplingMode);
