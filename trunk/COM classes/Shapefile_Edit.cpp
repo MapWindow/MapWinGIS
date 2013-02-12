@@ -205,9 +205,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 		}
 		else
 		{
-			// there is no file name; only SaveAs method will help
-			// Error: the name for in-memory shapefile wasn't specified
-			ErrorMessage(tkINVALID_FILENAME, cBack);
+			// Note that we are no longer editing shapes
+			_isEditingShapes = VARIANT_FALSE;
 		}
 	}
 	else

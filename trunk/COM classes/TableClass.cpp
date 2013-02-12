@@ -1689,11 +1689,14 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	if( dbfHandle == NULL )
 	{	
 		if( isEditingTable != FALSE )
-		{	
+		{
 			if( ApplyChanges != VARIANT_FALSE )
 				SaveAs(filename.AllocSysString(),cBack,retval);
 			else
 				EditClear(retval);
+
+			// Note that we are no longer editing the table
+			isEditingTable = FALSE;
 			return S_OK;
 		}
 		else
@@ -2991,7 +2994,7 @@ STDMETHODIMP CTableClass::StopAllJoins()
 STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
