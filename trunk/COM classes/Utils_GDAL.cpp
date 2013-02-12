@@ -6235,8 +6235,19 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
 	pszOutputFilename = OLE2CA(bstrDstFilename);
 
-    if( pszOutputFilename == NULL || nInputFiles == 0 )
+    if( pszOutputFilename == NULL )
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, CPLE_AppDefined, "Invalid output file specified");
+		return ResetConfigOptions();
+	}
+		
+	if( nInputFiles == 0 )
+	{
+		this->lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, CPLE_AppDefined, "No inputs files specified");
         return ResetConfigOptions();
+	}
 
     /* Avoid overwriting a non VRT dataset if the user did not put the */
     /* filenames in the right order */
@@ -6313,6 +6324,8 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
     if (CE_None == oBuilder.Build(pfnProgress, &params))
 		(*retval) = VARIANT_TRUE;
+	else
+		this->lastErrorCode = tkGDAL_ERROR;
 
     for(i=0;i<nInputFiles;i++)
     {
