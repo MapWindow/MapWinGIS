@@ -1222,7 +1222,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 	else if( m_cursorMode == cmPan )
 	{
-		if( nFlags & MK_LBUTTON )
+		if( (nFlags & MK_LBUTTON) && m_leftButtonDown )
 		{
 			m_bitbltClickMove = point;
 			double zmx = 0, zmy = 0;
