@@ -3374,10 +3374,9 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	}
 	
 	// we can use clipper for polygons only
-	ShpfileType type1, type2;	
-	type1 = Utility::ShapeTypeConvert2D(_shpfiletype);
+	ShpfileType type1, type2;
+	type1 = _shpfiletype;
 	sf->get_ShapefileType(&type2);	
-	type2 = Utility::ShapeTypeConvert2D(type2);
 	if (type1  != type2 )
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
@@ -3520,7 +3519,13 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	(*retval)->get_NumShapes(&numShapes);
 	if (numShapes == 0)
 	{
-		VARIANT_BOOL vbretval;
+		long errorCode = 0;
+		(*retval)->get_LastErrorCode(&errorCode);
+
+		if (errorCode != 0)
+			ErrorMessage(errorCode);
+
+		VARIANT_BOOL vbretval = VARIANT_FALSE;
 		(*retval)->Close(&vbretval);
 		(*retval)->Release();
 		(*retval) = NULL;
