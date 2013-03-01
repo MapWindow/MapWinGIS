@@ -1844,8 +1844,7 @@ void CMapView::DrawNextFrame(const CRect & rcBounds, CDC * dc)
 		return;
 	}
 	
-	HCURSOR oldCursor = ::GetCursor();
-	SetWaitCursor();
+	HCURSOR oldCursor = SetWaitCursor();
 
 	// clear extents of drawn labels and charts
 	ClearLabelFrames();
@@ -1863,7 +1862,9 @@ void CMapView::DrawNextFrame(const CRect & rcBounds, CDC * dc)
 		// drawing
 		DrawLists(rcBounds,dc,dlSpatiallyReferencedList);
 		m_drawMutex.Unlock();
-		::SetCursor(oldCursor);
+
+		if (oldCursor != NULL)
+			::SetCursor(oldCursor);
 		return;
 	}
 	
@@ -2274,7 +2275,9 @@ void CMapView::DrawNextFrame(const CRect & rcBounds, CDC * dc)
 	DrawLists(rcBounds,dc,dlSpatiallyReferencedList);
 	
 	m_drawMutex.Unlock();
-	::SetCursor(oldCursor);
+
+	if (oldCursor != NULL)
+		::SetCursor(oldCursor);
 
 	delete [] isConcealed;
 }
@@ -6568,8 +6571,13 @@ void CMapView::DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight)
 // **************************************************************************
 //		SetWaitCursor()
 // **************************************************************************
-void CMapView::SetWaitCursor()
+HCURSOR CMapView::SetWaitCursor()
 {
+	if (m_DisableWaitCursor)
+		return NULL;
+
+	HCURSOR oldCursor = ::GetCursor();
+
 	CPoint cpos;
 	GetCursorPos(&cpos);
 	CRect wrect;
@@ -6583,6 +6591,8 @@ void CMapView::SetWaitCursor()
 			::SetCursor(LoadCursor(NULL, IDC_WAIT) );
 		}
 	}
+
+	return oldCursor;
 }
 
 // *********************************************************

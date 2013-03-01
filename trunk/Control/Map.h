@@ -863,7 +863,7 @@ private:
 	//  END OF: Obsolete drawing procedures
 	// /////////////////////////////////////////////////////////////////
 
-	void CMapView::SetWaitCursor();
+	HCURSOR CMapView::SetWaitCursor();
 	tkInterpolationMode CMapView::ChooseInterpolationMode(tkInterpolationMode mode1, tkInterpolationMode mode2);
 
 	bool IsValidShape( long layerHandle, long shape );
