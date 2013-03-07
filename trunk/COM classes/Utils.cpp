@@ -2474,14 +2474,15 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	expand_header->put_NumberCols( exp_cols );
 	expand_header->put_NumberRows( exp_rows );
 	
-	char * tmpgname = new char[512];
-	char * tmpfname = new char[512];
-	char * tmppath = new char[260 + 512 + 1];
-	_getcwd(tmppath,260);
-	tmpnam(tmpfname);
-	sprintf(tmpgname, "%s.bgd", tmpfname);
+	char * tmpfname = new char[MAX_BUFFER];
+	char * tmppath = new char[MAX_PATH];
+	char * tmpfpath = new char[MAX_PATH + MAX_BUFFER + 1];
 
-	expand_grid->CreateNew(A2BSTR(tmpgname),expand_header,dType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
+	GetTempPath(MAX_PATH,tmppath);
+	tmpnam(tmpfname);
+	sprintf(tmpfpath, "%s%s.bgd", tmppath, tmpfname);
+
+	expand_grid->CreateNew(A2BSTR(tmpfpath),expand_header,dType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 
 	expand_header->Release();
 	expand_header = NULL;

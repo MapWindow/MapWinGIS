@@ -1733,7 +1733,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 		    // generate a tmpfilename
 		    char * tmpfname = new char[MAX_BUFFER];
 		    char * tmppath = new char[MAX_PATH + MAX_BUFFER + 1];
-		    _getcwd(tmppath,MAX_PATH);
+			GetTempPath(MAX_PATH, tmppath);
 		    tmpnam(tmpfname);
 		    CString * tempFilename = new CString(tmpfname);
 		    tempFiles.push_back(tempFilename);
