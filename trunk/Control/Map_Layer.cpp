@@ -940,7 +940,8 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 DOUBLE CMapView::GetLayerMaxVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		return layer->maxVisibleScale;
@@ -955,7 +956,8 @@ DOUBLE CMapView::GetLayerMaxVisibleScale(LONG LayerHandle)
 void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		layer->maxVisibleScale = newVal;
@@ -972,7 +974,8 @@ void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 DOUBLE CMapView::GetLayerMinVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		return layer->minVisibleScale;
@@ -987,7 +990,8 @@ DOUBLE CMapView::GetLayerMinVisibleScale(LONG LayerHandle)
 void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		layer->minVisibleScale = newVal;
@@ -1004,7 +1008,8 @@ void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		return layer->dynamicVisibility;
@@ -1019,7 +1024,8 @@ VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG LayerHandle)
 void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size() &&
+		m_allLayers[LayerHandle] != NULL)
 	{
 		Layer* layer = m_allLayers[LayerHandle];
 		layer->dynamicVisibility = newVal?true:false;
