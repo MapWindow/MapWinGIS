@@ -128,11 +128,9 @@ BEGIN_MESSAGE_MAP(CMapView, COleControl)
 	ON_WM_SIZE()
 	ON_WM_DROPFILES()
 	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_RBUTTONDOWN()
-	ON_WM_RBUTTONDBLCLK()
 	ON_WM_RBUTTONUP()
 	ON_WM_SETCURSOR()
 	ON_WM_TIMER()
@@ -1104,14 +1102,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 // ************************************************************
-//		OnLButtonDblClick
-// ************************************************************
-void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
-{
-   OnLButtonDown(nFlags, point);
-}
-
-// ************************************************************
 //		OnLButtonUp
 // ************************************************************
 void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
@@ -1248,14 +1238,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				InvalidateControl();
 		}
 	}
-}
-
-// ************************************************************
-//		OnRButtonDblClick
-// ************************************************************
-void CMapView::OnRButtonDblClk(UINT nFlags, CPoint point)
-{
-   OnRButtonDown(nFlags, point);
 }
 
 // ************************************************************
