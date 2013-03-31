@@ -3679,7 +3679,8 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 		GEOSGeom_destroy(gsGeom);
 	}
 
-	globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
+   if( globalCallback != NULL )
+	   globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 
 	sfNew->get_NumShapes(&numShapes);
 	if (numShapes == 0)
