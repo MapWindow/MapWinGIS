@@ -3261,7 +3261,7 @@ char *SanitizeSRS( const char *pszUserInput )
 /*                                GDALWarp()                            */
 /************************************************************************/
 
-STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
+STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilenames, BSTR bstrDstFilename,
 							  BSTR bstrOptions, ICallback * cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
@@ -3277,7 +3277,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     const char         *pszFormat = "GTiff";
     int bFormatExplicitelySet = FALSE;
     char              **papszSrcFiles = NULL;
-    char               *pszDstFilename = NULL;
+    const char         *pszDstFilename = NULL;
     int                 bCreateOutput = FALSE, i;
     void               *hTransformArg, *hGenImgProjArg=NULL, *hApproxArg=NULL;
     char               **papszWarpOptions = NULL;
@@ -3298,6 +3298,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int                  bCropToCutline = FALSE;
     int                  bOverwrite = FALSE;
 	struct CallbackParams params = { cBack, "Warping" };
+	CStringArray		 strSrcArray;
+	int					 nSrcCount = 0;
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */
@@ -3584,9 +3586,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		{
             // Skip it.
 		}
-
-        else 
-            papszSrcFiles = CSLAddString( papszSrcFiles, sArr[i] );
     }
 /* -------------------------------------------------------------------- */
 /*      Check that incompatible options are not used                    */
@@ -3605,19 +3604,24 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
-/* -------------------------------------------------------------------- */
-/*      The last filename in the file list is really our destination    */
-/*      file.                                                           */
-/* -------------------------------------------------------------------- */
-    if( CSLCount(papszSrcFiles) > 1 )
-    {
-        pszDstFilename = papszSrcFiles[CSLCount(papszSrcFiles)-1];
-        papszSrcFiles[CSLCount(papszSrcFiles)-1] = NULL;
-    }
+	// Get the source file names.
+
+	Parse(OLE2CA(bstrSrcFilenames), &nSrcCount, strSrcArray, FALSE);
+
+	for (int k = 0; k < nSrcCount; k++)
+	{
+		papszSrcFiles = CSLAddString( papszSrcFiles, strSrcArray[k] );
+	}
+
+	// Get the destination file name.
+
+	pszDstFilename = OLE2CA(bstrDstFilename);
 
     if( pszDstFilename == NULL )
 	{
-		// TODO: set error code?
+		this->lastErrorCode = tkGDAL_ERROR;
+		CPLError(CE_Failure, CPLE_AppDefined, "Invalid destination file specified");
+		return ResetConfigOptions();
 	}
         
     if( bVRT && CSLCount(papszSrcFiles) > 1 )
@@ -4176,7 +4180,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             GDALDestroyWarpOptions( psWO );
 
-            CPLFree( pszDstFilename );
             CSLDestroy( papszSrcFiles );
             CSLDestroy( papszWarpOptions );
             CSLDestroy( papszTO );
@@ -4229,7 +4232,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         bHasGotErr = TRUE;
     GDALClose( hDstDS );
     
-    CPLFree( pszDstFilename );
     CSLDestroy( papszSrcFiles );
     CSLDestroy( papszWarpOptions );
     CSLDestroy( papszTO );

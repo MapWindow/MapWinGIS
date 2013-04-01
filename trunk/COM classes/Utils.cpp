@@ -4399,9 +4399,17 @@ bool CUtils::MemoryAvailable(double bytes)
 /************************************************************************/
 void CUtils::Parse(CString sOrig, int * opts)
 {
+	Parse(sOrig, opts, this->sArr, TRUE);
+}
+
+/************************************************************************/
+/*                           Parse()                                    */
+/************************************************************************/
+void CUtils::Parse(CString sOrig, int * opts, CStringArray& strArr, BOOL bAddDummy)
+{
 	if (sOrig.IsEmpty())
 	{
-		sArr.RemoveAll();
+		strArr.RemoveAll();
 		*opts = 0;
 		return;
 	}
@@ -4411,9 +4419,12 @@ void CUtils::Parse(CString sOrig, int * opts)
 	char chSeps[] = " ";
 
 	//set an initial max array size
-	sArr.RemoveAll();
+	strArr.RemoveAll();
 	sOrig.TrimRight();
-	sArr.Add( "Dummy value at 0" );
+
+	if (bAddDummy)
+		strArr.Add( "Dummy value at 0" );
+
 	while(1)
 	{
 		if (sOrig.GetLength() <= 0)
@@ -4433,28 +4444,28 @@ void CUtils::Parse(CString sOrig, int * opts)
 
 		if (m == -1)
 		{
-			sArr.Add( sOrig );
+			strArr.Add( sOrig );
 			break;
 		}
 
 		sTemp = sOrig.Mid(0, m);
-		sArr.Add( sTemp );
+		strArr.Add( sTemp );
 		sTrans = sOrig.Mid(m+1, sOrig.GetLength());
 		sOrig = sTrans;
 	}
 
-	for (int i = 0; i < sArr.GetCount(); i++)
+	for (int i = 0; i < strArr.GetCount(); i++)
 	{
-		sTemp = sArr[i];
+		sTemp = strArr[i];
 		length = sTemp.GetLength ();
 
 		if (length < 2 || sTemp[0] != '"' || sTemp[length - 1] != '"')
 			continue;
 
-		sArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
+		strArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
 	}
 
-	*opts = (int) sArr.GetCount();
+	*opts = (int) strArr.GetCount();
 }
 
 // ***********************************************************
