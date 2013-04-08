@@ -5358,3 +5358,132 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid, IShapefile* sf, VARI
 	}
 	return S_OK;
 }
+
+// ********************************************************
+//     MaskRaster()
+// ********************************************************
+STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = VARIANT_FALSE;
+
+	GDALAllRegister();
+
+	USES_CONVERSION;
+	CString name = OLE2A(filename);
+	GDALDataset* dataset = (GDALDataset *) GDALOpen(name, GDALAccess::GA_Update );
+	if (!dataset)
+	{
+		this->ErrorMessage(tkINVALID_FILE);
+		return S_FALSE;
+	}
+	
+	GByte* pabyData; 
+	*retVal = VARIANT_TRUE;
+	int count = dataset->GetRasterCount();
+
+	for(int i = 1; i <= count; i++)
+	{
+		GDALRasterBand* poBand = dataset->GetRasterBand(i);
+		if (poBand->GetRasterDataType() != GDT_Byte)
+		{
+			this->ErrorMessage(tkNON_SINGLE_BYTE_PER_BAND);
+			*retVal = VARIANT_FALSE;
+			break;		
+		}
+		
+		unsigned char noData = (unsigned char)poBand->GetNoDataValue();
+
+		int nXBlockSize, nYBlockSize;
+		poBand->GetBlockSize(&nXBlockSize, &nYBlockSize);
+		
+		int nXBlocks = (poBand->GetXSize() + nXBlockSize - 1) / nXBlockSize;
+		int nYBlocks = (poBand->GetYSize() + nYBlockSize - 1) / nYBlockSize;
+		pabyData = (GByte *) CPLMalloc(nXBlockSize * nYBlockSize);
+		
+		CPLErr err = CPLErr::CE_None; 
+		long percent = 0;
+		for( int iYBlock = 0; iYBlock < nYBlocks; iYBlock++ )
+		{
+			for( int iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
+			{
+				if( globalCallback != NULL )
+				{
+					double count = iYBlock * nXBlocks + iXBlock;
+					long newpercent = (long)((double)count/(double)(nXBlocks * nYBlocks)*100.0);
+					if( newpercent > percent )
+					{	
+						percent = newpercent;
+						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
+					}
+				}
+				
+				int nXValid, nYValid;
+				err = poBand->ReadBlock( iXBlock, iYBlock, pabyData );
+				if (err != CPLErr::CE_None)
+				{
+					Debug::WriteLine("Error on reading band: %d; %d", iXBlock, iYBlock);
+					ErrorMessage(tkFAILED_READ_BLOCK);
+					*retVal = VARIANT_FALSE;
+					break;
+				}
+				
+				// Compute the portion of the block that is valid partial edge blocks.
+				if( (iXBlock+1) * nXBlockSize > poBand->GetXSize() )
+				{
+					nXValid = poBand->GetXSize() - iXBlock * nXBlockSize;
+				}
+				else
+				{
+					nXValid = nXBlockSize;
+				}
+				if( (iYBlock+1) * nYBlockSize > poBand->GetYSize() )
+				{
+					nYValid = poBand->GetYSize() - iYBlock * nYBlockSize;
+				}
+				else
+				{
+					nYValid = nYBlockSize;
+				}
+			 
+				// loop through valid pixels
+				for( int iY = 0; iY < nYValid; iY++ )
+				{
+					int y = iY * nXBlockSize;
+					for( int iX = 0; iX < nXValid; iX++ )
+					{
+						if (pabyData[iX + y] != noData)
+						{
+							pabyData[iX + y] = newPerBandValue;
+						}
+					}
+				}
+				err = poBand->WriteBlock(iXBlock, iYBlock, pabyData);
+				if (err != CPLErr::CE_None)
+				{
+					Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
+					ErrorMessage(tkFAILED_WRITE_BLOCK);
+					*retVal = VARIANT_FALSE;
+					break;
+				}
+			}
+			if(err != CPLErr::CE_None)
+				break;
+		}
+		CPLFree(pabyData);
+
+		if(err != CPLErr::CE_None)
+			break;
+	}
+	
+	if (dataset)
+	{
+		delete dataset;
+	}
+
+	if( globalCallback != NULL )
+	{
+		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
+	}
+	return S_OK;
+}

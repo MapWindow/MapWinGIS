@@ -133,6 +133,10 @@ const char * ErrorMsg( long ErrorCode );
 # define tkMISSING_FIELD 1015
 # define tkINVALID_FIELD 1016
 # define tkINVALID_FIELD_VALUE 1017
+# define tkNON_SINGLE_BYTE_PER_BAND 1018
+# define tkFAILED_READ_BLOCK 1019
+# define tkFAILED_WRITE_BLOCK 1020
+
 
 //1201-1400 = tkmap
 # define tkINVALID_LAYER_HANDLE 1201

@@ -255,6 +255,13 @@ const char * ErrorMsg( long ErrorCode )
 			return "A necessary field is invalid";
 		case tkINVALID_FIELD_VALUE:
 			return "A necessary field value is invalid";
+		case tkNON_SINGLE_BYTE_PER_BAND:
+			return "A raster with 1 byte per pixel per band is expected";
+		case tkFAILED_READ_BLOCK:
+			return "Failed to read GDAL band block";
+		case tkFAILED_WRITE_BLOCK:
+			return "Failed to write GDAL band block";
+
 
 		//1201-1400 = tkmap
 		case tkINVALID_LAYER_HANDLE:

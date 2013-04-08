@@ -275,6 +275,9 @@ private:
 	//IShape * GPCPolygonToShape(gpc_polygon * gpc,ShpfileType shptype);
 	//bool is_clockwise(gpc_vertex_list *contour);//ah 6/3/05
 public:
+	
+	
+	STDMETHOD(MaskRaster)(BSTR filename, BYTE newPerBandValue, VARIANT_BOOL* retVal);	
 	STDMETHOD(ColorByName)(tkMapColor name, OLE_COLOR* retVal);
 };
 
