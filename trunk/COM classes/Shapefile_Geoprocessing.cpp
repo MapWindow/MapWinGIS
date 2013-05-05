@@ -585,7 +585,17 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)sf);
 	VARIANT_BOOL vbretval;
 	USES_CONVERSION;
-	(*sf)->CreateNewWithShapeID(A2BSTR(""), SHP_POLYGON, &vbretval);
+
+	// if not merging shapes, copy fields
+	if (!MergeResults)
+	{
+		(*sf)->CreateNew(A2BSTR(""), SHP_POLYGON, &vbretval);
+		this->CopyFields(*sf);
+	}
+	else
+	{
+		(*sf)->CreateNewWithShapeID(A2BSTR(""), SHP_POLYGON, &vbretval);
+	}
 	
 	// copying the projection string
 	BSTR pVal;
@@ -642,14 +652,8 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				vector<IShape*> vShapes;
 				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
 				{
-					for (unsigned int j = 0; j < vShapes.size(); j++ )
-					{
-						IShape* shp = vShapes[j];
-						(*sf)->EditInsertShape(shp, &count, &vbretval);
-						shp->Release();
-						// shapeid will be set automatically
-						count++;
-					}
+					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
+					count += vShapes.size();
 				}
 				GEOSGeom_destroy(oGeom2);
 			}
