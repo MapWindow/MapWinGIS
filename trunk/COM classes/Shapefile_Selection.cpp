@@ -226,71 +226,86 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 
 					if( defineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
 					{
+						long numparts=parts.size();
 						numpoints = xPts.size();
 						bool addShape = false;
 						
-						for(j = 0; j < numpoints - 1; j++)
+						int beg_part = 0;
+						int end_part = 0;						
+
+						for(long i=0; i < numparts;i++)
 						{	
-							double p1x = xPts[j];
-							double p1y = yPts[j];
-							double p2x = xPts[j+1];
-							double p2y = yPts[j+1];
+							beg_part = parts[i];
+							if( beg_part < 0 ) beg_part = 0;
+							end_part = (int)(parts.size() - 1) > i ? parts[i+1] : numpoints;
 
-							//Test for inclusion p1
-							if( p1y <= b_maxY &&
-								p1y >= b_minY &&
-								p1x <= b_maxX &&
-								p1x >= b_minX )
-								{	
-									addShape = true;
-									break;	//Breaks inner loop
-								}							
+							//for(j = 0; j < numpoints - 1; j++)
+							for(long j = beg_part; j < end_part - 1; j++)
+							{	
+								double p1x = xPts[j];
+								double p1y = yPts[j];
+								double p2x = xPts[j+1];
+								double p2y = yPts[j+1];
 
-							//Test the Y line
-							if( ( p1y > b_maxY && p2y > b_maxY ) ||
-								( p1y < b_minY && p2y < b_minY ) )
-								{	continue;
-								}
-							//Test the X line
-							if( ( p1x > b_maxX && p2x > b_maxX ) ||
-								( p1x < b_minX && p2x < b_minX ) )
-								{	continue;
-								}
+								//Test for inclusion p1
+								if( p1y <= b_maxY &&
+									p1y >= b_minY &&
+									p1x <= b_maxX &&
+									p1x >= b_minX )
+									{	
+										addShape = true;
+										break;	//Breaks inner loop
+									}							
 
-							double dx = p2x - p1x;
-							double dy = p2y - p1y;
-							
-							//Check for vertical lines
-							if( fabs( dy ) <= Tolerance )
-							{
-								addShape = true;
-								break;
-							}
-							//Check for horizontal lines
-							if( fabs( dx ) <= Tolerance )
-							{
-								addShape = true;
-								break;
-							}
+								//Test the Y line
+								if( ( p1y > b_maxY && p2y > b_maxY ) ||
+									( p1y < b_minY && p2y < b_minY ) )
+									{	continue;
+									}
+								//Test the X line
+								if( ( p1x > b_maxX && p2x > b_maxX ) ||
+									( p1x < b_minX && p2x < b_minX ) )
+									{	continue;
+									}
 
-							//Generate the equation of the line							
-							double m = dy/dx;
-							double b = p1y - m*p1x;
-
-							double pm = -1*(dx/dy);
-							double pb = cy - pm*cx;
-							double mx = (pb - b)/(m-pm);
-							double my = m*mx + b;							
-
-							//Test for inclusion mx/my
-							if( my <= b_maxY &&
-								my >= b_minY &&
-								mx <= b_maxX &&
-								mx >= b_minX )
+								double dx = p2x - p1x;
+								double dy = p2y - p1y;
+								
+								//Check for vertical lines
+								if( fabs( dy ) <= Tolerance )
 								{
 									addShape = true;
-									break;	//Breaks inner loop
-								}								
+									break;
+								}
+								//Check for horizontal lines
+								if( fabs( dx ) <= Tolerance )
+								{
+									addShape = true;
+									break;
+								}
+
+								//Generate the equation of the line							
+								double m = dy/dx;
+								double b = p1y - m*p1x;
+
+								double pm = -1*(dx/dy);
+								double pb = cy - pm*cx;
+								double mx = (pb - b)/(m-pm);
+								double my = m*mx + b;							
+
+								//Test for inclusion mx/my
+								if( my <= b_maxY &&
+									my >= b_minY &&
+									mx <= b_maxX &&
+									mx >= b_minX )
+									{
+										addShape = true;
+										break;	//Breaks inner loop
+									}								
+							}
+							if (addShape) {
+								break;
+							}
 						}
 
 						if (addShape)
