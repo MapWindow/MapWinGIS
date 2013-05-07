@@ -136,6 +136,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkNON_SINGLE_BYTE_PER_BAND 1018
 # define tkFAILED_READ_BLOCK 1019
 # define tkFAILED_WRITE_BLOCK 1020
+# define tkINPUT_RASTERS_DIFFER 1021
 
 
 //1201-1400 = tkmap

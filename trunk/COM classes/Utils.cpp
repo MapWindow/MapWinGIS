@@ -5487,3 +5487,154 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 	}
 	return S_OK;
 }
+
+// ********************************************************
+//     CopyNodataValues()
+// ********************************************************
+STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = VARIANT_FALSE;
+	GDALAllRegister();
+
+	USES_CONVERSION;
+
+	CString name = OLE2A(sourceFilename);
+	GDALDataset* dsSource = (GDALDataset *) GDALOpen(name, GDALAccess::GA_ReadOnly );
+	
+	name = OLE2A(destFilename);
+	GDALDataset* dsDest = (GDALDataset *) GDALOpen(name, GDALAccess::GA_Update );
+
+	if (!dsSource || !dsDest)
+	{
+		this->ErrorMessage(tkINVALID_FILE);
+	}
+	else
+	{
+		if(dsSource->GetRasterCount() != dsDest->GetRasterCount() ||
+			dsSource->GetRasterXSize() != dsDest->GetRasterXSize() ||
+			dsSource->GetRasterYSize() != dsDest->GetRasterYSize()) {
+			this->ErrorMessage(tkINPUT_RASTERS_DIFFER);
+		}
+		else
+		{
+			GByte* pabyDataSource, *pabyDataDest; 
+			*retVal = VARIANT_TRUE;
+			int count = dsSource->GetRasterCount();
+
+			for(int i = 1; i <= count; i++)
+			{
+				GDALRasterBand* bandSource = dsSource->GetRasterBand(i);
+				GDALRasterBand* bandDest = dsDest->GetRasterBand(i);
+				if (bandSource->GetRasterDataType() != GDT_Byte ||
+					bandDest->GetRasterDataType() != GDT_Byte)
+				{
+					this->ErrorMessage(tkNON_SINGLE_BYTE_PER_BAND);
+					*retVal = VARIANT_FALSE;
+					break;		
+				}
+				
+				unsigned char noData = (unsigned char)bandSource->GetNoDataValue();
+
+				int nXBlockSize, nYBlockSize;
+				bandSource->GetBlockSize(&nXBlockSize, &nYBlockSize);
+				
+				int nXBlocks = (bandSource->GetXSize() + nXBlockSize - 1) / nXBlockSize;
+				int nYBlocks = (bandSource->GetYSize() + nYBlockSize - 1) / nYBlockSize;
+				pabyDataSource = (GByte *) CPLMalloc(nXBlockSize * nYBlockSize);
+				pabyDataDest = (GByte *) CPLMalloc(nXBlockSize * nYBlockSize);
+				
+				CPLErr err = CPLErr::CE_None; 
+				long percent = 0;
+				for( int iYBlock = 0; iYBlock < nYBlocks; iYBlock++ )
+				{
+					for( int iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
+					{
+						if( globalCallback != NULL )
+						{
+							double count = iYBlock * nXBlocks + iXBlock;
+							long newpercent = (long)((double)count/(double)(nXBlocks * nYBlocks)*100.0);
+							if( newpercent > percent )
+							{	
+								percent = newpercent;
+								CString s;
+								s.Format("Calculating band %d", i);
+								globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR(s));
+							}
+						}
+						
+						int nXValid, nYValid;
+						CPLErr err1 = bandSource->ReadBlock( iXBlock, iYBlock, pabyDataSource );
+						CPLErr err2 = bandDest->ReadBlock( iXBlock, iYBlock, pabyDataDest );
+						if (err1 != CPLErr::CE_None || err2 != CPLErr::CE_None)
+						{
+							Debug::WriteLine("Error on reading band: %d; %d", iXBlock, iYBlock);
+							ErrorMessage(tkFAILED_READ_BLOCK);
+							*retVal = VARIANT_FALSE;
+							break;
+						}
+						
+						// Compute the portion of the block that is valid partial edge blocks.
+						if( (iXBlock+1) * nXBlockSize > bandSource->GetXSize() )
+						{
+							nXValid = bandSource->GetXSize() - iXBlock * nXBlockSize;
+						}
+						else
+						{
+							nXValid = nXBlockSize;
+						}
+						if( (iYBlock+1) * nYBlockSize > bandSource->GetYSize() )
+						{
+							nYValid = bandSource->GetYSize() - iYBlock * nYBlockSize;
+						}
+						else
+						{
+							nYValid = nYBlockSize;
+						}
+					 
+						// loop through valid pixels
+						for( int iY = 0; iY < nYValid; iY++ )
+						{
+							int y = iY * nXBlockSize;
+							for( int iX = 0; iX < nXValid; iX++ )
+							{
+								if (pabyDataSource[iX + y] == noData)
+								{
+									pabyDataDest[iX + y] = noData;
+								}
+							}
+						}
+						
+						err = bandDest->WriteBlock(iXBlock, iYBlock, pabyDataDest);
+						if (err != CPLErr::CE_None)
+						{
+							Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
+							ErrorMessage(tkFAILED_WRITE_BLOCK);
+							*retVal = VARIANT_FALSE;
+							break;
+						}
+					}
+					if(err != CPLErr::CE_None)
+						break;
+				}
+				CPLFree(pabyDataSource);
+				CPLFree(pabyDataDest);
+
+				if(err != CPLErr::CE_None || (*retVal == VARIANT_FALSE))
+					break;
+			}
+		}
+	}
+	
+	if (dsSource)
+		delete dsSource;
+
+	if (dsDest)
+		delete dsDest;
+
+	if( globalCallback != NULL )
+	{
+		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
+	}
+	return S_OK;
+}

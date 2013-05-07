@@ -2790,6 +2790,7 @@ interface IUtils : IDispatch{
 	[id(41), helpstring("method OGRInfo")] HRESULT OGRInfo([in] BSTR bstrSrcFilename, [in] BSTR bstrOptions, [in, optional] BSTR bstrLayers, [in, optional] ICallback * cBack, [out, retval] BSTR * bstrInfo);
 	[id(42), helpstring("method OGR2OGR")] HRESULT OGR2OGR([in] BSTR bstrSrcFilename, [in] BSTR bstrDstFilename, [in] BSTR bstrOptions, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL *retval);
 	[id(43), helpstring("method MaskRaster")] HRESULT MaskRaster([in] BSTR filename, [in]BYTE newPerBandValue, [out,retval]VARIANT_BOOL* retVal);
+	[id(45), helpstring("method CopyNodataValues")] HRESULT CopyNodataValues([in]BSTR sourceFilename, [in]BSTR destFilename, [out,retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/

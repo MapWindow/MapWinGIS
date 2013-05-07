@@ -261,6 +261,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to read GDAL band block";
 		case tkFAILED_WRITE_BLOCK:
 			return "Failed to write GDAL band block";
+		case tkINPUT_RASTERS_DIFFER:
+			return "Input rasters must have the same size, number of bands and data type";
 
 
 		//1201-1400 = tkmap
