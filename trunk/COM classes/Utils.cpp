@@ -5533,12 +5533,20 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 					*retVal = VARIANT_FALSE;
 					break;		
 				}
+
+				int nXBlockSize, nYBlockSize;
+				int nXBlockSize2, nYBlockSize2;
+				bandSource->GetBlockSize(&nXBlockSize, &nYBlockSize);
+				bandDest->GetBlockSize(&nXBlockSize2, &nYBlockSize2);
+
+				if (nXBlockSize != nXBlockSize2 || nYBlockSize != nYBlockSize2) {
+					this->ErrorMessage(tkINPUT_RASTERS_DIFFER);
+					*retVal = VARIANT_FALSE;
+					break;		
+				}
 				
 				unsigned char noData = (unsigned char)bandSource->GetNoDataValue();
 
-				int nXBlockSize, nYBlockSize;
-				bandSource->GetBlockSize(&nXBlockSize, &nYBlockSize);
-				
 				int nXBlocks = (bandSource->GetXSize() + nXBlockSize - 1) / nXBlockSize;
 				int nYBlocks = (bandSource->GetYSize() + nYBlockSize - 1) / nYBlockSize;
 				pabyDataSource = (GByte *) CPLMalloc(nXBlockSize * nYBlockSize);
@@ -5554,11 +5562,11 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 						{
 							double count = iYBlock * nXBlocks + iXBlock;
 							long newpercent = (long)((double)count/(double)(nXBlocks * nYBlocks)*100.0);
-							if( newpercent > percent )
+							//if( newpercent > percent )		// Temporary for debugging
 							{	
 								percent = newpercent;
 								CString s;
-								s.Format("Calculating band %d", i);
+								s.Format("Calculating band %d; block Y: %d; block X: %d", i, iYBlock, iXBlock);
 								globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR(s));
 							}
 						}
