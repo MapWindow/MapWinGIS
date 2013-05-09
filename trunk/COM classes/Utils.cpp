@@ -5643,7 +5643,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 							}
 						}
 						
-						err = bandDest->WriteBlock(-1, iYBlock, pabyDataDest);
+						err = bandDest->WriteBlock(iXBlock, iYBlock, pabyDataDest);
 						if (err != CPLErr::CE_None)
 						{
 							Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
