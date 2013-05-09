@@ -5488,6 +5488,32 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 	return S_OK;
 }
 
+#pragma region "Gdal error handler"
+ICallback* gdalCallback;
+
+void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
+{
+	if (gdalCallback) {
+		CString s = msg;
+		s = "Gdal error: " + s;
+		USES_CONVERSION;
+		gdalCallback->Error(A2BSTR("Gdal"), A2BSTR(s));
+	}
+}
+
+void ClearGdalErrorHandler() 
+{
+	gdalCallback = NULL;
+}
+
+void SetGdalErrorHandler(ICallback* callback) 
+{
+	gdalCallback = callback;
+	CPLSetErrorHandler(&GdalErrorHandler);
+}
+
+#pragma endregion
+
 // ********************************************************
 //     CopyNodataValues()
 // ********************************************************
@@ -5496,6 +5522,10 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 	GDALAllRegister();
+
+	if (globalCallback) {
+		SetGdalErrorHandler(globalCallback);
+	}
 
 	USES_CONVERSION;
 
@@ -5613,7 +5643,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 							}
 						}
 						
-						err = bandDest->WriteBlock(iXBlock, iYBlock, pabyDataDest);
+						err = bandDest->WriteBlock(-1, iYBlock, pabyDataDest);
 						if (err != CPLErr::CE_None)
 						{
 							Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
@@ -5642,6 +5672,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 	if( globalCallback != NULL )
 	{
+		ClearGdalErrorHandler();
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 	}
 	return S_OK;
