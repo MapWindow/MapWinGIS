@@ -91,8 +91,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,8,7,3
- PRODUCTVERSION 4,8,7,3
+ FILEVERSION 4,8,7,6
+ PRODUCTVERSION 4,8,7,6
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -110,13 +110,13 @@ BEGIN
             VALUE "Comments", "This control includes a mapping component and objects for reading and writing shapefiles and various triangulated irregular network and grid files. It also has extensive label and chart options and includes projection routines."
             VALUE "CompanyName", "MapWindow OSS Team - www.mapwindow.org"
             VALUE "FileDescription", "MapWinGIS ActiveX Control"
-            VALUE "FileVersion", "4.8.7.4"
+            VALUE "FileVersion", "4.8.7.6"
             VALUE "InternalName", "MapWinGIS ActiveX Control"
-            VALUE "LegalCopyright", "Copyright (C) 2004-2012 MapWindow OSS Team"
-            VALUE "LegalTrademarks", "MapWindow GIS is a trademark of Daniel P. Ames, 2005-2012"
+            VALUE "LegalCopyright", "Copyright (C) 2004-2013 MapWindow OSS Team"
+            VALUE "LegalTrademarks", "MapWindow GIS is a trademark of Daniel P. Ames, 2005-2013"
             VALUE "OriginalFilename", "MapWinGIS.ocx"
             VALUE "ProductName", "MapWinGIS ActiveX Control"
-            VALUE "ProductVersion", "4.8.7.4"
+            VALUE "ProductVersion", "4.8.7.6"
         END
     END
     BLOCK "VarFileInfo"
