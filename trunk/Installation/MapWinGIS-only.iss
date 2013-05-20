@@ -4,7 +4,7 @@
 [ISSI]
 ;; Include ALL languages
 #define ISSI_Languages
-#define x64BitVersion
+;#define x64BitVersion
 
 ;; Create an About button in the Setup Wizard
 #define ISSI_About  "{cm:issiAbout}"
@@ -27,7 +27,7 @@
 #include ISSI_IncludePath+"\_issi.isi"
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.8.6.0"
+#define MyAppVersion "4.8.7.6"
 #define MyAppPublisher "MapWindow GIS"
 #define MyAppURL "http://www.mapwindow.org"
 #ifdef x64BitVersion
@@ -43,7 +43,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppID={{4DA288CD-C016-4E9E-B9EA-89799F678A06}
 PrivilegesRequired=poweruser
-MinVersion=,5.1.2600sp1
+MinVersion=5.1.2600sp1
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -93,9 +93,7 @@ WizardImageStretch=false
   Source: {#MySourcePath}vcfiles\msvcp90.dll; DestDir: {sys}; Flags: restartreplace 32bit uninsneveruninstall sharedfile
 #endif
 
-;;Source: gdal18.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
-;;Source: geos_c.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
-;;Source: IndexSearching.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+Source: netcdf.dll; DestDir: {app}; Flags: ignoreversion 32bit;   
 Source: lti_dsdk.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
 Source: lti_lidar_dsdk.dll; DestDir: {app}; Flags: ignoreversion 32bit;
 Source: NCScnet4.dll; DestDir: {app}; Flags: ignoreversion 32bit;
@@ -105,11 +103,16 @@ Source: log4net.dll; DestDir: {app}; Flags: ignoreversion 32bit;
 Source: tbb.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
 Source: MapWindowNotes.rtf; DestDir: {app}; Flags: ignoreversion isreadme; 
 Source: MapWinGIS.ocx; DestDir: {app}; Flags: ignoreversion 32bit; 
-;;Source: proj.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
 Source: stdole.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
-;;Source: xerces-c_3.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
 Source: regMapWinGIS.cmd; DestDir: {app}; Flags: ignoreversion 32bit;
 Source: SetEnv.exe; DestDir: {app}; Flags: ignoreversion 32bit; 
+
+;;Source: gdal18.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+;;Source: geos_c.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+;;Source: IndexSearching.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+;;Source: proj.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+;;Source: xerces-c_3.dll; DestDir: {app}; Flags: ignoreversion 32bit; 
+
 ;; Use a custom cmd file, without notification:
 Source: {#MySourcePath}regMapWinGIS.cmd; DestDir: {app}; Flags: ignoreversion
 ;; GDAL Projection files:
@@ -199,7 +202,7 @@ function NeedInstallVC8(): Boolean;
 begin
 
   // Check reg key:
-#if x64BitVersion  
+#ifdef x64BitVersion  
 	Result := not IsMsiProductInstalled(VCREDIST_X64);
 #else
 	Result := not IsMsiProductInstalled(VCREDIST_X86);
