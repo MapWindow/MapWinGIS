@@ -2366,8 +2366,12 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 	{
 		IShape* shp = NULL;
 		this->get_Shape(i, &shp);
+
 		if (!shp)
-			continue;
+		{
+			*result = VARIANT_TRUE;
+			break;
+		}
 
 		VARIANT_BOOL retval = VARIANT_TRUE;
 		shp->get_IsValid(&retval);
