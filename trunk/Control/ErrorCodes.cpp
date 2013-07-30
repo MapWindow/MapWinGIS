@@ -147,6 +147,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Invalid Shapefile type specified as return value";
 		case tkSHPFILE_WITH_INVALID_SHAPES:
 			return "Shapefile contains invalid shapes";
+		case tkCATEGORY_WASNT_FOUND:
+			return "Category wasn't found";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

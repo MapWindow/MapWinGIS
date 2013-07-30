@@ -124,6 +124,9 @@ public:
 
 	STDMETHOD(AddRange)(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT minValue, VARIANT maxValue, VARIANT_BOOL* retVal);
 
+	STDMETHOD(get_CategoryIndexByName)(BSTR categoryName, int* categoryIndex);
+	STDMETHOD(get_CategoryIndex)(IShapefileCategory* category, int* categoryIndex);
+
 	//STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, tkGroupOperation Operation, VARIANT_BOOL* retVal);
 
 	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node);

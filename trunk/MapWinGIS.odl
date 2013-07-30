@@ -2436,6 +2436,12 @@ interface IShapefile : IDispatch{
 																	  [in]int width, [out, retval]long* fieldIndex);
 	[id(109), helpstring("method HasInvalidShapes")] HRESULT HasInvalidShapes([out, retval]VARIANT_BOOL* result);
 
+	[propget, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [out, retval] BSTR* categoryName);
+	[propput, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [in] BSTR categoryName);
+
+	[propget, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3(long ShapeIndex, [out, retval] IShapefileCategory** category);
+	[propput, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3(long ShapeIndex, [in] IShapefileCategory* category);
+
 };
 
 /****************************  Shape Interface ***********************/
@@ -3527,6 +3533,9 @@ interface IShapefileCategories : IDispatch{
 	//[id(23), helpstring("method Sort")] HRESULT Sort([in] LONG FieldIndex, [in] VARIANT_BOOL Ascending, [in] tkGroupOperation Operation, [out,retval] VARIANT_BOOL* retVal);
 
 	[id(23), helpstring("property AddRange")] HRESULT AddRange([in]long FieldIndex,[in] tkClassificationType ClassificationType, [in]long numClasses, [in]VARIANT minValue, [in]VARIANT maxValue, [out, retval]VARIANT_BOOL* retVal);
+
+	[propget, id(24), helpstring("property CategoryIndexByName")] HRESULT CategoryIndexByName([in]BSTR categoryName, [out, retval] int* categoryIndex);
+	[propget, id(25), helpstring("property CategoryIndex")] HRESULT CategoryIndex([in] IShapefileCategory* category, [out, retval]int* categoryIndex);
 };
 
 /**********************  ShapefileCategory Interface  **************************/

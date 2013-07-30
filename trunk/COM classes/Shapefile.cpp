@@ -1484,6 +1484,114 @@ STDMETHODIMP CShapefile::put_ShapeCategory(long ShapeIndex, long newVal)
 	return S_OK;
 }
 
+// *************************************************************
+//		get_ShapeCategory2()
+// *************************************************************
+STDMETHODIMP CShapefile::put_ShapeCategory2(long ShapeIndex, BSTR categoryName)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+	{
+		int index;
+		m_categories->get_CategoryIndexByName(categoryName, &index);
+		if (index == -1)
+		{
+			ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		}
+		else
+		{
+			_shapeData[ShapeIndex]->category = (int)index;
+		}
+	}
+	return S_OK;
+}
+
+STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	*categoryName = A2BSTR("");
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+	{
+		int index = _shapeData[ShapeIndex]->category;
+		long count;
+		m_categories->get_Count(&count);
+		if (index >= 0 && index < count)
+		{
+			IShapefileCategory* ct;
+			m_categories->get_Item(index, &ct);
+			ct->get_Name(categoryName);
+			ct->Release();
+		}
+		else
+		{
+			ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		}
+	}
+	return S_OK;
+}
+
+// *************************************************************
+//		put_ShapeCategory3()
+// *************************************************************
+STDMETHODIMP CShapefile::put_ShapeCategory3(long ShapeIndex, IShapefileCategory* category)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+	{
+		int index;
+		m_categories->get_CategoryIndex(category, &index);
+		if (index == -1)
+		{
+			ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		}
+		else
+		{
+			_shapeData[ShapeIndex]->category = (int)index;
+		}
+	}
+	return S_OK;
+}
+
+STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory** category)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*category = NULL;
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+	{
+		int index = _shapeData[ShapeIndex]->category;
+		long count;
+		m_categories->get_Count(&count);
+		if (index >= 0 && index < count)
+		{
+			IShapefileCategory* ct;
+			m_categories->get_Item(index, &ct);
+			*category = ct;		// ref was aded in the get_Item
+		}
+		else
+		{
+			ErrorMessage(tkCATEGORY_WASNT_FOUND);
+		}
+	}
+	return S_OK;
+}
+
 // *******************************************************************
 //  	SelectionDrawingOptions()
 // *******************************************************************

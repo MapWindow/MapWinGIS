@@ -1000,6 +1000,45 @@ STDMETHODIMP CShapefileCategories::Deserialize(BSTR newVal)
 }
 
 // ********************************************************
+//     get_CategoryIndexByName()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::get_CategoryIndexByName(BSTR categoryName, int* categoryIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*categoryIndex = -1;
+	for(size_t i = 0; i < m_categories.size(); i++)
+	{
+		CComBSTR bstr;
+		m_categories[i]->get_Name(&bstr);
+		
+		if (lstrcmpW(bstr, categoryName) == 0)
+		{
+			*categoryIndex = i;
+			break;
+		}
+	}
+	return S_OK;
+}
+
+// ********************************************************
+//     get_CategoryIndex()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::get_CategoryIndex(IShapefileCategory* category, int* categoryIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*categoryIndex = -1;
+	for(size_t i = 0; i < m_categories.size(); i++)
+	{
+		if (m_categories[i] == category)
+		{
+			*categoryIndex = i;
+			break;
+		}
+	}
+	return S_OK;
+}
+
+// ********************************************************
 //     Sort()
 // ********************************************************
 //STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, tkGroupOperation Operation, VARIANT_BOOL* retVal)

@@ -413,6 +413,11 @@ public:
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 
+	STDMETHOD(get_ShapeCategory2)(long ShapeIndex, BSTR* categoryName);
+	STDMETHOD(put_ShapeCategory2)(long ShapeIndex, BSTR categoryName);
+	STDMETHOD(get_ShapeCategory3)(long ShapeIndex, IShapefileCategory** category);
+	STDMETHOD(put_ShapeCategory3)(long ShapeIndex, IShapefileCategory* category);
+
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
 	
