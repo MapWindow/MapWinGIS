@@ -9,15 +9,10 @@ Source: gdal_data\epsg.wkt; DestDir: {app}\gdal_data\
 Source: gdal_data\esri_extra.wkt; DestDir: {app}\gdal_data\
 Source: gdal_data\gcs.csv; DestDir: {app}\gdal_data\
 Source: gdal_data\gcs.override.csv; DestDir: {app}\gdal_data\
-Source: gdal_data\gdalicon.png; DestDir: {app}\gdal_data\
-Source: gdal_data\GDALLogoBW.svg; DestDir: {app}\gdal_data\
-Source: gdal_data\GDALLogoColor.svg; DestDir: {app}\gdal_data\
-Source: gdal_data\GDALLogoGS.svg; DestDir: {app}\gdal_data\
 Source: gdal_data\gdal_datum.csv; DestDir: {app}\gdal_data\
 Source: gdal_data\gt_datum.csv; DestDir: {app}\gdal_data\
 Source: gdal_data\gt_ellips.csv; DestDir: {app}\gdal_data\
 Source: gdal_data\header.dxf; DestDir: {app}\gdal_data\
-Source: gdal_data\LICENSE.TXT; DestDir: {app}\gdal_data\
 Source: gdal_data\pci_datum.txt; DestDir: {app}\gdal_data\
 Source: gdal_data\pci_ellips.txt; DestDir: {app}\gdal_data\
 Source: gdal_data\pcs.csv; DestDir: {app}\gdal_data\

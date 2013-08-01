@@ -27,13 +27,13 @@
 #include ISSI_IncludePath+"\_issi.isi"
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.8.7.6"
+#define MyAppVersion "4.8.8.0"
 #define MyAppPublisher "MapWindow GIS"
 #define MyAppURL "http://www.mapwindow.org"
 #ifdef x64BitVersion
   #define MyOutputBaseFilename "MapWinGIS-only-v4.8SR-64bit-installer"
 #else
-  #define MyOutputBaseFilename "MapWinGIS-only-v4.8SR-32bit-installer"
+  #define MyOutputBaseFilename "MapWinGIS-only-v4.8.8RC1-32bit-installer"
 #endif
 #define MySourcePath SourcePath
 
@@ -43,7 +43,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppID={{4DA288CD-C016-4E9E-B9EA-89799F678A06}
 PrivilegesRequired=poweruser
-MinVersion=5.1.2600sp1
+MinVersion=,5.1.2600sp1
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}

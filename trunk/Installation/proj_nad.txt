@@ -1,11 +1,11 @@
 ;Datum Shift Files
 Source: PROJ_NAD\alaska; DestDir: {app}\PROJ_NAD\
-Source: PROJ_NAD\CHENYX06a.gsb; DestDir: {app}\PROJ_NAD\
+;Source: PROJ_NAD\CHENYX06a.gsb; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\conus; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\epsg; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\esri; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\esri.extra; DestDir: {app}\PROJ_NAD\
-Source: PROJ_NAD\FL; DestDir: {app}\PROJ_NAD\
+;Source: PROJ_NAD\FL; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\GL27; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\hawaii; DestDir: {app}\PROJ_NAD\
 Source: PROJ_NAD\IGNF; DestDir: {app}\PROJ_NAD\
