@@ -1,9 +1,0 @@
-; MapWinGIS.def : Declares the module parameters.
-
-LIBRARY      "MAPWINGIS.OCX"
-
-EXPORTS
-	DllCanUnloadNow     PRIVATE ;@1 PRIVATE
-	DllGetClassObject   PRIVATE ;@2 PRIVATE
-	DllRegisterServer   PRIVATE ;@3 PRIVATE
-	DllUnregisterServer PRIVATE ;@4 PRIVATE
