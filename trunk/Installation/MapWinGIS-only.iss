@@ -27,13 +27,13 @@
 #include ISSI_IncludePath+"\_issi.isi"
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.8.8.0"
+#define MyAppVersion "4.8.8.1"
 #define MyAppPublisher "MapWindow GIS"
 #define MyAppURL "http://www.mapwindow.org"
 #ifdef x64BitVersion
   #define MyOutputBaseFilename "MapWinGIS-only-v4.8SR-64bit-installer"
 #else
-  #define MyOutputBaseFilename "MapWinGIS-only-v4.8.8RC1-32bit-installer"
+  #define MyOutputBaseFilename "MapWinGIS-only-v4.8.8SR-32bit-installer"
 #endif
 #define MySourcePath SourcePath
 
