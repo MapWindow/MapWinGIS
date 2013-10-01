@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.GridColorScheme.1 = s 'GridColorScheme Class'
+	{
+		CLSID = s '{ECEB5841-F84E-4DFD-8C96-32216C69C818}'
+	}
+	MapWinGIS.GridColorScheme = s 'GridColorScheme Class'
+	{
+		CLSID = s '{ECEB5841-F84E-4DFD-8C96-32216C69C818}'
+		CurVer = s 'MapWinGIS.GridColorScheme.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {ECEB5841-F84E-4DFD-8C96-32216C69C818} = s 'GridColorScheme Class'
+		{
+			ProgID = s 'MapWinGIS.GridColorScheme.1'
+			VersionIndependentProgID = s 'MapWinGIS.GridColorScheme'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

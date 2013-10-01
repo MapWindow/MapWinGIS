@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ESRIGridManager.1 = s 'ESRIGridManager Class'
+	{
+		CLSID = s '{86E02063-602C-47F2-9778-81E6979E3267}'
+	}
+	MapWinGIS.ESRIGridManager = s 'ESRIGridManager Class'
+	{
+		CLSID = s '{86E02063-602C-47F2-9778-81E6979E3267}'
+		CurVer = s 'MapWinGIS.ESRIGridManager.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {86E02063-602C-47F2-9778-81E6979E3267} = s 'ESRIGridManager Class'
+		{
+			ProgID = s 'MapWinGIS.ESRIGridManager.1'
+			VersionIndependentProgID = s 'MapWinGIS.ESRIGridManager'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

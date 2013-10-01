@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Grid.1 = s 'Grid Class'
+	{
+		CLSID = s '{B4A353E3-D3DF-455C-8E4D-CFC937800820}'
+	}
+	MapWinGIS.Grid = s 'Grid Class'
+	{
+		CLSID = s '{B4A353E3-D3DF-455C-8E4D-CFC937800820}'
+		CurVer = s 'MapWinGIS.Grid.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B4A353E3-D3DF-455C-8E4D-CFC937800820} = s 'Grid Class'
+		{
+			ProgID = s 'MapWinGIS.Grid.1'
+			VersionIndependentProgID = s 'MapWinGIS.Grid'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Field.1 = s 'Field Class'
+	{
+		CLSID = s '{C2C71E09-3DEB-4E6C-B54A-D5613986BFFE}'
+	}
+	MapWinGIS.Field = s 'Field Class'
+	{
+		CLSID = s '{C2C71E09-3DEB-4E6C-B54A-D5613986BFFE}'
+		CurVer = s 'MapWinGIS.Field.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {C2C71E09-3DEB-4E6C-B54A-D5613986BFFE} = s 'Field Class'
+		{
+			ProgID = s 'MapWinGIS.Field.1'
+			VersionIndependentProgID = s 'MapWinGIS.Field'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

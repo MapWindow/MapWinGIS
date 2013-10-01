@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Table.1 = s 'Table Class'
+	{
+		CLSID = s '{97EFB80F-3638-4BDC-9128-C5A30194C257}'
+	}
+	MapWinGIS.Table = s 'Table Class'
+	{
+		CLSID = s '{97EFB80F-3638-4BDC-9128-C5A30194C257}'
+		CurVer = s 'MapWinGIS.Table.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {97EFB80F-3638-4BDC-9128-C5A30194C257} = s 'Table Class'
+		{
+			ProgID = s 'MapWinGIS.Table.1'
+			VersionIndependentProgID = s 'MapWinGIS.Table'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

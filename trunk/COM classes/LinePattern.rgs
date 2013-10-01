@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.LinePattern.1 = s 'LinePattern Class'
+	{
+		CLSID = s '{FF695B0C-4977-4D9E-88DD-0DF4FF7082BC}'
+	}
+	MapWinGIS.LinePattern = s 'LinePattern Class'
+	{
+		CLSID = s '{FF695B0C-4977-4D9E-88DD-0DF4FF7082BC}'
+		CurVer = s 'MapWinGIS.LinePattern.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {FF695B0C-4977-4D9E-88DD-0DF4FF7082BC} = s 'LinePattern Class'
+		{
+			ProgID = s 'MapWinGIS.LinePattern.1'
+			VersionIndependentProgID = s 'MapWinGIS.LinePattern'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.TileProviders.1 = s 'TileProviders Class'
+	{
+		CLSID = s '{F2488D90-90B1-4862-BD16-81144151D284}'
+	}
+	MapWinGIS.TileProviders = s 'TileProviders Class'
+	{
+		CLSID = s '{F2488D90-90B1-4862-BD16-81144151D284}'
+		CurVer = s 'MapWinGIS.TileProviders.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F2488D90-90B1-4862-BD16-81144151D284} = s 'TileProviders Class'
+		{
+			ProgID = s 'MapWinGIS.TileProviders.1'
+			VersionIndependentProgID = s 'MapWinGIS.TileProviders'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

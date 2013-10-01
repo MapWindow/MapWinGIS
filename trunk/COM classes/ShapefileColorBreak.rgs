@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ShapefileLegendBreak.1 = s 'ShapefileLegendBreak Class'
+	{
+		CLSID = s '{700A2AAA-0D28-4943-92EC-08AA9682617A}'
+	}
+	MapWinGIS.ShapefileLegendBreak = s 'ShapefileLegendBreak Class'
+	{
+		CLSID = s '{700A2AAA-0D28-4943-92EC-08AA9682617A}'
+		CurVer = s 'MapWinGIS.ShapefileLegendBreak.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {700A2AAA-0D28-4943-92EC-08AA9682617A} = s 'ShapefileLegendBreak Class'
+		{
+			ProgID = s 'MapWinGIS.ShapefileLegendBreak.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapefileLegendBreak'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ChartField.1 = s 'ChartField Class'
+	{
+		CLSID = s '{8C429C40-4F0F-479A-B492-98819424801D}'
+	}
+	MapWinGIS.ChartField = s 'ChartField Class'
+	{
+		CLSID = s '{8C429C40-4F0F-479A-B492-98819424801D}'
+		CurVer = s 'MapWinGIS.ChartField.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {8C429C40-4F0F-479A-B492-98819424801D} = s 'ChartField Class'
+		{
+			ProgID = s 'MapWinGIS.ChartField.1'
+			VersionIndependentProgID = s 'MapWinGIS.ChartField'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

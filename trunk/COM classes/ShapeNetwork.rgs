@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ShapeNetwork.1 = s 'ShapeNetwork Class'
+	{
+		CLSID = s '{B655545F-1D9C-4D81-A73C-205FC2C3C4AB}'
+	}
+	MapWinGIS.ShapeNetwork = s 'ShapeNetwork Class'
+	{
+		CLSID = s '{B655545F-1D9C-4D81-A73C-205FC2C3C4AB}'
+		CurVer = s 'MapWinGIS.ShapeNetwork.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B655545F-1D9C-4D81-A73C-205FC2C3C4AB} = s 'ShapeNetwork Class'
+		{
+			ProgID = s 'MapWinGIS.ShapeNetwork.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapeNetwork'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ColorScheme.1 = s 'ColorScheme Class'
+	{
+		CLSID = s '{60409E71-BBB8-491C-A48B-ADA7F383CB6E}'
+	}
+	MapWinGIS.ColorScheme = s 'ColorScheme Class'
+	{
+		CLSID = s '{60409E71-BBB8-491C-A48B-ADA7F383CB6E}'
+		CurVer = s 'MapWinGIS.ColorScheme.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {60409E71-BBB8-491C-A48B-ADA7F383CB6E} = s 'ColorScheme Class'
+		{
+			ProgID = s 'MapWinGIS.ColorScheme.1'
+			VersionIndependentProgID = s 'MapWinGIS.ColorScheme'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

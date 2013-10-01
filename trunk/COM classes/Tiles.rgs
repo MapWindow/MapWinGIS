@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Tiles.1 = s 'Tiles Class'
+	{
+		CLSID = s '{9C7B823D-B1BE-4C39-A552-8B148C008FC5}'
+	}
+	MapWinGIS.Tiles = s 'Tiles Class'
+	{
+		CLSID = s '{9C7B823D-B1BE-4C39-A552-8B148C008FC5}'
+		CurVer = s 'MapWinGIS.Tiles.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {9C7B823D-B1BE-4C39-A552-8B148C008FC5} = s 'Tiles Class'
+		{
+			ProgID = s 'MapWinGIS.Tiles.1'
+			VersionIndependentProgID = s 'MapWinGIS.Tiles'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

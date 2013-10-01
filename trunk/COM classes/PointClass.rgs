@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Point.1 = s 'Point Class'
+	{
+		CLSID = s '{CE63AD29-C5EB-4865-B143-E0AC35ED6FBC}'
+	}
+	MapWinGIS.Point = s 'Point Class'
+	{
+		CLSID = s '{CE63AD29-C5EB-4865-B143-E0AC35ED6FBC}'
+		CurVer = s 'MapWinGIS.Point.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {CE63AD29-C5EB-4865-B143-E0AC35ED6FBC} = s 'Point Class'
+		{
+			ProgID = s 'MapWinGIS.Point.1'
+			VersionIndependentProgID = s 'MapWinGIS.Point'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

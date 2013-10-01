@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.GeoProjection.1 = s 'GeoProjection Class'
+	{
+		CLSID = s '{B0828DB2-3354-419F-82B0-AC0478DDB00D}'
+	}
+	MapWinGIS.GeoProjection = s 'GeoProjection Class'
+	{
+		CLSID = s '{B0828DB2-3354-419F-82B0-AC0478DDB00D}'
+		CurVer = s 'MapWinGIS.GeoProjection.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B0828DB2-3354-419F-82B0-AC0478DDB00D} = s 'GeoProjection Class'
+		{
+			ProgID = s 'MapWinGIS.GeoProjection.1'
+			VersionIndependentProgID = s 'MapWinGIS.GeoProjection'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

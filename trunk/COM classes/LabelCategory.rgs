@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.LabelCategory.1 = s 'LabelCategory Class'
+	{
+		CLSID = s '{92ADD941-94C2-4A57-A058-E9999F21D6BF}'
+	}
+	MapWinGIS.LabelCategory = s 'LabelCategory Class'
+	{
+		CLSID = s '{92ADD941-94C2-4A57-A058-E9999F21D6BF}'
+		CurVer = s 'MapWinGIS.LabelCategory.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {92ADD941-94C2-4A57-A058-E9999F21D6BF} = s 'LabelCategory Class'
+		{
+			ProgID = s 'MapWinGIS.LabelCategory.1'
+			VersionIndependentProgID = s 'MapWinGIS.LabelCategory'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

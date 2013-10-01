@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.GlobalSettings.1 = s 'GlobalSettings Class'
+	{
+		CLSID = s '{80CDFEE0-576F-4141-906E-877638A2AEF3}'
+	}
+	MapWinGIS.GlobalSettings = s 'GlobalSettings Class'
+	{
+		CLSID = s '{80CDFEE0-576F-4141-906E-877638A2AEF3}'
+		CurVer = s 'MapWinGIS.GlobalSettings.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {80CDFEE0-576F-4141-906E-877638A2AEF3} = s 'GlobalSettings Class'
+		{
+			ProgID = s 'MapWinGIS.GlobalSettings.1'
+			VersionIndependentProgID = s 'MapWinGIS.GlobalSettings'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

@@ -1,0 +1,1050 @@
+
+#pragma region Include
+#include "stdafx.h"
+#include "MapWinGis.h"
+#include "Map.h"
+#include "Shapefile.h"
+#include "Measuring.h"
+#pragma endregion
+
+// ***************************************************************
+//		OnKeyDown
+// ***************************************************************
+// Handles arrow keys
+void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{ 
+	double dx = (this->extents.right - this->extents.left)/4.0;
+	double dy = (this->extents.top - this->extents.bottom)/4.0;
+	IExtents* box = NULL;
+	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
+	
+	switch(nChar)
+	{
+		case VK_LEFT:
+			box->SetBounds(extents.left - dx, extents.bottom, 0.0, extents.right - dx, extents.top, 0.0);		
+			this->SetExtents(box);
+			break;
+		case VK_RIGHT:
+			box->SetBounds(extents.left + dx, extents.bottom, 0.0, extents.right + dx, extents.top, 0.0);		
+			this->SetExtents(box);
+			break;
+		case VK_UP:
+			box->SetBounds(extents.left, extents.bottom + dy, 0.0, extents.right, extents.top + dy, 0.0);		
+			this->SetExtents(box);
+			break;
+		case VK_DOWN:
+			box->SetBounds(extents.left, extents.bottom - dy, 0.0, extents.right, extents.top - dy, 0.0);		
+			this->SetExtents(box);
+			break;
+		default:
+			break;
+	}
+	box->Release();
+} 
+
+// ***************************************************************
+// 		OnMouseWheel()					           
+// ***************************************************************
+//  Processing mouse wheel event. Amount of zoom is determined by MouseWheelsSpeed parameter
+BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	if (m_MouseWheelSpeed < 0.1 || m_MouseWheelSpeed > 10) m_MouseWheelSpeed = 1;
+	if (m_MouseWheelSpeed == 1) return FALSE;
+	
+	RECT rect;
+	double width, height;
+	double xCent, yCent;
+	double dx, dy;
+
+	// absolute cursor position
+	this->GetWindowRect(&rect);
+	if (pt.x < rect.left || pt.x > rect.right || pt.y < rect.top || pt.y > rect.bottom)
+		return false;
+	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
+		return false;
+
+	if (m_Rotate != NULL && m_RotateAngle != 0)
+	{
+		CPoint curMousePt, origMousePt, rotCentre;
+	    
+		curMousePt.x = pt.x - rect.left;
+		curMousePt.y = pt.y - rect.top;
+		rotCentre.x = (rect.right - rect.left) / 2;
+		rotCentre.y = (rect.bottom - rect.top) / 2;
+
+		m_Rotate->getOriginalPixelPoint(curMousePt.x, curMousePt.y, &(origMousePt.x), &(origMousePt.y));
+		PixelToProj((double)(origMousePt.x), (double)(origMousePt.y), &xCent, &yCent);
+
+		dx = (double)(origMousePt.x) / (double)(rect.right - rect.left);
+		dy = (double)(origMousePt.y) / (double)(rect.bottom - rect.top);
+	}
+	else
+	{
+		PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
+		dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
+		dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+	}
+
+    // new extents
+	double ratio = zDelta > 0?m_MouseWheelSpeed:(1/m_MouseWheelSpeed);
+	height = (extents.top - extents.bottom) * ratio;
+	width = (extents.right - extents.left) * ratio;
+	
+	Extent ext;
+	ext.left = xCent - width * dx;
+	ext.right = xCent + width * (1 - dx);
+	ext.bottom = yCent - height * (1 - dy);
+	ext.top = yCent + height * dy;
+	
+	
+
+	this->SetExtentsCore(ext);
+	return true;
+}
+
+
+
+// ************************************************************
+//		OnLButtonDown
+// ************************************************************
+void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+   m_leftButtonDown = TRUE;
+
+	CPoint rotPoint = point;
+	if (m_Rotate != NULL && m_RotateAngle != 0)
+	{
+		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
+		m_clickDown = rotPoint;
+    }
+	else
+		m_clickDown = point;
+
+   m_clickDownExtents = extents;
+
+	long vbflags = 0;
+	if( nFlags & MK_SHIFT )
+		vbflags |= 1;
+	if( nFlags & MK_CONTROL )
+		vbflags |= 2;
+
+	if( m_cursorMode == cmZoomIn )
+	{
+		if (m_sendMouseDown)
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags,point.x,point.y -1);
+		}
+
+		m_ttip.Activate(FALSE);
+		
+		//Selection Box
+		CMapTracker selectBox = CMapTracker( this,
+			CRect(0,0,0,0),
+			CRectTracker::solidLine +
+			CRectTracker::resizeOutside );
+		selectBox.m_sizeMin = 0;
+
+		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
+		m_ttip.Activate(TRUE);
+
+		CRect rect = selectBox.m_rect;
+		rect.NormalizeRect();
+
+		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
+			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
+			selected = false;
+
+		if( selected == true )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+			{
+				CRect rectTmp = rect;
+				long tmpX = 0, tmpY = 0;
+				// adjust rectangle to unrotated coordinates
+				m_Rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+				rectTmp.TopLeft().x = tmpX;
+				rectTmp.TopLeft().y = tmpY;
+				m_Rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+				rectTmp.BottomRight().x = tmpX;
+				rectTmp.BottomRight().y = tmpY;
+				rect = rectTmp;
+			}
+			
+			double zrx = extents.right, zby = extents.bottom;
+			double zlx = extents.left, zty = extents.top;
+			PixelToProjection( rect.TopLeft().x, rect.TopLeft().y, zrx, zby );
+			PixelToProjection( rect.BottomRight().x, rect.BottomRight().y, zlx, zty );
+
+			double cLeft = MINIMUM( zrx, zlx );
+			double cRight = MAXIMUM( zrx, zlx );
+			double cBottom = MINIMUM( zty, zby );
+			double cTop = MAXIMUM( zty, zby );
+
+			this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));
+
+			if( m_sendSelectBoxFinal == TRUE )
+			{
+				long iby = rect.BottomRight().y;
+				long ity = rect.TopLeft().y;
+				this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x, iby, ity );
+			}
+			//InvalidateControl();
+		}
+		else
+		{
+			/*if (m_Rotate != NULL && m_RotateAngle != 0)
+			point = rotPoint;
+
+			double zx = extents.left, zy = extents.bottom;
+			PixelToProjection( point.x, point.y, zx, zy );
+
+			double halfxRange = (extents.right - extents.left)*.5;
+			double halfyRange = (extents.top - extents.bottom)*.5;*/
+
+			// Chris M and Steve Abbot -- Log the previous extents here,
+			// since we're about to change them.
+			//LogPrevExtent(); 
+
+			/*extents.left = zx - halfxRange;
+			extents.right = zx + halfxRange;
+			extents.bottom = zy - halfyRange;
+			extents.top = zy + halfyRange;*/
+			
+			ZoomIn( m_zoomPercent );
+			// lsu 16-mar-13: commented the next block, why to duplicate ZoomIn?
+
+			// Chris M and Steve Abbot -- commented out the next line and added the following code from ZoomIn
+			/*double xzin = ((extents.right - extents.left)*( 1.0 - m_zoomPercent ))*.5;
+			double xmiddle = extents.left + (extents.right - extents.left)*.5;
+
+			double cLeft = xmiddle - xzin;
+			double cRight = xmiddle + xzin;
+
+			double yzin = ((extents.top - extents.bottom)*( 1.0 - m_zoomPercent ))*.5;
+			double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
+
+			double cBottom = ymiddle - yzin;
+			double cTop = ymiddle + yzin;
+
+			this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));*/
+
+			//the MapTracker interferes with the OnMouseUp event so we will call it manually
+			if( m_sendMouseUp == TRUE )
+			{
+				if (m_Rotate != NULL && m_RotateAngle != 0)
+					this->FireMouseUp(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+				else
+					this->FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+			}
+		}
+	}
+	else if( m_cursorMode == cmZoomOut )
+	{
+		/*if (m_Rotate != NULL && m_RotateAngle != 0)
+			point = rotPoint;
+		double zx = extents.left, zy = extents.bottom;
+		this->PixelToProjection( point.x, point.y, zx, zy );
+
+		double halfxRange = (extents.right - extents.left)*.5;
+		double halfyRange = (extents.top - extents.bottom)*.5;
+
+		extents.left = zx - halfxRange;
+		extents.right = zx + halfxRange;
+		extents.bottom = zy - halfyRange;
+		extents.top = zy + halfyRange;*/
+
+		if( m_sendMouseDown == TRUE )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+		}
+		
+        ZoomOut( m_zoomPercent );
+		
+		// lsu 16-mar-13: commented the next block, why to duplicate ZoomOut?
+		// Chris M and Steve Abbot -- commented out the next line and added the following code from ZoomOut
+		/*double xzout = ((extents.right - extents.left)*( 1.0 + Percent ))*.5;
+		double xmiddle = extents.left + (extents.right - extents.left)*.5;
+
+		double cLeft = xmiddle - xzout;
+		double cRight = xmiddle + xzout;
+
+		double yzout = ((extents.top - extents.bottom)*( 1.0 + Percent ))*.5;
+		double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
+
+		double cBottom = ymiddle - yzout;
+		double cTop = ymiddle + yzout;
+
+		this->SetExtentsCore(Extent( cLeft, cRight, cBottom, cTop ), true);*/
+	}
+	else if( m_cursorMode == cmPan )
+	{
+		if( m_sendMouseDown == TRUE )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1);
+		}
+
+		CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
+		m_bitbltClickDown = point;
+		m_bitbltClickMove = point;
+		this->LogPrevExtent();
+		this->SetCapture();
+		this->LockWindow(lmLock);
+
+		//sent on mouse-up event
+		//FireExtentsChanged();
+	}
+	else if( m_cursorMode == cmSelection )
+	{
+		m_ttip.Activate(FALSE);
+		//Selection Box
+
+		if( m_sendMouseDown == TRUE )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+		}
+
+		CMapTracker selectBox = CMapTracker( this,
+			CRect(0,0,0,0),
+			CRectTracker::solidLine +
+			CRectTracker::resizeOutside );
+
+		selectBox.m_sizeMin = 0;
+
+		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
+		m_ttip.Activate(TRUE);
+
+		CRect rect = selectBox.m_rect;
+		rect.NormalizeRect();
+
+		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
+			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
+			selected = false;
+
+		if( selected )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+			{
+				CRect rectTmp = rect;
+				long tmpX = 0, tmpY = 0;
+				// adjust rectangle to unrotated coordinates
+				m_Rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+				rectTmp.TopLeft().x = tmpX;
+				rectTmp.TopLeft().y = tmpY;
+				m_Rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+				rectTmp.BottomRight().x = tmpX;
+				rectTmp.BottomRight().y = tmpY;
+				rect = rectTmp;
+			}
+
+			if( m_sendSelectBoxFinal == TRUE )
+			{	
+				long iby = rect.BottomRight().y;
+				long ity = rect.TopLeft().y;
+				this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x,	iby, ity );
+				return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
+			}
+		}
+		
+		//the MapTracker interferes with the OnMouseUp event so we will call it manually
+		if( m_sendMouseUp == TRUE )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				this->FireMouseUp(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				this->FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+		}
+	}
+	else if( m_cursorMode == cmMeasure )
+	{
+ 		double x, y;
+		this->PixelToProjection( point.x, point.y, x, y );
+		((CMeasuring*)m_measuring)->AddPoint(x, y);
+		m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
+
+		// better to call it before the redraw
+		if( m_sendMouseDown ) {
+			this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+		}
+
+		this->Refresh();		// update the map without redrawing the layers
+	}
+	else //if( m_cursorMode == cmNone )
+	{
+		SetCapture();
+		if( m_sendMouseDown == TRUE )
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+			else
+				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+		}
+	}
+}
+
+// ************************************************************
+//		OnLButtonDblClick
+// ************************************************************
+void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+   OnLButtonDown(nFlags, point);
+}
+
+// ************************************************************
+//		OnLButtonUp
+// ************************************************************
+void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	long vbflags = 0;
+	if( nFlags & MK_SHIFT )
+		vbflags |= 1;
+	if( nFlags & MK_CONTROL )
+		vbflags |= 2;
+  
+	if (m_Rotate != NULL && m_RotateAngle != 0)
+	{
+		CPoint rotPoint = point;
+		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
+		point = rotPoint;
+	}
+
+	if( m_sendMouseUp == TRUE && m_leftButtonDown )
+		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+
+   m_leftButtonDown = FALSE;
+
+	ReleaseCapture();
+
+	if( m_cursorMode == cmPan )
+	{
+		//this is the only mode we care about for this event
+		m_bitbltClickDown = CPoint(0,0);
+		m_bitbltClickMove = CPoint(0,0);
+		
+		this->SetExtentsCore(this->extents, false);
+		LockWindow(lmUnlock);
+	}
+}
+
+// ************************************************************
+//		OnMouseMove
+// ************************************************************
+void CMapView::OnMouseMove(UINT nFlags, CPoint point)
+{
+	VARIANT_BOOL vbretval;
+	CPoint rotPoint = point;
+	if (m_Rotate != NULL && m_RotateAngle != 0)
+		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
+
+	if( m_showingToolTip )
+	{
+		CToolInfo cti;
+		m_ttip.GetToolInfo(cti,this,IDC_TTBTN);
+		cti.rect.left = point.x - 2;
+		cti.rect.right = point.x + 2;
+		cti.rect.top = point.y - 2;
+		cti.rect.bottom = point.y + 2;
+		m_ttip.SetToolInfo(&cti);
+		m_ttip.SetWindowPos(&wndTop,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+
+		MSG pMsg;
+		pMsg.hwnd = this->m_hWnd;
+		pMsg.message = WM_MOUSEMOVE;
+		pMsg.wParam = nFlags;
+		pMsg.lParam = MAKELPARAM(point.x, point.y);
+		pMsg.pt = point;
+		m_ttip.RelayEvent(&pMsg);
+	}
+
+	long vbflags = 0;
+	if( nFlags & MK_SHIFT )
+		vbflags |= 1;
+	if( nFlags & MK_CONTROL )
+		vbflags |= 2;
+
+   CPoint movePnt = point;
+
+	if (m_Rotate != NULL && m_RotateAngle != 0)
+		movePnt = rotPoint;
+
+	if( m_sendMouseMove == TRUE )
+	{	
+		long mbutton = 0;
+		if( nFlags & MK_LBUTTON )
+			mbutton = 1;
+		else if( nFlags & MK_RBUTTON )
+			mbutton = 2;
+		else if( nFlags & MK_MBUTTON )
+			mbutton = 3;
+
+		if( (m_cursorMode == cmPan) && (nFlags & MK_LBUTTON ))
+		{
+			//Do Not Send the Event
+		}
+		else
+		{
+			if (m_Rotate != NULL && m_RotateAngle != 0)
+  				this->FireMouseMove( mbutton, (short)vbflags, rotPoint.x, rotPoint.y - 1 );   
+			else
+ 				this->FireMouseMove( mbutton, (short)vbflags, point.x, point.y - 1 );
+		}
+	}
+
+	if( m_cursorMode == cmPan )
+	{
+		if( (nFlags & MK_LBUTTON) && m_leftButtonDown )
+		{
+			m_bitbltClickMove = point;
+			double zmx = 0, zmy = 0;
+			double zpx = 0, zpy = 0;
+
+         double xAmount = (m_clickDown.x - movePnt.x)*m_inversePixelPerProjectionX;
+			double yAmount = (movePnt.y - m_clickDown.y)*m_inversePixelPerProjectionY;
+
+			extents.left = m_clickDownExtents.left + xAmount;
+			extents.right = m_clickDownExtents.right + xAmount;
+			extents.bottom = m_clickDownExtents.bottom + yAmount;
+			extents.top = m_clickDownExtents.top + yAmount;
+
+			if (m_UseSeamlessPan)
+			{
+				m_canbitblt = FALSE;	// lsu (07/03/2009) added for seamless panning; suggested by Bobby at http://www.mapwindow.org/phorum/read.php?3,13099
+				LockWindow(lmUnlock);	
+
+				FireExtentsChanged(); 
+				ReloadImageBuffers(); 
+			}	
+			else
+				InvalidateControl();
+
+			return;
+		}
+	}
+
+	if( m_cursorMode == cmMeasure ) {
+		double x, y;
+		this->PixelToProjection( point.x, point.y, x, y );
+		CMeasuring* m =((CMeasuring*)m_measuring);
+		if (m->points.size() > 0) {
+			m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
+			m->mousePoint.y = point.y;
+			m_drawMouseMoves = true;
+			this->Refresh();
+		}
+	}
+
+	// Hot tracking
+	double pixX = point.x;
+	double pixY = point.y;
+	double prjX, prjY;
+	this->PixelToProj(pixX, pixY, &prjX, &prjY);
+	
+	bool found = false;
+	IShapefile * sf = NULL;
+
+	for(int i = 0; i < (int)m_activeLayers.size(); i++ )
+	{
+		Layer* layer = m_allLayers[m_activeLayers[i]];
+		if (layer->type == ShapefileLayer)
+		{
+			layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			if (sf)
+			{
+				VARIANT_BOOL hotTracking = VARIANT_FALSE;
+				sf->get_HotTracking(&hotTracking);
+				if (hotTracking)
+				{
+					std::vector<long> shapes;
+
+					double tol = 0.0;
+					ShpfileType type;
+					sf->get_ShapefileType(&type);
+					type = Utility::ShapeTypeConvert2D(type);
+					if (type == SHP_MULTIPOINT || type == SHP_POINT)
+						tol = 5.0/this->PixelsPerMapUnit();
+
+					((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
+					
+					if (shapes.size() > 0)
+					{
+						if (m_activeLayers[i] != m_hotTracking.LayerHandle ||
+							shapes[0] != m_hotTracking.ShapeId)
+						{
+							IShape* shape = NULL;
+							sf->get_Shape(shapes[0], &shape);
+							if (shape)
+							{
+								IShape* shpClone = NULL;
+								shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
+															// on the first glance shape shouldn't be released on closing the shapefile
+								ULONG cnt = shape->Release();
+
+								if (!m_hotTracking.Shapefile)
+									CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(m_hotTracking.Shapefile));
+								else
+									m_hotTracking.Shapefile->Close(&vbretval);
+
+								if (m_hotTracking.Shapefile)
+								{
+									ShpfileType type;
+									sf->get_ShapefileType(&type);
+									
+									((CShapefile*)m_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
+									long index = 0;
+									m_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
+									m_hotTracking.Shapefile->RefreshExtents(&vbretval);
+									m_hotTracking.LayerHandle = m_activeLayers[i];
+									m_hotTracking.ShapeId = shapes[0];
+
+									IShapeDrawingOptions* options = NULL;
+									sf->get_SelectionDrawingOptions(&options);
+									if (options)
+									{
+										m_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+										options->Release();
+									}
+									this->Refresh();
+									
+									// pasing event to the caller
+									this->FireShapeHighlighted(m_hotTracking.LayerHandle, m_hotTracking.ShapeId);
+								}
+								shpClone->Release();
+							}
+						}
+						found = true;
+					}
+				}
+				
+				sf->Release();
+				sf = NULL;
+
+				if (found)
+					break;
+			}
+		}
+	}
+
+	if (!found && m_hotTracking.ShapeId != -1)
+	{
+		m_hotTracking.ShapeId = -1;
+		m_hotTracking.LayerHandle = -1;
+		if (m_hotTracking.Shapefile)
+			m_hotTracking.Shapefile->Close(&vbretval);
+		this->Refresh();
+		
+		// pasing event to the caller
+		this->FireShapeHighlighted(-1, -1);
+	}
+}
+
+// ************************************************************
+//		OnRButtonDblClick
+// ************************************************************
+void CMapView::OnRButtonDblClk(UINT nFlags, CPoint point)
+{
+   OnRButtonDown(nFlags, point);
+}
+
+// ************************************************************
+//		OnRButtonDown
+// ************************************************************
+void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+	// Added QUAY 3.16.09
+	if (DoTrapRMouseDown == TRUE )
+	{
+		long vbflags = 0;
+		if( nFlags & MK_SHIFT )
+			vbflags |= 1;
+		if( nFlags & MK_CONTROL )
+			vbflags |= 2;
+
+		m_clickDown = point;
+      m_clickDownExtents = extents;
+
+		VARIANT_BOOL redraw;
+		if( m_cursorMode == cmMeasure )
+		{
+			// we need to update before firing the event
+			((CMeasuring*)m_measuring)->UndoPoint(&redraw);
+			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
+		}
+
+		if( m_sendMouseDown == TRUE )
+			this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+
+		if( m_cursorMode == cmZoomOut )
+		{
+			double zx = extents.left, zy = extents.bottom;
+			PixelToProjection( point.x, point.y, zx, zy );
+
+			double halfxRange = (extents.right - extents.left)*.5;
+			double halfyRange = (extents.top - extents.bottom)*.5;
+
+			extents.left = zx - halfxRange;
+			extents.right = zx + halfxRange;
+			extents.bottom = zy - halfyRange;
+			extents.top = zy + halfyRange;
+
+			ZoomIn( m_zoomPercent );
+
+			FireExtentsChanged();
+			ReloadImageBuffers();
+		}
+		else if( m_cursorMode == cmZoomIn )
+		{
+			double zx = extents.left, zy = extents.bottom;
+			PixelToProjection( point.x, point.y, zx, zy );
+
+			double halfxRange = (extents.right - extents.left)*.5;
+			double halfyRange = (extents.top - extents.bottom)*.5;
+
+			extents.left = zx - halfxRange;
+			extents.right = zx + halfxRange;
+			extents.bottom = zy - halfyRange;
+			extents.top = zy + halfyRange;
+
+			ZoomOut( m_zoomPercent );
+
+			FireExtentsChanged();
+			ReloadImageBuffers();
+		}
+	
+		if( redraw ) {
+			this->Refresh();
+		}
+	}
+}
+
+// *********************************************************
+//		OnRButtonUp()
+// *********************************************************
+void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
+{
+	COleControl::OnRButtonUp(nFlags, point);
+	ReleaseCapture();//why is this being called, capture isn't set on RButtonDown as far as I can see...
+
+	long vbflags = 0;
+	if( nFlags & MK_SHIFT )
+		vbflags |= 1;
+	if( nFlags & MK_CONTROL )
+		vbflags |= 2;
+
+	if( m_sendMouseUp == TRUE )
+		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+}
+
+// *********************************************************
+//		OnMButtonUp()
+// *********************************************************
+void CMapView::OnMButtonUp(UINT nFlags, CPoint point)
+{
+	double zx = extents.left, zy = extents.bottom;
+	PixelToProjection( point.x, point.y, zx, zy );
+
+	double halfxRange = (extents.right - extents.left)*.5;
+	double halfyRange = (extents.top - extents.bottom)*.5;
+
+	extents.left = zx - halfxRange;
+	extents.right = zx + halfxRange;
+	extents.bottom = zy - halfyRange;
+	extents.top = zy + halfyRange;
+
+	this->SetExtentsCore(extents);
+
+	/*m_canbitblt = FALSE;
+	if( !m_lockCount )
+		this->InvalidateControl();
+
+	this->FireExtentsChanged();
+	this->ReloadImageBuffers();*/
+}
+
+void CMapView::ResizeBuffers(int cx, int cy)
+{
+	if (m_bufferBitmap)
+	{
+		delete m_bufferBitmap;
+		m_bufferBitmap = NULL;
+	}
+	m_bufferBitmap = new Gdiplus::Bitmap(cx, cy);
+
+	if (m_tilesBitmap)
+	{
+		delete m_tilesBitmap;
+		m_tilesBitmap = NULL;
+	}
+	m_tilesBitmap = new Gdiplus::Bitmap(cx, cy);
+
+	if (m_drawingBitmap)
+	{
+		delete m_drawingBitmap;
+		m_drawingBitmap = NULL;
+	}
+	m_drawingBitmap = new Gdiplus::Bitmap(cx, cy);
+
+	if (m_layerBitmap)
+	{
+		delete m_layerBitmap;
+		m_layerBitmap = NULL;
+	}
+	m_layerBitmap = new Gdiplus::Bitmap(cx, cy);
+}
+
+// *************************************************************
+//		CMapView::OnSize()
+// *************************************************************
+void CMapView::OnSize(UINT nType, int cx, int cy)
+{
+	// the redraw is prohibited before the job here is done
+	m_isSizing = true;
+
+	COleControl::OnSize(nType, cx, cy);
+
+	CDC* pDC = GetDC();
+	
+	ResizeBuffers(cx, cy);
+	
+	// we shall fill the new regions with back color
+	if (cx > m_viewWidth)
+	{
+		pDC->FillSolidRect(m_viewWidth, 0, cx - m_viewWidth, cy, m_backColor);
+	}
+	if (cy > m_viewHeight)
+	{
+		pDC->FillSolidRect(0, m_viewHeight, cx, cy - m_viewHeight, m_backColor);
+	}
+
+	ReleaseDC(pDC);
+
+	if( cx > 0 && cy > 0 )
+	{
+		m_viewWidth = cx;
+		m_viewHeight = cy;
+		m_aspectRatio = (double)m_viewWidth/(double)m_viewHeight;
+		m_isSizing = false;
+		
+		this->SetExtentsCore(extents, false, true);
+	}
+	else
+	{
+		m_isSizing = false;
+	}
+}
+
+// *******************************************************
+//		OnDropFiles()
+// *******************************************************
+void CMapView::OnDropFiles(HDROP hDropInfo)
+{
+	long numFiles = DragQueryFile( hDropInfo, 0xFFFFFFFF, NULL, 0 );
+
+	register int i;
+	for( i = 0; i < numFiles; i++ )
+	{
+		long fsize = DragQueryFile( hDropInfo, i, NULL, 0 );
+		if( fsize > 0 )
+		{	char * fname = new char[fsize + 2];
+			DragQueryFile( hDropInfo, i, fname, fsize + 1 );
+			FireFileDropped( fname );
+			delete [] fname;
+		}
+	}
+	COleControl::OnDropFiles(hDropInfo);
+}
+
+// *******************************************************
+//		OnBackColorChanged()
+// *******************************************************
+void CMapView::OnBackColorChanged()
+{
+	m_canbitblt = FALSE;
+	if( !m_lockCount )
+		InvalidateControl();
+}
+
+// *******************************************************
+//		OnMapCursorChanged()
+// *******************************************************
+void CMapView::OnMapCursorChanged()
+{	
+	OnSetCursor(this,0,0);
+}
+
+// *******************************************************
+//		OnSetCursor()
+// *******************************************************
+BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+   HCURSOR NewCursor = NULL;
+
+	if( nHitTest != HTCLIENT )
+	{
+		COleControl::OnSetCursor( pWnd, nHitTest, message );
+		return TRUE;
+	}
+
+	switch( m_mapCursor )
+	{
+		case crsrMapDefault:
+
+			switch( m_cursorMode )
+			{
+				case cmZoomIn:
+					NewCursor = m_cursorZoomin;
+					break;
+
+				case cmZoomOut:
+					NewCursor = m_cursorZoomout;
+					break;
+
+				case cmPan:
+					NewCursor = m_cursorPan;
+					break;
+
+				case cmSelection:
+					NewCursor = m_cursorSelect;
+					break;
+
+				case cmNone:
+					NewCursor = (HCURSOR)m_uDCursorHandle;
+					break;
+			}
+			break;
+	
+		case crsrAppStarting:
+			NewCursor = LoadCursor(NULL, IDC_APPSTARTING);
+			break;
+
+		case crsrArrow:
+			NewCursor = LoadCursor(NULL, IDC_ARROW);
+			break;
+
+		case crsrCross:
+			NewCursor = LoadCursor(NULL, IDC_CROSS);
+			break;
+
+		case crsrHelp:
+			NewCursor = LoadCursor(NULL, IDC_HELP);
+			break;
+
+		case crsrIBeam:
+			NewCursor = LoadCursor(NULL, IDC_IBEAM);
+			break;
+
+		case crsrNo:
+			NewCursor = LoadCursor(NULL, IDC_NO);
+			break;
+
+		case crsrSizeAll:
+			NewCursor = LoadCursor(NULL, IDC_SIZEALL);
+			break;
+
+		case crsrSizeNESW:
+			NewCursor = LoadCursor(NULL, IDC_SIZENESW);
+			break;
+
+		case crsrSizeNS:
+			NewCursor = LoadCursor(NULL, IDC_SIZENS);
+			break;
+
+		case crsrSizeNWSE:
+			NewCursor = LoadCursor(NULL, IDC_SIZENWSE);
+			break;
+
+		case crsrSizeWE:
+			NewCursor = LoadCursor(NULL, IDC_SIZEWE);
+			break;
+
+		case crsrUpArrow:
+			NewCursor = LoadCursor(NULL, IDC_UPARROW);
+			break;
+		
+		case crsrWait:
+
+			if (!m_DisableWaitCursor)
+				NewCursor = LoadCursor(NULL, IDC_WAIT);
+			break;
+
+		case crsrUserDefined:
+			NewCursor = (HCURSOR)m_uDCursorHandle;
+			break;
+	}
+
+	if (NewCursor != NULL)
+		::SetCursor( NewCursor );
+	else
+		COleControl::OnSetCursor( pWnd, nHitTest, message );
+
+	return TRUE;
+}
+
+// *************************************************************
+//		OnTimer()
+// *************************************************************
+#ifdef WIN64
+void CMapView::OnTimer(UINT_PTR nIDEvent)
+#else
+void CMapView::OnTimer(UINT nIDEvent)
+#endif
+{
+	// TODO: Add your message handler code here and/or call default
+	if( nIDEvent == SHOWTEXT )
+	{	KillTimer(SHOWTEXT);
+		m_showingToolTip = TRUE;
+	}
+	else if( nIDEvent == HIDETEXT)
+	{	KillTimer(HIDETEXT);
+		m_showingToolTip = FALSE;
+
+		CToolInfo cti;
+		m_ttip.GetToolInfo(cti,this,IDC_TTBTN);
+		cti.rect.left = -1;
+		cti.rect.top = - 1;
+		cti.rect.right = - 1;
+		cti.rect.bottom = - 1;
+		m_ttip.SetToolInfo(&cti);
+		m_ttip.Pop();
+	}
+
+	COleControl::OnTimer(nIDEvent);
+}
+
+// *********************************************************
+//		OnResetState 
+// *********************************************************
+// Reset control to default state
+void CMapView::OnResetState()
+{
+	COleControl::OnResetState();  // Resets defaults found in DoPropExchange
+	// TODO: Reset any other control state here.
+}
+
+// *********************************************************
+//		Unimplemented events
+// *********************************************************
+void CMapView::OnExtentPadChanged(){}
+void CMapView::OnExtentHistoryChanged(){}
+void CMapView::OnKeyChanged(){}
+void CMapView::OnDoubleBufferChanged(){}
+void CMapView::OnZoomPercentChanged(){}
+void CMapView::OnCursorModeChanged(){}
+void CMapView::OnUDCursorHandleChanged(){}
+void CMapView::OnSendMouseDownChanged(){}
+void CMapView::OnSendOnDrawBackBufferChanged(){}
+void CMapView::OnSendMouseUpChanged(){}
+void CMapView::OnSendMouseMoveChanged(){}
+void CMapView::OnSendSelectBoxDragChanged(){}
+void CMapView::OnSendSelectBoxFinalChanged(){}
+

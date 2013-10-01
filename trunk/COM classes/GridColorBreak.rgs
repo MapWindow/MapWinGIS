@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.GridColorBreak.1 = s 'GridColorBreak Class'
+	{
+		CLSID = s '{B82B0EB0-05B6-4FF2-AA16-BCD33FDE6568}'
+	}
+	MapWinGIS.GridColorBreak = s 'GridColorBreak Class'
+	{
+		CLSID = s '{B82B0EB0-05B6-4FF2-AA16-BCD33FDE6568}'
+		CurVer = s 'MapWinGIS.GridColorBreak.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B82B0EB0-05B6-4FF2-AA16-BCD33FDE6568} = s 'GridColorBreak Class'
+		{
+			ProgID = s 'MapWinGIS.GridColorBreak.1'
+			VersionIndependentProgID = s 'MapWinGIS.GridColorBreak'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

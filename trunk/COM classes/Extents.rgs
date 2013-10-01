@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.Extents.1 = s 'Extents Class'
+	{
+		CLSID = s '{03F9B3DB-637B-4544-BF7A-2F190F821F0D}'
+	}
+	MapWinGIS.Extents = s 'Extents Class'
+	{
+		CLSID = s '{03F9B3DB-637B-4544-BF7A-2F190F821F0D}'
+		CurVer = s 'MapWinGIS.Extents.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {03F9B3DB-637B-4544-BF7A-2F190F821F0D} = s 'Extents Class'
+		{
+			ProgID = s 'MapWinGIS.Extents.1'
+			VersionIndependentProgID = s 'MapWinGIS.Extents'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Both'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}
