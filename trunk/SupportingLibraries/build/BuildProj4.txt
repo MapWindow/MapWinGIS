@@ -1,0 +1,56 @@
+***************************************************
+* How to build the proj4 project for MapWinGIS
+*
+* Paul Meems
+* October 3, 2013
+***************************************************
+
+## Source code ##
+Download the source code from http://trac.osgeo.org/proj/
+
+## Build errors ##
+With the current trunk compile errors will appear.
+Look at http://trac.osgeo.org/proj/attachment/ticket/223/ticket223.patch to fix them: very easy.
+
+## Batch files ##
+Copy makeProj4-32Bit.bat and makeProj4-64Bit.bat into the proj4 main folder.
+
+## Changed files ##
+[proj-folder]\nmake.opt:
+Add at around line 12:
+  # Paul Meems:
+  !IFDEF WIN64
+  PLATFORM_NAME = x64
+  !ELSE
+  PLATFORM_NAME = Win32
+  !ENDIF
+  COPYTODIR=C:\dev\SupportingLibraries
+  OPTFLAGS=	/nologo /Ox /fp:precise /MD
+Change INSTDIR (line 7) to your location:
+  INSTDIR=C:\dev\SupportingLibraries\GDAL\proj-trunk
+Change EXE_PROJ (line 44) to:
+  EXE_PROJ = proj.lib
+
+[Proj-folder]\src\makefile.vc:
+Add at around line 118:
+  ..\src\nad2bin.exe < FL.lla FL
+after ..\src\nad2bin.exe < null.lla null
+Change 'install: all' to:
+  install: all
+	-mkdir $(COPYTODIR)
+	-mkdir $(COPYTODIR)\bin\$(PLATFORM_NAME)
+	-mkdir $(COPYTODIR)\bin\$(PLATFORM_NAME)\PROJ_NAD
+	-mkdir $(COPYTODIR)\lib\$(PLATFORM_NAME)
+	-mkdir $(COPYTODIR)\include
+	copy *.exe $(COPYTODIR)\bin\$(PLATFORM_NAME)
+	copy *.lib $(COPYTODIR)\lib\$(PLATFORM_NAME)
+	copy proj_api.h $(COPYTODIR)\include
+	copy geodesic.h $(COPYTODIR)\include
+	copy $(INSTDIR)\SHARE\*.* $(COPYTODIR)\bin\$(PLATFORM_NAME)\PROJ_NAD 
+
+## Build project ##
+Open the Visual Studio command prompt.
+Goto your proj4 folder and run makeProj4-32Bit.bat
+Open the Visual Studio x64 command prompt.
+Goto your proj4 folder and run makeProj4-64Bit.bat
+The bins, libs and includes are copied to the location set in COPYTODIR

@@ -1,0 +1,68 @@
+***************************************************
+* How to build the supporting libraries for MapWinGIS
+*
+* Paul Meems
+* October 4, 2013
+***************************************************
+
+## Proj4 ##
+Do the steps mentioned in BuildProj4.txt
+
+
+## GEOS ##
+Do the steps mentioned in BuildGeos.txt
+
+
+## ERDAS ECW JPEG2000 ##
+Download the SDK from 
+http://geospatial.intergraph.com/products/other/ecw/ERDASECWJPEG2000SDK/Downloads.aspx
+Install it on another computer and copy the following folders to your dev environment:
+* include
+* lib
+* redistributable
+
+
+## LizardTech MrSid ##
+Download the 32Bit and 64Bit SDKs from
+https://www.lizardtech.com/developer/
+You'll need to register first.
+
+
+## NetCDF ##
+Download the netCDF libs and binaries from Tamaz his site:
+http://vbkto.dyndns.org:1280/sdk/PackageList.aspx?file=release-1500-gdal-mapserver.zip
+* release-1500-gdal-mapserver.zip
+* release-1500-gdal-mapserver-libs.zip
+and place them in the general bin, lib and include folders:
+C:\dev\SupportingLibraries\GDAL\bin /lib and /include
+
+
+## GDAL ##
+Copy nmake.local to your GDAL-folder and check the paths in this file.
+Also compare the settings with [GDAL-folder]/nmake.opt
+
+In [GDAL-folder]/nmake.opt
+Change DLLBUILD=1 to DLLBUILD=0
+In [GDAL-folder]/makefile.vc
+at the end in the devinstall macro add
+	copy frmts\gtiff\libgeotiff\*.h $(INCDIR)
+	copy frmts\gtiff\libgeotiff\*.inc $(INCDIR)
+	copy frmts\gtiff\libtiff\*.h $(INCDIR)
+and change copy gdal_i.lib $(LIBDIR) to copy gdal.lib $(LIBDIR)
+
+[geos-folder]capi\geos_c.h (this file is restored during build of GEOS): 
+Change #include <geos/version.h> to #include <geos_version.h>
+Change #include <geos/export.h> to #include <geos_export.h>
+
+
+## SpatialIndex ##
+Replace the used extentions "idx" with "mwx" and "dat" with "mwd" 
+in storagemanager\DiskStorageManager.cc (lines 36 and 140) and capi\Utility.cc (line 140)
+Run makeSpatialIndex-32Bit.bat in a Visual Studio Command Prompt.
+
+
+
+
+
+## Copy needed files to MapWinGIS folder ##
+Run Copy2MapWinGIS.bat
