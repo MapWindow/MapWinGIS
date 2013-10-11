@@ -1,13 +1,95 @@
 #include "stdafx.h"
 #include "measuring.h"
 
+#include "..\Processing\GeograpicLib\PolygonArea.hpp"
+//const GeographicLib::Geodesic& geod = GeographicLib::Geodesic::WGS84;
+GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
+GeographicLib::PolygonArea poly(geod);
+
+// *******************************************************
+//		get_Length()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_IsStopped(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = this->IsStopped() ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// *******************************************************
+//		UndoPoint()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_PointCount(long* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = points.size();
+	return S_OK;
+}
+
+// *******************************************************
+//		get_PointXY()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_PointXY(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (pointIndex < 0 || pointIndex >= points.size())
+	{
+		// TODO: report error
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		*x = points[pointIndex]->Proj.x;
+		*y = points[pointIndex]->Proj.y;
+		*retVal = VARIANT_TRUE;
+	}
+	return S_OK;
+}
+
+// *******************************************************
+//		MeasuringType()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_MeasuringType(tkMeasuringType* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = this->measuringType;
+	return S_OK;
+}
+STDMETHODIMP CMeasuring::put_MeasuringType(tkMeasuringType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	this->measuringType = newVal;
+	return S_OK;
+}
+
 // *******************************************************
 //		get_Length()
 // *******************************************************
 STDMETHODIMP CMeasuring::get_Length(double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = this->getDistance();
+	*retVal = this->GetDistance();
+	return S_OK;
+}
+
+// *******************************************************
+//		get_AreaWithClosingVertex()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_AreaWithClosingVertex(double lastPointProjX, double lastPointProjY, double* retVal) 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	*retVal = this->GetArea(true, lastPointProjX, lastPointProjY);
+	return S_OK;
+}
+
+// *******************************************************
+//		get_Area()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_Area(double* retVal) 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = this->GetArea(false, 0.0, 0.0);
 	return S_OK;
 }
 
@@ -19,34 +101,57 @@ STDMETHODIMP CMeasuring::UndoPoint(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (points.size() > 0) {
-		points.resize(points.size() - 1);
+		delete points[points.size() - 1];
+		points.pop_back();
 		*retVal = VARIANT_TRUE;
+		areaRecalcIsNeeded = true;
 	}
+	stopped = false;
 	return S_OK;
 }
 
 // *******************************************************
-//		UndoPoint()
+//		Stop()
 // *******************************************************
-STDMETHODIMP CMeasuring::get_numPoints(long* retVal)
+STDMETHODIMP CMeasuring::FinishMeasuring()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = points.size();
+	this->stopped = true;
 	return S_OK;
 }
 
-// returns distance
-double CMeasuring::getDistance() {
-	double dist;
-	isGeodesic = true;
-	if (!GetGeodesicDistance(dist))	
-	{
-		dist = GetEuclidianDistance();	// if there us undefined or incompatible projection; return distance on plane 
-		isGeodesic = false;
-	}
-	return dist;
+// *******************************************************
+//		Clear()
+// *******************************************************
+STDMETHODIMP CMeasuring::Clear()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	for(size_t i = 0; i < points.size(); i++)
+		delete points[i];
+	this->points.clear();
+	poly.Clear();
+	return S_OK;
 }
 
+#pragma region Distance calculation
+// *******************************************************
+//		getDistance()
+// *******************************************************
+double CMeasuring::GetDistance() {
+	
+	if (transformationMode == tmNotDefined)
+	{
+		return GetEuclidianDistance();	// if there us undefined or incompatible projection; return distance on plane 
+	}
+	else
+	{
+		return GetGeodesicDistance();
+	}
+}
+
+// *******************************************************
+//		GetEuclidianDistance()
+// *******************************************************
 // in map units specified by current projection
 double CMeasuring::GetEuclidianDistance()
 {
@@ -55,69 +160,187 @@ double CMeasuring::GetEuclidianDistance()
 	{
 		for (size_t i = 0; i < points.size() - 1; i++)
 		{
-			dist += points[i].GetDistance(points[i + 1]);
+			dist += points[i]->Proj.GetDistance(points[i + 1]->Proj);
 		}
 	}
 	return dist;
 }
 
-// trasnforms input data to decimal degrees
-bool CMeasuring::GetTransformedPoints(vector<Point2D>& list) {
-	
-	VARIANT_BOOL vb;
-	projWGS84->StartTransform(proj, &vb);
-	if (!vb) {
-		return false;
-	}
-
-	list.resize(points.size());
-
-	for(size_t i = 0; i < list.size(); i++)
-	{
-		list[i].x = points[i].x;
-		projWGS84->Transform(&list[i].x, &list[i].y, &vb);
-		if (!vb) {
-			projWGS84->StopTransform();
-			return false;
-		}
-	}
-
-	projWGS84->StopTransform();
-	return true;
-}
-
+// *******************************************************
+//		GetGeodesicDistance()
+// *******************************************************
 // in meters with decimal degrees as input
-bool CMeasuring::GetGeodesicDistance(double& dist) 
+double CMeasuring::GetGeodesicDistance() 
 {
-	vector<Point2D> list;
-	
-	switch (transformationMode)
+	IUtils* utils = GetUtils();
+	double dist = 0.0;
+	if (points.size() > 0) 
 	{
-		case tkTransformationMode::tmNotDefined:
-			return false;			// no way to calc distance
-		case tkTransformationMode::tmDoTransformation:
-			if (!GetTransformedPoints(list)) {
-				return false;		// failed to transform
-			}
-			break;			
-		case tkTransformationMode::tmWgs84Complied:
-			break;	// do nothing
-	}
-
-	vector<Point2D>* data = transformationMode == tkTransformationMode::tmDoTransformation ? &list : &points;
-	
-	if (!m_utils)
-		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&m_utils);
-
-	dist = 0.0;
-	if (data->size() > 0) 
-	{
-		for (size_t i = 0; i < data->size() - 1; i++)
+		for (size_t i = 0; i < points.size() - 1; i++)
 		{
 			double val;
-			m_utils->GeodesicDistance((*data)[i].y, (*data)[i].x, (*data)[i + 1].y, (*data)[i + 1].x, &val);
+			utils->GeodesicDistance(points[i]->y, points[i]->x, points[i + 1]->y, points[i + 1]->x, &val);
 			dist += val;
 		}
 	}
-	return true;
+	return dist;
 }
+#pragma endregion
+
+#pragma region Calculate area
+
+// *******************************************************
+//		GetArea()
+// *******************************************************
+double CMeasuring::GetArea(bool closingPoint, double x, double y)
+{
+	if (transformationMode == tmNotDefined)
+	{
+		return GetEuclidianArea(closingPoint, x, y);   // x, y are projected
+	}
+	else
+	{
+		double xDeg = x, yDeg = y;
+		TransformPoint(xDeg, yDeg);
+		return GetGeodesicArea(closingPoint, xDeg, yDeg);	  // x, y are decimal degrees
+	}
+}
+
+// *******************************************************
+//		GetGeodesicArea()
+// *******************************************************
+// coordinates in decimal degress are expected
+double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y)
+{
+	unsigned int result;
+	double perimeter = 0.0, area = 0.0;
+	if (points.size() > 1)
+	{
+		if (areaRecalcIsNeeded)
+		{
+			areaRecalcIsNeeded = false;
+			poly.Clear();
+			for(int i = 0; i < points.size(); i++)
+			{
+				poly.AddPoint(points[i]->y, points[i]->x);
+			}
+			result = poly.Compute(true, true, perimeter, area);
+		}
+		
+		if (closingPoint)
+		{
+			//poly.AddPoint(y, x);
+			result = poly.TestPoint(y, x, true, true, perimeter, area);
+		}
+		else
+		{
+			result = poly.Compute(true, true, perimeter, area);
+		}
+	}
+	return area;
+}
+
+// *******************************************************
+//		GetEuclidianArea()
+// *******************************************************
+double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y) 
+{
+	double val = 0.0;
+	if (points.size() > 1)
+	{
+		VARIANT_BOOL vb;
+		shape->Create(ShpfileType::SHP_POLYGON, &vb);		// this will clear points
+
+		long pointIndex = -1;
+		
+		for (size_t i = 0; i < points.size(); i++)
+		{
+			shape->AddPoint(points[i]->Proj.x, points[i]->Proj.y, &pointIndex);
+		}
+		
+		if (closingPoint)
+			shape->AddPoint(x, y, &pointIndex);
+
+		shape->AddPoint(points[0]->Proj.x, points[0]->Proj.y, &pointIndex);   // we need to close the poly
+		shape->get_Area(&val);
+	}
+	return val;
+}
+#pragma endregion
+
+// *******************************************************
+//		SetProjection()
+// *******************************************************
+bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS84New, tkTransformationMode mode)
+{
+	if (projWGS84)
+		projWGS84->Release();
+	this->projWGS84 = projWGS84New;
+	projWGS84->AddRef();
+	
+	// we need to clone a map projection, so that nobody will stop out transformation
+	if (proj)
+	{
+		if (transformationMode == tmDoTransformation)
+			proj->StopTransform();
+	}
+	VARIANT_BOOL vb;
+	proj->CopyFrom(projNew, &vb);
+
+	this->transformationMode = mode;
+	if (transformationMode == tmDoTransformation)
+	{
+		proj->StartTransform(projWGS84, &vb);
+		if (!vb) {
+			transformationMode = tmNotDefined;
+			return false;
+		}
+	}
+	return (transformationMode != tmNotDefined);
+}
+
+// *******************************************************
+//		AddPoint()
+// *******************************************************
+void CMeasuring::AddPoint(double xProj, double yProj, double xScreen, double yScreen) 
+{
+	if (stopped)
+	{
+		this->points.clear();
+		this->stopped = false;
+	}
+	this->mousePoint.x = xScreen;
+	this->mousePoint.y = yScreen;
+	
+	MeasurePoint* pnt = new MeasurePoint();
+	pnt->Proj.x = xProj;
+	pnt->Proj.y = yProj;
+	points.push_back(pnt);	
+
+	double x = xProj, y = yProj;
+	if (TransformPoint(x, y))
+	{
+		pnt->x = x;
+		pnt->y = y;
+	}
+	areaRecalcIsNeeded = true;
+}
+
+// *******************************************************
+//		GetTransformedPoints()
+// *******************************************************
+// trasnforms input data to decimal degrees
+bool CMeasuring::TransformPoint(double& x, double& y) {
+	
+	VARIANT_BOOL vb;
+	switch (transformationMode)
+	{
+		case tkTransformationMode::tmDoTransformation:
+			proj->Transform(&x, &y, &vb);
+			return true;
+		case tkTransformationMode::tmWgs84Complied:	
+			return true;
+	}
+	return false;
+}
+

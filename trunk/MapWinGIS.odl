@@ -1125,6 +1125,31 @@ interface IImage;
 		modeXMLOverwrite = 4,
 	} tkSavingMode;
 
+	/************************** tkMeasuringAction **************************/
+	typedef
+	[
+		uuid(2AD7F93F-D4F7-4eb7-8B67-1C3B94E5498F),
+		helpstring("Enumerated tkMeasuringAction Types"),
+	]
+	enum tkMeasuringAction
+	{		
+		PointAdded = 0,
+		PointRemoved = 1,
+		MesuringStopped = 2,
+	} tkMeasuringAction;
+
+	/************************** tkMeasuringAction **************************/
+	typedef
+	[
+		uuid( 01BF0B10-6CBF-42b3-85E7-319936E06673),
+		helpstring("Enumerated tkMeasuringType Types"),
+	]
+	enum tkMeasuringType
+	{		
+		MeasureDistance = 0,
+		MeasureArea = 1,
+	} tkMeasuringType;
+
 	/************************* tkCoordinateSystem **************************/
 	/*typedef
 	[
@@ -2617,7 +2642,8 @@ interface IShapefile : IDispatch{
 	[propput, id(105), helpstring("property HotTracking")] HRESULT HotTracking([in] VARIANT_BOOL newVal);
 
 	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out,retval] IShapefile** retVal);
-	[id(107), helpstring("method GetClosestPoint")] HRESULT GetClosestPoint([in]double x, [in]double y, [in]double maxDistance, [out]long* shapeIndex, [out]long* pointIndex, [out, retval]VARIANT_BOOL* retVal);
+	[id(107), helpstring("method GetClosestPoint")] HRESULT GetClosestPoint([in]double x, [in]double y, [in]double maxDistance, 
+		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 
 	[propget, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [out, retval] BSTR* categoryName);
 	[propput, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [in] BSTR categoryName);
@@ -4259,8 +4285,16 @@ interface ITileProviders : IDispatch{
 ]
 interface IMeasuring : IDispatch{
 	[propget, id(1), helpstring("")] HRESULT Length([out, retval] double* retVal);
-	[propget, id(2), helpstring("")] HRESULT numPoints([out, retval] long* retVal);
+	[propget, id(2), helpstring("")] HRESULT PointCount([out, retval] long* retVal);
 	[id(3), helpstring("")] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
+	[id(4)] HRESULT get_PointXY([in]long pointIndex, [in,out]double* X, [in,out]double* Y, [out, retval]VARIANT_BOOL* retVal);
+	[id(5)] HRESULT get_AreaWithClosingVertex([in]double lastPointProjX, [in]double lastPointProjY, [out,retval]double* retVal);
+	[propget, id(6), helpstring("")] HRESULT MeasuringType([out, retval] tkMeasuringType* retVal);
+	[propput, id(6), helpstring("")] HRESULT MeasuringType([in] tkMeasuringType newVal);
+	[id(7), helpstring("")] HRESULT FinishMeasuring();
+	[propget, id(8), helpstring("")] HRESULT Area([out,retval]double* retVal);
+	[propget, id(9), helpstring("")] HRESULT IsStopped([out,retval]VARIANT_BOOL* retVal);
+	[id(10), helpstring("")] HRESULT Clear();
 };
 
 [ 
@@ -4620,6 +4654,7 @@ library MapWinGIS
 			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
+			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(DISPID_DBLCLICK)] void DblClick(void);
 			//}}AFX_ODL_EVENT
 	};

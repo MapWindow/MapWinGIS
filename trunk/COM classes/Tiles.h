@@ -240,7 +240,7 @@ private:
 	void ErrorMessage(long ErrorCode);
 	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
-	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect);
+	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
 public:
 	/*BEGIN_CONNECTION_POINT_MAP(CTiles)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITilesEvents))

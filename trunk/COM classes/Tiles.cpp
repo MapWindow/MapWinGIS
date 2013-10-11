@@ -290,18 +290,21 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 // ************************************************************
 //		getRectangleXY()
 // ************************************************************
-void CTiles::getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect)
+void CTiles::getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider)
 {
 	// the number of tiles around
-    CPoint p1, p2;
+    if (provider)
+	{
+		CPoint p1, p2;
 
-	m_provider->Projection->FromLatLngToXY(PointLatLng(yMaxD, xMinD), zoom, p1);
-	m_provider->Projection->FromLatLngToXY(PointLatLng(yMinD, xMaxD), zoom, p2);
+		provider->Projection->FromLatLngToXY(PointLatLng(yMaxD, xMinD), zoom, p1);
+		provider->Projection->FromLatLngToXY(PointLatLng(yMinD, xMaxD), zoom, p2);
 
-	rect.left = p1.x;
-	rect.right = p2.x;
-	rect.top = p1.y;
-	rect.bottom = p2.y;
+		rect.left = p1.x;
+		rect.right = p2.x;
+		rect.top = p1.y;
+		rect.bottom = p2.y;
+	}
 }
 
 bool CTiles::TilesAreInScreenBuffer(void* mapView)
@@ -348,7 +351,7 @@ bool CTiles::TilesAreInCache(void* mapView, tkTileProvider providerId)
 	}
 
 	int xMin, xMax, yMin, yMax, zoom;
-	if (!GetTilesForMap(mapView, xMin, xMax, yMin, yMax, zoom))
+	if (!GetTilesForMap(mapView, providerId, xMin, xMax, yMin, yMax, zoom))
 		return true;
 	
 	for (int x = xMin; x <= xMax; x++)
@@ -418,7 +421,7 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 
 	// what tiles are needed?
 	CRect rect;
-	this->getRectangleXY(xMinD, xMaxD, yMinD, yMaxD, zoom, rect);
+	this->getRectangleXY(xMinD, xMaxD, yMinD, yMaxD, zoom, rect, provider);
 	yMin = MIN(rect.top, rect.bottom);
 	yMax = MAX(rect.top, rect.bottom);
 	xMin = MIN(rect.left, rect.right);

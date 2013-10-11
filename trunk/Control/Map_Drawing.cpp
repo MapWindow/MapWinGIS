@@ -78,48 +78,22 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 			return;
 		
 		if (m_drawMouseMoves && !(m_blockMouseMoves || !m_canbitblt)) {
-			this->DrawMouseMoves(pdc, rcBounds, rcInvalid);
+			this->DrawMouseMoves(pdc, rcBounds, rcInvalid);   // drawing it on the top of buffer
 			m_drawMouseMoves = false;
 		}
 		else {
 			this->HandleNewDrawing(pdc, rcBounds, rcInvalid);
+			if (m_cursorMode == cmMeasure)
+			{
+				// let it blink on each loading of tile for a while,
+				this->DrawMouseMoves(pdc, rcBounds, rcInvalid);
+			}
 			m_blockMouseMoves = false;
 		}
 	}
 }
 
-// ***************************************************************
-//		DrawMouseMoves()
-// ***************************************************************
-void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid) {
 
-	// drawing layers
-	Gdiplus::Graphics* gDrawing = Gdiplus::Graphics::FromImage(m_drawingBitmap);			// allocate another bitmap for this purpose
-	gDrawing->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
-
-	// update measuring
-	if( m_cursorMode == cmMeasure ) {
-		CMeasuring* m =((CMeasuring*)m_measuring);
-		if (m->points.size() > 0) {
-			double x, y;
-			this->ProjectionToPixel(m->points[m->points.size() - 1].x, m->points[m->points.size() - 1].y, x, y);
-
-			if (m->points.size() > 0 && (m->mousePoint.x != x || m->mousePoint.y != y)) {
-				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
-				gDrawing->DrawLine(&pen, (Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)m->mousePoint.x, (Gdiplus::REAL)m->mousePoint.y);
-			}
-		}
-	}
-
-	HDC hdc = pdc->GetSafeHdc();
-	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
-	g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);
-	g->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
-
-	delete gDrawing;
-	g->ReleaseHDC(pdc->GetSafeHdc());
-	delete g;
-}
 
 // ***************************************************************
 //		OnDraw()
@@ -172,6 +146,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	VARIANT_BOOL tilesVisible;
 	m_tiles->get_Visible(&tilesVisible);
 
+	bool tilesUpdate = false;
 	// if projection isn't defined there is no way to display tiles
 	if (tilesVisible && m_transformationMode != tmNotDefined)		// TODO: restore
 	{
@@ -190,7 +165,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		}
 		else
 		{
-			if (tiles->UndrawnTilesExist())
+			tilesUpdate = tiles->UndrawnTilesExist();
+			if (tilesUpdate)
 			{
 				Gdiplus::Graphics* gTiles = Gdiplus::Graphics::FromImage(m_tilesBitmap);
 				if (!tiles->DrawnTilesExist())
@@ -381,7 +357,10 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		this->DrawScaleBar(m_isSnapshot ? gPrinting : gBuffer);
 
 	if (m_cursorMode == cmMeasure && !m_isSnapshot)
+	{
 		this->DrawMeasuring(gBuffer);
+		//this->DrawMouseMovesCore(gBuffer);
+	}
 
 	// passing the main buffer to the screen
 	if (!m_isSnapshot)
@@ -1890,19 +1869,120 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 	if (measuring)
 	{
 		int size = measuring->points.size();
-		if (size > 0)
+		if (size > 0 )
 		{
-			Gdiplus::PointF* data = new Gdiplus::PointF[size];
-			for(size_t i = 0; i < measuring->points.size(); i++) {
-				double x, y;
-				this->ProjectionToPixel(measuring->points[i].x, measuring->points[i].y, x, y);
-				data[i].X = (Gdiplus::REAL)x;
-				data[i].Y = (Gdiplus::REAL)y;
+			Gdiplus::SmoothingMode prevMode = g->GetSmoothingMode();
+			g->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+
+			if (measuring->measuringType == tkMeasuringType::MeasureDistance)  // drawing the last segment only
+			{
+				Gdiplus::PointF* data = new Gdiplus::PointF[size];
+				for(size_t i = 0; i < measuring->points.size(); i++) {
+					double x, y;
+					this->ProjectionToPixel(measuring->points[i]->Proj.x, measuring->points[i]->Proj.y, x, y);
+					data[i].X = (Gdiplus::REAL)x;
+					data[i].Y = (Gdiplus::REAL)y;
+				}
+				
+				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
+				g->DrawLines(&pen, data, size);
+				
+				// drawing points
+				Gdiplus::Pen penPoints(Gdiplus::Color::Blue, 1.0f);
+				Gdiplus::SolidBrush brush(Gdiplus::Color::LightBlue);
+				for(size_t i = 0; i < size; i++) {
+					g->FillEllipse(&brush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+					g->DrawEllipse(&penPoints, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+				}
+				delete[] data;
 			}
-			Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
-			g->DrawLines(&pen, data, size);
-			delete[] data;
+			else
+			{
+				// do nothing; it's being drawn in DrawMouseMoves
+			}
+
+			g->SetSmoothingMode(prevMode);
 		}
+	}
+}
+
+// ***************************************************************
+//		DrawMouseMoves()
+// ***************************************************************
+void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid) {
+	HDC hdc = pdc->GetSafeHdc();
+	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
+	g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);	
+
+	DrawMouseMovesCore(g);
+
+	g->ReleaseHDC(pdc->GetSafeHdc());
+	delete g;
+}
+
+void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g) 
+{
+	// update measuring
+	if( m_cursorMode == cmMeasure ) {
+		CMeasuring* m =((CMeasuring*)m_measuring);
+		
+		// drawing layers
+		Gdiplus::Graphics* gDrawing = Gdiplus::Graphics::FromImage(m_drawingBitmap);			// allocate another bitmap for this purpose
+		gDrawing->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+		gDrawing->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
+
+		if (m->points.size() > 0) 
+		{
+			if (m->measuringType == tkMeasuringType::MeasureDistance)  // drawing the last segment only
+			{
+				if (!m->IsStopped())
+				{
+					double x, y;
+					this->ProjectionToPixel(m->points[m->points.size() - 1]->Proj.x, m->points[m->points.size() - 1]->Proj.y, x, y);
+
+					if (m->points.size() > 0 && (m->mousePoint.x != x || m->mousePoint.y != y)) {
+						Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
+						gDrawing->DrawLine(&pen, (Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)m->mousePoint.x, (Gdiplus::REAL)m->mousePoint.y);
+					}
+				}
+			}
+			else	// area measuring; drawing the whole shape
+			{
+				int size = m->points.size();
+				if (!m->IsStopped())		// if it hasn't stopped we add one additional point for current mouse position
+					size++;
+
+				Gdiplus::PointF* data = new Gdiplus::PointF[size];
+				for(size_t i = 0; i < m->points.size(); i++) {
+					double x, y;
+					this->ProjectionToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, x, y);
+					data[i].X = (Gdiplus::REAL)x;
+					data[i].Y = (Gdiplus::REAL)y;
+				}
+
+				if (!m->IsStopped())
+				{
+					data[size - 1].X = m->mousePoint.x;	  // adding current mouse position
+					data[size - 1].Y = m->mousePoint.y;
+				}
+
+				// drawing points
+				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
+
+				Gdiplus::Color color(100, 255, 165, 0);
+				Gdiplus::SolidBrush brush(color);
+
+				gDrawing->FillPolygon(&brush, data, size);
+				gDrawing->DrawPolygon(&pen, data, size);
+
+				delete[] data;
+			}
+		}
+		
+		g->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
+
+		delete gDrawing;
+
 	}
 }
 

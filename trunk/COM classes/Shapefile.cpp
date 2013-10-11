@@ -2889,7 +2889,7 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 // *****************************************************************
 //		getClosestPoint()
 // *****************************************************************
-bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex)
+bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist)
 {
 	VARIANT_BOOL vb;
 	double minDist = DBL_MAX;
@@ -2922,7 +2922,7 @@ bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::ve
 // *****************************************************************
 //		GetClosestPoint()
 // *****************************************************************
-STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -2930,6 +2930,7 @@ STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance,
 	*shapeIndex = -1;
 	*pointIndex = -1;
 
+	double dist = 0.0;
 	bool result= false;
 	if (maxDistance <= 0.0)
 	{
@@ -2938,7 +2939,7 @@ STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance,
 		for (size_t i = 0; i < _shapeData.size(); i++) {
 			ids.push_back(i);
 		}
-		result = this->getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex);
+		result = this->getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex, dist);
 	}
 	else 
 	{
@@ -2946,7 +2947,7 @@ STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance,
 		Extent box(x - maxDistance, x + maxDistance, y - maxDistance, y + maxDistance);
 		if (this->SelectShapesCore(box, 0.0, SelectMode::INTERSECTION, ids))
 		{
-			result = getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex);
+			result = getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex, dist);
 		}
 	}
 	*retVal = result ? VARIANT_TRUE: VARIANT_FALSE;

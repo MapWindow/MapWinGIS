@@ -520,7 +520,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				}
 				
 				// laCenter alignment isn't allowedfor outo mode
-				tkLabelAlignment align = (autoOffset && m_options->alignment == laCenter) ? align = laCenterRight : m_options->alignment;
+				tkLabelAlignment align = (autoOffset && m_options->alignment == laCenter) ? laCenterRight : m_options->alignment;
 				AlignRectangle(rect, m_options->alignment);
 				
 				double piX, piY;
@@ -565,23 +565,23 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				
 				if (autoOffset)
 				{
-					if (m_options->alignment == laTopRight ||
-						m_options->alignment == laBottomRight ||
-						m_options->alignment == laCenterRight)
+					if (align == laTopRight ||
+						align == laBottomRight ||
+						align == laCenterRight)
 					{
 						rect.OffsetRect(offset, 0);
 					}
-					else if (m_options->alignment == laTopLeft ||
-						     m_options->alignment == laBottomLeft ||
-						     m_options->alignment == laCenterLeft)
+					else if (align == laTopLeft ||
+						     align == laBottomLeft ||
+						     align == laCenterLeft)
 					{
 						rect.OffsetRect(-offset, 0);
 					}
-					else if ( m_options->alignment == laTopCenter)
+					else if ( align == laTopCenter)
 					{
 						rect.OffsetRect(0, -offset);
 					}
-					else if ( m_options->alignment == laBottomCenter)
+					else if ( align == laBottomCenter)
 					{
 						rect.OffsetRect(0, offset);
 					}

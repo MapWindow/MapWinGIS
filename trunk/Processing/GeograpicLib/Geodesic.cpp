@@ -2,7 +2,7 @@
  * \file Geodesic.cpp
  * \brief Implementation for GeographicLib::Geodesic class
  *
- * Copyright (c) Charles Karney (2009-2012) <charles@karney.com> and licensed
+ * Copyright (c) Charles Karney (2009-2013) <charles@karney.com> and licensed
  * under the MIT/X11 License.  For more information, see
  * http://geographiclib.sourceforge.net/
  *
@@ -25,9 +25,15 @@
  * - a 12 suffix means a difference, e.g., s12 = s2 - s1.
  * - s and c prefixes mean sin and cos
  **********************************************************************/
+
 #include "stdafx.h"
 #include "Geodesic.hpp"
 #include "GeodesicLine.hpp"
+
+#if defined(_MSC_VER)
+// Squelch warnings about potentially uninitialized local variables
+#  pragma warning (disable: 4701)
+#endif
 
 namespace GeographicLib {
 
@@ -36,16 +42,16 @@ namespace GeographicLib {
   // Underflow guard.  We require
   //   tiny_ * epsilon() > 0
   //   tiny_ + epsilon() == epsilon()
-  const Math::real Geodesic::tiny_ = DBL_MIN; //sqrt(numeric_limits<real>::min());
-  const Math::real Geodesic::tol0_ = DBL_EPSILON; //numeric_limits<real>::epsilon();
-
-  
+  const Math::real Geodesic::tiny_ = DBL_MIN;
+  const Math::real Geodesic::tol0_ = DBL_EPSILON;
 
   // Increase multiplier in defn of tol1_ from 100 to 200 to fix inverse case
   // 52.784459512564 0 -52.784459512563990912 179.634407464943777557
   // which otherwise failed for Visual Studio 10 (Release and Debug)
   const Math::real Geodesic::tol1_ = 200 * tol0_;
-  const Math::real Geodesic::tol2_ = sqrt(numeric_limits<real>::epsilon());
+  const Math::real Geodesic::tol2_ = sqrt(tol0_);
+  // Check on bisection interval
+  const Math::real Geodesic::tolb_ = tol0_ * tol2_;
   const Math::real Geodesic::xthresh_ = 1000 * tol2_;
 
   Geodesic::Geodesic(real a, real f)
@@ -60,8 +66,18 @@ namespace GeographicLib {
            (_e2 == 0 ? 1 :
             (_e2 > 0 ? Math::atanh(sqrt(_e2)) : atan(sqrt(-_e2))) /
             sqrt(abs(_e2))))/2) // authalic radius squared
-      // The sig12 threshold for "really short"
-    , _etol2(10 * tol2_ / max(real(0.1), sqrt(abs(_e2))))
+      // The sig12 threshold for "really short".  Using the auxiliary sphere
+      // solution with dnm computed at (bet1 + bet2) / 2, the relative error in
+      // the azimuth consistency check is sig12^2 * abs(f) * min(1, 1-f/2) / 2.
+      // (Error measured for 1/100 < b/a < 100 and abs(f) >= 1/1000.  For a
+      // given f and sig12, the max error occurs for lines near the pole.  If
+      // the old rule for computing dnm = (dn1 + dn2)/2 is used, then the error
+      // increases by a factor of 2.)  Setting this equal to epsilon gives
+      // sig12 = etol2.  Here 0.1 is a safety factor (error decreased by 100)
+      // and max(0.001, abs(f)) stops etol2 getting too large in the nearly
+      // spherical case.
+    , _etol2(0.1 * tol2_ /
+             sqrt( max(real(0.001), abs(_f)) * min(real(1), 1 - _f/2) / 2 ))
   {
     if (!(Math::isfinite(_a) && _a > 0))
       throw GeographicErr("Major radius is not positive");
@@ -80,7 +96,7 @@ namespace GeographicLib {
                                     const real c[], int n) throw() {
     // Evaluate
     // y = sinp ? sum(c[i] * sin( 2*i    * x), i, 1, n) :
-    //            sum(c[i] * cos((2*i+1) * x), i, 0, n-1) :
+    //            sum(c[i] * cos((2*i+1) * x), i, 0, n-1)
     // using Clenshaw summation.  N.B. c[0] is unused for sin series
     // Approx operation count = (n + 5) mult and (2 * n + 2) add
     c += (n + sinp);            // Point to one beyond last element
@@ -123,16 +139,16 @@ namespace GeographicLib {
                                   real& m12, real& M12, real& M21, real& S12)
     const throw() {
     outmask &= OUT_ALL;
-    lon1 = Math::AngNormalize(lon1);
-    real lon12 = Math::AngNormalize(Math::AngNormalize(lon2) - lon1);
-    // If very close to being on the same meridian, then make it so.
-    // Not sure this is necessary...
+    // Compute longitude difference (AngDiff does this carefully).  Result is
+    // in [-180, 180] but -180 is only for west-going geodesics.  180 is for
+    // east-going and meridional geodesics.
+    real lon12 = Math::AngDiff(Math::AngNormalize(lon1),
+                               Math::AngNormalize(lon2));
+    // If very close to being on the same half-meridian, then make it so.
     lon12 = AngRound(lon12);
     // Make longitude difference positive.
     int lonsign = lon12 >= 0 ? 1 : -1;
     lon12 *= lonsign;
-    if (lon12 == 180)
-      lonsign = 1;
     // If really close to the equator, treat as on equator.
     lat1 = AngRound(lat1);
     lat2 = AngRound(lat2);
@@ -189,8 +205,12 @@ namespace GeographicLib {
     }
 
     real
+      dn1 = sqrt(1 + _ep2 * Math::sq(sbet1)),
+      dn2 = sqrt(1 + _ep2 * Math::sq(sbet2));
+
+    real
       lam12 = lon12 * Math::degree<real>(),
-      slam12 = lon12 == 180 ? 0 : sin(lam12),
+      slam12 = abs(lon12) == 180 ? 0 : sin(lam12),
       clam12 = cos(lam12);      // lon12 == 90 isn't interesting
 
     real a12, sig12, calp1, salp1, calp2, salp2;
@@ -217,7 +237,7 @@ namespace GeographicLib {
                     csig1 * csig2 + ssig1 * ssig2);
       {
         real dummy;
-        Lengths(_n, sig12, ssig1, csig1, ssig2, csig2,
+        Lengths(_n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
                 cbet1, cbet2, s12x, m12x, dummy,
                 (outmask & GEODESICSCALE) != 0U, M12, M21, C1a, C2a);
       }
@@ -229,7 +249,7 @@ namespace GeographicLib {
       // In fact, we will have sig12 > pi/2 for meridional geodesic which is
       // not a shortest path.
       if (sig12 < 1 || m12x >= 0) {
-        m12x *= _a;
+        m12x *= _b;
         s12x *= _b;
         a12 = sig12 / Math::degree<real>();
       } else
@@ -246,11 +266,11 @@ namespace GeographicLib {
       // Geodesic runs along equator
       calp1 = calp2 = 0; salp1 = salp2 = 1;
       s12x = _a * lam12;
-      m12x = _b * sin(lam12 / _f1);
-      if (outmask & GEODESICSCALE)
-        M12 = M21 = cos(lam12 / _f1);
-      a12 = lon12 / _f1;
       sig12 = omg12 = lam12 / _f1;
+      m12x = _b * sin(sig12);
+      if (outmask & GEODESICSCALE)
+        M12 = M21 = cos(sig12);
+      a12 = lon12 / _f1;
 
     } else if (!meridian) {
 
@@ -258,76 +278,92 @@ namespace GeographicLib {
       // meridian and geodesic is neither meridional or equatorial.
 
       // Figure a starting point for Newton's method
-      sig12 = InverseStart(sbet1, cbet1, sbet2, cbet2,
+      real dnm;
+      sig12 = InverseStart(sbet1, cbet1, dn1, sbet2, cbet2, dn2,
                            lam12,
-                           salp1, calp1, salp2, calp2,
+                           salp1, calp1, salp2, calp2, dnm,
                            C1a, C2a);
 
       if (sig12 >= 0) {
-        // Short lines (InverseStart sets salp2, calp2)
-        real wm = sqrt(1 - _e2 * Math::sq((cbet1 + cbet2) / 2));
-        s12x = sig12 * _a * wm;
-        m12x = Math::sq(wm) * _a / _f1 * sin(sig12 * _f1 / wm);
+        // Short lines (InverseStart sets salp2, calp2, dnm)
+        s12x = sig12 * _b * dnm;
+        m12x = Math::sq(dnm) * _b * sin(sig12 / dnm);
         if (outmask & GEODESICSCALE)
-          M12 = M21 = cos(sig12 * _f1 / wm);
+          M12 = M21 = cos(sig12 / dnm);
         a12 = sig12 / Math::degree<real>();
-        omg12 = lam12 / wm;
+        omg12 = lam12 / (_f1 * dnm);
       } else {
 
-        // Newton's method
+        // Newton's method.  This is a straightforward solution of f(alp1) =
+        // lambda12(alp1) - lam12 = 0 with one wrinkle.  f(alp) has exactly one
+        // root in the interval (0, pi) and its derivative is positive at the
+        // root.  Thus f(alp) is positive for alp > alp1 and negative for alp <
+        // alp1.  During the course of the iteration, a range (alp1a, alp1b) is
+        // maintained which brackets the root and with each evaluation of
+        // f(alp) the range is shrunk, if possible.  Newton's method is
+        // restarted whenever the derivative of f is negative (because the new
+        // value of alp1 is then further from the solution) or if the new
+        // estimate of alp1 lies outside (0,pi); in this case, the new starting
+        // guess is taken to be (alp1a + alp1b) / 2.
         real ssig1, csig1, ssig2, csig2, eps;
-        real ov = 0;
         unsigned numit = 0;
-        for (unsigned trip = 0; numit < maxit_; ++numit) {
+        // Bracketing range
+        real salp1a = tiny_, calp1a = 1, salp1b = tiny_, calp1b = -1;
+        for (bool tripn = false, tripb = false; numit < maxit2_; ++numit) {
+          // the WGS84 test set: mean = 1.47, sd = 1.25, max = 16
+          // WGS84 and random input: mean = 2.85, sd = 0.60
           real dv;
-          real v = Lambda12(sbet1, cbet1, sbet2, cbet2, salp1, calp1,
+          real v = Lambda12(sbet1, cbet1, dn1, sbet2, cbet2, dn2, salp1, calp1,
                             salp2, calp2, sig12, ssig1, csig1, ssig2, csig2,
-                            eps, omg12, trip < 1, dv, C1a, C2a, C3a) - lam12;
-          if (!(abs(v) > tiny_) || !(trip < 1)) {
-            if (!(abs(v) <= max(tol1_, ov)))
-              numit = maxit_;
-            break;
+                            eps, omg12, numit < maxit1_, dv, C1a, C2a, C3a)
+            - lam12;
+          // 2 * tol0 is approximately 1 ulp for a number in [0, pi].
+          // Reversed test to allow escape with NaNs
+          if (tripb || !(abs(v) >= (tripn ? 8 : 2) * tol0_)) break;
+          // Update bracketing values
+          if (v > 0 && (numit > maxit1_ || calp1/salp1 > calp1b/salp1b))
+            { salp1b = salp1; calp1b = calp1; }
+          else if (v < 0 && (numit > maxit1_ || calp1/salp1 < calp1a/salp1a))
+            { salp1a = salp1; calp1a = calp1; }
+          if (numit < maxit1_ && dv > 0) {
+            real
+              dalp1 = -v/dv;
+            real
+              sdalp1 = sin(dalp1), cdalp1 = cos(dalp1),
+              nsalp1 = salp1 * cdalp1 + calp1 * sdalp1;
+            if (nsalp1 > 0 && abs(dalp1) < Math::pi<real>()) {
+              calp1 = calp1 * cdalp1 - salp1 * sdalp1;
+              salp1 = nsalp1;
+              SinCosNorm(salp1, calp1);
+              // In some regimes we don't get quadratic convergence because
+              // slope -> 0.  So use convergence conditions based on epsilon
+              // instead of sqrt(epsilon).
+              tripn = abs(v) <= 16 * tol0_;
+              continue;
+            }
           }
-          real
-            dalp1 = -v/dv;
-          real
-            sdalp1 = sin(dalp1), cdalp1 = cos(dalp1),
-            nsalp1 = salp1 * cdalp1 + calp1 * sdalp1;
-          calp1 = calp1 * cdalp1 - salp1 * sdalp1;
-          salp1 = max(real(0), nsalp1);
+          // Either dv was not postive or updated value was outside legal
+          // range.  Use the midpoint of the bracket as the next estimate.
+          // This mechanism is not needed for the WGS84 ellipsoid, but it does
+          // catch problems with more eccentric ellipsoids.  Its efficacy is
+          // such for the WGS84 test set with the starting guess set to alp1 =
+          // 90deg:
+          // the WGS84 test set: mean = 5.21, sd = 3.93, max = 24
+          // WGS84 and random input: mean = 4.74, sd = 0.99
+          salp1 = (salp1a + salp1b)/2;
+          calp1 = (calp1a + calp1b)/2;
           SinCosNorm(salp1, calp1);
-          // In some regimes we don't get quadratic convergence because slope
-          // -> 0.  So use convergence conditions based on epsilon instead of
-          // sqrt(epsilon).  The first criterion is a test on abs(v) against
-          // 100 * epsilon.  The second takes credit for an anticipated
-          // reduction in abs(v) by v/ov (due to the latest update in alp1) and
-          // checks this against epsilon.
-          if (!(abs(v) >= tol1_ && Math::sq(v) >= ov * tol0_)) ++trip;
-          ov = abs(v);
+          tripn = false;
+          tripb = (abs(salp1a - salp1) + (calp1a - calp1) < tolb_ ||
+                   abs(salp1 - salp1b) + (calp1 - calp1b) < tolb_);
         }
-
-        if (numit >= maxit_) {
-          // Signal failure.
-          if (outmask & DISTANCE)
-            s12 = Math::NaN<real>();
-          if (outmask & AZIMUTH)
-            azi1 = azi2 = Math::NaN<real>();
-          if (outmask & REDUCEDLENGTH)
-            m12 = Math::NaN<real>();
-          if (outmask & GEODESICSCALE)
-            M12 = M21 = Math::NaN<real>();
-          if (outmask & AREA)
-            S12 = Math::NaN<real>();
-          return Math::NaN<real>();
-        }
-
         {
           real dummy;
-          Lengths(eps, sig12, ssig1, csig1, ssig2, csig2,
+          Lengths(eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
                   cbet1, cbet2, s12x, m12x, dummy,
                   (outmask & GEODESICSCALE) != 0U, M12, M21, C1a, C2a);
         }
-        m12x *= _a;
+        m12x *= _b;
         s12x *= _b;
         a12 = sig12 / Math::degree<real>();
         omg12 = lam12 - omg12;
@@ -352,12 +388,13 @@ namespace GeographicLib {
           ssig1 = sbet1, csig1 = calp1 * cbet1,
           ssig2 = sbet2, csig2 = calp2 * cbet2,
           k2 = Math::sq(calp0) * _ep2,
+          eps = k2 / (2 * (1 + sqrt(1 + k2)) + k2),
           // Multiplier = a^2 * e^2 * cos(alpha0) * sin(alpha0).
           A4 = Math::sq(_a) * calp0 * salp0 * _e2;
         SinCosNorm(ssig1, csig1);
         SinCosNorm(ssig2, csig2);
         real C4a[nC4_];
-        C4f(k2, C4a);
+        C4f(eps, C4a);
         real
           B41 = SinCosSeries(false, ssig1, csig1, C4a, nC4_),
           B42 = SinCosSeries(false, ssig2, csig2, C4a, nC4_);
@@ -420,13 +457,14 @@ namespace GeographicLib {
   }
 
   void Geodesic::Lengths(real eps, real sig12,
-                         real ssig1, real csig1, real ssig2, real csig2,
+                         real ssig1, real csig1, real dn1,
+                         real ssig2, real csig2, real dn2,
                          real cbet1, real cbet2,
-                         real& s12b, real& m12a, real& m0,
+                         real& s12b, real& m12b, real& m0,
                          bool scalep, real& M12, real& M21,
                          // Scratch areas of the right size
                          real C1a[], real C2a[]) const throw() {
-    // Return m12a = (reduced length)/_a; also calculate s12b = distance/_b,
+    // Return m12b = (reduced length)/_b; also calculate s12b = distance/_b,
     // and m0 = coefficient of secular term in expression for reduced length.
     C1f(eps, C1a);
     C2f(eps, C2a);
@@ -436,29 +474,20 @@ namespace GeographicLib {
                           SinCosSeries(true, ssig1, csig1, C1a, nC1_)),
       A2m1 = A2m1f(eps),
       AB2 = (1 + A2m1) * (SinCosSeries(true, ssig2, csig2, C2a, nC2_) -
-                          SinCosSeries(true, ssig1, csig1, C2a, nC2_)),
-      cbet1sq = Math::sq(cbet1),
-      cbet2sq = Math::sq(cbet2),
-      w1 = sqrt(1 - _e2 * cbet1sq),
-      w2 = sqrt(1 - _e2 * cbet2sq),
-      // Make sure it's OK to have repeated dummy arguments
-      m0x = A1m1 - A2m1,
-      J12 = m0x * sig12 + (AB1 - AB2);
-    m0 = m0x;
-    // Missing a factor of _a.
+                          SinCosSeries(true, ssig1, csig1, C2a, nC2_));
+    m0 = A1m1 - A2m1;
+    real J12 = m0 * sig12 + (AB1 - AB2);
+    // Missing a factor of _b.
     // Add parens around (csig1 * ssig2) and (ssig1 * csig2) to ensure accurate
     // cancellation in the case of coincident points.
-    m12a = (w2 * (csig1 * ssig2) - w1 * (ssig1 * csig2))
-      - _f1 * csig1 * csig2 * J12;
+    m12b = dn2 * (csig1 * ssig2) - dn1 * (ssig1 * csig2) - csig1 * csig2 * J12;
     // Missing a factor of _b
     s12b = (1 + A1m1) * sig12 + AB1;
     if (scalep) {
       real csig12 = csig1 * csig2 + ssig1 * ssig2;
-      J12 *= _f1;
-      M12 = csig12 + (_e2 * (cbet1sq - cbet2sq) * ssig2 / (w1 + w2)
-                      - csig2 * J12) * ssig1 / w1;
-      M21 = csig12 - (_e2 * (cbet1sq - cbet2sq) * ssig1 / (w1 + w2)
-                      - csig1 * J12) * ssig2 / w2;
+      real t = _ep2 * (cbet1 - cbet2) * (cbet1 + cbet2) / (dn1 + dn2);
+      M12 = csig12 + (t * ssig2 - csig2 * J12) * ssig1 / dn1;
+      M21 = csig12 - (t * ssig1 - csig1 * J12) * ssig2 / dn2;
     }
   }
 
@@ -514,12 +543,14 @@ namespace GeographicLib {
     return k;
   }
 
-  Math::real Geodesic::InverseStart(real sbet1, real cbet1,
-                                    real sbet2, real cbet2,
+  Math::real Geodesic::InverseStart(real sbet1, real cbet1, real dn1,
+                                    real sbet2, real cbet2, real dn2,
                                     real lam12,
                                     real& salp1, real& calp1,
                                     // Only updated if return val >= 0
                                     real& salp2, real& calp2,
+                                    // Only updated for short lines
+                                    real& dnm,
                                     // Scratch areas of the right size
                                     real C1a[], real C2a[]) const throw() {
     // Return a starting point for Newton's method in salp1 and calp1 (function
@@ -548,11 +579,17 @@ namespace GeographicLib {
     real sbet12a = sbet2 * cbet1 + cbet2 * sbet1;
 #endif
     bool shortline = cbet12 >= 0 && sbet12 < real(0.5) &&
-      lam12 <= Math::pi<real>() / 6;
-    real
-      omg12 = (!shortline ? lam12 :
-               lam12 / sqrt(1 - _e2 * Math::sq((cbet1 + cbet2) / 2))),
-      somg12 = sin(omg12), comg12 = cos(omg12);
+      cbet2 * lam12 < real(0.5);
+    real omg12 = lam12;
+    if (shortline) {
+      real sbetm2 = Math::sq(sbet1 + sbet2);
+      // sin((bet1+bet2)/2)^2
+      // =  (sbet1 + sbet2)^2 / ((sbet1 + sbet2)^2 + (cbet1 + cbet2)^2)
+      sbetm2 /= sbetm2 + Math::sq(cbet1 + cbet2);
+      dnm = sqrt(1 + _ep2 * sbetm2);
+      omg12 /= _f1 * dnm;
+    }
+    real somg12 = sin(omg12), comg12 = cos(omg12);
 
     salp1 = cbet2 * somg12;
     calp1 = comg12 >= 0 ?
@@ -566,12 +603,14 @@ namespace GeographicLib {
     if (shortline && ssig12 < _etol2) {
       // really short lines
       salp2 = cbet1 * somg12;
-      calp2 = sbet12 - cbet1 * sbet2 * Math::sq(somg12) / (1 + comg12);
+      calp2 = sbet12 - cbet1 * sbet2 *
+        (comg12 >= 0 ? Math::sq(somg12) / (1 + comg12) : 1 - comg12);
       SinCosNorm(salp2, calp2);
       // Set return value
       sig12 = atan2(ssig12, csig12);
-    } else if (csig12 >= 0 ||
-               ssig12 >= 3 * abs(_f) * Math::pi<real>() * Math::sq(cbet1)) {
+    } else if (abs(_n) > real(0.1) || // Skip astroid calc if too eccentric
+               csig12 >= 0 ||
+               ssig12 >= 6 * abs(_n) * Math::pi<real>() * Math::sq(cbet1)) {
       // Nothing to do, zeroth order spherical approximation is OK
     } else {
       // Scale lam12 and bet2 to x, y coordinate system where antipodal point
@@ -598,13 +637,14 @@ namespace GeographicLib {
         real
           cbet12a = cbet2 * cbet1 - sbet2 * sbet1,
           bet12a = atan2(sbet12a, cbet12a);
-        real m12a, m0, dummy;
+        real m12b, m0, dummy;
         // In the case of lon12 = 180, this repeats a calculation made in
         // Inverse.
-        Lengths(_n, Math::pi<real>() + bet12a, sbet1, -cbet1, sbet2, cbet2,
-                cbet1, cbet2, dummy, m12a, m0, false,
+        Lengths(_n, Math::pi<real>() + bet12a,
+                sbet1, -cbet1, dn1, sbet2, cbet2, dn2,
+                cbet1, cbet2, dummy, m12b, m0, false,
                 dummy, dummy, C1a, C2a);
-        x = -1 + m12a/(_f1 * cbet1 * cbet2 * m0 * Math::pi<real>());
+        x = -1 + m12b / (cbet1 * cbet2 * m0 * Math::pi<real>());
         betscale = x < -real(0.01) ? sbet12a / x :
           -_f * Math::sq(cbet1) * Math::pi<real>();
         lamscale = betscale / cbet1;
@@ -613,6 +653,7 @@ namespace GeographicLib {
 
       if (y > -tol1_ && x > -1 - xthresh_) {
         // strip near cut
+        // Need real(x) here to cast away the volatility of x for min/max
         if (_f >= 0) {
           salp1 = min(real(1), -real(x)); calp1 = - sqrt(1 - Math::sq(salp1));
         } else {
@@ -656,18 +697,23 @@ namespace GeographicLib {
         // Because omg12 is near pi, estimate work with omg12a = pi - omg12
         real k = Astroid(x, y);
         real
-          omg12a = lamscale * ( _f >= 0 ? -x * k/(1 + k) : -y * (1 + k)/k ),
-          somg12 = sin(omg12a), comg12 = -cos(omg12a);
+          omg12a = lamscale * ( _f >= 0 ? -x * k/(1 + k) : -y * (1 + k)/k );
+        somg12 = sin(omg12a); comg12 = -cos(omg12a);
         // Update spherical estimate of alp1 using omg12 instead of lam12
         salp1 = cbet2 * somg12;
         calp1 = sbet12a - cbet2 * sbet1 * Math::sq(somg12) / (1 - comg12);
       }
     }
-    SinCosNorm(salp1, calp1);
+    if (salp1 > 0)              // Sanity check on starting guess
+      SinCosNorm(salp1, calp1);
+    else {
+      salp1 = 1; calp1 = 0;
+    }
     return sig12;
   }
 
-  Math::real Geodesic::Lambda12(real sbet1, real cbet1, real sbet2, real cbet2,
+  Math::real Geodesic::Lambda12(real sbet1, real cbet1, real dn1,
+                                real sbet2, real cbet2, real dn2,
                                 real salp1, real calp1,
                                 real& salp2, real& calp2,
                                 real& sig12,
@@ -738,13 +784,13 @@ namespace GeographicLib {
 
     if (diffp) {
       if (calp2 == 0)
-        dlam12 = - 2 * sqrt(1 - _e2 * Math::sq(cbet1)) / sbet1;
+        dlam12 = - 2 * _f1 * dn1 / sbet1;
       else {
         real dummy;
-        Lengths(eps, sig12, ssig1, csig1, ssig2, csig2,
+        Lengths(eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
                 cbet1, cbet2, dummy, dlam12, dummy,
                 false, dummy, dummy, C1a, C2a);
-        dlam12 /= calp2 * cbet2;
+        dlam12 *= _f1 / (calp2 * cbet2);
       }
     }
 
@@ -752,7 +798,7 @@ namespace GeographicLib {
   }
 
   Math::real Geodesic::A3f(real eps) const throw() {
-    // Evaluation sum(_A3c[k] * eps^k, k, 0, nA3x_-1) by Horner's method
+    // Evaluate sum(_A3x[k] * eps^k, k, 0, nA3x_-1) by Horner's method
     real v = 0;
     for (int i = nA3x_; i; )
       v = eps * v + _A3x[--i];
@@ -760,7 +806,7 @@ namespace GeographicLib {
   }
 
   void Geodesic::C3f(real eps, real c[]) const throw() {
-    // Evaluation C3 coeffs by Horner's method
+    // Evaluate C3 coeffs by Horner's method
     // Elements c[1] thru c[nC3_ - 1] are set
     for (int j = nC3x_, k = nC3_ - 1; k; ) {
       real t = 0;
@@ -776,26 +822,26 @@ namespace GeographicLib {
     }
   }
 
-  void Geodesic::C4f(real k2, real c[]) const throw() {
-    // Evaluation C4 coeffs by Horner's method
+  void Geodesic::C4f(real eps, real c[]) const throw() {
+    // Evaluate C4 coeffs by Horner's method
     // Elements c[0] thru c[nC4_ - 1] are set
     for (int j = nC4x_, k = nC4_; k; ) {
       real t = 0;
       for (int i = nC4_ - k + 1; i; --i)
-        t = k2 * t + _C4x[--j];
+        t = eps * t + _C4x[--j];
       c[--k] = t;
     }
 
     real mult = 1;
     for (int k = 1; k < nC4_; ) {
-      mult *= k2;
+      mult *= eps;
       c[k++] *= mult;
     }
   }
 
   // Generated by Maxima on 2010-09-04 10:26:17-04:00
 
-  // The scale factor A1-1 = mean value of I1-1
+  // The scale factor A1-1 = mean value of (d/dsigma)I1 - 1
   Math::real Geodesic::A1m1f(real eps) throw() {
     real
       eps2 = Math::sq(eps),
@@ -1009,7 +1055,7 @@ namespace GeographicLib {
     }
   }
 
-  // The scale factor A2-1 = mean value of I2-1
+  // The scale factor A2-1 = mean value of (d/dsigma)I2 - 1
   Math::real Geodesic::A2m1f(real eps) throw() {
     real
       eps2 = Math::sq(eps),
@@ -1130,7 +1176,7 @@ namespace GeographicLib {
     }
   }
 
-  // The scale factor A3 = mean value of I3
+  // The scale factor A3 = mean value of (d/dsigma)I3
   void Geodesic::A3coeff() throw() {
     switch (nA3_) {
     case 0:
@@ -1302,6 +1348,8 @@ namespace GeographicLib {
     }
   }
 
+  // Generated by Maxima on 2012-10-19 08:02:34-04:00
+
   // The coefficients C4[l] in the Fourier expansion of I4
   void Geodesic::C4coeff() throw() {
     switch (nC4_) {
@@ -1311,150 +1359,147 @@ namespace GeographicLib {
       _C4x[0] = 2/real(3);
       break;
     case 2:
-      _C4x[0] = (10-_ep2)/15;
-      _C4x[1] = -1/real(20);
-      _C4x[2] = 1/real(180);
+      _C4x[0] = (10-4*_n)/15;
+      _C4x[1] = -1/real(5);
+      _C4x[2] = 1/real(45);
       break;
     case 3:
-      _C4x[0] = (_ep2*(4*_ep2-7)+70)/105;
-      _C4x[1] = (4*_ep2-7)/140;
-      _C4x[2] = 1/real(42);
-      _C4x[3] = (7-4*_ep2)/1260;
-      _C4x[4] = -1/real(252);
-      _C4x[5] = 1/real(2100);
+      _C4x[0] = (_n*(8*_n-28)+70)/105;
+      _C4x[1] = (16*_n-7)/35;
+      _C4x[2] = -2/real(105);
+      _C4x[3] = (7-16*_n)/315;
+      _C4x[4] = -2/real(105);
+      _C4x[5] = 4/real(525);
       break;
     case 4:
-      _C4x[0] = (_ep2*((12-8*_ep2)*_ep2-21)+210)/315;
-      _C4x[1] = ((12-8*_ep2)*_ep2-21)/420;
-      _C4x[2] = (3-2*_ep2)/126;
-      _C4x[3] = -1/real(72);
-      _C4x[4] = (_ep2*(8*_ep2-12)+21)/3780;
-      _C4x[5] = (2*_ep2-3)/756;
-      _C4x[6] = 1/real(360);
-      _C4x[7] = (3-2*_ep2)/6300;
-      _C4x[8] = -1/real(1800);
-      _C4x[9] = 1/real(17640);
+      _C4x[0] = (_n*(_n*(4*_n+24)-84)+210)/315;
+      _C4x[1] = ((48-32*_n)*_n-21)/105;
+      _C4x[2] = (-32*_n-6)/315;
+      _C4x[3] = 11/real(315);
+      _C4x[4] = (_n*(32*_n-48)+21)/945;
+      _C4x[5] = (64*_n-18)/945;
+      _C4x[6] = -1/real(105);
+      _C4x[7] = (12-32*_n)/1575;
+      _C4x[8] = -8/real(1575);
+      _C4x[9] = 8/real(2205);
       break;
     case 5:
-      _C4x[0] = (_ep2*(_ep2*(_ep2*(64*_ep2-88)+132)-231)+2310)/3465;
-      _C4x[1] = (_ep2*(_ep2*(64*_ep2-88)+132)-231)/4620;
-      _C4x[2] = (_ep2*(16*_ep2-22)+33)/1386;
-      _C4x[3] = (8*_ep2-11)/792;
-      _C4x[4] = 1/real(110);
-      _C4x[5] = (_ep2*((88-64*_ep2)*_ep2-132)+231)/41580;
-      _C4x[6] = ((22-16*_ep2)*_ep2-33)/8316;
-      _C4x[7] = (11-8*_ep2)/3960;
-      _C4x[8] = -1/real(495);
-      _C4x[9] = (_ep2*(16*_ep2-22)+33)/69300;
-      _C4x[10] = (8*_ep2-11)/19800;
-      _C4x[11] = 1/real(1925);
-      _C4x[12] = (11-8*_ep2)/194040;
-      _C4x[13] = -1/real(10780);
-      _C4x[14] = 1/real(124740);
+      _C4x[0] = (_n*(_n*(_n*(16*_n+44)+264)-924)+2310)/3465;
+      _C4x[1] = (_n*(_n*(48*_n-352)+528)-231)/1155;
+      _C4x[2] = (_n*(1088*_n-352)-66)/3465;
+      _C4x[3] = (121-368*_n)/3465;
+      _C4x[4] = 4/real(1155);
+      _C4x[5] = (_n*((352-48*_n)*_n-528)+231)/10395;
+      _C4x[6] = ((704-896*_n)*_n-198)/10395;
+      _C4x[7] = (80*_n-99)/10395;
+      _C4x[8] = 4/real(1155);
+      _C4x[9] = (_n*(320*_n-352)+132)/17325;
+      _C4x[10] = (384*_n-88)/17325;
+      _C4x[11] = -8/real(1925);
+      _C4x[12] = (88-256*_n)/24255;
+      _C4x[13] = -16/real(8085);
+      _C4x[14] = 64/real(31185);
       break;
     case 6:
-      _C4x[0] = (_ep2*(_ep2*(_ep2*((832-640*_ep2)*_ep2-1144)+1716)-3003)+
-                30030)/45045;
-      _C4x[1] = (_ep2*(_ep2*((832-640*_ep2)*_ep2-1144)+1716)-3003)/60060;
-      _C4x[2] = (_ep2*((208-160*_ep2)*_ep2-286)+429)/18018;
-      _C4x[3] = ((104-80*_ep2)*_ep2-143)/10296;
-      _C4x[4] = (13-10*_ep2)/1430;
-      _C4x[5] = -1/real(156);
-      _C4x[6] = (_ep2*(_ep2*(_ep2*(640*_ep2-832)+1144)-1716)+3003)/540540;
-      _C4x[7] = (_ep2*(_ep2*(160*_ep2-208)+286)-429)/108108;
-      _C4x[8] = (_ep2*(80*_ep2-104)+143)/51480;
-      _C4x[9] = (10*_ep2-13)/6435;
-      _C4x[10] = 5/real(3276);
-      _C4x[11] = (_ep2*((208-160*_ep2)*_ep2-286)+429)/900900;
-      _C4x[12] = ((104-80*_ep2)*_ep2-143)/257400;
-      _C4x[13] = (13-10*_ep2)/25025;
-      _C4x[14] = -1/real(2184);
-      _C4x[15] = (_ep2*(80*_ep2-104)+143)/2522520;
-      _C4x[16] = (10*_ep2-13)/140140;
-      _C4x[17] = 5/real(45864);
-      _C4x[18] = (13-10*_ep2)/1621620;
-      _C4x[19] = -1/real(58968);
-      _C4x[20] = 1/real(792792);
+      _C4x[0] = (_n*(_n*(_n*(_n*(100*_n+208)+572)+3432)-12012)+30030)/45045;
+      _C4x[1] = (_n*(_n*(_n*(64*_n+624)-4576)+6864)-3003)/15015;
+      _C4x[2] = (_n*((14144-10656*_n)*_n-4576)-858)/45045;
+      _C4x[3] = ((-224*_n-4784)*_n+1573)/45045;
+      _C4x[4] = (1088*_n+156)/45045;
+      _C4x[5] = 97/real(15015);
+      _C4x[6] = (_n*(_n*((-64*_n-624)*_n+4576)-6864)+3003)/135135;
+      _C4x[7] = (_n*(_n*(5952*_n-11648)+9152)-2574)/135135;
+      _C4x[8] = (_n*(5792*_n+1040)-1287)/135135;
+      _C4x[9] = (468-2944*_n)/135135;
+      _C4x[10] = 1/real(9009);
+      _C4x[11] = (_n*((4160-1440*_n)*_n-4576)+1716)/225225;
+      _C4x[12] = ((4992-8448*_n)*_n-1144)/225225;
+      _C4x[13] = (1856*_n-936)/225225;
+      _C4x[14] = 8/real(10725);
+      _C4x[15] = (_n*(3584*_n-3328)+1144)/315315;
+      _C4x[16] = (1024*_n-208)/105105;
+      _C4x[17] = -136/real(63063);
+      _C4x[18] = (832-2560*_n)/405405;
+      _C4x[19] = -128/real(135135);
+      _C4x[20] = 128/real(99099);
       break;
     case 7:
-      _C4x[0] = (_ep2*(_ep2*(_ep2*(_ep2*(_ep2*(512*_ep2-640)+832)-1144)+1716)-
-                3003)+30030)/45045;
-      _C4x[1] = (_ep2*(_ep2*(_ep2*(_ep2*(512*_ep2-640)+832)-1144)+1716)-
-                3003)/60060;
-      _C4x[2] = (_ep2*(_ep2*(_ep2*(128*_ep2-160)+208)-286)+429)/18018;
-      _C4x[3] = (_ep2*(_ep2*(64*_ep2-80)+104)-143)/10296;
-      _C4x[4] = (_ep2*(8*_ep2-10)+13)/1430;
-      _C4x[5] = (4*_ep2-5)/780;
-      _C4x[6] = 1/real(210);
-      _C4x[7] = (_ep2*(_ep2*(_ep2*((640-512*_ep2)*_ep2-832)+1144)-1716)+
-                3003)/540540;
-      _C4x[8] = (_ep2*(_ep2*((160-128*_ep2)*_ep2-208)+286)-429)/108108;
-      _C4x[9] = (_ep2*((80-64*_ep2)*_ep2-104)+143)/51480;
-      _C4x[10] = ((10-8*_ep2)*_ep2-13)/6435;
-      _C4x[11] = (5-4*_ep2)/3276;
-      _C4x[12] = -1/real(840);
-      _C4x[13] = (_ep2*(_ep2*(_ep2*(128*_ep2-160)+208)-286)+429)/900900;
-      _C4x[14] = (_ep2*(_ep2*(64*_ep2-80)+104)-143)/257400;
-      _C4x[15] = (_ep2*(8*_ep2-10)+13)/25025;
-      _C4x[16] = (4*_ep2-5)/10920;
-      _C4x[17] = 1/real(2520);
-      _C4x[18] = (_ep2*((80-64*_ep2)*_ep2-104)+143)/2522520;
-      _C4x[19] = ((10-8*_ep2)*_ep2-13)/140140;
-      _C4x[20] = (5-4*_ep2)/45864;
-      _C4x[21] = -1/real(8820);
-      _C4x[22] = (_ep2*(8*_ep2-10)+13)/1621620;
-      _C4x[23] = (4*_ep2-5)/294840;
-      _C4x[24] = 1/real(41580);
-      _C4x[25] = (5-4*_ep2)/3963960;
-      _C4x[26] = -1/real(304920);
-      _C4x[27] = 1/real(4684680);
+      _C4x[0] = (_n*(_n*(_n*(_n*(_n*(56*_n+100)+208)+572)+3432)-12012)+30030)/
+        45045;
+      _C4x[1] = (_n*(_n*(_n*(_n*(16*_n+64)+624)-4576)+6864)-3003)/15015;
+      _C4x[2] = (_n*(_n*(_n*(1664*_n-10656)+14144)-4576)-858)/45045;
+      _C4x[3] = (_n*(_n*(10736*_n-224)-4784)+1573)/45045;
+      _C4x[4] = ((1088-4480*_n)*_n+156)/45045;
+      _C4x[5] = (291-464*_n)/45045;
+      _C4x[6] = 10/real(9009);
+      _C4x[7] = (_n*(_n*(_n*((-16*_n-64)*_n-624)+4576)-6864)+3003)/135135;
+      _C4x[8] = (_n*(_n*((5952-768*_n)*_n-11648)+9152)-2574)/135135;
+      _C4x[9] = (_n*((5792-10704*_n)*_n+1040)-1287)/135135;
+      _C4x[10] = (_n*(3840*_n-2944)+468)/135135;
+      _C4x[11] = (112*_n+15)/135135;
+      _C4x[12] = 10/real(9009);
+      _C4x[13] = (_n*(_n*(_n*(128*_n-1440)+4160)-4576)+1716)/225225;
+      _C4x[14] = (_n*(_n*(6784*_n-8448)+4992)-1144)/225225;
+      _C4x[15] = (_n*(1664*_n+1856)-936)/225225;
+      _C4x[16] = (168-1664*_n)/225225;
+      _C4x[17] = -4/real(25025);
+      _C4x[18] = (_n*((3584-1792*_n)*_n-3328)+1144)/315315;
+      _C4x[19] = ((1024-2048*_n)*_n-208)/105105;
+      _C4x[20] = (1792*_n-680)/315315;
+      _C4x[21] = 64/real(315315);
+      _C4x[22] = (_n*(3072*_n-2560)+832)/405405;
+      _C4x[23] = (2048*_n-384)/405405;
+      _C4x[24] = -512/real(405405);
+      _C4x[25] = (640-2048*_n)/495495;
+      _C4x[26] = -256/real(495495);
+      _C4x[27] = 512/real(585585);
       break;
     case 8:
-      _C4x[0] = (_ep2*(_ep2*(_ep2*(_ep2*(_ep2*((8704-7168*_ep2)*_ep2-10880)+
-                14144)-19448)+29172)-51051)+510510)/765765;
-      _C4x[1] = (_ep2*(_ep2*(_ep2*(_ep2*((8704-7168*_ep2)*_ep2-10880)+14144)-
-                19448)+29172)-51051)/1021020;
-      _C4x[2] = (_ep2*(_ep2*(_ep2*((2176-1792*_ep2)*_ep2-2720)+3536)-4862)+
-                7293)/306306;
-      _C4x[3] = (_ep2*(_ep2*((1088-896*_ep2)*_ep2-1360)+1768)-2431)/175032;
-      _C4x[4] = (_ep2*((136-112*_ep2)*_ep2-170)+221)/24310;
-      _C4x[5] = ((68-56*_ep2)*_ep2-85)/13260;
-      _C4x[6] = (17-14*_ep2)/3570;
-      _C4x[7] = -1/real(272);
-      _C4x[8] = (_ep2*(_ep2*(_ep2*(_ep2*(_ep2*(7168*_ep2-8704)+10880)-14144)+
-                19448)-29172)+51051)/9189180;
-      _C4x[9] = (_ep2*(_ep2*(_ep2*(_ep2*(1792*_ep2-2176)+2720)-3536)+4862)-
-                7293)/1837836;
-      _C4x[10] = (_ep2*(_ep2*(_ep2*(896*_ep2-1088)+1360)-1768)+2431)/875160;
-      _C4x[11] = (_ep2*(_ep2*(112*_ep2-136)+170)-221)/109395;
-      _C4x[12] = (_ep2*(56*_ep2-68)+85)/55692;
-      _C4x[13] = (14*_ep2-17)/14280;
-      _C4x[14] = 7/real(7344);
-      _C4x[15] = (_ep2*(_ep2*(_ep2*((2176-1792*_ep2)*_ep2-2720)+3536)-4862)+
-                7293)/15315300;
-      _C4x[16] = (_ep2*(_ep2*((1088-896*_ep2)*_ep2-1360)+1768)-2431)/4375800;
-      _C4x[17] = (_ep2*((136-112*_ep2)*_ep2-170)+221)/425425;
-      _C4x[18] = ((68-56*_ep2)*_ep2-85)/185640;
-      _C4x[19] = (17-14*_ep2)/42840;
-      _C4x[20] = -7/real(20400);
-      _C4x[21] = (_ep2*(_ep2*(_ep2*(896*_ep2-1088)+1360)-1768)+2431)/42882840;
-      _C4x[22] = (_ep2*(_ep2*(112*_ep2-136)+170)-221)/2382380;
-      _C4x[23] = (_ep2*(56*_ep2-68)+85)/779688;
-      _C4x[24] = (14*_ep2-17)/149940;
-      _C4x[25] = 1/real(8976);
-      _C4x[26] = (_ep2*((136-112*_ep2)*_ep2-170)+221)/27567540;
-      _C4x[27] = ((68-56*_ep2)*_ep2-85)/5012280;
-      _C4x[28] = (17-14*_ep2)/706860;
-      _C4x[29] = -7/real(242352);
-      _C4x[30] = (_ep2*(56*_ep2-68)+85)/67387320;
-      _C4x[31] = (14*_ep2-17)/5183640;
-      _C4x[32] = 7/real(1283568);
-      _C4x[33] = (17-14*_ep2)/79639560;
-      _C4x[34] = -1/real(1516944);
-      _C4x[35] = 1/real(26254800);
+      _C4x[0] = (_n*(_n*(_n*(_n*(_n*(_n*(588*_n+952)+1700)+3536)+9724)+58344)-
+        204204)+510510)/765765;
+      _C4x[1] = (_n*(_n*(_n*(_n*(_n*(96*_n+272)+1088)+10608)-77792)+116688)-
+        51051)/255255;
+      _C4x[2] = (_n*(_n*(_n*(_n*(3232*_n+28288)-181152)+240448)-77792)-14586)/
+        765765;
+      _C4x[3] = (_n*(_n*((182512-154048*_n)*_n-3808)-81328)+26741)/765765;
+      _C4x[4] = (_n*(_n*(12480*_n-76160)+18496)+2652)/765765;
+      _C4x[5] = (_n*(20960*_n-7888)+4947)/765765;
+      _C4x[6] = (4192*_n+850)/765765;
+      _C4x[7] = 193/real(85085);
+      _C4x[8] = (_n*(_n*(_n*(_n*((-96*_n-272)*_n-1088)-10608)+77792)-116688)+
+        51051)/2297295;
+      _C4x[9] = (_n*(_n*(_n*((-1344*_n-13056)*_n+101184)-198016)+155584)-43758)/
+        2297295;
+      _C4x[10] = (_n*(_n*(_n*(103744*_n-181968)+98464)+17680)-21879)/2297295;
+      _C4x[11] = (_n*(_n*(52608*_n+65280)-50048)+7956)/2297295;
+      _C4x[12] = ((1904-39840*_n)*_n+255)/2297295;
+      _C4x[13] = (510-1472*_n)/459459;
+      _C4x[14] = 349/real(2297295);
+      _C4x[15] = (_n*(_n*(_n*(_n*(160*_n+2176)-24480)+70720)-77792)+29172)/
+        3828825;
+      _C4x[16] = (_n*(_n*((115328-41472*_n)*_n-143616)+84864)-19448)/3828825;
+      _C4x[17] = (_n*((28288-126528*_n)*_n+31552)-15912)/3828825;
+      _C4x[18] = (_n*(64256*_n-28288)+2856)/3828825;
+      _C4x[19] = (-928*_n-612)/3828825;
+      _C4x[20] = 464/real(1276275);
+      _C4x[21] = (_n*(_n*(_n*(7168*_n-30464)+60928)-56576)+19448)/5360355;
+      _C4x[22] = (_n*(_n*(35840*_n-34816)+17408)-3536)/1786785;
+      _C4x[23] = ((30464-2560*_n)*_n-11560)/5360355;
+      _C4x[24] = (1088-16384*_n)/5360355;
+      _C4x[25] = -16/real(97461);
+      _C4x[26] = (_n*((52224-32256*_n)*_n-43520)+14144)/6891885;
+      _C4x[27] = ((34816-77824*_n)*_n-6528)/6891885;
+      _C4x[28] = (26624*_n-8704)/6891885;
+      _C4x[29] = 128/real(2297295);
+      _C4x[30] = (_n*(45056*_n-34816)+10880)/8423415;
+      _C4x[31] = (24576*_n-4352)/8423415;
+      _C4x[32] = -6784/real(8423415);
+      _C4x[33] = (8704-28672*_n)/9954945;
+      _C4x[34] = -1024/real(3318315);
+      _C4x[35] = 1024/real(1640925);
       break;
     default:
-      STATIC_ASSERT(nC3_ >= 0 && nC4_ <= 8, "Bad value of nC4_");
+      STATIC_ASSERT(nC4_ >= 0 && nC4_ <= 8, "Bad value of nC4_");
     }
   }
 

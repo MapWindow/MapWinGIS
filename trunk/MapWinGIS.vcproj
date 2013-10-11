@@ -2733,6 +2733,10 @@
 				Name="GeographicLib"
 				>
 				<File
+					RelativePath=".\Processing\GeograpicLib\Accumulator.hpp"
+					>
+				</File>
+				<File
 					RelativePath=".\Processing\GeograpicLib\Config.h"
 					>
 				</File>
@@ -2758,6 +2762,14 @@
 				</File>
 				<File
 					RelativePath=".\Processing\GeograpicLib\Math.hpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Processing\GeograpicLib\PolygonArea.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Processing\GeograpicLib\PolygonArea.hpp"
 					>
 				</File>
 			</Filter>
@@ -2999,11 +3011,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

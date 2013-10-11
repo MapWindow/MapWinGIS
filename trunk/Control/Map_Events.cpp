@@ -368,17 +368,39 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	else if( m_cursorMode == cmMeasure )
 	{
- 		double x, y;
-		this->PixelToProjection( point.x, point.y, x, y );
-		((CMeasuring*)m_measuring)->AddPoint(x, y);
-		m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
-
-		// better to call it before the redraw
-		if( m_sendMouseDown ) {
-			this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+ 		bool found = false;
+		double x, y;
+		if ( nFlags & MK_SHIFT )	// when shift is pressed we seek for nearby point across all layers
+		{
+			double tolerance = 20;   // pixels;   TODO: make a parameter
+			if (FindSnapPoint(tolerance, point.x, point.y, x, y))
+				found = true;
+			else
+			{	// simply don't add a point, there is nothing to snap near by
+			}
 		}
+		else
+		{
+			this->PixelToProjection( point.x, point.y, x, y );
+			found = true;
+		}
+		
+		if (found)
+		{
+			double pixelX, pixelY;
+			ProjToPixel(x, y, &pixelX, &pixelY);
 
-		this->Refresh();		// update the map without redrawing the layers
+			((CMeasuring*)m_measuring)->AddPoint(x, y, pixelX, pixelY);
+			
+			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointAdded);
+			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
+
+			// better to call it before the redraw
+			if( m_sendMouseDown ) {
+				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+			}
+			this->Refresh();		// update the map without redrawing the layers
+		}
 	}
 	else //if( m_cursorMode == cmNone )
 	{
@@ -396,9 +418,69 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 // ************************************************************
 //		OnLButtonDblClick
 // ************************************************************
+bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound)
+{
+	double x, y, x2, y2;
+	this->PixelToProjection( xScreen, yScreen, x, y );
+	this->PixelToProjection( xScreen + tolerance, yScreen + tolerance, x2, y2 );
+	double maxDist = sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
+
+	long shapeIndex;
+	long pointIndex;
+	VARIANT_BOOL vb;
+	double distance;
+	
+	double minDist = DBL_MAX;
+	IShapefile* foundShapefile = NULL;
+	long foundShapeIndex;
+	long foundPointIndex;
+
+	for(long i = 0; i < this->GetNumLayers(); i++)
+	{
+		IShapefile* sf = this->GetShapefile(this->GetLayerHandle(i));
+		if (sf != NULL)
+		{
+			sf->GetClosestPoint(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+			if (vb)
+			{
+				if (distance < minDist)
+				{
+					minDist = distance;
+					foundShapefile = sf;
+					foundPointIndex = pointIndex;
+					foundShapeIndex = shapeIndex;
+				}
+			}
+			sf->Release();
+		}
+	}
+
+	bool result = false;
+	if (minDist != DBL_MAX && foundShapefile)
+	{
+		IShape* shape = NULL;
+		foundShapefile->get_Shape(foundShapeIndex, &shape);
+		if (shape)
+		{
+			shape->get_XY(foundPointIndex, &xFound, &yFound, &vb);
+			shape->Release();
+			result = true;
+		}
+	}
+	return result;
+}
+
+// ************************************************************
+//		OnLButtonDblClick
+// ************************************************************
 void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
    OnLButtonDown(nFlags, point);
+   if (m_cursorMode == cmMeasure)
+   {
+	   m_measuring->FinishMeasuring();
+	   FireMeasuringChanged(m_measuring, tkMeasuringAction::MesuringStopped);	
+   }
 }
 
 // ************************************************************
@@ -533,10 +615,11 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	if( m_cursorMode == cmMeasure ) {
-		double x, y;
-		this->PixelToProjection( point.x, point.y, x, y );
 		CMeasuring* m =((CMeasuring*)m_measuring);
-		if (m->points.size() > 0) {
+		if (!m->IsStopped())
+		{
+			double x, y;
+			this->PixelToProjection( point.x, point.y, x, y );
 			m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
 			m->mousePoint.y = point.y;
 			m_drawMouseMoves = true;
@@ -678,6 +761,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		{
 			// we need to update before firing the event
 			((CMeasuring*)m_measuring)->UndoPoint(&redraw);
+			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointRemoved);
 			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
 		}
 
@@ -1039,7 +1123,11 @@ void CMapView::OnExtentHistoryChanged(){}
 void CMapView::OnKeyChanged(){}
 void CMapView::OnDoubleBufferChanged(){}
 void CMapView::OnZoomPercentChanged(){}
-void CMapView::OnCursorModeChanged(){}
+void CMapView::OnCursorModeChanged()
+{
+	if (m_cursorMode != cmMeasure && m_measuring)
+		m_measuring->Clear();
+}
 void CMapView::OnUDCursorHandleChanged(){}
 void CMapView::OnSendMouseDownChanged(){}
 void CMapView::OnSendOnDrawBackBufferChanged(){}

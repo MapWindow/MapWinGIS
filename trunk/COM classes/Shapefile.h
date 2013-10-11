@@ -362,7 +362,7 @@ public:
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 
-	STDMETHOD(GetClosestPoint)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(GetClosestPoint)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal);
 	
 	STDMETHOD(get_ShapeCategory2)(long ShapeIndex, BSTR* categoryName);
 	STDMETHOD(put_ShapeCategory2)(long ShapeIndex, BSTR categoryName);
@@ -373,7 +373,7 @@ public:
 
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
 
-	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex);
+	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);

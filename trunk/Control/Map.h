@@ -630,6 +630,11 @@ public:
 		{FireEvent(eventidAfterDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireTilesLoaded(IDispatch* tiles, IDispatch* extents, VARIANT_BOOL snapshot, LPCTSTR key)
 		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, extents, snapshot,key);}
+	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
+	{
+		m_measuring->AddRef();
+		FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);
+	}
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
@@ -851,6 +856,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidBeforeDrawing = 11L,
 	eventidAfterDrawing = 12L,
 	eventidTilesLoaded = 13L,
+	eventidMeasuringChanged = 14L,
 	//}}AFX_DISP_ID
 	};
 #pragma endregion
@@ -1050,8 +1056,10 @@ protected:
 	void SetMaxExtents(IExtents* pVal);
 	
 private:
+	bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound);
 	void CMapView::ResizeBuffers(int cx, int cy);
 	void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid);
+	void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g);
 	
 	UINT CMapView::StartDrawLayers(LPVOID pParam);
 	

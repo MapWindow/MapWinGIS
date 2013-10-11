@@ -29,22 +29,28 @@
 #  define WORDS_BIGENDIAN 0
 #endif
 
-#if !defined(GEOGRAPHICLIB_PREC)
+#if !defined(HAVE_LONG_DOUBLE)
+#  define HAVE_LONG_DOUBLE 0
+#endif
+
+#if !defined(GEOGRAPHICLIB_PRECISION)
 /**
- * The precision of floating point numbers used in %GeographicLib.  0 means
- * float; 1 (default) means double; 2 means long double.  Nearly all the
- * testing has been carried out with doubles and that's the recommended
- * configuration.  In order for long double to be used, HAVE_LONG_DOUBLE needs
- * to be defined.  Note that with Microsoft Visual Studio, long double is the
- * same as double.
+ * The precision of floating point numbers used in %GeographicLib.  1 means
+ * float (single precision); 2 (the default) means double; 3 means long double;
+ * 4 is reserved for quadruple precision.  Nearly all the testing has been
+ * carried out with doubles and that's the recommended configuration.  In order
+ * for long double to be used, HAVE_LONG_DOUBLE needs to be defined.  Note that
+ * with Microsoft Visual Studio, long double is the same as double.
  **********************************************************************/
-#  define GEOGRAPHICLIB_PREC 1
+#  define GEOGRAPHICLIB_PRECISION 2
 #endif
 
 #include <cmath>
-#include <limits>
 #include <algorithm>
-#include <vector>
+#include <limits>
+#if defined(_LIBCPP_VERSION)
+#include <type_traits>
+#endif
 
 namespace GeographicLib {
 
@@ -61,13 +67,14 @@ namespace GeographicLib {
   class GEOGRAPHIC_EXPORT Math {
   private:
     void dummy() {
-      STATIC_ASSERT(GEOGRAPHICLIB_PREC >= 0 && GEOGRAPHICLIB_PREC <= 2,
+      STATIC_ASSERT(GEOGRAPHICLIB_PRECISION >= 1 &&
+                    GEOGRAPHICLIB_PRECISION <= 3,
                     "Bad value of precision");
     }
     Math();                     // Disable constructor
   public:
 
-#if defined(HAVE_LONG_DOUBLE)
+#if HAVE_LONG_DOUBLE
     /**
      * The extended precision type for real numbers, used for some testing.
      * This is long double on computers with this type; otherwise it is double.
@@ -77,7 +84,7 @@ namespace GeographicLib {
     typedef double extended;
 #endif
 
-#if GEOGRAPHICLIB_PREC == 1
+#if GEOGRAPHICLIB_PRECISION == 2
     /**
      * The real type for %GeographicLib. Nearly all the testing has been done
      * with \e real = double.  However, the algorithms should also work with
@@ -85,13 +92,23 @@ namespace GeographicLib {
      * accuracy typically cannot be obtained using floats.)
      **********************************************************************/
     typedef double real;
-#elif GEOGRAPHICLIB_PREC == 0
+#elif GEOGRAPHICLIB_PRECISION == 1
     typedef float real;
-#elif GEOGRAPHICLIB_PREC == 2
+#elif GEOGRAPHICLIB_PRECISION == 3
     typedef extended real;
 #else
     typedef double real;
 #endif
+
+    /**
+     * Number of additional decimal digits of precision of real relative to
+     * double (0 for float).
+     **********************************************************************/
+    static const int extradigits =
+      std::numeric_limits<real>::digits10 >
+      std::numeric_limits<double>::digits10 ?
+      std::numeric_limits<real>::digits10 -
+      std::numeric_limits<double>::digits10 : 0;
 
     /**
      * true if the machine is big-endian.
@@ -104,6 +121,7 @@ namespace GeographicLib {
      **********************************************************************/
     template<typename T> static inline T pi() throw()
     { return std::atan2(T(0), -T(1)); }
+
     /**
      * A synonym for pi<real>().
      **********************************************************************/
@@ -140,11 +158,12 @@ namespace GeographicLib {
      * @return sqrt(<i>x</i><sup>2</sup> + <i>y</i><sup>2</sup>).
      **********************************************************************/
     template<typename T> static inline T hypot(T x, T y) throw() {
-      x = std::abs(x);
-      y = std::abs(y);
-      T a = (std::max)(x, y),
-        b = (std::min)(x, y) / (a ? a : 1);
+      x = std::abs(x); y = std::abs(y);
+      T a = (std::max)(x, y), b = (std::min)(x, y) / (a ? a : 1);
       return a * std::sqrt(1 + b * b);
+      // For an alternative method see
+      // C. Moler and D. Morrision (1983) http://dx.doi.org/10.1147/rd.276.0577
+      // and A. A. Dubrulle (1983) http://dx.doi.org/10.1147/rd.276.0582
     }
 #elif GEOGRAPHICLIB_CPLUSPLUS11_MATH
     template<typename T> static inline T hypot(T x, T y) throw()
@@ -160,9 +179,9 @@ namespace GeographicLib {
     static inline float hypot(float x, float y) throw()
     { return _hypotf(x, y); }
 #  endif
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double hypot(long double x, long double y) throw()
-    { return _hypot(x, y); }
+    { return _hypot(double(x), double(y)); } // Suppress loss of data warning
 #  endif
 #else
     // Use overloading to define generic versions
@@ -170,7 +189,7 @@ namespace GeographicLib {
     { return ::hypot(x, y); }
     static inline float hypot(float x, float y) throw()
     { return ::hypotf(x, y); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double hypot(long double x, long double y) throw()
     { return ::hypotl(x, y); }
 #  endif
@@ -202,7 +221,7 @@ namespace GeographicLib {
 #else
     static inline double expm1(double x) throw() { return ::expm1(x); }
     static inline float expm1(float x) throw() { return ::expm1f(x); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double expm1(long double x) throw()
     { return ::expm1l(x); }
 #  endif
@@ -237,7 +256,7 @@ namespace GeographicLib {
 #else
     static inline double log1p(double x) throw() { return ::log1p(x); }
     static inline float log1p(float x) throw() { return ::log1pf(x); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double log1p(long double x) throw()
     { return ::log1pl(x); }
 #  endif
@@ -264,7 +283,7 @@ namespace GeographicLib {
 #else
     static inline double asinh(double x) throw() { return ::asinh(x); }
     static inline float asinh(float x) throw() { return ::asinhf(x); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double asinh(long double x) throw()
     { return ::asinhl(x); }
 #  endif
@@ -291,7 +310,7 @@ namespace GeographicLib {
 #else
     static inline double atanh(double x) throw() { return ::atanh(x); }
     static inline float atanh(float x) throw() { return ::atanhf(x); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double atanh(long double x) throw()
     { return ::atanhl(x); }
 #  endif
@@ -315,36 +334,84 @@ namespace GeographicLib {
 #else
     static inline double cbrt(double x) throw() { return ::cbrt(x); }
     static inline float cbrt(float x) throw() { return ::cbrtf(x); }
-#  if defined(HAVE_LONG_DOUBLE)
+#  if HAVE_LONG_DOUBLE
     static inline long double cbrt(long double x) throw() { return ::cbrtl(x); }
 #  endif
 #endif
+
+    /**
+     * The error-free sum of two numbers.
+     *
+     * @tparam T the type of the argument and the returned value.
+     * @param[in] u
+     * @param[in] v
+     * @param[out] t the exact error given by (\e u + \e v) - \e s.
+     * @return \e s = round(\e u + \e v).
+     *
+     * See D. E. Knuth, TAOCP, Vol 2, 4.2.2, Theorem B.  (Note that \e t can be
+     * the same as one of the first two arguments.)
+     **********************************************************************/
+    template<typename T> static inline T sum(T u, T v, T& t) throw() {
+      volatile T s = u + v;
+      volatile T up = s - v;
+      volatile T vpp = s - up;
+      up -= u;
+      vpp -= v;
+      t = -(up + vpp);
+      // u + v =       s      + t
+      //       = round(u + v) + t
+      return s;
+    }
 
     /**
      * Normalize an angle (restricted input range).
      *
      * @tparam T the type of the argument and returned value.
      * @param[in] x the angle in degrees.
-     * @return the angle reduced to the range [&minus;180&deg;,
-     *   180&deg;).
+     * @return the angle reduced to the range [&minus;180&deg;, 180&deg;).
      *
      * \e x must lie in [&minus;540&deg;, 540&deg;).
      **********************************************************************/
     template<typename T> static inline T AngNormalize(T x) throw()
     { return x >= 180 ? x - 360 : (x < -180 ? x + 360 : x); }
+
     /**
      * Normalize an arbitrary angle.
      *
      * @tparam T the type of the argument and returned value.
      * @param[in] x the angle in degrees.
-     * @return the angle reduced to the range [&minus;180&deg;,
-     *   180&deg;).
+     * @return the angle reduced to the range [&minus;180&deg;, 180&deg;).
      *
      * The range of \e x is unrestricted.
      **********************************************************************/
     template<typename T> static inline T AngNormalize2(T x) throw()
     { return AngNormalize<T>(std::fmod(x, T(360))); }
 
+    /**
+     * Difference of two angles reduced to [&minus;180&deg;, 180&deg;]
+     *
+     * @tparam T the type of the arguments and returned value.
+     * @param[in] x the first angle in degrees.
+     * @param[in] y the second angle in degrees.
+     * @return \e y &minus; \e x, reduced to the range [&minus;180&deg;,
+     *   180&deg;].
+     *
+     * \e x and \e y must both lie in [&minus;180&deg;, 180&deg;].  The result
+     * is equivalent to computing the difference exactly, reducing it to
+     * (&minus;180&deg;, 180&deg;] and rounding the result.  Note that this
+     * prescription allows &minus;180&deg; to be returned (e.g., if \e x is
+     * tiny and negative and \e y = 180&deg;).
+     **********************************************************************/
+    template<typename T> static inline T AngDiff(T x, T y) throw() {
+      T t, d = sum(-x, y, t);
+      if ((d - T(180)) + t > T(0)) // y - x > 180
+        d -= T(360);            // exact
+      else if ((d + T(180)) + t <= T(0)) // y - x <= -180
+        d += T(360);            // exact
+      return d + t;
+    }
+
+#if defined(DOXYGEN)
     /**
      * Test for finiteness.
      *
@@ -353,20 +420,38 @@ namespace GeographicLib {
      * @return true if number is finite, false if NaN or infinite.
      **********************************************************************/
     template<typename T> static inline bool isfinite(T x) throw() {
-#if defined(DOXYGEN)
       return std::abs(x) <= (std::numeric_limits<T>::max)();
-#elif (defined(_MSC_VER) && !GEOGRAPHICLIB_CPLUSPLUS11_MATH)
-      return _finite(x) != 0;
-#else
-      return std::isfinite(x);
-#endif
     }
+#elif (defined(_MSC_VER) && !GEOGRAPHICLIB_CPLUSPLUS11_MATH)
+    template<typename T> static inline bool isfinite(T x) throw() {
+      return _finite(double(x)) != 0;
+    }
+#elif defined(_LIBCPP_VERSION)
+    // libc++ implements std::isfinite() as a template that only allows
+    // floating-point types.  isfinite is invoked by Utility::str to format
+    // numbers conveniently and this allows integer arguments, so we need to
+    // allow Math::isfinite to work on integers.
+    template<typename T> static inline
+    typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+      isfinite(T x) throw() {
+      return std::isfinite(x);
+    }
+    template<typename T> static inline
+    typename std::enable_if<!std::is_floating_point<T>::value, bool>::type
+      isfinite(T /*x*/) throw() {
+      return true;
+    }
+#else
+    template<typename T> static inline bool isfinite(T x) throw() {
+      return std::isfinite(x);
+    }
+#endif
 
     /**
      * The NaN (not a number)
      *
      * @tparam T the type of the returned value.
-     * @return NaN if available, otherwise return the max real.
+     * @return NaN if available, otherwise return the max real of type T.
      **********************************************************************/
     template<typename T> static inline T NaN() throw() {
       return std::numeric_limits<T>::has_quiet_NaN ?

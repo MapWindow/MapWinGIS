@@ -26,6 +26,8 @@
 #include "MapWinGIS.h"
 #include <vector>
 
+
+
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
@@ -40,7 +42,22 @@ public:
 	CMeasuring() 
 	{
 		isGeodesic = false;
+		stopped = false;
 		mousePoint.x = mousePoint.y = 0;
+		measuringType = tkMeasuringType::MeasureDistance;
+		updateProjectionNeeded = false;
+		areaRecalcIsNeeded = true;
+		transformationMode = tmNotDefined;
+		projWGS84 = NULL;
+		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&proj);
+		//poly = new GeographicLib::PolygonArea(geod);
+	}
+
+	~CMeasuring()
+	{
+		Clear();
+		if (shape) shape->Release();
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_MEASURING)
@@ -61,40 +78,55 @@ public:
 	{
 	}
 private:
+	bool updateProjectionNeeded;
+	bool stopped;
 	bool isGeodesic;
 	IGeoProjection* proj;
 	IGeoProjection* projWGS84;
 	tkTransformationMode transformationMode;
+	IShape* shape;
+	bool areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
+	
 public:
 	STDMETHOD(get_Length)(double* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_numPoints)(long* retVal);
+	STDMETHOD(get_PointCount)(long* retVal);
+	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
+	STDMETHOD(get_AreaWithClosingVertex)(double lastPointProjX, double lastPointProjY, double* retVal);
+	STDMETHOD(get_MeasuringType)(tkMeasuringType* retVal);
+	STDMETHOD(put_MeasuringType)(tkMeasuringType newVal);
+	STDMETHOD(FinishMeasuring)();
+	STDMETHOD(get_Area)(double* retVal);
+	STDMETHOD(get_IsStopped)(VARIANT_BOOL* retVal);
+	STDMETHOD(Clear)();
 
-	double getDistance();
-	double GetEuclidianDistance();
-	bool GetTransformedPoints(vector<Point2D>& list);
-	bool GetGeodesicDistance(double& dist);
+	// projection should be specified before any calculations are possible
+	bool SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode);
+	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
+	bool CMeasuring::TransformPoint(double& x, double& y);
 	
-	void SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode)
-	{
-		this->proj = proj;
-		this->projWGS84 = projWGS84;
-		this->transformationMode = mode;
-	}
+	bool IsStopped() {return stopped; }
+	bool IsGeodesic() { return isGeodesic;}
 
+	double GetDistance();
+	double GetEuclidianDistance();
+	double CMeasuring::GetGeodesicDistance();
+
+	double CMeasuring::GetArea(bool closingPoint, double x, double y);
+	double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y);
+	double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y) ;
+
+	tkMeasuringType measuringType;
 	Point2D mousePoint;					   // points entered by user (in map units, whatever they are)
-	std::vector<Point2D> points;		   // points entered by user (in map units, whatever they are)
-	bool IsGeodesic() {
-		return isGeodesic;
-	}
+	
+	struct MeasurePoint
+	{
+		Point2D Proj;
+		double x;
+		double y;
+	};
 
-	void AddPoint(double x, double y) {
-		size_t size = points.size();
-		//points.resize(size + 1);
-		//points[size].x = x;
-		//points[size].y = y;
-		points.push_back(Point2D(x, y));
-	}
+	std::vector<MeasurePoint*> points;		   // points in decimal degrees (in case transformation to WGS84 is possible)
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Measuring), CMeasuring)
