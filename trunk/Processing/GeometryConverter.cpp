@@ -48,7 +48,10 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 	OGRGeometry* oGeom = ShapeToGeometry(shp);
 	if (oGeom != NULL)
 	{
-		GEOSGeometry* result = oGeom->exportToGEOS();
+		GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+		GEOSGeometry* result = oGeom->exportToGEOS(hGEOSCtxt);
+		OGRGeometry::freeGEOSContext( hGEOSCtxt );
+		
 		delete oGeom;
 		return result;
 	}
@@ -86,7 +89,9 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 		}
 	}
 	
-	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(gsGeom);
+	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
+	OGRGeometry::freeGEOSContext( hGEOSCtxt );
 
 	if (oGeom)
 	{

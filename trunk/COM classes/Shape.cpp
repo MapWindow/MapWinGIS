@@ -399,7 +399,11 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 
 	// added code
 	GEOSGeom hGeosGeom = NULL;	
-	hGeosGeom = oGeom->exportToGEOS();
+	
+	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+	hGeosGeom = oGeom->exportToGEOS(hGEOSCtxt);
+	OGRGeometry::freeGEOSContext( hGEOSCtxt );
+
 	delete oGeom;
 
 	if (hGeosGeom == NULL)

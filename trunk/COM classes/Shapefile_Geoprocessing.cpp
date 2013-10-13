@@ -647,7 +647,10 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
-			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(gsGeom);
+			GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
+			OGRGeometry::freeGEOSContext( hGEOSCtxt );
+
 			GEOSGeom_destroy(gsGeom);
 			
 			if (oGeom)
