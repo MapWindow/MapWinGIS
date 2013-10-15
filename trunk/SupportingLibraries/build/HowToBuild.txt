@@ -54,14 +54,17 @@ and change copy gdal_i.lib $(LIBDIR) to copy gdal.lib $(LIBDIR)
 Change #include <geos/version.h> to #include <geos_version.h>
 Change #include <geos/export.h> to #include <geos_export.h>
 
+[gdal-folder]gcore\gdaldllmain.cpp:
+Remove (or comment) the dllmain implementation, because this doesn't work
+with static libraries.
+
 
 ## SpatialIndex ##
+## For now keep using the 'old' version because the new version of this
+## Library isn't compiling
 Replace the used extentions "idx" with "mwx" and "dat" with "mwd" 
 in storagemanager\DiskStorageManager.cc (lines 36 and 140) and capi\Utility.cc (line 140)
 Run makeSpatialIndex-32Bit.bat in a Visual Studio Command Prompt.
-
-
-
 
 
 ## Copy needed files to MapWinGIS folder ##

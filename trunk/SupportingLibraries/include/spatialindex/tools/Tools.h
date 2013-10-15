@@ -1,34 +1,27 @@
-/******************************************************************************
- * Project:  libspatialindex - A C++ library for spatial indexing
- * Author:   Marios Hadjieleftheriou, mhadji@gmail.com
- ******************************************************************************
- * Copyright (c) 2004, Marios Hadjieleftheriou
- *
- * All rights reserved.
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation
- * the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
-******************************************************************************/
+// Spatial Index Library
+//
+// Copyright (C) 2004  Navel Ltd.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//  Email:
+//    mhadji@gmail.com
 
 #pragma once
 
-
-#if (defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64) && !defined __GNUC__
+#if defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64
   typedef __int8 int8_t;
   typedef __int16 int16_t;
   typedef __int32 int32_t;
@@ -45,15 +38,19 @@
   #include <stdint.h>
 #endif
 
-#if (defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64) && !defined __GNUC__
-  #ifdef SPATIALINDEX_CREATE_DLL
-    #define SIDX_DLL __declspec(dllexport)
-  #else
-    #define SIDX_DLL __declspec(dllimport)
-  #endif
-#else
-  #define SIDX_DLL
-#endif
+// Start Wasim Sabir: Since we are building static library therefore commenting code setting SIDX for DLL import/export.
+//#if defined _WIN32 || defined _WIN64 || defined WIN32 || defined WIN64
+//  #ifdef SPATIALINDEX_CREATE_DLL
+//    #define SIDX_DLL __declspec(dllexport)
+//  #else
+//    #define SIDX_DLL __declspec(dllimport)
+//  #endif
+//#else
+//  #define SIDX_DLL
+//#endif
+
+#define SIDX_DLL
+// End Wasim Sabir
 
 #include <assert.h>
 #include <iostream>
@@ -397,17 +394,29 @@ namespace Tools
 		uint16_t* m_pBuffer;
 	}; // Random
 
-	#if HAVE_PTHREAD_H
-	class SIDX_DLL LockGuard
+	class SIDX_DLL SharedLock
 	{
 	public:
-		LockGuard(pthread_mutex_t* pLock);
-		~LockGuard();
+	#if HAVE_PTHREAD_H
+		SharedLock(pthread_rwlock_t* pLock);
+		~SharedLock();
 
 	private:
-		pthread_mutex_t* m_pLock;
-	}; // LockGuard
+		pthread_rwlock_t* m_pLock;
 	#endif
+	}; // SharedLock
+
+	class SIDX_DLL ExclusiveLock
+	{
+	public:
+	#if HAVE_PTHREAD_H
+		ExclusiveLock(pthread_rwlock_t* pLock);
+		~ExclusiveLock();
+
+	private:
+		pthread_rwlock_t* m_pLock;
+	#endif
+	}; // ExclusiveLock
 
 	class SIDX_DLL BufferedFile
 	{
@@ -505,3 +514,4 @@ namespace Tools
 		BufferedFile* m_pFile;
 	};
 }
+

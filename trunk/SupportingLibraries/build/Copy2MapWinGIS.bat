@@ -10,7 +10,7 @@ xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Lidar_DSDK\lib\lti
 xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Raster_DSDK\lib\lti_dsdk.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
 xcopy /Y C:\dev\SupportingLibraries\lib\Win32\geos.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
 xcopy /Y C:\dev\SupportingLibraries\lib\Win32\proj.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
-xcopy /Y C:\dev\SupportingLibraries\lib\Win32\SpatialIndex.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
+rem xcopy /Y C:\dev\SupportingLibraries\lib\Win32\SpatialIndex.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
 xcopy /Y C:\dev\SupportingLibraries\lib\Win32\gdal.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
 xcopy /Y C:\dev\SupportingLibraries\lib\Win32\netcdf.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
 xcopy /Y C:\dev\SupportingLibraries\lib\Win32\cqlib.lib C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\SupportingLibraries\lib\Win32
