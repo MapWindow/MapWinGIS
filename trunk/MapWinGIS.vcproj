@@ -67,7 +67,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\SupportingLibraries\include\&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\atlhttp&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\spatialindex&quot;;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;NCSECW_EXPORTS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="1"
@@ -101,7 +101,7 @@
 				RegisterOutput="false"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="cqlib.lib GdiPlus.lib gdal.lib version.lib Crypt32.lib Dbghelp.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib NCSEcw.lib geos.lib proj.lib netcdf.lib"
+				AdditionalDependencies="cqlib.lib GdiPlus.lib gdal.lib version.lib Crypt32.lib Dbghelp.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib NCSEcwS.lib geos.lib proj.lib netcdf.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
 				Version="4.9.1"
@@ -308,7 +308,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\SupportingLibraries\include\&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\atlhttp&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\spatialindex&quot;;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;"
-				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;NCSECW_EXPORTS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="1"
@@ -344,7 +344,7 @@
 				RegisterOutput="false"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386 /ignore:4099 /verbose:lib"
-				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal.lib version.lib Crypt32.lib Dbghelp.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib NCSEcw.lib geos.lib proj.lib netcdf.lib"
+				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib version.lib Crypt32.lib Dbghelp.lib gdal.lib NCSEcwS.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib geos.lib proj.lib netcdf.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
 				Version="4.9.1"
@@ -554,7 +554,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\SupportingLibraries\include\&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\atlhttp&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\spatialindex&quot;;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;"
-				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;NCSECW_EXPORTS"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="1"
@@ -590,7 +590,7 @@
 				RegisterOutput="false"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="cqlib.lib GdiPlus.lib gdal.lib version.lib Crypt32.lib Dbghelp.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib NCSEcw.lib geos.lib proj.lib netcdf.lib"
+				AdditionalDependencies="cqlib.lib GdiPlus.lib gdal.lib version.lib Crypt32.lib Dbghelp.lib lti_dsdk.lib lti_lidar_dsdk.lib SpatialIndex.lib NCSEcwS.lib geos.lib proj.lib netcdf.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
 				Version="4.9"
@@ -602,7 +602,7 @@
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;netcdf.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="c:\dev\MapWindow4Dev\Bin\MapWinGIS.pdb"
+				ProgramDatabaseFile="$(OutDir)\MapWinGIS.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -630,6 +630,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				Description="Copy delay loaded dlls"
 				CommandLine="copy SupportingLibraries\bin\$(PlatformName)\*.dll $(TargetDir)"
 			/>
 		</Configuration>
@@ -3016,11 +3017,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>
