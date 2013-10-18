@@ -630,6 +630,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy SupportingLibraries\bin\$(PlatformName)\*.dll $(TargetDir)"
 			/>
 		</Configuration>
 		<Configuration
