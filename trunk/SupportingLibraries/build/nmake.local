@@ -11,7 +11,6 @@ PLATFORM_NAME = x64
 PLATFORM_NAME = Win32
 !ENDIF
 
-
 !IFNDEF GDAL_HOME
 GDAL_HOME = C:\dev\SupportingLibraries\GDAL\gdal-trunk
 !ENDIF
@@ -26,12 +25,13 @@ INCDIR = $(GDAL_HOME)\..\..\include
 !ENDIF
 
 # ECW Support
-ECWDIR  = 	$(GDAL_HOME)\..\ERDAS-ECW-JPEG-2000-SDK-5.0
-ECWFLAGS =	-DECWSDK_VERSION=50 \
-		-I$(ECWDIR)\include \
-		-I$(ECWDIR)\include/NCSECW/API -I$(ECWDIR)\include/NCSECW/JP2 \
-		-I$(ECWDIR)\include/NCSECW/ECW
-ECWLIB  = 	$(ECWDIR)\lib\vc90\$(PLATFORM_NAME)\NCSEcw.lib 
+ECWDIR   =  $(GDAL_HOME)\..\ERDAS-ECW-JPEG-2000-SDK-5.0
+ECWFLAGS =  -DECWSDK_VERSION=50 /DNCSECW_EXPORTS \
+            -I$(ECWDIR)\include \
+            -I$(ECWDIR)\include/NCSECW/API \
+            -I$(ECWDIR)\include/NCSECW/JP2 \
+            -I$(ECWDIR)\include/NCSECW/ECW
+ECWLIB   =  $(ECWDIR)\lib\vc90\$(PLATFORM_NAME)\NCSEcwS.lib 
 
 # LizardTech SDK Support
 MRSID_DIR =	$(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)
@@ -50,12 +50,12 @@ GEOS_LIB     = $(LIBDIR)\geos_c_i.lib
 TIFF_OPTS=	-DBIGTIFF_SUPPORT
 
 #NetCDF support
-NETCDF_PLUGIN = NO
-NETCDF_SETTING=yes
-NETCDF_LIB=$(LIBDIR)\netcdf.lib
-NETCDF_INC_DIR=$(INCDIR)   
-#NETCDF_HAS_NC4 = yes
-#NETCDF_HAS_HDF4 = yes
+#NETCDF_PLUGIN = NO
+#NETCDF_SETTING=yes
+#NETCDF_LIB=$(LIBDIR)\netcdf.lib
+#NETCDF_INC_DIR=$(INCDIR)   
+##NETCDF_HAS_NC4 = yes
+##NETCDF_HAS_HDF4 = yes
 
 # [PaulMeems] Since we don't yet use it, we'll disable it for now:
 # ESRI FileGDB support:
