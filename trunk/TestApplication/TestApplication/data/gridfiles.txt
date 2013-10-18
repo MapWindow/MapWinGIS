@@ -1,0 +1,11 @@
+# A list of image files that can be open to test.
+# Most files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/Grids/Formats/
+
+#ASCII
+C:\dev\TestingScripts\ScriptData\General\Grids\Formats\sj_dem_clip_utm.asc
+C:\dev\TestingScripts\ScriptData\General\Grids\Formats\testArea.asc
+
+#GeoTIFF
+C:\dev\TestingScripts\ScriptData\General\Grids\Formats\Grid.tif
+
+
