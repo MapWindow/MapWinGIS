@@ -218,7 +218,29 @@ namespace TestApplication
     /// </param>
     private void RunGridTestClick(object sender, EventArgs e)
     {
-      Tests.RunGridfileTest(GridInputfile.Text, this);
+      Tests.RunGridfileTest(this.GridInputfile.Text, this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectGridfileToClipClick(object sender, EventArgs e)
+    {
+      Tests.SelectGridfile(this.GridfileToClip, "Select grid file to clip");
+    }
+
+    private void SelectClippingPolygon_Click(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClippingPolygon, "Select clipping polygon shapefile");
+    }
+
+    private void RunClipGridByPolygonTest_Click(object sender, EventArgs e)
+    {
+      Tests.RunClipGridByPolygonTest(this.GridfileToClip.Text, this.ClippingPolygon.Text, this);
     }
   }
 }

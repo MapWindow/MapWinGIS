@@ -70,5 +70,29 @@ namespace TestApplication.Properties {
                 this["FormLocation"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GridfileToClip {
+            get {
+                return ((string)(this["GridfileToClip"]));
+            }
+            set {
+                this["GridfileToClip"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClippingPolygon {
+            get {
+                return ((string)(this["ClippingPolygon"]));
+            }
+            set {
+                this["ClippingPolygon"] = value;
+            }
+        }
     }
 }
