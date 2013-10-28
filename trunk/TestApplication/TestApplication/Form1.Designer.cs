@@ -32,7 +32,25 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox11 = new System.Windows.Forms.GroupBox();
+      this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox12 = new System.Windows.Forms.GroupBox();
+      this.RunBufferShapefileTest = new System.Windows.Forms.Button();
+      this.SelectBufferShapefile = new System.Windows.Forms.Button();
+      this.BufferShapefileInput = new System.Windows.Forms.TextBox();
+      this.label9 = new System.Windows.Forms.Label();
+      this.groupBox8 = new System.Windows.Forms.GroupBox();
+      this.groupBox9 = new System.Windows.Forms.GroupBox();
+      this.RunRasterizeTest = new System.Windows.Forms.Button();
+      this.SelectRasterizeInputfile = new System.Windows.Forms.Button();
+      this.RasterizeInputfile = new System.Windows.Forms.TextBox();
+      this.label8 = new System.Windows.Forms.Label();
       this.groupBox5 = new System.Windows.Forms.GroupBox();
+      this.groupBox7 = new System.Windows.Forms.GroupBox();
+      this.RunShapefileToGridTest = new System.Windows.Forms.Button();
+      this.SelectShapefileToGrid = new System.Windows.Forms.Button();
+      this.ShapefileToGrid = new System.Windows.Forms.TextBox();
+      this.label7 = new System.Windows.Forms.Label();
       this.groupBox6 = new System.Windows.Forms.GroupBox();
       this.RunClipGridByPolygonTest = new System.Windows.Forms.Button();
       this.SelectClippingPolygon = new System.Windows.Forms.Button();
@@ -67,7 +85,12 @@
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
+      this.groupBox10.SuspendLayout();
+      this.groupBox12.SuspendLayout();
+      this.groupBox8.SuspendLayout();
+      this.groupBox9.SuspendLayout();
       this.groupBox5.SuspendLayout();
+      this.groupBox7.SuspendLayout();
       this.groupBox6.SuspendLayout();
       this.groupBox1.SuspendLayout();
       this.groupBox4.SuspendLayout();
@@ -104,6 +127,9 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox11);
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox10);
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox8);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox5);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
       this.splitContainer2.Panel1.Controls.Add(this.label1);
@@ -116,15 +142,204 @@
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
       // 
+      // groupBox11
+      // 
+      this.groupBox11.Location = new System.Drawing.Point(3, 886);
+      this.groupBox11.Name = "groupBox11";
+      this.groupBox11.Size = new System.Drawing.Size(205, 58);
+      this.groupBox11.TabIndex = 5;
+      this.groupBox11.TabStop = false;
+      this.groupBox11.Text = "groupBox11";
+      // 
+      // groupBox10
+      // 
+      this.groupBox10.Controls.Add(this.groupBox12);
+      this.groupBox10.Location = new System.Drawing.Point(3, 722);
+      this.groupBox10.Name = "groupBox10";
+      this.groupBox10.Size = new System.Drawing.Size(205, 116);
+      this.groupBox10.TabIndex = 4;
+      this.groupBox10.TabStop = false;
+      this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox12
+      // 
+      this.groupBox12.Controls.Add(this.RunBufferShapefileTest);
+      this.groupBox12.Controls.Add(this.SelectBufferShapefile);
+      this.groupBox12.Controls.Add(this.BufferShapefileInput);
+      this.groupBox12.Controls.Add(this.label9);
+      this.groupBox12.Location = new System.Drawing.Point(6, 19);
+      this.groupBox12.Name = "groupBox12";
+      this.groupBox12.Size = new System.Drawing.Size(195, 89);
+      this.groupBox12.TabIndex = 3;
+      this.groupBox12.TabStop = false;
+      this.groupBox12.Text = "Buffer shapefile";
+      // 
+      // RunBufferShapefileTest
+      // 
+      this.RunBufferShapefileTest.Location = new System.Drawing.Point(9, 58);
+      this.RunBufferShapefileTest.Name = "RunBufferShapefileTest";
+      this.RunBufferShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunBufferShapefileTest.TabIndex = 9;
+      this.RunBufferShapefileTest.Text = "Run test";
+      this.RunBufferShapefileTest.UseVisualStyleBackColor = true;
+      this.RunBufferShapefileTest.Click += new System.EventHandler(this.RunBufferShapefileTestClick);
+      // 
+      // SelectBufferShapefile
+      // 
+      this.SelectBufferShapefile.Location = new System.Drawing.Point(162, 32);
+      this.SelectBufferShapefile.Name = "SelectBufferShapefile";
+      this.SelectBufferShapefile.Size = new System.Drawing.Size(27, 20);
+      this.SelectBufferShapefile.TabIndex = 8;
+      this.SelectBufferShapefile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectBufferShapefile, "Select text file with on every line the location of a shapefile");
+      this.SelectBufferShapefile.UseVisualStyleBackColor = true;
+      this.SelectBufferShapefile.Click += new System.EventHandler(this.SelectBufferShapefileClick);
+      // 
+      // BufferShapefileInput
+      // 
+      this.BufferShapefileInput.AcceptsReturn = true;
+      this.BufferShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "BufferShapefile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.BufferShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.BufferShapefileInput.Name = "BufferShapefileInput";
+      this.BufferShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.BufferShapefileInput.TabIndex = 7;
+      this.BufferShapefileInput.Text = global::TestApplication.Properties.Settings.Default.BufferShapefile;
+      // 
+      // label9
+      // 
+      this.label9.AutoSize = true;
+      this.label9.Location = new System.Drawing.Point(6, 16);
+      this.label9.Name = "label9";
+      this.label9.Size = new System.Drawing.Size(103, 13);
+      this.label9.TabIndex = 6;
+      this.label9.Text = "Select the shapefile:";
+      // 
+      // groupBox8
+      // 
+      this.groupBox8.Controls.Add(this.groupBox9);
+      this.groupBox8.Location = new System.Drawing.Point(3, 598);
+      this.groupBox8.Name = "groupBox8";
+      this.groupBox8.Size = new System.Drawing.Size(205, 118);
+      this.groupBox8.TabIndex = 3;
+      this.groupBox8.TabStop = false;
+      this.groupBox8.Text = "GDAL Methods";
+      // 
+      // groupBox9
+      // 
+      this.groupBox9.Controls.Add(this.RunRasterizeTest);
+      this.groupBox9.Controls.Add(this.SelectRasterizeInputfile);
+      this.groupBox9.Controls.Add(this.RasterizeInputfile);
+      this.groupBox9.Controls.Add(this.label8);
+      this.groupBox9.Location = new System.Drawing.Point(6, 19);
+      this.groupBox9.Name = "groupBox9";
+      this.groupBox9.Size = new System.Drawing.Size(195, 89);
+      this.groupBox9.TabIndex = 2;
+      this.groupBox9.TabStop = false;
+      this.groupBox9.Text = "Rasterize shapefile";
+      // 
+      // RunRasterizeTest
+      // 
+      this.RunRasterizeTest.Location = new System.Drawing.Point(9, 58);
+      this.RunRasterizeTest.Name = "RunRasterizeTest";
+      this.RunRasterizeTest.Size = new System.Drawing.Size(180, 23);
+      this.RunRasterizeTest.TabIndex = 9;
+      this.RunRasterizeTest.Text = "Run test";
+      this.RunRasterizeTest.UseVisualStyleBackColor = true;
+      this.RunRasterizeTest.Click += new System.EventHandler(this.RunRasterizeTestClick);
+      // 
+      // SelectRasterizeInputfile
+      // 
+      this.SelectRasterizeInputfile.Location = new System.Drawing.Point(162, 32);
+      this.SelectRasterizeInputfile.Name = "SelectRasterizeInputfile";
+      this.SelectRasterizeInputfile.Size = new System.Drawing.Size(27, 20);
+      this.SelectRasterizeInputfile.TabIndex = 8;
+      this.SelectRasterizeInputfile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectRasterizeInputfile, "Select text file with on every line the location of a shapefile");
+      this.SelectRasterizeInputfile.UseVisualStyleBackColor = true;
+      this.SelectRasterizeInputfile.Click += new System.EventHandler(this.SelectRasterizeInputfileClick);
+      // 
+      // RasterizeInputfile
+      // 
+      this.RasterizeInputfile.AcceptsReturn = true;
+      this.RasterizeInputfile.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "RasterizeInputfile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.RasterizeInputfile.Location = new System.Drawing.Point(9, 32);
+      this.RasterizeInputfile.Name = "RasterizeInputfile";
+      this.RasterizeInputfile.Size = new System.Drawing.Size(147, 20);
+      this.RasterizeInputfile.TabIndex = 7;
+      this.RasterizeInputfile.Text = global::TestApplication.Properties.Settings.Default.RasterizeInputfile;
+      // 
+      // label8
+      // 
+      this.label8.AutoSize = true;
+      this.label8.Location = new System.Drawing.Point(6, 16);
+      this.label8.Name = "label8";
+      this.label8.Size = new System.Drawing.Size(114, 13);
+      this.label8.TabIndex = 6;
+      this.label8.Text = "Select the polygon file:";
+      // 
       // groupBox5
       // 
+      this.groupBox5.Controls.Add(this.groupBox7);
       this.groupBox5.Controls.Add(this.groupBox6);
       this.groupBox5.Location = new System.Drawing.Point(3, 340);
       this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(205, 278);
+      this.groupBox5.Size = new System.Drawing.Size(205, 252);
       this.groupBox5.TabIndex = 2;
       this.groupBox5.TabStop = false;
       this.groupBox5.Text = "Spatial operations";
+      // 
+      // groupBox7
+      // 
+      this.groupBox7.Controls.Add(this.RunShapefileToGridTest);
+      this.groupBox7.Controls.Add(this.SelectShapefileToGrid);
+      this.groupBox7.Controls.Add(this.ShapefileToGrid);
+      this.groupBox7.Controls.Add(this.label7);
+      this.groupBox7.Location = new System.Drawing.Point(6, 154);
+      this.groupBox7.Name = "groupBox7";
+      this.groupBox7.Size = new System.Drawing.Size(195, 89);
+      this.groupBox7.TabIndex = 1;
+      this.groupBox7.TabStop = false;
+      this.groupBox7.Text = "Shapefile to grid";
+      // 
+      // RunShapefileToGridTest
+      // 
+      this.RunShapefileToGridTest.Location = new System.Drawing.Point(9, 58);
+      this.RunShapefileToGridTest.Name = "RunShapefileToGridTest";
+      this.RunShapefileToGridTest.Size = new System.Drawing.Size(180, 23);
+      this.RunShapefileToGridTest.TabIndex = 9;
+      this.RunShapefileToGridTest.Text = "Run test";
+      this.RunShapefileToGridTest.UseVisualStyleBackColor = true;
+      this.RunShapefileToGridTest.Click += new System.EventHandler(this.RunShapefileToGridTestClick);
+      // 
+      // SelectShapefileToGrid
+      // 
+      this.SelectShapefileToGrid.Location = new System.Drawing.Point(162, 32);
+      this.SelectShapefileToGrid.Name = "SelectShapefileToGrid";
+      this.SelectShapefileToGrid.Size = new System.Drawing.Size(27, 20);
+      this.SelectShapefileToGrid.TabIndex = 8;
+      this.SelectShapefileToGrid.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectShapefileToGrid, "Select text file with on every line the location of a shapefile");
+      this.SelectShapefileToGrid.UseVisualStyleBackColor = true;
+      this.SelectShapefileToGrid.Click += new System.EventHandler(this.SelectShapefileToGridClick);
+      // 
+      // ShapefileToGrid
+      // 
+      this.ShapefileToGrid.AcceptsReturn = true;
+      this.ShapefileToGrid.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ShapefileToGrid", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ShapefileToGrid.Location = new System.Drawing.Point(9, 32);
+      this.ShapefileToGrid.Name = "ShapefileToGrid";
+      this.ShapefileToGrid.Size = new System.Drawing.Size(147, 20);
+      this.ShapefileToGrid.TabIndex = 7;
+      this.ShapefileToGrid.Text = global::TestApplication.Properties.Settings.Default.ShapefileToGrid;
+      // 
+      // label7
+      // 
+      this.label7.AutoSize = true;
+      this.label7.Location = new System.Drawing.Point(6, 16);
+      this.label7.Name = "label7";
+      this.label7.Size = new System.Drawing.Size(114, 13);
+      this.label7.TabIndex = 6;
+      this.label7.Text = "Select the polygon file:";
       // 
       // groupBox6
       // 
@@ -150,7 +365,7 @@
       this.RunClipGridByPolygonTest.TabIndex = 9;
       this.RunClipGridByPolygonTest.Text = "Run test";
       this.RunClipGridByPolygonTest.UseVisualStyleBackColor = true;
-      this.RunClipGridByPolygonTest.Click += new System.EventHandler(this.RunClipGridByPolygonTest_Click);
+      this.RunClipGridByPolygonTest.Click += new System.EventHandler(this.RunClipGridByPolygonTestClick);
       // 
       // SelectClippingPolygon
       // 
@@ -161,7 +376,7 @@
       this.SelectClippingPolygon.Text = "...";
       this.toolTip1.SetToolTip(this.SelectClippingPolygon, "Select text file with on every line the location of a shapefile");
       this.SelectClippingPolygon.UseVisualStyleBackColor = true;
-      this.SelectClippingPolygon.Click += new System.EventHandler(this.SelectClippingPolygon_Click);
+      this.SelectClippingPolygon.Click += new System.EventHandler(this.SelectClippingPolygonClick);
       // 
       // ClippingPolygon
       // 
@@ -411,6 +626,7 @@
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.Progressbox.Size = new System.Drawing.Size(667, 99);
       this.Progressbox.TabIndex = 0;
+      this.Progressbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ProgressboxMouseClick);
       // 
       // Form1
       // 
@@ -433,7 +649,15 @@
       this.splitContainer2.Panel1.PerformLayout();
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
+      this.groupBox10.ResumeLayout(false);
+      this.groupBox12.ResumeLayout(false);
+      this.groupBox12.PerformLayout();
+      this.groupBox8.ResumeLayout(false);
+      this.groupBox9.ResumeLayout(false);
+      this.groupBox9.PerformLayout();
       this.groupBox5.ResumeLayout(false);
+      this.groupBox7.ResumeLayout(false);
+      this.groupBox7.PerformLayout();
       this.groupBox6.ResumeLayout(false);
       this.groupBox6.PerformLayout();
       this.groupBox1.ResumeLayout(false);
@@ -481,6 +705,24 @@
     private System.Windows.Forms.TextBox ClippingPolygon;
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.Button RunClipGridByPolygonTest;
+    private System.Windows.Forms.GroupBox groupBox7;
+    private System.Windows.Forms.Button RunShapefileToGridTest;
+    private System.Windows.Forms.Button SelectShapefileToGrid;
+    private System.Windows.Forms.TextBox ShapefileToGrid;
+    private System.Windows.Forms.Label label7;
+    private System.Windows.Forms.GroupBox groupBox8;
+    private System.Windows.Forms.GroupBox groupBox9;
+    private System.Windows.Forms.Button RunRasterizeTest;
+    private System.Windows.Forms.Button SelectRasterizeInputfile;
+    private System.Windows.Forms.TextBox RasterizeInputfile;
+    private System.Windows.Forms.Label label8;
+    private System.Windows.Forms.GroupBox groupBox11;
+    private System.Windows.Forms.GroupBox groupBox10;
+    private System.Windows.Forms.GroupBox groupBox12;
+    private System.Windows.Forms.Button RunBufferShapefileTest;
+    private System.Windows.Forms.Button SelectBufferShapefile;
+    private System.Windows.Forms.TextBox BufferShapefileInput;
+    private System.Windows.Forms.Label label9;
   }
 }
 

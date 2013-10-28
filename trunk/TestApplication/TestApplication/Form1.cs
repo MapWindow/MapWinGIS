@@ -82,7 +82,7 @@ namespace TestApplication
     private void Form1Load(object sender, EventArgs e)
     {
       Fileformats.Map = axMap1;
-      Tests.Map = axMap1;
+      Tests.MyAxMap = axMap1;
     }
 
     /// <summary>Form closing event</summary>
@@ -118,18 +118,15 @@ namespace TestApplication
       // Load shapefile
       if (ext == ".shp")
       {
-        Fileformats.OpenShapefileAsLayer(e.filename, this);
+        Fileformats.OpenShapefileAsLayer(e.filename, this, true);
         return;
       }
       
-      // Track GDAL Errors:
-      var settings = new GlobalSettings();
-
       // Load image file
       var img = new Image();
       if (img.CdlgFilter.Contains(ext))
       {
-        Fileformats.OpenImageAsLayer(e.filename, this);
+        Fileformats.OpenImageAsLayer(e.filename, this, true);
         return;
       }
 
@@ -137,7 +134,7 @@ namespace TestApplication
       var grd = new Grid();
       if (grd.CdlgFilter.Contains(ext))
       {
-        Fileformats.OpenGridAsLayer(e.filename, this);
+        Fileformats.OpenGridAsLayer(e.filename, this, true);
         return;
       }
 
@@ -146,6 +143,20 @@ namespace TestApplication
       return;
     }
 
+    /// <summary>Mouse click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void ProgressboxMouseClick(object sender, MouseEventArgs e)
+    {
+      // Select all:
+      this.Progressbox.SelectAll();
+    }
+
+    #region Select file click event
     /// <summary>Click event</summary>
     /// <param name="sender">
     /// The sender.
@@ -185,6 +196,68 @@ namespace TestApplication
       Tests.SelectTextfile(ImageInputfile, "Select text file with on every line the location of an image file");
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectGridfileToClipClick(object sender, EventArgs e)
+    {
+      Tests.SelectGridfile(this.GridfileToClip, "Select grid file to clip");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectClippingPolygonClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClippingPolygon, "Select clipping polygon shapefile");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectShapefileToGridClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ShapefileToGrid, "Select polygon shapefile to grid");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectRasterizeInputfileClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.RasterizeInputfile, "Select polygon shapefile to rasterize");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectBufferShapefileClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.BufferShapefileInput, "Select shapefile to buffer");
+    }
+    #endregion
+
+    #region Run test click event
     /// <summary>Start Shapefile open tests</summary>
     /// <param name="sender">
     /// The sender.
@@ -228,19 +301,47 @@ namespace TestApplication
     /// <param name="e">
     /// The e.
     /// </param>
-    private void SelectGridfileToClipClick(object sender, EventArgs e)
-    {
-      Tests.SelectGridfile(this.GridfileToClip, "Select grid file to clip");
-    }
-
-    private void SelectClippingPolygon_Click(object sender, EventArgs e)
-    {
-      Tests.SelectShapefile(this.ClippingPolygon, "Select clipping polygon shapefile");
-    }
-
-    private void RunClipGridByPolygonTest_Click(object sender, EventArgs e)
+    private void RunClipGridByPolygonTestClick(object sender, EventArgs e)
     {
       Tests.RunClipGridByPolygonTest(this.GridfileToClip.Text, this.ClippingPolygon.Text, this);
     }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunShapefileToGridTestClick(object sender, EventArgs e)
+    {
+      Tests.RunShapefileToGridTest(this.ShapefileToGrid.Text, this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunRasterizeTestClick(object sender, EventArgs e)
+    {
+      Tests.RunRasterizeTest(this.RasterizeInputfile.Text, this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunBufferShapefileTestClick(object sender, EventArgs e)
+    {
+      Tests.RunBufferShapefileTest(this.BufferShapefileInput.Text, this);
+    }
+
+    #endregion
   }
 }

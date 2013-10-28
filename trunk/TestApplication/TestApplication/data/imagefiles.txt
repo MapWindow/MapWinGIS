@@ -29,11 +29,6 @@ C:\dev\TestingScripts\ScriptData\General\Images\Formats\ECW-ERMapper-Compressed-
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale.ecw
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\RGBImage.ecw
 
-#JPEG2000
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.jp2
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\RGBImage2.jp2
-
 #MrSid
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\mercator.sid
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\meg_cr20.sid
@@ -53,12 +48,6 @@ C:\dev\TestingScripts\ScriptData\General\Images\Formats\test-assign.tif
 #EHdr/ESRI .hdr Labelled
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\EHdr-ESRI-BIL.bil
 
-
-#NITF/National Imagery Transmission Format
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.ntf
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\NITF-National-Imagery-Transmission-Format.LF2
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\U_0001A.NTF
-
 #HFA/Erdas Imagine Images
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\HFA-Erdas-Imagine-Image.img
 
@@ -73,3 +62,13 @@ C:\dev\TestingScripts\ScriptData\General\Images\Formats\PNM-Portable-Pixmap-Form
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\PNM-Portable-Pixmap-Format.ppm
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\rays2-P5-PGMB.pnm
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\snail2-P6-PPMB.pnm
+
+#JPEG2000
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.jp2
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\RGBImage2.jp2
+
+#NITF/National Imagery Transmission Format
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.ntf
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\NITF-National-Imagery-Transmission-Format.LF2
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\U_0001A.NTF

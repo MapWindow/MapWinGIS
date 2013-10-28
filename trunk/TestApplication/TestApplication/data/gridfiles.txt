@@ -9,3 +9,5 @@ C:\dev\TestingScripts\ScriptData\General\Grids\Formats\testArea.asc
 C:\dev\TestingScripts\ScriptData\General\Grids\Formats\Grid.tif
 
 
+#NetCDF:
+C:\dev\TestingScripts\ScriptData\General\Grids\Formats\NDB2_19901225.nc

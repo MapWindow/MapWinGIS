@@ -94,5 +94,41 @@ namespace TestApplication.Properties {
                 this["ClippingPolygon"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ShapefileToGrid {
+            get {
+                return ((string)(this["ShapefileToGrid"]));
+            }
+            set {
+                this["ShapefileToGrid"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string RasterizeInputfile {
+            get {
+                return ((string)(this["RasterizeInputfile"]));
+            }
+            set {
+                this["RasterizeInputfile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string BufferShapefile {
+            get {
+                return ((string)(this["BufferShapefile"]));
+            }
+            set {
+                this["BufferShapefile"] = value;
+            }
+        }
     }
 }
