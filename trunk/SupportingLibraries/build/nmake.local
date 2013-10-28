@@ -34,7 +34,9 @@ ECWFLAGS =  -DECWSDK_VERSION=50 /DNCSECW_EXPORTS \
 ECWLIB   =  $(ECWDIR)\lib\vc90\$(PLATFORM_NAME)\NCSEcwS.lib 
 
 # LizardTech SDK Support
-MRSID_DIR =	$(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)
+# The LIDAR SDK is not available for VS2008
+#MRSID_DIR =	$(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)
+MRSID_RASTER_DIR = $(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)\Raster_DSDK 
 
 # Proj4 support
 PROJ_FLAGS = -DPROJ_STATIC
@@ -44,7 +46,11 @@ PROJ_LIBRARY = $(LIBDIR)\proj.lib
 # GEOS Support
 GEOS_DIR = $(GDAL_HOME)\..\geos-3.4.2
 GEOS_CFLAGS = -I$(GEOS_DIR)/capi -I$(GEOS_DIR)/include -DHAVE_GEOS
+!IFDEF DEBUG
+GEOS_LIB     = $(LIBDIR)\geos_c_i_d.lib
+!ELSE
 GEOS_LIB     = $(LIBDIR)\geos_c_i.lib
+!ENDIF
 
 # Enabled big tiff support
 TIFF_OPTS=	-DBIGTIFF_SUPPORT

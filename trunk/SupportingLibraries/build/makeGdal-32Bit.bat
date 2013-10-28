@@ -29,8 +29,9 @@ if not %errorlevel% == 0 (
 if %errorlevel% == 0 echo [%DATE% %Time%] Project files were copied successful
 
 REM Copy additional dlls:
-xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Lidar_DSDK\lib\lti_lidar_dsdk.dll C:\dev\SupportingLibraries\bin\Win32
-xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Raster_DSDK\lib\lti_dsdk.dll C:\dev\SupportingLibraries\bin\Win32
+rem Not available for VS2008: xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Lidar_DSDK\lib\lti_lidar_dsdk.dll C:\dev\SupportingLibraries\bin\Win32
+xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Raster_DSDK\lib\lti_dsdk_9.0.dll C:\dev\SupportingLibraries\bin\Win32
+xcopy /Y C:\dev\SupportingLibraries\GDAL\LizardTech-SDK\Win32\Raster_DSDK\lib\tbb.dll C:\dev\SupportingLibraries\bin\Win32
 REM Not needed anymore, statically linked: xcopy /Y  C:\dev\SupportingLibraries\GDAL\ERDAS-ECW-JPEG-2000-SDK-5.0\redistributable\vc90\win32\NCSEcw.dll C:\dev\SupportingLibraries\bin\Win32
 
 echo This script was successful. The project has been made.

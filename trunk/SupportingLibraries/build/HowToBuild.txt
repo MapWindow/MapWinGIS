@@ -29,12 +29,14 @@ You'll need to register first.
 
 
 ## NetCDF ##
-Download the netCDF libs and binaries from Tamaz his site:
+Download the netCDF libs and binaries from Tamas his site:
 http://vbkto.dyndns.org:1280/sdk/PackageList.aspx?file=release-1500-gdal-mapserver.zip
 * release-1500-gdal-mapserver.zip
 * release-1500-gdal-mapserver-libs.zip
 and place them in the general bin, lib and include folders:
 C:\dev\SupportingLibraries\GDAL\bin /lib and /include
+### TODO ###
+We need to update to the latest stable version available
 
 
 ## GDAL ##
