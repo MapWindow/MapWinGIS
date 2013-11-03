@@ -11,6 +11,8 @@
 #include "ChartDrawing.h"
 #include "Image.h"
 #include "Measuring.h"
+#include "GeometryOperations.h"
+#include "Utils.h"
 
 #pragma endregion
 
@@ -1854,9 +1856,130 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	g->SetSmoothingMode(smoothing);
 }
 
+// ***************************************************************
+//		DrawSegmentInfo()
+// ***************************************************************
+void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
+					 double totalLength, int segmentIndex, CMeasuring* measure)
+{
+	CString s1, s2, s, sAz;
+
+	double x = xScr - xScr2;
+	double y = yScr - yScr2;
+	
+	double angle = 360.0 - GetPointAngle(x, y) * 180.0 / pi;							
+	sAz.Format("%.1f°", angle);
+	
+	x = -x;
+	y = -y;
+	angle = GetPointAngle(x, y) * 180.0 / pi;							
+	angle = - (angle - 90.0);
+
+	if (length > 1000.0)
+	{
+		s1.Format("%.2f km", length / 1000.0);
+	}
+	else
+	{
+		s1.Format("%.1f m", length);
+	}
+	
+	if (segmentIndex > 0 && totalLength != 0.0)
+	{
+		if (totalLength > 1000.0)
+		{
+			s2.Format("%.2f km", totalLength / 1000.0);
+		}
+		else
+		{
+			s2.Format("%.1f m", totalLength);
+		}
+		s.Format("%s (%s)", s1, s2);
+	}
+	else
+	{
+		s = s1;
+	}
+
+	WCHAR* wStr = Utility::StringToWideChar(s);
+	WCHAR* wAz = Utility::StringToWideChar(sAz);
+	
+	Gdiplus::RectF r1(0.0f, 0.0f, 0.0f, 0.0f);
+	Gdiplus::RectF r2(0.0f, 0.0f, 0.0f, 0.0f);
+	g->MeasureString(wStr, wcslen(wStr), measure->font, Gdiplus::PointF(0.0f,0.0f), &measure->format, &r1);
+	g->MeasureString(wAz, wcslen(wAz), measure->font, Gdiplus::PointF(0.0f,0.0f), &measure->format, &r2);
+	
+	double width = sqrt(x*x + y*y);	// width must not be longer than width of segment
+	if (r1.Width > width && segmentIndex > 0 && totalLength != 0.0)
+	{
+		// if a segment is too short, let's try to display it without total distance
+		delete wStr;
+		wStr = Utility::StringToWideChar(s1);
+		g->MeasureString(wStr, wcslen(wStr), measure->font, Gdiplus::PointF(0.0f,0.0f), &measure->format, &r1);
+	}
+	
+	if (width >= r1.Width)
+	{
+		Gdiplus::Matrix m;
+		g->GetTransform(&m);
+		g->TranslateTransform((Gdiplus::REAL)xScr, (Gdiplus::REAL)yScr);
+		
+		bool upsideDown = false;
+		if (angle < -90.0)
+		{
+			g->RotateTransform((Gdiplus::REAL)(angle + 180.0));
+			g->TranslateTransform((Gdiplus::REAL)-width, (Gdiplus::REAL)0.0f);
+			upsideDown = true;
+		}
+		else
+		{
+			g->RotateTransform((Gdiplus::REAL)angle);
+			
+		}
+		
+		// draw white blur
+		/*for(int i = -2; i <= 2; i++)
+		{
+			for(int j = -2; j <= 2; j++)
+			{
+				if (i != 0 && j != 0)
+				{
+					r.X = (Gdiplus::REAL)i;
+					r.Y = -r.Height + j;
+					g->DrawString(wStr, wcslen(wStr), measure->font, r, &measure->format, &measure->whiteBrush);
+					
+					r.Y = j;
+					g->DrawString(wAz, wcslen(wAz), measure->font, r, &measure->format, &measure->whiteBrush);
+				}
+			}
+		}*/
+
+		// draw black text
+		r1.X = (width - r1.Width) / 2.0f;
+		r1.Y = -r1.Height;
+		g->FillRectangle(&measure->whiteBrush, r1);
+		
+		r1.X = 0.0f;
+		r1.Width = width;
+		g->DrawString(wStr, wcslen(wStr), measure->font, r1, &measure->format, &measure->textBrush);
+		
+		r2.Y = 0.0f;
+		r2.X = (width - r2.Width) / 2.0f;
+		g->FillRectangle(&measure->whiteBrush, r2);
+		
+		r2.X = 0.0f;
+		r2.Width = width;
+		g->DrawString(wAz, wcslen(wAz), measure->font, r2, &measure->format, &measure->textBrush);
+		g->SetTransform(&m);		// restore transform
+	}
+	delete wStr;
+	delete wAz;
+}
+
 // ****************************************************************
 //		DrawMeasuring()
 // ****************************************************************
+
 void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 {
 	// transparency
@@ -1872,18 +1995,105 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 		if (size > 0 )
 		{
 			Gdiplus::SmoothingMode prevMode = g->GetSmoothingMode();
-			g->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+			Gdiplus::TextRenderingHint prevHint = g->GetTextRenderingHint();
+			g->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+			g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
 
 			if (measuring->measuringType == tkMeasuringType::MeasureDistance)  // drawing the last segment only
 			{
 				Gdiplus::PointF* data = new Gdiplus::PointF[size];
+				double x, y;
 				for(size_t i = 0; i < measuring->points.size(); i++) {
-					double x, y;
 					this->ProjectionToPixel(measuring->points[i]->Proj.x, measuring->points[i]->Proj.y, x, y);
 					data[i].X = (Gdiplus::REAL)x;
 					data[i].Y = (Gdiplus::REAL)y;
 				}
 				
+				if (measuring->closedPoly)
+				{
+					int sz = measuring->points.size() - 1 - measuring->firstPointIndex;
+					if (sz > 2 && measuring->firstPointIndex >= 0)
+					{
+						// let's draw fill and area
+						Gdiplus::PointF* polyData = &(data[measuring->firstPointIndex]);
+						Gdiplus::Color color(100, 255, 165, 0);
+						Gdiplus::SolidBrush brush(color);
+						g->FillPolygon(&brush, polyData, sz);
+						
+						// find position for label
+						IShape* shp = NULL;
+						CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+						if (shp)
+						{
+							long pointIndex;
+							VARIANT_BOOL vb;
+							shp->Create(ShpfileType::SHP_POLYGON, &vb);
+							for(int i = 0; i < sz; i++)
+							{
+								shp->AddPoint(polyData[i].X, polyData[i].Y, &pointIndex);
+							}
+							shp->AddPoint(polyData->X, polyData->Y, &pointIndex);	// close it
+							
+							IPoint* pnt = NULL;
+							shp->get_Centroid(&pnt);
+
+							double xOrig, yOrig;
+
+							if (pnt)
+							{
+								pnt->get_X(&xOrig);
+								pnt->get_Y(&yOrig);
+								pnt->Release();
+
+								// copy geog coordinates
+								int count = 0;
+								std::vector<Point2D> gPoints(sz);
+								for(int i = measuring->firstPointIndex; i < measuring->points.size(); i++)
+								{
+									gPoints.push_back(Point2D(measuring->points[i]->x, measuring->points[i]->y));
+									count++;
+								}
+								
+								// calc area
+								double area = abs(CalcPolyGeodesicArea(gPoints));
+			
+								// draw the label 
+								// TODO: extract to a function
+								CString str;
+								str.Format("%.1f ha", area / 10000.0);
+
+								WCHAR* wStr = Utility::StringToWideChar(str);
+								Gdiplus::Font* font = Utility::GetGdiPlusFont("Arial", 12);
+								
+								Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
+								Gdiplus::SolidBrush whiteBrush(Gdiplus::Color::White);
+								Gdiplus::PointF origin((Gdiplus::REAL)xOrig, (Gdiplus::REAL)yOrig);
+								
+								Gdiplus::StringFormat format;
+								format.SetAlignment(Gdiplus::StringAlignmentCenter);
+								format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+								Gdiplus::RectF box;
+								g->MeasureString(wStr, wcslen(wStr), font, origin, &format, &box);
+								g->FillRectangle(&whiteBrush, box);
+
+								g->DrawString(wStr, wcslen(wStr), font, origin, &format, &brush);
+								
+								delete font;
+								delete wStr;
+							}
+							shp->Release();
+						}
+					}
+				}
+
+				double length, totalLength = 0.0;
+				for(int i = 0; i < size - 1; i++) {
+					measuring->get_SegementLength(i, &length);
+					totalLength += length;
+					DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, measuring);
+				}
+
 				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
 				g->DrawLines(&pen, data, size);
 				
@@ -1902,6 +2112,7 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 			}
 
 			g->SetSmoothingMode(prevMode);
+			g->SetTextRenderingHint(prevHint);
 		}
 	}
 }
@@ -1941,6 +2152,24 @@ void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g)
 					this->ProjectionToPixel(m->points[m->points.size() - 1]->Proj.x, m->points[m->points.size() - 1]->Proj.y, x, y);
 
 					if (m->points.size() > 0 && (m->mousePoint.x != x || m->mousePoint.y != y)) {
+						Gdiplus::SmoothingMode prevMode = g->GetSmoothingMode();
+						Gdiplus::TextRenderingHint prevHint = g->GetTextRenderingHint();
+						gDrawing->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
+						gDrawing->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
+
+						double xLng, yLat;
+						this->PixelToProj(m->mousePoint.x, m->mousePoint.y, &xLng, &yLat);
+						if (m->TransformPoint(xLng, yLat))
+						{
+							double dist;
+							IUtils* utils = GetUtils();
+							utils->GeodesicDistance(m->points[m->points.size() - 1]->y, m->points[m->points.size() - 1]->x, yLat, xLng, &dist);
+							DrawSegmentInfo(gDrawing, x, y, m->mousePoint.x, m->mousePoint.y, dist, 0.0, 1, m);
+						}
+
+						gDrawing->SetSmoothingMode(prevMode);
+						gDrawing->SetTextRenderingHint(prevHint);
+						
 						Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
 						gDrawing->DrawLine(&pen, (Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)m->mousePoint.x, (Gdiplus::REAL)m->mousePoint.y);
 					}

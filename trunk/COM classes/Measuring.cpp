@@ -107,6 +107,7 @@ STDMETHODIMP CMeasuring::UndoPoint(VARIANT_BOOL* retVal)
 		areaRecalcIsNeeded = true;
 	}
 	stopped = false;
+	closedPoly = false;
 	return S_OK;
 }
 
@@ -133,12 +134,35 @@ STDMETHODIMP CMeasuring::Clear()
 	return S_OK;
 }
 
+STDMETHODIMP CMeasuring::get_SegementLength(int segmentIndex, double* retVal) 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (segmentIndex < 0 || segmentIndex >= points.size() - 1)
+	{
+		// TODO: report error
+	}
+	else
+	{
+		int i = segmentIndex;
+		if (transformationMode == tmNotDefined)
+		{
+			*retVal = points[i]->Proj.GetDistance(points[i + 1]->Proj);
+		}
+		else
+		{
+			IUtils* utils = GetUtils();
+			utils->GeodesicDistance(points[i]->y, points[i]->x, points[i + 1]->y, points[i + 1]->x, retVal);
+		}
+	}
+	return S_OK;
+}
+
 #pragma region Distance calculation
 // *******************************************************
 //		getDistance()
 // *******************************************************
-double CMeasuring::GetDistance() {
-	
+double CMeasuring::GetDistance() 
+{
 	if (transformationMode == tmNotDefined)
 	{
 		return GetEuclidianDistance();	// if there us undefined or incompatible projection; return distance on plane 
@@ -304,6 +328,7 @@ bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS8
 // *******************************************************
 void CMeasuring::AddPoint(double xProj, double yProj, double xScreen, double yScreen) 
 {
+	closedPoly = false;
 	if (stopped)
 	{
 		this->points.clear();

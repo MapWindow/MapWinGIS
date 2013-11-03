@@ -282,6 +282,7 @@ private:
 								int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam);
 	void WriteWorldFile(CString worldFile, CString imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void CUtils::ErrorMessage(long ErrorCode);
+	
 
 	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);
@@ -293,6 +294,9 @@ private:
 	CStringArray sArr;
 	CStringArray sConfig;
 };
+
+double CalcPolyGeodesicArea(std::vector<Point2D>& points);
+
 
 OBJECT_ENTRY_AUTO(__uuidof(Utils), CUtils)
 

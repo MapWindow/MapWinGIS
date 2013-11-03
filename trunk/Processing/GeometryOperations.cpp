@@ -249,11 +249,11 @@ tkExtentsRelation RelateExtents(CRect& r1, CRect& r2)
 		double angle = atan(x / y);
 		if (y < 0)			return pi + angle;
 		else if (x >= 0)	return angle;
-		else /*if (x <= 0)*/return 2 * pi + angle;
+		else /*if (x <= 0)*/return 2.0 * pi + angle;
 	}
 	else
 	{
-		if (x > 0)		return pi / 2;
+		if (x > 0)		return pi / 2.0;
 		else if(x < 0)	return 1.5 * pi;
 		else			return 0.0;
 	}

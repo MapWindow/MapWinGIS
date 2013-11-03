@@ -40,6 +40,8 @@ class ATL_NO_VTABLE CMeasuring :
 {
 public:
 	CMeasuring() 
+		: textBrush(Gdiplus::Color::Black), 
+		whiteBrush(Gdiplus::Color::White)
 	{
 		isGeodesic = false;
 		stopped = false;
@@ -51,6 +53,12 @@ public:
 		projWGS84 = NULL;
 		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&proj);
+
+		font = Utility::GetGdiPlusFont("Times New Roman", 9);
+		format.SetAlignment(Gdiplus::StringAlignmentCenter);
+		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+		closedPoly = false;
+		firstPointIndex = -1;
 		//poly = new GeographicLib::PolygonArea(geod);
 	}
 
@@ -99,6 +107,7 @@ public:
 	STDMETHOD(get_Area)(double* retVal);
 	STDMETHOD(get_IsStopped)(VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)();
+	STDMETHOD(get_SegementLength)(int segmentIndex, double* retVal);
 
 	// projection should be specified before any calculations are possible
 	bool SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode);
@@ -119,6 +128,19 @@ public:
 	tkMeasuringType measuringType;
 	Point2D mousePoint;					   // points entered by user (in map units, whatever they are)
 	
+	Gdiplus::Font* font;
+	Gdiplus::SolidBrush textBrush; //(Gdiplus::Color::Black);
+	Gdiplus::SolidBrush whiteBrush;//(Gdiplus::Color::White);
+	Gdiplus::StringFormat format;
+	bool closedPoly;
+	int firstPointIndex;
+
+	void ClosePoly(int firstPointIndex)
+	{
+		closedPoly = true;
+		this->firstPointIndex = firstPointIndex;
+	}
+
 	struct MeasurePoint
 	{
 		Point2D Proj;

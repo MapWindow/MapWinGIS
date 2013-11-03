@@ -69,8 +69,7 @@
 # include "MapRotate.h"   // ajp
 # include "ImageGroup.h"
 # include "CollisionList.h"
-
-
+# include "Measuring.h"
 
 #pragma endregion
 
@@ -1108,6 +1107,10 @@ private:
 
 	void CMapView::SetTempExtents(double left, double right, double top, double bottom, long Width, long Height);
 	void CMapView::RestoreExtents();
+
+	void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
+					 double totalLength, int segmentIndex, CMeasuring* measure);
+
 
 	#ifdef _DEBUG //Code added by Lailin Chen to profile the time consumption of this function. --- Lailin Chen 11/7/2005
 		 DWORD OnDrawTicks;

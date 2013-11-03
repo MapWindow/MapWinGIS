@@ -4624,6 +4624,20 @@ STDMETHODIMP CUtils::GeodesicDistance(double lat1, double lng1, double lat2, dou
 	return S_OK;
 }
 
+#include "..\Processing\GeograpicLib\PolygonArea.hpp"
+double CalcPolyGeodesicArea(std::vector<Point2D>& points)
+{
+	GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
+	GeographicLib::PolygonArea poly(geod);
+	for(int i = 0; i < points.size(); i++)
+	{
+		poly.AddPoint(points[i].y, points[i].x);
+	}
+	double area = 0.0, perimeter = 0.0;
+	unsigned int r = poly.Compute(true, true, perimeter, area);
+	return area;
+}
+
 // ********************************************************
 //     MaskRaster()
 // ********************************************************

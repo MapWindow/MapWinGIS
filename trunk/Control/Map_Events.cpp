@@ -95,14 +95,10 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	ext.right = xCent + width * (1 - dx);
 	ext.bottom = yCent - height * (1 - dy);
 	ext.top = yCent + height * dy;
-	
-	
 
 	this->SetExtentsCore(ext);
 	return true;
 }
-
-
 
 // ************************************************************
 //		OnLButtonDown
@@ -191,47 +187,11 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				long ity = rect.TopLeft().y;
 				this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x, iby, ity );
 			}
-			//InvalidateControl();
 		}
 		else
 		{
-			/*if (m_Rotate != NULL && m_RotateAngle != 0)
-			point = rotPoint;
-
-			double zx = extents.left, zy = extents.bottom;
-			PixelToProjection( point.x, point.y, zx, zy );
-
-			double halfxRange = (extents.right - extents.left)*.5;
-			double halfyRange = (extents.top - extents.bottom)*.5;*/
-
-			// Chris M and Steve Abbot -- Log the previous extents here,
-			// since we're about to change them.
-			//LogPrevExtent(); 
-
-			/*extents.left = zx - halfxRange;
-			extents.right = zx + halfxRange;
-			extents.bottom = zy - halfyRange;
-			extents.top = zy + halfyRange;*/
-			
 			ZoomIn( m_zoomPercent );
-			// lsu 16-mar-13: commented the next block, why to duplicate ZoomIn?
 
-			// Chris M and Steve Abbot -- commented out the next line and added the following code from ZoomIn
-			/*double xzin = ((extents.right - extents.left)*( 1.0 - m_zoomPercent ))*.5;
-			double xmiddle = extents.left + (extents.right - extents.left)*.5;
-
-			double cLeft = xmiddle - xzin;
-			double cRight = xmiddle + xzin;
-
-			double yzin = ((extents.top - extents.bottom)*( 1.0 - m_zoomPercent ))*.5;
-			double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
-
-			double cBottom = ymiddle - yzin;
-			double cTop = ymiddle + yzin;
-
-			this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));*/
-
-			//the MapTracker interferes with the OnMouseUp event so we will call it manually
 			if( m_sendMouseUp == TRUE )
 			{
 				if (m_Rotate != NULL && m_RotateAngle != 0)
@@ -243,19 +203,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	else if( m_cursorMode == cmZoomOut )
 	{
-		/*if (m_Rotate != NULL && m_RotateAngle != 0)
-			point = rotPoint;
-		double zx = extents.left, zy = extents.bottom;
-		this->PixelToProjection( point.x, point.y, zx, zy );
-
-		double halfxRange = (extents.right - extents.left)*.5;
-		double halfyRange = (extents.top - extents.bottom)*.5;
-
-		extents.left = zx - halfxRange;
-		extents.right = zx + halfxRange;
-		extents.bottom = zy - halfyRange;
-		extents.top = zy + halfyRange;*/
-
 		if( m_sendMouseDown == TRUE )
 		{
 			if (m_Rotate != NULL && m_RotateAngle != 0)
@@ -265,22 +212,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		
         ZoomOut( m_zoomPercent );
-		
-		// lsu 16-mar-13: commented the next block, why to duplicate ZoomOut?
-		// Chris M and Steve Abbot -- commented out the next line and added the following code from ZoomOut
-		/*double xzout = ((extents.right - extents.left)*( 1.0 + Percent ))*.5;
-		double xmiddle = extents.left + (extents.right - extents.left)*.5;
-
-		double cLeft = xmiddle - xzout;
-		double cRight = xmiddle + xzout;
-
-		double yzout = ((extents.top - extents.bottom)*( 1.0 + Percent ))*.5;
-		double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
-
-		double cBottom = ymiddle - yzout;
-		double cTop = ymiddle + yzout;
-
-		this->SetExtentsCore(Extent( cLeft, cRight, cBottom, cTop ), true);*/
 	}
 	else if( m_cursorMode == cmPan )
 	{
@@ -298,9 +229,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		this->LogPrevExtent();
 		this->SetCapture();
 		this->LockWindow(lmLock);
-
-		//sent on mouse-up event
-		//FireExtentsChanged();
 	}
 	else if( m_cursorMode == cmSelection )
 	{
@@ -368,9 +296,43 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 	else if( m_cursorMode == cmMeasure )
 	{
- 		bool found = false;
+		bool found = false;
 		double x, y;
-		if ( nFlags & MK_SHIFT )	// when shift is pressed we seek for nearby point across all layers
+		int closePointIndex= -1;
+		
+		tkMeasuringType measureType;
+		m_measuring->get_MeasuringType(&measureType);
+
+		if ( nFlags & MK_CONTROL && measureType == tkMeasuringType::MeasureDistance)
+		{
+			// closing to show area
+			double minDist = DBL_MAX;
+			double xTemp, yTemp;
+			
+			CMeasuring* m = (CMeasuring*)m_measuring;
+			for(int i = 0; i < m->points.size() - 2; i++)
+			{
+				ProjToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, &xTemp, &yTemp);
+				double dist = sqrt( pow(point.x - xTemp, 2.0) + pow(point.y - yTemp, 2.0));
+				if (dist < minDist)
+				{
+					minDist = dist;
+					closePointIndex = i;
+					found = true;
+				}
+			}
+
+			if (minDist != DBL_MAX)
+			{
+				x = m->points[closePointIndex]->Proj.x;
+				y = m->points[closePointIndex]->Proj.y;
+			}
+			else
+			{
+				// no points to close near by
+			}
+		}
+		else if ( nFlags & MK_SHIFT )	// when shift is pressed we seek for nearby point across all layers
 		{
 			double tolerance = 20;   // pixels;   TODO: make a parameter
 			if (FindSnapPoint(tolerance, point.x, point.y, x, y))
@@ -392,6 +354,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 			((CMeasuring*)m_measuring)->AddPoint(x, y, pixelX, pixelY);
 			
+			if (closePointIndex != -1)
+				((CMeasuring*)m_measuring)->ClosePoly(closePointIndex);
+
 			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointAdded);
 			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
 
@@ -504,7 +469,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	if( m_sendMouseUp == TRUE && m_leftButtonDown )
 		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
 
-   m_leftButtonDown = FALSE;
+    m_leftButtonDown = FALSE;
 
 	ReleaseCapture();
 
