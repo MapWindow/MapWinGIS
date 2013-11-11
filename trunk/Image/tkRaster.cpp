@@ -33,7 +33,7 @@ using namespace std;
 // *************************************************************
 bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 {
-	//AfxMessageBox("LoadRaster");
+	//AfxMessageBox("In LoadRaster");
 	// Chris M 11/15/2005 - This function doesn't use any AFX calls,
 	// and getting a static module state will make this function require unwinding.
 	// This will mean that SEH exception handing can't be used, and we'll be unable
@@ -49,7 +49,24 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 	__try
 	{
 		warped = false;
+		//AfxMessageBox("Before GDALAllRegister");
 		GDALAllRegister();
+		/*
+		AfxMessageBox("Before AutoLoadDrivers");
+		GetGDALDriverManager()->AutoLoadDrivers();		
+		
+		// FRMT_gtiff
+		AfxMessageBox("Before GDALRegister_GTiff");
+		GDALRegister_GTiff();
+		
+		// FRMT_mrsid
+		AfxMessageBox("Before GDALRegister_MrSID");
+		GDALRegister_MrSID();
+
+		AfxMessageBox("Before AutoSkipDrivers");		
+		GetGDALDriverManager()->AutoSkipDrivers();
+		*/
+		
 		//AfxMessageBox("Before GdalOpen");
 		//Rob JPEG2000 fails at this point with a nasty error if MapWinGIS is 
 		//compiled in debug mode. GIF images also crash here		
@@ -62,6 +79,8 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 			retVal = false;
 			return retVal;
 		}
+
+		//AfxMessageBox("After GDALOpen");
 
 		orig_Width = rasterDataset->GetRasterXSize();
 		orig_Height = rasterDataset->GetRasterYSize();			

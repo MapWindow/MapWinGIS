@@ -76,6 +76,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_RETURN_TYPE 222
 # define tkSHPFILE_WITH_INVALID_SHAPES 223
 # define tkCATEGORY_WASNT_FOUND 224
+# define tkRESULTINGSHPFILE_EMPTY 225 /* Added by Paul Meems. 23-10-2013 */
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

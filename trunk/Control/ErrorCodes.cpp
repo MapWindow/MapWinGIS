@@ -151,6 +151,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Shapefile contains invalid shapes";
 		case tkCATEGORY_WASNT_FOUND:
 			return "Category wasn't found";
+		case tkRESULTINGSHPFILE_EMPTY:
+			return "Resulting shapefile has no shapes";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

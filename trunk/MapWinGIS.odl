@@ -1297,7 +1297,8 @@ interface IImage;
         [helpstring("MAP_FILE")] MAP_FILE			        	=19,
 		[helpstring("LF2_FILE")] LF2_FILE			        	=20,
 		[helpstring("KAP_FILE")] KAP_FILE			        	=21,
-		[helpstring("DEM_FILE")] DEM_FILE			        	=22
+		[helpstring("DEM_FILE")] DEM_FILE			        	=22,
+		[helpstring("NTF_FILE")] NTF_FILE			        	=23
 	} ImageType;
 
 /****************************  Field Enumerations ***********************/

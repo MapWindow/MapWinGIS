@@ -552,6 +552,9 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, ISh
 STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: Should we do this here and what is the best option to save it, as an property of sf?:
+	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
 	
 	LONG numSelected;
 	this->get_NumSelected(&numSelected);
@@ -613,13 +616,18 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		this->get_Shape(i, &shp);
 		if (shp)
 		{
-			oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
+			// Use new GEOS API:
+			//oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
+			oGeom1 = GeometryConverter::Shape2GEOSGeom(hGEOSCtxt, shp);
 
 			shp->Release();
 			if (oGeom1 == NULL) continue;
 			
-			oGeom2 = GEOSBuffer( oGeom1, Distance, (int)nSegments);
-			GEOSGeom_destroy(oGeom1);
+			// Use new GEOS API:
+			//oGeom2 = GEOSBuffer( oGeom1, Distance, (int)nSegments);
+			//GEOSGeom_destroy(oGeom1);
+			oGeom2 = GEOSBuffer_r(hGEOSCtxt, oGeom1, Distance, (int)nSegments);
+			GEOSGeom_destroy_r(hGEOSCtxt, oGeom1);
 
 			if (oGeom2 == NULL)	continue;
 			
@@ -630,12 +638,18 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			else
 			{
 				vector<IShape*> vShapes;
-				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
+
+				// Use new GEOS API:
+				//if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
+				if (GeometryConverter::GEOSGeomToShapes(hGEOSCtxt, oGeom2, &vShapes))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
 				}
-				GEOSGeom_destroy(oGeom2);
+
+				// Use new GEOS API:
+				//GEOSGeom_destroy(oGeom2);
+				GEOSGeom_destroy_r(hGEOSCtxt, oGeom2);
 			}
 		}
 	}
@@ -643,15 +657,16 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// merging the results
 	if (MergeResults)
 	{
-		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(results, globalCallback);	// geometries will be released in the process
+		// Use the new GEOS API:
+		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(hGEOSCtxt, results, globalCallback);	// geometries will be released in the process
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
-			GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
 			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
-			OGRGeometry::freeGEOSContext( hGEOSCtxt );
 
-			GEOSGeom_destroy(gsGeom);
+			// Using the new GEOS API:
+			//GEOSGeom_destroy(gsGeom);
+			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
 			
 			if (oGeom)
 			{
@@ -659,10 +674,13 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				if (type == wkbMultiPolygon || type == wkbMultiPolygon25D)
 				{
 					std::vector<OGRGeometry*> polygons;
+					
+					// Doesn't use any GEOS functions:
 					if (GeometryConverter::MultiPolygon2Polygons(oGeom, &polygons))
 					{
 						for (unsigned int i = 0; i < polygons.size(); i++)
 						{
+							// Doesn't use any GEOS functions:
 							IShape* shp = GeometryConverter::GeometryToShape(polygons[i]);
 							if (shp)
 							{
@@ -675,6 +693,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				}
 				else
 				{
+					// Doesn't use any GEOS functions:
 					IShape* shp = GeometryConverter::GeometryToShape(oGeom);
 					if (shp)
 					{
@@ -693,6 +712,8 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	(*sf)->get_NumShapes(&numShapes);
 	if (numShapes <= 0)
 	{
+		// No shapes are buffered, return an error:
+		ErrorMessage(tkRESULTINGSHPFILE_EMPTY);
 		(*sf)->Close(&vbretval);
 		(*sf)->Release();
 		(*sf) = NULL;
@@ -703,6 +724,10 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
 	}
+
+	// Clean up:
+	OGRGeometry::freeGEOSContext( hGEOSCtxt );
+
 	return S_OK;
 }
 #pragma endregion

@@ -842,7 +842,7 @@ STDMETHODIMP CImageClass::get_CdlgFilter(BSTR *pVal)
 
 	// NOTE: These need to match the grid filter for any duplicates.
 	//"ECW Images (*.ecw)|*.ecw|" 
-	*pVal = A2BSTR( "All Supported Image Types|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.vrt;*.tif|" \
+	*pVal = A2BSTR( "All Supported Image Types|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.vrt;*.tif;*.ntf|" \
 					"ArcInfo Grid Images (hdr.adf)|hdr.adf|" \
 					"ASCII Grid Images (*.asc)|*.asc|" \
 					"Binary Terrain Images (*.bt)|*.bt|" \
@@ -860,6 +860,7 @@ STDMETHODIMP CImageClass::get_CdlgFilter(BSTR *pVal)
 					"CADRG (*.LF2)|*.lf2|" \
 					"BSB/KAP (*.kap)|*.kap|" \
 					"GDAL Virtual Dataset (*.vrt)|*.vrt|" \
+					"National Imagery Transmission Format (*.ntf)|*.ntf|" \
 					"Tagged Image File Format (*.tif)|*.tif"); 
 	return S_OK;
 }
@@ -1218,6 +1219,10 @@ bool CImageClass::getFileType(CString ImageFile, ImageType &ft)
 	else if(ext.CompareNoCase("dem") == 0)
 	{
 		ft = DEM_FILE;
+	}
+	else if(ext.CompareNoCase("ntf") == 0)
+	{
+		ft = NTF_FILE;
 	}
 	else
 	{	//unhandled file extension, return false;
