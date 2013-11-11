@@ -649,7 +649,15 @@ namespace TestApplication
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
         theForm.Progress(string.Empty, 0, "Start buffering " + Path.GetFileName(shapefilename));
-        var bufferedSf = sf.BufferByDistance(100, 16, false, false);
+        
+        // Make the distance depending on the projection.
+        var distance = 1000;
+        if (sf.GeoProjection.IsGeographic)
+        {
+          distance = 1;
+        }
+
+        var bufferedSf = sf.BufferByDistance(distance, 16, false, false);
 
         // Do some checks:
         if (bufferedSf == null)
