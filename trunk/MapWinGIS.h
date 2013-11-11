@@ -15,6 +15,8 @@
 #include "MapWinGIS_i.h"
 #include <math.h>
 #include "gdal_priv.h"
+#include "geos_c.h"
+#include "ogr_geometry.h"
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
@@ -25,6 +27,9 @@ extern const WORD _wVerMinor;
 
 // new labels will be used inspite of the mode
 #define FORCE_NEW_LABELS true
+
+extern GEOSContextHandle_t _geosContextHandle;
+GEOSContextHandle_t getGeosHandle();
 
 extern IUtils* m_utils;
 IUtils* GetUtils();

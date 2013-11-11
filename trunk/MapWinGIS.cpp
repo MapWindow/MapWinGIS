@@ -34,8 +34,16 @@ CComModule _Module;
 
 GlobalSettingsInfo m_globalSettings;
 GlobalClassFactory m_factory;
-IUtils* m_utils;
 
+GEOSContextHandle_t _geosContextHandle = NULL;
+GEOSContextHandle_t getGeosHandle()
+{
+	if (!_geosContextHandle)
+		_geosContextHandle = OGRGeometry::createGEOSContext();
+	return _geosContextHandle;
+}
+
+IUtils* m_utils;
 IUtils* GetUtils()
 {
 	if (!m_utils)

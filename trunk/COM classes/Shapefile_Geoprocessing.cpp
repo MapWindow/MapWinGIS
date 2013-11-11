@@ -554,7 +554,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	// TODO: Should we do this here and what is the best option to save it, as an property of sf?:
-	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+	//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
 	
 	LONG numSelected;
 	this->get_NumSelected(&numSelected);
@@ -618,7 +618,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		{
 			// Use new GEOS API:
 			//oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
-			oGeom1 = GeometryConverter::Shape2GEOSGeom(hGEOSCtxt, shp);
+			oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
 
 			shp->Release();
 			if (oGeom1 == NULL) continue;
@@ -626,8 +626,8 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			// Use new GEOS API:
 			//oGeom2 = GEOSBuffer( oGeom1, Distance, (int)nSegments);
 			//GEOSGeom_destroy(oGeom1);
-			oGeom2 = GEOSBuffer_r(hGEOSCtxt, oGeom1, Distance, (int)nSegments);
-			GEOSGeom_destroy_r(hGEOSCtxt, oGeom1);
+			oGeom2 = GEOSBuffer_r(getGeosHandle(), oGeom1, Distance, (int)nSegments);
+			GEOSGeom_destroy_r(getGeosHandle(), oGeom1);
 
 			if (oGeom2 == NULL)	continue;
 			
@@ -641,7 +641,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 				// Use new GEOS API:
 				//if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
-				if (GeometryConverter::GEOSGeomToShapes(hGEOSCtxt, oGeom2, &vShapes))
+				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
@@ -649,7 +649,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 				// Use new GEOS API:
 				//GEOSGeom_destroy(oGeom2);
-				GEOSGeom_destroy_r(hGEOSCtxt, oGeom2);
+				GEOSGeom_destroy_r(getGeosHandle(), oGeom2);
 			}
 		}
 	}
@@ -658,15 +658,15 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	if (MergeResults)
 	{
 		// Use the new GEOS API:
-		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(hGEOSCtxt, results, globalCallback);	// geometries will be released in the process
+		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(results, globalCallback);	// geometries will be released in the process
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
-			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
+			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(getGeosHandle(), gsGeom);
 
 			// Using the new GEOS API:
 			//GEOSGeom_destroy(gsGeom);
-			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
+			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
 			
 			if (oGeom)
 			{
@@ -726,7 +726,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	}
 
 	// Clean up:
-	OGRGeometry::freeGEOSContext( hGEOSCtxt );
+	//OGRGeometry::freeGEOSContext( hGEOSCtxt );
 
 	return S_OK;
 }

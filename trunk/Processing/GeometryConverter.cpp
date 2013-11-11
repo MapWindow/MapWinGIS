@@ -48,9 +48,9 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 	OGRGeometry* oGeom = ShapeToGeometry(shp);
 	if (oGeom != NULL)
 	{
-		GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
-		GEOSGeometry* result = oGeom->exportToGEOS(hGEOSCtxt);
-		OGRGeometry::freeGEOSContext( hGEOSCtxt );
+		//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+		GEOSGeometry* result = oGeom->exportToGEOS(getGeosHandle());
+		//OGRGeometry::freeGEOSContext( hGEOSCtxt );
 		
 		delete oGeom;
 		return result;
@@ -60,19 +60,19 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 }
 
 //  Converts MapWinGis shape to GEOS geometry, using new GEOS syntax
-GEOSGeom GeometryConverter::Shape2GEOSGeom(GEOSContextHandle_t hGEOSCtxt, IShape* shp)
-{
-	OGRGeometry* oGeom = ShapeToGeometry(shp);
-	if (oGeom != NULL)
-	{
-		GEOSGeometry* result = oGeom->exportToGEOS(hGEOSCtxt);		
-		
-		delete oGeom;
-		return result;
-	}
-	else 
-		return NULL;
-}
+//GEOSGeom GeometryConverter::Shape2GEOSGeom(GEOSContextHandle_t hGEOSCtxt, IShape* shp)
+//{
+//	OGRGeometry* oGeom = ShapeToGeometry(shp);
+//	if (oGeom != NULL)
+//	{
+//		GEOSGeometry* result = oGeom->exportToGEOS(hGEOSCtxt);		
+//		
+//		delete oGeom;
+//		return result;
+//	}
+//	else 
+//		return NULL;
+//}
 
 
 GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
@@ -88,17 +88,17 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* 
 }
 
 // Using new GEOS API
-GEOSGeometry* DoBuffer(GEOSContextHandle_t hGEOSCtxt, DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
-{
-	__try
-	{
-		return GEOSBuffer_r(hGEOSCtxt, gsGeom, distance, nQuadSegments );
-	}
-	__except(1)
-	{
-		return NULL;
-	}
-}
+//GEOSGeometry* DoBuffer(GEOSContextHandle_t hGEOSCtxt, DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
+//{
+//	__try
+//	{
+//		return GEOSBuffer_r(hGEOSCtxt, gsGeom, distance, nQuadSegments );
+//	}
+//	__except(1)
+//	{
+//		return NULL;
+//	}
+//}
 
 // *********************************************************************
 //		GEOSGeom2Shape()
@@ -110,7 +110,7 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 	if (!GEOSisValid(gsGeom))
 	{
 		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-		if (gsNew && GEOSisValid(gsNew))
+		if (gsNew && GEOSisValid_r(getGeosHandle(), gsNew))
 		{
 			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
 			gsGeom = gsNew;
@@ -151,49 +151,49 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 }
 
 // Converts GEOSGeom to MapWinGIS shapes, using new GEOS API
-bool GeometryConverter::GEOSGeomToShapes(GEOSContextHandle_t hGEOSCtxt, GEOSGeom gsGeom, vector<IShape*>* vShapes)
-{
-	bool substitute = false;
-	if (!GEOSisValid(gsGeom))
-	{
-		GEOSGeometry* gsNew = DoBuffer(hGEOSCtxt, m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-		if (gsNew && GEOSisValid_r(hGEOSCtxt, gsNew))
-		{
-			gsGeom = gsNew;
-			substitute = true;
-		}
-	}
-	
-	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
-
-	if (oGeom)
-	{
-		char* type = GEOSGeomType_r(hGEOSCtxt, gsGeom);
-		CString s = type;
-		GEOSFree(type);
-		
-		OGRwkbGeometryType oForceType = wkbNone;
-		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
-			oForceType = wkbLinearRing;
-
-		// Doesn't uses new GEOS API functions
-		bool result = GeometryToShapes(oGeom, vShapes, oForceType );
-		delete oGeom;
-
-		if (substitute)
-			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
-
-		return result;
-		
-	}
-	else
-	{
-		if (substitute)
-			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
-
-		return false;
-	}
-}
+//bool GeometryConverter::GEOSGeomToShapes(GEOSContextHandle_t hGEOSCtxt, GEOSGeom gsGeom, vector<IShape*>* vShapes)
+//{
+//	bool substitute = false;
+//	if (!GEOSisValid(gsGeom))
+//	{
+//		GEOSGeometry* gsNew = DoBuffer(hGEOSCtxt, m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
+//		if (gsNew && GEOSisValid_r(hGEOSCtxt, gsNew))
+//		{
+//			gsGeom = gsNew;
+//			substitute = true;
+//		}
+//	}
+//	
+//	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
+//
+//	if (oGeom)
+//	{
+//		char* type = GEOSGeomType_r(hGEOSCtxt, gsGeom);
+//		CString s = type;
+//		GEOSFree(type);
+//		
+//		OGRwkbGeometryType oForceType = wkbNone;
+//		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
+//			oForceType = wkbLinearRing;
+//
+//		// Doesn't uses new GEOS API functions
+//		bool result = GeometryToShapes(oGeom, vShapes, oForceType );
+//		delete oGeom;
+//
+//		if (substitute)
+//			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
+//
+//		return result;
+//		
+//	}
+//	else
+//	{
+//		if (substitute)
+//			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
+//
+//		return false;
+//	}
+//}
 
 //**********************************************************************
 //							ExplodePolygon()			               
@@ -1266,93 +1266,93 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 
 
 // Returns GEOS geometry which is result of the union operation for the geometries passed, using new GEOS API
-GEOSGeometry* GeometryConverter::MergeGeosGeometries(GEOSContextHandle_t hGEOSCtxt, std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput )
-{
-	if (data.size() == 0)
-		return NULL;
-	
-	USES_CONVERSION;
-	GEOSGeometry* g1 = NULL;
-	GEOSGeometry* g2 = NULL;
-	
-	bool stop = false;
-	int count = 0;	// number of union operation performed
-	long percent = 0;
-	
-	int size = data.size();
-	int depth = 0;
-
-	while (!stop)
-	{
-		stop = true;
-
-		for (int i = 0; i < size; i++)
-		{
-			if (data[i] != NULL)
-			{
-				bool doUnion = false;
-				if (!g1)
-				{
-					g1 = data[i];
-					data[i] = NULL;
-				}
-				else
-				{
-					g2 = data[i];
-					data[i] = NULL;
-				}
-
-				if (g2 != NULL)
-				{
-					// Use new GEOS API:
-					//GEOSGeometry* geom = GEOSUnion(g1, g2);
-					GEOSGeometry* geom = GEOSUnion_r(hGEOSCtxt, g1, g2);
-					data[i] = geom;		// placing the resulting geometry back for further processing
-					
-					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
-													// so the intial geometries should be intact (depth == 0)
-													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
-													// all cases
-					{
-						// Use new GEOS API:
-						//GEOSGeom_destroy(g1);						
-						//GEOSGeom_destroy(g2);
-						GEOSGeom_destroy_r(hGEOSCtxt, g1);
-						GEOSGeom_destroy_r(hGEOSCtxt, g2);
-					}
-					
-					g1 = NULL;
-					g2 = NULL;
-					count++;
-					stop = false;		// in case there is at least one union occured, we shall run once more
-
-					if( callback) 
-					{
-						long newpercent = (long)(((double)count/size)*100); 
-						if( newpercent > percent )
-						{	
-							percent = newpercent;
-							callback->Progress(A2BSTR(""),percent,A2BSTR("Merging shapes..."));
-						}
-					}
-				}
-				
-				// it the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
-				if (i == size -1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
-				{
-					// we need to clone it, to be able to apply unified memory management afterwards
-					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-					//GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
-					// Using new GEOS API:
-					GEOSGeometry* geomTemp = GEOSGeom_clone_r(hGEOSCtxt, g1);
-					g1 = geomTemp;
-				}
-			}
-		}
-		depth++;
-	}
-	return g1;
-}
+//GEOSGeometry* GeometryConverter::MergeGeosGeometries(GEOSContextHandle_t hGEOSCtxt, std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput )
+//{
+//	if (data.size() == 0)
+//		return NULL;
+//	
+//	USES_CONVERSION;
+//	GEOSGeometry* g1 = NULL;
+//	GEOSGeometry* g2 = NULL;
+//	
+//	bool stop = false;
+//	int count = 0;	// number of union operation performed
+//	long percent = 0;
+//	
+//	int size = data.size();
+//	int depth = 0;
+//
+//	while (!stop)
+//	{
+//		stop = true;
+//
+//		for (int i = 0; i < size; i++)
+//		{
+//			if (data[i] != NULL)
+//			{
+//				bool doUnion = false;
+//				if (!g1)
+//				{
+//					g1 = data[i];
+//					data[i] = NULL;
+//				}
+//				else
+//				{
+//					g2 = data[i];
+//					data[i] = NULL;
+//				}
+//
+//				if (g2 != NULL)
+//				{
+//					// Use new GEOS API:
+//					//GEOSGeometry* geom = GEOSUnion(g1, g2);
+//					GEOSGeometry* geom = GEOSUnion_r(hGEOSCtxt, g1, g2);
+//					data[i] = geom;		// placing the resulting geometry back for further processing
+//					
+//					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
+//													// so the intial geometries should be intact (depth == 0)
+//													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
+//													// all cases
+//					{
+//						// Use new GEOS API:
+//						//GEOSGeom_destroy(g1);						
+//						//GEOSGeom_destroy(g2);
+//						GEOSGeom_destroy_r(hGEOSCtxt, g1);
+//						GEOSGeom_destroy_r(hGEOSCtxt, g2);
+//					}
+//					
+//					g1 = NULL;
+//					g2 = NULL;
+//					count++;
+//					stop = false;		// in case there is at least one union occured, we shall run once more
+//
+//					if( callback) 
+//					{
+//						long newpercent = (long)(((double)count/size)*100); 
+//						if( newpercent > percent )
+//						{	
+//							percent = newpercent;
+//							callback->Progress(A2BSTR(""),percent,A2BSTR("Merging shapes..."));
+//						}
+//					}
+//				}
+//				
+//				// it the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
+//				if (i == size -1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
+//				{
+//					// we need to clone it, to be able to apply unified memory management afterwards
+//					// when depth > 0 all interim geometries are deleted, while this one should be preserved
+//					//GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
+//					// Using new GEOS API:
+//					GEOSGeometry* geomTemp = GEOSGeom_clone_r(hGEOSCtxt, g1);
+//					g1 = geomTemp;
+//				}
+//			}
+//		}
+//		depth++;
+//	}
+//	return g1;
+//}
 
 // *****************************************************
 //		SimplifyPolygon()

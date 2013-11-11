@@ -3307,7 +3307,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	(*retval) = VARIANT_FALSE;
 
-	Parse(bstrOptions, &argc);
+	CString opt = OLE2A(bstrOptions);
+	Parse(opt, &argc);
 
 	if (!ProcessGeneralOptions(&argc))
 	{
