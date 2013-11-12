@@ -24,19 +24,26 @@ LIBDIR = $(GDAL_HOME)\..\..\lib\$(PLATFORM_NAME)
 INCDIR = $(GDAL_HOME)\..\..\include
 !ENDIF
 
+# Link OGR utilities against main GDAL DLL
+# instead of statically linking against OGR libraries.
+DLLBUILD=0
+
+# Enabled big tiff support
+TIFF_OPTS=	-DBIGTIFF_SUPPORT
+
 # ECW Support
-ECWDIR   =  $(GDAL_HOME)\..\ERDAS-ECW-JPEG-2000-SDK-5.0
-ECWFLAGS =  -DECWSDK_VERSION=50 /DNCSECW_EXPORTS \
-            -I$(ECWDIR)\include \
-            -I$(ECWDIR)\include/NCSECW/API \
-            -I$(ECWDIR)\include/NCSECW/JP2 \
-            -I$(ECWDIR)\include/NCSECW/ECW
-ECWLIB   =  $(ECWDIR)\lib\vc90\$(PLATFORM_NAME)\NCSEcwS.lib 
+#ECWDIR   =  $(GDAL_HOME)\..\ERDAS-ECW-JPEG-2000-SDK-5.0
+#ECWFLAGS =  -DECWSDK_VERSION=50 /DNCSECW_EXPORTS \
+#            -I$(ECWDIR)\include \
+#            -I$(ECWDIR)\include/NCSECW/API \
+#            -I$(ECWDIR)\include/NCSECW/JP2 \
+#            -I$(ECWDIR)\include/NCSECW/ECW
+#ECWLIB   =  $(ECWDIR)\lib\vc90\$(PLATFORM_NAME)\NCSEcwS.lib 
 
 # LizardTech SDK Support
 # The LIDAR SDK is not available for VS2008
 #MRSID_DIR =	$(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)
-MRSID_RASTER_DIR = $(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)\Raster_DSDK 
+#MRSID_RASTER_DIR = $(GDAL_HOME)\..\LizardTech-SDK\$(PLATFORM_NAME)\Raster_DSDK 
 
 # Proj4 support
 PROJ_FLAGS = -DPROJ_STATIC
@@ -47,13 +54,10 @@ PROJ_LIBRARY = $(LIBDIR)\proj.lib
 GEOS_DIR = $(GDAL_HOME)\..\geos-3.4.2
 GEOS_CFLAGS = -I$(GEOS_DIR)/capi -I$(GEOS_DIR)/include -DHAVE_GEOS
 !IFDEF DEBUG
-GEOS_LIB     = $(LIBDIR)\geos_c_i_d.lib
+GEOS_LIB     = $(LIBDIR)\geos_d.lib
 !ELSE
-GEOS_LIB     = $(LIBDIR)\geos_c_i.lib
+GEOS_LIB     = $(LIBDIR)\geos.lib
 !ENDIF
-
-# Enabled big tiff support
-TIFF_OPTS=	-DBIGTIFF_SUPPORT
 
 #NetCDF support
 #NETCDF_PLUGIN = NO

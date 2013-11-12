@@ -48,9 +48,8 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 	OGRGeometry* oGeom = ShapeToGeometry(shp);
 	if (oGeom != NULL)
 	{
-		//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
+		// Using the new GEOS API:
 		GEOSGeometry* result = oGeom->exportToGEOS(getGeosHandle());
-		//OGRGeometry::freeGEOSContext( hGEOSCtxt );
 		
 		delete oGeom;
 		return result;
@@ -59,46 +58,19 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 		return NULL;
 }
 
-//  Converts MapWinGis shape to GEOS geometry, using new GEOS syntax
-//GEOSGeom GeometryConverter::Shape2GEOSGeom(GEOSContextHandle_t hGEOSCtxt, IShape* shp)
-//{
-//	OGRGeometry* oGeom = ShapeToGeometry(shp);
-//	if (oGeom != NULL)
-//	{
-//		GEOSGeometry* result = oGeom->exportToGEOS(hGEOSCtxt);		
-//		
-//		delete oGeom;
-//		return result;
-//	}
-//	else 
-//		return NULL;
-//}
-
-
 GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
 {
 	__try
 	{
-		 return GEOSBuffer( gsGeom, distance, nQuadSegments );
+		// Using the new GEOS API:
+		//return GEOSBuffer( gsGeom, distance, nQuadSegments );
+		return GEOSBuffer_r(getGeosHandle(), gsGeom, distance, nQuadSegments);
 	}
 	__except(1)
 	{
 		return NULL;
 	}
 }
-
-// Using new GEOS API
-//GEOSGeometry* DoBuffer(GEOSContextHandle_t hGEOSCtxt, DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
-//{
-//	__try
-//	{
-//		return GEOSBuffer_r(hGEOSCtxt, gsGeom, distance, nQuadSegments );
-//	}
-//	__except(1)
-//	{
-//		return NULL;
-//	}
-//}
 
 // *********************************************************************
 //		GEOSGeom2Shape()
@@ -107,9 +79,13 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* 
 bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes)
 {
 	bool substitute = false;
-	if (!GEOSisValid(gsGeom))
+
+	// Using the new GEOS API:
+	//if (!GEOSisValid(gsGeom))
+	if (!GEOSisValid_r(getGeosHandle(), gsGeom))
 	{
 		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
+		// Using the new GEOS API:
 		if (gsNew && GEOSisValid_r(getGeosHandle(), gsNew))
 		{
 			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
@@ -117,16 +93,20 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 			substitute = true;
 		}
 	}
-	
-	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
-	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
-	OGRGeometry::freeGEOSContext( hGEOSCtxt );
+
+	// Using the new GEOS API:
+	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(getGeosHandle(), gsGeom);
 
 	if (oGeom)
 	{
-		char* type = GEOSGeomType(gsGeom);
+		// Using the new GEOS API:
+		//char* type = GEOSGeomType(gsGeom);
+		char* type = GEOSGeomType_r(getGeosHandle(), gsGeom);
 		CString s = type;
-		GEOSFree(type);
+		
+		// Using the new GEOS API:
+		//GEOSFree(type);
+		GEOSFree_r(getGeosHandle(), type);
 		
 		OGRwkbGeometryType oForceType = wkbNone;
 		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
@@ -136,7 +116,11 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 		delete oGeom;
 
 		if (substitute)
-			GEOSGeom_destroy(gsGeom);
+		{
+			// Using the new GEOS API:
+			//GEOSGeom_destroy(gsGeom);
+			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
+		}
 
 		return result;
 		
@@ -144,56 +128,15 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 	else
 	{
 		if (substitute)
-			GEOSGeom_destroy(gsGeom);
+		{
+			// Using the new GEOS API:
+			//GEOSGeom_destroy(gsGeom);
+			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
+		}
 
 		return false;
 	}
 }
-
-// Converts GEOSGeom to MapWinGIS shapes, using new GEOS API
-//bool GeometryConverter::GEOSGeomToShapes(GEOSContextHandle_t hGEOSCtxt, GEOSGeom gsGeom, vector<IShape*>* vShapes)
-//{
-//	bool substitute = false;
-//	if (!GEOSisValid(gsGeom))
-//	{
-//		GEOSGeometry* gsNew = DoBuffer(hGEOSCtxt, m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-//		if (gsNew && GEOSisValid_r(hGEOSCtxt, gsNew))
-//		{
-//			gsGeom = gsNew;
-//			substitute = true;
-//		}
-//	}
-//	
-//	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(hGEOSCtxt, gsGeom);
-//
-//	if (oGeom)
-//	{
-//		char* type = GEOSGeomType_r(hGEOSCtxt, gsGeom);
-//		CString s = type;
-//		GEOSFree(type);
-//		
-//		OGRwkbGeometryType oForceType = wkbNone;
-//		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
-//			oForceType = wkbLinearRing;
-//
-//		// Doesn't uses new GEOS API functions
-//		bool result = GeometryToShapes(oGeom, vShapes, oForceType );
-//		delete oGeom;
-//
-//		if (substitute)
-//			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
-//
-//		return result;
-//		
-//	}
-//	else
-//	{
-//		if (substitute)
-//			GEOSGeom_destroy_r(hGEOSCtxt, gsGeom);
-//
-//		return false;
-//	}
-//}
 
 //**********************************************************************
 //							ExplodePolygon()			               

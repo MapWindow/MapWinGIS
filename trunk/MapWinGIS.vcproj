@@ -139,7 +139,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description=""
 				CommandLine=""
 			/>
 		</Configuration>
@@ -231,7 +230,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBC.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll"
+				DelayLoadDLLs=""
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"
@@ -354,8 +353,8 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBC.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll;netcdf.dll"
-				GenerateDebugInformation="true"
+				DelayLoadDLLs=""
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile="..\..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -476,7 +475,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBC.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
@@ -720,7 +719,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBC.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;geos_c.dll;NCSEcw4_RO.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
@@ -3013,11 +3012,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

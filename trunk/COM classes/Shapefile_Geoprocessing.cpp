@@ -552,9 +552,6 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, ISh
 STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	// TODO: Should we do this here and what is the best option to save it, as an property of sf?:
-	//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
 	
 	LONG numSelected;
 	this->get_NumSelected(&numSelected);
@@ -616,8 +613,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		this->get_Shape(i, &shp);
 		if (shp)
 		{
-			// Use new GEOS API:
-			//oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
 			oGeom1 = GeometryConverter::Shape2GEOSGeom(shp);
 
 			shp->Release();
@@ -639,8 +634,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			{
 				vector<IShape*> vShapes;
 
-				// Use new GEOS API:
-				//if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
 				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
@@ -656,12 +649,12 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	
 	// merging the results
 	if (MergeResults)
-	{
-		// Use the new GEOS API:
+	{		
 		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(results, globalCallback);	// geometries will be released in the process
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
+			// Use the new GEOS API:
 			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(getGeosHandle(), gsGeom);
 
 			// Using the new GEOS API:
@@ -724,9 +717,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
 	}
-
-	// Clean up:
-	//OGRGeometry::freeGEOSContext( hGEOSCtxt );
 
 	return S_OK;
 }

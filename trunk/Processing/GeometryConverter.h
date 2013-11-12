@@ -37,11 +37,6 @@ class GeometryConverter
 		static GEOSGeometry* MergeGeosGeometries( std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput = true );
 		static GEOSGeometry* SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance);
 
-		// Needed for the new GEOS API:
-		/*static bool GEOSGeomToShapes(GEOSContextHandle_t hGEOSCtxt, GEOSGeom gsGeom, vector<IShape*>* vShapes);
-		static GEOSGeom Shape2GEOSGeom(GEOSContextHandle_t hGEOSCtxt, IShape* shp);
-		static GEOSGeometry* MergeGeosGeometries(GEOSContextHandle_t hGEOSCtxt, std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput = true );*/
-
 		// coordinates for clipper are multiplied in case of geographic coordinate systems
 		double conversionFactor;
 		GeometryConverter::GeometryConverter()
