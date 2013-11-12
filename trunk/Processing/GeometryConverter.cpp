@@ -1,5 +1,5 @@
 //********************************************************************************************************
-//File name: OGR2MWShape.cpp
+//File name: GeometryConverter.cpp
 //Description: functions for conversion between OGRGeomerty Class and MapWinGis Shape Representation
 //********************************************************************************************************
 //The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); 
@@ -13,6 +13,7 @@
 //See OGRGeometry inheritance diagram is here: http://gdal.org/ogr/classOGRGeometry.html
 //See discussion of here: http://www.mapwindow.org/phorum/read.php?5,13428
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
+//Nov. 2013     Paul Meems    Updating GEOS calls to use new API (GEOSContext)
 
 #include "stdafx.h"
 #include "GeometryConverter.h"
@@ -1163,7 +1164,9 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 
 				if (g2 != NULL)
 				{
-					GEOSGeometry* geom = GEOSUnion(g1, g2);
+					// Using the new GEOS API:
+					//GEOSGeometry* geom = GEOSUnion(g1, g2);
+					GEOSGeometry* geom = GEOSUnion_r(getGeosHandle(), g1, g2);
 					data[i] = geom;		// placing the resulting geometry back for further processing
 					
 					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
@@ -1171,8 +1174,11 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
 													// all cases
 					{
-						GEOSGeom_destroy(g1);
-						GEOSGeom_destroy(g2);
+						// Using the new GEOS API:
+						//GEOSGeom_destroy(g1);
+						//GEOSGeom_destroy(g2);
+						GEOSGeom_destroy_r(getGeosHandle(), g1);
+						GEOSGeom_destroy_r(getGeosHandle(), g2);
 					}
 					
 					g1 = NULL;
@@ -1196,7 +1202,10 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 				{
 					// we need to clone it, to be able to apply unified memory management afterwards
 					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-					GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
+					
+					// Using the new GEOS API:
+					//GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
+					GEOSGeometry* geomTemp = GEOSGeom_clone_r(getGeosHandle(), g1);
 					g1 = geomTemp;
 				}
 			}
@@ -1206,97 +1215,6 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 	return g1;
 }
 
-
-
-// Returns GEOS geometry which is result of the union operation for the geometries passed, using new GEOS API
-//GEOSGeometry* GeometryConverter::MergeGeosGeometries(GEOSContextHandle_t hGEOSCtxt, std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput )
-//{
-//	if (data.size() == 0)
-//		return NULL;
-//	
-//	USES_CONVERSION;
-//	GEOSGeometry* g1 = NULL;
-//	GEOSGeometry* g2 = NULL;
-//	
-//	bool stop = false;
-//	int count = 0;	// number of union operation performed
-//	long percent = 0;
-//	
-//	int size = data.size();
-//	int depth = 0;
-//
-//	while (!stop)
-//	{
-//		stop = true;
-//
-//		for (int i = 0; i < size; i++)
-//		{
-//			if (data[i] != NULL)
-//			{
-//				bool doUnion = false;
-//				if (!g1)
-//				{
-//					g1 = data[i];
-//					data[i] = NULL;
-//				}
-//				else
-//				{
-//					g2 = data[i];
-//					data[i] = NULL;
-//				}
-//
-//				if (g2 != NULL)
-//				{
-//					// Use new GEOS API:
-//					//GEOSGeometry* geom = GEOSUnion(g1, g2);
-//					GEOSGeometry* geom = GEOSUnion_r(hGEOSCtxt, g1, g2);
-//					data[i] = geom;		// placing the resulting geometry back for further processing
-//					
-//					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
-//													// so the intial geometries should be intact (depth == 0)
-//													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
-//													// all cases
-//					{
-//						// Use new GEOS API:
-//						//GEOSGeom_destroy(g1);						
-//						//GEOSGeom_destroy(g2);
-//						GEOSGeom_destroy_r(hGEOSCtxt, g1);
-//						GEOSGeom_destroy_r(hGEOSCtxt, g2);
-//					}
-//					
-//					g1 = NULL;
-//					g2 = NULL;
-//					count++;
-//					stop = false;		// in case there is at least one union occured, we shall run once more
-//
-//					if( callback) 
-//					{
-//						long newpercent = (long)(((double)count/size)*100); 
-//						if( newpercent > percent )
-//						{	
-//							percent = newpercent;
-//							callback->Progress(A2BSTR(""),percent,A2BSTR("Merging shapes..."));
-//						}
-//					}
-//				}
-//				
-//				// it the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
-//				if (i == size -1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
-//				{
-//					// we need to clone it, to be able to apply unified memory management afterwards
-//					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-//					//GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
-//					// Using new GEOS API:
-//					GEOSGeometry* geomTemp = GEOSGeom_clone_r(hGEOSCtxt, g1);
-//					g1 = geomTemp;
-//				}
-//			}
-//		}
-//		depth++;
-//	}
-//	return g1;
-//}
-
 // *****************************************************
 //		SimplifyPolygon()
 // *****************************************************
@@ -1304,24 +1222,39 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 // (mutipolygons shoud be split into parts before treating with this routine)
 GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
-	const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
-	GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
+	// Using the new GEOS API:
+	//const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
+	//GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
+	const GEOSGeometry* gsRing = GEOSGetExteriorRing_r(getGeosHandle(), gsGeom);		// no memory is allocated there
+	GEOSGeom gsPoly = GEOSSimplify_r(getGeosHandle(), gsRing, tolerance);				// memory allocation
 
 	if (!gsPoly)
 		return NULL;
 	
 	std::vector<GEOSGeom> holes;
-	for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
+	
+	// Using the new GEOS API:
+	//for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
+	for (int n = 0; n < GEOSGetNumInteriorRings_r(getGeosHandle(), gsGeom); n++)
 	{
-		gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
+		// Using the new GEOS API:
+		//gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
+		gsRing = GEOSGetInteriorRingN_r(getGeosHandle(), gsGeom, n);				// no memory is allocated there
 		if (gsRing)
 		{
-			GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
+			// Using the new GEOS API:
+			//GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
+			GEOSGeom gsOut = GEOSSimplify_r(getGeosHandle(), gsRing, tolerance);	// memory allocation
 			if (gsOut)
 			{
-				char* type = GEOSGeomType(gsOut);
+				// Using the new GEOS API:
+				//char* type = GEOSGeomType(gsOut);
+				char* type = GEOSGeomType_r(getGeosHandle(), gsOut);
 				CString s = type;
-				GEOSFree(type);
+
+				// Using the new GEOS API:
+				//GEOSFree(type);
+				GEOSFree_r(getGeosHandle(), type);
 				if (s == "LinearRing")
 					holes.push_back(gsOut);
 			}
@@ -1331,11 +1264,15 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	GEOSGeometry *gsNew = NULL;
 	if (holes.size() > 0)
 	{
-		gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
+		// Using the new GEOS API:
+		//gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
+		gsNew = GEOSGeom_createPolygon_r(getGeosHandle(), gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
 	}
 	else
 	{
-		gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
+		// Using the new GEOS API:
+		//gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
+		gsNew = GEOSGeom_createPolygon_r(getGeosHandle(), gsPoly, NULL, 0);
 	}
 	
 	// cleaning
@@ -1343,6 +1280,5 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	for (size_t i = 0; i < holes.size(); i++)
 		GEOSGeom_destroy(holes[i]);*/
 
-	return gsNew;
-	
+	return gsNew;	
 }

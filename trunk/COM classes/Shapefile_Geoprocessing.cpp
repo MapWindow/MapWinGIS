@@ -548,6 +548,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, ISh
 #pragma region Buffer
 // ********************************************************************
 //		BufferByDistance()
+//
+// Nov. 2013 Updated to new GEOS API
 // ********************************************************************
 STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile** sf)
 {
@@ -3509,7 +3511,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 // A utility function to add geometry produced by simplification routine to the sfTarget shapefile,
 // with copying of attributes from source shapefile.
 // initShapeIndex - the index of shape to copy the attribute from
-bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSouce, int initShapeIndex )
+bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSource, int initShapeIndex )
 {
 	if (gsNew)
 	{
@@ -3530,7 +3532,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 					CComVariant val;
 					for (int f = 0; f < numFields; f++)
 					{
-						sfSouce->get_CellValue(f, initShapeIndex, &val);
+						sfSource->get_CellValue(f, initShapeIndex, &val);
 						sfTarget->EditCellValue(f, index, val, &vbretval);
 					}
 				}
@@ -3543,6 +3545,8 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 
 // **********************************************************************
 //		SimplifyLines()
+//
+// Nov. 2013 Updated to new GEOS API
 // **********************************************************************
 STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal)
 {
@@ -3583,7 +3587,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Simplifying..."));
 			}
 		}
 
@@ -3596,7 +3600,9 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 		shp->Release();
 		if (gsGeom == NULL) continue;
 
-		int numGeom = GEOSGetNumGeometries(gsGeom);
+		// Using the new GEOS API:
+		//int numGeom = GEOSGetNumGeometries(gsGeom);
+		int numGeom = GEOSGetNumGeometries_r(getGeosHandle(), gsGeom);
 			
 		/*	int numRings = 0;
 			if (type == "Polygon")
@@ -3604,16 +3610,22 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 
 		if (shpType == SHP_POLYLINE)
 		{
-			GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
+			// Using the new GEOS API:
+			//GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
+			GEOSGeom gsNew = GEOSSimplify_r(getGeosHandle(), gsGeom, Tolerance);
 			if (gsNew)
 			{
 				InsertGeosGeometry(sfNew, gsNew, this, i);
-				GEOSGeom_destroy(gsNew);
+				// Using the new GEOS API:
+				//GEOSGeom_destroy(gsNew);
+				GEOSGeom_destroy_r(getGeosHandle(), gsNew);
 			}
 		}
 		else
 		{
-			char* val = GEOSGeomType(gsGeom);
+			// Using the new GEOS API:
+			//char* val = GEOSGeomType(gsGeom);
+			char* val = GEOSGeomType_r(getGeosHandle(), gsGeom);
 			CString type = val;
 			CPLFree(val);
 
@@ -3623,24 +3635,36 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 				if (gsNew)
 				{
 					InsertGeosGeometry(sfNew, gsNew, this, i);
-					GEOSGeom_destroy(gsNew);
+					// Using the new GEOS API:
+					//GEOSGeom_destroy(gsNew);
+					GEOSGeom_destroy_r(getGeosHandle(), gsNew);
 				}
 			}
 			else
 			{
-				for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
+				// Using the new GEOS API:
+				//for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
+				for (int n = 0; n < GEOSGetNumGeometries_r(getGeosHandle(), gsGeom); n++)
 				{
-					const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
+					// Using the new GEOS API:
+					//const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
+					const GEOSGeometry* gsPart = GEOSGetGeometryN_r(getGeosHandle(), gsGeom, n);
 					GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsPart, Tolerance);
 					if (gsPart)
 					{
 						InsertGeosGeometry(sfNew, gsNew, this, i);
-						GEOSGeom_destroy(gsNew);
+
+						// Using the new GEOS API:						
+						//GEOSGeom_destroy(gsNew);
+						GEOSGeom_destroy_r(getGeosHandle(), gsNew);
 					}
 				}
 			}
 		}
-		GEOSGeom_destroy(gsGeom);
+
+		// Using the new GEOS API:
+		//GEOSGeom_destroy(gsGeom);
+		GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
 	}
 
 	globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
@@ -3648,6 +3672,8 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	sfNew->get_NumShapes(&numShapes);
 	if (numShapes == 0)
 	{
+		// No shapes are buffered, return an error:
+		ErrorMessage(tkRESULTINGSHPFILE_EMPTY);
 		sfNew->Close(&vbretval);
 		sfNew->Release();
 	}
@@ -3655,6 +3681,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	{
 		(*retVal) = sfNew;
 	}
+
 	return S_OK;
 }
 

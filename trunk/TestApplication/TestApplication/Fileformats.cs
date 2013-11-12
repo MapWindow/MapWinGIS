@@ -35,6 +35,7 @@ namespace TestApplication
     /// <returns>
     /// The layer handle
     /// </returns>
+    
     internal static int OpenShapefileAsLayer(string filename, Form1 theForm, bool clearLayers)
     {
       var sf = OpenShapefile(filename, theForm);
@@ -45,20 +46,25 @@ namespace TestApplication
         if (clearLayers)
         {
           Map.RemoveAllLayers();
+          theForm.Progress(string.Empty, 0, "Removed all layers from the map");
         }
 
         hndl = Map.AddLayer(sf, true);
-        
+
         // Check if a symbology file is present:
         var symbFilename = filename + ".mwsymb";
         if (File.Exists(symbFilename))
         {
           var layerDesc = string.Empty;
           Map.LoadLayerOptions(hndl, string.Empty, ref layerDesc);
-          theForm.Progress(string.Empty, 100, "Loading symbology");
+          theForm.Progress(string.Empty, 100, "Applying symbology");
         }
 
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+      }
+      else
+      {
+        theForm.Error(string.Empty, "Cannot load shapefile");
       }
 
       return hndl;

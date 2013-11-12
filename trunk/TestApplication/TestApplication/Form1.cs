@@ -255,6 +255,19 @@ namespace TestApplication
     {
       Tests.SelectShapefile(this.BufferShapefileInput, "Select shapefile to buffer");
     }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectSimplifyShapefileClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.SimplifyShapefileInput, "Select shapefile to simplify");
+    }
+
     #endregion
 
     #region Run test click event
@@ -343,5 +356,17 @@ namespace TestApplication
     }
 
     #endregion
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunSimplifyShapefileTestClick(object sender, EventArgs e)
+    {
+      Tests.RunSimplifyShapefileTest(this.SimplifyShapefileInput.Text, this);
+    }
   }
 }

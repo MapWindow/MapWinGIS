@@ -34,6 +34,11 @@
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox13 = new System.Windows.Forms.GroupBox();
+      this.RunSimplifyShapefileTest = new System.Windows.Forms.Button();
+      this.SelectSimplifyShapefile = new System.Windows.Forms.Button();
+      this.SimplifyShapefileInput = new System.Windows.Forms.TextBox();
+      this.label10 = new System.Windows.Forms.Label();
       this.groupBox12 = new System.Windows.Forms.GroupBox();
       this.RunBufferShapefileTest = new System.Windows.Forms.Button();
       this.SelectBufferShapefile = new System.Windows.Forms.Button();
@@ -86,6 +91,7 @@
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
       this.groupBox10.SuspendLayout();
+      this.groupBox13.SuspendLayout();
       this.groupBox12.SuspendLayout();
       this.groupBox8.SuspendLayout();
       this.groupBox9.SuspendLayout();
@@ -144,7 +150,7 @@
       // 
       // groupBox11
       // 
-      this.groupBox11.Location = new System.Drawing.Point(3, 886);
+      this.groupBox11.Location = new System.Drawing.Point(3, 948);
       this.groupBox11.Name = "groupBox11";
       this.groupBox11.Size = new System.Drawing.Size(205, 58);
       this.groupBox11.TabIndex = 5;
@@ -153,13 +159,67 @@
       // 
       // groupBox10
       // 
+      this.groupBox10.Controls.Add(this.groupBox13);
       this.groupBox10.Controls.Add(this.groupBox12);
       this.groupBox10.Location = new System.Drawing.Point(3, 722);
       this.groupBox10.Name = "groupBox10";
-      this.groupBox10.Size = new System.Drawing.Size(205, 116);
+      this.groupBox10.Size = new System.Drawing.Size(205, 208);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox13
+      // 
+      this.groupBox13.Controls.Add(this.RunSimplifyShapefileTest);
+      this.groupBox13.Controls.Add(this.SelectSimplifyShapefile);
+      this.groupBox13.Controls.Add(this.SimplifyShapefileInput);
+      this.groupBox13.Controls.Add(this.label10);
+      this.groupBox13.Location = new System.Drawing.Point(6, 114);
+      this.groupBox13.Name = "groupBox13";
+      this.groupBox13.Size = new System.Drawing.Size(195, 89);
+      this.groupBox13.TabIndex = 4;
+      this.groupBox13.TabStop = false;
+      this.groupBox13.Text = "Simplify shapefile";
+      // 
+      // RunSimplifyShapefileTest
+      // 
+      this.RunSimplifyShapefileTest.Location = new System.Drawing.Point(9, 58);
+      this.RunSimplifyShapefileTest.Name = "RunSimplifyShapefileTest";
+      this.RunSimplifyShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunSimplifyShapefileTest.TabIndex = 9;
+      this.RunSimplifyShapefileTest.Text = "Run test";
+      this.RunSimplifyShapefileTest.UseVisualStyleBackColor = true;
+      this.RunSimplifyShapefileTest.Click += new System.EventHandler(this.RunSimplifyShapefileTestClick);
+      // 
+      // SelectSimplifyShapefile
+      // 
+      this.SelectSimplifyShapefile.Location = new System.Drawing.Point(162, 32);
+      this.SelectSimplifyShapefile.Name = "SelectSimplifyShapefile";
+      this.SelectSimplifyShapefile.Size = new System.Drawing.Size(27, 20);
+      this.SelectSimplifyShapefile.TabIndex = 8;
+      this.SelectSimplifyShapefile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectSimplifyShapefile, "Select line shapefile to simplify");
+      this.SelectSimplifyShapefile.UseVisualStyleBackColor = true;
+      this.SelectSimplifyShapefile.Click += new System.EventHandler(this.SelectSimplifyShapefileClick);
+      // 
+      // SimplifyShapefileInput
+      // 
+      this.SimplifyShapefileInput.AcceptsReturn = true;
+      this.SimplifyShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "SimplifyShapefile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.SimplifyShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.SimplifyShapefileInput.Name = "SimplifyShapefileInput";
+      this.SimplifyShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.SimplifyShapefileInput.TabIndex = 7;
+      this.SimplifyShapefileInput.Text = global::TestApplication.Properties.Settings.Default.SimplifyShapefile;
+      // 
+      // label10
+      // 
+      this.label10.AutoSize = true;
+      this.label10.Location = new System.Drawing.Point(6, 16);
+      this.label10.Name = "label10";
+      this.label10.Size = new System.Drawing.Size(103, 13);
+      this.label10.TabIndex = 6;
+      this.label10.Text = "Select the shapefile:";
       // 
       // groupBox12
       // 
@@ -191,7 +251,7 @@
       this.SelectBufferShapefile.Size = new System.Drawing.Size(27, 20);
       this.SelectBufferShapefile.TabIndex = 8;
       this.SelectBufferShapefile.Text = "...";
-      this.toolTip1.SetToolTip(this.SelectBufferShapefile, "Select text file with on every line the location of a shapefile");
+      this.toolTip1.SetToolTip(this.SelectBufferShapefile, "Select shapefile to buffer");
       this.SelectBufferShapefile.UseVisualStyleBackColor = true;
       this.SelectBufferShapefile.Click += new System.EventHandler(this.SelectBufferShapefileClick);
       // 
@@ -650,6 +710,8 @@
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
       this.groupBox10.ResumeLayout(false);
+      this.groupBox13.ResumeLayout(false);
+      this.groupBox13.PerformLayout();
       this.groupBox12.ResumeLayout(false);
       this.groupBox12.PerformLayout();
       this.groupBox8.ResumeLayout(false);
@@ -723,6 +785,11 @@
     private System.Windows.Forms.Button SelectBufferShapefile;
     private System.Windows.Forms.TextBox BufferShapefileInput;
     private System.Windows.Forms.Label label9;
+    private System.Windows.Forms.GroupBox groupBox13;
+    private System.Windows.Forms.Button RunSimplifyShapefileTest;
+    private System.Windows.Forms.Button SelectSimplifyShapefile;
+    private System.Windows.Forms.TextBox SimplifyShapefileInput;
+    private System.Windows.Forms.Label label10;
   }
 }
 

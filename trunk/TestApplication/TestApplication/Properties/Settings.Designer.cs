@@ -130,5 +130,17 @@ namespace TestApplication.Properties {
                 this["BufferShapefile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SimplifyShapefile {
+            get {
+                return ((string)(this["SimplifyShapefile"]));
+            }
+            set {
+                this["SimplifyShapefile"] = value;
+            }
+        }
     }
 }
