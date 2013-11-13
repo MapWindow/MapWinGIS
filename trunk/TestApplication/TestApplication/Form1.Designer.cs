@@ -34,6 +34,21 @@
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox16 = new System.Windows.Forms.GroupBox();
+      this.SelectClipShapefileOverlay = new System.Windows.Forms.Button();
+      this.ClipShapefileOverlay = new System.Windows.Forms.TextBox();
+      this.label16 = new System.Windows.Forms.Label();
+      this.RunClipShapefileTest = new System.Windows.Forms.Button();
+      this.SelectClipShapefileInput = new System.Windows.Forms.Button();
+      this.ClipShapefileInput = new System.Windows.Forms.TextBox();
+      this.label15 = new System.Windows.Forms.Label();
+      this.groupBox15 = new System.Windows.Forms.GroupBox();
+      this.label14 = new System.Windows.Forms.Label();
+      this.DissolveFieldindex = new System.Windows.Forms.NumericUpDown();
+      this.RunDissolveShapefileTest = new System.Windows.Forms.Button();
+      this.SelectDissolveShapefile = new System.Windows.Forms.Button();
+      this.DissolveShapefileInput = new System.Windows.Forms.TextBox();
+      this.label13 = new System.Windows.Forms.Label();
       this.groupBox13 = new System.Windows.Forms.GroupBox();
       this.RunSimplifyShapefileTest = new System.Windows.Forms.Button();
       this.SelectSimplifyShapefile = new System.Windows.Forms.Button();
@@ -51,6 +66,13 @@
       this.RasterizeInputfile = new System.Windows.Forms.TextBox();
       this.label8 = new System.Windows.Forms.Label();
       this.groupBox5 = new System.Windows.Forms.GroupBox();
+      this.groupBox14 = new System.Windows.Forms.GroupBox();
+      this.label12 = new System.Windows.Forms.Label();
+      this.AggregateFieldindex = new System.Windows.Forms.NumericUpDown();
+      this.RunAggregateShapefileTest = new System.Windows.Forms.Button();
+      this.SelectAggregateShapefile = new System.Windows.Forms.Button();
+      this.AggregateShapefileInput = new System.Windows.Forms.TextBox();
+      this.label11 = new System.Windows.Forms.Label();
       this.groupBox7 = new System.Windows.Forms.GroupBox();
       this.RunShapefileToGridTest = new System.Windows.Forms.Button();
       this.SelectShapefileToGrid = new System.Windows.Forms.Button();
@@ -91,11 +113,16 @@
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
       this.groupBox10.SuspendLayout();
+      this.groupBox16.SuspendLayout();
+      this.groupBox15.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.DissolveFieldindex)).BeginInit();
       this.groupBox13.SuspendLayout();
       this.groupBox12.SuspendLayout();
       this.groupBox8.SuspendLayout();
       this.groupBox9.SuspendLayout();
       this.groupBox5.SuspendLayout();
+      this.groupBox14.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.AggregateFieldindex)).BeginInit();
       this.groupBox7.SuspendLayout();
       this.groupBox6.SuspendLayout();
       this.groupBox1.SuspendLayout();
@@ -119,8 +146,8 @@
       // splitContainer1.Panel2
       // 
       this.splitContainer1.Panel2.Controls.Add(this.Progressbox);
-      this.splitContainer1.Size = new System.Drawing.Size(667, 564);
-      this.splitContainer1.SplitterDistance = 461;
+      this.splitContainer1.Size = new System.Drawing.Size(667, 753);
+      this.splitContainer1.SplitterDistance = 615;
       this.splitContainer1.TabIndex = 0;
       // 
       // splitContainer2
@@ -144,29 +171,192 @@
       // splitContainer2.Panel2
       // 
       this.splitContainer2.Panel2.Controls.Add(this.axMap1);
-      this.splitContainer2.Size = new System.Drawing.Size(667, 461);
+      this.splitContainer2.Size = new System.Drawing.Size(667, 615);
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
       // 
       // groupBox11
       // 
-      this.groupBox11.Location = new System.Drawing.Point(3, 948);
+      this.groupBox11.Location = new System.Drawing.Point(3, 1531);
       this.groupBox11.Name = "groupBox11";
-      this.groupBox11.Size = new System.Drawing.Size(205, 58);
+      this.groupBox11.Size = new System.Drawing.Size(205, 188);
       this.groupBox11.TabIndex = 5;
       this.groupBox11.TabStop = false;
       this.groupBox11.Text = "groupBox11";
       // 
       // groupBox10
       // 
+      this.groupBox10.BackColor = System.Drawing.Color.LightSteelBlue;
+      this.groupBox10.Controls.Add(this.groupBox16);
+      this.groupBox10.Controls.Add(this.groupBox15);
       this.groupBox10.Controls.Add(this.groupBox13);
       this.groupBox10.Controls.Add(this.groupBox12);
-      this.groupBox10.Location = new System.Drawing.Point(3, 722);
+      this.groupBox10.Location = new System.Drawing.Point(3, 842);
       this.groupBox10.Name = "groupBox10";
-      this.groupBox10.Size = new System.Drawing.Size(205, 208);
+      this.groupBox10.Size = new System.Drawing.Size(205, 550);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox16
+      // 
+      this.groupBox16.Controls.Add(this.SelectClipShapefileOverlay);
+      this.groupBox16.Controls.Add(this.ClipShapefileOverlay);
+      this.groupBox16.Controls.Add(this.label16);
+      this.groupBox16.Controls.Add(this.RunClipShapefileTest);
+      this.groupBox16.Controls.Add(this.SelectClipShapefileInput);
+      this.groupBox16.Controls.Add(this.ClipShapefileInput);
+      this.groupBox16.Controls.Add(this.label15);
+      this.groupBox16.Location = new System.Drawing.Point(6, 330);
+      this.groupBox16.Name = "groupBox16";
+      this.groupBox16.Size = new System.Drawing.Size(195, 124);
+      this.groupBox16.TabIndex = 6;
+      this.groupBox16.TabStop = false;
+      this.groupBox16.Text = "Clip shapefile";
+      // 
+      // SelectClipShapefileOverlay
+      // 
+      this.SelectClipShapefileOverlay.Location = new System.Drawing.Point(162, 69);
+      this.SelectClipShapefileOverlay.Name = "SelectClipShapefileOverlay";
+      this.SelectClipShapefileOverlay.Size = new System.Drawing.Size(27, 20);
+      this.SelectClipShapefileOverlay.TabIndex = 12;
+      this.SelectClipShapefileOverlay.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectClipShapefileOverlay, "Select shapefile to buffer");
+      this.SelectClipShapefileOverlay.UseVisualStyleBackColor = true;
+      this.SelectClipShapefileOverlay.Click += new System.EventHandler(this.SelectClipShapefileOverlayClick);
+      // 
+      // ClipShapefileOverlay
+      // 
+      this.ClipShapefileOverlay.AcceptsReturn = true;
+      this.ClipShapefileOverlay.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClipShapefileOverlay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ClipShapefileOverlay.Location = new System.Drawing.Point(9, 69);
+      this.ClipShapefileOverlay.Name = "ClipShapefileOverlay";
+      this.ClipShapefileOverlay.Size = new System.Drawing.Size(147, 20);
+      this.ClipShapefileOverlay.TabIndex = 11;
+      this.ClipShapefileOverlay.Text = global::TestApplication.Properties.Settings.Default.ClipShapefileOverlay;
+      // 
+      // label16
+      // 
+      this.label16.AutoSize = true;
+      this.label16.Location = new System.Drawing.Point(6, 53);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(140, 13);
+      this.label16.TabIndex = 10;
+      this.label16.Text = "Select the overlay shapefile:";
+      // 
+      // RunClipShapefileTest
+      // 
+      this.RunClipShapefileTest.Location = new System.Drawing.Point(9, 95);
+      this.RunClipShapefileTest.Name = "RunClipShapefileTest";
+      this.RunClipShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunClipShapefileTest.TabIndex = 9;
+      this.RunClipShapefileTest.Text = "Run test";
+      this.RunClipShapefileTest.UseVisualStyleBackColor = true;
+      this.RunClipShapefileTest.Click += new System.EventHandler(this.RunClipShapefileTestClick);
+      // 
+      // SelectClipShapefileInput
+      // 
+      this.SelectClipShapefileInput.Location = new System.Drawing.Point(162, 32);
+      this.SelectClipShapefileInput.Name = "SelectClipShapefileInput";
+      this.SelectClipShapefileInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectClipShapefileInput.TabIndex = 8;
+      this.SelectClipShapefileInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectClipShapefileInput, "Select shapefile to buffer");
+      this.SelectClipShapefileInput.UseVisualStyleBackColor = true;
+      this.SelectClipShapefileInput.Click += new System.EventHandler(this.SelectClipShapefileInputClick);
+      // 
+      // ClipShapefileInput
+      // 
+      this.ClipShapefileInput.AcceptsReturn = true;
+      this.ClipShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClipShapefileInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ClipShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.ClipShapefileInput.Name = "ClipShapefileInput";
+      this.ClipShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.ClipShapefileInput.TabIndex = 7;
+      this.ClipShapefileInput.Text = global::TestApplication.Properties.Settings.Default.ClipShapefileInput;
+      // 
+      // label15
+      // 
+      this.label15.AutoSize = true;
+      this.label15.Location = new System.Drawing.Point(6, 16);
+      this.label15.Name = "label15";
+      this.label15.Size = new System.Drawing.Size(103, 13);
+      this.label15.TabIndex = 6;
+      this.label15.Text = "Select the shapefile:";
+      // 
+      // groupBox15
+      // 
+      this.groupBox15.Controls.Add(this.label14);
+      this.groupBox15.Controls.Add(this.DissolveFieldindex);
+      this.groupBox15.Controls.Add(this.RunDissolveShapefileTest);
+      this.groupBox15.Controls.Add(this.SelectDissolveShapefile);
+      this.groupBox15.Controls.Add(this.DissolveShapefileInput);
+      this.groupBox15.Controls.Add(this.label13);
+      this.groupBox15.Location = new System.Drawing.Point(6, 114);
+      this.groupBox15.Name = "groupBox15";
+      this.groupBox15.Size = new System.Drawing.Size(195, 115);
+      this.groupBox15.TabIndex = 5;
+      this.groupBox15.TabStop = false;
+      this.groupBox15.Text = "Dissolve shapefile";
+      // 
+      // label14
+      // 
+      this.label14.AutoSize = true;
+      this.label14.Location = new System.Drawing.Point(6, 60);
+      this.label14.Name = "label14";
+      this.label14.Size = new System.Drawing.Size(60, 13);
+      this.label14.TabIndex = 13;
+      this.label14.Text = "Field index:";
+      // 
+      // DissolveFieldindex
+      // 
+      this.DissolveFieldindex.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::TestApplication.Properties.Settings.Default, "DissolveFieldindex", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.DissolveFieldindex.Location = new System.Drawing.Point(72, 58);
+      this.DissolveFieldindex.Name = "DissolveFieldindex";
+      this.DissolveFieldindex.Size = new System.Drawing.Size(59, 20);
+      this.DissolveFieldindex.TabIndex = 12;
+      this.toolTip1.SetToolTip(this.DissolveFieldindex, "What is the field index to aggregate on? Zero-based");
+      this.DissolveFieldindex.Value = global::TestApplication.Properties.Settings.Default.DissolveFieldindex;
+      // 
+      // RunDissolveShapefileTest
+      // 
+      this.RunDissolveShapefileTest.Location = new System.Drawing.Point(9, 84);
+      this.RunDissolveShapefileTest.Name = "RunDissolveShapefileTest";
+      this.RunDissolveShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunDissolveShapefileTest.TabIndex = 9;
+      this.RunDissolveShapefileTest.Text = "Run test";
+      this.RunDissolveShapefileTest.UseVisualStyleBackColor = true;
+      this.RunDissolveShapefileTest.Click += new System.EventHandler(this.RunDissolveShapefileTestClick);
+      // 
+      // SelectDissolveShapefile
+      // 
+      this.SelectDissolveShapefile.Location = new System.Drawing.Point(162, 32);
+      this.SelectDissolveShapefile.Name = "SelectDissolveShapefile";
+      this.SelectDissolveShapefile.Size = new System.Drawing.Size(27, 20);
+      this.SelectDissolveShapefile.TabIndex = 8;
+      this.SelectDissolveShapefile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectDissolveShapefile, "Select shapefile to dissolve");
+      this.SelectDissolveShapefile.UseVisualStyleBackColor = true;
+      this.SelectDissolveShapefile.Click += new System.EventHandler(this.SelectDissolveShapefileClick);
+      // 
+      // DissolveShapefileInput
+      // 
+      this.DissolveShapefileInput.AcceptsReturn = true;
+      this.DissolveShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "DissolveShapefile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.DissolveShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.DissolveShapefileInput.Name = "DissolveShapefileInput";
+      this.DissolveShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.DissolveShapefileInput.TabIndex = 7;
+      this.DissolveShapefileInput.Text = global::TestApplication.Properties.Settings.Default.DissolveShapefile;
+      // 
+      // label13
+      // 
+      this.label13.AutoSize = true;
+      this.label13.Location = new System.Drawing.Point(6, 16);
+      this.label13.Name = "label13";
+      this.label13.Size = new System.Drawing.Size(103, 13);
+      this.label13.TabIndex = 6;
+      this.label13.Text = "Select the shapefile:";
       // 
       // groupBox13
       // 
@@ -174,7 +364,7 @@
       this.groupBox13.Controls.Add(this.SelectSimplifyShapefile);
       this.groupBox13.Controls.Add(this.SimplifyShapefileInput);
       this.groupBox13.Controls.Add(this.label10);
-      this.groupBox13.Location = new System.Drawing.Point(6, 114);
+      this.groupBox13.Location = new System.Drawing.Point(6, 235);
       this.groupBox13.Name = "groupBox13";
       this.groupBox13.Size = new System.Drawing.Size(195, 89);
       this.groupBox13.TabIndex = 4;
@@ -198,7 +388,7 @@
       this.SelectSimplifyShapefile.Size = new System.Drawing.Size(27, 20);
       this.SelectSimplifyShapefile.TabIndex = 8;
       this.SelectSimplifyShapefile.Text = "...";
-      this.toolTip1.SetToolTip(this.SelectSimplifyShapefile, "Select line shapefile to simplify");
+      this.toolTip1.SetToolTip(this.SelectSimplifyShapefile, "Select line or polygon shapefile to simplify");
       this.SelectSimplifyShapefile.UseVisualStyleBackColor = true;
       this.SelectSimplifyShapefile.Click += new System.EventHandler(this.SelectSimplifyShapefileClick);
       // 
@@ -276,8 +466,9 @@
       // 
       // groupBox8
       // 
+      this.groupBox8.BackColor = System.Drawing.Color.Cornsilk;
       this.groupBox8.Controls.Add(this.groupBox9);
-      this.groupBox8.Location = new System.Drawing.Point(3, 598);
+      this.groupBox8.Location = new System.Drawing.Point(3, 718);
       this.groupBox8.Name = "groupBox8";
       this.groupBox8.Size = new System.Drawing.Size(205, 118);
       this.groupBox8.TabIndex = 3;
@@ -339,14 +530,90 @@
       // 
       // groupBox5
       // 
+      this.groupBox5.BackColor = System.Drawing.Color.PeachPuff;
+      this.groupBox5.Controls.Add(this.groupBox14);
       this.groupBox5.Controls.Add(this.groupBox7);
       this.groupBox5.Controls.Add(this.groupBox6);
       this.groupBox5.Location = new System.Drawing.Point(3, 340);
       this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(205, 252);
+      this.groupBox5.Size = new System.Drawing.Size(205, 372);
       this.groupBox5.TabIndex = 2;
       this.groupBox5.TabStop = false;
       this.groupBox5.Text = "Spatial operations";
+      // 
+      // groupBox14
+      // 
+      this.groupBox14.Controls.Add(this.label12);
+      this.groupBox14.Controls.Add(this.AggregateFieldindex);
+      this.groupBox14.Controls.Add(this.RunAggregateShapefileTest);
+      this.groupBox14.Controls.Add(this.SelectAggregateShapefile);
+      this.groupBox14.Controls.Add(this.AggregateShapefileInput);
+      this.groupBox14.Controls.Add(this.label11);
+      this.groupBox14.Location = new System.Drawing.Point(6, 249);
+      this.groupBox14.Name = "groupBox14";
+      this.groupBox14.Size = new System.Drawing.Size(195, 114);
+      this.groupBox14.TabIndex = 6;
+      this.groupBox14.TabStop = false;
+      this.groupBox14.Text = "Aggregate shapefile";
+      // 
+      // label12
+      // 
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(6, 60);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(60, 13);
+      this.label12.TabIndex = 11;
+      this.label12.Text = "Field index:";
+      // 
+      // AggregateFieldindex
+      // 
+      this.AggregateFieldindex.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::TestApplication.Properties.Settings.Default, "AggregateFieldindex", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.AggregateFieldindex.Location = new System.Drawing.Point(72, 58);
+      this.AggregateFieldindex.Name = "AggregateFieldindex";
+      this.AggregateFieldindex.Size = new System.Drawing.Size(59, 20);
+      this.AggregateFieldindex.TabIndex = 10;
+      this.toolTip1.SetToolTip(this.AggregateFieldindex, "What is the field index to aggregate on? Zero-based");
+      this.AggregateFieldindex.Value = global::TestApplication.Properties.Settings.Default.AggregateFieldindex;
+      // 
+      // RunAggregateShapefileTest
+      // 
+      this.RunAggregateShapefileTest.Location = new System.Drawing.Point(9, 84);
+      this.RunAggregateShapefileTest.Name = "RunAggregateShapefileTest";
+      this.RunAggregateShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunAggregateShapefileTest.TabIndex = 9;
+      this.RunAggregateShapefileTest.Text = "Run test";
+      this.RunAggregateShapefileTest.UseVisualStyleBackColor = true;
+      this.RunAggregateShapefileTest.Click += new System.EventHandler(this.RunAggregateShapefileTestClick);
+      // 
+      // SelectAggregateShapefile
+      // 
+      this.SelectAggregateShapefile.Location = new System.Drawing.Point(162, 32);
+      this.SelectAggregateShapefile.Name = "SelectAggregateShapefile";
+      this.SelectAggregateShapefile.Size = new System.Drawing.Size(27, 20);
+      this.SelectAggregateShapefile.TabIndex = 8;
+      this.SelectAggregateShapefile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectAggregateShapefile, "Select line or polygon shapefile to simplify");
+      this.SelectAggregateShapefile.UseVisualStyleBackColor = true;
+      this.SelectAggregateShapefile.Click += new System.EventHandler(this.SelectAggregateShapefileClick);
+      // 
+      // AggregateShapefileInput
+      // 
+      this.AggregateShapefileInput.AcceptsReturn = true;
+      this.AggregateShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "AggregateShapefile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.AggregateShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.AggregateShapefileInput.Name = "AggregateShapefileInput";
+      this.AggregateShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.AggregateShapefileInput.TabIndex = 7;
+      this.AggregateShapefileInput.Text = global::TestApplication.Properties.Settings.Default.AggregateShapefile;
+      // 
+      // label11
+      // 
+      this.label11.AutoSize = true;
+      this.label11.Location = new System.Drawing.Point(6, 16);
+      this.label11.Name = "label11";
+      this.label11.Size = new System.Drawing.Size(103, 13);
+      this.label11.TabIndex = 6;
+      this.label11.Text = "Select the shapefile:";
       // 
       // groupBox7
       // 
@@ -489,6 +756,7 @@
       // 
       // groupBox1
       // 
+      this.groupBox1.BackColor = System.Drawing.Color.LightCoral;
       this.groupBox1.Controls.Add(this.groupBox4);
       this.groupBox1.Controls.Add(this.groupBox3);
       this.groupBox1.Controls.Add(this.groupBox2);
@@ -671,7 +939,7 @@
       this.axMap1.Location = new System.Drawing.Point(0, 0);
       this.axMap1.Name = "axMap1";
       this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-      this.axMap1.Size = new System.Drawing.Size(433, 461);
+      this.axMap1.Size = new System.Drawing.Size(433, 615);
       this.axMap1.TabIndex = 0;
       this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
       // 
@@ -684,7 +952,7 @@
       this.Progressbox.Name = "Progressbox";
       this.Progressbox.ReadOnly = true;
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-      this.Progressbox.Size = new System.Drawing.Size(667, 99);
+      this.Progressbox.Size = new System.Drawing.Size(667, 134);
       this.Progressbox.TabIndex = 0;
       this.Progressbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ProgressboxMouseClick);
       // 
@@ -692,7 +960,7 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(667, 564);
+      this.ClientSize = new System.Drawing.Size(667, 753);
       this.Controls.Add(this.splitContainer1);
       this.DataBindings.Add(new System.Windows.Forms.Binding("Location", global::TestApplication.Properties.Settings.Default, "FormLocation", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.Location = global::TestApplication.Properties.Settings.Default.FormLocation;
@@ -710,6 +978,11 @@
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
       this.groupBox10.ResumeLayout(false);
+      this.groupBox16.ResumeLayout(false);
+      this.groupBox16.PerformLayout();
+      this.groupBox15.ResumeLayout(false);
+      this.groupBox15.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.DissolveFieldindex)).EndInit();
       this.groupBox13.ResumeLayout(false);
       this.groupBox13.PerformLayout();
       this.groupBox12.ResumeLayout(false);
@@ -718,6 +991,9 @@
       this.groupBox9.ResumeLayout(false);
       this.groupBox9.PerformLayout();
       this.groupBox5.ResumeLayout(false);
+      this.groupBox14.ResumeLayout(false);
+      this.groupBox14.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this.AggregateFieldindex)).EndInit();
       this.groupBox7.ResumeLayout(false);
       this.groupBox7.PerformLayout();
       this.groupBox6.ResumeLayout(false);
@@ -790,6 +1066,28 @@
     private System.Windows.Forms.Button SelectSimplifyShapefile;
     private System.Windows.Forms.TextBox SimplifyShapefileInput;
     private System.Windows.Forms.Label label10;
+    private System.Windows.Forms.GroupBox groupBox15;
+    private System.Windows.Forms.Button RunDissolveShapefileTest;
+    private System.Windows.Forms.Button SelectDissolveShapefile;
+    private System.Windows.Forms.TextBox DissolveShapefileInput;
+    private System.Windows.Forms.Label label13;
+    private System.Windows.Forms.GroupBox groupBox14;
+    private System.Windows.Forms.Label label12;
+    private System.Windows.Forms.NumericUpDown AggregateFieldindex;
+    private System.Windows.Forms.Button RunAggregateShapefileTest;
+    private System.Windows.Forms.Button SelectAggregateShapefile;
+    private System.Windows.Forms.TextBox AggregateShapefileInput;
+    private System.Windows.Forms.Label label11;
+    private System.Windows.Forms.Label label14;
+    private System.Windows.Forms.NumericUpDown DissolveFieldindex;
+    private System.Windows.Forms.GroupBox groupBox16;
+    private System.Windows.Forms.Button RunClipShapefileTest;
+    private System.Windows.Forms.Button SelectClipShapefileInput;
+    private System.Windows.Forms.TextBox ClipShapefileInput;
+    private System.Windows.Forms.Label label15;
+    private System.Windows.Forms.Button SelectClipShapefileOverlay;
+    private System.Windows.Forms.TextBox ClipShapefileOverlay;
+    private System.Windows.Forms.Label label16;
   }
 }
 

@@ -19,7 +19,6 @@ namespace TestApplication
   /// <summary>Static class to hold the tests methods</summary>
   internal static class Tests
   {
-
     /// <summary>
     /// Gets or sets Map.
     /// </summary>
@@ -390,7 +389,7 @@ namespace TestApplication
       try
       {
         // Check inputs:
-        if (!CheckShapefileLocation(shapefilename, theForm))
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
           return;
         }
@@ -470,7 +469,7 @@ namespace TestApplication
       try
       {
         // Check inputs:
-        if (!CheckShapefileLocation(shapefilename, theForm))
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
           return;
         }
@@ -557,83 +556,27 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The Rasterize shapefile test has finished.");
     }
 
-    /// <summary>Run the Rasterize shapefile test</summary>
+    /// <summary>Run Aggregate shapefile test</summary>
     /// <param name="shapefilename">
     /// The shapefilename.
+    /// </param>
+    /// <param name="fieldIndex">
+    /// The field index.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunBufferShapefileTest(string shapefilename, Form1 theForm)
+    internal static void RunAggregateShapefileTest(string shapefilename, int fieldIndex, Form1 theForm)
     {
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Buffer shapefile test has started.", Environment.NewLine));
+        string.Format("{0}-----------------------{0}The Aggregate shapefile test has started.", Environment.NewLine));
 
       try
       {
         // Check inputs:
-        if (!CheckShapefileLocation(shapefilename, theForm))
-        {
-          return;
-        }
-
-        // Open the sf:
-        // First check if the MWShapeID field is present:
-        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
-        if (sf == null)
-        {
-          theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
-        }
-
-        var globalSettings = new GlobalSettings();
-        globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start buffering " + Path.GetFileName(shapefilename));
-        
-        // Make the distance depending on the projection.
-        var distance = 1000;
-        if (sf.GeoProjection.IsGeographic)
-        {
-          distance = 1;
-        }
-
-        var bufferedSf = sf.BufferByDistance(distance, 16, false, false);
-
-        // Do some checks:
-        if (!CheckShapefile(sf, bufferedSf, globalSettings.GdalLastErrorMsg, theForm))
-        {
-          return;
-        }
-
-        // Load the files:
-        Fileformats.OpenShapefileAsLayer(shapefilename, theForm, true);
-        bufferedSf.DefaultDrawingOptions.FillVisible = false;
-        MyAxMap.AddLayer(bufferedSf, true);
-      }
-      catch (Exception exception)
-      {
-        theForm.Error(string.Empty, "Exception: " + exception.Message);
-      }
-
-      theForm.Progress(string.Empty, 100, "The Buffer shapefile test has finished.");
-    }
-
-    /// <summary>Run the Simplify shapefile test</summary>
-    /// <param name="shapefilename">The shapefile name</param>
-    /// <param name="theForm">The form</param>
-    internal static void RunSimplifyShapefileTest(string shapefilename, Form1 theForm)
-    {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Simplify shapefile test has started.", Environment.NewLine));
-
-      try
-      {
-        // Check inputs:
-        if (!CheckShapefileLocation(shapefilename, theForm))
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
           return;
         }
@@ -648,127 +591,43 @@ namespace TestApplication
 
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start simplifying " + Path.GetFileName(shapefilename));
+        theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
 
-        // Make the tolerance depending on the projection.
-        var tolerance = 10d;
-        if (sf.GeoProjection.IsGeographic)
-        {
-          tolerance = 1;
-        }
+        var aggregatedSf = sf.AggregateShapes(false, fieldIndex);
 
-        var simplifiedSf = sf.SimplifyLines(tolerance, false);
-
-        // Do some checks:
-        if (!CheckShapefile(sf, simplifiedSf, globalSettings.GdalLastErrorMsg, theForm))
+        // Do some checks:))
+        if (!Helper.CheckShapefile(sf, aggregatedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
           return;
         }
 
-        // give the resulting lines a good width and color:
-        var utils = new Utils { GlobalCallback = theForm };
-        simplifiedSf.DefaultDrawingOptions.LineWidth = 2;
-        simplifiedSf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.OrangeRed);
-        simplifiedSf.DefaultDrawingOptions.LineStipple = tkDashStyle.dsSolid;
+        /*
+        // Save result:
+        aggregatedSf.SaveAs(shapefilename.Replace(".shp", "-aggregate.shp"), theForm);
+        theForm.Progress(string.Empty, 0, "The resulting file has been saved as " + aggregatedSf.Filename);
+        */
+
+        Helper.ColorShapes(ref aggregatedSf, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(simplifiedSf, true);
-        Fileformats.OpenShapefileAsLayer(shapefilename, theForm, false);
+        MyAxMap.AddLayer(aggregatedSf, true);
+
+        theForm.Progress(
+          string.Empty,
+          100,
+          string.Format(
+            "The Aggregate shapefile now has {0} shapes instead of {1} and has {2} rows",
+            aggregatedSf.NumShapes,
+            sf.NumShapes,
+            aggregatedSf.Table.NumRows));
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
 
-      theForm.Progress(string.Empty, 100, "The Simplify shapefile test has finished.");
-    }
-
-    /// <summary>Check the given shapefile location</summary>
-    /// <param name="shapefilename">
-    /// The shapefilename.
-    /// </param>
-    /// <param name="theForm">
-    /// The the form.
-    /// </param>
-    /// <returns>True when no errors else false</returns>
-    private static bool CheckShapefileLocation(string shapefilename, ICallback theForm)
-    {
-      if (shapefilename == string.Empty)
-      {
-        theForm.Error(string.Empty, "Input parameters are wrong");
-        return false;
-      }
-
-      var folder = Path.GetDirectoryName(shapefilename);
-      if (folder == null)
-      {
-        theForm.Error(string.Empty, "Input parameters are wrong");
-        return false;
-      }
-
-      if (!Directory.Exists(folder))
-      {
-        theForm.Error(string.Empty, "Output folder doesn't exists");
-        return false;
-      }
-
-      if (!File.Exists(shapefilename))
-      {
-        theForm.Error(string.Empty, "Input shapefile doesn't exists");
-        return false;
-      }
-
-      return true;
-    }
-
-    /// <summary>Check if the resulting shapefile is correct</summary>
-    /// <param name="inputSf">
-    /// The input sf.
-    /// </param>
-    /// <param name="resultingSf">
-    /// The resulting sf.
-    /// </param>
-    /// <param name="gdalLastErrorMsg">
-    /// The gdal last error msg.
-    /// </param>
-    /// <param name="theForm">
-    /// The the form.
-    /// </param>
-    /// <returns>True when no errors else false</returns>
-    private static bool CheckShapefile(IShapefile inputSf, IShapefile resultingSf, string gdalLastErrorMsg, ICallback theForm)
-    {
-      if (resultingSf == null)
-      {
-        var msg = "The resulting shapefile was not created: " + inputSf.get_ErrorMsg(inputSf.LastErrorCode);
-        if (gdalLastErrorMsg != string.Empty)
-        {
-          msg += Environment.NewLine + "GdalLastErrorMsg: " + gdalLastErrorMsg;
-        }
-
-        theForm.Error(string.Empty, msg);
-        return false;
-      }
-
-      if (resultingSf.NumShapes < -1)
-      {
-        theForm.Error(string.Empty, "Resulting shapefile has no shapes");
-        return false;
-      }
-
-      if (resultingSf.HasInvalidShapes())
-      {
-        theForm.Error(string.Empty, "Resulting shapefile has invalid shapes");
-        return false;
-      }
-
-      if (resultingSf.NumFields < -1)
-      {
-        theForm.Error(string.Empty, "Resulting shapefile has no fields");
-        return false;
-      }
-
-      return true;
+      theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished");
     }
   }
 }

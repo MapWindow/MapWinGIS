@@ -81,8 +81,10 @@ namespace TestApplication
     /// </param>
     private void Form1Load(object sender, EventArgs e)
     {
+      // Copy the map reference to the test methods:
       Fileformats.Map = axMap1;
       Tests.MyAxMap = axMap1;
+      GeosTests.MyAxMap = axMap1;
     }
 
     /// <summary>Form closing event</summary>
@@ -268,6 +270,53 @@ namespace TestApplication
       Tests.SelectShapefile(this.SimplifyShapefileInput, "Select shapefile to simplify");
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectAggregateShapefileClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.AggregateShapefileInput, "Select shapefile to aggregate");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectDissolveShapefileClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.DissolveShapefileInput, "Select shapefile to dissolve");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectClipShapefileInputClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClipShapefileInput, "Select shapefile to clip");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectClipShapefileOverlayClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClipShapefileOverlay, "Select overlay shapefile");
+    }
     #endregion
 
     #region Run test click event
@@ -352,7 +401,7 @@ namespace TestApplication
     /// </param>
     private void RunBufferShapefileTestClick(object sender, EventArgs e)
     {
-      Tests.RunBufferShapefileTest(this.BufferShapefileInput.Text, this);
+      GeosTests.RunBufferShapefileTest(this.BufferShapefileInput.Text, this);
     }
 
     #endregion
@@ -366,7 +415,44 @@ namespace TestApplication
     /// </param>
     private void RunSimplifyShapefileTestClick(object sender, EventArgs e)
     {
-      Tests.RunSimplifyShapefileTest(this.SimplifyShapefileInput.Text, this);
+      GeosTests.RunSimplifyShapefileTest(this.SimplifyShapefileInput.Text, this);
     }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunAggregateShapefileTestClick(object sender, EventArgs e)
+    {
+      Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, (int)Math.Floor(this.AggregateFieldindex.Value), this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunDissolveShapefileTestClick(object sender, EventArgs e)
+    {
+      GeosTests.RunDissolveShapefileTest(this.DissolveShapefileInput.Text, (int)Math.Floor(this.DissolveFieldindex.Value), this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunClipShapefileTestClick(object sender, EventArgs e)
+    {
+      GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this.ClipShapefileOverlay.Text, this);
+    }
+
   }
 }

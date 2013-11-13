@@ -142,5 +142,77 @@ namespace TestApplication.Properties {
                 this["SimplifyShapefile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AggregateShapefile {
+            get {
+                return ((string)(this["AggregateShapefile"]));
+            }
+            set {
+                this["AggregateShapefile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal AggregateFieldindex {
+            get {
+                return ((decimal)(this["AggregateFieldindex"]));
+            }
+            set {
+                this["AggregateFieldindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DissolveShapefile {
+            get {
+                return ((string)(this["DissolveShapefile"]));
+            }
+            set {
+                this["DissolveShapefile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal DissolveFieldindex {
+            get {
+                return ((decimal)(this["DissolveFieldindex"]));
+            }
+            set {
+                this["DissolveFieldindex"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClipShapefileInput {
+            get {
+                return ((string)(this["ClipShapefileInput"]));
+            }
+            set {
+                this["ClipShapefileInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClipShapefileOverlay {
+            get {
+                return ((string)(this["ClipShapefileOverlay"]));
+            }
+            set {
+                this["ClipShapefileOverlay"] = value;
+            }
+        }
     }
 }
