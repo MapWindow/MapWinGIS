@@ -2,7 +2,8 @@
 * How to build the GEOS project for MapWinGIS
 *
 * Paul Meems
-* October 4, 2013
+* Created: October 4, 2013
+* Last update: November 21, 2013
 ***************************************************
 
 ## Source code ##
@@ -21,29 +22,15 @@ Add at the end:
 
 [geos-folder]\nmake.opt:
 Add at around line 21:
-  PLATFORM_NAME = Win32
   !IFDEF WIN64
-  !IF "$(WIN64)" == "YES"
   PLATFORM_NAME = x64
-  !ENDIF
-  !ENDIF
-
-Change !IFDEF MSVC_VLD_DIR [around line 152] to:
-  !IFDEF MSVC_VLD_DIR
-  MSVC_VLD_FLAGS=-DMSVC_USE_VLD=1 -I$(MSVC_VLD_DIR)\include
-  MSVC_VLD_LIB=/LIBPATH:$(MSVC_VLD_DIR)/lib/Win32
-  !IFDEF WIN64
-  !IF "$(WIN64)" == "YES"
-  MSVC_VLD_LIB=/LIBPATH:$(MSVC_VLD_DIR)/lib/Win64
-  !ENDIF
-  !ENDIF
+  !ELSE
+  PLATFORM_NAME = Win32
   !ENDIF
 
 Add compilation flags above GEOS_CPPFLAGS = $(GEOS_CPPFLAGS) /D "GEOS_DLL_EXPORT" $(MSVC_VLD_FLAGS) [around line 172]
 !IFDEF WIN64
-!IF "$(WIN64)" == "YES"
 GEOS_CPPFLAGS = /D "NOMINMAX" /D "WIN64" /D "NOGDI"
-!ENDIF
 !ENDIF
 
 [geos-folder]\src\makefile.vc:
