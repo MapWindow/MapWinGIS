@@ -214,5 +214,29 @@ namespace TestApplication.Properties {
                 this["ClipShapefileOverlay"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IntersectionShapefileFirstInput {
+            get {
+                return ((string)(this["IntersectionShapefileFirstInput"]));
+            }
+            set {
+                this["IntersectionShapefileFirstInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IntersectionShapefileSecondInput {
+            get {
+                return ((string)(this["IntersectionShapefileSecondInput"]));
+            }
+            set {
+                this["IntersectionShapefileSecondInput"] = value;
+            }
+        }
     }
 }

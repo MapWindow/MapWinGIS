@@ -292,6 +292,81 @@ namespace TestApplication
 
       theForm.Progress(string.Empty, 100, "The clipping shapefile test has finished.");
     }
+
+    /// <summary>Run the intersect shapefile test</summary>
+    /// <param name="shapefilenameFirst">
+    /// The shapefilename first.
+    /// </param>
+    /// <param name="shapefilenameSecond">
+    /// The shapefilename second.
+    /// </param>
+    /// <param name="theForm">
+    /// The the form.
+    /// </param>
+    internal static void RunIntersectionShapefileTest(string shapefilenameFirst, string shapefilenameSecond, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The get Intersection shapefile test has started.", Environment.NewLine));
+
+      try
+      {
+        // Check inputs:
+        if (!Helper.CheckShapefileLocation(shapefilenameFirst, theForm))
+        {
+          return;
+        }
+
+        if (!Helper.CheckShapefileLocation(shapefilenameSecond, theForm))
+        {
+          return;
+        }
+
+        // Open the sf:
+        var sf = Fileformats.OpenShapefile(shapefilenameFirst, theForm);
+        if (sf == null)
+        {
+          theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
+          return;
+        }
+
+        var overlaySf = Fileformats.OpenShapefile(shapefilenameSecond, theForm);
+        if (overlaySf == null)
+        {
+          theForm.Error(string.Empty, "Opening overlay shapefile was unsuccessful");
+          return;
+        }
+
+        var globalSettings = new GlobalSettings();
+        globalSettings.ResetGdalError();
+        theForm.Progress(string.Empty, 0, "Start intersecting " + Path.GetFileName(shapefilenameFirst));
+
+        var intersectedSf = sf.GetIntersection(false, overlaySf, false, ShpfileType.SHP_NULLSHAPE, theForm);
+
+        // Do some checks:))
+        if (!Helper.CheckShapefile(sf, intersectedSf, globalSettings.GdalLastErrorMsg, theForm))
+        {
+          return;
+        }
+
+        Helper.ColorShapes(ref intersectedSf, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
+
+        // Save result:
+        //intersectedSf.SaveAs(shapefilenameSecond.Replace(".shp", "-intersect.shp"), theForm);
+
+        // Load the files:
+        MyAxMap.RemoveAllLayers();
+        MyAxMap.AddLayer(intersectedSf, true);
+        MyAxMap.AddLayer(overlaySf, true);
+      }
+      catch (Exception exception)
+      {
+        theForm.Error(string.Empty, "Exception: " + exception.Message);
+      }
+
+      theForm.Progress(string.Empty, 100, "The get intersection shapefile test has finished.");
+    }
   }
 
   /*

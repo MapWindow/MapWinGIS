@@ -129,8 +129,21 @@ namespace TestApplication
     {
       // Create visualization categories 
       var utils = new Utils();
-      sf.DefaultDrawingOptions.FillType = tkFillType.ftStandard;
-      sf.DefaultDrawingOptions.FillColor = utils.ColorByName(tkMapColor.Tomato);
+
+      if (sf.ShapefileType == ShpfileType.SHP_POLYGON || sf.ShapefileType == ShpfileType.SHP_POLYGONZ
+          || sf.ShapefileType == ShpfileType.SHP_POLYGONM)
+      {
+        sf.DefaultDrawingOptions.FillType = tkFillType.ftStandard;
+        sf.DefaultDrawingOptions.FillColor = utils.ColorByName(tkMapColor.Tomato);
+      }
+
+      if (sf.ShapefileType == ShpfileType.SHP_POLYLINE
+        || sf.ShapefileType == ShpfileType.SHP_POLYLINEZ
+        || sf.ShapefileType == ShpfileType.SHP_POLYLINEM)
+      {
+        sf.DefaultDrawingOptions.LineWidth = 3;
+      }
+
       if (!forceUnique && sf.NumShapes > 10)
       {
         sf.Categories.Generate(0, tkClassificationType.ctNaturalBreaks, 9);

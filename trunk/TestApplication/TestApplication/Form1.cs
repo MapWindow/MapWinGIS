@@ -317,6 +317,31 @@ namespace TestApplication
     {
       Tests.SelectShapefile(this.ClipShapefileOverlay, "Select overlay shapefile");
     }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectIntersectionShapefileFirstInputClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.IntersectionShapefileFirstInput, "Select first shapefile");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectIntersectionShapefileSecondInputClick(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.IntersectionShapefileSecondInput, "Select second shapefile");
+    }
+
     #endregion
 
     #region Run test click event
@@ -454,5 +479,16 @@ namespace TestApplication
       GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this.ClipShapefileOverlay.Text, this);
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunIntersectionShapefileTestClick(object sender, EventArgs e)
+    {
+      GeosTests.RunIntersectionShapefileTest(this.IntersectionShapefileFirstInput.Text, this.IntersectionShapefileSecondInput.Text, this);
+    }
   }
 }

@@ -34,6 +34,14 @@
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox17 = new System.Windows.Forms.GroupBox();
+      this.SelectIntersectionShapefileSecondInput = new System.Windows.Forms.Button();
+      this.IntersectionShapefileSecondInput = new System.Windows.Forms.TextBox();
+      this.label17 = new System.Windows.Forms.Label();
+      this.RunIntersectionShapefileTest = new System.Windows.Forms.Button();
+      this.SelectIntersectionShapefileFirstInput = new System.Windows.Forms.Button();
+      this.IntersectionShapefileFirstInput = new System.Windows.Forms.TextBox();
+      this.label18 = new System.Windows.Forms.Label();
       this.groupBox16 = new System.Windows.Forms.GroupBox();
       this.SelectClipShapefileOverlay = new System.Windows.Forms.Button();
       this.ClipShapefileOverlay = new System.Windows.Forms.TextBox();
@@ -113,6 +121,7 @@
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
       this.groupBox10.SuspendLayout();
+      this.groupBox17.SuspendLayout();
       this.groupBox16.SuspendLayout();
       this.groupBox15.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this.DissolveFieldindex)).BeginInit();
@@ -187,16 +196,103 @@
       // groupBox10
       // 
       this.groupBox10.BackColor = System.Drawing.Color.LightSteelBlue;
+      this.groupBox10.Controls.Add(this.groupBox17);
       this.groupBox10.Controls.Add(this.groupBox16);
       this.groupBox10.Controls.Add(this.groupBox15);
       this.groupBox10.Controls.Add(this.groupBox13);
       this.groupBox10.Controls.Add(this.groupBox12);
       this.groupBox10.Location = new System.Drawing.Point(3, 842);
       this.groupBox10.Name = "groupBox10";
-      this.groupBox10.Size = new System.Drawing.Size(205, 550);
+      this.groupBox10.Size = new System.Drawing.Size(205, 683);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox17
+      // 
+      this.groupBox17.Controls.Add(this.SelectIntersectionShapefileSecondInput);
+      this.groupBox17.Controls.Add(this.IntersectionShapefileSecondInput);
+      this.groupBox17.Controls.Add(this.label17);
+      this.groupBox17.Controls.Add(this.RunIntersectionShapefileTest);
+      this.groupBox17.Controls.Add(this.SelectIntersectionShapefileFirstInput);
+      this.groupBox17.Controls.Add(this.IntersectionShapefileFirstInput);
+      this.groupBox17.Controls.Add(this.label18);
+      this.groupBox17.Location = new System.Drawing.Point(6, 460);
+      this.groupBox17.Name = "groupBox17";
+      this.groupBox17.Size = new System.Drawing.Size(195, 124);
+      this.groupBox17.TabIndex = 7;
+      this.groupBox17.TabStop = false;
+      this.groupBox17.Text = "Get intersection";
+      // 
+      // SelectIntersectionShapefileSecondInput
+      // 
+      this.SelectIntersectionShapefileSecondInput.Location = new System.Drawing.Point(162, 69);
+      this.SelectIntersectionShapefileSecondInput.Name = "SelectIntersectionShapefileSecondInput";
+      this.SelectIntersectionShapefileSecondInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectIntersectionShapefileSecondInput.TabIndex = 12;
+      this.SelectIntersectionShapefileSecondInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectIntersectionShapefileSecondInput, "Select shapefile to buffer");
+      this.SelectIntersectionShapefileSecondInput.UseVisualStyleBackColor = true;
+      this.SelectIntersectionShapefileSecondInput.Click += new System.EventHandler(this.SelectIntersectionShapefileSecondInputClick);
+      // 
+      // IntersectionShapefileSecondInput
+      // 
+      this.IntersectionShapefileSecondInput.AcceptsReturn = true;
+      this.IntersectionShapefileSecondInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "IntersectionShapefileSecondInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.IntersectionShapefileSecondInput.Location = new System.Drawing.Point(9, 69);
+      this.IntersectionShapefileSecondInput.Name = "IntersectionShapefileSecondInput";
+      this.IntersectionShapefileSecondInput.Size = new System.Drawing.Size(147, 20);
+      this.IntersectionShapefileSecondInput.TabIndex = 11;
+      this.IntersectionShapefileSecondInput.Text = global::TestApplication.Properties.Settings.Default.IntersectionShapefileSecondInput;
+      // 
+      // label17
+      // 
+      this.label17.AutoSize = true;
+      this.label17.Location = new System.Drawing.Point(6, 53);
+      this.label17.Name = "label17";
+      this.label17.Size = new System.Drawing.Size(141, 13);
+      this.label17.TabIndex = 10;
+      this.label17.Text = "Select the second shapefile:";
+      // 
+      // RunIntersectionShapefileTest
+      // 
+      this.RunIntersectionShapefileTest.Location = new System.Drawing.Point(9, 95);
+      this.RunIntersectionShapefileTest.Name = "RunIntersectionShapefileTest";
+      this.RunIntersectionShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunIntersectionShapefileTest.TabIndex = 9;
+      this.RunIntersectionShapefileTest.Text = "Run test";
+      this.RunIntersectionShapefileTest.UseVisualStyleBackColor = true;
+      this.RunIntersectionShapefileTest.Click += new System.EventHandler(this.RunIntersectionShapefileTestClick);
+      // 
+      // SelectIntersectionShapefileFirstInput
+      // 
+      this.SelectIntersectionShapefileFirstInput.Location = new System.Drawing.Point(162, 32);
+      this.SelectIntersectionShapefileFirstInput.Name = "SelectIntersectionShapefileFirstInput";
+      this.SelectIntersectionShapefileFirstInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectIntersectionShapefileFirstInput.TabIndex = 8;
+      this.SelectIntersectionShapefileFirstInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectIntersectionShapefileFirstInput, "Select shapefile to buffer");
+      this.SelectIntersectionShapefileFirstInput.UseVisualStyleBackColor = true;
+      this.SelectIntersectionShapefileFirstInput.Click += new System.EventHandler(this.SelectIntersectionShapefileFirstInputClick);
+      // 
+      // IntersectionShapefileFirstInput
+      // 
+      this.IntersectionShapefileFirstInput.AcceptsReturn = true;
+      this.IntersectionShapefileFirstInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "IntersectionShapefileFirstInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.IntersectionShapefileFirstInput.Location = new System.Drawing.Point(9, 32);
+      this.IntersectionShapefileFirstInput.Name = "IntersectionShapefileFirstInput";
+      this.IntersectionShapefileFirstInput.Size = new System.Drawing.Size(147, 20);
+      this.IntersectionShapefileFirstInput.TabIndex = 7;
+      this.IntersectionShapefileFirstInput.Text = global::TestApplication.Properties.Settings.Default.IntersectionShapefileFirstInput;
+      // 
+      // label18
+      // 
+      this.label18.AutoSize = true;
+      this.label18.Location = new System.Drawing.Point(6, 16);
+      this.label18.Name = "label18";
+      this.label18.Size = new System.Drawing.Size(122, 13);
+      this.label18.TabIndex = 6;
+      this.label18.Text = "Select the first shapefile:";
       // 
       // groupBox16
       // 
@@ -978,6 +1074,8 @@
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
       this.groupBox10.ResumeLayout(false);
+      this.groupBox17.ResumeLayout(false);
+      this.groupBox17.PerformLayout();
       this.groupBox16.ResumeLayout(false);
       this.groupBox16.PerformLayout();
       this.groupBox15.ResumeLayout(false);
@@ -1088,6 +1186,14 @@
     private System.Windows.Forms.Button SelectClipShapefileOverlay;
     private System.Windows.Forms.TextBox ClipShapefileOverlay;
     private System.Windows.Forms.Label label16;
+    private System.Windows.Forms.GroupBox groupBox17;
+    private System.Windows.Forms.Button SelectIntersectionShapefileSecondInput;
+    private System.Windows.Forms.TextBox IntersectionShapefileSecondInput;
+    private System.Windows.Forms.Label label17;
+    private System.Windows.Forms.Button RunIntersectionShapefileTest;
+    private System.Windows.Forms.Button SelectIntersectionShapefileFirstInput;
+    private System.Windows.Forms.TextBox IntersectionShapefileFirstInput;
+    private System.Windows.Forms.Label label18;
   }
 }
 
