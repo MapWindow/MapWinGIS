@@ -1526,6 +1526,8 @@ cleaning:
 
 // ******************************************************************
 //		IntersectionGEOS()
+//
+// Checked: Updated to use new GEOS calls
 // ******************************************************************
 // shapesToExclude - vector to return shapes sum of intersected results for those is equasl to the initial area
 // such shapes can be excluded from further calculation in case of union; 
@@ -1581,7 +1583,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Clipping shapes..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Intersecting shapes..."));
 			}
 		}
 
@@ -1602,11 +1604,13 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 			
 			double initArea = 0.0;
 			shp1->get_Area(&initArea);
+			// TODO: Why not use getArea from GEOS?			
 			shp1->Release();
 
 			if (geom1)
 			{
 				double sumArea = 0.0;
+
 
 				// iterating through clip geometries
 				for (int j = 0; j < (int)shapeIds.size(); j++)
@@ -1619,7 +1623,9 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							GEOSGeom_destroy(geom1);
+							// Using the new GEOS API:
+							//GEOSGeom_destroy(geom1);
+							GEOSGeom_destroy_r(getGeosHandle(), geom1);
 							goto cleaning;
 						}
 					}
@@ -1656,13 +1662,17 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					}
 
 					// calculating intersection
-					GEOSGeometry* geom = GEOSIntersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
+					// Using the new GEOS API:
+					//GEOSGeometry* geom = GEOSIntersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
+					GEOSGeometry* geom = GEOSIntersection_r(getGeosHandle(), geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
 					if (geom == NULL) continue;
 					
 					// saving the results
 					vector<IShape* > vShapes;
 					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes);
-					GEOSGeom_destroy(geom);
+					// Using the new GEOS API:
+					//GEOSGeom_destroy(geom);
+					GEOSGeom_destroy_r(getGeosHandle(), geom);
 
 					// sum of area to exclude shapes from difference
 					if (buildSkipLists)
@@ -1681,7 +1691,10 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 
 					this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL, sfClip, clipId, fieldMap);	// shapes are released here
 				}
-				GEOSGeom_destroy(geom1);
+
+				// Using the new GEOS API:
+				//GEOSGeom_destroy(geom1);
+				GEOSGeom_destroy_r(getGeosHandle(), geom1);
 				
 				if (buildSkipLists)
 				{
@@ -1711,7 +1724,9 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			GEOSGeom_destroy(vGeometries[i]);
+			// Using the new GEOS API:
+			//GEOSGeom_destroy(vGeometries[i]);
+			GEOSGeom_destroy_r(getGeosHandle(), vGeometries[i]);
 		}
 	}
 
