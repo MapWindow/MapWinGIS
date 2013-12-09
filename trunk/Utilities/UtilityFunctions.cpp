@@ -452,12 +452,30 @@ namespace Utility
 	// ****************************************************
 	//   ReadFileToBuffer
 	// ****************************************************
-	// Reads the content of the file to buffer, return the number of butes read
+	// Reads the content of the file to buffer, return the number of bytes read
 	int ReadFileToBuffer(CString filename, unsigned char** buffer)
 	{
 		USES_CONVERSION;
+		
+		FILE* file = fopen(filename,"rb");
+		
+		long size = 0;
+		if (file)
+		{
+			fseek( file, 0, SEEK_END );
+			size = ftell(file);
+			if (size > 0)
+			{
+				*buffer = new unsigned char[size];
+				rewind(file);
+				size = fread(*buffer, sizeof(char), size, file);
+			}
+			fclose(file);
+		}
+		return size;
+
 		//ifstream
-		std::basic_ifstream<unsigned char, std::char_traits<unsigned char>> file(filename, ios::in|ios::binary|ios::ate);
+		/*std::basic_ifstream<unsigned char, std::char_traits<unsigned char>> file(filename, ios::in|ios::binary|ios::ate);
 		if (file.is_open())
 		{
 			int size = file.tellg();
@@ -466,8 +484,8 @@ namespace Utility
 			file.read(*buffer, size);
 			file.close();
 			return size;
-		}
-		return 0;
+		}*/
+		//return 0;
 	}
 
 	double FloatRound(double doValue, int nPrecision)

@@ -27,6 +27,7 @@
 #include "Templates.h"
 #include "Extents.h"
 #include "clipper.h"
+#include "Utilities\GeosHelper.h"
 
 #ifdef SERIALIZE_POLYGONS
 #include <fstream>
@@ -40,8 +41,6 @@ using namespace std;
 
 // ******************************************************************
 //		SelectByShapefile()
-//
-// Checked: Uses GEOS, but no new GEOS API calls
 // ******************************************************************
 //  Returns numbers(ids) of shapes of this shapefile which are situated 
 //	in certain spatial relation to the shapes of the input shapefile. 
@@ -92,7 +91,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Selecting shapes..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
 			}
 		}
 		
@@ -211,8 +210,6 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 
 // ***********************************************************
 // 		SelectShapesAlt()
-//
-// Checked: Uses GEOS, but no new GEOS API calls
 // ***********************************************************
 //  Alternative function for selection of shapes which fall in the given 
 //	rectangular. Uses quad tree on permanent basis. May become 
@@ -286,8 +283,6 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 #pragma region Dissolve
 // *************************************************************
 //     Dissolve()
-//
-// Checked: Uses GEOS, but no new GEOS API calls
 // *************************************************************
 //  Merges shapes of the shapefile based on the attribute of the given
 // 	field. Shapes with the same attribute are merged into one.
@@ -363,8 +358,6 @@ STDMETHODIMP CShapefile::Dissolve(long FieldIndex, VARIANT_BOOL SelectedOnly, IS
 
 // *************************************************************
 //     DissolveGEOS()
-//
-// Checked. Updated to new GEOS API
 // *************************************************************
 void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile* sf)
 {
@@ -381,7 +374,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 		{	
 			percent = newpercent;
 			if( globalCallback != NULL ) 
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Dissolving shapes..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Grouping shapes..."));
 		}
 
 		IShape* shp = NULL;
@@ -444,9 +437,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 					}
 				}
 			}
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(gsGeom);
-			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
+			GEOSGeom_destroy(gsGeom);
 		}
 		p++;
 		i++;
@@ -458,8 +449,6 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 
 // *************************************************************
 //     DissolveClipper()
-//
-// Checked: No GEOS calls
 // *************************************************************
 void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile* sf)
 {
@@ -481,7 +470,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, ISh
 		{	
 			percent = newpercent;
 			if( globalCallback != NULL ) 
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Dissolving shapes..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Merging shapes..."));
 		}
 
 		if (SelectedOnly && !_shapeData[i]->selected)
@@ -560,12 +549,13 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, ISh
 #pragma region Buffer
 // ********************************************************************
 //		BufferByDistance()
-//
-// Nov. 2013 Updated to new GEOS API
 // ********************************************************************
 STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// TODO: Should we do this here and what is the best option to save it, as an property of sf?:
+	//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
 	
 	LONG numSelected;
 	this->get_NumSelected(&numSelected);
@@ -632,11 +622,8 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			shp->Release();
 			if (oGeom1 == NULL) continue;
 			
-			// Use new GEOS API:
-			//oGeom2 = GEOSBuffer( oGeom1, Distance, (int)nSegments);
-			//GEOSGeom_destroy(oGeom1);
-			oGeom2 = GEOSBuffer_r(getGeosHandle(), oGeom1, Distance, (int)nSegments);
-			GEOSGeom_destroy_r(getGeosHandle(), oGeom1);
+			oGeom2 = GeosHelper::Buffer(oGeom1, Distance, (int)nSegments);
+			GeosHelper::DestroyGeometry(oGeom1);
 
 			if (oGeom2 == NULL)	continue;
 			
@@ -653,27 +640,21 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
 				}
-
-				// Use new GEOS API:
-				//GEOSGeom_destroy(oGeom2);
-				GEOSGeom_destroy_r(getGeosHandle(), oGeom2);
+				
+				GeosHelper::DestroyGeometry(oGeom2);
 			}
 		}
 	}
 	
 	// merging the results
 	if (MergeResults)
-	{		
+	{
 		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(results, globalCallback);	// geometries will be released in the process
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
-			// Use the new GEOS API:
-			OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(getGeosHandle(), gsGeom);
-
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(gsGeom);
-			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
+			OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
+			GeosHelper::DestroyGeometry(gsGeom);
 			
 			if (oGeom)
 			{
@@ -713,7 +694,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			}
 		}
 	}
-		
 
 	long numShapes;
 	(*sf)->get_NumShapes(&numShapes);
@@ -731,7 +711,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
 	}
-
 	return S_OK;
 }
 #pragma endregion
@@ -739,8 +718,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 #pragma region Clipping
 // ********************************************************************
 //		GetDifference()
-//
-// Checked: No GEOS calls
 // ********************************************************************
 STDMETHODIMP CShapefile::Difference(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
@@ -751,8 +728,6 @@ STDMETHODIMP CShapefile::Difference(VARIANT_BOOL SelectedOnlySubject, IShapefile
 
 // ********************************************************************
 //		Clip()
-//
-// Checked: No GEOS calls
 // ********************************************************************
 STDMETHODIMP CShapefile::Clip(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
@@ -763,8 +738,6 @@ STDMETHODIMP CShapefile::Clip(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOv
 
 // **********************************************************************
 // *	GetIntersection()				             
-//
-// Checked: No GEOS calls
 // **********************************************************************
 STDMETHODIMP CShapefile::GetIntersection(VARIANT_BOOL SelectedOnlyOfThis, IShapefile* sf,
 										 VARIANT_BOOL SelectedOnly, ShpfileType fileType, ICallback* cBack, IShapefile** retval)
@@ -776,8 +749,6 @@ STDMETHODIMP CShapefile::GetIntersection(VARIANT_BOOL SelectedOnlyOfThis, IShape
 
 // ********************************************************************
 //		GetSymmDifference()
-//
-// Checked: No GEOS calls
 // ********************************************************************
 STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
@@ -788,8 +759,6 @@ STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShape
 
 // ********************************************************************
 //		GetUnion()
-//
-// Checked: No GEOS calls
 // ********************************************************************
 STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
@@ -827,8 +796,6 @@ STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfO
 
 // ****************************************************************
 //		FieldsAreEqual()
-//
-// Checked: No GEOS calls
 // ****************************************************************
 bool CShapefile::FieldsAreEqual(IField* field1, IField* field2)
 {
@@ -892,8 +859,6 @@ bool CShapefile::FieldsAreEqual(IField* field1, IField* field2)
 
 // ****************************************************************
 //		CopyFields()
-//
-// Checked: No GEOS calls
 // ****************************************************************
 void CShapefile::CopyFields(IShapefile* source, IShapefile* target)
 {
@@ -918,8 +883,6 @@ void CShapefile::CopyFields(IShapefile* source, IShapefile* target)
 
 // ****************************************************************
 //		CopyFields()
-//
-// Checked: No GEOS calls
 // ****************************************************************
 // Exposed publicly
 void CShapefile::CopyFields(IShapefile* target)
@@ -948,8 +911,6 @@ void CShapefile::CopyFields(IShapefile* target)
 
 // ****************************************************************
 //		CopyFields()
-//
-// Checked: No GEOS calls
 // ****************************************************************
 void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShapefile* sfResult, map<long, long>& fieldMap, bool mergeFields)
 {
@@ -1004,9 +965,7 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 }
 
 // ********************************************************************
-//		DoClipOperation()
-//
-// Checked: No GEOS calls
+//		DoClipOperarion()
 // ********************************************************************
 void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, 
 								 VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval, 
@@ -1217,8 +1176,6 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 #pragma region Clip
 // ********************************************************************
 //		ClipGEOS()
-//
-// Checked: Updated to use new GEOS calls
 // ********************************************************************
 void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile* sfResult)
 {
@@ -1282,10 +1239,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							
-							// Using the new GEOS API:
-							//GEOSGeom_destroy(gsGeom1);
-							GEOSGeom_destroy_r(getGeosHandle(), gsGeom1);
+							GEOSGeom_destroy(gsGeom1);
 							goto cleaning;
 						}
 					}
@@ -1311,9 +1265,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 						gsGeom2 = vGeometries[clipId];
 					}
 					
-					// Using the new GEOS API:
-					//if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
-					if (gsGeom2 && GEOSIntersects_r(getGeosHandle(), gsGeom1, gsGeom2))
+					if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
 					{
 						vUnion.push_back(gsGeom2);
 					}
@@ -1335,17 +1287,12 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 
 				if (gsGeom2)
 				{
-					// Using the new GEOS API:
-					//GEOSGeometry* gsResult = GEOSIntersection(gsGeom1, gsGeom2);
-					GEOSGeometry* gsResult = GEOSIntersection_r(getGeosHandle(), gsGeom1, gsGeom2);
+					GEOSGeometry* gsResult = GEOSIntersection(gsGeom1, gsGeom2);
 					if (gsResult != NULL)
 					{
 						vector<IShape* > vShapes;
 						bool result = GeometryConverter::GEOSGeomToShapes(gsResult, &vShapes);
-
-						// Using the new GEOS API:
-						//GEOSGeom_destroy(gsResult);
-						GEOSGeom_destroy_r(getGeosHandle(), gsResult);
+						GEOSGeom_destroy(gsResult);
 						
 						this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL);
 						//InsertShapesVector(sfResult, vShapes, this, NULL);	// shapes are released here
@@ -1353,17 +1300,11 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 					
 					// clipping geometry should be deleted only in case it was build up from several parts
 					if (deleteNeeded)
-					{
-						// Using the new GEOS API:
-						//GEOSGeom_destroy(gsGeom2);
-						GEOSGeom_destroy_r(getGeosHandle(), gsGeom2);
-					}
+						GEOSGeom_destroy(gsGeom2);
 				}
 
 				// subject geometry should always be deleted
-				// Using the new GEOS API:
-				//GEOSGeom_destroy(gsGeom1);
-				GEOSGeom_destroy_r(getGeosHandle(), gsGeom1);
+				GEOSGeom_destroy(gsGeom1);
 			}
 		}
 	}
@@ -1373,9 +1314,7 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(vGeometries[i]);
-			GEOSGeom_destroy_r(getGeosHandle(), vGeometries[i]);
+			GEOSGeom_destroy(vGeometries[i]);
 		}
 	}
 
@@ -1526,8 +1465,6 @@ cleaning:
 
 // ******************************************************************
 //		IntersectionGEOS()
-//
-// Checked: Updated to use new GEOS calls
 // ******************************************************************
 // shapesToExclude - vector to return shapes sum of intersected results for those is equasl to the initial area
 // such shapes can be excluded from further calculation in case of union; 
@@ -1583,7 +1520,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Intersecting shapes..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Clipping shapes..."));
 			}
 		}
 
@@ -1604,13 +1541,11 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 			
 			double initArea = 0.0;
 			shp1->get_Area(&initArea);
-			// TODO: Why not use getArea from GEOS?			
 			shp1->Release();
 
 			if (geom1)
 			{
 				double sumArea = 0.0;
-
 
 				// iterating through clip geometries
 				for (int j = 0; j < (int)shapeIds.size(); j++)
@@ -1623,9 +1558,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							// Using the new GEOS API:
-							//GEOSGeom_destroy(geom1);
-							GEOSGeom_destroy_r(getGeosHandle(), geom1);
+							GEOSGeom_destroy(geom1);
 							goto cleaning;
 						}
 					}
@@ -1662,17 +1595,13 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					}
 
 					// calculating intersection
-					// Using the new GEOS API:
-					//GEOSGeometry* geom = GEOSIntersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
-					GEOSGeometry* geom = GEOSIntersection_r(getGeosHandle(), geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
+					GEOSGeometry* geom = GEOSIntersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
 					if (geom == NULL) continue;
 					
 					// saving the results
 					vector<IShape* > vShapes;
 					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes);
-					// Using the new GEOS API:
-					//GEOSGeom_destroy(geom);
-					GEOSGeom_destroy_r(getGeosHandle(), geom);
+					GEOSGeom_destroy(geom);
 
 					// sum of area to exclude shapes from difference
 					if (buildSkipLists)
@@ -1691,10 +1620,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 
 					this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL, sfClip, clipId, fieldMap);	// shapes are released here
 				}
-
-				// Using the new GEOS API:
-				//GEOSGeom_destroy(geom1);
-				GEOSGeom_destroy_r(getGeosHandle(), geom1);
+				GEOSGeom_destroy(geom1);
 				
 				if (buildSkipLists)
 				{
@@ -1724,9 +1650,7 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(vGeometries[i]);
-			GEOSGeom_destroy_r(getGeosHandle(), vGeometries[i]);
+			GEOSGeom_destroy(vGeometries[i]);
 		}
 	}
 
@@ -2943,9 +2867,6 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 
 // ********************************************************************
 //		AggregateShapes()
-//
-// Checked: No GEOS calls
-// TODO: Add groupedBy field to resulting shape
 // ********************************************************************
 STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IShapefile** retval)
 {
@@ -3116,8 +3037,6 @@ STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIn
 	(*retval)->get_NumShapes(&numShapes);
 	if (numShapes == 0)
 	{
-		// No shapes are grouped, return an error:
-		ErrorMessage(tkRESULTINGSHPFILE_EMPTY);
 		(*retval)->Close(&vbretval);
 		(*retval)->Release();
 		(*retval) = NULL;
@@ -3583,7 +3502,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 // A utility function to add geometry produced by simplification routine to the sfTarget shapefile,
 // with copying of attributes from source shapefile.
 // initShapeIndex - the index of shape to copy the attribute from
-bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSource, int initShapeIndex )
+bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* sfSouce, int initShapeIndex )
 {
 	if (gsNew)
 	{
@@ -3604,7 +3523,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 					CComVariant val;
 					for (int f = 0; f < numFields; f++)
 					{
-						sfSource->get_CellValue(f, initShapeIndex, &val);
+						sfSouce->get_CellValue(f, initShapeIndex, &val);
 						sfTarget->EditCellValue(f, index, val, &vbretval);
 					}
 				}
@@ -3617,8 +3536,6 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 
 // **********************************************************************
 //		SimplifyLines()
-//
-// Nov. 2013 Updated to new GEOS API
 // **********************************************************************
 STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOnly, IShapefile** retVal)
 {
@@ -3659,7 +3576,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Simplifying..."));
+				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
 			}
 		}
 
@@ -3672,9 +3589,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 		shp->Release();
 		if (gsGeom == NULL) continue;
 
-		// Using the new GEOS API:
-		//int numGeom = GEOSGetNumGeometries(gsGeom);
-		int numGeom = GEOSGetNumGeometries_r(getGeosHandle(), gsGeom);
+		int numGeom = GEOSGetNumGeometries(gsGeom);
 			
 		/*	int numRings = 0;
 			if (type == "Polygon")
@@ -3682,22 +3597,16 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 
 		if (shpType == SHP_POLYLINE)
 		{
-			// Using the new GEOS API:
-			//GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
-			GEOSGeom gsNew = GEOSSimplify_r(getGeosHandle(), gsGeom, Tolerance);
+			GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
 			if (gsNew)
 			{
 				InsertGeosGeometry(sfNew, gsNew, this, i);
-				// Using the new GEOS API:
-				//GEOSGeom_destroy(gsNew);
-				GEOSGeom_destroy_r(getGeosHandle(), gsNew);
+				GEOSGeom_destroy(gsNew);
 			}
 		}
 		else
 		{
-			// Using the new GEOS API:
-			//char* val = GEOSGeomType(gsGeom);
-			char* val = GEOSGeomType_r(getGeosHandle(), gsGeom);
+			char* val = GEOSGeomType(gsGeom);
 			CString type = val;
 			CPLFree(val);
 
@@ -3707,36 +3616,24 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 				if (gsNew)
 				{
 					InsertGeosGeometry(sfNew, gsNew, this, i);
-					// Using the new GEOS API:
-					//GEOSGeom_destroy(gsNew);
-					GEOSGeom_destroy_r(getGeosHandle(), gsNew);
+					GEOSGeom_destroy(gsNew);
 				}
 			}
 			else
 			{
-				// Using the new GEOS API:
-				//for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
-				for (int n = 0; n < GEOSGetNumGeometries_r(getGeosHandle(), gsGeom); n++)
+				for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
 				{
-					// Using the new GEOS API:
-					//const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
-					const GEOSGeometry* gsPart = GEOSGetGeometryN_r(getGeosHandle(), gsGeom, n);
+					const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
 					GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsPart, Tolerance);
 					if (gsPart)
 					{
 						InsertGeosGeometry(sfNew, gsNew, this, i);
-
-						// Using the new GEOS API:						
-						//GEOSGeom_destroy(gsNew);
-						GEOSGeom_destroy_r(getGeosHandle(), gsNew);
+						GEOSGeom_destroy(gsNew);
 					}
 				}
 			}
 		}
-
-		// Using the new GEOS API:
-		//GEOSGeom_destroy(gsGeom);
-		GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
+		GEOSGeom_destroy(gsGeom);
 	}
 
 	globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
@@ -3744,8 +3641,6 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	sfNew->get_NumShapes(&numShapes);
 	if (numShapes == 0)
 	{
-		// No shapes are buffered, return an error:
-		ErrorMessage(tkRESULTINGSHPFILE_EMPTY);
 		sfNew->Close(&vbretval);
 		sfNew->Release();
 	}
@@ -3753,7 +3648,6 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	{
 		(*retVal) = sfNew;
 	}
-
 	return S_OK;
 }
 

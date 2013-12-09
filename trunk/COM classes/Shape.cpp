@@ -24,6 +24,7 @@
 #include "Shape.h"
 #include "GeometryOperations.h"
 #include "Templates.h"
+#include "Utilities\GeosHelper.h"
 
 #ifdef MY_DEBUG
 #include <fstream>
@@ -400,9 +401,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// added code
 	GEOSGeom hGeosGeom = NULL;	
 	
-	GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
-	hGeosGeom = oGeom->exportToGEOS(hGEOSCtxt);
-	OGRGeometry::freeGEOSContext( hGEOSCtxt );
+	hGeosGeom = GeosHelper::ExportToGeos(oGeom);
 
 	delete oGeom;
 

@@ -35,6 +35,7 @@ CComModule _Module;
 GlobalSettingsInfo m_globalSettings;
 GlobalClassFactory m_factory;
 
+#ifdef GEOS_NEW
 GEOSContextHandle_t _geosContextHandle = NULL;
 GEOSContextHandle_t getGeosHandle()
 {
@@ -42,6 +43,7 @@ GEOSContextHandle_t getGeosHandle()
 		_geosContextHandle = OGRGeometry::createGEOSContext();
 	return _geosContextHandle;
 }
+#endif
 
 IUtils* m_utils;
 IUtils* GetUtils()

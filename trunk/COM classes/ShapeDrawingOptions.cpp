@@ -837,6 +837,38 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesType(tkVertexType newVal)
 }
 
 // *****************************************************************
+//		get_FrameVisible()
+// *****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_FrameVisible(VARIANT_BOOL* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = m_options.drawFrame;
+	return S_OK;
+}
+STDMETHODIMP CShapeDrawingOptions::put_FrameVisible(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	m_options.drawFrame = newVal;
+	return S_OK;
+}
+
+// *****************************************************************
+//		get_FrameType()
+// *****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_FrameType(tkLabelFrameType* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = m_options.frameType;
+	return S_OK;
+}
+STDMETHODIMP CShapeDrawingOptions::put_FrameType(tkLabelFrameType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	m_options.frameType = newVal;
+	return S_OK;
+}
+
+// *****************************************************************
 //		LineDecorationSymbol()
 // *****************************************************************
 //STDMETHODIMP CShapeDrawingOptions::get_LineDecorationSymbol(IShapeDrawingOptions** retVal)
@@ -1437,6 +1469,22 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
 }
 #pragma endregion
 
+// ****************************************************************
+//		get_AlignPictureBottom
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_AlignPictureByBottom(VARIANT_BOOL *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	*pVal = m_options.alignIconByBottom; 	
+	return S_OK;
+}
+STDMETHODIMP CShapeDrawingOptions::put_AlignPictureByBottom(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
+	m_options.alignIconByBottom = newVal;	
+	return S_OK;
+}
+
 // ********************************************************
 //     Serialize()
 // ********************************************************
@@ -1576,6 +1624,15 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->useLinePattern != m_options.useLinePattern)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseLinePattern", CPLString().Printf("%d", (int)m_options.useLinePattern));
 
+	if (opt->alignIconByBottom != m_options.alignIconByBottom)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "AlignPictureByBottom", CPLString().Printf("%d", (int)m_options.alignIconByBottom));
+
+	if (opt->drawFrame != m_options.drawFrame)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameVisible", CPLString().Printf("%d", (int)m_options.drawFrame));
+
+	if (opt->frameType != m_options.frameType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameType", CPLString().Printf("%d", (int)m_options.frameType));
+
 	delete opt;
 
 	if (m_options.linePattern)
@@ -1611,6 +1668,7 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	CDrawingOptionsEx* opt = new CDrawingOptionsEx();
 
 	CString s;
+	
 	s = CPLGetXMLValue( node, "FillBgColor", NULL );
 	m_options.fillBgColor = (s == "") ? opt->fillBgColor : (OLE_COLOR)atoi(s.GetString());
 
@@ -1710,6 +1768,15 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "Visible", NULL );
 	m_options.visible = (s == "") ? opt->visible : atoi(s.GetString()) == 0 ? false : true;
 	
+	s = CPLGetXMLValue( node, "AlignPictureByBottom", NULL );
+	m_options.alignIconByBottom = (s == "") ? opt->alignIconByBottom : atoi(s.GetString()) == 0 ? false : true;
+
+	s = CPLGetXMLValue( node, "FrameVisible", NULL );
+	m_options.drawFrame = (s == "") ? opt->drawFrame : atoi(s.GetString()) == 0 ? false : true;
+
+	s = CPLGetXMLValue( node, "FrameType", NULL );
+	m_options.frameType = (s == "") ? opt->frameType : (tkLabelFrameType)atoi(s.GetString());
+
 	delete opt;
 
 	// restoring picture

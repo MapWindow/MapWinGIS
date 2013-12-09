@@ -779,7 +779,7 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 		}
 		else if( shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM )
 		{	
-			if( numPoints < 2 )
+			if( numPoints < 3 )
 			{	
 				ShpfileType tmpshptype = SHP_NULLSHAPE;
 				shp->put_ShapeType(tmpshptype);

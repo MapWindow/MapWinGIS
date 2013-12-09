@@ -34,6 +34,7 @@
 
 # define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
 
+
 #pragma region Operators
 // ********************************************************
 //	  Operator=
@@ -939,10 +940,15 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 					delete[] pnts;
 				}
 			}
-			
 			this->InitGdiPlusBrushAndPen(&rect);
 			if (this->penPlus)
 				this->penPlus->SetAlignment(Gdiplus::PenAlignmentCenter);
+
+			Gdiplus::GraphicsPath* path2 = NULL;
+			if (path && this->drawFrame)
+			{
+				path2 = this->GetFrameForPath(*path);
+			}
 
 			Gdiplus::Matrix mtx;
 			for (int j = 0; j < count; j++)
@@ -954,6 +960,11 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 				
 				g.SetTransform(&mtx);
 				
+				if (path2)
+				{
+					this->DrawGraphicPathWithFillColor(&g, path2, 4.0f);
+				}
+
 				if (this->fillVisible)
 					g.FillPath(this->brushPlus, path);
 				
@@ -1003,6 +1014,23 @@ void CDrawingOptionsEx::DrawGraphicPath(Gdiplus::Graphics* graphics, Gdiplus::Gr
 		this->ReleaseGdiPlusPen();
 	}
 }
+
+void CDrawingOptionsEx::DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::REAL width)
+{
+	this->ReleaseGdiPlusPen();
+	
+	if(this->fillVisible) 
+	{
+		long alpha = ((long)this->fillTransparency)<<24;
+		penPlus = new Gdiplus::Pen(Gdiplus::Color(alpha | BGR_TO_RGB(this->fillColor)), width);
+		if (this->penPlus)
+		{
+			this->penPlus->SetLineJoin(Gdiplus::LineJoinRound);
+			graphics->DrawPath(this->penPlus, path);
+			this->ReleaseGdiPlusPen();
+		}
+	}
+}
 #pragma endregion
 
 // *****************************************************
@@ -1020,4 +1048,43 @@ bool CDrawingOptionsEx::CanUseLinePattern()
 		}
 	}
 	return false;
+}
+
+Gdiplus::GraphicsPath* CDrawingOptionsEx::GetFrameForPath(Gdiplus::GraphicsPath& path)
+{
+	Gdiplus::GraphicsPath* path2 = NULL;
+	Gdiplus::RectF bounds;
+	Gdiplus::Status status = path.GetBounds(&bounds);
+	if (status == Gdiplus::Status::Ok)
+	{
+		path2 = new Gdiplus::GraphicsPath();
+
+		float offset = (bounds.Width + bounds.Height) / 8.0f;	// 1/4
+		float x = bounds.X - offset, y = bounds.Y - offset, w = bounds.Width + 2 * offset, h = bounds.Height + 2 * offset;
+		if (this->frameType == tkLabelFrameType::lfRoundedRectangle)
+		{
+			float max = max(w, h);
+			float delta = max - w;
+			if (delta > 0.0f) x -= delta/2.0f;
+			delta = max - h;
+			if (delta > 0.0f) y -= delta/2.0f;
+			w = h = max;
+		}
+
+		switch(this->frameType)
+		{
+			case tkLabelFrameType::lfRectangle:
+			case tkLabelFrameType::lfPointedRectangle:
+			default:
+				path2->AddLine(x, y, x, y + h);
+				path2->AddLine(x, y + h, x + w, y + h);
+				path2->AddLine(x + w, y + h, x + w, y);
+				path2->AddLine(x + w, y, x, y);
+				break;
+			case tkLabelFrameType::lfRoundedRectangle:
+				path2->AddEllipse(x, y, w, h);
+				break;
+		}
+	}
+	return path2;
 }

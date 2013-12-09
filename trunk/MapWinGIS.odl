@@ -1149,6 +1149,18 @@ interface IImage;
 		MeasureDistance = 0,
 		MeasureArea = 1,
 	} tkMeasuringType;
+	
+	typedef
+	[
+		uuid( B09FDAA5-7BD0-4fdf-9356-E6C4510E1B8C),
+		helpstring("Enumerated tkLocalizedStrings Types"),
+	]
+	enum tkLocalizedStrings
+	{		
+		lsHectars = 0,
+		lsMeters = 1,
+		lsKilometers = 2,
+	} tkLocalizedStrings;
 
 	/************************* tkCoordinateSystem **************************/
 	/*typedef
@@ -3317,6 +3329,15 @@ interface IShapeDrawingOptions : IDispatch{
 
 	[propget, id(61), helpstring("property MaxScaleWidth")] HRESULT MaxLineWidth([out, retval] double* pVal);
 	[propput, id(61), helpstring("property MaxScaleWidth")] HRESULT MaxLineWidth([in] double newVal);
+
+	[propget, id(62), helpstring("property AlignPictureByBottom")] HRESULT AlignPictureByBottom([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(62), helpstring("property AlignPictureByBottom")] HRESULT AlignPictureByBottom([in] VARIANT_BOOL newVal);
+
+	[propget, id(63), helpstring("property FrameVisible")] HRESULT FrameVisible([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(63), helpstring("property FrameVisible")] HRESULT FrameVisible([in] VARIANT_BOOL newVal);
+
+	[propget, id(64), helpstring("property FrameType")] HRESULT FrameType([out, retval] tkLabelFrameType* pVal);
+	[propput, id(64), helpstring("property FrameType")] HRESULT FrameType([in] tkLabelFrameType newVal);
 };
 
 // ***********************************  Label Interface  **********************************
@@ -4157,6 +4178,12 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(11), helpstring("property LabelsSmoothingMode")] HRESULT LabelsSmoothingMode([in] tkSmoothingMode newVal);
 	[propget, id(12), helpstring("property LabelsCompositingQuality")] HRESULT LabelsCompositingQuality([out, retval] tkCompositingQuality* pVal);
 	[propput, id(12), helpstring("property LabelsCompositingQuality")] HRESULT LabelsCompositingQuality([in] tkCompositingQuality newVal);
+	[propget, id(13), helpstring("property ShortUnitsString")] HRESULT ShortUnitsString([in] tkLocalizedStrings unit, [out, retval] BSTR* retVal);
+	[propput, id(13), helpstring("property ShortUnitsString")] HRESULT ShortUnitsString([in] tkLocalizedStrings unit, [in] BSTR localizedString);
+	[propget, id(14), helpstring("property ZoomToFirstLayer")] HRESULT ZoomToFirstLayer( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(14), helpstring("property ZoomToFirstLayer")] HRESULT ZoomToFirstLayer( [in]VARIANT_BOOL newVal);
+	[propget, id(15), helpstring("property LabelsCollisionMode")] HRESULT LabelsCollisionMode( [out, retval]tkCollisionMode* retVal);
+	[propput, id(15), helpstring("property LabelsCollisionMode")] HRESULT LabelsCollisionMode( [in]tkCollisionMode newVal);
 };
 
 [
@@ -4296,6 +4323,8 @@ interface IMeasuring : IDispatch{
 	[propget, id(8), helpstring("")] HRESULT Area([out,retval]double* retVal);
 	[propget, id(9), helpstring("")] HRESULT IsStopped([out,retval]VARIANT_BOOL* retVal);
 	[id(10), helpstring("")] HRESULT Clear();
+	[propget, id(11), helpstring("")] HRESULT Persistent([out, retval] VARIANT_BOOL* retVal);
+	[propput, id(11), helpstring("")] HRESULT Persistent([in] VARIANT_BOOL newVal);
 };
 
 [ 
@@ -4605,6 +4634,11 @@ library MapWinGIS
 
 			[id(200), helpstring("method ZoomToWorld")] VARIANT_BOOL ZoomToWorld();
 			[id(201), helpstring("method LoadTiles")] void LoadTiles(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
+
+			[id(203), helpstring("method FindSnapPoint")] VARIANT_BOOL FindSnapPoint(
+				[in]double tolerance, [in]double xScreen, [in]double yScreen, [in, out]double* xFound, [in, out]double* yFound);
+
+			[id(204), helpstring("method TilesAreInCache")] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
 };
 			//}}AFX_ODL_METHOD
 	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),

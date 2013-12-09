@@ -1738,6 +1738,9 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return S_OK;
 	}
+	
+	CString str = OLE2CA(newVal);
+	m_labelExpression = str;
 
 	if (!m_synchronized)
 	{
@@ -1749,8 +1752,6 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 		m_shapefile->get_Table(&table);
 		if (table)
 		{
-			CString str = OLE2CA(newVal);
-
 			// analyses expression
 			CString strError;
 			std::vector<CString> results;
@@ -1763,9 +1764,6 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 					{
 						(*m_labels[i])[0]->text = results[i];
 					}
-					
-					// finally saves the expression
-					m_labelExpression = str;
 				}
 			}
 			else
@@ -1776,7 +1774,6 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 					{
 						(*m_labels[i])[0]->text = "";
 					}
-					m_labelExpression = str;
 				}
 				else
 				{
@@ -2407,7 +2404,7 @@ bool CLabels::GenerateEmptyLabels()
 	}
 	
 	this->put_Synchronized(VARIANT_TRUE);
-	return true;
+ 	return true;
 }
 
 // ************************************************************

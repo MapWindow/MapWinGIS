@@ -45,6 +45,8 @@ public:
 	bool fillVisible;
 	bool linesVisible;
 	bool fillBgTransparent;
+	bool alignIconByBottom;		// bottom center of the icon will be placed in the specified position on the map
+	bool drawFrame;
 
 	double scale;	// the current mapscale (for inner use only)
 
@@ -86,6 +88,7 @@ public:
 	tkVectorDrawingMode drawingMode;
 	tkGradientBounds fillGradientBounds;
 	tkGradientType fillGradientType;
+	tkLabelFrameType frameType;
 	
 	VARIANT_BOOL verticesVisible;
 	VARIANT_BOOL verticesFillVisible;
@@ -134,6 +137,8 @@ public:
 		fillVisible = true;
 		linesVisible = true;
 		fillBgTransparent = true;
+		alignIconByBottom = true;
+		drawFrame = false;
 		
 		fillColor = RGB(255,0,0);
 		fillColor2 = RGB(200,200,200);
@@ -155,6 +160,7 @@ public:
 		fillType = ftStandard;
 		pointShapeType = ptShapeRegular;
 		fillGradientBounds = gbPerShape;
+		frameType = lfRectangle;
 
 		picture = NULL;
 		pointCharcter = 'a';
@@ -225,6 +231,7 @@ public:
 	
 	#pragma region Functions
 
+	Gdiplus::GraphicsPath* GetFrameForPath(Gdiplus::GraphicsPath& path);
 	bool CanUseLinePattern();
 	void DrawGraphicPath(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path);
 	void FillGraphicsPath(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::RectF& bounds);
@@ -257,5 +264,7 @@ public:
 	void DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::Point* points, float* angles, int count);
 	int LineStippleToGDIPenStyle(tkDashStyle lineStipple);
 	Gdiplus::GraphicsPath* get_FontCharacterPath(CDC* dc, bool previewDrawing);
+
+	void DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::REAL width);
 	#pragma endregion
 };

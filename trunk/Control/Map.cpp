@@ -245,6 +245,8 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "LoadTiles", dispidLoadTiles, LoadTiles, VT_EMPTY,VTS_DISPATCH VTS_I4 VTS_BSTR VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "DrawWideCircleEx", dispidDrawWideCircleEx, DrawWideCircleEx, VT_EMPTY, VTS_I4 VTS_R8 VTS_R8 VTS_R8 VTS_COLOR VTS_BOOL VTS_I2)
 	DISP_FUNCTION_ID(CMapView, "DrawWidePolygonEx", dispidDrawWidePolygonEx, DrawWidePolygonEx, VT_EMPTY, VTS_I4 VTS_VARIANT VTS_VARIANT VTS_I4 VTS_COLOR VTS_BOOL VTS_I2)
+	DISP_FUNCTION_ID(CMapView, "TilesAreInCache", dispidTilesAreInCache, TilesAreInCache, VT_I4,VTS_DISPATCH VTS_I4 VTS_I4)
+
     // Added ajp June 2010
 	DISP_PROPERTY_EX_ID(CMapView, "DegreeRotationAngle", dispidMapRotationAngle, GetMapRotationAngle, SetMapRotationAngle, VT_R4)
 	DISP_PROPERTY_EX_ID(CMapView, "RotatedExtent", dispidRotatedExtent, GetRotatedExtent, SetNotSupported, VT_DISPATCH)
@@ -291,6 +293,8 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "Measuring", dispidMeasuring, GetMeasuring, SetNotSupported, VT_DISPATCH)
 	DISP_FUNCTION_ID(CMapView, "ZoomToTileLevel", dispidZoomToTileLevel, ZoomToTileLevel, VT_BOOL, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "ZoomToWorld", dispidZoomToWorld, ZoomToWorld, VT_BOOL, VTS_NONE)
+	DISP_FUNCTION_ID(CMapView, "FindSnapPoint", dispidFindSnapPoint, FindSnapPoint, VT_BOOL, VTS_R8 VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP
 #pragma endregion
@@ -489,8 +493,6 @@ CMapView::CMapView()
 	m_rectTrackerIsActive = false;
 
 	m_drawMouseMoves = false;
-	m_blockMouseMoves = false;
-
 	m_lastWidthMeters = 0.0;
 }
 

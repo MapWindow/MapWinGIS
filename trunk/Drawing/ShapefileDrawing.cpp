@@ -625,6 +625,8 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 #pragma endregion
 
 #pragma region DrawPointCategory
+
+
 // *************************************************************
 //		DrawPointsCategory()
 // *************************************************************
@@ -636,6 +638,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	tkDrawingShape pntShape;
 	
 	GraphicsPath* path = NULL;
+	GraphicsPath* path2 = NULL;		// for frame around character
 	float* data = NULL;
 	Bitmap* bmPixel = NULL;
 	int numPoints = 0;
@@ -649,10 +652,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		if ( options->pointSize <= 1.0 )
 		{
 			pntShape = pshPixel;
-			if ( options->linesVisible )
-				pixelColor = options->lineColor;
-			else
-				pixelColor = options->fillColor;
+			pixelColor = options->linesVisible? options->lineColor: options->fillColor;
 			
 			if (options->drawingMode == vdmGDIMixed || options->drawingMode == vdmGDI)
 			{
@@ -666,7 +666,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		}
 		else
 		{
-			options->drawingMode = vdmGDIPlus;	// GDI drawing will lead to rounding coordinates to intergers, and distortions as a result
+			options->drawingMode = vdmGDIPlus;	// GDI drawing will lead to rounding coordinates to integers, and distortions as a result
 			pntShape = pshPolygon;
 			data = get_SimplePointShape(options->pointShapeType, options->pointSize, options->rotation, options->pointNumSides, options->pointShapeRatio, &numPoints);
 			if (!data) 
@@ -730,7 +730,14 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		_graphics->GetTransform(&mtx);
 		mtx.Rotate((Gdiplus::REAL)options->rotation);
 		path->Transform(&mtx);
+		if (path2) path2->Transform(&mtx);
 		pntShape = pshPolygon;
+	}
+
+	// frame for s symbol
+	if (path && options->drawFrame)
+	{
+		path2 = options->GetFrameForPath(*path);
 	}
 
 	VARIANT_BOOL fastMode;
@@ -811,8 +818,15 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					options->picture->get_Height(&height);
 					int wd = static_cast<int>((double)width * options->scaleX/2.0);
 					int ht = static_cast<int>((double)height * options->scaleY/2.0);
-
-					rect = new CRect(xInt - wd, yInt - ht, xInt + wd, yInt + ht);
+					
+					if (!options->alignIconByBottom)
+					{
+						rect = new CRect(xInt - wd, yInt - ht, xInt + wd, yInt + ht);
+					}
+					else
+					{
+						rect = new CRect(xInt - wd, yInt - ht * 2, xInt + wd, yInt);
+					}
 				}
 				else
 				{
@@ -858,8 +872,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 			}
 			else if (pntShape == pshPicture)
 			{
-				Gdiplus::Matrix mtx;
-				_graphics->GetTransform(&mtx);
+				Gdiplus::Matrix mtxInit;
+				_graphics->GetTransform(&mtxInit);
 				
 				long width, height;
 				options->picture->get_Width(&width);
@@ -867,10 +881,17 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 				int wd = static_cast<int>((double)width * options->scaleX/2.0);
 				int ht = static_cast<int>((double)height * options->scaleY/2.0);
 				
-				mtx.Translate((float)(xInt), (float)(yInt));
-				mtx.Rotate((float)options->rotation);
-				mtx.Translate((float)-wd, (float)-ht);
-				_graphics->SetTransform(&mtx);
+				_graphics->TranslateTransform((float)(xInt), (float)(yInt));
+				_graphics->RotateTransform((float)options->rotation);
+				if (!options->alignIconByBottom)
+				{
+					_graphics->TranslateTransform((float)-wd, (float)-ht);
+				}
+				else
+				{
+					_graphics->TranslateTransform((float)-wd, (float)-ht * 2);
+				}
+				//_graphics->SetTransform(&mtxNew);
 				
 				Gdiplus::Rect rect(0, 0, INT(options->bitmapPlus->GetWidth() * options->scaleX), INT(options->bitmapPlus->GetHeight() * options->scaleY));
 
@@ -885,8 +906,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					_graphics->FillRectangle(&brush, rect);
 				}
 
-				mtx.Reset();
-				_graphics->SetTransform(&mtx);
+				//mtxInit.Reset();
+				_graphics->SetTransform(&mtxInit);
 
 				(*_shapeData)[shapeIndex]->size = MAX(wd, ht);
 			}
@@ -895,12 +916,18 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 				// GDI+ mode
 				if ( options->drawingMode == vdmGDIPlus || options->drawingMode == vdmGDIMixed )
 				{
-					Gdiplus::Matrix mtx;
-					mtx.Translate(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
-					_graphics->SetTransform(&mtx);
+					Gdiplus::Matrix mtxInit;
+					_graphics->GetTransform(&mtxInit);
 					
+					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+
 					if (!drawSelection || m_selectionTransparency < 255)
 					{
+						if (options->pointSymbolType == ptSymbolFontCharacter && path2)
+						{
+							options->DrawGraphicPathWithFillColor(_graphics, path2, 4.0f);
+						}
+						
 						// drawing fill
 						if ( options->fillVisible )
 						{
@@ -913,9 +940,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 							options->DrawGraphicPath(_graphics, path);
 						}
 					}
-
-					mtx.Reset();
-					_graphics->SetTransform(&mtx);
+					_graphics->SetTransform(&mtxInit);
 				}
 				
 				// GDI mode
@@ -941,15 +966,15 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 				// drawing transparent selection
 				if (drawSelection)
 				{
-					Gdiplus::Matrix mtx;
-					mtx.Translate(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
-					_graphics->SetTransform(&mtx);
+					Gdiplus::Matrix mtxInit;
+					_graphics->GetTransform(&mtxInit);
 					
+					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+				
 					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
 					_graphics->FillPath(&brush, path);
 
-					mtx.Reset();
-					_graphics->SetTransform(&mtx);
+					_graphics->SetTransform(&mtxInit);	
 				}
 
 				(*_shapeData)[shapeIndex]->size = (int)options->pointSize;
@@ -971,6 +996,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	if ( bmPixel ) delete bmPixel;
 	if ( path )	delete path;
 	if ( data )	delete[] data;
+	if (path2) delete path2;
 	
 	options->ReleaseGdiPlusBrush();
 	options->ReleaseGdiPlusBitmap();

@@ -543,7 +543,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					offset = (*shapeData)[i]->size/2 + 2;
 				}
 
-				// we make very narrow rect wider to have circular form in case of rounde frames
+				// we make very narrow rect wider to have circular form in case of rounded frames
 				if (rect.Height() > rect.Width())
 				{
 					long add = (long)ceil(double((rect.Height() - rect.Width())/2));
@@ -586,7 +586,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						rect.OffsetRect(0, offset);
 					}
 				}
-				else
+				
+				//else		// let's use standard offsets on the top of auto mode as well
 				{
 					rect.left += (LONG)m_options->offsetX;
 					rect.right += (LONG)m_options->offsetX;
@@ -761,8 +762,10 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					gpRect.Width = (Gdiplus::REAL)rect.Width();
 					gpRect.Height = (Gdiplus::REAL)rect.Height();
 
+
 					Gdiplus::Matrix mtxInit;
 					_graphics->GetTransform(&mtxInit);
+					
 
 					//Gdiplus::Matrix mtx;
 					//mtx.Translate((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);

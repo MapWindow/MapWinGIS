@@ -87,10 +87,10 @@ public:
 	{
 		if (str.size() != 0)
 		{
-			str = base64_decode(str);
-			const char* data = str.c_str();
+			std::string strNew = base64_decode(str);
+			const char* data = strNew.c_str();
 			
-			return this->LoadFromRawData(data, (int)str.size());
+			return this->LoadFromRawData(data, (int)strNew.size());
 		}
 		return false;
 	}
@@ -100,7 +100,21 @@ public:
 	// **************************************************
 	std::string SerializeToBase64String()
 	{
-		return base64_encode(reinterpret_cast<unsigned char*>(m_data), m_size);
+		if (m_data && m_size > 0)
+		{
+			void* hMem = ::GlobalLock(m_data);
+			if (hMem)
+			{
+				char* data = new char[m_size];
+				memcpy(data, hMem, m_size);
+				::GlobalUnlock(hMem);
+				
+				std::string str = base64_encode(reinterpret_cast<unsigned char*>(data), m_size);
+				delete[] data;
+				return str;
+			}
+		}
+		return "";
 	}
 
 	// **************************************************
@@ -142,16 +156,22 @@ public:
 	void Release()
 	{
 		if (m_bitmap)
+		{
 			delete m_bitmap;
+			m_bitmap = NULL;
+		}
 
 		if (m_stream)
+		{
 			m_stream->Release();
+			m_stream = NULL;
+		}
 
 		if (m_data)
 		{
 			m_data = GlobalFree(m_data);
+			m_data = NULL;
 		}
-
 		m_size = 0;
 	}
 

@@ -117,6 +117,41 @@ STDMETHODIMP CGlobalSettings::put_ShapefileFastMode(VARIANT_BOOL newVal)
 }
 
 // ****************************************************
+//	    get_ShapefileFastMode()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_ZoomToFirstLayer(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.zoomToFirstLayer ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_ZoomToFirstLayer(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.zoomToFirstLayer = newVal == VARIANT_FALSE ? false: true;
+	return S_OK;
+}
+
+// ****************************************************
+//	    get_LabelCollisionMode()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_LabelsCollisionMode(tkCollisionMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.labelsCollisionMode;
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_LabelsCollisionMode(tkCollisionMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.labelsCollisionMode = newVal;
+	return S_OK;
+}
+
+
+// ****************************************************
 //	    get_InvalidShapesBufferDistance()
 // ****************************************************
 STDMETHODIMP CGlobalSettings::get_InvalidShapesBufferDistance(DOUBLE* pVal)
@@ -260,3 +295,20 @@ STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(tkSmoothingMode newVal)
 	return S_OK;
 }
 #pragma endregion
+
+STDMETHODIMP CGlobalSettings::put_ShortUnitsString(tkLocalizedStrings unit, BSTR localizedString)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	m_globalSettings.shortUnitStrings[unit] = OLE2A(localizedString);
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::get_ShortUnitsString(tkLocalizedStrings unit, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = m_globalSettings.GetLocalizedString(unit);
+	USES_CONVERSION;
+	*retVal = A2BSTR(s);
+	return S_OK;
+}

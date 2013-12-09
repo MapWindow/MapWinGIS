@@ -27,7 +27,6 @@
 #include <vector>
 
 
-
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
@@ -59,7 +58,7 @@ public:
 		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 		closedPoly = false;
 		firstPointIndex = -1;
-		//poly = new GeographicLib::PolygonArea(geod);
+		persistent = VARIANT_FALSE;
 	}
 
 	~CMeasuring()
@@ -109,6 +108,9 @@ public:
 	STDMETHOD(Clear)();
 	STDMETHOD(get_SegementLength)(int segmentIndex, double* retVal);
 
+	STDMETHOD(get_Persistent)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_Persistent)(VARIANT_BOOL newVal);
+
 	// projection should be specified before any calculations are possible
 	bool SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode);
 	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
@@ -125,6 +127,9 @@ public:
 	double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y);
 	double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y) ;
 
+	int CMeasuring::get_ScreenPoints(void* map, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
+
+	VARIANT_BOOL persistent;			   // will be drawn even when cursor mode isn't cmMeasure
 	tkMeasuringType measuringType;
 	Point2D mousePoint;					   // points entered by user (in map units, whatever they are)
 	

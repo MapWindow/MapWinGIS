@@ -235,14 +235,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		m_ttip.Activate(FALSE);
 		//Selection Box
 
-		if( m_sendMouseDown == TRUE )
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-		}
-
 		CMapTracker selectBox = CMapTracker( this,
 			CRect(0,0,0,0),
 			CRectTracker::solidLine +
@@ -259,6 +251,17 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
 			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
 			selected = false;
+		
+		if (!selected || !m_sendSelectBoxFinal)
+		{
+			if( m_sendMouseDown == TRUE )
+			{
+				if (m_Rotate != NULL && m_RotateAngle != 0)
+					this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
+				else
+					this->FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
+			}
+		}
 
 		if( selected )
 		{
@@ -335,7 +338,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		else if ( nFlags & MK_SHIFT )	// when shift is pressed we seek for nearby point across all layers
 		{
 			double tolerance = 20;   // pixels;   TODO: make a parameter
-			if (FindSnapPoint(tolerance, point.x, point.y, x, y))
+			
+			if (FindSnapPoint(tolerance, point.x, point.y, &x, &y))
 				found = true;
 			else
 			{	// simply don't add a point, there is nothing to snap near by
@@ -358,7 +362,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				((CMeasuring*)m_measuring)->ClosePoly(closePointIndex);
 
 			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointAdded);
-			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
+			m_drawMouseMoves = false;	// we need to redraw in a normal way at least once
 
 			// better to call it before the redraw
 			if( m_sendMouseDown ) {
@@ -381,9 +385,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 }
 
 // ************************************************************
-//		OnLButtonDblClick
+//		FindSnapPoint
 // ************************************************************
-bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound)
+VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound)
 {
 	double x, y, x2, y2;
 	this->PixelToProjection( xScreen, yScreen, x, y );
@@ -427,7 +431,7 @@ bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, d
 		foundShapefile->get_Shape(foundShapeIndex, &shape);
 		if (shape)
 		{
-			shape->get_XY(foundPointIndex, &xFound, &yFound, &vb);
+			shape->get_XY(foundPointIndex, xFound, yFound, &vb);
 			shape->Release();
 			result = true;
 		}
@@ -542,9 +546,9 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		else
 		{
 			if (m_Rotate != NULL && m_RotateAngle != 0)
-  				this->FireMouseMove( mbutton, (short)vbflags, rotPoint.x, rotPoint.y - 1 );   
+  				this->FireMouseMove( mbutton, (short)vbflags, rotPoint.x, rotPoint.y );  // rotPoint.y - 1
 			else
- 				this->FireMouseMove( mbutton, (short)vbflags, point.x, point.y - 1 );
+ 				this->FireMouseMove( mbutton, (short)vbflags, point.x, point.y ); // point.y - 1
 		}
 	}
 
@@ -719,15 +723,14 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			vbflags |= 2;
 
 		m_clickDown = point;
-      m_clickDownExtents = extents;
+		m_clickDownExtents = extents;
 
 		VARIANT_BOOL redraw;
 		if( m_cursorMode == cmMeasure )
 		{
-			// we need to update before firing the event
 			((CMeasuring*)m_measuring)->UndoPoint(&redraw);
 			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointRemoved);
-			m_blockMouseMoves = true;	// we need to redraw in a normal way at least once
+			m_drawMouseMoves = false;	// we need to redraw in a normal way at least once
 		}
 
 		if( m_sendMouseDown == TRUE )
@@ -1090,8 +1093,13 @@ void CMapView::OnDoubleBufferChanged(){}
 void CMapView::OnZoomPercentChanged(){}
 void CMapView::OnCursorModeChanged()
 {
-	if (m_cursorMode != cmMeasure && m_measuring)
-		m_measuring->Clear();
+	if (m_measuring)
+	{
+		VARIANT_BOOL vb;
+		m_measuring->get_Persistent(&vb);
+		if (m_cursorMode != cmMeasure && !vb)
+			m_measuring->Clear();
+	}
 }
 void CMapView::OnUDCursorHandleChanged(){}
 void CMapView::OnSendMouseDownChanged(){}

@@ -59,18 +59,12 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 
 		Gdiplus::Graphics* gBuffer = Gdiplus::Graphics::FromImage(m_bufferBitmap);
 		
-		// drawing layers
-		//gBuffer->DrawImage(m_tilesBitmap, (Gdiplus::REAL)0.0, (Gdiplus::REAL)0.0);
-		//gBuffer->DrawImage(m_layerBitmap, (Gdiplus::REAL)0.0, (Gdiplus::REAL)0.0);
-		//gBuffer->DrawImage(m_drawingBitmap, (Gdiplus::REAL)0.0, (Gdiplus::REAL)0.0);
-	
 		// blit to the screen
 		HDC hdc = pdc->GetSafeHdc();
 		Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
 		g->DrawImage(m_bufferBitmap, (Gdiplus::REAL)x, (Gdiplus::REAL)y);
 		g->ReleaseHDC(hdc);
 		delete g;
-
 		delete gBuffer;
 	}
 	else
@@ -79,23 +73,21 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 		if (m_lockCount > 0)
 			return;
 		
-		if (m_drawMouseMoves && !(m_blockMouseMoves || !m_canbitblt)) {
-			this->DrawMouseMoves(pdc, rcBounds, rcInvalid);   // drawing it on the top of buffer
+		if ( m_drawMouseMoves && m_canbitblt) {	 // there was request to update measuring and no changes to other layers
+			this->DrawMouseMoves(pdc, rcBounds, rcInvalid);   // drawing on the top of buffer
 			m_drawMouseMoves = false;
 		}
 		else {
 			this->HandleNewDrawing(pdc, rcBounds, rcInvalid);
-			if (m_cursorMode == cmMeasure)
+			
+			if (m_cursorMode == cmMeasure || ((CMeasuring*)m_measuring)->persistent)
 			{
-				// let it blink on each loading of tile for a while,
+				// let it blink on each loading of tile
 				this->DrawMouseMoves(pdc, rcBounds, rcInvalid);
 			}
-			m_blockMouseMoves = false;
 		}
 	}
 }
-
-
 
 // ***************************************************************
 //		OnDraw()
@@ -125,17 +117,9 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		Gdiplus::RectF clip(rcInvalid.left, rcInvalid.top, rcInvalid.Width(), rcInvalid.Height());
 		gPrinting->SetClip(clip);
 		
-
-		//gPrinting->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);
-		//gPrinting->Clear(backColor);
-		
 		Gdiplus::Color color(255, 255, 255, 255);
 		Gdiplus::SolidBrush brush(color);
-		gPrinting->FillRectangle(&brush, 0.0f, 0.0f, (float)1000.0f, (float)1000.0f);
-		
-		/*Gdiplus::Color color2(100, 255, 0, 0);
-		brush.SetColor(color2);
-		gPrinting->FillRectangle(&brush, 0.0f, 0.0f, 1000.0f, 1000.0f);*/
+		gPrinting->Clear(color);
 	}
 	else
 	{
@@ -150,7 +134,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 
 	bool tilesUpdate = false;
 	// if projection isn't defined there is no way to display tiles
-	if (tilesVisible && m_transformationMode != tmNotDefined)		// TODO: restore
+	if (tilesVisible && m_transformationMode != tmNotDefined)
 	{
 		CTiles* tiles = (CTiles*)m_tiles;
 		if (m_isSnapshot)
@@ -293,10 +277,10 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 				// displaying the time
 				DWORD endTick = GetTickCount();
 				this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
-				m_canbitblt = TRUE;
 			}
 		}
 	}
+	m_canbitblt = TRUE;
 	
 	// hot tracking
 	if (m_hotTracking.Shapefile && !m_isSnapshot)
@@ -358,10 +342,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	if (m_scalebarVisible)
 		this->DrawScaleBar(m_isSnapshot ? gPrinting : gBuffer);
 
-	if (m_cursorMode == cmMeasure && !m_isSnapshot)
+	VARIANT_BOOL persistent;
+	m_measuring->get_Persistent(&persistent);
+	if (m_cursorMode == cmMeasure || persistent)
 	{
-		this->DrawMeasuring(gBuffer);
-		//this->DrawMouseMovesCore(gBuffer);
+		this->DrawMeasuring(m_isSnapshot ? gPrinting : gBuffer);
 	}
 
 	// passing the main buffer to the screen
@@ -1268,6 +1253,38 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 }
 
 // *********************************************************************
+//    TilesAreInCache()
+// *********************************************************************
+INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	
+	if (Extents)
+	{
+		// Get the image height based on the box aspect ratio
+		double xMin, xMax, yMin, yMax, zMin, zMax;
+		Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		
+		// Make sure that the width and height are valid
+		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
+		if (WidthPixels <= 0 || Height <= 0)
+		{
+			if( m_globalCallback != NULL )
+				m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+		}
+		else
+		{
+			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
+			bool tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this, provider);
+			RestoreExtents();
+			return tilesInCache ? 1 : 0;
+		}
+	}
+	return -1;	// error
+}
+
+// *********************************************************************
 //    LoadTiles()
 // *********************************************************************
 // Loads tiles for specified extents
@@ -1276,32 +1293,35 @@ void CMapView::LoadTiles(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTil
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 	
-	// Get the image height based on the box aspect ratio
-	double xMin, xMax, yMin, yMax, zMin, zMax;
-	Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-	
-	// Make sure that the width and height are valid
-	long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
-	if (WidthPixels <= 0 || Height <= 0)
+	if (Extents)
 	{
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
-	}
-	else
-	{
-		CString key = (char*)Key;
-		SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-		bool tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this, provider);
-		if (!tilesInCache)
+		// Get the image height based on the box aspect ratio
+		double xMin, xMax, yMin, yMax, zMin, zMax;
+		Extents->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		
+		// Make sure that the width and height are valid
+		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
+		if (WidthPixels <= 0 || Height <= 0)
 		{
-			((CTiles*)m_tiles)->LoadTiles((void*)this, true, (int)provider, key);
-			RestoreExtents();
+			if( m_globalCallback != NULL )
+				m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
 		}
 		else
 		{
-			// they are already here, no loading is needed
-			RestoreExtents();
-			FireTilesLoaded(m_tiles, NULL, true, key);
+			CString key = (char*)Key;
+			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
+			bool tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this, provider);
+			if (!tilesInCache)
+			{
+				((CTiles*)m_tiles)->LoadTiles((void*)this, true, (int)provider, key);
+				RestoreExtents();
+			}
+			else
+			{
+				// they are already here, no loading is needed
+				RestoreExtents();
+				FireTilesLoaded(m_tiles, NULL, true, key);
+			}
 		}
 	}
 }
@@ -1331,25 +1351,6 @@ BOOL CMapView::SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float Off
 		return FALSE;
 	}
 	
-	//Debug::WriteLine("Dpi: %f", g->GetDpiX());
-	//Gdiplus::Matrix m;
-	//g->GetTransform(&m);
-	//Debug::WriteLine("Offset X: %f", m.OffsetX());
-	//Debug::WriteLine("Offset Y: %f", m.OffsetY());
-
-	/*Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(dc);
-	g->TranslateTransform(OffsetX, OffsetY);
-	Gdiplus::RectF r(0,0,100, 100);
-	Gdiplus::SolidBrush br(Gdiplus::Color::Gray);
-	g->FillRectangle(&br, r);
-	g->ReleaseHDC(dc);
-	delete g;*/
-
-	//CRect r(50, 50, 150, 150);
-	//COLORREF clr = 255;
-	//CBrush brush(clr);
-	//tempDC->FillRect(r, &brush);
-
 	SnapShotCore(xMin, xMax, yMin, yMax, Width, Height, tempDC, OffsetX, OffsetY, ClipX, ClipY, clipWidth, clipHeight);
 	return TRUE;
 }
@@ -1452,42 +1453,6 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	SetTempExtents(left, right, top, bottom, Width, Height);
 
-	// saving the state of (do this even in case no new extents are needed, for not to hide declarations in the block)
-	//long mm_viewWidth = m_viewWidth;
-	//long mm_viewHeight = m_viewHeight;
-	//double mm_pixelPerProjectionX = m_pixelPerProjectionX;
-	//double mm_pixelPerProjectionY = m_pixelPerProjectionY;
-	//double mm_inversePixelPerProjectionX = m_inversePixelPerProjectionX;
-	//double mm_inversePixelPerProjectionY = m_inversePixelPerProjectionY;
-	//double mm_aspectRatio = m_aspectRatio;
-	//double mm_left = extents.left;
-	//double mm_right = extents.right;
-	//double mm_bottom = extents.bottom;
-	//double mm_top = extents.top;
-
-	//// calculating new bounds
-	//if (newExtents)
-	//{
-	//	m_viewWidth=Width;
-	//	m_viewHeight=Height;
-	//	//ResizeBuffers(m_viewWidth, m_viewHeight);
-	//	m_aspectRatio = (double)Width / (double)Height; 
-
-	//	double xrange = right - left;
-	//	double yrange = top - bottom;
-	//	m_pixelPerProjectionX = m_viewWidth/xrange;
-	//	m_inversePixelPerProjectionX = 1.0/m_pixelPerProjectionX;
-	//	m_pixelPerProjectionY = m_viewHeight/yrange;
-	//	m_inversePixelPerProjectionY = 1.0/m_pixelPerProjectionY;
-	//	
-	//	extents.left = left;
-	//	extents.right = right - m_inversePixelPerProjectionX;
-	//	extents.bottom = bottom;
-	//	extents.top = top - m_inversePixelPerProjectionY;
-
-	//	CalculateVisibleExtents(Extent(left,right,bottom,top));
-	//}
-
 	if (mm_newExtents)
 	{
 		ReloadImageBuffers();
@@ -1517,14 +1482,15 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	}
 
 	CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
-	if (clipWidth != 0.0 && clipHeight != 0.0)
+	CRect rcClip(clipX, clipY, clipWidth, clipHeight);
+	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcBounds : &rcClip;
+	
+	HandleNewDrawing(snapDC, rcBounds, *r, offsetX, offsetY);
+	
+	CMeasuring* m = (CMeasuring*)m_measuring;
+	if (m->persistent && m->IsStopped() && m->measuringType == tkMeasuringType::MeasureArea)
 	{
-		CRect rcClip(clipX, clipY, clipWidth, clipHeight);
-		HandleNewDrawing(snapDC, rcBounds, rcClip, offsetX, offsetY);
-	}
-	else
-	{
-		HandleNewDrawing(snapDC, rcBounds, rcBounds, offsetX, offsetY);
+		DrawMouseMoves(snapDC, rcBounds, *r, true, offsetX, offsetY);
 	}
 
 	m_canbitblt=FALSE;
@@ -1560,24 +1526,6 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		mm_newExtents = false;
 	}
 
-	// restore the previous state
-	//if (newExtents)
-	//{
-	//	m_viewWidth = mm_viewWidth;
-	//	m_viewHeight = mm_viewHeight;
-	//	//ResizeBuffers(m_viewWidth, m_viewHeight);
-	//	m_aspectRatio = mm_aspectRatio; 
-	//	m_pixelPerProjectionX = mm_pixelPerProjectionX;
-	//	m_pixelPerProjectionY = mm_pixelPerProjectionY;
-	//	m_inversePixelPerProjectionX = mm_inversePixelPerProjectionX;
-	//	m_inversePixelPerProjectionY = mm_inversePixelPerProjectionY;
-	//	extents.left = mm_left;
-	//	extents.right = mm_right;
-	//	extents.bottom = mm_bottom;
-	//	extents.top = mm_top;
-	//	this->ReloadImageBuffers();
-	//}
-	
 	if (tilesInCache)
 	{
 		((CTiles*)m_tiles)->LoadTiles((void*)this, false);	  // restore former list of tiles in the buffer
@@ -1843,12 +1791,6 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 
 				g->ResetTransform();
 			}
-
-			/*CString s;
-			s.Format("Invalid number of breaks: %d", count);	
-
-			if (count < 2 || count > 10)
-				AfxMessageBox(s);*/
 		}
 	}
 
@@ -1875,24 +1817,27 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 	angle = GetPointAngle(x, y) * 180.0 / pi;							
 	angle = - (angle - 90.0);
 
+	CString m = m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMeters);
+	CString km = m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsKilometers);
+
 	if (length > 1000.0)
 	{
-		s1.Format("%.2f km", length / 1000.0);
+		s1.Format("%.2f %s", length / 1000.0, km);
 	}
 	else
 	{
-		s1.Format("%.1f m", length);
+		s1.Format("%.1f %s", length, m);
 	}
 	
 	if (segmentIndex > 0 && totalLength != 0.0)
 	{
 		if (totalLength > 1000.0)
 		{
-			s2.Format("%.2f km", totalLength / 1000.0);
+			s2.Format("%.2f %s", totalLength / 1000.0, km);
 		}
 		else
 		{
-			s2.Format("%.1f m", totalLength);
+			s2.Format("%.1f %s", totalLength, m);
 		}
 		s.Format("%s (%s)", s1, s2);
 	}
@@ -1937,23 +1882,6 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 			
 		}
 		
-		// draw white blur
-		/*for(int i = -2; i <= 2; i++)
-		{
-			for(int j = -2; j <= 2; j++)
-			{
-				if (i != 0 && j != 0)
-				{
-					r.X = (Gdiplus::REAL)i;
-					r.Y = -r.Height + j;
-					g->DrawString(wStr, wcslen(wStr), measure->font, r, &measure->format, &measure->whiteBrush);
-					
-					r.Y = j;
-					g->DrawString(wAz, wcslen(wAz), measure->font, r, &measure->format, &measure->whiteBrush);
-				}
-			}
-		}*/
-
 		// draw black text
 		r1.X = (width - r1.Width) / 2.0f;
 		r1.Y = -r1.Height;
@@ -1979,7 +1907,6 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 // ****************************************************************
 //		DrawMeasuring()
 // ****************************************************************
-
 void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 {
 	// transparency
@@ -1999,112 +1926,63 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 			g->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
 			g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
 
-			if (measuring->measuringType == tkMeasuringType::MeasureDistance)  // drawing the last segment only
+			// drawing the last segment only
+			if (measuring->measuringType == tkMeasuringType::MeasureDistance)  
 			{
-				Gdiplus::PointF* data = new Gdiplus::PointF[size];
+				/*Gdiplus::PointF* data = new Gdiplus::PointF[size];
 				double x, y;
 				for(size_t i = 0; i < measuring->points.size(); i++) {
 					this->ProjectionToPixel(measuring->points[i]->Proj.x, measuring->points[i]->Proj.y, x, y);
 					data[i].X = (Gdiplus::REAL)x;
 					data[i].Y = (Gdiplus::REAL)y;
-				}
+				}*/
 				
-				if (measuring->closedPoly)
+				Gdiplus::PointF* data = NULL;
+				int size = measuring->get_ScreenPoints((void*)this, false, 0.0, 0.0, &data);
+				if (size > 0)
 				{
-					int sz = measuring->points.size() - 1 - measuring->firstPointIndex;
-					if (sz > 2 && measuring->firstPointIndex >= 0)
+					if (measuring->closedPoly)
 					{
-						// let's draw fill and area
-						Gdiplus::PointF* polyData = &(data[measuring->firstPointIndex]);
-						Gdiplus::Color color(100, 255, 165, 0);
-						Gdiplus::SolidBrush brush(color);
-						g->FillPolygon(&brush, polyData, sz);
-						
-						// find position for label
-						IShape* shp = NULL;
-						CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
-						if (shp)
+						int sz = measuring->points.size() - 1 - measuring->firstPointIndex;
+						if (sz > 2 && measuring->firstPointIndex >= 0)
 						{
-							long pointIndex;
-							VARIANT_BOOL vb;
-							shp->Create(ShpfileType::SHP_POLYGON, &vb);
-							for(int i = 0; i < sz; i++)
-							{
-								shp->AddPoint(polyData[i].X, polyData[i].Y, &pointIndex);
-							}
-							shp->AddPoint(polyData->X, polyData->Y, &pointIndex);	// close it
-							
-							IPoint* pnt = NULL;
-							shp->get_Centroid(&pnt);
-
-							double xOrig, yOrig;
-
-							if (pnt)
-							{
-								pnt->get_X(&xOrig);
-								pnt->get_Y(&yOrig);
-								pnt->Release();
-
-								// copy geog coordinates
-								int count = 0;
-								std::vector<Point2D> gPoints(sz);
-								for(int i = measuring->firstPointIndex; i < measuring->points.size(); i++)
-								{
-									gPoints.push_back(Point2D(measuring->points[i]->x, measuring->points[i]->y));
-									count++;
-								}
-								
-								// calc area
-								double area = abs(CalcPolyGeodesicArea(gPoints));
-			
-								// draw the label 
-								// TODO: extract to a function
-								CString str;
-								str.Format("%.1f ha", area / 10000.0);
-
-								WCHAR* wStr = Utility::StringToWideChar(str);
-								Gdiplus::Font* font = Utility::GetGdiPlusFont("Arial", 12);
-								
-								Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
-								Gdiplus::SolidBrush whiteBrush(Gdiplus::Color::White);
-								Gdiplus::PointF origin((Gdiplus::REAL)xOrig, (Gdiplus::REAL)yOrig);
-								
-								Gdiplus::StringFormat format;
-								format.SetAlignment(Gdiplus::StringAlignmentCenter);
-								format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-
-								Gdiplus::RectF box;
-								g->MeasureString(wStr, wcslen(wStr), font, origin, &format, &box);
-								g->FillRectangle(&whiteBrush, box);
-
-								g->DrawString(wStr, wcslen(wStr), font, origin, &format, &brush);
-								
-								delete font;
-								delete wStr;
-							}
-							shp->Release();
+							// let's draw fill and area
+							Gdiplus::PointF* polyData = &(data[measuring->firstPointIndex]);
+							Gdiplus::Color color(100, 255, 165, 0);
+							Gdiplus::SolidBrush brush(color);
+							g->FillPolygon(&brush, polyData, sz);
 						}
 					}
-				}
 
-				double length, totalLength = 0.0;
-				for(int i = 0; i < size - 1; i++) {
-					measuring->get_SegementLength(i, &length);
-					totalLength += length;
-					DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, measuring);
-				}
+					double length, totalLength = 0.0;
+					for(int i = 0; i < size - 1; i++) {
+						measuring->get_SegementLength(i, &length);
+						totalLength += length;
+						DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, measuring);
+					}
 
-				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
-				g->DrawLines(&pen, data, size);
-				
-				// drawing points
-				Gdiplus::Pen penPoints(Gdiplus::Color::Blue, 1.0f);
-				Gdiplus::SolidBrush brush(Gdiplus::Color::LightBlue);
-				for(size_t i = 0; i < size; i++) {
-					g->FillEllipse(&brush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
-					g->DrawEllipse(&penPoints, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+					Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
+					g->DrawLines(&pen, data, size);
+					
+					// drawing points
+					Gdiplus::Pen penPoints(Gdiplus::Color::Blue, 1.0f);
+					Gdiplus::SolidBrush brush(Gdiplus::Color::LightBlue);
+					for(size_t i = 0; i < size; i++) {
+						g->FillEllipse(&brush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+						g->DrawEllipse(&penPoints, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+					}
+
+					if (measuring->closedPoly)
+					{
+						IPoint* pnt = GetMeasuringPolyCenter(data, size);
+						if (pnt)
+						{
+							DrawMeasuringPolyArea(g, false, 0.0, 0.0, pnt);
+							pnt->Release();
+						}
+					}
+					delete[] data;
 				}
-				delete[] data;
 			}
 			else
 			{
@@ -2120,38 +1998,50 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 // ***************************************************************
 //		DrawMouseMoves()
 // ***************************************************************
-void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid) {
+void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool isSnapShot, float offsetX, float offsetY) {
 	HDC hdc = pdc->GetSafeHdc();
 	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
-	g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);	
+	g->TranslateTransform(offsetX, offsetY);
+	//g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);	
 
-	DrawMouseMovesCore(g);
+	DrawMouseMovesCore(g, isSnapShot);
 
 	g->ReleaseHDC(pdc->GetSafeHdc());
 	delete g;
 }
 
-void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g) 
+void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g, bool isSnapShot) 
 {
 	// update measuring
-	if( m_cursorMode == cmMeasure ) {
-		CMeasuring* m =((CMeasuring*)m_measuring);
-		
-		// drawing layers
-		Gdiplus::Graphics* gDrawing = Gdiplus::Graphics::FromImage(m_drawingBitmap);			// allocate another bitmap for this purpose
-		gDrawing->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
-		gDrawing->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
+	CMeasuring* m =(CMeasuring*)m_measuring;
+	if( m_cursorMode == cmMeasure || m->persistent ) {
+		Gdiplus::Graphics* gDrawing = NULL;
+		if (!isSnapShot)
+		{
+			// drawing layers
+			gDrawing = Gdiplus::Graphics::FromImage(m_drawingBitmap);			// allocate another bitmap for this purpose
+			gDrawing->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
+			gDrawing->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
+		}
+		else
+		{
+			gDrawing = g;
+		}
 
 		if (m->points.size() > 0) 
 		{
+			double x, y;
+			if (!m->IsStopped())
+			{
+				this->ProjectionToPixel(m->points[m->points.size() - 1]->Proj.x, m->points[m->points.size() - 1]->Proj.y, x, y);
+			}
+			
 			if (m->measuringType == tkMeasuringType::MeasureDistance)  // drawing the last segment only
 			{
 				if (!m->IsStopped())
 				{
-					double x, y;
-					this->ProjectionToPixel(m->points[m->points.size() - 1]->Proj.x, m->points[m->points.size() - 1]->Proj.y, x, y);
-
-					if (m->points.size() > 0 && (m->mousePoint.x != x || m->mousePoint.y != y)) {
+					if (m->points.size() > 0 && (m->mousePoint.x != x || m->mousePoint.y != y)) 
+					{
 						Gdiplus::SmoothingMode prevMode = g->GetSmoothingMode();
 						Gdiplus::TextRenderingHint prevHint = g->GetTextRenderingHint();
 						gDrawing->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeHighQuality);
@@ -2177,41 +2067,142 @@ void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g)
 			}
 			else	// area measuring; drawing the whole shape
 			{
-				int size = m->points.size();
-				if (!m->IsStopped())		// if it hasn't stopped we add one additional point for current mouse position
-					size++;
-
-				Gdiplus::PointF* data = new Gdiplus::PointF[size];
-				for(size_t i = 0; i < m->points.size(); i++) {
-					double x, y;
-					this->ProjectionToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, x, y);
-					data[i].X = (Gdiplus::REAL)x;
-					data[i].Y = (Gdiplus::REAL)y;
-				}
-
-				if (!m->IsStopped())
+				Gdiplus::PointF* data = NULL;
+				int size = m->get_ScreenPoints((void*)this, !m->IsStopped(), m->mousePoint.x, m->mousePoint.y, &data);
+				if (size > 0 )
 				{
-					data[size - 1].X = m->mousePoint.x;	  // adding current mouse position
-					data[size - 1].Y = m->mousePoint.y;
+					// drawing points
+					Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
+
+					Gdiplus::Color color(100, 255, 165, 0);
+					Gdiplus::SolidBrush brush(color);
+
+					gDrawing->FillPolygon(&brush, data, size);
+					gDrawing->DrawPolygon(&pen, data, size);
+
+					m->firstPointIndex = 0;		// the first one is actual start of the poly
+					IPoint* pnt = GetMeasuringPolyCenter(data, size);
+					if (pnt)
+					{
+						if (!m->IsStopped())
+						{
+							double xLng, yLat;
+							this->PixelToProj(m->mousePoint.x, m->mousePoint.y, &xLng, &yLat);
+							if (m->TransformPoint(xLng, yLat))
+							{
+								DrawMeasuringPolyArea(gDrawing, true, xLng, yLat, pnt);
+							}
+						}
+						else
+						{
+							DrawMeasuringPolyArea(gDrawing, false, 0.0, 0.0, pnt);
+						}
+						pnt->Release();
+					}
+					delete[] data;
 				}
-
-				// drawing points
-				Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
-
-				Gdiplus::Color color(100, 255, 165, 0);
-				Gdiplus::SolidBrush brush(color);
-
-				gDrawing->FillPolygon(&brush, data, size);
-				gDrawing->DrawPolygon(&pen, data, size);
-
-				delete[] data;
 			}
 		}
 		
-		g->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
+		if (!isSnapShot)
+		{
+			g->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
+			delete gDrawing;
+		}
+	}
+}
 
-		delete gDrawing;
+// ****************************************************************
+//		GetMeasuringPolyCenter()
+// ****************************************************************
+IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length)
+{
+	IPoint* pnt = NULL;
+	CMeasuring* measuring = ((CMeasuring*)m_measuring);
+	if (measuring)
+	{
+		if (length > 2 && measuring->firstPointIndex >= 0)
+		{
+			// let's draw fill and area
+			Gdiplus::PointF* polyData = &(data[measuring->firstPointIndex]);
+		
+			// find position for label
+			IShape* shp = NULL;
+			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+			if (shp)
+			{
+				long pointIndex;
+				VARIANT_BOOL vb;
+				shp->Create(ShpfileType::SHP_POLYGON, &vb);
+				
+				int sz = measuring->measuringType == tkMeasuringType::MeasureDistance ? measuring->points.size() - 1 - measuring->firstPointIndex : length;
+				for(int i = 0; i < sz; i++)
+				{
+					shp->AddPoint(polyData[i].X, polyData[i].Y, &pointIndex);
+				}
+				shp->AddPoint(polyData->X, polyData->Y, &pointIndex);	// close it
+				
+				shp->get_Centroid(&pnt);
+				shp->Release();
+			}
+		}
+	}
+	return pnt;
+}
 
+void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt)
+{
+	CMeasuring* measuring = ((CMeasuring*)m_measuring);
+	if (measuring)
+	{
+		double xOrig, yOrig;
+		pnt->get_X(&xOrig);
+		pnt->get_Y(&yOrig);
+		
+		int sz = measuring->points.size() - 1 - measuring->firstPointIndex;
+		if (lastPoint)
+			sz++;
+		
+		if (sz > 1)
+		{
+			// copy geog coordinates
+			int count = 0;
+			std::vector<Point2D> gPoints;
+			for(int i = measuring->firstPointIndex; i < measuring->points.size(); i++)
+			{
+				gPoints.push_back(Point2D(measuring->points[i]->x, measuring->points[i]->y));
+				count++;
+			}
+			if (lastPoint)
+				gPoints.push_back(Point2D(lastGeogX, lastGeogY));
+			
+			// calc area
+			double area = abs(CalcPolyGeodesicArea(gPoints));
+
+			// draw the label 
+			CString str;
+			str.Format("%.2f %s", area / 10000.0, m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsHectars));
+
+			WCHAR* wStr = Utility::StringToWideChar(str);
+			Gdiplus::Font* font = Utility::GetGdiPlusFont("Arial", 12);
+			
+			Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
+			Gdiplus::SolidBrush whiteBrush(Gdiplus::Color::White);
+			Gdiplus::PointF origin((Gdiplus::REAL)xOrig, (Gdiplus::REAL)yOrig);
+			
+			Gdiplus::StringFormat format;
+			format.SetAlignment(Gdiplus::StringAlignmentCenter);
+			format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+			Gdiplus::RectF box;
+			g->MeasureString(wStr, wcslen(wStr), font, origin, &format, &box);
+			g->FillRectangle(&whiteBrush, box);
+
+			g->DrawString(wStr, wcslen(wStr), font, origin, &format, &brush);
+			
+			delete font;
+			delete wStr;
+		}
 	}
 }
 

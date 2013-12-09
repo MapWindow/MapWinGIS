@@ -178,9 +178,9 @@ STDMETHODIMP CImageClass::Open(BSTR ImageFileName, ImageType FileType, VARIANT_B
 void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
+
 	CString ImageFile = OLE2CA(ImageFileName);
-	fileName = OLE2A(ImageFileName);
-	inRam = (InRam == VARIANT_TRUE)?true:false;
+	fileName = OLE2A(ImageFileName);	inRam = (InRam == VARIANT_TRUE)?true:false;
 	
 	// child classes will be deleted here
 	Close(retval);
@@ -1709,41 +1709,23 @@ bool CImageClass::SetDCBitsToImage(long hDC,BYTE* bits)
 	return true;
 }
 
-// ****************************************************************
-//		SetDCBitsToImage
-// ****************************************************************
-// Copies bits form the device context to image buffer
-STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
+bool CImageClass::SetImageBitsDCCore(HDC hDC)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	HBITMAP hBMP;
-	hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
-	
-	if( hBMP == NULL )
-	{	
-		*retval = VARIANT_FALSE;
-		return S_OK;
-	}
+	HBITMAP hBMP = (HBITMAP)GetCurrentObject(hDC,OBJ_BITMAP);
+	if( hBMP == NULL ) return false;
 
 	//Get the BITMAP Structure
 	//Get the dimensions
 	BITMAP bm;
 	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
-	{	
-		*retval = VARIANT_FALSE;
-		return S_OK;
-	}
+		return false;
 	
 	//Clean up the old tkImage and Create a new tkImage
 	VARIANT_BOOL vbretval;
 	Close(&vbretval);
 	CreateNew(bm.bmWidth,bm.bmHeight,&vbretval);
 	if (!vbretval)
-	{
-		*retval = VARIANT_FALSE;
-		return S_OK;
-	}
+		return false;
 
 	long sizeBMP = bm.bmWidthBytes*bm.bmHeight;
 	BYTE * bits = new BYTE[sizeBMP];
@@ -1809,8 +1791,20 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 	}
 	delete [] bits;
 	bits = NULL;
-	
-	*retval = VARIANT_TRUE;
+	return true;
+}
+
+// ****************************************************************
+//		SetDCBitsToImage
+// ****************************************************************
+// Copies bits form the device context to image buffer
+
+STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = VARIANT_FALSE;
+	bool result = SetImageBitsDCCore((HDC)hDC);
+	*retval = result ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 

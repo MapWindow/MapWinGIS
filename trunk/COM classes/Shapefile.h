@@ -73,7 +73,7 @@ public:
 		_selectionTransparency = 180;
 		_selectionAppearance = saSelectionColor;
 		_selectionColor = RGB(255, 255, 0);
-		_collisionMode = LocalList;
+		_collisionMode = tkCollisionMode::LocalList;
 		
 		_geometryEngine = engineGeos;
 		

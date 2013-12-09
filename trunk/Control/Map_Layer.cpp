@@ -351,17 +351,21 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			ShpfileType type;
 			ishp->get_ShapefileType(&type);
 
-			// set the initial extents
-			if( m_activeLayers.size() == 1 && pVisible != FALSE )
-			{	
-				double xrange = l->extents.right - l->extents.left;
-				double yrange = l->extents.top - l->extents.bottom;
-				extents.left = l->extents.left - xrange*m_extentPad;
-				extents.right = l->extents.right + xrange*m_extentPad;
-				extents.top = l->extents.top + yrange*m_extentPad;
-				extents.bottom = l->extents.bottom - yrange*m_extentPad;
-				
-				SetExtentsCore(extents);
+			//Set the initialExtents
+			if (m_globalSettings.zoomToFirstLayer)
+			{
+				// set the initial extents
+				if( m_activeLayers.size() == 1 && pVisible != FALSE )
+				{	
+					double xrange = l->extents.right - l->extents.left;
+					double yrange = l->extents.top - l->extents.bottom;
+					extents.left = l->extents.left - xrange*m_extentPad;
+					extents.right = l->extents.right + xrange*m_extentPad;
+					extents.top = l->extents.top + yrange*m_extentPad;
+					extents.bottom = l->extents.bottom - yrange*m_extentPad;
+					
+					SetExtentsCore(extents);
+				}
 			}
 		}
 	}
@@ -516,16 +520,19 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 
 		//Set the initialExtents
-		if( m_activeLayers.size() == 1 && pVisible)
-		{	
-			double xrange = l->extents.right - l->extents.left;
-			double yrange = l->extents.top - l->extents.bottom;
-			extents.left = l->extents.left - xrange*m_extentPad;
-			extents.right = l->extents.right + xrange*m_extentPad;
-			extents.top = l->extents.top + yrange*m_extentPad;
-			extents.bottom = l->extents.bottom - yrange*m_extentPad;
+		if (m_globalSettings.zoomToFirstLayer)
+		{
+			if( m_activeLayers.size() == 1 && pVisible)
+			{	
+				double xrange = l->extents.right - l->extents.left;
+				double yrange = l->extents.top - l->extents.bottom;
+				extents.left = l->extents.left - xrange*m_extentPad;
+				extents.right = l->extents.right + xrange*m_extentPad;
+				extents.top = l->extents.top + yrange*m_extentPad;
+				extents.bottom = l->extents.bottom - yrange*m_extentPad;
 
-			SetExtentsCore(extents);
+				SetExtentsCore(extents);
+			}
 		}
 		m_numImages++;
 	}

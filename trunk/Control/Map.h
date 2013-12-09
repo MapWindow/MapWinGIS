@@ -556,6 +556,8 @@ protected:
 	afx_msg BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, LONG Width);
 	afx_msg void LoadTiles(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider);
 
+	afx_msg INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider);
+
 	// Added ajp June 2010  
 	afx_msg void SetMapRotationAngle(float nNewValue);
 	afx_msg float GetMapRotationAngle(void);
@@ -592,6 +594,8 @@ protected:
 	afx_msg IMeasuring* GetMeasuring(void);
 
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
+
+	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
 
 	//}}AFX_DISPATCH
 	DECLARE_DISPATCH_MAP()
@@ -641,6 +645,8 @@ public:
 #pragma region DispatchAndEventIds
 public:
 enum {		//{{AFX_DISP_ID(CMapView)
+	dispidTilesAreInCache = 204L,
+	dispidFindSnapPoint = 203L,
 	dispidSnapShotToDC2 = 202L,
 	dispidLoadTiles = 201L,
 	dispidZoomToWorld = 200L,
@@ -863,7 +869,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 #pragma region Drawing variables
 	// only mouse moves are updated everything else is restored from buffer
 	bool m_drawMouseMoves;		
-	bool m_blockMouseMoves;
 
 	// temporary shapefile to display hot tracking
 	struct HotTrackingInfo
@@ -1024,6 +1029,9 @@ public:
 	
 	DOUBLE GetPixelsPerDegree(void);
 	void SetPixelsPerDegree(DOUBLE newVal);
+
+	inline void PixelToProjection( double piX, double piY, double & prX, double & prY );
+	inline void ProjectionToPixel( double prX, double prY, double & piX, double & piY );
 protected:
 	void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, 
 									float offsetX = 0.0f, float offsetY = 0.0f);
@@ -1055,10 +1063,10 @@ protected:
 	void SetMaxExtents(IExtents* pVal);
 	
 private:
-	bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound);
+	//bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound);
 	void CMapView::ResizeBuffers(int cx, int cy);
-	void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid);
-	void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g);
+	void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool isSnapShot = false, float offsetX = 0.0f, float offsetY = 0.0f);
+	void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g, bool isSnapShot);
 	
 	UINT CMapView::StartDrawLayers(LPVOID pParam);
 	
@@ -1086,8 +1094,7 @@ private:
 	void ClearLabelFrames();
 	void ReloadImageBuffers();
 	
-	inline void PixelToProjection( double piX, double piY, double & prX, double & prY );
-	inline void ProjectionToPixel( double prX, double prY, double & piX, double & piY );
+	
 	double UnitsPerPixel();
 
 	inline double makeVal( const char * sVal );
@@ -1110,6 +1117,9 @@ private:
 
 	void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
 					 double totalLength, int segmentIndex, CMeasuring* measure);
+
+	IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
+	void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
 
 
 	#ifdef _DEBUG //Code added by Lailin Chen to profile the time consumption of this function. --- Lailin Chen 11/7/2005

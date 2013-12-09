@@ -25,6 +25,7 @@
 
 #pragma once
 #include "MapWinGIS.h"
+#include <map>
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -40,6 +41,7 @@ class ATL_NO_VTABLE CGlobalSettings :
 public:
 	CGlobalSettings()
 	{
+		
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GLOBALSETTINGS)
@@ -83,6 +85,12 @@ public:
 	STDMETHOD(put_LabelsSmoothingMode)(tkSmoothingMode newVal);
 	STDMETHOD(get_LabelsCompositingQuality)(tkCompositingQuality* pVal);
 	STDMETHOD(put_LabelsCompositingQuality)(tkCompositingQuality newVal);
+	STDMETHOD(put_ShortUnitsString)(tkLocalizedStrings unit, BSTR localizedString);
+	STDMETHOD(get_ShortUnitsString)(tkLocalizedStrings unit, BSTR* retVal);
+	STDMETHOD(put_ZoomToFirstLayer)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ZoomToFirstLayer)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_LabelsCollisionMode)(tkCollisionMode newVal);
+	STDMETHOD(get_LabelsCollisionMode)(tkCollisionMode* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

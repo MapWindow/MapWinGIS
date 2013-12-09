@@ -1,5 +1,5 @@
 //********************************************************************************************************
-//File name: GeometryConverter.cpp
+//File name: OGR2MWShape.cpp
 //Description: functions for conversion between OGRGeomerty Class and MapWinGis Shape Representation
 //********************************************************************************************************
 //The contents of this file are subject to the Mozilla Public License Version 1.1 (the "License"); 
@@ -13,13 +13,13 @@
 //See OGRGeometry inheritance diagram is here: http://gdal.org/ogr/classOGRGeometry.html
 //See discussion of here: http://www.mapwindow.org/phorum/read.php?5,13428
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
-//Nov. 2013     Paul Meems    Updating GEOS calls to use new API (GEOSContext)
 
 #include "stdafx.h"
 #include "GeometryConverter.h"
 #include "Shape.h"
 #include "Shapefile.h"
 #include "ogr_spatialref.h"
+#include "Utilities\GeosHelper.h"
 
 // *********************************************************************
 //			SetConversionFactor()
@@ -49,9 +49,7 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 	OGRGeometry* oGeom = ShapeToGeometry(shp);
 	if (oGeom != NULL)
 	{
-		// Using the new GEOS API:
-		GEOSGeometry* result = oGeom->exportToGEOS(getGeosHandle());
-		
+		GEOSGeometry* result = GeosHelper::ExportToGeos(oGeom);
 		delete oGeom;
 		return result;
 	}
@@ -63,9 +61,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* 
 {
 	__try
 	{
-		// Using the new GEOS API:
-		//return GEOSBuffer( gsGeom, distance, nQuadSegments );
-		return GEOSBuffer_r(getGeosHandle(), gsGeom, distance, nQuadSegments);
+		 return GEOSBuffer( gsGeom, distance, nQuadSegments );
 	}
 	__except(1)
 	{
@@ -80,34 +76,23 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* 
 bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes)
 {
 	bool substitute = false;
-
-	// Using the new GEOS API:
-	//if (!GEOSisValid(gsGeom))
-	if (!GEOSisValid_r(getGeosHandle(), gsGeom))
+	if (!GEOSisValid(gsGeom))
 	{
 		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-		// Using the new GEOS API:
-		if (gsNew && GEOSisValid_r(getGeosHandle(), gsNew))
+		if (GeosHelper::IsValid(gsNew))
 		{
 			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
 			gsGeom = gsNew;
 			substitute = true;
 		}
 	}
-
-	// Using the new GEOS API:
-	OGRGeometry* oGeom = OGRGeometryFactory::createFromGEOS(getGeosHandle(), gsGeom);
-
+	
+	OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 	if (oGeom)
 	{
-		// Using the new GEOS API:
-		//char* type = GEOSGeomType(gsGeom);
-		char* type = GEOSGeomType_r(getGeosHandle(), gsGeom);
+		char* type = GEOSGeomType(gsGeom);
 		CString s = type;
-		
-		// Using the new GEOS API:
-		//GEOSFree(type);
-		GEOSFree_r(getGeosHandle(), type);
+		GEOSFree(type);
 		
 		OGRwkbGeometryType oForceType = wkbNone;
 		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
@@ -117,11 +102,7 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 		delete oGeom;
 
 		if (substitute)
-		{
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(gsGeom);
-			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
-		}
+			GEOSGeom_destroy(gsGeom);
 
 		return result;
 		
@@ -129,11 +110,7 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 	else
 	{
 		if (substitute)
-		{
-			// Using the new GEOS API:
-			//GEOSGeom_destroy(gsGeom);
-			GEOSGeom_destroy_r(getGeosHandle(), gsGeom);
-		}
+			GEOSGeom_destroy(gsGeom);
 
 		return false;
 	}
@@ -1164,9 +1141,7 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 
 				if (g2 != NULL)
 				{
-					// Using the new GEOS API:
-					//GEOSGeometry* geom = GEOSUnion(g1, g2);
-					GEOSGeometry* geom = GEOSUnion_r(getGeosHandle(), g1, g2);
+					GEOSGeometry* geom = GEOSUnion(g1, g2);
 					data[i] = geom;		// placing the resulting geometry back for further processing
 					
 					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
@@ -1174,11 +1149,8 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
 													// all cases
 					{
-						// Using the new GEOS API:
-						//GEOSGeom_destroy(g1);
-						//GEOSGeom_destroy(g2);
-						GEOSGeom_destroy_r(getGeosHandle(), g1);
-						GEOSGeom_destroy_r(getGeosHandle(), g2);
+						GEOSGeom_destroy(g1);
+						GEOSGeom_destroy(g2);
 					}
 					
 					g1 = NULL;
@@ -1202,10 +1174,7 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 				{
 					// we need to clone it, to be able to apply unified memory management afterwards
 					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-					
-					// Using the new GEOS API:
-					//GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
-					GEOSGeometry* geomTemp = GEOSGeom_clone_r(getGeosHandle(), g1);
+					GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
 					g1 = geomTemp;
 				}
 			}
@@ -1222,39 +1191,24 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 // (mutipolygons shoud be split into parts before treating with this routine)
 GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
-	// Using the new GEOS API:
-	//const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
-	//GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
-	const GEOSGeometry* gsRing = GEOSGetExteriorRing_r(getGeosHandle(), gsGeom);		// no memory is allocated there
-	GEOSGeom gsPoly = GEOSSimplify_r(getGeosHandle(), gsRing, tolerance);				// memory allocation
+	const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
+	GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
 
 	if (!gsPoly)
 		return NULL;
 	
 	std::vector<GEOSGeom> holes;
-	
-	// Using the new GEOS API:
-	//for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
-	for (int n = 0; n < GEOSGetNumInteriorRings_r(getGeosHandle(), gsGeom); n++)
+	for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
 	{
-		// Using the new GEOS API:
-		//gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
-		gsRing = GEOSGetInteriorRingN_r(getGeosHandle(), gsGeom, n);				// no memory is allocated there
+		gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
 		if (gsRing)
 		{
-			// Using the new GEOS API:
-			//GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
-			GEOSGeom gsOut = GEOSSimplify_r(getGeosHandle(), gsRing, tolerance);	// memory allocation
+			GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
 			if (gsOut)
 			{
-				// Using the new GEOS API:
-				//char* type = GEOSGeomType(gsOut);
-				char* type = GEOSGeomType_r(getGeosHandle(), gsOut);
+				char* type = GEOSGeomType(gsOut);
 				CString s = type;
-
-				// Using the new GEOS API:
-				//GEOSFree(type);
-				GEOSFree_r(getGeosHandle(), type);
+				GEOSFree(type);
 				if (s == "LinearRing")
 					holes.push_back(gsOut);
 			}
@@ -1264,15 +1218,11 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	GEOSGeometry *gsNew = NULL;
 	if (holes.size() > 0)
 	{
-		// Using the new GEOS API:
-		//gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
-		gsNew = GEOSGeom_createPolygon_r(getGeosHandle(), gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
+		gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
 	}
 	else
 	{
-		// Using the new GEOS API:
-		//gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
-		gsNew = GEOSGeom_createPolygon_r(getGeosHandle(), gsPoly, NULL, 0);
+		gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
 	}
 	
 	// cleaning
@@ -1280,5 +1230,6 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	for (size_t i = 0; i < holes.size(); i++)
 		GEOSGeom_destroy(holes[i]);*/
 
-	return gsNew;	
+	return gsNew;
+	
 }

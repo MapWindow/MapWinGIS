@@ -143,6 +143,9 @@ public:
 	STDMETHOD(put_PictureScaleX)(double newVal);
 	STDMETHOD(get_PictureScaleY)(double *pVal);
 	STDMETHOD(put_PictureScaleY)(double newVal);
+
+	STDMETHOD(get_AlignPictureByBottom)(VARIANT_BOOL *pVal);
+	STDMETHOD(put_AlignPictureByBottom)(VARIANT_BOOL newVal);
 	
 	// .NET overloads
 	STDMETHOD(DrawPoint)(int** hdc, float x, float y, 
@@ -201,6 +204,12 @@ public:
 	STDMETHOD(put_VerticesFillVisible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_VerticesType)(tkVertexType* retval);
 	STDMETHOD(put_VerticesType)(tkVertexType newVal);
+
+	STDMETHOD(get_FrameVisible)(VARIANT_BOOL* retval);
+	STDMETHOD(put_FrameVisible)(VARIANT_BOOL newVal);
+
+	STDMETHOD(get_FrameType)(tkLabelFrameType* retval);
+	STDMETHOD(put_FrameType)(tkLabelFrameType newVal);
 
 	STDMETHOD(get_LinePattern)(ILinePattern** retVal);
 	STDMETHOD(put_LinePattern)(ILinePattern* newVal);

@@ -1,10 +1,33 @@
 #include "stdafx.h"
 #include "measuring.h"
-
 #include "..\Processing\GeograpicLib\PolygonArea.hpp"
-//const GeographicLib::Geodesic& geod = GeographicLib::Geodesic::WGS84;
 GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 GeographicLib::PolygonArea poly(geod);
+
+#include "map.h"
+int CMeasuring::get_ScreenPoints(void* map, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data)
+{
+	CMapView* mapView = (CMapView*)map;
+	int size = this->points.size();
+	if (hasLastPoint) size++;
+	if (size > 0)
+	{
+		(*data) = new Gdiplus::PointF[size];
+		Gdiplus::PointF* temp = *data;
+		double x, y;
+		for(size_t i = 0; i < this->points.size(); i++) {
+			mapView->ProjectionToPixel(this->points[i]->Proj.x, this->points[i]->Proj.y, x, y);
+			temp[i].X = (Gdiplus::REAL)x;
+			temp[i].Y = (Gdiplus::REAL)y;
+		}
+		if (hasLastPoint)
+		{
+			temp[size - 1].X = lastX;
+			temp[size - 1].Y = lastY;
+		}
+	}
+	return size;
+}
 
 // *******************************************************
 //		get_Length()
@@ -59,6 +82,22 @@ STDMETHODIMP CMeasuring::put_MeasuringType(tkMeasuringType newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	this->measuringType = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		MeasuringType()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_Persistent(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = this->persistent;
+	return S_OK;
+}
+STDMETHODIMP CMeasuring::put_Persistent(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	this->persistent = newVal;
 	return S_OK;
 }
 
@@ -127,6 +166,7 @@ STDMETHODIMP CMeasuring::FinishMeasuring()
 STDMETHODIMP CMeasuring::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	this->firstPointIndex = -1;
 	for(size_t i = 0; i < points.size(); i++)
 		delete points[i];
 	this->points.clear();
@@ -225,7 +265,8 @@ double CMeasuring::GetArea(bool closingPoint, double x, double y)
 	else
 	{
 		double xDeg = x, yDeg = y;
-		TransformPoint(xDeg, yDeg);
+		if (closingPoint)
+			TransformPoint(xDeg, yDeg);
 		return GetGeodesicArea(closingPoint, xDeg, yDeg);	  // x, y are decimal degrees
 	}
 }
@@ -249,16 +290,19 @@ double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y)
 				poly.AddPoint(points[i]->y, points[i]->x);
 			}
 			result = poly.Compute(true, true, perimeter, area);
-		}
-		
-		if (closingPoint)
-		{
-			//poly.AddPoint(y, x);
-			result = poly.TestPoint(y, x, true, true, perimeter, area);
+			if (closingPoint)
+				result = poly.TestPoint(y, x, true, true, perimeter, area);
 		}
 		else
 		{
-			result = poly.Compute(true, true, perimeter, area);
+			if (closingPoint)
+			{
+				result = poly.TestPoint(y, x, true, true, perimeter, area);
+			}
+			else
+			{
+				result = poly.Compute(true, true, perimeter, area);
+			}	
 		}
 	}
 	return area;
@@ -297,12 +341,9 @@ double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y)
 // *******************************************************
 bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS84New, tkTransformationMode mode)
 {
-	if (projWGS84)
-		projWGS84->Release();
-	this->projWGS84 = projWGS84New;
-	projWGS84->AddRef();
-	
-	// we need to clone a map projection, so that nobody will stop out transformation
+	if (!Utility::put_ComReference(projWGS84New, (IDispatch**)&projWGS84, false))
+		return false;
+
 	if (proj)
 	{
 		if (transformationMode == tmDoTransformation)
@@ -368,4 +409,3 @@ bool CMeasuring::TransformPoint(double& x, double& y) {
 	}
 	return false;
 }
-

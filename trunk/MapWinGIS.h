@@ -17,6 +17,7 @@
 #include "gdal_priv.h"
 #include "geos_c.h"
 #include "ogr_geometry.h"
+#include <map>
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
@@ -86,10 +87,13 @@ struct GlobalSettingsInfo
 	CString gdalErrorMessage;
 	tkCompositingQuality labelsCompositingQuality;
 	tkSmoothingMode labelsSmoothingMode;
-	
+	std::map<tkLocalizedStrings, CString> shortUnitStrings;
+	bool zoomToFirstLayer;
+	tkCollisionMode labelsCollisionMode;
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		labelsCollisionMode = tkCollisionMode::LocalList;
 		minPolygonArea = 1.0;
 		minAreaToPerimeterRatio = 0.0001;
 		clipperGcsMultiplicationFactor = 100000.0;
@@ -98,6 +102,16 @@ struct GlobalSettingsInfo
 		shapefileFastUnion = true;
 		labelsCompositingQuality = HighQuality;
 		labelsSmoothingMode = HighQualityMode ;
+		zoomToFirstLayer = true;
+
+		shortUnitStrings[tkLocalizedStrings::lsHectars] = "ha";
+		shortUnitStrings[tkLocalizedStrings::lsMeters] = "m";
+		shortUnitStrings[tkLocalizedStrings::lsKilometers] = "km";
+	}
+	
+	CString GetLocalizedString(tkLocalizedStrings s)
+	{
+		return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : "";
 	}
 
 	double GetMinPolygonArea(IGeoProjection* proj)

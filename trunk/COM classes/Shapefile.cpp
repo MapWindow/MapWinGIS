@@ -377,6 +377,18 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 			_isEditingShapes = false;
 			StartEditingShapes(VARIANT_TRUE, cBack, &vb);
 			
+			// this will trigger loading of all dbf vaues into the memory
+			long numFields;
+			this->get_NumFields(&numFields);
+			if (numFields > 0)
+			{
+				CComVariant var;
+				for(size_t i = 0; i < _shapeData.size(); i++)
+				{
+					dbf->get_CellValue(0, i, &var);
+				}
+			}
+			
 			// closing disk file despite the result success or failure
 			_shpfileName = "";
 			_shxfileName = "";
@@ -396,6 +408,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 			*retval = vb;
 		}
 	}
+	return S_OK;
 }
 
 bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
@@ -489,6 +502,7 @@ bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
 			}
 		}
 	}		
+	return false;
 }
 
 // ************************************************************

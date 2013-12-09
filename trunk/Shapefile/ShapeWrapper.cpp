@@ -102,6 +102,7 @@ bool CShapeWrapper::put_ShapeType(ShpfileType newVal)
 		if( _ShapeType == SHP_NULLSHAPE )
 		{	
 			this->Clear();
+			_ShapeType2D = SHP_NULLSHAPE;
 		}
 		else if( _ShapeType == SHP_POINT || _ShapeType == SHP_POINTZ || _ShapeType == SHP_POINTM )
 		{	
@@ -942,30 +943,34 @@ int* CShapeWrapper::get_ShapeData(void)
 
 		// parts
 		int* parts = &intdata[11];
-		memcpy(parts, &_parts[0], sizeof(int) * numParts);
+		//if (numParts > 0)
+			memcpy(parts, &_parts[0], sizeof(int) * numParts);
 
 		// points
 		ddata = (double*)&intdata[11 + numParts];
-		memcpy(ddata, &_points[0], sizeof(double) * numPoints * 2);
-		
-		// z values
-		if( _ShapeType == SHP_POLYLINEZ || _ShapeType == SHP_POLYGONZ ||
-			_ShapeType == SHP_POLYLINEM || _ShapeType == SHP_POLYGONM)
+		//if (numPoints > 0)
 		{
-			ddata += numPoints * 2;
-			ddata[0] = _mMin;
-			ddata[1] = _mMax;
-			ddata += 2;
-			memcpy(ddata, &_pointsM[0], sizeof(double) * numPoints);
-			
-			// m values
-			if(_ShapeType == SHP_POLYLINEZ || _ShapeType == SHP_POLYGONZ)
+			memcpy(ddata, &_points[0], sizeof(double) * numPoints * 2);
+		
+			// z values
+			if( _ShapeType == SHP_POLYLINEZ || _ShapeType == SHP_POLYGONZ ||
+				_ShapeType == SHP_POLYLINEM || _ShapeType == SHP_POLYGONM)
 			{
-				ddata += numPoints;
-				ddata[0] = _zMin;
-				ddata[1] = _zMax;
+				ddata += numPoints * 2;
+				ddata[0] = _mMin;
+				ddata[1] = _mMax;
 				ddata += 2;
-				memcpy(ddata, &_pointsZ[0], sizeof(double) * numPoints);
+				memcpy(ddata, &_pointsM[0], sizeof(double) * numPoints);
+				
+				// m values
+				if(_ShapeType == SHP_POLYLINEZ || _ShapeType == SHP_POLYGONZ)
+				{
+					ddata += numPoints;
+					ddata[0] = _zMin;
+					ddata[1] = _zMax;
+					ddata += 2;
+					memcpy(ddata, &_pointsZ[0], sizeof(double) * numPoints);
+				}
 			}
 		}
 	}
