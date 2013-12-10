@@ -709,7 +709,7 @@ STDMETHODIMP CShape::get_Point(long PointIndex, IPoint **pVal)
 STDMETHODIMP CShape::put_Point(long PointIndex, IPoint *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( newVal = NULL )
+	if( newVal == NULL )
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 	}
