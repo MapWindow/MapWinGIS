@@ -367,10 +367,8 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
 		shp = GeometryConverter::GeometryToShape(oGeom, wkbNone, oForceType);
 		if (shp != NULL) vShapes->push_back(shp);
 	}
-	if (vShapes->size() > 0)	return true;
-	else						return false;
+	return vShapes->size() > 0;
 }
-
 
 /***********************************************************************/
 /*							GeometryToShape()			               */
@@ -648,8 +646,9 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 	else	
 		return NULL;	//(oType == wkbUnknown || oType == wkbNone)
 
-	if (!shp == NULL)
-	{	long numPoints = 0;
+	if (shp)
+	{	
+		long numPoints = 0;
 		shp->get_NumPoints(&numPoints);
 		if (numPoints == 0) 
 		{

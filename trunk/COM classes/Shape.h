@@ -172,6 +172,8 @@ public:
 	STDMETHOD(FixUp)(IShape** retval);
 	STDMETHOD(AddPoint)(double x, double y, long* pointIndex);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
+	STDMETHOD(ImportFromWKT)(BSTR Serialized, VARIANT_BOOL *retVal);
+	STDMETHOD(CopyTo)(IShape* target, VARIANT_BOOL* retVal);
 	
 	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
 	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);

@@ -2741,6 +2741,9 @@ interface IShape : IDispatch{
 	
 	[id(53), helpstring("method AddPoint")] HRESULT AddPoint([in]double x, [in]double y, [out,retval]long* pointIndex);
 	[id(54), helpstring("method ExportToWKT")] HRESULT ExportToWKT([out] BSTR* retVal);
+	[id(55), helpstring("method ImportToWKT")] HRESULT ImportFromWKT([in] BSTR Serialized, [out, retval]VARIANT_BOOL *retVal);
+	[id(56), helpstring("method CopyTo")] HRESULT CopyTo([in] IShape* target, [out, retval]VARIANT_BOOL* retVal);
+	
 };
 
 /****************************  Extents Interface ***********************/

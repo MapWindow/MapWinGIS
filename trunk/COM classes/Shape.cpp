@@ -2658,7 +2658,51 @@ bool CShape::get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& y
 	}
 	return true;
 }
+#pragma endregion
 
+//*****************************************************************
+//*		CopyTo()
+//*****************************************************************
+STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
+{	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (!target)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		ShpfileType shpType;
+		this->get_ShapeType(&shpType);
+		VARIANT_BOOL vb;
+		this->Create(shpType, &vb);
+		
+		long numParts;
+		this->get_NumParts(&numParts);
+		for(int i = 0; i < numParts; i++ )
+		{
+			long part, newIndex;
+			this->get_Part(i, &part);
+			target->InsertPart(part, &newIndex, &vb);
+		}
+
+		long numPoints;
+		this->get_NumPoints(&numPoints);
+		double x, y;
+		for(int i = 0; i < numPoints; i++ )
+		{
+			this->get_XY(i, &x, &y, &vb);
+			target->put_XY(i, x, y, &vb);
+		}
+		*retVal = VARIANT_TRUE;
+	}
+	return S_OK;
+}
+
+//*****************************************************************
+//*		ExportToWKT()
+//*****************************************************************
 STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2667,16 +2711,56 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 	if (geom != NULL) 
 	{
 		char* s;
-		//geom->exportToWkt(&s);
-		s = geom->exportToJson();
-		delete geom;
-
+		geom->exportToWkt(&s);
 		(*retVal) = A2BSTR(s);
-		//delete[] s;
+		delete geom;
+		delete[] s;
 	}
 	else {
 		(*retVal) = A2BSTR("");
 	}
 	return S_OK;
 }
-#pragma endregion
+
+//*****************************************************************
+//*		ImportFromWKT()
+//*****************************************************************
+STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CString ser = OLE2A(Serialized);
+
+	OGRGeometry* oGeom = NULL;
+	char* buffer = ser.GetBuffer();
+	OGRErr err = OGRGeometryFactory::createFromWkt(&buffer, NULL, &oGeom);
+	if (err != OGRERR_NONE || !oGeom)
+	{
+		ErrorMessage(tkINVALID_SHAPE);
+	}
+	else
+	{
+		// if there is a geometry collection only the first shape will be taken
+		std::vector<IShape*> shapes;
+		if (GeometryConverter::GeometryToShapes(oGeom, &shapes))
+		{
+			if (shapes.size() > 0 && shapes[0])
+			{
+				VARIANT_BOOL vb;
+				shapes[0]->CopyTo(this, &vb);
+				*retVal = VARIANT_TRUE;	
+			}
+			for(size_t i = 0; i < shapes.size(); i++)
+			{
+				if (shapes[i]) shapes[i]->Release();
+			}
+		}
+		else
+		{
+			ErrorMessage(tkINVALID_SHAPE);
+		}
+	}
+	return S_OK;
+}
