@@ -106,6 +106,16 @@ PolygonData* CShapefileReader::ReadPolygonData(char* data)
 	return shapeData;
 }
 
+PolygonData* CShapefileReader::ReadMultiPointData(char* data)
+{
+	PolygonData* shapeData = new PolygonData();
+	shapeData->partCount = 0;
+	shapeData->pointCount = *(int*)(data + 36);
+	shapeData->parts = NULL;
+	shapeData->points = (double*)(data + 40);
+	return shapeData;
+}
+
 //// ****************************************************************
 ////		ReadShape()
 //// ****************************************************************

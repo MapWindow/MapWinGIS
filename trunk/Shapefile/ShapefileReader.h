@@ -51,4 +51,5 @@ public:
 	bool ReadShapefileIndex(const char* filename, FILE* shpFile);
 	char* ReadShapeData(int& offset);
 	PolygonData* ReadPolygonData(char* data);
+	PolygonData* ReadMultiPointData(char* data);
 };
