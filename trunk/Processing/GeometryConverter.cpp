@@ -19,7 +19,7 @@
 #include "Shape.h"
 #include "Shapefile.h"
 #include "ogr_spatialref.h"
-#include "Utilities\GeosHelper.h"
+#include <GeosHelper.h>
 
 // *********************************************************************
 //			SetConversionFactor()
@@ -57,11 +57,11 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 		return NULL;
 }
 
-GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* gsGeom)
+GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom)
 {
 	__try
 	{
-		 return GEOSBuffer( gsGeom, distance, nQuadSegments );
+		return GeosHelper::Buffer(gsGeom, distance, nQuadSegments);
 	}
 	__except(1)
 	{
@@ -76,7 +76,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, const GEOSGeometry* 
 bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes)
 {
 	bool substitute = false;
-	if (!GEOSisValid(gsGeom))
+	if ( !GeosHelper::IsValid(gsGeom))
 	{
 		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
 		if (GeosHelper::IsValid(gsNew))
@@ -90,9 +90,9 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 	OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 	if (oGeom)
 	{
-		char* type = GEOSGeomType(gsGeom);
+		char* type = GeosHelper::GetGeometryType(gsGeom);
 		CString s = type;
-		GEOSFree(type);
+		GeosHelper::Free(type);
 		
 		OGRwkbGeometryType oForceType = wkbNone;
 		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
@@ -102,15 +102,13 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 		delete oGeom;
 
 		if (substitute)
-			GEOSGeom_destroy(gsGeom);
-
+			GeosHelper::DestroyGeometry(gsGeom);
 		return result;
-		
 	}
 	else
 	{
 		if (substitute)
-			GEOSGeom_destroy(gsGeom);
+			GeosHelper::DestroyGeometry(gsGeom);
 
 		return false;
 	}
@@ -1141,16 +1139,15 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 
 				if (g2 != NULL)
 				{
-					GEOSGeometry* geom = GEOSUnion(g1, g2);
+					GEOSGeometry* geom = GeosHelper::Union(g1, g2);
 					data[i] = geom;		// placing the resulting geometry back for further processing
 					
 					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
 													// so the intial geometries should be intact (depth == 0)
 													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
-													// all cases
 					{
-						GEOSGeom_destroy(g1);
-						GEOSGeom_destroy(g2);
+						GeosHelper::DestroyGeometry(g1);
+						GeosHelper::DestroyGeometry(g2);
 					}
 					
 					g1 = NULL;
@@ -1174,7 +1171,7 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 				{
 					// we need to clone it, to be able to apply unified memory management afterwards
 					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-					GEOSGeometry* geomTemp = GEOSGeom_clone(g1);
+					GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(g1);
 					g1 = geomTemp;
 				}
 			}
@@ -1191,24 +1188,24 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 // (mutipolygons shoud be split into parts before treating with this routine)
 GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
-	const GEOSGeometry* gsRing = GEOSGetExteriorRing(gsGeom);		// no memory is allocated there
-	GEOSGeom gsPoly = GEOSSimplify(gsRing, tolerance);				// memory allocation
+	const GEOSGeometry* gsRing =  GeosHelper::GetExteriorRing(gsGeom);	// no memory is allocated there
+	GEOSGeom gsPoly = GeosHelper::Simplify(gsRing, tolerance);		// memory allocation
 
 	if (!gsPoly)
 		return NULL;
 	
 	std::vector<GEOSGeom> holes;
-	for (int n = 0; n < GEOSGetNumInteriorRings(gsGeom); n++)
+	for (int n = 0; n < GeosHelper::GetNumInteriorRings(gsGeom); n++)
 	{
-		gsRing = GEOSGetInteriorRingN(gsGeom, n);				// no memory is allocated there
+		gsRing = GeosHelper::GetInteriorRingN(gsGeom, n);				// no memory is allocated there
 		if (gsRing)
 		{
-			GEOSGeom gsOut = GEOSSimplify(gsRing, tolerance);	// memory allocation
+			GEOSGeom gsOut = GeosHelper::Simplify(gsRing, tolerance);	// memory allocation
 			if (gsOut)
 			{
-				char* type = GEOSGeomType(gsOut);
+				char* type = GeosHelper::GetGeometryType(gsOut);
 				CString s = type;
-				GEOSFree(type);
+				GeosHelper::Free(type);
 				if (s == "LinearRing")
 					holes.push_back(gsOut);
 			}
@@ -1218,18 +1215,11 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	GEOSGeometry *gsNew = NULL;
 	if (holes.size() > 0)
 	{
-		gsNew = GEOSGeom_createPolygon(gsPoly, &(holes[0]), holes.size());	// memory allocation (should be released by caller)
+		gsNew = GeosHelper::CreatePolygon(gsPoly, &(holes[0]), holes.size()); // memory allocation (should be released by caller)
 	}
 	else
 	{
-		gsNew = GEOSGeom_createPolygon(gsPoly, NULL, 0);
+		gsNew = GeosHelper::CreatePolygon(gsPoly, NULL, 0);
 	}
-	
-	// cleaning
-	/*GEOSGeom_destroy(gsPoly);
-	for (size_t i = 0; i < holes.size(); i++)
-		GEOSGeom_destroy(holes[i]);*/
-
 	return gsNew;
-	
 }

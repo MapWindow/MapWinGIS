@@ -27,7 +27,7 @@
 #include "Templates.h"
 #include "Extents.h"
 #include "clipper.h"
-#include "Utilities\GeosHelper.h"
+#include <GeosHelper.h>
 
 #ifdef SERIALIZE_POLYGONS
 #include <fstream>
@@ -437,7 +437,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 					}
 				}
 			}
-			GEOSGeom_destroy(gsGeom);
+			GeosHelper::DestroyGeometry(gsGeom);
 		}
 		p++;
 		i++;
@@ -554,9 +554,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: Should we do this here and what is the best option to save it, as an property of sf?:
-	//GEOSContextHandle_t hGEOSCtxt = OGRGeometry::createGEOSContext();
-	
 	LONG numSelected;
 	this->get_NumSelected(&numSelected);
 	if (numSelected == 0 && SelectedOnly)
@@ -640,7 +637,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
 				}
-				
 				GeosHelper::DestroyGeometry(oGeom2);
 			}
 		}
@@ -1161,15 +1157,6 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	{
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 	}
-
-	// showing time
-	/*#ifdef DEBUG
-	DWORD endTick = ::GetTickCount();
-	float time = (float)(endTick - startTick)/1000.0f;
-	CString s;
-	s.Format("Calculation time: %.3f sec", time);
-	AfxMessageBox(s);
-	#endif*/
 }
 #pragma endregion
 
@@ -1239,7 +1226,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							GEOSGeom_destroy(gsGeom1);
+							GeosHelper::DestroyGeometry(gsGeom1);
 							goto cleaning;
 						}
 					}
@@ -1265,7 +1252,8 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 						gsGeom2 = vGeometries[clipId];
 					}
 					
-					if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
+					
+					if (GeosHelper::Intersects(gsGeom1, gsGeom2))
 					{
 						vUnion.push_back(gsGeom2);
 					}
@@ -1287,24 +1275,22 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 
 				if (gsGeom2)
 				{
-					GEOSGeometry* gsResult = GEOSIntersection(gsGeom1, gsGeom2);
+					GEOSGeometry* gsResult = GeosHelper::Intersection(gsGeom1, gsGeom2);
 					if (gsResult != NULL)
 					{
 						vector<IShape* > vShapes;
 						bool result = GeometryConverter::GEOSGeomToShapes(gsResult, &vShapes);
-						GEOSGeom_destroy(gsResult);
-						
+						GeosHelper::DestroyGeometry(gsResult);
 						this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL);
-						//InsertShapesVector(sfResult, vShapes, this, NULL);	// shapes are released here
 					}
 					
 					// clipping geometry should be deleted only in case it was build up from several parts
 					if (deleteNeeded)
-						GEOSGeom_destroy(gsGeom2);
+						GeosHelper::DestroyGeometry(gsGeom2);
 				}
 
 				// subject geometry should always be deleted
-				GEOSGeom_destroy(gsGeom1);
+				GeosHelper::DestroyGeometry(gsGeom1);
 			}
 		}
 	}
@@ -1314,7 +1300,7 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			GEOSGeom_destroy(vGeometries[i]);
+			GeosHelper::DestroyGeometry(vGeometries[i]);
 		}
 	}
 
@@ -1558,7 +1544,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							GEOSGeom_destroy(geom1);
+							GeosHelper::DestroyGeometry(geom1);
 							goto cleaning;
 						}
 					}
@@ -1595,13 +1581,13 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					}
 
 					// calculating intersection
-					GEOSGeometry* geom = GEOSIntersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
+					GEOSGeometry* geom = GeosHelper::Intersection(geom1, geom2);		// don't delete oGeom1 as it will be used on the next loops
 					if (geom == NULL) continue;
 					
 					// saving the results
 					vector<IShape* > vShapes;
 					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes);
-					GEOSGeom_destroy(geom);
+					GeosHelper::DestroyGeometry(geom);
 
 					// sum of area to exclude shapes from difference
 					if (buildSkipLists)
@@ -1620,7 +1606,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 
 					this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL, sfClip, clipId, fieldMap);	// shapes are released here
 				}
-				GEOSGeom_destroy(geom1);
+				GeosHelper::DestroyGeometry(geom1);
 				
 				if (buildSkipLists)
 				{
@@ -1650,7 +1636,7 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			GEOSGeom_destroy(vGeometries[i]);
+			GeosHelper::DestroyGeometry(vGeometries[i]);
 		}
 	}
 
@@ -2010,7 +1996,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 						if (stop)
 						{
 							sfResult->EditClear(&stop);
-							GEOSGeom_destroy(gsGeom1);
+							GeosHelper::DestroyGeometry(gsGeom1);
 							goto cleaning;
 						}
 					}
@@ -2038,7 +2024,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 						gsGeom2 = vGeometries[clipId];
 					}
 					
-					if (gsGeom2 && GEOSIntersects(gsGeom1, gsGeom2))
+					if (gsGeom2 && GeosHelper::Intersects(gsGeom1, gsGeom2))
 					{
 						vClip.push_back(gsGeom2);
 					}
@@ -2058,13 +2044,13 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 				if (gsClip)
 				{
 					GEOSGeometry* gsTemp = gsGeom1;
-					gsGeom1 = GEOSDifference(gsGeom1, gsClip);
-					GEOSGeom_destroy(gsTemp);	// initial subject geometry isn't needed any more
+					gsGeom1 = GeosHelper::Difference(gsGeom1, gsClip);
+					GeosHelper::DestroyGeometry(gsTemp);	// initial subject geometry isn't needed any more
 					
 					// if clip geometry was merged, we should delete it
 					if (vClip.size() > 1)
 					{
-						GEOSGeom_destroy(gsClip);
+						GeosHelper::DestroyGeometry(gsClip);
 					}
 				}
 				
@@ -2073,8 +2059,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 				{
 					vector<IShape* > vShapes;
 					bool result = GeometryConverter::GEOSGeomToShapes(gsGeom1, &vShapes);
-					GEOSGeom_destroy(gsGeom1);
-
+					GeosHelper::DestroyGeometry(gsGeom1);
 					this->InsertShapesVector(sfResult, vShapes, sfSubject, subjectId, fieldMap);	// shapes are released here
 				}
 			}
@@ -2096,7 +2081,7 @@ cleaning:
 	{	
 		if (vGeometries[i] !=NULL) 
 		{
-			GEOSGeom_destroy(vGeometries[i]);
+			GeosHelper::DestroyGeometry(vGeometries[i]);
 		}
 	}
 
@@ -3589,7 +3574,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 		shp->Release();
 		if (gsGeom == NULL) continue;
 
-		int numGeom = GEOSGetNumGeometries(gsGeom);
+		int numGeom = GeosHelper::GetNumGeometries(gsGeom);
 			
 		/*	int numRings = 0;
 			if (type == "Polygon")
@@ -3597,18 +3582,19 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 
 		if (shpType == SHP_POLYLINE)
 		{
-			GEOSGeom gsNew = GEOSSimplify(gsGeom, Tolerance);
+			GEOSGeom gsNew = GeosHelper::Simplify(gsGeom, Tolerance);
 			if (gsNew)
 			{
 				InsertGeosGeometry(sfNew, gsNew, this, i);
-				GEOSGeom_destroy(gsNew);
+				GeosHelper::DestroyGeometry(gsNew);
 			}
 		}
 		else
 		{
-			char* val = GEOSGeomType(gsGeom);
+			
+			char* val = GeosHelper::GetGeometryType(gsGeom);
 			CString type = val;
-			CPLFree(val);
+			GeosHelper::Free(val);
 
 			if (type != "MultiPolygon")
 			{
@@ -3616,24 +3602,24 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 				if (gsNew)
 				{
 					InsertGeosGeometry(sfNew, gsNew, this, i);
-					GEOSGeom_destroy(gsNew);
+					GeosHelper::DestroyGeometry(gsNew);
 				}
 			}
 			else
 			{
-				for (int n = 0; n < GEOSGetNumGeometries(gsGeom); n++)
+				for (int n = 0; n < GeosHelper::GetNumGeometries(gsGeom); n++)
 				{
-					const GEOSGeometry* gsPart = GEOSGetGeometryN(gsGeom, n);
+					const GEOSGeometry* gsPart = GeosHelper::GetGeometryN(gsGeom, n);
 					GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsPart, Tolerance);
 					if (gsPart)
 					{
 						InsertGeosGeometry(sfNew, gsNew, this, i);
-						GEOSGeom_destroy(gsNew);
+						GeosHelper::DestroyGeometry(gsNew);
 					}
 				}
 			}
 		}
-		GEOSGeom_destroy(gsGeom);
+		GeosHelper::DestroyGeometry(gsGeom);
 	}
 
 	globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
@@ -3703,27 +3689,27 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 						GEOSGeometry *gs = _shapeData[shapes[j]]->geosGeom;
 						if (!gsUnion)
 						{
-							gsUnion = GEOSGeom_clone(gs);
+							gsUnion = GeosHelper::CloneGeometry(gs);
 						}
 						else
 						{
-							GEOSGeometry *gsNew = GEOSUnion(gsUnion, gs);
+							GEOSGeometry *gsNew = GeosHelper::Union(gsUnion, gs);
 							if (gsNew)
 							{
-								GEOSGeom_destroy(gsUnion);	
+								GeosHelper::DestroyGeometry(gsUnion);
 								gsUnion = gsNew;
 							}
 						}
 					}
 				}
 
-				GEOSGeometry* gsOut = GEOSDifference(geom1, gsUnion);
-				GEOSGeom_destroy(gsUnion);	
+				GEOSGeometry* gsOut = GeosHelper::Difference(geom1, gsUnion);
+				GeosHelper::DestroyGeometry(gsUnion);
 
 				if (gsOut)
 				{
 					bool res = InsertGeosGeometry(sfOut, gsOut, this, i);
-					GEOSGeom_destroy(gsOut);
+					GeosHelper::DestroyGeometry(gsOut);
 					if (res)
 						continue;
 				}

@@ -305,7 +305,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories="c:\dev\SupportLibraries\SpatialIndex\include;c:\dev\SupportLibraries\include\atlhttp;c:\dev\SupportLibraries\include\;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;"
+				AdditionalIncludeDirectories="..\..\..\SupportLibraries\SpatialIndex\include;..\..\..\SupportLibraries\include\atlhttp;..\..\..\SupportLibraries\include\;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;"
 				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -349,11 +349,11 @@
 				Version="4.9"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;c:\dev\SupportLibraries\lib\$(PlatformName)&quot;;&quot;c:\dev\SupportLibraries\bin\$(PlatformName)&quot;"
+				AdditionalLibraryDirectories="&quot;..\..\..\SupportLibraries\lib\$(PlatformName)&quot;;&quot;..\..\..\SupportLibraries\bin\$(PlatformName)&quot;"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;netcdf.dll"
+				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="..\..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
@@ -842,7 +842,7 @@
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll;netcdf.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="..\..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
@@ -2003,6 +2003,14 @@
 			</File>
 			<File
 				RelativePath=".\Utilities\cppVector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\GeosHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\GeosHelper.h"
 				>
 			</File>
 			<File
@@ -3336,11 +3344,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

@@ -109,6 +109,8 @@ public:
 		sourceGridName = "";
 
 		m_iconGdiPlus = NULL;
+
+		fileName = NULL;
 	}
 	
 	// destructor

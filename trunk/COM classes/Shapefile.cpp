@@ -45,6 +45,7 @@
 #include "GeoProjection.h"
 #include "Templates.h"
 #include "TableClass.h"
+#include <GeosHelper.h>
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -2828,13 +2829,13 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 					char res = 0;
 					switch (relation)
 					{
-						case srContains:	res = GEOSContains(geomBase, geom); break;
-						case srCrosses:		res = GEOSCrosses(geomBase, geom); break;
-						case srEquals:		res = GEOSEquals(geomBase, geom); break;
-						case srIntersects:	res = GEOSIntersects(geomBase, geom); break;
-						case srOverlaps:	res = GEOSOverlaps(geomBase, geom); break;
-						case srTouches:		res = GEOSTouches(geomBase, geom); break;
-						case srWithin:		res = GEOSWithin(geomBase, geom); break;
+						case srContains:	res = GeosHelper::Contains(geomBase, geom); break;
+						case srCrosses:		res = GeosHelper::Crosses(geomBase, geom); break;
+						case srEquals:		res = GeosHelper::Equals(geomBase, geom); break;
+						case srIntersects:	res = GeosHelper::Intersects(geomBase, geom); break;
+						case srOverlaps:	res = GeosHelper::Overlaps(geomBase, geom); break;
+						case srTouches:		res = GeosHelper::Touches(geomBase, geom); break;
+						case srWithin:		res = GeosHelper::Within(geomBase, geom); break;
 					}
 					if (res)
 					{
@@ -2844,7 +2845,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 			}
 			
 			if (referenceIndex == -1)
-				GEOSGeom_destroy(geomBase);		// the geoemetry was created in this function so it must be destroyed
+				GeosHelper::DestroyGeometry(geomBase);	// the geometry was created in this function so it must be destroyed
 		}
 
 		*retval = Templates::Vector2SafeArray(&arr, VT_I4, resultArray);
