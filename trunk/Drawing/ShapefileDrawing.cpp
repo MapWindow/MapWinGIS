@@ -807,7 +807,9 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 				_shapefile->get_Shape(shapeIndex, &shape);
 				if (shape)
 				{
-					for(int i = 0; i < shp->get_PointCount(); i++)
+					long numPoints;
+					shape->get_NumPoints(&numPoints);
+					for(int i = 0; i < numPoints; i++)
 					{
 						shape->get_XY(i, &x, &y, &vbretval);
 						points.push_back(Point2D(x, y));

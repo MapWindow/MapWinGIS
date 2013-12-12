@@ -2879,6 +2879,18 @@ STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIn
 	}
 
 	this->CloneNoFields(retval);
+
+	long newFieldIndex = 0;
+	IField* fld = NULL;
+	this->get_Field(FieldIndex, &fld);
+	if (fld)
+	{
+		IField*	newField = NULL;
+		fld->Clone(&newField);
+		VARIANT_BOOL vb;
+		(*retval)->EditInsertField(newField, &newFieldIndex, NULL, &vb);
+	}
+
 	VARIANT_BOOL vbretval;
 
 	map <CComVariant, vector<IShape*>*> shapeMap;
@@ -3003,11 +3015,14 @@ STDMETHODIMP CShapefile::AggregateShapes(VARIANT_BOOL SelectedOnly, LONG FieldIn
 		shpBase->get_NumPoints(&pntIndex);
 		shpBase->get_NumParts(&partIndex);
 
-		if (partIndex > 0 && pntIndex > 0)
+		if (partIndex >= 0 && pntIndex > 0)
 		{
 			(*retval)->EditInsertShape(shpBase, &count, &vbretval);
+			(*retval)->EditCellValue(newFieldIndex, count, p->first, &vbretval);
 		}
-		shpBase->Release();
+		
+		if (_isEditingShapes)	// it was cloned in edit mode only
+			shpBase->Release();
 			
 		delete p->second;	// deleting the vector
 		count++;
