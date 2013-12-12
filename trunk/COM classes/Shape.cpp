@@ -1421,8 +1421,11 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	delete oGeom1;
 	if (oGeom2 == NULL)	return S_FALSE;
 	
+	ShpfileType shpType;
+	this->get_ShapeType(&shpType);
+
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2);
+	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	delete oGeom2;
@@ -1450,8 +1453,11 @@ STDMETHODIMP CShape::Boundry(IShape** retval)
 
 	if (oGeom2 == NULL)	return S_OK;
 	
+	ShpfileType shpType;
+	this->get_ShapeType(&shpType);
+
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2);
+	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	delete oGeom2;
@@ -1479,8 +1485,11 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 
 	if (oGeom2 == NULL)	return S_OK;
 	
+	ShpfileType shpType;
+	this->get_ShapeType(&shpType);
+
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2);
+	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	delete oGeom2;
@@ -1537,8 +1546,11 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	
 	if (oGeom3 == NULL) return S_OK;
 	
+	ShpfileType shpType;
+	this->get_ShapeType(&shpType);
+
 	std::vector<IShape*> vShapes;
-	if (!GeometryConverter::GeometryToShapes(oGeom3, &vShapes))return S_OK;
+	if (!GeometryConverter::GeometryToShapes(oGeom3, &vShapes, Utility::ShapeTypeIsM(shpType)))return S_OK;
 	delete oGeom3;
 
 	if (vShapes.size()!=0) 
@@ -2179,6 +2191,8 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 	}
 	else
 	{
+		bool isM = Utility::ShapeTypeIsM(shpType);
+		
 		// for polygons holes should be treated, the main problem here is to determine 
 		// to which part the hole belong; OGR will be used for this
 		OGRGeometry* geom = GeometryConverter::ShapeToGeometry(this);
@@ -2193,7 +2207,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 				{
 					for (unsigned int i = 0; i < polygons.size(); i++)
 					{
-						IShape* poly = GeometryConverter::GeometryToShape(polygons[i]);
+						IShape* poly = GeometryConverter::GeometryToShape(polygons[i], isM);
 						if (poly)
 						{
 							vShapes.push_back(poly);
@@ -2203,7 +2217,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 			}
 			else
 			{
-				IShape* shp = GeometryConverter::GeometryToShape(geom);
+				IShape* shp = GeometryConverter::GeometryToShape(geom, isM);
 				if (shp)
 				{
 					vShapes.push_back(shp);
@@ -2744,7 +2758,7 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 	{
 		// if there is a geometry collection only the first shape will be taken
 		std::vector<IShape*> shapes;
-		if (GeometryConverter::GeometryToShapes(oGeom, &shapes))
+		if (GeometryConverter::GeometryToShapes(oGeom, &shapes, true))
 		{
 			if (shapes.size() > 0 && shapes[0])
 			{

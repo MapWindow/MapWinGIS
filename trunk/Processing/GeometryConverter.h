@@ -24,12 +24,13 @@ using namespace std;
 class GeometryConverter
 {
 	public:
-		static IShape * GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
-		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, OGRwkbGeometryType oForceType = wkbNone);
+		//static void AddPoints(CShape* shp, OGRGeometry* geom, int startPointIndex, int endPointIndex);
+		static IShape * GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
+		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, OGRwkbGeometryType oForceType = wkbNone);
 		static OGRGeometry* ShapeToGeometry(IShape* shp);
 		static IShapefile* Read_OGR_Layer(BSTR Filename, ShpfileType shpType = SHP_NULLSHAPE);
 		static bool Write_OGR_Layer(IShapefile* sf, BSTR Filename);
-		static bool GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes);
+		static bool GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM);
 		static GEOSGeom Shape2GEOSGeom(IShape* shp);
 		static ClipperLib::Polygons* ClipPolygon(ClipperLib::Polygons* polyClip, ClipperLib::Polygons* polySubject, ClipperLib::ClipType operation);
 		static IShape* ClipPolygon(IShape* shapeClip, IShape* shapeSubject, PolygonOperation operation);

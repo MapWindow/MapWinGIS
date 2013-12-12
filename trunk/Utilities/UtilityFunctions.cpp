@@ -78,6 +78,11 @@ namespace Utility
 		}
 	}
 	
+	bool ShapeTypeIsM(ShpfileType shpType)
+	{
+		return shpType == SHP_POINTM || shpType == SHP_MULTIPOINTM || shpType == SHP_POLYLINEM || SHP_POLYGONM;
+	}
+
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType)
 	{
 		if		(shpType == SHP_NULLSHAPE)																return SHP_NULLSHAPE;

@@ -73,7 +73,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 //		GEOSGeom2Shape()
 // *********************************************************************
 // Converts GEOSGeom to MapWinGIS shapes
-bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes)
+bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
 	bool substitute = false;
 	if ( !GeosHelper::IsValid(gsGeom))
@@ -98,7 +98,7 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
 			oForceType = wkbLinearRing;
 
-		bool result = GeometryToShapes(oGeom, vShapes, oForceType );
+		bool result = GeometryToShapes(oGeom, vShapes, isM);
 		delete oGeom;
 
 		if (substitute)
@@ -138,10 +138,33 @@ bool GeometryConverter::MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeome
 		return false;
 }
 
+void AddPoints(CShape* shp, OGRLineString* geom, int startPointIndex, int endPointIndex)
+{
+	ShpfileType shpType;
+	shp->get_ShapeType(&shpType);
+	bool isM = Utility::ShapeTypeIsM(shpType);
+
+	VARIANT_BOOL vb;
+	double x, y, z;
+	for( int i = startPointIndex; i < endPointIndex; i++ )
+	{
+		if (isM)
+		{
+			shp->get_XY(i, &x, &y, &vb);
+			shp->get_M(i, &z);
+		}
+		else
+		{
+			shp->get_XYZ(i, &x, &y, &z);
+		}
+		geom->addPoint(x, y, z);
+	}
+}
+
 //**********************************************************************
 //							ShapeToGeometry()			               
 //**********************************************************************
-//  Converts MapWinGis shape object to OGR geometry object.
+// Converts MapWinGis shape object to OGR geometry object.
 OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 {
 	if( shape == NULL)
@@ -163,9 +186,19 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 	if (numPoints == 0)
 		return NULL;
 
+	VARIANT_BOOL vb;
+
 	if (shptype == SHP_POINT || shptype == SHP_POINTM || shptype == SHP_POINTZ)
 	{
-		shp->get_XYM(0, &x, &y, &z);
+		if (shptype == SHP_POINTM)
+		{
+			shp->get_XY(0, &x, &y, &vb);
+			shp->get_M(0, &z);
+		}
+		else
+		{
+			shp->get_XYZ(0, &x, &y, &z);
+		}
 		oGeom = new OGRPoint(x,y,z);
 	}
 
@@ -176,10 +209,17 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		else
 		{
 			OGRMultiPoint *oMPnt = new OGRMultiPoint();
-		
 			for( int i = 0; i < numPoints; i++ )
 			{
-				shp->get_XYZ(i, &x, &y, &z);
+				if (shptype == SHP_MULTIPOINTM)
+				{
+					shp->get_XY(i, &x, &y, &vb);
+					shp->get_M(i, &z);
+				}
+				else
+				{
+					shp->get_XYZ(i, &x, &y, &z);
+				}
 				OGRPoint* oPnt = new OGRPoint(x,y,z);
 				oMPnt->addGeometryDirectly(oPnt);		// no memory release is needed when "direct" methods are used
 			}
@@ -194,11 +234,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		else if (numParts == 1)
 		{	
 			OGRLineString *oLine = new OGRLineString();
-			for( int i = 0; i < numPoints; i++ )
-			{
-				shp->get_XYZ(i, &x, &y, &z);
-				oLine->addPoint(x,y,z);
-			}
+			AddPoints(shp, oLine, 0, numPoints);
 			oGeom = oLine;
 		}
 		else
@@ -208,17 +244,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 			for( int j = 0; j < numParts; j++ )
 			{
 				shp->get_Part(j, &beg_part);
-				if( numParts - 1 > j )
-					shp->get_Part(j +1, &end_part);
-				else
-					end_part = numPoints;
-				
+				shp->get_EndOfPart(j, &end_part);
+			
 				OGRLineString* oLine = new OGRLineString();
-				for (int i = beg_part; i < end_part; i++)
-				{
-					shp->get_XYZ(i, &x, &y, &z);
-					oLine->addPoint(x,y,z);
-				}
+				AddPoints(shp, oLine, beg_part, end_part + 1);
 				oMLine->addGeometryDirectly(oLine);
 			}
 			oGeom = oMLine;
@@ -227,18 +256,13 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		
 	else if (shptype == SHP_POLYGON || shptype == SHP_POLYGONM || shptype == SHP_POLYGONZ)
 	{	
-		
 		if (numParts == 0)
 			return NULL;
 
 		if (numParts == 1)
 		{	
 			OGRLinearRing* oRing = new OGRLinearRing();
-			for( int i = 0; i < numPoints; i++ )
-			{
-				shp->get_XYZ(i, &x, &y, &z);
-				oRing->addPoint(x,y,z); 
-			}
+			AddPoints(shp, oRing, 0, numPoints);
 
 			OGRPolygon* oPoly = new OGRPolygon();
 			oPoly->addRingDirectly(oRing);
@@ -251,18 +275,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 			for( int j = 0; j < numParts; j++ )
 			{			
 				shp->get_Part(j, &beg_part);
-				if( numParts - 1 > j )
-					shp->get_Part(j +1, &end_part);
-				else
-					end_part = numPoints;
+				shp->get_EndOfPart(j, &end_part);
 				
 				OGRLinearRing* oRing = new OGRLinearRing();
-
-				for (int i = beg_part; i < end_part; i++)
-				{
-					shp->get_XYZ(i, &x, &y, &z);
-					oRing->addPoint(x,y,z);
-				}
+				AddPoints(shp, oRing, beg_part, end_part + 1);
 				
 				tabPolygons[j] = new OGRPolygon();
 				tabPolygons[j]->addRingDirectly(oRing);
@@ -303,7 +319,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
  *
  *  @return true when at least one shape was created, and false otherwise
  */
-bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, OGRwkbGeometryType oForceType )
+bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, bool isM, OGRwkbGeometryType oForceType )
 {
 	IShape* shp;
 	if (!vShapes->empty()) vShapes->clear();
@@ -336,35 +352,35 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
 			else return false;		// we don't accept other types for now
 		}
 		if (bPoly25)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiPolygon25D);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bPoly)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiPolygon);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		
 		if (bLine25)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiLineString25D);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bLine)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiLineString);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		
 		if (bPoint25)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiPoint25D);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bPoint)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, wkbMultiPoint);
+		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 	}
 	else
 	{
-		shp = GeometryConverter::GeometryToShape(oGeom, wkbNone, oForceType);
+		shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbNone, oForceType );
 		if (shp != NULL) vShapes->push_back(shp);
 	}
 	return vShapes->size() > 0;
@@ -384,7 +400,7 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
  *
  *  @return pointer to shape on succes, or NULL otherwise
  */
-IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
+IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
 {
 	if (oGeom == NULL)
 		return NULL;
@@ -420,7 +436,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 	if (oType == wkbPoint || oType == wkbPoint25D) 
 	{
 		if		(oType == wkbPoint) 	shptype = SHP_POINT;
-		else if (oType == wkbPoint25D)	shptype = SHP_POINTZ;
+		else if (oType == wkbPoint25D)	shptype = isM ? SHP_POINTM : SHP_POINTZ;
 		
 		OGRPoint* oPnt = (OGRPoint *) oGeom;
 
@@ -430,7 +446,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 		pnt->put_X(oPnt->getX());
 		pnt->put_Y(oPnt->getY());
-		pnt->put_Z(oPnt->getZ());
+		if (isM)	pnt->put_M(oPnt->getZ());
+		else		pnt->put_Z(oPnt->getZ());
 		shp->InsertPoint(pnt,&pointIndex,&retval);
 		pnt->Release();
 	}
@@ -438,7 +455,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 	else if (oType == wkbMultiPoint || oType == wkbMultiPoint25D)
 	{
 		if		(oType == wkbMultiPoint) 	shptype = SHP_MULTIPOINT;
-		else if (oType == wkbMultiPoint25D)	shptype = SHP_MULTIPOINTZ;
+		else if (oType == wkbMultiPoint25D)	shptype = isM ? SHP_MULTIPOINTM : SHP_MULTIPOINTZ;
 		
 		OGRMultiPoint* oMPnt = (OGRMultiPoint* ) oGeom;
 		if (oMPnt->getNumGeometries() == 0)
@@ -457,7 +474,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					pnt->put_X(oPnt->getX());
 					pnt->put_Y(oPnt->getY());
-					pnt->put_Z(oPnt->getZ());
+					if (isM)	pnt->put_M(oPnt->getZ());
+					else		pnt->put_Z(oPnt->getZ());
 					shp->InsertPoint(pnt,&i,&retval);
 					pnt->Release();
 				}
@@ -468,7 +486,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 	else if (oType == wkbLineString || oType == wkbLineString25D)
 	{
 		if		(oType == wkbLineString) 	shptype = SHP_POLYLINE;
-		else if (oType == wkbLineString25D)	shptype = SHP_POLYLINEZ;
+		else if (oType == wkbLineString25D)	shptype = isM ? SHP_POLYLINEM : SHP_POLYLINEZ;
 		
 		OGRLineString* oLine = (OGRLineString *) oGeom;
 		if (oLine->getNumPoints() == 0)
@@ -483,7 +501,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 			m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 			pnt->put_X(oLine->getX(i));
 			pnt->put_Y(oLine->getY(i));
-			pnt->put_Z(oLine->getZ(i));
+			if (isM)	pnt->put_M(oLine->getZ(i));
+			else		pnt->put_Z(oLine->getZ(i));
 			shp->InsertPoint(pnt,&i,&retval);
 			pnt->Release();
 		}
@@ -492,7 +511,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 	else if (oType == wkbMultiLineString || oType == wkbMultiLineString25D)
 	{
 		if		(oType == wkbMultiLineString) 		shptype = SHP_POLYLINE;
-		else if (oType == wkbMultiLineString25D)	shptype = SHP_POLYLINEZ;
+		else if (oType == wkbMultiLineString25D)	shptype = isM ? SHP_POLYLINEM : SHP_POLYLINEZ;
 
 		OGRMultiLineString * oMLine = (OGRMultiLineString *) oGeom;
 		if (oMLine->getNumGeometries() == 0) 
@@ -518,7 +537,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 						m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 						pnt->put_X(oLine->getX(i));
 						pnt->put_Y(oLine->getY(i));
-						pnt->put_Z(oLine->getZ(i));
+						if (isM)	pnt->put_M(oLine->getZ(i));
+						else		pnt->put_Z(oLine->getZ(i));
 						shp->InsertPoint(pnt,&count,&retval);
 						pnt->Release();
 						if (retval) count++;
@@ -534,7 +554,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 		OGRLinearRing* oRing;
 		
 		shptype = SHP_POLYGON;
-		if (oGeom->getCoordinateDimension() == 3)	shptype = SHP_POLYGONZ;
+		if (oGeom->getCoordinateDimension() == 3)	shptype = isM ? SHP_POLYGONM : SHP_POLYGONZ;
 		else										shptype = SHP_POLYGON;
 		
 		oRing = (OGRLinearRing*) oGeom;
@@ -550,7 +570,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 			m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 			pnt->put_X(oRing->getX(i));
 			pnt->put_Y(oRing->getY(i));
-			pnt->put_Z(oRing->getZ(i));
+			if (isM)	pnt->put_M(oRing->getZ(i));
+			else		pnt->put_Z(oRing->getZ(i));
 			shp->InsertPoint(pnt,&i,&retval);
 			pnt->Release();
 		}
@@ -563,7 +584,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 		int nRings = 0;
 		
 		if		(oType == wkbPolygon || oType == wkbMultiPolygon)			shptype = SHP_POLYGON;
-		else if (oType == wkbPolygon25D || oType == wkbMultiPolygon25D)		shptype = SHP_POLYGONZ;
+		else if (oType == wkbPolygon25D || oType == wkbMultiPolygon25D)		shptype = isM ? SHP_POLYGONM : SHP_POLYGONZ;
 	
 		if (oType == wkbPolygon || oType == wkbPolygon25D)
 		{
@@ -634,6 +655,8 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, OGRwkbGeometryTy
 				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 				pnt->put_X(oRing->getX(i));
 				pnt->put_Y(oRing->getY(i));
+				if (isM)	pnt->put_M(oRing->getZ(i));
+				else		pnt->put_Z(oRing->getZ(i));
 				shp->InsertPoint(pnt,&count,&retval);
 				pnt->Release();
 				pnt = NULL;
@@ -739,7 +762,7 @@ IShapefile* GeometryConverter::Read_OGR_Layer(BSTR Filename, ShpfileType shpType
 		if(oGeom == NULL) continue;
 		
 		IShape* shp =NULL;
-		shp = GeometryConverter::GeometryToShape(oGeom);
+		shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
 		
 		long numShapes;
 		sf->get_NumShapes(&numShapes);

@@ -398,6 +398,8 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 		}
 	}
 	
+	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+
 	// saving results							
 	long count = 0;	// number of shapes inserted
 	int i = 0;		// for progress bar
@@ -423,7 +425,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShape
 		if (gsGeom != NULL)
 		{
 			std::vector<IShape*> vShapes;
-			if (GeometryConverter::GEOSGeomToShapes(gsGeom, &vShapes))
+			if (GeometryConverter::GEOSGeomToShapes(gsGeom, &vShapes, isM ))
 			{
 				for (unsigned int i = 0; i < vShapes.size(); i++)
 				{
@@ -592,6 +594,8 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	std::vector<GEOSGeometry*> results;
 	results.reserve(size);
 
+	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+
 	for (long i = 0; i < size; i++)
 	{
 		if( globalCallback) 
@@ -632,7 +636,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			{
 				vector<IShape*> vShapes;
 
-				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes))
+				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes, isM))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
@@ -654,18 +658,18 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			
 			if (oGeom)
 			{
+				bool isM = Utility::ShapeTypeIsM(this->_shpfiletype);
+
 				OGRwkbGeometryType type = oGeom->getGeometryType();
 				if (type == wkbMultiPolygon || type == wkbMultiPolygon25D)
 				{
 					std::vector<OGRGeometry*> polygons;
 					
-					// Doesn't use any GEOS functions:
 					if (GeometryConverter::MultiPolygon2Polygons(oGeom, &polygons))
 					{
 						for (unsigned int i = 0; i < polygons.size(); i++)
 						{
-							// Doesn't use any GEOS functions:
-							IShape* shp = GeometryConverter::GeometryToShape(polygons[i]);
+							IShape* shp = GeometryConverter::GeometryToShape(polygons[i], isM);
 							if (shp)
 							{
 								(*sf)->EditInsertShape(shp, &count, &vbretval);
@@ -678,7 +682,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				else
 				{
 					// Doesn't use any GEOS functions:
-					IShape* shp = GeometryConverter::GeometryToShape(oGeom);
+					IShape* shp = GeometryConverter::GeometryToShape(oGeom, isM);
 					if (shp)
 					{
 						(*sf)->EditInsertShape(shp, &count, &vbretval);	
@@ -1181,6 +1185,8 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 	
 	std::vector<ShapeData*>* shapeDataClip = ((CShapefile*)sfOverlay)->get_ShapeVector();
 
+	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
@@ -1279,7 +1285,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 					if (gsResult != NULL)
 					{
 						vector<IShape* > vShapes;
-						bool result = GeometryConverter::GEOSGeomToShapes(gsResult, &vShapes);
+						bool result = GeometryConverter::GEOSGeomToShapes(gsResult, &vShapes, isM);
 						GeosHelper::DestroyGeometry(gsResult);
 						this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL);
 					}
@@ -1496,6 +1502,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 		projection = NULL;
 	}
 	double AREA_TOLERANCE = m_globalSettings.GetMinPolygonArea(isGeographic) * 0.001;
+	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
@@ -1586,7 +1593,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					
 					// saving the results
 					vector<IShape* > vShapes;
-					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes);
+					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes, isM);
 					GeosHelper::DestroyGeometry(geom);
 
 					// sum of area to exclude shapes from difference
@@ -1945,6 +1952,8 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	std::vector<ShapeData*>* shapeDataClip = ((CShapefile*)sfOverlay)->get_ShapeVector();
 	std::vector<ShapeData*>* shapeDataSubject = ((CShapefile*)sfSubject)->get_ShapeVector();
 
+	bool isM = Utility::ShapeTypeIsM(_shpfiletype);
+
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
@@ -2058,7 +2067,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 				if (gsGeom1 != NULL)
 				{
 					vector<IShape* > vShapes;
-					bool result = GeometryConverter::GEOSGeomToShapes(gsGeom1, &vShapes);
+					bool result = GeometryConverter::GEOSGeomToShapes(gsGeom1, &vShapes, isM);
 					GeosHelper::DestroyGeometry(gsGeom1);
 					this->InsertShapesVector(sfResult, vShapes, sfSubject, subjectId, fieldMap);	// shapes are released here
 				}
@@ -3506,8 +3515,12 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 {
 	if (gsNew)
 	{
+		ShpfileType shpType;
+		sfTarget->get_ShapefileType(&shpType);
+		bool isM = Utility::ShapeTypeIsM(shpType);
+		
 		std::vector<IShape*> shapes;
-		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes))
+		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes, isM))
 		{
 			long index, numFields;
 			VARIANT_BOOL vbretval;

@@ -10,6 +10,7 @@ using namespace std;
 // Some of them are written in a hurry and perhaps can be improved or substituted by standart solutions
 namespace Utility
 {
+	bool ShapeTypeIsM(ShpfileType shpType);
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType);
 	BSTR Variant2BSTR(VARIANT* val);
 	BOOL fileExists(CString filename);
