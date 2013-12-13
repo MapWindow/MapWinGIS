@@ -355,7 +355,7 @@
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs="lti_dsdk.dll;lti_lidar_dsdk.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile="..\..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
+				ProgramDatabaseFile="..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -1824,6 +1824,14 @@
 			<File
 				RelativePath=".\MapWinGIS.cpp"
 				>
+				<FileConfiguration
+					Name="Release Fast|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\MapWinGIS.def"
@@ -3344,11 +3352,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

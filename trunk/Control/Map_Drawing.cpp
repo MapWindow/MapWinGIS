@@ -1483,7 +1483,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
 	CRect rcClip(clipX, clipY, clipWidth, clipHeight);
-	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcBounds : &rcClip;
+	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcClip : &rcBounds;
 	
 	HandleNewDrawing(snapDC, rcBounds, *r, offsetX, offsetY);
 	
