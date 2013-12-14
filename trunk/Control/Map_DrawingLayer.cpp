@@ -175,11 +175,11 @@ BOOL CMapView::GetUseDrawingLabelCollision(long drawHandle)
 // ***************************************************************
 //		SetUseDrawingLabelCollision()
 // ***************************************************************
-void CMapView::SetUseDrawingLabelCollision(long drawHandle, BOOL value)
+void CMapView::SetUseDrawingLabelCollision(long drawHandle, BOOL bNewValue)
 {
 	if( IsValidDrawList(drawHandle) )
 	{
-		m_allDrawLists[drawHandle]->m_labels->put_AvoidCollisions(value ? VARIANT_TRUE : VARIANT_FALSE);
+		m_allDrawLists[drawHandle]->m_labels->put_AvoidCollisions(bNewValue ? VARIANT_TRUE : VARIANT_FALSE);
 	}
 	else
 		ErrorMessage(tkINVALID_DRAW_HANDLE);

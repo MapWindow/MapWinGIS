@@ -458,7 +458,7 @@ protected:
 	afx_msg void SetDrawingLabelsShadowColor(long drawHandle, OLE_COLOR color);
 
 	afx_msg BOOL GetUseDrawingLabelCollision(long drawHandle);
-	afx_msg void SetUseDrawingLabelCollision(long drawHandle, BOOL value);
+	afx_msg void SetUseDrawingLabelCollision(long drawHandle, BOOL bNewValue);
 
 	afx_msg BOOL GetDrawingLabelsVisible(long drawHandle);
 	afx_msg void SetDrawingLabelsVisible(long drawHandle, BOOL bNewValue);

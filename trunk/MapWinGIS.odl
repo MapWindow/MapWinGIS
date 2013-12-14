@@ -4551,7 +4551,7 @@ library MapWinGIS
 			[id(128), propget] OLE_COLOR DrawingLabelsShadowColor(long drawHandle);
 			[id(128), propput] void DrawingLabelsShadowColor(long drawHandle, OLE_COLOR color);
 			[id(129), propget] VARIANT_BOOL UseDrawingLabelCollision(long drawHandle);
-			[id(129), propput] void UseDrawingLabelCollision(long drawHandle, VARIANT_BOOL value);
+			[id(129), propput] void UseDrawingLabelCollision(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(130), propget] VARIANT_BOOL DrawingLabelsVisible(long drawHandle);
 			[id(130), propput] void DrawingLabelsVisible(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(131)] void GetDrawingStandardViewWidth(long drawHandle, double * Width);
