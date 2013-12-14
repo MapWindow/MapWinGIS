@@ -689,6 +689,10 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 
 						if( sf )
 						{
+							long refCount;
+							sf->get_RefCount(&refCount);
+							Debug::WriteLine("Drawing: %d", refCount);
+							
 							sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
 
 							// for old modes we shall mark all the shapes of shapefile as visible as no visiblity expressions were analyzed
@@ -896,16 +900,20 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 			{
 				Layer * l = m_allLayers[m_activeLayers[(*indices)[j]]];
 				l->object->QueryInterface(IID_IImage, (void**)&iimg);
-				CImageClass* img = (CImageClass*)iimg;
-				
-				if (!img->_pixelsSaved)				// it's the first time we try to draw image or transparency color chnaged
+				if (iimg)
 				{
-					if (!img->SaveNotNullPixels())	// analysing pixels...
+					CImageClass* img = (CImageClass*)iimg;
+					
+					if (!img->_pixelsSaved)				// it's the first time we try to draw image or transparency color chnaged
 					{
-						(*indices)[j] = -1;
-						img->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more - there are to many data pixels in it
-						groupSize--;
+						if (!img->SaveNotNullPixels())	// analysing pixels...
+						{
+							(*indices)[j] = -1;
+							img->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more - there are to many data pixels in it
+							groupSize--;
+						}
 					}
+					iimg->Release();
 				}
 			}
 		}
@@ -921,8 +929,12 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 				{
 					Layer * l = m_allLayers[m_activeLayers[imageIndex]];
 					l->object->QueryInterface(IID_IImage, (void**)&iimg);
-					CImageClass* img = (CImageClass*)iimg;
-					img->m_groupID = groupId;
+					if (iimg)
+					{
+						CImageClass* img = (CImageClass*)iimg;
+						img->m_groupID = groupId;
+						iimg->Release();
+					}
 				}
 			}
 			groupId++;
@@ -1040,40 +1052,44 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 					if(l->type == ImageLayer && l->IsVisible(scale, zoom))
 					{
 						l->object->QueryInterface(IID_IImage, (void**)&iimg);
-						CImageClass* img = (CImageClass*)iimg;
-
-						if ( img )
+						if (iimg)
 						{
-							if (img->m_groupID == groupIndex)
+							CImageClass* img = (CImageClass*)iimg;
+
+							if ( img )
 							{
-								tkInterpolationMode downMode;
-								tkInterpolationMode upMode;
-								img->get_DownsamplingMode(&downMode);
-								img->get_UpsamplingMode(&upMode);
-								
-								// in case at least one image don't use transparency the grouped bitmap will have white background
-								VARIANT_BOOL transp;
-								img->get_UseTransparencyColor(&transp);
-								if (!transp) 
-									useTransparencyColor = false;
-
-								downsamplingMode = ChooseInterpolationMode(downsamplingMode, downMode);
-								upsamplingMode = ChooseInterpolationMode(upsamplingMode, upMode);
-								
-								visibleLayerExists = true;
-
-								DataPixels* pixels = img->m_pixels;
-								int pixelsCount = img->m_pixelsCount;
-
-								// passing data
-								DataPixels* val;
-								for (int p = 0; p < pixelsCount; p++ )
+								if (img->m_groupID == groupIndex)
 								{
-									val = pixels + p;
-									memcpy(&(dstData[val->position]), &val->value, sizeof(colour));
-									//dstData[val->position] = val->value;
+									tkInterpolationMode downMode;
+									tkInterpolationMode upMode;
+									img->get_DownsamplingMode(&downMode);
+									img->get_UpsamplingMode(&upMode);
+									
+									// in case at least one image don't use transparency the grouped bitmap will have white background
+									VARIANT_BOOL transp;
+									img->get_UseTransparencyColor(&transp);
+									if (!transp) 
+										useTransparencyColor = false;
+
+									downsamplingMode = ChooseInterpolationMode(downsamplingMode, downMode);
+									upsamplingMode = ChooseInterpolationMode(upsamplingMode, upMode);
+									
+									visibleLayerExists = true;
+
+									DataPixels* pixels = img->m_pixels;
+									int pixelsCount = img->m_pixelsCount;
+
+									// passing data
+									DataPixels* val;
+									for (int p = 0; p < pixelsCount; p++ )
+									{
+										val = pixels + p;
+										memcpy(&(dstData[val->position]), &val->value, sizeof(colour));
+										//dstData[val->position] = val->value;
+									}
 								}
 							}
+							iimg->Release();
 						}
 					}
 				}

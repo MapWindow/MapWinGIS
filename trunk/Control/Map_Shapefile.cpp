@@ -76,6 +76,7 @@ ShpfileType CMapView::get_ShapefileType(long layerHandle)
 			{
 				ShpfileType type;
 				sf->get_ShapefileType(&type);
+				sf->Release();
 				return type;
 			}
 		}

@@ -40,6 +40,9 @@ IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 		layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
 		if (sf)
 		{
+			long refCount;
+			sf->get_RefCount(&refCount);
+			Debug::WriteLine("Get shapefile: %d", refCount);
 			return sf;
 		}
 	}

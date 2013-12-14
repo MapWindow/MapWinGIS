@@ -373,6 +373,8 @@ public:
 
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
 
+	STDMETHOD(get_RefCount)(long* retVal);
+
 	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);

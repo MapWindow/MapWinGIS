@@ -545,6 +545,7 @@ STDMETHODIMP CGridColorScheme::Serialize(BSTR* retVal)
 	if (node)
 	{
 		CString str = CPLSerializeXMLTree(node);	
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -743,11 +744,12 @@ STDMETHODIMP CGridColorScheme::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=GridColorSchemeClass");
-		if (node)
+		CPLXMLNode* nodeGcs = CPLGetXMLNode(node, "=GridColorSchemeClass");
+		if (nodeGcs)
 		{
-			this->DeserializeCore(node);
+			this->DeserializeCore(nodeGcs);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }
@@ -800,5 +802,6 @@ STDMETHODIMP CGridColorScheme::WriteToFile(BSTR mwlegFilename, VARIANT_BOOL* ret
 	USES_CONVERSION;
 	CString filename = OLE2CA(mwlegFilename);
 	*retVal = CPLSerializeXMLTreeToFile(psTree, filename);
+	CPLDestroyXMLNode(psTree);
 	return S_OK;
 }

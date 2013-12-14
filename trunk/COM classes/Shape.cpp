@@ -2446,6 +2446,7 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 	{
 		unsigned char* buffer = reinterpret_cast<unsigned char*>(data);
 		*retVal = Bytes2SafeArray(buffer, contentLength, bytesArray);
+		delete[] data;
 		return S_OK;
 	}
 	else

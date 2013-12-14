@@ -832,6 +832,10 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retval = VARIANT_FALSE;
 
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = true;
+#endif
+
 	if (!target)
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -866,6 +870,10 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 	{
 		*retval = VARIANT_TRUE;
 	}
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = false;
+#endif
+
 	return S_OK;
 }
 

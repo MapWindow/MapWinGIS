@@ -988,6 +988,7 @@ STDMETHODIMP CTiles::Serialize(BSTR* retVal)
 	if (node)
 	{
 		CString str = CPLSerializeXMLTree(node);	
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -1033,11 +1034,12 @@ STDMETHODIMP CTiles::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=TilesClass");
-		if (node)
+		CPLXMLNode* nodeTiles = CPLGetXMLNode(node, "=TilesClass");
+		if (nodeTiles)
 		{
-			DeserializeCore(node);
+			DeserializeCore(nodeTiles);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

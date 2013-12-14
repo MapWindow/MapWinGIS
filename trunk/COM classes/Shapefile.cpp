@@ -53,7 +53,18 @@
 	static char THIS_FILE[] = __FILE__;
 #endif
 
+
 #pragma region Properties	
+// ************************************************************
+//		get_RefCount()
+// ************************************************************
+STDMETHODIMP CShapefile::get_RefCount(long *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = this->m_dwRef;
+	return S_OK;
+}
+
 // ************************************************************
 //		get_EditingShapes()
 // ************************************************************
@@ -444,8 +455,16 @@ bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
 	}
 	
 	// opening dbf
-	ASSERT(dbf == NULL);
-	CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&dbf);
+	//ASSERT(dbf == NULL);
+	if (!dbf)
+	{
+		CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&dbf);
+	}
+	else
+	{
+		VARIANT_BOOL vb;
+		dbf->Close(&vb);
+	}
 	dbf->put_GlobalCallback(globalCallback);
 	dbf->Open(A2BSTR(_dbffileName), cBack, &vbretval);
 
@@ -2041,7 +2060,8 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 	}
 	else
 	{
-		CString str = CPLSerializeXMLTree(psTree);	
+		CString str = CPLSerializeXMLTree(psTree);
+		CPLDestroyXMLNode(psTree);
 		*retVal = A2BSTR(str);
 	}
 	return S_OK;
@@ -2170,11 +2190,12 @@ STDMETHODIMP CShapefile::Deserialize(VARIANT_BOOL LoadSelection, BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=ShapefileClass");
-		if (node)
+		CPLXMLNode* nodeSf = CPLGetXMLNode(node, "=ShapefileClass");
+		if (nodeSf)
 		{
-			this->DeserializeCore(VARIANT_TRUE, node);
+			this->DeserializeCore(VARIANT_TRUE, nodeSf);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }
@@ -2529,11 +2550,20 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
 		return false;
 	}
-	
+
+//#ifdef _DEBUG
+//	gMemLeakDetect.stopped = true;
+//#endif
+
 	OGRSpatialReference* projSource = ((CGeoProjection*)m_geoProjection)->get_SpatialReference();
 	OGRSpatialReference* projTarget = ((CGeoProjection*)newProjection)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation( projSource, projTarget );
+
+//#ifdef _DEBUG
+//	gMemLeakDetect.stopped = false;
+//#endif
+
 	if (!transf)
 	{
 		m_globalSettings.gdalErrorMessage = CPLGetLastErrorMsg();
@@ -2630,6 +2660,12 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		}
 	}
 	
+	if (transf)
+	{
+		OGRCoordinateTransformation::DestroyCT(transf);
+		transf = NULL;
+	}
+
 	if( globalCallback != NULL )
 		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
 

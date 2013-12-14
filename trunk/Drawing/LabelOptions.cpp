@@ -154,6 +154,7 @@ void CLabelOptions::Deserialize(CString s)
 {
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	DeserializeFromNode(node);
+	CPLDestroyXMLNode(node);
 }
 
 // ********************************************************

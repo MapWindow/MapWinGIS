@@ -79,6 +79,18 @@ public:
 	int minVisibleZoom;
 	VARIANT_BOOL skipOnSaving;
 
+	bool QueryShapefile(IShapefile** sf)
+	{
+		this->object->QueryInterface(IID_IShapefile, (void**)sf);
+		return (*sf) != NULL;
+	}
+
+	bool QueryImage(Image** img)
+	{
+		this->object->QueryInterface(IID_IImage, (void**)img);
+		return (*img) != NULL;
+	}
+
 	// Returns the visiblity of layer considering dynamic visibility as well
 	bool IsVisible(double scale, int zoom)
 	{

@@ -32,7 +32,9 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 	}
 
 	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, Filename);
-	return CPLSerializeXMLTreeToFile(node, Filename) ? VARIANT_TRUE : VARIANT_FALSE;
+	bool result = CPLSerializeXMLTreeToFile(node, Filename);
+	CPLDestroyXMLNode(node);
+	return result ? VARIANT_TRUE : VARIANT_FALSE;
 }
 
 // *********************************************************
@@ -78,12 +80,14 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, IDispatch* Callback)
 VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	VARIANT_BOOL result = VARIANT_FALSE;
 	CPLXMLNode* node = CPLParseXMLString(State);
 	if (node)
 	{
-		return DeserializeMapStateCore(node, BasePath, LoadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;
+		result = DeserializeMapStateCore(node, BasePath, LoadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;
+		CPLDestroyXMLNode(node);
 	}
-	return VARIANT_TRUE;
+	return result;
 }
 
 // ******************************************************************
@@ -286,6 +290,7 @@ BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
 	if (node)
 	{
 		strResult = CPLSerializeXMLTree(node);
+		CPLDestroyXMLNode(node);
 	}
 	return strResult.AllocSysString();
 }
@@ -487,5 +492,6 @@ void CMapView::SetMapState(LPCTSTR lpszNewValue)
 	CString s = lpszNewValue;
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	this->DeserializeMapStateCore(node, "", VARIANT_TRUE, NULL);
+	CPLDestroyXMLNode(node);
 }
 #pragma endregion

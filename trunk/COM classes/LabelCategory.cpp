@@ -259,7 +259,8 @@ STDMETHODIMP CLabelCategory::Serialize(BSTR* retVal)
 	CPLXMLNode* node = SerializeCore("LabelCategoryClass");
 	if (node)
 	{
-		CString str = CPLSerializeXMLTree(node);	
+		CString str = CPLSerializeXMLTree(node);
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -303,6 +304,7 @@ STDMETHODIMP CLabelCategory::Deserialize(BSTR newVal)
 	CString s = OLE2CA(newVal);
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	this->DeserializeFromNode(node);
+	CPLDestroyXMLNode(node);
 	return S_OK;
 }
 

@@ -394,7 +394,7 @@ private:
 	//void LoadImageStandard(double mapUnitsPerScreenPixel);
 	bool CImageClass::IsGdalImageAvailable();
 	bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies,  long* count);
-	//bool CImageClass::SetImageBitsDCCore(HDC hdc);
+	bool CImageClass::SetImageBitsDCCore(HDC hdc);
 	
 };
 

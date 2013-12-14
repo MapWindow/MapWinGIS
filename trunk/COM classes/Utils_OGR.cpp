@@ -2122,7 +2122,8 @@ static int TranslateLayer( OGRDataSource *poSrcDS,
                     if (dfGeomOpParam > 0)
                         poDstGeometry->segmentize(dfGeomOpParam);
                 }
-                else if (eGeomOp == SIMPLIFY_PRESERVE_TOPOLOGY)
+#ifndef _DEBUG
+				else if (eGeomOp == SIMPLIFY_PRESERVE_TOPOLOGY)
                 {
                     if (dfGeomOpParam > 0)
                     {
@@ -2134,6 +2135,7 @@ static int TranslateLayer( OGRDataSource *poSrcDS,
                         }
                     }
                 }
+#endif
 
                 if (poClipSrc)
                 {

@@ -388,6 +388,7 @@ STDMETHODIMP CLinePattern::Serialize(BSTR* retVal)
 	if (node)
 	{
 		CString str = CPLSerializeXMLTree(node);	
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -593,11 +594,12 @@ STDMETHODIMP CLinePattern::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=LinePatternClass");
-		if (node)
+		CPLXMLNode* nodeLp = CPLGetXMLNode(node, "=LinePatternClass");
+		if (nodeLp)
 		{
-			DeserializeCore(node);
+			DeserializeCore(nodeLp);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

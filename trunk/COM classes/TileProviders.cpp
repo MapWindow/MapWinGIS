@@ -121,6 +121,10 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 			return m_providers[i];
 	}
 
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = true;
+#endif
+
 	BaseProvider* p = NULL;
 
 	switch (provider)
@@ -205,6 +209,10 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 	{
 		Debug::WriteLine("Provider wasn't found: %d", (int)provider);
 	}
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = false;
+#endif
+
 	return p;
 }
 #pragma endregion

@@ -3171,7 +3171,8 @@ STDMETHODIMP CImageClass::Serialize(VARIANT_BOOL SerializePixels, BSTR* retVal)
 	}
 	else
 	{
-		CString str = CPLSerializeXMLTree(psTree);	
+		CString str = CPLSerializeXMLTree(psTree);
+		CPLDestroyXMLNode(psTree);
 		*retVal = A2BSTR(str);
 	}
 	return S_OK;
@@ -3441,11 +3442,12 @@ STDMETHODIMP CImageClass::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=ImageClass");
-		if (node)
+		CPLXMLNode* nodeImage = CPLGetXMLNode(node, "=ImageClass");
+		if (nodeImage)
 		{
-			this->DeserializeCore(node);
+			this->DeserializeCore(nodeImage);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

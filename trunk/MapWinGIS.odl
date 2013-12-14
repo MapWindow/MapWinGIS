@@ -2666,6 +2666,7 @@ interface IShapefile : IDispatch{
 
 	[id(112), helpstring("method Dump")] HRESULT Dump([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(113), helpstring("method LoadDataFrom")] HRESULT LoadDataFrom([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[propget, id(114), helpstring("property RefCount")] HRESULT RefCount([out, retval] long* retVal);
 };
 
 /****************************  Shape Interface ***********************/

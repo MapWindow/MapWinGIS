@@ -54,10 +54,10 @@ namespace IndexSearching
 		  // Create and bulk load a new RTree with dimensionality 2, using "file" as
 		  // the StorageManager and the RSTAR splitting policy.
 		  id_type indexIdentifier;
-
+#ifndef __DEBUG
 		  tree = RTree::createAndBulkLoadNewRTree(RTree::BLM_STR, inputStream, *file, utilization,
 							 capacity, capacity, 2, SpatialIndex::RTree::RV_RSTAR, indexIdentifier);
-			
+#endif			
 		  ret = tree->isIndexValid();
 
 		}

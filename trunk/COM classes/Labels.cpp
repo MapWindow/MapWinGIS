@@ -560,15 +560,13 @@ STDMETHODIMP CLabels::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	for(unsigned int i=0; i < m_labels.size(); i++)
-	{
-		std::vector<CLabelInfo*>* parts = m_labels[i];
-		for (unsigned int j=0; j < parts->size(); j++)
+	for( size_t i = 0; i < (int)m_labels.size(); i++ )
+	{	
+		for(size_t j = 0; j < m_labels[i]->size(); j++)
 		{
-			delete parts->at(j);
+			delete m_labels[i]->at(j);
 		}
-		parts->clear();
-		delete parts;
+		delete m_labels[i];
 	}
 	m_labels.clear();
 	return S_OK;
@@ -1518,7 +1516,8 @@ STDMETHODIMP CLabels::Serialize(BSTR* retVal)
 	}
 	else
 	{
-		CString str = CPLSerializeXMLTree(psTree);	
+		CString str = CPLSerializeXMLTree(psTree);
+		CPLDestroyXMLNode(psTree);
 		*retVal = A2BSTR(str);
 	}
 	return S_OK;
@@ -1708,11 +1707,12 @@ STDMETHODIMP CLabels::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=LabelsClass");
-		if (node)
+		CPLXMLNode* nodeLabels = CPLGetXMLNode(node, "=LabelsClass");
+		if (nodeLabels)
 		{
-			DeserializeCore(node);
+			DeserializeCore(nodeLabels);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }
@@ -1825,6 +1825,7 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 
 			CPLAddXMLChild(psTree, node);
 			*retVal = CPLSerializeXMLTreeToFile(psTree, s);
+			CPLDestroyXMLNode(psTree);
 		}
 	}
 	return S_OK;

@@ -301,7 +301,7 @@ IPoint* CShapeWrapper::get_Point(long Index)
 		{
 			pnt->put_X(_points[Index].X);
 			pnt->put_Y(_points[Index].Y);
-			pnt->AddRef();			
+			//pnt->AddRef();			
 			// Z, M values aren't supported			
 			//pnt->put_Z(_pointsZ[Index]);
 			//pnt->put_M(_pointsM[Index]);

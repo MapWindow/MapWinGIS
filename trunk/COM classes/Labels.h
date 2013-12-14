@@ -75,11 +75,8 @@ public:
 	}
 	~CLabels()
 	{
-		for( int i = 0; i < (int)m_labels.size(); i++ )
-		{	
-			delete m_labels.at(i);
-		}
-		m_labels.clear();	
+		
+		this->Clear();
 		::SysFreeString(m_key);
 		::SysFreeString(m_expression);
 		

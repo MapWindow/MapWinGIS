@@ -121,7 +121,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		{
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{
-				ASSERT(_shapeData[i]->fastData);
+				//ASSERT(_shapeData[i]->fastData);
 				if (_shapeData[i]->fastData)
 				{
 					delete _shapeData[i]->fastData;

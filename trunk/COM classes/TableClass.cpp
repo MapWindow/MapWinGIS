@@ -3174,6 +3174,7 @@ STDMETHODIMP CTableClass::Serialize(BSTR* retVal)
 	USES_CONVERSION;
 	CPLXMLNode* psTree = this->SerializeCore("TableClass");
 	*retVal = A2BSTR(psTree ? CPLSerializeXMLTree(psTree) : "");
+	if (psTree) CPLDestroyXMLNode(psTree);
 	return S_OK;
 }
 
@@ -3189,11 +3190,12 @@ STDMETHODIMP CTableClass::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=TableClass");
-		if (node)
+		CPLXMLNode* nodeTable = CPLGetXMLNode(node, "=TableClass");
+		if (nodeTable)
 		{
-			this->DeserializeCore(node);
+			this->DeserializeCore(nodeTable);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

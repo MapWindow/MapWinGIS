@@ -48,7 +48,7 @@ int catchMemoryAllocHook(int	allocType,
 	long prevRequestNumber;
 
 	// internal C library internal allocations
-	if ( blockType == _CRT_BLOCK )
+	if ( blockType == _CRT_BLOCK || gMemLeakDetect.stopped)
 	{
 		return( TRUE );
 	}

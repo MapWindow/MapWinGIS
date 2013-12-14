@@ -1286,6 +1286,7 @@ BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
 			shpWrapper->RefreshBounds();
 			int* data = shpWrapper->get_ShapeData();
 			fwrite(data, sizeof(char), length, shp);
+			delete[] data;
 		}
 		else
 		{

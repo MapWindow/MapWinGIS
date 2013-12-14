@@ -567,14 +567,16 @@ void CMapView::RemoveLayer(long LayerHandle)
 				// It was a shp
 				short retval;
 				ishp->Close(&retval);
-				ishp->Release();
+				ishp->Release();		// we've just added the reference with query interface
+				ishp->Release();		// it's no longer used by map; so the one from AddLayer can finally be freed
 			}
 			if (iimg != NULL)
 			{
 				// It was an image
 				short retval;
 				iimg->Close(&retval);
-				iimg->Release();
+				ishp->Release();		// we've just added the reference with query interface
+				ishp->Release();		// it's no longer used by map; so the one from AddLayer can finally be freed
 			}
 
 			for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
@@ -643,11 +645,15 @@ void CMapView::RemoveLayerWithoutClosing(long LayerHandle)
 
 		// Release - but don't close :)
 		if (ishp != NULL)
-			ishp->Release();
+		{	
+			ishp->Release();  // first release for query interface, 
+			ishp->Release();  // and the second one - actual reference it's no longer used by map
+							  // the caller must have the reference at this point, other it won't be possible to access the object
+		}	
 		if (iimg != NULL)
-			iimg->Release();
+		{	iimg->Release(); iimg->Release();}
 		if (igrid != NULL)
-			igrid->Release();
+		{	igrid->Release(); igrid->Release();}
 
 		for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
 		{	
@@ -864,7 +870,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		{
 			IShapefile * sf = NULL;
 			l->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			if (sf == NULL)
+			if (sf == NULL) 
 				return;
 			sf->Resource(newFile.AllocSysString(), &rt);
 
@@ -875,6 +881,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			l->extents = Extent(xm,xM,ym,yM);
 			box->Release();
 			box = NULL;
+			sf->Release();
 
 			/*if (l->file != NULL) fclose(l->file);
 			l->file = ::fopen(newFile.GetBuffer(),"rb");*/
@@ -886,6 +893,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			if (iimg == NULL)
 				return;
 			iimg->Resource(newFile.AllocSysString(), &rt);
+			iimg->Release();
 
 			/*if (l->file != NULL) fclose(l->file);
 			l->file = ::fopen(newFile.GetBuffer(),"rb");*/
@@ -1129,15 +1137,17 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopE
 			{
 				sf->Open(A2BSTR(filename), NULL, &vb);
 			}
-		}
 		
-		if (vb)
-		{
-			layerHandle = this->AddLayer(sf, (BOOL)visible);
-			CPLXMLNode* nodeShapefile = CPLGetXMLNode(node, "ShapefileClass");
-			if (nodeShapefile)
+			if (vb)
 			{
-				((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, nodeShapefile);
+				layerHandle = this->AddLayer(sf, (BOOL)visible);
+				sf->Release();	// add layer added second reference
+				
+				CPLXMLNode* nodeShapefile = CPLGetXMLNode(node, "ShapefileClass");
+				if (nodeShapefile)
+				{
+					((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, nodeShapefile);
+				}
 			}
 		}
 	}
@@ -1155,6 +1165,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopE
 		if (vb)
 		{
 			layerHandle = this->AddLayer(img, (BOOL)visible);
+			img->Release();
 			CPLXMLNode* nodeImage = CPLGetXMLNode(node, "ImageClass");
 			if (nodeImage)
 			{
@@ -1398,23 +1409,29 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	{
 		IShapefile* sf = NULL;
 		layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
-		node = CPLGetXMLNode(node, "ShapefileClass");
-		if (node)
+		if (sf)
 		{
-			retVal = ((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, node);
+			node = CPLGetXMLNode(node, "ShapefileClass");
+			if (node)
+			{
+				retVal = ((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, node);
+			}
+			sf->Release();
 		}
-		sf->Release();
 	}
 	else if (layerType == ImageLayer )
 	{
 		IImage* img = NULL;
 		layer->object->QueryInterface(IID_IImage,(void**)&img);
-		node = CPLGetXMLNode(node, "ImageClass");
-		if (node)
+		if (img)
 		{
-			retVal =((CImageClass*)img)->DeserializeCore(node);
+			node = CPLGetXMLNode(node, "ImageClass");
+			if (node)
+			{
+				retVal =((CImageClass*)img)->DeserializeCore(node);
+			}
+			img->Release();
 		}
-		img->Release();
 	}
 	else
 	{
@@ -1572,7 +1589,9 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
-			return CPLSerializeXMLTreeToFile(psTree, name) ? VARIANT_TRUE : VARIANT_FALSE;
+			bool result = CPLSerializeXMLTreeToFile(psTree, name);
+			CPLDestroyXMLNode(psTree);
+			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}
 	}
 	

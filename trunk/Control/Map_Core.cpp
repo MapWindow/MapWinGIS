@@ -90,6 +90,7 @@ void CMapView::ReloadImageBuffers()
 			if( iimg != NULL ) 
 			{	
 				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
+				iimg->Release();
 			}
 		}
 	}
@@ -429,8 +430,8 @@ void CMapView::ClearLabelFrames()
 				if (sf != NULL)
 				{
 					((CShapefile*)sf)->ClearChartFrames();
+					sf->Release();
 				}
-				sf->Release();
 			}
 			
 			// labels

@@ -1379,7 +1379,8 @@ STDMETHODIMP CCharts::Serialize(BSTR* retVal)
 	CPLXMLNode* node = SerializeCore("ChartsClass");
 	if (node)
 	{
-		CString str = CPLSerializeXMLTree(node);	
+		CString str = CPLSerializeXMLTree(node);
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -1756,11 +1757,12 @@ STDMETHODIMP CCharts::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=ChartsClass");
-		if (node)
+		CPLXMLNode* nodeCharts = CPLGetXMLNode(node, "=ChartsClass");
+		if (nodeCharts)
 		{
-			this->DeserializeCore(node);
+			this->DeserializeCore(nodeCharts);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }
@@ -1801,6 +1803,7 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 			Utility::CPLCreateXMLAttributeAndValue(node, "Count", CPLString().Printf("%d", numShapes));
 			CPLAddXMLChild(psTree, node);
 			*retVal = CPLSerializeXMLTreeToFile(psTree, s);
+			CPLDestroyXMLNode(psTree);
 		}
 	}
 	return S_OK;

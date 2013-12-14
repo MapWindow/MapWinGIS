@@ -203,17 +203,16 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 
 	IPoint* pnt = NULL;
 	m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-	//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
 	pnt->put_X(clipWidth/2.0); 
 	pnt->put_Y(clipHeight/2.0);
 	long position = 0;
 	shp->InsertPoint(pnt, &position, &vbretval); 
 	pnt->Release();
 	
-	return this->DrawShapeCore(dc, x, y, shp, VARIANT_FALSE, clipWidth, clipHeight, backColor);
+	VARIANT_BOOL result = this->DrawShapeCore(dc, x, y, shp, VARIANT_FALSE, clipWidth, clipHeight, backColor);
 	shp->Release();
 
-	return VARIANT_TRUE;
+	return result;
 }
 #pragma endregion
 
@@ -1834,11 +1833,12 @@ STDMETHODIMP CShapeDrawingOptions::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=ShapeDrawingOptionsClass");
-		if (node)
+		CPLXMLNode* nodeSdo = CPLGetXMLNode(node, "=ShapeDrawingOptionsClass");
+		if (nodeSdo)
 		{
-			DeserializeCore(node);
+			DeserializeCore(nodeSdo);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

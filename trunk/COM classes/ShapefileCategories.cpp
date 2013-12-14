@@ -765,6 +765,7 @@ STDMETHODIMP CShapefileCategories::Serialize(BSTR* retVal)
 	if (node)
 	{
 		CString str = CPLSerializeXMLTree(node);	
+		CPLDestroyXMLNode(node);
 		*retVal = A2BSTR(str);
 	}
 	else
@@ -990,11 +991,12 @@ STDMETHODIMP CShapefileCategories::Deserialize(BSTR newVal)
 	CPLXMLNode* node = CPLParseXMLString(str.GetString());
 	if (node)
 	{
-		node = CPLGetXMLNode(node, "=ShapefileCategoriesClass");
-		if (node)
+		CPLXMLNode* nodeCat = CPLGetXMLNode(node, "=ShapefileCategoriesClass");
+		if (nodeCat)
 		{
-			DeserializeCore(node);
+			DeserializeCore(nodeCat);
 		}
+		CPLDestroyXMLNode(node);
 	}
 	return S_OK;
 }

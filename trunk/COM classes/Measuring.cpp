@@ -344,6 +344,9 @@ bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS8
 	if (!Utility::put_ComReference(projWGS84New, (IDispatch**)&projWGS84, false))
 		return false;
 
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = true;
+#endif
 	if (proj)
 	{
 		if (transformationMode == tmDoTransformation)
@@ -351,17 +354,21 @@ bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS8
 	}
 	VARIANT_BOOL vb;
 	proj->CopyFrom(projNew, &vb);
-
+	
+	bool result = true;
 	this->transformationMode = mode;
 	if (transformationMode == tmDoTransformation)
 	{
 		proj->StartTransform(projWGS84, &vb);
 		if (!vb) {
 			transformationMode = tmNotDefined;
-			return false;
+			result = false;
 		}
 	}
-	return (transformationMode != tmNotDefined);
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = false;
+#endif
+	return (result && transformationMode != tmNotDefined);
 }
 
 // *******************************************************
