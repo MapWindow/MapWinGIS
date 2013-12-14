@@ -160,5 +160,30 @@ namespace TestApplication
       scheme.SetColors2(mapColorFrom, mapColorTo);
       sf.Categories.ApplyColorScheme(tkColorSchemeType.ctSchemeGraduated, scheme);
     }
+
+    /// <summary>Delete the shapefile</summary>
+    /// <param name="filename">The filename</param>
+    /// <remarks>A shapefile has at least 3 files</remarks>
+    internal static void DeleteShapefile(string filename)
+    {
+      if (!File.Exists(filename))
+      {
+        // Nothing to do:
+        return;
+      }
+
+      var basename = Path.GetFileNameWithoutExtension(filename);
+      var folder = Path.GetDirectoryName(filename);
+      if (folder == null)
+      {
+        // Folder does not exists
+        return;
+      }
+
+      foreach (var f in new DirectoryInfo(folder).GetFiles(basename + ".*"))
+      {
+        f.Delete();
+      }
+    }
   }
 }

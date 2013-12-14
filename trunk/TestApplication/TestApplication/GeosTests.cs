@@ -280,10 +280,16 @@ namespace TestApplication
 
         Helper.ColorShapes(ref clippedSf, tkMapColor.DarkRed, tkMapColor.LightSeaGreen, true);
 
+        // Save result:
+        var newFilename = shapefilename.Replace(".shp", "-clipped.shp");
+        Helper.DeleteShapefile(newFilename);
+        clippedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
+
         // Load the files:
         MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(clippedSf, true);
         Fileformats.OpenShapefileAsLayer(overlayFilename, theForm, false);
+        MyAxMap.AddLayer(clippedSf, true);
       }
       catch (Exception exception)
       {
@@ -353,7 +359,7 @@ namespace TestApplication
         Helper.ColorShapes(ref intersectedSf, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
 
         // Save result:
-        //intersectedSf.SaveAs(shapefilenameSecond.Replace(".shp", "-intersect.shp"), theForm);
+        // intersectedSf.SaveAs(shapefilenameSecond.Replace(".shp", "-intersect.shp"), theForm);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();

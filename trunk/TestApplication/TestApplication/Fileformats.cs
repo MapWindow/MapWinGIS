@@ -6,6 +6,7 @@
 //   Static class to hold the file formats methods
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace TestApplication
 {
   using System;
@@ -20,9 +21,7 @@ namespace TestApplication
     /// </summary>
     internal static AxMapWinGIS.AxMap Map { get; set; }
 
-    /// <summary>
-    /// Open the shapefile and load it as an layer.
-    /// </summary>
+    /// <summary>Open the shapefile and load it as an layer.</summary>
     /// <param name="filename">
     /// The filename.
     /// </param>
@@ -93,10 +92,13 @@ namespace TestApplication
         return -1;
       }
 
+      var hndl = -1;
+
+      try
+      {
       // Track GDAL Errors:
       var settings = new GlobalSettings();
       var img = new Image { GlobalCallback = theForm };
-      var hndl = -1;
 
       settings.ResetGdalError();
       theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
@@ -123,6 +125,14 @@ namespace TestApplication
 
         hndl = Map.AddLayer(img, true);
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+      }
+      }
+      catch (Exception exception)
+      {
+        theForm.Progress(string.Empty, 100, "Exception in  OpenImageAsLayer: " + exception.Message);
+
+        // rethrow:
+        throw;
       }
 
       return hndl;
@@ -151,35 +161,46 @@ namespace TestApplication
         return -1;
       }
 
-      var settings = new GlobalSettings();
-      var grd = new Grid { GlobalCallback = theForm };
       var hndl = -1;
 
-      settings.ResetGdalError();
-      theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
-      if (!grd.Open(filename, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
+      try
       {
-        var msg = string.Format(
-          "Error opening grid: {0}{1}",
-          grd.get_ErrorMsg(grd.LastErrorCode),
-          Environment.NewLine);
-        if (settings.GdalLastErrorMsg != string.Empty)
-        {
-          msg += "GDAL Error: " + settings.GdalLastErrorMsg;
-        }
+        var settings = new GlobalSettings();
+        var grd = new Grid { GlobalCallback = theForm };
 
-        System.Diagnostics.Debug.WriteLine(msg);
-        theForm.Error(string.Empty, msg);
+        settings.ResetGdalError();
+        theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
+        if (!grd.Open(filename, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
+        {
+          var msg = string.Format(
+            "Error opening grid: {0}{1}",
+            grd.get_ErrorMsg(grd.LastErrorCode),
+            Environment.NewLine);
+          if (settings.GdalLastErrorMsg != string.Empty)
+          {
+            msg += "GDAL Error: " + settings.GdalLastErrorMsg;
+          }
+
+          System.Diagnostics.Debug.WriteLine(msg);
+          theForm.Error(string.Empty, msg);
+        }
+        else
+        {
+          if (clearLayers)
+          {
+            Map.RemoveAllLayers();
+          }
+
+          hndl = Map.AddLayer(grd, true);
+          theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+        }
       }
-      else
+      catch (Exception exception)
       {
-        if (clearLayers)
-        {
-          Map.RemoveAllLayers();
-        }
+        theForm.Progress(string.Empty, 100, "Exception in  OpenGridAsLayer: " + exception.Message);
 
-        hndl = Map.AddLayer(grd, true);
-        theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+        // rethrow:
+        throw;
       }
 
       return hndl;
