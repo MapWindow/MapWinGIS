@@ -10,6 +10,9 @@
 	#error include 'afxctl.h' before including this file
 #endif
 
+#pragma warning(disable:4482)	// non-standard extention used - for names of enumerations
+#pragma warning(disable:4099)	// missing program database
+
 #include "resource.h"
 #include "errorcodes.h"
 #include "MapWinGIS_i.h"
@@ -18,6 +21,7 @@
 #include "geos_c.h"
 #include "ogr_geometry.h"
 #include <map>
+#include "Utilities\Debugging\ReferenceCounter.h"
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;
@@ -42,6 +46,7 @@ IUtils* GetUtils();
 extern CMemLeakDetect gMemLeakDetect;
 #endif
 
+extern ReferenceCounter gReferenceCounter;
 
 // **********************************************************
 //		CMapWinGISApp class

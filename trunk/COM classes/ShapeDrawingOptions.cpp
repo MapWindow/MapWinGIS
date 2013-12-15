@@ -847,7 +847,7 @@ STDMETHODIMP CShapeDrawingOptions::get_FrameVisible(VARIANT_BOOL* retval)
 STDMETHODIMP CShapeDrawingOptions::put_FrameVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.drawFrame = newVal;
+		m_options.drawFrame = newVal ? true: false;
 	return S_OK;
 }
 
@@ -1480,7 +1480,7 @@ STDMETHODIMP CShapeDrawingOptions::get_AlignPictureByBottom(VARIANT_BOOL *pVal)
 STDMETHODIMP CShapeDrawingOptions::put_AlignPictureByBottom(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.alignIconByBottom = newVal;	
+	m_options.alignIconByBottom = newVal ? true: false;	
 	return S_OK;
 }
 

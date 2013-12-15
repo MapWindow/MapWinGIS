@@ -3431,7 +3431,6 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 
 		if (oGeom != NULL)
 		{
-			ShpfileType shpType;
 			SubjectPolygon->get_ShapeType(&shptype);
 			
 			vector<IShape* > vShapes;
@@ -4095,7 +4094,7 @@ intersection:
 						cell.right = xllWindow + dx * (j + 0.5);
 						if (cell.getIntersection(bounds, intersection))
 						{
-							double weight = intersection.getArea()/cellArea;  // the part of cell within polygon bounds
+							float weight = (float)(intersection.getArea()/cellArea);  // the part of cell within polygon bounds
 
 							if (vals[j] < min) {
 								min = vals[j];
@@ -4335,7 +4334,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 								row++;
 							}
 						}
-						sumWeight = count;
+						sumWeight = (float)count;
 					}
 					else   //GridScanMethod == Intersection
 					{
@@ -4359,7 +4358,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 									cell.right = xllWindow + dx * (j + 0.5);
 									if (cell.getIntersection(shape, intersection))
 									{
-										double weight = intersection.getArea()/cellArea;  // the part of cell within polygon bounds
+										float weight = (float)(intersection.getArea()/cellArea);  // the part of cell within polygon bounds
 
 										if (vals[j] < min) {
 											min = vals[j];
@@ -4632,7 +4631,7 @@ double CalcPolyGeodesicArea(std::vector<Point2D>& points)
 {
 	GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 	GeographicLib::PolygonArea poly(geod);
-	for(int i = 0; i < points.size(); i++)
+	for(size_t i = 0; i < points.size(); i++)
 	{
 		poly.AddPoint(points[i].y, points[i].x);
 	}

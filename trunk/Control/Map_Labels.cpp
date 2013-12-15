@@ -22,6 +22,7 @@ void CMapView::SetLineSeparationFactor(long sepFactor)
 
 long CMapView::GetLineSeparationFactor(void)
 {
+	gReferenceCounter.WriteReport();
 	// 0 is invalid, since it would result in no adjustments
     if (m_LineSeparationFactor == 0) m_LineSeparationFactor = 3;
 	return m_LineSeparationFactor;
@@ -37,14 +38,10 @@ IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 	{
 		Layer * layer = m_allLayers[LayerHandle];
 		IShapefile* sf = NULL;
-		layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
-		if (sf)
-		{
-			long refCount;
-			sf->get_RefCount(&refCount);
-			Debug::WriteLine("Get shapefile: %d", refCount);
+		if (layer->QueryShapefile(&sf))
 			return sf;
-		}
+		//layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+		//if (sf) return sf;
 	}
 	else
 	{
@@ -69,8 +66,9 @@ IImage* CMapView::GetImage(LONG LayerHandle)
 	{
 		Layer * layer = m_allLayers[LayerHandle];
 		IImage* img = NULL;
-		layer->object->QueryInterface(IID_IImage, (void**)&img);
-		if (img)
+		//layer->object->QueryInterface(IID_IImage, (void**)&img);
+		//if (img)
+		if (layer->QueryImage(&img))
 		{
 			return img;
 		}

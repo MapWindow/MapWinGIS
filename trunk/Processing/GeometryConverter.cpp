@@ -904,8 +904,8 @@ ClipperLib::Polygons* GeometryConverter::Shape2ClipperPolygon(IShape* shp)
 				y *= conversionFactor;
 			}
 
-			pnt.X = x;
-			pnt.Y = y;
+			pnt.X = (ClipperLib::long64)x;
+			pnt.Y = (ClipperLib::long64)y;
 			polygon.push_back(pnt);
 		}
 		retval->push_back(polygon);
@@ -969,8 +969,8 @@ IShape* GeometryConverter::ClipperPolygon2Shape(ClipperLib::Polygons* polygon)
 				IPoint* pnt = NULL;
 				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 				
-				x = (*poly)[j].X;
-				y = (*poly)[j].Y;
+				x = (double)(*poly)[j].X;
+				y = (double)(*poly)[j].Y;
 
 				if (this->conversionFactor != 1.0)
 				{
@@ -996,8 +996,8 @@ IShape* GeometryConverter::ClipperPolygon2Shape(ClipperLib::Polygons* polygon)
 					IPoint* pnt = NULL;
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					
-					x = (*poly)[size].X;	// slightly inoptimal, this point was calculated already
-					y = (*poly)[size].Y;
+					x = (double)(*poly)[size].X;	// slightly inoptimal, this point was calculated already
+					y = (double)(*poly)[size].Y;
 
 					if (this->conversionFactor != 1.0)
 					{

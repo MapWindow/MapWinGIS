@@ -411,17 +411,17 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 		return S_OK;
 	}
 
-	if (!GEOSisValid( hGeosGeom ))
+	if (!GeosHelper::IsValid(hGeosGeom ))
 	{
-		char* buffer = GEOSisValidReason(hGeosGeom);
+		char* buffer = GeosHelper::IsValidReason(hGeosGeom);
 		_isValidReason = buffer;
-		CPLFree(buffer);
+		GeosHelper::Free(buffer);
 	}
 	else
 	{
 		*retval = VARIANT_TRUE;
 	}
-	GEOSGeom_destroy( hGeosGeom );
+	GeosHelper::DestroyGeometry(hGeosGeom);
 	
 	return S_OK;
 }
@@ -1331,7 +1331,9 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 		return S_OK;
 
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom3, oReturnType);
+	ShpfileType shpType;
+	this->get_ShapeType(&shpType);
+	shp = GeometryConverter::GeometryToShape(oGeom3, Utility::ShapeTypeIsM(shpType), oReturnType);
 	
 	delete oGeom3;
 

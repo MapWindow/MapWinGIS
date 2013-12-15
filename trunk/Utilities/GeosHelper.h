@@ -7,6 +7,15 @@ public:
 	GeosHelper(void) {};
 	~GeosHelper(void) {};
 	
+	static char* IsValidReason(GEOSGeometry* gsGeom)
+	{
+		#ifdef GEOS_NEW
+			return GEOSisValidReason_r(getGeosHandle(), gsGeom);			
+		#else
+			return GEOSisValidReason(gsGeom);	
+		#endif
+	}
+
 	static char Within(const GEOSGeometry* gsBase, const GEOSGeometry* gsGeom)
 	{
 		#ifdef GEOS_NEW

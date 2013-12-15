@@ -86,8 +86,9 @@ void CMapView::ReloadImageBuffers()
 
 		if ((l->type == ImageLayer) && (l->flags & Visible))
 		{
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			if( iimg != NULL ) 
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			//if( iimg != NULL ) 
+			if (l->QueryImage(&iimg))
 			{	
 				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
 				iimg->Release();
@@ -108,8 +109,9 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 		if( l->type == ImageLayer )
 		{
 			IImage * iimg = NULL;
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			if( iimg == NULL )	
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			//if( iimg == NULL )	
+			if (!l->QueryImage(&iimg))
 				return 1.0;
 			
 			double val;
@@ -145,8 +147,10 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 		if( l->type == ImageLayer )
 		{	
 			IImage * iimg = NULL;
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			if( iimg == NULL )	return;
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			//if( iimg == NULL )	return;
+			if (!l->QueryImage(&iimg))
+				return;
 			iimg->put_TransparencyPercent(newValue);
 			iimg->Release(); iimg = NULL;
 		}
@@ -215,8 +219,9 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 		if (l->type == ImageLayer)
 		{
 			IImage * iimg = NULL;
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			if( iimg == NULL )return FALSE;
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			//if( iimg == NULL )return FALSE;
+			if (!l->QueryImage(&iimg)) return FALSE;
 			double xllCenter=0, yllCenter=0, dx=0, dy=0;
 			long width=0, height=0;
 			
@@ -234,8 +239,9 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 		else if (l->type == ShapefileLayer)
 		{
 			IShapefile * ishp = NULL;
-			l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-			if (ishp == NULL) return FALSE;
+			//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
+			//if (ishp == NULL) return FALSE;
+			if (!l->QueryShapefile(&ishp)) return FALSE;
 			IExtents * box = NULL;
 			ishp->get_Extents(&box);
 			double xm,ym,zm,xM,yM,zM;
@@ -426,8 +432,9 @@ void CMapView::ClearLabelFrames()
 			if (l->type == ShapefileLayer)
 			{
 				IShapefile * sf = NULL;
-				l->object->QueryInterface(IID_IShapefile, (void**)&sf);
-				if (sf != NULL)
+				//l->object->QueryInterface(IID_IShapefile, (void**)&sf);
+				//if (sf != NULL)
+				if (l->QueryShapefile(&sf))
 				{
 					((CShapefile*)sf)->ClearChartFrames();
 					sf->Release();

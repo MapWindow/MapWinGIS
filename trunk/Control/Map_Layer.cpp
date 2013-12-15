@@ -215,8 +215,9 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 			{
 				//iimg = (IImage*) m_allLayers[LayerHandle]->object;
 				IImage * iimg = NULL;
-				m_allLayers[LayerHandle]->object->QueryInterface(IID_IImage,(void**)&iimg);
-				if (iimg != NULL) 
+				//m_allLayers[LayerHandle]->object->QueryInterface(IID_IImage,(void**)&iimg);
+				//if (iimg != NULL) 
+				if (m_allLayers[LayerHandle]->QueryImage(&iimg))
 				{
 					((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
 					iimg->Release();	
@@ -397,7 +398,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		CString legendName = Utility::GetPathWOExtension(gridFilename) + ".mwleg";
 		CString imageName;
 		
-		bool schemeExists = Utility::fileExists(legendName);
+		bool schemeExists = Utility::fileExists(legendName) ? true : false;
 
 		igrid->GetColorScheme(&gridColorScheme);
 		if (gridColorScheme)
@@ -558,25 +559,25 @@ void CMapView::RemoveLayer(long LayerHandle)
 			if (l == NULL) return;
 
 			// Is it a SF?
-			l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
+			l->QueryShapefile(&ishp);
+			//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
 			// ...or an image?
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			l->QueryImage(&iimg);
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
 
 			if (ishp != NULL)
 			{
 				// It was a shp
 				short retval;
 				ishp->Close(&retval);
-				ishp->Release();		// we've just added the reference with query interface
-				ishp->Release();		// it's no longer used by map; so the one from AddLayer can finally be freed
+				ishp->Release();		// we release only once because one more release is in Layer destructor
 			}
 			if (iimg != NULL)
 			{
 				// It was an image
 				short retval;
 				iimg->Close(&retval);
-				ishp->Release();		// we've just added the reference with query interface
-				ishp->Release();		// it's no longer used by map; so the one from AddLayer can finally be freed
+				ishp->Release();		// we release only once because one more release is in Layer destructor
 			}
 
 			for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
@@ -637,23 +638,18 @@ void CMapView::RemoveLayerWithoutClosing(long LayerHandle)
 		IGrid * igrid = NULL;
 		
 		// Is it a SF?
-		l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
+		//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
+		l->QueryShapefile(&ishp);
 		// ...or an image?
-		l->object->QueryInterface(IID_IImage,(void**)&iimg);
+		//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+		l->QueryImage(&iimg);
 		// grid?
 		l->object->QueryInterface(IID_IGrid, (void**)&igrid);
 
 		// Release - but don't close :)
-		if (ishp != NULL)
-		{	
-			ishp->Release();  // first release for query interface, 
-			ishp->Release();  // and the second one - actual reference it's no longer used by map
-							  // the caller must have the reference at this point, other it won't be possible to access the object
-		}	
-		if (iimg != NULL)
-		{	iimg->Release(); iimg->Release();}
-		if (igrid != NULL)
-		{	igrid->Release(); igrid->Release();}
+		if (ishp != NULL) {	ishp->Release();}	
+		if (iimg != NULL) {iimg->Release(); }
+		if (igrid != NULL){	igrid->Release();}
 
 		for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
 		{	
@@ -710,10 +706,7 @@ void CMapView::RemoveAllLayers()
 	m_allLayers.clear();
 	LockWindow( lmUnlock );
 	
-	// probably makes sense to clear the back buffer
-	/*Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(m_layerBitmap);
-	gLayers->Clear(Gdiplus::Color::Transparent);
-	delete gLayers;*/
+	
 
 	m_canbitblt = FALSE;
 
@@ -869,9 +862,9 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		if (l->type == ShapefileLayer)
 		{
 			IShapefile * sf = NULL;
-			l->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			if (sf == NULL) 
-				return;
+			//l->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			//if (sf == NULL) return;
+			if (!l->QueryShapefile(&sf)) return;
 			sf->Resource(newFile.AllocSysString(), &rt);
 
 			IExtents * box = NULL;
@@ -889,9 +882,9 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		else if(l->type == ImageLayer)
 		{
 			IImage * iimg = NULL;
-			l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			if (iimg == NULL)
-				return;
+			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			//if (iimg == NULL) return;
+			if (!l->QueryImage(&iimg)) return;
 			iimg->Resource(newFile.AllocSysString(), &rt);
 			iimg->Release();
 
@@ -1281,9 +1274,11 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CString Filename)
 			IImage* img = NULL;
 			IShapefile* sf = NULL;
 			
-			layer->object->QueryInterface(IID_IImage,(void**)&img);
-			layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
-			
+			//layer->object->QueryInterface(IID_IImage,(void**)&img);
+			//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
+			layer->QueryShapefile(&sf);
+			layer->QueryImage(&img);
+
 			if (sf || img)
 			{
 				//BSTR filename;
@@ -1408,8 +1403,9 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	if (layerType == ShapefileLayer)
 	{
 		IShapefile* sf = NULL;
-		layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
-		if (sf)
+		//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
+		//if (sf)
+		if (layer->QueryShapefile(&sf))
 		{
 			node = CPLGetXMLNode(node, "ShapefileClass");
 			if (node)
@@ -1422,8 +1418,9 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	else if (layerType == ImageLayer )
 	{
 		IImage* img = NULL;
-		layer->object->QueryInterface(IID_IImage,(void**)&img);
-		if (img)
+		//layer->object->QueryInterface(IID_IImage,(void**)&img);
+		//if (img)
+		if (layer->QueryImage(&img))
 		{
 			node = CPLGetXMLNode(node, "ImageClass");
 			if (node)
@@ -1462,8 +1459,10 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 		{
 			IShapefile* sf = NULL;
 			IImage* img = NULL;
-			layer->object->QueryInterface(IID_IImage,(void**)&img);
-			layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
+			//layer->object->QueryInterface(IID_IImage,(void**)&img);
+			//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
+			layer->QueryShapefile(&sf);
+			layer->QueryImage(&img);
 
 			if (sf)
 			{
@@ -1589,7 +1588,7 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
-			bool result = CPLSerializeXMLTreeToFile(psTree, name);
+			bool result = CPLSerializeXMLTreeToFile(psTree, name) != 0;
 			CPLDestroyXMLNode(psTree);
 			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}

@@ -77,7 +77,7 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 //		GetTileImageUsingHttp()
 // ************************************************************
-CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr)
+CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr, bool recursive)
 {
 	CAtlHttpClient* httpClient = new CAtlHttpClient();
 	CAtlNavigateData navData;
@@ -114,7 +114,12 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr)
 	else
 	{
 		this->httpStatus = httpClient->GetStatus();
-		Debug::WriteLine("Request failed. Status code: %d\r\n", httpStatus);		
+		Debug::WriteLine("Request failed. Status code: %d; %s", httpStatus, m_urlStr);		
+		if (httpStatus == -1 && !recursive)
+		{
+			// let's try one more time
+			this->GetTileImageUsingHttp(m_urlStr, true);
+		}
 	}
 	
 	httpClient->Close();

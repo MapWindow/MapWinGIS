@@ -109,6 +109,7 @@ public:
 		isEditingTable = FALSE;
 		dbfHandle = NULL;
 		m_maxRowId = -1;
+		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
 	~CTableClass()
 	{
@@ -135,6 +136,7 @@ public:
 		if( globalCallback )
 			globalCallback->Release();
 		globalCallback = NULL;
+		gReferenceCounter.Release(tkInterface::idTable);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

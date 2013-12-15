@@ -286,7 +286,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 	if (_shptype == SHP_POLYGON || _shptype == SHP_POLYLINE)
 	{
 		int size = _shapeData->size();
-		for (size_t i = 0; i < size; i++)
+		for (int i = 0; i < size; i++)
 		{
 			(*_shapeData)[i]->size = 0;
 			(*_shapeData)[i]->isVisible = false;
@@ -297,7 +297,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 	//	 Building lists of shape indices for each category
 	// --------------------------------------------------------------
 	unsigned int k = 0; // position in arr of visible shapes
-	for(size_t i = 0; i < (int)_numShapes; i++ )
+	for(int i = 0; i < (int)_numShapes; i++ )
 	{
 		if(_useQTree && _isEditing)
 		{
@@ -1789,7 +1789,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 								size.cx = (LONG)markerSize;
 								size.cy = (LONG)markerSize;
 
-								for (size_t j = 0; j < count; j++)
+								for (int j = 0; j < count; j++)
 								{
 									double ratio = interval/length * (double)j;
 									Gdiplus::REAL xPos =(Gdiplus::REAL)(pntStart.X + dx * ratio);

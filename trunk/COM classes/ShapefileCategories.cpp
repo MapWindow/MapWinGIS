@@ -91,12 +91,10 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 	if (Index == m_categories.size())
 	{
 		m_categories.push_back(cat);
-		//cat->AddRef();
 	}
 	else
 	{
-		m_categories.insert( m_categories.begin() + m_categories.size(), cat);
-		//cat->AddRef();
+		m_categories.insert( m_categories.begin() + Index, cat);
 	}
 	
 	*retVal = cat;

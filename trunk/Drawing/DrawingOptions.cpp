@@ -99,7 +99,9 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->useLinePattern = opt.useLinePattern;
 	
 	brushPlus = NULL;
+	if(pen) delete pen;
 	pen = new CPen();
+	if (brush) delete brush;
 	brush = new CBrush();
 	penOld = NULL;
 	brushOld = NULL;

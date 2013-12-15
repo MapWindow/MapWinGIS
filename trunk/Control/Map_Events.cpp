@@ -313,7 +313,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			double xTemp, yTemp;
 			
 			CMeasuring* m = (CMeasuring*)m_measuring;
-			for(int i = 0; i < m->points.size() - 2; i++)
+			for(size_t i = 0; i < m->points.size() - 2; i++)
 			{
 				ProjToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, &xTemp, &yTemp);
 				double dist = sqrt( pow(point.x - xTemp, 2.0) + pow(point.y - yTemp, 2.0));
@@ -546,9 +546,9 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		else
 		{
 			if (m_Rotate != NULL && m_RotateAngle != 0)
-  				this->FireMouseMove( mbutton, (short)vbflags, rotPoint.x, rotPoint.y );  // rotPoint.y - 1
+  				this->FireMouseMove( (short)mbutton, (short)vbflags, rotPoint.x, rotPoint.y );  // rotPoint.y - 1
 			else
- 				this->FireMouseMove( mbutton, (short)vbflags, point.x, point.y ); // point.y - 1
+ 				this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y ); // point.y - 1
 		}
 	}
 
@@ -610,8 +610,9 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		Layer* layer = m_allLayers[m_activeLayers[i]];
 		if (layer->type == ShapefileLayer)
 		{
-			layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			if (sf)
+			//layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			//if (sf)
+			if (layer->QueryShapefile(&sf))
 			{
 				VARIANT_BOOL hotTracking = VARIANT_FALSE;
 				sf->get_HotTracking(&hotTracking);

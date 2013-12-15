@@ -243,7 +243,7 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 		}
 	}
 
-	Debug::WriteLine("best zoom: %d; tiles size: %f", bestZoom, GetTileSizeByWidth(location, bestZoom, pixelPerDegree));
+	//Debug::WriteLine("best zoom: %d; tiles size: %f", bestZoom, GetTileSizeByWidth(location, bestZoom, pixelPerDegree));
 
 	CSize s1, s2;
 	provider->Projection->GetTileMatrixMinXY(bestZoom, s1);
@@ -265,7 +265,7 @@ int CTiles::ChooseZoom(IExtents* ext, double pixelPerDegree,
 {
 	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
 	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
-	Debug::WriteLine("Extents changed: Lat = %f; Lng = %f; Lat2 = %f; Lng2 = %f", yMinD, xMinD, yMaxD, xMaxD);
+	//Debug::WriteLine("Extents changed: Lat = %f; Lng = %f; Lat2 = %f; Lng2 = %f", yMinD, xMinD, yMaxD, xMaxD);
 	return this->ChooseZoom(xMinD, xMaxD, yMinD, yMaxD, pixelPerDegree, limitByProvider, provider);
 }
 
@@ -1467,7 +1467,7 @@ bool CTiles::ProjectionBounds(IGeoProjection* wgsProjection, bool doTransformtat
 				Debug::WriteLine("Failed to project: x = %f; y = %f", bottom, right);
 				return false;
 			}
-			Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
+			//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 		}
 		
 		m_projExtents.left = left;

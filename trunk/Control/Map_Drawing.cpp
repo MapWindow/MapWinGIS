@@ -114,7 +114,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		//SetBkColor (hDC, m_backColor);
 		gPrinting = Gdiplus::Graphics::FromHDC(pdc->GetSafeHdc());
 		gPrinting->TranslateTransform(offsetX, offsetY);
-		Gdiplus::RectF clip(rcInvalid.left, rcInvalid.top, rcInvalid.Width(), rcInvalid.Height());
+		Gdiplus::RectF clip((Gdiplus::REAL)rcInvalid.left, (Gdiplus::REAL)rcInvalid.top, (Gdiplus::REAL)rcInvalid.Width(), (Gdiplus::REAL)rcInvalid.Height());
 		gPrinting->SetClip(clip);
 		
 		Gdiplus::Color color(255, 255, 255, 255);
@@ -425,8 +425,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 				if( l->type == ImageLayer && l->IsVisible(scale, zoom)) 
 				{
 					IImage * iimg = NULL;
-					l->object->QueryInterface(IID_IImage,(void**)&iimg);
-					if( iimg == NULL )continue;
+					if (!l->QueryImage(&iimg)) continue;
+					//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+					//if( iimg == NULL )continue;
 					
 					this->AdjustLayerExtents(i);
 
@@ -570,8 +571,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 					{
 						if(l->object == NULL ) continue;
 						IImage * iimg = NULL;
-						l->object->QueryInterface(IID_IImage,(void**)&iimg);
-						if( iimg == NULL ) continue;
+						if (!l->QueryImage(&iimg)) continue;
+						//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+						//if( iimg == NULL ) continue;
 						
 						CImageClass* img = (CImageClass*)iimg;
 						
@@ -682,17 +684,10 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 						}
 						
 						IShapefile* sf = NULL;
-						l->object->QueryInterface(IID_IShapefile,(void**)&sf);
-						
-						/*VARIANT_BOOL vb;
-						sf->get_HotTracking(&vb);*/
-
-						if( sf )
+						//l->object->QueryInterface(IID_IShapefile,(void**)&sf);
+						//if( sf )
+						if (l->QueryShapefile(&sf))
 						{
-							long refCount;
-							sf->get_RefCount(&refCount);
-							Debug::WriteLine("Drawing: %d", refCount);
-							
 							sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
 
 							// for old modes we shall mark all the shapes of shapefile as visible as no visiblity expressions were analyzed
@@ -773,8 +768,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 				
 				// charts: for all modes
 				IShapefile* sf = NULL;
-				l->object->QueryInterface(IID_IShapefile,(void**)&sf);
-				if ( sf )
+				//l->object->QueryInterface(IID_IShapefile,(void**)&sf);
+				//if ( sf )
+				if (l->QueryShapefile(&sf))
 				{
 					ICharts* charts = NULL;
 					sf->get_Charts(&charts);
@@ -826,9 +822,9 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 			if(l->type == ImageLayer)
 			{
 				IImage* iimg = NULL;
-				l->object->QueryInterface(IID_IImage, (void**)&iimg);
-
-				if ( iimg != NULL )
+				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
+				//if ( iimg != NULL )
+				if (l->QueryImage(&iimg))
 				{
 					CImageClass* img = (CImageClass*)iimg;
 					img->m_groupID = -1;
@@ -899,8 +895,9 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 			for (size_t j = 0; j < indices->size(); j++ )
 			{
 				Layer * l = m_allLayers[m_activeLayers[(*indices)[j]]];
-				l->object->QueryInterface(IID_IImage, (void**)&iimg);
-				if (iimg)
+				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
+				//if (iimg)
+				if (l->QueryImage(&iimg))
 				{
 					CImageClass* img = (CImageClass*)iimg;
 					
@@ -928,8 +925,9 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 				if (imageIndex != -1)
 				{
 					Layer * l = m_allLayers[m_activeLayers[imageIndex]];
-					l->object->QueryInterface(IID_IImage, (void**)&iimg);
-					if (iimg)
+					//l->object->QueryInterface(IID_IImage, (void**)&iimg);
+					//if (iimg)
+					if (l->QueryImage(&iimg))
 					{
 						CImageClass* img = (CImageClass*)iimg;
 						img->m_groupID = groupId;
@@ -1051,8 +1049,9 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 					//if(l->type == ImageLayer && (l->flags & Visible))
 					if(l->type == ImageLayer && l->IsVisible(scale, zoom))
 					{
-						l->object->QueryInterface(IID_IImage, (void**)&iimg);
-						if (iimg)
+						//l->object->QueryInterface(IID_IImage, (void**)&iimg);
+						//if (iimg)
+						if (l->QueryImage(&iimg))
 						{
 							CImageClass* img = (CImageClass*)iimg;
 
@@ -1220,13 +1219,13 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 		if( l->type == ShapefileLayer )
 		{
 			double ar = (right-left)/(top-bottom);
-			Width = (long) pWidth == 0 ? ((right - left) * Zoom) : pWidth;
+			Width = (long) (pWidth == 0 ? ((right - left) * Zoom) : pWidth);
 			Height = (long)((double)pWidth / ar);
 		}
 		else if(l->type == ImageLayer)
 		{
-			Width = right - left;
-			Height = top - bottom;
+			Width = (long)(right - left);
+			Height = (long)(top - bottom);
 			if (Zoom > 0)
 			{
 				Width *= (long)Zoom;
@@ -1498,7 +1497,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	}
 
 	CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
-	CRect rcClip(clipX, clipY, clipWidth, clipHeight);
+	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
 	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcClip : &rcBounds;
 	
 	HandleNewDrawing(snapDC, rcBounds, *r, offsetX, offsetY);
@@ -1899,20 +1898,20 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 		}
 		
 		// draw black text
-		r1.X = (width - r1.Width) / 2.0f;
+		r1.X = (Gdiplus::REAL)(width - r1.Width) / 2.0f;
 		r1.Y = -r1.Height;
 		g->FillRectangle(&measure->whiteBrush, r1);
 		
 		r1.X = 0.0f;
-		r1.Width = width;
+		r1.Width = (Gdiplus::REAL)width;
 		g->DrawString(wStr, wcslen(wStr), measure->font, r1, &measure->format, &measure->textBrush);
 		
 		r2.Y = 0.0f;
-		r2.X = (width - r2.Width) / 2.0f;
+		r2.X = (Gdiplus::REAL)(width - r2.Width) / 2.0f;
 		g->FillRectangle(&measure->whiteBrush, r2);
 		
 		r2.X = 0.0f;
-		r2.Width = width;
+		r2.Width = (Gdiplus::REAL)width;
 		g->DrawString(wAz, wcslen(wAz), measure->font, r2, &measure->format, &measure->textBrush);
 		g->SetTransform(&m);		// restore transform
 	}
@@ -1954,7 +1953,7 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 				}*/
 				
 				Gdiplus::PointF* data = NULL;
-				int size = measuring->get_ScreenPoints((void*)this, false, 0.0, 0.0, &data);
+				int size = measuring->get_ScreenPoints((void*)this, false, 0, 0, &data);
 				if (size > 0)
 				{
 					if (measuring->closedPoly)
@@ -1983,7 +1982,7 @@ void CMapView::DrawMeasuring(Gdiplus::Graphics* g )
 					// drawing points
 					Gdiplus::Pen penPoints(Gdiplus::Color::Blue, 1.0f);
 					Gdiplus::SolidBrush brush(Gdiplus::Color::LightBlue);
-					for(size_t i = 0; i < size; i++) {
+					for(int i = 0; i < size; i++) {
 						g->FillEllipse(&brush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
 						g->DrawEllipse(&penPoints, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
 					}
@@ -2084,7 +2083,7 @@ void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g, bool isSnapShot)
 			else	// area measuring; drawing the whole shape
 			{
 				Gdiplus::PointF* data = NULL;
-				int size = m->get_ScreenPoints((void*)this, !m->IsStopped(), m->mousePoint.x, m->mousePoint.y, &data);
+				int size = m->get_ScreenPoints((void*)this, !m->IsStopped(), (int)m->mousePoint.x, (int)m->mousePoint.y, &data);
 				if (size > 0 )
 				{
 					// drawing points
@@ -2184,7 +2183,7 @@ void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, doubl
 			// copy geog coordinates
 			int count = 0;
 			std::vector<Point2D> gPoints;
-			for(int i = measuring->firstPointIndex; i < measuring->points.size(); i++)
+			for(size_t i = measuring->firstPointIndex; i < measuring->points.size(); i++)
 			{
 				gPoints.push_back(Point2D(measuring->points[i]->x, measuring->points[i]->y));
 				count++;

@@ -320,8 +320,6 @@ STDMETHODIMP CLabels::put_Category(long Index, ILabelCategory* newVal)
 		{
 			Utility::put_ComReference(newVal, (IDispatch**)&m_categories[Index], false);
 		}
-		/*m_categories[Index]->Release();
-		m_categories[Index] = newVal;*/
 	}
 	return S_OK;
 };
@@ -507,22 +505,17 @@ STDMETHODIMP CLabels::InsertCategory(long Index, BSTR Name, ILabelCategory** ret
 	CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&cat);
 	if (cat == NULL) return S_OK;
 
-	CLabelOptions* options = ((CLabels*)this)->get_LabelOptions(); // coThis = static_cast<CLabels*>(this);
-	//char* options = coThis->get_LabelOptions();
-	CLabelCategory* coCat =	static_cast<CLabelCategory*>(cat);
-	coCat->put_LabelOptions(options);
-
+	CLabelOptions* options = this->get_LabelOptions(); 
+	((CLabelCategory*)cat)->put_LabelOptions(options);
 	cat->put_Name(Name);
 	
 	if (Index == m_categories.size())
 	{
 		m_categories.push_back(cat);
-		cat->AddRef();
 	}
 	else
 	{
-		m_categories.insert( m_categories.begin() + m_categories.size(), cat);
-		cat->AddRef();
+		m_categories.insert( m_categories.begin() + Index, cat);
 	}
 
 	*retVal = cat;
@@ -560,7 +553,7 @@ STDMETHODIMP CLabels::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	for( size_t i = 0; i < (int)m_labels.size(); i++ )
+	for( size_t i = 0; i < m_labels.size(); i++ )
 	{	
 		for(size_t j = 0; j < m_labels[i]->size(); j++)
 		{
@@ -1209,7 +1202,6 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 
 	cat->put_Name(A2BSTR("Default"));
 	*retVal = cat;
-	//cat->AddRef();	// we'll return the category, therefore one more reference
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)

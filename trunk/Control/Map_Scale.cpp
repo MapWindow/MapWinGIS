@@ -631,6 +631,7 @@ void CMapView::ZoomToMaxExtents()
 		extents = Extent(0,0,0,0);
 
 	this->SetExtentsCore(extents);
+
 }
 
 // ****************************************************************
@@ -726,9 +727,9 @@ void CMapView::ZoomToShape(long LayerHandle, long Shape)
 	{	
 		IShapefile * ishp = NULL;
 		Layer * l = m_allLayers[LayerHandle];
-		l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-
-		if( ishp == NULL )
+		//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
+		//if( ishp == NULL )
+		if (!l->QueryShapefile(&ishp))
 		{	
 			this->ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
 			return;

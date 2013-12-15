@@ -527,9 +527,6 @@ int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 }
 #pragma endregion
 
-
-
-
 #pragma region Destructor
 // ****************************************************
 //	    Destructor
@@ -576,6 +573,8 @@ CMapView::~CMapView()
 	long val = m_projection->Release();
 	val = m_wgsProjection->Release();
 	val = m_GMercProjection->Release();
+	if (m_measuring)
+		m_measuring->Release();
 
 	delete m_ttipCtrl;
 
@@ -601,7 +600,11 @@ CMapView::~CMapView()
 		m_imageGroups = NULL;
 	}
 	
-	m_tiles->Release();
+	if (m_tiles)
+	{
+		((CTiles*)m_tiles)->ClearAll();
+		m_tiles->Release();
+	}
 }
 #pragma endregion
 

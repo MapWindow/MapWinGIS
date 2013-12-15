@@ -2611,6 +2611,7 @@ STDMETHODIMP CTableClass::EditAddField(BSTR name, FieldType type, int precision,
 	*fieldIndex = (long)_fields.size();
 	VARIANT_BOOL vbretval;
 	this->EditInsertField(field, fieldIndex, NULL, &vbretval);
+	field->Release();		// the reference was added in previous call
 	if (vbretval == VARIANT_FALSE)
 		*fieldIndex = -1;
 	return S_OK;
@@ -3073,7 +3074,7 @@ STDMETHODIMP CTableClass::get_JoinCount(int* retVal)
 STDMETHODIMP CTableClass::get_FieldIsJoined(int fieldIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	if (fieldIndex < 0 || fieldIndex >= (int)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -3091,7 +3092,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = -1;
-	if (fieldIndex < 0 || fieldIndex >= _fields.size())
+	if (fieldIndex < 0 || fieldIndex >= (int)_fields.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -3116,7 +3117,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
@@ -3134,7 +3135,7 @@ STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
@@ -3153,7 +3154,7 @@ STDMETHODIMP CTableClass::get_JoinFromField(int joinIndex, BSTR* retVal)
 STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (joinIndex < 0 || joinIndex >= _joins.size())
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");

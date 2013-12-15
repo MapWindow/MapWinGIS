@@ -134,16 +134,18 @@ STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 	
 	char* proj = NULL;
 	OGRErr err = m_projection->exportToProj4(&proj);
+
 	if (err == OGRERR_NONE)
 	{
 		*retVal = A2BSTR(proj);
-		CPLFree(proj);
 	}
 	else
 	{
 		ErrorMessage(err);
 		*retVal = A2BSTR("");
 	}
+	if (proj)
+		CPLFree(proj);
 	return S_OK;
 }
 
@@ -217,13 +219,14 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 	if (err == OGRERR_NONE)
 	{
 		*retVal = A2BSTR(proj);
-		CPLFree(proj);
 	}
 	else
 	{
 		ErrorMessage(err);
 		*retVal = A2BSTR("");
 	}
+	if (proj)
+		CPLFree(proj);
 	return S_OK;
 }
 

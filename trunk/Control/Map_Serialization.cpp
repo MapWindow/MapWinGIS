@@ -32,7 +32,7 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 	}
 
 	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, Filename);
-	bool result = CPLSerializeXMLTreeToFile(node, Filename);
+	bool result = CPLSerializeXMLTreeToFile(node, Filename) != 0;
 	CPLDestroyXMLNode(node);
 	return result ? VARIANT_TRUE : VARIANT_FALSE;
 }

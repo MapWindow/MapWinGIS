@@ -55,6 +55,8 @@
 #define RECORD_HEADER_LENGTH_32 8
 #define RECORD_SHAPE_TYPE_32 8
 
+
+
 // *********************************************************************
 // CShapefile declaration
 // *********************************************************************
@@ -64,6 +66,7 @@ class ATL_NO_VTABLE CShapefile :
 	public IDispatchImpl<IShapefile, &IID_IShapefile, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
+	
 	CShapefile()
 	{	
 		m_hotTracking = VARIANT_FALSE;
@@ -137,6 +140,9 @@ public:
 		this->put_ReferenceToLabels();
 		this->put_ReferenceToCategories();
 		this->put_ReferenceToCharts();
+
+		gReferenceCounter.AddRef(tkInterface::idShapefile);
+
 	}
 	~CShapefile()
 	{			
@@ -189,6 +195,8 @@ public:
 		{
 			m_geoProjection->Release();
 		}
+		gReferenceCounter.Release(tkInterface::idShapefile);
+		//Debug::WriteLine("Shapefile destructor: %d", sfCount);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -372,8 +380,6 @@ public:
 	STDMETHOD(Dump)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
 
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
-
-	STDMETHOD(get_RefCount)(long* retVal);
 
 	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 

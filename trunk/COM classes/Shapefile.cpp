@@ -53,17 +53,7 @@
 	static char THIS_FILE[] = __FILE__;
 #endif
 
-
 #pragma region Properties	
-// ************************************************************
-//		get_RefCount()
-// ************************************************************
-STDMETHODIMP CShapefile::get_RefCount(long *retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = this->m_dwRef;
-	return S_OK;
-}
 
 // ************************************************************
 //		get_EditingShapes()
@@ -847,7 +837,20 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 		dbf->Release();
 		dbf = NULL;
 	}
-	*retval = VARIANT_TRUE; //!_isEditingShapes && !isEditingTable?VARIANT_TRUE:VARIANT_FALSE;
+	if (m_labels)
+	{
+		m_labels->Clear();
+		m_labels->ClearCategories();
+	}
+	if (m_charts)
+	{
+		m_charts->Clear();
+	}
+	if (m_categories)
+	{
+		m_categories->Clear();
+	}
+	*retval = VARIANT_TRUE; 
 	
 	return S_OK;
 }
@@ -1341,7 +1344,10 @@ STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 
 		if (!vbretval)
 		{
-			sf->Release(); sf = NULL; break;
+			sf->Close(&vbretval);
+			sf->Release(); 
+			sf = NULL; 
+			break;
 		}
 	}
 	
@@ -1602,6 +1608,10 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 			{
 				*pVal = testVal;
 				return S_OK;
+			}
+			else
+			{
+				testVal->Release();
 			}
 		}
 	}
@@ -2402,10 +2412,9 @@ OGRSpatialReference* CShapefile::get_OGRSpatialReference()
 	CString str = OLE2CA(proj);
 	SysFreeString(proj);
 
-	OGRSpatialReference* reference = new OGRSpatialReference;
-	
 	if (str != "")
 	{
+		OGRSpatialReference* reference = new OGRSpatialReference();
 		reference->importFromProj4(str.GetString());
 		return reference;
 	}

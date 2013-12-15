@@ -42,11 +42,13 @@ public:
 	{
 		m_canDelete = true;
 		m_label = new CLabelInfo();
+		gReferenceCounter.AddRef(tkInterface::idLabel);
 	}
 	~CLabelClass()
 	{
 		if (m_label != NULL && m_canDelete) 
 			delete m_label;
+		gReferenceCounter.Release(tkInterface::idLabel);
 	}
 
 DECLARE_REGISTRY_RESOURCEID(IDR_LABELCLASS)

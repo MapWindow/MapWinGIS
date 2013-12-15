@@ -45,9 +45,11 @@ public:
 	{	
 		_lastErrorCode = tkNO_ERROR;
 		_isLineDecoration = false;
+		gReferenceCounter.AddRef(tkInterface::idShapeDrawingOptions);
 	}
 	~CShapeDrawingOptions()
-	{				
+	{			
+		gReferenceCounter.Release(tkInterface::idShapeDrawingOptions);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

@@ -156,7 +156,7 @@ namespace IndexSearching
 		  int arrSize = vis->ids.size();
 		  for (unsigned i = 0; i < vis->ids.size();vis->ids.pop())
 			{
-			val = vis->ids.front();
+			val = (long)vis->ids.front();
 			int len = resulSet->getLength();
 			resulSet->addValue(val);
 			}

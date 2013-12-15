@@ -2382,12 +2382,17 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 				
 				if (shpNew )
 				{
-					// swapping shapes
 					shpNew->get_IsValid(&vbretval);
 					if (vbretval)
 					{
+						// the new one is valid; swapping shapes
 						shp->Release();
 						shp = shpNew;
+					}
+					else
+					{
+						// no luck with new one; discard it
+						shpNew->Release();
 					}
 				}
 			}

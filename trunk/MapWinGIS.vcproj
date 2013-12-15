@@ -2145,6 +2145,14 @@
 					RelativePath=".\Utilities\Debugging\MemLeakDetect.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Utilities\Debugging\ReferenceCounter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Utilities\Debugging\ReferenceCounter.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="SQLite"
@@ -3352,11 +3360,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

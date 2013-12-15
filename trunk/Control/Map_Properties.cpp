@@ -191,7 +191,7 @@ void CMapView::SetShapeDrawingMethod(short newVal)
 	m_ShapeDrawingMethod = (tkShapeDrawingMethod)newVal;
 	
 	// generating or clearing per-shape options
-	for(int i = 0; i < m_activeLayers.size(); i++)
+	for(size_t i = 0; i < m_activeLayers.size(); i++)
 	{
 		Layer * l = m_allLayers[m_activeLayers[i]];
 		if( l != NULL )
@@ -281,12 +281,12 @@ void CMapView::SetScalebarVisible(VARIANT_BOOL pVal)
 }
 bool CMapView::SendMouseMove()
 {	
-	return m_sendMouseMove;
+	return m_sendMouseMove ? true : false;
 }
 
 bool CMapView::SendSelectBoxDrag()
 {	
-	return  m_sendSelectBoxDrag;
+	return  m_sendSelectBoxDrag? true : false;
 }
 
 // *****************************************************

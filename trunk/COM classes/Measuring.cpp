@@ -22,8 +22,8 @@ int CMeasuring::get_ScreenPoints(void* map, bool hasLastPoint, int lastX, int la
 		}
 		if (hasLastPoint)
 		{
-			temp[size - 1].X = lastX;
-			temp[size - 1].Y = lastY;
+			temp[size - 1].X = (Gdiplus::REAL)lastX;
+			temp[size - 1].Y = (Gdiplus::REAL)lastY;
 		}
 	}
 	return size;
@@ -55,7 +55,7 @@ STDMETHODIMP CMeasuring::get_PointCount(long* retVal)
 STDMETHODIMP CMeasuring::get_PointXY(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (pointIndex < 0 || pointIndex >= points.size())
+	if (pointIndex < 0 || pointIndex >= (long)points.size())
 	{
 		// TODO: report error
 		*retVal = VARIANT_FALSE;
@@ -177,7 +177,7 @@ STDMETHODIMP CMeasuring::Clear()
 STDMETHODIMP CMeasuring::get_SegementLength(int segmentIndex, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (segmentIndex < 0 || segmentIndex >= points.size() - 1)
+	if (segmentIndex < 0 || segmentIndex >= (long)points.size() - 1)
 	{
 		// TODO: report error
 	}
@@ -285,7 +285,7 @@ double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y)
 		{
 			areaRecalcIsNeeded = false;
 			poly.Clear();
-			for(int i = 0; i < points.size(); i++)
+			for(size_t i = 0; i < points.size(); i++)
 			{
 				poly.AddPoint(points[i]->y, points[i]->x);
 			}

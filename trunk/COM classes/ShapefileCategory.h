@@ -51,6 +51,7 @@ public:
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_drawingOptions);
 
 		_categories = NULL;
+		gReferenceCounter.AddRef(tkInterface::idShapefileCategory);
 	}
 	
 	~CShapefileCategory()
@@ -59,6 +60,7 @@ public:
 		::SysFreeString(m_expression);
 		if(m_drawingOptions != NULL)
 			m_drawingOptions->Release();
+		gReferenceCounter.Release(tkInterface::idShapefileCategory);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILECATEGORY)

@@ -635,7 +635,6 @@ public:
 		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, extents, snapshot,key);}
 	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
 	{
-		m_measuring->AddRef();
 		FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);
 	}
 	//}}AFX_EVENT

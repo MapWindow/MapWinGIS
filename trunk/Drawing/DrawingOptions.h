@@ -201,6 +201,14 @@ public:
 	{
 		this->picture = NULL;
 		this->linePattern = NULL;
+		this->brush = NULL;
+		this->pen = NULL;
+		this->penPlus = NULL;
+		this->brushPlus = NULL;
+		this->bitmapPlus = NULL;
+		this->imgAttributes = NULL;
+		this->penOld = NULL;
+		this->brushOld = NULL;
 
 		*this = opt;
 		picture = NULL;

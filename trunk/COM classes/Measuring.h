@@ -65,6 +65,8 @@ public:
 	{
 		Clear();
 		if (shape) shape->Release();
+		if (proj) proj->Release();
+		if (projWGS84) projWGS84->Release();
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_MEASURING)

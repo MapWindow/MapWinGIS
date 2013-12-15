@@ -152,7 +152,7 @@ namespace Utility
 		DWORD ftyp = GetFileAttributesA(path);
 		if (ftyp == INVALID_FILE_ATTRIBUTES)
 			return false;  //something is wrong with your path!
-		return (ftyp & FILE_ATTRIBUTE_DIRECTORY);
+		return (ftyp & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
 	}
 
 	// *******************************************************************

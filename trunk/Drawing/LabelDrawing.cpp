@@ -660,7 +660,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						}
 					}
 					// memory must be cleared at this point
-					ASSERT(lbl->rotatedFrame);
+					ASSERT(!lbl->rotatedFrame);
 
 					lbl->rotatedFrame = rectNew;
 					lbl->isDrawn = VARIANT_TRUE;

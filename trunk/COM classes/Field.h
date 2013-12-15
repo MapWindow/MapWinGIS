@@ -46,6 +46,7 @@ public:
 		type = STRING_FIELD;
 		isUpdated = false;
 		_table = NULL;
+		gReferenceCounter.AddRef(tkInterface::idField);
 	}
 
 	~CField()
@@ -56,6 +57,7 @@ public:
 		if( globalCallback )
 			globalCallback->Release();
 		globalCallback = NULL;
+		gReferenceCounter.Release(tkInterface::idField);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

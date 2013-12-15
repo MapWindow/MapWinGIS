@@ -64,9 +64,18 @@ public:
 
 	~CTiles()
 	{
+		ClearAll();
+	}
+	
+	void ClearAll()
+	{
 		this->Stop();
 		this->Clear();
-		m_providers->Release();
+		if (m_providers)
+		{
+			m_providers->Release();
+			m_providers = NULL;
+		}
 	}
 
 	void setDefaults()

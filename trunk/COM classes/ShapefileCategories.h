@@ -50,6 +50,7 @@ public:
 		m_globalCallback = NULL;
 		m_lastErrorCode = tkNO_ERROR;
 		m_classificationField = -1;
+		gReferenceCounter.AddRef(tkInterface::idShapefileCategories);
 	}
 
 	~CShapefileCategories()
@@ -66,6 +67,7 @@ public:
 			m_globalCallback->Release();
 			m_globalCallback = NULL;
 		}
+		gReferenceCounter.Release(tkInterface::idShapefileCategories);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILECATEGORIES)

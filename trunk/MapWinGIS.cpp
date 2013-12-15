@@ -45,6 +45,8 @@ GEOSContextHandle_t getGeosHandle()
 }
 #endif
 
+ReferenceCounter gReferenceCounter;
+
 IUtils* m_utils;
 IUtils* GetUtils()
 {

@@ -46,6 +46,7 @@ public:
 		m_lastErrorCode = tkNO_ERROR;
 		m_projection = new OGRSpatialReference();
 		m_transformation = NULL;	
+		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
 		// TODO: apply WGS84 projection by default
 	}
 
@@ -61,6 +62,7 @@ public:
 		{
 			OGRCoordinateTransformation::DestroyCT(m_transformation);
 		}
+		gReferenceCounter.Release(tkInterface::idGeoProjection);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GEOPROJECTION)

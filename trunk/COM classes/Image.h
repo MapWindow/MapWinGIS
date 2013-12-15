@@ -111,6 +111,7 @@ public:
 		m_iconGdiPlus = NULL;
 
 		fileName = NULL;
+		gReferenceCounter.AddRef(tkInterface::idImage);
 	}
 	
 	// destructor
@@ -144,6 +145,7 @@ public:
 			delete m_iconGdiPlus;
 			m_iconGdiPlus = NULL;
 		}
+		gReferenceCounter.Release(tkInterface::idImage);
 	}
 
 public:

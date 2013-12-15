@@ -251,7 +251,7 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 		}
 		
 		/******************** CHOOSE THE FUNCTION TO READ THE IMAGE ***************/
-		if (ImgType == ImgType == IMG_FILE || ImgType == KAP_FILE || hasColorTable ||
+		if (ImgType == IMG_FILE || ImgType == KAP_FILE || hasColorTable ||
 			(ImgType == TIFF_FILE && dataType == GDT_UInt16))
 		{
 			handleImage = asComplex;

@@ -58,7 +58,7 @@ public:
 	int httpStatus;
 
 private:
-	CMemoryBitmap* GetTileImageUsingHttp(CString m_urlStr);
+	CMemoryBitmap* GetTileImageUsingHttp(CString m_urlStr, bool recursive = false);
 
 protected:
 	// abstract members

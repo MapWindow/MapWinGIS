@@ -21,8 +21,6 @@ bool LineIntersection1(const POINT& a1, const POINT& a2, const POINT& b1, const 
 		if ((ta >= 0) && (ta <= 1) && (tb >= 0) && (tb<=1))
 		{
 			return true;	// there is intersection
-
-			// c.setPoint(a1.x+ta*(a2.x-a1.x),a1.y+ta*(a2.y-a1.y));		// to return exact point
 		}
 		else
 			return false;	// there is no intersection of segments
@@ -49,7 +47,7 @@ bool LineIntersection(const POINT& a1, const POINT& a2, const POINT& b1, const P
 		if ((ta >= 0) && (ta <= 1) && (tb >= 0) && (tb<=1))
 		{
 			pntCross.x = a1.x + (LONG)ta*(a2.x-a1.x);
-            pntCross.y = a1.y + (LONG)ta*(a2.y-a1.y);
+            pntCross.y = a1.y + (LONG)tb*(a2.y-a1.y);
 			return true;	// there is intersection
 		}
 		else

@@ -75,8 +75,8 @@ public:
 	}
 	~CLabels()
 	{
-		
 		this->Clear();
+		this->ClearCategories();
 		::SysFreeString(m_key);
 		::SysFreeString(m_expression);
 		

@@ -33,8 +33,9 @@ CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 		if( layer->type == ShapefileLayer )
 		{
 			IShapefile* sf = NULL;
-			layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			if (sf)
+			//layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			//if (sf)
+			if (layer->QueryShapefile(&sf))
 			{
 				IShapeDrawingOptions* options = NULL;
 				sf->get_DefaultDrawingOptions(&options);
@@ -145,10 +146,10 @@ bool CMapView::IsValidShape( long layerHandle, long shape )
 		{	
 			this->AlignShapeLayerAndShapes(l);
 			
-			IDispatch * object = l->object;
 			IShapefile * ishp = NULL;
-
-			object->QueryInterface(IID_IShapefile,(void**)&ishp);
+			//IDispatch * object = l->object;
+			//object->QueryInterface(IID_IShapefile,(void**)&ishp);
+			l->QueryShapefile(&ishp);
 
 			long numShapes = 0;
 			if( ishp == NULL )

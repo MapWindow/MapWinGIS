@@ -47,6 +47,7 @@ public:
 		m_priority = 0;
 		m_enabled = VARIANT_TRUE;
 		m_value.vt = VT_EMPTY;
+		gReferenceCounter.AddRef(tkInterface::idLabelCategory);
 	}
 	
 	~CLabelCategory()
@@ -55,6 +56,7 @@ public:
 		::SysFreeString(m_expression);
 		VariantClear(&m_minValue);
 		VariantClear(&m_maxValue);
+		gReferenceCounter.Release(tkInterface::idLabelCategory);
 	}
 
 DECLARE_REGISTRY_RESOURCEID(IDR_LABELCATEGORY)

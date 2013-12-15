@@ -656,7 +656,6 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 			if (Xmin == 0.0) 
 			{
 				shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
-				Debug::WriteLine("Stop");
 			}
 
 			// refresh shapefile extents
