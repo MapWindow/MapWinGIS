@@ -1280,21 +1280,7 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL *retval)
 // ***********************************************************************
 void CShapefile::CloneNoFields(IShapefile** retVal)
 {
-	IShapefile* sf = NULL;
-	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
-	
-	ShpfileType shpType;
-	VARIANT_BOOL vbretval;
-	this->get_ShapefileType(&shpType);
-	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
-	
-	// copying the projection string
-	BSTR pVal;
-	this->get_Projection(&pVal);
-	if (pVal != NULL)
-		sf->put_Projection(pVal);
-
-	*retVal = sf;
+	CloneNoFields(retVal, _shpfiletype);
 }
 
 // ***********************************************************************

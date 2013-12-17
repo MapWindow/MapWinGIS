@@ -964,6 +964,43 @@ void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShape
 	}
 }
 
+ShpfileType GetClipOperationReturnType(ShpfileType type1, ShpfileType type2, tkClipOperation operation)
+{
+	// autochoosing the resulting type for intersection
+	switch (operation)
+	{
+		case clClip:	
+		case clIntersection:
+			// return type is always has the lower dimension of two
+			if (type1 == SHP_POINT || type2 == SHP_POINT || type1 == SHP_MULTIPOINT || type2 == SHP_MULTIPOINT ) 
+			{
+				// TODO: should we return multipoints type? 
+				return SHP_POINT;
+			}
+			else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
+			{
+				return SHP_POLYLINE;
+			}
+			else
+			{
+				return SHP_POLYGON;
+			}
+			break;
+		case clDifference:
+			// the subject type remains intact
+			return type1;
+		case clSymDifference:
+			// doesn't make sense in case of different types, for example poly vs line returns
+			// part of the polys from the first and part of the lines from the second
+			// we shall return type of subject, but it's arbitrary and can be type2 as well
+			return type1;
+		case clUnion:
+			// what is the result of poly vs line here?
+			break;
+	}
+	return type1;
+}
+
 // ********************************************************************
 //		DoClipOperarion()
 // ********************************************************************
@@ -997,83 +1034,44 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 		return;
 	}
 	
-	/*#ifdef DEBUG
-	DWORD startTick = ::GetTickCount();
-	#endif*/
-
 	// we can use clipper for polygons only
 	ShpfileType type1, type2;	
 	type1 = Utility::ShapeTypeConvert2D(_shpfiletype);
+	
 	sfOverlay->get_ShapefileType(&type2);	
 	type2 = Utility::ShapeTypeConvert2D(type2);
 	bool canUseClipper = (type1 == SHP_POLYGON && type2 == SHP_POLYGON);
 	
-	// autochoosing the resulting type for intersection
-	if (operation == clIntersection)
+	if (returnType == SHP_NULLSHAPE)
 	{
-		if (returnType == SHP_NULLSHAPE)
-		{
-			if (type1 == SHP_POINT || type2 == SHP_POINT ||
-				type1 == SHP_MULTIPOINT || type2 == SHP_MULTIPOINT)
-			{
-				type1 = SHP_POINT;
-			}
-			else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
-			{
-				type1 = SHP_POLYLINE;
-			}
-			else
-			{
-				type1 = SHP_POLYGON;
-			}
-		}
-		else
-		{
-			// is the specified return type not compatible?
-			if (type1 == SHP_POLYGON && type2 == SHP_POLYGON &&
-				(returnType == SHP_POLYLINE || returnType == SHP_POINT))
-			{
-				ErrorMessage(tkINVALID_RETURN_TYPE);
-				return;
-			}
-			else if (type1 == SHP_POLYGON && type2 == SHP_POLYLINE &&
-				returnType == SHP_POINT)
-			{
-				ErrorMessage(tkINVALID_RETURN_TYPE);
-				return;
-			}
-			else if (type2 == SHP_POLYGON && type1 == SHP_POLYLINE &&
-				returnType == SHP_POINT)
-			{
-				ErrorMessage(tkINVALID_RETURN_TYPE);
-				return;
-			}
-			else if (returnType == SHP_POLYGON && (type1 == SHP_POLYLINE ||
-				type2 == SHP_POLYLINE))
-			{
-				ErrorMessage(tkINVALID_RETURN_TYPE);
-				return;
-			}
-			else if (returnType != SHP_POINT && (type1 == SHP_POINT ||
-				type2 == SHP_POINT))
-			{
-				ErrorMessage(tkINVALID_RETURN_TYPE);
-				return;
-			}
-			else
-			{
-				type1 = returnType;
-			}
-		}
-
-		// creation of resulting shapefile
-		this->CloneNoFields(retval, type1);
+		// it wasn't specified, therefore autodetect
+		returnType = GetClipOperationReturnType(type1, type2, operation);
 	}
 	else
 	{
-		// creation of resulting shapefile
-		this->CloneNoFields(retval);
+		// check if the return type is valid (intersetion operation is the only one where type can specified explicitly)
+		if (returnType == SHP_POLYGON && (type1 != SHP_POLYGON || type2 != SHP_POLYGON))
+		{
+			// both must be polys to return a poly
+			ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+			return;
+		}
+		else if (returnType == SHP_POLYLINE && ((type1 != SHP_POLYLINE && type1 != SHP_POLYGON) ||
+											   (type2 != SHP_POLYLINE && type2 != SHP_POLYGON)))
+		{
+			// both must be either lines or polys to return a line
+			ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
+			return;
+		}
+		else if (returnType == SHP_POINT || returnType == SHP_MULTIPOINT)
+		{
+			// point can be received from any combination of types (event poly vs poly)
+			// not sure how multipoints are handled - so put no limitations for the either
+		}
 	}
+		
+	// creation of resulting shapefile
+	this->CloneNoFields(retval, returnType);
 
 	VARIANT_BOOL vbretval;
 	
@@ -1091,9 +1089,9 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 		globalCallback->QueryInterface(IID_IStopExecution,(void**)&_stopExecution);
 	}
 
-	// do calculation by Clipper
 	if (useClipper)
 	{
+		// do calculation by Clipper
 		switch (operation)
 		{
 			case clDifference:
