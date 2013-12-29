@@ -1,0 +1,26 @@
+# First line is shapefile, second line is overlay shapefile
+# Call will be sf.Clip(false, sfOverlay, false);
+
+# Clip lines with polygons:
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# Clip polygons with lines
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+
+# Clip polygons with polygons
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\LargePolygon.shp
+
+# Clip polygons with polygons (switched)
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\LargePolygon.shp
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# Clip polygons M with polygons
+# TODO
+
+# Clip lines with lines
+# TODO
+
+

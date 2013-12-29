@@ -8,3 +8,10 @@ C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefi
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
+
+# Polygon M
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\PolygonM.shp
+
+# Multi points:
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\MultiPoints.shp
+

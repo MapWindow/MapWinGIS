@@ -34,7 +34,6 @@ namespace TestApplication
     /// <returns>
     /// The layer handle
     /// </returns>
-    
     internal static int OpenShapefileAsLayer(string filename, Form1 theForm, bool clearLayers)
     {
       var sf = OpenShapefile(filename, theForm);
@@ -59,6 +58,7 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, "Applying symbology");
         }
 
+        theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
       }
       else
@@ -200,7 +200,7 @@ namespace TestApplication
         theForm.Progress(string.Empty, 100, "Exception in  OpenGridAsLayer: " + exception.Message);
 
         // rethrow:
-        throw;
+        // throw;
       }
 
       return hndl;

@@ -43,9 +43,6 @@
       this.IntersectionShapefileFirstInput = new System.Windows.Forms.TextBox();
       this.label18 = new System.Windows.Forms.Label();
       this.groupBox16 = new System.Windows.Forms.GroupBox();
-      this.SelectClipShapefileOverlay = new System.Windows.Forms.Button();
-      this.ClipShapefileOverlay = new System.Windows.Forms.TextBox();
-      this.label16 = new System.Windows.Forms.Label();
       this.RunClipShapefileTest = new System.Windows.Forms.Button();
       this.SelectClipShapefileInput = new System.Windows.Forms.Button();
       this.ClipShapefileInput = new System.Windows.Forms.TextBox();
@@ -111,9 +108,9 @@
       this.ShapefileInputfile = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
-      this.axMap1 = new AxMapWinGIS.AxMap();
       this.Progressbox = new System.Windows.Forms.TextBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+      this.axMap1 = new AxMapWinGIS.AxMap();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
@@ -217,7 +214,7 @@
       this.groupBox17.Controls.Add(this.SelectIntersectionShapefileFirstInput);
       this.groupBox17.Controls.Add(this.IntersectionShapefileFirstInput);
       this.groupBox17.Controls.Add(this.label18);
-      this.groupBox17.Location = new System.Drawing.Point(6, 460);
+      this.groupBox17.Location = new System.Drawing.Point(6, 426);
       this.groupBox17.Name = "groupBox17";
       this.groupBox17.Size = new System.Drawing.Size(195, 124);
       this.groupBox17.TabIndex = 7;
@@ -296,53 +293,20 @@
       // 
       // groupBox16
       // 
-      this.groupBox16.Controls.Add(this.SelectClipShapefileOverlay);
-      this.groupBox16.Controls.Add(this.ClipShapefileOverlay);
-      this.groupBox16.Controls.Add(this.label16);
       this.groupBox16.Controls.Add(this.RunClipShapefileTest);
       this.groupBox16.Controls.Add(this.SelectClipShapefileInput);
       this.groupBox16.Controls.Add(this.ClipShapefileInput);
       this.groupBox16.Controls.Add(this.label15);
       this.groupBox16.Location = new System.Drawing.Point(6, 330);
       this.groupBox16.Name = "groupBox16";
-      this.groupBox16.Size = new System.Drawing.Size(195, 124);
+      this.groupBox16.Size = new System.Drawing.Size(195, 90);
       this.groupBox16.TabIndex = 6;
       this.groupBox16.TabStop = false;
       this.groupBox16.Text = "Clip shapefile";
       // 
-      // SelectClipShapefileOverlay
-      // 
-      this.SelectClipShapefileOverlay.Location = new System.Drawing.Point(162, 69);
-      this.SelectClipShapefileOverlay.Name = "SelectClipShapefileOverlay";
-      this.SelectClipShapefileOverlay.Size = new System.Drawing.Size(27, 20);
-      this.SelectClipShapefileOverlay.TabIndex = 12;
-      this.SelectClipShapefileOverlay.Text = "...";
-      this.toolTip1.SetToolTip(this.SelectClipShapefileOverlay, "Select shapefile to buffer");
-      this.SelectClipShapefileOverlay.UseVisualStyleBackColor = true;
-      this.SelectClipShapefileOverlay.Click += new System.EventHandler(this.SelectClipShapefileOverlayClick);
-      // 
-      // ClipShapefileOverlay
-      // 
-      this.ClipShapefileOverlay.AcceptsReturn = true;
-      this.ClipShapefileOverlay.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClipShapefileOverlay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.ClipShapefileOverlay.Location = new System.Drawing.Point(9, 69);
-      this.ClipShapefileOverlay.Name = "ClipShapefileOverlay";
-      this.ClipShapefileOverlay.Size = new System.Drawing.Size(147, 20);
-      this.ClipShapefileOverlay.TabIndex = 11;
-      this.ClipShapefileOverlay.Text = global::TestApplication.Properties.Settings.Default.ClipShapefileOverlay;
-      // 
-      // label16
-      // 
-      this.label16.AutoSize = true;
-      this.label16.Location = new System.Drawing.Point(6, 53);
-      this.label16.Name = "label16";
-      this.label16.Size = new System.Drawing.Size(140, 13);
-      this.label16.TabIndex = 10;
-      this.label16.Text = "Select the overlay shapefile:";
-      // 
       // RunClipShapefileTest
       // 
-      this.RunClipShapefileTest.Location = new System.Drawing.Point(9, 95);
+      this.RunClipShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunClipShapefileTest.Name = "RunClipShapefileTest";
       this.RunClipShapefileTest.Size = new System.Drawing.Size(180, 23);
       this.RunClipShapefileTest.TabIndex = 9;
@@ -376,9 +340,9 @@
       this.label15.AutoSize = true;
       this.label15.Location = new System.Drawing.Point(6, 16);
       this.label15.Name = "label15";
-      this.label15.Size = new System.Drawing.Size(103, 13);
+      this.label15.Size = new System.Drawing.Size(171, 13);
       this.label15.TabIndex = 6;
-      this.label15.Text = "Select the shapefile:";
+      this.label15.Text = "Select a txt file with the files to clip:";
       // 
       // groupBox15
       // 
@@ -1028,17 +992,6 @@
       this.label1.TabIndex = 0;
       this.label1.Text = "Tests";
       // 
-      // axMap1
-      // 
-      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.axMap1.Enabled = true;
-      this.axMap1.Location = new System.Drawing.Point(0, 0);
-      this.axMap1.Name = "axMap1";
-      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-      this.axMap1.Size = new System.Drawing.Size(433, 615);
-      this.axMap1.TabIndex = 0;
-      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
-      // 
       // Progressbox
       // 
       this.Progressbox.BackColor = System.Drawing.Color.White;
@@ -1050,7 +1003,17 @@
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.Progressbox.Size = new System.Drawing.Size(667, 134);
       this.Progressbox.TabIndex = 0;
-      this.Progressbox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ProgressboxMouseClick);
+      // 
+      // axMap1
+      // 
+      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.axMap1.Enabled = true;
+      this.axMap1.Location = new System.Drawing.Point(0, 0);
+      this.axMap1.Name = "axMap1";
+      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
+      this.axMap1.Size = new System.Drawing.Size(433, 615);
+      this.axMap1.TabIndex = 0;
+      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
       // 
       // Form1
       // 
@@ -1183,9 +1146,6 @@
     private System.Windows.Forms.Button SelectClipShapefileInput;
     private System.Windows.Forms.TextBox ClipShapefileInput;
     private System.Windows.Forms.Label label15;
-    private System.Windows.Forms.Button SelectClipShapefileOverlay;
-    private System.Windows.Forms.TextBox ClipShapefileOverlay;
-    private System.Windows.Forms.Label label16;
     private System.Windows.Forms.GroupBox groupBox17;
     private System.Windows.Forms.Button SelectIntersectionShapefileSecondInput;
     private System.Windows.Forms.TextBox IntersectionShapefileSecondInput;

@@ -74,7 +74,13 @@ namespace TestApplication
           return;
         }
 
-        Helper.ColorShapes(ref bufferedSf, tkMapColor.LightBlue, tkMapColor.LightYellow, false);
+        Helper.ColorShapes(ref bufferedSf, 0, tkMapColor.LightBlue, tkMapColor.LightYellow, false);
+
+        // Save result:
+        var newFilename = shapefilename.Replace(".shp", "-buffered.shp");
+        Helper.DeleteShapefile(newFilename);
+        bufferedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
         Fileformats.OpenShapefileAsLayer(shapefilename, theForm, true);
@@ -140,6 +146,12 @@ namespace TestApplication
         simplifiedSf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.OrangeRed);
         simplifiedSf.DefaultDrawingOptions.LineStipple = tkDashStyle.dsSolid;
 
+        // Save result:
+        var newFilename = shapefilename.Replace(".shp", "-intersected.shp");
+        Helper.DeleteShapefile(newFilename);
+        simplifiedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
+
         // Load the files:
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(simplifiedSf, true);
@@ -198,17 +210,20 @@ namespace TestApplication
           return;
         }
 
-        /*
-        // Save result:
-        dissolvedSf.SaveAs(shapefilename.Replace(".shp", "-aggregate.shp"), theForm);
-        theForm.Progress(string.Empty, 0, "The resulting file has been saved as " + aggregatedSf.Filename);
-        */
+        // The resulting shapefile has only 1 field:
+        Helper.ColorShapes(ref dissolvedSf, 0, tkMapColor.BlueViolet, tkMapColor.Wheat, true);
 
-        Helper.ColorShapes(ref dissolvedSf, tkMapColor.BlueViolet, tkMapColor.Wheat, true);
+        // Save result:
+        var newFilename = shapefilename.Replace(".shp", "-dissolved.shp");
+        Helper.DeleteShapefile(newFilename);
+        dissolvedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(dissolvedSf, true);
+        sf.DefaultDrawingOptions.FillVisible = false;
+        MyAxMap.AddLayer(sf, true);
 
         theForm.Progress(
           string.Empty,
@@ -227,73 +242,49 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The Dissolve shapefile test has finished");
     }
 
-    /// <summary>Run the clip shapefile test</summary>
-    /// <param name="shapefilename">The shapefile name</param>
-    /// <param name="overlayFilename">The name of the overlay shapefile</param>
-    /// <param name="theForm">The form</param>
-    internal static void RunClipShapefileTest(string shapefilename, string overlayFilename, Form1 theForm)
+    /// <summary>Run the clip shapefile test
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static void RunClipShapefileTest(string textfileLocation, Form1 theForm)
     {
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Clip shapefile test has started.", Environment.NewLine));
 
-      try
+      // Load textfile, each first line is shapefile, each second line is overlay:
+      // Open file, read line by line, skip lines starting with #
+      var lines = File.ReadAllLines(textfileLocation);
+      for (var i = 0; i < lines.Length; i = i + 2)
       {
-        // Check inputs:
-        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
+        var firstFile = lines[i];
+        if (firstFile.StartsWith("#") || firstFile.Length == 0)
         {
-          return;
+          continue;
         }
 
-        if (!Helper.CheckShapefileLocation(overlayFilename, theForm))
-        {
-          return;
-        }
-
-        // Open the sf:
-        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
-        if (sf == null)
-        {
-          theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
-        }
-
-        var overlaySf = Fileformats.OpenShapefile(overlayFilename, theForm);
-        if (overlaySf == null)
-        {
-          theForm.Error(string.Empty, "Opening overlay shapefile was unsuccessful");
-          return;
-        }
-
-        var globalSettings = new GlobalSettings();
-        globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start clipping " + Path.GetFileName(shapefilename));
-
-        var clippedSf = sf.Clip(false, overlaySf, false);
+        var secondFile = lines[i + 1];
         
-        // Do some checks:)
-        if (!Helper.CheckShapefile(sf, clippedSf, globalSettings.GdalLastErrorMsg, theForm))
+        // check if this line starts with a #
+        while (secondFile.StartsWith("#") || secondFile.Length == 0)
         {
-          return;
+          // Move to next line:
+          i++;
+          secondFile = lines[i + 1];
         }
 
-        Helper.ColorShapes(ref clippedSf, tkMapColor.DarkRed, tkMapColor.LightSeaGreen, true);
-
-        // Save result:
-        var newFilename = shapefilename.Replace(".shp", "-clipped.shp");
-        Helper.DeleteShapefile(newFilename);
-        clippedSf.SaveAs(newFilename, theForm);
-        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
-
-        // Load the files:
-        MyAxMap.RemoveAllLayers();
-        Fileformats.OpenShapefileAsLayer(overlayFilename, theForm, false);
-        MyAxMap.AddLayer(clippedSf, true);
-      }
-      catch (Exception exception)
-      {
-        theForm.Error(string.Empty, "Exception: " + exception.Message);
+        ClipShapefile(firstFile, secondFile, theForm);
       }
 
       theForm.Progress(string.Empty, 100, "The clipping shapefile test has finished.");
@@ -356,10 +347,13 @@ namespace TestApplication
           return;
         }
 
-        Helper.ColorShapes(ref intersectedSf, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
+        Helper.ColorShapes(ref intersectedSf, 0, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
 
         // Save result:
-        // intersectedSf.SaveAs(shapefilenameSecond.Replace(".shp", "-intersect.shp"), theForm);
+        var newFilename = shapefilenameSecond.Replace(".shp", "-intersected.shp");
+        Helper.DeleteShapefile(newFilename);
+        intersectedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
@@ -372,6 +366,96 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The get intersection shapefile test has finished.");
+    }
+
+    /// <summary>Clip the shapefile</summary>
+    /// <param name="shapefilename">The shapefile name</param>
+    /// <param name="overlayFilename">The name of the overlay shapefile</param>
+    /// <param name="theForm">The form</param>
+    private static void ClipShapefile(string shapefilename, string overlayFilename, Form1 theForm)
+    {
+      try
+      {
+        // Check inputs:
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
+        {
+          return;
+        }
+
+        if (!Helper.CheckShapefileLocation(overlayFilename, theForm))
+        {
+          return;
+        }
+
+        // Open the sf:
+        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
+        if (sf == null)
+        {
+          theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
+          return;
+        }
+
+        var overlaySf = Fileformats.OpenShapefile(overlayFilename, theForm);
+        if (overlaySf == null)
+        {
+          theForm.Error(string.Empty, "Opening overlay shapefile was unsuccessful");
+          return;
+        }
+
+        theForm.Progress(
+          string.Empty,
+          0,
+          string.Format(
+            "Clipping {0} ({1}) with {2} ({3})",
+            Path.GetFileName(shapefilename),
+            sf.ShapefileType,
+            Path.GetFileName(overlayFilename),
+            overlaySf.ShapefileType));
+
+        var globalSettings = new GlobalSettings();
+        globalSettings.ResetGdalError();
+        theForm.Progress(string.Empty, 0, "Start clipping " + Path.GetFileName(shapefilename));
+
+        var clippedSf = sf.Clip(false, overlaySf, false);
+
+        // Do some checks:)
+        if (!Helper.CheckShapefile(sf, clippedSf, globalSettings.GdalLastErrorMsg, theForm))
+        {
+          return;
+        }
+
+        Helper.ColorShapes(ref clippedSf, 0, tkMapColor.DarkRed, tkMapColor.LightSeaGreen, true);
+
+        // Count the resulting shapes it should be higher than the input shapefile.
+        var numClippedSf = clippedSf.NumShapes;
+        var numInputSf = sf.NumShapes;
+
+        if (numClippedSf == numInputSf)
+        {
+          // Nothing was clipped
+          theForm.Error(string.Empty, "The resulting shapefile has the same number of shapes as the input shapefile. Either the input files are incorrect or the clipping function doesn't behaves as expected.");
+        }
+        else
+        {
+          // Save result:
+          var newFilename = shapefilename.Replace(
+            ".shp", "-" + Path.GetFileName(overlayFilename).Replace(".shp", "-clipped.shp"));
+          Helper.DeleteShapefile(newFilename);
+          clippedSf.SaveAs(newFilename, theForm);
+          theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
+
+          // Load the files:
+          MyAxMap.RemoveAllLayers();
+          Fileformats.OpenShapefileAsLayer(overlayFilename, theForm, false);
+          MyAxMap.AddLayer(clippedSf, true);
+        }
+      }
+      catch (Exception exception)
+      {
+        theForm.Error(string.Empty, "Exception: " + exception.Message);
+      }
+
+      theForm.Progress(string.Empty, 100, "This clipping has finished.");
     }
   }
 

@@ -9,6 +9,7 @@
 namespace TestApplication
 {
   using System;
+  using System.Reflection;
   using System.Windows.Forms;
 
   using MapWinGIS;
@@ -85,6 +86,11 @@ namespace TestApplication
       Fileformats.Map = axMap1;
       Tests.MyAxMap = axMap1;
       GeosTests.MyAxMap = axMap1;
+
+      // Write version number:
+      this.Progress(string.Empty, 100, string.Format("MapWinGIS version: {0} Test application version: {1}", this.axMap1.VersionNumber, Assembly.GetEntryAssembly().GetName().Version));
+      
+      // TODO: Also write GDAL version
     }
 
     /// <summary>Form closing event</summary>
@@ -143,19 +149,6 @@ namespace TestApplication
       // Don't know how to handle the dropped file:
       this.Error(string.Empty, "Don't know how to handle the dropped file");
       return;
-    }
-
-    /// <summary>Mouse click event</summary>
-    /// <param name="sender">
-    /// The sender.
-    /// </param>
-    /// <param name="e">
-    /// The e.
-    /// </param>
-    private void ProgressboxMouseClick(object sender, MouseEventArgs e)
-    {
-      // Select all:
-      this.Progressbox.SelectAll();
     }
 
     #region Select file click event
@@ -303,19 +296,9 @@ namespace TestApplication
     /// </param>
     private void SelectClipShapefileInputClick(object sender, EventArgs e)
     {
-      Tests.SelectShapefile(this.ClipShapefileInput, "Select shapefile to clip");
-    }
+      // Select text file with on every line the location of a shapefile
+      Tests.SelectTextfile(this.ClipShapefileInput, "Select text file with on two lines the locations of the shapefile");
 
-    /// <summary>Click event</summary>
-    /// <param name="sender">
-    /// The sender.
-    /// </param>
-    /// <param name="e">
-    /// The e.
-    /// </param>
-    private void SelectClipShapefileOverlayClick(object sender, EventArgs e)
-    {
-      Tests.SelectShapefile(this.ClipShapefileOverlay, "Select overlay shapefile");
     }
 
     /// <summary>Click event</summary>
@@ -476,7 +459,7 @@ namespace TestApplication
     /// </param>
     private void RunClipShapefileTestClick(object sender, EventArgs e)
     {
-      GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this.ClipShapefileOverlay.Text, this);
+      GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this);
     }
 
     /// <summary>Click event</summary>

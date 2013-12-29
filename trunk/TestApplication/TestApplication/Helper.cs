@@ -116,6 +116,7 @@ namespace TestApplication
     /// <param name="sf">
     /// The shapefile
     /// </param>
+    /// <param name="fieldIndex">The index to color from</param>
     /// <param name="mapColorFrom">
     /// The color from.
     /// </param>
@@ -125,7 +126,7 @@ namespace TestApplication
     /// <param name="forceUnique">
     /// Force unique.
     /// </param>
-    internal static void ColorShapes(ref Shapefile sf, tkMapColor mapColorFrom, tkMapColor mapColorTo, bool forceUnique)
+    internal static void ColorShapes(ref Shapefile sf, int fieldIndex, tkMapColor mapColorFrom, tkMapColor mapColorTo, bool forceUnique)
     {
       // Create visualization categories 
       var utils = new Utils();
@@ -146,11 +147,11 @@ namespace TestApplication
 
       if (!forceUnique && sf.NumShapes > 10)
       {
-        sf.Categories.Generate(0, tkClassificationType.ctNaturalBreaks, 9);
+        sf.Categories.Generate(fieldIndex, tkClassificationType.ctNaturalBreaks, 9);
       }
       else
       {
-        sf.Categories.Generate(0, tkClassificationType.ctUniqueValues, 0);
+        sf.Categories.Generate(fieldIndex, tkClassificationType.ctUniqueValues, 0);
       }
 
       sf.Categories.ApplyExpressions();

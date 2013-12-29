@@ -601,13 +601,13 @@ namespace TestApplication
           return;
         }
 
-        /*
         // Save result:
-        aggregatedSf.SaveAs(shapefilename.Replace(".shp", "-aggregate.shp"), theForm);
-        theForm.Progress(string.Empty, 0, "The resulting file has been saved as " + aggregatedSf.Filename);
-        */
+        var newFilename = shapefilename.Replace(".shp", "-aggregate.shp");
+        Helper.DeleteShapefile(newFilename);
+        aggregatedSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
-        Helper.ColorShapes(ref aggregatedSf, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
+        Helper.ColorShapes(ref aggregatedSf, fieldIndex, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
