@@ -1,0 +1,18 @@
+# A list of shapefiles that can be converted to wkt.
+# These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/MapWindow-Projects/
+
+# point
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+
+# polygon:
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+
+# polyline
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+
+# Polygon M
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\PolygonM.shp
+
+# Multi points:
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\MultiPoints.shp
+

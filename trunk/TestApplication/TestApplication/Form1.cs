@@ -272,7 +272,7 @@ namespace TestApplication
     /// </param>
     private void SelectAggregateShapefileClick(object sender, EventArgs e)
     {
-      Tests.SelectShapefile(this.AggregateShapefileInput, "Select shapefile to aggregate");
+      Tests.SelectTextfile(this.AggregateShapefileInput, "Select text file with on every line the location of a shapefile and every second line the field index");
     }
 
     /// <summary>Click event</summary>
@@ -297,8 +297,7 @@ namespace TestApplication
     private void SelectClipShapefileInputClick(object sender, EventArgs e)
     {
       // Select text file with on every line the location of a shapefile
-      Tests.SelectTextfile(this.ClipShapefileInput, "Select text file with on two lines the locations of the shapefile");
-
+      Tests.SelectTextfile(this.ClipShapefileInput, "Select text file with on two lines the locations of the shapefiles");
     }
 
     /// <summary>Click event</summary>
@@ -323,6 +322,18 @@ namespace TestApplication
     private void SelectIntersectionShapefileSecondInputClick(object sender, EventArgs e)
     {
       Tests.SelectShapefile(this.IntersectionShapefileSecondInput, "Select second shapefile");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectWktShapefileInputClick(object sender, EventArgs e)
+    {
+      Tests.SelectTextfile(this.WktShapefileInput, "Select text file with on each line the location of the shapefiles");
     }
 
     #endregion
@@ -435,7 +446,7 @@ namespace TestApplication
     /// </param>
     private void RunAggregateShapefileTestClick(object sender, EventArgs e)
     {
-      Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, (int)Math.Floor(this.AggregateFieldindex.Value), this);
+      Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, this);
     }
 
     /// <summary>Click event</summary>
@@ -472,6 +483,11 @@ namespace TestApplication
     private void RunIntersectionShapefileTestClick(object sender, EventArgs e)
     {
       GeosTests.RunIntersectionShapefileTest(this.IntersectionShapefileFirstInput.Text, this.IntersectionShapefileSecondInput.Text, this);
+    }
+
+    private void RunWktShapefileTest_Click(object sender, EventArgs e)
+    {
+      GeosTests.RunWktShapefileTest(this.WktShapefileInput.Text, this);
     }
   }
 }

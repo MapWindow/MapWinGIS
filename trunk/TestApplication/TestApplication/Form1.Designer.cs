@@ -34,6 +34,11 @@
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox18 = new System.Windows.Forms.GroupBox();
+      this.RunWktShapefileTest = new System.Windows.Forms.Button();
+      this.SelectWktShapefileInput = new System.Windows.Forms.Button();
+      this.WktShapefileInput = new System.Windows.Forms.TextBox();
+      this.label12 = new System.Windows.Forms.Label();
       this.groupBox17 = new System.Windows.Forms.GroupBox();
       this.SelectIntersectionShapefileSecondInput = new System.Windows.Forms.Button();
       this.IntersectionShapefileSecondInput = new System.Windows.Forms.TextBox();
@@ -72,8 +77,6 @@
       this.label8 = new System.Windows.Forms.Label();
       this.groupBox5 = new System.Windows.Forms.GroupBox();
       this.groupBox14 = new System.Windows.Forms.GroupBox();
-      this.label12 = new System.Windows.Forms.Label();
-      this.AggregateFieldindex = new System.Windows.Forms.NumericUpDown();
       this.RunAggregateShapefileTest = new System.Windows.Forms.Button();
       this.SelectAggregateShapefile = new System.Windows.Forms.Button();
       this.AggregateShapefileInput = new System.Windows.Forms.TextBox();
@@ -108,9 +111,9 @@
       this.ShapefileInputfile = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
+      this.axMap1 = new AxMapWinGIS.AxMap();
       this.Progressbox = new System.Windows.Forms.TextBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-      this.axMap1 = new AxMapWinGIS.AxMap();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
@@ -118,6 +121,7 @@
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
       this.groupBox10.SuspendLayout();
+      this.groupBox18.SuspendLayout();
       this.groupBox17.SuspendLayout();
       this.groupBox16.SuspendLayout();
       this.groupBox15.SuspendLayout();
@@ -128,7 +132,6 @@
       this.groupBox9.SuspendLayout();
       this.groupBox5.SuspendLayout();
       this.groupBox14.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.AggregateFieldindex)).BeginInit();
       this.groupBox7.SuspendLayout();
       this.groupBox6.SuspendLayout();
       this.groupBox1.SuspendLayout();
@@ -193,17 +196,71 @@
       // groupBox10
       // 
       this.groupBox10.BackColor = System.Drawing.Color.LightSteelBlue;
+      this.groupBox10.Controls.Add(this.groupBox18);
       this.groupBox10.Controls.Add(this.groupBox17);
       this.groupBox10.Controls.Add(this.groupBox16);
       this.groupBox10.Controls.Add(this.groupBox15);
       this.groupBox10.Controls.Add(this.groupBox13);
       this.groupBox10.Controls.Add(this.groupBox12);
-      this.groupBox10.Location = new System.Drawing.Point(3, 842);
+      this.groupBox10.Location = new System.Drawing.Point(3, 798);
       this.groupBox10.Name = "groupBox10";
       this.groupBox10.Size = new System.Drawing.Size(205, 683);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox18
+      // 
+      this.groupBox18.Controls.Add(this.RunWktShapefileTest);
+      this.groupBox18.Controls.Add(this.SelectWktShapefileInput);
+      this.groupBox18.Controls.Add(this.WktShapefileInput);
+      this.groupBox18.Controls.Add(this.label12);
+      this.groupBox18.Location = new System.Drawing.Point(6, 556);
+      this.groupBox18.Name = "groupBox18";
+      this.groupBox18.Size = new System.Drawing.Size(195, 89);
+      this.groupBox18.TabIndex = 8;
+      this.groupBox18.TabStop = false;
+      this.groupBox18.Text = "WKT shapefile";
+      // 
+      // RunWktShapefileTest
+      // 
+      this.RunWktShapefileTest.Location = new System.Drawing.Point(9, 58);
+      this.RunWktShapefileTest.Name = "RunWktShapefileTest";
+      this.RunWktShapefileTest.Size = new System.Drawing.Size(180, 23);
+      this.RunWktShapefileTest.TabIndex = 9;
+      this.RunWktShapefileTest.Text = "Run test";
+      this.RunWktShapefileTest.UseVisualStyleBackColor = true;
+      this.RunWktShapefileTest.Click += new System.EventHandler(this.RunWktShapefileTest_Click);
+      // 
+      // SelectWktShapefileInput
+      // 
+      this.SelectWktShapefileInput.Location = new System.Drawing.Point(162, 32);
+      this.SelectWktShapefileInput.Name = "SelectWktShapefileInput";
+      this.SelectWktShapefileInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectWktShapefileInput.TabIndex = 8;
+      this.SelectWktShapefileInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectWktShapefileInput, "Select line or polygon shapefile to simplify");
+      this.SelectWktShapefileInput.UseVisualStyleBackColor = true;
+      this.SelectWktShapefileInput.Click += new System.EventHandler(this.SelectWktShapefileInputClick);
+      // 
+      // WktShapefileInput
+      // 
+      this.WktShapefileInput.AcceptsReturn = true;
+      this.WktShapefileInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "WktShapefile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.WktShapefileInput.Location = new System.Drawing.Point(9, 32);
+      this.WktShapefileInput.Name = "WktShapefileInput";
+      this.WktShapefileInput.Size = new System.Drawing.Size(147, 20);
+      this.WktShapefileInput.TabIndex = 7;
+      this.WktShapefileInput.Text = global::TestApplication.Properties.Settings.Default.WktShapefile;
+      // 
+      // label12
+      // 
+      this.label12.AutoSize = true;
+      this.label12.Location = new System.Drawing.Point(6, 16);
+      this.label12.Name = "label12";
+      this.label12.Size = new System.Drawing.Size(179, 13);
+      this.label12.TabIndex = 6;
+      this.label12.Text = "Select a txt file with the files to open:";
       // 
       // groupBox17
       // 
@@ -528,7 +585,7 @@
       // 
       this.groupBox8.BackColor = System.Drawing.Color.Cornsilk;
       this.groupBox8.Controls.Add(this.groupBox9);
-      this.groupBox8.Location = new System.Drawing.Point(3, 718);
+      this.groupBox8.Location = new System.Drawing.Point(3, 684);
       this.groupBox8.Name = "groupBox8";
       this.groupBox8.Size = new System.Drawing.Size(205, 118);
       this.groupBox8.TabIndex = 3;
@@ -596,48 +653,27 @@
       this.groupBox5.Controls.Add(this.groupBox6);
       this.groupBox5.Location = new System.Drawing.Point(3, 340);
       this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(205, 372);
+      this.groupBox5.Size = new System.Drawing.Size(205, 346);
       this.groupBox5.TabIndex = 2;
       this.groupBox5.TabStop = false;
       this.groupBox5.Text = "Spatial operations";
       // 
       // groupBox14
       // 
-      this.groupBox14.Controls.Add(this.label12);
-      this.groupBox14.Controls.Add(this.AggregateFieldindex);
       this.groupBox14.Controls.Add(this.RunAggregateShapefileTest);
       this.groupBox14.Controls.Add(this.SelectAggregateShapefile);
       this.groupBox14.Controls.Add(this.AggregateShapefileInput);
       this.groupBox14.Controls.Add(this.label11);
       this.groupBox14.Location = new System.Drawing.Point(6, 249);
       this.groupBox14.Name = "groupBox14";
-      this.groupBox14.Size = new System.Drawing.Size(195, 114);
+      this.groupBox14.Size = new System.Drawing.Size(195, 89);
       this.groupBox14.TabIndex = 6;
       this.groupBox14.TabStop = false;
       this.groupBox14.Text = "Aggregate shapefile";
       // 
-      // label12
-      // 
-      this.label12.AutoSize = true;
-      this.label12.Location = new System.Drawing.Point(6, 60);
-      this.label12.Name = "label12";
-      this.label12.Size = new System.Drawing.Size(60, 13);
-      this.label12.TabIndex = 11;
-      this.label12.Text = "Field index:";
-      // 
-      // AggregateFieldindex
-      // 
-      this.AggregateFieldindex.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::TestApplication.Properties.Settings.Default, "AggregateFieldindex", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.AggregateFieldindex.Location = new System.Drawing.Point(72, 58);
-      this.AggregateFieldindex.Name = "AggregateFieldindex";
-      this.AggregateFieldindex.Size = new System.Drawing.Size(59, 20);
-      this.AggregateFieldindex.TabIndex = 10;
-      this.toolTip1.SetToolTip(this.AggregateFieldindex, "What is the field index to aggregate on? Zero-based");
-      this.AggregateFieldindex.Value = global::TestApplication.Properties.Settings.Default.AggregateFieldindex;
-      // 
       // RunAggregateShapefileTest
       // 
-      this.RunAggregateShapefileTest.Location = new System.Drawing.Point(9, 84);
+      this.RunAggregateShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunAggregateShapefileTest.Name = "RunAggregateShapefileTest";
       this.RunAggregateShapefileTest.Size = new System.Drawing.Size(180, 23);
       this.RunAggregateShapefileTest.TabIndex = 9;
@@ -671,9 +707,9 @@
       this.label11.AutoSize = true;
       this.label11.Location = new System.Drawing.Point(6, 16);
       this.label11.Name = "label11";
-      this.label11.Size = new System.Drawing.Size(103, 13);
+      this.label11.Size = new System.Drawing.Size(179, 13);
       this.label11.TabIndex = 6;
-      this.label11.Text = "Select the shapefile:";
+      this.label11.Text = "Select a txt file with the files to open:";
       // 
       // groupBox7
       // 
@@ -992,6 +1028,17 @@
       this.label1.TabIndex = 0;
       this.label1.Text = "Tests";
       // 
+      // axMap1
+      // 
+      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.axMap1.Enabled = true;
+      this.axMap1.Location = new System.Drawing.Point(0, 0);
+      this.axMap1.Name = "axMap1";
+      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
+      this.axMap1.Size = new System.Drawing.Size(433, 615);
+      this.axMap1.TabIndex = 0;
+      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
+      // 
       // Progressbox
       // 
       this.Progressbox.BackColor = System.Drawing.Color.White;
@@ -1003,17 +1050,6 @@
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.Progressbox.Size = new System.Drawing.Size(667, 134);
       this.Progressbox.TabIndex = 0;
-      // 
-      // axMap1
-      // 
-      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.axMap1.Enabled = true;
-      this.axMap1.Location = new System.Drawing.Point(0, 0);
-      this.axMap1.Name = "axMap1";
-      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-      this.axMap1.Size = new System.Drawing.Size(433, 615);
-      this.axMap1.TabIndex = 0;
-      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
       // 
       // Form1
       // 
@@ -1037,6 +1073,8 @@
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
       this.groupBox10.ResumeLayout(false);
+      this.groupBox18.ResumeLayout(false);
+      this.groupBox18.PerformLayout();
       this.groupBox17.ResumeLayout(false);
       this.groupBox17.PerformLayout();
       this.groupBox16.ResumeLayout(false);
@@ -1054,7 +1092,6 @@
       this.groupBox5.ResumeLayout(false);
       this.groupBox14.ResumeLayout(false);
       this.groupBox14.PerformLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.AggregateFieldindex)).EndInit();
       this.groupBox7.ResumeLayout(false);
       this.groupBox7.PerformLayout();
       this.groupBox6.ResumeLayout(false);
@@ -1133,8 +1170,6 @@
     private System.Windows.Forms.TextBox DissolveShapefileInput;
     private System.Windows.Forms.Label label13;
     private System.Windows.Forms.GroupBox groupBox14;
-    private System.Windows.Forms.Label label12;
-    private System.Windows.Forms.NumericUpDown AggregateFieldindex;
     private System.Windows.Forms.Button RunAggregateShapefileTest;
     private System.Windows.Forms.Button SelectAggregateShapefile;
     private System.Windows.Forms.TextBox AggregateShapefileInput;
@@ -1154,6 +1189,11 @@
     private System.Windows.Forms.Button SelectIntersectionShapefileFirstInput;
     private System.Windows.Forms.TextBox IntersectionShapefileFirstInput;
     private System.Windows.Forms.Label label18;
+    private System.Windows.Forms.GroupBox groupBox18;
+    private System.Windows.Forms.Button RunWktShapefileTest;
+    private System.Windows.Forms.Button SelectWktShapefileInput;
+    private System.Windows.Forms.TextBox WktShapefileInput;
+    private System.Windows.Forms.Label label12;
   }
 }
 

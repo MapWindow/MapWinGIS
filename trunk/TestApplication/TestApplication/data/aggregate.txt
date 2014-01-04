@@ -1,0 +1,14 @@
+# Select text file with on every line the location of a shapefile and every second line the field index
+
+# counties (polygons) on statename
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+1
+
+# roads (lines) on route
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+6
+
+# cities (points) on state
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+3
+

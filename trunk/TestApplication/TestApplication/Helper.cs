@@ -186,5 +186,140 @@ namespace TestApplication
         f.Delete();
       }
     }
+
+    /// <summary>
+    /// Read the text file with the file loctions
+    /// </summary>
+    /// <param name="textfileLocation">The location of the text file</param>
+    /// <returns>The relevant lines in a collection</returns>
+    internal static List<string> ReadTextfile(string textfileLocation)
+    {
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      // Open file, read line by line, skip lines starting with #
+      var lines = File.ReadAllLines(textfileLocation);
+
+      return (from t in lines where !t.StartsWith("#") && t.Length != 0 select t.Trim()).ToList();
+    }
+
+    internal static bool AreShapesDifferent(Shape shp, Shape shp2, ICallback theForm)
+    {
+      theForm.Progress(string.Empty, 100, "Checking the difference between the two shapes");
+
+      if (!shp.IsValid)
+      {
+        theForm.Error(string.Empty, "The first shape is invalid: " + shp.IsValidReason);
+        return false;
+      }
+
+      if (!shp2.IsValid)
+      {
+        theForm.Error(string.Empty, "The second shape is invalid: " + shp2.IsValidReason);
+        return false;
+      }
+
+      if (!shp.Equals(shp2))
+      {
+        theForm.Error(string.Empty, "Equals returns false");
+        return false;
+      }
+
+      if (shp.ShapeType != shp2.ShapeType)
+      {
+        theForm.Error(
+          string.Empty,
+          string.Format(
+            "The first shape is a {0} and the second shape is a {1}", shp.ShapeType, shp2.ShapeType));
+        return false;
+      }
+
+      if (shp.numPoints != shp2.numPoints)
+      {
+        theForm.Error(
+          string.Empty,
+          string.Format(
+            "The first shape has {0} points and the second shape has {1} points", shp.numPoints, shp2.NumParts));
+        return false;
+      }
+
+      if (shp.NumParts != shp2.NumParts)
+      {
+        theForm.Error(
+          string.Empty,
+          string.Format(
+            "The first shape has {0} points and the second shape has {1} points", shp.NumParts, shp2.NumParts));
+        return false;
+      }
+
+      if (shp.ShapeType == ShpfileType.SHP_POLYGON 
+       || shp.ShapeType == ShpfileType.SHP_POLYGONM 
+       || shp.ShapeType == ShpfileType.SHP_POLYGONZ)
+      {
+        // Check area:
+        if (shp.Area != shp2.Area)
+        {
+          theForm.Error(
+            string.Empty,
+            string.Format(
+              "The first shape has an area of {0} and the second shape has an area of {1}", shp.Area, shp2.Area));
+          return false;
+        }
+
+        // Check perimeter:
+        if (shp.Perimeter != shp2.Perimeter)
+        {
+          theForm.Error(
+            string.Empty,
+            string.Format(
+              "The first shape has a perimeter of {0} and the second shape has a perimeter of {1}", shp.Perimeter, shp2.Perimeter));
+          return false;
+        }
+      }
+
+      if (shp.ShapeType == ShpfileType.SHP_POLYLINE
+       || shp.ShapeType == ShpfileType.SHP_POLYLINEM
+       || shp.ShapeType == ShpfileType.SHP_POLYLINEZ)
+      {
+        // Check length:
+        if (shp.Length != shp2.Length)
+        {
+          theForm.Error(
+            string.Empty,
+            string.Format(
+              "The first shape has a length of {0} and the second shape has a length of {1}", shp.Length, shp2.Length));
+          return false;
+        }
+      }
+
+      if (shp.SerializeToString() != shp2.SerializeToString())
+      {
+        theForm.Error(string.Empty, "The SerializeToString methods return different values:");
+        theForm.Error(string.Empty, shp.SerializeToString());
+        theForm.Error(string.Empty, shp2.SerializeToString());
+        return false;
+      }
+
+      if (shp.Extents.xMax != shp2.Extents.xMax
+       || shp.Extents.yMax != shp2.Extents.yMax
+       || shp.Extents.zMax != shp2.Extents.zMax
+       || shp.Extents.mMax != shp2.Extents.mMax)
+      {
+        theForm.Error(string.Empty, "The max values of X, Y, Z or M return different values");
+      }
+
+      if (shp.Extents.xMin != shp2.Extents.xMin
+       || shp.Extents.yMin != shp2.Extents.yMin
+       || shp.Extents.zMin != shp2.Extents.zMin
+       || shp.Extents.mMin != shp2.Extents.mMin)
+      {
+        theForm.Error(string.Empty, "The min values of X, Y, Z or M return different values");
+      }
+      
+      return true;
+    }
   }
 }

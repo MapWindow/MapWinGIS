@@ -238,5 +238,17 @@ namespace TestApplication.Properties {
                 this["IntersectionShapefileSecondInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string WktShapefile {
+            get {
+                return ((string)(this["WktShapefile"]));
+            }
+            set {
+                this["WktShapefile"] = value;
+            }
+        }
     }
 }

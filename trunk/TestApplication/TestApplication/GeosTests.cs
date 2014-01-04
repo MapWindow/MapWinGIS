@@ -10,9 +10,6 @@ namespace TestApplication
 {
   using System;
   using System.IO;
-  using System.Linq;
-  using System.Threading;
-  using System.Windows.Forms;
 
   using MapWinGIS;
 
@@ -242,8 +239,7 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The Dissolve shapefile test has finished");
     }
 
-    /// <summary>Run the clip shapefile test
-    /// </summary>
+    /// <summary>Run the clip shapefile test</summary>
     /// <param name="textfileLocation">
     /// The textfile location.
     /// </param>
@@ -252,42 +248,58 @@ namespace TestApplication
     /// </param>
     internal static void RunClipShapefileTest(string textfileLocation, Form1 theForm)
     {
-      // Open text file:
-      if (!File.Exists(textfileLocation))
-      {
-        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
-      }
-
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Clip shapefile test has started.", Environment.NewLine));
 
-      // Load textfile, each first line is shapefile, each second line is overlay:
-      // Open file, read line by line, skip lines starting with #
-      var lines = File.ReadAllLines(textfileLocation);
-      for (var i = 0; i < lines.Length; i = i + 2)
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
       {
-        var firstFile = lines[i];
-        if (firstFile.StartsWith("#") || firstFile.Length == 0)
+        if (i + 1 > lines.Count)
         {
-          continue;
+          theForm.Error(string.Empty, "Input file is incorrect.");
+          break;
         }
 
-        var secondFile = lines[i + 1];
-        
-        // check if this line starts with a #
-        while (secondFile.StartsWith("#") || secondFile.Length == 0)
-        {
-          // Move to next line:
-          i++;
-          secondFile = lines[i + 1];
-        }
-
-        ClipShapefile(firstFile, secondFile, theForm);
+        ClipShapefile(lines[i], lines[i + 1], theForm);
       }
 
       theForm.Progress(string.Empty, 100, "The clipping shapefile test has finished.");
+    }
+
+    /// <summary>Run the WKT - shapefile conversion test</summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static void RunWktShapefileTest(string textfileLocation, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The WKT - shapefile conversion test has started.", Environment.NewLine));
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      foreach (var line in lines)
+      {
+        var shapeIndex = 0; // if needed change this method to read this value from the input text file
+        var wkt = ConvertToWkt(line, shapeIndex, theForm);
+        if (wkt != null)
+        {
+          theForm.Progress(string.Empty, 100, wkt);
+          ConvertFromWkt(line, shapeIndex, wkt, theForm);
+        }
+      }
+
+      theForm.Progress(string.Empty, 100, "The WKT - shapefile conversion test has finished.");
     }
 
     /// <summary>Run the intersect shapefile test</summary>
@@ -439,7 +451,7 @@ namespace TestApplication
         {
           // Save result:
           var newFilename = shapefilename.Replace(
-            ".shp", "-" + Path.GetFileName(overlayFilename).Replace(".shp", "-clipped.shp"));
+            ".shp", string.Format("-{0}", Path.GetFileName(overlayFilename).Replace(".shp", "-clipped.shp")));
           Helper.DeleteShapefile(newFilename);
           clippedSf.SaveAs(newFilename, theForm);
           theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
@@ -456,6 +468,85 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "This clipping has finished.");
+    }
+
+    /// <summary>Convert the shape to WKT</summary>
+    /// <param name="shapefilename">
+    /// The shapefilename.
+    /// </param>
+    /// <param name="shapeIndex">
+    /// The shape index.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>The WKT of the shape</returns>
+    private static string ConvertToWkt(string shapefilename, int shapeIndex, Form1 theForm)
+    {
+      try
+      {
+        // Check inputs:
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
+        {
+          return null;
+        }
+
+        // Open the sf:
+        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
+        if (sf == null)
+        {
+          theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
+          return null; 
+        }
+
+        // convert to WKT:
+        string wkt;
+        sf.get_Shape(shapeIndex).ExportToWKT(out wkt);
+        if (wkt == null || wkt.Trim() == string.Empty)
+        {
+          theForm.Error(string.Empty, "ExportToWKT was unsuccessful");
+          return null; 
+        }
+
+        return wkt;
+      }
+      catch (Exception exception)
+      {
+        theForm.Error(string.Empty, "Exception: " + exception.Message);
+      }
+
+      return null; 
+    }
+
+    /// <summary>Convert WKT to shape and test result</summary>
+    /// <param name="shapefilename">
+    /// The shapefilename.
+    /// </param>
+    /// <param name="shapeIndex">
+    /// The shape index.
+    /// </param>
+    /// <param name="wkt">
+    /// The wkt.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    private static void ConvertFromWkt(string shapefilename, int shapeIndex, string wkt, Form1 theForm)
+    {
+      // Convert the WKT
+      var shapeWkt = new Shape();
+      if (!shapeWkt.ImportFromWKT(wkt))
+      {
+        theForm.Error(string.Empty, "ImportFromWKT was unsuccessful: " + shapeWkt.get_ErrorMsg(shapeWkt.LastErrorCode));
+        return;
+      }
+
+      // Check with the original shape if it is still the same:
+      var sf = Fileformats.OpenShapefile(shapefilename, theForm);
+      if (Helper.AreShapesDifferent(sf.get_Shape(shapeIndex), shapeWkt, theForm))
+      {
+        theForm.Progress(string.Empty, 100, "The two shapes are identical.");
+      }
     }
   }
 

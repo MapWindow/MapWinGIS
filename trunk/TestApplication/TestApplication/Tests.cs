@@ -10,7 +10,6 @@ namespace TestApplication
 {
   using System;
   using System.IO;
-  using System.Linq;
   using System.Threading;
   using System.Windows.Forms;
 
@@ -75,34 +74,18 @@ namespace TestApplication
     /// </exception>
     internal static void RunShapefileTest(string textfileLocation, Form1 theForm)
     {
-      // Open text file:
-      if (!File.Exists(textfileLocation))
-      {
-        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
-      }
-
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The shapefile open tests have started.", Environment.NewLine));
 
-      // Open file, read line by line, skip lines starting with #
-      var lines = File.ReadAllLines(textfileLocation);
-      foreach (var line in lines.Where(line => !line.StartsWith("#") && line.Length != 0))
-      {
-        try
-        {
-          // Open shapefile:
-          Fileformats.OpenShapefileAsLayer(line, theForm, true);
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
 
-          // Wait a second to show something:
-          Application.DoEvents();
-          Thread.Sleep(1000);
-        }
-        catch (System.Runtime.InteropServices.SEHException sehException)
-        {
-          theForm.Error(string.Empty, "SEHException in RunShapefileTest: " + sehException.Message);
-        }
+      foreach (var line in lines)
+      {
+        // Open shapefile:
+        Fileformats.OpenShapefileAsLayer(line, theForm, true);
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
@@ -133,23 +116,12 @@ namespace TestApplication
         0,
         string.Format("{0}-----------------------{0}The image open tests have started.", Environment.NewLine));
 
-      // Open file, read line by line, skip lines starting with #
-      var lines = File.ReadAllLines(textfileLocation);
-      foreach (var line in lines.Where(line => !line.StartsWith("#") && line.Length != 0))
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
       {
-        try
-        {
-          // Open image:
-          Fileformats.OpenImageAsLayer(line, theForm, true);
-
-          // Wait a second to show something:
-          Application.DoEvents();
-          Thread.Sleep(1000);
-        }
-        catch (System.Runtime.InteropServices.SEHException sehException)
-        {
-          theForm.Error(string.Empty, "SEHException in RunImagefileTest: " + sehException.Message);
-        }
+        // Open image:
+        Fileformats.OpenImageAsLayer(line, theForm, true);
       }
 
       theForm.Progress(string.Empty, 100, "The image open tests have finished.");
@@ -180,23 +152,12 @@ namespace TestApplication
         0,
         string.Format("{0}-----------------------{0}The grid open tests have started.", Environment.NewLine));
 
-      // Open file, read line by line, skip lines starting with #
-      var lines = File.ReadAllLines(textfileLocation);
-      foreach (var line in lines.Where(line => !line.StartsWith("#") && line.Length != 0))
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
       {
-        try
-        {
-          // Open image:
-          Fileformats.OpenGridAsLayer(line, theForm, true);
-
-          // Wait a second to show something:
-          Application.DoEvents();
-          Thread.Sleep(1000);
-        }
-        catch (System.Runtime.InteropServices.SEHException sehException)
-        {
-          theForm.Error(string.Empty, "SEHException in RunGridfileTest: " + sehException.Message);
-        }
+        // Open image:
+        Fileformats.OpenGridAsLayer(line, theForm, true);
       }
 
       theForm.Progress(string.Empty, 100, "The grid open tests have finished.");
@@ -211,7 +172,7 @@ namespace TestApplication
     /// </param>
     internal static void SelectGridfile(TextBox textBox, string title)
     {
-      var grd = new MapWinGIS.Grid();
+      var grd = new Grid();
 
       using (var ofd = new OpenFileDialog
       {
@@ -395,52 +356,55 @@ namespace TestApplication
         }
 
         var folder = Path.GetDirectoryName(shapefilename);
-        var resultGridFilename = Path.Combine(folder, "ShapefileToGridTest.asc");
-        if (File.Exists(resultGridFilename))
+        if (folder != null)
         {
-          File.Delete(resultGridFilename);
-        }
-
-        // Setup grid header:
-        const int NumCols = 100;
-        const int NumRows = 100;
-        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
-        if (sf == null)
-        {
-          return;
-        }
-
-        double minX, minY, minZ, maxX, maxY, maxZ;
-        sf.Extents.GetBounds(out minX, out minY, out minZ, out maxX, out maxY, out maxZ);
-        var gridHeader = new GridHeader
-        {
-          NodataValue = -1,
-          NumberCols = NumCols,
-          NumberRows = NumRows,
-          Projection = sf.Projection,
-          Notes = "Created using ShapefileToGrid",
-          XllCenter = minX,
-          YllCenter = minY,
-          dX = (maxX - minX) / NumCols,
-          dY = (maxY - minY) / NumRows
-        };
-
-        var utils = new Utils { GlobalCallback = theForm };
-        var resultGrid = utils.ShapefileToGrid(sf, false, gridHeader, 30, true, 1);
-        if (resultGrid == null)
-        {
-          theForm.Error(string.Empty, "Error in ShapefileToGrid: " + utils.get_ErrorMsg(utils.LastErrorCode));
-        }
-        else
-        {
-          if (!resultGrid.Save(resultGridFilename, GridFileType.UseExtension, null))
+          var resultGridFilename = Path.Combine(folder, "ShapefileToGridTest.asc");
+          if (File.Exists(resultGridFilename))
           {
-            theForm.Error(string.Empty, "Error in Grid.Save(): " + resultGrid.get_ErrorMsg(resultGrid.LastErrorCode));
+            File.Delete(resultGridFilename);
+          }
+
+          // Setup grid header:
+          const int NumCols = 100;
+          const int NumRows = 100;
+          var sf = Fileformats.OpenShapefile(shapefilename, theForm);
+          if (sf == null)
+          {
+            return;
+          }
+
+          double minX, minY, minZ, maxX, maxY, maxZ;
+          sf.Extents.GetBounds(out minX, out minY, out minZ, out maxX, out maxY, out maxZ);
+          var gridHeader = new GridHeader
+            {
+              NodataValue = -1,
+              NumberCols = NumCols,
+              NumberRows = NumRows,
+              Projection = sf.Projection,
+              Notes = "Created using ShapefileToGrid",
+              XllCenter = minX,
+              YllCenter = minY,
+              dX = (maxX - minX) / NumCols,
+              dY = (maxY - minY) / NumRows
+            };
+
+          var utils = new Utils { GlobalCallback = theForm };
+          var resultGrid = utils.ShapefileToGrid(sf, false, gridHeader, 30, true, 1);
+          if (resultGrid == null)
+          {
+            theForm.Error(string.Empty, "Error in ShapefileToGrid: " + utils.get_ErrorMsg(utils.LastErrorCode));
           }
           else
           {
-            Fileformats.OpenGridAsLayer(resultGridFilename, theForm, true);
-            MyAxMap.AddLayer(sf, true);
+            if (!resultGrid.Save(resultGridFilename, GridFileType.UseExtension, null))
+            {
+              theForm.Error(string.Empty, "Error in Grid.Save(): " + resultGrid.get_ErrorMsg(resultGrid.LastErrorCode));
+            }
+            else
+            {
+              Fileformats.OpenGridAsLayer(resultGridFilename, theForm, true);
+              MyAxMap.AddLayer(sf, true);
+            }
           }
         }
       }
@@ -484,8 +448,6 @@ namespace TestApplication
         // Get target resolution. The values must be expressed in georeferenced units (-tr):
         double minX, minY, minZ, maxX, maxY, maxZ;
         sf.Extents.GetBounds(out minX, out minY, out minZ, out maxX, out maxY, out maxZ);
-        var resX = maxX - minX;
-        var resY = maxY - minY;
 
         const string FieldName = "MWShapeID";
         if (sf.Table.get_FieldIndexByName(FieldName) == -1)
@@ -521,31 +483,35 @@ namespace TestApplication
         var utils = new Utils { GlobalCallback = theForm };
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
-        var outputFile = Path.Combine(folder, "GDALRasterizeTest.tif");
-        if (File.Exists(outputFile))
+        if (folder != null)
         {
-          File.Delete(outputFile);
-        }
-
-        var options = string.Format(
-          "-a {0} -l {1} -of GTiff -a_nodata -999 -init -999 -ts 800 800",
-          FieldName,
-          Path.GetFileNameWithoutExtension(shapefilename));
-        System.Diagnostics.Debug.WriteLine(options);
-        if (!utils.GDALRasterize(shapefilename, outputFile, options, theForm))
-        {
-          var msg = " in GDALRasterize: " + utils.get_ErrorMsg(utils.LastErrorCode);
-          if (globalSettings.GdalLastErrorMsg != string.Empty)
+          var outputFile = Path.Combine(folder, "GDALRasterizeTest.tif");
+          if (File.Exists(outputFile))
           {
-            msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
+            File.Delete(outputFile);
           }
 
-          theForm.Error(string.Empty, msg);
-          return;
+          var options = string.Format(
+            "-a {0} -l {1} -of GTiff -a_nodata -999 -init -999 -ts 800 800",
+            FieldName,
+            Path.GetFileNameWithoutExtension(shapefilename));
+          System.Diagnostics.Debug.WriteLine(options);
+          if (!utils.GDALRasterize(shapefilename, outputFile, options, theForm))
+          {
+            var msg = " in GDALRasterize: " + utils.get_ErrorMsg(utils.LastErrorCode);
+            if (globalSettings.GdalLastErrorMsg != string.Empty)
+            {
+              msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
+            }
+
+            theForm.Error(string.Empty, msg);
+            return;
+          }
+
+          // Open the files:
+          Fileformats.OpenImageAsLayer(outputFile, theForm, true);
         }
 
-        // Open the files:
-        Fileformats.OpenImageAsLayer(outputFile, theForm, true);
         Fileformats.OpenShapefileAsLayer(shapefilename, theForm, false);
       }
       catch (Exception exception)
@@ -557,6 +523,48 @@ namespace TestApplication
     }
 
     /// <summary>Run Aggregate shapefile test</summary>
+    /// <param name="textfileLocation">
+    /// The location of the shapefile.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static void RunAggregateShapefileTest(string textfileLocation, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The Aggregate shapefile test has started.", Environment.NewLine));
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
+      {
+        if (i + 1 > lines.Count)
+        {
+          theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
+          break;
+        }
+
+        int fieldIndex;
+        if (!int.TryParse(lines[i + 1], out fieldIndex))
+        {
+          theForm.Error(string.Empty, "Input file is incorrect. Can't find field index value");
+          break;
+        }
+
+        AggregateShapefile(lines[i], fieldIndex, theForm);
+        
+        Application.DoEvents();
+        Thread.Sleep(1500);
+      }
+
+      theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished.");
+    }
+
+    /// <summary>Aggregate shapefile</summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
@@ -566,13 +574,8 @@ namespace TestApplication
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunAggregateShapefileTest(string shapefilename, int fieldIndex, Form1 theForm)
+    private static void AggregateShapefile(string shapefilename, int fieldIndex, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Aggregate shapefile test has started.", Environment.NewLine));
-
       try
       {
         // Check inputs:
@@ -591,12 +594,26 @@ namespace TestApplication
 
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
 
+        theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
         var aggregatedSf = sf.AggregateShapes(false, fieldIndex);
 
-        // Do some checks:))
-        if (!Helper.CheckShapefile(sf, aggregatedSf, globalSettings.GdalLastErrorMsg, theForm))
+        // The aggregate method is returning invalid shapes, fix them first:
+        Shapefile fixedSf;
+
+        theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
+        aggregatedSf.GlobalCallback = theForm;
+        if (!aggregatedSf.FixUpShapes(out fixedSf))
+        {
+          theForm.Error(string.Empty, "The fixup returned false");
+          return;
+        }
+
+        // Close file, because we continue with the fixed version:
+        aggregatedSf.Close();
+
+        // Do some checks:)
+        if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
           return;
         }
@@ -604,30 +621,28 @@ namespace TestApplication
         // Save result:
         var newFilename = shapefilename.Replace(".shp", "-aggregate.shp");
         Helper.DeleteShapefile(newFilename);
-        aggregatedSf.SaveAs(newFilename, theForm);
+        fixedSf.SaveAs(newFilename, theForm);
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
-        Helper.ColorShapes(ref aggregatedSf, fieldIndex, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
+        Helper.ColorShapes(ref fixedSf, 0, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(aggregatedSf, true);
+        MyAxMap.AddLayer(fixedSf, true);
 
         theForm.Progress(
           string.Empty,
           100,
           string.Format(
             "The Aggregate shapefile now has {0} shapes instead of {1} and has {2} rows",
-            aggregatedSf.NumShapes,
+            fixedSf.NumShapes,
             sf.NumShapes,
-            aggregatedSf.Table.NumRows));
+            fixedSf.Table.NumRows));
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
-
-      theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished");
     }
   }
 }

@@ -11,6 +11,9 @@ namespace TestApplication
 {
   using System;
   using System.IO;
+  using System.Threading;
+  using System.Windows.Forms;
+
   using MapWinGIS;
 
   /// <summary>Static class to hold the file formats methods</summary>
@@ -36,8 +39,8 @@ namespace TestApplication
     /// </returns>
     internal static int OpenShapefileAsLayer(string filename, Form1 theForm, bool clearLayers)
     {
-      var sf = OpenShapefile(filename, theForm);
       var hndl = -1;
+      var sf = OpenShapefile(filename, theForm);
 
       if (sf != null)
       {
@@ -57,6 +60,10 @@ namespace TestApplication
           Map.LoadLayerOptions(hndl, string.Empty, ref layerDesc);
           theForm.Progress(string.Empty, 100, "Applying symbology");
         }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
 
         theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
@@ -96,43 +103,44 @@ namespace TestApplication
 
       try
       {
-      // Track GDAL Errors:
-      var settings = new GlobalSettings();
-      var img = new Image { GlobalCallback = theForm };
+        // Track GDAL Errors:
+        var settings = new GlobalSettings();
+        var img = new Image { GlobalCallback = theForm };
 
-      settings.ResetGdalError();
-      theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
-      if (!img.Open(filename, ImageType.USE_FILE_EXTENSION, false, null))
-      {
-        var msg = string.Format(
-          "Error opening image: {0}{1}",
-          img.get_ErrorMsg(img.LastErrorCode),
-          Environment.NewLine);
-        if (settings.GdalLastErrorMsg != string.Empty)
+        settings.ResetGdalError();
+        theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
+        if (!img.Open(filename, ImageType.USE_FILE_EXTENSION, false, null))
         {
-          msg += "GDAL Error: " + settings.GdalLastErrorMsg;
-        }
+          var msg = string.Format(
+            "Error opening image: {0}{1}",
+            img.get_ErrorMsg(img.LastErrorCode),
+            Environment.NewLine);
+          if (settings.GdalLastErrorMsg != string.Empty)
+          {
+            msg += "GDAL Error: " + settings.GdalLastErrorMsg;
+          }
 
-        System.Diagnostics.Debug.WriteLine(msg);
-        theForm.Error(string.Empty, msg);
-      }
-      else
-      {
-        if (clearLayers)
+          System.Diagnostics.Debug.WriteLine(msg);
+          theForm.Error(string.Empty, msg);
+        }
+        else
         {
-          Map.RemoveAllLayers();
+          if (clearLayers)
+          {
+            Map.RemoveAllLayers();
+          }
+
+          hndl = Map.AddLayer(img, true);
+          theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+
+          // Wait a second to show something:
+          Application.DoEvents();
+          Thread.Sleep(1000);
         }
-
-        hndl = Map.AddLayer(img, true);
-        theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
       }
-      }
-      catch (Exception exception)
+      catch (System.Runtime.InteropServices.SEHException sehException)
       {
-        theForm.Progress(string.Empty, 100, "Exception in  OpenImageAsLayer: " + exception.Message);
-
-        // rethrow:
-        throw;
+        theForm.Error(string.Empty, "SEHException in OpenImageAsLayer: " + sehException.Message);
       }
 
       return hndl;
@@ -193,14 +201,15 @@ namespace TestApplication
 
           hndl = Map.AddLayer(grd, true);
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
+
+          // Wait a second to show something:
+          Application.DoEvents();
+          Thread.Sleep(1000);
         }
       }
-      catch (Exception exception)
+      catch (System.Runtime.InteropServices.SEHException sehException)
       {
-        theForm.Progress(string.Empty, 100, "Exception in  OpenGridAsLayer: " + exception.Message);
-
-        // rethrow:
-        // throw;
+        theForm.Error(string.Empty, "SEHException in OpenGridAsLayer: " + sehException.Message);
       }
 
       return hndl;
