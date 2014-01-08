@@ -1,0 +1,4 @@
+Download the SDK from 
+http://geospatial.intergraph.com/products/other/ecw/ERDASECWJPEG2000SDK/Downloads.aspx
+
+Extract the files in this folder.
