@@ -14,6 +14,8 @@ Global
 		Release|x64 = Release|x64
 		Tamas|Win32 = Tamas|Win32
 		Tamas|x64 = Tamas|x64
+		TamasDebug|Win32 = TamasDebug|Win32
+		TamasDebug|x64 = TamasDebug|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.Debug|Win32.ActiveCfg = Debug|Win32
@@ -36,6 +38,10 @@ Global
 		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.Tamas|Win32.Build.0 = Tamas|Win32
 		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.Tamas|x64.ActiveCfg = Tamas|x64
 		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.Tamas|x64.Build.0 = Tamas|x64
+		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.TamasDebug|Win32.ActiveCfg = TamasDebug|Win32
+		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.TamasDebug|Win32.Build.0 = TamasDebug|Win32
+		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.TamasDebug|x64.ActiveCfg = TamasDebug|x64
+		{1AB93398-2DE6-4043-BF6D-D438A794FB86}.TamasDebug|x64.Build.0 = TamasDebug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
