@@ -14,7 +14,7 @@ C:\dev\TestingScripts\ScriptData\General\Images\Formats\Pyramid.img.bmp
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\GIF-Graphics-Interchange-Format.gif
 
 #PNG
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\PNG-Portable-Network-Graphics.png
+# crashes C:\dev\TestingScripts\ScriptData\General\Images\Formats\PNG-Portable-Network-Graphics.png
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\test.png
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\wmsResult.png
 

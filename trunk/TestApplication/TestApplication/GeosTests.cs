@@ -547,7 +547,7 @@ namespace TestApplication
       {
         theForm.Progress(string.Empty, 100, "The two shapes are identical.");
       }
-    }
+    }        
   }
 
   /*
