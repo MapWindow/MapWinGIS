@@ -577,7 +577,7 @@ void CMapView::RemoveLayer(long LayerHandle)
 				// It was an image
 				short retval;
 				iimg->Close(&retval);
-				ishp->Release();		// we release only once because one more release is in Layer destructor
+				iimg->Release();		// we release only once because one more release is in Layer destructor
 			}
 
 			for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
