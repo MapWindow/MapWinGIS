@@ -1310,7 +1310,9 @@ interface IImage;
 		[helpstring("LF2_FILE")] LF2_FILE			        	=20,
 		[helpstring("KAP_FILE")] KAP_FILE			        	=21,
 		[helpstring("DEM_FILE")] DEM_FILE			        	=22,
-		[helpstring("NTF_FILE")] NTF_FILE			        	=23
+		[helpstring("NTF_FILE")] NTF_FILE			        	=23,
+	    [helpstring("NTF_FILE")] NETCDF_FILE                    =24,  /* Added by Paul Meems, Feb. 2014 */
+        [helpstring("NTF_FILE")] VRT_FILE                       =25   /* Added by Paul Meems, Feb. 2014 */
 	} ImageType;
 
 /****************************  Field Enumerations ***********************/

@@ -1255,6 +1255,9 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 			if (prj4 != NULL)
 			{
 				set_ProjectionIntoHeader(prj4);
+				// Causes crash:
+				// TODO Check if this doesn't introduces a memory leak!
+				// PM 26 Jan 2014 
 				CPLFree(prj4);
 			}
 			delete p; //added by Lailin Chen 12/30/2005
