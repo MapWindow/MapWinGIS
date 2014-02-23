@@ -155,6 +155,7 @@ bool CGrid::GetFloatValueGridColorTable(GradientModel gradientModel, ColoringTyp
 	if (result)
 	{
 		IColorScheme* scheme = NULL;
+		CoCreateInstance(CLSID_ColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IColorScheme,(void**)&scheme);
 		scheme->SetColors4((PredefinedColorScheme)(rand() % 7));
 		
 		double minValue, maxValue;
