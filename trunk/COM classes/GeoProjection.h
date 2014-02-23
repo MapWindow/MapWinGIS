@@ -44,7 +44,7 @@ public:
 		m_key = A2BSTR("");
 		m_globalCallback = NULL;
 		m_lastErrorCode = tkNO_ERROR;
-		m_projection = new OGRSpatialReference();
+		m_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
 		m_transformation = NULL;	
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
 		// TODO: apply WGS84 projection by default
@@ -56,7 +56,7 @@ public:
 		if (m_projection)
 		{
 			m_projection->Clear();
-			delete m_projection;
+			OGRSpatialReference::DestroySpatialReference(m_projection);
 		}
 		if (m_transformation)
 		{

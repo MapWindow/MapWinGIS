@@ -448,40 +448,8 @@ void tkGridRaster::ReadProjection()
 		{
 			char * wkt = (char *)rasterDataset->GetProjectionRef();
 
-			//if (wkt != NULL)  
 			if (wkt != NULL && _tcslen(wkt) != 0)
 			{
-				//Rob Cairns 18-Jun-09 Trying C implementation for stability - there seems to be a problem deleting *oSRS.  
-				//See FW suggestion at http://lists.osgeo.org/pipermail/gdal-dev/2006-March/008204.html
-
-				//	OGRSpatialReference * oSRS = new OGRSpatialReference();
-				//	__try
-				//	{
-				//		OGRErr eErr = oSRS->importFromESRI(&wkt);
-				//	}
-				//	__except(1)
-				//	{
-				//		__try
-				//		{
-				//			OGRErr eErr = oSRS->importFromWkt(&wkt);
-				//		}
-				//		__except(1)
-				//		{
-				//		}
-				//	}
-				//
-				//	char * pszProj4 = NULL;
-				//	oSRS->exportToProj4( &pszProj4 );
-				//	if (pszProj4 != NULL)
-				//	{
-				//		Projection = pszProj4;
-				//		// Don't free WKT -- CPLFree(wkt);
-				//		// (Projection ref is cleared by gdal automagically; we don't do it here)
-				//		CPLFree(pszProj4);
-				//	}
-				//	delete oSRS;
-				//}
-
 				OGRSpatialReferenceH  hSRS;
 				hSRS = OSRNewSpatialReference(NULL);
 

@@ -2400,7 +2400,7 @@ OGRSpatialReference* CShapefile::get_OGRSpatialReference()
 
 	if (str != "")
 	{
-		OGRSpatialReference* reference = new OGRSpatialReference();
+		OGRSpatialReference* reference = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
 		reference->importFromProj4(str.GetString());
 		return reference;
 	}
