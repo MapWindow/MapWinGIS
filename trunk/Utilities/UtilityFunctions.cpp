@@ -682,6 +682,20 @@ namespace Utility
 		return psNode;
 	}
 
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue)
+	{
+		CString temp;
+		temp.Format ("%d", nValue);
+		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
+	}
+
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue)
+	{
+		CString temp;
+		temp.Format ("%f", rValue);
+		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
+	}
+
 	 #define _SECOND ((__int64) 10000000)
 
 	// ********************************************************

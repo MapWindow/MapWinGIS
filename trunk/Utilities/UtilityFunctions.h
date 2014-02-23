@@ -47,6 +47,8 @@ namespace Utility
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue);
+	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue);
+	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue);
 	bool get_FileCreationTime(CString filename, FILETIME& time);
 	bool IsFileYounger(CString filename1, CString thanFilename);
 	bool RemoveFile(CString filename);

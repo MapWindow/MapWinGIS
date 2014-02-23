@@ -567,17 +567,16 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	 
-	CString str = OLE2CA(key);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", str);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "NoDataColor", CPLString().Printf("%d", NoDataColor));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceIntensity", CPLString().Printf("%f", LightSourceIntensity));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "AmbientIntensity", CPLString().Printf("%f", AmbientIntensity));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceElevation", CPLString().Printf("%f", LightSourceElevation));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceAzimuth", CPLString().Printf("%f", LightSourceAzimuth));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceI", CPLString().Printf("%f", LightSource.geti()));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceJ", CPLString().Printf("%f", LightSource.getj()));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceK", CPLString().Printf("%f", LightSource.getk()));
-	
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", OLE2CA(key));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "NoDataColor", (int)NoDataColor);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceIntensity", LightSourceIntensity);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "AmbientIntensity", AmbientIntensity);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceElevation", LightSourceElevation);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceAzimuth", LightSourceAzimuth);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceI", LightSource.geti());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceJ", LightSource.getj());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceK", LightSource.getk());
+
 	// color breaks
 	if (Breaks.size() > 0)
 	{
@@ -590,17 +589,17 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 
 				OLE_COLOR color;
 				Breaks[i]->get_HighColor(&color);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighColor", CPLString().Printf("%d", color));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighColor", (int)color);
 
 				Breaks[i]->get_LowColor(&color);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowColor", CPLString().Printf("%d", color));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowColor", (int)color);
 
 				double val;
 				Breaks[i]->get_LowValue(&val);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowValue", CPLString().Printf("%f", val));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowValue", val);
 
 				Breaks[i]->get_HighValue(&val);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighValue", CPLString().Printf("%f", val));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighValue", val);
 
 				BSTR caption;
 				Breaks[i]->get_Caption(&caption);
@@ -609,11 +608,11 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 				
 				ColoringType colorType;
 				Breaks[i]->get_ColoringType(&colorType);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "ColoringType", CPLString().Printf("%d", (int)colorType));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "ColoringType", (int)colorType);
 
 				GradientModel gradient;
 				Breaks[i]->get_GradientModel(&gradient);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", CPLString().Printf("%d", (int)gradient));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", (int)gradient);
 				
 				BSTR key;
 				Breaks[i]->get_Key(&key);

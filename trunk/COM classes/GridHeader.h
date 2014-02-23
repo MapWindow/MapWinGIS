@@ -79,7 +79,9 @@ public:
 		myowner_t = NULL;
 		myowner_s = NULL;
 
-		m_geoProjection->Release();
+		// Causing a crash
+		// BPH 23 Feb 2014
+		//m_geoProjection->Release();
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

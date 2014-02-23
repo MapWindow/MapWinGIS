@@ -37,6 +37,16 @@ static char THIS_FILE[] = __FILE__;
 // CGrid
 CGrid * activeGridObject = NULL;
 
+CString getProjectionFileName( CString gridFilename )
+{
+	int theDot = gridFilename.ReverseFind('.');
+
+	if (theDot < 0)
+		return gridFilename + ".prj";
+
+	return gridFilename.Left(theDot + 1) + "prj";
+}
+
 void gridCOMCALLBACK( int number, const char * message )
 {	USES_CONVERSION;
 	if( activeGridObject != NULL )
@@ -369,13 +379,7 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 	try
 	{
 		CString gridFilename(filename == NULL ? L"" : filename);
-		CString projectionFilename = L"";
-		int theDot = gridFilename.ReverseFind('.');
-
-		if (theDot < 0)
-			projectionFilename = gridFilename + ".prj";
-		else
-			projectionFilename = gridFilename.Left(theDot + 1) + "prj";
+		CString projectionFilename = getProjectionFileName(gridFilename);
 
 		if (projectionFilename != "")
 		{
@@ -1257,13 +1261,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	{
 		// If the .prj file exists, load this into the grid's projection property.
 		CString gridFilename(filename == NULL ? L"" : filename);
-		CString prjFilename = L"";
-		int theDot = gridFilename.ReverseFind('.');
-
-		if (theDot < 0)
-			prjFilename = gridFilename + ".prj";
-		else
-			prjFilename = gridFilename.Left(theDot + 1) + "prj";
+		CString prjFilename = getProjectionFileName(gridFilename);
 
 		if (prjFilename != "")
 		{
@@ -1904,13 +1902,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		if (strcmp(W2A(bstrProj), "") != 0)
 		{
 			CString gridFilename(filename == NULL ? L"" : filename);
-			CString prjFilename = L"";
-			int theDot = gridFilename.ReverseFind('.');
-
-			if (theDot < 0)
-				prjFilename = gridFilename + ".prj";
-			else
-				prjFilename = gridFilename.Left(theDot + 1) + "prj";
+			CString prjFilename = getProjectionFileName(gridFilename);
 
 			FILE * prjFile = NULL;
 			prjFile = fopen(prjFilename, "wb");
@@ -2518,10 +2510,7 @@ STDMETHODIMP CGrid::GetColorScheme(IGridColorScheme** retVal)
 	
 	if (!hasScheme)
 	{
-		// Causes crash when related to allocating and releasing COM objects
-		// TODO Figure out why or find a way to avoid the COM stuff
-		// BPH 23 Feb 2014
-		/*if(this->GetFloatValueGridColorTable(GradientModel::Linear, ColoringType::Gradient, &scheme))
+		if(this->GetFloatValueGridColorTable(GradientModel::Linear, ColoringType::Gradient, &scheme))
 		{
 			// do nothing
 		}
@@ -2537,7 +2526,7 @@ STDMETHODIMP CGrid::GetColorScheme(IGridColorScheme** retVal)
 			dVal(minimum, min);
 			dVal(maximum, max);
 			scheme->UsePredefined(min, max, (PredefinedColorScheme)(rand() % 7));
-		}*/
+		}
 	}
 	*retVal = scheme;
 	return S_OK;
