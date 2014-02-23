@@ -1245,7 +1245,13 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	{
 		// If the .prj file exists, load this into the grid's projection property.
 		CString gridFilename(filename == NULL ? L"" : filename);
-		CString prjFilename = gridFilename.Left(gridFilename.GetLength() - 3) + "prj";
+		CString prjFilename = L"";
+		int theDot = gridFilename.ReverseFind('.');
+
+		if (theDot < 0)
+			prjFilename = gridFilename + ".prj";
+		else
+			prjFilename = gridFilename.Left(theDot + 1) + "prj";
 
 		if (prjFilename != "")
 		{
