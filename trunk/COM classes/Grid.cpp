@@ -103,98 +103,98 @@ bool CGrid::GetFloatValueGridColorTable(GradientModel gradientModel, ColoringTyp
 
 	IGridHeader* header = NULL;
 	this->get_Header(&header);
-	if (header)
-	{
-		CComVariant varNodata;
-		
-		long rows, cols;
-		header->get_NumberCols(&cols);
-		header->get_NumberRows(&rows);
-		header->get_NodataValue(&varNodata);
-		header->Release();
-		
-		double noDataValue;
-		dVal(varNodata, noDataValue);
+	if (!header)
+		return false;
 
-		// TODO: take into account decimal separator
-		set<CComVariant> values;
+	CComVariant varNodata;
+	long rows = 0, cols = 0;
 
-		for(int i = 0; i < rows; i++)
-		{
-			for(int j = 0; j < cols; j++)
-			{
-				CComVariant var;
-				this->get_Value(j, i, &var);
-				if (values.find(var) == values.end())
-				{
-					values.insert(var);
-					if (values.size() > 100) 
-					{
-						return false;		// there are too may of them for unique values classification
-					}
-				}
-			}
-		}
+	header->get_NumberCols(&cols);
+	header->get_NumberRows(&rows);
+	header->get_NodataValue(&varNodata);
+	header->Release();
 	
-		if (values.size() == 0)    // it's empty, hence no scheme
-			return false;
+	double noDataValue;
+	dVal(varNodata, noDataValue);
 
-		IGridColorScheme* result = NULL;
-		CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&result);
-		if (result)
+	// TODO: take into account decimal separator
+	set<CComVariant> values;
+
+	for(int i = 0; i < rows; i++)
+	{
+		for(int j = 0; j < cols; j++)
 		{
-			IColorScheme* scheme = NULL;
-			scheme->SetColors4((PredefinedColorScheme)(rand() % 7));
-			
-			double minValue, maxValue;
-			dVal(*values.begin(), minValue);
-			dVal(*values.rbegin(), maxValue);
-
-			set<CComVariant>::iterator it = values.begin();
-			while (it != values.end())
+			CComVariant var;
+			this->get_Value(j, i, &var);
+			if (values.find(var) == values.end())
 			{
-				double val;
-				dVal(*it, val);
-
-				// add break for value
-				IGridColorBreak * brk;
-				CoCreateInstance(CLSID_GridColorBreak,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorBreak,(void**)&brk);
-				brk->put_LowValue( val );
-				brk->put_HighValue( val );
-
-				OLE_COLOR color;
-				if (maxValue == minValue)
+				values.insert(var);
+				if (values.size() > 100) 
 				{
-					double rnd = (double)rand()/(double)RAND_MAX;
-					scheme->get_RandomColor(rnd, &color);	// any color from the scheme
+					return false;		// there are too may of them for unique values classification
 				}
-                else
-				{
-                    double ratio = (val - minValue) / (maxValue - minValue);
-					if (coloringType == ColoringType::Random)
-					{
-						scheme->get_RandomColor(ratio, &color);
-					}
-					else
-					{
-						scheme->get_GraduatedColor(ratio, &color);
-					}
-				}
-				
-				brk->put_LowColor(color);	 
-                brk->put_HighColor(color);
-				brk->put_ColoringType(coloringType);
-                brk->put_GradientModel(gradientModel);
-
-				result->InsertBreak(brk);
-				brk->Release();
-
-				it++;
 			}
-			scheme->Release();
-			*newScheme = result;
-			return true;
 		}
+	}
+
+	if (values.size() == 0)    // it's empty, hence no scheme
+		return false;
+
+	IGridColorScheme* result = NULL;
+	CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&result);
+	if (result)
+	{
+		IColorScheme* scheme = NULL;
+		scheme->SetColors4((PredefinedColorScheme)(rand() % 7));
+		
+		double minValue, maxValue;
+		dVal(*values.begin(), minValue);
+		dVal(*values.rbegin(), maxValue);
+
+		set<CComVariant>::iterator it = values.begin();
+		while (it != values.end())
+		{
+			double val;
+			dVal(*it, val);
+
+			// add break for value
+			IGridColorBreak * brk;
+			CoCreateInstance(CLSID_GridColorBreak,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorBreak,(void**)&brk);
+			brk->put_LowValue( val );
+			brk->put_HighValue( val );
+
+			OLE_COLOR color;
+			if (maxValue == minValue)
+			{
+				double rnd = (double)rand()/(double)RAND_MAX;
+				scheme->get_RandomColor(rnd, &color);	// any color from the scheme
+			}
+            else
+			{
+                double ratio = (val - minValue) / (maxValue - minValue);
+				if (coloringType == ColoringType::Random)
+				{
+					scheme->get_RandomColor(ratio, &color);
+				}
+				else
+				{
+					scheme->get_GraduatedColor(ratio, &color);
+				}
+			}
+			
+			brk->put_LowColor(color);	 
+            brk->put_HighColor(color);
+			brk->put_ColoringType(coloringType);
+            brk->put_GradientModel(gradientModel);
+
+			result->InsertBreak(brk);
+			brk->Release();
+
+			it++;
+		}
+		scheme->Release();
+		*newScheme = result;
+		return true;
 	}
 	return false;
 }
@@ -369,7 +369,14 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 	try
 	{
 		CString gridFilename(filename == NULL ? L"" : filename);
-		CString projectionFilename = gridFilename.Left(gridFilename.GetLength() - 3) + "prj";
+		CString projectionFilename = L"";
+		int theDot = gridFilename.ReverseFind('.');
+
+		if (theDot < 0)
+			projectionFilename = gridFilename + ".prj";
+		else
+			projectionFilename = gridFilename.Left(theDot + 1) + "prj";
+
 		if (projectionFilename != "")
 		{
 			FILE * prjFile = NULL;
@@ -380,7 +387,12 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 				ProjectionTools * p = new ProjectionTools();
 				p->ToESRIWKTFromProj4(&wkt, projection);
 
-				fprintf(prjFile, "%s", wkt);
+				if (wkt != NULL)
+				{
+					fprintf(prjFile, "%s", wkt);
+					delete wkt;
+				}
+
 				fclose(prjFile);
 				prjFile = NULL;
 				delete p; //added by Lailin Chen 12/30/2005
@@ -1261,10 +1273,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 			if (prj4 != NULL)
 			{
 				set_ProjectionIntoHeader(prj4);
-				// Causes crash:
-				// TODO Check if this doesn't introduces a memory leak!
-				// PM 26 Jan 2014 
-				CPLFree(prj4);
+				delete prj4;
 			}
 			delete p; //added by Lailin Chen 12/30/2005
 		}
@@ -1895,7 +1904,14 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		if (strcmp(W2A(bstrProj), "") != 0)
 		{
 			CString gridFilename(filename == NULL ? L"" : filename);
-			CString prjFilename = gridFilename.Left(gridFilename.GetLength() - 3) + "prj";
+			CString prjFilename = L"";
+			int theDot = gridFilename.ReverseFind('.');
+
+			if (theDot < 0)
+				prjFilename = gridFilename + ".prj";
+			else
+				prjFilename = gridFilename.Left(theDot + 1) + "prj";
+
 			FILE * prjFile = NULL;
 			prjFile = fopen(prjFilename, "wb");
 			if (prjFile)
@@ -1908,6 +1924,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 				if (wkt != NULL)
 				{
 					fprintf(prjFile, "%s", wkt);
+					delete wkt;
 				}
 
 				fclose(prjFile);
@@ -2494,14 +2511,17 @@ STDMETHODIMP CGrid::GetColorScheme(IGridColorScheme** retVal)
 	bool hasScheme = false;
 	if (scheme)
 	{
-		long numBreaks;
+		long numBreaks = 0;
 		scheme->get_NumBreaks(&numBreaks);
 		hasScheme = numBreaks > 0;
 	}
 	
 	if (!hasScheme)
 	{
-		if(this->GetFloatValueGridColorTable(GradientModel::Linear, ColoringType::Gradient, &scheme))
+		// Causes crash when related to allocating and releasing COM objects
+		// TODO Figure out why or find a way to avoid the COM stuff
+		// BPH 23 Feb 2014
+		/*if(this->GetFloatValueGridColorTable(GradientModel::Linear, ColoringType::Gradient, &scheme))
 		{
 			// do nothing
 		}
@@ -2517,7 +2537,7 @@ STDMETHODIMP CGrid::GetColorScheme(IGridColorScheme** retVal)
 			dVal(minimum, min);
 			dVal(maximum, max);
 			scheme->UsePredefined(min, max, (PredefinedColorScheme)(rand() % 7));
-		}
+		}*/
 	}
 	*retVal = scheme;
 	return S_OK;

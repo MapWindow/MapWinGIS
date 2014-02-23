@@ -35,7 +35,7 @@ using namespace std;
 		}
 		fclose(pFile);
 		pFile = NULL;
-		OGRSpatialReference* oSRS = new OGRSpatialReference();
+		OGRSpatialReference* oSRS = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
 
 		char **papszPrj = CSLLoad(prjfileName);
 		if (papszPrj == NULL)
@@ -48,15 +48,16 @@ using namespace std;
 		{
 			OGRErr eErr = oSRS->importFromProj4(*papszPrj);
 		}
-
 		CSLDestroy( papszPrj );
+
 		char * pszProj4 = NULL;
 		eErr = oSRS->exportToProj4( &pszProj4 );
-		delete oSRS;
 
 		*prj4 = new char[_tcslen(pszProj4)+1];
 		strcpy(*prj4, pszProj4);
 		CPLFree(pszProj4);
+
+		OGRSpatialReference::DestroySpatialReference(oSRS);
 	}
 
 	void ProjectionTools::ToESRIWKTFromProj4(char ** wkt, char * prj4)
