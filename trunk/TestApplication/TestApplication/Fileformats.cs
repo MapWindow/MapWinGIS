@@ -130,6 +130,9 @@ namespace TestApplication
             Map.RemoveAllLayers();
           }
 
+          // Log projection
+          theForm.Progress(string.Empty, 0, "projection: " + img.GetProjection());
+
           hndl = Map.AddLayer(img, true);
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
 
@@ -199,6 +202,10 @@ namespace TestApplication
             Map.RemoveAllLayers();
           }
 
+          // Log projection:
+          theForm.Progress(string.Empty, 0, "Projection: " + grd.Header.GeoProjection.ExportToProj4());
+          theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NoBands);
+
           hndl = Map.AddLayer(grd, true);
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
 
@@ -240,6 +247,9 @@ namespace TestApplication
         theForm.Error(string.Empty, msg);
         return null;
       }
+
+      // Log projection:
+      theForm.Progress(string.Empty, 0, "Projection: " + sf.GeoProjection.ExportToProj4());
 
       return sf;
     }
