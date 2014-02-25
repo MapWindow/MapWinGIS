@@ -243,7 +243,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 	list[0] = str;
 	list[1] = NULL;
 	OGRErr err = m_projection->importFromWkt(list);
-	// TODO: delete those 2 bytes; GDAL can change the pointer
+	delete[] list;
 
 	*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 	if (err != OGRERR_NONE)
