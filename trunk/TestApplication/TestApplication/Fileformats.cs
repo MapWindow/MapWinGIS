@@ -62,7 +62,6 @@ namespace TestApplication
         }
 
         // Wait a second to show something:
-        Application.DoEvents();
         Thread.Sleep(1000);
 
         theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);

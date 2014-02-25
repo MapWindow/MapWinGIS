@@ -1822,7 +1822,7 @@ STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 	*retval = VARIANT_FALSE;
 	try
 	{
-		CString projectionFilename = FileName.Left(FileName.GetLength() - 3) + "prj";
+		CString projectionFilename = Utility::GetPathWOExtension(FileName) + ".prj";
 		if (projectionFilename != "")
 		{
 			FILE * prjFile = NULL;
@@ -1857,7 +1857,7 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 	USES_CONVERSION;
 	
 	// If the .prj file exists, load it.
-	CString prjFilename = FileName.Left(FileName.GetLength() - 3) + "prj";
+	CString prjFilename = Utility::GetPathWOExtension(FileName) + ".prj";
 	if (prjFilename != "")
 	{
 		char * prj4 = NULL;
@@ -1866,7 +1866,8 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 
 		if (prj4 != NULL) 
 			*Proj4 = A2BSTR(prj4);
-		CPLFree(prj4);
+
+		delete prj4;
 		delete p; //added by Lailin Chen 12/30/2005
 	}
 	else
@@ -1888,10 +1889,8 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 
 			if (wkt != NULL && _tcslen(wkt) != 0)
 			{
-
 				OGRSpatialReferenceH  hSRS;
 				hSRS = OSRNewSpatialReference(NULL);
-
 				
 				if( OSRImportFromESRI( hSRS, &wkt ) == CE_None ) 
 				{	
