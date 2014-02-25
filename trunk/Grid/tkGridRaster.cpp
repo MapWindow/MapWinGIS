@@ -256,9 +256,7 @@ bool tkGridRaster::LoadRaster(const char * filename, bool InRam, GridFileType fi
 	{
 		CanScanlineBuffer = false;
 		currentFileType = fileType;
-
-		mFilename = new char[_tcslen(filename) + 1];
-		strcpy(mFilename, filename);
+		mFilename = filename;
 
 		GDALAllRegister();
 		rasterDataset = (GDALDataset *) GDALOpen(filename, GA_Update );
@@ -594,8 +592,7 @@ bool tkGridRaster::CreateNew(char * filename, GridFileType newFileType, double d
 	poBand->SetNoDataValue(nodataval);
 	noDataValue = nodataval;
     
-	mFilename = new char[_tcslen(filename) + 1];
-	strcpy(mFilename, filename);
+	mFilename = filename;
 	inRam = CreateInRam;
 
 	if (inRam)
@@ -796,12 +793,6 @@ bool tkGridRaster::Close()
 		{
 			CPLFree( floatScanlineBufferB );
 			floatScanlineBufferB = NULL;
-		}
-
-		if (mFilename != NULL)
-		{
-			delete [] mFilename;
-			mFilename = NULL;
 		}
 	}
 	catch(...)
@@ -1134,7 +1125,7 @@ bool tkGridRaster::Save(char * saveToFilename, GridFileType newFileFormat)
 
 	}
 
-	if (strcmp(mFilename, saveToFilename) == 0 && newFileFormat == currentFileType)
+	if (mFilename == saveToFilename && newFileFormat == currentFileType)
 	{
 		return SaveFullBuffer();
 	}

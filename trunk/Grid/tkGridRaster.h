@@ -88,7 +88,7 @@ public:
 		transColor(0), hasTransparency(false),buffSize(0),cBack(NULL),dX(-1),dY(-1),
 		XllCenter(-1),YllCenter(-1)
 	{		//Rob Cairns
-			mFilename = NULL;
+			mFilename = "";
 			rasterDataset=NULL;
 			floatbuffer = NULL;
 			_int32buffer = NULL;
@@ -130,7 +130,7 @@ public:
 
 private:
 	const static long MAX_INRAM_SIZE = 536870912;
-	char * mFilename;
+	CString mFilename;
 			//world coordinate related variables
 
 	double dY;			//change in Y (for size of cell or pixel)
