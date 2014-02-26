@@ -440,47 +440,47 @@ void tkGridRaster::ReadProjection()
 	Projection = "";
 	__try
 	{
-		//Rob Cairns 13-Jun-09 - not a valid test because GetProjectionRef returns an empty string not a null string if grid is unprojected
-		//if (rasterDataset->GetProjectionRef() != NULL)
-		if (rasterDataset->GetProjectionRef() != NULL && _tcslen(rasterDataset->GetProjectionRef()) != 0)
+		const char * wkt = (char *)rasterDataset->GetProjectionRef();
+		int length = _tcslen(wkt);
+
+		if (wkt != NULL && length > 0)
 		{
-			char * wkt = (char *)rasterDataset->GetProjectionRef();
+         char * temp = new char[length+1];
+         strcpy(temp, wkt);
 
-			if (wkt != NULL && _tcslen(wkt) != 0)
+			OGRSpatialReferenceH  hSRS;
+			hSRS = OSRNewSpatialReference(NULL);
+
+			__try
 			{
-				OGRSpatialReferenceH  hSRS;
-				hSRS = OSRNewSpatialReference(NULL);
-
-				__try
-				{
-					if( OSRImportFromESRI( hSRS, &wkt ) == CE_None ) 
-					{	
-						char * pszProj4 = NULL;				
+				if( OSRImportFromESRI( hSRS, &temp ) == CE_None ) 
+				{	
+					char * pszProj4 = NULL;				
+					OSRExportToProj4(hSRS, &pszProj4);
+					if (pszProj4 != NULL)	
+					{
+						Projection = pszProj4;
+						CPLFree(pszProj4);
+					}
+				} 
+				else {
+					if( OSRImportFromWkt( hSRS, &temp ) == CE_None )
+					{
+						char * pszProj4 = NULL;
 						OSRExportToProj4(hSRS, &pszProj4);
 						if (pszProj4 != NULL)	
 						{
 							Projection = pszProj4;
 							CPLFree(pszProj4);
 						}
-					} 
-					else {
-						if( OSRImportFromWkt( hSRS, &wkt ) == CE_None )
-						{
-							char * pszProj4 = NULL;
-							OSRExportToProj4(hSRS, &pszProj4);
-							if (pszProj4 != NULL)	
-							{
-								Projection = pszProj4;
-								CPLFree(pszProj4);
-							}
-						}
 					}
 				}
-				__except(1)
-				{
-				}
-				OSRDestroySpatialReference( hSRS );
 			}
+			__except(1)
+			{
+			}
+			OSRDestroySpatialReference( hSRS );
+         delete temp;
 		}
 	}
 	__except(1)

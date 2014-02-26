@@ -17,6 +17,13 @@ namespace TestApplication
   /// <summary>Defines the form</summary>
   public partial class Form1 : Form, ICallback
   {
+    #region Delegates
+
+    delegate void ErrorCallback(string keyOfSender, string errorMsg);
+    delegate void ProgressCallback(string keyOfSender, int percent, string message);
+
+    #endregion
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Form1"/> class.
     /// </summary>
@@ -36,8 +43,13 @@ namespace TestApplication
     /// </param>
     public void Error(string keyOfSender, string errorMsg)
     {
-      var msg = @"Error:" + errorMsg;
-      Progressbox.AppendText(msg + Environment.NewLine);
+        if (this.InvokeRequired)
+            this.Invoke(new ErrorCallback(Error), keyOfSender, errorMsg);
+        else
+        {
+            var msg = @"Error:" + errorMsg;
+            Progressbox.AppendText(msg + Environment.NewLine);
+        }
     }
 
     /// <summary>The progress callback</summary>
@@ -52,23 +64,28 @@ namespace TestApplication
     /// </param>
     public void Progress(string keyOfSender, int percent, string message)
     {
-      switch (percent)
-      {
-        case 0:
-          if (message != string.Empty)
-          {
-            this.Progressbox.AppendText(message + Environment.NewLine);
-          }
+        if (this.InvokeRequired)
+            this.Invoke(new ProgressCallback(Progress), keyOfSender, percent, message);
+        else
+        {
+            switch (percent)
+            {
+                case 0:
+                    if (message != string.Empty)
+                    {
+                        this.Progressbox.AppendText(message + Environment.NewLine);
+                    }
 
-          break;
-        case 100:
-          this.Progressbox.AppendText(message + Environment.NewLine);
-          break;
-        default:
-          var msg = percent + @"% ... ";
-          this.Progressbox.AppendText(msg);
-          break;
-      }
+                    break;
+                case 100:
+                    this.Progressbox.AppendText(message + Environment.NewLine);
+                    break;
+                default:
+                    var msg = percent + @"% ... ";
+                    this.Progressbox.AppendText(msg);
+                    break;
+            }
+        }
     }
 
     #endregion

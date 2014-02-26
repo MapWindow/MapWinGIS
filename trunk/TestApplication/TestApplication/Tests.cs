@@ -89,6 +89,7 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
+      MyAxMap.Redraw();
     }
   
     /// <summary>
