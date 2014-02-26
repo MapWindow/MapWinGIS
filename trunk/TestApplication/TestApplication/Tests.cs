@@ -86,6 +86,8 @@ namespace TestApplication
       {
         // Open shapefile:
         Fileformats.OpenShapefileAsLayer(line, theForm, true);
+        MyAxMap.ZoomToMaxExtents();
+        Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
@@ -123,9 +125,14 @@ namespace TestApplication
       {
         // Open image:
         Fileformats.OpenImageAsLayer(line, theForm, true);
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The image open tests have finished.");
+      MyAxMap.Redraw();
     }
 
     /// <summary>
@@ -159,9 +166,14 @@ namespace TestApplication
       {
         // Open image:
         Fileformats.OpenGridAsLayer(line, theForm, true);
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The grid open tests have finished.");
+      MyAxMap.Redraw();
     }
 
     /// <summary>Select a grid file</summary>

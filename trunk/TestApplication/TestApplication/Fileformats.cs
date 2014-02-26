@@ -6,7 +6,6 @@
 //   Static class to hold the file formats methods
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace TestApplication
 {
   using System;
@@ -60,9 +59,6 @@ namespace TestApplication
           Map.LoadLayerOptions(hndl, string.Empty, ref layerDesc);
           theForm.Progress(string.Empty, 100, "Applying symbology");
         }
-
-        // Wait a second to show something:
-        Thread.Sleep(1000);
 
         theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
@@ -134,10 +130,6 @@ namespace TestApplication
 
           hndl = Map.AddLayer(img, true);
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
-
-          // Wait a second to show something:
-          Application.DoEvents();
-          Thread.Sleep(1000);
         }
       }
       catch (System.Runtime.InteropServices.SEHException sehException)
@@ -207,10 +199,6 @@ namespace TestApplication
 
           hndl = Map.AddLayer(grd, true);
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
-
-          // Wait a second to show something:
-          Application.DoEvents();
-          Thread.Sleep(1000);
         }
       }
       catch (System.Runtime.InteropServices.SEHException sehException)
