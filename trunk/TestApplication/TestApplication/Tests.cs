@@ -86,7 +86,7 @@ namespace TestApplication
       {
         // Open shapefile:
         Fileformats.OpenShapefileAsLayer(line, theForm, true);
-        MyAxMap.ZoomToMaxExtents();
+        Application.DoEvents();
         Thread.Sleep(1000);
       }
 
