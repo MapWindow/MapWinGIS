@@ -235,8 +235,12 @@ namespace TestApplication
         return null;
       }
 
-      // Log projection:
+      // Log some characteristics:
+      theForm.Progress(string.Empty, 0, "Number of shapes: " + sf.NumShapes);
+      theForm.Progress(string.Empty, 0, "Number of fields: " + sf.NumFields);
+      theForm.Progress(string.Empty, 0, "Type: " + sf.ShapefileType);
       theForm.Progress(string.Empty, 0, "Projection: " + sf.GeoProjection.ExportToProj4());
+      theForm.Progress(string.Empty, 0, "Has spatial index: " + sf.HasSpatialIndex);
 
       return sf;
     }

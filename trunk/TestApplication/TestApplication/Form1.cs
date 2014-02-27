@@ -353,6 +353,18 @@ namespace TestApplication
       Tests.SelectTextfile(this.WktShapefileInput, "Select text file with on each line the location of the shapefiles");
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectSpatialIndexInputfileClick(object sender, EventArgs e)
+    {
+      Tests.SelectTextfile(this.SpatialIndexInputfile, "Select text file with on each line the location of the shapefiles");
+    }
+
     #endregion
 
     #region Run test click event
@@ -502,9 +514,28 @@ namespace TestApplication
       GeosTests.RunIntersectionShapefileTest(this.IntersectionShapefileFirstInput.Text, this.IntersectionShapefileSecondInput.Text, this);
     }
 
-    private void RunWktShapefileTest_Click(object sender, EventArgs e)
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunWktShapefileTestClick(object sender, EventArgs e)
     {
       GeosTests.RunWktShapefileTest(this.WktShapefileInput.Text, this);
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunSpatialIndexTestClick(object sender, EventArgs e)
+    {
+      Tests.RunSpatialIndexTest(this.SpatialIndexInputfile.Text, this);
     }
   }
 }

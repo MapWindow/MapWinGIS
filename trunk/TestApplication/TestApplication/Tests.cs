@@ -9,6 +9,7 @@
 namespace TestApplication
 {
   using System;
+  using System.Diagnostics;
   using System.IO;
   using System.Threading;
   using System.Windows.Forms;
@@ -91,9 +92,143 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
-      MyAxMap.Redraw();
     }
-  
+
+    /// <summary>Run the Spatial Index tests</summary>
+    /// <param name="textfileLocation">The textfile location</param>
+    /// <param name="theForm">The form.</param>
+    internal static void RunSpatialIndexTest(string textfileLocation, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The Spatial Index tests have started.", Environment.NewLine));
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      foreach (var line in lines)
+      {
+        // Clear map:
+        MyAxMap.RemoveAllLayers();
+
+        // Remove index files:
+        var baseFilename = Path.Combine(Path.GetDirectoryName(line), Path.GetFileNameWithoutExtension(line));
+        File.Delete(baseFilename + ".mwd");
+        File.Delete(baseFilename + ".mwx");
+
+        // Open shapefile:
+        var sf = Fileformats.OpenShapefile(line, theForm);
+
+        // Log:
+
+        // Add to map:
+        MyAxMap.AddLayer(sf, true);
+
+        // Wait to show the map:
+        Application.DoEvents();
+
+        // Check:
+        theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
+
+        // Now do some selecting to time without spatial index.
+        var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
+
+        // for debugging, because CreateSpatialIndex does not work;
+        Thread.Sleep(1000);
+        continue;
+
+        // Create index:
+        if (!sf.CreateSpatialIndex(sf.Filename))
+        {
+          theForm.Error(string.Empty, "Error creating spatial index: " + sf.get_ErrorMsg(sf.LastErrorCode));
+          continue;
+        }
+
+        // Check:
+        theForm.Progress(string.Empty, 0, "SpatialIndexMaxAreaPercent: " + sf.SpatialIndexMaxAreaPercent);
+
+        // Set index:
+        sf.UseSpatialIndex = true;
+
+        // Check:
+        theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
+
+        // Check if the files are created:
+        if (File.Exists(baseFilename + ".mwd"))
+        {
+          theForm.Progress(string.Empty, 0, "The mwd file exists");
+        }
+        else
+        {
+          theForm.Error(string.Empty, "The mwd file does not exists");
+        }
+
+        if (File.Exists(baseFilename + ".mwx"))
+        {
+          theForm.Progress(string.Empty, 0, "The mwx file exists");
+        }
+        else
+        {
+          theForm.Error(string.Empty, "The mwx file does not exists");
+          continue;
+        }
+
+        // Now do some selecting to time wit spatial index.
+        var timeWithIndex = TimeSelectShapes(ref sf, theForm);
+
+        theForm.Progress(
+          string.Empty,
+          0,
+          string.Format("Select shapes without spatial index took {0} seconds, with spatial index it took {1}", timeWithoutIndex / 1000, timeWithIndex / 1000));
+
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, "The spatial index tests have finished.");
+    }
+
+    /// <summary>Time the select shapes method</summary>
+    /// <param name="sf">The shapefile</param>
+    /// <param name="theForm">The form</param>
+    /// <returns>The needed time</returns>
+    private static long TimeSelectShapes(ref Shapefile sf, ICallback theForm)
+    {
+      var boundBox = new Extents();
+      var width = sf.Extents.xMax - sf.Extents.xMin;
+      var height = sf.Extents.yMax - sf.Extents.yMin;
+      var stopWatch = Stopwatch.StartNew();
+      
+      sf.SelectNone();
+      boundBox.SetBounds(sf.Extents.xMin + (width / 3), sf.Extents.yMin + (height / 3), 0.0, sf.Extents.xMax - (width / 3), sf.Extents.yMax - (height / 3), 0.0);
+      object result = null;
+      if (!sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result))
+      {
+        theForm.Error(string.Empty, "Error in SelectShapes: " + sf.get_ErrorMsg(sf.LastErrorCode));
+      }
+      else
+      {
+        var shapes = result as int[];
+        if (shapes != null)
+        {
+          theForm.Progress(string.Empty, 0, "Number of shapes found: " + shapes.Length);
+          foreach (var index in shapes)
+          {
+            sf.set_ShapeSelected(index, true);
+          }
+
+          MyAxMap.Redraw();
+        }
+        else
+        {
+          theForm.Error(string.Empty, "No shapes found");
+        }
+      }
+
+      return EndStopWatch(ref stopWatch, theForm);
+    }
+
     /// <summary>
     /// Run image open tests
     /// </summary>
@@ -571,7 +706,7 @@ namespace TestApplication
         AggregateShapefile(lines[i], fieldIndex, theForm);
         
         Application.DoEvents();
-        Thread.Sleep(1500);
+        Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished.");
@@ -656,6 +791,20 @@ namespace TestApplication
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
+    }
+
+    /// <summary>End the stop watch and log the time needed</summary>
+    /// <param name="stopWatch">The stop watch</param>
+    /// <param name="theForm">The form</param>
+    /// <returns>The elapsed time</returns>
+    private static long EndStopWatch(ref Stopwatch stopWatch, ICallback theForm)
+    {
+      Application.DoEvents();
+      stopWatch.Stop();
+      var ts = stopWatch.Elapsed;
+      var elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
+      theForm.Progress(string.Empty, 0, "Time needed: " + elapsedTime);
+      return stopWatch.ElapsedMilliseconds;
     }
   }
 }

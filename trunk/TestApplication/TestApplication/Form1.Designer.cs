@@ -32,6 +32,12 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox19 = new System.Windows.Forms.GroupBox();
+      this.groupBox20 = new System.Windows.Forms.GroupBox();
+      this.RunSpatialIndexTest = new System.Windows.Forms.Button();
+      this.SelectSpatialIndexInputfile = new System.Windows.Forms.Button();
+      this.SpatialIndexInputfile = new System.Windows.Forms.TextBox();
+      this.label16 = new System.Windows.Forms.Label();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
       this.groupBox18 = new System.Windows.Forms.GroupBox();
@@ -120,6 +126,8 @@
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
+      this.groupBox19.SuspendLayout();
+      this.groupBox20.SuspendLayout();
       this.groupBox10.SuspendLayout();
       this.groupBox18.SuspendLayout();
       this.groupBox17.SuspendLayout();
@@ -169,6 +177,7 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox19);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox11);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox10);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox8);
@@ -184,14 +193,77 @@
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
       // 
+      // groupBox19
+      // 
+      this.groupBox19.BackColor = System.Drawing.Color.DarkSeaGreen;
+      this.groupBox19.Controls.Add(this.groupBox20);
+      this.groupBox19.Location = new System.Drawing.Point(5, 1460);
+      this.groupBox19.Name = "groupBox19";
+      this.groupBox19.Size = new System.Drawing.Size(205, 119);
+      this.groupBox19.TabIndex = 6;
+      this.groupBox19.TabStop = false;
+      this.groupBox19.Text = "Spatial Indexing";
+      // 
+      // groupBox20
+      // 
+      this.groupBox20.Controls.Add(this.RunSpatialIndexTest);
+      this.groupBox20.Controls.Add(this.SelectSpatialIndexInputfile);
+      this.groupBox20.Controls.Add(this.SpatialIndexInputfile);
+      this.groupBox20.Controls.Add(this.label16);
+      this.groupBox20.Location = new System.Drawing.Point(4, 19);
+      this.groupBox20.Name = "groupBox20";
+      this.groupBox20.Size = new System.Drawing.Size(195, 89);
+      this.groupBox20.TabIndex = 1;
+      this.groupBox20.TabStop = false;
+      this.groupBox20.Text = "Shapefiles";
+      // 
+      // RunSpatialIndexTest
+      // 
+      this.RunSpatialIndexTest.Location = new System.Drawing.Point(9, 58);
+      this.RunSpatialIndexTest.Name = "RunSpatialIndexTest";
+      this.RunSpatialIndexTest.Size = new System.Drawing.Size(180, 23);
+      this.RunSpatialIndexTest.TabIndex = 3;
+      this.RunSpatialIndexTest.Text = "Run test";
+      this.RunSpatialIndexTest.UseVisualStyleBackColor = true;
+      this.RunSpatialIndexTest.Click += new System.EventHandler(this.RunSpatialIndexTestClick);
+      // 
+      // SelectSpatialIndexInputfile
+      // 
+      this.SelectSpatialIndexInputfile.Location = new System.Drawing.Point(162, 32);
+      this.SelectSpatialIndexInputfile.Name = "SelectSpatialIndexInputfile";
+      this.SelectSpatialIndexInputfile.Size = new System.Drawing.Size(27, 20);
+      this.SelectSpatialIndexInputfile.TabIndex = 2;
+      this.SelectSpatialIndexInputfile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectSpatialIndexInputfile, "Select text file with on every line the location of a shapefile");
+      this.SelectSpatialIndexInputfile.UseVisualStyleBackColor = true;
+      this.SelectSpatialIndexInputfile.Click += new System.EventHandler(this.SelectSpatialIndexInputfileClick);
+      // 
+      // SpatialIndexInputfile
+      // 
+      this.SpatialIndexInputfile.AcceptsReturn = true;
+      this.SpatialIndexInputfile.Location = new System.Drawing.Point(9, 32);
+      this.SpatialIndexInputfile.Name = "SpatialIndexInputfile";
+      this.SpatialIndexInputfile.Size = new System.Drawing.Size(147, 20);
+      this.SpatialIndexInputfile.TabIndex = 1;
+      this.SpatialIndexInputfile.Text = global::TestApplication.Properties.Settings.Default.ShapefileInputText;
+      // 
+      // label16
+      // 
+      this.label16.AutoSize = true;
+      this.label16.Location = new System.Drawing.Point(6, 16);
+      this.label16.Name = "label16";
+      this.label16.Size = new System.Drawing.Size(179, 13);
+      this.label16.TabIndex = 0;
+      this.label16.Text = "Select a txt file with the files to open:";
+      // 
       // groupBox11
       // 
-      this.groupBox11.Location = new System.Drawing.Point(3, 1531);
+      this.groupBox11.Location = new System.Drawing.Point(0, 1622);
       this.groupBox11.Name = "groupBox11";
       this.groupBox11.Size = new System.Drawing.Size(205, 188);
       this.groupBox11.TabIndex = 5;
       this.groupBox11.TabStop = false;
-      this.groupBox11.Text = "groupBox11";
+      this.groupBox11.Text = "Todo";
       // 
       // groupBox10
       // 
@@ -204,7 +276,7 @@
       this.groupBox10.Controls.Add(this.groupBox12);
       this.groupBox10.Location = new System.Drawing.Point(3, 798);
       this.groupBox10.Name = "groupBox10";
-      this.groupBox10.Size = new System.Drawing.Size(205, 683);
+      this.groupBox10.Size = new System.Drawing.Size(205, 656);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
@@ -230,7 +302,7 @@
       this.RunWktShapefileTest.TabIndex = 9;
       this.RunWktShapefileTest.Text = "Run test";
       this.RunWktShapefileTest.UseVisualStyleBackColor = true;
-      this.RunWktShapefileTest.Click += new System.EventHandler(this.RunWktShapefileTest_Click);
+      this.RunWktShapefileTest.Click += new System.EventHandler(this.RunWktShapefileTestClick);
       // 
       // SelectWktShapefileInput
       // 
@@ -1072,6 +1144,9 @@
       this.splitContainer2.Panel1.PerformLayout();
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
+      this.groupBox19.ResumeLayout(false);
+      this.groupBox20.ResumeLayout(false);
+      this.groupBox20.PerformLayout();
       this.groupBox10.ResumeLayout(false);
       this.groupBox18.ResumeLayout(false);
       this.groupBox18.PerformLayout();
@@ -1194,6 +1269,12 @@
     private System.Windows.Forms.Button SelectWktShapefileInput;
     private System.Windows.Forms.TextBox WktShapefileInput;
     private System.Windows.Forms.Label label12;
+    private System.Windows.Forms.GroupBox groupBox19;
+    private System.Windows.Forms.GroupBox groupBox20;
+    private System.Windows.Forms.Button RunSpatialIndexTest;
+    private System.Windows.Forms.Button SelectSpatialIndexInputfile;
+    private System.Windows.Forms.TextBox SpatialIndexInputfile;
+    private System.Windows.Forms.Label label16;
   }
 }
 
