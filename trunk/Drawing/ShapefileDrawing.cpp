@@ -781,8 +781,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 						points.push_back(Point2D(x, y));
 					}
 					delete pdata;
+					delete[] data;
 				}
-				delete data;
 			}
 			else
 				continue;
