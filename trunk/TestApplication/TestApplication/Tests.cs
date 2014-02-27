@@ -311,6 +311,43 @@ namespace TestApplication
       MyAxMap.Redraw();
     }
 
+    /// <summary>Select a shapefile</summary>
+    /// <param name="textBox">
+    /// The text box.
+    /// </param>
+    /// <param name="title">
+    /// The title.
+    /// </param>
+    internal static void SelectAnyfile(TextBox textBox, string title)
+    {
+        using (var ofd = new OpenFileDialog
+        {
+            CheckFileExists = true,
+            Filter = @"All Files|*.*",
+            Multiselect = false,
+            SupportMultiDottedExtensions = true,
+            Title = title
+        })
+        {
+            if (textBox.Text != string.Empty)
+            {
+                var folder = Path.GetDirectoryName(textBox.Text);
+                if (folder != null)
+                {
+                    if (Directory.Exists(folder))
+                    {
+                        ofd.InitialDirectory = folder;
+                    }
+                }
+            }
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                textBox.Text = ofd.FileName;
+            }
+        }
+    }
+
     /// <summary>Select a grid file</summary>
     /// <param name="textBox">
     /// The text box.
@@ -562,6 +599,21 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The Shapefile to grid test has finished.");
+    }
+
+    /// <summary>Run the OGRInfo test</summary>
+    /// <param name="fileName">
+    /// The file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static void RunOGRInfoTest(string fileName, Form1 theForm)
+    {
+        var utils = new Utils { GlobalCallback = theForm };
+        string Output = utils.OGRInfo(fileName, String.Empty, Path.GetFileNameWithoutExtension(fileName), theForm);
+        MessageBox.Show(Output, "OGRInfo Test", MessageBoxButtons.OK);
+        theForm.Progress(string.Empty, 100, "The OGRInfo test has finished.");
     }
 
     /// <summary>Run the Rasterize shapefile test</summary>

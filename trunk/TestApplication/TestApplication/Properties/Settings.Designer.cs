@@ -262,5 +262,17 @@ namespace TestApplication.Properties {
                 this["SpatialIndexInputfile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OGRInfoInputfile {
+            get {
+                return ((string)(this["OGRInfoInputfile"]));
+            }
+            set {
+                this["OGRInfoInputfile"] = value;
+            }
+        }
     }
 }

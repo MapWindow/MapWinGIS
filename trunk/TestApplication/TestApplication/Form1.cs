@@ -537,5 +537,15 @@ namespace TestApplication
     {
       Tests.RunSpatialIndexTest(this.SpatialIndexInputfile.Text, this);
     }
+
+    private void RunOGRInfoTest_Click(object sender, EventArgs e)
+    {
+        Tests.RunOGRInfoTest(this.OGRInfoInputfile.Text, this);
+    }
+
+    private void SelectOGRInfoFile_Click(object sender, EventArgs e)
+    {
+        Tests.SelectAnyfile(this.OGRInfoInputfile, "Select file");
+    }
   }
 }
