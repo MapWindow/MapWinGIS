@@ -2346,7 +2346,7 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
             oRing.addPoint( atof(sArr[iArg+3]), atof(sArr[iArg+2]) );
             oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+2]) );
 
-            poSpatialFilter = new OGRPolygon();
+            poSpatialFilter = OGRGeometryFactory::createGeometry(wkbPolygon);
             ((OGRPolygon *) poSpatialFilter)->addRing( &oRing );
             iArg += 4;
         }

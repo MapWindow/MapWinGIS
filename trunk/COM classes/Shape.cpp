@@ -392,7 +392,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 				this->get_XY(0, &x, &y, &ret);
 				_isValidReason.Format("Polygon must be clockwise [%f %f]", x, y);
 				//_isValidReason = "";
-				delete oGeom;
+				OGRGeometryFactory::destroyGeometry(oGeom);
 				return S_OK;
 			}
 		}
@@ -403,7 +403,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	
 	hGeosGeom = GeosHelper::ExportToGeos(oGeom);
 
-	delete oGeom;
+	OGRGeometryFactory::destroyGeometry(oGeom);
 
 	if (hGeosGeom == NULL)
 	{
@@ -1190,7 +1190,7 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
-		delete oGeom1;
+		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 	
@@ -1208,8 +1208,8 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 		case srWithin:		res = oGeom1->Within(oGeom2); break;
 	}
 	
-	delete oGeom1;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 
 	*retval = res;
 	return S_OK;
@@ -1299,7 +1299,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
-		delete oGeom1;
+		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 	
@@ -1324,8 +1324,8 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 			break;
 	}
 	
-	delete oGeom1;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	
 	if (oGeom3 == NULL) 
 		return S_OK;
@@ -1335,7 +1335,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	this->get_ShapeType(&shpType);
 	shp = GeometryConverter::GeometryToShape(oGeom3, Utility::ShapeTypeIsM(shpType), oReturnType);
 	
-	delete oGeom3;
+	OGRGeometryFactory::destroyGeometry(oGeom3);
 
 	*retval = shp;
 	return S_OK;
@@ -1365,14 +1365,14 @@ STDMETHODIMP CShape::Distance(IShape* Shape, double* retval)
 	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
-		delete oGeom1;
+		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 
 	*retval = oGeom1->Distance(oGeom2);
 
-	delete oGeom1;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	return S_OK;
 }
 
@@ -1420,7 +1420,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 		#endif
 	}
 
-	delete oGeom1;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
 	if (oGeom2 == NULL)	return S_FALSE;
 	
 	ShpfileType shpType;
@@ -1430,7 +1430,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	
 	return S_OK;
 }
@@ -1451,7 +1451,7 @@ STDMETHODIMP CShape::Boundry(IShape** retval)
 	if (oGeom1 == NULL) return S_OK;
 	
 	oGeom2 = oGeom1->getBoundary();
-	delete oGeom1;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
 
 	if (oGeom2 == NULL)	return S_OK;
 	
@@ -1462,7 +1462,7 @@ STDMETHODIMP CShape::Boundry(IShape** retval)
 	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	
 	return S_OK;
 }
@@ -1483,7 +1483,7 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 	if (oGeom1 == NULL) return S_OK;
 	
 	oGeom2 = oGeom1->ConvexHull();
-	delete oGeom1;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
 
 	if (oGeom2 == NULL)	return S_OK;
 	
@@ -1494,7 +1494,7 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	
 	return S_OK;
 }
@@ -1536,15 +1536,15 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
-		delete oGeom1;
+		OGRGeometryFactory::destroyGeometry(oGeom1);
 		return S_OK;
 	}
 	
 	OGRGeometry* oGeom3 = NULL;
 	oGeom3 = oGeom1->Intersection(oGeom2);
 
-	delete oGeom1;
-	delete oGeom2;
+	OGRGeometryFactory::destroyGeometry(oGeom1);
+	OGRGeometryFactory::destroyGeometry(oGeom2);
 	
 	if (oGeom3 == NULL) return S_OK;
 	
@@ -1553,7 +1553,7 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 
 	std::vector<IShape*> vShapes;
 	if (!GeometryConverter::GeometryToShapes(oGeom3, &vShapes, Utility::ShapeTypeIsM(shpType)))return S_OK;
-	delete oGeom3;
+	OGRGeometryFactory::destroyGeometry(oGeom3);
 
 	if (vShapes.size()!=0) 
 	{
@@ -1583,7 +1583,7 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 		return S_OK;
 	}
 
-	OGRLineString* oLine = new OGRLineString();
+	OGRLineString* oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
 	oLine->addPoint(xMin,(yMax + yMin)/2);
 	oLine->addPoint(xMax,(yMax + yMin)/2);
 	
@@ -1591,7 +1591,8 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	if (oResult == NULL)
 	{
 		// TODO: add error code
-		delete oLine; return S_OK;
+		// Should we destroy the oGeom object?
+		OGRGeometryFactory::destroyGeometry(oLine); return S_OK;
 	}
 	
 	// Intersection can be line or point; for polygons we are interested
@@ -1648,9 +1649,9 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	}
 	
 	// cleaning
-	if (oLine)	delete oLine; 
-	if (oGeom)	delete oGeom; 
-	if (oResult)delete oResult;
+	if (oLine)	OGRGeometryFactory::destroyGeometry(oLine); 
+	if (oGeom)	OGRGeometryFactory::destroyGeometry(oGeom); 
+	if (oResult)OGRGeometryFactory::destroyGeometry(oResult);
 	return S_OK;
 }
 #pragma endregion
@@ -2225,7 +2226,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 					vShapes.push_back(shp);
 				}
 			}
-			delete geom;
+			OGRGeometryFactory::destroyGeometry(geom);
 		}
 	}
 	return vShapes.size() > 0;
@@ -2730,7 +2731,7 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 		char* s;
 		geom->exportToWkt(&s);
 		(*retVal) = A2BSTR(s);
-		delete geom;
+		OGRGeometryFactory::destroyGeometry(geom);
 		delete[] s;
 	}
 	else {

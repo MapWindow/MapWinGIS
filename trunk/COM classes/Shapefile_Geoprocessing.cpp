@@ -151,7 +151,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 						}
 					}
 				}
-				delete oGeom2;
+				OGRGeometryFactory::destroyGeometry(oGeom2);
 			}
 		}
 	}
@@ -199,7 +199,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	for(int i = 0; i < (int)vGeometries.size(); i++)
 	{	
 		if (vGeometries[i] !=NULL) 
-			delete vGeometries[i];		
+			OGRGeometryFactory::destroyGeometry(vGeometries[i]);		
 	}
 
 	if (qTree !=NULL) 
@@ -270,11 +270,11 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 			res = oGeom->Intersect (oBox);
 
 		if (res) results.insert(shapeIds[i]);
-		delete oGeom;
+		OGRGeometryFactory::destroyGeometry(oGeom);
 	}
 	
 	if (qTree!=NULL) delete qTree;
-	if (oBox!=NULL)	delete oBox;
+	if (oBox!=NULL)	OGRGeometryFactory::destroyGeometry(oBox);
 	retval = Templates::Set2SafeArray(&results, VT_I4, arr);
 	return retval;
 }
@@ -690,7 +690,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 						count++;
 					}
 				}
-				delete oGeom;
+				OGRGeometryFactory::destroyGeometry(oGeom);
 			}
 		}
 	}

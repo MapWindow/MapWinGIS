@@ -50,7 +50,7 @@ GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
 	if (oGeom != NULL)
 	{
 		GEOSGeometry* result = GeosHelper::ExportToGeos(oGeom);
-		delete oGeom;
+		OGRGeometryFactory::destroyGeometry(oGeom);
 		return result;
 	}
 	else 
@@ -99,7 +99,7 @@ bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShap
 			oForceType = wkbLinearRing;
 
 		bool result = GeometryToShapes(oGeom, vShapes, isM);
-		delete oGeom;
+		OGRGeometryFactory::destroyGeometry(oGeom);
 
 		if (substitute)
 			GeosHelper::DestroyGeometry(gsGeom);
@@ -199,7 +199,11 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		{
 			shp->get_XYZ(0, &x, &y, &z);
 		}
-		oGeom = new OGRPoint(x,y,z);
+		OGRPoint *oPnt = (OGRPoint*)OGRGeometryFactory::createGeometry(wkbPoint);
+		oPnt->setX(x);
+		oPnt->setY(y);
+		oPnt->setZ(z);
+		oGeom = oPnt;
 	}
 
 	else if (shptype == SHP_MULTIPOINT || shptype == SHP_MULTIPOINTM || shptype == SHP_MULTIPOINTZ)
@@ -208,7 +212,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 			oGeom = NULL;
 		else
 		{
-			OGRMultiPoint *oMPnt = new OGRMultiPoint();
+			OGRMultiPoint *oMPnt = (OGRMultiPoint*)OGRGeometryFactory::createGeometry(wkbMultiPoint);
 			for( int i = 0; i < numPoints; i++ )
 			{
 				if (shptype == SHP_MULTIPOINTM)
@@ -220,7 +224,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 				{
 					shp->get_XYZ(i, &x, &y, &z);
 				}
-				OGRPoint* oPnt = new OGRPoint(x,y,z);
+				OGRPoint *oPnt = (OGRPoint*)OGRGeometryFactory::createGeometry(wkbPoint);
+				oPnt->setX(x);
+				oPnt->setY(y);
+				oPnt->setZ(z);
 				oMPnt->addGeometryDirectly(oPnt);		// no memory release is needed when "direct" methods are used
 			}
 			oGeom = oMPnt;
@@ -233,20 +240,20 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		
 		else if (numParts == 1)
 		{	
-			OGRLineString *oLine = new OGRLineString();
+			OGRLineString *oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
 			AddPoints(shp, oLine, 0, numPoints);
 			oGeom = oLine;
 		}
 		else
-		{	
-			OGRMultiLineString* oMLine = new OGRMultiLineString();
+		{
+			OGRMultiLineString* oMLine = (OGRMultiLineString*)OGRGeometryFactory::createGeometry(wkbMultiLineString);
 			
 			for( int j = 0; j < numParts; j++ )
 			{
 				shp->get_Part(j, &beg_part);
 				shp->get_EndOfPart(j, &end_part);
 			
-				OGRLineString* oLine = new OGRLineString();
+				OGRLineString* oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
 				AddPoints(shp, oLine, beg_part, end_part + 1);
 				oMLine->addGeometryDirectly(oLine);
 			}
@@ -261,10 +268,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 
 		if (numParts == 1)
 		{	
-			OGRLinearRing* oRing = new OGRLinearRing();
+			OGRLinearRing* oRing = (OGRLinearRing*)OGRGeometryFactory::createGeometry(wkbLinearRing);
 			AddPoints(shp, oRing, 0, numPoints);
 
-			OGRPolygon* oPoly = new OGRPolygon();
+			OGRPolygon* oPoly = (OGRPolygon*)OGRGeometryFactory::createGeometry(wkbPolygon);
 			oPoly->addRingDirectly(oRing);
 			oGeom = oPoly;
 		}
@@ -277,10 +284,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 				shp->get_Part(j, &beg_part);
 				shp->get_EndOfPart(j, &end_part);
 				
-				OGRLinearRing* oRing = new OGRLinearRing();
+				OGRLinearRing* oRing = (OGRLinearRing*)OGRGeometryFactory::createGeometry(wkbLinearRing);
 				AddPoints(shp, oRing, beg_part, end_part + 1);
 				
-				tabPolygons[j] = new OGRPolygon();
+				tabPolygons[j] = (OGRPolygon*)OGRGeometryFactory::createGeometry(wkbPolygon);
 				tabPolygons[j]->addRingDirectly(oRing);
 			}				
 			int isValidGeometry;

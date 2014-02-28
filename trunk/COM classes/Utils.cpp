@@ -3405,7 +3405,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 		OGRGeometry* geomClip = GeometryConverter::ShapeToGeometry(ClipPolygon);
 		if (geomClip == NULL)
 		{
-			delete geomSubject;
+			OGRGeometryFactory::destroyGeometry(geomSubject);
 			return S_OK;
 		}
 		
@@ -3426,8 +3426,8 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 				break;
 		}
 		
-		delete geomClip;
-		delete geomSubject;
+		OGRGeometryFactory::destroyGeometry(geomClip);
+		OGRGeometryFactory::destroyGeometry(geomSubject);
 
 		if (oGeom != NULL)
 		{
@@ -3449,7 +3449,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 					}
 				}
 			}
-			delete oGeom;
+			OGRGeometryFactory::destroyGeometry(oGeom);
 		}
 	}
 	else

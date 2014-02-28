@@ -538,9 +538,6 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		m_numImages++;
 	}
 
-	if (gridColorScheme != NULL)
-		gridColorScheme->Release();
-
 	LockWindow( lmUnlock );
 	return layerHandle;
 }
