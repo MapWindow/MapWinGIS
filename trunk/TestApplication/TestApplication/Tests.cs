@@ -134,9 +134,8 @@ namespace TestApplication
         // Now do some selecting to time without spatial index.
         var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
 
-        // for debugging, because CreateSpatialIndex does not work;
+        // for debugging
         Thread.Sleep(1000);
-        continue;
 
         // Create index:
         if (!sf.CreateSpatialIndex(sf.Filename))
@@ -157,7 +156,7 @@ namespace TestApplication
         // Check if the files are created:
         if (File.Exists(baseFilename + ".mwd"))
         {
-          theForm.Progress(string.Empty, 0, "The mwd file exists");
+          //theForm.Progress(string.Empty, 0, "The mwd file exists");
         }
         else
         {
@@ -166,7 +165,7 @@ namespace TestApplication
 
         if (File.Exists(baseFilename + ".mwx"))
         {
-          theForm.Progress(string.Empty, 0, "The mwx file exists");
+          //theForm.Progress(string.Empty, 0, "The mwx file exists");
         }
         else
         {
@@ -180,7 +179,7 @@ namespace TestApplication
         theForm.Progress(
           string.Empty,
           0,
-          string.Format("Select shapes without spatial index took {0} seconds, with spatial index it took {1}", timeWithoutIndex / 1000, timeWithIndex / 1000));
+          string.Format("Select shapes without spatial index took {0} seconds, with spatial index it took {1}", timeWithoutIndex / 1000.0, timeWithIndex / 1000.0));
 
         Application.DoEvents();
         Thread.Sleep(1000);
@@ -855,7 +854,7 @@ namespace TestApplication
       stopWatch.Stop();
       var ts = stopWatch.Elapsed;
       var elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
-      theForm.Progress(string.Empty, 0, "Time needed: " + elapsedTime);
+      //theForm.Progress(string.Empty, 0, "Time needed: " + elapsedTime);
       return stopWatch.ElapsedMilliseconds;
     }
   }
