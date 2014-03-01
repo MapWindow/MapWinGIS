@@ -1323,7 +1323,7 @@
 				RegisterOutput="false"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386 /ignore:4099 "
-				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex.lib geos_c.lib libtiff_i.lib"
+				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-32.lib geos_c.lib libtiff_i.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
 				Version="4.9"

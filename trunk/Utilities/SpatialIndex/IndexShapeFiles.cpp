@@ -33,7 +33,7 @@ namespace IndexSearching
 	**
 	** Function to create inde file on a shape file.
 	**
-	**   Creates baseName.mwd and baseName.mwx
+	**   Creates baseName.dat and baseName.idx
 	**
 	** ************************************************************************* */
 	bool createIndexFile(double utilization, int capacity, string baseName)

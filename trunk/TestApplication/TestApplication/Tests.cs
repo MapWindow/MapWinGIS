@@ -115,7 +115,9 @@ namespace TestApplication
         // Remove index files:
         var baseFilename = Path.Combine(Path.GetDirectoryName(line), Path.GetFileNameWithoutExtension(line));
         File.Delete(baseFilename + ".mwd");
+        File.Delete(baseFilename + ".dat");
         File.Delete(baseFilename + ".mwx");
+        File.Delete(baseFilename + ".idx");
 
         // Open shapefile:
         var sf = Fileformats.OpenShapefile(line, theForm);
@@ -154,7 +156,7 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Check if the files are created:
-        if (File.Exists(baseFilename + ".mwd"))
+        if (File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat"))
         {
           //theForm.Progress(string.Empty, 0, "The mwd file exists");
         }
@@ -163,7 +165,7 @@ namespace TestApplication
           theForm.Error(string.Empty, "The mwd file does not exists");
         }
 
-        if (File.Exists(baseFilename + ".mwx"))
+        if (File.Exists(baseFilename + ".mwx") || File.Exists(baseFilename + ".idx"))
         {
           //theForm.Progress(string.Empty, 0, "The mwx file exists");
         }

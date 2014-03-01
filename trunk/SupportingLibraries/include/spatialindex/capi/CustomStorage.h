@@ -1,30 +1,31 @@
 /******************************************************************************
- * $Id: CustomStorage.h 1385 2009-06-17 13:45:16Z nitro $
- *
  * Project:  libsidx - A C API wrapper around libspatialindex
  * Purpose:  C++ object declarations to implement the custom storage manager.
- * Author:   Matthias (nitro)
- *
+ * Author:   Matthias (nitro), nitro@dr-code.org
  ******************************************************************************
  * Copyright (c) 2010, Matthias (nitro)
  *
  * All rights reserved.
  * 
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+******************************************************************************/
 
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
- * details.
- * 
- * You should have received a copy of the GNU Lesser General Public License 
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ****************************************************************************/
- 
 #pragma once
 
 namespace SpatialIndex
@@ -33,15 +34,22 @@ namespace SpatialIndex
 	{
         struct CustomStorageManagerCallbacks
         {
-            CustomStorageManagerCallbacks() : context(0), createCallback(0), destroyCallback(0), loadByteArrayCallback(0), storeByteArrayCallback(0), deleteByteArrayCallback(0)
+            CustomStorageManagerCallbacks() 
+            : context(0)
+            , createCallback(0)
+            , destroyCallback(0)
+            , loadByteArrayCallback(0)
+            , storeByteArrayCallback(0)
+            , deleteByteArrayCallback(0)
             {}
 
             void* context;
-            void (*createCallback)( const void* context, int* errorCode ); 
-            void (*destroyCallback)( const void* context, int* errorCode ); 
-            void (*loadByteArrayCallback)( const void* context, const id_type page, uint32_t* len, byte** data, int* errorCode ); 
-            void (*storeByteArrayCallback)( const void* context, id_type* page, const uint32_t len, const byte* const data, int* errorCode ); 
-            void (*deleteByteArrayCallback)( const void* context, const id_type page, int* errorCode ); 
+            void (*createCallback)( const void* context, int* errorCode );
+            void (*destroyCallback)( const void* context, int* errorCode );
+			void (*flushCallback)( const void* context, int* errorCode );
+            void (*loadByteArrayCallback)( const void* context, const id_type page, uint32_t* len, byte** data, int* errorCode );
+            void (*storeByteArrayCallback)( const void* context, id_type* page, const uint32_t len, const byte* const data, int* errorCode );
+            void (*deleteByteArrayCallback)( const void* context, const id_type page, int* errorCode );
         };
 
         class CustomStorageManager : public SpatialIndex::IStorageManager
@@ -56,6 +64,7 @@ namespace SpatialIndex
 
 	        virtual ~CustomStorageManager();
 
+			virtual void flush();
 	        virtual void loadByteArray(const id_type page, uint32_t& len, byte** data);
 	        virtual void storeByteArray(id_type& page, const uint32_t len, const byte* const data);
 	        virtual void deleteByteArray(const id_type page);
@@ -65,7 +74,7 @@ namespace SpatialIndex
 
             inline void processErrorCode(int errorCode, const id_type page);
         }; // CustomStorageManager
-    
+
         // factory function
         IStorageManager* returnCustomStorageManager(Tools::PropertySet& in);
     }

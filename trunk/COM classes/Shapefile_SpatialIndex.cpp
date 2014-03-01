@@ -35,8 +35,8 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
     try 
 	{
 		hasSpatialIndex	= FALSE;
-		CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
-		CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
+		CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "dat";
+		CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "idx";
 		if (Utility::fileExists(mwdfileName) && Utility::fileExists(mwxfileName))
 		{
 			hasSpatialIndex = TRUE;
@@ -199,7 +199,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL *re
 		baseName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 4);
 	    
 		// 0.9 = utilization rate, 100 = Node Capacity
-		// Creates two files baseName.mwd and baseName.mwx
+		// Creates two files baseName.dat and baseName.idx
 		try 
 		{
 			if (!IndexSearching::createSpatialIndex(0.9, spatialIndexNodeCapacity, (char *)baseName.c_str()))
