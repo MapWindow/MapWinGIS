@@ -29,7 +29,7 @@
 
 namespace SpatialIndex
 {
-	class SIDX_DLL MovingRegion : public TimeRegion, public IEvolvingShape
+	class MovingRegion : public TimeRegion, public IEvolvingShape
 	{
         using Region::getLow;
         using Region::getHigh;
@@ -162,9 +162,9 @@ namespace SpatialIndex
 		double* m_pVLow;
 		double* m_pVHigh;
 
-		friend SIDX_DLL std::ostream& operator<<(std::ostream& os, const MovingRegion& r);
+		friend std::ostream& operator<<(std::ostream& os, const MovingRegion& r);
 	}; // MovingRegion
 
 	typedef Tools::PoolPointer<MovingRegion> MovingRegionPtr;
-	SIDX_DLL std::ostream& operator<<(std::ostream& os, const MovingRegion& r);
+	std::ostream& operator<<(std::ostream& os, const MovingRegion& r);
 }

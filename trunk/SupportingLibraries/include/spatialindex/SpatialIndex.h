@@ -42,14 +42,14 @@ namespace SpatialIndex
 
 	typedef int64_t id_type;
 
-	SIDX_DLL enum CommandType
+	enum CommandType
 	{
 		CT_NODEREAD = 0x0,
 		CT_NODEDELETE,
 		CT_NODEWRITE
 	};
 
-	class SIDX_DLL InvalidPageException : public Tools::Exception
+	class InvalidPageException : public Tools::Exception
 	{
 	public:
 		InvalidPageException(id_type id);
@@ -64,7 +64,7 @@ namespace SpatialIndex
 	// Interfaces
 	//
 
-	class SIDX_DLL IShape : public Tools::ISerializable
+	class IShape : public Tools::ISerializable
 	{
 	public:
 		virtual bool intersectsShape(const IShape& in) const = 0;
@@ -78,7 +78,7 @@ namespace SpatialIndex
 		virtual ~IShape() {}
 	}; // IShape
 
-	class SIDX_DLL ITimeShape : public Tools::IInterval
+	class ITimeShape : public Tools::IInterval
 	{
 	public:
 		virtual bool intersectsShapeInTime(const ITimeShape& in) const = 0;
@@ -94,7 +94,7 @@ namespace SpatialIndex
 		virtual ~ITimeShape() {}
 	}; // ITimeShape
 
-	class SIDX_DLL IEvolvingShape
+	class IEvolvingShape
 	{
 	public:
 		virtual void getVMBR(Region& out) const = 0;
@@ -102,7 +102,7 @@ namespace SpatialIndex
 		virtual ~IEvolvingShape() {}
 	}; // IEvolvingShape
 
-	class SIDX_DLL IEntry : public Tools::IObject
+	class IEntry : public Tools::IObject
 	{
 	public:
 		virtual id_type getIdentifier() const = 0;
@@ -110,7 +110,7 @@ namespace SpatialIndex
 		virtual ~IEntry() {}
 	}; // IEntry
 
-	class SIDX_DLL INode : public IEntry, public Tools::ISerializable
+	class INode : public IEntry, public Tools::ISerializable
 	{
 	public:
 		virtual uint32_t getChildrenCount() const = 0;
@@ -123,28 +123,28 @@ namespace SpatialIndex
 		virtual ~INode() {}
 	}; // INode
 
-	class SIDX_DLL IData : public IEntry
+	class IData : public IEntry
 	{
 	public:
 		virtual void getData(uint32_t& len, byte** data) const = 0;
 		virtual ~IData() {}
 	}; // IData
 
-	class SIDX_DLL IDataStream : public Tools::IObjectStream
+	class IDataStream : public Tools::IObjectStream
 	{
 	public:
 		virtual IData* getNext() = 0;
 		virtual ~IDataStream() {}
 	}; // IDataStream
 
-	class SIDX_DLL ICommand
+	class ICommand
 	{
 	public:
 		virtual void execute(const INode& in) = 0;
 		virtual ~ICommand() {}
 	}; // ICommand
 
-	class SIDX_DLL INearestNeighborComparator
+	class INearestNeighborComparator
 	{
 	public:
 		virtual double getMinimumDistance(const IShape& query, const IShape& entry) = 0;
@@ -152,7 +152,7 @@ namespace SpatialIndex
 		virtual ~INearestNeighborComparator() {}
 	}; // INearestNeighborComparator
 
-	class SIDX_DLL IStorageManager
+	class IStorageManager
 	{
 	public:
 		virtual void loadByteArray(const id_type id, uint32_t& len, byte** data) = 0;
@@ -161,7 +161,7 @@ namespace SpatialIndex
 		virtual ~IStorageManager() {}
 	}; // IStorageManager
 
-	class SIDX_DLL IVisitor
+	class IVisitor
 	{
 	public:
 		virtual void visitNode(const INode& in) = 0;
@@ -170,14 +170,14 @@ namespace SpatialIndex
 		virtual ~IVisitor() {}
 	}; // IVisitor
 
-	class SIDX_DLL IQueryStrategy
+	class IQueryStrategy
 	{
 	public:
 		virtual void getNextEntry(const IEntry& previouslyFetched, id_type& nextEntryToFetch, bool& bFetchNextEntry) = 0;
 		virtual ~IQueryStrategy() {}
 	}; // IQueryStrategy
 
-	class SIDX_DLL IStatistics
+	class IStatistics
 	{
 	public:
 		virtual uint64_t getReads() const = 0;
@@ -187,7 +187,7 @@ namespace SpatialIndex
 		virtual ~IStatistics() {}
 	}; // IStatistics
 
-	class SIDX_DLL ISpatialIndex
+	class ISpatialIndex
 	{
 	public:
 		virtual void insertData(uint32_t len, const byte* pData, const IShape& shape, id_type shapeIdentifier) = 0;
@@ -209,13 +209,13 @@ namespace SpatialIndex
 
 	namespace StorageManager
 	{
-		SIDX_DLL enum StorageManagerConstants
+		enum StorageManagerConstants
 		{
 			EmptyPage = -0x1,
 			NewPage = -0x1
 		};
 
-		class SIDX_DLL IBuffer : public IStorageManager
+		class IBuffer : public IStorageManager
 		{
 		public:
 			virtual uint64_t getHits() = 0;
@@ -223,22 +223,22 @@ namespace SpatialIndex
 			virtual ~IBuffer() {}
 		}; // IBuffer
 
-		SIDX_DLL  IStorageManager* returnMemoryStorageManager(Tools::PropertySet& in);
-		SIDX_DLL  IStorageManager* createNewMemoryStorageManager();
+		 IStorageManager* returnMemoryStorageManager(Tools::PropertySet& in);
+		 IStorageManager* createNewMemoryStorageManager();
 
-		SIDX_DLL  IStorageManager* returnDiskStorageManager(Tools::PropertySet& in);
-		SIDX_DLL  IStorageManager* createNewDiskStorageManager(std::string& baseName, uint32_t pageSize);
-		SIDX_DLL  IStorageManager* loadDiskStorageManager(std::string& baseName);
+		 IStorageManager* returnDiskStorageManager(Tools::PropertySet& in);
+		 IStorageManager* createNewDiskStorageManager(std::string& baseName, uint32_t pageSize);
+		 IStorageManager* loadDiskStorageManager(std::string& baseName);
 
-		SIDX_DLL  IBuffer* returnRandomEvictionsBuffer(IStorageManager& ind, Tools::PropertySet& in);
-		SIDX_DLL  IBuffer* createNewRandomEvictionsBuffer(IStorageManager& in, uint32_t capacity, bool bWriteThrough);
+		 IBuffer* returnRandomEvictionsBuffer(IStorageManager& ind, Tools::PropertySet& in);
+		 IBuffer* createNewRandomEvictionsBuffer(IStorageManager& in, uint32_t capacity, bool bWriteThrough);
 	}
 
 	//
 	// Global functions
 	//
-	SIDX_DLL  std::ostream& operator<<(std::ostream&, const ISpatialIndex&);
-	SIDX_DLL  std::ostream& operator<<(std::ostream&, const IStatistics&);
+	 std::ostream& operator<<(std::ostream&, const ISpatialIndex&);
+	 std::ostream& operator<<(std::ostream&, const IStatistics&);
 }
 
 #include "Point.h"

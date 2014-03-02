@@ -29,7 +29,7 @@
 
 namespace SpatialIndex
 {
-	class SIDX_DLL TimeRegion : public Region, public ITimeShape
+	class TimeRegion : public Region, public ITimeShape
 	{
 	public:
 		TimeRegion();
@@ -101,9 +101,9 @@ namespace SpatialIndex
 		double m_startTime;
 		double m_endTime;
 
-		friend SIDX_DLL std::ostream& operator<<(std::ostream& os, const TimeRegion& r);
+		friend std::ostream& operator<<(std::ostream& os, const TimeRegion& r);
 	}; // TimeRegion
 
 	typedef Tools::PoolPointer<TimeRegion> TimeRegionPtr;
-	SIDX_DLL std::ostream& operator<<(std::ostream& os, const TimeRegion& r);
+	std::ostream& operator<<(std::ostream& os, const TimeRegion& r);
 }

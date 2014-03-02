@@ -32,24 +32,24 @@ namespace SpatialIndex
 {
 	namespace TPRTree
 	{
-		SIDX_DLL enum TPRTreeVariant
+		enum TPRTreeVariant
 		{
 			TPRV_RSTAR = 0x0
 		};
 
-		SIDX_DLL enum PersistenObjectIdentifier
+		enum PersistenObjectIdentifier
 		{
 			PersistentIndex = 0x1,
 			PersistentLeaf = 0x2
 		};
 
-		SIDX_DLL enum RangeQueryType
+		enum RangeQueryType
 		{
 			ContainmentQuery = 0x1,
 			IntersectionQuery = 0x2
 		};
 
-		class SIDX_DLL Data : public IData, public Tools::ISerializable
+		class Data : public IData, public Tools::ISerializable
 		{
 		public:
 			Data(uint32_t len, byte* pData, MovingRegion& r, id_type id);
@@ -69,8 +69,8 @@ namespace SpatialIndex
 			uint32_t m_dataLength;
 		}; // Data
 
-		SIDX_DLL ISpatialIndex* returnTPRTree(IStorageManager& ind, Tools::PropertySet& in);
-		SIDX_DLL ISpatialIndex* createNewTPRTree(
+		ISpatialIndex* returnTPRTree(IStorageManager& ind, Tools::PropertySet& in);
+		ISpatialIndex* createNewTPRTree(
 			IStorageManager& sm,
 			double fillFactor,
 			uint32_t indexCapacity,
@@ -80,6 +80,6 @@ namespace SpatialIndex
 			double horizon,
 			id_type& indexIdentifier
 		);
-		SIDX_DLL ISpatialIndex* loadTPRTree(IStorageManager& in, id_type indexIdentifier);
+		ISpatialIndex* loadTPRTree(IStorageManager& in, id_type indexIdentifier);
 	}
 }

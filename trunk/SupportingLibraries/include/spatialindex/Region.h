@@ -29,7 +29,7 @@
 
 namespace SpatialIndex
 {
-	class SIDX_DLL Region : public Tools::IObject, public virtual IShape
+	class Region : public Tools::IObject, public virtual IShape
 	{
 	public:
 		Region();
@@ -98,9 +98,9 @@ namespace SpatialIndex
 		double* m_pLow;
 		double* m_pHigh;
 
-		friend SIDX_DLL std::ostream& operator<<(std::ostream& os, const Region& r);
+		friend std::ostream& operator<<(std::ostream& os, const Region& r);
 	}; // Region
 	
 	typedef Tools::PoolPointer<Region> RegionPtr;
-	SIDX_DLL std::ostream& operator<<(std::ostream& os, const Region& r);
+	std::ostream& operator<<(std::ostream& os, const Region& r);
 }

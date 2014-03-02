@@ -29,7 +29,7 @@
 
 namespace SpatialIndex
 {
-	class SIDX_DLL LineSegment : public Tools::IObject, public virtual IShape
+	class LineSegment : public Tools::IObject, public virtual IShape
 	{
 	public:
 		LineSegment();
@@ -83,7 +83,7 @@ namespace SpatialIndex
 
 		friend class Region;
 		friend class Point;
-		friend SIDX_DLL std::ostream& operator<<(std::ostream& os, const LineSegment& pt);
+		friend std::ostream& operator<<(std::ostream& os, const LineSegment& pt);
 
     protected:
 
@@ -98,6 +98,6 @@ namespace SpatialIndex
 
 	}; // LineSegment
 
-	SIDX_DLL std::ostream& operator<<(std::ostream& os, const LineSegment& pt);
+	std::ostream& operator<<(std::ostream& os, const LineSegment& pt);
 }
 

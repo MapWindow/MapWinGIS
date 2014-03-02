@@ -2489,12 +2489,12 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 		if (this->ReprojectCore(newProjection, reprojectedCount, NULL, true))
 		{
 			// spatial index must be deleted, as it became useful all the same
-			CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "dat";
+			CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
 			if (Utility::fileExists(name))
 			{
 				remove(name);
 			}
-			name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "idx";
+			name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
 			if (Utility::fileExists(name))
 			{
 				remove(name);
