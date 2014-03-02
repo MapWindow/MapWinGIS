@@ -761,46 +761,62 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
         var aggregatedSf = sf.AggregateShapes(false, fieldIndex);
 
-        // The aggregate method is returning invalid shapes, fix them first:
-        Shapefile fixedSf;
-
-        theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
-        aggregatedSf.GlobalCallback = theForm;
-        if (!aggregatedSf.FixUpShapes(out fixedSf))
+        // Check if the result still contained invalid shapes:
+        Shapefile correctSf;
+        if (!aggregatedSf.HasInvalidShapes())
         {
-          theForm.Error(string.Empty, "The fixup returned false");
-          return;
+          correctSf = aggregatedSf;
+          theForm.Progress(string.Empty, 0, "The aggregated shapefile has no invalid shapes");
         }
-
-        // Close file, because we continue with the fixed version:
-        aggregatedSf.Close();
-
-        // Do some checks:)
-        if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
+        else
         {
-          return;
+          theForm.Progress(string.Empty, 0, string.Empty);
+          theForm.Progress(string.Empty, 0, "Warning! The aggregated shapefile has invalid shapes");
+          
+          // The aggregate method is returning invalid shapes, fix them first:
+          Shapefile fixedSf;
+
+          theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
+          aggregatedSf.GlobalCallback = theForm;
+          if (!aggregatedSf.FixUpShapes(out fixedSf))
+          {
+            theForm.Error(string.Empty, "The fixup returned false");
+            return;
+          }
+
+          // Close file, because we continue with the fixed version:
+          aggregatedSf.Close();
+
+          // Do some checks:)
+          if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
+          {
+            return;
+          }
+
+          // Continue with this sf:
+          correctSf = fixedSf;
         }
 
         // Save result:
         var newFilename = shapefilename.Replace(".shp", "-aggregate.shp");
         Helper.DeleteShapefile(newFilename);
-        fixedSf.SaveAs(newFilename, theForm);
+        correctSf.SaveAs(newFilename, theForm);
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
-        Helper.ColorShapes(ref fixedSf, 0, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
+        Helper.ColorShapes(ref correctSf, 0, tkMapColor.YellowGreen, tkMapColor.RoyalBlue, true);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(fixedSf, true);
+        MyAxMap.AddLayer(correctSf, true);
 
         theForm.Progress(
           string.Empty,
           100,
           string.Format(
             "The Aggregate shapefile now has {0} shapes instead of {1} and has {2} rows",
-            fixedSf.NumShapes,
+            correctSf.NumShapes,
             sf.NumShapes,
-            fixedSf.Table.NumRows));
+            correctSf.Table.NumRows));
       }
       catch (Exception exception)
       {
