@@ -122,8 +122,6 @@ namespace TestApplication
         // Open shapefile:
         var sf = Fileformats.OpenShapefile(line, theForm);
 
-        // Log:
-
         // Add to map:
         MyAxMap.AddLayer(sf, true);
 
@@ -134,6 +132,8 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Now do some selecting to time without spatial index.
+        var utils = new MapWinGIS.Utils();
+        sf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
         var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
 
         // for debugging
@@ -156,26 +156,19 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Check if the files are created:
-        if (File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat"))
-        {
-          //theForm.Progress(string.Empty, 0, "The mwd file exists");
-        }
-        else
+        if (!(File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat")))
         {
           theForm.Error(string.Empty, "The mwd file does not exists");
         }
 
-        if (File.Exists(baseFilename + ".mwx") || File.Exists(baseFilename + ".idx"))
-        {
-          //theForm.Progress(string.Empty, 0, "The mwx file exists");
-        }
-        else
+        if (!(File.Exists(baseFilename + ".mwx") || File.Exists(baseFilename + ".idx")))
         {
           theForm.Error(string.Empty, "The mwx file does not exists");
           continue;
         }
 
-        // Now do some selecting to time wit spatial index.
+        // Now do some selecting to time with spatial index.
+        sf.SelectionColor = utils.ColorByName(tkMapColor.Red);
         var timeWithIndex = TimeSelectShapes(ref sf, theForm);
 
         theForm.Progress(
@@ -199,11 +192,18 @@ namespace TestApplication
       var boundBox = new Extents();
       var width = sf.Extents.xMax - sf.Extents.xMin;
       var height = sf.Extents.yMax - sf.Extents.yMin;
-      var stopWatch = Stopwatch.StartNew();
       
       sf.SelectNone();
+      Application.DoEvents();
+      Thread.Sleep(100);
+
       boundBox.SetBounds(sf.Extents.xMin + (width / 3), sf.Extents.yMin + (height / 3), 0.0, sf.Extents.xMax - (width / 3), sf.Extents.yMax - (height / 3), 0.0);
       object result = null;
+
+      // Start stopwatch:
+      var stopWatch = Stopwatch.StartNew();
+
+       // Start selecting:
       if (!sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result))
       {
         theForm.Error(string.Empty, "Error in SelectShapes: " + sf.get_ErrorMsg(sf.LastErrorCode));
@@ -219,6 +219,7 @@ namespace TestApplication
             sf.set_ShapeSelected(index, true);
           }
 
+          Application.DoEvents();
           MyAxMap.Redraw();
         }
         else
