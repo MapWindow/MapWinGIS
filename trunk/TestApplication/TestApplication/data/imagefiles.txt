@@ -63,12 +63,12 @@ C:\dev\TestingScripts\ScriptData\General\Images\Formats\PNM-Portable-Pixmap-Form
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\rays2-P5-PGMB.pnm
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\snail2-P6-PPMB.pnm
 
-#JPEG2000
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.jp2
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2
-C:\dev\TestingScripts\ScriptData\General\Images\Formats\RGBImage2.jp2
-
 #NITF/National Imagery Transmission Format
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.ntf
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\NITF-National-Imagery-Transmission-Format.LF2
 C:\dev\TestingScripts\ScriptData\General\Images\Formats\U_0001A.NTF
+
+#JPEG2000
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\Greyscale2.jp2
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2
+C:\dev\TestingScripts\ScriptData\General\Images\Formats\RGBImage2.jp2

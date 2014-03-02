@@ -132,7 +132,7 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Now do some selecting to time without spatial index.
-        var utils = new MapWinGIS.Utils();
+        var utils = new Utils { GlobalCallback = theForm };
         sf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
         var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
 
@@ -183,54 +183,6 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The spatial index tests have finished.");
     }
 
-    /// <summary>Time the select shapes method</summary>
-    /// <param name="sf">The shapefile</param>
-    /// <param name="theForm">The form</param>
-    /// <returns>The needed time</returns>
-    private static long TimeSelectShapes(ref Shapefile sf, ICallback theForm)
-    {
-      var boundBox = new Extents();
-      var width = sf.Extents.xMax - sf.Extents.xMin;
-      var height = sf.Extents.yMax - sf.Extents.yMin;
-      
-      sf.SelectNone();
-      Application.DoEvents();
-      Thread.Sleep(100);
-
-      boundBox.SetBounds(sf.Extents.xMin + (width / 3), sf.Extents.yMin + (height / 3), 0.0, sf.Extents.xMax - (width / 3), sf.Extents.yMax - (height / 3), 0.0);
-      object result = null;
-
-      // Start stopwatch:
-      var stopWatch = Stopwatch.StartNew();
-
-       // Start selecting:
-      if (!sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result))
-      {
-        theForm.Error(string.Empty, "Error in SelectShapes: " + sf.get_ErrorMsg(sf.LastErrorCode));
-      }
-      else
-      {
-        var shapes = result as int[];
-        if (shapes != null)
-        {
-          theForm.Progress(string.Empty, 0, "Number of shapes found: " + shapes.Length);
-          foreach (var index in shapes)
-          {
-            sf.set_ShapeSelected(index, true);
-          }
-
-          Application.DoEvents();
-          MyAxMap.Redraw();
-        }
-        else
-        {
-          theForm.Error(string.Empty, "No shapes found");
-        }
-      }
-
-      return EndStopWatch(ref stopWatch, theForm);
-    }
-
     /// <summary>
     /// Run image open tests
     /// </summary>
@@ -261,11 +213,20 @@ namespace TestApplication
       foreach (var line in lines)
       {
         // Open image:
-        Fileformats.OpenImageAsLayer(line, theForm, true);
+        var hndle = Fileformats.OpenImageAsLayer(line, theForm, true);
+
+        if (hndle == -1)
+        {
+          continue;
+        }
 
         // Wait a second to show something:
         Application.DoEvents();
         Thread.Sleep(1000);
+        
+        // now do some zooming:
+        var img = MyAxMap.get_Image(hndle);
+        DoSomeZooming(theForm, img.NumOverviews);
       }
 
       theForm.Progress(string.Empty, 100, "The image open tests have finished.");
@@ -612,10 +573,10 @@ namespace TestApplication
     /// </param>
     internal static void RunOGRInfoTest(string fileName, Form1 theForm)
     {
-        var utils = new Utils { GlobalCallback = theForm };
-        string Output = utils.OGRInfo(fileName, String.Empty, Path.GetFileNameWithoutExtension(fileName), theForm);
-        MessageBox.Show(Output, "OGRInfo Test", MessageBoxButtons.OK);
-        theForm.Progress(string.Empty, 100, "The OGRInfo test has finished.");
+      var utils = new Utils { GlobalCallback = theForm };
+      var output = utils.OGRInfo(fileName, string.Empty, Path.GetFileNameWithoutExtension(fileName), theForm);
+      MessageBox.Show(output, @"OGRInfo Test", MessageBoxButtons.OK);
+      theForm.Progress(string.Empty, 100, "The OGRInfo test has finished.");
     }
 
     /// <summary>Run the Rasterize shapefile test</summary>
@@ -697,7 +658,7 @@ namespace TestApplication
             "-a {0} -l {1} -of GTiff -a_nodata -999 -init -999 -ts 800 800",
             FieldName,
             Path.GetFileNameWithoutExtension(shapefilename));
-          System.Diagnostics.Debug.WriteLine(options);
+          Debug.WriteLine(options);
           if (!utils.GDALRasterize(shapefilename, outputFile, options, theForm))
           {
             var msg = " in GDALRasterize: " + utils.get_ErrorMsg(utils.LastErrorCode);
@@ -849,16 +810,104 @@ namespace TestApplication
 
     /// <summary>End the stop watch and log the time needed</summary>
     /// <param name="stopWatch">The stop watch</param>
-    /// <param name="theForm">The form</param>
     /// <returns>The elapsed time</returns>
-    private static long EndStopWatch(ref Stopwatch stopWatch, ICallback theForm)
+    private static long EndStopWatch(ref Stopwatch stopWatch)
     {
       Application.DoEvents();
       stopWatch.Stop();
-      var ts = stopWatch.Elapsed;
-      var elapsedTime = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
-      //theForm.Progress(string.Empty, 0, "Time needed: " + elapsedTime);
       return stopWatch.ElapsedMilliseconds;
     }
+
+    /// <summary>Time the select shapes method</summary>
+    /// <param name="sf">The shapefile</param>
+    /// <param name="theForm">The form</param>
+    /// <returns>The needed time</returns>
+    private static long TimeSelectShapes(ref Shapefile sf, ICallback theForm)
+    {
+      var boundBox = new Extents();
+      var width = sf.Extents.xMax - sf.Extents.xMin;
+      var height = sf.Extents.yMax - sf.Extents.yMin;
+
+      sf.SelectNone();
+      Application.DoEvents();
+      Thread.Sleep(100);
+
+      boundBox.SetBounds(sf.Extents.xMin + (width / 3), sf.Extents.yMin + (height / 3), 0.0, sf.Extents.xMax - (width / 3), sf.Extents.yMax - (height / 3), 0.0);
+      object result = null;
+
+      // Start stopwatch:
+      var stopWatch = Stopwatch.StartNew();
+
+      // Start selecting:
+      if (!sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result))
+      {
+        theForm.Error(string.Empty, "Error in SelectShapes: " + sf.get_ErrorMsg(sf.LastErrorCode));
+      }
+      else
+      {
+        var shapes = result as int[];
+        if (shapes != null)
+        {
+          theForm.Progress(string.Empty, 0, "Number of shapes found: " + shapes.Length);
+          foreach (var index in shapes)
+          {
+            sf.set_ShapeSelected(index, true);
+          }
+
+          Application.DoEvents();
+          MyAxMap.Redraw();
+        }
+        else
+        {
+          theForm.Error(string.Empty, "No shapes found");
+        }
+      }
+
+      return EndStopWatch(ref stopWatch);
+    }
+
+    /// <summary>Do some zooming</summary>
+    /// <param name="theForm">The form</param>
+    private static void DoSomeZooming(ICallback theForm)
+    {
+      DoSomeZooming(theForm, -1);
+    }
+
+    /// <summary>Do some zooming</summary>
+    /// <param name="theForm">The form</param>
+    /// <param name="numOverviews">The number of overviews, -1 if not an image layer</param>
+    private static void DoSomeZooming(ICallback theForm, int numOverviews)
+    {
+      // Zoom in several times:
+      theForm.Progress(string.Empty, 0, "Zoom in several times");
+
+      // Initial zooms for shapefiles and grids:
+      var numZooms = 4;
+
+      if (numOverviews != -1)
+      {
+        // image layer
+        numZooms = numOverviews == 0 ? 2 : 4;
+      }
+
+      for (var i = 0; i < numZooms; i++)
+      {
+        MyAxMap.ZoomIn(0.2);  
+        Application.DoEvents();
+      }
+
+      // Zoom out again:
+      theForm.Progress(string.Empty, 0, "Zoom out again");
+      for (var i = 0; i < numZooms - 1; i++)
+      {
+        MyAxMap.ZoomOut(0.2);
+        Application.DoEvents();
+      }
+
+      // Zoom max extent:
+      theForm.Progress(string.Empty, 0, "Zoom max extent");
+      MyAxMap.ZoomToMaxExtents();
+    }
+
   }
 }

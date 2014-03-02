@@ -100,7 +100,18 @@ namespace TestApplication
       {
         // Track GDAL Errors:
         var settings = new GlobalSettings();
-        var img = new Image { GlobalCallback = theForm };
+        var img = new Image
+          {
+            GlobalCallback = theForm 
+          };
+
+        // Without overviews this decreases the performance too much:
+        if (img.NumOverviews > 1)
+        {
+          theForm.Progress(string.Empty, 0, "Opening the image with high quality interpolation mode.");
+          img.UpsamplingMode = tkInterpolationMode.imHighQualityBilinear;
+          img.DownsamplingMode = tkInterpolationMode.imBilinear;
+        }
 
         settings.ResetGdalError();
         theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
@@ -123,12 +134,18 @@ namespace TestApplication
           if (clearLayers)
           {
             Map.RemoveAllLayers();
+            Application.DoEvents();
           }
 
-          // Log projection
+          // Log characteristics:
           theForm.Progress(string.Empty, 0, "projection: " + img.GetProjection());
+          theForm.Progress(string.Empty, 0, "Number bands: " + img.NoBands);
+          theForm.Progress(string.Empty, 0, "Number overviews: " + img.NumOverviews);
+          theForm.Progress(string.Empty, 0, "Use transparency?: " + img.UseTransparencyColor);
+          theForm.Progress(string.Empty, 0, "Transparency Color: " + img.TransparencyColor);
 
           hndl = Map.AddLayer(img, true);
+
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
         }
       }

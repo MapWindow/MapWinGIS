@@ -11,6 +11,7 @@ namespace TestApplication
   using System;
   using System.Reflection;
   using System.Windows.Forms;
+  using System.Threading;
 
   using MapWinGIS;
 
@@ -546,6 +547,22 @@ namespace TestApplication
     private void SelectOGRInfoFile_Click(object sender, EventArgs e)
     {
         Tests.SelectAnyfile(this.OGRInfoInputfile, "Select file");
+    }
+
+    private void RunAllFileFormatsTestsButton_Click(object sender, EventArgs e)
+    {
+      // Run the shapefile open tests:
+      this.RunShapefileTestClick(sender, e);
+      Thread.Sleep(1000);
+
+      // Run the grid open tests:
+      this.RunGridTestClick(sender, e);
+      Thread.Sleep(1000);
+
+      // Run the image open tests:
+      this.RunImageTestClick(sender, e);
+
+      this.Progress(string.Empty, 0, "Done running all Fileformats tests.");
     }
   }
 }
