@@ -63,12 +63,12 @@
 ****************************************************************************/
 
 char DEL_STR[3] = {30,31,0};
-char FT = 30                  ;
-char FT_STR[2] = {30,0}    ;
-char SEP = 255                ;
-char SEP_STR[2] = {255,0}  ;
-char UT = 31                  ;
-char UT_STR[2] = {31,0}    ;
+char FT = 30;
+char FT_STR[2] = {30,0};
+char SEP = (char)255;
+char SEP_STR[2] = {(char)255,0};
+char UT = 31;
+char UT_STR[2] = {31,0};
 
 int ASCII = 0;
 int EBCDIC = 0;

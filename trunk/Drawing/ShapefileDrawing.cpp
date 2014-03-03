@@ -1050,7 +1050,6 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 		return;
 	
 	double xMin, xMax, yMin, yMax;
-	char* data = NULL;
 
 	// ------------------------------------------------------------------------------------------
 	// in GDIMixed, GDI will be used for drawing outlines, but only if width is equal to 1.  
@@ -1347,11 +1346,9 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 {
 	ASSERT(_dc == NULL);
 	
-	IShapeWrapper* shp = NULL;
 	IShapeData* shpData = NULL;
 
 	double xMin, xMax, yMin, yMax;
-	char* data = NULL;
 	
 	// Entering GDI mode; no calls to _graphics until releasing HDC!!!
 	m_hdc = _graphics->GetHDC();
@@ -1373,7 +1370,6 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 	_shapefile->get_MinDrawingSize(&minDrawingSize);
 	
 	double delta = MIN(minDrawingSize/_dx, minDrawingSize/_dy);
-	int count = 0;
 	
 	OLE_COLOR pointColor = options->linesVisible?options->lineColor:options->fillColor;
 	_bmpPixel->SetPixel(0,0, Gdiplus::Color(255 << 24 | BGR_TO_RGB(pointColor)));
@@ -1569,7 +1565,6 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 		return;
 	
 	double xMin, xMax, yMin, yMax;
-	char* data = NULL;
 
 	GraphicsPath* path = new Gdiplus::GraphicsPath(Gdiplus::FillModeWinding);
 	
@@ -1655,7 +1650,6 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 	bool dataRead = false;
 	int pointCount = 0;				// number of points in path
 	
-	Gdiplus::PointF* points = NULL;
 	double ratio;
 	
 	Gdiplus::PathData* data = new PathData();
@@ -1706,8 +1700,6 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 		}
 		else if (type == lltMarker)
 		{
-			bool saveAngles = true;
-			
 			if (!dataRead)
 			{
 				pointCount = path->GetPointCount();

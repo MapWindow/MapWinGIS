@@ -231,9 +231,7 @@ STDMETHODIMP CColorScheme::Clear()
 STDMETHODIMP CColorScheme::get_RandomColor(double Value, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	short r1, g1, b1, r2, g2, b2;
-	
-	
+	short r1 = 0, g1 = 0, b1 = 0, r2 = 0, g2 = 0, b2 = 0;
 
 	if ( _breaks.size() == 1)
 	{

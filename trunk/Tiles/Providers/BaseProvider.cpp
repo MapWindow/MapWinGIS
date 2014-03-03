@@ -190,7 +190,6 @@ CString GetProxyServer()
 			GlobalFree(Option[0].Value.pszValue);
 		}
 
-		DWORD flags = Option[1].Value.dwValue;
 		if((Option[1].Value.dwValue & PROXY_TYPE_PROXY) != PROXY_TYPE_PROXY)
 			return "";
 	}

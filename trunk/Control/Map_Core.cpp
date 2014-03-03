@@ -372,10 +372,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 {
 	try
 	{
-		TIFF 	*tiff=(TIFF*)0;  // TIFF-level descriptor 
-		const TIFFCodec *tCodec=(TIFFCodec*)0;
-
-		tiff = XTIFFOpen((char *)Filename, "r"); 
+		TIFF *tiff = XTIFFOpen((char *)Filename, "r"); // TIFF-level descriptor
 		if (tiff)
 		{
 			int w=0, h=0;

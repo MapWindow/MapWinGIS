@@ -1194,7 +1194,6 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	VARIANT val;
 	VariantInit(&val); //added by Rob Cairns 4-Jan-06
 	long percent = 0, newpercent = 0;
-	double total = nrows*ncols;
 	
 	for( int j = 0; j < nrows; j++ )
 	{	for( int i = 0; i < ncols; i++ )

@@ -580,7 +580,6 @@ BOOL CShapefile::defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 		// get the Info from the memShapes
 		// -------------------------------------------------------
 		IShape * shape = NULL;
-		IPoint * pnt = NULL;
 		ShpfileType shapetype;
 		//shape = memShapes[ShapeIndex];
 		shape = _shapeData[ShapeIndex]->shape;

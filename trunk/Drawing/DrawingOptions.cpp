@@ -354,7 +354,6 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 		// texture fill
 		bool canDraw = true;
 		
-		IImage* imgTest = this->picture;
 		if (this->picture == NULL) canDraw = false;
 		if (this->scaleX == 0 || this->scaleY == 0) canDraw = false;
 		

@@ -147,7 +147,7 @@ bool CGrid::GetFloatValueGridColorTable(GradientModel gradientModel, ColoringTyp
 		}
 	}
 
-	if (values.size() == 0)    // it's empty, hence no scheme
+	if (values.empty())    // it's empty, hence no scheme
 		return false;
 
 	IGridColorScheme* result = NULL;
@@ -961,9 +961,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	if (ecwpTest.MakeLower().Left(4) == "ecwp") {
 		// e.g. ecwp://imagery.oregonexplorer.info/ecwimages/2005orthoimagery.ecw
 		trgrid = new tkGridRaster();
-		VARIANT_BOOL opened = VARIANT_FALSE;
-		opened = trgrid->LoadRaster(OLE2CA(Filename), true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
-		*retval = opened;
+		*retval = trgrid->LoadRaster(OLE2CA(Filename), true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
 		return S_OK;
 	}
 

@@ -1154,7 +1154,6 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 		{
 			if (data[i] != NULL)
 			{
-				bool doUnion = false;
 				if (!g1)
 				{
 					g1 = data[i];

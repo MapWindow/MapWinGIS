@@ -24,9 +24,8 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 	
 	if( grid_type == GEOTIFF_GRID) //added 8/26/05 --ah
 	{
-		DATA_TYPE type;
-		TIFF *tiff=(TIFF*)0;  // TIFF-level descriptor
-		tiff = XTIFFOpen((char *)cfilename, "r"); 
+		DATA_TYPE type = UNKNOWN_TYPE;
+		TIFF *tiff = XTIFFOpen((char *)cfilename, "r"); // TIFF-level descriptor
 		if(tiff)
 		{
 			uint16 sampleFormat, bitsPerSample;

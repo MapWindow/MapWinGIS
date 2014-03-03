@@ -1079,8 +1079,7 @@ void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 // Loads layer based on the filename; return layer handle
 int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopExecution* callback)
 {
-	CString filename = "";
-	filename = CPLGetXMLValue( node, "Filename", NULL );
+	CString filename = CPLGetXMLValue( node, "Filename", NULL );
 	
     char buffer[4096] = ""; 
     DWORD retval = GetFullPathNameA(filename, 4096, buffer, NULL);
@@ -1399,7 +1398,7 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	s = CPLGetXMLValue( node, "LayerDescription", NULL );
 	this->SetLayerDescription(LayerHandle, s);
 
-	bool retVal;
+	bool retVal = false;
 	if (layerType == ShapefileLayer)
 	{
 		IShapefile* sf = NULL;

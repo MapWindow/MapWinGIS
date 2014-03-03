@@ -1256,8 +1256,6 @@ BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
 
 	long percent = 0, newpercent = 0;
 
-	double x = 0.0, y = 0.0, z = 0.0, m = 0.0;
-
 	for( int k = 0; k < size; k++)
 	{
 		this->get_Shape(k,&sh);

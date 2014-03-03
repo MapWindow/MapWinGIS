@@ -62,9 +62,8 @@ CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld)
 	
 	ShpfileType type = shpOld->get_ShapeType();
 
-	bool isZ = false, isM = false;
-	isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
-	isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
+	bool isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
+	bool isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
 	
 	double x, y, z, m;
 
@@ -115,9 +114,8 @@ CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld)
 	
 	ShpfileType type = shpOld->get_ShapeType();
 
-	bool isZ = false, isM = false;
-	isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
-	isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
+	bool isM = (type == SHP_MULTIPOINTM || type == SHP_POINTM || type == SHP_POLYGONM || type == SHP_POLYLINEM);
+	bool isZ = (type == SHP_MULTIPOINTZ || type == SHP_POINTZ || type == SHP_POLYGONZ || type == SHP_POLYLINEZ);
 	
 	// creating the new wrapper
 	CShapeWrapperCOM* shpNew = new CShapeWrapperCOM(type);

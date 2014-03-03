@@ -570,9 +570,10 @@ CMapView::~CMapView()
 	if( m_globalCallback )
 		m_globalCallback->Release();
 
-	long val = m_projection->Release();
-	val = m_wgsProjection->Release();
-	val = m_GMercProjection->Release();
+	m_projection->Release();
+	m_wgsProjection->Release();
+	m_GMercProjection->Release();
+
 	if (m_measuring)
 		m_measuring->Release();
 

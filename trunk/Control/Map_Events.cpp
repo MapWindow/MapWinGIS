@@ -557,8 +557,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		if( (nFlags & MK_LBUTTON) && m_leftButtonDown )
 		{
 			m_bitbltClickMove = point;
-			double zmx = 0, zmy = 0;
-			double zpx = 0, zpy = 0;
 
          double xAmount = (m_clickDown.x - movePnt.x)*m_inversePixelPerProjectionX;
 			double yAmount = (movePnt.y - m_clickDown.y)*m_inversePixelPerProjectionY;
