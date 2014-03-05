@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="MapWinGIS"
 	ProjectGUID="{1AB93398-2DE6-4043-BF6D-D438A794FB86}"
 	RootNamespace="MapWinGIS"
@@ -1074,7 +1074,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="false"
+				RegisterOutput="true"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386 /ignore:4099 "
 				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib geos_c.lib libtiff_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib"
@@ -1088,8 +1088,8 @@
 				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs=""
-				GenerateDebugInformation="false"
-				ProgramDatabaseFile=".\bin\$(PlatformName)\MapWinGIS.pdb"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)\MapWinGIS.pdb"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
 				RandomizedBaseAddress="1"

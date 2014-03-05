@@ -176,6 +176,7 @@ public:
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
 	STDMETHOD(ImportFromWKT)(BSTR Serialized, VARIANT_BOOL *retVal);
 	STDMETHOD(CopyTo)(IShape* target, VARIANT_BOOL* retVal);
+	STDMETHOD(ClosestPoints)(IShape* shape2, IShape** result);
 	
 	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
 	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);

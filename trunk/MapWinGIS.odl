@@ -2317,6 +2317,7 @@ interface IGrid : IDispatch{
 		[id(35), helpstring("method RemoveColorSchemeFile")] HRESULT RemoveColorSchemeFile([out, retval]VARIANT_BOOL* retVal);
 		[id(36), helpstring("method RemoveTempImageFile")] HRESULT RemoveTempImageFile([out, retval]VARIANT_BOOL* retVal);
 		[id(37), helpstring("method BuildGradientColorScheme")] HRESULT BuildGradientColorScheme([in]PredefinedColorScheme colors, [out,retval]IGridColorScheme** retVal);
+		//[id(38), helpstring("method CreateImageProxy")] HRESULT CreateImageProxy([in] [out, retval]VARIANT_BOOL* retVal);
 		
 };
 
@@ -2745,7 +2746,7 @@ interface IShape : IDispatch{
 	[id(54), helpstring("method ExportToWKT")] HRESULT ExportToWKT([out] BSTR* retVal);
 	[id(55), helpstring("method ImportToWKT")] HRESULT ImportFromWKT([in] BSTR Serialized, [out, retval]VARIANT_BOOL *retVal);
 	[id(56), helpstring("method CopyTo")] HRESULT CopyTo([in] IShape* target, [out, retval]VARIANT_BOOL* retVal);
-	
+	[id(57), helpstring("method ClosestPoints")] HRESULT ClosestPoints([in]IShape* shape2, [out, retval]IShape** result);
 };
 
 /****************************  Extents Interface ***********************/

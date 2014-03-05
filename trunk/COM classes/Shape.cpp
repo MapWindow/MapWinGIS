@@ -25,6 +25,7 @@
 #include "GeometryOperations.h"
 #include "Templates.h"
 #include "Utilities\GeosHelper.h"
+#include "geos_c.h"
 
 #ifdef MY_DEBUG
 #include <fstream>
@@ -1368,6 +1369,7 @@ STDMETHODIMP CShape::Distance(IShape* Shape, double* retval)
 	}
 
 	*retval = oGeom1->Distance(oGeom2);
+	
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -2780,3 +2782,55 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 	}
 	return S_OK;
 }
+
+//*****************************************************************
+//*		ClosestPoints()
+//*****************************************************************
+STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	
+	GEOSGeometry* g1 = GeometryConverter::Shape2GEOSGeom(this);
+	GEOSGeometry* g2 = GeometryConverter::Shape2GEOSGeom(shape2);
+	if (g1 && g2)
+	{
+		GEOSCoordSequence* coords = GeosHelper::ClosestPoints(g1, g2);
+		if (coords)
+		{
+			int size = GeosHelper::CoordinateSequenceSize(coords);
+			if (size > 0)
+			{
+				std::vector<Point2D> points;
+				double x, y;
+				for (int i = 0; i < size; i++) {
+					if (GeosHelper::CoordinateSequenceGetXY(coords, i, x, y))
+						points.push_back(Point2D(x, y));
+				}
+				if (points.size() > 1) 
+				{
+					VARIANT_BOOL vb;
+					CoCreateInstance( CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)result );
+					(*result)->Create(ShpfileType::SHP_POLYLINE, &vb);
+					long pointIndex;
+					for(size_t i = 0; i < points.size(); i++)
+					{
+						(*result)->AddPoint(points[i].x, points[i].y, &pointIndex);
+					}
+				}
+			}
+			GeosHelper::DestroyCoordinateSequence(coords);
+		}
+		if (!(*result))
+		{
+			// TODO: report GEOS error code
+		}
+	}
+	else
+	{
+		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
+	}
+	if (g1)	GeosHelper::DestroyGeometry(g1);
+	if (g2) GeosHelper::DestroyGeometry(g2);
+	return S_OK;
+}
+

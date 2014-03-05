@@ -249,4 +249,45 @@ public:
 			GEOSGeom_destroy(gsGeom);
 		#endif
 	}
+
+	static GEOSCoordSequence* ClosestPoints(GEOSGeometry* g1, GEOSGeometry* g2)
+	{
+		#ifdef GEOS_NEW
+			return GEOSNearestPoints_r(getGeosHandle(), g1, g2);
+		#else
+			return GEOSNearestPoints(g1, g2);
+		#endif
+	}
+
+	static void DestroyCoordinateSequence(GEOSCoordSequence* coords)
+	{
+		#ifdef GEOS_NEW
+			GEOSCoordSeq_destroy_r(	getGeosHandle(), coords);
+		#else
+			GEOSCoordSeq_destroy(coords);	
+		#endif
+	}
+
+	static unsigned int CoordinateSequenceSize(GEOSCoordSequence* coords)
+	{
+		unsigned int numPoints = 0;
+		#ifdef GEOS_NEW
+			GEOSCoordSeq_getSize_r(getGeosHandle(), coords, &numPoints);
+		#else
+			GEOSCoordSeq_getSize(coords, &numPoints);
+		#endif
+		return numPoints;
+	}
+
+	static bool CoordinateSequenceGetXY(GEOSCoordSequence* coords, unsigned int index, double& x, double& y)
+	{
+		#ifdef GEOS_NEW
+			int val1 = GEOSCoordSeq_getX_r(getGeosHandle(), coords, index, &x);
+			int val2 = GEOSCoordSeq_getY_r(getGeosHandle(), coords, index, &y);
+		#else
+			int val1 = GEOSCoordSeq_getX( coords, index, &x );
+			int val2 = GEOSCoordSeq_getY( coords, index, &y );
+		#endif
+		return val1 && val2;
+	}
 };
