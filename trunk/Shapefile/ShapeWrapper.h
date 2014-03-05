@@ -163,7 +163,7 @@ public:
 	std::vector<double> _pointsM;			// but it'll be impossible to copy all points at once to/from vector through memcopy
 	
 public:
-	int CShapeWrapper::get_ContentLength();
+	int get_ContentLength();
 	int get_PointCount(){return _points.size();}
 	int get_PartCount(){return _parts.size();}
 

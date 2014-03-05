@@ -1678,7 +1678,6 @@ bool CTin::canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, lon
 		double cosa11 = - ( b*b - a*a - c*c )/(2*a*c);
 		double cosa12 = - ( c*c - a*a - b*b )/(2*a*b);
 
-		double cosEqual = .5;
 		double quadAngleDev = fabs( .5 - cosa1 ) +
 								 fabs( .5 - cosa2 ) +
 								 fabs( .5 - cosa3 ) +

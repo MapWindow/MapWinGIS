@@ -2167,7 +2167,7 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 	//Change the BORDERS to TRACE_BORDERS
 	stack.push( RasterPoint( x, y ) );
 	int i = x, j = y;
-	while( stack.size() > 0 )
+	while( !stack.empty() )
 	{		
 		pt = stack.top();
 		i = pt.column;
@@ -2236,7 +2236,7 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 
 	//Mark Polygon as the CURRENT_POLYGON
 	stack.push( RasterPoint( x+1, y+1 ) );
-	while( stack.size() > 0 )
+	while( !stack.empty() )
 	{	
 		pt = stack.top();
 		i = pt.column;
@@ -2308,7 +2308,7 @@ void CUtils::scan_fill_to_edge( double & nodata, long x, long y )
 	//Erase the Polygon
 	int i = x, j = y;
 	stack.push( RasterPoint( x, y-1 ) );
-	while( stack.size() > 0 )
+	while( !stack.empty() )
 	{	
 		pt = stack.top();
 		i = pt.column;
@@ -2396,7 +2396,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 
 	stack.push(RasterPoint(x,y));
 
-	while ( stack.size() > 0)
+	while( !stack.empty() )
 	{
 		pt = stack.top();
 		x = pt.column;

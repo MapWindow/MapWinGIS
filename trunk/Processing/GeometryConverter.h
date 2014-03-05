@@ -40,16 +40,16 @@ class GeometryConverter
 
 		// coordinates for clipper are multiplied in case of geographic coordinate systems
 		double conversionFactor;
-		GeometryConverter::GeometryConverter()
+		GeometryConverter()
 		{
 			conversionFactor = 1.0;
 		}
-		GeometryConverter::GeometryConverter(IShapefile* sf)
+		GeometryConverter(IShapefile* sf)
 		{
 			conversionFactor = 1.0;
 			this->SetConversionFactor(sf);
 		}
-		void GeometryConverter::SetConversionFactor(IShapefile* sf);
+		void SetConversionFactor(IShapefile* sf);
 
 		ClipperLib::Polygons* Shape2ClipperPolygon(IShape* shp);
 		IShape* ClipperPolygon2Shape(ClipperLib::Polygons* polygon);

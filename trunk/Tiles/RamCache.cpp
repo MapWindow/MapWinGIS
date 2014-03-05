@@ -208,7 +208,7 @@ void RamCache::ClearByProvider(int provider, int fromScale, int toScale)
 						}
 						
 						// if all the Y's for given X are removed - delete the container
-						if (tiles->size() == 0)
+						if (tiles->empty())
 						{
 							points->erase(it2++);
 							delete tiles;
@@ -219,7 +219,7 @@ void RamCache::ClearByProvider(int provider, int fromScale, int toScale)
 
 					// if all the X's for a given scale are removed - delete the container,
 					// but don't delete scale entry - 25 scales must preserved as they are accessed by index
-					if (points->size() == 0)
+					if (points->empty())
 					{
 						delete points;
 						(*list)[i] = NULL;

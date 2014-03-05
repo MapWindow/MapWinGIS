@@ -38,9 +38,6 @@ void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &re
 {
 	lat = Clip(lat, MinLatitude, MaxLatitude);
 	lng = Clip(lng, MinLongitude, MaxLongitude);
-	
-	double dx = MaxLongitude - MinLongitude;
-	double dy = MaxLatitude - MinLatitude;
 
 	double y = (lat - MinLatitude)/(MaxLatitude - MinLatitude);
 	double x = (lng - MinLongitude)/(MaxLongitude - MinLongitude);

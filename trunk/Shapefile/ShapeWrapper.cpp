@@ -117,7 +117,7 @@ bool CShapeWrapper::put_ShapeType(ShpfileType newVal)
 				_parts.push_back(0);
 			}
 		}	
-		else if (_ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGONM )
+		else if (_ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGONZ || _ShapeType == SHP_POLYGONM )
 		{
 			_ShapeType2D = SHP_POLYGON;
 			if( /*_points.size() > 0 &&*/ _parts.size() <= 0 )	

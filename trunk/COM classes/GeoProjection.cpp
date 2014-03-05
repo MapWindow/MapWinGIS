@@ -84,18 +84,25 @@ void CGeoProjection::ErrorMessage(long ErrorCode)
 	{
 		case OGRERR_CORRUPT_DATA:
 			code = tkOGR_CORRUPT_DATA;
+         break;
 		case OGRERR_NOT_ENOUGH_MEMORY:
 			code = OGRERR_NOT_ENOUGH_MEMORY;
+         break;
 		case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
 			code = OGRERR_UNSUPPORTED_GEOMETRY_TYPE;
+         break;
 		case OGRERR_UNSUPPORTED_OPERATION:
 			code = OGRERR_UNSUPPORTED_OPERATION;
+         break;
 		case OGRERR_FAILURE:
 			code = OGRERR_FAILURE;
+         break;
 		case OGRERR_UNSUPPORTED_SRS:
 			code = OGRERR_UNSUPPORTED_SRS;
+         break;
 		case OGRERR_INVALID_HANDLE:
 			code = OGRERR_INVALID_HANDLE;
+         break;
 	}
 	
 	m_lastErrorCode = code;
@@ -447,8 +454,6 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 			
 			for (int i =0; i< numSamplingPoints; i++)
 			{
-				double x = xMin + (double)rand()/double(RAND_MAX) * dx;
-				double y = yMin + (double)rand()/double(RAND_MAX) * dy;
 				if (!this->IsSameProjection(transf, xMin, yMin, projected))
 				{
 					*pVal = VARIANT_FALSE;

@@ -60,42 +60,42 @@ private:
 	int* _parts;
 	// functions
 	ShpfileType ShapeTypeConvert2D(ShpfileType type);
-	void CShapeData::Clear();
+	void Clear();
 public:
-	ShpfileType CShapeData::get_shapeType()
+	ShpfileType get_shapeType()
 	{
 		return _shapeType;
 	}
-	int CShapeData::get_PointCount()
+	int get_PointCount()
 	{	
 		return _pointCount;
 	}
-	int CShapeData::get_PartCount()
+	int get_PartCount()
 	{
 		return _partCount;
 	}
-	int CShapeData::get_LastErrorCode()
+	int get_LastErrorCode()
 	{
 		int code = _lastErrorCode;
 		_lastErrorCode = tkNO_ERROR;
 		return code;
 	}
 
-	bool CShapeData::get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
+	bool get_BoundsXY(double& xMin, double& xMax, double& yMin, double& yMax);
 
 	// data
-	bool CShapeData::put_ShapeData(char* shapeData);
+	bool put_ShapeData(char* shapeData);
 
 	// parts
-	int CShapeData::get_PartStartPoint(int PartIndex);
-	int CShapeData::get_PartEndPoint(int PartIndex);
+	int get_PartStartPoint(int PartIndex);
+	int get_PartEndPoint(int PartIndex);
 
 	// points
-	double* CShapeData::get_PointsXY();
+	double* get_PointsXY();
 	void get_XYFast(int PointIndex, double& x, double& y);
-	bool CShapeData::get_PointXY(int PointIndex, double& x, double& y);
+	bool get_PointXY(int PointIndex, double& x, double& y);
 	
 	// utility
-	bool CShapeData::PointInRing(int partIndex, double pointX, double pointY);
+	bool PointInRing(int partIndex, double pointX, double pointY);
 };
 

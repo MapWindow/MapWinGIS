@@ -97,7 +97,7 @@ private:
 
 	struct CElement
 	{
-		CElement::CElement()
+		CElement()
 		{
 			wasCalculated = false;
 			type = etNone;

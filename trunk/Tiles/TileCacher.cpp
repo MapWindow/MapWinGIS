@@ -43,7 +43,7 @@ void CachingTask::DoTask()
 // Queues caching request
 void TileCacher::Run()
 {
-	if (queue.size() > 0 && !SQLiteCache::m_locked)
+	if (!queue.empty() && !SQLiteCache::m_locked)
 	{
 		TileCore* tile = queue.front();
 		queue.pop();
