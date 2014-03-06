@@ -853,9 +853,11 @@ namespace TestApplication
 
       // Start stopwatch:
       var stopWatch = Stopwatch.StartNew();
+      bool returnCode = sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result);
+      long selectTime = EndStopWatch(ref stopWatch);
 
       // Start selecting:
-      if (!sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result))
+      if (!returnCode)
       {
         theForm.Error(string.Empty, "Error in SelectShapes: " + sf.get_ErrorMsg(sf.LastErrorCode));
       }
@@ -879,7 +881,7 @@ namespace TestApplication
         }
       }
 
-      return EndStopWatch(ref stopWatch);
+      return selectTime;
     }
 
     /// <summary>Do some zooming</summary>
