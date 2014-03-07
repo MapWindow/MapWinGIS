@@ -40,6 +40,14 @@
       this.label16 = new System.Windows.Forms.Label();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
+      this.groupBox22 = new System.Windows.Forms.GroupBox();
+      this.SelectClosestPointShapefileInput2 = new System.Windows.Forms.Button();
+      this.ClosestPointShapefileInput2 = new System.Windows.Forms.TextBox();
+      this.label20 = new System.Windows.Forms.Label();
+      this.RunClosestPointTest = new System.Windows.Forms.Button();
+      this.SelectClosestPointShapefileInput1 = new System.Windows.Forms.Button();
+      this.ClosestPointShapefileInput1 = new System.Windows.Forms.TextBox();
+      this.label21 = new System.Windows.Forms.Label();
       this.groupBox18 = new System.Windows.Forms.GroupBox();
       this.RunWktShapefileTest = new System.Windows.Forms.Button();
       this.SelectWktShapefileInput = new System.Windows.Forms.Button();
@@ -106,6 +114,7 @@
       this.GridfileToClip = new System.Windows.Forms.TextBox();
       this.label5 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.RunAllFileFormatsTestsButton = new System.Windows.Forms.Button();
       this.groupBox4 = new System.Windows.Forms.GroupBox();
       this.RunImageTest = new System.Windows.Forms.Button();
       this.SelectImageInputfile = new System.Windows.Forms.Button();
@@ -125,7 +134,6 @@
       this.axMap1 = new AxMapWinGIS.AxMap();
       this.Progressbox = new System.Windows.Forms.TextBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-      this.RunAllFileFormatsTestsButton = new System.Windows.Forms.Button();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
@@ -135,6 +143,7 @@
       this.groupBox19.SuspendLayout();
       this.groupBox20.SuspendLayout();
       this.groupBox10.SuspendLayout();
+      this.groupBox22.SuspendLayout();
       this.groupBox18.SuspendLayout();
       this.groupBox17.SuspendLayout();
       this.groupBox16.SuspendLayout();
@@ -204,7 +213,7 @@
       // 
       this.groupBox19.BackColor = System.Drawing.Color.DarkSeaGreen;
       this.groupBox19.Controls.Add(this.groupBox20);
-      this.groupBox19.Location = new System.Drawing.Point(5, 1575);
+      this.groupBox19.Location = new System.Drawing.Point(3, 1705);
       this.groupBox19.Name = "groupBox19";
       this.groupBox19.Size = new System.Drawing.Size(205, 119);
       this.groupBox19.TabIndex = 6;
@@ -265,7 +274,7 @@
       // 
       // groupBox11
       // 
-      this.groupBox11.Location = new System.Drawing.Point(0, 1737);
+      this.groupBox11.Location = new System.Drawing.Point(3, 1830);
       this.groupBox11.Name = "groupBox11";
       this.groupBox11.Size = new System.Drawing.Size(205, 188);
       this.groupBox11.TabIndex = 5;
@@ -275,6 +284,7 @@
       // groupBox10
       // 
       this.groupBox10.BackColor = System.Drawing.Color.LightSteelBlue;
+      this.groupBox10.Controls.Add(this.groupBox22);
       this.groupBox10.Controls.Add(this.groupBox18);
       this.groupBox10.Controls.Add(this.groupBox17);
       this.groupBox10.Controls.Add(this.groupBox16);
@@ -283,10 +293,96 @@
       this.groupBox10.Controls.Add(this.groupBox12);
       this.groupBox10.Location = new System.Drawing.Point(3, 913);
       this.groupBox10.Name = "groupBox10";
-      this.groupBox10.Size = new System.Drawing.Size(205, 656);
+      this.groupBox10.Size = new System.Drawing.Size(205, 786);
       this.groupBox10.TabIndex = 4;
       this.groupBox10.TabStop = false;
       this.groupBox10.Text = "GEOS Methods";
+      // 
+      // groupBox22
+      // 
+      this.groupBox22.Controls.Add(this.SelectClosestPointShapefileInput2);
+      this.groupBox22.Controls.Add(this.ClosestPointShapefileInput2);
+      this.groupBox22.Controls.Add(this.label20);
+      this.groupBox22.Controls.Add(this.RunClosestPointTest);
+      this.groupBox22.Controls.Add(this.SelectClosestPointShapefileInput1);
+      this.groupBox22.Controls.Add(this.ClosestPointShapefileInput1);
+      this.groupBox22.Controls.Add(this.label21);
+      this.groupBox22.Location = new System.Drawing.Point(5, 651);
+      this.groupBox22.Name = "groupBox22";
+      this.groupBox22.Size = new System.Drawing.Size(195, 124);
+      this.groupBox22.TabIndex = 9;
+      this.groupBox22.TabStop = false;
+      this.groupBox22.Text = "Closest point";
+      // 
+      // SelectClosestPointShapefileInput2
+      // 
+      this.SelectClosestPointShapefileInput2.Location = new System.Drawing.Point(162, 69);
+      this.SelectClosestPointShapefileInput2.Name = "SelectClosestPointShapefileInput2";
+      this.SelectClosestPointShapefileInput2.Size = new System.Drawing.Size(27, 20);
+      this.SelectClosestPointShapefileInput2.TabIndex = 12;
+      this.SelectClosestPointShapefileInput2.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectClosestPointShapefileInput2, "Select shapefile to buffer");
+      this.SelectClosestPointShapefileInput2.UseVisualStyleBackColor = true;
+      this.SelectClosestPointShapefileInput2.Click += new System.EventHandler(this.SelectClosestPointShapefileInput2Click);
+      // 
+      // ClosestPointShapefileInput2
+      // 
+      this.ClosestPointShapefileInput2.AcceptsReturn = true;
+      this.ClosestPointShapefileInput2.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClosestPointShapefileInput2", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ClosestPointShapefileInput2.Location = new System.Drawing.Point(9, 69);
+      this.ClosestPointShapefileInput2.Name = "ClosestPointShapefileInput2";
+      this.ClosestPointShapefileInput2.Size = new System.Drawing.Size(147, 20);
+      this.ClosestPointShapefileInput2.TabIndex = 11;
+      this.ClosestPointShapefileInput2.Text = global::TestApplication.Properties.Settings.Default.ClosestPointShapefileInput2;
+      // 
+      // label20
+      // 
+      this.label20.AutoSize = true;
+      this.label20.Location = new System.Drawing.Point(6, 53);
+      this.label20.Name = "label20";
+      this.label20.Size = new System.Drawing.Size(141, 13);
+      this.label20.TabIndex = 10;
+      this.label20.Text = "Select the second shapefile:";
+      // 
+      // RunClosestPointTest
+      // 
+      this.RunClosestPointTest.Location = new System.Drawing.Point(9, 95);
+      this.RunClosestPointTest.Name = "RunClosestPointTest";
+      this.RunClosestPointTest.Size = new System.Drawing.Size(180, 23);
+      this.RunClosestPointTest.TabIndex = 9;
+      this.RunClosestPointTest.Text = "Run test";
+      this.RunClosestPointTest.UseVisualStyleBackColor = true;
+      this.RunClosestPointTest.Click += new System.EventHandler(this.RunClosestPointTestClick);
+      // 
+      // SelectClosestPointShapefileInput1
+      // 
+      this.SelectClosestPointShapefileInput1.Location = new System.Drawing.Point(162, 32);
+      this.SelectClosestPointShapefileInput1.Name = "SelectClosestPointShapefileInput1";
+      this.SelectClosestPointShapefileInput1.Size = new System.Drawing.Size(27, 20);
+      this.SelectClosestPointShapefileInput1.TabIndex = 8;
+      this.SelectClosestPointShapefileInput1.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectClosestPointShapefileInput1, "Select shapefile to buffer");
+      this.SelectClosestPointShapefileInput1.UseVisualStyleBackColor = true;
+      this.SelectClosestPointShapefileInput1.Click += new System.EventHandler(this.SelectClosestPointShapefileInput1Click);
+      // 
+      // ClosestPointShapefileInput1
+      // 
+      this.ClosestPointShapefileInput1.AcceptsReturn = true;
+      this.ClosestPointShapefileInput1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClosestPointShapefileInput1", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ClosestPointShapefileInput1.Location = new System.Drawing.Point(9, 32);
+      this.ClosestPointShapefileInput1.Name = "ClosestPointShapefileInput1";
+      this.ClosestPointShapefileInput1.Size = new System.Drawing.Size(147, 20);
+      this.ClosestPointShapefileInput1.TabIndex = 7;
+      this.ClosestPointShapefileInput1.Text = global::TestApplication.Properties.Settings.Default.ClosestPointShapefileInput1;
+      // 
+      // label21
+      // 
+      this.label21.AutoSize = true;
+      this.label21.Location = new System.Drawing.Point(6, 16);
+      this.label21.Name = "label21";
+      this.label21.Size = new System.Drawing.Size(129, 13);
+      this.label21.TabIndex = 6;
+      this.label21.Text = "Select the point shapefile:";
       // 
       // groupBox18
       // 
@@ -693,7 +789,7 @@
       this.RunOGRInfoTest.TabIndex = 9;
       this.RunOGRInfoTest.Text = "Run test";
       this.RunOGRInfoTest.UseVisualStyleBackColor = true;
-      this.RunOGRInfoTest.Click += new System.EventHandler(this.RunOGRInfoTest_Click);
+      this.RunOGRInfoTest.Click += new System.EventHandler(this.RunOGRInfoTestClick);
       // 
       // SelectOGRInfoFile
       // 
@@ -704,7 +800,7 @@
       this.SelectOGRInfoFile.Text = "...";
       this.toolTip1.SetToolTip(this.SelectOGRInfoFile, "Select text file with on every line the location of a shapefile");
       this.SelectOGRInfoFile.UseVisualStyleBackColor = true;
-      this.SelectOGRInfoFile.Click += new System.EventHandler(this.SelectOGRInfoFile_Click);
+      this.SelectOGRInfoFile.Click += new System.EventHandler(this.SelectOGRInfoFileClick);
       // 
       // OGRInfoInputfile
       // 
@@ -997,6 +1093,19 @@
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "File formats";
       // 
+      // RunAllFileFormatsTestsButton
+      // 
+      this.RunAllFileFormatsTestsButton.BackColor = System.Drawing.Color.LawnGreen;
+      this.RunAllFileFormatsTestsButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+      this.RunAllFileFormatsTestsButton.Location = new System.Drawing.Point(74, 2);
+      this.RunAllFileFormatsTestsButton.Name = "RunAllFileFormatsTestsButton";
+      this.RunAllFileFormatsTestsButton.Size = new System.Drawing.Size(126, 20);
+      this.RunAllFileFormatsTestsButton.TabIndex = 3;
+      this.RunAllFileFormatsTestsButton.Text = "Run all fileformats tests";
+      this.toolTip1.SetToolTip(this.RunAllFileFormatsTestsButton, "Run all fileformats tests");
+      this.RunAllFileFormatsTestsButton.UseVisualStyleBackColor = false;
+      this.RunAllFileFormatsTestsButton.Click += new System.EventHandler(this.RunAllFileFormatsTestsButtonClick);
+      // 
       // groupBox4
       // 
       this.groupBox4.Controls.Add(this.RunImageTest);
@@ -1185,19 +1294,6 @@
       this.Progressbox.Size = new System.Drawing.Size(929, 157);
       this.Progressbox.TabIndex = 0;
       // 
-      // RunAllFileFormatsTestsButton
-      // 
-      this.RunAllFileFormatsTestsButton.BackColor = System.Drawing.Color.LawnGreen;
-      this.RunAllFileFormatsTestsButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.RunAllFileFormatsTestsButton.Location = new System.Drawing.Point(74, 2);
-      this.RunAllFileFormatsTestsButton.Name = "RunAllFileFormatsTestsButton";
-      this.RunAllFileFormatsTestsButton.Size = new System.Drawing.Size(126, 20);
-      this.RunAllFileFormatsTestsButton.TabIndex = 3;
-      this.RunAllFileFormatsTestsButton.Text = "Run all fileformats tests";
-      this.toolTip1.SetToolTip(this.RunAllFileFormatsTestsButton, "Run all fileformats tests");
-      this.RunAllFileFormatsTestsButton.UseVisualStyleBackColor = false;
-      this.RunAllFileFormatsTestsButton.Click += new System.EventHandler(this.RunAllFileFormatsTestsButton_Click);
-      // 
       // Form1
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1223,6 +1319,8 @@
       this.groupBox20.ResumeLayout(false);
       this.groupBox20.PerformLayout();
       this.groupBox10.ResumeLayout(false);
+      this.groupBox22.ResumeLayout(false);
+      this.groupBox22.PerformLayout();
       this.groupBox18.ResumeLayout(false);
       this.groupBox18.PerformLayout();
       this.groupBox17.ResumeLayout(false);
@@ -1358,6 +1456,14 @@
     private System.Windows.Forms.TextBox OGRInfoInputfile;
     private System.Windows.Forms.Label label19;
     private System.Windows.Forms.Button RunAllFileFormatsTestsButton;
+    private System.Windows.Forms.GroupBox groupBox22;
+    private System.Windows.Forms.Button SelectClosestPointShapefileInput2;
+    private System.Windows.Forms.TextBox ClosestPointShapefileInput2;
+    private System.Windows.Forms.Label label20;
+    private System.Windows.Forms.Button RunClosestPointTest;
+    private System.Windows.Forms.Button SelectClosestPointShapefileInput1;
+    private System.Windows.Forms.TextBox ClosestPointShapefileInput1;
+    private System.Windows.Forms.Label label21;
   }
 }
 

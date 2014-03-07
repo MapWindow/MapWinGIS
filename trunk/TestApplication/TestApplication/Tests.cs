@@ -136,7 +136,8 @@ namespace TestApplication
         sf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
         var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
 
-        // for debugging
+        // for debugging:
+        Application.DoEvents();
         Thread.Sleep(1000);
 
         // Create index:
@@ -853,8 +854,8 @@ namespace TestApplication
 
       // Start stopwatch:
       var stopWatch = Stopwatch.StartNew();
-      bool returnCode = sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result);
-      long selectTime = EndStopWatch(ref stopWatch);
+      var returnCode = sf.SelectShapes(boundBox, 0, SelectMode.INTERSECTION, ref result);
+      var selectTime = EndStopWatch(ref stopWatch);
 
       // Start selecting:
       if (!returnCode)

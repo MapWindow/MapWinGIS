@@ -380,6 +380,151 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The get intersection shapefile test has finished.");
     }
 
+    /// <summary>Test the closest points method</summary>
+    /// <param name="pointShapefile">The point shapefile</param>
+    /// <param name="searchShapefile">The search shapefile</param>
+    /// <param name="theForm">The form</param>
+    internal static void RunClosestPointTest(string pointShapefile, string searchShapefile, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The closest point test has started.", Environment.NewLine));
+
+      try
+      {
+        // Check inputs:
+        if (!Helper.CheckShapefileLocation(pointShapefile, theForm))
+        {
+          return;
+        }
+
+        if (!Helper.CheckShapefileLocation(searchShapefile, theForm))
+        {
+          return;
+        }
+
+        // Open the sf:
+        var pointSf = Fileformats.OpenShapefile(pointShapefile, theForm);
+        if (pointSf == null)
+        {
+          theForm.Error(string.Empty, "Opening point shapefile was unsuccessful");
+          return;
+        }
+
+        var searchSf = Fileformats.OpenShapefile(searchShapefile, theForm);
+        if (searchSf == null)
+        {
+          theForm.Error(string.Empty, "Opening search shapefile was unsuccessful");
+          return;
+        }
+
+        // Create resulting shapefile:
+        var linksSf = new Shapefile { GlobalCallback = theForm };
+        linksSf.CreateNew(string.Empty, ShpfileType.SHP_POLYLINE);
+        var fieldIndex = linksSf.EditAddField("FoundId", FieldType.INTEGER_FIELD, 0, 0);
+
+        // Get a random point:
+        var index = new Random().Next(pointSf.NumShapes - 1);
+        var pointShp = pointSf.get_Shape(index);
+
+        // Select the shape:
+        var utils = new Utils { GlobalCallback = theForm };
+        pointSf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
+        pointSf.set_ShapeSelected(index, true);
+
+        // To store the lenght and index:
+        var minLength = double.MaxValue;
+        var closestIndex = -1;
+
+        // Search around the location until at least on shape is found.
+        // To optimize searching make sure a spatial index is used:
+        if (!searchSf.HasSpatialIndex)
+        {
+          searchSf.CreateSpatialIndex(searchSf.Filename);
+        }
+
+        searchSf.UseSpatialIndex = true;
+
+        // create start search box:
+        var searchExtent = pointShp.Extents;
+
+        // Make the start tolerance depending on the projection:
+        var tolerance = 2D;
+        if (searchSf.GeoProjection.IsGeographic)
+        {
+          tolerance = 0.01;
+        }
+        
+        var foundShapeID = -1;
+        object results = null;
+        while (true)
+        {
+          if (searchSf.SelectShapes(searchExtent, tolerance, SelectMode.INTERSECTION, ref results))
+          {
+            var shapes = results as int[];
+
+            // Use the first one:
+            if (shapes != null)
+            {
+              foundShapeID = shapes[0];
+            }
+
+            // stop searching:
+            break;
+          }
+          
+          // increase tolerance:
+          tolerance = tolerance + tolerance;
+        }
+        
+        if (foundShapeID == -1)
+        {
+          theForm.Error(string.Empty, "Error! Could not find any shapes");
+          return;
+        }
+
+        // Select teh found shape:
+        searchSf.SelectionColor = utils.ColorByName(tkMapColor.Red);
+        searchSf.set_ShapeSelected(foundShapeID, true);
+
+        var link = pointShp.ClosestPoints(searchSf.get_Shape(foundShapeID));
+        if (link != null && link.numPoints > 1)
+        {
+          var shapeId = linksSf.EditAddShape(link);
+          linksSf.EditCellValue(fieldIndex, shapeId, foundShapeID);
+          if (minLength > link.Length)
+          {
+            minLength = link.Length;
+            closestIndex = foundShapeID;
+          }
+        }
+
+        // Load the files:
+        MyAxMap.RemoveAllLayers();
+        MyAxMap.AddLayer(searchSf, true);
+        MyAxMap.AddLayer(pointSf, true);
+
+        linksSf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.Black);
+        linksSf.DefaultDrawingOptions.LineWidth = 2;
+        MyAxMap.AddLayer(linksSf, true);
+        linksSf.GenerateLabels(fieldIndex, tkLabelPositioning.lpMiddleSegment, false);
+        linksSf.Labels.OffsetX = 10;
+        linksSf.Labels.OffsetY = 10;
+
+        MyAxMap.ZoomToMaxExtents();
+        MyAxMap.Redraw();
+
+        theForm.Progress(string.Empty, 0, string.Format("The closest shape is: {0} and has a length of {1}", searchSf.get_CellValue(0, closestIndex), minLength));
+      }
+      catch (Exception exception)
+      {
+        theForm.Error(string.Empty, "Exception: " + exception.Message);
+      }
+
+      theForm.Progress(string.Empty, 100, "The closest point test has finished.");
+    }
+
     /// <summary>Clip the shapefile</summary>
     /// <param name="shapefilename">The shapefile name</param>
     /// <param name="overlayFilename">The name of the overlay shapefile</param>
@@ -547,7 +692,7 @@ namespace TestApplication
       {
         theForm.Progress(string.Empty, 100, "The two shapes are identical.");
       }
-    }        
+    }
   }
 
   /*

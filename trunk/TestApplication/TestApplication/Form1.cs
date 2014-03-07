@@ -366,6 +366,42 @@ namespace TestApplication
       Tests.SelectTextfile(this.SpatialIndexInputfile, "Select text file with on each line the location of the shapefiles");
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectClosestPointShapefileInput1Click(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClosestPointShapefileInput1, "Select point shapefile");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectClosestPointShapefileInput2Click(object sender, EventArgs e)
+    {
+      Tests.SelectShapefile(this.ClosestPointShapefileInput2, "Select shapefile to get the closest point from.");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectOGRInfoFileClick(object sender, EventArgs e)
+    {
+      Tests.SelectAnyfile(this.OGRInfoInputfile, "Select file");
+    }
+
     #endregion
 
     #region Run test click event
@@ -539,17 +575,26 @@ namespace TestApplication
       Tests.RunSpatialIndexTest(this.SpatialIndexInputfile.Text, this);
     }
 
-    private void RunOGRInfoTest_Click(object sender, EventArgs e)
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunOGRInfoTestClick(object sender, EventArgs e)
     {
         Tests.RunOGRInfoTest(this.OGRInfoInputfile.Text, this);
     }
 
-    private void SelectOGRInfoFile_Click(object sender, EventArgs e)
-    {
-        Tests.SelectAnyfile(this.OGRInfoInputfile, "Select file");
-    }
-
-    private void RunAllFileFormatsTestsButton_Click(object sender, EventArgs e)
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunAllFileFormatsTestsButtonClick(object sender, EventArgs e)
     {
       // Run the shapefile open tests:
       this.RunShapefileTestClick(sender, e);
@@ -563,6 +608,18 @@ namespace TestApplication
       this.RunImageTestClick(sender, e);
 
       this.Progress(string.Empty, 0, "Done running all Fileformats tests.");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void RunClosestPointTestClick(object sender, EventArgs e)
+    {
+      GeosTests.RunClosestPointTest(this.ClosestPointShapefileInput1.Text, this.ClosestPointShapefileInput2.Text, this);
     }
   }
 }

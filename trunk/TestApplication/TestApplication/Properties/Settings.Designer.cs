@@ -274,5 +274,29 @@ namespace TestApplication.Properties {
                 this["OGRInfoInputfile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClosestPointShapefileInput1 {
+            get {
+                return ((string)(this["ClosestPointShapefileInput1"]));
+            }
+            set {
+                this["ClosestPointShapefileInput1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClosestPointShapefileInput2 {
+            get {
+                return ((string)(this["ClosestPointShapefileInput2"]));
+            }
+            set {
+                this["ClosestPointShapefileInput2"] = value;
+            }
+        }
     }
 }
