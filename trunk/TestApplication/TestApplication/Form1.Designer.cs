@@ -107,11 +107,8 @@
       this.label7 = new System.Windows.Forms.Label();
       this.groupBox6 = new System.Windows.Forms.GroupBox();
       this.RunClipGridByPolygonTest = new System.Windows.Forms.Button();
-      this.SelectClippingPolygon = new System.Windows.Forms.Button();
-      this.ClippingPolygon = new System.Windows.Forms.TextBox();
-      this.label6 = new System.Windows.Forms.Label();
       this.SelectGridfileToClip = new System.Windows.Forms.Button();
-      this.GridfileToClip = new System.Windows.Forms.TextBox();
+      this.ClipGridByPolygonInputfile = new System.Windows.Forms.TextBox();
       this.label5 = new System.Windows.Forms.Label();
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.RunAllFileFormatsTestsButton = new System.Windows.Forms.Button();
@@ -882,7 +879,7 @@
       this.groupBox5.Controls.Add(this.groupBox6);
       this.groupBox5.Location = new System.Drawing.Point(3, 340);
       this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(205, 346);
+      this.groupBox5.Size = new System.Drawing.Size(205, 310);
       this.groupBox5.TabIndex = 2;
       this.groupBox5.TabStop = false;
       this.groupBox5.Text = "Spatial operations";
@@ -893,7 +890,7 @@
       this.groupBox14.Controls.Add(this.SelectAggregateShapefile);
       this.groupBox14.Controls.Add(this.AggregateShapefileInput);
       this.groupBox14.Controls.Add(this.label11);
-      this.groupBox14.Location = new System.Drawing.Point(6, 249);
+      this.groupBox14.Location = new System.Drawing.Point(6, 211);
       this.groupBox14.Name = "groupBox14";
       this.groupBox14.Size = new System.Drawing.Size(195, 89);
       this.groupBox14.TabIndex = 6;
@@ -946,7 +943,7 @@
       this.groupBox7.Controls.Add(this.SelectShapefileToGrid);
       this.groupBox7.Controls.Add(this.ShapefileToGrid);
       this.groupBox7.Controls.Add(this.label7);
-      this.groupBox7.Location = new System.Drawing.Point(6, 154);
+      this.groupBox7.Location = new System.Drawing.Point(6, 116);
       this.groupBox7.Name = "groupBox7";
       this.groupBox7.Size = new System.Drawing.Size(195, 89);
       this.groupBox7.TabIndex = 1;
@@ -996,58 +993,25 @@
       // groupBox6
       // 
       this.groupBox6.Controls.Add(this.RunClipGridByPolygonTest);
-      this.groupBox6.Controls.Add(this.SelectClippingPolygon);
-      this.groupBox6.Controls.Add(this.ClippingPolygon);
-      this.groupBox6.Controls.Add(this.label6);
       this.groupBox6.Controls.Add(this.SelectGridfileToClip);
-      this.groupBox6.Controls.Add(this.GridfileToClip);
+      this.groupBox6.Controls.Add(this.ClipGridByPolygonInputfile);
       this.groupBox6.Controls.Add(this.label5);
       this.groupBox6.Location = new System.Drawing.Point(6, 19);
       this.groupBox6.Name = "groupBox6";
-      this.groupBox6.Size = new System.Drawing.Size(195, 129);
+      this.groupBox6.Size = new System.Drawing.Size(195, 91);
       this.groupBox6.TabIndex = 0;
       this.groupBox6.TabStop = false;
       this.groupBox6.Text = "Clip grid by polygon";
       // 
       // RunClipGridByPolygonTest
       // 
-      this.RunClipGridByPolygonTest.Location = new System.Drawing.Point(9, 97);
+      this.RunClipGridByPolygonTest.Location = new System.Drawing.Point(9, 58);
       this.RunClipGridByPolygonTest.Name = "RunClipGridByPolygonTest";
       this.RunClipGridByPolygonTest.Size = new System.Drawing.Size(180, 23);
       this.RunClipGridByPolygonTest.TabIndex = 9;
       this.RunClipGridByPolygonTest.Text = "Run test";
       this.RunClipGridByPolygonTest.UseVisualStyleBackColor = true;
       this.RunClipGridByPolygonTest.Click += new System.EventHandler(this.RunClipGridByPolygonTestClick);
-      // 
-      // SelectClippingPolygon
-      // 
-      this.SelectClippingPolygon.Location = new System.Drawing.Point(162, 71);
-      this.SelectClippingPolygon.Name = "SelectClippingPolygon";
-      this.SelectClippingPolygon.Size = new System.Drawing.Size(27, 20);
-      this.SelectClippingPolygon.TabIndex = 8;
-      this.SelectClippingPolygon.Text = "...";
-      this.toolTip1.SetToolTip(this.SelectClippingPolygon, "Select text file with on every line the location of a shapefile");
-      this.SelectClippingPolygon.UseVisualStyleBackColor = true;
-      this.SelectClippingPolygon.Click += new System.EventHandler(this.SelectClippingPolygonClick);
-      // 
-      // ClippingPolygon
-      // 
-      this.ClippingPolygon.AcceptsReturn = true;
-      this.ClippingPolygon.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClippingPolygon", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.ClippingPolygon.Location = new System.Drawing.Point(9, 71);
-      this.ClippingPolygon.Name = "ClippingPolygon";
-      this.ClippingPolygon.Size = new System.Drawing.Size(147, 20);
-      this.ClippingPolygon.TabIndex = 7;
-      this.ClippingPolygon.Text = global::TestApplication.Properties.Settings.Default.ClippingPolygon;
-      // 
-      // label6
-      // 
-      this.label6.AutoSize = true;
-      this.label6.Location = new System.Drawing.Point(6, 55);
-      this.label6.Name = "label6";
-      this.label6.Size = new System.Drawing.Size(114, 13);
-      this.label6.TabIndex = 6;
-      this.label6.Text = "Select the polygon file:";
       // 
       // SelectGridfileToClip
       // 
@@ -1058,26 +1022,26 @@
       this.SelectGridfileToClip.Text = "...";
       this.toolTip1.SetToolTip(this.SelectGridfileToClip, "Select text file with on every line the location of a shapefile");
       this.SelectGridfileToClip.UseVisualStyleBackColor = true;
-      this.SelectGridfileToClip.Click += new System.EventHandler(this.SelectGridfileToClipClick);
+      this.SelectGridfileToClip.Click += new System.EventHandler(this.SelectClipGridByPolygonInputfile);
       // 
-      // GridfileToClip
+      // ClipGridByPolygonInputfile
       // 
-      this.GridfileToClip.AcceptsReturn = true;
-      this.GridfileToClip.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "GridfileToClip", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-      this.GridfileToClip.Location = new System.Drawing.Point(9, 32);
-      this.GridfileToClip.Name = "GridfileToClip";
-      this.GridfileToClip.Size = new System.Drawing.Size(147, 20);
-      this.GridfileToClip.TabIndex = 4;
-      this.GridfileToClip.Text = global::TestApplication.Properties.Settings.Default.GridfileToClip;
+      this.ClipGridByPolygonInputfile.AcceptsReturn = true;
+      this.ClipGridByPolygonInputfile.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ClipGridByPolygonInputfile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ClipGridByPolygonInputfile.Location = new System.Drawing.Point(9, 32);
+      this.ClipGridByPolygonInputfile.Name = "ClipGridByPolygonInputfile";
+      this.ClipGridByPolygonInputfile.Size = new System.Drawing.Size(147, 20);
+      this.ClipGridByPolygonInputfile.TabIndex = 4;
+      this.ClipGridByPolygonInputfile.Text = global::TestApplication.Properties.Settings.Default.ClipGridByPolygonInputfile;
       // 
       // label5
       // 
       this.label5.AutoSize = true;
       this.label5.Location = new System.Drawing.Point(6, 16);
       this.label5.Name = "label5";
-      this.label5.Size = new System.Drawing.Size(94, 13);
+      this.label5.Size = new System.Drawing.Size(172, 13);
       this.label5.TabIndex = 3;
-      this.label5.Text = "Select the grid file:";
+      this.label5.Text = "Select a txt file with the files to use:";
       // 
       // groupBox1
       // 
@@ -1306,7 +1270,7 @@
       this.Name = "Form1";
       this.Text = "Test application for MapWinGIS";
       this.Load += new System.EventHandler(this.Form1Load);
-      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1FormClosing);
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(Form1FormClosing);
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
       this.splitContainer1.Panel2.PerformLayout();
@@ -1385,11 +1349,8 @@
     private System.Windows.Forms.GroupBox groupBox5;
     private System.Windows.Forms.GroupBox groupBox6;
     private System.Windows.Forms.Button SelectGridfileToClip;
-    private System.Windows.Forms.TextBox GridfileToClip;
+    private System.Windows.Forms.TextBox ClipGridByPolygonInputfile;
     private System.Windows.Forms.Label label5;
-    private System.Windows.Forms.Button SelectClippingPolygon;
-    private System.Windows.Forms.TextBox ClippingPolygon;
-    private System.Windows.Forms.Label label6;
     private System.Windows.Forms.Button RunClipGridByPolygonTest;
     private System.Windows.Forms.GroupBox groupBox7;
     private System.Windows.Forms.Button RunShapefileToGridTest;

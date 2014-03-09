@@ -10,21 +10,13 @@ namespace TestApplication
 {
   using System;
   using System.Reflection;
-  using System.Windows.Forms;
   using System.Threading;
-
+  using System.Windows.Forms;
   using MapWinGIS;
 
   /// <summary>Defines the form</summary>
   public partial class Form1 : Form, ICallback
   {
-    #region Delegates
-
-    delegate void ErrorCallback(string keyOfSender, string errorMsg);
-    delegate void ProgressCallback(string keyOfSender, int percent, string message);
-
-    #endregion
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Form1"/> class.
     /// </summary>
@@ -32,6 +24,31 @@ namespace TestApplication
     {
       InitializeComponent();
     }
+
+    #region Delegates
+
+    /// <summary>The error callback</summary>
+    /// <param name="keyOfSender">
+    /// The key of sender.
+    /// </param>
+    /// <param name="errorMsg">
+    /// The error msg.
+    /// </param>
+    public delegate void ErrorCallback(string keyOfSender, string errorMsg);
+
+    /// <summary>The progress callback</summary>
+    /// <param name="keyOfSender">
+    /// The key of sender.
+    /// </param>
+    /// <param name="percent">
+    /// The percentage.
+    /// </param>
+    /// <param name="message">
+    /// The message.
+    /// </param>
+    public delegate void ProgressCallback(string keyOfSender, int percent, string message);
+
+    #endregion
 
     #region ICallback Members
 
@@ -44,13 +61,15 @@ namespace TestApplication
     /// </param>
     public void Error(string keyOfSender, string errorMsg)
     {
-        if (this.InvokeRequired)
-            this.Invoke(new ErrorCallback(Error), keyOfSender, errorMsg);
-        else
-        {
+      if (this.InvokeRequired)
+      {
+        this.Invoke(new ErrorCallback(this.Error), keyOfSender, errorMsg);
+      }
+      else
+      {
             var msg = @"Error:" + errorMsg;
             Progressbox.AppendText(msg + Environment.NewLine);
-        }
+      }
     }
 
     /// <summary>The progress callback</summary>
@@ -65,31 +84,45 @@ namespace TestApplication
     /// </param>
     public void Progress(string keyOfSender, int percent, string message)
     {
-        if (this.InvokeRequired)
-            this.Invoke(new ProgressCallback(Progress), keyOfSender, percent, message);
-        else
+      if (this.InvokeRequired)
+      {
+        this.Invoke(new ProgressCallback(this.Progress), keyOfSender, percent, message);
+      }
+      else
+      {
+        switch (percent)
         {
-            switch (percent)
+          case 0:
+            if (message != string.Empty)
             {
-                case 0:
-                    if (message != string.Empty)
-                    {
-                        this.Progressbox.AppendText(message + Environment.NewLine);
-                    }
-
-                    break;
-                case 100:
-                    this.Progressbox.AppendText(message + Environment.NewLine);
-                    break;
-                default:
-                    var msg = percent + @"% ... ";
-                    this.Progressbox.AppendText(msg);
-                    break;
+              this.Progressbox.AppendText(message + Environment.NewLine);
             }
+
+            break;
+          case 100:
+            this.Progressbox.AppendText(message + Environment.NewLine);
+            break;
+          default:
+            var msg = percent + @"% ... ";
+            this.Progressbox.AppendText(msg);
+            break;
         }
+      }
     }
 
     #endregion
+
+    /// <summary>Form closing event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private static void Form1FormClosing(object sender, FormClosingEventArgs e)
+    {
+      Properties.Settings.Default.Save();
+    }
 
     /// <summary>Form load event</summary>
     /// <param name="sender">
@@ -109,20 +142,6 @@ namespace TestApplication
       this.Progress(string.Empty, 100, string.Format("MapWinGIS version: {0} Test application version: {1}", this.axMap1.VersionNumber, Assembly.GetEntryAssembly().GetName().Version));
       
       // TODO: Also write GDAL version
-    }
-
-    /// <summary>Form closing event</summary>
-    /// <param name="sender">
-    /// The sender.
-    /// </param>
-    /// <param name="e">
-    /// The e.
-    /// </param>
-// ReSharper disable MemberCanBeMadeStatic.Local
-    private void Form1FormClosing(object sender, FormClosingEventArgs e)
-// ReSharper restore MemberCanBeMadeStatic.Local
-    {
-      Properties.Settings.Default.Save();
     }
 
     /// <summary>Handle the dropped file</summary>
@@ -206,7 +225,7 @@ namespace TestApplication
     private void SelectImageInputfileClick(object sender, EventArgs e)
     {
       // Select text file with on every line the location of an image file
-      Tests.SelectTextfile(ImageInputfile, "Select text file with on every line the location of an image file");
+      Tests.SelectTextfile(this.ImageInputfile, "Select text file with on every line the location of an image file");
     }
 
     /// <summary>Click event</summary>
@@ -216,21 +235,9 @@ namespace TestApplication
     /// <param name="e">
     /// The e.
     /// </param>
-    private void SelectGridfileToClipClick(object sender, EventArgs e)
+    private void SelectClipGridByPolygonInputfile(object sender, EventArgs e)
     {
-      Tests.SelectGridfile(this.GridfileToClip, "Select grid file to clip");
-    }
-
-    /// <summary>Click event</summary>
-    /// <param name="sender">
-    /// The sender.
-    /// </param>
-    /// <param name="e">
-    /// The e.
-    /// </param>
-    private void SelectClippingPolygonClick(object sender, EventArgs e)
-    {
-      Tests.SelectShapefile(this.ClippingPolygon, "Select clipping polygon shapefile");
+      Tests.SelectTextfile(this.ClipGridByPolygonInputfile, "Select text file with files to use.");
     }
 
     /// <summary>Click event</summary>
@@ -450,7 +457,7 @@ namespace TestApplication
     /// </param>
     private void RunClipGridByPolygonTestClick(object sender, EventArgs e)
     {
-      Tests.RunClipGridByPolygonTest(this.GridfileToClip.Text, this.ClippingPolygon.Text, this);
+      Tests.RunClipGridByPolygonTest(this.ClipGridByPolygonInputfile.Text, this);
     }
 
     /// <summary>Click event</summary>

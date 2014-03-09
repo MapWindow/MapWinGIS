@@ -1,0 +1,7 @@
+# These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/ClipGridByPolygon/
+# First line is grid,  second line is clipping shapefile
+
+# North-East of The Netherlands:
+C:\dev\TestingScripts\ScriptData\General\ClipGridByPolygon\AHN-10.asc
+C:\dev\TestingScripts\ScriptData\General\ClipGridByPolygon\ClippingPolygon-AHN.shp
+

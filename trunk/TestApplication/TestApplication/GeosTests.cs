@@ -484,7 +484,7 @@ namespace TestApplication
           return;
         }
 
-        // Select teh found shape:
+        // Select the found shape:
         searchSf.SelectionColor = utils.ColorByName(tkMapColor.Red);
         searchSf.set_ShapeSelected(foundShapeID, true);
 
@@ -516,6 +516,12 @@ namespace TestApplication
         MyAxMap.Redraw();
 
         theForm.Progress(string.Empty, 0, string.Format("The closest shape is: {0} and has a length of {1}", searchSf.get_CellValue(0, closestIndex), minLength));
+
+        // Save result:
+        var newFilename = pointSf.Filename.Replace(".shp", "-Closest.shp");
+        Helper.DeleteShapefile(newFilename);
+        linksSf.SaveAs(newFilename, theForm);
+        theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
       }
       catch (Exception exception)
       {

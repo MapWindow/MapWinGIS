@@ -389,94 +389,32 @@ namespace TestApplication
     }
 
     /// <summary>Run the Clip grid by polygon test</summary>
-    /// <param name="gridFilename">
-    /// The grid filename.
-    /// </param>
-    /// <param name="shapefilename">
-    /// The shapefilename.
+    /// <param name="textfileLocation">
+    /// The textfile location.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunClipGridByPolygonTest(string gridFilename, string shapefilename, Form1 theForm)
+    internal static void RunClipGridByPolygonTest(string textfileLocation, Form1 theForm)
     {
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Clip grid by polygon test has started.", Environment.NewLine));
 
-      try
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
       {
-        // Check inputs:
-        if (gridFilename == string.Empty || shapefilename == string.Empty)
+        if (i + 1 > lines.Count)
         {
-          theForm.Error(string.Empty, "Input parameters are wrong");
-          return;
+          theForm.Error(string.Empty, "Input file is incorrect.");
+          break;
         }
 
-        var folder = Path.GetDirectoryName(gridFilename);
-        if (folder == null)
-        {
-          theForm.Error(string.Empty, "Input parameters are wrong");
-          return;
-        }
-
-        if (!Directory.Exists(folder))
-        {
-          theForm.Error(string.Empty, "Output folder doesn't exists");
-          return;
-        }
-
-        if (!File.Exists(gridFilename))
-        {
-          theForm.Error(string.Empty, "Input grid file doesn't exists");
-          return;
-        }
-
-        if (!File.Exists(shapefilename))
-        {
-          theForm.Error(string.Empty, "Input shapefile doesn't exists");
-          return;
-        }
-        
-        var resultGrid = Path.Combine(folder, "ClipGridByPolygonTest" + Path.GetExtension(gridFilename));
-        if (File.Exists(resultGrid))
-        {
-          File.Delete(resultGrid);
-        }
-
-        var globalSettings = new GlobalSettings();
-        globalSettings.ResetGdalError();
-        var utils = new Utils { GlobalCallback = theForm };
-        var sf = new Shapefile();
-        sf.Open(shapefilename, theForm);
-        var polygon = sf.get_Shape(0);
-
-        // It returns false even if it is created
-        if (!utils.ClipGridWithPolygon(gridFilename, polygon, resultGrid, false))
-        {
-          var msg = "Failed to process: " + utils.get_ErrorMsg(utils.LastErrorCode);
-          if (globalSettings.GdalLastErrorMsg != string.Empty)
-          {
-            msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
-          }
-
-          theForm.Error(string.Empty, msg);
-        }
-
-        if (File.Exists(resultGrid))
-        {
-          theForm.Progress(string.Empty, 100, resultGrid + " was successfully created");
-          Fileformats.OpenGridAsLayer(resultGrid, theForm, true);
-        }
-        else
-        {
-          theForm.Error(string.Empty, "No grid was created");
-        }
-      }
-      catch (Exception exception)
-      {
-        theForm.Error(string.Empty, "Exception: " + exception.Message);
+        ClipGridByPolygon(lines[i], lines[i + 1], theForm);
       }
 
       theForm.Progress(string.Empty, 100, "The Clip grid by polygon test has finished.");
@@ -928,5 +866,103 @@ namespace TestApplication
       MyAxMap.ZoomToMaxExtents();
     }
 
+    /// <summary>Clip Grid by Polygon</summary>
+    /// <param name="gridFilename">
+    /// The grid filename.
+    /// </param>
+    /// <param name="shapefilename">
+    /// The shapefilename.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    private static void ClipGridByPolygon(string gridFilename, string shapefilename, Form1 theForm)
+    {
+      try
+      {
+        // Clear the map:
+        MyAxMap.RemoveAllLayers();
+        Application.DoEvents();
+
+        // Check inputs:
+        if (gridFilename == string.Empty || shapefilename == string.Empty)
+        {
+          theForm.Error(string.Empty, "Input parameters are wrong");
+          return;
+        }
+
+        var folder = Path.GetDirectoryName(gridFilename);
+        if (folder == null)
+        {
+          theForm.Error(string.Empty, "Input parameters are wrong");
+          return;
+        }
+
+        if (!Directory.Exists(folder))
+        {
+          theForm.Error(string.Empty, "Output folder doesn't exists");
+          return;
+        }
+
+        if (!File.Exists(gridFilename))
+        {
+          theForm.Error(string.Empty, "Input grid file doesn't exists");
+          return;
+        }
+
+        if (!File.Exists(shapefilename))
+        {
+          theForm.Error(string.Empty, "Input shapefile doesn't exists");
+          return;
+        }
+
+        var resultGrid = Path.Combine(folder, "ClipGridByPolygonTest" + Path.GetExtension(gridFilename));
+        if (File.Exists(resultGrid))
+        {
+          File.Delete(resultGrid);
+        }
+
+        var globalSettings = new GlobalSettings();
+        globalSettings.ResetGdalError();
+        var utils = new Utils { GlobalCallback = theForm };
+        var sf = new Shapefile();
+        sf.Open(shapefilename, theForm);
+
+        // Get one polygon the clip with:
+        var index = new Random().Next(sf.NumShapes - 1);
+        var polygon = sf.get_Shape(index);
+
+        // It returns false even if it is created
+        if (!utils.ClipGridWithPolygon(gridFilename, polygon, resultGrid, false))
+        {
+          var msg = "Failed to process: " + utils.get_ErrorMsg(utils.LastErrorCode);
+          if (globalSettings.GdalLastErrorMsg != string.Empty)
+          {
+            msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
+          }
+
+          theForm.Error(string.Empty, msg);
+        }
+
+        if (File.Exists(resultGrid))
+        {
+          theForm.Progress(string.Empty, 100, resultGrid + " was successfully created");
+
+          // Add the layers:
+          Fileformats.OpenGridAsLayer(gridFilename, theForm, true);
+          Fileformats.OpenGridAsLayer(resultGrid, theForm, false);
+          MyAxMap.AddLayer(sf, true);
+          Application.DoEvents();
+        }
+        else
+        {
+          theForm.Error(string.Empty, "No grid was created");
+        }
+      }
+      catch (Exception exception)
+      {
+        theForm.Error(string.Empty, "Exception: " + exception.Message);
+      }
+    }
   }
 }

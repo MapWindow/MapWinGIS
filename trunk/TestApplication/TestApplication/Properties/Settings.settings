@@ -71,5 +71,8 @@
     <Setting Name="ClosestPointShapefileInput2" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ClipGridByPolygonInputfile" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
