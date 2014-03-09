@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="MapWinGIS"
 	ProjectGUID="{1AB93398-2DE6-4043-BF6D-D438A794FB86}"
 	RootNamespace="MapWinGIS"
@@ -1008,7 +1008,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Copying executables..."
-				CommandLine="xcopy /D /Y $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName)\*.dll $(TargetDir)&#x0D;&#x0A;"
+				CommandLine="$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName) $(TargetDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -1135,7 +1135,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Copying executables..."
-				CommandLine="copy $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName)\*.dll $(TargetDir)"
+				CommandLine="$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName) $(TargetDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -1201,7 +1201,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:x64"
-				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib geos_c.lib libtiff_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex.lib"
+				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib geos_c.lib libtiff_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
 				Version="4.9.1"
@@ -1255,7 +1255,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Copying executables..."
-				CommandLine="xcopy /D /Y $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName)\*.dll $(TargetDir)&#x0D;&#x0A;"
+				CommandLine="$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName) $(TargetDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -1382,7 +1382,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Copying executables..."
-				CommandLine="xcopy /D /Y $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName)\*.dll $(TargetDir)&#x0D;&#x0A;"
+				CommandLine="$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(PlatformName) $(TargetDir)"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -4048,11 +4048,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>
