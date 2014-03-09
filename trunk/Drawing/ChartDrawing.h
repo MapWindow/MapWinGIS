@@ -33,7 +33,7 @@ class CChartDrawer: public CBaseDrawer
 {
 public:
 	// constructor
-	CChartDrawer::CChartDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, double currentScale, CCollisionList* collisionList)
+	CChartDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, double currentScale, CCollisionList* collisionList)
 	{
 		_dc = NULL;
 		_extents = extents;
@@ -46,7 +46,7 @@ public:
 		
 	}
 	
-	CChartDrawer::~CChartDrawer(void){}
+	~CChartDrawer(void){}
 
 protected:	
 	double _currentScale;
@@ -60,7 +60,7 @@ private:
 	};
 
 public:
-	void CChartDrawer::DrawCharts(IShapefile* sf);
+	void DrawCharts(IShapefile* sf);
 };
 
 

@@ -117,7 +117,7 @@ public:
 	
 	#pragma region Constructor
 	// constructor
-	CDrawingOptionsEx::CDrawingOptionsEx(void)
+	CDrawingOptionsEx(void)
 	{
 		m_needDeleteBitmapPlus = false;
 		//selectionColor = RGB(255, 255, 0);
@@ -197,7 +197,7 @@ public:
 	}
 	
 	// Constructor 2
-	CDrawingOptionsEx::CDrawingOptionsEx(const CDrawingOptionsEx& opt)
+	CDrawingOptionsEx(const CDrawingOptionsEx& opt)
 	{
 		this->picture = NULL;
 		this->linePattern = NULL;
@@ -216,7 +216,7 @@ public:
 	#pragma endregion
 	
 	#pragma region Destructor
-	CDrawingOptionsEx::~CDrawingOptionsEx()
+	~CDrawingOptionsEx()
 	{
 		if ( picture )	picture->Release();
 		if ( linePattern )	linePattern->Release();
@@ -268,7 +268,7 @@ public:
 
 	// utilities
 	Gdiplus::Bitmap* ImageToGdiPlusBitmap(IImage* img);
-	CPoint* CDrawingOptionsEx::GetVertex();
+	CPoint* GetVertex();
 	void DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::Point* points, float* angles, int count);
 	int LineStippleToGDIPenStyle(tkDashStyle lineStipple);
 	Gdiplus::GraphicsPath* get_FontCharacterPath(CDC* dc, bool previewDrawing);

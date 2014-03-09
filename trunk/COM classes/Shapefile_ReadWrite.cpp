@@ -78,6 +78,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 
 		if (count != length)
 		{
+			delete[] shapeData;
 			*pVal = NULL;
 			return S_OK;
 		}

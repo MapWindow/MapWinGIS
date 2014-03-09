@@ -194,7 +194,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					}	
 					
 					// Seeking the larges part of shape
-					double value;
+					double value = 0.0;
 					if (shpType == SHP_POLYGON)
 					{
 						shpPart->get_Area(&value);
@@ -453,7 +453,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 					}	
 					
 					// Seeking the larges part of shape
-					double value;
+					double value = 0.0;
 					if		(shpType == SHP_POLYGON)		shpPart->get_Area(&value);
 					else if (shpType == SHP_POLYLINE)	shpPart->get_Length(&value);
 
