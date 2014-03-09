@@ -94,7 +94,8 @@
       this.SelectRasterizeInputfile = new System.Windows.Forms.Button();
       this.RasterizeInputfile = new System.Windows.Forms.TextBox();
       this.label8 = new System.Windows.Forms.Label();
-      this.groupBox5 = new System.Windows.Forms.GroupBox();
+      this.SpatialOperationGroupBox = new System.Windows.Forms.GroupBox();
+      this.RunAllSpatialOperationTests = new System.Windows.Forms.Button();
       this.groupBox14 = new System.Windows.Forms.GroupBox();
       this.RunAggregateShapefileTest = new System.Windows.Forms.Button();
       this.SelectAggregateShapefile = new System.Windows.Forms.Button();
@@ -110,7 +111,7 @@
       this.SelectGridfileToClip = new System.Windows.Forms.Button();
       this.ClipGridByPolygonInputfile = new System.Windows.Forms.TextBox();
       this.label5 = new System.Windows.Forms.Label();
-      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.FileFormatsGroupBox = new System.Windows.Forms.GroupBox();
       this.RunAllFileFormatsTestsButton = new System.Windows.Forms.Button();
       this.groupBox4 = new System.Windows.Forms.GroupBox();
       this.RunImageTest = new System.Windows.Forms.Button();
@@ -151,11 +152,11 @@
       this.groupBox8.SuspendLayout();
       this.groupBox21.SuspendLayout();
       this.groupBox9.SuspendLayout();
-      this.groupBox5.SuspendLayout();
+      this.SpatialOperationGroupBox.SuspendLayout();
       this.groupBox14.SuspendLayout();
       this.groupBox7.SuspendLayout();
       this.groupBox6.SuspendLayout();
-      this.groupBox1.SuspendLayout();
+      this.FileFormatsGroupBox.SuspendLayout();
       this.groupBox4.SuspendLayout();
       this.groupBox3.SuspendLayout();
       this.groupBox2.SuspendLayout();
@@ -194,8 +195,8 @@
       this.splitContainer2.Panel1.Controls.Add(this.groupBox11);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox10);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox8);
-      this.splitContainer2.Panel1.Controls.Add(this.groupBox5);
-      this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
+      this.splitContainer2.Panel1.Controls.Add(this.SpatialOperationGroupBox);
+      this.splitContainer2.Panel1.Controls.Add(this.FileFormatsGroupBox);
       this.splitContainer2.Panel1.Controls.Add(this.label1);
       this.splitContainer2.Panel1MinSize = 30;
       // 
@@ -871,18 +872,32 @@
       this.label8.TabIndex = 6;
       this.label8.Text = "Select the polygon file:";
       // 
-      // groupBox5
+      // SpatialOperationGroupBox
       // 
-      this.groupBox5.BackColor = System.Drawing.Color.PeachPuff;
-      this.groupBox5.Controls.Add(this.groupBox14);
-      this.groupBox5.Controls.Add(this.groupBox7);
-      this.groupBox5.Controls.Add(this.groupBox6);
-      this.groupBox5.Location = new System.Drawing.Point(3, 340);
-      this.groupBox5.Name = "groupBox5";
-      this.groupBox5.Size = new System.Drawing.Size(205, 310);
-      this.groupBox5.TabIndex = 2;
-      this.groupBox5.TabStop = false;
-      this.groupBox5.Text = "Spatial operations";
+      this.SpatialOperationGroupBox.BackColor = System.Drawing.Color.PeachPuff;
+      this.SpatialOperationGroupBox.Controls.Add(this.RunAllSpatialOperationTests);
+      this.SpatialOperationGroupBox.Controls.Add(this.groupBox14);
+      this.SpatialOperationGroupBox.Controls.Add(this.groupBox7);
+      this.SpatialOperationGroupBox.Controls.Add(this.groupBox6);
+      this.SpatialOperationGroupBox.Location = new System.Drawing.Point(3, 340);
+      this.SpatialOperationGroupBox.Name = "SpatialOperationGroupBox";
+      this.SpatialOperationGroupBox.Size = new System.Drawing.Size(205, 310);
+      this.SpatialOperationGroupBox.TabIndex = 2;
+      this.SpatialOperationGroupBox.TabStop = false;
+      this.SpatialOperationGroupBox.Text = "Spatial operations";
+      // 
+      // RunAllSpatialOperationTests
+      // 
+      this.RunAllSpatialOperationTests.BackColor = System.Drawing.Color.LawnGreen;
+      this.RunAllSpatialOperationTests.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+      this.RunAllSpatialOperationTests.Location = new System.Drawing.Point(112, 0);
+      this.RunAllSpatialOperationTests.Name = "RunAllSpatialOperationTests";
+      this.RunAllSpatialOperationTests.Size = new System.Drawing.Size(83, 20);
+      this.RunAllSpatialOperationTests.TabIndex = 7;
+      this.RunAllSpatialOperationTests.Text = "Run all tests";
+      this.toolTip1.SetToolTip(this.RunAllSpatialOperationTests, "Run all Spatial Operation tests");
+      this.RunAllSpatialOperationTests.UseVisualStyleBackColor = false;
+      this.RunAllSpatialOperationTests.Click += new System.EventHandler(this.RunAllSpatialOperationTestsClick);
       // 
       // groupBox14
       // 
@@ -903,6 +918,7 @@
       this.RunAggregateShapefileTest.Name = "RunAggregateShapefileTest";
       this.RunAggregateShapefileTest.Size = new System.Drawing.Size(180, 23);
       this.RunAggregateShapefileTest.TabIndex = 9;
+      this.RunAggregateShapefileTest.Tag = "run";
       this.RunAggregateShapefileTest.Text = "Run test";
       this.RunAggregateShapefileTest.UseVisualStyleBackColor = true;
       this.RunAggregateShapefileTest.Click += new System.EventHandler(this.RunAggregateShapefileTestClick);
@@ -956,6 +972,7 @@
       this.RunShapefileToGridTest.Name = "RunShapefileToGridTest";
       this.RunShapefileToGridTest.Size = new System.Drawing.Size(180, 23);
       this.RunShapefileToGridTest.TabIndex = 9;
+      this.RunShapefileToGridTest.Tag = "run";
       this.RunShapefileToGridTest.Text = "Run test";
       this.RunShapefileToGridTest.UseVisualStyleBackColor = true;
       this.RunShapefileToGridTest.Click += new System.EventHandler(this.RunShapefileToGridTestClick);
@@ -1009,6 +1026,7 @@
       this.RunClipGridByPolygonTest.Name = "RunClipGridByPolygonTest";
       this.RunClipGridByPolygonTest.Size = new System.Drawing.Size(180, 23);
       this.RunClipGridByPolygonTest.TabIndex = 9;
+      this.RunClipGridByPolygonTest.Tag = "run";
       this.RunClipGridByPolygonTest.Text = "Run test";
       this.RunClipGridByPolygonTest.UseVisualStyleBackColor = true;
       this.RunClipGridByPolygonTest.Click += new System.EventHandler(this.RunClipGridByPolygonTestClick);
@@ -1043,29 +1061,29 @@
       this.label5.TabIndex = 3;
       this.label5.Text = "Select a txt file with the files to use:";
       // 
-      // groupBox1
+      // FileFormatsGroupBox
       // 
-      this.groupBox1.BackColor = System.Drawing.Color.LightCoral;
-      this.groupBox1.Controls.Add(this.RunAllFileFormatsTestsButton);
-      this.groupBox1.Controls.Add(this.groupBox4);
-      this.groupBox1.Controls.Add(this.groupBox3);
-      this.groupBox1.Controls.Add(this.groupBox2);
-      this.groupBox1.Location = new System.Drawing.Point(3, 28);
-      this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(205, 306);
-      this.groupBox1.TabIndex = 1;
-      this.groupBox1.TabStop = false;
-      this.groupBox1.Text = "File formats";
+      this.FileFormatsGroupBox.BackColor = System.Drawing.Color.LightCoral;
+      this.FileFormatsGroupBox.Controls.Add(this.RunAllFileFormatsTestsButton);
+      this.FileFormatsGroupBox.Controls.Add(this.groupBox4);
+      this.FileFormatsGroupBox.Controls.Add(this.groupBox3);
+      this.FileFormatsGroupBox.Controls.Add(this.groupBox2);
+      this.FileFormatsGroupBox.Location = new System.Drawing.Point(3, 28);
+      this.FileFormatsGroupBox.Name = "FileFormatsGroupBox";
+      this.FileFormatsGroupBox.Size = new System.Drawing.Size(205, 306);
+      this.FileFormatsGroupBox.TabIndex = 1;
+      this.FileFormatsGroupBox.TabStop = false;
+      this.FileFormatsGroupBox.Text = "File formats";
       // 
       // RunAllFileFormatsTestsButton
       // 
       this.RunAllFileFormatsTestsButton.BackColor = System.Drawing.Color.LawnGreen;
       this.RunAllFileFormatsTestsButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.RunAllFileFormatsTestsButton.Location = new System.Drawing.Point(74, 2);
+      this.RunAllFileFormatsTestsButton.Location = new System.Drawing.Point(112, 2);
       this.RunAllFileFormatsTestsButton.Name = "RunAllFileFormatsTestsButton";
-      this.RunAllFileFormatsTestsButton.Size = new System.Drawing.Size(126, 20);
+      this.RunAllFileFormatsTestsButton.Size = new System.Drawing.Size(82, 20);
       this.RunAllFileFormatsTestsButton.TabIndex = 3;
-      this.RunAllFileFormatsTestsButton.Text = "Run all fileformats tests";
+      this.RunAllFileFormatsTestsButton.Text = "Run all tests";
       this.toolTip1.SetToolTip(this.RunAllFileFormatsTestsButton, "Run all fileformats tests");
       this.RunAllFileFormatsTestsButton.UseVisualStyleBackColor = false;
       this.RunAllFileFormatsTestsButton.Click += new System.EventHandler(this.RunAllFileFormatsTestsButtonClick);
@@ -1089,6 +1107,7 @@
       this.RunImageTest.Name = "RunImageTest";
       this.RunImageTest.Size = new System.Drawing.Size(180, 23);
       this.RunImageTest.TabIndex = 3;
+      this.RunImageTest.Tag = "run";
       this.RunImageTest.Text = "Run test";
       this.RunImageTest.UseVisualStyleBackColor = true;
       this.RunImageTest.Click += new System.EventHandler(this.RunImageTestClick);
@@ -1140,6 +1159,7 @@
       this.RunGridTest.Name = "RunGridTest";
       this.RunGridTest.Size = new System.Drawing.Size(180, 23);
       this.RunGridTest.TabIndex = 3;
+      this.RunGridTest.Tag = "run";
       this.RunGridTest.Text = "Run test";
       this.RunGridTest.UseVisualStyleBackColor = true;
       this.RunGridTest.Click += new System.EventHandler(this.RunGridTestClick);
@@ -1191,6 +1211,7 @@
       this.RunShapefileTest.Name = "RunShapefileTest";
       this.RunShapefileTest.Size = new System.Drawing.Size(180, 23);
       this.RunShapefileTest.TabIndex = 3;
+      this.RunShapefileTest.Tag = "run";
       this.RunShapefileTest.Text = "Run test";
       this.RunShapefileTest.UseVisualStyleBackColor = true;
       this.RunShapefileTest.Click += new System.EventHandler(this.RunShapefileTestClick);
@@ -1270,7 +1291,7 @@
       this.Name = "Form1";
       this.Text = "Test application for MapWinGIS";
       this.Load += new System.EventHandler(this.Form1Load);
-      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(Form1FormClosing);
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1FormClosing);
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
       this.splitContainer1.Panel2.PerformLayout();
@@ -1303,14 +1324,14 @@
       this.groupBox21.PerformLayout();
       this.groupBox9.ResumeLayout(false);
       this.groupBox9.PerformLayout();
-      this.groupBox5.ResumeLayout(false);
+      this.SpatialOperationGroupBox.ResumeLayout(false);
       this.groupBox14.ResumeLayout(false);
       this.groupBox14.PerformLayout();
       this.groupBox7.ResumeLayout(false);
       this.groupBox7.PerformLayout();
       this.groupBox6.ResumeLayout(false);
       this.groupBox6.PerformLayout();
-      this.groupBox1.ResumeLayout(false);
+      this.FileFormatsGroupBox.ResumeLayout(false);
       this.groupBox4.ResumeLayout(false);
       this.groupBox4.PerformLayout();
       this.groupBox3.ResumeLayout(false);
@@ -1327,7 +1348,7 @@
     private System.Windows.Forms.SplitContainer splitContainer1;
     private System.Windows.Forms.SplitContainer splitContainer2;
     private System.Windows.Forms.Label label1;
-    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.GroupBox FileFormatsGroupBox;
     private System.Windows.Forms.GroupBox groupBox2;
     private System.Windows.Forms.Label label2;
     private System.Windows.Forms.Button RunShapefileTest;
@@ -1346,7 +1367,7 @@
     private System.Windows.Forms.ToolTip toolTip1;
     private AxMapWinGIS.AxMap axMap1;
     private System.Windows.Forms.TextBox Progressbox;
-    private System.Windows.Forms.GroupBox groupBox5;
+    private System.Windows.Forms.GroupBox SpatialOperationGroupBox;
     private System.Windows.Forms.GroupBox groupBox6;
     private System.Windows.Forms.Button SelectGridfileToClip;
     private System.Windows.Forms.TextBox ClipGridByPolygonInputfile;
@@ -1425,6 +1446,7 @@
     private System.Windows.Forms.Button SelectClosestPointShapefileInput1;
     private System.Windows.Forms.TextBox ClosestPointShapefileInput1;
     private System.Windows.Forms.Label label21;
+    private System.Windows.Forms.Button RunAllSpatialOperationTests;
   }
 }
 

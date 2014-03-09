@@ -9,6 +9,7 @@
 namespace TestApplication
 {
   using System;
+  using System.Linq;
   using System.Reflection;
   using System.Threading;
   using System.Windows.Forms;
@@ -119,7 +120,7 @@ namespace TestApplication
     /// <param name="e">
     /// The e.
     /// </param>
-    private static void Form1FormClosing(object sender, FormClosingEventArgs e)
+    private void Form1FormClosing(object sender, FormClosingEventArgs e)
     {
       Properties.Settings.Default.Save();
     }
@@ -603,16 +604,7 @@ namespace TestApplication
     /// </param>
     private void RunAllFileFormatsTestsButtonClick(object sender, EventArgs e)
     {
-      // Run the shapefile open tests:
-      this.RunShapefileTestClick(sender, e);
-      Thread.Sleep(1000);
-
-      // Run the grid open tests:
-      this.RunGridTestClick(sender, e);
-      Thread.Sleep(1000);
-
-      // Run the image open tests:
-      this.RunImageTestClick(sender, e);
+      Helper.RunAllTestsInGroupbox(this.FileFormatsGroupBox);
 
       this.Progress(string.Empty, 0, "Done running all Fileformats tests.");
     }
@@ -627,6 +619,15 @@ namespace TestApplication
     private void RunClosestPointTestClick(object sender, EventArgs e)
     {
       GeosTests.RunClosestPointTest(this.ClosestPointShapefileInput1.Text, this.ClosestPointShapefileInput2.Text, this);
+    }
+
+    /// <summary>Run all Spatial Operation tests at once</summary>
+    /// <param name="sender">The sender</param>
+    /// <param name="e">The event arguments</param>
+    private void RunAllSpatialOperationTestsClick(object sender, EventArgs e)
+    {
+      Helper.RunAllTestsInGroupbox(this.SpatialOperationGroupBox);
+      this.Progress(string.Empty, 0, "Done running all Spatial Operation tests.");
     }
   }
 }

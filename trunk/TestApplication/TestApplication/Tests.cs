@@ -446,10 +446,7 @@ namespace TestApplication
         if (folder != null)
         {
           var resultGridFilename = Path.Combine(folder, "ShapefileToGridTest.asc");
-          if (File.Exists(resultGridFilename))
-          {
-            File.Delete(resultGridFilename);
-          }
+          Helper.DeleteGridfile(resultGridFilename);
 
           // Setup grid header:
           const int NumCols = 100;
@@ -490,6 +487,11 @@ namespace TestApplication
             else
             {
               Fileformats.OpenGridAsLayer(resultGridFilename, theForm, true);
+
+              // Open shapefile:
+              sf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.Black);
+              sf.DefaultDrawingOptions.LineWidth = 1;
+              sf.DefaultDrawingOptions.FillVisible = false;
               MyAxMap.AddLayer(sf, true);
             }
           }

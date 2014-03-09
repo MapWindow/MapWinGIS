@@ -13,6 +13,7 @@ namespace TestApplication
   using System.IO;
   using System.Linq;
   using System.Text;
+  using System.Windows.Forms;
 
   using MapWinGIS;
 
@@ -187,6 +188,30 @@ namespace TestApplication
       }
     }
 
+    /// <summary>Delete the grid file</summary>
+    /// <param name="filename">The filename</param>
+    internal static void DeleteGridfile(string filename)
+    {
+      if (!File.Exists(filename))
+      {
+        // Nothing to do:
+        return;
+      }
+
+      var basename = Path.GetFileNameWithoutExtension(filename);
+      var folder = Path.GetDirectoryName(filename);
+      if (folder == null)
+      {
+        // Folder does not exists
+        return;
+      }
+
+      foreach (var f in new DirectoryInfo(folder).GetFiles(basename + ".*"))
+      {
+        f.Delete();
+      }
+    }
+
     /// <summary>
     /// Read the text file with the file loctions
     /// </summary>
@@ -289,8 +314,7 @@ namespace TestApplication
         {
           theForm.Error(
             string.Empty,
-            string.Format(
-              "The first shape has a length of {0} and the second shape has a length of {1}", shp.Length, shp2.Length));
+            string.Format("The first shape has a length of {0} and the second shape has a length of {1}", shp.Length, shp2.Length));
           return false;
         }
       }
@@ -320,6 +344,19 @@ namespace TestApplication
       }
       
       return true;
+    }
+
+    /// <summary>Run all tests in group box</summary>
+    /// <param name="parentBox">The parent group box</param>
+    internal static void RunAllTestsInGroupbox(GroupBox parentBox)
+    {
+      var groups = parentBox.Controls.OfType<GroupBox>();
+      foreach (var button in
+        groups.Select(groupBox => groupBox.Controls.OfType<Button>()).SelectMany(buttons => buttons.Where(button => button.Tag != null && button.Tag.ToString() == "run")))
+      {
+        button.PerformClick();
+        System.Threading.Thread.Sleep(100);
+      }
     }
   }
 }
