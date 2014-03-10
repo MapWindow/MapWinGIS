@@ -1126,8 +1126,10 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		m_sourceType = sstDiskBased;	
 
 		// saving projection in new format
-		VARIANT_BOOL vbretval;
-		m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+		VARIANT_BOOL vbretval, isEmpty;
+		m_geoProjection->get_IsEmpty(&isEmpty);
+		if(!isEmpty)
+			m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
 
 		if (useQTree)
 			GenerateQTree();
@@ -1878,7 +1880,7 @@ STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 		{
 			IShapefileCategory* ct;
 			m_categories->get_Item(index, &ct);
-			*category = ct;		// ref was aded in the get_Item
+			*category = ct;		// ref was added in the get_Item
 		}
 		else
 		{
