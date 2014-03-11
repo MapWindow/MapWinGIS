@@ -24,6 +24,8 @@ namespace TestApplication
     /// </summary>
     internal static AxMapWinGIS.AxMap MyAxMap { get; set; }
 
+    private static bool tilesAreLoaded = false;
+
     /// <summary>Select a text file using an OpenFileDialog</summary>
     /// <param name="textBox">
     /// The text box.
@@ -93,6 +95,121 @@ namespace TestApplication
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
     }
+
+    /// <summary>
+    /// Run tiles load tests
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form with the callback implementation.
+    /// </param>
+    internal static void RunTilesLoadTest(string textfileLocation, Form1 theForm)
+    {
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The tiles load tests have started.", Environment.NewLine));
+
+      // Set up event handler:
+      MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
+
+      // Enable tiling:
+      MyAxMap.Tiles.GlobalCallback = theForm;
+      MyAxMap.Tiles.Visible = true;
+      MyAxMap.Tiles.AutodetectProxy();
+      MyAxMap.Tiles.set_DoCaching(tkCacheType.Disk, true);
+      MyAxMap.Tiles.set_UseCache(tkCacheType.Disk, true);
+      MyAxMap.Tiles.UseServer = true;
+      MyAxMap.Tiles.Provider = tkTileProvider.OpenStreetMap;
+
+      // Save some settings:
+      var providerId = MyAxMap.Tiles.ProviderId;
+      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
+      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
+
+      // Do some logging
+      theForm.Progress(string.Empty, 0, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
+      theForm.Progress(string.Empty, 0, "CheckConnection: " + MyAxMap.Tiles.CheckConnection("http://www.google.com"));
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0} has a min zoom of {1} and  a max zoom of {2}", MyAxMap.Tiles.ProviderName, minZoom, maxZoom));
+      theForm.Progress(string.Empty, 0, "Current zoom: " + MyAxMap.Tiles.CurrentZoom);
+
+      var waitCount = 0;
+      const int MaxWaitCount = 30;
+      const int MaxSleepTime = 500;
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        // Open shapefile:
+        Fileformats.OpenShapefileAsLayer(line, theForm, true);
+        MyAxMap.ZoomToTileLevel(minZoom);
+        Application.DoEvents();
+        Thread.Sleep(MaxSleepTime);
+
+        // Continue when tiles are loaded:
+        while (!tilesAreLoaded && waitCount < MaxWaitCount)
+        {
+          Thread.Sleep(MaxSleepTime);
+          Application.DoEvents();
+          waitCount++;
+        }
+
+        if (!tilesAreLoaded)
+        {
+          theForm.Error(string.Empty, "No tiles have been loaded");  
+        }
+
+        // reset:
+        waitCount = 0;
+
+        theForm.Progress(string.Empty, 0, "Tiles error: " + MyAxMap.Tiles.get_ErrorMsg(MyAxMap.Tiles.LastErrorCode));
+
+        // Do some zooming:
+        for (var zoom = minZoom; zoom <= maxZoom; zoom = zoom + 2)
+        {
+          MyAxMap.ZoomToTileLevel(zoom);
+          theForm.Progress(string.Empty, 0, "Zooming to: " + zoom);
+         
+          // Continue when tiles are loaded:
+          waitCount = 0;
+          while (!tilesAreLoaded && waitCount < MaxWaitCount)
+          {
+            Thread.Sleep(MaxSleepTime);
+            Application.DoEvents();
+            waitCount++;
+          }
+        }
+
+        if (!tilesAreLoaded)
+        {
+          theForm.Error(string.Empty, "No tiles have been loaded");
+        }
+      }
+
+      theForm.Progress(string.Empty, 100, "The tiles load tests have finished.");
+
+      // Disable tiles again:
+      MyAxMap.Tiles.Visible = false;
+    }
+
+    /// <summary>TilesLoaded event handle</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private static void MyAxMapTilesLoaded(object sender, AxMapWinGIS._DMapEvents_TilesLoadedEvent e)
+    {
+      tilesAreLoaded = true;
+    }
+
 
     /// <summary>Run the Spatial Index tests</summary>
     /// <param name="textfileLocation">The textfile location</param>

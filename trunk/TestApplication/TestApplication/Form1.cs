@@ -410,6 +410,18 @@ namespace TestApplication
       Tests.SelectAnyfile(this.OGRInfoInputfile, "Select file");
     }
 
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private void SelectTilesInputfileClick(object sender, EventArgs e)
+    {
+      Tests.SelectTextfile(this.TilesInputfile, "Select text file with on each line the location of the shapefiles");
+    }
+
     #endregion
 
     #region Run test click event
@@ -628,6 +640,14 @@ namespace TestApplication
     {
       Helper.RunAllTestsInGroupbox(this.SpatialOperationGroupBox);
       this.Progress(string.Empty, 0, "Done running all Spatial Operation tests.");
+    }
+
+    /// <summary>Run the Tiles load test</summary>
+    /// <param name="sender">The sender</param>
+    /// <param name="e">The event arguments</param>
+    private void RunTilesLoadTestClick(object sender, EventArgs e)
+    {
+      Tests.RunTilesLoadTest(this.TilesInputfile.Text, this);
     }
   }
 }

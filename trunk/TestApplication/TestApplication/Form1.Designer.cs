@@ -32,6 +32,12 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox1 = new System.Windows.Forms.GroupBox();
+      this.groupBox5 = new System.Windows.Forms.GroupBox();
+      this.RunTilesLoadTest = new System.Windows.Forms.Button();
+      this.SelectTilesInputfile = new System.Windows.Forms.Button();
+      this.TilesInputfile = new System.Windows.Forms.TextBox();
+      this.label6 = new System.Windows.Forms.Label();
       this.groupBox19 = new System.Windows.Forms.GroupBox();
       this.groupBox20 = new System.Windows.Forms.GroupBox();
       this.RunSpatialIndexTest = new System.Windows.Forms.Button();
@@ -138,6 +144,8 @@
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
+      this.groupBox1.SuspendLayout();
+      this.groupBox5.SuspendLayout();
       this.groupBox19.SuspendLayout();
       this.groupBox20.SuspendLayout();
       this.groupBox10.SuspendLayout();
@@ -191,6 +199,7 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox19);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox11);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox10);
@@ -206,6 +215,71 @@
       this.splitContainer2.Size = new System.Drawing.Size(929, 717);
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
+      // 
+      // groupBox1
+      // 
+      this.groupBox1.BackColor = System.Drawing.Color.Pink;
+      this.groupBox1.Controls.Add(this.groupBox5);
+      this.groupBox1.Location = new System.Drawing.Point(3, 1830);
+      this.groupBox1.Name = "groupBox1";
+      this.groupBox1.Size = new System.Drawing.Size(205, 152);
+      this.groupBox1.TabIndex = 7;
+      this.groupBox1.TabStop = false;
+      this.groupBox1.Text = "Tiles";
+      // 
+      // groupBox5
+      // 
+      this.groupBox5.Controls.Add(this.RunTilesLoadTest);
+      this.groupBox5.Controls.Add(this.SelectTilesInputfile);
+      this.groupBox5.Controls.Add(this.TilesInputfile);
+      this.groupBox5.Controls.Add(this.label6);
+      this.groupBox5.Location = new System.Drawing.Point(4, 19);
+      this.groupBox5.Name = "groupBox5";
+      this.groupBox5.Size = new System.Drawing.Size(195, 89);
+      this.groupBox5.TabIndex = 1;
+      this.groupBox5.TabStop = false;
+      this.groupBox5.Text = "Shapefiles";
+      // 
+      // RunTilesLoadTest
+      // 
+      this.RunTilesLoadTest.Location = new System.Drawing.Point(9, 58);
+      this.RunTilesLoadTest.Name = "RunTilesLoadTest";
+      this.RunTilesLoadTest.Size = new System.Drawing.Size(180, 23);
+      this.RunTilesLoadTest.TabIndex = 3;
+      this.RunTilesLoadTest.Tag = "run";
+      this.RunTilesLoadTest.Text = "Run test";
+      this.RunTilesLoadTest.UseVisualStyleBackColor = true;
+      this.RunTilesLoadTest.Click += new System.EventHandler(this.RunTilesLoadTestClick);
+      // 
+      // SelectTilesInputfile
+      // 
+      this.SelectTilesInputfile.Location = new System.Drawing.Point(162, 32);
+      this.SelectTilesInputfile.Name = "SelectTilesInputfile";
+      this.SelectTilesInputfile.Size = new System.Drawing.Size(27, 20);
+      this.SelectTilesInputfile.TabIndex = 2;
+      this.SelectTilesInputfile.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectTilesInputfile, "Select text file with on every line the location of a shapefile");
+      this.SelectTilesInputfile.UseVisualStyleBackColor = true;
+      this.SelectTilesInputfile.Click += new System.EventHandler(this.SelectTilesInputfileClick);
+      // 
+      // TilesInputfile
+      // 
+      this.TilesInputfile.AcceptsReturn = true;
+      this.TilesInputfile.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "TilesInputfile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.TilesInputfile.Location = new System.Drawing.Point(9, 32);
+      this.TilesInputfile.Name = "TilesInputfile";
+      this.TilesInputfile.Size = new System.Drawing.Size(147, 20);
+      this.TilesInputfile.TabIndex = 1;
+      this.TilesInputfile.Text = global::TestApplication.Properties.Settings.Default.TilesInputfile;
+      // 
+      // label6
+      // 
+      this.label6.AutoSize = true;
+      this.label6.Location = new System.Drawing.Point(6, 16);
+      this.label6.Name = "label6";
+      this.label6.Size = new System.Drawing.Size(179, 13);
+      this.label6.TabIndex = 0;
+      this.label6.Text = "Select a txt file with the files to open:";
       // 
       // groupBox19
       // 
@@ -272,7 +346,7 @@
       // 
       // groupBox11
       // 
-      this.groupBox11.Location = new System.Drawing.Point(3, 1830);
+      this.groupBox11.Location = new System.Drawing.Point(3, 1988);
       this.groupBox11.Name = "groupBox11";
       this.groupBox11.Size = new System.Drawing.Size(205, 188);
       this.groupBox11.TabIndex = 5;
@@ -1300,6 +1374,9 @@
       this.splitContainer2.Panel1.PerformLayout();
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
+      this.groupBox1.ResumeLayout(false);
+      this.groupBox5.ResumeLayout(false);
+      this.groupBox5.PerformLayout();
       this.groupBox19.ResumeLayout(false);
       this.groupBox20.ResumeLayout(false);
       this.groupBox20.PerformLayout();
@@ -1447,6 +1524,12 @@
     private System.Windows.Forms.TextBox ClosestPointShapefileInput1;
     private System.Windows.Forms.Label label21;
     private System.Windows.Forms.Button RunAllSpatialOperationTests;
+    private System.Windows.Forms.GroupBox groupBox1;
+    private System.Windows.Forms.GroupBox groupBox5;
+    private System.Windows.Forms.Button RunTilesLoadTest;
+    private System.Windows.Forms.Button SelectTilesInputfile;
+    private System.Windows.Forms.TextBox TilesInputfile;
+    private System.Windows.Forms.Label label6;
   }
 }
 

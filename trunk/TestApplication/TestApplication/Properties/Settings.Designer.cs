@@ -310,5 +310,17 @@ namespace TestApplication.Properties {
                 this["ClipGridByPolygonInputfile"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TilesInputfile {
+            get {
+                return ((string)(this["TilesInputfile"]));
+            }
+            set {
+                this["TilesInputfile"] = value;
+            }
+        }
     }
 }
