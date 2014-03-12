@@ -2658,7 +2658,7 @@ interface IShapefile : IDispatch{
 	[propput, id(105), helpstring("property HotTracking")] HRESULT HotTracking([in] VARIANT_BOOL newVal);
 
 	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out,retval] IShapefile** retVal);
-	[id(107), helpstring("method GetClosestPoint")] HRESULT GetClosestPoint([in]double x, [in]double y, [in]double maxDistance, 
+	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance, 
 		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 
 	[propget, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [out, retval] BSTR* categoryName);

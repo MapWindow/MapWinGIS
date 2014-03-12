@@ -409,7 +409,7 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 		IShapefile* sf = this->GetShapefile(this->GetLayerHandle(i));
 		if (sf != NULL)
 		{
-			sf->GetClosestPoint(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+			sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
 			if (vb)
 			{
 				if (distance < minDist)

@@ -2968,9 +2968,9 @@ bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::ve
 }
 
 // *****************************************************************
-//		GetClosestPoint()
+//		GetClosestVertex()
 // *****************************************************************
-STDMETHODIMP CShapefile::GetClosestPoint(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	

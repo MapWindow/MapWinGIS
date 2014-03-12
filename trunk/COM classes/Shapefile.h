@@ -370,7 +370,7 @@ public:
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
 
-	STDMETHOD(GetClosestPoint)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal);
+	STDMETHOD(GetClosestVertex)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal);
 	
 	STDMETHOD(get_ShapeCategory2)(long ShapeIndex, BSTR* categoryName);
 	STDMETHOD(put_ShapeCategory2)(long ShapeIndex, BSTR categoryName);

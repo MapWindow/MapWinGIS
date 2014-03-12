@@ -176,13 +176,15 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 		{
 			ImageLayerInfo * ili = (ImageLayerInfo*)(l->addInfo);
 
-			if(ili->ColorScheme != NULL)
+			Utility::put_ComReference(ColorScheme, &ili->ColorScheme);
+
+			/*if(ili->ColorScheme != NULL)
 				ili->ColorScheme->Release();
 
 			ili->ColorScheme = ColorScheme;
 
 			if(ColorScheme!= NULL)
-				ColorScheme->AddRef();
+				ColorScheme->AddRef();*/
 
 			return VARIANT_TRUE;
 		}
