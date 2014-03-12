@@ -20,6 +20,7 @@
  // lsu 17 apr 2012 - created the file
 
 #pragma once
+#include <afxmt.h>
 #include <atlutil.h>
 #include <queue>
 #include "Threading.h"
@@ -37,6 +38,7 @@ private:
 public:
 	bool stopped;
 	CacheType cacheType;
+	::CCriticalSection queueLock;
 
 	TileCacher()
 	{
@@ -60,7 +62,9 @@ public:
 
 	void Enqueue(TileCore* tile)
 	{
+		this->queueLock.Lock();
 		queue.push(tile);
+		this->queueLock.Unlock();
 	}
 
 	void Run();

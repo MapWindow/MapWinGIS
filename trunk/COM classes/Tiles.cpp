@@ -72,6 +72,37 @@ bool CTiles::DrawnTilesExist()
 
 #pragma region "ErrorHandling"
 // ************************************************************
+//		ClearPrefetchErrors()
+// ************************************************************
+STDMETHODIMP CTiles::ClearPrefetchErrors()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	m_prefetchLoader.m_errorCount = 0;
+	m_prefetchLoader.m_sumCount = 0;
+	return S_OK;
+}
+
+// ************************************************************
+//		get_PrefetchErrorCount()
+// ************************************************************
+STDMETHODIMP CTiles::get_PrefetchTotalCount(int *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = m_prefetchLoader.m_sumCount;
+	return S_OK;
+}
+
+// ************************************************************
+//		get_PrefetchErrorCount()
+// ************************************************************
+STDMETHODIMP CTiles::get_PrefetchErrorCount(int *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = m_prefetchLoader.m_errorCount;
+	return S_OK;
+}
+
+// ************************************************************
 //		get_GlobalCallback()
 // ************************************************************
 STDMETHODIMP CTiles::get_GlobalCallback(ICallback **pVal)
@@ -145,6 +176,21 @@ STDMETHODIMP CTiles::put_Key(BSTR newVal)
 }
 
 #pragma endregion
+
+STDMETHODIMP CTiles::get_SleepBeforeRequestTimeout(long *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = m_prefetchLoader.m_sleepBeforeRequestTimeout;
+	return S_OK;
+}
+STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (newVal > 10000) newVal = 10000;
+	if (newVal < 0) newVal = 0;
+	m_prefetchLoader.m_sleepBeforeRequestTimeout = newVal;
+	return S_OK;
+}
 
 #pragma region Proxy
 // *********************************************************
@@ -459,10 +505,10 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	
 	int centX = (xMin + xMax) /2;
 	int centY = (yMin + yMax) /2;
-
-	SQLiteCache::Initialize();
+	
 	if (m_useDiskCache)
 	{
+		SQLiteCache::Initialize();
 		SQLiteCache::m_locked = true;	// caching will be stopped while loading tiles to avoid locking the database
 	}
 	
@@ -532,12 +578,15 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	{
 		SQLiteCache::m_locked = false;	// caching will be stopped while loading tiles to avoid locking the database and speed up things
 	}
-	m_tileLoader.RunCaching();
-
-    if (points.size() > 0)
+	
+	// let's try not to mess up snapshot if main tile loader is still working
+	TileLoader* loader = isSnapshot ? &m_prefetchLoader : &m_tileLoader;
+	
+	loader->RunCaching();
+	if (points.size() > 0)
 	{
 		m_reloadCount++;
-		m_tileLoader.Load(points, zoom, provider, (void*)this, isSnapshot, key);	// zoom can change in the process, so we use the calculated version
+		loader->Load(points, zoom, provider, (void*)this, isSnapshot, key);	// zoom can change in the process, so we use the calculated version
 														// and not the one current for provider
 		// releasing points
 		for (size_t i = 0; i < points.size(); i++)
@@ -1188,6 +1237,33 @@ STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom,
 }
 
 // *********************************************************
+//	     LogRequests()
+// *********************************************************
+STDMETHODIMP CTiles::StartLogRequests(BSTR filename, BSTR name, VARIANT_BOOL onlyErrors /* So far ignored */)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	CStringW path = OLE2W(filename);
+	CStringW logName = OLE2W(name);
+	Utility::OpenLog(tilesLogger, path, logName);
+	return S_OK;
+}
+
+// *********************************************************
+//	     StopLogRequests()
+// *********************************************************
+STDMETHODIMP CTiles::StopLogRequests()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (tilesLogger && tilesLogger.is_open())
+	{
+		tilesLogger.flush();
+		tilesLogger.close();
+	}
+	return S_OK;
+}
+
+// *********************************************************
 //	     PrefetchToFolder()
 // *********************************************************
 // Writes tiles to the specified folder
@@ -1201,13 +1277,22 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 	if (!Utility::dirExists(path))
 	{
 		ErrorMessage(tkFOLDER_NOT_EXISTS);
+		*retVal = -1;
 		return S_FALSE;
 	}
-	
+
+	if (tilesLogger.is_open() && tilesLogger.good())
+	{
+		tilesLogger << "\n";
+		tilesLogger << "ZOOM " << zoom << endl;
+		tilesLogger << "---------------------" << endl;
+	}
+
 	BaseProvider* p = ((CTileProviders*)m_providers)->get_Provider(providerId);
 	if (!p)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
+		*retVal = -1;
 		return S_FALSE;
 	}
 	else
@@ -1265,13 +1350,34 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		}
 		CacheType type = path.GetLength() > 0 ? CacheType::DiskCache : CacheType::SqliteCache;
 
+		if (type == CacheType::DiskCache)
+		{
+			CString ext = OLE2A(fileExt);
+			DiskCache::ext = ext;
+			DiskCache::rootPath = path;
+			DiskCache::encoder = "image/png";	// default
+			
+			if (ext.GetLength() >= 4)
+			{
+				CString s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
+				if (s == ".png")
+				{
+					DiskCache::encoder = "image/png";
+				}
+				else if (s == ".jpg")
+				{
+					DiskCache::encoder = "image/jpeg";
+				}
+			}
+		}
+
 		std::vector<CTilePoint*> points;
 		for (int x = minX; x <= maxX; x++)
 		{
 			for (int y = minY; y <= maxY; y++)
 			{
-				if ((type == CacheType::SqliteCache && !SQLiteCache::get_Exists(provider, zoom, x, y)) 
-					|| type == CacheType::DiskCache)
+				if ((type == CacheType::SqliteCache && !SQLiteCache::get_Exists(provider, zoom, x, y)) || 
+					 type == CacheType::DiskCache && !DiskCache::get_TileExists(zoom, x, y))
 				{
 					CTilePoint* pnt = new CTilePoint(x, y);
 					pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
@@ -1282,8 +1388,8 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 
 		if (points.size() > 0)
 		{
-			loader.doCacheSqlite = type == CacheType::SqliteCache;
-			loader.doCacheDisk = type == CacheType::DiskCache;
+			m_prefetchLoader.doCacheSqlite = type == CacheType::SqliteCache;
+			m_prefetchLoader.doCacheDisk = type == CacheType::DiskCache;
 			
 			if (type == CacheType::SqliteCache)
 			{
@@ -1291,34 +1397,17 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 			}
 			else 
 			{
-				CString ext = OLE2A(fileExt);
-				DiskCache::ext = ext;
-				DiskCache::rootPath = path;
-				DiskCache::encoder = "image/png";	// default
-				
-				if (ext.GetLength() >= 4)
-				{
-					CString s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
-					if (s == ".png")
-					{
-						DiskCache::encoder = "image/png";
-					}
-					else if (s == ".jpg")
-					{
-						DiskCache::encoder = "image/jpeg";
-					}
-				}
 				DiskCache::CreateFolders(zoom, points);
 			}
-			loader.m_stopCallback = stop;
+			m_prefetchLoader.m_stopCallback = stop;
 
 			if (m_globalCallback)
 			{
-				loader.m_callback = this->m_globalCallback;
+				m_prefetchLoader.m_callback = this->m_globalCallback;
 			}
 			
 			// actual call to do the job
-			loader.Load(points, zoom, provider, (void*)this, false, "", true);
+			m_prefetchLoader.Load(points, zoom, provider, (void*)this, false, "", true);
 
 			for (size_t i = 0; i < points.size(); i++)
 			{

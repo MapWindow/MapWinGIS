@@ -753,6 +753,30 @@ namespace Utility
 			return true;	// no file and therefore no problem
 		}
 	}
+
+	// ********************************************************
+	//    OpenLog()
+	// ********************************************************
+	void OpenLog(ofstream& logger, CStringW path, CStringW name)
+	{
+		if (logger.is_open())
+		{
+			logger.flush();
+			logger.close();
+		}
+
+		USES_CONVERSION;
+		CString pathA = W2A(path);
+
+		if (!Utility::dirExists(pathA))
+			_mkdir(pathA);
+
+		path += name;
+		logger.open(path);
+
+		Debug::WriteLine("Log opened: %d", logger.is_open());
+		Debug::WriteLine("Log good: %d", logger.good());
+	}
 }
 
 namespace Debug
@@ -780,4 +804,6 @@ namespace Debug
 	{
 		OutputDebugStringA(message);
 	}
+
+	
 }

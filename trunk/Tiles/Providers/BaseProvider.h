@@ -24,6 +24,10 @@
 #include "geopoint.h"
 #include "baseprojection.h"
 #include "TileCore.h"
+#include <iostream>
+#include <fstream>
+
+extern ofstream tilesLogger;
 
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
@@ -58,10 +62,9 @@ public:
 	int httpStatus;
 
 private:
-	CMemoryBitmap* GetTileImageUsingHttp(CString m_urlStr, bool recursive = false);
+	CMemoryBitmap* GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive = false);
 
 protected:
-	// abstract members
 	virtual CString MakeTileImageUrl(CPoint &pos, int zoom) = 0;
 
 	int GetServerNum(CPoint &pos, int max)

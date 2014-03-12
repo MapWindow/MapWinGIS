@@ -33,6 +33,8 @@ public:
 	// the code is used by clients via COM interfaces so 
 	// no need to bother much about encapsulation
 
+	bool m_hasErrors;		// there were errors during download, one of serveral layers weren't loaded
+
 	bool m_drawn;			// it's drawn on screen
 	bool m_toDelete;		// for inner working of RAM cache
 	
@@ -66,6 +68,7 @@ public:
 		m_drawn = false;
 		m_toDelete = false;
 		m_projectionOk = false;
+		m_hasErrors = false;
 		
 		// calculating geographic coordinates
 		SizeLatLng size;
@@ -110,6 +113,8 @@ public:
 		}
 		Overlays.clear();
 	}
+
+	bool IsEmpty() 	{ return Overlays.size() == 0; }
 	
 	// returns combined size of bitmaps for all overlays
 	int getSize()

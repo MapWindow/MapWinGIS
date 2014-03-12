@@ -52,6 +52,8 @@ namespace Utility
 	bool get_FileCreationTime(CString filename, FILETIME& time);
 	bool IsFileYounger(CString filename1, CString thanFilename);
 	bool RemoveFile(CString filename);
+
+	void OpenLog(ofstream& logger, CStringW path, CStringW name);
 }
 
 namespace Debug

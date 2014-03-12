@@ -4269,6 +4269,16 @@ interface ITiles : IDispatch{
 	[id(36), helpstring("")] HRESULT ZoomOut();*/
 	[id(37), helpstring("")] HRESULT PrefetchToFolder([in]IExtents* ext, [in]int zoom, [in]int providerId, 
 									[in]BSTR savePath, [in]BSTR fileExt, [in]IStopExecution* stop, [out,retval]LONG* retVal);
+
+	[propget, id(38), helpstring("")] HRESULT PrefetchErrorCount([out, retval] int* retVal);
+	[propget, id(39), helpstring("")] HRESULT PrefetchTotalCount([out, retval] int* retVal);
+	[id(40), helpstring("")] HRESULT ClearPrefetchErrors();
+
+	[id(41), helpstring("")] HRESULT StartLogRequests([in] BSTR Filename, [in] BSTR name, [in]VARIANT_BOOL onlyErrors);
+	[id(42), helpstring("")] HRESULT StopLogRequests();
+
+	[propget, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [out, retval]long* retVal);
+	[propput, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [in]long newVal);
 };
 
 [

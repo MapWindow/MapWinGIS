@@ -1441,6 +1441,13 @@ void CMapView::RestoreExtents()
 }
 #pragma endregion
 
+void CMapView::Log(CString message)
+{
+	if (tilesLogger.is_open() && tilesLogger.good())
+	{
+		tilesLogger << message << endl;    tilesLogger.flush();
+	}
+}
 
 // *********************************************************
 //		SnapShotCore()
@@ -1490,6 +1497,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	m_canbitblt=FALSE;
 	m_isSnapshot = true;
 
+	
 	tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this);
 	if (tilesInCache)
 	{
@@ -1543,7 +1551,8 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	if (tilesInCache)
 	{
-		((CTiles*)m_tiles)->LoadTiles((void*)this, false);	  // restore former list of tiles in the buffer
+		// restore former list of tiles in the buffer
+		((CTiles*)m_tiles)->LoadTiles((void*)this, false);	  
 	}
 
 	LockWindow( lmUnlock );

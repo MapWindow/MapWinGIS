@@ -45,6 +45,21 @@ void LoadingTask::DoTask()
 	}
 	else
 	{
+		//long waitTime = -1;
+		//do
+		//{
+		//	long waitTime = this->Loader->TryRequest();		// WARNING: potentially endless loop (-1 is expected)
+		//	if (waitTime != -1)
+		//	{
+		//		Debug::WriteLine("Request limit met. Thread is sleeping: %d", waitTime);
+		//		Sleep(waitTime);
+		//	}
+		//}
+		//while(waitTime != -1);
+
+		if (this->Loader->m_sleepBeforeRequestTimeout > 0 && this->Loader->m_sleepBeforeRequestTimeout < 10000)
+			Sleep(this->Loader->m_sleepBeforeRequestTimeout);
+
 		TileCore* tile = Provider->GetTileImage(CPoint(x, y), zoom);		// http call
 
 		if (this->Loader->stopped)
@@ -54,7 +69,7 @@ void LoadingTask::DoTask()
 		else 
 		{
 			this->Loader->m_count++;
-
+			
 			// prefetching without display
 			if (this->cacheOnly)
 			{
@@ -62,24 +77,26 @@ void LoadingTask::DoTask()
 			}
 			else
 			{
-				this->busy = true;	// notifies that related classes like CTiles can't be deleted until exiting this section
-				CMapView* mapView = (CMapView*)Provider->mapView;
-				CTiles* tiles = (CTiles*)mapView->GetTilesNoRef();
-				
-				if (this->generation < this->Loader->tileGeneration)
+				if (!tile->IsEmpty())
 				{
-					tiles->AddTileOnlyCaching(tile);
-					Debug::WriteLine("Outdated tile loading: tile cached");
+					this->busy = true;	// notifies that related classes like CTiles can't be deleted until exiting this section
+					CMapView* mapView = (CMapView*)Provider->mapView;
+					CTiles* tiles = (CTiles*)mapView->GetTilesNoRef();
+					
+					if (this->generation < this->Loader->tileGeneration)
+					{
+						tiles->AddTileOnlyCaching(tile);
+						Debug::WriteLine("Outdated tile loading: tile cached");
+					}
+					else
+					{
+						tiles->AddTileWithCaching(tile);
+						mapView->Invalidate();			// schedule map updated
+						this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
+					}
+					this->busy = false;
 				}
-				else
-				{
-					tiles->AddTileWithCaching(tile);
-					mapView->Invalidate();			// schedule map updated
-					this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
-				}
-				this->busy = false;
 			}
-
 			this->Loader->CheckComplete();
 		}
 	}
@@ -127,7 +144,9 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 		return;
 
 	CThreadPool<ThreadWorker>* pool = (this->tileGeneration % 2 == 0)  ? m_pool : m_pool2;
-	
+
+	pool->SetTimeout(100000);		// 100 seconds (low rate limit may be set)
+
 	Debug::WriteLine("Tiles requested; generation = %d", generation);	
 
 	m_count = 0;
@@ -136,7 +155,7 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 	this->CleanTasks();
 
 	sort(points.begin(), points.end(), &compPoints);
-	for (size_t i = 0; i < points.size(); i++ ) 
+	for ( size_t i = 0; i < points.size(); i++ ) 
 	{
 		LoadingTask* task = new LoadingTask(points[i]->x, points[i]->y, zoom, provider, generation, cacheOnly);
 		task->Loader = this;
@@ -163,6 +182,12 @@ void TileLoader::CheckComplete()
 //	Reports progress to clients, aborts the operation
 void TileLoader::TileLoaded(TileCore* tile)
 {	
+	this->m_sumCount++;
+	if (tile->m_hasErrors)
+	{
+		this->m_errorCount++;
+	}
+
 	if (m_callback != NULL)
 	{
 		section.Lock();
@@ -181,8 +206,12 @@ void TileLoader::TileLoaded(TileCore* tile)
 			m_callback->Progress(A2BSTR(""),-2,A2BSTR("Caching..."));
 		}
 	}
-	this->ScheduleForCaching(tile);
-	this->RunCaching();
+	
+	if (!tile->IsEmpty())
+	{
+		this->ScheduleForCaching(tile);
+		this->RunCaching();
+	}
 }
 
 // *******************************************************

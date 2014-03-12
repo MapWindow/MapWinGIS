@@ -37,6 +37,19 @@ public:
 	static CString ext;			// extension (with leading point)
 	static CString rootPath;	// root folder for storage
 	
+	static bool get_TileExists( LONG zoom, LONG x, LONG y)
+	{
+		bool exists = Utility::fileExists(get_TilePath(zoom, x, y));
+		return exists;
+	}
+
+	static CString get_TilePath(int zoom, int x, int y)
+	{
+		CString path;
+		path.Format("%s%d\\%d\\%d%s", rootPath, zoom, x, y, ext);
+		return path;
+	}
+
 	// creates folders to store provided list of points
 	void static CreateFolders(int zoom, vector<CTilePoint*>& points)
 	{
@@ -52,7 +65,7 @@ public:
 		name.Format("\\%d\\", zoom);	//	_mkdir can't create folders recursively
 		int val = _mkdir(rootPath + name);
 		name.Format("\\%d\\%d\\", zoom, pnt->x);
-		val = _mkdir(rootPath + name);
+		_mkdir(rootPath + name);
 	}
 
 	// writes to disk a single tile

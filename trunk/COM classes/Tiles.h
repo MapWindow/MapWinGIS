@@ -178,9 +178,18 @@ public:
 	STDMETHOD(get_CurrentZoom)(int* retVal);
 	
 	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
+
+	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
+	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
+	STDMETHOD(ClearPrefetchErrors)();
+	STDMETHOD(StartLogRequests)(BSTR filename, BSTR name, VARIANT_BOOL onlyErrors);
+	STDMETHOD(StopLogRequests)();
+	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
+	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
 	#pragma endregion
 
 private:
+	
 	long m_lastErrorCode;
 	ICallback * m_globalCallback;
 	BSTR m_key;
@@ -203,17 +212,17 @@ private:
 	ITileProviders* m_providers;
 	
 	TileLoader m_tileLoader;
-	TileLoader loader;
+	TileLoader m_prefetchLoader;
 	
 	Extent m_projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
 	bool m_projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
 	
-	
 public:
 	std::vector<TileCore*> m_tiles;
 	BaseProvider* m_provider;
-
+	
 public:	
+	
 	void CTiles::MarkUndrawn();
 	long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop);

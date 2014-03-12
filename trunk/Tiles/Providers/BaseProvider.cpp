@@ -25,6 +25,7 @@
 // init static members
 CString BaseProvider::m_proxyAddress = "";
 short BaseProvider::m_proxyPort = 0;
+ofstream tilesLogger;
 
 #pragma region Load tile
 
@@ -41,6 +42,10 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 		{
 			tile->AddBitmap(bmp);	
 		}
+		else
+		{
+			tile->m_hasErrors = true;
+		}
 	}
 	return tile;
 }
@@ -51,7 +56,9 @@ TileCore* BaseProvider::GetTileImage(CPoint &pos, int zoom)
 CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint &pos, int zoom)
 {
 	CString url = MakeTileImageUrl(pos, zoom);
-	CMemoryBitmap* bmp = this->GetTileImageUsingHttp(url);
+	CString shortUrl;
+	shortUrl.Format("\\zoom=%d\\x=%d\\y=%d", zoom, pos.x, pos.y);
+	CMemoryBitmap* bmp = this->GetTileImageUsingHttp(url, shortUrl);
 	return bmp;
 
 }
@@ -77,7 +84,7 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 //		GetTileImageUsingHttp()
 // ************************************************************
-CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr, bool recursive)
+CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
 	CAtlHttpClient* httpClient = new CAtlHttpClient();
 	CAtlNavigateData navData;
@@ -87,13 +94,16 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr, bool recurs
 		httpClient->SetProxy(m_proxyAddress, m_proxyPort);
 	}
 
-	char* body = 0;
+	char* body = NULL;
 	int bodyLen = 0;
 	bool imageData = false;
 	
-	if (httpClient->Navigate( m_urlStr, &navData ))
+	bool result = httpClient->Navigate( urlStr, &navData );
+	httpStatus = httpClient->GetStatus();
+
+	if (result)
 	{
-		if (httpClient->GetStatus() == 200) // 200 = successful HTTP transaction
+		if (httpStatus == 200) // 200 = successful HTTP transaction
 		{
 			bodyLen = httpClient->GetBodyLength();
 			if (bodyLen > 0)
@@ -111,15 +121,38 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr, bool recurs
 			}
 		}
 	}
-	else
+
+	if (tilesLogger.is_open() && tilesLogger.good())
 	{
-		this->httpStatus = httpClient->GetStatus();
-		Debug::WriteLine("Request failed. Status code: %d; %s", httpStatus, m_urlStr);		
-		if (httpStatus == -1 && !recursive)
+		bool shortLog = false;
+
+		SYSTEMTIME time;
+		GetLocalTime(&time);
+		CString err;
+		//err.Format("ERROR: %d\n", httpClient->GetLastError());
+		if (shortLog)
 		{
-			// let's try one more time
-			this->GetTileImageUsingHttp(m_urlStr, true);
+			err.Format("%d", httpClient->GetLastError());
 		}
+		else
+		{
+			err.Format("ERROR: %d\n", httpClient->GetLastError());
+		}
+		CString s;
+		if (shortLog)
+		{
+			if (httpStatus != 200 || bodyLen == 0)
+			{
+				s.Format("%02d:%02d:%02d.%-3d: status %d; error %s\n",
+					time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, (httpStatus == 200 ? "": err));
+			}
+		}
+		else
+		{
+			s.Format("%s%02d:%02d:%02d.%-3d: status %d size %6d b %s\n", (httpStatus == 200 ? "": err),
+				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, bodyLen, shortUrl);
+		}
+		//tilesLogger << s;		// TODO: probably should be protected by critical section
 	}
 	
 	httpClient->Close();
@@ -132,7 +165,16 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString m_urlStr, bool recurs
 		bmp->LoadFromRawData(body, bodyLen);
 		bmp->Provider = this->Id;
 	}
-	delete [] body;
+	if (body)
+		delete [] body;
+	
+	if (!result && !recursive && (httpStatus == -1 || bodyLen == 0))
+	{
+		// let's try one more time
+		Sleep(20);
+		bmp = this->GetTileImageUsingHttp(urlStr, shortUrl, true);
+	}
+
 	return bmp;
 }
 #pragma endregion

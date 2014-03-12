@@ -54,10 +54,12 @@ private:
 	void* tiles;
 	bool isSnapshot;
 	CString key;
-
 	void CleanTasks();
 public:
+	long m_sleepBeforeRequestTimeout;
+	int m_errorCount;
 	int m_totalCount;
+	int m_sumCount;
 	int m_count;
 	static ::CCriticalSection section;
 
@@ -81,6 +83,11 @@ public:
 		doCacheSqlite = true;
 		doCacheDisk = false;
 		tiles = NULL;
+		m_errorCount = 0;
+		m_sumCount = 0;
+		//m_requestWindow = 20000;			// TODO: make parameters
+		//m_maxRequestCount = 10;
+		m_sleepBeforeRequestTimeout = 0;
 	}
 
 	TileLoader::~TileLoader(void)
@@ -98,6 +105,58 @@ public:
 			delete m_pool2;
 		}
 	}
+
+#pragma region Request limit
+	//std::deque<long> m_requestTimes;
+	//int m_requestWindow;		// the length of period
+	//int m_maxRequestCount;		// the max number of requests in window
+
+	//long TryRequest()
+	//{
+	//	section.Lock();
+	//	DWORD now = GetTickCount();
+	//	int count = 0;
+	//	long waitTime = 0;
+	//	long time;
+	//	for(size_t i = 0; i < m_requestTimes.size(); i++)		// probably should go in reverse order
+	//	{
+	//		time = m_requestTimes[i];
+	//		Debug::WriteLine("Time: %d", time);
+	//		if (time + m_requestWindow > now)
+	//			count++;
+	//		else
+	//			break;	// outside the window
+	//		if (count == m_maxRequestCount)
+	//			waitTime = m_requestWindow - (now - time);
+	//		if (count > m_maxRequestCount)
+	//			break;
+	//	}
+
+	//	section.Lock();
+	//	bool result = count < m_maxRequestCount;
+	//	if (result) 
+	//	{
+	//		RegisterRequest();
+	//		Debug::WriteLine("Can request", waitTime);
+	//	}
+	//	else
+	//	{
+	//		Debug::WriteLine("Request limit met. Sleeping: %d", waitTime);
+	//	}
+
+	//	section.Unlock();
+	//	return result ? -1 : waitTime;
+	//}
+
+	//void RegisterRequest()
+	//{
+	//	DWORD now = GetTickCount();
+	//	m_requestTimes.push_front(now);
+	//	if (m_requestTimes.size() > 50)
+	//		m_requestTimes.pop_back();
+	//}
+#pragma endregion
+
 	void StopCaching()
 	{
 		m_diskCacher.stopped = true;

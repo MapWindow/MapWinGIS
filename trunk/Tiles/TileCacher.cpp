@@ -43,11 +43,16 @@ void CachingTask::DoTask()
 // Queues caching request
 void TileCacher::Run()
 {
-	if (!queue.empty() && !SQLiteCache::m_locked)
+	if (this->cacheType == CacheType::SqliteCache && SQLiteCache::m_locked)
+		return;
+
+	this->queueLock.Lock();
+	if (queue.size() > 0)
 	{
 		TileCore* tile = queue.front();
 		queue.pop();
 		CachingTask* task = new CachingTask(tile, this, this->cacheType);
 		myPool->QueueRequest( (ThreadWorker::RequestType) task );
 	}
+	this->queueLock.Unlock();
 }
