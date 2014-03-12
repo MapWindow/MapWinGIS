@@ -3814,6 +3814,8 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	*retVal = VARIANT_FALSE;
+
 	if (!poly || !grid) {
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_FALSE;
@@ -3933,6 +3935,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 			newGrid->Save(resultGridfile, GridFileType::UseExtension, NULL, &vb);
 			newGrid->Close(&vb);
 			newGrid->Release();
+			*retVal = VARIANT_TRUE;
 		}
 	}
 	return S_OK;

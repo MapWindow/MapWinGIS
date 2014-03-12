@@ -215,6 +215,7 @@ namespace TestApplication
           theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NoBands);
 
           hndl = Map.AddLayer(grd, true);
+          grd.Close();
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
         }
       }
