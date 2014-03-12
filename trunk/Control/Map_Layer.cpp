@@ -347,6 +347,39 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				m_allLayers.push_back(l);
 			}
 
+			// if it's the first layer, let's try and grab projection from it
+			if (m_activeLayers.size() == 0)
+			{
+				VARIANT_BOOL isEmpty;
+				m_projection->get_IsEmpty(&isEmpty);
+				if (isEmpty)
+				{
+					IGeoProjection* proj = NULL;
+					ishp->get_GeoProjection(&proj);
+					if (proj)
+					{
+						proj->get_IsEmpty(&isEmpty);
+						if (!isEmpty)
+						{
+							IGeoProjection* newProj = NULL;
+							GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&newProj);
+							VARIANT_BOOL vb;
+							newProj->CopyFrom(proj, &vb);
+							if (!vb)
+							{
+								ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
+								newProj->Release();
+							}
+							else
+							{
+								this->SetGeoProjection(newProj);
+							}
+						}
+						proj->Release();
+					}
+				}
+			}
+
 			m_activeLayers.push_back(layerHandle);
 
 			ShpfileType type;
@@ -443,9 +476,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				// let's create a new one
 				if (!Utility::fileExists(legendName)) {
 					gridColorScheme->WriteToFile(A2BSTR(legendName), &vb);	// save the newly created scheme
-				}
-
-				igrid->OpenAsImage(gridColorScheme, &iimg);
+				}				igrid->OpenAsImage(gridColorScheme, &iimg);
 			}
 			
 			if (iimg)

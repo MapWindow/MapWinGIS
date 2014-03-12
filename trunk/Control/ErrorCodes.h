@@ -181,6 +181,7 @@ const char * ErrorMsg( long ErrorCode );
 #define tkPROJECTION_NOT_INITIALIZED	1810
 #define tkPRJ_FILE_EXISTS				1811
 #define tkTRANSFORMATION_NOT_INITIALIZED	1812
+#define tkFAILED_TO_COPY_PROJECTION			1813
 
 
 //2001-2200 = tiles

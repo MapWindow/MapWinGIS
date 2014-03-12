@@ -353,6 +353,9 @@ void CTiles::getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMa
 	}
 }
 
+// ************************************************************
+//		TilesAreInScreenBuffer()
+// ************************************************************
 bool CTiles::TilesAreInScreenBuffer(void* mapView)
 {
 	if (!m_visible || !m_provider) {
@@ -441,7 +444,7 @@ bool CTiles::GetTilesForMap(void* mapView, int& xMin, int& xMax, int& yMin, int&
 }
 
 // *********************************************************
-//	     TilesAreInCache()
+//	     GetTilesForMap()
 // *********************************************************
 // returns list of tiles for current map extents
 bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom)
@@ -475,6 +478,9 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 	return true;
 }
 
+// *********************************************************
+//	     LoadTiles()
+// *********************************************************
 void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key)
 {
 	BaseProvider* provider = ((CTileProviders*)m_providers)->get_Provider(providerId);
@@ -591,6 +597,10 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		// releasing points
 		for (size_t i = 0; i < points.size(); i++)
 			delete points[i];
+	}
+	else
+	{
+		HandleOnTilesLoaded(false, "");
 	}
 }
 

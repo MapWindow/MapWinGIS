@@ -341,6 +341,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Projection file with such name already exists";
 		case tkTRANSFORMATION_NOT_INITIALIZED:
 			return "Transformation isn't initialized";
+		case tkFAILED_TO_COPY_PROJECTION:
+			return "Failed to copy projection";
 
 		//2001-2200 = tiles
 		case tkINVALID_PROVIDER_ID:

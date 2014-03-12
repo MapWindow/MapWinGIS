@@ -34,26 +34,78 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	double w = screenWidth / pxWidth * projWidth;		// requested width in meters (EPSG:3857)
 	double h = screenHeight / pxWidth * projWidth;		// requested width in meters (EPSG:3857)
 
-	VARIANT_BOOL vb;
+	VARIANT_BOOL vb, vb2;
 	IGeoProjection* projMap = this->GetGeoProjection();
-	projMap->get_IsSame(this->m_GMercProjection, &vb);
-	if (vb)
+	if (projMap)
 	{
-		minX = xCent - w/2.0;
-		maxX = xCent + w/2.0;
-		minY = yCent - h/2.0;
-		maxY = yCent + h/2.0;
-		this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
-		return VARIANT_TRUE;
+		VARIANT_BOOL projMatch;
+		projMap->get_IsSame(m_GMercProjection, &projMatch);
+		if (projMatch)
+		{
+			minX = xCent - w/2.0;
+			maxX = xCent + w/2.0;
+			minY = yCent - h/2.0;
+			maxY = yCent + h/2.0;
+			this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+			projMap->Release();
+			return VARIANT_TRUE;
+		}
+		else
+		{
+			// get center in GMercator
+			projMap->StartTransform(m_GMercProjection, &vb);
+			if (vb)
+			{
+				projMap->Transform(&xCent, &yCent, &vb);
+				projMap->StopTransform();
+				if (!vb)
+				{
+					ErrorMsg(tkFAILED_TO_REPROJECT);
+				}
+			}
+			else
+			{
+				ErrorMsg(tkFAILED_TO_REPROJECT);
+			}
+			
+			// return back to map projection
+			if (vb)
+			{
+				m_GMercProjection->StartTransform(projMap, &vb);
+				if (vb)
+				{
+					minX = xCent - w/2.0;
+					maxX = xCent + w/2.0;
+					minY = yCent - h/2.0;
+					maxY = yCent + h/2.0;
+					m_GMercProjection->Transform(&minX, &minY, &vb);
+					m_GMercProjection->Transform(&maxX, &maxY, &vb2);
+					m_GMercProjection->StopTransform();
+					if (!vb || !vb2)
+					{
+						ErrorMsg(tkFAILED_TO_REPROJECT);
+					}
+					else
+					{
+						Debug::WriteLine("Zoom to tile level: %d; extents: xMin:%f; xMax: %f; yMin: %f; yMax: %f", zoom, minX, maxX, minY, maxY);
+						this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+						projMap->Release();
+						return VARIANT_TRUE;
+					}
+				}
+				else
+				{
+					ErrorMsg(tkFAILED_TO_REPROJECT);
+				}
+			}
+		}
+		projMap->Release();
 	}
-	else 
+	else
 	{
-		// TODO: implement transformation
-		ErrorMsg(tkMETHOD_NOT_IMPLEMENTED);
-		return VARIANT_FALSE;
-		// projections are differ; transformation is needed
-		//this->m_GMercProjection->StartTransform(
+		ErrorMsg(tkMAP_PROJECTION_NOT_SET);
 	}
+	return VARIANT_FALSE;
 }
 
 // ****************************************************

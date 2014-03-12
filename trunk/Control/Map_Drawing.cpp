@@ -1656,6 +1656,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	double yMax = extents.bottom;
 	
 	double width = extents.right - extents.left; // maxX - minX;
+	tkUnitsOfMeasure units = m_unitsOfMeasure;
 
 	// run calculations on ellipsoid
 	if (m_transformationMode != tkTransformationMode::tmNotDefined)
@@ -1685,17 +1686,19 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			{
 				GetUtils()->GeodesicDistance((yMax + yMin)/2, xMin, (yMax + yMin)/2, xMax, &width);
 				m_lastWidthMeters = width;
+				units = tkUnitsOfMeasure::umMeters;
 			}
 		}
 		else
 		{
 			width = m_lastWidthMeters;
+			units = tkUnitsOfMeasure::umMeters;
 		}
 	}
 
 	if (width != 0.0)
 	{
-		if( Utility::ConvertDistance(m_unitsOfMeasure, targetUnits, width))
+		if( Utility::ConvertDistance(units, targetUnits, width))
 		{
 			double unitsPerPixel = width/(maxX - minX);	  // target units on screen size
 			double distance = (barWidth - xPadding * 2) * unitsPerPixel;
