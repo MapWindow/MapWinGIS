@@ -60,7 +60,8 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, "Applying symbology");
         }
 
-        theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
+        theForm.Progress(string.Empty, 0, "The shapefile is of type " + sf.ShapefileType);
+        theForm.Progress(string.Empty, 0, string.Format("The shapefile its projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
       }
       else
@@ -215,7 +216,11 @@ namespace TestApplication
           theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NoBands);
 
           hndl = Map.AddLayer(grd, true);
+
+          // The Grid objects are added to the Map control as Image layers. Once the Grid has been added, 
+          // the user is free to Close the Grid because that object is not actually referenced by the map:
           grd.Close();
+
           theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
         }
       }

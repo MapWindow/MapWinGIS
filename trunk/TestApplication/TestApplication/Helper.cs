@@ -354,6 +354,7 @@ namespace TestApplication
       foreach (var button in
         groups.Select(groupBox => groupBox.Controls.OfType<Button>()).SelectMany(buttons => buttons.Where(button => button.Tag != null && button.Tag.ToString() == "run")))
       {
+        //TODO: .OrderByDescending(button => button.Location.Y)
         button.PerformClick();
         System.Threading.Thread.Sleep(100);
       }

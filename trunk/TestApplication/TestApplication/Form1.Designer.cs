@@ -1229,13 +1229,14 @@
       // 
       // RunGridTest
       // 
+      this.RunGridTest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
       this.RunGridTest.Location = new System.Drawing.Point(9, 58);
       this.RunGridTest.Name = "RunGridTest";
       this.RunGridTest.Size = new System.Drawing.Size(180, 23);
       this.RunGridTest.TabIndex = 3;
       this.RunGridTest.Tag = "run";
       this.RunGridTest.Text = "Run test";
-      this.RunGridTest.UseVisualStyleBackColor = true;
+      this.RunGridTest.UseVisualStyleBackColor = false;
       this.RunGridTest.Click += new System.EventHandler(this.RunGridTestClick);
       // 
       // SelectGridInputfile

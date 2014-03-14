@@ -134,6 +134,9 @@ namespace TestApplication
     /// </param>
     private void Form1Load(object sender, EventArgs e)
     {
+      // Reset tiles;
+      axMap1.Tiles.Visible = false;
+
       // Copy the map reference to the test methods:
       Fileformats.Map = axMap1;
       Tests.MyAxMap = axMap1;
@@ -434,7 +437,9 @@ namespace TestApplication
     /// </param>
     private void RunShapefileTestClick(object sender, EventArgs e)
     {
-      Tests.RunShapefileTest(ShapefileInputfile.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunShapefileTest(ShapefileInputfile.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Start Image open tests</summary>
@@ -446,7 +451,9 @@ namespace TestApplication
     /// </param>
     private void RunImageTestClick(object sender, EventArgs e)
     {
-      Tests.RunImagefileTest(ImageInputfile.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunImagefileTest(ImageInputfile.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Start Grid open tests</summary>
@@ -457,8 +464,10 @@ namespace TestApplication
     /// The e.
     /// </param>
     private void RunGridTestClick(object sender, EventArgs e)
-    {
-      Tests.RunGridfileTest(this.GridInputfile.Text, this);
+    { 
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunGridfileTest(this.GridInputfile.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Click event</summary>
@@ -470,7 +479,9 @@ namespace TestApplication
     /// </param>
     private void RunClipGridByPolygonTestClick(object sender, EventArgs e)
     {
-      Tests.RunClipGridByPolygonTest(this.ClipGridByPolygonInputfile.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunClipGridByPolygonTest(this.ClipGridByPolygonInputfile.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Click event</summary>
@@ -482,7 +493,9 @@ namespace TestApplication
     /// </param>
     private void RunShapefileToGridTestClick(object sender, EventArgs e)
     {
-      Tests.RunShapefileToGridTest(this.ShapefileToGrid.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunShapefileToGridTest(this.ShapefileToGrid.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Click event</summary>
@@ -532,7 +545,9 @@ namespace TestApplication
     /// </param>
     private void RunAggregateShapefileTestClick(object sender, EventArgs e)
     {
-      Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
     /// <summary>Click event</summary>

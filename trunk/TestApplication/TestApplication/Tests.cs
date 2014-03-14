@@ -19,12 +19,13 @@ namespace TestApplication
   /// <summary>Static class to hold the tests methods</summary>
   internal static class Tests
   {
+    /// <summary>Are the tiles loaded or not</summary>
+    private static bool tilesAreLoaded;
+
     /// <summary>
     /// Gets or sets Map.
     /// </summary>
     internal static AxMapWinGIS.AxMap MyAxMap { get; set; }
-
-    private static bool tilesAreLoaded = false;
 
     /// <summary>Select a text file using an OpenFileDialog</summary>
     /// <param name="textBox">
@@ -75,8 +76,13 @@ namespace TestApplication
     /// <exception cref="FileNotFoundException">
     /// When the file is not found
     /// </exception>
-    internal static void RunShapefileTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    internal static bool RunShapefileTest(string textfileLocation, Form1 theForm)
     {
+      var retVal = true;
+
       theForm.Progress(
         string.Empty,
         0,
@@ -88,12 +94,18 @@ namespace TestApplication
       foreach (var line in lines)
       {
         // Open shapefile:
-        Fileformats.OpenShapefileAsLayer(line, theForm, true);
+        if (Fileformats.OpenShapefileAsLayer(line, theForm, true)  == -1)
+        {
+          // Something went wrong:
+          retVal = false;
+        }
+
         Application.DoEvents();
         Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
+      return retVal;
     }
 
     /// <summary>
@@ -133,8 +145,8 @@ namespace TestApplication
 
       // Save some settings:
       var providerId = MyAxMap.Tiles.ProviderId;
-      var minZoom = MyAxMap.Tiles.Providers.minZoom[providerId];
-      var maxZoom = MyAxMap.Tiles.Providers.maxZoom[providerId];
+      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
+      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
 
       // Do some logging
       theForm.Progress(string.Empty, 0, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
@@ -147,23 +159,37 @@ namespace TestApplication
 
       var waitCount = 0;
       const int MaxWaitCount = 30;
-      const int MaxSleepTime = 500;
-      bool hasErrors = false;
+      const int MaxSleepTime = 1000;
+      var hasErrors = false;
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
       foreach (var line in lines)
       {
         // Open shapefile:
-        int layerHandle = Fileformats.OpenShapefileAsLayer(line, theForm, true);
+        var layerHandle = Fileformats.OpenShapefileAsLayer(line, theForm, true);
         MyAxMap.ZoomToLayer(layerHandle);
+
+        theForm.Progress(string.Empty, 0, string.Format("Map projection: {0} ({1})", MyAxMap.GeoProjection.Name, MyAxMap.GeoProjection.GeogCSName));
         
-        // turn off the fill to see the tiles  
         var sf = MyAxMap.get_Shapefile(layerHandle);
+
         if (sf != null)
         {
-            sf.DefaultDrawingOptions.FillVisible = false;      
+          // turn off the symbology to see the tiles  
+          theForm.Progress(string.Empty, 0, string.Format("Layer projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
+          sf.DefaultDrawingOptions.FillVisible = false;      
+          sf.Categories.Clear();
+          sf.Labels.Clear();
+          sf.Charts.Clear(); 
+
+          // Minor bug:
+          if (!MyAxMap.GeoProjection.get_IsSame(sf.GeoProjection))
+          {
+            MyAxMap.GeoProjection.CopyFrom(sf.GeoProjection);
+          }
         }
+
         Thread.Sleep(MaxSleepTime);
 
         // start from current zoom after zooming to layer; when starting from minimum you won't 
@@ -191,7 +217,7 @@ namespace TestApplication
         // reset:
         waitCount = 0;
 
-        theForm.Progress(string.Empty, 0, "Tiles error: " + MyAxMap.Tiles.ErrorMsg[MyAxMap.Tiles.LastErrorCode]);
+        theForm.Progress(string.Empty, 0, "Tiles error: " + MyAxMap.Tiles.get_ErrorMsg(MyAxMap.Tiles.LastErrorCode));
 
         // Do some zooming:
         for (var zoom = minZoom + 2; zoom <= maxZoom; zoom = zoom + 2)
@@ -220,25 +246,11 @@ namespace TestApplication
       }
 
         theForm.Error(string.Empty, hasErrors ? "Tiles weren't loaded for some zooms" : "Tiles were loaded for all zoom levels");
-
         theForm.Progress(string.Empty, 100, "The tiles load tests have finished.");
 
       // Disable tiles again:
-      //MyAxMap.Tiles.Visible = false;
+      MyAxMap.Tiles.Visible = false;
     }
-
-    /// <summary>TilesLoaded event handle</summary>
-    /// <param name="sender">
-    /// The sender.
-    /// </param>
-    /// <param name="e">
-    /// The e.
-    /// </param>
-    private static void MyAxMapTilesLoaded(object sender, AxMapWinGIS._DMapEvents_TilesLoadedEvent e)
-    {
-      tilesAreLoaded = true;
-    }
-
 
     /// <summary>Run the Spatial Index tests</summary>
     /// <param name="textfileLocation">The textfile location</param>
@@ -342,8 +354,13 @@ namespace TestApplication
     /// <exception cref="FileNotFoundException">
     /// When the file is not found
     /// </exception>
-    internal static void RunImagefileTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True when no errors.
+    /// </returns>
+    internal static bool RunImagefileTest(string textfileLocation, Form1 theForm)
     {
+      var retVal = true;
+
       // Open text file:
       if (!File.Exists(textfileLocation))
       {
@@ -364,6 +381,7 @@ namespace TestApplication
 
         if (hndle == -1)
         {
+          retVal = false;
           continue;
         }
 
@@ -378,6 +396,8 @@ namespace TestApplication
 
       theForm.Progress(string.Empty, 100, "The image open tests have finished.");
       MyAxMap.Redraw();
+
+      return retVal;
     }
 
     /// <summary>
@@ -392,8 +412,13 @@ namespace TestApplication
     /// <exception cref="FileNotFoundException">
     /// When the file is not found
     /// </exception>
-    internal static void RunGridfileTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    internal static bool RunGridfileTest(string textfileLocation, Form1 theForm)
     {
+      var retVal = true;
+
       // Open text file:
       if (!File.Exists(textfileLocation))
       {
@@ -410,7 +435,10 @@ namespace TestApplication
       foreach (var line in lines)
       {
         // Open image:
-        Fileformats.OpenGridAsLayer(line, theForm, true);
+        if (Fileformats.OpenGridAsLayer(line, theForm, true) == -1)
+        {
+          retVal = false;
+        }
 
         // Wait a second to show something:
         Application.DoEvents();
@@ -419,6 +447,8 @@ namespace TestApplication
 
       theForm.Progress(string.Empty, 100, "The grid open tests have finished.");
       MyAxMap.Redraw();
+
+      return retVal;
     }
 
     /// <summary>Select a shapefile</summary>
@@ -534,19 +564,26 @@ namespace TestApplication
       }
     }
 
-    /// <summary>Run the Clip grid by polygon test</summary>
+    /// <summary>
+    /// Run the Clip grid by polygon test
+    /// </summary>
     /// <param name="textfileLocation">
     /// The textfile location.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunClipGridByPolygonTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    internal static bool RunClipGridByPolygonTest(string textfileLocation, Form1 theForm)
     {
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Clip grid by polygon test has started.", Environment.NewLine));
+
+      var retVal = true;
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -557,35 +594,48 @@ namespace TestApplication
         if (i + 1 > lines.Count)
         {
           theForm.Error(string.Empty, "Input file is incorrect.");
+          retVal = false;
           break;
         }
 
-        ClipGridByPolygon(lines[i], lines[i + 1], theForm);
+        if (!ClipGridByPolygon(lines[i], lines[i + 1], theForm))
+        {
+          retVal = false;
+        }
       }
 
       theForm.Progress(string.Empty, 100, "The Clip grid by polygon test has finished.");
+
+      return retVal;
     }
 
-    /// <summary>Run the Shapefile to grid test</summary>
+    /// <summary>
+    /// Run the Shapefile to grid test
+    /// </summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
     /// <param name="theForm">
     /// The the form.
     /// </param>
-    internal static void RunShapefileToGridTest(string shapefilename, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    internal static bool RunShapefileToGridTest(string shapefilename, Form1 theForm)
     {
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Shapefile to grid test has started.", Environment.NewLine));
 
+      var retVal = true;
+
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         var folder = Path.GetDirectoryName(shapefilename);
@@ -600,7 +650,7 @@ namespace TestApplication
           var sf = Fileformats.OpenShapefile(shapefilename, theForm);
           if (sf == null)
           {
-            return;
+            return false;
           }
 
           double minX, minY, minZ, maxX, maxY, maxZ;
@@ -623,12 +673,14 @@ namespace TestApplication
           if (resultGrid == null)
           {
             theForm.Error(string.Empty, "Error in ShapefileToGrid: " + utils.get_ErrorMsg(utils.LastErrorCode));
+            retVal = false;
           }
           else
           {
             if (!resultGrid.Save(resultGridFilename, GridFileType.UseExtension, null))
             {
               theForm.Error(string.Empty, "Error in Grid.Save(): " + resultGrid.get_ErrorMsg(resultGrid.LastErrorCode));
+              retVal = false;
             }
             else
             {
@@ -646,9 +698,12 @@ namespace TestApplication
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
+        retVal = false;
       }
 
       theForm.Progress(string.Empty, 100, "The Shapefile to grid test has finished.");
+
+      return retVal;
     }
 
     /// <summary>Run the OGRInfo test</summary>
@@ -772,19 +827,26 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The Rasterize shapefile test has finished.");
     }
 
-    /// <summary>Run Aggregate shapefile test</summary>
+    /// <summary>
+    /// Run Aggregate shapefile test
+    /// </summary>
     /// <param name="textfileLocation">
     /// The location of the shapefile.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunAggregateShapefileTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    internal static bool RunAggregateShapefileTest(string textfileLocation, Form1 theForm)
     {
       theForm.Progress(
         string.Empty,
         0,
         string.Format("{0}-----------------------{0}The Aggregate shapefile test has started.", Environment.NewLine));
+
+      var retVal = true;
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -805,16 +867,23 @@ namespace TestApplication
           break;
         }
 
-        AggregateShapefile(lines[i], fieldIndex, theForm);
+        if (!AggregateShapefile(lines[i], fieldIndex, theForm))
+        {
+          retVal = false;
+        }
         
         Application.DoEvents();
         Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished.");
+
+      return retVal;
     }
 
-    /// <summary>Aggregate shapefile</summary>
+    /// <summary>
+    /// Aggregate shapefile
+    /// </summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
@@ -824,14 +893,19 @@ namespace TestApplication
     /// <param name="theForm">
     /// The form.
     /// </param>
-    private static void AggregateShapefile(string shapefilename, int fieldIndex, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    private static bool AggregateShapefile(string shapefilename, int fieldIndex, Form1 theForm)
     {
+      var retVal = true;
+
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
@@ -839,7 +913,7 @@ namespace TestApplication
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var globalSettings = new GlobalSettings();
@@ -859,6 +933,7 @@ namespace TestApplication
         {
           theForm.Progress(string.Empty, 0, string.Empty);
           theForm.Progress(string.Empty, 0, "Warning! The aggregated shapefile has invalid shapes");
+          retVal = false;
           
           // The aggregate method is returning invalid shapes, fix them first:
           Shapefile fixedSf;
@@ -868,7 +943,7 @@ namespace TestApplication
           if (!aggregatedSf.FixUpShapes(out fixedSf))
           {
             theForm.Error(string.Empty, "The fixup returned false");
-            return;
+            return false;
           }
 
           // Close file, because we continue with the fixed version:
@@ -877,7 +952,7 @@ namespace TestApplication
           // Do some checks:)
           if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
           {
-            return;
+            return false;
           }
 
           // Continue with this sf:
@@ -908,7 +983,10 @@ namespace TestApplication
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
+        retVal = false;
       }
+
+      return retVal;
     }
 
     /// <summary>End the stop watch and log the time needed</summary>
@@ -1014,7 +1092,9 @@ namespace TestApplication
       MyAxMap.ZoomToMaxExtents();
     }
 
-    /// <summary>Clip Grid by Polygon</summary>
+    /// <summary>
+    /// Clip Grid by Polygon
+    /// </summary>
     /// <param name="gridFilename">
     /// The grid filename.
     /// </param>
@@ -1024,8 +1104,13 @@ namespace TestApplication
     /// <param name="theForm">
     /// The form.
     /// </param>
-    private static void ClipGridByPolygon(string gridFilename, string shapefilename, Form1 theForm)
+    /// <returns>
+    /// True when no errors
+    /// </returns>
+    private static bool ClipGridByPolygon(string gridFilename, string shapefilename, Form1 theForm)
     {
+      var retVal = true;
+
       try
       {
         // Clear the map:
@@ -1036,39 +1121,36 @@ namespace TestApplication
         if (gridFilename == string.Empty || shapefilename == string.Empty)
         {
           theForm.Error(string.Empty, "Input parameters are wrong");
-          return;
+          return false;
         }
 
         var folder = Path.GetDirectoryName(gridFilename);
         if (folder == null)
         {
           theForm.Error(string.Empty, "Input parameters are wrong");
-          return;
+          return false;
         }
 
         if (!Directory.Exists(folder))
         {
           theForm.Error(string.Empty, "Output folder doesn't exists");
-          return;
+          return false;
         }
 
         if (!File.Exists(gridFilename))
         {
           theForm.Error(string.Empty, "Input grid file doesn't exists");
-          return;
+          return false;
         }
 
         if (!File.Exists(shapefilename))
         {
           theForm.Error(string.Empty, "Input shapefile doesn't exists");
-          return;
+          return false;
         }
 
         var resultGrid = Path.Combine(folder, "ClipGridByPolygonTest" + Path.GetExtension(gridFilename));
-        if (File.Exists(resultGrid))
-        {
-          File.Delete(resultGrid);
-        }
+        Helper.DeleteGridfile(resultGrid);
 
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
@@ -1100,17 +1182,35 @@ namespace TestApplication
           Fileformats.OpenGridAsLayer(gridFilename, theForm, true);
           Fileformats.OpenGridAsLayer(resultGrid, theForm, false);
           MyAxMap.AddLayer(sf, true);
-          Application.DoEvents();
+
+          //TODO Causes a crash when multiple tests are run at once, don't know why.
+          //Application.DoEvents();
         }
         else
         {
           theForm.Error(string.Empty, "No grid was created");
+          retVal = false;
         }
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
+        retVal = false;
       }
+
+      return retVal;
+    }
+
+    /// <summary>TilesLoaded event handle</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
+    /// </param>
+    private static void MyAxMapTilesLoaded(object sender, AxMapWinGIS._DMapEvents_TilesLoadedEvent e)
+    {
+      tilesAreLoaded = true;
     }
   }
 }
