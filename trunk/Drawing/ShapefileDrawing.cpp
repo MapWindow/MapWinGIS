@@ -1067,6 +1067,12 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 	bool perShapeDrawing = options->fillVisible && options->fillType == ftGradient && 
 						   options->fillGradientBounds == gbPerShape && _shptype == SHP_POLYGON;
 	
+	Gdiplus::REAL dpi = _graphics->GetDpiX();
+	if (dpi > 100.0f) 
+	{
+		perShapeDrawing = true;
+	}
+
 	if (perShapeDrawing)
 	{
 		drawingMode = vdmGDIPlus;
@@ -1104,7 +1110,10 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 				RectF rect( (Gdiplus::REAL) xmin, (Gdiplus::REAL)ymin, (Gdiplus::REAL)xmax - xmin, (Gdiplus::REAL)ymax - ymin);
 				if (!drawSelection || m_selectionTransparency < 255)
 				{
-					options->FillGraphicsPath(_graphics, &pathFill, rect);
+					if ( options->fillVisible && _shptype == SHP_POLYGON )
+					{
+						options->FillGraphicsPath(_graphics, &pathFill, rect);
+					}
 				
 					// drawing lines
 					if ( options->linesVisible && drawingMode == vdmGDIPlus)
