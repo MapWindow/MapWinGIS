@@ -1438,7 +1438,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 // *************************************************************
 //		Boundry
 // *************************************************************
-STDMETHODIMP CShape::Boundry(IShape** retval)
+STDMETHODIMP CShape::Boundary(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 

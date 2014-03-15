@@ -154,7 +154,7 @@ public:
 	STDMETHOD(Overlaps)(IShape* Shape, VARIANT_BOOL* retval);
 	STDMETHOD(Touches)(IShape* Shape, VARIANT_BOOL* retval);
 	STDMETHOD(Within)(IShape* Shape, VARIANT_BOOL* retval);
-	STDMETHOD(Boundry)(IShape** retval);
+	STDMETHOD(Boundary)(IShape** retval);
 	STDMETHOD(ConvexHull)(IShape** retval);
 	STDMETHOD(get_IsValid)(VARIANT_BOOL* retval);
 	STDMETHOD(get_XY)(long PointIndex, double* x, double* y, VARIANT_BOOL* retval);
