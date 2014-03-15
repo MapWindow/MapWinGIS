@@ -2720,7 +2720,7 @@ interface IShape : IDispatch{
 	[id(32), helpstring("method Overlaps")] HRESULT Overlaps([in] IShape* Shape, [out, retval] VARIANT_BOOL* retval);
 	[id(33), helpstring("method Touches")] HRESULT Touches([in] IShape* Shape, [out, retval] VARIANT_BOOL* retval);
 	[id(34), helpstring("method Within")] HRESULT Within([in] IShape* Shape, [out, retval] VARIANT_BOOL* retval);
-	[id(35), helpstring("method Boundry")] HRESULT Boundry([out, retval] IShape** retval);
+	[id(35), helpstring("method Boundary")] HRESULT Boundary([out, retval] IShape** retval);
 	[id(36), helpstring("method ConvexHull")] HRESULT ConvexHull([out, retval] IShape** retval);
 	[propget, id(37), helpstring("property IsValid")] HRESULT IsValid([out, retval] VARIANT_BOOL* retval);
 	[propget, id(38), helpstring("property XY")] HRESULT XY([in]long PointIndex, [in, out]double* x, [in, out]double* y, [out, retval] VARIANT_BOOL* retval);

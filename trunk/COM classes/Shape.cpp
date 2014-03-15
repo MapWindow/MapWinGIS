@@ -1436,7 +1436,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 }
 
 // *************************************************************
-//		Boundry
+//		Boundary
 // *************************************************************
 STDMETHODIMP CShape::Boundary(IShape** retval)
 {

@@ -39,8 +39,7 @@ public:
 	
 	static bool get_TileExists( LONG zoom, LONG x, LONG y)
 	{
-		bool exists = Utility::fileExists(get_TilePath(zoom, x, y));
-		return exists;
+		return (Utility::fileExists(get_TilePath(zoom, x, y)) == TRUE);
 	}
 
 	static CString get_TilePath(int zoom, int x, int y)
