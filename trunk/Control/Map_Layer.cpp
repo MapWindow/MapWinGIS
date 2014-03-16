@@ -347,36 +347,33 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				m_allLayers.push_back(l);
 			}
 
-			// if it's the first layer, let's try and grab projection from it
-			if (m_activeLayers.size() == 0)
+			// if we don't have a projection, let's try and grab projection from it
+			VARIANT_BOOL isEmpty = VARIANT_FALSE;
+			m_projection->get_IsEmpty(&isEmpty);
+			if (isEmpty)
 			{
-				VARIANT_BOOL isEmpty;
-				m_projection->get_IsEmpty(&isEmpty);
-				if (isEmpty)
+				IGeoProjection* proj = NULL;
+				ishp->get_GeoProjection(&proj);
+				if (proj)
 				{
-					IGeoProjection* proj = NULL;
-					ishp->get_GeoProjection(&proj);
-					if (proj)
+					proj->get_IsEmpty(&isEmpty);
+					if (!isEmpty)
 					{
-						proj->get_IsEmpty(&isEmpty);
-						if (!isEmpty)
+						IGeoProjection* newProj = NULL;
+						GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&newProj);
+						VARIANT_BOOL vb;
+						newProj->CopyFrom(proj, &vb);
+						if (!vb)
 						{
-							IGeoProjection* newProj = NULL;
-							GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&newProj);
-							VARIANT_BOOL vb;
-							newProj->CopyFrom(proj, &vb);
-							if (!vb)
-							{
-								ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
-								newProj->Release();
-							}
-							else
-							{
-								this->SetGeoProjection(newProj);
-							}
+							ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
+							newProj->Release();
 						}
-						proj->Release();
+						else
+						{
+							this->SetGeoProjection(newProj);
+						}
 					}
+					proj->Release();
 				}
 			}
 
