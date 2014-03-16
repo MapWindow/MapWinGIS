@@ -46,7 +46,13 @@ namespace TestApplication
         if (clearLayers)
         {
           Map.RemoveAllLayers();
-          theForm.Progress(string.Empty, 0, "Removed all layers from the map");
+          Application.DoEvents();
+
+          // Set projection of map using the grid projection:
+          if (!sf.GeoProjection.IsEmpty)
+          {
+            Map.GeoProjection.CopyFrom(sf.GeoProjection);
+          }
         }
 
         hndl = Map.AddLayer(sf, true);
@@ -136,6 +142,12 @@ namespace TestApplication
           {
             Map.RemoveAllLayers();
             Application.DoEvents();
+
+            // Set projection of map using the grid projection:
+            if (img.GetProjection() != string.Empty)
+            {
+              Map.GeoProjection.ImportFromProj4(img.GetProjection());
+            }
           }
 
           // Log characteristics:
@@ -209,6 +221,13 @@ namespace TestApplication
           if (clearLayers)
           {
             Map.RemoveAllLayers();
+            Application.DoEvents();
+
+            // Set projection of map using the grid projection:
+            if (!grd.Header.GeoProjection.IsEmpty)
+            {
+              Map.GeoProjection.CopyFrom(grd.Header.GeoProjection);
+            }
           }
 
           // Log projection:

@@ -62,6 +62,7 @@ namespace TestApplication
     /// </param>
     public void Error(string keyOfSender, string errorMsg)
     {
+      System.Diagnostics.Debug.WriteLine(errorMsg);
       if (this.InvokeRequired)
       {
         this.Invoke(new ErrorCallback(this.Error), keyOfSender, errorMsg);
@@ -85,6 +86,11 @@ namespace TestApplication
     /// </param>
     public void Progress(string keyOfSender, int percent, string message)
     {
+      if (percent == 0)
+      {
+        System.Diagnostics.Debug.WriteLine(message);
+      }
+
       if (this.InvokeRequired)
       {
         this.Invoke(new ProgressCallback(this.Progress), keyOfSender, percent, message);

@@ -351,12 +351,13 @@ namespace TestApplication
     internal static void RunAllTestsInGroupbox(GroupBox parentBox)
     {
       var groups = parentBox.Controls.OfType<GroupBox>();
-      foreach (var button in
-        groups.Select(groupBox => groupBox.Controls.OfType<Button>()).SelectMany(buttons => buttons.Where(button => button.Tag != null && button.Tag.ToString() == "run")))
+      var buttons = groups.SelectMany(groupBox => groupBox.Controls.OfType<Button>());
+      var buttonsWithRunTag = buttons.Where(button => button.Tag != null && button.Tag.ToString() == "run");
+      var orderByTabIndex = buttonsWithRunTag.OrderBy(button => button.TabIndex);
+
+      foreach (var button in orderByTabIndex)
       {
-        //TODO: .OrderByDescending(button => button.Location.Y)
         button.PerformClick();
-        System.Threading.Thread.Sleep(100);
       }
     }
   }

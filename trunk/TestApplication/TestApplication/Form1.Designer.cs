@@ -135,9 +135,9 @@
       this.ShapefileInputfile = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
-      this.axMap1 = new AxMapWinGIS.AxMap();
       this.Progressbox = new System.Windows.Forms.TextBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+      this.axMap1 = new AxMapWinGIS.AxMap();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
@@ -245,7 +245,7 @@
       this.RunTilesLoadTest.Location = new System.Drawing.Point(9, 58);
       this.RunTilesLoadTest.Name = "RunTilesLoadTest";
       this.RunTilesLoadTest.Size = new System.Drawing.Size(180, 23);
-      this.RunTilesLoadTest.TabIndex = 3;
+      this.RunTilesLoadTest.TabIndex = 17;
       this.RunTilesLoadTest.Tag = "run";
       this.RunTilesLoadTest.Text = "Run test";
       this.RunTilesLoadTest.UseVisualStyleBackColor = true;
@@ -310,7 +310,7 @@
       this.RunSpatialIndexTest.Location = new System.Drawing.Point(9, 58);
       this.RunSpatialIndexTest.Name = "RunSpatialIndexTest";
       this.RunSpatialIndexTest.Size = new System.Drawing.Size(180, 23);
-      this.RunSpatialIndexTest.TabIndex = 3;
+      this.RunSpatialIndexTest.TabIndex = 16;
       this.RunSpatialIndexTest.Text = "Run test";
       this.RunSpatialIndexTest.UseVisualStyleBackColor = true;
       this.RunSpatialIndexTest.Click += new System.EventHandler(this.RunSpatialIndexTestClick);
@@ -421,7 +421,7 @@
       this.RunClosestPointTest.Location = new System.Drawing.Point(9, 95);
       this.RunClosestPointTest.Name = "RunClosestPointTest";
       this.RunClosestPointTest.Size = new System.Drawing.Size(180, 23);
-      this.RunClosestPointTest.TabIndex = 9;
+      this.RunClosestPointTest.TabIndex = 15;
       this.RunClosestPointTest.Text = "Run test";
       this.RunClosestPointTest.UseVisualStyleBackColor = true;
       this.RunClosestPointTest.Click += new System.EventHandler(this.RunClosestPointTestClick);
@@ -474,7 +474,7 @@
       this.RunWktShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunWktShapefileTest.Name = "RunWktShapefileTest";
       this.RunWktShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunWktShapefileTest.TabIndex = 9;
+      this.RunWktShapefileTest.TabIndex = 14;
       this.RunWktShapefileTest.Text = "Run test";
       this.RunWktShapefileTest.UseVisualStyleBackColor = true;
       this.RunWktShapefileTest.Click += new System.EventHandler(this.RunWktShapefileTestClick);
@@ -560,7 +560,7 @@
       this.RunIntersectionShapefileTest.Location = new System.Drawing.Point(9, 95);
       this.RunIntersectionShapefileTest.Name = "RunIntersectionShapefileTest";
       this.RunIntersectionShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunIntersectionShapefileTest.TabIndex = 9;
+      this.RunIntersectionShapefileTest.TabIndex = 13;
       this.RunIntersectionShapefileTest.Text = "Run test";
       this.RunIntersectionShapefileTest.UseVisualStyleBackColor = true;
       this.RunIntersectionShapefileTest.Click += new System.EventHandler(this.RunIntersectionShapefileTestClick);
@@ -613,7 +613,7 @@
       this.RunClipShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunClipShapefileTest.Name = "RunClipShapefileTest";
       this.RunClipShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunClipShapefileTest.TabIndex = 9;
+      this.RunClipShapefileTest.TabIndex = 12;
       this.RunClipShapefileTest.Text = "Run test";
       this.RunClipShapefileTest.UseVisualStyleBackColor = true;
       this.RunClipShapefileTest.Click += new System.EventHandler(this.RunClipShapefileTestClick);
@@ -687,7 +687,7 @@
       this.RunDissolveShapefileTest.Location = new System.Drawing.Point(9, 84);
       this.RunDissolveShapefileTest.Name = "RunDissolveShapefileTest";
       this.RunDissolveShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunDissolveShapefileTest.TabIndex = 9;
+      this.RunDissolveShapefileTest.TabIndex = 10;
       this.RunDissolveShapefileTest.Text = "Run test";
       this.RunDissolveShapefileTest.UseVisualStyleBackColor = true;
       this.RunDissolveShapefileTest.Click += new System.EventHandler(this.RunDissolveShapefileTestClick);
@@ -740,7 +740,7 @@
       this.RunSimplifyShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunSimplifyShapefileTest.Name = "RunSimplifyShapefileTest";
       this.RunSimplifyShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunSimplifyShapefileTest.TabIndex = 9;
+      this.RunSimplifyShapefileTest.TabIndex = 11;
       this.RunSimplifyShapefileTest.Text = "Run test";
       this.RunSimplifyShapefileTest.UseVisualStyleBackColor = true;
       this.RunSimplifyShapefileTest.Click += new System.EventHandler(this.RunSimplifyShapefileTestClick);
@@ -858,7 +858,7 @@
       this.RunOGRInfoTest.Location = new System.Drawing.Point(9, 58);
       this.RunOGRInfoTest.Name = "RunOGRInfoTest";
       this.RunOGRInfoTest.Size = new System.Drawing.Size(180, 23);
-      this.RunOGRInfoTest.TabIndex = 9;
+      this.RunOGRInfoTest.TabIndex = 8;
       this.RunOGRInfoTest.Text = "Run test";
       this.RunOGRInfoTest.UseVisualStyleBackColor = true;
       this.RunOGRInfoTest.Click += new System.EventHandler(this.RunOGRInfoTestClick);
@@ -911,7 +911,7 @@
       this.RunRasterizeTest.Location = new System.Drawing.Point(9, 58);
       this.RunRasterizeTest.Name = "RunRasterizeTest";
       this.RunRasterizeTest.Size = new System.Drawing.Size(180, 23);
-      this.RunRasterizeTest.TabIndex = 9;
+      this.RunRasterizeTest.TabIndex = 7;
       this.RunRasterizeTest.Text = "Run test";
       this.RunRasterizeTest.UseVisualStyleBackColor = true;
       this.RunRasterizeTest.Click += new System.EventHandler(this.RunRasterizeTestClick);
@@ -991,7 +991,7 @@
       this.RunAggregateShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunAggregateShapefileTest.Name = "RunAggregateShapefileTest";
       this.RunAggregateShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunAggregateShapefileTest.TabIndex = 9;
+      this.RunAggregateShapefileTest.TabIndex = 6;
       this.RunAggregateShapefileTest.Tag = "run";
       this.RunAggregateShapefileTest.Text = "Run test";
       this.RunAggregateShapefileTest.UseVisualStyleBackColor = true;
@@ -1045,7 +1045,7 @@
       this.RunShapefileToGridTest.Location = new System.Drawing.Point(9, 58);
       this.RunShapefileToGridTest.Name = "RunShapefileToGridTest";
       this.RunShapefileToGridTest.Size = new System.Drawing.Size(180, 23);
-      this.RunShapefileToGridTest.TabIndex = 9;
+      this.RunShapefileToGridTest.TabIndex = 5;
       this.RunShapefileToGridTest.Tag = "run";
       this.RunShapefileToGridTest.Text = "Run test";
       this.RunShapefileToGridTest.UseVisualStyleBackColor = true;
@@ -1099,7 +1099,7 @@
       this.RunClipGridByPolygonTest.Location = new System.Drawing.Point(9, 58);
       this.RunClipGridByPolygonTest.Name = "RunClipGridByPolygonTest";
       this.RunClipGridByPolygonTest.Size = new System.Drawing.Size(180, 23);
-      this.RunClipGridByPolygonTest.TabIndex = 9;
+      this.RunClipGridByPolygonTest.TabIndex = 4;
       this.RunClipGridByPolygonTest.Tag = "run";
       this.RunClipGridByPolygonTest.Text = "Run test";
       this.RunClipGridByPolygonTest.UseVisualStyleBackColor = true;
@@ -1233,7 +1233,7 @@
       this.RunGridTest.Location = new System.Drawing.Point(9, 58);
       this.RunGridTest.Name = "RunGridTest";
       this.RunGridTest.Size = new System.Drawing.Size(180, 23);
-      this.RunGridTest.TabIndex = 3;
+      this.RunGridTest.TabIndex = 2;
       this.RunGridTest.Tag = "run";
       this.RunGridTest.Text = "Run test";
       this.RunGridTest.UseVisualStyleBackColor = false;
@@ -1285,7 +1285,7 @@
       this.RunShapefileTest.Location = new System.Drawing.Point(9, 58);
       this.RunShapefileTest.Name = "RunShapefileTest";
       this.RunShapefileTest.Size = new System.Drawing.Size(180, 23);
-      this.RunShapefileTest.TabIndex = 3;
+      this.RunShapefileTest.TabIndex = 1;
       this.RunShapefileTest.Tag = "run";
       this.RunShapefileTest.Text = "Run test";
       this.RunShapefileTest.UseVisualStyleBackColor = true;
@@ -1331,17 +1331,6 @@
       this.label1.TabIndex = 0;
       this.label1.Text = "Tests";
       // 
-      // axMap1
-      // 
-      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.axMap1.Enabled = true;
-      this.axMap1.Location = new System.Drawing.Point(0, 0);
-      this.axMap1.Name = "axMap1";
-      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-      this.axMap1.Size = new System.Drawing.Size(695, 717);
-      this.axMap1.TabIndex = 0;
-      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
-      // 
       // Progressbox
       // 
       this.Progressbox.BackColor = System.Drawing.Color.White;
@@ -1353,6 +1342,17 @@
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.Progressbox.Size = new System.Drawing.Size(929, 157);
       this.Progressbox.TabIndex = 0;
+      // 
+      // axMap1
+      // 
+      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.axMap1.Enabled = true;
+      this.axMap1.Location = new System.Drawing.Point(0, 0);
+      this.axMap1.Name = "axMap1";
+      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
+      this.axMap1.Size = new System.Drawing.Size(695, 717);
+      this.axMap1.TabIndex = 0;
+      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
       // 
       // Form1
       // 
