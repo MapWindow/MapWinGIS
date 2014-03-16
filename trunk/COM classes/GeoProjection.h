@@ -129,6 +129,7 @@ public:
 	STDMETHOD(StopTransform)();
 	STDMETHOD(get_HasTransformation)(VARIANT_BOOL* retval);
 	STDMETHOD(SetGoogleMercator)(void);
+	STDMETHOD(Clear)();
 
 	OGRSpatialReference* get_SpatialReference()
 	{

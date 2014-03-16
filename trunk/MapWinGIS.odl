@@ -4151,7 +4151,8 @@ interface IGeoProjection : IDispatch{
 	[id(35), helpstring("method StopTransform")] HRESULT StopTransform(void);
 	[id(36), helpstring("method Transform")] HRESULT Transform([in,out] DOUBLE* x, [in,out] DOUBLE* y, [out,retval] VARIANT_BOOL* retval);
 	[propget, id(37), helpstring("property HasTransformation")] HRESULT HasTransformation([out, retval] VARIANT_BOOL* pVal);
-	[id(38), helpstring("")] HRESULT SetGoogleMercator();
+	[id(38), helpstring("method SetGoogleMercator")] HRESULT SetGoogleMercator();
+	[id(39), helpstring("method Clear")] HRESULT Clear();
 };
 
 [

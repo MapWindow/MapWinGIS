@@ -175,6 +175,17 @@ STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 }
 
 // *******************************************************
+//		Clear()
+// *******************************************************
+STDMETHODIMP CGeoProjection::Clear()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	this->StopTransform();
+	m_projection->Clear();
+	return S_OK;
+}
+
+// *******************************************************
 //		ImportFromESRI()
 // *******************************************************
 STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)

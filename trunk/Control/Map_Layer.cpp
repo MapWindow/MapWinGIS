@@ -727,6 +727,8 @@ void CMapView::RemoveLayerWithoutClosing(long LayerHandle)
 void CMapView::RemoveAllLayers()
 {
 	LockWindow( lmLock );
+	bool hadLayers = m_activeLayers.size() > 0;
+	
 	for(unsigned int i = 0; i < m_allLayers.size(); i++ )
 	{
 		if( IsValidLayer(i) )
@@ -737,7 +739,15 @@ void CMapView::RemoveAllLayers()
 	m_allLayers.clear();
 	LockWindow( lmUnlock );
 	
-	
+	// clear the projection if there is one
+	VARIANT_BOOL isEmpty;
+	m_projection->get_IsEmpty(&isEmpty);
+	if (hadLayers && !isEmpty)
+	{
+		IGeoProjection* proj = NULL;
+		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+		SetGeoProjection(proj);
+	}
 
 	m_canbitblt = FALSE;
 
