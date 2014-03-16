@@ -127,135 +127,15 @@ namespace TestApplication
         0,
         string.Format("{0}-----------------------{0}The tiles load tests have started.", Environment.NewLine));
 
-      // Set up event handler:
-      MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
-
-      // To set map projection explicitly:
-      //var proj = new GeoProjection();
-      //proj.SetWellKnownGeogCS(tkCoordinateSystem.csWGS_84);
-      //MyAxMap.GeoProjection = proj;
-
-      // Enable tiling:
-      MyAxMap.Tiles.GlobalCallback = theForm;
-      MyAxMap.Tiles.Visible = true;
-      MyAxMap.Tiles.AutodetectProxy();
-      MyAxMap.Tiles.set_DoCaching(tkCacheType.Disk, true);
-
-      // probably better to turn if off otherwise on second run nothing will be downloaded (everything in cache)  
-      MyAxMap.Tiles.set_UseCache(tkCacheType.Disk, false);
-      MyAxMap.Tiles.UseServer = true;
-      MyAxMap.Tiles.Provider = tkTileProvider.OpenStreetMap;
-
-      // Save some settings:
-      var providerId = MyAxMap.Tiles.ProviderId;
-      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
-      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
-
-      // Do some logging
-      theForm.Progress(string.Empty, 0, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
-      theForm.Progress(string.Empty, 0, "CheckConnection: " + MyAxMap.Tiles.CheckConnection("http://www.google.com"));
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0} has a min zoom of {1} and  a max zoom of {2}", MyAxMap.Tiles.ProviderName, minZoom, maxZoom));
-      theForm.Progress(string.Empty, 0, "Current zoom: " + MyAxMap.Tiles.CurrentZoom);
-
-      var waitCount = 0;
-      const int MaxWaitCount = 30;
-      const int MaxSleepTime = 500;
-      bool hasErrors = false;
-
-      // Read text file:
-      var lines = Helper.ReadTextfile(textfileLocation);
-      foreach (var line in lines)
-      {
-        // Open shapefile:
-        int layerHandle = Fileformats.OpenShapefileAsLayer(line, theForm, true);
-        MyAxMap.ZoomToLayer(layerHandle);
-
-        // turn off the fill to see the tiles  
-        var sf = MyAxMap.get_Shapefile(layerHandle);
-        if (sf != null)
-        {
-          sf.DefaultDrawingOptions.FillVisible = false;
-        }
-        Thread.Sleep(MaxSleepTime);
-
-        // start from current zoom after zooming to layer; when starting from minimum you won't 
-        // return back to the same shapefile because of projection distortions
-        // infact probably would better to take cities shapefile, take several random cities and zoom on the in particular
-        minZoom = MyAxMap.Tiles.CurrentZoom;
-
-        MyAxMap.ZoomToTileLevel(minZoom);
-        Thread.Sleep(MaxSleepTime);
-        Application.DoEvents();
-
-        // Continue when tiles are loaded:
-        while (!tilesAreLoaded && waitCount < MaxWaitCount)
-        {
-          Thread.Sleep(MaxSleepTime);
-          Application.DoEvents();
-          waitCount++;
-        }
-
-        if (!tilesAreLoaded)
-        {
-          theForm.Error(string.Empty, "No tiles have been loaded");
-        }
-
-        // reset:
-        waitCount = 0;
-
-        theForm.Progress(string.Empty, 0, "Tiles error: " + MyAxMap.Tiles.get_ErrorMsg(MyAxMap.Tiles.LastErrorCode));
-
-        // Do some zooming:
-        for (var zoom = minZoom + 2; zoom <= maxZoom; zoom = zoom + 2)
-        {
-          MyAxMap.ZoomToTileLevel(zoom);
-          theForm.Progress(string.Empty, 0, "Zooming to: " + zoom);
-
-          // Continue when tiles are loaded:
-          waitCount = 0;
-
-          while (!tilesAreLoaded && waitCount < MaxWaitCount)
-          {
-            Thread.Sleep(MaxSleepTime);
-            Application.DoEvents();
-            waitCount++;
-          }
-
-          if (!tilesAreLoaded)
-          {
-            theForm.Error(string.Empty, "Failed to load tiles for zoom: " + zoom);
-            hasErrors = true;
-          }
-
-          tilesAreLoaded = false;
-        }
-      }
-
-      theForm.Error(string.Empty, hasErrors ? "Tiles weren't loaded for some zooms" : "Tiles were loaded for all zoom levels");
-
-      theForm.Progress(string.Empty, 100, "The tiles load tests have finished.");
-
-      // Disable tiles again:
-      //MyAxMap.Tiles.Visible = false;
-
-      return true;
-    }
-    
-    internal static bool RunTilesLoadTestNew(string textfileLocation, Form1 theForm)
-    {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The tiles load tests have started.", Environment.NewLine));
-
       var retVal = true;
       
       // Set up event handler:
       MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
 
+      // Enable logging:
+      // TODO: Doesn't seems to work. files stays empty:
+      MyAxMap.Tiles.StartLogRequests(@"C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\TestApplication\TestApplication\data\", "tiles", false);
+
       // Enable tiling:
       MyAxMap.Tiles.GlobalCallback = theForm;
       MyAxMap.Tiles.Visible = true;
@@ -265,7 +145,6 @@ namespace TestApplication
       // probably better to turn if off otherwise on second run nothing will be downloaded (everything in cache)  
       MyAxMap.Tiles.set_UseCache(tkCacheType.Disk, false);
       MyAxMap.Tiles.UseServer = true;
-      MyAxMap.Tiles.Provider = tkTileProvider.OpenStreetMap;
 
       // Do some logging
       theForm.Progress(string.Empty, 0, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
@@ -286,148 +165,36 @@ namespace TestApplication
 
         int provId;
 
-        if (int.TryParse(lines[i + 1], out provId))
+        if (!int.TryParse(lines[i + 1], out provId))
         {
-          if (!LoadTiles(lines[i], provId, theForm))
+          theForm.Progress(string.Empty, 0, "Use custom provider");
+
+          // Add custom provider:
+          MyAxMap.Tiles.Providers.Clear(false);
+          provId = 1024;
+          
+          // TODO: Make tkTileProjection flexible:
+          if (!MyAxMap.Tiles.Providers.Add(provId, "Custom", lines[i + 1], tkTileProjection.Amersfoort, 0, 16))
           {
+            theForm.Error(string.Empty, "Provider add error: " + MyAxMap.Tiles.get_ErrorMsg(MyAxMap.Tiles.LastErrorCode));
             retVal = false;
           }
         }
-        else
+
+        // Load the tiles:
+        if (!LoadTiles(lines[i], provId, theForm))
         {
-          theForm.Progress(string.Empty, 0, "TODO. Use custom provider");
+          retVal = false;
         }
       }
 
-      theForm.Error(string.Empty, retVal ? "Tiles weren't loaded for some zooms" : "Tiles were loaded for all zoom levels");
+      theForm.Error(string.Empty, !retVal ? "Tiles weren't loaded for some zooms" : "Tiles were loaded for all zoom levels");
       theForm.Progress(string.Empty, 100, "The tiles load tests have finished.");
 
-      // Disable tiles again:
-      MyAxMap.Tiles.Visible = false;
+      // Stop logging:
+      MyAxMap.Tiles.StopLogRequests();
 
       return retVal;
-    }
-
-    /// <summary>
-    /// </summary>
-    /// <param name="shapefileLocation">
-    /// The shapefile location.
-    /// </param>
-    /// <param name="provId">
-    /// The prov id.
-    /// </param>
-    /// <param name="theForm">
-    /// The the form.
-    /// </param>
-    /// <returns>
-    /// </returns>
-    private static bool LoadTiles(string shapefileLocation, int provId, Form1 theForm)
-    {
-      var waitCount = 0;
-      const int MaxWaitCount = 15;
-      const int MaxSleepTime = 500;
-      var hasErrors = false;
-
-      // Open shapefile:
-      var layerHandle = Fileformats.OpenShapefileAsLayer(shapefileLocation, theForm, true);
-      MyAxMap.ZoomToLayer(layerHandle);
-
-      theForm.Progress(string.Empty, 0, string.Format("Map projection: {0} ({1})", MyAxMap.GeoProjection.Name, MyAxMap.GeoProjection.GeogCSName));
-
-      var sf = MyAxMap.get_Shapefile(layerHandle);
-
-      if (sf == null)
-      {
-        theForm.Error(string.Empty, "Shapefile could not be loaded");
-        return false;
-      }
-
-      // Minor bug:
-      if (!MyAxMap.GeoProjection.get_IsSame(sf.GeoProjection))
-      {
-        MyAxMap.GeoProjection.CopyFrom(sf.GeoProjection);
-      }
-
-      // turn off the symbology to see the tiles  
-      theForm.Progress(string.Empty, 0, string.Format("Layer projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
-      sf.DefaultDrawingOptions.FillVisible = false;
-      sf.Categories.Clear();
-      sf.Labels.Clear();
-      sf.Charts.Clear();
-     
-      Thread.Sleep(MaxSleepTime);
-      Application.DoEvents();
-
-      // Set Tiles provider:
-      // TODO: How to set the provider??
-      MyAxMap.Tiles.ProviderId = provId;
-
-      // Save some settings:
-      var providerId = MyAxMap.Tiles.ProviderId;
-      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
-      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
-      const int StartZoom = 10;
-      var numFailed = 0;
-
-      theForm.Progress(
-      string.Empty,
-      0,
-      string.Format("{0} has a min zoom of {1} and  a max zoom of {2}", MyAxMap.Tiles.ProviderName, minZoom, maxZoom));
-
-      // start from current zoom after zooming to layer; when starting from minimum you won't 
-      // return back to the same shapefile because of projection distortions
-      // infact probably would better to take cities shapefile, take several random cities and zoom on the in particular
-      MyAxMap.ZoomToTileLevel(StartZoom);
-
-      Thread.Sleep(MaxSleepTime);
-      Application.DoEvents();
-
-      // Continue when tiles are loaded:
-      while (!tilesAreLoaded && waitCount < MaxWaitCount)
-      {
-        Thread.Sleep(MaxSleepTime);
-        Application.DoEvents();
-        waitCount++;
-      }
-
-      if (!tilesAreLoaded)
-      {
-        theForm.Error(string.Empty, "No tiles have been loaded");
-      }
-
-      // Do some zooming:
-      for (var zoom = StartZoom; zoom <= maxZoom; zoom++)
-      {
-        theForm.Progress(string.Empty, 0, "Zooming to: " + zoom);
-        MyAxMap.ZoomToTileLevel(zoom);
-
-        // Continue when tiles are loaded:
-        waitCount = 0;
-
-        while (!tilesAreLoaded && waitCount < MaxWaitCount)
-        {
-          Thread.Sleep(MaxSleepTime);
-          Application.DoEvents();
-          waitCount++;
-        }
-
-        if (!tilesAreLoaded)
-        {
-          theForm.Error(string.Empty, "Failed to load tiles for zoom: " + zoom);
-          hasErrors = true;
-          numFailed++;
-        }
-
-        tilesAreLoaded = false;
-
-        if (numFailed > 2)
-        {
-          // Tried several times, without luck. Stop trying:
-          return false;
-        }
-      }
-
-      return !hasErrors;
     }
 
     /// <summary>Run the Spatial Index tests</summary>
@@ -1059,6 +826,120 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, "The Aggregate shapefile test has finished.");
 
       return retVal;
+    }
+
+    /// <summary>Load the tiles for the shapefile</summary>
+    /// <param name="shapefileLocation">
+    /// The shapefile location.
+    /// </param>
+    /// <param name="provId">
+    /// The prov id.
+    /// </param>
+    /// <param name="theForm">
+    /// The the form.
+    /// </param>
+    /// <returns>True when no errors </returns>
+    private static bool LoadTiles(string shapefileLocation, int provId, Form1 theForm)
+    {
+      var waitCount = 0;
+      const int MaxWaitCount = 15;
+      const int MaxSleepTime = 500;
+      var hasErrors = false;
+
+      // Open shapefile:
+      var layerHandle = Fileformats.OpenShapefileAsLayer(shapefileLocation, theForm, true);
+      MyAxMap.ZoomToLayer(layerHandle);
+
+      theForm.Progress(string.Empty, 0, string.Format("Map projection: {0} ({1})", MyAxMap.GeoProjection.Name, MyAxMap.GeoProjection.GeogCSName));
+
+      var sf = MyAxMap.get_Shapefile(layerHandle);
+
+      if (sf == null)
+      {
+        theForm.Error(string.Empty, "Shapefile could not be loaded");
+        return false;
+      }
+
+      // turn off the symbology to see the tiles  
+      theForm.Progress(string.Empty, 0, string.Format("Layer projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
+      sf.DefaultDrawingOptions.FillVisible = false;
+      sf.Categories.Clear();
+      sf.Labels.Clear();
+      sf.Charts.Clear();
+
+      Thread.Sleep(MaxSleepTime);
+      Application.DoEvents();
+
+      // Set Tiles provider:
+      MyAxMap.Tiles.ProviderId = provId;
+
+      // Save some settings:
+      var providerId = MyAxMap.Tiles.ProviderId;
+      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
+      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
+      const int StartZoom = 10;
+      var numFailed = 0;
+
+      theForm.Progress(
+      string.Empty,
+      0,
+      string.Format("{0} has a min zoom of {1} and  a max zoom of {2}", MyAxMap.Tiles.ProviderName, minZoom, maxZoom));
+
+      // start from current zoom after zooming to layer; when starting from minimum you won't 
+      // return back to the same shapefile because of projection distortions
+      // infact probably would better to take cities shapefile, take several random cities and zoom on the in particular
+      MyAxMap.ZoomToTileLevel(StartZoom);
+
+      Thread.Sleep(MaxSleepTime);
+      Application.DoEvents();
+
+      // Continue when tiles are loaded:
+      while (!tilesAreLoaded && waitCount < MaxWaitCount)
+      {
+        Thread.Sleep(MaxSleepTime);
+        Application.DoEvents();
+        waitCount++;
+      }
+
+      if (!tilesAreLoaded)
+      {
+        theForm.Error(string.Empty, "No tiles have been loaded");
+        hasErrors = true;
+      }
+
+      // Do some zooming:
+      for (var zoom = StartZoom; zoom <= maxZoom - 2; zoom++)
+      {
+        theForm.Progress(string.Empty, 0, "Zooming to: " + zoom);
+        MyAxMap.ZoomToTileLevel(zoom);
+
+        // Continue when tiles are loaded:
+        waitCount = 0;
+
+        while (!tilesAreLoaded && waitCount < MaxWaitCount)
+        {
+          Thread.Sleep(MaxSleepTime);
+          Application.DoEvents();
+          waitCount++;
+        }
+
+        if (!tilesAreLoaded)
+        {
+          theForm.Error(string.Empty, "Failed to load tiles for zoom: " + zoom);
+          hasErrors = true;
+          numFailed++;
+        }
+
+        tilesAreLoaded = false;
+
+        if (numFailed > 2)
+        {
+          // Tried several times, without luck. Stop trying:
+          return false;
+        }
+      }
+
+      return !hasErrors;
     }
 
     /// <summary>

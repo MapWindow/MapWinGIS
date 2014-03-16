@@ -51,12 +51,8 @@ namespace TestApplication
           // Set projection of map using the grid projection:
           if (!sf.GeoProjection.IsEmpty)
           {
-              // the inner logic of setting new projection won't be triggered
-              //Map.GeoProjection.CopyFrom(sf.GeoProjection);
-              
-              // here is, the proper way to do it
+              // Set the projection of the shapefile to the map:
               Map.GeoProjection = sf.GeoProjection.Clone();
-              
           }
         }
 

@@ -26,6 +26,10 @@ C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefi
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 8
 
+# Reproject OSM to Amersfoort
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+0
+
 # brtachtergrondkaart
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
 http://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaart/{zoom}/{x}/{y}.png8
@@ -33,3 +37,8 @@ http://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaa
 # brtachtergrondkaart
 C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
 http://geodata1.nationaalgeoregister.nl/luchtfoto/tms/1.0.0/luchtfoto/EPSG28992/{zoom}/{x}/{y}.jpeg
+
+# Own server
+C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+http://5.79.21.216:8080/geoserver/gwc/service/tms/1.0.0/Dakscan-Assen:Luchtfoto-hybrid/{zoom}/{x}/{y}.png8
+
