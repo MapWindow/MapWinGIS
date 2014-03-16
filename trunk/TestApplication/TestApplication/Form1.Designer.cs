@@ -135,9 +135,9 @@
       this.ShapefileInputfile = new System.Windows.Forms.TextBox();
       this.label2 = new System.Windows.Forms.Label();
       this.label1 = new System.Windows.Forms.Label();
+      this.axMap1 = new AxMapWinGIS.AxMap();
       this.Progressbox = new System.Windows.Forms.TextBox();
       this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-      this.axMap1 = new AxMapWinGIS.AxMap();
       this.splitContainer1.Panel1.SuspendLayout();
       this.splitContainer1.Panel2.SuspendLayout();
       this.splitContainer1.SuspendLayout();
@@ -220,7 +220,7 @@
       // 
       this.groupBox1.BackColor = System.Drawing.Color.Pink;
       this.groupBox1.Controls.Add(this.groupBox5);
-      this.groupBox1.Location = new System.Drawing.Point(3, 1830);
+      this.groupBox1.Location = new System.Drawing.Point(3, 1802);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(205, 152);
       this.groupBox1.TabIndex = 7;
@@ -249,6 +249,7 @@
       this.RunTilesLoadTest.Tag = "run";
       this.RunTilesLoadTest.Text = "Run test";
       this.RunTilesLoadTest.UseVisualStyleBackColor = true;
+      this.RunTilesLoadTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunTilesLoadTest.Click += new System.EventHandler(this.RunTilesLoadTestClick);
       // 
       // SelectTilesInputfile
@@ -285,7 +286,7 @@
       // 
       this.groupBox19.BackColor = System.Drawing.Color.DarkSeaGreen;
       this.groupBox19.Controls.Add(this.groupBox20);
-      this.groupBox19.Location = new System.Drawing.Point(3, 1705);
+      this.groupBox19.Location = new System.Drawing.Point(3, 1677);
       this.groupBox19.Name = "groupBox19";
       this.groupBox19.Size = new System.Drawing.Size(205, 119);
       this.groupBox19.TabIndex = 6;
@@ -313,6 +314,7 @@
       this.RunSpatialIndexTest.TabIndex = 16;
       this.RunSpatialIndexTest.Text = "Run test";
       this.RunSpatialIndexTest.UseVisualStyleBackColor = true;
+      this.RunSpatialIndexTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunSpatialIndexTest.Click += new System.EventHandler(this.RunSpatialIndexTestClick);
       // 
       // SelectSpatialIndexInputfile
@@ -363,7 +365,7 @@
       this.groupBox10.Controls.Add(this.groupBox15);
       this.groupBox10.Controls.Add(this.groupBox13);
       this.groupBox10.Controls.Add(this.groupBox12);
-      this.groupBox10.Location = new System.Drawing.Point(3, 913);
+      this.groupBox10.Location = new System.Drawing.Point(3, 885);
       this.groupBox10.Name = "groupBox10";
       this.groupBox10.Size = new System.Drawing.Size(205, 786);
       this.groupBox10.TabIndex = 4;
@@ -424,6 +426,7 @@
       this.RunClosestPointTest.TabIndex = 15;
       this.RunClosestPointTest.Text = "Run test";
       this.RunClosestPointTest.UseVisualStyleBackColor = true;
+      this.RunClosestPointTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunClosestPointTest.Click += new System.EventHandler(this.RunClosestPointTestClick);
       // 
       // SelectClosestPointShapefileInput1
@@ -477,6 +480,7 @@
       this.RunWktShapefileTest.TabIndex = 14;
       this.RunWktShapefileTest.Text = "Run test";
       this.RunWktShapefileTest.UseVisualStyleBackColor = true;
+      this.RunWktShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunWktShapefileTest.Click += new System.EventHandler(this.RunWktShapefileTestClick);
       // 
       // SelectWktShapefileInput
@@ -563,6 +567,7 @@
       this.RunIntersectionShapefileTest.TabIndex = 13;
       this.RunIntersectionShapefileTest.Text = "Run test";
       this.RunIntersectionShapefileTest.UseVisualStyleBackColor = true;
+      this.RunIntersectionShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunIntersectionShapefileTest.Click += new System.EventHandler(this.RunIntersectionShapefileTestClick);
       // 
       // SelectIntersectionShapefileFirstInput
@@ -616,6 +621,7 @@
       this.RunClipShapefileTest.TabIndex = 12;
       this.RunClipShapefileTest.Text = "Run test";
       this.RunClipShapefileTest.UseVisualStyleBackColor = true;
+      this.RunClipShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunClipShapefileTest.Click += new System.EventHandler(this.RunClipShapefileTestClick);
       // 
       // SelectClipShapefileInput
@@ -690,6 +696,7 @@
       this.RunDissolveShapefileTest.TabIndex = 10;
       this.RunDissolveShapefileTest.Text = "Run test";
       this.RunDissolveShapefileTest.UseVisualStyleBackColor = true;
+      this.RunDissolveShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunDissolveShapefileTest.Click += new System.EventHandler(this.RunDissolveShapefileTestClick);
       // 
       // SelectDissolveShapefile
@@ -743,6 +750,7 @@
       this.RunSimplifyShapefileTest.TabIndex = 11;
       this.RunSimplifyShapefileTest.Text = "Run test";
       this.RunSimplifyShapefileTest.UseVisualStyleBackColor = true;
+      this.RunSimplifyShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunSimplifyShapefileTest.Click += new System.EventHandler(this.RunSimplifyShapefileTestClick);
       // 
       // SelectSimplifyShapefile
@@ -796,6 +804,7 @@
       this.RunBufferShapefileTest.TabIndex = 9;
       this.RunBufferShapefileTest.Text = "Run test";
       this.RunBufferShapefileTest.UseVisualStyleBackColor = true;
+      this.RunBufferShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunBufferShapefileTest.Click += new System.EventHandler(this.RunBufferShapefileTestClick);
       // 
       // SelectBufferShapefile
@@ -833,7 +842,7 @@
       this.groupBox8.BackColor = System.Drawing.Color.Cornsilk;
       this.groupBox8.Controls.Add(this.groupBox21);
       this.groupBox8.Controls.Add(this.groupBox9);
-      this.groupBox8.Location = new System.Drawing.Point(3, 684);
+      this.groupBox8.Location = new System.Drawing.Point(3, 656);
       this.groupBox8.Name = "groupBox8";
       this.groupBox8.Size = new System.Drawing.Size(205, 223);
       this.groupBox8.TabIndex = 3;
@@ -861,6 +870,7 @@
       this.RunOGRInfoTest.TabIndex = 8;
       this.RunOGRInfoTest.Text = "Run test";
       this.RunOGRInfoTest.UseVisualStyleBackColor = true;
+      this.RunOGRInfoTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunOGRInfoTest.Click += new System.EventHandler(this.RunOGRInfoTestClick);
       // 
       // SelectOGRInfoFile
@@ -914,6 +924,7 @@
       this.RunRasterizeTest.TabIndex = 7;
       this.RunRasterizeTest.Text = "Run test";
       this.RunRasterizeTest.UseVisualStyleBackColor = true;
+      this.RunRasterizeTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunRasterizeTest.Click += new System.EventHandler(this.RunRasterizeTestClick);
       // 
       // SelectRasterizeInputfile
@@ -995,6 +1006,7 @@
       this.RunAggregateShapefileTest.Tag = "run";
       this.RunAggregateShapefileTest.Text = "Run test";
       this.RunAggregateShapefileTest.UseVisualStyleBackColor = true;
+      this.RunAggregateShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunAggregateShapefileTest.Click += new System.EventHandler(this.RunAggregateShapefileTestClick);
       // 
       // SelectAggregateShapefile
@@ -1049,6 +1061,7 @@
       this.RunShapefileToGridTest.Tag = "run";
       this.RunShapefileToGridTest.Text = "Run test";
       this.RunShapefileToGridTest.UseVisualStyleBackColor = true;
+      this.RunShapefileToGridTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunShapefileToGridTest.Click += new System.EventHandler(this.RunShapefileToGridTestClick);
       // 
       // SelectShapefileToGrid
@@ -1103,6 +1116,7 @@
       this.RunClipGridByPolygonTest.Tag = "run";
       this.RunClipGridByPolygonTest.Text = "Run test";
       this.RunClipGridByPolygonTest.UseVisualStyleBackColor = true;
+      this.RunClipGridByPolygonTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunClipGridByPolygonTest.Click += new System.EventHandler(this.RunClipGridByPolygonTestClick);
       // 
       // SelectGridfileToClip
@@ -1184,6 +1198,7 @@
       this.RunImageTest.Tag = "run";
       this.RunImageTest.Text = "Run test";
       this.RunImageTest.UseVisualStyleBackColor = true;
+      this.RunImageTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunImageTest.Click += new System.EventHandler(this.RunImageTestClick);
       // 
       // SelectImageInputfile
@@ -1229,14 +1244,15 @@
       // 
       // RunGridTest
       // 
-      this.RunGridTest.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+      this.RunGridTest.BackColor = System.Drawing.SystemColors.Control;
       this.RunGridTest.Location = new System.Drawing.Point(9, 58);
       this.RunGridTest.Name = "RunGridTest";
       this.RunGridTest.Size = new System.Drawing.Size(180, 23);
       this.RunGridTest.TabIndex = 2;
       this.RunGridTest.Tag = "run";
       this.RunGridTest.Text = "Run test";
-      this.RunGridTest.UseVisualStyleBackColor = false;
+      this.RunGridTest.UseVisualStyleBackColor = true;
+      this.RunGridTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunGridTest.Click += new System.EventHandler(this.RunGridTestClick);
       // 
       // SelectGridInputfile
@@ -1289,6 +1305,7 @@
       this.RunShapefileTest.Tag = "run";
       this.RunShapefileTest.Text = "Run test";
       this.RunShapefileTest.UseVisualStyleBackColor = true;
+      this.RunShapefileTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
       this.RunShapefileTest.Click += new System.EventHandler(this.RunShapefileTestClick);
       // 
       // SelectShapefileInputfile
@@ -1331,6 +1348,17 @@
       this.label1.TabIndex = 0;
       this.label1.Text = "Tests";
       // 
+      // axMap1
+      // 
+      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
+      this.axMap1.Enabled = true;
+      this.axMap1.Location = new System.Drawing.Point(0, 0);
+      this.axMap1.Name = "axMap1";
+      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
+      this.axMap1.Size = new System.Drawing.Size(695, 717);
+      this.axMap1.TabIndex = 0;
+      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
+      // 
       // Progressbox
       // 
       this.Progressbox.BackColor = System.Drawing.Color.White;
@@ -1342,17 +1370,6 @@
       this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
       this.Progressbox.Size = new System.Drawing.Size(929, 157);
       this.Progressbox.TabIndex = 0;
-      // 
-      // axMap1
-      // 
-      this.axMap1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.axMap1.Enabled = true;
-      this.axMap1.Location = new System.Drawing.Point(0, 0);
-      this.axMap1.Name = "axMap1";
-      this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-      this.axMap1.Size = new System.Drawing.Size(695, 717);
-      this.axMap1.TabIndex = 0;
-      this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
       // 
       // Form1
       // 

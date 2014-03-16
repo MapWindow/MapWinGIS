@@ -668,7 +668,17 @@ namespace TestApplication
     /// <param name="e">The event arguments</param>
     private void RunTilesLoadTestClick(object sender, EventArgs e)
     {
-      Tests.RunTilesLoadTest(this.TilesInputfile.Text, this);
+      ((Button)sender).BackColor = System.Drawing.Color.Blue;
+      var retVal = Tests.RunTilesLoadTest(this.TilesInputfile.Text, this);
+      ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+    }
+
+    /// <summary>Make sure the user sees the color change</summary>
+    /// <param name="sender">The sender</param>
+    /// <param name="e">The event arguments</param>
+    private void ButtonBackColorChanged(object sender, EventArgs e)
+    {
+      Application.DoEvents();
     }
   }
 }
