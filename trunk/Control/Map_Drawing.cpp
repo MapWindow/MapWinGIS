@@ -1696,7 +1696,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		}
 	}
 
-	if (width != 0.0)
+	if (width > 0.0)
 	{
 		if( Utility::ConvertDistance(units, targetUnits, width))
 		{
