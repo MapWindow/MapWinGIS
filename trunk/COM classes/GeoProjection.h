@@ -130,6 +130,7 @@ public:
 	STDMETHOD(get_HasTransformation)(VARIANT_BOOL* retval);
 	STDMETHOD(SetGoogleMercator)(void);
 	STDMETHOD(Clear)();
+	STDMETHOD(Clone)(IGeoProjection** retVal);
 
 	OGRSpatialReference* get_SpatialReference()
 	{

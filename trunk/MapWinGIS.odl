@@ -4153,6 +4153,7 @@ interface IGeoProjection : IDispatch{
 	[propget, id(37), helpstring("property HasTransformation")] HRESULT HasTransformation([out, retval] VARIANT_BOOL* pVal);
 	[id(38), helpstring("method SetGoogleMercator")] HRESULT SetGoogleMercator();
 	[id(39), helpstring("method Clear")] HRESULT Clear();
+	[id(40), helpstring("method Clone")] HRESULT Clone([out, retval]IGeoProjection** retVal);
 };
 
 [

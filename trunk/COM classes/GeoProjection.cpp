@@ -186,6 +186,24 @@ STDMETHODIMP CGeoProjection::Clear()
 }
 
 // *******************************************************
+//		Clone()
+// *******************************************************
+STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+	GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)retVal);
+	VARIANT_BOOL vb;
+	(*retVal)->CopyFrom(this, &vb);
+	if (!vb)
+	{
+		(*retVal)->Release();
+		(*retVal) = NULL;
+	}
+	return S_OK;
+}
+
+// *******************************************************
 //		ImportFromESRI()
 // *******************************************************
 STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
