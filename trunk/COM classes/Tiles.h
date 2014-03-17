@@ -182,8 +182,14 @@ public:
 	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
 	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
 	STDMETHOD(ClearPrefetchErrors)();
-	STDMETHOD(StartLogRequests)(BSTR filename, BSTR name, VARIANT_BOOL onlyErrors);
+	STDMETHOD(StartLogRequests)(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal);
 	STDMETHOD(StopLogRequests)();
+	STDMETHOD(get_LogFilename)(BSTR* retVal);
+	STDMETHOD(get_LogIsOpened)(VARIANT_BOOL* retVal);
+
+	STDMETHOD(get_LogErrorsOnly)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_LogErrorsOnly)(VARIANT_BOOL pVal);
+
 	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
 	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
 	#pragma endregion
@@ -216,7 +222,8 @@ private:
 	
 	Extent m_projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
 	bool m_projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
-	
+	CStringW m_logPath;
+
 public:
 	std::vector<TileCore*> m_tiles;
 	BaseProvider* m_provider;

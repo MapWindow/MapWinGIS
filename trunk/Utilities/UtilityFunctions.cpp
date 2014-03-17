@@ -754,29 +754,7 @@ namespace Utility
 		}
 	}
 
-	// ********************************************************
-	//    OpenLog()
-	// ********************************************************
-	void OpenLog(ofstream& logger, CStringW path, CStringW name)
-	{
-		if (logger.is_open())
-		{
-			logger.flush();
-			logger.close();
-		}
 
-		USES_CONVERSION;
-		CString pathA = W2A(path);
-
-		if (!Utility::dirExists(pathA))
-			_mkdir(pathA);
-
-		path += name;
-		logger.open(path);
-
-		Debug::WriteLine("Log opened: %d", logger.is_open());
-		Debug::WriteLine("Log good: %d", logger.good());
-	}
 }
 
 namespace Debug
@@ -788,7 +766,6 @@ namespace Debug
 		temp = ctime(&now);*/
 	void WriteLine(CString format, ...)
 	{
-		//#ifdef _DEBUG
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
@@ -796,8 +773,6 @@ namespace Debug
 		CString s = buffer;
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
-		//#endif
-		//return _CrtDbgReport(_CRT_WARN,NULL,NULL,NULL,buffer);
 	}
 
 	void Write(CString message)

@@ -25,7 +25,7 @@
 // init static members
 CString BaseProvider::m_proxyAddress = "";
 short BaseProvider::m_proxyPort = 0;
-ofstream tilesLogger;
+Debug::Logger tilesLogger;
 
 #pragma region Load tile
 
@@ -121,38 +121,26 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 			}
 		}
 	}
-
-	if (tilesLogger.is_open() && tilesLogger.good())
+	
+	if (tilesLogger.IsOpened())
 	{
-		bool shortLog = false;
-
-		SYSTEMTIME time;
-		GetLocalTime(&time);
-		CString err;
-		//err.Format("ERROR: %d\n", httpClient->GetLastError());
-		if (shortLog)
+		bool hasError = httpStatus != 200;
+		
+		if (tilesLogger.errorsOnly && !hasError)
 		{
-			err.Format("%d", httpClient->GetLastError());
+			// do nothing
 		}
 		else
 		{
+			SYSTEMTIME time;
+			GetLocalTime(&time);
+			CString err;
 			err.Format("ERROR: %d\n", httpClient->GetLastError());
-		}
-		CString s;
-		if (shortLog)
-		{
-			if (httpStatus != 200 || bodyLen == 0)
-			{
-				s.Format("%02d:%02d:%02d.%-3d: status %d; error %s\n",
-					time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, (httpStatus == 200 ? "": err));
-			}
-		}
-		else
-		{
-			s.Format("%s%02d:%02d:%02d.%-3d: status %d size %6d b %s\n", (httpStatus == 200 ? "": err),
+			CString s;
+			s.Format("%s%02d:%02d:%02d.%-3d: status %d size %6d b %s", (!hasError ? "": err),
 				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, bodyLen, shortUrl);
+			tilesLogger.Log(s);	// TODO: probably should be protected by critical section
 		}
-		//tilesLogger << s;		// TODO: probably should be protected by critical section
 	}
 	
 	httpClient->Close();

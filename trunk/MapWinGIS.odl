@@ -4276,11 +4276,17 @@ interface ITiles : IDispatch{
 	[propget, id(39), helpstring("")] HRESULT PrefetchTotalCount([out, retval] int* retVal);
 	[id(40), helpstring("")] HRESULT ClearPrefetchErrors();
 
-	[id(41), helpstring("")] HRESULT StartLogRequests([in] BSTR Filename, [in] BSTR name, [in]VARIANT_BOOL onlyErrors);
+	[id(41), helpstring("")] HRESULT StartLogRequests([in]BSTR Filename, [in, defaultvalue(FALSE)]VARIANT_BOOL errorsOnly, [out, retval]VARIANT_BOOL* retVal);
 	[id(42), helpstring("")] HRESULT StopLogRequests();
 
 	[propget, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [out, retval]long* retVal);
 	[propput, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [in]long newVal);
+
+	[propget, id(44), helpstring("")] HRESULT LogFilename( [out, retval]BSTR* retVal);
+	[propget, id(45), helpstring("")] HRESULT LogIsOpened( [out, retval]VARIANT_BOOL* retVal);
+	
+	[propget, id(46), helpstring("")] HRESULT LogErrorsOnly( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(46), helpstring("")] HRESULT LogErrorsOnly( [in]VARIANT_BOOL newVal);
 };
 
 [

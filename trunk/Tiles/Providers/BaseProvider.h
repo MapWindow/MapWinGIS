@@ -24,10 +24,10 @@
 #include "geopoint.h"
 #include "baseprojection.h"
 #include "TileCore.h"
-#include <iostream>
-#include <fstream>
+//#include <iostream>
+//#include <fstream>
 
-extern ofstream tilesLogger;
+extern Debug::Logger tilesLogger;
 
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider

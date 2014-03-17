@@ -1247,15 +1247,16 @@ STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom,
 }
 
 // *********************************************************
-//	     LogRequests()
+//	     StartLogRequests()
 // *********************************************************
-STDMETHODIMP CTiles::StartLogRequests(BSTR filename, BSTR name, VARIANT_BOOL onlyErrors /* So far ignored */)
+STDMETHODIMP CTiles::StartLogRequests(BSTR filename, VARIANT_BOOL errorsOnly, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 	CStringW path = OLE2W(filename);
-	CStringW logName = OLE2W(name);
-	Utility::OpenLog(tilesLogger, path, logName);
+	tilesLogger.Open(path);
+	tilesLogger.errorsOnly = errorsOnly ? true: false;
+	*retVal = tilesLogger.IsOpened();
 	return S_OK;
 }
 
@@ -1265,11 +1266,44 @@ STDMETHODIMP CTiles::StartLogRequests(BSTR filename, BSTR name, VARIANT_BOOL onl
 STDMETHODIMP CTiles::StopLogRequests()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (tilesLogger && tilesLogger.is_open())
-	{
-		tilesLogger.flush();
-		tilesLogger.close();
-	}
+	tilesLogger.Close();
+	return S_OK;
+}
+
+// *********************************************************
+//	     LogIsOpened()
+// *********************************************************
+STDMETHODIMP CTiles::get_LogIsOpened(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = tilesLogger.IsOpened();
+	return S_OK;
+}
+
+// *********************************************************
+//	     LogFilename()
+// *********************************************************
+STDMETHODIMP CTiles::get_LogFilename(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	*retVal = W2BSTR(tilesLogger.GetFilename());
+	return S_OK;
+}
+
+// *********************************************************
+//	     LogErrorsOnly()
+// *********************************************************
+STDMETHODIMP CTiles::get_LogErrorsOnly(VARIANT_BOOL *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = tilesLogger.errorsOnly;
+	return S_OK;
+}
+STDMETHODIMP CTiles::put_LogErrorsOnly(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	tilesLogger.errorsOnly = newVal ? true: false;
 	return S_OK;
 }
 
@@ -1291,11 +1325,12 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 		return S_FALSE;
 	}
 
-	if (tilesLogger.is_open() && tilesLogger.good())
+	if (tilesLogger.IsOpened())
 	{
-		tilesLogger << "\n";
-		tilesLogger << "ZOOM " << zoom << endl;
-		tilesLogger << "---------------------" << endl;
+		tilesLogger.out() << "\n";
+		tilesLogger.out() << "PREFETCHING TILES:\n";
+		tilesLogger.out() << "ZOOM " << zoom << endl;
+		tilesLogger.out() << "---------------------" << endl;
 	}
 
 	BaseProvider* p = ((CTileProviders*)m_providers)->get_Provider(providerId);

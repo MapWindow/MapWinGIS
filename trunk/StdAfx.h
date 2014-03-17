@@ -61,3 +61,4 @@ const double pi = 3.1415926535897932384626433832795;
 const double pi_2 = 1.5707963267948966192313216916398;
 
 #include "UtilityFunctions.h"
+#include "Logger.h"

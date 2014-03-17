@@ -1063,7 +1063,6 @@ protected:
 	
 private:
 	//bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound);
-	void Log(CString message);
 	void CMapView::ResizeBuffers(int cx, int cy);
 	void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool isSnapShot = false, float offsetX = 0.0f, float offsetY = 0.0f);
 	void CMapView::DrawMouseMovesCore(Gdiplus::Graphics* g, bool isSnapShot);

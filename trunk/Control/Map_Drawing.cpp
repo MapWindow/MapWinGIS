@@ -1441,13 +1441,7 @@ void CMapView::RestoreExtents()
 }
 #pragma endregion
 
-void CMapView::Log(CString message)
-{
-	if (tilesLogger.is_open() && tilesLogger.good())
-	{
-		tilesLogger << message << endl;    tilesLogger.flush();
-	}
-}
+
 
 // *********************************************************
 //		SnapShotCore()
