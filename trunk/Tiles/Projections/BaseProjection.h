@@ -36,6 +36,7 @@ public:
 	double PI;
 	bool projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
 	double earthRadius;
+	bool worldWide;
 
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
@@ -46,6 +47,7 @@ public:
 		 PI = 3.1415926535897932384626433832795;
 		 yInverse = false;
 		 earthRadius = 6378137.0;
+		 worldWide = true;
 	};
 	
 	virtual ~BaseProjection() {}

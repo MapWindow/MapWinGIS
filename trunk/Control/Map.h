@@ -1017,7 +1017,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 #pragma region Methods
 public:
 	//void ZoomToTileLevel(int zoom);
-	IExtents* GetGeographicExtentsCore(bool clipForTiles);
+	IExtents* GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents = NULL);
 	ITiles* GetTilesNoRef(void);
 	bool SendMouseMove();
 	bool SendSelectBoxDrag();

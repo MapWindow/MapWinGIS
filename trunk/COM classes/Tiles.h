@@ -251,8 +251,8 @@ public:
 	bool UndrawnTilesExist();
 	bool DrawnTilesExist();
 	BaseProjection* get_Projection(){return m_provider->Projection;}
-	bool ProjectionBounds(IGeoProjection* wgsProjection,bool doTransformtation, Extent& retVal);
-	void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key);
+	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProjection,bool doTransformtation, Extent& retVal);
+	void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
 
 	void UpdateProjection() {
 		m_projExtentsNeedUpdate = true;

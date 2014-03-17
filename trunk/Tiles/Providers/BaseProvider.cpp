@@ -125,6 +125,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	if (tilesLogger.IsOpened())
 	{
 		bool hasError = httpStatus != 200;
+		bool useShortUrl = false;
 		
 		if (tilesLogger.errorsOnly && !hasError)
 		{
@@ -138,7 +139,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 			err.Format("ERROR: %d\n", httpClient->GetLastError());
 			CString s;
 			s.Format("%s%02d:%02d:%02d.%-3d: status %d size %6d b %s", (!hasError ? "": err),
-				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, bodyLen, shortUrl);
+				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, bodyLen, useShortUrl ? shortUrl : urlStr);
 			tilesLogger.Log(s);	// TODO: probably should be protected by critical section
 		}
 	}

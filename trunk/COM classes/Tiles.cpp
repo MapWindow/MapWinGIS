@@ -453,8 +453,14 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 	if (!provider)
 		return false;
 
+	// TODO: it's assumed here that m_wgsProjection has open transformation to current map projection
+	// perhaps it should be checked explicitly
 	CMapView* map = (CMapView*)mapView;
-	IExtents* ext = map->GetGeographicExtentsCore(true);
+	Extent clipExtents(map->extents.left, map->extents.right, map->extents.bottom, map->extents.top);
+	bool clipForTiles = this->ProjectionBounds(provider, map->m_wgsProjection, true, clipExtents);
+	
+	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
+	IExtents* ext = map->GetGeographicExtentsCore(clipForTiles, &clipExtents);
 	if (!ext) {
 		return false;
 	}
@@ -496,6 +502,9 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		this->Clear();
 		return;
 	}
+
+	tilesLogger.WriteLine("");
+	tilesLogger.WriteLine("LOAD TILES: xMin=%d; xMax=%d; yMin=%d; yMax=%d; zoom =%d", xMin, xMax, yMin, yMax, zoom);
 
 	// schedule redraw
 	this->m_tilesLoaded = false;
@@ -592,6 +601,8 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	if (points.size() > 0)
 	{
 		m_reloadCount++;
+		
+		tilesLogger.WriteLine("Queued to load from server: %d", points.size());
 		loader->Load(points, zoom, provider, (void*)this, isSnapshot, key);	// zoom can change in the process, so we use the calculated version
 														// and not the one current for provider
 		// releasing points
@@ -600,7 +611,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	}
 	else
 	{
-		HandleOnTilesLoaded(false, "");
+		HandleOnTilesLoaded(false, "", true);
 	}
 }
 
@@ -615,15 +626,15 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, CString key)
 // *********************************************************
 //	     HandleOnTilesLoaded()
 // *********************************************************
-void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key)
+void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad)
 {
 	if ((CMapView*)m_provider->mapView != NULL)
 	{
 		LPCTSTR newStr = (LPCTSTR)key;
 		this->AddRef();
 		((CMapView*)m_provider->mapView)->FireTilesLoaded(this, NULL, isSnapshot, newStr);
+		tilesLogger.WriteLine("Tiles loaded; Nothing to load: %d", nothingToLoad);
 	}
-	//Fire_OnTilesLoaded(this, NULL, VARIANT_FALSE);
 }
 
 #pragma endregion
@@ -1575,44 +1586,47 @@ void CTiles::Zoom(bool out)
 // ************************************************************
 //		ProjectionBounds
 // ************************************************************
-bool CTiles::ProjectionBounds(IGeoProjection* wgsProjection, bool doTransformtation, Extent& retVal)
+bool CTiles::ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProjection, bool doTransformtation, Extent& retVal)
 {
-	if (!wgsProjection) {
-		return false;
-	}
-	if (m_projExtentsNeedUpdate)
+	if (!wgsProjection || !provider || !provider->Projection)	return false;
+
+	BaseProjection* proj = provider->Projection;
+	if (!proj->worldWide)
 	{
-		BaseProjection* pr = this->m_provider->Projection;
-		double left =  pr->MinLongitude;
-		double right = pr->MaxLongitude;
-		double top = pr->MaxLatitude;
-		double bottom = pr->MinLatitude;
-		
-		if (doTransformtation)
+		if (m_projExtentsNeedUpdate)
 		{
-			VARIANT_BOOL vb;
-			wgsProjection->Transform(&left, &top, &vb);
-			if (!vb) {
-				Debug::WriteLine("Failed to project: x = %f; y = %f", left, top);
-				return false;
+			double left =  proj->MinLongitude;
+			double right = proj->MaxLongitude;
+			double top = proj->MaxLatitude;
+			double bottom = proj->MinLatitude;
+			
+			if (doTransformtation)
+			{
+				VARIANT_BOOL vb;
+				wgsProjection->Transform(&left, &top, &vb);
+				if (!vb) {
+					Debug::WriteLine("Failed to project: x = %f; y = %f", left, top);
+					return false;
+				}
+				wgsProjection->Transform(&right, &bottom, &vb);
+				if (!vb) {
+					Debug::WriteLine("Failed to project: x = %f; y = %f", bottom, right);
+					return false;
+				}
+				//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 			}
-			wgsProjection->Transform(&right, &bottom, &vb);
-			if (!vb) {
-				Debug::WriteLine("Failed to project: x = %f; y = %f", bottom, right);
-				return false;
-			}
-			//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
+			
+			m_projExtents.left = left;
+			m_projExtents.right = right;
+			m_projExtents.top = top;
+			m_projExtents.bottom = bottom;
 		}
-		
-		m_projExtents.left = left;
-		m_projExtents.right = right;
-		m_projExtents.top = top;
-		m_projExtents.bottom = bottom;
+		retVal.left = m_projExtents.left;
+		retVal.right = m_projExtents.right;
+		retVal.top = m_projExtents.top;
+		retVal.bottom = m_projExtents.bottom;
+		return true;
 	}
-	retVal.left = m_projExtents.left;
-	retVal.right = m_projExtents.right;
-	retVal.top = m_projExtents.top;
-	retVal.bottom = m_projExtents.bottom;
-	return true;
+	return false;
 }
 

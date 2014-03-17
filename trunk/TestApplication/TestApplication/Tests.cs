@@ -130,11 +130,12 @@ namespace TestApplication
       var retVal = true;
       
       // Set up event handler:
-      MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
+        MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
 
       // Enable logging:
       // TODO: Doesn't seems to work. files stays empty:
       MyAxMap.Tiles.StartLogRequests(@"C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\TestApplication\TestApplication\data\", "tiles", false);
+      Debug.Print("Log is opened: " + MyAxMap.Tiles.LogIsOpened);
 
       // Enable tiling:
       MyAxMap.Tiles.GlobalCallback = theForm;
@@ -874,7 +875,7 @@ namespace TestApplication
       MyAxMap.Tiles.ProviderId = provId;
 
       // Save some settings:
-      var providerId = MyAxMap.Tiles.ProviderId;
+      var providerId = MyAxMap.Tiles.Providers.get_IndexByProviderId(MyAxMap.Tiles.ProviderId);
       var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
       var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
       const int StartZoom = 10;

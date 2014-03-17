@@ -312,7 +312,7 @@ IExtents* CMapView::GetGeographicExtents()
 // ***************************************************************
 //	   GetGeographicExtentsCore
 // ***************************************************************
-IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles)
+IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents)
 {
 	IExtents * box = NULL;
 
@@ -331,18 +331,12 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles)
 			if (vbretval)
 			{
 				Extent ext;
-
-				// we don't want to have coordinates outside world bounds, as it breaks tiles loading
-				bool clip = false;
-				if(clipForTiles) {
-					clip = ((CTiles*)m_tiles)->ProjectionBounds(m_wgsProjection, true, ext);
-				}
-				
+				bool clip = clipForTiles && clipExtents;
 				//Debug::WriteLine("GetGeographicExtentsCore extents: left = %f; right = %f; bottom = %f; top = %f", extents.left, extents.right, extents.bottom, extents.top);
-				ext.left = clip ? MAX(extents.left, ext.left) : extents.left;
-				ext.right = clip ? MIN(extents.right, ext.right) : extents.right;
-				ext.top = clip ? MIN(extents.top, ext.top) : extents.top;
-				ext.bottom = clip ? MAX(extents.bottom, ext.bottom) : extents.bottom;
+				ext.left = clip ? MAX(extents.left, clipExtents->left) : extents.left;
+				ext.right = clip ? MIN(extents.right, clipExtents->right) : extents.right;
+				ext.top = clip ? MIN(extents.top, clipExtents->top) : extents.top;
+				ext.bottom = clip ? MAX(extents.bottom, clipExtents->bottom) : extents.bottom;
 				//Debug::WriteLine("GetGeographicExtentsCore clipped extents: left = %f; right = %f; bottom = %f; top = %f", ext.left, ext.right, ext.bottom, ext.top);
 				
 				double xBL, yBL, xTL, yTL, xBR, yBR, xTR, yTR;

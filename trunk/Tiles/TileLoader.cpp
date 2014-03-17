@@ -68,7 +68,8 @@ void LoadingTask::DoTask()
 		}
 		else 
 		{
-			this->Loader->m_count++;
+			if (this->generation == this->Loader->tileGeneration)
+				this->Loader->m_count++;
 			
 			// prefetching without display
 			if (this->cacheOnly)
@@ -172,7 +173,7 @@ void TileLoader::CheckComplete()
 {
 	if (this->tiles != NULL && m_count == m_totalCount)
 	{
-		((CTiles*)this->tiles)->HandleOnTilesLoaded(this->isSnapshot, this->key);
+		((CTiles*)this->tiles)->HandleOnTilesLoaded(this->isSnapshot, this->key, false);
 	}
 }
 

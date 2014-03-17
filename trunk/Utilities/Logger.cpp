@@ -31,13 +31,16 @@ namespace Debug
 
 	void Logger::WriteLine(CString format, ...)
 	{
-		TCHAR buffer[1024];
-		va_list args;
-		va_start( args, format);
-		vsprintf( buffer, format, args );
-		CString s = buffer;
-		m_logger << s;
-		m_logger.flush();
+		if (m_logger.is_open())
+		{
+			TCHAR buffer[1024];
+			va_list args;
+			va_start( args, format);
+			vsprintf( buffer, format, args );
+			CString s = buffer;
+			m_logger << s << endl;
+			m_logger.flush();
+		}
 	}
 		
 	CStringW Logger::GetFilename()

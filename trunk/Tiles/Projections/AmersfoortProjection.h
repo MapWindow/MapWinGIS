@@ -34,6 +34,7 @@ public:
 		MinLongitude = -285401.920;
 		MaxLongitude = 595401.92;
 		yInverse = true;
+		worldWide = false;
 
 		VARIANT_BOOL ret1, ret2;
 		projWGS84->ImportFromEPSG(4326, &ret1);
