@@ -3,19 +3,19 @@
 
 # Clip lines with polygons:
 %DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
-%DATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
 # Clip polygons with lines
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 
 # Clip polygons with polygons
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
+#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+#%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
 
 # Clip polygons with polygons (switched)
-%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+#%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
+#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
 # Clip polygons M with polygons
 # TODO
