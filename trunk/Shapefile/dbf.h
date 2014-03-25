@@ -15,7 +15,8 @@ extern "C" {
 
 const wchar_t* Utf8ToWideChar( const char *pszFilename );
 
-DBFHandle DBFOpen_MW( const char * pszDBFFile, const char * pszAccess );
+DBFHandle DBFOpen_MW( CStringW pszDBFFile, const char * pszAccess );
+DBFHandle DBFCreate_MW( CStringW nameW );
 void * SfRealloc( void * pMem, int nNewSize );
 
 #ifdef __cplusplus

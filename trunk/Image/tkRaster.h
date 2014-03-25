@@ -30,7 +30,6 @@
 class tkRaster
 {
 public:
-	//Constructor
     tkRaster()
 	{	//Rob Cairns
 		rasterDataset=NULL;
@@ -57,20 +56,22 @@ public:
 		orig_Height = 0;
 		m_clearGDALCache = false;
 		warped = false;
-	} 
+		allowHillshade = true;
+		allowAsGrid = useAutoDetect;
+		activeBandIndex = 1;
+		CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&gridColorScheme);
+	};
+	~tkRaster()
+	{
+		if (gridColorScheme)
+			gridColorScheme->Release();
+	};
 
 private:	
 	struct BreakVal
 	{	
 		double lowVal;
 		double highVal;
-	};
-
-	enum HandleImage
-	{ 
-		asRGB=0,
-		asGrid=1,
-		asComplex=2
 	};
 
 	// ----------------------------------------------------
@@ -94,13 +95,15 @@ public:
 	colort transColor;		// transparent color
 	ICallback * cBack;
 
+	int activeBandIndex;
 	PredefinedColorScheme imageColorScheme; //Image color scheme if read as grid
-	bool allowAsGrid;		// Allow the image to be read as grid (if appropriate)
+	tkUseFunctionality allowAsGrid;		// Allow the image to be read as grid (if appropriate)
+	bool allowHillshade;	// if false changes ColorType from Hillshade to gradient
 	int imageQuality;		// Set the image quality 0-100
 	bool m_clearGDALCache;
 	bool hasColorTable;		// The image has a color table	
 	GDALPaletteInterp paletteInterp; //Pallette interpretation
-	bool	useHistogram;	// Use histogram equalization
+	bool useHistogram;		// Use histogram equalization
 	
 	ImageType ImgType;
 	
@@ -112,14 +115,15 @@ public:
 	long orig_Width;
 	long orig_Height;
 	bool warped;	// a warped dataset was created on opening
-	
+	IGridColorScheme * gridColorScheme;
 
 private:
 	double dfMin;
 	double dfMax;
 	double adfMinMax[2];	// holds the min and max values for grid images
 	
-	CString fileName;
+	CString fileName;			// TODO: use Unicode
+	GDALDataType dataType;
 	GDALDataset * rasterDataset;
 	GDALRasterBand * poBandR;
 	GDALRasterBand * poBandB;
@@ -130,8 +134,7 @@ private:
 	GDALPaletteInterp cPI;
 	GDALColorInterp cInterp;
 	GDALDataType genericType;
-	bool gridColorIncoming;
-	PredefinedColorScheme imgColor;
+	bool customColorScheme;				// GridColorScheme instance 
 
 	//Histogram variables
 	bool	histogramComputed;	// Has the histogram been computed
@@ -141,36 +144,49 @@ private:
     double  *padfScaleMax;
     int     **papanLUTs;
 	int nBands;					// No of bands in the image
-	GDALDataType dataType;
+	
 	
 	const char* ciName;			// Color interpretation name
 	int buffSize;
 	int ColorMapSize;
 	ColorEntry ColorMap[4096];
-	IGridColorScheme * gridColorScheme;
+	
 
 	// ---------------------------------------------
 	//   Methods
 	// ---------------------------------------------
+	bool LoadRasterCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly); 
 public:
-	bool LoadRaster(const char * filename, GDALAccess accessType = GA_ReadOnly); 
-	bool LoadBuffer(colour** ImageData, double MinX, double MinY, double MaxX, double MaxY, const char * filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel);
-	bool LoadBuffer2(colour** ImageData, Extent& extent, const char * filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel);
-    bool LoadBufferFull(colour** ImageData, const char * filename, double maxBufferSize = 50);
+	bool SetActiveBandIndex(int bandIndex)
+	{
+		if (nBands < bandIndex || bandIndex < 1)
+			return false;
+		else
+		{
+			activeBandIndex = bandIndex;
+			return true;
+		}
+	}
+	bool LoadRaster(CStringW filename, GDALAccess accessType = GA_ReadOnly); 
+	bool LoadBuffer(colour** ImageData, double MinX, double MinY, double MaxX, double MaxY, CStringW filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel);
+    bool LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize = 50);
 	void tkRaster::RefreshExtents();
 	bool SetNoDataValue(double Value);
+	bool CanUseExternalColorScheme();
+	bool tkRaster::WillBeRenderedAsGrid();
 
 	void Close();
 	int Dereference();
-	
-	// Exposing properties
 	void ApplyGridColorScheme(IGridColorScheme * scheme);
+
+	// Exposing properties
 	IGridColorScheme* get_GridColorScheme();
 	
 	GDALDataset* tkRaster::get_Dataset()	{return rasterDataset;}
 	bool get_HasColorTable(){return hasColorTable;};
 	GDALPaletteInterp get_PaletteInterpretation(){return cPI;};
 	int get_NoBands(){return nBands;};
+	bool IsRgb();
 	
 	double getDX() {return dX;} 
 	double getDY() {return dY;}
@@ -187,12 +203,16 @@ public:
 		else return NULL;
 	}
 private:
+	HandleImage tkRaster::ChooseRenderingMethod();
+	IGridColorScheme* tkRaster::GetColorScheme();
+	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme);
+	void tkRaster::ComputeBandMinMax();
 	bool ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
 	template <typename T> 
 	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff,	int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram);
 	bool ReadGridAsImage(colour ** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); // double dx, double dy, bool setRGBToGrey, PredefinedColorScheme imageColorScheme,bool clearGDALCache);
 	long findBreak( std::deque<BreakVal> & bvals, double val );
-	bool ComputeEqualizationLUTs( const char * filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
+	bool ComputeEqualizationLUTs( CStringW filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
 };
 

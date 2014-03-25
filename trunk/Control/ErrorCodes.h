@@ -93,7 +93,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkESRI_CANT_DELETE_FILE 412
 # define tkSDTS_BAD_FILE_HEADER 413
 # define tkGDAL_GRID_NOT_OPENED 414
-
+# define tkCANT_DISPLAY_WO_PROXY 415
+# define tkFAILED_TO_SAVE_GRID 416
 
 //601-800 = tkimg
 # define tkCANT_WRITE_WORLD_FILE 601
@@ -108,6 +109,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkICON_OR_TEXTURE_TOO_BIG 610
 # define tkFAILED_TO_OBTAIN_DC 611
 # define tkIMAGE_UNINITIALIZED 612
+# define tkCANT_DISPLAY_WITHOUT_EXTERNAL_SCHEME 613
 
 //801-1000 = tkdbf
 # define tkCANT_OPEN_DBF 801
@@ -182,6 +184,7 @@ const char * ErrorMsg( long ErrorCode );
 #define tkPRJ_FILE_EXISTS				1811
 #define tkTRANSFORMATION_NOT_INITIALIZED	1812
 #define tkFAILED_TO_COPY_PROJECTION			1813
+#define tkPROJECTION_IS_FROZEN			1814
 
 
 //2001-2200 = tiles

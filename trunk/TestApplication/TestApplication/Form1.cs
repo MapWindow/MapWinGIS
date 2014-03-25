@@ -14,6 +14,7 @@ namespace TestApplication
   using System.Threading;
   using System.Windows.Forms;
   using MapWinGIS;
+    using System.IO;
 
   /// <summary>Defines the form</summary>
   public partial class Form1 : Form, ICallback
@@ -679,6 +680,20 @@ namespace TestApplication
     private void ButtonBackColorChanged(object sender, EventArgs e)
     {
       Application.DoEvents();
+    }
+
+    private void BtnPopulateClick(object sender, EventArgs e)
+    {
+        string path = Constants.DATA_FILES_PATH;
+        ShapefileInputfile.Text = path + "shapefiles.txt";
+        GridInputfile.Text = path + "gridfiles.txt";
+        ImageInputfile.Text = path + "imagefiles.txt";
+        ClipGridByPolygonInputfile.Text = path + "ClipGridWithPolygon.txt";
+        ShapefileToGrid.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
+        AggregateShapefileInput.Text = path + "aggregate.txt";
+        TilesInputfile.Text = path + "tiles.txt";
+        ClipShapefileInput.Text = path + "clipping.txt";
+        WktShapefileInput.Text = path + "wkt.txt";
     }
   }
 }

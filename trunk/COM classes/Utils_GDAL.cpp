@@ -22,6 +22,7 @@
 #include "cpl_string.h"
 #include "vrtdataset.h"
 #include "direct.h"
+#include "gdalhelper.h"
 
 #pragma warning(disable:4996)
 
@@ -415,8 +416,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Open dataset.                                                   */
 	/* -------------------------------------------------------------------- */
-    hDataset = GDALOpen( pszFilename, GA_ReadOnly );
-    
+	hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
     if( hDataset == NULL )
     {
         CPLError(CE_Failure,0,
@@ -451,7 +451,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
             pszSubdatasetName =
                 CPLStrdup( CSLFetchNameValue( papszSubdatasets, szKeyName ) );
             GDALClose( hDataset );
-            hDataset = GDALOpen( pszSubdatasetName, GA_ReadOnly );
+			hDataset = GDALOpen( pszSubdatasetName, GA_ReadOnly );		// TODO: use Unicode
             CPLFree( pszSubdatasetName );
         }
         else
@@ -3087,7 +3087,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     }
     else
     {
-        hDstDS = GDALOpen( pszDstFilename, GA_Update );
+		//hDstDS = GDALOpen( pszDstFilename, GA_Update );
+		hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_Update);
         if( hDstDS == NULL )
             return ResetConfigOptions();
     }
@@ -3646,7 +3647,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     }
 
     CPLPushErrorHandler( CPLQuietErrorHandler );
-    hDstDS = GDALOpen( pszDstFilename, GA_Update );
+    //hDstDS = GDALOpen( pszDstFilename, GA_Update );
+	hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_Update);
     CPLPopErrorHandler();
 
     if( hDstDS != NULL && bOverwrite )
@@ -3671,7 +3673,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     if ( hDstDS == NULL && !bOverwrite )
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
-        hDstDS = GDALOpen( pszDstFilename, GA_ReadOnly );
+        hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_ReadOnly);
+		//hDstDS = GDALOpen( pszDstFilename, GA_ReadOnly );
         CPLPopErrorHandler();
         
         if (hDstDS)
@@ -3723,7 +3726,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         {
             if (papszSrcFiles[0] != NULL)
             {
-                GDALDatasetH hSrcDS = GDALOpen(papszSrcFiles[0], GA_ReadOnly);
+				GDALDatasetH hSrcDS = GDALOpen(papszSrcFiles[0], GA_ReadOnly);		// TODO: use Unicode
                 if (hSrcDS == NULL)
                 {
                     fprintf(stderr, "Cannot compute bounding box of cutline.\n");
@@ -3846,7 +3849,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         if (hUniqueSrcDS)
             hSrcDS = hUniqueSrcDS;
         else
-            hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );
+            hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );			// TODO: use Unicode
     
         if( hSrcDS == NULL )
             // TODO: clean up memory?
@@ -4335,7 +4338,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
         GDALDatasetH hSrcDS;
         const char *pszThisSourceSRS = CSLFetchNameValue(papszTO,"SRC_SRS");
 
-        hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );
+        hSrcDS = GDALOpen( papszSrcFiles[iSrc], GA_ReadOnly );			// TODO: use Unicode
         if( hSrcDS == NULL )
 			// TODO: free up memory...set error code?
 			return NULL;
@@ -5013,12 +5016,7 @@ TransformCutlineToSource( GDALDatasetH hSrcDS, void *hCutline,
 
 #pragma region gdalbuildvrt
 
-#define GEOTRSFRM_TOPLEFT_X            0
-#define GEOTRSFRM_WE_RES               1
-#define GEOTRSFRM_ROTATION_PARAM1      2
-#define GEOTRSFRM_TOPLEFT_Y            3
-#define GEOTRSFRM_ROTATION_PARAM2      4
-#define GEOTRSFRM_NS_RES               5
+
 
 typedef enum
 {
@@ -5920,7 +5918,7 @@ int VRTBuilder::Build(GDALProgressFunc pfnProgress, void * pProgressData)
             return CE_Failure;
         }
 
-        GDALDatasetH hDS = GDALOpen(ppszInputFilenames[i], GA_ReadOnly );
+        GDALDatasetH hDS = GDALOpen(ppszInputFilenames[i], GA_ReadOnly );		// TODO: use Unicode
         pasDatasetProperties[i].isFileOK = FALSE;
 
         if (hDS)
@@ -6419,12 +6417,16 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
     else
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
-        hDataset = GDALOpen( pszFilename, GA_Update );
+		//hDataset = GDALOpen( pszFilename, GA_Update );
+		hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_Update);
         CPLPopErrorHandler();
     }
 
     if( hDataset == NULL )
-        hDataset = GDALOpen( pszFilename, GA_ReadOnly );
+	{
+        //hDataset = GDALOpen( pszFilename, GA_ReadOnly );
+		hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
+	}
 
     if( hDataset == NULL )
 	{
@@ -6512,7 +6514,8 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Open source file.                                               */
 /* -------------------------------------------------------------------- */
-	GDALDatasetH hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
+	//GDALDatasetH hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
+	GDALDatasetH hSrcDS = GdalHelper::OpenDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
 	if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;
@@ -6540,7 +6543,8 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 	}
 	else
 	{
-		hMaskDS = GDALOpen( OLE2A(pszMaskFilename), GA_ReadOnly );
+		//hMaskDS = GDALOpen( OLE2A(pszMaskFilename), GA_ReadOnly );
+		hMaskDS = GdalHelper::OpenDatasetW(OLE2W(pszMaskFilename), GA_ReadOnly);
 		hMaskBand = GDALGetRasterBand( hMaskDS, 1 );
 	}
 
@@ -6708,7 +6712,8 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 /* -------------------------------------------------------------------- */
     GDALRasterBandH hBand;
 
-    hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
+	//hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
+	hSrcDS = GdalHelper::OpenDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
     if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;

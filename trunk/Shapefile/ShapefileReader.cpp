@@ -7,23 +7,20 @@
 //		ReadShapefileIndex()
 // ****************************************************************
 // Fast reading for drawing procedure without bounds, file code, etc
-bool CShapefileReader::ReadShapefileIndex(const char* filename, FILE* shpFile)
+bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 {
-	if (strlen(filename) < 4)
+	//if (strlen(filename) < 4)
+	if (filename.GetLength() < 4)
 	{
 		return false;
 	}
 	
 	// reading shape index (SHX)
-	char* sFilename = new char[strlen(filename) + 1];
-	strcpy_s(sFilename, strlen(filename) + 1, filename);
-	
-	_indexData = NULL;
-	int sFilenamelast =	(int)strlen(sFilename);
-	sFilename[sFilenamelast - 1] = 'x'; 
+	CStringW sFilename = filename;
+	sFilename.SetAt(sFilename.GetLength() - 1, L'x');
 
-	FILE* shxfile = fopen(sFilename, "rb");
-	delete[] sFilename;
+	FILE* shxfile = _wfopen(sFilename, L"rb");
+	//delete[] sFilename;
 
 	if (!shxfile )
 	{

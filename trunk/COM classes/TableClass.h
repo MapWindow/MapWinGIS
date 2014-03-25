@@ -252,7 +252,7 @@ public:
 	};
 
 	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
-	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CString filenameToReopen, CString options, set<CString>& fieldList);
+	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
 	void CTableClass::RemoveJoinedFields();
 
 public:	
@@ -272,10 +272,10 @@ private:
 	long lastErrorCode;
 	ICallback * globalCallback;
 	BOOL isEditingTable;
-	CString filename;
+	CStringW filename;
     
 	
-	bool SaveToFile(const CString& dbfFilename, bool updateFileInPlace, ICallback* cBack);
+	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
 	void LoadDefault_fields();
     void LoadDefault_rows();
     long RowCount();
@@ -291,7 +291,7 @@ private:
 
 	struct JoinInfo
 	{
-		CString filename;
+		CStringW filename;
 		CString fieldFrom;
 		CString fieldTo;
 		CString options;

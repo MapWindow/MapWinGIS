@@ -691,15 +691,16 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 
 	if( *retval)
 	{	
-		if( Utility::fileExistsUnicode( OLE2A(dbfFilename) ) == FALSE )
+		CStringW name = OLE2W(dbfFilename);
+		if( !Utility::fileExistsW(name))
 		{	
 			ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
 			return S_OK;
 		}
 		
 		// checking writing permissions
-		LPCSTR name = OLE2CA(dbfFilename);
-		DWORD dwAttrs = GetFileAttributes(name);
+		//LPCSTR name = OLE2CA(dbfFilename);
+		DWORD dwAttrs = GetFileAttributesW(name);
 		if (dwAttrs == INVALID_FILE_ATTRIBUTES)
 		{
 			ErrorMessage(tkCANT_OPEN_DBF);
@@ -707,17 +708,11 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		}
 		bool readOnly = (dwAttrs & FILE_ATTRIBUTE_READONLY);
 
-		// opening
 		if (!readOnly)
-		{
-			dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb+");
+			dbfHandle = DBFOpen_MW(name,"rb+");		// TODO: restore
 
-			// failed to open? try read only
-			if( dbfHandle == NULL )
-				dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb");
-		}
-		else
-			dbfHandle = DBFOpen_MW(OLE2CA(dbfFilename),"rb");
+		if( dbfHandle == NULL )
+				dbfHandle = DBFOpen_MW(name,"rb");
 		
 		if( dbfHandle == NULL )
 		{	
@@ -725,7 +720,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 			return S_OK;
 		}
 
-		filename = OLE2CA(dbfFilename);
+		filename = name;
 		*retval = VARIANT_TRUE;
 	
 		//After open the dbf file, load all _fields info and create spatial row indices 
@@ -780,7 +775,7 @@ void CTableClass::CloseUnderlyingFile()
 // **************************************************************
 //	  SaveToFile()
 // **************************************************************
-bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace, ICallback* cBack)
+bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
@@ -837,13 +832,13 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 	}
 	else
 	{
-		if ( Utility::fileExistsUnicode(dbfFilename) != FALSE )
+		if ( Utility::fileExistsW(dbfFilename) != FALSE )
 		{	
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return false;
 		}
 
-		newdbfHandle = DBFCreate(dbfFilename);
+		newdbfHandle = DBFCreate_MW(dbfFilename);
 		if( newdbfHandle == NULL )
 		{	
 			ErrorMessage(tkCANT_CREATE_DBF);
@@ -929,7 +924,7 @@ bool CTableClass::SaveToFile(const CString& dbfFilename, bool updateFileInPlace,
 STDMETHODIMP CTableClass::Dump(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-	*retval = SaveToFile( OLE2A(dbfFilename), false, cBack) ? VARIANT_TRUE: VARIANT_FALSE;
+	*retval = SaveToFile( OLE2W(dbfFilename), false, cBack) ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -939,7 +934,7 @@ STDMETHODIMP CTableClass::Dump(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-	if (!SaveToFile( OLE2A(dbfFilename), false, cBack))
+	if (!SaveToFile( OLE2W(dbfFilename), false, cBack))
 	{
 		*retval = VARIANT_FALSE;
 		return S_OK;
@@ -1753,9 +1748,9 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
 		    strcat( tmppath, tmpfname );
 		    strcat( tmppath, ".dbf" );
-            if (SaveToFile(tmppath, false, cBack))
+            if (SaveToFile(A2W(tmppath), false, cBack))		// TODO: use Unicode
             {
-		        BOOL result = CopyFile(tmppath,filename,FALSE);
+		        BOOL result = CopyFile(tmppath, W2A(filename),FALSE);
 		        _unlink(tmppath);
 		        delete [] tmpfname;
 		        tmpfname = NULL;
@@ -1788,7 +1783,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
 	BSTR state;
 	this->Serialize(&state);
-    this->Open(A2BSTR(filename), cBack, retval);
+    this->Open(W2BSTR(filename), cBack, retval);
 	this->Deserialize(state);	// restores joins
 	return S_OK;
 }
@@ -2740,7 +2735,7 @@ STDMETHODIMP CTableClass::Join2(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BS
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
 	set<CString> fields;
-	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2A(filenameToReopen), OLE2A(joinOptions), fields);
+	bool res = this->JoinInternal(table2, OLE2A(fieldTo), OLE2A(fieldFrom), OLE2W(filenameToReopen), OLE2A(joinOptions), fields);
 	*retVal = res ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
@@ -2873,7 +2868,7 @@ bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldF
 // *****************************************************
 //		JoinInternal()
 // *****************************************************
-bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CString filenameToReopen, CString options, set<CString>& fieldList)
+bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList)
 {
 	long index1, index2;
 	if (!this->CheckJoinInput(table2, fieldTo, fieldFrom, index1, index2))
@@ -3124,7 +3119,7 @@ STDMETHODIMP CTableClass::get_JoinFilename(int joinIndex, BSTR* retVal)
 	}
 	else 
 	{
-		*retVal = A2BSTR(_joins[joinIndex]->filename);
+		*retVal = W2BSTR(_joins[joinIndex]->filename);
 	}
 	return S_OK;
 }
@@ -3207,6 +3202,7 @@ STDMETHODIMP CTableClass::Deserialize(BSTR newVal)
 CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
 	if (_joins.size() > 0)
 	{
 		CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
@@ -3216,14 +3212,15 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 		{
 			for (size_t i = 0; i < _joins.size(); i++)
 			{
-				CString name = _joins[i]->filename;
-				if (this->filename != "")
+				CStringW name = _joins[i]->filename;
+				if (this->filename.GetLength() > 0)
 				{
+					
 					name = Utility::GetRelativePath(this->filename, name);
 				}
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(name));
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO: use Unicode
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
@@ -3248,15 +3245,15 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 	node = CPLGetXMLNode(node, "Joins");
 	if (node)
 	{
-		CString folderName = "";
-		char* cwd = NULL;
+		CStringW folderName = "";
+		wchar_t* cwd = NULL;
 		if (this->filename != "")
 		{
-			cwd = new char[4096];
-			_getcwd(cwd,4096);
+			cwd = new wchar_t[4096];
+			_wgetcwd(cwd,4096);
 			
 			folderName = Utility::GetFolderFromPath(this->filename);
-			_chdir(folderName);
+			_wchdir(folderName);
 		}
 		
 		node = node->psChild;
@@ -3264,7 +3261,7 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 		{
 			if (strcmp(node->pszValue, "Join") == 0)
 			{
-				CString filename = CPLGetXMLValue( node, "Filename", NULL );
+				CString filename = CPLGetXMLValue( node, "Filename", NULL );		// TODO: use Unicode
 				CString fieldTo = CPLGetXMLValue( node, "FieldTo", NULL );
 				CString fieldFrom = CPLGetXMLValue( node, "FieldFrom", NULL );
 				CString fields = CPLGetXMLValue( node, "Fields", NULL );
@@ -3313,7 +3310,7 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 
 		if (this->filename != "")
 		{
-			_chdir(cwd);
+			_wchdir(cwd);
 		}
 
 		return true;

@@ -104,6 +104,7 @@ public:
 	STDMETHOD(get_IndexByProvider)(tkTileProvider provider, int* retVal);
 	STDMETHOD(get_IndexByProviderId)(int provider, int* retVal);
 private:	
+	// TODO!!!: protect by critical section
 	ITiles* m_tiles;	// reference the parent
 	vector<BaseProvider*> m_providers;
 	BaseProvider* getProviderCore(tkTileProvider providerId);

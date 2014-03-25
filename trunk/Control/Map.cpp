@@ -290,6 +290,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "GeographicExtents", dispidGeographicExtents, GetGeographicExtents, SetNotSupported, VT_DISPATCH)
 	DISP_FUNCTION_ID(CMapView, "SetGeographicExtents", dispidSetGeographicExtents, SetGeographicExtents, VT_BOOL, VTS_DISPATCH)
 	DISP_PROPERTY_EX_ID(CMapView, "ScalebarVisible", dispidScalebarVisible, GetScalebarVisible, SetScalebarVisible, VT_BOOL)
+	DISP_PROPERTY_EX_ID(CMapView, "ScalebarUnits", dispidScalebarUnits, GetScalebarUnits, SetScalebarUnits, VT_I2)
 	DISP_PROPERTY_EX_ID(CMapView, "Measuring", dispidMeasuring, GetMeasuring, SetNotSupported, VT_DISPATCH)
 	DISP_FUNCTION_ID(CMapView, "ZoomToTileLevel", dispidZoomToTileLevel, ZoomToTileLevel, VT_BOOL, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "ZoomToWorld", dispidZoomToWorld, ZoomToWorld, VT_BOOL, VTS_NONE)
@@ -455,7 +456,7 @@ CMapView::CMapView()
 	m_ShowRedrawTime = VARIANT_FALSE;
 	m_ShowVersionNumber = VARIANT_FALSE;
 
-	srand( (unsigned)time( NULL ));
+	srand (time(NULL));
 
 	m_isSizing = false;
 
@@ -466,14 +467,10 @@ CMapView::CMapView()
 	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_projection);
 	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_wgsProjection);
 	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_GMercProjection);
-	//m_wgsProjection->SetWellKnownGeogCS(tkCoordinateSystem::csWGS_84);
 	
-	USES_CONVERSION;
 	VARIANT_BOOL vb;
-	// EPSG:4326
-	m_wgsProjection->ImportFromProj4(A2BSTR("+proj=longlat +datum=WGS84 +no_defs"), &vb);
-	// EPSG:3857
-	m_GMercProjection->ImportFromProj4(A2BSTR("+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs"), &vb);
+	m_wgsProjection->SetWgs84(&vb);		// EPSG:4326
+	m_GMercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 	
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
@@ -494,6 +491,8 @@ CMapView::CMapView()
 
 	m_drawMouseMoves = false;
 	m_lastWidthMeters = 0.0;
+
+	m_scalebarUnits = tkScalebarUnits::Metric;
 }
 
 // ********************************************************************
@@ -650,6 +649,10 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	temp = (long)rbMapResizeBehavior;
 	PX_Long( pPX, "MapResizeBehavior", temp, 0 );	//rbClassic
 	rbMapResizeBehavior = (tkResizeBehavior)temp;
+
+	temp = (long)m_scalebarUnits;
+	PX_Long( pPX, "ScalebarUnits", temp, 0 );	//suMetric
+	m_scalebarUnits = (tkScalebarUnits)temp;
 
 	temp = (long)m_ShapeDrawingMethod;
 	PX_Long( pPX, "ShapeDrawingMethod", temp, 3 );	// dmNewSymbology

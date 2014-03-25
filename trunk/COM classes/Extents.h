@@ -83,6 +83,9 @@ public:
 	STDMETHOD(GetIntersection)(IExtents* ext, IExtents** retVal);
 	STDMETHOD(Union)(IExtents* ext);
 	STDMETHOD(Intersects)(IExtents* ext, VARIANT_BOOL* retVal);
+	STDMETHOD(ToDebugString)(BSTR* retVal);
+	STDMETHOD(PointIsWithin)(double x, double y, VARIANT_BOOL* retVal);
+	STDMETHOD(get_Center)(IPoint** retVal);
 private:
 	double xmin;
 	double xmax;

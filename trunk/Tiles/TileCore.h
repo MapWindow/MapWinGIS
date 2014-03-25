@@ -53,7 +53,7 @@ public:
 	bool m_projectionOk;	// position of tile was recalculated using the current projection
 	BaseProjection* m_projection;
 	
-	CString getPath(CString root, CString ext);
+	CStringW getPath(CStringW root, CStringW ext);
 
 	// a tile may be comprised of several semi-transparent bitmaps (e.g. satellite image and labels above it)
 	vector<CMemoryBitmap*> Overlays;

@@ -34,18 +34,18 @@ private:
 	static CLSID pngClsid;
 public:
 	static CString encoder;		// gdi+ encoder
-	static CString ext;			// extension (with leading point)
-	static CString rootPath;	// root folder for storage
+	static CStringW ext;		// extension (with leading point)
+	static CStringW rootPath;	// root folder for storage
 	
 	static bool get_TileExists( LONG zoom, LONG x, LONG y)
 	{
-		return (Utility::fileExists(get_TilePath(zoom, x, y)) == TRUE);
+		return (Utility::fileExistsW(get_TilePath(zoom, x, y)) == TRUE);
 	}
 
-	static CString get_TilePath(int zoom, int x, int y)
+	static CStringW get_TilePath(int zoom, int x, int y)
 	{
-		CString path;
-		path.Format("%s%d\\%d\\%d%s", rootPath, zoom, x, y, ext);
+		CStringW path;
+		path.Format(L"%s%d\\%d\\%d%s", rootPath, zoom, x, y, ext);
 		return path;
 	}
 
@@ -60,11 +60,11 @@ public:
 	// creates folder for a single point
 	void static CreateFolder(int zoom, CTilePoint* pnt)
 	{
-		CString name;
-		name.Format("\\%d\\", zoom);	//	_mkdir can't create folders recursively
-		int val = _mkdir(rootPath + name);
-		name.Format("\\%d\\%d\\", zoom, pnt->x);
-		_mkdir(rootPath + name);
+		CStringW name;
+		name.Format(L"\\%d\\", zoom);	//	_mkdir can't create folders recursively
+		int val = _wmkdir(rootPath + name);
+		name.Format(L"\\%d\\%d\\", zoom, pnt->x);
+		_wmkdir(rootPath + name);
 	}
 
 	// writes to disk a single tile
@@ -91,8 +91,8 @@ public:
 		}
 
 		USES_CONVERSION;
-		CString path = tile->getPath(rootPath, ext);
-		bmp->Save(A2OLE(path), &pngClsid, NULL);
+		CStringW path = tile->getPath(rootPath, ext);
+		bmp->Save(path, &pngClsid, NULL);
 
 		delete g;
 		delete bmp;

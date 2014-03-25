@@ -2,6 +2,6 @@
 # First line is grid,  second line is clipping shapefile
 
 # North-East of The Netherlands:
-C:\dev\TestingScripts\ScriptData\General\ClipGridByPolygon\AHN-10.asc
-C:\dev\TestingScripts\ScriptData\General\ClipGridByPolygon\ClippingPolygon-AHN.shp
+%DATA%\General\ClipGridByPolygon\AHN-10.asc
+%DATA%\General\ClipGridByPolygon\ClippingPolygon-AHN.shp
 

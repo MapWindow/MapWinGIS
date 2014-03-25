@@ -216,7 +216,7 @@ STDMETHODIMP CShapefile::get_Filename(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = A2BSTR(_shpfileName);
+	*pVal = W2BSTR(_shpfileName);
 
 	return S_OK;
 }
@@ -413,7 +413,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 	return S_OK;
 }
 
-bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
+bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 {
 	USES_CONVERSION;
 	VARIANT_BOOL vbretval;
@@ -421,9 +421,9 @@ bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
 	// saving the provided names; 
 	// from now on we must clean the class varaibles in case the operation won't succeed
 	_shpfileName = tmp_shpfileName;
-	_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "shx";
-	_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-	_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
+	_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"shx";
+	_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"dbf";
+	_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"prj";
 
 	// Chris Michaelis 12/19/2005 - Windows 98 doesn't support unicode and will thus crash and burn on _wfopen.
 	OSVERSIONINFO OSversion;
@@ -433,15 +433,15 @@ bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
 	if (OSversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
 	{
 		// Running Windows 95, 98, ME
-		_shpfile = fopen(_shpfileName, "rb");
-		_shxfile = fopen(_shxfileName,"rb");
+		_shpfile = fopen(W2A(_shpfileName), "rb");
+		_shxfile = fopen(W2A(_shxfileName), "rb");
 	}
 	else
 	{
 		// Running 2k, XP, NT, or other future versions
 		////Changes made to use _wfopen to support Assian character file names ---Lailin Chen 11/5/2005
-		_shpfile = _wfopen( T2W(_shpfileName), L"rb");
-		_shxfile = _wfopen(T2W(_shxfileName),L"rb");
+		_shpfile = _wfopen( _shpfileName, L"rb");
+		_shxfile = _wfopen(_shxfileName,L"rb");
 	}
 	
 	// opening dbf
@@ -456,7 +456,7 @@ bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack)
 		dbf->Close(&vb);
 	}
 	dbf->put_GlobalCallback(globalCallback);
-	dbf->Open(A2BSTR(_dbffileName), cBack, &vbretval);
+	dbf->Open(W2BSTR(_dbffileName), cBack, &vbretval);
 
 	if( _shpfile == NULL )
 	{
@@ -531,7 +531,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	}
 	
 	USES_CONVERSION;
-	CString tmp_shpfileName = OLE2CA(ShapefileName);
+	CStringW tmp_shpfileName = OLE2CW(ShapefileName);
 
 	if (tmp_shpfileName.GetLength() == 0)
 	{
@@ -564,7 +564,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 			m_sourceType = sstDiskBased;
 
 			// reading projection
-			m_geoProjection->ReadFromFile(A2BSTR(_prjfileName), &vbretval);
+			m_geoProjection->ReadFromFile(W2BSTR(_prjfileName), &vbretval);
 
 			this->ApplyRandomDrawingOptions();
 			UpdateLabelsPositioning();
@@ -972,8 +972,8 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 
 		// saving projection in new format
 		VARIANT_BOOL vbretval;
-		CString prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "prj";
-		m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+		CStringW prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + L"prj";
+		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
 		*retval = VARIANT_TRUE;
 	}
@@ -1129,7 +1129,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		VARIANT_BOOL vbretval, isEmpty;
 		m_geoProjection->get_IsEmpty(&isEmpty);
 		if(!isEmpty)
-			m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+			m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
 		if (useQTree)
 			GenerateQTree();
@@ -1178,15 +1178,15 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 	// -------------------------------------------------
 	//	Reopen the files in the write mode
 	// -------------------------------------------------
-	if (_shpfile && _shxfile)	// TODO: check the condition
+	if (_shpfile && _shxfile)
 	{
-		_shpfile = freopen(_shpfileName,"wb+",_shpfile);
-		_shxfile = freopen(_shxfileName,"wb+",_shxfile);
+		_shpfile = _wfreopen(_shpfileName,L"wb+",_shpfile);
+		_shxfile = _wfreopen(_shxfileName,L"wb+",_shxfile);
 	}
 	else
 	{
-		_shpfile = fopen(_shpfileName,"wb+");
-		_shxfile = fopen(_shxfileName,"wb+");
+		_shpfile = _wfopen(_shpfileName,L"wb+");
+		_shxfile = _wfopen(_shxfileName,L"wb+");
 	}
 
 	if( _shpfile == NULL || _shxfile == NULL )
@@ -1224,8 +1224,8 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 		// -------------------------------------------------
 		//	Reopen the updated files
 		// -------------------------------------------------
-		_shpfile = freopen(_shpfileName,"rb+",_shpfile);
-		_shxfile = freopen(_shxfileName,"rb+",_shxfile);
+		_shpfile = _wfreopen(_shpfileName,L"rb+",_shpfile);
+		_shxfile = _wfreopen(_shxfileName,L"rb+",_shxfile);
 		
 		if( _shpfile == NULL || _shxfile == NULL )
 		{	
@@ -1255,7 +1255,7 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 
 			// saving projection in new format
 			VARIANT_BOOL vbretval;
-			m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+			m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
 			*retval = VARIANT_TRUE;
 		}
@@ -2351,65 +2351,12 @@ void CShapefile::UpdateLabelsPositioning()
 // *****************************************************************
 //		get_Projection()
 // *****************************************************************
-// Chris Michaelis Sept 19 2005
 STDMETHODIMP CShapefile::get_Projection(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	m_geoProjection->ExportToProj4(pVal);
 	return S_OK;
-
-	//if ( m_sourceType == sstDiskBased ) //&& _shpfileName != "" )
-	//{
-	//	try
-	//	{
-	//		char * prj4 = NULL;
-	//		ProjectionTools * p = new ProjectionTools();
-	//		p->GetProj4FromPRJFile(_prjfileName.GetBuffer(), &prj4);
-	//		delete p;
-
-	//		if (prj4 != NULL)
-	//		{
-	//			*pVal = A2BSTR(prj4);
-	//			CPLFree(prj4);
-	//		}
-	//		else
-	//		{
-	//			*pVal = A2BSTR("");
-	//		}
-	//	}
-	//	catch(...)
-	//	{
-	//	}
-	//}
-	//else
-	//{
-	//	// in-memory shapefile
-	//	*pVal = A2BSTR(m_projection);
-	//}
-}
-
-// *****************************************************************
-//		get_OGRSpatialReference()
-// *****************************************************************
-OGRSpatialReference* CShapefile::get_OGRSpatialReference()
-{
-	USES_CONVERSION;
-	BSTR proj;
-	this->get_Projection(&proj);
-	CString str = OLE2CA(proj);
-	SysFreeString(proj);
-
-	if (str != "")
-	{
-		OGRSpatialReference* reference = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
-		reference->importFromProj4(str.GetString());
-		return reference;
-	}
-	else
-	{
-		return NULL;
-	}
 }
 
 // *****************************************************************
@@ -2424,7 +2371,7 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 	m_geoProjection->ImportFromProj4(proj4Projection, &vbretval);
 	if (vbretval)
 	{
-		m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 	}
 	return S_OK;
 }
@@ -2452,7 +2399,7 @@ STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 	if (_prjfileName.GetLength() != 0)
 	{
 		VARIANT_BOOL vbretval;
-		m_geoProjection->WriteToFile(A2BSTR(_prjfileName), &vbretval);
+		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 	}
 	return S_OK;
 }

@@ -8,13 +8,11 @@ namespace Debug
 		this->Close();
 
 		USES_CONVERSION;
-		CStringA filenameA = W2A(filename);
-		CStringA pathA = Utility::GetFolderFromPath(filenameA);
+		CStringW path = Utility::GetFolderFromPath(filename);
+		if (!Utility::dirExists(path))
+			_wmkdir(path);
 
-		if (!Utility::dirExists(pathA))
-			_mkdir(pathA);
-
-		m_logger.open(filenameA);
+		m_logger.open(filename);
 
 		m_filename = filename;
 		Debug::WriteLine("Log opened: %d", m_logger.is_open());

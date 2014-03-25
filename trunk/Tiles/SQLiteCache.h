@@ -28,12 +28,12 @@
 #include "TileCacher.h"
 #include "BaseProvider.h"
 
-#define DB_NAME "mwtiles.db3"
+#define DB_NAME L"mwtiles.db3"
 
 // Provides storage for map tiles in SQLite database
 class SQLiteCache
 {
-	static CString m_dbName;
+	static CStringW m_dbName;
 	static sqlite3 *m_conn;
 public:
 	static ::CCriticalSection section;  // finer locks to prevent simultaneous access of the same operation from several threads
@@ -41,8 +41,8 @@ public:
 	static bool m_locked;		// coarse lock to block the adding tile to cache when extracting operations are made
 	static double maxSizeDisk;	// max size of disk cache in megabytes
 	
-	static CString get_DbName();
-	static bool set_DbName(CString name);
+	static CStringW get_DbName();
+	static bool set_DbName(CStringW name);
 	static bool CreateDatabase();
 	
 	static TileCore* get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG y);

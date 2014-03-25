@@ -61,17 +61,17 @@ public:
 
 	bool CanCreate();
 	bool CanCreate(GridFileType newFileType);
-	bool CreateNew(char * filename, GridFileType newFileType, double dx, double dy, 
+	bool CreateNew(CStringW filename, GridFileType newFileType, double dx, double dy, 
 			   double xllcenter, double yllcenter, double nodataval, char * projection,
 			   long ncols, long nrows, GridDataType DataType, bool CreateInRam, 
 			   double initialValue, bool applyInitialValue);
-	bool Save(char * saveToFilename, GridFileType newFileFormat);
+	bool Save(CStringW saveToFilename, GridFileType newFileFormat);
 	bool SaveToBGD(CString filename, void(*callback)(int number, const char * message));
 	bool ReadFromBGD(CString filename, void (*callback)(int number, const char * message));
 	bool ReadBGDHeader(CString filename, DATA_TYPE &bgdDataType);
 	bool GetIntValueGridColorTable(IGridColorScheme ** newscheme);
-
 	bool isInRam() { return inRam; }
+	bool IsRgb(); 	
 
 	BSTR key;
 	bool hasTransparency;
@@ -88,7 +88,7 @@ public:
 		transColor(0), hasTransparency(false),buffSize(0),cBack(NULL),dX(-1),dY(-1),
 		XllCenter(-1),YllCenter(-1)
 	{		//Rob Cairns
-			mFilename = "";
+			mFilename = L"";
 			rasterDataset=NULL;
 			floatbuffer = NULL;
 			_int32buffer = NULL;
@@ -104,6 +104,7 @@ public:
 			cachedMin = 9999;
 			genericType = GDT_Unknown;
 			hasColorTable = false;
+			activeBandIndex = 1;
 	} //Constructor
 
 	virtual ~tkGridRaster()
@@ -111,7 +112,7 @@ public:
 		Close(); // Free all memory used in Close.
 	} // Deconstructor
 	
-	bool LoadRaster(const char * filename, bool InRam, GridFileType fileType);
+	bool LoadRaster(CStringW filename, bool InRam, GridFileType fileType);
 
 	unsigned char * toDib();
 	long getWidth(){return width;}
@@ -127,17 +128,20 @@ public:
 	bool OpenBand(int bandIndex);
 	void ReadProjection();
 	int getNumBands();
+	int GetActiveBandIndex() { return activeBandIndex; }
 
 private:
+	
 	const static long MAX_INRAM_SIZE = 536870912;
-	CString mFilename;
-			//world coordinate related variables
-
+	
+	
+	//world coordinate related variables
 	double dY;			//change in Y (for size of cell or pixel)
 	double dX;			//change in X (for size of cell or pixel)
 	double YllCenter;	//Y coordinate of lower left corner of image (world coordinate)
 	double XllCenter;	//X coordinate of lower left corner of image (world coordinate)
 
+	int activeBandIndex;
 	_int32 * _int32buffer;
 	float * floatbuffer;
 
@@ -160,6 +164,7 @@ private:
 	bool MemoryAvailable(double bytes);
 	bool startsWith(const char* compare, const char* starts) const;
 	bool contains(char * haystack, char needle) const;
+	bool LoadRasterCore(char* filenameUtf8, bool InRam, GridFileType fileType);
 
 	GDALDataset * rasterDataset;
 	GDALColorTable * poColorT;
@@ -193,6 +198,7 @@ private:
 
 	double cachedMax;
 	double cachedMin;
+	CStringW mFilename;
 
 	void ReadPalette(int bits);
 	void DecompressJpg(int bits);

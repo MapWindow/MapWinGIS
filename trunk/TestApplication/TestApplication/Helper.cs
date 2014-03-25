@@ -228,6 +228,8 @@ namespace TestApplication
       // Open file, read line by line, skip lines starting with #
       var lines = File.ReadAllLines(textfileLocation);
 
+      lines = lines.Select(l => l.Replace("%DATA%", Constants.SCRIPT_DATA_PATH)).ToArray();
+
       return (from t in lines where !t.StartsWith("#") && t.Length != 0 select t.Trim()).ToList();
     }
 
@@ -262,12 +264,12 @@ namespace TestApplication
         return false;
       }
 
-      if (shp.numPoints != shp2.numPoints)
+      if (shp.NumPoints != shp2.NumPoints)
       {
         theForm.Error(
           string.Empty,
           string.Format(
-            "The first shape has {0} points and the second shape has {1} points", shp.numPoints, shp2.NumParts));
+            "The first shape has {0} points and the second shape has {1} points", shp.NumPoints, shp2.NumParts));
         return false;
       }
 

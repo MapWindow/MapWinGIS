@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="MapWinGIS"
 	ProjectGUID="{1AB93398-2DE6-4043-BF6D-D438A794FB86}"
 	RootNamespace="MapWinGIS"
@@ -2284,11 +2284,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\Map_ImageGrouping.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\Map_Labels.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Control\Map_Layer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\Map_Measuring.cpp"
 				>
 			</File>
 			<File
@@ -2304,11 +2312,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\Map_Scalebar.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\Map_Serialization.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\Control\Map_Shapefile.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\Map_Snapshot.cpp"
 				>
 			</File>
 			<File
@@ -2592,6 +2608,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Utilities\GdalHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\GdalHelper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Utilities\GeosHelper.cpp"
 				>
 			</File>
@@ -2609,6 +2633,14 @@
 			</File>
 			<File
 				RelativePath=".\Utilities\LineBresenham.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\Logger.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\Logger.h"
 				>
 			</File>
 			<File
@@ -4048,11 +4080,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

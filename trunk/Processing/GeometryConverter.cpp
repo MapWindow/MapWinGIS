@@ -26,17 +26,15 @@
 // *********************************************************************
 void GeometryConverter::SetConversionFactor(IShapefile* sf)
 {
-	if (!sf) 
-		return;
-
-	OGRSpatialReference* ref = ((CShapefile*)sf)->get_OGRSpatialReference();
-	if (ref) 
+	if (!sf) return;
+	CComPtr<IGeoProjection> proj = NULL;
+	sf->get_GeoProjection(&proj);
+	if (proj)
 	{
-		if (ref->IsGeographic() != 0)
-		{
-			this->conversionFactor = m_globalSettings.clipperGcsMultiplicationFactor;
-		}
-		OGRSpatialReference::DestroySpatialReference(ref);
+		VARIANT_BOOL vb;
+		proj->get_IsGeographic(&vb);
+		this->conversionFactor = vb ? m_globalSettings.clipperGcsMultiplicationFactor : 1.0;;
+		
 	}
 }
 

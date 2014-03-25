@@ -387,10 +387,10 @@ public:
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
 	
 	void CShapefile::CopyFields(IShapefile* target);
-	OGRSpatialReference* CShapefile::get_OGRSpatialReference();
+	//OGRSpatialReference* CShapefile::get_OGRSpatialReference();
 	void CShapefile::UpdateLabelsPositioning();
 
-	bool CShapefile::OpenCore(CString tmp_shpfileName, ICallback* cBack);
+	bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack);
 
 	// Returns underlying shapefile if any
 	FILE* CShapefile::get_File()
@@ -560,10 +560,10 @@ private:
 	std::vector<long> shpOffsets;		//(32 bit words)
 	
 	//Trio of Filenames
-	CString _shpfileName;
-	CString _shxfileName;
-	CString _dbffileName;
-	CString _prjfileName;
+	CStringW _shpfileName;
+	CStringW _shxfileName;
+	CStringW _dbffileName;
+	CStringW _prjfileName;
 	
 	ILabels* m_labels;
 	//CString m_projection;	// projection string

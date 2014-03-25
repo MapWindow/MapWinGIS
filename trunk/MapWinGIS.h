@@ -88,13 +88,21 @@ struct GlobalSettingsInfo
 	double clipperGcsMultiplicationFactor;
 	bool shapefileFastMode;
 	double invalidShapesBufferDistance;
+	tkGridProxyMode gridProxyMode;
 	bool shapefileFastUnion;
 	CString gdalErrorMessage;
 	tkCompositingQuality labelsCompositingQuality;
 	tkSmoothingMode labelsSmoothingMode;
-	std::map<tkLocalizedStrings, CString> shortUnitStrings;
+	std::map<tkLocalizedStrings, CStringW> shortUnitStrings;
 	bool zoomToFirstLayer;
 	tkCollisionMode labelsCollisionMode;
+	tkGridProxyFormat gridProxyFormat;
+	double maxNoProxyGridSizeMb;
+	int maxUniqueValuesCount;
+	bool grabMapProjectionFromFirstLayer;
+	bool randomColorSchemeForGrids;
+	PredefinedColorScheme defaultColorSchemeForGrids;
+
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
@@ -108,15 +116,28 @@ struct GlobalSettingsInfo
 		labelsCompositingQuality = HighQuality;
 		labelsSmoothingMode = HighQualityMode ;
 		zoomToFirstLayer = true;
+		gridProxyFormat = gpfBmpProxy;
+		maxNoProxyGridSizeMb = 20.0;
+		gridProxyMode = gpmAuto;
+		maxUniqueValuesCount = 100;
+		grabMapProjectionFromFirstLayer = true;
+		randomColorSchemeForGrids = true;
+		defaultColorSchemeForGrids = SummerMountains;
 
-		shortUnitStrings[tkLocalizedStrings::lsHectars] = "ha";
-		shortUnitStrings[tkLocalizedStrings::lsMeters] = "m";
-		shortUnitStrings[tkLocalizedStrings::lsKilometers] = "km";
+		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
+		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";
+		shortUnitStrings[tkLocalizedStrings::lsKilometers] = L"km";
+		shortUnitStrings[tkLocalizedStrings::lsSquareKilometers] = L"sq.km";
+		shortUnitStrings[tkLocalizedStrings::lsSquareMeters] = L"sq.m";
+		shortUnitStrings[tkLocalizedStrings::lsMapUnits] = L"mu";
+		shortUnitStrings[tkLocalizedStrings::lsSquareMapUnits] = L"sq.mu";
+		shortUnitStrings[tkLocalizedStrings::lsMiles] = L"miles";
+		shortUnitStrings[tkLocalizedStrings::lsFeet] = L"feet";
 	}
 	
-	CString GetLocalizedString(tkLocalizedStrings s)
+	CStringW GetLocalizedString(tkLocalizedStrings s)
 	{
-		return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : "";
+		return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : L"";
 	}
 
 	double GetMinPolygonArea(IGeoProjection* proj)
@@ -140,10 +161,16 @@ struct GlobalSettingsInfo
 			return minPolygonArea;
 		}
 	}	
+
+	void SetGdalUtf8(bool turnon)
+	{
+		CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", turnon ? "YES" : "NO");
+	}
 };
 
 extern GlobalSettingsInfo m_globalSettings;
 extern GlobalClassFactory m_factory;
+
 
 
 

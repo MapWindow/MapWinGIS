@@ -278,7 +278,7 @@ protected:
 	afx_msg void SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal);
 
 	afx_msg VARIANT_BOOL SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite);
-	afx_msg VARIANT_BOOL LoadMapState(LPCTSTR Filename, IDispatch* Callback);
+	afx_msg VARIANT_BOOL LoadMapState(LPCTSTR Filename, LPDISPATCH Callback);
 
 	afx_msg VARIANT_BOOL SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, VARIANT_BOOL Overwrite, LPCTSTR Description);
 	afx_msg VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
@@ -298,6 +298,9 @@ protected:
 
 	afx_msg VARIANT_BOOL GetScalebarVisible(void);
 	afx_msg void SetScalebarVisible(VARIANT_BOOL pVal);
+
+	afx_msg tkScalebarUnits GetScalebarUnits(void);
+	afx_msg void SetScalebarUnits(tkScalebarUnits pVal);
 
 	afx_msg VARIANT_BOOL GetShowRedrawTime(void);
 	afx_msg void SetShowRedrawTime(VARIANT_BOOL newVal);
@@ -634,9 +637,9 @@ public:
 	void FireTilesLoaded(IDispatch* tiles, IDispatch* extents, VARIANT_BOOL snapshot, LPCTSTR key)
 		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, extents, snapshot,key);}
 	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
-	{
-		FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);
-	}
+		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
+	void FireLayersChanged()
+		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
@@ -644,6 +647,7 @@ public:
 #pragma region DispatchAndEventIds
 public:
 enum {		//{{AFX_DISP_ID(CMapView)
+	dispidScalebarUnits = 205L,
 	dispidTilesAreInCache = 204L,
 	dispidFindSnapPoint = 203L,
 	dispidSnapShotToDC2 = 202L,
@@ -861,6 +865,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidAfterDrawing = 12L,
 	eventidTilesLoaded = 13L,
 	eventidMeasuringChanged = 14L,
+	eventidLayersChanged = 15L,
 	//}}AFX_DISP_ID
 	};
 #pragma endregion
@@ -960,6 +965,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	
 	std::vector<ImageGroup*>* m_imageGroups;
 	BOOL m_scalebarVisible;
+	tkScalebarUnits  m_scalebarUnits;
 	
 	tkTransformationMode m_transformationMode;
 	IGeoProjection* m_projection;
@@ -1052,10 +1058,10 @@ protected:
 	DOUBLE CMapView::DegreesPerMapUnit(void);
 	void CMapView::DrawScaleBar(Gdiplus::Graphics* g);
 
-	CPLXMLNode* SerializeMapStateCore(VARIANT_BOOL RelativePaths, CString ProjectName);		// used by SaveMapState and GetMapState
-	bool DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback);
-	CPLXMLNode* SerializeLayerCore(LONG LayerHandle, CString Filename);
-	int DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopExecution* callback);		// adds new layer on loading (is used by map state)
+	CPLXMLNode* SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName);		// used by SaveMapState and GetMapState
+	bool DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback);
+	CPLXMLNode* SerializeLayerCore(LONG LayerHandle, CStringW Filename);
+	int DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStopExecution* callback);		// adds new layer on loading (is used by map state)
 	VARIANT_BOOL DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode* node);
 	
 	IExtents* GetMaxExtents(void);

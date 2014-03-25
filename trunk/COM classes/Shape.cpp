@@ -1788,11 +1788,8 @@ STDMETHODIMP CShape::CreateFromString(BSTR Serialized, VARIANT_BOOL *retval)
 STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!m_utils)
-		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&m_utils);
 	
-	if (m_utils)
-		m_utils->PointInPolygon(this, pt, retval);
+	GetUtils()->PointInPolygon(this, pt, retval);
 
 	//bool result = _useFastMode ? PointInThisPolyFast(pt) : PointInThisPolyRegular(pt);
 	return S_OK;
@@ -2141,6 +2138,46 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 		
 		shp->put_Key(_key);
 		(*retval) = shp;
+	}
+	return S_OK;
+}
+
+//*****************************************************************
+//*		CopyTo()
+//*****************************************************************
+STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
+{	
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (!target)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		*retVal = VARIANT_FALSE;
+	}
+	else
+	{
+		ShpfileType shpType;
+		this->get_ShapeType(&shpType);
+		VARIANT_BOOL vb;
+		this->Create(shpType, &vb);
+		
+		long numParts;
+		this->get_NumParts(&numParts);
+		for(int i = 0; i < numParts; i++ )
+		{
+			long part, newIndex;
+			this->get_Part(i, &part);
+			target->InsertPart(part, &newIndex, &vb);
+		}
+
+		long numPoints;
+		this->get_NumPoints(&numPoints);
+		double x, y;
+		for(int i = 0; i < numPoints; i++ )
+		{
+			this->get_XY(i, &x, &y, &vb);
+			target->put_XY(i, x, y, &vb);
+		}
+		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -2678,45 +2715,7 @@ bool CShape::get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& y
 }
 #pragma endregion
 
-//*****************************************************************
-//*		CopyTo()
-//*****************************************************************
-STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
-{	
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!target)
-	{
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		*retVal = VARIANT_FALSE;
-	}
-	else
-	{
-		ShpfileType shpType;
-		this->get_ShapeType(&shpType);
-		VARIANT_BOOL vb;
-		this->Create(shpType, &vb);
-		
-		long numParts;
-		this->get_NumParts(&numParts);
-		for(int i = 0; i < numParts; i++ )
-		{
-			long part, newIndex;
-			this->get_Part(i, &part);
-			target->InsertPart(part, &newIndex, &vb);
-		}
 
-		long numPoints;
-		this->get_NumPoints(&numPoints);
-		double x, y;
-		for(int i = 0; i < numPoints; i++ )
-		{
-			this->get_XY(i, &x, &y, &vb);
-			target->put_XY(i, x, y, &vb);
-		}
-		*retVal = VARIANT_TRUE;
-	}
-	return S_OK;
-}
 
 //*****************************************************************
 //*		ExportToWKT()

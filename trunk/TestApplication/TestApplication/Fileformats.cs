@@ -125,10 +125,7 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
         if (!img.Open(filename, ImageType.USE_FILE_EXTENSION, false, null))
         {
-          var msg = string.Format(
-            "Error opening image: {0}{1}",
-            img.get_ErrorMsg(img.LastErrorCode),
-            Environment.NewLine);
+          var msg = string.Format("Error opening image: {0}{1}", img.ErrorMsg[img.LastErrorCode], Environment.NewLine);
           if (settings.GdalLastErrorMsg != string.Empty)
           {
             msg += "GDAL Error: " + settings.GdalLastErrorMsg;
@@ -144,11 +141,14 @@ namespace TestApplication
             Map.RemoveAllLayers();
             Application.DoEvents();
 
+            // lsu: It's not allowed to change projection is such way, only settings a new instance
+            // MapWinGIS: will grab projection from image layer by itself
+
             // Set projection of map using the grid projection:
-            if (img.GetProjection() != string.Empty)
-            {
-              Map.GeoProjection.ImportFromProj4(img.GetProjection());
-            }
+            //if (img.GetProjection() != string.Empty)
+            //{
+            //  Map.GeoProjection.ImportFromProj4(img.GetProjection());
+            //}
           }
 
           // Log characteristics:
@@ -233,7 +233,7 @@ namespace TestApplication
 
           // Log projection:
           theForm.Progress(string.Empty, 0, "Projection: " + grd.Header.GeoProjection.ExportToProj4());
-          theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NoBands);
+          theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NumBands);
 
           hndl = Map.AddLayer(grd, true);
 

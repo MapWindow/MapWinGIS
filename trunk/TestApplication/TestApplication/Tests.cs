@@ -133,8 +133,8 @@ namespace TestApplication
         MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
 
       // Enable logging:
-      // TODO: Doesn't seems to work. files stays empty:
-      MyAxMap.Tiles.StartLogRequests(@"C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\TestApplication\TestApplication\data\", "tiles", false);
+      string logPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\tiles.log";
+      MyAxMap.Tiles.StartLogRequests(logPath, false);
       Debug.Print("Log is opened: " + MyAxMap.Tiles.LogIsOpened);
 
       // Enable tiling:
@@ -319,16 +319,22 @@ namespace TestApplication
         string.Format("{0}-----------------------{0}The image open tests have started.", Environment.NewLine));
 
       // Read text file:
+      int count = 1;
       var lines = Helper.ReadTextfile(textfileLocation);
       foreach (var line in lines)
       {
+        theForm.Progress(string.Empty, 0, " ");
+        theForm.Progress(string.Empty, 0, "Image: " + count);
+        theForm.Progress(string.Empty, 0, "-------------------------------");
+        count++;
+          
         // Open image:
         var hndle = Fileformats.OpenImageAsLayer(line, theForm, true);
 
         if (hndle == -1)
         {
-          retVal = false;
-          continue;
+            retVal = false;
+            continue;
         }
 
         // Wait a second to show something:

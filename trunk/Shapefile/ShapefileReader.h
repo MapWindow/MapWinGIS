@@ -48,7 +48,7 @@ private:
 
 public:
 	// functions
-	bool ReadShapefileIndex(const char* filename, FILE* shpFile);
+	bool ReadShapefileIndex(CStringW filename, FILE* shpFile);
 	char* ReadShapeData(int& offset);
 	PolygonData* ReadPolygonData(char* data);
 	PolygonData* ReadMultiPointData(char* data);

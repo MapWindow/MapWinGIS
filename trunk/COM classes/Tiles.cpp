@@ -392,7 +392,6 @@ bool CTiles::TilesAreInScreenBuffer(void* mapView)
 // checks whether all the tiles are present in cache
 bool CTiles::TilesAreInCache(void* mapView, tkTileProvider providerId)
 {
-	
 	BaseProvider* provider = providerId == ProviderNone ? m_provider : ((CTileProviders*)m_providers)->get_Provider(providerId);
 
 	if (!m_visible || !provider) {
@@ -539,6 +538,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 				if (tile->m_tileX == x && tile->m_tileY == y && tile->m_providerId == provider->Id)
 				{
 					tile->m_toDelete = false;	// it must not be deleted
+					//tile->m_inBuffer = true;
 					continue;
 				}
 			}
@@ -742,7 +742,7 @@ STDMETHODIMP CTiles::put_GridLinesVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CTiles::get_MinScaleToCache(int* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_minScaleToCache;
+	*pVal = m_minScaleToCache;		// TODO: use in cachin process
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
@@ -758,7 +758,7 @@ STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
 STDMETHODIMP CTiles::get_MaxScaleToCache(int* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_maxScaleToCache;
+	*pVal = m_maxScaleToCache;		// TODO: use in cachin process
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_MaxScaleToCache(int newVal)
@@ -902,7 +902,7 @@ STDMETHODIMP CTiles::get_DiskCacheFilename(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	*retVal = A2BSTR(SQLiteCache::get_DbName());
+	*retVal = W2BSTR(SQLiteCache::get_DbName());
 	return S_OK;
 }
 
@@ -913,8 +913,7 @@ STDMETHODIMP CTiles::put_DiskCacheFilename(BSTR pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	CString s = OLE2A(pVal);
-	SQLiteCache::set_DbName(s);
+	SQLiteCache::set_DbName(OLE2W(pVal));
 	return S_OK;
 }
 
@@ -1025,6 +1024,7 @@ STDMETHODIMP CTiles::get_CacheSize(tkCacheType type, double* retVal)
 // *********************************************************
 //	     get_CacheSize3()
 // *********************************************************
+// TODO: use provider id rather than provider enumeration.
 STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, tkTileProvider provider, int scale, double* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -1088,7 +1088,8 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", SQLiteCache::maxSizeDisk));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", m_minScaleToCache));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", m_maxScaleToCache));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", SQLiteCache::get_DbName());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", W2A(SQLiteCache::get_DbName()));    // TODO: use Unicode
+	// TODO: serialize custom tile providers
 	return psTree;
 }
 
@@ -1158,8 +1159,9 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	setInteger(node, "MinScaleToCache", m_minScaleToCache);
 	setInteger(node, "MaxScaleToCache", m_maxScaleToCache);
 	
+	USES_CONVERSION;
 	s = CPLGetXMLValue( node, "DiskCacheFilename", NULL );
-	if (s != "") SQLiteCache::set_DbName(s);
+	if (s != "") SQLiteCache::set_DbName(A2W(s));		// TODO: use Unicode
 	return true;
 }
 #pragma endregion
@@ -1328,7 +1330,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 	*retVal = 0;
 	
 	USES_CONVERSION;
-	CString path = OLE2A(savePath);
+	CStringW path = OLE2W(savePath);
 	if (!Utility::dirExists(path))
 	{
 		ErrorMessage(tkFOLDER_NOT_EXISTS);
@@ -1398,11 +1400,12 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		int centX = (maxX + minX)/2;
 		int centY = (maxY + minY)/2;
 
+		// TODO: use Unicode
 		USES_CONVERSION;
-		CString path = OLE2A(savePath);
-		if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != '\\')
+		CStringW path = OLE2W(savePath);
+		if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
 		{
-			path += "\\";
+			path += L"\\";
 		}
 		CacheType type = path.GetLength() > 0 ? CacheType::DiskCache : CacheType::SqliteCache;
 
@@ -1415,7 +1418,7 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 			
 			if (ext.GetLength() >= 4)
 			{
-				CString s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
+				CStringW s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
 				if (s == ".png")
 				{
 					DiskCache::encoder = "image/png";
@@ -1508,6 +1511,7 @@ STDMETHODIMP CTiles::CheckConnection(BSTR url, VARIANT_BOOL* retVal)
 STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY, IExtents** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
 	BaseProvider* prov = ((CTileProviders*)m_providers)->get_Provider(provider);
 	if (!prov)
 	{

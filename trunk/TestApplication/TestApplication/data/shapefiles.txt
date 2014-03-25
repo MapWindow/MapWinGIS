@@ -1,16 +1,16 @@
 # A list of shapefiles that can be open to test.
 # These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/MapWindow-Projects/
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
 
 # Polygon M
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\PolygonM.shp
+%DATA%\General\MapWindow-Projects\polygonM\PolygonM.shp
 
 # Multi points:
-C:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\polygonM\MultiPoints.shp
+%DATA%\General\MapWindow-Projects\polygonM\MultiPoints.shp
 

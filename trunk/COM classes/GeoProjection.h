@@ -47,7 +47,7 @@ public:
 		m_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
 		m_transformation = NULL;	
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
-		// TODO: apply WGS84 projection by default
+		m_isFrozen = false;
 	}
 
 	~CGeoProjection()
@@ -79,10 +79,7 @@ public:
 		return S_OK;
 	}
 
-	void FinalRelease()
-	{
-
-	}
+	void FinalRelease() { }
 
 public:
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
@@ -128,9 +125,11 @@ public:
 	STDMETHOD(Transform)(double* x, double* y, VARIANT_BOOL* retval);
 	STDMETHOD(StopTransform)();
 	STDMETHOD(get_HasTransformation)(VARIANT_BOOL* retval);
-	STDMETHOD(SetGoogleMercator)(void);
-	STDMETHOD(Clear)();
+	STDMETHOD(SetGoogleMercator)(VARIANT_BOOL* retVal);
+	STDMETHOD(SetWgs84)(VARIANT_BOOL* retVal);
+	STDMETHOD(Clear)(VARIANT_BOOL* retVal);
 	STDMETHOD(Clone)(IGeoProjection** retVal);
+	STDMETHOD(get_IsFrozen)(VARIANT_BOOL* retVal);
 
 	OGRSpatialReference* get_SpatialReference()
 	{
@@ -143,6 +142,7 @@ private:
 	long m_lastErrorCode;
 	ICallback * m_globalCallback;
 	BSTR m_key;
+	bool m_isFrozen;
 
 	// functions
 	void ErrorMessage(long ErrorCode);
@@ -154,6 +154,10 @@ public:
 		VARIANT_BOOL vbretval;
 		this->get_IsSame(proj, &vbretval); 
 		return vbretval ? true : false;
+	}
+	void SetIsFrozen(bool frozen)
+	{
+		m_isFrozen = frozen;
 	}
 };
 

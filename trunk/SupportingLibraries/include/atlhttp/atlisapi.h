@@ -62,7 +62,7 @@
 #pragma warning(disable: 4702) // unreachable code
 
 #include <initguid.h>
-#include <dbgautoattach.h>
+//#include <dbgautoattach.h>
 
 #ifndef SESSION_COOKIE_NAME
 	#define SESSION_COOKIE_NAME "SESSIONID"

@@ -4,6 +4,7 @@
 #include "MapWinGis.h"
 #include "GridColorScheme.h"
 #include "Tiles.h"
+#include "GdalHelper.h"
 
 #pragma endregion
 
@@ -14,7 +15,9 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (Utility::fileExists(Filename))
+	USES_CONVERSION;
+	CStringW nameW = A2W(Filename);		// TODO: use Unicode
+	if (Utility::fileExistsW(nameW))
 	{
 		if (!Overwrite)
 		{
@@ -23,7 +26,7 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 		}
 		else
 		{
-			if( remove( Filename ) != 0 )
+			if( !Utility::RemoveFile(nameW) )
 			{
 				ErrorMessage(tkCANT_DELETE_FILE);
 				return VARIANT_FALSE;
@@ -31,8 +34,8 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 		}
 	}
 
-	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, Filename);
-	bool result = CPLSerializeXMLTreeToFile(node, Filename) != 0;
+	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, nameW);
+	bool result = GdalHelper::SerializeXMLTreeToFile(node, nameW) != 0;
 	CPLDestroyXMLNode(node);
 	return result ? VARIANT_TRUE : VARIANT_FALSE;
 }
@@ -40,13 +43,15 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 // *********************************************************
 //		LoadMapState()
 // *********************************************************
-VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, IDispatch* Callback)
+VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	try
 	{
-		CPLXMLNode* node = CPLParseXMLFile(Filename);
+		USES_CONVERSION;
+		CStringW nameW = A2W(Filename);		// TODO: use Unicode
+		CPLXMLNode* node = GdalHelper::ParseXMLFile(nameW);
 		if (node)
 		{
 			IStopExecution* cb = NULL;
@@ -55,7 +60,8 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, IDispatch* Callback)
 				Callback->QueryInterface(IID_IStopExecution, (void**)&cb);
 			}
 			
-			bool result = DeserializeMapStateCore(node, Filename, VARIANT_TRUE, cb);
+			USES_CONVERSION;
+			bool result = DeserializeMapStateCore(node, nameW, VARIANT_TRUE, cb);
 			
 			if (cb) 
 			{
@@ -75,7 +81,7 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, IDispatch* Callback)
 }
 
 // ******************************************************************
-//	   DeserializeMapStateCore()
+//	   DeserializeMapState()
 // ******************************************************************
 VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath)
 {
@@ -84,7 +90,8 @@ VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayer
 	CPLXMLNode* node = CPLParseXMLString(State);
 	if (node)
 	{
-		result = DeserializeMapStateCore(node, BasePath, LoadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;
+		USES_CONVERSION;
+		result = DeserializeMapStateCore(node, A2W(BasePath), LoadLayers, NULL) ? VARIANT_TRUE : VARIANT_FALSE;		// TODO: use Unicode
 		CPLDestroyXMLNode(node);
 	}
 	return result;
@@ -93,7 +100,7 @@ VARIANT_BOOL CMapView::DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayer
 // ******************************************************************
 //	   DeserializeMapStateCore()
 // ******************************************************************
-bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback)
+bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback)
 {
 	if (!node)
 	{
@@ -215,11 +222,11 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VA
 		// processing layers
 		this->RemoveAllLayers();
 
-		char* cwd = new char[4096];
-		_getcwd(cwd,4096);
+		wchar_t* cwd = new wchar_t[4096];
+		_wgetcwd(cwd,4096);
 		
 		ProjectName = Utility::GetFolderFromPath(ProjectName);
-		_chdir(ProjectName);
+		_wchdir(ProjectName);
 
 		CPLXMLNode* nodeLayer = nodeLayers->psChild;
 		while (nodeLayer)
@@ -228,11 +235,13 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VA
 			{
 				int handle = DeserializeLayerCore( nodeLayer, ProjectName, callback);
 				
-				if (handle != -1)
+				// No longer needed; it's serialized inside image class
+				/*if (handle != -1)
 				{
 					s = CPLGetXMLValue( nodeState, "GridFilename", NULL );
 					if (s != "")
 					{
+						CStringW gridName = Utility::ConvertFromUtf8(s);
 						node = CPLGetXMLNode(nodeState, "GridColorSchemeClass");
 						if (node)
 						{
@@ -242,17 +251,20 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CString ProjectName, VA
 							{
 								if (((CGridColorScheme*)scheme)->DeserializeCore(node))
 								{
-									this->SetGridFileName(handle, s);
+									USES_CONVERSION;
+									this->SetGridFileName(handle, W2BSTR(gridName));
 									this->SetImageLayerColorScheme(handle, (IDispatch*)scheme);
 								}
 							}
 						}
 					}
-				}
+				}*/
 			}
 			nodeLayer = nodeLayer->psNext;
 		}
-		_chdir(cwd);
+		_wchdir(cwd);
+		
+		FireLayersChanged();
 	}
 
 	// restoring tiles settings
@@ -298,7 +310,7 @@ BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
 // ************************************************************
 //		SerializeMapStateCore()
 // ************************************************************
-CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CString ProjectName)
+CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName)
 {
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWinGIS");
 	if (psTree) 
@@ -413,48 +425,38 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CString 
 						layerName = this->GetLayerFilename(handle);
 						
 						USES_CONVERSION;
-						CString tempLayerName = OLE2CA(layerName);
-						//if (_stricmp(tempLayerName, "") == 0)
-						//{
-						//	// in-memory layer, it won't be saved
-						//}
-						//else
+						CStringW layerNameW = OLE2W(layerName);
+						if (RelativePaths)
 						{
-							CString name = OLE2CA(layerName);
-							if (RelativePaths)
-							{
-								name = Utility::GetRelativePath(ProjectName, name);
-							}
-							CPLXMLNode* node = this->SerializeLayerCore(handle, name);
-							if (node)
-							{
-								// saving grid name
-								BSTR s = this->GetGridFileName(handle);
-								CString gridFilename = OLE2CA(s);
-								if (gridFilename != "")
-								{
-									LPDISPATCH obj = this->GetColorScheme(handle);
-									if (obj)
-									{
-										IGridColorScheme* scheme = NULL;
-										obj->QueryInterface(IID_IGridColorScheme,(void**)&scheme);
-										if (scheme)
-										{
-											CPLXMLNode* nodeScheme = ((CGridColorScheme*)scheme)->SerializeCore("GridColorSchemeClass");
-											if (nodeScheme)
-											{
-												CPLAddXMLChild(node, nodeScheme);
-
-												// it is grid layer
-												Utility::CPLCreateXMLAttributeAndValue(node, "GridFilename", gridFilename);
-											}
-											scheme->Release();
-										}
-										obj->Release();
-									}
-								}
-								CPLAddXMLChild(psLayers, node);	
-							}
+							layerNameW = Utility::GetRelativePath(ProjectName, layerNameW);
+						}
+						CPLXMLNode* node = this->SerializeLayerCore(handle, layerNameW);
+						if (node)
+						{
+							// No longer needed; it's serialized inside image class
+							//BSTR s = this->GetGridFileName(handle);
+							//CStringW gridFilenameW = OLE2W(s);
+							//if (gridFilenameW.GetLength() != 0)
+							//{
+							//	LPDISPATCH obj = this->GetColorScheme(handle);
+							//	if (obj)
+							//	{
+							//		IGridColorScheme* scheme = NULL;
+							//		obj->QueryInterface(IID_IGridColorScheme,(void**)&scheme);
+							//		if (scheme)
+							//		{
+							//			CPLXMLNode* nodeScheme = ((CGridColorScheme*)scheme)->SerializeCore("GridColorSchemeClass");
+							//			if (nodeScheme)
+							//			{
+							//				CPLAddXMLChild(node, nodeScheme);
+							//				Utility::CPLCreateXMLAttributeAndValue(node, "GridFilename", gridFilenameW);
+							//			}
+							//			scheme->Release();
+							//		}
+							//		obj->Release();
+							//	}
+							//}
+							CPLAddXMLChild(psLayers, node);	
 						}
 					}
 				}
@@ -471,7 +473,6 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CString 
 	}
 	return psTree;
 }
-
 
 #pragma region Obsolete
 // ************************************************************
@@ -491,7 +492,7 @@ void CMapView::SetMapState(LPCTSTR lpszNewValue)
 	m_mapstateMutex.Lock();	
 	CString s = lpszNewValue;
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
-	this->DeserializeMapStateCore(node, "", VARIANT_TRUE, NULL);
+	this->DeserializeMapStateCore(node, L"", VARIANT_TRUE, NULL);
 	CPLDestroyXMLNode(node);
 }
 #pragma endregion

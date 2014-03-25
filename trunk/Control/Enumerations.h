@@ -65,6 +65,11 @@ struct Point2D
 	{
 		return sqrt(pow(x - other.x, 2.0) + pow(y - other.y, 2.0));
 	}
+
+	double GetDistance(double x2, double y2) 
+	{
+		return sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
+	}
 };
 enum tkTransformationMode
 {
@@ -77,4 +82,12 @@ enum CacheType
 	SqliteCache = 0, 
 	DiskCache = 1, 
 };
+
+enum HandleImage
+{ 
+	asRGB=0,
+	asGrid=1,
+	asComplex=2
+};
+
 # endif

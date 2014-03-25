@@ -19,7 +19,7 @@
 #include "tkRaster.h"
 #include "Vector.h"
 #include "gdalwarper.h"
-
+#include "gdalhelper.h"
 extern "C" 
 {
 	#include "cq.h"
@@ -27,11 +27,54 @@ extern "C"
 
 using namespace std;
 
+// *************************************************************
+//	  ComputeMinMax()
+// *************************************************************
+void tkRaster::ComputeBandMinMax()
+{
+	int bGotMin=false, bGotMax=false;
+	adfMinMax[0] = poBandR->GetMinimum( &bGotMin );
+	adfMinMax[1] = poBandR->GetMaximum( &bGotMax );
+	
+	//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
+	if( ! (bGotMin && bGotMax) )
+	{
+		if ((dataType == GDT_Byte) &&  (ImgType != ADF_FILE) && (hasColorTable==false) && (ImgType != PNG_FILE))
+			//Just guess the min and max
+			//For some reason gdal does not seem to pick up the color table of a png binary image
+		{
+			dfMin = 0.0;
+			dfMax = 255.0;
+		}
+		else 
+		{	
+			GDALComputeRasterMinMax((GDALRasterBandH)poBandR, FALSE, adfMinMax);
+		}
+	}
+	dfMin = adfMinMax[0];
+
+	if (adfMinMax[1] > 0 )	{
+		dfMax = adfMinMax[1];
+	}
+	else {
+		// If GDALComputeRasterMinMax fails
+		dfMax = 255.0;
+	}
+}
 
 // *************************************************************
 //	  LoadRaster()
 // *************************************************************
-bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
+bool tkRaster::LoadRaster(CStringW filename, GDALAccess accessType)
+{
+	CStringA filenameA = Utility::ConvertToUtf8(filename);
+	return LoadRasterCore(filenameA, accessType);
+}
+
+// *************************************************************
+//	  LoadRasterCore()
+// *************************************************************
+bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 {
 	//AfxMessageBox("In LoadRaster");
 	// Chris M 11/15/2005 - This function doesn't use any AFX calls,
@@ -49,38 +92,19 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 	__try
 	{
 		warped = false;
-		//AfxMessageBox("Before GDALAllRegister");
 		GDALAllRegister();
-		/*
-		AfxMessageBox("Before AutoLoadDrivers");
-		GetGDALDriverManager()->AutoLoadDrivers();		
 		
-		// FRMT_gtiff
-		AfxMessageBox("Before GDALRegister_GTiff");
-		GDALRegister_GTiff();
-		
-		// FRMT_mrsid
-		AfxMessageBox("Before GDALRegister_MrSID");
-		GDALRegister_MrSID();
-
-		AfxMessageBox("Before AutoSkipDrivers");		
-		GetGDALDriverManager()->AutoSkipDrivers();
-		*/
-		
-		//AfxMessageBox("Before GdalOpen");
 		//Rob JPEG2000 fails at this point with a nasty error if MapWinGIS is 
 		//compiled in debug mode. GIF images also crash here		
 		
 		if (rasterDataset == NULL)
-			rasterDataset = (GDALDataset *) GDALOpen(filename, accessType );
-
+			rasterDataset = GdalHelper::OpenDatasetA(filename, accessType);
+	
 		if( rasterDataset == NULL ) 
 		{
 			retVal = false;
 			return retVal;
 		}
-
-		//AfxMessageBox("After GDALOpen");
 
 		orig_Width = rasterDataset->GetRasterXSize();
 		orig_Height = rasterDataset->GetRasterYSize();			
@@ -151,9 +175,9 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
   		2 band file, 0,1, and 2 for a 3 band file, and bands 0, 1, and 2 for a 20 band file.
   		[NB] ... fill all of Red, green and Blue for an input view containing only 1 band, which ensures 
   		that a grayscale view will still appear correctly in your RGB or BGR based bitmap. */
-
+		
 		nBands = rasterDataset->GetRasterCount();
-		nBands = nBands <= 3 ? nBands : 3;
+		//nBands = nBands <= 3 ? nBands : 3;		// TODO: perhaps this should be changed; as we can render any band with external color scheme
 
 		/************************ INITIALISE BANDS AND KEEP THEM OPEN **************/
 
@@ -172,8 +196,9 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 			retVal = false;
 			return retVal;
 		}
-
 		
+		activeBandIndex = 1;
+
 		/******************** GET THE DATA TYPE FROM THE FIRST BAND ***************/
 
 		dataType = poBandR->GetRasterDataType();
@@ -200,11 +225,11 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 
 		//Initialise
 		cPI = GPI_Gray;
-		gridColorIncoming = false;
+		customColorScheme = false;
 		histogramComputed = false;
 		allowHistogram = true;
 
-		allowAsGrid = true;				// Allow the image to be read as grid (if appropriate)
+		//allowAsGrid = true;				// Allow the image to be read as grid (if appropriate)
 		imageQuality = 100;				// Image quality 10-100
 		imageColorScheme = FallLeaves;	// Set the default color scheme if read as grid
 		useHistogram = false;			// Use histogram equalization
@@ -219,55 +244,13 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 		else 
 			hasColorTable=false;
 
-		/******************** COMPUTE THE MIN AND MAX VALUES ***************/
-
-		int bGotMin=false, bGotMax=false;
-		adfMinMax[0] = poBandR->GetMinimum( &bGotMin );
-		adfMinMax[1] = poBandR->GetMaximum( &bGotMax );
+		/************************** MIN/MAX AND RENDERING METHOD ***********************/
 		
-		//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
-		if( ! (bGotMin && bGotMax) )
-		{
-			if ((dataType == GDT_Byte) &&  (ImgType != ADF_FILE) && (hasColorTable==false) && (ImgType != PNG_FILE))
-				//Just guess the min and max
-				//For some reason gdal does not seem to pick up the color table of a png binary image
-			{
-				dfMin = 0.0;
-				dfMax = 255.0;
-			}
-			else 
-			{	
-				GDALComputeRasterMinMax((GDALRasterBandH)poBandR, FALSE, adfMinMax);
-			}
-		}
-		dfMin = adfMinMax[0];
-
-		if (adfMinMax[1] > 0 )	{
-			dfMax = adfMinMax[1];
-		}
-		// If GDALComputeRasterMinMax fails
-		else {
-			dfMax = 255.0;
-		}
+		// retreiving max and min values for the band
+		ComputeBandMinMax();
 		
-		/******************** CHOOSE THE FUNCTION TO READ THE IMAGE ***************/
-		if (ImgType == IMG_FILE || ImgType == KAP_FILE || hasColorTable ||
-			(ImgType == TIFF_FILE && dataType == GDT_UInt16))
-		{
-			handleImage = asComplex;
-		}
-		else if	( dataType == GDT_Byte && ImgType != ADF_FILE && dfMax > 15)
-		{
-			handleImage = asRGB;
-		}
-		else if (dfMax > 1 &&( nBands == 1 || ImgType == ADF_FILE || ImgType == ASC_FILE || ImgType == DEM_FILE)) 
-		{
-			handleImage = asGrid;
-		}
-		else
-		{
-			handleImage = asComplex;
-		}
+		// choosing rendering method
+		handleImage = ChooseRenderingMethod();
 
 		/********************* SET TRANSPARENCY COLOR AND GET THE COLOR INTERPRETATION **********************/
 
@@ -293,17 +276,19 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 			unsigned char nDVr=0,nDVg=0,nDVb=0;
 			if (nBands == 1 )
 			{
-				nDVr = nDVg = 0;
-				nDVb = (unsigned char) nDV;
+				// nDVr = nDVg = 0;
+				// nDVb = (unsigned char) nDV;
+				transColor = RGB(255,255,255);
+				hasTransparency = true;
 			}
 			else
 			{
 				if (poBandR != NULL) nDVr = (unsigned char) poBandR->GetNoDataValue();
 				if (poBandG != NULL) nDVg = (unsigned char) poBandG->GetNoDataValue();
 				if (poBandB != NULL) nDVb = (unsigned char) poBandB->GetNoDataValue();
+				transColor = RGB(nDVr,nDVg,nDVb);
+				hasTransparency = true;
 			}
-			transColor = RGB(nDVr,nDVg,nDVb);
-			hasTransparency = true;
 		}
 		else
 		{
@@ -334,7 +319,7 @@ bool tkRaster::LoadRaster(const char * filename, GDALAccess accessType)
 //		RefreshExtents()
 // *********************************************************
 // When loading buffer the extents are used, so they should be refreshed after each 
-// chnage of orig_XllCenter, orig_YllCenter, orig_dX, orig_dY
+// chage of orig_XllCenter, orig_YllCenter, orig_dX, orig_dY
 void tkRaster::RefreshExtents()
 {
 	_extents.left = orig_XllCenter - orig_dX * 0.5;
@@ -368,45 +353,23 @@ void tkRaster::Close()
 		poBandG = NULL;		// if somebody will want to open new dataset
 		poBandB = NULL;
 	}
+	if (gridColorScheme)
+	{
+		gridColorScheme->Clear();
+	}
+	allowAsGrid = useAutoDetect;
+	activeBandIndex = 1;
 	warped = false;
 }
 
 // *********************************************************
-//		ApplyGridColorScheme()
-// *********************************************************
-void tkRaster::ApplyGridColorScheme(IGridColorScheme* scheme)
-{
-	Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&gridColorScheme);
-	gridColorIncoming = true;
-}
-
-// *********************************************************
-//		get_GridColorScheme()
-// *********************************************************
-IGridColorScheme* tkRaster::get_GridColorScheme()
-{
-	if (gridColorScheme)
-		gridColorScheme->AddRef();
-	return gridColorScheme;
-}
-
-// *********************************************************
 //		LoadImageBuffer()
 // *********************************************************
-// overloaded function
-bool tkRaster::LoadBuffer2(colour** ImageData, Extent& extent, const char * filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel)
-{
-	return LoadBuffer(ImageData, extent.left, extent.bottom, extent.right, extent.top,  filename, downsamplingMode, setRGBToGrey, mapUnitsPerScreenPixel);
-}
-
-// *********************************************************
-//		LoadImageBuffer()
-// *********************************************************
-bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double MaxX, double MaxY, const char * filename,
+bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double MaxX, double MaxY, CStringW filename,
 							   tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel)
 {
 	if (! rasterDataset ) 
-		rasterDataset = (GDALDataset *) GDALOpen(filename, GA_ReadOnly );
+		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 	
 	if (! rasterDataset ) 
 		return false;
@@ -528,7 +491,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		if ((useHistogram) && (allowHistogram))
 		{
 			//Check all the conditions are met for histogram equalization compute the histogram once
-			if (nBands == 1 && !(handleImage == asGrid && allowAsGrid) && !hasColorTable)
+			if (nBands == 1 && !hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
 			{
 				if (!histogramComputed)
 				{
@@ -550,9 +513,9 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		//		Reading data to the buffer
 		// ---------------------------------------------------------
 		bool success;
-		if ( gridColorIncoming || (handleImage == asGrid && allowAsGrid))	/*&& (nBands == 1)*/
+		if ( this->WillBeRenderedAsGrid() )
 		{
-			// if user passed a color scheme image will be opend as grid using the first band
+			// if user passed a color scheme, image will be opend as grid using the first band
 			success = ReadGridAsImage(ImageData, _visibleRect.left, _visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
 		}
 		else
@@ -565,7 +528,6 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		}
 		else
 		{
-			//AfxMessageBox("Failed to read image buffer");
 			// TODO: clear the buffer and parameters
 		}
 	}
@@ -577,10 +539,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 // *********************************************************
 // maxBufferSize - the maximum size of buffer in megabytes if non-positive value is specified, 
 // the whole image will be loaded
-bool tkRaster::LoadBufferFull(colour** ImageData, const char * filename, double maxBufferSize)
+bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize)
 {
 	if (! rasterDataset ) 
-		rasterDataset = (GDALDataset *) GDALOpen(filename, GA_ReadOnly );
+		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 	
 	if (! rasterDataset ) 
 		return false;
@@ -634,7 +596,7 @@ bool tkRaster::LoadBufferFull(colour** ImageData, const char * filename, double 
 // *********************************************************
 //		ReadImage()
 // *********************************************************
-bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)//, bool useHistogram, bool clearGDALCache)
+bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)  //, bool useHistogram, bool clearGDALCache)
 {
     // -----------------------------------------------
 	//  allocating memory for initial buffer
@@ -1061,11 +1023,14 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	_int32 * pafScanAreaInt = NULL;
 	float * pafScanAreaFloat = NULL;
 
-	if (poBandR == NULL)
-	{
-		poBandR = rasterDataset->GetRasterBand(1);
-		// Keep them open until the dataset is destroyed
-	}
+	//if (poBandR == NULL)
+	//{
+	// poBandR = rasterDataset->GetRasterBand(1);
+	// Keep them open until the dataset is destroyed
+	//}
+	
+	Debug::WriteLine("ActiveBand: %d", activeBandIndex);
+	poBandR = rasterDataset->GetRasterBand(activeBandIndex);
 	if (poBandR == NULL) return false;
 
 	try
@@ -1126,18 +1091,8 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	double ka = .7;
 	double kd = .8;
 	
-	
-	if (gridColorIncoming)
-	{
-		//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
-		gridColorScheme->put_NoDataColor(transColor);
-	}
-	else if ( gridColorScheme == NULL || imgColor != imageColorScheme)
-	{
-		CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&gridColorScheme);
-		gridColorScheme->UsePredefined(dfMin, dfMax, imageColorScheme);
-		imgColor = imageColorScheme;
-	}
+	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
+	gridColorScheme->put_NoDataColor(transColor);
 
 	double ai = 0.0, li = 0.0;
 	gridColorScheme->get_AmbientIntensity(&ai);
@@ -1177,14 +1132,12 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	if (genericType == GDT_Int32)
 	{
 		poBandR->AdviseRead ( xOff, yOff,width, height, xBuff, yBuff, GDT_Int32, NULL);
-		poBandR->RasterIO( GF_Read, xOff, yOff,width, height,
-							pafScanAreaInt, xBuff, yBuff, GDT_Int32,0, 0 );
+		poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaInt, xBuff, yBuff, GDT_Int32,0, 0 );
 	}
 	else
 	{
 		poBandR->AdviseRead ( xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
-		poBandR->RasterIO( GF_Read, xOff, yOff,width, height,
-							pafScanAreaFloat, xBuff, yBuff, GDT_Float32,0, 0 );
+		poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaFloat, xBuff, yBuff, GDT_Float32,0, 0 );
 	}
 
 	for (int i = 0; i < yBuff; i++)
@@ -1303,8 +1256,10 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 			}
 
 			else
-			{ // Use the normal hillshade method
-
+			{ 
+				
+				
+				// Use the normal hillshade method
 				newpercent = (long)(((i * xBuff + j)/total)*100);
 				//Find the break
 				break_index = findBreak( bvals, tmp );
@@ -1333,6 +1288,10 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 				GradientModel gradmodel;
 				bi->get_GradientModel(&gradmodel);
 				bi->Release();
+				
+				if (!allowHillshade && colortype == Hillshade)
+					colortype = Gradient;
+
 				if( colortype == Hillshade )
 				{
 					double yone = 0, ytwo = 0, ythree = 0;
@@ -1591,7 +1550,7 @@ inline long tkRaster::findBreak( std::deque<BreakVal> & bVals, double val )
 /*      it.                                                             */
 /************************************************************************/
 
-bool tkRaster::ComputeEqualizationLUTs( const char * filename,
+bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
                          double **ppadfScaleMin, double **ppadfScaleMax, 
                          int ***ppapanLUTs)
 
@@ -1600,7 +1559,7 @@ bool tkRaster::ComputeEqualizationLUTs( const char * filename,
     int nHistSize = 0;
     int *panHistogram = NULL;
 	if (rasterDataset == NULL) 
-		rasterDataset = (GDALDataset *) GDALOpen(filename, GA_ReadOnly );
+		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 
 	GDALRasterBand * poBand;
     
@@ -1712,3 +1671,104 @@ bool tkRaster::SetNoDataValue(double Value)
 		return false;
 }
 
+#pragma region Predefined color scheme
+
+// *********************************************************
+//		GetColorScheme()
+// *********************************************************
+IGridColorScheme* tkRaster::GetColorScheme()
+{
+	long numBreaks;
+	gridColorScheme->get_NumBreaks(&numBreaks);
+	if (numBreaks == 0)
+	{
+		gridColorScheme->UsePredefined(dfMin, dfMax, imageColorScheme);
+	}
+	return gridColorScheme;
+}
+
+// *********************************************************
+//		ApplyPredefinedColorScheme()
+// *********************************************************
+void tkRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
+{
+	imageColorScheme = colorScheme;
+	gridColorScheme->UsePredefined(dfMin, dfMax, colorScheme);
+}
+
+// *********************************************************
+//		ApplyGridColorScheme()
+// *********************************************************
+void tkRaster::ApplyGridColorScheme(IGridColorScheme* scheme)
+{
+	Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&gridColorScheme, false);
+	customColorScheme = true;
+}
+
+// *********************************************************
+//		get_GridColorScheme()
+// *********************************************************
+IGridColorScheme* tkRaster::get_GridColorScheme()
+{
+	return gridColorScheme;
+}
+#pragma endregion
+
+#pragma region Choose rendering
+// *************************************************************
+//	  CanUseExternalColorScheme()
+// *************************************************************
+bool tkRaster::CanUseExternalColorScheme()
+{
+	Debug::WriteLine("Data type: %d", dataType);
+	// TODO: revisit; probably in some cases it's not possible after all
+	//return dataType == GDT_Int32 || dataType == GDT_Float32;
+	return true;
+}
+
+// *************************************************************
+//	  ChooseRenderingMethod()
+// *************************************************************
+HandleImage tkRaster::ChooseRenderingMethod()
+{
+	HandleImage method;
+	if (ImgType == IMG_FILE || ImgType == KAP_FILE || (ImgType == TIFF_FILE && dataType == GDT_UInt16) || hasColorTable )
+	{
+		method = asComplex;
+	}
+	else if	( dataType == GDT_Byte && ImgType != ADF_FILE && dfMax > 15)
+	{
+		method = asRGB;
+	}
+	else if (dfMax > 1 &&( nBands == 1 || ImgType == ADF_FILE || ImgType == ASC_FILE || ImgType == DEM_FILE)) 
+	{
+		method = asGrid;
+	}
+	else if (!IsRgb())
+	{
+		method = asGrid;
+	}
+	else
+	{
+		method = asComplex;
+	}
+	return method;
+}
+
+// *************************************************************
+//	  WillBeRenderedAsGrid()
+// *************************************************************
+bool tkRaster::WillBeRenderedAsGrid()
+{
+	return (allowAsGrid == tkUseFunctionality::useAlways) ||
+		   (allowAsGrid == tkUseFunctionality::useAutoDetect && handleImage == asGrid);
+}
+#pragma endregion
+
+// *************************************************************
+//	  IsRgb()
+// *************************************************************
+bool tkRaster::IsRgb()
+{
+	return GdalHelper::IsRgb(this->get_Dataset());
+}

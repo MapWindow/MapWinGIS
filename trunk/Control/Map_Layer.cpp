@@ -29,6 +29,7 @@
 #include "LabelCategory.h"
 #include "Labels.h"
 #include "Image.h"
+#include "Grid.h"
 
 #include "ShapefileDrawing.h"
 #include "ImageDrawing.h"
@@ -52,7 +53,7 @@ BSTR CMapView::GetLayerName(LONG LayerHandle)
 
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return OLE2BSTR( m_allLayers[LayerHandle]->name );
+		return W2BSTR( m_allLayers[LayerHandle]->name );
 	}
 	else
 	{	
@@ -67,8 +68,8 @@ void CMapView::SetLayerName(LONG LayerHandle, LPCTSTR newVal)
 
 	if( IsValidLayer(LayerHandle) )
 	{	
-		::SysFreeString(m_allLayers[LayerHandle]->name);
-		m_allLayers[LayerHandle]->name = A2BSTR(newVal);
+		USES_CONVERSION;
+		m_allLayers[LayerHandle]->name = A2W(newVal);	// TODO: use Unicode
 	}
 	else
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -257,24 +258,6 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 }
 
 // ***************************************************************
-//		LoadImageAttributesFromGridColorScheme()
-// ***************************************************************
-void LoadImageAttributesFromGridColorScheme(IImage* img, IGridColorScheme* scheme)
-{
-	if (img && scheme)
-	{
-		OLE_COLOR color;
-		scheme->get_NoDataColor(&color);
-		img->put_TransparencyColor(color);
-		img->put_TransparencyColor2(color);
-		img->put_UseTransparencyColor(true);
-		img->put_UpsamplingMode(tkInterpolationMode::imNone);		// we actually want to see pixels in grids
-		img->put_DownsamplingMode(tkInterpolationMode::imNone);		// for performance reasons
-		// TODO: probably sampling mode should be stored in the color scheme
-	}
-}
-
-// ***************************************************************
 //		AddLayer()
 // ***************************************************************
 long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
@@ -304,7 +287,9 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	LockWindow( lmLock );
-	
+
+	Layer * l = NULL;
+
 	if( ishp != NULL )
 	{
 		tkShapefileSourceType type;
@@ -316,104 +301,49 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			return -1;
 		}
 		
-		Layer * l = new Layer();
+		l = new Layer();
 		l->object = ishp;
 
+		IExtents * box = NULL;
+		ishp->get_Extents(&box);
+		double xm,ym,zm,xM,yM,zM;
+		box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
+		l->extents = Extent(xm,xM,ym,yM);
+		box->Release();
+		box = NULL;
+		
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
+		l->type = ShapefileLayer;
+		
+		for(size_t i = 0; i < m_allLayers.size(); i++ )
 		{
-			IExtents * box = NULL;
-			ishp->get_Extents(&box);
-			double xm,ym,zm,xM,yM,zM;
-			box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-			l->extents = Extent(xm,xM,ym,yM);
-			box->Release();
-			box = NULL;
-			
-			l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
-			l->type = ShapefileLayer;
-			
-			for(size_t i = 0; i < m_allLayers.size(); i++ )
-			{
-				if( !m_allLayers[i] )  // that means we can reuse it
-				{	
-					layerHandle = i;
-					m_allLayers[i] = l;
-					break;
-				}
-			}
-			
-			if( layerHandle == -1)
-			{
-				layerHandle = m_allLayers.size();
-				m_allLayers.push_back(l);
-			}
-
-			// if we don't have a projection, let's try and grab projection from it
-			VARIANT_BOOL isEmpty = VARIANT_FALSE;
-			m_projection->get_IsEmpty(&isEmpty);
-			if (isEmpty)
-			{
-				IGeoProjection* proj = NULL;
-				ishp->get_GeoProjection(&proj);
-				if (proj)
-				{
-					proj->get_IsEmpty(&isEmpty);
-					if (!isEmpty)
-					{
-						IGeoProjection* newProj = NULL;
-						GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&newProj);
-						VARIANT_BOOL vb;
-						newProj->CopyFrom(proj, &vb);
-						if (!vb)
-						{
-							ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
-							newProj->Release();
-						}
-						else
-						{
-							this->SetGeoProjection(newProj);
-						}
-					}
-					proj->Release();
-				}
-			}
-
-			m_activeLayers.push_back(layerHandle);
-
-			ShpfileType type;
-			ishp->get_ShapefileType(&type);
-
-			//Set the initialExtents
-			if (m_globalSettings.zoomToFirstLayer)
-			{
-				// set the initial extents
-				if( m_activeLayers.size() == 1 && pVisible != FALSE )
-				{	
-					double xrange = l->extents.right - l->extents.left;
-					double yrange = l->extents.top - l->extents.bottom;
-					extents.left = l->extents.left - xrange*m_extentPad;
-					extents.right = l->extents.right + xrange*m_extentPad;
-					extents.top = l->extents.top + yrange*m_extentPad;
-					extents.bottom = l->extents.bottom - yrange*m_extentPad;
-					
-					SetExtentsCore(extents);
-				}
+			if( !m_allLayers[i] )  // that means we can reuse it
+			{	
+				layerHandle = i;
+				m_allLayers[i] = l;
+				break;
 			}
 		}
+		
+		if( layerHandle == -1)
+		{
+			layerHandle = m_allLayers.size();
+			m_allLayers.push_back(l);
+		}
+
+		m_activeLayers.push_back(layerHandle);
+
+		//ShpfileType type;
+		//ishp->get_ShapefileType(&type);
 	}
 
 	// grids aren't added directly; an image representation is created first 
 	// using particular color scheme
-	CString gridFilename = "";
+	CStringW gridFilename = L"";
 	IGridColorScheme* gridColorScheme = NULL;
 
 	if (igrid != NULL)
 	{
-		BSTR name;
-		igrid->get_Filename(&name);
-		
-		USES_CONVERSION;
-		gridFilename = OLE2A(name);
-		
 		tkGridSourceType sourceType;
 		igrid->get_SourceType(&sourceType);
 		if (sourceType == tkGridSourceType::gstUninitialized)
@@ -423,63 +353,48 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			return -1;
 		}
 
-		CString bmpName = Utility::GetPathWOExtension(gridFilename) + ".bmp";
-		CString tiffName = Utility::GetPathWOExtension(gridFilename) + ".tif";
-		CString legendName = Utility::GetPathWOExtension(gridFilename) + ".mwleg";
-		CString imageName;
-		
-		bool schemeExists = Utility::fileExists(legendName) ? true : false;
+		CGrid* grid = (CGrid*)igrid;
+		gridFilename = grid->GetFilename();
+		CStringW proxyName = grid->GetProxyName();
+		CStringW legendName = grid->GetProxyLegendName();
+		CStringW imageName;
 
-		igrid->GetColorScheme(&gridColorScheme);
+		PredefinedColorScheme coloring = m_globalSettings.defaultColorSchemeForGrids;
+		if (m_globalSettings.randomColorSchemeForGrids)
+		{
+			srand ((unsigned int)time(NULL));
+			int r = rand();
+			coloring = (PredefinedColorScheme)(r % 7);
+		}
+
+		igrid->RetrieveOrGenerateColorScheme(gsrAuto, gsgGradient, coloring, &gridColorScheme);
 		if (gridColorScheme)
 		{
-			VARIANT_BOOL vb;
+			// there is no proxy; either create a new one or opening directly
+			ICallback* cback = NULL;
+			igrid->get_GlobalCallback(&cback);
+			tkGridProxyMode displayMode;
+			igrid->get_PreferedDisplayMode(&displayMode);
+			igrid->OpenAsImage(gridColorScheme, displayMode, cback, &iimg);
+			if (cback) cback->Release();
 
-			tkGridSourceMode mode;
-			if (schemeExists)
-			{
-				if (Utility::fileExists(tiffName) &&  Utility::IsFileYounger(tiffName, gridFilename))
-				{
-					mode = gsmTiffProxy;
-					imageName = tiffName;
-				}
-				else if (Utility::fileExists(bmpName) && Utility::IsFileYounger(bmpName, gridFilename))
-				{
-					mode = gsmBmpProxy;
-					imageName = bmpName;
-				}
-			}
-
-			if (imageName.GetLength() > 0)
-			{
-				// let's open the existing image representation
-				CoCreateInstance( CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&iimg);
-				iimg->Open(A2BSTR(imageName), ImageType::USE_FILE_EXTENSION, False, NULL, &vb);
-				if (!vb) 
-				{
-					iimg->Close(&vb);
-					iimg->Release();
-					iimg = NULL;
-				}
-				else
-				{
-					CImageClass* img = ((CImageClass*)iimg);
-					img->sourceGridName = gridFilename;
-					img->sourceGridMode = mode;
-				}
-			}
-			else
-			{
-				// let's create a new one
-				if (!Utility::fileExists(legendName)) {
-					gridColorScheme->WriteToFile(A2BSTR(legendName), &vb);	// save the newly created scheme
-				}				igrid->OpenAsImage(gridColorScheme, &iimg);
-			}
-			
 			if (iimg)
 			{
 				// load transparency, etc
-				LoadImageAttributesFromGridColorScheme(iimg, gridColorScheme);
+				// update color scheme from disk, as it's the one that is actually used; 
+				// and not necessarily the one we passed to Grid.OpenAsImage
+				VARIANT_BOOL vb;
+				VARIANT_BOOL isProxy;
+				iimg->get_IsGridProxy(&isProxy);
+				CStringW legendName = isProxy ? grid->GetProxyLegendName() : grid->GetLegendName();
+				IGridColorScheme* newScheme = NULL;
+				GetUtils()->CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
+				newScheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
+				if (vb)
+				{
+					((CImageClass*)iimg)->LoadImageAttributesFromGridColorScheme(newScheme);
+				}
+				newScheme->Release();
 			}
 		}
 	}
@@ -496,7 +411,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			return -1;
 		}
 		
-		Layer * l = new Layer();
+		l = new Layer();
 		l->object = iimg;
 
 		bool inserted = false;
@@ -534,38 +449,84 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		ImageLayerInfo * ili = new ImageLayerInfo();
 		l->addInfo = ili;
 
-		// if image is representation of grid let's register it
-		if (igrid && gridColorScheme)
-		{
-			this->SetImageLayerColorScheme(layerHandle, gridColorScheme);
-			this->SetGridFileName(layerHandle, gridFilename );
-		}
-		
 		// try to save pixels in case image grouping is enabled
 		if (_canUseImageGrouping)
 		{
 			if (!((CImageClass*)iimg)->SaveNotNullPixels())	// analysing pixels...
 				iimg->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more, before transparency values will be changed
 		}
-
-		//Set the initialExtents
-		if (m_globalSettings.zoomToFirstLayer)
-		{
-			if( m_activeLayers.size() == 1 && pVisible)
-			{	
-				double xrange = l->extents.right - l->extents.left;
-				double yrange = l->extents.top - l->extents.bottom;
-				extents.left = l->extents.left - xrange*m_extentPad;
-				extents.right = l->extents.right + xrange*m_extentPad;
-				extents.top = l->extents.top + yrange*m_extentPad;
-				extents.bottom = l->extents.bottom - yrange*m_extentPad;
-
-				SetExtentsCore(extents);
-			}
-		}
 		m_numImages++;
 	}
+	
+	// if we don't have a projection, let's try and grab projection from it
+	if (m_globalSettings.grabMapProjectionFromFirstLayer && (ishp || iimg))
+	{
+		VARIANT_BOOL isEmpty = VARIANT_FALSE;
+		m_projection->get_IsEmpty(&isEmpty);
+		if (isEmpty)
+		{
+			IGeoProjection* proj = NULL;
+			if (ishp)
+			{
+				// simply grab the object from sf
+				ishp->get_GeoProjection(&proj);
+			}
+			else
+			{
+				// there is no GeoProjection object; so create it from the string
+				CComBSTR bstr;
+				iimg->GetProjection(&bstr);
+				if (bstr.Length() > 0)
+				{
+					VARIANT_BOOL vb;
+					GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&proj);
+					proj->ImportFromAutoDetect(bstr, &vb);
+					if (!vb)
+					{
+						proj->Release();
+						proj = NULL;
+					}
+				}
+			}
+			
+			if (proj)
+			{
+				proj->get_IsEmpty(&isEmpty);
+				if (!isEmpty)
+				{
+					IGeoProjection* newProj = NULL;
+					proj->Clone(&newProj);
+					if (!newProj)
+					{
+						ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
+					}
+					else
+					{
+						this->SetGeoProjection(newProj);
+					}
+				}
+				proj->Release();
+			}
+		}
+	}
 
+	// set initial extents
+	if (l != NULL && m_globalSettings.zoomToFirstLayer)
+	{
+		if( m_activeLayers.size() == 1 && pVisible)
+		{	
+			double xrange = l->extents.right - l->extents.left;
+			double yrange = l->extents.top - l->extents.bottom;
+			extents.left = l->extents.left - xrange*m_extentPad;
+			extents.right = l->extents.right + xrange*m_extentPad;
+			extents.top = l->extents.top + yrange*m_extentPad;
+			extents.bottom = l->extents.bottom - yrange*m_extentPad;
+
+			SetExtentsCore(extents);
+		}
+	}
+
+	if (l != NULL) FireLayersChanged();
 	LockWindow( lmUnlock );
 	return layerHandle;
 }
@@ -641,6 +602,8 @@ void CMapView::RemoveLayer(long LayerHandle)
 			}
 
 			m_allLayers[LayerHandle] = NULL;
+
+			FireLayersChanged();
 
 			m_canbitblt = FALSE;
 			if( !m_lockCount )
@@ -734,16 +697,21 @@ void CMapView::RemoveAllLayers()
 		}
 	}
 	m_allLayers.clear();
+	FireLayersChanged();
+
 	LockWindow( lmUnlock );
 	
-	// clear the projection if there is one
-	VARIANT_BOOL isEmpty;
-	m_projection->get_IsEmpty(&isEmpty);
-	if (hadLayers && !isEmpty)
+	// clear the projection
+	if (m_globalSettings.grabMapProjectionFromFirstLayer)
 	{
-		IGeoProjection* proj = NULL;
-		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
-		SetGeoProjection(proj);
+		VARIANT_BOOL isEmpty;
+		m_projection->get_IsEmpty(&isEmpty);
+		if (hadLayers && !isEmpty)
+		{
+			IGeoProjection* proj = NULL;
+			GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+			SetGeoProjection(proj);
+		}
 	}
 
 	m_canbitblt = FALSE;
@@ -1115,24 +1083,20 @@ void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 //		DeserializeLayerCore()
 // ********************************************************
 // Loads layer based on the filename; return layer handle
-int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopExecution* callback)
+int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStopExecution* callback)
 {
-	CString filename = CPLGetXMLValue( node, "Filename", NULL );
+	const char* nameA = CPLGetXMLValue( node, "Filename", NULL );
 	
-    char buffer[4096] = ""; 
+    /*char buffer[4096] = ""; 
     DWORD retval = GetFullPathNameA(filename, 4096, buffer, NULL);
 	if (retval > 4096)
 	{
 		return -1;
 	}
+	filename = buffer;*/
 
-	filename = buffer;
-	/*if (!Utility::fileExists(filename))
-	{
-		ErrorMessage(tkINVALID_FILENAME);
-		return -1;
-	}*/
-
+	CStringW filename = Utility::ConvertFromUtf8(nameA);
+	
 	bool visible = false;
 	CString s = CPLGetXMLValue( node, "LayerVisible", NULL );
 	if (s != "") visible = atoi(s) == 0 ? false : true;
@@ -1159,19 +1123,20 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopE
 		
 		if (sf) 
 		{
-			if (filename == "")
+			if (filename.GetLength() != 0)
 			{
-				sf->CreateNew(A2BSTR(""), ShpfileType::SHP_POLYGON, &vb);    // shapefile type is arbitrary; the correct one will be supplied on deserialization
+				// shapefile type is arbitrary; the correct one will be supplied on deserialization
+				sf->CreateNew(A2BSTR(""), ShpfileType::SHP_POLYGON, &vb);    
 			}
 			else
 			{
-				sf->Open(A2BSTR(filename), NULL, &vb);
+				sf->Open(W2BSTR(filename), NULL, &vb);
 			}
 		
 			if (vb)
 			{
 				layerHandle = this->AddLayer(sf, (BOOL)visible);
-				sf->Release();	// add layer added second reference
+				sf->Release();	// Map.AddLayer added second reference
 				
 				CPLXMLNode* nodeShapefile = CPLGetXMLNode(node, "ShapefileClass");
 				if (nodeShapefile)
@@ -1189,7 +1154,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopE
 		
 		if (img) 
 		{
-			img->Open(A2BSTR(filename), USE_FILE_EXTENSION, VARIANT_FALSE, NULL, &vb);
+			img->Open(W2BSTR(filename), USE_FILE_EXTENSION, VARIANT_FALSE, NULL, &vb);
 		}
 		
 		if (vb)
@@ -1210,7 +1175,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CString ProjectName, IStopE
 	}
 
 	s = CPLGetXMLValue( node, "LayerName", NULL );
-	m_allLayers[layerHandle]->name = A2BSTR(s);
+	m_allLayers[layerHandle]->name = Utility::ConvertFromUtf8(s);
 
 	s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
 	m_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
@@ -1258,7 +1223,7 @@ BSTR CMapView::SerializeLayerOptions(LONG LayerHandle)
 //		SerializeLayerCore()
 // ********************************************************
 // For map state generation
-CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CString Filename)
+CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 {
 	USES_CONVERSION;
 	
@@ -1288,7 +1253,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CString Filename)
 					break;
 			}
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerType", s);
-			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerName", OLE2CA(layer->name));
+			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerName", layer->name);
 			
 			Utility::CPLCreateXMLAttributeAndValue( psLayer, "LayerVisible", CPLString().Printf("%d", (int)(layer->flags & Visible) ));
 			
@@ -1311,14 +1276,11 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CString Filename)
 			IImage* img = NULL;
 			IShapefile* sf = NULL;
 			
-			//layer->object->QueryInterface(IID_IImage,(void**)&img);
-			//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
 			layer->QueryShapefile(&sf);
 			layer->QueryImage(&img);
 
 			if (sf || img)
 			{
-				//BSTR filename;
 				CPLXMLNode* node = NULL;
 
 				if (sf)
@@ -1496,8 +1458,6 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 		{
 			IShapefile* sf = NULL;
 			IImage* img = NULL;
-			//layer->object->QueryInterface(IID_IImage,(void**)&img);
-			//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
 			layer->QueryShapefile(&sf);
 			layer->QueryImage(&img);
 
@@ -1675,7 +1635,7 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 		}
 	}
 
-	CPLXMLNode* node = CPLParseXMLFile(name);
+	CPLXMLNode* node = CPLParseXMLFile(name);		// TODO: use Unicode
 	if (node)
 	{
 		if (_stricmp( node->pszValue, "MapWinGIS") != 0)

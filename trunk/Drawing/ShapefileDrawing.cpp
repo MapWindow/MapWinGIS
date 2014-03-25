@@ -188,19 +188,20 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		else
 		{
 			// retrieving the name
-			BSTR fname;
+			CComBSTR fname;
 			sf->get_Filename(&fname);
-			int b_strlen = wcslen(fname);
+			/*int b_strlen = wcslen(fname);
 			char * sFilename = new char[(b_strlen+1)<<1];
 			int sFilenamelast = WideCharToMultiByte(CP_ACP,0,fname,b_strlen,sFilename,b_strlen<<1,0,0);
 			::SysFreeString(fname);
-			sFilename[sFilenamelast] = 0;
+			sFilename[sFilenamelast] = 0;*/
 			
 			// reading index
+			USES_CONVERSION;
 			_sfReader = new CShapefileReader();
-			if (!_sfReader->ReadShapefileIndex(sFilename, file))
+			if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
 			{
-				delete[] sFilename;
+				//delete[] sFilename;
 				delete _sfReader; _sfReader = NULL;
 				return;
 				// TODO: Add error handling
@@ -211,7 +212,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 			// ---------------------------------------------------------
 			if (_useSpatialIndex)
 			{
-				selectResult = SelectShapesFromSpatialIndex(sFilename, _extents);
+				selectResult = SelectShapesFromSpatialIndex(OLE2A(fname), _extents);		// TODO: use Unicode
 				if (!selectResult)
 				{
 					_useSpatialIndex = VARIANT_FALSE;
@@ -222,7 +223,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 					sort(selectResult->begin(), selectResult->end());
 				}
 			}
-			delete[] sFilename;
+			//delete[] sFilename;
 		}
 	}
 	#ifdef USE_TIMER

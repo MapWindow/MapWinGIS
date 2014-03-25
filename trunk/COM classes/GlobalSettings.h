@@ -85,12 +85,26 @@ public:
 	STDMETHOD(put_LabelsSmoothingMode)(tkSmoothingMode newVal);
 	STDMETHOD(get_LabelsCompositingQuality)(tkCompositingQuality* pVal);
 	STDMETHOD(put_LabelsCompositingQuality)(tkCompositingQuality newVal);
-	STDMETHOD(put_ShortUnitsString)(tkLocalizedStrings unit, BSTR localizedString);
-	STDMETHOD(get_ShortUnitsString)(tkLocalizedStrings unit, BSTR* retVal);
+	STDMETHOD(put_LocalizedString)(tkLocalizedStrings unit, BSTR localizedString);
+	STDMETHOD(get_LocalizedString)(tkLocalizedStrings unit, BSTR* retVal);
 	STDMETHOD(put_ZoomToFirstLayer)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ZoomToFirstLayer)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_LabelsCollisionMode)(tkCollisionMode newVal);
 	STDMETHOD(get_LabelsCollisionMode)(tkCollisionMode* pVal);
+	STDMETHOD(get_GridProxyFormat)(tkGridProxyFormat* pVal);
+	STDMETHOD(put_GridProxyFormat)(tkGridProxyFormat newVal);
+	STDMETHOD(get_MaxNoProxyGridSizeMb)(double* pVal);
+	STDMETHOD(put_MaxNoProxyGridSizeMb)(double newVal);
+	STDMETHOD(put_GridProxyMode)(tkGridProxyMode newVal);
+	STDMETHOD(get_GridProxyMode)(tkGridProxyMode* pVal);
+	STDMETHOD(put_MaxUniqueValuesCountForGridScheme)(int newVal);
+	STDMETHOD(get_MaxUniqueValuesCountForGridScheme)(int* pVal);
+	STDMETHOD(put_GrabMapProjectionFromFirstLayer)(VARIANT_BOOL newVal);
+	STDMETHOD(get_GrabMapProjectionFromFirstLayer)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_RandomColorSchemeForGrids)( VARIANT_BOOL *retVal);
+	STDMETHOD(put_RandomColorSchemeForGrids)( VARIANT_BOOL newVal);
+	STDMETHOD(get_DefaultColorSchemeForGrids)( PredefinedColorScheme *retVal);
+	STDMETHOD(put_DefaultColorSchemeForGrids)( PredefinedColorScheme newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

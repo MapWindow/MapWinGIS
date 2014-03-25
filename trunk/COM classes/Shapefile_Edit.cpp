@@ -220,8 +220,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			}
 			else
 			{
-				_shpfile = freopen(_shpfileName,"wb+", _shpfile);
-				_shxfile = freopen(_shxfileName,"wb+",_shxfile);
+				_shpfile = _wfreopen(_shpfileName, L"wb+", _shpfile);
+				_shxfile = _wfreopen(_shxfileName, L"wb+",_shxfile);
 
 				if( _shpfile == NULL || _shxfile == NULL )
 				{	
@@ -247,8 +247,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 					writeShp(_shpfile,cBack);
 					writeShx(_shxfile,cBack);
 
-					_shpfile = freopen(_shpfileName,"rb+", _shpfile);
-					_shxfile = freopen(_shxfileName,"rb+",_shxfile);
+					_shpfile = _wfreopen(_shpfileName,L"rb+", _shpfile);
+					_shxfile = _wfreopen(_shxfileName,L"rb+",_shxfile);
 					
 					if( _shpfile == NULL || _shxfile == NULL )
 					{	

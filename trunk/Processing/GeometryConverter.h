@@ -46,7 +46,7 @@ class GeometryConverter
 		}
 		GeometryConverter(IShapefile* sf)
 		{
-			conversionFactor = 1.0;
+			
 			this->SetConversionFactor(sf);
 		}
 		void SetConversionFactor(IShapefile* sf);

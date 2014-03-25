@@ -1767,7 +1767,7 @@ bool CShapeNetwork::IsAligned()
 	}
 }
 
-long round( double d )
+long roundCustom( double d )
 {	
 	if( ceil(d) - d <= .5 )
 		return (int)ceil(d);
@@ -1817,8 +1817,8 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 			return S_OK;
 		}
 
-		long ncols = round( ( xurcenter - xllcenter ) / cellsize ) + 1;
-		long nrows = round( ( yurcenter - yllcenter )/ cellsize ) + 1;
+		long ncols = roundCustom((xurcenter - xllcenter) / cellsize) + 1;
+		long nrows = roundCustom((yurcenter - yllcenter) / cellsize) + 1;
 
 		IGridHeader * nbheader = NULL;
 		CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&nbheader);

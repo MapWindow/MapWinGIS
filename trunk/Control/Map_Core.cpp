@@ -171,26 +171,27 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 
 	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
 	{
-		Layer * l = m_allLayers[LayerHandle];
-		if(l->type == ImageLayer)
+		// redirected to image class for backward compatibility
+		IGridColorScheme* scheme = NULL;
+		ColorScheme->QueryInterface(IID_IGridColorScheme,(void**)&scheme);
+		if (scheme)
 		{
-			ImageLayerInfo * ili = (ImageLayerInfo*)(l->addInfo);
-
-			Utility::put_ComReference(ColorScheme, &ili->ColorScheme);
-
-			/*if(ili->ColorScheme != NULL)
-				ili->ColorScheme->Release();
-
-			ili->ColorScheme = ColorScheme;
-
-			if(ColorScheme!= NULL)
-				ColorScheme->AddRef();*/
-
-			return VARIANT_TRUE;
+			IImage* img = this->GetImage(LayerHandle);
+			if (img != NULL)
+			{
+				img->put_ExternalColorScheme(scheme);
+				img->Release();
+				return VARIANT_TRUE;
+			}
+			else
+			{
+				ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
+				return VARIANT_FALSE;
+			}
+			scheme->Release();
 		}
 		else
 		{
-			
 			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return VARIANT_FALSE;
 		}
@@ -507,11 +508,19 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 		}
 		else if(l->type == ImageLayer)
 		{
-			ImageLayerInfo* ili = (ImageLayerInfo*)(l->addInfo);
-			if( ili->ColorScheme != NULL)
-				ili->ColorScheme->AddRef();
-
-			return (ili->ColorScheme);
+ 			// redirected to image color scheme for backward compatibility
+			IGridColorScheme* scheme = NULL;
+			IImage* img = this->GetImage(LayerHandle);
+			if (img != NULL)
+			{
+				img->get_ExternalColorScheme(&scheme);
+				img->Release();
+			}
+			else
+			{
+				ErrorMessage(tkUNEXPECTED_LAYER_TYPE);	
+			}
+			return scheme;
 		}
 		else
 		{
@@ -549,7 +558,6 @@ inline double CMapView::makeVal( const char * sVal )
 	return val;
 }
 
-
 BSTR CMapView::GetGridFileName(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -557,25 +565,24 @@ BSTR CMapView::GetGridFileName(LONG LayerHandle)
 
 	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
 	{
-		Layer * l = m_allLayers[LayerHandle];
-		if(l->type == ImageLayer)
-		{
-			ImageLayerInfo * ili = (ImageLayerInfo*)(l->addInfo);
-			return ili->GridFileName.AllocSysString();
+		// redirected to image class for backward compatibility
+		IImage* img = this->GetImage(LayerHandle);
+		if (img != NULL)
+		{	
+			BSTR gridName;
+			img->get_SourceGridName(&gridName);
+			img->Release();
+			return gridName;
 		}
 		else
 		{
-			m_lastErrorCode = tkUNEXPECTED_LAYER_TYPE;
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
+			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return retval.AllocSysString();
 		}
 	}
 	else
 	{
-		m_lastErrorCode = tkINVALID_LAYER_HANDLE;
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return retval.AllocSysString();
 	}
 }
@@ -586,28 +593,22 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 
 	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
 	{
-		Layer * l = m_allLayers[LayerHandle];
-		if(l->type == ImageLayer)
+		// redirected to image class for backward compatibility
+		IImage* img = this->GetImage(LayerHandle);
+		if (img != NULL)
 		{
-			ImageLayerInfo * ili = (ImageLayerInfo*)(l->addInfo);
-
-			ili->GridFileName = newVal;
-			return;
+			USES_CONVERSION;
+			((CImageClass*)img)->sourceGridName = A2W(newVal);		// TODO: use Unicode
+			img->Release();
 		}
 		else
 		{
-			m_lastErrorCode = tkUNEXPECTED_LAYER_TYPE;
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
-			return;
+			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 		}
 	}
 	else
 	{
-		m_lastErrorCode = tkINVALID_LAYER_HANDLE;
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
-		return;
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
 }
 

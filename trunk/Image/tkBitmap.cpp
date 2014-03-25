@@ -198,7 +198,7 @@ bool tkBitmap::CreateBitmap(const char * bmp_file, const colour * ImageData)
 	return true;
 }
 
-bool tkBitmap::Open(const char *FileName, colour *& ImageData)
+bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 {
 	USES_CONVERSION;
 	
@@ -206,7 +206,7 @@ bool tkBitmap::Open(const char *FileName, colour *& ImageData)
 	Begin Code for actual Bitmap file reading
 	********************************/
 
-	FILE* fin = fopen(FileName,"rb");
+	FILE* fin = _wfopen(FileName, L"rb");
 	
 	if( !fin )
 		return false;
@@ -503,7 +503,7 @@ bool tkBitmap::Open(const char *FileName, colour *& ImageData)
 	return true;
 }
 
-bool tkBitmap::Open(const char *FileName)
+bool tkBitmap::Open(CStringW FileName)
 {
 	
 	/********************************
@@ -515,9 +515,12 @@ bool tkBitmap::Open(const char *FileName)
 	// file with write access when (if?) needed.
 	// bmpfile = fopen(FileName,"r+b");
 	writable = false;
-	bmpFileName = new char[_tcslen(FileName) + 1];
-	strcpy(bmpFileName, FileName);
-	bmpfile = fopen(FileName,"rb");
+	
+	//bmpFileName = new char[_tcslen(FileName) + 1];
+	//strcpy(bmpFileName, FileName);
+	bmpFileName = FileName;
+
+	bmpfile = _wfopen(FileName, L"rb");
 
 	if( !bmpfile )
 		return false;
@@ -604,14 +607,14 @@ tkBitmap::tkBitmap()
 	bmiColors = NULL;
 	globalCallback = NULL;
 	key = A2BSTR("");
-	bmpFileName = NULL;
+	//bmpFileName = NULL;
 }
 
 tkBitmap::~tkBitmap()
 {	Close();
 
-	if (bmpFileName != NULL)
-		delete [] bmpFileName;
+	//if (bmpFileName != NULL)
+	//	delete [] bmpFileName;
 
 	::SysFreeString(key);
 }
@@ -694,7 +697,7 @@ bool tkBitmap::setValue( long Row, long Column, colour Value )
 {	
 	if (!writable)
 	{
-		bmpfile = freopen(bmpFileName, "r+b", bmpfile);
+		bmpfile = _wfreopen(bmpFileName, L"r+b", bmpfile);
 		writable = true;
 	}
 

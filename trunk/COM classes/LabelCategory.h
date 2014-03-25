@@ -221,7 +221,7 @@ private:
 	BSTR m_expression;
 	VARIANT m_minValue;
 	VARIANT m_maxValue;
-	VARIANT_BOOL m_enabled;		// doesn't infuence the drawing; is needed for symbology plug-in
+	VARIANT_BOOL m_enabled;		// doesn't influence the drawing; is needed for symbology plug-in
 	long m_priority;
 	CLabelOptions m_options;
 	

@@ -24,9 +24,9 @@
 #include "Grid.h"
 #include "Projections.h"
 #include "cpl_string.h"
-#include <set>
 #include "comutil.h"
 #include "Image.h"
+#include "GdalHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -36,16 +36,6 @@ static char THIS_FILE[] = __FILE__;
 
 // CGrid
 CGrid * activeGridObject = NULL;
-
-CString getProjectionFileName( CString gridFilename )
-{
-	int theDot = gridFilename.ReverseFind('.');
-
-	if (theDot < 0)
-		return gridFilename + ".prj";
-
-	return gridFilename.Left(theDot + 1) + "prj";
-}
 
 void gridCOMCALLBACK( int number, const char * message )
 {	USES_CONVERSION;
@@ -71,6 +61,7 @@ CGrid::CGrid()
 	lastErrorCode = tkNO_ERROR;
 	key = A2BSTR("");
 	filename = A2BSTR("");
+	preferedDisplayMode = gpmAuto;
 }
 
 CGrid::~CGrid()
@@ -84,132 +75,24 @@ CGrid::~CGrid()
 	::SysFreeString(key);
 	key = NULL;
 
-	::SysFreeString(filename);
-	filename = NULL;
-
 	globalCallback = NULL;	
 }
 
+// ***************************************************
+//		get_RasterColorTableColoringScheme()
+// ***************************************************
 // See comments at the top of tkGridRaster::GetIntValueGridColorTable
 // Builds unique values color scheme for GDAL integer grids
-STDMETHODIMP CGrid::get_RasterColorTableColoringScheme(IGridColorScheme * *pVal)
+STDMETHODIMP CGrid::get_RasterColorTableColoringScheme(IGridColorScheme **pVal)
 {
-	if (trgrid == NULL)
-		return S_FALSE;
-
-	if (trgrid->GetIntValueGridColorTable(pVal))
-		return S_OK;
-	else
-		return S_FALSE;
+	if (trgrid == NULL) 	return S_FALSE;
+	return trgrid->GetIntValueGridColorTable(pVal) ? S_OK : S_FALSE;
 }
 
-// Tries to build unique values color scheme for any grid type
-// *************************************************************
-//		GetFloatValueGridColorTable()
-// *************************************************************
-bool CGrid::GetFloatValueGridColorTable(GradientModel gradientModel, ColoringType coloringType, IGridColorScheme** newScheme)
-{
-	*newScheme = NULL;
 
-	IGridHeader* header = NULL;
-	this->get_Header(&header);
-	if (!header)
-		return false;
-
-	CComVariant varNodata;
-	long rows = 0, cols = 0;
-
-	header->get_NumberCols(&cols);
-	header->get_NumberRows(&rows);
-	header->get_NodataValue(&varNodata);
-	header->Release();
-	
-	double noDataValue;
-	dVal(varNodata, noDataValue);
-
-	// TODO: take into account decimal separator
-	set<CComVariant> values;
-
-	for(int i = 0; i < rows; i++)
-	{
-		for(int j = 0; j < cols; j++)
-		{
-			CComVariant var;
-			this->get_Value(j, i, &var);
-			if (values.find(var) == values.end())
-			{
-				values.insert(var);
-				if (values.size() > 100) 
-				{
-					return false;		// there are too may of them for unique values classification
-				}
-			}
-		}
-	}
-
-	if (values.empty())    // it's empty, hence no scheme
-		return false;
-
-	IGridColorScheme* result = NULL;
-	CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&result);
-	if (result)
-	{
-		IColorScheme* scheme = NULL;
-		CoCreateInstance(CLSID_ColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IColorScheme,(void**)&scheme);
-		scheme->SetColors4((PredefinedColorScheme)(rand() % 7));
-		
-		double minValue, maxValue;
-		dVal(*values.begin(), minValue);
-		dVal(*values.rbegin(), maxValue);
-
-		set<CComVariant>::iterator it = values.begin();
-		while (it != values.end())
-		{
-			double val;
-			dVal(*it, val);
-
-			// add break for value
-			IGridColorBreak * brk;
-			CoCreateInstance(CLSID_GridColorBreak,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorBreak,(void**)&brk);
-			brk->put_LowValue( val );
-			brk->put_HighValue( val );
-
-			OLE_COLOR color;
-			if (maxValue == minValue)
-			{
-				double rnd = (double)rand()/(double)RAND_MAX;
-				scheme->get_RandomColor(rnd, &color);	// any color from the scheme
-			}
-            else
-			{
-                double ratio = (val - minValue) / (maxValue - minValue);
-				if (coloringType == ColoringType::Random)
-				{
-					scheme->get_RandomColor(ratio, &color);
-				}
-				else
-				{
-					scheme->get_GraduatedColor(ratio, &color);
-				}
-			}
-			
-			brk->put_LowColor(color);	 
-            brk->put_HighColor(color);
-			brk->put_ColoringType(coloringType);
-            brk->put_GradientModel(gradientModel);
-
-			result->InsertBreak(brk);
-			brk->Release();
-
-			it++;
-		}
-		scheme->Release();
-		*newScheme = result;
-		return true;
-	}
-	return false;
-}
-
+// ***************************************************
+//		get_Header()
+// ***************************************************
 STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -327,6 +210,9 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		AssignNewProjection()
+// ***************************************************
 STDMETHODIMP CGrid::AssignNewProjection(BSTR projection, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
@@ -337,6 +223,46 @@ STDMETHODIMP CGrid::AssignNewProjection(BSTR projection, VARIANT_BOOL *retval)
 	return S_OK;
 }
 
+// ***************************************************
+//		SaveProjection()
+// ***************************************************
+// TODO:!!! use geoprojection
+void CGrid::SaveProjection(char* projection)						
+{
+	try
+	{
+		CStringW  projectionFilename = Utility::getProjectionFilename(GetFilename());
+
+		if (projectionFilename != "")
+		{
+			FILE * prjFile = NULL;
+			prjFile = _wfopen(projectionFilename, L"wb");
+			if (prjFile)
+			{
+				char * wkt;
+				ProjectionTools * p = new ProjectionTools();
+				p->ToESRIWKTFromProj4(&wkt, projection);
+
+				if (wkt != NULL)
+				{
+					fprintf(prjFile, "%s", wkt);
+					delete wkt;
+				}
+
+				fclose(prjFile);
+				prjFile = NULL;
+				delete p; //added by Lailin Chen 12/30/2005
+			}
+		}
+	}
+	catch(...)
+	{
+	}
+}
+
+// ***************************************************
+//		set_ProjectionIntoHeader()
+// ***************************************************
 void CGrid::set_ProjectionIntoHeader(char * projection)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -375,40 +301,12 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 		if( globalCallback != NULL )
 			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
-
-	// Attempt to write it to the .prj file
-	try
-	{
-		CString gridFilename(filename == NULL ? L"" : filename);
-		CString projectionFilename = getProjectionFileName(gridFilename);
-
-		if (projectionFilename != "")
-		{
-			FILE * prjFile = NULL;
-			prjFile = fopen(projectionFilename, "wb");
-			if (prjFile)
-			{
-				char * wkt;
-				ProjectionTools * p = new ProjectionTools();
-				p->ToESRIWKTFromProj4(&wkt, projection);
-
-				if (wkt != NULL)
-				{
-					fprintf(prjFile, "%s", wkt);
-					delete wkt;
-				}
-
-				fclose(prjFile);
-				prjFile = NULL;
-				delete p; //added by Lailin Chen 12/30/2005
-			}
-		}
-	}
-	catch(...)
-	{
-	}
+	SaveProjection(projection);
 }
 
+// ***************************************************
+//		Resource()
+// ***************************************************
 STDMETHODIMP CGrid::Resource(BSTR newSrcPath, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
@@ -419,6 +317,9 @@ STDMETHODIMP CGrid::Resource(BSTR newSrcPath, VARIANT_BOOL *retval)
 	return S_OK;
 }
 
+// ***************************************************
+//		GetRow()
+// ***************************************************
 STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -496,7 +397,9 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	return S_OK;
 }
 
-
+// ***************************************************
+//		PutRow()
+// ***************************************************
 STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -573,6 +476,9 @@ STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	return S_OK;
 }
 
+// ***************************************************
+//		SetInvalidValuesToNodata()
+// ***************************************************
 STDMETHODIMP CGrid::SetInvalidValuesToNodata(double MinThresholdValue, double MaxThresholdValue, VARIANT_BOOL * retval)
 {
 	if (MaxThresholdValue == MinThresholdValue || MaxThresholdValue < MinThresholdValue)
@@ -618,6 +524,9 @@ STDMETHODIMP CGrid::SetInvalidValuesToNodata(double MinThresholdValue, double Ma
 	return S_OK;
 }
 
+// ***************************************************
+//		get_Value()
+// ***************************************************
 STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -661,6 +570,9 @@ STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		put_Value()
+// ***************************************************
 STDMETHODIMP CGrid::put_Value(long Column, long Row, VARIANT newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -703,6 +615,9 @@ STDMETHODIMP CGrid::put_Value(long Column, long Row, VARIANT newVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		get_InRam()
+// ***************************************************
 STDMETHODIMP CGrid::get_InRam(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -728,6 +643,9 @@ STDMETHODIMP CGrid::get_InRam(VARIANT_BOOL *pVal)
 }
 
 #pragma warning (disable:4244)
+// ***************************************************
+//		get_Maximum()
+// ***************************************************
 STDMETHODIMP CGrid::get_Maximum(VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -756,13 +674,14 @@ STDMETHODIMP CGrid::get_Maximum(VARIANT *pVal)
 	else
 	{	pVal->vt = VT_I2;
 		pVal->iVal = 0;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;		
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	return S_OK;
 }
 
+// ***************************************************
+//		get_Minimum()
+// ***************************************************
 STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -838,6 +757,9 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 }
 #pragma warning (default:4244)
 
+// ***************************************************
+//		get_DataType()
+// ***************************************************
 STDMETHODIMP CGrid::get_DataType(GridDataType *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -866,15 +788,19 @@ STDMETHODIMP CGrid::get_DataType(GridDataType *pVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		get_LastErrorCode()
+// ***************************************************
 STDMETHODIMP CGrid::get_Filename(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	*pVal = OLE2BSTR(filename);
-
+	*pVal = W2BSTR(filename);
 	return S_OK;
 }
 
+// ***************************************************
+//		get_LastErrorCode()
+// ***************************************************
 STDMETHODIMP CGrid::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -898,27 +824,28 @@ STDMETHODIMP CGrid::get_LastErrorCode(long *pVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		get_ErrorMsg()
+// ***************************************************
 STDMETHODIMP CGrid::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
-
 	return S_OK;
 }
 
+// ***************************************************
+//		GlobalCallback()
+// ***************************************************
 STDMETHODIMP CGrid::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	*pVal = globalCallback;
 	if( globalCallback != NULL )
 		globalCallback->AddRef();
-
 	return S_OK;
 }
-
 STDMETHODIMP CGrid::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -926,51 +853,200 @@ STDMETHODIMP CGrid::put_GlobalCallback(ICallback *newVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		Key()
+// ***************************************************
 STDMETHODIMP CGrid::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	USES_CONVERSION;
 	*pVal = OLE2BSTR(key);
-
 	return S_OK;
 }
-
 STDMETHODIMP CGrid::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	::SysFreeString(key);
 	key = OLE2BSTR(newVal);
-
 	return S_OK;
 }
 
-STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRam, GridFileType FileType, ICallback *cBack, VARIANT_BOOL *retval)
+// ***************************************************
+//		SaveProjectionAsWkt()
+// ***************************************************
+void CGrid::SaveProjectionAsWkt()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState()) 
-	USES_CONVERSION;
-
-	Close(retval);
-
-	// Straight = only valid for cstring, not bstr
-	filename = OLE2BSTR(Filename);
-
-	// Are we handling ECWP imagery? Chris Michaelis, June 2009
-	CString ecwpTest = OLE2A(Filename);
-	if (ecwpTest.MakeLower().Left(4) == "ecwp") {
-		// e.g. ecwp://imagery.oregonexplorer.info/ecwimages/2005orthoimagery.ecw
-		trgrid = new tkGridRaster();
-		*retval = trgrid->LoadRaster(OLE2CA(Filename), true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
-		return S_OK;
+	CStringW prjFilename = Utility::getProjectionFilename(GetFilename());
+	if (prjFilename.GetLength() > 0)
+	{
+		IGeoProjection* proj = NULL;
+		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+		if (proj)
+		{
+			VARIANT_BOOL vb;
+			proj->ReadFromFile(W2BSTR(prjFilename), &vb);
+			if (vb)
+			{
+				CComBSTR bstr;
+				proj->ExportToProj4(&bstr);
+				USES_CONVERSION;
+				set_ProjectionIntoHeader(OLE2A(bstr));
+			}
+			proj->Release();
+		}
 	}
+	else
+	{
+		set_ProjectionIntoHeader("");
+	}
+}
 
-	//Handling aux header files, added by Lailin Chen, 8/7/2006
+// ***************************************************
+//		OpenCustomGrid()
+// ***************************************************
+bool CGrid::OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileType)
+{
+	USES_CONVERSION;
+	bool result = false;
+	if( DataType == DoubleDataType )
+	{	
+		dgrid = new dGrid();
+		result = dgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		if (!result)
+		{	
+			ErrorMessage(dgrid->LastErrorCode());
+			delete dgrid;
+			dgrid = NULL;
+		}
+	}
+	else if( DataType == FloatDataType )
+	{	
+		fgrid = new fGrid();
+		result = fgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		if (!result)
+		{
+			ErrorMessage(fgrid->LastErrorCode());
+			delete fgrid;
+			fgrid = NULL;
+		}
+	}
+	else if( DataType == LongDataType )
+	{	
+		lgrid = new lGrid();
+		result = lgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		if (!result)
+		{	
+			ErrorMessage(lgrid->LastErrorCode());
+			delete lgrid;
+			lgrid = NULL;
+		}
+	}
+	else if( DataType == ShortDataType )
+	{	
+		sgrid = new sGrid();
+		result = sgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK) ;		// TODO: use Unicode
+		if (!result)
+		{	
+			ErrorMessage(sgrid->LastErrorCode());
+			delete sgrid;
+			sgrid = NULL;
+		}
+	}
+	return result;
+}
+
+// ***************************************************
+//		OpenAsciiGrid()
+// ***************************************************
+void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcingGDALUse)
+{
+	if (DataType == DoubleDataType)
+	{
+		dgrid = new dGrid();
+		ifstream fin(filename);
+		dgrid->asciiReadHeader(fin);
+		dHeader dhd = dgrid->getHeader();
+		long ncol, nrow;
+		ncol = dhd.getNumberCols();
+		nrow = dhd.getNumberRows();
+		if (MemoryAvailable(sizeof(double) * ncol * nrow)) {}
+		else
+		{
+			inRam = false;
+			forcingGDALUse = true;
+		}
+		fin.close();
+		delete dgrid;
+		dgrid = NULL;
+	}
+	else if (DataType == FloatDataType)
+	{
+		fgrid = new fGrid();
+		ifstream fin(filename);
+		fgrid->asciiReadHeader(fin);
+		fHeader fhd = fgrid->getHeader();
+		long ncol, nrow;
+		ncol = fhd.getNumberCols();
+		nrow = fhd.getNumberRows();
+		if (MemoryAvailable(sizeof(double) * ncol * nrow)) {}
+		else
+		{
+			inRam = false;
+			forcingGDALUse = true;
+		}
+		fin.close();
+		delete fgrid;
+		fgrid = NULL;
+	}
+	else if (DataType == ShortDataType)
+	{
+		sgrid = new sGrid();
+		ifstream fin(filename);
+		sgrid->asciiReadHeader(fin);
+		sHeader shd = sgrid->getHeader();
+		long ncol, nrow;
+		ncol = shd.getNumberCols();
+		nrow = shd.getNumberRows();
+		if (MemoryAvailable(sizeof(double) * ncol * nrow)) {}
+		else
+		{
+			inRam = false;
+			forcingGDALUse = true;
+		}
+		fin.close();
+		delete sgrid;
+		sgrid = NULL;
+	}
+	else if (DataType == LongDataType)
+	{
+		lgrid = new lGrid();
+		ifstream fin(filename);
+		lgrid->asciiReadHeader(fin);
+		lHeader lhd = lgrid->getHeader();
+		long ncol, nrow;
+		ncol = lhd.getNumberCols();
+		nrow = lhd.getNumberRows();
+		if (MemoryAvailable(sizeof(double) * ncol * nrow)) {}
+		else
+		{
+			inRam = false;
+			forcingGDALUse = true;
+		}
+		fin.close();
+		delete lgrid;
+		lgrid = NULL;
+	}
+}
+
+// ***************************************************
+//		OpenAuxHeader()
+// ***************************************************
+bool CGrid::OpenAuxHeader(CStringW& filename)
+{
 	bool isAuxHeader = false;
 	try
 	{
-		//FILE * testAux = fopen(W2A(filename), "r");	// lsu 6-jul-2010
-		FILE * testAux = fopen(OLE2CA(filename), "r");
+		FILE * testAux = _wfopen(filename, L"r");
 		if ( testAux )
 		{
 			char buf[12];
@@ -983,18 +1059,14 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 				// Only make this replacement if sta.adf actually exists;
 				// there are a few rara cases where EHFA_HEADER exists but
 				// opening the current file is correct.
-				CString str = OLE2A(filename);
+				CStringW str = filename;
 				str.Delete(str.GetLength() - 4, 4);
-				str.Append("\\sta.adf");
-				struct stat buf;
-				int i = stat (str, &buf);
+				str.Append(L"\\sta.adf");
+				struct _stat64i32 buf;
+				int i = _wstat (str, &buf);
 				if ( i == 0 )
 				{
-					// File exists -- replace the old filename with the new
-					::SysFreeString(filename);
-					::SysFreeString(Filename);
-					filename = str.AllocSysString();
-					Filename = str.AllocSysString();
+					filename = str;
 					isAuxHeader = true;
 				}
  			}
@@ -1003,39 +1075,19 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	catch(...)
 	{
 	}
+	return isAuxHeader; 
+}
 
-	ICallback * tmpCallback = globalCallback;
-	if( cBack != NULL )
-	{
-		globalCallback = cBack;
-	}
-
-	bool inRam = false;
-	if(InRam == VARIANT_TRUE)
-		inRam = true;
-
-	if (Filename == A2BSTR(""))
-	{
-		lastErrorCode = tkINVALID_FILE;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-		return S_FALSE;
-	}
-
-	activeGridObject = this;
-	VARIANT_BOOL opened = VARIANT_FALSE;
-
-	CString f_name = OLE2A(Filename);
-	CString extension = f_name.Right( f_name.GetLength() - 1 - f_name.ReverseFind('.') );
-
-	ResolveFileType(FileType, extension);
-	if (isAuxHeader)
-		extension = "adf";
-
+// ***************************************************
+//		GetDataTypeFromBinaryGrid()
+// ***************************************************
+void GetDataTypeFromBinaryGrid(GridDataType& DataType, GridFileType& FileType, CStringW& filename)
+{
 	if( (FileType == Ascii || FileType == Binary || FileType == Sdts) && DataType == UnknownDataType || DataType == InvalidDataType)
 	{
+		USES_CONVERSION;
 		GridManager gm;
-		DATA_TYPE dType = gm.getGridDataType( OLE2CA(Filename), (GRID_TYPE)FileType );
+		DATA_TYPE dType = gm.getGridDataType( W2CA(filename), (GRID_TYPE)FileType );
 
 		if( dType == DOUBLE_TYPE)
 		{
@@ -1058,251 +1110,137 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 			DataType = ByteDataType;
 		}
 	}
+}
 
-	// If it's an ASCII, we want to open it with our object ONLY if we have enough memory
-	// because disk-based via our object isn't supported.
+// ***************************************************
+//		Open()
+// ***************************************************
+STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRam, GridFileType FileType, ICallback *cBack, VARIANT_BOOL *retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState()) 
+	USES_CONVERSION;
+
+	Close(retval);
+
+	if (Filename == A2BSTR(""))
+	{
+		ErrorMessage(tkINVALID_FILE);
+		return S_FALSE;
+	}
+
+	filename = OLE2BSTR(Filename);
+	ICallback * tmpCallback = globalCallback;
+	if( cBack != NULL )	globalCallback = cBack;
+	bool inRam = InRam == VARIANT_TRUE ? true: false;
+	
+	// Are we handling ECWP imagery? 
+	CStringW ecwpTest = filename;
+	if (ecwpTest.MakeLower().Left(4) == L"ecwp") 
+	{
+		// e.g. ecwp://imagery.oregonexplorer.info/ecwimages/2005orthoimagery.ecw
+		trgrid = new tkGridRaster();
+		VARIANT_BOOL opened = VARIANT_FALSE;
+		opened = trgrid->LoadRaster(filename, true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
+		*retval = opened;
+		return S_OK;
+	}
+	
+	// check or sta.adf file
+	bool isAuxHeader = OpenAuxHeader(filename);
+
+	activeGridObject = this;
+	bool opened = false;
+
+	// get extension
+	CString extension = W2A(filename.Right( filename.GetLength() - 1 - filename.ReverseFind('.') ));
+	ResolveFileType(FileType, extension);
+	if (isAuxHeader) extension = "adf";
+
+	// If it's an ASCII, we want to open it with our object ONLY if we have enough memory because disk-based via our object isn't supported.
 	// Note that GDAL cannot read BGD as it's our own native format.
 	bool forcingGDALUse = false;
 	if (FileType == Ascii)
 	{
-		// If inram is false, must force to use GDAL
 		if (!inRam)
 		{
 			forcingGDALUse = true;
 		}
 		else
 		{
-			if (DataType == DoubleDataType)
-			{
-				dgrid = new dGrid();
-				ifstream fin(OLE2CA(Filename));
-				dgrid->asciiReadHeader(fin);
-				dHeader dhd = dgrid->getHeader();
-				long ncol, nrow;
-				ncol = dhd.getNumberCols();
-				nrow = dhd.getNumberRows();
-				if (MemoryAvailable(sizeof(double) * ncol * nrow))
-				{
-					//AfxMessageBox("Memory Available; OK");
-				}
-				else
-				{
-					inRam = false;
-					forcingGDALUse = true;
-					//AfxMessageBox("Memory not available");
-				}
-				fin.close();
-				delete dgrid;
-				dgrid = NULL;
-			}
-			else if (DataType == FloatDataType)
-			{
-				fgrid = new fGrid();
-				ifstream fin(OLE2CA(Filename));
-				fgrid->asciiReadHeader(fin);
-				fHeader fhd = fgrid->getHeader();
-				long ncol, nrow;
-				ncol = fhd.getNumberCols();
-				nrow = fhd.getNumberRows();
-				if (MemoryAvailable(sizeof(double) * ncol * nrow))
-				{
-					//AfxMessageBox("Memory Available; OK");
-				}
-				else
-				{
-					inRam = false;
-					forcingGDALUse = true;
-					//AfxMessageBox("Memory not available");
-				}
-				fin.close();
-				delete fgrid;
-				fgrid = NULL;
-			}
-			else if (DataType == ShortDataType)
-			{
-				sgrid = new sGrid();
-				ifstream fin(OLE2CA(Filename));
-				sgrid->asciiReadHeader(fin);
-				sHeader shd = sgrid->getHeader();
-				long ncol, nrow;
-				ncol = shd.getNumberCols();
-				nrow = shd.getNumberRows();
-				if (MemoryAvailable(sizeof(double) * ncol * nrow))
-				{
-					//AfxMessageBox("Memory Available; OK");
-				}
-				else
-				{
-					inRam = false;
-					forcingGDALUse = true;
-					//AfxMessageBox("Memory not available");
-				}
-				fin.close();
-				delete sgrid;
-				sgrid = NULL;
-			}
-			else if (DataType == LongDataType)
-			{
-				lgrid = new lGrid();
-				ifstream fin(OLE2CA(Filename));
-				lgrid->asciiReadHeader(fin);
-				lHeader lhd = lgrid->getHeader();
-				long ncol, nrow;
-				ncol = lhd.getNumberCols();
-				nrow = lhd.getNumberRows();
-				if (MemoryAvailable(sizeof(double) * ncol * nrow))
-				{
-					//AfxMessageBox("Memory Available; OK");
-				}
-				else
-				{
-					inRam = false;
-					forcingGDALUse = true;
-					//AfxMessageBox("Memory not available");
-				}
-				fin.close();
-				delete lgrid;
-				lgrid = NULL;
-			}
+			TryOpenAsAsciiGrid(DataType, inRam, forcingGDALUse);
 		}
 	}
-
-	if (!inRam && FileType == Sdts)
+	else if (FileType == Sdts)
+	{
 		inRam = true;
+	}
 
-	// Chris M 2/9/06 yanked out: 
-	//    FileType == Ascii ||
-	//    extension.CompareNoCase("asc") == 0 || extension.CompareNoCase("arc") == 0 ||
-	// We have a lot of customizations in our own handler, which are still desired by many users.
+	// check whether it's binary and can be opened with our own grid classes
+	GetDataTypeFromBinaryGrid(DataType, FileType, filename);
 
 	// If opening an existing ASCII grid, this can be done with GDAL. GDAL doesn't
 	// support creation of ASCII grids however, so this will be done with our object
 	// for now. (This can be worked around using a virtual raster, but this will do for now)
-    // Paul Meems 21 August - Added dem as extension
-	if ( FileType == Esri || FileType == Flt || FileType == Ecw || FileType == Bil || FileType == MrSid || FileType == PAux || FileType == PCIDsk || FileType == DTed ||
-		(FileType == UseExtension && 
-		(((extension == f_name) && extension != "") || extension.CompareNoCase("adf") == 0 
+	if ( FileType == Esri || FileType == Flt || FileType == Ecw || FileType == Bil || FileType == MrSid || 
+		FileType == PAux || FileType == PCIDsk || FileType == DTed ||
+		(FileType == UseExtension && (((A2W(extension) == filename) && extension != "") 
+		|| extension.CompareNoCase("adf") == 0 || extension.CompareNoCase("dem") == 0
 		|| extension.CompareNoCase("ecw") == 0 || extension.CompareNoCase("bil") == 0 
 		|| extension.CompareNoCase("sid") == 0 || extension.CompareNoCase("aux") == 0 
-		|| extension.CompareNoCase("pix") == 0 || extension.CompareNoCase("dhm") == 0 || extension.CompareNoCase("dem") == 0
+		|| extension.CompareNoCase("pix") == 0 || extension.CompareNoCase("dhm") == 0 
 		|| extension.CompareNoCase("dt0") == 0 || extension.CompareNoCase("dt1") == 0)))
 	{
-		//AfxMessageBox("Before tkGridRaster");
 		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(OLE2CA(Filename), inRam, FileType)?VARIANT_TRUE:VARIANT_FALSE;
+		opened = trgrid->LoadRaster(filename, inRam, FileType);
 	}
 	else if ( forcingGDALUse || FileType == GeoTiff || (FileType == UseExtension && extension.CompareNoCase("tif") == 0))
 	{
 		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(OLE2CA(Filename), inRam, FileType)?VARIANT_TRUE:VARIANT_FALSE;
+		opened = trgrid->LoadRaster(filename, inRam, FileType);
 	}
-	else if( DataType == DoubleDataType )
-	{	dgrid = new dGrid();
-		if( dgrid->open( OLE2CA(Filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK ) == false )
-		{	lastErrorCode = dgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-			dgrid = NULL;
-		}
-		else
-		{	opened = VARIANT_TRUE;
-			this->filename = OLE2BSTR(Filename);
-		}
-	}
-	else if( DataType == FloatDataType )
-	{	fgrid = new fGrid();
-		if( fgrid->open( OLE2CA(Filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK ) == false )
-		{	lastErrorCode = fgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-			fgrid = NULL;
-		}
-		else
-		{	opened = VARIANT_TRUE;
-			this->filename = OLE2BSTR(Filename);
-		}
-	}
-	else if( DataType == LongDataType )
-	{	lgrid = new lGrid();
-		if( lgrid->open( OLE2CA(Filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK ) == false )
-		{	lastErrorCode = lgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-			lgrid = NULL;
-		}
-		else
-		{	opened = VARIANT_TRUE;
-			this->filename = OLE2BSTR(Filename);
-		}
-	}
-	else if( DataType == ShortDataType )
-	{	sgrid = new sGrid();
-		if( sgrid->open( OLE2CA(Filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK ) == false )
-		{	lastErrorCode = sgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-			sgrid = NULL;
-		}
-		else
-		{	opened = VARIANT_TRUE;
-			this->filename = OLE2BSTR(Filename);
-		}
+	else if(OpenCustomGrid(DataType, inRam, FileType))
+	{
+		opened = true;
 	}
 	else
 	{
-		// GDAL can handle many formats, many new ones always being added...
-		// Try it!
 		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(OLE2CA(Filename), inRam, FileType)?VARIANT_TRUE:VARIANT_FALSE;
+		opened = trgrid->LoadRaster(filename, inRam, FileType);
 	}
 
 	if (opened)
 	{
-		// If the .prj file exists, load this into the grid's projection property.
-		CString gridFilename(filename == NULL ? L"" : filename);
-		CString prjFilename = getProjectionFileName(gridFilename);
-
-		if (prjFilename != "")
-		{
-			char * prj4 = NULL;
-			ProjectionTools * p = new ProjectionTools();
-			p->GetProj4FromPRJFile(prjFilename.GetBuffer(), &prj4);
-			if (prj4 != NULL)
-			{
-				set_ProjectionIntoHeader(prj4);
-				delete prj4;
-			}
-			delete p; //added by Lailin Chen 12/30/2005
-		}
-		else
-			set_ProjectionIntoHeader("");
-				
+		SaveProjectionAsWkt();
 		globalCallback = tmpCallback;
 	}
 	else
 	{
 		VARIANT_BOOL vb;
 		this->Close(&vb);
+		filename = "";
 	}
 
-	*retval = opened;
+	*retval = opened ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
 
+// ***************************************************
+//		MemoryAvailable()
+// ***************************************************
 bool CGrid::MemoryAvailable(double bytes)
 {
-//  if (bytes > MAX_INRAM_SIZE) return false;
+	MEMORYSTATUS stat;
+	GlobalMemoryStatus (&stat);
 
-  MEMORYSTATUS stat;
-
-  GlobalMemoryStatus (&stat);
-
-  if (stat.dwAvailPhys >= bytes)
+	if (stat.dwAvailPhys >= bytes)
 	  return true;
 
-  return false;
+	return false;
 }
 
+// ***************************************************
+//		CreateNew()
+// ***************************************************
 #pragma warning (disable:4244)
 STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType DataType, VARIANT InitialValue, VARIANT_BOOL InRam, GridFileType FileType, ICallback *cBack, VARIANT_BOOL *retval)
 {
@@ -1339,24 +1277,24 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 
 	double value; 
 	if( dVal(InitialValue,value) == false )
-	{	*retval = VARIANT_FALSE;
-		lastErrorCode = tkINVALID_VARIANT_TYPE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		*retval = VARIANT_FALSE;
+		ErrorMessage(tkINVALID_VARIANT_TYPE);
 	}
 	else
 	{
 		// Create new must use our object for ascii grids - gdal doesn't support
 		// Create on AAIGrid, only CreateCopy. So, creating using gdal can be worked
 		// around, but for now we'll use our object.		
-		if ( FileType == Esri || FileType == Flt || FileType == GeoTiff || FileType == Ecw || FileType == Bil || FileType == MrSid || FileType == PAux || FileType == PCIDsk || FileType == DTed ||
+		if ( FileType == Esri || FileType == Flt || FileType == GeoTiff || FileType == Ecw || FileType == Bil || 
+			FileType == MrSid || FileType == PAux || FileType == PCIDsk || FileType == DTed ||
 			(FileType == UseExtension && 
 			(((extension == f_name) && extension != "") || extension.CompareNoCase("adf") == 0 
 			|| extension.CompareNoCase("tif") == 0 || extension.CompareNoCase("ecw") == 0 
 			|| extension.CompareNoCase("bil") == 0 || extension.CompareNoCase("sid") == 0 
 			|| extension.CompareNoCase("aux") == 0 || extension.CompareNoCase("pix") == 0 
 			|| extension.CompareNoCase("dhm") == 0 || extension.CompareNoCase("dt0") == 0
-			|| extension.CompareNoCase("dt1") == 0)))
+			|| extension.CompareNoCase("dt1") == 0)))   // TODO: reuse the code from Open
 		{
 			trgrid = new tkGridRaster();
 
@@ -1401,8 +1339,8 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			}
 		}
 		else if( DataType == DoubleDataType )
-		{	dgrid = new dGrid();
-
+		{	
+			dgrid = new dGrid();
 			dHeader dhdr;
 			double dx;
 			Header->get_dX(&dx);
@@ -1436,16 +1374,15 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			dhdr.setYllcenter(yllcenter);
 
 			if( dgrid->initialize(OLE2CA(Filename),dhdr,value,boolInRam) == true )
-			{	::SysFreeString(filename);
-				filename = OLE2BSTR(Filename);
+			{	
+				filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
-			{	lastErrorCode = dgrid->LastErrorCode();
+			{	
 				dgrid = NULL;
 				*retval = VARIANT_FALSE;
-				if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+				ErrorMessage(dgrid->LastErrorCode());
 			}
 			
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
@@ -1489,16 +1426,15 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			fhdr.setYllcenter(yllcenter);
 
 			if( fgrid->initialize(OLE2CA(Filename),fhdr,(float)value,boolInRam) == true )
-			{	::SysFreeString(filename);
-				filename = OLE2BSTR(Filename);
+			{	
+				filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
-			{	lastErrorCode = fgrid->LastErrorCode();
+			{	
 				fgrid = NULL;
 				*retval = VARIANT_FALSE;
-				if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+				ErrorMessage(fgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
@@ -1540,16 +1476,15 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			lhdr.setYllcenter(yllcenter);
 
 			if( lgrid->initialize(OLE2CA(Filename),lhdr,(long)value,boolInRam) == true )
-			{	::SysFreeString(filename);
-				filename = OLE2BSTR(Filename);
+			{	
+				filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
-			{	lastErrorCode = lgrid->LastErrorCode();
+			{	
 				lgrid = NULL;
 				*retval = VARIANT_FALSE;
-				if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+				ErrorMessage(lgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
@@ -1591,25 +1526,22 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			shdr.setYllcenter(yllcenter);
 
 			if( sgrid->initialize(OLE2CA(Filename),shdr,(short)value,boolInRam) == true )
-			{	::SysFreeString(filename);
-				filename = OLE2BSTR(Filename);
+			{	
+				filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
-			{	lastErrorCode = sgrid->LastErrorCode();
+			{	
 				sgrid = NULL;
 				*retval = VARIANT_FALSE;
-				if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+				ErrorMessage(sgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
 			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else
-		{	lastErrorCode = tkINVALID_DATA_TYPE;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		{	ErrorMessage(tkINVALID_DATA_TYPE);
 		}
 	}
 
@@ -1619,6 +1551,9 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 }
 #pragma warning (default:4244)
 
+// ***************************************************
+//		Close()
+// ***************************************************
 STDMETHODIMP CGrid::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1639,26 +1574,12 @@ STDMETHODIMP CGrid::Close(VARIANT_BOOL *retval)
 	if( sgrid != NULL )
 		*retval = sgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
 	sgrid = NULL;
-
-	::SysFreeString(filename);
-
-	/* OK, the block below was what was there before I read it all:
-	  -- CDM How it was:
-	filename = A2BSTR(""); //What is this????? comment out!!! --Lailin Chen 12/20/2005
-	//uncommented by Rob Cairns 2/1/06 - ::SysFreeString(filename); is called in ~Grid at Line 70
-	//so repeated loading and unloading of a grid layer eventually causes a crash if this is commented out.
-	  -- CDM End
-
-	  I read up on the SysFreeString documentation, and it says that the function
-	  simply returns if the BSTR is null. So, why not just set filename to NULL,
-	  and call it both here and in ~Grid?
-	*/
-
-	filename = NULL;
-	
 	return S_OK;
 }
 
+// ***************************************************
+//		Save()
+// ***************************************************
 STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1817,116 +1738,84 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	else if (trgrid != NULL)
 	{
 		if( trgrid->Save(W2A(Filename), FileType) )
-		{	::SysFreeString(filename);
-			filename = OLE2BSTR(Filename);
+		{	
+			filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			lastErrorCode = 1;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(tkFAILED_TO_SAVE_GRID);
 		}
 	}
 	else if( dgrid != NULL )
-	{	if( dgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
-		{	::SysFreeString(filename);
-			filename = OLE2BSTR(Filename);
+	{	
+		if( dgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		{	
+			filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			lastErrorCode = dgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(dgrid->LastErrorCode());
 		}
 	}
 	else if( fgrid != NULL )
-	{	if( fgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
-		{	::SysFreeString(filename);
-			filename = OLE2BSTR(Filename);
+	{	
+		if( fgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		{	
+			filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			lastErrorCode = fgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(fgrid->LastErrorCode());
 		}
 	}
 	else if( lgrid != NULL )
-	{	if( lgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
-		{	::SysFreeString(filename);
-			filename = OLE2BSTR(Filename);
+	{	
+		if( lgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		{	
+			filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			lastErrorCode = lgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(lgrid->LastErrorCode());
 		}
 	}
 	else if( sgrid != NULL )
-	{	if( sgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
-		{	::SysFreeString(filename);
-			filename = OLE2BSTR(Filename);
+	{	
+		if( sgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		{	
+			filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			lastErrorCode = sgrid->LastErrorCode();
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(sgrid->LastErrorCode());
 		}
 	}
 	else
-	{	lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-
-		// No reason to continue.
+	{	
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 		return S_OK;
 	}
 
 	try
 	{
-
 		// Write the projection to the .prj file
 		IGridHeader * header = NULL;
 		this->get_Header(&header);
-		BSTR bstrProj = NULL;
+		CComBSTR bstrProj = NULL;
 		header->get_Projection(&bstrProj);
+		header->Release();
+		header = NULL;
 
 		if (strcmp(W2A(bstrProj), "") != 0)
 		{
-			CString gridFilename(filename == NULL ? L"" : filename);
-			CString prjFilename = getProjectionFileName(gridFilename);
-
-			FILE * prjFile = NULL;
-			prjFile = fopen(prjFilename, "wb");
-			if (prjFile)
-			{
-				char * wkt = NULL;
-
-				ProjectionTools * p = new ProjectionTools();
-				p->ToESRIWKTFromProj4(&wkt, W2A(bstrProj));
-
-				if (wkt != NULL)
-				{
-					fprintf(prjFile, "%s", wkt);
-					delete wkt;
-				}
-
-				fclose(prjFile);
-				prjFile = NULL;
-				header = NULL;
-				delete p; //added by Lailin Chen 12/30/2005
-			}
+			SaveProjection(W2A(bstrProj));
 		}
 		globalCallback = tmpCallback;
-		::SysFreeString(bstrProj); //Lailin Chen 12/20/2005 
-		bstrProj = NULL;
 	}
 	catch(...)
 	{
@@ -1936,6 +1825,9 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	return S_OK;
 }
 
+// ***************************************************
+//		Clear()
+// ***************************************************
 STDMETHODIMP CGrid::Clear(VARIANT ClearValue, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1970,6 +1862,9 @@ STDMETHODIMP CGrid::Clear(VARIANT ClearValue, VARIANT_BOOL *retval)
 	return S_OK;
 }
 
+// ***************************************************
+//		ProjToCell()
+// ***************************************************
 STDMETHODIMP CGrid::ProjToCell(double x, double y, long *Column, long *Row)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1994,6 +1889,9 @@ STDMETHODIMP CGrid::ProjToCell(double x, double y, long *Column, long *Row)
 	return S_OK;
 }
 
+// ***************************************************
+//		CellToProj()
+// ***************************************************
 STDMETHODIMP CGrid::CellToProj(long Column, long Row, double *x, double *y)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -2018,6 +1916,9 @@ STDMETHODIMP CGrid::CellToProj(long Column, long Row, double *x, double *y)
 	return S_OK;
 }
 
+// ***************************************************
+//		get_CdlgFilter()
+// ***************************************************
 STDMETHODIMP CGrid::get_CdlgFilter(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -2060,6 +1961,9 @@ STDMETHODIMP CGrid::get_CdlgFilter(BSTR *pVal)
 	return S_OK;
 }
 
+// ***************************************************
+//		ResolveFileType()
+// ***************************************************
 void CGrid::ResolveFileType(GridFileType &newFileType, CString extension)
 {
 	if( extension.CompareNoCase("flt") == 0 )
@@ -2101,6 +2005,9 @@ void CGrid::ResolveFileType(GridFileType &newFileType, CString extension)
 		newFileType = Bil;
 }
 
+// ***************************************************
+//		GetFloatWindow()
+// ***************************************************
 STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, long EndCol, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -2180,6 +2087,9 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 	return S_OK;
 }
 
+// ***************************************************
+//		PutFloatWindow()
+// ***************************************************
 STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, long EndCol, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -2383,9 +2293,9 @@ IGrid* CGrid::Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow,
 }
 
 // **************************************************************
-//		get_NoBands()
+//		get_NumBands()
 // **************************************************************
-STDMETHODIMP CGrid::get_NoBands(int *retVal)
+STDMETHODIMP CGrid::get_NumBands(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (trgrid != NULL)
@@ -2409,7 +2319,7 @@ STDMETHODIMP CGrid::get_NoBands(int *retVal)
 STDMETHODIMP CGrid::get_ActiveBandIndex(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
+	*retVal = trgrid != NULL ? trgrid->GetActiveBandIndex() : 1;
 	return S_OK;
 }
 
@@ -2477,170 +2387,484 @@ STDMETHODIMP CGrid::get_SourceType (tkGridSourceType* retVal)
 	return S_OK;
 }
 
-
 // ****************************************************************
-//						GetColorScheme()						         
+//		IsRgb()						         
 // ****************************************************************
-STDMETHODIMP CGrid::GetColorScheme(IGridColorScheme** retVal)
+bool CGrid::IsRgb()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = NULL;
-	CString legendName = this->GetLegendName();
-		
-	VARIANT_BOOL vb;
-	IGridColorScheme* scheme = NULL;
-	if (Utility::fileExists(legendName))
-	{
-		CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
-		scheme->ReadFromFile(A2BSTR(legendName), A2BSTR(""), &vb);
-	}
-	else
-	{
-		this->get_RasterColorTableColoringScheme(&scheme);
-	}
-	
-	bool hasScheme = false;
-	if (scheme)
-	{
-		long numBreaks = 0;
-		scheme->get_NumBreaks(&numBreaks);
-		hasScheme = numBreaks > 0;
-	}
-	
-	if (!hasScheme)
-	{
-		if(this->GetFloatValueGridColorTable(GradientModel::Linear, ColoringType::Gradient, &scheme))
-		{
-			// do nothing
-		}
-		else
-		{
-			// TODO: whether all the three procedures are really necessary set predefined scheme
-			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
-			CComVariant minimum;
-			CComVariant maximum;
-			this->get_Minimum(&minimum);
-			this->get_Maximum(&maximum);
-			double min, max;
-			dVal(minimum, min);
-			dVal(maximum, max);
-			scheme->UsePredefined(min, max, (PredefinedColorScheme)(rand() % 7));
-		}
-	}
-	*retVal = scheme;
-	return S_OK;
+	return trgrid ? trgrid->IsRgb() : false;
 }
 
 // ****************************************************************
 //						OpenAsImage()						         
 // ****************************************************************
-STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, IImage** retVal)
+STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyMode, ICallback* cBack, IImage** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
 
-	CComBSTR filename;
-	this->get_Filename(&filename);
-	USES_CONVERSION;
-	CString gridName = OLE2A(filename);
-
-	IImage* img = NULL;
-	VARIANT_BOOL vb;
-	
-	// these formats can be opened by image class directly
-	if (Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
-		Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil"))
+	tkGridProxyMode mode = proxyMode;
+	if (mode == gpmAuto)
 	{
+		mode = m_globalSettings.gridProxyMode;
+	}
+	
+	CStringW gridName = GetFilename().MakeLower();
+
+	bool isRgb = IsRgb();
+
+	tkCanDisplayGridWoProxy canDisplay;
+	this->get_CanDisplayWithoutProxy(&canDisplay);		
+	
+	VARIANT_BOOL hasProxy;
+	this->get_HasValidImageProxy(&hasProxy);
+
+	// user need only noProxy, so return an error if we can't do it
+	// gpmFavourNoProxy can be used to switch to proxy as the last chance option
+	if (mode == gpmNoProxy && canDisplay != cdwYes)		
+	{
+		ErrorMessage(tkCANT_DISPLAY_WO_PROXY);
+		return S_FALSE;
+	}
+
+	if ((canDisplay == cdwYes && (mode == gpmNoProxy || mode == gpmFavourNoProxy)) || 
+		(canDisplay == cdwYes && mode == gpmAuto && !hasProxy) ||
+		(mode == gpmAuto && isRgb && canDisplay != cdwUnsupportedFormat) )
+	{
+		VARIANT_BOOL vb;
+		IImage* img = NULL;
 		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
-		img->Open(A2BSTR(gridName), ImageType::USE_FILE_EXTENSION, false, NULL, &vb);		// add callback
+		img->Open(OLE2BSTR(gridName), ImageType::USE_FILE_EXTENSION, false, cBack, &vb);
 		if (vb)
 		{
+			*retVal = img;
 			img->_pushSchemetkRaster(scheme, &vb);
 			if (vb){
 				CImageClass* cimg = ((CImageClass*)img);
 				if (cimg)
 				{
 					cimg->sourceGridName = gridName;
-					cimg->sourceGridMode = tkGridSourceMode::gsmDirect;
+					cimg->isGridProxy = false;
+					
+					// grab transparent color from image and save in color scheme
+					cimg->get_UseTransparencyColor(&vb);
+					if (vb)
+					{
+						OLE_COLOR transparentColor;
+						cimg->get_TransparencyColor(&transparentColor);
+						scheme->put_NoDataColor(transparentColor);
+					}
+
+					// save the color scheme to open next time
+					CStringW legendName = this->GetLegendName();
+					//if (!Utility::fileExistsW(legendName))	// always overwrite
+					{
+						int bandIndex = 1;
+						this->get_ActiveBandIndex(&bandIndex);
+						scheme->WriteToFile(W2BSTR(legendName), W2BSTR(GetFilename()), bandIndex, &vb);
+					}
 				}
+				return S_OK;
 			}
 			else {
-				// TODO: report error; it's a minor one - we shall proceed
+				ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
 			}
 		}
-		else 
-		{
-			// TODO: probably size limitation is needed as a parameter as well to prevent too lenghty loading
-			// for the rest of them try to create temp bitmap
-			if (Utility::EndsWith(gridName, ".bil"))
-				return S_FALSE;
-		}
 	}
-	
-	if (!img)
+	else
 	{
-		// create a new file representation
-		CComPtr<IUtils> utils = NULL;
-		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&utils);
-		if (utils)
+		if (hasProxy)
 		{
-			utils->GridToImage(this, scheme, this->globalCallback, &img);	   // TODO: add callback
-			if (img)
-			{
-				tkGridSourceMode mode;
-				img->get_SourceGridMode(&mode);
-				if (mode == gsmBmpProxy)
-				{
-					// let's save bmp and reopen it in disk mode
-					CString imgName = Utility::GetPathWOExtension(gridName) + ".bmp";
-					img->Save(A2BSTR(imgName), true, ImageType::BITMAP_FILE, NULL, &vb);
-					
-					// TODO: probably preserving inRam mode can used as an option
-					// perhaps image must be inRam if grid was opened inRam
-					img->Open(A2BSTR(imgName), ImageType::BITMAP_FILE, false, NULL, &vb);
-				}
-			}
+			*retVal = OpenImageProxy();
+		}
+		else
+		{
+			CreateImageProxy(scheme, retVal);
 		}
 	}
-
-	if (img != NULL) {
-		
-	}
-
-	*retVal = img;
 	return S_OK;
+}
+
+// ****************************************************************
+//			OpenImageProxy()						         
+// ****************************************************************
+IImage* CGrid::OpenImageProxy()
+{
+	VARIANT_BOOL hasProxy;
+	this->get_HasValidImageProxy(&hasProxy);
+	IImage* iimg= NULL;
+
+	if (hasProxy)
+	{
+		VARIANT_BOOL vb;
+		GetUtils()->CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
+		
+		((CImageClass*)iimg)->OpenImage(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, False, NULL, GDALAccess::GA_ReadOnly, false, &vb); 
+		if (!vb) 
+		{
+			iimg->Close(&vb);
+			iimg->Release();
+			iimg = NULL;
+		}
+		else
+		{
+			CImageClass* img = ((CImageClass*)iimg);
+			img->sourceGridName = this->GetFilename();
+			img->isGridProxy = true;
+		}
+	}
+	return iimg;
 }
 
 // ****************************************************************
 //			RemoveColorSchemeFile()						         
 // ****************************************************************
-STDMETHODIMP CGrid::RemoveColorSchemeFile(VARIANT_BOOL* retVal)
+bool CGrid::RemoveColorSchemeFile()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = Utility::RemoveFile(this->GetLegendName()) ? VARIANT_TRUE : VARIANT_FALSE;
-	return S_OK;
+	return Utility::RemoveFile(this->GetProxyLegendName());
 }
 
 // ****************************************************************
-//			RemoveTempImageFile()						         
+//			RemoveImageProxy()						         
 // ****************************************************************
-STDMETHODIMP CGrid::RemoveTempImageFile(VARIANT_BOOL* retVal)
+STDMETHODIMP CGrid::RemoveImageProxy(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	bool val1 = Utility::RemoveFile(this->GetTempBmpName());
-	bool val2 = Utility::RemoveFile(this->GetTempTifName());
-	*retVal = val1 && val2 ? VARIANT_TRUE : VARIANT_FALSE;
+	Utility::RemoveFile(this->GetProxyName());
+	Utility::RemoveFile(this->GetProxyWorldFileName());
+	RemoveColorSchemeFile();
 	return *retVal ? S_OK: S_FALSE;
 }
 
 // ****************************************************************
-//			BuildGradientColorScheme()						         
+//			PreferedDisplayMode()						         
 // ****************************************************************
-STDMETHODIMP CGrid::BuildGradientColorScheme(PredefinedColorScheme colors, IGridColorScheme** retVal)
+STDMETHODIMP CGrid::get_PreferedDisplayMode(tkGridProxyMode *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = VARIANT_FALSE;
+	*retVal = preferedDisplayMode;
+	return S_OK;
+}
+STDMETHODIMP CGrid::put_PreferedDisplayMode(tkGridProxyMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	preferedDisplayMode = newVal;
+	return S_OK;
+}
 
+// TODO: move to GdalHelper class
+bool canOpenWithGdal(CStringW filename)
+{
+	GDALAllRegister();
+	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	bool gdalFormat = dt != NULL;
+	if (dt)
+	{
+		dt->Dereference();
+		delete dt;
+		dt = NULL;
+	}
+	return gdalFormat;
+}
+
+// ****************************************************************
+//			get_CanDisplayWithoutProxy()						         
+// ****************************************************************
+STDMETHODIMP CGrid::get_CanDisplayWithoutProxy(tkCanDisplayGridWoProxy* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	CStringW gridName = GetFilename().MakeLower();
+
+	// ignore formats, it seems that almost any grid can be displayed directly, in some way or another
+	//Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
+	//Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil")
+
+	bool gdalFormat = canOpenWithGdal(GetFilename());
+
+	m_globalSettings.SetGdalUtf8(false);
+
+	if (gdalFormat)
+	{
+		if (IsRgb())
+		{
+			*retVal = cdwYes;
+		}
+		else
+		{
+			if (m_globalSettings.maxNoProxyGridSizeMb <= 0)	{
+				// there is no limitation
+				*retVal = cdwYes;
+			}
+			else
+			{
+				long size = Utility::get_FileSize(gridName) / (0x1 << 20);
+				*retVal = size > m_globalSettings.maxNoProxyGridSizeMb ? cdwSizeLimitation : cdwYes;
+			}
+		}
+	}
+	else
+	{
+		*retVal = cdwUnsupportedFormat;
+	}
+	return S_OK;
+}
+
+// ****************************************************************
+//			CreateImageProxy()						         
+// ****************************************************************
+STDMETHODIMP CGrid::CreateImageProxy(IGridColorScheme* colorScheme, IImage** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	VARIANT_BOOL vb;
+	RemoveImageProxy(&vb);
+	GetUtils()->GridToImage2(this, colorScheme, m_globalSettings.gridProxyFormat, VARIANT_FALSE, this->globalCallback, retVal);
+	return S_OK;
+}
+
+// ****************************************************************
+//			get_HasImageProxy()						         
+// ****************************************************************
+STDMETHODIMP CGrid::get_HasValidImageProxy(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	CStringW proxyName = GetProxyName();
+	CStringW legendName = GetProxyLegendName();
+	CStringW gridFilename = GetFilename();
+	*retVal = (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
+			   Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
+	return S_OK;
+}
+
+#pragma region Color scheme
+
+// ****************************************************************
+//		RetrieveOrGenerateColorScheme()						         
+// ****************************************************************
+STDMETHODIMP CGrid::RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval retrievalMethod, tkGridSchemeGeneration generateMethod, 
+												  PredefinedColorScheme colors, IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	RetrieveColorScheme(retrievalMethod, retVal); 
+	if (!(*retVal))
+	{
+		GenerateColorScheme(generateMethod, colors, retVal);
+	}
+	return S_OK;
+}
+
+bool schemeIsValid(IGridColorScheme** scheme)
+{
+	if (!*scheme) return false;
+	long numBreaks;
+	(*scheme)->get_NumBreaks(&numBreaks);
+	bool valid = numBreaks > 0;
+	if (!valid)
+	{
+		(*scheme)->Release();
+		(*scheme) = NULL;
+	}
+	return true;
+}
+
+// ****************************************************************
+//		RetrieveColorScheme()						         
+// ****************************************************************
+STDMETHODIMP CGrid::RetrieveColorScheme(tkGridSchemeRetrieval method, IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	IGridColorScheme* scheme = NULL;
+	VARIANT_BOOL vb;
+	
+	// disk based for the grid itself
+	if (method == gsrAuto || method == gsrDiskBased)
+	{
+		CStringW legendName = this->GetLegendName();
+		if (Utility::fileExistsW(legendName))
+		{
+			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
+			scheme->ReadFromFile(OLE2BSTR(legendName), A2BSTR(""), &vb);
+		}
+	}
+	
+	// disk based for proxy
+	if (method == gsrAuto || method == gsrDiskBasedForProxy)
+	{
+		if (!schemeIsValid(&scheme))
+		{
+			VARIANT_BOOL hasProxy;
+			this->get_HasValidImageProxy(&hasProxy);
+			if (hasProxy)
+			{
+				CStringW legendName = this->GetProxyLegendName();
+				CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
+				scheme->ReadFromFile(OLE2BSTR(legendName), A2BSTR(""), &vb);
+			}
+		}
+	}
+	
+	// from Gdal color table
+	if (method == gsrAuto || method == gsrGdalColorTable)
+	{
+		if (!schemeIsValid(&scheme))
+		{
+			this->get_RasterColorTableColoringScheme(&scheme);
+		}
+	}
+	
+	*retVal = scheme;
+	return S_OK;
+}
+
+// ****************************************************************
+//			GenerateColorScheme()						         
+// ****************************************************************
+STDMETHODIMP CGrid::GenerateColorScheme(tkGridSchemeGeneration method, PredefinedColorScheme colors, IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	IGridColorScheme* scheme = NULL;
+	switch(method)
+	{
+		case gsgGradient:
+			scheme = BuildGradientColorSchemeCore(colors, ColoringType::Hillshade);
+			break;
+		case gsgUniqueValues:
+			this->BuildUniqueColorScheme(INT_MAX, colors, ColoringType::Hillshade, &scheme);
+			break;
+		case gsgUniqueValuesOrGradient:
+			this->BuildUniqueColorScheme(m_globalSettings.maxUniqueValuesCount, colors, ColoringType::Hillshade, &scheme);
+			if (!schemeIsValid(&scheme))
+			{
+				scheme = BuildGradientColorSchemeCore(colors, ColoringType::Hillshade);
+			}
+			break;
+	}
+	*retVal = scheme;
+	return S_OK;
+}
+
+// *************************************************************
+//		BuildUniqueColorScheme()
+// *************************************************************
+bool CGrid::BuildUniqueColorScheme(int maxValuesCount, PredefinedColorScheme colors, ColoringType coloringType, IGridColorScheme** newScheme)
+{
+	*newScheme = NULL;
+
+	set<CComVariant> values;
+	if (!this->GetUniqueValues(values, maxValuesCount))
+		return false;
+
+	if (values.size() == 0)    // it's empty, hence no scheme
+		return false;
+
+	IGridColorScheme* result = NULL;
+	CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&result);
+	if (result)
+	{
+		IColorScheme* scheme = NULL;
+		CoCreateInstance(CLSID_ColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IColorScheme,(void**)&scheme);
+		scheme->SetColors4(colors);		
+		
+		double minValue, maxValue;
+		dVal(*values.begin(), minValue);
+		dVal(*values.rbegin(), maxValue);
+
+		set<CComVariant>::iterator it = values.begin();
+		while (it != values.end())
+		{
+			double val;
+			dVal(*it, val);
+
+			// add break for value
+			IGridColorBreak * brk;
+			CoCreateInstance(CLSID_GridColorBreak,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorBreak,(void**)&brk);
+			brk->put_LowValue( val );
+			brk->put_HighValue( val );
+
+			OLE_COLOR color;
+			if (maxValue == minValue)
+			{
+				double rnd = (double)rand()/(double)RAND_MAX;
+				scheme->get_RandomColor(rnd, &color);	// any color from the scheme
+			}
+            else
+			{
+                double ratio = (val - minValue) / (maxValue - minValue);
+				if (coloringType == ColoringType::Random)
+				{
+					scheme->get_RandomColor(ratio, &color);
+				}
+				else
+				{
+					scheme->get_GraduatedColor(ratio, &color);
+				}
+			}
+			
+			brk->put_LowColor(color);	 
+            brk->put_HighColor(color);
+			brk->put_ColoringType(coloringType);
+
+			result->InsertBreak(brk);
+			brk->Release();
+
+			it++;
+		}
+		scheme->Release();
+		*newScheme = result;
+		return true;
+	}
+	return false;
+}
+
+// *************************************************************
+//		GetUniqueValues()
+// *************************************************************
+// TODO: perhaps can be exposed to API
+bool CGrid::GetUniqueValues(set<CComVariant>& values, int maxCount)
+{
+	IGridHeader* header = NULL;
+	this->get_Header(&header);
+	if (!header)
+		return false;
+
+	CComVariant varNodata;
+	long rows = 0, cols = 0;
+
+	header->get_NumberCols(&cols);
+	header->get_NumberRows(&rows);
+	header->get_NodataValue(&varNodata);
+	header->Release();
+	
+	double noDataValue;
+	dVal(varNodata, noDataValue);
+
+	for(int i = 0; i < rows; i++)
+	{
+		for(int j = 0; j < cols; j++)
+		{
+			CComVariant var;
+			this->get_Value(j, i, &var);
+			if (values.find(var) == values.end())
+			{
+				values.insert(var);
+				if (values.size() > (unsigned int)maxCount)
+				{
+					// there are too many of them for unique values classification
+					return false;		
+				}
+			}
+		}
+	}
+	return true;
+}
+
+// ****************************************************************
+//			BuildGradientColorSchemeCore()						         
+// ****************************************************************
+IGridColorScheme* CGrid::BuildGradientColorSchemeCore(PredefinedColorScheme colors, ColoringType coloringType)
+{
 	CComVariant max, min;
 	this->get_Maximum(&max);
 	this->get_Minimum(&min);
@@ -2653,8 +2877,8 @@ STDMETHODIMP CGrid::BuildGradientColorScheme(PredefinedColorScheme colors, IGrid
 		dVal(min, low);
 		dVal(max, high);
 		scheme->UsePredefined(low, high, colors);
-		*retVal = scheme;
+		scheme->ApplyColoringType(coloringType);
 	}
-	return S_OK;
+	return scheme;
 }
-
+#pragma endregion

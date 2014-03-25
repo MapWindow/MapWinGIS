@@ -67,6 +67,7 @@
 	# define PROJX_TO_PIXELX(prX,piX,extents,ppx)(piX=(prX - extents.left)*ppx)
 	# define PROJY_TO_PIXELY(prY,piY)(piY=(prY - extents.bottom)*ppy)
 	#define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
+	#define BGR_TO_RGB_ALPHA(color)(color & 0xFF000000) | ((color & 0x00FF0000)>>16) | (color & 0x0000FF00) | ((color & 0x000000FF)<<16)
 	
 	
 	// lsu 27 aug 2009 for DrawShapefileAlt function

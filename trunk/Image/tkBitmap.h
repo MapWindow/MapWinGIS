@@ -27,8 +27,8 @@ public:
 	colour getValue( long Row, long Column );
 	bool setValue( long Row, long Column, colour Value );
 	void getRow( long Row, long * result );
-	bool Open(const char* FileName, colour *& ImageData);
-	bool Open(const char* FileName);
+	bool Open(CStringW FileName, colour *& ImageData);
+	bool Open(CStringW FileName);
 	bool CreateBitmap(const char * bmp_file, const colour * ImageData);
 	bool WriteBitmap(const char * bmp_file, const colour * ImageData);
 	bool WriteDiskToDisk(const char * SourceFile, const char * DestinationFile);
@@ -53,7 +53,7 @@ private:
 
 	// Chris M May 2006 -- Is this file currently opened in write mode?
 	bool writable;
-	char * bmpFileName;
+	CStringW bmpFileName;
 
 public:
 	FILE * bmpfile;	

@@ -13,11 +13,24 @@
 #  define TRUE		1
 #endif
 
-DBFHandle SHPAPI_CALL
-DBFOpen_MW( const char * pszFilename, const char * pszAccess )
+DBFHandle SHPAPI_CALL DBFOpen_MW( CStringW pszFilename, const char * pszAccess )
 {
-	return DBFOpen(pszFilename, pszAccess);
+	CStringA nameA = Utility::ConvertToUtf8(pszFilename);
+	m_globalSettings.SetGdalUtf8(true);
+	DBFHandle handle = DBFOpen(nameA, pszAccess);
+	m_globalSettings.SetGdalUtf8(false);
+	return handle;
 }
+
+DBFHandle SHPAPI_CALL DBFCreate_MW( CStringW nameW )
+{
+	CStringA nameA = Utility::ConvertToUtf8(nameW);
+	m_globalSettings.SetGdalUtf8(true);
+	DBFHandle handle = DBFCreate(nameA);
+	m_globalSettings.SetGdalUtf8(false);
+	return handle;
+}
+
 
 /************************************************************************/
 /*                             SfRealloc()                              */

@@ -261,16 +261,23 @@ void CMapView::SetVersionNumber(LONG newVal)
 }
 
 // *****************************************************
-//		ScalebarVisible
+//		ScalebarUnits
 // *****************************************************
-VARIANT_BOOL CMapView::GetScalebarVisible(void)
+tkScalebarUnits CMapView::GetScalebarUnits(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return m_scalebarVisible;
+	return m_scalebarUnits;
+}
+void CMapView::SetScalebarUnits(tkScalebarUnits pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_scalebarUnits = pVal;
+	if( !m_lockCount )
+		InvalidateControl();
 }
 
 // *****************************************************
-//		SetScalebarVisible
+//		ScalebarVisible
 // *****************************************************
 void CMapView::SetScalebarVisible(VARIANT_BOOL pVal)
 {
@@ -279,6 +286,12 @@ void CMapView::SetScalebarVisible(VARIANT_BOOL pVal)
 	if( !m_lockCount )
 		InvalidateControl();
 }
+VARIANT_BOOL CMapView::GetScalebarVisible(void)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return m_scalebarVisible;
+}
+
 bool CMapView::SendMouseMove()
 {	
 	return m_sendMouseMove ? true : false;

@@ -50,6 +50,7 @@
 #include "Grid.h"
 #include "Extents.h"
 #include "TableClass.h"
+#include "GdalHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -3150,7 +3151,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		
 		GDALAllRegister(); 
 
-		poDataset = (GDALDataset *) GDALOpen( pszGridFilename, GA_ReadOnly );
+		poDataset = GdalHelper::OpenDatasetW(OLE2W(bstrGridFilename), GA_ReadOnly);
 		if( poDataset == NULL )
 		{
 			printf( "Couldn't open dataset %s\n", 
@@ -3761,7 +3762,7 @@ void CUtils::ErrorMessage(long ErrorCode)
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = BGR_TO_RGB(name);
+	*retVal = BGR_TO_RGB_ALPHA(name);	// used to be BGR_TO_RGB
 	return S_OK;
 }
 
@@ -4547,6 +4548,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idGridHeader:
 			CoCreateInstance( CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, (void**)&val );
 			break;
+		case tkInterface::idImage:
+			CoCreateInstance( CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&val );
+			break;
 		case tkInterface::idLabelCategory:
 			CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&val );
 			break;
@@ -4653,8 +4657,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 	GDALAllRegister();
 
 	USES_CONVERSION;
-	CString name = OLE2A(filename);
-	GDALDataset* dataset = (GDALDataset *) GDALOpen(name, GDALAccess::GA_Update );
+	GDALDataset* dataset = GdalHelper::OpenDatasetW(OLE2W(filename), GDALAccess::GA_Update);
 	if (!dataset)
 	{
 		this->ErrorMessage(tkINVALID_FILE);
@@ -4812,11 +4815,9 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 	USES_CONVERSION;
 
-	CString name = OLE2A(sourceFilename);
-	GDALDataset* dsSource = (GDALDataset *) GDALOpen(name, GDALAccess::GA_ReadOnly );
+	GDALDataset* dsSource =  GdalHelper::OpenDatasetW(OLE2W(sourceFilename), GDALAccess::GA_ReadOnly);
 	
-	name = OLE2A(destFilename);
-	GDALDataset* dsDest = (GDALDataset *) GDALOpen(name, GDALAccess::GA_Update );
+	GDALDataset* dsDest = GdalHelper::OpenDatasetW(OLE2W(destFilename), GDALAccess::GA_ReadOnly); 
 
 	if (!dsSource || !dsDest)
 	{

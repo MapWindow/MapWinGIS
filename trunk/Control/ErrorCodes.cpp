@@ -183,7 +183,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "SDTS bad file header";
 		case tkGDAL_GRID_NOT_OPENED:
 			return "A mulitband grid wasn't opened";
-		
+		case tkCANT_DISPLAY_WO_PROXY:
+			return "Can't display grid without proxy. Check CanDisplayWithoutProxy for the reason. Set Grid.PreferedDisplayMode to gpmAuto to avoid the error.";
+		case tkFAILED_TO_SAVE_GRID:
+			return "Failed to save grid";
 
 		//601-800 = tkimg
 		case tkCANT_WRITE_WORLD_FILE:
@@ -208,6 +211,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Image or texture is too big.";
 		case tkFAILED_TO_OBTAIN_DC:
 			return "Failed to obtain device context from handle.";
+		case tkCANT_DISPLAY_WITHOUT_EXTERNAL_SCHEME:
+			return "Can't display datasource without external color scheme. Therefore Image.AllowExternalColorScheme can't be set to false.";
 
 		//801-1000 = tkdbf
 		case tkCANT_OPEN_DBF:
@@ -343,6 +348,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Transformation isn't initialized";
 		case tkFAILED_TO_COPY_PROJECTION:
 			return "Failed to copy projection";
+		case tkPROJECTION_IS_FROZEN:
+			return "It's not allowed to change GeoProjection object which is used by map.";
 
 		//2001-2200 = tiles
 		case tkINVALID_PROVIDER_ID:

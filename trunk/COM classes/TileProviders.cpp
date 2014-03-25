@@ -478,6 +478,7 @@ STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 // *******************************************************
 //			get_Projection()
 // *******************************************************
+// TODO: add separate property to return GeoProjection object
 STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())

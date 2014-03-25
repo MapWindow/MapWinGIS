@@ -105,12 +105,11 @@ public:
 
 		_sourceType = istUninitialized;
 
-		sourceGridMode = gsmNone;
+		isGridProxy = false;
 		sourceGridName = "";
 
 		m_iconGdiPlus = NULL;
-
-		fileName = NULL;
+		
 		gReferenceCounter.AddRef(tkInterface::idImage);
 	}
 	
@@ -279,7 +278,19 @@ public:
 	STDMETHOD(get_Warped)(VARIANT_BOOL* retVal);
 	
 	STDMETHOD(get_SourceGridName)(BSTR* retVal);
-	STDMETHOD(get_SourceGridMode)(tkGridSourceMode* retVal);
+	STDMETHOD(get_IsGridProxy)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_ExternalColorScheme)( IGridColorScheme** pVal);
+	STDMETHOD(put_ExternalColorScheme)( IGridColorScheme* newVal);
+	STDMETHOD(get_CanUseExternalColorScheme)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_AllowExternalColorScheme)(tkUseFunctionality* retVal);
+	STDMETHOD(put_AllowExternalColorScheme)(tkUseFunctionality newVal);
+	STDMETHOD(get_IsUsingExternalColorScheme)(VARIANT_BOOL* retVal);
+	STDMETHOD(SetTransparentColor)(OLE_COLOR color);
+	STDMETHOD(get_IsRgb)(VARIANT_BOOL* retVal);
+	STDMETHOD(OpenAsGrid)(IGrid** retVal);
+	STDMETHOD(get_SourceFilename)(BSTR* retVal);
+	STDMETHOD(get_ExternalColorSchemeBandIndex)(int* retVal);
+	STDMETHOD(put_ExternalColorSchemeBandIndex)(int newVal);
 
 	//STDMETHOD(LoadBuffer)(double mapMinX, double mapMinY, double mapMaxX, double mapMaxY, double mapUnitsPerScreenPixel, VARIANT_BOOL* retVal);
 	//STDMETHOD(OpenForUpdate)(BSTR ImageFileName, ImageType FileType,  VARIANT_BOOL InRam, ICallback * cBack, VARIANT_BOOL * retval);
@@ -298,8 +309,8 @@ public:
 	bool _bufferReloadIsNeeded;
 	bool _imageChanged;
 	ScreenBitmap* _screenBitmap;	// GDI+ bitmap on the screen
-	CString sourceGridName;
-	tkGridSourceMode sourceGridMode;
+	CStringW sourceGridName;
+	bool isGridProxy;
 
 private:
 	tkImageSourceType _sourceType;
@@ -317,15 +328,14 @@ private:
 	bool gdalImage;
 	bool dataLoaded;
 	bool setRGBToGrey;			//Set a color RGB image or hillshade to grey
-	char * fileName;			//For GDALOpen
+	CStringW fileName;			//For GDALOpen
 
 	//Image Variables
-	CString FileName;		//filename of image that was opened or created
+	//CStringW FileName;		//filename of image that was opened or created
 	colour * ImageData;		//array storing generic image data
 	long Width;				//number of Columns in image
 	long Height;			//number of rows in image
 	ImageType ImgType;	    //enumeration stating type of image currently being used
-	
 
 	//Image Objects
 	tkBitmap* _bitmapImage;
@@ -359,7 +369,7 @@ public:
 	void ClearBuffer();
 	bool SaveNotNullPixels(bool forceSaving = false);
 	void ClearNotNullPixels();
-	void OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, VARIANT_BOOL *retval);
+	void OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
 	
 	int get_originalBufferWidth()
 	{
@@ -372,31 +382,32 @@ public:
 		else							return 0;
 	}
 	void ErrorMessage(long ErrorCode);
+	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
 
 private:
 	bool Resample();
 	bool ReadPPM(CString ImageFile, bool InRam = true);
 	bool ReadGIF(CString ImageFile);
 	bool ReadJPEG(CString ImageFile);
-	bool ReadBMP(CString ImageFile, bool InRam);
-	bool ReadRaster(CString ImageFile, GDALAccess accessMode);
+	bool ReadBMP(const CStringW ImageFile, bool InRam);
+	bool ReadRaster(const CStringW ImageFile, GDALAccess accessMode);
 	//bool LoadImage(double minx, double miny, double maxx, double maxy, double mapUnitsPerScreenPixel);
 	
-	bool getFileType(CString ImageFile, ImageType &ft);
+	bool getFileType(const CStringW ImageFile, ImageType &ft);
 	bool WritePPM(CString ImageFile, bool WorldFile, ICallback *cBack);
 	bool WriteGIF(CString ImageFile, bool WorldFile, ICallback * cBack);
 	bool WriteBMP(CString FileName, bool WriteWorldFile, ICallback *cBack);
 	bool WriteGDIPlus(CString ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
-	bool CImageClass::CopyGDALImage(CString ImageFileName );
+	bool CImageClass::CopyGDALImage(CStringW ImageFileName );
 
-	VARIANT_BOOL WriteWorldFile(CString WorldFileName);
-	bool ReadWorldFile(CString WorldFileName);
-	
+	VARIANT_BOOL WriteWorldFile(CStringW WorldFileName);
+	bool ReadWorldFile(CStringW WorldFileName);
 	
 	//void LoadImageStandard(double mapUnitsPerScreenPixel);
 	bool CImageClass::IsGdalImageAvailable();
 	bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies,  long* count);
 	bool CImageClass::SetImageBitsDCCore(HDC hdc);
+	bool CImageClass::CheckForProxy();
 	
 };
 

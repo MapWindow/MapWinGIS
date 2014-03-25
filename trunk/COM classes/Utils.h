@@ -83,7 +83,12 @@ public:
 	std::vector<double> polyY;
 };
 
-
+#define GEOTRSFRM_TOPLEFT_X            0
+#define GEOTRSFRM_WE_RES               1
+#define GEOTRSFRM_ROTATION_PARAM1      2
+#define GEOTRSFRM_TOPLEFT_Y            3
+#define GEOTRSFRM_ROTATION_PARAM2      4
+#define GEOTRSFRM_NS_RES               5
 
 // CUtils
 
@@ -198,8 +203,8 @@ public:
 	STDMETHOD(MaskRaster)(BSTR filename, BYTE newPerBandValue, VARIANT_BOOL* retVal);
 	STDMETHOD(GridStatisticsForPolygon)(IGrid* grid, IGridHeader* header, IExtents* gridExtents, IShape* shape, 
 										  double noDataValue, double* meanValue, double* minValue, double* maxValue, VARIANT_BOOL* retVal);
-	STDMETHOD(GridToImage2)(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, ICallback* cBack, IImage ** retval);
-	STDMETHOD(GridToImageInRam)(IGrid * Grid, IGridColorScheme * ci, ICallback* cBack, IImage ** retval);
+	STDMETHOD(GridToImage2)(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, VARIANT_BOOL inRam, ICallback* cBack, IImage ** retval);
+	//STDMETHOD(GridToImageInRam)(IGrid * Grid, IGridColorScheme * ci, ICallback* cBack, IImage ** retval);
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
@@ -267,20 +272,19 @@ private:
 	bool is_clockwise(Poly *polygon);//ah 6/3/05
 	
 	bool isColinear( POINT one, POINT two, POINT test, double tolerance );
-	STDMETHODIMP CUtils::GridToImage_DiskBased(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
-	STDMETHODIMP CUtils::GridToImage_InRAM(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
+	//STDMETHODIMP CUtils::GridToImage_DiskBased(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
+	//STDMETHODIMP CUtils::GridToImage_InRAM(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
 	inline void PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gvalue, _int32 Bvalue, long totalWidth);
-	void CreateBitmap(char * filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval);
+	void CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval);
 	bool MemoryAvailable(double bytes);
 	void FinalizeAndCloseBitmap(int totalWidth);
 
 	HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, 
-								bool inRam, ICallback* callback, IImage ** retval);
-	void GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, tkGridProxyFormat format,
-							 bool inRam, IImage ** retval);
+								bool inRam, bool checkMemory, ICallback* callback, IImage ** retval);
+	void GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, bool inRam, IImage ** retval);
 	inline void WritePixel(IImage* img, int row, int col, OLE_COLOR color, 
 								int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam);
-	void WriteWorldFile(CString worldFile, CString imageFile, double dx, double dy, double xll, double yll, int nrows);
+	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void CUtils::ErrorMessage(long ErrorCode);
 	
 
@@ -296,7 +300,6 @@ private:
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);
-
 
 OBJECT_ENTRY_AUTO(__uuidof(Utils), CUtils)
 

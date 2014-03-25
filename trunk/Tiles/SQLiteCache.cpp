@@ -27,7 +27,7 @@
 sqlite3 *SQLiteCache::m_conn = NULL;
 bool SQLiteCache::m_locked = false;
 bool SQLiteCache::m_initNeeded = true;
-CString SQLiteCache::m_dbName;
+CStringW SQLiteCache::m_dbName;
 double SQLiteCache::maxSizeDisk = 100.0;
 
 ::CCriticalSection SQLiteCache::section;
@@ -38,14 +38,14 @@ double SQLiteCache::maxSizeDisk = 100.0;
 // ***********************************************************
 //		get_DbName()
 // ***********************************************************
-CString SQLiteCache::get_DbName()
+CStringW SQLiteCache::get_DbName()
 {
 	if (m_dbName.GetLength() == 0)
 	{
-		char* path = new char[MAX_PATH + 1];
-		GetModuleFileName(NULL, path, MAX_PATH);
-		CString name = Utility::GetFolderFromPath(path);
-		name += "\\";
+		wchar_t* path = new wchar_t[MAX_PATH + 1];
+		GetModuleFileNameW(NULL, path, MAX_PATH);
+		CStringW name = Utility::GetFolderFromPath(path);
+		name += L"\\";
 		name += DB_NAME;
 		Debug::WriteLine("Db path: %s", name);
 		delete[] path;
@@ -57,7 +57,7 @@ CString SQLiteCache::get_DbName()
 // ***********************************************************
 //		set_DbName()
 // ***********************************************************
-bool SQLiteCache::set_DbName(CString name)
+bool SQLiteCache::set_DbName(CStringW name)
 {
 	// TODO: check the validity of name
 	if (name.MakeLower() != m_dbName.MakeLower())

@@ -7,7 +7,41 @@
 namespace Utility
 {
 	static _locale_t m_locale = _create_locale(LC_ALL, "C");
+
+#pragma region String conversion
+	// ********************************************************
+	//    ConvertToUtf8()
+	// ********************************************************
+	CStringA ConvertToUtf8(CStringW unicode) {
+		USES_CONVERSION;
+		CStringA utf8 = CW2A(unicode, CP_UTF8);
+		return utf8;
+	}
+
+	// ********************************************************
+	//    ConvertFromUtf8()
+	// ********************************************************
+	CStringW ConvertFromUtf8(CStringA utf8) {
+		USES_CONVERSION;
+		CStringW unicode = CA2W(utf8, CP_UTF8);
+		return unicode;
+	}
 	
+	// ********************************************************
+	//    StringToWideChar()
+	// ********************************************************
+	WCHAR* StringToWideChar(CString s)
+	{
+		WCHAR* wText = NULL;
+		int size = MultiByteToWideChar(CP_ACP, 0, s.GetString(), -1, NULL, 0);
+		wText = new WCHAR[size];
+		MultiByteToWideChar(CP_ACP, 0, s.GetString(), -1, wText, size);
+		return wText;
+	}
+	
+	// ********************************************************
+	//		SYS2A
+	// ********************************************************
 	//ConservesStackMemory
 	char * Utility::SYS2A(BSTR str)
 	{
@@ -28,6 +62,9 @@ namespace Utility
 		return result;
 	}
 
+	// ********************************************************
+	//		ConvertBSTRToLPSTR
+	// ********************************************************
 	//Rob Cairns 29-Aug-2009
 	char* ConvertBSTRToLPSTR (BSTR bstrIn)
 	{
@@ -77,12 +114,20 @@ namespace Utility
 			return A2BSTR("");
 		}
 	}
-	
+#pragma endregion
+
+#pragma region Shapefile
+	// **************************************************************
+	//		ShapeTypeIsM()
+	// **************************************************************
 	bool ShapeTypeIsM(ShpfileType shpType)
 	{
 		return shpType == SHP_POINTM || shpType == SHP_MULTIPOINTM || shpType == SHP_POLYLINEM || shpType == SHP_POLYGONM;
 	}
 
+	// **************************************************************
+	//		ShapeTypeConvert2D()
+	// **************************************************************
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType)
 	{
 		if		(shpType == SHP_NULLSHAPE)																return SHP_NULLSHAPE;
@@ -92,7 +137,25 @@ namespace Utility
 		else if (shpType == SHP_POLYLINE || shpType == SHP_POLYLINEM || shpType == SHP_POLYLINEZ)		return SHP_POLYLINE;
 		else																							return shpType;
 	}
+	
+	// **************************************************************
+	//		Utility::swapEndian()
+	// **************************************************************
+	void Utility::swapEndian(char* a,int size) 
+	{
+		char hold;
+		for(int i = 0; i < size*.5; i++)
+		{	hold = a[i];
+			a[i] = a[size-i-1];
+			a[size-i-1] = hold;
+		}
+	}
+#pragma endregion
 
+#pragma region Files
+	// *******************************************************************
+	//		fileExists()
+	// *******************************************************************
 	BOOL Utility::fileExists(CString filename)
 	{
 		if( filename.GetLength() <= 0 )
@@ -108,12 +171,15 @@ namespace Utility
 		}
 	}
 
-	long Utility::get_FileSize(CString filename)
+	// *******************************************************************
+	//		get_FileSize()
+	// *******************************************************************
+	long Utility::get_FileSize(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
-
-		FILE * file = fopen(filename, "rb");
+		
+		FILE * file = _wfopen(filename, L"rb");
 		
 		long size = 0;
 		if (file)
@@ -126,7 +192,21 @@ namespace Utility
 		return size;
 	}
 
-	BOOL fileExistsw(CStringW filename)
+	// *******************************************************************
+	//		dirExists()
+	// *******************************************************************
+	bool dirExists(CStringW path)
+	{
+		DWORD ftyp = GetFileAttributesW(path);
+		if (ftyp == INVALID_FILE_ATTRIBUTES)
+			return false;  //something is wrong with your path!
+		return (ftyp & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
+	}
+
+	// *******************************************************************
+	//		Utility::fileExistsW()
+	// *******************************************************************
+	bool fileExistsW(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -135,30 +215,19 @@ namespace Utility
 		
 		if( file == NULL )
 		{
-			return FALSE;
+			return false;
 		}
 		else
 		{	
 			fclose(file);
-			return TRUE;
+			return true;
 		}
-	}
-
-	// *******************************************************************
-	//		Utility::dirExists()
-	// *******************************************************************
-	bool Utility::dirExists(CString path)
-	{
-		DWORD ftyp = GetFileAttributesA(path);
-		if (ftyp == INVALID_FILE_ATTRIBUTES)
-			return false;  //something is wrong with your path!
-		return (ftyp & FILE_ATTRIBUTE_DIRECTORY) ? true : false;
 	}
 
 	// *******************************************************************
 	//		Utility::fileExistsUnicode()
 	// *******************************************************************
-	BOOL Utility::fileExistsUnicode(CString filename)
+	bool Utility::fileExistsUnicode(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -172,37 +241,292 @@ namespace Utility
 		::GetVersionEx(&OSversion);
 		if (OSversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
 		{
-			file = fopen(filename, "rb");
+			file = fopen(W2A(filename), "rb");
 		}
 		else
 		{
 			// Running 2k, XP, NT, or other future versions
 			//Changed the following code to support Asian character file name 11/5/2005 --Lailin Chen.
-			file = _wfopen(T2W(filename), L"rb");
+			file = _wfopen(filename, L"rb");
 		}
 
 		if( file == NULL )
-			return FALSE;
+			return false;
 		else
 		{	
 			fclose(file);
-			return TRUE;
+			return true;
 		}
 	}
 
-	// **************************************************************
-	//		Utility::swapEndian()
-	// **************************************************************
-	void Utility::swapEndian(char* a,int size) 
+	// returns list paths for all parent folders for current file from inner most to top most
+	void GetFoldersList(CStringW path, std::vector<CStringW>& list)
 	{
-		char hold;
-		for(int i = 0; i < size*.5; i++)
-		{	hold = a[i];
-			a[i] = a[size-i-1];
-			a[size-i-1] = hold;
+		for (int i = path.GetLength() - 1; i >= 0; i--)
+		{
+			CStringW mid = path.Mid(i, 1);
+			if (mid == '\\' && i - 1 > 0)
+			{
+				list.push_back(path.Left(i));
+			}
 		}
 	}
 
+	// *********************************************************
+	//	     get_RelativePath()
+	// *********************************************************
+	CStringW Utility::GetRelativePath(CStringW ProjectName, CStringW Filename)
+	{
+		CStringW drive1, drive2;
+		wchar_t drive[1024];
+		wchar_t dir[1024];
+		wchar_t name[1024];
+		wchar_t ext[1024];
+
+		_wsplitpath(ProjectName, drive, dir, name, ext);
+		drive1 = drive;
+
+		_wsplitpath(Filename, drive, dir, name, ext);
+		drive2 = drive;
+
+		if (drive1 != drive2)
+		{
+			// files are on the different drives, no way to get a relative path
+			return Filename;
+		}
+		else
+		{
+			std::vector<CStringW> list1;
+			std::vector<CStringW> list2;
+			
+			GetFoldersList(ProjectName, list1);
+			GetFoldersList(Filename, list2);
+
+			// searching for the match (inner-most folder common to both files)
+			unsigned int i,j;
+			for ( i = 0; i < list1.size(); i++)
+			{
+				for ( j = 0; j < list2.size(); j++)
+				{
+					if (_wcsicmp(list1[i], list2[j]) == 0)
+					{
+						goto match;
+					}
+				}
+			}
+
+			match:
+			CStringW path = L"";
+			for (unsigned int k = 0; k < i; k++)
+			{
+				// going to the parent folder 
+				path += L"..\\";
+			}
+
+			// exluding folder part from the path
+			path += Filename.Mid(list1[i].GetLength() + 1);
+			return path;
+		}
+	}
+
+	// *********************************************************
+	//	     GetFolderFromPath()
+	// *********************************************************
+	CStringW Utility::GetFolderFromPath(CStringW path)
+	{
+		for (int i = path.GetLength() - 1; i > 0; i--)
+		{
+			if (path.Mid(i, 1) == '\\')
+			{
+				return path.Left(i);	// -1
+			}
+		}
+		return path;
+	}
+
+	// *********************************************************
+	//	     EndsWith()
+	// *********************************************************
+	bool EndsWith(CStringW path, CStringW ext)
+	{
+		if (path.GetLength() < ext.GetLength() + 1 || ext.GetLength() < 2) {
+			return false;
+		}
+		else
+		{
+			return path.Right(ext.GetLength()).CompareNoCase(ext) == 0;
+		}
+	}
+
+	// *********************************************************
+	//	     GetPathWOExtension()
+	// *********************************************************
+	CStringW GetPathWOExtension(CStringW path)
+	{
+		for (int i = path.GetLength() - 1; i > 0; i--)
+		{
+			if (path.Mid(i, 1) == ".")
+			{
+				return path.Left(i);
+			}
+		}
+		return path;
+	}
+
+	// ****************************************************
+	//   ReadFileToBuffer
+	// ****************************************************
+	// Reads the content of the file to buffer, return the number of bytes read
+	int ReadFileToBuffer(CStringW filename, unsigned char** buffer)
+	{
+		FILE* file = _wfopen(filename, L"rb");
+		
+		long size = 0;
+		if (file)
+		{
+			fseek( file, 0, SEEK_END );
+			size = ftell(file);
+			if (size > 0)
+			{
+				*buffer = new unsigned char[size];
+				rewind(file);
+				size = fread(*buffer, sizeof(unsigned char), size, file);
+			}
+			fclose(file);
+		}
+		return size;
+	}
+	
+	int ReadFileToBuffer(CStringW filename, char** buffer)
+	{
+		FILE* file = _wfopen(filename, L"rb");
+		
+		long size = 0;
+		if (file)
+		{
+			fseek( file, 0, SEEK_END );
+			size = ftell(file);
+			if (size > 0)
+			{
+				*buffer = new char[size];
+				rewind(file);
+				size = fread(*buffer, sizeof(char), size, file);
+			}
+			fclose(file);
+		}
+		return size;
+	}
+
+	#define _SECOND ((__int64) 10000000)
+
+	// ********************************************************
+	//     Utility::CompareCreationTime()
+	// ********************************************************
+	// returns: 1 = first file younger, -1 = vice versa, 0 = equal age; any other value = error
+	bool IsFileYounger(CStringW filename, CStringW thanFilename)
+	{
+		FILETIME time1, time2;
+		if (get_FileCreationTime(filename, time1) && get_FileCreationTime(thanFilename, time2))
+		{
+			// subtract several seconds
+			ULONGLONG qwResult;
+
+			// Copy the time into a quadword.
+			qwResult = (((ULONGLONG) time2.dwHighDateTime) << 32) + time2.dwLowDateTime;
+
+			// Add 30 days.
+			qwResult -= 10 * _SECOND;
+
+			// Copy the result back into the FILETIME structure.
+			time2.dwLowDateTime  = (DWORD) (qwResult & 0xFFFFFFFF );
+			time2.dwHighDateTime = (DWORD) (qwResult >> 32 );
+			
+			int val = CompareFileTime(&time1, &time2);
+			return val == 1 ;
+		}
+		return false;
+	}
+
+	// ********************************************************
+	//     Utility::get_FileCreationTime()
+	// ********************************************************
+	bool get_FileCreationTime(CStringW filename, FILETIME& time)
+	{
+		_WIN32_FILE_ATTRIBUTE_DATA data;
+		if (GetFileAttributesExW(filename, GetFileExInfoStandard, &data))
+		{
+			time = data.ftCreationTime;
+			return true;
+		}
+		return false;
+	}
+
+	// ********************************************************
+	//    RemoveFile()
+	// ********************************************************
+	bool RemoveFile(CStringW filename)
+	{
+		if (Utility::fileExistsW(filename))
+		{
+			return _wremove(filename) == 0;
+		}
+		else {
+			return true;	// no file and therefore no problem
+		}
+	}
+
+	// ********************************************************
+	//    getProjectionFileName()
+	// ********************************************************
+	CStringW getProjectionFilename( CStringW dataSourceName )
+	{
+		return ChangeExtension(dataSourceName, L"prj");
+	}
+
+	// ********************************************************
+	//    ChangeExtension()
+	// ********************************************************
+	CStringW ChangeExtension( CStringW filename, CStringW ext )
+	{
+		int theDot = filename.ReverseFind('.');
+		if (theDot < 0)
+			return filename + ext;
+		return filename.Left(theDot + 1) + ext;
+	}
+#pragma endregion
+	
+#pragma region Unit conversion
+	// ****************************************************************
+	//		GetUnitOfMeasureText
+	// ****************************************************************
+	// Returns the short namó for units of measure
+	CString Utility::GetUnitOfMeasureText(tkUnitsOfMeasure units)
+	{
+		switch(units)
+		{
+			case umDecimalDegrees:
+				return "deg.";
+			case umMiliMeters:
+				return "mm";
+			case umCentimeters:
+				return "cm";
+			case umInches:
+				return "inches";
+			case umFeets:
+				return "feet";
+			case umYards:
+				return "yards";
+			case umMeters:
+				return "m";
+			case umMiles:
+				return "miles";
+			case umKilometers:
+				return "km";
+			default:
+				return "units";
+		}
+	}
+	
 	// **********************************************************
 	//			get_ConversionFactor()
 	// **********************************************************
@@ -242,59 +566,11 @@ namespace Utility
 			return false;
 		}
 	}
+#pragma endregion
 
-	// Shade1974 Jan 10, 2006
-	// Explicit casting to int using rounding
-	int Utility::Rint(double value)
-	{
-		if(value < 0.0)
-			value -= 0.5;
-		else
-			value += 0.5;
-		int val = static_cast<int>(value);
-		return val;
-	}
-
-
-
-	DWORD* Utility::cvtUCharToDword(long inp, int &num)
-	{   /* Chris Michaelis and Michelle Hospodarsky 2-11-2004 */
-		/* this function creates a DWORD[] from a long : used to create the custom pen for a custom stipple*/
-		/* the first digit in inp is the multiplier for the remainder of the digits	*/
-
-		std::vector<long> temp;
-		int multiplier;
-		char inpStr[33];
-		_ltoa(inp,inpStr,10);
-
-		int iter = 0;
-		for (; inpStr[iter] != 0; iter++)
-		{
-		  temp.push_back(inpStr[iter]);
-		}
-
-		int size = temp.size();
-		DWORD * output = new DWORD[size];
-
-		//get the multiplier
-		multiplier = atoi((char*)&temp[0]);
-
-		for (int i = 1; i < size; i++)
-		{
-			output[i-1] =  multiplier * atoi((char*)&temp[i]); // multiply to enhance value since range = 0 - 9
-		}
-
-		/* get the number of elements*/
-		num = temp.size() - 1; // take off one for the multiplier and one for the null value
-		temp.clear(); // be frugal with memory..
-
-		return output;
-	}
-
-
-
+#pragma region Numbers
 	// *********************************************************
-	//		Format()
+	//		FormatNumber()
 	// *********************************************************
 	CString Utility::FormatNumber(double val, CString& sFormat)
 	{
@@ -327,119 +603,18 @@ namespace Utility
 		return s;
 	}
 
-	// returns list paths for all parent folders for current file
-	// from inner most to top most
-	void GetFoldersList(CString path, std::vector<CString>& list)
-	{
-		for (int i = path.GetLength() - 1; i >= 0; i--)
-		{
-			CString mid = path.Mid(i, 1);
-			if (mid == '\\' && i - 1 > 0)
-			{
-				list.push_back(path.Left(i));
-			}
-		}
-	}
-
 	// *********************************************************
-	//	     get_RelativePath()
+	// Shade1974 Jan 10, 2006
+	// Explicit casting to int using rounding
 	// *********************************************************
-	CString Utility::GetRelativePath(CString ProjectName, CString Filename)
+	int Utility::Rint(double value)
 	{
-		CString drive1, drive2;
-		char drive[1024];
-		char dir[1024];
-		char name[1024];
-		char ext[1024];
-
-		_splitpath(ProjectName, drive, dir, name, ext);
-		drive1 = drive;
-
-		_splitpath(Filename, drive, dir, name, ext);
-		drive2 = drive;
-
-		if (drive1 != drive2)
-		{
-			// files are on the different drives, no way to get a relative path
-			return Filename;
-		}
+		if(value < 0.0)
+			value -= 0.5;
 		else
-		{
-			std::vector<CString> list1;
-			std::vector<CString> list2;
-			
-			GetFoldersList(ProjectName, list1);
-			GetFoldersList(Filename, list2);
-
-			// searching for the match (inner-most folder common to both files)
-			unsigned int i,j;
-			for ( i = 0; i < list1.size(); i++)
-			{
-				for ( j = 0; j < list2.size(); j++)
-				{
-					if (_stricmp(list1[i], list2[j]) == 0)
-					{
-						goto match;
-					}
-				}
-			}
-
-			match:
-			CString path = "";
-			for (unsigned int k = 0; k < i; k++)
-			{
-				// going to the parent folder 
-				path += "..\\";
-			}
-
-			// exluding folder part from the path
-			path += Filename.Mid(list1[i].GetLength() + 1);
-			return path;
-		}
-	}
-
-	// *********************************************************
-	//	     GetPathWOExtension()
-	// *********************************************************
-	CString Utility::GetFolderFromPath(CString path)
-	{
-		for (int i = path.GetLength() - 1; i > 0; i--)
-		{
-			if (path.Mid(i, 1) == '\\')
-			{
-				return path.Left(i);	// -1
-			}
-		}
-		return path;
-	}
-
-	// *********************************************************
-	//	     GetFileExtension()
-	// *********************************************************
-	bool EndsWith(CString path, CString ext)
-	{
-		if (path.GetLength() < ext.GetLength() + 1 || ext.GetLength() < 2) {
-			return false;
-		}
-		else
-		{
-			return path.Right(ext.GetLength()).CompareNoCase(ext) == 0;
-		}
-	}
-
-	// *********************************************************
-	//	     GetPathWOExtension()
-	// *********************************************************
-	CString GetPathWOExtension(CString path)
-	{
-		for (int i = path.GetLength() - 1; i > 0; i--)
-		{
-			if (path.Mid(i, 1) == ".")
-			{
-				return path.Left(i);	// -1
-			}
-		}
-		return path;
+			value += 0.5;
+		int val = static_cast<int>(value);
+		return val;
 	}
 
 	// *********************************************************
@@ -451,46 +626,8 @@ namespace Utility
 		// it's enough just to replace , by .
 		// if user defined locale would be used std::locale("") the logic should be more complex
 		s.Replace(',', '.');
-		return _atof_l(s, m_locale);
-	}
-	
-	// ****************************************************
-	//   ReadFileToBuffer
-	// ****************************************************
-	// Reads the content of the file to buffer, return the number of bytes read
-	int ReadFileToBuffer(CString filename, unsigned char** buffer)
-	{
-		USES_CONVERSION;
-		
-		FILE* file = fopen(filename,"rb");
-		
-		long size = 0;
-		if (file)
-		{
-			fseek( file, 0, SEEK_END );
-			size = ftell(file);
-			if (size > 0)
-			{
-				*buffer = new unsigned char[size];
-				rewind(file);
-				size = fread(*buffer, sizeof(char), size, file);
-			}
-			fclose(file);
-		}
-		return size;
-
-		//ifstream
-		/*std::basic_ifstream<unsigned char, std::char_traits<unsigned char>> file(filename, ios::in|ios::binary|ios::ate);
-		if (file.is_open())
-		{
-			int size = file.tellg();
-			*buffer = new unsigned char[size];
-			file.seekg (0, ios::beg);
-			file.read(*buffer, size);
-			file.close();
-			return size;
-		}*/
-		//return 0;
+		double val = _atof_l(s, m_locale);
+		return val;
 	}
 
 	double FloatRound(double doValue, int nPrecision)
@@ -510,6 +647,9 @@ namespace Utility
 	    
 		return doComplete5i / pow(doBase, (double) nPrecision);
 	}
+#pragma endregion
+
+#pragma region Gdi	
 
 	// ***********************************************************
 	//		GetEncoderClsid()
@@ -548,15 +688,6 @@ namespace Utility
 	   return -1;  // Failure
 	}
 
-	WCHAR* StringToWideChar(CString s)
-	{
-		WCHAR* wText = NULL;
-		int size = MultiByteToWideChar(CP_ACP, 0, s.GetString(), -1, NULL, 0);
-		wText = new WCHAR[size];
-		MultiByteToWideChar(CP_ACP, 0, s.GetString(), -1, wText, size);
-		return wText;
-	}
-
 	Gdiplus::Font* GetGdiPlusFont(CString name, float size)
 	{
 		WCHAR* wFontName = StringToWideChar("Arial");
@@ -566,16 +697,9 @@ namespace Utility
 		return font;
 	}
 
-	int getCurrentYear()
-	{
-		const time_t curTime = time(NULL);
-		struct tm *tmData = localtime(&curTime);
-		return tmData->tm_year + 1900;
-	}
-
-	// --------------------------------------------------
+	// **************************************************
 	//	SaveBitmap
-	// --------------------------------------------------
+	// **************************************************
 	// Saves provided array of pixels as png image (uses GDI+)
 	bool Utility::SaveBitmap(int width, int height, unsigned char* pixels, BSTR outputName)
 	{
@@ -629,6 +753,76 @@ namespace Utility
 		return (status == Gdiplus::Ok);
 	}
 
+	DWORD* Utility::cvtUCharToDword(long inp, int &num)
+	{   /* Chris Michaelis and Michelle Hospodarsky 2-11-2004 */
+		/* this function creates a DWORD[] from a long : used to create the custom pen for a custom stipple*/
+		/* the first digit in inp is the multiplier for the remainder of the digits	*/
+
+		std::vector<long> temp;
+		int multiplier;
+		char inpStr[33];
+		_ltoa(inp,inpStr,10);
+
+		int iter = 0;
+		for (; inpStr[iter] != 0; iter++)
+		{
+		  temp.push_back(inpStr[iter]);
+		}
+
+		int size = temp.size();
+		DWORD * output = new DWORD[size];
+
+		//get the multiplier
+		multiplier = atoi((char*)&temp[0]);
+
+		for (int i = 1; i < size; i++)
+		{
+			output[i-1] =  multiplier * atoi((char*)&temp[i]); // multiply to enhance value since range = 0 - 9
+		}
+
+		/* get the number of elements*/
+		num = temp.size() - 1; // take off one for the multiplier and one for the null value
+		temp.clear(); // be frugal with memory..
+
+		return output;
+	}
+#pragma endregion
+
+#pragma region Gdal
+	// ********************************************************
+	//     CPLCreateXMLAttributeAndValue()
+	// ********************************************************
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, CStringW valueW)
+	{
+		CStringA valueA = Utility::ConvertToUtf8(valueW);	
+		CPLXMLNode* psNode = CPLCreateXMLNode(psParent, CXT_Attribute, pszName);
+		CPLCreateXMLNode( psNode, CXT_Text, valueA);
+		return psNode;
+	}
+	
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue)
+	{
+		CPLXMLNode* psNode = CPLCreateXMLNode(psParent, CXT_Attribute, pszName);
+		CPLCreateXMLNode( psNode, CXT_Text, pszValue);
+		return psNode;
+	}
+
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue)
+	{
+		CString temp;
+		temp.Format ("%d", nValue);
+		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
+	}
+
+	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue)
+	{
+		CString temp;
+		temp.Format ("%f", rValue);
+		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
+	}
+#pragma endregion
+
+#pragma region COM
 	// ********************************************************
 	//	  Utility::put_ComReference
 	// ********************************************************
@@ -671,90 +865,38 @@ namespace Utility
 		}
 		return true;
 	}
+#pragma endregion
 
 	// ********************************************************
-	//     Utility::CPLCreateXMLAttributeAndValue()
+	//	  getCurrentYear
 	// ********************************************************
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue)
+	int getCurrentYear()
 	{
-		CPLXMLNode* psNode = CPLCreateXMLNode(psParent, CXT_Attribute, pszName);
-		CPLCreateXMLNode( psNode, CXT_Text, pszValue);
-		return psNode;
+		const time_t curTime = time(NULL);
+		struct tm *tmData = localtime(&curTime);
+		return tmData->tm_year + 1900;
 	}
 
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue)
-	{
-		CString temp;
-		temp.Format ("%d", nValue);
-		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
-	}
-
-	CPLXMLNode* Utility::CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue)
-	{
-		CString temp;
-		temp.Format ("%f", rValue);
-		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
-	}
-
-	 #define _SECOND ((__int64) 10000000)
-
 	// ********************************************************
-	//     Utility::CompareCreationTime()
+	//    OpenLog()
 	// ********************************************************
-	// returns: 1 = first file younger, -1 = vice versa, 0 = equal age; any other value = error
-	bool IsFileYounger(CString filename, CString thanFilename)
+	void OpenLog(ofstream& logger, CStringW path, CStringW name)
 	{
-		FILETIME time1, time2;
-		if (get_FileCreationTime(filename, time1) && get_FileCreationTime(thanFilename, time2))
+		if (logger.is_open())
 		{
-			// subtract several seconds
-			ULONGLONG qwResult;
-
-			// Copy the time into a quadword.
-			qwResult = (((ULONGLONG) time2.dwHighDateTime) << 32) + time2.dwLowDateTime;
-
-			// Add 30 days.
-			qwResult -= 10 * _SECOND;
-
-			// Copy the result back into the FILETIME structure.
-			time2.dwLowDateTime  = (DWORD) (qwResult & 0xFFFFFFFF );
-			time2.dwHighDateTime = (DWORD) (qwResult >> 32 );
-			
-			int val = CompareFileTime(&time1, &time2);
-			return val == 1 ;
+			logger.flush();
+			logger.close();
 		}
-		return false;
+
+		if (!Utility::dirExists(path))
+			_wmkdir(path);
+
+		path += name;
+		logger.open(path);
+
+		Debug::WriteLine("Log opened: %d", logger.is_open());
+		Debug::WriteLine("Log good: %d", logger.good());
 	}
-
-	// ********************************************************
-	//     Utility::get_FileCreationTime()
-	// ********************************************************
-	bool get_FileCreationTime(CString filename, FILETIME& time)
-	{
-		_WIN32_FILE_ATTRIBUTE_DATA data;
-		if (GetFileAttributesEx(filename, GetFileExInfoStandard, &data))
-		{
-			time = data.ftCreationTime;
-			return true;
-		}
-		return false;
-	}
-
-	// ********************************************************
-	//    RemoveFile()
-	// ********************************************************
-	bool RemoveFile(CString filename)
-	{
-		if (Utility::fileExists(filename))
-		{
-			return remove(filename) == 0;
-		}
-		else {
-			return true;	// no file and therefore no problem
-		}
-	}
-
-
 }
 
 namespace Debug
@@ -766,6 +908,7 @@ namespace Debug
 		temp = ctime(&now);*/
 	void WriteLine(CString format, ...)
 	{
+		//#ifdef _DEBUG
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
@@ -773,6 +916,8 @@ namespace Debug
 		CString s = buffer;
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
+		//#endif
+		//return _CrtDbgReport(_CRT_WARN,NULL,NULL,NULL,buffer);
 	}
 
 	void Write(CString message)

@@ -2,12 +2,12 @@
 # Most files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/Grids/Formats/
 
 #ASCII
-C:\dev\TestingScripts\ScriptData\General\Grids\Formats\sj_dem_clip_utm.asc
-C:\dev\TestingScripts\ScriptData\General\Grids\Formats\testArea.asc
+%DATA%\General\Grids\Formats\sj_dem_clip_utm.asc
+%DATA%\General\Grids\Formats\testArea.asc
 
 #GeoTIFF
-C:\dev\TestingScripts\ScriptData\General\Grids\Formats\Grid.tif
-
+%DATA%\General\Grids\Formats\Grid.tif
 
 #NetCDF:
-C:\dev\TestingScripts\ScriptData\General\Grids\Formats\NDB2_19901225.nc
+%DATA%\General\Grids\Formats\NDB2_19901225.nc
+#%DATA%\General\Grids\Formats\precipitation29.nc

@@ -148,7 +148,8 @@ bool CShapefile::get_CanUseSpatialIndexCore(Extent& extents)
 				}
 				else
 				{
-					string baseName = _shpfileName.Left(_shpfileName.GetLength() - 4);
+					USES_CONVERSION;
+					string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
 					if (IndexSearching::loadSpatialIndex(baseName, false, spatialIndexNodeCapacity, spatialIndexID))
 					{
 						spatialIndexLoaded = true;
@@ -228,7 +229,8 @@ STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL *retval)
 		*retval = VARIANT_FALSE;
 	else
 	{
-		string baseName = _shpfileName.Left(_shpfileName.GetLength() - 4);
+		USES_CONVERSION;
+		string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
 		bool bIsValid = IndexSearching::isValidSpatialIndex(baseName.c_str(), spatialIndexNodeCapacity);
 		*retval = bIsValid ? VARIANT_TRUE : VARIANT_FALSE;
 	}

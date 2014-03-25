@@ -111,7 +111,9 @@ public:
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
 	STDMETHOD(ReadFromFile)(BSTR mwlegFilename, BSTR nodeName, VARIANT_BOOL* retVal);
-	STDMETHOD(WriteToFile)(BSTR mwlegFilename, VARIANT_BOOL* retVal);
+	STDMETHOD(WriteToFile)(BSTR mwlegFilename, BSTR gridName, int bandIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(ApplyColoringType)(ColoringType coloringType);
+	STDMETHOD(ApplyGradientModel)(GradientModel gradientModel);
 
 	CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName);
 	bool CGridColorScheme::DeserializeCore(CPLXMLNode* node);

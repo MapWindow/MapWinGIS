@@ -59,6 +59,7 @@ public:
 		closedPoly = false;
 		firstPointIndex = -1;
 		persistent = VARIANT_FALSE;
+		displayAngles = false;
 	}
 
 	~CMeasuring()
@@ -96,6 +97,7 @@ private:
 	IShape* shape;
 	bool areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
 	
+	
 public:
 	STDMETHOD(get_Length)(double* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
@@ -109,9 +111,10 @@ public:
 	STDMETHOD(get_IsStopped)(VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)();
 	STDMETHOD(get_SegementLength)(int segmentIndex, double* retVal);
-
 	STDMETHOD(get_Persistent)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_Persistent)(VARIANT_BOOL newVal);
+	STDMETHOD(get_DisplayAngles)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_DisplayAngles)(VARIANT_BOOL newVal);
 
 	// projection should be specified before any calculations are possible
 	bool SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode);
@@ -121,6 +124,7 @@ public:
 	bool IsStopped() {return stopped; }
 	bool IsGeodesic() { return isGeodesic;}
 
+	bool HasProjection() { return transformationMode != tmNotDefined; }
 	double GetDistance();
 	double GetEuclidianDistance();
 	double CMeasuring::GetGeodesicDistance();
@@ -134,6 +138,7 @@ public:
 	VARIANT_BOOL persistent;			   // will be drawn even when cursor mode isn't cmMeasure
 	tkMeasuringType measuringType;
 	Point2D mousePoint;					   // points entered by user (in map units, whatever they are)
+	bool displayAngles;
 	
 	Gdiplus::Font* font;
 	Gdiplus::SolidBrush textBrush; //(Gdiplus::Color::Black);

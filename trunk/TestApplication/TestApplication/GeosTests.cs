@@ -391,6 +391,10 @@ namespace TestApplication
         0,
         string.Format("{0}-----------------------{0}The closest point test has started.", Environment.NewLine));
 
+        const string path = @"c:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\";
+            pointShapefile = path + "cities.shp";
+            searchShapefile = path + "states.shp";
+
       try
       {
         // Check inputs:
@@ -489,7 +493,7 @@ namespace TestApplication
         searchSf.set_ShapeSelected(foundShapeID, true);
 
         var link = pointShp.ClosestPoints(searchSf.get_Shape(foundShapeID));
-        if (link != null && link.numPoints > 1)
+        if (link != null && link.NumPoints > 1)
         {
           var shapeId = linksSf.EditAddShape(link);
           linksSf.EditCellValue(fieldIndex, shapeId, foundShapeID);
@@ -651,8 +655,7 @@ namespace TestApplication
         }
 
         // convert to WKT:
-        string wkt;
-        sf.get_Shape(shapeIndex).ExportToWKT(out wkt);
+        string wkt = sf.Shape[shapeIndex].ExportToWKT();
         if (wkt == null || wkt.Trim() == string.Empty)
         {
           theForm.Error(string.Empty, "ExportToWKT was unsuccessful");

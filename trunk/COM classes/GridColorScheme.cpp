@@ -21,6 +21,7 @@
 
 #include "stdafx.h"
 #include "GridColorScheme.h"
+#include "GdalHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,7 +41,6 @@ STDMETHODIMP CGridColorScheme::get_NumBreaks(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = Breaks.size();
 
 	return S_OK;
@@ -50,7 +50,6 @@ STDMETHODIMP CGridColorScheme::get_AmbientIntensity(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = AmbientIntensity;
 
 	return S_OK;
@@ -79,7 +78,6 @@ STDMETHODIMP CGridColorScheme::get_LightSourceIntensity(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = LightSourceIntensity;
 
 	return S_OK;
@@ -107,7 +105,6 @@ STDMETHODIMP CGridColorScheme::get_LightSourceAzimuth(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = LightSourceAzimuth;
 
 	return S_OK;
@@ -117,7 +114,6 @@ STDMETHODIMP CGridColorScheme::get_LightSourceElevation(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = LightSourceElevation;
 
 	return S_OK;
@@ -242,7 +238,6 @@ STDMETHODIMP CGridColorScheme::get_NoDataColor(OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = NoDataColor;
 
 	return S_OK;
@@ -252,7 +247,6 @@ STDMETHODIMP CGridColorScheme::put_NoDataColor(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	NoDataColor = newVal;
 
 	return S_OK;
@@ -760,22 +754,24 @@ STDMETHODIMP CGridColorScheme::Deserialize(BSTR newVal)
 STDMETHODIMP CGridColorScheme::ReadFromFile(BSTR mwlegFilename, BSTR nodeName, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+	*retVal = VARIANT_FALSE;
 	USES_CONVERSION;
-	CString name = OLE2CA(mwlegFilename);
-	if (!Utility::fileExists(name))
+
+	CStringW name = OLE2W(mwlegFilename);
+	if (!Utility::fileExistsW(name))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
 
-	CPLXMLNode* node = CPLParseXMLFile(name.GetString());
+	CPLXMLNode* node = GdalHelper::ParseXMLFile(name);
 	if (node)
 	{
 		CString name = "";//"=";
 		name += SysStringLen(nodeName) == 0 ? "GridColoringScheme" : OLE2CA(nodeName);
 		node = CPLGetXMLNode(node, name);
-		this->DeserializeCore(node);
+		if (this->DeserializeCore(node))
+			*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -783,24 +779,51 @@ STDMETHODIMP CGridColorScheme::ReadFromFile(BSTR mwlegFilename, BSTR nodeName, V
 // ********************************************************
 //     WriteTo()
 // ********************************************************
-STDMETHODIMP CGridColorScheme::WriteToFile(BSTR mwlegFilename, VARIANT_BOOL* retVal)
+STDMETHODIMP CGridColorScheme::WriteToFile(BSTR mwlegFilename, BSTR gridName, int bandIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
+	USES_CONVERSION;
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "ColoringScheme" );
 	if (psTree)
 	{
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "SchemeType", "Grid");
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "GroupName", "Data Layers");
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "GridName", "");		// TODO: relative name without extension
+		CStringW relName = Utility::GetRelativePath(mwlegFilename, gridName);
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "GridName", relName);
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "BandIndex", bandIndex);
 	}
 
 	CPLXMLNode* node = this->SerializeCore("GridColoringScheme");
 	CPLAddXMLChild(psTree, node);
 
-	USES_CONVERSION;
-	CString filename = OLE2CA(mwlegFilename);
-	*retVal = CPLSerializeXMLTreeToFile(psTree, filename);
+	*retVal = GdalHelper::SerializeXMLTreeToFile(psTree, OLE2W(mwlegFilename));
 	CPLDestroyXMLNode(psTree);
+	return S_OK;
+}
+
+// ********************************************************
+//     ApplyColoringType()
+// ********************************************************
+STDMETHODIMP CGridColorScheme::ApplyColoringType(ColoringType coloringType)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	for(size_t i = 0; i < Breaks.size(); i++)
+	{
+		Breaks[i]->put_ColoringType(coloringType);
+	}
+	return S_OK;
+}
+
+// ********************************************************
+//     ApplyGradientModel()
+// ********************************************************
+STDMETHODIMP CGridColorScheme::ApplyGradientModel(GradientModel gradientModel)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	for(size_t i = 0; i < Breaks.size(); i++)
+	{
+		Breaks[i]->put_GradientModel(gradientModel);
+	}
 	return S_OK;
 }

@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "measuring.h"
 #include "..\Processing\GeograpicLib\PolygonArea.hpp"
+#include "map.h"
 GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 GeographicLib::PolygonArea poly(geod);
 
-#include "map.h"
+// *******************************************************
+//		get_ScreenPoints()
+// *******************************************************
 int CMeasuring::get_ScreenPoints(void* map, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data)
 {
 	CMapView* mapView = (CMapView*)map;
@@ -57,7 +60,7 @@ STDMETHODIMP CMeasuring::get_PointXY(long pointIndex, double* x, double* y, VARI
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (pointIndex < 0 || pointIndex >= (long)points.size())
 	{
-		// TODO: report error
+		ErrorMsg(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
 	}
 	else
@@ -80,7 +83,7 @@ STDMETHODIMP CMeasuring::get_MeasuringType(tkMeasuringType* retVal)
 }
 STDMETHODIMP CMeasuring::put_MeasuringType(tkMeasuringType newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	this->measuringType = newVal;
 	return S_OK;
 }
@@ -96,7 +99,7 @@ STDMETHODIMP CMeasuring::get_Persistent(VARIANT_BOOL* retVal)
 }
 STDMETHODIMP CMeasuring::put_Persistent(VARIANT_BOOL newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	this->persistent = newVal;
 	return S_OK;
 }
@@ -117,7 +120,6 @@ STDMETHODIMP CMeasuring::get_Length(double* retVal)
 STDMETHODIMP CMeasuring::get_AreaWithClosingVertex(double lastPointProjX, double lastPointProjY, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
 	*retVal = this->GetArea(true, lastPointProjX, lastPointProjY);
 	return S_OK;
 }
@@ -174,12 +176,16 @@ STDMETHODIMP CMeasuring::Clear()
 	return S_OK;
 }
 
+// *******************************************************
+//		SegementLength()
+// *******************************************************
 STDMETHODIMP CMeasuring::get_SegementLength(int segmentIndex, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (segmentIndex < 0 || segmentIndex >= (long)points.size() - 1)
 	{
-		// TODO: report error
+		*retVal = 0.0;
+		ErrorMsg(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else
 	{
@@ -416,3 +422,23 @@ bool CMeasuring::TransformPoint(double& x, double& y) {
 	}
 	return false;
 }
+
+// *******************************************************
+//		DisplayAngles()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_DisplayAngles(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = displayAngles ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+STDMETHODIMP CMeasuring::put_DisplayAngles(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	displayAngles = newVal ? true: false;
+	return S_OK;
+}
+
+
+	

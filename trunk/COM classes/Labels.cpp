@@ -34,6 +34,7 @@
 
 #include "GeometryOperations.h"
 #include "Templates.h"
+#include "GdalHelper.h"
 
 
 // ////////////////////////////////////////////////////////////// //
@@ -1939,14 +1940,15 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 	
 	USES_CONVERSION;
-	CString name = OLE2CA(filename);
-	if (!Utility::fileExists(name))
+	CStringW name = OLE2W(filename);
+	if (!Utility::fileExistsW(name))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;
 	}
 
-	CPLXMLNode* node = CPLParseXMLFile(name.GetString());
+	
+	CPLXMLNode* node = GdalHelper::ParseXMLFile(name); // CPLParseXMLFile(name.GetString());
 	if (node)
 	{
 		node = CPLGetXMLNode(node, "=MapWindow");

@@ -31,6 +31,8 @@
 #include "ogr_spatialref.h"
 
 #include "projections.h"
+#include "gdal_frmts.h"
+#include "gdalhelper.h"
 
 
 extern "C"
@@ -181,8 +183,6 @@ bool tkGridRaster::GetIntValueGridColorTable(IGridColorScheme ** newscheme)
 	return true;
 }
 
-
-
 void tkGridRaster::SaveHeaderInfo()
 {
 	if (rasterDataset == NULL)
@@ -237,9 +237,7 @@ void tkGridRaster::SaveHeaderInfo()
 	delete rasterDataset;
 	poBand = NULL;
 
-	rasterDataset = (GDALDataset *) GDALOpen(mFilename, GA_Update );
-	if (rasterDataset == NULL)  // Attempt ro open
-		rasterDataset = (GDALDataset *) GDALOpen(mFilename, GA_ReadOnly );
+	rasterDataset = GdalHelper::OpenDatasetW(mFilename);
 
 	if( rasterDataset != NULL )
 	{
@@ -250,25 +248,30 @@ void tkGridRaster::SaveHeaderInfo()
 // *****************************************************
 //		LoadRaster()
 // *****************************************************
-bool tkGridRaster::LoadRaster(const char * filename, bool InRam, GridFileType fileType)
+
+bool tkGridRaster::LoadRaster(CStringW filename, bool InRam, GridFileType fileType)
+{
+	mFilename = filename;
+	CStringA filenameA = Utility::ConvertToUtf8(filename);
+	return LoadRasterCore(filenameA.GetBuffer(), InRam, fileType);
+}
+
+bool tkGridRaster::LoadRasterCore(char* filenameA, bool InRam, GridFileType fileType)
 {
 	__try
 	{
 		CanScanlineBuffer = false;
 		currentFileType = fileType;
-		mFilename = filename;
 
 		GDALAllRegister();
-		rasterDataset = (GDALDataset *) GDALOpen(filename, GA_Update );
-
-		if (rasterDataset == NULL)  // Attempt ro open
-			rasterDataset = (GDALDataset *) GDALOpen(filename, GA_ReadOnly );
+		
+		rasterDataset = GdalHelper::OpenDatasetA(filenameA);
 
 		if (!rasterDataset) {
 			return false;
 		}
 
-		nBands = rasterDataset->GetRasterCount();   // lsu: added 13-apr-13
+		nBands = rasterDataset->GetRasterCount();
 		width = rasterDataset->GetRasterXSize();
 		height = rasterDataset->GetRasterYSize();
 		double adfGeoTransform[6];
@@ -282,26 +285,14 @@ bool tkGridRaster::LoadRaster(const char * filename, bool InRam, GridFileType fi
 			// anything, since the tiepoints won't change. CreateNew will default
 			// to PixelIsArea by applying the reverse of this adjustment.
 			const char * pszCellRegistration = rasterDataset->GetMetadataItem("AREA_OR_POINT", NULL);
-
-			// The IF statement is no longer needed; see comments above.
-			//if (pszCellRegistration == NULL || strcmp(pszCellRegistration, "Area") == 0 || strcmp(pszCellRegistration, "AREA") == 0)
-			//{
-				// PixelIsArea. Use half-cell offset fix. (Shift Inward)
-                dX = adfGeoTransform[1];
-				dY  = -1 * adfGeoTransform[5];
-				XllCenter = adfGeoTransform[0];
-				XllCenter += (dX / 2);
-				YllCenter = adfGeoTransform[3] - height*dY;
-				YllCenter += (dY / 2);
-			//}
-			//else // Old code from when this was assuming the corner coordinate.
-			//{
-			//	// PixelIsPoint
-   //             dX = adfGeoTransform[1];
-			//	dY  = -1 * adfGeoTransform[5];
-			//	XllCenter = adfGeoTransform[0];
-			//	YllCenter = adfGeoTransform[3] - height*dY;
-			//}
+		
+			// PixelIsArea. Use half-cell offset fix. (Shift Inward)
+            dX = adfGeoTransform[1];
+			dY  = -1 * adfGeoTransform[5];
+			XllCenter = adfGeoTransform[0];
+			XllCenter += (dX / 2);
+			YllCenter = adfGeoTransform[3] - height*dY;
+			YllCenter += (dY / 2);
 		}
 		else
 		{
@@ -312,8 +303,7 @@ bool tkGridRaster::LoadRaster(const char * filename, bool InRam, GridFileType fi
 			dY = -1;
 		}
 
-		// the first one is opened by default
-		if (!this->OpenBand(1))
+		if (!this->OpenBand(activeBandIndex))
 		{
 			return false;
 		}
@@ -358,10 +348,17 @@ int tkGridRaster::getNumBands()
 // *****************************************************
 bool tkGridRaster::OpenBand(int bandIndex)
 {
-	poBand = rasterDataset->GetRasterBand(bandIndex);   // was 1 by default
+	int count = rasterDataset->GetRasterCount();
+	
+	poBand = rasterDataset->GetRasterBand(bandIndex);
 	if (!poBand) {
 		return false;
 	}
+
+	cachedMax = -9999.0;
+	cachedMin = 9999.0;
+
+	activeBandIndex = bandIndex;
 
 	dataType = poBand->GetRasterDataType();
 	if(!(	(dataType == GDT_Byte)||(dataType == GDT_UInt16)||
@@ -383,6 +380,8 @@ bool tkGridRaster::OpenBand(int bandIndex)
 	{
 		hasColorTable = true;
 	}
+
+	Debug::WriteLine("Data type: %d", dataType);
 
 	//Route the image to the right reader
 	//Note: we are assuming here that the data type does not change across bands.
@@ -438,53 +437,25 @@ bool tkGridRaster::OpenBand(int bandIndex)
 void tkGridRaster::ReadProjection()
 {
 	Projection = "";
-	__try
-	{
-		const char * wkt = (char *)rasterDataset->GetProjectionRef();
-		int length = _tcslen(wkt);
 
-		if (wkt != NULL && length > 0)
+	char * wkt = (char *)rasterDataset->GetProjectionRef();
+	if (wkt)
+	{
+		IGeoProjection* proj = NULL;
+		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+		if (proj)
 		{
-         char * temp = new char[length+1];
-         strcpy(temp, wkt);
-
-			OGRSpatialReferenceH  hSRS;
-			hSRS = OSRNewSpatialReference(NULL);
-
-			__try
+			USES_CONVERSION;
+			VARIANT_BOOL vb;
+			proj->ImportFromAutoDetect(A2BSTR(wkt), &vb);
+			if (vb)
 			{
-				if( OSRImportFromESRI( hSRS, &temp ) == CE_None )
-				{
-					char * pszProj4 = NULL;
-					OSRExportToProj4(hSRS, &pszProj4);
-					if (pszProj4 != NULL)
-					{
-						Projection = pszProj4;
-						CPLFree(pszProj4);
-					}
-				}
-				else {
-					if( OSRImportFromWkt( hSRS, &temp ) == CE_None )
-					{
-						char * pszProj4 = NULL;
-						OSRExportToProj4(hSRS, &pszProj4);
-						if (pszProj4 != NULL)
-						{
-							Projection = pszProj4;
-							CPLFree(pszProj4);
-						}
-					}
-				}
+				CComBSTR bstr;
+				proj->ExportToProj4(&bstr);
+				Projection = OLE2A(bstr);
 			}
-			__except(1)
-			{
-			}
-			OSRDestroySpatialReference( hSRS );
-			delete[] temp;
+			proj->Release();
 		}
-	}
-	__except(1)
-	{
 	}
 }
 
@@ -498,7 +469,7 @@ GridDataType tkGridRaster::GetDataType()
 		return FloatDataType;
 }
 
-bool tkGridRaster::CreateNew(char * filename, GridFileType newFileType, double dx, double dy,
+bool tkGridRaster::CreateNew(CStringW filename, GridFileType newFileType, double dx, double dy, 
 			   double xllcenter, double yllcenter, double nodataval, char * projection,
 			   long ncols, long nrows, GridDataType DataType, bool CreateInRam, double initialValue, bool applyInitialValue)
 {
@@ -539,19 +510,20 @@ bool tkGridRaster::CreateNew(char * filename, GridFileType newFileType, double d
     if( poDriver == NULL )
         return false;
 
-	// Ensure the filename is not null.
-	if (filename == NULL)
+	if (filename.GetLength() == 0)
 		return false;
+	//if (filename == NULL) return false;
 
 	try
 	{
-		_unlink(filename);
+		_wunlink(filename);
 	}
 	catch(...)
 	{}
 
-    rasterDataset = poDriver->Create( filename, ncols, nrows, 1, genericType,
-                                papszOptions );
+	m_globalSettings.SetGdalUtf8(true);
+	rasterDataset = poDriver->Create( Utility::ConvertToUtf8(filename), ncols, nrows, 1, genericType, papszOptions );
+	m_globalSettings.SetGdalUtf8(false);
 
 	currentFileType = newFileType;
 
@@ -582,7 +554,7 @@ bool tkGridRaster::CreateNew(char * filename, GridFileType newFileType, double d
 	if (rasterDataset == NULL)
 		return false;
 
-    poBand = rasterDataset->GetRasterBand(1);
+    poBand = rasterDataset->GetRasterBand(1);		// to open the first band is ok here;
 
 	if (hasColorTable)
 	{
@@ -755,6 +727,7 @@ bool tkGridRaster::Close()
 	{
 		if (rasterDataset != NULL)
 		{
+			//GdalHelper::CloseDataset(rasterDataset);
 			delete rasterDataset;
 			rasterDataset=NULL;
 		}
@@ -794,6 +767,12 @@ bool tkGridRaster::Close()
 			CPLFree( floatScanlineBufferB );
 			floatScanlineBufferB = NULL;
 		}
+
+		cachedMax = -9999;
+		cachedMin = 9999;
+		genericType = GDT_Unknown;
+		hasColorTable = false;
+		activeBandIndex = 1;
 	}
 	catch(...)
 	{
@@ -812,10 +791,15 @@ double tkGridRaster::GetMaximum()
 	adfMinMax[0] = poBand->GetMinimum( &bGotMin );
     adfMinMax[1] = poBand->GetMaximum( &bGotMax );
     if( ! (bGotMin && bGotMax) )
-       GDALComputeRasterMinMax((GDALRasterBandH)poBand, false, adfMinMax);
+	{
+		GDALComputeRasterMinMax((GDALRasterBandH)poBand, false, adfMinMax);
+	}
 
 	cachedMax = adfMinMax[1];
 	cachedMin = adfMinMax[0];
+
+	Debug::WriteLine("Maximum: %f", cachedMax);
+	Debug::WriteLine("Minimum: %f", cachedMin);
 
 	return adfMinMax[1];
 }
@@ -829,10 +813,15 @@ double tkGridRaster::GetMinimum()
 	adfMinMax[0] = poBand->GetMinimum( &bGotMin );
     adfMinMax[1] = poBand->GetMaximum( &bGotMax );
     if( ! (bGotMin && bGotMax) )
-       GDALComputeRasterMinMax((GDALRasterBandH)poBand, false, adfMinMax);
+	{
+	   GDALComputeRasterMinMax((GDALRasterBandH)poBand, false, adfMinMax);
+	}
 
 	cachedMax = adfMinMax[1];
 	cachedMin = adfMinMax[0];
+
+	Debug::WriteLine("Maximum: %f", cachedMax);
+	Debug::WriteLine("Minimum: %f", cachedMin);
 
 	return adfMinMax[0];
 }
@@ -1100,20 +1089,18 @@ bool tkGridRaster::SaveFullBuffer()
 	return retVal;
 }
 
-bool tkGridRaster::Save(char * saveToFilename, GridFileType newFileFormat)
+bool tkGridRaster::Save(CStringW saveToFilename, GridFileType newFileFormat)
 {
-
 	// Write the .prj file
 	if (Projection.GetLength() > 0)
 	{
-		CString prjFilename = saveToFilename;
-		prjFilename = prjFilename.Left(prjFilename.GetLength() - 3) + "prj";
+		CStringW prjFilename = saveToFilename;
+		prjFilename = prjFilename.Left(prjFilename.GetLength() - 3) + L"prj";
 		FILE * prjFile = NULL;
-		prjFile = fopen(prjFilename, "wb");
+		prjFile = _wfopen(prjFilename, L"wb");
 		if (prjFile)
 		{
 			char * wkt;
-
 			ProjectionTools * p = new ProjectionTools();
 			p->ToESRIWKTFromProj4(&wkt, Projection.GetBuffer());
 
@@ -1122,7 +1109,6 @@ bool tkGridRaster::Save(char * saveToFilename, GridFileType newFileFormat)
 			prjFile = NULL;
 			delete p; //added by Lailin Chen 12/30/2005
 		}
-
 	}
 
 	if (mFilename == saveToFilename && newFileFormat == currentFileType)
@@ -1135,12 +1121,15 @@ bool tkGridRaster::Save(char * saveToFilename, GridFileType newFileFormat)
 		// save out any scanline memory buffers to the current file
 		if (scanlineADataChanged || scanlineBDataChanged)
 			SaveFullBuffer();
+		
 		// Note that if it's inram fully, the above isn't necessary;
 		// it can be written directly from our memory buffer by GDAL below.
-
 		GDALDataset *poDstDS;
-
-		poDstDS = rasterDataset->GetDriver()->CreateCopy( saveToFilename, rasterDataset, FALSE, NULL, NULL, NULL );
+		
+		CStringA saveFilenameA = Utility::ConvertToUtf8(saveToFilename);
+		m_globalSettings.SetGdalUtf8(true);
+		poDstDS = rasterDataset->GetDriver()->CreateCopy( saveFilenameA, rasterDataset, FALSE, NULL, NULL, NULL );
+		m_globalSettings.SetGdalUtf8(false);
 
 		if (poDstDS == NULL)
 			return false;
@@ -1223,7 +1212,6 @@ double tkGridRaster::getValue( long Row, long Column )
 		if (Row == scanlineBufferNumberA)
 		{
 			// Return from one-row buffer
-
 			scanlineLastAccessed = 'A';
 			if ((genericType == GDT_Int32 || genericType == GDT_Byte) && _int32ScanlineBufferA != NULL)
 				return static_cast<double>(_int32ScanlineBufferA[Column]);
@@ -1233,7 +1221,6 @@ double tkGridRaster::getValue( long Row, long Column )
 		else if (Row == scanlineBufferNumberB)
 		{
 			// Return from one-row buffer
-
 			scanlineLastAccessed = 'B';
 			if ((genericType == GDT_Int32 || genericType == GDT_Byte) && _int32ScanlineBufferB != NULL)
 				return static_cast<double>(_int32ScanlineBufferB[Column]);
@@ -1243,34 +1230,17 @@ double tkGridRaster::getValue( long Row, long Column )
 
 		// If we're still in the function, need to load a buffer
 		// or get a single value
-
 		if (CanScanlineBuffer)
 		{
 			if (scanlineLastAccessed == 'A')
 			{
 				// Load B
-
 				if (genericType == GDT_Int32 || genericType == GDT_Byte)
 				{
 					// If put_Value was called and wrote into the memory buffer,
 					// save that before dumping the old buffer data.
 					if (scanlineBDataChanged)
 						SaveFullBuffer();
-
-					// Chris M 1/28/2007 -- Avoid releasing and reallocating
-					// memory on every buffer shift. Rather, ensure that
-					// the datatypes are checked so I know which buffer to
-					// look at (in getvalue and putvalue and savefullbuffer)
-					// if (_int32ScanlineBufferB != NULL)
-					// {
-					// 	CPLFree(_int32ScanlineBufferB);
-					// 	_int32ScanlineBufferB = NULL;
-					// }
-					// if (floatScanlineBufferB != NULL)
-					// {
-					// 	CPLFree( floatScanlineBufferB);
-					// 	floatScanlineBufferB = NULL;
-					// }
 
 					if (_int32ScanlineBufferB == NULL)
 						_int32ScanlineBufferB = (_int32*) CPLMalloc( sizeof(_int32)*width);
@@ -1302,18 +1272,6 @@ double tkGridRaster::getValue( long Row, long Column )
 					if (scanlineBDataChanged)
 						SaveFullBuffer();
 
-					// see comment above
-					//if (_int32ScanlineBufferB != NULL)
-					//{
-					//	CPLFree(_int32ScanlineBufferB);
-					//	_int32ScanlineBufferB = NULL;
-					//}
-					//if (floatScanlineBufferB != NULL)
-					//{
-					//	CPLFree( floatScanlineBufferB);
-					//	floatScanlineBufferB = NULL;
-					//}
-
 					if (floatScanlineBufferB == NULL)
 						floatScanlineBufferB = (float *) CPLMalloc( sizeof(float)*width);
 
@@ -1341,25 +1299,12 @@ double tkGridRaster::getValue( long Row, long Column )
 			else
 			{
 				// Load A
-
 				if (genericType == GDT_Int32 || genericType == GDT_Byte)
 				{
 					// If put_Value was called and wrote into the memory buffer,
 					// save that before dumping the old buffer data.
 					if (scanlineADataChanged)
 						SaveFullBuffer();
-
-					// See comment above
-					//if (_int32ScanlineBufferA != NULL)
-					//{
-					//	CPLFree(_int32ScanlineBufferA);
-					//	_int32ScanlineBufferA = NULL;
-					//}
-					//if (floatScanlineBufferA != NULL)
-					//{
-					//	CPLFree( floatScanlineBufferA);
-					//	floatScanlineBufferA = NULL;
-					//}
 
 					if (_int32ScanlineBufferA == NULL)
 						_int32ScanlineBufferA = (_int32*) CPLMalloc( sizeof(_int32)*width);
@@ -1391,18 +1336,6 @@ double tkGridRaster::getValue( long Row, long Column )
 					if (scanlineADataChanged)
 						SaveFullBuffer();
 
-					// see comment above
-					//if (_int32ScanlineBufferA != NULL)
-					//{
-					//	CPLFree(_int32ScanlineBufferA);
-					//	_int32ScanlineBufferA = NULL;
-					//}
-					//if (floatScanlineBufferA != NULL)
-					//{
-					//	CPLFree( floatScanlineBufferA);
-					//	floatScanlineBufferA = NULL;
-					//}
-
 					if (floatScanlineBufferA == NULL)
 						floatScanlineBufferA = (float *) CPLMalloc( sizeof(float)*width);
 
@@ -1432,7 +1365,6 @@ double tkGridRaster::getValue( long Row, long Column )
 		else
 		{
 			// Read one value at a time. Performance hit...
-
 			_int32 pafScanAreaInt;
 			float pafScanAreaFloat;
 
@@ -1987,3 +1919,10 @@ bool tkGridRaster::BSTR2ColorTable(BSTR cTbl)
 	return true;
 }
 
+// ***********************************************
+//	    IsRgb
+// ***********************************************
+bool tkGridRaster::IsRgb()
+{ 
+	return GdalHelper::IsRgb(rasterDataset);
+}

@@ -159,19 +159,19 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* iimg, bool
 		if( fileHandle >= 0 )
 		{
 			USES_CONVERSION;
-			BSTR fname;
+			CComBSTR fname;
 			iimg->get_Filename(&fname);
-			imgfile = ::fopen(OLE2CA(fname),"rb");
-			::SysFreeString(fname);
+			imgfile = ::_wfopen(OLE2CW(fname), L"rb");
 		}
 
-		if (!imgfile)
-			goto clear_bmp;
-
+		unsigned char * data = NULL;
 		BITMAPFILEHEADER bmfh;
 		BITMAPINFOHEADER bmif;
 		RGBQUAD * bmiColors = NULL;
 		BITMAPINFO * bi = NULL;
+
+		if (!imgfile)
+			goto clear_bmp;
 
 		//read in BITMAPFILEHEADER
 		fread(&bmfh,sizeof(BITMAPFILEHEADER),1,imgfile);
@@ -221,7 +221,7 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* iimg, bool
 		// ------------------------------------------------------
 		//	 Preparing variables
 		// ------------------------------------------------------
-		unsigned char * data = new unsigned char[(rowLength+pad)*blockSize];
+		data = new unsigned char[(rowLength+pad)*blockSize];
 		long numRead;				// number of rows read
 		
 		double mapL, mapT, mapR, mapB;	// map units w/o clipping (world coordinates to place the image)

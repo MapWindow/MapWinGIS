@@ -33,7 +33,6 @@ STDMETHODIMP CExtents::SetBounds(double xMin, double yMin, double zMin, double x
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	xmin = xMin;
 	xmax = xMax;
 	ymin = yMin;
@@ -65,7 +64,6 @@ STDMETHODIMP CExtents::GetBounds(double * xMin, double * yMin, double * zMin, do
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*xMin = xmin;
 	*xMax = xmax;
 	*yMin = ymin;
@@ -80,8 +78,6 @@ STDMETHODIMP CExtents::GetBounds(double * xMin, double * yMin, double * zMin, do
 STDMETHODIMP CExtents::get_xMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	// TODO: Add your implementation code here
 	*pVal = xmin;
 	return S_OK;
 }
@@ -99,7 +95,6 @@ STDMETHODIMP CExtents::get_yMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = ymin;
 	return S_OK;
 }
@@ -108,7 +103,6 @@ STDMETHODIMP CExtents::get_yMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = ymax;
 	return S_OK;
 }
@@ -117,7 +111,6 @@ STDMETHODIMP CExtents::get_zMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = zmin;
 	return S_OK;
 }
@@ -126,7 +119,6 @@ STDMETHODIMP CExtents::get_zMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = zmax;
 	return S_OK;
 }
@@ -294,5 +286,40 @@ STDMETHODIMP CExtents::Intersects(IExtents* ext, VARIANT_BOOL* retVal)
 		zMax = MIN(zMax, this->zmax);
 		*retVal = (xMin <= xMax && yMin <= yMax && zMin <= zMax) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
+	return S_OK;
+}
+
+// ******************************************************
+//		ToDebugString()
+// ******************************************************
+STDMETHODIMP CExtents::ToDebugString(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	CString s;
+	s.Format("xMin=%f; xMax=%f; yMin=%f; yMax=%f", xmin, xmax, ymin, ymax);
+	USES_CONVERSION;
+	*retVal = A2BSTR(s);
+	return S_OK;
+}
+
+// ******************************************************
+//		PointIsWithin()
+// ******************************************************
+STDMETHODIMP CExtents::PointIsWithin(double x, double y, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal =  x >= xmin && x <= xmax && y >= ymin && y <= ymax ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+// ******************************************************
+//		GetCenter()
+// ******************************************************
+STDMETHODIMP CExtents::get_Center(IPoint** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	GetUtils()->CreateInstance(idPoint, (IDispatch**)retVal);
+	(*retVal)->put_X((xmin + xmax) / 2);
+	(*retVal)->put_Y((ymin + ymax) / 2);
 	return S_OK;
 }

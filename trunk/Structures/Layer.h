@@ -43,7 +43,6 @@ public:
 		addInfo = NULL;		
 		flags = 0;
 		key = A2BSTR("");
-		name = A2BSTR("");
 		dynamicVisibility = false;
 		maxVisibleScale = 100000000.0;
 		minVisibleScale = 0.0;
@@ -56,7 +55,6 @@ public:
 	~Layer()
 	{
 		::SysFreeString(key);
-		::SysFreeString(name);
 		if( object != NULL )
 			int refcnt = object->Release();
 		object = NULL;
@@ -71,7 +69,7 @@ public:
 	Extent extents;
 	long flags;
 	BSTR key;
-	BSTR name;
+	CStringW name;
 	bool dynamicVisibility;
 	double maxVisibleScale;
 	double minVisibleScale;

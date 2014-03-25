@@ -24,7 +24,7 @@
 
 bool DiskCache::init = false;
 CLSID DiskCache::pngClsid;
-CString DiskCache::rootPath;	// root folder for storage
-CString DiskCache::ext;			// extension (with leading point)
+CStringW DiskCache::rootPath;	// root folder for storage
+CStringW DiskCache::ext;			// extension (with leading point)
 CString DiskCache::encoder;		// gdi+ encoder
 

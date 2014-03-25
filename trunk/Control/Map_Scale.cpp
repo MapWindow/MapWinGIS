@@ -327,8 +327,20 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 		else if (m_transformationMode == tkTransformationMode::tmDoTransformation)
 		{
 			VARIANT_BOOL vbretval;
+			((CGeoProjection*)m_projection)->SetIsFrozen(false);
 			m_projection->StartTransform(m_wgsProjection, &vbretval);
-			if (vbretval)
+			((CGeoProjection*)m_projection)->SetIsFrozen(true);
+			if (!vbretval)
+			{
+				Debug::WriteLine("GetGeographicExtentsCore; failed to start trasnform");
+				USES_CONVERSION;
+				CComBSTR bstr;
+				m_projection->ExportToProj4(&bstr);
+				Debug::WriteLine(OLE2A(bstr));
+				m_wgsProjection->ExportToProj4(&bstr);
+				Debug::WriteLine(OLE2A(bstr));
+			}
+			else
 			{
 				Extent ext;
 				bool clip = clipForTiles && clipExtents;
@@ -391,7 +403,9 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 				box->SetBounds( xTL, yBR, 0, xBR, yTL, 0 );		// TODO: return 4 point geographical extents as projections other that equirectangular can be used
 
 cleaning:
+				((CGeoProjection*)m_projection)->SetIsFrozen(false);
 				m_projection->StopTransform();
+				((CGeoProjection*)m_projection)->SetIsFrozen(true);
 			}
 		}
 	}
@@ -406,8 +420,30 @@ cleaning:
 void CMapView::SetGeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	IGeoProjection* last = NULL;
+	if (pVal)
+	{
+		last = m_projection;
+		last->AddRef();		// add temp reference; as it ca be deleted in the next line
+	}
+	
 	Utility::put_ComReference(pVal, (IDispatch**)&m_projection, false);
 	
+	if (last != m_projection)
+	{
+		((CGeoProjection*)last)->SetIsFrozen(false);
+	}
+	if (last)
+	{
+		last->Release();
+		last = NULL;
+	}
+
+	if (m_projection)
+	{
+		((CGeoProjection*)m_projection)->SetIsFrozen(true);
+	}
+
 	if (m_transformationMode == tmDoTransformation)
 		m_wgsProjection->StopTransform();
 	
@@ -420,7 +456,9 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	else
 	{
 		VARIANT_BOOL vbretval;
+		((CGeoProjection*)m_projection)->SetIsFrozen(false);
 		m_wgsProjection->StartTransform(m_projection, &vbretval);
+		((CGeoProjection*)m_projection)->SetIsFrozen(true);
 		m_transformationMode = vbretval ? tmDoTransformation : tmNotDefined;
 	}
 

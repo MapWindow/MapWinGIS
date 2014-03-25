@@ -2,81 +2,20 @@
 #include "Utils.h"
 #include "colour.h"
 #include "Image.h"
+#include "Grid.h"
 
 #define MAX_BMP_SIZE_PIXELS 10000000
-
-// *************************************************************************
-//		GridToImage()
-// *************************************************************************
-STDMETHODIMP CUtils::GridToImage(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval)
-{
-	return RunGridToImage(Grid, ci, gpfAuto, false, cBack, retval);
-}
-
-// *************************************************************************
-//		GridToImage2()
-// *************************************************************************
-STDMETHODIMP CUtils::GridToImage2(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, ICallback* cBack, IImage ** retval)
-{
-	return RunGridToImage(Grid, ci, imageFormat, false, cBack, retval);
-}
-
-// *************************************************************************
-//		GridToImageInRam()
-// *************************************************************************
-STDMETHODIMP CUtils::GridToImageInRam(IGrid * Grid, IGridColorScheme * ci, ICallback* cBack, IImage ** retval)
-{
-	return RunGridToImage(Grid, ci, gpfBmp, true, cBack, retval);
-}
-
-// *************************************************************************
-//		RunGridToImage()
-// *************************************************************************
-HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, bool inRam, ICallback* callback, IImage ** retval)
-{
-	if( Grid == NULL || ci == NULL )
-	{	
-		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
-	}
-		
-	CComPtr<IGridHeader> gridheader = NULL;
-	Grid->get_Header(&gridheader);
-	long ncols, nrows;
-	gridheader->get_NumberCols(&ncols);
-	gridheader->get_NumberRows(&nrows);
-	
-	// Required memory -- colums times rows times size of colour struct	
-	// Check against increasing sizes to prevent double wraparound
-	bool hasMemory = (MemoryAvailable(ncols * nrows) && MemoryAvailable(ncols * nrows * 2) && 
-					  MemoryAvailable(static_cast<long>((ncols * nrows * sizeof(colour)))));
-
-	if (inRam && !hasMemory) {
-		// inRam version was requested explicitly, so we return error 
-		// rather than substitute it with the disk version
-		ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
-		return S_FALSE;
-	}
-	
-	tkGridProxyFormat format = imageFormat;
-	if (format == gpfAuto) {
-		format = (ncols * nrows > MAX_BMP_SIZE_PIXELS) ? gpfTiff: gpfBmp;		// use tiffs for large files
-	}
-
-	GridToImageCore(Grid, ci, callback, format, inRam, retval);
-	return S_OK;
-}
 
 // ****************************************************************
 //		ReadBreaks()
 // ****************************************************************
-void ReadBreaks(IGridColorScheme* ci, std::deque<BreakVal>& result) 
+void ReadBreaks(IGridColorScheme* ci, std::deque<BreakVal>& result)
 {
 	long numBreaks = 0;
 	ci->get_NumBreaks(&numBreaks);
 	double lowval, highval;
-	for( int i = 0; i < numBreaks; i++ )
-	{	
+	for (int i = 0; i < numBreaks; i++)
+	{
 		IGridColorBreak * bi = NULL;
 		ci->get_Break(i, &bi);
 		bi->get_LowValue(&lowval);
@@ -86,20 +25,20 @@ void ReadBreaks(IGridColorScheme* ci, std::deque<BreakVal>& result)
 		BreakVal bv;
 		bv.lowVal = lowval;
 		bv.highVal = highval;
-		result.push_back( bv );
+		result.push_back(bv);
 	}
 }
 
 // ****************************************************************
 //		findBreak()
 // ****************************************************************
-long CUtils::findBreak( std::deque<BreakVal> & bVals, double val )
+long CUtils::findBreak(std::deque<BreakVal> & bVals, double val)
 {
 	int sizeBVals = (int)bVals.size();
-	for( int i = 0; i < sizeBVals; i++ )
-	{	
-		if( val >= bVals[i].lowVal &&
-			val <= bVals[i].highVal )
+	for (int i = 0; i < sizeBVals; i++)
+	{
+		if (val >= bVals[i].lowVal &&
+			val <= bVals[i].highVal)
 			return i;
 	}
 	return -1;
@@ -111,7 +50,7 @@ long CUtils::findBreak( std::deque<BreakVal> & bVals, double val )
 void GetLightSource(IGridColorScheme* ci, cppVector& lightsource)
 {
 	// TODO: can be moved to IGridColorScheme
-	double lsi, lsj, lsk;					
+	double lsi, lsj, lsk;
 	IVector * v = NULL;
 	ci->GetLightSource(&v);
 	v->get_i(&lsi);
@@ -129,22 +68,22 @@ void GetLightSource(IGridColorScheme* ci, cppVector& lightsource)
 // *******************************************************
 bool CUtils::MemoryAvailable(double bytes)
 {
-  MEMORYSTATUS stat;
+	MEMORYSTATUS stat;
 
-  GlobalMemoryStatus (&stat);
+	GlobalMemoryStatus(&stat);
 
-  return (stat.dwAvailPhys >= bytes);
+	return (stat.dwAvailPhys >= bytes);
 }
 
 // ****************************************************************
 //		WritePixel()
 // ****************************************************************
-inline void CUtils::WritePixel(IImage* img, int row, int col, OLE_COLOR color, 
-					   int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam)
+inline void CUtils::WritePixel(IImage* img, int row, int col, OLE_COLOR color,
+	int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam)
 {
 	if (inRam)
 	{
-		img->put_Value( row, col, color );
+		img->put_Value(row, col, color);
 	}
 	else
 	{
@@ -153,10 +92,166 @@ inline void CUtils::WritePixel(IImage* img, int row, int col, OLE_COLOR color,
 }
 
 // *************************************************************************
+//		GridToImage()
+// *************************************************************************
+STDMETHODIMP CUtils::GridToImage(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval)
+{
+	// choosing inRam (logic preserved from older versions for backward compatibility)
+	IGridHeader * gridheader = NULL;
+	Grid->get_Header(&gridheader);
+	long ncols, nrows;
+	gridheader->get_NumberCols(&ncols);
+	gridheader->get_NumberRows(&nrows);
+	gridheader->Release();
+	bool inRam = MemoryAvailable(ncols * nrows) && MemoryAvailable(ncols * nrows * 2) && MemoryAvailable(static_cast<long>((ncols * nrows * sizeof(colour))));
+	return RunGridToImage(Grid, ci, gpfBmpProxy, inRam, false, cBack, retval);
+}
+
+// *************************************************************************
+//		GridToImage2()
+//		Overload with imageFormat and inRam parameters
+// *************************************************************************
+STDMETHODIMP CUtils::GridToImage2(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, VARIANT_BOOL inRam, ICallback* cBack, IImage ** retval)
+{
+	return RunGridToImage(Grid, ci, imageFormat, inRam == VARIANT_TRUE, true, cBack, retval);
+}
+
+// *************************************************************************
+//		RunGridToImage()
+// *************************************************************************
+HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, 
+							   bool inRam, bool checkMemory, ICallback* callback, IImage ** retval)
+{
+	if( Grid == NULL || ci == NULL )
+	{	
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_FALSE;
+	}
+
+	CComPtr<IGridHeader> gridheader = NULL;
+	Grid->get_Header(&gridheader);
+	long ncols, nrows;
+	gridheader->get_NumberCols(&ncols);
+	gridheader->get_NumberRows(&nrows);
+	double xll, yll;
+	double dx = 1.0, dy = 1.0;
+	gridheader->get_XllCenter(&xll);
+	gridheader->get_YllCenter(&yll);
+	gridheader->get_dX(&dx);
+	gridheader->get_dY(&dy);
+
+	//tkGridProxyMode format = imageFormat;
+	if (inRam && checkMemory)
+	{
+		// Required memory -- colums times rows times size of colour struct	
+		// Check against increasing sizes to prevent double wraparound
+		bool hasMemory = (MemoryAvailable(ncols * nrows) && MemoryAvailable(ncols * nrows * 2) &&
+			MemoryAvailable(static_cast<long>((ncols * nrows * sizeof(colour)))));
+
+		if (!hasMemory) {
+			// inRam version was requested explicitly, so we return error 
+			// rather than substitute it with the disk version
+			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
+			return S_FALSE;
+		}
+	}
+		
+	CGrid* g = (CGrid*)Grid;
+	CStringW gridName = g->GetFilename();
+	CStringW imageFile = g->GetProxyName();
+	
+	USES_CONVERSION;
+	VARIANT_BOOL vb;
+	CreateBitmap(imageFile, ncols, nrows, imageFormat, &vb);
+
+	CComBSTR bstr;
+	gridheader->get_Projection(&bstr);
+	rasterDataset->SetProjection(OLE2A(bstr));		// TODO: perhaps it should be converted into WKT format
+
+	if (imageFormat == gpfTiffProxy)
+	{
+		// TODO: perhaps the rotation parameters should also be copied; though currently it seems there is no API to do
+		double adfGeoTransform[6];
+		adfGeoTransform[GEOTRSFRM_TOPLEFT_X] = xll - dx /2.0;
+		adfGeoTransform[GEOTRSFRM_WE_RES] = dx;
+		adfGeoTransform[GEOTRSFRM_ROTATION_PARAM1] = 0;
+		adfGeoTransform[GEOTRSFRM_TOPLEFT_Y] = yll + ((nrows - 0.5) * dy);
+		adfGeoTransform[GEOTRSFRM_ROTATION_PARAM2] = 0;
+		adfGeoTransform[GEOTRSFRM_NS_RES] = -dy;
+		rasterDataset->SetGeoTransform(adfGeoTransform);
+	}
+
+	// the main processing
+	GridToImageCore(Grid, ci, callback, inRam, retval);
+
+	if (inRam)
+	{
+		(*retval)->put_XllCenter(xll);
+		(*retval)->put_YllCenter(yll);
+		(*retval)->put_dX(dx);
+		(*retval)->put_dY(dy);
+	}
+	else
+	{
+		// open the created file
+		CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)retval);
+		if (*retval) {
+			CImageClass* img = (CImageClass*)*retval;
+			img->OpenImage(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, GDALAccess::GA_ReadOnly, false, &vb);
+			//(*retval)->Open(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
+			if (!vb) {
+				(*retval)->Release();
+				(*retval) = NULL;
+				return S_FALSE;
+			}
+		}
+		
+		(*retval)->put_XllCenter(xll);
+		(*retval)->put_YllCenter(yll);
+		(*retval)->put_dX(dx);
+		(*retval)->put_dY(dy);
+
+		// saving the world file
+		CStringW WorldFile;
+		if (imageFormat == gpfBmpProxy) 
+		{
+			WorldFile = Utility::GetPathWOExtension(imageFile) + ".bpw";
+			
+			if (WorldFile.GetLength() > 0) 
+			{
+				WriteWorldFile(WorldFile, imageFile, dx, dy, xll, yll, nrows);
+			}
+		}
+
+		// rewriting the legend
+		CStringW legendName = ((CGrid*)Grid)->GetProxyLegendName();
+		if (Utility::RemoveFile(legendName)) 
+		{
+			int bandIndex = 1;
+			g->get_ActiveBandIndex(&bandIndex);
+			ci->WriteToFile(OLE2BSTR(legendName), W2BSTR(gridName), bandIndex, &vb);
+		}
+	}
+
+	if (*retval)
+	{
+		// TODO: perhaps mode should be set for disk based images only
+		// set the grid as source for image
+		CStringW gridName = ((CGrid*)Grid)->GetFilename();
+		CImageClass* img = ((CImageClass*)(*retval));
+		img->sourceGridName = gridName;
+		img->isGridProxy = true;
+
+
+	}
+
+	return S_OK;
+}
+
+// *************************************************************************
 //		Converts grid to image
 // *************************************************************************
-void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, tkGridProxyFormat format, 
-							 bool inRam, IImage ** retval)
+void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, bool inRam, IImage ** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
@@ -166,10 +261,6 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	{
 		globalCallback = cBack;
 		globalCallback->AddRef();
-	}
-
-	if (inRam) {
-		format = gpfBmp;
 	}
 	
 	CComPtr<IGridHeader> gridheader = NULL;
@@ -186,15 +277,12 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	}
 
 	double xll, yll, nodata;
-	double dx = 1.0, dy = 1.0;
 	CComVariant vndv;
 
 	gridheader->get_XllCenter(&xll);
 	gridheader->get_YllCenter(&yll);
 	gridheader->get_NodataValue(&vndv);
 	dVal(vndv, nodata);	
-	gridheader->get_dX(&dx);
-	gridheader->get_dY(&dy);
 	
 	//Hard code csize, so that the vectors are normal
 	double csize = 30;
@@ -223,9 +311,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 
 	cppVector lightsource(0.0,0.0,0.0);
 	GetLightSource(ci, lightsource);
-
-	// TODO: add other alternative targets
-	CString WorldFile, ImageFile;
+	
 	VARIANT_BOOL vbretval;
 	if (inRam)
 	{
@@ -234,19 +320,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	}
 	else
 	{
-		CComBSTR bImageFile;
-		Grid->get_Filename(&bImageFile);
-		ImageFile = OLE2CA(bImageFile);
-		int LocationOfPeriod = ImageFile.ReverseFind('.');
-		ImageFile = ImageFile.Left(LocationOfPeriod);
-		if (format == gpfBmp) {
-			// TODO: do we need world files for tiffs?
-			WorldFile = ImageFile;
-			WorldFile += ".bpw";
-		}
-		ImageFile += format == gpfTiff ? ".tif" : ".bmp";
-		CanScanlineBuffer = (MemoryAvailable(ncols * (sizeof(_int32) * 3)));
-		CreateBitmap(ImageFile.GetBuffer(), ncols, nrows, format, &vbretval);
+		CanScanlineBuffer = (MemoryAvailable(ncols * (sizeof(_int32)* 3)));
 	}
 
 	std::deque<BreakVal> bvals;
@@ -278,7 +352,8 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 				continue;
 			}
 
-			break_index = findBreak( bvals, val );
+													  // if color scheme is large it may take time O(N^3)
+			break_index = findBreak( bvals, val );    // can be reduced to O(N^2*log(N)) with a tree
 
 			// a break is not defined for this value
 			if( break_index < 0 )
@@ -492,55 +567,16 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 		}		
 	}
 	
-	if (inRam)
-	{
-		(*retval)->put_XllCenter(xll);
-		(*retval)->put_YllCenter(yll);
-		(*retval)->put_dX(dx);
-		(*retval)->put_dY(dy);
-	}
-	else
+	if (!inRam)
 	{
 		FinalizeAndCloseBitmap(ncols);
 
-		if (WorldFile.GetLength() > 0) {
-			WriteWorldFile(WorldFile, ImageFile, dx, dy, xll, yll, nrows);
-		}
-		
 		if (rasterDataset != NULL)
 		{
 			rasterDataset->FlushCache();
 			GDALClose(rasterDataset);
-			rasterDataset=NULL;
+			rasterDataset = NULL;
 		}
-		
-		// open the created file
-		IImage* img = NULL;
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
-		if (img) {
-			img->Open(A2BSTR(ImageFile), ImageType::TIFF_FILE, false, NULL, &vbretval);
-			if (!vbretval) {
-				img->Release();
-				img = NULL;
-				return;
-			}
-			else {
-				*retval = img;
-			}
-		}
-	}
-	
-	// set the grid as source for image
-	if (*retval)
-	{
-		CComBSTR name;
-		Grid->get_Filename(&name);
-		CString gridName = OLE2A(name);
-
-		CImageClass* img = ((CImageClass*)(*retval));
-		img->sourceGridName = gridName;
-		img->sourceGridMode = inRam ? gsmBmpProxy : gsmTiffProxy;;
-		(*retval) = img;
 	}
 
 	if( globalCallback != NULL )
@@ -554,7 +590,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 // *******************************************************
 //		CreateBitmap()
 // *******************************************************
-void CUtils::CreateBitmap(char * filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval)
+void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval)
 {
 	*retval = S_FALSE;
 
@@ -563,12 +599,14 @@ void CUtils::CreateBitmap(char * filename, long cols, long rows, tkGridProxyForm
     GDALDriver *poDriver;
     char **papszOptions = NULL;
 
-	poDriver = GetGDALDriverManager()->GetDriverByName(format == gpfTiff ? "GTiff" : "BMP");
+	poDriver = GetGDALDriverManager()->GetDriverByName(format == gpfTiffProxy ? "GTiff" : "BMP");
 
 	if( poDriver == NULL )
 		return;
 
-    rasterDataset = poDriver->Create( filename, cols, rows, 3, GDT_Byte, papszOptions );
+	m_globalSettings.SetGdalUtf8(true);
+	rasterDataset = poDriver->Create(Utility::ConvertToUtf8(filename), cols, rows, 3, GDT_Byte, papszOptions);
+	m_globalSettings.SetGdalUtf8(false);
 
 	if (rasterDataset)
 	{
@@ -761,9 +799,9 @@ void CUtils::FinalizeAndCloseBitmap(int totalWidth)
 // *******************************************************
 //		WriteWorldFile()
 // *******************************************************
-void CUtils::WriteWorldFile(CString worldFile, CString imageFile, double dx, double dy, double xll, double yll, int nrows)
+void CUtils::WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows)
 {
-	FILE* fout = fopen(worldFile, "w");
+	FILE* fout = _wfopen(worldFile, L"w");
 		
 	if( !fout )
 	{	

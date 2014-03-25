@@ -283,10 +283,6 @@ STDMETHODIMP CGlobalSettings::get_LabelsSmoothingMode(tkSmoothingMode* pVal)
 	*pVal = m_globalSettings.labelsSmoothingMode;
 	return S_OK;
 }
-
-// ****************************************************
-//	    put_SmoothingMode()
-// ****************************************************
 STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(tkSmoothingMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -296,19 +292,133 @@ STDMETHODIMP CGlobalSettings::put_LabelsSmoothingMode(tkSmoothingMode newVal)
 }
 #pragma endregion
 
-STDMETHODIMP CGlobalSettings::put_ShortUnitsString(tkLocalizedStrings unit, BSTR localizedString)
+// ****************************************************
+//	    LocalizedString()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::put_LocalizedString(tkLocalizedStrings unit, BSTR localizedString)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	m_globalSettings.shortUnitStrings[unit] = OLE2A(localizedString);
+	m_globalSettings.shortUnitStrings[unit] = OLE2W(localizedString);
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::get_LocalizedString(tkLocalizedStrings unit, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CStringW s = m_globalSettings.GetLocalizedString(unit);
+	USES_CONVERSION;
+	*retVal = W2BSTR(s);
 	return S_OK;
 }
 
-STDMETHODIMP CGlobalSettings::get_ShortUnitsString(tkLocalizedStrings unit, BSTR* retVal)
+// ****************************************************
+//	    GridProxyFormat()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_GridProxyFormat(tkGridProxyFormat* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CString s = m_globalSettings.GetLocalizedString(unit);
-	USES_CONVERSION;
-	*retVal = A2BSTR(s);
+	*pVal = m_globalSettings.gridProxyFormat;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GridProxyFormat(tkGridProxyFormat newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.gridProxyFormat = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    MaxNoProxyGridSizeMb()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_MaxNoProxyGridSizeMb(double* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.maxNoProxyGridSizeMb;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_MaxNoProxyGridSizeMb(double newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.maxNoProxyGridSizeMb = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    get_AlwaysCreateProxyForGrids()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_GridProxyMode(tkGridProxyMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.gridProxyMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GridProxyMode(tkGridProxyMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.gridProxyMode = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    get_MaxUniqueValuesCountForGridScheme()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_MaxUniqueValuesCountForGridScheme(int* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.maxUniqueValuesCount;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_MaxUniqueValuesCountForGridScheme(int newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.maxUniqueValuesCount = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    GrabMapProjectionFromFirstLayer()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_GrabMapProjectionFromFirstLayer(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.grabMapProjectionFromFirstLayer ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GrabMapProjectionFromFirstLayer(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.grabMapProjectionFromFirstLayer = newVal ? true: false;
+	return S_OK;
+}
+
+// ****************************************************
+//	    RandomColorSchemeForGrids()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_RandomColorSchemeForGrids(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.randomColorSchemeForGrids ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_RandomColorSchemeForGrids(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.randomColorSchemeForGrids = newVal ? true: false;
+	return S_OK;
+}
+	
+// ****************************************************
+//	    DefaultColorSchemeForGrids()
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_DefaultColorSchemeForGrids(PredefinedColorScheme* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.defaultColorSchemeForGrids;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_DefaultColorSchemeForGrids(PredefinedColorScheme newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.defaultColorSchemeForGrids = newVal;
 	return S_OK;
 }
