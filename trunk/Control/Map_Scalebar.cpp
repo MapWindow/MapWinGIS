@@ -19,13 +19,14 @@ void DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, 
 // ****************************************************************
 CStringW FormatUnits(CStringW& s, double step, double power, int count)
 {
-	if (power >= 0)
+	if (power >= 1)
 	{
 		s.Format(L"%d",(int)(step * count));
 	}
 	else
 	{
 		CStringW sFormat;
+		if (power == 0.0) power = -1;
 		sFormat.Format(L"%%.%df", (int)-power);
 		s.Format(sFormat,(float)step * count);
 	}
