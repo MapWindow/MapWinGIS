@@ -90,4 +90,9 @@ enum HandleImage
 	asComplex=2
 };
 
+enum ShapeValidityCheck
+{
+	FirstAndLastPointOfPartMatch = 0,
+};
+
 # endif

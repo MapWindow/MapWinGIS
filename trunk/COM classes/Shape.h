@@ -173,6 +173,8 @@ public:
 	STDMETHOD(ImportFromBinary)(VARIANT bytesArray, VARIANT_BOOL* retVal);
 	STDMETHOD(FixUp)(IShape** retval);
 	STDMETHOD(AddPoint)(double x, double y, long* pointIndex);
+	STDMETHOD(AddPoint2)(double x, double y, double m, long* pointIndex);
+	STDMETHOD(AddPoint3)(double x, double y, double m, double z, long* pointIndex);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
 	STDMETHOD(ImportFromWKT)(BSTR Serialized, VARIANT_BOOL *retVal);
 	STDMETHOD(CopyTo)(IShape* target, VARIANT_BOOL* retVal);
@@ -199,6 +201,7 @@ private:
 	void ErrorMessage(long ErrorCode);
 	bool CShape::PointInThisPolyFast(IPoint * pt);
 	bool CShape::PointInThisPolyRegular(IPoint * pt);
+	bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck);
 	
 public:
 	bool put_ShapeWrapper(CShapeWrapper* data);

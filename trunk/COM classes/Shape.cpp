@@ -366,16 +366,6 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 		}
 	}
 	
-	// -----------------------------------------------
-	//  check through GEOS (common for both modes)
-	// -----------------------------------------------
-	OGRGeometry* oGeom = GeometryConverter::ShapeToGeometry(this);
-	if (oGeom == NULL) 
-	{
-		_isValidReason = "Failed to convert to OGR geometry";
-		return S_OK;
-	}
-	
 	// checking the clockwise-order
 	if (shptype == SHP_POLYGON)
 	{
@@ -391,10 +381,19 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 				this->get_XY(0, &x, &y, &ret);
 				_isValidReason.Format("Polygon must be clockwise [%f %f]", x, y);
 				//_isValidReason = "";
-				OGRGeometryFactory::destroyGeometry(oGeom);
 				return S_OK;
 			}
 		}
+	}
+
+	// -----------------------------------------------
+	//  check through GEOS (common for both modes)
+	// -----------------------------------------------
+	OGRGeometry* oGeom = GeometryConverter::ShapeToGeometry(this);
+	if (oGeom == NULL) 
+	{
+		_isValidReason = "Failed to convert to OGR geometry";
+		return S_OK;
 	}
 
 	// added code
@@ -1200,7 +1199,7 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 		case srContains:	res = oGeom1->Contains(oGeom2); break;
 		case srCrosses:		res = oGeom1->Crosses(oGeom2); break;
 		case srDisjoint:	res = oGeom1->Disjoint(oGeom2); break;
-		case srEquals:		res = oGeom1->Equal(oGeom2); break;
+		case srEquals:		res = oGeom1->Equals(oGeom2); break;
 		case srIntersects:	res = oGeom1->Intersect(oGeom2); break;
 		case srOverlaps:	res = oGeom1->Overlaps(oGeom2); break;
 		case srTouches:		res = oGeom1->Touches(oGeom2); break;
@@ -2155,13 +2154,11 @@ STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
 	}
 	else
 	{
-		ShpfileType shpType;
-		this->get_ShapeType(&shpType);
+		ShpfileType shpType = _shp->get_ShapeType();
 		VARIANT_BOOL vb;
-		this->Create(shpType, &vb);
+		target->Create(shpType, &vb);
 		
-		long numParts;
-		this->get_NumParts(&numParts);
+		int numParts = _shp->get_PartCount();
 		for(int i = 0; i < numParts; i++ )
 		{
 			long part, newIndex;
@@ -2169,13 +2166,31 @@ STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
 			target->InsertPart(part, &newIndex, &vb);
 		}
 
+		bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
+		bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
+
 		long numPoints;
 		this->get_NumPoints(&numPoints);
-		double x, y;
+		double x, y, m, z;
+		long pointIndex;
 		for(int i = 0; i < numPoints; i++ )
 		{
 			this->get_XY(i, &x, &y, &vb);
-			target->put_XY(i, x, y, &vb);
+			if (hasM)
+			{
+				_shp->get_PointM(i, m);
+				target->AddPoint2(x, y, m, &pointIndex);
+			}
+			else if (hasZ)
+			{
+				_shp->get_PointM(i, m);
+				_shp->get_PointZ(i, z);
+				target->AddPoint3(x, y, m, z, &pointIndex);
+			}
+			else
+			{
+				target->AddPoint(x, y, &pointIndex);
+			}
 		}
 		*retVal = VARIANT_TRUE;
 	}
@@ -2541,6 +2556,61 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 }
 
 //*****************************************************************
+//*		FixupShapeCore()
+//*****************************************************************
+bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
+{
+	switch(validityCheck)	
+	{
+		case FirstAndLastPointOfPartMatch:
+			{
+				bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
+				bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
+
+				ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+				if (shptype == SHP_POLYGON)
+				{
+					int beg_part, end_part;
+					double x1, x2, y1, y2, m;
+
+					for(long i = 0; i < _shp->get_PartCount(); i++)
+					{
+						beg_part = _shp->get_PartStartPoint(i);
+						end_part = _shp->get_PartEndPoint(i);
+						
+						_shp->get_PointXY(beg_part, x1, y1);
+						_shp->get_PointXY(end_part, x2, y2);
+						if (x1 != x2 || y1 != y2)
+						{
+							_shp->InsertPointXY(end_part + 1, x1, y1);
+							
+							if (hasM)
+							{
+								_shp->get_PointM(beg_part, m);
+								_shp->put_PointM(end_part + 1, m);
+							}
+							if (hasZ)
+							{
+								_shp->get_PointZ(beg_part, m);
+								_shp->put_PointZ(end_part + 1, m);
+							}
+							
+							// the next parts should be moved a step forward
+							for(long part = i + 1; i < _shp->get_PartCount(); part++)
+							{
+								_shp->put_PartStartPoint(part, _shp->get_PartStartPoint(part));
+							}
+						}
+					}
+				}
+			}
+			return true;
+		default: 
+			return false;		// not implemented
+	}
+}
+
+//*****************************************************************
 //*		FixUp()
 //*****************************************************************
 STDMETHODIMP CShape::FixUp(IShape** retval)
@@ -2606,6 +2676,33 @@ STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
 	*pointIndex = success ? _shp->get_PointCount() - 1 : -1;
+	return S_OK;
+}
+
+//*****************************************************************
+//*		AddPoint2()
+//*****************************************************************
+STDMETHODIMP CShape::AddPoint2(double x, double y, double m, long* pointIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
+	int index = _shp->get_PointCount() - 1;
+	*pointIndex = success ?  index: -1;
+	_shp->put_PointM(index, m);
+	return S_OK;
+}
+
+//*****************************************************************
+//*		AddPoint3()
+//*****************************************************************
+STDMETHODIMP CShape::AddPoint3(double x, double y, double m, double z, long* pointIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
+	int index = _shp->get_PointCount() - 1;
+	*pointIndex = success ?  index: -1;
+	_shp->put_PointM(index, m);
+	_shp->put_PointZ(index, z);
 	return S_OK;
 }
 
@@ -2765,8 +2862,13 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 		{
 			if (shapes.size() > 0 && shapes[0])
 			{
+				IShape* result = shapes[0];
+				
+				// it was an impression that polygons are imported as non-closed
+				//((CShape*)result)->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
+
 				VARIANT_BOOL vb;
-				shapes[0]->CopyTo(this, &vb);
+				result->CopyTo(this, &vb);
 				*retVal = VARIANT_TRUE;	
 			}
 			for(size_t i = 0; i < shapes.size(); i++)

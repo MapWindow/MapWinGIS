@@ -249,9 +249,9 @@ namespace TestApplication
         return false;
       }
 
-      if (!shp.Equals(shp2))
+      if (shp.ExportToWKT() != shp2.ExportToWKT())
       {
-        theForm.Error(string.Empty, "Equals returns false");
+        theForm.Error(string.Empty, "Export to WKT for new shape is different from original one");
         return false;
       }
 
@@ -337,12 +337,27 @@ namespace TestApplication
         theForm.Error(string.Empty, "The max values of X, Y, Z or M return different values");
       }
 
+      for (int i = 0; i < shp.NumPoints; i++)
+      {
+        if (shp.Point[i].M != shp2.Point[i].M)
+        {
+          theForm.Error(string.Empty, "M values are different");
+        }
+      }
+
+
       if (shp.Extents.xMin != shp2.Extents.xMin
        || shp.Extents.yMin != shp2.Extents.yMin
        || shp.Extents.zMin != shp2.Extents.zMin
        || shp.Extents.mMin != shp2.Extents.mMin)
       {
         theForm.Error(string.Empty, "The min values of X, Y, Z or M return different values");
+      }
+
+      if (!shp.Equals(shp2))
+      {
+        theForm.Error(string.Empty, "Equals returns false");
+        return false;
       }
       
       return true;

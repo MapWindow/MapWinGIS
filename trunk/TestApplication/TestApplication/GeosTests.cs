@@ -6,6 +6,9 @@
 //   Static class to hold the tests methods for the GEOS functions
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
+using System.Diagnostics;
+
 namespace TestApplication
 {
   using System;
@@ -297,6 +300,7 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, wkt);
           ConvertFromWkt(line, shapeIndex, wkt, theForm);
         }
+        theForm.Progress(string.Empty, 100, " ");
       }
 
       theForm.Progress(string.Empty, 100, "The WKT - shapefile conversion test has finished.");
@@ -601,6 +605,8 @@ namespace TestApplication
         {
           // Nothing was clipped
           theForm.Error(string.Empty, "The resulting shapefile has the same number of shapes as the input shapefile. Either the input files are incorrect or the clipping function doesn't behaves as expected.");
+          MyAxMap.AddLayer(sf, true);
+          MyAxMap.AddLayer(overlaySf, true);
         }
         else
         {
@@ -654,7 +660,24 @@ namespace TestApplication
           return null; 
         }
 
-        // convert to WKT:
+        // assigning random M values
+        //if (sf.ShapefileType == ShpfileType.SHP_POLYGONM)
+        //{
+        //  if (sf.StartEditingShapes())
+        //  {
+        //    Random r = new Random();
+        //    for (int i = 0; i < sf.NumShapes; i++)
+        //    {
+        //      var shp = sf.get_Shape(i);
+        //      for (int j = 0; j < shp.NumPoints; j++)
+        //      {
+        //        shp.get_Point(j).M = r.Next(1000);
+        //      }
+        //    }
+        //    sf.SaveAs("d:\\PolygonM_fixed.shp", theForm);
+        //  }
+        //}
+
         string wkt = sf.Shape[shapeIndex].ExportToWKT();
         if (wkt == null || wkt.Trim() == string.Empty)
         {

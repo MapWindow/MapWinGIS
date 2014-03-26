@@ -717,6 +717,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 					pnt->Release();
 				}
 
+				// M range
 				fread(&bm,sizeof(double),1,_shpfile);
 				fread(&bm,sizeof(double),1,_shpfile);
 

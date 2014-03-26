@@ -2827,6 +2827,8 @@ interface IShape : IDispatch{
 	[id(55), helpstring("method ImportToWKT")] HRESULT ImportFromWKT([in] BSTR Serialized, [out, retval]VARIANT_BOOL *retVal);
 	[id(56), helpstring("method CopyTo")] HRESULT CopyTo([in] IShape* target, [out, retval]VARIANT_BOOL* retVal);
 	[id(57), helpstring("method ClosestPoints")] HRESULT ClosestPoints([in]IShape* shape2, [out, retval]IShape** result);
+	[id(58), helpstring("method AddPoint2")] HRESULT AddPoint2([in]double x, [in]double y, [in]double m, [out,retval]long* pointIndex);
+	[id(59), helpstring("method AddPoint2")] HRESULT AddPoint3([in]double x, [in]double y, [in]double m, [in]double z, [out,retval]long* pointIndex);
 };
 
 /****************************  Extents Interface ***********************/
