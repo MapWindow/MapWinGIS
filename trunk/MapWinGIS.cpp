@@ -96,6 +96,8 @@ BOOL CMapWinGISApp::InitInstance()
 // *****************************************************
 int CMapWinGISApp::ExitInstance()
 {
+	//if (false)	{ AFX_MANAGE_STATE(NULL);}
+	
 	if (m_utils)
 	{
 		m_utils->Release();
@@ -125,8 +127,15 @@ STDAPI DllRegisterServer(void)
 		return ResultFromScode(SELFREG_E_CLASS);
 
 	return _Module.RegisterServer(TRUE);
+	
 
 	return NOERROR;
+}
+
+HINSTANCE GetModuleInstance()
+{
+	HINSTANCE instance = _Module.GetModuleInstance();
+	return instance;
 }
 
 // **************************************************************

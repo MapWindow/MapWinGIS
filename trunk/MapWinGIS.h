@@ -38,6 +38,7 @@ GEOSContextHandle_t getGeosHandle();
 
 extern IUtils* m_utils;
 IUtils* GetUtils();
+HINSTANCE GetModuleInstance();
 
 // comment these lines to turn off the memory leaking detection tools
 #ifdef _DEBUG

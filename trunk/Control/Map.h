@@ -208,8 +208,8 @@ protected:
 	// Regular properties
 	#pragma region Regular properties
 	
-	afx_msg LONG GetVersionNumber(void);
-	afx_msg void SetVersionNumber(LONG newVal);
+	afx_msg BSTR GetVersionNumber(void);
+	//afx_msg void SetVersionNumber(LONG newVal);
 
 	afx_msg BSTR GetSerialNumber(void);
 	afx_msg void SetSerialNumber(LPCTSTR newVal);
@@ -999,6 +999,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	tkShapeDrawingMethod m_ShapeDrawingMethod;
 	tkUnitsOfMeasure m_unitsOfMeasure;
 	BOOL m_ShowRedrawTime;				   // whether to show time in the lower left corner
+	CString _versionNumber;
 	BOOL m_ShowVersionNumber;			   // whether to show version nubmer in the lower right corner
 	tkResizeBehavior rbMapResizeBehavior;  // How to behave on resize
 	

@@ -241,23 +241,57 @@ float CMapView::GetMapRotationAngle()
 }
 
 // ****************************************************************** 
-//			VersionNumber
+//		GetFileVersionString
 // ****************************************************************** 
-// Returns the state of SHAPE_OLD constant
-LONG CMapView::GetVersionNumber(void)
+CString GetFileVersionString()
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	#ifdef SHAPE_OLD
-		return 0;
-	#else
-		return 1;
-	#endif
+	wchar_t* path = new wchar_t[MAX_PATH + 1];
+	GetModuleFileNameW(GetModuleInstance(), path, MAX_PATH);
+
+	DWORD  verHandle = NULL;
+	UINT   size      = 0;
+	LPBYTE lpBuffer  = NULL;
+	DWORD  verSize   = GetFileVersionInfoSizeW( path, &verHandle);
+	CString result;
+
+	if (verSize != NULL)
+	{
+		LPSTR verData = new char[verSize];
+
+		if (GetFileVersionInfoW( path, verHandle, verSize, verData))
+		{
+			if (VerQueryValue(verData,"\\",(VOID FAR* FAR*)&lpBuffer,&size))
+			{
+				if (size)
+				{
+					VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+					if (verInfo->dwSignature == 0xfeef04bd)
+					{
+						int major = HIWORD(verInfo->dwFileVersionMS);
+						int minor = LOWORD(verInfo->dwFileVersionMS);
+						int build = HIWORD(verInfo->dwFileVersionLS);
+						int sub = LOWORD(verInfo->dwFileVersionLS);
+						result.Format("%d.%d.%d.%d", major, minor, build, sub);
+						Debug::WriteLine(result);
+					}
+				}
+			}
+		}
+		delete[] verData;
+	}
+	return result;
 }
 
-void CMapView::SetVersionNumber(LONG newVal)
+// ****************************************************************** 
+//			VersionNumber
+// ****************************************************************** 
+BSTR CMapView::GetVersionNumber(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	SetNotSupported();
+	if (_versionNumber.GetLength() == 0)
+		_versionNumber = GetFileVersionString();
+	USES_CONVERSION;
+	return A2BSTR(_versionNumber);
 }
 
 // *****************************************************

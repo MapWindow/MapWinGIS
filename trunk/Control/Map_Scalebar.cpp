@@ -346,78 +346,49 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message
 	if (!m_ShowRedrawTime && !m_ShowVersionNumber)	return;
 
 	// preparing canvas
-	Gdiplus::SmoothingMode smoothing = g->GetSmoothingMode();
 	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
-	g->SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAlias);
-
-	// initializing brushes
+	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
 	Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
-	Gdiplus::Pen pen(Gdiplus::Color::White, 3.0f);
-	pen.SetLineJoin(Gdiplus::LineJoinRound);
-
-	// initializing font
+	Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
 	Gdiplus::FontFamily family(L"Arial");
-	Gdiplus::Font font(&family, (Gdiplus::REAL)12.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
+	Gdiplus::Font font(&family, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 	Gdiplus::PointF point(0.0f, 0.0f);
 	Gdiplus::StringFormat format; 
 	
-	// vars
 	CStringW s;
-	Gdiplus::GraphicsPath path;
 	Gdiplus::RectF rect;
-	Gdiplus::Matrix mtx;
-	
-	Gdiplus::REAL width = (Gdiplus::REAL)m_viewWidth; //r.right - r.left;
-	Gdiplus::REAL height;
 
 	if (m_ShowVersionNumber)
 	{
-		s.Format(L"MapWinGIS %d.%d", _wVerMajor, _wVerMinor);
-		path.StartFigure();
-		path.AddString(s.GetString(), wcslen(s), &family, font.GetStyle(), font.GetSize(), point, &format);
-		path.CloseFigure();
-		path.GetBounds(&rect);
-		height = rect.Height;
+		USES_CONVERSION;
+		s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
+		g->MeasureString(s, s.GetLength(), &font, point, &format, &rect);
 		
-		if (rect.Width + 10 < width)		// control must be big enough to host the string
+		if (rect.Width + 10 < m_viewWidth)		// control must be big enough to host the string
 		{
-			mtx.Translate((float)(m_viewWidth - rect.Width - 10), (float)(m_viewHeight - height - 10));
-			path.Transform(&mtx);
-			g->DrawPath(&pen, &path);
-			g->FillPath(&brush, &path);
-			width -= (rect.Width);
+			point.X = (float)(m_viewWidth - rect.Width - 10);
+			point.Y = (float)(m_viewHeight - rect.Height - 10);
+			DrawStringWithShade(g, s, &font, point, &brush, &brushOutline);
 		}
 	}
-	
-	path.Reset();
-	mtx.Reset();
 
-	if (m_ShowRedrawTime)
+	if (m_ShowRedrawTime && time > 0.01)
 	{
-		if (wcslen(message) != 0)
+		if (message.GetLength() != 0)
 		{
 			s = message;
 		}
 		else
 		{
-			s.Format(L"Redraw time: %.3f sec", time);
+			s.Format(L"Redraw time: %.3f s", time);
 		}
-		path.StartFigure();
-		path.AddString(s.GetString(), wcslen(s), &family, font.GetStyle(), font.GetSize(), point, &format);
-		path.CloseFigure();
-		path.GetBounds(&rect);
-		height = m_ShowVersionNumber?height:rect.Height + 3;
-		if (rect.Width + 15 < width)		// control must be big enough to host the string
+		g->MeasureString(s, s.GetLength(), &font, point, &format, &rect);
+		if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
 		{
-			mtx.Translate(5.0f, (float)(m_viewHeight - height - 10));
-			path.Transform(&mtx);
-			g->DrawPath(&pen, &path);
-			g->FillPath(&brush, &path);
-			width -= (rect.Width + 15);
+			point.X = (float)(m_viewWidth - rect.Width - 10);
+			point.Y = (float)(10.0f);
+			DrawStringWithShade(g, s, &font, point, &brush, &brushOutline);
 		}
 	}
-	
 	g->SetTextRenderingHint(hint);
-	g->SetSmoothingMode(smoothing);
 }

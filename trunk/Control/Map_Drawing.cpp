@@ -178,6 +178,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	}
 	
 	// layers
+	DWORD startTick = ::GetTickCount();
+
 	bool layersExist = m_activeLayers.size() > 0;
 	if (layersExist)
 	{
@@ -194,8 +196,6 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 			}
 			else
 			{
-				DWORD startTick = ::GetTickCount();
-				
 				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(m_layerBitmap);
 				gLayers->Clear(Gdiplus::Color::Transparent);
 
@@ -205,83 +205,76 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 
 				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 
-				// main drawing
-				//if (m_RotateAngle == 0)	// currently rotation is simply ignored
-				{
-					 this->DrawLayers(rcBounds, gLayers);
-					
-					 #pragma region Asynchronous
-					 // a pointer ot member function
-					 /*UINT (CMapView::* ptrDrawLayers)(LPVOID) = &CMapView::StartDrawLayers;
-					 CMapView* map = this;
-					 (this->*ptrDrawLayers)(NULL);*/
-
-					 //DrawingParams* param = new  DrawingParams(this, gLayers, &rcBounds);
-					 //CWinThread* thread = AfxBeginThread(&StartThread, param);
-					 //delete param;
-					 #pragma endregion
-				}
+				this->DrawLayers(rcBounds, gLayers);
 				
-				if (0)	// TODO: reimplement rotation
+				 #pragma region Asynchronous
+				 // a pointer ot member function
+				 /*UINT (CMapView::* ptrDrawLayers)(LPVOID) = &CMapView::StartDrawLayers;
+				 CMapView* map = this;
+				 (this->*ptrDrawLayers)(NULL);*/
+
+				 //DrawingParams* param = new  DrawingParams(this, gLayers, &rcBounds);
+				 //CWinThread* thread = AfxBeginThread(&StartThread, param);
+				 //delete param;
+				 #pragma endregion
+				
+				if (0)	// TODO: reimplement rotation using GDI+
 				{
-					// TODO: reimplement using GDI+
-					#pragma region Rotation
-						//HDC hdcLayers = gLayers->GetHDC();
-						//CDC* dcLayers = CDC::FromHandle(hdcLayers);
-						//if (dcLayers)
-						//{
-					
-						//	CDC     *tmpBackbuffer = new CDC();
-						//	CRect   tmpRcBounds = new CRect();
-						//	Extent  tmpExtent, saveExtent;       
-						//	long    save_viewWidth, save_viewHeight;
+					HDC hdcLayers = gLayers->GetHDC();
+					CDC* dcLayers = CDC::FromHandle(hdcLayers);
+					if (dcLayers)
+					{
+				
+						CDC     *tmpBackbuffer = new CDC();
+						CRect   tmpRcBounds = new CRect();
+						Extent  tmpExtent, saveExtent;       
+						long    save_viewWidth, save_viewHeight;
 
-						//	if (m_Rotate == NULL)
-						//	  m_Rotate = new Rotate();
+						if (m_Rotate == NULL)
+						  m_Rotate = new Rotate();
 
-						//	tmpBackbuffer->CreateCompatibleDC(dcLayers);
-						//	m_Rotate->setSize(rcBounds);
-						//	m_Rotate->setupRotateBackbuffer(tmpBackbuffer->m_hDC, pdc->m_hDC, m_backColor);
+						tmpBackbuffer->CreateCompatibleDC(dcLayers);
+						m_Rotate->setSize(rcBounds);
+						m_Rotate->setupRotateBackbuffer(tmpBackbuffer->m_hDC, pdc->m_hDC, m_backColor);
 
-						//	save_viewWidth = m_viewWidth;
-						//	save_viewHeight = m_viewHeight;
-						//	m_viewWidth = m_Rotate->rotatedWidth;
-						//	m_viewHeight = m_Rotate->rotatedHeight;
-						//	saveExtent = extents;
-						//	tmpExtent = extents;
-						//	tmpExtent.right += (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-						//	tmpExtent.bottom -= (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
-						//	tmpExtent.left -= (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-						//	tmpExtent.top += (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
-						//	extents = tmpExtent;
+						save_viewWidth = m_viewWidth;
+						save_viewHeight = m_viewHeight;
+						m_viewWidth = m_Rotate->rotatedWidth;
+						m_viewHeight = m_Rotate->rotatedHeight;
+						saveExtent = extents;
+						tmpExtent = extents;
+						tmpExtent.right += (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
+						tmpExtent.bottom -= (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
+						tmpExtent.left -= (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
+						tmpExtent.top += (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
+						extents = tmpExtent;
 
-						//	// draw the Map
-						//	//this->DrawLayers(rcBounds,tmpBackbuffer, gLayers);
-						//	
-						//	// Cleanup
-						//	extents = saveExtent;
-						//	m_viewWidth = save_viewWidth;
-						//	m_viewHeight = save_viewHeight;
-						//	m_Rotate->resetWorldTransform(tmpBackbuffer->m_hDC);
-						//	dcLayers->BitBlt(0,0,rcBounds.Width(),rcBounds.Height(), tmpBackbuffer, 0, 0, SRCCOPY);
-						//	m_Rotate->cleanupRotation(tmpBackbuffer->m_hDC);
-						//	tmpBackbuffer->DeleteDC();
-						//}
-						//gLayers->ReleaseHDC(hdcLayers);
-					#pragma endregion
+						// draw the Map
+						//this->DrawLayers(rcBounds,tmpBackbuffer, gLayers);
+						
+						// Cleanup
+						extents = saveExtent;
+						m_viewWidth = save_viewWidth;
+						m_viewHeight = save_viewHeight;
+						m_Rotate->resetWorldTransform(tmpBackbuffer->m_hDC);
+						dcLayers->BitBlt(0,0,rcBounds.Width(),rcBounds.Height(), tmpBackbuffer, 0, 0, SRCCOPY);
+						m_Rotate->cleanupRotation(tmpBackbuffer->m_hDC);
+						tmpBackbuffer->DeleteDC();
+					}
+					gLayers->ReleaseHDC(hdcLayers);
 				}
 				
 				// passing layers to the back buffer
 				gBuffer->DrawImage(m_layerBitmap, 0.0f, 0.0f);
-
-				// displaying the time
-				DWORD endTick = GetTickCount();
-				this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
 			}
 		}
 	}
 	m_canbitblt = TRUE;
 	
+	// displaying the time
+	DWORD endTick = GetTickCount();
+	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
+
 	// hot tracking
 	if (m_hotTracking.Shapefile && !m_isSnapshot)
 	{

@@ -4509,7 +4509,7 @@ library MapWinGIS
 			[id(154), helpstring("Sets the function to perform shapefile drawing. New function supports selection drawing options")] tkShapeDrawingMethod ShapeDrawingMethod;
 			[id(156), helpstring("property CurrentScale")] DOUBLE CurrentScale;
 			[id(158), helpstring("property MapUnits")] tkUnitsOfMeasure MapUnits;			
-			[id(166), helpstring("property VersionNumber")] LONG VersionNumber;
+			[id(166), helpstring("property VersionNumber")] BSTR VersionNumber;
 			[id(172), helpstring("property ShowRedrawTime")] VARIANT_BOOL ShowRedrawTime;
 			[id(173), helpstring("property ShowVersionNumber")] VARIANT_BOOL ShowVersionNumber;
 			[id(187), helpstring("property MaxExtents")] IExtents* MaxExtents;
