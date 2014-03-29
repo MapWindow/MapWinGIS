@@ -190,7 +190,7 @@ STDMETHODIMP CMeasuring::get_SegementLength(int segmentIndex, double* retVal)
 	else
 	{
 		int i = segmentIndex;
-		if (transformationMode == tmNotDefined)
+		if (GetTransformationMode() == tmNotDefined)
 		{
 			*retVal = points[i]->Proj.GetDistance(points[i + 1]->Proj);
 		}
@@ -209,7 +209,7 @@ STDMETHODIMP CMeasuring::get_SegementLength(int segmentIndex, double* retVal)
 // *******************************************************
 double CMeasuring::GetDistance() 
 {
-	if (transformationMode == tmNotDefined)
+	if (GetTransformationMode() == tmNotDefined)
 	{
 		return GetEuclidianDistance();	// if there us undefined or incompatible projection; return distance on plane 
 	}
@@ -264,7 +264,7 @@ double CMeasuring::GetGeodesicDistance()
 // *******************************************************
 double CMeasuring::GetArea(bool closingPoint, double x, double y)
 {
-	if (transformationMode == tmNotDefined)
+	if (GetTransformationMode() == tmNotDefined)
 	{
 		return GetEuclidianArea(closingPoint, x, y);   // x, y are projected
 	}
@@ -343,38 +343,24 @@ double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y)
 #pragma endregion
 
 // *******************************************************
-//		SetProjection()
+//		SetMapView()
 // *******************************************************
-bool CMeasuring::SetProjection(IGeoProjection* projNew, IGeoProjection* projWGS84New, tkTransformationMode mode)
+void CMeasuring::SetMapView(void* mapView)
 {
-	if (!Utility::put_ComReference(projWGS84New, (IDispatch**)&projWGS84, false))
-		return false;
+	_mapView = mapView;
+}
 
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = true;
-#endif
-	if (proj)
-	{
-		if (transformationMode == tmDoTransformation)
-			proj->StopTransform();
-	}
-	VARIANT_BOOL vb;
-	proj->CopyFrom(projNew, &vb);
-	
-	bool result = true;
-	this->transformationMode = mode;
-	if (transformationMode == tmDoTransformation)
-	{
-		proj->StartTransform(projWGS84, &vb);
-		if (!vb) {
-			transformationMode = tmNotDefined;
-			result = false;
-		}
-	}
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = false;
-#endif
-	return (result && transformationMode != tmNotDefined);
+IGeoProjection* CMeasuring::GetWgs84Projection()
+{
+	return _mapView ? ((CMapView*)_mapView)->m_wgsProjection : NULL;
+}
+IGeoProjection* CMeasuring::GetMapProjection()
+{
+	return _mapView ? ((CMapView*)_mapView)->m_projection : NULL;
+}
+tkTransformationMode CMeasuring::GetTransformationMode()
+{
+	return _mapView ? ((CMapView*)_mapView)->m_transformationMode : tmNotDefined;
 }
 
 // *******************************************************
@@ -412,10 +398,10 @@ void CMeasuring::AddPoint(double xProj, double yProj, double xScreen, double ySc
 bool CMeasuring::TransformPoint(double& x, double& y) {
 	
 	VARIANT_BOOL vb;
-	switch (transformationMode)
+	switch (GetTransformationMode())
 	{
 		case tkTransformationMode::tmDoTransformation:
-			proj->Transform(&x, &y, &vb);
+			GetMapProjection()->Transform(&x, &y, &vb);
 			return true;
 		case tkTransformationMode::tmWgs84Complied:	
 			return true;

@@ -295,6 +295,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "ZoomToTileLevel", dispidZoomToTileLevel, ZoomToTileLevel, VT_BOOL, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "ZoomToWorld", dispidZoomToWorld, ZoomToWorld, VT_BOOL, VTS_NONE)
 	DISP_FUNCTION_ID(CMapView, "FindSnapPoint", dispidFindSnapPoint, FindSnapPoint, VT_BOOL, VTS_R8 VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	DISP_FUNCTION(CMapView, "Clear", Clear, VT_EMPTY, VTS_NONE)
 	
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP
@@ -386,16 +387,55 @@ BOOL CMapView::CMapViewFactory::UpdateRegistry(BOOL bRegister)
 }
 #pragma endregion
 
+#pragma region Constructor/destructor
 
-#pragma region Constructor
-CMapView::CMapView()
-	: vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"), valsLen(39), m_isSnapshot(false)
+
+// ********************************************************************
+//		CMapView() constructor
+// ********************************************************************
+CMapView::CMapView() : vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"), valsLen(39), m_isSnapshot(false)
+{
+	Startup();
+	SetDefaults();
+}
+
+// ****************************************************
+//	    Destructor
+// ****************************************************
+CMapView::~CMapView()
+{
+	this->RemoveAllLayers();
+
+	this->ClearDrawings();
+
+	ReleaseTempObjects();
 	
+	this->Shutdown();
+}
+
+// **********************************************************************
+//	Clear
+// **********************************************************************
+void CMapView::Clear()
+{
+	this->RemoveAllLayers();
+	this->ClearDrawings();
+	ReleaseTempObjects();
+	SetDefaults();
+
+	IGeoProjection* p = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	SetGeoProjection(p);
+}
+
+// **********************************************************************
+//	Startup
+// **********************************************************************
+// Must be called from constructor only
+void CMapView::Startup()
 {
 	this->GdiplusStartup();
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
-
-	MultilineLabeling = true;
 
 	m_canbitblt = FALSE;
 	m_leftButtonDown = FALSE;
@@ -403,14 +443,11 @@ CMapView::CMapView()
 	m_bitbltClickDown = CPoint(0,0);
 
 	m_globalCallback = NULL;
-	m_lastErrorCode = tkNO_ERROR;
 
 	m_key = "";
 
 	m_viewHeight = 0;
 	m_viewWidth = 0;
-
-	rbMapResizeBehavior = rbClassic;
 
 	//Cursors
 	m_cursorPan = AfxGetApp()->LoadCursor(IDC_PAN);
@@ -430,21 +467,8 @@ CMapView::CMapView()
 	m_drawMutex.Unlock();
 	m_legendMutex.Unlock();
 	m_mapstateMutex.Unlock();
-
-	m_LineSeparationFactor = 3;		
-
-	m_useLabelCollision = false;
-
+	
 	_setmaxstdio(2048);
-
-	// Added QUAY 3.16.09 for TrapRMouseDown
-    DoTrapRMouseDown = TRUE;
-	//--------------------------------------
-	m_UseSeamlessPan = FALSE;
-	m_MouseWheelSpeed = 0.5;
-	m_ShapeDrawingMethod = dmNewSymbology;
-	m_unitsOfMeasure = umMeters;
-	m_DisableWaitCursor = false;
 
 	m_RotateAngle = 0.0f;
 	m_Rotate = NULL;
@@ -453,9 +477,6 @@ CMapView::CMapView()
 
 	m_imageGroups = NULL;
 
-	m_ShowRedrawTime = VARIANT_FALSE;
-	m_ShowVersionNumber = VARIANT_FALSE;
-
 	srand (time(NULL));
 
 	m_isSizing = false;
@@ -463,85 +484,95 @@ CMapView::CMapView()
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = true;
 	#endif
-
-	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_projection);
+	
 	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_wgsProjection);
 	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_GMercProjection);
+	CoCreateInstance(CLSID_Tiles, NULL, CLSCTX_INPROC_SERVER, IID_ITiles, (void**)&m_tiles);
+	CoCreateInstance(CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&m_measuring);
 	
 	VARIANT_BOOL vb;
 	m_wgsProjection->SetWgs84(&vb);		// EPSG:4326
 	m_GMercProjection->SetGoogleMercator(&vb);	// EPSG:3857
-	
+
+	m_transformationMode = tmNotDefined;
+	m_projection = NULL;
+
+	IGeoProjection* p = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	SetGeoProjection(p);
+
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
 	#endif
-
-	m_transformationMode = tmNotDefined;
-	m_scalebarVisible = VARIANT_TRUE;
 
 	m_hotTracking.Shapefile = NULL;
 	m_hotTracking.LayerHandle = -1;
 	m_hotTracking.ShapeId = -1;
 
-	CoCreateInstance(CLSID_Tiles, NULL, CLSCTX_INPROC_SERVER, IID_ITiles, (void**)&m_tiles);
-	CoCreateInstance(CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&m_measuring);
-	((CMeasuring*)m_measuring)->SetProjection(m_projection, m_wgsProjection, m_transformationMode);
-
 	m_rectTrackerIsActive = false;
 
 	m_drawMouseMoves = false;
 	m_lastWidthMeters = 0.0;
+}
 
+// **********************************************************************
+//	SetDefaults
+// **********************************************************************
+void CMapView::SetDefaults()
+{
+	// TODO: set defaults for property exchanged
+	m_scalebarVisible = VARIANT_TRUE;
+	MultilineLabeling = true;
+	m_lastErrorCode = tkNO_ERROR;
+	rbMapResizeBehavior = rbClassic;
+	DoTrapRMouseDown = TRUE;
+	m_UseSeamlessPan = FALSE;
+	m_MouseWheelSpeed = 0.5;
+	m_ShapeDrawingMethod = dmNewSymbology;
+	m_unitsOfMeasure = umMeters;
+	m_DisableWaitCursor = false;
+	m_LineSeparationFactor = 3;		
+	m_useLabelCollision = false;
+	m_ShowRedrawTime = VARIANT_FALSE;
+	m_ShowVersionNumber = VARIANT_FALSE;	
 	m_scalebarUnits = tkScalebarUnits::Metric;
+	((CTiles*)m_tiles)->SetDefaults();
+	((CMeasuring*)m_measuring)->SetDefaults();
 }
 
-// ********************************************************************
-//		OnCreate()
-// ********************************************************************
-int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
-{
-	if (COleControl::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	m_bufferBitmap = NULL;
-	m_tilesBitmap = NULL;
-	m_layerBitmap = NULL;
-	m_drawingBitmap = NULL;
-
-	DragAcceptFiles( TRUE );
-
-	CRect rect(0,0,0,0);
-	m_ttipCtrl->Create(NULL,WS_CHILD,rect,this,IDC_TTBTN);
-	m_ttipCtrl->ShowWindow(FALSE);
-
-	//CTool Tip
-	m_ttip.Create(this,TTS_ALWAYSTIP);
-	m_ttip.Activate(TRUE);
-	m_ttip.AddTool(this,"",rect,IDC_TTBTN);
-	m_ttip.SetDelayTime(TTDT_AUTOPOP,0);
-	m_ttip.SetDelayTime(TTDT_INITIAL,0);
-	m_ttip.SetDelayTime(TTDT_RESHOW,0);
-
-	return 0;
-}
-#pragma endregion
-
-#pragma region Destructor
-// ****************************************************
-//	    Destructor
-// ****************************************************
-CMapView::~CMapView()
-{
-	Debug::WriteLine("MapView destructor");
-
-	((CTiles*)m_tiles)->Stop();
-
+// **********************************************************************
+//	ReleaseTempObjects
+// **********************************************************************
+void CMapView::ReleaseTempObjects()
+{	
 	m_collisionList.Clear();
 	
-	this->RemoveAllLayers();
+	m_RotateAngle = 0.0f;
+	if (m_Rotate)
+	{
+		delete m_Rotate;
+		m_Rotate = NULL;
+	}
 
-	this->ClearDrawings();
+	if (m_imageGroups)
+	{
+		for (int i = 0; i < m_imageGroups->size(); i++)
+		{
+			delete (*m_imageGroups)[i];
+		}
+		m_imageGroups->clear();
+		delete m_imageGroups;
+		m_imageGroups = NULL;
+	}
+}
 
+// **********************************************************************
+//	Shutdown
+// **********************************************************************
+// Must be called from desctructor only
+void CMapView::Shutdown()
+{
+	((CTiles*)m_tiles)->Stop();
 	if (m_bufferBitmap)
 	{
 		delete m_bufferBitmap;
@@ -576,35 +607,48 @@ CMapView::~CMapView()
 	if (m_measuring)
 		m_measuring->Release();
 
-	delete m_ttipCtrl;
-
-	if (m_hotTracking.Shapefile)
-		m_hotTracking.Shapefile->Release();
-
-	this->GdiplusShutdown();
-
-	if (m_Rotate)
-	{
-		delete m_Rotate;
-		m_Rotate = NULL;
-	}
-
-	if (m_imageGroups)
-	{
-		for (int i = 0; i < m_imageGroups->size(); i++)
-		{
-			delete (*m_imageGroups)[i];
-		}
-		m_imageGroups->clear();
-		delete m_imageGroups;
-		m_imageGroups = NULL;
-	}
-	
 	if (m_tiles)
 	{
 		((CTiles*)m_tiles)->ClearAll();
 		m_tiles->Release();
 	}
+
+	if (m_hotTracking.Shapefile)
+		m_hotTracking.Shapefile->Release();
+
+	delete m_ttipCtrl;
+
+	this->GdiplusShutdown();
+}
+
+// ********************************************************************
+//		OnCreate()
+// ********************************************************************
+int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (COleControl::OnCreate(lpCreateStruct) == -1)
+		return -1;
+	
+	m_bufferBitmap = NULL;
+	m_tilesBitmap = NULL;
+	m_layerBitmap = NULL;
+	m_drawingBitmap = NULL;
+
+	DragAcceptFiles( TRUE );
+
+	CRect rect(0,0,0,0);
+	m_ttipCtrl->Create(NULL,WS_CHILD,rect,this,IDC_TTBTN);
+	m_ttipCtrl->ShowWindow(FALSE);
+
+	//CTool Tip
+	m_ttip.Create(this,TTS_ALWAYSTIP);
+	m_ttip.Activate(TRUE);
+	m_ttip.AddTool(this,"",rect,IDC_TTBTN);
+	m_ttip.SetDelayTime(TTDT_AUTOPOP,0);
+	m_ttip.SetDelayTime(TTDT_INITIAL,0);
+	m_ttip.SetDelayTime(TTDT_RESHOW,0);
+
+	return 0;
 }
 #pragma endregion
 

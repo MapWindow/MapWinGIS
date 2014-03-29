@@ -1141,7 +1141,7 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	if (!node)
 		return false;
 
-	this->setDefaults();
+	this->SetDefaults();
 
 	setBoolean(node, "Visible", m_visible);
 	setBoolean(node, "GridLinesVisible", m_gridLinesVisible);

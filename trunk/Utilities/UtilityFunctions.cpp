@@ -867,6 +867,36 @@ namespace Utility
 	}
 #pragma endregion
 
+#pragma region Progress
+	// ********************************************************************
+	//		DisplayProgress()
+	// ********************************************************************
+	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent)
+	{
+		if( callback != NULL ) 
+		{
+			long newpercent = (long)(((double)(index + 1)/count)*100);
+			if( newpercent > lastPercent )
+			{	
+				lastPercent = newpercent;
+				callback->Progress(OLE2BSTR(key),newpercent,A2BSTR(message));
+			}
+		}
+	}
+
+	// ********************************************************************
+	//		DisplayProgressCompleted()
+	// ********************************************************************
+	void DisplayProgressCompleted(ICallback* callback, BSTR& key)
+	{
+		if( callback != NULL )
+		{
+			callback->Progress(OLE2BSTR(key),100,A2BSTR("Completed"));
+			callback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+		}
+	}
+#pragma endregion
+
 	// ********************************************************
 	//	  getCurrentYear
 	// ********************************************************

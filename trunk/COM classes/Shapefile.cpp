@@ -46,6 +46,7 @@
 #include "Templates.h"
 #include "TableClass.h"
 #include <GeosHelper.h>
+#include "ShapeValidator.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -88,6 +89,30 @@ STDMETHODIMP CShapefile::get_CdlgFilter(BSTR *pVal)
 }
 
 // ************************************************************
+//		LastInputValidation
+// ************************************************************
+STDMETHODIMP CShapefile::get_LastInputValidation(IShapeValidationInfo** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (_inputValidation)
+		_inputValidation->AddRef();
+	*retVal = _inputValidation;
+	return S_OK;
+}
+
+// ************************************************************
+//		LastOutputValidation
+// ************************************************************
+STDMETHODIMP CShapefile::get_LastOutputValidation(IShapeValidationInfo** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (_outputValidation)
+		_outputValidation->AddRef();
+	*retVal = _outputValidation;
+	return S_OK;
+}
+
+// ************************************************************
 //		get/put_GlobalCallback()
 // ************************************************************
 STDMETHODIMP CShapefile::get_GlobalCallback(ICallback **pVal)
@@ -106,6 +131,16 @@ STDMETHODIMP CShapefile::put_GlobalCallback(ICallback *newVal)
 	if( dbf != NULL )
 		dbf->put_GlobalCallback(newVal);
 
+	return S_OK;
+}
+
+// ************************************************************
+//		StopExecution
+// ************************************************************
+STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	Utility::put_ComReference((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
 	return S_OK;
 }
 
@@ -778,6 +813,9 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
+	ClearValidationList();
+	ClearCachedGeometries();
+
 	if( _isEditingShapes )
 	{
 		// just stop editing shapes, if the shape is in open status
@@ -824,6 +862,18 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 	_minM = 0.0;
 	_maxM = 0.0;
 	
+	if (_inputValidation != NULL)
+	{
+		_inputValidation->Release();
+		_inputValidation = NULL;
+	}
+
+	if (_outputValidation != NULL)
+	{
+		_outputValidation->Release();
+		_outputValidation = NULL;
+	}
+
 	if( _shpfile != NULL) fclose(_shpfile);
 	_shpfile = NULL;
 	
@@ -855,6 +905,9 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 	return S_OK;
 }
 
+// **********************************************************
+//		Dump()
+// **********************************************************
 //Saves shapefile without reopening it in a new location
 STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval)
 {
@@ -881,6 +934,9 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		return S_FALSE;
 	}
 	
+	if (!this->ValidateOutput(this, "Dump", "Shapefile", false))
+		return S_FALSE;
+
 	USES_CONVERSION;
 	CString sa_shpfileName;
 	sa_shpfileName = OLE2CA(ShapefileName);
@@ -1013,6 +1069,9 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		return S_FALSE;
 	}
 	
+	if (!this->ValidateOutput(this, "SaveAs", "Shapefile", false))
+		return S_FALSE;
+
 	USES_CONVERSION;
 	CString sa_shpfileName;
 	sa_shpfileName = OLE2CA(ShapefileName);
@@ -1171,6 +1230,9 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 		return S_OK;
 	}
 	
+	if (!this->ValidateOutput(this, "Save", "Shapefile", false))
+		return S_FALSE;
+
 	// compute the extents
 	VARIANT_BOOL res;
 	RefreshExtents(&res);
@@ -1277,30 +1339,42 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL *retval)
 #pragma endregion
 
 #pragma region Clone
+//TODO: move to shapefile helper class
+
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void CShapefile::CloneNoFields(IShapefile** retVal)
+void CShapefile::CloneNoFields(IShapefile** retVal, bool addShapeId)
 {
-	CloneNoFields(retVal, _shpfiletype);
+	CloneNoFields(retVal, _shpfiletype, addShapeId);
 }
 
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
-void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType)
+void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType, bool addShapeId)
 {
 	IShapefile* sf = NULL;
 	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
 	
-	VARIANT_BOOL vbretval;
-	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
+	VARIANT_BOOL vb;
+	if(addShapeId)
+	{
+		sf->CreateNewWithShapeID(A2BSTR(""), shpType, &vb);
+	}
+	else {
+		sf->CreateNew(A2BSTR(""), shpType, &vb);
+	}
 	
 	// copying the projection string
 	BSTR pVal;
 	this->get_Projection(&pVal);
 	if (pVal != NULL)
 		sf->put_Projection(pVal);
+
+	ICallback* callback = NULL;
+	this->get_GlobalCallback(&callback);
+	sf->put_GlobalCallback(callback);
 
 	*retVal = sf;
 }
@@ -1311,7 +1385,17 @@ void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType)
 //  Creates new shapefile with the same type and fields as existing one
 STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 {
-	CloneNoFields(retVal);
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	this->CloneCore(retVal, _shpfiletype);
+	return S_OK;
+}
+
+// ***********************************************************************
+//		CloneCore()
+// ***********************************************************************
+void CShapefile::CloneCore(IShapefile** retVal, ShpfileType shpType, bool addShapeId)
+{
+	CloneNoFields(retVal, shpType, addShapeId);
 	VARIANT_BOOL vbretval;
 
 	IShapefile* sf = *retVal;
@@ -1339,7 +1423,7 @@ STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 		}
 	}
 	
-	return S_OK;
+	
 }
 #pragma endregion
 
@@ -1592,7 +1676,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 			dbf->get_Field(fld,&testVal);
 			testVal->get_Name(&Testname);
 			strTestname = OLE2A(Testname);
-			if(strTestname == strFieldname)
+			if( strTestname.CompareNoCase(strFieldname))
 			{
 				*pVal = testVal;
 				return S_OK;
@@ -2472,14 +2556,9 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 // *****************************************************************
 bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace)
 {
-	m_globalSettings.gdalErrorMessage = "";
-	
-	if (m_sourceType == sstUninitialized )
-	{
-		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
-		return false;
-	}
-
+	// ------------------------------------------------------
+	//   Validation
+	// ------------------------------------------------------
 	if (!newProjection)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
@@ -2494,20 +2573,15 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
 		return false;
 	}
-
-//#ifdef _DEBUG
-//	gMemLeakDetect.stopped = true;
-//#endif
-
+	
+	if (!ValidateInput(this, "Reproject/ReprojectInPlace", "this", VARIANT_FALSE))
+		return false;
+	
+	m_globalSettings.gdalErrorMessage = "";
 	OGRSpatialReference* projSource = ((CGeoProjection*)m_geoProjection)->get_SpatialReference();
 	OGRSpatialReference* projTarget = ((CGeoProjection*)newProjection)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation( projSource, projTarget );
-
-//#ifdef _DEBUG
-//	gMemLeakDetect.stopped = false;
-//#endif
-
 	if (!transf)
 	{
 		m_globalSettings.gdalErrorMessage = CPLGetLastErrorMsg();
@@ -2515,11 +2589,15 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		return false;
 	}
 
-	// creating a copy of the shapefile
+	// ------------------------------------------------------
+	//   Creating output
+	// ------------------------------------------------------
 	if (!reprojectInPlace)
 		this->Clone(retVal);
 
-	// do reprojection
+	// ------------------------------------------------------
+	//   Processing
+	// ------------------------------------------------------
 	CComVariant var;
 	long numShapes = _shapeData.size();
 	long count = 0;
@@ -2527,23 +2605,16 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	long numFields, percent = 0;
 	this->get_NumFields(&numFields);
 	
-	VARIANT_BOOL vbretval = VARIANT_FALSE;
+	VARIANT_BOOL vb = VARIANT_FALSE;
 	*reprojectedCount = 0;
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		if( globalCallback != NULL )
-		{
-			long newpercent = (long)(((double)(i + 1)/numShapes)*100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Projecting..."));
-			}
-		}
-		
+		Utility::DisplayProgress(globalCallback, i, numShapes, "Reprojecting...", key, percent);
+
 		IShape* shp = NULL;
-		this->get_Shape(i, &shp);
+		this->GetValidatedShape(i, &shp);
+		if (!shp) continue;
 		
 		if (!reprojectInPlace)
 		{
@@ -2566,7 +2637,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 				// extracting coordinates
 				for (long j = 0; j < numPoints; j++)
 				{
-					shp->get_XY(j, x + j, y + j, &vbretval);
+					shp->get_XY(j, x + j, y + j, &vb);
 				}
 
 				// will work faster after embedding to the CShape class
@@ -2581,19 +2652,19 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 					// saving updated coordinates
 					for (long j = 0; j < numPoints; j++)
 					{
-						shp->put_XY(j, x[j], y[j], &vbretval);
+						shp->put_XY(j, x[j], y[j], &vb);
 					}
 
 					if (!reprojectInPlace)
 					{
 						(*retVal)->get_NumShapes(&count);
-						(*retVal)->EditInsertShape(shp, &count, &vbretval);
+						(*retVal)->EditInsertShape(shp, &count, &vb);
 						
 						// copying attributes
 						for (long j = 0; j < numFields; j++)
 						{
 							this->get_CellValue(j, i, &var);
-							(*retVal)->EditCellValue(j, i, var, &vbretval);
+							(*retVal)->EditCellValue(j, i, var, &vb);
 						}
 					}
 					(*reprojectedCount)++;
@@ -2610,13 +2681,10 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		transf = NULL;
 	}
 
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
-
 	// setting new projection
 	if (reprojectInPlace)
 	{
-		m_geoProjection->CopyFrom(newProjection, &vbretval);
+		m_geoProjection->CopyFrom(newProjection, &vb);
 	}
 	else
 	{
@@ -2624,13 +2692,27 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		(*retVal)->get_GeoProjection(&proj);
 		if (proj)
 		{
-			proj->CopyFrom(newProjection, &vbretval);
+			proj->CopyFrom(newProjection, &vb);
 			proj->Release();
 		}
 	}
 	
+	// -------------------------------------- 
+	//	  Output validation
+	// -------------------------------------- 
+	Utility::DisplayProgressCompleted(globalCallback, key);
+	ClearValidationList();
+	if (!reprojectInPlace)
+	{
+		this->ValidateOutput(retVal, "Reproject/ReprojectInPlace", "Shapefile", false);
+	}
+	else
+	{
+		this->ValidateOutput(this, "Reproject/ReprojectInPlace", "Shapefile", false);
+	}
+
 	// it's critical to set correct projection, so false will be returned if it wasn't done
-	return vbretval ? true : false;
+	return vb ? true : false;
 }
 #pragma endregion
 
@@ -2653,15 +2735,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 
 		for (int i = 0; i < numShapes; i++)
 		{
-			if( globalCallback != NULL )
-			{
-				long newpercent = (long)(((double)(i + 1)/numShapes)*100);
-				if( newpercent > percent )
-				{	
-					percent = newpercent;
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Fixing..."));
-				}
-			}
+			Utility::DisplayProgress(globalCallback, i, numShapes, "Fixing...", key, percent);
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
@@ -2701,25 +2775,6 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 	return S_OK;
 }
 
-
-void CShapefile::ReadGeosGeometries()
-{
-	for (size_t i = 0; i < _shapeData.size(); i++)
-	{
-		IShape* shp = NULL;
-		this->get_Shape(i, &shp);
-		if (shp)
-		{
-			GEOSGeom geom = GeometryConverter::Shape2GEOSGeom(shp);
-			if (geom)
-			{
-				_shapeData[i]->geosGeom = geom;
-			}
-			shp->Release();
-		}
-	}
-	m_geosGeometriesRead = true;
-}
 
 // *********************************************************
 //		GetRelatedShapes()
@@ -2769,15 +2824,12 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 	if (relation == srDisjoint)	// TODO: implement
 		return;				
 	
-	// caching geos geometries
-	if (!m_geosGeometriesRead)
-		this->ReadGeosGeometries();
+	this->ReadGeosGeometries(VARIANT_TRUE);
 
 	// turns on the quad tree
 	VARIANT_BOOL useQTree = VARIANT_FALSE;
 	this->get_UseQTree(&useQTree);
-	if (!useQTree)
-		this->put_UseQTree(VARIANT_TRUE);
+	if (!useQTree) this->put_UseQTree(VARIANT_TRUE);
 
 	double xMin, xMax, yMin, yMax;
 	if(((CShape*)referenceShape)->get_ExtentsXY(xMin, yMin, xMax, yMax))
@@ -2830,6 +2882,9 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 
 		*retval = Templates::Vector2SafeArray(&arr, VT_I4, resultArray);
 	}
+
+	// Don't clear the list here as function may be called in a loop
+	//this->ClearCachedGeometries();
 }
 
 // ***************************************************
@@ -2848,7 +2903,6 @@ STDMETHODIMP CShapefile::put_HotTracking(VARIANT_BOOL newVal)
 	m_hotTracking = newVal;
 	return S_OK;
 }
-
 
 // *****************************************************************
 //		EditAddField()

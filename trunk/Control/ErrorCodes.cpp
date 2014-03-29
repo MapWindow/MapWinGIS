@@ -153,6 +153,14 @@ const char * ErrorMsg( long ErrorCode )
 			return "Category wasn't found";
 		case tkRESULTINGSHPFILE_EMPTY:
 			return "Resulting shapefile has no shapes";
+		case tkABORTED_ON_INPUT_VALIDATION:
+			return "Operation was aborted because of invalid input shapes. Fix invalid shapes in the input or set more loose validation rules. See GlobalSettings.ShapeInputValidationMode.";
+		case tkABORTED_ON_OUTPUT_VALIDATION:
+			return "No results were returned because of invalid shapes in output. Try to set more loose validation rules. See GlobalSettings.ShapeOutputValidationMode.";
+		case tkSHAPEFILE_IS_EMPTY:
+			return "Operation wasn't executed because input shapefile has no shapes.";
+		case tkFAILED_TO_BUILD_SPATIAL_INDEX:
+			return "Failed to build temporary spatial index for operation.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

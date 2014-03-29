@@ -38,24 +38,25 @@ class ATL_NO_VTABLE CMeasuring :
 	public IDispatchImpl<IMeasuring, &IID_IMeasuring, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CMeasuring() 
-		: textBrush(Gdiplus::Color::Black), 
-		whiteBrush(Gdiplus::Color::White)
+	CMeasuring() : textBrush(Gdiplus::Color::Black), whiteBrush(Gdiplus::Color::White)
+	{
+		_mapView = NULL;
+		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+
+		font = Utility::GetGdiPlusFont("Times New Roman", 9);
+		format.SetAlignment(Gdiplus::StringAlignmentCenter);
+		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+
+		SetDefaults();
+	}
+
+	void SetDefaults()
 	{
 		isGeodesic = false;
 		stopped = false;
 		mousePoint.x = mousePoint.y = 0;
 		measuringType = tkMeasuringType::MeasureDistance;
-		updateProjectionNeeded = false;
 		areaRecalcIsNeeded = true;
-		transformationMode = tmNotDefined;
-		projWGS84 = NULL;
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
-		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&proj);
-
-		font = Utility::GetGdiPlusFont("Times New Roman", 9);
-		format.SetAlignment(Gdiplus::StringAlignmentCenter);
-		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 		closedPoly = false;
 		firstPointIndex = -1;
 		persistent = VARIANT_FALSE;
@@ -66,8 +67,6 @@ public:
 	{
 		Clear();
 		if (shape) shape->Release();
-		if (proj) proj->Release();
-		if (projWGS84) projWGS84->Release();
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_MEASURING)
@@ -88,16 +87,11 @@ public:
 	{
 	}
 private:
-	bool updateProjectionNeeded;
 	bool stopped;
 	bool isGeodesic;
-	IGeoProjection* proj;
-	IGeoProjection* projWGS84;
-	tkTransformationMode transformationMode;
-	IShape* shape;
+	void* _mapView;
 	bool areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
-	
-	
+	IShape* shape;
 public:
 	STDMETHOD(get_Length)(double* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
@@ -117,14 +111,18 @@ public:
 	STDMETHOD(put_DisplayAngles)(VARIANT_BOOL newVal);
 
 	// projection should be specified before any calculations are possible
-	bool SetProjection(IGeoProjection* proj, IGeoProjection* projWGS84, tkTransformationMode mode);
+	void SetMapView(void* mapView);
+	IGeoProjection* GetMapProjection();
+	IGeoProjection* GetWgs84Projection();
+	tkTransformationMode GetTransformationMode();
+
 	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
 	bool CMeasuring::TransformPoint(double& x, double& y);
 	
 	bool IsStopped() {return stopped; }
 	bool IsGeodesic() { return isGeodesic;}
 
-	bool HasProjection() { return transformationMode != tmNotDefined; }
+	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
 	double GetDistance();
 	double GetEuclidianDistance();
 	double CMeasuring::GetGeodesicDistance();

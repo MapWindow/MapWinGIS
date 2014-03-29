@@ -424,17 +424,18 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	if (pVal)
 	{
 		last = m_projection;
-		last->AddRef();		// add temp reference; as it ca be deleted in the next line
+		if (last)
+			last->AddRef();		// add temp reference; as it ca be deleted in the next line
 	}
 	
 	Utility::put_ComReference(pVal, (IDispatch**)&m_projection, false);
 	
-	if (last != m_projection)
-	{
-		((CGeoProjection*)last)->SetIsFrozen(false);
-	}
 	if (last)
 	{
+		if (last != m_projection)
+		{
+			((CGeoProjection*)last)->SetIsFrozen(false);
+		}
 		last->Release();
 		last = NULL;
 	}
@@ -465,7 +466,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	VARIANT_BOOL geographic;
 	m_projection->get_IsGeographic(&geographic);
 	m_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
-	((CMeasuring*)m_measuring)->SetProjection(m_projection, m_wgsProjection, m_transformationMode);
+	((CMeasuring*)m_measuring)->SetMapView((void*)this);
 
 	((CTiles*)m_tiles)->UpdateProjection();
 }

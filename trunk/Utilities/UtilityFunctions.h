@@ -66,6 +66,10 @@ namespace Utility
 	bool ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value);
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 
+	// display progress
+	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent);
+	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
+
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
 	

@@ -11,6 +11,7 @@ struct ShapeData
 	ShapeData()
 	{
 		shape = NULL;
+		fixedShape = NULL;
 		fastData = NULL;
 		chart = NULL;
 		geosGeom = NULL;
@@ -21,6 +22,8 @@ struct ShapeData
 		
 		selected = false;
 		isVisible = false;
+
+		status = ShapeValidationStatus::Original;
 	}
 
 	~ShapeData()
@@ -48,12 +51,21 @@ struct ShapeData
 			GEOSGeom_destroy(geosGeom);
 			geosGeom = NULL;
 		}
+
+		if (status == ShapeValidationStatus::Fixed && fixedShape)
+		{
+			fixedShape->Release();
+			fixedShape = NULL;
+		}
 	}
 	
 	IShape* shape;
 	CShapeData* fastData;	// fast non-edit mode
 	CChartInfo* chart;
 	GEOSGeom geosGeom;		// caches geometry
+	
+	IShape* fixedShape;				// will be used as substitute of original in input shapefil
+	ShapeValidationStatus status;
 	
 	int handle;				// the unique handle of shape, assigned in the increasing order
 	int category;			// the ShapefileCategory to which the shape belongs: < 0 - default options

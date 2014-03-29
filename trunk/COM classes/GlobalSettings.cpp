@@ -422,3 +422,51 @@ STDMETHODIMP CGlobalSettings::put_DefaultColorSchemeForGrids(PredefinedColorSche
 	m_globalSettings.defaultColorSchemeForGrids = newVal;
 	return S_OK;
 }
+
+// ****************************************************
+//	    ShapeOutputValidationMode
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_ShapeOutputValidationMode(tkShapeValidationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.outputValidation;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ShapeOutputValidationMode(tkShapeValidationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.outputValidation = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    ShapeInputValidationMode
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_ShapeInputValidationMode(tkShapeValidationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.inputValidation;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ShapeInputValidationMode(tkShapeValidationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.inputValidation = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    GeometryEngine
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_GeometryEngine(tkGeometryEngine* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.geometryEngine;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GeometryEngine(tkGeometryEngine newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.geometryEngine = newVal;
+	return S_OK;
+}

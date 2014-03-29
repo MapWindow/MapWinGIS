@@ -1144,6 +1144,19 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 	int size = data.size();
 	int depth = 0;
 
+	if (size == 1)
+	{
+		// no need for calculation
+		if (deleteInput)
+			return data[0];	 // no need to clone; it will be exactly the same
+		else
+		{
+			GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(data[0]);
+			return geomTemp;
+		}
+	}
+
+	BSTR key = A2BSTR("");
 	while (!stop)
 	{
 		stop = true;
@@ -1181,18 +1194,10 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 					count++;
 					stop = false;		// in case there is at least one union occured, we shall run once more
 
-					if( callback) 
-					{
-						long newpercent = (long)(((double)count/size)*100); 
-						if( newpercent > percent )
-						{	
-							percent = newpercent;
-							callback->Progress(A2BSTR(""),percent,A2BSTR("Merging shapes..."));
-						}
-					}
+					Utility::DisplayProgress(callback, count, size, "Merging shapes...", key, percent);
 				}
 				
-				// it the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
+				// it is the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
 				if (i == size -1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
 				{
 					// we need to clone it, to be able to apply unified memory management afterwards

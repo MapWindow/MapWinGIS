@@ -314,6 +314,8 @@ protected:
 	afx_msg VARIANT_BOOL GetLayerSkipOnSaving(LONG LayerHandle);
 	afx_msg void SetLayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal);
 
+	afx_msg void Clear();
+
 	#pragma endregion
 	
 
@@ -647,6 +649,7 @@ public:
 #pragma region DispatchAndEventIds
 public:
 enum {		//{{AFX_DISP_ID(CMapView)
+	dispidClear = 206L,
 	dispidScalebarUnits = 205L,
 	dispidTilesAreInCache = 204L,
 	dispidFindSnapPoint = 203L,
@@ -1127,6 +1130,10 @@ private:
 	IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
 	void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
 
+	void SetDefaults();
+	void ReleaseTempObjects();
+	void Shutdown();
+	void Startup();
 
 	#ifdef _DEBUG //Code added by Lailin Chen to profile the time consumption of this function. --- Lailin Chen 11/7/2005
 		 DWORD OnDrawTicks;

@@ -130,6 +130,7 @@ public:
 	STDMETHOD(Clear)(VARIANT_BOOL* retVal);
 	STDMETHOD(Clone)(IGeoProjection** retVal);
 	STDMETHOD(get_IsFrozen)(VARIANT_BOOL* retVal);
+	STDMETHOD(TryAutoDetectEpsg)(int* epsgCode, VARIANT_BOOL* retVal);
 
 	OGRSpatialReference* get_SpatialReference()
 	{

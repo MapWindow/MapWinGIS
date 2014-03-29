@@ -293,12 +293,6 @@ STDMETHODIMP CShapefile::put_UseQTree(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	/*if(!_isEditingShapes)
-	{
-		ErrorMessage( tkSHPFILE_NOT_IN_EDIT_MODE );
-		return S_OK;
-	}*/
-
 	if (pVal && !useQTree)
 	{
 		this->GenerateQTree();
@@ -328,94 +322,34 @@ void CShapefile::GenerateQTree()
 		m_qtree = NULL;
 	}
 	
-	//generate QTree
-	IExtents* ext = NULL;
-	double xm,xM,ym,yM,zm,zM;
-	this->get_Extents(&ext);
-
-	if (!ext)
-		return;
-
-	ext->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-	ext->Release();
-	m_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
-	
-	int numShapes = (int)_shapeData.size();
-	int percent = 0, newPercent = 0;
-	for( int i = 0; i < numShapes; i++ )
-	{	
-		if (_fastMode)
-		{
-			_shapeData[i]->fastData->get_BoundsXY(xm, xM, ym, yM);
-		}
-		else
-		{
-			this->QuickExtentsCore(i, &xm,&ym,&xM,&yM);
-		}
-		
-		QTreeNode node;
-		node.Extent.left =xm;
-		node.Extent.right = xM;
-		node.Extent.top = yM;
-		node.Extent.bottom = ym;
-		node.index = i;
-		m_qtree->AddNode(node);
-
-		if (globalCallback != NULL)
-		{
-			newPercent = (long)((i + 1.0)/numShapes*100);
-			if( newPercent > percent )
-			{	
-				percent = newPercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading shapes..."));
-			}
-		}
-	}
-	
-	if (globalCallback)
-	{
-		globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading shapes..."));
-	}
+	m_qtree = GenerateQTreeCore(false);
 }
 
 // **********************************************************************
-// 						GenerateLocalQTree()				           
+// 						GenerateQTreeCore()				           
 // **********************************************************************
-//  Temporary function used to generate local copy of quad tree. 
-//	Shapefile quad tree can be be used in edit mode only now, but it's
-//  inconvenient to start edit mode just to perform geoprocessing
-//	operation. 
-//	
-//	@return pointer to quad tree on success, or NULL otherwise
-QTree* CShapefile::GenerateLocalQTree(IShapefile* sf, bool SelectedOnly)
+QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 {	
-	if (sf == NULL) 
-		return NULL;
-
-	long _numShapes = 0;
-	sf->get_NumShapes(&_numShapes);
-	if (_numShapes == 0) 
+	if (_shapeData.size() == 0)
 		return NULL;
 	
 	IExtents* ext = NULL;
 	double xMin,xMax,yMin,yMax,zMin,zMax;
-	sf->get_Extents(&ext);
-
-	if (!ext)
-		return NULL;
-
+	this->get_Extents(&ext);
+	if (!ext) return NULL;
 	ext->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
 	ext->Release();
+
 	QTree* qtree = new QTree(QTreeExtent(xMin,xMax,yMax,yMin));
 
-	vector<ShapeData*>* data = ((CShapefile*)sf)->get_ShapeVector();
-
-	for(long i = 0; i < _numShapes; i++ )
+	long percent;
+	int numShapes = (int)_shapeData.size();
+	for(int i = 0; i < numShapes; i++ )
 	{	
-		if (SelectedOnly && !(*data)[i]->selected)
+		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
 
-		((CShapefile*)sf)->QuickExtentsCore(i, &xMin,&yMin,&xMax,&yMax);
+		this->QuickExtentsCore(i, &xMin,&yMin,&xMax,&yMax);
 		
 		QTreeNode node;
 		node.Extent.left =xMin;
@@ -424,9 +358,46 @@ QTree* CShapefile::GenerateLocalQTree(IShapefile* sf, bool SelectedOnly)
 		node.Extent.bottom = yMin;
 		node.index = i;
 		qtree->AddNode(node);
+		
+		Utility::DisplayProgress(globalCallback, i, numShapes, "Building index...", key, percent);
 	}
+	Utility::DisplayProgressCompleted(globalCallback, key);
+
 	return qtree;
 }
 #pragma endregion
+
+// Build the tree anew for geoprocessing operations, as the original one
+// probably not 100% accurate/optimal + we may need only selected shapes
+
+// **********************************************************************
+// 						GenerateTempQTree()				           
+// **********************************************************************
+bool CShapefile::GenerateTempQTree(bool SelectedOnly)
+{
+	ClearTempQTree();
+	_tempTree = GenerateQTreeCore(SelectedOnly);
+	return _tempTree != NULL;
+}
+
+// **********************************************************************
+// 						ClearTempQTree()				           
+// **********************************************************************
+void CShapefile::ClearTempQTree()
+{
+	if (_tempTree)
+	{
+		delete _tempTree;
+		_tempTree = NULL;
+	}
+}
+
+// **********************************************************************
+// 						GetTempQtree()				           
+// **********************************************************************
+QTree* CShapefile::GetTempQtree()
+{
+	return _tempTree;
+}
 
 

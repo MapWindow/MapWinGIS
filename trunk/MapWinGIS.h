@@ -103,7 +103,9 @@ struct GlobalSettingsInfo
 	bool grabMapProjectionFromFirstLayer;
 	bool randomColorSchemeForGrids;
 	PredefinedColorScheme defaultColorSchemeForGrids;
-
+	tkShapeValidationMode inputValidation;
+	tkShapeValidationMode outputValidation;
+	tkGeometryEngine geometryEngine;
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
@@ -124,6 +126,9 @@ struct GlobalSettingsInfo
 		grabMapProjectionFromFirstLayer = true;
 		randomColorSchemeForGrids = true;
 		defaultColorSchemeForGrids = SummerMountains;
+		inputValidation = tkShapeValidationMode::NoValidation;
+		outputValidation = tkShapeValidationMode::NoValidation;
+		geometryEngine = tkGeometryEngine::engineGeos;
 
 		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
 		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";

@@ -55,10 +55,10 @@ public:
 		m_key = A2BSTR("");
 		m_globalCallback = NULL;
 		m_lastErrorCode = tkNO_ERROR;
-		this->setDefaults();
+		
 		CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&m_providers);
 		((CTileProviders*)m_providers)->put_Tiles(this);
-		m_provider = ((CTileProviders*)m_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
+		this->SetDefaults();
 		m_lastZoom = -1;
 	}
 
@@ -78,8 +78,9 @@ public:
 		}
 	}
 
-	void setDefaults()
+	void SetDefaults()
 	{
+		m_provider = ((CTileProviders*)m_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
 		m_visible = true;
 		m_tilesLoaded = false;
 		m_gridLinesVisible = false;

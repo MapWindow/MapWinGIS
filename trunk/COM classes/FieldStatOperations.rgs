@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.FieldStatOperations.1 = s 'FieldStatOperations Class'
+	{
+		CLSID = s '{DECA4D77-5191-4B19-9670-ECB9D36E2206}'
+	}
+	MapWinGIS.FieldStatOperations = s 'FieldStatOperations Class'
+	{
+		CLSID = s '{DECA4D77-5191-4B19-9670-ECB9D36E2206}'
+		CurVer = s 'MapWinGIS.FieldStatOperations.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {DECA4D77-5191-4B19-9670-ECB9D36E2206} = s 'FieldStatOperations Class'
+		{
+			ProgID = s 'MapWinGIS.FieldStatOperations.1'
+			VersionIndependentProgID = s 'MapWinGIS.FieldStatOperations'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

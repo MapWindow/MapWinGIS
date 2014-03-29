@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.ShapeValidationInfo.1 = s 'ShapeValidationInfo Class'
+	{
+		CLSID = s '{B8223915-5CDF-4F55-A4B7-7C7293F2FFFF}'
+	}
+	MapWinGIS.ShapeValidationInfo = s 'ShapeValidationInfo Class'
+	{
+		CLSID = s '{B8223915-5CDF-4F55-A4B7-7C7293F2FFFF}'
+		CurVer = s 'MapWinGIS.ShapeValidationInfo.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B8223915-5CDF-4F55-A4B7-7C7293F2FFFF} = s 'ShapeValidationInfo Class'
+		{
+			ProgID = s 'MapWinGIS.ShapeValidationInfo.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapeValidationInfo'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

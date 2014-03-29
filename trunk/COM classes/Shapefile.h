@@ -26,14 +26,13 @@
 #include <map>
 #include <set>
 #include <io.h>
-
 #include "IndexSearching.h"
-
 #include "Enumerations.h"
 #include "DrawingOptions.h"
 #include "RotatedRectangle.h"
 #include "ShapeDrawingOptions.h"
 #include "ShapefileCategories.h"
+#include "ShapeValidationInfo.h"
 #include "Shape.h"
 #include "Chart.h"
 #include "ShapeWrapper.h"
@@ -44,7 +43,6 @@
 #include "ogr_spatialref.h"
 #include "cpl_minixml.h"
 
-
 //Shapefile File Info
 #define HEADER_BYTES_16 50
 #define HEADER_BYTES_32 100
@@ -54,8 +52,6 @@
 #define UNUSEDVAL		0     	    
 #define RECORD_HEADER_LENGTH_32 8
 #define RECORD_SHAPE_TYPE_32 8
-
-
 
 // *********************************************************************
 // CShapefile declaration
@@ -70,7 +66,8 @@ public:
 	CShapefile()
 	{	
 		m_hotTracking = VARIANT_FALSE;
-		m_geosGeometriesRead = false;
+		_geosGeometriesRead = false;
+		_useValidationList = false;
 		_stopExecution = NULL;
 
 		_selectionTransparency = 180;
@@ -78,7 +75,7 @@ public:
 		_selectionColor = RGB(255, 255, 0);
 		_collisionMode = tkCollisionMode::LocalList;
 		
-		_geometryEngine = engineGeos;
+		_geometryEngine = m_globalSettings.geometryEngine;
 		
 		m_sourceType = sstUninitialized;
 		
@@ -99,6 +96,7 @@ public:
 		useQTree = VARIANT_FALSE;
 		cacheExtents = FALSE;
 		m_qtree = NULL;
+		_tempTree = NULL;
 
 		_shpfile = NULL;
 		_shxfile = NULL;
@@ -129,6 +127,8 @@ public:
 		m_categories = NULL;
 		m_charts = NULL;
 		m_geoProjection = NULL;
+		_inputValidation = NULL;
+		_outputValidation = NULL;
 
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_selectDrawOpt);
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_defaultDrawOpt);
@@ -321,40 +321,28 @@ public:
 	STDMETHOD(put_MinDrawingSize)(LONG newVal);
 	STDMETHOD(get_SourceType)(tkShapefileSourceType* pVal);
 	STDMETHOD(BufferByDistance)(double Distance, LONG nSegments, VARIANT_BOOL SelectedOnly, VARIANT_BOOL MergeResults, IShapefile** sf);
-
 	STDMETHOD(get_GeometryEngine)(tkGeometryEngine* pVal);
 	STDMETHOD(put_GeometryEngine)(tkGeometryEngine pVal);
-	
 	STDMETHOD(Difference)(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval);
 	STDMETHOD(Clip)(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval);
 	STDMETHOD(SymmDifference)(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval);
 	STDMETHOD(Union)(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval);
-	
 	STDMETHOD(ExplodeShapes)(VARIANT_BOOL SelectedOnly, IShapefile** retval);
 	STDMETHOD(AggregateShapes)(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IShapefile** retval);
 	STDMETHOD(ExportSelection)(IShapefile** retval);
 	STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefile** retval);
 	STDMETHOD(Merge)(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VARIANT_BOOL SelectedOnly, IShapefile** retval);
-
 	STDMETHOD(get_SelectionColor)(OLE_COLOR* retval);
 	STDMETHOD(put_SelectionColor)(OLE_COLOR newVal);
 	STDMETHOD(get_SelectionAppearance)(tkSelectionAppearance* retval);
 	STDMETHOD(put_SelectionAppearance)(tkSelectionAppearance newVal);
 	STDMETHOD(get_CollisionMode)(tkCollisionMode* retval);
 	STDMETHOD(put_CollisionMode)(tkCollisionMode newVal);
-
 	STDMETHOD(get_SelectionTransparency)(BYTE* retval);
 	STDMETHOD(put_SelectionTransparency)(BYTE newVal);
-
-	STDMETHOD(put_StopExecution)(IStopExecution* stopper)
-	{
-		Utility::put_ComReference((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
-		return S_OK;
-	}
-
+	STDMETHOD(put_StopExecution)(IStopExecution* stopper);
 	STDMETHOD(Serialize)(VARIANT_BOOL SaveSelection, BSTR* retVal);
 	STDMETHOD(Deserialize)(VARIANT_BOOL LoadSelection, BSTR newVal);
-
 	STDMETHOD(get_GeoProjection)(IGeoProjection** retVal);
 	STDMETHOD(put_GeoProjection)(IGeoProjection* pVal);
 	STDMETHOD(Reproject)(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal);
@@ -366,47 +354,169 @@ public:
 	STDMETHOD(get_HotTracking)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_HotTracking)(VARIANT_BOOL newVal);
 	STDMETHOD(HasInvalidShapes)(VARIANT_BOOL* result);
-	
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);
-
 	STDMETHOD(GetClosestVertex)(double x, double y, double maxDistance, long* shapeIndex, long* pointIndex, double* distance, VARIANT_BOOL* retVal);
-	
 	STDMETHOD(get_ShapeCategory2)(long ShapeIndex, BSTR* categoryName);
 	STDMETHOD(put_ShapeCategory2)(long ShapeIndex, BSTR categoryName);
 	STDMETHOD(get_ShapeCategory3)(long ShapeIndex, IShapefileCategory** category);
 	STDMETHOD(put_ShapeCategory3)(long ShapeIndex, IShapefileCategory* category);
-
 	STDMETHOD(Dump)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
-
 	STDMETHOD(LoadDataFrom)(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval);
-
-	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
-
-	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
+	STDMETHOD(Segmentize)(IShapefile** retVal);
+	STDMETHOD(get_LastInputValidation)(IShapeValidationInfo** retVal);
+	STDMETHOD(get_LastOutputValidation)(IShapeValidationInfo** retVal);
+	STDMETHOD(ClearCachedGeometries)();
+	STDMETHOD(AggregateShapesWithStats)(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* statOperations, IShapefile** retval);
+	STDMETHOD(DissolveWithStats)(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* statOperations, IShapefile** sf);
 	
-	void CShapefile::CopyFields(IShapefile* target);
-	//OGRSpatialReference* CShapefile::get_OGRSpatialReference();
-	void CShapefile::UpdateLabelsPositioning();
-
-	bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack);
-
-	// Returns underlying shapefile if any
-	FILE* CShapefile::get_File()
-	{
-		return _shpfile;
-	}
-
-	void CShapefile::AddPolygonsToClipper(ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly);
+	
 private:
-	void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
-	void CShapefile::ApplyRandomDrawingOptions();
+	// data for point in shapefile test
+	struct ShapeHeader 
+	{
+		double MinX, MinY;
+		double MaxX, MaxY;
+		int NumParts;
+		int NumPoints;
+	};
+	struct PolygonShapefile
+	{
+		ShapeHeader shpHeader;
+		std::vector<Point2D> Points;
+		std::vector<int> Parts;
+	};
+	std::vector<PolygonShapefile> m_PolySF;
+	
+	// -------------------------------------------------------------
+	//	private members
+	// -------------------------------------------------------------
+	tkShapefileSourceType m_sourceType;		// is it disk-based or in-memory?
+	ShpfileType _shpfiletype;
+	BSTR key;
+	long lastErrorCode;
+	
+	//Extent Information
+	double _minX;
+	double _minY;
+	double _minZ;
+	double _maxX;
+	double _maxY;
+	double _maxZ;
+	double _minM;
+	double _maxM;
 
-	// GEOPROCESSING
+	//Disk access
+	FILE * _shpfile;
+	FILE * _shxfile;
+
+	CStringW _shpfileName;
+	CStringW _shxfileName;
+	CStringW _dbffileName;
+	CStringW _prjfileName;
+	
+	std::vector<ShapeData*> _shapeData;
+	std::vector<long> shpOffsets;		//(32 bit words)
+
+	// table is initialized in CreateNew or Open methods
+	// it is is destroyed in Close() method
+	// in case table is null, shapefile will be considered uninitialized
+	ITable * dbf;
+	IGeoProjection* m_geoProjection;
+	IStopExecution* _stopExecution;
+	ICharts* m_charts;
+	ILabels* m_labels;
+	IShapefileCategories* m_categories;
+	ICallback * globalCallback;
+	IShapeDrawingOptions* m_selectDrawOpt;	
+	IShapeDrawingOptions* m_defaultDrawOpt;
+	IShapeValidationInfo* _inputValidation;
+	IShapeValidationInfo* _outputValidation;
+	
+	VARIANT_BOOL m_hotTracking;
+	bool _geosGeometriesRead;
+	tkCollisionMode _collisionMode;		// collision modre for point shapefiles
+	tkGeometryEngine _geometryEngine;		// GEOS or Clipper
+	bool m_writing;		// is currently writing to the file
+	bool m_reading;		// is currently reading data into memory
+	
+	BSTR _expression;		// visibility expression
+	BOOL _isEditingShapes;		//Flag for Disk vs. Memory
+	long _nextShapeHandle;		// the next unique handle to assign
+	
+	// When this flag is on CShapeWrapper will be used in the Shape class to stre the points
+	// otherwise usual COM points
+	BOOL _fastMode;
+	int _minDrawingSize;	// objects which are less than this value in pixels for current scale, will drawn as point
+	BOOL cacheExtents;	// extents won't be recalculated in each get_Extents call
+
+	//Flags for Spatial Indexing
+	BOOL useSpatialIndex;
+	BOOL hasSpatialIndex;
+	IndexSearching::CSpatialIndexID spatialIndexID;
+	BOOL spatialIndexLoaded;	
+	DOUBLE spatialIndexMaxAreaPercent;
+	int spatialIndexNodeCapacity;
+	
+	// drawing options
+	tkSelectionAppearance _selectionAppearance;
+	OLE_COLOR _selectionColor;
+	unsigned char _selectionTransparency;
+
+	//Neio (07/21/2009) shapes are stored in QTree (EDIT MODE)
+	QTree* m_qtree;
+	BOOL useQTree;
+	vector<int> deleteElement;
+	
+	// during geoprocessing operations only
+	QTree* _tempTree;
+	
+	bool _useValidationList;
+	//std::vector<ShapeValidationRecord*> _validationList;
+
+	// -------------------------------------------------------------
+	//	private functions
+	// -------------------------------------------------------------
+	BOOL ReleaseMemoryShapes();
+	BOOL verifyMemShapes(ICallback * cBack);
+	long FindNewShapeID(long FieldIndex);
+
+	//Read Write Functions
+	BOOL readShx();
+	BOOL writeShx(FILE * _shxfile, ICallback * cBack);
+	BOOL writeShp(FILE * shpfile, ICallback * cBack);	
+
+	// selection Functions
+	//BOOL defineShapeBounds(long ShapeIndex, ShpfileType & ShapeType, double &s_minX, double &s_minY, double &s_maxX, double &s_maxY );	
+	BOOL defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts );
+	BOOL pointInPolygon( long ShapeIndex, double x, double y );
+	
+	//Neio 2009 07 22
+	void GenerateQTree();
+	void TrimMemShapes();
+	
+	bool UniqueFieldNames(IShapefile* sf);
+	
+	QTree* GenerateQTreeCore(bool SelectedOnly);
+	bool GenerateTempQTree(bool SelectedOnly);
+	void ClearTempQTree();
+	QTree* GetTempQtree();
+	VARIANT_BOOL SelectShapesAlt(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr);
+	void put_ReferenceToLabels(bool bNullReference = false);
+	void put_ReferenceToCategories(bool bNullReference = false);
+	void put_ReferenceToCharts(bool bNullReference = false);
+	int get_OuterRingIndex(int ShapeIndex, int PartIndex);
+
+	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
+	void ApplyRandomDrawingOptions();
+
+	// -------------------------------------------------
+	// Geoprocessing
+	// -------------------------------------------------
 	#pragma region Geoprocessing
-	void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile* sf);
-	void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IShapefile* sf);
+	void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations, IShapefile* sf);
+	void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations, IShapefile* sf);
+
 	
 	void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, 
 									 VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval, 
@@ -433,196 +543,20 @@ private:
 	void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile* sfResult);
 	void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile* sfResult);
 	
+	// dissolve
+	void AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* statOperations, IShapefile** retval);
+	void DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* statOperations, IShapefile** sf);
+	void CShapefile::CalculateFieldStats(map<int, vector<int>*>& indicesMap, IFieldStatOperations* operations, IShapefile* output);
+
 	// utilities
 	void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, 
 									IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,
 									IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
-	#pragma endregion
-
-	void CShapefile::CopyFields(IShapefile* source, IShapefile* target);
-	
-	void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShapefile* sfResult, map<long, long>& fieldMap, bool mergeFields = false);
-	bool CShapefile::FieldsAreEqual(IField* field1, IField* field2);
-
-	bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace);
-	
-	void CShapefile::CloneNoFields(IShapefile** retVal);
-	void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType);
-
-	#pragma region Member variables
-	VARIANT_BOOL m_hotTracking;
-	
-	bool m_geosGeometriesRead;
-
-	IGeoProjection* m_geoProjection;
-	
-	IStopExecution* _stopExecution;
-
-	// collision modre for point shapefiles
-	tkCollisionMode _collisionMode;
-	
-	// GEOS or Clipper
-	tkGeometryEngine _geometryEngine;
-
-	// table is initialized in CreateNew or Open methods
-	// it is is destroyed in Close() method
-	// in case table is null, shapefile will be considered uninitialized
-	ITable * dbf;
-	
-	// flag showing that shapefile is currently writing to the file
-	bool m_writing;
-
-	// flag showing that shapefile is currently reading into memory
-	bool m_reading;
-	
-	// is it disk-based or in-memory?
-	tkShapefileSourceType m_sourceType;
-	
-	// visibility expression
-	BSTR _expression;
-	
-	//Flag for Disk vs. Memory
-	BOOL _isEditingShapes;
-	
-	// When this flag is on CShapeWrapper will be used in the Shape class to stre the points
-	// otherwise usual COM points
-	BOOL _fastMode;
-	
-	// objects which are less than this value in pixels for current scale, will drawn as point
-	int _minDrawingSize;
-
-	//Flags for Spatial Indexing
-	BOOL useSpatialIndex;
-	BOOL hasSpatialIndex;
-	IndexSearching::CSpatialIndexID spatialIndexID;
-	BOOL spatialIndexLoaded;	
-	DOUBLE spatialIndexMaxAreaPercent;
-	int spatialIndexNodeCapacity;
-	
-	// drawing options
-	IShapeDrawingOptions* m_selectDrawOpt;	
-	IShapeDrawingOptions* m_defaultDrawOpt;
-	tkSelectionAppearance _selectionAppearance;
-	OLE_COLOR _selectionColor;
-	unsigned char _selectionTransparency;
-
-	// charts
-	ICharts* m_charts;
-
-	// extents won't be recalculated in each get_Extents call
-	BOOL cacheExtents;
-
-	//Neio (07/21/2009) shapes are stored in QTree (EDIT MODE)
-	QTree* m_qtree;
-	BOOL useQTree;
-	vector<int> deleteElement;
-
-	//Disk access
-	FILE * _shpfile;
-	FILE * _shxfile;
-
-	//
-	ShpfileType _shpfiletype;
-	//long _numShapes;
-	long _nextShapeHandle;		// the next unique handle to assign
-	
-	// data for point in shapefile test
-	struct ShapeHeader 
-	{
-		double MinX, MinY;
-		double MaxX, MaxY;
-		int NumParts;
-		int NumPoints;
-	};
-	struct PolygonShapefile
-	{
-		ShapeHeader shpHeader;
-		std::vector<Point2D> Points;
-		std::vector<int> Parts;
-	};
-	std::vector<PolygonShapefile> m_PolySF;
-
-	//Extent Information
-	double _minX;
-	double _minY;
-	double _minZ;
-	double _maxX;
-	double _maxY;
-	double _maxZ;
-	double _minM;
-	double _maxM;
-
-	BSTR key;
-	long lastErrorCode;
-	ICallback * globalCallback;
-	
-	std::vector<ShapeData*> _shapeData;
-	std::vector<long> shpOffsets;		//(32 bit words)
-	
-	//Trio of Filenames
-	CStringW _shpfileName;
-	CStringW _shxfileName;
-	CStringW _dbffileName;
-	CStringW _prjfileName;
-	
-	ILabels* m_labels;
-	//CString m_projection;	// projection string
-	
-	IShapefileCategories* m_categories;
-
-	// -------------------------------------------------------------
-	//	private functions
-	// -------------------------------------------------------------
-	BOOL ReleaseMemoryShapes();
-	BOOL verifyMemShapes(ICallback * cBack);
-	long FindNewShapeID(long FieldIndex);
-
-	//Read Write Functions
-	BOOL readShx();
-	BOOL writeShx(FILE * _shxfile, ICallback * cBack);
-	BOOL writeShp(FILE * shpfile, ICallback * cBack);	
-
-	// selection Functions
-	//BOOL defineShapeBounds(long ShapeIndex, ShpfileType & ShapeType, double &s_minX, double &s_minY, double &s_maxX, double &s_maxY );	
-	BOOL defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts );
-	BOOL pointInPolygon( long ShapeIndex, double x, double y );
-	
-	//Neio 2009 07 22
-	void GenerateQTree();
-	void TrimMemShapes();
-	
-	bool UniqueFieldNames(IShapefile* sf);
-	
-	QTree* GenerateLocalQTree(IShapefile* sf, bool SelectedOnly);
-	VARIANT_BOOL SelectShapesAlt(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr);
-	//void CShapefile::get_LabelPosition(IShape* shp, tkLabelPositioning method, double& x, double& y, double& rotation);
-	void put_ReferenceToLabels(bool bNullReference = false);
-	void put_ReferenceToCategories(bool bNullReference = false);
-	void put_ReferenceToCharts(bool bNullReference = false);
-	int get_OuterRingIndex(int ShapeIndex, int PartIndex);
-
-
-
-#pragma endregion
 
 public:
-	// -----------------------------------------------------------------
+	// -------------------------------------------------------------
 	//	public functions
-	// -----------------------------------------------------------------
-	void ErrorMessage(long ErrorCode);
-	void ErrorMessage(long ErrorCode, ICallback* cBack);
-	int get_ShapeCategory(int ShapeIndex);
-	
-	void SetChartsPositions(tkLabelPositioning Method);
-	bool ReadChartFields(std::vector<double*>* values);
-	bool ReadChartField(std::vector<double>* values, int FieldIndex);
-	void ClearChartFrames();
-	void CShapefile::ReadGeosGeometries();
-	bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
-	bool CShapefile::get_CanUseSpatialIndexCore(Extent& extents);
-	HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType, bool applyRandomOptions, VARIANT_BOOL *retval);
-
-	// fast access
+	// -------------------------------------------------------------
 	std::vector<ShapeData*>* get_ShapeVector()
 	{
 		return &_shapeData;
@@ -635,6 +569,45 @@ public:
 	{
 		return (_shapeData[ShapeIndex])->fastData;
 	}
+	void SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
+	{
+		Utility::put_ComReference(info, 
+			(IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
+	}
+	
+	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
+
+	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
+
+	void CShapefile::CopyFields(IShapefile* target);
+	void CShapefile::UpdateLabelsPositioning();
+	bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack);
+	FILE* CShapefile::get_File(){ return _shpfile;}
+	void CShapefile::AddPolygonsToClipper(ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly);
+	
+	void CShapefile::CopyFields(IShapefile* source, IShapefile* target);
+	
+	void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShapefile* sfResult, map<long, long>& fieldMap, bool mergeFields = false);
+	bool CShapefile::FieldsAreEqual(IField* field1, IField* field2);
+
+	bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedCount, IShapefile** retVal, bool reprojectInPlace);
+	
+	void CShapefile::CloneNoFields(IShapefile** retVal, bool addShapeId = false);
+	void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
+	
+	void ErrorMessage(long ErrorCode);
+	void ErrorMessage(long ErrorCode, ICallback* cBack);
+	int get_ShapeCategory(int ShapeIndex);
+	
+	void SetChartsPositions(tkLabelPositioning Method);
+	bool ReadChartFields(std::vector<double*>* values);
+	bool ReadChartField(std::vector<double>* values, int FieldIndex);
+	void ClearChartFrames();
+	void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly);
+	bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
+	bool CShapefile::get_CanUseSpatialIndexCore(Extent& extents);
+	HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType, bool applyRandomOptions, VARIANT_BOOL *retval);
 	bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result);
 	bool CShapefile::QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, double* xMax, double* yMax);
 	bool PolygonIntersection(std::vector<double>& xPts, std::vector<double>& yPts, std::vector<long>& parts,
@@ -642,7 +615,18 @@ public:
 	bool PolylineIntersection(std::vector<double>& xPts, std::vector<double>& yPts, std::vector<long>& parts,
 						  double& b_minX, double& b_maxX, double& b_minY, double& b_maxY, double& Tolerance);
 
-
-	STDMETHOD(Segmentize)(IShapefile** retVal);
+	void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex);
+	
+	// validation
+	void CShapefile::CreateValidationList(bool selectedOnly);
+	void CShapefile::ClearValidationList();
+	HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal);
+	void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status, IShape* shape = NULL);
+	CShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, CString parameterName, VARIANT_BOOL selectedOnly, CString className = "Shapefile");
+	CShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
+	bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
+	bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
+	GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex);
+	void CShapefile::CloneCore(IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

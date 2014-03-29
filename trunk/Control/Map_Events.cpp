@@ -813,13 +813,6 @@ void CMapView::OnMButtonUp(UINT nFlags, CPoint point)
 	extents.top = zy + halfyRange;
 
 	this->SetExtentsCore(extents);
-
-	/*m_canbitblt = FALSE;
-	if( !m_lockCount )
-		this->InvalidateControl();
-
-	this->FireExtentsChanged();
-	this->ReloadImageBuffers();*/
 }
 
 void CMapView::ResizeBuffers(int cx, int cy)

@@ -77,6 +77,10 @@ const char * ErrorMsg( long ErrorCode );
 # define tkSHPFILE_WITH_INVALID_SHAPES 223
 # define tkCATEGORY_WASNT_FOUND 224
 # define tkRESULTINGSHPFILE_EMPTY 225 /* Added by Paul Meems. 23-10-2013 */
+# define tkABORTED_ON_INPUT_VALIDATION 226
+# define tkABORTED_ON_OUTPUT_VALIDATION 227
+# define tkSHAPEFILE_IS_EMPTY 228
+# define tkFAILED_TO_BUILD_SPATIAL_INDEX 229
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

@@ -1048,3 +1048,27 @@ STDMETHODIMP CGeoProjection::get_IsFrozen(VARIANT_BOOL* retVal)
 	*retVal = m_isFrozen ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
+
+// ************************************************************
+//		TryAutoDetectEpsg
+// ************************************************************
+STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*epsgCode = -1;
+	if (!m_isFrozen) {
+		m_projection->AutoIdentifyEPSG();	// it changes the underluing object
+	}
+	if (m_projection->IsGeographic())
+	{
+		*epsgCode = m_projection->GetEPSGGeogCS();
+	}
+	else
+	{
+		const char *pszAuthName = m_projection->GetAuthorityName( "PROJCS" );
+		if( pszAuthName != NULL && _strnicmp(pszAuthName, "epsg", 4))
+		    *epsgCode = atoi(m_projection->GetAuthorityCode( "PROJCS" ));
+	}
+	*retVal = *epsgCode != -1 ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}

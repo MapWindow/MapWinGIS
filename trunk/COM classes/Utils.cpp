@@ -404,6 +404,9 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 	return S_OK;
 }
 
+// ************************************************************
+//		RemoveColinearPoints
+// ************************************************************
 STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTolerance, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -412,7 +415,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	{
 		*retval = NULL;
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_OK;
+		return S_FALSE;
 	}
 
 	ShpfileType shptype;
@@ -434,6 +437,9 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		return S_OK;
 	}
 
+	if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
+		return S_FALSE;
+
 	VARIANT_BOOL vbretval;
 	Shapes->StartEditingShapes(FALSE,cBack,&vbretval);
 	long numShapes;
@@ -452,7 +458,8 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		for( int currentShape = 0; currentShape < numShapes; currentShape++ )
 		{	
 			IShape * shape = NULL;
-			Shapes->get_Shape(currentShape,&shape);
+			((CShapefile*)Shapes)->GetValidatedShape(currentShape,&shape);
+			if (!shape) continue;
 
 			long numPoints = 0, forward_index = 0, backward_index = 0;
 			shape->get_NumPoints(&numPoints);
@@ -577,8 +584,14 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		}		
 	}	
 
-	Shapes->StopEditingShapes(TRUE,FALSE,cBack,&vbretval);
-
+	// ---------------------------------------------------
+	//	 Validating output
+	// ---------------------------------------------------
+	Utility::DisplayProgressCompleted(globalCallback, key);
+	((CShapefile*)Shapes)->ClearValidationList();
+	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
+	if (Shapes)
+		Shapes->StopEditingShapes(TRUE,FALSE,cBack,&vbretval);
 	return S_OK;
 }
 
@@ -1497,6 +1510,11 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		}
 	}
 
+	if (*retval)
+	{
+		((CShapefile*)(*retval))->ValidateOutput(retval, "GridToShapefile", "Utils");
+	}
+
 	return S_OK;
 }
 
@@ -1530,6 +1548,9 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 
 # endif
 
+// ***************************************************
+//    GridToShapefile()
+// ***************************************************
 STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallback *cBack, IShapefile **retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -2107,6 +2128,11 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
 	
+	if (*retval)
+	{
+		((CShapefile*)(*retval))->ValidateOutput(retval, "GridToShapefile", "Utils");
+	}
+
 	return S_OK;
 }
 
@@ -2812,14 +2838,11 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		return S_OK;
 	}
 	
+	if (!((CShapefile*)Shpfile)->ValidateInput(Shpfile, "ShapefileToGrid", "Shpfile", VARIANT_FALSE, "Utils"))
+		return S_FALSE;
+
 	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
-	if ((*retval) == NULL)
-	{
-		this->ErrorMessage(tkCANT_COCREATE_COM_INSTANCE);
-		return S_OK;
-	}
-	
 	VARIANT_BOOL result = VARIANT_FALSE;
 	VARIANT vndv; //no data value
 	VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
@@ -2834,8 +2857,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			(*retval)->Release();
 			*retval = NULL;
 			this->ErrorMessage(tkINVALID_PARAMETER_VALUE);
-			VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-			return S_OK;
+			goto cleaning;		
 		}
 		
 
@@ -2850,8 +2872,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			(*retval)->Release();
 			*retval = NULL;
 			this->ErrorMessage(tkINVALID_PARAMETER_VALUE);
-			VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-			return S_OK;
+			goto cleaning;
 		}
 
 		(*retval)->CreateNew(A2BSTR(""),GridHeader,ShortDataType ,vndv,VARIANT_TRUE,UseExtension,globalCallback,&result);
@@ -2863,8 +2884,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			*retval = NULL;
 			if( globalCallback != NULL )
 				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-			VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-			return S_OK;
+			goto cleaning;
 		}
 
 		long NumShapes;
@@ -2883,7 +2903,8 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			else
 				cellValue = CurShape;
 
-			Shpfile->get_Shape(CurShape,&shape);
+			((CShapefile*)Shpfile)->GetValidatedShape(CurShape,&shape);
+			if (!shape) continue;
 			if ( PolygonToGrid(shape,retval,cellValue) == false)
 				break;
 			shape->Release();
@@ -2925,7 +2946,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		if( Cellsize <= 1 )
 		{	*retval = NULL;
 			this->ErrorMessage(	tkINVALID_PARAMETER_VALUE);
-			return S_OK;
+			goto cleaning;
 		}
 
 		long ncols = ROUND( ( xurcenter - xllcenter ) / Cellsize ) + 1;
@@ -2973,15 +2994,18 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			else
 				cellValue = CurShape;
 
-			Shpfile->get_Shape(CurShape,&shape);
+			((CShapefile*)Shpfile)->GetValidatedShape(CurShape,&shape);
+			if (!shape) continue;
 			if ( PolygonToGrid(shape,retval,cellValue) == false)
 				break;
 			shape->Release();
 		}
-
 	}
 
+cleaning:
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+	Utility::DisplayProgressCompleted(globalCallback, key);
+	((CShapefile*)Shpfile)->ClearValidationList();
 	return S_OK;
 }
 
@@ -3362,6 +3386,10 @@ STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICa
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	(*sf) = GeometryConverter::Read_OGR_Layer(Filename, shpType);
+	if (*sf)
+	{
+		((CShapefile*)(*sf))->ValidateOutput(sf, "OGRLayerToShapefile", "Utils");
+	}
 	return S_OK;
 }
 
@@ -3653,11 +3681,15 @@ Cleaning:
 STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, IGeoProjection* target, IShapefile** result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	// ------------------------------------------------
+	//	Validation
+	// ------------------------------------------------
 	if (!sf || !source || !target)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		*result = NULL;
-		return S_OK;
+		return S_FALSE;
 	}
 
 	OGRSpatialReference* ref1 = ((CGeoProjection*)source)->get_SpatialReference();
@@ -3671,10 +3703,17 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		return S_FALSE;
 	}
 
-	// creating a copy of the shapefile
+	if(!((CShapefile*)sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
+		return S_FALSE;
+
+	// ------------------------------------------------
+	//	Creating output
+	// ------------------------------------------------
 	sf->Clone(result);
 
-	// do reprojection
+	// ------------------------------------------------
+	//	Processing
+	// ------------------------------------------------
 	VARIANT_BOOL vbretval;
 	CComVariant var;
 	long numShapes, count = 0;
@@ -3685,15 +3724,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	
 	for (long i = 0; i < numShapes; i++)
 	{
-		if( globalCallback != NULL )
-		{
-			long newpercent = (long)(((double)(i + 1)/numShapes)*100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Projecting..."));
-			}
-		}
+		Utility::DisplayProgress(globalCallback, i, numShapes, "Reprojecting...", key, percent);
 		
 		IShape* shp = NULL;
 		sf->get_Shape(i, &shp);
@@ -3721,7 +3752,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 				}
 				else
 				{
-					// if there is at least one failed point, reprojection will be interupted
+					// if there is at least one failed point, reprojection will be interrupted
 					shpNew->Release();	
 					(*result)->Release();
 					(*result) = NULL;
@@ -3741,10 +3772,13 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 		}
 	}
 
-	if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
-	}
+	// --------------------------------------------------
+	//    Validating output
+	// --------------------------------------------------
+	Utility::DisplayProgressCompleted(globalCallback, key);
+	((CShapefile*)sf)->ClearValidationList();
+	((CShapefile*)sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
+	
 	return S_OK;
 }
 
@@ -4592,6 +4626,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idShapeNetwork:
 			CoCreateInstance( CLSID_ShapeNetwork, NULL, CLSCTX_INPROC_SERVER, IID_IShapeNetwork, (void**)&val );
+			break;
+		case tkInterface::idShapeValidationInfo:
+			CoCreateInstance( CLSID_ShapeValidationInfo, NULL, CLSCTX_INPROC_SERVER, IID_IShapeValidationInfo, (void**)&val );
 			break;
 		case tkInterface::idTable:
 			CoCreateInstance( CLSID_Table, NULL, CLSCTX_INPROC_SERVER, IID_ITable, (void**)&val );

@@ -95,4 +95,11 @@ enum ShapeValidityCheck
 	FirstAndLastPointOfPartMatch = 0,
 };
 
+enum ShapeValidationStatus
+{
+	Original = 0,
+	Fixed = 1,
+	Skip = 2,
+};
+
 # endif

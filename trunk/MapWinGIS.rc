@@ -12,25 +12,6 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-///////////////////////////////////////////////////////////////////////////////
-//// Russian resources
-//
-//#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-//#ifdef _WIN32
-//LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-//#pragma code_page(1251)
-//#endif //_WIN32
-//
-///////////////////////////////////////////////////////////////////////////////
-////
-//// REGISTRY
-////
-//
-//
-//#endif    // Russian resources
-///////////////////////////////////////////////////////////////////////////////
-
-
 /////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
@@ -80,6 +61,8 @@ IDR_GLOBALSETTINGS      REGISTRY                "COM Classes/GlobalSettings.rgs"
 IDR_TILES               REGISTRY                "COM Classes/Tiles.rgs"
 IDR_TILEPROVIDERS       REGISTRY                "COM Classes/TileProviders.rgs"
 IDR_MEASURING           REGISTRY                "COM Classes/Measuring.rgs"
+IDR_SHAPEVALIDATIONINFO REGISTRY                "COM Classes/ShapeValidationInfo.rgs"
+IDR_FIELDSTATOPERATIONS REGISTRY                "COM Classes/FieldStatOperations.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

@@ -1068,7 +1068,7 @@ BOOL CShapefile::writeShx(FILE * shx, ICallback * cBack)
 
 	shpOffsets.clear();
 	int size  = (int)_shapeData.size();
-	for( int i = 0; i < size; i++) //_numShapes; i++ )
+	for( int i = 0; i < size; i++)
 	{
 		// convert to (32 bit words)
 		shpOffsets.push_back(offset);
@@ -1096,26 +1096,13 @@ BOOL CShapefile::writeShx(FILE * shx, ICallback * cBack)
 
 		shape->Release();
 
-		newpercent = (long)(((i+1.0)/size) * 100); //_numShapes)*100);
-		if( newpercent > percent )
-		{
-			percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Writing .shx file"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Writing .shx file"));
-		}
+		Utility::DisplayProgress(cBack, i, size, "Writing .shx file", key, percent);
+		Utility::DisplayProgress(globalCallback, i, size, "Writing .shx file", key, percent);
 	}
 
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key),100,A2BSTR("Complete"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR("Complete"));
-	}
-
+	Utility::DisplayProgressCompleted(cBack, key);
+	Utility::DisplayProgressCompleted(globalCallback, key);
+	
 	fflush(shx);
 
 	return TRUE;

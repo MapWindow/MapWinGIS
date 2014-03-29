@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="MapWinGIS"
 	ProjectGUID="{1AB93398-2DE6-4043-BF6D-D438A794FB86}"
 	RootNamespace="MapWinGIS"
@@ -1675,6 +1675,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\FieldStatOperations.rgs"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\GeoProjection.rgs"
 					>
 				</File>
@@ -1763,6 +1767,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\ShapeValidationInfo.rgs"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\TableClass.rgs"
 					>
 				</File>
@@ -1820,6 +1828,10 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\Field.h"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\FieldStatOperations.h"
 					>
 				</File>
 				<File
@@ -1911,6 +1923,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\ShapeValidationInfo.h"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\TableClass.h"
 					>
 				</File>
@@ -1964,6 +1980,10 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\Field.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\FieldStatOperations.cpp"
 					>
 				</File>
 				<File
@@ -2063,6 +2083,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\Shapefile_Validation.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\ShapefileCategories.cpp"
 					>
 				</File>
@@ -2080,6 +2104,10 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\ShapeNetwork.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\ShapeValidationInfo.cpp"
 					>
 				</File>
 				<File
@@ -3523,6 +3551,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Shapefile\ShapeValidator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Shapefile\ShapeValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Shapefile\ShapeWrapper.cpp"
 				>
 			</File>
@@ -3972,6 +4008,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\FieldStatOperations.rgs"
+			>
+		</File>
+		<File
 			RelativePath=".\Resource\Map.bmp"
 			>
 		</File>
@@ -4080,11 +4120,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

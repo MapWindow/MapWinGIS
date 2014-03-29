@@ -325,6 +325,103 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 #pragma region Operations
 
 // ***********************************************************
+//		RegisterNewShape()
+// ***********************************************************
+// Must be called after inserting or swapping shape in shape vector
+void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
+{
+	// shape must have corrct underlying data structure
+	// shapes not bound to shapefile all use CShapeWrapperCOM underlying class
+	// and if fast mode is set to true, CShapeWrapper class is expected
+	if ((this->_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
+	{
+		((CShape*)Shape)->put_fastMode(this->_fastMode?true:false);
+	}
+
+	VARIANT_BOOL bSynchronized;
+	m_labels->get_Synchronized(&bSynchronized);
+
+	// updating labels
+	if (dbf) 
+	{
+		double x = 0.0, y = 0.0, rotation = 0.0;
+		VARIANT_BOOL vbretval;
+
+		bool chartsExist = ((CCharts*)m_charts)->_chartsExist;
+		if (bSynchronized || chartsExist)
+		{
+			// position
+			tkLabelPositioning positioning;
+			m_labels->get_Positioning(&positioning);
+
+			tkLineLabelOrientation orientation;
+			m_labels->get_LineOrientation(&orientation);
+			
+			((CShape*)Shape)->get_LabelPosition(positioning, x, y, rotation, orientation);
+		}
+		
+		if (bSynchronized)
+		{
+			// it doesn't make sense to recalculate expression as dbf cells are empty all the same
+			CString text;
+			m_labels->InsertLabel(ShapeIndex, A2BSTR(text), x, y, rotation, -1, &vbretval);
+		}
+
+		if (chartsExist)
+		{
+			if (!_shapeData[ShapeIndex]->chart)
+			{
+				_shapeData[ShapeIndex]->chart = new CChartInfo();
+				_shapeData[ShapeIndex]->chart->x = x;
+				_shapeData[ShapeIndex]->chart->y = y;
+			}
+		}
+	}
+	
+	// extending the bounds of the shapefile we don't care if the bounds became less
+	// it's necessary to call RefreshExtents in this case, for zoom to layer working right
+	IExtents * box;
+	Shape->get_Extents(&box);
+	double xm,ym,zm,xM,yM,zM;
+	box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
+	box->Release();
+
+	if (_shapeData.size() == 1)
+	{
+		_minX = xm;
+		_maxX = xM;
+		_minY = ym;
+		_maxY = yM;
+		_minZ = zm;
+		_maxZ = zM;
+	}
+	else
+	{
+		
+		if (xm < _minX) _minX = xm;
+		if (xM > _maxX) _maxX = xM;
+		if (ym < _minY) _minY = ym;
+		if (yM > _maxY) _maxY = yM;
+		if (zm < _minZ) _minZ = zm;
+		if (zM > _maxZ) _maxZ = zM;
+	}
+
+	// Neio 07/23/2009 - add qtree
+	if(useQTree)
+	{
+		QTreeNode node;
+		
+		//node.index = memShapes.size() - 1;
+		node.index = ShapeIndex;
+		node.Extent.left = xm;
+		node.Extent.right = xM;
+		node.Extent.top = yM;
+		node.Extent.bottom = ym;
+		m_qtree->AddNode(node);
+	}
+}
+
+// ***********************************************************
 //		EditInsertShape()
 // ***********************************************************
 STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIANT_BOOL *retval)
@@ -332,6 +429,11 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 	
+	if(_useValidationList)
+	{
+		Debug::WriteLine("Error: shape inserted when validation list in action");
+	}
+
  	if( dbf == NULL || m_sourceType == sstUninitialized )
 	{	
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -386,100 +488,15 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 					}			
 					else
 					{	
-						VARIANT_BOOL bSynchronized;
-						m_labels->get_Synchronized(&bSynchronized);
+						
 
 						ShapeData* data = new ShapeData();
 						Shape->AddRef();
 						data->shape = Shape;
 						_shapeData.insert(_shapeData.begin() + *ShapeIndex, data);
-
-						// shape must have corrct underlying data structure
-						// shapes not bound to shapefile all use CShapeWrapperCOM underlying class
-						// and if fast mode is set to true, CShapeWrapper class is expected
-						if ((this->_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
-						{
-							((CShape*)Shape)->put_fastMode(this->_fastMode?true:false);
-						}
-
-						// updating labels
-						if (dbf) 
-						{
-							double x = 0.0, y = 0.0, rotation = 0.0;
-							VARIANT_BOOL vbretval;
-
-							bool chartsExist = ((CCharts*)m_charts)->_chartsExist;
-							if (bSynchronized || chartsExist)
-							{
-								// position
-								tkLabelPositioning positioning;
-								m_labels->get_Positioning(&positioning);
-
-								tkLineLabelOrientation orientation;
-								m_labels->get_LineOrientation(&orientation);
-								
-								((CShape*)Shape)->get_LabelPosition(positioning, x, y, rotation, orientation);
-							}
-							
-							if (bSynchronized)
-							{
-								// it doesn't make sense to recalculate expression as dbf cells are empty all the same
-								CString text;
-								m_labels->InsertLabel(*ShapeIndex, A2BSTR(text), x, y, rotation, -1, &vbretval);
-							}
-
-							if (chartsExist)
-							{
-								if (!_shapeData[*ShapeIndex]->chart)
-								{
-									_shapeData[*ShapeIndex]->chart = new CChartInfo();
-									_shapeData[*ShapeIndex]->chart->x = x;
-									_shapeData[*ShapeIndex]->chart->y = y;
-								}
-							}
-						}
 						
-						// extending the bounds of the shapefile we don't care if the bounds became less
-						// it's necessarry to call RefreshExtents in this case, for zoom to layer working right
-						IExtents * box;
-						Shape->get_Extents(&box);
-						double xm,ym,zm,xM,yM,zM;
-						box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-						box->Release();
-
-						if (_shapeData.size() == 1)
-						{
-							_minX = xm;
-							_maxX = xM;
-							_minY = ym;
-							_maxY = yM;
-							_minZ = zm;
-							_maxZ = zM;
-						}
-						else
-						{
-							
-							if (xm < _minX) _minX = xm;
-							if (xM > _maxX) _maxX = xM;
-							if (ym < _minY) _minY = ym;
-							if (yM > _maxY) _maxY = yM;
-							if (zm < _minZ) _minZ = zm;
-							if (zM > _maxZ) _maxZ = zM;
-						}
-
-						// Neio 07/23/2009 - add qtree
-						if(useQTree)
-						{
-							QTreeNode node;
-							
-							//node.index = memShapes.size() - 1;
-							node.index = *ShapeIndex;
-							node.Extent.left = xm;
-							node.Extent.right = xM;
-							node.Extent.top = yM;
-							node.Extent.bottom = ym;
-							m_qtree->AddNode(node);
-						}
+						RegisterNewShape(Shape, *ShapeIndex);
+						
 						*retval = VARIANT_TRUE;
 					}
 					
@@ -499,6 +516,11 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
+
+	if(_useValidationList)
+	{
+		Debug::WriteLine("Error: EditDelete called when validation list in action");
+	}
 
 	if( dbf == NULL || m_sourceType == sstUninitialized )
 	{	
@@ -555,6 +577,11 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
+
+	if(_useValidationList)
+	{
+		Debug::WriteLine("Error: EditClear called when validation list in action");
+	}
 
 	if (dbf == NULL || m_sourceType == sstUninitialized)
 	{
@@ -737,7 +764,6 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 		globalCallback->AddRef();
 	}
 
-	//for( int i = 0; i < (int)memShapes.size(); i++ )
 	for( int i = 0; i < (int)_shapeData.size(); i++ )
 	{						
 		IShape* shp = _shapeData[i]->shape;
@@ -747,7 +773,6 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 		shp->get_ShapeType(&shapetype);
 		shp->get_NumPoints(&numPoints);
 		shp->get_NumParts(&numParts);
-
 
 		if( shapetype != SHP_NULLSHAPE && shapetype != _shpfiletype )
 		{	
@@ -864,3 +889,4 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 	return TRUE;
 }
 #pragma endregion
+

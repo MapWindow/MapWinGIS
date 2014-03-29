@@ -105,6 +105,12 @@ public:
 	STDMETHOD(put_RandomColorSchemeForGrids)( VARIANT_BOOL newVal);
 	STDMETHOD(get_DefaultColorSchemeForGrids)( PredefinedColorScheme *retVal);
 	STDMETHOD(put_DefaultColorSchemeForGrids)( PredefinedColorScheme newVal);
+	STDMETHOD(get_ShapeOutputValidationMode)( tkShapeValidationMode *retVal);
+	STDMETHOD(put_ShapeOutputValidationMode)( tkShapeValidationMode newVal);
+	STDMETHOD(get_ShapeInputValidationMode)( tkShapeValidationMode *retVal);
+	STDMETHOD(put_ShapeInputValidationMode)( tkShapeValidationMode newVal);
+	STDMETHOD(get_GeometryEngine)( tkGeometryEngine *retVal);
+	STDMETHOD(put_GeometryEngine)( tkGeometryEngine newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

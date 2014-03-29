@@ -49,6 +49,80 @@ interface ITiles;
 interface ITileProviders;
 interface IMeasuring;
 interface IImage;
+interface IShapeValidationInfo;
+interface IFieldStatOperations;
+
+/**************************  tkFieldOperationValidity Enumerations **********************/
+typedef		
+[
+	uuid(E689BC76-309F-453b-BE68-A838BFA79040),
+	helpstring("FieldOperationValidity"),
+]
+enum tkFieldOperationValidity
+{
+	fovValid = 0,
+	fovFieldNotFound = 1,
+	fovNotSupported = 2,
+} tkFieldOperationValidity;
+
+/**************************  tkFieldStatOperation Enumerations **********************/
+typedef		
+[
+	uuid(23C1D558-A645-4093-8782-102A6E3F4EC2),
+	helpstring("Field stat operation"),
+]
+enum tkFieldStatOperation
+{
+	fsoSum = 0,
+	fsoMin = 1,
+	fsoMax = 2,
+	fsoAvg = 3,
+	fsoWeightedAvg = 4,
+	fsoMode = 5,
+} tkFieldStatOperation;
+
+/**************************  tkShapeValidationType Enumerations **********************/
+typedef		
+[
+	uuid(F7EC0DD4-86AE-4af2-8603-821C1B3F714F),
+	helpstring("Shape validation type"),
+]
+enum tkShapeValidationType
+{
+   svtInput = 0,
+   svtOutput = 1,
+} tkShapeValidationType;
+
+/**************************  tkShapeValidationMode Enumerations **********************/
+typedef		
+[
+	uuid(E30A98AB-13AC-4702-9F56-304787CB04FA),
+	helpstring("Shape validation mode"),
+]
+enum tkShapeValidationMode
+{
+   NoValidation = 0,         
+   TryFixProceedOnFailure = 1,
+   TryFixSkipOnFailure = 2,   
+   TryFixAbortOnFailure = 3,  
+   AbortOnErrors = 4,
+} tkShapeValidationMode;	
+
+/**************************  tkShapeValidationStatus Enumerations **********************/
+typedef		
+[
+	uuid(A64DDE57-3F28-4f72-A4DE-4AAD0CCD34BF),
+	helpstring("Shape validation status"),
+]
+enum tkShapeValidationStatus
+{
+   WasntValidated = 0,
+   Valid = 1,
+   InvalidFixed = 2,
+   InvalidSkipped = 3,
+   InvalidReturned = 4,
+   OperationAborted = 5,
+} tkShapeValidationStatus;
 
 /**************************  tkScalebarUnits Enumerations **********************/
 typedef		
@@ -106,6 +180,7 @@ enum tkScalebarUnits
 		idTin = 31,
 		idUtils = 32,
 		idVector = 33,
+		idShapeValidationInfo = 34,
 	} tkInterface;	
 
 	typedef		
@@ -2691,63 +2766,54 @@ interface IShapefile : IDispatch{
 	[id(81), helpstring("method Clip")] HRESULT Clip([in]VARIANT_BOOL SelectedOnlySubject, [in]IShapefile* sfOverlay, [in]VARIANT_BOOL SelectedOnlyOverlay, [out, retval]IShapefile** retval);
 	[id(82), helpstring("method SymmDifference")] HRESULT SymmDifference([in]VARIANT_BOOL SelectedOnlySubject, [in]IShapefile* sfOverlay, [in]VARIANT_BOOL SelectedOnlyOverlay, [out, retval]IShapefile** retval);
 	[id(83), helpstring("method Union")] HRESULT Union([in]VARIANT_BOOL SelectedOnlySubject, [in]IShapefile* sfOverlay, [in]VARIANT_BOOL SelectedOnlyOverlay, [out, retval]IShapefile** retval);
-
 	[id(84), helpstring("method ExplodeShapes")] HRESULT ExplodeShapes([in]VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** retval);
 	[id(85), helpstring("method AggregateShapes")] HRESULT AggregateShapes([in]VARIANT_BOOL SelectedOnly, [in, optional, defaultvalue(-1)]LONG FieldIndex, [out, retval]IShapefile** retval);
 	[id(86), helpstring("method ExportSelection")] HRESULT ExportSelection([out, retval]IShapefile** retval);
 	[id(87), helpstring("method Sort")] HRESULT Sort([in]LONG FieldIndex, [in]VARIANT_BOOL Ascending, [out, retval]IShapefile** retval);
 	[id(88), helpstring("method Merge")] HRESULT Merge([in]VARIANT_BOOL SelectedOnlyThis, [in]IShapefile* sf, [in]VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** retval);
-	
-	//[in, optional, defaultvalue(TRUE)]
-
 	[propget, id(89), helpstring("property SelectionColor")] HRESULT SelectionColor([out, retval] OLE_COLOR* retval);
 	[propput, id(89), helpstring("property SelectionColor")] HRESULT SelectionColor([in] OLE_COLOR newVal);
 	[propget, id(90), helpstring("property SelectionAppearance")] HRESULT SelectionAppearance([out, retval] tkSelectionAppearance* retval);
 	[propput, id(90), helpstring("property SelectionAppearance")] HRESULT SelectionAppearance([in] tkSelectionAppearance newVal);
 	[propget, id(91), helpstring("property CollisionMode")] HRESULT CollisionMode([out, retval] tkCollisionMode* retval);
 	[propput, id(91), helpstring("property CollisionMode")] HRESULT CollisionMode([in] tkCollisionMode newVal);
-	
 	[propget, id(92), helpstring("property SelectionTransparency")] HRESULT SelectionTransparency([out, retval] BYTE* retval);
 	[propput, id(92), helpstring("property SelectionTransparency")] HRESULT SelectionTransparency([in] BYTE newVal);
-
 	[propput, id(93), helpstring("property StopExecution")] HRESULT StopExecution([in] IStopExecution* stopper);
-
 	[id(94), helpstring("property Serialize")] HRESULT Serialize([in]VARIANT_BOOL SaveSelection, [out, retval]BSTR* retVal);
 	[id(95), helpstring("property Deserialize")] HRESULT Deserialize([in]VARIANT_BOOL LoadSelection, [in]BSTR newVal);
-	
 	[propget, id(96), helpstring("property GeoProjection")] HRESULT GeoProjection([out, retval] IGeoProjection** retVal);
 	[propput, id(96), helpstring("property GeoProjection")] HRESULT GeoProjection([in] IGeoProjection* pVal);
 	[id(97), helpstring("method Reproject")] HRESULT Reproject([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out,retval] IShapefile** retVal);
 	[id(98), helpstring("method ReprojectInPlace")] HRESULT ReprojectInPlace([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out,retval] VARIANT_BOOL* retVal);
 	[id(99), helpstring("method SimplifyLines")] HRESULT SimplifyLines([in] DOUBLE Tolerance, [in]VARIANT_BOOL SelectedOnly, [out,retval] IShapefile** retVal);
 	[id(100), helpstring("method FixUpShapes")] HRESULT FixUpShapes([out]IShapefile** retVal, [out, retval]VARIANT_BOOL* fixed);
-
 	[id(101), helpstring("method EditAddShape")] HRESULT EditAddShape([in]IShape* shape, [out, retval]long* shapeIndex);
 	[id(102), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision,
 																	  [in]int width, [out, retval]long* fieldIndex);
-
-	/**** Out of order for compatibility reasons. ****/
-	[id(109), helpstring("method HasInvalidShapes")] HRESULT HasInvalidShapes([out, retval]VARIANT_BOOL* result);
-	/*************************************************/
-
 	[id(103), helpstring("method GetRelatedShapes")] HRESULT GetRelatedShapes([in] long referenceIndex, [in] tkSpatialRelation relation, [in,out] VARIANT* resultArray, [out,retval] VARIANT_BOOL* retval);
 	[id(104), helpstring("method GetRelatedShapes2")] HRESULT GetRelatedShapes2([in] IShape* referenceShape, [in] tkSpatialRelation relation, [in,out] VARIANT* resultArray, [out,retval] VARIANT_BOOL* retval);
-
 	[propget, id(105), helpstring("property HotTracking")] HRESULT HotTracking([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(105), helpstring("property HotTracking")] HRESULT HotTracking([in] VARIANT_BOOL newVal);
-
 	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out,retval] IShapefile** retVal);
 	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance, 
 		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
-
-	[propget, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [out, retval] BSTR* categoryName);
-	[propput, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2(long ShapeIndex, [in] BSTR categoryName);
-
-	[propget, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3(long ShapeIndex, [out, retval] IShapefileCategory** category);
-	[propput, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3(long ShapeIndex, [in] IShapefileCategory* category);
-
+	/**** Out of order for compatibility reasons. ****/
+	[id(109), helpstring("method HasInvalidShapes")] HRESULT HasInvalidShapes([out, retval]VARIANT_BOOL* result);
+	/*************************************************/
+	[propget, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2([in]long ShapeIndex, [out, retval] BSTR* categoryName);
+	[propput, id(110), helpstring("property ShapeCategory2")] HRESULT ShapeCategory2([in]long ShapeIndex, [in] BSTR categoryName);
+	[propget, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3([in]long ShapeIndex, [out, retval] IShapefileCategory** category);
+	[propput, id(111), helpstring("property ShapeCategory3")] HRESULT ShapeCategory3([in]long ShapeIndex, [in] IShapefileCategory* category);
 	[id(112), helpstring("method Dump")] HRESULT Dump([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(113), helpstring("method LoadDataFrom")] HRESULT LoadDataFrom([in] BSTR ShapefileName, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[propget, id(114), helpstring("property LastInputValidation")] HRESULT LastInputValidation([out, retval] IShapeValidationInfo** retVal);
+	[propget, id(115), helpstring("property LastOutputValidation")] HRESULT LastOutputValidation([out, retval] IShapeValidationInfo** retVal);
+	[id(116), helpstring("property ClearCachedGeometries")] HRESULT ClearCachedGeometries();
+	[id(117), helpstring("method AggregateShapesWithStats")] HRESULT AggregateShapesWithStats([in]VARIANT_BOOL SelectedOnly, 
+			[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
+	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, 
+			[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out,retval]IShapefile** sf);
 };
 
 /****************************  Shape Interface ***********************/
@@ -4245,6 +4311,7 @@ interface IGeoProjection : IDispatch{
 	[id(40), helpstring("method Clone")] HRESULT Clone([out, retval]IGeoProjection** retVal);
 	[id(41), helpstring("method SetWgs84")] HRESULT SetWgs84([out,retval]VARIANT_BOOL* retVal);
 	[propget, id(42), helpstring("property IsFrozen")] HRESULT IsFrozen([out, retval] VARIANT_BOOL* retVal);
+	[id(43), helpstring("method TryAutoDetectEpsg")] HRESULT TryAutoDetectEpsg([out]int* epsgCode, [out,retval]VARIANT_BOOL* retVal);
 };
 
 [
@@ -4297,6 +4364,12 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(21), helpstring("property RandomColorSchemeForGrids")] HRESULT RandomColorSchemeForGrids([in] VARIANT_BOOL newVal);
 	[propget, id(22), helpstring("property DefaultColorSchemeForGrids")] HRESULT DefaultColorSchemeForGrids([out, retval] PredefinedColorScheme *retVal);
 	[propput, id(22), helpstring("property DefaultColorSchemeForGrids")] HRESULT DefaultColorSchemeForGrids([in] PredefinedColorScheme newVal);
+	[propget, id(23), helpstring("property ShapeOutputValidationMode")] HRESULT ShapeOutputValidationMode([out, retval] tkShapeValidationMode *retVal);
+	[propput, id(23), helpstring("property ShapeOutputValidationMode")] HRESULT ShapeOutputValidationMode([in] tkShapeValidationMode newVal);
+	[propget, id(24), helpstring("property ShapeInputValidationMode")] HRESULT ShapeInputValidationMode([out, retval] tkShapeValidationMode *retVal);
+	[propput, id(24), helpstring("property ShapeInputValidationMode")] HRESULT ShapeInputValidationMode([in] tkShapeValidationMode newVal);
+	[propget, id(25), helpstring("property ShapeInputValidationMode")] HRESULT GeometryEngine([out, retval] tkGeometryEngine *retVal);
+	[propput, id(25), helpstring("property ShapeInputValidationMode")] HRESULT GeometryEngine([in] tkGeometryEngine newVal);
 };
 
 [
@@ -4458,6 +4531,52 @@ interface IMeasuring : IDispatch{
 	[propput, id(12), helpstring("")] HRESULT DisplayAngles([in] VARIANT_BOOL newVal);
 };
 
+[
+	object,
+	uuid(B96029D1-C6D6-4EF5-A0A4-B0DF49434DEF),
+	dual,
+	nonextensible,
+	helpstring("IShapeValidationInfo Interface"),
+	pointer_default(unique)
+]
+interface IShapeValidationInfo : IDispatch{
+	[propget, id(1), helpstring("")] HRESULT ClassName([out, retval] BSTR* retVal);
+	[propget, id(2), helpstring("")] HRESULT MethodName([out, retval] BSTR* retVal);
+	[propget, id(3), helpstring("")] HRESULT ParameterName([out, retval] BSTR* retVal);
+	[propget, id(4), helpstring("")] HRESULT ValidationType([out, retval] tkShapeValidationType* retVal);
+	[propget, id(5), helpstring("")] HRESULT ValidationMode([out, retval] tkShapeValidationMode* retVal);
+	[propget, id(6), helpstring("")] HRESULT IsValid([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(7), helpstring("")] HRESULT Status([out, retval] tkShapeValidationStatus* retVal);
+	[propget, id(8), helpstring("")] HRESULT WasValidated([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(9), helpstring("")] HRESULT StillInvalidCount([out, retval] int* retVal);
+	[propget, id(10), helpstring("")] HRESULT WereInvalidCount([out, retval] int* retVal);
+	[propget, id(11), helpstring("")] HRESULT FixedCount([out, retval] int* retVal);
+	[propget, id(12), helpstring("")] HRESULT SkippedCount([out, retval] int* retVal);
+};
+
+[
+	object,
+	uuid(C0FBAA85-8657-4B72-A52B-9EF837C0BAB5),
+	dual,
+	nonextensible,
+	helpstring("IFieldStatOperations Interface"),
+	pointer_default(unique)
+]
+interface IFieldStatOperations : IDispatch{
+	[id(1), helpstring("AddFieldIndex")] HRESULT AddFieldIndex([in]int fieldIndex, [in]tkFieldStatOperation operation);
+	[id(2), helpstring("Remove")] HRESULT Remove([in]int operationIndex, [out, retval]VARIANT_BOOL* retVal);
+	[id(3), helpstring("Clear")] HRESULT Clear();
+	[propget, id(4), helpstring("Count")] HRESULT Count([out, retval] int* retVal);
+	[propget, id(5), helpstring("Operation")] HRESULT Operation([in]int operationIndex, [out, retval] tkFieldStatOperation* retVal);
+	[propget, id(6), helpstring("FieldIndex")] HRESULT FieldIndex([in]int operationIndex, [out, retval] int* retVal);
+	[propget, id(7), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(8), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[id(9), helpstring("AddFieldName")] HRESULT AddFieldName([in]BSTR fieldName, [in]tkFieldStatOperation operation);
+	[propget, id(10), helpstring("FieldName")] HRESULT FieldName([in]int operationIndex, [out, retval] BSTR* retVal);
+	[id(11), helpstring("Validate")] HRESULT Validate([in]IShapefile* sf, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(12), helpstring("OperationIsValid")] HRESULT OperationIsValid([in]int operationIndex, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(13), helpstring("OperationIsValidReason")] HRESULT OperationIsValidReason([in]int operationIndex, [out, retval] tkFieldOperationValidity* retVal);
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -4765,6 +4884,7 @@ library MapWinGIS
 			[id(201), helpstring("method LoadTiles")] void LoadTiles(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
 			[id(203), helpstring("method FindSnapPoint")] VARIANT_BOOL FindSnapPoint([in]double tolerance, [in]double xScreen, [in]double yScreen, [in, out]double* xFound, [in, out]double* yFound);
 			[id(204), helpstring("method TilesAreInCache")] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
+			[id(206), helpstring("method Clear")] void Clear();
 };
 			//}}AFX_ODL_METHOD
 	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),
@@ -5153,5 +5273,21 @@ library MapWinGIS
 	coclass Measuring
 	{
 		[default] interface IMeasuring;
+	};
+	[
+		uuid(B8223915-5CDF-4F55-A4B7-7C7293F2FFFF),
+		helpstring("ShapeValidationInfo Class")
+	]
+	coclass ShapeValidationInfo
+	{
+		[default] interface IShapeValidationInfo;
+	};
+	[
+		uuid(DECA4D77-5191-4B19-9670-ECB9D36E2206),
+		helpstring("FieldStatOperations Class")
+	]
+	coclass FieldStatOperations
+	{
+		[default] interface IFieldStatOperations;
 	};
 };
