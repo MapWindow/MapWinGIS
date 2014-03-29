@@ -8,7 +8,7 @@
 // ***************************************************************
 IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidationMode validationMode, 
 			tkShapeValidationType validationType, CString className, CString methodName, CString parameterName,
-			bool selectedOnly, bool editingInPlace)
+			ICallback* callback, BSTR& key, bool selectedOnly, bool editingInPlace)
 {
 	if (!isf)
 		return NULL;
@@ -58,9 +58,10 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 
 		bool checkEditMode = true;
 
+		long percent = 0;
 		for (int i = numShapes - 1; i >= 0 ; i--)
 		{
-			// TODO: display progress of operation
+			Utility::DisplayProgress(callback, numShapes - 1 - i, numShapes, "Validating shapes...", key, percent);
 			
 			IShape* shp = NULL;
 			isf->get_Shape(i, &shp);

@@ -33,7 +33,7 @@ CShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodN
 	}
 	
 	IShapeValidationInfo* iinfo = ShapeValidator::Validate(isf, m_globalSettings.inputValidation, svtInput, 
-			className, methodName, parameterName, selectedOnly ? true: false);
+			className, methodName, parameterName, globalCallback, key, selectedOnly ? true: false);
 	
 	CShapefile* sf = (CShapefile*)isf;
 	sf->SetValidationInfo(iinfo, svtInput);
@@ -77,7 +77,7 @@ clear_result:
 	else
 	{
 		IShapeValidationInfo* iinfo = ShapeValidator::Validate(*isf, m_globalSettings.outputValidation, svtOutput, 
-									className, methodName, "", false);
+									className, methodName, "", globalCallback, key, false);
 		CShapefile* sf = (CShapefile*)this;		// writing validation into this shapefile
 		sf->SetValidationInfo(iinfo, svtOutput);
 		CShapeValidationInfo* info = (CShapeValidationInfo*)iinfo;

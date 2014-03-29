@@ -301,6 +301,8 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		adfMinMax[0] = dfMin;
 		adfMinMax[1] = dfMax;
 
+		
+
 		/*********************** END OF INITIALISING ************************************/
 		
 		retVal = true;
@@ -311,6 +313,8 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		AfxMessageBox("Exception in LoadRaster function");
 		retVal = false;
 	}
+
+	
 
 	return retVal;
 }
@@ -1091,6 +1095,16 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	double ka = .7;
 	double kd = .8;
 	
+	long numBreaks = 0;
+	gridColorScheme->get_NumBreaks(&numBreaks);
+	
+	// TODO: temp solution
+	if (numBreaks == 0)
+	{
+		gridColorScheme->UsePredefined(dfMin, dfMax, imageColorScheme);
+		gridColorScheme->get_NumBreaks(&numBreaks);
+	}
+
 	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
 	gridColorScheme->put_NoDataColor(transColor);
 
@@ -1107,8 +1121,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	cppVector lightsource(lsi,lsj,lsk);
 
 	std::deque<BreakVal> bvals;
-	long numBreaks = 0;
-	gridColorScheme->get_NumBreaks(&numBreaks);
+	
 	double lowval, highval;
 	for( int i = 0; i < numBreaks; i++ )
 	{	
