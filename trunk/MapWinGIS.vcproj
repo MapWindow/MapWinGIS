@@ -4008,10 +4008,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\FieldStatOperations.rgs"
-			>
-		</File>
-		<File
 			RelativePath=".\Resource\Map.bmp"
 			>
 		</File>
@@ -4120,11 +4116,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

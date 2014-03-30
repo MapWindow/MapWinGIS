@@ -338,7 +338,7 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 
 		if (!trgrid->isInRam())
 		{
-			trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1);
+			trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1, false);
 		}
 		else
 		{
@@ -384,10 +384,7 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	}
 	else
 	{	Vals = NULL;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 		*retval = S_FALSE;
 		return *retval;
 	}
@@ -395,6 +392,31 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	*retval = TRUE;
 
 	return S_OK;
+}
+
+// ***************************************************
+//		PutRow()
+// ***************************************************
+// only gdal grids not in-memory grids are supported, extend if needed
+bool CGrid::PutRowDouble(long Row, double *Vals)
+{
+	if (trgrid != NULL)
+	{
+		if (Row < 0 || Row >= trgrid->getHeight() )
+		{
+			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			Vals = NULL;
+		}
+
+		long ncols = trgrid->getWidth();
+		
+		if (!trgrid->isInRam())
+		{
+			trgrid->PutFloatWindow((void*)Vals, Row, Row, 0, ncols-1, true);
+			return true;
+		}
+	}
+	return false;
 }
 
 // ***************************************************
@@ -418,7 +440,7 @@ STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 		
 		if (!trgrid->isInRam())
 		{
-			trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1);
+			trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1, false);
 		}
 		else
 		{
@@ -431,7 +453,6 @@ STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	else if( dgrid != NULL )
 	{	
 		int ncols = dgrid->getHeader().getNumberCols();
-
 		for (int i = 0; i < ncols; i++)
 		{
 			dgrid->setValue(i, Row, Vals[i]);
@@ -440,23 +461,22 @@ STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	else if( fgrid != NULL )
 	{	
 		int ncols = fgrid->getHeader().getNumberCols();
-
 		for (int i = 0; i < ncols; i++)
 		{
 			fgrid->setValue(i, Row, Vals[i]);
 		}
 	}
 	else if( lgrid != NULL )
-	{	int ncols = lgrid->getHeader().getNumberCols();
-
+	{	
+		int ncols = lgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			lgrid->setValue(i, Row, static_cast<long>(Vals[i]));
 		}
 	}
 	else if( sgrid != NULL )
-	{	int ncols = sgrid->getHeader().getNumberCols();
-
+	{	
+		int ncols = sgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			sgrid->setValue(i, Row, static_cast<short>(Vals[i]));
@@ -464,10 +484,7 @@ STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 	}
 	else
 	{
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 		*retval = FALSE;
 		return S_FALSE;
 	}
@@ -2011,21 +2028,41 @@ void CGrid::ResolveFileType(GridFileType &newFileType, CString extension)
 STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, long EndCol, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	GetFloatWindowCore(StartRow, EndRow, StartCol, EndCol, (void*)Vals, false, retval);
+	return *retval ? S_OK : S_FALSE;
+}
 
+// ***************************************************
+//		GetFloatWindow2()
+// ***************************************************
+STDMETHODIMP CGrid::GetFloatWindow2(long StartRow, long EndRow, long StartCol, long EndCol, double *Vals, VARIANT_BOOL * retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	GetFloatWindowCore(StartRow, EndRow, StartCol, EndCol, (void*)Vals, true, retval);
+	return *retval ? S_OK : S_FALSE;
+}
+
+// ***************************************************
+//		GetFloatWindowCore()
+// ***************************************************
+void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval)
+{
+	double* ValsDouble = reinterpret_cast<double*>(Vals);
+	float* ValsFloat = reinterpret_cast<float*>(Vals);
+	
 	if (trgrid != NULL)
 	{
 		if (StartRow < 0 || StartRow >= trgrid->getHeight() || EndRow < 0 || EndRow >= trgrid->getHeight() )
 		{
- 			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			Vals = NULL;
+			ValsDouble = NULL;
 			*retval = FALSE;
-			return S_FALSE;
 		}
 
-		if (!trgrid->GetFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol))
+		if (!trgrid->GetFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
 		{
-			*retval = FALSE;
-			return S_FALSE;
+			*retval = VARIANT_FALSE;
 		}
 	}
 	else if( dgrid != NULL )
@@ -2035,7 +2072,14 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				Vals[position++] = static_cast<float>(dgrid->getValue(i, j));
+				if (useDouble)
+				{
+					ValsDouble[position++] = dgrid->getValue(i, j);
+				}
+				else
+				{
+					ValsFloat[position++] = static_cast<float>(dgrid->getValue(i, j));
+				}
 			}
 		}
 	}
@@ -2046,7 +2090,14 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				Vals[position++] = static_cast<float>(fgrid->getValue(i, j));
+				if (useDouble)
+				{
+					ValsDouble[position++] = fgrid->getValue(i, j);
+				}
+				else
+				{
+					ValsFloat[position++] = static_cast<float>(fgrid->getValue(i, j));
+				}
 			}
 		}
 	}
@@ -2057,7 +2108,14 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				Vals[position++] = static_cast<float>(lgrid->getValue(i, j));
+				if (useDouble)
+				{
+					ValsDouble[position++] = lgrid->getValue(i, j);
+				}
+				else
+				{
+					ValsFloat[position++] = static_cast<float>(lgrid->getValue(i, j));
+				}
 			}
 		}
 	}
@@ -2068,23 +2126,24 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				Vals[position++] = static_cast<float>(sgrid->getValue(i, j));
+				if (useDouble)
+				{
+					ValsDouble[position++] = sgrid->getValue(i, j);
+				}
+				else
+				{
+					ValsFloat[position++] = static_cast<float>(sgrid->getValue(i, j));
+				}
 			}
 		}
 	}
 	else
 	{	Vals = NULL;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-
-		*retval = FALSE;
-		return S_FALSE;
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
+		*retval = VARIANT_FALSE;
 	}
 
-	*retval = TRUE;
-
-	return S_OK;
+	*retval = VARIANT_TRUE;
 }
 
 // ***************************************************
@@ -2093,7 +2152,27 @@ STDMETHODIMP CGrid::GetFloatWindow(long StartRow, long EndRow, long StartCol, lo
 STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, long EndCol, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	PutFloatWindowCore(StartRow, EndRow, StartCol, EndCol, (void*)Vals, false, retval);
+	return *retval ? S_OK : S_FALSE;
+}
 
+// ***************************************************
+//		PutFloatWindow2()
+// ***************************************************
+STDMETHODIMP CGrid::PutFloatWindow2(long StartRow, long EndRow, long StartCol, long EndCol, double *Vals, VARIANT_BOOL * retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	PutFloatWindowCore(StartRow, EndRow, StartCol, EndCol, (void*)Vals, true, retval);
+	return *retval ? S_OK : S_FALSE;
+}
+
+// ******************************************************************
+//		PutFloatWindowCore()
+// ******************************************************************
+void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval)
+{
+	double* ValsDouble = reinterpret_cast<double*>(Vals);
+	float* ValsFloat = reinterpret_cast<float*>(Vals);
 	if (trgrid != NULL)
 	{
  		if (StartRow < 0 || StartRow >= trgrid->getHeight() || EndRow < 0 || EndRow >= trgrid->getHeight())
@@ -2101,13 +2180,11 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
 			*retval = FALSE;
-			return S_OK;
 		}
 
-		if (!trgrid->PutFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol))
+		if (!trgrid->PutFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
 		{
 			*retval = FALSE;
-			return S_OK;
 		}
 	}
 	else if( dgrid != NULL )
@@ -2119,7 +2196,14 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				dgrid->setValue(i, j, Vals[position++]);
+				if (useDouble)
+				{
+					dgrid->setValue(i, j, ValsDouble[position++]);
+				}
+				else
+				{
+					dgrid->setValue(i, j, ValsFloat[position++]);
+				}
 			}
 		}
 	}
@@ -2132,7 +2216,14 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				fgrid->setValue(i, j, Vals[position++]);
+				if (useDouble)
+				{
+					fgrid->setValue(i, j, static_cast<float>(ValsDouble[position++]));
+				}
+				else
+				{
+					fgrid->setValue(i, j, ValsFloat[position++]);
+				}
 			}
 		}
 	}
@@ -2145,7 +2236,14 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				lgrid->setValue(i, j, static_cast<long>(Vals[position++]));
+				if (useDouble)
+				{
+					lgrid->setValue(i, j, static_cast<long>(ValsDouble[position++]));
+				}
+				else
+				{
+					lgrid->setValue(i, j, static_cast<long>(ValsFloat[position++]));
+				}
 			}
 		}
 	}
@@ -2158,22 +2256,24 @@ STDMETHODIMP CGrid::PutFloatWindow(long StartRow, long EndRow, long StartCol, lo
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
-				sgrid->setValue(i, j, static_cast<short>(Vals[position++]));
+				if (useDouble)
+				{
+					sgrid->setValue(i, j, static_cast<short>(ValsDouble[position++]));
+				}
+				else
+				{
+					sgrid->setValue(i, j, static_cast<short>(ValsFloat[position++]));
+				}
 			}
 		}
 	}
 	else
 	{
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 		*retval = FALSE;
-		return S_FALSE;
 	}
 
 	*retval = TRUE;
-	return S_OK;
 }
 
 // ******************************************************************

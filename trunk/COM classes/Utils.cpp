@@ -3929,14 +3929,14 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 
 			if (cmnCount > 0 && rowCount > 0) 
 			{
-				float* vals = new float[cmnCount];
+				double* vals = new double[cmnCount];
 				long row = 0;
 
 				CPointInPolygon pip;
 				if (pip.SetPolygon(poly))
 				{
 					for (long i = minRow; i <= maxRow; i++ ) {
-						grid->GetFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+						grid->GetFloatWindow2(i, i, firstCol, lastCol, vals, &vb);
 						
 						if (vb) {
 							
@@ -3955,11 +3955,11 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 							}
 							
 							if (keepExtents) {
-								newGrid->PutFloatWindow(i, i, firstCol, lastCol, vals, &vb);
+								newGrid->PutFloatWindow2(i, i, firstCol, lastCol, vals, &vb);
 								row++;
 							}
 							else {
-								newGrid->PutRow(row++, vals, &vb);
+								((CGrid*)newGrid)->PutRowDouble(row++, vals);
 							}
 						}
 					}

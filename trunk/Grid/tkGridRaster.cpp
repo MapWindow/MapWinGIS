@@ -908,7 +908,7 @@ void tkGridRaster::LoadFullBuffer()
 	}
 }
 
-bool tkGridRaster::GetFloatWindow(float *Vals, long StartRow, long EndRow, long StartCol, long EndCol)
+bool tkGridRaster::GetFloatWindow(void *Vals, long StartRow, long EndRow, long StartCol, long EndCol, bool useDouble)
 {
 	if (poBand == NULL) return false;
 
@@ -918,13 +918,23 @@ bool tkGridRaster::GetFloatWindow(float *Vals, long StartRow, long EndRow, long 
 	{
 		long position = 0;
 
+		double* ValsDouble = reinterpret_cast<double*>(Vals);
+		float* ValsFloat = reinterpret_cast<float*>(Vals);
+
 		for (long j = StartRow; j <= EndRow; j++)
 		{
 			for (long i = StartCol; i <= EndCol; i++)
 			{
 				// Just use getvalue -- it will be memory-based,
 				// and will account for the correct buffer.
-				Vals[position++] = static_cast<float>(getValue(j, i));
+				if (useDouble)
+				{
+					ValsDouble[position++] = getValue(j, i);
+				}
+				else
+				{
+					ValsFloat[position++] = static_cast<float>(getValue(j, i));
+				}
 			}
 		}
 	}
@@ -934,9 +944,9 @@ bool tkGridRaster::GetFloatWindow(float *Vals, long StartRow, long EndRow, long 
 		// which is likely when this function will be called anyway.
 		try
 		{
-			poBand->AdviseRead ( StartCol, StartRow, (EndCol - StartCol)+1, (EndRow - StartRow)+1, (EndCol - StartCol)+1, (EndRow - StartRow)+1, GDT_Float32, NULL);
-			poBand->RasterIO( GF_Read, StartCol, StartRow, (EndCol - StartCol)+1, (EndRow - StartRow)+1,
-								Vals, (EndCol - StartCol)+1, (EndRow - StartRow)+1, GDT_Float32, 0, 0 );
+			GDALDataType type = useDouble ? GDT_Float64 : GDT_Float32;
+			poBand->AdviseRead ( StartCol, StartRow, (EndCol - StartCol)+1, (EndRow - StartRow)+1, (EndCol - StartCol)+1, (EndRow - StartRow)+1, type, NULL);
+			poBand->RasterIO( GF_Read, StartCol, StartRow, (EndCol - StartCol)+1, (EndRow - StartRow)+1, Vals, (EndCol - StartCol)+1, (EndRow - StartRow)+1, type, 0, 0 );
 		}
 		catch(...)
 		{
@@ -948,7 +958,7 @@ bool tkGridRaster::GetFloatWindow(float *Vals, long StartRow, long EndRow, long 
 }
 
 
-bool tkGridRaster::PutFloatWindow(float *Vals, long StartRow, long EndRow, long StartCol, long EndCol)
+bool tkGridRaster::PutFloatWindow(void *Vals, long StartRow, long EndRow, long StartCol, long EndCol, bool useDouble)
 {
 	if (poBand == NULL) return false;
 
@@ -957,8 +967,13 @@ bool tkGridRaster::PutFloatWindow(float *Vals, long StartRow, long EndRow, long 
 	cachedMax = -9999;
 
 	// Save to buffer if it exists, otherwise use RasterIO.
-	if (_int32buffer != NULL || floatbuffer != NULL || _int32ScanlineBufferB != NULL || floatScanlineBufferB != NULL || _int32ScanlineBufferA != NULL || floatScanlineBufferA != NULL)
+	if (_int32buffer != NULL || floatbuffer != NULL || _int32ScanlineBufferB != NULL || 
+		floatScanlineBufferB != NULL || _int32ScanlineBufferA != NULL || floatScanlineBufferA != NULL)
 	{
+		
+		double* ValsDouble = reinterpret_cast<double*>(Vals);
+		float* ValsFloat = reinterpret_cast<float*>(Vals);
+
 		long position = 0;
 
 		for (long j = StartRow; j <= EndRow; j++)
@@ -967,7 +982,15 @@ bool tkGridRaster::PutFloatWindow(float *Vals, long StartRow, long EndRow, long 
 			{
 				// Just use putvalue -- it will be memory-based,
 				// and will account for the correct buffer.
-				putValue(j, i, static_cast<double>(Vals[position++]));
+				if (useDouble)
+				{
+					putValue(j, i, ValsDouble[position++]);
+					
+				}
+				else
+				{
+					putValue(j, i,  static_cast<float>(ValsFloat[position++]));
+				}
 			}
 		}
 	}
@@ -977,8 +1000,9 @@ bool tkGridRaster::PutFloatWindow(float *Vals, long StartRow, long EndRow, long 
 		// which is likely when this function will be called anyway.
 		try
 		{
+			GDALDataType type = useDouble ? GDT_Float64 : GDT_Float32;
 			poBand->RasterIO( GF_Write, StartCol, StartRow, (EndCol - StartCol)+1, (EndRow - StartRow)+1,
-								Vals, (EndCol - StartCol)+1, (EndRow - StartRow)+1, GDT_Float32, 0, 0 );
+								Vals, (EndCol - StartCol)+1, (EndRow - StartRow)+1, type, 0, 0 );
 		}
 		catch(...)
 		{

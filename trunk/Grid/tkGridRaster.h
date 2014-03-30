@@ -48,8 +48,8 @@ public:
 	void setYllCenter(double yll) {YllCenter = yll;}	
 	void setXllCenter(double xll) {XllCenter = xll;}	
 
-	bool PutFloatWindow(float *Vals, long StartRow, long EndRow, long StartCol, long EndCol);
-	bool GetFloatWindow(float *Vals, long StartRow, long EndRow, long StartCol, long EndCol);
+	bool PutFloatWindow(void *Vals, long StartRow, long EndRow, long StartCol, long EndCol, bool useDouble);
+	bool GetFloatWindow(void *Vals, long StartRow, long EndRow, long StartCol, long EndCol, bool useDouble);
 
 	void ProjToCell( double x, double y, long & column, long & row );
 	void CellToProj( long column, long row, double & x, double & y );

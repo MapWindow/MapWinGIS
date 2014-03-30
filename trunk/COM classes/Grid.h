@@ -98,10 +98,11 @@ public:
 	STDMETHOD(PutRow)(/*[in]*/ long Row, /*[in]*/ float *Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GetFloatWindow)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ float * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(PutFloatWindow)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ float * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(GetFloatWindow2)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ double * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(PutFloatWindow2)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ double * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(SetInvalidValuesToNodata)(/*[in*/ double MinThresholdValue, /*[in*/ double MaxThresholdValue, /*out, retval*/ VARIANT_BOOL * retval);
 	STDMETHOD(Resource)(/*[in]*/ BSTR newSrcPath, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(get_Extents)(IExtents** retVal);
-
 	STDMETHOD(get_NumBands)(int *retVal);
 	STDMETHOD(get_ActiveBandIndex)(int *retVal);
 	STDMETHOD(OpenBand)(int bandIndex, VARIANT_BOOL* retVal);
@@ -109,7 +110,6 @@ public:
 	STDMETHOD(RetrieveColorScheme)(tkGridSchemeRetrieval method, IGridColorScheme** retVal);
 	STDMETHOD(GenerateColorScheme)(tkGridSchemeGeneration method, PredefinedColorScheme colors, IGridColorScheme** retVal);
 	STDMETHOD(RetrieveOrGenerateColorScheme)(tkGridSchemeRetrieval retrievalMethod, tkGridSchemeGeneration generateMethod, PredefinedColorScheme colors, IGridColorScheme** retVal);
-	
 	STDMETHOD(OpenAsImage)(IGridColorScheme* scheme, tkGridProxyMode proxyMode, ICallback* cBack, IImage** retVal);
 	STDMETHOD(RemoveImageProxy)(VARIANT_BOOL* retVal);
 	STDMETHOD(CreateImageProxy)(IGridColorScheme* colorScheme, IImage** retVal);
@@ -178,7 +178,9 @@ public:
 
 	IGridColorScheme* BuildGradientColorSchemeCore(PredefinedColorScheme colors, ColoringType coloringType);
 	bool CGrid::GetUniqueValues(set<CComVariant>& values, int maxCount);
-
+	void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	bool CGrid::PutRowDouble(long Row, double *Vals);
 private:
 	dGrid * dgrid;
 	fGrid * fgrid;

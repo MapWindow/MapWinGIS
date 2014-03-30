@@ -2405,8 +2405,6 @@ enum tkScalebarUnits
 	pointer_default(unique)
 ]
 
-	
-
 interface IGrid : IDispatch{
 		[propget, id(1), helpstring("property Header")] HRESULT Header([out, retval] IGridHeader * *pVal);
 		[propget, id(2), helpstring("property Value")] HRESULT Value([in] long Column, [in] long Row, [out, retval] VARIANT *pVal);
@@ -2461,6 +2459,9 @@ interface IGrid : IDispatch{
 
 		[id(41), helpstring("method RetrieveOrGenerateColorScheme")] HRESULT RetrieveOrGenerateColorScheme([in]tkGridSchemeRetrieval retrievalMethod, 
 							[in]tkGridSchemeGeneration generateMethod, [in]PredefinedColorScheme colors, [out, retval]IGridColorScheme** retVal);
+
+		[id(42), helpstring("property GetFloatWindow2")] HRESULT GetFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
+		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 };
 
 /****************************  GridHeader Interface ***********************/
