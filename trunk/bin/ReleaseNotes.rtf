@@ -3,14 +3,20 @@
 {\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang1033\b\f0\fs28 What's New in 4.9.1\b0\fs20\par
 \f1 Release date: Not released yet\b\f0\fs24\par
 \pard\nowidctlpar\li360\b0\fs20\par
-\ul\b General\ulnone\b0\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Fixed several memory leaks. (Brad Hester)\par
-{\pntext\f2\'B7\tab}Update code as suggested by CppCheck ({\field{\*\fldinst{HYPERLINK "http://cppcheck.sourceforge.net/"}}{\fldrslt{\ul\cf1 http://cppcheck.sourceforge.net/}}}\f0\fs20 ) (Brad Hester)\par
-\pard\nowidctlpar\li360\par
+Ended at 74105\par
+\par
 \ul\b TestApplication\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Created a test application to test several methods and show sample code (Paul Meems)\par
+\pard\nowidctlpar\li360\ul\b\par
+General\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Fixed several memory leaks. (Brad Hester)\par
+{\pntext\f2\'B7\tab}Update code as suggested by CppCheck ({\field{\*\fldinst{HYPERLINK "http://cppcheck.sourceforge.net/"}}{\fldrslt{\ul\cf1 http://cppcheck.sourceforge.net/}}}\f0\fs20 ) (Brad Hester)\par
+\pard\nowidctlpar\li360\ul\b\par
+Map\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for scalebar units, when decimal degrees are used as map units. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Map.RemoveAllLayers will clear map projection. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Map.ZoomToTileLevel will work when map projection is other than Google Mercator (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
-\par
 \ul\b Shapefiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Support serialization of in-memory shapefiles. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Solved issue #2328: Multi points are not rendered. (Sergei Leschinsky)\par
@@ -18,21 +24,29 @@
 {\pntext\f2\'B7\tab}Fix: .prj file won't be written if projection string for shapefile is empty. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added Shape.ClosestPoints method - returns line segment connecting this shape with another one passed as parameter. Uses GEOS method nearestPoints(). (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Shapefile.GetClosestPoint renamed to Shapefile.GetClosestVertex to avoid confusion with new Shape.ClosestPoints. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}A fix for polygon layer drawing: per-shape drawing will be used when printing (otherwise there can be SEH exception at some printer drivers when path is too large), also in some cases fill for polyline layers could be drawn. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Spelling error: Shape.Boundry -> Shape.Boundary (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Displaying progress of shapefile validation (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Grid\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added support for NetCDF. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}A code for handling grid files and grid colour schemes. Migrated from .NET part (MapWindow4). Grids are handled in Map.AddLayer, where an image representation is created for them. Not fully completed, but already somewhat functional. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Double version of Grid.GetFloatWindow/Grid.PutFloatWindow for Utils.ClipGridWithPolygon2. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\ul\b\par
 Tiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Updated version numbers for some tile providers. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}New Map.TilesLoaded event. Snapshot functions will schedule the loading of tiles in case at least one is missing in cache. TilesLoaded event will be fired afterwards with IsSnapshot = true parameter. Then a snapshot of the same extents with all the tiles can be done. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Projection for map will be grabbed from the first shapefile layer (so tiles can work out of the box). (Sergei Leschinsky)\par
-{\pntext\f2\'B7\tab}Map.ZoomToTileLevel willwork when map projection is other than Google Mercator. (Sergei Leschinsky)\par
-{\pntext\f2\'B7\tab}A fix for scalebar units, when decimal degrees are used as map units. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Request logging (Tiles.StartLogRequests, Tiles.StopLogRequests) (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Extents clipping is off when server projection is GoogleMercator - there is no reliable way to convert world extents to arbitrary map projection. TilesLoaded event is fired correctly - doesn't take into account tiles from previous requests. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
-\pard\nowidctlpar\li360\ul\b Utils\ulnone\b0\par
+\ul\b Utils\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 ClipGridWithPolygon method has proper return values.  (Brad Hester)\par
+\pard\nowidctlpar\li360\par
+\ul\b Projections\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Projection for map will be grabbed from the first shapefile layer. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added GeoProjection.Clear method. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added GeoProjection.Clone method. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Supporting libraries\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720\ulnone\b0 Changed  the build proces so we can use the pre-build binaries from {\field{\*\fldinst{HYPERLINK "http://www.gisinternals.com/sdk/"}}{\fldrslt{\ul\cf1 http://www.gisinternals.com/sdk/}}}\f0\fs20 . We're now using GDAL v1.11, with GEOS v3.4, PROJ4 v##, NetCDF v4.3, LizardTech (MrSID) v9.0, Intergraph/ERDAS (ECW) v5.0 (Tamas Szekeres, Paul Meems)\par
