@@ -1,44 +1,46 @@
-# A list of shapefiles that can be open to test.
-# These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/MapWindow-Projects/
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
 # First line is the shapefile, second line the the provider ID or UrlPattern:
 
 # OpenStreetMap
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
 0
 
 # OpenCycleMap
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
 2
 
 # BingSatellite
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
 4
 
 # GoogleTerrain
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
 9
 
 # YandexMaps
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 14
 
 # GoogleHybrid
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 8
 
 # Reproject OSM to Amersfoort
-%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
 0
 
 # brtachtergrondkaart
-%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
 http://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaart/{zoom}/{x}/{y}.png8
 
-# brtachtergrondkaart
-%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
-http://geodata1.nationaalgeoregister.nl/luchtfoto/tms/1.0.0/luchtfoto/EPSG28992/{zoom}/{x}/{y}.jpeg
+# TODO
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+#http://geodata1.nationaalgeoregister.nl/luchtfoto/tms/1.0.0/luchtfoto/EPSG28992/{zoom}/{x}/{y}.jpeg
 
-# Own server
-%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
-http://5.79.21.216:8080/geoserver/gwc/service/tms/1.0.0/Dakscan-Assen:Luchtfoto-hybrid/{zoom}/{x}/{y}.png8
+# Own server TODO
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+#http://5.79.21.216:8080/geoserver/gwc/service/tms/1.0.0/Dakscan-Assen:Luchtfoto-hybrid/{zoom}/{x}/{y}.png8
 

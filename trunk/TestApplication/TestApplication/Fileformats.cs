@@ -125,7 +125,7 @@ namespace TestApplication
         theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
         if (!img.Open(filename, ImageType.USE_FILE_EXTENSION, false, null))
         {
-          var msg = string.Format("Error opening image: {0}{1}", img.ErrorMsg[img.LastErrorCode], Environment.NewLine);
+          var msg = string.Format("Error opening image: {0}{1}", img.get_ErrorMsg(img.LastErrorCode), Environment.NewLine);
           if (settings.GdalLastErrorMsg != string.Empty)
           {
             msg += "GDAL Error: " + settings.GdalLastErrorMsg;

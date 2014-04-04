@@ -1,16 +1,17 @@
-# A list of shapefiles that can be open to test.
-# These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/MapWindow-Projects/
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-%DATA%\General\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
 
 # Polygon M
-%DATA%\General\MapWindow-Projects\polygonM\PolygonM.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\PolygonM.shp
 
 # Multi points:
-%DATA%\General\MapWindow-Projects\polygonM\MultiPoints.shp
-
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\MultiPoints.shp

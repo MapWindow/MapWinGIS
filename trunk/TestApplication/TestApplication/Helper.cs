@@ -12,7 +12,6 @@ namespace TestApplication
   using System.Collections.Generic;
   using System.IO;
   using System.Linq;
-  using System.Text;
   using System.Windows.Forms;
 
   using MapWinGIS;
@@ -227,12 +226,21 @@ namespace TestApplication
 
       // Open file, read line by line, skip lines starting with #
       var lines = File.ReadAllLines(textfileLocation);
+      
+      // lines = lines.Select(l => l.Replace("%DATA%", Constants.SCRIPT_DATA_PATH)).ToArray();
+      // Replace env. var in line from text file:
+      var scriptPath = Environment.GetEnvironmentVariable("MW_SAMPLEDATA") ?? Constants.SCRIPT_DATA_PATH;
 
-      lines = lines.Select(l => l.Replace("%DATA%", Constants.SCRIPT_DATA_PATH)).ToArray();
+      lines = lines.Select(l => l.Replace("%MW_SAMPLEDATA%", scriptPath)).ToArray();
 
       return (from t in lines where !t.StartsWith("#") && t.Length != 0 select t.Trim()).ToList();
     }
 
+    /// <summary>Checking the difference between the two shapes</summary>
+    /// <param name="shp">The first shape</param>
+    /// <param name="shp2">The second shape</param>
+    /// <param name="theForm">The form</param>
+    /// <returns>True when different</returns>
     internal static bool AreShapesDifferent(Shape shp, Shape shp2, ICallback theForm)
     {
       theForm.Progress(string.Empty, 100, "Checking the difference between the two shapes");
@@ -259,8 +267,7 @@ namespace TestApplication
       {
         theForm.Error(
           string.Empty,
-          string.Format(
-            "The first shape is a {0} and the second shape is a {1}", shp.ShapeType, shp2.ShapeType));
+          string.Format("The first shape is a {0} and the second shape is a {1}", shp.ShapeType, shp2.ShapeType));
         return false;
       }
 
@@ -268,8 +275,7 @@ namespace TestApplication
       {
         theForm.Error(
           string.Empty,
-          string.Format(
-            "The first shape has {0} points and the second shape has {1} points", shp.NumPoints, shp2.NumParts));
+          string.Format("The first shape has {0} points and the second shape has {1} points", shp.NumPoints, shp2.NumParts));
         return false;
       }
 
@@ -277,8 +283,7 @@ namespace TestApplication
       {
         theForm.Error(
           string.Empty,
-          string.Format(
-            "The first shape has {0} points and the second shape has {1} points", shp.NumParts, shp2.NumParts));
+          string.Format("The first shape has {0} points and the second shape has {1} points", shp.NumParts, shp2.NumParts));
         return false;
       }
 
@@ -291,8 +296,7 @@ namespace TestApplication
         {
           theForm.Error(
             string.Empty,
-            string.Format(
-              "The first shape has an area of {0} and the second shape has an area of {1}", shp.Area, shp2.Area));
+            string.Format("The first shape has an area of {0} and the second shape has an area of {1}", shp.Area, shp2.Area));
           return false;
         }
 
@@ -301,8 +305,7 @@ namespace TestApplication
         {
           theForm.Error(
             string.Empty,
-            string.Format(
-              "The first shape has a perimeter of {0} and the second shape has a perimeter of {1}", shp.Perimeter, shp2.Perimeter));
+            string.Format("The first shape has a perimeter of {0} and the second shape has a perimeter of {1}", shp.Perimeter, shp2.Perimeter));
           return false;
         }
       }
@@ -337,14 +340,13 @@ namespace TestApplication
         theForm.Error(string.Empty, "The max values of X, Y, Z or M return different values");
       }
 
-      for (int i = 0; i < shp.NumPoints; i++)
+      for (var i = 0; i < shp.NumPoints; i++)
       {
-        if (shp.Point[i].M != shp2.Point[i].M)
+        if (shp.get_Point(i).M != shp2.get_Point(i).M)
         {
           theForm.Error(string.Empty, "M values are different");
         }
       }
-
 
       if (shp.Extents.xMin != shp2.Extents.xMin
        || shp.Extents.yMin != shp2.Extents.yMin

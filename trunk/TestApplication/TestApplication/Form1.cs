@@ -689,7 +689,7 @@ namespace TestApplication
         GridInputfile.Text = path + "gridfiles.txt";
         ImageInputfile.Text = path + "imagefiles.txt";
         ClipGridByPolygonInputfile.Text = path + "ClipGridWithPolygon.txt";
-        ShapefileToGrid.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
+        ShapefileToGrid.Text = Constants.SCRIPT_DATA_PATH + @"\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
         AggregateShapefileInput.Text = path + "aggregate.txt";
         TilesInputfile.Text = path + "tiles.txt";
         ClipShapefileInput.Text = path + "clipping.txt";

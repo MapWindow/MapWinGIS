@@ -1,21 +1,25 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
 # First line is shapefile, second line is overlay shapefile
 # Call will be sf.Clip(false, sfOverlay, false);
 
 # Clip lines with polygons:
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
 # Clip polygons with lines
-#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 
 # Clip polygons with polygons
-#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-#%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\LargePolygon.shp
 
 # Clip polygons with polygons (switched)
-#%DATA%\General\MapWindow-Projects\polygonM\LargePolygon.shp
-#%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\LargePolygon.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
 # Clip polygons M with polygons
 # TODO

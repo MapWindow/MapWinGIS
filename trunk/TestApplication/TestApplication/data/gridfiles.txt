@@ -1,13 +1,13 @@
-# A list of image files that can be open to test.
-# Most files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/Grids/Formats/
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
 
 #ASCII
-%DATA%\General\Grids\Formats\sj_dem_clip_utm.asc
-%DATA%\General\Grids\Formats\testArea.asc
+%MW_SAMPLEDATA%\Grids\Formats\sj_dem_clip_utm.asc
+%MW_SAMPLEDATA%\Grids\Formats\testArea.asc
 
 #GeoTIFF
-%DATA%\General\Grids\Formats\Grid.tif
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
 
 #NetCDF:
-%DATA%\General\Grids\Formats\NDB2_19901225.nc
-#%DATA%\General\Grids\Formats\precipitation29.nc
+%MW_SAMPLEDATA%\Grids\Formats\NDB2_19901225.nc

@@ -678,7 +678,7 @@ namespace TestApplication
         //  }
         //}
 
-        string wkt = sf.Shape[shapeIndex].ExportToWKT();
+        string wkt = sf.get_Shape(shapeIndex).ExportToWKT();
         if (wkt == null || wkt.Trim() == string.Empty)
         {
           theForm.Error(string.Empty, "ExportToWKT was unsuccessful");

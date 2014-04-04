@@ -1,18 +1,19 @@
-# A list of shapefiles that can be converted to wkt.
-# These files come from http://svn.mapwindow.org/svnroot/TestingScripts/ScriptData/General/MapWindow-Projects/
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
 
 # point
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
 
 # polygon:
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
 
 # polyline
-%DATA%\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 
 # Polygon M
-%DATA%\General\MapWindow-Projects\polygonM\PolygonM.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\PolygonM.shp
 
 # Multi points:
-%DATA%\General\MapWindow-Projects\polygonM\MultiPoints.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\MultiPoints.shp
 
