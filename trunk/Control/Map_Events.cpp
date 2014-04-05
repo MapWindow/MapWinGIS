@@ -8,25 +8,136 @@
 #pragma endregion
 
 // ***************************************************************
+//		UpdateCursor
+// ***************************************************************
+void CMapView::UpdateCursor(tkCursorMode cursor)
+{
+	m_cursorMode = cursor;
+	OnSetCursor(this,HTCLIENT,0);
+	OnCursorModeChanged();
+}
+
+// ***************************************************************
+//		OnKeyUp
+// ***************************************************************
+void CMapView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags) 
+{
+	switch(nChar)
+	{
+		case VK_SPACE:
+			if (m_cursorMode == cmPan)
+			{
+				// releasing capture for panning operation
+				ReleaseCapture();
+				//this is the only mode we care about for this event
+				m_bitbltClickDown = CPoint(0,0);
+				m_bitbltClickMove = CPoint(0,0);
+				
+				this->SetExtentsCore(this->extents, false);
+				LockWindow(lmUnlock);
+				
+				UpdateCursor(_lastCursorMode);
+				_lastCursorMode = cmNone;
+				if (m_cursorMode == cmMeasure)
+				{
+					m_measuring->put_Persistent(_measuringPersistent ? VARIANT_TRUE: VARIANT_FALSE);
+				}
+			}
+			break;
+	}
+}
+
+// ***************************************************************
 //		OnKeyDown
 // ***************************************************************
-// Handles arrow keys
 void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 { 
 	double dx = (this->extents.right - this->extents.left)/4.0;
 	double dy = (this->extents.top - this->extents.bottom)/4.0;
-	IExtents* box = NULL;
-	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
 	
+	IExtents* box = NULL;
+	bool arrows = nChar == VK_LEFT || nChar == VK_RIGHT || nChar == VK_UP || nChar == VK_DOWN;
+	if (arrows)
+		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
+	
+	bool ctrl = GetKeyState(VK_CONTROL) & 0x8000 ? true: false;
+
 	switch(nChar)
 	{
+		case VK_SPACE:
+			if (m_cursorMode != cmPan)
+			{
+				if (m_cursorMode == cmMeasure)
+				{
+					VARIANT_BOOL vb;
+					m_measuring->get_Persistent(&vb);
+					_measuringPersistent = vb ? true: false;
+					m_measuring->put_Persistent(VARIANT_TRUE);
+				}
+				_lastCursorMode = (tkCursorMode)m_cursorMode;
+				UpdateCursor(cmPan);
+			}
+			break;
+		case 'Z':
+			UpdateCursor(cmZoomIn);
+			break;
+		case 'M':
+			UpdateCursor(cmMeasure);
+			break;
+		case VK_BACK:
+			ZoomToPrev();
+			break;
+		case VK_ADD:
+			ZoomIn(0.3);
+			break;
+		case VK_SUBTRACT:
+			ZoomOut(0.3);
+			break;
+		case VK_MULTIPLY:
+			int zoom;
+			m_tiles->get_CurrentZoom(&zoom);
+			ZoomToTileLevel(zoom);
+			break;
+		case VK_HOME:
+			ZoomToMaxExtents();
+			break;
 		case VK_LEFT:
-			box->SetBounds(extents.left - dx, extents.bottom, 0.0, extents.right - dx, extents.top, 0.0);		
-			this->SetExtents(box);
+			if (ctrl) {
+				// moving to previous layer
+				_activeLayerPosition--;
+				if (m_activeLayers.size() > 0)
+				{
+					if (_activeLayerPosition < 0) {
+						_activeLayerPosition = m_activeLayers.size() - 1;
+					}
+					int handle = GetLayerHandle(_activeLayerPosition);
+					ZoomToLayer(handle);
+				}
+			}
+			else
+			{
+				box->SetBounds(extents.left - dx, extents.bottom, 0.0, extents.right - dx, extents.top, 0.0);		
+				this->SetExtents(box);
+			}
 			break;
 		case VK_RIGHT:
-			box->SetBounds(extents.left + dx, extents.bottom, 0.0, extents.right + dx, extents.top, 0.0);		
-			this->SetExtents(box);
+			if (ctrl) {
+				// moving to the next layer
+				_activeLayerPosition++;
+				if (m_activeLayers.size() > 0)
+				{
+					if (_activeLayerPosition >= (int)m_activeLayers.size()) {
+						_activeLayerPosition = 0;
+					}
+					int handle = GetLayerHandle(_activeLayerPosition);
+					ZoomToLayer(handle);
+				}
+			}
+			else
+			{
+				box->SetBounds(extents.left + dx, extents.bottom, 0.0, extents.right + dx, extents.top, 0.0);		
+				this->SetExtents(box);
+			}
 			break;
 		case VK_UP:
 			box->SetBounds(extents.left, extents.bottom + dy, 0.0, extents.right, extents.top + dy, 0.0);		
@@ -39,7 +150,8 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		default:
 			break;
 	}
-	box->Release();
+	if (box)
+		box->Release();
 } 
 
 // ***************************************************************
@@ -313,7 +425,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			double xTemp, yTemp;
 			
 			CMeasuring* m = (CMeasuring*)m_measuring;
-			for(size_t i = 0; i < m->points.size() - 2; i++)
+			int size = m->points.size() - 2;
+			for(int i = 0; i < size; i++)
 			{
 				ProjToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, &xTemp, &yTemp);
 				double dist = sqrt( pow(point.x - xTemp, 2.0) + pow(point.y - yTemp, 2.0));
@@ -362,7 +475,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				((CMeasuring*)m_measuring)->ClosePoly(closePointIndex);
 
 			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointAdded);
-			m_drawMouseMoves = false;	// we need to redraw in a normal way at least once
+			_canUseMainBuffer = false;
 
 			// better to call it before the redraw
 			if( m_sendMouseDown ) {
@@ -568,7 +681,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 			if (m_UseSeamlessPan)
 			{
-				m_canbitblt = FALSE;	// lsu (07/03/2009) added for seamless panning; suggested by Bobby at http://www.mapwindow.org/phorum/read.php?3,13099
+				_canUseLayerBuffer = FALSE;	// lsu (07/03/2009) added for seamless panning; suggested by Bobby at http://www.mapwindow.org/phorum/read.php?3,13099
 				LockWindow(lmUnlock);	
 
 				FireExtentsChanged(); 
@@ -581,121 +694,134 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	if( m_cursorMode == cmMeasure ) {
+	bool refreshNeeded = false;
+
+	if( m_cursorMode == cmMeasure ) 
+	{
 		CMeasuring* m =((CMeasuring*)m_measuring);
-		if (!m->IsStopped())
+		if (!m->IsStopped() && m->points.size() > 0)
 		{
 			double x, y;
 			this->PixelToProjection( point.x, point.y, x, y );
 			m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
 			m->mousePoint.y = point.y;
-			m_drawMouseMoves = true;
-			this->Refresh();
+			_canUseMainBuffer = false;
+			refreshNeeded = true;
 		}
 	}
 
 	// Hot tracking
-	double pixX = point.x;
-	double pixY = point.y;
-	double prjX, prjY;
-	this->PixelToProj(pixX, pixY, &prjX, &prjY);
-	
-	bool found = false;
-	IShapefile * sf = NULL;
-
-	for(int i = 0; i < (int)m_activeLayers.size(); i++ )
+	if (_hasHotTracking)
 	{
-		Layer* layer = m_allLayers[m_activeLayers[i]];
-		if (layer->type == ShapefileLayer)
+		double pixX = point.x;
+		double pixY = point.y;
+		double prjX, prjY;
+		this->PixelToProj(pixX, pixY, &prjX, &prjY);
+		
+		bool found = false;
+		IShapefile * sf = NULL;
+
+		for(int i = 0; i < (int)m_activeLayers.size(); i++ )
 		{
-			//layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			//if (sf)
-			if (layer->QueryShapefile(&sf))
+			Layer* layer = m_allLayers[m_activeLayers[i]];
+			if (layer->type == ShapefileLayer)
 			{
-				VARIANT_BOOL hotTracking = VARIANT_FALSE;
-				sf->get_HotTracking(&hotTracking);
-				if (hotTracking)
+				if (layer->QueryShapefile(&sf))
 				{
-					std::vector<long> shapes;
-
-					double tol = 0.0;
-					ShpfileType type;
-					sf->get_ShapefileType(&type);
-					type = Utility::ShapeTypeConvert2D(type);
-					if (type == SHP_MULTIPOINT || type == SHP_POINT)
-						tol = 5.0/this->PixelsPerMapUnit();
-
-					((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
-					
-					if (shapes.size() > 0)
+					VARIANT_BOOL hotTracking = VARIANT_FALSE;
+					sf->get_HotTracking(&hotTracking);
+					if (hotTracking)
 					{
-						if (m_activeLayers[i] != m_hotTracking.LayerHandle ||
-							shapes[0] != m_hotTracking.ShapeId)
+						std::vector<long> shapes;
+
+						double tol = 0.0;
+						ShpfileType type;
+						sf->get_ShapefileType(&type);
+						type = Utility::ShapeTypeConvert2D(type);
+						if (type == SHP_MULTIPOINT || type == SHP_POINT)
+							tol = 5.0/this->PixelsPerMapUnit();
+
+						((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
+						
+						if (shapes.size() > 0)
 						{
-							IShape* shape = NULL;
-							sf->get_Shape(shapes[0], &shape);
-							if (shape)
+							if (m_activeLayers[i] != m_hotTracking.LayerHandle || shapes[0] != m_hotTracking.ShapeId)
 							{
-								IShape* shpClone = NULL;
-								shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
-															// on the first glance shape shouldn't be released on closing the shapefile
-								ULONG cnt = shape->Release();
-
-								if (!m_hotTracking.Shapefile)
-									CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(m_hotTracking.Shapefile));
-								else
-									m_hotTracking.Shapefile->Close(&vbretval);
-
-								if (m_hotTracking.Shapefile)
+								IShape* shape = NULL;
+								sf->get_Shape(shapes[0], &shape);
+								if (shape)
 								{
-									ShpfileType type;
-									sf->get_ShapefileType(&type);
-									
-									((CShapefile*)m_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
-									long index = 0;
-									m_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
-									m_hotTracking.Shapefile->RefreshExtents(&vbretval);
-									m_hotTracking.LayerHandle = m_activeLayers[i];
-									m_hotTracking.ShapeId = shapes[0];
+									IShape* shpClone = NULL;
+									shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
+																// on the first glance shape shouldn't be released on closing the shapefile
+									ULONG cnt = shape->Release();
 
-									IShapeDrawingOptions* options = NULL;
-									sf->get_SelectionDrawingOptions(&options);
-									if (options)
+									if (!m_hotTracking.Shapefile)
+										CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(m_hotTracking.Shapefile));
+									else
+										m_hotTracking.Shapefile->Close(&vbretval);
+
+									if (m_hotTracking.Shapefile)
 									{
-										m_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-										options->Release();
+										ShpfileType type;
+										sf->get_ShapefileType(&type);
+										
+										((CShapefile*)m_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
+										long index = 0;
+										m_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
+										m_hotTracking.Shapefile->RefreshExtents(&vbretval);
+										m_hotTracking.LayerHandle = m_activeLayers[i];
+										m_hotTracking.ShapeId = shapes[0];
+
+										IShapeDrawingOptions* options = NULL;
+										sf->get_SelectionDrawingOptions(&options);
+										if (options)
+										{
+											m_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+											options->Release();
+										}
+										
 									}
-									this->Refresh();
-									
-									// pasing event to the caller
-									this->FireShapeHighlighted(m_hotTracking.LayerHandle, m_hotTracking.ShapeId);
+									shpClone->Release();   // there is one reference in new shapefile
+									found = true;
 								}
-								shpClone->Release();
 							}
 						}
-						found = true;
 					}
+					
+					sf->Release();
+					sf = NULL;
 				}
-				
-				sf->Release();
-				sf = NULL;
-
-				if (found)
-					break;
 			}
+
+			if (found)
+			{
+				// pasing event to the caller
+				this->FireShapeHighlighted(m_hotTracking.LayerHandle, m_hotTracking.ShapeId);
+				_canUseMainBuffer = false;
+				refreshNeeded = true;
+				break;
+			}
+		}
+
+		if (!found && m_hotTracking.ShapeId != -1)
+		{
+			m_hotTracking.ShapeId = -1;
+			m_hotTracking.LayerHandle = -1;
+			if (m_hotTracking.Shapefile)
+				m_hotTracking.Shapefile->Close(&vbretval);
+			
+			// pasing event to the caller
+			this->FireShapeHighlighted(-1, -1);
 		}
 	}
 
-	if (!found && m_hotTracking.ShapeId != -1)
-	{
-		m_hotTracking.ShapeId = -1;
-		m_hotTracking.LayerHandle = -1;
-		if (m_hotTracking.Shapefile)
-			m_hotTracking.Shapefile->Close(&vbretval);
+	if (_showCoordinates != cdmNone) {
+		refreshNeeded = true;
+	}
+
+	if (refreshNeeded) {
 		this->Refresh();
-		
-		// pasing event to the caller
-		this->FireShapeHighlighted(-1, -1);
 	}
 }
 
@@ -729,11 +855,13 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		{
 			((CMeasuring*)m_measuring)->UndoPoint(&redraw);
 			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointRemoved);
-			m_drawMouseMoves = false;	// we need to redraw in a normal way at least once
+			_canUseMainBuffer = false;
 		}
 
 		if( m_sendMouseDown == TRUE )
 			this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+
+		_reverseZooming = true;
 
 		if( m_cursorMode == cmZoomOut )
 		{
@@ -749,6 +877,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			extents.top = zy + halfyRange;
 
 			ZoomIn( m_zoomPercent );
+			::SetCursor( m_cursorZoomin );
 
 			FireExtentsChanged();
 			ReloadImageBuffers();
@@ -767,6 +896,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			extents.top = zy + halfyRange;
 
 			ZoomOut( m_zoomPercent );
+			::SetCursor( m_cursorZoomout );
 
 			FireExtentsChanged();
 			ReloadImageBuffers();
@@ -785,6 +915,10 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	COleControl::OnRButtonUp(nFlags, point);
 	ReleaseCapture();//why is this being called, capture isn't set on RButtonDown as far as I can see...
+
+	_reverseZooming = false;
+	if (m_cursorMode == cmZoomIn) ::SetCursor( m_cursorZoomin );
+	if (m_cursorMode == cmZoomOut) ::SetCursor( m_cursorZoomout );
 
 	long vbflags = 0;
 	if( nFlags & MK_SHIFT )
@@ -913,7 +1047,7 @@ void CMapView::OnDropFiles(HDROP hDropInfo)
 // *******************************************************
 void CMapView::OnBackColorChanged()
 {
-	m_canbitblt = FALSE;
+	_canUseLayerBuffer = FALSE;
 	if( !m_lockCount )
 		InvalidateControl();
 }
@@ -946,11 +1080,11 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			switch( m_cursorMode )
 			{
 				case cmZoomIn:
-					NewCursor = m_cursorZoomin;
+					NewCursor = _reverseZooming ?  m_cursorZoomout : m_cursorZoomin;
 					break;
 
 				case cmZoomOut:
-					NewCursor = m_cursorZoomout;
+					NewCursor = _reverseZooming ?  m_cursorZoomin : m_cursorZoomout;
 					break;
 
 				case cmPan:
@@ -959,6 +1093,10 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 				case cmSelection:
 					NewCursor = m_cursorSelect;
+					break;
+				
+				case cmMeasure:
+					NewCursor = m_cursorMeasure;
 					break;
 
 				case cmNone:
@@ -1072,17 +1210,12 @@ void CMapView::OnTimer(UINT nIDEvent)
 void CMapView::OnResetState()
 {
 	COleControl::OnResetState();  // Resets defaults found in DoPropExchange
-	// TODO: Reset any other control state here.
+	//SetDefaults();		// TODO: Reset any other control state here.
 }
 
 // *********************************************************
-//		Unimplemented events
+//		OnResetState 
 // *********************************************************
-void CMapView::OnExtentPadChanged(){}
-void CMapView::OnExtentHistoryChanged(){}
-void CMapView::OnKeyChanged(){}
-void CMapView::OnDoubleBufferChanged(){}
-void CMapView::OnZoomPercentChanged(){}
 void CMapView::OnCursorModeChanged()
 {
 	if (m_measuring)
@@ -1093,6 +1226,15 @@ void CMapView::OnCursorModeChanged()
 			m_measuring->Clear();
 	}
 }
+
+// *********************************************************
+//		Unimplemented events
+// *********************************************************
+void CMapView::OnExtentPadChanged(){}
+void CMapView::OnExtentHistoryChanged(){}
+void CMapView::OnKeyChanged(){}
+void CMapView::OnDoubleBufferChanged(){}
+void CMapView::OnZoomPercentChanged(){}
 void CMapView::OnUDCursorHandleChanged(){}
 void CMapView::OnSendMouseDownChanged(){}
 void CMapView::OnSendOnDrawBackBufferChanged(){}

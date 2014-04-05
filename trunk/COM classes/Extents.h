@@ -86,6 +86,8 @@ public:
 	STDMETHOD(ToDebugString)(BSTR* retVal);
 	STDMETHOD(PointIsWithin)(double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(get_Center)(IPoint** retVal);
+	STDMETHOD(MoveTo)(double x, double y);
+	
 private:
 	double xmin;
 	double xmax;

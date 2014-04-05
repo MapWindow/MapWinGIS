@@ -98,7 +98,11 @@ const char * ErrorMsg( long ErrorCode )
 		case tkMETHOD_NOT_IMPLEMENTED:
 			return "The method you called is not implemented";
 		case tkFOLDER_NOT_EXISTS:
-			return "Folder specified folder doesn't exist";
+			return "Folder doesn't exist";
+		case tkFILE_NOT_EXISTS:
+			return "File doesn't exist";
+		case tkMETHOD_DEPRECATED:
+			return "Method deprecated.";
 
 			//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
@@ -220,7 +224,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkFAILED_TO_OBTAIN_DC:
 			return "Failed to obtain device context from handle.";
 		case tkCANT_DISPLAY_WITHOUT_EXTERNAL_SCHEME:
-			return "Can't display datasource without external color scheme. Therefore Image.AllowExternalColorScheme can't be set to false.";
+			return "Can't display datasource without external color scheme. Therefore Image.AllowGridRendering can't be set to false.";
 
 		//801-1000 = tkdbf
 		case tkCANT_OPEN_DBF:
@@ -313,6 +317,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Layer specified in MapState string failed to load";
 		case tkMAP_PROJECTION_NOT_SET:
 			return "Map projection isn't set. See Map.SetGeoProjection method.";
+		case tkINVALID_GEOGRAPHIC_COORDINATES:
+			return "Invalid geographic coordinates.";
 
 		//1401-1600 = tktinvuc
 		case tkVALUE_MUST_BE_2_TO_N:

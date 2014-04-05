@@ -49,7 +49,7 @@ class YandexMapProvider: public YandexBaseProvider
 public:
 	YandexMapProvider() 
 	{
-		Version = "4.6.9"; //"2.48.0";
+		Version = "4.13.1";
 		UrlServer = "vec";
 		Id = tkTileProvider::YandexMaps;
 		Name = "YandexMaps";
@@ -64,7 +64,7 @@ public:
 	YandexSatelliteProvider() 
 	{
 		UrlServer = "sat";
-		Version = "3.140.0";
+		Version = "3.154.0";
 		Id = tkTileProvider::YandexSatellite;
 		Name = "YandexSatellite";
 		UrlFormat = "http://%s0%d.maps.yandex.net/tiles?l=sat&v=%s&x=%d&y=%d&z=%d";		
@@ -78,7 +78,7 @@ public:
 	YandexHybridProvider(CTileProviders* list) 
 	{
 		UrlServer = "vec";
-		Version = "4.6.9"; //"2.48.0";
+		Version = "4.13.1";
 		Id = tkTileProvider::YandexHybrid;
 		Name = "YandexHybrid";
 		UrlFormat = "http://%s0%d.maps.yandex.net/tiles?l=skl&v=%s&x=%d&y=%d&z=%d";		

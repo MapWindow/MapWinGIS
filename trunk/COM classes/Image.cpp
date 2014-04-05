@@ -160,8 +160,7 @@ void CImageClass::LoadImageAttributesFromGridColorScheme(IGridColorScheme* schem
 		this->put_TransparencyColor2(color);
 		this->put_UseTransparencyColor(true);
 		this->put_UpsamplingMode(tkInterpolationMode::imNone);		// we actually want to see pixels in grids
-		this->put_DownsamplingMode(tkInterpolationMode::imNone);		// for performance reasons
-		// TODO: probably sampling mode should be stored in the color scheme
+		this->put_DownsamplingMode(tkInterpolationMode::imNone);	// for performance reasons
 	}
 }
 
@@ -173,8 +172,6 @@ void CImageClass::LoadImageAttributesFromGridColorScheme(IGridColorScheme* schem
 void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval)
 {
 	USES_CONVERSION;
-
-	//CStringW ImageFile = OLE2CW(ImageFileName);
 	fileName = OLE2W(ImageFileName);	
 	inRam = (InRam == VARIANT_TRUE)?true:false;
 	
@@ -182,12 +179,11 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 	Close(retval);
 	if (*retval == VARIANT_FALSE)
 		return;
-
 	
 	// figuring out extension from the path
 	if(FileType == USE_FILE_EXTENSION)
 	{
-		if(getFileType(fileName, FileType) == false)
+		if(!getFileType(fileName, FileType))
 		{
 			// don't give up, we'll try to open it through GDAL
 			*retval = VARIANT_FALSE;
@@ -197,13 +193,8 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 	if (FileType == BITMAP_FILE)
 	{
 		_bitmapImage = new tkBitmap();
+		if (!globalCallback) this->put_GlobalCallback(cBack);
 		_bitmapImage->globalCallback = globalCallback;
-		if (!globalCallback && cBack)
-		{
-			_bitmapImage->globalCallback = cBack;
-			globalCallback = cBack;
-			cBack->AddRef();
-		}
 
 		ImgType = BITMAP_FILE;
 		*retval = ReadBMP( fileName, inRam)?VARIANT_TRUE:VARIANT_FALSE;
@@ -219,18 +210,13 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 		// we can keep up with. If all of its drivers fail, retval will be false anyway.
 		
 		_rasterImage = new tkRaster();
+		if (!globalCallback) this->put_GlobalCallback(cBack);
 		_rasterImage->cBack = globalCallback;
-		if (!globalCallback && cBack)
-		{
-			globalCallback = cBack;
-			_rasterImage->cBack = cBack;
-			cBack->AddRef();
-		}
 
 		ImgType = FileType;
 		*retval = ReadRaster(fileName, accessMode)?VARIANT_TRUE:VARIANT_FALSE;
 		
-		if (*retval == VARIANT_TRUE)
+		if (*retval)
 		{
 			// setting the type (file extention); for information only?
 			switch(FileType)
@@ -272,9 +258,6 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 // checks if this is a proxy for some grid
 bool CImageClass::CheckForProxy()
 {	
-	// TODO!!!: save grid color scheme; for further serialization
-
-	// TODO: update if more proxy formats are available
 	if (Utility::EndsWith(fileName, L"_proxy.bmp") ||
 		Utility::EndsWith(fileName, L"_proxy.tif") )
 	{
@@ -285,6 +268,13 @@ bool CImageClass::CheckForProxy()
 			
 			const char* value = CPLGetXMLValue( node, "GridName", NULL );
 			CStringW nameW = Utility::ConvertFromUtf8(value);
+
+			if (nameW.GetLength() == 0 && fileName.GetLength() > 16) 
+			{
+				// there is no name; try to guess it
+				//nameW = fileName.Left(fileName.GetLength() - 16);
+				// TODO: how to guess extension
+			}
 
 			if (nameW.GetLength() > 0)
 			{
@@ -330,12 +320,10 @@ bool CImageClass::ReadRaster(const CStringW ImageFile, GDALAccess accessMode)
 	}
 	fileName = ImageFile;
 	
-	// lsu: buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
+	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
 	
 	transColor = (int)_rasterImage->transColor;		// default is RGB(0,0,0) if no data value wan't set
 	transColor2 = (int)_rasterImage->transColor;
-
-	Debug::WriteLine("TransparentColor: %d", transColor );
 
 	// TODO: it's possible to add code to determine transparency by the prevaling color
 	useTransColor = _rasterImage->hasTransparency?VARIANT_TRUE:VARIANT_FALSE;
@@ -582,7 +570,7 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 
 	_sourceType = istUninitialized;
 	isGridProxy = false;
-	sourceGridName = "";
+	sourceGridName = L"";
 
 	*retval = VARIANT_TRUE;
 	return S_OK;
@@ -1265,9 +1253,16 @@ bool CImageClass::getFileType(const CStringW ImageFile, ImageType &ft)
 	{
 		ft = NTF_FILE;
 	}
+	else if(ext.CompareNoCase("vrt") == 0)
+	{
+		ft = VRT_FILE;
+	}
+	else if(ext.CompareNoCase("nc") == 0)
+	{
+		ft = NETCDF_FILE;
+	}
 	else
-	{	//unhandled file extension, return false;
-		ErrorMessage(tkUNSUPPORTED_FILE_EXTENSION);
+	{	//ErrorMessage(tkUNSUPPORTED_FILE_EXTENSION);    // no need to report error, as GDAL may still open it
 		return false;
 	}
 
@@ -3205,59 +3200,61 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	
 	// properties
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", OLE2CA(key));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "SetToGrey", CPLString().Printf("%d", (int)setRGBToGrey));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor", CPLString().Printf("%d", transColor));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor2", CPLString().Printf("%d", transColor2));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseTransparencyColor", CPLString().Printf("%d", (int)useTransColor));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyPercent", CPLString().Printf("%f", m_transparencyPercent));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "DownsamplingMode", CPLString().Printf("%d", (int)m_downsamplingMode));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "UpsamplingMode", CPLString().Printf("%d", (int)m_upsamplingMode));
+	CString skey = OLE2CA(key);
+	if (skey.GetLength() != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", skey);
+	if (setRGBToGrey != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SetToGrey", CPLString().Printf("%d", (int)setRGBToGrey));
+	if (transColor != RGB(0,0,0))
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor", CPLString().Printf("%d", transColor));
+	if (transColor != transColor2)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor2", CPLString().Printf("%d", transColor2));
+	if (useTransColor != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseTransparencyColor", CPLString().Printf("%d", (int)useTransColor));
+	if (m_transparencyPercent != 1.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyPercent", CPLString().Printf("%f", m_transparencyPercent));
+	if (m_downsamplingMode != imNone)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DownsamplingMode", CPLString().Printf("%d", (int)m_downsamplingMode));
+	if (m_upsamplingMode != imBilinear)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UpsamplingMode", CPLString().Printf("%d", (int)m_upsamplingMode));
+	
+	PredefinedColorScheme colors;
+	get_ImageColorScheme(&colors);
+	if ( colors != FallLeaves)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ImageColorScheme", CPLString().Printf("%d", (int)colors));
 
 	if (gdalImage)
 	{
 		// GDAL only properties
-		tkUseFunctionality allowExtScheme;
-		this->get_AllowExternalColorScheme(&allowExtScheme);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowExternalColorScheme", CPLString().Printf("%d", (int)allowExtScheme));
+		tkGridRendering allowExtScheme;
+		this->get_AllowGridRendering(&allowExtScheme);
+		if (allowExtScheme != tkGridRendering::grForGridsOnly)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowGridRendering", CPLString().Printf("%d", (int)allowExtScheme));
 
 		VARIANT_BOOL allowHillshade;
 		this->get_AllowHillshade(&allowHillshade);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowHillshade", CPLString().Printf("%d", (int)allowHillshade));
+		if (allowHillshade != VARIANT_FALSE)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowHillshade", CPLString().Printf("%d", (int)allowHillshade));
 
 		int bufferSize;
 		this->get_BufferSize(&bufferSize);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "BufferSize", CPLString().Printf("%d", bufferSize));
+		if (bufferSize != 100.0)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "BufferSize", CPLString().Printf("%d", bufferSize));
 
 		VARIANT_BOOL clearCache;
 		this->get_ClearGDALCache(&clearCache);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "ClearGdalCache", CPLString().Printf("%d", (int)clearCache));
+		if (clearCache != VARIANT_FALSE)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "ClearGdalCache", CPLString().Printf("%d", (int)clearCache));
 
 		int bandIndex;
-		this->get_ExternalColorSchemeBandIndex(&bandIndex);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "ExternalColorSchemeBandIndex", CPLString().Printf("%d", bandIndex));
+		this->get_SourceGridBandIndex(&bandIndex);
+		if (bandIndex != -1)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceGridBandIndex", CPLString().Printf("%d", bandIndex));
 		
 		VARIANT_BOOL useHistogram;
-		this->get_ClearGDALCache(&useHistogram);
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseHistogram", CPLString().Printf("%d", (int)useHistogram));
-	}
-
-	// saving grid color scheme
-	if (sourceGridName.GetLength() != 0)
-	{
-		// TODO!!!: where colorscheme should be stored for bmp images?
-		IGridColorScheme* scheme = NULL;
-		if (gdalImage)
-		{
-			scheme = _rasterImage->get_GridColorScheme();
-		}
-		CPLXMLNode* nodeScheme = ((CGridColorScheme*)scheme)->SerializeCore("GridColorSchemeClass");
-		if (nodeScheme)
-		{
-			CPLAddXMLChild(psTree, nodeScheme);
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceGridName", sourceGridName);
-		}
-		scheme->Release();
+		this->get_UseHistogram(&useHistogram);
+		if (useHistogram != VARIANT_FALSE)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseHistogram", CPLString().Printf("%d", (int)useHistogram));
 	}
 
 	if (SerializePixels)	// check if the buffer is loaded
@@ -3337,20 +3334,6 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 		}
 	}
 
-	// grid color scheme
-	/*if (gdalImage)
-	{
-		IGridColorScheme* scheme = _rasterImage->get_GridColorScheme();
-		if (scheme)
-		{
-			CPLXMLNode* node = ((CGridColorScheme*)scheme)->SerializeCore("GridColorSchemeClass");
-			if (node)
-			{
-				CPLAddXMLChild(psTree, node);
-			}
-		}
-	}*/
-
 	// labels
 	if (!SerializePixels)	// if pixels are serialized, then it's icon or a texture;
 							// it's obvious that no labels can be there
@@ -3369,6 +3352,8 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 // ********************************************************
 bool CImageClass::DeserializeCore(CPLXMLNode* node)
 {
+	SetDefaults();
+	
 	CString s;
 	CPLXMLNode* nodeBuffer = CPLGetXMLNode(node, "ImageBuffer");
 	if (nodeBuffer)
@@ -3428,7 +3413,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 			}
 		}
 	}
-	
+
 	s = CPLGetXMLValue( node, "Key", NULL );
 	if (s != "") this->put_Key(A2BSTR(s));
 
@@ -3439,7 +3424,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 	if (s != "") transColor = (OLE_COLOR)atoi(s);
 
 	s = CPLGetXMLValue( node, "TransparencyColor2", NULL );
-	if (s != "") transColor2 = (OLE_COLOR)atoi(s);
+	transColor2 = s != "" ? (OLE_COLOR)atoi(s) : transColor ;
 
 	s = CPLGetXMLValue( node, "UseTransparencyColor", NULL );
 	if (s != "") useTransColor = (VARIANT_BOOL)atoi(s);
@@ -3463,28 +3448,10 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 	// GridColorScheme
 	if (gdalImage)
 	{
-		psChild = CPLGetXMLNode(node, "GridColorSchemeClass");
-		if (psChild)
-		{
-			IGridColorScheme* scheme = NULL;
-			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme );
-			if (scheme)
-			{
-				((CGridColorScheme*)scheme)->DeserializeCore(psChild);
-			}
-			VARIANT_BOOL vb;
-			_pushSchemetkRaster(scheme, &vb);
-			scheme->Release();
-
-			USES_CONVERSION;
-			s = CPLGetXMLValue( node, "SourceGridName", NULL );		// TODO: use Unicode
-			if (s != "") sourceGridName = A2W(s);
-		}
-
-		tkUseFunctionality allowColorScheme;
-		s = CPLGetXMLValue( node, "AllowExternalColorScheme", "0" );
-		if (s != "") allowColorScheme = (tkUseFunctionality)atoi(s);
-		this->put_AllowExternalColorScheme(allowColorScheme);
+		tkGridRendering allowColorScheme;
+		s = CPLGetXMLValue( node, "AllowGridRendering", "0" );
+		if (s != "") allowColorScheme = (tkGridRendering)atoi(s);
+		this->put_AllowGridRendering(allowColorScheme);
 
 		VARIANT_BOOL allowHillshade;
 		s = CPLGetXMLValue( node, "AllowHillshade", "1" );
@@ -3502,14 +3469,19 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 		this->put_ClearGDALCache(clearCache);
 
 		int bandIndex;
-		s = CPLGetXMLValue( node, "ExternalColorSchemeBandIndex", "1" );
+		s = CPLGetXMLValue( node, "SourceGridBandIndex", "1" );
 		if (s != "") bandIndex = atoi(s);
-		this->put_ExternalColorSchemeBandIndex(bandIndex);
+		this->put_SourceGridBandIndex(bandIndex);
 
 		VARIANT_BOOL useHistogram;
 		s = CPLGetXMLValue( node, "UseHistogram", "1" );
 		if (s != "") useHistogram = (VARIANT_BOOL)atoi(s);
 		this->put_UseHistogram(useHistogram);
+
+		PredefinedColorScheme colors;
+		s = CPLGetXMLValue( node, "ImageColorScheme", "0" );
+		if (s != "") colors = (PredefinedColorScheme)atoi(s);
+		_rasterImage->ApplyPredefinedColorScheme(colors);
 	}
 	return true;
 }
@@ -3570,19 +3542,9 @@ STDMETHODIMP CImageClass::get_IsGridProxy(VARIANT_BOOL* retVal)
 }
 
 // ********************************************************
-//     get_CanUseExternalColorScheme()
+//     get_GridRendering()
 // ********************************************************
-STDMETHODIMP CImageClass::get_CanUseExternalColorScheme(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	(*retVal) = gdalImage ? _rasterImage->CanUseExternalColorScheme() : false;	 
-	return S_OK;
-}
-
-// ********************************************************
-//     get_IsUsingExternalColorScheme()
-// ********************************************************
-STDMETHODIMP CImageClass::get_IsUsingExternalColorScheme(VARIANT_BOOL* retVal)
+STDMETHODIMP CImageClass::get_GridRendering(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = gdalImage ? _rasterImage->WillBeRenderedAsGrid() : VARIANT_FALSE;
@@ -3590,24 +3552,20 @@ STDMETHODIMP CImageClass::get_IsUsingExternalColorScheme(VARIANT_BOOL* retVal)
 }
 
 // ********************************************************
-//     AllowExternalColorScheme
+//     AllowGridRendering
 // ********************************************************
-STDMETHODIMP CImageClass::get_AllowExternalColorScheme(tkUseFunctionality * pVal)
+STDMETHODIMP CImageClass::get_AllowGridRendering(tkGridRendering * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = gdalImage ? _rasterImage->allowAsGrid : tkUseFunctionality::useAutoDetect;
+	*pVal = gdalImage ? _rasterImage->allowAsGrid : tkGridRendering::grForGridsOnly;
 	return S_OK;
 }
-STDMETHODIMP CImageClass::put_AllowExternalColorScheme(tkUseFunctionality newValue)
+STDMETHODIMP CImageClass::put_AllowGridRendering(tkGridRendering newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (gdalImage)
 	{
-		if (!_rasterImage->IsRgb() && newValue == tkUseFunctionality::useNever)
-		{
-			ErrorMsg(tkNOT_APPLICABLE_TO_BITMAP);
-		}
-		else
+		if (_rasterImage->allowAsGrid != newValue)
 		{
 			_rasterImage->allowAsGrid = newValue;
 			this->_imageChanged = true;
@@ -3629,7 +3587,7 @@ STDMETHODIMP CImageClass::_pushSchemetkRaster(IGridColorScheme * cScheme, VARIAN
 	{
 		if ( cScheme )
 		{
-			_rasterImage->ApplyGridColorScheme(cScheme);
+			_rasterImage->ApplyCustomColorScheme(cScheme);
 			_imageChanged = true;
 			*retval = VARIANT_TRUE;
 		}
@@ -3653,7 +3611,7 @@ STDMETHODIMP CImageClass::_pushSchemetkRaster(IGridColorScheme * cScheme, VARIAN
 STDMETHODIMP CImageClass::get_ImageColorScheme(PredefinedColorScheme * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = gdalImage ? _rasterImage->imageColorScheme : FallLeaves;
+	*pVal = gdalImage ? _rasterImage->GetDefaultColors() : FallLeaves;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_ImageColorScheme(PredefinedColorScheme newValue)
@@ -3661,7 +3619,7 @@ STDMETHODIMP CImageClass::put_ImageColorScheme(PredefinedColorScheme newValue)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (gdalImage)
 	{
-		_rasterImage->imageColorScheme = newValue;
+		_rasterImage->ApplyPredefinedColorScheme(newValue);
 		this->_imageChanged = true;
 	}
 	return S_OK;
@@ -3670,12 +3628,12 @@ STDMETHODIMP CImageClass::put_ImageColorScheme(PredefinedColorScheme newValue)
 // ********************************************************
 //     ImageColorScheme2
 // ********************************************************
-STDMETHODIMP CImageClass::get_ExternalColorScheme(IGridColorScheme** retVal)
+STDMETHODIMP CImageClass::get_CustomColorScheme(IGridColorScheme** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (gdalImage && _rasterImage )
 	{
-		IGridColorScheme* scheme = _rasterImage->get_GridColorScheme();
+		IGridColorScheme* scheme = _rasterImage->get_CustomColorScheme();
 		if (scheme)	scheme->AddRef();
 		(*retVal) = scheme;
 	}
@@ -3686,7 +3644,7 @@ STDMETHODIMP CImageClass::get_ExternalColorScheme(IGridColorScheme** retVal)
 	}
 	return S_OK;
 }
-STDMETHODIMP CImageClass::put_ExternalColorScheme(IGridColorScheme* newValue)
+STDMETHODIMP CImageClass::put_CustomColorScheme(IGridColorScheme* newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vb;
@@ -3746,15 +3704,15 @@ STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 }
 
 // ********************************************************
-//     ExternalColorSchemeBandIndex
+//     SourceGridBandIndex
 // ********************************************************
-STDMETHODIMP CImageClass::get_ExternalColorSchemeBandIndex(int * pVal)
+STDMETHODIMP CImageClass::get_SourceGridBandIndex(int * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = gdalImage ? _rasterImage->activeBandIndex : -1;
 	return S_OK;
 }
-STDMETHODIMP CImageClass::put_ExternalColorSchemeBandIndex(int newValue)
+STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (gdalImage)

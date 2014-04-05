@@ -148,7 +148,7 @@ INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvide
 //    LoadTiles()
 // *********************************************************************
 // Loads tiles for specified extents
-void CMapView::LoadTiles(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider)
+void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
@@ -338,7 +338,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	}
 	
 	// do the drawing
-	m_canbitblt=FALSE;
+	_canUseLayerBuffer=FALSE;
 	m_isSnapshot = true;
 
 	
@@ -352,15 +352,13 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
 	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcClip : &rcBounds;
 	
-	HandleNewDrawing(snapDC, rcBounds, *r, offsetX, offsetY);
+	// draws to output canvas directly because of m_isSnapshot parameter
+	HandleNewDrawing(snapDC, rcBounds, *r, true, offsetX, offsetY);
 	
-	CMeasuring* m = (CMeasuring*)m_measuring;
-	if (m->persistent && m->IsStopped() && m->measuringType == tkMeasuringType::MeasureArea)
-	{
-		DrawMouseMoves(snapDC, rcBounds, *r, true, offsetX, offsetY);
-	}
+	// drawing on the output canvas atop the previous drawing, naturally we don't care about flickering here
+	DrawMouseMoves(snapDC, rcBounds, *r, false, offsetX, offsetY);
 
-	m_canbitblt=FALSE;
+	_canUseLayerBuffer=FALSE;
 	m_isSnapshot = false;
 
 	if (createDC)

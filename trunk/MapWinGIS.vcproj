@@ -1679,6 +1679,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\FileManager.rgs"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\GeoProjection.rgs"
 					>
 				</File>
@@ -1835,6 +1839,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\COM classes\FileManager.h"
+					>
+				</File>
+				<File
 					RelativePath=".\COM classes\GeoProjection.h"
 					>
 				</File>
@@ -1984,6 +1992,10 @@
 				</File>
 				<File
 					RelativePath=".\COM classes\FieldStatOperations.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\COM classes\FileManager.cpp"
 					>
 				</File>
 				<File
@@ -2332,6 +2344,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\Map_Projection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\Map_Properties.cpp"
 				>
 			</File>
@@ -2503,6 +2519,7 @@
 					>
 					<Tool
 						Name="VCMIDLTool"
+						WarningLevel="0"
 						TargetEnvironment="1"
 						GenerateStublessProxies="true"
 						TypeLibraryName=".\MapWinGIS.tlb"
@@ -4005,6 +4022,10 @@
 		</File>
 		<File
 			RelativePath=".\Resource\cursor4.cur"
+			>
+		</File>
+		<File
+			RelativePath=".\Resource\cursor5.cur"
 			>
 		</File>
 		<File

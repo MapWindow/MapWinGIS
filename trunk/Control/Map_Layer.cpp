@@ -38,6 +38,7 @@
 
 #include "Projections.h"
 #include "cpl_minixml.h"
+#include "gdalhelper.h"
 
 long CMapView::GetNumLayers()
 {
@@ -226,7 +227,7 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 			}
 		}
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 		{
 			InvalidateControl();
@@ -256,6 +257,24 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 		return NULL;
 	}
 }
+
+// ***************************************************************
+//		AddLayerFromFilename()
+// ***************************************************************
+long CMapView::AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible)
+{
+	USES_CONVERSION;
+	IDispatch* layer = NULL;
+	_fileManager->Open(A2BSTR(Filename), openStrategy, m_globalCallback, &layer);
+	if (layer) {
+		return AddLayer(layer, visible);
+	}
+	else {
+		return -1;
+	}
+}
+
+
 
 // ***************************************************************
 //		AddLayer()
@@ -455,14 +474,13 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			if (!((CImageClass*)iimg)->SaveNotNullPixels())	// analysing pixels...
 				iimg->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more, before transparency values will be changed
 		}
-		m_numImages++;
 	}
 	
 	// if we don't have a projection, let's try and grab projection from it
-	if (m_globalSettings.grabMapProjectionFromFirstLayer && (ishp || iimg))
+	if (_grabProjectionFromData && (ishp || iimg))
 	{
 		VARIANT_BOOL isEmpty = VARIANT_FALSE;
-		m_projection->get_IsEmpty(&isEmpty);
+		GetMapProjection()->get_IsEmpty(&isEmpty);
 		if (isEmpty)
 		{
 			IGeoProjection* proj = NULL;
@@ -534,39 +552,44 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 // ***************************************************************
 //		RemoveLayer()
 // ***************************************************************
-void CMapView::RemoveLayer(long LayerHandle)
+void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 {
 	try
 	{
 		if( IsValidLayer(LayerHandle) )
 		{
+			bool hadLayers = m_activeLayers.size() > 0;
+			
 			IShapefile * ishp = NULL;
 			IImage * iimg = NULL;
+			IGrid * igrid = NULL;
 
 			if (LayerHandle >= (long)m_allLayers.size()) return;
 			Layer * l = m_allLayers[LayerHandle];
 			if (l == NULL) return;
 
-			// Is it a SF?
 			l->QueryShapefile(&ishp);
-			//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-			// ...or an image?
 			l->QueryImage(&iimg);
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			l->object->QueryInterface(IID_IGrid, (void**)&igrid);
 
+			VARIANT_BOOL vb;
 			if (ishp != NULL)
 			{
-				// It was a shp
-				short retval;
-				ishp->Close(&retval);
+				if (closeDatasources)
+					ishp->Close(&vb);
 				ishp->Release();		// we release only once because one more release is in Layer destructor
 			}
 			if (iimg != NULL)
 			{
-				// It was an image
-				short retval;
-				iimg->Close(&retval);
+				if (closeDatasources)
+					iimg->Close(&vb);
 				iimg->Release();		// we release only once because one more release is in Layer destructor
+			}
+			if (igrid != NULL)
+			{	
+				if (closeDatasources)
+					igrid->Close(&vb);
+				igrid->Release();
 			}
 
 			for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
@@ -574,14 +597,6 @@ void CMapView::RemoveLayer(long LayerHandle)
 				if( m_activeLayers[i] == LayerHandle )
 				{	
 					m_activeLayers.erase( m_activeLayers.begin() + i );
-					
-					// lsu 03 apr 13: removed this behavior there can be tiles on the map
-					// so it's ok to have no layers
-
-					/*if( m_activeLayers.size() == 0 )
-					{	extents = Extent( 0.0, 0.0, 0.0, 0.0 );
-						m_prevExtents.clear();
-					}*/
 					break;
 				}
 			}
@@ -603,9 +618,12 @@ void CMapView::RemoveLayer(long LayerHandle)
 
 			m_allLayers[LayerHandle] = NULL;
 
+			if (m_activeLayers.size() == 0 && hadLayers)
+				ClearMapProjectionWithLastLayer();
+
 			FireLayersChanged();
 
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 			if( !m_lockCount )
 				InvalidateControl();
 		}
@@ -617,68 +635,19 @@ void CMapView::RemoveLayer(long LayerHandle)
 }
 
 // ***************************************************************
+//		RemoveLayer()
+// ***************************************************************
+void CMapView::RemoveLayer(long LayerHandle)
+{
+	RemoveLayerCore(LayerHandle, true);
+}
+
+// ***************************************************************
 //		RemoveLayerWithoutClosing()
 // ***************************************************************
 void CMapView::RemoveLayerWithoutClosing(long LayerHandle)
 {
-	if( IsValidLayer(LayerHandle) )
-	{
-		IShapefile * ishp = NULL;
-		IImage * iimg = NULL;
-		Layer * l = m_allLayers[LayerHandle];
-		IGrid * igrid = NULL;
-		
-		// Is it a SF?
-		//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-		l->QueryShapefile(&ishp);
-		// ...or an image?
-		//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-		l->QueryImage(&iimg);
-		// grid?
-		l->object->QueryInterface(IID_IGrid, (void**)&igrid);
-
-		// Release - but don't close :)
-		if (ishp != NULL) {	ishp->Release();}	
-		if (iimg != NULL) {iimg->Release(); }
-		if (igrid != NULL){	igrid->Release();}
-
-		for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
-		{	
-			if( m_activeLayers[i] == LayerHandle )
-			{	
-				m_activeLayers.erase( m_activeLayers.begin() + i );
-				if( m_activeLayers.size() == 0 )
-				{	
-					extents = Extent( 0.0, 0.0, 0.0, 0.0 );
-					m_prevExtents.clear();
-				}
-				break;
-			}
-		}
-
-		try
-		{
-			// This may have been deleted already.
-			if (m_allLayers[LayerHandle] != NULL)
-			{
-				delete m_allLayers[LayerHandle];
-			}
-		}
-		catch(...)
-		{
-			#ifdef _DEBUG
-						AfxMessageBox("CMapView::RemoveLayer: Exception while deleting Layer.");
-			#endif
-		}
-		
-		m_allLayers[LayerHandle] = NULL;
-
-		m_canbitblt = FALSE;
-		if( !m_lockCount )
-			InvalidateControl();
-	}
-	else
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
+	RemoveLayerCore(LayerHandle, false);
 }
 
 // ***************************************************************
@@ -697,24 +666,15 @@ void CMapView::RemoveAllLayers()
 		}
 	}
 	m_allLayers.clear();
-	FireLayersChanged();
+	//FireLayersChanged();
 
 	LockWindow( lmUnlock );
-	
-	// clear the projection
-	if (m_globalSettings.grabMapProjectionFromFirstLayer)
-	{
-		VARIANT_BOOL isEmpty;
-		m_projection->get_IsEmpty(&isEmpty);
-		if (hadLayers && !isEmpty)
-		{
-			IGeoProjection* proj = NULL;
-			GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
-			SetGeoProjection(proj);
-		}
-	}
 
-	m_canbitblt = FALSE;
+	//if (hadLayers)
+	//	ClearMapProjectionWithLastLayer();		// it is removed in RemoveLayerCore
+
+	_activeLayerPosition = 0;
+	_canUseLayerBuffer = FALSE;
 
 	if( !m_lockCount )
 		InvalidateControl();
@@ -737,7 +697,7 @@ BOOL CMapView::MoveLayerUp(long InitialPosition)
 
 		m_activeLayers.insert( m_activeLayers.begin() + newPos, layerHandle );
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 		return TRUE;
@@ -765,7 +725,7 @@ BOOL CMapView::MoveLayerDown(long InitialPosition)
 
 		m_activeLayers.insert( m_activeLayers.begin() + newPos, layerHandle );
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 
@@ -794,7 +754,7 @@ BOOL CMapView::MoveLayer(long InitialPosition, long TargetPosition)
 		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
 		m_activeLayers.insert( m_activeLayers.begin() + TargetPosition, layerHandle );
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 
@@ -818,7 +778,7 @@ BOOL CMapView::MoveLayerTop(long InitialPosition)
 		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
 		m_activeLayers.push_back(layerHandle);
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 		return TRUE;
@@ -841,7 +801,7 @@ BOOL CMapView::MoveLayerBottom(long InitialPosition)
 		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
 		m_activeLayers.push_front(layerHandle);
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 		return TRUE;
@@ -888,7 +848,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		else if(l->type == ImageLayer)
 		{
 			IImage * iimg = NULL;
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			
 			//if (iimg == NULL) return;
 			if (!l->QueryImage(&iimg)) return;
 			iimg->Resource(newFile.AllocSysString(), &rt);
@@ -900,7 +860,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		else
 			return;
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -1075,9 +1035,6 @@ void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 	}
 }
 
-
-
-
 #pragma region Serialization
 // ********************************************************
 //		DeserializeLayerCore()
@@ -1087,15 +1044,14 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 {
 	const char* nameA = CPLGetXMLValue( node, "Filename", NULL );
 	
-    /*char buffer[4096] = ""; 
-    DWORD retval = GetFullPathNameA(filename, 4096, buffer, NULL);
-	if (retval > 4096)
-	{
-		return -1;
-	}
-	filename = buffer;*/
-
 	CStringW filename = Utility::ConvertFromUtf8(nameA);
+
+	wchar_t buffer[4096] = L""; 
+    DWORD retval = GetFullPathNameW(filename, 4096, buffer, NULL);
+	if (retval > 4096)
+		return -1;
+	
+	filename = buffer;
 	
 	bool visible = false;
 	CString s = CPLGetXMLValue( node, "LayerVisible", NULL );
@@ -1123,7 +1079,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 		
 		if (sf) 
 		{
-			if (filename.GetLength() != 0)
+			if (filename.GetLength() == 0)
 			{
 				// shapefile type is arbitrary; the correct one will be supplied on deserialization
 				sf->CreateNew(A2BSTR(""), ShpfileType::SHP_POLYGON, &vb);    
@@ -1174,23 +1130,26 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 		return -1;
 	}
 
-	s = CPLGetXMLValue( node, "LayerName", NULL );
-	m_allLayers[layerHandle]->name = Utility::ConvertFromUtf8(s);
+	if(layerHandle != -1) 
+	{
+		s = CPLGetXMLValue( node, "LayerName", NULL );
+		m_allLayers[layerHandle]->name = Utility::ConvertFromUtf8(s);
 
-	s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
-	m_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
-	
-	s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-	m_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : 100000000.0;	// todo use constant
+		s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
+		m_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
+		
+		s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
+		m_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : 100000000.0;	// TODO: use constant
 
-	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
-	m_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;
+		s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
+		m_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;
 
-	s = CPLGetXMLValue( node, "LayerKey", NULL );
-	this->SetLayerKey(layerHandle, s);
+		s = CPLGetXMLValue( node, "LayerKey", NULL );
+		this->SetLayerKey(layerHandle, s);
 
-	s = CPLGetXMLValue( node, "LayerDescription", NULL );
-	this->SetLayerDescription(layerHandle, s);
+		s = CPLGetXMLValue( node, "LayerDescription", NULL );
+		this->SetLayerDescription(layerHandle, s);
+	}
 
 	return layerHandle;
 }
@@ -1290,7 +1249,13 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 				}
 				else
 				{
+					BSTR bstr;
+					img->get_SourceFilename(&bstr);
+					CStringW sourceName = Utility::GetNameFromPath(OLE2W(bstr));
+					Utility::CPLCreateXMLAttributeAndValue( psLayer, "SourceName", sourceName);
+
 					node = ((CImageClass*)img)->SerializeCore(VARIANT_FALSE, "ImageClass");
+					
 					img->Release();
 				}
 				
@@ -1572,20 +1537,14 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWinGIS");
 	if (psTree) 
 	{
-		// TODO: implement version autoincrement
-		CString s;
-		s.Format("%d.%d", _wVerMajor, _wVerMinor);
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "OcxVersion", s);
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileType", "LayerFile");		// CPLString().Printf("LayerFile")
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileVersion", CPLString().Printf("%d", 0));
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "Description", Description);
-		//Utility::CPLCreateXMLAttributeAndValue( psTree, "CreationDate", CPLString().Printf("%d", 0));
+		Utility::WriteXmlHeaderAttributes(psTree, "LayerFile");
 
 		CPLXMLNode* node = this->SerializeLayerCore(LayerHandle, "");
 		if (node)
 		{
+			USES_CONVERSION;
 			CPLAddXMLChild(psTree, node);
-			bool result = CPLSerializeXMLTreeToFile(psTree, name) != 0;
+			bool result = GdalHelper::SerializeXMLTreeToFile(psTree, A2W(name)) != 0;		// TODO: use Unicode
 			CPLDestroyXMLNode(psTree);
 			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}

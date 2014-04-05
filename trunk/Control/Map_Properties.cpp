@@ -40,7 +40,7 @@ void CMapView::SetShowVersionNumber(VARIANT_BOOL newVal)
 	if (m_ShowVersionNumber != newVal)
 	{
 		m_ShowVersionNumber = newVal;
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -64,7 +64,7 @@ void CMapView::SetShowRedrawTime(VARIANT_BOOL newVal)
 	if (m_ShowRedrawTime != newVal)
 	{
 		m_ShowRedrawTime = newVal;
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -228,7 +228,9 @@ void CMapView::SetMapRotationAngle(float nNewValue)
 {
 	// !!! Map rotation is temporary unsupported. GDI+ version of it should be implemented
 	// !!! See CMapView::DrawNextFrame
+	ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 	return; 
+
 	m_RotateAngle = nNewValue;
 	if (m_Rotate == NULL)
 		m_Rotate = new Rotate();
@@ -240,47 +242,6 @@ float CMapView::GetMapRotationAngle()
 	return (float)m_RotateAngle;
 }
 
-// ****************************************************************** 
-//		GetFileVersionString
-// ****************************************************************** 
-CString GetFileVersionString()
-{
-	wchar_t* path = new wchar_t[MAX_PATH + 1];
-	GetModuleFileNameW(GetModuleInstance(), path, MAX_PATH);
-
-	DWORD  verHandle = NULL;
-	UINT   size      = 0;
-	LPBYTE lpBuffer  = NULL;
-	DWORD  verSize   = GetFileVersionInfoSizeW( path, &verHandle);
-	CString result;
-
-	if (verSize != NULL)
-	{
-		LPSTR verData = new char[verSize];
-
-		if (GetFileVersionInfoW( path, verHandle, verSize, verData))
-		{
-			if (VerQueryValue(verData,"\\",(VOID FAR* FAR*)&lpBuffer,&size))
-			{
-				if (size)
-				{
-					VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
-					if (verInfo->dwSignature == 0xfeef04bd)
-					{
-						int major = HIWORD(verInfo->dwFileVersionMS);
-						int minor = LOWORD(verInfo->dwFileVersionMS);
-						int build = HIWORD(verInfo->dwFileVersionLS);
-						int sub = LOWORD(verInfo->dwFileVersionLS);
-						result.Format("%d.%d.%d.%d", major, minor, build, sub);
-						Debug::WriteLine(result);
-					}
-				}
-			}
-		}
-		delete[] verData;
-	}
-	return result;
-}
 
 // ****************************************************************** 
 //			VersionNumber
@@ -289,7 +250,7 @@ BSTR CMapView::GetVersionNumber(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (_versionNumber.GetLength() == 0)
-		_versionNumber = GetFileVersionString();
+		_versionNumber = Utility::GetFileVersionString();
 	USES_CONVERSION;
 	return A2BSTR(_versionNumber);
 }
@@ -352,10 +313,26 @@ ITiles* CMapView::GetTilesNoRef(void)
 }
 
 // *****************************************************
-//		SetTiles
+//		GetFileManager
 // *****************************************************
-void CMapView::SetTiles(ITiles* pVal)
+IFileManager* CMapView::GetFileManager(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	SetModifiedFlag();
+	if (_fileManager)
+		_fileManager->AddRef();
+	return _fileManager;
+}
+
+// *****************************************************
+//		ZoomBehavior
+// *****************************************************
+short CMapView::GetZoomBehavior()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomBehavior;
+}
+void CMapView::SetZoomBehavior(short nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_zoomBehavior = (tkZoomBehavior)nNewValue;
 }

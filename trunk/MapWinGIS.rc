@@ -27,7 +27,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDR_SHAPEFILELEGEND     REGISTRY                "COM Classes/ShapefileColorScheme.rgs"
-IDR_SHAPEFILELEGENDBREAK REGISTRY                "COM Classes/ShapefileColorBreak.rgs"
+IDR_SHAPEFILELEGENDBREAK REGISTRY               "COM Classes/ShapefileColorBreak.rgs"
 IDR_GRID                REGISTRY                "COM Classes/Grid.rgs"
 IDR_GRIDHEADER          REGISTRY                "COM Classes/GridHeader.rgs"
 IDR_ESRIGRIDMANAGER     REGISTRY                "COM Classes/ESRIGridManager.rgs"
@@ -63,6 +63,7 @@ IDR_TILEPROVIDERS       REGISTRY                "COM Classes/TileProviders.rgs"
 IDR_MEASURING           REGISTRY                "COM Classes/Measuring.rgs"
 IDR_SHAPEVALIDATIONINFO REGISTRY                "COM Classes/ShapeValidationInfo.rgs"
 IDR_FIELDSTATOPERATIONS REGISTRY                "COM Classes/FieldStatOperations.rgs"
+IDR_FILEMANAGER         REGISTRY                "COM Classes/FileManager.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -96,8 +97,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,9,2,0
- PRODUCTVERSION 4,9,2,0
+ FILEVERSION 4,9,1,0
+ PRODUCTVERSION 4,9,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -115,13 +116,13 @@ BEGIN
             VALUE "Comments", "This control includes a mapping component and objects for reading and writing shapefiles and various triangulated irregular network and grid files. It also has extensive label and chart options and includes projection routines."
             VALUE "CompanyName", "MapWindow OSS Team - www.mapwindow.org"
             VALUE "FileDescription", "MapWinGIS ActiveX Control"
-            VALUE "FileVersion", "4.9.2.0"
+            VALUE "FileVersion", "4.9.1.0"
             VALUE "InternalName", "MapWinGIS ActiveX Control"
             VALUE "LegalCopyright", "Copyright (C) 2004-2014 MapWindow OSS Team"
             VALUE "LegalTrademarks", "MapWindow GIS is a trademark of Daniel P. Ames, 2005-2014"
             VALUE "OriginalFilename", "MapWinGIS.ocx"
             VALUE "ProductName", "MapWinGIS ActiveX Control"
-            VALUE "ProductVersion", "4.9.2.0"
+            VALUE "ProductVersion", "4.9.1.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -179,6 +180,7 @@ IDC_ZOOMIN              CURSOR                  "Resource/cursor4.cur"
 IDC_PAN                 CURSOR                  "Resource/cursor1.cur"
 IDC_SELECT              CURSOR                  "Resource/cursor2.cur"
 IDC_ZOOMOUT             CURSOR                  "Resource/cursor3.cur"
+IDC_MEASURE             CURSOR                  "Resource/cursor5.cur"
 
 /////////////////////////////////////////////////////////////////////////////
 //

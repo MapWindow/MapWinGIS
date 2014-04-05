@@ -57,7 +57,7 @@ public:
 		m_collisionBuffer = 0;
 
 		m_dynamicVisibility = VARIANT_FALSE;
-		m_avoidCollisions = m_globalSettings.labelsCollisionMode != tkCollisionMode::AllowCollisions; // VARIANT_TRUE
+		m_avoidCollisions = m_globalSettings.labelsCollisionMode != tkCollisionMode::AllowCollisions;
 		m_useWidthLimits = VARIANT_FALSE;
 		m_removeDuplicates = VARIANT_FALSE;
 		m_gdiPlus = VARIANT_TRUE;

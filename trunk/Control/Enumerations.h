@@ -102,4 +102,26 @@ enum ShapeValidationStatus
 	Skip = 2,
 };
 
+enum GdalSupport
+{
+	GdalSupportNone = 0,
+	GdalSupportRgb = 1,
+	GdalSupportGrid = 2
+};
+
+enum tkDrawingDataAvailable
+{
+	MeasuringData = 0,
+	Coordinates = 1,
+	TilesData = 2,
+	LayersData = 3,
+	HotTracking = 4,
+};
+
+enum SqliteOpenMode
+{
+	OpenIfExists = 0,
+	OpenOrCreate = 1,
+};
+
 # endif

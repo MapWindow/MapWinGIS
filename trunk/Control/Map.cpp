@@ -70,6 +70,7 @@ BEGIN_MESSAGE_MAP(CMapView, COleControl)
 	ON_WM_MBUTTONUP()
 	ON_WM_MOUSEWHEEL()
 	ON_WM_KEYDOWN()
+	ON_WM_KEYUP()
 
 	//ON_WM_CHAR()
 	//}}AFX_MSG_MAP
@@ -93,6 +94,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_NOTIFY(CMapView, "SendMouseMove", m_sendMouseMove, OnSendMouseMoveChanged, VT_BOOL)
 	DISP_PROPERTY_NOTIFY(CMapView, "SendSelectBoxDrag", m_sendSelectBoxDrag, OnSendSelectBoxDragChanged, VT_BOOL)
 	DISP_PROPERTY_NOTIFY(CMapView, "SendSelectBoxFinal", m_sendSelectBoxFinal, OnSendSelectBoxFinalChanged, VT_BOOL)
+	
 	DISP_PROPERTY_NOTIFY(CMapView, "ExtentPad", m_extentPad, OnExtentPadChanged, VT_R8)
 	DISP_PROPERTY_NOTIFY(CMapView, "ExtentHistory", m_extentHistory, OnExtentHistoryChanged, VT_I4)
 	DISP_PROPERTY_NOTIFY(CMapView, "Key", m_key, OnKeyChanged, VT_BSTR)
@@ -191,6 +193,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION(CMapView, "IsSameProjection", IsSameProjection, VT_BOOL, VTS_BSTR VTS_BSTR)
 	DISP_FUNCTION(CMapView, "ZoomToMaxVisibleExtents", ZoomToMaxVisibleExtents, VT_EMPTY, VTS_NONE)
 	DISP_PROPERTY_EX(CMapView, "MapResizeBehavior", GetMapResizeBehavior, SetMapResizeBehavior, VT_I2)
+	
 	DISP_PROPERTY_EX(CMapView, "HWnd", HWnd, SetNotSupported, VT_I4)	
 	DISP_FUNCTION(CMapView, "set_UDPointImageListAdd", set_UDPointImageListAdd, VT_I4, VTS_I4 VTS_DISPATCH)
 	DISP_PROPERTY_PARAM(CMapView, "ShapePointImageListID", GetShapePointImageListID, SetShapePointImageListID, VT_I4, VTS_I4 VTS_I4)
@@ -200,7 +203,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION(CMapView, "DrawLineEx", DrawLineEx, VT_EMPTY, VTS_I4 VTS_R8 VTS_R8 VTS_R8 VTS_R8 VTS_I4 VTS_COLOR)
 	DISP_FUNCTION(CMapView, "DrawPointEx",  DrawPointEx, VT_EMPTY,VTS_I4 VTS_R8 VTS_R8 VTS_I4 VTS_COLOR)
 	DISP_FUNCTION(CMapView, "DrawCircleEx", DrawCircleEx, VT_EMPTY, VTS_I4 VTS_R8 VTS_R8 VTS_R8 VTS_COLOR VTS_BOOL)
-	DISP_PROPERTY_NOTIFY(CMapView, "SendOnDrawBackBuffer", m_sendOnDrawBackBuffer, OnSendOnDrawBackBufferChanged, VT_I4)
+	DISP_PROPERTY_NOTIFY_ID(CMapView, "SendOnDrawBackBuffer", dispidSendOnDrawBackBuffer, m_sendOnDrawBackBuffer, OnSendOnDrawBackBufferChanged, VT_BOOL)
 	DISP_PROPERTY_EX_ID(CMapView, "MultilineLabels", dispidMultilineLabels, GetMultilineLabeling, SetMultilineLabeling, VT_BOOL)
 	DISP_FUNCTION_ID(CMapView, "LabelColor", dispidLabelColor, LabelColor, VT_EMPTY, VTS_I4 VTS_COLOR)
 	DISP_FUNCTION_ID(CMapView, "SetDrawingLayerVisible", dispidSetDrawingLayerVisible, SetDrawingLayerVisible, VT_EMPTY, VTS_I4 VTS_BOOL)
@@ -242,31 +245,24 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "MapUnits", dispidMapUnits, GetMapUnits, SetMapUnits, VT_I2)
 	DISP_FUNCTION_ID(CMapView, "SnapShotToDC", dispidSnapShotToDC, SnapShotToDC, VT_BOOL,VTS_I4 VTS_DISPATCH VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "SnapShotToDC2", dispidSnapShotToDC2, SnapShotToDC2, VT_BOOL,VTS_I4 VTS_DISPATCH VTS_I4 VTS_R4 VTS_R4 VTS_R4 VTS_R4 VTS_R4 VTS_R4)
-	DISP_FUNCTION_ID(CMapView, "LoadTiles", dispidLoadTiles, LoadTiles, VT_EMPTY,VTS_DISPATCH VTS_I4 VTS_BSTR VTS_I4)
+	DISP_FUNCTION_ID(CMapView, "LoadTilesForSnapshot", dispidLoadTilesForSnapshot, LoadTilesForSnapshot, VT_EMPTY,VTS_DISPATCH VTS_I4 VTS_BSTR VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "DrawWideCircleEx", dispidDrawWideCircleEx, DrawWideCircleEx, VT_EMPTY, VTS_I4 VTS_R8 VTS_R8 VTS_R8 VTS_COLOR VTS_BOOL VTS_I2)
 	DISP_FUNCTION_ID(CMapView, "DrawWidePolygonEx", dispidDrawWidePolygonEx, DrawWidePolygonEx, VT_EMPTY, VTS_I4 VTS_VARIANT VTS_VARIANT VTS_I4 VTS_COLOR VTS_BOOL VTS_I2)
 	DISP_FUNCTION_ID(CMapView, "TilesAreInCache", dispidTilesAreInCache, TilesAreInCache, VT_I4,VTS_DISPATCH VTS_I4 VTS_I4)
-
-    // Added ajp June 2010
 	DISP_PROPERTY_EX_ID(CMapView, "DegreeRotationAngle", dispidMapRotationAngle, GetMapRotationAngle, SetMapRotationAngle, VT_R4)
 	DISP_PROPERTY_EX_ID(CMapView, "RotatedExtent", dispidRotatedExtent, GetRotatedExtent, SetNotSupported, VT_DISPATCH)
     DISP_FUNCTION_ID(CMapView, "GetBaseProjectionPoint", dispidGetBaseProjectionPoint, GetBaseProjectionPoint, VT_DISPATCH, VTS_R8 VTS_R8)
 	DISP_PROPERTY_EX_ID(CMapView, "CanUseImageGrouping", dispidCanUseImageGrouping, GetCanUseImageGrouping, SetCanUseImageGrouping, VT_BOOL)
-
 	DISP_PROPERTY_EX_ID(CMapView, "VersionNumber", dispidVersionNumber, GetVersionNumber, SetNotSupported, VT_BSTR)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerMaxVisibleScale", dispidLayerMaxVisibleScale, GetLayerMaxVisibleScale, SetLayerMaxVisibleScale, VT_R8, VTS_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerMinVisibleScale", dispidLayerMinVisibleScale, GetLayerMinVisibleScale, SetLayerMinVisibleScale, VT_R8, VTS_I4)
-
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerMaxVisibleZoom", dispidLayerMaxVisibleZoom, GetLayerMaxVisibleZoom, SetLayerMaxVisibleZoom, VT_I4, VTS_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerMinVisibleZoom", dispidLayerMinVisibleZoom, GetLayerMinVisibleZoom, SetLayerMinVisibleZoom, VT_I4, VTS_I4)
-
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerDynamicVisibility", dispidLayerDynamicVisibility, GetLayerDynamicVisibility, SetLayerDynamicVisibility, VT_BOOL, VTS_I4)
-
 	DISP_FUNCTION_ID(CMapView, "DrawBackBuffer", dispidDrawBackBuffer, DrawBackBuffer, VT_EMPTY, VTS_I4 VTS_I4 VTS_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerLabels", dispidLayerLabels, GetLayerLabels, SetLayerLabels, VT_DISPATCH, VTS_I4)
 	DISP_PROPERTY_EX_ID(CMapView, "ShowRedrawTime", dispidShowRedrawTime, GetShowRedrawTime, SetShowRedrawTime, VT_BOOL)
 	DISP_PROPERTY_EX_ID(CMapView, "ShowVersionNumber", dispidShowVersionNumber, GetShowVersionNumber, SetShowVersionNumber, VT_BOOL)
-
 	DISP_PROPERTY_PARAM_ID(CMapView, "Shapefile", dispidShapefile, GetShapefile, SetShapefile, VT_DISPATCH, VTS_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "Image", dispidImage, GetImage, SetImage, VT_DISPATCH, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "SerializeLayer", dispidSerializeLayerOptions, SerializeLayerOptions, VT_BSTR, VTS_I4)
@@ -281,9 +277,9 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "RemoveLayerOptions", dispidRemoveLayerOptions, RemoveLayerOptions, VT_BOOL, VTS_I4 VTS_BSTR)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerSkipOnSaving", dispidLayerSkipOnSaving, GetLayerSkipOnSaving, SetLayerSkipOnSaving, VT_BOOL, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "RemoveLayerWithoutClosing", dispidRemoveLayerWithoutClosing, RemoveLayerWithoutClosing, VT_EMPTY, VTS_I4)
-	DISP_PROPERTY_EX_ID(CMapView, "MaxExtents", dispidMaxExtents, GetMaxExtents, SetMaxExtents, VT_DISPATCH)
-	DISP_PROPERTY_EX_ID(CMapView, "PixelsPerDegree", dispidPixelsPerDegree, GetPixelsPerDegree, SetPixelsPerDegree, VT_R8)
-	DISP_PROPERTY_EX_ID(CMapView, "Tiles", dispidTiles, GetTiles, SetTiles, VT_DISPATCH)
+	DISP_PROPERTY_EX_ID(CMapView, "MaxExtents", dispidMaxExtents, GetMaxExtents, SetNotSupported, VT_DISPATCH)
+	DISP_PROPERTY_EX_ID(CMapView, "PixelsPerDegree", dispidPixelsPerDegree, GetPixelsPerDegree, SetNotSupported, VT_R8)
+	DISP_PROPERTY_EX_ID(CMapView, "Tiles", dispidTiles, GetTiles, SetNotSupported, VT_DISPATCH)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerFilename", dispidLayerFilename, GetLayerFilename, SetNotSupported, VT_BSTR, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "ZoomToSelected", dispidZoomToSelected, ZoomToSelected, VT_BOOL, VTS_I4)
 	DISP_PROPERTY_EX_ID(CMapView, "Projection", dispidProjection, GetGeoProjection, SetGeoProjection, VT_DISPATCH)
@@ -295,7 +291,21 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "ZoomToTileLevel", dispidZoomToTileLevel, ZoomToTileLevel, VT_BOOL, VTS_I4)
 	DISP_FUNCTION_ID(CMapView, "ZoomToWorld", dispidZoomToWorld, ZoomToWorld, VT_BOOL, VTS_NONE)
 	DISP_FUNCTION_ID(CMapView, "FindSnapPoint", dispidFindSnapPoint, FindSnapPoint, VT_BOOL, VTS_R8 VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
-	DISP_FUNCTION(CMapView, "Clear", Clear, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(CMapView, "Clear", dispidClear, Clear, VT_EMPTY, VTS_NONE)
+	DISP_FUNCTION_ID(CMapView, "SetGeographicExtents2", dispidSetGeographicExtents2, SetGeographicExtents2, VT_BOOL, VTS_R8 VTS_R8 VTS_R8)
+	DISP_FUNCTION_ID(CMapView, "AddLayerFromFilename", dispidAddLayerFromFilename, AddLayerFromFilename, VT_I4, VTS_BSTR VTS_I2 VTS_BOOL)
+	DISP_FUNCTION_ID(CMapView, "GetKnownExtents", dispidGetKnownExtents, GetKnownExtents, VT_DISPATCH, VTS_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "ZoomBehavior", dispidZoomBehavior, GetZoomBehavior, SetZoomBehavior, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "FileManager", dispidFileManager, GetFileManager, SetNotSupported, VT_DISPATCH)
+	DISP_PROPERTY_EX_ID(CMapView, "Latitude", dispidLatitude, GetLatitude, SetLatitude, VT_R4)
+	DISP_PROPERTY_EX_ID(CMapView, "Longitude", dispidLongitude, GetLongitude, SetLongitude, VT_R4)
+	DISP_PROPERTY_EX_ID(CMapView, "CurrentZoom", dispidCurrentZoom, GetCurrentZoom, SetCurrentZoom, VT_I4)
+	DISP_PROPERTY_EX_ID(CMapView, "TileProvider", dispidTileProvider, GetTileProvider, SetTileProvider, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "Projection", dispidMapProjection, GetProjection, SetProjection, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "KnownExtents", dispidKnownExtents, GetKnownExtentsCore, SetKnownExtentsCore, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "ShowCoordinates", dispidShowCoordinates, GetShowCoordinates, SetShowCoordinates, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "GrabProjectionFromData", dispidGrabProjectionFromData, GetGrabProjectionFromData, SetGrabProjectionFromData, VT_I2)
+	DISP_FUNCTION_ID(CMapView, "Redraw2", dispidRedraw2, Redraw2, VT_EMPTY, VTS_I2)
 	
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP
@@ -436,8 +446,13 @@ void CMapView::Startup()
 {
 	this->GdiplusStartup();
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
+	
+	// TODO: release in destructor
+	Gdiplus::FontFamily family(L"Courier New");
+	_font = new Gdiplus::Font(&family, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 
-	m_canbitblt = FALSE;
+	_canUseLayerBuffer = FALSE;
+	_canUseMainBuffer = false;
 	m_leftButtonDown = FALSE;
 	m_bitbltClickMove = CPoint(0,0);
 	m_bitbltClickDown = CPoint(0,0);
@@ -454,10 +469,10 @@ void CMapView::Startup()
 	m_cursorZoomin = AfxGetApp()->LoadCursor(IDC_ZOOMIN);
 	m_cursorZoomout = AfxGetApp()->LoadCursor(IDC_ZOOMOUT);
 	m_cursorSelect = AfxGetApp()->LoadCursor(IDC_SELECT);
+	m_cursorMeasure = AfxGetApp()->LoadCursor(IDC_MEASURE);
 	m_udCursor = NULL;
 
 	m_lockCount = 0;
-	m_numImages = 0;
 
 	m_currentDrawing = -1;
 
@@ -484,22 +499,16 @@ void CMapView::Startup()
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = true;
 	#endif
-	
-	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_wgsProjection);
-	CoCreateInstance(CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&m_GMercProjection);
-	CoCreateInstance(CLSID_Tiles, NULL, CLSCTX_INPROC_SERVER, IID_ITiles, (void**)&m_tiles);
-	CoCreateInstance(CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&m_measuring);
-	
-	VARIANT_BOOL vb;
-	m_wgsProjection->SetWgs84(&vb);		// EPSG:4326
-	m_GMercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 
-	m_transformationMode = tmNotDefined;
-	m_projection = NULL;
+	GetUtils()->CreateInstance(idTiles, (IDispatch**)&m_tiles);
 
-	IGeoProjection* p = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
-	SetGeoProjection(p);
+	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&m_measuring);
+	
+	GetUtils()->CreateInstance(idFileManager, (IDispatch**)&_fileManager);
+
+	InitProjections();
+	
+	((CMeasuring*)m_measuring)->SetMapView((void*)this);
 
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
@@ -511,7 +520,6 @@ void CMapView::Startup()
 
 	m_rectTrackerIsActive = false;
 
-	m_drawMouseMoves = false;
 	m_lastWidthMeters = 0.0;
 }
 
@@ -521,6 +529,15 @@ void CMapView::Startup()
 void CMapView::SetDefaults()
 {
 	// TODO: set defaults for property exchanged
+	_grabProjectionFromData = true;
+	_hasHotTracking = false;
+	_showCoordinates = cdmAuto;
+	_knownExtents = keNone;
+	_zoomBehavior = zbUseTileLevels;
+	_measuringPersistent = false;
+	_lastCursorMode = cmNone;
+	_reverseZooming = false;
+	_activeLayerPosition = 0;
 	m_scalebarVisible = VARIANT_TRUE;
 	MultilineLabeling = true;
 	m_lastErrorCode = tkNO_ERROR;
@@ -535,7 +552,7 @@ void CMapView::SetDefaults()
 	m_useLabelCollision = false;
 	m_ShowRedrawTime = VARIANT_FALSE;
 	m_ShowVersionNumber = VARIANT_FALSE;	
-	m_scalebarUnits = tkScalebarUnits::Metric;
+	m_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	((CTiles*)m_tiles)->SetDefaults();
 	((CMeasuring*)m_measuring)->SetDefaults();
 }
@@ -600,9 +617,10 @@ void CMapView::Shutdown()
 	if( m_globalCallback )
 		m_globalCallback->Release();
 
-	m_projection->Release();
-	m_wgsProjection->Release();
-	m_GMercProjection->Release();
+	ReleaseProjections();
+
+	if (_fileManager)
+		_fileManager->Release();
 
 	if (m_measuring)
 		m_measuring->Release();
@@ -663,6 +681,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	ExchangeVersion(pPX, MAKELONG(_wVerMinor, _wVerMajor));
 	COleControl::DoPropExchange(pPX);
 
+	bool loading = pPX->IsLoading();
+
 	PX_Color( pPX, "BackColor", m_backColor, RGB( 255, 255, 255 ) );
 	PX_Double( pPX, "ExtentPad", m_extentPad, .02 );
 	PX_Short( pPX, "CursorMode", m_cursorMode, 0 );
@@ -675,7 +695,6 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	PX_Long( pPX, "ExtentHistory", m_extentHistory, 20 );
 	PX_Bool( pPX, "DoubleBuffer", m_doubleBuffer, TRUE );
 	PX_Bool( pPX, "SendOnDrawBackBuffer", m_sendOnDrawBackBuffer, FALSE);
-	// lsu: 1-feb-2011
 	PX_Bool( pPX, "ShowRedrawTime", m_ShowRedrawTime, FALSE);
 	PX_Bool( pPX, "ShowVersionNumber", m_ShowVersionNumber, FALSE);
 	PX_Double( pPX, "MouseWheelSpeed", m_MouseWheelSpeed, .5 );
@@ -685,7 +704,7 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	PX_Bool( pPX, "DisableWaitCursor", m_DisableWaitCursor, FALSE );	
 	PX_Float( pPX, "MapRotationAngle", m_RotateAngle, 0.0 );
 	PX_Bool( pPX, "CanUseImageGrouping", _canUseImageGrouping, FALSE );
-	PX_Bool( pPX, "ScalebarVisible", m_scalebarVisible, FALSE );
+	PX_Bool( pPX, "ScalebarVisible", m_scalebarVisible, TRUE );
 	
 	// enumerated constants aren't supported directly so temp buffer will be used
 	// we don't care about the direction of exchanage, doing both getting and setting
@@ -694,8 +713,12 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	PX_Long( pPX, "MapResizeBehavior", temp, 0 );	//rbClassic
 	rbMapResizeBehavior = (tkResizeBehavior)temp;
 
+	temp = (long)_zoomBehavior;
+	PX_Long( pPX, "ZoomBehavior", temp, 1 );	// zbUseTileLevels
+	_zoomBehavior = (tkZoomBehavior)temp;
+
 	temp = (long)m_scalebarUnits;
-	PX_Long( pPX, "ScalebarUnits", temp, 0 );	//suMetric
+	PX_Long( pPX, "ScalebarUnits", temp, 2 );	//suGoogleStyle
 	m_scalebarUnits = (tkScalebarUnits)temp;
 
 	temp = (long)m_ShapeDrawingMethod;
@@ -705,6 +728,42 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 	temp = (long)m_unitsOfMeasure;
 	PX_Long( pPX, "MapUnits", temp, 6 );			//umMeters
 	m_unitsOfMeasure = (tkUnitsOfMeasure)temp;
+
+	temp = (long)_showCoordinates;
+	PX_Long( pPX, "ShowCoordinates", temp, 1 );			//cdmAuto
+	_showCoordinates = (tkCoordinatesDisplay)temp;
+
+	temp = (long)GetTileProvider();
+	PX_Long( pPX, "TileProvider", temp, 0 );		// OpenStreetMap
+	SetTileProvider((tkTileProvider)temp);
+
+	tkMapProjection projection;
+	if (!loading) {
+		projection = GetProjection();
+		temp = (long)projection;
+	}
+
+	if (loading) {
+		this->LockWindow(lmLock);
+	}
+
+	PX_Long( pPX, "Projection", temp, 0 );			// PROJECTION_NONE
+	projection = (tkMapProjection)temp;
+	if (loading) {
+		SetProjection(projection);
+	}
+	
+	PX_Double( pPX, "xMin", extents.left, .3 );
+	PX_Double( pPX, "xMax", extents.right, .3 );
+	PX_Double( pPX, "yMin", extents.bottom, .3 );
+	PX_Double( pPX, "yMax", extents.top, .3 );
+	if (loading) {
+		SetExtentsCore(extents, false);
+	}
+
+	if (loading) {
+		this->LockWindow(lmUnlock);
+	}
 
 	m_mapCursor = 0;	// why not to save it?
 }

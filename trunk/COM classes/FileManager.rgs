@@ -1,0 +1,26 @@
+HKCR
+{
+	MapWinGIS.FileManager.1 = s 'FileManager Class'
+	{
+		CLSID = s '{EE5738FA-2DC4-411B-91DC-2E6AF5C3543E}'
+	}
+	MapWinGIS.FileManager = s 'FileManager Class'
+	{
+		CLSID = s '{EE5738FA-2DC4-411B-91DC-2E6AF5C3543E}'
+		CurVer = s 'MapWinGIS.FileManager.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {EE5738FA-2DC4-411B-91DC-2E6AF5C3543E} = s 'FileManager Class'
+		{
+			ProgID = s 'MapWinGIS.FileManager.1'
+			VersionIndependentProgID = s 'MapWinGIS.FileManager'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{C368D713-CC5F-40ED-9F53-F84FE197B96A}'
+		}
+	}
+}

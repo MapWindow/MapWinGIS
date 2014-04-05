@@ -225,13 +225,12 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		//Initialise
 		cPI = GPI_Gray;
-		customColorScheme = false;
 		histogramComputed = false;
 		allowHistogram = true;
 
 		//allowAsGrid = true;				// Allow the image to be read as grid (if appropriate)
 		imageQuality = 100;				// Image quality 10-100
-		imageColorScheme = FallLeaves;	// Set the default color scheme if read as grid
+		_predefinedColors = FallLeaves;	// Set the default color scheme if read as grid
 		useHistogram = false;			// Use histogram equalization
 
 		poCT = poBandR->GetColorTable();
@@ -357,11 +356,12 @@ void tkRaster::Close()
 		poBandG = NULL;		// if somebody will want to open new dataset
 		poBandB = NULL;
 	}
-	if (gridColorScheme)
+	if (predefinedColorScheme)
 	{
-		gridColorScheme->Clear();
+		predefinedColorScheme->Clear();
+		predefinedColorScheme = NULL;
 	}
-	allowAsGrid = useAutoDetect;
+	allowAsGrid = grForGridsOnly;
 	activeBandIndex = 1;
 	warped = false;
 }
@@ -1095,16 +1095,10 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	double ka = .7;
 	double kd = .8;
 	
+	IGridColorScheme* gridColorScheme = GetColorSchemeForRendering();
 	long numBreaks = 0;
 	gridColorScheme->get_NumBreaks(&numBreaks);
 	
-	// TODO: temp solution
-	if (numBreaks == 0)
-	{
-		gridColorScheme->UsePredefined(dfMin, dfMax, imageColorScheme);
-		gridColorScheme->get_NumBreaks(&numBreaks);
-	}
-
 	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
 	gridColorScheme->put_NoDataColor(transColor);
 
@@ -1684,50 +1678,36 @@ bool tkRaster::SetNoDataValue(double Value)
 		return false;
 }
 
-#pragma region Predefined color scheme
-
+#pragma region Choose rendering
 // *********************************************************
 //		GetColorScheme()
 // *********************************************************
-IGridColorScheme* tkRaster::GetColorScheme()
+// Which of the 2 color schemes can we use
+IGridColorScheme* tkRaster::GetColorSchemeForRendering()
 {
-	long numBreaks;
-	gridColorScheme->get_NumBreaks(&numBreaks);
-	if (numBreaks == 0)
-	{
-		gridColorScheme->UsePredefined(dfMin, dfMax, imageColorScheme);
+	long numBreaks;	
+	bool hasCustomScheme = false;
+	if (customColorScheme) {
+		customColorScheme->get_NumBreaks(&numBreaks);
+		if (numBreaks > 0) {
+			hasCustomScheme = true;
+		}
 	}
-	return gridColorScheme;
+	
+	if (hasCustomScheme) {
+		return customColorScheme;
+	}
+	else
+	{
+		// make sure that at least everything is all right with predefined one
+		predefinedColorScheme->get_NumBreaks(&numBreaks);
+		if (numBreaks == 0) {
+			predefinedColorScheme->UsePredefined(dfMin, dfMax, _predefinedColors);
+		}
+		return predefinedColorScheme;
+	}
 }
 
-// *********************************************************
-//		ApplyPredefinedColorScheme()
-// *********************************************************
-void tkRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
-{
-	imageColorScheme = colorScheme;
-	gridColorScheme->UsePredefined(dfMin, dfMax, colorScheme);
-}
-
-// *********************************************************
-//		ApplyGridColorScheme()
-// *********************************************************
-void tkRaster::ApplyGridColorScheme(IGridColorScheme* scheme)
-{
-	Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&gridColorScheme, false);
-	customColorScheme = true;
-}
-
-// *********************************************************
-//		get_GridColorScheme()
-// *********************************************************
-IGridColorScheme* tkRaster::get_GridColorScheme()
-{
-	return gridColorScheme;
-}
-#pragma endregion
-
-#pragma region Choose rendering
 // *************************************************************
 //	  CanUseExternalColorScheme()
 // *************************************************************
@@ -1773,8 +1753,8 @@ HandleImage tkRaster::ChooseRenderingMethod()
 // *************************************************************
 bool tkRaster::WillBeRenderedAsGrid()
 {
-	return (allowAsGrid == tkUseFunctionality::useAlways) ||
-		   (allowAsGrid == tkUseFunctionality::useAutoDetect && handleImage == asGrid);
+	return (allowAsGrid == tkGridRendering::grForceForAllFormats ||
+		   (allowAsGrid == tkGridRendering::grForGridsOnly && handleImage == asGrid));
 }
 #pragma endregion
 

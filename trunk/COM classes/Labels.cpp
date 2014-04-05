@@ -1434,9 +1434,6 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	if (str != "")
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "VisibilityExpression", str);
 	
-	/*if (m_classificationField != -1)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "ClassificationField", CPLString().Printf("%d", m_classificationField));*/
-
 	str = OLE2CA(m_key);
 	if (str != "")
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "Key", str);
@@ -1465,7 +1462,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	if (m_dynamicVisibility != VARIANT_FALSE)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "DynamicVisibility", CPLString().Printf("%d", (int)m_dynamicVisibility));
 
-	if (m_avoidCollisions != VARIANT_TRUE)
+	if (m_globalSettings.labelsCollisionMode == tkCollisionMode::AllowCollisions)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "AvoidCollisions", CPLString().Printf("%d", (int)m_avoidCollisions));
 
 	if (m_useWidthLimits != VARIANT_FALSE)
@@ -1788,24 +1785,23 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
-	CString s = OLE2CA(filename);
+	CStringW s = OLE2W(filename);
 	if (s.GetLength() < 5)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_OK;
+		return S_FALSE;
 	}
 
-	if (s.Right(4).MakeLower() != ".lbl")
+	if (s.Right(4).MakeLower() != L".lbl")
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_OK;
+		return S_FALSE;
 	}
 	
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWindow" );
 	if (psTree)
 	{
-		// version = 1, for the old .lbl files no version were specified
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileVersion", CPLString().Printf("%d", 1));
+		Utility::WriteXmlHeaderAttributes( psTree, "Labels");
 
 		bool saveText, saveRotation;
 		CPLXMLNode* node = SerializeLabelData("Labels", saveRotation, saveText);
@@ -1817,7 +1813,7 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 			Utility::CPLCreateXMLAttributeAndValue( node, "TextSaved", CPLString().Printf("%d", (int)(saveText)));
 
 			CPLAddXMLChild(psTree, node);
-			*retVal = CPLSerializeXMLTreeToFile(psTree, s);
+			*retVal = GdalHelper::SerializeXMLTreeToFile( psTree, s );
 			CPLDestroyXMLNode(psTree);
 		}
 	}

@@ -95,7 +95,9 @@ public:
 	STDMETHOD(AssignNewProjection)(/*[in]*/ BSTR projection, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(get_RasterColorTableColoringScheme)(/*[out, retval]*/ IGridColorScheme * *pVal);
 	STDMETHOD(GetRow)(/*[in]*/ long Row, /*[in, out]*/ float *Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(GetRow2)(/*[in]*/ long Row, /*[in, out]*/ double *Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(PutRow)(/*[in]*/ long Row, /*[in]*/ float *Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(PutRow2)(/*[in]*/ long Row, /*[in]*/ double *Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GetFloatWindow)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ float * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(PutFloatWindow)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ float * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(GetFloatWindow2)(/*[in]*/ long StartRow, /*[in]*/ long EndRow, /*[in]*/ long StartCol, /*[in]*/ long EndCol, /*[in, out]*/ double * Vals, /*[out, retval]*/ VARIANT_BOOL * retval);
@@ -129,8 +131,11 @@ public:
 		return Utility::GetPathWOExtension(filename) + L".mwleg";
 	}
 
-	CStringW GetProxyLegendName()
+	CStringW GetProxyLegendName(CStringW filename = "")
 	{
+		if (filename.GetLength() == 0)
+			filename = GetFilename();
+		
 		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
 		switch(format) {
 			case gpfTiffProxy:
@@ -141,8 +146,11 @@ public:
 		}
 	}
 
-	CStringW GetProxyName()
+	CStringW GetProxyName(CStringW filename = "")
 	{
+		if (filename.GetLength() == 0)
+			filename = GetFilename();
+
 		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
 		switch(format) {
 			case gpfTiffProxy:
@@ -155,6 +163,9 @@ public:
 
 	CStringW GetProxyWorldFileName()
 	{
+		if (filename.GetLength() == 0)
+			filename = GetFilename();
+
 		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
 		switch(format) {
 			case gpfTiffProxy:
@@ -181,6 +192,9 @@ public:
 	void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 	void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 	bool CGrid::PutRowDouble(long Row, double *Vals);
+	bool CGrid::HasValidProxy(CStringW gridFilename);
+	void CGrid::PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	void CGrid::GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 private:
 	dGrid * dgrid;
 	fGrid * fgrid;

@@ -103,8 +103,9 @@ public:
 	STDMETHOD(put_Version)(int Index, BSTR newVal);
 	STDMETHOD(get_IndexByProvider)(tkTileProvider provider, int* retVal);
 	STDMETHOD(get_IndexByProviderId)(int provider, int* retVal);
+	STDMETHOD(get_Language)(int Index, BSTR* retVal);
+	STDMETHOD(put_Language)(int Index, BSTR twoLetterCode);
 private:	
-	// TODO!!!: protect by critical section
 	ITiles* m_tiles;	// reference the parent
 	vector<BaseProvider*> m_providers;
 	BaseProvider* getProviderCore(tkTileProvider providerId);

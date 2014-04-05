@@ -24,6 +24,7 @@ namespace TestGrids
             }
             else
             {
+                var ut = new Utils();
                 axMap1.RemoveAllLayers();
                 int handle = axMap1.AddLayer(sf, true);
                 axMap1.ZoomToLayer(handle);

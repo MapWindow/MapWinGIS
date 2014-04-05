@@ -412,6 +412,40 @@ STDMETHODIMP CTileProviders::put_Name(int Index, BSTR pVal)
 	return S_OK;
 }
 
+// *******************************************************
+//			Language()
+// *******************************************************
+STDMETHODIMP CTileProviders::get_Language(int Index, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
+	if (Index < 0 || Index >= (int)m_providers.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*retVal = A2BSTR("");
+	}
+	else {
+		*retVal = A2BSTR(m_providers[Index]->LanguageStr);
+	}	
+	return S_OK;
+}
+
+STDMETHODIMP CTileProviders::put_Language(int Index, BSTR pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (Index < 0 || Index >= (int)m_providers.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_FALSE;
+	}
+	else
+	{
+		USES_CONVERSION;
+		m_providers[Index]->LanguageStr = OLE2A(pVal);
+	}
+	return S_OK;
+}
+
 // ******************************************************
 //		get_IsCustom()
 // ******************************************************

@@ -323,3 +323,20 @@ STDMETHODIMP CExtents::get_Center(IPoint** retVal)
 	(*retVal)->put_Y((ymin + ymax) / 2);
 	return S_OK;
 }
+
+// ******************************************************
+//		MoveTo()
+// ******************************************************
+STDMETHODIMP CExtents::MoveTo(double x, double y)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	double dx = xmax - xmin;
+	double dy = ymax - ymin;
+	xmin = x - dx / 2.0;
+	xmax = x + dx / 2.0;
+	ymin = y - dy / 2.0;
+	ymax = y + dy / 2.0;
+	return S_OK;
+}
+
+

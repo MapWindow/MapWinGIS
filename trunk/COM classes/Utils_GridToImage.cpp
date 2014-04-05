@@ -140,7 +140,6 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 	gridheader->get_dX(&dx);
 	gridheader->get_dY(&dy);
 
-	//tkGridProxyMode format = imageFormat;
 	if (inRam && checkMemory)
 	{
 		// Required memory -- colums times rows times size of colour struct	
@@ -190,15 +189,29 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		(*retval)->put_YllCenter(yll);
 		(*retval)->put_dX(dx);
 		(*retval)->put_dY(dy);
+		
+		// marking that it's a proxy
+		CStringW gridName = ((CGrid*)Grid)->GetFilename();
+		CImageClass* img = ((CImageClass*)(*retval));
+		img->sourceGridName = gridName;
+		img->isGridProxy = true;
 	}
 	else
 	{
+		// rewriting the legend (must be done before opening image so the legend is applied to it)
+		CStringW legendName = ((CGrid*)Grid)->GetProxyLegendName();
+		if (Utility::RemoveFile(legendName)) 
+		{
+			int bandIndex = 1;
+			g->get_ActiveBandIndex(&bandIndex);
+			ci->WriteToFile(OLE2BSTR(legendName), W2BSTR(gridName), bandIndex, &vb);
+		}
+		
 		// open the created file
 		CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)retval);
 		if (*retval) {
 			CImageClass* img = (CImageClass*)*retval;
-			img->OpenImage(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, GDALAccess::GA_ReadOnly, false, &vb);
-			//(*retval)->Open(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
+			(*retval)->Open(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
 			if (!vb) {
 				(*retval)->Release();
 				(*retval) = NULL;
@@ -222,29 +235,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 				WriteWorldFile(WorldFile, imageFile, dx, dy, xll, yll, nrows);
 			}
 		}
-
-		// rewriting the legend
-		CStringW legendName = ((CGrid*)Grid)->GetProxyLegendName();
-		if (Utility::RemoveFile(legendName)) 
-		{
-			int bandIndex = 1;
-			g->get_ActiveBandIndex(&bandIndex);
-			ci->WriteToFile(OLE2BSTR(legendName), W2BSTR(gridName), bandIndex, &vb);
-		}
 	}
-
-	if (*retval)
-	{
-		// TODO: perhaps mode should be set for disk based images only
-		// set the grid as source for image
-		CStringW gridName = ((CGrid*)Grid)->GetFilename();
-		CImageClass* img = ((CImageClass*)(*retval));
-		img->sourceGridName = gridName;
-		img->isGridProxy = true;
-
-
-	}
-
 	return S_OK;
 }
 

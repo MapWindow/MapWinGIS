@@ -57,43 +57,53 @@ namespace TestGrids
         /// <summary>
         /// Opens specified grid layer using MapWinGIS global settings
         /// </summary>
-        public static void OpenGridLayer(string filename)
+        public static void OpenGridLayer(string filename, bool useFileManager)
         {
             axMap1.RemoveAllLayers();
 
-            if (!File.Exists(filename))
+            if (useFileManager)
             {
-                MessageBox.Show("Failed to find grid: " + filename);
+                //FileManager fm = new FileManager();
+                //Image img = fm.OpenRaster(filename, tkFileOpenStrategy.fosProxyForGrid);
+                //axMap1.AddLayer(img, true);
+                axMap1.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
             }
             else
             {
-                Grid grid = new Grid { GlobalCallback = callback };
-
-                if (grid.Open(filename, GridDataType.UnknownDataType, false, GridFileType.UseExtension, null))
+                if (!File.Exists(filename))
                 {
-                    int layerHandle = axMap1.AddLayer(grid, true);
-                    if (layerHandle != -1)
-                    {
-                        var img = axMap1.get_Image(layerHandle);
-                        if (img != null)
-                        {
-                            Debug.Print("Number of bands: " + img.NoBands);
-                            Debug.Print("Allow external color scheme: " + img.AllowExternalColorScheme);
-                            MessageBox.Show("Layer was added to the map");
-                        }
-                        
-                    }
-                    else
-                    {
-                        MessageBox.Show("Failed to load layer: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
-                    }
+                    MessageBox.Show("Failed to find grid: " + filename);
                 }
                 else
                 {
-                    MessageBox.Show("Failed to open grid");
-                }
+                    Grid grid = new Grid {GlobalCallback = callback};
 
-                //grid.Close();
+                    if (grid.Open(filename, GridDataType.UnknownDataType, false, GridFileType.UseExtension, null))
+                    {
+                        int layerHandle = axMap1.AddLayer(grid, true);
+                        if (layerHandle != -1)
+                        {
+                            var img = axMap1.get_Image(layerHandle);
+                            if (img != null)
+                            {
+                                Debug.Print("Number of bands: " + img.NoBands);
+                                Debug.Print("Allow external color scheme: " + img.AllowGridRendering);
+                                MessageBox.Show("Layer was added to the map");
+                            }
+
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to load layer: " + axMap1.get_ErrorMsg(axMap1.LastErrorCode));
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Failed to open grid");
+                    }
+
+                    //grid.Close();
+                }
             }
         }
 
@@ -147,12 +157,12 @@ namespace TestGrids
         public static void ReloadMapStateWithGridProxy(string stateFilename)
         {
             var img = axMap1.GetActiveLayer();
-            if (img == null || !img.IsGridProxy)
-            {
-                MessageBox.Show("Map must have one layer with grid proxy");
-            }
-            else
-            {
+            //if (img == null || !img.IsGridProxy)
+            //{
+            //    MessageBox.Show("Map must have one layer with grid proxy");
+            //}
+            //else
+            //{
                 if (axMap1.SaveMapState(stateFilename, true, true))
                 {
                     axMap1.RemoveAllLayers();
@@ -181,7 +191,7 @@ namespace TestGrids
                 {
                     MessageBox.Show("Failed to save map state");
                 }
-            }
+            //}
         }
         
         /// <summary>
@@ -230,9 +240,9 @@ namespace TestGrids
             else
             {
                 // it's enough to set new color scheme
-                img.ExternalColorSchemeBandIndex = bandIndex;
-                img.ExternalColorScheme = scheme;
-                img.AllowExternalColorScheme = allowExternalColorScheme ? tkUseFunctionality.useAlways : tkUseFunctionality.useNever;
+                img.SourceGridBandIndex = bandIndex;
+                img.CustomColorScheme = scheme;
+                img.AllowGridRendering = allowExternalColorScheme ? tkGridRendering.grForceForAllFormats : tkGridRendering.grForGridsOnly;
                 axMap1.Redraw();
             }
         }

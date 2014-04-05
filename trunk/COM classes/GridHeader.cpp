@@ -459,6 +459,8 @@ STDMETHODIMP CGridHeader::put_ColorTable(BSTR newVal)
 STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (m_geoProjection)
+		m_geoProjection->AddRef();
 	*pVal = m_geoProjection;
 	return S_OK;
 }

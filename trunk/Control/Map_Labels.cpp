@@ -40,8 +40,6 @@ IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 		IShapefile* sf = NULL;
 		if (layer->QueryShapefile(&sf))
 			return sf;
-		//layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
-		//if (sf) return sf;
 	}
 	else
 	{
@@ -66,8 +64,6 @@ IImage* CMapView::GetImage(LONG LayerHandle)
 	{
 		Layer * layer = m_allLayers[LayerHandle];
 		IImage* img = NULL;
-		//layer->object->QueryInterface(IID_IImage, (void**)&img);
-		//if (img)
 		if (layer->QueryImage(&img))
 		{
 			return img;
@@ -272,7 +268,7 @@ bool CMapView::GetMultilineLabeling()
 {
 	if (m_ShapeDrawingMethod == dmNewWithLabels || m_ShapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
 	{
-		ErrorMessage(tkPROPERTY_DEPRECATED);
+		//ErrorMessage(tkPROPERTY_DEPRECATED);
 	}
 	// we shall save the value all the same
 	return MultilineLabeling?true:false;

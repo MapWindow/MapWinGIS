@@ -761,11 +761,7 @@ STDMETHODIMP CShape::DeletePoint(long PointIndex, VARIANT_BOOL *retval)
 STDMETHODIMP CShape::get_XY(long PointIndex, double* x, double* y, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = (VARIANT_BOOL)_shp->get_PointXY(PointIndex, *x, *y);
-	if (*retval == VARIANT_FALSE)
-	{
-		ErrorMessage(_shp->get_LastErrorCode());
-	}
+	*retval = get_XY(PointIndex, x, y);
 	return S_OK;
 }
 
@@ -780,6 +776,54 @@ STDMETHODIMP CShape::put_XY(LONG pointIndex, double x, double y, VARIANT_BOOL* r
 	{
 		ErrorMessage(_shp->get_LastErrorCode());
 	}
+	return S_OK;
+}
+
+// **********************************************
+//   put_M()
+// **********************************************
+STDMETHODIMP CShape::put_M(LONG pointIndex, double m, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = (VARIANT_BOOL)_shp->put_PointM(pointIndex, m);
+	if (!(*retVal))
+	{
+		ErrorMessage(_shp->get_LastErrorCode());
+	}
+	return S_OK;
+}
+
+// **********************************************
+//   put_Z()
+// **********************************************
+STDMETHODIMP CShape::put_Z(LONG pointIndex, double z, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = (VARIANT_BOOL)_shp->put_PointZ(pointIndex, z);
+	if (!(*retVal))
+	{
+		ErrorMessage(_shp->get_LastErrorCode());
+	}
+	return S_OK;
+}
+
+// *************************************************************
+//		get_Z
+// *************************************************************
+STDMETHODIMP CShape::get_Z(long PointIndex, double* z, VARIANT_BOOL* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = get_Z(PointIndex, z);
+	return S_OK;
+}
+
+// *************************************************************
+//		get_M
+// *************************************************************
+STDMETHODIMP CShape::get_M(long PointIndex, double* m, VARIANT_BOOL* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = get_M(PointIndex, m);
 	return S_OK;
 }
 
@@ -2142,54 +2186,53 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 }
 
 //*****************************************************************
-//*		CopyTo()
+//*		CopyFrom()
 //*****************************************************************
-STDMETHODIMP CShape::CopyTo(IShape* target, VARIANT_BOOL* retVal)
+STDMETHODIMP CShape::CopyFrom(IShape* source, VARIANT_BOOL* retVal)   
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!target)
+	if (!source)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		*retVal = VARIANT_FALSE;
 	}
 	else
 	{
-		ShpfileType shpType = _shp->get_ShapeType();
+		IShape* target = this;
+		ShpfileType shpType;
+		source->get_ShapeType(&shpType);
 		VARIANT_BOOL vb;
 		target->Create(shpType, &vb);
 		
-		int numParts = _shp->get_PartCount();
+		long numParts;
+		source->get_NumParts(&numParts);
 		for(int i = 0; i < numParts; i++ )
 		{
 			long part, newIndex;
-			this->get_Part(i, &part);
+			source->get_Part(i, &part);
 			target->InsertPart(part, &newIndex, &vb);
 		}
 
-		bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
-		bool hasZ = _shp->get_ShapeType() == SHP_POLYGONZ;
+		bool hasM = shpType == SHP_POLYGONM || shpType == SHP_POLYGONZ;
+		bool hasZ = shpType == SHP_POLYGONZ;
 
 		long numPoints;
-		this->get_NumPoints(&numPoints);
+		source->get_NumPoints(&numPoints);
 		double x, y, m, z;
 		long pointIndex;
 		for(int i = 0; i < numPoints; i++ )
 		{
-			this->get_XY(i, &x, &y, &vb);
+			source->get_XY(i, &x, &y, &vb);
+			target->AddPoint(x, y, &pointIndex);
 			if (hasM)
 			{
-				_shp->get_PointM(i, m);
-				target->AddPoint2(x, y, m, &pointIndex);
+				source->get_M(i, &m, &vb);
+				target->put_M(i, m, &vb);
 			}
 			else if (hasZ)
 			{
-				_shp->get_PointM(i, m);
-				_shp->get_PointZ(i, z);
-				target->AddPoint3(x, y, m, z, &pointIndex);
-			}
-			else
-			{
-				target->AddPoint(x, y, &pointIndex);
+				source->get_Z(i, &z, &vb);
+				target->put_Z(i, z, &vb);
 			}
 		}
 		*retVal = VARIANT_TRUE;
@@ -2679,34 +2722,20 @@ STDMETHODIMP CShape::AddPoint(double x, double y, long* pointIndex)
 	return S_OK;
 }
 
-//*****************************************************************
-//*		AddPoint2()
-//*****************************************************************
-STDMETHODIMP CShape::AddPoint2(double x, double y, double m, long* pointIndex)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
-	int index = _shp->get_PointCount() - 1;
-	*pointIndex = success ?  index: -1;
-	_shp->put_PointM(index, m);
-	return S_OK;
-}
-
-//*****************************************************************
-//*		AddPoint3()
-//*****************************************************************
-STDMETHODIMP CShape::AddPoint3(double x, double y, double m, double z, long* pointIndex)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	bool success = _shp->InsertPointXY(_shp->get_PointCount(), x, y);
-	int index = _shp->get_PointCount() - 1;
-	*pointIndex = success ?  index: -1;
-	_shp->put_PointM(index, m);
-	_shp->put_PointZ(index, z);
-	return S_OK;
-}
-
 #pragma region Get point
+
+// XY coordinates
+bool CShape::get_XY(long PointIndex, double* x, double* y)
+{
+	if(!_shp->get_PointXY(PointIndex, *x, *y))
+	{
+		this->ErrorMessage(_shp->get_LastErrorCode());
+		return false;
+	}
+	else
+		return true;
+}
+
 bool CShape::get_Z(long PointIndex, double* z)
 {
 	if(!_shp->get_PointZ(PointIndex, *z))
@@ -2721,18 +2750,6 @@ bool CShape::get_Z(long PointIndex, double* z)
 bool CShape::get_M(long PointIndex, double* m)
 {
 	if(!_shp->get_PointM(PointIndex, *m))
-	{
-		this->ErrorMessage(_shp->get_LastErrorCode());
-		return false;
-	}
-	else
-		return true;
-}
-
-// XY coordinates
-bool CShape::get_XY(long PointIndex, double* x, double* y)
-{
-	if(!_shp->get_PointXY(PointIndex, *x, *y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
@@ -2812,8 +2829,6 @@ bool CShape::get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& y
 }
 #pragma endregion
 
-
-
 //*****************************************************************
 //*		ExportToWKT()
 //*****************************************************************
@@ -2868,7 +2883,7 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 				//((CShape*)result)->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
 
 				VARIANT_BOOL vb;
-				result->CopyTo(this, &vb);
+				this->CopyFrom(result, &vb);
 				*retVal = VARIANT_TRUE;	
 			}
 			for(size_t i = 0; i < shapes.size(); i++)

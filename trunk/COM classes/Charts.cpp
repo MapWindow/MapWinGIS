@@ -25,7 +25,6 @@
 
 #include "stdafx.h"
 #include "Charts.h"
-
 #include "Shapefile.h"
 #include "macros.h"
 #include "GeometryOperations.h"
@@ -1777,24 +1776,23 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 
 	USES_CONVERSION;
-	CString s = OLE2CA(Filename);
+	CStringW s = OLE2W(Filename);
 	if (s.GetLength() < 7)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_OK;
+		return S_FALSE;
 	}
 
-	if (s.Right(6).MakeLower() != ".chart")
+	if (s.Right(6).MakeLower() != L".chart")
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_OK;
+		return S_FALSE;
 	}
 	
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWindow" );
 	if (psTree)
 	{
-		// version = 1, for the old .lbl files no version were specified
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileVersion", CPLString().Printf("%d", 1));
+		Utility::WriteXmlHeaderAttributes(psTree, "Charts");
 
 		CPLXMLNode* node = SerializeChartData("Charts");
 		if (node)
@@ -1803,7 +1801,7 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 			_shapefile->get_NumShapes(&numShapes);
 			Utility::CPLCreateXMLAttributeAndValue(node, "Count", CPLString().Printf("%d", numShapes));
 			CPLAddXMLChild(psTree, node);
-			*retVal = CPLSerializeXMLTreeToFile(psTree, s);
+			*retVal = GdalHelper::SerializeXMLTreeToFile(psTree, s);
 			CPLDestroyXMLNode(psTree);
 		}
 	}

@@ -117,3 +117,40 @@ void GdalHelper::CloseDataset(GDALDataset* dt)
 		GDALClose(dt);
 	}
 }
+
+// **************************************************************
+//		CanOpenWithGdal
+// **************************************************************
+bool GdalHelper::CanOpenWithGdal(CStringW filename)
+{
+	GDALAllRegister();
+	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	bool gdalFormat = dt != NULL;
+	if (dt)
+	{
+		dt->Dereference();
+		delete dt;
+		dt = NULL;
+	}
+	return gdalFormat;
+}
+
+// **************************************************************
+//		TryOpenWithGdal
+// **************************************************************
+GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
+{
+	GDALAllRegister();
+	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	if (!dt) {
+		return GdalSupport::GdalSupportNone;
+	}
+	else
+	{
+		bool isRgb = IsRgb(dt);
+		dt->Dereference();
+		delete dt;
+		dt = NULL;
+		return isRgb ? GdalSupportRgb : GdalSupportGrid;
+	}
+}

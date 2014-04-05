@@ -1,4 +1,3 @@
-#pragma region Include
 #include "stdafx.h"
 #include "MapWinGis.h"
 #include "Map.h"
@@ -12,9 +11,6 @@
 #include "Image.h"
 #include "Measuring.h"
 #include "GeometryOperations.h"
-
-
-#pragma endregion
 
 #pragma region OnDraw
 // ***************************************************************
@@ -73,50 +69,50 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 		if (m_lockCount > 0)
 			return;
 		
-		if ( m_drawMouseMoves && m_canbitblt) {	 // there was request to update measuring and no changes to other layers
-			this->DrawMouseMoves(pdc, rcBounds, rcInvalid);   // drawing on the top of buffer
-			m_drawMouseMoves = false;
-		}
-		else {
-			this->HandleNewDrawing(pdc, rcBounds, rcInvalid);
+		if (!_canUseMainBuffer || !_canUseLayerBuffer) 
+		{
+			bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || HasDrawingData(tkDrawingDataAvailable::Coordinates);
+
+			// if there is no move data, draws to output canvas directly
+			this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
 			
-			if (m_cursorMode == cmMeasure || ((CMeasuring*)m_measuring)->persistent)
+			if (hasMouseMoveData) 
 			{
-				// let it blink on each loading of tile
-				this->DrawMouseMoves(pdc, rcBounds, rcInvalid);
+				// the main drawing will be taken from the buffer as it wasn't passed to output canvas yet
+				this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true);
 			}
+			_canUseMainBuffer = true;
+		}
+		else 
+		{
+			// always draw the main buffer, even if there is no measuring data
+			this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true); 
 		}
 	}
 }
 
 // ***************************************************************
-//		OnDraw()
+//		HandleNewDrawing()
 // ***************************************************************
-void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, float offsetX, float offsetY)
+void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, 
+								bool drawToOutputCanvas, float offsetX, float offsetY)
 {
-	#ifdef _DEBUG	
-	CLSID pngClsid;
-	Utility::GetEncoderClsid(L"image/png", &pngClsid);		
-	#endif
-	
-	bool layersRedraw = !m_canbitblt;
-	bool drawingRedraw = true;		// currently always on; can be time consuming when tiles are enabled 
-	
-	// background
 	long alpha = (255)<<24;
 	Gdiplus::Color backColor = Gdiplus::Color(alpha | BGR_TO_RGB(m_backColor));
 
-	Gdiplus::Graphics* gBuffer = NULL;
-	Gdiplus::Graphics* gPrinting = NULL;
+	Gdiplus::Graphics* gBuffer = NULL;		// for control rendering
+	Gdiplus::Graphics* gPrinting = NULL;	// for snapshot drawing
+
+	// ---------------------------------------
+	// preparing graphics (for snapshot drawing to output canvas directly; 
+	// for control rendering main buffer is used)
+	// ---------------------------------------
 	if (m_isSnapshot)
 	{
-		//SetBkMode (hdc, TRANSPARENT);
-		//SetBkColor (hDC, m_backColor);
 		gPrinting = Gdiplus::Graphics::FromHDC(pdc->GetSafeHdc());
 		gPrinting->TranslateTransform(offsetX, offsetY);
 		Gdiplus::RectF clip((Gdiplus::REAL)rcInvalid.left, (Gdiplus::REAL)rcInvalid.top, (Gdiplus::REAL)rcInvalid.Width(), (Gdiplus::REAL)rcInvalid.Height());
 		gPrinting->SetClip(clip);
-		
 		Gdiplus::Color color(255, 255, 255, 255);
 		Gdiplus::SolidBrush brush(color);
 		gPrinting->Clear(color);
@@ -128,31 +124,26 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		gBuffer->Clear(backColor);
 	}
 
-	// tiles
-	VARIANT_BOOL tilesVisible;
-	m_tiles->get_Visible(&tilesVisible);
+	DWORD startTick = ::GetTickCount();
 
-	bool tilesUpdate = false;
-	// if projection isn't defined there is no way to display tiles
-	if (tilesVisible && m_transformationMode != tmNotDefined)
+	// ---------------------------------------
+	// drawing of tiles
+	// ---------------------------------------
+	if (HasDrawingData(tkDrawingDataAvailable::TilesData))
 	{
 		CTiles* tiles = (CTiles*)m_tiles;
 		if (m_isSnapshot)
 		{
-			if (((CTiles*)m_tiles)->TilesAreInScreenBuffer((void*)this))
+			if (tiles->TilesAreInScreenBuffer((void*)this))
 			{
-				((CTiles*)m_tiles)->MarkUndrawn();	
-				CTilesDrawer drawer(gPrinting, &this->extents, this->m_pixelPerProjectionX, this->m_pixelPerProjectionY);
-				if (m_transformationMode == tmDoTransformation)
-					drawer.m_transfomation = ((CGeoProjection*)m_wgsProjection)->m_transformation;
-				drawer.DrawTiles(this->m_tiles, this->PixelsPerMapUnit(), m_projection, tiles->m_provider->Projection, true);
-				((CTiles*)m_tiles)->MarkUndrawn();
+				tiles->MarkUndrawn();	
+				DrawTiles(gPrinting);
+				tiles->MarkUndrawn();
 			}
 		}
 		else
 		{
-			tilesUpdate = tiles->UndrawnTilesExist();
-			if (tilesUpdate)
+			if (tiles->UndrawnTilesExist())
 			{
 				Gdiplus::Graphics* gTiles = Gdiplus::Graphics::FromImage(m_tilesBitmap);
 				if (!tiles->DrawnTilesExist())
@@ -161,15 +152,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 					gTiles->Clear(Gdiplus::Color::Transparent);
 				}
 				
-				// draw new tiles
-				CTilesDrawer drawer(gTiles, &this->extents, this->m_pixelPerProjectionX, this->m_pixelPerProjectionY);
-
-				if (m_transformationMode == tmDoTransformation)
-					drawer.m_transfomation = ((CGeoProjection*)m_wgsProjection)->m_transformation;
-
-				drawer.DrawTiles(this->m_tiles, this->PixelsPerMapUnit(), m_projection, tiles->m_provider->Projection, false);
+				// drawing new tiles
+				DrawTiles(gTiles);
 			}
 
+			// draw exiting one from buffer
 			if (tiles->DrawnTilesExist())
 			{
 				gBuffer->DrawImage(m_tilesBitmap, 0.0f, 0.0f);
@@ -177,11 +164,10 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		}
 	}
 	
-	// layers
-	DWORD startTick = ::GetTickCount();
-
-	bool layersExist = m_activeLayers.size() > 0;
-	if (layersExist)
+	// ---------------------------------------
+	// drawing of layers
+	// ---------------------------------------
+	if ( HasDrawingData(tkDrawingDataAvailable::LayersData) )
 	{
 		if (m_isSnapshot)
 		{
@@ -189,7 +175,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		}
 		else
 		{
-			if(!layersRedraw)
+			if(_canUseLayerBuffer)
 			{	
 				// update from the layer buffer
 				gBuffer->DrawImage(m_layerBitmap, 0.0f, 0.0f);
@@ -198,104 +184,46 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 			{
 				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(m_layerBitmap);
 				gLayers->Clear(Gdiplus::Color::Transparent);
-
-				#ifdef _DEBUG
-				//m_layerBitmap->Save(L"C:\\layers.png", &pngClsid, NULL);
-				#endif
-
 				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 
-				this->DrawLayers(rcBounds, gLayers);
-				
-				 #pragma region Asynchronous
-				 // a pointer ot member function
-				 /*UINT (CMapView::* ptrDrawLayers)(LPVOID) = &CMapView::StartDrawLayers;
-				 CMapView* map = this;
-				 (this->*ptrDrawLayers)(NULL);*/
-
-				 //DrawingParams* param = new  DrawingParams(this, gLayers, &rcBounds);
-				 //CWinThread* thread = AfxBeginThread(&StartThread, param);
-				 //delete param;
-				 #pragma endregion
-				
-				if (0)	// TODO: reimplement rotation using GDI+
-				{
-					HDC hdcLayers = gLayers->GetHDC();
-					CDC* dcLayers = CDC::FromHandle(hdcLayers);
-					if (dcLayers)
-					{
-				
-						CDC     *tmpBackbuffer = new CDC();
-						CRect   tmpRcBounds = new CRect();
-						Extent  tmpExtent, saveExtent;       
-						long    save_viewWidth, save_viewHeight;
-
-						if (m_Rotate == NULL)
-						  m_Rotate = new Rotate();
-
-						tmpBackbuffer->CreateCompatibleDC(dcLayers);
-						m_Rotate->setSize(rcBounds);
-						m_Rotate->setupRotateBackbuffer(tmpBackbuffer->m_hDC, pdc->m_hDC, m_backColor);
-
-						save_viewWidth = m_viewWidth;
-						save_viewHeight = m_viewHeight;
-						m_viewWidth = m_Rotate->rotatedWidth;
-						m_viewHeight = m_Rotate->rotatedHeight;
-						saveExtent = extents;
-						tmpExtent = extents;
-						tmpExtent.right += (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-						tmpExtent.bottom -= (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
-						tmpExtent.left -= (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-						tmpExtent.top += (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
-						extents = tmpExtent;
-
-						// draw the Map
-						//this->DrawLayers(rcBounds,tmpBackbuffer, gLayers);
-						
-						// Cleanup
-						extents = saveExtent;
-						m_viewWidth = save_viewWidth;
-						m_viewHeight = save_viewHeight;
-						m_Rotate->resetWorldTransform(tmpBackbuffer->m_hDC);
-						dcLayers->BitBlt(0,0,rcBounds.Width(),rcBounds.Height(), tmpBackbuffer, 0, 0, SRCCOPY);
-						m_Rotate->cleanupRotation(tmpBackbuffer->m_hDC);
-						tmpBackbuffer->DeleteDC();
-					}
-					gLayers->ReleaseHDC(hdcLayers);
+				bool useRotation = false;	// not implemented
+				if (useRotation) {
+					this->DrawLayersRotated(pdc, gLayers, rcBounds);
 				}
-				
-				// passing layers to the back buffer
+				else {
+					this->DrawLayers(rcBounds, gLayers);
+				}
+
+				// passing layer buffer to the main buffer
 				gBuffer->DrawImage(m_layerBitmap, 0.0f, 0.0f);
 			}
 		}
+		_canUseLayerBuffer = TRUE;
 	}
-	m_canbitblt = TRUE;
 	
-	// displaying the time
-	DWORD endTick = GetTickCount();
-	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
-
-	// hot tracking
-	if (m_hotTracking.Shapefile && !m_isSnapshot)
+	// -----------------------------------
+	// shapefile hot tracking
+	// -----------------------------------
+	if (HasDrawingData(tkDrawingDataAvailable::HotTracking))
 	{
 		CShapefileDrawer drawer(gBuffer, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, &m_collisionList, 
 			this->GetCurrentScale(), true);
 		drawer.Draw(rcBounds, m_hotTracking.Shapefile, ((CShapefile*)m_hotTracking.Shapefile)->get_File());
 	}
 
-	// passing buffer to user (includes background, tiles, layers, spatially referenced drawing)
+	// -----------------------------------
+	// passing main buffer to user for custom drawing
+	// -----------------------------------
 	if (m_sendOnDrawBackBuffer && !m_isSnapshot)
 	{
 		HDC hdc = gBuffer->GetHDC();
 		this->FireOnDrawBackBuffer((long)hdc);
 		gBuffer->ReleaseHDC(hdc);
 	}
-	
-	#ifdef _DEBUG
-	//m_layerBitmap->Save(L"C:\\layers.png", &pngClsid, NULL);
-	//m_bufferBitmap->Save(L"C:\\buffer.png", &pngClsid, NULL);
-	#endif
 
+	// -----------------------------------
+	//  rendering drawing layers
+	// -----------------------------------
 	if (m_isSnapshot)
 	{
 		this->DrawLists(rcBounds, gPrinting, dlSpatiallyReferencedList);
@@ -327,30 +255,46 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 			gBuffer->ReleaseHDC(hdc);
 		}
 
-		// passing layers to the back buffer
+		// passing layers to the main buffer
 		gBuffer->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
 		delete gDrawing;
 	}
 
+	// -----------------------------------
+	//  rendering scalebar
+	// -----------------------------------
 	if (m_scalebarVisible)
 		this->DrawScaleBar(m_isSnapshot ? gPrinting : gBuffer);
 
-	VARIANT_BOOL persistent;
-	m_measuring->get_Persistent(&persistent);
-	if (m_cursorMode == cmMeasure || persistent)
-	{
-		this->DrawMeasuring(m_isSnapshot ? gPrinting : gBuffer);
-	}
+	// -----------------------------------
+	// redraw time and logo
+	// -----------------------------------
+	DWORD endTick = GetTickCount();
+	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
 
-	// passing the main buffer to the screen
+	// -------------------------------------------
+	// distance measuring or persisten measuring
+	// -------------------------------------------
+	this->DrawMeasuringToMainBuffer(m_isSnapshot ? gPrinting : gBuffer);
+	
+	// -------------------------------------------
+	// passing the main buffer to the screen 
+	// if no other drawing will be needed
+	// -------------------------------------------
 	if (!m_isSnapshot)
 	{
-		HDC hdc = pdc->GetSafeHdc();
-		Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
-		g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);
-		g->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
-		g->ReleaseHDC(pdc->GetSafeHdc());
-		delete g;
+		if (drawToOutputCanvas) 
+		{
+			HDC hdc = pdc->GetSafeHdc();
+			Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
+			g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);
+			g->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
+			g->ReleaseHDC(pdc->GetSafeHdc());
+			delete g;
+		}
+		else {
+			// otherwise, there must be mouse move data and the buffer will be drawn there to avoid flickering
+		}
 		delete gBuffer;
 	}
 	else
@@ -362,6 +306,21 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 #pragma endregion
 
 #pragma region Draw layers
+
+// ***************************************************************
+//		DrawTiles()
+// ***************************************************************
+void CMapView::DrawTiles(Gdiplus::Graphics* g) 
+{
+	CTilesDrawer drawer(g, &this->extents, m_pixelPerProjectionX, m_pixelPerProjectionY);
+	if (m_transformationMode == tmDoTransformation)
+	{
+		CGeoProjection* p = (CGeoProjection*)GetWgs84ToMapTransform();
+		if (p) { drawer.m_transfomation = p->m_transformation; }
+	}
+	drawer.DrawTiles(m_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)m_tiles)->m_provider->Projection, m_isSnapshot);
+}
+
 // ****************************************************************
 //		DrawLayers()
 // ****************************************************************
@@ -379,11 +338,13 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 	
 	m_drawMutex.Lock();
 
-	//dc->FillSolidRect(rcBounds,m_backColor);
-	register int i, j;
+	register int i;
 	long startcondition = 0;
 	long endcondition = m_activeLayers.size();
 
+	// ---------------------------------------------------
+	//	perhaps ther eis nothing to draw
+	// ---------------------------------------------------
 	if (endcondition == 0)
 	{
 		m_drawMutex.Unlock();
@@ -403,123 +364,24 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 		isConcealed = new bool[endcondition];
 		memset(isConcealed,0,endcondition*sizeof(bool));
 	}
-	
+
 	double scale = this->GetCurrentScale();
 	int zoom;
-	this->m_tiles->get_CurrentZoom(&zoom);
+	m_tiles->get_CurrentZoom(&zoom);
 
-	if( m_numImages > 0 && !_canUseImageGrouping )
-	{
-		for( i = endcondition - 1; i >= 0; i-- )
-		{
-			Layer * l = m_allLayers[m_activeLayers[i]];
-			if( IS_VALID_PTR(l) )
-			{
-				if( l->type == ImageLayer && l->IsVisible(scale, zoom)) 
-				{
-					IImage * iimg = NULL;
-					if (!l->QueryImage(&iimg)) continue;
-					//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-					//if( iimg == NULL )continue;
-					
-					this->AdjustLayerExtents(i);
+	CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
 
-					VARIANT_BOOL useTransparencyColor;
-					iimg->get_UseTransparencyColor(&useTransparencyColor);
-					iimg->Release();
-					iimg = NULL;
+	// do we have shapefiles with hot tracking? check it once here and don't check on mouse move
+	_hasHotTracking = HasHotTracking();
 
-					if( useTransparencyColor == FALSE )
-					{
-						//Check if this is the end condition layer
-						if( l->extents.left <= extents.left && 
-							l->extents.right >= extents.right &&
-							l->extents.bottom <= extents.bottom && 
-							l->extents.top >= extents.top )
-						{	
-							startcondition = i;
-							break;
-						}
-						//Check if this layer conceals any others
-						else if( isConcealed[i] == false )
-						{
-							for( j = i - 1; j >= 0; j-- )
-							{
-								Layer * l2 = m_allLayers[m_activeLayers[j]];
-								if( IS_VALID_PTR(l2) )
-								{
-									if( l->extents.left <= l2->extents.left && 
-										l->extents.right >= l2->extents.right &&
-										l->extents.bottom <= l2->extents.bottom && 
-										l->extents.top >= l2->extents.top )
-									{
-										isConcealed[j] = true;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	// ---------------------------------------------------
+	//	Drawing grouped images
+	// ---------------------------------------------------
+	DrawImageGroups();
 	
-	// ------------------------------------------------------------------
-	//		Drawing of grouped image layers
-	// ------------------------------------------------------------------
-	if ( _canUseImageGrouping )
-	{
-		std::vector<ImageGroup*>* newGroups = new std::vector<ImageGroup*>;
-
-		// building groups
-		this->BuildImageGroups(*newGroups);
-		
-		// comparing them with the old list
-		if (m_imageGroups != NULL)
-		{
-			if (this->ImageGroupsAreEqual(*m_imageGroups, *newGroups))
-			{
-				// groups are the same so we can continue to use them
-				for (size_t i = 0; i < newGroups->size(); i++)
-				{
-					delete (*newGroups)[i];
-				}
-				newGroups->clear();
-				delete newGroups;
-				newGroups = NULL;
-			}
-			else
-			{
-				// groups has changed, swapping pointers
-				if (m_imageGroups != NULL)
-				{
-					for (size_t i = 0; i < m_imageGroups->size(); i++)
-					{
-						delete (*m_imageGroups)[i];
-					}
-					
-					m_imageGroups->clear();
-					delete m_imageGroups;
-					m_imageGroups = NULL;
-				}
-				m_imageGroups = newGroups;
-			}
-		}
-		else
-		{
-			m_imageGroups = newGroups;
-		}
-		
-		// mark all images as undrawn
-		for (size_t i = 0; i < m_imageGroups->size(); i++)
-		{
-			(*m_imageGroups)[i]->wasDrawn = false;
-		}
-	}
-	
-	// ------------------------------------------------------------------
-	//		Actual drawing
-	// ------------------------------------------------------------------
+	// ---------------------------------------------------
+	//	Prepare for drawing
+	// ---------------------------------------------------
 	double currentScale = this->GetCurrentScale();
 
 	bool useCommonCollisionListForCharts = true;
@@ -539,20 +401,18 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 	// initializing classes for drawing
 	bool forceGdiplus = this->m_RotateAngle != 0.0f || m_isSnapshot;
 	
-	CShapefileDrawer sfDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, &m_collisionList, 
-						   this->GetCurrentScale(), forceGdiplus);
-
+	CShapefileDrawer sfDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, &m_collisionList, this->GetCurrentScale(), forceGdiplus);
 	CImageDrawer imgDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, m_viewWidth, m_viewHeight);
-	CLabelDrawer lblDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, currentScale, 
-		chosenListLabels, m_RotateAngle, m_isSnapshot);
+	CLabelDrawer lblDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, currentScale, chosenListLabels, m_RotateAngle, m_isSnapshot);
 	CChartDrawer chartDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, currentScale, chosenListCharts);
+	
+	
 
+	// ---------------------------------------------------
+	//	Run drawing
+	// ---------------------------------------------------
 	for(int i = startcondition; i < endcondition; i++)
 	{
-		//CString str;
-		//str.Format("Drawing layer %d", i);
-		//timer.PrintTime(str.GetBuffer());
-		
 		if( isConcealed[i] == false )
 		{
 			Layer * l = m_allLayers[m_activeLayers[i]];
@@ -565,8 +425,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 						if(l->object == NULL ) continue;
 						IImage * iimg = NULL;
 						if (!l->QueryImage(&iimg)) continue;
-						//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-						//if( iimg == NULL ) continue;
 						
 						CImageClass* img = (CImageClass*)iimg;
 						
@@ -598,7 +456,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 										bmp->viewWidth == m_viewWidth &&
 										bmp->viewHeight == m_viewHeight && !((CImageClass*)iimg)->_imageChanged )
 									{
-										//Gdiplus::Graphics g(dc->m_hDC);
 										graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
 										
 										// TODO: choose interpolation mode more precisely
@@ -677,8 +534,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 						}
 						
 						IShapefile* sf = NULL;
-						//l->object->QueryInterface(IID_IShapefile,(void**)&sf);
-						//if( sf )
 						if (l->QueryShapefile(&sf))
 						{
 							sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
@@ -761,8 +616,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 				
 				// charts: for all modes
 				IShapefile* sf = NULL;
-				//l->object->QueryInterface(IID_IShapefile,(void**)&sf);
-				//if ( sf )
 				if (l->QueryShapefile(&sf))
 				{
 					ICharts* charts = NULL;
@@ -785,8 +638,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 			}
 		}
 	}
-
-	
 	
 	m_drawMutex.Unlock();
 
@@ -795,10 +646,274 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 
 	delete[] isConcealed;
 }
+
+// ****************************************************************
+//		DrawImageGroups()
+// ****************************************************************
+void CMapView::DrawImageGroups()
+{
+	if ( _canUseImageGrouping )
+	{
+		std::vector<ImageGroup*>* newGroups = new std::vector<ImageGroup*>;
+
+		// building groups
+		this->BuildImageGroups(*newGroups);
+		
+		// comparing them with the old list
+		if (m_imageGroups != NULL)
+		{
+			if (this->ImageGroupsAreEqual(*m_imageGroups, *newGroups))
+			{
+				// groups are the same so we can continue to use them
+				for (size_t i = 0; i < newGroups->size(); i++)
+				{
+					delete (*newGroups)[i];
+				}
+				newGroups->clear();
+				delete newGroups;
+				newGroups = NULL;
+			}
+			else
+			{
+				// groups has changed, swapping pointers
+				if (m_imageGroups != NULL)
+				{
+					for (size_t i = 0; i < m_imageGroups->size(); i++)
+					{
+						delete (*m_imageGroups)[i];
+					}
+					
+					m_imageGroups->clear();
+					delete m_imageGroups;
+					m_imageGroups = NULL;
+				}
+				m_imageGroups = newGroups;
+			}
+		}
+		else
+		{
+			m_imageGroups = newGroups;
+		}
+		
+		// mark all images as undrawn
+		for (size_t i = 0; i < m_imageGroups->size(); i++)
+		{
+			(*m_imageGroups)[i]->wasDrawn = false;
+		}
+	}
+}
+
 #pragma endregion
 
+#pragma region Utilities
+// ***************************************************************
+//		HasDrawingData()
+// ***************************************************************
+bool CMapView::HasDrawingData(tkDrawingDataAvailable type) 
+{
+	switch(type) 
+	{
+		case tkDrawingDataAvailable::LayersData:	
+			{
+				return m_activeLayers.size() > 0;
+			}
+		case tkDrawingDataAvailable::MeasuringData:
+			{
+				CMeasuring* m = ((CMeasuring*)m_measuring);
+				return m->NeedsDrawing() || (m_cursorMode == cmMeasure && m->points.size() > 0);
+			}
+		case tkDrawingDataAvailable::Coordinates:
+			{
+				return _showCoordinates != cdmNone && !m_isSnapshot;
+			}
+		case tkDrawingDataAvailable::TilesData:
+			{
+				// if projection isn't defined there is no way to display tiles
+				VARIANT_BOOL tilesVisible;
+				m_tiles->get_Visible(&tilesVisible);
+				return tilesVisible && m_transformationMode != tmNotDefined;
+			}
+		case tkDrawingDataAvailable::HotTracking:
+			{
+				return m_hotTracking.Shapefile && !m_isSnapshot;
+			}
+		default:
+			return false;
+	}
+}
 
-#pragma region Multithreading
+// ****************************************************************
+//		HasImages()
+// ****************************************************************
+bool CMapView::HasImages() 
+{
+	for(long i = m_activeLayers.size() - 1; i >= 0; i-- )
+	{
+		Layer * l = m_allLayers[m_activeLayers[i]];
+		if( IS_VALID_PTR(l) )
+		{
+			if( l->type == ImageLayer)
+				return true;
+		}
+	}
+	return false;
+}
+
+// ****************************************************************
+//		HasHotTracking()
+// ****************************************************************
+bool CMapView::HasHotTracking() 
+{
+	for(long i = m_activeLayers.size() - 1; i >= 0; i-- )
+	{
+		Layer * l = m_allLayers[m_activeLayers[i]];
+		if( IS_VALID_PTR(l) )
+		{
+			if( l->type == ShapefileLayer)
+			{
+				IShapefile* sf = NULL;
+				l->QueryShapefile(&sf);
+				if (sf) {
+					VARIANT_BOOL vb;
+					sf->get_HotTracking(&vb);
+					sf->Release();
+					if (vb) return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+// ****************************************************************
+//		CheckForConcealedImages()
+// ****************************************************************
+void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, long& endcondition, double scale, int zoom) 
+{
+	if( HasImages() && !_canUseImageGrouping )
+	{
+		register int i, j;
+
+		for( i = endcondition - 1; i >= 0; i-- )
+		{
+			Layer * l = m_allLayers[m_activeLayers[i]];
+			if( IS_VALID_PTR(l) )
+			{
+				if( l->type == ImageLayer && l->IsVisible(scale, zoom)) 
+				{
+					IImage * iimg = NULL;
+					if (!l->QueryImage(&iimg)) continue;
+					
+					this->AdjustLayerExtents(i);
+
+					VARIANT_BOOL useTransparencyColor;
+					iimg->get_UseTransparencyColor(&useTransparencyColor);
+					iimg->Release();
+					iimg = NULL;
+
+					if( useTransparencyColor == FALSE )
+					{
+						//Check if this is the end condition layer
+						if( l->extents.left <= extents.left && 
+							l->extents.right >= extents.right &&
+							l->extents.bottom <= extents.bottom && 
+							l->extents.top >= extents.top )
+						{	
+							startcondition = i;
+							break;
+						}
+						//Check if this layer conceals any others
+						else if( isConcealed[i] == false )
+						{
+							for( j = i - 1; j >= 0; j-- )
+							{
+								Layer * l2 = m_allLayers[m_activeLayers[j]];
+								if( IS_VALID_PTR(l2) )
+								{
+									if( l->extents.left <= l2->extents.left && 
+										l->extents.right >= l2->extents.right &&
+										l->extents.bottom <= l2->extents.bottom && 
+										l->extents.top >= l2->extents.top )
+									{
+										isConcealed[j] = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+#pragma endregion
+
+#pragma region Rotation (unused)
+// ***************************************************************
+//		DrawLayersRotated()
+// ***************************************************************
+void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds)
+{
+	// TODO: reimplement rotation using GDI+
+	return;
+
+	HDC hdcLayers = gLayers->GetHDC();
+	CDC* dcLayers = CDC::FromHandle(hdcLayers);
+	if (dcLayers)
+	{
+		CDC     *tmpBackbuffer = new CDC();
+		CRect   tmpRcBounds = new CRect();
+		Extent  tmpExtent, saveExtent;       
+		long    save_viewWidth, save_viewHeight;
+
+		if (m_Rotate == NULL)
+		  m_Rotate = new Rotate();
+
+		tmpBackbuffer->CreateCompatibleDC(dcLayers);
+		m_Rotate->setSize(rcBounds);
+		m_Rotate->setupRotateBackbuffer(tmpBackbuffer->m_hDC, pdc->m_hDC, m_backColor);
+
+		save_viewWidth = m_viewWidth;
+		save_viewHeight = m_viewHeight;
+		m_viewWidth = m_Rotate->rotatedWidth;
+		m_viewHeight = m_Rotate->rotatedHeight;
+		saveExtent = extents;
+		tmpExtent = extents;
+		tmpExtent.right += (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
+		tmpExtent.bottom -= (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
+		tmpExtent.left -= (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
+		tmpExtent.top += (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
+		extents = tmpExtent;
+
+		// draw the Map
+		//this->DrawLayers(rcBounds,tmpBackbuffer, gLayers);
+		
+		// Cleanup
+		extents = saveExtent;
+		m_viewWidth = save_viewWidth;
+		m_viewHeight = save_viewHeight;
+		m_Rotate->resetWorldTransform(tmpBackbuffer->m_hDC);
+		dcLayers->BitBlt(0,0,rcBounds.Width(),rcBounds.Height(), tmpBackbuffer, 0, 0, SRCCOPY);
+		m_Rotate->cleanupRotation(tmpBackbuffer->m_hDC);
+		tmpBackbuffer->DeleteDC();
+	}
+	gLayers->ReleaseHDC(hdcLayers);
+}
+#pragma endregion
+
+#pragma region Multithreading (unused)
+//void RunBacktreadDrawing() 
+//{
+	// a pointer ot member function	
+	/*UINT (CMapView::* ptrDrawLayers)(LPVOID) = &CMapView::StartDrawLayers;
+	 CMapView* map = this;
+	 (this->*ptrDrawLayers)(NULL);*/
+
+	 //DrawingParams* param = new  DrawingParams(this, gLayers, &rcBounds);
+	 //CWinThread* thread = AfxBeginThread(&StartThread, param);
+	 //delete param;
+//}
+
 // ******************************************************************
 //		InitMapRotation()
 // ******************************************************************

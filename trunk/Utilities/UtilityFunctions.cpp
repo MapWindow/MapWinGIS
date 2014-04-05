@@ -345,6 +345,22 @@ namespace Utility
 	}
 
 	// *********************************************************
+	//	     GetNameFromPath()
+	// *********************************************************
+	CStringW Utility::GetNameFromPath(CStringW path)
+	{
+		for (int i = path.GetLength() - 1; i > 0; i--)
+		{
+			if (path.Mid(i, 1) == '\\')
+			{
+				int length = path.GetLength() - 1 - i;
+				return length > 0 ? path.Right(length) : L"";
+			}
+		}
+		return path;
+	}
+
+	// *********************************************************
 	//	     EndsWith()
 	// *********************************************************
 	bool EndsWith(CStringW path, CStringW ext)
@@ -569,6 +585,31 @@ namespace Utility
 #pragma endregion
 
 #pragma region Numbers
+	// *********************************************************
+	//		FormatAngle()
+	// *********************************************************	
+	CStringW Utility::FormatAngle(double angle, bool withDecimals)
+    {
+        while (angle < -180.0)
+            angle += 360.0;
+
+        while (angle > 180.0)
+            angle -= 360.0;
+
+        int degrees = (int)floor(angle);
+        double delta = angle - degrees;
+
+        int minutes = (int)floor(60.0 * delta);
+        
+        delta = delta - minutes/60.0;
+        double seconds = delta*3600.0;
+
+        //CString dec = withDecimals ? ((int)((seconds % 1)*100.0 + 0.5)).ToString("D2") : "";
+        CStringW s;
+		s.Format(L"%d° %2d' %2d\"", degrees, minutes, (int)floor(seconds)); //, dec);
+		return s;
+    }
+
 	// *********************************************************
 	//		FormatNumber()
 	// *********************************************************
@@ -895,6 +936,37 @@ namespace Utility
 			callback->Progress(OLE2BSTR(key),0,A2BSTR(""));
 		}
 	}
+
+	// ********************************************************************
+	//		DisplayErrorMsg()
+	// ********************************************************************
+	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...)
+	{
+		if( callback )
+		{
+			TCHAR buffer[1024];
+ 			va_list args;
+			va_start( args, message);
+			vsprintf( buffer, message, args );
+			CString s = buffer;
+			Debug::WriteLine(s);
+			callback->Error(OLE2BSTR(key), A2BSTR(s));
+		}
+	}
+	void DisplayErrorMsg(ICallback* callback, CString key, char* message, ...)
+	{
+		if( callback )
+		{
+			TCHAR buffer[1024];
+ 			va_list args;
+			va_start( args, message);
+			vsprintf( buffer, message, args );
+			CString s = buffer;
+			Debug::WriteLine(s);
+			callback->Error(A2BSTR(key), A2BSTR(s));
+		}
+	}
+
 #pragma endregion
 
 	// ********************************************************
@@ -927,6 +999,60 @@ namespace Utility
 		Debug::WriteLine("Log opened: %d", logger.is_open());
 		Debug::WriteLine("Log good: %d", logger.good());
 	}
+
+	// ************************************************************
+	//		WriteXmlHeader()
+	// ************************************************************
+	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType)
+	{
+		USES_CONVERSION;
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "OcxVersion", GetFileVersionString());
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileType", fileType);
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileVersion", CPLString().Printf("%d", m_globalSettings.xmlFileVersion));
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "FilenamesEncoding", CPLString().Printf(m_globalSettings.xmlFilenameEncoding));
+	}
+
+	// ****************************************************************** 
+	//		GetFileVersionString
+	// ****************************************************************** 
+	CString GetFileVersionString()
+	{
+		wchar_t* path = new wchar_t[MAX_PATH + 1];
+		GetModuleFileNameW(GetModuleInstance(), path, MAX_PATH);
+
+		DWORD  verHandle = NULL;
+		UINT   size      = 0;
+		LPBYTE lpBuffer  = NULL;
+		DWORD  verSize   = GetFileVersionInfoSizeW( path, &verHandle);
+		CString result;
+
+		if (verSize != NULL)
+		{
+			LPSTR verData = new char[verSize];
+
+			if (GetFileVersionInfoW( path, verHandle, verSize, verData))
+			{
+				if (VerQueryValue(verData,"\\",(VOID FAR* FAR*)&lpBuffer,&size))
+				{
+					if (size)
+					{
+						VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+						if (verInfo->dwSignature == 0xfeef04bd)
+						{
+							int major = HIWORD(verInfo->dwFileVersionMS);
+							int minor = LOWORD(verInfo->dwFileVersionMS);
+							int build = HIWORD(verInfo->dwFileVersionLS);
+							int sub = LOWORD(verInfo->dwFileVersionLS);
+							result.Format("%d.%d.%d.%d", major, minor, build, sub);
+							Debug::WriteLine(result);
+						}
+					}
+				}
+			}
+			delete[] verData;
+		}
+		return result;
+	}
 }
 
 namespace Debug
@@ -947,13 +1073,5 @@ namespace Debug
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
 		//#endif
-		//return _CrtDbgReport(_CRT_WARN,NULL,NULL,NULL,buffer);
 	}
-
-	void Write(CString message)
-	{
-		OutputDebugStringA(message);
-	}
-
-	
 }

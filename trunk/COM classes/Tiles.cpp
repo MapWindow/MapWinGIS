@@ -289,8 +289,6 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 		}
 	}
 
-	//Debug::WriteLine("best zoom: %d; tiles size: %f", bestZoom, GetTileSizeByWidth(location, bestZoom, pixelPerDegree));
-
 	CSize s1, s2;
 	provider->Projection->GetTileMatrixMinXY(bestZoom, s1);
 	provider->Projection->GetTileMatrixMaxXY(bestZoom, s2);
@@ -306,12 +304,10 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 // ************************************************************
 //		ChooseZoom()
 // ************************************************************
-int CTiles::ChooseZoom(IExtents* ext, double pixelPerDegree, 
-					   bool limitByProvider, BaseProvider* provider)
+int CTiles::ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider)
 {
 	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
 	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
-	//Debug::WriteLine("Extents changed: Lat = %f; Lng = %f; Lat2 = %f; Lng2 = %f", yMinD, xMinD, yMaxD, xMaxD);
 	return this->ChooseZoom(xMinD, xMaxD, yMinD, yMaxD, pixelPerDegree, limitByProvider, provider);
 }
 
@@ -452,21 +448,18 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 	if (!provider)
 		return false;
 
-	// TODO: it's assumed here that m_wgsProjection has open transformation to current map projection
-	// perhaps it should be checked explicitly
 	CMapView* map = (CMapView*)mapView;
 	Extent clipExtents(map->extents.left, map->extents.right, map->extents.bottom, map->extents.top);
-	bool clipForTiles = this->ProjectionBounds(provider, map->m_wgsProjection, true, clipExtents);
+	bool clipForTiles = this->ProjectionBounds(provider, map->GetWgs84Projection(), true, clipExtents);
 	
+	if (!provider->mapView)
+		provider->mapView = mapView;
+
 	// we don't want to have coordinates outside world bounds, as it breaks tiles loading
 	IExtents* ext = map->GetGeographicExtentsCore(clipForTiles, &clipExtents);
 	if (!ext) {
 		return false;
 	}
-
-	// schedule redraw
-	if (!provider->mapView)
-		provider->mapView = mapView;
 
 	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
 	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
@@ -520,9 +513,11 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	int centX = (xMin + xMax) /2;
 	int centY = (yMin + yMax) /2;
 	
-	if (m_useDiskCache)
-	{
-		SQLiteCache::Initialize();
+	if (m_doDiskCaching)  {
+		SQLiteCache::Initialize(SqliteOpenMode::OpenOrCreate);
+	}
+	if (m_useDiskCache)	{
+		SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
 		SQLiteCache::m_locked = true;	// caching will be stopped while loading tiles to avoid locking the database
 	}
 	
@@ -537,7 +532,10 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 				TileCore* tile = m_tiles[i];
 				if (tile->m_tileX == x && tile->m_tileY == y && tile->m_providerId == provider->Id)
 				{
-					tile->m_toDelete = false;	// it must not be deleted
+					tile->m_toDelete = false;
+					
+					// TODO: actually it's in buffer; but for some reason there are crashes when setting it,
+					// so investigation is needed
 					//tile->m_inBuffer = true;
 					continue;
 				}
@@ -654,7 +652,7 @@ void CTiles::AddTileNoCaching(TileCore* tile)
 	tile->m_inBuffer = true;
 	tile->m_toDelete = false;
 	tile->AddRef();
-	m_tiles.push_back(tile);
+	m_tiles.push_back(tile);		// TODO!!!: protect with critical section
 	m_tilesLoaded = true;
 }
 
@@ -1076,19 +1074,35 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	USES_CONVERSION;
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)m_visible));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)m_gridLinesVisible));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)m_provider->Id));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)m_doRamCaching));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)m_doDiskCaching));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)m_useRamCache));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)m_useDiskCache));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer", CPLString().Printf("%d", (int)m_useServer));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", RamCache::m_maxSize));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", SQLiteCache::maxSizeDisk));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", m_minScaleToCache));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", m_maxScaleToCache));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", W2A(SQLiteCache::get_DbName()));    // TODO: use Unicode
+	if (!m_visible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)m_visible));
+	if (m_gridLinesVisible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "GridLinesVisible", CPLString().Printf("%d", (int)m_gridLinesVisible));
+	if (m_provider->Id != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Provider", CPLString().Printf("%d", (int)m_provider->Id));
+	if (!m_doRamCaching)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoRamCaching", CPLString().Printf("%d", (int)m_doRamCaching));
+	if (m_doDiskCaching)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DoDiskCaching", CPLString().Printf("%d", (int)m_doDiskCaching));
+	if (!m_useRamCache)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRamCache", CPLString().Printf("%d", (int)m_useRamCache));
+	if (!m_useDiskCache)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseDiskCache", CPLString().Printf("%d", (int)m_useDiskCache));
+	if (!m_useServer)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseServer", CPLString().Printf("%d", (int)m_useServer));
+	if (RamCache::m_maxSize != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxRamCacheSize", CPLString().Printf("%f", RamCache::m_maxSize));
+	if (SQLiteCache::maxSizeDisk != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxDiskCacheSize", CPLString().Printf("%f", SQLiteCache::maxSizeDisk));
+	if (m_minScaleToCache != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinScaleToCache", CPLString().Printf("%d", m_minScaleToCache));
+	if (m_maxScaleToCache != 100)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxScaleToCache", CPLString().Printf("%d", m_maxScaleToCache));
+	
+	CStringW dbName = SQLiteCache::get_DbName();
+	if (dbName.GetLength() != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", dbName);
+	
 	// TODO: serialize custom tile providers
 	return psTree;
 }
@@ -1161,7 +1175,7 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	
 	USES_CONVERSION;
 	s = CPLGetXMLValue( node, "DiskCacheFilename", NULL );
-	if (s != "") SQLiteCache::set_DbName(A2W(s));		// TODO: use Unicode
+	if (s != "") SQLiteCache::set_DbName(Utility::ConvertFromUtf8(s));
 	return true;
 }
 #pragma endregion
@@ -1452,7 +1466,7 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 			
 			if (type == CacheType::SqliteCache)
 			{
-				SQLiteCache::Initialize();
+				SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
 			}
 			else 
 			{
@@ -1634,3 +1648,22 @@ bool CTiles::ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProject
 	return false;
 }
 
+// ************************************************************
+//		get_MaxZoom
+// ************************************************************
+STDMETHODIMP CTiles::get_MaxZoom(int* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_provider->maxZoom;
+	return S_OK;
+}
+
+// ************************************************************
+//		put_MinZoom
+// ************************************************************
+STDMETHODIMP CTiles::get_MinZoom(int* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_provider->minZoom;
+	return S_OK;
+}

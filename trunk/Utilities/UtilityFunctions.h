@@ -24,6 +24,7 @@ namespace Utility
 	int Rint(double value);
 	double atof_custom(CString s);
 	double FloatRound(double doValue, int nPrecision);
+	CStringW FormatAngle(double angle, bool withDecimals = false);
 
 	// files, !!! all parameters should be CStringW; we use Unicode !!!
 	bool fileExistsW(CStringW filename);
@@ -40,6 +41,7 @@ namespace Utility
 	long get_FileSize(CStringW filename);
 	CStringW getProjectionFilename( CStringW dataSourceName );
 	CStringW GetFolderFromPath(CStringW path);
+	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL fileExists(CString filename);	
@@ -49,6 +51,8 @@ namespace Utility
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue);
+	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
+	CString GetFileVersionString();
 
 	// GDI
 	int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);
@@ -69,6 +73,8 @@ namespace Utility
 	// display progress
 	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent);
 	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
+	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...);
+	void DisplayErrorMsg(ICallback* callback, CString key, char* message, ...);
 
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
@@ -80,5 +86,4 @@ namespace Utility
 namespace Debug
 {
 	void WriteLine(CString format, ...);
-	//void WriteLine(CString message);
 }

@@ -255,7 +255,8 @@ public:
 		#ifdef GEOS_NEW
 			return GEOSNearestPoints_r(getGeosHandle(), g1, g2);
 		#else
-			return GEOSNearestPoints(g1, g2);
+			return NULL;
+			//return GEOSNearestPoints(g1, g2);		// TODO: restore
 		#endif
 	}
 

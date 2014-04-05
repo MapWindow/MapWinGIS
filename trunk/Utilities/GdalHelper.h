@@ -22,4 +22,7 @@ public:
 	static int SerializeXMLTreeToFile(CPLXMLNode* psTree, CStringW filename);
 
 	static void CloseDataset(GDALDataset* dt);
+	static bool GdalHelper::CanOpenWithGdal(CStringW filename);
+
+	static GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename);
 };

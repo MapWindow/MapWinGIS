@@ -128,7 +128,7 @@ public:
 
 	//STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, tkGroupOperation Operation, VARIANT_BOOL* retVal);
 
-	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node);
+	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressions);
 	CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName);
 
 	STDMETHOD(get_CategoryIndexByName)(BSTR categoryName, int* categoryIndex);

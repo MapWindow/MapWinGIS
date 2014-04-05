@@ -94,7 +94,7 @@ void CMapView::SetDrawingLabelsShadow(long drawHandle, BOOL newValue)
 	if( IsValidDrawList(drawHandle) )
 	{
 		m_allDrawLists[drawHandle]->m_labels->put_HaloVisible(newValue? VARIANT_TRUE : VARIANT_FALSE);
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -128,7 +128,7 @@ void CMapView::SetDrawingLabelsScale(long drawHandle, BOOL newValue)
 	if( IsValidDrawList(drawHandle) )
 	{
 		m_allDrawLists[drawHandle]->m_labels->put_ScaleLabels(newValue? VARIANT_TRUE : VARIANT_FALSE);
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -211,7 +211,7 @@ void CMapView::SetDrawingLabelsVisible(long drawHandle, BOOL bNewValue)
 	if( IsValidDrawList(drawHandle) )
 	{
 		m_allDrawLists[drawHandle]->m_labels->put_Visible(bNewValue ? VARIANT_TRUE : VARIANT_FALSE);
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -613,7 +613,7 @@ void CMapView::ClearDrawing(long Drawing)
 		if( m_allDrawLists[Drawing] )
 		{
 			if (m_allDrawLists[Drawing]->listType == dlSpatiallyReferencedList)
-				m_canbitblt = FALSE;
+				_canUseLayerBuffer = FALSE;
 
 			// lsu: it's cleared in destructor I think, but I add it here as well t be sure
 			m_allDrawLists[Drawing]->m_labels->Clear();
@@ -642,7 +642,7 @@ void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, d
 		if (m_allDrawLists[drawHandle]->m_labels)
 			m_allDrawLists[drawHandle]->m_labels->AddLabel(A2BSTR(Text), x, y);
 		
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -660,7 +660,7 @@ void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color,
 		if (m_allDrawLists[drawHandle]->m_labels)
 			m_allDrawLists[drawHandle]->m_labels->AddLabel(A2BSTR(Text), x, y, Rotation );
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -677,7 +677,7 @@ void CMapView::ClearDrawingLabels(long drawHandle)
 	{	
 		m_allDrawLists[drawHandle]->m_labels->Clear();
 
-		m_canbitblt = FALSE;
+		_canUseLayerBuffer = FALSE;
 		if( !m_lockCount )
 			InvalidateControl();
 	}
@@ -698,7 +698,7 @@ void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 		dlist->m_labels->put_FontSize(FontSize);
 		if (dlist->listType == dlSpatiallyReferencedList)
 		{
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 		}
 		if( !m_lockCount )
 			InvalidateControl();
@@ -722,7 +722,7 @@ void CMapView::ClearDrawings()
 	}
 	m_allDrawLists.clear();
 
-	m_canbitblt = FALSE;
+	_canUseLayerBuffer = FALSE;
 	if( !m_lockCount )
 			InvalidateControl();
 }
@@ -775,7 +775,7 @@ void CMapView::DrawPoint(double x, double y, long size, OLE_COLOR color)
 		dlist->m_dpoints.push_back(dp);
 
 		if (dlist->listType == dlSpatiallyReferencedList)
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 
 		if( !m_lockCount )
 			InvalidateControl();
@@ -802,7 +802,7 @@ void CMapView::DrawLine(double x1, double y1, double x2, double y2, long width, 
 		dlist->m_dlines.push_back(dl);
 
 		if (dlist->listType == dlSpatiallyReferencedList)
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 
 		if( !m_lockCount )
 			InvalidateControl();
@@ -829,7 +829,7 @@ void CMapView::DrawCircle(double x, double y, double radius, OLE_COLOR color, BO
 		dlist->m_dcircles.push_back(dc);
 
 		if (dlist->listType == dlSpatiallyReferencedList)
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 
 		if( !m_lockCount )
 			InvalidateControl();
@@ -858,7 +858,7 @@ void CMapView::DrawWideCircle(double x, double y, double radius, OLE_COLOR color
 		dlist->m_dcircles.push_back(dc);
 
 		if (dlist->listType == dlSpatiallyReferencedList)
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 
 		if( !m_lockCount )
 			InvalidateControl();
@@ -898,7 +898,7 @@ void CMapView::DrawPolygon(VARIANT *xPoints,VARIANT *yPoints, long numPoints, OL
 		dlist->m_dpolygons.push_back(dp);
     
 		//if (dlist->listType == dlSpatiallyReferencedList)
-		//	m_canbitblt = FALSE;
+		//	_canUseLayerBuffer = FALSE;
 		
 		if(  !m_lockCount )
 			InvalidateControl();
@@ -938,7 +938,7 @@ void CMapView::DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoint
 		dlist->m_dpolygons.push_back(dp);
 
 		if (dlist->listType == dlSpatiallyReferencedList)
-			m_canbitblt = FALSE;
+			_canUseLayerBuffer = FALSE;
 
 		if(  !m_lockCount )
 			InvalidateControl();

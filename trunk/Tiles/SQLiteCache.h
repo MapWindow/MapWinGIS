@@ -37,11 +37,13 @@ class SQLiteCache
 	static sqlite3 *m_conn;
 public:
 	static ::CCriticalSection section;  // finer locks to prevent simultaneous access of the same operation from several threads
-	static bool m_initNeeded;	// to create a database
+	static bool _createNeeded;	
+	static bool _openNeeded;	
 	static bool m_locked;		// coarse lock to block the adding tile to cache when extracting operations are made
 	static double maxSizeDisk;	// max size of disk cache in megabytes
 	
 	static CStringW get_DbName();
+	static CStringW get_DefaultDbName();
 	static bool set_DbName(CStringW name);
 	static bool CreateDatabase();
 	
@@ -68,18 +70,8 @@ public:
 		}
 	}
 
-	// creates database opens connection
-	static void Initialize()
-	{
-		section.Lock();
-		if (m_initNeeded) {
-			SQLiteCache::CreateDatabase();
-			m_initNeeded = false;
-			
-		}
-		section.Unlock();
-	}
-	
+	static bool Initialize(SqliteOpenMode openMode);
+
 	// to monitor potential treed conflicts
 	static void PrintThread(CString msg)
 	{

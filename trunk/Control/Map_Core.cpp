@@ -1,4 +1,3 @@
-#pragma region Include
 #include "stdafx.h"
 #include "MapWinGis.h"
 #include "Map.h"
@@ -7,7 +6,6 @@
 #include "Shapefile.h"
 #include "Labels.h"
 #include "Tiles.h"
-
 #include "xtiffio.h"  /* for TIFF */
 #include "geotiffio.h" /* for GeoTIFF */
 #include "Gdipluspixelformats.h"
@@ -18,9 +16,10 @@
 #include "tiffio.h"
 #include "tiffiop.h"
 
-#pragma endregion
-
-#pragma region REGION Rotation
+#pragma region Rotation
+// ****************************************************************
+//		GetRotatedExtent()
+// ****************************************************************
 //ajp (June 2010)
 IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 {
@@ -46,6 +45,9 @@ IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
   return curPoint;
 }
 
+// ****************************************************************
+//		GetRotatedExtent()
+// ****************************************************************
 //ajp (June 2010)
 IExtents* CMapView::GetRotatedExtent()
 {
@@ -73,7 +75,7 @@ IExtents* CMapView::GetRotatedExtent()
 }
 #pragma endregion
 
-#pragma region REGION Images
+#pragma region Images
 // ****************************************************************
 //		ReloadImageBuffers()
 // ****************************************************************
@@ -86,8 +88,6 @@ void CMapView::ReloadImageBuffers()
 
 		if ((l->type == ImageLayer) && (l->flags & Visible))
 		{
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			//if( iimg != NULL ) 
 			if (l->QueryImage(&iimg))
 			{	
 				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
@@ -100,7 +100,6 @@ void CMapView::ReloadImageBuffers()
 // ***************************************************
 //  GetImageLayerPercentTransparent
 // ***************************************************
-// Will be deprecated
 float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 {
 	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
@@ -109,8 +108,7 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 		if( l->type == ImageLayer )
 		{
 			IImage * iimg = NULL;
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			//if( iimg == NULL )	
+			
 			if (!l->QueryImage(&iimg))
 				return 1.0;
 			
@@ -147,7 +145,7 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 		if( l->type == ImageLayer )
 		{	
 			IImage * iimg = NULL;
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
+			
 			//if( iimg == NULL )	return;
 			if (!l->QueryImage(&iimg))
 				return;
@@ -179,7 +177,7 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 			IImage* img = this->GetImage(LayerHandle);
 			if (img != NULL)
 			{
-				img->put_ExternalColorScheme(scheme);
+				img->put_CustomColorScheme(scheme);
 				img->Release();
 				return VARIANT_TRUE;
 			}
@@ -206,7 +204,7 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 // deprecated
 void CMapView::UpdateImage(LONG LayerHandle)
 {
-	ErrorMessage(tkPROPERTY_DEPRECATED);
+	ErrorMessage(tkMETHOD_DEPRECATED);
 }
 
 // ***************************************************************
@@ -222,8 +220,6 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 		if (l->type == ImageLayer)
 		{
 			IImage * iimg = NULL;
-			//l->object->QueryInterface(IID_IImage,(void**)&iimg);
-			//if( iimg == NULL )return FALSE;
 			if (!l->QueryImage(&iimg)) return FALSE;
 			double xllCenter=0, yllCenter=0, dx=0, dy=0;
 			long width=0, height=0;
@@ -242,8 +238,6 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 		else if (l->type == ShapefileLayer)
 		{
 			IShapefile * ishp = NULL;
-			//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-			//if (ishp == NULL) return FALSE;
 			if (!l->QueryShapefile(&ishp)) return FALSE;
 			IExtents * box = NULL;
 			ishp->get_Extents(&box);
@@ -268,7 +262,10 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 
 #pragma endregion
 
-#pragma region REGION Methods
+#pragma region Methods
+// *************************************************
+//			LockWindow()						  
+// *************************************************
 void CMapView::LockWindow(short LockMode)
 {
 	if( LockMode == lmUnlock )
@@ -286,6 +283,9 @@ void CMapView::LockWindow(short LockMode)
 		m_lockCount++;
 }
 
+// *************************************************
+//			Resize()						  
+// *************************************************
 void CMapView::Resize(long Width, long Height)
 {
 	POINTL pl;
@@ -315,16 +315,42 @@ void CMapView::Resize(long Width, long Height)
 	OnSize( SIZE_RESTORED, size.cx, size.cy );
 }
 
-void CMapView::Redraw()
+// *************************************************
+//			Redraw2()						  
+// *************************************************
+void CMapView::Redraw2(tkRedrawType redrawType)
 {
-	m_canbitblt = FALSE;	// layers buffer won't be used
-	
-	((CTiles*)m_tiles)->LoadTiles((void*)this);
-	
-	ReloadImageBuffers();
+	if (redrawType != RedrawTempObjectsOnly) {
+		((CTiles*)m_tiles)->LoadTiles((void*)this);
+	}
+
+	switch (redrawType)
+	{
+		case tkRedrawType::RedrawAll:
+			_canUseLayerBuffer = FALSE;
+			ReloadImageBuffers();
+			break;
+		case tkRedrawType::RedrawSkipDataLayers:
+			_canUseMainBuffer = false;
+			break;
+		case tkRedrawType::RedrawTempObjectsOnly:
+			// do nothing, simply invalidate control
+			break;
+	}
 	InvalidateControl();
 }
 
+// *************************************************
+//			Redraw()						  
+// *************************************************
+void CMapView::Redraw()
+{
+	Redraw2(tkRedrawType::RedrawAll);
+}
+
+// *************************************************
+//			ShowToolTip()						  
+// *************************************************
 void CMapView::ShowToolTip(LPCTSTR Text, long Milliseconds)
 {
 	m_ttip.UpdateTipText(Text,this,IDC_TTBTN);
@@ -338,11 +364,17 @@ void CMapView::ShowToolTip(LPCTSTR Text, long Milliseconds)
 	SetTimer(HIDETEXT,Milliseconds,NULL);
 }
 
+// *************************************************
+//			GetErrorMsg()						  
+// *************************************************
 BSTR CMapView::GetErrorMsg(long ErrorCode)
 {
 	return A2BSTR(ErrorMsg(ErrorCode));
 }
 
+// *************************************************
+//			GetLastErrorCode()						  
+// *************************************************
 long CMapView::GetLastErrorCode()
 {
 	long lec = m_lastErrorCode;
@@ -350,9 +382,9 @@ long CMapView::GetLastErrorCode()
 	return lec;
 }
 
-/***********************************************************************/
-/*						ErrorMessage()						           */
-/***********************************************************************/
+// *************************************************
+//			ErrorMessage()						  
+// *************************************************
 inline void CMapView::ErrorMessage(long ErrorCode)
 {
 	USES_CONVERSION;
@@ -362,6 +394,9 @@ inline void CMapView::ErrorMessage(long ErrorCode)
 	return;
 }
 
+// *************************************************
+//			IsSameProjection()						  
+// *************************************************
 BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 {
 	ProjectionTools * pt = new ProjectionTools();
@@ -371,6 +406,9 @@ BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 	return (rt ? TRUE : FALSE);
 }
 
+// *************************************************
+//			IsTIFFGrid()						  
+// *************************************************
 BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 {
 	try
@@ -415,7 +453,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 }
 #pragma endregion
 
-#pragma region REGION LayerUpdate
+#pragma region LayerUpdate
 // **********************************************************
 //			GetDrawingLabels()
 // **********************************************************
@@ -432,8 +470,6 @@ void CMapView::ClearLabelFrames()
 			if (l->type == ShapefileLayer)
 			{
 				IShapefile * sf = NULL;
-				//l->object->QueryInterface(IID_IShapefile, (void**)&sf);
-				//if (sf != NULL)
 				if (l->QueryShapefile(&sf))
 				{
 					((CShapefile*)sf)->ClearChartFrames();
@@ -477,6 +513,9 @@ void CMapView::ClearLabelFrames()
 		}
 	}
 }
+#pragma endregion
+
+#pragma region Obsolete
 
 // ***************************************************************
 //		AlignShapeLayerAndShapes()
@@ -488,15 +527,19 @@ void CMapView::AlignShapeLayerAndShapes(Layer * layer)
 {
 	return;
 }
-#pragma endregion
 
-#pragma region REGION Others
+// *********************************************************
+//		ApplyLegendColors()
+// *********************************************************
 BOOL CMapView::ApplyLegendColors(LPDISPATCH pLegend)
 {
-	this->ErrorMessage(tkPROPERTY_DEPRECATED);
-	return FALSE;	// deprecated
+	this->ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
+	return FALSE;
 }
 
+// *********************************************************
+//		GetColorScheme()
+// *********************************************************
 LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 {
 	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
@@ -513,7 +556,7 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 			IImage* img = this->GetImage(LayerHandle);
 			if (img != NULL)
 			{
-				img->get_ExternalColorScheme(&scheme);
+				img->get_CustomColorScheme(&scheme);
 				img->Release();
 			}
 			else
@@ -535,29 +578,9 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 	}
 }
 
-inline double CMapView::makeVal( const char * sVal )
-{
-	double val = 0.0;
-
-	if( sVal != NULL )
-	{	
-		for( size_t i = 0; i < _tcslen( sVal ); i++ )
-		{
-			char c = sVal[i];
-			if( isalpha(c) || isdigit(c) )
-			{	c = toupper(c);
-
-				//Adjust by the ASCII value of 0
-				c = c - 48;
-
-				//90-48 = range
-				val += ((double)c)*(42*pow((double)10, (double)i));
-			}
-		}
-	}
-	return val;
-}
-
+// *********************************************************
+//		GetGridFileName()
+// *********************************************************
 BSTR CMapView::GetGridFileName(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -587,6 +610,9 @@ BSTR CMapView::GetGridFileName(LONG LayerHandle)
 	}
 }
 
+// *********************************************************
+//		SetGridFileName()
+// *********************************************************
 void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -612,6 +638,87 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 	}
 }
 
+#pragma endregion
+
+#pragma region Serial number
+// *********************************************************
+//		Crypt()
+// *********************************************************
+CString CMapView::Crypt(CString str)
+{
+	CString tmp;
+
+	int len = str.GetLength();
+	int end = len;
+	int cur = 0;
+
+	str.MakeUpper();
+
+	// convert to uppercase and remove non alpha chars
+	for (int i = 0; i < end && cur < 7; i++)
+	{
+		char t = str[i];
+		if (t >= 'A' && t <= 'Z')
+		{
+			tmp.AppendChar(t);
+			cur++;
+		}
+	}
+
+	for (int j = cur; j < 7; j++)
+		tmp.AppendChar((char)((rand() % 26) + 64));
+
+	//	PrepString(str, tmp);
+
+	int curPosition = 0;
+	int offset = 0;
+	for (int i = 0; i < 7; i++)
+	{
+		offset = (int)(tmp[6 - i] - 'A') + 7;
+		curPosition += offset; // spin the decoder wheel to get then encoded character
+		curPosition %= valsLen; // wrap around the "end" of the wheel if needed
+		tmp.AppendChar(vals[curPosition]); // read what the magic wheel says
+	}
+
+	return tmp;
+}
+
+// *********************************************************
+//		VerifySerial()
+// *********************************************************
+bool CMapView::VerifySerial(CString str)
+{
+	if (Crypt(str) == str)
+		return true;
+	else
+		return false;
+}
+
+// *********************************************************
+//		makeVal()
+// *********************************************************
+inline double CMapView::makeVal( const char * sVal )
+{
+	double val = 0.0;
+
+	if( sVal != NULL )
+	{	
+		for( size_t i = 0; i < _tcslen( sVal ); i++ )
+		{
+			char c = sVal[i];
+			if( isalpha(c) || isdigit(c) )
+			{	c = toupper(c);
+
+				//Adjust by the ASCII value of 0
+				c = c - 48;
+
+				//90-48 = range
+				val += ((double)c)*(42*pow((double)10, (double)i));
+			}
+		}
+	}
+	return val;
+}
 #pragma endregion
 
 // *********************************************************
@@ -640,53 +747,3 @@ HCURSOR CMapView::SetWaitCursor()
 
    return oldCursor;
 }
-
-#pragma region REGION Serial number
-CString CMapView::Crypt(CString str)
-{
-	CString tmp;
-
-	int len = str.GetLength();
-	int end = len;
-	int cur = 0;
-
-	str.MakeUpper();
-
-	// convert to uppercase and remove non alpha chars
-	for (int i = 0; i < end && cur < 7; i++)
-	{
-		char t = str[i];
-		if (t >= 'A' && t <= 'Z')
-		{
-			tmp.AppendChar(t);
-			cur++;
-		}
-	}
-
-	for (int j = cur; j < 7; j++)
-		tmp.AppendChar((char)((rand() % 26) + 64));
-
-//	PrepString(str, tmp);
-
-	int curPosition = 0;
-	int offset = 0;
-	for (int i = 0; i < 7; i++)
-	{
-		offset = (int)(tmp[6 - i] - 'A') + 7;
-		curPosition += offset; // spin the decoder wheel to get then encoded character
-		curPosition %= valsLen; // wrap around the "end" of the wheel if needed
-		tmp.AppendChar(vals[curPosition]); // read what the magic wheel says
-	}
-
-	return tmp;
-}
-
-bool CMapView::VerifySerial(CString str)
-{
-	if (Crypt(str) == str)
-		return true;
-	else
-		return false;
-}
-
-#pragma endregion

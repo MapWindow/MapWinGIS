@@ -193,6 +193,9 @@ public:
 
 	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
 	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
+
+	STDMETHOD(get_MaxZoom)(int* retVal);
+	STDMETHOD(get_MinZoom)(int* pVal);
 	#pragma endregion
 
 private:

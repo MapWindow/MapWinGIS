@@ -1,12 +1,9 @@
-#pragma region Include
 #include "stdafx.h"
 #include "Map.h"
 #include "MapWinGis.h"
 #include "GridColorScheme.h"
 #include "Tiles.h"
 #include "GdalHelper.h"
-
-#pragma endregion
 
 // *********************************************************
 //		SaveMapState()
@@ -234,37 +231,10 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 			if (_stricmp(nodeLayer->pszValue, "Layer") == 0)
 			{
 				int handle = DeserializeLayerCore( nodeLayer, ProjectName, callback);
-				
-				// No longer needed; it's serialized inside image class
-				/*if (handle != -1)
-				{
-					s = CPLGetXMLValue( nodeState, "GridFilename", NULL );
-					if (s != "")
-					{
-						CStringW gridName = Utility::ConvertFromUtf8(s);
-						node = CPLGetXMLNode(nodeState, "GridColorSchemeClass");
-						if (node)
-						{
-							IGridColorScheme* scheme = NULL;
-							CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&scheme);
-							if (scheme)
-							{
-								if (((CGridColorScheme*)scheme)->DeserializeCore(node))
-								{
-									USES_CONVERSION;
-									this->SetGridFileName(handle, W2BSTR(gridName));
-									this->SetImageLayerColorScheme(handle, (IDispatch*)scheme);
-								}
-							}
-						}
-					}
-				}*/
 			}
 			nodeLayer = nodeLayer->psNext;
 		}
 		_wchdir(cwd);
-		
-		FireLayersChanged();
 	}
 
 	// restoring tiles settings
@@ -315,13 +285,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWinGIS");
 	if (psTree) 
 	{
-		// TODO: implement version autoincrement
-		// ocx version			
-		CString s;
-		s.Format("%d.%d", _wVerMajor, _wVerMinor);
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "OcxVersion", s);
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileType", "MapState");
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "FileVersion", CPLString().Printf("%d", 0));
+		Utility::WriteXmlHeaderAttributes(psTree, "MapState");
 
 		// control options
 		CPLXMLNode* psState = CPLCreateXMLNode( NULL, CXT_Element, "MapState");
@@ -433,29 +397,6 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 						CPLXMLNode* node = this->SerializeLayerCore(handle, layerNameW);
 						if (node)
 						{
-							// No longer needed; it's serialized inside image class
-							//BSTR s = this->GetGridFileName(handle);
-							//CStringW gridFilenameW = OLE2W(s);
-							//if (gridFilenameW.GetLength() != 0)
-							//{
-							//	LPDISPATCH obj = this->GetColorScheme(handle);
-							//	if (obj)
-							//	{
-							//		IGridColorScheme* scheme = NULL;
-							//		obj->QueryInterface(IID_IGridColorScheme,(void**)&scheme);
-							//		if (scheme)
-							//		{
-							//			CPLXMLNode* nodeScheme = ((CGridColorScheme*)scheme)->SerializeCore("GridColorSchemeClass");
-							//			if (nodeScheme)
-							//			{
-							//				CPLAddXMLChild(node, nodeScheme);
-							//				Utility::CPLCreateXMLAttributeAndValue(node, "GridFilename", gridFilenameW);
-							//			}
-							//			scheme->Release();
-							//		}
-							//		obj->Release();
-							//	}
-							//}
 							CPLAddXMLChild(psLayers, node);	
 						}
 					}

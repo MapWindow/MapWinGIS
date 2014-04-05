@@ -872,7 +872,7 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 // ********************************************************
 //     DeserializeCore()
 // ********************************************************
-bool CShapefileCategories::DeserializeCore(CPLXMLNode* node)
+bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressions)
 {
 	if (!node)
 		return false;
@@ -972,7 +972,8 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node)
 			node = node->psNext;
 		} 
 
-		this->ApplyExpressions();
+		if (applyExpressions)
+			this->ApplyExpressions();
 	}
 	return true;
 }
@@ -992,7 +993,7 @@ STDMETHODIMP CShapefileCategories::Deserialize(BSTR newVal)
 		CPLXMLNode* nodeCat = CPLGetXMLNode(node, "=ShapefileCategoriesClass");
 		if (nodeCat)
 		{
-			DeserializeCore(nodeCat);
+			DeserializeCore(nodeCat, true);
 		}
 		CPLDestroyXMLNode(node);
 	}

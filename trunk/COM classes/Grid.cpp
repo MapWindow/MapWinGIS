@@ -318,11 +318,12 @@ STDMETHODIMP CGrid::Resource(BSTR newSrcPath, VARIANT_BOOL *retval)
 }
 
 // ***************************************************
-//		GetRow()
+//		GetRowCore()
 // ***************************************************
-STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
+void CGrid::GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	double* ValsDouble = reinterpret_cast<double*>(Vals);
+	float* ValsFloat = reinterpret_cast<float*>(Vals);
 
 	if (trgrid != NULL)
 	{
@@ -331,20 +332,24 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
 			*retval = FALSE;
-			return S_FALSE;
 		}
 
 		int ncols = trgrid->getWidth();
 
 		if (!trgrid->isInRam())
 		{
-			trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1, false);
+			trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
 		}
 		else
 		{
 			for (int i = 0; i < ncols; i++)
 			{
-				Vals[i] = static_cast<float>(trgrid->getValue(Row, i));
+				if (useDouble) {
+					ValsDouble[i] = trgrid->getValue(Row, i);
+				}
+				else {
+					ValsFloat[i] = static_cast<float>(trgrid->getValue(Row, i));
+				}
 			}
 		}
 	}
@@ -354,7 +359,12 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 
 		for (int i = 0; i < ncols; i++)
 		{
-			Vals[i] = static_cast<float>(dgrid->getValue(i, Row));
+			if (useDouble) {
+				ValsDouble[i] = dgrid->getValue(i, Row);
+			}
+			else {
+				ValsFloat[i] = static_cast<float>(dgrid->getValue(i, Row));
+			}
 		}
 	}
 	else if( fgrid != NULL )
@@ -363,7 +373,12 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 
 		for (int i = 0; i < ncols; i++)
 		{
-			Vals[i] = fgrid->getValue(i, Row);
+			if (useDouble) {
+				ValsDouble[i] = static_cast<double>(fgrid->getValue(i, Row));
+			}
+			else {
+				ValsFloat[i] = fgrid->getValue(i, Row);
+			}
 		}
 	}
 	else if( lgrid != NULL )
@@ -371,7 +386,12 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 
 		for (int i = 0; i < ncols; i++)
 		{
-			Vals[i] = static_cast<float>(lgrid->getValue(i, Row));
+			if (useDouble) {
+				ValsDouble[i] = static_cast<double>(lgrid->getValue(i, Row));
+			}
+			else {
+				ValsFloat[i] = static_cast<float>(lgrid->getValue(i, Row));
+			}
 		}
 	}
 	else if( sgrid != NULL )
@@ -379,44 +399,150 @@ STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 
 		for (int i = 0; i < ncols; i++)
 		{
-			Vals[i] = static_cast<float>(sgrid->getValue(i, Row));
+			if (useDouble) {
+				ValsDouble[i] = static_cast<double>(sgrid->getValue(i, Row));
+			}
+			else {
+				ValsFloat[i] = static_cast<float>(sgrid->getValue(i, Row));
+			}
 		}
 	}
 	else
 	{	Vals = NULL;
 		ErrorMessage(tkGRID_NOT_INITIALIZED);
 		*retval = S_FALSE;
-		return *retval;
 	}
-
 	*retval = TRUE;
-
-	return S_OK;
 }
 
 // ***************************************************
-//		PutRow()
+//		GetRow()
 // ***************************************************
-// only gdal grids not in-memory grids are supported, extend if needed
-bool CGrid::PutRowDouble(long Row, double *Vals)
+STDMETHODIMP CGrid::GetRow(long Row, float *Vals, VARIANT_BOOL * retval)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	GetRowCore(Row, Vals, false, retval);
+	return *retval ? S_OK : S_FALSE;
+}
+
+// ***************************************************
+//		GetRow2()
+// ***************************************************
+STDMETHODIMP CGrid::GetRow2(long Row, double *Vals, VARIANT_BOOL * retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	GetRowCore(Row, Vals, true, retval);
+	return *retval ? S_OK : S_FALSE;
+}
+
+// ***************************************************
+//		PutRowCore()
+// ***************************************************
+void CGrid::PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval)
+{
+	double* ValsDouble = reinterpret_cast<double*>(Vals);
+	float* ValsFloat = reinterpret_cast<float*>(Vals);
+
 	if (trgrid != NULL)
 	{
 		if (Row < 0 || Row >= trgrid->getHeight() )
 		{
 			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
+			*retval = FALSE;
 		}
 
 		long ncols = trgrid->getWidth();
 		
 		if (!trgrid->isInRam())
 		{
-			trgrid->PutFloatWindow((void*)Vals, Row, Row, 0, ncols-1, true);
-			return true;
+			trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
+		}
+		else
+		{
+			for (long i = 0; i < ncols; i++)
+			{
+				if (useDouble) {
+					trgrid->putValue(Row, i, ValsDouble[i]);
+				}
+				else
+				{
+					trgrid->putValue(Row, i, static_cast<double>(ValsFloat[i]));
+				}
+			}
 		}
 	}
-	return false;
+	else if( dgrid != NULL )
+	{	
+		int ncols = dgrid->getHeader().getNumberCols();
+		for (int i = 0; i < ncols; i++)
+		{
+			if (useDouble) {
+				dgrid->setValue(i, Row, ValsDouble[i]);
+			}
+			else {
+				dgrid->setValue(i, Row, static_cast<double>(ValsFloat[i]));
+			}
+		}
+	}
+	else if( fgrid != NULL )
+	{	
+		int ncols = fgrid->getHeader().getNumberCols();
+		for (int i = 0; i < ncols; i++)
+		{
+			if (useDouble) {
+				fgrid->setValue(i, Row, static_cast<float>(ValsDouble[i]));
+			}
+			else {
+				fgrid->setValue(i, Row, ValsFloat[i]);
+			}
+		}
+	}
+	else if( lgrid != NULL )
+	{	
+		int ncols = lgrid->getHeader().getNumberCols();
+		for (int i = 0; i < ncols; i++)
+		{
+			if (useDouble) {
+				double val = ValsDouble[i];
+				long lval = static_cast<long>(ValsDouble[i]);
+				lgrid->setValue(i, Row, static_cast<long>(ValsDouble[i]));
+			}
+			else {
+				lgrid->setValue(i, Row, static_cast<long>(ValsFloat[i]));
+			}
+		}
+	}
+	else if( sgrid != NULL )
+	{	
+		int ncols = sgrid->getHeader().getNumberCols();
+		for (int i = 0; i < ncols; i++)
+		{
+			if (useDouble) {
+				sgrid->setValue(i, Row, static_cast<short>(ValsDouble[i]));
+			}
+			else {
+				sgrid->setValue(i, Row, static_cast<short>(ValsFloat[i]));
+			}
+		}
+	}
+	else
+	{
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
+		*retval = FALSE;
+	}
+	*retval = TRUE;
+}
+
+// ***************************************************
+//		PutRow()
+// ***************************************************
+// only gdal grids not in-memory grids are supported, extend if needed
+STDMETHODIMP CGrid::PutRow2(long Row, double *Vals, VARIANT_BOOL * retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	PutRowCore(Row, Vals, true, retval);
+	return *retval ? S_OK : S_FALSE;
 }
 
 // ***************************************************
@@ -425,72 +551,8 @@ bool CGrid::PutRowDouble(long Row, double *Vals)
 STDMETHODIMP CGrid::PutRow(long Row, float *Vals, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	if (trgrid != NULL)
-	{
-		if (Row < 0 || Row >= trgrid->getHeight() )
-		{
-			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-			Vals = NULL;
-			*retval = FALSE;
-			return S_FALSE;
-		}
-
-		long ncols = trgrid->getWidth();
-		
-		if (!trgrid->isInRam())
-		{
-			trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1, false);
-		}
-		else
-		{
-			for (long i = 0; i < ncols; i++)
-			{
-				trgrid->putValue(Row, i, Vals[i]);
-			}
-		}
-	}
-	else if( dgrid != NULL )
-	{	
-		int ncols = dgrid->getHeader().getNumberCols();
-		for (int i = 0; i < ncols; i++)
-		{
-			dgrid->setValue(i, Row, Vals[i]);
-		}
-	}
-	else if( fgrid != NULL )
-	{	
-		int ncols = fgrid->getHeader().getNumberCols();
-		for (int i = 0; i < ncols; i++)
-		{
-			fgrid->setValue(i, Row, Vals[i]);
-		}
-	}
-	else if( lgrid != NULL )
-	{	
-		int ncols = lgrid->getHeader().getNumberCols();
-		for (int i = 0; i < ncols; i++)
-		{
-			lgrid->setValue(i, Row, static_cast<long>(Vals[i]));
-		}
-	}
-	else if( sgrid != NULL )
-	{	
-		int ncols = sgrid->getHeader().getNumberCols();
-		for (int i = 0; i < ncols; i++)
-		{
-			sgrid->setValue(i, Row, static_cast<short>(Vals[i]));
-		}
-	}
-	else
-	{
-		ErrorMessage(tkGRID_NOT_INITIALIZED);
-		*retval = FALSE;
-		return S_FALSE;
-	}
-
-	*retval = TRUE;
-	return S_OK;
+	PutRowCore(Row, Vals, false, retval);
+	return *retval ? S_OK : S_FALSE;
 }
 
 // ***************************************************
@@ -973,7 +1035,7 @@ bool CGrid::OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileT
 }
 
 // ***************************************************
-//		OpenAsciiGrid()
+//		TryOpenAsAsciiGrid()
 // ***************************************************
 void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcingGDALUse)
 {
@@ -2092,11 +2154,11 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = fgrid->getValue(i, j);
+					ValsDouble[position++] = static_cast<double>(fgrid->getValue(i, j));
 				}
 				else
 				{
-					ValsFloat[position++] = static_cast<float>(fgrid->getValue(i, j));
+					ValsFloat[position++] = fgrid->getValue(i, j);
 				}
 			}
 		}
@@ -2110,7 +2172,7 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = lgrid->getValue(i, j);
+					ValsDouble[position++] = static_cast<double>(lgrid->getValue(i, j));
 				}
 				else
 				{
@@ -2128,7 +2190,7 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = sgrid->getValue(i, j);
+					ValsDouble[position++] = static_cast<double>(sgrid->getValue(i, j));
 				}
 				else
 				{
@@ -2202,7 +2264,7 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 				}
 				else
 				{
-					dgrid->setValue(i, j, ValsFloat[position++]);
+					dgrid->setValue(i, j, static_cast<float>(ValsFloat[position++]));
 				}
 			}
 		}
@@ -2557,12 +2619,12 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 
 					// save the color scheme to open next time
 					CStringW legendName = this->GetLegendName();
-					//if (!Utility::fileExistsW(legendName))	// always overwrite
-					{
-						int bandIndex = 1;
-						this->get_ActiveBandIndex(&bandIndex);
+					int bandIndex;
+					this->get_ActiveBandIndex(&bandIndex);
+					if (m_globalSettings.saveGridColorSchemeToFile) {
 						scheme->WriteToFile(W2BSTR(legendName), W2BSTR(GetFilename()), bandIndex, &vb);
 					}
+					
 				}
 				return S_OK;
 			}
@@ -2599,18 +2661,12 @@ IImage* CGrid::OpenImageProxy()
 		VARIANT_BOOL vb;
 		GetUtils()->CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
 		
-		((CImageClass*)iimg)->OpenImage(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, False, NULL, GDALAccess::GA_ReadOnly, false, &vb); 
+		iimg->Open(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, globalCallback, &vb);
 		if (!vb) 
 		{
 			iimg->Close(&vb);
 			iimg->Release();
 			iimg = NULL;
-		}
-		else
-		{
-			CImageClass* img = ((CImageClass*)iimg);
-			img->sourceGridName = this->GetFilename();
-			img->isGridProxy = true;
 		}
 	}
 	return iimg;
@@ -2652,21 +2708,6 @@ STDMETHODIMP CGrid::put_PreferedDisplayMode(tkGridProxyMode newVal)
 	return S_OK;
 }
 
-// TODO: move to GdalHelper class
-bool canOpenWithGdal(CStringW filename)
-{
-	GDALAllRegister();
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
-	bool gdalFormat = dt != NULL;
-	if (dt)
-	{
-		dt->Dereference();
-		delete dt;
-		dt = NULL;
-	}
-	return gdalFormat;
-}
-
 // ****************************************************************
 //			get_CanDisplayWithoutProxy()						         
 // ****************************************************************
@@ -2679,9 +2720,7 @@ STDMETHODIMP CGrid::get_CanDisplayWithoutProxy(tkCanDisplayGridWoProxy* retVal)
 	//Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
 	//Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil")
 
-	bool gdalFormat = canOpenWithGdal(GetFilename());
-
-	m_globalSettings.SetGdalUtf8(false);
+	bool gdalFormat = GdalHelper::CanOpenWithGdal(GetFilename());
 
 	if (gdalFormat)
 	{
@@ -2727,13 +2766,21 @@ STDMETHODIMP CGrid::CreateImageProxy(IGridColorScheme* colorScheme, IImage** ret
 STDMETHODIMP CGrid::get_HasValidImageProxy(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CStringW proxyName = GetProxyName();
-	CStringW legendName = GetProxyLegendName();
 	CStringW gridFilename = GetFilename();
-	*retVal = (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
-			   Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
+	*retVal = HasValidProxy(gridFilename);
 	return S_OK;
 }
+
+// ****************************************************************
+//			HasValidProxy()						         
+// ****************************************************************
+bool CGrid::HasValidProxy(CStringW gridFilename)
+{
+	CStringW proxyName = GetProxyName(gridFilename);
+	CStringW legendName = GetProxyLegendName(gridFilename);
+	return (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
+		    Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
+}	
 
 #pragma region Color scheme
 

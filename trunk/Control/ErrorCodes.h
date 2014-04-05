@@ -50,6 +50,9 @@ const char * ErrorMsg( long ErrorCode );
 # define tkGDAL_ERROR 28
 # define tkMETHOD_NOT_IMPLEMENTED 29
 # define tkFOLDER_NOT_EXISTS 30
+# define tkFILE_NOT_EXISTS 31
+# define tkMETHOD_DEPRECATED 32
+
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201
@@ -163,6 +166,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkMAP_INVALID_MAPSTATE 1211
 # define tkMAP_MAPSTATE_LAYER_LOAD_FAILED 1212
 # define tkMAP_PROJECTION_NOT_SET 1213
+# define tkINVALID_GEOGRAPHIC_COORDINATES 1214
 
 //1401-1600 = tktinvuc
 # define tkVALUE_MUST_BE_2_TO_N 1401

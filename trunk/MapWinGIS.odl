@@ -51,6 +51,335 @@ interface IMeasuring;
 interface IImage;
 interface IShapeValidationInfo;
 interface IFieldStatOperations;
+interface IFileManager;
+
+/************************** tkRedrawType Enumerations **********************/
+typedef		
+[
+	uuid(81897081-0416-4a11-A011-294176989374),
+	helpstring("tkRedrawType"),
+]
+enum tkRedrawType
+{
+	RedrawAll = 1,
+	RedrawSkipDataLayers = 2,
+	RedrawTempObjectsOnly = 3,
+} tkRedrawType;
+
+/************************** tkCoordinatesDisplay Enumerations **********************/
+typedef		
+[
+	uuid(685CFA4D-ECBB-4753-A018-B8453F32DC92),
+	helpstring("tkCoordinatesDisplay"),
+]
+enum tkCoordinatesDisplay
+{
+	cdmNone = 0,
+	cdmAuto = 1,
+	cdmDegrees = 2,
+	cdmMapUnits = 3,
+} tkCoordinatesDisplay;
+
+/**************************  tkMapProjection Enumerations **********************/
+typedef		
+[
+	uuid(5E15651A-3AB7-483f-BDB0-AFFA2FFB1A32),
+	helpstring("tkMapProjection"),
+]
+enum tkMapProjection
+{
+	PROJECTION_CUSTOM = -1,
+	PROJECTION_NONE = 0,
+	PROJECTION_WGS84 = 1,
+	PROJECTION_GOOGLE_MERCATOR = 2,
+} tkMapProjection;
+
+/**************************  tkKnownExtents Enumerations **********************/
+typedef		
+[
+	uuid(AF3F5F49-1D6B-4bd2-9370-A3C0DA2368C7),
+	helpstring("tkKnownExtents"),
+]
+enum tkKnownExtents
+{
+	keSiliconValley = -3,
+	keGreenwich = -2,
+	keNone = -1,
+	keWorld = 0,
+	keAfghanistan=  1,
+	keAland_Islands=  2,
+	keAlbania=  3,
+	keAlgeria=  4,
+	keAmerican_Samoa=  5,
+	keAndorra=  6,
+	keAngola=  7,
+	keAnguilla=  8,
+	keAntigua=  9,
+	keArgentina=  10,
+	keArmenia=  11,
+	keAruba=  12,
+	keAustralia=  13,
+	keAustria=  14,
+	keAzerbaijan=  15,
+	keBahamas=  16,
+	keBahrain=  17,
+	keBangladesh=  18,
+	keBarbados=  19,
+	keBelarus=  20,
+	keBelgium=  21,
+	keBelize=  22,
+	keBenin=  23,
+	keBermuda=  24,
+	keBhutan=  25,
+	keBolivia=  26,
+	keBosnia_and_Herzegovina=  27,
+	keBotswana=  28,
+	keBrazil=  29,
+	keBritish_Virgin_Islands=  30,
+	keBrunei=  31,
+	keBulgaria=  32,
+	keBurkina_Faso=  33,
+	keBurundi=  34,
+	keCambodia=  35,
+	keCameroon=  36,
+	keCanada=  37,
+	keCape_Verde=  38,
+	keCayman_Islands=  39,
+	keCentral_African_Republic=  40,
+	keChad=  41,
+	keChile=  42,
+	keChina=  43,
+	keCocos_Islands=  44,
+	keColombia=  45,
+	keComoros=  46,
+	keCongo=  47,
+	keCook_Islands=  48,
+	keCosta_Rica=  49,
+	keCroatia=  50,
+	keCuba=  51,
+	keCyprus=  52,
+	keCzech_Republic=  53,
+	keDenmark=  54,
+	keDjibouti=  55,
+	keDominica=  56,
+	keDominican_Republic=  57,
+	keDR_Congo=  58,
+	keEcuador=  59,
+	keEgypt=  60,
+	keEl_Salvador=  61,
+	keEquatorial_Guinea=  62,
+	keEritrea=  63,
+	keEstonia=  64,
+	keEthiopia=  65,
+	keFaeroe_Islands=  66,
+	keFalkland_Islands=  67,
+	keFiji=  68,
+	keFinland=  69,
+	keFrance=  70,
+	keFrench_Guiana=  71,
+	keFrench_Polynesia=  72,
+	keGabon=  73,
+	keGambia=  74,
+	keGeorgia=  75,
+	keGermany=  76,
+	keGhana=  77,
+	keGibraltar=  78,
+	keGreat_Britain=  79,
+	keGreece=  80,
+	keGreenland=  81,
+	keGrenada=  82,
+	keGuadeloupe=  83,
+	keGuam=  84,
+	keGuatemala=  85,
+	keGuernsey=  86,
+	keGuinea=  87,
+	keGuinea_Bissau=  88,
+	keGuyana=  89,
+	keHaiti=  90,
+	keHonduras=  91,
+	keHungary=  92,
+	keIceland=  93,
+	keIndia=  94,
+	keIndonesia=  95,
+	keIran=  96,
+	keIraq=  97,
+	keIreland=  98,
+	keIsle_of_Man=  99,
+	keIsrael=  100,
+	keItaly=  101,
+	keIvory_Coast=  102,
+	keJamaica=  103,
+	keJapan=  104,
+	keJersey=  105,
+	keJordan=  106,
+	keKazakhstan=  107,
+	keKenya=  108,
+	keKiribati=  109,
+	keKuwait=  110,
+	keKyrgyzstan=  111,
+	keLaos=  112,
+	keLatvia=  113,
+	keLebanon=  114,
+	keLesotho=  115,
+	keLiberia=  116,
+	keLibya=  117,
+	keLiechtenstein=  118,
+	keLithuania=  119,
+	keLuxembourg=  120,
+	keMacao=  121,
+	keMacedonia=  122,
+	keMadagascar=  123,
+	keMalawi=  124,
+	keMalaysia=  125,
+	keMaldives=  126,
+	keMali=  127,
+	keMalta=  128,
+	keMarshall_Islands=  129,
+	keMartinique=  130,
+	keMauritania=  131,
+	keMauritius=  132,
+	keMayotte=  133,
+	keMexico=  134,
+	keMicronesia=  135,
+	keMoldova=  136,
+	keMonaco=  137,
+	keMongolia=  138,
+	keMontenegro=  139,
+	keMontserrat=  140,
+	keMorocco=  141,
+	keMozambique=  142,
+	keNamibia=  143,
+	keNauru=  144,
+	keNepal=  145,
+	keNetherlands=  146,
+	keNew_Caledonia=  147,
+	keNew_Zealand=  148,
+	keNicaragua=  149,
+	keNiger=  150,
+	keNigeria=  151,
+	keNiue=  152,
+	keNorfolk_Island=  153,
+	keNorth_Korea=  154,
+	keNorthern_Mariana_Islands=  155,
+	keNorway=  156,
+	keOccupied_Palestinian_Territory=  157,
+	keOman=  158,
+	kePakistan=  159,
+	kePalau=  160,
+	kePanama=  161,
+	kePapua_New_Guinea=  162,
+	keParaguay=  163,
+	kePeru=  164,
+	kePhilippines=  165,
+	kePitcairn=  166,
+	kePoland=  167,
+	kePortugal=  168,
+	kePuerto_Rico=  169,
+	keQatar=  170,
+	keReunion_Island=  171,
+	keRomania=  172,
+	keRussia=  173,
+	keRwanda=  174,
+	keSaint_Barthelemy=  175,
+	keSaint_Martin_French_part=  176,
+	keSamoa=  177,
+	keSan_Marino=  178,
+	keSao_Tome_and_Principe=  179,
+	keSaudi_Arabia=  180,
+	keSenegal=  181,
+	keSerbia=  182,
+	keSeychelles=  183,
+	keSierra_Leone=  184,
+	keSingapore=  185,
+	keSlovakia=  186,
+	keSlovenia=  187,
+	keSolomon_Islands=  188,
+	keSomalia=  189,
+	keSouth_Africa=  190,
+	keSouth_Korea=  191,
+	keSpain=  192,
+	keSri_Lanka=  193,
+	keSt_Helena=  194,
+	keSt_Kitts_and_Nevis=  195,
+	keSt_Lucia=  196,
+	keSt_Pierre_and_Miquelon=  197,
+	keSt_Vincent=  198,
+	keSudan=  199,
+	keSuriname=  200,
+	keSvalbard_and_Jan_Mayen=  201,
+	keSwaziland=  202,
+	keSweden=  203,
+	keSwitzerland=  204,
+	keSyria=  205,
+	keTajikistan=  206,
+	keTanzania=  207,
+	keThailand=  208,
+	keTimor_Leste=  209,
+	keTogo=  210,
+	keTokelau=  211,
+	keTonga=  212,
+	keTrinidad_and_Tobago=  213,
+	keTunisia=  214,
+	keTurkey=  215,
+	keTurkmenistan=  216,
+	keTurks_and_Caicos_Islands=  217,
+	keTuvalu=  218,
+	keUganda=  219,
+	keUkraine=  220,
+	keUnited_Arab_Emirates=  221,
+	keUruguay=  222,
+	keUS_Virgin_Islands=  223,
+	keUSA=  224,
+	keUzbekistan=  225,
+	keVanuatu=  226,
+	keVenezuela=  227,
+	keVietnam=  228,
+	keWallis_and_Futuna=  229,
+	keWestern_Sahara=  230,
+	keYemen=  231,
+	keZambia=  232,
+	keZimbabwe=  233,
+} tkKnownExtents;
+
+/**************************  tkZoomBehavior Enumerations **********************/
+typedef		
+[
+	uuid(EBDAA822-C53B-4cc1-B0F4-0832A0ECDA96),
+	helpstring("tkZoomBehavior"),
+]
+enum tkZoomBehavior
+{
+	zbDefault = 0,
+	zbUseTileLevels = 1,
+} tkZoomBehavior;
+
+/**************************  tkSupportType Enumerations **********************/
+typedef		
+[
+	uuid(C4DC2024-0249-4585-A34E-ABF30F05AB5B),
+	helpstring("tkSupportType"),
+]
+enum tkSupportType
+{
+	stGdal = 0,
+} tkSupportType;
+
+
+/**************************  tkFileOpenStrategy Enumerations **********************/
+typedef		
+[
+	uuid(4090F506-308B-43a5-9814-67BC585B8BAE),
+	helpstring("tkFileOpenStrategy"),
+]
+enum tkFileOpenStrategy
+{
+	fosNotSupported = -1,
+	fosAutoDetect = 0,
+	fosRgbImage = 1,
+	fosDirectGrid = 2,
+	fosProxyForGrid = 3,
+	fosVectorLayer = 4,
+} tkFileOpenStrategy;
 
 /**************************  tkFieldOperationValidity Enumerations **********************/
 typedef		
@@ -181,6 +510,9 @@ enum tkScalebarUnits
 		idUtils = 32,
 		idVector = 33,
 		idShapeValidationInfo = 34,
+		idMeasuring = 35,
+		idFileManager = 36,
+		idFieldStatOperations = 37,
 	} tkInterface;	
 
 	typedef		
@@ -1064,7 +1396,7 @@ enum tkScalebarUnits
         Teal                 = 0xFF008080,
         Thistle              = 0xFFD8BFD8,
         Tomato               = 0xFFFF6347,
-        Transparent          = 0x00FFFFFF,
+        /*Transparent          = 0x00FFFFFF,*/		// removed, alpha channel is set through different set of properties in API, so it's problematic to support this constant
         Turquoise            = 0xFF40E0D0,
         Violet               = 0xFFEE82EE,
         Wheat                = 0xFFF5DEB3,
@@ -1265,6 +1597,8 @@ enum tkScalebarUnits
 		lsSquareMapUnits = 6,
 		lsMiles = 7,
 		lsFeet = 8,
+		lsLatitude = 9,
+		lsLongitude = 10,
 	} tkLocalizedStrings;
 
 	/************************* tkProjectionParameter **************************/
@@ -1515,18 +1849,17 @@ enum tkScalebarUnits
 		gsgUniqueValuesOrGradient = 2,
 	} tkGridSchemeGeneration;
 
-	/**************************  tkUseFunctionality enum  *****************/
+	/**************************  tkGridRendering enum  *****************/
 	typedef
 	[
 		uuid(52EDC6DD-5ED5-40a0-8CD5-ED971CE87208),
-		helpstring("Enumerated tkUseFunctionality Types"),
+		helpstring("Enumerated tkGridRendering Types"),
 	]
-	enum tkUseFunctionality
+	enum tkGridRendering
 	{
-		useAlways = 0,
-		useNever = 1,
-		useAutoDetect = 2,
-	} tkUseFunctionality;
+		grForceForAllFormats = 0,
+		grForGridsOnly = 1,
+	} tkGridRendering;
 
 	typedef
 	[
@@ -2432,6 +2765,7 @@ interface IGrid : IDispatch{
 		[propget, id(21), helpstring("property RasterColorTableColoringScheme")] HRESULT RasterColorTableColoringScheme([out, retval] IGridColorScheme * *pVal);
 		[id(22), helpstring("property GetRow")] HRESULT GetRow([in] long Row, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(23), helpstring("property PutRow")] HRESULT PutRow([in] long Row, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
+		
 		[id(24), helpstring("property GetFloatWindow")] HRESULT GetFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(25), helpstring("property PutFloatWindow")] HRESULT PutFloatWindow([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] float * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(26), helpstring("method SetInvalidValuesToNodata")] HRESULT SetInvalidValuesToNodata([in] double MinThresholdValue, [in] double MaxThresholdValue, [out, retval] VARIANT_BOOL * retval);
@@ -2462,6 +2796,8 @@ interface IGrid : IDispatch{
 
 		[id(42), helpstring("property GetFloatWindow2")] HRESULT GetFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
+		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
+		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 };
 
 /****************************  GridHeader Interface ***********************/
@@ -2641,18 +2977,17 @@ interface IImage : IDispatch{
 	[propget, id(74), helpstring("property Warped")] HRESULT Warped([out, retval] VARIANT_BOOL* retVal);
 	[propget, id(75), helpstring("property SourceGridName")] HRESULT SourceGridName([out, retval]BSTR *retVal);
 	[propget, id(76), helpstring("property IsGridProxy")] HRESULT IsGridProxy([out, retval]VARIANT_BOOL *retVal);
-	[propget, id(77), helpstring("property ExternalColorScheme")] HRESULT ExternalColorScheme([out, retval] IGridColorScheme** pVal);
-	[propput, id(77), helpstring("property ExternalColorScheme")] HRESULT ExternalColorScheme([in] IGridColorScheme* newVal);
-	//[propget, id(78), helpstring("property CanUseExternalColorScheme")] HRESULT CanUseExternalColorScheme([out, retval] VARIANT_BOOL* retVal);
-	[propget, id(79), helpstring("property AllowExternalColorScheme")] HRESULT AllowExternalColorScheme([out, retval] tkUseFunctionality* pVal);
-	[propput, id(79), helpstring("property AllowExternalColorScheme")] HRESULT AllowExternalColorScheme([in] tkUseFunctionality newVal);
-	[propget, id(80), helpstring("property IsUsingExternalColorScheme")] HRESULT IsUsingExternalColorScheme([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(77), helpstring("property CustomColorScheme")] HRESULT CustomColorScheme([out, retval] IGridColorScheme** pVal);
+	[propput, id(77), helpstring("property CustomColorScheme")] HRESULT CustomColorScheme([in] IGridColorScheme* newVal);
+	[propget, id(79), helpstring("property AllowGridRendering")] HRESULT AllowGridRendering([out, retval] tkGridRendering* pVal);
+	[propput, id(79), helpstring("property AllowGridRendering")] HRESULT AllowGridRendering([in] tkGridRendering newVal);
+	[propget, id(80), helpstring("property GridRendering")] HRESULT GridRendering([out, retval] VARIANT_BOOL* pVal);
 	[id(81), helpstring("method SetTransparentColor")] HRESULT SetTransparentColor([in]OLE_COLOR color);
 	[propget, id(82), helpstring("property IsRgb")] HRESULT IsRgb([out, retval] VARIANT_BOOL* pVal);
 	[id(83), helpstring("method OpenAsGrid")] HRESULT OpenAsGrid([out, retval] IGrid** retVal);
 	[propget, id(84), helpstring("property SourceFilename")] HRESULT SourceFilename([out, retval]BSTR *retVal);
-	[propget, id(85), helpstring("property ExternalColorSchemeBandIndex")] HRESULT ExternalColorSchemeBandIndex([out, retval] int* pVal);
-	[propput, id(85), helpstring("property ExternalColorSchemeBandIndex")] HRESULT ExternalColorSchemeBandIndex([in] int newVal);
+	[propget, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([out, retval] int* pVal);
+	[propput, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([in] int newVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -2700,7 +3035,7 @@ interface IShapefile : IDispatch{
 	[propget, id(31), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 	[id(32), helpstring("method QuickPoint")] HRESULT QuickPoint([in] long ShapeIndex, [in] long PointIndex, [out, retval] IPoint ** retval);
 	[id(33), helpstring("method QuickExtents")] HRESULT QuickExtents([in] long ShapeIndex, [out, retval] IExtents ** retval);
-	[id(34), helpstring("method QuickPoints")] HRESULT QuickPoints([in] long ShapeIndex, [in, out] long * NumPoints, [out, retval] SAFEARRAY(double) * retval);
+	[id(34), helpstring("method QuickPoints")] HRESULT QuickPoints([in] long ShapeIndex, [in, out] long * numPoints, [out, retval] SAFEARRAY(double) * retval);
 	[id(35), helpstring("method PointInShape")] HRESULT PointInShape([in] LONG ShapeIndex, [in] DOUBLE x, [in] DOUBLE y, [out,retval] VARIANT_BOOL* retval);
 	[id(36), helpstring("method PointInShapefile")] HRESULT PointInShapefile([in] DOUBLE x, [in] DOUBLE y, [out,retval] LONG* ShapeIndex);
 	[id(37), helpstring("method BeginPointInShapefile")] HRESULT BeginPointInShapefile([out,retval] VARIANT_BOOL* retval);
@@ -2892,10 +3227,12 @@ interface IShape : IDispatch{
 	[id(53), helpstring("method AddPoint")] HRESULT AddPoint([in]double x, [in]double y, [out,retval]long* pointIndex);
 	[id(54), helpstring("method ExportToWKT")] HRESULT ExportToWKT([out, retval] BSTR* retVal);
 	[id(55), helpstring("method ImportToWKT")] HRESULT ImportFromWKT([in] BSTR Serialized, [out, retval]VARIANT_BOOL *retVal);
-	[id(56), helpstring("method CopyTo")] HRESULT CopyTo([in] IShape* target, [out, retval]VARIANT_BOOL* retVal);
+	[id(56), helpstring("method CopyFrom")] HRESULT CopyFrom([in] IShape* sourceShape, [out, retval]VARIANT_BOOL* retVal);
 	[id(57), helpstring("method ClosestPoints")] HRESULT ClosestPoints([in]IShape* shape2, [out, retval]IShape** result);
-	[id(58), helpstring("method AddPoint2")] HRESULT AddPoint2([in]double x, [in]double y, [in]double m, [out,retval]long* pointIndex);
-	[id(59), helpstring("method AddPoint2")] HRESULT AddPoint3([in]double x, [in]double y, [in]double m, [in]double z, [out,retval]long* pointIndex);
+	[id(58), helpstring("method put_M")] HRESULT put_M([in]LONG pointIndex, [in]double m, [out, retval]VARIANT_BOOL* retVal);
+	[id(59), helpstring("method put_Z")] HRESULT put_Z([in]LONG pointIndex, [in]double z, [out, retval]VARIANT_BOOL* retVal);
+	[id(60), helpstring("method get_M")] HRESULT get_M([in]LONG pointIndex, [out]double* m, [out, retval]VARIANT_BOOL* retVal);
+	[id(61), helpstring("method get_Z")] HRESULT get_Z([in]LONG pointIndex, [out]double* z, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Extents Interface ***********************/
@@ -2908,8 +3245,7 @@ interface IShape : IDispatch{
 	pointer_default(unique)
 ]
 interface IExtents : IDispatch{
-	[id(1), helpstring("method SetBounds")] HRESULT SetBounds([in] double xMin, [in] double yMin, [in] double zMin, [in] double xMax, [in] double yMax, [in] double zMax);		
-//		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([in, out] double * xMin, [in, out] double * yMin, [in, out] double * zMin, [in, out] double * xMax, [in, out] double * yMax, [in, out] double * zMax);
+		[id(1), helpstring("method SetBounds")] HRESULT SetBounds([in] double xMin, [in] double yMin, [in] double zMin, [in] double xMax, [in] double yMax, [in] double zMax);		
 		[id(2), helpstring("method GetBounds")] HRESULT GetBounds([out] double * xMin, [out] double * yMin, [out] double * zMin, [out] double * xMax, [out] double * yMax, [out] double * zMax);
 		[propget, id(3), helpstring("property xMin")] HRESULT xMin([out, retval] double *pVal);
 		[propget, id(4), helpstring("property xMax")] HRESULT xMax([out, retval] double *pVal);
@@ -2919,14 +3255,13 @@ interface IExtents : IDispatch{
 		[propget, id(8), helpstring("property zMax")] HRESULT zMax([out, retval] double *pVal);
 		[propget, id(9), helpstring("property mMin")] HRESULT mMin([out, retval] double *pVal);
 		[propget, id(10), helpstring("property mMax")] HRESULT mMax([out, retval] double *pVal);
-		//[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([in, out] double * mMin, [in, out] double * mMax);
 		[id(11), helpstring("method GetMeasureBounds")] HRESULT GetMeasureBounds([out] double * mMin, [out] double * mMax);
 		[id(12), helpstring("method SetMeasureBounds")] HRESULT SetMeasureBounds([in]double mMin, [in]double mMax);
 		[id(13), helpstring("method ToDebugString")] HRESULT ToDebugString([out, retval] BSTR* retVal);
 		[id(14), helpstring("method PointIsWithin")] HRESULT PointIsWithin([in]double x, [in]double y, [out, retval]VARIANT_BOOL* retVal);
 		[id(15), helpstring("method ToShape")] HRESULT ToShape([out, retval]IShape** retval);
 		[propget, id(16), helpstring("property Center")] HRESULT Center([out, retval]IPoint** retVal);
-
+		[id(17), helpstring("method MoveTo")] HRESULT MoveTo([in]double x, [in]double y);
 		//[id(13), helpstring("method Disjoint")] HRESULT Disjoint([in]IExtents* ext, [out, retval]VARIANT_BOOL* retval);
 		//[id(15), helpstring("method Union")] HRESULT Union([in]IExtents* ext);
 		//[id(16), helpstring("method GetIntersection")] HRESULT GetIntersection([in]IExtents* ext, [out, retval]IExtents** retval);
@@ -4359,8 +4694,6 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(18), helpstring("property GridProxyMode")] HRESULT GridProxyMode([in] tkGridProxyMode newVal);
 	[propget, id(19), helpstring("property MaxUniqueValuesCountForGridScheme")] HRESULT MaxUniqueValuesCountForGridScheme([out, retval] int *retVal);
 	[propput, id(19), helpstring("property MaxUniqueValuesCountForGridScheme")] HRESULT MaxUniqueValuesCountForGridScheme([in] int newVal);
-	[propget, id(20), helpstring("property GrabMapProjectionFromFirstLayer")] HRESULT GrabMapProjectionFromFirstLayer([out, retval] VARIANT_BOOL *retVal);
-	[propput, id(20), helpstring("property GrabMapProjectionFromFirstLayer")] HRESULT GrabMapProjectionFromFirstLayer([in] VARIANT_BOOL newVal);
 	[propget, id(21), helpstring("property RandomColorSchemeForGrids")] HRESULT RandomColorSchemeForGrids([out, retval] VARIANT_BOOL *retVal);
 	[propput, id(21), helpstring("property RandomColorSchemeForGrids")] HRESULT RandomColorSchemeForGrids([in] VARIANT_BOOL newVal);
 	[propget, id(22), helpstring("property DefaultColorSchemeForGrids")] HRESULT DefaultColorSchemeForGrids([out, retval] PredefinedColorScheme *retVal);
@@ -4369,8 +4702,10 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(23), helpstring("property ShapeOutputValidationMode")] HRESULT ShapeOutputValidationMode([in] tkShapeValidationMode newVal);
 	[propget, id(24), helpstring("property ShapeInputValidationMode")] HRESULT ShapeInputValidationMode([out, retval] tkShapeValidationMode *retVal);
 	[propput, id(24), helpstring("property ShapeInputValidationMode")] HRESULT ShapeInputValidationMode([in] tkShapeValidationMode newVal);
-	[propget, id(25), helpstring("property ShapeInputValidationMode")] HRESULT GeometryEngine([out, retval] tkGeometryEngine *retVal);
-	[propput, id(25), helpstring("property ShapeInputValidationMode")] HRESULT GeometryEngine([in] tkGeometryEngine newVal);
+	[propget, id(25), helpstring("property GeometryEngine")] HRESULT GeometryEngine([out, retval] tkGeometryEngine *retVal);
+	[propput, id(25), helpstring("property GeometryEngine")] HRESULT GeometryEngine([in] tkGeometryEngine newVal);
+	[propget, id(26), helpstring("property SaveGridColorSchemeToFile")] HRESULT SaveGridColorSchemeToFile([out, retval] VARIANT_BOOL *retVal);
+	[propput, id(26), helpstring("property SaveGridColorSchemeToFile")] HRESULT SaveGridColorSchemeToFile([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -4446,8 +4781,6 @@ interface ITiles : IDispatch{
 													 [in]int tileX, [in]int tileY, [out, retval] IExtents** retVal);
 	[propget, id(34), helpstring("")] HRESULT CurrentZoom([out, retval] int* retVal);
 	
-	/*[id(35), helpstring("")] HRESULT ZoomIn();
-	[id(36), helpstring("")] HRESULT ZoomOut();*/
 	[id(37), helpstring("")] HRESULT PrefetchToFolder([in]IExtents* Extents, [in]int zoom, [in]int providerId, 
 									[in]BSTR savePath, [in]BSTR fileExtension, [in]IStopExecution* stop, [out,retval]LONG* retVal);
 
@@ -4466,6 +4799,9 @@ interface ITiles : IDispatch{
 	
 	[propget, id(46), helpstring("")] HRESULT LogErrorsOnly( [out, retval]VARIANT_BOOL* retVal);
 	[propput, id(46), helpstring("")] HRESULT LogErrorsOnly( [in]VARIANT_BOOL newVal);
+
+	[propget, id(47), helpstring("")] HRESULT MaxZoom( [out, retval]int* retVal);
+	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
 };
 
 [
@@ -4503,8 +4839,8 @@ interface ITileProviders : IDispatch{
 	[propput, id(15), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
 	[propget, id(16), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 	[propget, id(17), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
-	/*[propget, id(18), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
-	[propput, id(18), helpstring("")] HRESULT Key( [in]BSTR newVal);*/
+	[propget, id(18), helpstring("")] HRESULT Language([in] int Index, [out, retval] BSTR* retVal);
+	[propput, id(18), helpstring("")] HRESULT Language([in] int Index, [in] BSTR twoLetterCode);
 };
 [
 	object,
@@ -4577,6 +4913,41 @@ interface IFieldStatOperations : IDispatch{
 	[id(11), helpstring("Validate")] HRESULT Validate([in]IShapefile* sf, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(12), helpstring("OperationIsValid")] HRESULT OperationIsValid([in]int operationIndex, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(13), helpstring("OperationIsValidReason")] HRESULT OperationIsValidReason([in]int operationIndex, [out, retval] tkFieldOperationValidity* retVal);
+	[propget, id(14), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(14), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
+};
+[
+	object,
+	uuid(73BA5648-1A53-4C20-A01F-B37EBC9D093F),
+	dual,
+	nonextensible,
+	helpstring("IFileManager Interface"),
+	pointer_default(unique)
+]
+interface IFileManager : IDispatch{
+	[propget, id(1), helpstring("IsSupported")] HRESULT IsSupported([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(2), helpstring("IsRgbImage")] HRESULT IsRgbImage([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(3), helpstring("IsGrid")] HRESULT IsGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(4), helpstring("IsVectorLayer")] HRESULT IsVectorLayer([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(5), helpstring("OpenStrategy")] HRESULT OpenStrategy([in]BSTR Filename, [out, retval] tkFileOpenStrategy* retVal);
+	[propget, id(6), helpstring("CanOpenAs")] HRESULT CanOpenAs([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [out, retval] VARIANT_BOOL* retVal);
+	[id(7), helpstring("Open")] HRESULT Open([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IDispatch** retVal);
+	[id(8), helpstring("OpenShapefile")] HRESULT OpenShapefile([in]BSTR Filename, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IShapefile** retVal);
+	[id(9), helpstring("OpenRaster")] HRESULT OpenRaster([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IImage** retVal);
+	[propget, id(10), helpstring("IsSupportedBy")] HRESULT IsSupportedBy([in]BSTR Filename, [in]tkSupportType supportType, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(11), helpstring("property LastErrorCode")] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(12), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([out, retval] ICallback * *pVal);
+	[propput, id(13), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
+	[propget, id(14), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
+	[propput, id(14), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
+	[propget, id(15), helpstring("property LastOpenStrategy")] HRESULT LastOpenStrategy([out, retval] tkFileOpenStrategy *pVal);
+	[propget, id(16), helpstring("property LastFilename")] HRESULT LastFilename([out, retval] BSTR *pVal);
+	[propget, id(17), helpstring("property LastOpenIsSuccess")] HRESULT LastOpenIsSuccess([out, retval] VARIANT_BOOL *pVal);
+	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
+	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
+	//[id(13), helpstring("DeleteDatasource")] HRESULT DeleteDatasource([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -4596,7 +4967,7 @@ library MapWinGIS
 	]
 	dispinterface _DMap
 	{
-		properties:
+	properties:
 			// NOTE - ClassWizard will maintain property information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_PROP(CMapView)
@@ -4604,7 +4975,7 @@ library MapWinGIS
 			[id(2)] double ZoomPercent;
 			[id(3)] tkCursorMode CursorMode;
 			[id(4)] tkCursor MapCursor;
-			[id(5)] long UDCursorHandle;
+			
 			[id(6)] VARIANT_BOOL SendMouseDown;
 			[id(7)] VARIANT_BOOL SendMouseUp;
 			[id(8)] VARIANT_BOOL SendMouseMove;
@@ -4615,29 +4986,34 @@ library MapWinGIS
 			[id(13)] BSTR Key;
 			[id(14)] VARIANT_BOOL DoubleBuffer;
 			[id(15)] IDispatch* GlobalCallback;
-			[id(16)] long NumLayers;
+			[id(16), readonly] long NumLayers;
 			[id(17)] IDispatch* Extents;
-			[id(18)] long LastErrorCode;
+			[id(18), readonly] long LastErrorCode;
 			[id(19)] tkLockMode IsLocked;
-			[id(20)] BSTR MapState;
-			[id(95), helpstring("property SerialNumber")] BSTR SerialNumber;
-			[id(96), hidden] long LineSeparationFactor;
+			[id(20), readonly] BSTR MapState;
 			[id(118)] VARIANT_BOOL SendOnDrawBackBuffer;
-			[id(133), hidden] VARIANT_BOOL MultilineLabels;
-			[id(151), helpstring("property UseSeamlessPan")] VARIANT_BOOL UseSeamlessPan;
+			[id(151)] VARIANT_BOOL UseSeamlessPan;
 			[id(152), helpstring("Determines the speed and direction of zooming with mouse wheel. Use values smaller than 1 to zoom in while wheeling forward and greater than 1 to zoom out. Zooming is turned off when speed equals 1. Acceptable range: 0.1-10 (default 0.5).")] DOUBLE MouseWheelSpeed;
-			[id(154), helpstring("Sets the function to perform shapefile drawing. New function supports selection drawing options")] tkShapeDrawingMethod ShapeDrawingMethod;
-			[id(156), helpstring("property CurrentScale")] DOUBLE CurrentScale;
-			[id(158), helpstring("property MapUnits")] tkUnitsOfMeasure MapUnits;			
-			[id(166), helpstring("property VersionNumber")] BSTR VersionNumber;
-			[id(172), helpstring("property ShowRedrawTime")] VARIANT_BOOL ShowRedrawTime;
-			[id(173), helpstring("property ShowVersionNumber")] VARIANT_BOOL ShowVersionNumber;
-			[id(187), helpstring("property MaxExtents")] IExtents* MaxExtents;
-			[id(188), helpstring("property PixelsPerDegree")] DOUBLE PixelsPerDegree;
-			[id(191), helpstring("property Tiles")] ITiles* Tiles;
-			[id(192), helpstring("property GeoProjection")] IGeoProjection* GeoProjection;
-			[id(195), helpstring("property ScalebarVisible")] VARIANT_BOOL ScalebarVisible;
-			[id(205), helpstring("property ScalebarUnits")] tkScalebarUnits ScalebarUnits;
+			[id(158)] tkUnitsOfMeasure MapUnits;			
+			[id(166), readonly] BSTR VersionNumber;
+			[id(172)] VARIANT_BOOL ShowRedrawTime;
+			[id(173)] VARIANT_BOOL ShowVersionNumber;
+			[id(187), readonly] IExtents* MaxExtents;
+			[id(191), readonly] ITiles* Tiles;
+			[id(192)] IGeoProjection* GeoProjection;
+			[id(195)] VARIANT_BOOL ScalebarVisible;
+			[id(205)] tkScalebarUnits ScalebarUnits;
+			[id(211), readonly] IFileManager* FileManager;
+				
+			// changed to methods to hide from property grid
+			//[id(5)] long UDCursorHandle;
+			//[id(156)] DOUBLE CurrentScale;
+			//[id(188), readonly] DOUBLE PixelsPerDegree;
+			//[id(95), readonly] BSTR SerialNumber;
+			//[id(96), hidden, readonly] long LineSeparationFactor;
+			//[id(133), hidden, readonly] VARIANT_BOOL MultilineLabels;
+			//[id(154), readonly] tkShapeDrawingMethod ShapeDrawingMethod;
+			// end of changed to methods
 
 			//}}AFX_ODL_PROP
 
@@ -4645,6 +5021,22 @@ library MapWinGIS
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(CMapView)
+			// used to properties; changed to methods to apply nonbrowsable attribute (doesn't work for properties in .NET)
+			[id(5), propput, nonbrowsable] void UDCursorHandle(long nNewValue);
+			[id(5), propget, nonbrowsable] long UDCursorHandle();
+			[id(95), propput, nonbrowsable] void SerialNumber(BSTR nNewValue);
+			[id(95), propget, nonbrowsable] BSTR SerialNumber();
+			[id(96), propput, nonbrowsable] void LineSeparationFactor(long nNewValue);
+			[id(96), propget, nonbrowsable] long LineSeparationFactor();
+			[id(133), propput, nonbrowsable] void MultilineLabels(VARIANT_BOOL nNewValue);
+			[id(133), propget, nonbrowsable] VARIANT_BOOL MultilineLabels();
+			[id(154), propput, nonbrowsable] void ShapeDrawingMethod(tkShapeDrawingMethod nNewValue);
+			[id(154), propget, nonbrowsable] tkShapeDrawingMethod ShapeDrawingMethod();
+			[id(156), propput, nonbrowsable] void CurrentScale(double nNewValue);
+			[id(156), propget, nonbrowsable] double CurrentScale();
+			[id(188), propget, nonbrowsable] double PixelsPerDegree();
+			// end of used to properties; changed to methods to apply nonbrowsable attribute (doesn't work for properties in .NET)
+			
 			[id(21)] void Redraw();
 			[id(22)] long AddLayer(IDispatch* Object, VARIANT_BOOL Visible);
 			[id(23)] void RemoveLayer(long LayerHandle);
@@ -4784,7 +5176,6 @@ library MapWinGIS
 			[id(116), helpstring("method DrawPointEx")] void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
 			[id(117), helpstring("method DrawCircleEx")] void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
 			[id(119), helpstring("method LabelColor")] void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
-
 			[id(120), helpstring("method SetDrawingLayerVisible")] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visiable);
 			[id(121), helpstring("method ClearDrawingLabels")] void ClearDrawingLabels(long drawHandle);
 			[id(122), helpstring("method DrawingFont")] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
@@ -4837,12 +5228,12 @@ library MapWinGIS
 			[id(157), propput] void DrawingLabels(long DrawingLayerIndex, ILabels* newVal);
 			[id(160), helpstring("method DrawWideCircleEx")] void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
 			[id(161)] void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
-			[id(162), propget] double MapRotationAngle();
-			[id(162), propput] void MapRotationAngle(double nNewValue);
+			[id(162), propget, nonbrowsable] double MapRotationAngle();
+			[id(162), propput, nonbrowsable] void MapRotationAngle(double nNewValue);
 			[id(163)] IExtents* GetRotatedExtent();
 			[id(164)] IPoint* GetBaseProjectionPoint(double rotX, double rotY);
-			[id(165), propget] VARIANT_BOOL CanUseImageGrouping();
-			[id(165), propput] void CanUseImageGrouping(VARIANT_BOOL nNewValue);
+			[id(165), propget, nonbrowsable] VARIANT_BOOL CanUseImageGrouping();
+			[id(165), propput, nonbrowsable] void CanUseImageGrouping(VARIANT_BOOL nNewValue);
 			[id(167), propget, helpstring("property LayerMaxVisibleScale")] DOUBLE LayerMaxVisibleScale(LONG LayerHandle);
 			[id(167), propput, helpstring("property LayerMaxVisibleScale")] void LayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal);
 			[id(168), propget, helpstring("property LayerMinVisibleScale")] DOUBLE LayerMinVisibleScale(LONG LayerHandle);
@@ -4882,12 +5273,35 @@ library MapWinGIS
 			[id(199), propget, helpstring("property LayerMinVisibleZoom")] int LayerMinVisibleZoom(LONG LayerHandle);
 			[id(199), propput, helpstring("property LayerMinVisibleZoom")] void LayerMinVisibleZoom(LONG LayerHandle, int newVal);
 			[id(200), helpstring("method ZoomToWorld")] VARIANT_BOOL ZoomToWorld();
-			[id(201), helpstring("method LoadTiles")] void LoadTiles(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
+			[id(201), helpstring("method LoadTilesForSnapshot")] void LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
 			[id(203), helpstring("method FindSnapPoint")] VARIANT_BOOL FindSnapPoint([in]double tolerance, [in]double xScreen, [in]double yScreen, [in, out]double* xFound, [in, out]double* yFound);
 			[id(204), helpstring("method TilesAreInCache")] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
 			[id(206), helpstring("method Clear")] void Clear();
-};
+			[id(208), helpstring("method SetGeographicExtents2")] VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
+			[id(209), helpstring("method GetKnownExtents")] IExtents* GetKnownExtents(tkKnownExtents extents);
+			[id(210), helpstring("method AddLayerFromFilename")] LONG AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL Visible);
+			[id(207), propput, helpstring("property ZoomBehavior")] void ZoomBehavior(tkZoomBehavior nNewValue);
+			[id(207), propget, helpstring("property ZoomBehavior")] tkZoomBehavior ZoomBehavior();
+			[id(212), propput] void Latitude(float nNewValue);
+			[id(212), propget] float Latitude();
+			[id(213), propput] void Longitude(float nNewValue);
+			[id(213), propget] float Longitude();
+			[id(214), propput] void CurrentZoom(int nNewValue);
+			[id(214), propget] int CurrentZoom();
+			[id(216), propput] void TileProvider(tkTileProvider nNewValue);
+			[id(216), propget] tkTileProvider TileProvider();
+			[id(217), propput] void Projection(tkMapProjection nNewValue);
+			[id(217), propget] tkMapProjection Projection();
+			[id(218), propput] void KnownExtents(tkKnownExtents nNewValue);
+			[id(218), propget] tkKnownExtents KnownExtents();
+			[id(219), propput] void ShowCoordinates(tkCoordinatesDisplay nNewValue);
+			[id(219), propget] tkCoordinatesDisplay ShowCoordinates();
+			[id(220)] void Redraw2(tkRedrawType redrawType);
+			[id(221), propput] void GrabProjectionFromData(VARIANT_BOOL nNewValue);
+			[id(221), propget] VARIANT_BOOL GrabProjectionFromData();
 			//}}AFX_ODL_METHOD
+	};
+
 	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),
 	 helpstring("Event interface for Table class") ]
 	dispinterface _ITableEvents 
@@ -5290,5 +5704,13 @@ library MapWinGIS
 	coclass FieldStatOperations
 	{
 		[default] interface IFieldStatOperations;
+	};
+	[
+		uuid(EE5738FA-2DC4-411B-91DC-2E6AF5C3543E),
+		helpstring("FileManager Class")
+	]
+	coclass FileManager
+	{
+		[default] interface IFileManager;
 	};
 };

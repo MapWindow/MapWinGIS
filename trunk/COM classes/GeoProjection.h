@@ -53,14 +53,11 @@ public:
 	~CGeoProjection()
 	{
 		SysFreeString(m_key);
+		StopTransform();
 		if (m_projection)
 		{
 			m_projection->Clear();
 			OGRSpatialReference::DestroySpatialReference(m_projection);
-		}
-		if (m_transformation)
-		{
-			OGRCoordinateTransformation::DestroyCT(m_transformation);
 		}
 		gReferenceCounter.Release(tkInterface::idGeoProjection);
 	}

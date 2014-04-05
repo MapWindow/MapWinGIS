@@ -32,12 +32,14 @@
             this.btnOpen = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkUseFileManager = new System.Windows.Forms.CheckBox();
             this.lstFilenames = new System.Windows.Forms.ListBox();
             this.btnReloadMapState = new System.Windows.Forms.Button();
             this.btnOpenProxy = new System.Windows.Forms.Button();
             this.btnClearMap = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.btnOpenShapefile = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.udMaxSizeWoProxy = new System.Windows.Forms.NumericUpDown();
@@ -75,8 +77,14 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.gdalInfoSource = new System.Windows.Forms.RichTextBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.btnTestProjection = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.cboZoomBehavior = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.cboCoordinates = new System.Windows.Forms.ComboBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.btnSetKnownExtents = new System.Windows.Forms.Button();
+            this.cboCountry = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
             this.cboScalebarUnits = new System.Windows.Forms.ComboBox();
             this.label12 = new System.Windows.Forms.Label();
@@ -85,7 +93,16 @@
             this.optDistance = new System.Windows.Forms.RadioButton();
             this.btnStopMeasuring = new System.Windows.Forms.Button();
             this.btnMeasure = new System.Windows.Forms.Button();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
+            this.btnDissolve = new System.Windows.Forms.Button();
+            this.btnIdentify = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.btnTestProjection = new System.Windows.Forms.Button();
+            this.lblProgress = new System.Windows.Forms.Label();
             this.axMap1 = new AxMapWinGIS.AxMap();
+            this.btnCreateShapefile = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -99,6 +116,7 @@
             this.groupBox7.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -116,14 +134,15 @@
             // 
             this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar1.Location = new System.Drawing.Point(12, 615);
+            this.progressBar1.Location = new System.Drawing.Point(10, 597);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(587, 19);
+            this.progressBar1.Size = new System.Drawing.Size(588, 19);
             this.progressBar1.TabIndex = 5;
             // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.chkUseFileManager);
             this.groupBox1.Controls.Add(this.lstFilenames);
             this.groupBox1.Controls.Add(this.btnReloadMapState);
             this.groupBox1.Controls.Add(this.btnOpenProxy);
@@ -131,10 +150,20 @@
             this.groupBox1.Controls.Add(this.btnOpen);
             this.groupBox1.Location = new System.Drawing.Point(6, 172);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(314, 199);
+            this.groupBox1.Size = new System.Drawing.Size(314, 224);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Commands";
+            // 
+            // chkUseFileManager
+            // 
+            this.chkUseFileManager.AutoSize = true;
+            this.chkUseFileManager.Location = new System.Drawing.Point(16, 197);
+            this.chkUseFileManager.Name = "chkUseFileManager";
+            this.chkUseFileManager.Size = new System.Drawing.Size(105, 17);
+            this.chkUseFileManager.TabIndex = 18;
+            this.chkUseFileManager.Text = "Use file manager";
+            this.chkUseFileManager.UseVisualStyleBackColor = true;
             // 
             // lstFilenames
             // 
@@ -184,6 +213,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(605, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -192,6 +222,8 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.btnCreateShapefile);
+            this.tabPage3.Controls.Add(this.btnOpenShapefile);
             this.tabPage3.Controls.Add(this.groupBox1);
             this.tabPage3.Controls.Add(this.groupBox6);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
@@ -200,6 +232,16 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Open";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // btnOpenShapefile
+            // 
+            this.btnOpenShapefile.Location = new System.Drawing.Point(22, 402);
+            this.btnOpenShapefile.Name = "btnOpenShapefile";
+            this.btnOpenShapefile.Size = new System.Drawing.Size(86, 32);
+            this.btnOpenShapefile.TabIndex = 22;
+            this.btnOpenShapefile.Text = "Open shapefile";
+            this.btnOpenShapefile.UseVisualStyleBackColor = true;
+            this.btnOpenShapefile.Click += new System.EventHandler(this.btnOpenShapefile_Click);
             // 
             // groupBox6
             // 
@@ -569,7 +611,6 @@
             // 
             // tabPage4
             // 
-            this.tabPage4.Controls.Add(this.btnTestProjection);
             this.tabPage4.Controls.Add(this.groupBox4);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
@@ -578,18 +619,15 @@
             this.tabPage4.Text = "Measuring";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // btnTestProjection
-            // 
-            this.btnTestProjection.Location = new System.Drawing.Point(23, 303);
-            this.btnTestProjection.Name = "btnTestProjection";
-            this.btnTestProjection.Size = new System.Drawing.Size(162, 32);
-            this.btnTestProjection.TabIndex = 24;
-            this.btnTestProjection.Text = "Test GeoProjection.IsFrozen";
-            this.btnTestProjection.UseVisualStyleBackColor = true;
-            this.btnTestProjection.Click += new System.EventHandler(this.BtnTestProjectionClick);
-            // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.label14);
+            this.groupBox4.Controls.Add(this.cboZoomBehavior);
+            this.groupBox4.Controls.Add(this.label13);
+            this.groupBox4.Controls.Add(this.cboCoordinates);
+            this.groupBox4.Controls.Add(this.label11);
+            this.groupBox4.Controls.Add(this.btnSetKnownExtents);
+            this.groupBox4.Controls.Add(this.cboCountry);
             this.groupBox4.Controls.Add(this.label5);
             this.groupBox4.Controls.Add(this.cboScalebarUnits);
             this.groupBox4.Controls.Add(this.label12);
@@ -600,15 +638,81 @@
             this.groupBox4.Controls.Add(this.btnMeasure);
             this.groupBox4.Location = new System.Drawing.Point(11, 12);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(310, 275);
+            this.groupBox4.Size = new System.Drawing.Size(310, 466);
             this.groupBox4.TabIndex = 23;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Measuring";
             // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(13, 336);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(81, 13);
+            this.label14.TabIndex = 37;
+            this.label14.Text = "Zoom behavior:";
+            // 
+            // cboZoomBehavior
+            // 
+            this.cboZoomBehavior.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboZoomBehavior.FormattingEnabled = true;
+            this.cboZoomBehavior.Location = new System.Drawing.Point(12, 352);
+            this.cboZoomBehavior.Name = "cboZoomBehavior";
+            this.cboZoomBehavior.Size = new System.Drawing.Size(179, 21);
+            this.cboZoomBehavior.TabIndex = 36;
+            this.cboZoomBehavior.SelectedIndexChanged += new System.EventHandler(this.cboZoomBehavior_SelectedIndexChanged);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(13, 281);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(95, 13);
+            this.label13.TabIndex = 35;
+            this.label13.Text = "Show coordinates:";
+            // 
+            // cboCoordinates
+            // 
+            this.cboCoordinates.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCoordinates.FormattingEnabled = true;
+            this.cboCoordinates.Location = new System.Drawing.Point(9, 297);
+            this.cboCoordinates.Name = "cboCoordinates";
+            this.cboCoordinates.Size = new System.Drawing.Size(179, 21);
+            this.cboCoordinates.TabIndex = 34;
+            this.cboCoordinates.SelectedIndexChanged += new System.EventHandler(this.cboCoordinates_SelectedIndexChanged);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(13, 385);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(68, 13);
+            this.label11.TabIndex = 33;
+            this.label11.Text = "Map extents:";
+            // 
+            // btnSetKnownExtents
+            // 
+            this.btnSetKnownExtents.Location = new System.Drawing.Point(194, 428);
+            this.btnSetKnownExtents.Name = "btnSetKnownExtents";
+            this.btnSetKnownExtents.Size = new System.Drawing.Size(100, 32);
+            this.btnSetKnownExtents.TabIndex = 31;
+            this.btnSetKnownExtents.Text = "Zoom to";
+            this.btnSetKnownExtents.UseVisualStyleBackColor = true;
+            this.btnSetKnownExtents.Click += new System.EventHandler(this.btnSetKnownExtents_Click);
+            // 
+            // cboCountry
+            // 
+            this.cboCountry.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCountry.FormattingEnabled = true;
+            this.cboCountry.Location = new System.Drawing.Point(9, 401);
+            this.cboCountry.Name = "cboCountry";
+            this.cboCountry.Size = new System.Drawing.Size(279, 21);
+            this.cboCountry.TabIndex = 32;
+            // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(20, 217);
+            this.label5.Location = new System.Drawing.Point(13, 229);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(77, 13);
             this.label5.TabIndex = 23;
@@ -618,7 +722,7 @@
             // 
             this.cboScalebarUnits.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboScalebarUnits.FormattingEnabled = true;
-            this.cboScalebarUnits.Location = new System.Drawing.Point(16, 233);
+            this.cboScalebarUnits.Location = new System.Drawing.Point(9, 245);
             this.cboScalebarUnits.Name = "cboScalebarUnits";
             this.cboScalebarUnits.Size = new System.Drawing.Size(179, 21);
             this.cboScalebarUnits.TabIndex = 22;
@@ -628,7 +732,7 @@
             // 
             this.label12.Location = new System.Drawing.Point(9, 131);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(285, 73);
+            this.label12.Size = new System.Drawing.Size(285, 86);
             this.label12.TabIndex = 21;
             this.label12.Text = resources.GetString("label12.Text");
             // 
@@ -685,17 +789,109 @@
             this.btnMeasure.UseVisualStyleBackColor = true;
             this.btnMeasure.Click += new System.EventHandler(this.BtnMeasureClick);
             // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.button3);
+            this.tabPage5.Controls.Add(this.btnDissolve);
+            this.tabPage5.Controls.Add(this.btnIdentify);
+            this.tabPage5.Controls.Add(this.button2);
+            this.tabPage5.Controls.Add(this.button1);
+            this.tabPage5.Controls.Add(this.btnTestProjection);
+            this.tabPage5.Location = new System.Drawing.Point(4, 22);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(326, 598);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Tests";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(16, 204);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(162, 32);
+            this.button3.TabIndex = 36;
+            this.button3.Text = "Test category serialiation";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // btnDissolve
+            // 
+            this.btnDissolve.Location = new System.Drawing.Point(16, 166);
+            this.btnDissolve.Name = "btnDissolve";
+            this.btnDissolve.Size = new System.Drawing.Size(162, 32);
+            this.btnDissolve.TabIndex = 35;
+            this.btnDissolve.Text = "Dissolve";
+            this.btnDissolve.UseVisualStyleBackColor = true;
+            this.btnDissolve.Click += new System.EventHandler(this.BtnDissolveClick);
+            // 
+            // btnIdentify
+            // 
+            this.btnIdentify.Location = new System.Drawing.Point(16, 128);
+            this.btnIdentify.Name = "btnIdentify";
+            this.btnIdentify.Size = new System.Drawing.Size(162, 32);
+            this.btnIdentify.TabIndex = 34;
+            this.btnIdentify.Text = "TryAutoDetectEpsg";
+            this.btnIdentify.UseVisualStyleBackColor = true;
+            this.btnIdentify.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(16, 90);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(162, 32);
+            this.button2.TabIndex = 33;
+            this.button2.Text = "Map.Clear";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(16, 52);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(162, 32);
+            this.button1.TabIndex = 32;
+            this.button1.Text = "AggregateNotValid";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // btnTestProjection
+            // 
+            this.btnTestProjection.Location = new System.Drawing.Point(16, 14);
+            this.btnTestProjection.Name = "btnTestProjection";
+            this.btnTestProjection.Size = new System.Drawing.Size(162, 32);
+            this.btnTestProjection.TabIndex = 30;
+            this.btnTestProjection.Text = "Test GeoProjection.IsFrozen";
+            this.btnTestProjection.UseVisualStyleBackColor = true;
+            this.btnTestProjection.Click += new System.EventHandler(this.BtnTestProjectionClick);
+            // 
+            // lblProgress
+            // 
+            this.lblProgress.AutoSize = true;
+            this.lblProgress.Location = new System.Drawing.Point(8, 624);
+            this.lblProgress.Name = "lblProgress";
+            this.lblProgress.Size = new System.Drawing.Size(0, 13);
+            this.lblProgress.TabIndex = 22;
+            // 
             // axMap1
             // 
             this.axMap1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.axMap1.Enabled = true;
-            this.axMap1.Location = new System.Drawing.Point(11, 15);
+            this.axMap1.Location = new System.Drawing.Point(10, 12);
             this.axMap1.Name = "axMap1";
             this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
-            this.axMap1.Size = new System.Drawing.Size(587, 592);
-            this.axMap1.TabIndex = 21;
+            this.axMap1.Size = new System.Drawing.Size(588, 579);
+            this.axMap1.TabIndex = 23;
+            // 
+            // btnCreateShapefile
+            // 
+            this.btnCreateShapefile.Location = new System.Drawing.Point(114, 402);
+            this.btnCreateShapefile.Name = "btnCreateShapefile";
+            this.btnCreateShapefile.Size = new System.Drawing.Size(108, 32);
+            this.btnCreateShapefile.TabIndex = 23;
+            this.btnCreateShapefile.Text = "Create shapefile";
+            this.btnCreateShapefile.UseVisualStyleBackColor = true;
+            this.btnCreateShapefile.Click += new System.EventHandler(this.btnCreateShapefile_Click);
             // 
             // TestGridForm1
             // 
@@ -703,11 +899,13 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(942, 646);
             this.Controls.Add(this.axMap1);
+            this.Controls.Add(this.lblProgress);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.progressBar1);
             this.Name = "TestGridForm1";
             this.Text = "TestGrid";
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.groupBox6.ResumeLayout(false);
@@ -725,8 +923,10 @@
             this.tabPage4.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -771,7 +971,6 @@
         private System.Windows.Forms.Button btnReloadMapState;
         private System.Windows.Forms.Button btnRemoveProxy;
         private System.Windows.Forms.ListBox lstFilenames;
-        private AxMapWinGIS.AxMap axMap1;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label12;
@@ -780,7 +979,6 @@
         private System.Windows.Forms.RadioButton optDistance;
         private System.Windows.Forms.Button btnStopMeasuring;
         private System.Windows.Forms.Button btnMeasure;
-        private System.Windows.Forms.Button btnTestProjection;
         private System.Windows.Forms.GroupBox groupBox8;
         private System.Windows.Forms.RichTextBox gdalInfoProxy;
         private System.Windows.Forms.GroupBox groupBox7;
@@ -789,5 +987,24 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox cboScalebarUnits;
         private System.Windows.Forms.CheckBox chkLayerVisible;
+        private System.Windows.Forms.Label lblProgress;
+        private System.Windows.Forms.ComboBox cboCountry;
+        private System.Windows.Forms.Button btnSetKnownExtents;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.ComboBox cboCoordinates;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.Button btnDissolve;
+        private System.Windows.Forms.Button btnIdentify;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnTestProjection;
+        private AxMapWinGIS.AxMap axMap1;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ComboBox cboZoomBehavior;
+        private System.Windows.Forms.CheckBox chkUseFileManager;
+        private System.Windows.Forms.Button btnOpenShapefile;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button btnCreateShapefile;
     }
 }

@@ -787,6 +787,7 @@ STDMETHODIMP CGridColorScheme::WriteToFile(BSTR mwlegFilename, BSTR gridName, in
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "ColoringScheme" );
 	if (psTree)
 	{
+		Utility::WriteXmlHeaderAttributes(psTree, "GridColorScheme");
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "SchemeType", "Grid");
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "GroupName", "Data Layers");
 		CStringW relName = Utility::GetRelativePath(mwlegFilename, gridName);

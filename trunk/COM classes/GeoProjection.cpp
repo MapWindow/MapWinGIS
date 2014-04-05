@@ -962,11 +962,7 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 
 		OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
 
-		if (m_transformation)
-		{
-			delete m_transformation;
-			m_transformation = NULL;
-		}
+		StopTransform();
 
 		m_transformation = OGRCreateCoordinateTransformation ( m_projection, projTarget );
 
@@ -1013,7 +1009,8 @@ STDMETHODIMP CGeoProjection::StopTransform()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (m_transformation)
 	{
-		delete m_transformation;
+		//delete m_transformation;		// better to do it using Gdal API
+		OGRCoordinateTransformation::DestroyCT(m_transformation);
 		m_transformation = NULL;
 	}
 	return S_OK;

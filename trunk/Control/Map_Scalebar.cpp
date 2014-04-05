@@ -5,7 +5,7 @@
 // ****************************************************************
 //		DrawStringWithShade()
 // ****************************************************************
-void DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, Gdiplus::PointF &point, 
+void CMapView::DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, Gdiplus::PointF &point, 
 						 Gdiplus::Brush *brush, Gdiplus::Brush *brushOutline)
 {
 	g->DrawString(s.GetString(), s.GetLength(), font, point, brushOutline);
@@ -144,7 +144,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		}
 	}
 	
-	double minX, maxX, minY, maxY;	// size of ap control in pixels
+	double minX, maxX, minY, maxY;	// size of map control in pixels
     PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
 	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
 
@@ -168,16 +168,11 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			if (m_transformationMode == tkTransformationMode::tmDoTransformation)
 			{
 				VARIANT_BOOL vb;
-				m_projection->get_HasTransformation(&vb);
-				if (!vb) {
-					((CGeoProjection*)m_projection)->SetIsFrozen(false);
-					m_projection->StartTransform(m_wgsProjection, &vb);
-					((CGeoProjection*)m_projection)->SetIsFrozen(true);
-				}
-				if (vb)
+				IGeoProjection* projTemp = GetMapToWgs84Transform();
+				if (projTemp)
 				{
-					m_projection->Transform(&xMin, &yMin, &vb);
-					m_projection->Transform(&xMax, &yMax, &vb);
+					projTemp->Transform(&xMin, &yMin, &vb);
+					projTemp->Transform(&xMax, &yMax, &vb);
 				}
 				else {
 					skipTransform = true;
@@ -349,10 +344,8 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message
 	// preparing canvas
 	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
 	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
-	Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
+	Gdiplus::SolidBrush brush(Gdiplus::Color::Black);			// TODO: cache brushes
 	Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
-	Gdiplus::FontFamily family(L"Arial");
-	Gdiplus::Font font(&family, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 	Gdiplus::PointF point(0.0f, 0.0f);
 	Gdiplus::StringFormat format; 
 	
@@ -363,13 +356,13 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message
 	{
 		USES_CONVERSION;
 		s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
-		g->MeasureString(s, s.GetLength(), &font, point, &format, &rect);
+		g->MeasureString(s, s.GetLength(), _font, point, &format, &rect);
 		
 		if (rect.Width + 10 < m_viewWidth)		// control must be big enough to host the string
 		{
 			point.X = (float)(m_viewWidth - rect.Width - 10);
 			point.Y = (float)(m_viewHeight - rect.Height - 10);
-			DrawStringWithShade(g, s, &font, point, &brush, &brushOutline);
+			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
 		}
 	}
 
@@ -383,13 +376,53 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message
 		{
 			s.Format(L"Redraw time: %.3f s", time);
 		}
-		g->MeasureString(s, s.GetLength(), &font, point, &format, &rect);
+		g->MeasureString(s, s.GetLength(), _font, point, &format, &rect);
 		if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
 		{
 			point.X = (float)(m_viewWidth - rect.Width - 10);
 			point.Y = (float)(10.0f);
-			DrawStringWithShade(g, s, &font, point, &brush, &brushOutline);
+			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
 		}
 	}
 	g->SetTextRenderingHint(hint);
+}
+
+// ****************************************************************
+//		DrawCoordinates()
+// ****************************************************************
+void CMapView::DrawCoordinates(Gdiplus::Graphics* g) 
+{
+	POINT p;
+	if (GetCursorPos(&p))
+	{
+		ScreenToClient(&p);
+		double x = p.x, y = p.y;
+		double prX, prY;
+		PixelToProjection(x, y, prX, prY);
+
+		CStringW s;
+		s.Format(L"x=%f; y=%f", prX, prY);
+		Gdiplus::PointF point(0.0f, 0.0f);
+		Gdiplus::RectF rect;
+
+		Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
+		Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
+		
+		g->MeasureString(s, s.GetLength(), _font, point, Gdiplus::StringFormat::GenericDefault(), &rect);
+		if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
+		{
+			point.X = 10.0f;
+			point.Y = 10.0f;
+			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
+		}
+	}
+}
+void CMapView::DrawCoordinates(CDC* pdc) 
+{
+	HDC hdc = pdc->GetSafeHdc();
+	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
+	//g->TranslateTransform(offsetX, offsetY);
+	DrawCoordinates(g);
+	g->ReleaseHDC(pdc->GetSafeHdc());
+	delete g;
 }

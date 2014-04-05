@@ -3,6 +3,25 @@
 #include "stdafx.h"
 #include "FieldStatOperations.h"
 
+//***********************************************************************
+//*		get/put_Key()
+//***********************************************************************
+STDMETHODIMP CFieldStatOperations::get_Key(BSTR *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(m_key);
+	return S_OK;
+}
+STDMETHODIMP CFieldStatOperations::put_Key(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	::SysFreeString(m_key);
+	USES_CONVERSION;
+	m_key = OLE2BSTR(newVal);
+	return S_OK;
+}
+
 //***********************************************************************/
 //*			ErrorMessage()
 //***********************************************************************/

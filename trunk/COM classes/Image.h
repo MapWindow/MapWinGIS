@@ -54,39 +54,25 @@ public:
 	// constructor
 	CImageClass::CImageClass()
 	{
+		globalCallback = NULL;
+		ImageData = NULL;
+		
 		m_drawingMethod = 0;
 		m_drawingMethod |= idmNewWithResampling;
 		m_drawingMethod |= idmGDIPlusDrawing;
 		m_drawingMethod |= idmGDIPlusResampling;
 
-		m_downsamplingMode = imNone;
-		m_upsamplingMode = imBilinear;
-
-		m_transparencyPercent = 1.0;
-
-		setRGBToGrey = false;
-		m_downSampling = false;
-		
-		globalCallback = NULL;
-		ImageData = NULL;
-		
-		lastErrorCode = tkNO_ERROR;
-
-		USES_CONVERSION;
-		key = A2BSTR("");
-		
-		transColor = RGB(0,0,0);
-		transColor2 = RGB(0,0,0);
-		useTransColor = VARIANT_FALSE;
-
-		m_labels = NULL;
-		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
-
 		dX = dY = 1.0;
 		XllCenter = YllCenter = 0.0;
 		Width = Height = 0;
 
-		_canUseGrouping = true;
+		lastErrorCode = tkNO_ERROR;
+
+		USES_CONVERSION;
+		key = A2BSTR("");
+
+		m_labels = NULL;
+		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
 		
 		_bitmapImage = NULL;
 		_rasterImage = NULL;
@@ -109,10 +95,29 @@ public:
 		sourceGridName = "";
 
 		m_iconGdiPlus = NULL;
+
+		SetDefaults();
 		
 		gReferenceCounter.AddRef(tkInterface::idImage);
 	}
 	
+	void CImageClass::SetDefaults()
+	{
+		m_downsamplingMode = imNone;
+		m_upsamplingMode = imBilinear;
+
+		m_transparencyPercent = 1.0;
+
+		setRGBToGrey = false;
+		m_downSampling = false;
+
+		transColor = RGB(0,0,0);
+		transColor2 = RGB(0,0,0);
+		useTransColor = VARIANT_FALSE;
+
+		_canUseGrouping = true;
+	}
+
 	// destructor
 	CImageClass::~CImageClass()
 	{	
@@ -279,18 +284,18 @@ public:
 	
 	STDMETHOD(get_SourceGridName)(BSTR* retVal);
 	STDMETHOD(get_IsGridProxy)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_ExternalColorScheme)( IGridColorScheme** pVal);
-	STDMETHOD(put_ExternalColorScheme)( IGridColorScheme* newVal);
-	STDMETHOD(get_CanUseExternalColorScheme)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_AllowExternalColorScheme)(tkUseFunctionality* retVal);
-	STDMETHOD(put_AllowExternalColorScheme)(tkUseFunctionality newVal);
-	STDMETHOD(get_IsUsingExternalColorScheme)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_CustomColorScheme)( IGridColorScheme** pVal);
+	STDMETHOD(put_CustomColorScheme)( IGridColorScheme* newVal);
+	//STDMETHOD(get_CanUseExternalColorScheme)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_AllowGridRendering)(tkGridRendering* retVal);
+	STDMETHOD(put_AllowGridRendering)(tkGridRendering newVal);
+	STDMETHOD(get_GridRendering)(VARIANT_BOOL* retVal);
 	STDMETHOD(SetTransparentColor)(OLE_COLOR color);
 	STDMETHOD(get_IsRgb)(VARIANT_BOOL* retVal);
 	STDMETHOD(OpenAsGrid)(IGrid** retVal);
 	STDMETHOD(get_SourceFilename)(BSTR* retVal);
-	STDMETHOD(get_ExternalColorSchemeBandIndex)(int* retVal);
-	STDMETHOD(put_ExternalColorSchemeBandIndex)(int newVal);
+	STDMETHOD(get_SourceGridBandIndex)(int* retVal);
+	STDMETHOD(put_SourceGridBandIndex)(int newVal);
 
 	//STDMETHOD(LoadBuffer)(double mapMinX, double mapMinY, double mapMaxX, double mapMaxY, double mapUnitsPerScreenPixel, VARIANT_BOOL* retVal);
 	//STDMETHOD(OpenForUpdate)(BSTR ImageFileName, ImageType FileType,  VARIANT_BOOL InRam, ICallback * cBack, VARIANT_BOOL * retval);
@@ -331,7 +336,6 @@ private:
 	CStringW fileName;			//For GDALOpen
 
 	//Image Variables
-	//CStringW FileName;		//filename of image that was opened or created
 	colour * ImageData;		//array storing generic image data
 	long Width;				//number of Columns in image
 	long Height;			//number of rows in image

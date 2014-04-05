@@ -99,8 +99,6 @@ public:
 	STDMETHOD(get_GridProxyMode)(tkGridProxyMode* pVal);
 	STDMETHOD(put_MaxUniqueValuesCountForGridScheme)(int newVal);
 	STDMETHOD(get_MaxUniqueValuesCountForGridScheme)(int* pVal);
-	STDMETHOD(put_GrabMapProjectionFromFirstLayer)(VARIANT_BOOL newVal);
-	STDMETHOD(get_GrabMapProjectionFromFirstLayer)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_RandomColorSchemeForGrids)( VARIANT_BOOL *retVal);
 	STDMETHOD(put_RandomColorSchemeForGrids)( VARIANT_BOOL newVal);
 	STDMETHOD(get_DefaultColorSchemeForGrids)( PredefinedColorScheme *retVal);
@@ -111,6 +109,8 @@ public:
 	STDMETHOD(put_ShapeInputValidationMode)( tkShapeValidationMode newVal);
 	STDMETHOD(get_GeometryEngine)( tkGeometryEngine *retVal);
 	STDMETHOD(put_GeometryEngine)( tkGeometryEngine newVal);
+	STDMETHOD(get_SaveGridColorSchemeToFile)( VARIANT_BOOL *retVal);
+	STDMETHOD(put_SaveGridColorSchemeToFile)( VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

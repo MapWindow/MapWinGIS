@@ -121,6 +121,9 @@ public:
 	
 	bool IsStopped() {return stopped; }
 	bool IsGeodesic() { return isGeodesic;}
+	bool NeedsDrawing() {
+		return persistent && points.size() > 0;
+	}
 
 	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
 	double GetDistance();
@@ -139,8 +142,8 @@ public:
 	bool displayAngles;
 	
 	Gdiplus::Font* font;
-	Gdiplus::SolidBrush textBrush; //(Gdiplus::Color::Black);
-	Gdiplus::SolidBrush whiteBrush;//(Gdiplus::Color::White);
+	Gdiplus::SolidBrush textBrush; // Black;
+	Gdiplus::SolidBrush whiteBrush;// White;
 	Gdiplus::StringFormat format;
 	bool closedPoly;
 	int firstPointIndex;

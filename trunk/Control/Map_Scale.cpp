@@ -35,75 +35,62 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	double h = screenHeight / pxWidth * projWidth;		// requested width in meters (EPSG:3857)
 
 	VARIANT_BOOL vb, vb2;
-	IGeoProjection* projMap = this->GetGeoProjection();
-	if (projMap)
+	
+	VARIANT_BOOL projMatch;
+	GetMapProjection()->get_IsSame(GetGMercProjection(), &projMatch);
+	if (projMatch)
 	{
-		VARIANT_BOOL projMatch;
-		projMap->get_IsSame(m_GMercProjection, &projMatch);
-		if (projMatch)
+		minX = xCent - w/2.0;
+		maxX = xCent + w/2.0;
+		minY = yCent - h/2.0;
+		maxY = yCent + h/2.0;
+		this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+		return VARIANT_TRUE;
+	}
+	else
+	{
+		// get center in GMercator
+		IGeoProjection* projTemp = GetMapToGMercTransform();
+		if (projTemp)
 		{
-			minX = xCent - w/2.0;
-			maxX = xCent + w/2.0;
-			minY = yCent - h/2.0;
-			maxY = yCent + h/2.0;
-			this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
-			projMap->Release();
-			return VARIANT_TRUE;
+			projTemp->Transform(&xCent, &yCent, &vb);
+			if (!vb)
+			{
+				ErrorMsg(tkFAILED_TO_REPROJECT);
+			}
 		}
 		else
 		{
-			// get center in GMercator
-			projMap->StartTransform(m_GMercProjection, &vb);
-			if (vb)
+			ErrorMsg(tkFAILED_TO_REPROJECT);
+		}
+		
+		// return back to map projection
+		if (vb)
+		{
+			projTemp = GetGMercToMapTransform();
+			if (projTemp)
 			{
-				projMap->Transform(&xCent, &yCent, &vb);
-				projMap->StopTransform();
-				if (!vb)
+				minX = xCent - w/2.0;
+				maxX = xCent + w/2.0;
+				minY = yCent - h/2.0;
+				maxY = yCent + h/2.0;
+				projTemp->Transform(&minX, &minY, &vb);
+				projTemp->Transform(&maxX, &maxY, &vb2);
+				if (!vb || !vb2)
 				{
 					ErrorMsg(tkFAILED_TO_REPROJECT);
+				}
+				else
+				{
+					this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+					return VARIANT_TRUE;
 				}
 			}
 			else
 			{
 				ErrorMsg(tkFAILED_TO_REPROJECT);
 			}
-			
-			// return back to map projection
-			if (vb)
-			{
-				m_GMercProjection->StartTransform(projMap, &vb);
-				if (vb)
-				{
-					minX = xCent - w/2.0;
-					maxX = xCent + w/2.0;
-					minY = yCent - h/2.0;
-					maxY = yCent + h/2.0;
-					m_GMercProjection->Transform(&minX, &minY, &vb);
-					m_GMercProjection->Transform(&maxX, &maxY, &vb2);
-					m_GMercProjection->StopTransform();
-					if (!vb || !vb2)
-					{
-						ErrorMsg(tkFAILED_TO_REPROJECT);
-					}
-					else
-					{
-						Debug::WriteLine("Zoom to tile level: %d; extents: xMin:%f; xMax: %f; yMin: %f; yMax: %f", zoom, minX, maxX, minY, maxY);
-						this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
-						projMap->Release();
-						return VARIANT_TRUE;
-					}
-				}
-				else
-				{
-					ErrorMsg(tkFAILED_TO_REPROJECT);
-				}
-			}
 		}
-		projMap->Release();
-	}
-	else
-	{
-		ErrorMsg(tkMAP_PROJECTION_NOT_SET);
 	}
 	return VARIANT_FALSE;
 }
@@ -113,16 +100,16 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 // ****************************************************
 void CMapView::SetExtentsCore(Extent ext, bool logExtents, bool mapSizeChanged)
 {
+	_knownExtents = keNone;
 	this->CalculateVisibleExtents(ext, logExtents, mapSizeChanged);
-	m_canbitblt = FALSE;
+	_canUseLayerBuffer = FALSE;
 
 	this->FireExtentsChanged();
 	this->ReloadImageBuffers();
 	
 	this->m_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
 
-	if( !m_lockCount )
-	{
+	if( !m_lockCount ) {
 		((CTiles*)m_tiles)->LoadTiles((void*)this);
 		this->InvalidateControl();
 	}
@@ -179,9 +166,6 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
     PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
 	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
 	
-	//TODO: reimplement
-
-	// getting screen size
 	long pixX = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSX);
 	long pixY = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSY);
 	if (pixX == 0.0 || pixY == 0.0)	
@@ -255,6 +239,7 @@ void CMapView::SetExtents(LPDISPATCH newValue)
 #pragma endregion
 
 #pragma region GeographicExtents
+
 // *****************************************************
 //		SetGeographicExtents()
 // *****************************************************
@@ -268,7 +253,9 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* pVal)
 	}
 	else
 	{
-		if (m_transformationMode == tmWgs84Complied)  //||((CGeoProjection*)m_projection)->get_IsSame(m_wgsProjection))
+		this->LockWindow(tkLockMode::lmLock);
+		
+		if (m_transformationMode == tmWgs84Complied)
 		{
 			this->SetExtents(pVal);
 		}
@@ -278,12 +265,40 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* pVal)
 			pVal->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
 			
 			VARIANT_BOOL vbretval;
-			m_wgsProjection->Transform(&xMin, &yMin, &vbretval);	 if (!vbretval) return VARIANT_FALSE;
-			m_wgsProjection->Transform(&xMax, &yMax, &vbretval);	 if (!vbretval) return VARIANT_FALSE;
+			IGeoProjection* p = GetWgs84ToMapTransform();
+			if (p) {
+				p->Transform(&xMin, &yMin, &vbretval);	 
+				if (!vbretval) {
+					this->LockWindow(tkLockMode::lmUnlock);
+					this->ErrorMessage(tkFAILED_TO_REPROJECT);
+					return VARIANT_FALSE;
+				}
+				p->Transform(&xMax, &yMax, &vbretval);	 
+				if (!vbretval) {
+					this->LockWindow(tkLockMode::lmUnlock);
+					this->ErrorMessage(tkFAILED_TO_REPROJECT);
+					return VARIANT_FALSE;
+				}
+			}
+			else
+			{
+				this->LockWindow(tkLockMode::lmUnlock);
+				this->ErrorMessage(tkFAILED_TO_REPROJECT);
+				return VARIANT_FALSE;
+			}
 
 			pVal->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
 			this->SetExtents(pVal); 
 		}
+
+		tkZoomBehavior zb = GetZoomBehaviorCore();
+		if (zb == zbUseTileLevels)
+		{
+			int zoom;
+			m_tiles->get_CurrentZoom(&zoom);
+			ZoomToTileLevel(zoom);
+		}
+		this->LockWindow(tkLockMode::lmUnlock);
 		return VARIANT_TRUE;
 	}
 }
@@ -316,9 +331,8 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 {
 	IExtents * box = NULL;
 
-	if (m_projection)
+	if (GetMapProjection())
 	{
-		//if (((CGeoProjection*)m_projection)->get_IsSame(m_wgsProjection))
 		if (m_transformationMode == tkTransformationMode::tmWgs84Complied)
 		{
 			CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
@@ -326,30 +340,16 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 		}
 		else if (m_transformationMode == tkTransformationMode::tmDoTransformation)
 		{
-			VARIANT_BOOL vbretval;
-			((CGeoProjection*)m_projection)->SetIsFrozen(false);
-			m_projection->StartTransform(m_wgsProjection, &vbretval);
-			((CGeoProjection*)m_projection)->SetIsFrozen(true);
-			if (!vbretval)
-			{
-				Debug::WriteLine("GetGeographicExtentsCore; failed to start trasnform");
-				USES_CONVERSION;
-				CComBSTR bstr;
-				m_projection->ExportToProj4(&bstr);
-				Debug::WriteLine(OLE2A(bstr));
-				m_wgsProjection->ExportToProj4(&bstr);
-				Debug::WriteLine(OLE2A(bstr));
-			}
-			else
+			VARIANT_BOOL vb;
+			IGeoProjection* projTemp = GetMapToWgs84Transform();
+			if (projTemp)
 			{
 				Extent ext;
 				bool clip = clipForTiles && clipExtents;
-				//Debug::WriteLine("GetGeographicExtentsCore extents: left = %f; right = %f; bottom = %f; top = %f", extents.left, extents.right, extents.bottom, extents.top);
 				ext.left = clip ? MAX(extents.left, clipExtents->left) : extents.left;
 				ext.right = clip ? MIN(extents.right, clipExtents->right) : extents.right;
 				ext.top = clip ? MIN(extents.top, clipExtents->top) : extents.top;
 				ext.bottom = clip ? MAX(extents.bottom, clipExtents->bottom) : extents.bottom;
-				//Debug::WriteLine("GetGeographicExtentsCore clipped extents: left = %f; right = %f; bottom = %f; top = %f", ext.left, ext.right, ext.bottom, ext.top);
 				
 				double xBL, yBL, xTL, yTL, xBR, yBR, xTR, yTR;
 				
@@ -365,22 +365,29 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 				xTR = ext.right;
 				yTR = ext.top;
 
-				m_projection->Transform(&xBL, &yBL, &vbretval);	 if (!vbretval) goto cleaning;
-				m_projection->Transform(&xTL, &yTL, &vbretval);	 if (!vbretval) goto cleaning;
-				m_projection->Transform(&xBR, &yBR, &vbretval);  if (!vbretval) goto cleaning;
-				m_projection->Transform(&xTR, &yTR, &vbretval);  if (!vbretval) goto cleaning;
+				projTemp->Transform(&xBL, &yBL, &vb);	if (!vb) goto cleaning;
+				projTemp->Transform(&xTL, &yTL, &vb);	if (!vb) goto cleaning;
+				projTemp->Transform(&xBR, &yBR, &vb);  if (!vb) goto cleaning;
+				projTemp->Transform(&xTR, &yTR, &vb);  if (!vb) goto cleaning;
 				
 				double degreePerMapUnit = this->DegreesPerMapUnit();
 
 				bool checkBounds = true;
-				if (checkBounds && !clipForTiles)		// TODO: is it needed
+				if (checkBounds && !clipForTiles)
 				{
 					double xMinTest = xTL; 
 					double yMinTest = yBR;
 					double xMaxTest = xBR; 
 					double yMaxTest = yTL;
-					m_wgsProjection->Transform(&xMinTest, &yMinTest, &vbretval);	if (!vbretval) goto cleaning;
-					m_wgsProjection->Transform(&xMaxTest, &yMaxTest, &vbretval);    if (!vbretval) goto cleaning;
+					
+					projTemp = GetWgs84ToMapTransform();
+					if (projTemp)
+					{
+						projTemp->Transform(&xMinTest, &yMinTest, &vb);	if (!vb) goto cleaning;
+						projTemp->Transform(&xMaxTest, &yMaxTest, &vb);    if (!vb) goto cleaning;
+					}
+					else
+						goto cleaning;
 					
 					double x1 = fabs(xMinTest - extents.left);
 					double x2 = fabs(xMaxTest - extents.right);
@@ -388,7 +395,7 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 					double y2 = fabs(yMaxTest - extents.top);
 					
 					VARIANT_BOOL projected;
-					m_projection->get_IsGeographic(&projected);
+					GetMapProjection()->get_IsGeographic(&projected);
 					if (projected)
 					{
 						if (x1 > 500.0)
@@ -401,85 +408,11 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 
 				CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
 				box->SetBounds( xTL, yBR, 0, xBR, yTL, 0 );		// TODO: return 4 point geographical extents as projections other that equirectangular can be used
-
-cleaning:
-				((CGeoProjection*)m_projection)->SetIsFrozen(false);
-				m_projection->StopTransform();
-				((CGeoProjection*)m_projection)->SetIsFrozen(true);
 			}
 		}
 	}
+cleaning:
 	return box;
-}
-#pragma endregion
-
-#pragma region GeoProjection
-// *****************************************************
-//		SetProjection()
-// *****************************************************
-void CMapView::SetGeoProjection(IGeoProjection* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	IGeoProjection* last = NULL;
-	if (pVal)
-	{
-		last = m_projection;
-		if (last)
-			last->AddRef();		// add temp reference; as it ca be deleted in the next line
-	}
-	
-	Utility::put_ComReference(pVal, (IDispatch**)&m_projection, false);
-	
-	if (last)
-	{
-		if (last != m_projection)
-		{
-			((CGeoProjection*)last)->SetIsFrozen(false);
-		}
-		last->Release();
-		last = NULL;
-	}
-
-	if (m_projection)
-	{
-		((CGeoProjection*)m_projection)->SetIsFrozen(true);
-	}
-
-	if (m_transformationMode == tmDoTransformation)
-		m_wgsProjection->StopTransform();
-	
-	VARIANT_BOOL isSame;
-	m_wgsProjection->get_IsSame(m_projection, &isSame);
-	if (isSame)
-	{
-		m_transformationMode = tmWgs84Complied;
-	}
-	else
-	{
-		VARIANT_BOOL vbretval;
-		((CGeoProjection*)m_projection)->SetIsFrozen(false);
-		m_wgsProjection->StartTransform(m_projection, &vbretval);
-		((CGeoProjection*)m_projection)->SetIsFrozen(true);
-		m_transformationMode = vbretval ? tmDoTransformation : tmNotDefined;
-	}
-
-	VARIANT_BOOL geographic;
-	m_projection->get_IsGeographic(&geographic);
-	m_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
-	((CMeasuring*)m_measuring)->SetMapView((void*)this);
-
-	((CTiles*)m_tiles)->UpdateProjection();
-}
-
-// *****************************************************
-//		GetProjection()
-// *****************************************************
-IGeoProjection* CMapView::GetGeoProjection (void)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (m_projection)
-		m_projection->AddRef();
-	return m_projection;
 }
 #pragma endregion
 
@@ -556,11 +489,11 @@ DOUBLE CMapView::DegreesPerMapUnit(void)
 // *****************************************************
 //		SetPixelsPerDegree
 // *****************************************************
-void CMapView::SetPixelsPerDegree(DOUBLE newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	SetNotSupported();
-}
+//void CMapView::SetPixelsPerDegree(DOUBLE newVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+//	SetNotSupported();
+//}
 
 void CMapView::ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY)
 {
@@ -1066,33 +999,36 @@ IExtents* CMapView::GetMaxExtents(void)
 	ext->SetBounds(maxExtents.left, maxExtents.bottom, 0.0, maxExtents.right, maxExtents.top, 0.0);
 	return ext;
 }
-
-// ****************************************************************
-//		SetMaxExtents()
-// ****************************************************************
-void CMapView::SetMaxExtents(IExtents* pVal)
-{
-	SetNotSupported();
-}
 #pragma endregion
 
 #pragma region Zoom in/zoom out
-bool tiledZoom = false;
+
+// ***************************************************
+//		GetZoomBehaviorCore()
+// ***************************************************
+tkZoomBehavior CMapView::GetZoomBehaviorCore()
+{
+	VARIANT_BOOL vb;
+	m_tiles->get_Visible(&vb);
+	return vb && _zoomBehavior == (short)zbUseTileLevels ? zbUseTileLevels : zbDefault;
+}
+
 // ***************************************************
 //		ZoomIn()
 // ***************************************************
 void CMapView::ZoomIn(double Percent)
 {
-	if (tiledZoom)
+	if (GetZoomBehaviorCore() == (short)zbUseTileLevels)
 	{
 		// An attempt to use discrete zoom levels from tiles; unfinished
-		int zoom;
-		this->m_tiles->get_CurrentZoom(&zoom);
-		Debug::WriteLine("Current zoom: %d", zoom);
-		if (zoom < 18) {
+		int zoom, maxZoom;
+		m_tiles->get_CurrentZoom(&zoom);
+		m_tiles->get_MaxZoom(&maxZoom);
+		if (zoom + 1 <= maxZoom) {
+			Debug::WriteLine("Zoom requested: %d", zoom);
 			this->ZoomToTileLevel(zoom + 1);
 			this->m_tiles->get_CurrentZoom(&zoom);
-			Debug::WriteLine("After zoom in: %d", zoom);
+			Debug::WriteLine("Zoom received: %d", zoom);
 		}
 	}
 	else {
@@ -1117,17 +1053,17 @@ void CMapView::ZoomIn(double Percent)
 // ***************************************************
 void CMapView::ZoomOut(double Percent)
 {
-	if (tiledZoom)
+	if (GetZoomBehaviorCore() == (short)zbUseTileLevels)
 	{
-		int zoom;
-		this->m_tiles->get_CurrentZoom(&zoom);
-		Debug::WriteLine("Current zoom: %d", zoom);
-		if (zoom > 1) {
+		int zoom, minZoom;
+		m_tiles->get_CurrentZoom(&zoom);
+		m_tiles->get_MinZoom(&minZoom);
+		if (zoom - 1 >= minZoom) {
+			Debug::WriteLine("Zoom out requested: %d", zoom - 1);
 			this->ZoomToTileLevel(zoom - 1);
-			Debug::WriteLine("After zoom out: %d", zoom);
+			this->m_tiles->get_CurrentZoom(&zoom);
+			Debug::WriteLine("Zoom out receivend: %d", zoom);
 		}
-		// An attempt to use discrete zoom levels from tiles; unfinished
-		//this->m_tiles->ZoomOut();
 	}
 	else 
 	{
@@ -1147,6 +1083,9 @@ void CMapView::ZoomOut(double Percent)
 	}
 }
 
+// ***************************************************
+//		LogPrevExtent()
+// ***************************************************
 void CMapView::LogPrevExtent()
 {
 	m_prevExtents.push_back( extents );
@@ -1154,6 +1093,9 @@ void CMapView::LogPrevExtent()
 		m_prevExtents.pop_front();
 }
 
+// ***************************************************
+//		ZoomToPrev()
+// ***************************************************
 long CMapView::ZoomToPrev()
 {
 	if( m_prevExtents.size() > 0 )
@@ -1170,11 +1112,11 @@ long CMapView::ZoomToPrev()
 VARIANT_BOOL CMapView::ZoomToWorld()
 {
 	VARIANT_BOOL vb;
-	m_projection->get_IsEmpty(&vb);
+	GetMapProjection()->get_IsEmpty(&vb);
 	if (!vb) {
 		IExtents* ext = NULL;
 		CoCreateInstance(CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
-		ext->SetBounds(-180.0, -85.0, 0.0, 180.0, 85.0, 0.0);
+		ext->SetBounds(-179.5, -85.0, 0.0, 179.5, 85.0, 0.0);
 		vb = this->SetGeographicExtents(ext);
 		if (vb)  {
 			this->Redraw();
@@ -1185,4 +1127,596 @@ VARIANT_BOOL CMapView::ZoomToWorld()
 		this->ErrorMessage(tkMAP_PROJECTION_NOT_SET);
 	}
 	return false;
+}
+
+// ****************************************************************
+//		SetGeographicExtents2()
+// ****************************************************************
+VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers)
+{
+	if (abs(xLongitude) > 179.5 || abs(yLatitude) > 89.5) {
+		// TODO: accept values in [-90, 90] [-180, 180]
+		ErrorMessage(tkINVALID_GEOGRAPHIC_COORDINATES);
+		return VARIANT_FALSE;
+	}
+	else 
+	{
+		IExtents* box = NULL;
+		GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);
+
+		double dy = 0.0, dx = 0.0;				// meters per degree
+		GetUtils()->GeodesicDistance(yLatitude - 0.5, xLongitude, yLatitude + 0.5, xLongitude, &dy);
+		GetUtils()->GeodesicDistance(yLatitude, xLongitude - 0.5, yLatitude, xLongitude + 0.5, &dx);
+
+		double distortion = dy / dx;
+		
+		dx = widthKilometers * 1000.0 / dx;  	// in degrees
+		dy = dx / (m_viewHeight / m_viewWidth) / distortion;
+		
+		box->SetBounds(xLongitude - dx / 2.0, yLatitude - dy / 2.0, 0.0, xLongitude + dx / 2.0, yLatitude + dy / 2.0, 0.0);
+		VARIANT_BOOL vb = this->SetGeographicExtents(box);
+		box->Release();
+		return vb;
+	}
+	return VARIANT_FALSE;
+}
+
+// ****************************************************************
+//		ZoomToKnownExtents()
+// ****************************************************************
+IExtents* CMapView::GetKnownExtents(tkKnownExtents extents)
+{
+	IExtents* box = NULL;
+	GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);
+
+	// generated from MW4 projection database
+	switch(extents) {
+		case keWorld: box->SetBounds(-179.0, -85.0, 0.0, 179.0, 85.0, 0.0);	break;
+		case keAfghanistan: box->SetBounds( 60.504166,  29.406105, 0.0,  74.915741,  38.472115, 0.0); break;
+		case keAland_Islands: box->SetBounds( 19.510555,  59.976944, 0.0,  20.442497,  60.40361, 0.0); break;
+		case keAlbania: box->SetBounds( 19.282497,  39.644722, 0.0,  21.054165,  42.661942, 0.0); break;
+		case keAlgeria: box->SetBounds(-8.667223,  18.976387, 0.0,  11.986475,  37.091385, 0.0); break;
+		case keAmerican_Samoa: box->SetBounds(-170.82611, -14.375555, 0.0, -169.43832, -14.166389, 0.0); break;
+		case keAndorra: box->SetBounds( 1.421389,  42.436104, 0.0,  1.78172,  42.656387, 0.0); break;
+		case keAngola: box->SetBounds( 11.663332, -18.016392, 0.0,  24.084442, -4.388991, 0.0); break;
+		case keAnguilla: box->SetBounds(-63.167778,  18.164444, 0.0, -62.969452,  18.276665, 0.0); break;
+		case keAntigua: box->SetBounds(-61.891113,  16.989719, 0.0, -61.666389,  17.724998, 0.0); break;
+		case keArgentina: box->SetBounds(-73.583618, -55.051674, 0.0, -53.649727, -21.780521, 0.0); break;
+		case keArmenia: box->SetBounds( 43.453888,  38.841148, 0.0,  46.62249,  41.29705, 0.0); break;
+		case keAruba: box->SetBounds(-70.063339,  12.41111, 0.0, -69.873337,  12.631109, 0.0); break;
+		case keAustralia: box->SetBounds( 112.907211, -54.753891, 0.0,  159.101898, -10.05139, 0.0); break;
+		case keAustria: box->SetBounds( 9.533569,  46.407494, 0.0,  17.166386,  49.018883, 0.0); break;
+		case keAzerbaijan: box->SetBounds( 44.778862,  38.389153, 0.0,  50.374992,  41.897057, 0.0); break;
+		case keBahamas: box->SetBounds(-78.978897,  20.915276, 0.0, -72.737503,  26.929165, 0.0); break;
+		case keBahrain: box->SetBounds( 50.453049,  25.571941, 0.0,  50.822495,  26.288887, 0.0); break;
+		case keBangladesh: box->SetBounds( 88.04332,  20.738049, 0.0,  92.669342,  26.631939, 0.0); break;
+		case keBarbados: box->SetBounds(-59.659447,  13.050554, 0.0, -59.426949,  13.337221, 0.0); break;
+		case keBelarus: box->SetBounds( 23.1654,  51.251846, 0.0,  32.741379,  56.16777, 0.0); break;
+		case keBelgium: box->SetBounds( 2.541667,  49.504166, 0.0,  6.398204,  51.503609, 0.0); break;
+		case keBelize: box->SetBounds(-89.2164,  15.889851, 0.0, -87.7789,  18.489902, 0.0); break;
+		case keBenin: box->SetBounds( .776667,  6.218721, 0.0,  3.855,  12.396658, 0.0); break;
+		case keBermuda: box->SetBounds(-64.876114,  32.260551, 0.0, -64.638626,  32.382217, 0.0); break;
+		case keBhutan: box->SetBounds( 88.751938,  26.703049, 0.0,  92.115265,  28.325275, 0.0); break;
+		case keBolivia: box->SetBounds(-69.656189, -22.901112, 0.0, -57.521118, -9.679195, 0.0); break;
+		case keBosnia_and_Herzegovina: box->SetBounds( 15.736387,  42.565826, 0.0,  19.621765,  45.265945, 0.0); break;
+		case keBotswana: box->SetBounds( 19.996109, -26.875557, 0.0,  29.373623, -17.781391, 0.0); break;
+		case keBrazil: box->SetBounds(-74.010559, -33.743896, 0.0, -29.84,  5.273889, 0.0); break;
+		case keBritish_Virgin_Islands: box->SetBounds(-64.700287,  18.383888, 0.0, -64.26918,  18.748608, 0.0); break;
+		case keBrunei: box->SetBounds( 114.095078,  4.017499, 0.0,  115.36026,  5.053054, 0.0); break;
+		case keBulgaria: box->SetBounds( 22.365276,  41.24305, 0.0,  28.606384,  44.224716, 0.0); break;
+		case keBurkina_Faso: box->SetBounds(-5.521111,  9.393888, 0.0,  2.397925,  15.082777, 0.0); break;
+		case keBurundi: box->SetBounds( 28.983887, -4.448056, 0.0,  30.853886, -2.298056, 0.0); break;
+		case keCambodia: box->SetBounds( 102.345543,  10.422739, 0.0,  107.636383,  14.708618, 0.0); break;
+		case keCameroon: box->SetBounds( 8.502222,  1.654166, 0.0,  16.207222,  13.085278, 0.0); break;
+		case keCanada: box->SetBounds(-141.00299,  41.675552, 0.0, -52.614449,  83.113876, 0.0); break;
+		case keCape_Verde: box->SetBounds(-25.360558,  14.81111, 0.0, -22.665836,  17.193054, 0.0); break;
+		case keCayman_Islands: box->SetBounds(-81.401123,  19.264721, 0.0, -79.732788,  19.762218, 0.0); break;
+		case keCentral_African_Republic: box->SetBounds( 14.41861,  2.220833, 0.0,  27.460278,  11.001389, 0.0); break;
+		case keChad: box->SetBounds( 13.461666,  7.457777, 0.0,  24.002747,  23.450554, 0.0); break;
+		case keChile: box->SetBounds(-109.44917, -55.919724, 0.0, -66.419174, -17.50528, 0.0); break;
+		case keChina: box->SetBounds( 73.617203,  18.168884, 0.0,  134.77359,  53.554436, 0.0); break;
+		case keCocos_Islands: box->SetBounds( 96.81749, -12.199999, 0.0,  96.924423, -12.128332, 0.0); break;
+		case keColombia: box->SetBounds(-81.722778, -4.236874, 0.0, -66.871887,  13.378611, 0.0); break;
+		case keComoros: box->SetBounds( 43.213608, -12.383057, 0.0,  44.53083, -11.366945, 0.0); break;
+		case keCongo: box->SetBounds( 11.140661, -5.019444, 0.0,  18.643608,  3.713055, 0.0); break;
+		case keCook_Islands: box->SetBounds(-165.85028, -21.940834, 0.0, -157.30587, -8.948057, 0.0); break;
+		case keCosta_Rica: box->SetBounds(-85.911392,  8.025669, 0.0, -82.561401,  11.21361, 0.0); break;
+		case keCroatia: box->SetBounds( 13.496387,  42.39666, 0.0,  19.426109,  46.535828, 0.0); break;
+		case keCuba: box->SetBounds(-84.953339,  19.821941, 0.0, -74.130844,  23.204166, 0.0); break;
+		case keCyprus: box->SetBounds( 32.269165,  34.56255, 0.0,  34.590553,  35.690277, 0.0); break;
+		case keCzech_Republic: box->SetBounds( 12.093704,  48.581379, 0.0,  18.852219,  51.053604, 0.0); break;
+		case keDenmark: box->SetBounds( 8.087221,  54.561661, 0.0,  15.15,  57.746666, 0.0); break;
+		case keDjibouti: box->SetBounds( 41.75972,  10.941944, 0.0,  43.42083,  12.708332, 0.0); break;
+		case keDominica: box->SetBounds(-61.491394,  15.198055, 0.0, -61.250557,  15.631943, 0.0); break;
+		case keDominican_Republic: box->SetBounds(-72.003067,  17.540276, 0.0, -68.322235,  19.93111, 0.0); break;
+		case keDR_Congo: box->SetBounds( 12.214552, -13.458057, 0.0,  31.302776,  5.381389, 0.0); break;
+		case keEcuador: box->SetBounds(-91.663895, -5.009132, 0.0, -75.21608,  1.437778, 0.0); break;
+		case keEgypt: box->SetBounds( 24.706665,  21.994164, 0.0,  36.898331,  31.646942, 0.0); break;
+		case keEl_Salvador: box->SetBounds(-90.108337,  13.156387, 0.0, -87.684723,  14.431982, 0.0); break;
+		case keEquatorial_Guinea: box->SetBounds( 5.615277, -1.479445, 0.0,  11.353888,  3.763333, 0.0); break;
+		case keEritrea: box->SetBounds( 36.443283,  12.363888, 0.0,  43.121384,  17.994881, 0.0); break;
+		case keEstonia: box->SetBounds( 21.83194,  57.522217, 0.0,  28.195274,  59.668327, 0.0); break;
+		case keEthiopia: box->SetBounds( 32.991104,  3.406389, 0.0,  47.988243,  14.88361, 0.0); break;
+		case keFaeroe_Islands: box->SetBounds(-7.435,  61.388329, 0.0, -6.388612,  62.396942, 0.0); break;
+		case keFalkland_Islands: box->SetBounds(-61.315834, -52.343056, 0.0, -57.731392, -51.249451, 0.0); break;
+		case keFiji: box->SetBounds(-180, -20.674442, 0.0,  180, -12.481943, 0.0); break;
+		case keFinland: box->SetBounds( 20.580929,  59.804993, 0.0,  31.588928,  70.088882, 0.0); break;
+		case keFrance: box->SetBounds(-5.134723,  41.364166, 0.0,  9.562222,  51.09111, 0.0); break;
+		case keFrench_Guiana: box->SetBounds(-54.603783,  2.112222, 0.0, -51.647781,  5.755555, 0.0); break;
+		case keFrench_Polynesia: box->SetBounds(-152.87973, -27.915554, 0.0, -134.9414, -7.888333, 0.0); break;
+		case keGabon: box->SetBounds( 8.698332, -3.925277, 0.0,  14.520555,  2.317898, 0.0); break;
+		case keGambia: box->SetBounds(-16.821667,  13.059977, 0.0, -13.798613,  13.826387, 0.0); break;
+		case keGeorgia: box->SetBounds( 40.002968,  41.046097, 0.0,  46.710815,  43.584717, 0.0); break;
+		case keGermany: box->SetBounds( 5.864166,  47.274719, 0.0,  15.038887,  55.056664, 0.0); break;
+		case keGhana: box->SetBounds(-3.249167,  4.726388, 0.0,  1.202778,  11.166666, 0.0); break;
+		case keGibraltar: box->SetBounds(-5.35624,  36.112175, 0.0, -5.334508,  36.163307, 0.0); break;
+		case keGreat_Britain: box->SetBounds(-8.621389,  49.911659, 0.0,  1.749444,  60.844444, 0.0); break;
+		case keGreece: box->SetBounds( 19.37611,  34.808884, 0.0,  28.238049,  41.748322, 0.0); break;
+		case keGreenland: box->SetBounds(-73.053604,  59.790276, 0.0, -12.155001,  83.623596, 0.0); break;
+		case keGrenada: box->SetBounds(-61.789726,  11.996387, 0.0, -61.418617,  12.529165, 0.0); break;
+		case keGuadeloupe: box->SetBounds(-62.873062,  15.869999, 0.0, -60.988617,  17.930275, 0.0); break;
+		case keGuam: box->SetBounds( 144.634155,  13.234997, 0.0,  144.953308,  13.65361, 0.0); break;
+		case keGuatemala: box->SetBounds(-92.24678,  13.745832, 0.0, -88.214737,  17.82111, 0.0); break;
+		case keGuernsey: box->SetBounds(-2.670278,  49.422493, 0.0, -2.500278,  49.508888, 0.0); break;
+		case keGuinea: box->SetBounds(-15.081112,  7.198889, 0.0, -7.646536,  12.6775, 0.0); break;
+		case keGuinea_Bissau: box->SetBounds(-16.71777,  10.922777, 0.0, -13.643057,  12.684721, 0.0); break;
+		case keGuyana: box->SetBounds(-61.389725,  1.185555, 0.0, -56.470634,  8.535276, 0.0); break;
+		case keHaiti: box->SetBounds(-74.467789,  18.022778, 0.0, -71.628891,  20.09222, 0.0); break;
+		case keHonduras: box->SetBounds(-89.351959,  12.979721, 0.0, -83.131851,  17.420277, 0.0); break;
+		case keHungary: box->SetBounds( 16.111805,  45.748329, 0.0,  22.894804,  48.57666, 0.0); break;
+		case keIceland: box->SetBounds(-24.542225,  63.389999, 0.0, -13.499445,  66.536102, 0.0); break;
+		case keIndia: box->SetBounds( 68.139435,  6.745554, 0.0,  97.380539,  35.506104, 0.0); break;
+		case keIndonesia: box->SetBounds( 95.008026, -10.93, 0.0,  141.007019,  5.913888, 0.0); break;
+		case keIran: box->SetBounds( 44.034157,  25.075275, 0.0,  63.341934,  39.78054, 0.0); break;
+		case keIraq: box->SetBounds( 38.794701,  29.061661, 0.0,  48.563881,  37.38472, 0.0); break;
+		case keIreland: box->SetBounds(-10.474724,  51.445549, 0.0, -6.013056,  55.380272, 0.0); break;
+		case keIsle_of_Man: box->SetBounds(-4.788611,  54.05555, 0.0, -4.307501,  54.416664, 0.0); break;
+		case keIsrael: box->SetBounds( 34.267578,  29.486706, 0.0,  35.683052,  33.270271, 0.0); break;
+		case keItaly: box->SetBounds( 6.61976,  36.649162, 0.0,  18.514999,  47.094719, 0.0); break;
+		case keIvory_Coast: box->SetBounds(-8.606384,  4.344722, 0.0, -2.487778,  10.735256, 0.0); break;
+		case keJamaica: box->SetBounds(-78.373901,  17.696663, 0.0, -76.221115,  18.522499, 0.0); break;
+		case keJapan: box->SetBounds( 122.935257,  24.250832, 0.0,  153.96579,  45.486382, 0.0); break;
+		case keJersey: box->SetBounds(-2.2475,  49.16777, 0.0, -2.015,  49.261108, 0.0); break;
+		case keJordan: box->SetBounds( 34.959999,  29.188889, 0.0,  39.301109,  33.377594, 0.0); break;
+		case keKazakhstan: box->SetBounds( 46.499161,  40.594437, 0.0,  87.348206,  55.44471, 0.0); break;
+		case keKenya: box->SetBounds( 33.907219, -4.669618, 0.0,  41.905167,  4.622499, 0.0); break;
+		case keKiribati: box->SetBounds(-172.23333, -11.466665, 0.0,  176.85025,  4.725832, 0.0); break;
+		case keKuwait: box->SetBounds( 46.546944,  28.538883, 0.0,  48.416588,  30.084438, 0.0); break;
+		case keKyrgyzstan: box->SetBounds( 69.248871,  39.191856, 0.0,  80.283325,  43.216904, 0.0); break;
+		case keLaos: box->SetBounds( 100.09137,  13.926664, 0.0,  107.695251,  22.500832, 0.0); break;
+		case keLatvia: box->SetBounds( 20.968605,  55.674835, 0.0,  28.237774,  58.084435, 0.0); break;
+		case keLebanon: box->SetBounds( 35.10083,  33.061943, 0.0,  36.623741,  34.647499, 0.0); break;
+		case keLesotho: box->SetBounds( 27.011108, -30.650528, 0.0,  29.456108, -28.569447, 0.0); break;
+		case keLiberia: box->SetBounds(-11.492331,  4.343333, 0.0, -7.366667,  8.512777, 0.0); break;
+		case keLibya: box->SetBounds( 9.303888,  19.499065, 0.0,  25.152775,  33.171135, 0.0); break;
+		case keLiechtenstein: box->SetBounds( 9.474637,  47.057457, 0.0,  9.63611,  47.274544, 0.0); break;
+		case keLithuania: box->SetBounds( 20.942833,  53.888046, 0.0,  26.819717,  56.450829, 0.0); break;
+		case keLuxembourg: box->SetBounds( 5.734444,  49.448326, 0.0,  6.524722,  50.18222, 0.0); break;
+		case keMacao: box->SetBounds( 113.531372,  22.183052, 0.0,  113.556374,  22.214439, 0.0); break;
+		case keMacedonia: box->SetBounds( 20.457775,  40.855888, 0.0,  23.032776,  42.361382, 0.0); break;
+		case keMadagascar: box->SetBounds( 43.236824, -25.588337, 0.0,  50.501389, -11.945557, 0.0); break;
+		case keMalawi: box->SetBounds( 32.678886, -17.135281, 0.0,  35.924164, -9.373335, 0.0); break;
+		case keMalaysia: box->SetBounds( 99.640823,  .852778, 0.0,  119.275818,  7.35361, 0.0); break;
+		case keMaldives: box->SetBounds( 72.687759, -.690833, 0.0,  73.753601,  7.096388, 0.0); break;
+		case keMali: box->SetBounds(-12.244833,  10.141109, 0.0,  4.2525,  25.000275, 0.0); break;
+		case keMalta: box->SetBounds( 14.180832,  35.799995, 0.0,  14.57,  36.074997, 0.0); break;
+		case keMarshall_Islands: box->SetBounds( 162.323578,  5.600277, 0.0,  172.090515,  14.598331, 0.0); break;
+		case keMartinique: box->SetBounds(-61.231674,  14.402777, 0.0, -60.816673,  14.880278, 0.0); break;
+		case keMauritania: box->SetBounds(-17.075558,  14.725321, 0.0, -4.806111,  27.290459, 0.0); break;
+		case keMauritius: box->SetBounds( 56.507217, -20.520557, 0.0,  63.498604, -10.316668, 0.0); break;
+		case keMayotte: box->SetBounds( 45.039162, -12.9925, 0.0,  45.293327, -12.6625, 0.0); break;
+		case keMexico: box->SetBounds(-118.40416,  14.550547, 0.0, -86.701401,  32.718456, 0.0); break;
+		case keMicronesia: box->SetBounds( 138.058319,  5.261666, 0.0,  163.043304,  9.589441, 0.0); break;
+		case keMoldova: box->SetBounds( 26.634995,  45.448647, 0.0,  30.133228,  48.468323, 0.0); break;
+		case keMonaco: box->SetBounds( 7.386389,  43.727547, 0.0,  7.439293,  43.773048, 0.0); break;
+		case keMongolia: box->SetBounds( 87.758331,  41.581383, 0.0,  119.934982,  52.143608, 0.0); break;
+		case keMontenegro: box->SetBounds( 18.453331,  41.848999, 0.0,  20.382774,  43.556107, 0.0); break;
+		case keMontserrat: box->SetBounds(-62.237228,  16.671387, 0.0, -62.137505,  16.81361, 0.0); break;
+		case keMorocco: box->SetBounds(-13.174961,  27.664238, 0.0, -1.010278,  35.919167, 0.0); break;
+		case keMozambique: box->SetBounds( 30.213017, -26.860279, 0.0,  40.846107, -10.471111, 0.0); break;
+		case keNamibia: box->SetBounds( 11.716389, -28.962502, 0.0,  25.264431, -16.952778, 0.0); break;
+		case keNauru: box->SetBounds( 166.904419, -.552222, 0.0,  166.958588, -.493333, 0.0); break;
+		case keNepal: box->SetBounds( 80.0522,  26.364719, 0.0,  88.195816,  30.424995, 0.0); break;
+		case keNetherlands: box->SetBounds( 3.370866,  50.753883, 0.0,  7.211666,  53.511383, 0.0); break;
+		case keNew_Caledonia: box->SetBounds( 159.922211, -22.694164, 0.0,  171.313873, -19.114445, 0.0); break;
+		case keNew_Zealand: box->SetBounds(-178.61306, -52.578056, 0.0,  179.082733, -29.223057, 0.0); break;
+		case keNicaragua: box->SetBounds(-87.693069,  10.708611, 0.0, -82.72139,  15.022221, 0.0); break;
+		case keNiger: box->SetBounds( .166667,  11.693274, 0.0,  15.996666,  23.522305, 0.0); break;
+		case keNigeria: box->SetBounds( 2.6925,  4.272499, 0.0,  14.658054,  13.891499, 0.0); break;
+		case keNiue: box->SetBounds(-169.95306, -19.145557, 0.0, -169.7814, -18.963333, 0.0); break;
+		case keNorfolk_Island: box->SetBounds( 167.909424, -29.081112, 0.0,  168, -29.000557, 0.0); break;
+		case keNorth_Korea: box->SetBounds( 124.322769,  37.671379, 0.0,  130.697418,  43.008324, 0.0); break;
+		case keNorthern_Mariana_Islands: box->SetBounds( 144.89859,  14.105276, 0.0,  145.870789,  20.556385, 0.0); break;
+		case keNorway: box->SetBounds( 4.62,  57.987778, 0.0,  31.078053,  71.154709, 0.0); break;
+		case keOccupied_Palestinian_Territory: box->SetBounds( 34.21666,  31.216541, 0.0,  35.573296,  32.546387, 0.0); break;
+		case keOman: box->SetBounds( 51.99929,  16.642778, 0.0,  59.847221,  26.382389, 0.0); break;
+		case kePakistan: box->SetBounds( 60.866302,  23.688049, 0.0,  77.823929,  37.062592, 0.0); break;
+		case kePalau: box->SetBounds( 132.208313,  5.292221, 0.0,  134.658875,  7.729444, 0.0); break;
+		case kePanama: box->SetBounds(-83.030289,  7.206111, 0.0, -77.198334,  9.620277, 0.0); break;
+		case kePapua_New_Guinea: box->SetBounds( 140.858856, -11.6425, 0.0,  159.523041, -1.098333, 0.0); break;
+		case keParaguay: box->SetBounds(-62.643768, -27.588337, 0.0, -54.243896, -19.296669, 0.0); break;
+		case kePeru: box->SetBounds(-81.3564, -18.348545, 0.0, -68.673904, -.031389, 0.0); break;
+		case kePhilippines: box->SetBounds( 116.949997,  4.641388, 0.0,  126.598038,  21.118053, 0.0); break;
+		case kePitcairn: box->SetBounds(-130.10748, -25.082226, 0.0, -124.77113, -24.325005, 0.0); break;
+		case kePoland: box->SetBounds( 14.145555,  49.001938, 0.0,  24.144718,  54.836937, 0.0); break;
+		case kePortugal: box->SetBounds(-31.290001,  32.637497, 0.0, -6.187222,  42.15274, 0.0); break;
+		case kePuerto_Rico: box->SetBounds(-67.938339,  17.922222, 0.0, -65.241959,  18.519444, 0.0); break;
+		case keQatar: box->SetBounds( 50.751938,  24.556042, 0.0,  51.615829,  26.15361, 0.0); break;
+		case keReunion_Island: box->SetBounds( 55.219719, -21.37389, 0.0,  55.85305, -20.856392, 0.0); break;
+		case keRomania: box->SetBounds( 20.261024,  43.622437, 0.0,  29.672497,  48.263885, 0.0); break;
+		case keRussia: box->SetBounds(-180,  41.196091, 0.0,  180,  81.851929, 0.0); break;
+		case keRwanda: box->SetBounds( 28.853333, -2.826667, 0.0,  30.894444, -1.053889, 0.0); break;
+		case keSaint_Barthelemy: box->SetBounds(-63.139839,  18.015553, 0.0, -63.010284,  18.070366, 0.0); break;
+		case keSaint_Martin_French_part: box->SetBounds(-63.146667,  18.058601, 0.0, -63.006393,  18.121944, 0.0); break;
+		case keSamoa: box->SetBounds(-172.7806, -14.057503, 0.0, -171.42865, -13.460556, 0.0); break;
+		case keSan_Marino: box->SetBounds( 12.403889,  43.895554, 0.0,  12.511665,  43.989166, 0.0); break;
+		case keSao_Tome_and_Principe: box->SetBounds( 6.464444,  .018333, 0.0,  7.464167,  1.701944, 0.0); break;
+		case keSaudi_Arabia: box->SetBounds( 34.492218,  15.616943, 0.0,  55.666107,  32.154942, 0.0); break;
+		case keSenegal: box->SetBounds(-17.537224,  12.301748, 0.0, -11.3675,  16.693054, 0.0); break;
+		case keSerbia: box->SetBounds( 18.81702,  41.855827, 0.0,  23.004997,  46.181389, 0.0); break;
+		case keSeychelles: box->SetBounds( 46.204163, -9.755001, 0.0,  56.28611, -4.280001, 0.0); break;
+		case keSierra_Leone: box->SetBounds(-13.29561,  6.923611, 0.0, -10.264168,  9.997499, 0.0); break;
+		case keSingapore: box->SetBounds( 103.640808,  1.258889, 0.0,  103.998863,  1.445277, 0.0); break;
+		case keSlovakia: box->SetBounds( 16.839996,  47.737221, 0.0,  22.558052,  49.60083, 0.0); break;
+		case keSlovenia: box->SetBounds( 13.383055,  45.425819, 0.0,  16.607872,  46.876663, 0.0); break;
+		case keSolomon_Islands: box->SetBounds( 155.507477, -11.845833, 0.0,  167.209961, -5.293056, 0.0); break;
+		case keSomalia: box->SetBounds( 40.986595, -1.674868, 0.0,  51.412636,  11.979166, 0.0); break;
+		case keSouth_Africa: box->SetBounds( 16.48333, -46.969727, 0.0,  37.981667, -22.136391, 0.0); break;
+		case keSouth_Korea: box->SetBounds( 124.609711,  33.190269, 0.0,  130.924133,  38.625244, 0.0); break;
+		case keSpain: box->SetBounds(-18.170559,  27.637497, 0.0,  4.316944,  43.772217, 0.0); break;
+		case keSri_Lanka: box->SetBounds( 79.651932,  5.917777, 0.0,  81.891663,  9.828331, 0.0); break;
+		case keSt_Helena: box->SetBounds(-14.416113, -40.403893, 0.0, -5.645278, -7.883056, 0.0); break;
+		case keSt_Kitts_and_Nevis: box->SetBounds(-62.863892,  17.091663, 0.0, -62.534172,  17.410831, 0.0); break;
+		case keSt_Lucia: box->SetBounds(-61.079727,  13.709444, 0.0, -60.878059,  14.109444, 0.0); break;
+		case keSt_Pierre_and_Miquelon: box->SetBounds(-56.398056,  46.747215, 0.0, -56.144165,  47.136658, 0.0); break;
+		case keSt_Vincent: box->SetBounds(-61.45417,  12.584444, 0.0, -61.120285,  13.384165, 0.0); break;
+		case keSudan: box->SetBounds( 21.827774,  3.493394, 0.0,  38.607498,  22.23222, 0.0); break;
+		case keSuriname: box->SetBounds(-58.071396,  1.835556, 0.0, -53.984169,  6.003055, 0.0); break;
+		case keSvalbard_and_Jan_Mayen: box->SetBounds(-9.120058,  70.803864, 0.0,  36.853325,  80.76416, 0.0); break;
+		case keSwaziland: box->SetBounds( 30.798332, -27.316669, 0.0,  32.1334, -25.728336, 0.0); break;
+		case keSweden: box->SetBounds( 11.106943,  55.339165, 0.0,  24.16861,  69.060303, 0.0); break;
+		case keSwitzerland: box->SetBounds( 5.96611,  45.829437, 0.0,  10.488913,  47.806938, 0.0); break;
+		case keSyria: box->SetBounds( 35.614464,  32.313606, 0.0,  42.379166,  37.290543, 0.0); break;
+		case keTajikistan: box->SetBounds( 67.3647,  36.671844, 0.0,  75.187485,  41.050224, 0.0); break;
+		case keTanzania: box->SetBounds( 29.340832, -11.740835, 0.0,  40.436813, -.997222, 0.0); break;
+		case keThailand: box->SetBounds( 97.345261,  5.63111, 0.0,  105.639427,  20.455273, 0.0); break;
+		case keTimor_Leste: box->SetBounds( 124.046161, -9.4633795, 0.0,  127.308594, -8.324444, 0.0); break;
+		case keTogo: box->SetBounds(-.149762,  6.100546, 0.0,  1.799327,  11.13854, 0.0); break;
+		case keTokelau: box->SetBounds(-172.50033, -9.381111, 0.0, -171.21142, -8.553614, 0.0); break;
+		case keTonga: box->SetBounds(-175.68472, -21.454166, 0.0, -173.90615, -15.56028, 0.0); break;
+		case keTrinidad_and_Tobago: box->SetBounds(-61.924446,  10.037498, 0.0, -60.520561,  11.346109, 0.0); break;
+		case keTunisia: box->SetBounds( 7.491666,  30.23439, 0.0,  11.583332,  37.539444, 0.0); break;
+		case keTurkey: box->SetBounds( 25.663883,  35.817497, 0.0,  44.822762,  42.109993, 0.0); break;
+		case keTurkmenistan: box->SetBounds( 52.440071,  35.141663, 0.0,  66.672485,  42.797775, 0.0); break;
+		case keTurks_and_Caicos_Islands: box->SetBounds(-72.468063,  21.430275, 0.0, -71.127792,  21.957775, 0.0); break;
+		case keTuvalu: box->SetBounds( 176.066376, -8.561292, 0.0,  179.232285, -5.657778, 0.0); break;
+		case keUganda: box->SetBounds( 29.570831, -1.47611, 0.0,  35.00972,  4.222777, 0.0); break;
+		case keUkraine: box->SetBounds( 22.151442,  44.37915, 0.0,  40.179718,  52.379715, 0.0); break;
+		case keUnited_Arab_Emirates: box->SetBounds( 51.583328,  22.633329, 0.0,  56.38166,  26.08416, 0.0); break;
+		case keUruguay: box->SetBounds(-58.438614, -34.948891, 0.0, -53.093056, -30.096668, 0.0); break;
+		case keUS_Virgin_Islands: box->SetBounds(-65.026947,  17.676666, 0.0, -64.560287,  18.377777, 0.0); break;
+		case keUSA: box->SetBounds(-179.14199,  18.923882, 0.0,  179.777466,  71.365814, 0.0); break;
+		case keUzbekistan: box->SetBounds( 55.99749,  37.183876, 0.0,  73.173035,  45.571106, 0.0); break;
+		case keVanuatu: box->SetBounds( 166.516663, -20.254169, 0.0,  170.235229, -13.070555, 0.0); break;
+		case keVenezuela: box->SetBounds(-73.378067,  .648611, 0.0, -59.801392,  12.198889, 0.0); break;
+		case keVietnam: box->SetBounds( 102.140747,  8.558609, 0.0,  109.466377,  23.334721, 0.0); break;
+		case keWallis_and_Futuna: box->SetBounds(-178.1911, -14.323891, 0.0, -176.12109, -13.213614, 0.0); break;
+		case keWestern_Sahara: box->SetBounds(-17.105278,  20.764095, 0.0, -8.666389,  27.666958, 0.0); break;
+		case keYemen: box->SetBounds( 42.555832,  12.10611, 0.0,  54.476944,  18.999344, 0.0); break;
+		case keZambia: box->SetBounds( 21.996387, -18.076126, 0.0,  33.702278, -8.191668, 0.0); break;
+		case keZimbabwe: box->SetBounds( 25.236664, -22.414764, 0.0,  33.073051, -15.616112, 0.0); break;
+		case keGreenwich: box->SetBounds( -0.1, 51.4791 - 0.1, 0.0,  0.1, 51.4791 + 0.1, 0.0); break;
+		case keSiliconValley: box->SetBounds( -122.44, 36.97, 0.0, -122.04, 37.77, 0.0); break;
+	}
+	VARIANT_BOOL vb = this->SetGeographicExtents(box);
+	return box;
+}
+
+// ****************************************************************
+//		GetGeoPosition()
+// ****************************************************************
+bool CMapView::GetGeoPosition(double& x, double& y)
+{
+	double centerX = 0.0;
+	double centerY = 0.0;
+
+	PixelToProjection( m_viewWidth / 2.0,  m_viewHeight / 2.0, centerX, centerY);
+	
+	switch(m_transformationMode)
+	{
+		case tmWgs84Complied:
+			break;
+		case tmDoTransformation:
+			{
+				VARIANT_BOOL vb;
+				IGeoProjection* p = GetMapToWgs84Transform();
+				if (p) {
+					p->Transform(&centerX, &centerY, &vb);
+					if (!vb) {
+						return false;
+					}
+				}
+			}
+			break;
+		case tmNotDefined:
+			return false;
+	}
+	x = centerX;
+	y = centerY;
+	return true;
+}
+
+// ****************************************************************
+//		GetGeoPosition()
+// ****************************************************************
+bool CMapView::SetGeoPosition(double x, double y)
+{
+	double dx = extents.right - extents.left;
+	double dy = extents.top - extents.bottom;
+
+	switch(m_transformationMode)
+	{
+		case tmNotDefined:
+			return false;
+		case tmWgs84Complied:
+			break;
+		case tmDoTransformation:
+			IGeoProjection* p = GetWgs84ToMapTransform();
+			if (p) {
+				VARIANT_BOOL vb;
+				p->Transform(&x, &y, &vb);
+				if (!vb)
+					return false;
+			}
+			else
+				return false;
+	}
+	Extent ext(x - dx/ 2.0, x + dx / 2.0, y - dy / 2.0, y + dy / 2.0);
+	SetExtentsCore(ext, true, false);
+	return true;
+}
+
+// ****************************************************************
+//		Latitude()
+// ****************************************************************
+void CMapView::SetLatitude(float latitude)
+{
+	if (abs(latitude) > 90.0) {
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
+
+	SetGeoPosition(GetLongitude(), latitude);
+}
+
+float CMapView::GetLatitude()
+{
+	double x, y;
+	if (GetGeoPosition(x, y))
+		return (float)y;
+	return 0.0;
+}
+
+// ****************************************************************
+//		Longitude()
+// ****************************************************************
+void CMapView::SetLongitude(float longitude)
+{
+	if (abs(longitude) > 180.0) {
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
+	SetGeoPosition(longitude, GetLatitude());
+}
+float CMapView::GetLongitude()
+{
+	double x, y;
+	if (GetGeoPosition(x, y))
+		return (float)x;
+	return 0.0;
+}
+
+// ****************************************************************
+//		CurrentZoom()
+// ****************************************************************
+void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate) 
+{
+	if (m_transformationMode != tmNotDefined)
+	{
+		if (zoom < 0 || zoom > 25) {
+			ErrorMessage(tkINVALID_DATA_TYPE);
+			return;
+		}
+		int oldZoom;
+		m_tiles->get_CurrentZoom(&oldZoom);
+		if (oldZoom != zoom || forceUpdate) {
+			ZoomToTileLevel(zoom);
+			Redraw();
+		}
+	}
+	else
+	{
+		ErrorMessage(tkMAP_PROJECTION_NOT_SET);
+	}
+}
+void CMapView::SetCurrentZoom(int zoom)
+{
+	SetCurrentZoomCore(zoom, false);
+}
+int CMapView::GetCurrentZoom()
+{
+	if (m_transformationMode != tmNotDefined) {
+		int val;
+		m_tiles->get_CurrentZoom(&val);
+		return val;
+	}
+	else
+		return -1;
+}
+
+// ****************************************************************
+//		TileProvider()
+// ****************************************************************
+void CMapView::SetTileProvider(tkTileProvider provider)
+{
+	tkTileProvider oldProvider = GetTileProvider();
+	if (provider != oldProvider)
+	{
+		if (provider == tkTileProvider::ProviderNone) {
+			m_tiles->put_Visible(VARIANT_FALSE);
+		}
+		else {
+			m_tiles->put_Provider(provider);
+			m_tiles->put_Visible(VARIANT_TRUE);
+		}
+		Redraw();
+	}
+}
+tkTileProvider CMapView::GetTileProvider()
+{
+	VARIANT_BOOL vb;
+	m_tiles->get_Visible(&vb);
+	if (!vb) {
+		return tkTileProvider::ProviderNone;
+	}
+	else
+	{
+		tkTileProvider provider;
+		m_tiles->get_Provider(&provider);
+		return provider;
+	}
+}
+
+// ****************************************************************
+//		SetInitExtents()
+// ****************************************************************
+void CMapView::SetInitGeoExtents() 
+{
+	/*IExtents* box = NULL;
+	GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);	
+	double y = 37.37;
+	double x = -122.04;
+	double delta = 0.4;
+	
+	box->SetBounds( x - delta, y - delta, 0.0, x + delta, y + delta, 0.0);
+	this->SetGeographicExtents(box);
+	box->Release();*/
+	SetKnownExtentsCore(keSiliconValley);
+}
+
+// ****************************************************************
+//		Projection()
+// ****************************************************************
+void CMapView::SetProjection(tkMapProjection projection)
+{
+	if (projection == PROJECTION_CUSTOM)
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return;
+	}
+
+	tkTransformationMode prevMode = m_transformationMode;
+
+	IGeoProjection* p = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	if (p)
+	{
+		VARIANT_BOOL vb;
+		tkMapProjection oldProjection = GetProjection();
+		if(projection != oldProjection) {
+			IExtents* ext = GetGeographicExtents();	// try to preserve extents
+			switch(projection) {
+				case PROJECTION_WGS84:
+					p->SetWgs84(&vb);
+					SetGeoProjection(p);
+					if (prevMode == tmNotDefined)
+						SetInitGeoExtents();
+					break;
+				case PROJECTION_GOOGLE_MERCATOR:
+					p->SetGoogleMercator(&vb);
+					SetGeoProjection(p);
+					if (prevMode == tmNotDefined)
+						SetInitGeoExtents();
+					break;
+				case PROJECTION_NONE:
+					// simply set an empty one
+					SetGeoProjection(p);
+					break;
+			}
+			if (ext) {
+				SetGeographicExtents(ext);
+			}
+			Redraw();
+		}
+	}
+}
+tkMapProjection CMapView::GetProjection()
+{
+	VARIANT_BOOL vb;
+	m_projection->get_IsEmpty(&vb);
+	if (vb) {
+		return PROJECTION_NONE;
+	}
+
+	GetWgs84Projection()->get_IsSame(GetMapProjection(), &vb);
+	if (vb) {
+		return PROJECTION_WGS84;
+	}
+
+	GetGMercProjection()->get_IsSame(GetMapProjection(), &vb);
+	if (vb) {
+		return PROJECTION_GOOGLE_MERCATOR;
+	}
+	return PROJECTION_CUSTOM;
+}
+
+// ****************************************************************
+//		KnownExtents()
+// ****************************************************************
+tkKnownExtents CMapView::GetKnownExtentsCore()
+{
+	if (m_transformationMode != tmNotDefined) {
+		return _knownExtents;
+	}
+	else {
+		return keNone;
+	}
+}
+void CMapView::SetKnownExtentsCore(tkKnownExtents extents)
+{
+	if (m_transformationMode != tmNotDefined) {
+		IExtents* ext = GetKnownExtents(extents);
+		if (ext) {
+			this->SetGeographicExtents(ext);
+			_knownExtents = extents;
+			ext->Release();
+		}
+	}
+	else {
+		ErrorMessage(tkMAP_PROJECTION_NOT_SET);
+	}
+}
+
+// ****************************************************************
+//		CoordinatesDisplay()
+// ****************************************************************
+tkCoordinatesDisplay CMapView::GetShowCoordinates()
+{
+	return _showCoordinates;
+}
+void CMapView::SetShowCoordinates(tkCoordinatesDisplay value)
+{
+	_showCoordinates = value;
+}
+
+// ****************************************************************
+//		GrabProjectionFromData()
+// ****************************************************************
+VARIANT_BOOL CMapView::GetGrabProjectionFromData()
+{
+	return _grabProjectionFromData ? VARIANT_TRUE : VARIANT_FALSE;
+}
+void CMapView::SetGrabProjectionFromData(VARIANT_BOOL value)
+{
+	_grabProjectionFromData = value ? true : false;
 }

@@ -48,11 +48,6 @@ public:
 		_lastErrorCode = tkNO_ERROR;
 		_isValidReason = "";
 		
-		//_useFastMode = false;	// equal to false by default
-		//						// the usage of wrapper can be set through shapefile only;
-		//						// in that case when inserting new shape into the shapefile,
-		//						// point objects will be converted to the wrapper class
-
 		_useFastMode = m_globalSettings.shapefileFastMode;
 		if (m_globalSettings.shapefileFastMode)
 		{
@@ -173,13 +168,16 @@ public:
 	STDMETHOD(ImportFromBinary)(VARIANT bytesArray, VARIANT_BOOL* retVal);
 	STDMETHOD(FixUp)(IShape** retval);
 	STDMETHOD(AddPoint)(double x, double y, long* pointIndex);
-	STDMETHOD(AddPoint2)(double x, double y, double m, long* pointIndex);
-	STDMETHOD(AddPoint3)(double x, double y, double m, double z, long* pointIndex);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
 	STDMETHOD(ImportFromWKT)(BSTR Serialized, VARIANT_BOOL *retVal);
-	STDMETHOD(CopyTo)(IShape* target, VARIANT_BOOL* retVal);
+	STDMETHOD(CopyFrom)(IShape* sourceShape, VARIANT_BOOL* retVal);
 	STDMETHOD(ClosestPoints)(IShape* shape2, IShape** result);
+	STDMETHOD(put_M)(LONG pointIndex, double m, VARIANT_BOOL* retVal);
+	STDMETHOD(put_Z)(LONG pointIndex, double z, VARIANT_BOOL* retVal);
 	
+	STDMETHOD(get_M)(LONG pointIndex, double* m, VARIANT_BOOL* retVal);
+	STDMETHOD(get_Z)(LONG pointIndex, double* z, VARIANT_BOOL* retVal);
+
 	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
 	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);
 	CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld);

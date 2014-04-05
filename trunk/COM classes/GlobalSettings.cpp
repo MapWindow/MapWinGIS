@@ -376,22 +376,6 @@ STDMETHODIMP CGlobalSettings::put_MaxUniqueValuesCountForGridScheme(int newVal)
 }
 
 // ****************************************************
-//	    GrabMapProjectionFromFirstLayer()
-// ****************************************************
-STDMETHODIMP CGlobalSettings::get_GrabMapProjectionFromFirstLayer(VARIANT_BOOL* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.grabMapProjectionFromFirstLayer ? VARIANT_TRUE: VARIANT_FALSE;
-	return S_OK;
-}
-STDMETHODIMP CGlobalSettings::put_GrabMapProjectionFromFirstLayer(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.grabMapProjectionFromFirstLayer = newVal ? true: false;
-	return S_OK;
-}
-
-// ****************************************************
 //	    RandomColorSchemeForGrids()
 // ****************************************************
 STDMETHODIMP CGlobalSettings::get_RandomColorSchemeForGrids(VARIANT_BOOL* pVal)
@@ -468,5 +452,22 @@ STDMETHODIMP CGlobalSettings::put_GeometryEngine(tkGeometryEngine newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.geometryEngine = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    SaveGridColorSchemeToFile
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_SaveGridColorSchemeToFile( VARIANT_BOOL *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.saveGridColorSchemeToFile ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_SaveGridColorSchemeToFile( VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.saveGridColorSchemeToFile = newVal ? true : false;
 	return S_OK;
 }

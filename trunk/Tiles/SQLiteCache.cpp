@@ -26,7 +26,8 @@
 // init static members
 sqlite3 *SQLiteCache::m_conn = NULL;
 bool SQLiteCache::m_locked = false;
-bool SQLiteCache::m_initNeeded = true;
+bool SQLiteCache::_createNeeded = true;
+bool SQLiteCache::_openNeeded = true;
 CStringW SQLiteCache::m_dbName;
 double SQLiteCache::maxSizeDisk = 100.0;
 
@@ -35,22 +36,44 @@ double SQLiteCache::maxSizeDisk = 100.0;
 #define SIZE_TO_CLEAR 2 * 0x1 << 20	 // 20 MB; when overall size of tiles exceeds maximum, tiles will be removed 
 									 // until this amount of memory is freed
 
+
+// ***********************************************************
+//		Initialize()
+// ***********************************************************
+// creates database opens connection
+bool SQLiteCache::Initialize(SqliteOpenMode openMode)
+{
+	section.Lock();
+	switch(openMode)
+	{
+		case SqliteOpenMode::OpenIfExists:
+			// need to open exiting one
+			if (_openNeeded)
+			{
+				CStringW s = get_DbName();
+				if (Utility::fileExistsW(s))
+				{
+					SQLiteCache::CreateDatabase();
+				}
+				_openNeeded = false;
+			}
+			break;
+		case SqliteOpenMode::OpenOrCreate:
+			// need to open or create
+			if (_createNeeded) {
+				SQLiteCache::CreateDatabase();
+				_createNeeded = false;
+			}
+	}
+	section.Unlock();
+	return m_conn != NULL;
+}
+
 // ***********************************************************
 //		get_DbName()
 // ***********************************************************
 CStringW SQLiteCache::get_DbName()
 {
-	if (m_dbName.GetLength() == 0)
-	{
-		wchar_t* path = new wchar_t[MAX_PATH + 1];
-		GetModuleFileNameW(NULL, path, MAX_PATH);
-		CStringW name = Utility::GetFolderFromPath(path);
-		name += L"\\";
-		name += DB_NAME;
-		Debug::WriteLine("Db path: %s", name);
-		delete[] path;
-		m_dbName = name;
-	}
 	return m_dbName;
 }
 
@@ -59,7 +82,6 @@ CStringW SQLiteCache::get_DbName()
 // ***********************************************************
 bool SQLiteCache::set_DbName(CStringW name)
 {
-	// TODO: check the validity of name
 	if (name.MakeLower() != m_dbName.MakeLower())
 	{
 		m_dbName = name;
@@ -69,11 +91,30 @@ bool SQLiteCache::set_DbName(CStringW name)
 }
 
 // ***********************************************************
+//		get_DefaultDbName()
+// ***********************************************************
+CStringW SQLiteCache::get_DefaultDbName()
+{
+	wchar_t* path = new wchar_t[MAX_PATH + 1];
+	GetModuleFileNameW(NULL, path, MAX_PATH);
+	CStringW name = Utility::GetFolderFromPath(path);
+	name += L"\\";
+	name += DB_NAME;
+	delete[] path;
+	return name;
+}
+
+// ***********************************************************
 //		CreateDatabase()
 // ***********************************************************
 bool SQLiteCache::CreateDatabase()
 {
-	CString name = SQLiteCache::get_DbName();
+	if (m_dbName.GetLength() == 0) {
+		m_dbName = get_DefaultDbName();
+	}
+	
+	USES_CONVERSION;
+	CString name = W2A(m_dbName);	// TODO: use Unicode
 	
 	if (m_conn)
 	{
@@ -129,7 +170,8 @@ void SQLiteCache::DoCaching(TileCore* tile)
 	static int addedCount = 0;
 	static int percent = 0;
 
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return;
 	
 	section.Lock();
 
@@ -260,7 +302,9 @@ void SQLiteCache::AutoClear()
 // ***********************************************************
 bool SQLiteCache::get_Exists(BaseProvider* provider, LONG scale, LONG x, LONG y)
 {
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return false;
+
 	const char   *tail;
 	sqlite3_stmt *stmt;
 	bool exists = true;
@@ -305,7 +349,8 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 {
 	TileCore* tile = NULL;
 	
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return NULL;
 
 	section.Lock();
 
@@ -382,7 +427,8 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 // ****************************************************************
 void SQLiteCache::Clear(int providerId, int fromScale, int toScale)
 {
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return;
 	
 	// there is no need to delete from tilesdata table as there is ON CASCADE DELETE rule specified in foreign key constraint
 	// updated: in fact there is a trigger which does the job
@@ -417,7 +463,8 @@ void SQLiteCache::Clear(int providerId, int fromScale, int toScale)
 // ****************************************************************
 double SQLiteCache::get_FileSize() 
 {	
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return 0.0;
 	
 	const char   *tail;
 	sqlite3_stmt *stmt;
@@ -448,7 +495,8 @@ double SQLiteCache::get_FileSize()
 // ****************************************************************
 double SQLiteCache::get_FileSize(tkTileProvider provider, int scale) 
 {
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return 0.0;
 	
 	int size = 0;
 	double result = 0.0;
@@ -496,7 +544,8 @@ double SQLiteCache::get_FileSize(tkTileProvider provider, int scale)
 // ****************************************************************
 int SQLiteCache::get_TileCount(int provider, int zoom, int xMin, int xMax, int yMin, int yMax) 
 {
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return 0;
 
 	const char   *tail;
 	sqlite3_stmt *stmt;
@@ -536,7 +585,8 @@ int SQLiteCache::get_TileCount(int provider, int zoom, int xMin, int xMax, int y
 // ****************************************************************
 bool SQLiteCache::get_TilesXY(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, std::list<CPoint*>& list) 
 {
-	SQLiteCache::Initialize();
+	if(!SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists))
+		return false;
 
 	const char   *tail;
 	sqlite3_stmt *stmt;

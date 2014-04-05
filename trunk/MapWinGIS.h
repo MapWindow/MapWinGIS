@@ -100,12 +100,14 @@ struct GlobalSettingsInfo
 	tkGridProxyFormat gridProxyFormat;
 	double maxNoProxyGridSizeMb;
 	int maxUniqueValuesCount;
-	bool grabMapProjectionFromFirstLayer;
 	bool randomColorSchemeForGrids;
 	PredefinedColorScheme defaultColorSchemeForGrids;
 	tkShapeValidationMode inputValidation;
 	tkShapeValidationMode outputValidation;
 	tkGeometryEngine geometryEngine;
+	bool saveGridColorSchemeToFile;
+	int xmlFileVersion;
+	CString xmlFilenameEncoding;
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
@@ -123,12 +125,14 @@ struct GlobalSettingsInfo
 		maxNoProxyGridSizeMb = 20.0;
 		gridProxyMode = gpmAuto;
 		maxUniqueValuesCount = 100;
-		grabMapProjectionFromFirstLayer = true;
 		randomColorSchemeForGrids = true;
 		defaultColorSchemeForGrids = SummerMountains;
 		inputValidation = tkShapeValidationMode::NoValidation;
 		outputValidation = tkShapeValidationMode::NoValidation;
 		geometryEngine = tkGeometryEngine::engineGeos;
+		saveGridColorSchemeToFile = true;
+		xmlFileVersion = 2;
+		xmlFilenameEncoding = "utf8";
 
 		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
 		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";
@@ -139,6 +143,8 @@ struct GlobalSettingsInfo
 		shortUnitStrings[tkLocalizedStrings::lsSquareMapUnits] = L"sq.mu";
 		shortUnitStrings[tkLocalizedStrings::lsMiles] = L"miles";
 		shortUnitStrings[tkLocalizedStrings::lsFeet] = L"feet";
+		shortUnitStrings[tkLocalizedStrings::lsLatitude] = L"Lat";
+		shortUnitStrings[tkLocalizedStrings::lsLongitude] = L"Lng";
 	}
 	
 	CStringW GetLocalizedString(tkLocalizedStrings s)

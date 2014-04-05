@@ -1676,7 +1676,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 			dbf->get_Field(fld,&testVal);
 			testVal->get_Name(&Testname);
 			strTestname = OLE2A(Testname);
-			if( strTestname.CompareNoCase(strFieldname))
+			if( strTestname.CompareNoCase(strFieldname) == 0)
 			{
 				*pVal = testVal;
 				return S_OK;
@@ -2227,7 +2227,9 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 			CPLAddXMLChild(psTree, psCharts);
 		}
 
+		// ----------------------------------------------------
 		// selection
+		// ----------------------------------------------------
 		long numSelected;
 		this->get_NumSelected(&numSelected);
 		
@@ -2249,7 +2251,37 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 			delete[] selection;
 		}
 
+		// ----------------------------------------------------
+		// serialization of category indices
+		// ----------------------------------------------------
+		bool serializeCategories;
+		for(size_t i = 0; i < _shapeData.size(); i++) {
+			if (_shapeData[i]->category != -1) {
+				serializeCategories = true;
+			}
+		}
+
+		if (serializeCategories) 
+		{
+			s = "";
+			// doing it with CString is ugly of course, better to allocate a buffer
+			CString temp;
+			for(size_t i = 0; i < _shapeData.size(); i++) {
+				temp.Format("%d,", _shapeData[i]->category);
+				s +=  temp;
+			}
+		}
+		
+		// when there are no indices assigned, write an empty node with Count = 0;
+		// to signal, that categories must not be applied automatically (behavior for older versions)
+		CPLXMLNode* nodeCats = CPLCreateXMLElementAndValue(psTree, "CategoryIndices", s.GetBuffer());
+		if (nodeCats) {
+			Utility::CPLCreateXMLAttributeAndValue(nodeCats, "Count", CPLString().Printf("%d", serializeCategories ? _shapeData.size() : 0));
+		}
+
+		// ----------------------------------------------------
 		// table
+		// ----------------------------------------------------
 		if (dbf) {
 			CPLXMLNode* psTable = ((CTableClass*)dbf)->SerializeCore("TableClass");
 			if (psTable) {
@@ -2350,7 +2382,48 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	psChild = CPLGetXMLNode(node, "ShapefileCategoriesClass");
 	if (psChild)
 	{
-		((CShapefileCategories*)m_categories)->DeserializeCore(psChild);
+		((CShapefileCategories*)m_categories)->DeserializeCore(psChild, false);
+	}
+
+	// category indices
+	bool hasIndices = false;
+	CPLXMLNode* nodeCats = CPLGetXMLNode(node, "CategoryIndices");
+
+	if (nodeCats)
+	{
+		CString indices = CPLGetXMLValue(nodeCats, "=CategoryIndices", "");
+		if (indices.GetLength() > 0)
+		{
+			s = CPLGetXMLValue(nodeCats, "Count", "0");
+			long savedCount = atoi(s);
+			int foundCount = 0;
+			char* buffer = indices.GetBuffer();
+			for (int i = 0; i < indices.GetLength(); i++) {
+				if (buffer[i] == ',') {
+					foundCount++;
+				}
+			}
+			
+			if (foundCount == savedCount && foundCount == _shapeData.size())		
+			{
+				int size = _shapeData.size();
+				int pos = 0, count = 0;
+				CString ct;
+				ct = indices.Tokenize(",", pos);
+				while (ct.GetLength() != 0 && count < size)
+				{
+					_shapeData[count]->category = atoi(ct);
+					ct = indices.Tokenize(",", pos);
+					count++;
+				};
+				hasIndices = true;
+			}
+		}
+	}
+	else
+	{
+		// for older versions of file without indices apply previously loaded cats
+		((CShapefileCategories*)m_categories)->ApplyExpressions();
 	}
 
 	// Labels
@@ -2373,7 +2446,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	{
 		this->SelectNone();
 
-		CString s = CPLGetXMLValue(nodeSelection, "TotalCount", "0");
+		s = CPLGetXMLValue(nodeSelection, "TotalCount", "0");
 		long count = atoi(s);
 		s = CPLGetXMLValue(nodeSelection, "=Selection", "");
 		if (s.GetLength() == count && s.GetLength() == _shapeData.size())
@@ -2388,6 +2461,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 			}
 		}
 	}
+	
 
 	// table
 	if (dbf) 

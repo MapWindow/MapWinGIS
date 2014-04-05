@@ -814,8 +814,6 @@ STDMETHODIMP CUtils::put_Key(BSTR newVal)
 	return S_OK;
 }
 
-
-
 STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL InRam, GridFileType GrdFileType, ICallback *cBack, IGrid **retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -3796,7 +3794,7 @@ void CUtils::ErrorMessage(long ErrorCode)
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = BGR_TO_RGB_ALPHA(name);	// used to be BGR_TO_RGB
+	*retVal = BGR_TO_RGB(name);
 	return S_OK;
 }
 
@@ -3908,8 +3906,8 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 			
 			CComVariant var;
 			header->get_NodataValue(&var);
-			float noData;
-			fVal(var, noData);
+			double noData;
+			dVal(var, noData);
 
 			long minRow = MIN(firstRow, lastRow);
 			long maxRow = MAX(firstRow, lastRow);
@@ -3959,7 +3957,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 								row++;
 							}
 							else {
-								((CGrid*)newGrid)->PutRowDouble(row++, vals);
+								newGrid->PutRow2(row++, vals, &vb);
 							}
 						}
 					}
@@ -4564,6 +4562,12 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idField:
 			CoCreateInstance( CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&val );
 			break;
+		case tkInterface::idFieldStatOperations:
+			CoCreateInstance( CLSID_FieldStatOperations, NULL, CLSCTX_INPROC_SERVER, IID_IFieldStatOperations, (void**)&val );
+			break;
+		case tkInterface::idFileManager:
+			CoCreateInstance( CLSID_FileManager, NULL, CLSCTX_INPROC_SERVER, IID_IFileManager, (void**)&val );
+			break;
 		case tkInterface::idGeoProjection:
 			CoCreateInstance( CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&val );
 			break;
@@ -4599,6 +4603,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idLineSegment:
 			CoCreateInstance( CLSID_LineSegment, NULL, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&val );
+			break;
+		case tkInterface::idMeasuring:
+			CoCreateInstance( CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&val );
 			break;
 		case tkInterface::idPoint:
 			CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&val );
@@ -4648,6 +4655,7 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idVector:
 			CoCreateInstance( CLSID_Vector, NULL, CLSCTX_INPROC_SERVER, IID_IVector, (void**)&val );
 			break;
+		
 	}
 
 	*retVal = val ? (IDispatch*)val : NULL;
@@ -4664,8 +4672,6 @@ STDMETHODIMP CUtils::GeodesicDistance(double lat1, double lng1, double lat2, dou
 	const GeographicLib::Geodesic& geod = GeographicLib::Geodesic::WGS84;
 	
 	geod.Inverse(lat1, lng1, lat2, lng2, *retVal);
-	/*double dist;
-	*retVal = dist;*/
 	return S_OK;
 }
 

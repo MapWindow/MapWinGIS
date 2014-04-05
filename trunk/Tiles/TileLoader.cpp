@@ -92,7 +92,8 @@ void LoadingTask::DoTask()
 					else
 					{
 						tiles->AddTileWithCaching(tile);
-						mapView->Invalidate();			// schedule map updated
+						mapView->_canUseMainBuffer = false;
+						mapView->Invalidate();
 						this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
 					}
 					this->busy = false;

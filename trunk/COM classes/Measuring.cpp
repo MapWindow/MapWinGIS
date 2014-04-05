@@ -352,11 +352,11 @@ void CMeasuring::SetMapView(void* mapView)
 
 IGeoProjection* CMeasuring::GetWgs84Projection()
 {
-	return _mapView ? ((CMapView*)_mapView)->m_wgsProjection : NULL;
+	return _mapView ? ((CMapView*)_mapView)->GetWgs84Projection() : NULL;
 }
 IGeoProjection* CMeasuring::GetMapProjection()
 {
-	return _mapView ? ((CMapView*)_mapView)->m_projection : NULL;
+	return _mapView ? ((CMapView*)_mapView)->GetMapProjection() : NULL;
 }
 tkTransformationMode CMeasuring::GetTransformationMode()
 {

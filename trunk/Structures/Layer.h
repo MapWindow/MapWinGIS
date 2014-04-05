@@ -115,8 +115,6 @@ public:
 		if(this->type == ShapefileLayer)
 		{
 			IShapefile * sf = NULL;
-			//this->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			//if (sf != NULL)
 			if (this->QueryShapefile(&sf))
 			{
 				sf->get_Labels(&labels);
@@ -126,8 +124,6 @@ public:
 		else if (this->type == ImageLayer)
 		{
 			IImage * img = NULL;
-			//this->object->QueryInterface(IID_IImage, (void**)&img);
-			//if (img != NULL)
 			if (this->QueryImage(&img))
 			{
 				img->get_Labels(&labels);
