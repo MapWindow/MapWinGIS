@@ -1,21 +1,55 @@
 {\rtf1\ansi\ansicpg1252\deff0\deflang1043\deflangfe1043{\fonttbl{\f0\fswiss\fprq2\fcharset0 Arial;}{\f1\fnil\fcharset0 Courier New;}{\f2\fnil\fcharset2 Symbol;}}
-{\colortbl ;\red0\green0\blue255;}
+{\colortbl ;\red0\green0\blue255;\red192\green80\blue77;\red247\green150\blue70;\red155\green187\blue89;\red75\green172\blue198;\red79\green129\blue189;\red128\green100\blue162;\red255\green192\blue0;\red143\green176\blue140;}
 {\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang1033\b\f0\fs28 What's New in 4.9.1\b0\fs20\par
-\f1 Release date: Not released yet\b\f0\fs24\par
+\f1 Release date: April 6th, 2014\par
+Note: This version is just to test the installer and find any backwards incompatibility.\par
+The last commit number in this release is 74161; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
 \pard\nowidctlpar\li360\b0\fs20\par
-Ended at 74105\par
-\par
+\ul\b Updated API\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 New \cf2\b Grid Members\cf0\b0 : RetrieveColorScheme, GenerateColorScheme, CreateImageProxy, RemoveImageProxy, RetrieveOrGenerateColorScheme, Get/PutRow (overload), Get/PutFloatWindow (overload).\par
+{\pntext\f2\'B7\tab}New \cf2\b Grid Properties\cf0\b0 : PreferedDisplayMode, CanDisplayWithoutProxy, HasValidImageProxy.\par
+{\pntext\f2\'B7\tab}New\cf3\b  Image Properties\cf0\b0 : IsGridProxy, ExternalColorScheme, AllowExternalColorScheme, IsUsingExternalColorScheme, ExternalColorSchemeBandIndex, IsRgb, SourceFilename; \par
+{\pntext\f2\'B7\tab}New\cf3\b  Image Methods\cf0\b0 : OpenAsGrid, SetTransparentColor.\par
+{\pntext\f2\'B7\tab}New \cf4\b GlobalSettings Properties\cf0\b0 : LocalizedString, GridProxyFormat, MaxNoProxyGridSizeMb, GridProxyMode, MaxUniqueValuesCountForGridScheme, GrabMapProjectionFromFirstLayer, RandomColorSchemeForGrids, DefaultColorSchemeForGrids.\par
+{\pntext\f2\'B7\tab}New \cf5\b GridColorScheme Methods\cf0\b0 : ApplyColoringType, ApplyGradientModel (just shortcuts).\par
+{\pntext\f2\'B7\tab}New \cf6\b GeoProjection Methods\cf0\b0 : SetWgs84.\par
+{\pntext\f2\'B7\tab}New \cf6\b GeoProjection Properties\cf0\b0 : IsFrozen.\par
+{\pntext\f2\'B7\tab}New \cf7\b Measuring Properties\cf0\b0 : DisplayAngles.\par
+{\pntext\f2\'B7\tab}New \cf8\b Map Methods\cf0\b0 : Clear, AddLayerFromFilename, Redraw2.\par
+{\pntext\f2\'B7\tab}New \cf8\b Map Properties\cf0\b0 : ScalebarUnits, KnownExtents, ZoomBehavior, ShowCoordinates.\par
+{\pntext\f2\'B7\tab}New \cf8\b Map Events\cf0\b0 : LayersChanges (fires when layers either were added or removed).\par
+{\pntext\f2\'B7\tab}New \cf9\b Extents Methods\cf0\b0 : ToDebugString, PointIsWithin, ToShape.\par
+{\pntext\f2\'B7\tab}New \cf9\b Extents Property\cf0\b0 : Center.\par
+\pard\nowidctlpar\li360\par
 \ul\b TestApplication\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Created a test application to test several methods and show sample code (Paul Meems)\par
 \pard\nowidctlpar\li360\ul\b\par
 General\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Fixed several memory leaks. (Brad Hester)\par
 {\pntext\f2\'B7\tab}Update code as suggested by CppCheck ({\field{\*\fldinst{HYPERLINK "http://cppcheck.sourceforge.net/"}}{\fldrslt{\ul\cf1 http://cppcheck.sourceforge.net/}}}\f0\fs20 ) (Brad Hester)\par
+{\pntext\f2\'B7\tab}Filenames are handled as UTF16 (CStringW) rather than ANSI in significant part of code. Filenames for GDAL datasets and those serialized to XML are passed as UTF8. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Measuring tool will work when no map projection is set. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Better support in .NET PropertyGrid: properties Latitude, Longitude, TileProvider, Projection, CurrentZoom (tiles can rendered in form designer); several properties marked as nonbrowsable. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Serialization of category indices for shapes (so manually assigned categories can be restored as well). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Serialization: default properties for tiles and images won't be serialized, FilenamesEncoding = "utf8" attribute for all XML's written to disk. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Several hotkeys for map ("+" = zoom in; "-" = zoom out; "*" - zoom to closest tile level; "Home" = ZoomToMaxExtents; "Backspace" = zoom to previous extents; "Shift + Left" and "Shift + Right" zoom to the prev/ next layer; "Z" = ZoomIn tool; "M" = measuring tool; "Space" = switches to panning mode). (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\ul\b\par
 Map\ulnone\b0\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for scalebar units, when decimal degrees are used as map units. (Sergei Leschinsky)\par
-{\pntext\f2\'B7\tab}Map.RemoveAllLayers will clear map projection. (Sergei Leschinsky)\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Map.RemoveAllLayers will clear map projection. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Map.ZoomToTileLevel will work when map projection is other than Google Mercator (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Updated Map.VersionNumber property to return file version and its rendering on map (upper right corner). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Map.Clear method to revert to default settings. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Map.AddLayerFromFilename (automatically chooses how to open datasource, as image, as image with grid rendering, or image proxy for grid). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Map.KnownExtents property with list of extents for all countries. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Map.ZoomBehavior with UseTileLevels option to avoid scaling of tiles. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Map.ShowCoordinates: Displaying of coordinates under cursor on map. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Tweaks for drawing buffers: measuring won't flicker on tile painting. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}New Map.Redraw2 methods with tkRedrawType parameter. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\pard\nowidctlpar\li360\ul\b Scalebar\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for scalebar units, when decimal degrees are used as map units. (Sergei Leschinsky)\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Updated scalebar: 3 modes (metric, American, google maps style; Map.ScalebarUnits) + much nicer rendering.  (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Scalebar values from 1 to 10 will be displayed in #.# format, as it turned out they are not necessarily rounded. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Shapefiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Support serialization of in-memory shapefiles. (Sergei Leschinsky)\par
@@ -27,12 +61,23 @@ Map\ulnone\b0\par
 {\pntext\f2\'B7\tab}A fix for polygon layer drawing: per-shape drawing will be used when printing (otherwise there can be SEH exception at some printer drivers when path is too large), also in some cases fill for polyline layers could be drawn. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Spelling error: Shape.Boundry -> Shape.Boundary (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Displaying progress of shapefile validation (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}A fix for Shape.ImportFromWKT (in fact a problem in Shape.CopyFrom) (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Shape.AddPoint overload methods with Z and M parameters are added. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Shapefile validation for geoprocessing operations. The mode can be set by GlobalSettings.ShapeInputValidation, GlobalSettings.ShapeOutputValidation (is off by default). Affects methods taking shapefile as a parameter or returning a shapefile (but not those working on the level of single shapes). When on, will check validity of shapes, try to fix them, and acts according the mode in case of failure. Validation report can be accessed via Shapefile.LastInputValidation, Shapefile.LastOutputValidation. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Field stats calculation of Shapefile.Dissolve and Shapefile.AggregateShapes methods (min, max, sum, average, weighted average, mode). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Displaying progress of shapefile validation. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Grid\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added support for NetCDF. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}A code for handling grid files and grid colour schemes. Migrated from .NET part (MapWindow4). Grids are handled in Map.AddLayer, where an image representation is created for them. Not fully completed, but already somewhat functional. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Double version of Grid.GetFloatWindow/Grid.PutFloatWindow for Utils.ClipGridWithPolygon2. (Sergei Leschinsky)\par
-\pard\nowidctlpar\li360\ul\b\par
+{\pntext\f2\'B7\tab}New API members for grids (choosing of proxy format - BMP/GTiff; creating, removing, checking for valid proxy; configuration of default opening behaviour in GlobalSettings; several grid relalated members in Image class). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}double overloads of Grid.Get/PutRow, Grid.Get/PutFloatWindow to be used in Utils.ClipGridWithPolygon2; regular float version looses precision for long integers;\par
+\pard\nowidctlpar\li360\par
+\pard\nowidctlpar\li360\ul\b Image\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for images opened as grids. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b\par
 Tiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Updated version numbers for some tile providers. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}New Map.TilesLoaded event. Snapshot functions will schedule the loading of tiles in case at least one is missing in cache. TilesLoaded event will be fired afterwards with IsSnapshot = true parameter. Then a snapshot of the same extents with all the tiles can be done. (Sergei Leschinsky)\par
@@ -47,6 +92,9 @@ Tiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Projection for map will be grabbed from the first shapefile layer. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added GeoProjection.Clear method. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added GeoProjection.Clone method. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}It's not allowed to changed GeoProjection set to map, only set a new one (GeoProjection.IsFrozen property).  (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Projection will be grabbed from image and grids in Map.AddLayer not only shapefiles (GlobalSettings.GrabMapProjectionFromFirstLayer - default true). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}GeoProjection.TryAutoDetectEpsg (GDAL implementation; weak now, but can be enhanced over time).\par
 \pard\nowidctlpar\li360\par
 \ul\b Supporting libraries\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720\ulnone\b0 Changed  the build proces so we can use the pre-build binaries from {\field{\*\fldinst{HYPERLINK "http://www.gisinternals.com/sdk/"}}{\fldrslt{\ul\cf1 http://www.gisinternals.com/sdk/}}}\f0\fs20 . We're now using GDAL v1.11, with GEOS v3.4, PROJ4 v##, NetCDF v4.3, LizardTech (MrSID) v9.0, Intergraph/ERDAS (ECW) v5.0 (Tamas Szekeres, Paul Meems)\par
