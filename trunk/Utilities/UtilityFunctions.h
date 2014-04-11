@@ -43,6 +43,7 @@ namespace Utility
 	CStringW GetFolderFromPath(CStringW path);
 	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
+	CStringW GetProxyLegendName(CStringW filename);
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL fileExists(CString filename);	
 

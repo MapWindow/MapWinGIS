@@ -57,6 +57,7 @@ int CloneField(IShapefile* source, IShapefile* target, int fieldIndex, long newF
 			newFieldIndex = numShapes;
 		}
 		target->EditInsertField(newField, &newFieldIndex, NULL, &vb);
+		newField->Release();
 	}
 	return newFieldIndex;
 }

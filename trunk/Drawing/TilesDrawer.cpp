@@ -121,7 +121,7 @@ void CTilesDrawer::DrawTiles(ITiles* cotiles, double pixelsPerMapUnit,
 			// draw grid (debugging)
 			if (drawGrid)
 			{
-				Gdiplus::Pen pen(Gdiplus::Color::Red, 1.0f);
+				Gdiplus::Pen pen(Gdiplus::Color::Orange, 1.0f);
 				pen.SetDashStyle(Gdiplus::DashStyleDash);
 				g->DrawRectangle(&pen, rect);
 			}
@@ -131,10 +131,11 @@ void CTilesDrawer::DrawTiles(ITiles* cotiles, double pixelsPerMapUnit,
 			if (drawText)
 			{
 				CString str;
+				str.Format("x=%d; y=%d", tile->m_tileX, tile->m_tileY);
 				WCHAR* wStr = Utility::StringToWideChar(str);
 				Gdiplus::Font* font = Utility::GetGdiPlusFont("Arial", 14);
 				
-				Gdiplus::SolidBrush brush(Gdiplus::Color::Red);
+				Gdiplus::SolidBrush brush(Gdiplus::Color::Orange);
 				Gdiplus::RectF r((Gdiplus::REAL)rect.X, (Gdiplus::REAL)rect.Y, (Gdiplus::REAL)rect.Width, (Gdiplus::REAL)rect.Height);
 				
 				Gdiplus::StringFormat format;

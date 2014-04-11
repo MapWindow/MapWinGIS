@@ -426,5 +426,12 @@ STDMETHODIMP CMeasuring::put_DisplayAngles(VARIANT_BOOL newVal)
 	return S_OK;
 }
 
-
-	
+// *******************************************************
+//		IsUsingEllipsoid()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_IsUsingEllipsoid(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = GetTransformationMode() != tmNotDefined;
+	return S_OK;
+}

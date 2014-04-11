@@ -32,7 +32,6 @@
 #include "TileLoader.h"
 #include "Extent.h"
 #include "MapWinGIS_i.h"
-//#include "_ITilesEvents_CP.H"
 
 using namespace std;
 
@@ -43,9 +42,7 @@ using namespace std;
 class ATL_NO_VTABLE CTiles :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CTiles, &CLSID_Tiles>,
-	public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>//,
-	//public IConnectionPointContainerImpl<CTiles>,
-	//public CProxy_ITilesEvents<CTiles>
+	public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	#pragma region Constructor/destructor
@@ -196,6 +193,9 @@ public:
 
 	STDMETHOD(get_MaxZoom)(int* retVal);
 	STDMETHOD(get_MinZoom)(int* pVal);
+
+	STDMETHOD(get_ServerProjection)(tkTileProjection* retVal);
+	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
 	#pragma endregion
 
 private:
@@ -227,13 +227,14 @@ private:
 	Extent m_projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
 	bool m_projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
 	CStringW m_logPath;
+	void* mapView;
 
 public:
 	std::vector<TileCore*> m_tiles;
 	BaseProvider* m_provider;
 	
 public:	
-	
+	void Init(void* map) {	mapView = map; }
 	void CTiles::MarkUndrawn();
 	long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop);
@@ -270,10 +271,6 @@ private:
 	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
-public:
-	/*BEGIN_CONNECTION_POINT_MAP(CTiles)
-		CONNECTION_POINT_ENTRY(__uuidof(_ITilesEvents))
-	END_CONNECTION_POINT_MAP()*/
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

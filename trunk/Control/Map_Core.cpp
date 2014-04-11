@@ -495,7 +495,7 @@ void CMapView::ClearLabelFrames()
 		{
 			if (DrawingLayerInVisilbe[i] == j)
 			{
-				isSkip = true;	// skip if this layer is set invisiable
+				isSkip = true;	// skip if this layer is set invisible
 				break;  
 			}
 		}

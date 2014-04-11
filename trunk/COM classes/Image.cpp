@@ -3542,6 +3542,34 @@ STDMETHODIMP CImageClass::get_IsGridProxy(VARIANT_BOOL* retVal)
 }
 
 // ********************************************************
+//     get_GridProxyColorScheme()
+// ********************************************************
+STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+	if (isGridProxy)
+	{
+		CStringW legendName = Utility::GetProxyLegendName(sourceGridName);
+		if (Utility::fileExistsW(legendName))
+		{
+			IGridColorScheme* scheme = NULL;
+			GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
+			VARIANT_BOOL vb;
+			USES_CONVERSION;
+			scheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
+			if (!vb) {
+				scheme->Release();
+			}
+			else {
+				*retVal = scheme;
+			}
+		}
+	}
+	return S_OK;
+}
+
+// ********************************************************
 //     get_GridRendering()
 // ********************************************************
 STDMETHODIMP CImageClass::get_GridRendering(VARIANT_BOOL* retVal)

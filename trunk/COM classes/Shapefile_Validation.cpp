@@ -137,6 +137,7 @@ void CShapefile::ClearValidationList()
 		if (_shapeData[i]->fixedShape)
 		{
 			_shapeData[i]->fixedShape->Release();
+			_shapeData[i]->fixedShape = NULL;
 		}
 	}
 }
@@ -160,6 +161,10 @@ void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status,
 
 	if (_useValidationList)
 	{
+		if (_shapeData[shapeIndex]->fixedShape) {
+			_shapeData[shapeIndex]->fixedShape->Release();
+			_shapeData[shapeIndex]->fixedShape = NULL;
+		}
 		_shapeData[shapeIndex]->status = status;
 		_shapeData[shapeIndex]->fixedShape = shape;
 	}
@@ -183,7 +188,7 @@ HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal)
 {
 	if (_useValidationList)
 	{
-		IShape* shp = _shapeData[shapeIndex]->shape;
+		IShape* shp = _shapeData[shapeIndex]->fixedShape;
 		if (shp) shp->AddRef();
 		*retVal = shp;
 	}

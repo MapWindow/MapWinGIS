@@ -205,6 +205,9 @@ public:
 										  double noDataValue, double* meanValue, double* minValue, double* maxValue, VARIANT_BOOL* retVal);
 	STDMETHOD(GridToImage2)(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, VARIANT_BOOL inRam, ICallback* cBack, IImage ** retval);
 	//STDMETHOD(GridToImageInRam)(IGrid * Grid, IGridColorScheme * ci, ICallback* cBack, IImage ** retval);
+
+	STDMETHOD(ErrorMsgFromObject)(IDispatch * comClass, BSTR* retVal);
+	STDMETHOD(TileProjectionToGeoProjection)(tkTileProjection projection, IGeoProjection** retVal);
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);

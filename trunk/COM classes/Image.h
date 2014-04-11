@@ -296,6 +296,7 @@ public:
 	STDMETHOD(get_SourceFilename)(BSTR* retVal);
 	STDMETHOD(get_SourceGridBandIndex)(int* retVal);
 	STDMETHOD(put_SourceGridBandIndex)(int newVal);
+	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
 
 	//STDMETHOD(LoadBuffer)(double mapMinX, double mapMinY, double mapMaxX, double mapMaxY, double mapUnitsPerScreenPixel, VARIANT_BOOL* retVal);
 	//STDMETHOD(OpenForUpdate)(BSTR ImageFileName, ImageType FileType,  VARIANT_BOOL InRam, ICallback * cBack, VARIANT_BOOL * retval);

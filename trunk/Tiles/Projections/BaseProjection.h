@@ -37,6 +37,7 @@ public:
 	bool projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
 	double earthRadius;
 	bool worldWide;
+	tkTileProjection serverProjection;
 
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
@@ -48,6 +49,7 @@ public:
 		 yInverse = false;
 		 earthRadius = 6378137.0;
 		 worldWide = true;
+		 serverProjection = tkTileProjection::SphericalMercator;
 	};
 	
 	virtual ~BaseProjection() {}

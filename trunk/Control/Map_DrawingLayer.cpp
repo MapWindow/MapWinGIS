@@ -277,7 +277,7 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 		{
 			if (DrawingLayerInVisilbe[i] == j)
 			{
-				isSkip = true;	// skip if this layer is set invisiable
+				isSkip = true;	// skip if this layer is set invisible
 				break;  
 			}
 		}
@@ -1028,18 +1028,18 @@ void CMapView::DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoint
 // *****************************************************************
 //		SetDrawingLayerVisible()
 // *****************************************************************
-void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visiable)
+void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if(!Visiable)
+	if(!Visible)
 	{
 		for (unsigned int i = 0; i < DrawingLayerInVisilbe.size(); i++)
 		{
 			if (DrawingLayerInVisilbe[i] == LayerHandle)
 				break;
 		}
-		//Put the layer into invisiable list
+		//Put the layer into invisible list
 		DrawingLayerInVisilbe.push_back(LayerHandle); 
 	}
 	else
@@ -1048,7 +1048,7 @@ void CMapView::SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visiable)
 		{
 			if (DrawingLayerInVisilbe[i] == LayerHandle)
 			{
-				//Release the layer from invisiable list
+				//Release the layer from invisible list
 				DrawingLayerInVisilbe.erase(DrawingLayerInVisilbe.begin() + i); 
 				break;
 			}

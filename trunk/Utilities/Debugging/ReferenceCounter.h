@@ -15,17 +15,17 @@ public:
 	~ReferenceCounter(void) {};
 	void AddRef(tkInterface type)
 	{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 		int* val = &referenceCounts[(int)type];
 		(*val)++;
-#endif
+//#endif
 	}
 	void Release(tkInterface type)
 	{
-#ifdef _DEBUG		
+//#ifdef _DEBUG		
 		int* val = &referenceCounts[(int)type];
 		(*val)--;
-#endif
+//#endif
 	}
 	void WriteReport();
 };

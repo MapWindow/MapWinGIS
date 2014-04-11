@@ -617,9 +617,9 @@ STDMETHODIMP CShape::ReversePointsOrder(long PartIndex, VARIANT_BOOL* retval)
 	else
 	{
 		CShapeWrapperCOM* shp = (CShapeWrapperCOM*) _shp;
-		std::deque<IPoint* > allPoints = shp->_allPoints;
-		deque<IPoint *>::iterator iter1 = allPoints.begin();
-		deque<IPoint *>::iterator iter2 = allPoints.begin();
+		std::deque<IPoint* >* allPoints = &shp->_allPoints;
+		deque<IPoint *>::iterator iter1 = allPoints->begin();
+		deque<IPoint *>::iterator iter2 = allPoints->begin();
 		iter1 +=beg_part;
 		iter2 +=end_part;
 		reverse( iter1, iter2);

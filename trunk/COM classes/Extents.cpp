@@ -189,7 +189,6 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 	for (long i = 0; i<=4; i++)
 	{
 		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
 
 		if (i == 0 || i ==4)
 		{	
@@ -198,8 +197,9 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 		}
 		else if (i ==1)
 		{
-			pnt->put_X(this->xmax);
-			pnt->put_Y(this->ymin);
+			pnt->put_X(this->xmin);
+			pnt->put_Y(this->ymax);
+			
 		}
 		else if (i ==2)
 		{
@@ -208,8 +208,8 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 		}
 		else if (i ==3)
 		{
-			pnt->put_X(this->xmin);
-			pnt->put_Y(this->ymax);
+			pnt->put_X(this->xmax);
+			pnt->put_Y(this->ymin);
 		}
 
 		shp->InsertPoint(pnt, &i, &vbretval);

@@ -5004,3 +5004,302 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 	}
 	return S_OK;
 }
+
+// ********************************************************
+//     ErrorMsgFromObject()
+// ********************************************************
+STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (!comClass)
+	{
+		ErrorMsg(tkUNEXPECTED_NULL_PARAMETER);
+		*retVal = A2BSTR("");
+		return S_FALSE;
+	}
+	long errorCode;
+
+	//IChart* Chart = NULL;
+	//IChartField* ChartField = NULL;
+
+	ICharts* Charts = NULL;
+	comClass->QueryInterface(IID_ICharts, (void**)(&Charts));
+	if (Charts) 
+	{
+		Charts->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Charts->Release();
+	}
+
+	IColorScheme* ColorScheme = NULL;
+	comClass->QueryInterface(IID_IColorScheme, (void**)(&ColorScheme));
+	if (ColorScheme) 
+	{
+		ColorScheme->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ColorScheme->Release();
+	}
+
+	IESRIGridManager* ESRIGridManager = NULL;
+	comClass->QueryInterface(IID_IESRIGridManager, (void**)(&ESRIGridManager));
+	if (ESRIGridManager) 
+	{
+		ESRIGridManager->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ESRIGridManager->Release();
+	}
+
+	//IExtents* Extents = NULL;
+
+	IField* Field = NULL;
+	comClass->QueryInterface(IID_IField, (void**)(&Field));
+	if (Field) 
+	{
+		Field->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Field->Release();
+	}
+
+	IGeoProjection* GeoProjection = NULL;
+	comClass->QueryInterface(IID_IGeoProjection, (void**)(&GeoProjection));
+	if (GeoProjection) 
+	{
+		GeoProjection->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		GeoProjection->Release();
+	}
+
+	//IGlobalSettings* GlobalSettings = NULL;
+	
+	IGrid* Grid = NULL;
+	comClass->QueryInterface(IID_IGrid, (void**)(&Grid));
+	if (Grid) 
+	{
+		Grid->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Grid->Release();
+	}
+
+	IGridColorBreak* GridColorBreak = NULL;
+	comClass->QueryInterface(IID_IGridColorBreak, (void**)(&GridColorBreak));
+	if (GridColorBreak) 
+	{
+		GridColorBreak->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		GridColorBreak->Release();
+	}
+
+	IGridColorScheme* GridColorScheme = NULL;
+	comClass->QueryInterface(IID_IGridColorScheme, (void**)(&GridColorScheme));
+	if (GridColorScheme) 
+	{
+		GridColorScheme->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		GridColorScheme->Release();
+	}
+
+	IGridHeader* GridHeader = NULL;
+	comClass->QueryInterface(IID_IGridHeader, (void**)(&GridHeader));
+	if (GridHeader) 
+	{
+		GridHeader->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		GridHeader->Release();
+	}
+
+	IImage* Image = NULL;
+	comClass->QueryInterface(IID_IImage, (void**)(&Image));
+	if (Image) 
+	{
+		Image->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Image->Release();
+	}
+
+	//ILabelCategory* LabelCategory = NULL;
+
+	ILabels* Labels = NULL;
+	comClass->QueryInterface(IID_ILabels, (void**)(&Labels));
+	if (Labels) 
+	{
+		Labels->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Labels->Release();
+	}
+
+	ILinePattern* LinePattern = NULL;
+	comClass->QueryInterface(IID_ILinePattern, (void**)(&LinePattern));
+	if (LinePattern) 
+	{
+		LinePattern->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		LinePattern->Release();
+	}
+
+	//ILineSegment* LineSegment = NULL;
+
+	//IMeasuring* Measuring = NULL;
+
+	IPoint* Point = NULL;
+	comClass->QueryInterface(IID_IPoint, (void**)(&Point));
+	if (Point) 
+	{
+		Point->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Point->Release();
+	}
+
+	IShape* Shape = NULL;
+	comClass->QueryInterface(IID_IShape, (void**)(&Shape));
+	if (Shape) 
+	{
+		Shape->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Shape->Release();
+	}
+
+	IShapeDrawingOptions* ShapeDrawingOptions = NULL;
+	comClass->QueryInterface(IID_IShapeDrawingOptions, (void**)(&ShapeDrawingOptions));
+	if (ShapeDrawingOptions) 
+	{
+		ShapeDrawingOptions->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ShapeDrawingOptions->Release();
+	}
+
+	IShapefile* Shapefile = NULL;
+	comClass->QueryInterface(IID_IShapefile, (void**)(&Shapefile));
+	if (Shapefile) 
+	{
+		Shapefile->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Shapefile->Release();
+	}
+
+	IShapefileCategories* ShapefileCategories = NULL;
+	comClass->QueryInterface(IID_IShapefileCategories, (void**)(&ShapefileCategories));
+	if (ShapefileCategories) 
+	{
+		ShapefileCategories->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ShapefileCategories->Release();
+	}
+
+	//IShapefileCategory* ShapefileCategory = NULL;
+
+	//IShapefileColorBreak* ShapefileColorBreak = NULL;
+
+	IShapefileColorScheme* ShapefileColorScheme = NULL;
+	comClass->QueryInterface(IID_IShapefileColorScheme, (void**)(&ShapefileColorScheme));
+	if (ShapefileColorScheme) 
+	{
+		ShapefileColorScheme->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ShapefileColorScheme->Release();
+	}
+
+	IShapeNetwork* ShapeNetwork = NULL;
+	comClass->QueryInterface(IID_IShapeNetwork, (void**)(&ShapeNetwork));
+	if (ShapeNetwork) 
+	{
+		ShapeNetwork->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		ShapeNetwork->Release();
+	}
+
+	ITable* Table = NULL;
+	comClass->QueryInterface(IID_ITable, (void**)(&Table));
+	if (Table) 
+	{
+		Table->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Table->Release();
+	}
+
+	ITileProviders* TileProviders = NULL;
+	comClass->QueryInterface(IID_ITileProviders, (void**)(&TileProviders));
+	if (TileProviders) 
+	{
+		TileProviders->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		TileProviders->Release();
+	}
+
+	ITin* Tin = NULL;
+	comClass->QueryInterface(IID_ITin, (void**)(&Tin));
+	if (Tin) 
+	{
+		Tin->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Tin->Release();
+	}
+
+	IUtils* Utils = NULL;
+	comClass->QueryInterface(IID_IUtils, (void**)(&Utils));
+	if (Utils) 
+	{
+		Utils->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Utils->Release();
+	}
+
+	IVector* Vector = NULL;
+	comClass->QueryInterface(IID_IVector, (void**)(&Vector));
+	if (Vector) 
+	{
+		Vector->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		Vector->Release();
+	}
+
+	IFileManager* FileManager = NULL;
+	comClass->QueryInterface(IID_IFileManager, (void**)(&FileManager));
+	if (FileManager) 
+	{
+		FileManager->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		FileManager->Release();
+	}
+
+	//IShapeValidationInfo* ShapeValidationInfo = NULL;
+
+	IFieldStatOperations* FieldStatOperations = NULL;
+	comClass->QueryInterface(IID_IFieldStatOperations, (void**)(&FieldStatOperations));
+	if (FieldStatOperations) 
+	{
+		FieldStatOperations->get_LastErrorCode(&errorCode);
+		get_ErrorMsg(errorCode, retVal);
+		FieldStatOperations->Release();
+	}
+
+	if (*retVal == A2BSTR(""))
+	{
+		*retVal = A2BSTR("Unknown class");
+		return S_FALSE;
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     TileProjectionToGeoProjection()
+// ********************************************************
+STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, IGeoProjection** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	IGeoProjection* gp = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+	VARIANT_BOOL vb;
+
+	switch(projection)
+	{
+		case tkTileProjection::SphericalMercator:
+			gp->SetGoogleMercator(&vb);
+			break;
+		case tkTileProjection::Amersfoort:
+			gp->ImportFromProj4(A2BSTR("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs"), &vb);
+			break;
+	}
+	*retVal = gp;
+	return S_OK;
+}

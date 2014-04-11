@@ -135,15 +135,7 @@ public:
 	{
 		if (filename.GetLength() == 0)
 			filename = GetFilename();
-		
-		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
-		switch(format) {
-			case gpfTiffProxy:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.tif.mwleg";
-			case gpfBmpProxy:
-			default:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.bmp.mwleg";
-		}
+		return Utility::GetProxyLegendName(filename);
 	}
 
 	CStringW GetProxyName(CStringW filename = "")

@@ -44,7 +44,7 @@ void ChooseScalebarUnits(tkUnitsOfMeasure sourceUnits, tkUnitsOfMeasure& targetU
 		if (distance < 1)
 		{
 			targetUnits = umFeets;
-			unitsPerPixel *= 5280.0;		// feets in mile
+			unitsPerPixel *= 5280.0;		// feet in mile
 			distance *= 5280.0;
 		}
 	}

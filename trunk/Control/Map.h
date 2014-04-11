@@ -623,6 +623,11 @@ protected:
 	afx_msg void SetGrabProjectionFromData(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetGrabProjectionFromData();
 
+	afx_msg VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
+	afx_msg VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
+	afx_msg VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+	afx_msg VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+
 	//}}AFX_DISPATCH
 	DECLARE_DISPATCH_MAP()
 #pragma endregion
@@ -672,6 +677,11 @@ public:
 #pragma region DispatchAndEventIds
 public:
 enum {		//{{AFX_DISP_ID(CMapView)
+	
+	dispidDegreesToPixel = 225L,
+	dispidPixelToDegrees = 224L,
+	dispidDegreesToProj = 223L,
+	dispidProjToDegrees = 222L,
 	dispidGrabProjectionFromData = 221L,
 	dispidRedraw2 = 220L,
 	dispidShowCoordinates = 219L,
@@ -965,7 +975,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	//Draw Layers
 	std::deque<long> m_activeDrawLists;
 	std::deque<DrawList *> m_allDrawLists;
-	std::deque<long> DrawingLayerInVisilbe; //stores all the invisiable layer handles
+	std::deque<long> DrawingLayerInVisilbe; //stores all the invisible layer handles
 	long m_currentDrawing;					//current Drawing
 
 	//Extents
@@ -1121,7 +1131,7 @@ protected:
 									  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
 
 	void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
-	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visiable);
+	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
 	
 	void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
 	bool IsValidDrawList(long listHandle);

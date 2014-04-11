@@ -58,6 +58,7 @@ public:
 			_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
 		}
 		gReferenceCounter.AddRef(tkInterface::idShape);
+		Debug::WriteLine("Shape created");
 	}
 	
 	// destructor
@@ -83,6 +84,7 @@ public:
 			_globalCallback->Release();
 		}
 		gReferenceCounter.Release(tkInterface::idShape);
+		Debug::WriteLine("Shape deleted");
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

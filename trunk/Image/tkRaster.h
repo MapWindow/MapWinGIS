@@ -183,7 +183,7 @@ public:
 	}
 	void ApplyCustomColorScheme(IGridColorScheme * scheme)
 	{
-		Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&customColorScheme, false);
+		Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&customColorScheme, true);
 	}
 	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 	{

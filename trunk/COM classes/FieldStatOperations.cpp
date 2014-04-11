@@ -60,7 +60,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldIndex(int index, int* retVal)
 	}
 	else
 	{
-		*retVal = _operations[index]->hasName ?  -1 : _operations[index]->fieldIndex;
+		*retVal = _operations[index]->fieldIndex;
 	}
 	return S_OK;
 };
@@ -78,7 +78,7 @@ STDMETHODIMP CFieldStatOperations::get_FieldName(int index, BSTR* retVal)
 	}
 	else
 	{
-		*retVal = _operations[index]->hasName ? W2BSTR(_operations[index]->fieldName) :  A2BSTR("");
+		*retVal = W2BSTR(_operations[index]->fieldName);
 	}
 	return S_OK;
 };

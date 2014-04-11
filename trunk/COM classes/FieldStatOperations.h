@@ -16,6 +16,12 @@ struct FieldOperation
 	bool valid;
 	FieldType targetFieldType;
 	tkFieldOperationValidity isValidReason;
+
+	FieldOperation()
+	{
+		fieldIndex = -1;
+		fieldName = L"";
+	}
 };
 
 // CFieldStatOperations

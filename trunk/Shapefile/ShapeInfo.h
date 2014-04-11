@@ -52,7 +52,7 @@ struct ShapeData
 			geosGeom = NULL;
 		}
 
-		if (status == ShapeValidationStatus::Fixed && fixedShape)
+		if (/*status == ShapeValidationStatus::Fixed &&*/ fixedShape)
 		{
 			fixedShape->Release();
 			fixedShape = NULL;

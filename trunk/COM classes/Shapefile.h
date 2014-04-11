@@ -127,8 +127,9 @@ public:
 		m_categories = NULL;
 		m_charts = NULL;
 		m_geoProjection = NULL;
-		_inputValidation = NULL;
-		_outputValidation = NULL;
+		
+		GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
+		GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
 
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_selectDrawOpt);
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_defaultDrawOpt);

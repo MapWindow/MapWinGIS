@@ -109,6 +109,7 @@ public:
 	STDMETHOD(put_Persistent)(VARIANT_BOOL newVal);
 	STDMETHOD(get_DisplayAngles)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_DisplayAngles)(VARIANT_BOOL newVal);
+	STDMETHOD(get_IsUsingEllipsoid)(VARIANT_BOOL* retVal);
 
 	// projection should be specified before any calculations are possible
 	void SetMapView(void* mapView);

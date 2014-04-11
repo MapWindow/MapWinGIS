@@ -167,6 +167,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// ---------------------------------------
 	// drawing of layers
 	// ---------------------------------------
+	bool layersRedraw = false;
 	if ( HasDrawingData(tkDrawingDataAvailable::LayersData) )
 	{
 		if (m_isSnapshot)
@@ -182,6 +183,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 			}
 			else
 			{
+				layersRedraw = true;
 				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(m_layerBitmap);
 				gLayers->Clear(Gdiplus::Color::Transparent);
 				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
@@ -269,8 +271,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// -----------------------------------
 	// redraw time and logo
 	// -----------------------------------
-	DWORD endTick = GetTickCount();
-	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
+	if (layersRedraw && !m_isSnapshot)
+	{
+		DWORD endTick = GetTickCount();
+		this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f);
+	}
 
 	// -------------------------------------------
 	// distance measuring or persisten measuring

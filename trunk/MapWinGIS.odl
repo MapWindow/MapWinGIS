@@ -53,6 +53,19 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+/************************** tkTilesProjectionStatus Enumerations **********************/
+typedef		
+[
+	uuid(DF236F37-6AA9-4d32-98C5-11D1B8A7D166),
+	helpstring("tkTilesProjectionStatus"),
+]
+enum tkTilesProjectionStatus
+{
+	tpsNative = 0,
+	tpsCompatible = 1,
+	tpsEmptyOrInvalid = 2,
+} tkTilesProjectionStatus;
+
 /************************** tkRedrawType Enumerations **********************/
 typedef		
 [
@@ -2791,8 +2804,11 @@ interface IGrid : IDispatch{
 
 		[propget, id(40), helpstring("property HasValidImageProxy")] HRESULT HasValidImageProxy([out, retval] VARIANT_BOOL *retVal);
 
-		[id(41), helpstring("method RetrieveOrGenerateColorScheme")] HRESULT RetrieveOrGenerateColorScheme([in]tkGridSchemeRetrieval retrievalMethod, 
-							[in]tkGridSchemeGeneration generateMethod, [in]PredefinedColorScheme colors, [out, retval]IGridColorScheme** retVal);
+		[id(41), helpstring("method RetrieveOrGenerateColorScheme")] HRESULT RetrieveOrGenerateColorScheme(
+							[in, optional, defaultvalue(gsrAuto)]tkGridSchemeRetrieval retrievalMethod, 
+							[in, optional, defaultvalue(gsgGradient)]tkGridSchemeGeneration generateMethod, 
+							[in, optional, defaultvalue(FallLeaves)]PredefinedColorScheme colors, 				
+							[out, retval]IGridColorScheme** retVal);
 
 		[id(42), helpstring("property GetFloatWindow2")] HRESULT GetFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
@@ -2988,6 +3004,7 @@ interface IImage : IDispatch{
 	[propget, id(84), helpstring("property SourceFilename")] HRESULT SourceFilename([out, retval]BSTR *retVal);
 	[propget, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([out, retval] int* pVal);
 	[propput, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([in] int newVal);
+	[propget, id(86), helpstring("property GridProxyColorScheme")] HRESULT GridProxyColorScheme([out, retval] IGridColorScheme** retVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -3526,6 +3543,9 @@ interface IUtils : IDispatch{
 
 	[id(46), helpstring("method GridToImage2")] HRESULT GridToImage2([in]IGrid * grid, [in]IGridColorScheme * ci, [in]tkGridProxyFormat imageFormat, [in]VARIANT_BOOL inRam, [in]ICallback* cBack, [out,retval]IImage ** retVal);
 	//[id(47), helpstring("method GridToImageInRam")] HRESULT GridToImageInRam([in]IGrid * grid, [in]IGridColorScheme * ci, [in]ICallback* cBack, [out,retval]IImage ** retVal);
+	[id(48), helpstring("method ErrorMsgFromObject")] HRESULT ErrorMsgFromObject([in]IDispatch * comClass, [out, retval]BSTR* retVal);
+	[id(49), helpstring("method TileProjectionToGeoProjection")] HRESULT TileProjectionToGeoProjection(
+		[in]tkTileProjection projection, [out, retval]IGeoProjection** retVal);
 };
 
 /****************************  Vector Interface ***********************/
@@ -3589,8 +3609,7 @@ interface IGridColorScheme : IDispatch{
 	[id(18), helpstring("method InsertAt")] HRESULT InsertAt([in] int Position, [in] IGridColorBreak *Break);
 	[id(19), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(20), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
-	// TODO: set default nodeName
-	[id(21), helpstring("property ReadFromFile")] HRESULT ReadFromFile([in]BSTR mwlegFilename, [in]BSTR nodeName, [out,retval]VARIANT_BOOL* retVal);
+	[id(21), helpstring("property ReadFromFile")] HRESULT ReadFromFile([in]BSTR mwlegFilename, [in, optional, defaultvalue("GridColoringScheme")]BSTR nodeName, [out,retval]VARIANT_BOOL* retVal);
 	[id(22), helpstring("property WriteToFile")] HRESULT WriteToFile([in]BSTR mwlegFilename, [in, defaultvalue("")]BSTR gridName, [in, defaultvalue(1)]int bandIndex, [out, retval]VARIANT_BOOL* retVal);
 	[id(23), helpstring("property ApplyColoringType")] HRESULT ApplyColoringType([in]ColoringType coloringType);
 	[id(24), helpstring("property ApplyGradientModel")] HRESULT ApplyGradientModel([in]GradientModel gradientModel);
@@ -4629,7 +4648,8 @@ interface IGeoProjection : IDispatch{
 	[propget, id(24), helpstring("property ProjectionName")] HRESULT ProjectionName([out, retval] BSTR* pVal);
 	[propget, id(25), helpstring("property GeogCSName")] HRESULT GeogCSName([out, retval] BSTR* pVal);
 	[propget, id(26), helpstring("property GeogCSParam")] HRESULT GeogCSParam([in] tkGeogCSParameter name, [in]DOUBLE* pVal, [out, retval]VARIANT_BOOL* retVal);
-	[id(27), helpstring("method SetGeographicCS")] HRESULT SetGeographicCS([in] tkCoordinateSystem coordinateSystem);
+	// it's a duplicate of SetWellKnownGeogCS
+	//[id(27), helpstring("method SetGeographicCS")] HRESULT SetGeographicCS([in] tkCoordinateSystem coordinateSystem);
 	[id(28), helpstring("method SetWgs84Projection")] HRESULT SetWgs84Projection([in] tkWgs84Projection Projection);
 	[id(29), helpstring("method SetNad83Projection")] HRESULT SetNad83Projection([in] tkNad83Projection Projection);
 	[propget, id(30), helpstring("property IsSame")] HRESULT IsSameExt([in] IGeoProjection* proj, [in] IExtents* bounds, 
@@ -4790,18 +4810,16 @@ interface ITiles : IDispatch{
 
 	[id(41), helpstring("")] HRESULT StartLogRequests([in]BSTR Filename, [in, defaultvalue(FALSE)]VARIANT_BOOL errorsOnly, [out, retval]VARIANT_BOOL* retVal);
 	[id(42), helpstring("")] HRESULT StopLogRequests();
-
 	[propget, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [out, retval]long* retVal);
 	[propput, id(43), helpstring("")] HRESULT SleepBeforeRequestTimeout( [in]long newVal);
-
 	[propget, id(44), helpstring("")] HRESULT LogFilename( [out, retval]BSTR* retVal);
 	[propget, id(45), helpstring("")] HRESULT LogIsOpened( [out, retval]VARIANT_BOOL* retVal);
-	
 	[propget, id(46), helpstring("")] HRESULT LogErrorsOnly( [out, retval]VARIANT_BOOL* retVal);
 	[propput, id(46), helpstring("")] HRESULT LogErrorsOnly( [in]VARIANT_BOOL newVal);
-
 	[propget, id(47), helpstring("")] HRESULT MaxZoom( [out, retval]int* retVal);
 	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
+	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]tkTileProjection* retVal);
+	[propget, id(50), helpstring("")] HRESULT ProjectionStatus( [out, retval]tkTilesProjectionStatus* retVal);
 };
 
 [
@@ -4820,8 +4838,8 @@ interface ITileProviders : IDispatch{
 										[in]BSTR Name, 
 										[in]BSTR UrlPattern, 
 										[in]tkTileProjection Projection, 
-										[in, optional, defaultvalue(0)]int minZoom, 
-										[in, optional, defaultvalue(17)]int maxZoom,
+										[in, optional, defaultvalue(0)]int MinZoom, 
+										[in, optional, defaultvalue(17)]int MaxZoom,
 										[out,retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("")] HRESULT Id([in] int Index, [out, retval] LONG* retVal);
 	[propget, id(6), helpstring("")] HRESULT Name([in] int Index, [out, retval] BSTR* retVal);
@@ -4854,7 +4872,7 @@ interface IMeasuring : IDispatch{
 	[propget, id(1), helpstring("")] HRESULT Length([out, retval] double* retVal);
 	[propget, id(2), helpstring("")] HRESULT PointCount([out, retval] long* retVal);
 	[id(3), helpstring("")] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
-	[id(4)] HRESULT get_PointXY([in]long pointIndex, [in,out]double* X, [in,out]double* Y, [out, retval]VARIANT_BOOL* retVal);
+	[id(4)] HRESULT get_PointXY([in]long pointIndex, [out]double* X, [out]double* Y, [out, retval]VARIANT_BOOL* retVal);
 	[id(5)] HRESULT get_AreaWithClosingVertex([in]double lastPointProjX, [in]double lastPointProjY, [out,retval]double* retVal);
 	[propget, id(6), helpstring("")] HRESULT MeasuringType([out, retval] tkMeasuringType* retVal);
 	[propput, id(6), helpstring("")] HRESULT MeasuringType([in] tkMeasuringType newVal);
@@ -4866,6 +4884,7 @@ interface IMeasuring : IDispatch{
 	[propput, id(11), helpstring("")] HRESULT Persistent([in] VARIANT_BOOL newVal);
 	[propget, id(12), helpstring("")] HRESULT DisplayAngles([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(12), helpstring("")] HRESULT DisplayAngles([in] VARIANT_BOOL newVal);
+	[propget, id(13), helpstring("")] HRESULT IsUsingEllipsoid([out, retval] VARIANT_BOOL* retVal);
 };
 
 [
@@ -4931,7 +4950,7 @@ interface IFileManager : IDispatch{
 	[propget, id(4), helpstring("IsVectorLayer")] HRESULT IsVectorLayer([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(5), helpstring("OpenStrategy")] HRESULT OpenStrategy([in]BSTR Filename, [out, retval] tkFileOpenStrategy* retVal);
 	[propget, id(6), helpstring("CanOpenAs")] HRESULT CanOpenAs([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [out, retval] VARIANT_BOOL* retVal);
-	[id(7), helpstring("Open")] HRESULT Open([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IDispatch** retVal);
+	[id(7), helpstring("Open")] HRESULT Open([in]BSTR Filename, [in, optional, defaultvalue(fosAutoDetect)]tkFileOpenStrategy openStrategy, [in, optional, defaultvalue(NULL)]ICallback* cBack, [out, retval]IDispatch** retVal);
 	[id(8), helpstring("OpenShapefile")] HRESULT OpenShapefile([in]BSTR Filename, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IShapefile** retVal);
 	[id(9), helpstring("OpenRaster")] HRESULT OpenRaster([in]BSTR Filename, [in]tkFileOpenStrategy openStrategy, [in, defaultvalue(NULL)]ICallback* cBack, [out, retval]IImage** retVal);
 	[propget, id(10), helpstring("IsSupportedBy")] HRESULT IsSupportedBy([in]BSTR Filename, [in]tkSupportType supportType, [out, retval]VARIANT_BOOL* retVal);
@@ -4942,7 +4961,7 @@ interface IFileManager : IDispatch{
 	[propget, id(14), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(14), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[propget, id(15), helpstring("property LastOpenStrategy")] HRESULT LastOpenStrategy([out, retval] tkFileOpenStrategy *pVal);
-	[propget, id(16), helpstring("property LastFilename")] HRESULT LastFilename([out, retval] BSTR *pVal);
+	[propget, id(16), helpstring("property LastOpenFilename")] HRESULT LastOpenFilename([out, retval] BSTR *pVal);
 	[propget, id(17), helpstring("property LastOpenIsSuccess")] HRESULT LastOpenIsSuccess([out, retval] VARIANT_BOOL *pVal);
 	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
@@ -5176,7 +5195,7 @@ library MapWinGIS
 			[id(116), helpstring("method DrawPointEx")] void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
 			[id(117), helpstring("method DrawCircleEx")] void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
 			[id(119), helpstring("method LabelColor")] void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
-			[id(120), helpstring("method SetDrawingLayerVisible")] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visiable);
+			[id(120), helpstring("method SetDrawingLayerVisible")] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
 			[id(121), helpstring("method ClearDrawingLabels")] void ClearDrawingLabels(long drawHandle);
 			[id(122), helpstring("method DrawingFont")] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
 			[id(123), helpstring("method AddDrawingLabelEx")] void AddDrawingLabelEx(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
@@ -5299,6 +5318,10 @@ library MapWinGIS
 			[id(220)] void Redraw2(tkRedrawType redrawType);
 			[id(221), propput] void GrabProjectionFromData(VARIANT_BOOL nNewValue);
 			[id(221), propget] VARIANT_BOOL GrabProjectionFromData();
+			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
+			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
+			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+			[id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
 			//}}AFX_ODL_METHOD
 	};
 

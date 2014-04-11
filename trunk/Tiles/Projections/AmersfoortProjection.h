@@ -50,5 +50,7 @@ public:
 		projCustom->StartTransform(projWGS84, &ret2);
 		if (!ret2)
 			Debug::WriteLine("Failed to initialize transformation 2");
+
+		serverProjection = tkTileProjection::Amersfoort;
 	}
 };

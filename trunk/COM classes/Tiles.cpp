@@ -1667,3 +1667,53 @@ STDMETHODIMP CTiles::get_MinZoom(int* retVal)
 	*retVal = m_provider->minZoom;
 	return S_OK;
 }
+
+// ************************************************************
+//		ServerProjection
+// ************************************************************
+STDMETHODIMP CTiles::get_ServerProjection(tkTileProjection* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	BaseProjection* p = m_provider->Projection;
+	*retVal = p ? p->serverProjection : tkTileProjection::SphericalMercator;
+	return S_OK;
+}
+
+// ************************************************************
+//		ProjectionStatus
+// ************************************************************
+STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = tkTilesProjectionStatus::tpsEmptyOrInvalid;
+
+	CMapView* map = ((CMapView*)this->mapView);
+	if (map) {
+		IGeoProjection* gp = map->GetMapProjection();
+		IGeoProjection* gpServer = NULL;
+		GetUtils()->TileProjectionToGeoProjection(m_provider->Projection->serverProjection, &gpServer);
+		if (gp && gpServer)
+		{
+			VARIANT_BOOL vb;
+			gp->get_IsSame(gpServer, &vb);
+			if (vb) {
+				*retVal = tkTilesProjectionStatus::tpsNative;
+			}
+			else
+			{
+				if (gpServer->StartTransform(gp, &vb))
+				{
+					*retVal = tkTilesProjectionStatus::tpsCompatible;
+					gpServer->StopTransform();
+				}
+			}
+		}
+
+		if (gpServer)
+		{
+			gpServer->Release();
+			gpServer = NULL;
+		}
+	}
+	return S_OK;
+}

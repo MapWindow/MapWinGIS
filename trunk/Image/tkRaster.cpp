@@ -300,8 +300,6 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		adfMinMax[0] = dfMin;
 		adfMinMax[1] = dfMax;
 
-		
-
 		/*********************** END OF INITIALISING ************************************/
 		
 		retVal = true;
@@ -312,8 +310,6 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		AfxMessageBox("Exception in LoadRaster function");
 		retVal = false;
 	}
-
-	
 
 	return retVal;
 }

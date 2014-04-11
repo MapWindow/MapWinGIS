@@ -3099,6 +3099,7 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 
 		VARIANT_BOOL retval = VARIANT_TRUE;
 		shp->get_IsValid(&retval);
+		shp->Release();
 		if (retval == VARIANT_FALSE)
 		{
 			*result = VARIANT_TRUE;

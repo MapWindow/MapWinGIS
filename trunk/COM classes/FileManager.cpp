@@ -5,8 +5,6 @@
 #include "GridManager.h"
 #include "Grid.h"
 
-
-
 //***********************************************************************
 //*		get/put_Key()
 //***********************************************************************
@@ -170,18 +168,18 @@ STDMETHODIMP CFileManager::get_IsSupported(BSTR Filename, VARIANT_BOOL* retVal)
 STDMETHODIMP CFileManager::get_LastOpenStrategy(tkFileOpenStrategy* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _lastStrategy;
+	*retVal = _lastOpenStrategy;
 	return S_OK;
 }
 
 //****************************************************************
-//			get_LastFilename()
+//			get_LastOpenFilename()
 //****************************************************************
-STDMETHODIMP CFileManager::get_LastFilename(BSTR* retVal)
+STDMETHODIMP CFileManager::get_LastOpenFilename(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retVal = W2BSTR(_lastFilename);
+	*retVal = W2BSTR(_lastOpenFilename);
 	return S_OK;
 }
 
@@ -290,6 +288,10 @@ STDMETHODIMP CFileManager::Open(BSTR Filename, tkFileOpenStrategy openStrategy, 
 		put_GlobalCallback(callback);
 	}
 
+	_lastOpenIsSuccess = false;
+	_lastOpenFilename = Filename;
+	_lastOpenStrategy = openStrategy;
+
 	USES_CONVERSION;
 	if (!Utility::fileExistsW(OLE2W(Filename)))
 	{
@@ -323,6 +325,9 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
 
+	_lastOpenFilename = Filename;
+	_lastOpenStrategy = fosVectorLayer;
+
 	if (callback) {
 		put_GlobalCallback(callback);
 	}
@@ -342,13 +347,17 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 		sf->Open(Filename, m_globalCallback, &vb);
 		if (!vb)
 		{
+			
 			sf->get_LastErrorCode(&m_lastErrorCode);
 			ErrorMessage(m_lastErrorCode);
 			sf->Release();
 			sf = NULL;
 		}
 		else
+		{
+			_lastOpenIsSuccess = true;
 			*retVal = sf;
+		}
 	}
 	return S_OK;
 }
@@ -360,6 +369,9 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
+
+	_lastOpenFilename = Filename;
+	_lastOpenStrategy = openStrategy;
 
 	if (callback) {
 		put_GlobalCallback(callback);
@@ -375,6 +387,9 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 	if (openStrategy == fosAutoDetect) {
 		openStrategy = get_OpenStrategyCore(Filename);
 	}
+
+	_lastOpenStrategy = openStrategy;
+
 	switch(openStrategy) 
 	{
 		case fosNotSupported:
@@ -395,7 +410,10 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						img = NULL;
 					}
 					else
+					{
+						_lastOpenIsSuccess = true;
 						*retVal = img;
+					}
 				}
 			}
 			break;
@@ -409,6 +427,8 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 					// TODO: choose inRam mode
 					grid->Open(Filename, GridDataType::UnknownDataType, VARIANT_FALSE, GridFileType::UseExtension, m_globalCallback, &vb);
 					if (!vb) {
+						grid->get_LastErrorCode(&m_lastErrorCode);
+						ErrorMessage(m_lastErrorCode);
 						grid->Release();
 						grid = NULL;
 					}
@@ -427,10 +447,17 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						IImage* img = NULL;
 						grid->OpenAsImage(scheme, mode, m_globalCallback, &img);
 						
-						// TODO: perhaps use another mode on failure
+						if (!img) {
+							// TODO: perhaps use another mode on failure
+							grid->get_LastErrorCode(&m_lastErrorCode);
+							ErrorMessage(m_lastErrorCode);
+						}
+						else {
+							_lastOpenIsSuccess = true;
+							*retVal = img;
+						}
+						grid->Close(&vb);
 						grid->Release();
-
-						*retVal = img;
 					}
 				}
 			}

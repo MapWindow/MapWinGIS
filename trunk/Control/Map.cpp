@@ -306,6 +306,10 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "ShowCoordinates", dispidShowCoordinates, GetShowCoordinates, SetShowCoordinates, VT_I2)
 	DISP_PROPERTY_EX_ID(CMapView, "GrabProjectionFromData", dispidGrabProjectionFromData, GetGrabProjectionFromData, SetGrabProjectionFromData, VT_I2)
 	DISP_FUNCTION_ID(CMapView, "Redraw2", dispidRedraw2, Redraw2, VT_EMPTY, VTS_I2)
+	DISP_FUNCTION(CMapView, "ProjToDegrees", ProjToDegrees, VT_BOOL, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	DISP_FUNCTION(CMapView, "DegreesToProj", DegreesToProj, VT_BOOL, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	DISP_FUNCTION(CMapView, "PixelToDegrees", PixelToDegrees, VT_BOOL, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
+	DISP_FUNCTION(CMapView, "DegreesToPixel", DegreesToPixel, VT_BOOL, VTS_R8 VTS_R8 VTS_PR8 VTS_PR8)
 	
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP
@@ -501,6 +505,7 @@ void CMapView::Startup()
 	#endif
 
 	GetUtils()->CreateInstance(idTiles, (IDispatch**)&m_tiles);
+	((CTiles*)m_tiles)->Init((void*)this);
 
 	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&m_measuring);
 	

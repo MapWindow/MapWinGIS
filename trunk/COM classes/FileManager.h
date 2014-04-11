@@ -17,9 +17,9 @@ public:
 		m_key = A2BSTR("");
 		m_lastErrorCode = tkNO_ERROR;
 		m_globalCallback = NULL;
-		_lastStrategy = fosAutoDetect;
+		_lastOpenStrategy = fosAutoDetect;
 		_lastOpenIsSuccess = true;
-		_lastFilename = L"";
+		_lastOpenFilename = L"";
 	};
 	~CFileManager()
 	{
@@ -67,15 +67,15 @@ public:
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(get_LastOpenStrategy)(tkFileOpenStrategy* retVal);
-	STDMETHOD(get_LastFilename)(BSTR* retVal);
+	STDMETHOD(get_LastOpenFilename)(BSTR* retVal);
 	STDMETHOD(get_LastOpenIsSuccess)(VARIANT_BOOL* retVal);
 private:
 	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
 	bool NeedProxyForGrid(CStringW filename);
 	
-	tkFileOpenStrategy _lastStrategy;
+	tkFileOpenStrategy _lastOpenStrategy;
 	bool _lastOpenIsSuccess;
-	CStringW _lastFilename;
+	CStringW _lastOpenFilename;
 	CString test;
 	ICallback * m_globalCallback;
 	void ErrorMessage(long ErrorCode);

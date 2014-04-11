@@ -22,7 +22,7 @@ void CMapView::SetLineSeparationFactor(long sepFactor)
 
 long CMapView::GetLineSeparationFactor(void)
 {
-	gReferenceCounter.WriteReport();
+	//gReferenceCounter.WriteReport();
 	// 0 is invalid, since it would result in no adjustments
     if (m_LineSeparationFactor == 0) m_LineSeparationFactor = 3;
 	return m_LineSeparationFactor;

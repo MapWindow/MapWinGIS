@@ -1395,7 +1395,7 @@ IExtents* CMapView::GetKnownExtents(tkKnownExtents extents)
 		case keUnited_Arab_Emirates: box->SetBounds( 51.583328,  22.633329, 0.0,  56.38166,  26.08416, 0.0); break;
 		case keUruguay: box->SetBounds(-58.438614, -34.948891, 0.0, -53.093056, -30.096668, 0.0); break;
 		case keUS_Virgin_Islands: box->SetBounds(-65.026947,  17.676666, 0.0, -64.560287,  18.377777, 0.0); break;
-		case keUSA: box->SetBounds(-179.14199,  18.923882, 0.0,  179.777466,  71.365814, 0.0); break;
+		case keUSA: box->SetBounds(-124.731422,  24.955967, 0.0,  -66.969849,  49.371735, 0.0); break;
 		case keUzbekistan: box->SetBounds( 55.99749,  37.183876, 0.0,  73.173035,  45.571106, 0.0); break;
 		case keVanuatu: box->SetBounds( 166.516663, -20.254169, 0.0,  170.235229, -13.070555, 0.0); break;
 		case keVenezuela: box->SetBounds(-73.378067,  .648611, 0.0, -59.801392,  12.198889, 0.0); break;
@@ -1601,7 +1601,7 @@ void CMapView::SetInitGeoExtents()
 	box->SetBounds( x - delta, y - delta, 0.0, x + delta, y + delta, 0.0);
 	this->SetGeographicExtents(box);
 	box->Release();*/
-	SetKnownExtentsCore(keSiliconValley);
+	SetKnownExtentsCore(keUSA);
 }
 
 // ****************************************************************
@@ -1719,4 +1719,76 @@ VARIANT_BOOL CMapView::GetGrabProjectionFromData()
 void CMapView::SetGrabProjectionFromData(VARIANT_BOOL value)
 {
 	_grabProjectionFromData = value ? true : false;
+}
+
+// ****************************************************************
+//		ProjToDegrees()
+// ****************************************************************
+VARIANT_BOOL CMapView::ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY)
+{
+	*degreesLngX = 0.0;
+	*degreesLatY = 0.0;
+	switch(m_transformationMode)
+	{
+		case tmNotDefined:
+			return VARIANT_FALSE;
+		case tmWgs84Complied:
+			*degreesLngX = projX;
+			*degreesLatY = projY;
+			return VARIANT_TRUE;
+		case tmDoTransformation:
+			IGeoProjection* gp = GetMapToWgs84Transform();
+			VARIANT_BOOL vb;
+			gp->Transform(&projX, &projY, &vb);
+			*degreesLngX = projX;
+			*degreesLatY = projY;
+			return vb;
+	}
+	return VARIANT_FALSE;
+}
+VARIANT_BOOL CMapView::DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY)
+{
+	*projX = 0.0;
+	*projY = 0.0;
+	switch(m_transformationMode)
+	{
+		case tmNotDefined:
+			return VARIANT_FALSE;
+		case tmWgs84Complied:
+			*projX = degreesLngX;
+			*projY = degreesLatY;
+			return VARIANT_TRUE;
+		case tmDoTransformation:
+			IGeoProjection* gp = GetMapToWgs84Transform();
+			VARIANT_BOOL vb;
+			gp->Transform(&degreesLngX, &degreesLatY, &vb);
+			*projX = degreesLngX;
+			*projY = degreesLatY;
+			return vb;
+	}
+	return VARIANT_FALSE;
+}
+
+// ****************************************************************
+//		ProjToDegrees()
+// ****************************************************************
+VARIANT_BOOL CMapView::PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY)
+{
+	*degreesLngX = 0.0;
+	*degreesLatY = 0.0;
+	double projX, projY;
+	PixelToProjection(pixelX,pixelY,projX,projY);
+	return ProjToDegrees(projX, projY, degreesLngX, degreesLatY);
+}
+VARIANT_BOOL CMapView::DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY)
+{
+	*pixelX = 0.0;
+	*pixelY = 0.0;
+	double projX, projY;
+	if (DegreesToProj(degreesLngX, degreesLatY, &projX, &projY ))
+	{
+		ProjectionToPixel(projX,projY,*pixelX,*pixelY);
+		return VARIANT_TRUE;
+	}
+	return VARIANT_FALSE;
 }

@@ -17,6 +17,13 @@ class ATL_NO_VTABLE CShapeValidationInfo :
 public:
 	CShapeValidationInfo()
 	{
+		validationType = tkShapeValidationType::svtInput;
+		validationMode = tkShapeValidationMode::NoValidation;
+		validationStatus = tkShapeValidationStatus::WasntValidated;
+		wereInvalidCount = 0;
+		fixedCount = 0;
+		stillInvalidCount = 0;
+		skippedCount = 0;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEVALIDATIONINFO)

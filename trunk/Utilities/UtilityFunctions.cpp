@@ -509,6 +509,21 @@ namespace Utility
 			return filename + ext;
 		return filename.Left(theDot + 1) + ext;
 	}
+
+	// ****************************************************************** 
+	//		GetProxyLegendName
+	// ****************************************************************** 
+	CStringW GetProxyLegendName(CStringW filename)
+	{
+		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
+		switch(format) {
+			case gpfTiffProxy:
+				return Utility::GetPathWOExtension(filename) + L"_proxy.tif.mwleg";
+			case gpfBmpProxy:
+			default:
+				return Utility::GetPathWOExtension(filename) + L"_proxy.bmp.mwleg";
+		}
+	}
 #pragma endregion
 	
 #pragma region Unit conversion
@@ -1053,6 +1068,9 @@ namespace Utility
 		}
 		return result;
 	}
+
+	
+
 }
 
 namespace Debug
