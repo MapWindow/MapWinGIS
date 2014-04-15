@@ -882,8 +882,8 @@ namespace TestApplication
 
       // Save some settings:
       var providerId = MyAxMap.Tiles.Providers.get_IndexByProviderId(MyAxMap.Tiles.ProviderId);
-      var maxZoom = MyAxMap.Tiles.Providers.get_maxZoom(providerId);
-      var minZoom = MyAxMap.Tiles.Providers.get_minZoom(providerId);
+      var maxZoom = MyAxMap.Tiles.Providers.get_MaxZoom(providerId);
+      var minZoom = MyAxMap.Tiles.Providers.get_MinZoom(providerId);
       const int StartZoom = 10;
       var numFailed = 0;
 
