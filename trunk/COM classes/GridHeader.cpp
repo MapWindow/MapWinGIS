@@ -471,7 +471,7 @@ STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 STDMETHODIMP CGridHeader::put_GeoProjection(IGeoProjection* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)m_geoProjection, false);
+	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&m_geoProjection, false);
 	return S_OK;
 }
 

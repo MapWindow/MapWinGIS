@@ -328,18 +328,18 @@ STDMETHODIMP CGlobalSettings::put_GridProxyFormat(tkGridProxyFormat newVal)
 }
 
 // ****************************************************
-//	    MaxNoProxyGridSizeMb()
+//	    MaxDirectGridSizeMb()
 // ****************************************************
-STDMETHODIMP CGlobalSettings::get_MaxNoProxyGridSizeMb(double* pVal)
+STDMETHODIMP CGlobalSettings::get_MaxDirectGridSizeMb(double* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.maxNoProxyGridSizeMb;
+	*pVal = m_globalSettings.MaxDirectGridSizeMb;
 	return S_OK;
 }
-STDMETHODIMP CGlobalSettings::put_MaxNoProxyGridSizeMb(double newVal)
+STDMETHODIMP CGlobalSettings::put_MaxDirectGridSizeMb(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.maxNoProxyGridSizeMb = newVal;
+	m_globalSettings.MaxDirectGridSizeMb = newVal;
 	return S_OK;
 }
 
@@ -469,5 +469,69 @@ STDMETHODIMP CGlobalSettings::put_SaveGridColorSchemeToFile( VARIANT_BOOL newVal
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.saveGridColorSchemeToFile = newVal ? true : false;
+	return S_OK;
+}
+
+// ****************************************************
+//	    TiffCompression
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_TiffCompression( tkTiffCompression *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.tiffCompression;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_TiffCompression( tkTiffCompression newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.tiffCompression = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    RasterOverviewCreation
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_RasterOverviewCreation( tkRasterOverviewCreation *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.rasterOverviewCreation;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_RasterOverviewCreation( tkRasterOverviewCreation newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.rasterOverviewCreation = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    MinOverviewWidth
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_MinOverviewWidth( int *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.minOverviewWidth;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_MinOverviewWidth( int newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.minOverviewWidth = newVal;
+	return S_OK;
+}
+
+// ****************************************************
+//	    RasterOverviewResampling
+// ****************************************************
+STDMETHODIMP CGlobalSettings::get_RasterOverviewResampling( tkGDALResamplingMethod *retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.rasterOverviewResampling;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_RasterOverviewResampling( tkGDALResamplingMethod newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.rasterOverviewResampling = newVal;
 	return S_OK;
 }

@@ -2564,6 +2564,9 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
+	
+	if (!globalCallback && cBack)
+		Utility::put_ComReference(cBack, (IDispatch**)&globalCallback, false);
 
 	tkGridProxyMode mode = proxyMode;
 	if (mode == gpmAuto)
@@ -2573,69 +2576,34 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 	
 	CStringW gridName = GetFilename().MakeLower();
 
-	bool isRgb = IsRgb();
-
-	tkCanDisplayGridWoProxy canDisplay;
-	this->get_CanDisplayWithoutProxy(&canDisplay);		
-	
-	VARIANT_BOOL hasProxy;
-	this->get_HasValidImageProxy(&hasProxy);
-
-	// user need only noProxy, so return an error if we can't do it
-	// gpmFavourNoProxy can be used to switch to proxy as the last chance option
-	if (mode == gpmNoProxy && canDisplay != cdwYes)		
+	// ---------------------------------------------
+	//	Doing the checks
+	// ---------------------------------------------
+	if (!GdalHelper::CanOpenWithGdal(gridName) && mode == gpmNoProxy)
 	{
 		ErrorMessage(tkCANT_DISPLAY_WO_PROXY);
 		return S_FALSE;
 	}
 
-	if ((canDisplay == cdwYes && (mode == gpmNoProxy || mode == gpmFavourNoProxy)) || 
-		(canDisplay == cdwYes && mode == gpmAuto && !hasProxy) ||
-		(mode == gpmAuto && isRgb && canDisplay != cdwUnsupportedFormat) )
-	{
-		VARIANT_BOOL vb;
-		IImage* img = NULL;
-		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
-		img->Open(OLE2BSTR(gridName), ImageType::USE_FILE_EXTENSION, false, cBack, &vb);
-		if (vb)
-		{
-			*retVal = img;
-			img->_pushSchemetkRaster(scheme, &vb);
-			if (vb){
-				CImageClass* cimg = ((CImageClass*)img);
-				if (cimg)
-				{
-					cimg->sourceGridName = gridName;
-					cimg->isGridProxy = false;
-					
-					// grab transparent color from image and save in color scheme
-					cimg->get_UseTransparencyColor(&vb);
-					if (vb)
-					{
-						OLE_COLOR transparentColor;
-						cimg->get_TransparencyColor(&transparentColor);
-						scheme->put_NoDataColor(transparentColor);
-					}
+	bool needsProxy;
+	bool isRgb = IsRgb();
+	if (mode == gpmAuto && isRgb) {
+		needsProxy = false;
+	}
+	else {
+		needsProxy = GridManager::NeedProxyForGrid(gridName, mode, this);
+	}
 
-					// save the color scheme to open next time
-					CStringW legendName = this->GetLegendName();
-					int bandIndex;
-					this->get_ActiveBandIndex(&bandIndex);
-					if (m_globalSettings.saveGridColorSchemeToFile) {
-						scheme->WriteToFile(W2BSTR(legendName), W2BSTR(GetFilename()), bandIndex, &vb);
-					}
-					
-				}
-				return S_OK;
-			}
-			else {
-				ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
-			}
-		}
+	// ---------------------------------------------
+	//	Opening
+	// ---------------------------------------------
+	if ( !needsProxy)
+	{
+		OpenAsDirectImage(scheme, globalCallback, retVal);
 	}
 	else
 	{
-		if (hasProxy)
+		if (GridManager::HasValidProxy(gridName))
 		{
 			*retVal = OpenImageProxy();
 		}
@@ -2645,6 +2613,56 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 		}
 	}
 	return S_OK;
+}
+
+// ****************************************************************
+//						OpenAsDirectImage()						         
+// ****************************************************************
+void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage** retVal)
+{
+	VARIANT_BOOL vb;
+	IImage* img = NULL;
+	CStringW gridName = GetFilename().MakeLower();
+
+	CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
+	img->Open(OLE2BSTR(gridName), ImageType::USE_FILE_EXTENSION, false, cBack, &vb);
+	if (vb)
+	{
+		*retVal = img;
+		img->_pushSchemetkRaster(scheme, &vb);
+		if (vb){
+			CImageClass* cimg = ((CImageClass*)img);
+			if (cimg)
+			{
+				
+				cimg->sourceGridName = gridName;
+				cimg->isGridProxy = false;
+				
+				// grab transparent color from image and save in color scheme
+				cimg->get_UseTransparencyColor(&vb);
+				if (vb)
+				{
+					OLE_COLOR transparentColor;
+					cimg->get_TransparencyColor(&transparentColor);
+					scheme->put_NoDataColor(transparentColor);
+				}
+
+				// save the color scheme to open next time
+				CStringW legendName = this->GetLegendName();
+				int bandIndex;
+				this->get_ActiveBandIndex(&bandIndex);
+				if (m_globalSettings.saveGridColorSchemeToFile) {
+					scheme->WriteToFile(W2BSTR(legendName), W2BSTR(GetFilename()), bandIndex, &vb);
+				}
+			}
+
+			// let's build overviews for direct grid
+			GdalHelper::BuildOverviewsIfNeeded(gridName, true, globalCallback);
+		}
+		else {
+			ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		}
+	}
 }
 
 // ****************************************************************
@@ -2686,9 +2704,7 @@ bool CGrid::RemoveColorSchemeFile()
 STDMETHODIMP CGrid::RemoveImageProxy(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::RemoveFile(this->GetProxyName());
-	Utility::RemoveFile(this->GetProxyWorldFileName());
-	RemoveColorSchemeFile();
+	GridManager::RemoveImageProxy(GetFilename());
 	return *retVal ? S_OK: S_FALSE;
 }
 
@@ -2711,42 +2727,42 @@ STDMETHODIMP CGrid::put_PreferedDisplayMode(tkGridProxyMode newVal)
 // ****************************************************************
 //			get_CanDisplayWithoutProxy()						         
 // ****************************************************************
-STDMETHODIMP CGrid::get_CanDisplayWithoutProxy(tkCanDisplayGridWoProxy* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CStringW gridName = GetFilename().MakeLower();
-
-	// ignore formats, it seems that almost any grid can be displayed directly, in some way or another
-	//Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
-	//Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil")
-
-	bool gdalFormat = GdalHelper::CanOpenWithGdal(GetFilename());
-
-	if (gdalFormat)
-	{
-		if (IsRgb())
-		{
-			*retVal = cdwYes;
-		}
-		else
-		{
-			if (m_globalSettings.maxNoProxyGridSizeMb <= 0)	{
-				// there is no limitation
-				*retVal = cdwYes;
-			}
-			else
-			{
-				long size = Utility::get_FileSize(gridName) / (0x1 << 20);
-				*retVal = size > m_globalSettings.maxNoProxyGridSizeMb ? cdwSizeLimitation : cdwYes;
-			}
-		}
-	}
-	else
-	{
-		*retVal = cdwUnsupportedFormat;
-	}
-	return S_OK;
-}
+//STDMETHODIMP CGrid::get_CanDisplayWithoutProxy(tkCanDisplayGridWoProxy* retVal)
+//{
+//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+//	CStringW gridName = GetFilename().MakeLower();
+//
+//	// ignore formats, it seems that almost any grid can be displayed directly, in some way or another
+//	//Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
+//	//Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil")
+//
+//	bool gdalFormat = GdalHelper::CanOpenWithGdal(GetFilename());
+//
+//	if (gdalFormat)
+//	{
+//		if (IsRgb())
+//		{
+//			*retVal = cdwYes;
+//		}
+//		else
+//		{
+//			if (m_globalSettings.MaxDirectGridSizeMb <= 0)	{
+//				// there is no limitation
+//				*retVal = cdwYes;
+//			}
+//			else
+//			{
+//				long size = Utility::get_FileSize(gridName) / (0x1 << 20);
+//				*retVal = size > m_globalSettings.MaxDirectGridSizeMb ? cdwSizeLimitation : cdwYes;
+//			}
+//		}
+//	}
+//	else
+//	{
+//		*retVal = cdwUnsupportedFormat;
+//	}
+//	return S_OK;
+//}
 
 // ****************************************************************
 //			CreateImageProxy()						         
@@ -2761,26 +2777,15 @@ STDMETHODIMP CGrid::CreateImageProxy(IGridColorScheme* colorScheme, IImage** ret
 }
 
 // ****************************************************************
-//			get_HasImageProxy()						         
+//			get_HasValidImageProxy()						         
 // ****************************************************************
 STDMETHODIMP CGrid::get_HasValidImageProxy(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CStringW gridFilename = GetFilename();
-	*retVal = HasValidProxy(gridFilename);
+	*retVal = GridManager::HasValidProxy(gridFilename);
 	return S_OK;
 }
-
-// ****************************************************************
-//			HasValidProxy()						         
-// ****************************************************************
-bool CGrid::HasValidProxy(CStringW gridFilename)
-{
-	CStringW proxyName = GetProxyName(gridFilename);
-	CStringW legendName = GetProxyLegendName(gridFilename);
-	return (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
-		    Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
-}	
 
 #pragma region Color scheme
 

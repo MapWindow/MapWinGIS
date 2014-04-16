@@ -21,6 +21,7 @@
 #include "geos_c.h"
 #include "ogr_geometry.h"
 #include <map>
+#include "GlobalSettingsInfo.h"
 #include "Utilities\Debugging\ReferenceCounter.h"
 
 extern const GUID CDECL _tlid;
@@ -79,112 +80,10 @@ public:
 	}
 };
 
-// **********************************************************
-//	GlobalSettingsInfo
-// **********************************************************
-struct GlobalSettingsInfo
-{
-	double minPolygonArea;
-	double minAreaToPerimeterRatio;
-	double clipperGcsMultiplicationFactor;
-	bool shapefileFastMode;
-	double invalidShapesBufferDistance;
-	tkGridProxyMode gridProxyMode;
-	bool shapefileFastUnion;
-	CString gdalErrorMessage;
-	tkCompositingQuality labelsCompositingQuality;
-	tkSmoothingMode labelsSmoothingMode;
-	std::map<tkLocalizedStrings, CStringW> shortUnitStrings;
-	bool zoomToFirstLayer;
-	tkCollisionMode labelsCollisionMode;
-	tkGridProxyFormat gridProxyFormat;
-	double maxNoProxyGridSizeMb;
-	int maxUniqueValuesCount;
-	bool randomColorSchemeForGrids;
-	PredefinedColorScheme defaultColorSchemeForGrids;
-	tkShapeValidationMode inputValidation;
-	tkShapeValidationMode outputValidation;
-	tkGeometryEngine geometryEngine;
-	bool saveGridColorSchemeToFile;
-	int xmlFileVersion;
-	CString xmlFilenameEncoding;
 
-	GlobalSettingsInfo::GlobalSettingsInfo()
-	{
-		labelsCollisionMode = tkCollisionMode::LocalList;
-		minPolygonArea = 1.0;
-		minAreaToPerimeterRatio = 0.0001;
-		clipperGcsMultiplicationFactor = 100000.0;
-		shapefileFastMode = false;
-		invalidShapesBufferDistance = 0.001;
-		shapefileFastUnion = true;
-		labelsCompositingQuality = HighQuality;
-		labelsSmoothingMode = HighQualityMode ;
-		zoomToFirstLayer = true;
-		gridProxyFormat = gpfBmpProxy;
-		maxNoProxyGridSizeMb = 20.0;
-		gridProxyMode = gpmAuto;
-		maxUniqueValuesCount = 100;
-		randomColorSchemeForGrids = true;
-		defaultColorSchemeForGrids = SummerMountains;
-		inputValidation = tkShapeValidationMode::NoValidation;
-		outputValidation = tkShapeValidationMode::NoValidation;
-		geometryEngine = tkGeometryEngine::engineGeos;
-		saveGridColorSchemeToFile = true;
-		xmlFileVersion = 2;
-		xmlFilenameEncoding = "utf8";
-
-		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
-		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";
-		shortUnitStrings[tkLocalizedStrings::lsKilometers] = L"km";
-		shortUnitStrings[tkLocalizedStrings::lsSquareKilometers] = L"sq.km";
-		shortUnitStrings[tkLocalizedStrings::lsSquareMeters] = L"sq.m";
-		shortUnitStrings[tkLocalizedStrings::lsMapUnits] = L"mu";
-		shortUnitStrings[tkLocalizedStrings::lsSquareMapUnits] = L"sq.mu";
-		shortUnitStrings[tkLocalizedStrings::lsMiles] = L"miles";
-		shortUnitStrings[tkLocalizedStrings::lsFeet] = L"feet";
-		shortUnitStrings[tkLocalizedStrings::lsLatitude] = L"Lat";
-		shortUnitStrings[tkLocalizedStrings::lsLongitude] = L"Lng";
-	}
-	
-	CStringW GetLocalizedString(tkLocalizedStrings s)
-	{
-		return shortUnitStrings.find(s) != shortUnitStrings.end() ? shortUnitStrings[s] : L"";
-	}
-
-	double GetMinPolygonArea(IGeoProjection* proj)
-	{
-		VARIANT_BOOL isGeographic;
-		if (proj == NULL)
-			return minPolygonArea;
-
-		proj->get_IsGeographic(&isGeographic);
-		return this->GetMinPolygonArea(isGeographic);
-	}	
-
-	double GetMinPolygonArea(VARIANT_BOOL isGeographic)
-	{
-		if (isGeographic)
-		{
-			return minPolygonArea/ pow(110899.999942, 2.0);	 // degrees to meters
-		}
-		else
-		{
-			return minPolygonArea;
-		}
-	}	
-
-	void SetGdalUtf8(bool turnon)
-	{
-		CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", turnon ? "YES" : "NO");
-	}
-};
 
 extern GlobalSettingsInfo m_globalSettings;
 extern GlobalClassFactory m_factory;
-
-
-
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

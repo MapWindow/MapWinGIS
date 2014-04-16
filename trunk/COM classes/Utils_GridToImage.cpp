@@ -3,6 +3,7 @@
 #include "colour.h"
 #include "Image.h"
 #include "Grid.h"
+#include "GdalHelper.h"
 
 #define MAX_BMP_SIZE_PIXELS 10000000
 
@@ -234,6 +235,10 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 			{
 				WriteWorldFile(WorldFile, imageFile, dx, dy, xll, yll, nrows);
 			}
+		}
+		else 
+		{
+			GdalHelper::BuildOverviewsIfNeeded(imageFile, false, globalCallback);		// built-in overviews
 		}
 	}
 	return S_OK;
@@ -560,6 +565,8 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	
 	if (!inRam)
 	{
+		
+
 		FinalizeAndCloseBitmap(ncols);
 
 		if (rasterDataset != NULL)
@@ -570,10 +577,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 		}
 	}
 
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR("GridToImage"));				
-
-	return;
+	Utility::DisplayProgressCompleted(globalCallback, key);
 }
 
 #pragma region Write disk-based
@@ -595,9 +599,19 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 	if( poDriver == NULL )
 		return;
 
+	bool hasOptions = false;
+	if (format == gpfTiffProxy) {
+		papszOptions = CSLSetNameValue( papszOptions, "COMPRESS", m_globalSettings.GetTiffCompression() );
+		hasOptions = true;
+	}
+
 	m_globalSettings.SetGdalUtf8(true);
 	rasterDataset = poDriver->Create(Utility::ConvertToUtf8(filename), cols, rows, 3, GDT_Byte, papszOptions);
 	m_globalSettings.SetGdalUtf8(false);
+
+	if (hasOptions) {
+		CSLDestroy( papszOptions );
+	}
 
 	if (rasterDataset)
 	{

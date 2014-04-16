@@ -39,7 +39,6 @@
             this.btnClearMap = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.btnOpenShapefile = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label7 = new System.Windows.Forms.Label();
             this.udMaxSizeWoProxy = new System.Windows.Forms.NumericUpDown();
@@ -93,16 +92,8 @@
             this.optDistance = new System.Windows.Forms.RadioButton();
             this.btnStopMeasuring = new System.Windows.Forms.Button();
             this.btnMeasure = new System.Windows.Forms.Button();
-            this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.button3 = new System.Windows.Forms.Button();
-            this.btnDissolve = new System.Windows.Forms.Button();
-            this.btnIdentify = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.btnTestProjection = new System.Windows.Forms.Button();
             this.lblProgress = new System.Windows.Forms.Label();
             this.axMap1 = new AxMapWinGIS.AxMap();
-            this.btnCreateShapefile = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -116,7 +107,6 @@
             this.groupBox7.SuspendLayout();
             this.tabPage4.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -213,7 +203,6 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Location = new System.Drawing.Point(605, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -222,8 +211,6 @@
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.btnCreateShapefile);
-            this.tabPage3.Controls.Add(this.btnOpenShapefile);
             this.tabPage3.Controls.Add(this.groupBox1);
             this.tabPage3.Controls.Add(this.groupBox6);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
@@ -232,16 +219,6 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Open";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // btnOpenShapefile
-            // 
-            this.btnOpenShapefile.Location = new System.Drawing.Point(22, 402);
-            this.btnOpenShapefile.Name = "btnOpenShapefile";
-            this.btnOpenShapefile.Size = new System.Drawing.Size(86, 32);
-            this.btnOpenShapefile.TabIndex = 22;
-            this.btnOpenShapefile.Text = "Open shapefile";
-            this.btnOpenShapefile.UseVisualStyleBackColor = true;
-            this.btnOpenShapefile.Click += new System.EventHandler(this.btnOpenShapefile_Click);
             // 
             // groupBox6
             // 
@@ -789,80 +766,6 @@
             this.btnMeasure.UseVisualStyleBackColor = true;
             this.btnMeasure.Click += new System.EventHandler(this.BtnMeasureClick);
             // 
-            // tabPage5
-            // 
-            this.tabPage5.Controls.Add(this.button3);
-            this.tabPage5.Controls.Add(this.btnDissolve);
-            this.tabPage5.Controls.Add(this.btnIdentify);
-            this.tabPage5.Controls.Add(this.button2);
-            this.tabPage5.Controls.Add(this.button1);
-            this.tabPage5.Controls.Add(this.btnTestProjection);
-            this.tabPage5.Location = new System.Drawing.Point(4, 22);
-            this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(326, 598);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "Tests";
-            this.tabPage5.UseVisualStyleBackColor = true;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(16, 204);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(162, 32);
-            this.button3.TabIndex = 36;
-            this.button3.Text = "Test category serialiation";
-            this.button3.UseVisualStyleBackColor = true;
-            // 
-            // btnDissolve
-            // 
-            this.btnDissolve.Location = new System.Drawing.Point(16, 166);
-            this.btnDissolve.Name = "btnDissolve";
-            this.btnDissolve.Size = new System.Drawing.Size(162, 32);
-            this.btnDissolve.TabIndex = 35;
-            this.btnDissolve.Text = "Dissolve";
-            this.btnDissolve.UseVisualStyleBackColor = true;
-            this.btnDissolve.Click += new System.EventHandler(this.BtnDissolveClick);
-            // 
-            // btnIdentify
-            // 
-            this.btnIdentify.Location = new System.Drawing.Point(16, 128);
-            this.btnIdentify.Name = "btnIdentify";
-            this.btnIdentify.Size = new System.Drawing.Size(162, 32);
-            this.btnIdentify.TabIndex = 34;
-            this.btnIdentify.Text = "TryAutoDetectEpsg";
-            this.btnIdentify.UseVisualStyleBackColor = true;
-            this.btnIdentify.Click += new System.EventHandler(this.button3_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(16, 90);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(162, 32);
-            this.button2.TabIndex = 33;
-            this.button2.Text = "Map.Clear";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(16, 52);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(162, 32);
-            this.button1.TabIndex = 32;
-            this.button1.Text = "AggregateNotValid";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // btnTestProjection
-            // 
-            this.btnTestProjection.Location = new System.Drawing.Point(16, 14);
-            this.btnTestProjection.Name = "btnTestProjection";
-            this.btnTestProjection.Size = new System.Drawing.Size(162, 32);
-            this.btnTestProjection.TabIndex = 30;
-            this.btnTestProjection.Text = "Test GeoProjection.IsFrozen";
-            this.btnTestProjection.UseVisualStyleBackColor = true;
-            this.btnTestProjection.Click += new System.EventHandler(this.BtnTestProjectionClick);
-            // 
             // lblProgress
             // 
             this.lblProgress.AutoSize = true;
@@ -882,16 +785,6 @@
             this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
             this.axMap1.Size = new System.Drawing.Size(588, 579);
             this.axMap1.TabIndex = 23;
-            // 
-            // btnCreateShapefile
-            // 
-            this.btnCreateShapefile.Location = new System.Drawing.Point(114, 402);
-            this.btnCreateShapefile.Name = "btnCreateShapefile";
-            this.btnCreateShapefile.Size = new System.Drawing.Size(108, 32);
-            this.btnCreateShapefile.TabIndex = 23;
-            this.btnCreateShapefile.Text = "Create shapefile";
-            this.btnCreateShapefile.UseVisualStyleBackColor = true;
-            this.btnCreateShapefile.Click += new System.EventHandler(this.btnCreateShapefile_Click);
             // 
             // TestGridForm1
             // 
@@ -923,7 +816,6 @@
             this.tabPage4.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            this.tabPage5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -993,18 +885,9 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.ComboBox cboCoordinates;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TabPage tabPage5;
-        private System.Windows.Forms.Button btnDissolve;
-        private System.Windows.Forms.Button btnIdentify;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button btnTestProjection;
         private AxMapWinGIS.AxMap axMap1;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.ComboBox cboZoomBehavior;
         private System.Windows.Forms.CheckBox chkUseFileManager;
-        private System.Windows.Forms.Button btnOpenShapefile;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button btnCreateShapefile;
     }
 }

@@ -381,8 +381,6 @@ bool tkGridRaster::OpenBand(int bandIndex)
 		hasColorTable = true;
 	}
 
-	Debug::WriteLine("Data type: %d", dataType);
-
 	//Route the image to the right reader
 	//Note: we are assuming here that the data type does not change across bands.
 	//However in some complex formats this is not necessarily the case
@@ -727,7 +725,6 @@ bool tkGridRaster::Close()
 	{
 		if (rasterDataset != NULL)
 		{
-			//GdalHelper::CloseDataset(rasterDataset);
 			delete rasterDataset;
 			rasterDataset=NULL;
 		}

@@ -44,6 +44,7 @@
 #include "Labels.h"
 #include "GridColorScheme.h"
 #include "GdalHelper.h"
+#include "GridManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1157,13 +1158,13 @@ bool CImageClass::WritePPM(CString ImageFile, bool WorldFile, ICallback *cBack)
 // **********************************************************
 bool CImageClass::getFileType(const CStringW ImageFile, ImageType &ft)
 {
-	int _strlen = ImageFile.GetLength();
+	int length = ImageFile.GetLength();
 	int dotpos = ImageFile.ReverseFind('.');
 
 	if(dotpos == -1) return false;
 
 	USES_CONVERSION;
-	CString ext = W2A(ImageFile.Right(_strlen - dotpos - 1));
+	CString ext = W2A(ImageFile.Right(length - dotpos - 1));
 
 	if(ext.CompareNoCase("BMP") == 0)
 	{
@@ -1317,8 +1318,6 @@ bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
 			ReadWorldFile(WorldFileName);
 		}
 	} 
-
-	Debug::WriteLine("dx = %f", dX);
 
 	long val;
 	get_Value( 0, 0, &val );					
@@ -2273,52 +2272,24 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 	}
 	
 	int* overviewList = (int*)OverviewList->pvData;
-	GDALDataset* dataset = _rasterImage->get_Dataset();
-	if (dataset)
+	if (gdalImage)
 	{
-		// choosing algorithm
-		const char* pszResampling;
-		switch(ResamplingMethod)			//"MODE", "AVERAGE_MAGPHASE"
+		GDALDataset* dataset = _rasterImage->get_Dataset();
+		if (dataset)
 		{
-			case grmAverage: 
-				pszResampling = "AVERAGE"; break;
-			case grmBicubic: 
-				pszResampling = "CUBIC"; break;
-			case grmGauss:	
-				pszResampling = "GAUSS"; break;
-			case grmNearest: 
-				pszResampling = "NEAREST"; break;
-			default: 
-				pszResampling = "NONE";
+			if (GdalHelper::BuildOverviewsCore(dataset, ResamplingMethod, overviewList, numOverviews, globalCallback)) {
+				*retval = VARIANT_TRUE;
+			}
+			else {
+				ErrorMessage(tkUNSUPPORTED_FORMAT);
+			}
 		}
-
-		// building	
-		//CString str = "building overviews";
-		if (dataset->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, (GDALProgressFunc)GDALProgressFunction, globalCallback) == CE_None)
-		{
-			*retval = VARIANT_TRUE;
-		}
-		else
-			ErrorMessage(tkUNSUPPORTED_FORMAT);
-
-		if (globalCallback)
-			globalCallback->Progress(NULL, 0, NULL);
+	}
+	else
+	{
+		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
 	}
 	return S_OK;
-}
-
-// **************************************************************
-//		GDALProgressFunction
-// **************************************************************
-int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData)
-{
-	if( pData != NULL )
-	{
-		long percent = long(dfComplete * 100.0);
-		ICallback* cback = (ICallback*)pData;
-			cback->Progress(NULL,percent, NULL);
-	}
-	return TRUE;
 }
 
 /***********************************************************************/
@@ -3550,7 +3521,7 @@ STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 	*retVal = NULL;
 	if (isGridProxy)
 	{
-		CStringW legendName = Utility::GetProxyLegendName(sourceGridName);
+		CStringW legendName = GridManager::GetProxyLegendName(sourceGridName);
 		if (Utility::fileExistsW(legendName))
 		{
 			IGridColorScheme* scheme = NULL;

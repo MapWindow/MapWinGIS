@@ -6,6 +6,10 @@
 //   Form to test some of the functionality of MapWinGIS
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
+using System.Collections.Generic;
+using System.Diagnostics;
+
 namespace TestApplication
 {
   using System;
@@ -19,12 +23,28 @@ namespace TestApplication
   /// <summary>Defines the form</summary>
   public partial class Form1 : Form, ICallback
   {
+    private static Form1 _instance;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Form1"/> class.
     /// </summary>
     public Form1()
     {
       InitializeComponent();
+      var gs = new GlobalSettings { ShapeOutputValidationMode = tkShapeValidationMode.TryFixProceedOnFailure, GeometryEngine = tkGeometryEngine.engineClipper };
+      SetHardcodedPaths();
+      _instance = this;
+    }
+
+    private void SetHardcodedPaths()
+    {
+      GridOpenInput.Text = Constants.SCRIPT_DATA_PATH + @"\Grids\Formats\pov.tif";
+      AnalyzeFilesInput.Text = Constants.SCRIPT_DATA_PATH + @"\Grids\Formats\";
+    }
+
+    public static Form1 Instance
+    {
+      get { return _instance;  }
     }
 
     #region Delegates
@@ -53,6 +73,23 @@ namespace TestApplication
     #endregion
 
     #region ICallback Members
+
+    /// <summary>
+    /// Writes a message to output
+    /// </summary>
+    /// <param name="msg">Message to be written</param>
+    public void WriteMsg(string msg)
+    {
+      Debug.WriteLine(msg);
+      if (this.InvokeRequired)
+      {
+        this.Invoke(new ProgressCallback(this.Progress), "", "", msg);
+      }
+      else
+      {
+        Progressbox.AppendText(msg + Environment.NewLine);
+      }
+    }
 
     /// <summary>The error callback</summary>
     /// <param name="keyOfSender">
@@ -117,6 +154,8 @@ namespace TestApplication
         }
       }
     }
+
+
 
     #endregion
 
@@ -694,6 +733,31 @@ namespace TestApplication
         TilesInputfile.Text = path + "tiles.txt";
         ClipShapefileInput.Text = path + "clipping.txt";
         WktShapefileInput.Text = path + "wkt.txt";
+        BufferShapefileInput.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp";
+        DissolveShapefileInput.Text = @"d:\mw\_data\sample_data\USA\counties2.shp";
+        DissolveFieldindex.Value = 1;
+        IntersectionShapefileFirstInput.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\rivers-buffered.shp";
+        IntersectionShapefileSecondInput.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\states.shp";
+        SimplifyShapefileInput.Text = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp";
+        
+    }
+
+    /// <summary>
+    /// Analyzes raster files in particular folder, displaying possible open strategies
+    /// </summary>
+    private void RunAnalyzeFilesClick(object sender, EventArgs e)
+    {
+        bool result = FileManagerTests.AnalyeFiles(AnalyzeFilesInput.Text);
+        this.Progress("", 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
+    }
+
+    /// <summary>
+    /// Opens grid with different options and checks how the open strategy is chosen
+    /// </summary>
+    private void RunGridOpenTestClick(object sender, EventArgs e)
+    {
+        bool result = FileManagerTests.GridOpenTest(GridOpenInput.Text);
+        this.Progress("", 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
     }
   }
 }

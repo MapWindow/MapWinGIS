@@ -117,7 +117,7 @@ public:
 	STDMETHOD(CreateImageProxy)(IGridColorScheme* colorScheme, IImage** retVal);
 	STDMETHOD(get_PreferedDisplayMode)( tkGridProxyMode *retVal);
 	STDMETHOD(put_PreferedDisplayMode)( tkGridProxyMode newVal);
-	STDMETHOD(get_CanDisplayWithoutProxy)( tkCanDisplayGridWoProxy *retVal);
+	//STDMETHOD(get_CanDisplayWithoutProxy)( tkCanDisplayGridWoProxy *retVal);
 	STDMETHOD(get_HasValidImageProxy)( VARIANT_BOOL *retVal);
 
 	// Gets name of the legend file associated with grid
@@ -131,41 +131,19 @@ public:
 		return Utility::GetPathWOExtension(filename) + L".mwleg";
 	}
 
-	CStringW GetProxyLegendName(CStringW filename = "")
+	CStringW GetProxyLegendName()
 	{
-		if (filename.GetLength() == 0)
-			filename = GetFilename();
-		return Utility::GetProxyLegendName(filename);
+		return GridManager::GetProxyLegendName(GetFilename());
 	}
 
-	CStringW GetProxyName(CStringW filename = "")
+	CStringW GetProxyName()
 	{
-		if (filename.GetLength() == 0)
-			filename = GetFilename();
-
-		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
-		switch(format) {
-			case gpfTiffProxy:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.tif";
-			case gpfBmpProxy:
-			default:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.bmp";
-		}
+		return GridManager::GetProxyName(GetFilename());
 	}
 
 	CStringW GetProxyWorldFileName()
 	{
-		if (filename.GetLength() == 0)
-			filename = GetFilename();
-
-		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
-		switch(format) {
-			case gpfTiffProxy:
-				return L"";
-			case gpfBmpProxy:
-			default:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.bpw";
-		}
+		return GridManager::GetProxyWorldFileName(GetFilename());
 	}
 
 	bool CGrid::IsRgb();
@@ -184,7 +162,6 @@ public:
 	void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 	void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 	bool CGrid::PutRowDouble(long Row, double *Vals);
-	bool CGrid::HasValidProxy(CStringW gridFilename);
 	void CGrid::PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 	void CGrid::GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 private:
@@ -207,6 +184,7 @@ private:
 	bool CGrid::OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileType);
 	void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcingGDALUse);
 	bool OpenAuxHeader(CStringW& filename);
+	void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage** retVal);
 
 	tkGridProxyMode preferedDisplayMode;
 

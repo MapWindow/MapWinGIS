@@ -378,13 +378,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		CStringW legendName = grid->GetProxyLegendName();
 		CStringW imageName;
 
-		PredefinedColorScheme coloring = m_globalSettings.defaultColorSchemeForGrids;
-		if (m_globalSettings.randomColorSchemeForGrids)
-		{
-			srand ((unsigned int)time(NULL));
-			int r = rand();
-			coloring = (PredefinedColorScheme)(r % 7);
-		}
+		PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
 
 		igrid->RetrieveOrGenerateColorScheme(gsrAuto, gsgGradient, coloring, &gridColorScheme);
 		if (gridColorScheme)

@@ -70,32 +70,6 @@ STDMETHODIMP CFileManager::put_GlobalCallback(ICallback *newVal)
 }
 
 //****************************************************************
-//			NeedProxyForGrid()
-//****************************************************************
-// Assuming that it's grid and is supported by GDAL, should we use proxy for it?
-bool CFileManager::NeedProxyForGrid(CStringW filename)
-{
-	bool tooLarge = false;
-	if (m_globalSettings.maxNoProxyGridSizeMb > 0)	
-	{
-		long size = Utility::get_FileSize(filename) / (0x1 << 20);
-		tooLarge = size > m_globalSettings.maxNoProxyGridSizeMb;
-	}
-
-	if (m_globalSettings.gridProxyMode == gpmUseProxy || tooLarge)
-		return true;
-
-	bool hasProxy = false;
-	IGrid* grid = NULL;
-	GetUtils()->CreateInstance(idGrid, (IDispatch**)&grid);
-	if (grid) {
-		 hasProxy = ((CGrid*)grid)->HasValidProxy(filename);
-		 grid->Release();
-	}
-	return hasProxy;
-}
-
-//****************************************************************
 //			get_OpenStrategyCore()
 //****************************************************************
 tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename)
@@ -118,7 +92,7 @@ tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename)
 		}
 		else
 		{
-			return NeedProxyForGrid(name) ? tkFileOpenStrategy::fosProxyForGrid : tkFileOpenStrategy::fosDirectGrid;
+			return GridManager::NeedProxyForGrid(name, m_globalSettings.gridProxyMode) ? tkFileOpenStrategy::fosProxyForGrid : tkFileOpenStrategy::fosDirectGrid;
 		}
 	}
 
@@ -145,6 +119,9 @@ STDMETHODIMP CFileManager::get_IsSupportedBy(BSTR Filename, tkSupportType suppor
 	{
 		case stGdal:
 			*retVal = GdalHelper::CanOpenWithGdal(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
+			return S_OK;
+		case stGdalOverviews:
+			*retVal = GdalHelper::SupportsOverviews(OLE2W(Filename), m_globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
 			return S_OK;
 	}
 	*retVal = VARIANT_FALSE;
@@ -217,8 +194,23 @@ STDMETHODIMP CFileManager::get_IsGrid(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	tkFileOpenStrategy strategy = get_OpenStrategyCore(Filename);
-	*retVal = strategy == fosDirectGrid || strategy == fosProxyForGrid ? VARIANT_TRUE: VARIANT_FALSE;
+	
+	CStringW name = OLE2W(Filename);
+	GdalSupport support = GdalHelper::TryOpenWithGdal(name);
+	if (support != GdalSupport::GdalSupportNone) {
+		*retVal = support != GdalSupportRgb ? VARIANT_TRUE: VARIANT_FALSE;
+	}
+	else
+	{
+		// it can be binary grid, handled by our own driver
+		USES_CONVERSION;
+		GridManager gm;
+		DATA_TYPE dType = gm.getGridDataType( W2A(name), USE_EXTENSION );
+		if (dType != INVALID_DATA_TYPE)
+		{
+			*retVal = VARIANT_TRUE;
+		}
+	}
 	return S_OK;
 }
 
@@ -398,7 +390,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 		case fosRgbImage:
 			{
 				IImage* img = NULL;
-				GetUtils()->CreateInstance(idImage, (IDispatch**)img);
+				GetUtils()->CreateInstance(idImage, (IDispatch**)&img);
 				if (img)
 				{
 					img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, m_globalCallback, &vb );
@@ -411,6 +403,14 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 					}
 					else
 					{
+						// check that is is actually RGB image
+						img->get_IsRgb(&vb);
+						if (!vb) {
+							ErrorMessage(tkINVALID_OPEN_STRATEGY);
+							img->Close(&vb);
+							img->Release();
+							img = NULL;
+						}
 						_lastOpenIsSuccess = true;
 						*retVal = img;
 					}
@@ -434,15 +434,13 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 					}
 					else
 					{
-						srand ((unsigned int)time(NULL));
-						int r = rand();
-						PredefinedColorScheme coloring = (PredefinedColorScheme)(r % 7);
+						PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
 						IGridColorScheme* scheme = NULL;
 						
 						grid->RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval::gsrAuto, 
 															tkGridSchemeGeneration::gsgGradient, coloring, &scheme);
 						
-						tkGridProxyMode mode = openStrategy == fosDirectGrid ? gpmFavourNoProxy : gpmUseProxy;
+						tkGridProxyMode mode = openStrategy == fosDirectGrid ? gpmNoProxy : gpmUseProxy;
 						
 						IImage* img = NULL;
 						grid->OpenAsImage(scheme, mode, m_globalCallback, &img);
@@ -508,6 +506,75 @@ STDMETHODIMP CFileManager::DeleteDatasource(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
-	// TODO: implement
 	return S_OK;
 }
+
+//****************************************************************
+//			HasGdalOverviews()
+//****************************************************************
+STDMETHODIMP CFileManager::get_HasGdalOverviews(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = GdalHelper::HasOverviews(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+//****************************************************************
+//			ClearGdalOverviews()
+//****************************************************************
+STDMETHODIMP CFileManager::ClearGdalOverviews(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = GdalHelper::RemoveOverviews(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+
+//****************************************************************
+//			CreateGdalOverviews()
+//****************************************************************
+STDMETHODIMP CFileManager::BuildGdalOverviews(BSTR Filename, ICallback* callback, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	
+	if (callback && !m_globalCallback) {
+		Utility::put_ComReference(callback, (IDispatch**)&m_globalCallback, true);
+	}
+	*retVal = GdalHelper::BuildOverviewsIfNeeded(OLE2W(Filename), true, callback) ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+//****************************************************************
+//			NeedsGdalOverviews()
+//****************************************************************
+STDMETHODIMP CFileManager::get_NeedsGdalOverviews(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	return S_OK;
+}
+
+//****************************************************************
+//			RemoveProxyImages()
+//****************************************************************
+STDMETHODIMP CFileManager::RemoveProxyForGrid(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	VARIANT_BOOL isGrid;
+	this->get_IsGrid(Filename, &isGrid);
+	if (isGrid) {
+		*retVal = GridManager::RemoveImageProxy(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
+	}
+	*retVal = VARIANT_FALSE;
+	return S_OK;
+}
+
+//****************************************************************
+//			HasValidProxyForGrid()
+//****************************************************************
+STDMETHODIMP CFileManager::get_HasValidProxyForGrid(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = GridManager::HasValidProxy(OLE2W(Filename));
+	return S_OK;
+}
+

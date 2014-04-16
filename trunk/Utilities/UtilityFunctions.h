@@ -43,7 +43,7 @@ namespace Utility
 	CStringW GetFolderFromPath(CStringW path);
 	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
-	CStringW GetProxyLegendName(CStringW filename);
+	
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL fileExists(CString filename);	
 
@@ -74,6 +74,7 @@ namespace Utility
 	// display progress
 	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent);
 	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
+	void DisplayProgressCompleted(ICallback* callback);
 	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...);
 	void DisplayErrorMsg(ICallback* callback, CString key, char* message, ...);
 
@@ -87,4 +88,5 @@ namespace Utility
 namespace Debug
 {
 	void WriteLine(CString format, ...);
+	void WriteError(CString format, ...);
 }

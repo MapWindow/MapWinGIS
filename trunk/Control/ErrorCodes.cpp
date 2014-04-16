@@ -103,6 +103,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "File doesn't exist";
 		case tkMETHOD_DEPRECATED:
 			return "Method deprecated.";
+		case tkINVALID_OPEN_STRATEGY:
+			return "Invalid open strategy for dataset.";
 
 			//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:

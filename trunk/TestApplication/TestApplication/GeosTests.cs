@@ -223,7 +223,7 @@ namespace TestApplication
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(dissolvedSf, true);
         sf.DefaultDrawingOptions.FillVisible = false;
-        MyAxMap.AddLayer(sf, true);
+        //MyAxMap.AddLayer(sf, true);
 
         theForm.Progress(
           string.Empty,
@@ -355,7 +355,8 @@ namespace TestApplication
         globalSettings.ResetGdalError();
         theForm.Progress(string.Empty, 0, "Start intersecting " + Path.GetFileName(shapefilenameFirst));
 
-        var intersectedSf = sf.GetIntersection(false, overlaySf, false, ShpfileType.SHP_NULLSHAPE, theForm);
+        var intersectedSf = sf.Union(false, overlaySf, false);
+        //var intersectedSf = sf.GetIntersection(false, overlaySf, false, ShpfileType.SHP_NULLSHAPE, theForm);
 
         // Do some checks:))
         if (!Helper.CheckShapefile(sf, intersectedSf, globalSettings.GdalLastErrorMsg, theForm))
@@ -374,7 +375,7 @@ namespace TestApplication
         // Load the files:
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(intersectedSf, true);
-        MyAxMap.AddLayer(overlaySf, true);
+        //MyAxMap.AddLayer(overlaySf, true);
       }
       catch (Exception exception)
       {
@@ -395,7 +396,7 @@ namespace TestApplication
         0,
         string.Format("{0}-----------------------{0}The closest point test has started.", Environment.NewLine));
 
-        const string path = @"c:\dev\TestingScripts\ScriptData\General\MapWindow-Projects\UnitedStates\Shapefiles\";
+        const string path = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\";
             pointShapefile = path + "cities.shp";
             searchShapefile = path + "states.shp";
 

@@ -41,7 +41,6 @@ class ATL_NO_VTABLE CGlobalSettings :
 public:
 	CGlobalSettings()
 	{
-		
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GLOBALSETTINGS)
@@ -93,8 +92,8 @@ public:
 	STDMETHOD(get_LabelsCollisionMode)(tkCollisionMode* pVal);
 	STDMETHOD(get_GridProxyFormat)(tkGridProxyFormat* pVal);
 	STDMETHOD(put_GridProxyFormat)(tkGridProxyFormat newVal);
-	STDMETHOD(get_MaxNoProxyGridSizeMb)(double* pVal);
-	STDMETHOD(put_MaxNoProxyGridSizeMb)(double newVal);
+	STDMETHOD(get_MaxDirectGridSizeMb)(double* pVal);
+	STDMETHOD(put_MaxDirectGridSizeMb)(double newVal);
 	STDMETHOD(put_GridProxyMode)(tkGridProxyMode newVal);
 	STDMETHOD(get_GridProxyMode)(tkGridProxyMode* pVal);
 	STDMETHOD(put_MaxUniqueValuesCountForGridScheme)(int newVal);
@@ -111,6 +110,14 @@ public:
 	STDMETHOD(put_GeometryEngine)( tkGeometryEngine newVal);
 	STDMETHOD(get_SaveGridColorSchemeToFile)( VARIANT_BOOL *retVal);
 	STDMETHOD(put_SaveGridColorSchemeToFile)( VARIANT_BOOL newVal);
+	STDMETHOD(get_TiffCompression)( tkTiffCompression *retVal);
+	STDMETHOD(put_TiffCompression)( tkTiffCompression newVal);
+	STDMETHOD(get_RasterOverviewCreation)( tkRasterOverviewCreation *retVal);
+	STDMETHOD(put_RasterOverviewCreation)( tkRasterOverviewCreation newVal);
+	STDMETHOD(get_MinOverviewWidth)( int *retVal);
+	STDMETHOD(put_MinOverviewWidth)( int newVal);
+	STDMETHOD(get_RasterOverviewResampling)( tkGDALResamplingMethod *retVal);
+	STDMETHOD(put_RasterOverviewResampling)( tkGDALResamplingMethod newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

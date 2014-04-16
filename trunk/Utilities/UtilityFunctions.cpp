@@ -509,21 +509,6 @@ namespace Utility
 			return filename + ext;
 		return filename.Left(theDot + 1) + ext;
 	}
-
-	// ****************************************************************** 
-	//		GetProxyLegendName
-	// ****************************************************************** 
-	CStringW GetProxyLegendName(CStringW filename)
-	{
-		tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
-		switch(format) {
-			case gpfTiffProxy:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.tif.mwleg";
-			case gpfBmpProxy:
-			default:
-				return Utility::GetPathWOExtension(filename) + L"_proxy.bmp.mwleg";
-		}
-	}
 #pragma endregion
 	
 #pragma region Unit conversion
@@ -953,6 +938,18 @@ namespace Utility
 	}
 
 	// ********************************************************************
+	//		DisplayProgressCompleted()
+	// ********************************************************************
+	void DisplayProgressCompleted(ICallback* callback)
+	{
+		if( callback != NULL )
+		{
+			callback->Progress(A2BSTR(""),100,A2BSTR("Completed"));
+			callback->Progress(A2BSTR(""),0,A2BSTR(""));
+		}
+	}
+
+	// ********************************************************************
 	//		DisplayErrorMsg()
 	// ********************************************************************
 	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...)
@@ -1059,7 +1056,6 @@ namespace Utility
 							int build = HIWORD(verInfo->dwFileVersionLS);
 							int sub = LOWORD(verInfo->dwFileVersionLS);
 							result.Format("%d.%d.%d.%d", major, minor, build, sub);
-							Debug::WriteLine(result);
 						}
 					}
 				}
@@ -1068,21 +1064,15 @@ namespace Utility
 		}
 		return result;
 	}
-
-	
-
 }
 
 namespace Debug
 {
-	//#include <time.h>
-	/*time_t now;
-		time(&now);
-		CString temp;
-		temp = ctime(&now);*/
+	// ****************************************************************** 
+	//		WriteLine
+	// ****************************************************************** 
 	void WriteLine(CString format, ...)
 	{
-		//#ifdef _DEBUG
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
@@ -1090,6 +1080,19 @@ namespace Debug
 		CString s = buffer;
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
-		//#endif
+	}
+
+	// ****************************************************************** 
+	//		WriteError
+	// ****************************************************************** 
+	void WriteError(CString format, ...)
+	{
+		TCHAR buffer[1024];
+ 		va_list args;
+		va_start( args, format);
+		vsprintf( buffer, format, args );
+		CString s = buffer;
+		format = "OCX ERROR: " + s + "\n";
+		OutputDebugStringA(format);
 	}
 }

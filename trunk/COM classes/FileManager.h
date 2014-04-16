@@ -69,9 +69,15 @@ public:
 	STDMETHOD(get_LastOpenStrategy)(tkFileOpenStrategy* retVal);
 	STDMETHOD(get_LastOpenFilename)(BSTR* retVal);
 	STDMETHOD(get_LastOpenIsSuccess)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(ClearGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(BuildGdalOverviews)(BSTR Filename, ICallback* callback, VARIANT_BOOL* retVal);
+	STDMETHOD(get_NeedsGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(RemoveProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasValidProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 private:
 	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
-	bool NeedProxyForGrid(CStringW filename);
+	//bool NeedProxyForGrid(CStringW filename);
 	
 	tkFileOpenStrategy _lastOpenStrategy;
 	bool _lastOpenIsSuccess;

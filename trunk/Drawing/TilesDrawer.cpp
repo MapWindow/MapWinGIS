@@ -30,14 +30,14 @@ using namespace Gdiplus;
 // ***************************************************************
 //		DrawTiles()
 // ***************************************************************
-void CTilesDrawer::DrawTiles(ITiles* cotiles, double pixelsPerMapUnit, 
+void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit, 
 							 IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing)
 {
 	// get list of tiles surpassing the COM interface
-	vector<TileCore*> tiles = ((CTiles*)cotiles)->m_tiles;
-	
+	vector<TileCore*> tiles = ((CTiles*)itiles)->m_tiles;
+
 	VARIANT_BOOL drawGrid;
-	cotiles->get_GridLinesVisible(&drawGrid);
+	itiles->get_GridLinesVisible(&drawGrid);
 	
 	// to support both GDI and GDI+ drawing
 	Graphics* g = m_graphics ? m_graphics : Graphics::FromHDC(_dc->m_hDC);		
@@ -59,6 +59,11 @@ void CTilesDrawer::DrawTiles(ITiles* cotiles, double pixelsPerMapUnit,
 		}
 	}
 	
+	// copy to temporary vector, for not lock the original one for the whole length of drawing	
+	((CTiles*)itiles)->_tilesBufferLock.Lock();
+	std::vector<TileCore*> tempTiles(tiles);
+	((CTiles*)itiles)->_tilesBufferLock.Unlock();
+
 	// per tile drawing
 	for (size_t i = 0; i < tiles.size();i++)
 	{

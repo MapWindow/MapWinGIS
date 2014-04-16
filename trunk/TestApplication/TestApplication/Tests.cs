@@ -987,45 +987,72 @@ namespace TestApplication
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
 
+        //bool hasInvalid = sf.HasInvalidShapes();
+
         theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
         var aggregatedSf = sf.AggregateShapes(false, fieldIndex);
+        var info = sf.LastOutputValidation;
+        if (info != null)
+        {
+          Debug.Print("Shapefile returned: " + (aggregatedSf != null));
+          if (aggregatedSf != null)
+          {
+            bool hasInvalidShapes = aggregatedSf.HasInvalidShapes();
+            Debug.Print("Has invalid shapes: " + hasInvalidShapes);
+          }
+          Debug.Print("Operation is valid: " + info.IsValid);
+        }
 
         // Check if the result still contained invalid shapes:
         Shapefile correctSf;
-        if (!aggregatedSf.HasInvalidShapes())
-        {
+        //if (!aggregatedSf.HasInvalidShapes())
+        //{
           correctSf = aggregatedSf;
-          theForm.Progress(string.Empty, 0, "The aggregated shapefile has no invalid shapes");
-        }
-        else
-        {
-          theForm.Progress(string.Empty, 0, string.Empty);
-          theForm.Progress(string.Empty, 0, "Warning! The aggregated shapefile has invalid shapes");
-          retVal = false;
+        //  theForm.Progress(string.Empty, 0, "The aggregated shapefile has no invalid shapes");
+        //  for (int i = 0; i < aggregatedSf.NumShapes; i++)
+        //  {
+        //    var shp = aggregatedSf.get_Shape(i);
+        //    if (!shp.IsValid)
+        //    {
+        //      Debug.Print("Is valid index: " + shp.IsValidReason);
+        //      Debug.Print(shp.ExportToWKT());
+        //      aggregatedSf.set_ShapeSelected(i, true);
+        //    }
+        //    else
+        //    {
+        //      Debug.Print("This shape is valid");
+        //    }
+        //  }
+        //}
+        //else
+        //{
+        //  theForm.Progress(string.Empty, 0, string.Empty);
+        //  theForm.Progress(string.Empty, 0, "Warning! The aggregated shapefile has invalid shapes");
+        //  retVal = false;
           
-          // The aggregate method is returning invalid shapes, fix them first:
-          Shapefile fixedSf;
+        //  // The aggregate method is returning invalid shapes, fix them first:
+        //  Shapefile fixedSf;
 
-          theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
-          aggregatedSf.GlobalCallback = theForm;
-          if (!aggregatedSf.FixUpShapes(out fixedSf))
-          {
-            theForm.Error(string.Empty, "The fixup returned false");
-            return false;
-          }
+        //  theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
+        //  aggregatedSf.GlobalCallback = theForm;
+        //  if (!aggregatedSf.FixUpShapes(out fixedSf))
+        //  {
+        //    theForm.Error(string.Empty, "The fixup returned false");
+        //    return false;
+        //  }
 
-          // Close file, because we continue with the fixed version:
-          aggregatedSf.Close();
+        //  // Close file, because we continue with the fixed version:
+        //  aggregatedSf.Close();
 
-          // Do some checks:)
-          if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
-          {
-            return false;
-          }
+        //  // Do some checks:)
+        //  if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
+        //  {
+        //    return false;
+        //  }
 
-          // Continue with this sf:
-          correctSf = fixedSf;
-        }
+        //  // Continue with this sf:
+        //  correctSf = fixedSf;
+        //}
 
         // Save result:
         var newFilename = shapefilename.Replace(".shp", "-aggregate.shp");
@@ -1038,6 +1065,7 @@ namespace TestApplication
         // Load the files:
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(correctSf, true);
+        //MyAxMap.AddLayer(sf, true);
 
         theForm.Progress(
           string.Empty,
@@ -1047,6 +1075,8 @@ namespace TestApplication
             correctSf.NumShapes,
             sf.NumShapes,
             correctSf.Table.NumRows));
+        theForm.Progress(string.Empty, 100, " ");
+
       }
       catch (Exception exception)
       {
@@ -1247,9 +1277,10 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, resultGrid + " was successfully created");
 
           // Add the layers:
-          Fileformats.OpenGridAsLayer(gridFilename, theForm, true);
-          Fileformats.OpenGridAsLayer(resultGrid, theForm, false);
+          //Fileformats.OpenGridAsLayer(gridFilename, theForm, true);
           MyAxMap.AddLayer(sf, true);
+          Fileformats.OpenGridAsLayer(resultGrid, theForm, false);
+          
 
           Application.DoEvents();
         }

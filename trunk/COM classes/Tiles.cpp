@@ -30,15 +30,19 @@
 #include "map.h"
 #include "DiskCache.h"
 
+::CCriticalSection m_tilesBufferSection;
+
 // ************************************************************
 //		MarkUndrawn()
 // ************************************************************
 void CTiles::MarkUndrawn()
 {
+	_tilesBufferLock.Lock();
 	for (unsigned int i = 0; i < m_tiles.size(); i++)
 	{
 		m_tiles[i]->m_drawn = false;
 	}
+	_tilesBufferLock.Unlock();
 }
 
 // ************************************************************
@@ -47,12 +51,18 @@ void CTiles::MarkUndrawn()
 // Returns true if at least one undrawn tile exists
 bool CTiles::UndrawnTilesExist()
 {
+	_tilesBufferLock.Lock();
+	bool exists = false;
 	for (unsigned int i = 0; i < m_tiles.size(); i++)
 	{
-		if (!m_tiles[i]->m_drawn)
-			return true;
+		if (!m_tiles[i]->m_drawn) {
+			exists = true;
+			break;
+		}
 	}
-	return false;
+	_tilesBufferLock.Unlock();
+
+	return exists;
 }
 
 // ************************************************************
@@ -61,12 +71,18 @@ bool CTiles::UndrawnTilesExist()
 // Returns true if at least one drawn tile exists
 bool CTiles::DrawnTilesExist()
 {
+	_tilesBufferLock.Lock();
+	bool exists = false;
 	for (unsigned int i = 0; i < m_tiles.size(); i++)
 	{
-		if (m_tiles[i]->m_drawn)
-			return true;
+		if (m_tiles[i]->m_drawn) {
+			exists = true;
+			break;
+		}
 	}
-	return false;
+	_tilesBufferLock.Unlock();
+
+	return exists;
 }
 
 
@@ -367,6 +383,8 @@ bool CTiles::TilesAreInScreenBuffer(void* mapView)
 		for (int y = yMin; y <= yMax; y++)
 		{
 			bool found = false;
+			
+			_tilesBufferLock.Lock();
 			for (size_t i = 0; i < m_tiles.size(); i++ )
 			{
 				if (m_tiles[i]->m_tileX == x && m_tiles[i]->m_tileY == y && m_tiles[i]->m_providerId == m_provider->Id)
@@ -375,6 +393,8 @@ bool CTiles::TilesAreInScreenBuffer(void* mapView)
 					break;
 				}
 			}
+			_tilesBufferLock.Unlock();
+
 			if (!found)
 				return false;
 		}
@@ -403,6 +423,8 @@ bool CTiles::TilesAreInCache(void* mapView, tkTileProvider providerId)
 		for (int y = yMin; y <= yMax; y++)
 		{
 			bool found = false;
+			
+			_tilesBufferLock.Lock();
 			for (size_t i = 0; i < m_tiles.size(); i++ )
 			{
 				if (m_tiles[i]->m_tileX == x && 
@@ -414,6 +436,8 @@ bool CTiles::TilesAreInCache(void* mapView, tkTileProvider providerId)
 					break;
 				}
 			}
+			_tilesBufferLock.Unlock();
+
 			if (!found && m_useRamCache)
 			{
 				TileCore* tile = RamCache::get_Tile(provider->Id, zoom, x, y);
@@ -500,12 +524,15 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 
 	// schedule redraw
 	this->m_tilesLoaded = false;
+	
+	_tilesBufferLock.Lock();
 	for (size_t i = 0; i < m_tiles.size(); i++ )
 	{
 		m_tiles[i]->m_drawn = false;
 		m_tiles[i]->m_inBuffer = false;
 		m_tiles[i]->m_toDelete = true;
 	}
+	_tilesBufferLock.Unlock();
 
 	if (!provider->mapView)
 		provider->mapView = mapView;
@@ -527,6 +554,9 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		for (int y = yMin; y <= yMax; y++)
 		{
 			// first, check maybe the tile is already in the buffer
+			bool found = false;
+			
+			_tilesBufferLock.Lock();
 			for (size_t i = 0; i < m_tiles.size(); i++ )
 			{
 				TileCore* tile = m_tiles[i];
@@ -534,12 +564,16 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 				{
 					tile->m_toDelete = false;
 					
-					// TODO: actually it's in buffer; but for some reason there are crashes when setting it,
-					// so investigation is needed
+					// TODO: actually it's in buffer; but for some reason there are crashes when setting it, investigation is needed
 					//tile->m_inBuffer = true;
-					continue;
+					found = true;
+					break;
 				}
 			}
+			_tilesBufferLock.Unlock();
+			
+			if (found)
+				continue;
 			
 			if (m_useRamCache)
 			{
@@ -572,6 +606,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	}
 
 	// finally delete the unused tiles from the screen buffer
+	_tilesBufferLock.Lock();			
 	std::vector<TileCore*>::iterator it = m_tiles.begin();
 	while (it < m_tiles.end())
 	{
@@ -586,6 +621,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 			it++;
 		}
 	}
+	_tilesBufferLock.Unlock();
 
 	if (m_useDiskCache)
 	{
@@ -652,7 +688,11 @@ void CTiles::AddTileNoCaching(TileCore* tile)
 	tile->m_inBuffer = true;
 	tile->m_toDelete = false;
 	tile->AddRef();
-	m_tiles.push_back(tile);		// TODO!!!: protect with critical section
+	
+	_tilesBufferLock.Lock();
+	m_tiles.push_back(tile);
+	_tilesBufferLock.Unlock();
+
 	m_tilesLoaded = true;
 }
 
@@ -671,6 +711,7 @@ void CTiles::AddTileOnlyCaching(TileCore* tile)
 // *********************************************************
 void CTiles::Clear()
 {
+	_tilesBufferLock.Lock();
 	for (size_t i = 0; i < m_tiles.size(); i++)
 	{
 		m_tiles[i]->m_drawn = false;
@@ -678,6 +719,8 @@ void CTiles::Clear()
 		m_tiles[i]->Release();
 	}
 	m_tiles.clear();
+	_tilesBufferLock.Unlock();
+
 	m_tilesLoaded = false;
 }
 #pragma endregion

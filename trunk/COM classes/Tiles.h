@@ -230,6 +230,7 @@ private:
 	void* mapView;
 
 public:
+	::CCriticalSection _tilesBufferLock;
 	std::vector<TileCore*> m_tiles;
 	BaseProvider* m_provider;
 	

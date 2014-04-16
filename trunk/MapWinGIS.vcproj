@@ -2296,6 +2296,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\GlobalSettingsInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\macros.h"
 				>
 			</File>
@@ -4137,11 +4141,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

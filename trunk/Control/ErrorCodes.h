@@ -52,7 +52,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkFOLDER_NOT_EXISTS 30
 # define tkFILE_NOT_EXISTS 31
 # define tkMETHOD_DEPRECATED 32
-
+# define tkINVALID_OPEN_STRATEGY 33
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201

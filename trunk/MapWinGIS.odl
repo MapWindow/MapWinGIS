@@ -53,6 +53,38 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+/************************** tkRasterOverviewCreation Enumerations **********************/
+typedef		
+[
+	uuid(DA0A0612-901D-4877-8E68-CF2E6770B83D),
+	helpstring("tkRasterOverviewCreation"),
+]
+enum tkRasterOverviewCreation
+{
+	rocAuto = 0,
+	rocYes = 1,
+	rocNo = 2,
+} tkRasterOverviewCreation;
+
+/************************** tkTiffCompression Enumerations **********************/
+typedef		
+[
+	uuid(E607E6F3-B73E-4b9c-814A-623AD8A95F1D),
+	helpstring("tkTiffCompression"),
+]
+enum tkTiffCompression
+{
+	tkmAUTO = -1,
+	tkmJPEG = 0,
+	tkmLZW = 1,
+	tkmPACKBITS = 2,
+	tkmDEFLATE = 3,
+	tkmCCITTRLE = 4,
+	tkmCCITTFAX3 = 5,
+	tkmCCITTFAX4 = 6,
+	tkmNONE = 7,
+} tkTiffCompression;
+
 /************************** tkTilesProjectionStatus Enumerations **********************/
 typedef		
 [
@@ -375,6 +407,7 @@ typedef
 enum tkSupportType
 {
 	stGdal = 0,
+	stGdalOverviews = 1,
 } tkSupportType;
 
 
@@ -1537,7 +1570,7 @@ enum tkScalebarUnits
 		gpmAuto = 0,
 		gpmUseProxy = 1,
 		gpmNoProxy = 2,
-		gpmFavourNoProxy = 3,
+		//gpmFavourNoProxy = 3,
 		//gpmInRamProxy = 4,		// TODO: should we add it?
 	} tkGridProxyMode;
 
@@ -2800,7 +2833,7 @@ interface IGrid : IDispatch{
 
 		[propget, id(38), helpstring("property PreferedDisplayMode")] HRESULT PreferedDisplayMode([out, retval] tkGridProxyMode *retVal);
 		[propput, id(38), helpstring("property PreferedDisplayMode")] HRESULT PreferedDisplayMode([in] tkGridProxyMode newVal);
-		[propget, id(39), helpstring("property CanDisplayWithoutProxy")] HRESULT CanDisplayWithoutProxy([out, retval] tkCanDisplayGridWoProxy *retVal);
+		//[propget, id(39), helpstring("property CanDisplayWithoutProxy")] HRESULT CanDisplayWithoutProxy([out, retval] tkCanDisplayGridWoProxy *retVal);
 
 		[propget, id(40), helpstring("property HasValidImageProxy")] HRESULT HasValidImageProxy([out, retval] VARIANT_BOOL *retVal);
 
@@ -2814,6 +2847,8 @@ interface IGrid : IDispatch{
 		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
+
+		
 };
 
 /****************************  GridHeader Interface ***********************/
@@ -4708,8 +4743,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(15), helpstring("property LabelsCollisionMode")] HRESULT LabelsCollisionMode( [in]tkCollisionMode newVal);
 	[propget, id(16), helpstring("property GridProxyFormat")] HRESULT GridProxyFormat( [out, retval]tkGridProxyFormat* retVal);
 	[propput, id(16), helpstring("property GridProxyFormat")] HRESULT GridProxyFormat( [in]tkGridProxyFormat newVal);
-	[propget, id(17), helpstring("property MaxNoProxyGridSizeMb")] HRESULT MaxNoProxyGridSizeMb( [out, retval]double* retVal);
-	[propput, id(17), helpstring("property MaxNoProxyGridSizeMb")] HRESULT MaxNoProxyGridSizeMb( [in]double newVal);
+	[propget, id(17), helpstring("property MaxDirectGridSizeMb")] HRESULT MaxDirectGridSizeMb( [out, retval]double* retVal);
+	[propput, id(17), helpstring("property MaxDirectGridSizeMb")] HRESULT MaxDirectGridSizeMb( [in]double newVal);
 	[propget, id(18), helpstring("property GridProxyMode")] HRESULT GridProxyMode([out, retval] tkGridProxyMode *retVal);
 	[propput, id(18), helpstring("property GridProxyMode")] HRESULT GridProxyMode([in] tkGridProxyMode newVal);
 	[propget, id(19), helpstring("property MaxUniqueValuesCountForGridScheme")] HRESULT MaxUniqueValuesCountForGridScheme([out, retval] int *retVal);
@@ -4726,6 +4761,15 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(25), helpstring("property GeometryEngine")] HRESULT GeometryEngine([in] tkGeometryEngine newVal);
 	[propget, id(26), helpstring("property SaveGridColorSchemeToFile")] HRESULT SaveGridColorSchemeToFile([out, retval] VARIANT_BOOL *retVal);
 	[propput, id(26), helpstring("property SaveGridColorSchemeToFile")] HRESULT SaveGridColorSchemeToFile([in] VARIANT_BOOL newVal);
+	[propget, id(27)] HRESULT MinOverviewWidth([out, retval] int *retVal);
+	[propput, id(27)] HRESULT MinOverviewWidth([in] int newVal);
+	[propget, id(28)] HRESULT RasterOverviewCreation([out, retval] tkRasterOverviewCreation *retVal);
+	[propput, id(28)] HRESULT RasterOverviewCreation([in] tkRasterOverviewCreation newVal);
+	[propget, id(29)] HRESULT TiffCompression([out, retval] tkTiffCompression *retVal);
+	[propput, id(29)] HRESULT TiffCompression([in] tkTiffCompression newVal);
+	[propget, id(30)] HRESULT RasterOverviewResampling([out, retval] tkGDALResamplingMethod *retVal);
+	[propput, id(30)] HRESULT RasterOverviewResampling([in] tkGDALResamplingMethod newVal);
+
 };
 
 [
@@ -4963,6 +5007,12 @@ interface IFileManager : IDispatch{
 	[propget, id(15), helpstring("property LastOpenStrategy")] HRESULT LastOpenStrategy([out, retval] tkFileOpenStrategy *pVal);
 	[propget, id(16), helpstring("property LastOpenFilename")] HRESULT LastOpenFilename([out, retval] BSTR *pVal);
 	[propget, id(17), helpstring("property LastOpenIsSuccess")] HRESULT LastOpenIsSuccess([out, retval] VARIANT_BOOL *pVal);
+	[propget, id(18)] HRESULT HasGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
+	[id(19)] HRESULT ClearGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
+	[id(20)] HRESULT BuildGdalOverviews([in]BSTR Filename, [in]ICallback* cBack, [out, retval] VARIANT_BOOL *pVal);
+	[propget, id(21)] HRESULT NeedsGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
+	[id(22)] HRESULT RemoveProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
+	[propget, id(23)] HRESULT HasValidProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);

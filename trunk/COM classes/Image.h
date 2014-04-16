@@ -33,7 +33,7 @@
 #include "ImageGroup.h"
 #include "InMemoryBitmap.h"
 
-int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData);
+//int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData);
 
 
 struct DataPixels

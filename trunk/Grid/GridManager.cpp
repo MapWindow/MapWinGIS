@@ -3,6 +3,8 @@
 # include <deque>
 # include "xtiffio.h"  /* for TIFF */
 # include "tiff.h"
+# include "gdalhelper.h"
+# include "grid.h"
 
 GridManager::GridManager()
 {	//AfxMessageBox("GridManager::GridManager()");
@@ -237,5 +239,124 @@ bool GridManager::deleteGrid( const char * cfilename, GRID_TYPE GridType )
 	else
 		return false;
 
+	return true;
+}
+
+// ****************************************************************
+//						NeedProxyForGrid()						         
+// ****************************************************************
+bool GridManager::NeedProxyForGrid(CStringW filename, tkGridProxyMode proxyMode, IGrid* grid)
+{
+	if (proxyMode == gpmNoProxy )
+		return false;
+
+	if (proxyMode == gpmUseProxy )
+		return true;
+
+	// so we are in the autochoose mode: to render it quickly we need either overviews or image proxy
+	// first check overviews
+	if(GdalHelper::HasOverviews(filename))
+		return false;
+
+	bool tempGridNeeded = grid == NULL;
+
+	// then if there is a proxy
+	bool hasProxy = GridManager::HasValidProxy(filename);
+	if (hasProxy) return true;
+
+	// so, we have none of the two; if grid is small - nevermind - open directly
+	if (m_globalSettings.MaxDirectGridSizeMb > 0)	
+	{
+		long size = Utility::get_FileSize(filename) / (0x1 << 20);
+		if( size < m_globalSettings.MaxDirectGridSizeMb)
+			return false;
+	}
+
+	bool canBuildOverviews = m_globalSettings.rasterOverviewCreation != rocNo;
+	if (!GdalHelper::SupportsOverviews(filename, NULL))
+		canBuildOverviews = false;
+	return !canBuildOverviews;
+}
+
+// ****************************************************************** 
+//		GetProxyLegendName
+// ****************************************************************** 
+CStringW GridManager::GetProxyLegendName(CStringW filename)
+{
+	tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
+	switch(format) {
+		case gpfTiffProxy:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.tif.mwleg";
+		case gpfBmpProxy:
+		default:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.bmp.mwleg";
+	}
+}
+
+// ****************************************************************** 
+//		GetProxyName
+// ****************************************************************** 
+CStringW GridManager::GetProxyName(CStringW filename)
+{
+	tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
+	switch(format) {
+		case gpfTiffProxy:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.tif";
+		case gpfBmpProxy:
+		default:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.bmp";
+	}
+}
+
+// ****************************************************************** 
+//		GetProxyWorldFileName
+// ****************************************************************** 
+CStringW GridManager::GetProxyWorldFileName(CStringW filename)
+{
+	tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
+	switch(format) {
+		case gpfTiffProxy:
+			return L"";
+		case gpfBmpProxy:
+		default:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.bpw";
+	}
+}
+
+// ****************************************************************** 
+//		GetOverviewsFilename
+// ****************************************************************** 
+CStringW GridManager::GetOverviewsFilename(CStringW filename)
+{
+	tkGridProxyFormat format = m_globalSettings.gridProxyFormat;
+	switch(format) {
+		case gpfTiffProxy:
+			return Utility::GetPathWOExtension(filename) + L"_proxy.tif.ovr";
+		case gpfBmpProxy:
+		default:
+			return L"";
+	}
+}
+
+// ****************************************************************** 
+//		HasValidProxy
+// ****************************************************************** 
+bool GridManager::HasValidProxy(CStringW gridFilename)
+{
+	CStringW proxyName = GetProxyName(gridFilename);
+	CStringW legendName = GetProxyLegendName(gridFilename);
+	return (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
+		    Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
+}
+
+// ****************************************************************** 
+//		RemoveImageProxy
+// ****************************************************************** 
+bool GridManager::RemoveImageProxy(CStringW gridFilename)
+{
+	Utility::RemoveFile(GetProxyName(gridFilename));
+	Utility::RemoveFile(GetProxyLegendName(gridFilename));
+	Utility::RemoveFile(GetProxyWorldFileName(gridFilename));
+	Utility::RemoveFile(GetOverviewsFilename(gridFilename));
 	return true;
 }
