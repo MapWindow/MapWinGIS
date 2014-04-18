@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.btnPopulate = new System.Windows.Forms.Button();
             this.groupBox23 = new System.Windows.Forms.GroupBox();
             this.groupBox25 = new System.Windows.Forms.GroupBox();
             this.RunGridOpenTest = new System.Windows.Forms.Button();
@@ -43,7 +44,6 @@
             this.SelectAnalyzedFiles = new System.Windows.Forms.Button();
             this.AnalyzeFilesInput = new System.Windows.Forms.TextBox();
             this.label24 = new System.Windows.Forms.Label();
-            this.btnPopulate = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.RunTilesLoadTest = new System.Windows.Forms.Button();
@@ -150,9 +150,17 @@
             this.axMap1 = new AxMapWinGIS.AxMap();
             this.Progressbox = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.groupBox26 = new System.Windows.Forms.GroupBox();
+            this.groupBox27 = new System.Windows.Forms.GroupBox();
+            this.RunAxMapClearTest = new System.Windows.Forms.Button();
+            this.SelectAxMapClearInput = new System.Windows.Forms.Button();
+            this.AxMapClearInput = new System.Windows.Forms.TextBox();
+            this.label23 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
@@ -184,6 +192,8 @@
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
+            this.groupBox26.SuspendLayout();
+            this.groupBox27.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
@@ -214,6 +224,7 @@
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.AutoScroll = true;
+            this.splitContainer2.Panel1.Controls.Add(this.groupBox26);
             this.splitContainer2.Panel1.Controls.Add(this.btnPopulate);
             this.splitContainer2.Panel1.Controls.Add(this.groupBox23);
             this.splitContainer2.Panel1.Controls.Add(this.groupBox1);
@@ -232,6 +243,16 @@
             this.splitContainer2.Size = new System.Drawing.Size(929, 717);
             this.splitContainer2.SplitterDistance = 230;
             this.splitContainer2.TabIndex = 0;
+            // 
+            // btnPopulate
+            // 
+            this.btnPopulate.Location = new System.Drawing.Point(99, 6);
+            this.btnPopulate.Name = "btnPopulate";
+            this.btnPopulate.Size = new System.Drawing.Size(105, 22);
+            this.btnPopulate.TabIndex = 8;
+            this.btnPopulate.Text = "Populate textboxes";
+            this.btnPopulate.UseVisualStyleBackColor = true;
+            this.btnPopulate.Click += new System.EventHandler(this.BtnPopulateClick);
             // 
             // groupBox23
             // 
@@ -346,16 +367,6 @@
             this.label24.Size = new System.Drawing.Size(108, 13);
             this.label24.TabIndex = 0;
             this.label24.Text = "Select folder to open:";
-            // 
-            // btnPopulate
-            // 
-            this.btnPopulate.Location = new System.Drawing.Point(99, 6);
-            this.btnPopulate.Name = "btnPopulate";
-            this.btnPopulate.Size = new System.Drawing.Size(105, 22);
-            this.btnPopulate.TabIndex = 8;
-            this.btnPopulate.Text = "Populate textboxes";
-            this.btnPopulate.UseVisualStyleBackColor = true;
-            this.btnPopulate.Click += new System.EventHandler(this.BtnPopulateClick);
             // 
             // groupBox1
             // 
@@ -489,7 +500,7 @@
             // 
             // groupBox11
             // 
-            this.groupBox11.Location = new System.Drawing.Point(3, 2136);
+            this.groupBox11.Location = new System.Drawing.Point(5, 2270);
             this.groupBox11.Name = "groupBox11";
             this.groupBox11.Size = new System.Drawing.Size(205, 128);
             this.groupBox11.TabIndex = 5;
@@ -1512,6 +1523,70 @@
             this.Progressbox.Size = new System.Drawing.Size(929, 157);
             this.Progressbox.TabIndex = 0;
             // 
+            // groupBox26
+            // 
+            this.groupBox26.Controls.Add(this.groupBox27);
+            this.groupBox26.Location = new System.Drawing.Point(5, 2136);
+            this.groupBox26.Name = "groupBox26";
+            this.groupBox26.Size = new System.Drawing.Size(205, 128);
+            this.groupBox26.TabIndex = 10;
+            this.groupBox26.TabStop = false;
+            this.groupBox26.Text = "Misc";
+            // 
+            // groupBox27
+            // 
+            this.groupBox27.Controls.Add(this.RunAxMapClearTest);
+            this.groupBox27.Controls.Add(this.SelectAxMapClearInput);
+            this.groupBox27.Controls.Add(this.AxMapClearInput);
+            this.groupBox27.Controls.Add(this.label23);
+            this.groupBox27.Location = new System.Drawing.Point(5, 20);
+            this.groupBox27.Name = "groupBox27";
+            this.groupBox27.Size = new System.Drawing.Size(195, 89);
+            this.groupBox27.TabIndex = 2;
+            this.groupBox27.TabStop = false;
+            this.groupBox27.Text = "AxMap.Clear";
+            // 
+            // RunAxMapClearTest
+            // 
+            this.RunAxMapClearTest.Location = new System.Drawing.Point(9, 58);
+            this.RunAxMapClearTest.Name = "RunAxMapClearTest";
+            this.RunAxMapClearTest.Size = new System.Drawing.Size(180, 23);
+            this.RunAxMapClearTest.TabIndex = 17;
+            this.RunAxMapClearTest.Tag = "run";
+            this.RunAxMapClearTest.Text = "Run test";
+            this.RunAxMapClearTest.UseVisualStyleBackColor = true;
+            this.RunAxMapClearTest.Click += new System.EventHandler(this.RunAxMapClearTest_Click);
+            // 
+            // SelectAxMapClearInput
+            // 
+            this.SelectAxMapClearInput.Location = new System.Drawing.Point(162, 32);
+            this.SelectAxMapClearInput.Name = "SelectAxMapClearInput";
+            this.SelectAxMapClearInput.Size = new System.Drawing.Size(27, 20);
+            this.SelectAxMapClearInput.TabIndex = 2;
+            this.SelectAxMapClearInput.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectAxMapClearInput, "Select text file with on every line the location of a shapefile");
+            this.SelectAxMapClearInput.UseVisualStyleBackColor = true;
+            this.SelectAxMapClearInput.Click += new System.EventHandler(this.SelectAxMapClearInput_Click);
+            // 
+            // AxMapClearInput
+            // 
+            this.AxMapClearInput.AcceptsReturn = true;
+            this.AxMapClearInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "TilesInputfile", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.AxMapClearInput.Location = new System.Drawing.Point(9, 32);
+            this.AxMapClearInput.Name = "AxMapClearInput";
+            this.AxMapClearInput.Size = new System.Drawing.Size(147, 20);
+            this.AxMapClearInput.TabIndex = 1;
+            this.AxMapClearInput.Text = global::TestApplication.Properties.Settings.Default.TilesInputfile;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(6, 16);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(103, 13);
+            this.label23.TabIndex = 0;
+            this.label23.Text = "Select the shapefile:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1528,10 +1603,12 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel1.PerformLayout();
             this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.groupBox23.ResumeLayout(false);
             this.groupBox25.ResumeLayout(false);
@@ -1580,6 +1657,9 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
+            this.groupBox26.ResumeLayout(false);
+            this.groupBox27.ResumeLayout(false);
+            this.groupBox27.PerformLayout();
             this.ResumeLayout(false);
 
     }
@@ -1706,6 +1786,12 @@
     private System.Windows.Forms.Button SelectAnalyzedFiles;
     private System.Windows.Forms.TextBox AnalyzeFilesInput;
     private System.Windows.Forms.Label label24;
+    private System.Windows.Forms.GroupBox groupBox26;
+    private System.Windows.Forms.GroupBox groupBox27;
+    private System.Windows.Forms.Button RunAxMapClearTest;
+    private System.Windows.Forms.Button SelectAxMapClearInput;
+    private System.Windows.Forms.TextBox AxMapClearInput;
+    private System.Windows.Forms.Label label23;
   }
 }
 

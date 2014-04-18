@@ -8,7 +8,7 @@
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\Buurtkaart.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Buurtkaart.shp
 
 # Polygon M
 %MW_SAMPLEDATA%\MapWindow-Projects\polygonM\PolygonM.shp
