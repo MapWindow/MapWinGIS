@@ -774,5 +774,26 @@ namespace TestApplication
             bool retVal = Tests.RunAxMapClearTest(this.AxMapClearInput.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
+
+        private void axMap1_MouseMoveEvent(object sender, AxMapWinGIS._DMapEvents_MouseMoveEvent e)
+        {
+            if (this.InvokeRequired)
+                this.Invoke(new AxMapWinGIS._DMapEvents_MouseMoveEventHandler(axMap1_MouseMoveEvent), sender, e);
+            else
+            {
+                double Lat = 0.0, Lon = 0.0;
+
+                if (axMap1.PixelToDegrees(e.x, e.y, ref Lon, ref Lat))
+                    this.toolStripStatusCoordLabel.Text = String.Format("{0:0.000}, {1:0.000}", Lat, Lon);
+                else
+                {
+                    double clientX = 0.0, clientY = 0.0;
+                    this.axMap1.PixelToProj(e.x, e.y, ref clientX, ref clientY);
+                    this.toolStripStatusCoordLabel.Text = String.Format("{0:0.00}, {1:0.00}", clientX, clientY);
+                }
+
+                this.statusStrip1.Refresh();
+            }
+        }
     }
 }

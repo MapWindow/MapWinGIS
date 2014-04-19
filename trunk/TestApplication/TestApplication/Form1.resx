@@ -125,15 +125,15 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACFTeXN0
         ZW0uV2luZG93cy5Gb3Jtcy5BeEhvc3QrU3RhdGUBAAAABERhdGEHAgIAAAAJAwAAAA8DAAAAmgAAAAIB
-        AAAAAQAAAAAAAAAAAAAAAIUAAAAJAAQA1UcAABtKAAAAAAAA////AHsUrkfhepQ/AAAzMzMzMzPTPwAA
+        AAAAAQAAAAAAAAAAAAAAAIUAAAAJAAQA1UcAAD5IAAAAAAAA////AHsUrkfhepQ/AAAzMzMzMzPTPwEA
         AAAAFAAAAAEAAAAAAAAAAADgPwAAAQAAAAAAAAEAAAAAAAAAAAIAAAADAAAABgAAAAEAAAAAAAAAAAAA
-        AFQ+jPt1SfW/7tcllQ/j/j+QZw3r2xz2vyoBp4R1tv8/Cw==
+        AHdEkCHXcvm/CO+UXTiGAUAWWEl3aJ/5v9h4cQiBnAFACw==
 </value>
   </data>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
+  <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>114, 17</value>
   </metadata>
   <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>25</value>
+    <value>48</value>
   </metadata>
 </root>

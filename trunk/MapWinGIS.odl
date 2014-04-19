@@ -5370,8 +5370,8 @@ library MapWinGIS
 			[id(221), propget] VARIANT_BOOL GrabProjectionFromData();
 			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
 			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
-			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
-			[id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+			[id(224)] VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double* degreesLatY);
+			[id(225)] VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double * pixelY);
 			//}}AFX_ODL_METHOD
 	};
 
