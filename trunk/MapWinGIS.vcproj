@@ -1033,6 +1033,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP "
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="true"
@@ -1059,6 +1060,7 @@
 				SuppressStartupBanner="false"
 				DebugInformationFormat="3"
 				CompileAs="0"
+				ShowIncludes="false"
 				OmitDefaultLibName="true"
 			/>
 			<Tool
@@ -1529,6 +1531,10 @@
 			</File>
 			<File
 				RelativePath=".\Structures\ShapeLayerInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Structures.h"
 				>
 			</File>
 		</Filter>
@@ -2244,6 +2250,10 @@
 			Name="Control"
 			>
 			<File
+				RelativePath=".\Control\DispIds.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\Enumerations.h"
 				>
 			</File>
@@ -2300,6 +2310,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Control\GlobalVars.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Control\GlobalVars.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Control\macros.h"
 				>
 			</File>
@@ -2313,6 +2331,31 @@
 			</File>
 			<File
 				RelativePath=".\Control\Map_Core.cpp"
+				>
+				<FileConfiguration
+					Name="Tamas|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						PrecompiledHeaderThrough="stdafx.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Control\Map_Cursors.cpp"
+				>
+				<FileConfiguration
+					Name="Tamas|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="2"
+						PrecompiledHeaderThrough="stdafx.h"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\Control\Map_DispatchMap.cpp"
 				>
 			</File>
 			<File
@@ -2670,6 +2713,10 @@
 			</File>
 			<File
 				RelativePath=".\Utilities\GeosHelper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Utilities\GlobalClassFactory.h"
 				>
 			</File>
 			<File
@@ -3743,6 +3790,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Processing\ClipperConverter.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Processing\Expression.h"
 					>
 				</File>
@@ -3780,6 +3831,10 @@
 				</File>
 				<File
 					RelativePath=".\Processing\clipper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Processing\ClipperConverter.cpp"
 					>
 				</File>
 				<File
@@ -4141,11 +4196,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

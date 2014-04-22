@@ -28,7 +28,6 @@
 # define _LARGEFILE_SOURCE 1
 #endif
 
-//#include "stdafx.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

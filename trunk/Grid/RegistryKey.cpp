@@ -78,41 +78,41 @@ char * RegistryKey::getValueName(unsigned long KeyIndex)
 		return NULL;
 }
 
-char * RegistryKey::getErrorMsg()
-{
-	char * msg;
-
-	if (m_ErrorCode == 0)
-		msg = "No Error";
-	else if (m_ErrorCode < 0)
-	{
-		//RegistryKey Class Error
-		msg = new char [BUFFER_SIZE];
-		switch(m_ErrorCode)
-		{
-		case REG_KEY_NOT_OPEN:
-			msg = "Key not open";
-			break;
-		case REG_INVALID_NULL_PARAM:
-			msg = "Invalid Null Parameter";
-			break;
-		case REG_INDEX_OUT_OF_BOUNDS:
-			msg = "Index out of bounds";
-			break;
-		default:
-			msg = "Unknown error code";
-		}
-	}
-	else//system error
-	{
-		DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
-		DWORD LANG_ID = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
-		DWORD NumBytes = FormatMessage(flags,NULL,m_ErrorCode, LANG_ID,(LPTSTR) &msg,0,NULL);
-
-	}
-
-	return msg;
-}
+//char * RegistryKey::getErrorMsg()
+//{
+//	char * msg;
+//
+//	if (m_ErrorCode == 0)
+//		msg = "No Error";
+//	else if (m_ErrorCode < 0)
+//	{
+//		//RegistryKey Class Error
+//		msg = new char [BUFFER_SIZE];
+//		switch(m_ErrorCode)
+//		{
+//		case REG_KEY_NOT_OPEN:
+//			msg = "Key not open";
+//			break;
+//		case REG_INVALID_NULL_PARAM:
+//			msg = "Invalid Null Parameter";
+//			break;
+//		case REG_INDEX_OUT_OF_BOUNDS:
+//			msg = "Index out of bounds";
+//			break;
+//		default:
+//			msg = "Unknown error code";
+//		}
+//	}
+//	else//system error
+//	{
+//		DWORD flags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+//		DWORD LANG_ID = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+//		DWORD NumBytes = FormatMessage(flags,NULL,m_ErrorCode, LANG_ID,(LPTSTR) &msg,0,NULL);
+//
+//	}
+//
+//	return msg;
+//}
 
 bool RegistryKey::isOpen()
 {

@@ -3,7 +3,6 @@
 #include "EsriDll.h"
 #include "gioapi.h"
 #include "stc123.h"
-#include <deque>
 #include <math.h>
 #include <iomanip>
 

@@ -24,7 +24,6 @@
 
 #include "stdafx.h"
 #include "ShapeNetwork.h"
-#include <fstream>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

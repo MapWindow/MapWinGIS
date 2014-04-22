@@ -1,6 +1,10 @@
+#pragma once
 #include "resource.h"
 #include "errorcodes.h"
 #include "MapWinGIS_i.h"
+#include <map>
+
+#pragma warning(disable:4482)	// non-standard extention used - for names of enumerations
 
 struct GlobalSettingsInfo
 {

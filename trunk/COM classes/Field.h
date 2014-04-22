@@ -21,13 +21,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
-
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
 
 // CField
-
 class ATL_NO_VTABLE CField : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CField, &CLSID_Field>,

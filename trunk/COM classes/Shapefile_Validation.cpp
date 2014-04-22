@@ -1,12 +1,14 @@
 #include "stdafx.h"
 #include "Shapefile.h"
 #include "ShapeValidator.h"
+#include "GeometryConverter.h"
+#include "ShapeValidationInfo.h"
 
 #pragma region Validation
 // ********************************************************************
 //		ValidateInput()
 // ********************************************************************
-CShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, 
+IShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, 
 												CString parameterName, VARIANT_BOOL selectedOnly, CString className)
 {
 	tkShapefileSourceType sourceType;
@@ -50,7 +52,7 @@ CShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodN
 // ********************************************************************
 //		ValidateOutput()
 // ********************************************************************
-CShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString methodName, CString className, bool abortIfEmpty)
+IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString methodName, CString className, bool abortIfEmpty)
 {
 	if (!(*isf)) return NULL;
 

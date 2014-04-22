@@ -64,14 +64,14 @@ bool CShapeWrapperCOM::put_ShapeType(ShpfileType shpType)
 		}
 		else if( _ShapeType == SHP_POLYLINE || _ShapeType == SHP_POLYLINEZ || _ShapeType == SHP_POLYLINEM )
 		{	
-			if( /*_allPoints.size() > 0 &&*/ _allParts.size() <= 0 )
+			if( _allParts.size() <= 0 )
 			{
 				_allParts.push_back(0);
 			}
 		}	
-		else if( _ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGONM )
+		else if( _ShapeType == SHP_POLYGON || _ShapeType == SHP_POLYGONZ || _ShapeType == SHP_POLYGONM )
 		{	
-			if( /*_allPoints.size() > 0 &&*/ _allParts.size() <= 0 )
+			if( _allParts.size() <= 0 )
 			{
 				_allParts.push_back(0);
 			}

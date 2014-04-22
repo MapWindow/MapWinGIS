@@ -5,7 +5,6 @@
 #if !defined(AFX_HASHTABLE_H__28C8E59E_9980_478E_B40B_2D37F41FA886__INCLUDED_)
 #define AFX_HASHTABLE_H__28C8E59E_9980_478E_B40B_2D37F41FA886__INCLUDED_
 
-//#include "stdafx.h"	// Added by ClassView
 #include "ImageStructs.h"
 
 

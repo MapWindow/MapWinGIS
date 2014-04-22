@@ -25,10 +25,7 @@ public:
 		top = 0;
 	}
 
-	Extent::~Extent()
-	{
-
-	}
+	Extent::~Extent() {}
 
 	Extent::Extent( double Left, double Right, double Bottom, double Top )
 	{	
@@ -77,6 +74,16 @@ public:
 	double Extent::getArea()
 	{
 		return ((this->right - this->left) * (this->top - this->bottom));
+	}
+
+	double Width()
+	{
+		return right - left;
+	}
+
+	double Height()
+	{
+		return top - bottom;
 	}
 };
 

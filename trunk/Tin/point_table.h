@@ -1,8 +1,8 @@
 # ifndef POINT_TABLE_H
 # define POINT_TABLE_H
 
-# include <deque>
 # include "point.h"
+
 class point_table
 {
 	public:

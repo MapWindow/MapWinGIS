@@ -61,7 +61,7 @@ public:
 
 		readSHXFile(-1);
 
-		if (!m_ShpIdx.good() | !m_ShpFile.good())
+		if (!m_ShpIdx.good() || !m_ShpFile.good())
         {
 			throw Tools::IllegalStateException("Input file not found.");
         }
@@ -99,7 +99,7 @@ public:
     void readSHPFile(void);
     void readSHXFileHeader(void);
     void readSHPFileHeader(void);
-    inline void ShapeFileStream::swapEndian(char* a,int size);
+    inline void swapEndian(char* a,int size);
 
 	  RTree::Data* m_pIdxNext;
 

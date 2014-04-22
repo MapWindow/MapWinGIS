@@ -25,15 +25,11 @@
 
 #include "stdafx.h"
 #include "DrawingOptions.h"
-
 #include "Image.h"
 #include "ImageAttributes.h"
 #include "GeometryOperations.h"
 #include "PointSymbols.h"
-//#include "UtilityFunctions.h"
-
-# define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
-
+#include "macros.h"
 
 #pragma region Operators
 // ********************************************************
@@ -97,6 +93,8 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->verticesVisible = opt.verticesVisible;
 
 	this->useLinePattern = opt.useLinePattern;
+	this->alignIconByBottom = opt.alignIconByBottom;
+	this->drawFrame = opt.drawFrame;
 	
 	brushPlus = NULL;
 	if(pen) delete pen;

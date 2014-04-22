@@ -24,9 +24,6 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include "MapWinGis.h"
-#include <gdiplus.h>
-#include <vector>
 #include "LabelOptions.h"
 #include "CollisionList.h"
 #include "BaseDrawer.h"
@@ -35,12 +32,12 @@ class CLabelDrawer: public CBaseDrawer
 {
 public:
 	// constructor for spatially referenced labels
-	CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, 
+	CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, 
 										double currentScale, CCollisionList* collisionList, double mapRotation, bool printing);
 
 	// constructor for screen referenced labels
-	CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollisionList* collisionList, double mapRotation);
-	CLabelDrawer::~CLabelDrawer(void){};
+	CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollisionList* collisionList, double mapRotation);
+	~CLabelDrawer(void){};
 
 private:	
 	HDC m_hdc;

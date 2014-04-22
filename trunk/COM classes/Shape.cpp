@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -25,19 +25,61 @@
 #include "GeometryOperations.h"
 #include "Templates.h"
 #include "Utilities\GeosHelper.h"
-#include "geos_c.h"
-
-#ifdef MY_DEBUG
-#include <fstream>
-#include <iostream>
-using namespace std;
-#endif
+#include <algorithm>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+CShape::CShape()
+{	
+	USES_CONVERSION;
+	_key = A2BSTR("");
+	_globalCallback = NULL;
+	_lastErrorCode = tkNO_ERROR;
+	_isValidReason = "";
+	
+	_useFastMode = m_globalSettings.shapefileFastMode;
+	if (m_globalSettings.shapefileFastMode)
+	{
+		_shp = new CShapeWrapper(SHP_NULLSHAPE);
+	}
+	else
+	{
+		_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
+	}
+	gReferenceCounter.AddRef(tkInterface::idShape);
+	Debug::WriteLine("Shape created");
+}
+	
+	// destructor
+CShape::~CShape()
+{
+	::SysFreeString(_key);			
+		
+	if (_shp)
+	{
+		if (_useFastMode)
+		{
+			delete (CShapeWrapper*)_shp;
+		}
+		else
+		{
+			delete (CShapeWrapperCOM*)_shp;
+		}
+		_shp = NULL;
+	}
+
+	if (_globalCallback)
+	{
+		_globalCallback->Release();
+	}
+	gReferenceCounter.Release(tkInterface::idShape);
+	Debug::WriteLine("Shape deleted");
+}
+
 
 #pragma region DataConversions
 
@@ -1446,22 +1488,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	oGeom1 = GeometryConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_FALSE;
 		
-	//oGeom2 = oGeom1->Buffer(Distance, (int)nQuadSegments);
 	oGeom2 = DoBuffer(Distance, nQuadSegments, oGeom1);
-	if (oGeom2)
-	{
-		#ifdef MY_DEBUG
-		IShapefile* sf = NULL;
-		CoCreateInstance( CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf );
-		VARIANT_BOOL vbretval;
-		long index = 0;
-		sf->CreateNewWithShapeID(A2BSTR(""), ShpfileType::SHP_POLYGON, &vbretval);
-		sf->EditInsertShape(this, &index, &vbretval);
-		sf->SaveAs(A2BSTR("c:\\temp.shp"), NULL, &vbretval);
-		sf->Close(&vbretval);
-		sf->Release();
-		#endif
-	}
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
 	if (oGeom2 == NULL)	return S_FALSE;
@@ -1823,8 +1850,6 @@ STDMETHODIMP CShape::CreateFromString(BSTR Serialized, VARIANT_BOOL *retval)
 }
 #pragma endregion
 
-#pragma region PointInPolygon
-
 // *****************************************************************
 //		PointInThisPoly()
 // *****************************************************************
@@ -1837,247 +1862,6 @@ STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 	//bool result = _useFastMode ? PointInThisPolyFast(pt) : PointInThisPolyRegular(pt);
 	return S_OK;
 }
-
-// *****************************************************************
-//		PointInThisPolyFast()
-// *****************************************************************
-//bool CShape::PointInThisPolyFast(IPoint * pt)
-//{
-//	if (!_useFastMode)
-//	{
-//		AfxMessageBox("Wrong shape fast edit mode usage");
-//		return false;
-//	}
-//
-//	ShpfileType shptype = _shp->get_ShapeType();
-//	
-//	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
-//	{
-//		return false;
-//	}
-//
-//	double x;
-//	double y;
-//	pt->get_X(&x);
-//	pt->get_Y(&y);
-//
-//	double dbuf, dbuf1;
-//
-//	static double minx = -1;
-//	static double miny = -1;
-//	static double maxx = -1;
-//	static double maxy = -1;
-//	static bool foundMinsMaxs = false;
-//	
-//	if (!foundMinsMaxs)
-//	{
-//		if (_shp->get_PointCount() > 0)
-//		{
-//			_shp->get_PointXY(0, dbuf, dbuf1);
-//			minx = maxx = dbuf;
-//			miny = maxy = dbuf1;
-//			
-//			for (int i = 1; i < _shp->get_PointCount(); i++)
-//			{
-//				_shp->get_PointXY(i, dbuf, dbuf1);
-//				if (dbuf > maxx) maxx = dbuf;
-//				if (dbuf < minx) minx = dbuf;
-//				
-//				if (dbuf1 > maxy) maxy = dbuf1;
-//				if (dbuf1 < miny) miny = dbuf1;
-//			}
-//		}
-//		else
-//		{
-//			return false;
-//		}
-//		foundMinsMaxs = true;
-//	}
-//
-//	if(x < minx || y < miny || x > maxx || y > maxy)
-//	{
-//		return false;
-//	}
-//
-//	int CrossCount = 0;
-//
-//	double x1, y1, x2, y2;
-//	
-//	for(int nPart = 0; nPart < _shp->get_PartCount(); nPart++)
-//	{
-//		int nPointMax = _shp->get_PointCount() - 1;
-//		
-//		if (_shp->get_PartCount() - 1 > nPart)
-//			nPointMax = _shp->get_PartStartPoint(nPart+1) - 1;
-//		
-//		for(int nPoint = _shp->get_PartStartPoint(nPart); nPoint < nPointMax; nPoint++)
-//		{
-//			_shp->get_PointXY(nPoint, x1, y1);
-//			x1 -= x;
-//			y1 -= y;
-//
-//			_shp->get_PointXY(nPoint + 1, x2, y2);
-//			x2 -= x;
-//			y2 -= y;
-//
-//			register double y1y2 = y1*y2;
-//
-//			if(y1y2 > 0.0) // If the signs are the same
-//			{
-//				// Then it does not cross
-//				continue;
-//			}
-//			else if(y1y2 == 0.0) // Then it has intesected a vertex
-//			{
-//				if(y1 == 0.0)
-//				{
-//					if( y2 > 0.0 )
-//						continue;
-//				}
-//				else if( y1 > 0.0 )
-//					continue;
-//			}
-//
-//			if( x1 > 0.0 && x2 > 0.0 )
-//			{
-//				CrossCount++;
-//				continue;
-//			}
-//
-//			// Calculate Intersection
-//			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
-//				CrossCount++;
-//		}
-//	}
-//
-//	return (CrossCount&1);
-//}
-
-// *************************************************************
-//		PointInThisPolyRegular()
-// *************************************************************
-//bool CShape::PointInThisPolyRegular(IPoint * pt)
-//{
-//	ASSERT(_useFastMode == false);
-//	
-//	ShpfileType shptype = _shp->get_ShapeType();
-//
-//	if (!( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM ))
-//	{
-//		return false;
-//	}
-//
-//	double x;
-//	double y;
-//	pt->get_X(&x);
-//	pt->get_Y(&y);
-//
-//	double dbuf;
-//
-//	static double minx = -1;
-//	static double miny = -1;
-//	static double maxx = -1;
-//	static double maxy = -1;
-//	static bool foundMinsMaxs = false;
-//	
-//	CShapeWrapperCOM* shp = (CShapeWrapperCOM*)_shp;
-//	std::deque<IPoint*> allPoints = shp->_allPoints;
-//	std::deque<long> allParts = shp->_allParts;
-//
-//	if (!foundMinsMaxs)
-//	{
-//		if (allPoints.size() > 0)
-//		{
-//			allPoints[0]->get_X(&dbuf);
-//			minx = dbuf;
-//			maxx = dbuf;
-//			allPoints[0]->get_Y(&dbuf);
-//			miny = dbuf;
-//			maxy = dbuf;
-//			for (register unsigned int i = 1; i < allPoints.size(); i++)
-//			{
-//				allPoints[i]->get_X(&dbuf);
-//				if (dbuf > maxx) maxx = dbuf;
-//				if (dbuf < minx) minx = dbuf;
-//				allPoints[i]->get_Y(&dbuf);
-//				if (dbuf > maxy) maxy = dbuf;
-//				if (dbuf < miny) miny = dbuf;
-//			}
-//		}
-//		else
-//		{
-//			return false;
-//		}
-//		foundMinsMaxs = true;
-//	}
-//
-//	if(x < minx || y < miny || x > maxx || y > maxy)
-//	{
-//		return false;
-//	}
-//
-//	register int CrossCount = 0;
-//
-//	for(register unsigned int nPart = 0; nPart < allParts.size(); nPart++)
-//	{
-//		int nPointMax = allPoints.size() - 1;
-//		if (allParts.size() - 1 > nPart)
-//		{
-//			nPointMax = allParts[nPart+1] - 1;
-//		}
-//		for(register int nPoint = allParts[nPart]; nPoint < nPointMax; nPoint++)
-//		{
-//			register double x1;
-//			register double y1;
-//			register double x2;
-//			register double y2;
-//			allPoints[nPoint]->get_X(&x1);
-//			x1 -= x;
-//			allPoints[nPoint]->get_Y(&y1);
-//			y1 -= y;
-//			allPoints[nPoint+1]->get_X(&x2);
-//			x2 -= x;
-//			allPoints[nPoint+1]->get_Y(&y2);
-//			y2 -= y;
-//
-//			register double y1y2 = y1*y2;
-//
-//			if(y1y2 > 0.0) // If the signs are the same
-//			{
-//				// Then it does not cross
-//				continue;
-//			}
-//			else if(y1y2 == 0.0) // Then it has intesected a vertex
-//			{
-//				if(y1 == 0.0)
-//				{
-//					if( y2 > 0.0 )
-//						continue;
-//				}
-//				else if( y1 > 0.0 )
-//					continue;
-//			}
-//
-//			if( x1 > 0.0 && x2 > 0.0 )
-//			{
-//				CrossCount++;
-//				continue;
-//			}
-//
-//			// Calculate Intersection
-//			if((x1 - y1*((x2 - x1)/(y2 - y1))) > 0.0)
-//				CrossCount++;
-//		}
-//	}
-//
-//	if(CrossCount&1)
-//	{
-//		return true;
-//	}
-//
-//	return false;
-//}
-#pragma endregion
 
 //*******************************************************************
 //		Get_SegmentAngle()
@@ -2113,7 +1897,7 @@ IShapeWrapper* CShape::get_ShapeWrapper()
 // **********************************************
 bool CShape::put_ShapeWrapper(CShapeWrapper* data)
 {
-	if (data == NULL )		// fast mode should be set explictly before using wrapper
+	if (data == NULL )		// fast mode should be set explicitly before using wrapper
 	{
 		return false;
 	}
@@ -2372,9 +2156,6 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 	}
 	else if (shpType == SHP_POLYLINE)
 	{
-		IPoint* pnt1 = NULL;
-		IPoint* pnt2 = NULL;
-		
 		long numPoints;
 		this->get_NumPoints(&numPoints);
 		if (numPoints < 2) return;
@@ -2464,7 +2245,7 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 	}
 	else if (shpType == SHP_POINT)
 	{
-		// just return the point itself inspite of method
+		// just return the point itself in spite of method
 		this->get_XY(0, &x, &y, &vbretval);
 	}
 	else if (shpType == SHP_MULTIPOINT)
@@ -2497,7 +2278,8 @@ bool Bytes2SafeArray(unsigned char* data, int size, VARIANT* arr)
 			unsigned char* pchar = NULL;
 			SafeArrayAccessData(psa,(void HUGEP* FAR*)(&pchar));
 			
-			memcpy(pchar,&(data[0]),sizeof(unsigned char)*size);
+			if (pchar)
+				memcpy(pchar,&(data[0]),sizeof(unsigned char)*size);
 			
 			SafeArrayUnaccessData(psa);
 			

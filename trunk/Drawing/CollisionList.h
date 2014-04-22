@@ -25,7 +25,6 @@
 
 #pragma once
 #include "RotatedRectangle.h"
-#include <vector>
 
 class CCollisionList
 {

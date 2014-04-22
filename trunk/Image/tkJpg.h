@@ -11,14 +11,7 @@
 
 //#pragma pack(push, gif2, 1)
 
-//#include "jinclude.h"
-//#include "jpeglib.h"
-#include "MapWinGis.h"
-#include <gdiplus.h>
 #include <Gdipluspixelformats.h>
-//#include "jpeglib.h"
-//#include "jdhuff.h"
-
 #include "HashTable.h"
 #include "ImageStructs.h"
 

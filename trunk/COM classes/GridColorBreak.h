@@ -23,12 +23,8 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-#include "errorcodes.h"
 
 // CGridColorBreak
-
 class ATL_NO_VTABLE CGridColorBreak : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CGridColorBreak, &CLSID_GridColorBreak>,

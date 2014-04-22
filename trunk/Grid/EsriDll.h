@@ -2,7 +2,6 @@
 # ifndef ESRI_DLL_H
 # define ESRI_DLL_H
 
-//#include "registrykey.hpp"
 #include "RegistryKey.h"
 #include "gioapi.h"
 #include "grdTypes.h"

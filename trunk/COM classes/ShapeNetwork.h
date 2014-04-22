@@ -23,13 +23,8 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-#include <math.h>
-
 #include "graph.h"
 #include "heap.h"
-#include "varH.h"
 
 //Required Structs
 struct dPOINT

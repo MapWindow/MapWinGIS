@@ -24,7 +24,6 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include "MapWinGis.h"
 #include "enumerations.h"
 #include "RotatedRectangle.h"
 #include "cpl_minixml.h"
@@ -181,10 +180,9 @@ public:
 	int frameTransparency;
 	int frameVisible;
 
-	void CLabelOptions::Deserialize(CString s);
-	//CPLXMLNode* CLabelOptions::Serialize(CString elementName);
-	CPLXMLNode* CLabelOptions::SerializeToTree(CString elementName );
-	void CLabelOptions::DeserializeFromNode(CPLXMLNode* node);
+	void Deserialize(CString s);
+	CPLXMLNode* SerializeToTree(CString elementName );
+	void DeserializeFromNode(CPLXMLNode* node);
 	
 };
 

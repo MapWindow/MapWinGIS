@@ -24,39 +24,11 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file.
 
 #pragma once
-#include "MapWinGis.h"
+#include "ShapeInfo.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
-
-struct CChartInfo
-{	
-public:
-	CChartInfo()
-	{
-		visible	= true;
-		x = y = 0.0;
-		frame = NULL;
-		isDrawn = VARIANT_FALSE;
-	}
-	~CChartInfo()
-	{
-		// don't forget to set pointer to NULL after the use of frame
-		// or it will be the problems here
-		if (frame) 
-		{
-			delete frame;
-			frame = NULL;
-		}
-	}
-	
-	VARIANT_BOOL isDrawn;
-	CRect* frame;		// and are deleted on the next redraw
-	bool visible;
-	double x;
-	double y;
-};
 
 // CChart
 class ATL_NO_VTABLE CChart :

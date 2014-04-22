@@ -4,25 +4,21 @@
 //********************************************************************************************************
 #include "stdafx.h"
 #include "Utils.h"
-
 #include "atlsafe.h"
 #include <stack>
 #include <comdef.h>
-
 #include "gdal.h"
 #include "gdal_alg.h"
 #include "gdalwarper.h"
 #include "gdal_proxy.h"
 #include "cpl_conv.h"
 #include "cpl_multiproc.h"
-#include "ogr_spatialref.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
 #include "cpl_vsi.h"
 #include "cpl_string.h"
 #include "vrtdataset.h"
 #include "direct.h"
-#include "gdalhelper.h"
 
 #pragma warning(disable:4996)
 
@@ -1916,7 +1912,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			for( nColor = 0; nColor < nColorCount; nColor++ )
 			{
 				const GDALColorEntry* poEntry = poColorTable->GetColorEntry(nColor);
-				if (poEntry->c1 != poEntry->c2 || poEntry->c1 != poEntry->c2)
+				if (poEntry->c1 != poEntry->c2 || poEntry->c1 != poEntry->c2)	// TODO: perhaps c3
 				{
 					CPLError(CE_Warning, 0, "Warning : color table contains non gray levels colors");
 					break;
@@ -6392,11 +6388,10 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 
 	pszFilename = OLE2CA(bstrSrcFilename);
 
-	CString sLevels = OLE2CA(bstrLevels);
-	CString sLevelToken = "";
 	int curPos = 0;
-
-	sLevelToken = sLevels.Tokenize(" ", curPos);
+	CString sLevels = OLE2CA(bstrLevels);
+	CString sLevelToken = sLevels.Tokenize(" ", curPos);
+	
 
 	while( !sLevelToken.IsEmpty() )
 	{

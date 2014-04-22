@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "GenericHeader.h"
-# include <fstream>
-# include <stdio.h>
-# include <io.h>
+//# include <fstream>
+//# include <stdio.h>
+//# include <io.h>
 
 using namespace std;
 

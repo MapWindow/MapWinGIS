@@ -23,7 +23,6 @@
  * (Open source contributors should list themselves and their modifications here). */
  
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "ShapefileColorBreak.h"
 
 #ifdef _DEBUG

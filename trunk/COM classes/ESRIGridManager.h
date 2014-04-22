@@ -23,12 +23,9 @@
  * (Open source contributors should list themselves and their modifications here). */
  
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
 #include "GridManager.h"
 
 // CESRIGridManager
-
 class ATL_NO_VTABLE CESRIGridManager : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CESRIGridManager, &CLSID_ESRIGridManager>,

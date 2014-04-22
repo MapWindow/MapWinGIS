@@ -24,23 +24,20 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include "MapWinGis.h"
-#include <gdiplus.h>
-#include <vector>
-
 #include "BaseDrawer.h"
 #include "Shapefile.h"
 #include "LinePattern.h"
 #include "ShapefileReader.h"
 #include "DrawingOptions.h"
 #include "CollisionList.h"
-
+#include "Shape.h"
 
 class CShapefileDrawer
 {
 public:
 	CShapefileDrawer(Gdiplus::Graphics* graphics, Extent* extents, double dx, double dy, CCollisionList* collisionList, double scale, bool forceGdiplus = false)
 	{
+		m_hdc = NULL;
 		_dc = NULL;			// should be obtained from Graphics and released after the usage
 		_shapefile = NULL;
 		_extents = extents;
@@ -150,14 +147,14 @@ private:
 	void DrawLinePatternCategory(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
 	void DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOptionsEx* options, bool drawSelection);
 
-	void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
+	void DrawCategory(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
 
 	bool WithinVisibleExtents(double xMin, double xMax, double yMin, double yMax)
 	{
 		return 	!(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
 	};
 
-	void CShapefileDrawer::InitDC()
+	void InitDC()
 	{
 		if (!_dc)
 		{
@@ -165,7 +162,7 @@ private:
 			_dc = CDC::FromHandle(m_hdc);
 		}
 	}
-	void CShapefileDrawer::ReleaseDC()
+	void ReleaseDC()
 	{
 		if (_dc)
 		{
@@ -173,5 +170,5 @@ private:
 			_dc = NULL;
 		}
 	}
-	bool HavePointCollision(CRect* rect);
+	//bool HavePointCollision(CRect* rect);
 };

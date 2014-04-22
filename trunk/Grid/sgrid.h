@@ -1,13 +1,8 @@
 # ifndef SGRID_H
 # define SGRID_H
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <io.h>
 #include "sHeader.h"
 #include "grdTypes.h"
-//#include "errorcodes.h"
 
 #define MISSINGSHORT -32767
 

@@ -8,41 +8,15 @@
 #pragma once
 
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "Map.h"
-
-#include "xtiffio.h"  /* for TIFF */
-#include "geotiffio.h" /* for GeoTIFF */
-#include "tiff.h"
-#include "geotiff.h"
-#include "geo_normalize.h"
-#include "geovalues.h"
-#include "tiffio.h"
-#include "tiffiop.h"
-#include <fstream>
-#include <vector>
-#include <atlsafe.h>
-#include "IndexSearching.h"
-
-#include "Enumerations.h"
-
-#include "LabelCategory.h"
-#include "Labels.h"
 #include "Image.h"
 #include "Grid.h"
-
-#include "ShapefileDrawing.h"
-#include "ImageDrawing.h"
-#include "LabelDrawing.h"
-#include "ChartDrawing.h"
-
-#include "Projections.h"
-#include "cpl_minixml.h"
-#include "gdalhelper.h"
+#include "Shapefile.h"
+#include "ImageLayerInfo.h"
 
 long CMapView::GetNumLayers()
 {
-	return m_activeLayers.size();
+	return _activeLayers.size();
 }
 
 // ************************************************************
@@ -54,7 +28,7 @@ BSTR CMapView::GetLayerName(LONG LayerHandle)
 
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return W2BSTR( m_allLayers[LayerHandle]->name );
+		return W2BSTR( _allLayers[LayerHandle]->name );
 	}
 	else
 	{	
@@ -70,7 +44,7 @@ void CMapView::SetLayerName(LONG LayerHandle, LPCTSTR newVal)
 	if( IsValidLayer(LayerHandle) )
 	{	
 		USES_CONVERSION;
-		m_allLayers[LayerHandle]->name = A2W(newVal);	// TODO: use Unicode
+		_allLayers[LayerHandle]->name = A2W(newVal);	// TODO: use Unicode
 	}
 	else
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -85,7 +59,7 @@ BSTR CMapView::GetLayerDescription(LONG LayerHandle)
 
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return A2BSTR( m_allLayers[LayerHandle]->description );
+		return A2BSTR( _allLayers[LayerHandle]->description );
 	}
 	else
 	{	
@@ -101,9 +75,9 @@ BSTR CMapView::GetLayerDescription(LONG LayerHandle)
 void CMapView::SetLayerDescription(LONG LayerHandle, LPCTSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		layer->description = newVal;
 	}
 	else
@@ -120,7 +94,7 @@ BSTR CMapView::GetLayerKey(long LayerHandle)
 	USES_CONVERSION;
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return OLE2BSTR( m_allLayers[LayerHandle]->key );
+		return OLE2BSTR( _allLayers[LayerHandle]->key );
 	}
 	else
 	{	
@@ -135,8 +109,8 @@ void CMapView::SetLayerKey(long LayerHandle, LPCTSTR lpszNewValue)
 
 	if( IsValidLayer(LayerHandle) )
 	{	
-		::SysFreeString(m_allLayers[LayerHandle]->key);
-		m_allLayers[LayerHandle]->key = A2BSTR(lpszNewValue);
+		::SysFreeString(_allLayers[LayerHandle]->key);
+		_allLayers[LayerHandle]->key = A2BSTR(lpszNewValue);
 	}
 	else
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -150,10 +124,10 @@ long CMapView::GetLayerPosition(long LayerHandle)
 	if( IsValidLayer(LayerHandle) )
 	{
 		register int i;
-		long endcondition = m_activeLayers.size();
+		long endcondition = _activeLayers.size();
 		for( i = 0; i < endcondition; i++ )
 		{
-			if( m_activeLayers[i] == LayerHandle )
+			if( _activeLayers[i] == LayerHandle )
 				return i;
 		}
 
@@ -171,9 +145,9 @@ long CMapView::GetLayerPosition(long LayerHandle)
 // ************************************************************
 long CMapView::GetLayerHandle(long LayerPosition)
 {
-	if( LayerPosition >= 0 && LayerPosition < (long)m_activeLayers.size())
+	if( LayerPosition >= 0 && LayerPosition < (long)_activeLayers.size())
 	{
-		return m_activeLayers[LayerPosition];
+		return _activeLayers[LayerPosition];
 	}
 	else
 	{	
@@ -189,7 +163,7 @@ BOOL CMapView::GetLayerVisible(long LayerHandle)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		return ( m_allLayers[LayerHandle]->flags & Visible );
+		return ( _allLayers[LayerHandle]->flags & Visible );
 	}
 	else
 	{	
@@ -206,20 +180,17 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 	if( IsValidLayer(LayerHandle) )
 	{	
 		if( bNewValue != FALSE )
-			m_allLayers[LayerHandle]->flags |= Visible;
+			_allLayers[LayerHandle]->flags |= Visible;
 		else
-			m_allLayers[LayerHandle]->flags = m_allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
+			_allLayers[LayerHandle]->flags = _allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
 
 		// we need to refresh the buffer here
-		if (m_allLayers[LayerHandle]->type == ImageLayer)
+		if (_allLayers[LayerHandle]->type == ImageLayer)
 		{
-			if (m_allLayers[LayerHandle]->object)
+			if (_allLayers[LayerHandle]->object)
 			{
-				//iimg = (IImage*) m_allLayers[LayerHandle]->object;
 				IImage * iimg = NULL;
-				//m_allLayers[LayerHandle]->object->QueryInterface(IID_IImage,(void**)&iimg);
-				//if (iimg != NULL) 
-				if (m_allLayers[LayerHandle]->QueryImage(&iimg))
+				if (_allLayers[LayerHandle]->QueryImage(&iimg))
 				{
 					((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
 					iimg->Release();	
@@ -228,7 +199,7 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 		}
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 		{
 			InvalidateControl();
 		}
@@ -247,9 +218,9 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		if (m_allLayers[LayerHandle]->object != NULL)
-			m_allLayers[LayerHandle]->object->AddRef();
-		return m_allLayers[LayerHandle]->object;
+		if (_allLayers[LayerHandle]->object != NULL)
+			_allLayers[LayerHandle]->object->AddRef();
+		return _allLayers[LayerHandle]->object;
 	}
 	else
 	{	
@@ -265,7 +236,7 @@ long CMapView::AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStr
 {
 	USES_CONVERSION;
 	IDispatch* layer = NULL;
-	_fileManager->Open(A2BSTR(Filename), openStrategy, m_globalCallback, &layer);
+	_fileManager->Open(A2BSTR(Filename), openStrategy, _globalCallback, &layer);
 	if (layer) {
 		return AddLayer(layer, visible);
 	}
@@ -273,8 +244,6 @@ long CMapView::AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStr
 		return -1;
 	}
 }
-
-
 
 // ***************************************************************
 //		AddLayer()
@@ -334,23 +303,23 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
 		l->type = ShapefileLayer;
 		
-		for(size_t i = 0; i < m_allLayers.size(); i++ )
+		for(size_t i = 0; i < _allLayers.size(); i++ )
 		{
-			if( !m_allLayers[i] )  // that means we can reuse it
+			if( !_allLayers[i] )  // that means we can reuse it
 			{	
 				layerHandle = i;
-				m_allLayers[i] = l;
+				_allLayers[i] = l;
 				break;
 			}
 		}
 		
 		if( layerHandle == -1)
 		{
-			layerHandle = m_allLayers.size();
-			m_allLayers.push_back(l);
+			layerHandle = _allLayers.size();
+			_allLayers.push_back(l);
 		}
 
-		m_activeLayers.push_back(layerHandle);
+		_activeLayers.push_back(layerHandle);
 
 		//ShpfileType type;
 		//ishp->get_ShapefileType(&type);
@@ -428,22 +397,22 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		l->object = iimg;
 
 		bool inserted = false;
-		for(unsigned int i = 0; i < m_allLayers.size() && !inserted; i++ )
+		for(unsigned int i = 0; i < _allLayers.size() && !inserted; i++ )
 		{	
-			if( m_allLayers[i] == NULL )
+			if( _allLayers[i] == NULL )
 			{	
 				layerHandle = i;
-				m_allLayers[i] = l;
+				_allLayers[i] = l;
 				inserted = true;
 			}
 		}
 		if( inserted == false )
 		{	
-			layerHandle = m_allLayers.size();
-			m_allLayers.push_back(l);
+			layerHandle = _allLayers.size();
+			_allLayers.push_back(l);
 		}
 
-		m_activeLayers.push_back(layerHandle);
+		_activeLayers.push_back(layerHandle);
 
 		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
 		l->type = ImageLayer;
@@ -525,16 +494,16 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// set initial extents
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
 	{
-		if( m_activeLayers.size() == 1 && pVisible)
+		if( _activeLayers.size() == 1 && pVisible)
 		{	
 			double xrange = l->extents.right - l->extents.left;
 			double yrange = l->extents.top - l->extents.bottom;
-			extents.left = l->extents.left - xrange*m_extentPad;
-			extents.right = l->extents.right + xrange*m_extentPad;
-			extents.top = l->extents.top + yrange*m_extentPad;
-			extents.bottom = l->extents.bottom - yrange*m_extentPad;
+			_extents.left = l->extents.left - xrange*m_extentPad;
+			_extents.right = l->extents.right + xrange*m_extentPad;
+			_extents.top = l->extents.top + yrange*m_extentPad;
+			_extents.bottom = l->extents.bottom - yrange*m_extentPad;
 
-			SetExtentsCore(extents);
+			SetExtentsCore(_extents);
 		}
 	}
 
@@ -552,14 +521,14 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 	{
 		if( IsValidLayer(LayerHandle) )
 		{
-			bool hadLayers = m_activeLayers.size() > 0;
+			bool hadLayers = _activeLayers.size() > 0;
 			
 			IShapefile * ishp = NULL;
 			IImage * iimg = NULL;
 			IGrid * igrid = NULL;
 
-			if (LayerHandle >= (long)m_allLayers.size()) return;
-			Layer * l = m_allLayers[LayerHandle];
+			if (LayerHandle >= (long)_allLayers.size()) return;
+			Layer * l = _allLayers[LayerHandle];
 			if (l == NULL) return;
 
 			l->QueryShapefile(&ishp);
@@ -586,11 +555,11 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 				igrid->Release();
 			}
 
-			for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
+			for(unsigned int i = 0; i < _activeLayers.size(); i++ )
 			{	
-				if( m_activeLayers[i] == LayerHandle )
+				if( _activeLayers[i] == LayerHandle )
 				{	
-					m_activeLayers.erase( m_activeLayers.begin() + i );
+					_activeLayers.erase( _activeLayers.begin() + i );
 					break;
 				}
 			}
@@ -598,9 +567,9 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 			try
 			{
 				// This may have been deleted already.
-				if (m_allLayers[LayerHandle] != NULL)
+				if (_allLayers[LayerHandle] != NULL)
 				{
-					delete m_allLayers[LayerHandle];
+					delete _allLayers[LayerHandle];
 				}
 			}
 			catch(...)
@@ -610,15 +579,15 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 				#endif
 			}
 
-			m_allLayers[LayerHandle] = NULL;
+			_allLayers[LayerHandle] = NULL;
 
-			if (m_activeLayers.size() == 0 && hadLayers)
+			if (_activeLayers.size() == 0 && hadLayers)
 				ClearMapProjectionWithLastLayer();
 
 			FireLayersChanged();
 
 			_canUseLayerBuffer = FALSE;
-			if( !m_lockCount )
+			if( !_lockCount )
 				InvalidateControl();
 		}
 		else
@@ -650,16 +619,16 @@ void CMapView::RemoveLayerWithoutClosing(long LayerHandle)
 void CMapView::RemoveAllLayers()
 {
 	LockWindow( lmLock );
-	bool hadLayers = m_activeLayers.size() > 0;
+	bool hadLayers = _activeLayers.size() > 0;
 	
-	for(unsigned int i = 0; i < m_allLayers.size(); i++ )
+	for(unsigned int i = 0; i < _allLayers.size(); i++ )
 	{
 		if( IsValidLayer(i) )
 		{
 			RemoveLayer(i);
 		}
 	}
-	m_allLayers.clear();
+	_allLayers.clear();
 	//FireLayersChanged();
 
 	LockWindow( lmUnlock );
@@ -670,7 +639,7 @@ void CMapView::RemoveAllLayers()
 	_activeLayerPosition = 0;
 	_canUseLayerBuffer = FALSE;
 
-	if( !m_lockCount )
+	if( !_lockCount )
 		InvalidateControl();
 }
 
@@ -679,20 +648,20 @@ void CMapView::RemoveAllLayers()
 // ***************************************************************
 BOOL CMapView::MoveLayerUp(long InitialPosition)
 {
-	if( InitialPosition >= 0 && InitialPosition < (long)m_activeLayers.size() )
+	if( InitialPosition >= 0 && InitialPosition < (long)_activeLayers.size() )
 	{	
-		long layerHandle = m_activeLayers[InitialPosition];
+		long layerHandle = _activeLayers[InitialPosition];
 
-		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
+		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
 
 		long newPos = InitialPosition + 1;
-		if( newPos > (long)m_activeLayers.size() )
-			newPos = m_activeLayers.size();
+		if( newPos > (long)_activeLayers.size() )
+			newPos = _activeLayers.size();
 
-		m_activeLayers.insert( m_activeLayers.begin() + newPos, layerHandle );
+		_activeLayers.insert( _activeLayers.begin() + newPos, layerHandle );
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 		return TRUE;
 	}
@@ -708,19 +677,19 @@ BOOL CMapView::MoveLayerUp(long InitialPosition)
 // ***************************************************************
 BOOL CMapView::MoveLayerDown(long InitialPosition)
 {
-	if( InitialPosition >= 0 && InitialPosition < (long)m_activeLayers.size() )
+	if( InitialPosition >= 0 && InitialPosition < (long)_activeLayers.size() )
 	{	
-		long layerHandle = m_activeLayers[InitialPosition];
-		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
+		long layerHandle = _activeLayers[InitialPosition];
+		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
 
 		long newPos = InitialPosition - 1;
 		if( newPos < 0 )
 			newPos = 0;
 
-		m_activeLayers.insert( m_activeLayers.begin() + newPos, layerHandle );
+		_activeLayers.insert( _activeLayers.begin() + newPos, layerHandle );
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 
 		return TRUE;
@@ -740,16 +709,16 @@ BOOL CMapView::MoveLayer(long InitialPosition, long TargetPosition)
 	if(InitialPosition == TargetPosition)
 		return TRUE;
 
-	if( InitialPosition >= 0 && InitialPosition < (long)m_activeLayers.size() &&  
-		TargetPosition >= 0 && TargetPosition < (long)m_activeLayers.size())
+	if( InitialPosition >= 0 && InitialPosition < (long)_activeLayers.size() &&  
+		TargetPosition >= 0 && TargetPosition < (long)_activeLayers.size())
 	{
-		long layerHandle = m_activeLayers[InitialPosition];
+		long layerHandle = _activeLayers[InitialPosition];
 
-		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
-		m_activeLayers.insert( m_activeLayers.begin() + TargetPosition, layerHandle );
+		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
+		_activeLayers.insert( _activeLayers.begin() + TargetPosition, layerHandle );
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 
 		return TRUE;
@@ -766,14 +735,14 @@ BOOL CMapView::MoveLayer(long InitialPosition, long TargetPosition)
 // ***************************************************************
 BOOL CMapView::MoveLayerTop(long InitialPosition)
 {
-	if( InitialPosition >= 0 && InitialPosition < (long)m_activeLayers.size() )
+	if( InitialPosition >= 0 && InitialPosition < (long)_activeLayers.size() )
 	{	
-		long layerHandle = m_activeLayers[InitialPosition];
-		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
-		m_activeLayers.push_back(layerHandle);
+		long layerHandle = _activeLayers[InitialPosition];
+		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
+		_activeLayers.push_back(layerHandle);
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 		return TRUE;
 	}
@@ -789,14 +758,14 @@ BOOL CMapView::MoveLayerTop(long InitialPosition)
 // ***************************************************************
 BOOL CMapView::MoveLayerBottom(long InitialPosition)
 {
-	if( InitialPosition >= 0 && InitialPosition < (long)m_activeLayers.size() )
+	if( InitialPosition >= 0 && InitialPosition < (long)_activeLayers.size() )
 	{	
-		long layerHandle = m_activeLayers[InitialPosition];
-		m_activeLayers.erase( m_activeLayers.begin() + InitialPosition );
-		m_activeLayers.push_front(layerHandle);
+		long layerHandle = _activeLayers[InitialPosition];
+		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
+		_activeLayers.push_front(layerHandle);
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 		return TRUE;
 	}
@@ -816,7 +785,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 
 	if (IsValidLayer(LayerHandle))
 	{	
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		CString newFile = newSrcPath;
 		VARIANT_BOOL rt;
 		if (l->type == ShapefileLayer)
@@ -855,13 +824,13 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			return;
 
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 	}
 	else
-	{	m_lastErrorCode = tkINVALID_LAYER_HANDLE;
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
+	{	_lastErrorCode = tkINVALID_LAYER_HANDLE;
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
 	}
 }
 
@@ -871,9 +840,9 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 DOUBLE CMapView::GetLayerMaxVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		return layer->maxVisibleScale;
 	}
 	else
@@ -886,9 +855,9 @@ DOUBLE CMapView::GetLayerMaxVisibleScale(LONG LayerHandle)
 void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		layer->maxVisibleScale = newVal;
 	}
 	else
@@ -903,9 +872,9 @@ void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 DOUBLE CMapView::GetLayerMinVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		return layer->minVisibleScale;
 	}
 	else
@@ -918,9 +887,9 @@ DOUBLE CMapView::GetLayerMinVisibleScale(LONG LayerHandle)
 void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		layer->minVisibleScale = newVal;
 	}
 	else
@@ -935,9 +904,9 @@ void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 int CMapView::GetLayerMinVisibleZoom(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		return layer->minVisibleZoom;
 	}
 	else
@@ -950,9 +919,9 @@ int CMapView::GetLayerMinVisibleZoom(LONG LayerHandle)
 void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		if (newVal < 0) newVal = 0;
 		if (newVal > 18) newVal = 18;
 		layer->minVisibleZoom = newVal;
@@ -969,9 +938,9 @@ void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 int CMapView::GetLayerMaxVisibleZoom(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		return layer->maxVisibleZoom;
 	}
 	else
@@ -984,9 +953,9 @@ int CMapView::GetLayerMaxVisibleZoom(LONG LayerHandle)
 void CMapView::SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		if (newVal < 0) newVal = 0;
 		if (newVal > 18) newVal = 18;
 		layer->maxVisibleZoom = newVal;
@@ -1003,9 +972,9 @@ void CMapView::SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal)
 VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		return layer->dynamicVisibility;
 	}
 	else
@@ -1018,9 +987,9 @@ VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG LayerHandle)
 void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		layer->dynamicVisibility = newVal?true:false;
 	}
 	else
@@ -1127,16 +1096,16 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 	if(layerHandle != -1) 
 	{
 		s = CPLGetXMLValue( node, "LayerName", NULL );
-		m_allLayers[layerHandle]->name = Utility::ConvertFromUtf8(s);
+		_allLayers[layerHandle]->name = Utility::ConvertFromUtf8(s);
 
 		s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
-		m_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
+		_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
 		
 		s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-		m_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : 100000000.0;	// TODO: use constant
+		_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : 100000000.0;	// TODO: use constant
 
 		s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
-		m_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;
+		_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;
 
 		s = CPLGetXMLValue( node, "LayerKey", NULL );
 		this->SetLayerKey(layerHandle, s);
@@ -1180,7 +1149,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 {
 	USES_CONVERSION;
 	
-	if (LayerHandle < 0 || LayerHandle >= (long)m_allLayers.size())
+	if (LayerHandle < 0 || LayerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return NULL;
@@ -1190,7 +1159,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 	if (psLayer)
 	{
 		CString s;
-		Layer* layer = m_allLayers[LayerHandle];
+		Layer* layer = _allLayers[LayerHandle];
 		if (layer)
 		{
 			switch (layer->type)
@@ -1289,7 +1258,7 @@ VARIANT_BOOL CMapView::DeserializeLayerOptions(LONG LayerHandle, LPCTSTR newVal)
 // ********************************************************
 VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode* node)
 {
-	if (LayerHandle < 0 || LayerHandle >= (long)m_allLayers.size())
+	if (LayerHandle < 0 || LayerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return VARIANT_FALSE;
@@ -1324,7 +1293,7 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	}
 
 	// actual layer type
-	Layer* layer = m_allLayers[LayerHandle];
+	Layer* layer = _allLayers[LayerHandle];
 	if (layer->type != layerType)
 	{
 		ErrorMessage(tkINVALID_FILE);
@@ -1337,19 +1306,19 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	{
 		BOOL val = atoi(s);
 		if( val )
-			m_allLayers[LayerHandle]->flags |= Visible;
+			_allLayers[LayerHandle]->flags |= Visible;
 		else
-			m_allLayers[LayerHandle]->flags = m_allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
+			_allLayers[LayerHandle]->flags = _allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
 	}
 
 	s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
-	m_allLayers[LayerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
+	_allLayers[LayerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
 	
 	s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-	m_allLayers[LayerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;	// todo use constant
+	_allLayers[LayerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;	// todo use constant
 
 	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
-	m_allLayers[LayerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
+	_allLayers[LayerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
 
 	s = CPLGetXMLValue( node, "LayerKey", NULL );
 	this->SetLayerKey(LayerHandle, s);
@@ -1404,7 +1373,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 
 	BSTR layerName = A2BSTR("");;
 
-	if (layerHandle < 0 || layerHandle >= (long)m_allLayers.size())
+	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
@@ -1412,7 +1381,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 	{
 		// extracting object
 		CComBSTR filename;
-		Layer* layer = m_allLayers[layerHandle];
+		Layer* layer = _allLayers[layerHandle];
 		if (layer)
 		{
 			IShapefile* sf = NULL;
@@ -1615,13 +1584,13 @@ VARIANT_BOOL CMapView::GetLayerSkipOnSaving(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (LayerHandle < 0 || LayerHandle >= (long)m_allLayers.size())
+	if (LayerHandle < 0 || LayerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return VARIANT_FALSE;
 	}
 	
-	Layer* layer = m_allLayers[LayerHandle];
+	Layer* layer = _allLayers[LayerHandle];
 	if (layer)
 	{
 		return layer->skipOnSaving;
@@ -1639,13 +1608,13 @@ void CMapView::SetLayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (LayerHandle < 0 || LayerHandle >= (long)m_allLayers.size())
+	if (LayerHandle < 0 || LayerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return;
 	}
 
-	Layer* layer = m_allLayers[LayerHandle];
+	Layer* layer = _allLayers[LayerHandle];
 	if (layer)
 	{
 		layer->skipOnSaving = newVal;

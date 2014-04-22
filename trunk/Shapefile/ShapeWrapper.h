@@ -24,10 +24,7 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include "MapWinGis.h"
 #include "ShapeInterfaces.h"
-#include "Extent.h"
-#include <vector>
 
 #pragma region Memo
 // Record header
@@ -111,15 +108,18 @@ public:
 		_ShapeType2D = ShapeTypeConvert2D(_ShapeType);
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
+		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax = 0.0;
 	}
 	CShapeWrapper(char* shpData)
 	{
+		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax= 0.0;
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
 		put_ShapeData(shpData, NULL);
 	}
 	CShapeWrapper(char* shpData, Extent* extents)
 	{
+		_xMin = _yMin =	_xMax =	_yMax =	_zMin =	_mMin =	_zMax =	_mMax= 0.0;
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
 		put_ShapeData(shpData, extents);

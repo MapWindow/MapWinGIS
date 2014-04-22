@@ -1,8 +1,5 @@
 #pragma once
-#include "MapWinGis.h"
-#include <vector>
 #include "gdiplus.h"
-#include "Extent.h"
 
 // Content of the image resampled to the screen resolution, as a GDIPlus bitmap
 // Used to speed up drawing of grouped images along with mwTiles

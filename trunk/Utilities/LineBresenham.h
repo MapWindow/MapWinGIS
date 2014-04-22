@@ -2,7 +2,6 @@
 #define _LINEBREZENHAM_H_
 
 #include <math.h>
-#include <vector>
 
 //Point struct to make sure that any platform 
 //has access to this simple object

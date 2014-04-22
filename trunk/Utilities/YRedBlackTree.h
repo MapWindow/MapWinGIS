@@ -1,9 +1,6 @@
-//# include <iostream>
 # include <assert.h>
 # include <iomanip>
 # include "YRedBlackNode.h"
-
-//using namespace std;
 
 # ifndef YREDBLACKTREE_H
 # define YREDBLACKTREE_H

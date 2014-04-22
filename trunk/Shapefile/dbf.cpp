@@ -1,12 +1,9 @@
 #include "stdafx.h"
 #include "dbf.h"
 #include "shapefil.h"
-
-#include <math.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
 
 #ifndef FALSE
 #  define FALSE		0

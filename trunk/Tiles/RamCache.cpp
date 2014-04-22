@@ -60,7 +60,7 @@ void RamCache::Close()
 						if (tiles) {
 							delete tiles;
 						}
-						it2++;
+						++it2;
 					}
 					delete points;
 				}
@@ -214,7 +214,7 @@ void RamCache::ClearByProvider(int provider, int fromScale, int toScale)
 							delete tiles;
 						}
 						else
-							it2++;
+							++it2;
 					}
 
 					// if all the X's for a given scale are removed - delete the container,

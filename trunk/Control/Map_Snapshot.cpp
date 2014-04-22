@@ -29,7 +29,7 @@ LPDISPATCH CMapView::SnapShot(LPDISPATCH BoundBox)
 	box->Release();
 	box = NULL;
 	
-	return SnapShotCore(left, right, bottom, top, m_viewWidth, m_viewHeight);
+	return SnapShotCore(left, right, bottom, top, _viewWidth, _viewHeight);
 }
 
 // *********************************************************
@@ -43,11 +43,11 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 	long Width, Height;
 	double left, right, bottom, top;
 
-	Layer * l = m_allLayers[ClippingLayerNbr];
+	Layer * l = _allLayers[ClippingLayerNbr];
 	if( !IS_VALID_PTR(l) )
 	{
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer"));
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer"));
 		return NULL;
 	}
 	else
@@ -76,16 +76,16 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 		}
 		else
 		{
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer type"));
+			if( _globalCallback != NULL )
+				_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer type"));
 			return NULL;
 		}
 	}
 
 	if (Width <= 0 || Height <= 0)
 	{
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
 		return NULL;
 	}
 
@@ -104,8 +104,8 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 	long Height = (long)((double)Width / ((right-left)/(top-bottom)));
 	if (Width <= 0 || Height <= 0)
 	{
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
 		return NULL;
 	}
 
@@ -130,13 +130,13 @@ INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvide
 		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
 		if (WidthPixels <= 0 || Height <= 0)
 		{
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+			if( _globalCallback != NULL )
+				_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
 		}
 		else
 		{
 			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-			bool tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this, provider);
+			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this, provider);
 			RestoreExtents();
 			return tilesInCache ? 1 : 0;
 		}
@@ -163,24 +163,24 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
 		if (WidthPixels <= 0 || Height <= 0)
 		{
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+			if( _globalCallback != NULL )
+				_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
 		}
 		else
 		{
 			CString key = (char*)Key;
 			SetTempExtents(xMin, xMax, yMin, yMax, WidthPixels, Height);
-			bool tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this, provider);
+			bool tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this, provider);
 			if (!tilesInCache)
 			{
-				((CTiles*)m_tiles)->LoadTiles((void*)this, true, (int)provider, key);
+				((CTiles*)_tiles)->LoadTiles((void*)this, true, (int)provider, key);
 				RestoreExtents();
 			}
 			else
 			{
 				// they are already here, no loading is needed
 				RestoreExtents();
-				FireTilesLoaded(m_tiles, NULL, true, key);
+				FireTilesLoaded(_tiles, NULL, true, key);
 			}
 		}
 	}
@@ -209,8 +209,8 @@ BOOL CMapView::SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float Off
 	long Height = static_cast<long>((double)Width *(yMax - yMin) / (xMax - xMin));
 	if (Width <= 0 || Height <= 0)
 	{
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
 		return FALSE;
 	}
 	
@@ -232,40 +232,40 @@ BOOL CMapView::SnapShotToDC(PVOID hdc, IExtents* Extents, LONG Width)
 // *********************************************************************
 void CMapView::SetTempExtents(double left, double right, double top, double bottom, long Width, long Height)
 {
-	mm_viewWidth = m_viewWidth;
-	mm_viewHeight = m_viewHeight;
-	mm_pixelPerProjectionX = m_pixelPerProjectionX;
-	mm_pixelPerProjectionY = m_pixelPerProjectionY;
-	mm_inversePixelPerProjectionX = m_inversePixelPerProjectionX;
-	mm_inversePixelPerProjectionY = m_inversePixelPerProjectionY;
-	mm_aspectRatio = m_aspectRatio;
-	mm_left = extents.left;
-	mm_right = extents.right;
-	mm_bottom = extents.bottom;
-	mm_top = extents.top;
+	mm_viewWidth = _viewWidth;
+	mm_viewHeight = _viewHeight;
+	mm_pixelPerProjectionX = _pixelPerProjectionX;
+	mm_pixelPerProjectionY = _pixelPerProjectionY;
+	mm_inversePixelPerProjectionX = _inversePixelPerProjectionX;
+	mm_inversePixelPerProjectionY = _inversePixelPerProjectionY;
+	mm_aspectRatio = _aspectRatio;
+	mm_left = _extents.left;
+	mm_right = _extents.right;
+	mm_bottom = _extents.bottom;
+	mm_top = _extents.top;
 
-	mm_newExtents = (Width != m_viewWidth || Height != m_viewWidth ||
-						left != extents.left || right !=  extents.right ||
-						top != extents.top || bottom != extents.bottom);
+	mm_newExtents = (Width != _viewWidth || Height != _viewWidth ||
+						left != _extents.left || right !=  _extents.right ||
+						top != _extents.top || bottom != _extents.bottom);
 
 	if (mm_newExtents)
 	{
-		m_viewWidth=Width;
-		m_viewHeight=Height;
+		_viewWidth=Width;
+		_viewHeight=Height;
 		//ResizeBuffers(m_viewWidth, m_viewHeight);
-		m_aspectRatio = (double)Width / (double)Height; 
+		_aspectRatio = (double)Width / (double)Height; 
 
 		double xrange = right - left;
 		double yrange = top - bottom;
-		m_pixelPerProjectionX = m_viewWidth/xrange;
-		m_inversePixelPerProjectionX = 1.0/m_pixelPerProjectionX;
-		m_pixelPerProjectionY = m_viewHeight/yrange;
-		m_inversePixelPerProjectionY = 1.0/m_pixelPerProjectionY;
+		_pixelPerProjectionX = _viewWidth/xrange;
+		_inversePixelPerProjectionX = 1.0/_pixelPerProjectionX;
+		_pixelPerProjectionY = _viewHeight/yrange;
+		_inversePixelPerProjectionY = 1.0/_pixelPerProjectionY;
 		
-		extents.left = left;
-		extents.right = right - m_inversePixelPerProjectionX;
-		extents.bottom = bottom;
-		extents.top = top - m_inversePixelPerProjectionY;
+		_extents.left = left;
+		_extents.right = right - _inversePixelPerProjectionX;
+		_extents.bottom = bottom;
+		_extents.top = top - _inversePixelPerProjectionY;
 
 		CalculateVisibleExtents(Extent(left,right,bottom,top));
 	}
@@ -278,18 +278,18 @@ void CMapView::RestoreExtents()
 {
 	if (mm_newExtents)
 	{
-		m_viewWidth = mm_viewWidth;
-		m_viewHeight = mm_viewHeight;
+		_viewWidth = mm_viewWidth;
+		_viewHeight = mm_viewHeight;
 		//ResizeBuffers(m_viewWidth, m_viewHeight);
-		m_aspectRatio = mm_aspectRatio; 
-		m_pixelPerProjectionX = mm_pixelPerProjectionX;
-		m_pixelPerProjectionY = mm_pixelPerProjectionY;
-		m_inversePixelPerProjectionX = mm_inversePixelPerProjectionX;
-		m_inversePixelPerProjectionY = mm_inversePixelPerProjectionY;
-		extents.left = mm_left;
-		extents.right = mm_right;
-		extents.bottom = mm_bottom;
-		extents.top = mm_top;
+		_aspectRatio = mm_aspectRatio; 
+		_pixelPerProjectionX = mm_pixelPerProjectionX;
+		_pixelPerProjectionY = mm_pixelPerProjectionY;
+		_inversePixelPerProjectionX = mm_inversePixelPerProjectionX;
+		_inversePixelPerProjectionY = mm_inversePixelPerProjectionY;
+		_extents.left = mm_left;
+		_extents.right = mm_right;
+		_extents.bottom = mm_bottom;
+		_extents.top = mm_top;
 	}
 }
 
@@ -309,8 +309,8 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		if (!bmp->CreateDiscardableBitmap(GetDC(), Width, Height))
 		{
 			delete bmp;
-			if( m_globalCallback != NULL )
-				m_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Failed to create bitmap; not enough memory?"));
+			if( _globalCallback != NULL )
+				_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Failed to create bitmap; not enough memory?"));
 			return NULL;
 		}
 	}
@@ -322,7 +322,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	if (mm_newExtents)
 	{
 		ReloadImageBuffers();
-		((CTiles*)m_tiles)->MarkUndrawn();		// otherwise they will be taken from screen buffer
+		((CTiles*)_tiles)->MarkUndrawn();		// otherwise they will be taken from screen buffer
 	}
 
 	IImage * iimg = NULL;
@@ -339,16 +339,16 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	
 	// do the drawing
 	_canUseLayerBuffer=FALSE;
-	m_isSnapshot = true;
+	_isSnapshot = true;
 
 	
-	tilesInCache =((CTiles*)m_tiles)->TilesAreInCache((void*)this);
+	tilesInCache =((CTiles*)_tiles)->TilesAreInCache((void*)this);
 	if (tilesInCache)
 	{
-		((CTiles*)m_tiles)->LoadTiles((void*)this, true);		// simply move the to the screen buffer (is performed synchronously)
+		DoUpdateTiles(true);		// simply move the to the screen buffer (is performed synchronously)
 	}
 
-	CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
+	CRect rcBounds(0,0,_viewWidth,_viewHeight);
 	CRect rcClip((int)clipX, (int)clipY, (int)clipWidth, (int)clipHeight);
 	CRect* r = clipWidth != 0.0 && clipHeight != 0.0 ? &rcClip : &rcBounds;
 	
@@ -359,7 +359,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	DrawMouseMoves(snapDC, rcBounds, *r, false, offsetX, offsetY);
 
 	_canUseLayerBuffer=FALSE;
-	m_isSnapshot = false;
+	_isSnapshot = false;
 
 	if (createDC)
 	{
@@ -368,8 +368,8 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&iimg);
 		iimg->SetImageBitsDC((long)snapDC->m_hDC,&retval);
 
-		double dx = (right-left)/(double)(m_viewWidth);
-		double dy = (top-bottom)/(double)(m_viewHeight);
+		double dx = (right-left)/(double)(_viewWidth);
+		double dy = (top-bottom)/(double)(_viewHeight);
 		iimg->put_dX(dx);
 		iimg->put_dY(dy);
 		iimg->put_XllCenter(left + dx*.5);
@@ -394,7 +394,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	if (tilesInCache)
 	{
 		// restore former list of tiles in the buffer
-		((CTiles*)m_tiles)->LoadTiles((void*)this, false);	  
+		DoUpdateTiles(false);
 	}
 
 	LockWindow( lmUnlock );
@@ -404,13 +404,13 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 // ********************************************************************
 //		DrawBackBuffer()
 // ********************************************************************
-// Draws the backbuffer to the specified DC (probably external)
+// Draws the back buffer to the specified DC (probably external)
 void CMapView::DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (!hdc)
 	{
-		m_lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
+		_lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
 		return;
 	}
 	

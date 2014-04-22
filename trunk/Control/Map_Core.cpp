@@ -1,11 +1,6 @@
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "Map.h"
-#include "Image.h"
 #include "Projections.h"
-#include "Shapefile.h"
-#include "Labels.h"
-#include "Tiles.h"
 #include "xtiffio.h"  /* for TIFF */
 #include "geotiffio.h" /* for GeoTIFF */
 #include "Gdipluspixelformats.h"
@@ -29,14 +24,14 @@ IPoint* CMapView::GetBaseProjectionPoint(double rotPixX, double rotPixY)
 	
   CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&curPoint);
 
-	if (m_Rotate == NULL || m_Rotate->degAngle == 0.0)
+	if (_rotate == NULL || _rotate->degAngle == 0.0)
   {
     basePixX = (long)rotPixX;
     basePixY = (long)rotPixY;
   }
   else
   {
-     m_Rotate->getOriginalPixelPoint((long) rotPixX, (long) rotPixY, &basePixX, &basePixY);
+     _rotate->getOriginalPixelPoint((long) rotPixX, (long) rotPixY, &basePixX, &basePixY);
   }
   PixelToProjection( basePixX, basePixY, baseProjX, baseProjY);
   
@@ -54,21 +49,21 @@ IExtents* CMapView::GetRotatedExtent()
   Extent rotExtent;
 	IExtents * box = NULL;
 
-	rotExtent = extents;
+	rotExtent = _extents;
 	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
   box->SetBounds( rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0 );
 
-	if (m_RotateAngle == 0)
+	if (_rotateAngle == 0)
 	  return box;
 
-	if (m_Rotate == NULL)
-		m_Rotate = new Rotate();
+	if (_rotate == NULL)
+		_rotate = new Rotate();
 
-	m_Rotate->calcRotatedExtent(m_viewWidth, m_viewHeight);
-  rotExtent.right += (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-  rotExtent.bottom -= (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
-  rotExtent.left -= (m_Rotate->xAxisDiff * m_inversePixelPerProjectionX);
-  rotExtent.top += (m_Rotate->yAxisDiff * m_inversePixelPerProjectionY);
+	_rotate->calcRotatedExtent(_viewWidth, _viewHeight);
+  rotExtent.right += (_rotate->xAxisDiff * _inversePixelPerProjectionX);
+  rotExtent.bottom -= (_rotate->yAxisDiff * _inversePixelPerProjectionY);
+  rotExtent.left -= (_rotate->xAxisDiff * _inversePixelPerProjectionX);
+  rotExtent.top += (_rotate->yAxisDiff * _inversePixelPerProjectionY);
   box->SetBounds( rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0 );
 
 	return box;
@@ -76,35 +71,15 @@ IExtents* CMapView::GetRotatedExtent()
 #pragma endregion
 
 #pragma region Images
-// ****************************************************************
-//		ReloadImageBuffers()
-// ****************************************************************
-void CMapView::ReloadImageBuffers()
-{
-	IImage * iimg = NULL;
-	for(size_t i = 0; i < m_activeLayers.size(); i++ )
-	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
-
-		if ((l->type == ImageLayer) && (l->flags & Visible))
-		{
-			if (l->QueryImage(&iimg))
-			{	
-				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
-				iimg->Release();
-			}
-		}
-	}
-}
 
 // ***************************************************
 //  GetImageLayerPercentTransparent
 // ***************************************************
 float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		if( l->type == ImageLayer )
 		{
 			IImage * iimg = NULL;
@@ -139,9 +114,9 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 	if( newValue < 0.0 )		newValue = 0.0;
 	else if( newValue > 1.0 )	newValue = 1.0;
 
-	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		if( l->type == ImageLayer )
 		{	
 			IImage * iimg = NULL;
@@ -167,7 +142,7 @@ VARIANT_BOOL CMapView::SetImageLayerColorScheme(LONG LayerHandle, IDispatch* Col
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
+	if(IS_VALID_LAYER(LayerHandle,_allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IGridColorScheme* scheme = NULL;
@@ -212,9 +187,9 @@ void CMapView::UpdateImage(LONG LayerHandle)
 // ***************************************************************
 BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		if(l->object == NULL) return FALSE;
 		
 		if (l->type == ImageLayer)
@@ -270,17 +245,17 @@ void CMapView::LockWindow(short LockMode)
 {
 	if( LockMode == lmUnlock )
 	{
-		m_lockCount--;
-		if( m_lockCount <= 0 )
+		_lockCount--;
+		if( _lockCount <= 0 )
 		{
-			m_lockCount = 0;
-			((CTiles*)m_tiles)->LoadTiles(this);
+			_lockCount = 0;
+			DoUpdateTiles();
 			ReloadImageBuffers();
 			InvalidateControl();
 		}
 	}
 	else if( LockMode == lmLock )
-		m_lockCount++;
+		_lockCount++;
 }
 
 // *************************************************
@@ -320,8 +295,16 @@ void CMapView::Resize(long Width, long Height)
 // *************************************************
 void CMapView::Redraw2(tkRedrawType redrawType)
 {
-	if (redrawType != RedrawTempObjectsOnly) {
-		((CTiles*)m_tiles)->LoadTiles((void*)this);
+	RedrawCore(redrawType, redrawType != RedrawTempObjectsOnly, false);
+}
+
+// *************************************************
+//			Redraw3()						  
+// *************************************************
+void CMapView::RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce )
+{
+	if (updateTiles) {
+		DoUpdateTiles();
 	}
 
 	switch (redrawType)
@@ -337,7 +320,12 @@ void CMapView::Redraw2(tkRedrawType redrawType)
 			// do nothing, simply invalidate control
 			break;
 	}
-	InvalidateControl();
+	if (atOnce){
+		this->Refresh();
+	}
+	else {
+		InvalidateControl();
+	}
 }
 
 // *************************************************
@@ -353,8 +341,8 @@ void CMapView::Redraw()
 // *************************************************
 void CMapView::ShowToolTip(LPCTSTR Text, long Milliseconds)
 {
-	m_ttip.UpdateTipText(Text,this,IDC_TTBTN);
-	m_ttip.SetDelayTime(TTDT_AUTOPOP,Milliseconds);
+	_ttip.UpdateTipText(Text,this,IDC_TTBTN);
+	_ttip.SetDelayTime(TTDT_AUTOPOP,Milliseconds);
 	KillTimer(HIDETEXT);
 	SetTimer(SHOWTEXT,0,NULL);
 
@@ -377,8 +365,8 @@ BSTR CMapView::GetErrorMsg(long ErrorCode)
 // *************************************************
 long CMapView::GetLastErrorCode()
 {
-	long lec = m_lastErrorCode;
-	m_lastErrorCode = tkNO_ERROR;
+	long lec = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return lec;
 }
 
@@ -388,9 +376,9 @@ long CMapView::GetLastErrorCode()
 inline void CMapView::ErrorMessage(long ErrorCode)
 {
 	USES_CONVERSION;
-	m_lastErrorCode = ErrorCode;
-	if( m_globalCallback != NULL) 
-		m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
+	_lastErrorCode = ErrorCode;
+	if( _globalCallback != NULL) 
+		_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
 	return;
 }
 
@@ -454,65 +442,7 @@ BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 #pragma endregion
 
 #pragma region LayerUpdate
-// **********************************************************
-//			GetDrawingLabels()
-// **********************************************************
-// Deletes dynamically alocated frames info for all layers; drops isDrawn flag
-void CMapView::ClearLabelFrames()
-{
-	// clear frames for regular labels
-	for (int i = 0; i < (int)m_activeLayers.size(); i++)
-	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
-		if( l != NULL )
-		{	
-			// charts
-			if (l->type == ShapefileLayer)
-			{
-				IShapefile * sf = NULL;
-				if (l->QueryShapefile(&sf))
-				{
-					((CShapefile*)sf)->ClearChartFrames();
-					sf->Release();
-				}
-			}
-			
-			// labels
-			ILabels* LabelsClass = l->get_Labels();
-			if (LabelsClass == NULL) continue;
-			
-			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
-			coLabels->ClearLabelFrames();
-			LabelsClass->Release(); LabelsClass = NULL;
-		}
-	}
 
-	// clear frames for drawing labels
-	for(size_t j = 0; j < m_activeDrawLists.size(); j++ )
-	{
-		bool isSkip = false;
-		for (size_t i = 0; i < DrawingLayerInVisilbe.size(); i++)
-		{
-			if (DrawingLayerInVisilbe[i] == j)
-			{
-				isSkip = true;	// skip if this layer is set invisible
-				break;  
-			}
-		}
-		if(isSkip) 
-			continue;
-
-		DrawList * dlist = m_allDrawLists[m_activeDrawLists[j]];
-		if( IS_VALID_PTR(dlist) )
-		{
-			if (dlist->listType == dlSpatiallyReferencedList)
-			{
-				CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
-				coLabels->ClearLabelFrames();
-			}
-		}
-	}
-}
 #pragma endregion
 
 #pragma region Obsolete
@@ -542,9 +472,9 @@ BOOL CMapView::ApplyLegendColors(LPDISPATCH pLegend)
 // *********************************************************
 LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		if( l->type == ShapefileLayer )
 		{	
 			return NULL;	// probably return ShapeDrawingOptions ?
@@ -586,7 +516,7 @@ BSTR CMapView::GetGridFileName(LONG LayerHandle)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString retval;
 
-	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
+	if(IS_VALID_LAYER(LayerHandle,_allLayers))
 	{
 		// redirected to image class for backward compatibility
 		IImage* img = this->GetImage(LayerHandle);
@@ -610,33 +540,7 @@ BSTR CMapView::GetGridFileName(LONG LayerHandle)
 	}
 }
 
-// *********************************************************
-//		SetGridFileName()
-// *********************************************************
-void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if(IS_VALID_LAYER(LayerHandle,m_allLayers))
-	{
-		// redirected to image class for backward compatibility
-		IImage* img = this->GetImage(LayerHandle);
-		if (img != NULL)
-		{
-			USES_CONVERSION;
-			((CImageClass*)img)->sourceGridName = A2W(newVal);		// TODO: use Unicode
-			img->Release();
-		}
-		else
-		{
-			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
-		}
-	}
-	else
-	{
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}
-}
 
 #pragma endregion
 
@@ -676,8 +580,8 @@ CString CMapView::Crypt(CString str)
 	{
 		offset = (int)(tmp[6 - i] - 'A') + 7;
 		curPosition += offset; // spin the decoder wheel to get then encoded character
-		curPosition %= valsLen; // wrap around the "end" of the wheel if needed
-		tmp.AppendChar(vals[curPosition]); // read what the magic wheel says
+		curPosition %= _valsLen; // wrap around the "end" of the wheel if needed
+		tmp.AppendChar(_vals[curPosition]); // read what the magic wheel says
 	}
 
 	return tmp;
@@ -688,62 +592,7 @@ CString CMapView::Crypt(CString str)
 // *********************************************************
 bool CMapView::VerifySerial(CString str)
 {
-	if (Crypt(str) == str)
-		return true;
-	else
-		return false;
-}
-
-// *********************************************************
-//		makeVal()
-// *********************************************************
-inline double CMapView::makeVal( const char * sVal )
-{
-	double val = 0.0;
-
-	if( sVal != NULL )
-	{	
-		for( size_t i = 0; i < _tcslen( sVal ); i++ )
-		{
-			char c = sVal[i];
-			if( isalpha(c) || isdigit(c) )
-			{	c = toupper(c);
-
-				//Adjust by the ASCII value of 0
-				c = c - 48;
-
-				//90-48 = range
-				val += ((double)c)*(42*pow((double)10, (double)i));
-			}
-		}
-	}
-	return val;
+	return Crypt(str) == str;
 }
 #pragma endregion
 
-// *********************************************************
-//		SetWaitCursor()
-// *********************************************************
-HCURSOR CMapView::SetWaitCursor()
-{
-   if (m_DisableWaitCursor)
-		return NULL;
-
-	HCURSOR oldCursor = ::GetCursor();
-   
-	CPoint cpos;
-	GetCursorPos(&cpos);
-	CRect wrect;
-	GetWindowRect(&wrect);
-	
-	HWND wndActive = ::GetActiveWindow();
-	if ((wndActive == this->GetSafeHwnd()) || (wndActive == this->GetParentOwner()->GetSafeHwnd()))
-	{
-		if( wrect.PtInRect(cpos) && (m_mapCursor != crsrUserDefined) && !m_DisableWaitCursor)
-		{
-			::SetCursor(LoadCursor(NULL, IDC_WAIT) );
-		}
-	}
-
-   return oldCursor;
-}

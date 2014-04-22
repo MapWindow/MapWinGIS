@@ -1,14 +1,8 @@
 # ifndef DGRID_H
 # define DGRID_H
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <io.h>
 #include "grdTypes.h"
 #include "dHeader.h"
-//#include "stdafx.h"
-//#include "errorcodes.h"
 
 using namespace std;
 

@@ -2194,8 +2194,8 @@ void CTin::Prune(int &nv,XYZ v[])
 	XYZ *pv = new XYZ[nv];
 	int count=0;
 
-	//removes an duplicate vertices
-	//the array must be sored before prune is called
+	//removes duplicate vertices
+	//the array must be sorted before prune is called
 	for(int i =0; i < nv;i++)
 	{
 		if(i != nv && v[i].x == v[i+1].x && v[i].y == v[i+1].y)
@@ -2227,6 +2227,7 @@ void CTin::Prune(int &nv,XYZ v[])
 	}
 	
 	nv = count;
+	delete[] pv;
 }
 
 void CTin::BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin)

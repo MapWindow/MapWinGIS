@@ -30,8 +30,6 @@
 #include "ShapeDrawingOptions.h"
 #include "Shapefile.h"
 #include "TableClass.h"
-#include "VarH.h"
-//#include "UtilityFunctions.h"
 
 //***********************************************************************/
 //*			get_Count()

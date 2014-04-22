@@ -23,7 +23,6 @@
  // lsu 27 feb 2011 - Created the file.
 
 #pragma once
-#include "MapWinGis.h"
 
 void get_DefaultSymbolOptions(tkDefaultPointSymbol symbol, tkPointShapeType& type, double& rotation, int& numSides, float& sidesRatio);
 float* get_SimplePointShape(tkPointShapeType type, float& size, double& rotation, int& numSides, float& sidesRatio, int* numPoints);

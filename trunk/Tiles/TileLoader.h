@@ -20,12 +20,9 @@
  // lsu 17 apr 2012 - created the file
 
 #pragma once
-#include <atlutil.h>
-#include <algorithm>
 #include <list>
 #include "baseprovider.h"
-#include "Threading.h"
-#include "SQLiteCache.h"
+#include "tilecacher.h"
 
 #define THREADPOOL_SIZE	5
 
@@ -55,6 +52,8 @@ private:
 	bool isSnapshot;
 	CString key;
 	void CleanTasks();
+	std::list<void*> _activeTasks;	// http requests are performed
+	::CCriticalSection _activeTasksLock;
 public:
 	long m_sleepBeforeRequestTimeout;
 	int m_errorCount;
@@ -85,9 +84,10 @@ public:
 		tiles = NULL;
 		m_errorCount = 0;
 		m_sumCount = 0;
-		//m_requestWindow = 20000;			// TODO: make parameters
-		//m_maxRequestCount = 10;
 		m_sleepBeforeRequestTimeout = 0;
+		m_totalCount = 0;
+		isSnapshot = false;
+		m_count = 0;
 	}
 
 	TileLoader::~TileLoader(void)
@@ -106,56 +106,11 @@ public:
 		}
 	}
 
-#pragma region Request limit
-	//std::deque<long> m_requestTimes;
-	//int m_requestWindow;		// the length of period
-	//int m_maxRequestCount;		// the max number of requests in window
-
-	//long TryRequest()
-	//{
-	//	section.Lock();
-	//	DWORD now = GetTickCount();
-	//	int count = 0;
-	//	long waitTime = 0;
-	//	long time;
-	//	for(size_t i = 0; i < m_requestTimes.size(); i++)		// probably should go in reverse order
-	//	{
-	//		time = m_requestTimes[i];
-	//		Debug::WriteLine("Time: %d", time);
-	//		if (time + m_requestWindow > now)
-	//			count++;
-	//		else
-	//			break;	// outside the window
-	//		if (count == m_maxRequestCount)
-	//			waitTime = m_requestWindow - (now - time);
-	//		if (count > m_maxRequestCount)
-	//			break;
-	//	}
-
-	//	section.Lock();
-	//	bool result = count < m_maxRequestCount;
-	//	if (result) 
-	//	{
-	//		RegisterRequest();
-	//		Debug::WriteLine("Can request", waitTime);
-	//	}
-	//	else
-	//	{
-	//		Debug::WriteLine("Request limit met. Sleeping: %d", waitTime);
-	//	}
-
-	//	section.Unlock();
-	//	return result ? -1 : waitTime;
-	//}
-
-	//void RegisterRequest()
-	//{
-	//	DWORD now = GetTickCount();
-	//	m_requestTimes.push_front(now);
-	//	if (m_requestTimes.size() > 50)
-	//		m_requestTimes.pop_back();
-	//}
-#pragma endregion
+	std::list<void*> GetActiveTasks() { return _activeTasks; }
+	void LockActiveTasks(bool lock);
+	void AddActiveTask(void* task);
+	void RemoveActiveTask(void* task);
+	bool HasActiveTask(void* task);
 
 	void StopCaching()
 	{
@@ -190,7 +145,8 @@ public:
 			m_diskCacher.Run();
 		}
 	}
-	void Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, bool isSnaphot, CString key, bool cacheOnly = false);
+	void Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, bool isSnaphot, CString key, 
+		int generation, bool cacheOnly = false);
 	bool InitPools();
 	void Stop();
 	void TileLoaded(TileCore* tile);
@@ -214,10 +170,15 @@ public:
 	LoadingTask(int x, int y, int zoom, BaseProvider* provider, int generation, bool cacheOnly)
 		: x(x), y(y), zoom(zoom), cacheOnly(cacheOnly)
 	{
+		Loader = NULL;
 		this->busy = false;
 		this->completed = false;
 		this->Provider = provider;
 		this->generation = generation;
+	}
+
+	bool Compare(LoadingTask* other) {
+		return this->x == other->x && this->y == other->y && this->zoom == other->zoom;
 	}
 
 	void DoTask();

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Macros.h"
 #include "ShapefileReader.h"
-//#include "UtilityFunctions.h"
 
 // ****************************************************************
 //		ReadShapefileIndex()

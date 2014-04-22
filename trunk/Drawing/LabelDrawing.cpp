@@ -25,10 +25,8 @@
 
 #include "stdafx.h"
 #include "LabelDrawing.h"
-
 #include <map>
 #include <set>
-
 #include "Labels.h"
 #include "LabelCategory.h"
 #include "TableClass.h"
@@ -44,6 +42,9 @@ using namespace Gdiplus;
 CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, double currentScale, 
 						 CCollisionList* collisionList, double mapRotation, bool printing)
 {		
+	_currentScale = 0;
+	_printing = false;
+	m_hdc = NULL;
 	_extents = extents;
 	_pixelPerProjectionX = pixelPerProjectionX;
 	_pixelPerProjectionY = pixelPerProjectionY;
@@ -59,6 +60,9 @@ CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double 
 // screen referenced list
 CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollisionList* collisionList, double mapRotation)
 {
+	_currentScale = 0;
+	_printing = false;
+	m_hdc = NULL;
 	_extents = extents;
 	_pixelPerProjectionX = 0.0;
 	_pixelPerProjectionY = 0.0;
@@ -138,7 +142,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	
 	if (!useGdiPlus)
 	{
-		// let's check whethe it's possible to draw everything by GDI
+		// let's check whether it's possible to draw everything by GDI
 		CLabelOptions* options = ((CLabels*)LabelsClass)->get_LabelOptions();
 		if (options->fontGradientMode != gmNone || options->fontTransparency != 255 || 
 		  ((options->frameGradientMode != gmNone || options->frameTransparency != 255) && options->frameVisible))
@@ -184,7 +188,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	// ------------------------------------------------------------
 	//		GDI+ objects
 	// ------------------------------------------------------------
-	// We create GDI+ objects even if no GDI+ mode is used as varibles won't be visible through the code otherwise.
+	// We create GDI+ objects even if no GDI+ mode is used as variables won't be visible through the code otherwise.
 	// Create them inside loop for each category is a waste of time
 
 	// pens
@@ -207,7 +211,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	Gdiplus::LinearGradientBrush* gpBrushFontGrad = NULL;
 	Gdiplus::LinearGradientBrush* gpBrushFrameGrad = NULL;
 	
-	WCHAR* wText = NULL;
+	CStringW wText;
 	Font* gpFont = NULL;
 
 	RectF gpRect(0.0f, 0.0f, 0.0f, 0.0f);
@@ -356,7 +360,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		}
 		else
 		{
-			// Drawing with standart settings
+			// Drawing with standard settings
 			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
 			m_options = coLabels->get_LabelOptions();
 		}
@@ -365,7 +369,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		if (!m_options->visible) continue;
 
 		// ---------------------------------------------------------------
-		//	 Standart or category settings
+		//	 Standard or category settings
 		// ---------------------------------------------------------------
 		CString s(m_options->fontName);
 		fnt.CreatePointFont(m_options->fontSize * 10, s);
@@ -445,7 +449,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		}
 		else
 		{
-			// TODO: limit options of tkLineStipples maybe part standart penStyles enumeration
+			// TODO: limit options of tkLineStipples maybe part standard penStyles enumeration
 			penFontOutline.CreatePen(PS_SOLID, m_options->fontOutlineWidth, m_options->fontOutlineColor);
 			penFrameOutline.CreatePen(m_options->frameOutlineStyle, m_options->frameOutlineWidth, m_options->frameOutlineColor);
 		
@@ -491,7 +495,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				}
 
 				// -------------------------------------------------------
-				//	Calculating the width and heiht of output rectangle
+				//	Calculating the width and height of output rectangle
 				// -------------------------------------------------------
 				if (!useGdiPlus)
 				{
@@ -502,11 +506,13 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				}
 				else
 				{
+					USES_CONVERSION;
+					wText = A2W(lbl->text);
 					//wText = CT2WEX((LPCSTR)lbl->text.GetString());		// TODO: try to implement this version
-					int size = MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, NULL, 0);
+					/*int size = MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, NULL, 0);
 					wText = new WCHAR[size];
-					MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, wText, size);
-					_graphics->MeasureString(wText, lbl->text.GetLength(), gpFont, PointF(0.0f, 0.0f), &gpRect);
+					MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, wText, size);*/
+					_graphics->MeasureString(wText, wText.GetLength(), gpFont, PointF(0.0f, 0.0f), &gpRect);
 					
 					// in some case we lose the last letter by clipping; 
 					gpRect.Width += 1;
@@ -519,7 +525,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					rect.bottom = static_cast<LONG>(gpRect.Y + gpRect.Height);
 				}
 				
-				// laCenter alignment isn't allowedfor outo mode
+				// laCenter alignment isn't allowed for auto mode
 				tkLabelAlignment align = (autoOffset && m_options->alignment == laCenter) ? laCenterRight : m_options->alignment;
 				AlignRectangle(rect, m_options->alignment);
 				
@@ -654,8 +660,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					{
 						if (_collisionList->HaveCollision(*rectNew))
 						{
-							if (useGdiPlus)
-								delete wText;
 							delete rectNew;	continue;
 						}
 					}
@@ -682,8 +686,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					{
 						if (_collisionList->HaveCollision(*rectNew) )
 						{
-							if (useGdiPlus)
-								delete wText;
 							delete rectNew; continue;
 						}
 					}
@@ -792,7 +794,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					
 					if (m_options->fontTransparency != 0)
 					{
-						bool pathNeeded = m_options->shadowVisible || (m_options->haloVisible && m_options) || m_options->fontOutlineVisible;
+						bool pathNeeded = m_options && (m_options->shadowVisible || m_options->haloVisible || m_options->fontOutlineVisible);
 						GraphicsPath* gp = NULL;
 						if (pathNeeded)
 						{
@@ -800,7 +802,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 							gp->StartFigure();
 							FontFamily fam; 
 							gpFont->GetFamily(&fam);
-							gp->AddString(wText, wcslen(wText), &fam, gpFont->GetStyle(), gpFont->GetSize(), gpRect, &gpStringFormat);
+							gp->AddString(wText, wText.GetLength(), &fam, gpFont->GetStyle(), gpFont->GetSize(), gpRect, &gpStringFormat);
 							gp->CloseFigure();
 						}
 
@@ -815,7 +817,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 							gp->Transform(&mtx1);
 						}
 
-						if  (m_options->haloVisible && m_options)
+						if  (m_options && m_options->haloVisible)
 							_graphics->DrawPath(gpPenHalo, gp);
 
 						if(m_options->fontOutlineVisible)
@@ -824,19 +826,17 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						if (m_options->fontGradientMode != gmNone)
 						{
 							gpBrushFontGrad = new LinearGradientBrush(gpRect, clFont1, clFont2, (LinearGradientMode)m_options->fontGradientMode);
-							_graphics->DrawString(wText, wcslen(wText), gpFont, gpRect, &gpStringFormat, gpBrushFontGrad);	// TODO: we need speed test here to choose the function
+							_graphics->DrawString(wText, wText.GetLength(), gpFont, gpRect, &gpStringFormat, gpBrushFontGrad);	// TODO: we need speed test here to choose the function
 							delete gpBrushFontGrad;
 						}
 						else
 						{
-							_graphics->DrawString(wText, wcslen(wText), gpFont, gpRect, &gpStringFormat, gpBrushFont);
+							_graphics->DrawString(wText, wText.GetLength(), gpFont, gpRect, &gpStringFormat, gpBrushFont);
 						}
 						if (pathNeeded) {
 							delete gp;
 						}
-						delete wText;
 					}
-
 					_graphics->SetTransform(&mtxInit);
 				}
 			}

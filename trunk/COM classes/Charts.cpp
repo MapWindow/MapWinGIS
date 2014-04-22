@@ -30,7 +30,7 @@
 #include "GeometryOperations.h"
 #include "Templates.h"
 #include "CollisionList.h"
-#include "GdalHelper.h"
+#include "Chart.h"
 
 // **********************************************************
 //		get/put_Key()

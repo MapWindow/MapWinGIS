@@ -1,7 +1,6 @@
 // MapPpg.cpp : Implementation of the CMapPropPage property page class.
 
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "MapPpg.h"
 
 #ifdef _DEBUG

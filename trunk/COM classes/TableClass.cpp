@@ -18,27 +18,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ************************************************************************************** 
- * Contributor(s): 
- * (Open source contributors should list themselves and their modifications here). */
-
-// 06/07/2007 - Tom Shanley (tws) - fixed a memory leak in EditCellValue
-// 07/28/2009 - ÷‹¥œª‘(Neio)   -- change the bahavior of SaveAs
-//                                             -- Add Save Method for saving without exiting edit mode
-//
-// 09/02/2009 - Charles Yin - Change the behavior of StartEditing and StopEditing, make the saving faster 
-//                            less memory usage.                              
+ ************************************************************************************** */
 
 #include "stdafx.h"
 #include "TableClass.h"
-#include <Oleauto.h> //used for Date Variant conversion
-
 #include <algorithm>
-#include <iterator>
-
-#include "VarH.h"
 #include "Templates.h"
 #include "JenksBreaks.h"
+#include "Field.h"
 
 #pragma warning(disable:4996)
 
@@ -1037,7 +1024,7 @@ void CTableClass::LoadDefault_rows()
 {	
     if (!_rows.empty())
     {
-        for (std::vector<RecordWrapper>::iterator i = _rows.begin(); i!= _rows.end(); i++)
+        for (std::vector<RecordWrapper>::iterator i = _rows.begin(); i!= _rows.end(); ++i)
         {
             if ( (*i).row != NULL) delete (*i).row;
         }
@@ -1635,7 +1622,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 		    {	
 				CString cval;
 			    CString fmat;
-			    fmat.Format("%i",precision);
+			    fmat.Format("%ld",precision);
 			    cval.Format("%." + fmat + "d",precision,newVal.dblVal);	
 			    valWidth = cval.GetLength();
 		    }
@@ -2887,7 +2874,7 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	while(it != fieldList.end())
 	{
 		csvFields += *it + ",";
-		it++;
+		++it;
 	}
 	if (csvFields.GetLength() > 0) {
 		csvFields = csvFields.Left(csvFields.GetLength() - 1);

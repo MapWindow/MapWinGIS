@@ -5,13 +5,7 @@
 
 #include "stdafx.h"
 #include "tkJpg.h"
-
-//#include <setjmp.h>
-
-
-
 #include <cassert>
-#include <fstream>
 #include <exception>
 
 extern "C" 

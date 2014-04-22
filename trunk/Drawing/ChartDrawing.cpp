@@ -25,14 +25,10 @@
 
 #include "stdafx.h"
 #include "ChartDrawing.h"
-
-#include <fstream>
 #include <set>
-
 #include "Shapefile.h"
 #include "Charts.h"
 #include "TableClass.h"
-
 #include "Macros.h"
 
 // ******************************************************

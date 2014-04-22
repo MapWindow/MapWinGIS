@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,64 +14,19 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-
-// --------------------------------------------------------------------------------------------------------
-//Contributor(s): (Open source contributors should list themselves and their modifications here). 
-// --------------------------------------------------------------------------------------------------------
-//3-28-2005 dpa - Updated for custom line stipples and label collision.
-//3-16-2006 Chris Michaelis (cdm) -- Added the ability to use multiple (differing) icons 
-//			in a single layer through the new functions set_ShapePointImageListID and 
-//			set_UDPointImageListAdd; also the new tkPointType enum value "ptImageList".
-//			Also a few functions to get the count of images and get an image, etc. The functions have "set_" in
-//			them to try to make the functions appear next to the properties in VB intellisense.
-//4-07-2007 Tom Shanley (tws) - support for large-scale image exports: added SnapShot2(), m_isSnapshot
-//3-16-2009 Ray Quay - Added ability to turn off trapping of right mouse click for zoom, and property
-//          to turn trapping on and off.  This allows right click context menus without zoom.
-//          Added property TrapRMouseDown:BOOL Functions SetTrapRMouseDown, GetTrapRMouseDown
-//7-03-2009 Sergei Leschinski (lsu) UseSeamlessPan property added.
-// --------------------------------------------------------------------------------------------------------
-
-#if !defined(AFX_MAP_H__FAF5AFC5_D242_402A_B6E3_E6FF5E2E514C__INCLUDED_)
-#define AFX_MAP_H__FAF5AFC5_D242_402A_B6E3_E6FF5E2E514C__INCLUDED_
-
-#if _MSC_VER > 1000
+//********************************************************************************************************
 #pragma once
-#endif // _MSC_VER > 1000
-
-#pragma region Include
-# include "MapWinGis.h"
-
-# include <stdio.h>
-# include <io.h>
-# include <vector>
-# include <stack>
-# include <winbase.h>
+# include <list>
 # include <afxmt.h>
-# include <math.h>
-# include <gdiplus.h>
-
-# include "MapTracker.h"
+# include "DispIds.h"
 # include "macros.h"
-# include "ErrorCodes.h"
 # include "ToolTipEx.h"
-
-# include "varH.h"
-
-# include "ShapeLayerInfo.h"
-# include "ShapeInfo.h"
-# include "ImageLayerInfo.h"
 # include "Layer.h"
 # include "DrawList.h"
-
 # include "DrawingOptions.h"
-
-# include "GeometryOperations.h"
-# include "MapRotate.h"   // ajp
+# include "MapRotate.h"
 # include "ImageGroup.h"
 # include "CollisionList.h"
-# include "Measuring.h"
-
-#pragma endregion
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -201,7 +156,7 @@ protected:
 	afx_msg long GetLayerPosition(long LayerHandle);
 	afx_msg long GetLayerHandle(long LayerPosition);
 	afx_msg LPDISPATCH GetColorScheme(long LayerHandle);
-	afx_msg VARIANT_BOOL CMapView::get_Fileame(LONG LayerHandle, BSTR* layerName );
+	afx_msg VARIANT_BOOL get_Fileame(LONG LayerHandle, BSTR* layerName );
 
 	#pragma endregion
 
@@ -287,7 +242,7 @@ protected:
 	afx_msg VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
 
 public:
-	afx_msg IExtents* CMapView::GetGeographicExtents();
+	afx_msg IExtents* GetGeographicExtents();
 	afx_msg VARIANT_BOOL SetGeographicExtents(IExtents* extents);
 
 	afx_msg ITiles* GetTiles(void);
@@ -302,6 +257,9 @@ protected:
 
 	afx_msg VARIANT_BOOL GetScalebarVisible(void);
 	afx_msg void SetScalebarVisible(VARIANT_BOOL pVal);
+
+	afx_msg VARIANT_BOOL GetShowZoombar(void);
+	afx_msg void SetShowZoombar(VARIANT_BOOL pVal);
 
 	afx_msg tkScalebarUnits GetScalebarUnits(void);
 	afx_msg void SetScalebarUnits(tkScalebarUnits pVal);
@@ -321,7 +279,6 @@ protected:
 	afx_msg void Clear();
 
 	#pragma endregion
-	
 
 	// Obsolete properties
 	#pragma region Obsolete properties
@@ -488,7 +445,6 @@ protected:
 	afx_msg BOOL GetShapeStippleTransparent(long LayerHandle, long Shape);
 	#pragma endregion
 
-
 	// Regular methods
 	#pragma region Methods
 	afx_msg void Redraw2(tkRedrawType redrawType);
@@ -520,7 +476,6 @@ protected:
 	afx_msg void ShowToolTip(LPCTSTR Text, long Milliseconds);
 	#pragma endregion
 
-
 	// Obsolete methods
 	#pragma region Obsolete methods
 	afx_msg void AddLabel(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, double x, double y, short hJustification);
@@ -539,6 +494,7 @@ protected:
 	afx_msg void ClearDrawingLabels(long drawHandle);
 	#pragma endregion
 		
+	#pragma region New API members
 	afx_msg long NewDrawing(short Projection);
 	afx_msg void DrawPoint(double x, double y, long size, OLE_COLOR color);
 	afx_msg void DrawLine(double x1, double y1, double x2, double y2, long width, OLE_COLOR color);
@@ -546,66 +502,47 @@ protected:
 	afx_msg void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill);
 	afx_msg void DrawWideCircle(double x, double y, double radius, OLE_COLOR color, BOOL fill, int width);
 	afx_msg void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, BOOL fill, short Width);
-
 	afx_msg BOOL IsTIFFGrid(LPCTSTR Filename);
 	afx_msg BOOL IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b);
 	afx_msg long HWnd();
-	
 	afx_msg void ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath);
 	afx_msg BOOL AdjustLayerExtents(long LayerHandle);	// Rob Cairns 29-Jun-09
-	
 	afx_msg void SetCurrentScale(DOUBLE newVal);
 	afx_msg DOUBLE GetCurrentScale(void);
-	
 	afx_msg void SetMapUnits(tkUnitsOfMeasure units);
 	afx_msg tkUnitsOfMeasure GetMapUnits(void);
-	
-	afx_msg BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY,
-							 float ClipX, float ClipY, float clipWidth, float clipHeight);
+	afx_msg BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, float ClipX, float ClipY, float clipWidth, float clipHeight);
 	afx_msg BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, LONG Width);
 	afx_msg void LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider);
-
-	afx_msg INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider);
-
-	// Added ajp June 2010  
+	afx_msg INT TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvider provider);
 	afx_msg void SetMapRotationAngle(float nNewValue);
 	afx_msg float GetMapRotationAngle(void);
 	afx_msg IExtents* GetRotatedExtent(void);
 	afx_msg IPoint* GetBaseProjectionPoint(double rotPixX, double rotPixY);
-	
 	afx_msg void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color);
 	afx_msg void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
 	afx_msg void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
 	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
 	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
 	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
-
-	// saves layer options, on loading doesn't add new layer
 	afx_msg BSTR SerializeLayerOptions(LONG LayerHandle);
 	afx_msg VARIANT_BOOL DeserializeLayerOptions(LONG LayerHandle, LPCTSTR newVal);
-
-
 	afx_msg IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
 	afx_msg IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
-
 	afx_msg VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
 	afx_msg void UpdateImage(LONG LayerHandle);
-
 	afx_msg VARIANT_BOOL DeserializeMapState(LPCTSTR State, VARIANT_BOOL LoadLayers, LPCTSTR BasePath);
 	afx_msg BSTR SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath);
 	afx_msg CString get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName);
 	afx_msg VARIANT_BOOL RemoveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName);
-
 	afx_msg VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 	afx_msg VARIANT_BOOL ZoomToTileLevel(int zoom);
 	afx_msg IMeasuring* GetMeasuring(void);
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
 	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
-
 	afx_msg long AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
 	afx_msg VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
 	afx_msg IExtents* GetKnownExtents(tkKnownExtents extents);
-	
 	afx_msg void SetLatitude(float nNewValue);
 	afx_msg float GetLatitude();
 	afx_msg void SetLongitude(float nNewValue);
@@ -622,11 +559,11 @@ protected:
 	afx_msg tkCoordinatesDisplay GetShowCoordinates();
 	afx_msg void SetGrabProjectionFromData(VARIANT_BOOL nNewValue);
 	afx_msg VARIANT_BOOL GetGrabProjectionFromData();
-
 	afx_msg VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
 	afx_msg VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
 	afx_msg VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
 	afx_msg VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+	#pragma endregion
 
 	//}}AFX_DISPATCH
 	DECLARE_DISPATCH_MAP()
@@ -667,333 +604,124 @@ public:
 	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
-		{
-			FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));
-		}
+		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
 
-#pragma region DispatchAndEventIds
 public:
-enum {		//{{AFX_DISP_ID(CMapView)
+#pragma region Members
+	// --------------------------------------------
+	//	  Drawing
+	// --------------------------------------------
+	BOOL _canUseLayerBuffer;			// the data layers can be drawn from buffer
+	bool _canUseMainBuffer;				// all the stuff can taken from buffer (only mouse moves will be drawn above)
+	int _redrawId;					// the ordinal number of redraw request
+	bool _isSnapshot;					// used by SnapShots
+	int _lockCount;
+	bool _isSizing;					// the sizing of control takes place now, redraw is forbidden - TODO: replace by Mutex
 	
-	dispidDegreesToPixel = 225L,
-	dispidPixelToDegrees = 224L,
-	dispidDegreesToProj = 223L,
-	dispidProjToDegrees = 222L,
-	dispidGrabProjectionFromData = 221L,
-	dispidRedraw2 = 220L,
-	dispidShowCoordinates = 219L,
-	dispidKnownExtents = 218L,
-	dispidMapProjection = 217L,
-	dispidLatitude = 212L,
-	dispidLongitude = 213L,
-	dispidCurrentZoom = 214L,
-	dispidTileProvider = 216L,
-	dispidFileManager = 211L,
-	dispidAddLayerFromFilename = 210L,
-	dispidGetKnownExtents = 209L,
-	dispidSetGeographicExtents2 = 208L,
-	dispidZoomBehavior = 207L,
-	dispidClear = 206L,
-	dispidScalebarUnits = 205L,
-	dispidTilesAreInCache = 204L,
-	dispidFindSnapPoint = 203L,
-	dispidSnapShotToDC2 = 202L,
-	dispidLoadTilesForSnapshot = 201L,
-	dispidZoomToWorld = 200L,
-	dispidLayerMinVisibleZoom = 199L,
-	dispidLayerMaxVisibleZoom = 198L,
-	dispidZoomToTileLevel = 197L,
-	dispidMeasuring = 196L,
-	dispidScalebarVisible = 195L,
-	dispidSetGeographicExtents = 194L,
-	dispidGeographicExtents = 193L,
-	dispidProjection = 192L,
-	dispidTiles = 191L,
-	dispidZoomToSelected = 190L,
-	dispidLayerFilename = 189,
-	dispidPixelsPerDegree = 188,
-	dispidMaxExtents = 187,
-	dispidLayerSkipOnSaving = 186,
-	dispidRemoveLayerOptions = 185L,
-	dispidSerializeMapState = 184L,
-	dispidDeserializeMapState = 183L,
-	dispidLayerDescription = 182,
-	dispidLoadLayerOptions = 181L,
-	dispidSaveLayerOptions = 180L,
-	dispidLoadMapState = 179L,
-	dispidSaveMapState = 178L,
-	dispidDeserializeLayerOptions = 177L,
-	dispidSerializeLayerOptions = 176L,
-	dispidImage = 175,
-	dispidShapefile = 174,
-	dispidShowVersionNumber = 173,
-	dispidShowRedrawTime = 172,
-	dispidLayerLabels = 171,
-	dispidLayerDynamicVisibility = 169,
-	dispidLayerMinVisibleScale = 168,
-	dispidLayerMaxVisibleScale = 167,
-	dispidVersionNumber = 166,
-	dispidDrawWideCircleEx = 160L,
-	dispidDrawWidePolygonEx = 161L,
-
-	// NOTE: ClassWizard will add and remove enumeration elements here
-	//    DO NOT EDIT what you see in these blocks of generated code !
-	// **ClassWizard is a thing of the past... feel free to edit this code.
-	dispidBackColor = 1L,
-	dispidZoomPercent = 2L,
-	dispidCursorMode = 3L,
-	dispidMapCursor = 4L,
-	dispidUDCursorHandle = 5L,
-	dispidSendMouseDown = 6L,
-	dispidSendMouseUp = 7L,
-	dispidSendMouseMove = 8L,
-	dispidSendSelectBoxDrag = 9L,
-	dispidSendSelectBoxFinal = 10L,
-	dispidExtentPad = 11L,
-	dispidExtentHistory = 12L,
-	dispidKey = 13L,
-	dispidDoubleBuffer = 14L,
-	dispidGlobalCallback = 15L,
-	dispidNumLayers = 16L,
-	dispidExtents = 17L,
-	dispidLastErrorCode = 18L,
-	dispidIsLocked = 19L,
-	dispidMapState = 20L,
-	dispidInitializeMap = 21L,
-	dispidUninitializeMap = 22L,
-	dispidRedraw = 23L,
-	dispidAddLayer = 24L,
-	dispidRemoveLayer = 25L,
-	dispidRemoveLayerWithoutClosing = 138L,
-	dispidRemoveAllLayers = 26L,
-	dispidMoveLayerUp = 27L,
-	dispidMoveLayerDown = 28L,
-	dispidMoveLayer = 29L,
-	dispidMoveLayerTop = 30L,
-	dispidMoveLayerBottom = 31L,
-	dispidZoomToMaxExtents = 32L,
-	dispidZoomToLayer = 33L,
-	dispidZoomToShape = 34L,
-	dispidZoomIn = 35L,
-	dispidZoomOut = 36L,
-	dispidZoomToPrev = 37L,
-	dispidProjToPixel = 38L,
-	dispidPixelToProj = 39L,
-	dispidClearDrawing = 40L,
-	dispidClearDrawings = 41L,
-	dispidSnapShot = 42L,
-	dispidApplyLegendColors = 43L,
-	dispidLockWindow = 44L,
-	dispidResize = 45L,
-	dispidShowToolTip = 46L,
-	dispidAddLabel = 47L,
-	dispidClearLabels = 48L,
-	dispidLayerFont = 49L,
-	dispidGetColorScheme = 50L,
-	dispidNewDrawing = 51L,
-	dispidPoint = 52L,
-	dispidLine = 53L,
-	dispidCircle = 54L,
-	dispidPolygon = 55L,
-	dispidLayerKey = 56L,
-	dispidLayerPosition = 57L,
-	dispidLayerHandle = 58L,
-	dispidLayerVisible = 59L,
-	dispidShapeLayerFillColor = 60L,
-	dispidShapeFillColor = 61L,
-	dispidShapeLayerLineColor = 62L,
-	dispidShapeLineColor = 63L,
-	dispidShapeLayerPointColor = 64L,
-	dispidShapePointColor = 65L,
-	dispidShapeLayerDrawFill = 66L,
-	dispidShapeDrawFill = 67L,
-	dispidShapeLayerDrawLine = 68L,
-	dispidShapeDrawLine = 69L,
-	dispidShapeLayerDrawPoint = 70L,
-	dispidShapeDrawPoint = 71L,
-	dispidShapeLayerLineWidth = 72L,
-	dispidShapeLineWidth = 73L,
-	dispidShapeLayerPointSize = 74L,
-	dispidShapePointSize = 75L,
-	dispidShapeLayerFillTransparency = 76L,
-	dispidShapeFillTransparency = 77L,
-	dispidShapeLayerLineStipple = 78L,
-	dispidShapeLineStipple = 79L,
-	dispidShapeLayerFillStipple = 80L,
-	dispidShapeFillStipple = 81L,
-	dispidShapeVisible = 82L,
-	dispidImageLayerPercentTransparent = 83L,
-	dispidErrorMsg = 84L,
-	dispidDrawingKey = 85L,
-	dispidShapeLayerPointType = 86L,
-	dispidShapePointType = 87L,
-	dispidLayerLabelsVisible = 88L,
-	dispidUDLineStipple = 89L,
-	dispidUDFillStipple = 90L,
-	dispidUDPointType = 91L,
-	dispidGetObject = 92L,
-	dispidLayerName = 91,	
-	dispidSetImageLayerColorScheme = 92L,		
-	dispidGridFileName = 93,	
-	dispidUpdateImage = 94L,
-	dispidSerialNumber = 95,
-	dispidLineSeparationFactor = 96,
-	dispidLayerLabelsShadow = 97L,
-	dispidLayerLabelsScale = 98L,
-	dispidAddLabelEx = 99L,
-	dispidGetLayerStandardViewWidth = 100L,
-	dispidSetLayerStandardViewWidth = 101L,
-	dispidLayerLabelsOffset = 102L,
-	dispidLayerLabelsShadowColor = 103L,
-	dispidUseLabelCollision = 104L,
-	dispidIsTIFFGrid = 105L,
-	dispidIsSameProjection = 106L,
-	dispidZoomToMaxVisibleExtents = 107L,
-	dispidMapResizeBehavior = 108L,
-	dispidDrawLineEx = 115L,		
-	dispidDrawPointEx = 116L,		
-	dispidDrawCircleEx = 117L,		
-	dispidSendOnDrawBackBuffer = 118L,		
-	dispidLabelColor = 119L,		
-	dispidSetDrawingLayerVisible = 120L,		
-	dispidClearDrawingLabels = 121L,
-	dispidDrawingFont = 122L,
-	dispidAddDrawingLabelEx = 123L,
-	dispidAddDrawingLabel =124L,
-	dispidDrawingLabelsOffset = 125L,
-	dispidDrawingLabelsScale = 126L,
-	dispidDrawingLabelsShadow = 127L,
-	dispidDrawingLabelsShadowColor = 128L,
-	dispidUseDrawingLabelCollision = 129L,
-	dispidDrawingLabelsVisible = 130L,
-	dispidGetDrawingStandardViewWidth = 131L,
-	dispidSetDrawingStandardViewWidth = 132L,
-	dispidMultilineLabels = 133,
-	dispidSnapShot2 = 136L,
-	dispidLayerFontEx = 137L, 
-	dispidset_UDPointFontCharFont = 139L, 
-	dispidset_UDPointFontCharFontSize = 141L,
-	dispidset_UDPointFontCharListAdd = 140L, 
-	dispidShapePointFontCharListID = 142L,
-    dispidReSourceLayer = 143L,
-	dispidShapeLayerStippleColor = 144L,
-	dispidShapeStippleColor = 145L,
-	dispidShapeStippleTransparent = 146L,
-	dispidShapeLayerStippleTransparent = 147L,
-    dispidTrapRMouseDown = 148L,
-	dispidDisableWaitCursor = 149L,
-	dispidAdjustLayerExtents = 150L,
-	dispidUseSeamlessPan = 151L,
-	dispidMouseWheelSpeed = 152L,
-	dispidSnapShot3 = 153L,
-	dispidShapeDrawingMethod = 154L,
-	dispidDrawPolygonEx = 155L,
-	dispidCurrentScale = 156L,
-	dispidDrawingLabels = 157L,
-	dispidMapUnits = 158L,
-	dispidSnapShotToDC = 159L,
-    dispidMapRotationAngle = 162L,           //ajp June 2010
-    dispidRotatedExtent = 163L,				  //ajp June 2010
-    dispidGetBaseProjectionPoint = 164L,     //ajp June 2010
-	dispidCanUseImageGrouping = 165L,		 // lsu
-	dispidDrawBackBuffer = 170L,
-
-	// events
-	eventidMouseDown = 1L,
-	eventidMouseUp = 2L,
-	eventidMouseMove = 3L,
-	eventidFileDropped = 4L,
-	eventidSelectBoxFinal = 5L,
-	eventidSelectBoxDrag = 6L,
-	eventidExtentsChanged = 7L,
-	eventidMapState = 8L,
-	eventidOnDrawBackBuffer = 9L,
-	eventidShapeHighlighted = 10L,
-	eventidBeforeDrawing = 11L,
-	eventidAfterDrawing = 12L,
-	eventidTilesLoaded = 13L,
-	eventidMeasuringChanged = 14L,
-	eventidLayersChanged = 15L,
-	//}}AFX_DISP_ID
-	};
-#pragma endregion
-
-#pragma region Drawing variables
-	
-
-	// temporary shapefile to display hot tracking
-	struct HotTrackingInfo
-	{
-		IShapefile* Shapefile;
-		int ShapeId;
-		int LayerHandle;
-	}m_hotTracking;
-
-	Gdiplus::Bitmap* m_layerBitmap;
-	
-	// the data layers can be drawn from buffer
-	BOOL _canUseLayerBuffer;	
-	
-	// all the stuff can taken from buffer (only mouse moves will be drawn above)
-	bool _canUseMainBuffer;		
-
-	bool m_rectTrackerIsActive;
-
-	// tiles buffer
-	Gdiplus::Bitmap* m_tilesBitmap;
-	ITiles* m_tiles;			// the list of tiles (in-memory GDI+ bitmaps)
-
-	// a back buffer for drawing objects, the stuff like rubber band lines, etc.
-	Gdiplus::Bitmap* m_drawingBitmap;
-
-	// combined buffer, holds all the other ones (tiles, layers, drawing layers)
-	// is used for dragging operation
-	Gdiplus::Bitmap* m_bufferBitmap;
-
-	// map is being dragged by user
-	CPoint m_bitbltClickDown;
-	CPoint m_bitbltClickMove;
-
-	// image grouping
-	BOOL _canUseImageGrouping;	// lsu 11 jul 2010
-
-	// mutexes
 	::CMutex m_drawMutex;
-	int m_lockCount;
-	::CMutex m_legendMutex;		//Legend Mutes
-	::CMutex m_mapstateMutex;
-	bool m_isSizing;			// the sizing of control takes place now, redraw is forbidden - TODO: replace by Mutex
-	bool snapshot;
 
-	//Layers
-	std::deque<long> m_activeLayers;
-	std::vector<Layer *> m_allLayers;
+	Gdiplus::Bitmap* _layerBitmap;	   // layer buffer
+	Gdiplus::Bitmap* _tilesBitmap;	   // tiles buffer
+	Gdiplus::Bitmap* _drawingBitmap;   // a back buffer for drawing objects, the stuff like rubber band lines, etc.
+	Gdiplus::Bitmap* _bufferBitmap;    // combined buffer, holds all the other ones (tiles, layers, drawing layers)
+	Gdiplus::Bitmap* _tempBitmap;	   // to scale contents of the rest bitmaps 
+
+	Gdiplus::SolidBrush _brushBlack;
+	Gdiplus::SolidBrush _brushWhite;
+	Gdiplus::SolidBrush _brushGray;
+	Gdiplus::Pen _penGray;
+	Gdiplus::Pen _penDarkGray;
+	Gdiplus::Font* _fontCourier;
+	Gdiplus::Font* _fontArial;
+
+	HCURSOR _cursorPan;
+	HCURSOR _cursorZoomin;
+	HCURSOR _cursorZoomout;
+	HCURSOR _cursorSelect;
+	HCURSOR _cursorMeasure;
+	HCURSOR _udCursor;
 	
-	//Draw Layers
-	std::deque<long> m_activeDrawLists;
-	std::deque<DrawList *> m_allDrawLists;
-	std::deque<long> DrawingLayerInVisilbe; //stores all the invisible layer handles
-	long m_currentDrawing;					//current Drawing
+	// --------------------------------------------
+	//	  Layers
+	// --------------------------------------------
+	std::deque<long> _activeLayers;
+	std::vector<Layer *> _allLayers;
+	
+	// draw layers
+	deque<long> _activeDrawLists;
+	std::deque<DrawList *> _allDrawLists;
+	std::deque<long> _drawingLayerInvisilbe; //stores all the invisible layer handles
+	long _currentDrawing;					//current Drawing
 
-	//Extents
-	Extent extents;
-	std::deque<Extent> m_prevExtents;
+	// --------------------------------------------
+	//	 Extents
+	// --------------------------------------------
+	TileBuffer _tileBuffer;
+	Extent _extents;
+	std::deque<Extent> _prevExtents;
 
-	//Window Properties
-	long m_viewWidth;
-	long m_viewHeight;
-	double m_aspectRatio;
+	// window properties
+	long _viewWidth;
+	long _viewHeight;
+	double _aspectRatio;
 
-	//Projection Variables
-	double m_pixelPerProjectionX;
-	double m_pixelPerProjectionY;
-	double m_inversePixelPerProjectionX;
-	double m_inversePixelPerProjectionY;
+	// projection variables
+	double _pixelPerProjectionX;
+	double _pixelPerProjectionY;
+	double _inversePixelPerProjectionX;
+	double _inversePixelPerProjectionY;
 
-	// snapshot temp variables
+	// ---------------------------------------------
+	//	Public control properties
+	// ---------------------------------------------
+	BOOL _doTrapRMouseDown;
+	BOOL _disableWaitCursor;
+	BOOL _useSeamlessPan;
+	BOOL _showVersionNumber;			   // whether to show version number in the lower right corner
+	BOOL _showRedrawTime;				   // whether to show time in the lower left corner
+	BOOL _scalebarVisible;
+	BOOL _grabProjectionFromData;
+	BOOL _zoombarVisible;
+	BOOL _canUseImageGrouping;
+	BOOL _panningInertia;			// TODO: make a property
+	BOOL _reuseTileBuffer;			// TODO: make property
+	BOOL _zoomAnimation;			// TODO: make property
+
+	tkShapeDrawingMethod _shapeDrawingMethod;
+	tkUnitsOfMeasure _unitsOfMeasure;
+	tkResizeBehavior _mapResizeBehavior;  // How to behave on resize
+	tkZoomBehavior _zoomBehavior;
+	tkKnownExtents _knownExtents;
+	tkCoordinatesDisplay _showCoordinates;
+	tkScalebarUnits  _scalebarUnits;
+	
+	CString _versionNumber;
+	double _mouseWheelSpeed;
+	long _lastErrorCode;
+	
+	// ---------------------------------------------
+	//	COM instances
+	// ---------------------------------------------
+	IFileManager* _fileManager;
+	IMeasuring* _measuring;
+	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
+	ICallback * _globalCallback;
+	
+	// ---------------------------------------------
+	//	Projections
+	// ---------------------------------------------
+	IGeoProjection* _projection;			// must always have transformation to WWGS84
+	IGeoProjection* _projectionToGMerc;	// a clone of map projection with initialized transformation to GMercator
+	IGeoProjection* _wgsProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
+	IGeoProjection* _gmercProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
+	tkTransformationMode _transformationMode;
+
+	// ---------------------------------------------
+	//	snapshot temp variables
+	// ---------------------------------------------
 	long mm_viewWidth;
 	long mm_viewHeight;
 	double mm_pixelPerProjectionX;
@@ -1007,94 +735,70 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	double mm_top;
 	bool mm_newExtents;
 
-	CCollisionList m_collisionList;		// global collision list for labels and charts
-
-	bool m_isSnapshot;		// tws added 4/7/2007: used by SnapShot2 to coerce DrawImage() to use the desired size rather than the screen size
-
-	double m_lastWidthMeters;		// last width of the screen in meters (to avoid recalculation of scalebar on tile redraw)
-
-	int _activeLayerPosition;		// for zoomin between layer
-#pragma endregion
-		
-#pragma region Property variables
+	// ---------------------------------------------
+	//	cursor state
+	// ---------------------------------------------
+	BOOL _leftButtonDown;
+	CPoint _draggingStart;	// map is being dragged by user
+	CPoint _draggingMove;	// map is being dragged by user
+	DraggingOperation _draggingOperation;
+	Extent _clickDownExtents;
+	::CCriticalSection _panningLock;
 	
-	IMeasuring* m_measuring;
+	// ---------------------------------------------
+	//	structures and lists
+	// ---------------------------------------------
+	std::vector<ImageGroup*>* _imageGroups;
+	std::vector<TimedPoint*> _panningList;		// TODO: wrap in a separate class
+
+	ZoombarPart _lastZooombarPart;
+	ZoombarParts _zoombarParts;
+	CCollisionList _collisionList;	// global collision list for labels and charts
+	HotTrackingInfo _hotTracking;	// temporary shapefile to display hot tracking
 	
-	std::vector<ImageGroup*>* m_imageGroups;
-	BOOL m_scalebarVisible;
-	tkScalebarUnits  m_scalebarUnits;
-	
-	tkTransformationMode m_transformationMode;
-	IGeoProjection* m_projection;			// must always have transfomation to WWGS84
-	IGeoProjection* m_projectionToGMerc;	// a clone of map projection with initialized transformation to GMercator
-	IGeoProjection* m_wgsProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
-	IGeoProjection* m_GMercProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
-
-	IFileManager* _fileManager;
-
-	//Map Rotation (ajp June 2010) 
-	float   m_RotateAngle;
-	Rotate *m_Rotate;
-
-	//Callback
-	ICallback * m_globalCallback;
-	long m_lastErrorCode;
-
-	//Cursors
-	HCURSOR m_cursorPan;
-	HCURSOR m_cursorZoomin;
-	HCURSOR m_cursorZoomout;
-	HCURSOR m_cursorSelect;
-	HCURSOR m_cursorMeasure;
-	HCURSOR m_udCursor;
-	bool _reverseZooming;
+	// ---------------------------------------------
+	//	temp state variable
+	// ---------------------------------------------
 	tkCursorMode _lastCursorMode;
+	double _lastWidthMeters;		// last width of the screen in meters (to avoid recalculation of scale bar on tile redraw)
+	int _activeLayerPosition;		// for zooming between layer
+	bool _rectTrackerIsActive;
 	bool _measuringPersistent;
-
-	//CursorModesHelpers
-	CPoint m_clickDown;
-	Extent m_clickDownExtents;
-	BOOL m_leftButtonDown;
-
-    BOOL DoTrapRMouseDown;					// Added Quay for TrapRMouseDown 3.16.09
-	BOOL m_DisableWaitCursor;
-	BOOL m_UseSeamlessPan;					//lsu 07/03/09
-	double m_MouseWheelSpeed;
-	tkShapeDrawingMethod m_ShapeDrawingMethod;
-	tkUnitsOfMeasure m_unitsOfMeasure;
-	BOOL m_ShowRedrawTime;				   // whether to show time in the lower left corner
-	CString _versionNumber;
-	BOOL m_ShowVersionNumber;			   // whether to show version nubmer in the lower right corner
-	tkResizeBehavior rbMapResizeBehavior;  // How to behave on resize
-	tkZoomBehavior _zoomBehavior;
-	tkKnownExtents _knownExtents;
-	tkCoordinatesDisplay _showCoordinates;
+	bool _reverseZooming;
 	bool _hasHotTracking;
-	bool _grabProjectionFromData;
+	int _zoombarTargetZoom;
+	bool _panningAnimation;
+	int _currentZoom;				// cached zoom set with ZoomToTileLevel (works only with ZoomBehavior = zbUseTileLevels)
+	bool _spacePressed;
 
-	Gdiplus::Font* _font;
+	// ---------------------------------------------
+	//	various stuff
+	// ---------------------------------------------
+	// rotation
+	Rotate *_rotate;
+	float   _rotateAngle;			//Map Rotation (ajp June 2010) 
 	
-	//Tool Tips
-	CToolTipEx m_ttip;
-	CButton * m_ttipCtrl;
-	BOOL m_showingToolTip;
+	// tooltips
+	CToolTipEx _ttip;
+	CButton * _ttipCtrl;
+	BOOL _showingToolTip;
 
-	// Serial number handling stuff
-	CString m_serial;
-	const char * vals;
-	const int valsLen;
-#pragma endregion
+	// serial number
+	CString _serial;
+	const char * _vals;
+	const int _valsLen;
+
+	::CMutex _mapstateMutex;
 	
-#pragma region Obsolete variables
-	// OBSOLETE members - should be removed after new drawing procedures are tested
-	BOOL MultilineLabeling;			// Allow multiline labels?
-	long m_LineSeparationFactor;	// Thickness between double and triple lines; adjust factor.
-	bool m_useLabelCollision;		//Label Collision
+	// obsolete members
+	BOOL _multilineLabeling;			// Allow multi line labels?
+	long _lineSeparationFactor;	// Thickness between double and triple lines; adjust factor.
+	bool _useLabelCollision;		//Label Collision
 #pragma endregion
 
 #pragma region Methods
+
 public:
-	//void ZoomToTileLevel(int zoom);
 	IExtents* GetGeographicExtentsCore(bool clipForTiles, Extent* clipExtents = NULL);
 	ITiles* GetTilesNoRef(void);
 	bool SendMouseMove();
@@ -1103,16 +807,15 @@ public:
 	CString Crypt(CString str);
 	bool VerifySerial(CString str);
 	void DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics);
-	bool CMapView::HasImages() ;
-	bool CMapView::HasHotTracking() ;
+	bool HasImages() ;
+	bool HasHotTracking() ;
 	
 	DOUBLE GetPixelsPerDegree(void);
-	//void SetPixelsPerDegree(DOUBLE newVal);
 
 	inline void PixelToProjection( double piX, double piY, double & prX, double & prY );
 	inline void ProjectionToPixel( double prX, double prY, double & piX, double & piY );
 
-	// some simple incapsulation for readability of code
+	// some simple encapsulation for code readability
 	IGeoProjection* GetMapToWgs84Transform();
 	IGeoProjection* GetMapToGMercTransform();
 	IGeoProjection* GetWgs84ToMapTransform();
@@ -1122,30 +825,60 @@ public:
 	IGeoProjection* GetMapProjection();
 	void ReleaseProjections();
 	void InitProjections();
-
-protected:
-	void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, 
-									bool drawToOutputCanvas, float offsetX = 0.0f, float offsetY = 0.0f);
-	IDispatch* CMapView::SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
-									  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
-									  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
-
-	void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
-	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
+	void RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce );
 	
-	void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
-	bool IsValidDrawList(long listHandle);
+private:
+	bool IS_VALID_LAYER(int layerHandle, vector<Layer*> allLayers)
+	{
+		return (layerHandle >= 0 && layerHandle < (int)allLayers.size()?(allLayers[layerHandle]!=NULL?TRUE:FALSE):FALSE);
+	}
 	
-	ShpfileType CMapView::get_ShapefileType(long layerHandle);
-	void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message = L"");
-	void CMapView::DrawMeasuringToMainBuffer(Gdiplus::Graphics* g );
-	void CMapView::DrawMeasuringToScreenBuffer(Gdiplus::Graphics* g);
-	void CMapView::DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g);
+	// ---------------------------------------------
+	// Gdiplus startup/shutdown handling. 
+	// Please see *.cpp for more explanation.
+	// ---------------------------------------------
+	static void GdiplusStartup();
+	static void GdiplusShutdown();
+	static ULONG_PTR ms_gdiplusToken;
+	static unsigned ms_gdiplusCount;
+	static ::CCriticalSection ms_gdiplusLock;
 
-	DOUBLE CMapView::PixelsPerMapUnit(void);
-	DOUBLE CMapView::DegreesPerMapUnit(void);
-	void CMapView::DrawScaleBar(Gdiplus::Graphics* g);
+	// ---------------------------------------------
+	//	 Init/terminate
+	// ---------------------------------------------
+	void SetDefaults();
+	void ReleaseTempObjects();
+	void Shutdown();
+	void Startup();
 
+	// ---------------------------------------------
+	//	 Drawing
+	// ---------------------------------------------
+	void HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawToOutputCanvas, float offsetX = 0.0f, float offsetY = 0.0f);
+	void ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message = L"");
+	void DrawMeasuringToMainBuffer(Gdiplus::Graphics* g );
+	void DrawMeasuringToScreenBuffer(Gdiplus::Graphics* g);
+	void DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g);
+	void DrawScaleBar(Gdiplus::Graphics* g);
+	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
+	bool HasDrawingData(tkDrawingDataAvailable type);
+	void DrawTiles(Gdiplus::Graphics* g);
+	void DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds);
+	void DrawImageGroups();
+	void DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, Gdiplus::PointF &point, Gdiplus::Brush *brush, Gdiplus::Brush *brushOutline);
+	void DrawZoombar(Gdiplus::Graphics* g);
+	void DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType);
+	void DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist);
+	void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, double totalLength, int segmentIndex);
+	void DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
+	IPoint* GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
+	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
+								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
+								  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
+
+	// ---------------------------------------------
+	//	 Serialization
+	// ---------------------------------------------
 	CPLXMLNode* SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName);		// used by SaveMapState and GetMapState
 	bool DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback);
 	CPLXMLNode* SerializeLayerCore(LONG LayerHandle, CStringW Filename);
@@ -1153,92 +886,81 @@ protected:
 	VARIANT_BOOL DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode* node);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
 	
+	// -------------------------------------------
+	//	Extents and projection
+	// -------------------------------------------
+	void CalculateVisibleExtents( Extent e, bool LogPrev = true, bool MapSizeChanged = false);
+	void SetExtentsCore(Extent ext, bool logExtents = false, bool mapSizeChanged = false, bool adjustZoom = true);
+	void SetTempExtents(double left, double right, double top, double bottom, long Width, long Height);
+	void RestoreExtents();
+	void SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn );
 	IExtents* GetMaxExtents(void);
-	
-private:
-	//bool CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double& xFound, double& yFound);
-	void CMapView::ResizeBuffers(int cx, int cy);
-	void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
-	
-	UINT CMapView::StartDrawLayers(LPVOID pParam);
-	
-	// Gdiplus startup/shutdown handling. Please see *.cpp for more explanation.
-	static void GdiplusStartup();
-	static void GdiplusShutdown();
-	static ULONG_PTR ms_gdiplusToken;
-	static unsigned ms_gdiplusCount;
-	static ::CCriticalSection ms_gdiplusLock;
-	
-	// drawing procedures to be replaced	
-	void DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType);
-	void DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist);//, CLabelDrawer* lblDrawer);
+	DOUBLE PixelsPerMapUnit(void);
+	DOUBLE DegreesPerMapUnit(void);
+	double UnitsPerPixel();
+	void LogPrevExtent();
+	bool GetGeoPosition(double& x, double& y);
+	bool SetGeoPosition(double x, double y);
+	void SetCurrentZoomCore(int zoom, bool forceUpdate = false);
+	void SetInitGeoExtents();
 
-	HCURSOR CMapView::SetWaitCursor();
-	tkInterpolationMode CMapView::ChooseInterpolationMode(tkInterpolationMode mode1, tkInterpolationMode mode2);
-
-	bool IsValidShape( long layerHandle, long shape );
+	// ---------------------------------------------
+	//	Data layers
+	// ---------------------------------------------
 	bool IsValidLayer( long layerHandle );
+	BSTR GetLayerFilename(LONG layerHandle);
+	void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources);
+	
+	// shapefiles	
+	bool IsValidShape( long layerHandle, long shape );
 	Layer* get_ShapefileLayer(long layerHandle);
 	CDrawingOptionsEx* get_ShapefileDrawingOptions(long LayerHandle);
-
-	void CalculateVisibleExtents( Extent e, bool LogPrev = true, bool MapSizeChanged = false);
 	void AlignShapeLayerAndShapes(Layer * layer);
-	void ClearLabelFrames();
+	ShpfileType get_ShapefileType(long layerHandle);
+	
+	// images
 	void ReloadImageBuffers();
-	
-	double UnitsPerPixel();
+	void CheckForConcealedImages(bool* isConcealed, long& startCondition, long& endCondition, double scale, int zoom) ;
 
-	inline double makeVal( const char * sVal );
-	void LogPrevExtent();
-	
-	bool IS_VALID_LAYER(int layerHandle, vector<Layer*> allLayers)
-	{
-		return (layerHandle >= 0 && layerHandle < (int)allLayers.size()?(allLayers[layerHandle]!=NULL?TRUE:FALSE):FALSE);
-	}
 	// image grouping
 	void BuildImageGroups(std::vector<ImageGroup*>& imageGroups);
 	void DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphics, int groupIndex);
 	bool ImageGroupsAreEqual(std::vector<ImageGroup*>& groups1, std::vector<ImageGroup*>& groups2);
 
-	BSTR GetLayerFilename(LONG layerHandle);
-	void SetExtentsCore(Extent ext, bool logExtents = false, bool mapSizeChanged = false);
+	// labels
+	void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
+	void ClearLabelFrames();
 
-	void CMapView::SetTempExtents(double left, double right, double top, double bottom, long Width, long Height);
-	void CMapView::RestoreExtents();
-
-	void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
-					 double totalLength, int segmentIndex, CMeasuring* measure);
-
-	IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
-	void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
-	bool CMapView::HasDrawingData(tkDrawingDataAvailable type);
-	void CMapView::DrawTiles(Gdiplus::Graphics* g);
-	void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds);
-	void CMapView::CheckForConcealedImages(bool* isConcealed, long& startCondition, long& endCondition, double scale, int zoom) ;
-	void CMapView::DrawImageGroups();
-
-	void SetDefaults();
-	void ReleaseTempObjects();
-	void Shutdown();
-	void Startup();
-	void CMapView::UpdateCursor(tkCursorMode cursor);
-	void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources);
-	void CMapView::ClearMapProjectionWithLastLayer();
-	tkZoomBehavior CMapView::GetZoomBehaviorCore();
-	bool CMapView::GetGeoPosition(double& x, double& y);
-	bool CMapView::SetGeoPosition(double x, double y);
-	void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate = false);
-	void SetInitGeoExtents();
-	void CMapView::DrawCoordinates(Gdiplus::Graphics* g) ;
-	void CMapView::DrawCoordinates(CDC* pdc);
-	void CMapView::DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, Gdiplus::PointF &point, 
-						 Gdiplus::Brush *brush, Gdiplus::Brush *brushOutline);
+	// drawing layers
+	void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
+	void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
+	bool IsValidDrawList(long listHandle);
 	
-	
+	// ---------------------------------------------
+	//	Various
+	// ---------------------------------------------
+	void UpdateCursor(tkCursorMode cursor);
+	void ResizeBuffers(int cx, int cy);
+	UINT StartDrawLayers(LPVOID pParam);
+	HCURSOR SetWaitCursor();
+	tkInterpolationMode ChooseInterpolationMode(tkInterpolationMode mode1, tkInterpolationMode mode2);
+	void ClearMapProjectionWithLastLayer();
+	ZoombarPart ZoombarHitTest(int x, int y);
+	bool UpdateHotTracking(CPoint point);
+	void DoPanning(CPoint point);
+	void DoUpdateTiles(bool isSnapshot = false, CString key = "");
+	bool HandleOnZoombarMouseDown( CPoint point );
+	bool HandleOnZoombarMouseMove( CPoint point );
+	DWORD GetPropertyExchangeVersion();
+	bool ForceDiscreteZoom();
+	bool HasRotation();
+	void ClearPanningList();
+	void DisplayPanningInertia( CPoint point );
+	void UpdateTileBuffer(CDC* dc);
+	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target);
+	void TurnOffPanning();
 #pragma endregion
 };
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_MAP_H__FAF5AFC5_D242_402A_B6E3_E6FF5E2E514C__INCLUDED)

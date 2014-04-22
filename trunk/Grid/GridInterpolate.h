@@ -1,11 +1,8 @@
 #ifndef _GRIDINTERPOLATE_H_
 #define _GRIDINTERPOLATE_H_
 
-#include "MapWinGis.h"
-#include <math.h>
 #include <queue>
 #include <stack>
-#include "varH.h"
 
 struct neighbor_cell{
 	int row;

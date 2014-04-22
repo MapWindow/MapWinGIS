@@ -24,9 +24,7 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file.
 
 #pragma once
-#include "MapWinGis.h"
 #include "BaseDrawer.h"
-#include <gdiplus.h>
 #include "ImageGroup.h"
 
 class CImageDrawer: public CBaseDrawer

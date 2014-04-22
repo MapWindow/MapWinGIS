@@ -2,7 +2,6 @@
 # define HEAP_H
 
 # include "heap_node.h"
-# include <deque>
 
 class heap
 {

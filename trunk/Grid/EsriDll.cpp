@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "EsriDll.h"
-#include <deque>
 #pragma warning(disable : 4996)
 
 //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//

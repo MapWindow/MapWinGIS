@@ -23,9 +23,6 @@
  * (Open source contributors should list themselves and their modifications here). */
  // Sergei Leschinski (lsu) 30 jan 2011 - created the file
 #pragma once
-#include "MapWinGis.h"
-#include "Extent.h"
-#include <vector>
 #include "ShapeInterfaces.h"
 
 // CShapeData declaration

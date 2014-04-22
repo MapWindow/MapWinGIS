@@ -19,13 +19,9 @@
  * (Open source contributors should list themselves and their modifications here). */
   
 #pragma once
-#include <atlhttp.h>		// ATL HTTP Client (CAtlHttpClient)
-#include <stdio.h>
 #include "geopoint.h"
 #include "baseprojection.h"
 #include "TileCore.h"
-//#include <iostream>
-//#include <fstream>
 
 extern Debug::Logger tilesLogger;
 
@@ -33,7 +29,6 @@ extern Debug::Logger tilesLogger;
 class BaseProvider
 {
 private:
-	CAtlHttpClient* httpClient;
 	bool m_initialized;
 
 protected:
@@ -78,6 +73,8 @@ public:
 		mapView = NULL;
 		LanguageStr = "en";
 		Projection = NULL;
+		m_initialized = false;
+		Selected = false;
 	}
 
 	virtual ~BaseProvider(void)
@@ -86,7 +83,7 @@ public:
 			delete Projection;
 	};
 
-	// proxy suport
+	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}
 	CString get_ProxyAddress() {return m_proxyAddress;}
 	bool SetProxy(CString address, int port);

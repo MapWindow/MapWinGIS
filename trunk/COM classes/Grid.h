@@ -23,18 +23,13 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
 #include <set>
-
-#include "varH.h"
 #include "dgrid.h"
 #include "fgrid.h"
 #include "lgrid.h"
 #include "sgrid.h"
 #include "GridManager.h"
 #include "tkGridRaster.h"
-
 
 // CGrid
 class ATL_NO_VTABLE CGrid : 

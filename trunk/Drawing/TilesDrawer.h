@@ -21,9 +21,7 @@
 
 #pragma once
 #include "basedrawer.h"
-#include <vector>
 #include "Tiles.h"
-#include "ogr_spatialref.h"
 
 class CTilesDrawer : public CBaseDrawer
 {
@@ -36,6 +34,7 @@ public:
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
 		m_transfomation = NULL;
+		m_graphics = NULL;
 	};
 	// newer one for GDI+ drawing
 	CTilesDrawer(Gdiplus::Graphics* g, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY)

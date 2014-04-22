@@ -1,5 +1,5 @@
 #pragma once
-#include "ogr_spatialref.h"
+#include "globalvars.h"
 
 class GeosHelper
 {

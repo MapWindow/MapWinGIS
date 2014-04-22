@@ -24,9 +24,7 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file.
 
 #pragma once
-#include "MapWinGis.h"
 #include "BaseDrawer.h"
-#include <gdiplus.h>
 #include "CollisionList.h"
 
 class CChartDrawer: public CBaseDrawer
@@ -42,8 +40,6 @@ public:
 		_collisionList = collisionList;
 		_currentScale = currentScale;
 		_graphics = graphics;
-
-		
 	}
 	
 	~CChartDrawer(void){}

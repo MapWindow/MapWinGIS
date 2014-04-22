@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "tkGif.h"
 #include <cassert>
-#include <fstream>
 
 extern "C" 
 {

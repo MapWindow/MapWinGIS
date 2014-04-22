@@ -3,7 +3,6 @@
 
 # include "heap_node.h"
 # include "tintypes.h"
-# include <deque>
 # include "vertex.h"
 
 class TinHeap

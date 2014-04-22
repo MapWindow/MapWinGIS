@@ -1,24 +1,11 @@
 #pragma once
-
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <io.h>
-#include "stdafx.h"
-
 # include "GridManager.h"
 # include "dGrid.h"
 # include "fGrid.h"
 # include "lGrid.h"
 # include "sGrid.h"
 # include "GenericHeader.h"
-# include "dHeader.h"
-# include "fHeader.h"
-# include "lHeader.h"
-# include "sHeader.h"
-
 # include "grdTypes.h"
-
 using namespace std;
 
 #pragma warning(disable:4251)

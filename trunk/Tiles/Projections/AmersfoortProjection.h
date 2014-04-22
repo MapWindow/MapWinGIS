@@ -28,28 +28,49 @@ public:
 	// EPSG 28992
 	AmersfoortProjection()
 	{
-		// in meters 
-		MinLatitude = 22598.080;
-		MaxLatitude = 903401.920;
-		MinLongitude = -285401.920;
-		MaxLongitude = 595401.92;
+		bool calculateDegrees = false;
+		
+		if (!calculateDegrees)
+		{
+			// let's just use precalculated values; it unlikely that proj4 calculation will ever change
+			//Lat = -0.515879655998403; Lng = 48.0405185800458
+			//Lat = -1.65729159493417; Lng = 55.9136415710084
+			//Lat = 12.4317273490522; Lng = 55.9136222637686
+			//Lat = 11.2902580269759; Lng = 48.0405018446845
+
+			// there is some question however as to which values to take as we don't have 
+			// a horizontally oriented rectangle; let's take the maximum bounds
+			MinLatitude = -0.515879655998403;
+			MaxLatitude = 12.4317273490522;
+			MinLongitude = 48.0405018446845;
+			MaxLongitude = 55.9136415710084;
+		}
+		else
+		{
+			// in meters 
+			MinLatitude = 22598.080;
+			MaxLatitude = 903401.920;
+			MinLongitude = -285401.920;
+			MaxLongitude = 595401.92;
+
+			VARIANT_BOOL ret1, ret2;
+			projWGS84->ImportFromEPSG(4326, &ret1);
+			projCustom->ImportFromEPSG(28992, &ret2);
+
+			if (!ret1 || !ret2)
+				Debug::WriteLine("Failed to initialize projection for Amersfoort");
+
+			projWGS84->StartTransform(projCustom, &ret1);
+			if (!ret1)
+				Debug::WriteLine("Failed to initialize transformation 1");
+
+			projCustom->StartTransform(projWGS84, &ret2);
+			if (!ret2)
+				Debug::WriteLine("Failed to initialize transformation 2");
+		}
+
 		yInverse = true;
 		worldWide = false;
-
-		VARIANT_BOOL ret1, ret2;
-		projWGS84->ImportFromEPSG(4326, &ret1);
-		projCustom->ImportFromEPSG(28992, &ret2);
-
-		if (!ret1 || !ret2)
-			Debug::WriteLine("Failed to initialize projection for Amersfoort");
-
-		projWGS84->StartTransform(projCustom, &ret1);
-		if (!ret1)
-			Debug::WriteLine("Failed to initialize transformation 1");
-
-		projCustom->StartTransform(projWGS84, &ret2);
-		if (!ret2)
-			Debug::WriteLine("Failed to initialize transformation 2");
 
 		serverProjection = tkTileProjection::Amersfoort;
 	}

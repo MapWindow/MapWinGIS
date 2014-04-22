@@ -70,7 +70,7 @@ public:
 		Clip(ret, zoom);
 	}
 
-	// converts tile cordinates to decimal degrees
+	// converts tile coordinates to decimal degrees
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret)
 	{
 		int x = pnt.x;

@@ -1,5 +1,4 @@
 #pragma once
-#include <deque>
 using namespace std;
 
 class CPointInPolygon {
@@ -130,6 +129,8 @@ public:
 			{
 				if (_scanX[i] < x)
 					count++;
+				else
+					break;			// a fix suggested here: http://bugs.mapwindow.org/view.php?id=2349
 			}
 			return (count % 2 != 0);
 		}
@@ -146,6 +147,8 @@ public:
 				{
 					if (_scanX[i] < x)
 						count++;
+					else
+						break;		// a fix suggested here: http://bugs.mapwindow.org/view.php?id=2349
 				}
 				if (count % 2 != 0)
 					ringCount++;

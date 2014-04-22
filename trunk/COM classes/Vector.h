@@ -23,8 +23,6 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
 #include "cppVector.h"
 
 // CVector

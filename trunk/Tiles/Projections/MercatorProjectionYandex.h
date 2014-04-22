@@ -39,6 +39,8 @@ public:
 		piDiv4 = PI / 4;
 	};
 	
+	virtual bool CoordinatesInDegrees()	{ return true; }
+
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 	{
 		FromLatLngToXY(pnt.Lat, pnt.Lng, zoom, ret);

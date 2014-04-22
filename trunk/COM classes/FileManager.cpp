@@ -1,7 +1,6 @@
 // FileManager.cpp : Implementation of CFileManager
 #include "stdafx.h"
 #include "FileManager.h"
-#include "GdalHelper.h"
 #include "GridManager.h"
 #include "Grid.h"
 

@@ -1,11 +1,6 @@
 #include "stdafx.h"
-#include <gdiplus.h>
-#include "MapWinGis.h"
 #include "Map.h"
-#include "GeoProjection.h"
 #include "Shapefile.h"
-# include "Tiles.h"
-#include "Measuring.h"
 
 #pragma region Scale
 
@@ -16,19 +11,20 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 {
 	// we shall make all the calculations in the Google Mercator (EPSG: 3857)
 	// and then transform bounds to the current coordinate system
-	double xCent = (extents.left + extents.right)/2.0;
-	double yCent = (extents.bottom + extents.top)/2.0;
+	double xCent = (_extents.left + _extents.right)/2.0;
+	double yCent = (_extents.bottom + _extents.top)/2.0;
 	
 	double minX, maxX, minY, maxY;	// size of control in pixels
-	PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
+	PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
+	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 	
 	// getting screen size
-	double screenHeight = abs(maxY - minY); ///96.0;
-	double screenWidth =  abs(maxX - minX); ///96.0;
+	double screenHeight = abs(maxY - minY); //96.0;
+	double screenWidth =  abs(maxX - minX); //96.0;
 
-	double ratio = 1.2;		// multiplication ratio
-	double projWidth = 20037508.342789244 * 2.0;	// half of equator circumference (width and height for mercator projection)
+	// multiplication ratio, to tiles looks nicer
+	double ratio = 1.0;		// TODO: perhaps add as a parameter
+	double projWidth = 20037508.342789244 * 2.0;	// half of equator circumference (width and height for Mercator projection)
 	double pxWidth = ratio * 512.0 * pow(2.0, zoom - 1);	// width of map in pixels at the requested zoom
 
 	double w = screenWidth / pxWidth * projWidth;		// requested width in meters (EPSG:3857)
@@ -44,7 +40,8 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 		maxX = xCent + w/2.0;
 		minY = yCent - h/2.0;
 		maxY = yCent + h/2.0;
-		this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+		this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true, false, false);
+		_currentZoom = zoom;
 		return VARIANT_TRUE;
 	}
 	else
@@ -82,7 +79,8 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 				}
 				else
 				{
-					this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true);
+					this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true, false, false);
+					_currentZoom = zoom;
 					return VARIANT_TRUE;
 				}
 			}
@@ -96,21 +94,81 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 }
 
 // ****************************************************
+//	   SetNewExtentsWithZoomIn()
+// ****************************************************
+// Sets new extents and makes sure that map is zoomed in for at least one level
+void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
+{
+	double cLeft = ext.left;
+	double cRight = ext.right;
+	double cBottom = ext.bottom;
+	double cTop = ext.top;
+	
+	// If new extents are 2 or more times smaller than current ones
+	// we'll zoom in to the next level (or through several levels), otherwise return to the previous one.
+	// As a user generally expects zooming, let's make extents smaller manually to force zooming
+	// if they are not small enough.
+	if (ForceDiscreteZoom())
+	{
+		double ratioX = (_extents.right - _extents.left) / (cRight - cLeft);
+		double ratioY = (_extents.top - _extents.bottom) / (cTop - cBottom);
+		double ratio = MIN(ratioX, ratioY);
+		
+		double targetRatio = zoomIn ? 2.001 : 0.499;	// 2.001 = add some margin for rounding issues
+
+		if ((zoomIn && ratio < 2.0) || !zoomIn && ratio > 0.5)
+		{
+			// no need to preserve the aspect ratio of new selection; control will adjust it all the same
+			double w = (_extents.right - _extents.left) / targetRatio;		
+			double h = (_extents.top - _extents.bottom) / targetRatio;
+			double centX = (cRight + cLeft) / 2.0;
+			double centY = (cTop + cBottom) / 2.0;
+			cLeft = centX - w/2.0;
+			cRight = centX + w/2.0;
+			cTop = centY - h/2.0;
+			cBottom = centY + h/2.0;
+		}
+	}
+	this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));
+}
+
+// ****************************************************
 //	   SetExtentsCore()
 // ****************************************************
-void CMapView::SetExtentsCore(Extent ext, bool logExtents, bool mapSizeChanged)
+// adjustZoom - when we use discrete zoom levels the extents should be adjusted
+// unless the call is from ZoomToTileLevel, so it's already done
+void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool mapSizeChanged /*= false*/, bool adjustZoom /*= true*/ )
 {
 	_knownExtents = keNone;
+
 	this->CalculateVisibleExtents(ext, logExtents, mapSizeChanged);
+
+	/*int z = this->GetCurrentZoom();
+	Debug::WriteLine("Extents applied: %f; %f; %f; %f", _extents.left, _extents.right, _extents.bottom, _extents.top);
+	Debug::WriteLine("Pixel per degree: %f", GetPixelsPerDegree());
+	Debug::WriteLine("Get current zoom: %d", z);*/
+
+	if (ForceDiscreteZoom() && adjustZoom )
+	{
+		// Adjust it to the smaller discrete zoom level.
+		// The computation overhead on calculating twice is negligible
+		// In order it to work, Tiles.ChooseZoomLevel must not scale down the tiles
+		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
+		int zoom = this->GetCurrentZoom();
+		this->ZoomToTileLevel(zoom);
+		return;
+	}
+
 	_canUseLayerBuffer = FALSE;
 
 	this->FireExtentsChanged();
 	this->ReloadImageBuffers();
 	
-	this->m_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
+	_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
 
-	if( !m_lockCount ) {
-		((CTiles*)m_tiles)->LoadTiles((void*)this);
+	if( !_lockCount ) 
+	{
+		DoUpdateTiles();
 		this->InvalidateControl();
 	}
 }
@@ -122,9 +180,9 @@ DOUBLE CMapView::GetCurrentScale(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	 
-	double minX, maxX, minY, maxY;	// size of ap control in pixels
-    PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
+	double minX, maxX, minY, maxY;	// size of map control in pixels
+    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
+	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 	if (minX == maxX && minY == maxY)
 	{
 		return 0.0;
@@ -141,10 +199,10 @@ DOUBLE CMapView::GetCurrentScale(void)
 		double screenWidth =  fabs(maxX - minX)/(double)pixX;	//96.0
 		
 		// size of map being displayed, inches
-		double convFact = Utility::getConversionFactor(m_unitsOfMeasure);	
+		double convFact = Utility::getConversionFactor(_unitsOfMeasure);	
 		if (convFact == 0) return 0.0;
-		double mapHeight = (extents.top - extents.bottom)*convFact;
-		double mapWidth = (extents.right - extents.left)*convFact;
+		double mapHeight = (_extents.top - _extents.bottom)*convFact;
+		double mapWidth = (_extents.right - _extents.left)*convFact;
 		
 		// calculate it as diagonal
 		return sqrt(pow(mapWidth, 2) + pow(mapHeight, 2)) / sqrt(pow(screenWidth,2) + pow(screenHeigth,2));
@@ -159,12 +217,12 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal == 0.0) return;
 
-	double xCent = (extents.left + extents.right)/2.0;
-	double yCent = (extents.bottom + extents.top)/2.0;
+	double xCent = (_extents.left + _extents.right)/2.0;
+	double yCent = (_extents.bottom + _extents.top)/2.0;
 	
 	double minX, maxX, minY, maxY;	// size of ap control in pixels
-    PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
+    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
+	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 	
 	long pixX = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSX);
 	long pixY = 96; //m_layerDC->GetDeviceCaps(LOGPIXELSY);
@@ -185,8 +243,8 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 																// y = sqrt(b^2/(a^2 + 1))
 																// x = y*a
 	// converting to the map units
-	mapHeight /= Utility::getConversionFactor(m_unitsOfMeasure);
-	mapWidth /= Utility::getConversionFactor(m_unitsOfMeasure);
+	mapHeight /= Utility::getConversionFactor(_unitsOfMeasure);
+	mapWidth /= Utility::getConversionFactor(_unitsOfMeasure);
 
 	IExtents* box = NULL;
 	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
@@ -205,7 +263,7 @@ LPDISPATCH CMapView::GetExtents()
 {
 	IExtents * box = NULL;
 	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
-	box->SetBounds( extents.left, extents.bottom, 0, extents.right, extents.top, 0 );
+	box->SetBounds( _extents.left, _extents.bottom, 0, _extents.right, _extents.top, 0 );
 	return box;
 }
 
@@ -255,11 +313,11 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* pVal)
 	{
 		this->LockWindow(tkLockMode::lmLock);
 		
-		if (m_transformationMode == tmWgs84Complied)
+		if (_transformationMode == tmWgs84Complied)
 		{
 			this->SetExtents(pVal);
 		}
-		else if (m_transformationMode == tmDoTransformation)
+		else if (_transformationMode == tmDoTransformation)
 		{
 			double xMin, xMax, yMin, yMax, zMin, zMax;
 			pVal->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
@@ -291,11 +349,10 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* pVal)
 			this->SetExtents(pVal); 
 		}
 
-		tkZoomBehavior zb = GetZoomBehaviorCore();
-		if (zb == zbUseTileLevels)
+		if (ForceDiscreteZoom())
 		{
 			int zoom;
-			m_tiles->get_CurrentZoom(&zoom);
+			_tiles->get_CurrentZoom(&zoom);
 			ZoomToTileLevel(zoom);
 		}
 		this->LockWindow(tkLockMode::lmUnlock);
@@ -309,10 +366,10 @@ VARIANT_BOOL CMapView::SetGeographicExtents(IExtents* pVal)
 IMeasuring* CMapView::GetMeasuring() 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if(m_measuring) {
-		m_measuring->AddRef();
+	if(_measuring) {
+		_measuring->AddRef();
 	}
-	return m_measuring;
+	return _measuring;
 }
 
 // *****************************************************
@@ -333,12 +390,12 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 
 	if (GetMapProjection())
 	{
-		if (m_transformationMode == tkTransformationMode::tmWgs84Complied)
+		if (_transformationMode == tkTransformationMode::tmWgs84Complied)
 		{
 			CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
-			box->SetBounds( extents.left, extents.bottom, 0, extents.right, extents.top, 0 );
+			box->SetBounds( _extents.left, _extents.bottom, 0, _extents.right, _extents.top, 0 );
 		}
-		else if (m_transformationMode == tkTransformationMode::tmDoTransformation)
+		else if (_transformationMode == tkTransformationMode::tmDoTransformation)
 		{
 			VARIANT_BOOL vb;
 			IGeoProjection* projTemp = GetMapToWgs84Transform();
@@ -346,10 +403,10 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 			{
 				Extent ext;
 				bool clip = clipForTiles && clipExtents;
-				ext.left = clip ? MAX(extents.left, clipExtents->left) : extents.left;
-				ext.right = clip ? MIN(extents.right, clipExtents->right) : extents.right;
-				ext.top = clip ? MIN(extents.top, clipExtents->top) : extents.top;
-				ext.bottom = clip ? MAX(extents.bottom, clipExtents->bottom) : extents.bottom;
+				ext.left = clip ? MAX(_extents.left, clipExtents->left) : _extents.left;
+				ext.right = clip ? MIN(_extents.right, clipExtents->right) : _extents.right;
+				ext.top = clip ? MIN(_extents.top, clipExtents->top) : _extents.top;
+				ext.bottom = clip ? MAX(_extents.bottom, clipExtents->bottom) : _extents.bottom;
 				
 				double xBL, yBL, xTL, yTL, xBR, yBR, xTR, yTR;
 				
@@ -389,10 +446,10 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 					else
 						goto cleaning;
 					
-					double x1 = fabs(xMinTest - extents.left);
-					double x2 = fabs(xMaxTest - extents.right);
-					double y1 = fabs(yMinTest - extents.bottom);
-					double y2 = fabs(yMaxTest - extents.top);
+					double x1 = fabs(xMinTest - _extents.left);
+					double x2 = fabs(xMaxTest - _extents.right);
+					double y1 = fabs(yMinTest - _extents.bottom);
+					double y2 = fabs(yMaxTest - _extents.top);
 					
 					VARIANT_BOOL projected;
 					GetMapProjection()->get_IsGeographic(&projected);
@@ -425,9 +482,9 @@ DOUBLE CMapView::GetPixelsPerDegree(void)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	double val = 1.0;
 	
-	if (this->m_unitsOfMeasure != umDecimalDegrees)
+	if (this->_unitsOfMeasure != umDecimalDegrees)
 	{
-		if (!Utility::ConvertDistance(umDecimalDegrees, this->m_unitsOfMeasure, val))
+		if (!Utility::ConvertDistance(umDecimalDegrees, this->_unitsOfMeasure, val))
 		{
 			return 0.0;
 		}
@@ -442,7 +499,18 @@ DOUBLE CMapView::GetPixelsPerDegree(void)
 
     x = y = val;
     this->ProjToPixel(x, y, &screenX, &screenY);
-    return (abs(screenX - x1) + abs(screenY - y1))/2.0;
+    double result = (abs(screenX - x1) + abs(screenY - y1))/2.0;
+	
+	// alternative approach (results depend on latitude)
+	/*double px, py, px2, py2;
+	double degX, degY;
+	
+	PixelToDegrees(_viewWidth/2, _viewHeight/2, &degX, &degY);
+	DegreesToPixel(degX, degY, &px, &py );
+	DegreesToPixel(degX + 1, degY + 1, &px2, &py2 );
+	double result2 = (abs(px - px2) + abs(py - py2))/2.0;*/
+
+	return result;
 }
 
 // *****************************************************
@@ -471,13 +539,13 @@ DOUBLE CMapView::PixelsPerMapUnit(void)
 DOUBLE CMapView::DegreesPerMapUnit(void)
 {
 	double val = 1.0;
-	if (m_unitsOfMeasure == umDecimalDegrees)
+	if (_unitsOfMeasure == umDecimalDegrees)
 	{
 		return val;
 	}
 	else
 	{
-		if (Utility::ConvertDistance(this->m_unitsOfMeasure, umDecimalDegrees, val))
+		if (Utility::ConvertDistance(this->_unitsOfMeasure, umDecimalDegrees, val))
 		{
 			return val;
 		}
@@ -507,14 +575,14 @@ void CMapView::PixelToProj(double pixelX, double pixelY, double FAR* projX, doub
 
 inline void CMapView::PixelToProjection( double piX, double piY, double & prX, double & prY )
 {
-	prX = extents.left + piX*m_inversePixelPerProjectionX;
-	prY = extents.top - piY*m_inversePixelPerProjectionY;
+	prX = _extents.left + piX*_inversePixelPerProjectionX;
+	prY = _extents.top - piY*_inversePixelPerProjectionY;
 }
 
 inline void CMapView::ProjectionToPixel( double prX, double prY, double & piX, double & piY )
 {
-	piX = (prX - extents.left)*m_pixelPerProjectionX;
-	piY = (extents.top - prY) * m_pixelPerProjectionY;
+	piX = (prX - _extents.left)*_pixelPerProjectionX;
+	piY = (_extents.top - prY) * _pixelPerProjectionY;
 }
 
 // ***********************************************************
@@ -524,15 +592,15 @@ inline void CMapView::ProjectionToPixel( double prX, double prY, double & piX, d
 double CMapView::UnitsPerPixel()
 {
     double minX, maxX, minY, maxY;
-    PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
+    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
+	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 	if (minX == maxX && minY == maxY)
 	{
 		return 0.0;
 	}
 	else
 	{
-		return sqrt(pow(extents.right - extents.left, 2) + pow(extents.top - extents.bottom, 2)) / 
+		return sqrt(pow(_extents.right - _extents.left, 2) + pow(_extents.top - _extents.bottom, 2)) / 
 			   sqrt(pow(maxX - minX,2) + pow(maxY - minY,2));
 	}
 }
@@ -602,14 +670,14 @@ void CMapView::ZoomToMaxExtents()
 {
 	bool extentsSet = false;
 
-	if( m_activeLayers.size() > 0 )
+	if( _activeLayers.size() > 0 )
 		LogPrevExtent();
 
-	long endcondition = m_activeLayers.size();
+	long endcondition = _activeLayers.size();
 	for(int i = 0; i < endcondition; i++ )
 	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
-		this->AdjustLayerExtents(m_activeLayers[i]);
+		Layer * l = _allLayers[_activeLayers[i]];
+		this->AdjustLayerExtents(_activeLayers[i]);
 
 		if( extentsSet == false )
 		{	
@@ -620,10 +688,10 @@ void CMapView::ZoomToMaxExtents()
 			if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 				continue;
 
-			extents.left = l->extents.left - xrange*m_extentPad;
-			extents.right = l->extents.right + xrange*m_extentPad;
-			extents.top = l->extents.top + yrange*m_extentPad;
-			extents.bottom = l->extents.bottom - yrange*m_extentPad;
+			_extents.left = l->extents.left - xrange*m_extentPad;
+			_extents.right = l->extents.right + xrange*m_extentPad;
+			_extents.top = l->extents.top + yrange*m_extentPad;
+			_extents.bottom = l->extents.bottom - yrange*m_extentPad;
 			extentsSet = true;
 		}
 		else
@@ -634,21 +702,21 @@ void CMapView::ZoomToMaxExtents()
 			if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 				continue;
 
-			if( l->extents.left - xrange*m_extentPad < extents.left )
-				extents.left = l->extents.left - xrange*m_extentPad;
-			if( l->extents.right + xrange*m_extentPad > extents.right )
-				extents.right = l->extents.right + xrange*m_extentPad;
-			if( l->extents.bottom - yrange*m_extentPad < extents.bottom )
-				extents.bottom = l->extents.bottom - yrange*m_extentPad;
-			if( l->extents.top + yrange*m_extentPad > extents.top )
-				extents.top = l->extents.top + yrange*m_extentPad;
+			if( l->extents.left - xrange*m_extentPad < _extents.left )
+				_extents.left = l->extents.left - xrange*m_extentPad;
+			if( l->extents.right + xrange*m_extentPad > _extents.right )
+				_extents.right = l->extents.right + xrange*m_extentPad;
+			if( l->extents.bottom - yrange*m_extentPad < _extents.bottom )
+				_extents.bottom = l->extents.bottom - yrange*m_extentPad;
+			if( l->extents.top + yrange*m_extentPad > _extents.top )
+				_extents.top = l->extents.top + yrange*m_extentPad;
 		}
 	}
 
 	if( !extentsSet )
-		extents = Extent(0,0,0,0);
+		_extents = Extent(0,0,0,0);
 
-	this->SetExtentsCore(extents);
+	this->SetExtentsCore(_extents);
 
 }
 
@@ -660,15 +728,15 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 {
 	bool extentsSet = false;
 
-	if( m_activeLayers.size() > 0 )
+	if( _activeLayers.size() > 0 )
 		LogPrevExtent();
 
 	register int i;
-	long endcondition = m_activeLayers.size();
+	long endcondition = _activeLayers.size();
 	for( i = 0; i < endcondition; i++ )
 	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
-		this->AdjustLayerExtents(m_activeLayers[i]);
+		Layer * l = _allLayers[_activeLayers[i]];
+		this->AdjustLayerExtents(_activeLayers[i]);
 		if( l->flags & Visible)
 		{
 			if( extentsSet == false )
@@ -679,10 +747,10 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 				if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 					continue;
 
-				extents.left = l->extents.left - xrange*m_extentPad;
-				extents.right = l->extents.right + xrange*m_extentPad;
-				extents.top = l->extents.top + yrange*m_extentPad;
-				extents.bottom = l->extents.bottom - yrange*m_extentPad;
+				_extents.left = l->extents.left - xrange*m_extentPad;
+				_extents.right = l->extents.right + xrange*m_extentPad;
+				_extents.top = l->extents.top + yrange*m_extentPad;
+				_extents.bottom = l->extents.bottom - yrange*m_extentPad;
 				extentsSet = true;
 			}
 			else
@@ -693,23 +761,23 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 				if(xrange == 0 && yrange ==0 && l->extents.right ==0 && l->extents.top == 0)
 					continue;
 
-				if( l->extents.left - xrange*m_extentPad < extents.left )
-					extents.left = l->extents.left - xrange*m_extentPad;
-				if( l->extents.right + xrange*m_extentPad > extents.right )
-					extents.right = l->extents.right + xrange*m_extentPad;
-				if( l->extents.bottom - yrange*m_extentPad < extents.bottom )
-					extents.bottom = l->extents.bottom - yrange*m_extentPad;
-				if( l->extents.top + yrange*m_extentPad > extents.top )
-					extents.top = l->extents.top + yrange*m_extentPad;
+				if( l->extents.left - xrange*m_extentPad < _extents.left )
+					_extents.left = l->extents.left - xrange*m_extentPad;
+				if( l->extents.right + xrange*m_extentPad > _extents.right )
+					_extents.right = l->extents.right + xrange*m_extentPad;
+				if( l->extents.bottom - yrange*m_extentPad < _extents.bottom )
+					_extents.bottom = l->extents.bottom - yrange*m_extentPad;
+				if( l->extents.top + yrange*m_extentPad > _extents.top )
+					_extents.top = l->extents.top + yrange*m_extentPad;
 			}
 		}
 
 	}
 
 	if( ! extentsSet )
-		extents = Extent(0,0,0,0);
+		_extents = Extent(0,0,0,0);
 
-	this->SetExtentsCore(extents);
+	this->SetExtentsCore(_extents);
 }
 
 // **************************************************************
@@ -717,20 +785,20 @@ void CMapView::ZoomToMaxVisibleExtents(void)
 // **************************************************************
 void CMapView::ZoomToLayer(long LayerHandle)
 {
-	if( IS_VALID_LAYER(LayerHandle,m_allLayers) )
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
 		this->AdjustLayerExtents(LayerHandle);
 		
 		this->LogPrevExtent();
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		double xrange = l->extents.right - l->extents.left;
 		double yrange = l->extents.top - l->extents.bottom;
-		extents.left = l->extents.left - xrange*m_extentPad;
-		extents.right = l->extents.right + xrange*m_extentPad;
-		extents.top = l->extents.top + yrange*m_extentPad;
-		extents.bottom = l->extents.bottom - yrange*m_extentPad;
+		_extents.left = l->extents.left - xrange*m_extentPad;
+		_extents.right = l->extents.right + xrange*m_extentPad;
+		_extents.top = l->extents.top + yrange*m_extentPad;
+		_extents.bottom = l->extents.bottom - yrange*m_extentPad;
 		
-		this->SetExtentsCore(extents);
+		this->SetExtentsCore(_extents);
 	}
 	else
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -744,7 +812,7 @@ void CMapView::ZoomToShape(long LayerHandle, long Shape)
 	if( IsValidShape(LayerHandle, Shape) )
 	{	
 		IShapefile * ishp = NULL;
-		Layer * l = m_allLayers[LayerHandle];
+		Layer * l = _allLayers[LayerHandle];
 		//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
 		//if( ishp == NULL )
 		if (!l->QueryShapefile(&ishp))
@@ -771,18 +839,18 @@ void CMapView::ZoomToShape(long LayerHandle, long Shape)
 		if(yrange == 0)
 			yrange = 1;
 
-		extents.left = left - xrange*m_extentPad;
-		extents.right = right + xrange*m_extentPad;
-		extents.top = top + yrange*m_extentPad;
-		extents.bottom = bottom - yrange*m_extentPad;
+		_extents.left = left - xrange*m_extentPad;
+		_extents.right = right + xrange*m_extentPad;
+		_extents.top = top + yrange*m_extentPad;
+		_extents.bottom = bottom - yrange*m_extentPad;
 
-		this->SetExtentsCore(extents);
+		this->SetExtentsCore(_extents);
 	}
 	else
 	{	
 		//Error Code set in func
-		if( m_globalCallback != NULL )
-			m_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(m_lastErrorCode)));
+		if( _globalCallback != NULL )
+			_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
 	}
 }
 
@@ -816,15 +884,16 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 	double yrange = top - bottom;
 
 	double yextent, xextent;
-	double xadjust = 0, yadjust = 0;
+	double xadjust = 0.0, yadjust = 0.0;
+	xextent = yextent = 0.0;
 	
-	if (!MapSizeChanged && rbMapResizeBehavior != rbWarp)
+	if (!MapSizeChanged && _mapResizeBehavior != rbWarp)
 	{
 		// size of control is the same, we need just to apply new extents
-		if (m_viewHeight!= 0 && m_viewWidth != 0 && xrange != 0.0 && yrange != 0.0)
+		if (_viewHeight!= 0 && _viewWidth != 0 && xrange != 0.0 && yrange != 0.0)
 		{	 
 			// make extents proportional to screen sides ratio
-			double ratio = ((double)m_viewWidth/(double)m_viewHeight)/(xrange/yrange);
+			double ratio = ((double)_viewWidth/(double)_viewHeight)/(xrange/yrange);
 			if (ratio > 1 )
 			{	
 				left = left - xrange * (ratio - 1)/2;
@@ -842,21 +911,21 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 	else
 	{	
 		// size of control changed; we need to calculate new extents
-		if ( (rbMapResizeBehavior == rbClassic) || (rbMapResizeBehavior == rbIntuitive) )
+		if ( (_mapResizeBehavior == rbClassic) || (_mapResizeBehavior == rbIntuitive) )
 		{
 			if( xrange > yrange )
 			{
-				yextent = (xrange / m_viewWidth) * m_viewHeight;
+				yextent = (xrange / _viewWidth) * _viewHeight;
 				xextent = xrange;
 				yadjust = (yextent - yrange) * .5;
 				xadjust = 0;
 				
-				if (rbMapResizeBehavior == rbClassic)
+				if (_mapResizeBehavior == rbClassic)
 				{
 					if( yextent < yrange )
 					{
 						yextent = yrange;
-						xextent = (yrange / m_viewHeight) * m_viewWidth;
+						xextent = (yrange / _viewHeight) * _viewWidth;
 						yadjust = 0;
 						xadjust = (xextent - xrange) * .5;
 					}
@@ -864,43 +933,43 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 			}
 			else
 			{
-				xextent = (yrange / m_viewHeight) * m_viewWidth;
+				xextent = (yrange / _viewHeight) * _viewWidth;
 				yextent = yrange;
 				xadjust = (xextent - xrange) * .5;
 				yadjust = 0;
 				
-				if (rbMapResizeBehavior == rbClassic)
+				if (_mapResizeBehavior == rbClassic)
 				{
 					if( xextent < xrange )
 					{
 						xextent = xrange;
-						yextent = (xrange / m_viewWidth) * m_viewHeight;
+						yextent = (xrange / _viewWidth) * _viewHeight;
 						xadjust = 0;
 						yadjust = (yextent - yrange) * .5;
 					}
 				}
 			}
 		}
-		else if (rbMapResizeBehavior == rbModern)
+		else if (_mapResizeBehavior == rbModern)
 		{   
 			//sizeOption is "modern" - this leaves scale on dX but adjusts scale on dY
-			xextent = (yrange / m_viewHeight) * m_viewWidth;
+			xextent = (yrange / _viewHeight) * _viewWidth;
 		    yextent = yrange;
 		}
 		
-		else if (rbMapResizeBehavior == rbKeepScale)
+		else if (_mapResizeBehavior == rbKeepScale)
 		{   
 			// lsu (07/03/09) sizeOption is "keep scale", no scale adjustments for both axes
-			if (m_pixelPerProjectionX == 0 || m_pixelPerProjectionY == 0)
+			if (_pixelPerProjectionX == 0 || _pixelPerProjectionY == 0)
 			{	xextent = xrange;
 				yextent = yrange;
 			}
 			else
-			{	xextent = m_viewWidth/m_pixelPerProjectionX;
-				yextent = m_viewHeight/m_pixelPerProjectionY;
+			{	xextent = _viewWidth/_pixelPerProjectionX;
+				yextent = _viewHeight/_pixelPerProjectionY;
 			}
 		}
-		else if (rbMapResizeBehavior == rbWarp)
+		else if (_mapResizeBehavior == rbWarp)
 		{
 			//sizeOption is "Warp" - this does not scale
 			xextent = xrange;
@@ -912,7 +981,7 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 		left = left - xadjust;
 		right = left + xextent;
 		bottom = bottom - yadjust;
-		if (rbMapResizeBehavior == rbKeepScale)
+		if (_mapResizeBehavior == rbKeepScale)
 			bottom = top - yextent;
 		else
 			top = bottom + yextent;	
@@ -922,31 +991,31 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 	}
 	
 	// save new extents and recalculate scale
-	extents.left = left;
-	extents.right = right;
-	extents.bottom = bottom;
-	extents.top = top;
+	_extents.left = left;
+	_extents.right = right;
+	_extents.bottom = bottom;
+	_extents.top = top;
 	
 	if (xrange == 0)
 	{
-		m_pixelPerProjectionX = 0;
-		m_inversePixelPerProjectionX = 0;
+		_pixelPerProjectionX = 0;
+		_inversePixelPerProjectionX = 0;
 	}
 	else
 	{
-		m_pixelPerProjectionX = m_viewWidth/xrange;
-		m_inversePixelPerProjectionX = 1.0/m_pixelPerProjectionX;
+		_pixelPerProjectionX = _viewWidth/xrange;
+		_inversePixelPerProjectionX = 1.0/_pixelPerProjectionX;
 	}
 
 	if (yrange == 0)
 	{
-		m_pixelPerProjectionY = 0;
-		m_inversePixelPerProjectionY = 0;
+		_pixelPerProjectionY = 0;
+		_inversePixelPerProjectionY = 0;
 	}
 	else
 	{
-		m_pixelPerProjectionY = m_viewHeight/yrange;
-		m_inversePixelPerProjectionY = 1.0/m_pixelPerProjectionY;
+		_pixelPerProjectionY = _viewHeight/yrange;
+		_inversePixelPerProjectionY = 1.0/_pixelPerProjectionY;
 	}
 }
 #pragma endregion
@@ -962,10 +1031,10 @@ IExtents* CMapView::GetMaxExtents(void)
 	bool extentsSet = false;
 	Extent maxExtents;
 
-	for(size_t i = 0; i <  m_activeLayers.size(); i++ )
+	for(size_t i = 0; i <  _activeLayers.size(); i++ )
 	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
-		this->AdjustLayerExtents(m_activeLayers[i]);
+		Layer * l = _allLayers[_activeLayers[i]];
+		this->AdjustLayerExtents(_activeLayers[i]);
 
 		if( !extentsSet )
 		{	
@@ -1004,42 +1073,32 @@ IExtents* CMapView::GetMaxExtents(void)
 #pragma region Zoom in/zoom out
 
 // ***************************************************
-//		GetZoomBehaviorCore()
-// ***************************************************
-tkZoomBehavior CMapView::GetZoomBehaviorCore()
-{
-	VARIANT_BOOL vb;
-	m_tiles->get_Visible(&vb);
-	return vb && _zoomBehavior == (short)zbUseTileLevels ? zbUseTileLevels : zbDefault;
-}
-
-// ***************************************************
 //		ZoomIn()
 // ***************************************************
 void CMapView::ZoomIn(double Percent)
 {
-	if (GetZoomBehaviorCore() == (short)zbUseTileLevels)
+	if (ForceDiscreteZoom())
 	{
 		// An attempt to use discrete zoom levels from tiles; unfinished
 		int zoom, maxZoom;
-		m_tiles->get_CurrentZoom(&zoom);
-		m_tiles->get_MaxZoom(&maxZoom);
+		_tiles->get_CurrentZoom(&zoom);
+		_tiles->get_MaxZoom(&maxZoom);
 		if (zoom + 1 <= maxZoom) {
 			Debug::WriteLine("Zoom requested: %d", zoom);
 			this->ZoomToTileLevel(zoom + 1);
-			this->m_tiles->get_CurrentZoom(&zoom);
+			this->_tiles->get_CurrentZoom(&zoom);
 			Debug::WriteLine("Zoom received: %d", zoom);
 		}
 	}
 	else {
-		double xzin = ((extents.right - extents.left)*( 1.0 - Percent ))*.5;
-		double xmiddle = extents.left + (extents.right - extents.left)*.5;
+		double xzin = ((_extents.right - _extents.left)*( 1.0 - Percent ))*.5;
+		double xmiddle = _extents.left + (_extents.right - _extents.left)*.5;
 
 		double cLeft = xmiddle - xzin;
 		double cRight = xmiddle + xzin;
 
-		double yzin = ((extents.top - extents.bottom)*( 1.0 - Percent ))*.5;
-		double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
+		double yzin = ((_extents.top - _extents.bottom)*( 1.0 - Percent ))*.5;
+		double ymiddle = _extents.bottom + (_extents.top - _extents.bottom)*.5;
 
 		double cBottom = ymiddle - yzin;
 		double cTop = ymiddle + yzin;
@@ -1053,28 +1112,28 @@ void CMapView::ZoomIn(double Percent)
 // ***************************************************
 void CMapView::ZoomOut(double Percent)
 {
-	if (GetZoomBehaviorCore() == (short)zbUseTileLevels)
+	if (ForceDiscreteZoom())
 	{
 		int zoom, minZoom;
-		m_tiles->get_CurrentZoom(&zoom);
-		m_tiles->get_MinZoom(&minZoom);
+		_tiles->get_CurrentZoom(&zoom);
+		_tiles->get_MinZoom(&minZoom);
 		if (zoom - 1 >= minZoom) {
 			Debug::WriteLine("Zoom out requested: %d", zoom - 1);
 			this->ZoomToTileLevel(zoom - 1);
-			this->m_tiles->get_CurrentZoom(&zoom);
-			Debug::WriteLine("Zoom out receivend: %d", zoom);
+			this->_tiles->get_CurrentZoom(&zoom);
+			Debug::WriteLine("Zoom out received: %d", zoom);
 		}
 	}
 	else 
 	{
-		double xzout = ((extents.right - extents.left)*( 1.0 + Percent ))*.5;
-		double xmiddle = extents.left + (extents.right - extents.left)*.5;
+		double xzout = ((_extents.right - _extents.left)*( 1.0 + Percent ))*.5;
+		double xmiddle = _extents.left + (_extents.right - _extents.left)*.5;
 
 		double cLeft = xmiddle - xzout;
 		double cRight = xmiddle + xzout;
 
-		double yzout = ((extents.top - extents.bottom)*( 1.0 + Percent ))*.5;
-		double ymiddle = extents.bottom + (extents.top - extents.bottom)*.5;
+		double yzout = ((_extents.top - _extents.bottom)*( 1.0 + Percent ))*.5;
+		double ymiddle = _extents.bottom + (_extents.top - _extents.bottom)*.5;
 
 		double cBottom = ymiddle - yzout;
 		double cTop = ymiddle + yzout;
@@ -1088,9 +1147,9 @@ void CMapView::ZoomOut(double Percent)
 // ***************************************************
 void CMapView::LogPrevExtent()
 {
-	m_prevExtents.push_back( extents );
-	if( m_prevExtents.size() > (size_t)m_extentHistory )
-		m_prevExtents.pop_front();
+	_prevExtents.push_back( _extents );
+	if( _prevExtents.size() > (size_t)m_extentHistory )
+		_prevExtents.pop_front();
 }
 
 // ***************************************************
@@ -1098,12 +1157,12 @@ void CMapView::LogPrevExtent()
 // ***************************************************
 long CMapView::ZoomToPrev()
 {
-	if( m_prevExtents.size() > 0 )
+	if( _prevExtents.size() > 0 )
 	{	
-		this->SetExtentsCore(m_prevExtents[m_prevExtents.size() - 1], false);
-		m_prevExtents.pop_back();
+		this->SetExtentsCore(_prevExtents[_prevExtents.size() - 1], false);
+		_prevExtents.pop_back();
 	}
-	return m_prevExtents.size();
+	return _prevExtents.size();
 }
 
 // ****************************************************************
@@ -1151,7 +1210,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude
 		double distortion = dy / dx;
 		
 		dx = widthKilometers * 1000.0 / dx;  	// in degrees
-		dy = dx / (m_viewHeight / m_viewWidth) / distortion;
+		dy = dx / (_viewHeight / _viewWidth) / distortion;
 		
 		box->SetBounds(xLongitude - dx / 2.0, yLatitude - dy / 2.0, 0.0, xLongitude + dx / 2.0, yLatitude + dy / 2.0, 0.0);
 		VARIANT_BOOL vb = this->SetGeographicExtents(box);
@@ -1420,9 +1479,9 @@ bool CMapView::GetGeoPosition(double& x, double& y)
 	double centerX = 0.0;
 	double centerY = 0.0;
 
-	PixelToProjection( m_viewWidth / 2.0,  m_viewHeight / 2.0, centerX, centerY);
+	PixelToProjection( _viewWidth / 2.0,  _viewHeight / 2.0, centerX, centerY);
 	
-	switch(m_transformationMode)
+	switch(_transformationMode)
 	{
 		case tmWgs84Complied:
 			break;
@@ -1451,10 +1510,10 @@ bool CMapView::GetGeoPosition(double& x, double& y)
 // ****************************************************************
 bool CMapView::SetGeoPosition(double x, double y)
 {
-	double dx = extents.right - extents.left;
-	double dy = extents.top - extents.bottom;
+	double dx = _extents.right - _extents.left;
+	double dy = _extents.top - _extents.bottom;
 
-	switch(m_transformationMode)
+	switch(_transformationMode)
 	{
 		case tmNotDefined:
 			return false;
@@ -1521,14 +1580,14 @@ float CMapView::GetLongitude()
 // ****************************************************************
 void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate) 
 {
-	if (m_transformationMode != tmNotDefined)
+	if (_transformationMode != tmNotDefined)
 	{
 		if (zoom < 0 || zoom > 25) {
 			ErrorMessage(tkINVALID_DATA_TYPE);
 			return;
 		}
 		int oldZoom;
-		m_tiles->get_CurrentZoom(&oldZoom);
+		_tiles->get_CurrentZoom(&oldZoom);
 		if (oldZoom != zoom || forceUpdate) {
 			ZoomToTileLevel(zoom);
 			Redraw();
@@ -1545,9 +1604,9 @@ void CMapView::SetCurrentZoom(int zoom)
 }
 int CMapView::GetCurrentZoom()
 {
-	if (m_transformationMode != tmNotDefined) {
+	if (_transformationMode != tmNotDefined) {
 		int val;
-		m_tiles->get_CurrentZoom(&val);
+		_tiles->get_CurrentZoom(&val);
 		return val;
 	}
 	else
@@ -1563,11 +1622,11 @@ void CMapView::SetTileProvider(tkTileProvider provider)
 	if (provider != oldProvider)
 	{
 		if (provider == tkTileProvider::ProviderNone) {
-			m_tiles->put_Visible(VARIANT_FALSE);
+			_tiles->put_Visible(VARIANT_FALSE);
 		}
 		else {
-			m_tiles->put_Provider(provider);
-			m_tiles->put_Visible(VARIANT_TRUE);
+			_tiles->put_Provider(provider);
+			_tiles->put_Visible(VARIANT_TRUE);
 		}
 		Redraw();
 	}
@@ -1575,14 +1634,14 @@ void CMapView::SetTileProvider(tkTileProvider provider)
 tkTileProvider CMapView::GetTileProvider()
 {
 	VARIANT_BOOL vb;
-	m_tiles->get_Visible(&vb);
+	_tiles->get_Visible(&vb);
 	if (!vb) {
 		return tkTileProvider::ProviderNone;
 	}
 	else
 	{
 		tkTileProvider provider;
-		m_tiles->get_Provider(&provider);
+		_tiles->get_Provider(&provider);
 		return provider;
 	}
 }
@@ -1615,7 +1674,7 @@ void CMapView::SetProjection(tkMapProjection projection)
 		return;
 	}
 
-	tkTransformationMode prevMode = m_transformationMode;
+	tkTransformationMode prevMode = _transformationMode;
 
 	IGeoProjection* p = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
@@ -1653,7 +1712,7 @@ void CMapView::SetProjection(tkMapProjection projection)
 tkMapProjection CMapView::GetProjection()
 {
 	VARIANT_BOOL vb;
-	m_projection->get_IsEmpty(&vb);
+	_projection->get_IsEmpty(&vb);
 	if (vb) {
 		return PROJECTION_NONE;
 	}
@@ -1675,7 +1734,7 @@ tkMapProjection CMapView::GetProjection()
 // ****************************************************************
 tkKnownExtents CMapView::GetKnownExtentsCore()
 {
-	if (m_transformationMode != tmNotDefined) {
+	if (_transformationMode != tmNotDefined) {
 		return _knownExtents;
 	}
 	else {
@@ -1684,7 +1743,7 @@ tkKnownExtents CMapView::GetKnownExtentsCore()
 }
 void CMapView::SetKnownExtentsCore(tkKnownExtents extents)
 {
-	if (m_transformationMode != tmNotDefined) {
+	if (_transformationMode != tmNotDefined) {
 		IExtents* ext = GetKnownExtents(extents);
 		if (ext) {
 			this->SetGeographicExtents(ext);
@@ -1718,7 +1777,7 @@ VARIANT_BOOL CMapView::GetGrabProjectionFromData()
 }
 void CMapView::SetGrabProjectionFromData(VARIANT_BOOL value)
 {
-	_grabProjectionFromData = value ? true : false;
+	_grabProjectionFromData = value;
 }
 
 // ****************************************************************
@@ -1728,7 +1787,7 @@ VARIANT_BOOL CMapView::ProjToDegrees(double projX, double projY, double* degrees
 {
 	*degreesLngX = 0.0;
 	*degreesLatY = 0.0;
-	switch(m_transformationMode)
+	switch(_transformationMode)
 	{
 		case tmNotDefined:
 			return VARIANT_FALSE;
@@ -1750,7 +1809,7 @@ VARIANT_BOOL CMapView::DegreesToProj(double degreesLngX, double degreesLatY, dou
 {
 	*projX = 0.0;
 	*projY = 0.0;
-	switch(m_transformationMode)
+	switch(_transformationMode)
 	{
 		case tmNotDefined:
 			return VARIANT_FALSE;
@@ -1759,7 +1818,7 @@ VARIANT_BOOL CMapView::DegreesToProj(double degreesLngX, double degreesLatY, dou
 			*projY = degreesLatY;
 			return VARIANT_TRUE;
 		case tmDoTransformation:
-			IGeoProjection* gp = GetMapToWgs84Transform();
+			IGeoProjection* gp = GetWgs84ToMapTransform();
 			VARIANT_BOOL vb;
 			gp->Transform(&degreesLngX, &degreesLatY, &vb);
 			*projX = degreesLngX;

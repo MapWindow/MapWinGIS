@@ -10,11 +10,7 @@
 #endif
 
 #include <winreg.h>
-
-#include <vector>
-
 #include <iostream>
-
 using namespace std;
 
 //Error Codes
@@ -56,7 +52,7 @@ public:
 	unsigned long getNumSubKeys();
 	unsigned long getNumValues();
 	bool isOpen();
-	char * getErrorMsg();
+	//char * getErrorMsg();
 	char * getValueName(unsigned long KeyIndex);
 	bool OpenKey(HKEY BaseSection, char * KeyName);
 	

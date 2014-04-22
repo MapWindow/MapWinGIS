@@ -21,7 +21,6 @@
 
 #pragma once;
 #include "base64.h"
-#include <gdiplus.h>
 
 // A wrapper for GDI+ bitmap located in the global heap
 class CMemoryBitmap

@@ -25,9 +25,6 @@
 #ifndef __SHAPEFILELEGEND_H_
 #define __SHAPEFILELEGEND_H_
 
-#include "MapWinGis.h"       // main symbols
-#include <vector>
-
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorScheme
 class ATL_NO_VTABLE CShapefileColorScheme : 

@@ -1,8 +1,6 @@
 # ifndef ENUMERATIONS_H
 # define ENUMERATIONS_H
 
-#include "MapWinGis.h"
-
 enum ShapeLayerFlags
 {	sfVisible = 1,
 	slfDrawFill = 2,
@@ -122,6 +120,23 @@ enum SqliteOpenMode
 {
 	OpenIfExists = 0,
 	OpenOrCreate = 1,
+};
+
+enum ZoombarPart
+{
+	ZoombarNone = 0,
+	ZoombarPlus = 1,
+	ZoombarMinus = 2,
+	ZoombarHandle = 3,
+	ZoombarBar = 4,
+};
+
+enum DraggingOperation
+{
+	DragNone = 0,
+	DragPanning = 1,
+	DragZoombarHandle = 2,
+	DragZoombox = 3,
 };
 
 # endif

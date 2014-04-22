@@ -1,6 +1,6 @@
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -12,28 +12,18 @@
 //Contributor(s): (Open source contributors should list themselves and their modifications here).
 //10-25-2005 Rob Cairns. Added extents property. Changed structure of LoadImageBuffer
 //////////////////////////////////////////////////////////////////////
-//#if _MSC_VER > 1000
-//#endif // _MSC_VER > 1000
-//#pragma pack(push, gif2, 1)
 
 #pragma once
-#include "MapWinGis.h"
-#include <deque>
-#include "gdal_priv.h"
-
 #include "colour.h"
 #include "ImageStructs.h"
-
-#include "ErrorCodes.h"
-#include "Extent.h"
 
 class tkRaster
 {
 public:
     tkRaster()
+		: transColor(RGB(0,0,0))
 	{	//Rob Cairns
 		rasterDataset=NULL;
-		transColor = RGB(0,0,0);
 		predefinedColorScheme = NULL;
 		customColorScheme = NULL;
 		poBandR = NULL;

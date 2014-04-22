@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "map.h"
 #include "Utils.h"
+#include "measuring.h"
+#include "GeometryOperations.h"
 
 #pragma region DrawMouseMoves
 // ***************************************************************
@@ -17,9 +19,9 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 	{
 		// creating a temp buffer, and passing content of main buffer to it;
 		// so that all the resulting stuff can passed to screen in one take, without flickering
-		gTemp = Gdiplus::Graphics::FromImage(m_drawingBitmap);
+		gTemp = Gdiplus::Graphics::FromImage(_drawingBitmap);
 		gTemp->SetSmoothingMode(Gdiplus::SmoothingMode::SmoothingModeAntiAlias);
-		gTemp->DrawImage(m_bufferBitmap, 0.0f, 0.0f);
+		gTemp->DrawImage(_bufferBitmap, 0.0f, 0.0f);
 	}
 	else
 	{
@@ -36,7 +38,7 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 	{
 		// it's not snapshot so we are using temp buffer to avoid flickering;
 		// let's pass it to the screen here;
-		g->DrawImage(m_drawingBitmap, 0.0f, 0.0f);
+		g->DrawImage(_drawingBitmap, 0.0f, 0.0f);
 		delete gTemp;
 	}
 
@@ -59,8 +61,8 @@ void CMapView::DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g)
 			double prX, prY;
 			PixelToProjection(x, y, prX, prY);
 
-			bool canUseDegrees = m_transformationMode == tmWgs84Complied;
-			if (m_transformationMode == tmDoTransformation && (_showCoordinates == cdmDegrees || _showCoordinates == cdmAuto))
+			bool canUseDegrees = _transformationMode == tmWgs84Complied;
+			if (_transformationMode == tmDoTransformation && (_showCoordinates == cdmDegrees || _showCoordinates == cdmAuto))
 			{
 				IGeoProjection* p = GetMapToWgs84Transform();
 				if (p) {
@@ -86,12 +88,12 @@ void CMapView::DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g)
 				Gdiplus::PointF point(0.0f, 0.0f);
 				Gdiplus::RectF rect;
 				
-				g->MeasureString(s, s.GetLength(), _font, point, Gdiplus::StringFormat::GenericDefault(), &rect);
-				if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
+				g->MeasureString(s, s.GetLength(), _fontCourier, point, Gdiplus::StringFormat::GenericDefault(), &rect);
+				if (rect.Width + 15 < _viewWidth)		// control must be big enough to host the string
 				{
-					point.X = 7.0f;
+					point.X = _viewWidth - rect.Width - 7.0f;
 					point.Y = 7.0f;
-					DrawStringWithShade(g, s, _font, point, &((CMeasuring*)m_measuring)->textBrush, &((CMeasuring*)m_measuring)->whiteBrush);
+					DrawStringWithShade(g, s, _fontCourier, point, &((CMeasuring*)_measuring)->textBrush, &((CMeasuring*)_measuring)->whiteBrush);
 				}
 			}
 		}
@@ -108,7 +110,7 @@ void CMapView::DrawMeasuringToScreenBuffer(Gdiplus::Graphics* g)
 {
 	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
 	{
-		CMeasuring* m =(CMeasuring*)m_measuring;
+		CMeasuring* m =(CMeasuring*)_measuring;
 		double x, y;
 		if (!m->IsStopped())
 		{
@@ -137,7 +139,7 @@ void CMapView::DrawMeasuringToScreenBuffer(Gdiplus::Graphics* g)
 					{
 						dist = m->points[m->points.size() - 1]->Proj.GetDistance(xLng, yLat);
 					}
-					DrawSegmentInfo(g, x, y, m->mousePoint.x, m->mousePoint.y, dist, 0.0, 1, m);
+					DrawSegmentInfo(g, x, y, m->mousePoint.x, m->mousePoint.y, dist, 0.0, 1);
 
 					g->SetSmoothingMode(prevMode);
 					g->SetTextRenderingHint(prevHint);
@@ -198,7 +200,7 @@ void CMapView::DrawMeasuringToMainBuffer(Gdiplus::Graphics* g )
 	// TODO: perhaps add more rendering options: transparency, color, width, style, vertex size
 	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
 	{
-		CMeasuring* measuring = ((CMeasuring*)m_measuring);
+		CMeasuring* measuring = ((CMeasuring*)_measuring);
 		switch(measuring->measuringType)	
 		{
 			case tkMeasuringType::MeasureArea:
@@ -232,7 +234,7 @@ void CMapView::DrawMeasuringToMainBuffer(Gdiplus::Graphics* g )
 					for(int i = 0; i < size - 1; i++) {
 						measuring->get_SegementLength(i, &length);
 						totalLength += length;
-						DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, measuring);
+						DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i);
 					}
 
 					Gdiplus::Pen pen(Gdiplus::Color::Orange, 2.0f);
@@ -274,7 +276,7 @@ void CMapView::DrawMeasuringToMainBuffer(Gdiplus::Graphics* g )
 IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length)
 {
 	IPoint* pnt = NULL;
-	CMeasuring* measuring = ((CMeasuring*)m_measuring);
+	CMeasuring* measuring = ((CMeasuring*)_measuring);
 	if (measuring)
 	{
 		if (length > 2 && measuring->firstPointIndex >= 0)
@@ -328,7 +330,7 @@ IPoint* CMapView::GetMeasuringPolyCenter(Gdiplus::PointF* data, int length)
 // ****************************************************************
 void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt)
 {
-	CMeasuring* measuring = ((CMeasuring*)m_measuring);
+	CMeasuring* measuring = ((CMeasuring*)_measuring);
 	if (measuring)
 	{
 		double xOrig, yOrig;
@@ -403,12 +405,11 @@ void CMapView::DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, doubl
 	}
 }
 
-
 // ***************************************************************
 //		DrawSegmentInfo()
 // ***************************************************************
 void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
-					 double totalLength, int segmentIndex, CMeasuring* measure)
+					 double totalLength, int segmentIndex)
 {
 	CStringW s1, s2, s, sAz;
 
@@ -423,6 +424,7 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 	angle = GetPointAngle(x, y) * 180.0 / pi;							
 	angle = - (angle - 90.0);
 
+	CMeasuring* measure = (CMeasuring*)_measuring;
 	if (measure->HasProjection())
 	{
 		CStringW m = m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMeters);
@@ -526,3 +528,4 @@ void CMapView::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, d
 	}
 }
 #pragma endregion
+

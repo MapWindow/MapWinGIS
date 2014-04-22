@@ -5,7 +5,6 @@
 #ifndef tkBitmap_h
 #define tkBitmap_h
 #include "colour.h"
-#include "MapWinGis.h"
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////

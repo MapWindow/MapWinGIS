@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "Wininet.h"
 #include "BaseProvider.h"
+#include <atlhttp.h>		// ATL HTTP Client (CAtlHttpClient)
 
 // init static members
 CString BaseProvider::m_proxyAddress = "";
@@ -133,13 +134,10 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		}
 		else
 		{
-			SYSTEMTIME time;
-			GetLocalTime(&time);
 			CString err;
-			err.Format("ERROR: %d\n", httpClient->GetLastError());
+			err.Format("ERROR: %d; ", httpClient->GetLastError());
 			CString s;
-			s.Format("%s%02d:%02d:%02d.%-3d: status %d size %6d b %s", (!hasError ? "": err),
-				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds, httpStatus, bodyLen, useShortUrl ? shortUrl : urlStr);
+			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), httpStatus, bodyLen, useShortUrl ? shortUrl : urlStr);
 			tilesLogger.Log(s);	// TODO: probably should be protected by critical section
 		}
 	}

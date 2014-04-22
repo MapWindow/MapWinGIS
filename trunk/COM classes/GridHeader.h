@@ -23,11 +23,6 @@
  * (Open source contributors should list themselves and their modifications here). */
  
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-
-#include "varH.h"
-
 #include "fheader.h"
 #include "sheader.h"
 #include "dheader.h"
@@ -35,7 +30,6 @@
 #include "tkGridRaster.h"
 
 // CGridHeader
-
 class ATL_NO_VTABLE CGridHeader : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CGridHeader, &CLSID_GridHeader>,

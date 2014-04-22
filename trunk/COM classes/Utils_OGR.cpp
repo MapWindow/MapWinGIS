@@ -4,17 +4,14 @@
 //********************************************************************************************************
 #include "stdafx.h"
 #include "Utils.h"
-
 #include "atlsafe.h"
 #include <stack>
 #include <comdef.h>
-
 #include "gdal.h"
 #include "gdal_alg.h"
 #include "cpl_conv.h"
 #include "cpl_string.h"
 #include "cpl_multiproc.h"
-#include "ogr_spatialref.h"
 #include "ogr_api.h"
 #include "ogr_srs_api.h"
 #include "cpl_vsi.h"
@@ -2393,11 +2390,9 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 
 	if( bstrLayers != NULL && SysStringLen(bstrLayers) > 0 )
 	{
-		CString sLayers = OLE2CA(bstrLayers);
-		CString sLayerToken = "";
 		int curPos = 0;
-
-		sLayerToken = sLayers.Tokenize(" ", curPos);
+		CString sLayers = OLE2CA(bstrLayers);
+		CString sLayerToken = sLayers.Tokenize(" ", curPos);
 
 		while( !sLayerToken.IsEmpty() )
 		{

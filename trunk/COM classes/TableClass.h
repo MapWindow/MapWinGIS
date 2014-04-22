@@ -23,22 +23,11 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-
-#include <vector>
-#include <deque>
-#include <map>
 #include <set>
-#include <direct.h>
-
-#include "Field.h"
 #include "TableRow.h"
 #include "dbf.h"
 #include "Expression.h"
-#include "MapWinGIS_i.h"
 #include "_ITableEvents_CP.H"
-
 
 using namespace std;
 
@@ -58,6 +47,7 @@ struct FieldWrapper
 	{
 		field = NULL;
 		joinId = -1;
+		oldIndex = -1;
 	}
 
 	~FieldWrapper()
@@ -77,6 +67,7 @@ struct RecordWrapper
 	RecordWrapper()
 	{
 		row = NULL;
+		oldIndex = -1;
 	}
 };
 

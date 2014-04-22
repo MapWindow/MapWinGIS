@@ -42,29 +42,23 @@ void LoadingTask::DoTask()
 	{
 		// this tile is no longer needed; another set of tiles was requested		
 		//Debug::WriteLine("Outdated tile loading: canceled");
+		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", this->zoom, this->x, this->y);
 	}
 	else
 	{
-		//long waitTime = -1;
-		//do
-		//{
-		//	long waitTime = this->Loader->TryRequest();		// WARNING: potentially endless loop (-1 is expected)
-		//	if (waitTime != -1)
-		//	{
-		//		Debug::WriteLine("Request limit met. Thread is sleeping: %d", waitTime);
-		//		Sleep(waitTime);
-		//	}
-		//}
-		//while(waitTime != -1);
+		long timeout = this->Loader->m_sleepBeforeRequestTimeout;
+		if (timeout > 0 && timeout < 10000) Sleep(timeout);
 
-		if (this->Loader->m_sleepBeforeRequestTimeout > 0 && this->Loader->m_sleepBeforeRequestTimeout < 10000)
-			Sleep(this->Loader->m_sleepBeforeRequestTimeout);
-
+		if (!this->cacheOnly)
+			this->Loader->AddActiveTask(this);
+		
 		TileCore* tile = Provider->GetTileImage(CPoint(x, y), zoom);		// http call
 
 		if (this->Loader->stopped)
 		{
 			delete tile;	// requesting from a server takes time; probably the task was already aborted
+			if (!this->cacheOnly)
+				this->Loader->RemoveActiveTask(this);
 		}
 		else 
 		{
@@ -84,25 +78,105 @@ void LoadingTask::DoTask()
 					CMapView* mapView = (CMapView*)Provider->mapView;
 					CTiles* tiles = (CTiles*)mapView->GetTilesNoRef();
 					
+					// quickly pass it from active list to cache; so it's always avaiable while building the next list of requests
+					this->Loader->LockActiveTasks(true);
+					tiles->AddTileToRamCache(tile);
+					this->Loader->RemoveActiveTask(this);
+					this->Loader->LockActiveTasks(false);
+
 					if (this->generation < this->Loader->tileGeneration)
 					{
-						tiles->AddTileOnlyCaching(tile);
-						Debug::WriteLine("Outdated tile loading: tile cached");
+						tiles->AddTileOnlyCaching(tile);      
+						tilesLogger.WriteLine("Outdated tile; cached: %d\\%d\\%d", this->zoom, this->x, this->y);
 					}
 					else
 					{
 						tiles->AddTileWithCaching(tile);
-						mapView->_canUseMainBuffer = false;
-						mapView->Invalidate();
+						mapView->RedrawCore(RedrawSkipDataLayers, false, false);
 						this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
 					}
 					this->busy = false;
 				}
+				else {
+					this->Loader->RemoveActiveTask(this);
+				}
 			}
-			this->Loader->CheckComplete();
+
+			// check generation to avoid firing the event several times when outdated times are loaded
+			if(this->generation == this->Loader->tileGeneration) {
+				this->Loader->CheckComplete();		
+			}
 		}
 	}
+	
+	// let's try to duplicate this, as sometimes tiles still remain in the list when completed flag is set
+	this->Loader->RemoveActiveTask(this);	
 	this->completed = true;
+}
+
+// *******************************************************
+//		LockActiveTasks()
+// *******************************************************
+void TileLoader::LockActiveTasks(bool lock)
+{
+	if (lock)
+		_activeTasksLock.Lock();
+	else
+		_activeTasksLock.Unlock();
+}
+
+// *******************************************************
+//		AddActiveTask()
+// *******************************************************
+void TileLoader::AddActiveTask(void* task)
+{
+	_activeTasksLock.Lock();
+	_activeTasks.push_back(task);
+	_activeTasksLock.Unlock();
+}
+
+// *******************************************************
+//		RemoveActiveTask()
+// *******************************************************
+void TileLoader::RemoveActiveTask(void* t)
+{
+	_activeTasksLock.Lock();
+	LoadingTask* task = (LoadingTask*)t;
+	list<void*>::iterator it = _activeTasks.begin();
+	while (it != _activeTasks.end())
+	{
+		LoadingTask* item = (LoadingTask*)*it;
+		if (item->Compare(task))
+		{
+			_activeTasks.remove(item);
+			break;
+		}
+		++it;
+	}
+	_activeTasksLock.Unlock();
+}
+
+// *******************************************************
+//		HasActiveTask()
+// *******************************************************
+bool TileLoader::HasActiveTask(void* t)
+{
+	_activeTasksLock.Lock();
+	LoadingTask* task = (LoadingTask*)t;
+	list<void*>::iterator it = _activeTasks.begin();
+	bool found = false;
+	while (it != _activeTasks.end())
+	{
+		LoadingTask* item = (LoadingTask*)*it;
+		if (item->Compare(task))
+		{
+			found = true;
+			break;
+		}
+		++it;
+	}
+	_activeTasksLock.Unlock();
+	return found;
 }
 
 // *******************************************************
@@ -134,25 +208,31 @@ bool TileLoader::InitPools()
 //		Load()
 // *******************************************************
 //	Creates tasks for tile points and enqueues them in thread pool
-void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, bool isSnapshot, CString key, bool cacheOnly)
+void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* provider, void* tiles, 
+					  bool isSnapshot, CString key, int generation, bool cacheOnly)
 {
 	this->key = key;
 	this->isSnapshot = isSnapshot;
 	this->tiles = tiles;
-	this->tileGeneration++;
-	int generation = this->tileGeneration;
+	if (isSnapshot) {
+		this->tileGeneration++;
+		generation = this->tileGeneration;
+	}
 	
 	if (!InitPools())
 		return;
 
-	CThreadPool<ThreadWorker>* pool = (this->tileGeneration % 2 == 0)  ? m_pool : m_pool2;
+	CThreadPool<ThreadWorker>* pool = (generation % 2 == 0)  ? m_pool : m_pool2;
 
 	pool->SetTimeout(100000);		// 100 seconds (low rate limit may be set)
 
-	Debug::WriteLine("Tiles requested; generation = %d", generation);	
+	//Debug::WriteLine();	
+	tilesLogger.WriteLine("Tiles requested; generation = %d", generation);
 
-	m_count = 0;
-	m_totalCount = points.size();
+	if (isSnapshot) {
+		m_count = 0;
+		m_totalCount = points.size();
+	}
 
 	this->CleanTasks();
 
@@ -238,7 +318,7 @@ void TileLoader::Stop()
 				busy = true;
 				break;
 			}
-			it++;
+			++it;
 		}
 	} while (busy);
 
@@ -262,7 +342,7 @@ void TileLoader::CleanTasks()
 		}
 		else
 		{
-			it++;
+			++it;
 		}
 	}
 }

@@ -24,7 +24,6 @@
  // Sergei Leschinski (lsu) 8 feb 2011 - created the file
 
 #pragma once
-#include "MapWinGis.h"
 
 class IShapePoint
 {

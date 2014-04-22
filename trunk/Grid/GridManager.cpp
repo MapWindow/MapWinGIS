@@ -1,9 +1,7 @@
 # include "stdafx.h"
 # include "GridManager.h"
-# include <deque>
 # include "xtiffio.h"  /* for TIFF */
 # include "tiff.h"
-# include "gdalhelper.h"
 # include "grid.h"
 
 GridManager::GridManager()

@@ -3,29 +3,23 @@
 
 #pragma once
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "Map.h"
-#include <fstream>
-#include <vector>
-#include <atlsafe.h>
 #include "IndexSearching.h"
-#include "MapPpg.h"
-#include "Enumerations.h"
 #include "LabelCategory.h"
 #include "Labels.h"
 
 #pragma region Properties
 void CMapView::SetLineSeparationFactor(long sepFactor)
 {
-	m_LineSeparationFactor = sepFactor;
+	_lineSeparationFactor = sepFactor;
 }
 
 long CMapView::GetLineSeparationFactor(void)
 {
 	//gReferenceCounter.WriteReport();
 	// 0 is invalid, since it would result in no adjustments
-    if (m_LineSeparationFactor == 0) m_LineSeparationFactor = 3;
-	return m_LineSeparationFactor;
+    if (_lineSeparationFactor == 0) _lineSeparationFactor = 3;
+	return _lineSeparationFactor;
 }
 
 // *************************************************************
@@ -34,9 +28,9 @@ long CMapView::GetLineSeparationFactor(void)
 IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[LayerHandle];
+		Layer * layer = _allLayers[LayerHandle];
 		IShapefile* sf = NULL;
 		if (layer->QueryShapefile(&sf))
 			return sf;
@@ -60,9 +54,9 @@ void CMapView::SetShapefile(LONG LayerHandle, IShapefile* pVal)
 IImage* CMapView::GetImage(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[LayerHandle];
+		Layer * layer = _allLayers[LayerHandle];
 		IImage* img = NULL;
 		if (layer->QueryImage(&img))
 		{
@@ -86,9 +80,9 @@ void CMapView::SetImage(LONG LayerHandle, IImage* pVal)
 // *************************************************************
 ILabels* CMapView::GetLayerLabels(LONG LayerHandle)
 {
-	if (LayerHandle >= 0 && LayerHandle < (long)m_allLayers.size())
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[LayerHandle];
+		Layer * layer = _allLayers[LayerHandle];
 		return layer->get_Labels();
 	}
 	else
@@ -266,12 +260,12 @@ void CMapView::SetLayerLabelsShadowColor(long LayerHandle, OLE_COLOR color)
 // **********************************************************
 bool CMapView::GetMultilineLabeling()
 {
-	if (m_ShapeDrawingMethod == dmNewWithLabels || m_ShapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
+	if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
 	{
 		//ErrorMessage(tkPROPERTY_DEPRECATED);
 	}
 	// we shall save the value all the same
-	return MultilineLabeling?true:false;
+	return _multilineLabeling?true:false;
 }
 
 // **********************************************************
@@ -279,12 +273,12 @@ bool CMapView::GetMultilineLabeling()
 // **********************************************************
 void CMapView::SetMultilineLabeling(bool Value)
 {
-	if (m_ShapeDrawingMethod == dmNewWithLabels || m_ShapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
+	if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
 	{
 		ErrorMessage(tkPROPERTY_DEPRECATED);
 	}
 	// we shall save the value all the same
-	MultilineLabeling = Value;
+	_multilineLabeling = Value;
 }
 
 // **********************************************************

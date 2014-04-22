@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 // The original Author is Neio(neio.zhou@gmail.com) and released as public domain in July 2009 to be a part of MapWinGIS.
@@ -16,8 +16,8 @@
 #include "QTree.h"
 
 QTree::QTree(QTreeExtent extent)
+	:extent(extent)
 {
-	this->extent = extent;
 	LT = NULL;
 	RT = NULL;
 	LB = NULL;

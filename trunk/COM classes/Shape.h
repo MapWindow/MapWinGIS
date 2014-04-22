@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 // http://www.mozilla.org/MPL/ 
 // Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-// ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+// ANY KIND, either express or implied. See the License for the specific language governing rights and 
 // limitations under the License. 
 //
 // The Original Code is MapWindow Open Source. 
@@ -19,12 +19,7 @@
 // Contributor(s): (Open source contributors should list themselves and their modifications here). 
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-#include <deque>
-#include <vector>
-#include <algorithm>
-
+//
 #include "ShapeInterfaces.h"
 #include "GeometryConverter.h"
 #include "ShapeWrapper.h"
@@ -40,52 +35,8 @@ class ATL_NO_VTABLE CShape :
 	public IDispatchImpl<IShape, &IID_IShape, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CShape()
-	{	
-		USES_CONVERSION;
-		_key = A2BSTR("");
-		_globalCallback = NULL;
-		_lastErrorCode = tkNO_ERROR;
-		_isValidReason = "";
-		
-		_useFastMode = m_globalSettings.shapefileFastMode;
-		if (m_globalSettings.shapefileFastMode)
-		{
-			_shp = new CShapeWrapper(SHP_NULLSHAPE);
-		}
-		else
-		{
-			_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
-		}
-		gReferenceCounter.AddRef(tkInterface::idShape);
-		Debug::WriteLine("Shape created");
-	}
-	
-	// destructor
-	~CShape()
-	{
-		::SysFreeString(_key);			
-			
-		if (_shp)
-		{
-			if (_useFastMode)
-			{
-				delete (CShapeWrapper*)_shp;
-			}
-			else
-			{
-				delete (CShapeWrapperCOM*)_shp;
-			}
-			_shp = NULL;
-		}
-
-		if (_globalCallback)
-		{
-			_globalCallback->Release();
-		}
-		gReferenceCounter.Release(tkInterface::idShape);
-		Debug::WriteLine("Shape deleted");
-	}
+	CShape();
+	~CShape();
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 

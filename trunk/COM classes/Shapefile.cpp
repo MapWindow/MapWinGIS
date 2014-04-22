@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,32 +14,10 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-//
-//Contributor(s): (Open source contributors should list themselves and their modifications here). 
-// -------------------------------------------------------------------------------------------------------
-// 06/06/2007 - T Shanley (tws) - fixed some memory leaks in EditInsertShape
-// 07/03/2009 - Sergei Leschinski (lsu) - caching of shape extents for faster redraw in edit mode 
-//				(see http://www.mapwindow.org/phorum/read.php?5,13065).
-//				New properties/methods: RefreshShapeExtents, RefreshExtents, CacheExtents.
-//				Works only in edit mode (Shapefile.EditingShapes = true). Set Shapefile.CacheExtents = true 
-//				to activate this functionality. When changes are made to certain shapes RefreshShapeExtents 
-//				must be used to update cached information. RefreshExtents is used to update extents for 
-//				a whole shapefile. shpBounds vector is used to store extents. 
-// 07/23/2009 - ÷‹¥œª‘ (Neio Zhou) - 
-//              QuadTree support in Edit mode, see (http://www.mapwindow.org/phorum/read.php?5,13404)
-//			    use UseQTree property to switch if use the quadtree.
-//              The performance is much better when use both cacheExtents = true and UseQTree = true.
-//              Add Save Method to save without exiting edit mode
-//              Change the bahavior of SaveAs (This beed to be discussed)
-//              Change the selectShapes in Edit Mode in order to fix a bug that cannot select inserted shapes
-// 08-24-2009 (sm) Fixes to performance issues with the spatial index trees as per 
-//				http://www.mapwindow.org/phorum/read.php?5,13738
-// 27 aug 2009 lsu Added support for selection. GetIntersection, SpatialQuery, SelectShapesAlt functions.
+//********************************************************************************************************
                        
 #include "stdafx.h"
 #include "Shapefile.h"
-#include "Varh.h"
-#include "Projections.h"		// ProjectionTools
 #include "Labels.h"
 #include "Charts.h"
 #include "GeoProjection.h"
@@ -47,12 +25,170 @@
 #include "TableClass.h"
 #include <GeosHelper.h>
 #include "ShapeValidator.h"
+#include "ShapefileCategories.h"
+#include "Shape.h"
+#include <io.h>
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
 	#undef THIS_FILE
 	static char THIS_FILE[] = __FILE__;
 #endif
+
+CShapefile::CShapefile()
+{	
+	_hotTracking = VARIANT_FALSE;
+	_geosGeometriesRead = false;
+	_useValidationList = false;
+	_stopExecution = NULL;
+
+	_selectionTransparency = 180;
+	_selectionAppearance = saSelectionColor;
+	_selectionColor = RGB(255, 255, 0);
+	_collisionMode = tkCollisionMode::LocalList;
+	
+	_geometryEngine = m_globalSettings.geometryEngine;
+	
+	m_sourceType = sstUninitialized;
+	
+	m_writing = false;
+	m_reading = false;
+	
+	_isEditingShapes = FALSE;
+	_fastMode = m_globalSettings.shapefileFastMode ? TRUE : FALSE;
+	_minDrawingSize = 1;
+
+    useSpatialIndex = TRUE;
+    hasSpatialIndex = FALSE;
+    spatialIndexLoaded = FALSE;
+	spatialIndexMaxAreaPercent = 0.5;
+	spatialIndexNodeCapacity = 100;
+
+	//Neio 20090721
+	useQTree = VARIANT_FALSE;
+	cacheExtents = FALSE;
+	m_qtree = NULL;
+	_tempTree = NULL;
+
+	_shpfile = NULL;
+	_shxfile = NULL;
+
+	_shpfiletype = SHP_NULLSHAPE;
+	_nextShapeHandle = 0;
+
+	_minX = 0.0;
+	_minY = 0.0;
+	_minZ = 0.0;
+	_maxX = 0.0;
+	_maxY = 0.0;
+	_maxZ = 0.0;
+	_minM = 0.0;
+	_maxM = 0.0;
+	
+	USES_CONVERSION;
+	key = A2BSTR("");
+	_expression = A2BSTR("");
+	globalCallback = NULL;
+	lastErrorCode = tkNO_ERROR;
+	dbf = NULL;
+	
+	// creation of children classes
+	m_selectDrawOpt = NULL;
+	m_defaultDrawOpt = NULL;
+	m_labels = NULL;
+	m_categories = NULL;
+	m_charts = NULL;
+	m_geoProjection = NULL;
+	
+	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
+	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
+
+	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_selectDrawOpt);
+	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_defaultDrawOpt);
+	CoCreateInstance(CLSID_ShapefileCategories,NULL,CLSCTX_INPROC_SERVER,IID_IShapefileCategories,(void**)&m_categories);
+	CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
+	CoCreateInstance(CLSID_Charts,NULL,CLSCTX_INPROC_SERVER,IID_ICharts,(void**)&m_charts);
+	CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&m_geoProjection);
+
+	this->put_ReferenceToLabels();
+	this->put_ReferenceToCategories();
+	this->put_ReferenceToCharts();
+
+	gReferenceCounter.AddRef(tkInterface::idShapefile);
+
+}
+CShapefile::~CShapefile()
+{			
+	VARIANT_BOOL vbretval;
+	this->Close(&vbretval);
+	
+	::SysFreeString(key);
+	::SysFreeString(_expression);
+
+	if (m_selectDrawOpt != NULL)
+	{
+		m_selectDrawOpt->Release();
+		m_selectDrawOpt = NULL;
+	}
+
+	if (m_defaultDrawOpt != NULL)
+	{
+		m_defaultDrawOpt->Release();
+		m_defaultDrawOpt = NULL;
+	}
+
+	if (m_labels != NULL)
+	{
+		put_ReferenceToLabels(true);	// labels class maybe referenced by client and won't be deleted as a result
+		m_labels->Release();			// therefore we must clear the reference to the parent as it will be invalid
+		m_labels = NULL;
+	}
+
+	if (m_categories != NULL)
+	{
+		put_ReferenceToCategories(true);
+		m_categories->Release();
+		m_categories = NULL;
+	}
+
+	if (m_charts != NULL)
+	{
+		put_ReferenceToCharts(true);
+		m_charts->Release();
+		m_charts = NULL;
+	}
+
+	if (_stopExecution)
+	{
+		_stopExecution->Release();
+		_stopExecution = NULL;
+	}
+
+	if (m_geoProjection)
+	{
+		m_geoProjection->Release();
+	}
+	gReferenceCounter.Release(tkInterface::idShapefile);
+	//Debug::WriteLine("Shapefile destructor: %d", sfCount);
+}
+
+std::vector<ShapeData*>* CShapefile::get_ShapeVector()
+{
+	return &_shapeData;
+}
+IShapeWrapper* CShapefile::get_ShapeWrapper(int ShapeIndex)
+{
+	return ((CShape*)_shapeData[ShapeIndex]->shape)->get_ShapeWrapper();
+}
+IShapeData* CShapefile::get_ShapeData(int ShapeIndex)
+{
+	return (_shapeData[ShapeIndex])->fastData;
+}
+void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
+{
+	Utility::put_ComReference(info, 
+		(IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
+}
 
 #pragma region Properties	
 
@@ -337,7 +473,7 @@ void CShapefile::ApplyRandomDrawingOptions()
 			unsigned char b = b1 + unsigned char(double(rand()/double(RAND_MAX) * (b2 - b1)));
 			options->put_FillColor(RGB(r,g,b));
 
-			// grey color for outlines
+			// gray color for outlines
 			options->put_LineColor(RGB(150,150,150));
 		}
 		else   // point and multipoints
@@ -349,7 +485,7 @@ void CShapefile::ApplyRandomDrawingOptions()
 			unsigned char b = b1 + unsigned char(double(rand()/double(RAND_MAX) * (b2 - b1)));
 			options->put_FillColor(RGB(r,g,b));
 
-			// grey color for outlines
+			// gray color for outlines
 			options->put_LineColor(RGB(150,150,150));
 		}
 		options->Release();
@@ -366,13 +502,13 @@ void CShapefile::ApplyRandomDrawingOptions()
 		else if( type == SHP_POLYGON || type == SHP_POLYGONZ || type == SHP_POLYGONM )
 		{
 			options->put_FillColor(RGB(255,255,0));
-			// grey color for outlines
+			// gray color for outlines
 			options->put_LineColor(RGB(150,150,150));
 		}
 		else   // point and multipoints
 		{
 			options->put_FillColor(RGB(255, 255,0));
-			// grey color for outlines
+			// gray color for outlines
 			options->put_LineColor(RGB(150,150,150));
 		}
 		options->Release();
@@ -414,7 +550,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 			_isEditingShapes = false;
 			StartEditingShapes(VARIANT_TRUE, cBack, &vb);
 			
-			// this will trigger loading of all dbf vaues into the memory
+			// this will trigger loading of all dbf values into the memory
 			long numFields;
 			this->get_NumFields(&numFields);
 			if (numFields > 0)
@@ -454,7 +590,7 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	VARIANT_BOOL vbretval;
 
 	// saving the provided names; 
-	// from now on we must clean the class varaibles in case the operation won't succeed
+	// from now on we must clean the class variables in case the operation won't succeed
 	_shpfileName = tmp_shpfileName;
 	_shxfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"shx";
 	_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"dbf";
@@ -474,7 +610,7 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	else
 	{
 		// Running 2k, XP, NT, or other future versions
-		////Changes made to use _wfopen to support Assian character file names ---Lailin Chen 11/5/2005
+		////Changes made to use _wfopen to support Asian character file names ---Lailin Chen 11/5/2005
 		_shpfile = _wfopen( _shpfileName, L"rb");
 		_shxfile = _wfopen(_shxfileName,L"rb");
 	}
@@ -723,7 +859,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 			}
 			if( Utility::fileExists(prjName) != FALSE )
 			{	
-				ErrorMessage(tkPRJ_FILE_EXISTS);	// lsu: probably it's ok to overwite it blindly ?
+				ErrorMessage(tkPRJ_FILE_EXISTS);	// lsu: probably it's ok to overwrite it blindly ?
 				return S_OK;
 			}
 
@@ -1010,7 +1146,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// ------------------------------------------------
 		this->writeShp(sa_shpfile,cBack);
 		this->writeShx(sa_shxfile,cBack);
-
+		
 		fclose(sa_shpfile);
 		fclose(sa_shxfile);
 		//_unlink(sa_shpfileName);
@@ -2967,14 +3103,14 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 STDMETHODIMP CShapefile::get_HotTracking(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = m_hotTracking;
+	*retVal = _hotTracking;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefile::put_HotTracking(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_hotTracking = newVal;
+	_hotTracking = newVal;
 	return S_OK;
 }
 

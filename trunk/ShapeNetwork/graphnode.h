@@ -1,8 +1,6 @@
 # ifndef GRAPH_NODE
 # define GRAPH_NODE
 
-# include <deque>
-
 class graphnode
 {
 public:

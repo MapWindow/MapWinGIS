@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,24 +14,13 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-//
-//Contributor(s): (Open source contributors should list themselves and their modifications here). 
-//3-28-2005 dpa - Added some interpolation functionality and fixed the perimeter calculator.
-//6-6-2005 angela - fixed ClipPolygon, GPCPolygonToShape, ShapeToGPCPolygon.
-//11-8-2004 angela - fixed is_clockwise and get_Area.
-//12-18-2005 cdm - Added Hillshade code from Rob Cairns and Matt Perry
-//3-Apr-2006 Rob Cairns - Added TranslateRaster - wrapper for gdal_translate
-//29 jul 2009 Sergei Leschinski (lsu) - a fix for ClipPolygon subfunctions
-//06-aug-2009 lsu - ShapesIntersection and NextResultShape functions based on OGR/GEOS;
-//					shifted implementation of area, length, perimeter properties to CShape 
 //********************************************************************************************************
+//Contributor(s): dpa, angela, cdm, Rob Cairns, lsu
+//********************************************************************************************************
+
 #include "stdafx.h"
 #include "Utils.h"
-
-#include "atlsafe.h"
 #include <stack>
-#include <comdef.h>
-
 #include "colour.h"
 #include "Projections.h"
 #include "GeometryConverter.h"
@@ -40,17 +29,15 @@
 #include "Shapefile.h"
 #include "GeoProjection.h"
 #include "macros.h"
-
 #include "XRedBlackTree.h"
 #include "YRedBlackTree.h"
-
-#include "varH.h"
 #include "GridInterpolate.h"
 #include "PointInPolygon.h"
 #include "Grid.h"
 #include "Extents.h"
 #include "TableClass.h"
-#include "GdalHelper.h"
+#include "Shape.h"
+#include "Vector.h"
 
 #pragma warning(disable:4996)
 
@@ -60,7 +47,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-// CUtils
 STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -3480,7 +3466,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 	}
 	else
 	{
-		IShape* shp = GeometryConverter::ClipPolygon(ClipPolygon, SubjectPolygon, op);
+		IShape* shp = ClipperConverter::ClipPolygon(ClipPolygon, SubjectPolygon, op);
 		*retval = shp;
 	}
 	return S_OK;
@@ -3736,8 +3722,6 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 			shpNew->get_NumPoints(&numPoints);
 			
 			double x, y;
-			int success = -1;
-			IPoint* pnt = NULL;
 			for (long j = 0; j < numPoints; j++)
 			{
 				shpNew->get_XY(j, &x, &y, &vbretval);
@@ -3938,13 +3922,16 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 						
 						if (vb) {
 							
-							double y = yll + dy * (rowCount - row - 1.5);	// (rowCount - 1) - row;  -0.5 - center of cell
+							//double y = yll + dy * (rowCount - row - 1.5);	// (rowCount - 1) - row;  -0.5 - center of cell
+							double y = yll + dy * (rowCount - row - 1);   // a fix suggested here: http://bugs.mapwindow.org/view.php?id=2349
+
 							pip.PrepareScanLine(y);
 							
 							// set values outside polygon to nodata
 							for (long j = 0; j < cmnCount; j++)
 							{
-								double x = xll + dx * (j + 0.5);
+								// double x = xll + dx * (j + 0.5);
+								double x = xll + dx * j;		// a fix suggested here: http://bugs.mapwindow.org/view.php?id=2349
 								
 								if (!pip.ScanPoint(x))
 								{
@@ -4112,7 +4099,6 @@ intersection:
 			Extent cell;
 			Extent intersection;
 			double cellArea = dx * dy;
-			float sumWeight = 0.0f;	// a sum of cell parts which fall within polygon
 
 			for (long i = minRow; i <= maxRow; i++ ) 
 			{
@@ -4222,7 +4208,6 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 	((CGrid*)grid)->get_Extents(&extGrid);
 	
 	VARIANT_BOOL vb;
-	IExtents* bounds = NULL;
 	((CExtents*)extGrid)->Intersects(extSf, &vb);
 	extSf->Release();
 	
@@ -4424,7 +4409,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 						CComVariant vMean(sum/sumWeight);
 						sf->EditCellValue(fieldIndices[0], n, vMean, &vb);
 
-						if (values.size() > 0) 
+						if (!values.empty()) 
 						{
 							// 1 - "Median"
 							int half = count/2;
@@ -4439,7 +4424,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 									sf->EditCellValue(fieldIndices[1], n, vMedian, &vb);
 									break;
 								}
-								it++;
+								++it;
 							}
 							
 							int maxCount = INT_MIN;
@@ -4457,7 +4442,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 									minCount = it->second;
 									minor = it->first;
 								}
-								it++;
+								++it;
 							}
 
 							// 2 - "Majority"
@@ -4534,7 +4519,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 // ******************************************************
 // Creates a new instance of the specified interface
 // Can be useful for scripting clients + creating objects in the background thread
-// though penalties for marshalling between apartments can significnt
+// though penalties for marshalling between apartments can significant
 STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())

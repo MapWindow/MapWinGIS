@@ -1,6 +1,4 @@
 #pragma once
-#include "Extent.h"
-#include <GdiPlus.h>
 
 class CBaseDrawer
 {
@@ -12,8 +10,16 @@ protected:
 	Gdiplus::Graphics* _graphics;
 
 public:
-	CBaseDrawer(void);
-	virtual ~CBaseDrawer(void);
+	CBaseDrawer(void) {
+		_extents = NULL;
+		_pixelPerProjectionX = 0.0;
+		_pixelPerProjectionY = 0.0;
+		_dc = NULL;
+		_graphics = NULL;
+	};
+	virtual ~CBaseDrawer(void) {
+
+	};
 
 	void PixelToProjection( double piX, double piY, double& prX, double& prY )
 	{

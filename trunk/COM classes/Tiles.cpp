@@ -272,7 +272,7 @@ double CTiles::GetTileSize(PointLatLng& location, int zoom, double pixelPerDegre
 // ************************************************************
 //		GetTileSize()
 // ************************************************************
-// Returns tiles size of the specified zoom level under currrne map scale
+// Returns tiles size of the specified zoom level under current map scale
 double CTiles::GetTileSizeByWidth(PointLatLng& location, int zoom, double pixelPerDegree)
 {
 	CPoint point;
@@ -299,10 +299,15 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)
 	{
 		double tileSize = GetTileSizeByWidth(location, i, pixelPerDegree);
-		if (tileSize > 256)
+		int minSize = (int)(256 * 0.999);	// 0.999 = set some error margin for rounding issues
+		if (tileSize < minSize)
 		{
-			bestZoom = i;
+			//Debug::WriteLine("Tile size: %f", tileSize * 2.0);
+			//Debug::WriteLine("Zoom chosen: %d", bestZoom);
+			break;
 		}
+
+		bestZoom = i;
 	}
 
 	CSize s1, s2;
@@ -473,8 +478,12 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 		return false;
 
 	CMapView* map = (CMapView*)mapView;
-	Extent clipExtents(map->extents.left, map->extents.right, map->extents.bottom, map->extents.top);
-	bool clipForTiles = this->ProjectionBounds(provider, map->GetWgs84Projection(), true, clipExtents);
+	tkTransformationMode transformMode = map->_transformationMode;
+	if (transformMode == tmNotDefined)
+		return false;		// no need to go any further there is no projection
+
+	Extent clipExtents(map->_extents.left, map->_extents.right, map->_extents.bottom, map->_extents.top);
+	bool clipForTiles = this->ProjectionBounds(provider, map->GetMapProjection(), map->GetWgs84Projection(), transformMode, clipExtents);
 	
 	if (!provider->mapView)
 		provider->mapView = mapView;
@@ -503,28 +512,73 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 // *********************************************************
 //	     LoadTiles()
 // *********************************************************
+// current provider will be used
+void CTiles::LoadTiles(void* mapView, bool isSnapshot, CString key)
+{
+	LoadTiles(mapView, isSnapshot, m_provider->Id, key);
+}
+
+// *********************************************************
+//	     LoadTiles()
+// *********************************************************
+// any provider can be passed (for caching or snapshot)
 void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key)
 {
+	CMapView* map = (CMapView*)mapView;
+	if (_lastMapExtents.left == map->_extents.left && _lastMapExtents.right == map->_extents.right &&
+		_lastMapExtents.top == map->_extents.top && _lastMapExtents.bottom == map->_extents.bottom &&
+		_lastProvider == providerId)
+	{
+		tilesLogger.WriteLine("Duplicate request dropped.");
+		return;	
+	}
+	
 	BaseProvider* provider = ((CTileProviders*)m_providers)->get_Provider(providerId);
-
 	if (!m_visible || !provider) {
 		this->Clear();
 		return;
 	}
-	
+
 	int xMin, xMax, yMin, yMax, zoom;
 	if (!GetTilesForMap(mapView, provider->Id, xMin, xMax, yMin, yMax, zoom))
 	{
+		Debug::WriteLine("Can't calculate extents for tiles; zoom = %d", zoom);
 		this->Clear();
 		return;
 	}
 
+	if (xMin == _lastTileExtents.left && xMax == _lastTileExtents.right &&
+		yMin == _lastTileExtents.bottom && yMax == _lastTileExtents.top &&
+		_lastProvider == provider->Id && _lastZoom == zoom)
+	{
+		// map extents has changed but the list of tiles to be displayed is the same
+		tilesLogger.WriteLine("The same list of tiles can be used.");
+		
+		// mark them as not-drawn
+		_tilesBufferLock.Lock();
+		for (size_t i = 0; i < m_tiles.size(); i++ )
+		{
+			m_tiles[i]->m_drawn = false;
+		}
+		_tilesBufferLock.Unlock();
+		((CMapView*)mapView)->_tileBuffer.Initialized = false;
+		return;	
+	}
+
+	_lastMapExtents.left = map->_extents.left;
+	_lastMapExtents.right = map->_extents.right;
+	_lastMapExtents.top = map->_extents.top;
+	_lastMapExtents.bottom = map->_extents.bottom;
+	_lastTileExtents.left = xMin;
+	_lastTileExtents.right = xMax;
+	_lastTileExtents.top = yMax;
+	_lastTileExtents.bottom = yMin;
+	_lastProvider = providerId;
+	_lastZoom = zoom;
+
 	tilesLogger.WriteLine("");
 	tilesLogger.WriteLine("LOAD TILES: xMin=%d; xMax=%d; yMin=%d; yMax=%d; zoom =%d", xMin, xMax, yMin, yMax, zoom);
 
-	// schedule redraw
-	this->m_tilesLoaded = false;
-	
 	_tilesBufferLock.Lock();
 	for (size_t i = 0; i < m_tiles.size(); i++ )
 	{
@@ -533,6 +587,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		m_tiles[i]->m_toDelete = true;
 	}
 	_tilesBufferLock.Unlock();
+	((CMapView*)mapView)->_tileBuffer.Initialized = false;
 
 	if (!provider->mapView)
 		provider->mapView = mapView;
@@ -548,24 +603,66 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		SQLiteCache::m_locked = true;	// caching will be stopped while loading tiles to avoid locking the database
 	}
 	
+	int generation = 0;
+	m_tileLoader.tileGeneration++;		// all incoming tasks will be discarded
+	generation = m_tileLoader.tileGeneration;
+
+	// ------------------------------------------------------------------
+	//  check which ones we already have, and which ones are to be loaded
+	// ------------------------------------------------------------------
+	// first check active tasks
+	std::vector<CTilePoint*> activeTasks;
+	if (!isSnapshot) {
+		// lock it, so active task can't be removed while we analyze it here
+		m_tileLoader.LockActiveTasks(true);
+		
+		std::list<void*> list = m_tileLoader.GetActiveTasks();
+		std::list<void*>::iterator it = list.begin();
+		while (it != list.end())
+		{
+			LoadingTask* task = (LoadingTask*)*it;
+			if (task->Provider->Id == providerId && task->zoom == zoom &&
+				task->x >= xMin && task->x <= xMax && task->y >= yMin && task->y <= yMax)
+			{
+				tilesLogger.WriteLine("Tile reassigned to current generation: %d\\%d\\%d", zoom, task->x, task->y);
+				task->generation = generation;								// reassign it to current generation
+				activeTasks.push_back(new CTilePoint(task->x, task->y));    // don't include in current list of requests
+			}
+			++it;
+		}
+		m_tileLoader.m_count = 0;
+		m_tileLoader.m_totalCount = 1000;		// set it to a big number until we count them all
+		m_tileLoader.LockActiveTasks(false);
+	}
+	
 	std::vector<CTilePoint*> points;
 	for (int x = xMin; x <= xMax; x++)
 	{
 		for (int y = yMin; y <= yMax; y++)
 		{
-			// first, check maybe the tile is already in the buffer
+			// was it reassigned already is reassigned?
 			bool found = false;
+			for (size_t i = 0; i < activeTasks.size(); i++ )
+			{
+				if (activeTasks[i]->x == x && activeTasks[i]->y == y)
+				{
+					found = true;
+					break;
+				}
+			}
 			
+			if (found)
+				continue;
+			
+			// check maybe the tile is already in the buffer
 			_tilesBufferLock.Lock();
 			for (size_t i = 0; i < m_tiles.size(); i++ )
 			{
 				TileCore* tile = m_tiles[i];
-				if (tile->m_tileX == x && tile->m_tileY == y && tile->m_providerId == provider->Id)
+				if (tile->m_tileX == x && tile->m_tileY == y  && tile->m_scale == zoom && tile->m_providerId == provider->Id)
 				{
 					tile->m_toDelete = false;
-					
-					// TODO: actually it's in buffer; but for some reason there are crashes when setting it, investigation is needed
-					//tile->m_inBuffer = true;
+					tile->m_inBuffer = true;
 					found = true;
 					break;
 				}
@@ -604,8 +701,16 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 			}
 		}
 	}
+	if(!isSnapshot) {
+		m_tileLoader.m_totalCount = points.size() + activeTasks.size();
+	}
 
-	// finally delete the unused tiles from the screen buffer
+	for (size_t i = 0; i < activeTasks.size(); i++)
+		delete activeTasks[i];
+
+	// -------------------------------------------------
+	// delete unused tiles from the screen buffer
+	// -------------------------------------------------
 	_tilesBufferLock.Lock();			
 	std::vector<TileCore*>::iterator it = m_tiles.begin();
 	while (it < m_tiles.end())
@@ -618,7 +723,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		}
 		else
 		{
-			it++;
+			++it;
 		}
 	}
 	_tilesBufferLock.Unlock();
@@ -628,17 +733,21 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		SQLiteCache::m_locked = false;	// caching will be stopped while loading tiles to avoid locking the database and speed up things
 	}
 	
+	// -------------------------------------------------
+	// passing list of tiles too loader
+	// -------------------------------------------------
 	// let's try not to mess up snapshot if main tile loader is still working
 	TileLoader* loader = isSnapshot ? &m_prefetchLoader : &m_tileLoader;
-	
+
 	loader->RunCaching();
 	if (points.size() > 0)
 	{
-		m_reloadCount++;
-		
 		tilesLogger.WriteLine("Queued to load from server: %d", points.size());
-		loader->Load(points, zoom, provider, (void*)this, isSnapshot, key);	// zoom can change in the process, so we use the calculated version
-														// and not the one current for provider
+		
+		// zoom can change in the process, so we use the calculated version
+		// and not the one current for provider
+		loader->Load(points, zoom, provider, (void*)this, isSnapshot, key, generation);	
+														
 		// releasing points
 		for (size_t i = 0; i < points.size(); i++)
 			delete points[i];
@@ -647,14 +756,6 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	{
 		HandleOnTilesLoaded(false, "", true);
 	}
-}
-
-// *********************************************************
-//	     LoadTiles()
-// *********************************************************
-void CTiles::LoadTiles(void* mapView, bool isSnapshot, CString key)
-{
-	LoadTiles(mapView, isSnapshot, m_provider->Id, key);
 }
 
 // *********************************************************
@@ -667,7 +768,7 @@ void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoa
 		LPCTSTR newStr = (LPCTSTR)key;
 		this->AddRef();
 		((CMapView*)m_provider->mapView)->FireTilesLoaded(this, NULL, isSnapshot, newStr);
-		tilesLogger.WriteLine("Tiles loaded; Nothing to load: %d", nothingToLoad);
+		tilesLogger.WriteLine("Tiles loaded event; Were loaded from server (y/n): %d", !nothingToLoad);
 	}
 }
 
@@ -692,17 +793,21 @@ void CTiles::AddTileNoCaching(TileCore* tile)
 	_tilesBufferLock.Lock();
 	m_tiles.push_back(tile);
 	_tilesBufferLock.Unlock();
-
-	m_tilesLoaded = true;
 }
 
 void CTiles::AddTileOnlyCaching(TileCore* tile)
 {
-	if (m_doRamCaching) {
+	/*if (m_doRamCaching) {
 		RamCache::AddToCache(tile);
-	}
+	}*/
 	if (m_doDiskCaching) {
 		m_tileLoader.ScheduleForCaching(tile);
+	}
+}
+
+void CTiles::AddTileToRamCache(TileCore* tile) {
+	if (m_doRamCaching) {
+		RamCache::AddToCache(tile);
 	}
 }
 
@@ -720,8 +825,6 @@ void CTiles::Clear()
 	}
 	m_tiles.clear();
 	_tilesBufferLock.Unlock();
-
-	m_tilesLoaded = false;
 }
 #pragma endregion
 
@@ -799,7 +902,7 @@ STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
 STDMETHODIMP CTiles::get_MaxScaleToCache(int* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_maxScaleToCache;		// TODO: use in cachin process
+	*pVal = m_maxScaleToCache;		// TODO: use in caching process
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_MaxScaleToCache(int newVal)
@@ -1523,7 +1626,7 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 			}
 			
 			// actual call to do the job
-			m_prefetchLoader.Load(points, zoom, provider, (void*)this, false, "", true);
+			m_prefetchLoader.Load(points, zoom, provider, (void*)this, false, "", 0, true);
 
 			for (size_t i = 0; i < points.size(); i++)
 			{
@@ -1647,21 +1750,43 @@ void CTiles::Zoom(bool out)
 // ************************************************************
 //		ProjectionBounds
 // ************************************************************
-bool CTiles::ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProjection, bool doTransformtation, Extent& retVal)
+bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection, tkTransformationMode transformationMode, Extent& retVal )
 {
 	if (!wgsProjection || !provider || !provider->Projection)	return false;
 
 	BaseProjection* proj = provider->Projection;
-	if (!proj->worldWide)
+	
+	if (proj && m_projExtentsNeedUpdate)
 	{
-		if (m_projExtentsNeedUpdate)
+		double left =  proj->MinLongitude;
+		double right = proj->MaxLongitude;
+		double top = proj->MaxLatitude;
+		double bottom = proj->MinLatitude;
+		
+		if (transformationMode == tmDoTransformation)	// i.e. map cs isn't in decimal degrees
 		{
-			double left =  proj->MinLongitude;
-			double right = proj->MaxLongitude;
-			double top = proj->MaxLatitude;
-			double bottom = proj->MinLatitude;
-			
-			if (doTransformtation)
+			// There is a problem if map projection isn't geographic (like Amersfoort for example).
+			// Then values outside its bounds may not to be transformed correctly.
+			// There is hardly any workaround here. Ideally we should know the bounds for map
+			// projection and clip both by them and by bounds of server projection. Since bounds
+			// of map projection aren't available partial solutions can be used:
+			// - don't use clipping if map projection isn't geographic while server projection is
+			// (which will obviously lead to server bounds outside transformation range).
+			// Alternatives:
+			// - doing some checks after transformation to make sure that calculations make sense;
+			// - add a method to API to set bounds of map projection/tiles;
+			// - store and update built-in database of bounds for different coordinate systems
+			// and identify projection on setting it to map;
+			VARIANT_BOOL isGeograpic;		
+			mapProjection->get_IsGeographic(&isGeograpic);
+
+			if (false) // !isGeograpic && proj->worldWide) // server projection is geograpic; map one - not
+			{
+				// so far just skip it;
+				// optionally possible try to transform check if the results make sense
+				return false;
+			}
+			else
 			{
 				VARIANT_BOOL vb;
 				wgsProjection->Transform(&left, &top, &vb);
@@ -1674,21 +1799,22 @@ bool CTiles::ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProject
 					Debug::WriteLine("Failed to project: x = %f; y = %f", bottom, right);
 					return false;
 				}
-				//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 			}
-			
-			m_projExtents.left = left;
-			m_projExtents.right = right;
-			m_projExtents.top = top;
-			m_projExtents.bottom = bottom;
+			//Debug::WriteLine("Projected world bounds: left = %f; right = %f; bottom = %f; top = %f", left, right, bottom, top);
 		}
-		retVal.left = m_projExtents.left;
-		retVal.right = m_projExtents.right;
-		retVal.top = m_projExtents.top;
-		retVal.bottom = m_projExtents.bottom;
-		return true;
+		
+		m_projExtents.left = left;
+		m_projExtents.right = right;
+		m_projExtents.top = top;
+		m_projExtents.bottom = bottom;
+		m_projExtentsNeedUpdate = false;
 	}
-	return false;
+
+	retVal.left = m_projExtents.left;
+	retVal.right = m_projExtents.right;
+	retVal.top = m_projExtents.top;
+	retVal.bottom = m_projExtents.bottom;
+	return true;
 }
 
 // ************************************************************

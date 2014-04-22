@@ -23,24 +23,19 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-# include <deque>
-# include <string>
-# include <math.h>
-# include <stdlib.h>
-
 # include "TinHeap.h"
 # include "heap_node.h"
-# include "triangle_table.h"
 # include "point_table.h"
-# include "vertex_table.h"
 # include "table_row.h"
 # include "table_row_node.h"
 # include "tintypes.h"
-# include "vertex.h"
+# include "triangle_table.h"
 # include "varH.h"
-
+# include "vertex.h"
+# include "vertex_table.h"
+# include <math.h>
+# include <stdlib.h>
+# include <string>
 
 // CTin
 enum PerpSplitMethod 

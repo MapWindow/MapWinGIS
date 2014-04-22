@@ -7,30 +7,30 @@
 IGeoProjection* CMapView::GetMapToWgs84Transform() 
 { 
 	VARIANT_BOOL vb;
-	m_projection->get_HasTransformation(&vb);
-	return vb ?  m_projection : NULL; 
+	_projection->get_HasTransformation(&vb);
+	return vb ?  _projection : NULL; 
 }
 IGeoProjection* CMapView::GetMapToGMercTransform() 
 {
 	VARIANT_BOOL vb;
-	m_projectionToGMerc->get_HasTransformation(&vb);
-	return vb ?  m_projectionToGMerc : NULL; 
+	_projectionToGMerc->get_HasTransformation(&vb);
+	return vb ?  _projectionToGMerc : NULL; 
 }
 IGeoProjection* CMapView::GetWgs84ToMapTransform() 
 { 
 	VARIANT_BOOL vb;
-	m_wgsProjection->get_HasTransformation(&vb);
-	return vb ?  m_wgsProjection : NULL; 
+	_wgsProjection->get_HasTransformation(&vb);
+	return vb ?  _wgsProjection : NULL; 
 }
 IGeoProjection* CMapView::GetGMercToMapTransform() 
 { 
 	VARIANT_BOOL vb;
-	m_GMercProjection->get_HasTransformation(&vb);
-	return vb ?  m_GMercProjection : NULL; 
+	_gmercProjection->get_HasTransformation(&vb);
+	return vb ?  _gmercProjection : NULL; 
 }
-IGeoProjection* CMapView::GetWgs84Projection() { return m_wgsProjection; }
-IGeoProjection* CMapView::GetGMercProjection() { return m_GMercProjection; }
-IGeoProjection* CMapView::GetMapProjection() { return m_projection; }
+IGeoProjection* CMapView::GetWgs84Projection() { return _wgsProjection; }
+IGeoProjection* CMapView::GetGMercProjection() { return _gmercProjection; }
+IGeoProjection* CMapView::GetMapProjection() { return _projection; }
 
 // *****************************************************
 //		ReleaseProjections()
@@ -38,17 +38,17 @@ IGeoProjection* CMapView::GetMapProjection() { return m_projection; }
 void CMapView::ReleaseProjections()
 {
 	VARIANT_BOOL vb;
-	m_projection->Clear(&vb);
-	m_projection->Release();
+	_projection->Clear(&vb);
+	_projection->Release();
 
-	m_projectionToGMerc->Clear(&vb);
-	m_projectionToGMerc->Release();
+	_projectionToGMerc->Clear(&vb);
+	_projectionToGMerc->Release();
 	
-	m_wgsProjection->Clear(&vb);
-	m_wgsProjection->Release();
+	_wgsProjection->Clear(&vb);
+	_wgsProjection->Release();
 	
-	m_GMercProjection->Clear(&vb);
-	m_GMercProjection->Release();
+	_gmercProjection->Clear(&vb);
+	_gmercProjection->Release();
 }
 
 // *****************************************************
@@ -56,22 +56,22 @@ void CMapView::ReleaseProjections()
 // *****************************************************
 void CMapView::InitProjections()
 {
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&m_projectionToGMerc);
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&m_wgsProjection);
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&m_GMercProjection);
-	m_transformationMode = tmNotDefined;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_projectionToGMerc);
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_wgsProjection);
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_gmercProjection);
+	_transformationMode = tmNotDefined;
 	VARIANT_BOOL vb;
-	m_wgsProjection->SetWgs84(&vb);		// EPSG:4326
-	m_GMercProjection->SetGoogleMercator(&vb);	// EPSG:3857
+	_wgsProjection->SetWgs84(&vb);		// EPSG:4326
+	_gmercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 	
-	m_projection = NULL;
+	_projection = NULL;
 	IGeoProjection* p = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 }
 
 // *****************************************************
-//		SetProjection()
+//		SetGeoProjection()
 // *****************************************************
 void CMapView::SetGeoProjection(IGeoProjection* pVal)
 {
@@ -79,16 +79,16 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	IGeoProjection* last = NULL;
 	if (pVal)
 	{
-		last = m_projection;
+		last = _projection;
 		if (last)
 			last->AddRef();		// add temp reference; as it ca be deleted in the next line
 	}
 	
-	Utility::put_ComReference(pVal, (IDispatch**)&m_projection, false);
+	Utility::put_ComReference(pVal, (IDispatch**)&_projection, false);
 	
 	if (last)
 	{
-		if (last != m_projection)
+		if (last != _projection)
 		{
 			((CGeoProjection*)last)->SetIsFrozen(false);
 		}
@@ -96,51 +96,51 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 		last = NULL;
 	}
 
-	if (m_transformationMode == tmDoTransformation)
-		m_wgsProjection->StopTransform();
+	if (_transformationMode == tmDoTransformation)
+		_wgsProjection->StopTransform();
 	
 	VARIANT_BOOL isSame, vb;
-	m_wgsProjection->get_IsSame(m_projection, &isSame);
+	_wgsProjection->get_IsSame(_projection, &isSame);
 	if (isSame)
 	{
-		m_transformationMode = tmWgs84Complied;
+		_transformationMode = tmWgs84Complied;
 	}
 	else
 	{
-		m_wgsProjection->StartTransform(m_projection, &vb);	// must always have transformation to current projection
-		m_transformationMode = vb ? tmDoTransformation : tmNotDefined;
+		_wgsProjection->StartTransform(_projection, &vb);	// must always have transformation to current projection
+		_transformationMode = vb ? tmDoTransformation : tmNotDefined;
 		if (!vb) {
-			Utility::DisplayErrorMsg(m_globalCallback, m_key, "Failed to start WGS84 to map transformation.");
+			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start WGS84 to map transformation.");
 		}
 
-		m_projection->StartTransform(m_wgsProjection, &vb);	// must always have transformation to WGS84
+		_projection->StartTransform(_wgsProjection, &vb);	// must always have transformation to WGS84
 		if (!vb) {
-			Utility::DisplayErrorMsg(m_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
+			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
 		}
 	}
 
-	if (m_projection)
+	if (_projection)
 	{
-		((CGeoProjection*)m_projection)->SetIsFrozen(true);
+		((CGeoProjection*)_projection)->SetIsFrozen(true);
 	}
 
 	// init Google Mercator transforms (for tiles)
-	m_GMercProjection->StartTransform(m_projection, &vb);		// must always have transformation to current projection
+	_gmercProjection->StartTransform(_projection, &vb);		// must always have transformation to current projection
 	if (!vb) {
-		Utility::DisplayErrorMsg(m_globalCallback, m_key, "Failed to start GMercator to map transformation.");
+		Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start GMercator to map transformation.");
 	}
 	
-	m_projection->Clone(&m_projectionToGMerc);
-	m_projectionToGMerc->StartTransform(m_GMercProjection, &vb);
+	_projection->Clone(&_projectionToGMerc);
+	_projectionToGMerc->StartTransform(_gmercProjection, &vb);
 	if (!vb) {
-		Utility::DisplayErrorMsg(m_globalCallback, m_key, "Failed to start map to GMercator transformation.");
+		Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to GMercator transformation.");
 	}
 
 	VARIANT_BOOL geographic;
-	m_projection->get_IsGeographic(&geographic);
-	m_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
+	_projection->get_IsGeographic(&geographic);
+	_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
 
-	((CTiles*)m_tiles)->UpdateProjection();
+	((CTiles*)_tiles)->UpdateProjection();
 }
 
 // *****************************************************
@@ -149,9 +149,9 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 IGeoProjection* CMapView::GetGeoProjection (void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (m_projection)
-		m_projection->AddRef();
-	return m_projection;
+	if (_projection)
+		_projection->AddRef();
+	return _projection;
 }
 
 // ***************************************************************
@@ -162,7 +162,7 @@ void CMapView::ClearMapProjectionWithLastLayer()
 	if (_grabProjectionFromData)
 	{
 		VARIANT_BOOL isEmpty;
-		m_projection->get_IsEmpty(&isEmpty);
+		_projection->get_IsEmpty(&isEmpty);
 		if (!isEmpty)
 		{
 			IGeoProjection* proj = NULL;

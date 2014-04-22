@@ -3,7 +3,7 @@
 #include "colour.h"
 #include "Image.h"
 #include "Grid.h"
-#include "GdalHelper.h"
+#include "Vector.h"
 
 #define MAX_BMP_SIZE_PIXELS 10000000
 

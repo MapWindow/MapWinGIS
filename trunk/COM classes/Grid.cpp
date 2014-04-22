@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -26,7 +26,6 @@
 #include "cpl_string.h"
 #include "comutil.h"
 #include "Image.h"
-#include "GdalHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1218,9 +1217,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	{
 		// e.g. ecwp://imagery.oregonexplorer.info/ecwimages/2005orthoimagery.ecw
 		trgrid = new tkGridRaster();
-		VARIANT_BOOL opened = VARIANT_FALSE;
-		opened = trgrid->LoadRaster(filename, true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
-		*retval = opened;
+		*retval = trgrid->LoadRaster(filename, true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
 		return S_OK;
 	}
 	
@@ -2961,7 +2958,7 @@ bool CGrid::BuildUniqueColorScheme(int maxValuesCount, PredefinedColorScheme col
 			result->InsertBreak(brk);
 			brk->Release();
 
-			it++;
+			++it;
 		}
 		scheme->Release();
 		*newScheme = result;

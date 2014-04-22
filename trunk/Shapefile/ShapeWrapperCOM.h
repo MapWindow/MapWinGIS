@@ -24,9 +24,6 @@
  // Sergei Leschinski 03-feb-2011 - created the file
 
 #pragma once
-#include "MapWinGis.h"
-#include "Extent.h"
-#include <deque>
 #include "ShapeInterfaces.h"
 
 class CShapeWrapperCOM : public IShapeWrapper //, public IShapeData

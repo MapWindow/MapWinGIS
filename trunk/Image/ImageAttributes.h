@@ -1,16 +1,10 @@
 #pragma once;
-#include "MapWinGis.h"
-#include <gdiplus.h>
 
 #ifndef MAX
 #  define MIN(a,b)      ((a<b) ? a : b)
 #  define MAX(a,b)      ((a>b) ? a : b)
 #endif
 
-
-// ******************************************************************
-//		get_ImageAttributes()
-// ******************************************************************
 class CImageAttributesEx: public Gdiplus::ImageAttributes
 {
 public:

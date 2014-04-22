@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "MapTracker.h"
 #include "Map.h"
 
@@ -57,9 +56,9 @@ void CMapTracker::OnChangedRect( const CRect& rectOld )
 }
 BOOL CMapTracker::TrackRubberBand(CWnd* pWnd, CPoint point, BOOL bAllowInvert)
 {
-	((CMapView*)parent)->m_rectTrackerIsActive = true;
+	((CMapView*)parent)->_rectTrackerIsActive = true;
 	BOOL ret = CRectTracker::TrackRubberBand(pWnd, point, bAllowInvert);
-	((CMapView*)parent)->m_rectTrackerIsActive = false;
+	((CMapView*)parent)->_rectTrackerIsActive = false;
 	return ret;
 }
 

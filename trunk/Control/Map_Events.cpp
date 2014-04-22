@@ -1,22 +1,10 @@
-
-#pragma region Include
 #include "stdafx.h"
-#include "MapWinGis.h"
+#include "MapWinGIS_i.h"
 #include "Map.h"
-#include "Shapefile.h"
 #include "Measuring.h"
-#pragma endregion
+#include "MapTracker.h"
 
-// ***************************************************************
-//		UpdateCursor
-// ***************************************************************
-void CMapView::UpdateCursor(tkCursorMode cursor)
-{
-	m_cursorMode = cursor;
-	OnSetCursor(this,HTCLIENT,0);
-	OnCursorModeChanged();
-}
-
+#pragma region Keyboard events
 // ***************************************************************
 //		OnKeyUp
 // ***************************************************************
@@ -25,25 +13,42 @@ void CMapView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	switch(nChar)
 	{
 		case VK_SPACE:
-			if (m_cursorMode == cmPan)
+			if (_spacePressed)
 			{
-				// releasing capture for panning operation
-				ReleaseCapture();
-				//this is the only mode we care about for this event
-				m_bitbltClickDown = CPoint(0,0);
-				m_bitbltClickMove = CPoint(0,0);
-				
-				this->SetExtentsCore(this->extents, false);
-				LockWindow(lmUnlock);
-				
-				UpdateCursor(_lastCursorMode);
-				_lastCursorMode = cmNone;
-				if (m_cursorMode == cmMeasure)
-				{
-					m_measuring->put_Persistent(_measuringPersistent ? VARIANT_TRUE: VARIANT_FALSE);
-				}
+				TurnOffPanning();
+				_spacePressed = false;
+				Debug::WriteWithTime("Space up");
 			}
 			break;
+	}
+}
+
+// ***************************************************************
+//		TurnOffPanning
+// ***************************************************************
+void CMapView::TurnOffPanning()
+{
+	if (m_cursorMode == cmPan && _lastCursorMode != cmNone)
+	{
+		UpdateCursor(_lastCursorMode);
+		_lastCursorMode = cmNone;
+
+		if (m_cursorMode == cmMeasure)
+		{
+			_measuring->put_Persistent(_measuringPersistent ? VARIANT_TRUE: VARIANT_FALSE);
+		}
+
+		if (!_panningAnimation)
+		{
+			// releasing capture for panning operation
+			ReleaseCapture();
+
+			//this is the only mode we care about for this event
+			_draggingStart = CPoint(0,0);
+			_draggingMove = CPoint(0,0);
+
+			this->SetExtentsCore(this->_extents, false);
+		}
 	}
 }
 
@@ -52,8 +57,8 @@ void CMapView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 // ***************************************************************
 void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
 { 
-	double dx = (this->extents.right - this->extents.left)/4.0;
-	double dy = (this->extents.top - this->extents.bottom)/4.0;
+	double dx = (this->_extents.right - this->_extents.left)/4.0;
+	double dy = (this->_extents.top - this->_extents.bottom)/4.0;
 	
 	IExtents* box = NULL;
 	bool arrows = nChar == VK_LEFT || nChar == VK_RIGHT || nChar == VK_UP || nChar == VK_DOWN;
@@ -65,18 +70,40 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	switch(nChar)
 	{
 		case VK_SPACE:
-			if (m_cursorMode != cmPan)
 			{
-				if (m_cursorMode == cmMeasure)
+				bool on14 =  nFlags & (1 << 14);
+				if (!on14)
 				{
-					VARIANT_BOOL vb;
-					m_measuring->get_Persistent(&vb);
-					_measuringPersistent = vb ? true: false;
-					m_measuring->put_Persistent(VARIANT_TRUE);
+					if (m_cursorMode != cmPan)
+					{
+						Debug::WriteWithTime("Space down: start panning");
+
+						// starting panning
+						if (m_cursorMode == cmMeasure)
+						{
+							VARIANT_BOOL vb;
+							_measuring->get_Persistent(&vb);
+							_measuringPersistent = vb ? true: false;
+							_measuring->put_Persistent(VARIANT_TRUE);
+						}
+						_lastCursorMode = (tkCursorMode)m_cursorMode;
+						UpdateCursor(cmPan);
+					}
+					else
+					{
+						Debug::WriteWithTime("Space down: turn off panning");
+						TurnOffPanning();
+					}
 				}
-				_lastCursorMode = (tkCursorMode)m_cursorMode;
-				UpdateCursor(cmPan);
+				else
+				{
+  					Debug::WriteWithTime("Holding space");
+					_spacePressed = true;
+				}
 			}
+			break;
+		case 'P':
+			UpdateCursor(cmPan);
 			break;
 		case 'Z':
 			UpdateCursor(cmZoomIn);
@@ -95,7 +122,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		case VK_MULTIPLY:
 			int zoom;
-			m_tiles->get_CurrentZoom(&zoom);
+			_tiles->get_CurrentZoom(&zoom);
 			ZoomToTileLevel(zoom);
 			break;
 		case VK_HOME:
@@ -105,10 +132,10 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			if (ctrl) {
 				// moving to previous layer
 				_activeLayerPosition--;
-				if (m_activeLayers.size() > 0)
+				if (_activeLayers.size() > 0)
 				{
 					if (_activeLayerPosition < 0) {
-						_activeLayerPosition = m_activeLayers.size() - 1;
+						_activeLayerPosition = _activeLayers.size() - 1;
 					}
 					int handle = GetLayerHandle(_activeLayerPosition);
 					ZoomToLayer(handle);
@@ -116,7 +143,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			}
 			else
 			{
-				box->SetBounds(extents.left - dx, extents.bottom, 0.0, extents.right - dx, extents.top, 0.0);		
+				box->SetBounds(_extents.left - dx, _extents.bottom, 0.0, _extents.right - dx, _extents.top, 0.0);		
 				this->SetExtents(box);
 			}
 			break;
@@ -124,9 +151,9 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			if (ctrl) {
 				// moving to the next layer
 				_activeLayerPosition++;
-				if (m_activeLayers.size() > 0)
+				if (_activeLayers.size() > 0)
 				{
-					if (_activeLayerPosition >= (int)m_activeLayers.size()) {
+					if (_activeLayerPosition >= (int)_activeLayers.size()) {
 						_activeLayerPosition = 0;
 					}
 					int handle = GetLayerHandle(_activeLayerPosition);
@@ -135,16 +162,16 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			}
 			else
 			{
-				box->SetBounds(extents.left + dx, extents.bottom, 0.0, extents.right + dx, extents.top, 0.0);		
+				box->SetBounds(_extents.left + dx, _extents.bottom, 0.0, _extents.right + dx, _extents.top, 0.0);		
 				this->SetExtents(box);
 			}
 			break;
 		case VK_UP:
-			box->SetBounds(extents.left, extents.bottom + dy, 0.0, extents.right, extents.top + dy, 0.0);		
+			box->SetBounds(_extents.left, _extents.bottom + dy, 0.0, _extents.right, _extents.top + dy, 0.0);		
 			this->SetExtents(box);
 			break;
 		case VK_DOWN:
-			box->SetBounds(extents.left, extents.bottom - dy, 0.0, extents.right, extents.top - dy, 0.0);		
+			box->SetBounds(_extents.left, _extents.bottom - dy, 0.0, _extents.right, _extents.top - dy, 0.0);		
 			this->SetExtents(box);
 			break;
 		default:
@@ -153,15 +180,17 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	if (box)
 		box->Release();
 } 
+#pragma endregion
 
+#pragma region Mouse wheel
 // ***************************************************************
 // 		OnMouseWheel()					           
 // ***************************************************************
 //  Processing mouse wheel event. Amount of zoom is determined by MouseWheelsSpeed parameter
 BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	if (m_MouseWheelSpeed < 0.1 || m_MouseWheelSpeed > 10) m_MouseWheelSpeed = 1;
-	if (m_MouseWheelSpeed == 1) return FALSE;
+	if (_mouseWheelSpeed < 0.1 || _mouseWheelSpeed > 10) _mouseWheelSpeed = 1;
+	if (_mouseWheelSpeed == 1) return FALSE;
 	
 	RECT rect;
 	double width, height;
@@ -175,7 +204,7 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
 		return false;
 
-	if (m_Rotate != NULL && m_RotateAngle != 0)
+	if (HasRotation())
 	{
 		CPoint curMousePt, origMousePt, rotCentre;
 	    
@@ -184,7 +213,7 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		rotCentre.x = (rect.right - rect.left) / 2;
 		rotCentre.y = (rect.bottom - rect.top) / 2;
 
-		m_Rotate->getOriginalPixelPoint(curMousePt.x, curMousePt.y, &(origMousePt.x), &(origMousePt.y));
+		_rotate->getOriginalPixelPoint(curMousePt.x, curMousePt.y, &(origMousePt.x), &(origMousePt.y));
 		PixelToProj((double)(origMousePt.x), (double)(origMousePt.y), &xCent, &yCent);
 
 		dx = (double)(origMousePt.x) / (double)(rect.right - rect.left);
@@ -197,38 +226,133 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
 	}
 
-    // new extents
-	double ratio = zDelta > 0?m_MouseWheelSpeed:(1/m_MouseWheelSpeed);
-	height = (extents.top - extents.bottom) * ratio;
-	width = (extents.right - extents.left) * ratio;
+    // make sure that we have enough momentum to reach the next tile level
+	double speed = _mouseWheelSpeed;
+	if (ForceDiscreteZoom()) {
+		speed = _mouseWheelSpeed > 1 ? 2.001 : 0.499;		// add some margin for rounding error and account for reversed wheeling
+	}
+	
+	// new extents
+	double ratio = zDelta > 0 ? speed : (1/speed);
+	height = (_extents.top - _extents.bottom) * ratio;
+	width = (_extents.right - _extents.left) * ratio;
 	
 	Extent ext;
 	ext.left = xCent - width * dx;
 	ext.right = xCent + width * (1 - dx);
 	ext.bottom = yCent - height * (1 - dy);
 	ext.top = yCent + height * dy;
+	
+	SetExtentsCore(ext);
 
-	this->SetExtentsCore(ext);
+	return true;
+}
+#pragma endregion
+
+#pragma region Zoombar
+// ************************************************************
+//		HandleOnZoombarMouseDown
+// ************************************************************
+bool CMapView::HandleOnZoombarMouseDown( CPoint point )
+{
+	if (_zoombarVisible && _transformationMode != tmNotDefined)
+	{
+		ZoombarPart part = ZoombarHitTest(point.x, point.y);
+		switch(part) 
+		{
+			case ZoombarPart::ZoombarPlus:
+				{
+					// zoom in
+					int zoom = GetCurrentZoom();
+					int maxZoom;
+					GetTilesNoRef()->get_MaxZoom(&maxZoom);
+					if (zoom + 1 <= maxZoom)
+					{
+						ZoomToTileLevel(zoom + 1);
+					}
+					break;
+				}
+
+			case ZoombarPart::ZoombarMinus:
+				{
+					// zoom out
+					int zoom = GetCurrentZoom();
+					int minZoom;
+					GetTilesNoRef()->get_MinZoom(&minZoom);
+					if (zoom - 1 >= minZoom)
+					{
+						ZoomToTileLevel(zoom - 1);
+					}
+					break;
+				}
+			case ZoombarPart::ZoombarHandle:
+				_draggingOperation = DragZoombarHandle;
+				break;
+			case ZoombarPart::ZoombarBar:
+				{
+					double ratio = _zoombarParts.GetRelativeZoomFromClick(point.y);
+					int maxZoom, minZoom;
+					GetTilesNoRef()->get_MinZoom(&minZoom);
+					GetTilesNoRef()->get_MaxZoom(&maxZoom);
+					int zoom = (int)(minZoom + (maxZoom - minZoom) * ratio + 0.5);
+					ZoomToTileLevel(zoom);
+				}
+				break;
+			case ZoombarNone: 
+			default: 
+				return false;
+		}
+	}
 	return true;
 }
 
+// ************************************************************
+//		HandleOnZoombarMouseMove
+// ************************************************************
+bool CMapView::HandleOnZoombarMouseMove( CPoint point )
+{
+	if (_draggingOperation == DragZoombarHandle)
+	{
+		RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+		return true;
+	}
+	else
+	{
+		ZoombarPart part = ZoombarHitTest(point.x, point.y);
+		if (part != _lastZooombarPart)
+		{
+			_lastZooombarPart = part;		// update before calling OnSetCursor
+			OnSetCursor(this,HTCLIENT,0);
+			RedrawCore(RedrawSkipDataLayers, false, true);
+			_canUseMainBuffer = false;
+			this->Refresh();
+		}
+		return part != ZoombarNone;
+	}
+}
+#pragma endregion
+
+#pragma region Left button
 // ************************************************************
 //		OnLButtonDown
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-   m_leftButtonDown = TRUE;
+	Debug::WriteWithTime("Left button down");
 
-	CPoint rotPoint = point;
-	if (m_Rotate != NULL && m_RotateAngle != 0)
+	if (HasRotation())
 	{
-		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
-		m_clickDown = rotPoint;
-    }
-	else
-		m_clickDown = point;
-
-   m_clickDownExtents = extents;
+		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
+	}
+	_draggingStart = point;
+	_draggingMove = point;
+	_clickDownExtents = _extents;
+	_leftButtonDown = TRUE;
+	
+	// process zoombar before everything else; if zoom bar was clicked, 
+	// map must not receive the event at all
+	if (HandleOnZoombarMouseDown(point))
+		return;
 
 	long vbflags = 0;
 	if( nFlags & MK_SHIFT )
@@ -236,27 +360,22 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if( nFlags & MK_CONTROL )
 		vbflags |= 2;
 
+	long x = point.x;
+	long y = point.y - 1;
+
 	if( m_cursorMode == cmZoomIn )
 	{
+		// TODO: should be merge logic for zooming and panning rubber band rectangle? They mostly the same
 		if (m_sendMouseDown)
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags,point.x,point.y -1);
-		}
+			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 
-		m_ttip.Activate(FALSE);
+		_ttip.Activate(FALSE);
 		
-		//Selection Box
-		CMapTracker selectBox = CMapTracker( this,
-			CRect(0,0,0,0),
-			CRectTracker::solidLine +
-			CRectTracker::resizeOutside );
+		CMapTracker selectBox = CMapTracker( this, CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
 		selectBox.m_sizeMin = 0;
 
 		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
-		m_ttip.Activate(TRUE);
+		_ttip.Activate(TRUE);
 
 		CRect rect = selectBox.m_rect;
 		rect.NormalizeRect();
@@ -267,22 +386,22 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		if( selected == true )
 		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
+			if (HasRotation())
 			{
 				CRect rectTmp = rect;
 				long tmpX = 0, tmpY = 0;
 				// adjust rectangle to unrotated coordinates
-				m_Rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+				_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
 				rectTmp.TopLeft().x = tmpX;
 				rectTmp.TopLeft().y = tmpY;
-				m_Rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+				_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
 				rectTmp.BottomRight().x = tmpX;
 				rectTmp.BottomRight().y = tmpY;
 				rect = rectTmp;
 			}
 			
-			double zrx = extents.right, zby = extents.bottom;
-			double zlx = extents.left, zty = extents.top;
+			double zrx = _extents.right, zby = _extents.bottom;
+			double zlx = _extents.left, zty = _extents.top;
 			PixelToProjection( rect.TopLeft().x, rect.TopLeft().y, zrx, zby );
 			PixelToProjection( rect.BottomRight().x, rect.BottomRight().y, zlx, zty );
 
@@ -291,9 +410,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			double cBottom = MINIMUM( zty, zby );
 			double cTop = MAXIMUM( zty, zby );
 
-			this->SetExtentsCore(Extent(cLeft, cRight, cBottom, cTop));
+			SetNewExtentsWithForcedZooming(Extent(cLeft, cRight, cBottom, cTop), true);
 
-			if( m_sendSelectBoxFinal == TRUE )
+			if( m_sendSelectBoxFinal )
 			{
 				long iby = rect.BottomRight().y;
 				long ity = rect.TopLeft().y;
@@ -303,59 +422,35 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		else
 		{
 			ZoomIn( m_zoomPercent );
-
 			if( m_sendMouseUp == TRUE )
-			{
-				if (m_Rotate != NULL && m_RotateAngle != 0)
-					this->FireMouseUp(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-				else
-					this->FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-			}
+				this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
 		}
 	}
 	else if( m_cursorMode == cmZoomOut )
 	{
 		if( m_sendMouseDown == TRUE )
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-		}
-		
+			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
         ZoomOut( m_zoomPercent );
 	}
 	else if( m_cursorMode == cmPan )
 	{
 		if( m_sendMouseDown == TRUE )
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1);
-		}
+			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 
-		CRect rcBounds(0,0,m_viewWidth,m_viewHeight);
-		m_bitbltClickDown = point;
-		m_bitbltClickMove = point;
+		CRect rcBounds(0,0,_viewWidth,_viewHeight);
 		this->LogPrevExtent();
 		this->SetCapture();
-		this->LockWindow(lmLock);
+		_draggingOperation = DragPanning;
+		Debug::WriteWithTime("Start new panning");
 	}
 	else if( m_cursorMode == cmSelection )
 	{
-		m_ttip.Activate(FALSE);
-		//Selection Box
-
-		CMapTracker selectBox = CMapTracker( this,
-			CRect(0,0,0,0),
-			CRectTracker::solidLine +
-			CRectTracker::resizeOutside );
-
+		_ttip.Activate(FALSE);
+		CMapTracker selectBox = CMapTracker( this,	CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
 		selectBox.m_sizeMin = 0;
 
 		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
-		m_ttip.Activate(TRUE);
+		_ttip.Activate(TRUE);
 
 		CRect rect = selectBox.m_rect;
 		rect.NormalizeRect();
@@ -367,25 +462,20 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (!selected || !m_sendSelectBoxFinal)
 		{
 			if( m_sendMouseDown == TRUE )
-			{
-				if (m_Rotate != NULL && m_RotateAngle != 0)
-					this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-				else
-					this->FireMouseDown(MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-			}
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 		}
 
 		if( selected )
 		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
+			if (HasRotation())
 			{
 				CRect rectTmp = rect;
 				long tmpX = 0, tmpY = 0;
 				// adjust rectangle to unrotated coordinates
-				m_Rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+				_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
 				rectTmp.TopLeft().x = tmpX;
 				rectTmp.TopLeft().y = tmpY;
-				m_Rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+				_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
 				rectTmp.BottomRight().x = tmpX;
 				rectTmp.BottomRight().y = tmpY;
 				rect = rectTmp;
@@ -402,12 +492,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		
 		//the MapTracker interferes with the OnMouseUp event so we will call it manually
 		if( m_sendMouseUp == TRUE )
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				this->FireMouseUp(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				this->FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-		}
+			this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
 	}
 	else if( m_cursorMode == cmMeasure )
 	{
@@ -416,7 +501,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		int closePointIndex= -1;
 		
 		tkMeasuringType measureType;
-		m_measuring->get_MeasuringType(&measureType);
+		_measuring->get_MeasuringType(&measureType);
 
 		if ( nFlags & MK_CONTROL && measureType == tkMeasuringType::MeasureDistance)
 		{
@@ -424,7 +509,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			double minDist = DBL_MAX;
 			double xTemp, yTemp;
 			
-			CMeasuring* m = (CMeasuring*)m_measuring;
+			CMeasuring* m = (CMeasuring*)_measuring;
 			int size = m->points.size() - 2;
 			for(int i = 0; i < size; i++)
 			{
@@ -448,15 +533,15 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				// no points to close near by
 			}
 		}
-		else if ( nFlags & MK_SHIFT )	// when shift is pressed we seek for nearby point across all layers
+		else if ( nFlags & MK_SHIFT )	
 		{
 			double tolerance = 20;   // pixels;   TODO: make a parameter
-			
+
+			// we seek for nearby point across all layers
 			if (FindSnapPoint(tolerance, point.x, point.y, &x, &y))
 				found = true;
-			else
-			{	// simply don't add a point, there is nothing to snap near by
-			}
+			
+			// otherwise simply don't add a point, there is nothing to snap near by
 		}
 		else
 		{
@@ -469,99 +554,43 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			double pixelX, pixelY;
 			ProjToPixel(x, y, &pixelX, &pixelY);
 
-			((CMeasuring*)m_measuring)->AddPoint(x, y, pixelX, pixelY);
+			((CMeasuring*)_measuring)->AddPoint(x, y, pixelX, pixelY);
 			
 			if (closePointIndex != -1)
-				((CMeasuring*)m_measuring)->ClosePoly(closePointIndex);
+				((CMeasuring*)_measuring)->ClosePoly(closePointIndex);
 
-			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointAdded);
-			_canUseMainBuffer = false;
+			FireMeasuringChanged(_measuring, tkMeasuringAction::PointAdded);
 
-			// better to call it before the redraw
-			if( m_sendMouseDown ) {
+			if( m_sendMouseDown )
 				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-			}
-			this->Refresh();		// update the map without redrawing the layers
+			
+			_canUseMainBuffer = false;
+			this->Refresh();
 		}
 	}
 	else //if( m_cursorMode == cmNone )
 	{
 		SetCapture();
 		if( m_sendMouseDown == TRUE )
-		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags,rotPoint.x,rotPoint.y -1);
-			else
-				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-		}
+			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 	}
 }
 
-// ************************************************************
-//		FindSnapPoint
-// ************************************************************
-VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound)
-{
-	double x, y, x2, y2;
-	this->PixelToProjection( xScreen, yScreen, x, y );
-	this->PixelToProjection( xScreen + tolerance, yScreen + tolerance, x2, y2 );
-	double maxDist = sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
-
-	long shapeIndex;
-	long pointIndex;
-	VARIANT_BOOL vb;
-	double distance;
-	
-	double minDist = DBL_MAX;
-	IShapefile* foundShapefile = NULL;
-	long foundShapeIndex;
-	long foundPointIndex;
-
-	for(long i = 0; i < this->GetNumLayers(); i++)
-	{
-		IShapefile* sf = this->GetShapefile(this->GetLayerHandle(i));
-		if (sf != NULL)
-		{
-			sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
-			if (vb)
-			{
-				if (distance < minDist)
-				{
-					minDist = distance;
-					foundShapefile = sf;
-					foundPointIndex = pointIndex;
-					foundShapeIndex = shapeIndex;
-				}
-			}
-			sf->Release();
-		}
-	}
-
-	bool result = false;
-	if (minDist != DBL_MAX && foundShapefile)
-	{
-		IShape* shape = NULL;
-		foundShapefile->get_Shape(foundShapeIndex, &shape);
-		if (shape)
-		{
-			shape->get_XY(foundPointIndex, xFound, yFound, &vb);
-			shape->Release();
-			result = true;
-		}
-	}
-	return result;
-}
 
 // ************************************************************
 //		OnLButtonDblClick
 // ************************************************************
 void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
+   ZoombarPart part = ZoombarHitTest(point.x, point.y);
+	if (part != ZoombarPart::ZoombarNone)
+		return;
+
    OnLButtonDown(nFlags, point);
    if (m_cursorMode == cmMeasure)
    {
-	   m_measuring->FinishMeasuring();
-	   FireMeasuringChanged(m_measuring, tkMeasuringAction::MesuringStopped);	
+	   _measuring->FinishMeasuring();
+	   FireMeasuringChanged(_measuring, tkMeasuringAction::MesuringStopped);	
    }
 }
 
@@ -570,57 +599,184 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 // ************************************************************
 void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 {
+	if (HasRotation())
+		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
+	
 	long vbflags = 0;
 	if( nFlags & MK_SHIFT )
 		vbflags |= 1;
 	if( nFlags & MK_CONTROL )
 		vbflags |= 2;
-  
-	if (m_Rotate != NULL && m_RotateAngle != 0)
-	{
-		CPoint rotPoint = point;
-		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
-		point = rotPoint;
-	}
 
-	if( m_sendMouseUp == TRUE && m_leftButtonDown )
+	if( m_sendMouseUp == TRUE && _leftButtonDown )
 		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
 
-    m_leftButtonDown = FALSE;
+	bool zooming = _draggingOperation == DragZoombarHandle;
+	bool panning = _draggingOperation == DragPanning;
 
+	_leftButtonDown = FALSE;
+	_draggingOperation = DragNone;
 	ReleaseCapture();
 
-	if( m_cursorMode == cmPan )
+	if (zooming)
 	{
-		//this is the only mode we care about for this event
-		m_bitbltClickDown = CPoint(0,0);
-		m_bitbltClickMove = CPoint(0,0);
+		if (_zoombarTargetZoom == -1)
+			Debug::WriteError("Invalid target zoom for zoom bar");
+
+		ZoomToTileLevel(_zoombarTargetZoom);
+	}
+	else if( panning )
+	{
+		if (m_cursorMode != cmPan)
+			Debug::WriteError("Wrong cursor mode when panning is expected");
+
+		if (!_spacePressed)
+			DisplayPanningInertia(point);
 		
-		this->SetExtentsCore(this->extents, false);
-		LockWindow(lmUnlock);
+		this->SetExtentsCore(this->_extents, false);
+		
+		//this is the only mode we care about for this event
+		_draggingStart = CPoint(0,0);
+		_draggingMove = CPoint(0,0);
+
+		ClearPanningList();
+
+		// we need to redraw the layers
+		Redraw2(tkRedrawType::RedrawAll);
 	}
 }
 
+// ************************************************************
+//		DisplayPanningInertia
+// ************************************************************
+void CMapView::DisplayPanningInertia( CPoint point )
+{
+	if (_panningInertia)
+	{
+		bool inertia = false;
+		double dx = 0.0, dy = 0.0;
+		DWORD normalInterval = Utility::Rint(0.3 * CLOCKS_PER_SEC);		// normal interval
+		DWORD interval = 0;												// measured interval
+		DWORD timeNow = GetTickCount();
+
+		// -----------------------------------------------------------
+		//	 Choosing the interval for speed calculation
+		// -----------------------------------------------------------
+		_panningLock.Lock();
+		size_t size = _panningList.size();
+
+		if (size > 1 )
+		{
+			DWORD minTime = timeNow - normalInterval;
+			int firstIndex = size - 2;
+
+			for(int i = size - 1; i >= 0; i--)
+			{
+				if (_panningList[i]->time < minTime)
+				{
+					firstIndex = i;
+					break;
+				}
+			}
+
+			if (firstIndex != -1)
+			{
+				dx = _panningList[size - 1]->x - _panningList[firstIndex]->x;
+				dy = _panningList[size - 1]->y - _panningList[firstIndex]->y;
+				interval = timeNow - _panningList[firstIndex]->time;
+				inertia = true;
+			}
+		}
+		_panningLock.Unlock();
+
+		// -----------------------------------------------------------
+		//	 Rendering inertia
+		// -----------------------------------------------------------
+		if (inertia)
+		{
+			// for small map the same inertia is perceived as being faster
+			double coeff = 1.5 + (_viewWidth * _viewHeight) / 1e6 * 0.7;	
+			double ratio = normalInterval / (double)interval * coeff;		
+			dx *= ratio;
+			dy *= ratio;
+
+			double dist = sqrt(pow(dx, 2.0) + pow(dy, 2.0));
+
+			int numSteps = 0, sum = 0;
+			do 
+			{
+				numSteps++;
+				sum += (numSteps * 3);
+			} while (sum < dist);
+
+			if (numSteps > 1)
+			{
+				_panningAnimation = true;
+				for (int i = numSteps; i >= 0; i--) 
+				{
+					DWORD lastTime = GetTickCount();
+					_draggingMove.x += Utility::Rint(dx * i * 3 / sum);
+					_draggingMove.y += Utility::Rint(dy * i * 3 / sum);
+					DoPanning(_draggingMove);
+					Debug::WriteWithTime("Drawing inertia");
+
+					// if rendering is too fast, let's introduce some artificial slowness
+					DWORD timeNow = GetTickCount();
+					if ( timeNow - lastTime < 80 ) {
+						Sleep( 80 - timeNow + lastTime);
+					}
+
+					// make that release of TAB will be processed in time to return to prev cursor
+					/*MSG msg;
+					if (::PeekMessage(&msg, NULL, WM_KEYUP, WM_KEYUP, PM_NOREMOVE ))
+					{
+						if (::GetMessage(&msg, NULL, WM_KEYUP, WM_KEYUP))
+						{
+							WPARAM param = msg.wParam;
+							::TranslateMessage(&msg);
+							::DispatchMessage(&msg);
+						}
+					}*/
+
+					MSG msg;
+					// remove all key down, so that pressed TAB won't be processed after the end of animation
+					if (::PeekMessage(&msg, NULL, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE )) 
+						break;
+
+					// let user stop animation with left button click
+					if (::PeekMessage(&msg, NULL, WM_LBUTTONDOWN, WM_LBUTTONDOWN, PM_NOREMOVE ))
+						break;
+				}
+				_panningAnimation = false;
+			}
+		}
+	}
+}
+#pragma endregion
+
+#pragma region Mouse move
 // ************************************************************
 //		OnMouseMove
 // ************************************************************
 void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	VARIANT_BOOL vbretval;
-	CPoint rotPoint = point;
-	if (m_Rotate != NULL && m_RotateAngle != 0)
-		m_Rotate->getOriginalPixelPoint(point.x, point.y, &(rotPoint.x), &(rotPoint.y));
+	if (HasRotation())
+		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
+	_draggingMove = point;
 
-	if( m_showingToolTip )
+	if (HandleOnZoombarMouseMove(point))
+		return;
+
+	if( _showingToolTip )
 	{
 		CToolInfo cti;
-		m_ttip.GetToolInfo(cti,this,IDC_TTBTN);
+		_ttip.GetToolInfo(cti,this,IDC_TTBTN);
 		cti.rect.left = point.x - 2;
 		cti.rect.right = point.x + 2;
 		cti.rect.top = point.y - 2;
 		cti.rect.bottom = point.y + 2;
-		m_ttip.SetToolInfo(&cti);
-		m_ttip.SetWindowPos(&wndTop,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+		_ttip.SetToolInfo(&cti);
+		_ttip.SetWindowPos(&wndTop,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
 
 		MSG pMsg;
 		pMsg.hwnd = this->m_hWnd;
@@ -628,7 +784,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		pMsg.wParam = nFlags;
 		pMsg.lParam = MAKELPARAM(point.x, point.y);
 		pMsg.pt = point;
-		m_ttip.RelayEvent(&pMsg);
+		_ttip.RelayEvent(&pMsg);
 	}
 
 	long vbflags = 0;
@@ -636,11 +792,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		vbflags |= 1;
 	if( nFlags & MK_CONTROL )
 		vbflags |= 2;
-
-   CPoint movePnt = point;
-
-	if (m_Rotate != NULL && m_RotateAngle != 0)
-		movePnt = rotPoint;
 
 	if( m_sendMouseMove == TRUE )
 	{	
@@ -658,38 +809,21 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		else
 		{
-			if (m_Rotate != NULL && m_RotateAngle != 0)
-  				this->FireMouseMove( (short)mbutton, (short)vbflags, rotPoint.x, rotPoint.y );  // rotPoint.y - 1
-			else
- 				this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y ); // point.y - 1
+			this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y );
 		}
 	}
 
 	if( m_cursorMode == cmPan )
 	{
-		if( (nFlags & MK_LBUTTON) && m_leftButtonDown )
+		
+		if( (nFlags & MK_LBUTTON) && _leftButtonDown )
 		{
-			m_bitbltClickMove = point;
-
-         double xAmount = (m_clickDown.x - movePnt.x)*m_inversePixelPerProjectionX;
-			double yAmount = (movePnt.y - m_clickDown.y)*m_inversePixelPerProjectionY;
-
-			extents.left = m_clickDownExtents.left + xAmount;
-			extents.right = m_clickDownExtents.right + xAmount;
-			extents.bottom = m_clickDownExtents.bottom + yAmount;
-			extents.top = m_clickDownExtents.top + yAmount;
-
-			if (m_UseSeamlessPan)
-			{
-				_canUseLayerBuffer = FALSE;	// lsu (07/03/2009) added for seamless panning; suggested by Bobby at http://www.mapwindow.org/phorum/read.php?3,13099
-				LockWindow(lmUnlock);	
-
-				FireExtentsChanged(); 
-				ReloadImageBuffers(); 
-			}	
-			else
-				InvalidateControl();
-
+			Debug::WriteWithTime("Mouse move panning");
+			DWORD time = GetTickCount();
+			_panningLock.Lock();
+			_panningList.push_back(new TimedPoint(point.x, point.y, time));
+			_panningLock.Unlock();
+			DoPanning(point);
 			return;
 		}
 	}
@@ -698,7 +832,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 	if( m_cursorMode == cmMeasure ) 
 	{
-		CMeasuring* m =((CMeasuring*)m_measuring);
+		CMeasuring* m =((CMeasuring*)_measuring);
 		if (!m->IsStopped() && m->points.size() > 0)
 		{
 			double x, y;
@@ -710,111 +844,8 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 
-	// Hot tracking
-	if (_hasHotTracking)
-	{
-		double pixX = point.x;
-		double pixY = point.y;
-		double prjX, prjY;
-		this->PixelToProj(pixX, pixY, &prjX, &prjY);
-		
-		bool found = false;
-		IShapefile * sf = NULL;
-
-		for(int i = 0; i < (int)m_activeLayers.size(); i++ )
-		{
-			Layer* layer = m_allLayers[m_activeLayers[i]];
-			if (layer->type == ShapefileLayer)
-			{
-				if (layer->QueryShapefile(&sf))
-				{
-					VARIANT_BOOL hotTracking = VARIANT_FALSE;
-					sf->get_HotTracking(&hotTracking);
-					if (hotTracking)
-					{
-						std::vector<long> shapes;
-
-						double tol = 0.0;
-						ShpfileType type;
-						sf->get_ShapefileType(&type);
-						type = Utility::ShapeTypeConvert2D(type);
-						if (type == SHP_MULTIPOINT || type == SHP_POINT)
-							tol = 5.0/this->PixelsPerMapUnit();
-
-						((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
-						
-						if (shapes.size() > 0)
-						{
-							if (m_activeLayers[i] != m_hotTracking.LayerHandle || shapes[0] != m_hotTracking.ShapeId)
-							{
-								IShape* shape = NULL;
-								sf->get_Shape(shapes[0], &shape);
-								if (shape)
-								{
-									IShape* shpClone = NULL;
-									shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
-																// on the first glance shape shouldn't be released on closing the shapefile
-									ULONG cnt = shape->Release();
-
-									if (!m_hotTracking.Shapefile)
-										CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(m_hotTracking.Shapefile));
-									else
-										m_hotTracking.Shapefile->Close(&vbretval);
-
-									if (m_hotTracking.Shapefile)
-									{
-										ShpfileType type;
-										sf->get_ShapefileType(&type);
-										
-										((CShapefile*)m_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
-										long index = 0;
-										m_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
-										m_hotTracking.Shapefile->RefreshExtents(&vbretval);
-										m_hotTracking.LayerHandle = m_activeLayers[i];
-										m_hotTracking.ShapeId = shapes[0];
-
-										IShapeDrawingOptions* options = NULL;
-										sf->get_SelectionDrawingOptions(&options);
-										if (options)
-										{
-											m_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-											options->Release();
-										}
-										
-									}
-									shpClone->Release();   // there is one reference in new shapefile
-									found = true;
-								}
-							}
-						}
-					}
-					
-					sf->Release();
-					sf = NULL;
-				}
-			}
-
-			if (found)
-			{
-				// pasing event to the caller
-				this->FireShapeHighlighted(m_hotTracking.LayerHandle, m_hotTracking.ShapeId);
-				_canUseMainBuffer = false;
-				refreshNeeded = true;
-				break;
-			}
-		}
-
-		if (!found && m_hotTracking.ShapeId != -1)
-		{
-			m_hotTracking.ShapeId = -1;
-			m_hotTracking.LayerHandle = -1;
-			if (m_hotTracking.Shapefile)
-				m_hotTracking.Shapefile->Close(&vbretval);
-			
-			// pasing event to the caller
-			this->FireShapeHighlighted(-1, -1);
-		}
-	}
+	if (UpdateHotTracking(point))
+		refreshNeeded = true;
 
 	if (_showCoordinates != cdmNone) {
 		refreshNeeded = true;
@@ -825,6 +856,44 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 }
 
+// ************************************************************
+//		DoPanning
+// ************************************************************
+void CMapView::DoPanning(CPoint point)
+{
+	double xAmount = (_draggingStart.x - _draggingMove.x) * _inversePixelPerProjectionX;
+	double yAmount = (_draggingMove.y - _draggingStart.y) * _inversePixelPerProjectionY;
+
+	Debug::WriteWithTime("Panning amount: x=%d; y=%d", _draggingStart.x - _draggingMove.x, _draggingMove.y - _draggingStart.y);
+	Debug::WriteWithTime("Cliecked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top);
+
+	_extents.left = _clickDownExtents.left + xAmount;
+	_extents.right = _clickDownExtents.right + xAmount;
+	_extents.bottom = _clickDownExtents.bottom + yAmount;
+	_extents.top = _clickDownExtents.top + yAmount;
+	
+	// trigger redraw of scalebar; commented: doesn't look nice + additional computational burden
+	//m_lastWidthMeters = 0.0;	
+
+	if (_useSeamlessPan)
+	{
+		// complete redraw; bad for performance, especially for large layers
+		// AxMap.LayerScreenBufferMode property should be used instead to mark
+		// layer for immediate redraw
+		_canUseLayerBuffer = FALSE;
+		LockWindow(lmUnlock);	
+		FireExtentsChanged(); 
+		ReloadImageBuffers(); 
+	}	
+	else
+	{
+		// layers stay the same, while all the rest must be updated
+		RedrawCore(RedrawSkipDataLayers, true, true);
+	}
+}
+#pragma endregion
+
+#pragma region Right and middle buttons
 // ************************************************************
 //		OnRButtonDblClick
 // ************************************************************
@@ -838,25 +907,25 @@ void CMapView::OnRButtonDblClk(UINT nFlags, CPoint point)
 // ************************************************************
 void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 {
-	// Added QUAY 3.16.09
-	if (DoTrapRMouseDown == TRUE )
+	ZoombarPart part = ZoombarHitTest(point.x, point.y);
+	if (part != ZoombarPart::ZoombarNone)
+		return;
+	
+	VARIANT_BOOL redraw;
+	if( m_cursorMode == cmMeasure )
+	{
+		((CMeasuring*)_measuring)->UndoPoint(&redraw);
+		FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
+		_canUseMainBuffer = false;
+	}
+
+	if (_doTrapRMouseDown == TRUE )
 	{
 		long vbflags = 0;
 		if( nFlags & MK_SHIFT )
 			vbflags |= 1;
 		if( nFlags & MK_CONTROL )
 			vbflags |= 2;
-
-		m_clickDown = point;
-		m_clickDownExtents = extents;
-
-		VARIANT_BOOL redraw;
-		if( m_cursorMode == cmMeasure )
-		{
-			((CMeasuring*)m_measuring)->UndoPoint(&redraw);
-			FireMeasuringChanged(m_measuring, tkMeasuringAction::PointRemoved);
-			_canUseMainBuffer = false;
-		}
 
 		if( m_sendMouseDown == TRUE )
 			this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
@@ -865,38 +934,38 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 
 		if( m_cursorMode == cmZoomOut )
 		{
-			double zx = extents.left, zy = extents.bottom;
+			double zx = _extents.left, zy = _extents.bottom;
 			PixelToProjection( point.x, point.y, zx, zy );
 
-			double halfxRange = (extents.right - extents.left)*.5;
-			double halfyRange = (extents.top - extents.bottom)*.5;
+			double halfxRange = (_extents.right - _extents.left)*.5;
+			double halfyRange = (_extents.top - _extents.bottom)*.5;
 
-			extents.left = zx - halfxRange;
-			extents.right = zx + halfxRange;
-			extents.bottom = zy - halfyRange;
-			extents.top = zy + halfyRange;
+			_extents.left = zx - halfxRange;
+			_extents.right = zx + halfxRange;
+			_extents.bottom = zy - halfyRange;
+			_extents.top = zy + halfyRange;
 
 			ZoomIn( m_zoomPercent );
-			::SetCursor( m_cursorZoomin );
+			::SetCursor( _cursorZoomin );
 
 			FireExtentsChanged();
 			ReloadImageBuffers();
 		}
 		else if( m_cursorMode == cmZoomIn )
 		{
-			double zx = extents.left, zy = extents.bottom;
+			double zx = _extents.left, zy = _extents.bottom;
 			PixelToProjection( point.x, point.y, zx, zy );
 
-			double halfxRange = (extents.right - extents.left)*.5;
-			double halfyRange = (extents.top - extents.bottom)*.5;
+			double halfxRange = (_extents.right - _extents.left)*.5;
+			double halfyRange = (_extents.top - _extents.bottom)*.5;
 
-			extents.left = zx - halfxRange;
-			extents.right = zx + halfxRange;
-			extents.bottom = zy - halfyRange;
-			extents.top = zy + halfyRange;
+			_extents.left = zx - halfxRange;
+			_extents.right = zx + halfxRange;
+			_extents.bottom = zy - halfyRange;
+			_extents.top = zy + halfyRange;
 
 			ZoomOut( m_zoomPercent );
-			::SetCursor( m_cursorZoomout );
+			::SetCursor( _cursorZoomout );
 
 			FireExtentsChanged();
 			ReloadImageBuffers();
@@ -917,8 +986,8 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 	ReleaseCapture();//why is this being called, capture isn't set on RButtonDown as far as I can see...
 
 	_reverseZooming = false;
-	if (m_cursorMode == cmZoomIn) ::SetCursor( m_cursorZoomin );
-	if (m_cursorMode == cmZoomOut) ::SetCursor( m_cursorZoomout );
+	if (m_cursorMode == cmZoomIn) ::SetCursor( _cursorZoomin );
+	if (m_cursorMode == cmZoomOut) ::SetCursor( _cursorZoomout );
 
 	long vbflags = 0;
 	if( nFlags & MK_SHIFT )
@@ -935,58 +1004,29 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 // *********************************************************
 void CMapView::OnMButtonUp(UINT nFlags, CPoint point)
 {
-	double zx = extents.left, zy = extents.bottom;
+	double zx = _extents.left, zy = _extents.bottom;
 	PixelToProjection( point.x, point.y, zx, zy );
 
-	double halfxRange = (extents.right - extents.left)*.5;
-	double halfyRange = (extents.top - extents.bottom)*.5;
+	double halfxRange = (_extents.right - _extents.left)*.5;
+	double halfyRange = (_extents.top - _extents.bottom)*.5;
 
-	extents.left = zx - halfxRange;
-	extents.right = zx + halfxRange;
-	extents.bottom = zy - halfyRange;
-	extents.top = zy + halfyRange;
+	_extents.left = zx - halfxRange;
+	_extents.right = zx + halfxRange;
+	_extents.bottom = zy - halfyRange;
+	_extents.top = zy + halfyRange;
 
-	this->SetExtentsCore(extents);
+	this->SetExtentsCore(_extents);
 }
+#pragma endregion
 
-void CMapView::ResizeBuffers(int cx, int cy)
-{
-	if (m_bufferBitmap)
-	{
-		delete m_bufferBitmap;
-		m_bufferBitmap = NULL;
-	}
-	m_bufferBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (m_tilesBitmap)
-	{
-		delete m_tilesBitmap;
-		m_tilesBitmap = NULL;
-	}
-	m_tilesBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (m_drawingBitmap)
-	{
-		delete m_drawingBitmap;
-		m_drawingBitmap = NULL;
-	}
-	m_drawingBitmap = new Gdiplus::Bitmap(cx, cy);
-
-	if (m_layerBitmap)
-	{
-		delete m_layerBitmap;
-		m_layerBitmap = NULL;
-	}
-	m_layerBitmap = new Gdiplus::Bitmap(cx, cy);
-}
-
+#pragma region Others
 // *************************************************************
 //		CMapView::OnSize()
 // *************************************************************
 void CMapView::OnSize(UINT nType, int cx, int cy)
 {
 	// the redraw is prohibited before the job here is done
-	m_isSizing = true;
+	_isSizing = true;
 
 	COleControl::OnSize(nType, cx, cy);
 
@@ -995,29 +1035,29 @@ void CMapView::OnSize(UINT nType, int cx, int cy)
 	ResizeBuffers(cx, cy);
 	
 	// we shall fill the new regions with back color
-	if (cx > m_viewWidth)
+	if (cx > _viewWidth)
 	{
-		pDC->FillSolidRect(m_viewWidth, 0, cx - m_viewWidth, cy, m_backColor);
+		pDC->FillSolidRect(_viewWidth, 0, cx - _viewWidth, cy, m_backColor);
 	}
-	if (cy > m_viewHeight)
+	if (cy > _viewHeight)
 	{
-		pDC->FillSolidRect(0, m_viewHeight, cx, cy - m_viewHeight, m_backColor);
+		pDC->FillSolidRect(0, _viewHeight, cx, cy - _viewHeight, m_backColor);
 	}
 
 	ReleaseDC(pDC);
 
 	if( cx > 0 && cy > 0 )
 	{
-		m_viewWidth = cx;
-		m_viewHeight = cy;
-		m_aspectRatio = (double)m_viewWidth/(double)m_viewHeight;
-		m_isSizing = false;
+		_viewWidth = cx;
+		_viewHeight = cy;
+		_aspectRatio = (double)_viewWidth/(double)_viewHeight;
+		_isSizing = false;
 		
-		this->SetExtentsCore(extents, false, true);
+		this->SetExtentsCore(_extents, false, true);
 	}
 	else
 	{
-		m_isSizing = false;
+		_isSizing = false;
 	}
 }
 
@@ -1048,160 +1088,10 @@ void CMapView::OnDropFiles(HDROP hDropInfo)
 void CMapView::OnBackColorChanged()
 {
 	_canUseLayerBuffer = FALSE;
-	if( !m_lockCount )
+	if( !_lockCount )
 		InvalidateControl();
 }
 
-// *******************************************************
-//		OnMapCursorChanged()
-// *******************************************************
-void CMapView::OnMapCursorChanged()
-{	
-	OnSetCursor(this,0,0);
-}
-
-// *******************************************************
-//		OnSetCursor()
-// *******************************************************
-BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
-{
-   HCURSOR NewCursor = NULL;
-
-	if( nHitTest != HTCLIENT )
-	{
-		COleControl::OnSetCursor( pWnd, nHitTest, message );
-		return TRUE;
-	}
-
-	switch( m_mapCursor )
-	{
-		case crsrMapDefault:
-
-			switch( m_cursorMode )
-			{
-				case cmZoomIn:
-					NewCursor = _reverseZooming ?  m_cursorZoomout : m_cursorZoomin;
-					break;
-
-				case cmZoomOut:
-					NewCursor = _reverseZooming ?  m_cursorZoomin : m_cursorZoomout;
-					break;
-
-				case cmPan:
-					NewCursor = m_cursorPan;
-					break;
-
-				case cmSelection:
-					NewCursor = m_cursorSelect;
-					break;
-				
-				case cmMeasure:
-					NewCursor = m_cursorMeasure;
-					break;
-
-				case cmNone:
-					NewCursor = (HCURSOR)m_uDCursorHandle;
-					break;
-			}
-			break;
-	
-		case crsrAppStarting:
-			NewCursor = LoadCursor(NULL, IDC_APPSTARTING);
-			break;
-
-		case crsrArrow:
-			NewCursor = LoadCursor(NULL, IDC_ARROW);
-			break;
-
-		case crsrCross:
-			NewCursor = LoadCursor(NULL, IDC_CROSS);
-			break;
-
-		case crsrHelp:
-			NewCursor = LoadCursor(NULL, IDC_HELP);
-			break;
-
-		case crsrIBeam:
-			NewCursor = LoadCursor(NULL, IDC_IBEAM);
-			break;
-
-		case crsrNo:
-			NewCursor = LoadCursor(NULL, IDC_NO);
-			break;
-
-		case crsrSizeAll:
-			NewCursor = LoadCursor(NULL, IDC_SIZEALL);
-			break;
-
-		case crsrSizeNESW:
-			NewCursor = LoadCursor(NULL, IDC_SIZENESW);
-			break;
-
-		case crsrSizeNS:
-			NewCursor = LoadCursor(NULL, IDC_SIZENS);
-			break;
-
-		case crsrSizeNWSE:
-			NewCursor = LoadCursor(NULL, IDC_SIZENWSE);
-			break;
-
-		case crsrSizeWE:
-			NewCursor = LoadCursor(NULL, IDC_SIZEWE);
-			break;
-
-		case crsrUpArrow:
-			NewCursor = LoadCursor(NULL, IDC_UPARROW);
-			break;
-		
-		case crsrWait:
-
-			if (!m_DisableWaitCursor)
-				NewCursor = LoadCursor(NULL, IDC_WAIT);
-			break;
-
-		case crsrUserDefined:
-			NewCursor = (HCURSOR)m_uDCursorHandle;
-			break;
-	}
-
-	if (NewCursor != NULL)
-		::SetCursor( NewCursor );
-	else
-		COleControl::OnSetCursor( pWnd, nHitTest, message );
-
-	return TRUE;
-}
-
-// *************************************************************
-//		OnTimer()
-// *************************************************************
-#ifdef WIN64
-void CMapView::OnTimer(UINT_PTR nIDEvent)
-#else
-void CMapView::OnTimer(UINT nIDEvent)
-#endif
-{
-	// TODO: Add your message handler code here and/or call default
-	if( nIDEvent == SHOWTEXT )
-	{	KillTimer(SHOWTEXT);
-		m_showingToolTip = TRUE;
-	}
-	else if( nIDEvent == HIDETEXT)
-	{	KillTimer(HIDETEXT);
-		m_showingToolTip = FALSE;
-
-		CToolInfo cti;
-		m_ttip.GetToolInfo(cti,this,IDC_TTBTN);
-		cti.rect.left = -1;
-		cti.rect.top = - 1;
-		cti.rect.right = - 1;
-		cti.rect.bottom = - 1;
-		m_ttip.SetToolInfo(&cti);
-		m_ttip.Pop();
-	}
-
-	COleControl::OnTimer(nIDEvent);
-}
 
 // *********************************************************
 //		OnResetState 
@@ -1211,20 +1101,6 @@ void CMapView::OnResetState()
 {
 	COleControl::OnResetState();  // Resets defaults found in DoPropExchange
 	//SetDefaults();		// TODO: Reset any other control state here.
-}
-
-// *********************************************************
-//		OnResetState 
-// *********************************************************
-void CMapView::OnCursorModeChanged()
-{
-	if (m_measuring)
-	{
-		VARIANT_BOOL vb;
-		m_measuring->get_Persistent(&vb);
-		if (m_cursorMode != cmMeasure && !vb)
-			m_measuring->Clear();
-	}
 }
 
 // *********************************************************
@@ -1242,4 +1118,35 @@ void CMapView::OnSendMouseUpChanged(){}
 void CMapView::OnSendMouseMoveChanged(){}
 void CMapView::OnSendSelectBoxDragChanged(){}
 void CMapView::OnSendSelectBoxFinalChanged(){}
+#pragma endregion
 
+// *************************************************************
+//		OnTimer()
+// *************************************************************
+#ifdef WIN64
+void CMapView::OnTimer(UINT_PTR nIDEvent)
+#else
+void CMapView::OnTimer(UINT nIDEvent)
+#endif
+{
+	// TODO: Add your message handler code here and/or call default
+	if( nIDEvent == SHOWTEXT )
+	{	KillTimer(SHOWTEXT);
+	_showingToolTip = TRUE;
+	}
+	else if( nIDEvent == HIDETEXT)
+	{	KillTimer(HIDETEXT);
+	_showingToolTip = FALSE;
+
+	CToolInfo cti;
+	_ttip.GetToolInfo(cti,this,IDC_TTBTN);
+	cti.rect.left = -1;
+	cti.rect.top = - 1;
+	cti.rect.right = - 1;
+	cti.rect.bottom = - 1;
+	_ttip.SetToolInfo(&cti);
+	_ttip.Pop();
+	}
+
+	COleControl::OnTimer(nIDEvent);
+}

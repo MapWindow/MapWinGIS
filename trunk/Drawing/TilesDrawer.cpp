@@ -33,7 +33,6 @@ using namespace Gdiplus;
 void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit, 
 							 IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing)
 {
-	// get list of tiles surpassing the COM interface
 	vector<TileCore*> tiles = ((CTiles*)itiles)->m_tiles;
 
 	VARIANT_BOOL drawGrid;
@@ -45,7 +44,7 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 	CImageAttributesEx attr(1.0, false, false, 0, 0);
 	attr.SetWrapMode(Gdiplus::WrapModeTileFlipXY);
 
-	// check perhaps the map projection is the same as the one for tiles
+	// check perhaps map projection is the same as the one for tiles
 	// then we don't have to use conversion to WGS84 decimal degrees
 	VARIANT_BOOL isSame;
 	CustomProjection* customProj = NULL;
@@ -54,6 +53,7 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 		customProj = dynamic_cast<CustomProjection*>(tileProjection);
 		if (customProj)
 		{
+			// TODO: can be cached
 			mapProjection->get_IsSame(customProj->projCustom, &isSame);
 			Debug::WriteLine("Is same projection: %d", isSame);
 		}
@@ -83,13 +83,13 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 				{
 					if (m_transfomation)
 					{
-						// projection differs from WGS84 deciml degrees
+						// projection differs from WGS84 decimal degrees
 						if (!tile->UpdateProjection(m_transfomation))
 							continue;
 					}
 					else
 					{
-						// we are working with WGS84 decimal degress
+						// we are working with WGS84 decimal degrees
 						tile->Proj.xLng = tile->Geog.xLng;
 						tile->Proj.yLat = tile->Geog.yLat;
 						tile->Proj.WidthLng = tile->Geog.WidthLng;
@@ -115,11 +115,19 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 				Gdiplus::Bitmap* bmp = tile->getBitmap(i)->m_bitmap;
 				if (bmp)
 				{
-					g->DrawImage(bmp, rect, (Gdiplus::REAL)(-0.0), (Gdiplus::REAL)(-0.0), 
-						(Gdiplus::REAL)bmp->GetWidth(), (Gdiplus::REAL)bmp->GetHeight(), Gdiplus::UnitPixel, &attr);
-
-					//g->DrawImage(bmp, rect, (Gdiplus::REAL)(-0.5), (Gdiplus::REAL)(-0.5), 
-					//	(Gdiplus::REAL)bmp->GetWidth(), (Gdiplus::REAL)bmp->GetHeight(), Gdiplus::UnitPixel, &attr);
+					double TOLERANCE = 0.01;
+					if ( abs(width - bmp->GetWidth()) < TOLERANCE && 
+						 abs(height - bmp->GetHeight()) < TOLERANCE)
+					{
+						// TODO: perhaps better to check that all tiles have the same size
+						// and apply this rendering only then
+						g->DrawImage(bmp,  Utility::Rint(x), Utility::Rint(y));
+					}
+					else
+					{
+						g->DrawImage(bmp, rect, (Gdiplus::REAL)(-0.0), (Gdiplus::REAL)(-0.0), 
+							(Gdiplus::REAL)bmp->GetWidth(), (Gdiplus::REAL)bmp->GetHeight(), Gdiplus::UnitPixel, &attr);
+					}
 				}
 			}
 			

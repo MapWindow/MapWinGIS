@@ -638,6 +638,7 @@ enum tkScalebarUnits
 		[helpstring("crsrUpArrow")] crsrUpArrow = 12,
 		[helpstring("crsrWait")] crsrWait = 13,
 		[helpstring("crsrUserDefined")] crsrUserDefined = 14,
+		[helpstring("crsrHand")] crsrHand = 15,
 	} tkCursor;
 
 	typedef  
@@ -5370,8 +5371,10 @@ library MapWinGIS
 			[id(221), propget] VARIANT_BOOL GrabProjectionFromData();
 			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
 			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
-			[id(224)] VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double* degreesLatY);
-			[id(225)] VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double * pixelY);
+			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+ 	        [id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+			[id(226), propput] void ShowZoombar(VARIANT_BOOL nNewValue);
+			[id(226), propget] VARIANT_BOOL ShowZoombar();
 			//}}AFX_ODL_METHOD
 	};
 

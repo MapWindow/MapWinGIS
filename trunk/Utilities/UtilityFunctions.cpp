@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include <iterator>
 #include <fstream>
-#include <gdiplus.h>
-#include <vector>
 
 namespace Utility
 {
@@ -551,7 +549,11 @@ namespace Utility
 	{
 		switch (Units)
 		{
-			case umDecimalDegrees:	return 4366141.73;
+			// calculated considering sphere with radius 6378137 km, i.e. the one used WGS84/Google Mercator projection
+			// http://spatialreference.org/ref/sr-org/7483/html/
+			// cf = (2 * pi * R) / 360 / 0.0254
+			case umDecimalDegrees:	return 4382657.117845416246;		
+
 			case umMeters:			return 39.3700787;
 			case umCentimeters:		return 0.393700787;
 			case umFeets:			return 12.0;
@@ -656,6 +658,17 @@ namespace Utility
 			value += 0.5;
 		int val = static_cast<int>(value);
 		return val;
+	}
+
+	// *********************************************************
+	//	     Factorial()
+	// *********************************************************
+	int Utility::Factorial(int n)
+	{
+		int ret = 1;
+		for(int i = 1; i <= n; ++i)
+			ret *= i;
+		return ret;
 	}
 
 	// *********************************************************
@@ -1068,6 +1081,25 @@ namespace Utility
 
 namespace Debug
 {
+	// ****************************************************************** 
+	//		WriteLine
+	// ****************************************************************** 
+	void WriteWithTime(CString format, ...)
+	{
+		TCHAR buffer[1024];
+		va_list args;
+		va_start( args, format);
+		vsprintf( buffer, format, args );
+		
+		SYSTEMTIME time;
+		GetLocalTime(&time);
+		CString s2;
+		s2.Format("%02d:%02d:%02d.%-3d: ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+		CString s = buffer;
+		format = s2 + s + "\n";
+		OutputDebugStringA(format);
+	}
+	
 	// ****************************************************************** 
 	//		WriteLine
 	// ****************************************************************** 

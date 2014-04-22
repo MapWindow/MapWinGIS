@@ -29,14 +29,25 @@ namespace Debug
 
 	void Logger::WriteLine(CString format, ...)
 	{
-		if (m_logger.is_open())
+		if (IsOpened())
 		{
 			TCHAR buffer[1024];
 			va_list args;
 			va_start( args, format);
 			vsprintf( buffer, format, args );
 			CString s = buffer;
-			m_logger << s << endl;
+
+			if (format.GetLength() > 0)
+			{
+				SYSTEMTIME time;
+				GetLocalTime(&time);
+				CString s2;
+				s2.Format("%02d:%02d:%02d.%-3d: ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+				m_logger << s2 << s << endl;
+			}
+			else {
+				m_logger << endl;
+			}
 			m_logger.flush();
 		}
 	}
@@ -57,9 +68,6 @@ namespace Debug
 
 	void Logger::Log(CString message)
 	{
-		if (this->IsOpened())
-		{
-			m_logger << message << endl;   m_logger.flush();
-		}
+		WriteLine(message);
 	}
 }

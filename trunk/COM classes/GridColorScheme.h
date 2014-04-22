@@ -23,13 +23,9 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-#include <deque>
 #include "vector.h"
 
 // CGridColorScheme
-
 class ATL_NO_VTABLE CGridColorScheme : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CGridColorScheme, &CLSID_GridColorScheme>,

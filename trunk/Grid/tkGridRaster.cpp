@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at
 //http://www.mozilla.org/MPL/
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and
+//ANY KIND, either express or implied. See the License for the specific language governing rights and
 //limitations under the License.
 //
 //The Original Code is MapWindow Open Source.
@@ -19,21 +19,12 @@
 //********************************************************************************************************
 
 #include "stdafx.h"
-#include <math.h>
 #include <cassert>
-#include <fstream>
 #include <exception>
-
 #include "grdTypes.h"
 #include "tkGridRaster.h"
-#include "ogr_srs_api.h"
 #include "cpl_string.h"
-#include "ogr_spatialref.h"
-
 #include "projections.h"
-#include "gdal_frmts.h"
-#include "gdalhelper.h"
-
 
 extern "C"
 {
@@ -592,7 +583,7 @@ bool tkGridRaster::CreateNew(CStringW filename, GridFileType newFileType, double
 	if (applyInitialValue)
 		clear(initialValue);
 
-	if (strcmp(projection, "") != 0 && projection != NULL)
+	if (projection && strcmp(projection, "") != 0)
 	{
 		// SetProjection expects WKT
 		if (startsWith(projection, "+proj"))
@@ -689,8 +680,6 @@ bool tkGridRaster::CanCreate()
 
 	if (haveDetermined) return priorDecision;
 
-	bool retval;
-
 	GDALAllRegister();
 
 	GDALDriver *poDriver;
@@ -715,8 +704,6 @@ bool tkGridRaster::CanCreate()
 		priorDecision = false;
 		return false;
 	}
-
-	return retval;
 }
 
 bool tkGridRaster::Close()
@@ -1766,11 +1753,11 @@ void tkGridRaster::ReadBGDHeader( CString filename, FILE * in, DATA_TYPE &bgdDat
 				CPLFree(newProj);
 			}
 
-			if (strcmp(projection, "") != 0 && projection != NULL)
+			if (projection && strcmp(projection, "") != 0)
 			{
 					try
 					{
-						if (strcmp(projection, "") != 0 && projection != NULL)
+						if (projection && strcmp(projection, "") != 0 )
 						{
 							// SetProjection expects WKT
 							if (startsWith(projection, "+proj"))

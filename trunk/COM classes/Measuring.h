@@ -23,9 +23,6 @@
  * (Open source contributors should list themselves and their modifications here). */
  
 #pragma once
-#include "MapWinGIS.h"
-#include <vector>
-
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -56,7 +53,7 @@ public:
 		stopped = false;
 		mousePoint.x = mousePoint.y = 0;
 		measuringType = tkMeasuringType::MeasureDistance;
-		areaRecalcIsNeeded = true;
+		_areaRecalcIsNeeded = true;
 		closedPoly = false;
 		firstPointIndex = -1;
 		persistent = VARIANT_FALSE;
@@ -86,12 +83,7 @@ public:
 	void FinalRelease()
 	{
 	}
-private:
-	bool stopped;
-	bool isGeodesic;
-	void* _mapView;
-	bool areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
-	IShape* shape;
+
 public:
 	STDMETHOD(get_Length)(double* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
@@ -111,6 +103,13 @@ public:
 	STDMETHOD(put_DisplayAngles)(VARIANT_BOOL newVal);
 	STDMETHOD(get_IsUsingEllipsoid)(VARIANT_BOOL* retVal);
 
+private:
+	bool stopped;
+	bool isGeodesic;
+	void* _mapView;
+	bool _areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
+	IShape* shape;
+public:
 	// projection should be specified before any calculations are possible
 	void SetMapView(void* mapView);
 	IGeoProjection* GetMapProjection();

@@ -1,13 +1,8 @@
 # ifndef FGRID_H
 # define FGRID_H
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <io.h>
 #include "fHeader.h"
 #include "grdTypes.h"
-//#include "errorcodes.h"
 
 #pragma warning(disable:4251)
 

@@ -402,7 +402,7 @@ clear_bmp:
 				if (!vbretval)
 				{
 					iimgNew->Release(); iimgNew = NULL;   // error message in the image class
-					delete pColours;
+					delete[] pColours;
 					goto final_clear;
 				}
 				

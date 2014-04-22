@@ -34,7 +34,6 @@
 #ifndef clipper_hpp
 #define clipper_hpp
 
-#include <vector>
 #include <stdexcept>
 #include <cstring>
 #include <cstdlib>

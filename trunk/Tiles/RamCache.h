@@ -20,8 +20,6 @@
  // lsu 17 apr 2012 - created the file
 
 #pragma once
-#include <vector>
-#include <map>
 #include "TileCore.h"
 using namespace std;
 

@@ -12,9 +12,9 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 {
 	imageGroups.clear();
 
-	for(size_t i = 0; i < m_activeLayers.size(); i++)
+	for(size_t i = 0; i < _activeLayers.size(); i++)
 	{
-		Layer * l = m_allLayers[m_activeLayers[i]];
+		Layer * l = _allLayers[_activeLayers[i]];
 		if( l != NULL )
 		{	
 			if(l->type == ImageLayer)
@@ -92,7 +92,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 		{
 			for (size_t j = 0; j < indices->size(); j++ )
 			{
-				Layer * l = m_allLayers[m_activeLayers[(*indices)[j]]];
+				Layer * l = _allLayers[_activeLayers[(*indices)[j]]];
 				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
 				//if (iimg)
 				if (l->QueryImage(&iimg))
@@ -122,7 +122,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 				int imageIndex = (*indices)[i];
 				if (imageIndex != -1)
 				{
-					Layer * l = m_allLayers[m_activeLayers[imageIndex]];
+					Layer * l = _allLayers[_activeLayers[imageIndex]];
 					//l->object->QueryInterface(IID_IImage, (void**)&iimg);
 					//if (iimg)
 					if (l->QueryImage(&iimg))
@@ -176,10 +176,10 @@ tkInterpolationMode CMapView::ChooseInterpolationMode(tkInterpolationMode mode1,
 // groupIndex - index of group that should be drawn
 void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphics, int groupIndex)
 {
-	CImageDrawer imgDrawer(graphics, &extents, m_pixelPerProjectionX, m_pixelPerProjectionY, m_viewWidth, m_viewHeight);
+	CImageDrawer imgDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, _viewWidth, _viewHeight);
 	IImage* iimg = NULL;
 
-	ImageGroup* group = (*m_imageGroups)[groupIndex];
+	ImageGroup* group = (*_imageGroups)[groupIndex];
 	if (! group->isValid ) 
 		return;
 	
@@ -188,11 +188,11 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 	bmp = group->screenBitmap;
 	if (bmp != NULL)
 	{
-		if (bmp->extents == extents &&
-			bmp->pixelPerProjectionX == m_pixelPerProjectionX &&
-			bmp->pixelPerProjectionY == m_pixelPerProjectionY &&
-			bmp->viewWidth == m_viewWidth &&
-			bmp->viewHeight == m_viewHeight)
+		if (bmp->extents == _extents &&
+			bmp->pixelPerProjectionX == _pixelPerProjectionX &&
+			bmp->pixelPerProjectionY == _pixelPerProjectionY &&
+			bmp->viewWidth == _viewWidth &&
+			bmp->viewHeight == _viewHeight)
 		{
 			//Gdiplus::Graphics g(dc->m_hDC);
 			graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
@@ -207,7 +207,7 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 	
 	double scale = GetCurrentScale();
 	int zoom;
-	this->m_tiles->get_CurrentZoom(&zoom);
+	this->_tiles->get_CurrentZoom(&zoom);
 
 	if(group->image == NULL)
 	{
@@ -239,9 +239,9 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 			// passing the data from all images
 			bool visibleLayerExists = false;
 			bool useTransparencyColor = true;		
-			for(size_t j = 0; j < m_activeLayers.size(); j++)
+			for(size_t j = 0; j < _activeLayers.size(); j++)
 			{
-				Layer * l = m_allLayers[m_activeLayers[j]];
+				Layer * l = _allLayers[_activeLayers[j]];
 				if( l != NULL )
 				{	
 					//if(l->type == ImageLayer && (l->flags & Visible))
@@ -357,3 +357,51 @@ bool CMapView::ImageGroupsAreEqual(std::vector<ImageGroup*>& groups1, std::vecto
 	return true;
 }
 
+// *********************************************************
+//		SetGridFileName()
+// *********************************************************
+void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if(IS_VALID_LAYER(LayerHandle,_allLayers))
+	{
+		// redirected to image class for backward compatibility
+		IImage* img = this->GetImage(LayerHandle);
+		if (img != NULL)
+		{
+			USES_CONVERSION;
+			((CImageClass*)img)->sourceGridName = A2W(newVal);		// TODO: use Unicode
+			img->Release();
+		}
+		else
+		{
+			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
+		}
+	}
+	else
+	{
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
+	}
+}
+
+// ****************************************************************
+//		ReloadImageBuffers()
+// ****************************************************************
+void CMapView::ReloadImageBuffers()
+{
+	IImage * iimg = NULL;
+	for(size_t i = 0; i < _activeLayers.size(); i++ )
+	{
+		Layer * l = _allLayers[_activeLayers[i]];
+
+		if ((l->type == ImageLayer) && (l->flags & Visible))
+		{
+			if (l->QueryImage(&iimg))
+			{	
+				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
+				iimg->Release();
+			}
+		}
+	}
+}

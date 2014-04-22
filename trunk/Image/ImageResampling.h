@@ -24,9 +24,7 @@
  // lsu 15-mar-2010 - Created this file, based upon code from Graphics32 library
 
 #pragma once
-#include "MapWinGis.h"
 #include "colour.h"
-//#include "Image.h"
 
 const int MAX_KERNEL_WIDTH = 4;
 

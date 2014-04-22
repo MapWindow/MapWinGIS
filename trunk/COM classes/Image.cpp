@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,37 +14,22 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-//
-//Contributor(s): (Open source contributors should list themselves and their modifications here).
-//10-25-2005 Rob Cairns - Altered for GDAL support
-//3-28-2005 dpa - Fixed so image is unloaded regardless of if it is in memory.
-//3-28-2005 dpa - Added code from Kurt Wolfe - EPA Athens - for handling GeoTIFF
-//1-10-2006 - 1-18-2006 - cdm -- removed tkTiff
-//4-05-2007 - tom shanley - added get_OriginalWidth, Height
 //********************************************************************************************************
+
 #include "stdafx.h"
 #include "Image.h"
-#include <stdio.h>
-#include <io.h>
-#include <fstream>
-#include <map>
-
-#include "geo_normalize.h"
-#include "geovalues.h"
-
 #include "colour.h"
 #include "ImageResampling.h"
 #include "tkGif.h"
 #include "tkJpg.h"
 #include "tkRaster.h"
-
 #include "projections.h"
 #include "Templates.h"
 #include "Base64.h"
 #include "Labels.h"
 #include "GridColorScheme.h"
-#include "GdalHelper.h"
 #include "GridManager.h"
+#include <io.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,7 +55,7 @@ VARIANT_BOOL CImageClass::WriteWorldFile(CStringW WorldFileName)
 		return VARIANT_FALSE;
 	}
 
-	fprintf(fout,"%.14f\n",dX,setlocale(LC_ALL,"C"));
+	fprintf(fout,"%.14f\n",dX,setlocale(LC_ALL,"C"));		// TODO: is locale parameter valid?
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",0.0);
 	fprintf(fout,"%.14f\n",dY*-1.0);
@@ -2366,7 +2351,7 @@ void CImageClass::ClearNotNullPixels()
 // ******************************************************************
 //	   SaveNotNullPixels()
 // ******************************************************************
-// Saves all pixels whose avalue differs from traspColor to the m_pixels array
+// Saves all pixels with values different from traspColor to the m_pixels array
 bool CImageClass::SaveNotNullPixels(bool forceSaving)
 {
 	ClearNotNullPixels();
@@ -2392,6 +2377,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 
 	DataPixels* tmpData = new DataPixels[(int)((double)Width * (double)Height * part) + Width];	// we don't know how many pixels would be, but not greater than this value
 	colour* val;
+	bool result = false;
 
 	// perhaps it makes sense to limit the size of buffer
 	if (_rasterImage->LoadBufferFull(&ImageData, fileName, 0))
@@ -2459,8 +2445,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 		}
 
 		// copying pixels to the permanent structure
-		bool result = false;
-		if ( /*count > 0 &&*/ count < maxPixels)	
+		if ( count < maxPixels)	
 		{
 			if (count > 0)
 			{
@@ -2478,7 +2463,6 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 		}
 		
 		// cleaning
-		delete[] tmpData;
 		if( ImageData )
 		{
 			delete[] ImageData;
@@ -2486,10 +2470,10 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 		}
 		Width = 0;
 		Height = 0;			
-		return result;
 	}
-	else
-		return false;
+	
+	delete[] tmpData;
+	return result;
 }
 
 // ********************************************************************
@@ -2506,7 +2490,7 @@ void CImageClass::ErrorMessage(long ErrorCode)
 // **************************************************************
 //		ProjectionToImage
 // **************************************************************
-// Returns image coorinates to the given map coordinates
+// Returns image coordinates to the given map coordinates
 STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* ImageX, long* ImageY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2526,7 +2510,7 @@ STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Im
 // **************************************************************
 //		ImageToProjection
 // **************************************************************
-// Returns map coorinates to the given image coordinates
+// Returns map coordinates to the given image coordinates
 STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* ProjX, double* ProjY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2547,7 +2531,7 @@ STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* Pr
 // **************************************************************
 //		ProjectionToBuffer
 // **************************************************************
-// Returns image coorinates to the given map coordinates
+// Returns image coordinates to the given map coordinates
 STDMETHODIMP CImageClass::ProjectionToBuffer(double ProjX, double ProjY, long* BufferX, long* BufferY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2559,7 +2543,7 @@ STDMETHODIMP CImageClass::ProjectionToBuffer(double ProjX, double ProjY, long* B
 // **************************************************************
 //		ImageToProjection
 // **************************************************************
-// Returns map coorinates to the given image coordinates
+// Returns map coordinates to the given image coordinates
 STDMETHODIMP CImageClass::BufferToProjection(long BufferX, long BufferY, double* ProjX, double* ProjY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2598,7 +2582,7 @@ STDMETHODIMP CImageClass::put_CanUseGrouping(VARIANT_BOOL newVal)
    can be done here as well; according to logic I would better forbid
    the changes for consistency with GDAL images, but this would break
    a lot of code; perhaps it makes sense to return error code urging
-   the developer to use 'original' propoerties
+   the developer to use 'original' properties
    - parameters of image buffer for GDAL-based images; no 
    changes are allowed in this case.
 */
@@ -2926,7 +2910,7 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 		{
 			pair<long, OLE_COLOR> myPair(p->second, p->first);	
 			sortedMap.insert(myPair);
-			p++;
+			++p;
 		}
 
 		// returning result
@@ -2941,7 +2925,7 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 		{
 			colors[i] = pp->second;
 			frequences[i] = pp->first;
-			pp++; i++;
+			++pp; ++i;
 		}
 		*count = sortedMap.size();
 		
@@ -3045,7 +3029,7 @@ STDMETHODIMP CImageClass::get_SourceType (tkImageSourceType* retVal)
 
 #pragma region Obsolete
 // ***************************************************
-//		Deprecated methods. Use 'Original' propoerties instead
+//		Deprecated methods. Use 'Original' properties instead
 // ***************************************************
 STDMETHODIMP CImageClass::GetOriginalXllCenter(double *pVal)
 {	// added by Rob Cairns 1-Jun-09

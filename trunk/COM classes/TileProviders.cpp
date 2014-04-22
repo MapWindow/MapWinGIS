@@ -301,7 +301,7 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 		}
 		else
 		{
-			it++;
+			++it;
 		}
 	}
 	return S_OK;

@@ -47,7 +47,7 @@ void TileCacher::Run()
 		return;
 
 	this->queueLock.Lock();
-	if (queue.size() > 0)
+	if (!queue.empty())
 	{
 		TileCore* tile = queue.front();
 		queue.pop();

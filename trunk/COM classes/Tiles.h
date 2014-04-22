@@ -24,15 +24,10 @@
  // lsu 21 aug 2011 - created the file
 
 #pragma once
-#include "MapWinGIS.h"
-#include <vector>
 #include "TileCore.h"
 #include "BaseProvider.h"
 #include "TileProviders.h"
 #include "TileLoader.h"
-#include "Extent.h"
-#include "MapWinGIS_i.h"
-
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -56,7 +51,8 @@ public:
 		CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&m_providers);
 		((CTileProviders*)m_providers)->put_Tiles(this);
 		this->SetDefaults();
-		m_lastZoom = -1;
+		_lastZoom = -1;
+		_lastProvider = tkTileProvider::ProviderNone;
 	}
 
 	~CTiles()
@@ -79,7 +75,6 @@ public:
 	{
 		m_provider = ((CTileProviders*)m_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
 		m_visible = true;
-		m_tilesLoaded = false;
 		m_gridLinesVisible = false;
 		m_doRamCaching = true;
 		m_doDiskCaching = false;
@@ -88,7 +83,6 @@ public:
 		m_useServer = true;
 		m_minScaleToCache = 0;
 		m_maxScaleToCache = 100;
-		m_reloadCount = 0;
 		m_projExtentsNeedUpdate = true;
 	}
 
@@ -215,10 +209,6 @@ private:
 	int m_minScaleToCache;
 	int m_maxScaleToCache;
 	
-	bool m_tilesLoaded;
-	int m_reloadCount;
-	int m_lastZoom;
-
 	ITileProviders* m_providers;
 	
 	TileLoader m_tileLoader;
@@ -228,6 +218,12 @@ private:
 	bool m_projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
 	CStringW m_logPath;
 	void* mapView;
+
+	// to avoid duplicate consecutive requests
+	int _lastZoom;
+	int _lastProvider;
+	Extent _lastTileExtents;	// in tile coordinates
+	Extent _lastMapExtents;
 
 public:
 	::CCriticalSection _tilesBufferLock;
@@ -245,11 +241,12 @@ public:
 	void AddTileWithCaching(TileCore* tile);
 	void AddTileNoCaching(TileCore* tile);
 	void CTiles::AddTileOnlyCaching(TileCore* tile);
+	void CTiles::AddTileToRamCache(TileCore* tile);
 	void Clear();
 	void LoadTiles(void* mapView, bool isSnapshot = false, CString key = "");
-	void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key = "");
+	void LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key = "");
 	bool TilesAreInCache(void* mapView, tkTileProvider providerId = ProviderNone);
-	bool CTiles::TilesAreInScreenBuffer(void* mapView);
+	bool TilesAreInScreenBuffer(void* mapView);
 	bool GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom);
 	bool GetTilesForMap(void* mapView, int& xMin, int& xMax, int& yMin, int& yMax, int& zoom);
 	bool DeserializeCore(CPLXMLNode* node);
@@ -257,8 +254,8 @@ public:
 	bool UndrawnTilesExist();
 	bool DrawnTilesExist();
 	BaseProjection* get_Projection(){return m_provider->Projection;}
-	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* wgsProjection,bool doTransformtation, Extent& retVal);
-	void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
+	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection,tkTransformationMode transformationMode, Extent& retVal);
+	void HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
 
 	void UpdateProjection() {
 		m_projExtentsNeedUpdate = true;

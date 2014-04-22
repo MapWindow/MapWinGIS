@@ -5,9 +5,7 @@
 # include <time.h>
 # include <fstream>		//removed ".h" 2-5-2005 dpa
 using namespace std;
-//# include <iostream.h> why was this included twice? 2-5-2005 dpa
 
-//# define _NO_MACRO
 # define _WINDOWS_TIMER
 
 //Timer macros and functions

@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -17,23 +17,22 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #include "stdafx.h"
 #include "Shapefile.h"
 #include "GeometryConverter.h"
-#include <map>
-#include "Varh.h"
 #include "Templates.h"
 #include "Extents.h"
 #include "clipper.h"
 #include <GeosHelper.h>
 #include "FieldStatOperations.h"
+#include "Shape.h"
 
 #ifdef SERIALIZE_POLYGONS
-#include <fstream>
-#include <iostream>
-using namespace std;
+	#include <fstream>
+	#include <iostream>
+	using namespace std;
 #endif
 
 #pragma region Utilities
@@ -116,7 +115,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 				
 				// TODO: use constant
 				if (isGeographic)
-					area *= 110899.999942;	// comparison is perfromed in meters, area will grow as squar of linear size
+					area *= 110899.999942;	// comparison is performed in meters, area will grow as square of linear size
 											// we multilpy area only; in reality:((area * c^2)/ (perimeter * c))
 				
 				if (area/perimeter < m_globalSettings.minAreaToPerimeterRatio)
@@ -167,7 +166,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 				{
 					sfSubject->get_CellValue(p->first, subjectId, &var);
 					sf->EditCellValue(p->second, newId, var, &vbretval);
-					p++;
+					++p;
 				}
 			}
 			else
@@ -187,7 +186,7 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 				{
 					sfClip->get_CellValue(p->first, clipId, &var);
 					sf->EditCellValue(p->second, newId, var, &vbretval);
-					p++;
+					++p;
 				}
 			}
 		}
@@ -425,7 +424,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 				if (*p > i)
 					break;
 
-				p++;
+				++p;
 			}
 			if (include)
 			{
@@ -753,7 +752,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 							max = p->second;
 							sSum = p->first;
 						}
-						p++;
+						++p;
 					}
 				}
 				
@@ -841,7 +840,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 			}
 		}
 		index++;
-		p++;
+		++p;
 	}
 
 	Utility::DisplayProgressCompleted(globalCallback, key);
@@ -948,7 +947,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 			}
 			GeosHelper::DestroyGeometry(gsGeom);
 		}
-		p++;
+		++p;
 		i++;
 	}
 
@@ -961,7 +960,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 		while(p != indicesMap.end())
 		{
 			delete p->second;
-			p++;
+			++p;
 		}
 	}
 
@@ -985,7 +984,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 	std::vector<ClipperLib::Polygons*> polygons;
 	polygons.resize(size, NULL);
 
-	GeometryConverter ogr(this);
+	ClipperConverter ogr(this);
 
 	bool calcStats = false;
 	if (operations)
@@ -1070,7 +1069,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 			}
 			delete p->second;
 		}
-		p++;
+		++p;
 	}
 
 	// deleting the polygons
@@ -1094,7 +1093,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		while(p != indicesMap.end())
 		{
 			delete p->second;
-			p++;
+			++p;
 		}
 	}
 }
@@ -1293,7 +1292,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 			
 		delete p->second;	// deleting the vector
 		count++;
-		p++;
+		++p;
 		i++;
 	}
 
@@ -1309,7 +1308,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 		while(p != indicesMap.end())
 		{
 			delete p->second;
-			p++;
+			++p;
 		}
 	}
 
@@ -1509,36 +1508,7 @@ STDMETHODIMP CShapefile::SymmDifference(VARIANT_BOOL SelectedOnlySubject, IShape
 STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	// NEW VALIDATION IS USED
-
-	//// no overlay shapefile specified?
-	//if( sfOverlay == NULL)
-	//{	
-	//	ErrorMessage( tkUNEXPECTED_NULL_PARAMETER );
-	//	return S_OK;
-	//} 
-
-	//// does this shapefile have invalid shapes?
-	//VARIANT_BOOL invalid = VARIANT_FALSE;
-	//this->HasInvalidShapes(&invalid);
-	//if (invalid)
-	//{
-	//	ErrorMessage( tkSHPFILE_WITH_INVALID_SHAPES );
-	//	return S_OK;
-	//}
-
-	//// does the overlay shapefile have invalid shapes?
-	//invalid = VARIANT_FALSE;
-	//((CShapefile*)sfOverlay)->HasInvalidShapes(&invalid);
-	//if (invalid)
-	//{
-	//	ErrorMessage( tkSHPFILE_WITH_INVALID_SHAPES );
-	//	return S_OK;
-	//}
-
-	// find the union.
-	DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);	// enumeration should be repaired
+	DoClipOperation(SelectedOnlySubject, sfOverlay, SelectedOnlyOverlay, retval, clUnion);	
 	return S_OK;
 }
 
@@ -2076,7 +2046,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
 	
 	ClipperLib::Clipper clp; 
-	GeometryConverter ogr(this);
+	ClipperConverter ogr(this);
 	
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
@@ -2281,7 +2251,7 @@ void CShapefile::AddPolygonsToClipper(ClipperLib::Clipper& clp, ClipperLib::Poly
 	long numShapes;		
 	this->get_NumShapes(&numShapes);		
 
-	GeometryConverter converter(this);
+	ClipperConverter converter(this);
 
 	IShape* shp =NULL;
 	for (long i = 0; i < numShapes; i++) 
@@ -2316,7 +2286,7 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
 	ClipperLib::Polygons polyResult;
 	if (clp.Execute(ClipperLib::ClipType::ctIntersection, polyResult)) {
 		
-		GeometryConverter converter(sfResult);
+		ClipperConverter converter(sfResult);
 		IShape* shp = converter.ClipperPolygon2Shape(&polyResult);
 
 		VARIANT_BOOL vb;
@@ -2347,7 +2317,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
 	
 	ClipperLib::Clipper clp; 
-	GeometryConverter converter(this);
+	ClipperConverter converter(this);
 
 	IGeoProjection* projection = NULL;
 	sfClip->get_GeoProjection(&projection);
@@ -2697,7 +2667,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	vector<ClipperLib::Polygons*> vPolygons;		// we shall create vectors for both clipper and GEOS 
 	vPolygons.assign(numShapesClip, NULL);	// this won't take much RAM or time
 	
-	GeometryConverter ogr(sfSubject);
+	ClipperConverter ogr(sfSubject);
 	
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
@@ -3358,7 +3328,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 		{
 			// marking the index of shape
 			CString str;
-			str.Format("%d", i);
+			str.Format("%dl", i);
 			BSTR index = A2BSTR(str);
 			shp->put_Key(index);
 			SysFreeString(index);
@@ -3385,7 +3355,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 			
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
-			p++;
+			++p;
 		}
 	}
 	else
@@ -3397,7 +3367,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
-			p++;
+			++p;
 		}
 	}
 
@@ -3548,7 +3518,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 				{
 					sf->get_CellValue(p->first, i, &val);
 					(*retval)->EditCellValue(p->second, count, val, &vbretval);
-					p++;
+					++p;
 				}
 				count++;
 			}

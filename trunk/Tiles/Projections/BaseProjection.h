@@ -19,7 +19,6 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
-#include <vector>
 #include "geopoint.h"
 
 // A base abstract class to handle transformation between map coordinates (decimal degrees)
@@ -50,6 +49,7 @@ public:
 		 earthRadius = 6378137.0;
 		 worldWide = true;
 		 serverProjection = tkTileProjection::SphericalMercator;
+		 MinLatitude = MaxLatitude = MinLongitude = MaxLongitude = 0.0;
 	};
 	
 	virtual ~BaseProjection() {}

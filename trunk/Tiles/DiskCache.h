@@ -20,8 +20,6 @@
  // lsu 17 apr 2012 - created the file
 
 #pragma once
-#include <vector>
-#include <gdiplus.h>
 #include "TileCore.h"
 #include "TileLoader.h"
 using namespace std;

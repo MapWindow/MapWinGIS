@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GdalHelper.h"
-#include <vector>
 
 // **************************************************************
 //		GdalOpen
@@ -335,7 +334,6 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 				pszResampling = "NONE";
 		}
 
-		bool result = false;
 		if (dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, (GDALProgressFunc)GDALProgressFunction, callback) == CE_None)
 			return true;
 

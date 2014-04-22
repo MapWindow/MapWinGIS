@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -137,23 +137,15 @@ bool tkBitmap::WriteBitmap(const char * bmp_file, const colour * ImageData)
 		//*****WRITE THE PAD******
 		if( pad > 0 )
 			fwrite(padding,sizeof(BYTE),pad,fout);				
-
-		if( globalCallback != NULL )
-		{
-			newpercent = (long)(((ecnt++)/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Saving Image"));
-			}
-		}			
 		
-	}//end outside for loop	
+		Utility::DisplayProgress(globalCallback, ecnt, (long)total, "Saving Image", key, percent);
+		ecnt++;
+	} 
 
 	fclose(fout);
-
-	//CGOH if (BitmapBits)
-	//CGOH 	delete [] BitmapBits;
-	//CGOH BitmapBits = NULL;
+	
+	if (pad > 0)
+		delete[] padding;
 
 	return true;
 }

@@ -2,7 +2,6 @@
 # define VERTEX_TABLE_H
 
 # include "vertex.h"
-# include <deque>
 
 class vertexTable
 {

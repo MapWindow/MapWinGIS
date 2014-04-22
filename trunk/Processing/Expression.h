@@ -24,8 +24,6 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file.
 
 #pragma once
-#include <vector>
-#include "MapWinGis.h"
 
 // A single value within expression, either double, boolean or string
 struct CExpressionValue
@@ -55,7 +53,7 @@ struct CExpressionValue
 	}	
 };
 
-// Parses and calculates math expression, potentilly with varible fields
+// Parses and calculates math expression, potentially with variable fields
 // See supported operators below
 class CExpression
 {
@@ -121,8 +119,8 @@ private:
 		CString fieldName;       // name of field (in [square brackets])
 		bool isField;			 // the element is field from table
 
-		// perfoming calculation
-		bool wasCalculated;      // the value has been calculated, so calc value should be used henceforth
+		// performing calculation
+		bool wasCalculated;      // the value has been calculated, so calculated value should be used henceforth
 		bool turnedOff;          // turned off till the end of calculation
 		int partIndex;           // the element is result of calculations on the bracket with given index
 	};
@@ -139,6 +137,7 @@ private:
 		CExpressionPart()
 		{
 			activeCount = 0;
+			val = NULL;
 		}
 	};
 	struct COperation

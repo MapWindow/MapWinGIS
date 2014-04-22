@@ -145,7 +145,7 @@ STDMETHODIMP CMeasuring::UndoPoint(VARIANT_BOOL* retVal)
 		delete points[points.size() - 1];
 		points.pop_back();
 		*retVal = VARIANT_TRUE;
-		areaRecalcIsNeeded = true;
+		_areaRecalcIsNeeded = true;
 	}
 	stopped = false;
 	closedPoly = false;
@@ -287,9 +287,9 @@ double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y)
 	double perimeter = 0.0, area = 0.0;
 	if (points.size() > 1)
 	{
-		if (areaRecalcIsNeeded)
+		if (_areaRecalcIsNeeded)
 		{
-			areaRecalcIsNeeded = false;
+			_areaRecalcIsNeeded = false;
 			poly.Clear();
 			for(size_t i = 0; i < points.size(); i++)
 			{
@@ -360,7 +360,7 @@ IGeoProjection* CMeasuring::GetMapProjection()
 }
 tkTransformationMode CMeasuring::GetTransformationMode()
 {
-	return _mapView ? ((CMapView*)_mapView)->m_transformationMode : tmNotDefined;
+	return _mapView ? ((CMapView*)_mapView)->_transformationMode : tmNotDefined;
 }
 
 // *******************************************************
@@ -388,7 +388,7 @@ void CMeasuring::AddPoint(double xProj, double yProj, double xScreen, double ySc
 		pnt->x = x;
 		pnt->y = y;
 	}
-	areaRecalcIsNeeded = true;
+	_areaRecalcIsNeeded = true;
 }
 
 // *******************************************************

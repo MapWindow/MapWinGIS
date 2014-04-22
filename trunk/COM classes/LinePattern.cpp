@@ -29,7 +29,6 @@
 #include "LineDrawing.h"
 #include "macros.h"
 #include "PointSymbols.h"
-//#include "UtilityFunctions.h"
 
 #pragma region General
 // *************************************************************

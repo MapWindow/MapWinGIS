@@ -10,7 +10,6 @@
 # define GRID_TYPES
 
 #include "stdafx.h"
-#include "MapWinGis.h"
 
 	enum GRID_TYPE	
 	{ ASCII_GRID,

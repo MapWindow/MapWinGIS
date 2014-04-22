@@ -25,8 +25,6 @@
 #ifndef __SHAPEFILELEGENDBREAK_H_
 #define __SHAPEFILELEGENDBREAK_H_
 
-#include "MapWinGis.h"       // main symbols
-
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorBreak
 class ATL_NO_VTABLE CShapefileColorBreak : 

@@ -24,8 +24,6 @@
  // lsu 22 aug 2009 - Created the file; adapted the code from ShapeInfo.h
 
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
 #include "DrawingOptions.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)

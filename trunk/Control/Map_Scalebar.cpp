@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "map.h"
-#include "GeoProjection.h"
 
 // ****************************************************************
 //		DrawStringWithShade()
@@ -125,13 +124,13 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	int yOffset = 10;
 	int segmHeight = 5;
 
-	if (m_viewWidth <= barWidth + xOffset || m_viewHeight <= barHeight + yOffset)		// control must be big enough
+	if (_viewWidth <= barWidth + xOffset || _viewHeight <= barHeight + yOffset)		// control must be big enough
 		return;
 	
-	if (m_transformationMode != tkTransformationMode::tmNotDefined)
+	if (_transformationMode != tkTransformationMode::tmNotDefined)
 	{
 		int zoom = -1;
-		m_tiles->get_CurrentZoom(&zoom);
+		_tiles->get_CurrentZoom(&zoom);
 		if (zoom >= 0 && zoom < 3) {
 			// lsu: there are some problems with displaying scalebar at such zoom levels: 
 			// - there are areas outside the globe where coordinate transformations may fail;
@@ -145,27 +144,27 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	}
 	
 	double minX, maxX, minY, maxY;	// size of map control in pixels
-    PROJECTION_TO_PIXEL(extents.left, extents.bottom, minX, minY);
-	PROJECTION_TO_PIXEL(extents.right, extents.top, maxX, maxY);
+    PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
+	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 
-	double xMin = extents.left;
-	double yMin = extents.top;
-	double xMax = extents.right;
-	double yMax = extents.bottom;
+	double xMin = _extents.left;
+	double yMin = _extents.top;
+	double xMax = _extents.right;
+	double yMax = _extents.bottom;
 	
-	double width = extents.right - extents.left;
-	tkUnitsOfMeasure units = m_unitsOfMeasure;
+	double width = _extents.right - _extents.left;
+	tkUnitsOfMeasure units = _unitsOfMeasure;
 
 	// ----------------------------------------------------------
 	//    Geodesic distance calculation
 	// ----------------------------------------------------------
-	if (m_transformationMode != tkTransformationMode::tmNotDefined)
+	if (_transformationMode != tkTransformationMode::tmNotDefined)
 	{
 		// skip calculations when extents haven't changed
-		if (this->m_lastWidthMeters == 0.0)
+		if (this->_lastWidthMeters == 0.0)
 		{
 			bool skipTransform = false;
-			if (m_transformationMode == tkTransformationMode::tmDoTransformation)
+			if (_transformationMode == tkTransformationMode::tmDoTransformation)
 			{
 				VARIANT_BOOL vb;
 				IGeoProjection* projTemp = GetMapToWgs84Transform();
@@ -182,13 +181,13 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			if ( !skipTransform)
 			{
 				GetUtils()->GeodesicDistance((yMax + yMin)/2, xMin, (yMax + yMin)/2, xMax, &width);
-				m_lastWidthMeters = width;
+				_lastWidthMeters = width;
 				units = tkUnitsOfMeasure::umMeters;
 			}
 		}
 		else
 		{
-			width = m_lastWidthMeters;
+			width = _lastWidthMeters;
 			units = tkUnitsOfMeasure::umMeters;
 		}
 	}
@@ -204,14 +203,14 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		double newWidth = width;
 
 		// metric calculations are performed for mixed mode as well
-		tkUnitsOfMeasure targetUnits = m_scalebarUnits == American ? umMiles : umMeters;		
+		tkUnitsOfMeasure targetUnits = _scalebarUnits == American ? umMiles : umMeters;		
 		Utility::ConvertDistance(units, targetUnits, newWidth);
 		unitsPerPixel = newWidth/(maxX - minX);	  // target units on screen size
 		double distance = (barWidth - xPadding * 2) * unitsPerPixel;
 		ChooseScalebarUnits(units, targetUnits, distance, unitsPerPixel, step, count, power);
 		
 		tkUnitsOfMeasure targetUnits2 = umMiles;
-		if (m_scalebarUnits == GoogleStyle)
+		if (_scalebarUnits == GoogleStyle)
 		{
 			// now do calculation for miles
 			newWidth = width;
@@ -225,11 +224,8 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		//    Initialize drawing
 		// ----------------------------------------------------------
 		Gdiplus::Matrix mtx;
-		mtx.Translate((float)5, (float)m_viewHeight - barHeight - yOffset);
+		mtx.Translate((float)5, (float)_viewHeight - barHeight - yOffset);
 		g->SetTransform(&mtx);
-
-		Gdiplus::SolidBrush brushBlack(Gdiplus::Color::Black);
-		Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
 
 		Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)barWidth, (Gdiplus::REAL)barHeight );
 
@@ -239,7 +235,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		std::vector<Gdiplus::Rect*> parts;
 		int length = (int)(step * count / unitsPerPixel + xPadding);
 
-		if (m_scalebarUnits != GoogleStyle)
+		if (_scalebarUnits != GoogleStyle)
 		{
 			// horizontal line
 			parts.push_back(new Gdiplus::Rect(xPadding, barHeight - yPadding, length - xPadding, 0));
@@ -272,12 +268,12 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 
 		for(size_t i = 0; i < parts.size(); i++)				
 		{
-			g->FillRectangle(&brushOutline, parts[i]->X - 2, parts[i]->Y - 2, parts[i]->Width + 4, parts[i]->Height + 4);
+			g->FillRectangle(&_brushWhite, parts[i]->X - 2, parts[i]->Y - 2, parts[i]->Width + 4, parts[i]->Height + 4);
 		}
 
 		for(size_t i = 0; i < parts.size(); i++)				
 		{
-			g->FillRectangle(&brushBlack, parts[i]->X - 1, parts[i]->Y - 1, parts[i]->Width + 2, parts[i]->Height + 2);
+			g->FillRectangle(&_brushBlack, parts[i]->X - 1, parts[i]->Y - 1, parts[i]->Width + 2, parts[i]->Height + 2);
 		}
 
 		for(size_t i = 0; i < parts.size(); i++)				
@@ -292,28 +288,28 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
 		g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
 		Gdiplus::FontFamily family(L"Arial");
-		Gdiplus::REAL fontSize = m_scalebarUnits != GoogleStyle? 10.0f : 8.0f;
+		Gdiplus::REAL fontSize = _scalebarUnits != GoogleStyle? 10.0f : 8.0f;
 		Gdiplus::Font font(&family, fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 		CStringW s;
 		Gdiplus::StringFormat format; 
 
-		if (m_scalebarUnits != GoogleStyle)
+		if (_scalebarUnits != GoogleStyle)
 		{
 			s.Format(L"0");
 			Gdiplus::PointF point(xPadding + 4.0f, -4.0f);
-			DrawStringWithShade(g, s, &font, point, &brushBlack, &brushOutline);
+			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 			
 			// max
 			FormatUnits(s, step, power, count);
 			point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
 			point.Y = -4.0f;
-			DrawStringWithShade(g, s, &font, point, &brushBlack, &brushOutline);
+			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 			
 			// units
 			s = GetLocalizedUnitsText(targetUnits);
 			point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
 			point.Y = (Gdiplus::REAL)(barHeight - yPadding - 12 + 1.0f);
-			DrawStringWithShade(g, s, &font, point, &brushBlack, &brushOutline);
+			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 		}
 		else
 		{
@@ -321,12 +317,12 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			USES_CONVERSION;
 			s.Format(L"%s %s", FormatUnits(s, step, power, count), GetLocalizedUnitsText(targetUnits));
 			Gdiplus::PointF point(xPadding + 8.0f, -10.0f);
-			DrawStringWithShade(g, s, &font, point, &brushBlack, &brushOutline);
+			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 			
 			// miles
 			s.Format(L"%s %s", FormatUnits(s, step2, power2, count2), GetLocalizedUnitsText(targetUnits2));
 			point.Y = 8.0f;
-			DrawStringWithShade(g, s, &font, point, &brushBlack, &brushOutline);
+			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 		}
 		g->SetTextRenderingHint(hint);
 		g->ResetTransform();
@@ -337,36 +333,34 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 //		ShowRedrawTime()
 // ****************************************************************
 // Displays redraw time in the bottom left corner
-void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message )
+void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message )
 {
-	if (!m_ShowRedrawTime && !m_ShowVersionNumber)	return;
+	if ((!_showRedrawTime || !layerRedraw) && !_showVersionNumber) return;
 
 	// preparing canvas
 	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
 	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
-	Gdiplus::SolidBrush brush(Gdiplus::Color::Black);			// TODO: cache brushes
-	Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
 	Gdiplus::PointF point(0.0f, 0.0f);
 	Gdiplus::StringFormat format; 
 	
 	CStringW s;
 	Gdiplus::RectF rect;
 
-	if (m_ShowVersionNumber)
+	if (_showVersionNumber)
 	{
 		USES_CONVERSION;
 		s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
-		g->MeasureString(s, s.GetLength(), _font, point, &format, &rect);
+		g->MeasureString(s, s.GetLength(), _fontCourier, point, &format, &rect);
 		
-		if (rect.Width + 10 < m_viewWidth)		// control must be big enough to host the string
+		if (rect.Width + 10 < _viewWidth)		// control must be big enough to host the string
 		{
-			point.X = (float)(m_viewWidth - rect.Width - 10);
-			point.Y = (float)(m_viewHeight - rect.Height - 10);
-			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
+			point.X = (float)(_viewWidth - rect.Width - 10);
+			point.Y = (float)(_viewHeight - rect.Height - 10);
+			DrawStringWithShade(g, s, _fontCourier, point, &_brushBlack, &_brushWhite);
 		}
 	}
 
-	if (m_ShowRedrawTime && time > 0.01)
+	if (_showRedrawTime && layerRedraw && time > 0.01)
 	{
 		if (message.GetLength() != 0)
 		{
@@ -376,53 +370,233 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, CStringW message
 		{
 			s.Format(L"Redraw time: %.3f s", time);
 		}
-		g->MeasureString(s, s.GetLength(), _font, point, &format, &rect);
-		if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
+		g->MeasureString(s, s.GetLength(), _fontCourier, point, &format, &rect);
+		if (rect.Width + 15 < _viewWidth)		// control must be big enough to host the string
 		{
-			point.X = (float)(m_viewWidth - rect.Width - 10);
+			point.X = (float)(_viewWidth - rect.Width - 10);
 			point.Y = (float)(10.0f);
-			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
+			DrawStringWithShade(g, s, _fontCourier, point, &_brushBlack, &_brushWhite);
 		}
 	}
 	g->SetTextRenderingHint(hint);
 }
 
+#pragma region Zoombar
+
 // ****************************************************************
-//		DrawCoordinates()
+//		ZoombarHitTest()
 // ****************************************************************
-void CMapView::DrawCoordinates(Gdiplus::Graphics* g) 
+ZoombarPart CMapView::ZoombarHitTest(int x, int y)
 {
-	POINT p;
-	if (GetCursorPos(&p))
+	if (!_zoombarVisible || _transformationMode == tmNotDefined)
+		return ZoombarPart::ZoombarNone;
+	
+	POINT pnt;
+	pnt.x = x; pnt.y = y;
+	
+	// plus button
+	if (_zoombarParts.PlusButton.PtInRect(pnt))
+		return ZoombarPart::ZoombarPlus;
+
+	// minus button
+	if (_zoombarParts.MinusButton.PtInRect(pnt))
+		return ZoombarPart::ZoombarMinus;
+
+	// handle
+	if (_zoombarParts.Handle.PtInRect(pnt))
+		return ZoombarPart::ZoombarHandle;
+
+	// bar
+	if (_zoombarParts.Bar.PtInRect(pnt))
+		return ZoombarPart::ZoombarBar;
+
+	return ZoombarPart::ZoombarNone;
+}
+
+// ****************************************************************
+//		DrawZoombar()
+// ****************************************************************
+void CMapView::DrawZoombar(Gdiplus::Graphics* g) 
+{
+	if (!_zoombarVisible || _transformationMode == tmNotDefined)
+		return;
+
+	//  mouse position
+	POINT pnt;
+	if (GetCursorPos(&pnt))
+		ScreenToClient(&pnt);
+
+	float boxSize = 17.0f;
+	float cornerRadius = 4.0f;
+	
+	Gdiplus::GraphicsPath path;
+    Gdiplus::RectF bounds(0.0f,0.0f,boxSize,boxSize);
+	path.AddArc(bounds.X, bounds.Y, cornerRadius, cornerRadius, 180.0f, 90.0f);
+    path.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y, cornerRadius, cornerRadius, 270.0f, 90.0f);
+    path.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 0.0f, 90.0f);
+    path.AddArc(bounds.X, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 90.0f, 90.0f);
+    path.CloseAllFigures();
+
+	// TODO: set length of the bar depending on the number of levels; 
+	// so that notches can be positioned with integer coordinates
+	float x = 15.0f, y = 15.0f, height = 160.0f;		
+	
+	Gdiplus::Matrix m;
+	g->GetTransform(&m);
+
+	// ---------------------------------------------------
+	//	 Plus/minus sings
+	// ---------------------------------------------------
+	Gdiplus::PixelOffsetMode pixelOffsetMode = g->GetPixelOffsetMode();
+
+	// upper plus button
+	_zoombarParts.PlusButton.SetRect((int)x, (int)y, (int)(x + boxSize), (int)(y + boxSize));
+	BOOL highlight = _zoombarParts.PlusButton.PtInRect(pnt);
+	g->TranslateTransform(x, y);
+	g->FillPath(&_brushWhite, &path);
+	g->DrawPath( highlight ? &_penDarkGray : &_penGray, &path);
+	g->SetTransform(&m);
+
+	// lower minus button
+	_zoombarParts.MinusButton.SetRect((int)x, (int)(y + height), (int)(x + boxSize), (int)(y + height + boxSize));
+	highlight = _zoombarParts.MinusButton.PtInRect(pnt);
+	g->TranslateTransform(x, y + height);
+	g->FillPath(&_brushWhite, &path);
+	g->DrawPath(highlight ? &_penDarkGray : &_penGray, &path);
+	g->SetTransform(&m);
+
+	// plus sign
+	g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
+	g->FillRectangle(&_brushGray, x + 5.0f, y + 8.0f, 8.0f, 2.0f);
+	g->FillRectangle(&_brushGray, x + 8.0f, y + 5.0f, 2.0f, 8.0f);
+
+	// minus sign
+	g->FillRectangle(&_brushGray, x + 5.0f, y + height + 8.0f, 8.0f, 2.0f);
+
+	g->SetPixelOffsetMode(pixelOffsetMode);
+
+	// ---------------------------------------------------
+	//	 Handle position
+	// ---------------------------------------------------
+	float lineWidth = 5.0f;
+	float lineOffset = 8.0f;
+	float lineHeight = height - boxSize - 2*lineOffset;
+	float handleY = 0.0f;
+	bool handleHighlight = false;
+	int zoom = this->GetCurrentZoom();
+	int targetZoom = -1;					// for handle dragging
+	ITiles* tiles = this->GetTilesNoRef();
+	int maxZoom, minZoom;
+	tiles->get_MinZoom(&minZoom);
+	tiles->get_MaxZoom(&maxZoom);
+
+	bool zooming = _draggingOperation == DragZoombarHandle;
+	if (zooming)
 	{
-		ScreenToClient(&p);
-		double x = p.x, y = p.y;
-		double prX, prY;
-		PixelToProjection(x, y, prX, prY);
-
-		CStringW s;
-		s.Format(L"x=%f; y=%f", prX, prY);
-		Gdiplus::PointF point(0.0f, 0.0f);
-		Gdiplus::RectF rect;
-
-		Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
-		Gdiplus::SolidBrush brushOutline(Gdiplus::Color::White);
+		// take y from current mouse position
+		handleY = (float)_draggingMove.y;
 		
-		g->MeasureString(s, s.GetLength(), _font, point, Gdiplus::StringFormat::GenericDefault(), &rect);
-		if (rect.Width + 15 < m_viewWidth)		// control must be big enough to host the string
-		{
-			point.X = 10.0f;
-			point.Y = 10.0f;
-			DrawStringWithShade(g, s, _font, point, &brush, &brushOutline);
-		}
+		// make sure that we are within bar
+		float minY = y + boxSize + lineOffset;
+		float maxY = minY + lineHeight;
+		if (handleY < minY) handleY = minY;
+		if (handleY > maxY) handleY = maxY;
+
+		// calculate current zoom
+		float ratio = (handleY - minY) / (maxY - minY);
+		targetZoom = (int)Utility::Rint(maxZoom - (maxZoom - minZoom) * ratio);
+		_zoombarTargetZoom = targetZoom;
+
+		// adjust for the height of handle
+		handleY -= boxSize/4.0f;
+		handleY = (float)Utility::Rint(handleY);
+		
+		handleHighlight = true;
+		_zoombarParts.Handle.SetRect((int)x, (int)handleY, (int)(x + boxSize), (int)(handleY + bounds.Height));
 	}
+	else
+	{
+		// display current zoom
+		if (zoom > maxZoom) zoom = maxZoom;
+		if (zoom < minZoom) zoom = minZoom;
+		float position = (float)((maxZoom - zoom) / ((double)(maxZoom - minZoom)) * lineHeight);
+		handleY = (float)(int)(y + boxSize + lineOffset + position - boxSize/4.0f + 0.5);
+		_zoombarParts.Handle.SetRect((int)x, (int)handleY, (int)(x + boxSize), (int)(handleY + bounds.Height));
+		handleHighlight = _zoombarParts.Handle.PtInRect(pnt) ? true : false;
+	}
+
+	// ---------------------------------------------------
+	//	 Tooltip drawing
+	// ---------------------------------------------------
+	// if handle is highlighted (i.e. mouse cursor is within it, draw a tooltip)
+	if (handleHighlight)
+	{
+		double scale = GetCurrentScale();
+		if (zooming)
+		{
+			// it's troublesome to calculate target scale directly, therefore use simple proportion
+			double ratio = pow(2.0, (double)(zoom - targetZoom));
+			scale = scale * ratio;
+		}
+		double resoultion = scale / 96.0 * 0.0254;	// meters per pixel
+		
+		CStringW s;
+		s.Format(L"Zoom: %d\nScale: 1:%.0f\nResolution: %.2f", zooming ? targetZoom : zoom, scale, resoultion);
+		float tooltipOffset = 15.0f;
+		Gdiplus::PointF tooltipOrigin(x + boxSize + tooltipOffset, handleY);
+		Gdiplus::RectF tooltipBox;
+		g->MeasureString(s, s.GetLength(), _fontArial, tooltipOrigin, &tooltipBox);
+		Gdiplus::SolidBrush tooltipBrush(Gdiplus::Color(246, 212, 178 ));
+		tooltipBox.Inflate(9.0f, 5.0f);
+		g->FillRectangle(&tooltipBrush, tooltipBox);
+		g->DrawRectangle(&_penGray, tooltipBox);
+		tooltipBox.Inflate(-9.0f, -5.0f);
+		g->DrawString(s, s.GetLength(), _fontArial, tooltipOrigin, &_brushBlack );
+	}
+
+	// ---------------------------------------------------
+	//	 Bar with notches
+	// ---------------------------------------------------
+	Gdiplus::RectF line(x + boxSize/2.0f - lineWidth/2.0f, y + boxSize + lineOffset, lineWidth, lineHeight);
+	_zoombarParts.Bar.SetRect((int)x, (int)line.Y, (int)(x + boxSize), (int)(line.Y + line.Height));  // include the width of handle; not the actual line only
+	highlight = _zoombarParts.Bar.PtInRect(pnt);
+	g->FillRectangle(&_brushWhite, line);
+	g->DrawRectangle(highlight && !handleHighlight ? &_penDarkGray : &_penGray, line);
+	
+	// notches for zoom levels
+	g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
+	float step = lineHeight / (maxZoom - minZoom);
+	float tempX  = x + boxSize/2.0f - lineWidth/2.0f + 1;
+	for (int i = 1; i < maxZoom - minZoom; i++)
+	{
+		float tempY = (float)(int)(y + boxSize + lineOffset + step * i + 0.5);
+		g->FillRectangle(&_brushGray, tempX, tempY, 4.0f, 1.0f);
+	}
+	g->SetPixelOffsetMode(pixelOffsetMode);
+
+	// ---------------------------------------------------
+	//	 Drawing of handle
+	// ---------------------------------------------------
+	// shape of handle
+	Gdiplus::GraphicsPath path2;
+	bounds.Height = 9.0f;
+	path2.AddArc(bounds.X, bounds.Y, cornerRadius, cornerRadius, 180, 90);
+    path2.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y, cornerRadius, cornerRadius, 270, 90);
+    path2.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+    path2.AddArc(bounds.X, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+    path2.CloseAllFigures();
+
+	// drawing the handle
+	g->TranslateTransform(x, handleY);		// boxSize/4.0 = center of handle is the position
+	g->FillPath(&_brushWhite, &path2);
+	g->DrawPath(handleHighlight ? &_penDarkGray : &_penGray, &path2);
+	g->SetTransform(&m);
+
+	// minus sign
+	g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
+	g->FillRectangle(&_brushGray, x + 5.0f, handleY + 4.0f, 8.0f, 2.0f);
+	g->SetPixelOffsetMode(pixelOffsetMode);
+	_penDarkGray.SetWidth(1.0f);
 }
-void CMapView::DrawCoordinates(CDC* pdc) 
-{
-	HDC hdc = pdc->GetSafeHdc();
-	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
-	//g->TranslateTransform(offsetX, offsetY);
-	DrawCoordinates(g);
-	g->ReleaseHDC(pdc->GetSafeHdc());
-	delete g;
-}
+
+#pragma endregion

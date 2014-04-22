@@ -26,7 +26,6 @@
 #include "stdafx.h"
 #include "GeoProjection.h"
 
-
 #pragma region "ErrorHandling"
 // ************************************************************
 //		get_GlobalCallback()

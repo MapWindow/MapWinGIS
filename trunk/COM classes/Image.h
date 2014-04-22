@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,27 +14,12 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-//
-//Contributor(s): (Open source contributors should list themselves and their modifications here).
-//10-25-2005 Rob Cairns - Altered for ECW support
-//3-28-2005 dpa - Added this notice 
-//3-28-2005 dpa - Added code from Kurt Wolfe, EPA Athens, for handling GeoTIFF
-//4-05-2007 - tom shanley - added get_OriginalWidth, Height
 //********************************************************************************************************
 #pragma once
-#include "MapWinGis.h"
-#include <comsvcs.h>
-
-#include "Enumerations.h"
-#include "Extents.h"
-
 #include "tkBitmap.h"
 #include "tkRaster.h"
 #include "ImageGroup.h"
 #include "InMemoryBitmap.h"
-
-//int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData);
-
 
 struct DataPixels
 {

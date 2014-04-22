@@ -11,7 +11,6 @@
 
 //#pragma pack(push, gif2, 1)
 
-#include "MapWinGis.h"
 #include "HashTable.h"
 #include "ImageStructs.h"
 

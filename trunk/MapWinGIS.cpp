@@ -1,10 +1,6 @@
 // MapWinGIS.cpp : Implementation of CMapWinGISApp and DLL registration.
-
 #include "stdafx.h"
 #include <initguid.h>
-#include <fstream>
-
-#include "MapWinGis.h"
 #include "MapWinGIS_i.c"
 #include "ShapefileColorScheme.h"
 #include "ShapefileColorBreak.h"
@@ -15,52 +11,18 @@
 
 #ifdef _DEBUG
 #include "gdal.h"
-#endif
-
-#ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CMapWinGISApp NEAR theApp;
-
-const GUID CDECL BASED_CODE _tlid =
-		{ 0xc368d713, 0xcc5f, 0x40ed, { 0x9f, 0x53, 0xf8, 0x4f, 0xe1, 0x97, 0xb9, 0x6a } };
+const GUID CDECL BASED_CODE _tlid = { 0xc368d713, 0xcc5f, 0x40ed, { 0x9f, 0x53, 0xf8, 0x4f, 0xe1, 0x97, 0xb9, 0x6a } };
 const WORD _wVerMajor = 4;
 const WORD _wVerMinor = 9;
 
+CMapWinGISApp NEAR theApp;
 CComModule _Module;
-
-GlobalSettingsInfo m_globalSettings;
-GlobalClassFactory m_factory;
-
-#ifdef GEOS_NEW
-GEOSContextHandle_t _geosContextHandle = NULL;
-GEOSContextHandle_t getGeosHandle()
-{
-	if (!_geosContextHandle)
-		_geosContextHandle = OGRGeometry::createGEOSContext();
-	return _geosContextHandle;
-}
-#endif
-
-ReferenceCounter gReferenceCounter;
-
-IUtils* m_utils;
-IUtils* GetUtils()
-{
-	if (!m_utils)
-	{
-		CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&m_utils);
-	}
-	return m_utils;
-}
-
-// comment these lines to turn off the memory leaking detection tools
-#ifdef _DEBUG
-CMemLeakDetect gMemLeakDetect;
-#endif
+GlobalClassFactory m_factory;	// make sure that this one is initialized after the _Module above
 
 // ******************************************************
 // CMapWinGISApp::InitInstance - DLL initialization
@@ -132,6 +94,9 @@ STDAPI DllRegisterServer(void)
 	return NOERROR;
 }
 
+// **************************************************************
+//   GetModuleInstance
+// **************************************************************
 HINSTANCE GetModuleInstance()
 {
 	HINSTANCE instance = _Module.GetModuleInstance();
@@ -199,13 +164,11 @@ BEGIN_OBJECT_MAP(ObjectMap)
 	OBJECT_ENTRY(CLSID_ShapefileColorBreak, CShapefileColorBreak)
 END_OBJECT_MAP()
 
+// *****************************************************************
+//		InitATL
+// *****************************************************************
 BOOL CMapWinGISApp::InitATL()
 {
 	_Module.Init(ObjectMap, AfxGetInstanceHandle());
 	return TRUE;
 }
-
-
-
-
-

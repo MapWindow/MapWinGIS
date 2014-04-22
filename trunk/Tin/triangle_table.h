@@ -1,7 +1,6 @@
 # ifndef TRIANGLE_TABLE_H
 # define TRIANGLE_TABLE_H
 
-# include <deque>
 # include "tintypes.h"
 # include "table_row_node.h"
 # include "table_row.h"

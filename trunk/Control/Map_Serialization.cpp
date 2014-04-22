@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "Map.h"
-#include "MapWinGis.h"
-#include "GridColorScheme.h"
 #include "Tiles.h"
-#include "GdalHelper.h"
 
 // *********************************************************
 //		SaveMapState()
@@ -182,37 +179,37 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	m_mapCursor = (s != "") ? (short)atoi(s) : crsrMapDefault;
 
 	s = CPLGetXMLValue( nodeState, "ResizeBehavior", NULL );
-	rbMapResizeBehavior = (s != "") ? (tkResizeBehavior)atoi(s) : rbClassic;
+	_mapResizeBehavior = (s != "") ? (tkResizeBehavior)atoi(s) : rbClassic;
 
 	s = CPLGetXMLValue( nodeState, "TrapRightMouseDown", NULL );
-	DoTrapRMouseDown = (s != "") ? (BOOL)atoi(s) : FALSE;
+	_doTrapRMouseDown = (s != "") ? (BOOL)atoi(s) : FALSE;
 	
 	s = CPLGetXMLValue( nodeState, "UseSeamlessPan", NULL );
-	m_UseSeamlessPan = (s != "") ? (BOOL)atoi(s) : FALSE;
+	_useSeamlessPan = (s != "") ? (BOOL)atoi(s) : FALSE;
 	
 	s = CPLGetXMLValue( nodeState, "MouseWheelSpeed", NULL );
-	m_MouseWheelSpeed = (s != "") ? Utility::atof_custom(s) : 0.5;
+	_mouseWheelSpeed = (s != "") ? Utility::atof_custom(s) : 0.5;
 
 	s = CPLGetXMLValue( nodeState, "ShapeDrawingMethod", NULL );
-	m_ShapeDrawingMethod = (s != "") ? (tkShapeDrawingMethod)atoi(s) : dmNewSymbology;
+	_shapeDrawingMethod = (s != "") ? (tkShapeDrawingMethod)atoi(s) : dmNewSymbology;
 
 	s = CPLGetXMLValue( nodeState, "UnitsOfMeasure", NULL );
-	m_unitsOfMeasure = (s != "") ? (tkUnitsOfMeasure)atoi(s) : umMeters;
+	_unitsOfMeasure = (s != "") ? (tkUnitsOfMeasure)atoi(s) : umMeters;
 
 	s = CPLGetXMLValue( nodeState, "DisableWaitCursor", NULL );
-	m_DisableWaitCursor = (s != "") ? (BOOL)atoi(s) : FALSE;
+	_disableWaitCursor = (s != "") ? (BOOL)atoi(s) : FALSE;
 
 	s = CPLGetXMLValue( nodeState, "RotationAngle", NULL );
-	m_RotateAngle = (s != "") ? (float)Utility::atof_custom(s) : 0;
+	_rotateAngle = (s != "") ? (float)Utility::atof_custom(s) : 0;
 
 	s = CPLGetXMLValue( nodeState, "CanUseImageGrouping", NULL );
 	_canUseImageGrouping = (s != "") ? (BOOL)atoi(s) : FALSE;
 
 	s = CPLGetXMLValue( nodeState, "ShowRedrawTime", NULL );
-	m_ShowRedrawTime = (s != "") ? (BOOL)atoi(s) : FALSE;
+	_showRedrawTime = (s != "") ? (BOOL)atoi(s) : FALSE;
 
 	s = CPLGetXMLValue( nodeState, "ShowVersionNumber", NULL );
-	m_ShowVersionNumber = (s != "") ? (BOOL)atoi(s) : FALSE;
+	_showVersionNumber = (s != "") ? (BOOL)atoi(s) : FALSE;
 
 	if (LoadLayers)
 	{
@@ -238,25 +235,25 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	}
 
 	// restoring tiles settings
-	((CTiles*)m_tiles)->DeserializeCore(nodeTiles);
+	((CTiles*)_tiles)->DeserializeCore(nodeTiles);
 
 	// extents
 	s = CPLGetXMLValue( nodeState, "ExtentsLeft", NULL );
-	if (s != "") extents.left = Utility::atof_custom(s);
+	if (s != "") _extents.left = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsRight", NULL );
-	if (s != "") extents.right = Utility::atof_custom(s);
+	if (s != "") _extents.right = Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( nodeState, "ExtentsBottom", NULL );
-	if (s != "") extents.bottom = Utility::atof_custom(s);
+	if (s != "") _extents.bottom = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsTop", NULL );
-	if (s != "") extents.top = Utility::atof_custom(s);
+	if (s != "") _extents.top = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsPad", NULL );
 	if (s != "") m_extentPad = Utility::atof_custom(s);
 
-	this->SetExtentsCore(extents);
+	this->SetExtentsCore(_extents);
 
 	return true;
 }
@@ -333,43 +330,43 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 			if (m_mapCursor != 0)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "MapCursor", CPLString().Printf("%d", (int)m_mapCursor));
 
-			if (rbMapResizeBehavior != rbClassic)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "ResizeBehavior", CPLString().Printf("%d", (int)rbMapResizeBehavior));
+			if (_mapResizeBehavior != rbClassic)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "ResizeBehavior", CPLString().Printf("%d", (int)_mapResizeBehavior));
 
-			if (DoTrapRMouseDown != FALSE)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "TrapRightMouseDown", CPLString().Printf("%d", (int)DoTrapRMouseDown));
+			if (_doTrapRMouseDown != FALSE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "TrapRightMouseDown", CPLString().Printf("%d", (int)_doTrapRMouseDown));
 
-			if (m_UseSeamlessPan != FALSE)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "UseSeamlessPan", CPLString().Printf("%d", (int)m_UseSeamlessPan));
+			if (_useSeamlessPan != FALSE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "UseSeamlessPan", CPLString().Printf("%d", (int)_useSeamlessPan));
 
-			if (m_MouseWheelSpeed != 0.5)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "MouseWheelSpeed", CPLString().Printf("%f", m_MouseWheelSpeed));
+			if (_mouseWheelSpeed != 0.5)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "MouseWheelSpeed", CPLString().Printf("%f", _mouseWheelSpeed));
 
-			if (m_ShapeDrawingMethod != dmNewSymbology)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "ShapeDrawingMethod", CPLString().Printf("%d", (int)m_ShapeDrawingMethod));
+			if (_shapeDrawingMethod != dmNewSymbology)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "ShapeDrawingMethod", CPLString().Printf("%d", (int)_shapeDrawingMethod));
 
-			if (m_unitsOfMeasure != umMeters)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "UnitsOfMeasure", CPLString().Printf("%d", (int)m_unitsOfMeasure));
+			if (_unitsOfMeasure != umMeters)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "UnitsOfMeasure", CPLString().Printf("%d", (int)_unitsOfMeasure));
 
-			if (m_DisableWaitCursor != FALSE)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "DisableWaitCursor", CPLString().Printf("%d", (int)m_DisableWaitCursor));
+			if (_disableWaitCursor != FALSE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "DisableWaitCursor", CPLString().Printf("%d", (int)_disableWaitCursor));
 
-			if (m_RotateAngle != 0.0f)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "RotationAngle", CPLString().Printf("%f", m_RotateAngle));
+			if (_rotateAngle != 0.0f)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "RotationAngle", CPLString().Printf("%f", _rotateAngle));
 			
 			if (_canUseImageGrouping != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "CanUseImageGrouping", CPLString().Printf("%d", (int)_canUseImageGrouping));
 
-			if (m_ShowRedrawTime != FALSE)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowRedrawTime", CPLString().Printf("%d", (int)m_ShowRedrawTime));
+			if (_showRedrawTime != FALSE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowRedrawTime", CPLString().Printf("%d", (int)_showRedrawTime));
 
-			if (m_ShowVersionNumber != FALSE)
-				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowVersionNumber", CPLString().Printf("%d", (int)m_ShowVersionNumber));
+			if (_showVersionNumber != FALSE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowVersionNumber", CPLString().Printf("%d", (int)_showVersionNumber));
 
-			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsLeft", CPLString().Printf("%f", extents.left));
-			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsRight", CPLString().Printf("%f", extents.right));
-			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsBottom", CPLString().Printf("%f", extents.bottom));
-			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsTop", CPLString().Printf("%f", extents.top));
+			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsLeft", CPLString().Printf("%f", _extents.left));
+			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsRight", CPLString().Printf("%f", _extents.right));
+			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsBottom", CPLString().Printf("%f", _extents.bottom));
+			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsTop", CPLString().Printf("%f", _extents.top));
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsPad", CPLString().Printf("%f", m_extentPad));
 			
 			CPLAddXMLChild(psTree, psState);
@@ -378,9 +375,9 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 			CPLXMLNode* psLayers = CPLCreateXMLNode( NULL, CXT_Element, "Layers");
 			if (psLayers)
 			{
-				for(unsigned int i = 0; i < m_activeLayers.size(); i++ )
+				for(unsigned int i = 0; i < _activeLayers.size(); i++ )
 				{	
-					LONG handle = m_activeLayers[i];
+					LONG handle = _activeLayers[i];
 
 					if (!this->GetLayerSkipOnSaving(handle))
 					{
@@ -404,7 +401,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 				CPLAddXMLChild(psTree, psLayers);
 
 				// adding tiles
-				CPLXMLNode* nodeTiles = ((CTiles*)m_tiles)->SerializeCore("Tiles");
+				CPLXMLNode* nodeTiles = ((CTiles*)_tiles)->SerializeCore("Tiles");
 				if (nodeTiles)
 				{
 					CPLAddXMLChild(psTree, nodeTiles);
@@ -430,10 +427,11 @@ BSTR CMapView::GetMapState()
 // TODO: write support for the new symbology
 void CMapView::SetMapState(LPCTSTR lpszNewValue)
 {
-	m_mapstateMutex.Lock();	
+	_mapstateMutex.Lock();	
 	CString s = lpszNewValue;
 	CPLXMLNode* node = CPLParseXMLString(s.GetString());
 	this->DeserializeMapStateCore(node, L"", VARIANT_TRUE, NULL);
 	CPLDestroyXMLNode(node);
+	_mapstateMutex.Unlock();	
 }
 #pragma endregion

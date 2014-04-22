@@ -1,5 +1,4 @@
 #pragma once
-#include "MapWinGIS.h"
 #include "Enumerations.h"
 #include <gdiplus.h>
 #include "cpl_minixml.h"
@@ -22,6 +21,7 @@ namespace Utility
 	// numbers
 	CString FormatNumber(double val, CString& sFormat);
 	int Rint(double value);
+	int Factorial(int n);
 	double atof_custom(CString s);
 	double FloatRound(double doValue, int nPrecision);
 	CStringW FormatAngle(double angle, bool withDecimals = false);
@@ -87,6 +87,7 @@ namespace Utility
 
 namespace Debug
 {
+	void WriteWithTime(CString format, ...);
 	void WriteLine(CString format, ...);
 	void WriteError(CString format, ...);
 }

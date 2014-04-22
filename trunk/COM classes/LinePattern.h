@@ -24,8 +24,6 @@
  // Sergei Leschinski (lsu) 18 august 2010 - created the file.
 
 #pragma once
-#include "MapWinGis.h"
-#include <vector>
 #include "LineSegment.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)

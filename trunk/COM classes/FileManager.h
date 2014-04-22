@@ -1,8 +1,5 @@
 // FileManager.h : Declaration of the CFileManager
-
 #pragma once
-#include "MapWinGIS.h"
-#include <comsvcs.h>
 
 // CFileManager
 class ATL_NO_VTABLE CFileManager :

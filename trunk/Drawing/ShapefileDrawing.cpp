@@ -36,6 +36,7 @@
 #include "GeometryOperations.h"
 #include "macros.h"
 #include "PointSymbols.h"
+#include "ShapefileCategories.h"
 
 // MEMO: there are several formats to hold shape data while drawing
 // there are 2 switches: regular/edit mode; and fast/slow mode
@@ -190,11 +191,6 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 			// retrieving the name
 			CComBSTR fname;
 			sf->get_Filename(&fname);
-			/*int b_strlen = wcslen(fname);
-			char * sFilename = new char[(b_strlen+1)<<1];
-			int sFilenamelast = WideCharToMultiByte(CP_ACP,0,fname,b_strlen,sFilename,b_strlen<<1,0,0);
-			::SysFreeString(fname);
-			sFilename[sFilenamelast] = 0;*/
 			
 			// reading index
 			USES_CONVERSION;
@@ -223,11 +219,10 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 					sort(selectResult->begin(), selectResult->end());
 				}
 			}
-			//delete[] sFilename;
 		}
 	}
 	#ifdef USE_TIMER
-		tmr.PrintTime("After reading shapeindex");	
+		tmr.PrintTime("After reading shape index");	
 	#endif
 
 	long numCategories;
@@ -495,7 +490,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		DrawVertices(_vertexPathes[i].path, _vertexPathes[i].options);
 	}
 	
-	// clearing pathes
+	// clearing paths
 	for (unsigned int i = 0; i <_vertexPathes.size(); i++)
 	{
 		delete _vertexPathes[i].path;
@@ -649,7 +644,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	// creating a symbol to draw
 	if (options->pointSymbolType == ptSymbolStandard || (options->pointSymbolType == ptSymbolPicture && options->picture == NULL))
 	{
-		// receiving coodinates to define shape of symbol
+		// receiving coordinates to define shape of symbol
 		if ( options->pointSize <= 1.0 )
 		{
 			pntShape = pshPixel;
@@ -1518,11 +1513,10 @@ void CShapefileDrawer::DrawVertices(Gdiplus::GraphicsPath* path, CDrawingOptions
 		HDC hdc = _graphics->GetHDC();
 		_dc = CDC::FromHandle(hdc);
 
-		Gdiplus::PointF* points = NULL;
 		int count = path->GetPointCount();
 		if (count > 0)
 		{
-			points = new Gdiplus::PointF[count];
+			Gdiplus::PointF* points = new Gdiplus::PointF[count];
 			path->GetPathPoints(points, count);
 			
 			// drawing of vertices
@@ -1740,14 +1734,14 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 				//	preparing marker
 				int numPoints = 0;
 				float* points = get_SimplePointShape(symbol, markerSize, &numPoints);
-				int n = 0;
-
+				
 				if (numPoints > 0)
 				{
 					Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(color)));
 					Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(lineColor)));
 					pen->SetAlignment(Gdiplus::PenAlignmentInset);
 				
+					int n = 0;
 					double offset = 0;	// set by the marker offset for the start point, and by the unended part of interval for others
 
 					while(n < pointCount)
@@ -2198,7 +2192,7 @@ void CShapefileDrawer::DrawPolyGDI( IShapeData* shp, CDrawingOptionsEx* options,
 // ******************************************************************
 //		DrawPolygonPoint()
 // ******************************************************************
-// Draws point in plcae of small polygons
+// Draws point in place of small polygons
 inline void CShapefileDrawer::DrawPolygonPoint(double &xMin, double& xMax, double& yMin, double& yMax, OLE_COLOR& pointColor)
 {
 	int x = (int)(((xMax + xMin)/2 - _extents->left) * _dx);
@@ -2256,21 +2250,21 @@ std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(char* sFilenam
 //		HavePointCollision()
 // *************************************************************
 // Checks whether new point overlaps one of the existing points;
-// Bounds are treated there as recatngles without rotation
-bool CShapefileDrawer::HavePointCollision(CRect* rect)
-{
-	for(int i=0; i < (int)_pointRectangles.size(); i++)
-	{
-		CRect* r = _pointRectangles[i];
-		if ((rect->right < r->left) || 
-			(rect->bottom < r->top)  || 
-			(r->right < rect->left) || 
-			(r->bottom < rect->top))
-			continue;
-		else
-			return true;
-	}
-	_pointRectangles.push_back(rect);
-	return false;
-}
+// Bounds are treated there as rectangles without rotation
+//bool CShapefileDrawer::HavePointCollision(CRect* rect)
+//{
+//	for(int i=0; i < (int)_pointRectangles.size(); i++)
+//	{
+//		CRect* r = _pointRectangles[i];
+//		if ((rect->right < r->left) || 
+//			(rect->bottom < r->top)  || 
+//			(r->right < rect->left) || 
+//			(r->bottom < rect->top))
+//			continue;
+//		else
+//			return true;
+//	}
+//	_pointRectangles.push_back(rect);
+//	return false;
+//}
 #pragma endregion

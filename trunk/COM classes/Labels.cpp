@@ -24,18 +24,13 @@
  // lsu: jan 2010 - created the file.
 
 #include "stdafx.h"
-#include "varH.h"
-#include "Labels.h"
-
+#include "GeometryOperations.h"
 #include "LabelCategory.h"
 #include "LabelClass.h"
+#include "Labels.h"
 #include "Shapefile.h"
 #include "TableClass.h"
-
-#include "GeometryOperations.h"
 #include "Templates.h"
-#include "GdalHelper.h"
-
 
 // ////////////////////////////////////////////////////////////// //
 //	PROPERTIES COMMON FOR CLABELS AND CLABELCATEGORY

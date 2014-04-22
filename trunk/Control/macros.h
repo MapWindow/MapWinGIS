@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -49,12 +49,12 @@
 	//	piY = m_viewHeight-piY-1;\ //
 	# define PROJECTION_TO_PIXEL(prX,prY,piX,piY)\
 	{\
-		piX = (prX - extents.left)*m_pixelPerProjectionX;\
-		piY = (extents.top - prY) * m_pixelPerProjectionY;\
+		piX = (prX - _extents.left)*_pixelPerProjectionX;\
+		piY = (_extents.top - prY) * _pixelPerProjectionY;\
 	}
 
 	# define SET_SIGN(val,SH)(val<0?SH=-1:SH=1)
-	# define OUT_OF_VIEW(xm,ym,xM,yM,extents)(xm>extents.right||xM<extents.left||ym>extents.top||yM<extents.bottom?TRUE:FALSE)
+	# define OUT_OF_VIEW(xm,ym,xM,yM,_extents)(xm>_extents.right||xM<_extents.left||ym>_extents.top||yM<_extents.bottom?TRUE:FALSE)
 	# define IS_VALID_PTR(ptr)(ptr==NULL?FALSE:TRUE)
 	# define IS_VALID_INDEX(index,size)(index>=0&&index<size?TRUE:FALSE)
 	# define MAXIMUM(n1,n2)((n1)>(n2)?(n1):(n2))
@@ -64,16 +64,16 @@
 	# define IS_VALID_LAYER_POSITION(position,activeLayers)(position >= 0 && position < activeLayers.size()?TRUE:FALSE)
 	# define IS_VALID_DRAWLIST(listHandle,allDrawLists)(listHandle >= 0 && listHandle < allDrawLists.size()?(allDrawLists[listHandle]!=NULL?TRUE:FALSE):FALSE)
 	
-	# define PROJX_TO_PIXELX(prX,piX,extents,ppx)(piX=(prX - extents.left)*ppx)
-	# define PROJY_TO_PIXELY(prY,piY)(piY=(prY - extents.bottom)*ppy)
+	# define PROJX_TO_PIXELX(prX,piX,_extents,ppx)(piX=(prX - _extents.left)*ppx)
+	# define PROJY_TO_PIXELY(prY,piY)(piY=(prY - _extents.bottom)*ppy)
 	#define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
 	
 	
 	// lsu 27 aug 2009 for DrawShapefileAlt function
 	# define PROJECTION_TO_PIXEL_INT(prX,prY,pxX,pxY)\
 	{\
-		double dX = (prX - extents.left)* m_pixelPerProjectionX;\
-		double dY = (extents.top - prY) * m_pixelPerProjectionY;\
+		double dX = (prX - _extents.left)* _pixelPerProjectionX;\
+		double dY = (_extents.top - prY) * _pixelPerProjectionY;\
 		pxX = Utility::Rint(dX);\
 		pxY = Utility::Rint(dY);\
 	}

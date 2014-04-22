@@ -24,8 +24,6 @@
  // lsu 13 jan 2011 - Created the file.
 
 #pragma once
-#include "MapWinGis.h"
-#include <gdiplus.h>
 #include "ShapeDrawingOptions.h"
 #include "LinePattern.h"
 #include "GeometryOperations.h"
@@ -36,11 +34,11 @@ class CLineDrawer
 {
 public:
 
-	CLineDrawer::CLineDrawer(CDC* dc)
+	CLineDrawer(CDC* dc)
 	{
 		_dc = dc;
 	}
-	CLineDrawer::~CLineDrawer(void)
+	~CLineDrawer(void)
 	{
 
 	}
@@ -50,5 +48,4 @@ public:
 	
 protected:
 	CDC* _dc;
-	
 };

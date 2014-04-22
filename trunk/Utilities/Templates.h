@@ -1,23 +1,11 @@
 #pragma once
 
-#include "MapWinGIS.h"
-#include "Enumerations.h"
 #include <set>
-#include <vector>
 #include <iterator>
 using namespace std;
 
 namespace Templates
 {
-	/*template <typename T>  
-	bool Set2SafeArray(std::set<T>* v, VARTYPE variantType, VARIANT* arr);
-	
-	template <typename T>  
-	bool Vector2SafeArray(std::vector<T>* v, VARTYPE variantType, VARIANT* arr);
-	
-	template <typename T>
-	bool Vector2SafeArray(std::vector<T>* v, VARIANT* arr);*/
-
 	// ********************************************************************
 	//					Vector2SafeArray()				               
 	// ********************************************************************

@@ -38,11 +38,10 @@ namespace IndexSearching
 	** ************************************************************************* */
 	 int createSpatialIndex(double utilization, int capacity, char *fileName)
 	  {
-	  bool bRet = true;
 	  
 	  std::string baseName = fileName;
 
-	  bRet = createIndexFile(utilization, capacity, baseName);
+	  bool bRet = createIndexFile(utilization, capacity, baseName);
 
 	  return (int) bRet;
 	  }

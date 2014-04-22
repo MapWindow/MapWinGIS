@@ -1,13 +1,8 @@
 # ifndef LGRID_H
 # define LGRID_H
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <io.h>
 #include "lHeader.h"
 #include "grdTypes.h"
-//#include "errorcodes.h"
 
 using namespace std;
 

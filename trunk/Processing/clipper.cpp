@@ -41,7 +41,6 @@
 #include "stdafx.h"
 #include "clipper.h"
 #include <cmath>
-#include <vector>
 #include <algorithm>
 #include <stdexcept>
 #include <cstring>

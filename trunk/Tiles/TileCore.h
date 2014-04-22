@@ -20,7 +20,6 @@
  // lsu 17 apr 2012 - created the file
 
 #pragma once
-#include "ogr_spatialref.h"
 #include "InMemoryBitmap.h"
 #include "GeoPoint.h"
 #include "CustomProjection.h"

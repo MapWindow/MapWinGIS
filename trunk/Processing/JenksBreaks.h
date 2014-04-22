@@ -24,7 +24,6 @@
  // Sergei Leschinski (lsu) 25 june 2010 - created the file
 
 #pragma once
-#include <vector>
 #include <algorithm>
 #include "float.h"
 
@@ -90,16 +89,16 @@ private:
 
 // functions
 public:
-	std::vector<long>* CJenksBreaks::get_Results();
-	void CJenksBreaks::Optimize();
-	std::vector<int>* CJenksBreaks::SolveAsDP(std::vector<double>& data, int numClasses);
+	std::vector<long>* get_Results();
+	void Optimize();
+	std::vector<int>* SolveAsDP(std::vector<double>& data, int numClasses);
 	bool Initialized()
 	{
 		return _init;
 	}
 private:
-	double CJenksBreaks::get_SumStandardDeviations();
-	bool CJenksBreaks::FindShift();
-	void CJenksBreaks::MakeShift(int maxId, int targetId, int valueId);
-	std::vector<int>* CJenksBreaks::BuildEqualBreaks(std::vector<double>& data, int numClasses);
+	double get_SumStandardDeviations();
+	bool FindShift();
+	void MakeShift(int maxId, int targetId, int valueId);
+	std::vector<int>* BuildEqualBreaks(std::vector<double>& data, int numClasses);
 };

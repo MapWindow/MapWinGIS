@@ -1,18 +1,12 @@
 // This file stores properties of shapefile layers and separate shapes
 // The properties are obsolete, new ShapeDrawingOptions and ShapeCategory classes should be used instead
 // Where possible the call where redirected to the new classes
-
-// TODO: old and new implementations should be merged
-// m_drawingMethod = dmNewSymbology will serve as a switch
-
 #pragma once
 #include "stdafx.h"
-#include "MapWinGis.h"
 #include "Map.h"
-#include <vector>
-#include "Enumerations.h"
-//#include "UtilityFunctions.h"
 #include "ShapeDrawingOptions.h"
+#include "Shapefile.h"
+#include "Labels.h"
 
 // TODO: the following propoerties for the new symbology must be implemented
 // ShapeLayerLineStipple
@@ -27,14 +21,12 @@
 // Returns drawing options for a given shapefile
 CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 {
-	if (layerHandle >= 0 && layerHandle < (long)m_allLayers.size())
+	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[layerHandle];
+		Layer * layer = _allLayers[layerHandle];
 		if( layer->type == ShapefileLayer )
 		{
 			IShapefile* sf = NULL;
-			
-			//if (sf)
 			if (layer->QueryShapefile(&sf))
 			{
 				IShapeDrawingOptions* options = NULL;
@@ -66,9 +58,9 @@ CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 // Returns type of the shapefile with a given handle
 ShpfileType CMapView::get_ShapefileType(long layerHandle)
 {
-	if (layerHandle >= 0 && layerHandle < (long)m_allLayers.size())
+	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[layerHandle];
+		Layer * layer = _allLayers[layerHandle];
 		if( layer->type == ShapefileLayer )
 		{
 			IShapefile* sf = NULL;
@@ -99,9 +91,9 @@ ShpfileType CMapView::get_ShapefileType(long layerHandle)
 // Returns pointer to the shapefile layer with the given index, checks it's type
 Layer* CMapView::get_ShapefileLayer(long layerHandle)
 {
-	if (layerHandle >= 0 && layerHandle < (long)m_allLayers.size())
+	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		Layer * layer = m_allLayers[layerHandle];
+		Layer * layer = _allLayers[layerHandle];
 		if( layer->type == ShapefileLayer )
 		{
 			return layer;
@@ -124,9 +116,9 @@ Layer* CMapView::get_ShapefileLayer(long layerHandle)
 // ***************************************************************
 bool CMapView::IsValidLayer( long layerHandle )
 {
-	if (layerHandle >= 0 && layerHandle < (long)m_allLayers.size())
+	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
-		return (m_allLayers[layerHandle]!=NULL)?true:false;
+		return (_allLayers[layerHandle]!=NULL)?true:false;
 	}
 	else
 	{
@@ -141,7 +133,7 @@ bool CMapView::IsValidShape( long layerHandle, long shape )
 {	
 	if( IsValidLayer(layerHandle) )
 	{
-		Layer * l = m_allLayers[layerHandle];
+		Layer * l = _allLayers[layerHandle];
 		if( l->type == ShapefileLayer )
 		{	
 			this->AlignShapeLayerAndShapes(l);
@@ -463,7 +455,7 @@ void CMapView::SetShapeLayerLineWidth(long LayerHandle, float newValue)
 	{
 		options->lineWidth = newValue;
 		_canUseLayerBuffer = FALSE;
-		if( !m_lockCount )
+		if( !_lockCount )
 			InvalidateControl();
 	}
 }
@@ -1070,7 +1062,236 @@ long CMapView::GetShapePointFontCharListID(long LayerHandle, long Shape)
 	return -1;
 }
 #pragma endregion
+
+#pragma region Loop through shapefiles
+// ************************************************************
+//		FindSnapPoint
+// ************************************************************
+VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound)
+{
+	double x, y, x2, y2;
+	this->PixelToProjection( xScreen, yScreen, x, y );
+	this->PixelToProjection( xScreen + tolerance, yScreen + tolerance, x2, y2 );
+	double maxDist = sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
+
+	long shapeIndex;
+	long pointIndex;
+	VARIANT_BOOL vb;
+	double distance;
 	
+	double minDist = DBL_MAX;
+	IShapefile* foundShapefile = NULL;
+	long foundShapeIndex;
+	long foundPointIndex;
 
+	for(long i = 0; i < this->GetNumLayers(); i++)
+	{
+		IShapefile* sf = this->GetShapefile(this->GetLayerHandle(i));
+		if (sf != NULL)
+		{
+			sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+			if (vb)
+			{
+				if (distance < minDist)
+				{
+					minDist = distance;
+					foundShapefile = sf;
+					foundPointIndex = pointIndex;
+					foundShapeIndex = shapeIndex;
+				}
+			}
+			sf->Release();
+		}
+	}
 
+	bool result = false;
+	if (minDist != DBL_MAX && foundShapefile)
+	{
+		IShape* shape = NULL;
+		foundShapefile->get_Shape(foundShapeIndex, &shape);
+		if (shape)
+		{
+			shape->get_XY(foundPointIndex, xFound, yFound, &vb);
+			shape->Release();
+			result = true;
+		}
+	}
+	return result;
+}
+
+// ************************************************************
+//		UpdateHotTracking
+// ************************************************************
+bool CMapView::UpdateHotTracking(CPoint point)
+{
+	bool refreshNeeded = false;
+	if (_hasHotTracking)
+	{
+		double pixX = point.x;
+		double pixY = point.y;
+		double prjX, prjY;
+		this->PixelToProj(pixX, pixY, &prjX, &prjY);
+		
+		bool found = false;
+		IShapefile * sf = NULL;
+
+		VARIANT_BOOL vbretval;
+		for(int i = 0; i < (int)_activeLayers.size(); i++ )
+		{
+			Layer* layer = _allLayers[_activeLayers[i]];
+			if (layer->type == ShapefileLayer)
+			{
+				if (layer->QueryShapefile(&sf))
+				{
+					VARIANT_BOOL hotTracking = VARIANT_FALSE;
+					sf->get_HotTracking(&hotTracking);
+					if (hotTracking)
+					{
+						std::vector<long> shapes;
+
+						double tol = 0.0;
+						ShpfileType type;
+						sf->get_ShapefileType(&type);
+						type = Utility::ShapeTypeConvert2D(type);
+						if (type == SHP_MULTIPOINT || type == SHP_POINT)
+							tol = 5.0/this->PixelsPerMapUnit();
+
+						((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
+						
+						if (shapes.size() > 0)
+						{
+							if (_activeLayers[i] != _hotTracking.LayerHandle || shapes[0] != _hotTracking.ShapeId)
+							{
+								IShape* shape = NULL;
+								sf->get_Shape(shapes[0], &shape);
+								if (shape)
+								{
+									IShape* shpClone = NULL;
+									shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
+																// on the first glance shape shouldn't be released on closing the shapefile
+									ULONG cnt = shape->Release();
+
+									if (!_hotTracking.Shapefile)
+										CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(_hotTracking.Shapefile));
+									else
+										_hotTracking.Shapefile->Close(&vbretval);
+
+									if (_hotTracking.Shapefile)
+									{
+										ShpfileType type;
+										sf->get_ShapefileType(&type);
+										
+										((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
+										long index = 0;
+										_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
+										_hotTracking.Shapefile->RefreshExtents(&vbretval);
+										_hotTracking.LayerHandle = _activeLayers[i];
+										_hotTracking.ShapeId = shapes[0];
+
+										IShapeDrawingOptions* options = NULL;
+										sf->get_SelectionDrawingOptions(&options);
+										if (options)
+										{
+											_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+											options->Release();
+										}
+										
+									}
+									shpClone->Release();   // there is one reference in new shapefile
+									found = true;
+								}
+							}
+						}
+					}
+					
+					sf->Release();
+					sf = NULL;
+				}
+			}
+
+			if (found)
+			{
+				// pasing event to the caller
+				this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeId);
+				_canUseMainBuffer = false;
+				refreshNeeded = true;
+				break;
+			}
+		}
+
+		if (!found && _hotTracking.ShapeId != -1)
+		{
+			_hotTracking.ShapeId = -1;
+			_hotTracking.LayerHandle = -1;
+			if (_hotTracking.Shapefile)
+				_hotTracking.Shapefile->Close(&vbretval);
+			
+			// pasing event to the caller
+			this->FireShapeHighlighted(-1, -1);
+		}
+	}
+	return refreshNeeded;
+}
+
+// **********************************************************
+//			GetDrawingLabels()
+// **********************************************************
+// Deletes dynamically alocated frames info for all layers; drops isDrawn flag
+void CMapView::ClearLabelFrames()
+{
+	// clear frames for regular labels
+	for (int i = 0; i < (int)_activeLayers.size(); i++)
+	{
+		Layer * l = _allLayers[_activeLayers[i]];
+		if( l != NULL )
+		{	
+			// charts
+			if (l->type == ShapefileLayer)
+			{
+				IShapefile * sf = NULL;
+				if (l->QueryShapefile(&sf))
+				{
+					((CShapefile*)sf)->ClearChartFrames();
+					sf->Release();
+				}
+			}
+			
+			// labels
+			ILabels* LabelsClass = l->get_Labels();
+			if (LabelsClass == NULL) continue;
+			
+			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
+			coLabels->ClearLabelFrames();
+			LabelsClass->Release(); LabelsClass = NULL;
+		}
+	}
+
+	// clear frames for drawing labels
+	for(size_t j = 0; j < _activeDrawLists.size(); j++ )
+	{
+		bool isSkip = false;
+		for (size_t i = 0; i < _drawingLayerInvisilbe.size(); i++)
+		{
+			if (_drawingLayerInvisilbe[i] == j)
+			{
+				isSkip = true;	// skip if this layer is set invisible
+				break;  
+			}
+		}
+		if(isSkip) 
+			continue;
+
+		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
+		if( IS_VALID_PTR(dlist) )
+		{
+			if (dlist->listType == dlSpatiallyReferencedList)
+			{
+				CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
+				coLabels->ClearLabelFrames();
+			}
+		}
+	}
+}
+
+#pragma endregion
 

@@ -26,10 +26,7 @@
 
 #include "stdafx.h"
 #include "ShapeDrawingOptions.h"
-#include <gdiplus.h>
-
 #include "ImageAttributes.h"
-//#include "UtilityFunctions.h"
 #include "macros.h"
 #include "PointSymbols.h"
 #include "Image.h"

@@ -6,7 +6,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at 
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and 
+//ANY KIND, either express or implied. See the License for the specific language governing rights and 
 //limitations under the License. 
 //
 //The Original Code is MapWindow Open Source. 
@@ -14,34 +14,14 @@
 //The Initial Developer of this version of the Original Code is Daniel P. Ames using portions created by 
 //Utah State University and the Idaho National Engineering and Environmental Lab that were released as 
 //public domain in March 2004.  
-//
-//Contributor(s): (Open source contributors should list themselves and their modifications here). 
-// -------------------------------------------------------------------------------------------------------
+//********************************************************************************************************
 
 #pragma once
-#include "MapWinGis.h"
-#include "ShapeInfo.h"
-#include <comsvcs.h>
-#include <vector>
-#include <map>
 #include <set>
-#include <io.h>
 #include "IndexSearching.h"
-#include "Enumerations.h"
-#include "DrawingOptions.h"
-#include "RotatedRectangle.h"
-#include "ShapeDrawingOptions.h"
-#include "ShapefileCategories.h"
-#include "ShapeValidationInfo.h"
-#include "Shape.h"
-#include "Chart.h"
-#include "ShapeWrapper.h"
-#include "Expression.h"
 #include "QTree.h"
-#include "GeometryConverter.h"
-#include "ShapeData.h"
-#include "ogr_spatialref.h"
-#include "cpl_minixml.h"
+#include "ClipperConverter.h"
+#include "ShapeInfo.h"
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -63,142 +43,8 @@ class ATL_NO_VTABLE CShapefile :
 {
 public:
 	
-	CShapefile()
-	{	
-		m_hotTracking = VARIANT_FALSE;
-		_geosGeometriesRead = false;
-		_useValidationList = false;
-		_stopExecution = NULL;
-
-		_selectionTransparency = 180;
-		_selectionAppearance = saSelectionColor;
-		_selectionColor = RGB(255, 255, 0);
-		_collisionMode = tkCollisionMode::LocalList;
-		
-		_geometryEngine = m_globalSettings.geometryEngine;
-		
-		m_sourceType = sstUninitialized;
-		
-		m_writing = false;
-		m_reading = false;
-		
-		_isEditingShapes = FALSE;
-		_fastMode = m_globalSettings.shapefileFastMode ? TRUE : FALSE;
-		_minDrawingSize = 1;
-
-	    useSpatialIndex = TRUE;
-	    hasSpatialIndex = FALSE;
-	    spatialIndexLoaded = FALSE;
-		spatialIndexMaxAreaPercent = 0.5;
-		spatialIndexNodeCapacity = 100;
-
-		//Neio 20090721
-		useQTree = VARIANT_FALSE;
-		cacheExtents = FALSE;
-		m_qtree = NULL;
-		_tempTree = NULL;
-
-		_shpfile = NULL;
-		_shxfile = NULL;
-
-		_shpfiletype = SHP_NULLSHAPE;
-		_nextShapeHandle = 0;
-
-		_minX = 0.0;
-		_minY = 0.0;
-		_minZ = 0.0;
-		_maxX = 0.0;
-		_maxY = 0.0;
-		_maxZ = 0.0;
-		_minM = 0.0;
-		_maxM = 0.0;
-		
-		USES_CONVERSION;
-		key = A2BSTR("");
-		_expression = A2BSTR("");
-		globalCallback = NULL;
-		lastErrorCode = tkNO_ERROR;
-		dbf = NULL;
-		
-		// creation of children classes
-		m_selectDrawOpt = NULL;
-		m_defaultDrawOpt = NULL;
-		m_labels = NULL;
-		m_categories = NULL;
-		m_charts = NULL;
-		m_geoProjection = NULL;
-		
-		GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
-		GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
-
-		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_selectDrawOpt);
-		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_defaultDrawOpt);
-		CoCreateInstance(CLSID_ShapefileCategories,NULL,CLSCTX_INPROC_SERVER,IID_IShapefileCategories,(void**)&m_categories);
-		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
-		CoCreateInstance(CLSID_Charts,NULL,CLSCTX_INPROC_SERVER,IID_ICharts,(void**)&m_charts);
-		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&m_geoProjection);
-
-		this->put_ReferenceToLabels();
-		this->put_ReferenceToCategories();
-		this->put_ReferenceToCharts();
-
-		gReferenceCounter.AddRef(tkInterface::idShapefile);
-
-	}
-	~CShapefile()
-	{			
-		VARIANT_BOOL vbretval;
-		this->Close(&vbretval);
-		
-		::SysFreeString(key);
-		::SysFreeString(_expression);
-
-		if (m_selectDrawOpt != NULL)
-		{
-			m_selectDrawOpt->Release();
-			m_selectDrawOpt = NULL;
-		}
-
-		if (m_defaultDrawOpt != NULL)
-		{
-			m_defaultDrawOpt->Release();
-			m_defaultDrawOpt = NULL;
-		}
-
-		if (m_labels != NULL)
-		{
-			put_ReferenceToLabels(true);	// labels class maybe referenced by client and won't be deleted as a result
-			m_labels->Release();			// therefore we must clear the reference to the parent as it will be invalid
-			m_labels = NULL;
-		}
-
-		if (m_categories != NULL)
-		{
-			put_ReferenceToCategories(true);
-			m_categories->Release();
-			m_categories = NULL;
-		}
-
-		if (m_charts != NULL)
-		{
-			put_ReferenceToCharts(true);
-			m_charts->Release();
-			m_charts = NULL;
-		}
-
-		if (_stopExecution)
-		{
-			_stopExecution->Release();
-			_stopExecution = NULL;
-		}
-
-		if (m_geoProjection)
-		{
-			m_geoProjection->Release();
-		}
-		gReferenceCounter.Release(tkInterface::idShapefile);
-		//Debug::WriteLine("Shapefile destructor: %d", sfCount);
-	}
+	CShapefile();
+	~CShapefile();
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
@@ -317,7 +163,7 @@ public:
 	STDMETHOD(get_VisibilityExpression)(BSTR* retval);
 	STDMETHOD(put_VisibilityExpression)(BSTR newVal);
 	STDMETHOD(get_FastMode)(VARIANT_BOOL* retval);		// in fast editing mode CShapeWrapper class is used to store shape points
-	STDMETHOD(put_FastMode)(VARIANT_BOOL newVal);		// there are some restictions on editing this mode though
+	STDMETHOD(put_FastMode)(VARIANT_BOOL newVal);		// there are some restrictions on editing this mode though
 	STDMETHOD(get_MinDrawingSize)(LONG* pVal);
 	STDMETHOD(put_MinDrawingSize)(LONG newVal);
 	STDMETHOD(get_SourceType)(tkShapefileSourceType* pVal);
@@ -434,9 +280,9 @@ private:
 	IShapeValidationInfo* _inputValidation;
 	IShapeValidationInfo* _outputValidation;
 	
-	VARIANT_BOOL m_hotTracking;
+	VARIANT_BOOL _hotTracking;
 	bool _geosGeometriesRead;
-	tkCollisionMode _collisionMode;		// collision modre for point shapefiles
+	tkCollisionMode _collisionMode;		// collision mode for point shapefiles
 	tkGeometryEngine _geometryEngine;		// GEOS or Clipper
 	bool m_writing;		// is currently writing to the file
 	bool m_reading;		// is currently reading data into memory
@@ -445,7 +291,7 @@ private:
 	BOOL _isEditingShapes;		//Flag for Disk vs. Memory
 	long _nextShapeHandle;		// the next unique handle to assign
 	
-	// When this flag is on CShapeWrapper will be used in the Shape class to stre the points
+	// When this flag is on CShapeWrapper will be used in the Shape class to store the points
 	// otherwise usual COM points
 	BOOL _fastMode;
 	int _minDrawingSize;	// objects which are less than this value in pixels for current scale, will drawn as point
@@ -473,7 +319,6 @@ private:
 	QTree* _tempTree;
 	
 	bool _useValidationList;
-	//std::vector<ShapeValidationRecord*> _validationList;
 
 	// -------------------------------------------------------------
 	//	private functions
@@ -558,23 +403,10 @@ public:
 	// -------------------------------------------------------------
 	//	public functions
 	// -------------------------------------------------------------
-	std::vector<ShapeData*>* get_ShapeVector()
-	{
-		return &_shapeData;
-	}
-	IShapeWrapper* get_ShapeWrapper(int ShapeIndex)
-	{
-		return ((CShape*)_shapeData[ShapeIndex]->shape)->get_ShapeWrapper();
-	}
-	IShapeData* get_ShapeData(int ShapeIndex)
-	{
-		return (_shapeData[ShapeIndex])->fastData;
-	}
-	void SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
-	{
-		Utility::put_ComReference(info, 
-			(IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
-	}
+	std::vector<ShapeData*>* get_ShapeVector();
+	IShapeWrapper* get_ShapeWrapper(int ShapeIndex);
+	IShapeData* get_ShapeData(int ShapeIndex);
+	void SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType);
 	
 	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 
@@ -623,8 +455,8 @@ public:
 	void CShapefile::ClearValidationList();
 	HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal);
 	void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status, IShape* shape = NULL);
-	CShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, CString parameterName, VARIANT_BOOL selectedOnly, CString className = "Shapefile");
-	CShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
+	IShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, CString parameterName, VARIANT_BOOL selectedOnly, CString className = "Shapefile");
+	IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
 	bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
 	bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
 	GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex);

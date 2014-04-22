@@ -1,9 +1,6 @@
 # ifndef DRAW_LIST_H
 # define DRAW_LIST_H
 
-# include <deque>
-# include <vector>
-
 //Stan 30.09.2006
 # include "label.h"
 
