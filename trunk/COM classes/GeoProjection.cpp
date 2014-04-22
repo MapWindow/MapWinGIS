@@ -263,6 +263,16 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		*retVal = VARIANT_FALSE;
 	}
+	else if (projCode == 3857)
+	{
+		SetGoogleMercator(retVal);
+		return S_OK;
+	}
+	else if (projCode == 4326)
+	{
+		SetWgs84(retVal);
+		return S_OK;
+	}
 	else
 	{
 		OGRErr err = m_projection->importFromEPSG(projCode);
