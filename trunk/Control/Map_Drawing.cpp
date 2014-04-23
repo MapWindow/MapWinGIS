@@ -81,7 +81,6 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 
 		m_drawMutex.Lock();		// TODO: perhaps use lighter CCriticalSection
 
-		Debug::WriteWithTime("Handle new drawing");
 		if (!_canUseMainBuffer || !_canUseLayerBuffer) 
 		{
 			bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || HasDrawingData(tkDrawingDataAvailable::Coordinates);
@@ -144,7 +143,6 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// any tile after this moment will do it, otherwise a newcomer will be already in screen buffer
 	_canUseMainBuffer = true;
 
-	Debug::WriteWithTime("Before tile drawing");
 	// ---------------------------------------
 	// drawing of tiles
 	// ---------------------------------------
@@ -186,11 +184,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		{
 			if(_canUseLayerBuffer)
 			{	
-				bool dragging = (_draggingStart.x != 0 || _draggingStart.y != 0 ||
- 								 _draggingMove.x != 0 || _draggingMove.y != 0);
+				bool dragging = (_dragging.Start.x != 0 || _dragging.Start.y != 0 ||
+ 								 _dragging.Move.x != 0 || _dragging.Move.y != 0);
 
-				int x = _draggingMove.x - _draggingStart.x;
-				int y = _draggingMove.y - _draggingStart.y;
+				int x = _dragging.Move.x - _dragging.Start.x;
+				int y = _dragging.Move.y - _dragging.Start.y;
 				
 				// update from the layer buffer
 				gBuffer->DrawImage(_layerBitmap, (float)x, (float)y);
@@ -291,11 +289,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// -----------------------------------
 	// redraw time and logo
 	// -----------------------------------
-	if (!_isSnapshot)
-	{
-		DWORD endTick = GetTickCount();
-		this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f, layersRedraw);
-	}
+	DWORD endTick = GetTickCount();
+	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f, layersRedraw);
 
 	// -------------------------------------------
 	// distance measuring or persistent measuring

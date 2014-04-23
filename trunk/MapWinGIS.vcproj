@@ -1534,7 +1534,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Structures.h"
+				RelativePath=".\Structures\Structures.h"
 				>
 			</File>
 		</Filter>

@@ -335,7 +335,9 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 // Displays redraw time in the bottom left corner
 void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message )
 {
-	if ((!_showRedrawTime || !layerRedraw) && !_showVersionNumber) return;
+	bool showRedrawTime = _showRedrawTime && layerRedraw && time > 0.01 && !_isSnapshot;
+	
+	if (!showRedrawTime && !_showVersionNumber) return;
 
 	// preparing canvas
 	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
@@ -360,7 +362,7 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 		}
 	}
 
-	if (_showRedrawTime && layerRedraw && time > 0.01)
+	if (showRedrawTime)
 	{
 		if (message.GetLength() != 0)
 		{
@@ -490,11 +492,11 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	tiles->get_MinZoom(&minZoom);
 	tiles->get_MaxZoom(&maxZoom);
 
-	bool zooming = _draggingOperation == DragZoombarHandle;
+	bool zooming = _dragging.Operation == DragZoombarHandle;
 	if (zooming)
 	{
 		// take y from current mouse position
-		handleY = (float)_draggingMove.y;
+		handleY = (float)_dragging.Move.y;
 		
 		// make sure that we are within bar
 		float minY = y + boxSize + lineOffset;
@@ -531,27 +533,39 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	// if handle is highlighted (i.e. mouse cursor is within it, draw a tooltip)
 	if (handleHighlight)
 	{
-		double scale = GetCurrentScale();
-		if (zooming)
+		if (_zoomBarVerbosity != zbvNone)
 		{
-			// it's troublesome to calculate target scale directly, therefore use simple proportion
-			double ratio = pow(2.0, (double)(zoom - targetZoom));
-			scale = scale * ratio;
+			double scale = GetCurrentScale();
+			if (zooming)
+			{
+				// it's troublesome to calculate target scale directly, therefore use simple proportion
+				double ratio = pow(2.0, (double)(zoom - targetZoom));
+				scale = scale * ratio;
+			}
+			double resoultion = scale / 96.0 * 0.0254;	// meters per pixel
+			
+			CStringW s;
+			switch(_zoomBarVerbosity)
+			{
+				case zbvFull:
+					s.Format(L"Zoom: %d\nScale: 1:%.0f\nResolution: %.2f", zooming ? targetZoom : zoom, scale, resoultion);
+					break;
+				case zbvZoomOnly:
+					s.Format(L"Zoom: %d", zooming ? targetZoom : zoom);
+					break;
+			}
+			
+			float tooltipOffset = 15.0f;
+			Gdiplus::PointF tooltipOrigin(x + boxSize + tooltipOffset, handleY);
+			Gdiplus::RectF tooltipBox;
+			g->MeasureString(s, s.GetLength(), _fontArial, tooltipOrigin, &tooltipBox);
+			Gdiplus::SolidBrush tooltipBrush(Gdiplus::Color(246, 212, 178 ));
+			tooltipBox.Inflate(9.0f, 5.0f);
+			g->FillRectangle(&tooltipBrush, tooltipBox);
+			g->DrawRectangle(&_penGray, tooltipBox);
+			tooltipBox.Inflate(-9.0f, -5.0f);
+			g->DrawString(s, s.GetLength(), _fontArial, tooltipOrigin, &_brushBlack );
 		}
-		double resoultion = scale / 96.0 * 0.0254;	// meters per pixel
-		
-		CStringW s;
-		s.Format(L"Zoom: %d\nScale: 1:%.0f\nResolution: %.2f", zooming ? targetZoom : zoom, scale, resoultion);
-		float tooltipOffset = 15.0f;
-		Gdiplus::PointF tooltipOrigin(x + boxSize + tooltipOffset, handleY);
-		Gdiplus::RectF tooltipBox;
-		g->MeasureString(s, s.GetLength(), _fontArial, tooltipOrigin, &tooltipBox);
-		Gdiplus::SolidBrush tooltipBrush(Gdiplus::Color(246, 212, 178 ));
-		tooltipBox.Inflate(9.0f, 5.0f);
-		g->FillRectangle(&tooltipBrush, tooltipBox);
-		g->DrawRectangle(&_penGray, tooltipBox);
-		tooltipBox.Inflate(-9.0f, -5.0f);
-		g->DrawString(s, s.GetLength(), _fontArial, tooltipOrigin, &_brushBlack );
 	}
 
 	// ---------------------------------------------------

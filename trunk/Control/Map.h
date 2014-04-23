@@ -258,8 +258,8 @@ protected:
 	afx_msg VARIANT_BOOL GetScalebarVisible(void);
 	afx_msg void SetScalebarVisible(VARIANT_BOOL pVal);
 
-	afx_msg VARIANT_BOOL GetShowZoombar(void);
-	afx_msg void SetShowZoombar(VARIANT_BOOL pVal);
+	afx_msg VARIANT_BOOL GetShowZoomBar(void);
+	afx_msg void SetShowZoomBar(VARIANT_BOOL pVal);
 
 	afx_msg tkScalebarUnits GetScalebarUnits(void);
 	afx_msg void SetScalebarUnits(tkScalebarUnits pVal);
@@ -563,6 +563,17 @@ protected:
 	afx_msg VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
 	afx_msg VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
 	afx_msg VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+	afx_msg VARIANT_BOOL GetAnimationOnZooming();
+	afx_msg void SetAnimationOnZooming(VARIANT_BOOL newVal);
+	afx_msg VARIANT_BOOL GetInertiaOnPanning();
+	afx_msg void SetInertiaOnPanning(VARIANT_BOOL newVal);
+	afx_msg VARIANT_BOOL GetReuseTileBuffer();
+	afx_msg void SetReuseTileBuffer(VARIANT_BOOL newVal);
+	afx_msg tkZoomBarVerbosity GetZoomBarVerbosity();
+	afx_msg void SetZoomBarVerbosity(tkZoomBarVerbosity newVal);
+	afx_msg tkZoomBoxStyle GetZoomBoxStyle();
+	afx_msg void SetZoomBoxStyle(tkZoomBoxStyle newVal);
+
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -686,10 +697,11 @@ public:
 	BOOL _grabProjectionFromData;
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
-	BOOL _panningInertia;			// TODO: make a property
-	BOOL _reuseTileBuffer;			// TODO: make property
-	BOOL _zoomAnimation;			// TODO: make property
-
+	BOOL _panningInertia;			
+	BOOL _reuseTileBuffer;			
+	BOOL _zoomAnimation;			
+	
+	tkZoomBoxStyle _zoomBoxStyle;
 	tkShapeDrawingMethod _shapeDrawingMethod;
 	tkUnitsOfMeasure _unitsOfMeasure;
 	tkResizeBehavior _mapResizeBehavior;  // How to behave on resize
@@ -697,6 +709,7 @@ public:
 	tkKnownExtents _knownExtents;
 	tkCoordinatesDisplay _showCoordinates;
 	tkScalebarUnits  _scalebarUnits;
+	tkZoomBarVerbosity _zoomBarVerbosity;
 	
 	CString _versionNumber;
 	double _mouseWheelSpeed;
@@ -739,9 +752,7 @@ public:
 	//	cursor state
 	// ---------------------------------------------
 	BOOL _leftButtonDown;
-	CPoint _draggingStart;	// map is being dragged by user
-	CPoint _draggingMove;	// map is being dragged by user
-	DraggingOperation _draggingOperation;
+	DraggingState _dragging;
 	Extent _clickDownExtents;
 	::CCriticalSection _panningLock;
 	
@@ -842,7 +853,7 @@ private:
 	static ULONG_PTR ms_gdiplusToken;
 	static unsigned ms_gdiplusCount;
 	static ::CCriticalSection ms_gdiplusLock;
-
+	
 	// ---------------------------------------------
 	//	 Init/terminate
 	// ---------------------------------------------
@@ -959,6 +970,7 @@ private:
 	void UpdateTileBuffer(CDC* dc);
 	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target);
 	void TurnOffPanning();
+	void DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g);
 #pragma endregion
 };
 

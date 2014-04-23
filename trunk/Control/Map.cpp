@@ -169,9 +169,9 @@ void CMapView::Startup()
 	
 	_panningAnimation = false;
 	_zoombarTargetZoom = -1;
-	_draggingMove = CPoint(0,0);
-	_draggingStart = CPoint(0,0);
-	_draggingOperation = DragNone;
+	_dragging.Move = CPoint(0,0);
+	_dragging.Start = CPoint(0,0);
+	_dragging.Operation = DragNone;
 	_currentZoom = -1;
 	_spacePressed = false;
 	_tileBuffer.Extents.left = 0.0;
@@ -293,9 +293,11 @@ void CMapView::SetDefaults()
 	_showRedrawTime = VARIANT_FALSE;
 	_showVersionNumber = VARIANT_FALSE;	
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
+	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
 	_panningInertia = TRUE;
 	_reuseTileBuffer = TRUE;
 	_zoomAnimation = TRUE;
+	_zoomBoxStyle = tkZoomBoxStyle::zbsGray;
 
 	((CTiles*)_tiles)->SetDefaults();
 	((CMeasuring*)_measuring)->SetDefaults();
@@ -442,7 +444,7 @@ DWORD CMapView::GetPropertyExchangeVersion()
 {
 	// properties can be added between versions, so let use a bit different numbering
 	//return MAKELONG(_wVerMinor, _wVerMajor);
-	return MAKELONG(49, 1);
+	return MAKELONG(49, 11);
 }
 
 // **********************************************************************
@@ -554,8 +556,19 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 			this->LockWindow(lmUnlock);
 		}
 
-		PX_Bool( pPX, "ShowZoombar", _zoombarVisible, TRUE );
+		PX_Bool( pPX, "ShowZoomBar", _zoombarVisible, TRUE );
 		PX_Bool( pPX, "GrabProjectionFromData", _grabProjectionFromData, TRUE );
+		PX_Bool( pPX, "AnimationOnZooming", _zoomAnimation, TRUE );
+		PX_Bool( pPX, "InertiaOnPanning", _panningInertia, TRUE );
+		PX_Bool( pPX, "ReuseTileBuffer", _reuseTileBuffer, TRUE );
+
+		temp = (long)_zoomBarVerbosity;
+		PX_Long( pPX, "ZoomBarVerbosity", temp, 1 );			// zbvFull
+		_zoomBarVerbosity = (tkZoomBarVerbosity)temp;
+
+		temp = (long)_zoomBoxStyle;
+		PX_Long( pPX, "ZoomBoxStyle", temp, 1 );			// zbsGray
+		_zoomBoxStyle = (tkZoomBoxStyle)temp;
 
 		m_mapCursor = 0;	// why not to save it?
 	}

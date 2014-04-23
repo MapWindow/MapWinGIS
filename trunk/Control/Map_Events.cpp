@@ -44,8 +44,8 @@ void CMapView::TurnOffPanning()
 			ReleaseCapture();
 
 			//this is the only mode we care about for this event
-			_draggingStart = CPoint(0,0);
-			_draggingMove = CPoint(0,0);
+			_dragging.Start = CPoint(0,0);
+			_dragging.Move = CPoint(0,0);
 
 			this->SetExtentsCore(this->_extents, false);
 		}
@@ -71,8 +71,8 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		case VK_SPACE:
 			{
-				bool on14 =  nFlags & (1 << 14);
-				if (!on14)
+				bool repetitive =  (nFlags & (1 << 14)) ? true : false;
+				if (!repetitive)
 				{
 					if (m_cursorMode != cmPan)
 					{
@@ -287,7 +287,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 				}
 
 			case ZoombarPart::ZoombarHandle:
-				_draggingOperation = DragZoombarHandle;
+				_dragging.Operation = DragZoombarHandle;
 				return true;
 
 			case ZoombarPart::ZoombarBar:
@@ -314,7 +314,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 // ************************************************************
 bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 {
-	if (_draggingOperation == DragZoombarHandle)
+	if (_dragging.Operation == DragZoombarHandle)
 	{
 		RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
 		return true;
@@ -347,8 +347,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	}
-	_draggingStart = point;
-	_draggingMove = point;
+	_dragging.Start = point;
+	_dragging.Move = point;
 	_clickDownExtents = _extents;
 	_leftButtonDown = TRUE;
 	
@@ -368,12 +368,14 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if( m_cursorMode == cmZoomIn )
 	{
-		// TODO: should be merge logic for zooming and panning rubber band rectangle? They mostly the same
 		if (m_sendMouseDown)
 			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 
-		_ttip.Activate(FALSE);
-		
+		_dragging.Operation = DragZoombox;
+
+		// TODO: CMapTracker is no longer used; remove all references
+		/*_ttip.Activate(FALSE);
+
 		CMapTracker selectBox = CMapTracker( this, CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
 		selectBox.m_sizeMin = 0;
 
@@ -385,49 +387,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
 			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
-			selected = false;
-
-		if( selected == true )
-		{
-			if (HasRotation())
-			{
-				CRect rectTmp = rect;
-				long tmpX = 0, tmpY = 0;
-				// adjust rectangle to unrotated coordinates
-				_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
-				rectTmp.TopLeft().x = tmpX;
-				rectTmp.TopLeft().y = tmpY;
-				_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
-				rectTmp.BottomRight().x = tmpX;
-				rectTmp.BottomRight().y = tmpY;
-				rect = rectTmp;
-			}
-			
-			double zrx = _extents.right, zby = _extents.bottom;
-			double zlx = _extents.left, zty = _extents.top;
-			PixelToProjection( rect.TopLeft().x, rect.TopLeft().y, zrx, zby );
-			PixelToProjection( rect.BottomRight().x, rect.BottomRight().y, zlx, zty );
-
-			double cLeft = MINIMUM( zrx, zlx );
-			double cRight = MAXIMUM( zrx, zlx );
-			double cBottom = MINIMUM( zty, zby );
-			double cTop = MAXIMUM( zty, zby );
-
-			SetNewExtentsWithForcedZooming(Extent(cLeft, cRight, cBottom, cTop), true);
-
-			if( m_sendSelectBoxFinal )
-			{
-				long iby = rect.BottomRight().y;
-				long ity = rect.TopLeft().y;
-				this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x, iby, ity );
-			}
-		}
-		else
-		{
-			ZoomIn( m_zoomPercent );
-			if( m_sendMouseUp == TRUE )
-				this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
-		}
+			selected = false;*/
 	}
 	else if( m_cursorMode == cmZoomOut )
 	{
@@ -443,7 +403,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		CRect rcBounds(0,0,_viewWidth,_viewHeight);
 		this->LogPrevExtent();
 		this->SetCapture();
-		_draggingOperation = DragPanning;
+		_dragging.Operation = DragPanning;
 		Debug::WriteWithTime("Start new panning");
 	}
 	else if( m_cursorMode == cmSelection )
@@ -614,39 +574,77 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	if( m_sendMouseUp == TRUE && _leftButtonDown )
 		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
 
-	bool zooming = _draggingOperation == DragZoombarHandle;
-	bool panning = _draggingOperation == DragPanning;
+	DraggingOperation operation = _dragging.Operation;
 
 	_leftButtonDown = FALSE;
-	_draggingOperation = DragNone;
+	_dragging.Operation = DragNone;
 	ReleaseCapture();
 
-	if (zooming)
+	switch(operation)
 	{
-		if (_zoombarTargetZoom == -1)
-			Debug::WriteError("Invalid target zoom for zoom bar");
+		case DragPanning:
+			if (m_cursorMode != cmPan)
+				Debug::WriteError("Wrong cursor mode when panning is expected");
 
-		ZoomToTileLevel(_zoombarTargetZoom);
+			if (!_spacePressed)
+				DisplayPanningInertia(point);
+
+			this->SetExtentsCore(this->_extents, false);
+
+			ClearPanningList();
+
+			// we need to redraw the layers
+			Redraw2(tkRedrawType::RedrawAll);
+			break;
+		case DragZoombarHandle:
+			if (_zoombarTargetZoom == -1)
+				Debug::WriteError("Invalid target zoom for zoom bar");
+
+			ZoomToTileLevel(_zoombarTargetZoom);
+			break;
+		case DragZoombox:
+			if (!_dragging.HasRectangle())
+			{
+				ZoomIn( m_zoomPercent );
+			}
+			else
+			{
+				CRect rect = _dragging.GetRectangle();
+
+				if (HasRotation())	// TODO: wrap in class
+				{
+					CRect rectTmp = rect;
+					long tmpX = 0, tmpY = 0;
+					_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+					rectTmp.TopLeft().x = tmpX;
+					rectTmp.TopLeft().y = tmpY;
+					_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+					rectTmp.BottomRight().x = tmpX;
+					rectTmp.BottomRight().y = tmpY;
+					rect = rectTmp;
+				}
+				
+				double rx, by, lx, ty;
+				PixelToProjection( rect.TopLeft().x, rect.TopLeft().y, rx, by );
+				PixelToProjection( rect.BottomRight().x, rect.BottomRight().y, lx, ty );
+
+				double cLeft = MINIMUM( rx, lx );
+				double cRight = MAXIMUM( rx, lx );
+				double cBottom = MINIMUM( ty, by );
+				double cTop = MAXIMUM( ty, by );
+
+				SetNewExtentsWithForcedZooming(Extent(cLeft, cRight, cBottom, cTop), true);
+
+				if( m_sendSelectBoxFinal )
+				{
+					long iby = rect.BottomRight().y;
+					long ity = rect.TopLeft().y;
+					this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x, iby, ity );
+				}
+			}
+			break;
 	}
-	else if( panning )
-	{
-		if (m_cursorMode != cmPan)
-			Debug::WriteError("Wrong cursor mode when panning is expected");
-
-		if (!_spacePressed)
-			DisplayPanningInertia(point);
-		
-		this->SetExtentsCore(this->_extents, false);
-		
-		//this is the only mode we care about for this event
-		_draggingStart = CPoint(0,0);
-		_draggingMove = CPoint(0,0);
-
-		ClearPanningList();
-
-		// we need to redraw the layers
-		Redraw2(tkRedrawType::RedrawAll);
-	}
+	_dragging.Clear();
 }
 
 // ************************************************************
@@ -718,9 +716,9 @@ void CMapView::DisplayPanningInertia( CPoint point )
 				for (int i = numSteps; i >= 0; i--) 
 				{
 					DWORD lastTime = GetTickCount();
-					_draggingMove.x += Utility::Rint(dx * i * 3 / sum);
-					_draggingMove.y += Utility::Rint(dy * i * 3 / sum);
-					DoPanning(_draggingMove);
+					_dragging.Move.x += Utility::Rint(dx * i * 3 / sum);
+					_dragging.Move.y += Utility::Rint(dy * i * 3 / sum);
+					DoPanning(_dragging.Move);
 					Debug::WriteWithTime("Drawing inertia");
 
 					// if rendering is too fast, let's introduce some artificial slowness
@@ -728,18 +726,6 @@ void CMapView::DisplayPanningInertia( CPoint point )
 					if ( timeNow - lastTime < 80 ) {
 						Sleep( 80 - timeNow + lastTime);
 					}
-
-					// make that release of TAB will be processed in time to return to prev cursor
-					/*MSG msg;
-					if (::PeekMessage(&msg, NULL, WM_KEYUP, WM_KEYUP, PM_NOREMOVE ))
-					{
-						if (::GetMessage(&msg, NULL, WM_KEYUP, WM_KEYUP))
-						{
-							WPARAM param = msg.wParam;
-							::TranslateMessage(&msg);
-							::DispatchMessage(&msg);
-						}
-					}*/
 
 					MSG msg;
 					// remove all key down, so that pressed TAB won't be processed after the end of animation
@@ -765,7 +751,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (HasRotation())
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
-	_draggingMove = point;
+	_dragging.Move = point;
 
 	if (HandleOnZoombarMouseMove(point))
 		return;
@@ -815,40 +801,49 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y );
 		}
 	}
-
-	if( m_cursorMode == cmPan )
-	{
-		
-		if( (nFlags & MK_LBUTTON) && _leftButtonDown )
-		{
-			Debug::WriteWithTime("Mouse move panning");
-			DWORD time = GetTickCount();
-			_panningLock.Lock();
-			_panningList.push_back(new TimedPoint(point.x, point.y, time));
-			_panningLock.Unlock();
-			DoPanning(point);
-			return;
-		}
-	}
-
+	
 	bool refreshNeeded = false;
-
-	if( m_cursorMode == cmMeasure ) 
+	switch(m_cursorMode)
 	{
-		CMeasuring* m =((CMeasuring*)_measuring);
-		if (!m->IsStopped() && m->points.size() > 0)
+		case cmZoomIn:
+			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
+			{
+				refreshNeeded = true;
+			}
+			break;
+		case cmPan:
+			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
+			{
+				Debug::WriteWithTime("Mouse move panning");
+				DWORD time = GetTickCount();
+				_panningLock.Lock();
+				_panningList.push_back(new TimedPoint(point.x, point.y, time));
+				_panningLock.Unlock();
+				DoPanning(point);
+				return;
+			}
+			break;
+		case cmMeasure:
 		{
-			double x, y;
-			this->PixelToProjection( point.x, point.y, x, y );
-			m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
-			m->mousePoint.y = point.y;
-			_canUseMainBuffer = false;
-			refreshNeeded = true;
+			CMeasuring* m =((CMeasuring*)_measuring);
+			if (!m->IsStopped() && m->points.size() > 0)
+			{
+				double x, y;
+				this->PixelToProjection( point.x, point.y, x, y );
+				m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
+				m->mousePoint.y = point.y;
+				_canUseMainBuffer = false;
+				refreshNeeded = true;
+			}
+			break;
 		}
 	}
 
-	if (UpdateHotTracking(point))
-		refreshNeeded = true;
+	if (!refreshNeeded)
+	{
+		if (UpdateHotTracking(point))
+			refreshNeeded = true;
+	}
 
 	if (_showCoordinates != cdmNone) {
 		refreshNeeded = true;
@@ -864,10 +859,10 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 // ************************************************************
 void CMapView::DoPanning(CPoint point)
 {
-	double xAmount = (_draggingStart.x - _draggingMove.x) * _inversePixelPerProjectionX;
-	double yAmount = (_draggingMove.y - _draggingStart.y) * _inversePixelPerProjectionY;
+	double xAmount = (_dragging.Start.x - _dragging.Move.x) * _inversePixelPerProjectionX;
+	double yAmount = (_dragging.Move.y - _dragging.Start.y) * _inversePixelPerProjectionY;
 
-	Debug::WriteWithTime("Panning amount: x=%d; y=%d", _draggingStart.x - _draggingMove.x, _draggingMove.y - _draggingStart.y);
+	Debug::WriteWithTime("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y);
 	Debug::WriteWithTime("Cliecked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top);
 
 	_extents.left = _clickDownExtents.left + xAmount;

@@ -53,6 +53,34 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+/************************** tkZoomBarVerbosity Enumerations **********************/
+typedef		
+[
+	uuid(46640334-BBC8-4237-A307-90D2C812C272),
+	helpstring("tkZoomBarVerbosity"),
+]
+enum tkZoomBarVerbosity
+{
+	zbvZoomOnly = 0,
+	zbvFull = 1,
+	zbvNone = 2,
+} tkZoomBarVerbosity;
+
+/************************** tkZoomBoxStyle Enumerations **********************/
+typedef		
+[
+	uuid(C04A7C5D-6CD8-4671-96B7-0293D5FB81D4),
+	helpstring("tkZoomBoxStyle"),
+]
+enum tkZoomBoxStyle
+{
+	zbsRubberBand = 0,
+	zbsGray = 1,
+	zbsGrayInverted = 2,
+	zbsOrange = 3,
+	zbsBlue = 4,
+} tkZoomBoxStyle;
+
 /************************** tkRasterOverviewCreation Enumerations **********************/
 typedef		
 [
@@ -5373,8 +5401,18 @@ library MapWinGIS
 			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
 			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
  	        [id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
-			[id(226), propput] void ShowZoombar(VARIANT_BOOL nNewValue);
-			[id(226), propget] VARIANT_BOOL ShowZoombar();
+			[id(226), propput] void ShowZoomBar(VARIANT_BOOL nNewValue);
+			[id(226), propget] VARIANT_BOOL ShowZoomBar();
+			[id(227), propput] void AnimationOnZooming(VARIANT_BOOL nNewValue);
+			[id(227), propget] VARIANT_BOOL AnimationOnZooming();
+			[id(228), propput] void InertiaOnPanning(VARIANT_BOOL nNewValue);
+			[id(228), propget] VARIANT_BOOL InertiaOnPanning();
+			[id(229), propput] void ReuseTileBuffer(VARIANT_BOOL nNewValue);
+			[id(229), propget] VARIANT_BOOL ReuseTileBuffer();
+			[id(230), propput] void ZoomBarVerbosity(tkZoomBarVerbosity nNewValue);
+			[id(230), propget] tkZoomBarVerbosity ZoomBarVerbosity();
+			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
+			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
 			//}}AFX_ODL_METHOD
 	};
 

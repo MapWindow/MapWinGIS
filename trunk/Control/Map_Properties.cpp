@@ -283,9 +283,9 @@ VARIANT_BOOL CMapView::GetScalebarVisible(void)
 }
 
 // *****************************************************
-//		ShowZoombar
+//		ShowZoomBar
 // *****************************************************
-void CMapView::SetShowZoombar(VARIANT_BOOL pVal)
+void CMapView::SetShowZoomBar(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_zoombarVisible = pVal;
@@ -294,7 +294,7 @@ void CMapView::SetShowZoombar(VARIANT_BOOL pVal)
 		InvalidateControl();	// TODO: mark main buffer as changed
 	}
 }
-VARIANT_BOOL CMapView::GetShowZoombar(void)
+VARIANT_BOOL CMapView::GetShowZoomBar(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	return _zoombarVisible;
@@ -365,4 +365,74 @@ bool CMapView::ForceDiscreteZoom()
 bool CMapView::HasRotation()
 {
 	return _rotate != NULL && _rotateAngle != 0 && false;		// TODO: restore, reimplement and test
+}
+
+// *****************************************************
+//		AnimationOnZooming
+// *****************************************************
+VARIANT_BOOL CMapView::GetAnimationOnZooming()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomAnimation;
+}
+void CMapView::SetAnimationOnZooming(VARIANT_BOOL nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_zoomAnimation = nNewValue;
+}
+
+// *****************************************************
+//		InertiaOnPanning
+// *****************************************************
+VARIANT_BOOL CMapView::GetInertiaOnPanning()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _panningInertia;
+}
+void CMapView::SetInertiaOnPanning(VARIANT_BOOL nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_panningInertia = nNewValue;
+}
+
+// *****************************************************
+//		ReuseTileBuffer
+// *****************************************************
+VARIANT_BOOL CMapView::GetReuseTileBuffer()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _reuseTileBuffer;
+}
+void CMapView::SetReuseTileBuffer(VARIANT_BOOL nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_reuseTileBuffer = nNewValue;
+}
+
+// *****************************************************
+//		ReuseTileBuffer
+// *****************************************************
+tkZoomBarVerbosity CMapView::GetZoomBarVerbosity()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomBarVerbosity;
+}
+void CMapView::SetZoomBarVerbosity(tkZoomBarVerbosity nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_zoomBarVerbosity = nNewValue;
+}
+
+// *****************************************************
+//		ZoomBoxStyle
+// *****************************************************
+tkZoomBoxStyle CMapView::GetZoomBoxStyle()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomBoxStyle;
+}
+void CMapView::SetZoomBoxStyle(tkZoomBoxStyle nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_zoomBoxStyle = nNewValue;
 }

@@ -49,3 +49,27 @@ public:
 		return 1 - val;
 	}
 };
+
+class DraggingState
+{
+public:	
+	DraggingState(): Start(0,0), Move(0,0), Operation(DragNone){};
+	DraggingOperation Operation;
+	CPoint Start;
+	CPoint Move;
+	bool HasRectangle()
+	{
+		return !(abs(Start.x - Move.x) < 10 && abs(Start.y - Move.y) < 10);
+	}
+	CRect GetRectangle()
+	{
+		CRect r = CRect(Start.x, Start.y, Move.x, Move.y);
+		r.NormalizeRect();
+		return r;
+	};
+	void Clear()
+	{
+		Start.x = Start.y = Move.x = Move.y = 0;
+		Operation = DragNone;
+	}
+};
