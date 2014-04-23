@@ -270,7 +270,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 					{
 						ZoomToTileLevel(zoom + 1);
 					}
-					break;
+					return true;
 				}
 
 			case ZoombarPart::ZoombarMinus:
@@ -283,11 +283,13 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 					{
 						ZoomToTileLevel(zoom - 1);
 					}
-					break;
+					return true;
 				}
+
 			case ZoombarPart::ZoombarHandle:
 				_draggingOperation = DragZoombarHandle;
-				break;
+				return true;
+
 			case ZoombarPart::ZoombarBar:
 				{
 					double ratio = _zoombarParts.GetRelativeZoomFromClick(point.y);
@@ -296,14 +298,15 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 					GetTilesNoRef()->get_MaxZoom(&maxZoom);
 					int zoom = (int)(minZoom + (maxZoom - minZoom) * ratio + 0.5);
 					ZoomToTileLevel(zoom);
+					return true;
 				}
-				break;
+
 			case ZoombarNone: 
 			default: 
 				return false;
 		}
 	}
-	return true;
+	return false;
 }
 
 // ************************************************************
