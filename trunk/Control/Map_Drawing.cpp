@@ -184,11 +184,12 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		{
 			if(_canUseLayerBuffer)
 			{	
-				bool dragging = (_dragging.Start.x != 0 || _dragging.Start.y != 0 ||
- 								 _dragging.Move.x != 0 || _dragging.Move.y != 0);
+				bool dragging = _dragging.Operation == DragPanning &&
+								(_dragging.Start.x != 0 || _dragging.Start.y != 0 ||
+								 _dragging.Move.x != 0 || _dragging.Move.y != 0);
 
-				int x = _dragging.Move.x - _dragging.Start.x;
-				int y = _dragging.Move.y - _dragging.Start.y;
+				int x = dragging ? _dragging.Move.x - _dragging.Start.x : 0;
+				int y = dragging ? _dragging.Move.y - _dragging.Start.y : 0;
 				
 				// update from the layer buffer
 				gBuffer->DrawImage(_layerBitmap, (float)x, (float)y);

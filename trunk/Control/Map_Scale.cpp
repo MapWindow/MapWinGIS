@@ -1467,7 +1467,7 @@ IExtents* CMapView::GetKnownExtents(tkKnownExtents extents)
 		case keGreenwich: box->SetBounds( -0.1, 51.4791 - 0.1, 0.0,  0.1, 51.4791 + 0.1, 0.0); break;
 		case keSiliconValley: box->SetBounds( -122.44, 36.97, 0.0, -122.04, 37.77, 0.0); break;
 	}
-	VARIANT_BOOL vb = this->SetGeographicExtents(box);
+	//VARIANT_BOOL vb = this->SetGeographicExtents(box);
 	return box;
 }
 

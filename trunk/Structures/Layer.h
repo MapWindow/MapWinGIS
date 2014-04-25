@@ -34,7 +34,7 @@ public:
 
 		type = UndefinedLayer;
 		object = NULL;
-		addInfo = NULL;		
+		//addInfo = NULL;		
 		flags = 0;
 		key = A2BSTR("");
 		dynamicVisibility = false;
@@ -52,14 +52,12 @@ public:
 		if( object != NULL )
 			int refcnt = object->Release();
 		object = NULL;
-		delete addInfo; // Was: casting and deleting depending on LayerType...
 	}	
 	
 	CString description;
 	LayerType type;
 	IDispatch * object;
 	//FILE * file;
-	BaseLayerInfo* addInfo;
 	Extent extents;
 	long flags;
 	BSTR key;
@@ -126,6 +124,86 @@ public:
 		}
 		return labels;
 	};
+
+	// ---------------------------------------------------------
+	//	 Returning projection of underlying object
+	// ---------------------------------------------------------
+	IGeoProjection* GetGeoProjection()
+	{
+		IGeoProjection* gp = NULL;
+		if(this->type == ShapefileLayer)
+		{
+			IShapefile * sf = NULL;
+			if (this->QueryShapefile(&sf))
+			{
+				// simply grab the object from sf
+				sf->get_GeoProjection(&gp);
+				sf->Release(); sf = NULL;
+			}
+		}
+		else if (this->type == ImageLayer)
+		{
+			IImage * img = NULL;
+			if (this->QueryImage(&img))
+			{
+				// there is no GeoProjection object; so create it from the string
+				CComBSTR bstr;
+				img->GetProjection(&bstr);
+				if (bstr.Length() > 0)
+				{
+					VARIANT_BOOL vb;
+					GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&gp);
+					gp->ImportFromAutoDetect(bstr, &vb);
+					if (!vb)
+					{
+						gp->Release();
+						gp = NULL;
+					}
+				}
+				img->Release(); img = NULL;
+			}
+		}
+		return gp;
+	}
+
+	// ---------------------------------------------------------
+	//	 UpdateExtentsFromDatasource
+	// ---------------------------------------------------------
+	void UpdateExtentsFromDatasource()
+	{
+		if(this->type == ShapefileLayer)
+		{
+			IShapefile * sf = NULL;
+			if (this->QueryShapefile(&sf))
+			{
+				IExtents * box = NULL;
+				sf->get_Extents(&box);
+				double xm,ym,zm,xM,yM,zM;
+				box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
+				this->extents = Extent(xm,xM,ym,yM);
+				box->Release();
+				box = NULL;
+				sf->Release();
+			}
+		}
+		else if (this->type == ImageLayer)
+		{
+			IImage * img = NULL;
+			if (this->QueryImage(&img))
+			{
+				double xllCenter = 0, yllCenter = 0, dx = 0, dy = 0;
+				long height = 0, width = 0;
+				img->get_OriginalXllCenter(&xllCenter);
+				img->get_OriginalYllCenter(&yllCenter);
+				img->get_OriginalHeight(&height);
+				img->get_OriginalWidth(&width);
+				img->get_OriginalDX(&dx);
+				img->get_OriginalDY(&dy);
+				this->extents = Extent( xllCenter, xllCenter + dx*width, yllCenter, yllCenter + dy*height );
+				img->Release();
+			}
+		}
+	}
 };
 
 

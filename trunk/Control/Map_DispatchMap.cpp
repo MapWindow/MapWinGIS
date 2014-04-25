@@ -261,6 +261,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "ReuseTileBuffer", dispidReuseTileBuffer, GetReuseTileBuffer, SetReuseTileBuffer, VT_BOOL)
 	DISP_PROPERTY_EX_ID(CMapView, "ZoomBarVerbosity", dispidZoomBarVerbosity, GetZoomBarVerbosity, SetZoomBarVerbosity, VT_I2)
 	DISP_PROPERTY_EX_ID(CMapView, "ZoomBoxStyle", dispidZoomBoxStyle, GetZoomBoxStyle, SetZoomBoxStyle, VT_I2)
+	DISP_PROPERTY_EX_ID(CMapView, "ProjectionMismatchBehavior", dispidProjectionMismatchBehavior, GetProjectionMismatchBehavior, SetProjectionMismatchBehavior, VT_I2)
 
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

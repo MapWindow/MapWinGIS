@@ -577,7 +577,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	DraggingOperation operation = _dragging.Operation;
 
 	_leftButtonDown = FALSE;
-	_dragging.Operation = DragNone;
+	
 	ReleaseCapture();
 
 	switch(operation)
@@ -594,6 +594,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 			ClearPanningList();
 
 			// we need to redraw the layers
+			_dragging.Operation = DragNone;		// don't clear dragging state until the end of animation; it won't offset the layers
 			Redraw2(tkRedrawType::RedrawAll);
 			break;
 		case DragZoombarHandle:
@@ -601,8 +602,10 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 				Debug::WriteError("Invalid target zoom for zoom bar");
 
 			ZoomToTileLevel(_zoombarTargetZoom);
+			_dragging.Operation = DragNone;
 			break;
 		case DragZoombox:
+			_dragging.Operation = DragNone;
 			if (!_dragging.HasRectangle())
 			{
 				ZoomIn( m_zoomPercent );

@@ -298,6 +298,7 @@ void CMapView::SetDefaults()
 	_reuseTileBuffer = TRUE;
 	_zoomAnimation = TRUE;
 	_zoomBoxStyle = tkZoomBoxStyle::zbsGray;
+	_projectionMismatchBehavior = mbIgnore;
 
 	((CTiles*)_tiles)->SetDefaults();
 	((CMeasuring*)_measuring)->SetDefaults();
@@ -570,6 +571,11 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		PX_Long( pPX, "ZoomBoxStyle", temp, 1 );			// zbsGray
 		_zoomBoxStyle = (tkZoomBoxStyle)temp;
 
+
+		temp = (long)_projectionMismatchBehavior;
+		PX_Long( pPX, "ProjectionMistmatchBehavior", temp, 0 );			// mbIgnore
+		_projectionMismatchBehavior = (tkMismatchBehavior)temp;
+
 		m_mapCursor = 0;	// why not to save it?
 	}
 	catch(...)
@@ -688,14 +694,5 @@ void CMapView::ClearPanningList()
 	_panningList.clear();
 	_panningLock.Unlock();
 }
-
-
-
-
-
-
-
-
-
 
 

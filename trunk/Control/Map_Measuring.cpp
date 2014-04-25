@@ -73,7 +73,7 @@ void CMapView::DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g)
 				break;
 			case zbsGray:
 				{
-					Gdiplus::SolidBrush brush(Gdiplus::Color(75, 192, 192, 192));
+					Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
 					Gdiplus::Pen pen(Gdiplus::Color(255, 192, 192, 192));
 					g->FillRectangle(&brush, rect);
 					g->DrawRectangle(&pen, rect);
@@ -101,7 +101,7 @@ void CMapView::DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g)
 					Gdiplus::Rect r2(0,0, r.left, _viewHeight);
 					Gdiplus::Rect r3(r.left, r.bottom, r.Width(), _viewHeight - r.bottom);
 					Gdiplus::Rect r4(r.right, 0, _viewWidth - r.right, _viewHeight);
-					Gdiplus::SolidBrush brush(Gdiplus::Color(75, 192, 192, 192));
+					Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
 					
 					g->FillRectangle(&brush, r1);
 					g->FillRectangle(&brush, r2);

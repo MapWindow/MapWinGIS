@@ -76,7 +76,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkOUT_OF_RANGE_0_TO_1:
 			return "Value was out of range (0 to 1)";
 		case tkCANT_COCREATE_COM_INSTANCE:
-			return "Unable to retreive COM object from dll";
+			return "Unable to retrieve COM object from dll";
 		case tkFAILED_TO_ALLOCATE_MEMORY:
 			return "Failed to allocate memory";
 		case tkUNSUPPORTED_FORMAT:
@@ -355,9 +355,9 @@ const char * ErrorMsg( long ErrorCode )
 		case tkOGR_INVALID_HANDLE:
 			return "OGR: invalid handle";
 		case tkFAILED_TO_REPROJECT:
-			return "Failed to reproject";
+			return "Failed to reproject shapefile.";
 		case tkPROJECTION_NOT_INITIALIZED:
-			return "Geoprojection is not initilized";
+			return "Geoprojection is not initialized";
 		case tkPRJ_FILE_EXISTS:
 			return "Projection file with such name already exists";
 		case tkTRANSFORMATION_NOT_INITIALIZED:
@@ -366,6 +366,14 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to copy projection";
 		case tkPROJECTION_IS_FROZEN:
 			return "It's not allowed to change GeoProjection object which is used by map.";
+		case tkGEOGRAPHIC_PROJECTION_EXPECTED:
+			return "Projection mismatch. Map uses geographic coordinate system while data seems to be outside [-180;180],[-90;90] bounds.";
+		case tkMISSING_GEOPROJECTION:
+			return "Can't add layer to the map. No metadata about projection can be found.";
+		case tkPROJECTION_MISMATCH:
+			return "Can't add layer to the map. Layer projection doesn't match map projection.";
+		case tkNO_REPROJECTION_FOR_IMAGES:
+			return "Can't add layer to the map. Layer projection doesn't match map projection. Automatic transformation isn't supported for images.";
 
 		//2001-2200 = tiles
 		case tkINVALID_PROVIDER_ID:

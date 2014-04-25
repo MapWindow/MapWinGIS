@@ -416,6 +416,39 @@ ZoombarPart CMapView::ZoombarHitTest(int x, int y)
 }
 
 // ****************************************************************
+//		DrawGradientShadowForPath()
+// ****************************************************************
+void DrawGradientShadowForPath(Gdiplus::GraphicsPath& path, Gdiplus::Graphics* g)
+{
+	bool enableShadow = false;   // doesn't look well; skip it for now
+	if (enableShadow)
+	{
+		float shadowOffset = 2.0f;
+		g->TranslateTransform(0.0f, shadowOffset);
+
+		// drawing shadow
+		Gdiplus::GraphicsPath* outline = path.Clone();
+		Gdiplus::Pen p2(Gdiplus::Color::Gray, 4.0f);
+		outline->Widen(&p2);
+		Gdiplus::PathGradientBrush pathBrush(outline);
+		pathBrush.SetWrapMode(Gdiplus::WrapMode::WrapModeClamp);
+		Gdiplus::Color colors[3];
+		colors[0] = Gdiplus::Color::Transparent;
+		colors[1] = Gdiplus::Color(180, 0, 0, 0);
+		colors[2] = Gdiplus::Color(180, 0, 0, 0);
+
+		float positions[3];
+		positions[0] = 0.0f;
+		positions[1] = 0.7f;
+		positions[2] = 1.0f;
+		pathBrush.SetInterpolationColors(&(colors[0]), &(positions[0]), 3);
+		g->FillPath(&pathBrush, outline);
+
+		g->TranslateTransform(0, -shadowOffset);
+	}
+}
+
+// ****************************************************************
 //		DrawZoombar()
 // ****************************************************************
 void CMapView::DrawZoombar(Gdiplus::Graphics* g) 
@@ -429,19 +462,26 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 		ScreenToClient(&pnt);
 
 	float boxSize = 17.0f;
-	float cornerRadius = 4.0f;
+	float cornerRadius = 5.0f;
 	
 	Gdiplus::GraphicsPath path;
     Gdiplus::RectF bounds(0.0f,0.0f,boxSize,boxSize);
-	path.AddArc(bounds.X, bounds.Y, cornerRadius, cornerRadius, 180.0f, 90.0f);
     path.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y, cornerRadius, cornerRadius, 270.0f, 90.0f);
     path.AddArc(bounds.X + bounds.Width - cornerRadius, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 0.0f, 90.0f);
     path.AddArc(bounds.X, bounds.Y + bounds.Height - cornerRadius, cornerRadius, cornerRadius, 90.0f, 90.0f);
+	path.AddArc(bounds.X, bounds.Y, cornerRadius, cornerRadius, 180.0f, 90.0f);
     path.CloseAllFigures();
 
-	// TODO: set length of the bar depending on the number of levels; 
-	// so that notches can be positioned with integer coordinates
-	float x = 15.0f, y = 15.0f, height = 160.0f;		
+	ITiles* tiles = this->GetTilesNoRef();
+	int maxZoom, minZoom;
+	tiles->get_MinZoom(&minZoom);
+	tiles->get_MaxZoom(&maxZoom);
+
+	float notchStep = 7;
+	float lineOffset = 8.0f;
+	float lineHeight = (maxZoom - minZoom) * notchStep;
+	float x = 15.0f, y = 15.0f;
+	float height =lineHeight + boxSize + 2 * lineOffset;
 	
 	Gdiplus::Matrix m;
 	g->GetTransform(&m);
@@ -455,6 +495,7 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	_zoombarParts.PlusButton.SetRect((int)x, (int)y, (int)(x + boxSize), (int)(y + boxSize));
 	BOOL highlight = _zoombarParts.PlusButton.PtInRect(pnt);
 	g->TranslateTransform(x, y);
+	DrawGradientShadowForPath(path, g);
 	g->FillPath(&_brushWhite, &path);
 	g->DrawPath( highlight ? &_penDarkGray : &_penGray, &path);
 	g->SetTransform(&m);
@@ -463,6 +504,7 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	_zoombarParts.MinusButton.SetRect((int)x, (int)(y + height), (int)(x + boxSize), (int)(y + height + boxSize));
 	highlight = _zoombarParts.MinusButton.PtInRect(pnt);
 	g->TranslateTransform(x, y + height);
+	DrawGradientShadowForPath(path, g);
 	g->FillPath(&_brushWhite, &path);
 	g->DrawPath(highlight ? &_penDarkGray : &_penGray, &path);
 	g->SetTransform(&m);
@@ -481,16 +523,11 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	//	 Handle position
 	// ---------------------------------------------------
 	float lineWidth = 5.0f;
-	float lineOffset = 8.0f;
-	float lineHeight = height - boxSize - 2*lineOffset;
+	
 	float handleY = 0.0f;
 	bool handleHighlight = false;
 	int zoom = this->GetCurrentZoom();
 	int targetZoom = -1;					// for handle dragging
-	ITiles* tiles = this->GetTilesNoRef();
-	int maxZoom, minZoom;
-	tiles->get_MinZoom(&minZoom);
-	tiles->get_MaxZoom(&maxZoom);
 
 	bool zooming = _dragging.Operation == DragZoombarHandle;
 	if (zooming)
@@ -509,8 +546,12 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 		targetZoom = (int)Utility::Rint(maxZoom - (maxZoom - minZoom) * ratio);
 		_zoombarTargetZoom = targetZoom;
 
+		// backward calculation to snap to the level
+		float position = (float)((maxZoom - targetZoom) / ((double)(maxZoom - minZoom)) * lineHeight);
+		handleY = (float)(int)(y + boxSize + lineOffset + position - boxSize/4.0f + 0.5);
+
 		// adjust for the height of handle
-		handleY -= boxSize/4.0f;
+		//handleY -= boxSize/4.0f;
 		handleY = (float)Utility::Rint(handleY);
 		
 		handleHighlight = true;
@@ -574,8 +615,14 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	Gdiplus::RectF line(x + boxSize/2.0f - lineWidth/2.0f, y + boxSize + lineOffset, lineWidth, lineHeight);
 	_zoombarParts.Bar.SetRect((int)x, (int)line.Y, (int)(x + boxSize), (int)(line.Y + line.Height));  // include the width of handle; not the actual line only
 	highlight = _zoombarParts.Bar.PtInRect(pnt);
+	
+	Gdiplus::GraphicsPath path3;
+	path3.AddRectangle(line);
+	DrawGradientShadowForPath(path3, g);
+	
 	g->FillRectangle(&_brushWhite, line);
 	g->DrawRectangle(highlight && !handleHighlight ? &_penDarkGray : &_penGray, line);
+
 	
 	// notches for zoom levels
 	g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
@@ -602,6 +649,7 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 
 	// drawing the handle
 	g->TranslateTransform(x, handleY);		// boxSize/4.0 = center of handle is the position
+	DrawGradientShadowForPath(path2, g);
 	g->FillPath(&_brushWhite, &path2);
 	g->DrawPath(handleHighlight ? &_penDarkGray : &_penGray, &path2);
 	g->SetTransform(&m);

@@ -53,6 +53,21 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+/************************** tkMismatchBehavior Enumerations **********************/
+typedef		
+[
+	uuid(DFBADBA7-93E8-4da2-AB02-432613A3699D),
+	helpstring("tkMismatchBehavior"),
+]
+enum tkMismatchBehavior
+{
+	mbIgnore = 0,
+	mbCheckLoose = 1,
+	mbCheckStrict = 2,
+	mbCheckLooseAndReproject = 3,
+	mbCheckStrictAndReproject = 4,
+} tkMismatchBehavior;
+
 /************************** tkZoomBarVerbosity Enumerations **********************/
 typedef		
 [
@@ -5413,6 +5428,8 @@ library MapWinGIS
 			[id(230), propget] tkZoomBarVerbosity ZoomBarVerbosity();
 			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
 			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
+			[id(232), propput] void ProjectionMismatchBehavior(tkMismatchBehavior nNewValue);
+			[id(232), propget] tkMismatchBehavior ProjectionMismatchBehavior();
 			//}}AFX_ODL_METHOD
 	};
 

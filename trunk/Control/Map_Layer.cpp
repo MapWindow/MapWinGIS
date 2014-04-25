@@ -291,17 +291,9 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		
 		l = new Layer();
 		l->object = ishp;
-
-		IExtents * box = NULL;
-		ishp->get_Extents(&box);
-		double xm,ym,zm,xM,yM,zM;
-		box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-		l->extents = Extent(xm,xM,ym,yM);
-		box->Release();
-		box = NULL;
-		
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
 		l->type = ShapefileLayer;
+		l->UpdateExtentsFromDatasource();
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
 		
 		for(size_t i = 0; i < _allLayers.size(); i++ )
 		{
@@ -320,9 +312,6 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 
 		_activeLayers.push_back(layerHandle);
-
-		//ShpfileType type;
-		//ishp->get_ShapefileType(&type);
 	}
 
 	// grids aren't added directly; an image representation is created first 
@@ -395,6 +384,9 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		
 		l = new Layer();
 		l->object = iimg;
+		l->type = ImageLayer;
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
+		l->UpdateExtentsFromDatasource();
 
 		bool inserted = false;
 		for(unsigned int i = 0; i < _allLayers.size() && !inserted; i++ )
@@ -414,81 +406,22 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 		_activeLayers.push_back(layerHandle);
 
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
-		l->type = ImageLayer;
-
-		double xllCenter = 0, yllCenter = 0, dx = 0, dy = 0;
-		long height = 0, width = 0;
-		iimg->get_OriginalXllCenter(&xllCenter);
-		iimg->get_OriginalYllCenter(&yllCenter);
-		iimg->get_OriginalHeight(&height);
-		iimg->get_OriginalWidth(&width);
-		iimg->get_OriginalDX(&dx);
-		iimg->get_OriginalDY(&dy);
-
-		l->extents = Extent( xllCenter, xllCenter + dx*width, yllCenter, yllCenter + dy*height );
-
-		ImageLayerInfo * ili = new ImageLayerInfo();
-		l->addInfo = ili;
-
+		
 		// try to save pixels in case image grouping is enabled
 		if (_canUseImageGrouping)
 		{
-			if (!((CImageClass*)iimg)->SaveNotNullPixels())	// analysing pixels...
+			if (!((CImageClass*)iimg)->SaveNotNullPixels())	// analyzing pixels...
 				iimg->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more, before transparency values will be changed
 		}
 	}
 	
-	// if we don't have a projection, let's try and grab projection from it
-	if (_grabProjectionFromData && (ishp || iimg))
+	GrabLayerProjection(l);
+
+	// do projection mismatch check
+	if (!CheckLayerProjection(l))
 	{
-		VARIANT_BOOL isEmpty = VARIANT_FALSE;
-		GetMapProjection()->get_IsEmpty(&isEmpty);
-		if (isEmpty)
-		{
-			IGeoProjection* proj = NULL;
-			if (ishp)
-			{
-				// simply grab the object from sf
-				ishp->get_GeoProjection(&proj);
-			}
-			else
-			{
-				// there is no GeoProjection object; so create it from the string
-				CComBSTR bstr;
-				iimg->GetProjection(&bstr);
-				if (bstr.Length() > 0)
-				{
-					VARIANT_BOOL vb;
-					GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&proj);
-					proj->ImportFromAutoDetect(bstr, &vb);
-					if (!vb)
-					{
-						proj->Release();
-						proj = NULL;
-					}
-				}
-			}
-			
-			if (proj)
-			{
-				proj->get_IsEmpty(&isEmpty);
-				if (!isEmpty)
-				{
-					IGeoProjection* newProj = NULL;
-					proj->Clone(&newProj);
-					if (!newProj)
-					{
-						ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
-					}
-					else
-					{
-						this->SetGeoProjection(newProj);
-					}
-				}
-				proj->Release();
-			}
-		}
+		LockWindow( lmUnlock );
+		return -1;
 	}
 
 	// set initial extents
@@ -496,7 +429,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	{
 		if( _activeLayers.size() == 1 && pVisible)
 		{	
-			double xrange = l->extents.right - l->extents.left;
+			double xrange = l->extents.right - l->extents.left;			// TODO: add Extent.ApplyPad function
 			double yrange = l->extents.top - l->extents.bottom;
 			_extents.left = l->extents.left - xrange*m_extentPad;
 			_extents.right = l->extents.right + xrange*m_extentPad;
@@ -513,7 +446,166 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 }
 
 // ***************************************************************
-//		RemoveLayer()
+//		GrabLayerProjection()
+// ***************************************************************
+void CMapView::GrabLayerProjection( Layer* layer )
+{
+	// if we don't have a projection, let's try and grab projection from it
+	if (_grabProjectionFromData && layer)
+	{
+		VARIANT_BOOL isEmpty = VARIANT_FALSE;
+		GetMapProjection()->get_IsEmpty(&isEmpty);
+		if (isEmpty)
+		{
+			IGeoProjection* gp =  layer->GetGeoProjection();
+			if (gp)
+			{
+				gp->get_IsEmpty(&isEmpty);
+				if (!isEmpty)
+				{
+					IGeoProjection* newProj = NULL;
+					gp->Clone(&newProj);
+					if (!newProj)
+					{
+						ErrorMsg(tkFAILED_TO_COPY_PROJECTION);
+					}
+					else
+					{
+						this->SetGeoProjection(newProj);
+					}
+				}
+				gp->Release();
+			}
+		}
+	}
+}
+
+// ***************************************************************
+//		CheckLayerProjection()
+// ***************************************************************
+bool CMapView::CheckLayerProjection( Layer* layer )
+{
+	if (_projectionMismatchBehavior == mbIgnore)
+		return true;
+
+	IGeoProjection* mapProj = GetMapProjection();
+	VARIANT_BOOL isGeographic;
+	mapProj->get_IsGeographic(&isGeographic);
+
+	// compare projection of layer with one for the map
+	VARIANT_BOOL isEmpty = VARIANT_FALSE;
+	IGeoProjection* gp =  layer->GetGeoProjection();
+	if (gp)
+	{
+		gp->get_IsEmpty(&isEmpty);
+	}
+	
+	bool result = false;
+	if (isEmpty)
+	{
+		switch (_projectionMismatchBehavior)
+		{
+		case mbCheckLoose:
+		case mbCheckLooseAndReproject:
+			if (isGeographic &&
+				(layer->extents.left < -180.0 || layer->extents.right > 180.0 || 
+				layer->extents.top > 90.0 || layer->extents.bottom < -90.0))
+			{
+				ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
+				result = false;
+			}
+			else {
+				// nothing else to check; since it's loose check - let it be
+				result = true;
+			}
+		case mbCheckStrict:
+		case mbCheckStrictAndReproject:
+			// since it's strict, we want to be sure
+			ErrorMessage(tkMISSING_GEOPROJECTION);
+			result = false;
+		}
+		if (gp)
+			gp->Release();
+		return result;
+	}
+	else
+	{
+		IExtents* ext = NULL;
+		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
+		ext->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
+
+		VARIANT_BOOL match;
+		GetMapProjection()->get_IsSameExt(gp, ext, 20, &match);
+		ext->Release();
+		gp->Release();
+
+		if (match)
+		{
+			return true;
+		}
+		else
+		{
+			if (_projectionMismatchBehavior == mbCheckStrict || 
+				_projectionMismatchBehavior == mbCheckLoose)
+			{
+				// no transformation option is chosen, so give up
+				ErrorMessage(tkPROJECTION_MISMATCH);
+				return false;
+			}
+			
+			
+			if (layer->type == ImageLayer)
+			{
+				ErrorMessage(tkNO_REPROJECTION_FOR_IMAGES);
+				return false;
+			}
+			
+			// let's try to do a transformation
+			if (layer->type == ShapefileLayer)
+			{
+				IShapefile* sf = NULL;
+				layer->QueryShapefile(&sf);
+				if (sf)
+				{
+					long numShapes;
+					sf->get_NumShapes(&numShapes);
+					
+					long count;
+					IShapefile* sfNew = NULL;
+					sf->Reproject(GetMapProjection(), &count, &sfNew);
+
+					result = false;
+					if (!sfNew || 
+						(numShapes != count && _projectionMismatchBehavior == mbCheckStrictAndReproject))
+					{
+						if (sfNew)
+							sfNew->Release();
+						ErrorMessage(tkFAILED_TO_REPROJECT);
+						return false;
+					}
+					else
+					{
+						// let's substitute original file with this one
+						// don't close the original shapefile; use may still want to interact with it
+						sf->Release();				// release the original reference
+						layer->object = sfNew;		// TODO: save it to the disk as an option
+						layer->UpdateExtentsFromDatasource();
+						return true;
+					}
+
+					sf->Release();
+					return result;
+				}
+			}
+
+			// in case of some omissions or new layer types
+			return _projectionMismatchBehavior == mbCheckLooseAndReproject ? true : false;		
+		}
+	}
+}
+
+// ***************************************************************
+//		RemoveLayerCore()
 // ***************************************************************
 void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 {

@@ -573,6 +573,8 @@ protected:
 	afx_msg void SetZoomBarVerbosity(tkZoomBarVerbosity newVal);
 	afx_msg tkZoomBoxStyle GetZoomBoxStyle();
 	afx_msg void SetZoomBoxStyle(tkZoomBoxStyle newVal);
+	afx_msg tkMismatchBehavior GetProjectionMismatchBehavior();
+	afx_msg void SetProjectionMismatchBehavior(tkMismatchBehavior newVal);
 
 	#pragma endregion
 
@@ -710,6 +712,7 @@ public:
 	tkCoordinatesDisplay _showCoordinates;
 	tkScalebarUnits  _scalebarUnits;
 	tkZoomBarVerbosity _zoomBarVerbosity;
+	tkMismatchBehavior _projectionMismatchBehavior;
 	
 	CString _versionNumber;
 	double _mouseWheelSpeed;
@@ -971,6 +974,8 @@ private:
 	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target);
 	void TurnOffPanning();
 	void DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g);
+	bool CheckLayerProjection( Layer* layer );
+	void GrabLayerProjection( Layer* layer );
 #pragma endregion
 };
 
