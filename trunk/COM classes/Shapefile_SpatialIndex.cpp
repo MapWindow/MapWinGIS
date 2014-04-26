@@ -394,7 +394,7 @@ void CShapefile::ClearTempQTree()
 // **********************************************************************
 // 						GetTempQtree()				           
 // **********************************************************************
-QTree* CShapefile::GetTempQtree()
+QTree* CShapefile::GetTempQTree()
 {
 	return _tempTree;
 }

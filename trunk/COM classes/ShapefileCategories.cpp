@@ -1038,94 +1038,197 @@ STDMETHODIMP CShapefileCategories::get_CategoryIndex(IShapefileCategory* categor
 }
 
 // ********************************************************
+//     GenerateColorForPolygons()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, VARIANT_BOOL* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = VARIANT_FALSE;
+	
+	// -------------------------------------------------
+	// parameter validation
+	// -------------------------------------------------
+	if(!m_shapefile) {
+		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
+		return S_FALSE;
+	}
+
+	ShpfileType shpType;
+	m_shapefile->get_ShapefileType(&shpType);
+	if (Utility::ShapeTypeConvert2D(shpType) != SHP_POLYGON)
+	{
+		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+		return S_FALSE;
+	}
+
+	bool tempScheme = false;
+	if (!scheme)
+	{
+		// let's create a scheme if none is provided
+		GetUtils()->CreateInstance(idColorScheme, (IDispatch**)&scheme);
+		scheme->AddBreak(0.0, RGB(255, 179, 71));
+		scheme->AddBreak(0.1, RGB(253, 253, 150));
+		scheme->AddBreak(0.2, RGB(119, 221, 119));
+		scheme->AddBreak(0.3, RGB(174, 198, 207));
+		scheme->AddBreak(0.4, RGB(222, 165, 164));
+		scheme->AddBreak(0.5, RGB(255, 105, 97));
+		scheme->AddBreak(0.6, RGB(130, 105, 83));
+		scheme->AddBreak(0.7, RGB(100, 20, 100));
+		scheme->AddBreak(1.0, RGB(207, 207, 196));
+		//scheme->SetColors4(PredefinedColorScheme::SummerMountains);
+		tempScheme= true;
+	}
+	
+	// -------------------------------------------------
+	//  do the processing
+	// -------------------------------------------------
+	Coloring::ColorGraph* graph = ((CShapefile*)m_shapefile)->GeneratePolygonColors();
+	if (graph)
+	{
+		int colorCount = graph->GetColorCount();
+		Debug::WriteLine("Has non-colored nodes: %d", graph->HasNonColoredNodes());
+		Debug::WriteLine("Number of colors used: %d", colorCount);
+
+		// -------------------------------------------------
+		// create categories
+		// -------------------------------------------------
+		int firstCategory = m_categories.size();
+		long numBreaks;
+		scheme->get_NumBreaks(&numBreaks);
+		for(int i = 0; i < colorCount; i++)
+		{
+			CString s;
+			s.Format("Color %d", i + 1);
+			IShapefileCategory* ct = NULL;
+			this->Add(A2BSTR(s), &ct);
+			CDrawingOptionsEx* opt = ((CShapefileCategory*)ct)->get_UnderlyingOptions();
+			
+			OLE_COLOR clr;
+			if (colorCount <= numBreaks)
+			{
+				// we can use colors without interpolation
+				scheme->get_BreakColor(i, &clr);
+			}
+			else
+			{
+				// must use interpolation
+				scheme->get_GraduatedColor(i/(double)colorCount, &clr);
+			}
+
+			opt->fillColor = clr;
+			ct->Release();
+		}
+
+		// -------------------------------------------------
+		// apply indices to polygons
+		// -------------------------------------------------
+		for(size_t i = 0; i < graph->nodes.size(); i++)
+		{
+			int shapeId = graph->nodes[i]->id;
+			m_shapefile->put_ShapeCategory(shapeId, firstCategory + graph->nodes[i]->color);
+		}
+		delete graph;
+	}
+
+	if (tempScheme)
+		scheme->Release();
+	return S_OK;
+}
+
+// ********************************************************
 //     Sort()
 // ********************************************************
-//STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, tkGroupOperation Operation, VARIANT_BOOL* retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	*retVal = VARIANT_FALSE;
-//
-//	if (!m_shapefile)
-//		return S_OK;
-//
-//	LONG numFields;
-//	m_shapefile->get_NumFields(&numFields);
-//	if (FieldIndex < 0 || FieldIndex >= numFields)
-//	{
-//		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-//		return S_OK;
-//	}
-//	
-//	if (m_categories.size() < 2)
-//	{
-//		// nothing to sort
-//		return S_OK;
-//	}
-//
-//	ITable* table = NULL;
-//	m_shapefile->get_Table(&table);
-//	if (!table)
-//	{
-//		return S_OK;
-//	}
-//
-//	IField* fld = NULL;
-//	table->get_Field(FieldIndex, &fld);
-//	FieldType type;
-//	fld->get_Type(&type);
-//	fld->Release();
-//	CComVariant valDefault;
-//	if (type == DOUBLE_FIELD || INTEGER_FIELD)
-//	{
-//		valDefault = 0;
-//	}
-//	else
-//	{
-//		valDefault = "";
-//	}
-//		
-//	multimap <CComVariant, IShapefileCategory*> map;
-//
-//	for (unsigned int i = 0; i < m_categories.size(); i++)
-//	{
-//		VARIANT_BOOL vbretval;
-//		CComVariant var = NULL;
-//		BSTR expr;
-//		m_categories[i]->get_Expression(&expr);
-//		table->CalculateStat(FieldIndex, Operation, expr, &var, &vbretval);
-//
-//		if (vbretval)
-//		{
-//			pair<CComVariant, IShapefileCategory*> myPair(var, m_categories[i]);	
-//			map.insert(myPair);	
-//		}
-//		else
-//		{
-//			pair<CComVariant, IShapefileCategory*> myPair(valDefault, m_categories[i]);	
-//			map.insert(myPair);	
-//		}
-//	}
-//	
-//	if (table)
-//	{
-//		table->Release();
-//		table = NULL;
-//	}
-//	
-//	// returning result
-//	multimap <CComVariant, IShapefileCategory*>::iterator p;
-//	p = map.begin();
-//		
-//	int i = 0;
-//	ASSERT(map.size() == m_categories.size());
-//	
-//	while(p != map.end())
-//	{
-//		IShapefileCategory* cat = p->second;
-//		m_categories[i] = p->second;
-//		i++; p++;
-//	}
-//
-//	*retVal = VARIANT_TRUE;
-//	return S_OK;
-//}
+// TODO: implement
+STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	if (!m_shapefile)
+		return S_OK;
+
+	LONG numFields;
+	m_shapefile->get_NumFields(&numFields);
+	if (FieldIndex < 0 || FieldIndex >= numFields)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+	
+	if (m_categories.size() < 2)
+	{
+		// nothing to sort
+		return S_OK;
+	}
+
+	ITable* table = NULL;
+	m_shapefile->get_Table(&table);
+	if (!table)
+	{
+		return S_OK;
+	}
+
+	IField* fld = NULL;
+	table->get_Field(FieldIndex, &fld);
+	FieldType type;
+	fld->get_Type(&type);
+	fld->Release();
+	CComVariant valDefault;
+	if (type == DOUBLE_FIELD || INTEGER_FIELD)
+	{
+		valDefault = 0;
+	}
+	else
+	{
+		valDefault = "";
+	}
+		
+	multimap <CComVariant, IShapefileCategory*> map;
+
+	for (unsigned int i = 0; i < m_categories.size(); i++)
+	{
+		VARIANT_BOOL vbretval = VARIANT_FALSE;
+		CComVariant var = NULL;
+		BSTR expr;
+		m_categories[i]->get_Expression(&expr);
+
+		// TODO: implement
+		//table->CalculateStat(FieldIndex, Operation, expr, &var, &vbretval);
+
+		if (vbretval)
+		{
+			pair<CComVariant, IShapefileCategory*> myPair(var, m_categories[i]);	
+			map.insert(myPair);	
+		}
+		else
+		{
+			pair<CComVariant, IShapefileCategory*> myPair(valDefault, m_categories[i]);	
+			map.insert(myPair);	
+		}
+	}
+	
+	if (table)
+	{
+		table->Release();
+		table = NULL;
+	}
+	
+	// returning result
+	multimap <CComVariant, IShapefileCategory*>::iterator p;
+	p = map.begin();
+		
+	int i = 0;
+	ASSERT(map.size() == m_categories.size());
+	
+	while(p != map.end())
+	{
+		IShapefileCategory* cat = p->second;
+		m_categories[i] = p->second;
+		i++; p++;
+	}
+
+	*retVal = VARIANT_TRUE;
+	return S_OK;
+}
+
+

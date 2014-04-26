@@ -28,6 +28,8 @@
 #include <GeosHelper.h>
 #include "FieldStatOperations.h"
 #include "Shape.h"
+#include "ColoringGraph.h"
+#include "GeometryOperations.h"
 
 #ifdef SERIALIZE_POLYGONS
 	#include <fstream>
@@ -1934,7 +1936,7 @@ cleaning:
 // ********************************************************************
 void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile* sfResult)
 {
-	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 	
 	long numShapesSubject, numShapesClip;		
 	this->get_NumShapes(&numShapesSubject);		
@@ -2036,7 +2038,7 @@ cleaning:
 // ********************************************************************
 void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, IShapefile* sfResult)
 {
-	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 	
 	long numShapesSubject, numShapesClip;		
 	this->get_NumShapes(&numShapesSubject);		
@@ -2164,14 +2166,14 @@ cleaning:
 // ******************************************************************
 //		IntersectionGEOS()
 // ******************************************************************
-// shapesToExclude - vector to return shapes sum of intersected results for those is equasl to the initial area
+// shapesToExclude - vector to return shapes sum of intersected results for those is equals to the initial area
 // such shapes can be excluded from further calculation in case of union; 
 void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip, VARIANT_BOOL SelectedOnlyClip, 
 								  IShapefile* sfResult, map<long, long>* fieldMap, 
 								  std::set<int>* subjectShapesToSkip, 
 								  std::set<int>* clippingShapesToSkip)
 {
-	QTree* qTree = ((CShapefile*)sfClip)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 	
 	long numShapesSubject, numShapesClip;		
 	this->get_NumShapes(&numShapesSubject);		
@@ -2307,7 +2309,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 									  std::set<int>* subjectShapesToSkip, 
 								      std::set<int>* clippingShapesToSkip)
 {
-	QTree* qTree = ((CShapefile*)sfClip)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 	
 	long numShapesSubject, numShapesClip;		
 	this->get_NumShapes(&numShapesSubject);		
@@ -2502,7 +2504,7 @@ cleaning:
 void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverlay, VARIANT_BOOL SelectedOnlyOverlay, 
 								IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
-	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfOverlay)->GetTempQTree();
 
 	long numShapesSubject, numShapesClip;		
 	sfSubject->get_NumShapes(&numShapesSubject);		
@@ -2658,7 +2660,7 @@ void SerializePolygon(ofstream& out, ClipperLib::Polygons* poly)
 void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedOnlySubject, IShapefile* sfClip, VARIANT_BOOL SelectedOnlyClip, 
 								   IShapefile* sfResult, map<long, long>* fieldMap, set<int>* shapesToSkip)
 {
-	QTree* qTree = ((CShapefile*)sfClip)->GetTempQtree();
+	QTree* qTree = ((CShapefile*)sfClip)->GetTempQTree();
 	
 	long numShapesSubject, numShapesClip;		
 	sfSubject->get_NumShapes(&numShapesSubject);		
@@ -3743,5 +3745,121 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	this->ClearValidationList();
 	ValidateOutput(retVal, "Segmentize");
 	return S_OK;
+
+	GeneratePolygonColors();
+}
+#pragma endregion
+
+#pragma region Coloring
+
+double CalcMinAngle(GEOSGeometry* geom, double& xCent, double& yCent)
+{
+	double minAngle = DBL_MAX;
+	GEOSCoordSequence* cs = const_cast<GEOSCoordSequence*>(GeosHelper::GetCoordinatesSeq(geom));
+	if(cs)
+	{
+		unsigned int size = GeosHelper::CoordinateSequenceSize(cs);
+		double x, y;
+		for(unsigned int i = 0; i < size; i++)
+		{
+			if (GeosHelper::CoordinateSequenceGetXY(cs, i, x, y))
+			{
+				x -= xCent;
+				y -= yCent;
+				double angle = GetPointAngle(x, y);
+				if (angle < minAngle)
+					minAngle = angle;
+			}
+		}
+	}
+	return minAngle;
+}
+
+// **********************************************************************
+//		GeneratePolygonColors()
+// **********************************************************************
+Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
+{
+	GenerateTempQTree(false);
+	QTree* tree = GetTempQTree();
+	ReadGeosGeometries(VARIANT_FALSE);
+
+	long numShapes = _shapeData.size();
+	long percent = 0;
+
+	Coloring::ColorGraph* graph = new Coloring::ColorGraph();
+
+	// ---------------------------------------
+	//  spatial relations
+	// ---------------------------------------
+	//int missingAngleCount = 0;
+	for(size_t i = 0; i < _shapeData.size(); i++)
+	{
+		Utility::DisplayProgress(globalCallback, i, numShapes, "Calculating spatial relations...", key, percent);
+
+		vector<int> shapeIds;
+		double xMin, xMax, yMin, yMax;
+		this->QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax);
+		shapeIds = tree->GetNodes(QTreeExtent(xMin,xMax,yMax,yMin));
+
+		graph->InsertNode(i);
+
+		if (shapeIds.size() > 0)
+		{
+			GEOSGeometry* geom = GetGeosGeometry(i);
+			if (geom)
+			{
+				for (size_t j = 0; j < shapeIds.size(); j++)
+				{
+					if (shapeIds[j] <= (int)i)		// it's a single node, not a pair; or the pair was already analyzed in reverse order
+						continue;
+
+					GEOSGeometry* geom2 = GetGeosGeometry(shapeIds[j]);
+					if (GeosHelper::Touches(geom, geom2))
+					{
+						double angle = DBL_MAX;
+						bool commonEdge = false;
+						GEOSGeometry* g = GeosHelper::Intersection(geom, geom2);
+						if (g)
+						{
+							// ------------------------------------------------
+							//	Let's calculate clockwise direction for shape
+							// ------------------------------------------------
+							int geomType = GeosHelper::GetGeometryTypeId(g);
+							switch(geomType)
+							{
+								case GEOS_POINT:
+									break;		// we need at least common edge
+								case GEOS_LINESTRING:
+								case GEOS_LINEARRING:
+								case GEOS_MULTILINESTRING:								
+									commonEdge = true;
+									break;
+								default:
+									Debug::WriteError("Unexpected geometry type: %d", geomType);
+									break;
+							}
+							GeosHelper::DestroyGeometry(g);
+						}
+						if (commonEdge)
+						{
+							graph->InsertEdge(i, shapeIds[j], angle);
+							
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// ---------------------------------------
+	//  actual coloring
+	// ---------------------------------------
+	graph->DoColoring();
+	
+	ClearCachedGeometries();
+	ClearTempQTree();
+
+	return graph;
 }
 #pragma endregion

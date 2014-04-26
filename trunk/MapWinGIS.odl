@@ -3246,6 +3246,8 @@ interface IShapefile : IDispatch{
 			[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
 	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, 
 			[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out,retval]IShapefile** sf);
+
+
 };
 
 /****************************  Shape Interface ***********************/
@@ -4393,6 +4395,8 @@ interface IShapefileCategories : IDispatch{
 
 	[propget, id(24), helpstring("property CategoryIndexByName")] HRESULT CategoryIndexByName([in]BSTR categoryName, [out, retval] int* categoryIndex);
 	[propget, id(25), helpstring("property CategoryIndex")] HRESULT CategoryIndex([in] IShapefileCategory* category, [out, retval]int* categoryIndex);
+	[id(26), helpstring("method GeneratePolygonColors")] HRESULT GeneratePolygonColors([in, optional, defaultvalue(NULL)]IColorScheme* scheme, [out, retval]VARIANT_BOOL* retVal);
+	
 };
 
 /**********************  ShapefileCategory Interface  **************************/

@@ -116,19 +116,16 @@ public:
 
 	STDMETHOD(MoveUp)(long Index, VARIANT_BOOL* retval);
 	STDMETHOD(MoveDown)(long Index, VARIANT_BOOL* retval);
-
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
-
 	STDMETHOD(AddRange)(long FieldIndex, tkClassificationType ClassificationType, long numClasses, VARIANT minValue, VARIANT maxValue, VARIANT_BOOL* retVal);
-
-	//STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, tkGroupOperation Operation, VARIANT_BOOL* retVal);
+	STDMETHOD(get_CategoryIndexByName)(BSTR categoryName, int* categoryIndex);
+	STDMETHOD(get_CategoryIndex)(IShapefileCategory* category, int* categoryIndex);
+	STDMETHOD(GeneratePolygonColors)(IColorScheme* scheme, VARIANT_BOOL* retval);
+	STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, VARIANT_BOOL* retVal);
 
 	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressions);
 	CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName);
-
-	STDMETHOD(get_CategoryIndexByName)(BSTR categoryName, int* categoryIndex);
-	STDMETHOD(get_CategoryIndex)(IShapefileCategory* category, int* categoryIndex);
 private:
 	// ------------------------------------------------------------------
 	//		Private members

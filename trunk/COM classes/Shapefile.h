@@ -22,6 +22,7 @@
 #include "QTree.h"
 #include "ClipperConverter.h"
 #include "ShapeInfo.h"
+#include "ColoringGraph.h"
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -346,7 +347,7 @@ private:
 	QTree* GenerateQTreeCore(bool SelectedOnly);
 	bool GenerateTempQTree(bool SelectedOnly);
 	void ClearTempQTree();
-	QTree* GetTempQtree();
+	QTree* GetTempQTree();
 	VARIANT_BOOL SelectShapesAlt(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT* arr);
 	void put_ReferenceToLabels(bool bNullReference = false);
 	void put_ReferenceToCategories(bool bNullReference = false);
@@ -461,5 +462,6 @@ public:
 	bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
 	GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex);
 	void CShapefile::CloneCore(IShapefile** retVal, ShpfileType shpType, bool addShapeId = false);
+	Coloring::ColorGraph* GeneratePolygonColors();
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

@@ -160,6 +160,15 @@ public:
 		#endif
 	}
 
+	static int GetGeometryTypeId(GEOSGeometry* gsGeom)
+	{
+		#ifdef GEOS_NEW
+			return GEOSGeomTypeId_r(getGeosHandle(), gsGeom);
+		#else
+			return GEOSGeomTypeId(gsGeom);	
+		#endif
+	}
+
 	static GEOSGeometry* Buffer(GEOSGeometry* gsGeom, double Distance, int nSegments)
 	{
 		#ifdef GEOS_NEW
@@ -290,5 +299,23 @@ public:
 			int val2 = GEOSCoordSeq_getY( coords, index, &y );
 		#endif
 		return val1 && val2;
+	}
+
+	static GEOSGeometry* GetCentroid(GEOSGeometry* gs)
+	{
+		#ifdef GEOS_NEW
+			return GEOSGetCentroid_r(getGeosHandle(), gs);
+		#else
+			return GEOSGetCentroid(gs);	
+		#endif
+	}
+
+	static const GEOSCoordSequence* GetCoordinatesSeq(GEOSGeometry* gs)
+	{
+		#ifdef GEOS_NEW
+			return GEOSGeom_getCoordSeq_r(getGeosHandle(), gs);
+		#else
+			return GEOSGeom_getCoordSeq(gs);	
+		#endif
 	}
 };
