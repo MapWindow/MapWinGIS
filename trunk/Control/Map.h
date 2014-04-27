@@ -563,10 +563,10 @@ protected:
 	afx_msg VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
 	afx_msg VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
 	afx_msg VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
-	afx_msg VARIANT_BOOL GetAnimationOnZooming();
-	afx_msg void SetAnimationOnZooming(VARIANT_BOOL newVal);
-	afx_msg VARIANT_BOOL GetInertiaOnPanning();
-	afx_msg void SetInertiaOnPanning(VARIANT_BOOL newVal);
+	afx_msg tkCustomState GetAnimationOnZooming();
+	afx_msg void SetAnimationOnZooming(tkCustomState newVal);
+	afx_msg tkCustomState GetInertiaOnPanning();
+	afx_msg void SetInertiaOnPanning(tkCustomState newVal);
 	afx_msg VARIANT_BOOL GetReuseTileBuffer();
 	afx_msg void SetReuseTileBuffer(VARIANT_BOOL newVal);
 	afx_msg tkZoomBarVerbosity GetZoomBarVerbosity();
@@ -699,9 +699,9 @@ public:
 	BOOL _grabProjectionFromData;
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
-	BOOL _panningInertia;			
+	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
-	BOOL _zoomAnimation;			
+	tkCustomState _zoomAnimation;			
 	
 	tkZoomBoxStyle _zoomBoxStyle;
 	tkShapeDrawingMethod _shapeDrawingMethod;
@@ -784,6 +784,8 @@ public:
 	bool _panningAnimation;
 	int _currentZoom;				// cached zoom set with ZoomToTileLevel (works only with ZoomBehavior = zbUseTileLevels)
 	bool _spacePressed;
+	float _lastRedrawTime;
+	int _projectionChangeCount;
 
 	// ---------------------------------------------
 	//	various stuff
@@ -970,12 +972,13 @@ private:
 	bool HasRotation();
 	void ClearPanningList();
 	void DisplayPanningInertia( CPoint point );
-	void UpdateTileBuffer(CDC* dc);
-	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target);
+	void UpdateTileBuffer(CDC* dc, bool zoomingAnimation);
+	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target, bool zoomingAnimation);
 	void TurnOffPanning();
 	void DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g);
 	bool CheckLayerProjection( Layer* layer );
 	void GrabLayerProjection( Layer* layer );
+	bool HaveDataLayersWithinView();
 #pragma endregion
 };
 

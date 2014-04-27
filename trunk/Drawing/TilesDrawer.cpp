@@ -30,8 +30,8 @@ using namespace Gdiplus;
 // ***************************************************************
 //		DrawTiles()
 // ***************************************************************
-void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit, 
-							 IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing)
+void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProjection* mapProjection, 
+							 BaseProjection* tileProjection, bool printing, int projectionChangeCount )
 {
 	vector<TileCore*> tiles = ((CTiles*)itiles)->m_tiles;
 
@@ -70,13 +70,13 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 		TileCore* tile = tiles[i];
 		if (!tile->m_drawn || printing)
 		{
-			// doing reprojection on the first drawing of tile
-			if (!tile->m_projectionOk)
+			// doing transformation on the first drawing of tile
+			if (tile->m_projectionOk < projectionChangeCount)
 			{
 				if (isSame)
 				{
 					// projection for tiles matches map projection (most often it's Google Mercator; EPSG:3857)
-					if (!tile->UpdateProjection(customProj))
+					if (!tile->UpdateProjection(customProj, projectionChangeCount))
 						continue;
 				}
 				else
@@ -84,7 +84,7 @@ void CTilesDrawer::DrawTiles(ITiles* itiles, double pixelsPerMapUnit,
 					if (m_transfomation)
 					{
 						// projection differs from WGS84 decimal degrees
-						if (!tile->UpdateProjection(m_transfomation))
+						if (!tile->UpdateProjection(m_transfomation, projectionChangeCount))
 							continue;
 					}
 					else

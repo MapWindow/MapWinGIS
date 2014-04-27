@@ -32,7 +32,7 @@ public:
 	// the code is used by clients via COM interfaces so 
 	// no need to bother much about encapsulation
 
-	bool m_hasErrors;		// there were errors during download, one of serveral layers weren't loaded
+	bool m_hasErrors;		// there were errors during download, one of several layers weren't loaded
 
 	bool m_drawn;			// it's drawn on screen
 	bool m_toDelete;		// for inner working of RAM cache
@@ -49,7 +49,7 @@ public:
 	RectLatLng Geog;
 	RectLatLng Proj;
 
-	bool m_projectionOk;	// position of tile was recalculated using the current projection
+	int m_projectionOk;	// position of tile was recalculated using the current projection; number of projection changes
 	BaseProjection* m_projection;
 	
 	CStringW getPath(CStringW root, CStringW ext);
@@ -66,7 +66,7 @@ public:
 		m_refCount = 0;
 		m_drawn = false;
 		m_toDelete = false;
-		m_projectionOk = false;
+		m_projectionOk = -1;
 		m_hasErrors = false;
 		
 		// calculating geographic coordinates
@@ -173,8 +173,8 @@ public:
 #pragma endregion
 
 	// Recalculates projected coordinates; it is assumed that map projection is different from WGS84
-	bool UpdateProjection(OGRCoordinateTransformation* transformation);
-	bool UpdateProjection(CustomProjection* proj);
+	bool UpdateProjection(OGRCoordinateTransformation* transformation, int projectionChangeCount);
+	bool UpdateProjection(CustomProjection* proj, int projectionChangeCount);
 
 	bool TileCore::operator==(const TileCore &t2)
 	{

@@ -335,7 +335,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 // Displays redraw time in the bottom left corner
 void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message )
 {
-	bool showRedrawTime = _showRedrawTime && layerRedraw && time > 0.01 && !_isSnapshot;
+	bool showRedrawTime = _showRedrawTime && time > 0.01 && !_isSnapshot;
 	
 	if (!showRedrawTime && !_showVersionNumber) return;
 
@@ -370,13 +370,14 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 		}
 		else
 		{
-			s.Format(L"Redraw time: %.3f s", time);
+			s.Format(L"Redraw time: %.3fs", time);
 		}
+
 		g->MeasureString(s, s.GetLength(), _fontCourier, point, &format, &rect);
 		if (rect.Width + 15 < _viewWidth)		// control must be big enough to host the string
 		{
 			point.X = (float)(_viewWidth - rect.Width - 10);
-			point.Y = (float)(10.0f);
+			point.Y = _showCoordinates != cdmNone ? 10.0f + rect.Height : 10.0f;
 			DrawStringWithShade(g, s, _fontCourier, point, &_brushBlack, &_brushWhite);
 		}
 	}

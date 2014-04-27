@@ -96,6 +96,8 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 		last = NULL;
 	}
 
+	_projectionChangeCount++;
+
 	if (_transformationMode == tmDoTransformation)
 		_wgsProjection->StopTransform();
 	

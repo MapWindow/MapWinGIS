@@ -25,9 +25,11 @@ class OpenStreetMapProvider: public BaseProvider
 {
 public:
 	~OpenStreetMapProvider(void){};
+	int count;
 
 	OpenStreetMapProvider() 
 	{
+		count = 0;
 		Id = tkTileProvider::OpenStreetMap;
 		Name = "OpenStreetMap";
 		Copyright.Format("© OpenStreetMap - Map data ©%d OpenStreetMap", Utility::getCurrentYear());
@@ -41,7 +43,9 @@ public:
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		char letter = ServerLetters[GetServerNum(pos, 3)];
+		//char letter = ServerLetters[GetServerNum(pos, 3)];
+		char letter = ServerLetters[count % 3];
+		count++;
 		CString s; 
 		s.Format(UrlFormat, letter, zoom, pos.x, pos.y);
 		return s;

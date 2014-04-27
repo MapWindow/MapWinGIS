@@ -114,6 +114,8 @@ enum tkDrawingDataAvailable
 	TilesData = 2,
 	LayersData = 3,
 	HotTracking = 4,
+	ZoomingAnimation = 5,
+	PanningInertia = 6,
 };
 
 enum SqliteOpenMode

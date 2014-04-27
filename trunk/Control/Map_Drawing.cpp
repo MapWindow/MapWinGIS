@@ -137,8 +137,6 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		gBuffer->Clear(backColor);
 	}
 
-	DWORD startTick = ::GetTickCount();
-
 	// the main thing is to ensure that if new tile is coming it will trigger a new redraw,
 	// any tile after this moment will do it, otherwise a newcomer will be already in screen buffer
 	_canUseMainBuffer = true;
@@ -160,7 +158,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		}
 		else
 		{
-			UpdateTileBuffer(pdc);
+			bool zoomingAnimation = HasDrawingData(tkDrawingDataAvailable::ZoomingAnimation);
+			UpdateTileBuffer(pdc, zoomingAnimation);
 
 			// draw existing ones from buffer
 			//if (tiles->DrawnTilesExist())
@@ -170,6 +169,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		}
 	}
 	
+	DWORD startTick = ::GetTickCount();
+
 	// ---------------------------------------
 	// drawing of layers
 	// ---------------------------------------
@@ -291,7 +292,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// redraw time and logo
 	// -----------------------------------
 	DWORD endTick = GetTickCount();
-	this->ShowRedrawTime(gBuffer, (float)(endTick - startTick)/1000.0f, layersRedraw);
+
+	if (layersRedraw) {
+		_lastRedrawTime = (float)(endTick - startTick)/1000.0f;
+	}
+	this->ShowRedrawTime(gBuffer, _lastRedrawTime, layersRedraw);
 
 	// -------------------------------------------
 	// distance measuring or persistent measuring
@@ -331,7 +336,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 // ***************************************************************
 //	UpdateTileBuffer
 // ***************************************************************
-void CMapView::UpdateTileBuffer( CDC* dc )
+void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 {
 	CTiles* tiles = (CTiles*)_tiles;
 	Gdiplus::Graphics* gTiles = Gdiplus::Graphics::FromImage(_tilesBitmap);
@@ -354,7 +359,7 @@ void CMapView::UpdateTileBuffer( CDC* dc )
 			if (_extents.getIntersection(_tileBuffer.Extents, match))
 			{
 				Gdiplus::RectF source, target;
-				DrawZoomingAnimation(match, gTemp, dc, source, target);
+				DrawZoomingAnimation(match, gTemp, dc, source, target, zoomingAnimation);
 
 				if (_reuseTileBuffer)
 				{
@@ -392,7 +397,7 @@ void CMapView::UpdateTileBuffer( CDC* dc )
 // ***************************************************************
 //	DrawZoomingAnimation
 // ***************************************************************
-void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target )
+void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target, bool zoomingAnimation )
 {
 	// target rectangle (current screen buffer)	
 	double tx = (match.left - _extents.left)/_extents.Width();
@@ -422,7 +427,7 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 	// -----------------------------------------------
 	// zooming animation
 	// -----------------------------------------------
-	if (_zoomAnimation)
+	if (zoomingAnimation)
 	{
 		HDC hdc = dc->GetSafeHdc();
 		Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
@@ -521,7 +526,7 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 		CGeoProjection* p = (CGeoProjection*)GetWgs84ToMapTransform();
 		if (p) { drawer.m_transfomation = p->m_transformation; }
 	}
-	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot);
+	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot, _projectionChangeCount);
 }
 #pragma endregion
 
@@ -842,12 +847,35 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 		}
 	}
 	
-	//m_drawMutex.Unlock();
-
    if (oldCursor != NULL)
       ::SetCursor(oldCursor);
 
 	delete[] isConcealed;
+}
+
+// ****************************************************************
+//		HaveDataLayersWithinView()
+// ****************************************************************
+bool CMapView::HaveDataLayersWithinView()
+{
+	double scale = this->GetCurrentScale();
+	int zoom;
+	_tiles->get_CurrentZoom(&zoom);
+	
+	for(size_t i = 0; i < _activeLayers.size(); i++)
+	{
+		Layer * l = _allLayers[_activeLayers[i]];
+		if( l != NULL )
+		{	
+			if (l->IsVisible(scale, zoom))
+			{
+				Extent result;
+				if (l->extents.getIntersection(_extents, result))
+					return true;
+			}
+		}
+	}
+	return false;	
 }
 
 // ****************************************************************
@@ -981,6 +1009,26 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			{
 				return _hotTracking.Shapefile && !_isSnapshot;
 			}
+		case tkDrawingDataAvailable::ZoomingAnimation:
+		case tkDrawingDataAvailable::PanningInertia:
+			{
+				VARIANT_BOOL visible;
+				_tiles->get_Visible(&visible);
+				if (!visible) {
+					return false;
+				}
+				else
+				{
+					tkCustomState state = (type == ZoomingAnimation) ? _zoomAnimation : _panningInertia;
+					if (state == csAuto) {
+						return !HaveDataLayersWithinView();
+					}
+					else {
+						return state == csTrue;  
+					}
+				}
+			}
+			break;
 		default:
 			return false;
 	}

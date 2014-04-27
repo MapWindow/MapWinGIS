@@ -370,12 +370,12 @@ bool CMapView::HasRotation()
 // *****************************************************
 //		AnimationOnZooming
 // *****************************************************
-VARIANT_BOOL CMapView::GetAnimationOnZooming()
+tkCustomState CMapView::GetAnimationOnZooming()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	return _zoomAnimation;
 }
-void CMapView::SetAnimationOnZooming(VARIANT_BOOL nNewValue)
+void CMapView::SetAnimationOnZooming(tkCustomState nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_zoomAnimation = nNewValue;
@@ -384,12 +384,12 @@ void CMapView::SetAnimationOnZooming(VARIANT_BOOL nNewValue)
 // *****************************************************
 //		InertiaOnPanning
 // *****************************************************
-VARIANT_BOOL CMapView::GetInertiaOnPanning()
+tkCustomState CMapView::GetInertiaOnPanning()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	return _panningInertia;
 }
-void CMapView::SetInertiaOnPanning(VARIANT_BOOL nNewValue)
+void CMapView::SetInertiaOnPanning(tkCustomState nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_panningInertia = nNewValue;

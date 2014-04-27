@@ -48,7 +48,7 @@ public:
 	};
 	~CTilesDrawer(void){};
 
-	void DrawTiles(ITiles* tiles, double pixelsPerDegree, IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing);
+	void DrawTiles(ITiles* tiles, double pixelsPerDegree, IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing, int projectionChangeCount);
 
 	OGRCoordinateTransformation* m_transfomation;
 	Gdiplus::Graphics* m_graphics;

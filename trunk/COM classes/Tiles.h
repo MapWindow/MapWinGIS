@@ -269,6 +269,7 @@ private:
 	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
+	bool ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgs84Projection );
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

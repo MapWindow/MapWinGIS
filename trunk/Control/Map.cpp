@@ -174,6 +174,8 @@ void CMapView::Startup()
 	_dragging.Operation = DragNone;
 	_currentZoom = -1;
 	_spacePressed = false;
+	_lastRedrawTime = 0.0f;
+	_projectionChangeCount = 0;
 	_tileBuffer.Extents.left = 0.0;
 	_tileBuffer.Extents.right = 0.0;
 	_tileBuffer.Extents.top = 0.0;
@@ -294,10 +296,10 @@ void CMapView::SetDefaults()
 	_showVersionNumber = VARIANT_FALSE;	
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
-	_panningInertia = TRUE;
+	_panningInertia = csAuto;
 	_reuseTileBuffer = TRUE;
-	_zoomAnimation = TRUE;
-	_zoomBoxStyle = tkZoomBoxStyle::zbsGray;
+	_zoomAnimation = csAuto;
+	_zoomBoxStyle = tkZoomBoxStyle::zbsBlue;
 	_projectionMismatchBehavior = mbIgnore;
 
 	((CTiles*)_tiles)->SetDefaults();
@@ -559,8 +561,15 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Bool( pPX, "ShowZoomBar", _zoombarVisible, TRUE );
 		PX_Bool( pPX, "GrabProjectionFromData", _grabProjectionFromData, TRUE );
-		PX_Bool( pPX, "AnimationOnZooming", _zoomAnimation, TRUE );
-		PX_Bool( pPX, "InertiaOnPanning", _panningInertia, TRUE );
+
+		temp = (long)_zoomAnimation;
+		PX_Long( pPX, "AnimationOnZooming", temp, 0 );			// csAuto
+		_zoomAnimation = (tkCustomState)temp;
+
+		temp = (long)_panningInertia;
+		PX_Long( pPX, "InertiaOnPanning", temp, 0 );			// csAuto
+		_panningInertia = (tkCustomState)temp;
+
 		PX_Bool( pPX, "ReuseTileBuffer", _reuseTileBuffer, TRUE );
 
 		temp = (long)_zoomBarVerbosity;
@@ -568,9 +577,8 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		_zoomBarVerbosity = (tkZoomBarVerbosity)temp;
 
 		temp = (long)_zoomBoxStyle;
-		PX_Long( pPX, "ZoomBoxStyle", temp, 1 );			// zbsGray
+		PX_Long( pPX, "ZoomBoxStyle", temp, 4 );			// zbsBlue
 		_zoomBoxStyle = (tkZoomBoxStyle)temp;
-
 
 		temp = (long)_projectionMismatchBehavior;
 		PX_Long( pPX, "ProjectionMistmatchBehavior", temp, 0 );			// mbIgnore

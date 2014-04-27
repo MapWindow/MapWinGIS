@@ -87,8 +87,14 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
+	
 	CAtlHttpClient* httpClient = new CAtlHttpClient();
 	CAtlNavigateData navData;
+	
+	// TODO: reuse HTTP client
+	// ResetConnection
+	// Connect
+	// ConnectSocket
 
 	if (m_proxyAddress.GetLength() > 0)
 	{

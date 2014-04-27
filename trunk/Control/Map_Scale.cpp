@@ -110,6 +110,13 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 	// if they are not small enough.
 	if (ForceDiscreteZoom())
 	{
+		int zoom, maxZoom, minZoom;
+		_tiles->get_CurrentZoom(&zoom);
+		_tiles->get_MaxZoom(&maxZoom);
+		_tiles->get_MinZoom(&minZoom);
+		if (zoom + 1 > maxZoom || zoom - 1 < minZoom) 
+			return;
+		
 		double ratioX = (_extents.right - _extents.left) / (cRight - cLeft);
 		double ratioY = (_extents.top - _extents.bottom) / (cTop - cBottom);
 		double ratio = MIN(ratioX, ratioY);
@@ -140,6 +147,7 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool mapSizeChanged /*= false*/, bool adjustZoom /*= true*/ )
 {
 	_knownExtents = keNone;
+	_lastRedrawTime = 0.0f;
 
 	this->CalculateVisibleExtents(ext, logExtents, mapSizeChanged);
 

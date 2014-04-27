@@ -53,6 +53,19 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+/************************** tkCustomState Enumeration **********************/
+typedef		
+[
+	uuid(0F17F6D4-C34F-49eb-A47E-0996CDDE12F8),
+	helpstring("tkCustomState"),
+]
+enum tkCustomState
+{
+	csAuto = 0,
+	csTrue = 1,
+	csFalse = 2,
+} tkCustomState;
+
 /************************** tkMismatchBehavior Enumerations **********************/
 typedef		
 [
@@ -5422,10 +5435,10 @@ library MapWinGIS
  	        [id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
 			[id(226), propput] void ShowZoomBar(VARIANT_BOOL nNewValue);
 			[id(226), propget] VARIANT_BOOL ShowZoomBar();
-			[id(227), propput] void AnimationOnZooming(VARIANT_BOOL nNewValue);
-			[id(227), propget] VARIANT_BOOL AnimationOnZooming();
-			[id(228), propput] void InertiaOnPanning(VARIANT_BOOL nNewValue);
-			[id(228), propget] VARIANT_BOOL InertiaOnPanning();
+			[id(227), propput] void AnimationOnZooming(tkCustomState nNewValue);
+			[id(227), propget] tkCustomState AnimationOnZooming();
+			[id(228), propput] void InertiaOnPanning(tkCustomState nNewValue);
+			[id(228), propget] tkCustomState InertiaOnPanning();
 			[id(229), propput] void ReuseTileBuffer(VARIANT_BOOL nNewValue);
 			[id(229), propget] VARIANT_BOOL ReuseTileBuffer();
 			[id(230), propput] void ZoomBarVerbosity(tkZoomBarVerbosity nNewValue);

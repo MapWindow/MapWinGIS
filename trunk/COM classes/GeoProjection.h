@@ -83,17 +83,14 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
-
 	STDMETHOD(ImportFromProj4)(BSTR proj, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromESRI)(BSTR proj, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromEPSG)(LONG projCode, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromWKT)(BSTR proj, VARIANT_BOOL* retVal);
 	STDMETHOD(ImportFromAutoDetect)(BSTR proj, VARIANT_BOOL* retVal);
-
 	STDMETHOD(ExportToProj4)(BSTR* retVal);
 	STDMETHOD(ExportToWKT)(BSTR* retVal);
 	STDMETHOD(SetWellKnownGeogCS)(tkCoordinateSystem newVal);
-
 	STDMETHOD(get_IsGeographic)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsProjected)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_IsLocal)(VARIANT_BOOL* pVal);
@@ -115,7 +112,6 @@ public:
 	STDMETHOD(get_IsSameExt)(IGeoProjection* proj, IExtents* bounds, int numSamplingPoints, VARIANT_BOOL* pVal);
 	STDMETHOD(ReadFromFile)(BSTR filename, VARIANT_BOOL* retVal);
 	STDMETHOD(WriteToFile)(BSTR filename, VARIANT_BOOL* retVal);
-
 	STDMETHOD(StartTransform)(IGeoProjection* target, VARIANT_BOOL* retval);
 	STDMETHOD(Transform)(double* x, double* y, VARIANT_BOOL* retval);
 	STDMETHOD(StopTransform)();

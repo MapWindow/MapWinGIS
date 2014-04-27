@@ -31,7 +31,7 @@ CStringW TileCore::getPath(CStringW root, CStringW ext)
 }
 
 // in case map projection and tiles projection are the same
-bool TileCore::UpdateProjection(CustomProjection* proj)
+bool TileCore::UpdateProjection(CustomProjection* proj, int projectionChangeCount)
 {
 	PointLatLng pnt;
 	proj->FromXYToProj(CPoint(this->m_tileX, this->m_tileY + 1), this->m_scale, pnt);
@@ -41,12 +41,12 @@ bool TileCore::UpdateProjection(CustomProjection* proj)
 	Proj.yLat = pnt.Lat;
 	Proj.WidthLng = size.cx;
 	Proj.HeightLat = size.cy;
-	m_projectionOk = true;
+	m_projectionOk = projectionChangeCount;
 	return true;
 }
 
 // in case maps and tiles projection aren't the same
-bool TileCore::UpdateProjection(OGRCoordinateTransformation* transformation)
+bool TileCore::UpdateProjection(OGRCoordinateTransformation* transformation, int projectionChangeCount)
 {
 	if (transformation)
 	{
@@ -89,7 +89,7 @@ bool TileCore::UpdateProjection(OGRCoordinateTransformation* transformation)
 		Proj.WidthLng = (xTR + xBR)/2.0 - Proj.xLng;
 		Proj.HeightLat = Proj.yLat - (yBR + yBL)/2.0;
 		
-		m_projectionOk = true;
+		m_projectionOk = projectionChangeCount;
 		return true;
 	}
 	return false;

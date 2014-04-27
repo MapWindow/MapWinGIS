@@ -371,6 +371,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (m_sendMouseDown)
 			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 
+		this->SetCapture();
 		_dragging.Operation = DragZoombox;
 
 		// TODO: CMapTracker is no longer used; remove all references
@@ -586,6 +587,8 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 			if (m_cursorMode != cmPan)
 				Debug::WriteError("Wrong cursor mode when panning is expected");
 
+			ReleaseCapture();
+
 			if (!_spacePressed)
 				DisplayPanningInertia(point);
 
@@ -655,7 +658,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 // ************************************************************
 void CMapView::DisplayPanningInertia( CPoint point )
 {
-	if (_panningInertia)
+	if (HasDrawingData(PanningInertia))
 	{
 		bool inertia = false;
 		double dx = 0.0, dy = 0.0;

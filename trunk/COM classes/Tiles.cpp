@@ -1748,6 +1748,42 @@ void CTiles::Zoom(bool out)
 }
 
 // ************************************************************
+//		ProjectionSupportsWorldWideTransform
+// ************************************************************
+bool CTiles::ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgsProjection )
+{
+	// let's check if map projection supports world wide transformation
+	VARIANT_BOOL isGeograpic;		
+	mapProjection->get_IsGeographic(&isGeograpic);
+	if (isGeograpic)
+	{
+		return true;
+	}
+	else
+	{
+		double TOLERANCE = 0.00001;
+		VARIANT_BOOL vb1, vb2;
+		double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
+		double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
+		wgsProjection->Transform(&x1, &y1, &vb1);
+		wgsProjection->Transform(&x2, &y2, &vb2);
+		if (vb1 && vb2)
+		{
+			mapProjection->Transform(&x1, &y1, &vb1);
+			mapProjection->Transform(&x2, &y2, &vb1);
+			if (abs(x1 - minLng) <  TOLERANCE &&
+				abs(x2 - maxLng) <  TOLERANCE &&
+				abs(y1 - minLat) <  TOLERANCE &&
+				abs(y2 - maxLat) <  TOLERANCE)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+// ************************************************************
 //		ProjectionBounds
 // ************************************************************
 bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection, tkTransformationMode transformationMode, Extent& retVal )
@@ -1765,25 +1801,24 @@ bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjec
 		
 		if (transformationMode == tmDoTransformation)	// i.e. map cs isn't in decimal degrees
 		{
-			// There is a problem if map projection isn't geographic (like Amersfoort for example).
+			// There is a problem if map projection isn't world wide (like Amersfoort for example).
 			// Then values outside its bounds may not to be transformed correctly.
 			// There is hardly any workaround here. Ideally we should know the bounds for map
 			// projection and clip both by them and by bounds of server projection. Since bounds
 			// of map projection aren't available partial solutions can be used:
-			// - don't use clipping if map projection isn't geographic while server projection is
+			// - don't use clipping if map projection isn't world wide while server projection is
 			// (which will obviously lead to server bounds outside transformation range).
 			// Alternatives:
 			// - doing some checks after transformation to make sure that calculations make sense;
 			// - add a method to API to set bounds of map projection/tiles;
 			// - store and update built-in database of bounds for different coordinate systems
 			// and identify projection on setting it to map;
-			VARIANT_BOOL isGeograpic;		
-			mapProjection->get_IsGeographic(&isGeograpic);
+			bool supportsWorldWideTransform = ProjectionSupportsWorldWideTransform(mapProjection, wgsProjection);
 
-			if (false) // !isGeograpic && proj->worldWide) // server projection is geograpic; map one - not
+			if (proj->worldWide && !supportsWorldWideTransform) // server projection is world wide, map projection - not
 			{
 				// so far just skip it;
-				// optionally possible try to transform check if the results make sense
+				// optionally possible to transform to check if the results make sense
 				return false;
 			}
 			else
@@ -1886,3 +1921,5 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 	}
 	return S_OK;
 }
+
+
