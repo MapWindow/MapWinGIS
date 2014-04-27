@@ -85,6 +85,16 @@ public:
 	{
 		return top - bottom;
 	}
+
+	void MoveTo( double xCent, double yCent ) 
+	{
+		double dx = (this->right - this->left) / 2.0;
+		double dy = (this->top - this->bottom) / 2.0;
+		left = xCent - dx;
+		right = xCent + dx;
+		bottom = yCent - dy;
+		top = yCent + dy;
+	}
 };
 
 #endif // !defined(AFX_EXTENT_H__CCC7B001_1ECF_11D5_A566_00104BCC583E__INCLUDED_)

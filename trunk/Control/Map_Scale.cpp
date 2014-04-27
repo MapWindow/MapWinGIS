@@ -3,14 +3,19 @@
 #include "Shapefile.h"
 
 #pragma region Scale
-
 // ****************************************************
 //	   ZoomToTileLevel()
 // ****************************************************
 VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 {
+	if (_transformationMode == tmNotDefined)
+		return VARIANT_FALSE;
+	
 	// we shall make all the calculations in the Google Mercator (EPSG: 3857)
 	// and then transform bounds to the current coordinate system
+	VARIANT_BOOL isGMercator;
+	GetMapProjection()->get_IsSame(GetGMercProjection(), &isGMercator);
+
 	double xCent = (_extents.left + _extents.right)/2.0;
 	double yCent = (_extents.bottom + _extents.top)/2.0;
 	
@@ -19,12 +24,18 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 	
 	// getting screen size
-	double screenHeight = abs(maxY - minY); //96.0;
-	double screenWidth =  abs(maxX - minX); //96.0;
+	double screenHeight = abs(maxY - minY); 
+	double screenWidth =  abs(maxX - minX);
 
-	// multiplication ratio, to tiles looks nicer
-	double ratio = 1.0;		// TODO: perhaps add as a parameter
-	double projWidth = 20037508.342789244 * 2.0;	// half of equator circumference (width and height for Mercator projection)
+	// multiplication ratio, to make texts more legible when projection-related scaling is underway
+	double ratio = 1.0;		// TODO: use larger than 1.0 for non-GMercator
+
+	// TODO: make global constants
+	double MAX_VAL = 20037508.342789244;	// in GMercator for bot long and lat
+	double MAX_LATITUDE = 85.05112878;		// in WGS84
+	double MAX_LONGITUDE = 180.0;
+
+	double projWidth = MAX_VAL * 2.0;	// half of equator circumference (width and height for Mercator projection)
 	double pxWidth = ratio * 512.0 * pow(2.0, zoom - 1);	// width of map in pixels at the requested zoom
 
 	double w = screenWidth / pxWidth * projWidth;		// requested width in meters (EPSG:3857)
@@ -32,9 +43,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 	VARIANT_BOOL vb, vb2;
 	
-	VARIANT_BOOL projMatch;
-	GetMapProjection()->get_IsSame(GetGMercProjection(), &projMatch);
-	if (projMatch)
+	if (isGMercator)
 	{
 		minX = xCent - w/2.0;
 		maxX = xCent + w/2.0;
@@ -46,48 +55,62 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	}
 	else
 	{
-		// get center in GMercator
-		IGeoProjection* projTemp = GetMapToGMercTransform();
+		// return back to map projection
+		IGeoProjection* projTemp = GetGMercToMapTransform();
 		if (projTemp)
 		{
-			projTemp->Transform(&xCent, &yCent, &vb);
-			if (!vb)
+			minX = xCent - w/2.0;
+			maxX = xCent + w/2.0;
+			minY = yCent - h/2.0;
+			maxY = yCent + h/2.0;
+
+			// In case we are outside bounds of GMercator, results will incorrect.
+			// Let's use clipping and extrapolation as a remedy.
+			// We shall assume that GMercator meters to map units ratio is constant and doesn't 
+			// depend on latitude or longitude, which is not true.
+			// TODO: do transformation in several points within world bounds for better extrapolation.
+			double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
+
+			if (minX < - MAX_VAL)
+				minLng = -MAX_LONGITUDE - abs(minX + MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
+
+			if (maxX > MAX_VAL)
+				maxLng = MAX_LONGITUDE + abs(maxX - MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
+
+			if (minY < - MAX_VAL)
+				minLat = -MAX_LATITUDE - abs(minY + MAX_VAL) / MAX_VAL * MAX_LATITUDE;
+
+			if (maxY > MAX_VAL)
+				maxLat = MAX_LATITUDE + abs(maxY - MAX_VAL) / MAX_VAL * MAX_LATITUDE;
+
+
+			projTemp->Transform(&minX, &minY, &vb);
+			projTemp->Transform(&maxX, &maxY, &vb2);
+
+			// substitute with extrapolated values if we are outside bounds
+			if (minLng != 0.0) minX = minLng;
+			if (maxLng != 0.0) maxX = maxLng;
+			if (minLat != 0.0) minY = minLat;
+			if (maxLat != 0.0) maxY = maxLat;
+
+			if (!vb || !vb2)
 			{
 				ErrorMsg(tkFAILED_TO_REPROJECT);
+			}
+			else
+			{
+				// finally adjust the center to it's initial position
+				Extent ext = Extent( minX, maxX, minY, maxY );
+				ext.MoveTo(xCent, yCent);
+				
+				this->SetExtentsCore(ext, true, false, false);
+				_currentZoom = zoom;
+				return VARIANT_TRUE;
 			}
 		}
 		else
 		{
 			ErrorMsg(tkFAILED_TO_REPROJECT);
-		}
-		
-		// return back to map projection
-		if (vb)
-		{
-			projTemp = GetGMercToMapTransform();
-			if (projTemp)
-			{
-				minX = xCent - w/2.0;
-				maxX = xCent + w/2.0;
-				minY = yCent - h/2.0;
-				maxY = yCent + h/2.0;
-				projTemp->Transform(&minX, &minY, &vb);
-				projTemp->Transform(&maxX, &maxY, &vb2);
-				if (!vb || !vb2)
-				{
-					ErrorMsg(tkFAILED_TO_REPROJECT);
-				}
-				else
-				{
-					this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true, false, false);
-					_currentZoom = zoom;
-					return VARIANT_TRUE;
-				}
-			}
-			else
-			{
-				ErrorMsg(tkFAILED_TO_REPROJECT);
-			}
 		}
 	}
 	return VARIANT_FALSE;
@@ -114,7 +137,7 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 		_tiles->get_CurrentZoom(&zoom);
 		_tiles->get_MaxZoom(&maxZoom);
 		_tiles->get_MinZoom(&minZoom);
-		if (zoom + 1 > maxZoom || zoom - 1 < minZoom) 
+		if ((zoom + 1 > maxZoom && zoomIn) || (zoom - 1 < minZoom && !zoomIn)) 
 			return;
 		
 		double ratioX = (_extents.right - _extents.left) / (cRight - cLeft);
