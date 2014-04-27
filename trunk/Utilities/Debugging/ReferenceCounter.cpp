@@ -1,15 +1,41 @@
 #include "stdafx.h"
 #include "ReferenceCounter.h"
 
-void ReferenceCounter::WriteReport()
+// ********************************************************
+//     WriteReport()
+// ********************************************************
+void ReferenceCounter::WriteReport(bool unreleasedOnly)
 {
-	//#ifdef _DEBUG
-		Debug::WriteLine("UNRELEASED COM REFERENCES:");
-		for(int i = 0; i < 33; i++)
+	CString s = GetReport(unreleasedOnly);
+	Debug::WriteLine(s);
+	Debug::WriteLine("-------------------------");
+}
+
+// ********************************************************
+//     GetReport()
+// ********************************************************
+CString ReferenceCounter::GetReport(bool unreleasedOnly)
+{
+	CString s, temp;
+	s += unreleasedOnly ? "UNRELEASED COM REFERENCES:\n": "COM REFERENCES (unreleased/allocated):\n";
+	for(int i = 0; i < INTERFACES_COUNT; i++)
+	{
+		if (unreleasedOnly)
 		{
-			if (referenceCounts[i] != 0)
-				Debug::WriteLine("Class: %d; count: %d", i, referenceCounts[i]);
+			if (referenceCounts[i] != 0)	
+			{
+				temp.Format("Class %s: %d\n", Utility::GetInterfaceName((tkInterface)i), referenceCounts[i]);
+				s += temp;
+			}
 		}
-		Debug::WriteLine("-------------------------");
-	//#endif
+		else
+		{
+			if (totalCounts[i] != 0)	
+			{
+				temp.Format("Class %s: %d/%d\n", Utility::GetInterfaceName((tkInterface)i), referenceCounts[i], totalCounts[i]);
+				s += temp;
+			}
+		}
+	}
+	return s;
 }

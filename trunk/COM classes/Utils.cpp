@@ -5288,3 +5288,15 @@ STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, 
 	*retVal = gp;
 	return S_OK;
 }
+
+// ********************************************************
+//     ComUsageReport()
+// ********************************************************
+STDMETHODIMP CUtils::get_ComUsageReport(VARIANT_BOOL unreleasedOnly, BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = gReferenceCounter.GetReport(unreleasedOnly ? true: false);
+	USES_CONVERSION;
+	*retVal = A2BSTR(s);
+	return S_OK;
+}

@@ -919,6 +919,56 @@ namespace Utility
 		}
 		return true;
 	}
+
+	// ********************************************************
+	//     GetInterfaceName()
+	// ********************************************************
+	CString Utility::GetInterfaceName(tkInterface id)
+	{
+		switch(id)
+		{
+		case idChart: 			return "Chart";
+		case idChartField:		return "ChartField";
+		case idCharts:			return "Charts";
+		case idColorScheme:		return "ColorScheme";
+		case idESRIGridManager:	return "ESRIGridManager";
+		case idExtents:			return "Extents";
+		case idField:			return "Field";
+		case idFieldStatOperations:			return "FieldStatOperations";
+		case idFileManager:		return "FileManager";
+		case idGeoProjection:	return "GeoProjection";
+		case idGlobalSettings:	return "GlobalSettings";
+		case idGrid:			return "Grid:";
+		case idGridColorBreak:	return "GridColorBreak";
+		case idGridColorScheme:	return "GridColorScheme";
+		case idGridHeader:		return "GridHeader";
+		case idImage:			return "Image";
+		case idLabelCategory:	return "LabelCategory";
+		case idLabel:			return "Label";
+		case idLabels:			return "Labels";
+		case idLinePattern:		return "LinePattern";
+		case idLineSegment:		return "LineSegment";
+		case idMeasuring:		return "Measuring";
+		case idPoint:			return "Point";
+		case idShape:			return "Shape";
+		case idShapeDrawingOptions:		return "ShapeDrawingOptions";
+		case idShapefile:		return "Shapefile";
+		case idShapefileCategories:		return "ShapefileCategories";
+		case idShapefileCategory:		return "ShapefileCategory";
+		case idShapefileColorBreak:		return "ShapefileColorBreak";
+		case idShapefileColorScheme:	return "ShapefileColorScheme";
+		case idShapeNetwork:			return "ShapeNetwork";
+		case idShapeValidationInfo:		return "ShapeValidationInfo";
+		case idTable:			return "Table";
+		case idTileProviders:	return "TileProviders";
+		case idTiles:			return "Tiles";
+		case idTin:				return "Tin";
+		case idUtils:			return "Utils";
+		case idVector:			return "Vector";
+		default:				return "Unknown";
+		}
+	}
+
 #pragma endregion
 
 #pragma region Progress

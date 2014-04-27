@@ -3640,6 +3640,7 @@ interface IUtils : IDispatch{
 	[id(48), helpstring("method ErrorMsgFromObject")] HRESULT ErrorMsgFromObject([in]IDispatch * comClass, [out, retval]BSTR* retVal);
 	[id(49), helpstring("method TileProjectionToGeoProjection")] HRESULT TileProjectionToGeoProjection(
 		[in]tkTileProjection projection, [out, retval]IGeoProjection** retVal);
+	[propget, id(50), helpstring("method ComUsageReport")] HRESULT ComUsageReport([in]VARIANT_BOOL unreleasedOnly, [out, retval]BSTR* retVal);
 };
 
 /****************************  Vector Interface ***********************/

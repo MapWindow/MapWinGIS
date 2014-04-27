@@ -80,6 +80,7 @@ namespace Utility
 
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
+	CString GetInterfaceName(tkInterface id);
 	
 	// time
 	int getCurrentYear();
