@@ -67,6 +67,7 @@ public:
 		 worldWide = true;
 		 serverProjection = tkTileProjection::SphericalMercator;
 		 yMinLat = yMaxLat = xMinLng = xMaxLng = 0.0;
+		 projected = false;
 	};
 	
 	virtual ~BaseProjection() {}
