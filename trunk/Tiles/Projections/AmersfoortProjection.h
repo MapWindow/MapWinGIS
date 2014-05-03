@@ -28,7 +28,7 @@ public:
 	// EPSG 28992
 	AmersfoortProjection()
 	{
-		bool calculateDegrees = false;
+		bool calculateDegrees = true;
 		
 		if (!calculateDegrees)
 		{
@@ -40,18 +40,18 @@ public:
 
 			// there is some question however as to which values to take as we don't have 
 			// a horizontally oriented rectangle; let's take the maximum bounds
-			MinLatitude = -0.515879655998403;
-			MaxLatitude = 12.4317273490522;
-			MinLongitude = 48.0405018446845;
-			MaxLongitude = 55.9136415710084;
+			/*yMinLat = -0.515879655998403;
+			yMaxLat = 12.4317273490522;
+			xMinLng = 48.0405018446845;
+			xMaxLng = 55.9136415710084;*/
 		}
 		else
 		{
 			// in meters 
-			MinLatitude = 22598.080;
-			MaxLatitude = 903401.920;
-			MinLongitude = -285401.920;
-			MaxLongitude = 595401.92;
+			yMinLat = 22598.080;
+			yMaxLat = 903401.920;
+			xMinLng = -285401.920;
+			xMaxLng = 595401.92;
 
 			VARIANT_BOOL ret1, ret2;
 			projWGS84->ImportFromEPSG(4326, &ret1);
@@ -67,6 +67,13 @@ public:
 			projCustom->StartTransform(projWGS84, &ret2);
 			if (!ret2)
 				Debug::WriteLine("Failed to initialize transformation 2");
+
+			MinLatitude = yMinLat;
+			MaxLatitude = yMaxLat;
+			MinLongitude = xMinLng;
+			MaxLongitude = xMaxLng;
+			projCustom->Transform(&MinLongitude, &MinLatitude, &ret1);
+			projCustom->Transform(&MaxLongitude, &MaxLatitude, &ret2);
 		}
 
 		yInverse = true;

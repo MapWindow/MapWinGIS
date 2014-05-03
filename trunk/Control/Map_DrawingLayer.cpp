@@ -252,7 +252,8 @@ void CMapView::SetDrawingStandardViewWidth(long drawHandle, double Width)
 // ******************************************************************
 void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType)
 {
-	// TODO: implement proper collision list for drawing labels; frames for drawing labels should be cleared from list while frames from the rest layers should remain 
+	// TODO: implement proper collision list for drawing labels; 
+	// frames for drawing labels should be cleared from list while frames from the rest layers should remain 
 	// in case Map.Refresh() was called
 	CCollisionList collisionList;
 

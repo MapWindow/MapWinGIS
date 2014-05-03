@@ -508,10 +508,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				{
 					USES_CONVERSION;
 					wText = A2W(lbl->text);
-					//wText = CT2WEX((LPCSTR)lbl->text.GetString());		// TODO: try to implement this version
-					/*int size = MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, NULL, 0);
-					wText = new WCHAR[size];
-					MultiByteToWideChar(CP_ACP, 0, lbl->text.GetString(), -1, wText, size);*/
 					_graphics->MeasureString(wText, wText.GetLength(), gpFont, PointF(0.0f, 0.0f), &gpRect);
 					
 					// in some case we lose the last letter by clipping; 

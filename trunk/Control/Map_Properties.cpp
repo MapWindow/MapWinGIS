@@ -291,7 +291,8 @@ void CMapView::SetShowZoomBar(VARIANT_BOOL pVal)
 	_zoombarVisible = pVal;
 	if( !_lockCount )
 	{
-		InvalidateControl();	// TODO: mark main buffer as changed
+		_canUseMainBuffer = false;
+		InvalidateControl();
 	}
 }
 VARIANT_BOOL CMapView::GetShowZoomBar(void)

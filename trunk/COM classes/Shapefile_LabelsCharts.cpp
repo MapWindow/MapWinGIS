@@ -66,13 +66,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 	for(int i = 0; i < _numShapes; i++)
 	{
-		long newpercent = (long)(((double)i/_numShapes)*100);
-		if( newpercent > percent )
-		{	
-			percent = newpercent;
-			if( globalCallback != NULL ) 
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating label positions..."));
-		}
+		Utility::DisplayProgress(globalCallback, i, _numShapes, "Calculating label positions...", key, percent);
 		
 		/* extracting field value */
 		if (FieldIndex != -1)
@@ -163,7 +157,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 				if (partCount == 0)
 				{
-					// if no parts valid parts were found, add ficitious label then
+					// if no parts valid parts were found, add fictitious label then
 					goto add_empty_label;
 				}
 			}

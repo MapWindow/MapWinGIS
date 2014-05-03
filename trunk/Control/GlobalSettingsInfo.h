@@ -36,6 +36,8 @@ struct GlobalSettingsInfo
 	tkRasterOverviewCreation rasterOverviewCreation;
 	int minOverviewWidth;
 	tkGDALResamplingMethod rasterOverviewResampling;
+	int tilesThreadPoolSize;
+	bool loadSymbologyOnAddLayer;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
@@ -65,6 +67,8 @@ struct GlobalSettingsInfo
 		saveGridColorSchemeToFile = true;
 		xmlFileVersion = 2;
 		xmlFilenameEncoding = "utf8";
+		tilesThreadPoolSize = 5;
+		loadSymbologyOnAddLayer = true;
 
 		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
 		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";
@@ -149,5 +153,11 @@ struct GlobalSettingsInfo
 	void SetGdalUtf8(bool turnon)
 	{
 		CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", turnon ? "YES" : "NO");
+	}
+
+	int GetTilesThreadPoolSize()
+	{
+		int size = tilesThreadPoolSize > 20 ? 20 : tilesThreadPoolSize;
+		return size;
 	}
 };

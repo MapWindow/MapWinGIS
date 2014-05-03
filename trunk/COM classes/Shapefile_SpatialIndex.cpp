@@ -54,14 +54,11 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
 // *****************************************************************
 //		get_HasSpatialIndex()
 // *****************************************************************
-
-// TODO: does it make sense to write to this property - no index will be created?
-
 //ajp June 2008 Property does spatial index exist
 STDMETHODIMP CShapefile::put_HasSpatialIndex(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	hasSpatialIndex = pVal;
+	hasSpatialIndex = pVal;	// CreateSpatialIndex should be used to create it
 	return S_OK;
 }
 
@@ -243,9 +240,6 @@ STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL *retval)
 // ********************************************************************
 //		QuickQueryInEditMode()
 // ********************************************************************
-
-// TODO: exclude from IShapefile interface
-
 //Neio 2009/07/21 
 STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result, int* ResultCount )
 {
@@ -265,11 +259,7 @@ STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result,
 		int size = r.size();
 		*Result = new int[size];
 		
-		// TODO: test and remove commented
 		memcpy( *Result, &r[0], sizeof(int) * size);
-		//for(int i = 0; i < size;i ++)
-		//	(*Result)[i] = r[i];
-		
 		*ResultCount = size;
 	}
 	return S_OK;

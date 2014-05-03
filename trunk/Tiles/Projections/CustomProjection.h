@@ -53,7 +53,7 @@ public:
 	void GetTileSizeProj(int zoom, CSize &size)
 	{
 		this->GetTileMatrixSizeXY(zoom, size);
-		size.cx = (long)((MaxLongitude - MinLongitude)/(double)size.cx);
-		size.cy = (long)((MaxLatitude - MinLatitude)/(double)size.cy);
+		size.cx = (long)((xMaxLng - xMinLng)/(double)size.cx);
+		size.cy = (long)((yMaxLat - yMinLat)/(double)size.cy);
 	}
 };

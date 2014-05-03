@@ -36,11 +36,11 @@ void CustomProjection::FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 // Converts from projected units to tile coordinates
 void CustomProjection::FromProjToXY(double lat, double lng, int zoom, CPoint &ret)
 {
-	lat = Clip(lat, MinLatitude, MaxLatitude);
-	lng = Clip(lng, MinLongitude, MaxLongitude);
+	lat = Clip(lat, yMinLat, yMaxLat);
+	lng = Clip(lng, xMinLng, xMaxLng);
 
-	double y = (lat - MinLatitude)/(MaxLatitude - MinLatitude);
-	double x = (lng - MinLongitude)/(MaxLongitude - MinLongitude);
+	double y = (lat - yMinLat)/(yMaxLat - yMinLat);
+	double x = (lng - xMinLng)/(xMaxLng - xMinLng);
 	
 	CSize s;
 	GetTileMatrixSizeXY(zoom, s);
@@ -76,8 +76,8 @@ void CustomProjection::FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret)
 	double x = Clip(pnt.x, 0, mapSizeX) / mapSizeX;
 	double y = Clip(pnt.y, 0, mapSizeY) / mapSizeY;
 
-	x = MinLongitude + x * (MaxLongitude - MinLongitude);
-	y = MinLatitude + y * (MaxLatitude - MinLatitude);
+	x = xMinLng + x * (xMaxLng - xMinLng);
+	y = yMinLat + y * (yMaxLat - yMinLat);
 
 	ret.Lat = y;
 	ret.Lng = x;

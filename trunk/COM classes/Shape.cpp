@@ -717,7 +717,6 @@ STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
 
 #pragma endregion	
 
-// TODO: add methods to set Z and M; write method put_XY
 #pragma region Points
 // **********************************************************
 //		get_NumPoints
@@ -1051,15 +1050,6 @@ STDMETHODIMP CShape::get_Extents(IExtents **pVal)
 //		get_Area
 // *************************************************************
 // TODO: it's possible to optimize it for fast mode
-
-	struct Poly
-	{	
-	public:
-		Poly(){}
-		std::vector<double> polyX;
-		std::vector<double> polyY;
-	};
-
 STDMETHODIMP CShape::get_Area(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -1660,9 +1650,9 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	OGRGeometry* oResult = oGeom->Intersection(oLine);
 	if (oResult == NULL)
 	{
-		// TODO: add error code
-		// Should we destroy the oGeom object?
-		OGRGeometryFactory::destroyGeometry(oLine); return S_OK;
+		ErrorMessage(tkSPATIAL_OPERATION_FAILED);
+		OGRGeometryFactory::destroyGeometry(oLine); 
+		return S_OK;
 	}
 	
 	// Intersection can be line or point; for polygons we are interested
@@ -1671,13 +1661,13 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	double x = DBL_MIN;
 	double y = DBL_MIN;
 	
-	ShpfileType shptype = _shp->get_ShapeType();
+	ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
 
-	if( shptype == SHP_POLYLINE || shptype == SHP_POLYLINEZ || shptype == SHP_POLYLINEM )
+	if( shptype == SHP_POLYLINE)
 	{
-		// TODO: write implementation
+		ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 	}
-	if( shptype == SHP_POLYGON || shptype == SHP_POLYGONZ || shptype == SHP_POLYGONM )
+	if( shptype == SHP_POLYGON)
 	{
 		OGRwkbGeometryType oType = oResult->getGeometryType();
 		if (oType == wkbLineString || oType == wkbLineString25D)
@@ -2146,8 +2136,13 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 			return;
 		}
 		
-		// TODO: interior point can return no result; write some error handling
-		if (pnt != NULL)
+		if (!pnt && method == lpInteriorPoint)
+		{
+			// let's calculate centroid instead
+			this->get_Centroid(&pnt);
+		}
+
+		if (pnt)
 		{
 			pnt->get_X(&x);
 			pnt->get_Y(&y);
@@ -2260,8 +2255,8 @@ void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, 
 // ********************************************************************
 //		Bytes2SafeArray()				               
 // ********************************************************************
-//  Creates safearray with numbers of shapes as long values
-//  Returns true when created safearray has elements, and false otherwise
+//  Creates safe array with numbers of shapes as long values
+//  Returns true when created safe array has elements, and false otherwise
 bool Bytes2SafeArray(unsigned char* data, int size, VARIANT* arr)
 {
 	SAFEARRAY FAR* psa = NULL;

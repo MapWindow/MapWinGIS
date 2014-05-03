@@ -14,6 +14,7 @@ namespace Utility
 	char * SYS2A(BSTR str);
 	WCHAR* StringToWideChar(CString s);
 	char* ConvertBSTRToLPSTR (BSTR bstrIn);
+	CString ReplaceNoCase( LPCTSTR instr, LPCTSTR oldstr, LPCTSTR newstr );
 	
 	CStringA ConvertToUtf8(CStringW unicode); 
 	CStringW ConvertFromUtf8(CStringA utf8);
@@ -37,7 +38,7 @@ namespace Utility
 	CStringW GetRelativePath(CStringW ProjectName, CStringW Filename);
 	CStringW GetPathWOExtension(CStringW path);
 	int ReadFileToBuffer(CStringW filename, char** buffer);
-	int ReadFileToBuffer(CStringW filename, unsigned char** buffer);		// TODO: use template
+	int ReadFileToBuffer(CStringW filename, unsigned char** buffer);
 	long get_FileSize(CStringW filename);
 	CStringW getProjectionFilename( CStringW dataSourceName );
 	CStringW GetFolderFromPath(CStringW path);
@@ -60,6 +61,7 @@ namespace Utility
 	Gdiplus::Font* GetGdiPlusFont(CString name, float size);
 	bool SaveBitmap(int width, int height, unsigned char* pixels, BSTR outputName);
 	DWORD* cvtUCharToDword(long inp, int &num);
+	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);
 
 	// shapefile
 	void swapEndian(char* a,int size);

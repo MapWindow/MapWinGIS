@@ -52,7 +52,7 @@ STDMETHODIMP CLabels::put_FontName(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	::SysFreeString(m_options.fontName);
-	m_options.fontName = OLE2BSTR(newVal);	// TODO: add check of the input value through EnumFontFamiliesEx
+	m_options.fontName = OLE2BSTR(newVal);
 	return S_OK;
 };	
 
@@ -731,7 +731,6 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 			CLabelInfo* lbl = labelParts->at(j);
 			if (lbl->isDrawn)
 			{
-				//if (lbl->rotation == 0.0)
 				if (lbl->horizontalFrame)
 				{
 					CRect* frame = lbl->horizontalFrame;
@@ -798,7 +797,6 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 									if (k == 4) k = 0;
 
 									m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-									//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
 									pnt->put_X(double(frame->points[k].x));
 									pnt->put_Y(double(frame->points[k].y));
 									shp->InsertPoint(pnt,&n,&vbretval);
@@ -806,12 +804,10 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 								}
 
 								m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-								//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
 								pnt->put_X(double(box.left));
 								pnt->put_Y(double(box.bottom));
 
 								utils->PointInPolygon(shp, pnt, &vbretval);
-								//shp->PointInThisPoly(pnt, &vbretval);
 								pnt->Release();
 								if (vbretval)
 								{
@@ -1164,22 +1160,6 @@ bool CLabels::LabelsSynchronized()
 	long numShapes;
 	m_shapefile->get_NumShapes(&numShapes);
 	if (numShapes != (long)m_labels.size())	return false;
-	
-	// lsu 18 feb 2010
-	// TODO: consider it once more
-	/*for (long i = 0; i < numShapes; i++)
-	{
-		IShape* shp = NULL;
-		m_shapefile->get_Shape(i, &shp);
-		long numParts;
-		shp->get_NumParts(&numParts);
-		shp->Release();
-		shp = NULL;
-		if (numParts != (long)m_labels[i]->size())
-		{
-			return false;
-		}
-	}*/
 	return true;
 }
 // *****************************************************************
@@ -1352,7 +1332,6 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 		CPLXMLNode* psCategories = CPLCreateXMLNode(psTree, CXT_Element, "LabelCategories");
 		for (unsigned int i = 0; i < m_categories.size(); i++)
 		{
-			// TODO: serialize only the properties that are different from the deafault
 			CPLXMLNode* node = ((CLabelCategory*)m_categories[i])->SerializeCore("LabelCategoryClass");
 			if (node)
 			{
@@ -1415,7 +1394,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 		}
 		else if (m_savingMode == modeDBF)
 		{
-			// TODO: implement
+			ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 		}
 	}
 
@@ -1737,7 +1716,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 		m_shapefile->get_Table(&table);
 		if (table)
 		{
-			// analyses expression
+			// analyzes expression
 			CString strError;
 			std::vector<CString> results;
 			if (((CTableClass*)table)->Calculate_(str, results, strError))
@@ -1762,7 +1741,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 				}
 				else
 				{
-					//TODO: return error - uncorrect expression
+					ErrorMessage(tkINVALID_EXPRESSION);
 				}
 			}
 			table->Release();
@@ -2473,7 +2452,35 @@ STDMETHODIMP CLabels::get_Positioning(tkLabelPositioning* pVal)
 STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	// TODO: add check of shapefile type
+	if (m_shapefile)
+	{
+		ShpfileType type;
+		m_shapefile->get_ShapefileType(&type);
+		type = Utility::ShapeTypeConvert2D(type);
+
+		bool polyline =false, polygon = false;
+		switch(newVal)
+		{
+			case lpFirstSegment:
+			case lpLastSegment:
+			case lpMiddleSegment:
+			case lpLongestSegement:
+				polyline = true;
+				break;
+			case lpCenter:
+			case lpCentroid:
+			case lpInteriorPoint:
+				polygon = true;
+				break;
+		}
+
+		if ((type == SHP_POLYLINE && !polyline) ||
+			(type == SHP_POLYGON && !polygon))
+		{
+			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+			return S_FALSE;
+		}
+	}
 	m_positioning = newVal;
 	return S_OK;
 }

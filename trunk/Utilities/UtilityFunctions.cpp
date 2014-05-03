@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include <iterator>
 #include <fstream>
+#include "macros.h"
 
 namespace Utility
 {
@@ -111,6 +112,37 @@ namespace Utility
 		{
 			return A2BSTR("");
 		}
+	}
+
+	//from http://www.codeproject.com/Articles/260/Case-Insensitive-String-Replace
+	// instr:  string to search in.
+	// oldstr: string to search for, ignoring the case.
+	// newstr: string replacing the occurrences of oldstr.
+	CString ReplaceNoCase( LPCTSTR instr, LPCTSTR oldstr, LPCTSTR newstr )
+	{
+		CString output( instr );
+
+		// lowercase-versions to search in.
+		CString input_lower( instr );
+		CString oldone_lower( oldstr );
+		input_lower.MakeLower();
+		oldone_lower.MakeLower();
+
+		// search in the lowercase versions,
+		// replace in the original-case version.
+		int pos=0;
+		while ( (pos=input_lower.Find(oldone_lower,pos))!=-1 ) {
+
+			// need for empty "newstr" cases.
+			input_lower.Delete( pos, lstrlen(oldstr) );	
+			input_lower.Insert( pos, newstr );
+
+			// actually replace.
+			output.Delete( pos, lstrlen(oldstr) );
+			output.Insert( pos, newstr );
+		}
+
+		return output;
 	}
 #pragma endregion
 
@@ -839,6 +871,19 @@ namespace Utility
 		temp.clear(); // be frugal with memory..
 
 		return output;
+	}
+
+	// ***********************************************************
+	//		DimColor
+	// ***********************************************************
+	Gdiplus::Color Utility::ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha)
+	{
+		short r = GetRValue(color) + shiftValue;	if (r< 0) r = 0;	if (r> 255) r = 255;
+		short g = GetGValue(color) + shiftValue;	if (g< 0) g = 0;	if (g> 255) g = 255;
+		short b = GetBValue(color) + shiftValue;	if (b< 0) b = 0;	if (b> 255) b = 255;
+
+		Gdiplus::Color clr(alpha|BGR_TO_RGB(RGB(r,g,b)));
+		return clr;
 	}
 #pragma endregion
 

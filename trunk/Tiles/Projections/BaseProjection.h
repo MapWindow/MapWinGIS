@@ -22,21 +22,38 @@
 #include "geopoint.h"
 
 // A base abstract class to handle transformation between map coordinates (decimal degrees)
-// and tile coordinates (indices of tiles at particular zom level)
+// and tile coordinates (indices of tiles at particular zoom level)
 class BaseProjection
 {
-public:
-    CSize tileSize;
+protected:
 	double MinLatitude;
 	double MaxLatitude;
 	double MinLongitude;
 	double MaxLongitude;
+public:
+    CSize tileSize;
+	double yMinLat;		// in decimal degrees for Mercator projection or projected units for custom projections
+	double yMaxLat;
+	double xMinLng;
+	double xMaxLng;
 	bool yInverse;
 	double PI;
 	bool projected;	  // it's projected coordinate system; direct calculations of tile positions will be attempted
 	double earthRadius;
 	bool worldWide;
 	tkTileProjection serverProjection;
+
+	double GetMinLatitude() { 
+		return projected ? MinLatitude : yMinLat; 
+	}
+	double GetMaxLatitude() { 
+		return projected ? MaxLatitude : yMaxLat; }
+	double GetMinLongitude() { 
+		return projected ? MinLongitude : xMinLng; 
+	}
+	double GetMaxLongitude() { 
+		return projected ? MaxLongitude : xMaxLng; 
+	}
 
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
@@ -49,7 +66,7 @@ public:
 		 earthRadius = 6378137.0;
 		 worldWide = true;
 		 serverProjection = tkTileProjection::SphericalMercator;
-		 MinLatitude = MaxLatitude = MinLongitude = MaxLongitude = 0.0;
+		 yMinLat = yMaxLat = xMinLng = xMaxLng = 0.0;
 	};
 	
 	virtual ~BaseProjection() {}

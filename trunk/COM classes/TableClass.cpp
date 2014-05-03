@@ -696,7 +696,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		bool readOnly = (dwAttrs & FILE_ATTRIBUTE_READONLY);
 
 		if (!readOnly)
-			dbfHandle = DBFOpen_MW(name,"rb+");		// TODO: restore
+			dbfHandle = DBFOpen_MW(name,"rb+");
 
 		if( dbfHandle == NULL )
 				dbfHandle = DBFOpen_MW(name,"rb");
@@ -3207,7 +3207,7 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				}
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO: use Unicode
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO!!!: use utf-8
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
@@ -3248,7 +3248,7 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 		{
 			if (strcmp(node->pszValue, "Join") == 0)
 			{
-				CString filename = CPLGetXMLValue( node, "Filename", NULL );		// TODO: use Unicode
+				CString filename = CPLGetXMLValue( node, "Filename", NULL );		// TODO!!!: use utf-8
 				CString fieldTo = CPLGetXMLValue( node, "FieldTo", NULL );
 				CString fieldFrom = CPLGetXMLValue( node, "FieldFrom", NULL );
 				CString fields = CPLGetXMLValue( node, "Fields", NULL );

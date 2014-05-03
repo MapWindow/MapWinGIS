@@ -4,9 +4,7 @@
 // In this the members can copied to the new class. In the current class 
 // simple redirections will be used. To make m_alllayers, m_activelayers available
 // the variables can be initialized with the pointers to underlying data of Layers class
-
 #pragma once
-
 #include "stdafx.h"
 #include "Map.h"
 #include "Image.h"
@@ -437,6 +435,19 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			_extents.bottom = l->extents.bottom - yrange*m_extentPad;
 
 			SetExtentsCore(_extents);
+		}
+	}
+
+	// loading symbology
+	if (m_globalSettings.loadSymbologyOnAddLayer)
+	{
+		CComBSTR name = GetLayerFilename(layerHandle);
+		CStringW filename = OLE2W(name);
+		filename += ".mwsymb";
+		if (Utility::fileExistsW(filename))
+		{
+			CComBSTR desc;
+			this->LoadLayerOptions(layerHandle, "", &desc);
 		}
 	}
 
@@ -1194,7 +1205,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 		_allLayers[layerHandle]->dynamicVisibility = (s != "") ? (atoi(s) == 0 ? false : true) : false;
 		
 		s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-		_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : 100000000.0;	// TODO: use constant
+		_allLayers[layerHandle]->maxVisibleScale = (s != "") ? Utility::atof_custom (s) : MAX_LAYER_VISIBLE_SCALE;
 
 		s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
 		_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;

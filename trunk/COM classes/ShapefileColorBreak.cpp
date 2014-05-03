@@ -36,7 +36,6 @@ static char THIS_FILE[] = __FILE__;
 
 STDMETHODIMP CShapefileColorBreak::get_StartValue(VARIANT *pVal)
 {
-	// TODO: Add your implementation code here
 	VariantClear(pVal);
 	VariantInit(pVal);
 	VariantCopy(pVal,&startValue);
@@ -45,7 +44,6 @@ STDMETHODIMP CShapefileColorBreak::get_StartValue(VARIANT *pVal)
 
 STDMETHODIMP CShapefileColorBreak::put_StartValue(VARIANT newVal)
 {
-	// TODO: Add your implementation code here
 	VariantClear(&startValue);	
 	VariantInit(&startValue);	
 	VariantCopy(&startValue,&newVal);
@@ -54,7 +52,6 @@ STDMETHODIMP CShapefileColorBreak::put_StartValue(VARIANT newVal)
 
 STDMETHODIMP CShapefileColorBreak::get_EndValue(VARIANT *pVal)
 {
-	// TODO: Add your implementation code here
 	VariantClear(pVal);
 	VariantInit(pVal);
 	VariantCopy(pVal,&endValue);
@@ -63,7 +60,6 @@ STDMETHODIMP CShapefileColorBreak::get_EndValue(VARIANT *pVal)
 
 STDMETHODIMP CShapefileColorBreak::put_EndValue(VARIANT newVal)
 {
-	// TODO: Add your implementation code here
 	VariantClear(&endValue);
 	VariantInit(&endValue);	
 	VariantCopy(&endValue,&newVal);
@@ -72,28 +68,24 @@ STDMETHODIMP CShapefileColorBreak::put_EndValue(VARIANT newVal)
 
 STDMETHODIMP CShapefileColorBreak::get_StartColor(OLE_COLOR *pVal)
 {
-	// TODO: Add your implementation code here
 	*pVal = startColor;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_StartColor(OLE_COLOR newVal)
 {
-	// TODO: Add your implementation code here
 	startColor = newVal;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::get_EndColor(OLE_COLOR *pVal)
 {
-	// TODO: Add your implementation code here
 	*pVal = endColor;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_EndColor(OLE_COLOR newVal)
 {
-	// TODO: Add your implementation code here
 	endColor = newVal;
 	return S_OK;
 }

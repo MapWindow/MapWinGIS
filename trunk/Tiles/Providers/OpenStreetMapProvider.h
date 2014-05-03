@@ -39,6 +39,19 @@ public:
 		ServerLetters = "abc";
 		RefererUrl = "http://www.openstreetmap.org/";
 		UrlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+
+		//_clientLock.Lock();
+		//for(int i = 0; i < 3; i++)
+		//{
+		//	CString url;
+		//	url.Format("http://%c.tile.openstreetmap.org/", ServerLetters[i]);
+		//	for(int j = 0; j < 2; j++) {
+		//		MyHttpClient* client = new MyHttpClient();
+		//		//client->SetDefaultUrl(url);
+		//		_httpClients.push_back(client);
+		//	}
+		//}
+		//_clientLock.Unlock();
 	}
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
@@ -73,5 +86,18 @@ public:
 		Name = "OpenTransportMap";
 		RefererUrl = "http://www.opencyclemap.org/";
 		UrlFormat = "http://%c.tile2.opencyclemap.org/transport/%d/%d/%d.png";
+	}
+};
+
+
+class OpenHumanitarianMapProvider: public OpenStreetMapProvider
+{
+public:	
+	OpenHumanitarianMapProvider() 
+	{
+		Id = tkTileProvider::OpenHumanitarianMap;
+		Name = "OpenHumanitarianMap";
+		RefererUrl = "http://www.openstreetmap.org/";
+		UrlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
 	}
 };

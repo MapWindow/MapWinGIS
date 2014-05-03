@@ -21,7 +21,6 @@
 #include "stdafx.h"
 #include "Wininet.h"
 #include "BaseProvider.h"
-#include <atlhttp.h>		// ATL HTTP Client (CAtlHttpClient)
 
 // init static members
 CString BaseProvider::m_proxyAddress = "";
@@ -87,14 +86,17 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
+	bool canReuseConnections = this->CanReuseConnections();
 	
-	CAtlHttpClient* httpClient = new CAtlHttpClient();
+	// TODO: try reuse HTTP client
+	MyHttpClient* httpClient = canReuseConnections ? this->GetHttpClient():  new MyHttpClient();
 	CAtlNavigateData navData;
 	
-	// TODO: reuse HTTP client
-	// ResetConnection
-	// Connect
-	// ConnectSocket
+	if (!httpClient)
+	{
+		Debug::WriteLine("Can't retrieve http client");
+		return NULL;
+	}
 
 	if (m_proxyAddress.GetLength() > 0)
 	{
@@ -105,6 +107,9 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	int bodyLen = 0;
 	bool imageData = false;
 	
+	//navData.SetExtraHeaders("Connection: keep-alive\n");
+	//navData.SetExtraHeaders("Pragma: no-cache\nCache-Control: no-cache\nProxy-Connection: keep-alive\n");
+
 	bool result = httpClient->Navigate( urlStr, &navData );
 	httpStatus = httpClient->GetStatus();
 
@@ -148,8 +153,16 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		}
 	}
 	
-	httpClient->Close();
-	delete httpClient;
+	if (!canReuseConnections)
+	{
+		//httpClient->Close();
+		delete httpClient;
+	}
+	else
+	{
+		httpClient->Close();
+		ReleaseHttpClient(httpClient);
+	}
 
 	CMemoryBitmap* bmp = NULL;
 	if (imageData)
@@ -167,7 +180,6 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		Sleep(20);
 		bmp = this->GetTileImageUsingHttp(urlStr, shortUrl, true);
 	}
-
 	return bmp;
 }
 #pragma endregion

@@ -214,8 +214,8 @@ STDMETHODIMP CLineSegment::Draw (int** hdc, float x, float y, int clipWidth, int
 {
 	if (!hdc)
 	{
-		// TODO: implement error reporting
-		return S_OK;
+		
+		return S_FALSE;
 	}
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
@@ -229,8 +229,8 @@ STDMETHODIMP CLineSegment::DrawVB (int hdc, float x, float y, int clipWidth, int
 {
 	if (!hdc)
 	{
-		// TODO: implement error reporting
-		return S_OK;
+		// TODO: report error
+		return S_FALSE;
 	}
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
@@ -245,7 +245,7 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	if (!dc)
 	{
 		// TODO: report error
-		return VARIANT_FALSE;
+		return S_FALSE;
 	}
 
 	Gdiplus::Bitmap bmp(clipWidth, clipHeight, PixelFormat32bppARGB);

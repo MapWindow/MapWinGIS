@@ -58,17 +58,6 @@ public:
 	long column;
 };
 
-struct Poly
-{	
-public:
-	Poly()
-	{
-	}
-
-	std::vector<double> polyX;
-	std::vector<double> polyY;
-};
-
 #define GEOTRSFRM_TOPLEFT_X            0
 #define GEOTRSFRM_WE_RES               1
 #define GEOTRSFRM_ROTATION_PARAM1      2
@@ -109,9 +98,18 @@ public:
 		rasterDataset = NULL;
 
 		bSubCall = FALSE;
+		_tileProjections[0] = NULL;
+		_tileProjections[1] = NULL;
 	}
 	~CUtils()
 	{
+		for(int i = 0; i < 2; i++)
+		{
+			if (_tileProjections[i]) {
+				_tileProjections[i]->Release();
+				_tileProjections[i] = NULL;
+			}
+		}
 		::SysFreeString(key);
 	}
 
@@ -245,6 +243,7 @@ private:
 	long lastErrorCode;
 	ICallback * globalCallback;
 	BSTR key;
+	IGeoProjection* _tileProjections[2];
 
 	void trace_polygon( long x, long y, std::deque<RasterPoint> & polygon );
 	inline bool is_joint( double cell2, double cell8, double cell4, double cell6 );

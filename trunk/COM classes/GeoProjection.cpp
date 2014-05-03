@@ -443,6 +443,9 @@ STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal
 	return S_OK;
 }
 
+// *******************************************************
+//		IsSameProjection()
+// *******************************************************
 bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected)
 {
 	double xNew = x;
@@ -452,7 +455,7 @@ bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, doubl
 	{
 		int tolerance = projected == true ? 3 : 7;
 		
-		// TODO: probably it will be needed to think more over the comparison, 
+		// probably it will be needed to think more over the comparison, 
 		// let's try an existing function so far
 		double x1 = Utility::FloatRound(xNew, tolerance);
 		double x2 = Utility::FloatRound(x, tolerance);
@@ -738,7 +741,7 @@ STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 	else
 	{
 		USES_CONVERSION;
-		CString name = OLE2A(filename);		// TODO: use Unicode
+		CString name = OLE2A(filename);		// TODO!!!: use Unicode
 
 		if (!Utility::fileExists(name))
 		{

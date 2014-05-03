@@ -3,7 +3,7 @@
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
  * Description: implementation of CShapefileCategory - a class representing a particular
- * of shapfile visualization scheme
+ * of shapefile visualization scheme
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
@@ -69,43 +69,6 @@ STDMETHODIMP CShapefileCategory::put_Expression(BSTR newVal)
 	return S_OK;
 }
 
-// *****************************************************************
-//		get/put_StartValue
-// *****************************************************************
-//STDMETHODIMP CShapefileCategory::get_MinValue(VARIANT *pVal)
-//{
-//	VariantClear(pVal);
-//	VariantInit(pVal);
-//	VariantCopy(pVal,&m_minValue);
-//	return S_OK;
-//}
-//
-//STDMETHODIMP CShapefileCategory::put_MinValue(VARIANT newVal)
-//{
-//	VariantClear(&m_minValue);	
-//	VariantInit(&m_minValue);	
-//	VariantCopy(&m_minValue,&newVal);
-//	return S_OK;
-//}
-
-// *****************************************************************
-//		get/put_EndValue
-// *****************************************************************
-//STDMETHODIMP CShapefileCategory::get_MaxValue(VARIANT *pVal)
-//{
-//	VariantClear(pVal);
-//	VariantInit(pVal);
-//	VariantCopy(pVal,&m_maxValue);
-//	return S_OK;
-//}
-//STDMETHODIMP CShapefileCategory::put_MaxValue(VARIANT newVal)
-//{
-//	VariantClear(&m_maxValue);
-//	VariantInit(&m_maxValue);	
-//	VariantCopy(&m_maxValue,&newVal);
-//	return S_OK;
-//}
-
 // ***************************************************************
 //		get/put_DrawingOptions()
 // ***************************************************************
@@ -155,7 +118,8 @@ void CShapefileCategory::put_underlyingOptions(CDrawingOptionsEx* newVal)
 // ***************************************************************
 //		get_Count()
 // ***************************************************************
-// Returns number of shapes that fall into curren category
+// TODO!!!: implement
+// Returns number of shapes that fall into current category
 //STDMETHODIMP CShapefileCategory::get_Count(LONG* retval)
 //{
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState())

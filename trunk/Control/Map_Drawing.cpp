@@ -31,77 +31,36 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 	//before trying to draw. Lailin Chen - 2005/10/17
 	if (this->m_hWnd == NULL)
 		return;
-	
-	// TODO: change that
+
 	// no redraw is allowed when the rubber band is being dragged
 	if (_rectTrackerIsActive)
 		return;
 
-	// -------------------------------------------------------------
-	// Old panning behavior (dragging the whole buffer is off now)
-	// don't remove it for now; probably it still will be needed
-	// as an option
-	// -------------------------------------------------------------
-	//bool dragging =  (m_bitbltClickDown.x != 0 || m_bitbltClickDown.y != 0 ||
-	//				  m_bitbltClickMove.x != 0 || m_bitbltClickMove.y != 0);
-	//dragging = false;
-	//
-	//// for panning restore everything from the main buffer, no need to update anything until user releases the button
-	//if (dragging)
-	//{
-	//	// background for the new area
-	//	pdc->FillSolidRect(0, 0, m_bitbltClickMove.x - m_bitbltClickDown.x, rcBounds.Height(), m_backColor);
-	//	pdc->FillSolidRect(rcBounds.Width() - ( m_bitbltClickDown.x - m_bitbltClickMove.x ), 0, rcBounds.Width(), rcBounds.Height(), m_backColor);
-	//	pdc->FillSolidRect(0, 0, rcBounds.Width(), m_bitbltClickMove.y - m_bitbltClickDown.y, m_backColor);
-	//	pdc->FillSolidRect(0, rcBounds.Height() - ( m_bitbltClickDown.y - m_bitbltClickMove.y ), rcBounds.Width(), rcBounds.Height(), m_backColor);
-	//	
-	//	// passing main buffer to the screen
-	//	int x = m_bitbltClickMove.x - m_bitbltClickDown.x;
-	//	int y = m_bitbltClickMove.y - m_bitbltClickDown.y;
+	// the map is locked
+	if (_lockCount > 0)
+		return;
 
-	//	Gdiplus::Graphics* gBuffer = Gdiplus::Graphics::FromImage(m_bufferBitmap);
-	//	
-	//	// blit to the screen
-	//	HDC hdc = pdc->GetSafeHdc();
-	//	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
-	//	g->DrawImage(m_bufferBitmap, (Gdiplus::REAL)x, (Gdiplus::REAL)y);
-	//	g->ReleaseHDC(hdc);
-	//	delete g;
-	//	delete gBuffer;
-	//}
-	//else
-	//{
-	// -------------------------------------------------------------
-	//   End of old panning behavior
-	// -------------------------------------------------------------
+	m_drawMutex.Lock();		// TODO: perhaps use lighter CCriticalSection
 
-		// the map is locked
-		if (_lockCount > 0)
-			return;
+	if (!_canUseMainBuffer || !_canUseLayerBuffer) 
+	{
+		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || HasDrawingData(tkDrawingDataAvailable::Coordinates);
 
-		m_drawMutex.Lock();		// TODO: perhaps use lighter CCriticalSection
-
-		if (!_canUseMainBuffer || !_canUseLayerBuffer) 
-		{
-			bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || HasDrawingData(tkDrawingDataAvailable::Coordinates);
-
-			// if there is no move data, draws to output canvas directly
-			this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
-			
-			if (hasMouseMoveData) 
-			{
-				// the main drawing will be taken from the buffer as it wasn't passed to output canvas yet
-				this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true);
-			}
-		}
-		else 
-		{
-			// always draw the main buffer, even if there is no measuring data
-			this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true); 
-		}
+		// if there is no move data, draws to output canvas directly
+		this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
 		
-		m_drawMutex.Unlock();
-	//}
+		if (hasMouseMoveData) 
+		{
+			// the main drawing will be taken from the buffer as it wasn't passed to output canvas yet
+			this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true);
+		}
+	}
+	else 
+	{
+		// always draw the main buffer, even if there is no measuring data
+		this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true); 
+	}
+	m_drawMutex.Unlock();
 }
 
 // ***************************************************************
@@ -524,7 +483,10 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 	if (_transformationMode == tmDoTransformation)
 	{
 		CGeoProjection* p = (CGeoProjection*)GetWgs84ToMapTransform();
-		if (p) { drawer.m_transfomation = p->m_transformation; }
+		if (p) 
+		{ 
+			drawer.m_transfomation = p->m_transformation; 
+		}
 	}
 	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot, _projectionChangeCount);
 }
@@ -728,7 +690,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 					}
 					else if( l->type == ShapefileLayer )
 					{
-						// grab extents from shapefile in case they've changed
+						// grab extents from shapefile in case they have changed
 						this->AdjustLayerExtents(_activeLayers[i]);
 
 						if( l->extents.left   < _extents.left   && l->extents.right < _extents.left )		continue;
@@ -738,7 +700,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 					
 						if( l->object == NULL )
 						{
-							continue;	// TODO: report the error?
+							Debug::WriteError("Layer object is missing");
+							continue;
 						}
 						
 						IShapefile* sf = NULL;
@@ -1146,7 +1109,7 @@ void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, 
 // ***************************************************************
 void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds)
 {
-	// TODO: reimplement rotation using GDI+
+	// TODO: implement rotation using GDI+
 	return;
 
 	HDC hdcLayers = gLayers->GetHDC();
@@ -1209,7 +1172,7 @@ void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRe
 // ******************************************************************
 //		InitMapRotation()
 // ******************************************************************
-//	Chnages the nessary variables to perform drawing with rotation
+//	Changes the necessary variables to perform drawing with rotation
 void InitMapRotation()
 {
 	// TODO: implement

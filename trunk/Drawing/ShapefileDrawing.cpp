@@ -197,7 +197,6 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 			_sfReader = new CShapefileReader();
 			if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
 			{
-				//delete[] sFilename;
 				delete _sfReader; _sfReader = NULL;
 				return;
 				// TODO: Add error handling

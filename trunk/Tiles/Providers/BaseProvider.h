@@ -22,8 +22,26 @@
 #include "geopoint.h"
 #include "baseprojection.h"
 #include "TileCore.h"
+#include <atlhttp.h>		// ATL HTTP Client (CAtlHttpClient)
+#include "afxmt.h"
 
 extern Debug::Logger tilesLogger;
+
+class MyHttpClient: public CAtlHttpClient
+{
+public:
+	bool _inUse;
+
+	MyHttpClient()
+	{
+		_inUse = false;
+	}
+
+	void SetDefaultUrl(CString url)
+	{
+		CAtlHttpClient::SetDefaultUrl(url);
+	}
+};
 
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
@@ -34,7 +52,8 @@ private:
 protected:
 	static CString m_proxyAddress;
 	static short m_proxyPort;
-
+	std::vector<MyHttpClient*> _httpClients;
+	::CCriticalSection _clientLock;
 public:
 	bool BaseProvider::CheckConnection(CString url);
 	std::vector<BaseProvider*> subProviders;	// for complex providers with more than one source bitmap per tile
@@ -75,13 +94,52 @@ public:
 		Projection = NULL;
 		m_initialized = false;
 		Selected = false;
+		_clientLock.Unlock();
 	}
 
 	virtual ~BaseProvider(void)
 	{
 		if (Projection != NULL)
 			delete Projection;
+		for(size_t i = 0; i < _httpClients.size(); i++)
+		{
+			_httpClients[i]->Close();
+			delete _httpClients[i];
+		}
+		_httpClients.clear();
 	};
+
+	MyHttpClient* GetHttpClient()
+	{
+		_clientLock.Lock();
+		MyHttpClient* client = NULL;
+		for(size_t i = 0; i < _httpClients.size(); i++)
+		{
+			if(!_httpClients[i]->_inUse)
+			{
+				_httpClients[i]->_inUse = true;
+				client = _httpClients[i];
+				break;
+			}
+		}
+		_clientLock.Unlock();
+		return client;
+	}
+
+	void ReleaseHttpClient(MyHttpClient* client)
+	{
+		_clientLock.Lock();
+		client->_inUse = false;
+		_clientLock.Unlock();
+	}
+
+	bool CanReuseConnections()
+	{
+		_clientLock.Lock();
+		bool canReuse = _httpClients.size() > 0;
+		_clientLock.Unlock();
+		return canReuse;
+	}
 
 	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}

@@ -76,6 +76,9 @@ void CMapView::InitProjections()
 void CMapView::SetGeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!pVal)
+		return;
+
 	IGeoProjection* last = NULL;
 	if (pVal)
 	{
@@ -91,51 +94,60 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 		if (last != _projection)
 		{
 			((CGeoProjection*)last)->SetIsFrozen(false);
+			last->StopTransform();
 		}
 		last->Release();
 		last = NULL;
 	}
 
 	_projectionChangeCount++;
-
-	if (_transformationMode == tmDoTransformation)
-		_wgsProjection->StopTransform();
 	
-	VARIANT_BOOL isSame, vb;
-	_wgsProjection->get_IsSame(_projection, &isSame);
-	if (isSame)
+	IGeoProjection* gp = NULL;
+	
+	_wgsProjection->StopTransform();
+	_gmercProjection->StopTransform();
+	_projectionToGMerc->StopTransform();
+	
+	VARIANT_BOOL isEmpty;
+	_projection->get_IsEmpty(&isEmpty);
+	if (!isEmpty)
 	{
-		_transformationMode = tmWgs84Complied;
-	}
-	else
-	{
-		_wgsProjection->StartTransform(_projection, &vb);	// must always have transformation to current projection
-		_transformationMode = vb ? tmDoTransformation : tmNotDefined;
-		if (!vb) {
-			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start WGS84 to map transformation.");
+		VARIANT_BOOL isSame, vb;
+		_wgsProjection->get_IsSame(_projection, &isSame);
+		if (isSame)
+		{
+			_transformationMode = tmWgs84Complied;
+		}
+		else
+		{
+			_wgsProjection->StartTransform(_projection, &vb);	// must always have transformation to current projection
+			_transformationMode = vb ? tmDoTransformation : tmNotDefined;
+			if (!vb) {
+				Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start WGS84 to map transformation.");
+			}
+
+			_projection->StartTransform(_wgsProjection, &vb);	// must always have transformation to WGS84
+			if (!vb) {
+				Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
+			}
 		}
 
-		_projection->StartTransform(_wgsProjection, &vb);	// must always have transformation to WGS84
+		// init Google Mercator transforms (for tiles)
+		_gmercProjection->StartTransform(_projection, &vb);		// must always have transformation to current projection
 		if (!vb) {
-			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
+			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start GMercator to map transformation.");
+		}
+
+		_projection->Clone(&_projectionToGMerc);
+		_projectionToGMerc->StartTransform(_gmercProjection, &vb);
+		if (!vb) {
+			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to GMercator transformation.");
 		}
 	}
 
 	if (_projection)
 	{
 		((CGeoProjection*)_projection)->SetIsFrozen(true);
-	}
-
-	// init Google Mercator transforms (for tiles)
-	_gmercProjection->StartTransform(_projection, &vb);		// must always have transformation to current projection
-	if (!vb) {
-		Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start GMercator to map transformation.");
-	}
-	
-	_projection->Clone(&_projectionToGMerc);
-	_projectionToGMerc->StartTransform(_gmercProjection, &vb);
-	if (!vb) {
-		Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to GMercator transformation.");
 	}
 
 	VARIANT_BOOL geographic;

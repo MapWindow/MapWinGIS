@@ -44,9 +44,8 @@ STDMETHODIMP CShapefileColorScheme::Remove(long Index)
 		allBreaks.erase( allBreaks.begin() + Index );
 	}
 	else
-	{	lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( globalCallback != NULL )
-			globalCallback->Error( OLE2BSTR(key),  A2BSTR(ErrorMsg(lastErrorCode) ) );
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	return S_OK;
 }
@@ -86,10 +85,7 @@ STDMETHODIMP CShapefileColorScheme::get_ColorBreak(long Index, IShapefileColorBr
 	}
 	else
 	{	*pVal = NULL;
-		lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( globalCallback != NULL )
-			globalCallback->Error( OLE2BSTR(key),  A2BSTR(ErrorMsg(lastErrorCode) ) );
-					
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);	
 	}
 	return S_OK;
 }
@@ -100,7 +96,7 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 	{	
 		if (!newVal)
 		{
-			// TODO: report error
+			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		}
 		else
 		{
@@ -109,11 +105,19 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 	}
 	else
 	{	
-		lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( globalCallback != NULL )
-			globalCallback->Error( OLE2BSTR(key),  A2BSTR(ErrorMsg(lastErrorCode) ) );
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	return S_OK;
+}
+
+//***********************************************************************/
+//*			ErrorMessage()
+//***********************************************************************/
+void CShapefileColorScheme::ErrorMessage(long ErrorCode)
+{
+	lastErrorCode = ErrorCode;
+	if( globalCallback != NULL) globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+	return;
 }
 
 STDMETHODIMP CShapefileColorScheme::get_LayerHandle(long *pVal)
@@ -172,7 +176,6 @@ STDMETHODIMP CShapefileColorScheme::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CShapefileColorScheme::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	
 	*pVal = lastErrorCode;
 	lastErrorCode = tkNO_ERROR;
@@ -183,7 +186,6 @@ STDMETHODIMP CShapefileColorScheme::get_LastErrorCode(long *pVal)
 STDMETHODIMP CShapefileColorScheme::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	
 	USES_CONVERSION;
 	*pVal = OLE2BSTR(key);
@@ -195,9 +197,9 @@ STDMETHODIMP CShapefileColorScheme::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	
 	::SysFreeString(key);
 	key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
+

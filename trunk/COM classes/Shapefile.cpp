@@ -530,7 +530,7 @@ void CShapefile::ApplyRandomDrawingOptions()
 // ************************************************************
 //		LoadDataFrom()
 // ************************************************************
-// loads shape and dbf data from disk file into in-memory mode
+// Loads shape and dbf data from disk file into in-memory mode
 STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -539,7 +539,8 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 	*retval = VARIANT_FALSE;
 	if (m_sourceType != sstInMemory)
 	{
-		return S_FALSE;	   // TODO: add error message; works only for in-memory shapefiles
+		ErrorMessage(tkINMEMORY_SHAPEFILE_EXPECTED);
+		return S_FALSE;
 	}
 	else
 	{
@@ -1475,8 +1476,6 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL *retval)
 #pragma endregion
 
 #pragma region Clone
-//TODO: move to shapefile helper class
-
 // ***********************************************************************
 //		CloneNoFields()
 // ***********************************************************************
@@ -3031,8 +3030,12 @@ STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRela
 // *********************************************************
 void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval)
 {
-	if (relation == srDisjoint)	// TODO: implement
+	if (relation == srDisjoint)
+	{
+		// TODO: implement
+		ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 		return;				
+	}
 	
 	this->ReadGeosGeometries(VARIANT_TRUE);
 

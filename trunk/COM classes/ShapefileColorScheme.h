@@ -79,6 +79,7 @@ public:
 	STDMETHOD(NumBreaks)(/*[out, retval]*/ long * result);
 	STDMETHOD(InsertAt)(/*[in]*/ int Position, /*[in]*/ IShapefileColorBreak *Break, /*[out,retval]*/ long *result);
 
+	void CShapefileColorScheme::ErrorMessage(long ErrorCode);
 private:
 	long fieldIndex;
 	long layerHandle;

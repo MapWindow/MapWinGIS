@@ -308,10 +308,10 @@ bool CImageClass::ReadRaster(const CStringW ImageFile, GDALAccess accessMode)
 	
 	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
 	
-	transColor = (int)_rasterImage->transColor;		// default is RGB(0,0,0) if no data value wan't set
+	transColor = (int)_rasterImage->transColor;		// default is RGB(0,0,0) if no data value wasn't't set
 	transColor2 = (int)_rasterImage->transColor;
 
-	// TODO: it's possible to add code to determine transparency by the prevaling color
+	// TODO: it's possible to add code to determine transparency by the prevailing color
 	useTransColor = _rasterImage->hasTransparency?VARIANT_TRUE:VARIANT_FALSE;
 
 	gdalImage = true;
@@ -1024,7 +1024,7 @@ bool CImageClass::WriteBMP(CString ImageFile, bool WorldFile, ICallback *cBack)
 	}
 	else
 	{
-		// Techncially it is -- but no action is required. putValue calls
+		// Technically it is -- but no action is required. putValue calls
 		// the _bitmapImage object directly to put the value.
 		USES_CONVERSION;
 		CStringA filenameA = W2A(fileName);			// TODO: use Unicode
@@ -1870,7 +1870,7 @@ STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 // ****************************************************************
 //		GetProjection
 // ****************************************************************
-// TODO!!!: rewrite using GeoProjection class
+// TODO: rewrite using GeoProjection class
 STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 {
 	USES_CONVERSION;

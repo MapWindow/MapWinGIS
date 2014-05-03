@@ -298,12 +298,13 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 	int bestZoom = provider->minZoom;
 	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)
 	{
-		double tileSize = GetTileSizeByWidth(location, i, pixelPerDegree);
+		//double tileSize = GetTileSizeByWidth(location, i, pixelPerDegree);
+		double tileSize = GetTileSize(location, i, pixelPerDegree);
 		int minSize = (int)(256 * 0.999);	// 0.999 = set some error margin for rounding issues
 		if (tileSize < minSize)
 		{
-			//Debug::WriteLine("Tile size: %f", tileSize * 2.0);
-			//Debug::WriteLine("Zoom chosen: %d", bestZoom);
+			Debug::WriteLine("Tile size: %f", tileSize * 2.0);
+			Debug::WriteLine("Zoom chosen: %d", bestZoom);
 			break;
 		}
 
@@ -339,8 +340,8 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (m_provider->mapView) {
-		CMapView* map = (CMapView*)m_provider->mapView;
+	if (this->mapView) {
+		CMapView* map = (CMapView*)this->mapView;
 		IExtents* ext = map->GetGeographicExtents();
 		if (ext) {
 			*retVal = this->ChooseZoom(ext, map->GetPixelsPerDegree(), false, m_provider);
@@ -886,7 +887,7 @@ STDMETHODIMP CTiles::put_GridLinesVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CTiles::get_MinScaleToCache(int* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_minScaleToCache;		// TODO: use in cachin process
+	*pVal = m_minScaleToCache;		// TODO: use in caching process
 	return S_OK;
 }
 STDMETHODIMP CTiles::put_MinScaleToCache(int newVal)
@@ -1249,7 +1250,7 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	if (dbName.GetLength() != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", dbName);
 	
-	// TODO: serialize custom tile providers
+	// TODO!!!: serialize custom tile providers
 	return psTree;
 }
 
@@ -1560,7 +1561,6 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 		int centX = (maxX + minX)/2;
 		int centY = (maxY + minY)/2;
 
-		// TODO: use Unicode
 		USES_CONVERSION;
 		CStringW path = OLE2W(savePath);
 		if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
@@ -1703,51 +1703,6 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 }
 
 // ************************************************************
-//		Zoom()
-// ************************************************************
-// Sets the closest discrete zoom; not finished; probably should be updated 
-// using code from CMapView::ZoomToTileScale
-void CTiles::Zoom(bool out)
-{
-	CMapView* map = (CMapView*)m_provider->mapView;
-	if (map) {
-		IExtents* ext = map->GetGeographicExtents();
-		if (ext) {
-			double xMin, xMax, yMin, yMax, zMin, zMax;
-			ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-			double lon = (xMax + xMin) / 2.0;
-			double lat = (yMax + yMin) / 2.0;
-			PointLatLng loc(lat, lon);
-			
-			double tileSize = (double)m_provider->Projection->tileSize.cx;
-			double size = GetTileSize(loc, m_provider->zoom, map->GetPixelsPerDegree());
-			if ((size > tileSize && out) ||
-				size < tileSize && !out)
-			{
-				// remain at the same oom level; do nothing
-			}
-			else if (size > tileSize && !out) 
-			{
-				//size = GetTileSize(loc, m_provider->zoom + 1, map->GetPixelsPerDegree());
-				// next level
-			}
-			else if (size < tileSize && out)
-			{
-				//size = GetTileSize(loc, m_provider->zoom - 1, map->GetPixelsPerDegree());
-				// previous level
-			}
-
-			double ratio = size/tileSize;
-			
-			double w = (xMax - xMin) * ratio;
-			double h =(yMax - yMin) * ratio;
-			ext->SetBounds(lon - w/2.0, lat - h/2.0, 0.0, lon + w/2.0, lat + h/2.0, 0.0);
-			map->SetGeographicExtents(ext);
-		}
-	}
-}
-
-// ************************************************************
 //		ProjectionSupportsWorldWideTransform
 // ************************************************************
 bool CTiles::ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgsProjection )
@@ -1794,10 +1749,10 @@ bool CTiles::ProjectionBounds( BaseProvider* provider, IGeoProjection* mapProjec
 	
 	if (proj && m_projExtentsNeedUpdate)
 	{
-		double left =  proj->MinLongitude;
-		double right = proj->MaxLongitude;
-		double top = proj->MaxLatitude;
-		double bottom = proj->MinLatitude;
+		double left =  proj->xMinLng;
+		double right = proj->xMaxLng;
+		double top = proj->yMaxLat;
+		double bottom = proj->yMinLat;
 		
 		if (transformationMode == tmDoTransformation)	// i.e. map cs isn't in decimal degrees
 		{

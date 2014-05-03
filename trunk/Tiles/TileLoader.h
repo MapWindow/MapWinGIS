@@ -61,9 +61,10 @@ public:
 	int m_sumCount;
 	int m_count;
 	static ::CCriticalSection section;
+	static ::CCriticalSection _requestLock;
 
 	ICallback* m_callback;			 // to report progress to clients via COM interface
-	IStopExecution* m_stopCallback;	 // to stop execution by clents via COM interface
+	IStopExecution* m_stopCallback;	 // to stop execution by clients via COM interface
 	int tileGeneration;
 	bool stopped;
 	bool doCacheSqlite;
@@ -88,6 +89,7 @@ public:
 		m_totalCount = 0;
 		isSnapshot = false;
 		m_count = 0;
+		_requestLock.Unlock();
 	}
 
 	TileLoader::~TileLoader(void)

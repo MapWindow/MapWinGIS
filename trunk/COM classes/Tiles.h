@@ -237,7 +237,7 @@ public:
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop);
 	double GetTileSize(PointLatLng& location, int zoom, double pixelPerDegree);
 	double GetTileSizeByWidth(PointLatLng& location, int zoom, double pixelPerDegree);
-	void Zoom(bool out);
+	//void Zoom(bool out);
 	void AddTileWithCaching(TileCore* tile);
 	void AddTileNoCaching(TileCore* tile);
 	void CTiles::AddTileOnlyCaching(TileCore* tile);

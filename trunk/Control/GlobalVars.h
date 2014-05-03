@@ -32,6 +32,11 @@ GEOSContextHandle_t getGeosHandle();
 // constants to be available  in the whole program
 const double pi = 3.1415926535897932384626433832795;
 const double pi_2 = 1.5707963267948966192313216916398;
+const double METERS_PER_DEGREE = 110899.999942;
+const double MAX_LAYER_VISIBLE_SCALE = 100000000.0;
+const double MERCATOR_MAX_VAL = 20037508.342789244;	// in GMercator for bot long and lat
+const double MAX_LATITUDE = 85.05112878;		// in WGS84
+const double MAX_LONGITUDE = 180.0;
 
 // comment these lines to turn off the memory leaking detection tools
 #ifdef _DEBUG

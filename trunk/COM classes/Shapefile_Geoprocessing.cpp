@@ -115,10 +115,9 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 				double perimeter;
 				shp->get_Perimeter(&perimeter);
 				
-				// TODO: use constant
 				if (isGeographic)
-					area *= 110899.999942;	// comparison is performed in meters, area will grow as square of linear size
-											// we multilpy area only; in reality:((area * c^2)/ (perimeter * c))
+					area *= METERS_PER_DEGREE;	// comparison is performed in meters, area will grow as square of linear size
+												// we multilpy area only; in reality:((area * c^2)/ (perimeter * c))
 				
 				if (area/perimeter < m_globalSettings.minAreaToPerimeterRatio)
 				{
@@ -126,33 +125,6 @@ void CShapefile::InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes,
 					continue;
 				}
 			}
-
-			// OUTPUT VALIDATION IS INBEDDED IN EACH FUNCTION NOW, SO NO NEED TO DO IT HERE
-			// checking for validity
-			//shp->get_IsValid(&vbretval);
-			//if (!vbretval)
-			//{
-			//	// let's try to buffer it
-			//	IShape* shpNew = NULL;
-			//	double distance = m_globalSettings.invalidShapesBufferDistance;
-			//	shp->Buffer(distance, 30, &shpNew);
-			//	
-			//	if (shpNew )
-			//	{
-			//		shpNew->get_IsValid(&vbretval);
-			//		if (vbretval)
-			//		{
-			//			// the new one is valid; swapping shapes
-			//			shp->Release();
-			//			shp = shpNew;
-			//		}
-			//		else
-			//		{
-			//			// no luck with new one; discard it
-			//			shpNew->Release();
-			//		}
-			//	}
-			//}
 
 			long newId;
 			sf->get_NumShapes(&newId);

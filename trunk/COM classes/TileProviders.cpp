@@ -193,11 +193,16 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 			p = (BaseProvider*)new TopomapperProvider();
 			break;
 		case Rosreestr:
-			RosreestrProvider* pr1 = new RosreestrProvider(false);
-			pr1->subProviders.push_back(pr1);
-			pr1->subProviders.push_back(new RosreestrProvider(true));
-			pr1->subProviders.push_back(new RosreestrBordersProvider());
-			p = pr1;
+			{
+				RosreestrProvider* pr1 = new RosreestrProvider(false);
+				pr1->subProviders.push_back(pr1);
+				pr1->subProviders.push_back(new RosreestrProvider(true));
+				pr1->subProviders.push_back(new RosreestrBordersProvider());
+				p = pr1;
+			}
+			break;
+		case OpenHumanitarianMap:
+			p = (BaseProvider*)new OpenHumanitarianMapProvider();
 			break;
 	}
 
@@ -512,7 +517,6 @@ STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 // *******************************************************
 //			get_Projection()
 // *******************************************************
-// TODO: add separate property to return GeoProjection object
 STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())

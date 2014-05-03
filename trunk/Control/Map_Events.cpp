@@ -373,22 +373,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 		this->SetCapture();
 		_dragging.Operation = DragZoombox;
-
-		// TODO: CMapTracker is no longer used; remove all references
-		/*_ttip.Activate(FALSE);
-
-		CMapTracker selectBox = CMapTracker( this, CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
-		selectBox.m_sizeMin = 0;
-
-		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
-		_ttip.Activate(TRUE);
-
-		CRect rect = selectBox.m_rect;
-		rect.NormalizeRect();
-
-		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
-			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
-			selected = false;*/
 	}
 	else if( m_cursorMode == cmZoomOut )
 	{
@@ -1104,7 +1088,7 @@ void CMapView::OnBackColorChanged()
 void CMapView::OnResetState()
 {
 	COleControl::OnResetState();  // Resets defaults found in DoPropExchange
-	//SetDefaults();		// TODO: Reset any other control state here.
+	// TODO: Reset any other control state here.
 }
 
 // *********************************************************

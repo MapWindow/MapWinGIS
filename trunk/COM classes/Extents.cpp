@@ -85,8 +85,6 @@ STDMETHODIMP CExtents::get_xMin(double *pVal)
 STDMETHODIMP CExtents::get_xMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	// TODO: Add your implementation code here
 	*pVal = xmax;
 	return S_OK;
 }

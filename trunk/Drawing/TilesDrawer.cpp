@@ -55,7 +55,6 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 		{
 			// TODO: can be cached
 			mapProjection->get_IsSame(customProj->projCustom, &isSame);
-			Debug::WriteLine("Is same projection: %d", isSame);
 		}
 	}
 	
@@ -115,9 +114,9 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 				Gdiplus::Bitmap* bmp = tile->getBitmap(i)->m_bitmap;
 				if (bmp)
 				{
-					double TOLERANCE = 0.01;
-					if ( abs(width - bmp->GetWidth()) < TOLERANCE && 
-						 abs(height - bmp->GetHeight()) < TOLERANCE)
+					double ROUNDING_TOLERANCE = 0.1;
+					if ( abs(width - bmp->GetWidth()) < ROUNDING_TOLERANCE && 
+						 abs(height - bmp->GetHeight()) < ROUNDING_TOLERANCE)
 					{
 						// TODO: perhaps better to check that all tiles have the same size
 						// and apply this rendering only then

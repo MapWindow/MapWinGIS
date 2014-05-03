@@ -865,41 +865,6 @@ STDMETHODIMP CShapeDrawingOptions::put_FrameType(tkLabelFrameType newVal)
 }
 
 // *****************************************************************
-//		LineDecorationSymbol()
-// *****************************************************************
-//STDMETHODIMP CShapeDrawingOptions::get_LineDecorationSymbol(IShapeDrawingOptions** retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	
-//	*retVal = m_options.lineDecorationSymbol;
-//	if (m_options.lineDecorationSymbol)
-//		m_options.lineDecorationSymbol->AddRef();
-//	return S_OK;
-//}
-//STDMETHODIMP CShapeDrawingOptions::put_LineDecorationSymbol(IShapeDrawingOptions* newVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	if (this->_isLineDecoration)
-//	{
-//		// TODO: report error - nested line decoration are forbidden
-//	}
-//	else
-//	{
-//		if (m_options.lineDecorationSymbol )
-//			m_options.lineDecorationSymbol->Release();
-//		
-//		m_options.lineDecorationSymbol = newVal;
-//		if (newVal)
-//		{
-//			m_options.lineDecorationSymbol->AddRef();
-//			((CShapeDrawingOptions*)m_options.lineDecorationSymbol)->_isLineDecoration = true;
-//		}
-//	}
-//	return S_OK;
-//}
-
-
-// *****************************************************************
 //		LinePattern ()
 // *****************************************************************
 STDMETHODIMP CShapeDrawingOptions::get_LinePattern(ILinePattern** retVal)
@@ -928,7 +893,7 @@ STDMETHODIMP CShapeDrawingOptions::SetGradientFill(OLE_COLOR color, short range)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (range < 0)
 	{
-		// TODO: report error
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 	}
 	unsigned char r = GetRValue(color);
 	unsigned char g = GetGValue(color);

@@ -30,10 +30,10 @@ class MercatorProjectionYandex: public BaseProjection
 public:
 	MercatorProjectionYandex()
 	{
-		MinLatitude = -85.05112878;
-		MaxLatitude = 85.05112878;
-		MinLongitude = -180;
-		MaxLongitude = 180;
+		yMinLat = -85.05112878;
+		yMaxLat = 85.05112878;
+		xMinLng = -180;
+		xMaxLng = 180;
 		RAD_DEG = 180 / PI;
 		DEG_RAD = PI / 180;
 		piDiv4 = PI / 4;
@@ -52,8 +52,8 @@ public:
 
 	void FromLatLngToXY(double lat, double lng, int zoom, CPoint &ret)
 	{
-		lat = Clip(lat, MinLatitude, MaxLatitude);
-        lng = Clip(lng, MinLongitude, MaxLongitude);
+		lat = Clip(lat, yMinLat, yMaxLat);
+        lng = Clip(lng, xMinLng, xMaxLng);
 
         double rLon = lng * DEG_RAD; 
         double rLat = lat * DEG_RAD;

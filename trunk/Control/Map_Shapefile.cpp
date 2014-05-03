@@ -8,7 +8,7 @@
 #include "Shapefile.h"
 #include "Labels.h"
 
-// TODO: the following propoerties for the new symbology must be implemented
+// TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
 // ShapeLayerFillStipple
 // ShapeLayerPointType

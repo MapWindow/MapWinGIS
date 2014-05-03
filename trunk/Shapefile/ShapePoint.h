@@ -75,7 +75,6 @@ public:
 	}
 	void put_Key(BSTR newVal)
 	{
-		// TODO: find conversion
 		key = newVal;
 	}
 	double get_X(){return x;}

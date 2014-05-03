@@ -759,19 +759,7 @@ STDMETHODIMP CCharts::Clear()
 	return S_OK;
 }
 
-// ***********************************************************
-//		DimColor
-// ***********************************************************
-// TODO: move to the utitity functions
-Gdiplus::Color CCharts::ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha)
-{
-	short r = GetRValue(color) + shiftValue;	if (r< 0) r = 0;	if (r> 255) r = 255;
-	short g = GetGValue(color) + shiftValue;	if (g< 0) g = 0;	if (g> 255) g = 255;
-	short b = GetBValue(color) + shiftValue;	if (b< 0) b = 0;	if (b> 255) b = 255;
 
-	Gdiplus::Color clr(alpha|BGR_TO_RGB(RGB(r,g,b)));
-	return clr;
-}
 
 // **************************************************************
 //		DrawChart()
@@ -805,7 +793,7 @@ STDMETHODIMP CCharts::DrawChartVB(int hdc, float x, float y, VARIANT_BOOL hideLa
 // **************************************************************
 //		DrawChartCore()
 // **************************************************************
-// Perfoms drawing by external calls
+// Performs drawing by external calls
 VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor)
 {
 	if (!dc)
@@ -920,7 +908,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			
 			// initializing brushes
 			Gdiplus::Color clr(alpha | BGR_TO_RGB(color));
-			Gdiplus::Color clrDimmed = ChangeBrightness(color, -100, alpha);
+			Gdiplus::Color clrDimmed = Utility::ChangeBrightness(color, -100, alpha);
 			Gdiplus::SolidBrush brush(clr);
 			Gdiplus::SolidBrush brushDimmed(clrDimmed);
 
@@ -1088,7 +1076,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			
 			// initializing brushes
 			Gdiplus::Color clr(alpha | BGR_TO_RGB(color));
-			Gdiplus::Color clrDimmed = ChangeBrightness(color, -100, alpha);
+			Gdiplus::Color clrDimmed = Utility::ChangeBrightness(color, -100, alpha);
 			Gdiplus::SolidBrush brush(clr);
 			Gdiplus::SolidBrush brushDimmed(clrDimmed);
 			
@@ -1310,7 +1298,7 @@ STDMETHODIMP CCharts::put_ValuesFontName(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	::SysFreeString(_options.valuesFontName);
-	_options.valuesFontName = OLE2BSTR(newVal);	// TODO: add check of the input value through EnumFontFamiliesEx
+	_options.valuesFontName = OLE2BSTR(newVal);
 	return S_OK;
 };	
 
@@ -1480,6 +1468,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 		else if (m_savingMode == modeDBF)
 		{
 			// TODO: implement
+			ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 		}
 	}
 

@@ -37,7 +37,6 @@ public:
 	bool m_drawn;			// it's drawn on screen
 	bool m_toDelete;		// for inner working of RAM cache
 	
-	// TODO: most likely can be removed because of reference counting
 	bool m_inBuffer;		// it's currently displayed or scheduled to be displayed; it must not be destroyed while cleaning the cache
 
 	long m_scale;

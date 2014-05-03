@@ -63,8 +63,8 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
 		ErrorMessage(tkRESULTINGSHPFILE_EMPTY);
 
 clear_result:		
-		// TODO: actually I don't see much sense in it; GlobalCallback if there is any must've been passed 
-		// to output shapefile as well so in case there was an error it was already reported
+		// TODO: actually I don't see much sense in it; GlobalCallback, if there is any, must have been passed 
+		// to output shapefile as; so in case there was an error it was already reported
 		long errorCode = 0;
 		(*isf)->get_LastErrorCode(&errorCode);
 		if (errorCode != 0)
@@ -105,7 +105,7 @@ bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString clas
 void CShapefile::CreateValidationList(bool selectedOnly)
 {
 	if (_useValidationList)
-		Debug::WriteLine("ERROR: Attempting to create validation list which exists");
+		Debug::WriteError("Attempting to create validation list which exists");
 	
 	if (!_useValidationList)
 	{
@@ -249,19 +249,14 @@ STDMETHODIMP CShapefile::ClearCachedGeometries()
 // *********************************************************
 //		ReadGeosGeometries()
 // *********************************************************
-// Used by:
-// -Shapefile.GetRelatedShapes
-// -Shapefile.Segmetize
 void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 {
 	if (_geosGeometriesRead)
 	{
-		Debug::WriteLine("ERROR: attempt to reread GEOS geometries while they are in memory");
+		Debug::WriteError("Attempt to reread GEOS geometries while they are in memory");
 		ClearCachedGeometries();
 	}
 	
-	// TODO!!!: can shapefile be edited so the geometries are no longer valid?
-	// Free them after exiting each function!!!
 	long percent = 0;
 	int size = (int)_shapeData.size();
 	for (int i = 0; i < size; i++)
@@ -272,7 +267,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 			continue;
 
 		if(_shapeData[i]->geosGeom)
-			Debug::WriteLine("ERROR: GEOS Geometry was expected to be empty");
+			Debug::WriteError("GEOS Geometry was expected to be empty");
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);

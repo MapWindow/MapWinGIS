@@ -105,6 +105,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Method deprecated.";
 		case tkINVALID_OPEN_STRATEGY:
 			return "Invalid open strategy for dataset.";
+		case tkSPATIAL_OPERATION_FAILED:
+			return "Spatial operation failed";
+		case tkFAILED_TO_READ_INPUT_NAMES:
+			return "Failed to read the names of input files";
 
 			//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
@@ -167,6 +171,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Operation wasn't executed because input shapefile has no shapes.";
 		case tkFAILED_TO_BUILD_SPATIAL_INDEX:
 			return "Failed to build temporary spatial index for operation.";
+		case tkINMEMORY_SHAPEFILE_EXPECTED:
+			return "Operation is valid for in-memory shapefiles only.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:
@@ -227,6 +233,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to obtain device context from handle.";
 		case tkCANT_DISPLAY_WITHOUT_EXTERNAL_SCHEME:
 			return "Can't display datasource without external color scheme. Therefore Image.AllowGridRendering can't be set to false.";
+		case tkAT_LEAST_TWO_DATASOURCES_EXPECTED:
+			return "At least 2 datasources expected.";
+		case tkIMAGES_MUST_HAVE_THE_SAME_SIZE:
+			return "Images must have the same size.";
 
 		//801-1000 = tkdbf
 		case tkCANT_OPEN_DBF:

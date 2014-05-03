@@ -60,26 +60,27 @@ public:
 		}
 		
 		// these 3 parts are required in any pattern
-		urlPattern = (urlPattern.MakeLower());
-		urlPattern.Replace(" ", "");
+		CString temp = urlPattern;
+		temp.MakeLower();
+		temp.Replace(" ", "");
 		CString token[3] = {"{zoom}", "{x}", "{y}"};
 		for (int i = 0; i < 3; i++)	{
-			int pos = urlPattern.Find(token[i]); 
+			int pos = temp.Find(token[i]); 
 			if (pos < 0)
 				throw 2;
 		}
 
 		// varying server numbers
-		int pos = urlPattern.Find("{switch:"); 
+		int pos = temp.Find("{switch:"); 
 		if (pos >= 0)
 		{
-			int pos2 = urlPattern.Find("}", pos);
+			int pos2 = temp.Find("}", pos);
 			if (pos2 < 0) {
 				throw 2;	// no closing bracket for switch pattern
 			}
 			else
 			{
-				this->pattern = urlPattern.Mid(pos, pos2 - pos + 1);
+				this->pattern = temp.Mid(pos, pos2 - pos + 1);
 				ServerLetters = pattern.Mid(8, pattern.GetLength() - 9);
 				
 				pos = 0;
@@ -100,13 +101,13 @@ public:
 		CString s;
 
 		s.Format("%d", zoom);
-		url.Replace("{zoom}", s);
+		url = Utility::ReplaceNoCase(url, "{zoom}", s);
 
 		s.Format("%d", pos.x);
-		url.Replace("{x}", s);
+		url = Utility::ReplaceNoCase(url, "{x}", s);
 
 		s.Format("%d", pos.y);
-		url.Replace("{y}", s);
+		url = Utility::ReplaceNoCase(url, "{y}", s);
 
 		if (pattern.GetLength() != 0 && tokens.size() > 0)
 		{

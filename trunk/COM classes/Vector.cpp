@@ -35,8 +35,6 @@ static char THIS_FILE[] = __FILE__;
 STDMETHODIMP CVector::get_i(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	// TODO: Add your implementation code here
 	*pVal = v.geti();
 	return S_OK;
 }
@@ -44,8 +42,6 @@ STDMETHODIMP CVector::get_i(double *pVal)
 STDMETHODIMP CVector::put_i(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	// TODO: Add your implementation code here
 	v.seti( newVal );
 	return S_OK;
 }
@@ -54,7 +50,6 @@ STDMETHODIMP CVector::get_j(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = v.getj();
 	return S_OK;
 }
@@ -63,7 +58,6 @@ STDMETHODIMP CVector::put_j(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	v.setj( newVal );
 	return S_OK;
 }
@@ -72,7 +66,6 @@ STDMETHODIMP CVector::get_k(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	*pVal = v.getk();
 	return S_OK;
 }
@@ -81,7 +74,6 @@ STDMETHODIMP CVector::put_k(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	v.setk( newVal );
 	return S_OK;
 }
@@ -90,7 +82,6 @@ STDMETHODIMP CVector::Normalize()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	v.Normalize();
 	return S_OK;
 }
@@ -99,7 +90,6 @@ STDMETHODIMP CVector::Dot(IVector *V, double *result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	double i = 0, j = 0, k = 0;
 	V->get_i( &i );
 	V->get_j( &j );
@@ -112,7 +102,6 @@ STDMETHODIMP CVector::CrossProduct(IVector *V, IVector **result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	// TODO: Add your implementation code here
 	IVector * normal = new CComObject<CVector>;
 	
 	double i = 0, j = 0, k = 0;

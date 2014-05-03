@@ -535,3 +535,35 @@ STDMETHODIMP CGlobalSettings::put_RasterOverviewResampling( tkGDALResamplingMeth
 	m_globalSettings.rasterOverviewResampling = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     TilesThreadPoolSize
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_TilesThreadPoolSize(int* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.tilesThreadPoolSize;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_TilesThreadPoolSize(int newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.tilesThreadPoolSize = newVal;
+	return S_OK;
+}
+
+// *********************************************************
+//	     LoadSymbologyOnAddLayer
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_LoadSymbologyOnAddLayer(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.loadSymbologyOnAddLayer;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_LoadSymbologyOnAddLayer(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.loadSymbologyOnAddLayer = newVal ? true: false;
+	return S_OK;
+}

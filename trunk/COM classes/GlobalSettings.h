@@ -115,6 +115,10 @@ public:
 	STDMETHOD(put_MinOverviewWidth)( int newVal);
 	STDMETHOD(get_RasterOverviewResampling)( tkGDALResamplingMethod *retVal);
 	STDMETHOD(put_RasterOverviewResampling)( tkGDALResamplingMethod newVal);
+	STDMETHOD(put_TilesThreadPoolSize)(int newVal);
+	STDMETHOD(get_TilesThreadPoolSize)(int* pVal);
+	STDMETHOD(put_LoadSymbologyOnAddLayer)(VARIANT_BOOL newVal);
+	STDMETHOD(get_LoadSymbologyOnAddLayer)(VARIANT_BOOL* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

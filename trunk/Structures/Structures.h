@@ -3,6 +3,14 @@
 #include "Enumerations.h"
 #include "Extent.h"
 
+struct Poly
+{	
+public:
+	Poly(){}
+	std::vector<double> polyX;
+	std::vector<double> polyY;
+};
+
 struct HotTrackingInfo
 {
 	IShapefile* Shapefile;

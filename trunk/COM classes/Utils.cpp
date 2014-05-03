@@ -3487,7 +3487,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	{
         // most likely this error will be caught while marshalling the array
 		// AfxThrowOleDispatchException(1002, "Type Mismatch in Parameter. Pass a one-dimensional array");
-		AfxMessageBox("Failed to read the names of input files");
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
 		return S_OK;
 	}
 
@@ -3496,14 +3496,14 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	hr = SafeArrayGetLBound(InputNames, 1, &lLBound);
     if (FAILED(hr))
 	{
-        AfxMessageBox("Failed to read the names of input files");
+        ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
 		return S_OK;
 	}
     
 	hr = SafeArrayGetUBound(InputNames, 1, &lUBound);
     if (FAILED(hr))
 	{
-		AfxMessageBox("Failed to read the names of input files");
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
 		return S_OK;
 	}
 	
@@ -3512,8 +3512,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	hr = SafeArrayAccessData(InputNames, (void HUGEP* FAR*)&pbstr);
     if (FAILED(hr))
 	{
-        // TODO: report error        
-		AfxMessageBox("Failed to read the names of input files");
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
 		return S_OK;
 	}
 	
@@ -3544,8 +3543,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	LONG width, height;
 	if (images.size() <= 1)
 	{
-		// TODO: report error: less than 2 valid images were provided
-		AfxMessageBox("Less than 2 valid images were provided");
+		ErrorMessage(tkAT_LEAST_TWO_DATASOURCES_EXPECTED);
 		goto Cleaning;
 	}
 	else
@@ -3564,8 +3562,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 			}
 			else if ( w != width || h != height)
 			{
-				AfxMessageBox("All the images must have the same size");
-				// TODO: report error: all the images ust have the same size
+				ErrorMessage(tkIMAGES_MUST_HAVE_THE_SAME_SIZE);
 				goto Cleaning;
 			}
 		}
@@ -3738,7 +3735,8 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 					shpNew->Release();	
 					(*result)->Release();
 					(*result) = NULL;
-					return S_FALSE;	// TODO: report error code
+					ErrorMessage(tkFAILED_TO_REPROJECT);
+					return S_FALSE;
 				}
 			}
 
@@ -5272,20 +5270,36 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	IGeoProjection* gp = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
-	VARIANT_BOOL vb;
-
-	switch(projection)
+	*retVal = VARIANT_FALSE;
+	
+	if (projection != Amersfoort && projection != SphericalMercator)
+		return S_FALSE;
+	
+	if (_tileProjections[projection])
 	{
-		case tkTileProjection::SphericalMercator:
-			gp->SetGoogleMercator(&vb);
-			break;
-		case tkTileProjection::Amersfoort:
-			gp->ImportFromProj4(A2BSTR("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs"), &vb);
-			break;
+		// let's take it from cache
+		_tileProjections[projection]->AddRef();
+		*retVal = _tileProjections[projection];
 	}
-	*retVal = gp;
+	else
+	{
+		IGeoProjection* gp = NULL;
+		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+		VARIANT_BOOL vb;
+		switch(projection)
+		{
+			case tkTileProjection::SphericalMercator:
+				gp->SetGoogleMercator(&vb);
+				break;
+			case tkTileProjection::Amersfoort:
+				gp->ImportFromEPSG(28992, &vb);
+				//gp->ImportFromProj4(A2BSTR("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs"), &vb);
+				break;
+		}
+		_tileProjections[projection] = gp;
+		gp->AddRef();
+		*retVal = gp;
+	}
 	return S_OK;
 }
 

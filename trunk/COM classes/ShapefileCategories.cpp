@@ -414,8 +414,10 @@ IShapefile* CShapefileCategories::get_ParentShapefile()
 // *******************************************************************
 CDrawingOptionsEx* CShapefileCategories::get_UnderlyingOptions(int Index)
 {
-	// TODO: add check for input parameter
-	return ((CShapefileCategory*)m_categories[Index])->get_UnderlyingOptions();
+	if (Index >=0 && Index < (int)m_categories.size())
+		return ((CShapefileCategory*)m_categories[Index])->get_UnderlyingOptions();
+	else
+		return NULL;
 }
 
 // *******************************************************************
@@ -595,7 +597,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 	
 	if (!m_shapefile)
 	{
-		// TODO: report error
+		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return S_OK;
 	}
 
@@ -604,11 +606,11 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 
 	if (numBreaks <= 1)
 	{
-		// TODO: report error
+		ErrorMessage(tkCOLOR_SCHEME_IS_EMPTY);
 		return S_OK;
 	}
 
-	// we'll correct inproper indices
+	// we'll correct invalid indices
 	if (CategoryEndIndex >= (long)m_categories.size())
 	{
 		CategoryEndIndex = (long)(m_categories.size() - 1);
@@ -621,7 +623,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 
 	if ( CategoryEndIndex == CategoryStartIndex )
 	{
-		// TODO: report error
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}
 

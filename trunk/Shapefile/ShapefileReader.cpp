@@ -8,7 +8,6 @@
 // Fast reading for drawing procedure without bounds, file code, etc
 bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 {
-	//if (strlen(filename) < 4)
 	if (filename.GetLength() < 4)
 	{
 		return false;
@@ -19,7 +18,6 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 	sFilename.SetAt(sFilename.GetLength() - 1, L'x');
 
 	FILE* shxfile = _wfopen(sFilename, L"rb");
-	//delete[] sFilename;
 
 	if (!shxfile )
 	{

@@ -670,6 +670,7 @@ enum tkScalebarUnits
 		[helpstring("")] YahooHybrid = 19,
 		[helpstring("")] Topomapper = 20,
 		[helpstring("")] Rosreestr = 21,
+		[helpstring("")] OpenHumanitarianMap = 22,
 		[helpstring("")] ProviderCustom = 1024,
 	} tkTileProvider;
 
@@ -1627,8 +1628,6 @@ enum tkScalebarUnits
 		gpmAuto = 0,
 		gpmUseProxy = 1,
 		gpmNoProxy = 2,
-		//gpmFavourNoProxy = 3,
-		//gpmInRamProxy = 4,		// TODO: should we add it?
 	} tkGridProxyMode;
 
 	/************************** tkSavingMode **************************/
@@ -3164,7 +3163,6 @@ interface IShapefile : IDispatch{
 	[propput, id(47), helpstring("property CacheExtents")] HRESULT CacheExtents([in] VARIANT_BOOL newVal);
 	[id(48), helpstring("method RefreshExtents")] HRESULT RefreshExtents([out, retval] VARIANT_BOOL *pVal);
 	[id(49), helpstring("method RefreshShapeExtents")] HRESULT RefreshShapeExtents([in] LONG ShapeId,[out, retval] VARIANT_BOOL * pVal);
-	//add by Neio 2009 07
 	//[id(50),helpstring("method QuickQueryInEditMode")] HRESULT QuickQueryInEditMode([in] IExtents *BoundBox, [in, out] int** Result,[in, out] int* ResultCount);
 	[propget, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([out, retval] VARIANT_BOOL *pVal);
 	[propput, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([in,defaultvalue(TRUE)] VARIANT_BOOL pVal);
@@ -4831,6 +4829,10 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(29)] HRESULT TiffCompression([in] tkTiffCompression newVal);
 	[propget, id(30)] HRESULT RasterOverviewResampling([out, retval] tkGDALResamplingMethod *retVal);
 	[propput, id(30)] HRESULT RasterOverviewResampling([in] tkGDALResamplingMethod newVal);
+	[propget, id(31)] HRESULT TilesThreadPoolSize( [out, retval]int* retVal);
+	[propput, id(31)] HRESULT TilesThreadPoolSize( [in]int newVal);
+	[propget, id(32)] HRESULT LoadSymbologyOnAddLayer( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(32)] HRESULT LoadSymbologyOnAddLayer( [in]VARIANT_BOOL newVal);
 
 };
 

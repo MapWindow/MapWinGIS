@@ -31,10 +31,10 @@ private:
 public:
 	MercatorProjection()
 	{
-		 MinLatitude = -85.05112878;
-		 MaxLatitude = 85.05112878;
-		 MinLongitude = -180;
-		 MaxLongitude = 180;
+		 yMinLat = -85.05112878;
+		 yMaxLat = 85.05112878;
+		 xMinLng = -180;
+		 xMaxLng = 180;
 	};
 	
 	~MercatorProjection() { }
@@ -52,8 +52,8 @@ public:
 	// converts decimal degrees to tile coordinates
 	void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret)
 	{
-		double lat = Clip(pnt.Lat, MinLatitude, MaxLatitude);
-		double lng = Clip(pnt.Lng, MinLongitude, MaxLongitude);
+		double lat = Clip(pnt.Lat, yMinLat, yMaxLat);
+		double lng = Clip(pnt.Lng, xMinLng, xMaxLng);
 
 		double x = (lng + 180) / 360;
 		double sinLatitude = sin(lat * PI / 180);

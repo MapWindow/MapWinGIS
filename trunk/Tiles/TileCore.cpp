@@ -58,10 +58,10 @@ bool TileCore::UpdateProjection(OGRCoordinateTransformation* transformation, int
 		BaseProjection* pr = this->m_projection;
 		if (pr)
 		{
-			xMin = MAX(xMin, pr->MinLongitude);
-			xMax = MIN(xMax, pr->MaxLongitude);
-			yMin = MAX(yMin, pr->MinLatitude);
-			yMax = MIN(yMax, pr->MaxLatitude);
+			xMin = MAX(xMin, pr->GetMinLongitude());
+			xMax = MIN(xMax, pr->GetMaxLongitude());
+			yMin = MAX(yMin, pr->GetMinLatitude());
+			yMax = MIN(yMax, pr->GetMaxLatitude());
 		}
 
 		double xTL, xTR, xBL, xBR;

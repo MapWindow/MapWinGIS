@@ -124,7 +124,7 @@ STDMETHODIMP CLabelCategory::put_FontName(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	::SysFreeString(m_options.fontName);
-	m_options.fontName = OLE2BSTR(newVal);	// TODO: add check of the input value through EnumFontFamiliesEx
+	m_options.fontName = OLE2BSTR(newVal);
 	return S_OK;
 };	
 

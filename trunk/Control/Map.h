@@ -763,7 +763,7 @@ public:
 	//	structures and lists
 	// ---------------------------------------------
 	std::vector<ImageGroup*>* _imageGroups;
-	std::vector<TimedPoint*> _panningList;		// TODO: wrap in a separate class
+	std::vector<TimedPoint*> _panningList;
 
 	ZoombarPart _lastZooombarPart;
 	ZoombarParts _zoombarParts;

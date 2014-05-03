@@ -132,7 +132,6 @@ public:
 	STDMETHOD(put_CacheExtents)(VARIANT_BOOL newVal);
 	STDMETHOD(RefreshExtents)(VARIANT_BOOL * pVal);
 	STDMETHOD(RefreshShapeExtents)(LONG ShapeId, VARIANT_BOOL *pVal);
-	//Neio 2009/07/21 QTree Mode
 	STDMETHOD(QuickQueryInEditMode)(/*[in]*/IExtents * BoundBox,int ** Result, int* ResultCount);
 	STDMETHOD(get_UseQTree)(VARIANT_BOOL * pVal);
 	STDMETHOD(put_UseQTree)(VARIANT_BOOL pVal);

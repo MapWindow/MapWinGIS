@@ -225,7 +225,7 @@ STDMETHODIMP CGrid::AssignNewProjection(BSTR projection, VARIANT_BOOL *retval)
 // ***************************************************
 //		SaveProjection()
 // ***************************************************
-// TODO:!!! use geoprojection
+// TODO: use geoprojection
 void CGrid::SaveProjection(char* projection)						
 {
 	try

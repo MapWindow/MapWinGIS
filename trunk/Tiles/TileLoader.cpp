@@ -26,6 +26,7 @@
 #include "map.h"
 
 ::CCriticalSection TileLoader::section;
+::CCriticalSection TileLoader::_requestLock;
 
 // *******************************************************
 //		LoadingTask::DoTask()
@@ -52,7 +53,12 @@ void LoadingTask::DoTask()
 		if (!this->cacheOnly)
 			this->Loader->AddActiveTask(this);
 		
+		/*::CCriticalSection* lock = &this->Loader->_requestLock;
+		lock->Lock();
+		Sleep(25);
+		lock->Unlock();*/
 		TileCore* tile = Provider->GetTileImage(CPoint(x, y), zoom);		// http call
+		
 
 		if (this->Loader->stopped)
 		{
@@ -186,10 +192,12 @@ bool TileLoader::InitPools()
 {
 	this->stopped = false;
 
+	int size = m_globalSettings.GetTilesThreadPoolSize();
+
 	if (!m_pool)
 	{
 		m_pool = new CThreadPool<ThreadWorker>();
-		HRESULT hr = m_pool->Initialize(NULL, THREADPOOL_SIZE);
+		HRESULT hr = m_pool->Initialize(NULL, size);
 		if (!SUCCEEDED( hr ))
 			Debug::WriteLine("Failed to initialize pool 1");
 	}
@@ -197,7 +205,7 @@ bool TileLoader::InitPools()
 	if (!m_pool2)
 	{
 		m_pool2 = new CThreadPool<ThreadWorker>();
-		HRESULT hr = m_pool2->Initialize(NULL, THREADPOOL_SIZE);
+		HRESULT hr = m_pool2->Initialize(NULL, size);
 		if(!SUCCEEDED( hr ))
 			Debug::WriteLine("Failed to initialize pool 2");
 	}
@@ -224,9 +232,10 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 
 	CThreadPool<ThreadWorker>* pool = (generation % 2 == 0)  ? m_pool : m_pool2;
 
+	pool->SetSize(m_globalSettings.GetTilesThreadPoolSize());
+
 	pool->SetTimeout(100000);		// 100 seconds (low rate limit may be set)
 
-	//Debug::WriteLine();	
 	tilesLogger.WriteLine("Tiles requested; generation = %d", generation);
 
 	if (isSnapshot) {

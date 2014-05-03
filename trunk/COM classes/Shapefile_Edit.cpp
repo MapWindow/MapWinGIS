@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 #pragma once
 #include "stdafx.h"
 #include "Shapefile.h"
@@ -77,11 +77,11 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		
 		// reading shapes into memory
 		IShape * shp = NULL;
-		lastErrorCode = tkNO_ERROR;			// TODO: why?
+		lastErrorCode = tkNO_ERROR;	
 		long percent = 0, newpercent = 0; 
 		
 		int size = (int)_shapeData.size();
-		for( int i = 0; i < size; i++) //_numShapes; i++ )
+		for( int i = 0; i < size; i++)
 		{	
 			this->get_Shape(i, &shp);
 
@@ -107,13 +107,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 				m_qtree->AddNode(node);
 			}
 			
-			newpercent = (long)((i + 1.0)/size * 100); //_numShapes * 100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading shapes into memory"));
-			}
+			Utility::DisplayProgress(globalCallback, i, size, "Reading shapes into memory", key, percent);
 		}
 		*retval = VARIANT_TRUE;
 	
@@ -189,14 +183,13 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	}
 	else if ( m_sourceType == sstInMemory )
 	{
-		// shapefile wan't saved before
+		// shapefile wasn't saved before
 		if(_shpfileName.GetLength() > 0)
 		{
 			this->Save(cBack, retval);
 			
 			if (*retval)
 			{
-				// TODO: stop editing with discarding changes
 				_isEditingShapes = VARIANT_FALSE;
 			}
 		}
@@ -287,7 +280,6 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			_isEditingShapes = FALSE;
 			ReleaseMemoryShapes();
 
-			// TODO: is it needed ?
 			// reload the shx file
 			this->readShx();
 
@@ -295,15 +287,6 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			{
 				StopEditingTable(ApplyChanges,cBack,retval);
 			}
-
-			// TODO: the number of shapes can be different; labels, charts, etc will be lost as a result
-			// the initial state should be copied somewhere for not loosing drawing options
-			// TODO: is it needed?
-			/*if (_shapeData.size() != _numShapes)
-			{
-				_shapeData.clear();
-				_shapeData.resize(_numShapes);
-			}*/
 			*retval = VARIANT_TRUE;
 		}
 		
@@ -609,8 +592,6 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 				dbf->get_LastErrorCode(&lastErrorCode);
 				ErrorMessage(lastErrorCode);
 			}
-			
-			//_numShapes = 0;		// todo: remove
 			
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{

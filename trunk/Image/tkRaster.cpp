@@ -176,7 +176,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
   		that a grayscale view will still appear correctly in your RGB or BGR based bitmap. */
 		
 		nBands = rasterDataset->GetRasterCount();
-		//nBands = nBands <= 3 ? nBands : 3;		// TODO: perhaps this should be changed; as we can render any band with external color scheme
+		//nBands = nBands <= 3 ? nBands : 3;		// older behavior
 
 		/************************ INITIALISE BANDS AND KEEP THEM OPEN **************/
 
@@ -439,10 +439,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 
 		for (int i = 0; ; i++)
 		{
-			// In case of large images and downsampling it makes sense to reduce the size of buffer,
+			// In case of large images and down sampling it makes sense to reduce the size of buffer,
 			// as additional details will be lost all the same but memory usage can be unacceptable.
 			
-			double mapUnitsPerImagePixel = (dX + dY);			// we intentially don't divide by 2 here, as we'll check the possiblity of decreasing buffer by 2
+			double mapUnitsPerImagePixel = (dX + dY);			// we intentionally don't divide by 2 here, as we'll check the possibility of decreasing buffer by 2
 			
 			if (downsamplingMode == imBicubic || downsamplingMode == imBilinear)		// In case of interpolation algorithm different form nearest neigbour is used 
 				mapUnitsPerImagePixel *= 2.0;											// the buffer should be noticeably bigger than screen dimensions to preserve details
@@ -450,7 +450,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 			if (downsamplingMode == imHighQualityBicubic || downsamplingMode == imHighQualityBilinear)
 				mapUnitsPerImagePixel *= 3.0;
 
-			if ( mapUnitsPerImagePixel < mapUnitsPerScreenPixel )		// it's downsampling
+			if ( mapUnitsPerImagePixel < mapUnitsPerScreenPixel )		// it's down sampling
 			{
 				int xTemp = xBuff/2;
 				int yTemp = yBuff/2;
@@ -514,7 +514,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		bool success;
 		if ( this->WillBeRenderedAsGrid() )
 		{
-			// if user passed a color scheme, image will be opend as grid using the first band
+			// if user passed a color scheme, image will be opened as grid using the first band
 			success = ReadGridAsImage(ImageData, _visibleRect.left, _visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
 		}
 		else

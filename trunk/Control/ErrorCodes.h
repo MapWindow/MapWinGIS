@@ -53,6 +53,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkFILE_NOT_EXISTS 31
 # define tkMETHOD_DEPRECATED 32
 # define tkINVALID_OPEN_STRATEGY 33
+# define tkSPATIAL_OPERATION_FAILED 34
+# define tkFAILED_TO_READ_INPUT_NAMES 35
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201
@@ -84,6 +86,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkABORTED_ON_OUTPUT_VALIDATION 227
 # define tkSHAPEFILE_IS_EMPTY 228
 # define tkFAILED_TO_BUILD_SPATIAL_INDEX 229
+# define tkINMEMORY_SHAPEFILE_EXPECTED 230
+# define tkCOLOR_SCHEME_IS_EMPTY 231
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401
@@ -118,6 +122,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkIMAGE_UNINITIALIZED 612
 # define tkCANT_DISPLAY_WITHOUT_EXTERNAL_SCHEME 613
 
+
 //801-1000 = tkdbf
 # define tkCANT_OPEN_DBF 801
 # define tkDBF_IN_EDIT_MODE 802
@@ -151,6 +156,8 @@ const char * ErrorMsg( long ErrorCode );
 # define tkFAILED_READ_BLOCK 1019
 # define tkFAILED_WRITE_BLOCK 1020
 # define tkINPUT_RASTERS_DIFFER 1021
+# define tkAT_LEAST_TWO_DATASOURCES_EXPECTED 1022
+# define tkIMAGES_MUST_HAVE_THE_SAME_SIZE 1023
 
 //1201-1400 = tkmap
 # define tkINVALID_LAYER_HANDLE 1201
