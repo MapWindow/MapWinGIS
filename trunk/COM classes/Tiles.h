@@ -53,6 +53,7 @@ public:
 		this->SetDefaults();
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
+		
 	}
 
 	~CTiles()
@@ -84,6 +85,7 @@ public:
 		m_minScaleToCache = 0;
 		m_maxScaleToCache = 100;
 		m_projExtentsNeedUpdate = true;
+		_scalingRatio = 1.0;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_TILES)
@@ -112,17 +114,14 @@ public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
-
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
-
 	STDMETHOD(get_Visible)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_GridLinesVisible)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_GridLinesVisible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_Provider)(tkTileProvider* pVal);
 	STDMETHOD(put_Provider)(tkTileProvider newVal);
-
 	STDMETHOD(get_DoCaching)(tkCacheType type, VARIANT_BOOL* pVal);
 	STDMETHOD(put_DoCaching)(tkCacheType type, VARIANT_BOOL newVal);
 	STDMETHOD(get_UseCache)(tkCacheType type, VARIANT_BOOL* pVal);
@@ -135,42 +134,29 @@ public:
 	STDMETHOD(put_MinScaleToCache)(int newVal);
 	STDMETHOD(get_MaxScaleToCache)(int* pVal);
 	STDMETHOD(put_MaxScaleToCache)(int newVal);
-	
 	STDMETHOD(ClearCache)(tkCacheType type);
-	STDMETHOD(ClearCache2)(tkCacheType type, 
-						   tkTileProvider provider, 
-						   int fromScale = 0, 
-						   int toScale = 100);
-	
+	STDMETHOD(ClearCache2)(tkCacheType type, tkTileProvider provider, int fromScale = 0, int toScale = 100);
 	STDMETHOD(get_CacheSize)(tkCacheType type, double* retVal);
 	STDMETHOD(get_CacheSize2)(tkCacheType type, tkTileProvider provider, int scale, double* retVal);
-
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
-
 	STDMETHOD(SetProxy)(BSTR address, int port, VARIANT_BOOL* retVal);
 	STDMETHOD(get_Proxy)(BSTR* retVal);
-
 	STDMETHOD(AutodetectProxy)(VARIANT_BOOL* retVal);
-
 	STDMETHOD(get_DiskCacheFilename)(BSTR* retVal);
 	STDMETHOD(put_DiskCacheFilename)(BSTR pVal);
 	STDMETHOD(get_Providers)(ITileProviders** retVal);
 	STDMETHOD(get_ProviderId)(int* retVal);
 	STDMETHOD(put_ProviderId)(int newVal);
 	STDMETHOD(GetTilesIndices)(IExtents* boundsDegrees, int zoom, int provider, IExtents** retVal);
-	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, 
-						int provider, IStopExecution* stop, LONG* retVal);
+	STDMETHOD(Prefetch)(double minLat, double maxLat, double minLng, double maxLng, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(Prefetch2)(int minX, int maxX, int minY, int maxY, int zoom, int provider, IStopExecution* stop, LONG* retVal);
 	STDMETHOD(get_DiskCacheCount)(int provider, int zoom, int xMin, int xMax, int yMin, int yMax, LONG* retVal);
 	STDMETHOD(get_ProviderName)(BSTR* retVal);
 	STDMETHOD(CheckConnection)(BSTR url, VARIANT_BOOL* retVal);
-
 	STDMETHOD(GetTileBounds)(int provider, int zoom, int tileX, int tileY, IExtents** retVal);
 	STDMETHOD(get_CurrentZoom)(int* retVal);
-	
 	STDMETHOD(PrefetchToFolder)(IExtents* ext, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop, LONG* retVal);
-
 	STDMETHOD(get_PrefetchErrorCount)(int* retVal);
 	STDMETHOD(get_PrefetchTotalCount)(int* retVal);
 	STDMETHOD(ClearPrefetchErrors)();
@@ -178,18 +164,16 @@ public:
 	STDMETHOD(StopLogRequests)();
 	STDMETHOD(get_LogFilename)(BSTR* retVal);
 	STDMETHOD(get_LogIsOpened)(VARIANT_BOOL* retVal);
-
 	STDMETHOD(get_LogErrorsOnly)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_LogErrorsOnly)(VARIANT_BOOL pVal);
-
 	STDMETHOD(get_SleepBeforeRequestTimeout)(long* retVal);
 	STDMETHOD(put_SleepBeforeRequestTimeout)(long pVal);
-
 	STDMETHOD(get_MaxZoom)(int* retVal);
 	STDMETHOD(get_MinZoom)(int* pVal);
-
 	STDMETHOD(get_ServerProjection)(tkTileProjection* retVal);
 	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
+	STDMETHOD(get_ScalingRatio)(double* pVal);
+	STDMETHOD(put_ScalingRatio)(double newVal);
 	#pragma endregion
 
 private:
@@ -197,6 +181,8 @@ private:
 	long m_lastErrorCode;
 	ICallback * m_globalCallback;
 	BSTR m_key;
+
+	double _scalingRatio;
 
 	bool m_visible;
 	bool m_gridLinesVisible;
@@ -232,16 +218,14 @@ public:
 	
 public:	
 	void Init(void* map) {	mapView = map; }
-	void CTiles::MarkUndrawn();
-	long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
+	void MarkUndrawn();
+	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop);
-	double GetTileSize(PointLatLng& location, int zoom, double pixelPerDegree);
-	double GetTileSizeByWidth(PointLatLng& location, int zoom, double pixelPerDegree);
-	//void Zoom(bool out);
+	
 	void AddTileWithCaching(TileCore* tile);
 	void AddTileNoCaching(TileCore* tile);
-	void CTiles::AddTileOnlyCaching(TileCore* tile);
-	void CTiles::AddTileToRamCache(TileCore* tile);
+	void AddTileOnlyCaching(TileCore* tile);
+	void AddTileToRamCache(TileCore* tile);
 	void Clear();
 	void LoadTiles(void* mapView, bool isSnapshot = false, CString key = "");
 	void LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key = "");
@@ -256,10 +240,7 @@ public:
 	BaseProjection* get_Projection(){return m_provider->Projection;}
 	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection,tkTransformationMode transformationMode, Extent& retVal);
 	void HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
-
-	void UpdateProjection() {
-		m_projExtentsNeedUpdate = true;
-	}
+	void UpdateProjection();
 	void Stop() {
 		m_tileLoader.Stop(); 
 		this->m_visible = false;	// will prevent reloading tiles after remove all layers in map destructor

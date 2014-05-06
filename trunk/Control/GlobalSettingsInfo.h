@@ -38,9 +38,18 @@ struct GlobalSettingsInfo
 	tkGDALResamplingMethod rasterOverviewResampling;
 	int tilesThreadPoolSize;
 	bool loadSymbologyOnAddLayer;
+	int tilesMaxZoomOnProjectionMismatch;
+	tkInterpolationMode imageUpsamplingMode;
+	tkInterpolationMode imageDownsamplingMode;
+	tkInterpolationMode gridUpsamplingMode;			// currently not used
+	tkInterpolationMode gridDownsamplingMode;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		imageUpsamplingMode = imNone;
+		imageDownsamplingMode = imBilinear;
+		gridUpsamplingMode = imNone;
+		gridDownsamplingMode = imBilinear;
 		rasterOverviewResampling = tkGDALResamplingMethod::grmNearest;
 		minOverviewWidth = 512;
 		rasterOverviewCreation = tkRasterOverviewCreation::rocAuto;
@@ -69,6 +78,7 @@ struct GlobalSettingsInfo
 		xmlFilenameEncoding = "utf8";
 		tilesThreadPoolSize = 5;
 		loadSymbologyOnAddLayer = true;
+		tilesMaxZoomOnProjectionMismatch = 6;
 
 		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
 		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";

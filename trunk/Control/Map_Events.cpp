@@ -109,7 +109,19 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			UpdateCursor(cmZoomIn);
 			break;
 		case 'M':
-			UpdateCursor(cmMeasure);
+			if (m_cursorMode == cmMeasure)
+			{
+				_measuring->Clear();
+				tkMeasuringType type;
+				_measuring->get_MeasuringType(&type);
+				tkMeasuringType newType = type == MeasureArea ? MeasureDistance : MeasureArea;
+				_measuring->put_MeasuringType(newType);
+				Redraw2(RedrawSkipDataLayers);
+			}
+			else
+			{
+				UpdateCursor(cmMeasure);
+			}
 			break;
 		case VK_BACK:
 			ZoomToPrev();
@@ -257,6 +269,9 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 {
 	if (_zoombarVisible && _transformationMode != tmNotDefined)
 	{
+		int minZoom, maxZoom;
+		GetMinMaxZoom(minZoom, maxZoom);
+		
 		ZoombarPart part = ZoombarHitTest(point.x, point.y);
 		switch(part) 
 		{
@@ -264,9 +279,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 				{
 					// zoom in
 					int zoom = GetCurrentZoom();
-					int maxZoom;
-					GetTilesNoRef()->get_MaxZoom(&maxZoom);
-					if (zoom + 1 <= maxZoom)
+					if (zoom <= maxZoom)
 					{
 						ZoomToTileLevel(zoom + 1);
 					}
@@ -277,9 +290,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 				{
 					// zoom out
 					int zoom = GetCurrentZoom();
-					int minZoom;
-					GetTilesNoRef()->get_MinZoom(&minZoom);
-					if (zoom - 1 >= minZoom)
+					if (zoom - 1 >= minZoom )
 					{
 						ZoomToTileLevel(zoom - 1);
 					}
@@ -293,9 +304,6 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 			case ZoombarPart::ZoombarBar:
 				{
 					double ratio = _zoombarParts.GetRelativeZoomFromClick(point.y);
-					int maxZoom, minZoom;
-					GetTilesNoRef()->get_MinZoom(&minZoom);
-					GetTilesNoRef()->get_MaxZoom(&maxZoom);
 					int zoom = (int)(minZoom + (maxZoom - minZoom) * ratio + 0.5);
 					ZoomToTileLevel(zoom);
 					return true;

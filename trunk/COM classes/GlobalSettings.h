@@ -119,6 +119,16 @@ public:
 	STDMETHOD(get_TilesThreadPoolSize)(int* pVal);
 	STDMETHOD(put_LoadSymbologyOnAddLayer)(VARIANT_BOOL newVal);
 	STDMETHOD(get_LoadSymbologyOnAddLayer)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_TilesMinZoomOnProjectionMismatch)(int newVal);
+	STDMETHOD(get_TilesMinZoomOnProjectionMismatch)(int* pVal);
+	STDMETHOD(get_ImageUpsamplingMode)(tkInterpolationMode* newVal);
+	STDMETHOD(put_ImageUpsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(get_ImageDownsamplingMode)(tkInterpolationMode* newVal);
+	STDMETHOD(put_ImageDownsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(get_GridUpsamplingMode)(tkInterpolationMode* newVal);
+	STDMETHOD(put_GridUpsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(get_GridDownsamplingMode)(tkInterpolationMode* newVal);
+	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

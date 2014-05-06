@@ -29,6 +29,7 @@
 #include "RamCache.h"
 #include "map.h"
 #include "DiskCache.h"
+#include "TileHelper.h"
 
 ::CCriticalSection m_tilesBufferSection;
 
@@ -193,6 +194,9 @@ STDMETHODIMP CTiles::put_Key(BSTR newVal)
 
 #pragma endregion
 
+// *********************************************************
+//	     SleepBeforeRequestTimeout()
+// *********************************************************
 STDMETHODIMP CTiles::get_SleepBeforeRequestTimeout(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -205,6 +209,27 @@ STDMETHODIMP CTiles::put_SleepBeforeRequestTimeout(long newVal)
 	if (newVal > 10000) newVal = 10000;
 	if (newVal < 0) newVal = 0;
 	m_prefetchLoader.m_sleepBeforeRequestTimeout = newVal;
+	return S_OK;
+}
+
+// *********************************************************
+//	     ScalingRatio()
+// *********************************************************
+STDMETHODIMP CTiles::get_ScalingRatio(double *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _scalingRatio;
+	return S_OK;
+}
+STDMETHODIMP CTiles::put_ScalingRatio(double newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (newVal < 0.5 || newVal > 4.0)
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return S_FALSE;
+	}
+	_scalingRatio = newVal;
 	return S_OK;
 }
 
@@ -255,56 +280,54 @@ STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
 }
 #pragma endregion
 
-#pragma region Load tiles
+#pragma region Choose zoom
+
 // ************************************************************
-//		GetTileSize()
+//		ChooseZoom()
 // ************************************************************
-// Returns tiles size of the specified zoom level under current map scale
-double CTiles::GetTileSize(PointLatLng& location, int zoom, double pixelPerDegree)
+int CTiles::ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider)
 {
-	CPoint point;
-	m_provider->Projection->FromLatLngToXY(location, zoom, point);
-	SizeLatLng size;
-	m_provider->Projection->GetTileSizeLatLon(point, zoom, size);
-	return (size.WidthLng + size.HeightLat) * pixelPerDegree / 2.0;
+	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
+	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
+	return this->ChooseZoom(xMinD, xMaxD, yMinD, yMaxD, pixelPerDegree, limitByProvider, provider);
 }
 
 // ************************************************************
-//		GetTileSize()
-// ************************************************************
-// Returns tiles size of the specified zoom level under current map scale
-double CTiles::GetTileSizeByWidth(PointLatLng& location, int zoom, double pixelPerDegree)
-{
-	CPoint point;
-	m_provider->Projection->FromLatLngToXY(location, zoom, point);
-	SizeLatLng size;
-	m_provider->Projection->GetTileSizeLatLon(point, zoom, size);
-	return size.WidthLng * pixelPerDegree;
-}
-
-// ************************************************************
-//		get_ClosestZoom()
+//		ChooseZoom()
 // ************************************************************
 int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax, 
 					   double pixelPerDegree, bool limitByProvider, BaseProvider* provider)
 {
 	if (!provider)
-		return 0;
+		return 1;
 
 	double lon = (xMax + xMin) / 2.0;
 	double lat = (yMax + yMin) / 2.0;
 	PointLatLng location(lat, lon);
-	
+	CMapView* map = (CMapView*)mapView;
+	if (!map)
+		return 1;
+
+	bool precise = map->_tileProjectionState == ProjectionMatch;
+	double ratio = precise ? 0.99: 0.75;		// 0.99 = set some error margin for rounding issues
+
 	int bestZoom = provider->minZoom;
 	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)
 	{
+		bool isSame = map->_tileProjectionState == tpsNative;
+		double tileSize = TileHelper::GetTileSizeProj(isSame, provider, map->GetWgs84ToMapTransform(), location, i);
+		if (tileSize == -1)
+			continue;
+
+		double pixelsPerMapUnit = map->PixelsPerMapUnit();
+		tileSize *= pixelsPerMapUnit;
 		//double tileSize = GetTileSizeByWidth(location, i, pixelPerDegree);
-		double tileSize = GetTileSize(location, i, pixelPerDegree);
-		int minSize = (int)(256 * 0.999);	// 0.999 = set some error margin for rounding issues
+
+		int minSize = (int)(256 * _scalingRatio  * ratio);	
 		if (tileSize < minSize)
 		{
-			Debug::WriteLine("Tile size: %f", tileSize * 2.0);
-			Debug::WriteLine("Zoom chosen: %d", bestZoom);
+			Debug::WriteLine("Choose zoom; Tile size: %f", tileSize * 2.0);
+			Debug::WriteLine("Choose zoom; Zoom chosen: %d", bestZoom);
 			break;
 		}
 
@@ -324,24 +347,14 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 }
 
 // ************************************************************
-//		ChooseZoom()
-// ************************************************************
-int CTiles::ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider)
-{
-	double xMaxD, xMinD, yMaxD, yMinD, zMaxD, zMinD;
-	ext->GetBounds(&xMinD, &yMinD, &zMinD, &xMaxD, &yMaxD, &zMaxD);
-	return this->ChooseZoom(xMinD, xMaxD, yMinD, yMaxD, pixelPerDegree, limitByProvider, provider);
-}
-
-// ************************************************************
 //		get_CurrentZoom()
 // ************************************************************
 STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (this->mapView) {
-		CMapView* map = (CMapView*)this->mapView;
+	*retVal = -1;
+	CMapView* map = (CMapView*)this->mapView;
+	if (map) {
 		IExtents* ext = map->GetGeographicExtents();
 		if (ext) {
 			*retVal = this->ChooseZoom(ext, map->GetPixelsPerDegree(), false, m_provider);
@@ -350,7 +363,9 @@ STDMETHODIMP CTiles::get_CurrentZoom(int* retVal)
 	}
 	return S_OK;
 }
+#pragma endregion
 
+#pragma region Seek tiles
 // ************************************************************
 //		getRectangleXY()
 // ************************************************************
@@ -509,7 +524,9 @@ bool CTiles::GetTilesForMap(void* mapView, int providerId, int& xMin, int& xMax,
 	xMax = MAX(rect.left, rect.right);
 	return true;
 }
+#pragma endregion
 
+#pragma region Load tiles
 // *********************************************************
 //	     LoadTiles()
 // *********************************************************
@@ -702,6 +719,7 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 			}
 		}
 	}
+
 	if(!isSnapshot) {
 		m_tileLoader.m_totalCount = points.size() + activeTasks.size();
 	}
@@ -1860,7 +1878,8 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 			}
 			else
 			{
-				if (gpServer->StartTransform(gp, &vb))
+				gpServer->StartTransform(gp, &vb);
+				if (vb)
 				{
 					*retVal = tkTilesProjectionStatus::tpsCompatible;
 					gpServer->StopTransform();
@@ -1877,4 +1896,14 @@ STDMETHODIMP CTiles::get_ProjectionStatus(tkTilesProjectionStatus* retVal)
 	return S_OK;
 }
 
-
+// ************************************************************
+//		UpdateProjection
+// ************************************************************
+void CTiles::UpdateProjection()
+{
+	m_projExtentsNeedUpdate = true;
+	CMapView* map = (CMapView*)mapView;
+	if (map) {
+		map->UpdateTileProjection();
+	}
+}

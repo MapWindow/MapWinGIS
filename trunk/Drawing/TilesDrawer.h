@@ -50,6 +50,6 @@ public:
 
 	void DrawTiles(ITiles* tiles, double pixelsPerDegree, IGeoProjection* mapProjection, BaseProjection* tileProjection, bool printing, int projectionChangeCount);
 
-	OGRCoordinateTransformation* m_transfomation;
+	IGeoProjection* m_transfomation;
 	Gdiplus::Graphics* m_graphics;
 };

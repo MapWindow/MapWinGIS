@@ -22,7 +22,7 @@
 #include "BaseProjection.h"
 
 // commonly used Google Mercator projection; EPSG 3857
-class MercatorProjection: public BaseProjection
+class MercatorProjection: public MercatorBase
 {
 private:
 	double degToRad (double ang) {

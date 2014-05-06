@@ -22,7 +22,7 @@
 #include "BaseProjection.h"
 
 // Mercator projection used by Yandex
-class MercatorProjectionYandex: public BaseProjection
+class MercatorProjectionYandex: public MercatorBase
 {
 	double RAD_DEG;
     double DEG_RAD;

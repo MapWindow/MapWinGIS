@@ -5265,17 +5265,16 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 }
 
 // ********************************************************
-//     TileProjectionToGeoProjection()
+//     TileProjectionToGeoProjectionCore()
 // ********************************************************
-STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, IGeoProjection** retVal)
+HRESULT CUtils::TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-	
+	*retVal = NULL;
+
 	if (projection != Amersfoort && projection != SphericalMercator)
 		return S_FALSE;
-	
-	if (_tileProjections[projection])
+
+	if (_tileProjections[projection] && useCache)
 	{
 		// let's take it from cache
 		_tileProjections[projection]->AddRef();
@@ -5288,19 +5287,28 @@ STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, 
 		VARIANT_BOOL vb;
 		switch(projection)
 		{
-			case tkTileProjection::SphericalMercator:
-				gp->SetGoogleMercator(&vb);
-				break;
-			case tkTileProjection::Amersfoort:
-				gp->ImportFromEPSG(28992, &vb);
-				//gp->ImportFromProj4(A2BSTR("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs"), &vb);
-				break;
+		case tkTileProjection::SphericalMercator:
+			gp->SetGoogleMercator(&vb);
+			break;
+		case tkTileProjection::Amersfoort:
+			gp->ImportFromEPSG(EPSG_AMERSFOORT, &vb);
+			//gp->ImportFromProj4(A2BSTR("+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +units=m +no_defs"), &vb);
+			break;
 		}
 		_tileProjections[projection] = gp;
 		gp->AddRef();
 		*retVal = gp;
 	}
 	return S_OK;
+}
+
+// ********************************************************
+//     TileProjectionToGeoProjection()
+// ********************************************************
+STDMETHODIMP CUtils::TileProjectionToGeoProjection(tkTileProjection projection, IGeoProjection** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return TileProjectionToGeoProjectionCore(projection, VARIANT_FALSE, retVal);
 }
 
 // ********************************************************

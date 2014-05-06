@@ -3,18 +3,12 @@
 #include "GeoProjection.h"
 #include "Tiles.h"
 
-// some simple incapsulation for readability of code
+// some simple encapsulation for readability of code
 IGeoProjection* CMapView::GetMapToWgs84Transform() 
 { 
 	VARIANT_BOOL vb;
 	_projection->get_HasTransformation(&vb);
 	return vb ?  _projection : NULL; 
-}
-IGeoProjection* CMapView::GetMapToGMercTransform() 
-{
-	VARIANT_BOOL vb;
-	_projectionToGMerc->get_HasTransformation(&vb);
-	return vb ?  _projectionToGMerc : NULL; 
 }
 IGeoProjection* CMapView::GetWgs84ToMapTransform() 
 { 
@@ -22,12 +16,20 @@ IGeoProjection* CMapView::GetWgs84ToMapTransform()
 	_wgsProjection->get_HasTransformation(&vb);
 	return vb ?  _wgsProjection : NULL; 
 }
-IGeoProjection* CMapView::GetGMercToMapTransform() 
+IGeoProjection* CMapView::GetTilesToMapTransform() 
 { 
 	VARIANT_BOOL vb;
-	_gmercProjection->get_HasTransformation(&vb);
-	return vb ?  _gmercProjection : NULL; 
+	_tileProjection->get_HasTransformation(&vb);
+	return vb ?  _tileProjection : NULL; 
 }
+
+IGeoProjection* CMapView::GetMapToTilesTransform() 
+{
+	VARIANT_BOOL vb;
+	_tileReverseProjection->get_HasTransformation(&vb);
+	return vb ?  _tileReverseProjection : NULL; 
+}
+
 IGeoProjection* CMapView::GetWgs84Projection() { return _wgsProjection; }
 IGeoProjection* CMapView::GetGMercProjection() { return _gmercProjection; }
 IGeoProjection* CMapView::GetMapProjection() { return _projection; }
@@ -41,8 +43,11 @@ void CMapView::ReleaseProjections()
 	_projection->Clear(&vb);
 	_projection->Release();
 
-	_projectionToGMerc->Clear(&vb);
-	_projectionToGMerc->Release();
+	_tileProjection->Clear(&vb);
+	_tileProjection->Release();
+
+	_tileReverseProjection->Clear(&vb);
+	_tileReverseProjection->Release();
 	
 	_wgsProjection->Clear(&vb);
 	_wgsProjection->Release();
@@ -56,12 +61,13 @@ void CMapView::ReleaseProjections()
 // *****************************************************
 void CMapView::InitProjections()
 {
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_projectionToGMerc);
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_tileProjection);
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_tileReverseProjection);
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_wgsProjection);
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_gmercProjection);
 	_transformationMode = tmNotDefined;
 	VARIANT_BOOL vb;
-	_wgsProjection->SetWgs84(&vb);		// EPSG:4326
+	_wgsProjection->SetWgs84(&vb);				// EPSG:4326
 	_gmercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 	
 	_projection = NULL;
@@ -79,12 +85,14 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	if (!pVal)
 		return;
 
+	bool preserveExtents = _activeLayers.size() == 0;
+	IExtents* ext = GetGeographicExtents();	// try to preserve extents
+
 	IGeoProjection* last = NULL;
 	if (pVal)
 	{
 		last = _projection;
-		if (last)
-			last->AddRef();		// add temp reference; as it ca be deleted in the next line
+		if (last) last->AddRef();		// add temp reference; as it can be deleted in the next line
 	}
 	
 	Utility::put_ComReference(pVal, (IDispatch**)&_projection, false);
@@ -100,13 +108,15 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 		last = NULL;
 	}
 
+	USES_CONVERSION;
+	CComBSTR str;
+	_projection->ExportToWKT(&str);
+	Debug::WriteLine("New map projection is set: %s", OLE2A(str));
+
 	_projectionChangeCount++;
-	
 	IGeoProjection* gp = NULL;
 	
 	_wgsProjection->StopTransform();
-	_gmercProjection->StopTransform();
-	_projectionToGMerc->StopTransform();
 	
 	VARIANT_BOOL isEmpty;
 	_projection->get_IsEmpty(&isEmpty);
@@ -131,18 +141,6 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 				Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
 			}
 		}
-
-		// init Google Mercator transforms (for tiles)
-		_gmercProjection->StartTransform(_projection, &vb);		// must always have transformation to current projection
-		if (!vb) {
-			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start GMercator to map transformation.");
-		}
-
-		_projection->Clone(&_projectionToGMerc);
-		_projectionToGMerc->StartTransform(_gmercProjection, &vb);
-		if (!vb) {
-			Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to GMercator transformation.");
-		}
 	}
 
 	if (_projection)
@@ -155,6 +153,58 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
 
 	((CTiles*)_tiles)->UpdateProjection();
+
+	if (ext) {
+		if (preserveExtents)
+			SetGeographicExtents(ext);
+		ext->Release();
+	}
+}
+
+// *****************************************************
+//		UpdateTileProjection()
+// *****************************************************
+void CMapView::UpdateTileProjection()
+{
+	VARIANT_BOOL vb;
+	_tileProjection->Clear(&vb);
+	_tileReverseProjection->Clear(&vb);
+	
+	tkTileProjection tp;
+	_tiles->get_ServerProjection(&tp);
+	
+	switch(tp)
+	{
+		case SphericalMercator:
+			_tileProjection->SetGoogleMercator(&vb);
+			break;
+		case Amersfoort:
+			_tileProjection->ImportFromEPSG(EPSG_AMERSFOORT, &vb);
+			break;
+	}
+	_tileReverseProjection->CopyFrom(_projection, &vb);
+
+	_tileProjection->get_IsSame(_projection, &vb);
+	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
+
+	
+	if (_transformationMode == tmWgs84Complied && tp == SphericalMercator)
+	{
+		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
+		_tileProjectionState = ProjectionCompatible;
+	}
+
+	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
+	{
+		_tileProjection->StartTransform(_projection, &vb);
+		if (!vb) {
+			Debug::WriteError("Failed to start tiles to map transformation.");
+		}
+		_tileReverseProjection->StartTransform(_tileProjection, &vb);
+		if (!vb) {
+			Debug::WriteError("Failed to start map to tiles transformation.");
+		}
+	}
 }
 
 // *****************************************************
@@ -185,3 +235,4 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		}
 	}
 }
+

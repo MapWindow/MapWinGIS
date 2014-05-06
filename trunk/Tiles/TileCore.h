@@ -48,7 +48,7 @@ public:
 	RectLatLng Geog;
 	RectLatLng Proj;
 
-	int m_projectionOk;	// position of tile was recalculated using the current projection; number of projection changes
+	int _projectionChangeCount;	// position of tile was recalculated using the current projection; number of projection changes
 	BaseProjection* m_projection;
 	
 	CStringW getPath(CStringW root, CStringW ext);
@@ -65,34 +65,9 @@ public:
 		m_refCount = 0;
 		m_drawn = false;
 		m_toDelete = false;
-		m_projectionOk = -1;
+		_projectionChangeCount = -1;
 		m_hasErrors = false;
-		
-		// calculating geographic coordinates
-		SizeLatLng size;
-		projection->GetTileSizeLatLon(pnt, zoom, size );
-		
-		if (size.WidthLng == 0.0 || size.HeightLat == 0.0) {
-			Debug::WriteLine("Invalid tile size");
-		}
-
-		if (projection->yInverse)
-		{
-			PointLatLng geoPnt;
-			CPoint pnt2 = pnt;
-			pnt2.y++;			// y corresponds to the bottom of tile as the axis is directed up
-								// while the drawing position is defined by its top-left corner
-								// so the calculation is made by the upper tile
-
-			projection->FromXYToLatLng(pnt2, zoom, geoPnt);
-			Geog = RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
-		}
-		else
-		{
-			PointLatLng geoPnt;
-			projection->FromXYToLatLng(pnt, zoom, geoPnt);
-			Geog = RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat );
-		}
+		Geog =	projection->CalculateGeogBounds(pnt, zoom);
 	}
 
 	~TileCore()
@@ -170,10 +145,6 @@ public:
 		}
 	}
 #pragma endregion
-
-	// Recalculates projected coordinates; it is assumed that map projection is different from WGS84
-	bool UpdateProjection(OGRCoordinateTransformation* transformation, int projectionChangeCount);
-	bool UpdateProjection(CustomProjection* proj, int projectionChangeCount);
 
 	bool TileCore::operator==(const TileCore &t2)
 	{

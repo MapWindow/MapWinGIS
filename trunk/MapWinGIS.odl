@@ -53,6 +53,7 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 
+
 /************************** tkCustomState Enumeration **********************/
 typedef		
 [
@@ -4833,7 +4834,17 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(31)] HRESULT TilesThreadPoolSize( [in]int newVal);
 	[propget, id(32)] HRESULT LoadSymbologyOnAddLayer( [out, retval]VARIANT_BOOL* retVal);
 	[propput, id(32)] HRESULT LoadSymbologyOnAddLayer( [in]VARIANT_BOOL newVal);
+	[propget, id(33)] HRESULT TilesMinZoomOnProjectionMismatch( [out, retval]int* retVal);
+	[propput, id(33)] HRESULT TilesMinZoomOnProjectionMismatch( [in]int newVal);
 
+	[propget, id(34)] HRESULT ImageUpsamplingMode( [out, retval]tkInterpolationMode* retVal);
+	[propput, id(34)] HRESULT ImageUpsamplingMode( [in]tkInterpolationMode newVal);
+	[propget, id(35)] HRESULT ImageDownsamplingMode( [out, retval]tkInterpolationMode* retVal);
+	[propput, id(35)] HRESULT ImageDownsamplingMode( [in]tkInterpolationMode newVal);
+	/*[propget, id(36)] HRESULT GridUpsamplingMode( [out, retval]tkInterpolationMode* retVal);
+	[propput, id(36)] HRESULT GridUpsamplingMode( [in]tkInterpolationMode newVal);
+	[propget, id(37)] HRESULT GridDownsamplingMode( [out, retval]tkInterpolationMode* retVal);
+	[propput, id(37)] HRESULT GridDownsamplingMode( [in]tkInterpolationMode newVal);*/
 };
 
 [
@@ -4928,6 +4939,8 @@ interface ITiles : IDispatch{
 	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
 	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]tkTileProjection* retVal);
 	[propget, id(50), helpstring("")] HRESULT ProjectionStatus( [out, retval]tkTilesProjectionStatus* retVal);
+	/*[propget, id(51), helpstring("")] HRESULT ScalingRatio( [out, retval]double* retVal);
+	[propput, id(51), helpstring("")] HRESULT ScalingRatio( [in]double newVal);*/
 };
 
 [
@@ -5450,6 +5463,10 @@ library MapWinGIS
 			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
 			[id(232), propput] void ProjectionMismatchBehavior(tkMismatchBehavior nNewValue);
 			[id(232), propget] tkMismatchBehavior ProjectionMismatchBehavior();
+			[id(233), propput] void ZoomBarMinZoom(long nNewValue);
+			[id(233), propget] long ZoomBarMinZoom();
+			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
+			[id(234), propget] long ZoomBarMaxZoom();
 			//}}AFX_ODL_METHOD
 	};
 

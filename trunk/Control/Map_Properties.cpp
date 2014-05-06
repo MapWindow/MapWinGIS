@@ -357,7 +357,7 @@ void CMapView::SetZoomBehavior(short nNewValue)
 bool CMapView::ForceDiscreteZoom()
 {
 	// should we use it when tiles are invisible or there is no Internet connection?
-	return _zoomBehavior == zbUseTileLevels && _transformationMode != tmNotDefined;
+	return _zoomBehavior == zbUseTileLevels && _transformationMode != tmNotDefined && _tileProjectionState != ProjectionDoTransform;
 }
 
 // ***************************************************************
@@ -450,4 +450,39 @@ void CMapView::SetProjectionMismatchBehavior(tkMismatchBehavior nNewValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_projectionMismatchBehavior = nNewValue;
+}
+
+
+// *****************************************************
+//		ZoomBarMinZoom
+// *****************************************************
+long CMapView::GetZoomBarMinZoom()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomBarMinZoom;
+}
+void CMapView::SetZoomBarMinZoom(long nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (nNewValue < 1)	nNewValue = -1;
+	if (nNewValue > 25)	nNewValue = 25;
+	_zoomBarMinZoom = nNewValue;
+	RedrawCore(tkRedrawType::RedrawAll, true, false);
+}
+
+// *****************************************************
+//		ZoomBarMaxZoom
+// *****************************************************
+long CMapView::GetZoomBarMaxZoom()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _zoomBarMaxZoom;
+}
+void CMapView::SetZoomBarMaxZoom(long nNewValue)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (nNewValue < 1)	nNewValue = -1;
+	if (nNewValue > 25)	nNewValue = 25;
+	_zoomBarMaxZoom = nNewValue;
+	RedrawCore(tkRedrawType::RedrawAll, true, false);
 }

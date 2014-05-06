@@ -141,4 +141,11 @@ enum DraggingOperation
 	DragZoombox = 3,
 };
 
+enum TileProjectionState
+{
+	ProjectionMatch = 0,
+	ProjectionDoTransform = 1,
+	ProjectionCompatible = 2,	// WGS84 map; GMercator server; transformation is still necessary but at least results are guaranteed
+};
+
 # endif

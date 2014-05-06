@@ -57,6 +57,7 @@ public:
 
 	virtual void FromLatLngToXY(PointLatLng pnt, int zoom, CPoint &ret) = 0;
 	virtual void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret) = 0;
+	virtual double GetWidth() = 0;
 
 	BaseProjection()
 	{
@@ -101,4 +102,42 @@ public:
 	void GetTileSizeLatLon(PointLatLng point, int zoom, SizeLatLng &ret);
 	void GetTileSizeLatLon(CPoint point, int zoom, SizeLatLng &ret);
 	void GetTileMatrixSizeXY(int zoom, CSize &ret);
+
+	RectLatLng CalculateGeogBounds(CPoint pnt, int zoom)
+	{
+		// calculating geographic coordinates
+		SizeLatLng size;
+		this->GetTileSizeLatLon(pnt, zoom, size );
+
+		if (size.WidthLng == 0.0 || size.HeightLat == 0.0) {
+			Debug::WriteLine("Invalid tile size");
+		}
+
+		if (this->yInverse)
+		{
+			PointLatLng geoPnt;
+			CPoint pnt2 = pnt;
+			pnt2.y++;			// y corresponds to the bottom of tile as the axis is directed up
+			// while the drawing position is defined by its top-left corner
+			// so the calculation is made by the upper tile
+
+			this->FromXYToLatLng(pnt2, zoom, geoPnt);
+			return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat);
+		}
+		else
+		{
+			PointLatLng geoPnt;
+			this->FromXYToLatLng(pnt, zoom, geoPnt);
+			return RectLatLng(geoPnt.Lng, geoPnt.Lat, size.WidthLng, size.HeightLat );
+		}
+	}
 };
+
+class MercatorBase: public BaseProjection
+{
+	double GetWidth()
+	{
+		return MERCATOR_MAX_VAL * 2.0;
+	}
+};
+

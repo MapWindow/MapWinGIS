@@ -192,6 +192,9 @@ public:
 	STDMETHOD(ErrorMsgFromObject)(IDispatch * comClass, BSTR* retVal);
 	STDMETHOD(TileProjectionToGeoProjection)(tkTileProjection projection, IGeoProjection** retVal);
 	STDMETHOD(get_ComUsageReport)(VARIANT_BOOL unreleasedOnly, BSTR* retVal);
+	
+	// must not be included in interface
+	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
 private:
 	inline long findBreak( std::deque<BreakVal> & bvals, double val );
 	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
@@ -260,8 +263,6 @@ private:
 	bool is_clockwise(Poly *polygon);//ah 6/3/05
 	
 	bool isColinear( POINT one, POINT two, POINT test, double tolerance );
-	//STDMETHODIMP CUtils::GridToImage_DiskBased(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
-	//STDMETHODIMP CUtils::GridToImage_InRAM(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, IImage ** retval);
 	inline void PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gvalue, _int32 Bvalue, long totalWidth);
 	void CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval);
 	bool MemoryAvailable(double bytes);
@@ -273,7 +274,7 @@ private:
 	inline void WritePixel(IImage* img, int row, int col, OLE_COLOR color, 
 								int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam);
 	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
-	void CUtils::ErrorMessage(long ErrorCode);
+	void ErrorMessage(long ErrorCode);
 	
 
 	/* GDAL/OGR functions */

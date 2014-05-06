@@ -173,8 +173,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 				gBuffer->DrawImage(_layerBitmap, 0.0f, 0.0f);
 			}
 		}
-		_canUseLayerBuffer = TRUE;
 	}
+	_canUseLayerBuffer = TRUE;
 	
 	// -----------------------------------
 	// shapefile hot tracking
@@ -305,7 +305,7 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	if (!_tileBuffer.Initialized)
 	{
 		// it's the first tile for current extents, we need to initialize the buffer
-		bool canReuseBuffer = ForceDiscreteZoom() &&
+		bool canReuseBuffer = /*ForceDiscreteZoom() &&*/
 			GetTileProvider() == _tileBuffer.Provider &&			   
 			_currentZoom != _tileBuffer.Zoom && abs(_currentZoom - _tileBuffer.Zoom) <= 4;		// for larger difference it's not practical
 
@@ -410,7 +410,7 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 				y = i / steps * sy;
 				y2 = sy2 + (1 - sy2) * (1 - i/steps);
 
-				Debug::WriteLine("Zoom in animation: x=%f; x2=%f; y=%f; y2=%f", x, x2, y, y2 );
+				//Debug::WriteLine("Zoom in animation: x=%f; x2=%f; y=%f; y2=%f", x, x2, y, y2 );
 
 				x *= _tilesBitmap->GetWidth();
 				x2 *= _tilesBitmap->GetWidth();
@@ -479,14 +479,16 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 // ***************************************************************
 void CMapView::DrawTiles(Gdiplus::Graphics* g) 
 {
+	int minZoom;
+	if ( GetTileMismatchMinZoom(minZoom) )
+	{
+		if (_currentZoom < minZoom) return;
+	}
+	
 	CTilesDrawer drawer(g, &this->_extents, _pixelPerProjectionX, _pixelPerProjectionY);
 	if (_transformationMode == tmDoTransformation)
 	{
-		CGeoProjection* p = (CGeoProjection*)GetWgs84ToMapTransform();
-		if (p) 
-		{ 
-			drawer.m_transfomation = p->m_transformation; 
-		}
+		drawer.m_transfomation = GetWgs84ToMapTransform(); 
 	}
 	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot, _projectionChangeCount);
 }
@@ -822,8 +824,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 bool CMapView::HaveDataLayersWithinView()
 {
 	double scale = this->GetCurrentScale();
-	int zoom;
-	_tiles->get_CurrentZoom(&zoom);
+	//int zoom;
+	//_tiles->get_CurrentZoom(&zoom);
+	int zoom = _currentZoom;
 	
 	for(size_t i = 0; i < _activeLayers.size(); i++)
 	{

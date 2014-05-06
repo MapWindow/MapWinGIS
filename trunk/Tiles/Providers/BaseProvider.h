@@ -149,4 +149,7 @@ public:
 
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
+	
+
+	
 };

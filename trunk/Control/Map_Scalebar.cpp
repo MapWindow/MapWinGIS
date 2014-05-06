@@ -129,16 +129,15 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	
 	if (_transformationMode != tkTransformationMode::tmNotDefined)
 	{
-		int zoom = -1;
-		_tiles->get_CurrentZoom(&zoom);
+		int zoom = GetCurrentZoom();
 		if (zoom >= 0 && zoom < 3) {
-			// lsu: there are some problems with displaying scalebar at such zoom levels: 
+			// lsu: there are some problems with displaying scale bar at such zoom levels: 
 			// - there are areas outside the globe where coordinate transformations may fail;
 			// - the points at the left and right sides of the screen may lie on the same meridian
 			// so geodesic distance across the screen will be 0;
 			// - finally projection distortions change drastically by Y axis across map so
 			// the scalebar will be virtually meaningless;
-			// The easy solution will be simply not to show scalebar at such small scales
+			// The easy solution will be simply not to show scale bar at such small scales
 			return;
 		}
 	}
@@ -473,10 +472,8 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	path.AddArc(bounds.X, bounds.Y, cornerRadius, cornerRadius, 180.0f, 90.0f);
     path.CloseAllFigures();
 
-	ITiles* tiles = this->GetTilesNoRef();
 	int maxZoom, minZoom;
-	tiles->get_MinZoom(&minZoom);
-	tiles->get_MaxZoom(&maxZoom);
+	GetMinMaxZoom(minZoom, maxZoom);
 
 	float notchStep = 7;
 	float lineOffset = 8.0f;
@@ -662,4 +659,42 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 	_penDarkGray.SetWidth(1.0f);
 }
 
+// ****************************************************************
+//		GetMinMaxZoom()
+// ****************************************************************
+bool CMapView::GetMinMaxZoom( int& minZoom, int& maxZoom )
+{
+	_tiles->get_MinZoom(&minZoom);
+	_tiles->get_MaxZoom(&maxZoom);
+
+	if (_zoomBarMinZoom + 1 <= _zoomBarMaxZoom)
+	{
+		if (_zoomBarMinZoom != -1) minZoom = _zoomBarMinZoom;
+		if (_zoomBarMaxZoom != -1) maxZoom = _zoomBarMaxZoom;
+	}
+
+	int min;
+	if (GetTileMismatchMinZoom(min)) {
+		minZoom = min;
+	}
+	return true;
+}
+
+// ****************************************************************
+//		GetTileMismatchMinZoom()
+// ****************************************************************
+bool CMapView::GetTileMismatchMinZoom( int& minZoom )
+{
+	tkTileProjection tp;
+	_tiles->get_ServerProjection(&tp);
+	if (_tileProjectionState == ProjectionDoTransform && tp == SphericalMercator)
+	{
+		minZoom = m_globalSettings.tilesMaxZoomOnProjectionMismatch;
+		return true;
+	}
+	else 
+	{
+		return false;
+	}
+}
 #pragma endregion

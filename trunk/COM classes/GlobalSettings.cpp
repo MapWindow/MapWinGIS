@@ -567,3 +567,84 @@ STDMETHODIMP CGlobalSettings::put_LoadSymbologyOnAddLayer(VARIANT_BOOL newVal)
 	m_globalSettings.loadSymbologyOnAddLayer = newVal ? true: false;
 	return S_OK;
 }
+
+// *********************************************************
+//	     TilesMinZoomOnProjectionMismatch
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_TilesMinZoomOnProjectionMismatch(int* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.tilesMaxZoomOnProjectionMismatch;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_TilesMinZoomOnProjectionMismatch(int newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.tilesMaxZoomOnProjectionMismatch = newVal;
+	return S_OK;
+}
+
+
+// *********************************************************
+//	     ImageUpsamplingMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_ImageUpsamplingMode(tkInterpolationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.imageUpsamplingMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ImageUpsamplingMode(tkInterpolationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.imageUpsamplingMode = newVal;
+	return S_OK;
+}
+
+// *********************************************************
+//	     ImageDownsamplingMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_ImageDownsamplingMode(tkInterpolationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.imageDownsamplingMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ImageDownsamplingMode(tkInterpolationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.imageDownsamplingMode = newVal;
+	return S_OK;
+}
+
+// *********************************************************
+//	     GridUpsamplingMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_GridUpsamplingMode(tkInterpolationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.gridUpsamplingMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GridUpsamplingMode(tkInterpolationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.gridUpsamplingMode = newVal;
+	return S_OK;
+}
+
+// *********************************************************
+//	     GridDownsamplingMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_GridDownsamplingMode(tkInterpolationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.gridDownsamplingMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GridDownsamplingMode(tkInterpolationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.gridDownsamplingMode = newVal;
+	return S_OK;
+}

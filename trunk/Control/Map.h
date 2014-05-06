@@ -575,6 +575,10 @@ protected:
 	afx_msg void SetZoomBoxStyle(tkZoomBoxStyle newVal);
 	afx_msg tkMismatchBehavior GetProjectionMismatchBehavior();
 	afx_msg void SetProjectionMismatchBehavior(tkMismatchBehavior newVal);
+	afx_msg long GetZoomBarMinZoom();
+	afx_msg void SetZoomBarMinZoom(long newVal);
+	afx_msg long GetZoomBarMaxZoom();
+	afx_msg void SetZoomBarMaxZoom(long newVal);
 
 	#pragma endregion
 
@@ -716,6 +720,8 @@ public:
 	
 	CString _versionNumber;
 	double _mouseWheelSpeed;
+	long _zoomBarMinZoom;
+	long _zoomBarMaxZoom;
 	long _lastErrorCode;
 	
 	// ---------------------------------------------
@@ -730,10 +736,12 @@ public:
 	//	Projections
 	// ---------------------------------------------
 	IGeoProjection* _projection;			// must always have transformation to WWGS84
-	IGeoProjection* _projectionToGMerc;	// a clone of map projection with initialized transformation to GMercator
 	IGeoProjection* _wgsProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
 	IGeoProjection* _gmercProjection;		// must always have transform to current map projection (set in map.SetGeoProjection)
+	IGeoProjection* _tileProjection;
+	IGeoProjection* _tileReverseProjection;
 	tkTransformationMode _transformationMode;
+	TileProjectionState _tileProjectionState;
 
 	// ---------------------------------------------
 	//	snapshot temp variables
@@ -827,21 +835,25 @@ public:
 	bool HasHotTracking() ;
 	
 	DOUBLE GetPixelsPerDegree(void);
+	DOUBLE PixelsPerMapUnit(void);
 
 	inline void PixelToProjection( double piX, double piY, double & prX, double & prY );
 	inline void ProjectionToPixel( double prX, double prY, double & piX, double & piY );
 
 	// some simple encapsulation for code readability
 	IGeoProjection* GetMapToWgs84Transform();
-	IGeoProjection* GetMapToGMercTransform();
+	IGeoProjection* GetMapToTilesTransform();
 	IGeoProjection* GetWgs84ToMapTransform();
-	IGeoProjection* GetGMercToMapTransform();
+	IGeoProjection* GetTilesToMapTransform();
 	IGeoProjection* GetWgs84Projection();
 	IGeoProjection* GetGMercProjection();
 	IGeoProjection* GetMapProjection();
+	
+	void RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce );
+
 	void ReleaseProjections();
 	void InitProjections();
-	void RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce );
+	void UpdateTileProjection();
 	
 private:
 	bool IS_VALID_LAYER(int layerHandle, vector<Layer*> allLayers)
@@ -911,7 +923,6 @@ private:
 	void RestoreExtents();
 	void SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn );
 	IExtents* GetMaxExtents(void);
-	DOUBLE PixelsPerMapUnit(void);
 	DOUBLE DegreesPerMapUnit(void);
 	double UnitsPerPixel();
 	void LogPrevExtent();
@@ -919,6 +930,7 @@ private:
 	bool SetGeoPosition(double x, double y);
 	void SetCurrentZoomCore(int zoom, bool forceUpdate = false);
 	void SetInitGeoExtents();
+	
 
 	// ---------------------------------------------
 	//	Data layers
@@ -979,6 +991,10 @@ private:
 	bool CheckLayerProjection( Layer* layer );
 	void GrabLayerProjection( Layer* layer );
 	bool HaveDataLayersWithinView();
+	void AdjustZoom(int zoom);
+	double GetCurrentTileSize( int zoom );
+	bool GetMinMaxZoom(int& minZoom, int& maxZoom);
+	bool GetTileMismatchMinZoom( int& minZoom );
 #pragma endregion
 };
 

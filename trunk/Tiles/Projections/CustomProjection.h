@@ -50,6 +50,11 @@ public:
 	void FromXYToLatLng(CPoint pnt, int zoom, PointLatLng &ret);
 	void FromXYToProj(CPoint pnt, int zoom, PointLatLng &ret);
 
+	double GetWidth()
+	{
+		return xMaxLng - xMinLng;
+	}
+
 	void GetTileSizeProj(int zoom, CSize &size)
 	{
 		this->GetTileMatrixSizeXY(zoom, size);

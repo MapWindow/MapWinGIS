@@ -88,8 +88,8 @@ public:
 	
 	void CImageClass::SetDefaults()
 	{
-		m_downsamplingMode = imNone;
-		m_upsamplingMode = imBilinear;
+		m_downsamplingMode = m_globalSettings.imageDownsamplingMode;	// imNone
+		m_upsamplingMode = m_globalSettings.imageUpsamplingMode;		// imBilinear
 
 		m_transparencyPercent = 1.0;
 

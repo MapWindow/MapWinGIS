@@ -24,6 +24,7 @@
 #include "Tiles.h"
 #include "ImageAttributes.h"
 #include "AmersfoortProjection.h"
+#include "TileHelper.h"
 
 using namespace Gdiplus;
 
@@ -70,31 +71,15 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 		if (!tile->m_drawn || printing)
 		{
 			// doing transformation on the first drawing of tile
-			if (tile->m_projectionOk < projectionChangeCount)
+			if (tile->_projectionChangeCount < projectionChangeCount)
 			{
-				if (isSame)
-				{
-					// projection for tiles matches map projection (most often it's Google Mercator; EPSG:3857)
-					if (!tile->UpdateProjection(customProj, projectionChangeCount))
-						continue;
-				}
-				else
-				{
-					if (m_transfomation)
-					{
-						// projection differs from WGS84 decimal degrees
-						if (!tile->UpdateProjection(m_transfomation, projectionChangeCount))
-							continue;
-					}
-					else
-					{
-						// we are working with WGS84 decimal degrees
-						tile->Proj.xLng = tile->Geog.xLng;
-						tile->Proj.yLat = tile->Geog.yLat;
-						tile->Proj.WidthLng = tile->Geog.WidthLng;
-						tile->Proj.HeightLat = tile->Geog.HeightLat;
-					}
-				}
+				RectLatLng rect;
+				bool transform = TileHelper::Transform(tile->Geog, m_transfomation, tile->m_projection, isSame ? true: false, tile->m_tileX, tile->m_tileY, tile->m_scale, rect);
+				if (!transform)
+					continue;
+
+				tile->Proj = rect;
+				tile->_projectionChangeCount = projectionChangeCount;
 			}
 			
 			// convert to screen coordinates
@@ -103,8 +88,10 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			double width = tile->Proj.WidthLng * pixelsPerMapUnit;
 			double height = tile->Proj.HeightLat * pixelsPerMapUnit;
 			
+			if (width < 0 || height < 0) continue;		// there was problem with transformation (coordinates outside bounds, don't draw it)
+
 			//Debug::WriteLine("X: %f; y: %f", x, y);
-			//Debug::WriteLine("Width: %f; height: %f", width, height);
+			Debug::WriteLine("Drawing; Width: %f; height: %f", width, height);
 
 			Gdiplus::RectF rect((Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)width, (Gdiplus::REAL)height);
 			

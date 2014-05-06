@@ -2,6 +2,8 @@
 #include "Map.h"
 #include "Shapefile.h"
 #include "Tiles.h"
+#include "Utils.h"
+#include "TileHelper.h"
 
 #pragma region Scale
 // ****************************************************
@@ -12,22 +14,27 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	if (_transformationMode == tmNotDefined)
 		return VARIANT_FALSE;
 	
+	if (_viewWidth == 0 || _viewHeight == 0)
+		return VARIANT_FALSE;
+
+	// TODO!!!: remve for debugging only
+	/*if (_transformationMode != tmWgs84Complied)
+	{
+		int maxZoom, minZoom;
+		_tiles->get_MinZoom(&minZoom);
+		_tiles->get_MaxZoom(&maxZoom);
+		for(int i = minZoom; i <= maxZoom; i++ )
+		{
+			double tileSize = GetCurrentTileSize(i);
+			Debug::WriteLine("Zoom: %d; Tile size: %f", i, tileSize);
+		}
+	}*/
+
 	tkTileProjection tileProjection;
 	_tiles->get_ServerProjection(&tileProjection);
 
-	// we shall make all the calculations in the Google Mercator (EPSG: 3857)
+	// we shall make all the calculations in server projection (either GMercator or custom)
 	// and then transform bounds to the current coordinate system
-	VARIANT_BOOL isSame;
-	IGeoProjection* serverProj = NULL;
-	GetUtils()->TileProjectionToGeoProjection(tileProjection, & serverProj);
-	if (!serverProj)
-		return VARIANT_FALSE;
-	else
-	{
-		GetMapProjection()->get_IsSame(serverProj, &isSame);
-		serverProj->Release();
-	}
-
 	double xCentOld = (_extents.left + _extents.right)/2.0;
 	double yCentOld = (_extents.bottom + _extents.top)/2.0;
 
@@ -40,16 +47,11 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	double screenWidth =  abs(maxX - minX);
 
 	// multiplication ratio, to make texts more legible when projection-related scaling is underway
-	double ratio = 1.0;		// TODO!!!: use larger than 1.0 for non-GMercator
+	double ratio;
+	((CTiles*)_tiles)->get_ScalingRatio(&ratio);	// 1.0 by default
 
 	// half of equator circumference (width and height for Mercator projection)
-	
-	double projWidth = MERCATOR_MAX_VAL * 2.0;
-	if (tileProjection != SphericalMercator)
-	{
-		BaseProjection* p = ((CTiles*)_tiles)->m_provider->Projection;
-		projWidth = p->xMaxLng - p->xMinLng;
-	}
+	double projWidth = ((CTiles*)_tiles)->m_provider->Projection->GetWidth();
 
 	double pxWidth = ratio * 512.0 * pow(2.0, zoom - 1);	// width of map in pixels at the requested zoom
 
@@ -58,7 +60,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 	VARIANT_BOOL vb, vb2;
 
-	if (isSame)
+	if (_tileProjectionState == ProjectionMatch)
 	{
 		minX = xCentOld - w/2.0;
 		maxX = xCentOld + w/2.0;
@@ -71,26 +73,25 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	else
 	{
 		// return back to map projection
-		IGeoProjection* projTemp = GetGMercToMapTransform();
+		IGeoProjection* projTemp = GetTilesToMapTransform();
 		if (projTemp)
 		{
 			double xCent = xCentOld, yCent = yCentOld;
-			GetMapToGMercTransform()->Transform(&xCent, &yCent, &vb);
-
+			GetMapToTilesTransform()->Transform(&xCent, &yCent, &vb);
 			minX = xCent - w/2.0;
 			maxX = xCent + w/2.0;
 			minY = yCent - h/2.0;
 			maxY = yCent + h/2.0;
 
-			if (tileProjection == SphericalMercator)
+			bool extrapolation = tileProjection == SphericalMercator && _transformationMode == tmWgs84Complied;
+			double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
+			if (extrapolation)		// ding extrapolation for WGS84
 			{
 				// In case we are outside bounds of GMercator, results will incorrect.
 				// Let's use clipping and extrapolation as a remedy.
 				// We shall assume that GMercator meters to map units ratio is constant and doesn't 
 				// depend on latitude or longitude, which is not true.
 				// TODO: do transformation in several points within world bounds for better extrapolation.
-				double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
-
 				double MAX_VAL = MERCATOR_MAX_VAL;
 				if (minX < - MAX_VAL)
 					minLng = -MAX_LONGITUDE - abs(minX + MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
@@ -103,22 +104,18 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 				if (maxY > MAX_VAL)
 					maxLat = MAX_LATITUDE + abs(maxY - MAX_VAL) / MAX_VAL * MAX_LATITUDE;
+			}
 
+			projTemp->Transform(&minX, &minY, &vb);
+			projTemp->Transform(&maxX, &maxY, &vb2);
 
-				projTemp->Transform(&minX, &minY, &vb);
-				projTemp->Transform(&maxX, &maxY, &vb2);
-
-				// substitute with extrapolated values if we are outside bounds
+			// substitute with extrapolated values if we are outside bounds
+			if (extrapolation)
+			{
 				if (minLng != 0.0) minX = minLng;
 				if (maxLng != 0.0) maxX = maxLng;
 				if (minLat != 0.0) minY = minLat;
 				if (maxLat != 0.0) maxY = maxLat;
-			}
-			else
-			{
-				// no interpolation for Amersfoort
-				projTemp->Transform(&minX, &minY, &vb);
-				projTemp->Transform(&maxX, &maxY, &vb2);
 			}
 
 			if (!vb || !vb2)
@@ -133,6 +130,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 				this->SetExtentsCore(ext, true, false, false);
 				_currentZoom = zoom;
+				AdjustZoom(zoom);
 				return VARIANT_TRUE;
 			}
 		}
@@ -142,6 +140,63 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 		}
 	}
 	return VARIANT_FALSE;
+}
+
+// ****************************************************
+//	   GetCurrentTileSize()
+// ****************************************************
+double CMapView::GetCurrentTileSize( int zoom )
+{
+	VARIANT_BOOL vb;
+	double xTemp = (_extents.left + _extents.right)/2.0;
+	double yTemp = (_extents.bottom + _extents.top)/2.0;
+	IGeoProjection* gp = GetMapToWgs84Transform();
+	gp->Transform(&xTemp, &yTemp, &vb);
+	PointLatLng loc;
+	loc.Lat = yTemp;
+	loc.Lng = xTemp;
+	
+	double size = TileHelper::GetTileSizeProj(_tileProjectionState == ProjectionMatch, 
+		((CTiles*)_tiles)->m_provider, GetWgs84ToMapTransform(), loc, zoom);
+
+	double pixelsPerMapUnit = PixelsPerMapUnit();
+	size *= pixelsPerMapUnit;
+	return size;
+}
+
+// ****************************************************
+//	   AdjustZoom()
+// ****************************************************
+void CMapView::AdjustZoom(int zoom)
+{
+	if (_transformationMode == tmWgs84Complied || _tileProjectionState == ProjectionMatch)
+		return;
+	
+	double size = GetCurrentTileSize(zoom);
+	if (size < 0) return;
+	Debug::WriteLine("After zooming; tile size: %f", size);
+
+	double scalingRatio;
+	((CTiles*)_tiles)->get_ScalingRatio(&scalingRatio);
+	
+	double targetSize = 256.0 * scalingRatio;
+	if (abs(size - targetSize) > 1.0)
+	{
+		// let's adjust it
+		double xTemp = (_extents.left + _extents.right)/2.0;
+		double yTemp = (_extents.bottom + _extents.top)/2.0;
+		double ratio = size / targetSize;
+		double w = _extents.Width() * ratio;
+		double h = _extents.Height() * ratio;
+		_extents.left = xTemp - w / 2.0;
+		_extents.right = xTemp + w / 2.0;
+		_extents.top = yTemp - h / 2.0;
+		_extents.bottom = yTemp + h / 2.0;
+		this->SetExtentsCore(_extents, true, false, false);
+	}
+	
+	size = GetCurrentTileSize(zoom);
+	Debug::WriteLine("After adjusting; tile size: %f", size);
 }
 
 // ****************************************************
@@ -163,8 +218,7 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 	{
 		int zoom, maxZoom, minZoom;
 		_tiles->get_CurrentZoom(&zoom);
-		_tiles->get_MaxZoom(&maxZoom);
-		_tiles->get_MinZoom(&minZoom);
+		GetMinMaxZoom(minZoom, maxZoom);
 		if ((zoom + 1 > maxZoom && zoomIn) || (zoom - 1 < minZoom && !zoomIn)) 
 			return;
 		
@@ -202,23 +256,24 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 
 	this->CalculateVisibleExtents(ext, logExtents, mapSizeChanged);
 
-	/*int z = this->GetCurrentZoom();
-	Debug::WriteLine("Extents applied: %f; %f; %f; %f", _extents.left, _extents.right, _extents.bottom, _extents.top);
-	Debug::WriteLine("Pixel per degree: %f", GetPixelsPerDegree());
-	Debug::WriteLine("Get current zoom: %d", z);*/
-
 	if (ForceDiscreteZoom() && adjustZoom )
 	{
 		// Adjust it to the smaller discrete zoom level.
 		// The computation overhead on calculating twice is negligible
 		// In order it to work, Tiles.ChooseZoomLevel must not scale down the tiles
 		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
-		int zoom = this->GetCurrentZoom();
-		Debug::WriteLine("Requested zoom: %d", zoom);
+		int zoom;
+		_tiles->get_CurrentZoom(&zoom);
+		Debug::WriteLine("SetExtentsCore; Requested zoom: %d", zoom);
 		this->ZoomToTileLevel(zoom);
-		zoom = this->GetCurrentZoom();
-		Debug::WriteLine("Zoomed to: %d", zoom);
+		_tiles->get_CurrentZoom(&zoom);
+		Debug::WriteLine("SetExtentsCore; Zoomed to: %d", zoom);
 		return;
+	}
+
+	if (!ForceDiscreteZoom())
+	{
+		_currentZoom = GetCurrentZoom();
 	}
 
 	_canUseLayerBuffer = FALSE;
@@ -256,8 +311,8 @@ DOUBLE CMapView::GetCurrentScale(void)
 		if (pixX == 0.0 || pixY == 0.0)	return 0.0;
 		
 		// logical size of screen, inches
-		double screenHeigth = fabs(maxY - minY)/(double)pixY;	//96.0
-		double screenWidth =  fabs(maxX - minX)/(double)pixX;	//96.0
+		double screenHeigth = fabs(maxY - minY)/(double)pixY;
+		double screenWidth =  fabs(maxX - minX)/(double)pixX;
 		
 		// size of map being displayed, inches
 		double convFact = Utility::getConversionFactor(_unitsOfMeasure);	
@@ -1132,14 +1187,11 @@ void CMapView::ZoomIn(double Percent)
 	if (ForceDiscreteZoom())
 	{
 		// An attempt to use discrete zoom levels from tiles; unfinished
-		int zoom, maxZoom;
-		_tiles->get_CurrentZoom(&zoom);
-		_tiles->get_MaxZoom(&maxZoom);
+		int zoom  = GetCurrentZoom();
+		int maxZoom, minZoom;
+		GetMinMaxZoom(minZoom, maxZoom);
 		if (zoom + 1 <= maxZoom) {
-			Debug::WriteLine("Zoom requested: %d", zoom);
 			this->ZoomToTileLevel(zoom + 1);
-			this->_tiles->get_CurrentZoom(&zoom);
-			Debug::WriteLine("Zoom received: %d", zoom);
 		}
 	}
 	else {
@@ -1166,14 +1218,11 @@ void CMapView::ZoomOut(double Percent)
 {
 	if (ForceDiscreteZoom())
 	{
-		int zoom, minZoom;
-		_tiles->get_CurrentZoom(&zoom);
-		_tiles->get_MinZoom(&minZoom);
+		int zoom = GetCurrentZoom();
+		int minZoom, maxZoom;
+		GetMinMaxZoom(minZoom, maxZoom);
 		if (zoom - 1 >= minZoom) {
-			Debug::WriteLine("Zoom out requested: %d", zoom - 1);
 			this->ZoomToTileLevel(zoom - 1);
-			this->_tiles->get_CurrentZoom(&zoom);
-			Debug::WriteLine("Zoom out received: %d", zoom);
 		}
 	}
 	else 
@@ -1650,6 +1699,10 @@ void CMapView::SetCurrentZoomCore(int zoom, bool forceUpdate)
 		ErrorMessage(tkMAP_PROJECTION_NOT_SET);
 	}
 }
+
+// ****************************************************************
+//		CurrentZoom()
+// ****************************************************************
 void CMapView::SetCurrentZoom(int zoom)
 {
 	SetCurrentZoomCore(zoom, false);
@@ -1657,9 +1710,16 @@ void CMapView::SetCurrentZoom(int zoom)
 int CMapView::GetCurrentZoom()
 {
 	if (_transformationMode != tmNotDefined) {
-		int val;
-		_tiles->get_CurrentZoom(&val);
-		return val;
+		if (ForceDiscreteZoom() && _currentZoom != -1)
+		{
+			return _currentZoom;
+		}
+		else 
+		{
+			int val;
+			_tiles->get_CurrentZoom(&val);
+			return val;
+		}
 	}
 	else
 		return -1;
@@ -1703,15 +1763,6 @@ tkTileProvider CMapView::GetTileProvider()
 // ****************************************************************
 void CMapView::SetInitGeoExtents() 
 {
-	/*IExtents* box = NULL;
-	GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);	
-	double y = 37.37;
-	double x = -122.04;
-	double delta = 0.4;
-	
-	box->SetBounds( x - delta, y - delta, 0.0, x + delta, y + delta, 0.0);
-	this->SetGeographicExtents(box);
-	box->Release();*/
 	SetKnownExtentsCore(keUSA);
 }
 
@@ -1735,7 +1786,9 @@ void CMapView::SetProjection(tkMapProjection projection)
 		VARIANT_BOOL vb;
 		tkMapProjection oldProjection = GetProjection();
 		if(projection != oldProjection) {
+			bool preserveExtents = _activeLayers.size() == 0;
 			IExtents* ext = GetGeographicExtents();	// try to preserve extents
+
 			switch(projection) {
 				case PROJECTION_WGS84:
 					p->SetWgs84(&vb);
@@ -1755,8 +1808,11 @@ void CMapView::SetProjection(tkMapProjection projection)
 					break;
 			}
 			if (ext) {
-				SetGeographicExtents(ext);
+				if (preserveExtents)
+					SetGeographicExtents(ext);
+				ext->Release();
 			}
+			
 			Redraw();
 		}
 	}

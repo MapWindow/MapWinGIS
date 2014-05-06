@@ -183,6 +183,7 @@ void CMapView::Startup()
 	_tileBuffer.Zoom = -1;
 	_tileBuffer.Provider = (int)tkTileProvider::ProviderNone;
 	_tileBuffer.Initialized = false;
+	_tileProjectionState = ProjectionDoTransform;
 
 	_globalCallback = NULL;
 
@@ -301,6 +302,8 @@ void CMapView::SetDefaults()
 	_zoomAnimation = csAuto;
 	_zoomBoxStyle = tkZoomBoxStyle::zbsBlue;
 	_projectionMismatchBehavior = mbIgnore;
+	_zoomBarMinZoom = -1;
+	_zoomBarMaxZoom = -1;
 
 	((CTiles*)_tiles)->SetDefaults();
 	((CMeasuring*)_measuring)->SetDefaults();
@@ -546,8 +549,6 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 			PX_Double( pPX, "yMin", _extents.bottom, .3 );
 			PX_Double( pPX, "yMax", _extents.top, .3 );
 
-			Debug::WriteLine("%f", _extents.left);
-
 			if (loading) {
 				SetExtentsCore(_extents, false);
 			}
@@ -583,6 +584,9 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		temp = (long)_projectionMismatchBehavior;
 		PX_Long( pPX, "ProjectionMistmatchBehavior", temp, 0 );			// mbIgnore
 		_projectionMismatchBehavior = (tkMismatchBehavior)temp;
+
+		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
+		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
 
 		m_mapCursor = 0;	// why not to save it?
 	}
@@ -702,5 +706,10 @@ void CMapView::ClearPanningList()
 	_panningList.clear();
 	_panningLock.Unlock();
 }
+
+
+
+
+
 
 
