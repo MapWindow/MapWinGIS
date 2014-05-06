@@ -142,6 +142,10 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 			}
 		}
 	}
+	else
+	{
+		_transformationMode= tmNotDefined;
+	}
 
 	if (_projection)
 	{
