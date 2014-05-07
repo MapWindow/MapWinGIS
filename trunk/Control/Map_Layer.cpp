@@ -418,6 +418,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// do projection mismatch check
 	if (!CheckLayerProjection(l))
 	{
+		RemoveLayerCore(layerHandle, false);
 		LockWindow( lmUnlock );
 		return -1;
 	}
@@ -452,6 +453,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	if (l != NULL) FireLayersChanged();
+	_canUseLayerBuffer = FALSE;
 	LockWindow( lmUnlock );
 	return layerHandle;
 }
@@ -547,10 +549,22 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
 		ext->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
 
+		IGeoProjection* gpMap = GetMapProjection();
+		VARIANT_BOOL isEmpty;
+		gpMap->get_IsEmpty(&isEmpty);
+		if (isEmpty && 
+			(_projectionMismatchBehavior == mbCheckLoose || _projectionMismatchBehavior == mbCheckLooseAndReproject)) 
+		{
+			return true;
+		}
+
 		VARIANT_BOOL match;
 		GetMapProjection()->get_IsSameExt(gp, ext, 20, &match);
 		ext->Release();
-		gp->Release();
+		if (gp) {
+			gp->Release();
+			gp = NULL;
+		}
 
 		if (match)
 		{
