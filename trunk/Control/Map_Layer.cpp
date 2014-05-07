@@ -516,24 +516,26 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 	{
 		switch (_projectionMismatchBehavior)
 		{
-		case mbCheckLoose:
-		case mbCheckLooseAndReproject:
-			if (isGeographic &&
-				(layer->extents.left < -180.0 || layer->extents.right > 180.0 || 
-				layer->extents.top > 90.0 || layer->extents.bottom < -90.0))
-			{
-				ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
+			case mbCheckLoose:
+			case mbCheckLooseAndReproject:
+				if (isGeographic &&
+					(layer->extents.left < -180.0 || layer->extents.right > 180.0 || 
+					layer->extents.top > 90.0 || layer->extents.bottom < -90.0))
+				{
+					ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
+					result = false;
+				}
+				else {
+					// nothing else to check; since it's loose check - let it be
+					result = true;
+				}
+				break;
+			case mbCheckStrict:
+			case mbCheckStrictAndReproject:
+				// since it's strict, we want to be sure
+				ErrorMessage(tkMISSING_GEOPROJECTION);
 				result = false;
-			}
-			else {
-				// nothing else to check; since it's loose check - let it be
-				result = true;
-			}
-		case mbCheckStrict:
-		case mbCheckStrictAndReproject:
-			// since it's strict, we want to be sure
-			ErrorMessage(tkMISSING_GEOPROJECTION);
-			result = false;
+				break;
 		}
 		if (gp)
 			gp->Release();

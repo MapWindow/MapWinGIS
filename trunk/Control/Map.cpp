@@ -117,7 +117,8 @@ CMapView::CMapView()
 	_brushWhite(Gdiplus::Color::White), 
 	_penGray(Gdiplus::Color::Gray),
 	_brushGray(Gdiplus::Color::Gray), 
-	_penDarkGray(Gdiplus::Color::DarkSlateGray)
+	_penDarkGray(Gdiplus::Color::DarkSlateGray),
+	_propertyExchange(NULL)
 {
 	Startup();
 	SetDefaults();
@@ -150,6 +151,8 @@ void CMapView::Clear()
 	IGeoProjection* p = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
+
+	Redraw();
 }
 
 // **********************************************************************
@@ -258,10 +261,6 @@ void CMapView::SetDefaults()
 	_measuringPersistent = false;
 	_lastErrorCode = tkNO_ERROR;
 
-	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
-	// perhaps this call can do this:
-	//RequestAsynchronousExchange(GetPropertyExchangeVersion());
-
 	// public control properties
 	m_sendMouseMove = FALSE;
 	m_sendMouseDown = FALSE;
@@ -304,6 +303,10 @@ void CMapView::SetDefaults()
 	_projectionMismatchBehavior = mbIgnore;
 	_zoomBarMinZoom = -1;
 	_zoomBarMaxZoom = -1;
+
+	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
+	// perhaps this call can do this:
+	//RequestAsynchronousExchange(GetPropertyExchangeVersion());
 
 	((CTiles*)_tiles)->SetDefaults();
 	((CMeasuring*)_measuring)->SetDefaults();
@@ -459,7 +462,6 @@ DWORD CMapView::GetPropertyExchangeVersion()
 // Persistence support: http://msdn.microsoft.com/en-us/library/xxf9wx2c.aspx
 void CMapView::DoPropExchange(CPropExchange* pPX)
 {
-	//ExchangeVersion(pPX, );
 	ExchangeVersion(pPX, GetPropertyExchangeVersion());		// version should be changed when new properties are added
 	
 	GetPropertyExchangeVersion();

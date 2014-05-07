@@ -818,6 +818,8 @@ public:
 	BOOL _multilineLabeling;			// Allow multi line labels?
 	long _lineSeparationFactor;	// Thickness between double and triple lines; adjust factor.
 	bool _useLabelCollision;		//Label Collision
+
+	CPropExchange* _propertyExchange;
 #pragma endregion
 
 #pragma region Methods

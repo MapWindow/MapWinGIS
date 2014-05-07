@@ -1643,9 +1643,15 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 // *********************************************************
 STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retval)
 {  
-    // StartEditingTable now just simplly set the editing flag, not read all records into memory
+    // StartEditingTable now just simply set the editing flag, not read all records into memory
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
+
+	if (isEditingTable)
+	{
+		*retval = VARIANT_TRUE;
+		return S_OK;
+	}
 
 	if( dbfHandle == NULL )
 	{	
