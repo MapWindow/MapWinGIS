@@ -383,7 +383,10 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 					CRect* rect = &value.rect;
 
 					value.string = Utility::FormatNumber(values[i][j], sFormat);
+					
+					HDC hdc = _graphics->GetHDC();
 					_dc->DrawText(value.string, rect, DT_CALCRECT);	// add alignment
+					_graphics->ReleaseHDC(hdc);
 					
 					Gdiplus::REAL labelAngle = startAngle + sweepAngle/2.0f + 90.0f;
 					if (labelAngle > 360.0f)
@@ -500,6 +503,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			// drawing the values
 			if (_options->valuesVisible)
 			{
+				HDC hdc = _graphics->GetHDC();
+
 				for (unsigned int i = 0; i < labels.size(); i++)
 				{
 					CRect* rect = &labels[i].rect;
@@ -520,6 +525,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 					_dc->DrawText(labels[i].string, rect, DT_CENTER | DT_VCENTER);
 				}
+
+				_graphics->ReleaseHDC(hdc);
 			}
 			
 			// storing rectangle for drawing operations
@@ -530,7 +537,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 				info->chart->isDrawn = true;
 			}
 			
-			// storing rectange for collision avoidance
+			// storing rectangle for collision avoidance
 			if ( _options->avoidCollisions && _collisionList != NULL)
 			{
 				_collisionList->AddRectangle(chartRect, _collisionBuffer, _collisionBuffer);
@@ -619,6 +626,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			std::vector<ValueRectangle> labels;
 			if (_options->valuesVisible)
 			{
+				HDC hdc = _graphics->GetHDC();
+				
 				int xAdd = (int)(sin(45.0/180*pi) * _options->thickness);
 				
 				// drawing values
@@ -701,6 +710,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 					}
 					xStart += _options->barWidth;
 				}
+				_graphics->ReleaseHDC(hdc);
 				
 				// some of the labels has collision with other charts
 				if (labels.size() != numBars)
@@ -762,6 +772,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 				xStart += _options->barWidth;
 			}
 
+			HDC hdc = _graphics->GetHDC();
+
 			// drawing the labels, all of them are visible
 			for (unsigned int j = 0; j < labels.size(); j++)
 			{
@@ -783,7 +795,6 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 				}
 				else
 				{
-					
 					_dc->TextOutA(rect->left, rect->bottom - 3, labels[j].string);
 				}
 				if ( _options->avoidCollisions && _collisionList != NULL)
@@ -791,6 +802,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 					_collisionList->AddRectangle(rect, 0, 0);
 				}
 			}
+
+			_graphics->ReleaseHDC(hdc);
 			
 			// adding chart rect to collision list
 			if ( _options->avoidCollisions && _collisionList != NULL)

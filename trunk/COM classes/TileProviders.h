@@ -114,6 +114,11 @@ private:
 
 	void ErrorMessage(long ErrorCode);
 public:
+	vector<BaseProvider*>* GetList()
+	{
+		return &m_providers;
+	}
+
 	void put_Tiles(ITiles* tiles){
 		m_tiles = tiles;
 	}

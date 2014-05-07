@@ -211,6 +211,17 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	s = CPLGetXMLValue( nodeState, "ShowVersionNumber", NULL );
 	_showVersionNumber = (s != "") ? (BOOL)atoi(s) : FALSE;
 
+	IGeoProjection* gp = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+	s = CPLGetXMLValue( nodeState, "Projection", NULL );
+	if (s.GetLength() > 0)
+	{
+		USES_CONVERSION;
+		VARIANT_BOOL vb;
+		gp->ImportFromAutoDetect(A2BSTR(s), &vb);
+	}
+	SetGeoProjection(gp);
+
 	if (LoadLayers)
 	{
 		// processing layers
@@ -362,6 +373,17 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 
 			if (_showVersionNumber != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowVersionNumber", CPLString().Printf("%d", (int)_showVersionNumber));
+
+			IGeoProjection* gp = GetMapProjection();
+			VARIANT_BOOL isEmpty;
+			gp->get_IsEmpty(&isEmpty);
+			if (!isEmpty)
+			{
+				CComBSTR proj = NULL;
+				gp->ExportToProj4(&proj);
+				USES_CONVERSION;
+				Utility::CPLCreateXMLAttributeAndValue(psState, "Projection", OLE2A(proj));
+			}
 
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsLeft", CPLString().Printf("%f", _extents.left));
 			Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentsRight", CPLString().Printf("%f", _extents.right));

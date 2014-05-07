@@ -207,7 +207,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		unitsPerPixel = newWidth/(maxX - minX);	  // target units on screen size
 		double distance = (barWidth - xPadding * 2) * unitsPerPixel;
 		ChooseScalebarUnits(units, targetUnits, distance, unitsPerPixel, step, count, power);
-		
+
 		tkUnitsOfMeasure targetUnits2 = umMiles;
 		if (_scalebarUnits == GoogleStyle)
 		{
@@ -225,8 +225,10 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		Gdiplus::Matrix mtx;
 		mtx.Translate((float)5, (float)_viewHeight - barHeight - yOffset);
 		g->SetTransform(&mtx);
+		Gdiplus::PixelOffsetMode pixelOffsetMode = g->GetPixelOffsetMode();
+		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
 
-		Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)barWidth, (Gdiplus::REAL)barHeight );
+		Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)barWidth, (Gdiplus::REAL)barHeight);
 
 		// ----------------------------------------------------------
 		//    Drawing of segments
@@ -280,6 +282,8 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 			delete parts[i];
 		}
 		parts.clear();
+
+		g->SetPixelOffsetMode(pixelOffsetMode);
 
 		// ----------------------------------------------------------
 		//    Drawing of text

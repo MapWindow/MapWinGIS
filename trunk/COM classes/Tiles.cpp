@@ -1268,7 +1268,28 @@ CPLXMLNode* CTiles::SerializeCore(CString ElementName)
 	if (dbName.GetLength() != 0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DiskCacheFilename", dbName);
 	
-	// TODO!!!: serialize custom tile providers
+	// serialization of custom providers
+	CPLXMLNode* psProviders = CPLCreateXMLNode( NULL, CXT_Element, "TileProviders");
+	if (psProviders)
+	{
+		vector<BaseProvider*>* providers = ((CTileProviders*)m_providers)->GetList();
+		for(size_t i = 0; i < providers->size(); i++)
+		{
+			CustomProvider* cp = dynamic_cast<CustomProvider*>(providers->at(i));
+			if (cp)
+			{
+				CPLXMLNode* psCustom = CPLCreateXMLNode( NULL, CXT_Element, "TileProvider");
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Id", CPLString().Printf("%d", cp->Id));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Name", cp->Name);
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Url", cp->UrlFormat);
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "Projection", CPLString().Printf("%d", (int)cp->m_projectionId));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MinZoom", CPLString().Printf("%d", cp->minZoom));
+				Utility::CPLCreateXMLAttributeAndValue(psCustom, "MaxZoom", CPLString().Printf("%d", cp->maxZoom));
+				CPLAddXMLChild(psProviders, psCustom);
+			}
+		}
+		CPLAddXMLChild(psTree, psProviders);
+	}
 	return psTree;
 }
 
@@ -1341,6 +1362,47 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 	USES_CONVERSION;
 	s = CPLGetXMLValue( node, "DiskCacheFilename", NULL );
 	if (s != "") SQLiteCache::set_DbName(Utility::ConvertFromUtf8(s));
+
+	// custom providers
+	CPLXMLNode* nodeProviders = CPLGetXMLNode(node, "TileProviders");
+	if (nodeProviders)
+	{
+		// don't clear providers as it will clear the cache as well,
+		// if provider with certain id exists, it simply won't be added twice
+		vector<BaseProvider*>* providers = ((CTileProviders*)m_providers)->GetList();
+
+		CPLXMLNode* nodeProvider = nodeProviders->psChild;
+		while (nodeProvider)
+		{
+			if (strcmp(nodeProvider->pszValue, "TileProvider") == 0)
+			{
+				int id, minZoom, maxZoom, projection;
+				CString url, name;
+				
+				s = CPLGetXMLValue( nodeProvider, "Id", NULL );
+				if (s != "") id = atoi(s);
+
+				s = CPLGetXMLValue( nodeProvider, "MinZoom", NULL );
+				if (s != "") minZoom = atoi(s);
+
+				s = CPLGetXMLValue( nodeProvider, "MaxZoom", NULL );
+				if (s != "") maxZoom = atoi(s);
+
+				s = CPLGetXMLValue( nodeProvider, "Projection", NULL );
+				if (s != "") projection = atoi(s);
+
+				s = CPLGetXMLValue( nodeProvider, "Url", NULL );
+				if (s != "") url = s;
+
+				s = CPLGetXMLValue( nodeProvider, "Name", NULL );
+				if (s != "") name = s;
+
+				VARIANT_BOOL vb;
+				m_providers->Add(id, A2BSTR(name), A2BSTR(url), (tkTileProjection)projection, minZoom, maxZoom, &vb);
+			}
+			nodeProvider = nodeProvider->psNext;
+		}
+	}
 	return true;
 }
 #pragma endregion
