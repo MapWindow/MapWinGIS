@@ -118,17 +118,17 @@ namespace TestApplication
             
             // first, let's check that overview creation/removal works correctly
             fm.ClearGdalOverviews(filename);
-            bool overviews = fm.HasGdalOverviews[filename];
+            bool overviews = fm.get_HasGdalOverviews(filename);
             if (overviews) Error( "Failed to remove overviews.");
             
             fm.BuildGdalOverviews(filename, null);
-            overviews = fm.HasGdalOverviews[filename];
+            overviews = fm.get_HasGdalOverviews(filename);
             if (!overviews) Error( "Failed to build overviews.");
 
             fm.ClearGdalOverviews(filename);
             fm.RemoveProxyForGrid(filename);
 
-            bool proxy = fm.HasValidProxyForGrid[filename];
+            bool proxy = fm.get_HasValidProxyForGrid(filename);
 
             Image img = null;
             for (int i = 0; i < 6; i++)
@@ -168,8 +168,8 @@ namespace TestApplication
                         break;
                 }
 
-                Write("Gdal overviews: " + fm.HasGdalOverviews[filename]);
-                Write("Grid proxy: " + fm.HasValidProxyForGrid[filename]);
+                Write("Gdal overviews: " + fm.get_HasGdalOverviews(filename));
+                Write("Grid proxy: " + fm.get_HasValidProxyForGrid(filename));
 
                 img = fm.OpenRaster(filename, strategy, callback);
                 if (img != null)
@@ -177,8 +177,8 @@ namespace TestApplication
                     img.Close();
 
                     strategy = fm.LastOpenStrategy;
-                    overviews = fm.HasGdalOverviews[filename];
-                    proxy = fm.HasValidProxyForGrid[filename];
+                    overviews = fm.get_HasGdalOverviews(filename);
+                    proxy = fm.get_HasValidProxyForGrid(filename);
                     Write("Last open strategy: " + strategy);
                     Write("Gdal overviews: " + overviews);
                     Write("Grid proxy: " + proxy);
@@ -216,11 +216,11 @@ namespace TestApplication
             fm.ClearGdalOverviews(filename);
             fm.RemoveProxyForGrid(filename);
 
-            overviews = fm.HasGdalOverviews[filename];
-            proxy = fm.HasValidProxyForGrid[filename];
+            overviews = fm.get_HasGdalOverviews(filename);
+            proxy = fm.get_HasValidProxyForGrid(filename);
 
-            Write("Gdal overviews: " + fm.HasGdalOverviews[filename]);
-            Write("Grid proxy: " + fm.HasValidProxyForGrid[filename]);
+            Write("Gdal overviews: " + fm.get_HasGdalOverviews(filename));
+            Write("Grid proxy: " + fm.get_HasValidProxyForGrid(filename));
             if (proxy) Error( "Failed to remove proxy.");
             if (overviews) Error( "Failed to remove overviews.");
 

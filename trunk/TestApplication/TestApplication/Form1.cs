@@ -6,21 +6,17 @@
 //   Form to test some of the functionality of MapWinGIS
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
-using System.Collections.Generic;
-using System.Diagnostics;
-
 namespace TestApplication
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Windows.Forms;
-    using MapWinGIS;
-    using System.IO;
+  using System;
+  using System.Diagnostics;
+  using System.Reflection;
+  using System.Windows.Forms;
+  using AxMapWinGIS;
+  using MapWinGIS;
+  using _DMapEvents_MouseMoveEventHandler = AxMapWinGIS._DMapEvents_MouseMoveEventHandler;
 
-    /// <summary>Defines the form</summary>
+  /// <summary>Defines the form</summary>
     public partial class Form1 : Form, ICallback
     {
         private static Form1 _instance;
@@ -31,8 +27,7 @@ namespace TestApplication
         public Form1()
         {
             InitializeComponent();
-            var gs = new GlobalSettings { ShapeOutputValidationMode = tkShapeValidationMode.TryFixProceedOnFailure, GeometryEngine = tkGeometryEngine.engineClipper };
-            SetHardcodedPaths();
+            this.SetHardcodedPaths();
             _instance = this;
         }
 
@@ -166,7 +161,7 @@ namespace TestApplication
         /// <param name="e">
         /// The e.
         /// </param>
-        private void Form1FormClosing(object sender, FormClosingEventArgs e)
+        private static void Form1FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Save();
         }
@@ -180,8 +175,7 @@ namespace TestApplication
         /// </param>
         private void Form1Load(object sender, EventArgs e)
         {
-            // Reset tiles;
-            axMap1.Tiles.Visible = false;
+          this.ResetMapSettings(false);
 
             // Copy the map reference to the test methods:
             Fileformats.Map = axMap1;
@@ -203,6 +197,13 @@ namespace TestApplication
         /// </param>
         private void AxMap1FileDropped(object sender, AxMapWinGIS._DMapEvents_FileDroppedEvent e)
         {
+          // Clear the map:
+          this.ResetMapSettings(true);
+
+          // Use the new AddLayerFromFilename method:
+          this.axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
+
+          /*
             // Check extension:
             var ext = System.IO.Path.GetExtension(e.filename);
             if (ext == null)
@@ -235,6 +236,8 @@ namespace TestApplication
 
             // Don't know how to handle the dropped file:
             this.Error(string.Empty, "Don't know how to handle the dropped file");
+           */ 
+
             return;
         }
 
@@ -483,6 +486,8 @@ namespace TestApplication
         /// </param>
         private void RunShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
+
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunShapefileTest(ShapefileInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -497,6 +502,8 @@ namespace TestApplication
         /// </param>
         private void RunImageTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
+
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunImagefileTest(ImageInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -511,7 +518,8 @@ namespace TestApplication
         /// </param>
         private void RunGridTestClick(object sender, EventArgs e)
         {
-            ((Button)sender).BackColor = System.Drawing.Color.Blue;
+          this.ResetMapSettings(false); 
+          ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunGridfileTest(this.GridInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
@@ -525,6 +533,7 @@ namespace TestApplication
         /// </param>
         private void RunClipGridByPolygonTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunClipGridByPolygonTest(this.ClipGridByPolygonInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -539,6 +548,7 @@ namespace TestApplication
         /// </param>
         private void RunShapefileToGridTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunShapefileToGridTest(this.ShapefileToGrid.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -553,6 +563,7 @@ namespace TestApplication
         /// </param>
         private void RunRasterizeTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             Tests.RunRasterizeTest(this.RasterizeInputfile.Text, this);
         }
 
@@ -565,6 +576,7 @@ namespace TestApplication
         /// </param>
         private void RunBufferShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunBufferShapefileTest(this.BufferShapefileInput.Text, this);
         }
 
@@ -579,6 +591,7 @@ namespace TestApplication
         /// </param>
         private void RunSimplifyShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunSimplifyShapefileTest(this.SimplifyShapefileInput.Text, this);
         }
 
@@ -591,6 +604,7 @@ namespace TestApplication
         /// </param>
         private void RunAggregateShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -605,6 +619,7 @@ namespace TestApplication
         /// </param>
         private void RunDissolveShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunDissolveShapefileTest(this.DissolveShapefileInput.Text, (int)Math.Floor(this.DissolveFieldindex.Value), this);
         }
 
@@ -617,6 +632,7 @@ namespace TestApplication
         /// </param>
         private void RunClipShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this);
         }
 
@@ -629,6 +645,7 @@ namespace TestApplication
         /// </param>
         private void RunIntersectionShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunIntersectionShapefileTest(this.IntersectionShapefileFirstInput.Text, this.IntersectionShapefileSecondInput.Text, this);
         }
 
@@ -641,6 +658,7 @@ namespace TestApplication
         /// </param>
         private void RunWktShapefileTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunWktShapefileTest(this.WktShapefileInput.Text, this);
         }
 
@@ -653,6 +671,7 @@ namespace TestApplication
         /// </param>
         private void RunSpatialIndexTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             Tests.RunSpatialIndexTest(this.SpatialIndexInputfile.Text, this);
         }
 
@@ -665,6 +684,7 @@ namespace TestApplication
         /// </param>
         private void RunOGRInfoTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             Tests.RunOGRInfoTest(this.OGRInfoInputfile.Text, this);
         }
 
@@ -678,7 +698,6 @@ namespace TestApplication
         private void RunAllFileFormatsTestsButtonClick(object sender, EventArgs e)
         {
             Helper.RunAllTestsInGroupbox(this.FileFormatsGroupBox);
-
             this.Progress(string.Empty, 0, "Done running all Fileformats tests.");
         }
 
@@ -691,6 +710,7 @@ namespace TestApplication
         /// </param>
         private void RunClosestPointTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             GeosTests.RunClosestPointTest(this.ClosestPointShapefileInput1.Text, this.ClosestPointShapefileInput2.Text, this);
         }
 
@@ -708,6 +728,7 @@ namespace TestApplication
         /// <param name="e">The event arguments</param>
         private void RunTilesLoadTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(true);
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             var retVal = Tests.RunTilesLoadTest(this.TilesInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
@@ -759,6 +780,7 @@ namespace TestApplication
         /// </summary>
         private void RunGridOpenTestClick(object sender, EventArgs e)
         {
+          this.ResetMapSettings(false);
             bool result = FileManagerTests.GridOpenTest(GridOpenInput.Text);
             this.Progress("", 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
         }
@@ -775,25 +797,62 @@ namespace TestApplication
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 
-        private void axMap1_MouseMoveEvent(object sender, AxMapWinGIS._DMapEvents_MouseMoveEvent e)
+        private void axMap1_MouseMoveEvent(object sender, _DMapEvents_MouseMoveEvent e)
         {
             if (this.InvokeRequired)
-                this.Invoke(new AxMapWinGIS._DMapEvents_MouseMoveEventHandler(axMap1_MouseMoveEvent), sender, e);
+                this.Invoke(new _DMapEvents_MouseMoveEventHandler(axMap1_MouseMoveEvent), sender, e);
             else
             {
                 double Lat = 0.0, Lon = 0.0;
 
                 if (axMap1.PixelToDegrees(e.x, e.y, ref Lon, ref Lat))
-                    this.toolStripStatusCoordLabel.Text = String.Format("{0:0.000}, {1:0.000}", Lat, Lon);
+                    this.toolStripStatusCoordLabel.Text = string.Format("{0:0.000}, {1:0.000}", Lat, Lon);
                 else
                 {
                     double clientX = 0.0, clientY = 0.0;
                     this.axMap1.PixelToProj(e.x, e.y, ref clientX, ref clientY);
-                    this.toolStripStatusCoordLabel.Text = String.Format("{0:0.00}, {1:0.00}", clientX, clientY);
+                    this.toolStripStatusCoordLabel.Text = string.Format("{0:0.00}, {1:0.00}", clientX, clientY);
                 }
 
                 this.statusStrip1.Refresh();
             }
         }
+
+      /// <summary>
+      /// Clear the map and reset settings
+      /// </summary>
+      /// <param name="showTiles">
+      /// Show the Tiles.
+      /// </param>
+      private void ResetMapSettings(bool showTiles)
+      {
+        this.axMap1.Clear();
+
+        this.axMap1.Tiles.Visible = showTiles;
+
+        this.axMap1.Redraw();
+        Application.DoEvents();
+
+        this.axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
+        this.axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmAuto;
+        this.axMap1.ShowZoomBar = true;
+
+        var gs = new GlobalSettings
+          {
+            ShapeOutputValidationMode = tkShapeValidationMode.TryFixProceedOnFailure,
+            ShapeInputValidationMode = tkShapeValidationMode.TryFixProceedOnFailure,
+            GeometryEngine = tkGeometryEngine.engineGeos,
+            GridProxyFormat = tkGridProxyFormat.gpfTiffProxy,
+            GridProxyMode = tkGridProxyMode.gpmAuto,
+            ImageDownsamplingMode = tkInterpolationMode.imBilinear,
+            ImageUpsamplingMode = tkInterpolationMode.imHighQualityBilinear,
+            LoadSymbologyOnAddLayer = true,
+            ZoomToFirstLayer = true,
+            LabelsCollisionMode = tkCollisionMode.GlobalList,
+            RasterOverviewCreation = tkRasterOverviewCreation.rocAuto,
+            TiffCompression = tkTiffCompression.tkmJPEG,
+            RasterOverviewResampling = tkGDALResamplingMethod.grmGauss
+          };
+      }
     }
 }

@@ -133,7 +133,7 @@ namespace TestApplication
             MyAxMap.TilesLoaded += MyAxMapTilesLoaded;
 
             // Enable logging:
-            string logPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\tiles.log";
+            var logPath = Path.GetDirectoryName(Application.ExecutablePath) + "\\tiles.log";
             MyAxMap.Tiles.StartLogRequests(logPath, false);
             Debug.Print("Log is opened: " + MyAxMap.Tiles.LogIsOpened);
 
@@ -171,10 +171,10 @@ namespace TestApplication
                     theForm.Progress(string.Empty, 0, "Use custom provider");
 
                     // Add custom provider:
-                    MyAxMap.Tiles.Providers.Clear(false);
-                    provId = 1024;
-
-                    // TODO: Make tkTileProjection flexible:
+                    MyAxMap.Tiles.Providers.Clear(true);
+                  provId = 1024 + MyAxMap.Tiles.Providers.Count;
+                  
+                    // TODO: Make tkTileProjection flexible, grab it from the map projection:
                     if (!MyAxMap.Tiles.Providers.Add(provId, "Custom", lines[i + 1], tkTileProjection.Amersfoort, 0, 16))
                     {
                         theForm.Error(string.Empty, "Provider add error: " + MyAxMap.Tiles.get_ErrorMsg(MyAxMap.Tiles.LastErrorCode));
