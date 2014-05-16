@@ -116,6 +116,7 @@ enum tkDrawingDataAvailable
 	HotTracking = 4,
 	ZoomingAnimation = 5,
 	PanningInertia = 6,
+	ZoomBox = 9,
 };
 
 enum SqliteOpenMode

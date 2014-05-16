@@ -44,7 +44,9 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 
 	if (!_canUseMainBuffer || !_canUseLayerBuffer) 
 	{
-		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || HasDrawingData(tkDrawingDataAvailable::Coordinates);
+		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || 
+								HasDrawingData(tkDrawingDataAvailable::Coordinates) ||
+								HasDrawingData(tkDrawingDataAvailable::ZoomBox);
 
 		// if there is no move data, draws to output canvas directly
 		this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
@@ -951,6 +953,8 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 {
 	switch(type) 
 	{
+		case ZoomBox:
+			return _dragging.Operation == DragZoombox;
 		case tkDrawingDataAvailable::LayersData:	
 			{
 				return _activeLayers.size() > 0;
