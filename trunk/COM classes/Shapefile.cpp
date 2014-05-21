@@ -2488,7 +2488,9 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	if (m_sourceType == sstInMemory)
 	{
 		s = CPLGetXMLValue( node, "ShpType", NULL );
-		_shpfiletype = (s != "") ? (ShpfileType)atoi(s.GetString()) : ShpfileType::SHP_NULLSHAPE;
+		if (s != "") {
+			_shpfiletype = (ShpfileType)atoi(s.GetString());
+		}
 	}
 
 	// drawing options

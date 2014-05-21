@@ -997,6 +997,7 @@ private:
 	double GetCurrentTileSize( int zoom );
 	bool GetMinMaxZoom(int& minZoom, int& maxZoom);
 	bool GetTileMismatchMinZoom( int& minZoom );
+	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
 #pragma endregion
 };
 

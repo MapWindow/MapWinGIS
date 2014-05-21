@@ -415,6 +415,16 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	
 	GrabLayerProjection(l);
 
+	// find out filename with symbology before file was substituted by reprojection
+	CStringW symbologyName;
+	if (m_globalSettings.loadSymbologyOnAddLayer)
+	{
+		CComBSTR name = GetLayerFilename(layerHandle);
+		symbologyName = OLE2W(name);
+		symbologyName += L".mwsymb";
+		symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(name) : L"";
+	}
+
 	// do projection mismatch check
 	if (!CheckLayerProjection(l))
 	{
@@ -440,16 +450,11 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	// loading symbology
-	if (m_globalSettings.loadSymbologyOnAddLayer)
+	if(symbologyName.GetLength() > 0)
 	{
-		CComBSTR name = GetLayerFilename(layerHandle);
-		CStringW filename = OLE2W(name);
-		filename += ".mwsymb";
-		if (Utility::fileExistsW(filename))
-		{
-			CComBSTR desc;
-			this->LoadLayerOptions(layerHandle, "", &desc);
-		}
+		CComBSTR desc;
+		USES_CONVERSION;
+		this->LoadLayerOptionsCore(W2A(symbologyName), layerHandle, "", &desc);
 	}
 
 	if (l != NULL) FireLayersChanged();
@@ -1636,18 +1641,10 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 }
 
 // *********************************************************
-//		LoadLayerOptions()
+//		LoadLayerOptionsCore()
 // *********************************************************
-VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description)
+VARIANT_BOOL CMapView::LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	CComBSTR filename;
-	filename = this->GetLayerFilename(LayerHandle);
-	
-	// constructing name
-	USES_CONVERSION;
-	CString baseName = OLE2CA(filename);
 	if (_stricmp(baseName, "") == 0) 
 	{
 		return VARIANT_FALSE;		// error code is in the function
@@ -1693,6 +1690,23 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 		}
 	}
 	return VARIANT_FALSE;
+}
+
+// *********************************************************
+//		LoadLayerOptions()
+// *********************************************************
+VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	CComBSTR filename;
+	filename = this->GetLayerFilename(LayerHandle);
+	
+	// constructing name
+	USES_CONVERSION;
+	CString baseName = OLE2CA(filename);
+
+	return LoadLayerOptionsCore(baseName, LayerHandle, OptionsName, Description);
 }
 #pragma endregion
 
