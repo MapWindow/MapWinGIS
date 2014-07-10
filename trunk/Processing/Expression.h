@@ -93,9 +93,8 @@ public:
 
 	~CExpressionValue()
 	{
-		// TODO: restore
-		/*if (matrix)
-			delete matrix;*/
+		if (matrix)
+			delete matrix;
 	}
 
 	CExpressionValue& operator=(const CExpressionValue& val)

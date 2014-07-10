@@ -1125,6 +1125,32 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 						elLeft->calcVal->type = vtBoolean;
 					}
 				}
+				else if(valLeft->type == vtFloatArray && valRight->type == vtDouble)
+				{
+					RasterMatrix* matrix = new RasterMatrix(*valLeft->matrix);
+					
+					float* data = new float[1];
+					data[0] = (float)valRight->dbl;
+					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
+					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
+					delete right;
+
+					elLeft->calcVal->matrix = matrix;
+					elLeft->calcVal->type = vtFloatArray;
+				}
+				else if(valLeft->type == vtDouble && valRight->type == vtFloatArray)
+				{
+					RasterMatrix* matrix = new RasterMatrix(*valRight->matrix);
+
+					float* data = new float[1];
+					data[0] = (float)valLeft->dbl;
+					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
+					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
+					delete left;
+
+					elLeft->calcVal->matrix = matrix;
+					elLeft->calcVal->type = vtFloatArray;
+				}
 				else
 				{
 					_errorMessage = "Inconsistent types for comparison operation";
@@ -1241,7 +1267,7 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 
 					float* data = new float[1];
 					data[0] = (float)valRight->dbl;
-					RasterMatrix* right = new RasterMatrix(1, 1, data, -FLT_MAX );
+					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
 					delete right;
 				}
@@ -1253,7 +1279,7 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 
 					float* data = new float[1];
 					data[0] = (float)valLeft->dbl;
-					RasterMatrix* left = new RasterMatrix(1, 1, data, -FLT_MAX );
+					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
 					delete left;
 				}
