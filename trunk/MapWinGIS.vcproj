@@ -2197,6 +2197,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Image\RasterMatrix.h"
+					>
+				</File>
+				<File
 					RelativePath="Image\tkBitmap.h"
 					>
 				</File>
@@ -2226,6 +2230,10 @@
 				</File>
 				<File
 					RelativePath=".\Image\ImageResamling.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Image\RasterMatrix.cpp"
 					>
 				</File>
 				<File

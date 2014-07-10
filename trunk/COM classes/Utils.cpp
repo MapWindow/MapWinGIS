@@ -38,6 +38,7 @@
 #include "TableClass.h"
 #include "Shape.h"
 #include "Vector.h"
+#include "Expression.h"
 
 #pragma warning(disable:4996)
 
@@ -5320,5 +5321,371 @@ STDMETHODIMP CUtils::get_ComUsageReport(VARIANT_BOOL unreleasedOnly, BSTR* retVa
 	CString s = gReferenceCounter.GetReport(unreleasedOnly ? true: false);
 	USES_CONVERSION;
 	*retVal = A2BSTR(s);
+	return S_OK;
+}
+
+// ********************************************************
+//     ValidateInputNames()
+// ********************************************************
+// Accesses data in safe array of BSTR
+bool CUtils::ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr)
+{
+	// Check dimensions of the array.
+	if (SafeArrayGetDim(InputNames) != 1)
+	{
+		// most likely this error will be caught while marshalling the array
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
+		return false;
+	}
+
+	HRESULT hr;
+	hr = SafeArrayGetLBound(InputNames, 1, &lLBound);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
+		return false;
+	}
+
+	hr = SafeArrayGetUBound(InputNames, 1, &lUBound);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
+		return false;
+	}
+
+	// TODO: add check that we have an array of BSTR and not the other data type
+	hr = SafeArrayAccessData(InputNames, (void HUGEP* FAR*)pbstr);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkFAILED_TO_READ_INPUT_NAMES);
+		return false;
+	}
+	return true;
+}
+
+// ********************************************************
+//     OpenOutputDriver()
+// ********************************************************
+GDALDriverH OpenOutputDriver(CString driverName)
+{
+	GDALDriverH outputDriver = GDALGetDriverByName( driverName );
+	if ( outputDriver )
+	{
+		char **driverMetadata = GDALGetMetadata( outputDriver, NULL );
+		if ( !CSLFetchBoolean( driverMetadata, GDAL_DCAP_CREATE, false ) )
+		{
+			outputDriver = NULL; //driver exist, but it does not support the create operation
+		}
+	}
+	return outputDriver;
+}
+
+// ********************************************************
+//     OpenOutputFile()
+// ********************************************************
+GDALDataset* OpenOutputFile( GDALDriverH outputDriver, CStringW filename, int xSize, int ySize, GDALDataset* sourceTransform )
+{
+	m_globalSettings.SetGdalUtf8(true);
+
+	char **papszOptions = NULL;
+	GDALDataset* outputDataset = (GDALDataset *)GDALCreate( outputDriver, Utility::ConvertToUtf8(filename), xSize, ySize, 1, GDT_Float32, papszOptions );
+	
+	double transform[6];
+	sourceTransform->GetGeoTransform((double*)&transform);
+	outputDataset->SetGeoTransform(transform);
+
+	m_globalSettings.SetGdalUtf8(false);
+	return outputDataset;
+}
+
+int atoi_custom( const char *c ) {
+	int value = 0;
+	int sign = 1;
+	if( *c == '+' || *c == '-' ) {
+		if( *c == '-' ) sign = -1;
+		c++;
+	}
+	while ( isdigit( *c ) ) {
+		value *= 10;
+		value += (int) (*c-'0');
+		c++;
+	}
+	return value * sign;
+}
+
+// ********************************************************
+//     CalculateRaster()
+// ********************************************************
+STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BSTR outputFilename, BSTR gdalOutputFormat,
+									 float outputNodataValue, ICallback* callback, BSTR* errorMsg, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	CExpression expr;	
+	CString err;
+
+	// --------------------------------------------------------
+	//   Open input
+	// --------------------------------------------------------
+	LONG lBound, uBound;
+	BSTR* names;
+	if (!ValidateInputNames(InputNames,  lBound, uBound, &names))
+	{
+		*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+		return S_FALSE;
+	}
+
+	int count = uBound - lBound + 1;
+	if (count < 2)
+	{
+		ErrorMessage(tkAT_LEAST_TWO_DATASOURCES_EXPECTED);
+		*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+		return S_FALSE;
+	}
+
+	int xSize = 0;
+	int ySize = 0;
+	
+	GDALAllRegister();
+
+	USES_CONVERSION;
+	map<CString, GDALDataset*> datasets;
+	for (int i = 0; i < count; i++)
+	{
+		CStringW path = OLE2W(names[i]);
+		CString name = W2A(Utility::GetNameFromPath(path));
+		name = name.MakeLower();
+
+		GDALDataset* dt = GdalHelper::OpenDatasetW(path, GDALAccess::GA_ReadOnly);
+		if (dt)
+		{
+			// perhaps check rotation and create north up dataset in case bounds should be supported
+			/*double inputGeoTransform[6];
+			if ( GDALGetGeoTransform( inputDataset, inputGeoTransform ) == CE_None
+				&& ( inputGeoTransform[1] < 0.0
+				|| inputGeoTransform[2] != 0.0
+				|| inputGeoTransform[4] != 0.0
+				|| inputGeoTransform[5] > 0.0 ) )
+			{
+				GDALDatasetH vDataset = GDALAutoCreateWarpedVRT( inputDataset, NULL, NULL, GRA_NearestNeighbour, 0.2, NULL );
+				mInputDatasets.push_back( vDataset );
+				mInputDatasets.push_back( inputDataset );
+				inputDataset = vDataset;
+			}
+			else
+			{
+				mInputDatasets.push_back( inputDataset );
+			}*/
+		}
+		else
+		{
+			CStringW temp = L"Failed to open dataset: " + path;
+			*errorMsg = W2BSTR(temp);
+			goto cleaning;
+		}
+
+		if (dt)
+			datasets [name] = dt;
+
+		if (i == 0)
+		{
+			// take size from the first one
+			xSize = dt->GetRasterXSize();
+			ySize = dt->GetRasterYSize();
+		}
+		else
+		{
+			// make sure that others are of the same size
+			if (dt->GetRasterXSize() != xSize || dt->GetRasterYSize() != ySize )
+			{
+				ErrorMessage(tkIMAGES_MUST_HAVE_THE_SAME_SIZE);
+				*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+				goto cleaning;
+			}
+		}
+	}
+
+	if (datasets.size() < 2)
+	{
+		*errorMsg = A2BSTR(ErrorMsg(tkAT_LEAST_TWO_DATASOURCES_EXPECTED));
+		ErrorMessage(lastErrorCode);
+		goto cleaning;
+	}
+	
+	// --------------------------------------------------------
+	//   Creating output
+	// --------------------------------------------------------
+	GDALDataset* dtOutput = NULL;
+	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
+	if (driver != NULL)
+	{
+		dtOutput = OpenOutputFile(driver, OLE2W(outputFilename), xSize, ySize, datasets.begin()->second);
+
+		// TODO: coordinate system metadata from the first file
+		/*QgsRasterLayer* rl = mRasterEntries.at( 0 ).raster;
+		if ( rl )
+		{
+			char* crsWKT = 0;
+			OGRSpatialReferenceH ogrSRS = OSRNewSpatialReference( NULL );
+			if ( OSRSetFromUserInput( ogrSRS, rl->crs().authid().toUtf8().constData() ) == OGRERR_NONE )
+			{
+				OSRExportToWkt( ogrSRS, &crsWKT );
+				GDALSetProjection( outputDataset, crsWKT );
+			}
+			else
+			{
+				GDALSetProjection( outputDataset, TO8( rl->crs().toWkt() ) );
+			}
+			OSRDestroySpatialReference( ogrSRS );
+			CPLFree( crsWKT );
+		}*/
+	}
+
+	if (!dtOutput)
+	{
+		ErrorMsg(tkINVALID_FILENAME);
+		*errorMsg = A2BSTR("Failed to create output dataset");
+		goto cleaning;
+	}
+
+	// setting no data value
+	GDALRasterBand* bandOutput = dtOutput->GetRasterBand(1);
+	bandOutput->SetNoDataValue(outputNodataValue);
+
+	if (!expr.ParseExpression(OLE2A(expression), false, err))
+	{
+		ErrorMessage(tkINVALID_EXPRESSION);
+		*errorMsg = A2BSTR(err);
+		goto cleaning;
+	}
+	else
+	{
+		// --------------------------------------------------------
+		//   looking for source bands
+		// --------------------------------------------------------
+		int numFields = expr.get_NumFields();
+		for(int i = 0; i < numFields; i++)
+		{
+			CString name = expr.get_FieldName(i);
+			int pos = name.Find('@', 0);
+			if (pos == -1 || pos == name.GetLength() - 1)
+			{
+				ErrorMessage(tkINVALID_EXPRESSION);
+				err.Format("Invalid formula field: %s; @ sign to separate filename and band index is expected", name);
+				*errorMsg = A2BSTR(err);
+				goto cleaning;
+			}
+
+			CString dtName = name.Mid(0, pos).MakeLower();
+			if (datasets.find(dtName) != datasets.end())
+			{
+				GDALDataset* dt = datasets[dtName];
+				int bandIndex = atoi_custom(name.Mid(pos + 1));
+				GDALRasterBand* band = dt->GetRasterBand(bandIndex);
+				if (band)
+				{
+					CExpressionValue* val = expr.get_FieldValue(i);
+					val->band = band;
+					val->type = vtFloatArray;
+					double nodv = band->GetNoDataValue();
+					val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
+				}
+				else
+				{
+					ErrorMessage(tkINVALID_EXPRESSION);
+					err.Format("Band wasn't found: %s", name);
+					*errorMsg = A2BSTR(err);
+					goto cleaning;
+				}
+			}
+			else
+			{
+				err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
+				goto cleaning;
+			}
+		}
+		
+		// --------------------------------------------------------
+		//   doing calculations
+		// --------------------------------------------------------
+		long numColumns = xSize;
+		long numRows = ySize;
+		long percent = 0;
+		for(long i = 0; i < numRows; i++ )
+		{
+			Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
+
+			for(int j = 0; j < numFields; j++)
+			{
+				CExpressionValue* val = expr.get_FieldValue(j);
+				GDALRasterBand* band = ((GDALRasterBand*)val->band);
+				double nodv = band->GetNoDataValue();
+				if (val->matrix) delete val->matrix;
+				val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
+				band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
+			}
+
+			CString errorMsg;
+			CExpressionValue* resultVal = expr.Calculate(errorMsg);
+			if (resultVal)
+			{
+				RasterMatrix* resultMatrix = resultVal->matrix;
+
+				bool resultIsNumber = resultMatrix->isNumber();
+				float* calcData = new float[numColumns];
+
+				if ( resultIsNumber ) //scalar result. Insert number for every pixel
+				{
+					for ( int j = 0; j < numColumns; ++j )
+					{
+						calcData[j] = (float)resultMatrix->number();
+					}
+				}
+				else //result is real matrix
+				{
+					memcpy(calcData, resultMatrix->data(), resultMatrix->GetBufferSize());
+					//calcData = resultMatrix->data();
+				}
+
+				float ndv = (float)resultMatrix->nodataValue();
+				int count = 0;
+				for ( int j = 0; j < numColumns; ++j )
+				{
+					if ( calcData[j] == ndv )
+					{
+						calcData[j] = outputNodataValue;
+						count++;
+					}
+				}
+				
+				if (bandOutput->RasterIO( GF_Write, 0, i, numColumns, 1, calcData, numColumns, 1, GDT_Float32, 0, 0 ) != CE_None )
+				{
+					return S_FALSE;
+				}
+				
+				delete[] calcData;
+			}
+		}
+	}
+
+	*retVal = VARIANT_TRUE;
+
+cleaning:
+	// ------------------------------------------------------
+	//	Cleaning
+	// ------------------------------------------------------
+	Utility::DisplayProgressCompleted(callback);
+	map<CString, GDALDataset*>::iterator it = datasets.begin();
+	while (it != datasets.end()) 
+	{
+		GDALDataset* dt = it->second;
+		if (dt)
+			GdalHelper::CloseDataset(dt);
+		it++;
+	}
+	if (dtOutput)
+		GdalHelper::CloseDataset(dtOutput);
+	
 	return S_OK;
 }

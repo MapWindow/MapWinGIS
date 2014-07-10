@@ -192,6 +192,8 @@ public:
 	STDMETHOD(ErrorMsgFromObject)(IDispatch * comClass, BSTR* retVal);
 	STDMETHOD(TileProjectionToGeoProjection)(tkTileProjection projection, IGeoProjection** retVal);
 	STDMETHOD(get_ComUsageReport)(VARIANT_BOOL unreleasedOnly, BSTR* retVal);
+	STDMETHOD(CalculateRaster)(SAFEARRAY* filenames, BSTR expression, BSTR outputFilename, BSTR gdalOutputFormat, 
+		float noDataValue, ICallback* cBack, BSTR* errorMsg, VARIANT_BOOL* retVal);
 	
 	// must not be included in interface
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
@@ -275,7 +277,7 @@ private:
 								int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam);
 	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void ErrorMessage(long ErrorCode);
-	
+	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
 
 	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);
