@@ -1051,6 +1051,16 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 					else if ( oper == operCONSEQ )	elLeft->calcVal->bln = (!valLeft->bln || valLeft->bln && valRight->bln);
 					elLeft->calcVal->type = vtBoolean;
 				}
+				else if (valLeft->type == vtFloatArray && valRight->type == vtFloatArray)
+				{
+					if (oper == operOR || oper == operAND)			
+					{
+						RasterMatrix* matrix = new RasterMatrix(*valLeft->matrix);
+						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix );
+						elLeft->calcVal->matrix = matrix;
+						elLeft->calcVal->type = vtFloatArray;
+					}
+				}
 				else
 				{
 					_errorMessage = "The operands of CONSEQUENCE operation must have boolean type";
