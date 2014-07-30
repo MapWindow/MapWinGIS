@@ -29,18 +29,18 @@
 8
 
 # Reproject OSM to Amersfoort
-%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
 0
 
 # brtachtergrondkaart
-%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
 http://geodata.nationaalgeoregister.nl/tiles/service/tms/1.0.0/brtachtergrondkaart/{zoom}/{x}/{y}.png8
 
 # TODO
-#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
 #http://geodata1.nationaalgeoregister.nl/luchtfoto/tms/1.0.0/luchtfoto/EPSG28992/{zoom}/{x}/{y}.jpeg
 
 # Own server TODO
-#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Shapefiles\prov.shp
+#%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\provincies.shp
 #http://5.79.21.216:8080/geoserver/gwc/service/tms/1.0.0/Dakscan-Assen:Luchtfoto-hybrid/{zoom}/{x}/{y}.png8
 

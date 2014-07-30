@@ -35,7 +35,7 @@
 %MW_SAMPLEDATA%\Images\Formats\GTiff-GeoTIFF.tif
 
 #EHdr/ESRI .hdr Labelled
-%MW_SAMPLEDATA%\Images\Formats\EHdr-ESRI-BIL.bil
+#Not Supported %MW_SAMPLEDATA%\Images\Formats\EHdr-ESRI-BIL.bil
 
 #HFA/Erdas Imagine Images
 %MW_SAMPLEDATA%\Images\Formats\HFA-Erdas-Imagine-Image.img

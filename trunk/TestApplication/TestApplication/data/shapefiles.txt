@@ -11,7 +11,7 @@
 %MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Buurtkaart.shp
 
 # Polygon M
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\PolygonM.shp
+%MW_SAMPLEDATA%\Shapefiles\PolygonM.shp
 
 # Multi points:
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\MultiPoints.shp
+%MW_SAMPLEDATA%\Shapefiles\MultiPoints.shp

@@ -10,6 +10,7 @@ namespace TestApplication
 {
   using System;
   using System.Diagnostics;
+  using System.Linq;
   using System.Reflection;
   using System.Windows.Forms;
   using AxMapWinGIS;
@@ -161,9 +162,10 @@ namespace TestApplication
         /// <param name="e">
         /// The e.
         /// </param>
-        private static void Form1FormClosing(object sender, FormClosingEventArgs e)
+        private void Form1FormClosing(object sender, FormClosingEventArgs e)
         {
-            Properties.Settings.Default.Save();
+          // Save all settings:
+          Properties.Settings.Default.Save();
         }
 
         /// <summary>Form load event</summary>
@@ -474,7 +476,18 @@ namespace TestApplication
             Tests.SelectTextfile(this.TilesInputfile, "Select text file with on each line the location of the shapefiles");
         }
 
-        #endregion
+        /// <summary>Click event</summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectRasterAInputClick(object sender, EventArgs e)
+        {
+          Tests.SelectTextfile(this.RasterCalculatorInput, "Select file with rasters and formulas");
+        }
+    #endregion
 
         #region Run test click event
         /// <summary>Start Shapefile open tests</summary>
@@ -778,11 +791,17 @@ namespace TestApplication
         /// <summary>
         /// Opens grid with different options and checks how the open strategy is chosen
         /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The event arguments
+        /// </param>
         private void RunGridOpenTestClick(object sender, EventArgs e)
         {
           this.ResetMapSettings(false);
-            bool result = FileManagerTests.GridOpenTest(GridOpenInput.Text);
-            this.Progress("", 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
+          var result = FileManagerTests.GridOpenTest(GridOpenInput.Text);
+          this.Progress(string.Empty, 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
         }
 
         private void SelectAxMapClearInput_Click(object sender, EventArgs e)
@@ -795,6 +814,22 @@ namespace TestApplication
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
             bool retVal = Tests.RunAxMapClearTest(this.AxMapClearInput.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+        }
+
+        /// <summary>
+        /// Perform several raster calculations
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The event arguments
+        /// </param>
+        private void RunRasterCalculatorTestClick(object sender, EventArgs e)
+        {
+          ((Button)sender).BackColor = System.Drawing.Color.Blue;
+          var retVal = Tests.RunRasterCalculatorTest(this.RasterCalculatorInput.Text, this);
+          ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 
         private void axMap1_MouseMoveEvent(object sender, _DMapEvents_MouseMoveEvent e)

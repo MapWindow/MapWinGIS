@@ -12,8 +12,8 @@
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 
 # Polygon M
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\PolygonM.shp
+%MW_SAMPLEDATA%\Shapefiles\PolygonM.shp
 
 # Multi points:
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\MultiPoints.shp
+%MW_SAMPLEDATA%\Shapefiles\MultiPoints.shp
 

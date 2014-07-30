@@ -1,0 +1,10 @@
+# Text file to test the raster calculator
+# First line is Raster A, second line is Raster B, third line is formula:
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([Clip_L7_20000423_B5.tif@1]+[Clip_L7_20000423_B2.tif@1]) * 5
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([Clip_L7_20000423_B5.tif@1]-[Clip_L7_20000423_B2.tif@1]) / ([Clip_L7_20000423_B5.tif@1]+[Clip_L7_20000423_B2.tif@1])

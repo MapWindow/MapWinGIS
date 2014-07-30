@@ -32,6 +32,7 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox23 = new System.Windows.Forms.GroupBox();
       this.groupBox30 = new System.Windows.Forms.GroupBox();
       this.groupBox33 = new System.Windows.Forms.GroupBox();
       this.RunAxMapClearTest = new System.Windows.Forms.Button();
@@ -63,6 +64,10 @@
       this.SpatialIndexInputfile = new System.Windows.Forms.TextBox();
       this.label16 = new System.Windows.Forms.Label();
       this.groupBox11 = new System.Windows.Forms.GroupBox();
+      this.RunRasterCalculatorTest = new System.Windows.Forms.Button();
+      this.SelectRasterAInput = new System.Windows.Forms.Button();
+      this.RasterCalculatorInput = new System.Windows.Forms.TextBox();
+      this.label25 = new System.Windows.Forms.Label();
       this.groupBox10 = new System.Windows.Forms.GroupBox();
       this.groupBox22 = new System.Windows.Forms.GroupBox();
       this.SelectClosestPointShapefileInput2 = new System.Windows.Forms.Button();
@@ -173,6 +178,7 @@
       this.groupBox5.SuspendLayout();
       this.groupBox19.SuspendLayout();
       this.groupBox20.SuspendLayout();
+      this.groupBox11.SuspendLayout();
       this.groupBox10.SuspendLayout();
       this.groupBox22.SuspendLayout();
       this.groupBox18.SuspendLayout();
@@ -225,6 +231,7 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox23);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox30);
       this.splitContainer2.Panel1.Controls.Add(this.btnPopulate);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox29);
@@ -244,6 +251,15 @@
       this.splitContainer2.Size = new System.Drawing.Size(929, 699);
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
+      // 
+      // groupBox23
+      // 
+      this.groupBox23.Location = new System.Drawing.Point(5, 2369);
+      this.groupBox23.Name = "groupBox23";
+      this.groupBox23.Size = new System.Drawing.Size(205, 128);
+      this.groupBox23.TabIndex = 11;
+      this.groupBox23.TabStop = false;
+      this.groupBox23.Text = "Todo";
       // 
       // groupBox30
       // 
@@ -566,12 +582,59 @@
       // 
       // groupBox11
       // 
+      this.groupBox11.BackColor = System.Drawing.Color.PeachPuff;
+      this.groupBox11.Controls.Add(this.RunRasterCalculatorTest);
+      this.groupBox11.Controls.Add(this.SelectRasterAInput);
+      this.groupBox11.Controls.Add(this.RasterCalculatorInput);
+      this.groupBox11.Controls.Add(this.label25);
       this.groupBox11.Location = new System.Drawing.Point(5, 2270);
       this.groupBox11.Name = "groupBox11";
-      this.groupBox11.Size = new System.Drawing.Size(205, 128);
+      this.groupBox11.Size = new System.Drawing.Size(205, 93);
       this.groupBox11.TabIndex = 5;
       this.groupBox11.TabStop = false;
-      this.groupBox11.Text = "Todo";
+      this.groupBox11.Text = "Raster calculator";
+      // 
+      // RunRasterCalculatorTest
+      // 
+      this.RunRasterCalculatorTest.Location = new System.Drawing.Point(11, 58);
+      this.RunRasterCalculatorTest.Name = "RunRasterCalculatorTest";
+      this.RunRasterCalculatorTest.Size = new System.Drawing.Size(180, 23);
+      this.RunRasterCalculatorTest.TabIndex = 21;
+      this.RunRasterCalculatorTest.Tag = "run";
+      this.RunRasterCalculatorTest.Text = "Run test";
+      this.RunRasterCalculatorTest.UseVisualStyleBackColor = true;
+      this.RunRasterCalculatorTest.Click += new System.EventHandler(this.RunRasterCalculatorTestClick);
+      // 
+      // SelectRasterAInput
+      // 
+      this.SelectRasterAInput.Location = new System.Drawing.Point(165, 32);
+      this.SelectRasterAInput.Name = "SelectRasterAInput";
+      this.SelectRasterAInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectRasterAInput.TabIndex = 20;
+      this.SelectRasterAInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectRasterAInput, "Select first raster file");
+      this.SelectRasterAInput.UseVisualStyleBackColor = true;
+      this.SelectRasterAInput.Click += new System.EventHandler(this.SelectRasterAInputClick);
+      // 
+      // RasterCalculatorInput
+      // 
+      this.RasterCalculatorInput.AcceptsReturn = true;
+      this.RasterCalculatorInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "RasterCalculatorInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.RasterCalculatorInput.Location = new System.Drawing.Point(12, 32);
+      this.RasterCalculatorInput.Name = "RasterCalculatorInput";
+      this.RasterCalculatorInput.Size = new System.Drawing.Size(147, 20);
+      this.RasterCalculatorInput.TabIndex = 19;
+      this.RasterCalculatorInput.Text = global::TestApplication.Properties.Settings.Default.RasterCalculatorInput;
+      this.toolTip1.SetToolTip(this.RasterCalculatorInput, "Select text file with rasters and formulas");
+      // 
+      // label25
+      // 
+      this.label25.AutoSize = true;
+      this.label25.Location = new System.Drawing.Point(9, 16);
+      this.label25.Name = "label25";
+      this.label25.Size = new System.Drawing.Size(73, 13);
+      this.label25.TabIndex = 18;
+      this.label25.Text = "Select text file";
       // 
       // groupBox10
       // 
@@ -1619,7 +1682,7 @@
       this.Name = "Form1";
       this.Text = "Test application for MapWinGIS";
       this.Load += new System.EventHandler(this.Form1Load);
-      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(Form1FormClosing);
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1FormClosing);
       this.splitContainer1.Panel1.ResumeLayout(false);
       this.splitContainer1.Panel2.ResumeLayout(false);
       this.splitContainer1.Panel2.PerformLayout();
@@ -1642,6 +1705,8 @@
       this.groupBox19.ResumeLayout(false);
       this.groupBox20.ResumeLayout(false);
       this.groupBox20.PerformLayout();
+      this.groupBox11.ResumeLayout(false);
+      this.groupBox11.PerformLayout();
       this.groupBox10.ResumeLayout(false);
       this.groupBox22.ResumeLayout(false);
       this.groupBox22.PerformLayout();
@@ -1815,6 +1880,11 @@
     private System.Windows.Forms.Label label23;
     private System.Windows.Forms.StatusStrip statusStrip1;
     private System.Windows.Forms.ToolStripStatusLabel toolStripStatusCoordLabel;
+    private System.Windows.Forms.GroupBox groupBox23;
+    private System.Windows.Forms.Button RunRasterCalculatorTest;
+    private System.Windows.Forms.Button SelectRasterAInput;
+    private System.Windows.Forms.TextBox RasterCalculatorInput;
+    private System.Windows.Forms.Label label25;
   }
 }
 

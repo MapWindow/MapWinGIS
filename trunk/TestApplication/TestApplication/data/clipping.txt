@@ -15,10 +15,10 @@
 
 # Clip polygons with polygons
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\LargePolygon.shp
+%MW_SAMPLEDATA%\Shapefiles\LargePolygon.shp
 
 # Clip polygons with polygons (switched)
-%MW_SAMPLEDATA%\MapWindow-Projects\polygonM\LargePolygon.shp
+%MW_SAMPLEDATA%\Shapefiles\polygonM\LargePolygon.shp
 %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
 # Clip polygons M with polygons

@@ -287,5 +287,10 @@ namespace TestApplication
 
       return sf;
     }
+
+    internal static int AddLayer(string filename)
+    {
+      return Map.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
+    }
   }
 }
