@@ -652,6 +652,8 @@ void CMapView::DisplayPanningInertia( CPoint point )
 {
 	if (HasDrawingData(PanningInertia))
 	{
+		if (_panningInertia == csFalse) return;
+
 		bool inertia = false;
 		double dx = 0.0, dy = 0.0;
 		DWORD normalInterval = Utility::Rint(0.3 * CLOCKS_PER_SEC);		// normal interval
@@ -814,9 +816,12 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			{
 				Debug::WriteWithTime("Mouse move panning");
 				DWORD time = GetTickCount();
-				_panningLock.Lock();
-				_panningList.push_back(new TimedPoint(point.x, point.y, time));
-				_panningLock.Unlock();
+				if (_panningInertia != csFalse)
+				{
+					_panningLock.Lock();
+					_panningList.push_back(new TimedPoint(point.x, point.y, time));
+					_panningLock.Unlock();
+				}
 				DoPanning(point);
 				return;
 			}

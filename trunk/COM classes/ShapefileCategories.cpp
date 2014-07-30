@@ -71,7 +71,7 @@ STDMETHODIMP CShapefileCategories::Insert(long Index, BSTR Name, IShapefileCateg
 	CoCreateInstance( CLSID_ShapefileCategory, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&cat);
 	if (cat == NULL) return S_OK;
 	
-	// initializtion with default options if shapefile is present
+	// initialization with default options if shapefile is present
 	if (m_shapefile != NULL)
 	{
 		IShapeDrawingOptions* defaultOpt = NULL;

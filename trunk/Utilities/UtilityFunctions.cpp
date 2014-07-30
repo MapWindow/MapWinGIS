@@ -9,6 +9,15 @@ namespace Utility
 
 #pragma region String conversion
 	// ********************************************************
+	//    XmlFilenameToUnicode()
+	// ********************************************************
+	CStringW XmlFilenameToUnicode(CStringA s, bool utf8) {
+		USES_CONVERSION;
+		CStringW unicode = utf8 ? CA2W(s, CP_UTF8) : A2W(s);
+		return unicode;
+	}
+	
+	// ********************************************************
 	//    ConvertToUtf8()
 	// ********************************************************
 	CStringA ConvertToUtf8(CStringW unicode) {

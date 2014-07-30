@@ -108,8 +108,15 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		orig_Width = rasterDataset->GetRasterXSize();
 		orig_Height = rasterDataset->GetRasterYSize();			
 		
+		m_globalSettings.SetGdalUtf8(true);		// otherwise there can be problems when reading world file
+												// as dataset filename is already stored as UTF8
+
 		double adfGeoTransform[6];
-		if( rasterDataset->GetGeoTransform( adfGeoTransform ) == CE_None )
+		bool success = rasterDataset->GetGeoTransform( adfGeoTransform ) == CE_None;
+
+		m_globalSettings.SetGdalUtf8(false);
+
+		if( success )
 		{
             orig_dX = adfGeoTransform[1];
 			orig_dY  = adfGeoTransform[5];
@@ -244,7 +251,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		/************************** MIN/MAX AND RENDERING METHOD ***********************/
 		
-		// retreiving max and min values for the band
+		// retrieving max and min values for the band
 		ComputeBandMinMax();
 		
 		// choosing rendering method

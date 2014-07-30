@@ -722,7 +722,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		_dc = NULL;
 
 		Gdiplus::Matrix mtx;
-		_graphics->GetTransform(&mtx);
+		//_graphics->GetTransform(&mtx);
+		mtx.Reset();
 		mtx.Rotate((Gdiplus::REAL)options->rotation);
 		path->Transform(&mtx);
 		if (path2) path2->Transform(&mtx);
@@ -953,7 +954,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 						{
 							if (options->pointSymbolType == ptSymbolFontCharacter && path2)
 							{
-								options->DrawGraphicPathWithFillColor(_graphics, path2, 4.0f);
+								options->DrawGraphicPathWithFillColor(_graphics, path2, 2.0f);
 							}
 							
 							// drawing fill

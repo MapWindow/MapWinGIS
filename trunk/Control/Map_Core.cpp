@@ -183,6 +183,30 @@ void CMapView::UpdateImage(LONG LayerHandle)
 }
 
 // ***************************************************************
+//		LayerIsEmpty()
+// ***************************************************************
+bool CMapView::LayerIsEmpty(long LayerHandle)
+{
+	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
+	{	
+		Layer * l = _allLayers[LayerHandle];
+		if(l->object == NULL) return true;
+		if (l->type == ShapefileLayer)
+		{
+			IShapefile * ishp = NULL;
+			if (!l->QueryShapefile(&ishp)) return true;
+
+			long numShapes;
+			ishp->get_NumShapes(&numShapes);
+			ishp->Release();
+			if (numShapes == 0) return true;
+		}
+		return false;
+	}
+	return true;
+}
+
+// ***************************************************************
 //		AdjustLayerExtents()
 // ***************************************************************
 BOOL CMapView::AdjustLayerExtents(long LayerHandle)

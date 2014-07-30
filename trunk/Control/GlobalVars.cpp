@@ -8,7 +8,7 @@ CMemLeakDetect gMemLeakDetect;		// comment this line to turn off the memory leak
 GlobalSettingsInfo m_globalSettings;
 ReferenceCounter gReferenceCounter;
 IUtils* m_utils;
-
+char* UTF8_ENCODING_MARKER = "utf8";
 
 // *****************************************************************
 //		getGeosHandle

@@ -2416,7 +2416,7 @@ bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 							}
 							
 							// the next parts should be moved a step forward
-							for(long part = i + 1; i < _shp->get_PartCount(); part++)
+							for(long part = i + 1; part < _shp->get_PartCount(); part++)
 							{
 								_shp->put_PartStartPoint(part, _shp->get_PartStartPoint(part));
 							}
@@ -2436,6 +2436,7 @@ bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 STDMETHODIMP CShape::FixUp(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = NULL;
 	VARIANT_BOOL vbretval = VARIANT_FALSE;
 
 	// no points? nothing we can do.

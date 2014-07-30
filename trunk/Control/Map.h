@@ -610,8 +610,8 @@ public:
 		{FireEvent(eventidMapState,EVENT_PARAM(VTS_I4), LayerHandle);}
 	void FireOnDrawBackBuffer(long BackBuffer)
 		{FireEvent(eventidOnDrawBackBuffer,EVENT_PARAM(VTS_I4), BackBuffer);}
-	void FireShapeHighlighted(long LayerHandle, long ShapeIndex)
-		{FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4), LayerHandle, ShapeIndex);}
+	void FireShapeHighlighted(long LayerHandle, long ShapeIndex, long pointX, long pointY)
+		{FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4  VTS_I4), LayerHandle, ShapeIndex, pointX, pointY);}
 	void FireBeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
 		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
@@ -912,7 +912,7 @@ private:
 	CPLXMLNode* SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW ProjectName);		// used by SaveMapState and GetMapState
 	bool DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, VARIANT_BOOL LoadLayers, IStopExecution* callback);
 	CPLXMLNode* SerializeLayerCore(LONG LayerHandle, CStringW Filename);
-	int DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStopExecution* callback);		// adds new layer on loading (is used by map state)
+	int DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool utf8Filenames, IStopExecution* callback);		// adds new layer on loading (is used by map state)
 	VARIANT_BOOL DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode* node);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
 	
@@ -977,6 +977,7 @@ private:
 	void ClearMapProjectionWithLastLayer();
 	ZoombarPart ZoombarHitTest(int x, int y);
 	bool UpdateHotTracking(CPoint point);
+	void ClearHotTracking();
 	void DoPanning(CPoint point);
 	void DoUpdateTiles(bool isSnapshot = false, CString key = "");
 	bool HandleOnZoombarMouseDown( CPoint point );
@@ -998,6 +999,8 @@ private:
 	bool GetMinMaxZoom(int& minZoom, int& maxZoom);
 	bool GetTileMismatchMinZoom( int& minZoom );
 	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
+	bool LayerIsEmpty(long LayerHandle);
+	HotTrackingInfo* FindShapeAtScreenPoint(CPoint point, bool hotTracking);
 #pragma endregion
 };
 

@@ -25,6 +25,7 @@ extern GEOSContextHandle_t _geosContextHandle;
 extern IUtils* m_utils;
 extern ReferenceCounter gReferenceCounter;
 extern GlobalSettingsInfo m_globalSettings;
+extern char* UTF8_ENCODING_MARKER;
 
 IUtils* GetUtils();
 GEOSContextHandle_t getGeosHandle();

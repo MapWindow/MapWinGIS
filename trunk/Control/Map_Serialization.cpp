@@ -135,8 +135,12 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		return false;
 	}
 
-	// control options
+	bool utf8 = false;
 	CString s;
+	s = CPLGetXMLValue(node, "FilenamesEncoding", NULL);
+	utf8 = s.CompareNoCase(UTF8_ENCODING_MARKER) == 0;
+
+	// control options
 	s = CPLGetXMLValue( nodeState, "BackColor", NULL );
 	m_backColor = (s != "") ? (OLE_COLOR)atoi(s.GetString()) : RGB(255, 255, 255);
 	
@@ -238,7 +242,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		{
 			if (_stricmp(nodeLayer->pszValue, "Layer") == 0)
 			{
-				int handle = DeserializeLayerCore( nodeLayer, ProjectName, callback);
+				int handle = DeserializeLayerCore( nodeLayer, ProjectName, utf8, callback);
 			}
 			nodeLayer = nodeLayer->psNext;
 		}

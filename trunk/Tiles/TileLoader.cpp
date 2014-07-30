@@ -238,7 +238,7 @@ void TileLoader::Load(std::vector<CTilePoint*> &points, int zoom, BaseProvider* 
 
 	tilesLogger.WriteLine("Tiles requested; generation = %d", generation);
 
-	if (isSnapshot) {
+	if (isSnapshot || cacheOnly) {
 		m_count = 0;
 		m_totalCount = points.size();
 	}

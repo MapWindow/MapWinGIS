@@ -961,7 +961,7 @@ void CDrawingOptionsEx::DrawPointSymbol(Gdiplus::Graphics& g, CDC* dc, Gdiplus::
 				
 				if (path2)
 				{
-					this->DrawGraphicPathWithFillColor(&g, path2, 4.0f);
+					this->DrawGraphicPathWithFillColor(&g, path2, 2.0f);
 				}
 
 				if (this->fillVisible)

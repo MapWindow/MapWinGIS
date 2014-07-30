@@ -228,7 +228,8 @@ void CMapView::Startup()
 	
 	((CMeasuring*)_measuring)->SetMapView((void*)this);
 
-	_panningLock.Unlock();
+	if (_panningInertia != csFalse)
+		_panningLock.Unlock();
 
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
@@ -296,7 +297,7 @@ void CMapView::SetDefaults()
 	_showVersionNumber = VARIANT_FALSE;	
 	_scalebarUnits = tkScalebarUnits::GoogleStyle;
 	_zoomBarVerbosity = tkZoomBarVerbosity::zbvFull;
-	_panningInertia = csAuto;
+	_panningInertia = csFalse;
 	_reuseTileBuffer = TRUE;
 	_zoomAnimation = csAuto;
 	_zoomBoxStyle = tkZoomBoxStyle::zbsBlue;
@@ -388,6 +389,7 @@ void CMapView::Shutdown()
 	if( _globalCallback )
 		_globalCallback->Release();
 
+	
 	ClearPanningList();
 
 	ReleaseProjections();
@@ -700,13 +702,16 @@ void CMapView::DoUpdateTiles(bool isSnapshot, CString key)
 // ***************************************************************
 void CMapView::ClearPanningList()
 {
-	_panningLock.Lock();
-	for(int i = 0; i < _panningList.size(); i++)
+	if (_panningInertia != csFalse)
 	{
-		delete _panningList[i];
+		_panningLock.Lock();
+		for(int i = 0; i < _panningList.size(); i++)
+		{
+			delete _panningList[i];
+		}
+		_panningList.clear();
+		_panningLock.Unlock();
 	}
-	_panningList.clear();
-	_panningLock.Unlock();
 }
 
 

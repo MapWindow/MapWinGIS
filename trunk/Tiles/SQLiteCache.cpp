@@ -413,6 +413,10 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 			delete tile;
 			tile = NULL;
 		}
+
+		// for composite providers
+		if (tile)
+			tile->m_providerId = provider->Id;
 	}
 	catch(...)
 	{

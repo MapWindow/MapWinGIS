@@ -158,6 +158,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 			}
 			else
 			{
+				ClearHotTracking();
+
 				layersRedraw = true;
 				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(_layerBitmap);
 				gLayers->Clear(Gdiplus::Color::Transparent);

@@ -73,7 +73,7 @@ public:
 	{
 		UrlFormatServer = "mt";
 		UrlFormatRequest = "vt";	
-		Version = "m@256000000";
+		Version = "m@267000000";
 		Id = tkTileProvider::GoogleMaps;
 		Name = "GoogleMaps";
 		UrlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
@@ -88,7 +88,7 @@ public:
 	{
 		UrlFormatServer = "khms";
 		UrlFormatRequest = "kh";
-		Version = "145";
+		Version = "153";
 		Id = tkTileProvider::GoogleSatellite;
 		Name = "GoogleSatellite";
 		UrlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
@@ -103,7 +103,7 @@ public:
 	{
 		UrlFormatServer = "mt";
 		UrlFormatRequest = "vt";	
-		Version = "h@256000000";
+		Version = "h@267000000";
 		Id = tkTileProvider::GoogleHybrid;
 		Name = "GoogleHybrid";
 		UrlFormat = "http://%s%d.%s/%s/lyrs=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";
@@ -119,8 +119,7 @@ public:
 	{
 		UrlFormatServer = "mt";
 		UrlFormatRequest = "vt";
-		//Version = "t@128,r@177000000";
-		Version = "t@145,r@256000000";
+		Version = "t@153,r@267000000";
 		Id = tkTileProvider::GoogleTerrain;
 		Name = "GoogleTerrain";
 		UrlFormat = "http://%s%d.%s/%s/v=%s&hl=%s&x=%d%s&y=%d&z=%d&s=%s";

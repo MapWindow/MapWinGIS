@@ -1081,7 +1081,7 @@ void CMapView::SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal)
 	{
 		Layer* layer = _allLayers[LayerHandle];
 		if (newVal < 0) newVal = 0;
-		if (newVal > 18) newVal = 18;
+		if (newVal > 100) newVal = 100;
 		layer->maxVisibleZoom = newVal;
 	}
 	else
@@ -1127,11 +1127,11 @@ void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 //		DeserializeLayerCore()
 // ********************************************************
 // Loads layer based on the filename; return layer handle
-int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStopExecution* callback)
+int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool utf8Filenames, IStopExecution* callback)
 {
 	const char* nameA = CPLGetXMLValue( node, "Filename", NULL );
 	
-	CStringW filename = Utility::ConvertFromUtf8(nameA);
+	CStringW filename = Utility::XmlFilenameToUnicode(nameA, utf8Filenames);
 
 	wchar_t buffer[4096] = L""; 
     DWORD retval = GetFullPathNameW(filename, 4096, buffer, NULL);
@@ -1231,6 +1231,12 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, IStop
 		s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
 		_allLayers[layerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom (s) : 0.0;
 
+		s = CPLGetXMLValue( node, "MaxVisibleZoom", NULL );
+		_allLayers[layerHandle]->maxVisibleZoom = (s != "") ? atoi(s) : 18;
+
+		s = CPLGetXMLValue( node, "MinVisibleZoom", NULL );
+		_allLayers[layerHandle]->minVisibleZoom = (s != "") ? atoi(s) : 0;
+
 		s = CPLGetXMLValue( node, "LayerKey", NULL );
 		this->SetLayerKey(layerHandle, s);
 
@@ -1318,6 +1324,12 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			if (layer->maxVisibleScale != 100000000.0)
 				Utility::CPLCreateXMLAttributeAndValue( psLayer, "MaxVisibleScale", CPLString().Printf("%f", layer->maxVisibleScale));
 			
+			if (layer->minVisibleZoom != 0)
+				Utility::CPLCreateXMLAttributeAndValue( psLayer, "MinVisibleZoom", CPLString().Printf("%d", layer->minVisibleZoom));
+
+			if (layer->maxVisibleZoom != 18)
+				Utility::CPLCreateXMLAttributeAndValue( psLayer, "MaxVisibleZoom", CPLString().Printf("%d", layer->maxVisibleZoom));
+
 			// retrieving filename
 			IImage* img = NULL;
 			IShapefile* sf = NULL;

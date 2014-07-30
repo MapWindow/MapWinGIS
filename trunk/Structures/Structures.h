@@ -11,11 +11,19 @@ public:
 	std::vector<double> polyY;
 };
 
-struct HotTrackingInfo
+class HotTrackingInfo
 {
+public:	
 	IShapefile* Shapefile;
+	IShape* Shape;
 	int ShapeId;
 	int LayerHandle;
+	HotTrackingInfo(): Shape(NULL), Shapefile(NULL), ShapeId(-1), LayerHandle(-1) {}
+	~HotTrackingInfo()
+	{
+		if (Shape)
+			Shape->Release();
+	}
 };
 
 struct TileBuffer

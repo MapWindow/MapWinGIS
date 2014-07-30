@@ -3404,7 +3404,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 	if (gdalImage)
 	{
 		tkGridRendering allowColorScheme;
-		s = CPLGetXMLValue( node, "AllowGridRendering", "0" );
+		s = CPLGetXMLValue( node, "AllowGridRendering", "1" );		// 1 = grForGridsOnly
 		if (s != "") allowColorScheme = (tkGridRendering)atoi(s);
 		this->put_AllowGridRendering(allowColorScheme);
 

@@ -783,6 +783,8 @@ void CMapView::ZoomToMaxExtents()
 	long endcondition = _activeLayers.size();
 	for(int i = 0; i < endcondition; i++ )
 	{
+		if (this->LayerIsEmpty(_activeLayers[i])) continue;
+
 		Layer * l = _allLayers[_activeLayers[i]];
 		this->AdjustLayerExtents(_activeLayers[i]);
 
@@ -1140,6 +1142,8 @@ IExtents* CMapView::GetMaxExtents(void)
 
 	for(size_t i = 0; i <  _activeLayers.size(); i++ )
 	{
+		if (this->LayerIsEmpty(_activeLayers[i])) continue;
+		
 		Layer * l = _allLayers[_activeLayers[i]];
 		this->AdjustLayerExtents(_activeLayers[i]);
 

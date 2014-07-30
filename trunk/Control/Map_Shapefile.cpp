@@ -1119,116 +1119,164 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 	return result;
 }
 
+void CMapView::ClearHotTracking()
+{
+	VARIANT_BOOL vb;
+	_hotTracking.ShapeId = -1;
+	_hotTracking.LayerHandle = -1;
+	if (_hotTracking.Shapefile)
+		_hotTracking.Shapefile->Close(&vb);
+}
+
+// ************************************************************
+//		FindShapeAtScreenPoint
+// ************************************************************
+HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking)
+{
+	HotTrackingInfo* info = NULL;
+
+	double pixX = point.x;
+	double pixY = point.y;
+	double prjX, prjY;
+	this->PixelToProj(pixX, pixY, &prjX, &prjY);
+
+	bool found = false;
+	IShapefile * sf = NULL;
+
+	for(int i = 0; i < (int)_activeLayers.size(); i++ )
+	{
+		Layer* layer = _allLayers[_activeLayers[i]];
+		if (layer->type == ShapefileLayer)
+		{
+			if (layer->QueryShapefile(&sf))
+			{
+				bool proceed = true;
+				if (hotTracking)
+				{
+					VARIANT_BOOL vb;
+					sf->get_HotTracking(&vb);
+					if (!vb) proceed = false;
+				}
+
+				if (proceed)
+				{
+					std::vector<long> shapes;
+
+					double tol = 0.0;
+					ShpfileType type;
+					sf->get_ShapefileType(&type);
+					type = Utility::ShapeTypeConvert2D(type);
+					if (type == SHP_MULTIPOINT || type == SHP_POINT)
+						tol = 5.0/this->PixelsPerMapUnit();
+
+					((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), 0.0, SelectMode::INCLUSION, shapes);
+
+					if (shapes.size() > 0)
+					{
+						IShape* shape = NULL;
+						sf->get_Shape(shapes[0], &shape);
+						info = new HotTrackingInfo();
+						info->ShapeId = shapes[0];
+						info->LayerHandle = _activeLayers[i];
+						info->Shapefile = sf;
+						info->Shape = shape;
+
+						long numPoints;
+						shape->get_NumPoints(&numPoints);
+						Debug::WriteLine("Number of points: %d", numPoints);
+
+						return info;
+					}
+				}
+				sf->Release();
+				sf = NULL;
+				if (info) break;
+			}
+		}
+	}
+	return info;
+}
+
 // ************************************************************
 //		UpdateHotTracking
 // ************************************************************
 bool CMapView::UpdateHotTracking(CPoint point)
 {
+	bool found = false;
 	bool refreshNeeded = false;
+	VARIANT_BOOL vb;
+	bool sameShape = false;
+
+
 	if (_hasHotTracking)
 	{
-		double pixX = point.x;
-		double pixY = point.y;
-		double prjX, prjY;
-		this->PixelToProj(pixX, pixY, &prjX, &prjY);
-		
-		bool found = false;
-		IShapefile * sf = NULL;
-
-		VARIANT_BOOL vbretval;
-		for(int i = 0; i < (int)_activeLayers.size(); i++ )
+		HotTrackingInfo* info = FindShapeAtScreenPoint(point, true);
+		if (info)
 		{
-			Layer* layer = _allLayers[_activeLayers[i]];
-			if (layer->type == ShapefileLayer)
+			sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);
+			if (!sameShape)
 			{
-				if (layer->QueryShapefile(&sf))
+				IShape* shape = info->Shape;
+				if (shape)
 				{
-					VARIANT_BOOL hotTracking = VARIANT_FALSE;
-					sf->get_HotTracking(&hotTracking);
-					if (hotTracking)
+					IShape* shpClone = NULL;
+					shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
+					// on the first glance shape shouldn't be released on closing the shapefile
+					//ULONG cnt = shape->Release();
+
+					if (!_hotTracking.Shapefile)
+						CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(_hotTracking.Shapefile));
+					else
+						_hotTracking.Shapefile->Close(&vb);
+
+					if (_hotTracking.Shapefile)
 					{
-						std::vector<long> shapes;
-
-						double tol = 0.0;
 						ShpfileType type;
-						sf->get_ShapefileType(&type);
-						type = Utility::ShapeTypeConvert2D(type);
-						if (type == SHP_MULTIPOINT || type == SHP_POINT)
-							tol = 5.0/this->PixelsPerMapUnit();
+						info->Shapefile->get_ShapefileType(&type);
 
-						((CShapefile*)sf)->SelectShapesCore(Extent(prjX, prjX, prjY, prjY), tol, SelectMode::INCLUSION, shapes);
-						
-						if (shapes.size() > 0)
+						((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
+						long index = 0;
+						_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vb);
+						_hotTracking.Shapefile->RefreshExtents(&vb);
+						_hotTracking.LayerHandle = info->LayerHandle;
+						_hotTracking.ShapeId = info->ShapeId;
+
+						IShapeDrawingOptions* options = NULL;
+						info->Shapefile->get_SelectionDrawingOptions(&options);
+						if (options)
 						{
-							if (_activeLayers[i] != _hotTracking.LayerHandle || shapes[0] != _hotTracking.ShapeId)
-							{
-								IShape* shape = NULL;
-								sf->get_Shape(shapes[0], &shape);
-								if (shape)
-								{
-									IShape* shpClone = NULL;
-									shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
-																// on the first glance shape shouldn't be released on closing the shapefile
-									ULONG cnt = shape->Release();
-
-									if (!_hotTracking.Shapefile)
-										CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(_hotTracking.Shapefile));
-									else
-										_hotTracking.Shapefile->Close(&vbretval);
-
-									if (_hotTracking.Shapefile)
-									{
-										ShpfileType type;
-										sf->get_ShapefileType(&type);
-										
-										((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vbretval);
-										long index = 0;
-										_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vbretval);
-										_hotTracking.Shapefile->RefreshExtents(&vbretval);
-										_hotTracking.LayerHandle = _activeLayers[i];
-										_hotTracking.ShapeId = shapes[0];
-
-										IShapeDrawingOptions* options = NULL;
-										sf->get_SelectionDrawingOptions(&options);
-										if (options)
-										{
-											_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-											options->Release();
-										}
-										
-									}
-									shpClone->Release();   // there is one reference in new shapefile
-									found = true;
-								}
-							}
+							/*options->put_FillVisible(VARIANT_FALSE);
+							options->put_LineColor(RGB(30, 144, 255));
+							options->put_LineWidth(2.0f);*/
+							_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+							options->Release();
 						}
 					}
-					
-					sf->Release();
-					sf = NULL;
+					shpClone->Release();   // there is one reference in new shapefile
+					found = true;
 				}
 			}
-
-			if (found)
-			{
-				// pasing event to the caller
-				this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeId);
-				_canUseMainBuffer = false;
-				refreshNeeded = true;
-				break;
-			}
+			delete info;
 		}
+	}
 
-		if (!found && _hotTracking.ShapeId != -1)
-		{
-			_hotTracking.ShapeId = -1;
-			_hotTracking.LayerHandle = -1;
-			if (_hotTracking.Shapefile)
-				_hotTracking.Shapefile->Close(&vbretval);
-			
-			// pasing event to the caller
-			this->FireShapeHighlighted(-1, -1);
-		}
+	if (sameShape) return false;
+
+	if (found)
+	{
+		// passing event to the caller
+		this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeId, point.x, point.y);
+		_canUseMainBuffer = false;
+		refreshNeeded = true;
+	}
+
+	if (!found && _hotTracking.ShapeId != -1)
+	{
+		ClearHotTracking();
+
+		// passing event to the caller
+		this->FireShapeHighlighted(-1, -1, point.x, point.y);
+		refreshNeeded = true;
 	}
 	return refreshNeeded;
 }

@@ -844,6 +844,15 @@ void CTiles::Clear()
 	}
 	m_tiles.clear();
 	_tilesBufferLock.Unlock();
+
+	_lastMapExtents.left = 0;
+	_lastMapExtents.right = 0;
+	_lastMapExtents.top = 0;
+	_lastMapExtents.bottom = 0;
+	_lastTileExtents.left = 0;
+	_lastTileExtents.right = 0;
+	_lastTileExtents.top = 0;
+	_lastTileExtents.bottom = 0;
 }
 #pragma endregion
 

@@ -16,6 +16,7 @@ namespace Utility
 	char* ConvertBSTRToLPSTR (BSTR bstrIn);
 	CString ReplaceNoCase( LPCTSTR instr, LPCTSTR oldstr, LPCTSTR newstr );
 	
+	CStringW XmlFilenameToUnicode(CStringA s, bool utf8);
 	CStringA ConvertToUtf8(CStringW unicode); 
 	CStringW ConvertFromUtf8(CStringA utf8);
 	
