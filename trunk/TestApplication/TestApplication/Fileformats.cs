@@ -288,7 +288,7 @@ namespace TestApplication
       return sf;
     }
 
-    internal static int AddLayer(string filename)
+    internal static int AddLayer(string filename, Form1 theForm)
     {
       return Map.AddLayerFromFilename(filename, tkFileOpenStrategy.fosAutoDetect, true);
     }
