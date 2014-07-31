@@ -89,7 +89,6 @@ public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(StopEditingShapes)(/*[in, optional, defaultvalue(TRUE)]*/VARIANT_BOOL ApplyChanges,/*[in,optional,defaultvalue(TRUE)]*/VARIANT_BOOL StopEditTable, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(StartEditingShapes)(/*[in,optional,defaultvalue(TRUE)]*/VARIANT_BOOL StartEditTable,/*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-	
 	STDMETHOD(SelectShapes)(/*[in]*/ IExtents * BoundBox, /*[in, optional, defaultvalue(0.0)]*/double Tolerance, /*[in, optional, defaultvalue(INTERSECTION)]*/ SelectMode SelectMode, /*[in, out]*/ VARIANT * Result, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(EditDeleteShape)(/*[in]*/long ShapeIndex, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(EditInsertShape)(/*[in]*/IShape * Shape, /*[in, out]*/ long * ShapeIndex, /*[out, retval]*/ VARIANT_BOOL * retval);
@@ -216,8 +215,13 @@ public:
 	STDMETHOD(ClearCachedGeometries)();
 	STDMETHOD(AggregateShapesWithStats)(VARIANT_BOOL SelectedOnly, LONG FieldIndex, IFieldStatOperations* statOperations, IShapefile** retval);
 	STDMETHOD(DissolveWithStats)(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* statOperations, IShapefile** sf);
-	
-	
+	STDMETHOD(get_ShapeRotation)(long ShapeIndex, double* pVal);
+	STDMETHOD(put_ShapeRotation)(long ShapeIndex, double newVal);
+	STDMETHOD(get_ShapeVisible)(long ShapeIndex, VARIANT_BOOL* pVal);
+	STDMETHOD(put_ShapeVisible)(long ShapeIndex, VARIANT_BOOL newVal);
+	STDMETHOD(get_Volatile)(VARIANT_BOOL* retval);
+	STDMETHOD(put_Volatile)(VARIANT_BOOL newVal);
+
 private:
 	// data for point in shapefile test
 	struct ShapeHeader 
@@ -296,6 +300,7 @@ private:
 	BOOL _fastMode;
 	int _minDrawingSize;	// objects which are less than this value in pixels for current scale, will drawn as point
 	BOOL cacheExtents;	// extents won't be recalculated in each get_Extents call
+	bool _volatile;
 
 	//Flags for Spatial Indexing
 	BOOL useSpatialIndex;

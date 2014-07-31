@@ -51,7 +51,6 @@ CShape::CShape()
 		_shp = new CShapeWrapperCOM(SHP_NULLSHAPE);
 	}
 	gReferenceCounter.AddRef(tkInterface::idShape);
-	Debug::WriteLine("Shape created");
 }
 	
 	// destructor
@@ -77,7 +76,6 @@ CShape::~CShape()
 		_globalCallback->Release();
 	}
 	gReferenceCounter.Release(tkInterface::idShape);
-	Debug::WriteLine("Shape deleted");
 }
 
 

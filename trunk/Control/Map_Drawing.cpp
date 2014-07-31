@@ -181,6 +181,12 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	_canUseLayerBuffer = TRUE;
 	
 	// -----------------------------------
+	// volatile shapefile drawing
+	// -----------------------------------
+	if (HasVolatileShapefiles())
+		this->DrawLayers(rcBounds, gBuffer, false);
+
+	// -----------------------------------
 	// shapefile hot tracking
 	// -----------------------------------
 	if (HasDrawingData(tkDrawingDataAvailable::HotTracking))
@@ -191,7 +197,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	}
 
 	// -----------------------------------
-	// passing main buffer to user for custom drawing
+	// passing main buffer to client for custom drawing
 	// -----------------------------------
 	if (m_sendOnDrawBackBuffer && !_isSnapshot)
 	{
@@ -502,20 +508,19 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 // ****************************************************************
 //		DrawLayers()
 // ****************************************************************
-void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
+void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer)
 {
 	if (_lockCount > 0 && !_isSnapshot)
 	{
 		return;
 	}
 	
-	HCURSOR oldCursor = this->SetWaitCursor();
+	HCURSOR oldCursor;
+	if (layerBuffer) this->SetWaitCursor();
 
 	// clear extents of drawn labels and charts
 	this->ClearLabelFrames();
 	
-	//m_drawMutex.Lock();
-
 	register int i;
 	long startcondition = 0;
 	long endcondition = _activeLayers.size();
@@ -525,11 +530,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 	// ---------------------------------------------------
 	if (endcondition == 0)
 	{
-		//m_drawMutex.Unlock();
-
-      if (oldCursor != NULL)
-         ::SetCursor(oldCursor);
-		return;
+	     if (layerBuffer && oldCursor != NULL) 
+			 ::SetCursor(oldCursor);
+		 return;
 	}
 	
 	// ------------------------------------------------------------------
@@ -537,17 +540,15 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 	//	no need to draw them then
 	// ------------------------------------------------------------------
 	bool * isConcealed = NULL;
-	if( endcondition )
-	{
-		isConcealed = new bool[endcondition];
-		memset(isConcealed,0,endcondition*sizeof(bool));
-	}
+	isConcealed = new bool[endcondition];
+	memset(isConcealed,0,endcondition*sizeof(bool));
 
 	double scale = this->GetCurrentScale();
 	int zoom;
 	_tiles->get_CurrentZoom(&zoom);
 
-	CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
+	if (layerBuffer)
+		CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
 
 	// do we have shapefiles with hot tracking? check it once here and don't check on mouse move
 	_hasHotTracking = HasHotTracking();
@@ -555,7 +556,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 	// ---------------------------------------------------
 	//	Drawing grouped images
 	// ---------------------------------------------------
-	DrawImageGroups();
+	if (layerBuffer)
+		DrawImageGroups();
 	
 	// ---------------------------------------------------
 	//	Prepare for drawing
@@ -598,6 +600,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 				{
 					if(l->type == ImageLayer)
 					{
+						if (!layerBuffer) continue;
+
 						if(l->object == NULL ) continue;
 						IImage * iimg = NULL;
 						if (!l->QueryImage(&iimg)) continue;
@@ -713,48 +717,53 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 						IShapefile* sf = NULL;
 						if (l->QueryShapefile(&sf))
 						{
-							sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
-
-							// for old modes we shall mark all the shapes of shapefile as visible as no visiblity expressions were analyzed
-							if (_shapeDrawingMethod != dmNewSymbology)
+							VARIANT_BOOL isVolatile;
+							sf->get_Volatile(&isVolatile);
+							if (((bool)isVolatile) != layerBuffer)
 							{
-								std::vector<ShapeData*>* shapeData = ((CShapefile*)sf)->get_ShapeVector();
-								if (shapeData)
+								sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
+
+								// for old modes we shall mark all the shapes of shapefile as visible as no visibility expressions were analyzed
+								if (_shapeDrawingMethod != dmNewSymbology)
 								{
-									for (size_t n = 0; n < shapeData->size(); n++)
+									std::vector<ShapeData*>* shapeData = ((CShapefile*)sf)->get_ShapeVector();
+									if (shapeData)
 									{
-										(*shapeData)[n]->isVisible = true;
+										for (size_t n = 0; n < shapeData->size(); n++)
+										{
+											(*shapeData)[n]->isVisible = true;
+										}
 									}
 								}
-							}
 
-							// labels
-							ILabels* labels = l->get_Labels();
-							if(labels != NULL)
-							{
-								tkVerticalPosition vertPos;
-								labels->get_VerticalPosition(&vertPos);
-								if (vertPos == vpAboveParentLayer)		
+								// labels
+								ILabels* labels = l->get_Labels();
+								if(labels != NULL)
 								{
-									lblDrawer.DrawLabels(labels);
+									tkVerticalPosition vertPos;
+									labels->get_VerticalPosition(&vertPos);
+									if (vertPos == vpAboveParentLayer)		
+									{
+										lblDrawer.DrawLabels(labels);
+									}
+									labels->Release();
+									labels = NULL;
 								}
-								labels->Release();
-								labels = NULL;
-							}
 
-							// charts: available for all modes
-							ICharts* charts = NULL;
-							sf->get_Charts(&charts);
-							if (charts)
-							{
-								tkVerticalPosition vertPosition;
-								charts->get_VerticalPosition(&vertPosition);
-								if (vertPosition == vpAboveParentLayer )
+								// charts: available for all modes
+								ICharts* charts = NULL;
+								sf->get_Charts(&charts);
+								if (charts)
 								{
-									chartDrawer.DrawCharts(sf);
+									tkVerticalPosition vertPosition;
+									charts->get_VerticalPosition(&vertPosition);
+									if (vertPosition == vpAboveParentLayer )
+									{
+										chartDrawer.DrawCharts(sf);
+									}
+									charts->Release();
+									charts = NULL;
 								}
-								charts->Release();
-								charts = NULL;
 							}
 							sf->Release();
 						}
@@ -774,8 +783,19 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 		{	
 			if (l->IsVisible(scale, zoom))
 			{
+				IShapefile* sf = NULL;
+				if (l->QueryShapefile(&sf))
+				{
+					VARIANT_BOOL isVolatile;
+					sf->get_Volatile(&isVolatile);
+					sf->Release();
+					if (((bool)isVolatile) == layerBuffer)
+						continue;
+				}
+
 				//  labels: for the new modes only
-				if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology || l->type == ImageLayer || FORCE_NEW_LABELS)
+				if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology || 
+					l->type == ImageLayer || FORCE_NEW_LABELS)
 				{
 					ILabels* labels = l->get_Labels();
 					if ( labels )
@@ -792,7 +812,6 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 				}
 				
 				// charts: for all modes
-				IShapefile* sf = NULL;
 				if (l->QueryShapefile(&sf))
 				{
 					ICharts* charts = NULL;
@@ -816,10 +835,11 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics)
 		}
 	}
 	
-   if (oldCursor != NULL)
+   if (layerBuffer && oldCursor != NULL)
       ::SetCursor(oldCursor);
 
-	delete[] isConcealed;
+   if (layerBuffer)
+		delete[] isConcealed;
 }
 
 // ****************************************************************
@@ -1040,6 +1060,32 @@ bool CMapView::HasHotTracking()
 				if (sf) {
 					VARIANT_BOOL vb;
 					sf->get_HotTracking(&vb);
+					sf->Release();
+					if (vb) return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+// ****************************************************************
+//		HasVolatileShapefiles()
+// ****************************************************************
+bool CMapView::HasVolatileShapefiles() 
+{
+	for(long i = _activeLayers.size() - 1; i >= 0; i-- )
+	{
+		Layer * l = _allLayers[_activeLayers[i]];
+		if( IS_VALID_PTR(l) )
+		{
+			if( l->type == ShapefileLayer)
+			{
+				IShapefile* sf = NULL;
+				l->QueryShapefile(&sf);
+				if (sf) {
+					VARIANT_BOOL vb;
+					sf->get_Volatile(&vb);
 					sf->Release();
 					if (vb) return true;
 				}

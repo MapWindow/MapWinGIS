@@ -346,9 +346,12 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 			}
 		}
 		
+		// whether it was hidden explicitly by user
+		if (!(*_shapeData)[offset]->visible)
+			continue;
+
 		// marking shape as visible; it may still fall out of extents but it is inefficient to test it here
 		(*_shapeData)[offset]->isVisible = true;
-		
 		
 		bool selected = (*_shapeData)[offset]->selected;
 		if (selected)
@@ -427,7 +430,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 				this->DrawCategory(options, indices, true);
 			}
 		}
-		else
+		else		// selection drawing options
 		{
 			options = selectionOptions;
 			std::vector<int>* indices = &categoryIndices[numCategories + 1];	
@@ -663,6 +666,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		{
 			options->drawingMode = vdmGDIPlus;	// GDI drawing will lead to rounding coordinates to integers, and distortions as a result
 			pntShape = pshPolygon;
+			
+			// regular point rotation is set here
 			data = get_SimplePointShape(options->pointShapeType, options->pointSize, options->rotation, options->pointNumSides, options->pointShapeRatio, &numPoints);
 			if (!data) 
 				return;
@@ -722,8 +727,9 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		_dc = NULL;
 
 		Gdiplus::Matrix mtx;
-		//_graphics->GetTransform(&mtx);
 		mtx.Reset();
+		
+		// font character rotation is set here
 		mtx.Rotate((Gdiplus::REAL)options->rotation);
 		path->Transform(&mtx);
 		if (path2) path2->Transform(&mtx);
@@ -754,7 +760,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		// ------------------------------------------------------
 		//	 Reading point data
 		// ------------------------------------------------------
-		std::vector<Point2D> points;
+		std::vector<PointWithId> points;
 		if (! _isEditing)
 		{
 			char* data = _sfReader->ReadShapeData(shapeIndex);
@@ -765,7 +771,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					x = *(double*)(data + 4);	// 4 bytes on shape type
 					y = *(double*)(data + 12); 
 					delete[] data;
-					points.push_back(Point2D(x, y));
+					points.push_back(PointWithId(x, y, shapeIndex));
 				}
 				else
 				{
@@ -774,7 +780,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					{
 						x = pdata->points[i * 2];
 						y = pdata->points[i * 2 + 1];
-						points.push_back(Point2D(x, y));
+						points.push_back(PointWithId(x, y, shapeIndex));
 					}
 					delete pdata;
 					delete[] data;
@@ -793,7 +799,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					for(int i = 0; i < shp->get_PointCount(); i++)
 					{
 						shp->get_PointXY(i, x, y);
-						points.push_back(Point2D(x, y));
+						points.push_back(PointWithId(x, y, shapeIndex));
 					}
 				}
 				else 
@@ -810,7 +816,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					for(int i = 0; i < numPoints; i++)
 					{
 						shape->get_XY(i, &x, &y, &vbretval);
-						points.push_back(Point2D(x, y));
+						points.push_back(PointWithId(x, y, shapeIndex));
 					}
 					shape->Release();
 				}
@@ -911,7 +917,15 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					int ht = static_cast<int>((double)height * options->scaleY/2.0);
 					
 					_graphics->TranslateTransform((float)(xInt), (float)(yInt));
-					_graphics->RotateTransform((float)options->rotation);
+					
+					float angle = (float)((*_shapeData)[points[i].id])->rotation;
+					
+					// if not set explicitly, try to grab it from category
+					if (angle == 0)
+						angle = (float)options->rotation;
+
+					_graphics->RotateTransform(angle);
+					
 					if (!options->alignIconByBottom)
 					{
 						_graphics->TranslateTransform((float)-wd, (float)-ht);
@@ -920,7 +934,6 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					{
 						_graphics->TranslateTransform((float)-wd, (float)-ht * 2);
 					}
-					//_graphics->SetTransform(&mtxNew);
 					
 					Gdiplus::Rect rect(0, 0, INT(options->bitmapPlus->GetWidth() * options->scaleX), INT(options->bitmapPlus->GetHeight() * options->scaleY));
 

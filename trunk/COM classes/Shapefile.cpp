@@ -57,6 +57,7 @@ CShapefile::CShapefile()
 	_isEditingShapes = FALSE;
 	_fastMode = m_globalSettings.shapefileFastMode ? TRUE : FALSE;
 	_minDrawingSize = 1;
+	_volatile = false;
 
     useSpatialIndex = TRUE;
     hasSpatialIndex = FALSE;
@@ -313,6 +314,22 @@ STDMETHODIMP CShapefile::put_VisibilityExpression(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	::SysFreeString(_expression);
 	_expression = OLE2BSTR(newVal);
+	return S_OK;
+}
+
+// ************************************************************
+//		get/put_Volatile
+// ************************************************************
+STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*pVal = _volatile ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	_volatile = newVal == VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -1973,6 +1990,63 @@ bool CShapefile::UniqueFieldNames(IShapefile* sf)
 #pragma endregion
 
 #pragma region DrawingOptions
+
+// *************************************************************
+//		get_ShapeRotation()
+// *************************************************************
+STDMETHODIMP CShapefile::get_ShapeRotation(long ShapeIndex, double* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		*pVal = -1;
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		*pVal = _shapeData[ShapeIndex]->rotation; 
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_ShapeRotation(long ShapeIndex, double newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		_shapeData[ShapeIndex]->rotation = newVal;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		get_ShapeVisible()
+// *************************************************************
+STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		*pVal = -1;
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		*pVal = _shapeData[ShapeIndex]->visible ? VARIANT_TRUE : VARIANT_FALSE; 
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_ShapeVisible(long ShapeIndex, VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		_shapeData[ShapeIndex]->visible = newVal ? true: false;
+
+	return S_OK;
+}
+
 // *************************************************************
 //		get_ShapeCategory()
 // *************************************************************

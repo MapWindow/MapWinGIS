@@ -326,8 +326,8 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 		int minSize = (int)(256 * _scalingRatio  * ratio);	
 		if (tileSize < minSize)
 		{
-			Debug::WriteLine("Choose zoom; Tile size: %f", tileSize * 2.0);
-			Debug::WriteLine("Choose zoom; Zoom chosen: %d", bestZoom);
+			//Debug::WriteLine("Choose zoom; Tile size: %f", tileSize * 2.0);
+			//Debug::WriteLine("Choose zoom; Zoom chosen: %d", bestZoom);
 			break;
 		}
 

@@ -832,9 +832,10 @@ public:
 	void ErrorMessage(long ErrorCode);
 	CString Crypt(CString str);
 	bool VerifySerial(CString str);
-	void DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics);
+	void DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer = true);
 	bool HasImages() ;
-	bool HasHotTracking() ;
+	bool HasHotTracking();
+	bool HasVolatileShapefiles();
 	
 	DOUBLE GetPixelsPerDegree(void);
 	DOUBLE PixelsPerMapUnit(void);

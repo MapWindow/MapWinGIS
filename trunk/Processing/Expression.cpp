@@ -1336,8 +1336,8 @@ inline CExpressionValue* CExpression::GetValue(CExpressionPart* part, int elemen
 	else if (element->partIndex != -1)	val = _parts[element->partIndex]->val;
 	else								val = element->val;
 	
-	Debug::WriteLine("Type %d", (int)(element->val)->type);
-	Debug::WriteLine("Type %d", (int)val->type);
+	//Debug::WriteLine("Type %d", (int)(element->val)->type);
+	//Debug::WriteLine("Type %d", (int)val->type);
 
 	return val;
 }

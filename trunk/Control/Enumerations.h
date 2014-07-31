@@ -47,7 +47,7 @@ enum tkExtentsRelation
 enum tkImageDrawingMethod
 {
 	idmNewWithResampling = 1,	// new drawing procedures will be used
-    idmGDIPlusDrawing = 2,		// GDIPlus rather then GDI darwing will be used
+    idmGDIPlusDrawing = 2,		// GDIPlus rather then GDI drawing will be used
     idmGDIPlusResampling = 4,		// Resampling for GDAL based images will be made by GDI+, otherwise it'll be carried out in tkRaster.cpp (ImageRampling.cpp)
 };
 
@@ -69,6 +69,15 @@ struct Point2D
 		return sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
 	}
 };
+
+struct PointWithId: Point2D
+{
+	double x, y;
+	int id;
+	PointWithId() : x(0.0), y(0.0), id(0) {}
+	PointWithId(double x, double y, int id) : x(x), y(y), id(id) {}
+};
+
 enum tkTransformationMode
 {
 	tmNotDefined = 0,

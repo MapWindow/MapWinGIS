@@ -86,10 +86,10 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
-	bool canReuseConnections = this->CanReuseConnections();
+	bool canReuseConnections = false; //this->CanReuseConnections();
 	
 	// TODO: try reuse HTTP client
-	MyHttpClient* httpClient = canReuseConnections ? this->GetHttpClient():  new MyHttpClient();
+	MyHttpClient* httpClient = /*canReuseConnections ? this->GetHttpClient():*/  new MyHttpClient();
 	CAtlNavigateData navData;
 	
 	if (!httpClient)

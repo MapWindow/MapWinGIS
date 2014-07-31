@@ -3260,6 +3260,12 @@ interface IShapefile : IDispatch{
 	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, 
 			[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out,retval]IShapefile** sf);
 
+	[propget, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
+	[propput, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
+	[propget, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [out, retval] double* pVal);
+	[propput, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [in] double newVal);
+	[propget, id(121)] HRESULT Volatile([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(121)] HRESULT Volatile([in] VARIANT_BOOL newVal);
 
 };
 

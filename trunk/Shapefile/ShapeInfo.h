@@ -47,6 +47,8 @@ struct ShapeData
 		
 		selected = false;
 		isVisible = false;
+		visible = true;
+		rotation = 0.0;
 
 		status = ShapeValidationStatus::Original;
 	}
@@ -98,5 +100,7 @@ struct ShapeData
 	
 	bool selected;
 	bool isVisible;			// because of the visibility expression 		
+	bool visible;			// set per shape explicitly
+	double rotation;
 };
 
