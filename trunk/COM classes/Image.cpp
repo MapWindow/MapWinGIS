@@ -1931,10 +1931,10 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 					}
 				}
 				OSRDestroySpatialReference( hSRS );
-
-				GDALClose(rasterDataset);
-				rasterDataset = NULL;
 			}
+
+			GDALClose(rasterDataset);
+			rasterDataset = NULL;
 		}
 	}
 	return S_OK;
