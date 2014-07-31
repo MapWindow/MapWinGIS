@@ -327,7 +327,7 @@ namespace Examples
                     break;
                 case 29:
                     ex.GuiName = "Track vehicles";
-                    ex.description = "Simululates motion of vehicles based on GPS data.";
+                    ex.description = "simulate motion of vehicles based on GPS data.";
                     ex.function = "TrackCars";
                     ex.group = ExampleGroup.Interaction;
                     break;
