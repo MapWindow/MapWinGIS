@@ -5394,6 +5394,8 @@ GDALDataset* OpenOutputFile( GDALDriverH outputDriver, CStringW filename, int xS
 	sourceTransform->GetGeoTransform((double*)&transform);
 	outputDataset->SetGeoTransform(transform);
 
+	outputDataset->SetProjection( sourceTransform->GetProjectionRef() );
+
 	m_globalSettings.SetGdalUtf8(false);
 	return outputDataset;
 }
@@ -5521,25 +5523,6 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	if (driver != NULL)
 	{
 		dtOutput = OpenOutputFile(driver, OLE2W(outputFilename), xSize, ySize, datasets.begin()->second);
-
-		// TODO: coordinate system metadata from the first file
-		/*QgsRasterLayer* rl = mRasterEntries.at( 0 ).raster;
-		if ( rl )
-		{
-			char* crsWKT = 0;
-			OGRSpatialReferenceH ogrSRS = OSRNewSpatialReference( NULL );
-			if ( OSRSetFromUserInput( ogrSRS, rl->crs().authid().toUtf8().constData() ) == OGRERR_NONE )
-			{
-				OSRExportToWkt( ogrSRS, &crsWKT );
-				GDALSetProjection( outputDataset, crsWKT );
-			}
-			else
-			{
-				GDALSetProjection( outputDataset, TO8( rl->crs().toWkt() ) );
-			}
-			OSRDestroySpatialReference( ogrSRS );
-			CPLFree( crsWKT );
-		}*/
 	}
 
 	if (!dtOutput)

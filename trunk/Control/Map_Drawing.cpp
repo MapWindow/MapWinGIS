@@ -184,7 +184,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// volatile shapefile drawing
 	// -----------------------------------
 	if (HasVolatileShapefiles())
-		this->DrawLayers(rcBounds, gBuffer, false);
+		this->DrawLayers(rcBounds, _isSnapshot ? gPrinting : gBuffer, false);
 
 	// -----------------------------------
 	// shapefile hot tracking
