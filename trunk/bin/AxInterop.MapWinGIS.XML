@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AxInterop.MapWinGIS</name>
+    </assembly>
+    <members>
+        <member name="T:AxMapWinGIS.AxMap">
+            <summary>
+            MapWinGIS Map component.
+            </summary>
+        </member>
+        <member name="M:AxMapWinGIS.AxMap.AddDrawingLabel(System.Int32,System.String,System.UInt32,System.Double,System.Double,MapWinGIS.tkHJustification)">
+            <summary>
+            Adds label to the specified drawing layer 
+            </summary>
+            <param name="DrawHandle"></param>
+            <param name="Text"></param>
+            <param name="Color"></param>
+            <param name="x"></param>
+            <param name="y"></param>
+            <param name="hJustification"></param>
+        </member>
+    </members>
+</doc>

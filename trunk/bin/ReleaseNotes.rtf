@@ -1,6 +1,115 @@
 {\rtf1\ansi\ansicpg1252\deff0\deflang1043\deflangfe1043{\fonttbl{\f0\fswiss\fprq2\fcharset0 Arial;}{\f1\fnil\fcharset0 Courier New;}{\f2\fnil\fcharset2 Symbol;}}
 {\colortbl ;\red0\green0\blue255;\red192\green80\blue77;\red247\green150\blue70;\red155\green187\blue89;\red75\green172\blue198;\red79\green129\blue189;\red128\green100\blue162;\red255\green192\blue0;\red143\green176\blue140;}
-{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang1033\b\f0\fs28 What's New in 4.9.1\b0\fs20\par
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang1033\b\f0\fs28 What's New in 4.9.2\b0\fs20\par
+\f1 Release date: August 1th, 2014\par
+Note: All binaries have been compiled using MS Visual Studio 2010.\par
+The last commit number in this release is 74755; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
+\pard\nowidctlpar\li360\b0\fs20\par
+\ul\b Updated API\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added Utils.CalculateRaster (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Shapefile.Volatile (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Shapefile.ShapeRotation (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Shapefile.ShapeVisible (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added AxMap.ZoomBarMinZoom, AxMap.ZoomBarMaxZoom properties to artificially limit zooming range. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added GlobalSettings.ImageUpsamplingMode, Image.ImageDownsamplingMode properties to set default values for properties in constructor of Image class. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added GlobalSettings.LoadSymbologyOnAddLayer and GlobalsSettings.TilesThreadPoolSize properties. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Utils.ComUsageReport property to identify leaking of COM objcts. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added ShapefileCategories.GeneratePolygonColors. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added AxMap.ProjectionMismatchBehavior. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added AxMap.ZoomBoxStyle property. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added AxMap.AnimationOnZooming, AxMap.InertiaOnPanning, AxMap.ReuseTileBuffer, AxMap.ZoomBarVerbosity properties. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}GlobalSettings class: Added RasterOverviewCreation, RasterOverviewResampling, MinOverviewWidth, TiffCompression. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}FileManager class: Added HasGdalOverviews, ClearGdalOverviews, BuildGdalOverviews, NeedsGdalOverviews, RemoveProxyForGrid, HasValidProxyForGrid. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Image.GridProxyColorScheme, Measuring.IsUsingEllipsoid, Tiles.ServerProjection, Tiles.ProjectionStatus, Map.ProjToDegrees, Map.DegreesToProj, Map.PixelToDegrees, Map.DegreesToPixel, Utils.TileProjectionToGeoProjection, Utils.ErrorMsgFromObject. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b TestApplication\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added tests for new functionality:\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Raster calculation. (Paul Meems)\par
+{\pntext\f2\'B7\tab}AxMap.Clear. (Brad Hester)\par
+{\pntext\f2\'B7\tab}overviews/proxy for grids. (Sergei Leschinsky)\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added a status bar to the TestApplication which currently only shows the coordinates of the mouse cursor. (Brad Hester)\par
+\pard\nowidctlpar\li360\ul\b\par
+General\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A number of small fixes (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 empty shapefiles will be skipped when calculating max extents, preventing zooming to the equator;\par
+{\pntext\f2\'B7\tab}panning inertia turned off by default (deadlocks were reported on some occasions);\par
+{\pntext\f2\'B7\tab}utf8 will be used when loading world file with GDAL (as it's already used for dataset filename);\par
+{\pntext\f2\'B7\tab}fixes for shape hot tracking functionality (Shapefile.HotTracking);\par
+{\pntext\f2\'B7\tab}max/min layer zoom properties added to serialization;\par
+{\pntext\f2\'B7\tab}Serialization of map projection and custom tile providers;\par
+{\pntext\f2\'B7\tab}Fixes for drawing of chart values and scalebar during snapshot;\par
+{\pntext\f2\'B7\tab}A fix for a bug when map extents set in Form Designer aren't preserved.\par
+{\pntext\f2\'B7\tab}When in measuring mode M hotkey will toggle the tool between measuring distance and area.\par
+{\pntext\f2\'B7\tab}Zooming and panning animation by default will be used only if there is no data layers within view (csAuto value for respective properties).\par
+{\pntext\f2\'B7\tab}A fix for Utils.ClipGridWithPolygon suggested here: {\field{\*\fldinst{HYPERLINK "http://bugs.mapwindow.org/view.php?id=2349"}}{\fldrslt{\ul\cf1 http://bugs.mapwindow.org/view.php?id=2349}}}\f0\fs20\par
+{\pntext\f2\'B7\tab}Optimization of headers/compilation speed.\par
+{\pntext\f2\'B7\tab}A few memory leaks and warnings found with CppTest.\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Animation on zooming (both zooming in and out; only tile buffer is used). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Enhanced panning (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 New tiles are rendered during the panning operation;\par
+{\pntext\f2\'B7\tab}Scale bar, zoom bar, etc will remain in place;\par
+{\pntext\f2\'B7\tab}Animation to simulate inertia.\par
+\pard\nowidctlpar\li360\ul\b\par
+Zoombar\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Small tweaking of zoom bar: handle will snap to levels while moving. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Fixed pixel interval between notches to avoid rounding issues. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Styling for zoom box (AxMap.ZoomBoxStyle property). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Properties for latest functionality: AxMap.AnimationOnZooming, AxMap.InertiaOnPanning, AxMap.ReuseTileBuffer, AxMap.ZoomBarVerbosity. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}New zoom bar (displayed when map has a cs & projection). (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b Shapefiles\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added Shapefile.ShapeRotation(shapeIndex), Shapefile.ShapeVisible(shapeIndex) - options for individual shapes overriding categories. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Shapefile.Volatile property - shapefiles marked as such will be excluded from layer buffer, so no full map redraw is needed to update them. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Auto loading of .mwsymb file for reprojected shapefile. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Simple greedy algorithm for polygon coloring problem (aka Four Color Theorem). It uses 4 colors for USA states shapefile and 5 colors for USA counties shapefile. New method: ShapefileCategories.GeneratePolygonColors. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Fixed couple of leaks and problems with shapefile validation. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b Grid\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for an issue with raster data sources being still in use after removal from map. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Support of GDAL overviews for grids (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 If overviews exists direct rendering will be chosen rather than usage of proxy;\par
+{\pntext\f2\'B7\tab}If neither overview no proxy exist, overviews will be created (if grid is large enough - GlobalSettings.MinOverviewWidth; if driver supports that; external .ovr format is used);\par
+{\pntext\f2\'B7\tab}If proxy exists but overviews doesn't, proxy will be used;\par
+{\pntext\f2\'B7\tab}Proxy will be created if overviews can't be created.\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 GTiff proxy will used compression set in GlobalSettings.TiffCompression. Also built-in overviews will be automatically created for it. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\ul\b\par
+Tiles\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Zoom box flickering on tile rendering is eliminated. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Revised handling of tiles when server and map projection don't match (e.g. server - GMercator, map - WGS84 UTM zone) (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 No auto snapping to discrete zoom level as those calculations aren't precise and scale often change along the map;\par
+{\pntext\f2\'B7\tab}When server projection is GMercator, minimum available zoom level will be 6 (distortions at smaller levels make them unusable; can be changed with GlobalSettings.TilesMinZoomOnProjectionMismatch);\par
+{\pntext\f2\'B7\tab}Adjusted calculations in ZoomToTileLevel, so that tile size is as close to original as possible (though it usually will vary);\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added OpenStreetMap humanitarian TMS provider. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Fixes for zoom bar / discrete zooming for non-GMercator projections (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Zooming to smallest levels will work (crude extrapolation will be used if view extents are outside world extents);\par
+{\pntext\f2\'B7\tab}ZoomToTileLevel method won't change the center of view in current projection.\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Optimizations for tiles (Sergei Leschinsky):\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 No scaling when displaying tiles in native projection, they will be exactly 256*256 pixels, therefore rendering quality is the same as provided by original services (so far tested for Spherical Mercator only);\par
+{\pntext\f2\'B7\tab}ZoomBehavior = zbUseTileLevels will be used for any changes of extents; so when it's on, it will be impossible to set extents not matched with some tile level;\par
+{\pntext\f2\'B7\tab}No duplicate HTTP requests and unnecessary cache search.\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Some thread-safe locking for tiles screen buffer. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b Utils\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added Utils.CalculateRaster method, populates a new raster from input ones based on specified expression, has support for raster and scalar comparisons and AND / OR operators. (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b Projections\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A couple of fixes related to projection mismatch behavior. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}A fix to correctly reset map to empty projection. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}When setting new AxMap.GeoProjection property, the current geographic extents will be preserved (in case there is no data layers on the map). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Fixes for custom tile server projections, including zoom bar support (currently it affects only Amersfoort/RDNew). (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Built-in projection mismatch testing (AxMap.ProjectionMismatchBehavior; mbIgnore by default). Automatic transformation for shapefiles is supported as an option. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added simple checks to ImportFromEPSG when attempting to import 3857 (Google Mercator) and 4326 (WGS84). (Brad Hester)\par
+{\pntext\f2\'B7\tab}Google Mercator projection is initialized using WKT string instead of Proj.4 string. (Brad Hester)\par
+\pard\nowidctlpar\li360\par
+\ul\b Documentation\ulnone\b0\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Updated to v4.9.2. It can be found at {\field{\*\fldinst{HYPERLINK "http://www.mapwindow.org/documentation/mapwingis4.9/"}}{\fldrslt{\ul\cf1 http://www.mapwindow.org/documentation/mapwingis4.9/}}}\f0\fs20  (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added new examples (Sergei Leschinsky)\par
+\pard\nowidctlpar\li360\par
+\ul\b Supporting libraries\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720\ulnone\b0 Updated to GDAL v1.11.0 (released 2014/04/16) with GEOS v3.4, PROJ4 v4.8, NetCDF v4.3, LizardTech (MrSID) v9.0, Intergraph/ERDAS (ECW) v5.0 using the pre-build binaries from {\field{\*\fldinst{HYPERLINK "http://www.gisinternals.com/sdk/"}}{\fldrslt{\ul\cf1 http://www.gisinternals.com/sdk/}}}\f0\fs20 . (Paul Meems)\par
+\pard\nowidctlpar\li360\par
+\pard\nowidctlpar\b\fs28\par
+What's New in 4.9.1\b0\fs20\par
 \f1 Release date: April 6th, 2014\par
 Note: This version is just to test the installer and find any backwards incompatibility.\par
 The last commit number in this release is 74161; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
@@ -46,9 +155,9 @@ Map\ulnone\b0\par
 {\pntext\f2\'B7\tab}Tweaks for drawing buffers: measuring won't flicker on tile painting. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}New Map.Redraw2 methods with tkRedrawType parameter. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
-\pard\nowidctlpar\li360\ul\b Scalebar\ulnone\b0\par
+\ul\b Scalebar\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for scalebar units, when decimal degrees are used as map units. (Sergei Leschinsky)\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Updated scalebar: 3 modes (metric, American, google maps style; Map.ScalebarUnits) + much nicer rendering.  (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Updated scalebar: 3 modes (metric, American, google maps style; Map.ScalebarUnits) + much nicer rendering.  (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Scalebar values from 1 to 10 will be displayed in #.# format, as it turned out they are not necessarily rounded. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Shapefiles\ulnone\b0\par
@@ -74,10 +183,9 @@ Map\ulnone\b0\par
 {\pntext\f2\'B7\tab}New API members for grids (choosing of proxy format - BMP/GTiff; creating, removing, checking for valid proxy; configuration of default opening behaviour in GlobalSettings; several grid relalated members in Image class). (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}double overloads of Grid.Get/PutRow, Grid.Get/PutFloatWindow to be used in Utils.ClipGridWithPolygon2; regular float version looses precision for long integers;\par
 \pard\nowidctlpar\li360\par
-\pard\nowidctlpar\li360\ul\b Image\ulnone\b0\par
+\ul\b Image\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A fix for images opened as grids. (Sergei Leschinsky)\par
-\pard\nowidctlpar\li360\par
-\ul\b\par
+\pard\nowidctlpar\li360\ul\b\par
 Tiles\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Updated version numbers for some tile providers. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}New Map.TilesLoaded event. Snapshot functions will schedule the loading of tiles in case at least one is missing in cache. TilesLoaded event will be fired afterwards with IsSnapshot = true parameter. Then a snapshot of the same extents with all the tiles can be done. (Sergei Leschinsky)\par
@@ -97,7 +205,7 @@ Tiles\ulnone\b0\par
 {\pntext\f2\'B7\tab}GeoProjection.TryAutoDetectEpsg (GDAL implementation; weak now, but can be enhanced over time).\par
 \pard\nowidctlpar\li360\par
 \ul\b Supporting libraries\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720\ulnone\b0 Changed  the build proces so we can use the pre-build binaries from {\field{\*\fldinst{HYPERLINK "http://www.gisinternals.com/sdk/"}}{\fldrslt{\ul\cf1 http://www.gisinternals.com/sdk/}}}\f0\fs20 . We're now using GDAL v1.11, with GEOS v3.4, PROJ4 v##, NetCDF v4.3, LizardTech (MrSID) v9.0, Intergraph/ERDAS (ECW) v5.0 (Tamas Szekeres, Paul Meems)\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720\ulnone\b0 Changed  the build proces so we can use the pre-build binaries from {\field{\*\fldinst{HYPERLINK "http://www.gisinternals.com/sdk/"}}{\fldrslt{\ul\cf1 http://www.gisinternals.com/sdk/}}}\f0\fs20 . We're now using GDAL v1.11Dev (released 2013/04/13), with GEOS v3.4, PROJ4 v4.8, NetCDF v4.3, LizardTech (MrSID) v9.0, Intergraph/ERDAS (ECW) v5.0 (Tamas Szekeres, Paul Meems)\par
 {\pntext\f2\'B7\tab}Updated the SpatialIndex library ({\field{\*\fldinst{HYPERLINK "http://libspatialindex.org"}}{\fldrslt{\ul\cf1 http://libspatialindex.org}}}\f0\fs20 ) to version 1.8.1 (Brad Hester)\par
 \pard\nowidctlpar\li360\par
 \pard\nowidctlpar\b\fs24\par
