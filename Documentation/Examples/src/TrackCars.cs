@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using AxMapWinGIS;
-using Examples.Classes;
 using MapWinGIS;
 using System;
 using System.IO;

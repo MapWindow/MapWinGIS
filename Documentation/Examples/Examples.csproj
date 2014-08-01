@@ -78,7 +78,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\CarService.cs" />
     <Compile Include="src\GeoProjection.cs" />
     <Compile Include="src\MergeImages.cs" />
     <Compile Include="MapExamples.cs" />
@@ -86,7 +85,7 @@
     <Compile Include="src\AddLayers.cs" />
     <Compile Include="src\CalculateArea.cs" />
     <Compile Include="src\LabelSelection.cs" />
-    <Compile Include="src\VehiclesTracker.cs" />
+    <Compile Include="src\TrackCars.cs" />
     <Compile Include="src\ZoomToValues.cs" />
     <Compile Include="src\SelectBox.cs" />
     <Compile Include="src\Tooltip.cs" />

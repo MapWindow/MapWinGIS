@@ -1791,6 +1791,79 @@ namespace MapWinGIS
         #endregion
 
         /// @}
+
+        
+        /// <summary>
+        /// Gets or sets a value indicating whether shapefile can be redrawn without redrawing other layer on the map.
+        /// </summary>
+        /// <remarks>
+        /// All volatile shapefiles will be placed in main screen buffer (along with drawing layers) rather than data layer buffer,
+        /// so that their redraw can be forced with AxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers). This can be recommended 
+        /// for in-memory shapefiles with constantly changing values to ensure rendering performance.
+        /// </remarks>
+        /// \new493 Added in version 4.9.3
+        public bool Volatile
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets rotation angle for a shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>Angle in degrees (0-360).</returns>
+        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// \new493 Added in version 4.9.3
+        public double get_ShapeRotation(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets rotation angle for a shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="pVal">Angle in degrees (0-360).</param>
+        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// \new493 Added in version 4.9.3
+        public void set_ShapeRotation(int ShapeIndex, double pVal)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets visibility of shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>True if shape is visible.</returns>
+        /// <remarks>When set to false it will override any other properties, 
+        /// like ShapeDrawingOptions.Visible or Shapefile.VisibilityExpression, i.e. the shape is GURANTEED to be hidden.
+        /// When set to true all other settings will be taken into account also, so the shape MAY be visible provided
+        /// that other properties allow it.</remarks>
+        /// \new493 Added in version 4.9.3
+        public bool get_ShapeVisible(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets visibility of shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="pVal">True if shape is visible.</param>
+        /// <returns>True if shape is visible.</returns>
+        /// <remarks>When set to false it will override any other properties, 
+        /// like ShapeDrawingOptions.Visible or Shapefile.VisibilityExpression, i.e. the shape is GURANTEED to be hidden.
+        /// When set to true all other settings will be taken into account also, so the shape MAY be visible provided
+        /// that other properties allow it.</remarks>
+        /// \new493 Added in version 4.9.3 
+        public void set_ShapeVisible(int ShapeIndex, bool pVal)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

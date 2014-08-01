@@ -655,6 +655,41 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Creates a new raster dataset based on the array of input datasets and an arbitrary formula 
+        /// to calculate values of output dataset.
+        /// </summary>
+        /// <param name="filenames">Array of filenames.</param>
+        /// <param name="Expression">Formula to calculate.</param>
+        /// <param name="outputFilename">Name of output dataset.</param>
+        /// <param name="gdalOutputFormat">GDAL format. See list here: http://www.gdal.org/formats_list.html. Not
+        /// all of them are necessarily support creation and writing operations.</param>
+        /// <param name="NodataValue">No data value for output datasource.</param>
+        /// <param name="cBack">Callback to report progress and errors.</param>
+        /// <param name="ErrorMsg">Error description to be returned when method fails.</param>
+        /// <returns>True on success.</returns>
+        /// <remarks>
+        /// Input datasets must have the same size in pixels (projection and transformation parameters 
+        /// will be copied to output from first datasource, but won't be used during calculation process).
+        /// Names of datasources in formula must match their filenames without path. Additionally @@X postfix
+        /// must be added to mark index of band to be used (1-based). The following operation are supported in formula:
+        /// arithmetic (+, -, *, /, ^); comparisons
+        /// (&gt;, &lt;, &lt;=, &gt;=, &lt;&gt;, =) both for raster values and scalar constants.
+        /// \code
+        /// string[] names = { @"d:\Clip_L7_20000423_B2.tif", @"d:\Clip_L7_20000423_B5.tif" };
+        /// string formula = "[Clip_L7_20000423_B5.tif@1] + [Clip_L7_20000423_B2.tif@1] + 5";   // @1 = first band is used in both cases
+        /// string errorMsg;
+        /// var ut = new Utils();
+        /// bool result = ut.CalculateRaster(names, formula, @"d:\output.tif", "GTiff",
+        /// 0f /* no data value */, this /*callback */, out errorMsg);
+        /// \endcode
+        /// </remarks>
+        /// \new493 Added in version 4.9.3
+        public bool CalculateRaster(Array filenames, string Expression, string outputFilename, string gdalOutputFormat, float NodataValue, ICallback cBack, out string ErrorMsg)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

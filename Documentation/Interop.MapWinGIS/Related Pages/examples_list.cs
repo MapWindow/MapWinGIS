@@ -141,7 +141,7 @@
 /// \image html GenerateLabelsManually.png
 /// \example GenerateLabelsManually.cs
 
-/// This example demonstrates how to Simululates motion of vehicles based on GPS data.
+/// This example demonstrates how to simulate motion of vehicles based on GPS data.
 ///Here is a screenshot with the results of the code execution.
 /// \image html TrackCars.png
 /// \example TrackCars.cs
