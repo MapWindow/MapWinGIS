@@ -12,5 +12,3 @@
 #NetCDF:
 %MW_SAMPLEDATA%\Grids\Formats\NDB2_19901225.nc
 
-#Multi-band:
-%MW_SAMPLEDATA%\Grids\Formats\Multi-band.tif
