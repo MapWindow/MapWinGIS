@@ -685,7 +685,7 @@ namespace MapWinGIS
         /// 0f /* no data value */, this /*callback */, out errorMsg);
         /// \endcode
         /// </remarks>
-        /// \new493 Added in version 4.9.3
+        /// \new492 Added in version 4.9.2
         public bool CalculateRaster(Array filenames, string Expression, string outputFilename, string gdalOutputFormat, float NodataValue, ICallback cBack, out string ErrorMsg)
         {
             throw new NotImplementedException();

@@ -1801,7 +1801,7 @@ namespace MapWinGIS
         /// so that their redraw can be forced with AxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers). This can be recommended 
         /// for in-memory shapefiles with constantly changing values to ensure rendering performance.
         /// </remarks>
-        /// \new493 Added in version 4.9.3
+        /// \new492 Added in version 4.9.2
         public bool Volatile
         {
             get { throw new NotImplementedException(); }
@@ -1815,7 +1815,7 @@ namespace MapWinGIS
         /// <returns>Angle in degrees (0-360).</returns>
         /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
         /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
-        /// \new493 Added in version 4.9.3
+        /// \new492 Added in version 4.9.2
         public double get_ShapeRotation(int ShapeIndex)
         {
             throw new NotImplementedException();
@@ -1828,7 +1828,7 @@ namespace MapWinGIS
         /// <param name="pVal">Angle in degrees (0-360).</param>
         /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
         /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
-        /// \new493 Added in version 4.9.3
+        /// \new492 Added in version 4.9.2
         public void set_ShapeRotation(int ShapeIndex, double pVal)
         {
             throw new NotImplementedException();
@@ -1843,7 +1843,7 @@ namespace MapWinGIS
         /// like ShapeDrawingOptions.Visible or Shapefile.VisibilityExpression, i.e. the shape is GURANTEED to be hidden.
         /// When set to true all other settings will be taken into account also, so the shape MAY be visible provided
         /// that other properties allow it.</remarks>
-        /// \new493 Added in version 4.9.3
+        /// \new492 Added in version 4.9.2
         public bool get_ShapeVisible(int ShapeIndex)
         {
             throw new NotImplementedException();
@@ -1859,7 +1859,7 @@ namespace MapWinGIS
         /// like ShapeDrawingOptions.Visible or Shapefile.VisibilityExpression, i.e. the shape is GURANTEED to be hidden.
         /// When set to true all other settings will be taken into account also, so the shape MAY be visible provided
         /// that other properties allow it.</remarks>
-        /// \new493 Added in version 4.9.3 
+        /// \new492 Added in version 4.9.2 
         public void set_ShapeVisible(int ShapeIndex, bool pVal)
         {
             throw new NotImplementedException();
