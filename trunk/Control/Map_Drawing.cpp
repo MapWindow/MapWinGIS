@@ -516,7 +516,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	}
 	
 	HCURSOR oldCursor;
-	if (layerBuffer) this->SetWaitCursor();
+	if (layerBuffer) 
+		oldCursor = this->SetWaitCursor();
 
 	// clear extents of drawn labels and charts
 	this->ClearLabelFrames();
