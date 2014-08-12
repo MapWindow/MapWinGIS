@@ -4537,6 +4537,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idColorScheme:
 			CoCreateInstance( CLSID_ColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IColorScheme, (void**)&val );
 			break;
+		//case tkInterface::idEditShape:
+		//	CoCreateInstance( CLSID_EditShape, NULL, CLSCTX_INPROC_SERVER, IID_IEditShape, (void**)&val );
+		//	break;
 		case tkInterface::idESRIGridManager:
 			CoCreateInstance( CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val );
 			break;
@@ -5599,6 +5602,8 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		{
 			Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
 
+			expr.ReleaseMemory();
+
 			for(int j = 0; j < numFields; j++)
 			{
 				CExpressionValue* val = expr.get_FieldValue(j);
@@ -5650,6 +5655,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 				delete[] calcData;
 			}
 		}
+
+		expr.Clear();
+
 	}
 
 	*retVal = VARIANT_TRUE;

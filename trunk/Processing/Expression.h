@@ -177,6 +177,10 @@ class CExpression
 private:
 	
 public:
+	CExpression()
+	{
+		//Debug::WriteLine("Constructor");
+	}
 	~CExpression()
 	{
 		Clear();
@@ -199,6 +203,24 @@ public:
 		_parts.clear();
 		_operations.clear();
 		_strings.clear();
+	}
+	void ReleaseMemory()
+	{
+		for(size_t i = 0; i < _parts.size(); i++)
+		{
+			for(size_t j = 0; j < _parts[i]->elements.size(); j++)
+			{
+				if (_parts[i]->elements[j]->type == etValue)
+				{
+					CExpressionValue* v = _parts[i]->elements[j]->calcVal;
+					if (v->matrix)
+					{
+						delete v->matrix;
+						v->matrix = NULL;
+					}
+				}
+			}
+		}
 	}
 
 private:
