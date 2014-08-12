@@ -1055,10 +1055,10 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				{
 					if (oper == operOR || oper == operAND)			
 					{
-						RasterMatrix* matrix = new RasterMatrix(*valLeft->matrix);
+						if (elLeft->calcVal != valLeft)
+							elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
+						RasterMatrix* matrix = elLeft->calcVal->matrix;
 						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix );
-						elLeft->calcVal->matrix = matrix;
-						elLeft->calcVal->type = vtFloatArray;
 					}
 				}
 				else
@@ -1095,10 +1095,10 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				{
 					if (valLeft->type == vtFloatArray)
 					{
-						RasterMatrix* matrix = new RasterMatrix(*valLeft->matrix);
+						if (elLeft->calcVal != valLeft)
+							elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
+						RasterMatrix* matrix = elLeft->calcVal->matrix;
 						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix );
-						elLeft->calcVal->matrix = matrix;
-						elLeft->calcVal->type = vtFloatArray;
 					}
 					else
 					{
@@ -1137,29 +1137,26 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				}
 				else if(valLeft->type == vtFloatArray && valRight->type == vtDouble)
 				{
-					RasterMatrix* matrix = new RasterMatrix(*valLeft->matrix);
+					if (elLeft->calcVal != valLeft)
+						elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
+					RasterMatrix* matrix = elLeft->calcVal->matrix;
 					
 					float* data = new float[1];
 					data[0] = (float)valRight->dbl;
 					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
 					delete right;
-
-					elLeft->calcVal->matrix = matrix;
-					elLeft->calcVal->type = vtFloatArray;
 				}
 				else if(valLeft->type == vtDouble && valRight->type == vtFloatArray)
 				{
 					RasterMatrix* matrix = new RasterMatrix(*valRight->matrix);
+					elLeft->calcVal->SetMatrix(matrix);
 
 					float* data = new float[1];
 					data[0] = (float)valLeft->dbl;
 					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
 					delete left;
-
-					elLeft->calcVal->matrix = matrix;
-					elLeft->calcVal->type = vtFloatArray;
 				}
 				else
 				{
@@ -1177,10 +1174,9 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				}
 				else if (valRight->type == vtFloatArray)
 				{
-					RasterMatrix* matrix = valRight->matrix->Clone(true);
-					matrix->changeSign();
-					elRight->calcVal->matrix = matrix;
-					elRight->calcVal->type = vtFloatArray;
+					if (elRight->calcVal != valRight)
+						elRight->calcVal->SetMatrix(valRight->matrix->Clone(true));
+					elRight->calcVal->matrix->changeSign();
 				}
 				else
 				{
@@ -1264,16 +1260,17 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				}
 				else if (valLeft->type == vtFloatArray && valRight->type == vtFloatArray )
 				{
-					RasterMatrix* matrix = valLeft->matrix->Clone(true);
-					elLeft->calcVal->matrix = matrix;
-					elLeft->calcVal->type = vtFloatArray;
+					if (elLeft->calcVal != valLeft)
+						elLeft->calcVal->SetMatrix(valLeft->matrix->Clone(true));
+					RasterMatrix* matrix = elLeft->calcVal->matrix;
+					
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix);
 				}
 				else if (valLeft->type == vtFloatArray && valRight->type == vtDouble )
 				{
-					RasterMatrix* matrix = valLeft->matrix->Clone(true);
-					elLeft->calcVal->matrix = matrix;
-					elLeft->calcVal->type = vtFloatArray;
+					if (elLeft->calcVal != valLeft)
+						elLeft->calcVal->SetMatrix(valLeft->matrix->Clone(true));
+					RasterMatrix* matrix = elLeft->calcVal->matrix;
 
 					float* data = new float[1];
 					data[0] = (float)valRight->dbl;
@@ -1284,8 +1281,7 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				else if (valLeft->type == vtDouble && valRight->type == vtFloatArray )
 				{
 					RasterMatrix* matrix = valRight->matrix->Clone(true);
-					elLeft->calcVal->matrix = matrix;
-					elLeft->calcVal->type = vtFloatArray;
+					elLeft->calcVal->SetMatrix(matrix);
 
 					float* data = new float[1];
 					data[0] = (float)valLeft->dbl;

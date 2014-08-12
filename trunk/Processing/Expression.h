@@ -108,6 +108,14 @@ public:
 		this->type = val.type;
 		return *this;
 	}	
+
+	void SetMatrix(RasterMatrix* m)
+	{
+		if (matrix)
+			delete matrix;
+		matrix = m;
+		type = vtFloatArray;
+	}
 };
 
 class CElement
@@ -187,6 +195,8 @@ public:
 	}
 	void Clear()
 	{
+		ReleaseMemory();
+
 		for(size_t i = 0; i < _parts.size(); i++)
 		{
 			for(size_t j = 0; j < _parts[i]->elements.size(); j++)
@@ -210,7 +220,7 @@ public:
 		{
 			for(size_t j = 0; j < _parts[i]->elements.size(); j++)
 			{
-				if (_parts[i]->elements[j]->type == etValue)
+				if (_parts[i]->elements[j]->type == etValue || _parts[i]->elements[j]->type == etPart)
 				{
 					CExpressionValue* v = _parts[i]->elements[j]->calcVal;
 					if (v->matrix)
@@ -218,8 +228,21 @@ public:
 						delete v->matrix;
 						v->matrix = NULL;
 					}
+
+					v = _parts[i]->elements[j]->val;
+					if (v->matrix)
+					{
+						delete v->matrix;
+						v->matrix = NULL;
+					}
 				}
 			}
+
+			/*if (_parts[i]->val->matrix)
+			{
+				delete _parts[i]->val->matrix;
+				_parts[i]->val->matrix = NULL;
+			}*/
 		}
 	}
 

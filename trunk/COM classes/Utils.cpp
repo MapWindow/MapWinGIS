@@ -5602,8 +5602,6 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		{
 			Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
 
-			expr.ReleaseMemory();
-
 			for(int j = 0; j < numFields; j++)
 			{
 				CExpressionValue* val = expr.get_FieldValue(j);
@@ -5653,6 +5651,8 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 				}
 				
 				delete[] calcData;
+
+				expr.ReleaseMemory();
 			}
 		}
 
