@@ -18,7 +18,7 @@ namespace TestApplication
   using MapWinGIS;
   using NCalc;
 
-    /// <summary>Static class to hold the tests methods</summary>
+  /// <summary>Static class to hold the tests methods</summary>
   internal static class Tests
   {
     /// <summary>Are the tiles loaded or not</summary>
@@ -102,6 +102,7 @@ namespace TestApplication
           retVal = false;
         }
 
+        // Suddenly causes a SEH exception: 
         Application.DoEvents();
         Thread.Sleep(1000);
       }
@@ -612,17 +613,17 @@ namespace TestApplication
           double minX, minY, minZ, maxX, maxY, maxZ;
           sf.Extents.GetBounds(out minX, out minY, out minZ, out maxX, out maxY, out maxZ);
           var gridHeader = new GridHeader
-            {
-              NodataValue = -1,
-              NumberCols = NumCols,
-              NumberRows = NumRows,
-              Projection = sf.Projection,
-              Notes = "Created using ShapefileToGrid",
-              XllCenter = minX,
-              YllCenter = minY,
-              dX = (maxX - minX) / NumCols,
-              dY = (maxY - minY) / NumRows
-            };
+          {
+            NodataValue = -1,
+            NumberCols = NumCols,
+            NumberRows = NumRows,
+            Projection = sf.Projection,
+            Notes = "Created using ShapefileToGrid",
+            XllCenter = minX,
+            YllCenter = minY,
+            dX = (maxX - minX) / NumCols,
+            dY = (maxY - minY) / NumRows
+          };
 
           var utils = new Utils { GlobalCallback = theForm };
           var resultGrid = utils.ShapefileToGrid(sf, false, gridHeader, 30, true, 1);
@@ -787,7 +788,7 @@ namespace TestApplication
     /// </summary>
     /// <param name="shapefileLocation">Location of a shapefile</param>
     /// <param name="theForm">The main form of the application</param>
-    /// <returns></returns>
+    /// <returns>True on success</returns>
     internal static bool RunAxMapClearTest(string shapefileLocation, Form1 theForm)
     {
       theForm.Progress(
@@ -864,6 +865,14 @@ namespace TestApplication
       return true;
     }
 
+    /// <summary>Run the raster calculator test</summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns> True on success </returns>
     internal static bool RunRasterCalculatorTest(string textfileLocation, Form1 theForm)
     {
       theForm.Progress(
@@ -885,7 +894,10 @@ namespace TestApplication
           break;
         }
 
+        var stopWatch = Stopwatch.StartNew();
         retVal = RasterCalculatorTest(lines[i], lines[i + 1], lines[i + 2], theForm);
+        var selectTime = EndStopWatch(ref stopWatch);
+        theForm.Progress(string.Empty, 100, string.Format("The calculation of {0} took {1} seconds", lines[i + 2], selectTime / 1000.0));
 
         Application.DoEvents();
         Thread.Sleep(1000);
@@ -1425,6 +1437,12 @@ namespace TestApplication
       tilesAreLoaded = true;
     }
 
+    /// <summary>The raster calculator test</summary>
+    /// <param name="rasterA">The first raster</param>
+    /// <param name="rasterB">The second raster</param>
+    /// <param name="formula">The formula</param>
+    /// <param name="theForm">The form</param>
+    /// <returns>True on success</returns>
     private static bool RasterCalculatorTest(string rasterA, string rasterB, string formula, Form1 theForm)
     {
       bool retVal;
@@ -1504,6 +1522,7 @@ namespace TestApplication
           }
 
           // Add the layer:
+          theForm.Progress(string.Empty, 100, "Adding the calculated raster.");
           Fileformats.AddLayer(resultRaster, theForm);
 
           Application.DoEvents();
@@ -1522,155 +1541,155 @@ namespace TestApplication
       return retVal;
     }
 
-      /// <summary>Get some random cells and recalculate the values</summary>
-      /// <param name="rasterA">
-      /// The first raster
-      /// </param>
-      /// <param name="rasterB">
-      /// The second raster
-      /// </param>
-      /// <param name="resultRaster">
-      /// The result raster.
-      /// </param>
-      /// <param name="formula">
-      /// The formula.
-      /// </param>
-      /// <param name="theForm">
-      /// The form.
-      /// </param>
-      /// <returns>True when OK</returns>
-      private static bool CheckRasterCalculator(string rasterA, string rasterB, string resultRaster, string formula, Form1 theForm)
+    /// <summary>Get some random cells and recalculate the values</summary>
+    /// <param name="rasterA">
+    /// The first raster
+    /// </param>
+    /// <param name="rasterB">
+    /// The second raster
+    /// </param>
+    /// <param name="resultRaster">
+    /// The result raster.
+    /// </param>
+    /// <param name="formula">
+    /// The formula.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>True when OK</returns>
+    private static bool CheckRasterCalculator(string rasterA, string rasterB, string resultRaster, string formula, Form1 theForm)
+    {
+      var retVal = false;
+      var grdA = new Grid { GlobalCallback = theForm };
+      var grdB = new Grid { GlobalCallback = theForm };
+      var grdC = new Grid { GlobalCallback = theForm };
+
+      try
       {
-        var retVal = false;
-        var grdA = new Grid { GlobalCallback = theForm };
-        var grdB = new Grid { GlobalCallback = theForm };
-        var grdC = new Grid { GlobalCallback = theForm };
-
-        try
+        // Open the rasters:
+        if (!grdA.Open(rasterA, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
         {
-          // Open the rasters:
-          if (!grdA.Open(rasterA, GridDataType.UnknownDataType, true, GridFileType.UseExtension, theForm))
+          theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdA.get_ErrorMsg(grdA.LastErrorCode));
+          return false;
+        }
+
+        if (!grdB.Open(rasterB, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
+        {
+          theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdB.get_ErrorMsg(grdB.LastErrorCode));
+          return false;
+        }
+
+        if (!grdC.Open(resultRaster, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
+        {
+          theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdC.get_ErrorMsg(grdC.LastErrorCode));
+          return false;
+        }
+
+        // Rasters have the same size and the same number of columns and rows.
+        var numColumns = grdA.Header.NumberCols;
+        var numRows = grdA.Header.NumberCols;
+        var nodata = grdA.Header.NodataValue; // Returns an object
+        var rnd = new Random();
+        var randomColumn = 0; // = rnd.Next(numColumns);
+        var randomRow = 0; // = rnd.Next(numRows);
+
+        // read cell:
+        var valA = nodata;
+
+        // Check for nodata value:
+        while (valA == nodata)
+        {
+          randomColumn = rnd.Next(numColumns);
+          randomRow = rnd.Next(numRows);
+          valA = grdA.get_Value(randomColumn, randomRow); // Returns an object
+        }
+
+        Debug.WriteLine("valA: " + valA);
+
+        // Get values from other rasters, make expression and evaluate:
+        var valB = grdB.get_Value(randomColumn, randomRow); // Returns an object
+        Debug.WriteLine("valB: " + valB);
+        var valC = grdC.get_Value(randomColumn, randomRow); // Returns an object
+        Debug.WriteLine("valC: " + valC);
+        var expression = formula.Replace("[A]", string.Format("({0})", ((double)valA).ToString(CultureInfo.InvariantCulture))).Replace("[B]", string.Format("({0})", ((double)valB).ToString(CultureInfo.InvariantCulture)));
+        theForm.Progress(string.Empty, 100, "Checking expression: " + expression);
+        var e = new Expression(expression);
+        var result = e.Evaluate(); // Returns an object
+        if (result == null)
+        {
+          theForm.Error(string.Empty, "Could not check this expression: " + e.Error);
+          return false;
+        }
+
+        // TODO: Most likely this can be done in a better way, but I don't know how:
+        // Without it I keep getting invalid casts with result of valC:
+        var goodCalculation = false;
+        if (result.GetType() == typeof(int))
+        {
+          if (valC.GetType() == typeof(int))
           {
-            theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdA.get_ErrorMsg(grdA.LastErrorCode));
-            return false;
-          }
-
-          if (!grdB.Open(rasterB, GridDataType.UnknownDataType, true, GridFileType.UseExtension, theForm))
-          {
-            theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdB.get_ErrorMsg(grdB.LastErrorCode));
-            return false;
-          }
-
-          if (!grdC.Open(resultRaster, GridDataType.UnknownDataType, true, GridFileType.UseExtension, theForm))
-          {
-            theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdC.get_ErrorMsg(grdC.LastErrorCode));
-            return false;
-          }
-
-          // Rasters have the same size and the same number of columns and rows.
-          var numColumns = grdA.Header.NumberCols;
-          var numRows = grdA.Header.NumberCols;
-          var nodata = grdA.Header.NodataValue; // Returns an object
-          var rnd = new Random();
-          var randomColumn = 0; // = rnd.Next(numColumns);
-          var randomRow = 0; // = rnd.Next(numRows);
-
-          // read cell:
-          var valA = nodata;
-
-          // Check for nodata value:
-          while (valA == nodata)
-          {
-            randomColumn = rnd.Next(numColumns);
-            randomRow = rnd.Next(numRows);
-            valA = grdA.get_Value(randomColumn, randomRow); // Returns an object
-          }
-
-          Debug.WriteLine("valA: " + valA);
-
-          // Get values from other rasters, make expression and evaluate:
-          var valB = grdB.get_Value(randomColumn, randomRow); // Returns an object
-          Debug.WriteLine("valB: " + valB);
-          var valC = grdC.get_Value(randomColumn, randomRow); // Returns an object
-          Debug.WriteLine("valC: " + valC);
-          var expression = formula.Replace("[A]", string.Format("({0})", ((double)valA).ToString(CultureInfo.InvariantCulture))).Replace("[B]", string.Format("({0})", ((double)valB).ToString(CultureInfo.InvariantCulture)));
-          theForm.Progress(string.Empty, 100, "Checking expression: " + expression);
-          var e = new Expression(expression);
-          var result = e.Evaluate(); // Returns an object
-          if (result == null)
-          {
-            theForm.Error(string.Empty, "Could not check this expression: " + e.Error);
-            return false;
-          }
-
-          // TODO: Most likely this can be done in a better way, but I don't know how:
-          // Without it I keep getting invalid casts wirh result or valC:
-          var goodCalculation = false;
-          if (result.GetType() == typeof(int))
-          {
-            if (valC.GetType() == typeof(int))
+            if (Math.Abs((int)valC - (int)result) < 1)
             {
-              if (Math.Abs((int)valC - (int)result) < 1)
-              {
-                goodCalculation = true;
-              }
-            }
-            else
-            {
-              if (Math.Abs((double)valC - (int)result) < 1)
-              {
-                goodCalculation = true;
-              }
+              goodCalculation = true;
             }
           }
           else
           {
-            if (valC.GetType() == typeof(int))
+            if (Math.Abs((double)valC - (int)result) < 1)
             {
-              if (Math.Abs((int)valC - (double)result) < 1)
-              {
-                goodCalculation = true;
-              }
-            }
-            else
-            {
-              if (Math.Abs((double)valC - (double)result) < 1)
-              {
-                goodCalculation = true;
-              }
+              goodCalculation = true;
             }
           }
-
-          if (goodCalculation)
+        }
+        else
+        {
+          if (valC.GetType() == typeof(int))
           {
-            theForm.Progress(string.Empty, 100, "Checking some random values was correct: " + expression);
-            retVal = true;
+            if (Math.Abs((int)valC - (double)result) < 1)
+            {
+              goodCalculation = true;
+            }
           }
           else
           {
-            theForm.Error(
-              string.Empty, 
-              string.Format("The expression {0} returned {1}. But {2} was expected!", expression, result, valC));
+            if (Math.Abs((double)valC - (double)result) < 1)
+            {
+              goodCalculation = true;
+            }
           }
         }
-        catch (InvalidCastException ex)
-        {
-          // TODO: Don't know how to fix this, continue for now.
-          theForm.Error(string.Empty, "InvalidCastException in CheckRasterCalculator: " + ex.Message);
-        }
-        catch (Exception ex)
-        {
-          theForm.Error(string.Empty, "Error in CheckRasterCalculator: " + ex.Message);
-        }
-        finally
-        {
-          // Close the rasters again:
-          grdA.Close();
-          grdB.Close();
-          grdC.Close();
-        }
 
-        return retVal;
+        if (goodCalculation)
+        {
+          theForm.Progress(string.Empty, 100, "Checking some random values was correct: " + expression);
+          retVal = true;
+        }
+        else
+        {
+          theForm.Error(
+            string.Empty,
+            string.Format("The expression {0} returned {1}. But {2} was expected!", expression, result, valC));
+        }
       }
+      catch (InvalidCastException ex)
+      {
+        // TODO: Don't know how to fix this, continue for now.
+        theForm.Error(string.Empty, "InvalidCastException in CheckRasterCalculator: " + ex.Message);
+      }
+      catch (Exception ex)
+      {
+        theForm.Error(string.Empty, "Error in CheckRasterCalculator: " + ex.Message);
+      }
+      finally
+      {
+        // Close the rasters again:
+        grdA.Close();
+        grdB.Close();
+        grdC.Close();
+      }
+
+      return retVal;
+    }
   }
 }

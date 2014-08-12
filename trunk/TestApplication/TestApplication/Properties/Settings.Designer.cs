@@ -370,5 +370,29 @@ namespace TestApplication.Properties {
                 this["RasterCalculatorInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Filemanager_GridOpen {
+            get {
+                return ((string)(this["Filemanager_GridOpen"]));
+            }
+            set {
+                this["Filemanager_GridOpen"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Filemanager_OpenFolder {
+            get {
+                return ((string)(this["Filemanager_OpenFolder"]));
+            }
+            set {
+                this["Filemanager_OpenFolder"] = value;
+            }
+        }
     }
 }

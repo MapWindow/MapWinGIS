@@ -10,7 +10,6 @@ namespace TestApplication
 {
   using System;
   using System.Diagnostics;
-  using System.Linq;
   using System.Reflection;
   using System.Windows.Forms;
   using AxMapWinGIS;
@@ -20,30 +19,29 @@ namespace TestApplication
   /// <summary>Defines the form</summary>
     public partial class Form1 : Form, ICallback
     {
-        private static Form1 _instance;
-
-        /// <summary>
+    /// <summary>
         /// Initializes a new instance of the <see cref="Form1"/> class.
         /// </summary>
         public Form1()
         {
             InitializeComponent();
             this.SetHardcodedPaths();
-            _instance = this;
+            Instance = this;
         }
 
+        /// <summary>
+        /// Gets Instance of the form
+        /// </summary>
+        public static Form1 Instance { get; private set; }
+
+        /// <summary>Set hardcoded paths</summary>
         private void SetHardcodedPaths()
         {
             GridOpenInput.Text = Constants.SCRIPT_DATA_PATH + @"\Grids\Formats\pov.tif";
             AnalyzeFilesInput.Text = Constants.SCRIPT_DATA_PATH + @"\Grids\Formats\";
         }
 
-        public static Form1 Instance
-        {
-            get { return _instance; }
-        }
-
-        #region Delegates
+    #region Delegates
 
         /// <summary>The error callback</summary>
         /// <param name="keyOfSender">
@@ -79,7 +77,7 @@ namespace TestApplication
             Debug.WriteLine(msg);
             if (this.InvokeRequired)
             {
-                this.Invoke(new ProgressCallback(this.Progress), "", "", msg);
+                this.Invoke(new ProgressCallback(this.Progress), string.Empty, string.Empty, msg);
             }
             else
             {
@@ -96,7 +94,7 @@ namespace TestApplication
         /// </param>
         public void Error(string keyOfSender, string errorMsg)
         {
-            System.Diagnostics.Debug.WriteLine(errorMsg);
+            Debug.WriteLine(errorMsg);
             if (this.InvokeRequired)
             {
                 this.Invoke(new ErrorCallback(this.Error), keyOfSender, errorMsg);
@@ -122,7 +120,7 @@ namespace TestApplication
         {
             if (percent == 0)
             {
-                System.Diagnostics.Debug.WriteLine(message);
+                Debug.WriteLine(message);
             }
 
             if (this.InvokeRequired)
@@ -151,8 +149,6 @@ namespace TestApplication
             }
         }
 
-
-
         #endregion
 
         /// <summary>Form closing event</summary>
@@ -179,15 +175,18 @@ namespace TestApplication
         {
           this.ResetMapSettings(false);
 
-            // Copy the map reference to the test methods:
-            Fileformats.Map = axMap1;
-            Tests.MyAxMap = axMap1;
-            GeosTests.MyAxMap = axMap1;
+          // Copy the map reference to the test methods:
+          Fileformats.Map = axMap1;
+          Tests.MyAxMap = axMap1;
+          GeosTests.MyAxMap = axMap1;
 
-            // Write version number:
-            this.Progress(string.Empty, 100, string.Format("MapWinGIS version: {0} Test application version: {1}", this.axMap1.VersionNumber, Assembly.GetEntryAssembly().GetName().Version));
+          // Write version number:
+          this.Progress(string.Empty, 100, string.Format("MapWinGIS version: {0} Test application version: {1}", this.axMap1.VersionNumber, Assembly.GetEntryAssembly().GetName().Version));
 
-            // TODO: Also write GDAL version
+          // Also write GDAL version
+          var utils = new Utils();
+          var version = utils.GDALInfo(string.Empty, "--version", this);
+          this.Progress(string.Empty, 100, string.Format("GDAL version: {0}", version));
         }
 
         /// <summary>Handle the dropped file</summary>
@@ -205,42 +204,7 @@ namespace TestApplication
           // Use the new AddLayerFromFilename method:
           this.axMap1.AddLayerFromFilename(e.filename, tkFileOpenStrategy.fosAutoDetect, true);
 
-          /*
-            // Check extension:
-            var ext = System.IO.Path.GetExtension(e.filename);
-            if (ext == null)
-            {
-                return;
-            }
-
-            // Load shapefile
-            if (ext == ".shp")
-            {
-                Fileformats.OpenShapefileAsLayer(e.filename, this, true);
-                return;
-            }
-
-            // Load image file
-            var img = new Image();
-            if (img.CdlgFilter.Contains(ext))
-            {
-                Fileformats.OpenImageAsLayer(e.filename, this, true);
-                return;
-            }
-
-            // Load grid file
-            var grd = new Grid();
-            if (grd.CdlgFilter.Contains(ext))
-            {
-                Fileformats.OpenGridAsLayer(e.filename, this, true);
-                return;
-            }
-
-            // Don't know how to handle the dropped file:
-            this.Error(string.Empty, "Don't know how to handle the dropped file");
-           */ 
-
-            return;
+          return;
         }
 
         #region Select file click event
@@ -268,6 +232,18 @@ namespace TestApplication
         {
             // Select text file with on every line the location of an image file
             Tests.SelectTextfile(GridInputfile, "Select text file with on every line the location of an grid file");
+        }
+
+        /// <summary>Click event</summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectGridOpenInputClick(object sender, EventArgs e)
+        {
+          Tests.SelectGridfile(GridOpenInput, "Select the grid file");
         }
 
         /// <summary>Click event</summary>
@@ -782,10 +758,16 @@ namespace TestApplication
         /// <summary>
         /// Analyzes raster files in particular folder, displaying possible open strategies
         /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
         private void RunAnalyzeFilesClick(object sender, EventArgs e)
         {
-            bool result = FileManagerTests.AnalyeFiles(AnalyzeFilesInput.Text);
-            this.Progress("", 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
+            var result = FileManagerTests.AnalyzeFiles(AnalyzeFilesInput.Text);
+            this.Progress(string.Empty, 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
         }
 
         /// <summary>
@@ -800,8 +782,22 @@ namespace TestApplication
         private void RunGridOpenTestClick(object sender, EventArgs e)
         {
           this.ResetMapSettings(false);
-          var result = FileManagerTests.GridOpenTest(GridOpenInput.Text);
-          this.Progress(string.Empty, 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
+          ((Button)sender).BackColor = System.Drawing.Color.Blue;
+          var retVal = FileManagerTests.GridOpenTest(GridOpenInput.Text);
+          this.Progress(string.Empty, 100, "TEST RESULTS: " + (retVal ? "sucess" : "failed"));
+
+          if (retVal)
+          {
+            // Open file as grid:
+            this.Progress(string.Empty, 100, "Open grid file");
+            var fm = new FileManager();
+            var grdProxy = fm.OpenRaster(GridOpenInput.Text, tkFileOpenStrategy.fosProxyForGrid, null);
+            this.Progress(string.Empty, 100, "Add grid to map");
+            var hndl = this.axMap1.AddLayer(grdProxy, true);
+            retVal = hndl != -1;
+          }
+
+          ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 
         private void SelectAxMapClearInput_Click(object sender, EventArgs e)
@@ -812,7 +808,7 @@ namespace TestApplication
         private void RunAxMapClearTest_Click(object sender, EventArgs e)
         {
             ((Button)sender).BackColor = System.Drawing.Color.Blue;
-            bool retVal = Tests.RunAxMapClearTest(this.AxMapClearInput.Text, this);
+            var retVal = Tests.RunAxMapClearTest(this.AxMapClearInput.Text, this);
             ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 

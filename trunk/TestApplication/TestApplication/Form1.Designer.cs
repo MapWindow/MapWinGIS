@@ -381,14 +381,17 @@
       this.SelectGridOpenInput.Text = "...";
       this.toolTip1.SetToolTip(this.SelectGridOpenInput, "Select text file with on every line the location of a shapefile");
       this.SelectGridOpenInput.UseVisualStyleBackColor = true;
+      this.SelectGridOpenInput.Click += new System.EventHandler(this.SelectGridOpenInputClick);
       // 
       // GridOpenInput
       // 
       this.GridOpenInput.AcceptsReturn = true;
+      this.GridOpenInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "Filemanager_GridOpen", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.GridOpenInput.Location = new System.Drawing.Point(9, 32);
       this.GridOpenInput.Name = "GridOpenInput";
       this.GridOpenInput.Size = new System.Drawing.Size(147, 20);
       this.GridOpenInput.TabIndex = 1;
+      this.GridOpenInput.Text = global::TestApplication.Properties.Settings.Default.Filemanager_GridOpen;
       // 
       // label22
       // 
@@ -436,10 +439,12 @@
       // AnalyzeFilesInput
       // 
       this.AnalyzeFilesInput.AcceptsReturn = true;
+      this.AnalyzeFilesInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "Filemanager_OpenFolder", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
       this.AnalyzeFilesInput.Location = new System.Drawing.Point(9, 32);
       this.AnalyzeFilesInput.Name = "AnalyzeFilesInput";
       this.AnalyzeFilesInput.Size = new System.Drawing.Size(147, 20);
       this.AnalyzeFilesInput.TabIndex = 1;
+      this.AnalyzeFilesInput.Text = global::TestApplication.Properties.Settings.Default.Filemanager_OpenFolder;
       // 
       // label24
       // 
