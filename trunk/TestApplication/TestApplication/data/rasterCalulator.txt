@@ -29,3 +29,19 @@
 %MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
 %MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
 ([A]-[B])/([A]+[B])
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+[A] OR [B]
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+(50 < [A]) * [A]
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+-[A] + 100
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+(([A]+[B]) * 5 - ([A]-[B]) * [A] * 5) / 6
