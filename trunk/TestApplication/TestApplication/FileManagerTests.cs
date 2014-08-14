@@ -217,6 +217,7 @@
             {
               Error("Direct grid strategy was expected.");
             }
+
             break;
           case 1:
             if (!proxy)

@@ -322,7 +322,7 @@ namespace TestApplication
         string.Format("{0}-----------------------{0}The image open tests have started.", Environment.NewLine));
 
       // Read text file:
-      int count = 1;
+      var count = 1;
       var lines = Helper.ReadTextfile(textfileLocation);
       foreach (var line in lines)
       {
@@ -893,17 +893,68 @@ namespace TestApplication
           theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
           break;
         }
-
-        var stopWatch = Stopwatch.StartNew();
+        
         retVal = RasterCalculatorTest(lines[i], lines[i + 1], lines[i + 2], theForm);
-        var selectTime = EndStopWatch(ref stopWatch);
-        theForm.Progress(string.Empty, 100, string.Format("The calculation of {0} took {1} seconds", lines[i + 2], selectTime / 1000.0));
 
         Application.DoEvents();
         Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The Raster calculator test has finished.");
+
+      return retVal;
+    }
+
+    /// <summary>Run the grid proxy test</summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>True on success</returns>
+    internal static bool RunGridProxyTest(string textfileLocation, Form1 theForm)
+    {
+      var retVal = false;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("{0}-----------------------{0}The grid proxy tests have started.", Environment.NewLine));
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        MyAxMap.Clear();
+
+        var grid = new Grid();
+        if (grid.Open(line, GridDataType.UnknownDataType, true, GridFileType.UseExtension, null))
+        {
+          var scheme = grid.RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval.gsrAuto, tkGridSchemeGeneration.gsgGradient, PredefinedColorScheme.SummerMountains);
+          var img = grid.OpenAsImage(scheme, tkGridProxyMode.gpmAuto, null);
+          if (img != null)
+          {
+            var handle = MyAxMap.AddLayer(img, true);
+            retVal = handle != -1;
+          }
+
+          grid.Close();   // we no longer need it as Image class is used for rendering
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, "The grid proxy tests have finished.");
+      MyAxMap.Redraw();
 
       return retVal;
     }
@@ -1497,7 +1548,10 @@ namespace TestApplication
           "[B]", string.Format("[{0}@1]", Path.GetFileName(rasterB)));
 
         string errorMsg;
+        var stopWatch = Stopwatch.StartNew();
         retVal = utils.CalculateRaster(names, expression, resultRaster, "GTiff", 0f /* no data value */, theForm /*callback */, out errorMsg);
+        var selectTime = EndStopWatch(ref stopWatch);
+        theForm.Progress(string.Empty, 100, string.Format("The calculation of {0} took {1} seconds", formula, selectTime / 1000.0));
 
         if (!retVal)
         {
@@ -1558,7 +1612,7 @@ namespace TestApplication
     /// The form.
     /// </param>
     /// <returns>True when OK</returns>
-    private static bool CheckRasterCalculator(string rasterA, string rasterB, string resultRaster, string formula, Form1 theForm)
+    private static bool CheckRasterCalculator(string rasterA, string rasterB, string resultRaster, string formula, ICallback theForm)
     {
       var retVal = false;
       var grdA = new Grid { GlobalCallback = theForm };
@@ -1576,13 +1630,13 @@ namespace TestApplication
 
         if (!grdB.Open(rasterB, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
         {
-          theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdB.get_ErrorMsg(grdB.LastErrorCode));
+          theForm.Error(string.Empty, "Something went wrong opening the second raster: " + grdB.get_ErrorMsg(grdB.LastErrorCode));
           return false;
         }
 
         if (!grdC.Open(resultRaster, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
         {
-          theForm.Error(string.Empty, "Something went wrong opening the first raster: " + grdC.get_ErrorMsg(grdC.LastErrorCode));
+          theForm.Error(string.Empty, "Something went wrong opening the resulting raster: " + grdC.get_ErrorMsg(grdC.LastErrorCode));
           return false;
         }
 
@@ -1598,7 +1652,7 @@ namespace TestApplication
         var valA = nodata;
 
         // Check for nodata value:
-        while (valA == nodata)
+        while (valA == nodata || valA == (object)0)
         {
           randomColumn = rnd.Next(numColumns);
           randomRow = rnd.Next(numRows);
@@ -1612,8 +1666,10 @@ namespace TestApplication
         Debug.WriteLine("valB: " + valB);
         var valC = grdC.get_Value(randomColumn, randomRow); // Returns an object
         Debug.WriteLine("valC: " + valC);
+
+        // TODO: Is this the best syntax to do this:
         var expression = formula.Replace("[A]", string.Format("({0})", ((double)valA).ToString(CultureInfo.InvariantCulture))).Replace("[B]", string.Format("({0})", ((double)valB).ToString(CultureInfo.InvariantCulture)));
-        theForm.Progress(string.Empty, 100, "Checking expression: " + expression);
+        theForm.Progress(string.Empty, 100, "Checking formula: " + formula);
         var e = new Expression(expression);
         var result = e.Evaluate(); // Returns an object
         if (result == null)
@@ -1662,7 +1718,8 @@ namespace TestApplication
 
         if (goodCalculation)
         {
-          theForm.Progress(string.Empty, 100, "Checking some random values was correct: " + expression);
+          theForm.Progress(
+            string.Empty, 100, string.Format("Checking some random values was correct: {0}={1}", expression, result));
           retVal = true;
         }
         else

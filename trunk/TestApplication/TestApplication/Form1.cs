@@ -463,6 +463,19 @@ namespace TestApplication
         {
           Tests.SelectTextfile(this.RasterCalculatorInput, "Select file with rasters and formulas");
         }
+
+        /// <summary>Click event</summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectGridProxyInputClick(object sender, EventArgs e)
+        {
+          Tests.SelectTextfile(this.GridProxyInput, "Select file with grids (tiff)");
+        }
+
     #endregion
 
         #region Run test click event
@@ -785,18 +798,6 @@ namespace TestApplication
           ((Button)sender).BackColor = System.Drawing.Color.Blue;
           var retVal = FileManagerTests.GridOpenTest(GridOpenInput.Text);
           this.Progress(string.Empty, 100, "TEST RESULTS: " + (retVal ? "sucess" : "failed"));
-
-          if (retVal)
-          {
-            // Open file as grid:
-            this.Progress(string.Empty, 100, "Open grid file");
-            var fm = new FileManager();
-            var grdProxy = fm.OpenRaster(GridOpenInput.Text, tkFileOpenStrategy.fosProxyForGrid, null);
-            this.Progress(string.Empty, 100, "Add grid to map");
-            var hndl = this.axMap1.AddLayer(grdProxy, true);
-            retVal = hndl != -1;
-          }
-
           ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 
@@ -825,6 +826,22 @@ namespace TestApplication
         {
           ((Button)sender).BackColor = System.Drawing.Color.Blue;
           var retVal = Tests.RunRasterCalculatorTest(this.RasterCalculatorInput.Text, this);
+          ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+        }
+
+        /// <summary>
+        /// Run grid proxy creation tests
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The event arguments
+        /// </param>
+        private void RunGridProxyTest_Click(object sender, EventArgs e)
+        {
+          ((Button)sender).BackColor = System.Drawing.Color.Blue;
+          var retVal = Tests.RunGridProxyTest(this.GridProxyInput.Text, this);
           ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 

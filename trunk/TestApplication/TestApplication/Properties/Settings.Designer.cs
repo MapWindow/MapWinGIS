@@ -394,5 +394,17 @@ namespace TestApplication.Properties {
                 this["Filemanager_OpenFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GridProxyInput {
+            get {
+                return ((string)(this["GridProxyInput"]));
+            }
+            set {
+                this["GridProxyInput"] = value;
+            }
+        }
     }
 }

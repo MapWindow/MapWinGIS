@@ -113,14 +113,6 @@ namespace TestApplication
             GlobalCallback = theForm 
           };
 
-        // Without overviews this decreases the performance too much:
-        if (img.NumOverviews > 1)
-        {
-          theForm.Progress(string.Empty, 0, "Opening the image with high quality interpolation mode.");
-          img.UpsamplingMode = tkInterpolationMode.imHighQualityBilinear;
-          img.DownsamplingMode = tkInterpolationMode.imBilinear;
-        }
-
         settings.ResetGdalError();
         theForm.Progress(string.Empty, 0, "Start opening " + Path.GetFileName(filename));
         if (!img.Open(filename, ImageType.USE_FILE_EXTENSION, false, null))
@@ -136,19 +128,18 @@ namespace TestApplication
         }
         else
         {
+          // Without overviews this decreases the performance too much:
+          if (img.NumOverviews > 1)
+          {
+            theForm.Progress(string.Empty, 0, "Opening the image with high quality interpolation mode.");
+            img.UpsamplingMode = tkInterpolationMode.imHighQualityBilinear;
+            img.DownsamplingMode = tkInterpolationMode.imBilinear;
+          }
+
           if (clearLayers)
           {
             Map.RemoveAllLayers();
             Application.DoEvents();
-
-            // lsu: It's not allowed to change projection is such way, only settings a new instance
-            // MapWinGIS: will grab projection from image layer by itself
-
-            // Set projection of map using the grid projection:
-            //if (img.GetProjection() != string.Empty)
-            //{
-            //  Map.GeoProjection.ImportFromProj4(img.GetProjection());
-            //}
           }
 
           // Log characteristics:

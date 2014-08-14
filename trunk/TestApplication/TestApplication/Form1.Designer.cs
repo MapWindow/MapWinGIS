@@ -32,6 +32,11 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox24 = new System.Windows.Forms.GroupBox();
+      this.RunGridProxyTest = new System.Windows.Forms.Button();
+      this.SelectGridProxyInput = new System.Windows.Forms.Button();
+      this.GridProxyInput = new System.Windows.Forms.TextBox();
+      this.label26 = new System.Windows.Forms.Label();
       this.groupBox23 = new System.Windows.Forms.GroupBox();
       this.groupBox30 = new System.Windows.Forms.GroupBox();
       this.groupBox33 = new System.Windows.Forms.GroupBox();
@@ -169,6 +174,7 @@
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
+      this.groupBox24.SuspendLayout();
       this.groupBox30.SuspendLayout();
       this.groupBox33.SuspendLayout();
       this.groupBox29.SuspendLayout();
@@ -231,6 +237,7 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox24);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox23);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox30);
       this.splitContainer2.Panel1.Controls.Add(this.btnPopulate);
@@ -252,14 +259,70 @@
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
       // 
+      // groupBox24
+      // 
+      this.groupBox24.BackColor = System.Drawing.Color.PaleGreen;
+      this.groupBox24.Controls.Add(this.RunGridProxyTest);
+      this.groupBox24.Controls.Add(this.SelectGridProxyInput);
+      this.groupBox24.Controls.Add(this.GridProxyInput);
+      this.groupBox24.Controls.Add(this.label26);
+      this.groupBox24.Location = new System.Drawing.Point(5, 2369);
+      this.groupBox24.Name = "groupBox24";
+      this.groupBox24.Size = new System.Drawing.Size(205, 96);
+      this.groupBox24.TabIndex = 12;
+      this.groupBox24.TabStop = false;
+      this.groupBox24.Text = "Grid proxy";
+      // 
+      // RunGridProxyTest
+      // 
+      this.RunGridProxyTest.Location = new System.Drawing.Point(12, 58);
+      this.RunGridProxyTest.Name = "RunGridProxyTest";
+      this.RunGridProxyTest.Size = new System.Drawing.Size(180, 23);
+      this.RunGridProxyTest.TabIndex = 25;
+      this.RunGridProxyTest.Tag = "run";
+      this.RunGridProxyTest.Text = "Run test";
+      this.RunGridProxyTest.UseVisualStyleBackColor = true;
+      this.RunGridProxyTest.Click += new System.EventHandler(this.RunGridProxyTest_Click);
+      // 
+      // SelectGridProxyInput
+      // 
+      this.SelectGridProxyInput.Location = new System.Drawing.Point(166, 32);
+      this.SelectGridProxyInput.Name = "SelectGridProxyInput";
+      this.SelectGridProxyInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectGridProxyInput.TabIndex = 24;
+      this.SelectGridProxyInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectGridProxyInput, "Select first raster file");
+      this.SelectGridProxyInput.UseVisualStyleBackColor = true;
+      this.SelectGridProxyInput.Click += new System.EventHandler(this.SelectGridProxyInputClick);
+      // 
+      // GridProxyInput
+      // 
+      this.GridProxyInput.AcceptsReturn = true;
+      this.GridProxyInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "GridProxyInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.GridProxyInput.Location = new System.Drawing.Point(13, 32);
+      this.GridProxyInput.Name = "GridProxyInput";
+      this.GridProxyInput.Size = new System.Drawing.Size(147, 20);
+      this.GridProxyInput.TabIndex = 23;
+      this.GridProxyInput.Text = global::TestApplication.Properties.Settings.Default.GridProxyInput;
+      this.toolTip1.SetToolTip(this.GridProxyInput, "Select text file with rasters and formulas");
+      // 
+      // label26
+      // 
+      this.label26.AutoSize = true;
+      this.label26.Location = new System.Drawing.Point(10, 16);
+      this.label26.Name = "label26";
+      this.label26.Size = new System.Drawing.Size(76, 13);
+      this.label26.TabIndex = 22;
+      this.label26.Text = "Select text file:";
+      // 
       // groupBox23
       // 
-      this.groupBox23.Location = new System.Drawing.Point(5, 2369);
+      this.groupBox23.Location = new System.Drawing.Point(5, 2503);
       this.groupBox23.Name = "groupBox23";
       this.groupBox23.Size = new System.Drawing.Size(205, 128);
       this.groupBox23.TabIndex = 11;
       this.groupBox23.TabStop = false;
-      this.groupBox23.Text = "Todo";
+      this.groupBox23.Text = "New";
       // 
       // groupBox30
       // 
@@ -637,9 +700,9 @@
       this.label25.AutoSize = true;
       this.label25.Location = new System.Drawing.Point(9, 16);
       this.label25.Name = "label25";
-      this.label25.Size = new System.Drawing.Size(73, 13);
+      this.label25.Size = new System.Drawing.Size(76, 13);
       this.label25.TabIndex = 18;
-      this.label25.Text = "Select text file";
+      this.label25.Text = "Select text file:";
       // 
       // groupBox10
       // 
@@ -1696,6 +1759,8 @@
       this.splitContainer2.Panel1.PerformLayout();
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
+      this.groupBox24.ResumeLayout(false);
+      this.groupBox24.PerformLayout();
       this.groupBox30.ResumeLayout(false);
       this.groupBox33.ResumeLayout(false);
       this.groupBox33.PerformLayout();
@@ -1890,6 +1955,11 @@
     private System.Windows.Forms.Button SelectRasterAInput;
     private System.Windows.Forms.TextBox RasterCalculatorInput;
     private System.Windows.Forms.Label label25;
+    private System.Windows.Forms.GroupBox groupBox24;
+    private System.Windows.Forms.Button RunGridProxyTest;
+    private System.Windows.Forms.Button SelectGridProxyInput;
+    private System.Windows.Forms.TextBox GridProxyInput;
+    private System.Windows.Forms.Label label26;
   }
 }
 
