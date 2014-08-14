@@ -1512,7 +1512,8 @@ namespace MapWinGIS
     public enum tkGridSchemeRetrieval
     {
         /// <summary>
-        /// All available retrieval methods will be executed until a first successful one is found.
+        /// All available retrieval methods will be executed until a first successful one is found. 
+        /// The methods will be tried in the following order: gsrDiskBased, gsrDiskBasedForProxy, gsrGdalColorTable.
         /// </summary>
         gsrAuto = 0,
 
