@@ -55,6 +55,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_OPEN_STRATEGY 33
 # define tkSPATIAL_OPERATION_FAILED 34
 # define tkFAILED_TO_READ_INPUT_NAMES 35
+# define tkINVALID_PARAMETERS_ARRAY 36
 
 //201 - 400 = tkshp
 # define tkUNSUPPORTED_SHAPEFILE_TYPE 201
@@ -88,6 +89,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkFAILED_TO_BUILD_SPATIAL_INDEX 229
 # define tkINMEMORY_SHAPEFILE_EXPECTED 230
 # define tkCOLOR_SCHEME_IS_EMPTY 231
+# define tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE 232
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

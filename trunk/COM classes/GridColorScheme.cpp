@@ -20,6 +20,7 @@
 //********************************************************************************************************
 
 #include "stdafx.h"
+#include <algorithm>
 #include "GridColorScheme.h"
 
 #ifdef _DEBUG
@@ -271,7 +272,40 @@ STDMETHODIMP CGridColorScheme::UsePredefined(double LowValue, double HighValue, 
 		HighValue = temp;
 	}
 	
-	if( Preset == SummerMountains )
+	if (Preset == Rainbow || Preset == ReversedRainbow)
+	{
+		vector<tkMapColor> colors;
+		colors.push_back(tkMapColor::Red);
+		colors.push_back(tkMapColor::Orange);
+		colors.push_back(tkMapColor::Yellow);
+		colors.push_back(tkMapColor::LightGreen);
+		colors.push_back(tkMapColor::LightBlue);
+		colors.push_back(tkMapColor::DodgerBlue);
+		colors.push_back(tkMapColor::DarkBlue);
+		
+		if (Preset == ReversedRainbow)
+		{
+			std::reverse(colors.begin(), colors.end());
+		}
+		
+		OLE_COLOR clr1, clr2;
+		IGridColorBreak* br = NULL;
+		double step = (HighValue - LowValue) / 6;
+
+		for(int i = 0; i < 6; i++)
+		{
+			GetUtils()->CreateInstance(idGridColorBreak, (IDispatch**)&br);
+			br->put_LowValue(LowValue + i * step);
+			br->put_HighValue(LowValue + (i + 1) * step);
+			GetUtils()->ColorByName(colors[i], &clr1);
+			GetUtils()->ColorByName(colors[i + 1], &clr2);
+			br->put_LowColor(clr1);
+			br->put_HighColor(clr2);
+			InsertBreak(br);
+			br->Release();
+		}
+	}
+	else if( Preset == SummerMountains )
 	{	
 		IGridColorBreak* lowbreak, * highbreak;
 		CoCreateInstance(CLSID_GridColorBreak,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorBreak,(void**)&lowbreak);

@@ -5327,6 +5327,8 @@ STDMETHODIMP CUtils::get_ComUsageReport(VARIANT_BOOL unreleasedOnly, BSTR* retVa
 	return S_OK;
 }
 
+#pragma region Raster Calculator
+
 // ********************************************************
 //     ValidateInputNames()
 // ********************************************************
@@ -5545,127 +5547,122 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		*errorMsg = A2BSTR(err);
 		goto cleaning;
 	}
-	else
+	
+	// --------------------------------------------------------
+	//   looking for source bands
+	// --------------------------------------------------------
+	int numFields = expr.get_NumFields();
+	for(int i = 0; i < numFields; i++)
 	{
-		// --------------------------------------------------------
-		//   looking for source bands
-		// --------------------------------------------------------
-		int numFields = expr.get_NumFields();
-		for(int i = 0; i < numFields; i++)
+		CString name = expr.get_FieldName(i);
+		int pos = name.Find('@', 0);
+		if (pos == -1 || pos == name.GetLength() - 1)
 		{
-			CString name = expr.get_FieldName(i);
-			int pos = name.Find('@', 0);
-			if (pos == -1 || pos == name.GetLength() - 1)
-			{
-				ErrorMessage(tkINVALID_EXPRESSION);
-				err.Format("Invalid formula field: %s; @ sign to separate filename and band index is expected", name);
-				*errorMsg = A2BSTR(err);
-				goto cleaning;
-			}
+			ErrorMessage(tkINVALID_EXPRESSION);
+			err.Format("Invalid formula field: %s; @ sign to separate filename and band index is expected", name);
+			*errorMsg = A2BSTR(err);
+			goto cleaning;
+		}
 
-			CString dtName = name.Mid(0, pos).MakeLower();
-			if (datasets.find(dtName) != datasets.end())
+		CString dtName = name.Mid(0, pos).MakeLower();
+		if (datasets.find(dtName) != datasets.end())
+		{
+			GDALDataset* dt = datasets[dtName];
+			int bandIndex = atoi_custom(name.Mid(pos + 1));
+			GDALRasterBand* band = dt->GetRasterBand(bandIndex);
+			if (band)
 			{
-				GDALDataset* dt = datasets[dtName];
-				int bandIndex = atoi_custom(name.Mid(pos + 1));
-				GDALRasterBand* band = dt->GetRasterBand(bandIndex);
-				if (band)
-				{
-					CExpressionValue* val = expr.get_FieldValue(i);
-					val->band = band;
-					val->type = vtFloatArray;
-					double nodv = band->GetNoDataValue();
-					val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
-				}
-				else
-				{
-					ErrorMessage(tkINVALID_EXPRESSION);
-					err.Format("Band wasn't found: %s", name);
-					*errorMsg = A2BSTR(err);
-					goto cleaning;
-				}
+				CExpressionValue* val = expr.get_FieldValue(i);
+				val->band = band;
+				val->type = vtFloatArray;
+				double nodv = band->GetNoDataValue();
+				val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
 			}
 			else
 			{
-				err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
+				ErrorMessage(tkINVALID_EXPRESSION);
+				err.Format("Band wasn't found: %s", name);
+				*errorMsg = A2BSTR(err);
 				goto cleaning;
 			}
 		}
-		
-		// --------------------------------------------------------
-		//   doing calculations
-		// --------------------------------------------------------
-		long numColumns = xSize;
-		long numRows = ySize;
-		long percent = 0;
-		for(long i = 0; i < numRows; i++ )
+		else
 		{
-			Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
+			err.Format("Invalid formula field: %s; no dataset with such name in input names", name);
+			goto cleaning;
+		}
+	}
+	
+	// --------------------------------------------------------
+	//   doing calculations
+	// --------------------------------------------------------
+	long numColumns = xSize;
+	long numRows = ySize;
+	long percent = 0;
+	float* calcData = new float[numColumns];
 
-			for(int j = 0; j < numFields; j++)
-			{
-				CExpressionValue* val = expr.get_FieldValue(j);
-				GDALRasterBand* band = ((GDALRasterBand*)val->band);
-				double nodv = band->GetNoDataValue();
-				if (val->matrix) delete val->matrix;
-				val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
-				band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
-			}
+	for(long i = 0; i < numRows; i++ )
+	{
+		Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
 
-			CString errorMsg;
-			CExpressionValue* resultVal = expr.Calculate(errorMsg);
-			if (resultVal)
-			{
-				RasterMatrix* resultMatrix = resultVal->matrix;
-
-				bool resultIsNumber = resultMatrix->isNumber();
-				float* calcData = new float[numColumns];
-
-				if ( resultIsNumber ) //scalar result. Insert number for every pixel
-				{
-					for ( int j = 0; j < numColumns; ++j )
-					{
-						calcData[j] = (float)resultMatrix->number();
-					}
-				}
-				else //result is real matrix
-				{
-					memcpy(calcData, resultMatrix->data(), resultMatrix->GetBufferSize());
-					//calcData = resultMatrix->data();
-				}
-
-				float ndv = (float)resultMatrix->nodataValue();
-				int count = 0;
-				for ( int j = 0; j < numColumns; ++j )
-				{
-					if ( calcData[j] == ndv )
-					{
-						calcData[j] = outputNodataValue;
-						count++;
-					}
-				}
-				
-				if (bandOutput->RasterIO( GF_Write, 0, i, numColumns, 1, calcData, numColumns, 1, GDT_Float32, 0, 0 ) != CE_None )
-				{
-					return S_FALSE;
-				}
-				
-				delete[] calcData;
-
-				expr.ReleaseMemory();
-			}
+		for(int j = 0; j < numFields; j++)
+		{
+			CExpressionValue* val = expr.get_FieldValue(j);
+			GDALRasterBand* band = ((GDALRasterBand*)val->band);
+			double nodv = band->GetNoDataValue();
+			if (val->matrix) delete val->matrix;
+			val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
+			band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
 		}
 
-		expr.Clear();
+		CString errorMsg;
+		CExpressionValue* resultVal = expr.Calculate(errorMsg);
+		if (resultVal)
+		{
+			RasterMatrix* resultMatrix = resultVal->matrix;
 
+			bool resultIsNumber = resultMatrix->isNumber();
+			
+
+			if ( resultIsNumber ) //scalar result. Insert number for every pixel
+			{
+				for ( int j = 0; j < numColumns; ++j )
+				{
+					calcData[j] = (float)resultMatrix->number();
+				}
+			}
+			else //result is real matrix
+			{
+				memcpy(calcData, resultMatrix->data(), resultMatrix->GetBufferSize());
+			}
+
+			float ndv = (float)resultMatrix->nodataValue();
+			int count = 0;
+			for ( int j = 0; j < numColumns; ++j )
+			{
+				if ( calcData[j] == ndv )
+				{
+					calcData[j] = outputNodataValue;
+					count++;
+				}
+			}
+			
+			if (bandOutput->RasterIO( GF_Write, 0, i, numColumns, 1, calcData, numColumns, 1, GDT_Float32, 0, 0 ) != CE_None )
+				goto cleaning;
+			
+			expr.ReleaseMemory();
+		}
 	}
-
 	*retVal = VARIANT_TRUE;
 
 cleaning:
 	// ------------------------------------------------------
 	//	Cleaning
 	// ------------------------------------------------------
+	if (calcData)
+		delete[] calcData;
+
+	expr.Clear();
 	Utility::DisplayProgressCompleted(callback);
 	map<CString, GDALDataset*>::iterator it = datasets.begin();
 	while (it != datasets.end()) 
@@ -5678,5 +5675,196 @@ cleaning:
 	if (dtOutput)
 		GdalHelper::CloseDataset(dtOutput);
 	
+	return S_OK;
+}
+#pragma endregion
+
+#pragma region Reclassify raster
+
+// ********************************************************
+//     ParseSafeArray()
+// ********************************************************
+bool CUtils::ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr)
+{
+	// Check dimensions of the array.
+	if (SafeArrayGetDim(arr) != 1)
+	{
+		// most likely this error will be caught while marshalling the array
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		return false;
+	}
+
+	HRESULT hr;
+	hr = SafeArrayGetLBound(arr, 1, &lLBound);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		return false;
+	}
+
+	hr = SafeArrayGetUBound(arr, 1, &lUBound);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		return false;
+	}
+
+	hr = SafeArrayAccessData(arr, (void HUGEP* FAR*)pbstr);
+	if (FAILED(hr))
+	{
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		return false;
+	}
+	return true;
+}
+
+// ********************************************************
+//     ReclassifyRaster()
+// ********************************************************
+STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputName, SAFEARRAY* LowBounds, 
+									  SAFEARRAY* HighBounds, SAFEARRAY* NewValues, 
+									  BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	USES_CONVERSION;
+	CStringW name = OLE2W(Filename);
+	CStringW outName = OLE2W(outputName);
+	
+	if (!Utility::fileExistsW(name))
+	{
+		ErrorMessage(tkFILE_NOT_EXISTS);
+		return S_FALSE;
+	}
+
+	if (Utility::fileExistsW(outName))
+	{
+		ErrorMessage(tkFILE_EXISTS);
+		return S_FALSE;
+	}
+	
+	double* lows, *highs, *vals;
+	LONG lb1, ub1, lb2, ub2, lb3, ub3; 
+	if (!ParseSafeArray(LowBounds, lb1, ub1, (void**)&lows))
+	{
+		return S_FALSE;
+	}
+
+	if (!ParseSafeArray(HighBounds, lb2, ub2, (void**)&highs))
+	{
+		return S_FALSE;
+	}
+
+	if (!ParseSafeArray(NewValues, lb3, ub3, (void**)&vals))
+	{
+		return S_FALSE;
+	}
+
+	long length = ub1 - lb1;
+	if (ub2 - lb2 != length || ub3 - lb3 != length || length == 0)
+	{
+		ErrorMessage(tkINVALID_PARAMETERS_ARRAY);
+		return S_OK;
+	}
+	
+	std::deque<BreakVal> breaks;
+	for (int i = 0; i < length; i++)
+	{
+		BreakVal b;
+		b.highVal = highs[i];
+		b.lowVal = lows[i];
+		b.newVal = vals[i];
+		breaks.push_back(b);
+	}
+
+	GDALDataset* dtOutput = NULL;
+	float* data = NULL;
+
+	// -------------------------------------------------------
+	//		Source
+	// -------------------------------------------------------
+	GDALDataset* dt = GdalHelper::OpenDatasetW(name, GDALAccess::GA_ReadOnly);
+	if (!dt)
+	{
+		ErrorMessage(tkCANT_OPEN_FILE);
+		return S_FALSE;
+	}
+	int	xSize = dt->GetRasterXSize();
+	int ySize = dt->GetRasterYSize();
+
+	int bandCount = dt->GetRasterCount();
+	if (bandIndex > bandCount)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		goto cleaning;
+	}
+	GDALRasterBand* band = dt->GetRasterBand(bandIndex);
+	if (!band)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		goto cleaning;
+	}
+	
+	// -------------------------------------------------------
+	//		Creating output
+	// -------------------------------------------------------
+	GDALDriverH driver = OpenOutputDriver(OLE2A(gdalOutputFormat));
+	if (driver != NULL)
+	{
+		dtOutput = OpenOutputFile(driver, OLE2W(outputName), xSize, ySize, dt);
+	}
+
+	if (!dtOutput)
+	{
+		ErrorMsg(tkCANT_CREATE_FILE);
+		goto cleaning;
+	}
+
+	// setting no data value
+	GDALRasterBand* bandOutput = dtOutput->GetRasterBand(1);
+	bandOutput->SetNoDataValue(band->GetNoDataValue());
+	
+	// -------------------------------------------------------
+	//	  Processing
+	// -------------------------------------------------------
+	long numColumns = xSize;
+	long numRows = ySize;
+	long percent = 0;
+	data = new float[numColumns];
+	long index;
+
+	for(long i = 0; i < numRows; i++ )
+	{
+		Utility::DisplayProgress(cBack, i, numRows, "Calculating", key, percent);
+		
+		band->RasterIO(GF_Read, 0, i, numColumns, 1, data, numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
+
+		for(int j = 0; j < numColumns; j++)
+		{
+			index = findBreak(breaks, (double)(*(data + j)));
+			if (index != -1)
+			{
+				*(data + j) = (float)breaks[index].newVal;
+			}
+			else
+			{
+				// leave it untouched
+			}
+
+		}
+		if (bandOutput->RasterIO( GF_Write, 0, i, numColumns, 1, data, numColumns, 1, GDT_Float32, 0, 0 ) != CE_None )
+			goto cleaning;
+	}
+	*retVal = VARIANT_TRUE;
+	
+cleaning:
+	if (data)
+		delete[] data;
+	if (dt)
+		GdalHelper::CloseDataset(dt);
+	if (dtOutput)
+		GdalHelper::CloseDataset(dtOutput);
+
 	return S_OK;
 }

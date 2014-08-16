@@ -109,6 +109,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Spatial operation failed";
 		case tkFAILED_TO_READ_INPUT_NAMES:
 			return "Failed to read the names of input files";
+		case tkINVALID_PARAMETERS_ARRAY:
+			return "Failed to read array of input parameters";
 
 			//201 - 400 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
@@ -173,6 +175,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to build temporary spatial index for operation.";
 		case tkINMEMORY_SHAPEFILE_EXPECTED:
 			return "Operation is valid for in-memory shapefiles only.";
+		case tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE:
+			return "Shape contains too few points for specifeid shape type.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

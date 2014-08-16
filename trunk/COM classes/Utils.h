@@ -34,6 +34,7 @@ struct BreakVal
 {	
 	double lowVal;
 	double highVal;
+	double newVal;
 };
 
 struct CallbackParams
@@ -194,7 +195,10 @@ public:
 	STDMETHOD(get_ComUsageReport)(VARIANT_BOOL unreleasedOnly, BSTR* retVal);
 	STDMETHOD(CalculateRaster)(SAFEARRAY* filenames, BSTR expression, BSTR outputFilename, BSTR gdalOutputFormat, 
 		float noDataValue, ICallback* cBack, BSTR* errorMsg, VARIANT_BOOL* retVal);
-	
+	STDMETHOD(ReclassifyRaster)(BSTR Filename, int bandIndex, BSTR outputName, SAFEARRAY* LowerBounds, 
+		SAFEARRAY* UpperBounds, SAFEARRAY* NewValues, 
+		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
+
 	// must not be included in interface
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
 private:
@@ -278,6 +282,7 @@ private:
 	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void ErrorMessage(long ErrorCode);
 	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
+	bool ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr);
 
 	/* GDAL/OGR functions */
 	void Parse(CString sOrig, int * opts);

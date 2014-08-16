@@ -888,6 +888,8 @@ enum tkScalebarUnits
 		[helpstring("ValleyFires")] ValleyFires = 5,	
 		[helpstring("DeadSea")] DeadSea = 6,	
 		[helpstring("Highway1")] Highway1 = 7,	
+		[helpstring("Rainbow")] Rainbow = 8,	
+		[helpstring("ReversedRainbow")] ReversedRainbow = 9,	
 	} PredefinedColorScheme;
 	
 	typedef
@@ -3649,8 +3651,9 @@ interface IUtils : IDispatch{
 	[propget, id(50), helpstring("method ComUsageReport")] HRESULT ComUsageReport([in]VARIANT_BOOL unreleasedOnly, [out, retval]BSTR* retVal);
 	[id(51)] HRESULT CalculateRaster([in]SAFEARRAY(BSTR) filenames, [in]BSTR expression, [in]BSTR outputFilename, 
 		[in]BSTR gdalOutputFormat, [in] float noDataValue, [in]ICallback* cBack, [out]BSTR* errorMsg, [out, retval]VARIANT_BOOL* retVal);
-
-	
+	[id(52)] HRESULT ReclassifyRaster([in]BSTR Filename, [in]int bandIndex, [in]BSTR outputName, 
+		[in]SAFEARRAY(double) LowerBounds, [in]SAFEARRAY(double) UpperBounds, 
+		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/
