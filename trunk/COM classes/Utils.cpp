@@ -5454,6 +5454,8 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	int xSize = 0;
 	int ySize = 0;
 	
+	float* calcData = NULL;
+
 	GDALAllRegister();
 
 	USES_CONVERSION;
@@ -5599,7 +5601,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	long numColumns = xSize;
 	long numRows = ySize;
 	long percent = 0;
-	float* calcData = new float[numColumns];
+	calcData = new float[numColumns];
 
 	for(long i = 0; i < numRows; i++ )
 	{
