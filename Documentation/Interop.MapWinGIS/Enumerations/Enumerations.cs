@@ -136,6 +136,8 @@ namespace MapWinGIS
         ValleyFires = 5,
         DeadSea = 6,
         Highway1 = 7,
+        Rainbox = 8,
+        ReversedRainbow = 9,
     }
 
     /// <summary>

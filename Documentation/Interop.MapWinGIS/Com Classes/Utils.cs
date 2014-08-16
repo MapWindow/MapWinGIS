@@ -690,6 +690,56 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Creates a new datasource by mapping data ranges of the specified band of input datasource 
+        /// to new values. 
+        /// </summary>
+        /// <param name="Filename">Filename of input GDAL raster datasource.</param>
+        /// <param name="bandIndex">Band index of input datasource to be processed.</param>
+        /// <param name="OutputName">Filename of output datasource.</param>
+        /// <param name="LowerBounds">Array of double type with lower bounds of mapping ranges. These values
+        /// will be compared with values of input datasource.</param>
+        /// <param name="UpperBounds">Array of double type with upper bounds of mapping ranges. These values
+        /// will be compared with values of input datasource.</param>
+        /// <param name="NewValues">Array of double type with values to be set for output datasource
+        /// for each mapping range.</param>
+        /// <param name="gdalOutputFormat">GDAL format. See list here: http://www.gdal.org/formats_list.html. Not
+        /// all of them are necessarily support creation and writing operations.</param>
+        /// <param name="cBack">Callback to report progress and errors.</param>
+        /// <returns>True on success.</returns>
+        /// <remarks>
+        /// All 3 input arrays must be of the same size. In case of overlapping ranges the one located first
+        /// will be used. Here is code sample with 5 data ranges using anonymous data type:
+        /// \code
+        /// var ut = new Utils();
+        /// var arr = new[]
+        /// {
+        ///    new {Low = 0.0, High = 20.0, NewValue = 40.0},
+        ///    new {Low = 20.0, High = 40.0, NewValue = 150.0},
+        ///    new {Low = 40.0, High = 60.0, NewValue = 100.0},
+        ///    new {Low = 60.0, High = 80.0, NewValue = 20.0},
+        ///    new {Low = 80.0, High = 100.0, NewValue = 80.0},
+        /// };
+        /// if (!ut.ReclassifyRaster(@"d:\source.tiff", 1 /* band index */, 
+        ///    @"d:\output.tif", 
+        ///    arr.Select(i => i.Low).ToArray(),
+        ///    arr.Select(i => i.High).ToArray(),
+        ///    arr.Select(i => i.NewValue).ToArray(),
+        ///    "GTiff", this /* callback */))
+        /// {
+        ///    MessageBox.Show("Failed to reclassify: " + ut.get_ErrorMsg(ut.LastErrorCode));
+        /// }
+        /// else
+        /// {
+        ///    MessageBox.Show("Reclassified successfully");
+        /// }
+        /// \endcode
+        /// </remarks>
+        public bool ReclassifyRaster(string Filename, int bandIndex, string OutputName, Array LowerBounds, Array UpperBounds, Array NewValues, string gdalOutputFormat, ICallback cBack)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }
