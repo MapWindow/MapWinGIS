@@ -524,7 +524,7 @@ namespace TestApplication
         MyAxMap.ZoomToMaxExtents();
         MyAxMap.Redraw();
 
-        theForm.Progress(string.Empty, 0, string.Format("The closest shape is: {0} and has a length of {1}", searchSf.get_CellValue(0, closestIndex), minLength));
+        theForm.Progress(string.Empty, 100, string.Format("The closest shape is: {0} and has a length of {1}", searchSf.get_CellValue(0, closestIndex), minLength));
 
         // Save result:
         var newFilename = pointSf.Filename.Replace(".shp", "-Closest.shp");

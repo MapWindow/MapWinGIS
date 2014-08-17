@@ -32,6 +32,11 @@
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
       this.splitContainer1 = new System.Windows.Forms.SplitContainer();
       this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+      this.groupBox25 = new System.Windows.Forms.GroupBox();
+      this.RunReclassifyTest = new System.Windows.Forms.Button();
+      this.SelectReclassifyInput = new System.Windows.Forms.Button();
+      this.ReclassifyInput = new System.Windows.Forms.TextBox();
+      this.label27 = new System.Windows.Forms.Label();
       this.groupBox24 = new System.Windows.Forms.GroupBox();
       this.RunGridProxyTest = new System.Windows.Forms.Button();
       this.SelectGridProxyInput = new System.Windows.Forms.Button();
@@ -174,6 +179,7 @@
       this.splitContainer2.Panel1.SuspendLayout();
       this.splitContainer2.Panel2.SuspendLayout();
       this.splitContainer2.SuspendLayout();
+      this.groupBox25.SuspendLayout();
       this.groupBox24.SuspendLayout();
       this.groupBox30.SuspendLayout();
       this.groupBox33.SuspendLayout();
@@ -237,6 +243,7 @@
       // splitContainer2.Panel1
       // 
       this.splitContainer2.Panel1.AutoScroll = true;
+      this.splitContainer2.Panel1.Controls.Add(this.groupBox25);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox24);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox23);
       this.splitContainer2.Panel1.Controls.Add(this.groupBox30);
@@ -258,6 +265,62 @@
       this.splitContainer2.Size = new System.Drawing.Size(929, 699);
       this.splitContainer2.SplitterDistance = 230;
       this.splitContainer2.TabIndex = 0;
+      // 
+      // groupBox25
+      // 
+      this.groupBox25.BackColor = System.Drawing.Color.RosyBrown;
+      this.groupBox25.Controls.Add(this.RunReclassifyTest);
+      this.groupBox25.Controls.Add(this.SelectReclassifyInput);
+      this.groupBox25.Controls.Add(this.ReclassifyInput);
+      this.groupBox25.Controls.Add(this.label27);
+      this.groupBox25.Location = new System.Drawing.Point(5, 2471);
+      this.groupBox25.Name = "groupBox25";
+      this.groupBox25.Size = new System.Drawing.Size(205, 96);
+      this.groupBox25.TabIndex = 13;
+      this.groupBox25.TabStop = false;
+      this.groupBox25.Text = "Reclassify raster";
+      // 
+      // RunReclassifyTest
+      // 
+      this.RunReclassifyTest.Location = new System.Drawing.Point(12, 58);
+      this.RunReclassifyTest.Name = "RunReclassifyTest";
+      this.RunReclassifyTest.Size = new System.Drawing.Size(180, 23);
+      this.RunReclassifyTest.TabIndex = 25;
+      this.RunReclassifyTest.Tag = "run";
+      this.RunReclassifyTest.Text = "Run test";
+      this.RunReclassifyTest.UseVisualStyleBackColor = true;
+      this.RunReclassifyTest.Click += new System.EventHandler(this.RunReclassifyTestClick);
+      // 
+      // SelectReclassifyInput
+      // 
+      this.SelectReclassifyInput.Location = new System.Drawing.Point(166, 32);
+      this.SelectReclassifyInput.Name = "SelectReclassifyInput";
+      this.SelectReclassifyInput.Size = new System.Drawing.Size(27, 20);
+      this.SelectReclassifyInput.TabIndex = 24;
+      this.SelectReclassifyInput.Text = "...";
+      this.toolTip1.SetToolTip(this.SelectReclassifyInput, "Select first raster file");
+      this.SelectReclassifyInput.UseVisualStyleBackColor = true;
+      this.SelectReclassifyInput.Click += new System.EventHandler(this.SelectReclassifyInputClick);
+      // 
+      // ReclassifyInput
+      // 
+      this.ReclassifyInput.AcceptsReturn = true;
+      this.ReclassifyInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "ReclassifyInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+      this.ReclassifyInput.Location = new System.Drawing.Point(13, 32);
+      this.ReclassifyInput.Name = "ReclassifyInput";
+      this.ReclassifyInput.Size = new System.Drawing.Size(147, 20);
+      this.ReclassifyInput.TabIndex = 23;
+      this.ReclassifyInput.Text = global::TestApplication.Properties.Settings.Default.ReclassifyInput;
+      this.toolTip1.SetToolTip(this.ReclassifyInput, "Select text file with rasters and formulas");
+      // 
+      // label27
+      // 
+      this.label27.AutoSize = true;
+      this.label27.Location = new System.Drawing.Point(10, 16);
+      this.label27.Name = "label27";
+      this.label27.Size = new System.Drawing.Size(76, 13);
+      this.label27.TabIndex = 22;
+      this.label27.Text = "Select text file:";
       // 
       // groupBox24
       // 
@@ -317,7 +380,7 @@
       // 
       // groupBox23
       // 
-      this.groupBox23.Location = new System.Drawing.Point(5, 2503);
+      this.groupBox23.Location = new System.Drawing.Point(5, 2584);
       this.groupBox23.Name = "groupBox23";
       this.groupBox23.Size = new System.Drawing.Size(205, 128);
       this.groupBox23.TabIndex = 11;
@@ -1759,6 +1822,8 @@
       this.splitContainer2.Panel1.PerformLayout();
       this.splitContainer2.Panel2.ResumeLayout(false);
       this.splitContainer2.ResumeLayout(false);
+      this.groupBox25.ResumeLayout(false);
+      this.groupBox25.PerformLayout();
       this.groupBox24.ResumeLayout(false);
       this.groupBox24.PerformLayout();
       this.groupBox30.ResumeLayout(false);
@@ -1960,6 +2025,11 @@
     private System.Windows.Forms.Button SelectGridProxyInput;
     private System.Windows.Forms.TextBox GridProxyInput;
     private System.Windows.Forms.Label label26;
+    private System.Windows.Forms.GroupBox groupBox25;
+    private System.Windows.Forms.Button RunReclassifyTest;
+    private System.Windows.Forms.Button SelectReclassifyInput;
+    private System.Windows.Forms.TextBox ReclassifyInput;
+    private System.Windows.Forms.Label label27;
   }
 }
 

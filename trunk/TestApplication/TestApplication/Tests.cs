@@ -12,6 +12,7 @@ namespace TestApplication
   using System.Diagnostics;
   using System.Globalization;
   using System.IO;
+  using System.Linq;
   using System.Threading;
   using System.Windows.Forms;
 
@@ -88,7 +89,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The shapefile open tests have started.", Environment.NewLine));
+        string.Format("-----------------------The shapefile open tests have started.", Environment.NewLine));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -128,7 +129,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The tiles load tests have started.", Environment.NewLine));
+        string.Format("-----------------------The tiles load tests have started.", Environment.NewLine));
 
       var retVal = true;
 
@@ -151,8 +152,8 @@ namespace TestApplication
       MyAxMap.Tiles.UseServer = true;
 
       // Do some logging
-      theForm.Progress(string.Empty, 0, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
-      theForm.Progress(string.Empty, 0, "CheckConnection: " + MyAxMap.Tiles.CheckConnection("http://www.google.com"));
+      theForm.Progress(string.Empty, 100, "DiskCacheFilename: " + MyAxMap.Tiles.DiskCacheFilename);
+      theForm.Progress(string.Empty, 100, "CheckConnection: " + MyAxMap.Tiles.CheckConnection("http://www.google.com"));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -171,7 +172,7 @@ namespace TestApplication
 
         if (!int.TryParse(lines[i + 1], out provId))
         {
-          theForm.Progress(string.Empty, 0, "Use custom provider");
+          theForm.Progress(string.Empty, 100, "Use custom provider");
 
           // Add custom provider:
           MyAxMap.Tiles.Providers.Clear(true);
@@ -209,7 +210,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Spatial Index tests have started.", Environment.NewLine));
+        string.Format("-----------------------The Spatial Index tests have started.", Environment.NewLine));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -236,7 +237,7 @@ namespace TestApplication
         Application.DoEvents();
 
         // Check:
-        theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
+        theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Now do some selecting to time without spatial index.
         var utils = new Utils { GlobalCallback = theForm };
@@ -255,13 +256,13 @@ namespace TestApplication
         }
 
         // Check:
-        theForm.Progress(string.Empty, 0, "SpatialIndexMaxAreaPercent: " + sf.SpatialIndexMaxAreaPercent);
+        theForm.Progress(string.Empty, 100, "SpatialIndexMaxAreaPercent: " + sf.SpatialIndexMaxAreaPercent);
 
         // Set index:
         sf.UseSpatialIndex = true;
 
         // Check:
-        theForm.Progress(string.Empty, 0, "Shapefile has index: " + sf.HasSpatialIndex);
+        theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
 
         // Check if the files are created:
         if (!(File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat")))
@@ -319,16 +320,16 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The image open tests have started.", Environment.NewLine));
+        string.Format("-----------------------The image open tests have started.", Environment.NewLine));
 
       // Read text file:
       var count = 1;
       var lines = Helper.ReadTextfile(textfileLocation);
       foreach (var line in lines)
       {
-        theForm.Progress(string.Empty, 0, " ");
-        theForm.Progress(string.Empty, 0, "Image: " + count);
-        theForm.Progress(string.Empty, 0, "-------------------------------");
+        theForm.Progress(string.Empty, 100, " ");
+        theForm.Progress(string.Empty, 100, "Image: " + count);
+        theForm.Progress(string.Empty, 100, "-------------------------------");
         count++;
 
         // Open image:
@@ -383,7 +384,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The grid open tests have started.", Environment.NewLine));
+        string.Format("-----------------------The grid open tests have started.", Environment.NewLine));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -536,7 +537,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Clip grid by polygon test has started.", Environment.NewLine));
+        string.Format("-----------------------The Clip grid by polygon test has started.", Environment.NewLine));
 
       var retVal = true;
 
@@ -581,7 +582,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Shapefile to grid test has started.", Environment.NewLine));
+        string.Format("-----------------------The Shapefile to grid test has started.", Environment.NewLine));
 
       var retVal = true;
 
@@ -689,7 +690,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Rasterize shapefile test has started.", Environment.NewLine));
+        string.Format("-----------------------The Rasterize shapefile test has started.", Environment.NewLine));
 
       try
       {
@@ -713,7 +714,7 @@ namespace TestApplication
         const string FieldName = "MWShapeID";
         if (sf.Table.get_FieldIndexByName(FieldName) == -1)
         {
-          theForm.Progress(string.Empty, 0, "Adding " + FieldName + " as field");
+          theForm.Progress(string.Empty, 100, "Adding " + FieldName + " as field");
 
           if (!sf.StartEditingShapes(true, theForm))
           {
@@ -794,7 +795,7 @@ namespace TestApplication
       theForm.Progress(
             string.Empty,
             0,
-            string.Format("{0}-----------------------{0}The AxMap.Clear() test has started.", Environment.NewLine));
+            string.Format("-----------------------The AxMap.Clear() test has started.", Environment.NewLine));
 
       try
       {
@@ -823,6 +824,7 @@ namespace TestApplication
 
         // Clear everything from the map
         MyAxMap.Clear();
+        Application.DoEvents();
 
         // Test the projection
         if (shapeProj == tkMapProjection.PROJECTION_NONE)
@@ -878,7 +880,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Raster calculator test has started.", Environment.NewLine));
+        string.Format("-----------------------The Raster calculator test has started.", Environment.NewLine));
 
       var retVal = true;
 
@@ -888,7 +890,7 @@ namespace TestApplication
       // Get every first, second and third line:
       for (var i = 0; i < lines.Count; i = i + 3)
       {
-        if (i + 1 > lines.Count)
+        if (i + 2 > lines.Count)
         {
           theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
           break;
@@ -915,7 +917,7 @@ namespace TestApplication
     /// <returns>True on success</returns>
     internal static bool RunGridProxyTest(string textfileLocation, Form1 theForm)
     {
-      var retVal = false;
+      var numErrors = 0;
 
       // Open text file:
       if (!File.Exists(textfileLocation))
@@ -926,23 +928,54 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The grid proxy tests have started.", Environment.NewLine));
+        string.Format("-----------------------The grid proxy tests have started.", Environment.NewLine));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
-      foreach (var line in lines)
+      
+      // Get every first and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
       {
-        MyAxMap.Clear();
-
-        var grid = new Grid();
-        if (grid.Open(line, GridDataType.UnknownDataType, true, GridFileType.UseExtension, null))
+        if (i + 1 > lines.Count)
         {
-          var scheme = grid.RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval.gsrAuto, tkGridSchemeGeneration.gsgGradient, PredefinedColorScheme.SummerMountains);
-          var img = grid.OpenAsImage(scheme, tkGridProxyMode.gpmAuto, null);
+          theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
+          break;
+        }
+
+        MyAxMap.Clear();
+        Application.DoEvents();
+
+        var grid = new Grid { GlobalCallback = theForm };
+        var filename = lines[i];
+        var colorScheme = Convert.ToInt32(lines[i + 1]);
+        theForm.Progress(
+          string.Empty,
+          100,
+          string.Format("++++++++++++++++++ Loading grid with color scheme {0}", (PredefinedColorScheme)colorScheme));
+        if (grid.Open(filename, GridDataType.UnknownDataType, true, GridFileType.UseExtension, theForm))
+        {
+          // If it already has a proxy file, remove it first:
+          if (grid.HasValidImageProxy)
+          {
+            grid.RemoveImageProxy();
+          }
+
+          var scheme = grid.GenerateColorScheme(tkGridSchemeGeneration.gsgGradient, (PredefinedColorScheme)colorScheme);
+          theForm.Progress(string.Empty, 100, "Scheme: " + scheme.Serialize());
+          theForm.Progress(string.Empty, 100, "Open grid as image");
+          var img = grid.OpenAsImage(scheme, tkGridProxyMode.gpmAuto, theForm);
           if (img != null)
           {
+            img.UpsamplingMode = tkInterpolationMode.imHighQualityBilinear;
+            img.DownsamplingMode = tkInterpolationMode.imHighQualityBilinear;
+            theForm.Progress(string.Empty, 100, "Adding to map");
             var handle = MyAxMap.AddLayer(img, true);
-            retVal = handle != -1;
+            if (handle == -1)
+            {
+              numErrors++;
+            }
+
+            MyAxMap.Refresh();
           }
 
           grid.Close();   // we no longer need it as Image class is used for rendering
@@ -950,13 +983,124 @@ namespace TestApplication
 
         // Wait a second to show something:
         Application.DoEvents();
+        theForm.Progress(string.Empty, 100, "Finished adding to map");
         Thread.Sleep(1000);
       }
 
-      theForm.Progress(string.Empty, 100, "The grid proxy tests have finished.");
-      MyAxMap.Redraw();
+      theForm.Progress(string.Empty, 100, string.Format("The grid proxy tests have finished. {0} tests failed", numErrors));
 
-      return retVal;
+      return numErrors == 0;
+    }
+
+    /// <summary>Run the grid proxy test</summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>True on success</returns>
+    internal static bool RunReclassifyTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 100, "-----------------------The reclassify tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
+      {
+        if (i + 1 > lines.Count)
+        {
+          theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
+          break;
+        }
+
+        MyAxMap.Clear();
+        Application.DoEvents();
+
+        var grid = new Grid { GlobalCallback = theForm };
+        var filename = lines[i];
+        var numClasses = Convert.ToInt32(lines[i + 1]);
+        var output = Helper.CreateOutputFilename(filename, "reclassified");
+
+        // Delete output file:
+        Helper.DeleteGridfile(output);
+
+        // Open grid to create reclassify array:);
+        if (!grid.Open(filename, GridDataType.UnknownDataType, true, GridFileType.UseExtension, theForm))
+        {
+          theForm.Error(string.Empty, "Coumd not load inout grid file. Ending test");
+          numErrors++;
+          continue;
+        }
+
+        // TODO: Read statistics from filename.aux.xml file, created after calling gdalinfo -stats
+        var min = (double)grid.Minimum;
+        var max = (double)grid.Maximum;
+
+        // close the grid
+        grid.Close();
+        
+        var difference = max - min;
+        var step = difference / numClasses;
+
+        var ut = new Utils();
+        
+        // TODO: Use the number of classes in the text file:
+        var arr = new[]
+          {
+            new { Low = min, High = min + step, NewValue = 40.0 },
+            new { Low = min + step, High = min + (2 * step), NewValue = 60.0 },
+            //new { Low = 40.0, High = 60.0, NewValue = 80.0 }, 
+            //new { Low = 60.0, High = 80.0, NewValue = 100.0 },
+            new { Low = min + (2 * step), High = max, NewValue = 120.0 },
+          };
+
+        if (!ut.ReclassifyRaster(
+            filename,
+            1,
+            output,
+            arr.Select(j => j.Low).ToArray(),
+            arr.Select(j => j.High).ToArray(),
+            arr.Select(j => j.NewValue).ToArray(),
+            "GTiff",
+            theForm))
+        {
+          theForm.Error(string.Empty, "Failed to reclassify: " + ut.get_ErrorMsg(ut.LastErrorCode));
+        }
+        else
+        {
+          theForm.Progress(string.Empty, 100, "Reclassified successfully");
+
+          // Open the result:
+          if (Fileformats.OpenGridAsLayer(output, theForm, true) == -1)
+          {
+            theForm.Error(string.Empty, "Cannot open the resulting grid");
+            numErrors++;
+          }
+
+          MyAxMap.Refresh();
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        theForm.Progress(string.Empty, 100, "Finished adding to map");
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The reclassify tests have finished. {0} tests failed", numErrors));
+      // MyAxMap.Redraw();
+
+      return numErrors == 0;
     }
 
     /// <summary>
@@ -976,7 +1120,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("{0}-----------------------{0}The Aggregate shapefile test has started.", Environment.NewLine));
+        string.Format("-----------------------The Aggregate shapefile test has started.", Environment.NewLine));
 
       var retVal = true;
 
@@ -1035,7 +1179,7 @@ namespace TestApplication
       var layerHandle = Fileformats.OpenShapefileAsLayer(shapefileLocation, theForm, true);
       MyAxMap.ZoomToLayer(layerHandle);
 
-      theForm.Progress(string.Empty, 0, string.Format("Map projection: {0} ({1})", MyAxMap.GeoProjection.Name, MyAxMap.GeoProjection.GeogCSName));
+      theForm.Progress(string.Empty, 100, string.Format("Map projection: {0} ({1})", MyAxMap.GeoProjection.Name, MyAxMap.GeoProjection.GeogCSName));
 
       var sf = MyAxMap.get_Shapefile(layerHandle);
 
@@ -1046,7 +1190,7 @@ namespace TestApplication
       }
 
       // turn off the symbology to see the tiles  
-      theForm.Progress(string.Empty, 0, string.Format("Layer projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
+      theForm.Progress(string.Empty, 100, string.Format("Layer projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
       sf.DefaultDrawingOptions.FillVisible = false;
       sf.Categories.Clear();
       sf.Labels.Clear();
@@ -1095,7 +1239,7 @@ namespace TestApplication
       // Do some zooming:
       for (var zoom = StartZoom; zoom <= maxZoom - 2; zoom++)
       {
-        theForm.Progress(string.Empty, 0, "Zooming to: " + zoom);
+        theForm.Progress(string.Empty, 100, "Zooming to: " + zoom);
         MyAxMap.ZoomToTileLevel(zoom);
 
         // Continue when tiles are loaded:
@@ -1165,8 +1309,6 @@ namespace TestApplication
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
 
-        //bool hasInvalid = sf.HasInvalidShapes();
-
         theForm.Progress(string.Empty, 0, "Start aggregating " + Path.GetFileName(shapefilename));
         var aggregatedSf = sf.AggregateShapes(false, fieldIndex);
         var info = sf.LastOutputValidation;
@@ -1175,62 +1317,15 @@ namespace TestApplication
           Debug.Print("Shapefile returned: " + (aggregatedSf != null));
           if (aggregatedSf != null)
           {
-            bool hasInvalidShapes = aggregatedSf.HasInvalidShapes();
+            var hasInvalidShapes = aggregatedSf.HasInvalidShapes();
             Debug.Print("Has invalid shapes: " + hasInvalidShapes);
           }
+
           Debug.Print("Operation is valid: " + info.IsValid);
         }
 
         // Check if the result still contained invalid shapes:
-        Shapefile correctSf;
-        //if (!aggregatedSf.HasInvalidShapes())
-        //{
-        correctSf = aggregatedSf;
-        //  theForm.Progress(string.Empty, 0, "The aggregated shapefile has no invalid shapes");
-        //  for (int i = 0; i < aggregatedSf.NumShapes; i++)
-        //  {
-        //    var shp = aggregatedSf.get_Shape(i);
-        //    if (!shp.IsValid)
-        //    {
-        //      Debug.Print("Is valid index: " + shp.IsValidReason);
-        //      Debug.Print(shp.ExportToWKT());
-        //      aggregatedSf.set_ShapeSelected(i, true);
-        //    }
-        //    else
-        //    {
-        //      Debug.Print("This shape is valid");
-        //    }
-        //  }
-        //}
-        //else
-        //{
-        //  theForm.Progress(string.Empty, 0, string.Empty);
-        //  theForm.Progress(string.Empty, 0, "Warning! The aggregated shapefile has invalid shapes");
-        //  retVal = false;
-
-        //  // The aggregate method is returning invalid shapes, fix them first:
-        //  Shapefile fixedSf;
-
-        //  theForm.Progress(string.Empty, 0, "Start fixing " + Path.GetFileName(shapefilename));
-        //  aggregatedSf.GlobalCallback = theForm;
-        //  if (!aggregatedSf.FixUpShapes(out fixedSf))
-        //  {
-        //    theForm.Error(string.Empty, "The fixup returned false");
-        //    return false;
-        //  }
-
-        //  // Close file, because we continue with the fixed version:
-        //  aggregatedSf.Close();
-
-        //  // Do some checks:)
-        //  if (!Helper.CheckShapefile(sf, fixedSf, globalSettings.GdalLastErrorMsg, theForm))
-        //  {
-        //    return false;
-        //  }
-
-        //  // Continue with this sf:
-        //  correctSf = fixedSf;
-        //}
+        var correctSf = aggregatedSf;
 
         // Save result:
         var newFilename = shapefilename.Replace(".shp", "-aggregate.shp");
@@ -1243,7 +1338,6 @@ namespace TestApplication
         // Load the files:
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(correctSf, true);
-        //MyAxMap.AddLayer(sf, true);
 
         theForm.Progress(
           string.Empty,
@@ -1254,7 +1348,6 @@ namespace TestApplication
             sf.NumShapes,
             correctSf.Table.NumRows));
         theForm.Progress(string.Empty, 100, " ");
-
       }
       catch (Exception exception)
       {
@@ -1307,7 +1400,7 @@ namespace TestApplication
         var shapes = result as int[];
         if (shapes != null)
         {
-          theForm.Progress(string.Empty, 0, "Number of shapes found: " + shapes.Length);
+          theForm.Progress(string.Empty, 100, "Number of shapes found: " + shapes.Length);
           foreach (var index in shapes)
           {
             sf.set_ShapeSelected(index, true);
@@ -1338,7 +1431,7 @@ namespace TestApplication
     private static void DoSomeZooming(ICallback theForm, int numOverviews)
     {
       // Zoom in several times:
-      theForm.Progress(string.Empty, 0, "Zoom in several times");
+      theForm.Progress(string.Empty, 100, "Zoom in several times");
 
       // Initial zooms for shapefiles and grids:
       var numZooms = 4;
@@ -1356,7 +1449,7 @@ namespace TestApplication
       }
 
       // Zoom out again:
-      theForm.Progress(string.Empty, 0, "Zoom out again");
+      theForm.Progress(string.Empty, 100, "Zoom out again");
       for (var i = 0; i < numZooms - 1; i++)
       {
         MyAxMap.ZoomOut(0.2);
@@ -1364,7 +1457,7 @@ namespace TestApplication
       }
 
       // Zoom max extent:
-      theForm.Progress(string.Empty, 0, "Zoom max extent");
+      theForm.Progress(string.Empty, 100, "Zoom max extent");
       MyAxMap.ZoomToMaxExtents();
     }
 
@@ -1536,7 +1629,8 @@ namespace TestApplication
           return false;
         }
 
-        var resultRaster = Path.Combine(folder, "RasterCalculatorTest.tif");
+        // var resultRaster = Path.Combine(folder, "RasterCalculatorTest.tif");
+        var resultRaster = Helper.CreateOutputFilename(rasterA, "calculated");
         Helper.DeleteGridfile(resultRaster);
 
         var globalSettings = new GlobalSettings();

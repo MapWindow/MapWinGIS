@@ -67,8 +67,8 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, "Applying symbology");
         }
 
-        theForm.Progress(string.Empty, 0, "The shapefile is of type " + sf.ShapefileType);
-        theForm.Progress(string.Empty, 0, string.Format("The shapefile its projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
+        theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
+        theForm.Progress(string.Empty, 100, string.Format("The shapefile its projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
         theForm.Progress(string.Empty, 100, "Done opening " + Path.GetFileName(filename));
       }
       else
@@ -131,7 +131,7 @@ namespace TestApplication
           // Without overviews this decreases the performance too much:
           if (img.NumOverviews > 1)
           {
-            theForm.Progress(string.Empty, 0, "Opening the image with high quality interpolation mode.");
+            theForm.Progress(string.Empty, 100, "Opening the image with high quality interpolation mode.");
             img.UpsamplingMode = tkInterpolationMode.imHighQualityBilinear;
             img.DownsamplingMode = tkInterpolationMode.imBilinear;
           }
@@ -143,11 +143,11 @@ namespace TestApplication
           }
 
           // Log characteristics:
-          theForm.Progress(string.Empty, 0, "projection: " + img.GetProjection());
-          theForm.Progress(string.Empty, 0, "Number bands: " + img.NoBands);
-          theForm.Progress(string.Empty, 0, "Number overviews: " + img.NumOverviews);
-          theForm.Progress(string.Empty, 0, "Use transparency?: " + img.UseTransparencyColor);
-          theForm.Progress(string.Empty, 0, "Transparency Color: " + img.TransparencyColor);
+          theForm.Progress(string.Empty, 100, "projection: " + img.GetProjection());
+          theForm.Progress(string.Empty, 100, "Number bands: " + img.NoBands);
+          theForm.Progress(string.Empty, 100, "Number overviews: " + img.NumOverviews);
+          theForm.Progress(string.Empty, 100, "Use transparency?: " + img.UseTransparencyColor);
+          theForm.Progress(string.Empty, 100, "Transparency Color: " + img.TransparencyColor);
 
           hndl = Map.AddLayer(img, true);
 
@@ -223,8 +223,8 @@ namespace TestApplication
           }
 
           // Log projection:
-          theForm.Progress(string.Empty, 0, "Projection: " + grd.Header.GeoProjection.ExportToProj4());
-          theForm.Progress(string.Empty, 0, "Number of bands: " + grd.NumBands);
+          theForm.Progress(string.Empty, 100, "Projection: " + grd.Header.GeoProjection.ExportToProj4());
+          theForm.Progress(string.Empty, 100, "Number of bands: " + grd.NumBands);
 
           hndl = Map.AddLayer(grd, true);
 
@@ -270,11 +270,11 @@ namespace TestApplication
       }
 
       // Log some characteristics:
-      theForm.Progress(string.Empty, 0, "Number of shapes: " + sf.NumShapes);
-      theForm.Progress(string.Empty, 0, "Number of fields: " + sf.NumFields);
-      theForm.Progress(string.Empty, 0, "Type: " + sf.ShapefileType);
-      theForm.Progress(string.Empty, 0, "Projection: " + sf.GeoProjection.ExportToProj4());
-      theForm.Progress(string.Empty, 0, "Has spatial index: " + sf.HasSpatialIndex);
+      theForm.Progress(string.Empty, 100, "Number of shapes: " + sf.NumShapes);
+      theForm.Progress(string.Empty, 100, "Number of fields: " + sf.NumFields);
+      theForm.Progress(string.Empty, 100, "Type: " + sf.ShapefileType);
+      theForm.Progress(string.Empty, 100, "Projection: " + sf.GeoProjection.ExportToProj4());
+      theForm.Progress(string.Empty, 100, "Has spatial index: " + sf.HasSpatialIndex);
 
       return sf;
     }

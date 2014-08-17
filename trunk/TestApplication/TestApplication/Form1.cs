@@ -134,12 +134,13 @@ namespace TestApplication
                     case 0:
                         if (message != string.Empty)
                         {
-                            this.Progressbox.AppendText(message + Environment.NewLine);
+                          this.Progressbox.AppendText(
+                            string.Format("{2}{0} - {1}{2}", DateTime.Now, message, Environment.NewLine));
                         }
 
                         break;
                     case 100:
-                        this.Progressbox.AppendText(message + Environment.NewLine);
+                        this.Progressbox.AppendText(string.Format("{0} - {1}{2}", DateTime.Now, message, Environment.NewLine));
                         break;
                     default:
                         var msg = percent + @"% ... ";
@@ -461,7 +462,7 @@ namespace TestApplication
         /// </param>
         private void SelectRasterAInputClick(object sender, EventArgs e)
         {
-          Tests.SelectTextfile(this.RasterCalculatorInput, "Select file with rasters and formulas");
+          Tests.SelectTextfile(this.RasterCalculatorInput, "Select text file with rasters and formulas");
         }
 
         /// <summary>Click event</summary>
@@ -473,7 +474,20 @@ namespace TestApplication
         /// </param>
         private void SelectGridProxyInputClick(object sender, EventArgs e)
         {
-          Tests.SelectTextfile(this.GridProxyInput, "Select file with grids (tiff)");
+          Tests.SelectTextfile(this.GridProxyInput, "Select text file with grids (tiff) and color schemas");
+        }
+
+
+        /// <summary>Click event</summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectReclassifyInputClick(object sender, EventArgs e)
+        {
+          Tests.SelectTextfile(this.ReclassifyInput, "Select text file with grids (tiff)");
         }
 
     #endregion
@@ -700,7 +714,7 @@ namespace TestApplication
         private void RunAllFileFormatsTestsButtonClick(object sender, EventArgs e)
         {
             Helper.RunAllTestsInGroupbox(this.FileFormatsGroupBox);
-            this.Progress(string.Empty, 0, "Done running all Fileformats tests.");
+            this.Progress(string.Empty, 100, "Done running all Fileformats tests.");
         }
 
         /// <summary>Click event</summary>
@@ -722,7 +736,7 @@ namespace TestApplication
         private void RunAllSpatialOperationTestsClick(object sender, EventArgs e)
         {
             Helper.RunAllTestsInGroupbox(this.SpatialOperationGroupBox);
-            this.Progress(string.Empty, 0, "Done running all Spatial Operation tests.");
+            this.Progress(string.Empty, 100, "Done running all Spatial Operation tests.");
         }
 
         /// <summary>Run the Tiles load test</summary>
@@ -844,6 +858,23 @@ namespace TestApplication
           var retVal = Tests.RunGridProxyTest(this.GridProxyInput.Text, this);
           ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
+
+        /// <summary>
+        /// Run reclassify tests
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The event arguments
+        /// </param>
+        private void RunReclassifyTestClick(object sender, EventArgs e)
+        {
+          ((Button)sender).BackColor = System.Drawing.Color.Blue;
+          var retVal = Tests.RunReclassifyTest(this.ReclassifyInput.Text, this);
+          ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+        }
+
 
         private void axMap1_MouseMoveEvent(object sender, _DMapEvents_MouseMoveEvent e)
         {

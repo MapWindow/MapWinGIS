@@ -212,6 +212,28 @@ namespace TestApplication
     }
 
     /// <summary>
+    /// </summary>
+    /// <param name="filename">
+    /// The filename.
+    /// </param>
+    /// <param name="appendText">
+    /// The append text.
+    /// </param>
+    /// <returns>The new filename</returns>
+    internal static string CreateOutputFilename(string filename, string appendText)
+    {
+      var basename = Path.GetFileNameWithoutExtension(filename);
+      var folder = Path.GetDirectoryName(filename);
+      var extension = Path.GetExtension(filename);
+      if (folder == null)
+      {
+        throw new DirectoryNotFoundException(folder + " doesn't exists!");
+      }
+
+      return Path.Combine(folder, string.Format("{0}-{1}{2}", basename, appendText, extension));
+    }
+
+    /// <summary>
     /// Read the text file with the file loctions
     /// </summary>
     /// <param name="textfileLocation">The location of the text file</param>
