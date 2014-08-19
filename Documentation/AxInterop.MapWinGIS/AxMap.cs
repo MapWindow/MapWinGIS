@@ -167,6 +167,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications. 
         /// </summary>
+        /// <remarks>.NET clients passing ICallback implementation to this property must make respective 
+        /// class COM visible by setting ComVisible(true) attribute. In fact ComVisible(true) is set by default 
+		/// for public classes, so it's enough to make sure that it isn't explicitly set to false for the class
+		/// or assembly where the class is defined. Otherwise InvalidCastException may occur at runtime.</remarks>
         public object GlobalCallback
         {
             get { throw new NotImplementedException(); }

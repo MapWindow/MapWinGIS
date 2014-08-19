@@ -699,7 +699,7 @@ namespace MapWinGIS
         /// <param name="bandIndex">Band index of input datasource to be processed.</param>
         /// <param name="OutputName">Filename of output datasource.</param>
         /// <param name="LowerBounds">Array of double type with lower bounds of mapping ranges. These values
-        /// will be compared with values of input datasource.</param>
+        /// will be compared with values of input datasource. Must be sorted in ascending order.</param>
         /// <param name="UpperBounds">Array of double type with upper bounds of mapping ranges. These values
         /// will be compared with values of input datasource.</param>
         /// <param name="NewValues">Array of double type with values to be set for output datasource
@@ -736,6 +736,7 @@ namespace MapWinGIS
         /// }
         /// \endcode
         /// </remarks>
+        /// \new492 Added in version 4.9.2
         public bool ReclassifyRaster(string Filename, int bandIndex, string OutputName, Array LowerBounds, Array UpperBounds, Array NewValues, string gdalOutputFormat, ICallback cBack)
         {
             throw new NotImplementedException();
