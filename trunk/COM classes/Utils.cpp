@@ -5825,8 +5825,11 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 
 	// setting no data value
 	GDALRasterBand* bandOutput = dtOutput->GetRasterBand(1);
-	bandOutput->SetNoDataValue(band->GetNoDataValue());
 	
+	
+	float nodv = static_cast<float>(band->GetNoDataValue());
+	bandOutput->SetNoDataValue(static_cast<double>(nodv));
+
 	// -------------------------------------------------------
 	//	  Processing
 	// -------------------------------------------------------
@@ -5859,7 +5862,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 			goto cleaning;
 	}
 	*retVal = VARIANT_TRUE;
-	
+
 cleaning:
 	if (data)
 		delete[] data;
