@@ -1041,7 +1041,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\SupportingLibraries\include&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\atlhttp&quot;;&quot;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include&quot;;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;;&quot;$(ProjectDir)\SupportingLibraries\Tamas\include&quot;"
-				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW"
+				PreprocessorDefinitions="WIN32;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW"
 				StringPooling="true"
 				MinimalRebuild="false"
 				ExceptionHandling="1"
@@ -1076,13 +1076,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="true"
+				RegisterOutput="false"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386 /ignore:4099 "
-				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib geos_c.lib libtiff_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib"
+				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib geos_c.lib libtiff_i.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
-				Version="4.9"
+				Version="4.9.2"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)SupportingLibraries\Tamas\lib\$(PlatformName)&quot;;&quot;$(ProjectDir)SupportingLibraries\lib\$(PlatformName)&quot;;&quot;$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(PlatformName)&quot;"
@@ -1090,7 +1090,7 @@
 				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				ProgramDatabaseFile="$(OutDir)\MapWinGIS.pdb"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
@@ -1125,7 +1125,7 @@
 		</Configuration>
 		<Configuration
 			Name="Tamas|x64"
-			OutputDirectory="$(SolutionDir)\bin\$(PlatformName)"
+			OutputDirectory="$(SolutionDir)\bin64\$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)\$(PlatformName)"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -1154,7 +1154,7 @@
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
-				AdditionalIncludeDirectories="..\tkutils;..\common\cpp"
+				AdditionalIncludeDirectories=""
 				WarningLevel="0"
 				SuppressStartupBanner="true"
 				TargetEnvironment="3"
@@ -1169,7 +1169,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="&quot;$(ProjectDir)\SupportingLibraries\include&quot;;&quot;$(ProjectDir)\SupportingLibraries\include\atlhttp&quot;;&quot;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include&quot;;&quot;$(ProjectDir)&quot;;&quot;$(ProjectDir)\COM classes&quot;;&quot;$(ProjectDir)\Control&quot;;&quot;$(ProjectDir)\Drawing&quot;;&quot;$(ProjectDir)\Grid&quot;;&quot;$(ProjectDir)\Image&quot;;&quot;$(ProjectDir)\Processing&quot;;&quot;$(ProjectDir)\Shapefile&quot;;&quot;$(ProjectDir)\ShapeNetwork&quot;;&quot;$(ProjectDir)\Structures&quot;;&quot;$(ProjectDir)\Tin&quot;;&quot;$(ProjectDir)\Utilities&quot;;&quot;$(ProjectDir)\Grid\fip&quot;;&quot;$(ProjectDir)\Utilities\SpatialIndex&quot;;&quot;$(ProjectDir)\Tiles&quot;;&quot;$(ProjectDir)\Tiles\Providers&quot;;&quot;$(ProjectDir)\Utilities\SQLite&quot;;&quot;$(ProjectDir)\Tiles\Projections&quot;;&quot;$(ProjectDir)\SupportingLibraries\Tamas\include&quot;"
-				PreprocessorDefinitions="WIN32;WIN64;_NDBGSYMBOLS;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL"
+				PreprocessorDefinitions="WIN32;WIN64;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW"
 				StringPooling="true"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="0"
@@ -1187,6 +1187,8 @@
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
 				CompileAs="0"
+				ShowIncludes="false"
+				OmitDefaultLibName="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -1203,19 +1205,19 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:x64"
-				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib geos_c.lib libtiff_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib"
+				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib geos_c.lib libtiff_i.lib"
 				ShowProgress="0"
 				OutputFile="$(OutDir)\MapWinGIS.ocx"
-				Version="4.9.1"
+				Version="4.9.2"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)SupportingLibraries\Tamas\lib\$(PlatformName)&quot;;&quot;$(ProjectDir)SupportingLibraries\lib\$(PlatformName)&quot;;&quot;$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(PlatformName)&quot;"
 				IgnoreAllDefaultLibraries="false"
-				IgnoreDefaultLibraryNames="LIBC.lib"
+				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
-				DelayLoadDLLs="lti_dsdk_9.0.dll;lti_lidar_dsdk_1.1.dll;NCSEcw.dll;netcdf.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="false"
-				ProgramDatabaseFile=".\bin\$(PlatformName)\MapWinGIS.pdb"
+				ProgramDatabaseFile="$(OutDir)\MapWinGIS.pdb"
 				SubSystem="2"
 				ImportLibrary="$(IntDir)\MapWinGIS.lib"
 				TargetMachine="17"
@@ -4220,11 +4222,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

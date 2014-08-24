@@ -738,7 +738,7 @@ namespace TestApplication
 
       theForm.Progress(string.Empty, 100, string.Format("The OGR Info tests have finished, with {0} errors", numErrors));
 
-      return numErrors > 0;
+      return numErrors == 0;
     }
 
     /// <summary>

@@ -766,6 +766,19 @@ namespace TestApplication
     /// </param>
     /// <param name="e">
     /// The e.
+    /// </param>
+    private void RunAllGdalMethodsTestsClick(object sender, EventArgs e)
+    {
+      Helper.RunAllTestsInGroupbox(this.GdalMethodsGroupBox);
+      this.Progress(string.Empty, 100, "Done running all GDAL Methods tests.");
+    }
+
+    /// <summary>Click event</summary>
+    /// <param name="sender">
+    /// The sender.
+    /// </param>
+    /// <param name="e">
+    /// The e.
     /// </param>    
     private void RunAllMiscTestsClick(object sender, EventArgs e)
     {

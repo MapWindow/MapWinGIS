@@ -117,7 +117,7 @@
       this.SelectBufferShapefile = new System.Windows.Forms.Button();
       this.BufferShapefileInput = new System.Windows.Forms.TextBox();
       this.label9 = new System.Windows.Forms.Label();
-      this.groupBox8 = new System.Windows.Forms.GroupBox();
+      this.GdalMethodsGroupBox = new System.Windows.Forms.GroupBox();
       this.RunAllGdalMethodsTests = new System.Windows.Forms.Button();
       this.groupBox21 = new System.Windows.Forms.GroupBox();
       this.RunOGRInfoTest = new System.Windows.Forms.Button();
@@ -193,7 +193,7 @@
       this.groupBox15.SuspendLayout();
       this.groupBox13.SuspendLayout();
       this.groupBox12.SuspendLayout();
-      this.groupBox8.SuspendLayout();
+      this.GdalMethodsGroupBox.SuspendLayout();
       this.groupBox21.SuspendLayout();
       this.groupBox9.SuspendLayout();
       this.SpatialOperationGroupBox.SuspendLayout();
@@ -242,7 +242,7 @@
       this.splitContainer2.Panel1.Controls.Add(this.btnPopulate);
       this.splitContainer2.Panel1.Controls.Add(this.FileManagerGroupBox);
       this.splitContainer2.Panel1.Controls.Add(this.GeosMethodsGroupBox);
-      this.splitContainer2.Panel1.Controls.Add(this.groupBox8);
+      this.splitContainer2.Panel1.Controls.Add(this.GdalMethodsGroupBox);
       this.splitContainer2.Panel1.Controls.Add(this.SpatialOperationGroupBox);
       this.splitContainer2.Panel1.Controls.Add(this.FileFormatsGroupBox);
       this.splitContainer2.Panel1MinSize = 30;
@@ -1218,18 +1218,18 @@
       this.label9.TabIndex = 6;
       this.label9.Text = "Select a txt file with the files:";
       // 
-      // groupBox8
+      // GdalMethodsGroupBox
       // 
-      this.groupBox8.BackColor = System.Drawing.Color.Cornsilk;
-      this.groupBox8.Controls.Add(this.RunAllGdalMethodsTests);
-      this.groupBox8.Controls.Add(this.groupBox21);
-      this.groupBox8.Controls.Add(this.groupBox9);
-      this.groupBox8.Location = new System.Drawing.Point(3, 668);
-      this.groupBox8.Name = "groupBox8";
-      this.groupBox8.Size = new System.Drawing.Size(205, 223);
-      this.groupBox8.TabIndex = 3;
-      this.groupBox8.TabStop = false;
-      this.groupBox8.Text = "GDAL Methods";
+      this.GdalMethodsGroupBox.BackColor = System.Drawing.Color.Cornsilk;
+      this.GdalMethodsGroupBox.Controls.Add(this.RunAllGdalMethodsTests);
+      this.GdalMethodsGroupBox.Controls.Add(this.groupBox21);
+      this.GdalMethodsGroupBox.Controls.Add(this.groupBox9);
+      this.GdalMethodsGroupBox.Location = new System.Drawing.Point(3, 668);
+      this.GdalMethodsGroupBox.Name = "GdalMethodsGroupBox";
+      this.GdalMethodsGroupBox.Size = new System.Drawing.Size(205, 223);
+      this.GdalMethodsGroupBox.TabIndex = 3;
+      this.GdalMethodsGroupBox.TabStop = false;
+      this.GdalMethodsGroupBox.Text = "GDAL Methods";
       // 
       // RunAllGdalMethodsTests
       // 
@@ -1243,6 +1243,7 @@
       this.RunAllGdalMethodsTests.Text = "Run all tests";
       this.toolTip1.SetToolTip(this.RunAllGdalMethodsTests, "Run all GDAL Methods tests");
       this.RunAllGdalMethodsTests.UseVisualStyleBackColor = false;
+      this.RunAllGdalMethodsTests.Click += new System.EventHandler(this.RunAllGdalMethodsTestsClick);
       // 
       // groupBox21
       // 
@@ -1263,6 +1264,7 @@
       this.RunOGRInfoTest.Name = "RunOGRInfoTest";
       this.RunOGRInfoTest.Size = new System.Drawing.Size(180, 23);
       this.RunOGRInfoTest.TabIndex = 8;
+      this.RunOGRInfoTest.Tag = "run";
       this.RunOGRInfoTest.Text = "Run test";
       this.RunOGRInfoTest.UseVisualStyleBackColor = true;
       this.RunOGRInfoTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
@@ -1317,6 +1319,7 @@
       this.RunRasterizeTest.Name = "RunRasterizeTest";
       this.RunRasterizeTest.Size = new System.Drawing.Size(180, 23);
       this.RunRasterizeTest.TabIndex = 7;
+      this.RunRasterizeTest.Tag = "run";
       this.RunRasterizeTest.Text = "Run test";
       this.RunRasterizeTest.UseVisualStyleBackColor = true;
       this.RunRasterizeTest.BackColorChanged += new System.EventHandler(this.ButtonBackColorChanged);
@@ -1830,7 +1833,7 @@
       this.groupBox13.PerformLayout();
       this.groupBox12.ResumeLayout(false);
       this.groupBox12.PerformLayout();
-      this.groupBox8.ResumeLayout(false);
+      this.GdalMethodsGroupBox.ResumeLayout(false);
       this.groupBox21.ResumeLayout(false);
       this.groupBox21.PerformLayout();
       this.groupBox9.ResumeLayout(false);
@@ -1891,7 +1894,7 @@
     private System.Windows.Forms.Button SelectShapefileToGrid;
     private System.Windows.Forms.TextBox ShapefileToGridInputfile;
     private System.Windows.Forms.Label label7;
-    private System.Windows.Forms.GroupBox groupBox8;
+    private System.Windows.Forms.GroupBox GdalMethodsGroupBox;
     private System.Windows.Forms.GroupBox groupBox9;
     private System.Windows.Forms.Button RunRasterizeTest;
     private System.Windows.Forms.Button SelectRasterizeInputfile;
