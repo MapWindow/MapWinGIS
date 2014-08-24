@@ -2,12 +2,11 @@
 # https://mapwingis.codeplex.com/releases
 # This installer will also correctly set the MW_SAMPLEDATA environment variable
 
-#ASCII
-%MW_SAMPLEDATA%\Grids\Formats\sj_dem_clip_utm.asc
+# Lines
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
 
-#GeoTIFF
-%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+# Polygons:
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
 
-#NetCDF:
-%MW_SAMPLEDATA%\Grids\Formats\NDB2_19901225.nc
-
+# Polygon M
+%MW_SAMPLEDATA%\Shapefiles\PolygonM.shp

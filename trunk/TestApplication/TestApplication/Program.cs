@@ -1,15 +1,25 @@
-﻿using System;
-using System.Windows.Forms;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="Program.cs" company="MapWindow Open Source GIS Community">
+//   MapWindow Open Source GIS Community
+// </copyright>
+// <summary>
+//   The main class
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace TestApplication
 {
-  static class Program
+  using System;
+  using System.Windows.Forms;
+
+  /// <summary>The start class</summary>
+  public static class Program
   {
     /// <summary>
     /// The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main()
+    public static void Main()
     {
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);

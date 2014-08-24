@@ -89,7 +89,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("-----------------------The shapefile open tests have started.", Environment.NewLine));
+        string.Format("-----------------------The shapefile open tests have started."));
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -126,10 +126,7 @@ namespace TestApplication
     /// </returns>
     internal static bool RunTilesLoadTest(string textfileLocation, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The tiles load tests have started.", Environment.NewLine));
+      theForm.Progress(string.Empty, 0, "-----------------------The tiles load tests have started.");
 
       var retVal = true;
 
@@ -205,91 +202,129 @@ namespace TestApplication
     /// <summary>Run the Spatial Index tests</summary>
     /// <param name="textfileLocation">The textfile location</param>
     /// <param name="theForm">The form.</param>
-    internal static void RunSpatialIndexTest(string textfileLocation, Form1 theForm)
+    /// <returns>True on success</returns>
+    internal static bool RunSpatialIndexTest(string textfileLocation, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The Spatial Index tests have started.", Environment.NewLine));
+      var numErrors = 0;
+
+      theForm.Progress(string.Empty, 0, "-----------------------The Spatial Index tests have started.");
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
 
       foreach (var line in lines)
       {
-        // Clear map:
-        MyAxMap.RemoveAllLayers();
-
-        // Remove index files:
-        var baseFilename = Path.Combine(Path.GetDirectoryName(line), Path.GetFileNameWithoutExtension(line));
-        File.Delete(baseFilename + ".mwd");
-        File.Delete(baseFilename + ".dat");
-        File.Delete(baseFilename + ".mwx");
-        File.Delete(baseFilename + ".idx");
-
-        // Open shapefile:
-        var sf = Fileformats.OpenShapefile(line, theForm);
-
-        // Add to map:
-        MyAxMap.AddLayer(sf, true);
-
-        // Wait to show the map:
-        Application.DoEvents();
-
-        // Check:
-        theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
-
-        // Now do some selecting to time without spatial index.
-        var utils = new Utils { GlobalCallback = theForm };
-        sf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
-        var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
-
-        // for debugging:
-        Application.DoEvents();
-        Thread.Sleep(1000);
-
-        // Create index:
-        if (!sf.CreateSpatialIndex(sf.Filename))
+        if (!SpatialIndexTest(line, theForm))
         {
-          theForm.Error(string.Empty, "Error creating spatial index: " + sf.get_ErrorMsg(sf.LastErrorCode));
-          continue;
+          numErrors++;
         }
-
-        // Check:
-        theForm.Progress(string.Empty, 100, "SpatialIndexMaxAreaPercent: " + sf.SpatialIndexMaxAreaPercent);
-
-        // Set index:
-        sf.UseSpatialIndex = true;
-
-        // Check:
-        theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
-
-        // Check if the files are created:
-        if (!(File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat")))
-        {
-          theForm.Error(string.Empty, "The mwd file does not exists");
-        }
-
-        if (!(File.Exists(baseFilename + ".mwx") || File.Exists(baseFilename + ".idx")))
-        {
-          theForm.Error(string.Empty, "The mwx file does not exists");
-          continue;
-        }
-
-        // Now do some selecting to time with spatial index.
-        sf.SelectionColor = utils.ColorByName(tkMapColor.Red);
-        var timeWithIndex = TimeSelectShapes(ref sf, theForm);
-
-        theForm.Progress(
-          string.Empty,
-          0,
-          string.Format("Select shapes without spatial index took {0} seconds, with spatial index it took {1}", timeWithoutIndex / 1000.0, timeWithIndex / 1000.0));
 
         Application.DoEvents();
         Thread.Sleep(1000);
       }
 
-      theForm.Progress(string.Empty, 100, "The spatial index tests have finished.");
+      theForm.Progress(
+        string.Empty, 100, string.Format("The spatial index tests have finished. {0} tests failed.", numErrors));
+
+      return numErrors == 0;
+    }
+
+    /// <summary>Test the spatial indexing</summary>
+    /// <param name="filename">
+    /// The filename.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns> True on success </returns>
+    private static bool SpatialIndexTest(string filename, Form1 theForm)
+    {
+      // Check if file exists:
+      if (!Helper.CheckShapefileLocation(filename, theForm))
+      {
+        return false;
+      }
+
+      // Clear map:
+      MyAxMap.Clear();
+      MyAxMap.Tiles.Visible = false;
+
+      // Remove index files:
+      var baseFilename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename));
+      File.Delete(baseFilename + ".mwd");
+      File.Delete(baseFilename + ".dat");
+      File.Delete(baseFilename + ".mwx");
+      File.Delete(baseFilename + ".idx");
+
+      // Open shapefile:
+      var sf = Fileformats.OpenShapefile(filename, theForm);
+
+      if (sf == null)
+      {
+        theForm.WriteError("Cannot load shapefile");
+        return false;
+      }
+
+      // Add to map:
+      if (MyAxMap.AddLayer(sf, true) == -1)
+      {
+        theForm.WriteError("Cannot add shapefile to the map");
+        return false;
+      }
+
+      // Wait to show the map:
+      Application.DoEvents();
+
+      // Check:
+      theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
+
+      // Now do some selecting to time without spatial index.
+      var utils = new Utils { GlobalCallback = theForm };
+      sf.SelectionColor = utils.ColorByName(tkMapColor.Yellow);
+      var timeWithoutIndex = TimeSelectShapes(ref sf, theForm);
+
+      // for debugging:
+      Application.DoEvents();
+      Thread.Sleep(1000);
+
+      // Create index:
+      if (!sf.CreateSpatialIndex(sf.Filename))
+      {
+        theForm.Error(string.Empty, "Error creating spatial index: " + sf.get_ErrorMsg(sf.LastErrorCode));
+        return false;
+      }
+
+      // Check:
+      theForm.Progress(string.Empty, 100, "SpatialIndexMaxAreaPercent: " + sf.SpatialIndexMaxAreaPercent);
+
+      // Set index:
+      sf.UseSpatialIndex = true;
+
+      // Check:
+      theForm.Progress(string.Empty, 100, "Shapefile has index: " + sf.HasSpatialIndex);
+
+      // Check if the files are created:
+      if (!(File.Exists(baseFilename + ".mwd") || File.Exists(baseFilename + ".dat")))
+      {
+        theForm.Error(string.Empty, "The mwd file does not exists");
+      }
+
+      if (!(File.Exists(baseFilename + ".mwx") || File.Exists(baseFilename + ".idx")))
+      {
+        theForm.Error(string.Empty, "The mwx file does not exists");
+        return false;
+      }
+
+      // Now do some selecting to time with spatial index.
+      sf.SelectionColor = utils.ColorByName(tkMapColor.Red);
+      var timeWithIndex = TimeSelectShapes(ref sf, theForm);
+
+      theForm.Progress(
+        string.Empty,
+        0,
+        string.Format("Select shapes without spatial index took {0} seconds, with spatial index it took {1}", timeWithoutIndex / 1000.0, timeWithIndex / 1000.0));
+
+      return true;
     }
 
     /// <summary>
@@ -317,10 +352,7 @@ namespace TestApplication
         throw new FileNotFoundException("Cannot find text file.", textfileLocation);
       }
 
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The image open tests have started.", Environment.NewLine));
+      theForm.Progress(string.Empty, 0, "-----------------------The image open tests have started.");
 
       // Read text file:
       var count = 1;
@@ -351,7 +383,6 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The image open tests have finished.");
-      MyAxMap.Redraw();
 
       return retVal;
     }
@@ -381,10 +412,7 @@ namespace TestApplication
         throw new FileNotFoundException("Cannot find text file.", textfileLocation);
       }
 
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The grid open tests have started.", Environment.NewLine));
+      theForm.Progress(string.Empty, 0, "-----------------------The grid open tests have started.");
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -402,7 +430,6 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The grid open tests have finished.");
-      MyAxMap.Redraw();
 
       return retVal;
     }
@@ -582,7 +609,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("-----------------------The Shapefile to grid test has started.", Environment.NewLine));
+        string.Format("-----------------------The Shapefile to grid test has started."));
 
       var retVal = true;
 
@@ -649,6 +676,9 @@ namespace TestApplication
               sf.DefaultDrawingOptions.LineWidth = 1;
               sf.DefaultDrawingOptions.FillVisible = false;
               MyAxMap.AddLayer(sf, true);
+
+              // Wait to show the map:
+              Application.DoEvents();
             }
           }
         }
@@ -664,47 +694,127 @@ namespace TestApplication
       return retVal;
     }
 
-    /// <summary>Run the OGRInfo test</summary>
-    /// <param name="fileName">
+    /// <summary>
+    /// Run the OGRInfo test
+    /// </summary>
+    /// <param name="textfileLocation">
     /// The file.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunOGRInfoTest(string fileName, Form1 theForm)
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunOGRInfoTest(string textfileLocation, Form1 theForm)
     {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The OGR Info tests have started.");
+
       var utils = new Utils { GlobalCallback = theForm };
-      var output = utils.OGRInfo(fileName, "-so", Path.GetFileNameWithoutExtension(fileName), theForm);
-      theForm.Progress(string.Empty, 100, output.Replace("\n", Environment.NewLine));
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        var output = utils.OGRInfo(line, "-so", Path.GetFileNameWithoutExtension(line), theForm);
+        theForm.Progress(string.Empty, 100, output.Replace("\n", Environment.NewLine));
+        if (string.IsNullOrEmpty(output))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The OGR Info tests have finished, with {0} errors", numErrors));
+
+      return numErrors > 0;
     }
 
-    /// <summary>Run the Rasterize shapefile test</summary>
+    /// <summary>
+    /// Run the Rasterize shapefile test
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form with the callback implementation.
+    /// </param>
+    /// <exception cref="FileNotFoundException">
+    /// When the file is not found
+    /// </exception>
+    /// <returns>
+    /// True when no errors.
+    /// </returns>
+    internal static bool RunRasterizeTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The rasterize shapfile tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!RasterizeShapefile(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(2000);
+      }
+
+      theForm.Progress(
+        string.Empty, 100, string.Format("The  rasterize shapfile tests have finished. {0} tests failed", numErrors));
+      
+      return numErrors == 0;
+    }
+
+    /// <summary>
+    /// Rasterize the shapefile
+    /// </summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunRasterizeTest(string shapefilename, Form1 theForm)
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RasterizeShapefile(string shapefilename, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The Rasterize shapefile test has started.", Environment.NewLine));
-
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         // First check if the MWShapeID field is present:
         var sf = Fileformats.OpenShapefile(shapefilename, theForm);
         if (sf == null)
         {
-          return;
+          return false;
         }
 
         // Get target resolution. The values must be expressed in georeferenced units (-tr):
@@ -719,26 +829,26 @@ namespace TestApplication
           if (!sf.StartEditingShapes(true, theForm))
           {
             theForm.Error(string.Empty, "Could not put shapefile in edit mode: " + sf.get_ErrorMsg(sf.LastErrorCode));
-            return;
+            return false;
           }
 
           if (sf.EditAddField(FieldName, FieldType.INTEGER_FIELD, 0, 10) == -1)
           {
             theForm.Error(string.Empty, "Could not add the fieldname: " + sf.get_ErrorMsg(sf.LastErrorCode));
-            return;
+            return false;
           }
 
           if (!sf.StopEditingShapes(true, true, theForm))
           {
             theForm.Error(string.Empty, "Could not end shapefile in edit mode: " + sf.get_ErrorMsg(sf.LastErrorCode));
-            return;
+            return false;
           }
         }
 
         if (!sf.Close())
         {
           theForm.Error(string.Empty, "Could not close the shapefile: " + sf.get_ErrorMsg(sf.LastErrorCode));
-          return;
+          return false;
         }
 
         var folder = Path.GetDirectoryName(shapefilename);
@@ -747,7 +857,8 @@ namespace TestApplication
         globalSettings.ResetGdalError();
         if (folder != null)
         {
-          var outputFile = Path.Combine(folder, "GDALRasterizeTest.tif");
+          var outputFile = Helper.CreateOutputFilename(shapefilename, "rasterized");
+          outputFile = Path.ChangeExtension(outputFile, ".tif");
           if (File.Exists(outputFile))
           {
             File.Delete(outputFile);
@@ -767,21 +878,58 @@ namespace TestApplication
             }
 
             theForm.Error(string.Empty, msg);
-            return;
+            return false;
           }
 
           // Open the files:
           Fileformats.OpenImageAsLayer(outputFile, theForm, true);
         }
-
-        Fileformats.OpenShapefileAsLayer(shapefilename, theForm, false);
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
+        return false;
       }
 
-      theForm.Progress(string.Empty, 100, "The Rasterize shapefile test has finished.");
+      return true;
+    }
+
+    /// <summary>Run the clear the map test</summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static bool RunAxMapClearTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The Clear the map tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!AxMapClear(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The Clear the map tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
     }
 
     /// <summary>
@@ -790,13 +938,8 @@ namespace TestApplication
     /// <param name="shapefileLocation">Location of a shapefile</param>
     /// <param name="theForm">The main form of the application</param>
     /// <returns>True on success</returns>
-    internal static bool RunAxMapClearTest(string shapefileLocation, Form1 theForm)
+    internal static bool AxMapClear(string shapefileLocation, Form1 theForm)
     {
-      theForm.Progress(
-            string.Empty,
-            0,
-            string.Format("-----------------------The AxMap.Clear() test has started.", Environment.NewLine));
-
       try
       {
         // Check the inputs
@@ -807,20 +950,23 @@ namespace TestApplication
 
         // Add the shapefile as a layer
         Fileformats.OpenShapefileAsLayer(shapefileLocation, theForm, true);
+        Application.DoEvents();
 
         // Draw something on the map
-        int DrawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlScreenReferencedList);
-        MyAxMap.DrawCircle(50, 50, 50, 0x0, true);
+        var drawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlScreenReferencedList);
+        MyAxMap.DrawCircleEx(drawHandle, 50, 50, 50, 0x0, true);
+        Application.DoEvents();
+        Thread.Sleep(1000);
 
         // Change some of the settings
         MyAxMap.ShowVersionNumber = true;
         MyAxMap.ShowCoordinates = tkCoordinatesDisplay.cdmDegrees;
 
         // Get the layer count
-        int layerCount = MyAxMap.NumLayers;
+        var layerCount = MyAxMap.NumLayers;
 
         // Get the new projection after adding the shapefile
-        tkMapProjection shapeProj = MyAxMap.Projection;
+        var shapeProj = MyAxMap.Projection;
 
         // Clear everything from the map
         MyAxMap.Clear();
@@ -828,14 +974,18 @@ namespace TestApplication
 
         // Test the projection
         if (shapeProj == tkMapProjection.PROJECTION_NONE)
+        {
           theForm.Progress(string.Empty, 10, "Could not test Projection.");
+        }
         else if (MyAxMap.Projection != tkMapProjection.PROJECTION_NONE)
         {
           theForm.Error(string.Empty, "Failed to reset Projection to default.");
           return false;
         }
         else
+        {
           theForm.Progress(string.Empty, 10, "Successfully reset Projection to default.");
+        }
 
         // Test the settings
         if (MyAxMap.ShowVersionNumber || MyAxMap.ShowCoordinates != tkCoordinatesDisplay.cdmAuto)
@@ -843,26 +993,28 @@ namespace TestApplication
           theForm.Error(string.Empty, "Failed to reset settings to defaults.");
           return false;
         }
-        else
-          theForm.Progress(string.Empty, 20, "Successfully reset settings to defaults.");
+
+        theForm.Progress(string.Empty, 20, "Successfully reset settings to defaults.");
 
         // Make sure all the layers are removed
         if (layerCount != 2)
+        {
           theForm.Progress(string.Empty, 30, "Could not test removing layers.");
+        }
         else if (MyAxMap.NumLayers != 0)
         {
           theForm.Error(string.Empty, "Failed to remove all layers.");
           return false;
         }
         else
+        {
           theForm.Progress(string.Empty, 30, "Successfully removed all layers.");
+        }
       }
       catch (Exception ex)
       {
         theForm.Error(string.Empty, "Exception: " + ex.Message);
       }
-
-      theForm.Progress(string.Empty, 100, "The AxMap.Clear() test has finished.");
 
       return true;
     }
@@ -877,10 +1029,7 @@ namespace TestApplication
     /// <returns> True on success </returns>
     internal static bool RunRasterCalculatorTest(string textfileLocation, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The Raster calculator test has started.", Environment.NewLine));
+      theForm.Progress(string.Empty, 0, "-----------------------The Raster calculator test has started.");
 
       var retVal = true;
 
@@ -925,10 +1074,7 @@ namespace TestApplication
         throw new FileNotFoundException("Cannot find text file.", textfileLocation);
       }
 
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("-----------------------The grid proxy tests have started.", Environment.NewLine));
+      theForm.Progress(string.Empty, 0, "-----------------------The grid proxy tests have started.");
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -975,7 +1121,8 @@ namespace TestApplication
               numErrors++;
             }
 
-            MyAxMap.Refresh();
+            // Wait to show the map:
+            Application.DoEvents();
           }
 
           grid.Close();   // we no longer need it as Image class is used for rendering
@@ -1339,6 +1486,9 @@ namespace TestApplication
         MyAxMap.RemoveAllLayers();
         MyAxMap.AddLayer(correctSf, true);
 
+        // Wait to show the map:
+        Application.DoEvents();
+
         theForm.Progress(
           string.Empty,
           100,
@@ -1655,6 +1805,11 @@ namespace TestApplication
             msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
           }
 
+          if (errorMsg != string.Empty)
+          {
+            msg += Environment.NewLine + "CalculateRaster error: " + errorMsg;
+          }
+
           theForm.Error(string.Empty, msg);
         }
 
@@ -1713,6 +1868,9 @@ namespace TestApplication
       var grdB = new Grid { GlobalCallback = theForm };
       var grdC = new Grid { GlobalCallback = theForm };
 
+      var randomColumn = 0;
+      var randomRow = 0;
+
       try
       {
         // Open the rasters:
@@ -1737,32 +1895,37 @@ namespace TestApplication
         // Rasters have the same size and the same number of columns and rows.
         var numColumns = grdA.Header.NumberCols;
         var numRows = grdA.Header.NumberCols;
-        var nodata = grdA.Header.NodataValue; // Returns an object
+        Debug.WriteLine("grdA.Filename: " + grdA.Filename);
+        Debug.WriteLine("grdA.Header.NodataValue: " + grdA.Header.NodataValue);
+        Debug.WriteLine("grdA.Minimum: " + grdA.Minimum);
+        Debug.WriteLine("grdA.Maximum: " + grdA.Maximum);
+        var nodata = Convert.ToDouble(grdA.Header.NodataValue); 
+        Debug.WriteLine("nodata: " + nodata);
         var rnd = new Random();
-        var randomColumn = 0; // = rnd.Next(numColumns);
-        var randomRow = 0; // = rnd.Next(numRows);
 
         // read cell:
         var valA = nodata;
 
         // Check for nodata value:
-        while (valA == nodata || valA == (object)0)
+        while (valA == nodata || valA == 0 || valA < Convert.ToDouble(grdA.Minimum) || valA > Convert.ToDouble(grdA.Maximum))
         {
           randomColumn = rnd.Next(numColumns);
           randomRow = rnd.Next(numRows);
-          valA = grdA.get_Value(randomColumn, randomRow); // Returns an object
+          valA = Convert.ToDouble(grdA.get_Value(randomColumn, randomRow));
         }
 
         Debug.WriteLine("valA: " + valA);
 
         // Get values from other rasters, make expression and evaluate:
-        var valB = grdB.get_Value(randomColumn, randomRow); // Returns an object
+        var valB = Convert.ToDouble(grdB.get_Value(randomColumn, randomRow));
         Debug.WriteLine("valB: " + valB);
-        var valC = grdC.get_Value(randomColumn, randomRow); // Returns an object
+        var valC = Convert.ToDouble(grdC.get_Value(randomColumn, randomRow));
         Debug.WriteLine("valC: " + valC);
 
         // TODO: Is this the best syntax to do this:
-        var expression = formula.Replace("[A]", string.Format("({0})", ((double)valA).ToString(CultureInfo.InvariantCulture))).Replace("[B]", string.Format("({0})", ((double)valB).ToString(CultureInfo.InvariantCulture)));
+        var expression =
+          formula.Replace("[A]", string.Format("({0})", valA.ToString(CultureInfo.InvariantCulture))).Replace(
+            "[B]", string.Format("({0})", valB.ToString(CultureInfo.InvariantCulture)));
         theForm.Progress(string.Empty, 100, "Checking formula: " + formula);
         var e = new Expression(expression);
         var result = e.Evaluate(); // Returns an object
@@ -1772,48 +1935,18 @@ namespace TestApplication
           return false;
         }
 
-        // TODO: Most likely this can be done in a better way, but I don't know how:
-        // Without it I keep getting invalid casts with result of valC:
         var goodCalculation = false;
-        if (result.GetType() == typeof(int))
+        
+        // A small rounding difference is OK:
+        if (Math.Abs(valC - Convert.ToDouble(result)) < 0.001)
         {
-          if (valC.GetType() == typeof(int))
-          {
-            if (Math.Abs((int)valC - (int)result) < 1)
-            {
-              goodCalculation = true;
-            }
-          }
-          else
-          {
-            if (Math.Abs((double)valC - (int)result) < 1)
-            {
-              goodCalculation = true;
-            }
-          }
-        }
-        else
-        {
-          if (valC.GetType() == typeof(int))
-          {
-            if (Math.Abs((int)valC - (double)result) < 1)
-            {
-              goodCalculation = true;
-            }
-          }
-          else
-          {
-            if (Math.Abs((double)valC - (double)result) < 1)
-            {
-              goodCalculation = true;
-            }
-          }
+          goodCalculation = true;
         }
 
         if (goodCalculation)
         {
           theForm.Progress(
-            string.Empty, 100, string.Format("Checking some random values was correct: {0}={1}", expression, result));
+            string.Empty, 100, string.Format("Checking some random values was correct: {0} = {1}", expression, result));
           retVal = true;
         }
         else
@@ -1825,8 +1958,15 @@ namespace TestApplication
       }
       catch (InvalidCastException ex)
       {
-        // TODO: Don't know how to fix this, continue for now.
-        theForm.Error(string.Empty, "InvalidCastException in CheckRasterCalculator: " + ex.Message);
+        // Thanks to the suggestions of Jeen this should no longer happen.
+        theForm.Error(
+          string.Empty,
+          string.Format(
+            "InvalidCastException in CheckRasterCalculator: {0}{1}Column {2}, row{3}",
+            ex.Message,
+            Environment.NewLine,
+            randomColumn,
+            randomRow));
       }
       catch (Exception ex)
       {

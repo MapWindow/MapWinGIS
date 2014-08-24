@@ -7,12 +7,12 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Diagnostics;
-
 namespace TestApplication
 {
   using System;
   using System.IO;
+  using System.Threading;
+  using System.Windows.Forms;
 
   using MapWinGIS;
 
@@ -25,39 +25,72 @@ namespace TestApplication
     internal static AxMapWinGIS.AxMap MyAxMap { get; set; }
 
     /// <summary>Run the Buffer shapefile test</summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    internal static bool RunBufferShapefileTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The GEOS Buffer tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!BufferShapefile(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The GEOS Buffer tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
+    }
+
+    /// <summary>Buffer the shapefile</summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunBufferShapefileTest(string shapefilename, Form1 theForm)
+    /// <returns>True on success</returns>
+    private static bool BufferShapefile(string shapefilename, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Buffer shapefile test has started.", Environment.NewLine));
-
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
-        // First check if the MWShapeID field is present:
         var sf = Fileformats.OpenShapefile(shapefilename, theForm);
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start buffering " + Path.GetFileName(shapefilename));
+        theForm.Progress(string.Empty, 100, "Start buffering " + Path.GetFileName(shapefilename));
 
         // Make the distance depending on the projection.
         var distance = 1000;
@@ -71,7 +104,7 @@ namespace TestApplication
         // Do some checks:
         if (!Helper.CheckShapefile(sf, bufferedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
-          return;
+          return false;
         }
 
         Helper.ColorShapes(ref bufferedSf, 0, tkMapColor.LightBlue, tkMapColor.LightYellow, false);
@@ -83,34 +116,77 @@ namespace TestApplication
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
+        MyAxMap.Clear();
         Fileformats.OpenShapefileAsLayer(shapefilename, theForm, true);
         bufferedSf.DefaultDrawingOptions.FillVisible = false;
-        MyAxMap.AddLayer(bufferedSf, true);
+        if (MyAxMap.AddLayer(bufferedSf, true) == -1)
+        {
+          theForm.Error(string.Empty, "Could not add the buffered shapefile to the map");
+          return false;
+        }
+
+        // Wait to show the map:
+        Application.DoEvents();
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
 
-      theForm.Progress(string.Empty, 100, "The Buffer shapefile test has finished.");
+      return true;
     }
 
-    /// <summary>Run the Simplify shapefile test</summary>
-    /// <param name="shapefilename">The shapefile name</param>
-    /// <param name="theForm">The form</param>
-    internal static void RunSimplifyShapefileTest(string shapefilename, Form1 theForm)
+    /// <summary>
+    /// Run the Simplify shapefile test
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file
+    /// </param>
+    /// <param name="theForm">
+    /// The form
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunSimplifyShapefileTest(string textfileLocation, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Simplify shapefile test has started.", Environment.NewLine));
+      var numErrors = 0;
 
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The GEOS Simplify tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!SimplifyShapefile(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The GEOS Simplify tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
+    }
+
+    private static bool SimplifyShapefile(string shapefilename, Form1 theForm)
+    {
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
@@ -118,7 +194,7 @@ namespace TestApplication
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
         
         var globalSettings = new GlobalSettings();
@@ -137,7 +213,7 @@ namespace TestApplication
         // Do some checks:
         if (!Helper.CheckShapefile(sf, simplifiedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
-          return;
+          return false;
         }
 
         // give the resulting lines a good width and color:
@@ -147,25 +223,93 @@ namespace TestApplication
         simplifiedSf.DefaultDrawingOptions.LineStipple = tkDashStyle.dsSolid;
 
         // Save result:
-        var newFilename = shapefilename.Replace(".shp", "-intersected.shp");
+        var newFilename = shapefilename.Replace(".shp", "-simplified.shp");
         Helper.DeleteShapefile(newFilename);
         simplifiedSf.SaveAs(newFilename, theForm);
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
-        MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(simplifiedSf, true);
+        MyAxMap.Clear();
+        if (MyAxMap.AddLayer(simplifiedSf, true) == -1)
+        {
+          theForm.Error(string.Empty, "Could not add the simplified shapefile to the map");
+          return false;
+        }
+
         Fileformats.OpenShapefileAsLayer(shapefilename, theForm, false);
+      
+        // Wait to show the map:
+        Application.DoEvents();
       }
       catch (Exception exception)
       {
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
 
-      theForm.Progress(string.Empty, 100, "The Simplify shapefile test has finished.");
+      return true;
     }
 
-    /// <summary>Run Aggregate shapefile test</summary>
+    /// <summary>
+    /// Run the Dissolve shapefile test
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunDissolveShapefileTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The GEOS Dissolve tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
+      {
+        if (i + 1 > lines.Count)
+        {
+          theForm.Error(string.Empty, "Input file is incorrect. Not enough lines");
+          break;
+        }
+
+        int fieldIndex;
+        if (!int.TryParse(lines[i + 1], out fieldIndex))
+        {
+          theForm.Error(string.Empty, "Input file is incorrect. Can't find field index value");
+          break;
+        }
+
+        if (!DissolveShapefile(lines[i], fieldIndex, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The GEOS Dissolve tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
+    }
+
+    /// <summary>
+    /// Dissolve the shapefile
+    /// </summary>
     /// <param name="shapefilename">
     /// The shapefilename.
     /// </param>
@@ -175,19 +319,17 @@ namespace TestApplication
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunDissolveShapefileTest(string shapefilename, int fieldIndex, Form1 theForm)
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool DissolveShapefile(string shapefilename, int fieldIndex, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Dissolve shapefile test has started.", Environment.NewLine));
-
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
@@ -195,7 +337,7 @@ namespace TestApplication
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var globalSettings = new GlobalSettings();
@@ -204,10 +346,10 @@ namespace TestApplication
 
         var dissolvedSf = sf.Dissolve(fieldIndex, false);
 
-        // Do some checks:))
+        // Do some checks:
         if (!Helper.CheckShapefile(sf, dissolvedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
-          return;
+          return false;
         }
 
         // The resulting shapefile has only 1 field:
@@ -220,10 +362,18 @@ namespace TestApplication
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
-        MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(dissolvedSf, true);
+        MyAxMap.Clear();
+        if (MyAxMap.AddLayer(dissolvedSf, true) == -1)
+        {
+          theForm.Error(string.Empty, "Cannot open dissolved shapefiles");
+          return false;
+        }
+
         sf.DefaultDrawingOptions.FillVisible = false;
         //MyAxMap.AddLayer(sf, true);
+
+        // Wait to show the map:
+        Application.DoEvents();
 
         theForm.Progress(
           string.Empty,
@@ -240,6 +390,8 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "The Dissolve shapefile test has finished");
+
+      return true;
     }
 
     /// <summary>Run the clip shapefile test</summary>
@@ -249,12 +401,10 @@ namespace TestApplication
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunClipShapefileTest(string textfileLocation, Form1 theForm)
+    internal static bool RunClipShapefileTest(string textfileLocation, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The Clip shapefile test has started.", Environment.NewLine));
+      var numErrors = 0;
+      theForm.Progress(string.Empty, 0, "-----------------------The Clip shapefile test has started.");
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -268,21 +418,36 @@ namespace TestApplication
           break;
         }
 
-        ClipShapefile(lines[i], lines[i + 1], theForm);
+        if (!ClipShapefile(lines[i], lines[i + 1], theForm))
+        {
+          numErrors++;
+        }
+
+        Thread.Sleep(1000);
       }
 
-      theForm.Progress(string.Empty, 100, "The clipping shapefile test has finished.");
+      theForm.Progress(
+        string.Empty, 100, string.Format("The clipping shapefile test has finished. {0} tests went wrong", numErrors));
+
+      return numErrors == 0;
     }
 
-    /// <summary>Run the WKT - shapefile conversion test</summary>
+    /// <summary>
+    /// Run the WKT - shapefile conversion test
+    /// </summary>
     /// <param name="textfileLocation">
     /// The textfile location.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
-    internal static void RunWktShapefileTest(string textfileLocation, Form1 theForm)
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunWktShapefileTest(string textfileLocation, Form1 theForm)
     {
+      var numErrors = 0;
+
       theForm.Progress(
         string.Empty,
         0,
@@ -300,81 +465,133 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, wkt);
           ConvertFromWkt(line, shapeIndex, wkt, theForm);
         }
+        else
+        {
+          numErrors++;
+        }
+
         theForm.Progress(string.Empty, 100, " ");
+        Thread.Sleep(1000);
       }
 
       theForm.Progress(string.Empty, 100, "The WKT - shapefile conversion test has finished.");
+
+      return numErrors == 0;
     }
 
-    /// <summary>Run the intersect shapefile test</summary>
-    /// <param name="shapefilenameFirst">
-    /// The shapefilename first.
+    /// <summary>Run the intersection shapefile test</summary>
+    /// <param name="textfileLocation">
+    /// The textfile location.
     /// </param>
-    /// <param name="shapefilenameSecond">
-    /// The shapefilename second.
+    /// <param name="theForm">
+    /// The form.
     /// </param>
+    internal static bool RunIntersectionShapefileTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+      theForm.Progress(string.Empty, 0, "-----------------------The intersection shapefile test has started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
+      {
+        if (i + 1 > lines.Count)
+        {
+          theForm.Error(string.Empty, "Input file is incorrect.");
+          break;
+        }
+
+        if (!IntersectShapefile(lines[i], lines[i + 1], theForm))
+        {
+          numErrors++;
+        }
+
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(
+        string.Empty, 100, string.Format("The intersection shapefile test has finished. {0} tests went wrong", numErrors));
+
+      return numErrors == 0;
+    }
+
+    /// <summary>
+    /// Run the intersect shapefile test
+    /// </summary>
+    /// <param name="shapefilename">The shapefile name</param>
+    /// <param name="overlayFilename">The name of the overlay shapefile</param>
     /// <param name="theForm">
     /// The the form.
     /// </param>
-    internal static void RunIntersectionShapefileTest(string shapefilenameFirst, string shapefilenameSecond, Form1 theForm)
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool IntersectShapefile(string shapefilename, string overlayFilename, Form1 theForm)
     {
-      theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The get Intersection shapefile test has started.", Environment.NewLine));
-
       try
       {
         // Check inputs:
-        if (!Helper.CheckShapefileLocation(shapefilenameFirst, theForm))
+        if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
-        if (!Helper.CheckShapefileLocation(shapefilenameSecond, theForm))
+        if (!Helper.CheckShapefileLocation(overlayFilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
-        var sf = Fileformats.OpenShapefile(shapefilenameFirst, theForm);
+        var sf = Fileformats.OpenShapefile(shapefilename, theForm);
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
 
-        var overlaySf = Fileformats.OpenShapefile(shapefilenameSecond, theForm);
+        var overlaySf = Fileformats.OpenShapefile(overlayFilename, theForm);
         if (overlaySf == null)
         {
           theForm.Error(string.Empty, "Opening overlay shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var globalSettings = new GlobalSettings();
         globalSettings.ResetGdalError();
-        theForm.Progress(string.Empty, 0, "Start intersecting " + Path.GetFileName(shapefilenameFirst));
+        theForm.Progress(string.Empty, 0, "Start intersecting " + Path.GetFileName(shapefilename));
 
-        var intersectedSf = sf.Union(false, overlaySf, false);
-        //var intersectedSf = sf.GetIntersection(false, overlaySf, false, ShpfileType.SHP_NULLSHAPE, theForm);
+        // var intersectedSf = sf.Union(false, overlaySf, false);
 
-        // Do some checks:))
+        // With SHP_NULLSHAPE the most obvious type will be used:
+        var intersectedSf = sf.GetIntersection(false, overlaySf, false, ShpfileType.SHP_NULLSHAPE, theForm);
+
+        // Do some checks:)
         if (!Helper.CheckShapefile(sf, intersectedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
-          return;
+          return false;
         }
 
         Helper.ColorShapes(ref intersectedSf, 0, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
 
         // Save result:
-        var newFilename = shapefilenameSecond.Replace(".shp", "-intersected.shp");
+        var newFilename = overlayFilename.Replace(".shp", "-intersected.shp");
         Helper.DeleteShapefile(newFilename);
         intersectedSf.SaveAs(newFilename, theForm);
         theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
         // Load the files:
         MyAxMap.RemoveAllLayers();
-        MyAxMap.AddLayer(intersectedSf, true);
+        if (MyAxMap.AddLayer(intersectedSf, true) == -1)
+        {
+          theForm.Error(string.Empty, "Could not add the intersected shapefile to the map");
+          return false;
+        }
+
+        // Wait to show the map:
+        Application.DoEvents();
+
         //MyAxMap.AddLayer(overlaySf, true);
       }
       catch (Exception exception)
@@ -382,35 +599,77 @@ namespace TestApplication
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
 
-      theForm.Progress(string.Empty, 100, "The get intersection shapefile test has finished.");
+      return true;
     }
 
-    /// <summary>Test the closest points method</summary>
-    /// <param name="pointShapefile">The point shapefile</param>
-    /// <param name="searchShapefile">The search shapefile</param>
-    /// <param name="theForm">The form</param>
-    internal static void RunClosestPointTest(string pointShapefile, string searchShapefile, Form1 theForm)
+    /// <summary>
+    /// Test the closest points method
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The textfile Location.
+    /// </param>
+    /// <param name="theForm">
+    /// The form
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunClosestPointTest(string textfileLocation, Form1 theForm)
     {
+      var numErrors = 0;
+      theForm.Progress(string.Empty, 0, "-----------------------The closest point test has started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+
+      // Get every first line and second line:
+      for (var i = 0; i < lines.Count; i = i + 2)
+      {
+        if (i + 1 > lines.Count)
+        {
+          theForm.Error(string.Empty, "Input file is incorrect.");
+          break;
+        }
+
+        if (!ClosestPoint(lines[i], lines[i + 1], theForm))
+        {
+          numErrors++;
+        }
+
+        Thread.Sleep(1000);
+      }
+
       theForm.Progress(
-        string.Empty,
-        0,
-        string.Format("{0}-----------------------{0}The closest point test has started.", Environment.NewLine));
+        string.Empty, 100, string.Format("The closest point test has finished. {0} tests went wrong", numErrors));
 
-        const string path = Constants.SCRIPT_DATA_PATH + @"\General\MapWindow-Projects\UnitedStates\Shapefiles\";
-            pointShapefile = path + "cities.shp";
-            searchShapefile = path + "states.shp";
+      return numErrors == 0;
+    }
 
+    /// <summary>Get the closest point
+    /// </summary>
+    /// <param name="pointShapefile">
+    /// The point shapefile.
+    /// </param>
+    /// <param name="searchShapefile">
+    /// The search shapefile.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>True on success</returns>
+    private static bool ClosestPoint(string pointShapefile, string searchShapefile, Form1 theForm)
+    {
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(pointShapefile, theForm))
         {
-          return;
+          return false;
         }
 
         if (!Helper.CheckShapefileLocation(searchShapefile, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
@@ -418,14 +677,14 @@ namespace TestApplication
         if (pointSf == null)
         {
           theForm.Error(string.Empty, "Opening point shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var searchSf = Fileformats.OpenShapefile(searchShapefile, theForm);
         if (searchSf == null)
         {
           theForm.Error(string.Empty, "Opening search shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         // Create resulting shapefile:
@@ -464,7 +723,7 @@ namespace TestApplication
         {
           tolerance = 0.01;
         }
-        
+
         var foundShapeID = -1;
         object results = null;
         while (true)
@@ -482,15 +741,15 @@ namespace TestApplication
             // stop searching:
             break;
           }
-          
+
           // increase tolerance:
           tolerance = tolerance + tolerance;
         }
-        
+
         if (foundShapeID == -1)
         {
           theForm.Error(string.Empty, "Error! Could not find any shapes");
-          return;
+          return false;
         }
 
         // Select the found shape:
@@ -522,9 +781,19 @@ namespace TestApplication
         linksSf.Labels.OffsetY = 10;
 
         MyAxMap.ZoomToMaxExtents();
-        MyAxMap.Redraw();
 
-        theForm.Progress(string.Empty, 100, string.Format("The closest shape is: {0} and has a length of {1}", searchSf.get_CellValue(0, closestIndex), minLength));
+        // MyAxMap.Redraw();
+        // Wait to show the map:
+        Application.DoEvents();
+
+        theForm.Progress(
+          string.Empty,
+          100,
+          string.Format(
+            "The closest shape is{0}, has a value of {1} and a length of {2}",
+            closestIndex,
+            searchSf.get_CellValue(0, closestIndex),
+            minLength));
 
         // Save result:
         var newFilename = pointSf.Filename.Replace(".shp", "-Closest.shp");
@@ -537,26 +806,37 @@ namespace TestApplication
         theForm.Error(string.Empty, "Exception: " + exception.Message);
       }
 
-      theForm.Progress(string.Empty, 100, "The closest point test has finished.");
+      return true;
     }
 
-    /// <summary>Clip the shapefile</summary>
-    /// <param name="shapefilename">The shapefile name</param>
-    /// <param name="overlayFilename">The name of the overlay shapefile</param>
-    /// <param name="theForm">The form</param>
-    private static void ClipShapefile(string shapefilename, string overlayFilename, Form1 theForm)
+    /// <summary>
+    /// Clip the shapefile
+    /// </summary>
+    /// <param name="shapefilename">
+    /// The shapefile name
+    /// </param>
+    /// <param name="overlayFilename">
+    /// The name of the overlay shapefile
+    /// </param>
+    /// <param name="theForm">
+    /// The form
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    private static bool ClipShapefile(string shapefilename, string overlayFilename, Form1 theForm)
     {
       try
       {
         // Check inputs:
         if (!Helper.CheckShapefileLocation(shapefilename, theForm))
         {
-          return;
+          return false;
         }
 
         if (!Helper.CheckShapefileLocation(overlayFilename, theForm))
         {
-          return;
+          return false;
         }
 
         // Open the sf:
@@ -564,14 +844,14 @@ namespace TestApplication
         if (sf == null)
         {
           theForm.Error(string.Empty, "Opening input shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         var overlaySf = Fileformats.OpenShapefile(overlayFilename, theForm);
         if (overlaySf == null)
         {
           theForm.Error(string.Empty, "Opening overlay shapefile was unsuccessful");
-          return;
+          return false;
         }
 
         theForm.Progress(
@@ -590,10 +870,10 @@ namespace TestApplication
 
         var clippedSf = sf.Clip(false, overlaySf, false);
 
-        // Do some checks:)
+        // Do some checks:
         if (!Helper.CheckShapefile(sf, clippedSf, globalSettings.GdalLastErrorMsg, theForm))
         {
-          return;
+          return false;
         }
 
         Helper.ColorShapes(ref clippedSf, 0, tkMapColor.DarkRed, tkMapColor.LightSeaGreen, true);
@@ -602,16 +882,25 @@ namespace TestApplication
         var numClippedSf = clippedSf.NumShapes;
         var numInputSf = sf.NumShapes;
 
+        // Reset map:
+        MyAxMap.Clear();
+
         if (numClippedSf == numInputSf)
         {
           // Nothing was clipped
           theForm.Error(string.Empty, "The resulting shapefile has the same number of shapes as the input shapefile. Either the input files are incorrect or the clipping function doesn't behaves as expected.");
           MyAxMap.AddLayer(sf, true);
           MyAxMap.AddLayer(overlaySf, true);
+
+          // Wait to show the map:
+          Application.DoEvents();
+
+          return false;
         }
-        else
+        
+        // Save result:
+        if (overlayFilename != null)
         {
-          // Save result:
           var newFilename = shapefilename.Replace(
             ".shp", string.Format("-{0}", Path.GetFileName(overlayFilename).Replace(".shp", "-clipped.shp")));
           Helper.DeleteShapefile(newFilename);
@@ -619,9 +908,19 @@ namespace TestApplication
           theForm.Progress(string.Empty, 100, "The resulting shapefile has been saved as " + newFilename);
 
           // Load the files:
-          MyAxMap.RemoveAllLayers();
           Fileformats.OpenShapefileAsLayer(overlayFilename, theForm, false);
-          MyAxMap.AddLayer(clippedSf, true);
+          if (MyAxMap.AddLayer(clippedSf, true) == -1)
+          {
+            theForm.Error(string.Empty, "Could not add the clipped shapefile to the map");
+            return false;
+          }
+
+          // Wait to show the map:
+          Application.DoEvents();
+        }
+        else
+        {
+          return false;
         }
       }
       catch (Exception exception)
@@ -630,6 +929,7 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 100, "This clipping has finished.");
+      return true;
     }
 
     /// <summary>Convert the shape to WKT</summary>
@@ -661,25 +961,7 @@ namespace TestApplication
           return null; 
         }
 
-        // assigning random M values
-        //if (sf.ShapefileType == ShpfileType.SHP_POLYGONM)
-        //{
-        //  if (sf.StartEditingShapes())
-        //  {
-        //    Random r = new Random();
-        //    for (int i = 0; i < sf.NumShapes; i++)
-        //    {
-        //      var shp = sf.get_Shape(i);
-        //      for (int j = 0; j < shp.NumPoints; j++)
-        //      {
-        //        shp.get_Point(j).M = r.Next(1000);
-        //      }
-        //    }
-        //    sf.SaveAs("d:\\PolygonM_fixed.shp", theForm);
-        //  }
-        //}
-
-        string wkt = sf.get_Shape(shapeIndex).ExportToWKT();
+        var wkt = sf.get_Shape(shapeIndex).ExportToWKT();
         if (wkt == null || wkt.Trim() == string.Empty)
         {
           theForm.Error(string.Empty, "ExportToWKT was unsuccessful");

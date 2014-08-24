@@ -3,11 +3,19 @@
   using System.Collections.Generic;
   using System.IO;
   using System.Linq;
+  using System.Threading;
+  using System.Windows.Forms;
+
   using MapWinGIS;
 
-  public static class FileManagerTests
+  internal static class FileManagerTests
   {
-    private static bool error = false;
+    private static bool error;
+
+    /// <summary>
+    /// Gets or sets Map.
+    /// </summary>
+    internal static AxMapWinGIS.AxMap MyAxMap { get; set; }
 
     private static void Write(string msg)
     {
@@ -16,86 +24,178 @@
 
     private static void Error(string msg)
     {
-      Form1.Instance.WriteMsg(msg);
+      Form1.Instance.WriteError(msg);
       error = true;
     }
 
+    /// <summary>Run the Filemanager Analyze Files test</summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    public static bool RunAnalyzeFilesTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The Filemanager Analyze Files tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!AnalyzeFiles(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The Filemanager Analyze Files tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
+    }
+
     /// <summary>
-    /// Analyzes raster files in particular folder, displaying possible open strategies
+    /// Analyzes raster file, displaying possible open strategies
     /// </summary>
-    /// <param name="path">
+    /// <param name="filename">
     /// The path.
     /// </param>
     /// <returns>
     /// True on success
     /// </returns>
-    public static bool AnalyzeFiles(string path)
+    private static bool AnalyzeFiles(string filename, Form1 theForm)
     {
-      Write(" ");
-      Write("\nStart ANALYZE FILES TEST.");
       error = false;
-      if (!Directory.Exists(path))
-      {
-        Write("ERROR: directory not found: " + path);
-        return false;
-      }
+
+      // running check for all files with such extensions
+      var manager = new FileManager();
+
+      var count = 0;
 
       // getting list of extension for images and grids
       var img = new Image();
-      string filter = img.CdlgFilter.Replace("*.", "");
+      var filter = img.CdlgFilter.Replace("*.", string.Empty);
       var dict = filter.Split(new[] { '|' }).ToDictionary(item => item);
 
       var grid = new Grid();
-      filter = grid.CdlgFilter.Replace("*.", "");
+      filter = grid.CdlgFilter.Replace("*.", string.Empty);
       var dict2 = filter.Split(new[] { '|' }).ToDictionary(item => item);
 
       dict = dict.Keys.Union(dict2.Keys).ToDictionary(item => item);
 
       var notSupportedExtensions = new HashSet<string>();
 
-      // running check for all files with such extensions
-      var manager = new FileManager();
-
-      int count = 1;
-      var names = Directory.GetFiles(path);
-      foreach (var name in names)
+      if (File.Exists(filename))
       {
-        string ext = Path.GetExtension(name).Substring(1).ToLower();
+        var ext = Path.GetExtension(filename).Substring(1).ToLower();
+
         if (dict.ContainsKey(ext))
         {
-
-          Write(string.Format("{0}. Filename: {1}", count, Path.GetFileName(name)));
-          Write(string.Format("Is supported: {0}", manager.get_IsSupported(name)));
-          Write(string.Format("Is RGB image: {0}", manager.get_IsRgbImage(name)));
-          Write(string.Format("Is grid: {0}", manager.get_IsGrid(name)));
-          Write(string.Format("DEFAULT OPEN STRATEGY: {0}", manager.get_OpenStrategy(name)));
-          Write(string.Format("Can open as RGB image: {0}", manager.get_CanOpenAs(name, tkFileOpenStrategy.fosRgbImage).ToString()));
-          Write(string.Format("Can open as direct grid: {0}", manager.get_CanOpenAs(name, tkFileOpenStrategy.fosDirectGrid).ToString()));
-          Write(string.Format("Can open as proxy grid: {0}", manager.get_CanOpenAs(name, tkFileOpenStrategy.fosProxyForGrid).ToString()));
+          Write(string.Format("{0}. Filename: {1}", count++, Path.GetFileName(filename)));
+          Write(string.Format("Is supported: {0}", manager.get_IsSupported(filename)));
+          Write(string.Format("Is RGB image: {0}", manager.get_IsRgbImage(filename)));
+          Write(string.Format("Is grid: {0}", manager.get_IsGrid(filename)));
+          Write(string.Format("DEFAULT OPEN STRATEGY: {0}", manager.get_OpenStrategy(filename)));
+          Write(string.Format("Can open as RGB image: {0}", manager.get_CanOpenAs(filename, tkFileOpenStrategy.fosRgbImage)));
+          Write(string.Format("Can open as direct grid: {0}", manager.get_CanOpenAs(filename, tkFileOpenStrategy.fosDirectGrid)));
+          Write(string.Format("Can open as proxy grid: {0}", manager.get_CanOpenAs(filename, tkFileOpenStrategy.fosProxyForGrid)));
           Write(string.Format("------------------------------------------"));
 
-          Write(string.Format(""));
+          Write(string.Format(string.Empty));
+
           // TODO: try to open with these strategies
-          count++;
+          var rst = manager.OpenRaster(filename, tkFileOpenStrategy.fosAutoDetect, theForm);
+          if (rst != null)
+          {
+            MyAxMap.Clear();
+            if (MyAxMap.AddLayer(rst, true) == -1)
+            {
+              Error("Cannot add the raster file to the map");
+            }
+          }
+          else
+          {
+            Error("Cannot load the raster file");
+          }
         }
         else
         {
           if (!notSupportedExtensions.Contains(ext))
+          {
             notSupportedExtensions.Add(ext);
+          }
         }
+      }
+      else
+      {
+        Error(filename + " does not exists.");
       }
 
       if (notSupportedExtensions.Any())
       {
         Write("The following extensions, are among common dialog filters:");
-        foreach (var ext in notSupportedExtensions.ToList())
+        foreach (var extension in notSupportedExtensions.ToList())
         {
-          Write(ext);
+          Write(extension);
         }
       }
 
-      Write("TEST COMPLETED\n");
       return !error;
+    }
+
+    /// <summary>
+    /// Run the Filemanager Grid open test
+    /// </summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    public static bool RunGridOpenTest(string textfileLocation, Form1 theForm)
+    {
+      var numErrors = 0;
+
+      // Open text file:
+      if (!File.Exists(textfileLocation))
+      {
+        throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+      }
+
+      theForm.Progress(string.Empty, 0, "-----------------------The Filemanager Grid open tests have started.");
+
+      // Read text file:
+      var lines = Helper.ReadTextfile(textfileLocation);
+      foreach (var line in lines)
+      {
+        if (!GridOpenTest(line, theForm))
+        {
+          numErrors++;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+      }
+
+      theForm.Progress(string.Empty, 100, string.Format("The Filemanager Grid open tests have finished, with {0} errors", numErrors));
+
+      return numErrors == 0;
     }
 
     /// <summary>
@@ -104,21 +204,20 @@
     /// <param name="filename">
     /// The filename.
     /// </param>
+    /// <param name="theForm">
+    /// The Form.
+    /// </param>
     /// <returns>
     /// True on success
     /// </returns>
-    public static bool GridOpenTest(string filename)
+    private static bool GridOpenTest(string filename, ICallback theForm)
     {
-      Write(" ");
-      Write("Start GRID OPEN TEST.");
       error = false;
       if (!File.Exists(filename))
       {
         Error("Filename wasn't found: " + filename);
         return false;
       }
-
-      ICallback callback = null; // Form1.Instance;
 
       var gs = new GlobalSettings
       {
@@ -127,7 +226,7 @@
         RasterOverviewCreation = tkRasterOverviewCreation.rocYes
       };
 
-      var fm = new FileManager();
+      var fm = new FileManager { GlobalCallback = theForm };
 
       // first, let's check that overview creation/removal works correctly
       fm.ClearGdalOverviews(filename);
@@ -147,7 +246,8 @@
       fm.ClearGdalOverviews(filename);
       fm.RemoveProxyForGrid(filename);
 
-      var proxy = fm.get_HasValidProxyForGrid(filename);
+      var hasValidProxyForGrid = fm.get_HasValidProxyForGrid(filename);
+      Write("File has valid proxy for grid: " + hasValidProxyForGrid);
 
       Image img = null;
       for (var i = 0; i < 6; i++)
@@ -190,20 +290,21 @@
         Write("Gdal overviews: " + fm.get_HasGdalOverviews(filename));
         Write("Grid proxy: " + fm.get_HasValidProxyForGrid(filename));
 
-        img = fm.OpenRaster(filename, strategy, callback);
+        img = fm.OpenRaster(filename, strategy, theForm);
         if (img == null)
         {
           continue;
         }
-
+        
+        // Don't add the image to the map, because we're going to delete some helper files:
         img.Close();
 
         strategy = fm.LastOpenStrategy;
         overviews = fm.get_HasGdalOverviews(filename);
-        proxy = fm.get_HasValidProxyForGrid(filename);
+        hasValidProxyForGrid = fm.get_HasValidProxyForGrid(filename);
         Write("Last open strategy: " + strategy);
         Write("Gdal overviews: " + overviews);
-        Write("Grid proxy: " + proxy);
+        Write("Grid proxy: " + hasValidProxyForGrid);
 
         switch (i)
         {
@@ -220,7 +321,7 @@
 
             break;
           case 1:
-            if (!proxy)
+            if (!hasValidProxyForGrid)
             {
               Error("Failed to build proxy.");
             }
@@ -268,7 +369,7 @@
 
             break;
           case 5:
-            if (!proxy)
+            if (!hasValidProxyForGrid)
             {
               Error("Failed to build proxy.");
             }
@@ -286,11 +387,11 @@
       fm.RemoveProxyForGrid(filename);
 
       overviews = fm.get_HasGdalOverviews(filename);
-      proxy = fm.get_HasValidProxyForGrid(filename);
+      hasValidProxyForGrid = fm.get_HasValidProxyForGrid(filename);
 
       Write("Gdal overviews: " + fm.get_HasGdalOverviews(filename));
       Write("Grid proxy: " + fm.get_HasValidProxyForGrid(filename));
-      if (proxy)
+      if (hasValidProxyForGrid)
       {
         Error("Failed to remove proxy.");
       }
@@ -299,8 +400,6 @@
       {
         Error("Failed to remove overviews.");
       }
-
-      Write("TEST COMPLETED\n");
 
       return !error;
     }

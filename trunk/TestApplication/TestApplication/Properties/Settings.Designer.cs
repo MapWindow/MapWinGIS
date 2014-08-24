@@ -418,5 +418,53 @@ namespace TestApplication.Properties {
                 this["ReclassifyInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IntersectionShapefileInput {
+            get {
+                return ((string)(this["IntersectionShapefileInput"]));
+            }
+            set {
+                this["IntersectionShapefileInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ClosestPointInput {
+            get {
+                return ((string)(this["ClosestPointInput"]));
+            }
+            set {
+                this["ClosestPointInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AnalyzeFilesInput {
+            get {
+                return ((string)(this["AnalyzeFilesInput"]));
+            }
+            set {
+                this["AnalyzeFilesInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AxMapClearInput {
+            get {
+                return ((string)(this["AxMapClearInput"]));
+            }
+            set {
+                this["AxMapClearInput"] = value;
+            }
+        }
     }
 }

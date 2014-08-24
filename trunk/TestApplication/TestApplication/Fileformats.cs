@@ -59,13 +59,13 @@ namespace TestApplication
         hndl = Map.AddLayer(sf, true);
 
         // Check if a symbology file is present:
-        var symbFilename = filename + ".mwsymb";
-        if (File.Exists(symbFilename))
-        {
-          var layerDesc = string.Empty;
-          Map.LoadLayerOptions(hndl, string.Empty, ref layerDesc);
-          theForm.Progress(string.Empty, 100, "Applying symbology");
-        }
+        //var symbFilename = filename + ".mwsymb";
+        //if (File.Exists(symbFilename))
+        //{
+        //  var layerDesc = string.Empty;
+        //  Map.LoadLayerOptions(hndl, string.Empty, ref layerDesc);
+        //  theForm.Progress(string.Empty, 100, "Applying symbology");
+        //}
 
         theForm.Progress(string.Empty, 100, "The shapefile is of type " + sf.ShapefileType);
         theForm.Progress(string.Empty, 100, string.Format("The shapefile its projection: {0} ({1})", sf.GeoProjection.Name, sf.GeoProjection.GeogCSName));
