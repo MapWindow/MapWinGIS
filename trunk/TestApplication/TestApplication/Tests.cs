@@ -1894,7 +1894,7 @@ namespace TestApplication
 
         // Rasters have the same size and the same number of columns and rows.
         var numColumns = grdA.Header.NumberCols;
-        var numRows = grdA.Header.NumberCols;
+        var numRows = grdA.Header.NumberRows;
         Debug.WriteLine("grdA.Filename: " + grdA.Filename);
         Debug.WriteLine("grdA.Header.NodataValue: " + grdA.Header.NodataValue);
         Debug.WriteLine("grdA.Minimum: " + grdA.Minimum);

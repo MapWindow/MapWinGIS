@@ -1076,7 +1076,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				RegisterOutput="false"
+				RegisterOutput="true"
 				IgnoreImportLibrary="false"
 				AdditionalOptions="/MACHINE:I386 /ignore:4099 "
 				AdditionalDependencies="mfcs90.lib msvcrt.lib cqlib.lib GdiPlus.lib gdal_i.lib version.lib Crypt32.lib Dbghelp.lib SpatialIndex-mw.lib geos_c.lib libtiff_i.lib"
@@ -1090,7 +1090,7 @@
 				IgnoreDefaultLibraryNames="mfcs90.lib;LIBC.lib;msvcrt.lib"
 				ModuleDefinitionFile=".\MapWinGIS.def"
 				DelayLoadDLLs=""
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)\MapWinGIS.pdb"
 				SubSystem="2"
 				LinkTimeCodeGeneration="1"
@@ -4230,11 +4230,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Resources\zoom_in_16_2.ico"
+			RelativePath=".\Resource\zoom_in_16_2.ico"
 			>
 		</File>
 		<File
-			RelativePath=".\Resource\zoom_in_16_2.ico"
+			RelativePath=".\Resources\zoom_in_16_2.ico"
 			>
 		</File>
 	</Files>

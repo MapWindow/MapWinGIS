@@ -614,7 +614,7 @@ STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 		if (Column < 0 || Column >= trgrid->getWidth() || Row< 0 || Row >= trgrid->getHeight() )
 		{
 			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-			pVal->vt = VT_R4;
+			pVal->vt = VT_R8;
 			pVal->dblVal = trgrid->noDataValue;
 			return S_OK;
 		}
