@@ -1,12 +1,13 @@
 {\rtf1\ansi\ansicpg1252\deff0\deflang1043\deflangfe1043{\fonttbl{\f0\fswiss\fprq2\fcharset0 Arial;}{\f1\fnil\fcharset0 Courier New;}{\f2\fnil\fcharset2 Symbol;}}
 {\colortbl ;\red0\green0\blue255;\red192\green80\blue77;\red247\green150\blue70;\red155\green187\blue89;\red75\green172\blue198;\red79\green129\blue189;\red128\green100\blue162;\red255\green192\blue0;\red143\green176\blue140;}
 {\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\nowidctlpar\lang1033\b\f0\fs28 What's New in 4.9.2\b0\fs20\par
-\f1 Release date: August 1th, 2014\par
-Note: All binaries have been compiled using MS Visual Studio 2010.\par
-The last commit number in this release is 74755; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
+\f1 Release date: August 24th, 2014\par
+The last commit number in this release is 74920; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
 \pard\nowidctlpar\li360\b0\fs20\par
-\ul\b Updated API\ulnone\b0\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added Utils.CalculateRaster (Sergei Leschinsky)\par
+\ul\b Updated API\line\ulnone\b0 See also {\field{\*\fldinst{HYPERLINK "http://www.mapwindow.org/documentation/mapwingis4.9/newpage492.html"}}{\fldrslt{\ul\cf1 http://www.mapwindow.org/documentation/mapwingis4.9/newpage492.html}}}\f0\fs20\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added Utils.ReclassifyRaster (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added 2 extra PredefinedColorSchemes for grids: Rainbow, ReversedRainbow (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Added Utils.CalculateRaster (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added Shapefile.Volatile (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added Shapefile.ShapeRotation (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Added Shapefile.ShapeVisible (Sergei Leschinsky)\par
@@ -21,21 +22,22 @@ The last commit number in this release is 74755; full commit history can be foun
 {\pntext\f2\'B7\tab}GlobalSettings class: Added RasterOverviewCreation, RasterOverviewResampling, MinOverviewWidth, TiffCompression. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}FileManager class: Added HasGdalOverviews, ClearGdalOverviews, BuildGdalOverviews, NeedsGdalOverviews, RemoveProxyForGrid, HasValidProxyForGrid. (Sergei Leschinsky)\par
 {\pntext\f2\'B7\tab}Image.GridProxyColorScheme, Measuring.IsUsingEllipsoid, Tiles.ServerProjection, Tiles.ProjectionStatus, Map.ProjToDegrees, Map.DegreesToProj, Map.PixelToDegrees, Map.DegreesToPixel, Utils.TileProjectionToGeoProjection, Utils.ErrorMsgFromObject. (Sergei Leschinsky)\par
+{\pntext\f2\'B7\tab}Deprecated methods and properties can be found here: {\field{\*\fldinst{HYPERLINK "http://www.mapwindow.org/documentation/mapwingis4.9/deprecated.html"}}{\fldrslt{\ul\cf1 http://www.mapwindow.org/documentation/mapwingis4.9/deprecated.html}}}\f0\fs20\par
 \pard\nowidctlpar\li360\par
 \ul\b TestApplication\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added tests for new functionality:\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Raster calculation. (Paul Meems)\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Reclassify raster calculation. (Paul Meems)\par
+{\pntext\f2\'B7\tab}Raster calculation. (Paul Meems)\par
 {\pntext\f2\'B7\tab}AxMap.Clear. (Brad Hester)\par
-{\pntext\f2\'B7\tab}overviews/proxy for grids. (Sergei Leschinsky)\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Added a status bar to the TestApplication which currently only shows the coordinates of the mouse cursor. (Brad Hester)\par
+{\pntext\f2\'B7\tab}Overviews/proxy for grids. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\ul\b\par
 General\ulnone\b0\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 A number of small fixes (Sergei Leschinsky):\par
-\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 empty shapefiles will be skipped when calculating max extents, preventing zooming to the equator;\par
-{\pntext\f2\'B7\tab}panning inertia turned off by default (deadlocks were reported on some occasions);\par
+\pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li1080 Empty shapefiles will be skipped when calculating max extents, preventing zooming to the equator;\par
+{\pntext\f2\'B7\tab}Panning inertia turned off by default (deadlocks were reported on some occasions);\par
 {\pntext\f2\'B7\tab}utf8 will be used when loading world file with GDAL (as it's already used for dataset filename);\par
-{\pntext\f2\'B7\tab}fixes for shape hot tracking functionality (Shapefile.HotTracking);\par
-{\pntext\f2\'B7\tab}max/min layer zoom properties added to serialization;\par
+{\pntext\f2\'B7\tab}Fixes for shape hot tracking functionality (Shapefile.HotTracking);\par
+{\pntext\f2\'B7\tab}Max/min layer zoom properties added to serialization;\par
 {\pntext\f2\'B7\tab}Serialization of map projection and custom tile providers;\par
 {\pntext\f2\'B7\tab}Fixes for drawing of chart values and scalebar during snapshot;\par
 {\pntext\f2\'B7\tab}A fix for a bug when map extents set in Form Designer aren't preserved.\par
@@ -114,7 +116,7 @@ What's New in 4.9.1\b0\fs20\par
 Note: This version is just to test the installer and find any backwards incompatibility.\par
 The last commit number in this release is 74161; full commit history can be found at {\field{\*\fldinst{HYPERLINK "https://mapwingis.codeplex.com/SourceControl/list/changesets"}}{\fldrslt{\ul\cf1 https://mapwingis.codeplex.com/SourceControl/list/changesets}}}\b\f0\fs24\par
 \pard\nowidctlpar\li360\b0\fs20\par
-\ul\b Updated API\ulnone\b0\par
+\ul\b Updated API\line\ulnone\b0 See also {\field{\*\fldinst{HYPERLINK "http://www.mapwindow.org/documentation/mapwingis4.9/newpage491.html"}}{\fldrslt{\ul\cf1 http://www.mapwindow.org/documentation/mapwingis4.9/newpage491.html}}}\f0\fs20\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 New \cf2\b Grid Members\cf0\b0 : RetrieveColorScheme, GenerateColorScheme, CreateImageProxy, RemoveImageProxy, RetrieveOrGenerateColorScheme, Get/PutRow (overload), Get/PutFloatWindow (overload).\par
 {\pntext\f2\'B7\tab}New \cf2\b Grid Properties\cf0\b0 : PreferedDisplayMode, CanDisplayWithoutProxy, HasValidImageProxy.\par
 {\pntext\f2\'B7\tab}New\cf3\b  Image Properties\cf0\b0 : IsGridProxy, ExternalColorScheme, AllowExternalColorScheme, IsUsingExternalColorScheme, ExternalColorSchemeBandIndex, IsRgb, SourceFilename; \par
@@ -212,7 +214,7 @@ Tiles\ulnone\b0\par
 \fs28 What's New in 4.9.0\b0\fs20\par
 \f1 Release date: 18 June 2013\b\f0\fs24\par
 \pard\nowidctlpar\li360\b0\fs20\par
-\ul\b API\ulnone\b0\par
+\ul\b API\line\ulnone\b0 See also {\field{\*\fldinst{HYPERLINK "http://www.mapwindow.org/documentation/mapwingis4.9/newpage490.html"}}{\fldrslt{\ul\cf1 http://www.mapwindow.org/documentation/mapwingis4.9/newpage490.html}}}\f0\fs20\par
 \pard{\pntext\f2\'B7\tab}{\*\pn\pnlvlblt\pnf2\pnindent0{\pntxtb\'B7}}\nowidctlpar\fi-360\li720 Some API changes have been made, mostly textual: lower-case vs upper-case naming. (Sergei Leschinsky)\par
 \pard\nowidctlpar\li360\par
 \ul\b Optimizations\ulnone\b0\par
