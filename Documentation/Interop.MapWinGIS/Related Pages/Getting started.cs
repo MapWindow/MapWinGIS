@@ -1,10 +1,12 @@
-﻿/// \page getting_started Getting started with MapWinGIS 4.9.2
+/// \page getting_started Getting started with MapWinGIS 4.9.2
 ///
 /// \section gs1 A. Adding control control to .NET WinForms project.
 ///
 /// Let's start assuming that you:
-/// - installed the latest version of MapWinGIS from installer available on <a href="mapwingis.codeplex.com">MapWinGIS site</a>;
-/// - created a new WinForms project in Visual Studio and have a new Form to add map control to.
+/// - Installed the latest 32-Bit version of MapWinGIS using the installer available on the <a href="https://mapwingis.codeplex.com/releases/">MapWinGIS site</a>;
+/// - Important! You can create a 64-Bit version of you application and run it with the 64-Bit version of MapWinGIS, but you need to install the 32-Bit version of MapWinGIS as well to be able to use the control in Visual Studio.
+///   This is because Visual Studio cannot handle 64-Bit ActiveX controls.
+/// - Created a new WinForms project in Visual Studio and have a new Form to add map control to.
 ///
 /// Here are steps to start working with MapWinGIS ActiveX control:\n\n
 /// 1. Right click on Toolbox window (Ctrl + Alt + X) and select "Choose items" option.\n\n

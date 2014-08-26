@@ -934,3 +934,6 @@ dl.citelist dd {
   }
 }
 
+div#footer {
+  border-top: 1px solid #A8B8D9;
+}
