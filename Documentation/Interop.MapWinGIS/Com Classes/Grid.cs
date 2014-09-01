@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 #if nsp
 namespace MapWinGIS
@@ -903,7 +903,7 @@ namespace MapWinGIS
         /// <remarks> The row is the integer row to read from the grid 
         /// object. The vals variable is actually the first element of the array of floats that you want to be populated with the values from 
         /// the grid. Since arrays are stored sequentially in memory, passing the first element allows the prediction of where the other 
-        /// values must go. It is very important that you always dimension the array as being of type float, and always make sure that 
+        /// values must go. It is very important that you always dimension the array as being of type double, and always make sure that 
         /// you dimension it from 0 to numCols - 1. </remarks>
         /// <param name="Row">The Integer value of the row to retrieve values for.</param>
         /// <param name="Vals">Reference to the first element of the array of doubles that will hold the row of values. </param>
