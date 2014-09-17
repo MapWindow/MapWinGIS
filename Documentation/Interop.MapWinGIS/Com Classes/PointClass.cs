@@ -21,7 +21,7 @@ namespace MapWinGIS
     /// node [color = tan peripheries = 1 height = 0.3, width = 1.0];
     /// shp [ label="Shape" URL="\ref Shape"];
     /// 
-    /// edge [ dir = "none", style = soild, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
+    /// edge [ dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
     /// shp -> pnt [ URL="\ref Shape.get_Point()", tooltip = "Labels.get_Point()", headlabel = "   n"];
     /// }
     /// \enddot
