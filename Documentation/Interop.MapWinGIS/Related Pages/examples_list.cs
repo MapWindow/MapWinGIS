@@ -40,8 +40,8 @@
 
 /// This example demonstrates how to show tootip with attributes of a shape in mousemove event. The tooltip is drawn as a label on the spatially referenced drawing layer. The smooth redraw of the tooltip is possible only for version higher than 4.8  where the redraw of the spatially referenced drawing layers can be done independently of the data layers. 
 ///Here is a screenshot with the results of the code execution.
-/// \image html ToolTip.png
-/// \example ToolTip.cs
+/// \image html Tooltip.png
+/// \example Tooltip.cs
 
 /// This example demonstrates how to split a shapefile into several shapefiles according the values of the given attribute. For each unique value of the specified field a new shapefile will be created. Then each shape of the input shapefile will be copied to the one of the newly created shapefiles. To determine the list of the unique value generation of shapefile categories is made. Finally all new shapefiles are added to the map. A common color scheme is applied to them using ColorScheme class. Note: generally it is not needed split a shapefile into parts for applying color scheme. More likely use of such approach is splitting large shapefiles into several parts for faster rendering.
 ///Here is a screenshot with the results of the code execution.
