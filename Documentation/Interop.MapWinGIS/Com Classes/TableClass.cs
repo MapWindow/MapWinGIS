@@ -24,7 +24,7 @@ namespace MapWinGIS
     /// 
     /// edge [ dir = none, style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" labeldistance = 0.6]
     /// sf -> tbl [ URL="\ref Shapefile.Table", tooltip = "Shapefile.Table", headlabel = "   1"];
-    /// [style = solid]
+    /// 
     /// tbl -> fld [ URL="\ref Table.get_Field()", tooltip = "Table.get_Field()", headlabel = "   n"];
     /// }
     /// \enddot
