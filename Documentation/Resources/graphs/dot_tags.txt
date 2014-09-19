@@ -13,7 +13,7 @@
     // color, style, peripheries are overriden
     lbs [ label="Charts" URL="\ref Charts" color = gray, style = dashed, peripheries = 1];
      
-    // edge global settings
+    // edge global settings 
     edge [ arrowhead="open", fontsize = 9, fontcolor = blue, color = "#606060", dir = none ]
     
     // definition of edge 
