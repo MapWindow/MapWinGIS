@@ -1,7 +1,7 @@
 digraph map_actions {
- splines = ortho;
- ranksep = 0.2;
- nodesep = 0.3;
+ splines=ortho;
+ ranksep=0.2;
+ nodesep=0.3;
 
  node   [shape = polygon, peripheries = 1, fontname=Helvetica, fontsize=9, fillcolor = lightsalmon, color = "gray", style = filled, height = 0.3, width = 1.1];
 
