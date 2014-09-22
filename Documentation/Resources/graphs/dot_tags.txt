@@ -1,4 +1,4 @@
-﻿digraph graph_name
+digraph graph_name
 {
     nodesep = 0.3;	// graph settings
     ranksep = 0.2;

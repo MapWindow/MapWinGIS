@@ -1,4 +1,4 @@
-﻿digraph map_actions {
+digraph map_actions {
  splines = true;
  
  node [shape= "polygon", peripheries = 1, fontname=Helvetica, fontsize=9, color = palegreen, style = filled, height = 0.35, width = 1.2];
