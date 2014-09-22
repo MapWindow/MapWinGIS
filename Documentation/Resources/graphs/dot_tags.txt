@@ -16,6 +16,6 @@ digraph graph_name
     // edge global settings 
     edge [ arrowhead="open", fontsize = 9, fontcolor = blue, color = "#606060", dir = none ]
     
-    // definition of edge 
+    // definition of edge
     lbs -> lb [ URL="\ref Charts.get_Chart()"];
 }
