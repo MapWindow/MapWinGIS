@@ -4,7 +4,7 @@ digraph graph_name
     ranksep = 0.2;
     splines = ortho;
     
-    // global settings for node
+    //  global settings for node
     node [shape= "polygon", peripheries = 2, color = lightblue, style = filled, height = 0.3, width = 1.0];
 	
     // defininition of loads with some additional settings
