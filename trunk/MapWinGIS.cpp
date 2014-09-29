@@ -35,7 +35,7 @@ BOOL CMapWinGISApp::InitInstance()
 	//However, there are just too many bugs associated with this change. See Bug 1446 for more information. Changing back to classic.
 	std::locale::global(std::locale("C"));
 	
-	// initialize all static variables, to keep our menory leaking report clean from them
+	// initialize all static variables, to keep our memory leaking report clean from them
 	#ifdef _DEBUG
 		gMemLeakDetect.stopped = true;
 		GDALAllRegister();
@@ -145,7 +145,8 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 	HRESULT hres;
 	if(AfxDllGetClassObject(rclsid, riid, ppv) == S_OK)
 		hres = S_OK;
-	hres = _Module.GetClassObject(rclsid, riid, ppv);
+	else
+		hres = _Module.GetClassObject(rclsid, riid, ppv);
 	
 #ifdef _DEBUG	
 	gMemLeakDetect.stopped = state;
