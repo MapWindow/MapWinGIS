@@ -1201,9 +1201,9 @@
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\EditShape.h" />
+    <ClInclude Include="COM classes\OgrDatasource.h" />
+    <ClInclude Include="COM classes\OgrLayer.h" />
     <ClInclude Include="Image\cq.h" />
-    <ClInclude Include="Image\tkTiff.h" />
-    <ClInclude Include="Processing\clipper_misc.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
     <ClInclude Include="Shapefile\dbfopen.h" />
@@ -1417,6 +1417,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\EditShape.cpp" />
+    <ClCompile Include="COM classes\OgrDatasource.cpp" />
+    <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
@@ -1524,8 +1526,6 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
-    <ClCompile Include="Image\tkTiff.cpp" />
-    <ClCompile Include="Processing\clipper_misc.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
     <ClCompile Include="MapWinGIS.cpp">
@@ -1547,7 +1547,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
-    <ClCompile Include="Tiles\Providers\YandexProvider.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />
@@ -1776,6 +1775,8 @@
     <None Include="COM classes\LinePattern.rgs" />
     <None Include="COM classes\LineSegment.rgs" />
     <None Include="COM classes\Measuring.rgs" />
+    <None Include="COM classes\OgrDatasource.rgs" />
+    <None Include="COM classes\OgrLayer.rgs" />
     <None Include="COM classes\PointClass.rgs" />
     <None Include="COM classes\Shape.rgs" />
     <None Include="COM classes\ShapeDrawingOptions.rgs" />
@@ -1807,7 +1808,6 @@
     <None Include="Resources\zoom_in_16_2.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="COM classes\Callback.idl" />
     <Midl Include="MapWinGIS.odl">
       <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Win32</TargetEnvironment>
       <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateStublessProxies>

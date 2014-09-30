@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -27,7 +25,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDR_SHAPEFILELEGEND     REGISTRY                "COM Classes/ShapefileColorScheme.rgs"
-IDR_SHAPEFILELEGENDBREAK REGISTRY               "COM Classes/ShapefileColorBreak.rgs"
+IDR_SHAPEFILELEGENDBREAK REGISTRY                "COM Classes/ShapefileColorBreak.rgs"
 IDR_GRID                REGISTRY                "COM Classes/Grid.rgs"
 IDR_GRIDHEADER          REGISTRY                "COM Classes/GridHeader.rgs"
 IDR_ESRIGRIDMANAGER     REGISTRY                "COM Classes/ESRIGridManager.rgs"
@@ -65,6 +63,8 @@ IDR_SHAPEVALIDATIONINFO REGISTRY                "COM Classes/ShapeValidationInfo
 IDR_FIELDSTATOPERATIONS REGISTRY                "COM Classes/FieldStatOperations.rgs"
 IDR_FILEMANAGER         REGISTRY                "COM Classes/FileManager.rgs"
 IDR_EDITSHAPE           REGISTRY                "COM Classes/EditShape.rgs"
+IDR_OGRDATASOURCE       REGISTRY                "COM Classes/OgrDatasource.rgs"
+IDR_OGRLAYER            REGISTRY                "COM Classes/OgrLayer.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ IDB_MAP                 BITMAP                  "Resource\\Map.bmp"
 // Dialog
 //
 
-IDD_PROPPAGE_MAP DIALOG  0, 0, 250, 62
+IDD_PROPPAGE_MAP DIALOG 0, 0, 250, 62
 STYLE DS_SETFONT | WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
@@ -159,7 +159,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_PROPPAGE_MAP, DIALOG
     BEGIN
@@ -197,18 +197,18 @@ IDI_ICON1               ICON                    "Resource/zoom_in_16_2.ico"
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_MAP                 "Map Control"
     IDS_MAP_PPG             "Map Property Page"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_MAP_PPG_CAPTION     "General"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

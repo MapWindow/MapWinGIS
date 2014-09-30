@@ -5243,6 +5243,24 @@ interface IEditShape : IDispatch{
 	[propget, id(34), helpstring("")] HRESULT SelectedVertex( [out, retval]int* retVal);
 	[propput, id(34), helpstring("")] HRESULT SelectedVertex( [in]int newVal);
 };
+[
+	object,
+	uuid(EC7866BE-AE6C-46D6-8E9A-1F55D166F440),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IOgrDatasource : IDispatch{
+};
+[
+	object,
+	uuid(FF8206BE-8312-46BB-8AF0-A637CE1ACAF7),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IOgrLayer : IDispatch{
+};
 
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -6040,5 +6058,19 @@ library MapWinGIS
 	coclass EditShape
 	{
 		[default] interface IEditShape;
+	};
+	[
+		uuid(33F91D20-8EBA-4033-AE3B-15A7041087BB)
+	]
+	coclass OgrDatasource
+	{
+		[default] interface IOgrDatasource;
+	};
+	[
+		uuid(E13D56FE-78CE-4ECD-BF0F-3E9C9DDC73F9)
+	]
+	coclass OgrLayer
+	{
+		[default] interface IOgrLayer;
 	};
 };

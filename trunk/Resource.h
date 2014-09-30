@@ -45,6 +45,9 @@
 #define IDR_FIELDSTATOPERATIONS         143
 #define IDR_FILEMANAGER                 144
 #define IDR_EDITSHAPE                   145
+#define IDR_MAPWINGIS                   146
+#define IDR_OGRDATASOURCE               147
+#define IDR_OGRLAYER                    148
 #define IDS_MAP_PPG_CAPTION             200
 #define IDD_PROPPAGE_MAP                200
 #define IDC_ZOOMIN                      203
@@ -67,6 +70,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        216
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         201
-#define _APS_NEXT_SYMED_VALUE           146
+#define _APS_NEXT_SYMED_VALUE           149
 #endif
 #endif

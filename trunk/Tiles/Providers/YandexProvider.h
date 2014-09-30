@@ -19,6 +19,7 @@
  * (Open source contributors should list themselves and their modifications here). */
 
 #pragma once
+#include "BaseProvider.h"
 #include "MercatorProjectionYandex.h"
 
 class YandexBaseProvider: public BaseProvider
