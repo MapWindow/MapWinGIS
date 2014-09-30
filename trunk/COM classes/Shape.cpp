@@ -1869,7 +1869,7 @@ double CShape::get_SegmentAngle( long segementIndex)
 	this->get_XY(segementIndex, &x1, &y1, &vbretval);
 	this->get_XY(segementIndex + 1, &x2, &y2, &vbretval);
 	dx = x2 -x1; dy = y2 - y1;
-	return GetPointAngle(dx, dy) / pi * 180.0;
+	return GetPointAngle(dx, dy) / pi_ * 180.0;
 }
 
 // **********************************************

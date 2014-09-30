@@ -86,7 +86,7 @@ float* get_RegularShape(float sizeX, float sizeY, int numSides, double rotation)
 	float* points = new float[(numSides + 1) * 2];
 	for (int i = 0; i <= numSides; i++)
     {
-        float angle = (float)(i * (2 * pi) / numSides + rotation/180.0*pi);
+        float angle = (float)(i * (2 * pi_) / numSides + rotation/180.0*pi_);
         points[i * 2] = (float)(cos(angle) * sizeX/2.0f);
 		points[i * 2 + 1] = (float)(sin(angle) * sizeY/2.0f);
     }
@@ -102,7 +102,7 @@ float* get_StarShape(float sizeX, float sizeY, int numSides, float shapeRatio, d
 	float* points = new float[(numSides * 2 + 1) * 2];
     for (int i = 0; i <= numSides * 2; i++)
     {
-        double angle = i * pi / numSides + rotation/180.0*pi;
+        double angle = i * pi_ / numSides + rotation/180.0*pi_;
         float x = (float)cos(angle) * sizeX / 2.0f;
         float y = (float)sin(angle) * sizeY / 2.0f;
         if (i % 2 == 0)
@@ -122,7 +122,7 @@ float* get_StarShape(float sizeX, float sizeY, int numSides, float shapeRatio, d
 float* get_CrossShape(float size, int numSides, float shapeRatio, double rotation)
 {
     float r = size / 2.0f * shapeRatio;		// radius of circle around the regular shape in the center of cross
-    double alpha = (pi * 2.0f) / numSides;
+    double alpha = (pi_ * 2.0f) / numSides;
     double side = 2.0 * r * sin(alpha / 2.0);	// side of the regular shape in the center of cross
     float d = (float)(sqrt(pow(side / 2.0, 2.0) + pow(size / 2.0, 2.0)));	// distance to the side point of arm
     double beta = atan(side / size);			// angle between arm direction and direction ot it's side point
@@ -133,21 +133,21 @@ float* get_CrossShape(float size, int numSides, float shapeRatio, double rotatio
     {
         if (i % 3 == 0)	
 		{
-			double angle = double(i/3) / numSides * (pi * 2.0) + rotation/180.0*pi;
+			double angle = double(i/3) / numSides * (pi_ * 2.0) + rotation/180.0*pi_;
 			angle -= beta;
 			x = (float)cos(angle) * d;
 			y = (float)sin(angle) * d;
 		}
 		else if(i % 3 == 1)
 		{
-			double angle = double(i/3) / numSides * (pi * 2.0) + rotation/180.0*pi;
+			double angle = double(i/3) / numSides * (pi_ * 2.0) + rotation/180.0*pi_;
 			angle += beta;
 			x = (float)cos(angle) * d;
 			y = (float)sin(angle) * d;
 		}
 		else if (i % 3 == 2)
 		{
-			double angle = double (i/3 * 2 + 1) /(numSides * 2.0) * (pi * 2.0) + rotation/180.0*pi;
+			double angle = double (i/3 * 2 + 1) /(numSides * 2.0) * (pi_ * 2.0) + rotation/180.0*pi_;
 			x = (float)cos(angle) * r;
 			y = (float)sin(angle) * r;
 		}
@@ -192,8 +192,8 @@ float* get_ArrowShape(float sizeX, float sizeY, double rotation)
 			y = (double)points[i * 2 + 1];
 			float angle = (float)GetPointAngle(x,y);
 			float dist = (float)sqrt(pow(x,2) + pow(y,2));
-			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi));
-			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi));
+			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi_));
+			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi_));
 		}
 	}
 	return points;
@@ -232,8 +232,8 @@ float* get_FlagShape(float sizeX, float sizeY, double rotation)
 			y = (double)points[i * 2 + 1];
 			double angle = GetPointAngle(x,y);
 			double dist = sqrt(pow(x,2) + pow(y,2));
-			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi));
-			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi));
+			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi_));
+			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi_));
 		}
 
 	}

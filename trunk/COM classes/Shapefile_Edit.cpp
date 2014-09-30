@@ -308,13 +308,15 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 
 #pragma region Operations
 
+///void CShapefile::Re
+
 // ***********************************************************
 //		RegisterNewShape()
 // ***********************************************************
 // Must be called after inserting or swapping shape in shape vector
 void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 {
-	// shape must have corrct underlying data structure
+	// shape must have correct underlying data structure
 	// shapes not bound to shapefile all use CShapeWrapperCOM underlying class
 	// and if fast mode is set to true, CShapeWrapper class is expected
 	if ((this->_fastMode ? true : false) != ((CShape*)Shape)->get_fastMode())
@@ -381,7 +383,6 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	}
 	else
 	{
-		
 		if (xm < _minX) _minX = xm;
 		if (xM > _maxX) _maxX = xM;
 		if (ym < _minY) _minY = ym;
@@ -394,9 +395,94 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	if(useQTree)
 	{
 		QTreeNode node;
-		
-		//node.index = memShapes.size() - 1;
 		node.index = ShapeIndex;
+		node.Extent.left = xm;
+		node.Extent.right = xM;
+		node.Extent.top = yM;
+		node.Extent.bottom = ym;
+		m_qtree->AddNode(node);
+	}
+}
+
+// ***********************************************************
+//		EditUpdateShape()
+// ***********************************************************
+// Substitutes one shape with another without formal remove/add call,
+// so that attribute table will be intact
+STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIANT_BOOL *retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = VARIANT_FALSE;
+	if (!_isEditingShapes) 
+	{
+		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		return S_FALSE;
+	}
+
+	if (shapeIndex < 0 || shapeIndex >= _shapeData.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_FALSE;
+	}
+	else
+	{
+		Utility::put_ComReference(shpNew, (IDispatch**)&_shapeData[shapeIndex]->shape, false);
+		ReregisterShape(shapeIndex);
+		return S_OK;
+	}
+}
+
+// ***********************************************************
+//		UpdateShapeCore()
+// ***********************************************************
+// should be called when geometry of shape changed
+void CShapefile::ReregisterShape(int shapeIndex)
+{
+	if (!_isEditingShapes) return;
+
+	if (shapeIndex < 0  || shapeIndex >= _shapeData.size())
+		return;
+
+	IShape* shp = _shapeData[shapeIndex]->shape;
+	_shapeData[shapeIndex]->fastData;
+	
+	bool fastMode = _fastMode ? true : false;
+	if (fastMode != ((CShape*)shp)->get_fastMode())
+	{
+		((CShape*)shp)->put_fastMode(fastMode);
+	}
+
+	IExtents * box;
+	shp->get_Extents(&box);
+	double xm,ym,zm,xM,yM,zM;
+	box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
+	box->Release();
+
+	if (_shapeData.size() == 1)
+	{
+		_minX = xm;
+		_maxX = xM;
+		_minY = ym;
+		_maxY = yM;
+		_minZ = zm;
+		_maxZ = zM;
+	}
+	else
+	{
+		if (xm < _minX) _minX = xm;
+		if (xM > _maxX) _maxX = xM;
+		if (ym < _minY) _minY = ym;
+		if (yM > _maxY) _maxY = yM;
+		if (zm < _minZ) _minZ = zm;
+		if (zM > _maxZ) _maxZ = zM;
+	}
+
+	if(useQTree)
+	{
+		m_qtree->RemoveNode(shapeIndex);
+		
+		QTreeNode node;
+		node.index = shapeIndex;
 		node.Extent.left = xm;
 		node.Extent.right = xM;
 		node.Extent.top = yM;
@@ -547,6 +633,8 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 				delete _shapeData[ShapeIndex];
 				_shapeData.erase( _shapeData.begin() + ShapeIndex );
 				
+				// TODO: why haven't we updated QTree?
+
 				*retval = VARIANT_TRUE;
 			}
 		}

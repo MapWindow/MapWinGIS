@@ -980,8 +980,8 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					labelAngle = labelAngle - 360.0f;
 				}
 				
-				int x = (int)(xStart + sin(labelAngle/180.0 * pi) * _options.radius);
-				int y = (int)(yStart - cos(labelAngle/180.0 * pi) * _options.radius);
+				int x = (int)(xStart + sin(labelAngle/180.0 * pi_) * _options.radius);
+				int y = (int)(yStart - cos(labelAngle/180.0 * pi_) * _options.radius);
 								
 				if (labelAngle >= 0.0 && labelAngle <= 180.0)
 				{
@@ -1095,13 +1095,13 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 				if ( _options.use3Dmode )
 				{
 					points[0].X = (Gdiplus::REAL)xStart;
-					points[1].X = (Gdiplus::REAL)(xStart + sin(angle/180*pi) * _options.thickness);
+					points[1].X = (Gdiplus::REAL)(xStart + sin(angle/180*pi_) * _options.thickness);
 					points[2].X = (Gdiplus::REAL)points[1].X + _options.barWidth;
 					points[3].X = (Gdiplus::REAL)xStart + _options.barWidth;
 					points[4].X = (Gdiplus::REAL)xStart;
 
 					points[0].Y = (Gdiplus::REAL)offsetY;
-					points[1].Y = (Gdiplus::REAL)(offsetY - cos(angle/180*pi) * _options.thickness);
+					points[1].Y = (Gdiplus::REAL)(offsetY - cos(angle/180*pi_) * _options.thickness);
 					points[2].Y = (Gdiplus::REAL)points[1].Y;
 					points[3].Y = (Gdiplus::REAL)offsetY;
 					points[4].Y = (Gdiplus::REAL)offsetY;
@@ -1112,13 +1112,13 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 					g.FillPolygon(&brushDimmed, points, 5);
 
 					points[0].X = (Gdiplus::REAL)xStart + _options.barWidth;
-					points[1].X = (Gdiplus::REAL)(points[0].X  + sin(angle/180*pi) * _options.thickness);
+					points[1].X = (Gdiplus::REAL)(points[0].X  + sin(angle/180*pi_) * _options.thickness);
 					points[2].X = (Gdiplus::REAL)points[1].X;
 					points[3].X = (Gdiplus::REAL)points[0].X;
 					points[4].X = (Gdiplus::REAL)points[0].X;
 
 					points[0].Y = (Gdiplus::REAL)offsetY;
-					points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle/180*pi) * _options.thickness);
+					points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle/180*pi_) * _options.thickness);
 					points[2].Y = (Gdiplus::REAL)points[1].Y + height;
 					points[3].Y = (Gdiplus::REAL)points[0].Y + height;
 					points[4].Y = (Gdiplus::REAL)points[0].Y;
@@ -1136,7 +1136,7 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 		std::vector<ValueRectangle> labels;
 		if (_options.valuesVisible && !hideLabels)
 		{
-			int xAdd = (int)(sin(45.0/180*pi) * _options.thickness);
+			int xAdd = (int)(sin(45.0/180*pi_) * _options.thickness);
 			
 			xStart = int(x); //- numBars * _options.barWidth/2.0);
 			yStart = int(y + maxHeight);

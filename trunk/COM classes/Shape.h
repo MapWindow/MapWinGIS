@@ -152,9 +152,10 @@ private:
 	void ErrorMessage(long ErrorCode);
 	bool CShape::PointInThisPolyFast(IPoint * pt);
 	bool CShape::PointInThisPolyRegular(IPoint * pt);
-	bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck);
+	
 	
 public:
+	bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck);
 	bool put_ShapeWrapper(CShapeWrapper* data);
 	IShapeWrapper* get_ShapeWrapper();
 	void CShape::put_fastMode(bool state);				// toggles the storing mode for the shape

@@ -437,7 +437,7 @@ double Sinc(double Value)
 {
 	if (Value != 0)
 	{
-		Value = Value * pi;
+		Value = Value * pi_;
 		return sin(Value) / Value;
 	}
 	else return 1.0;

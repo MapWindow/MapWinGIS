@@ -3361,7 +3361,7 @@ void CUtils::Parse(CString sOrig, int * opts)
 		sArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
 	}
 
-	*opts = (int) sArr.GetCount();
+	*opts = (int)sArr.GetCount();
 }
 
 // ***********************************************************
@@ -4537,9 +4537,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idColorScheme:
 			CoCreateInstance( CLSID_ColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IColorScheme, (void**)&val );
 			break;
-		//case tkInterface::idEditShape:
-		//	CoCreateInstance( CLSID_EditShape, NULL, CLSCTX_INPROC_SERVER, IID_IEditShape, (void**)&val );
-		//	break;
+		case tkInterface::idEditShape:
+			CoCreateInstance( CLSID_EditShape, NULL, CLSCTX_INPROC_SERVER, IID_IEditShape, (void**)&val );
+			break;
 		case tkInterface::idESRIGridManager:
 			CoCreateInstance( CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val );
 			break;

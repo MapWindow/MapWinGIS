@@ -270,7 +270,18 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// -------------------------------------------
 	// distance measuring or persistent measuring
 	// -------------------------------------------
-	this->DrawMeasuringToMainBuffer(_isSnapshot ? gPrinting : gBuffer);
+	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
+	{
+		GetMeasuringBase()->DrawData(_isSnapshot ? gPrinting : gBuffer, false, OffsetNone);
+	}
+
+	// -------------------------------------------
+	// edit shape
+	// -------------------------------------------
+	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
+	{
+		DrawEditShape(_isSnapshot ? gPrinting : gBuffer, false);
+	}
 	
 	// -------------------------------------------
 	// passing the main buffer to the screen 
@@ -720,7 +731,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 						{
 							VARIANT_BOOL isVolatile;
 							sf->get_Volatile(&isVolatile);
-							if (((bool)isVolatile) != layerBuffer)
+							if ((isVolatile ? true : false) != layerBuffer)
 							{
 								sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
 
@@ -790,7 +801,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 					VARIANT_BOOL isVolatile;
 					sf->get_Volatile(&isVolatile);
 					sf->Release();
-					if (((bool)isVolatile) == layerBuffer)
+					if ((isVolatile ? true : false) == layerBuffer)
 						continue;
 				}
 
@@ -976,16 +987,27 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 {
 	switch(type) 
 	{
+		case ActShape:	
+			{
+				return GetEditShapeBase()->GetPointCount() > 0;
+			}	
 		case ZoomBox:
-			return _dragging.Operation == DragZoombox;
+			{
+				return _dragging.Operation == DragZoombox;
+			}
+		case ShapeEditing:
+			{
+				if (!GetEditShapeBase()->GetCreationMode())
+					return false;
+				return GetEditShapeBase()->GetPointCount() > 0;
+			}
 		case tkDrawingDataAvailable::LayersData:	
 			{
 				return _activeLayers.size() > 0;
 			}
 		case tkDrawingDataAvailable::MeasuringData:
 			{
-				CMeasuring* m = ((CMeasuring*)_measuring);
-				return m->NeedsDrawing() || (m_cursorMode == cmMeasure && m->points.size() > 0);
+				return GetMeasuringBase()->NeedsDrawing() || (m_cursorMode == cmMeasure && GetMeasuringBase()->GetPointCount() > 0);
 			}
 		case tkDrawingDataAvailable::Coordinates:
 			{

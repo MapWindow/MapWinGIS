@@ -8,7 +8,7 @@
 #include <cmath>
 using namespace std;
 
-#define pi 3.1415926535897932384626433832795
+#define pi_ 3.1415926535897932384626433832795
 
 class Rotate
 	{
@@ -39,8 +39,8 @@ class Rotate
 		void setRotateAngle(float angle)
 			{
 			degAngle = angle;
-			_cosine = (float) cos((angle * pi) / 180);
-	    _sine   = (float) sin((angle * pi) / 180);
+			_cosine = (float) cos((angle * pi_) / 180);
+	    _sine   = (float) sin((angle * pi_) / 180);
 			}
 
  		float getRotateAngle()

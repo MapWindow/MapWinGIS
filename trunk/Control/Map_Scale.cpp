@@ -489,6 +489,18 @@ IMeasuring* CMapView::GetMeasuring()
 }
 
 // *****************************************************
+//		GetEditShape()
+// *****************************************************
+IEditShape* CMapView::GetEditShape() 
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if(_editShape) {
+		_editShape->AddRef();
+	}
+	return _editShape;
+}
+
+// *****************************************************
 //		GetGeographicExtents()
 // *****************************************************
 IExtents* CMapView::GetGeographicExtents()

@@ -64,6 +64,7 @@ IDR_MEASURING           REGISTRY                "COM Classes/Measuring.rgs"
 IDR_SHAPEVALIDATIONINFO REGISTRY                "COM Classes/ShapeValidationInfo.rgs"
 IDR_FIELDSTATOPERATIONS REGISTRY                "COM Classes/FieldStatOperations.rgs"
 IDR_FILEMANAGER         REGISTRY                "COM Classes/FileManager.rgs"
+IDR_EDITSHAPE           REGISTRY                "COM Classes/EditShape.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

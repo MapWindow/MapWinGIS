@@ -11,5 +11,5 @@ const double eps = 0.000001;
 	tkExtentsRelation RelateExtents(IExtents* ext1, IExtents* ext2);
 	tkExtentsRelation RelateExtents(CRect& r1, CRect& r2);
 	double GetPointAngle(double &x, double &y);
-
+	bool PointOnSegment(double x1, double y1, double x2, double y2, double pntX, double pntY);
 #endif

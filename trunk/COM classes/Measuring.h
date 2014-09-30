@@ -23,6 +23,7 @@
  * (Open source contributors should list themselves and their modifications here). */
  
 #pragma once
+#include "MeasuringBase.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -35,35 +36,16 @@ class ATL_NO_VTABLE CMeasuring :
 	public IDispatchImpl<IMeasuring, &IID_IMeasuring, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CMeasuring() : textBrush(Gdiplus::Color::Black), whiteBrush(Gdiplus::Color::White)
-	{
-		_mapView = NULL;
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
-
-		font = Utility::GetGdiPlusFont("Times New Roman", 9);
-		format.SetAlignment(Gdiplus::StringAlignmentCenter);
-		format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
-
-		SetDefaults();
+	CMeasuring() {
+		_measuring = new MeasuringBase();
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
+		USES_CONVERSION;
+		_key = A2BSTR("");
 	}
 
-	void SetDefaults()
-	{
-		isGeodesic = false;
-		stopped = false;
-		mousePoint.x = mousePoint.y = 0;
-		measuringType = tkMeasuringType::MeasureDistance;
-		_areaRecalcIsNeeded = true;
-		closedPoly = false;
-		firstPointIndex = -1;
-		persistent = VARIANT_FALSE;
-		displayAngles = false;
-	}
-
-	~CMeasuring()
-	{
-		Clear();
-		if (shape) shape->Release();
+	~CMeasuring() {
+		delete _measuring;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_MEASURING)
@@ -85,6 +67,12 @@ public:
 	}
 
 public:
+	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
+	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
+	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
+	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
+	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(get_Length)(double* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_PointCount)(long* retVal);
@@ -96,72 +84,22 @@ public:
 	STDMETHOD(get_Area)(double* retVal);
 	STDMETHOD(get_IsStopped)(VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)();
-	STDMETHOD(get_SegementLength)(int segmentIndex, double* retVal);
+	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_Persistent)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_Persistent)(VARIANT_BOOL newVal);
 	STDMETHOD(get_DisplayAngles)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_DisplayAngles)(VARIANT_BOOL newVal);
 	STDMETHOD(get_IsUsingEllipsoid)(VARIANT_BOOL* retVal);
-
+	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
+	STDMETHOD(put_AreaDisplayMode)(tkAreaDisplayMode newVal);
+	
 private:
-	bool stopped;
-	bool isGeodesic;
-	void* _mapView;
-	bool _areaRecalcIsNeeded;  // geodesic area should be recalculated a new (after a point was added or removed)
-	IShape* shape;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+	MeasuringBase* _measuring;
 public:
-	// projection should be specified before any calculations are possible
-	void SetMapView(void* mapView);
-	IGeoProjection* GetMapProjection();
-	IGeoProjection* GetWgs84Projection();
-	tkTransformationMode GetTransformationMode();
-
-	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
-	bool CMeasuring::TransformPoint(double& x, double& y);
-	
-	bool IsStopped() {return stopped; }
-	bool IsGeodesic() { return isGeodesic;}
-	bool NeedsDrawing() {
-		return persistent && points.size() > 0;
-	}
-
-	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
-	double GetDistance();
-	double GetEuclidianDistance();
-	double CMeasuring::GetGeodesicDistance();
-
-	double CMeasuring::GetArea(bool closingPoint, double x, double y);
-	double CMeasuring::GetGeodesicArea(bool closingPoint, double x, double y);
-	double CMeasuring::GetEuclidianArea(bool closingPoint, double x, double y) ;
-
-	int CMeasuring::get_ScreenPoints(void* map, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
-
-	VARIANT_BOOL persistent;			   // will be drawn even when cursor mode isn't cmMeasure
-	tkMeasuringType measuringType;
-	Point2D mousePoint;					   // points entered by user (in map units, whatever they are)
-	bool displayAngles;
-	
-	Gdiplus::Font* font;
-	Gdiplus::SolidBrush textBrush; // Black;
-	Gdiplus::SolidBrush whiteBrush;// White;
-	Gdiplus::StringFormat format;
-	bool closedPoly;
-	int firstPointIndex;
-
-	void ClosePoly(int firstPointIndex)
-	{
-		closedPoly = true;
-		this->firstPointIndex = firstPointIndex;
-	}
-
-	struct MeasurePoint
-	{
-		Point2D Proj;
-		double x;
-		double y;
-	};
-
-	std::vector<MeasurePoint*> points;		   // points in decimal degrees (in case transformation to WGS84 is possible)
+	MeasuringBase* GetBase() { return _measuring; }
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Measuring), CMeasuring)

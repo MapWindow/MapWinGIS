@@ -637,13 +637,13 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					else if (angle >= 180.0 && angle < 270.0)	angle -= 180.0;
 				}
 				
-				angleRad = angle/180.0 * pi;
+				angleRad = angle/180.0 * pi_;
 				//END OF NEW CODE
 
 				if (angle != 0.0)
 				{
 					CRotatedRectangle* rectNew = new CRotatedRectangle(rect);
-					double angle1 = 2* pi - angleRad;
+					double angle1 = 2* pi_ - angleRad;
 					for(int i = 0; i < 4; i++)
 					{
 						long x = rectNew->points[i].x;

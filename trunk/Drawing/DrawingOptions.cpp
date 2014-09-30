@@ -406,7 +406,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 		double rot = this->fillGradientRotation;
 		if (rot != 0.0)
 		{
-			double angleRad = (rot/180 * pi);
+			double angleRad = (rot/180 * pi_);
 			Gdiplus::REAL width = (Gdiplus::REAL)(abs(bounds->Width * cos(angleRad)) + abs(bounds->Height * sin(angleRad)));
 			Gdiplus::REAL height = (Gdiplus::REAL)(abs(bounds->Width * sin(angleRad)) + abs(bounds->Height * cos(angleRad)));
 			
@@ -480,7 +480,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 			double angle = rot;
 			if (angle < 0) angle = 360.0 + angle;
 			angle = (long)angle % 90;
-			angle = 2 * (pi * angle / 180.0);
+			angle = 2 * (pi_ * angle / 180.0);
 			
 			double x = a * cos(angle);
 			double y = -b - a * sin(angle);

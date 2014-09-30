@@ -27,6 +27,9 @@
 # include "MapRotate.h"
 # include "ImageGroup.h"
 # include "CollisionList.h"
+# include "MeasuringBase.h"
+# include "EditShapeBase.h"
+
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -248,6 +251,10 @@ public:
 	afx_msg ITiles* GetTiles(void);
 	afx_msg IFileManager* GetFileManager(void);
 	//afx_msg void SetTiles(ITiles* pVal);
+
+	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
+	afx_msg void PixelToProj(double pixelX, double pixelY, double FAR* projX, double FAR* projY);
+
 protected:
 	afx_msg BSTR GetLayerDescription(LONG LayerHandle);
 	afx_msg void SetLayerDescription(LONG LayerHandle, LPCTSTR newVal);
@@ -465,8 +472,7 @@ protected:
 	afx_msg void ZoomIn(double Percent);
 	afx_msg void ZoomOut(double Percent);
 	afx_msg long ZoomToPrev();
-	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
-	afx_msg void PixelToProj(double pixelX, double pixelY, double FAR* projX, double FAR* projY);
+	
 	afx_msg void ClearDrawing(long DrawHandle);
 	afx_msg void ClearDrawings();
 	afx_msg LPDISPATCH SnapShot(LPDISPATCH BoundBox);
@@ -538,6 +544,7 @@ protected:
 	afx_msg VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 	afx_msg VARIANT_BOOL ZoomToTileLevel(int zoom);
 	afx_msg IMeasuring* GetMeasuring(void);
+	afx_msg IEditShape* GetEditShape(void);
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
 	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
 	afx_msg long AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
@@ -622,6 +629,12 @@ public:
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
+	void FireShapeEditing(IDispatch* shapeData, tkShapeEditingAction action, VARIANT_BOOL* cancel)
+		{FireEvent(eventidShapeEditing,EVENT_PARAM(VTS_DISPATCH VTS_I4 VTS_PBOOL), shapeData, action, cancel);}
+	void FireSelectShape( double projX, double projY, long* layerHandle, long* shapeIndex, VARIANT_BOOL* handled)
+		{FireEvent(eventidSelectShape,EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4 VTS_PI4 VTS_PBOOL), 
+		projX, projY, layerHandle, shapeIndex, handled);}
+
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
@@ -729,6 +742,7 @@ public:
 	// ---------------------------------------------
 	IFileManager* _fileManager;
 	IMeasuring* _measuring;
+	IEditShape* _editShape;
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
 	
@@ -887,11 +901,12 @@ private:
 	// ---------------------------------------------
 	void HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawToOutputCanvas, float offsetX = 0.0f, float offsetY = 0.0f);
 	void ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message = L"");
-	void DrawMeasuringToMainBuffer(Gdiplus::Graphics* g );
-	void DrawMeasuringToScreenBuffer(Gdiplus::Graphics* g);
+	//void DrawMeasuringToMainBuffer(Gdiplus::Graphics* g );
+	//IPoint* GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
+	//void DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
+	//void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, double totalLength, int segmentIndex);
 	void DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g);
 	void DrawScaleBar(Gdiplus::Graphics* g);
-	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
 	bool HasDrawingData(tkDrawingDataAvailable type);
 	void DrawTiles(Gdiplus::Graphics* g);
 	void DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds);
@@ -900,9 +915,7 @@ private:
 	void DrawZoombar(Gdiplus::Graphics* g);
 	void DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType);
 	void DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist);
-	void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, double totalLength, int segmentIndex);
 	void DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
-	IPoint* GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
 	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
 								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
 								  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
@@ -1001,7 +1014,19 @@ private:
 	bool GetTileMismatchMinZoom( int& minZoom );
 	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
 	bool LayerIsEmpty(long LayerHandle);
-	HotTrackingInfo* FindShapeAtScreenPoint(CPoint point, bool hotTracking);
+	HotTrackingInfo* FindShapeAtScreenPoint(CPoint point, LayerSelector selector);
+	HotTrackingInfo* FindShapeCore(double projX, double projY, std::vector<bool>& layers);
+	MeasuringBase* GetMeasuringBase();
+	EditShapeBase* GetEditShapeBase();
+	ActiveShape* GetAtiveShape();
+	bool HandleCustomControlClick();
+	void DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer );
+	bool SelectLayers(LayerSelector selector, std::vector<bool>& layers);
+	bool SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex);
+	void SetEditShape(long layerHandle, long shapeIndex);
+	void SaveEditShape();
+	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
+	bool TryAddVertex(double projX, double projY);
 #pragma endregion
 };
 

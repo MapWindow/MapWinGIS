@@ -125,6 +125,8 @@ enum tkDrawingDataAvailable
 	HotTracking = 4,
 	ZoomingAnimation = 5,
 	PanningInertia = 6,
+	ActShape = 7,
+	ShapeEditing = 8,
 	ZoomBox = 9,
 };
 
@@ -149,6 +151,8 @@ enum DraggingOperation
 	DragPanning = 1,
 	DragZoombarHandle = 2,
 	DragZoombox = 3,
+	DragMoveShape = 4,
+	DragMoveVertex = 5,
 };
 
 enum TileProjectionState
@@ -156,6 +160,32 @@ enum TileProjectionState
 	ProjectionMatch = 0,
 	ProjectionDoTransform = 1,
 	ProjectionCompatible = 2,	// WGS84 map; GMercator server; transformation is still necessary but at least results are guaranteed
+};
+
+enum ShapeInputMode
+{
+	simMeasuring = 0,
+	simEditing = 1,
+};
+
+enum LayerSelector
+{
+	slctAll = 0,
+	slctInMemorySf = 1,
+	slctHotTracking = 2,
+};
+
+enum OffsetType
+{
+	OffsetNone = 0,
+	OffsetShape = 1,
+	OffsetVertex = 2,
+};
+
+enum MouseTolerance
+{
+	ToleranceSelect = 0,
+	ToleranceInsert = 1,
 };
 
 # endif

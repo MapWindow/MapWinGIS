@@ -6,7 +6,7 @@
 // *******************************************************************
 bool LineIntersection1(const POINT& a1, const POINT& a2, const POINT& b1, const POINT& b2)
 {
-	// calcultion of roots for system of 2 linear equations by the Kramer algorythms
+	// calculation of roots for system of 2 linear equations by the Kramer algorithm
 	double d, da, db;	// determinants
 	d  =(a1.x-a2.x)*(b2.y-b1.y) - (a1.y-a2.y)*(b2.x-b1.x);
 	da =(a1.x-b1.x)*(b2.y-b1.y) - (a1.y-b1.y)*(b2.x-b1.x);
@@ -32,7 +32,7 @@ bool LineIntersection1(const POINT& a1, const POINT& a2, const POINT& b1, const 
 // *******************************************************************
 bool LineIntersection(const POINT& a1, const POINT& a2, const POINT& b1, const POINT& b2, POINT& pntCross)
 {
-	// calcultion of roots for system of 2 linear equations by the Kramer algorythms
+	// calculation of roots for system of 2 linear equations by the Kramer algorithm
 	double d, da, db;	// determinants
 	d  =(a1.x-a2.x)*(b2.y-b1.y) - (a1.y-a2.y)*(b2.x-b1.x);
 	da =(a1.x-b1.x)*(b2.y-b1.y) - (a1.y-b1.y)*(b2.x-b1.x);
@@ -145,7 +145,7 @@ bool ExtentsIntersection(const POINT& p1, const POINT& p2, const POINT& p3, cons
 /***********************************************************************/
 
 /*  Temporary function will be shifted to extents class
- *  Extents1 include/is included/insterect extents2
+ *  Extents1 include/is included/intersect extents2
  */
 tkExtentsRelation RelateExtents(IShape* shp1, IShape* shp2)
 {
@@ -164,7 +164,7 @@ tkExtentsRelation RelateExtents(IShape* shp1, IShape* shp2)
 }
 
 /*  Temporary function will be shifted to extents class
- *  Extents1 include/is included/insterect extents2
+ *  Extents1 include/is included/intersect extents2
  */
 tkExtentsRelation RelateExtents(IExtents* ext1, IExtents* ext2)
 {
@@ -236,6 +236,39 @@ tkExtentsRelation RelateExtents(CRect& r1, CRect& r2)
 		return erIntersection;
 }
 
+//**************************************************************************
+//		PointOnSegment()													
+//**************************************************************************
+bool PointOnSegment(double x1, double y1, double x2, double y2, double pntX, double pntY)
+{
+	if ((pntX < x1 && pntX < x2) || (pntX > x1 && pntX > x2) ||
+		(pntY < y1 && pntY < y2) || (pntY > y1 && pntY > y2) )
+	{
+		return false;
+	}
+
+	double TOLERANCE = 1e-6;
+
+	double dx = x2 - x1;
+	double dy = y2 - y1;
+	double a = (y2 - y1) / (x2 - x1);
+	double b = y1 - a * x1;
+	
+	// regular case
+	if (dx != 0.0 && dy != 0.0)
+	{
+		return abs(a * pntX + b - pntY) < TOLERANCE;
+	}
+	
+	// vertical line
+	if (dx == 0) return pntY - y1 < TOLERANCE;
+	
+	// horizontal line
+	if (dy == 0) return pntX - x1 < TOLERANCE;
+
+	return false;
+}
+
 /****************************************************************************/
 /*		get_PointAngle()														*/
 /****************************************************************************/
@@ -245,14 +278,14 @@ tkExtentsRelation RelateExtents(CRect& r1, CRect& r2)
 	if( y != 0)
 	{
 		double angle = atan(x / y);
-		if (y < 0)			return pi + angle;
+		if (y < 0)			return pi_ + angle;
 		else if (x >= 0)	return angle;
-		else /*if (x <= 0)*/return 2.0 * pi + angle;
+		else /*if (x <= 0)*/return 2.0 * pi_ + angle;
 	}
 	else
 	{
-		if (x > 0)		return pi / 2.0;
-		else if(x < 0)	return 1.5 * pi;
+		if (x > 0)		return pi_ / 2.0;
+		else if(x < 0)	return 1.5 * pi_;
 		else			return 0.0;
 	}
 }
@@ -262,7 +295,7 @@ tkExtentsRelation RelateExtents(CRect& r1, CRect& r2)
 /****************************************************************************/
 
 /*	Seeks intersection point of two line segments. First - first 4 values;
- *  second - from 5 to 8. x,y - intersectoin position. Returns true if lines
+ *  second - from 5 to 8. x,y - intersection position. Returns true if lines
  *  have intersection and false otherwise (lines parallel)
  */
 //inline bool LineDrawer::LinesIntersection(long &x11, long &y11, long &x12, long &y12, long &x21, long &y21, long &x22, long &y22, long &x, long &y)

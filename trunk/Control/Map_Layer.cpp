@@ -12,6 +12,9 @@
 #include "Shapefile.h"
 #include "ImageLayerInfo.h"
 
+// ************************************************************
+//		GetNumLayers()
+// ************************************************************
 long CMapView::GetNumLayers()
 {
 	return _activeLayers.size();

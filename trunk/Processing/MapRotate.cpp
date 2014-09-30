@@ -60,7 +60,7 @@ void Rotate::getOriginalPixelPoint(long rotatedX, long rotatedY, long *origX, lo
   
   float angle1 = atan2((float) yLen, (float) xLen);
 
-  float diffAngle = angle1 + (float)((degAngle * pi) / 180.0);
+  float diffAngle = angle1 + (float)((degAngle * pi_) / 180.0);
 
   float radLen = sqrtf((float)((xLen * xLen) + (yLen * yLen)));
   
@@ -84,11 +84,11 @@ void Rotate::getNewPixelPoint(long origX, long origY, long *rotatedX, long *rota
   
   float angle1 = atan2((float) yLen, (float) xLen);
 
-  float tmpA1 = angle1 * (float)(180.00 / pi);
+  float tmpA1 = angle1 * (float)(180.00 / pi_);
 
-  float diffAngle = angle1 - (float)((degAngle * pi) / 180.0);
+  float diffAngle = angle1 - (float)((degAngle * pi_) / 180.0);
   
-  float tmpdiffA = diffAngle * (float)(180.00 / pi);
+  float tmpdiffA = diffAngle * (float)(180.00 / pi_);
 
   float radLen = sqrtf((float)((xLen * xLen) + (yLen * yLen)));
   

@@ -42,17 +42,14 @@ QTree::~QTree(void)
 
 void QTree::Regenerate()
 {
-	
 	unsigned int nodeNumber = nodes.size();
 	double middleX = (this->extent.left + this->extent.right) /2;
 	double middleY = (this->extent.top + this->extent.bottom) /2;
 	
 	///vector<QTreeNode*> nodesCross(MAX_LEAF_NODES);//Crossed Shapes
 	
-	
 	for(int i = nodeNumber-1 ; i >=0; i--)
 	{
-
 		//not exist in any two areas
 		if( ! ( nodes[i]->Extent.left <= middleX 
 			&& nodes[i]->Extent.right > middleX
@@ -69,16 +66,10 @@ void QTree::Regenerate()
 			
 		}
 	}
-	
-	
-
 }
 
 void QTree::AddNode(const QTreeNode& Node)
 {
-
-
-
 	//if the Node overflow the extent of QuadTree
 	if( ! this->extent.Contain(Node.Extent))
 	{
@@ -89,12 +80,9 @@ void QTree::AddNode(const QTreeNode& Node)
 			this->extent.bottom == 0)
 		{
 			this->extent = Node.Extent;
-			
-			
 		}
 		else
 		{
-
 			QTree* oldQtree = new QTree(
 				QTreeExtent(this->extent.left,
 				this->extent.right,this->extent.top,this->extent.bottom));

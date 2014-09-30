@@ -8,6 +8,7 @@ CMemLeakDetect gMemLeakDetect;		// comment this line to turn off the memory leak
 GlobalSettingsInfo m_globalSettings;
 ReferenceCounter gReferenceCounter;
 IUtils* m_utils;
+IShapefile* m_shapefile;
 char* UTF8_ENCODING_MARKER = "utf8";
 
 // *****************************************************************
@@ -35,3 +36,14 @@ IUtils* GetUtils()
 	return m_utils;
 }
 
+// *****************************************************************
+//		GetTempShapefile
+// *****************************************************************
+IShapefile* GetTempShapefile()
+{
+	if (!m_shapefile)
+	{
+		CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&m_shapefile);
+	}
+	return m_shapefile;
+}

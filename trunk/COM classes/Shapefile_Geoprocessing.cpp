@@ -2815,6 +2815,7 @@ STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 BOOL CShapefile::pointInPolygon( long ShapeIndex, double x, double y )
 {
 	VARIANT_BOOL InPolygon;
+	if (ShapeIndex < 0) return FALSE;
 	PointInShape(ShapeIndex, x, y, &InPolygon);
 	return -InPolygon;
 }

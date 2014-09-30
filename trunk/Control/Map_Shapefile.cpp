@@ -139,8 +139,6 @@ bool CMapView::IsValidShape( long layerHandle, long shape )
 			this->AlignShapeLayerAndShapes(l);
 			
 			IShapefile * ishp = NULL;
-			//IDispatch * object = l->object;
-			//object->QueryInterface(IID_IShapefile,(void**)&ishp);
 			l->QueryShapefile(&ishp);
 
 			long numShapes = 0;
@@ -1131,18 +1129,90 @@ void CMapView::ClearHotTracking()
 // ************************************************************
 //		FindShapeAtScreenPoint
 // ************************************************************
-HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking)
+HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector selector)
 {
-	HotTrackingInfo* info = NULL;
-
 	double pixX = point.x;
 	double pixY = point.y;
 	double prjX, prjY;
 	this->PixelToProj(pixX, pixY, &prjX, &prjY);
+	
+	std::vector<bool> layers;
+	if (SelectLayers(selector, layers))
+	{
+		return FindShapeCore(prjX, prjY, layers);
+	}
+	
+	return new HotTrackingInfo();
+}
 
-	bool found = false;
+// ************************************************************
+//		SelectLayers
+// ************************************************************
+bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
+{
 	IShapefile * sf = NULL;
+	for(int i = 0; i < (int)_activeLayers.size(); i++ )
+	{
+		if (selector == slctAll)
+		{
+			layers.push_back(true);
+			continue;
+		}
 
+		Layer* layer = _allLayers[_activeLayers[i]];
+		if (layer->type == ShapefileLayer)
+		{
+			if (layer->QueryShapefile(&sf))
+			{
+				VARIANT_BOOL vb;
+				switch(selector)
+				{
+					case slctHotTracking:
+						sf->get_HotTracking(&vb);
+						
+					case slctInMemorySf:
+						sf->get_EditingShapes(&vb);
+				}
+				sf->Release();
+				layers.push_back(vb ? true : false);
+				continue;
+			}
+		}
+		layers.push_back(false);
+	}
+	for(size_t i = 0; i < layers.size(); i++)
+		if (layers[i]) return true;
+	return false;
+}
+
+// ************************************************************
+//		GetMouseTolerance
+// ************************************************************
+// Mouse tolerance in projected units
+double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
+{
+	double tol = 0;
+	switch(tolerance)
+	{
+		case ToleranceSelect:
+			tol = 20;
+			break;
+		case ToleranceInsert:
+			tol = 10;
+			break;
+	}
+	if (proj)
+		tol /= this->PixelsPerMapUnit();
+	return tol;
+}
+
+// ************************************************************
+//		FindShapeCore
+// ************************************************************
+HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<bool>& layers)
+{
+	HotTrackingInfo* info = NULL;
+	IShapefile * sf = NULL;
 	for(int i = 0; i < (int)_activeLayers.size(); i++ )
 	{
 		Layer* layer = _allLayers[_activeLayers[i]];
@@ -1151,12 +1221,6 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking
 			if (layer->QueryShapefile(&sf))
 			{
 				bool proceed = true;
-				if (hotTracking)
-				{
-					VARIANT_BOOL vb;
-					sf->get_HotTracking(&vb);
-					if (!vb) proceed = false;
-				}
 
 				if (proceed)
 				{
@@ -1166,10 +1230,12 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking
 					ShpfileType type;
 					sf->get_ShapefileType(&type);
 					type = Utility::ShapeTypeConvert2D(type);
-					if (type == SHP_MULTIPOINT || type == SHP_POINT)
-						tol = 5.0/this->PixelsPerMapUnit();
+					if (type == SHP_MULTIPOINT || type == SHP_POINT || type == SHP_POLYLINE)
+						tol = GetMouseTolerance(ToleranceSelect);
 
-					((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), 0.0, SelectMode::INCLUSION, shapes);
+					SelectMode mode = type == SHP_POLYGON ? INCLUSION : INTERSECTION;
+
+					((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), tol, mode, shapes);
 
 					if (shapes.size() > 0)
 					{
@@ -1183,8 +1249,6 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking
 
 						long numPoints;
 						shape->get_NumPoints(&numPoints);
-						Debug::WriteLine("Number of points: %d", numPoints);
-
 						return info;
 					}
 				}
@@ -1194,7 +1258,7 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, bool hotTracking
 			}
 		}
 	}
-	return info;
+	return NULL;
 }
 
 // ************************************************************
@@ -1207,10 +1271,9 @@ bool CMapView::UpdateHotTracking(CPoint point)
 	VARIANT_BOOL vb;
 	bool sameShape = false;
 
-
 	if (_hasHotTracking)
 	{
-		HotTrackingInfo* info = FindShapeAtScreenPoint(point, true);
+		HotTrackingInfo* info = FindShapeAtScreenPoint(point, slctHotTracking);
 		if (info)
 		{
 			sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);

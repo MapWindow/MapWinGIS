@@ -1788,11 +1788,11 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 								float angle = 0.0f;
 								if (orientation == lorParallel )
 								{
-									angle = (float)(GetPointAngle(dx, dy) / pi * 180.0 - 90.0);
+									angle = (float)(GetPointAngle(dx, dy) / pi_ * 180.0 - 90.0);
 								}
 								else if (orientation == lorPerpindicular)
 								{
-									angle = (float)(GetPointAngle(dx, dy) / pi * 180.0); //+ 90.0);
+									angle = (float)(GetPointAngle(dx, dy) / pi_ * 180.0); //+ 90.0);
 								}
 								
 								//int size = (int)markerSize/2;

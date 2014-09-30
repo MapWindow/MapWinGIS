@@ -26,6 +26,7 @@
 #include "MapPpg.h"
 #include "Measuring.h"
 #include "Tiles.h"
+#include "EditShape.h"
 using namespace std;
 
 //disable some known warnings we don't care about
@@ -221,12 +222,15 @@ void CMapView::Startup()
 	((CTiles*)_tiles)->Init((void*)this);
 
 	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&_measuring);
-	
+	GetUtils()->CreateInstance(idEditShape, (IDispatch**)&_editShape);
+
 	GetUtils()->CreateInstance(idFileManager, (IDispatch**)&_fileManager);
 
 	InitProjections();
 	
-	((CMeasuring*)_measuring)->SetMapView((void*)this);
+	GetMeasuringBase()->SetMapView((void*)this, ShapeInputMode::simMeasuring);
+	GetEditShapeBase()->SetMapView((void*)this, ShapeInputMode::simEditing);
+	
 
 	if (_panningInertia != csFalse)
 		_panningLock.Unlock();
@@ -310,7 +314,7 @@ void CMapView::SetDefaults()
 	//RequestAsynchronousExchange(GetPropertyExchangeVersion());
 
 	((CTiles*)_tiles)->SetDefaults();
-	((CMeasuring*)_measuring)->SetDefaults();
+	GetMeasuringBase()->Clear();
 }
 
 // **********************************************************************
@@ -399,6 +403,11 @@ void CMapView::Shutdown()
 
 	if (_measuring)
 		_measuring->Release();
+
+	if (_editShape) {
+		_editShape->Release();
+		_editShape = NULL;
+	}
 
 	if (_tiles)
 	{
@@ -714,6 +723,31 @@ void CMapView::ClearPanningList()
 	}
 }
 
+// ***************************************************************
+//	GetMeasuringBase
+// ***************************************************************
+MeasuringBase* CMapView::GetMeasuringBase()
+{
+	return ((CMeasuring*)_measuring)->GetBase();
+}
+
+// ***************************************************************
+//	GetEditShapeBase
+// ***************************************************************
+EditShapeBase* CMapView::GetEditShapeBase()
+{
+	return ((CEditShape*)_editShape)->GetBase();
+}
+
+// ***************************************************************
+//	GetAtiveShape
+// ***************************************************************
+ActiveShape* CMapView::GetAtiveShape()
+{
+	if (m_cursorMode == cmMeasure) return GetMeasuringBase();
+	if (m_cursorMode == cmAddShape) return GetEditShapeBase();
+	return NULL;		
+}
 
 
 

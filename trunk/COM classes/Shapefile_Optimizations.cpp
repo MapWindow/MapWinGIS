@@ -58,7 +58,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 		}
 		else
 		{
-			// Temporary: make sure that memory is released
+			// make sure that memory is released
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{
 				if (_shapeData[i]->fastData)

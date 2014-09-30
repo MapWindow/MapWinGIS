@@ -89,3 +89,10 @@ public:
 		Operation = DragNone;
 	}
 };
+
+struct MeasurePoint
+{
+	Point2D Proj;
+	double x;		// in decimal degrees
+	double y;
+};

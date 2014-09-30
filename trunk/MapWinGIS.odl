@@ -52,7 +52,75 @@ interface IImage;
 interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
+interface IEditShape;
 
+/************************** tkShapeSelectAction Enumeration **********************/
+typedef		
+[
+	uuid(CD38707C-72C0-4139-84BF-7B89F7DC5485),
+	helpstring("tkShapeSelectAction"),
+]
+enum tkShapeSelectAction
+{
+	saEditShape = 0,
+} tkShapeSelectAction;
+
+/************************** tkShapeEditingAction Enumeration **********************/
+typedef		
+[
+	uuid(36C56EEE-CB4B-4dea-81B5-058431337C90),
+	helpstring("tkShapeEditingAction"),
+]
+enum tkShapeEditingAction
+{
+	eaNewShape = 0,
+	eaAddPoint = 1,
+	eaUndoPoint = 2,
+	eaShapeCreated = 3,
+	eaShapeMoved = 4,
+	eaSelectShape = 5,
+} tkShapeEditingAction;
+
+/************************** tkAngleFormat Enumeration **********************/
+typedef		
+[
+	uuid(82134A4F-5442-4E75-850B-025AE50C805B),
+	helpstring("tkAngleFormat"),
+]
+enum tkAngleFormat
+{
+	 afDegrees05 = 0,
+     afDegrees01 = 1,
+     afDegreesAndMinutes = 2,
+} tkAngleFormat;
+
+/************************** tkAngleDisplay Enumeration **********************/
+typedef		
+[
+	uuid(BCAF8D23-3F37-44CF-B0A5-00FD12497CA7),
+	helpstring("tkAngleDisplay"),
+]
+enum tkAngleDisplay
+{
+	 Azimuth = 0,
+     RussianRhumb = 1,
+     ClockwiseBearing = 2,
+     CounterClockwiseBearing = 3,
+     AngleNone = 4,
+} tkAngleDisplay;
+
+/************************** tkAreaDisplayMode Enumeration **********************/
+typedef		
+[
+	uuid(03653908-7002-420D-BCD8-F686556B65E2),
+	helpstring("tkAreaDisplayMode"),
+]
+enum tkAreaDisplayMode
+{
+	 admMetric = 0,
+     admHectars = 1,
+	 admNone = 2,
+} tkAreaDisplayMode;
 
 /************************** tkCustomState Enumeration **********************/
 typedef		
@@ -616,6 +684,7 @@ enum tkScalebarUnits
 		idMeasuring = 35,
 		idFileManager = 36,
 		idFieldStatOperations = 37,
+		idEditShape = 38,
 	} tkInterface;	
 
 	typedef		
@@ -717,13 +786,16 @@ enum tkScalebarUnits
 		uuid(9106CF0F-8A9A-4040-A4B0-D60B72B46504),
 		helpstring("Enumerated Cursor Modes"),
 	]
-	enum tkCursorMode
-	{	[helpstring("cmZoomIn")] cmZoomIn = 0,
-		[helpstring("cmZoomOut")] cmZoomOut = 1,
-		[helpstring("cmPan")] cmPan = 2,
-		[helpstring("cmSelection")] cmSelection = 3,
-		[helpstring("cmNone")] cmNone = 4,
-		[helpstring("cmMeasure")] cmMeasure = 5,
+	enum tkCursorMode {
+		cmZoomIn = 0,
+		cmZoomOut = 1,
+		cmPan = 2,
+		cmSelection = 3,
+		cmNone = 4,
+		cmMeasure = 5,
+		cmAddShape	= 6,
+		cmMoveShape	= 7,
+		cmEditShape = 8,
 	} tkCursorMode;
 
 	typedef 
@@ -3268,7 +3340,7 @@ interface IShapefile : IDispatch{
 	[propput, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [in] double newVal);
 	[propget, id(121)] HRESULT Volatile([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(121)] HRESULT Volatile([in] VARIANT_BOOL newVal);
-
+	[id(122)] HRESULT EditUpdateShape([in]long ShapeIndex, [in]IShape* shpNew, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/
@@ -5020,6 +5092,12 @@ interface IMeasuring : IDispatch{
 	[propget, id(12), helpstring("")] HRESULT DisplayAngles([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(12), helpstring("")] HRESULT DisplayAngles([in] VARIANT_BOOL newVal);
 	[propget, id(13), helpstring("")] HRESULT IsUsingEllipsoid([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(14), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(15), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(16), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
+	[propput, id(16), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(17), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
+	[propput, id(17), helpstring("")] HRESULT Key( [in]BSTR newVal);
 };
 
 [
@@ -5109,6 +5187,63 @@ interface IFileManager : IDispatch{
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
 	//[id(13), helpstring("DeleteDatasource")] HRESULT DeleteDatasource([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 };
+
+[
+	object,
+	uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
+	dual,
+	nonextensible,
+	helpstring("IEditShape Interface"),
+	pointer_default(unique)
+]
+interface IEditShape : IDispatch{
+	[propget, id(1), helpstring("")] HRESULT ShapeType([out, retval] ShpfileType* retVal);
+	[propput, id(1), helpstring("")] HRESULT ShapeType([in] ShpfileType newVal);
+	[propget, id(2), helpstring("")] HRESULT AsShape([out, retval] IShape** retVal);
+	[propget, id(3), helpstring("")] HRESULT NumPoints([out, retval] long* retVal);
+	[id(4), helpstring("")] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
+	[id(5)] HRESULT get_PointXY([in]long pointIndex, [out]double* X, [out]double* Y, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(6), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(7), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(8), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
+	[propput, id(8), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
+	[propget, id(9), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
+	[propput, id(9), helpstring("")] HRESULT Key( [in]BSTR newVal);
+	[id(10), helpstring("")] HRESULT Clear();
+	[id(11), helpstring("")] HRESULT FinishShape([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(12), helpstring("")] HRESULT SegmentLength( [in]int segmentIndex, [out, retval]double* retVal);
+	[propget, id(13), helpstring("")] HRESULT SegmentAngle( [in]int segmentIndex, [out, retval]double* retVal);
+	[propget, id(14), helpstring("")] HRESULT AreaDisplayMode( [out, retval]tkAreaDisplayMode* retVal);
+	[propput, id(14), helpstring("")] HRESULT AreaDisplayMode( [in]tkAreaDisplayMode newVal);
+	[propget, id(17), helpstring("")] HRESULT CreationMode( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(17), helpstring("")] HRESULT CreationMode( [in]VARIANT_BOOL newVal);
+	[id(18), helpstring("")] HRESULT AddPoint( [in]double xProj, [in]double yProj);
+	[propget, id(20), helpstring("")] HRESULT Area( [out, retval]double* retVal);
+	[id(21), helpstring("")] HRESULT SetShape( [in]IShape* shp);
+	[propget, id(22), helpstring("")] HRESULT AngleDisplayMode( [out, retval]tkAngleDisplay* retVal);
+	[propput, id(22), helpstring("")] HRESULT AngleDisplayMode( [in]tkAngleDisplay newVal);
+	[propget, id(23), helpstring("")] HRESULT AngleFormat( [out, retval]tkAngleFormat* retVal);
+	[propput, id(23), helpstring("")] HRESULT AngleFormat( [in]tkAngleFormat newVal);
+	[propget, id(24), helpstring("")] HRESULT LengthRounding( [out, retval]int* retVal);
+	[propput, id(24), helpstring("")] HRESULT LengthRounding( [in]int newVal);
+	[propget, id(25), helpstring("")] HRESULT AreaRounding( [out, retval]int* retVal);
+	[propput, id(25), helpstring("")] HRESULT AreaRounding( [in]int newVal);
+	[id(26)] HRESULT put_PointXY([in]long pointIndex, [in]double X, [in]double Y, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(27), helpstring("")] HRESULT LayerHandle( [out, retval]int* retVal);
+	[propput, id(27), helpstring("")] HRESULT LayerHandle( [in]int newVal);
+	[propget, id(28), helpstring("")] HRESULT ShapeIndex( [out, retval]int* retVal);
+	[propput, id(28), helpstring("")] HRESULT ShapeIndex( [in]int newVal);
+	[propget, id(30), helpstring("")] HRESULT AngleCorrection( [out, retval]double* retVal);
+	[propput, id(30), helpstring("")] HRESULT AngleCorrection( [in]double newVal);
+	[propget, id(31), helpstring("")] HRESULT Visible( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(31), helpstring("")] HRESULT Visible( [in]VARIANT_BOOL newVal);
+	[propget, id(32), helpstring("")] HRESULT DrawLabelsOnly( [out, retval]VARIANT_BOOL* retVal);
+	[propput, id(32), helpstring("")] HRESULT DrawLabelsOnly( [in]VARIANT_BOOL newVal);
+	[propget, id(33), helpstring("")] HRESULT HasValidShape( [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(34), helpstring("")] HRESULT SelectedVertex( [out, retval]int* retVal);
+	[propput, id(34), helpstring("")] HRESULT SelectedVertex( [in]int newVal);
+};
+
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -5481,6 +5616,7 @@ library MapWinGIS
 			[id(233), propget] long ZoomBarMinZoom();
 			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
 			[id(234), propget] long ZoomBarMaxZoom();
+			[id(235), propget] IEditShape* EditShape();
 			//}}AFX_ODL_METHOD
 	};
 
@@ -5523,6 +5659,8 @@ library MapWinGIS
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
+			[id(16)] void ShapeEditing(IEditShape* ShapeData, tkShapeEditingAction Action, VARIANT_BOOL* Cancel);
+			[id(17)] void ShapeSelected(double projX, double projY, long* layerHandle, long* shapeIndex, VARIANT_BOOL* handled);
 			[id(DISPID_DBLCLICK)] void DblClick(void);
 			//}}AFX_ODL_EVENT
 	};
@@ -5894,5 +6032,13 @@ library MapWinGIS
 	coclass FileManager
 	{
 		[default] interface IFileManager;
+	};
+	[
+		uuid(130B7AEB-0350-437F-B044-4839AEC92F22),
+		helpstring("EditShape Class")
+	]
+	coclass EditShape
+	{
+		[default] interface IEditShape;
 	};
 };

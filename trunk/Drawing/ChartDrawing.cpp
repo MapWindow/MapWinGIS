@@ -394,8 +394,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 						labelAngle = labelAngle - 360.0f;
 					}
 					
-					int x = (int)(xStart + sin(labelAngle/180.0 * pi) * _options->radius);
-					int y = (int)(yStart - cos(labelAngle/180.0 * pi) * _options->radius);
+					int x = (int)(xStart + sin(labelAngle/180.0 * pi_) * _options->radius);
+					int y = (int)(yStart - cos(labelAngle/180.0 * pi_) * _options->radius);
 									
 					if (labelAngle >= 0.0 && labelAngle <= 180.0)
 					{
@@ -612,8 +612,8 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 				rectChart = new CRect((int)xStart, int(yStart - _options->barHeight), int(xStart + _options->barWidth * numBars), (int)yStart);
 				if (_options->use3Dmode)
 				{
-					rectChart->right += (long)(sin(pi/4.0) * _options->thickness);
-					rectChart->top -= (long)(cos(pi/4.0) * _options->thickness);
+					rectChart->right += (long)(sin(pi_/4.0) * _options->thickness);
+					rectChart->top -= (long)(cos(pi_/4.0) * _options->thickness);
 				}
 
 				if (_collisionList->HaveCollision(*rectChart))
@@ -628,7 +628,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			{
 				HDC hdc = _graphics->GetHDC();
 				
-				int xAdd = (int)(sin(45.0/180*pi) * _options->thickness);
+				int xAdd = (int)(sin(45.0/180*pi_) * _options->thickness);
 				
 				// drawing values
 				xStart = int(x - numBars * _options->barWidth/2.0);
@@ -739,13 +739,13 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 					if ( _options->use3Dmode )
 					{
 						points[0].X = (Gdiplus::REAL)xStart;
-						points[1].X = (Gdiplus::REAL)(xStart + sin(angle/180*pi) * _options->thickness);
+						points[1].X = (Gdiplus::REAL)(xStart + sin(angle/180*pi_) * _options->thickness);
 						points[2].X = (Gdiplus::REAL)points[1].X + _options->barWidth;
 						points[3].X = (Gdiplus::REAL)xStart + _options->barWidth;
 						points[4].X = (Gdiplus::REAL)xStart;
 
 						points[0].Y = (Gdiplus::REAL)yStart - height;
-						points[1].Y = (Gdiplus::REAL)(yStart - height - cos(angle/180*pi) *  _options->thickness);
+						points[1].Y = (Gdiplus::REAL)(yStart - height - cos(angle/180*pi_) *  _options->thickness);
 						points[2].Y = (Gdiplus::REAL)points[1].Y;
 						points[3].Y = (Gdiplus::REAL)yStart - height;
 						points[4].Y = (Gdiplus::REAL)yStart - height;
@@ -754,13 +754,13 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 						_graphics->FillPolygon(brushesDimmed[j], points, 5);
 
 						points[0].X = (Gdiplus::REAL)xStart + _options->barWidth;
-						points[1].X = (Gdiplus::REAL)(points[0].X  + sin(angle/180*pi) *  _options->thickness);
+						points[1].X = (Gdiplus::REAL)(points[0].X  + sin(angle/180*pi_) *  _options->thickness);
 						points[2].X = (Gdiplus::REAL)points[1].X;
 						points[3].X = (Gdiplus::REAL)points[0].X;
 						points[4].X = (Gdiplus::REAL)points[0].X;
 
 						points[0].Y = (Gdiplus::REAL)yStart - height;
-						points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle/180*pi) *  _options->thickness);
+						points[1].Y = (Gdiplus::REAL)(points[0].Y - cos(angle/180*pi_) *  _options->thickness);
 						points[2].Y = (Gdiplus::REAL)points[1].Y + height;
 						points[3].Y = (Gdiplus::REAL)points[0].Y + height;
 						points[4].Y = (Gdiplus::REAL)points[0].Y;

@@ -53,7 +53,7 @@ STDMETHODIMP CExtents::SetBounds(double xMin, double yMin, double zMin, double x
 	}
 	if( zmin > zmax )
 	{	tmp = zmax;
-		zmax = zmin;
+	zmax = zmin;
 		zmin = tmp;
 	}
 

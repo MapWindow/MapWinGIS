@@ -3,6 +3,8 @@
 #include "Map.h"
 #include "Measuring.h"
 #include "MapTracker.h"
+#include "EditShape.h"
+#include "Shapefile.h"
 
 #pragma region Keyboard events
 // ***************************************************************
@@ -69,6 +71,19 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	switch(nChar)
 	{
+		case VK_DELETE:
+			{
+				if (m_cursorMode == cmEditShape)
+				{
+					EditShapeBase* base = GetEditShapeBase();
+					if (base->HasSelectedVertex())
+					{
+						base->RemoveVertex(base->_selectedVertex);
+						RedrawCore(RedrawSkipDataLayers, false, true);
+					}
+				}
+			}
+			break;
 		case VK_SPACE:
 			{
 				bool repetitive =  (nFlags & (1 << 14)) ? true : false;
@@ -344,194 +359,417 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 #pragma endregion
 
 #pragma region Left button
+
+// ************************************************************
+//		SelectSingleShape
+// ************************************************************
+bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex)
+{
+	double projX, projY;
+	PixelToProj(x, y, &projX, &projY);
+	VARIANT_BOOL handled = VARIANT_FALSE;
+	FireSelectShape(projX, projY, &layerHandle, &shapeIndex, &handled);
+	if (!handled)
+	{
+		HotTrackingInfo* info = FindShapeAtScreenPoint(CPoint(x, y), slctInMemorySf);
+		if (info)
+		{
+			layerHandle = info->LayerHandle;
+			shapeIndex = info->ShapeId;
+			delete info;
+			return true;
+		}
+	}
+	return false;
+}
+
+// ************************************************************
+//		SetEditShape
+// ************************************************************
+void CMapView::SetEditShape(long layerHandle, long shapeIndex)
+{
+	if (layerHandle != -1 && shapeIndex != -1)
+	{
+		IShapefile* sf = GetShapefile(layerHandle);
+		if (sf)
+		{
+			IShape* shp = NULL;
+			sf->get_Shape(shapeIndex, &shp);
+			if (shp)
+			{
+				_editShape->SetShape(shp);
+				_editShape->put_LayerHandle(layerHandle);
+				_editShape->put_ShapeIndex(shapeIndex);
+				shp->Release();
+				RedrawCore(RedrawSkipDataLayers, false, true);
+			}
+			sf->Release();
+		}
+	}
+}
+
 // ************************************************************
 //		OnLButtonDown
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	Debug::WriteWithTime("Left button down");
-
-	if (HasRotation())
-	{
+	if (HasRotation()) {
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	}
 	_dragging.Start = point;
 	_dragging.Move = point;
 	_clickDownExtents = _extents;
 	_leftButtonDown = TRUE;
-	
+
 	// process zoombar before everything else; if zoom bar was clicked, 
 	// map must not receive the event at all
 	if (HandleOnZoombarMouseDown(point))
 		return;
 
+	bool ctrl = nFlags & MK_CONTROL ? true: false;
+
 	long vbflags = 0;
-	if( nFlags & MK_SHIFT )
-		vbflags |= 1;
-	if( nFlags & MK_CONTROL )
-		vbflags |= 2;
+	if( nFlags & MK_SHIFT ) vbflags |= 1;
+	if( nFlags & MK_CONTROL ) vbflags |= 2;
 
 	long x = point.x;
 	long y = point.y - 1;
 
-	if( m_cursorMode == cmZoomIn )
-	{
-		if (m_sendMouseDown)
-			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+	// --------------------------------------------
+	//  Snapping
+	// --------------------------------------------
+	double snappedX;
+	double snappedY;
+	bool snapping = (nFlags & MK_SHIFT) && (m_cursorMode == cmMeasure || m_cursorMode == cmAddShape);
 
-		this->SetCapture();
-		_dragging.Operation = DragZoombox;
+	if ( snapping )	
+	{
+		// we seek for nearby point across all layers
+		if (!FindSnapPoint(SNAP_TOLERANCE, point.x, point.y, &snappedX, &snappedY))
+			return;
 	}
-	else if( m_cursorMode == cmZoomOut )
+
+	switch(m_cursorMode)
 	{
-		if( m_sendMouseDown == TRUE )
-			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
-        ZoomOut( m_zoomPercent );
+		case cmZoomIn:
+		case cmZoomOut:
+		case cmPan:
+		case cmMoveShape:
+			if (m_sendMouseDown)
+				this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+			break;
 	}
-	else if( m_cursorMode == cmPan )
+
+	// --------------------------------------------
+	//  Handling particular cursor modes
+	// --------------------------------------------
+	switch(m_cursorMode)
 	{
-		if( m_sendMouseDown == TRUE )
-			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
-
-		CRect rcBounds(0,0,_viewWidth,_viewHeight);
-		this->LogPrevExtent();
-		this->SetCapture();
-		_dragging.Operation = DragPanning;
-		Debug::WriteWithTime("Start new panning");
-	}
-	else if( m_cursorMode == cmSelection )
-	{
-		_ttip.Activate(FALSE);
-		CMapTracker selectBox = CMapTracker( this,	CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
-		selectBox.m_sizeMin = 0;
-
-		bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
-		_ttip.Activate(TRUE);
-
-		CRect rect = selectBox.m_rect;
-		rect.NormalizeRect();
-
-		if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
-			( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
-			selected = false;
 		
-		if (!selected || !m_sendSelectBoxFinal)
+		case cmZoomIn:
+			{
+				this->SetCapture();
+				_dragging.Operation = DragZoombox;
+			}
+			break;
+		case cmZoomOut:
+			{
+				ZoomOut( m_zoomPercent );
+			}
+			break;
+		case cmPan:
+			{
+				CRect rcBounds(0,0,_viewWidth,_viewHeight);
+				this->LogPrevExtent();
+				this->SetCapture();
+				_dragging.Operation = DragPanning;
+			}
+			break;
+		case cmSelection:
+			{
+				_ttip.Activate(FALSE);
+				CMapTracker selectBox = CMapTracker( this,	CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
+				selectBox.m_sizeMin = 0;
+
+				bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
+				_ttip.Activate(TRUE);
+
+				CRect rect = selectBox.m_rect;
+				rect.NormalizeRect();
+
+				if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
+					( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
+					selected = false;
+
+				if (!selected || !m_sendSelectBoxFinal)
+				{
+					if( m_sendMouseDown == TRUE )
+						this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+				}
+
+				if( selected )
+				{
+					if (HasRotation())
+					{
+						CRect rectTmp = rect;
+						long tmpX = 0, tmpY = 0;
+						// adjust rectangle to unrotated coordinates
+						_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+						rectTmp.TopLeft().x = tmpX;
+						rectTmp.TopLeft().y = tmpY;
+						_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+						rectTmp.BottomRight().x = tmpX;
+						rectTmp.BottomRight().y = tmpY;
+						rect = rectTmp;
+					}
+
+					if( m_sendSelectBoxFinal == TRUE )
+					{	
+						long iby = rect.BottomRight().y;
+						long ity = rect.TopLeft().y;
+						this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x,	iby, ity );
+						return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
+					}
+				}
+
+				//the MapTracker interferes with the OnMouseUp event so we will call it manually
+				if( m_sendMouseUp == TRUE )
+					this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
+			}
+			break;
+		case cmMeasure:
+			{
+				bool added = true;
+				if (snapping){
+					GetMeasuringBase()->HandleSnappedPointAdd(snappedX, snappedY);
+				}
+				else {
+					added = GetMeasuringBase()->HandlePointAdd(x, y, ctrl);
+				}
+
+				if (added)
+				{
+					FireMeasuringChanged(_measuring, tkMeasuringAction::PointAdded);
+					if( m_sendMouseDown ) this->FireMouseDown( MK_LBUTTON, (short)vbflags, x, y );
+					RedrawCore(RedrawSkipDataLayers, false, true);
+				}
+			}
+			break;
+		case cmAddShape:
+			{
+				GetEditShapeBase()->SetCreationMode(true);
+				ShpfileType shpType;
+				_editShape->get_ShapeType(&shpType);
+
+				VARIANT_BOOL cancel = VARIANT_FALSE;
+				if (shpType == SHP_NULLSHAPE)
+				{
+					FireShapeEditing(_editShape, eaNewShape, &cancel);
+					_editShape->get_ShapeType(&shpType);
+					shpType = Utility::ShapeTypeConvert2D(shpType);
+				}
+
+				if (ctrl) {
+					if (HandleCustomControlClick()) return;
+				}
+
+				EditShapeBase* editShape = GetEditShapeBase();
+				bool added = true;
+				if (snapping){
+					editShape->HandleSnappedPointAdd(snappedX, snappedY);
+				}
+				else {
+					added = editShape->HandlePointAdd(x, y, ctrl);
+				}
+
+				if (added)
+				{
+					if (shpType == SHP_POINT)
+					{
+						VARIANT_BOOL vb;
+						_editShape->FinishShape(&vb);
+						RedrawCore(tkRedrawType::RedrawAll, false, true);
+					}
+					else
+					{
+						FireShapeEditing(_editShape, eaAddPoint, &cancel);
+						RedrawCore(RedrawSkipDataLayers, false, true);
+					}
+				}
+			}
+			break;
+		case cmMoveShape:
+		case cmEditShape:
+			{
+				long layerHandle, shapeIndex;
+				if (GetEditShapeBase()->IsEmpty())
+				{
+					if (SelectSingleShape(x, y, layerHandle, shapeIndex))
+					{
+						SetEditShape(layerHandle, shapeIndex);
+					}
+				}
+				else
+				{
+					IShapefile* sf = GetTempShapefile();
+					if (sf != NULL)
+					{
+						IShape* shp = NULL;
+						_editShape->get_AsShape(&shp);
+
+						double projX, projY;
+						PixelToProj(x, y, &projX, &projY);
+
+						bool handled = false;
+						if (m_cursorMode == cmMoveShape)
+						{
+							if (((CShapefile*)sf)->PointWithinShape(shp, projX, projY, MOUSE_CLICK_TOLERANCE))
+							{
+								this->SetCapture();
+								_dragging.Operation = DragMoveShape;
+								handled = true;
+							}
+						}
+						else if(m_cursorMode == cmEditShape)
+						{
+							if (ctrl)
+							{
+								// let's try to add vertex
+								if (TryAddVertex(projX, projY))
+									RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+								return;
+							}
+							else
+							{
+								EditShapeBase* base = GetEditShapeBase();
+								int pntIndex = base->SelectVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
+								if (pntIndex != -1)
+								{
+									bool changed = base->_selectedVertex != pntIndex;
+									base->_selectedVertex = pntIndex;
+
+									this->SetCapture();
+									_dragging.Operation = DragMoveVertex;
+									handled = true;
+
+									if (changed)
+										RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+								}
+							}
+						}
+
+						if (!handled)
+						{
+							SaveEditShape();
+
+							if (SelectSingleShape(x, y, layerHandle, shapeIndex))
+							{
+								SetEditShape(layerHandle, shapeIndex);
+							}
+							else
+							{
+								GetEditShapeBase()->Clear();
+							}
+							RedrawCore(RedrawAll, false, false);
+						}
+					}
+				}
+			}
+			break;
+	default: //if( m_cursorMode == cmNone )
 		{
+			SetCapture();
 			if( m_sendMouseDown == TRUE )
 				this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 		}
-
-		if( selected )
-		{
-			if (HasRotation())
-			{
-				CRect rectTmp = rect;
-				long tmpX = 0, tmpY = 0;
-				// adjust rectangle to unrotated coordinates
-				_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
-				rectTmp.TopLeft().x = tmpX;
-				rectTmp.TopLeft().y = tmpY;
-				_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
-				rectTmp.BottomRight().x = tmpX;
-				rectTmp.BottomRight().y = tmpY;
-				rect = rectTmp;
-			}
-
-			if( m_sendSelectBoxFinal == TRUE )
-			{	
-				long iby = rect.BottomRight().y;
-				long ity = rect.TopLeft().y;
-				this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x,	iby, ity );
-				return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
-			}
-		}
-		
-		//the MapTracker interferes with the OnMouseUp event so we will call it manually
-		if( m_sendMouseUp == TRUE )
-			this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
-	}
-	else if( m_cursorMode == cmMeasure )
-	{
-		bool found = false;
-		double x, y;
-		int closePointIndex= -1;
-		
-		tkMeasuringType measureType;
-		_measuring->get_MeasuringType(&measureType);
-
-		if ( nFlags & MK_CONTROL && measureType == tkMeasuringType::MeasureDistance)
-		{
-			// closing to show area
-			double minDist = DBL_MAX;
-			double xTemp, yTemp;
-			
-			CMeasuring* m = (CMeasuring*)_measuring;
-			int size = m->points.size() - 2;
-			for(int i = 0; i < size; i++)
-			{
-				ProjToPixel(m->points[i]->Proj.x, m->points[i]->Proj.y, &xTemp, &yTemp);
-				double dist = sqrt( pow(point.x - xTemp, 2.0) + pow(point.y - yTemp, 2.0));
-				if (dist < minDist)
-				{
-					minDist = dist;
-					closePointIndex = i;
-					found = true;
-				}
-			}
-
-			if (minDist != DBL_MAX)
-			{
-				x = m->points[closePointIndex]->Proj.x;
-				y = m->points[closePointIndex]->Proj.y;
-			}
-			else
-			{
-				// no points to close near by
-			}
-		}
-		else if ( nFlags & MK_SHIFT )	
-		{
-			double tolerance = 20;   // pixels;   TODO: make a parameter
-
-			// we seek for nearby point across all layers
-			if (FindSnapPoint(tolerance, point.x, point.y, &x, &y))
-				found = true;
-			
-			// otherwise simply don't add a point, there is nothing to snap near by
-		}
-		else
-		{
-			this->PixelToProjection( point.x, point.y, x, y );
-			found = true;
-		}
-		
-		if (found)
-		{
-			double pixelX, pixelY;
-			ProjToPixel(x, y, &pixelX, &pixelY);
-
-			((CMeasuring*)_measuring)->AddPoint(x, y, pixelX, pixelY);
-			
-			if (closePointIndex != -1)
-				((CMeasuring*)_measuring)->ClosePoly(closePointIndex);
-
-			FireMeasuringChanged(_measuring, tkMeasuringAction::PointAdded);
-
-			if( m_sendMouseDown )
-				this->FireMouseDown( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-			
-			_canUseMainBuffer = false;
-			this->Refresh();
-		}
-	}
-	else //if( m_cursorMode == cmNone )
-	{
-		SetCapture();
-		if( m_sendMouseDown == TRUE )
-			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+		break;
 	}
 }
 
+// ************************************************************
+//		TryAddEditVertex
+// ************************************************************
+bool CMapView::TryAddVertex(double projX, double projY)
+{
+	ShpfileType shpType;
+	_editShape->get_ShapeType(&shpType);
+	shpType = Utility::ShapeTypeConvert2D(shpType);
+
+	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+		return false;				// TODO: multi points should be supported
+
+	bool success = false;
+	IShape* shp = NULL;
+	_editShape->get_AsShape(&shp);
+	if (shp)
+	{
+		if (shpType == SHP_POLYGON )
+		{
+			// we need ClosestPoints method to return points on contour, and not inner points
+			shp->put_ShapeType(SHP_POLYLINE);
+		}
+
+		// creating temp edit shape
+		VARIANT_BOOL vb;
+		long pointIndex = 0;
+		IShape* shp2 = NULL;
+		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp2);
+		shp2->Create(SHP_POINT, &vb);
+		shp2->AddPoint(projX, projY, &pointIndex);
+
+		IShape* result = NULL;
+		shp->ClosestPoints(shp2, &result);
+		if (result != NULL)
+		{
+			double x, y;
+			result->get_XY(0, &x, &y, &vb);		// 0 = point lying on the line
+			
+			double dist = sqrt(pow(x - projX, 2.0) + pow(y - projY, 2.0));
+			if (dist < GetMouseTolerance(ToleranceSelect))
+			{
+				success = GetEditShapeBase()->TryInsertVertex(x, y);
+			}
+			result->Release();
+		}
+		shp->Release();
+		shp2->Release();
+	}
+	return success;
+}
+
+// ************************************************************
+//		SaveEditShape
+// ************************************************************
+void CMapView::SaveEditShape()
+{
+	// TODO: fire event to allow user to override
+	// TODO: check if there are indeed changes
+	int layerHandle, shapeIndex;
+	IShape* shp = NULL;
+	_editShape->get_AsShape(&shp);
+	_editShape->get_LayerHandle(&layerHandle);
+	_editShape->get_ShapeIndex(&shapeIndex);
+
+	IShapefile* sf = GetShapefile(layerHandle);
+	if (sf)
+	{
+		VARIANT_BOOL vb;
+		sf->EditUpdateShape(shapeIndex, shp, &vb);
+		sf->Release();
+	}
+}
+
+// ************************************************************
+//		HandleControlClick
+// ************************************************************
+bool CMapView::HandleCustomControlClick()
+{
+	EditShapeBase* editShape = GetEditShapeBase();
+	VARIANT_BOOL vb;
+	_editShape->FinishShape(&vb);
+	RedrawCore(RedrawSkipDataLayers, false, true);
+	return true;
+}
 
 // ************************************************************
 //		OnLButtonDblClick
@@ -548,6 +786,13 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	   _measuring->FinishMeasuring();
 	   FireMeasuringChanged(_measuring, tkMeasuringAction::MesuringStopped);	
    }
+  /* else if (m_cursorMode == cmAddShape)
+   {
+		EditShapeBase* editShape = GetEditShapeBase();
+		VARIANT_BOOL vb;
+		_editShape->FinishShape(&vb);
+		RedrawCore(RedrawSkipDataLayers, false, true);
+   }*/
 }
 
 // ************************************************************
@@ -575,6 +820,33 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	switch(operation)
 	{
+		case DragMoveVertex:
+			{
+				double x1, x2, y1, y2;
+				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
+				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+
+				GetEditShapeBase()->MoveVertex(x2 - x1, y2 - y1);
+
+				_dragging.Operation = DragNone;
+				Redraw2(tkRedrawType::RedrawSkipDataLayers);
+				// TODO: fire event
+			}
+			break;
+		case DragMoveShape:
+			{
+				double x1, x2, y1, y2;
+				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
+				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+				GetEditShapeBase()->Move(x2 - x1, y2 - y1);
+				
+				_dragging.Operation = DragNone;
+				Redraw2(tkRedrawType::RedrawSkipDataLayers);
+
+				VARIANT_BOOL cancel = VARIANT_FALSE;
+				FireShapeEditing(_editShape, eaShapeMoved, &cancel);
+			}
+			break;	
 		case DragPanning:
 			if (m_cursorMode != cmPan)
 				Debug::WriteError("Wrong cursor mode when panning is expected");
@@ -805,16 +1077,32 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	bool refreshNeeded = false;
 	switch(m_cursorMode)
 	{
-		case cmZoomIn:
-			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
+		case cmEditShape:
 			{
-				refreshNeeded = true;
+				bool hasVertex = GetEditShapeBase()->_selectedVertex != -1;
+				if( hasVertex && (nFlags & MK_LBUTTON) && _leftButtonDown )
+				{
+					_canUseMainBuffer = false;
+					refreshNeeded = true;
+				}	
 			}
 			break;
+		case cmMoveShape:
+			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
+			{
+				_canUseMainBuffer = false;
+				refreshNeeded = true;
+			}	
+			break;	
+		case cmZoomIn:
+				if( (nFlags & MK_LBUTTON) && _leftButtonDown )
+				{
+					refreshNeeded = true;
+				}
+				break;
 		case cmPan:
 			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
 			{
-				Debug::WriteWithTime("Mouse move panning");
 				DWORD time = GetTickCount();
 				if (_panningInertia != csFalse)
 				{
@@ -827,19 +1115,18 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			}
 			break;
 		case cmMeasure:
-		{
-			CMeasuring* m =((CMeasuring*)_measuring);
-			if (!m->IsStopped() && m->points.size() > 0)
+		case cmAddShape:
 			{
-				double x, y;
-				this->PixelToProjection( point.x, point.y, x, y );
-				m->mousePoint.x = point.x;	// save the current position; it will be drawn during invalidation
-				m->mousePoint.y = point.y;
-				_canUseMainBuffer = false;
-				refreshNeeded = true;
+				ActiveShape* shp = GetAtiveShape();
+				if (shp->IsDynamic() && shp->GetPointCount() > 0)
+				{
+					double x, y;
+					this->PixelToProjection( point.x, point.y, x, y );
+					shp->SetMousePosition(point.x, point.y);
+					refreshNeeded = true;
+				}
+				break;
 			}
-			break;
-		}
 	}
 
 	if (!refreshNeeded)
@@ -911,25 +1198,35 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 	ZoombarPart part = ZoombarHitTest(point.x, point.y);
 	if (part != ZoombarPart::ZoombarNone)
 		return;
-	
-	VARIANT_BOOL redraw;
-	if( m_cursorMode == cmMeasure )
-	{
-		((CMeasuring*)_measuring)->UndoPoint(&redraw);
-		FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
-		_canUseMainBuffer = false;
-	}
 
-	if (_doTrapRMouseDown == TRUE )
-	{
-		long vbflags = 0;
-		if( nFlags & MK_SHIFT )
-			vbflags |= 1;
-		if( nFlags & MK_CONTROL )
-			vbflags |= 2;
+	long vbflags = 0;
+	if( nFlags & MK_SHIFT )
+		vbflags |= 1;
+	if( nFlags & MK_CONTROL )
+		vbflags |= 2;
 
-		if( m_sendMouseDown == TRUE )
-			this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+	if( m_sendMouseDown == TRUE )
+		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
+
+	if (_doTrapRMouseDown == TRUE)
+	{
+		VARIANT_BOOL redraw;
+		if( m_cursorMode == cmMeasure)
+		{
+			((CMeasuring*)_measuring)->UndoPoint(&redraw);
+			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
+			_canUseMainBuffer = false;
+		}
+		else if (m_cursorMode == cmAddShape)
+		{
+			VARIANT_BOOL cancel = VARIANT_FALSE;
+			FireShapeEditing(_editShape, eaUndoPoint, &cancel);
+			if (!cancel)
+			{
+				((CEditShape*)_editShape)->UndoPoint(&redraw);
+				_canUseMainBuffer = false;
+			}
+		}
 
 		_reverseZooming = true;
 
@@ -971,7 +1268,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireExtentsChanged();
 			ReloadImageBuffers();
 		}
-	
+
 		if( redraw ) {
 			this->Refresh();
 		}
