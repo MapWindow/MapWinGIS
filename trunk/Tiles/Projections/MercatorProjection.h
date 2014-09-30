@@ -26,7 +26,7 @@ class MercatorProjection: public MercatorBase
 {
 private:
 	double degToRad (double ang) {
-		return ang * pi / 180.0;
+		return ang * pi_ / 180.0;
 	}
 public:
 	MercatorProjection()
@@ -43,7 +43,7 @@ public:
 	PointLatLng TileXYToProj(CPoint &pos, int zoom, PointLatLng &ret){
 		this->FromXYToLatLng(pos, zoom, ret);
 		double x = this->earthRadius * degToRad (ret.Lng);
-		double y = this->earthRadius * log(tan(pi/4.0 + degToRad(ret.Lat)/2 ));
+		double y = this->earthRadius * log(tan(pi_/4.0 + degToRad(ret.Lat)/2 ));
 		ret.Lng = x;
 		ret.Lat = y;
 		return ret;

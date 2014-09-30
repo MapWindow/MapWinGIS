@@ -1199,6 +1199,16 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="COM classes\Callback.h" />
+    <ClInclude Include="COM classes\EditShape.h" />
+    <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Image\tkTiff.h" />
+    <ClInclude Include="Processing\clipper_misc.h" />
+    <ClInclude Include="Processing\MeasuringTool.h" />
+    <ClInclude Include="Shapefile\ActiveShape.h" />
+    <ClInclude Include="Shapefile\dbfopen.h" />
+    <ClInclude Include="Shapefile\EditShapeBase.h" />
+    <ClInclude Include="Shapefile\MeasuringBase.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -1286,6 +1296,8 @@
     <ClInclude Include="Utilities\ColoringGraph.h" />
     <ClInclude Include="Utilities\cppVector.h" />
     <ClInclude Include="Utilities\GdalHelper.h" />
+    <ClInclude Include="Utilities\GdiPlusHelper.h" />
+    <ClInclude Include="Utilities\GeographLibHelper.h" />
     <ClInclude Include="Utilities\GeosHelper.h" />
     <ClInclude Include="Utilities\GlobalClassFactory.h" />
     <ClInclude Include="Utilities\HashTable.h" />
@@ -1404,6 +1416,7 @@
     <ClInclude Include="_ITableEvents_CP.H" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="COM classes\EditShape.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
@@ -1511,11 +1524,18 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
+    <ClCompile Include="Image\tkTiff.cpp" />
+    <ClCompile Include="Processing\clipper_misc.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
     <ClCompile Include="MapWinGIS.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Processing\MeasuringTool.cpp" />
+    <ClCompile Include="Shapefile\ActiveShape.cpp" />
+    <ClCompile Include="Shapefile\dbfopen.cpp" />
+    <ClCompile Include="Shapefile\EditShapeBase.cpp" />
+    <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">Create</PrecompiledHeader>
@@ -1527,9 +1547,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
+    <ClCompile Include="Tiles\Providers\YandexProvider.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />
+    <ClCompile Include="Utilities\GdiPlusHelper.cpp" />
+    <ClCompile Include="Utilities\GeographLibHelper.cpp" />
     <ClCompile Include="Utilities\GeosHelper.cpp" />
     <ClCompile Include="Utilities\LineBresenham.cpp" />
     <ClCompile Include="Utilities\Logger.cpp" />
@@ -1734,6 +1757,7 @@
     <None Include="COM classes\ChartField.rgs" />
     <None Include="COM classes\Charts.rgs" />
     <None Include="COM classes\ColorScheme.rgs" />
+    <None Include="COM classes\EditShape.rgs" />
     <None Include="COM classes\ESRIGridManager.rgs" />
     <None Include="COM classes\Extents.rgs" />
     <None Include="COM classes\Field.rgs" />
@@ -1783,6 +1807,7 @@
     <None Include="Resources\zoom_in_16_2.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="COM classes\Callback.idl" />
     <Midl Include="MapWinGIS.odl">
       <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Win32</TargetEnvironment>
       <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateStublessProxies>
