@@ -577,3 +577,33 @@ STDMETHODIMP CFileManager::get_HasValidProxyForGrid(BSTR Filename, VARIANT_BOOL*
 	return S_OK;
 }
 
+//****************************************************************
+//			OpenFromDatabase()
+//****************************************************************
+STDMETHODIMP CFileManager::OpenFromDatabase(BSTR connectionString, BSTR layerNameOrQuery, IOgrLayer** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retVal = NULL;
+	
+	IOgrDatasource* source = NULL;
+	GetUtils()->CreateInstance(idOgrDatasource, (IDispatch**)&source);
+	VARIANT_BOOL vb;
+	source->Open(connectionString, &vb);
+	if (!vb)
+	{
+		long errorCode;
+		source->get_LastErrorCode(&errorCode);
+		ErrorMessage(errorCode);
+		return S_FALSE;
+	}
+	
+	source->GetLayerByName(layerNameOrQuery, VARIANT_FALSE, retVal);
+	if (*retVal == NULL)
+	{
+		source->RunQuery(layerNameOrQuery, retVal);
+	}
+	source->Close();
+	source->Release();
+	return S_OK;
+}
+

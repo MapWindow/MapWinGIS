@@ -1,0 +1,16 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {33F91D20-8EBA-4033-AE3B-15A7041087BB} = s 'OgrDatasource Class'
+		{
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{5863687C-726A-47CE-8BF0-7E8E0D2FDE43}'
+			Version = s '1.0'
+		}
+	}
+}

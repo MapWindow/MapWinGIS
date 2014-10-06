@@ -72,6 +72,8 @@ public:
 	STDMETHOD(get_NeedsGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasValidProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerNameOrQuery, IOgrLayer** retVal);
+
 private:
 	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
 	//bool NeedProxyForGrid(CStringW filename);

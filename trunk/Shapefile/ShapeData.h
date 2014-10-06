@@ -32,6 +32,7 @@ public:
 	// Constructors
 	CShapeData(char* shpData)
 	{
+		_shapeType = SHP_NULLSHAPE;
 		_lastErrorCode = tkNO_ERROR;
 		_bounds = NULL;
 		_points = NULL;

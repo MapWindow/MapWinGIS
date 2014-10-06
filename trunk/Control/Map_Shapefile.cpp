@@ -24,7 +24,7 @@ CDrawingOptionsEx* CMapView::get_ShapefileDrawingOptions(long layerHandle)
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
 		Layer * layer = _allLayers[layerHandle];
-		if( layer->type == ShapefileLayer )
+		if( layer->IsShapefile() )
 		{
 			IShapefile* sf = NULL;
 			if (layer->QueryShapefile(&sf))
@@ -61,10 +61,10 @@ ShpfileType CMapView::get_ShapefileType(long layerHandle)
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
 		Layer * layer = _allLayers[layerHandle];
-		if( layer->type == ShapefileLayer )
+		if( layer->IsShapefile() )
 		{
 			IShapefile* sf = NULL;
-			layer->object->QueryInterface(IID_IShapefile, (void**)&sf);
+			layer->QueryShapefile(&sf);
 			if (sf)
 			{
 				ShpfileType type;
@@ -94,7 +94,7 @@ Layer* CMapView::get_ShapefileLayer(long layerHandle)
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
 		Layer * layer = _allLayers[layerHandle];
-		if( layer->type == ShapefileLayer )
+		if( layer->IsShapefile() )
 		{
 			return layer;
 		}
@@ -134,7 +134,7 @@ bool CMapView::IsValidShape( long layerHandle, long shape )
 	if( IsValidLayer(layerHandle) )
 	{
 		Layer * l = _allLayers[layerHandle];
-		if( l->type == ShapefileLayer )
+		if( l->IsShapefile() )
 		{	
 			this->AlignShapeLayerAndShapes(l);
 			
@@ -1160,7 +1160,7 @@ bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
 		}
 
 		Layer* layer = _allLayers[_activeLayers[i]];
-		if (layer->type == ShapefileLayer)
+		if (layer->IsShapefile())
 		{
 			if (layer->QueryShapefile(&sf))
 			{
@@ -1216,7 +1216,7 @@ HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<b
 	for(int i = 0; i < (int)_activeLayers.size(); i++ )
 	{
 		Layer* layer = _allLayers[_activeLayers[i]];
-		if (layer->type == ShapefileLayer)
+		if (layer->IsShapefile())
 		{
 			if (layer->QueryShapefile(&sf))
 			{
@@ -1357,7 +1357,7 @@ void CMapView::ClearLabelFrames()
 		if( l != NULL )
 		{	
 			// charts
-			if (l->type == ShapefileLayer)
+			if (l->IsShapefile())
 			{
 				IShapefile * sf = NULL;
 				if (l->QueryShapefile(&sf))

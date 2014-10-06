@@ -80,7 +80,7 @@ float CMapView::GetImageLayerPercentTransparent(long LayerHandle)
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{
 		Layer * l = _allLayers[LayerHandle];
-		if( l->type == ImageLayer )
+		if( l->IsImage() )
 		{
 			IImage * iimg = NULL;
 			
@@ -117,7 +117,7 @@ void CMapView::SetImageLayerPercentTransparent(long LayerHandle, float newValue)
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{
 		Layer * l = _allLayers[LayerHandle];
-		if( l->type == ImageLayer )
+		if( l->IsImage() )
 		{	
 			IImage * iimg = NULL;
 			
@@ -191,7 +191,7 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 	{	
 		Layer * l = _allLayers[LayerHandle];
 		if(l->object == NULL) return true;
-		if (l->type == ShapefileLayer)
+		if (l->IsShapefile())
 		{
 			IShapefile * ishp = NULL;
 			if (!l->QueryShapefile(&ishp)) return true;
@@ -216,7 +216,7 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 		Layer * l = _allLayers[LayerHandle];
 		if(l->object == NULL) return FALSE;
 		
-		if (l->type == ImageLayer)
+		if (l->IsImage())
 		{
 			IImage * iimg = NULL;
 			if (!l->QueryImage(&iimg)) return FALSE;
@@ -234,7 +234,7 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 			iimg = NULL;
 			return TRUE;
 		}
-		else if (l->type == ShapefileLayer)
+		else if (l->IsShapefile())
 		{
 			IShapefile * ishp = NULL;
 			if (!l->QueryShapefile(&ishp)) return FALSE;
@@ -499,11 +499,11 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
 		Layer * l = _allLayers[LayerHandle];
-		if( l->type == ShapefileLayer )
+		if( l->IsShapefile() )
 		{	
 			return NULL;	// probably return ShapeDrawingOptions ?
 		}
-		else if(l->type == ImageLayer)
+		else if(l->IsImage())
 		{
  			// redirected to image color scheme for backward compatibility
 			IGridColorScheme* scheme = NULL;

@@ -2,7 +2,7 @@
 
 class ReferenceCounter
 {
-	static const int INTERFACES_COUNT = 38;
+	static const int INTERFACES_COUNT = 40;
 	int referenceCounts[INTERFACES_COUNT];
 	int totalCounts[INTERFACES_COUNT];
 public:

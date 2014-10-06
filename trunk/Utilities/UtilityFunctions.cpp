@@ -8,6 +8,21 @@ namespace Utility
 	static _locale_t m_locale = _create_locale(LC_ALL, "C");
 
 #pragma region String conversion
+	// *************************************************************
+	//		Bstr2Char()
+	// *************************************************************
+	CStringA Bstr2Char(BSTR& bstr)
+	{
+		// check if UTF-8 conversion is needed
+		return Utility::ConvertToUtf8(OLE2W(bstr));
+	}
+
+	CStringA CComBstr2Char(CComBSTR& bstr)
+	{
+		// check if UTF-8 conversion is needed
+		return Utility::ConvertToUtf8(OLE2W(bstr));
+	}
+	
 	// ********************************************************
 	//    XmlFilenameToUnicode()
 	// ********************************************************
@@ -1019,6 +1034,8 @@ namespace Utility
 		case idTin:				return "Tin";
 		case idUtils:			return "Utils";
 		case idVector:			return "Vector";
+		case idOgrDatasource:   return "OgrDatasource";
+		case idOgrLayer:		return "OgrLayer";
 		default:				return "Unknown";
 		}
 	}
@@ -1181,12 +1198,27 @@ namespace Utility
 		}
 		return result;
 	}
+
+	// ****************************************************************** 
+	//		ClearShapefileModifiedFlag
+	// ****************************************************************** 
+	void ClearShapefileModifiedFlag(IShapefile* sf)
+	{
+		if (!sf) return;
+		long numShapes = 0;
+		sf->get_NumShapes(&numShapes);
+		for (int i = 0; i < numShapes; i++)
+		{
+			sf->put_ShapeModified(i, VARIANT_FALSE);
+		}
+	}
+
 }
 
 namespace Debug
 {
 	// ****************************************************************** 
-	//		WriteLine
+	//		WriteWithTime
 	// ****************************************************************** 
 	void WriteWithTime(CString format, ...)
 	{

@@ -2048,6 +2048,36 @@ STDMETHODIMP CShapefile::put_ShapeVisible(long ShapeIndex, VARIANT_BOOL newVal)
 }
 
 // *************************************************************
+//		get_ShapeModified()
+// *************************************************************
+STDMETHODIMP CShapefile::get_ShapeModified(long ShapeIndex, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{
+		*retVal = -1;
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		*retVal = _shapeData[ShapeIndex]->modified ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+STDMETHODIMP CShapefile::put_ShapeModified(long ShapeIndex, VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		_shapeData[ShapeIndex]->modified = newVal ? true : false;
+
+	return S_OK;
+}
+
+
+// *************************************************************
 //		get_ShapeCategory()
 // *************************************************************
 STDMETHODIMP CShapefile::get_ShapeCategory(long ShapeIndex, long* pVal)
@@ -2982,6 +3012,8 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		}
 	}
 	
+	Utility::ClearShapefileModifiedFlag((*retVal));		// inserted shapes were marked as modified, correct this
+
 	// -------------------------------------- 
 	//	  Output validation
 	// -------------------------------------- 
@@ -3324,3 +3356,4 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 
 	return S_OK;
 }
+

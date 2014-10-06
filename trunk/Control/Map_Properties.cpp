@@ -191,7 +191,7 @@ void CMapView::SetShapeDrawingMethod(short newVal)
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( l != NULL )
 		{	
-			if(l->type == ShapefileLayer)
+			if(l->IsShapefile())
 			{
 				AlignShapeLayerAndShapes(l);
 			}

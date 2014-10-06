@@ -104,7 +104,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 			((CGeoProjection*)last)->SetIsFrozen(false);
 			last->StopTransform();
 		}
-		last->Release();
+		ULONG refCount = last->Release();
 		last = NULL;
 	}
 
@@ -235,7 +235,11 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		{
 			IGeoProjection* proj = NULL;
 			GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
-			SetGeoProjection(proj);
+			if (proj)
+			{
+				SetGeoProjection(proj);
+				proj->Release();
+			}
 		}
 	}
 }

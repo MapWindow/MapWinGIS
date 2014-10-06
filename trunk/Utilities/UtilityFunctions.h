@@ -16,6 +16,8 @@ namespace Utility
 	char* ConvertBSTRToLPSTR (BSTR bstrIn);
 	CString ReplaceNoCase( LPCTSTR instr, LPCTSTR oldstr, LPCTSTR newstr );
 	
+	CStringA CComBstr2Char(CComBSTR& bstr);
+	CStringA Bstr2Char(BSTR& bstr);
 	CStringW XmlFilenameToUnicode(CStringA s, bool utf8);
 	CStringA ConvertToUtf8(CStringW unicode); 
 	CStringW ConvertFromUtf8(CStringA utf8);
@@ -68,6 +70,7 @@ namespace Utility
 	void swapEndian(char* a,int size);
 	bool ShapeTypeIsM(ShpfileType shpType);
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType);
+	void ClearShapefileModifiedFlag(IShapefile* sf);
 
 	// units conversions
 	double getConversionFactor(tkUnitsOfMeasure Units);

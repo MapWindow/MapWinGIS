@@ -1206,7 +1206,6 @@
     <ClInclude Include="Image\cq.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
-    <ClInclude Include="Shapefile\dbfopen.h" />
     <ClInclude Include="Shapefile\EditShapeBase.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
@@ -1215,7 +1214,6 @@
     <ClInclude Include="Structures\ImageLayerInfo.h" />
     <ClInclude Include="Structures\Label.h" />
     <ClInclude Include="Structures\Layer.h" />
-    <ClInclude Include="Structures\ShapeInfo.h" />
     <ClInclude Include="Structures\ShapeLayerInfo.h" />
     <ClInclude Include="Structures\Structures.h" />
     <ClInclude Include="Drawing\BaseDrawer.h" />
@@ -1304,6 +1302,7 @@
     <ClInclude Include="Utilities\LineBresenham.h" />
     <ClInclude Include="Utilities\Logger.h" />
     <ClInclude Include="Utilities\Matrix.h" />
+    <ClInclude Include="Utilities\OgrHelper.h" />
     <ClInclude Include="Utilities\RegistryKey.h" />
     <CustomBuildStep Include="Utilities\Templates.h" />
     <ClInclude Include="Utilities\Timer.h" />
@@ -1533,7 +1532,6 @@
     </ClCompile>
     <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Shapefile\ActiveShape.cpp" />
-    <ClCompile Include="Shapefile\dbfopen.cpp" />
     <ClCompile Include="Shapefile\EditShapeBase.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
@@ -1556,6 +1554,7 @@
     <ClCompile Include="Utilities\LineBresenham.cpp" />
     <ClCompile Include="Utilities\Logger.cpp" />
     <ClCompile Include="Utilities\Matrix.cpp" />
+    <ClCompile Include="Utilities\OgrHelper.cpp" />
     <ClCompile Include="Utilities\RegistryKey.cpp" />
     <ClCompile Include="Utilities\UtilityFunctions.cpp" />
     <ClCompile Include="Utilities\varH.cpp" />

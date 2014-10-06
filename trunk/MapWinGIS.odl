@@ -53,6 +53,116 @@ interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
 interface IEditShape;
+interface IOgrDatasource;
+interface IOgrLayer;
+
+/************************** tkOgrSaveType Enumeration **********************/
+typedef
+[
+	uuid(423D6519-8961-440B-BDF4-0DBF1727CE63),
+	helpstring("tkOgrSaveType"),
+]
+enum tkOgrSaveType
+{
+	ostGeometryOnly = 0,
+	ostAttributesOnly = 1,
+	ostSaveAll = 2,
+} tkOgrSaveType;
+
+/************************** tkOgrLayerCapability Enumeration **********************/
+typedef
+[
+	uuid(FB18C88E-BD29-4F81-91BB-70AC7D8DA997),
+	helpstring("tkOgrLayerCapability"),
+]
+enum tkOgrLayerCapability
+{
+	olcRandomRead = 0,
+	olcSequentialWrite = 1,
+	olcRandomWrite = 2,
+	olcFastSpatialFilter = 3,
+	olcFastFeatureCount = 4,
+	olcFastGetExtent = 5,
+	olcCreateField = 6,
+	olcDeleteField = 7,
+	olcReorderFields = 8,
+	olcAlterFieldDefn = 9,
+	olcTransactions = 10,
+	olcDeleteFeature = 11,
+	olcFastSetNextByIndex = 12,
+	olcStringsAsUTF8 = 13,
+	olcIgnoreFields = 14,
+	olcCreateGeomField = 15,
+} tkOgrLayerCapability;
+
+/************************** tkOgrSaveResult Enumeration **********************/
+typedef
+[
+	uuid(E314FA80-F752-4D88-AC31-E3EB053576DA),
+	helpstring("tkOgrSaveResult"),
+]
+enum tkOgrSaveResult
+{
+	osrNoChanges = 0,
+	osrAllSaved = 1,
+	osrSomeSaved = 2,
+	osrNoneSaved = 3,
+} tkOgrSaveResult;
+
+/************************** tkGdalDriverMetadata Enumeration **********************/
+typedef
+[
+	uuid(47F83622-7E83-4849-B299-6289A8B432B7),
+	helpstring("tkGdalDriverMetadata"),
+]
+enum tkGdalDriverMetadata
+{
+	dmdLONGNAME = 0,
+	dmdHELPTOPIC = 1,
+	dmdMIMETYPE = 2,
+	dmdEXTENSION = 3,
+	dmdEXTENSIONS = 4,
+	dmdCREATIONOPTIONLIST = 5,
+	dmdOPENOPTIONLIST = 6,
+	dmdCREATIONDATATYPES = 7,
+	dmdSUBDATASETS = 8,
+	dmdOPEN       = 9,
+	dmdCREATE     = 10,
+	dmdCREATECOPY = 11,
+	dmdVIRTUALIO  = 12,
+	dmdLAYER_CREATIONOPTIONLIST = 13,
+	dmdOGR_DRIVER = 14,
+} tkGdalDriverMetadata;
+
+/************************** tkOgrSourceType Enumeration **********************/
+typedef
+[
+	uuid(0140B532-B59F-4EEC-AD39-EB52800CF2D4),
+	helpstring("tkOgrSourceType"),
+]
+enum tkOgrSourceType
+{
+	ogrUninitialized = 0,
+	ogrFile = 1,
+	ogrDbTable = 2,
+	ogrQuery = 3,
+} tkOgrSourceType;
+
+/************************** tkOgrDSCapability Enumeration **********************/
+typedef
+[
+	uuid(190B74F5-693B-44B4-B2CE-9D3881FFFC3B),
+	helpstring("tkOgrDSCapability"),
+]
+enum tkOgrDSCapability
+{
+	odcCreateLayer = 0,
+	odcDeleteLayer = 1,
+	odcCreateGeomFieldAfterCreateLayer = 2,
+	odcCreateDataSource = 3,
+	odcDeleteDataSource = 4,
+} tkOgrDSCapability;
+
 
 /************************** tkShapeSelectAction Enumeration **********************/
 typedef		
@@ -685,6 +795,8 @@ enum tkScalebarUnits
 		idFileManager = 36,
 		idFieldStatOperations = 37,
 		idEditShape = 38,
+		idOgrDatasource = 39,
+		idOgrLayer = 40,
 	} tkInterface;	
 
 	typedef		
@@ -3205,8 +3317,8 @@ interface IShapefile : IDispatch{
 	[id(17), helpstring("method EditDeleteShape")] HRESULT EditDeleteShape([in]long ShapeIndex, [out, retval] VARIANT_BOOL * retval);
 	[id(18), helpstring("method SelectShapes")] HRESULT SelectShapes([in] IExtents * BoundBox, [in, optional, defaultvalue(0.0)]double Tolerance, [in, optional, defaultvalue(INTERSECTION)] SelectMode SelectMode, [in, out, optional] VARIANT * Result, [out, retval] VARIANT_BOOL * retval);
 	[id(19), helpstring("method StartEditingShapes")] HRESULT StartEditingShapes([in, optional, defaultvalue(TRUE)] VARIANT_BOOL StartEditTable, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(20), helpstring("method StopEditingShapes")] HRESULT StopEditingShapes([in, optional, defaultvalue(TRUE)] VARIANT_BOOL ApplyChanges, [in,optional,defaultvalue(TRUE)]VARIANT_BOOL StopEditTable, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
-	[id(22), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField * NewField, [in,out]long * FieldIndex, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(20), helpstring("method StopEditingShapes")] HRESULT StopEditingShapes([in, optional, defaultvalue(TRUE)] VARIANT_BOOL ApplyChanges, [in, optional, defaultvalue(TRUE)]VARIANT_BOOL StopEditTable, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
+	[id(22), helpstring("method EditInsertField")] HRESULT EditInsertField([in] IField * NewField, [in, out]long * FieldIndex, [in, optional]ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(23), helpstring("method EditDeleteField")] HRESULT EditDeleteField([in] long FieldIndex, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(24), helpstring("method EditCellValue")] HRESULT EditCellValue([in] long FieldIndex, [in] long ShapeIndex, [in] VARIANT NewVal, [out, retval] VARIANT_BOOL * retval);
 	[id(25), helpstring("method StartEditingTable")] HRESULT StartEditingTable([in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
@@ -3215,14 +3327,14 @@ interface IShapefile : IDispatch{
 	[propget, id(28), helpstring("property CellValue")] HRESULT CellValue([in] long FieldIndex, [in] long ShapeIndex, [out, retval] VARIANT *pVal);
 	[propget, id(29), helpstring("property EditingTable")] HRESULT EditingTable([out, retval] VARIANT_BOOL *pVal);
 	[propget, id(21), helpstring("property ErrorMsg")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(30), helpstring("property FileHandle"), hidden] HRESULT FileHandle([out, retval] long * pVal);		
+	[propget, id(30), helpstring("property FileHandle"), hidden] HRESULT FileHandle([out, retval] long * pVal);
 	[propget, id(31), helpstring("property Filename")] HRESULT Filename([out, retval] BSTR *pVal);
 	[id(32), helpstring("method QuickPoint")] HRESULT QuickPoint([in] long ShapeIndex, [in] long PointIndex, [out, retval] IPoint ** retval);
 	[id(33), helpstring("method QuickExtents")] HRESULT QuickExtents([in] long ShapeIndex, [out, retval] IExtents ** retval);
 	[id(34), helpstring("method QuickPoints")] HRESULT QuickPoints([in] long ShapeIndex, [in, out] long * numPoints, [out, retval] SAFEARRAY(double) * retval);
-	[id(35), helpstring("method PointInShape")] HRESULT PointInShape([in] LONG ShapeIndex, [in] DOUBLE x, [in] DOUBLE y, [out,retval] VARIANT_BOOL* retval);
-	[id(36), helpstring("method PointInShapefile")] HRESULT PointInShapefile([in] DOUBLE x, [in] DOUBLE y, [out,retval] LONG* ShapeIndex);
-	[id(37), helpstring("method BeginPointInShapefile")] HRESULT BeginPointInShapefile([out,retval] VARIANT_BOOL* retval);
+	[id(35), helpstring("method PointInShape")] HRESULT PointInShape([in] LONG ShapeIndex, [in] DOUBLE x, [in] DOUBLE y, [out, retval] VARIANT_BOOL* retval);
+	[id(36), helpstring("method PointInShapefile")] HRESULT PointInShapefile([in] DOUBLE x, [in] DOUBLE y, [out, retval] LONG* ShapeIndex);
+	[id(37), helpstring("method BeginPointInShapefile")] HRESULT BeginPointInShapefile([out, retval] VARIANT_BOOL* retval);
 	[id(38), helpstring("method EndPointInShapefile")] HRESULT EndPointInShapefile(void);
 	[propget, id(39), helpstring("property Projection")] HRESULT Projection([out, retval] BSTR *pVal);
 	[propput, id(39), helpstring("property Projection")] HRESULT Projection([in] BSTR proj4String);
@@ -3238,29 +3350,29 @@ interface IShapefile : IDispatch{
 	[propget, id(47), helpstring("property CacheExtents")] HRESULT CacheExtents([out, retval] VARIANT_BOOL *pVal);
 	[propput, id(47), helpstring("property CacheExtents")] HRESULT CacheExtents([in] VARIANT_BOOL newVal);
 	[id(48), helpstring("method RefreshExtents")] HRESULT RefreshExtents([out, retval] VARIANT_BOOL *pVal);
-	[id(49), helpstring("method RefreshShapeExtents")] HRESULT RefreshShapeExtents([in] LONG ShapeId,[out, retval] VARIANT_BOOL * pVal);
+	[id(49), helpstring("method RefreshShapeExtents")] HRESULT RefreshShapeExtents([in] LONG ShapeId, [out, retval] VARIANT_BOOL * pVal);
 	//[id(50),helpstring("method QuickQueryInEditMode")] HRESULT QuickQueryInEditMode([in] IExtents *BoundBox, [in, out] int** Result,[in, out] int* ResultCount);
 	[propget, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([out, retval] VARIANT_BOOL *pVal);
-	[propput, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([in,defaultvalue(TRUE)] VARIANT_BOOL pVal);
+	[propput, id(51), helpstring("property UseQTree In Edit Mode (default true)")] HRESULT UseQTree([in, defaultvalue(TRUE)] VARIANT_BOOL pVal);
 	[id(52), helpstring("method Save")] HRESULT Save([in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);
 	[id(53), helpstring("method IsSpatialIndexValid")] HRESULT IsSpatialIndexValid([out, retval] VARIANT_BOOL * pVal);
 	[propput, id(54), helpstring("property SpatialIndexMaxAreaPercent")] HRESULT SpatialIndexMaxAreaPercent([in] DOUBLE newVal);
 	[propget, id(54), helpstring("property SpatialIndexMaxAreaPercent")] HRESULT SpatialIndexMaxAreaPercent([out, retval] DOUBLE* pVal);
 	[propget, id(55), helpstring("property CanUseSpatialIndex")] HRESULT CanUseSpatialIndex([in] IExtents* pArea, [out, retval] VARIANT_BOOL* pVal);
 	[id(56), helpstring("method GetIntersection")] HRESULT GetIntersection([in]VARIANT_BOOL SelectedOnlyOfThis, [in]IShapefile* sf, [in]VARIANT_BOOL SelectedOnly, [in] ShpfileType fileType, [in, optional, defaultvalue(NULL)] ICallback * cBack, [out, retval] IShapefile** retval);
-	[id(57), helpstring("method SelectByShapefile")] HRESULT SelectByShapefile([in]IShapefile* sf, [in]tkSpatialRelation Relation, [in]VARIANT_BOOL SelectedOnly,  [in, out] VARIANT *Result, [in, optional, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
-	[propget, id(58), helpstring("property NumSelected")] HRESULT NumSelected([out,retval] long* pVal);
+	[id(57), helpstring("method SelectByShapefile")] HRESULT SelectByShapefile([in]IShapefile* sf, [in]tkSpatialRelation Relation, [in]VARIANT_BOOL SelectedOnly, [in, out] VARIANT *Result, [in, optional, defaultvalue(NULL)] ICallback* cBack, [out, retval] VARIANT_BOOL *retval);
+	[propget, id(58), helpstring("property NumSelected")] HRESULT NumSelected([out, retval] long* pVal);
 	[propget, id(59), helpstring("property ShapeSelected")] HRESULT ShapeSelected([in]long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 	[propput, id(59), helpstring("property ShapeSelected")] HRESULT ShapeSelected([in]long ShapeIndex, [in] VARIANT_BOOL newVal);
 	[propget, id(60), helpstring("property SelectionDrawingOptions")] HRESULT SelectionDrawingOptions([out, retval]IShapeDrawingOptions** pVal);
 	[propput, id(60), helpstring("property SelectionDrawingOptions")] HRESULT SelectionDrawingOptions([in]IShapeDrawingOptions* newVal);
 	[id(62), helpstring("method SelectAll")] HRESULT SelectAll();
-	[id(63), helpstring("method SelectNone")] HRESULT SelectNone ();
+	[id(63), helpstring("method SelectNone")] HRESULT SelectNone();
 	[id(64), helpstring("method InvertSelection")] HRESULT InvertSelection();
-	[id(65), helpstring("method Dissolve")] HRESULT Dissolve([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, [out,retval]IShapefile** sf);
+	[id(65), helpstring("method Dissolve")] HRESULT Dissolve([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, [out, retval]IShapefile** sf);
 	[propget, id(66), helpstring("property Labels")] HRESULT Labels([out, retval] ILabels** pVal);
 	[propput, id(66), helpstring("property Labels")] HRESULT Labels([in] ILabels* newVal);
-	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in,optional,defaultvalue(FALSE)]VARIANT_BOOL LargestPartOnly, [out, retval] long* count);
+	[id(67), helpstring("method GenerateLabels")] HRESULT GenerateLabels([in]long FieldIndex, [in]tkLabelPositioning Method, [in, optional, defaultvalue(FALSE)]VARIANT_BOOL LargestPartOnly, [out, retval] long* count);
 	[id(68), helpstring("method Clone")] HRESULT Clone([out, retval]IShapefile** retVal);
 	[propget, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([out, retval]IShapeDrawingOptions** pVal);
 	[propput, id(69), helpstring("property DefaultDrawingOptions")] HRESULT DefaultDrawingOptions([in]IShapeDrawingOptions* newVal);
@@ -3303,19 +3415,19 @@ interface IShapefile : IDispatch{
 	[id(95), helpstring("property Deserialize")] HRESULT Deserialize([in]VARIANT_BOOL LoadSelection, [in]BSTR newVal);
 	[propget, id(96), helpstring("property GeoProjection")] HRESULT GeoProjection([out, retval] IGeoProjection** retVal);
 	[propput, id(96), helpstring("property GeoProjection")] HRESULT GeoProjection([in] IGeoProjection* pVal);
-	[id(97), helpstring("method Reproject")] HRESULT Reproject([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out,retval] IShapefile** retVal);
-	[id(98), helpstring("method ReprojectInPlace")] HRESULT ReprojectInPlace([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out,retval] VARIANT_BOOL* retVal);
-	[id(99), helpstring("method SimplifyLines")] HRESULT SimplifyLines([in] DOUBLE Tolerance, [in]VARIANT_BOOL SelectedOnly, [out,retval] IShapefile** retVal);
+	[id(97), helpstring("method Reproject")] HRESULT Reproject([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out, retval] IShapefile** retVal);
+	[id(98), helpstring("method ReprojectInPlace")] HRESULT ReprojectInPlace([in] IGeoProjection* newProjection, [in, out]LONG* reprojectedCount, [out, retval] VARIANT_BOOL* retVal);
+	[id(99), helpstring("method SimplifyLines")] HRESULT SimplifyLines([in] DOUBLE Tolerance, [in]VARIANT_BOOL SelectedOnly, [out, retval] IShapefile** retVal);
 	[id(100), helpstring("method FixUpShapes")] HRESULT FixUpShapes([out]IShapefile** retVal, [out, retval]VARIANT_BOOL* fixed);
 	[id(101), helpstring("method EditAddShape")] HRESULT EditAddShape([in]IShape* shape, [out, retval]long* shapeIndex);
 	[id(102), helpstring("method EditAddField")] HRESULT EditAddField([in]BSTR name, [in]FieldType type, [in]int precision,
-																	  [in]int width, [out, retval]long* fieldIndex);
-	[id(103), helpstring("method GetRelatedShapes")] HRESULT GetRelatedShapes([in] long referenceIndex, [in] tkSpatialRelation relation, [in,out] VARIANT* resultArray, [out,retval] VARIANT_BOOL* retval);
-	[id(104), helpstring("method GetRelatedShapes2")] HRESULT GetRelatedShapes2([in] IShape* referenceShape, [in] tkSpatialRelation relation, [in,out] VARIANT* resultArray, [out,retval] VARIANT_BOOL* retval);
+		[in]int width, [out, retval]long* fieldIndex);
+	[id(103), helpstring("method GetRelatedShapes")] HRESULT GetRelatedShapes([in] long referenceIndex, [in] tkSpatialRelation relation, [in, out] VARIANT* resultArray, [out, retval] VARIANT_BOOL* retval);
+	[id(104), helpstring("method GetRelatedShapes2")] HRESULT GetRelatedShapes2([in] IShape* referenceShape, [in] tkSpatialRelation relation, [in, out] VARIANT* resultArray, [out, retval] VARIANT_BOOL* retval);
 	[propget, id(105), helpstring("property HotTracking")] HRESULT HotTracking([out, retval] VARIANT_BOOL* retVal);
 	[propput, id(105), helpstring("property HotTracking")] HRESULT HotTracking([in] VARIANT_BOOL newVal);
-	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out,retval] IShapefile** retVal);
-	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance, 
+	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out, retval] IShapefile** retVal);
+	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance,
 		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
 	/**** Out of order for compatibility reasons. ****/
 	[id(109), helpstring("method HasInvalidShapes")] HRESULT HasInvalidShapes([out, retval]VARIANT_BOOL* result);
@@ -3329,10 +3441,10 @@ interface IShapefile : IDispatch{
 	[propget, id(114), helpstring("property LastInputValidation")] HRESULT LastInputValidation([out, retval] IShapeValidationInfo** retVal);
 	[propget, id(115), helpstring("property LastOutputValidation")] HRESULT LastOutputValidation([out, retval] IShapeValidationInfo** retVal);
 	[id(116), helpstring("property ClearCachedGeometries")] HRESULT ClearCachedGeometries();
-	[id(117), helpstring("method AggregateShapesWithStats")] HRESULT AggregateShapesWithStats([in]VARIANT_BOOL SelectedOnly, 
-			[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
-	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly, 
-			[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out,retval]IShapefile** sf);
+	[id(117), helpstring("method AggregateShapesWithStats")] HRESULT AggregateShapesWithStats([in]VARIANT_BOOL SelectedOnly,
+		[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
+	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly,
+		[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** sf);
 
 	[propget, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 	[propput, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
@@ -3341,6 +3453,9 @@ interface IShapefile : IDispatch{
 	[propget, id(121)] HRESULT Volatile([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(121)] HRESULT Volatile([in] VARIANT_BOOL newVal);
 	[id(122)] HRESULT EditUpdateShape([in]long ShapeIndex, [in]IShape* shpNew, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
+	[propput, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
+	[id(124)] HRESULT Validate([in]tkShapeValidationMode validationMode, [in]VARIANT_BOOL selectedOnly, [out, retval]IShapeValidationInfo** results);
 };
 
 /****************************  Shape Interface ***********************/
@@ -5182,6 +5297,7 @@ interface IFileManager : IDispatch{
 	[propget, id(21)] HRESULT NeedsGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[id(22)] HRESULT RemoveProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[propget, id(23)] HRESULT HasValidProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
+	[id(24)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerNameOrQuery, [out, retval]IOgrLayer** retVal);
 	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
@@ -5251,6 +5367,34 @@ interface IEditShape : IDispatch{
 	pointer_default(unique)
 ]
 interface IOgrDatasource : IDispatch{
+	[propget, id(1)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(3)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
+	[propput, id(3)] HRESULT GlobalCallback([in]ICallback* newVal);
+	[propget, id(4)] HRESULT Key([out, retval]BSTR* retVal);
+	[propput, id(4)] HRESULT Key([in]BSTR newVal);
+	[id(5)] HRESULT Close();
+	[id(6)] HRESULT Open([in]BSTR connectionString, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(7)] HRESULT LayerCount([out, retval]int* retVal);
+	[id(8)] HRESULT GetLayer([in]int index, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
+	[propget, id(9)] HRESULT DriverName([out, retval]BSTR* retVal);
+	[id(10)] HRESULT GetLayerName([in]int layerIndex, [out, retval]BSTR* retVal);
+	[id(11)] HRESULT GetLayerByName([in]BSTR layerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
+	[id(12)] HRESULT RunQuery([in]BSTR sql, [out, retval]IOgrLayer** retVal);
+	[id(13)] HRESULT DeleteLayer([in]int layerIndex, [out, retval]VARIANT_BOOL* retVal);
+	[id(14)] HRESULT TestCapability([in]tkOgrDSCapability capability, [out, retval]VARIANT_BOOL* retVal);
+	[id(15)] HRESULT CreateLayer([in]BSTR layerName, [in]ShpfileType shpType, 
+		[in, optional, defaultvalue(NULL)]IGeoProjection* projection, 
+		[in, optional,defaultvalue("")]BSTR creationOptions, [out, retval]VARIANT_BOOL* retVal);
+	[id(16)] HRESULT LayerIndexByName([in]BSTR layerName, [out, retval]int* retVal);
+	[id(17)] HRESULT ImportShapefile([in] IShapefile* shapefile, [in]BSTR layerName,
+		[in, optional, defaultvalue("")]BSTR creationOptions, 
+		[in, optional, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode validationMode, 
+		[out, retval]VARIANT_BOOL* retVal);
+	[propget, id(18)] HRESULT DriverMetadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
+	[propget, id(19)] HRESULT DriverMetadataCount([out, retval]int* retVal);
+	[propget, id(20)] HRESULT DriverMetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
+	[id(21)] HRESULT ExecuteSQL([in]BSTR sql, [out]BSTR* errorMessage, [out, retval]VARIANT_BOOL* retVal);
 };
 [
 	object,
@@ -5260,6 +5404,38 @@ interface IOgrDatasource : IDispatch{
 	pointer_default(unique)
 ]
 interface IOgrLayer : IDispatch{
+	[propget, id(1)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
+	[propget, id(3)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
+	[propput, id(3)] HRESULT GlobalCallback([in]ICallback* newVal);
+	[propget, id(4)] HRESULT Key([out, retval]BSTR* retVal);
+	[propput, id(4)] HRESULT Key([in]BSTR newVal);
+	[id(5)] HRESULT Close();
+	[propget, id(6)] HRESULT Name([out, retval]BSTR* retVal);
+	[id(7)] HRESULT GetData([out, retval]IShapefile** retVal);
+	[id(8)] HRESULT ReloadFromSource([out, retval]VARIANT_BOOL* retVal);
+	[id(9)] HRESULT RedefineQuery([in]BSTR newSql, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(10)] HRESULT ConnectionString([out, retval]BSTR* retVal);
+	[propget, id(11)] HRESULT SourceQuery([out, retval]BSTR* retVal);
+	[propget, id(12)] HRESULT GeoProjection([out, retval]IGeoProjection** retVal);
+	[propget, id(13)] HRESULT ShapeType([out, retval]ShpfileType* retVal);
+	[propget, id(14)] HRESULT DataIsReprojected([out, retval]VARIANT_BOOL* retVal);
+	[propget, id(15)] HRESULT FidColumnName([out, retval]BSTR* retVal);
+	[id(16)] HRESULT SaveChanges([out]int* savedCount, 
+								[in, optional, defaultvalue(ostSaveAll)]tkOgrSaveType saveType, 
+								[in, optional, defaultvalue(1)]VARIANT_BOOL validateShapes, [out, retval]tkOgrSaveResult* retVal);
+	[id(17)] HRESULT TestCapability([in]tkOgrLayerCapability capability, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(18)] HRESULT UpdateSourceErrorCount([out, retval]int* retVal);
+	[propget, id(19)] HRESULT UpdateSourceErrorMsg([in]int errorIndex, [out, retval]BSTR* retVal);
+	[propget, id(20)] HRESULT UpdateSourceErrorShapeIndex([in]int errorIndex, [out, retval]int* retVal);
+	[propget, id(21)] HRESULT FeatureCount([in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]int* retVal);
+	[propget, id(22)] HRESULT Extents([out]IExtents** extents, [in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]VARIANT_BOOL *retVal);
+	[propget, id(23)] HRESULT GeometryColumnName([out, retval]BSTR* retVal);
+	[propget, id(24)] HRESULT SupportsEditing([in]tkOgrSaveType editingType, [out, retval]VARIANT_BOOL* retVal);
+	[id(25)] HRESULT Serialize([out, retval]BSTR* retVal);
+	[id(26)] HRESULT Deserialize([in]BSTR newVal, [out, retval]VARIANT_BOOL* retVal);
+	[id(27)] HRESULT OpenFromQuery([in]BSTR connectionString, [in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
+	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerName, [in]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 };
 
 [ 
@@ -5635,6 +5811,8 @@ library MapWinGIS
 			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
 			[id(234), propget] long ZoomBarMaxZoom();
 			[id(235), propget] IEditShape* EditShape();
+			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
+			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL Visible);
 			//}}AFX_ODL_METHOD
 	};
 

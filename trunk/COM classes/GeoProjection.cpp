@@ -1090,7 +1090,7 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*epsgCode = -1;
 	if (!m_isFrozen) {
-		m_projection->AutoIdentifyEPSG();	// it changes the underluing object
+		m_projection->AutoIdentifyEPSG();	// it changes the underlying object
 	}
 	if (m_projection->IsGeographic())
 	{

@@ -17,7 +17,7 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( l != NULL )
 		{	
-			if(l->type == ImageLayer)
+			if(l->IsImage())
 			{
 				IImage* iimg = NULL;
 				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
@@ -245,7 +245,7 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 				if( l != NULL )
 				{	
 					//if(l->type == ImageLayer && (l->flags & Visible))
-					if(l->type == ImageLayer && l->IsVisible(scale, zoom))
+					if(l->IsImage() && l->IsVisible(scale, zoom))
 					{
 						//l->object->QueryInterface(IID_IImage, (void**)&iimg);
 						//if (iimg)
@@ -395,7 +395,7 @@ void CMapView::ReloadImageBuffers()
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
 
-		if ((l->type == ImageLayer) && (l->flags & Visible))
+		if ((l->IsImage()) && (l->flags & Visible))
 		{
 			if (l->QueryImage(&iimg))
 			{	

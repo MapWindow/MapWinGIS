@@ -163,7 +163,7 @@ void AddPoints(CShape* shp, OGRLineString* geom, int startPointIndex, int endPoi
 //							ShapeToGeometry()			               
 //**********************************************************************
 // Converts MapWinGis shape object to OGR geometry object.
-OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
+OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType forceGeometryType)
 {
 	if( shape == NULL)
 		return NULL;
@@ -236,7 +236,8 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		if (numParts == 0)
 			oGeom = NULL;
 		
-		else if (numParts == 1)
+		bool multiLineString = forceGeometryType == wkbMultiLineString || forceGeometryType == wkbMultiLineString;
+		if (numParts == 1 && !multiLineString)
 		{	
 			OGRLineString *oLine = (OGRLineString*)OGRGeometryFactory::createGeometry(wkbLineString);
 			AddPoints(shp, oLine, 0, numPoints);
@@ -264,7 +265,8 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 		if (numParts == 0)
 			return NULL;
 
-		if (numParts == 1)
+		bool multiPolygon = (forceGeometryType == wkbMultiPolygon || forceGeometryType == wkbMultiPolygon25D);
+		if (numParts == 1 && !multiPolygon)
 		{	
 			OGRLinearRing* oRing = (OGRLinearRing*)OGRGeometryFactory::createGeometry(wkbLinearRing);
 			AddPoints(shp, oRing, 0, numPoints);
@@ -294,6 +296,10 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape)
 			oGeom = OGRGeometryFactory::organizePolygons
 					((OGRGeometry**)tabPolygons, numParts, &isValidGeometry, papszOptions);
 			delete[] tabPolygons;
+
+			if (multiPolygon)
+				oGeom = OGRGeometryFactory::forceToMultiPolygon(oGeom);		// TODO: should we destroy the initial one?
+
 			//if (!isValidGeometry) all polygons will be contained in one multipolygon;
 		}
 	}
@@ -704,114 +710,115 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkb
  */
 IShapefile* GeometryConverter::Read_OGR_Layer(BSTR Filename, ShpfileType shpType)
 {
-	USES_CONVERSION;
-	
-	CString fname = W2CA(Filename);
-	if (fname.GetLength() == 0) return NULL;
-
-	OGRRegisterAll();
-    
-	OGRDataSource*	oData;
-    oData = OGRSFDriverRegistrar::Open(fname, FALSE);
-    if( oData == NULL ) return NULL;
-
-	OGRLayer*	oLayer;
-	OGRFeature* oFeature;
-    
-	oLayer = oData->GetLayer(0);
-	OGRFeatureDefn* oLDefn = oLayer->GetLayerDefn();
-	oLayer->ResetReading();
-
-/* ----------------------------------------------------------------- */
-/*		Creation of shapefile										 */
-/* ----------------------------------------------------------------- */
-	IShapefile* sf;
-	VARIANT_BOOL vbretval;
-	
-	if (shpType == SHP_NULLSHAPE)
-		shpType = GeometryType2ShapeType(oLDefn->GetGeomType());
-	
-	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
-	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
-    
-/* ----------------------------------------------------------------- */
-/*		Converting of fields										 */
-/* ----------------------------------------------------------------- */
-    for(long iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
-    {
-		IField * fld = NULL;
-		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&fld);
-		
-		OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
-		OGRFieldType type = oField->GetType();
-		
-		if( type == OFTInteger )	fld->put_Type(INTEGER_FIELD);
-        else if(type == OFTReal )	fld->put_Type(DOUBLE_FIELD);
-        else if(type == OFTString )	fld->put_Type(STRING_FIELD);
-
-		fld->put_Name(A2BSTR(oField->GetNameRef()));
-		fld->put_Width((long)oField->GetWidth());
-		fld->put_Precision((long)oField->GetPrecision());
-
-		sf->EditInsertField(fld, &iFld, NULL, &vbretval);
-		fld->Release();
-    }
-	
-/* ----------------------------------------------------------------- */
-/*		Converting of the shapes and cellvalues						 */
-/* ----------------------------------------------------------------- */
-	while( (oFeature = oLayer->GetNextFeature()) != NULL )
-    {
-		OGRGeometry *oGeom;
-        oGeom = oFeature->GetGeometryRef();
-		if(oGeom == NULL) continue;
-		
-		IShape* shp =NULL;
-		shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
-		
-		long numShapes;
-		sf->get_NumShapes(&numShapes);
-		sf->EditInsertShape(shp, &numShapes, &vbretval);
-
-        for(int iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
-        {
-            OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
-			OGRFieldType type = oField->GetType();
-			VARIANT val;
-			VariantInit(&val);
-
-			if(type == OFTInteger)	
-			{
-				val.vt = VT_I4;
-				val.lVal = oFeature->GetFieldAsInteger(iFld);
-			}
-            else if(type == OFTReal)
-			{
-				val.vt = VT_R8;
-				val.dblVal = oFeature->GetFieldAsDouble(iFld);
-			}
-		    else //if (type == OFTString )
-			{	
-				val.vt = VT_BSTR;
-				val.bstrVal = A2BSTR(oFeature->GetFieldAsString(iFld));	
-			}
-            sf->EditCellValue(iFld, numShapes, val, &vbretval);
-			VariantClear(&val);
-        }
-        OGRFeature::DestroyFeature(oFeature);
-    }
-	
-    OGRDataSource::DestroyDataSource(oData);
-
-	sf->RefreshExtents(&vbretval);
-	return sf;
+	return NULL;
+	//	USES_CONVERSION;
+//	
+//	CString fname = W2CA(Filename);
+//	if (fname.GetLength() == 0) return NULL;
+//
+//	OGRRegisterAll();
+//    
+//	OGRDataSource*	oData;
+//    oData = OGRSFDriverRegistrar::Open(fname, FALSE);
+//    if( oData == NULL ) return NULL;
+//
+//	OGRLayer*	oLayer;
+//	OGRFeature* oFeature;
+//    
+//	oLayer = oData->GetLayer(0);
+//	OGRFeatureDefn* oLDefn = oLayer->GetLayerDefn();
+//	oLayer->ResetReading();
+//
+///* ----------------------------------------------------------------- */
+///*		Creation of shapefile										 */
+///* ----------------------------------------------------------------- */
+//	IShapefile* sf;
+//	VARIANT_BOOL vbretval;
+//	
+//	if (shpType == SHP_NULLSHAPE)
+//		shpType = GeometryType2ShapeType(oLDefn->GetGeomType());
+//	
+//	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
+//	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
+//    
+///* ----------------------------------------------------------------- */
+///*		Converting of fields										 */
+///* ----------------------------------------------------------------- */
+//    for(long iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
+//    {
+//		IField * fld = NULL;
+//		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&fld);
+//		
+//		OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
+//		OGRFieldType type = oField->GetType();
+//		
+//		if( type == OFTInteger )	fld->put_Type(INTEGER_FIELD);
+//        else if(type == OFTReal )	fld->put_Type(DOUBLE_FIELD);
+//        else if(type == OFTString )	fld->put_Type(STRING_FIELD);
+//
+//		fld->put_Name(A2BSTR(oField->GetNameRef()));
+//		fld->put_Width((long)oField->GetWidth());
+//		fld->put_Precision((long)oField->GetPrecision());
+//
+//		sf->EditInsertField(fld, &iFld, NULL, &vbretval);
+//		fld->Release();
+//    }
+//	
+///* ----------------------------------------------------------------- */
+///*		Converting of the shapes and cellvalues						 */
+///* ----------------------------------------------------------------- */
+//	while( (oFeature = oLayer->GetNextFeature()) != NULL )
+//    {
+//		OGRGeometry *oGeom;
+//        oGeom = oFeature->GetGeometryRef();
+//		if(oGeom == NULL) continue;
+//		
+//		IShape* shp =NULL;
+//		shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
+//		
+//		long numShapes;
+//		sf->get_NumShapes(&numShapes);
+//		sf->EditInsertShape(shp, &numShapes, &vbretval);
+//
+//        for(int iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
+//        {
+//            OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
+//			OGRFieldType type = oField->GetType();
+//			VARIANT val;
+//			VariantInit(&val);
+//
+//			if(type == OFTInteger)	
+//			{
+//				val.vt = VT_I4;
+//				val.lVal = oFeature->GetFieldAsInteger(iFld);
+//			}
+//            else if(type == OFTReal)
+//			{
+//				val.vt = VT_R8;
+//				val.dblVal = oFeature->GetFieldAsDouble(iFld);
+//			}
+//		    else //if (type == OFTString )
+//			{	
+//				val.vt = VT_BSTR;
+//				val.bstrVal = A2BSTR(oFeature->GetFieldAsString(iFld));	
+//			}
+//            sf->EditCellValue(iFld, numShapes, val, &vbretval);
+//			VariantClear(&val);
+//        }
+//        OGRFeature::DestroyFeature(oFeature);
+//    }
+//	
+//    OGRDataSource::DestroyDataSource(oData);
+//
+//	sf->RefreshExtents(&vbretval);
+//	return sf;
 }
 
 /***********************************************************************/
 /*			GeometryType2ShapeType()/ShapeType2GeometryType			   */
 /***********************************************************************/
 
-/*  Establish correspondance between the types of MapWinGis shapefile  
+/*  Establish correspondence between the types of MapWinGis shapefile  
  *	layer and the types of ogr layers.
  */
 ShpfileType GeometryConverter::GeometryType2ShapeType(OGRwkbGeometryType oType)
@@ -822,17 +829,23 @@ ShpfileType GeometryConverter::GeometryType2ShapeType(OGRwkbGeometryType oType)
 		case wkbPoint25D:			return SHP_POINTZ;
 		case wkbMultiPoint:			return SHP_MULTIPOINT;
 		case wkbMultiPoint25D:		return SHP_MULTIPOINTZ;
-		case wkbLineString:			return SHP_POLYLINE;
-		case wkbLineString25D:		return SHP_POLYLINEZ;
-		case wkbPolygon:			return SHP_POLYGON;
-		case wkbPolygon25D:			return SHP_POLYGONZ;
-		case wkbMultiPolygon:		return SHP_POLYGON;
-		case wkbMultiPolygon25D:	return SHP_POLYGONZ;
+		case wkbLineString:			
+		case wkbMultiLineString:
+									return SHP_POLYLINE;
+		case wkbLineString25D:		
+		case wkbMultiLineString25D:
+									return SHP_POLYLINEZ;
+		case wkbPolygon:			
+		case wkbMultiPolygon:		
+									return SHP_POLYGON;
+		case wkbPolygon25D:
+		case wkbMultiPolygon25D:	
+									return SHP_POLYGONZ;
 		case wkbNone:				return SHP_NULLSHAPE;
 	}
 	return SHP_NULLSHAPE;
 }
-OGRwkbGeometryType GeometryConverter::ShapeType2GeometryType(ShpfileType shpType)
+OGRwkbGeometryType GeometryConverter::ShapeType2GeometryType(ShpfileType shpType, bool forceMulti /*= false*/)
 {
 	switch( shpType )
 	{
@@ -842,12 +855,12 @@ OGRwkbGeometryType GeometryConverter::ShapeType2GeometryType(ShpfileType shpType
 		case SHP_MULTIPOINT:	return wkbMultiPoint;
 		case SHP_MULTIPOINTM:	return wkbMultiPoint;
 		case SHP_MULTIPOINTZ:	return wkbMultiPoint25D;
-		case SHP_POLYLINE:		return wkbLineString;
-		case SHP_POLYLINEM:		return wkbLineString;
-		case SHP_POLYLINEZ:		return wkbLineString25D;
-		case SHP_POLYGON:		return wkbPolygon;
-		case SHP_POLYGONM:		return wkbPolygon;
-		case SHP_POLYGONZ:		return wkbPolygon25D;
+		case SHP_POLYLINE:		return forceMulti ? wkbMultiLineString : wkbLineString;
+		case SHP_POLYLINEM:		return forceMulti ? wkbMultiLineString : wkbLineString;
+		case SHP_POLYLINEZ:		return forceMulti ? wkbMultiLineString25D : wkbLineString25D;
+		case SHP_POLYGON:		return forceMulti ? wkbMultiPolygon : wkbPolygon;
+		case SHP_POLYGONM:		return forceMulti ? wkbMultiPolygon : wkbPolygon;
+		case SHP_POLYGONZ:		return forceMulti ? wkbMultiPolygon25D : wkbPolygon25D;
 		case SHP_NULLSHAPE:		return wkbNone;
 	}
 	return wkbNone;
@@ -862,7 +875,6 @@ bool GeometryConverter::Write_OGR_Layer(IShapefile* sf, BSTR Filename)
 {
 	return false;
 }
-
 
 // ********************************************************************
 //		MergeGeosGeometries

@@ -558,11 +558,10 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 					}			
 					else
 					{	
-						
-
 						ShapeData* data = new ShapeData();
 						Shape->AddRef();
 						data->shape = Shape;
+						data->modified = true;
 						_shapeData.insert(_shapeData.begin() + *ShapeIndex, data);
 						
 						RegisterNewShape(Shape, *ShapeIndex);

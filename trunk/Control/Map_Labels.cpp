@@ -22,6 +22,27 @@ long CMapView::GetLineSeparationFactor(void)
 	return _lineSeparationFactor;
 }
 
+
+// *************************************************************
+//		GetOgrLayer()
+// *************************************************************
+IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
+	{
+		Layer * layer = _allLayers[LayerHandle];
+		IOgrLayer* ogr = NULL;
+		if (layer->QueryOgrLayer(&ogr))
+			return ogr;
+	}
+	else
+	{
+		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+	}
+	return NULL;
+}
+
 // *************************************************************
 //		GetShapefile()
 // *************************************************************

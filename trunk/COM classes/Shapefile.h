@@ -222,6 +222,9 @@ public:
 	STDMETHOD(get_Volatile)(VARIANT_BOOL* retval);
 	STDMETHOD(put_Volatile)(VARIANT_BOOL newVal);
 	STDMETHOD(EditUpdateShape)(long shapeIndex, IShape* shpNew, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ShapeModified)(long ShapeIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(put_ShapeModified)(long ShapeIndex, VARIANT_BOOL newVal);
+	STDMETHOD(Validate)(tkShapeValidationMode validationMode, VARIANT_BOOL selectedOnly, IShapeValidationInfo** results);
 
 private:
 	// data for point in shapefile test
@@ -463,7 +466,10 @@ public:
 	void ClearValidationList();
 	HRESULT GetValidatedShape(int shapeIndex, IShape** retVal);
 	void SetValidatedShape(int shapeIndex, ShapeValidationStatus status, IShape* shape = NULL);
-	IShapeValidationInfo* ValidateInput(IShapefile* isf, CString methodName, CString parameterName, VARIANT_BOOL selectedOnly, CString className = "Shapefile");
+	bool ValidateInput(IShapefile* isf, CString methodName, CString parameterName, 
+		VARIANT_BOOL selectedOnly, CString className = "Shapefile");
+	IShapeValidationInfo* ValidateInputCore(IShapefile* isf, CString methodName, CString parameterName,
+		VARIANT_BOOL selectedOnly, tkShapeValidationMode validationMode, CString className = "Shapefile", bool reportOnly = false);
 	IShapeValidationInfo* ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
 	bool ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
 	bool ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);

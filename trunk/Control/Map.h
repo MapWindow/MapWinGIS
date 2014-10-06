@@ -211,6 +211,9 @@ protected:
 	afx_msg ILabels* GetLayerLabels(LONG LayerHandle);
 	afx_msg void SetLayerLabels(LONG LayerHandle, ILabels* pVal);
 
+	afx_msg IOgrLayer* GetOgrLayer(LONG LayerHandle);
+	afx_msg void SetOgrLayer(LONG LayerHandle, IShapefile* pVal);
+
 	afx_msg IShapefile* GetShapefile(LONG LayerHandle);
 	afx_msg void SetShapefile(LONG LayerHandle, IShapefile* pVal);
 
@@ -548,6 +551,7 @@ protected:
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
 	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
 	afx_msg long AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
+	afx_msg long AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL visible);
 	afx_msg VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
 	afx_msg IExtents* GetKnownExtents(tkKnownExtents extents);
 	afx_msg void SetLatitude(float nNewValue);
@@ -1027,6 +1031,8 @@ private:
 	void SaveEditShape();
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
 	bool TryAddVertex(double projX, double projY);
+	int AddLayerCore(Layer* layer);
+
 #pragma endregion
 };
 

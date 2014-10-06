@@ -96,3 +96,10 @@ struct MeasurePoint
 	double x;		// in decimal degrees
 	double y;
 };
+
+struct OgrUpdateError
+{
+	int ShapeIndex;
+	CString ErrorMsg;
+	OgrUpdateError(int shapeIndex, const char* msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {	}
+};

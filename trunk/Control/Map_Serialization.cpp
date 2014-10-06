@@ -225,6 +225,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 		gp->ImportFromAutoDetect(A2BSTR(s), &vb);
 	}
 	SetGeoProjection(gp);
+	gp->Release();
 
 	if (LoadLayers)
 	{

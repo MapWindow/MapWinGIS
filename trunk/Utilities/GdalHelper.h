@@ -9,6 +9,9 @@ public:
 	GdalHelper(void) {};
 	~GdalHelper(void) {};
 
+	static GDALDataset* OpenOgrDatasetW(CStringW filenameW, bool forUpdate);
+	static GDALDataset* OpenOgrDatasetA(char* filenameUtf8, bool forUpdate);
+
 	static GDALDataset* OpenDatasetA( char* filenameUtf8 );
 	static GDALDataset* OpenDatasetA( CStringA& filenameUtf8 );
 	static GDALDataset* OpenDatasetW( CStringW filenameW );
@@ -34,4 +37,8 @@ public:
 	static void BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback);
 	static bool BuildOverviewsIfNeeded(CStringW filename, bool external = true, ICallback* callback = NULL);
 	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback);
+
+	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
+	void GetMetaData(GDALDriver* driver);
+	void DumpDriverInfo();
 };

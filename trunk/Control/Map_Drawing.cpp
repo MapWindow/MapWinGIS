@@ -610,7 +610,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 			{	
 				if (l->IsVisible(scale, zoom))
 				{
-					if(l->type == ImageLayer)
+					if(l->IsImage())
 					{
 						if (!layerBuffer) continue;
 
@@ -710,7 +710,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 							labels = NULL;
 						}
 					}
-					else if( l->type == ShapefileLayer )
+					else if( l->IsShapefile() )
 					{
 						// grab extents from shapefile in case they have changed
 						this->AdjustLayerExtents(_activeLayers[i]);
@@ -807,7 +807,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 				//  labels: for the new modes only
 				if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology || 
-					l->type == ImageLayer || FORCE_NEW_LABELS)
+					l->IsImage() || FORCE_NEW_LABELS)
 				{
 					ILabels* labels = l->get_Labels();
 					if ( labels )
@@ -1059,7 +1059,7 @@ bool CMapView::HasImages()
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( IS_VALID_PTR(l) )
 		{
-			if( l->type == ImageLayer)
+			if( l->IsImage())
 				return true;
 		}
 	}
@@ -1076,7 +1076,7 @@ bool CMapView::HasHotTracking()
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( IS_VALID_PTR(l) )
 		{
-			if( l->type == ShapefileLayer)
+			if( l->IsShapefile())
 			{
 				IShapefile* sf = NULL;
 				l->QueryShapefile(&sf);
@@ -1102,7 +1102,7 @@ bool CMapView::HasVolatileShapefiles()
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( IS_VALID_PTR(l) )
 		{
-			if( l->type == ShapefileLayer)
+			if( l->IsShapefile())
 			{
 				IShapefile* sf = NULL;
 				l->QueryShapefile(&sf);
@@ -1132,7 +1132,7 @@ void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, 
 			Layer * l = _allLayers[_activeLayers[i]];
 			if( IS_VALID_PTR(l) )
 			{
-				if( l->type == ImageLayer && l->IsVisible(scale, zoom)) 
+				if( l->IsImage() && l->IsVisible(scale, zoom)) 
 				{
 					IImage * iimg = NULL;
 					if (!l->QueryImage(&iimg)) continue;

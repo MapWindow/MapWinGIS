@@ -17,7 +17,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	if (_viewWidth == 0 || _viewHeight == 0)
 		return VARIANT_FALSE;
 
-	// TODO!!!: remve for debugging only
+	// for debugging only
 	/*if (_transformationMode != tmWgs84Complied)
 	{
 		int maxZoom, minZoom;
@@ -1831,6 +1831,7 @@ void CMapView::SetProjection(tkMapProjection projection)
 			
 			Redraw();
 		}
+		p->Release();
 	}
 }
 tkMapProjection CMapView::GetProjection()

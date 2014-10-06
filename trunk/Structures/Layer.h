@@ -57,7 +57,6 @@ public:
 	CString description;
 	LayerType type;
 	IDispatch * object;
-	//FILE * file;
 	Extent extents;
 	long flags;
 	BSTR key;
@@ -69,19 +68,67 @@ public:
 	int minVisibleZoom;
 	VARIANT_BOOL skipOnSaving;
 
+	bool IsInMemoryShapefile()
+	{
+		if (type == OgrLayerSource) return true;
+		if (type == ImageLayer) return false;
+		if (type == ShapefileLayer)
+		{
+			CComPtr<IShapefile> sf = NULL;
+			QueryShapefile(&sf);
+			if (sf)
+			{
+				tkShapefileSourceType sourceType;
+				sf->get_SourceType(&sourceType);
+				return sourceType == sstInMemory;
+			}
+			return false;
+		}
+	}
+
+	bool IsShapefile()
+	{
+		return(type == ShapefileLayer || type == OgrLayerSource);
+	}
+
+	bool IsImage()
+	{
+		return type == ImageLayer;
+	}
+
 	bool QueryShapefile(IShapefile** sf)
 	{
+		if (!this->object) return false;
 		this->object->QueryInterface(IID_IShapefile, (void**)sf);
+		if (!(*sf)) 
+		{
+			// in case of OGR, we will return underlying shapefile
+			IOgrLayer* ogr = NULL;
+			this->object->QueryInterface(IID_IOgrLayer, (void**)&ogr);
+			if (ogr)
+			{
+				ogr->GetData(sf);
+				ogr->Release();
+			}
+		}
 		return (*sf) != NULL;
 	}
 
 	bool QueryImage(IImage** img)
 	{
+		if (!this->object) return false;
 		this->object->QueryInterface(IID_IImage, (void**)img);
 		return (*img) != NULL;
 	}
 
-	// Returns the visiblity of layer considering dynamic visibility as well
+	bool QueryOgrLayer(IOgrLayer** ogrLayer)
+	{
+		if (!this->object) return false;
+		this->object->QueryInterface(IID_IOgrLayer, (void**)ogrLayer);
+		return (*ogrLayer) != NULL;
+	}
+
+	// Returns the visibility of layer considering dynamic visibility as well
 	bool IsVisible(double scale, int zoom)
 	{
 		if (this->flags & Visible)
@@ -104,7 +151,7 @@ public:
 	ILabels* get_Labels()
 	{
 		ILabels* labels = NULL;
-		if(this->type == ShapefileLayer)
+		if(this->IsShapefile())
 		{
 			IShapefile * sf = NULL;
 			if (this->QueryShapefile(&sf))
@@ -113,7 +160,7 @@ public:
 				sf->Release(); sf = NULL;
 			}
 		}
-		else if (this->type == ImageLayer)
+		else if (this->IsImage())
 		{
 			IImage * img = NULL;
 			if (this->QueryImage(&img))
@@ -131,7 +178,7 @@ public:
 	IGeoProjection* GetGeoProjection()
 	{
 		IGeoProjection* gp = NULL;
-		if(this->type == ShapefileLayer)
+		if(this->IsShapefile())
 		{
 			IShapefile * sf = NULL;
 			if (this->QueryShapefile(&sf))
@@ -141,7 +188,7 @@ public:
 				sf->Release(); sf = NULL;
 			}
 		}
-		else if (this->type == ImageLayer)
+		else if (this->IsImage())
 		{
 			IImage * img = NULL;
 			if (this->QueryImage(&img))
@@ -171,7 +218,7 @@ public:
 	// ---------------------------------------------------------
 	void UpdateExtentsFromDatasource()
 	{
-		if(this->type == ShapefileLayer)
+		if(this->IsShapefile())
 		{
 			IShapefile * sf = NULL;
 			if (this->QueryShapefile(&sf))
@@ -186,7 +233,7 @@ public:
 				sf->Release();
 			}
 		}
-		else if (this->type == ImageLayer)
+		else if (this->IsImage())
 		{
 			IImage * img = NULL;
 			if (this->QueryImage(&img))

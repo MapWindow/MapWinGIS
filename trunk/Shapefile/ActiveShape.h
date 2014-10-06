@@ -1,7 +1,7 @@
 #pragma once
 
 
-// TODO!!!: perhaps add more rendering options: transparency, color, width, style, vertex size
+// TODO: perhaps add more rendering options: transparency, color, width, style, vertex size
 class ActiveShape
 {
 public:	
@@ -21,7 +21,7 @@ public:
 		_formatLeft.SetAlignment(Gdiplus::StringAlignmentNear);
 		_formatLeft.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 
-		_mixedLinePolyMode = true;		// TODO!!!: set externally
+		_mixedLinePolyMode = true;		// TODO: set externally
 		_drawLineForPoly = true;
 		_lengthRounding = 1;
 		_areaRounding = 1;

@@ -123,11 +123,6 @@ public:
 	STDMETHOD(get_IsFrozen)(VARIANT_BOOL* retVal);
 	STDMETHOD(TryAutoDetectEpsg)(int* epsgCode, VARIANT_BOOL* retVal);
 
-	OGRSpatialReference* get_SpatialReference()
-	{
-		return m_projection;
-	}
-
 private:
 	// members
 	OGRSpatialReference* m_projection;
@@ -141,6 +136,7 @@ private:
 	bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
 public:
 	OGRCoordinateTransformation* m_transformation;
+	OGRSpatialReference* get_SpatialReference() { return m_projection; }
 	bool get_IsSame(IGeoProjection* proj)
 	{
 		VARIANT_BOOL vbretval;
@@ -150,6 +146,15 @@ public:
 	void SetIsFrozen(bool frozen)
 	{
 		m_isFrozen = frozen;
+	}
+	void InjectSpatialReference(OGRSpatialReference* sr)
+	{
+		if (m_projection)
+		{
+			m_projection->Clear();
+			OGRSpatialReference::DestroySpatialReference(m_projection);
+		}
+		m_projection = sr->Clone();
 	}
 };
 

@@ -11,6 +11,7 @@
 #include "Grid.h"
 #include "Shapefile.h"
 #include "ImageLayerInfo.h"
+#include "OgrLayer.h"
 
 // ************************************************************
 //		GetNumLayers()
@@ -186,7 +187,7 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 			_allLayers[LayerHandle]->flags = _allLayers[LayerHandle]->flags & ( 0xFFFFFFFF ^ Visible );
 
 		// we need to refresh the buffer here
-		if (_allLayers[LayerHandle]->type == ImageLayer)
+		if (_allLayers[LayerHandle]->IsImage())
 		{
 			if (_allLayers[LayerHandle]->object)
 			{
@@ -219,9 +220,17 @@ LPDISPATCH CMapView::GetGetObject(long LayerHandle)
 {
 	if( IsValidLayer(LayerHandle) )
 	{	
-		if (_allLayers[LayerHandle]->object != NULL)
-			_allLayers[LayerHandle]->object->AddRef();
-		return _allLayers[LayerHandle]->object;
+		if (_allLayers[LayerHandle]->type == OgrLayerSource)
+		{
+			// for OGR layers we return underlying shapefile to make it compliant with existing client code
+			IShapefile* sf = NULL;
+			_allLayers[LayerHandle]->QueryShapefile(&sf);
+			return (IDispatch*)sf;
+		}
+
+		IDispatch* obj = _allLayers[LayerHandle]->object;
+		if (obj != NULL) obj->AddRef();
+		return obj;
 	}
 	else
 	{	
@@ -239,11 +248,57 @@ long CMapView::AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStr
 	IDispatch* layer = NULL;
 	_fileManager->Open(A2BSTR(Filename), openStrategy, _globalCallback, &layer);
 	if (layer) {
-		return AddLayer(layer, visible);
+		long handle = AddLayer(layer, visible);
+		layer->Release();
+		return handle;
 	}
 	else {
 		return -1;
 	}
+}
+
+// ***************************************************************
+//		AddLayerFromDatabase()
+// ***************************************************************
+long CMapView::AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL visible)
+{
+	USES_CONVERSION;
+	IOgrLayer* layer = NULL;
+	_fileManager->OpenFromDatabase(A2BSTR(ConnectionString), A2BSTR(layerNameOrQuery), &layer);
+	if (layer) {
+		long handle = AddLayer(layer, visible);
+		layer->Release();
+		return handle;
+	}
+	else {
+		return -1;
+	}
+}
+
+// ***************************************************************
+//		AddLayerCore()
+// ***************************************************************
+int CMapView::AddLayerCore(Layer* layer)
+{
+	int layerHandle = -1;
+	for (size_t i = 0; i < _allLayers.size(); i++)
+	{
+		if (!_allLayers[i])  // that means we can reuse it
+		{
+			layerHandle = i;
+			_allLayers[i] = layer;
+			break;
+		}
+	}
+
+	if (layerHandle == -1)
+	{
+		layerHandle = _allLayers.size();
+		_allLayers.push_back(layer);
+	}
+
+	_activeLayers.push_back(layerHandle);
+	return layerHandle;
 }
 
 // ***************************************************************
@@ -267,8 +322,11 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 	IGrid * igrid = NULL;
 	Object->QueryInterface(IID_IGrid,(void**)&igrid);
+
+	IOgrLayer * iogr = NULL;
+	Object->QueryInterface(IID_IOgrLayer, (void**)&iogr);
 	
-	if(!igrid && !iimg && !ishp)
+	if(!igrid && !iimg && !ishp && !iogr)
 	{
 		AfxMessageBox("Error: Interface Not Supported");
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
@@ -279,40 +337,28 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 	Layer * l = NULL;
 
-	if( ishp != NULL )
+	if( ishp != NULL || iogr != NULL )
 	{
-		tkShapefileSourceType type;
-		ishp->get_SourceType(&type);
-		if (type == sstUninitialized)
+		if (ishp)
 		{
-			ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
-			LockWindow(lmUnlock);
-			return -1;
-		}
-		
-		l = new Layer();
-		l->object = ishp;
-		l->type = ShapefileLayer;
-		l->UpdateExtentsFromDatasource();
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
-		
-		for(size_t i = 0; i < _allLayers.size(); i++ )
-		{
-			if( !_allLayers[i] )  // that means we can reuse it
-			{	
-				layerHandle = i;
-				_allLayers[i] = l;
-				break;
+			tkShapefileSourceType type;
+			ishp->get_SourceType(&type);
+			if (type == sstUninitialized)
+			{
+				ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
+				LockWindow(lmUnlock);
+				return -1;
 			}
 		}
 		
-		if( layerHandle == -1)
-		{
-			layerHandle = _allLayers.size();
-			_allLayers.push_back(l);
-		}
-
-		_activeLayers.push_back(layerHandle);
+		l = new Layer();
+		if (ishp) l->object = ishp;
+		else l->object = iogr;
+		l->type = ishp ? ShapefileLayer : OgrLayerSource;
+		l->UpdateExtentsFromDatasource();
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
+		
+		layerHandle = AddLayerCore(l);
 	}
 
 	// grids aren't added directly; an image representation is created first 
@@ -389,24 +435,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
 		l->UpdateExtentsFromDatasource();
 
-		bool inserted = false;
-		for(unsigned int i = 0; i < _allLayers.size() && !inserted; i++ )
-		{	
-			if( _allLayers[i] == NULL )
-			{	
-				layerHandle = i;
-				_allLayers[i] = l;
-				inserted = true;
-			}
-		}
-		if( inserted == false )
-		{	
-			layerHandle = _allLayers.size();
-			_allLayers.push_back(l);
-		}
-
-		_activeLayers.push_back(layerHandle);
-
+		layerHandle = AddLayerCore(l);
 		
 		// try to save pixels in case image grouping is enabled
 		if (_canUseImageGrouping)
@@ -422,10 +451,13 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	CStringW symbologyName;
 	if (m_globalSettings.loadSymbologyOnAddLayer)
 	{
-		CComBSTR name = GetLayerFilename(layerHandle);
-		symbologyName = OLE2W(name);
-		symbologyName += L".mwsymb";
-		symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(name) : L"";
+		if (!l->IsInMemoryShapefile())
+		{
+			CComBSTR name = GetLayerFilename(layerHandle);
+			symbologyName = OLE2W(name);
+			symbologyName += L".mwsymb";
+			symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(name) : L"";
+		}
 	}
 
 	// do projection mismatch check
@@ -493,6 +525,7 @@ void CMapView::GrabLayerProjection( Layer* layer )
 					else
 					{
 						this->SetGeoProjection(newProj);
+						newProj->Release();
 					}
 				}
 				gp->Release();
@@ -588,15 +621,14 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 				return false;
 			}
 			
-			
-			if (layer->type == ImageLayer)
+			if (layer->IsImage())
 			{
 				ErrorMessage(tkNO_REPROJECTION_FOR_IMAGES);
 				return false;
 			}
 			
 			// let's try to do a transformation
-			if (layer->type == ShapefileLayer)
+			if (layer->IsShapefile())
 			{
 				IShapefile* sf = NULL;
 				layer->QueryShapefile(&sf);
@@ -623,7 +655,19 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 						// let's substitute original file with this one
 						// don't close the original shapefile; use may still want to interact with it
 						sf->Release();				// release the original reference
-						layer->object = sfNew;		// TODO: save it to the disk as an option
+						if (layer->type == OgrLayerSource)
+						{
+							IOgrLayer* ogr;
+							layer->QueryOgrLayer(&ogr);
+							if (ogr) {
+								((COgrLayer*)ogr)->InjectShapefile(sfNew);
+								ogr->Release();
+							}
+						}
+						else
+						{
+							layer->object = sfNew;		// TODO: save it to the disk as an option
+						}
 						layer->UpdateExtentsFromDatasource();
 						return true;
 					}
@@ -915,7 +959,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		Layer * l = _allLayers[LayerHandle];
 		CString newFile = newSrcPath;
 		VARIANT_BOOL rt;
-		if (l->type == ShapefileLayer)
+		if (l->IsShapefile())
 		{
 			IShapefile * sf = NULL;
 			//l->object->QueryInterface(IID_IShapefile, (void**)&sf);
@@ -935,7 +979,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			/*if (l->file != NULL) fclose(l->file);
 			l->file = ::fopen(newFile.GetBuffer(),"rb");*/
 		}
-		else if(l->type == ImageLayer)
+		else if(l->IsImage())
 		{
 			IImage * iimg = NULL;
 			
@@ -1160,6 +1204,10 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	{
 		layerType = ImageLayer;
 	}
+	else if (_stricmp(s, "OgrLayer") == 0)
+	{
+		layerType = OgrLayerSource;
+	}
 	
 	if (layerType == ShapefileLayer)
 	{
@@ -1213,6 +1261,19 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 				((CImageClass*)img)->DeserializeCore(nodeImage);
 			}
 		}
+	}
+	else if (layerType == OgrLayerSource)
+	{
+		IOgrLayer* layer = NULL;
+		GetUtils()->CreateInstance(idOgrLayer, (IDispatch**)&layer);
+
+		CPLXMLNode* nodeOgrLayer = CPLGetXMLNode(node, "OgrLayerClass");
+		if (nodeOgrLayer)
+		{
+			((COgrLayer*)layer)->DeserializeCore(nodeOgrLayer);
+			AddLayer(layer, (BOOL)visible);
+		}
+		layer->Release();
 	}
 	else
 	{
@@ -1297,6 +1358,9 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 		{
 			switch (layer->type)
 			{
+				case OgrLayerSource:
+					s = "OgrLayer";
+					break;
 				case ImageLayer: 
 					s = "Image";
 					break;
@@ -1333,38 +1397,51 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			if (layer->maxVisibleZoom != 18)
 				Utility::CPLCreateXMLAttributeAndValue( psLayer, "MaxVisibleZoom", CPLString().Printf("%d", layer->maxVisibleZoom));
 
-			// retrieving filename
-			IImage* img = NULL;
-			IShapefile* sf = NULL;
-			
-			layer->QueryShapefile(&sf);
-			layer->QueryImage(&img);
-
-			if (sf || img)
+			IOgrLayer* ogr = NULL;
+			layer->QueryOgrLayer(&ogr);
+			if (ogr)
 			{
-				CPLXMLNode* node = NULL;
-
-				if (sf)
-				{
-					node = ((CShapefile*)sf)->SerializeCore(VARIANT_TRUE, "ShapefileClass");
-					sf->Release();
-				}
-				else
-				{
-					BSTR bstr;
-					img->get_SourceFilename(&bstr);
-					CStringW sourceName = Utility::GetNameFromPath(OLE2W(bstr));
-					Utility::CPLCreateXMLAttributeAndValue( psLayer, "SourceName", sourceName);
-
-					node = ((CImageClass*)img)->SerializeCore(VARIANT_FALSE, "ImageClass");
-					
-					img->Release();
-				}
-				
-				Utility::CPLCreateXMLAttributeAndValue( psLayer, "Filename", Filename);
-				if (node)
+				CPLXMLNode* node = ((COgrLayer*)ogr)->SerializeCore("OgrLayerClass");
+				ogr->Release();
+				if (node != NULL)
 				{
 					CPLAddXMLChild(psLayer, node);
+				}
+			}
+			else
+			{
+				// retrieving filename
+				IImage* img = NULL;
+				IShapefile* sf = NULL;
+				layer->QueryShapefile(&sf);
+				layer->QueryImage(&img);
+
+				if (sf || img)
+				{
+					CPLXMLNode* node = NULL;
+
+					if (sf)
+					{
+						node = ((CShapefile*)sf)->SerializeCore(VARIANT_TRUE, "ShapefileClass");
+						sf->Release();
+					}
+					else
+					{
+						BSTR bstr;
+						img->get_SourceFilename(&bstr);
+						CStringW sourceName = Utility::GetNameFromPath(OLE2W(bstr));
+						Utility::CPLCreateXMLAttributeAndValue(psLayer, "SourceName", sourceName);
+
+						node = ((CImageClass*)img)->SerializeCore(VARIANT_FALSE, "ImageClass");
+
+						img->Release();
+					}
+
+					Utility::CPLCreateXMLAttributeAndValue(psLayer, "Filename", Filename);
+					if (node)
+					{
+						CPLAddXMLChild(psLayer, node);
+					}
 				}
 			}
 		}
@@ -1504,7 +1581,7 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 }
 
 // *********************************************************
-//		get_LayerName()
+//		GetLayerFilename()
 // *********************************************************
 BSTR CMapView::GetLayerFilename(LONG layerHandle)
 {
@@ -1521,7 +1598,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 		// extracting object
 		CComBSTR filename;
 		Layer* layer = _allLayers[layerHandle];
-		if (layer)
+		if (layer && (layer->type == ShapefileLayer || layer->type == ImageLayer) )
 		{
 			IShapefile* sf = NULL;
 			IImage* img = NULL;
@@ -1535,10 +1612,10 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 				sf->get_Filename(&layerName);
 				sf->Release();
 
-				if (shpSource != sstDiskBased)
+				/*if (shpSource != sstDiskBased)
 				{
 					this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-				}
+				}*/
 			}
 			else if (img)
 			{
@@ -1547,15 +1624,15 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 				img->get_Filename(&layerName);
 				img->Release();
 				
-				if (imgSource != istDiskBased && imgSource != istGDALBased)
+				/*if (imgSource != istDiskBased && imgSource != istGDALBased)
 				{
-					this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-				}
-			}
-			else
-			{
 				this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
+				}*/
 			}
+			/*else
+			{
+			this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
+			}*/
 		}
 	}
 	return layerName;

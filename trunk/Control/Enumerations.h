@@ -11,7 +11,8 @@ enum ShapeLayerFlags
 enum LayerType
 {	ImageLayer,
 	ShapefileLayer,
-	UndefinedLayer
+	UndefinedLayer,
+	OgrLayerSource,
 };
 enum LayerFlags
 {	Visible = 1

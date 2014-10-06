@@ -118,7 +118,6 @@ void CShapefileCategory::put_underlyingOptions(CDrawingOptionsEx* newVal)
 // ***************************************************************
 //		get_Count()
 // ***************************************************************
-// TODO!!!: implement
 // Returns number of shapes that fall into current category
 //STDMETHODIMP CShapefileCategory::get_Count(LONG* retval)
 //{

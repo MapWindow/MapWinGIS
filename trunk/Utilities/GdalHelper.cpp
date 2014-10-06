@@ -1,5 +1,31 @@
 #include "stdafx.h"
 #include "GdalHelper.h"
+#include "ogrsf_frmts.h"
+
+// **************************************************************
+//		OpenOgrDatasetA
+// **************************************************************
+GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
+{
+	m_globalSettings.SetGdalUtf8(true);
+
+	GDALAllRegister();
+	int method = GDAL_OF_VECTOR;
+	if (forUpdate) method |= GDAL_OF_UPDATE;
+	GDALDataset* dt = (GDALDataset *)GDALOpenEx(filenameUtf8, method, NULL, NULL, NULL);
+	m_globalSettings.SetGdalUtf8(false);
+	GDALAccess update = (method & GDAL_OF_UPDATE) ? GA_Update : GA_ReadOnly;		// TODO: remove
+	return dt;
+}
+
+// **************************************************************
+//		OpenOgrDatasetW
+// **************************************************************
+GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate)
+{
+	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
+	return OpenOgrDatasetA(filenameA.GetBuffer(), forUpdate);
+}
 
 // **************************************************************
 //		GdalOpen
@@ -340,4 +366,80 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 		Utility::DisplayProgressCompleted(callback);
 	}
 	return false;
+}
+
+// *******************************************************
+//		GetMetadataNameString()
+// *******************************************************
+CStringA GdalHelper::GetMetadataNameString(tkGdalDriverMetadata metadata)
+{
+	switch (metadata)
+	{
+		case dmdLONGNAME: return "DMD_LONGNAME";
+		case dmdHELPTOPIC: return "DMD_HELPTOPIC";
+		case dmdMIMETYPE: return "DMD_MIMETYPE";
+		case dmdEXTENSION: return "DMD_EXTENSION";
+		case dmdEXTENSIONS: return "DMD_EXTENSIONS";
+		case dmdCREATIONOPTIONLIST: return "DMD_CREATIONOPTIONLIST";
+		case dmdOPENOPTIONLIST: return "DMD_OPENOPTIONLIST";
+		case dmdCREATIONDATATYPES: return "DMD_CREATIONDATATYPES";
+		case dmdSUBDATASETS: return "DMD_SUBDATASETS";
+		case dmdOPEN: return       "DCAP_OPEN";
+		case dmdCREATE: return     "DCAP_CREATE";
+		case dmdCREATECOPY: return "DCAP_CREATECOPY";
+		case dmdVIRTUALIO: return  "DCAP_VIRTUALIO";
+		case dmdLAYER_CREATIONOPTIONLIST: return  "DS_LAYER_CREATIONOPTIONLIST";
+		case dmdOGR_DRIVER: return  "OGR_DRIVER";
+	}
+	return "";
+}
+
+// ******************************************************
+//		DumpDriverInfo()
+// ******************************************************
+void GdalHelper::DumpDriverInfo()
+{
+	GDALDriverManager* manager = GetGDALDriverManager();
+	manager->AutoLoadDrivers();
+	int count = manager->GetDriverCount();
+	for (int i = 0; i < count; i++)
+	{
+		GDALDriver* driver = manager->GetDriver(i);
+		OGRSFDriver* ogrDriver = dynamic_cast<OGRSFDriver*>(driver);
+		CString description = driver->GetDescription();
+		if (ogrDriver != NULL)
+		{
+			Debug::WriteLine("OGR Driver: %s", description);
+		}
+		else
+		{
+			Debug::WriteLine("GDAL Driver: %s", description);
+		}
+		GetMetaData(driver);
+	}
+}
+
+// **************************************************
+//		GetMetaData()
+// **************************************************
+void GdalHelper::GetMetaData(GDALDriver* driver)
+{
+	if (driver)
+	{
+		Debug::WriteLine("Dumping metadata domain list:");
+		char** list = driver->GetMetadataDomainList();
+		int count = CSLCount(list);
+		for (int i = 0; i < count; i++)
+		{
+			Debug::WriteLine(CSLGetField(list, i));
+		}
+
+		Debug::WriteLine("Dumping metadata:");
+		list = driver->GetMetadata();
+		count = CSLCount(list);
+		for (int i = 0; i < count; i++)
+		{
+			Debug::WriteLine(CSLGetField(list, i));
+		}
+	}
 }

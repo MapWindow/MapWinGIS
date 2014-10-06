@@ -19,21 +19,19 @@ using namespace std;
 class GeometryConverter
 {
 	public:
-		//static void AddPoints(CShape* shp, OGRGeometry* geom, int startPointIndex, int endPointIndex);
 		static IShape * GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
 		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, OGRwkbGeometryType oForceType = wkbNone);
-		static OGRGeometry* ShapeToGeometry(IShape* shp);
+		static OGRGeometry* ShapeToGeometry(IShape* shp, OGRwkbGeometryType forceGeometryType = wkbNone);
 		static IShapefile* Read_OGR_Layer(BSTR Filename, ShpfileType shpType = SHP_NULLSHAPE);
 		static bool Write_OGR_Layer(IShapefile* sf, BSTR Filename);
 		static bool GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM);
 		static GEOSGeom Shape2GEOSGeom(IShape* shp);
-		
 		static bool MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>* results);
 		static GEOSGeometry* MergeGeosGeometries( std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput = true );
 		static GEOSGeometry* SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance);
-	private:
 		static ShpfileType GeometryType2ShapeType(OGRwkbGeometryType oType);
-		static OGRwkbGeometryType ShapeType2GeometryType(ShpfileType shpType);
+		static OGRwkbGeometryType ShapeType2GeometryType(ShpfileType shpType, bool forceMulti = false);
+	private:
 };
 
 

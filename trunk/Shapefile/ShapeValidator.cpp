@@ -8,7 +8,7 @@
 // ***************************************************************
 IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidationMode validationMode, 
 			tkShapeValidationType validationType, CString className, CString methodName, CString parameterName,
-			ICallback* callback, BSTR& key, bool selectedOnly, bool editingInPlace)
+			ICallback* callback, BSTR& key, bool selectedOnly, bool reportOnly)
 {
 	if (!isf)
 		return NULL;
@@ -47,7 +47,10 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 		info->fixedCount = 0;
 		info->skippedCount = 0;
 
-		bool canEdit = validationType == tkShapeValidationType::svtOutput || editingInPlace;
+		VARIANT_BOOL canEdit;
+		isf->get_EditingShapes(&canEdit);
+		if (validationType == svtInput)
+			canEdit = VARIANT_FALSE;
 		if (!canEdit)
 		{
 			sf->CreateValidationList(selectedOnly);
@@ -75,7 +78,12 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 			{
 				info->wereInvalidCount++;
 
-				if (validationMode == AbortOnErrors)	// retreat on the first error
+				if (reportOnly)
+				{
+					info->stillInvalidCount++;
+					shp->Release();
+				}
+				else if (validationMode == AbortOnErrors)	// retreat on the first error
 				{
 					info->validationStatus = tkShapeValidationStatus::OperationAborted;
 					shp->Release();

@@ -112,7 +112,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkINVALID_PARAMETERS_ARRAY:
 			return "Failed to read array of input parameters";
 
-			//201 - 400 = tkshp
+			//201 - 300 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
 			return "Unsupported Shapefile Type";
 		case tkINCOMPATIBLE_SHAPEFILE_TYPE:
@@ -176,7 +176,39 @@ const char * ErrorMsg( long ErrorCode )
 		case tkINMEMORY_SHAPEFILE_EXPECTED:
 			return "Operation is valid for in-memory shapefiles only.";
 		case tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE:
-			return "Shape contains too few points for specifeid shape type.";
+			return "Shape contains too few points for specified shape type.";
+		case tkNO_FIXING_IN_DISK_MODE:
+			return "Fixing of shapes for Shapefile.Validate method is available in edit mode only. Mode was switched to ReportWithoutFixing.";
+		
+		//301-400 = ogr
+		case tkFAILED_TO_OPEN_OGR_LAYER:
+			return "Failed to open OGR layer.";
+		case tkOGR_DATASOURCE_UNINITIALIZED:
+			return "OGR datasource wasn't initialized.";
+		case tkOGR_LAYER_UNINITIALIZED:
+			return "OGR layer wasn't initialized.";
+		case tkINVALID_LAYER_NAME:
+			return "Invalid layer name.";
+		case tkFAILED_TO_CREATE_OGR_LAYER:
+			return "Failed to create OGR layer.";
+		case tkUNEXPECTED_OGR_SOURCE_TYPE:
+			return "Operation isn't supported for layers of such source type.";
+		case tkOGR_QUERY_FAILED:
+			return "OGR SQL query has failed.";
+		case tkFAILED_TO_OPEN_OGR_DATASOURCE:
+			return "Failed to open OGR datasource.";
+		case tkNO_OGR_DATA_WAS_LOADED:
+			return "No data was loaded for OGR layer.";
+		case tkOGR_NO_MODIFICATIONS:
+			return "OGR layer has no local modifications to be saved.";
+		case tkFID_COLUMN_NOT_FOUND:
+			return "Feature ID (FID) column wasn't found.";
+		case tkCANT_SAVE_REPROJECTED_GEOMETRIES:
+			return "Geometry data was reprojected and can't be saved to the source.";
+		case tkOGR_RANDOM_WRITE_NOT_SUPPORTED:
+			return "Random write operations aren't supported for this layer. It's either layer was opened without forUpdate flag or driver doesn't support it at all (check GDAL docs).";
+		case tkOGR_ABORTED_INVALID_SHAPES:
+			return "Operation aborted because of the invalid shapes. Consider changing shape validation mode.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:
@@ -206,7 +238,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkSDTS_BAD_FILE_HEADER:
 			return "SDTS bad file header";
 		case tkGDAL_GRID_NOT_OPENED:
-			return "A mulitband grid wasn't opened";
+			return "A multitband grid wasn't opened";
 		case tkCANT_DISPLAY_WO_PROXY:
 			return "Can't display grid without proxy. Check CanDisplayWithoutProxy for the reason. Set Grid.PreferedDisplayMode to gpmAuto to avoid the error.";
 		case tkFAILED_TO_SAVE_GRID:

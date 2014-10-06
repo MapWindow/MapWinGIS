@@ -4594,6 +4594,12 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idMeasuring:
 			CoCreateInstance( CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&val );
 			break;
+		case tkInterface::idOgrDatasource:
+			CoCreateInstance(CLSID_OgrDatasource, NULL, CLSCTX_INPROC_SERVER, IID_IOgrDatasource, (void**)&val);
+			break;
+		case tkInterface::idOgrLayer:
+			CoCreateInstance(CLSID_OgrLayer, NULL, CLSCTX_INPROC_SERVER, IID_IOgrLayer, (void**)&val);
+			break;
 		case tkInterface::idPoint:
 			CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&val );
 			break;

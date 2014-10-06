@@ -45,6 +45,7 @@ struct ShapeData
 		handle = -1;
 		size = 0;
 		
+		modified = false;
 		selected = false;
 		isVisible = false;
 		visible = true;
@@ -91,7 +92,7 @@ struct ShapeData
 	CChartInfo* chart;
 	GEOSGeom geosGeom;		// caches geometry
 	
-	IShape* fixedShape;				// will be used as substitute of original in input shapefil
+	IShape* fixedShape;				// will be used as substitute of original in input shapefile
 	ShapeValidationStatus status;
 	
 	int handle;				// the unique handle of shape, assigned in the increasing order
@@ -102,5 +103,6 @@ struct ShapeData
 	bool isVisible;			// because of the visibility expression 		
 	bool visible;			// set per shape explicitly
 	double rotation;
+	bool modified;
 };
 

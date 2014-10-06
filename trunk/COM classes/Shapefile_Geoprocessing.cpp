@@ -552,7 +552,13 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	// ----------------------------------------------
 	//   Creating output
 	// ----------------------------------------------
-	CloneNoFields(sf);
+	ShpfileType type = _shpfiletype;
+	//TODO!!!: set multipoint 
+	/*if (type == SHP_POINT) type = SHP_MULTIPOINT;
+	if (type == SHP_POINTZ) type = SHP_MULTIPOINTZ;
+	if (type == SHP_POINTM) type = SHP_MULTIPOINTM;*/
+	
+	CloneNoFields(sf, type);
 	CloneField(this, *sf, FieldIndex, -1);
 	
 	// -------------------------------------------

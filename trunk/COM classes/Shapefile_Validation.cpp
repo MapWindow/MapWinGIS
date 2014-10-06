@@ -5,11 +5,49 @@
 #include "ShapeValidationInfo.h"
 
 #pragma region Validation
+
+// *****************************************************************
+//		Validate()
+// *****************************************************************
+STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_BOOL selectedOnly, IShapeValidationInfo** results)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*results = NULL;
+
+	if (validationMode == NoValidation)
+		return S_FALSE;
+
+	VARIANT_BOOL editing;
+	get_EditingShapes(&editing);
+	if (!editing)
+	{
+		ErrorMessage(tkNO_FIXING_IN_DISK_MODE);
+		*results = ValidateInputCore(this, "Validate", "this", selectedOnly, validationMode, "Shapefile", true);
+	}
+	else
+	{
+		*results = ValidateInputCore(this, "Validate", "this", selectedOnly, validationMode);
+	}
+	return S_OK;
+}
+
 // ********************************************************************
 //		ValidateInput()
 // ********************************************************************
-IShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodName, 
-												CString parameterName, VARIANT_BOOL selectedOnly, CString className)
+bool CShapefile::ValidateInput(IShapefile* isf, CString methodName, 
+	CString parameterName, VARIANT_BOOL selectedOnly, CString className /*= "Shapefile"*/)
+{
+	IShapeValidationInfo* info = ValidateInputCore(isf, methodName, parameterName, selectedOnly, m_globalSettings.inputValidation, className);
+	bool result = info != NULL;
+	if (info) info->Release();
+	return result;
+}
+
+// ********************************************************************
+//		ValidateInputCore()
+// ********************************************************************
+IShapeValidationInfo* CShapefile::ValidateInputCore(IShapefile* isf, CString methodName, 
+	CString parameterName, VARIANT_BOOL selectedOnly, tkShapeValidationMode validationMode, CString className, bool reportOnly)
 {
 	tkShapefileSourceType sourceType;
 	if (isf->get_SourceType(&sourceType))
@@ -34,8 +72,8 @@ IShapeValidationInfo* CShapefile::ValidateInput(IShapefile* isf, CString methodN
 		return NULL;
 	}
 	
-	IShapeValidationInfo* iinfo = ShapeValidator::Validate(isf, m_globalSettings.inputValidation, svtInput, 
-			className, methodName, parameterName, globalCallback, key, selectedOnly ? true: false);
+	IShapeValidationInfo* iinfo = ShapeValidator::Validate(isf, validationMode, svtInput,
+			className, methodName, parameterName, globalCallback, key, selectedOnly ? true: false, reportOnly);
 	
 	CShapefile* sf = (CShapefile*)isf;
 	sf->SetValidationInfo(iinfo, svtInput);
@@ -141,6 +179,7 @@ void CShapefile::ClearValidationList()
 			_shapeData[i]->fixedShape->Release();
 			_shapeData[i]->fixedShape = NULL;
 		}
+		_shapeData[i]->status = Original;
 	}
 }
 

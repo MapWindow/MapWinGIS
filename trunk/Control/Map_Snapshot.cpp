@@ -58,13 +58,13 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 		top = l->extents.top;
 		bottom = l->extents.bottom;
 
-		if( l->type == ShapefileLayer )
+		if( l->IsShapefile() )
 		{
 			double ar = (right-left)/(top-bottom);
 			Width = (long) (pWidth == 0 ? ((right - left) * Zoom) : pWidth);
 			Height = (long)((double)pWidth / ar);
 		}
-		else if(l->type == ImageLayer)
+		else if(l->IsImage())
 		{
 			Width = (long)(right - left);
 			Height = (long)(top - bottom);
