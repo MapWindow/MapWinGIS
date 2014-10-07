@@ -25,7 +25,7 @@ namespace MapWinGIS
     /// img [ label="Image" URL="\ref Image"];
     /// 
     /// edge [dir = "none", dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
-    /// img -> lbs [ URL="\ref Shapefile.Labels()", tooltip = "Shapefile.Labels()", headlabel = "   1"];
+    /// img -> lbs [ URL="\ref Image.Labels()", tooltip = "Image.Labels()", headlabel = "   1"];
     /// map -> img [URL="\ref AxMap.get_Image()", tooltip = "AxMap.get_Image()", headlabel = "   n"]
     /// }
     /// \enddot

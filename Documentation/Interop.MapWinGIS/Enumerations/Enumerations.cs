@@ -2135,6 +2135,136 @@ namespace MapWinGIS
         tkmCCITTFAX4 = 6,
         tkmNONE = 7,
     }
+
+    /// <summary>
+    /// Defines possible subjects of OgrLayer.SaveChanges method.
+    /// </summary>
+    /// \new492b Added in version 4.9.2
+    public enum tkOgrSaveType
+    {
+        /// <summary>
+        /// Only shapes from associated in-memory shapefile will be saved.
+        /// </summary>
+        ostGeometryOnly = 0,
+        /// <summary>
+        /// Only values from attribute table of associated in-memory shapefile will be saved.
+        /// </summary>
+        ostAttributesOnly = 1,
+        /// <summary>
+        /// Both shapes and attributes of associated in-memory shapefile will be saved.
+        /// </summary>
+        ostSaveAll = 2,
+    }
+
+    /// <summary>
+    /// List of capabilities that might or might not be supported by particular OGR driver.
+    /// </summary>
+    /// <remarks>See description <a href="http://www.gdal.org/classOGRLayer.html#aeedbda1a62f9b89b8e5f24332cf22286">here</a></remarks>.
+    /// \new492b Added in version 4.9.2
+    public enum tkOgrLayerCapability
+    {
+        olcRandomRead = 0,
+        olcSequentialWrite = 1,
+        olcRandomWrite = 2,
+        olcFastSpatialFilter = 3,
+        olcFastFeatureCount = 4,
+        olcFastGetExtent = 5,
+        olcCreateField = 6,
+        olcDeleteField = 7,
+        olcReorderFields = 8,
+        olcAlterFieldDefn = 9,
+        olcTransactions = 10,
+        olcDeleteFeature = 11,
+        olcFastSetNextByIndex = 12,
+        olcStringsAsUTF8 = 13,
+        olcIgnoreFields = 14,
+        olcCreateGeomField = 15,
+    }
+
+    /// <summary>
+    /// Possible results for OgrLayer.SaveChanges operation.
+    /// </summary>
+    /// \new492b Added in version 4.9.2
+    public enum tkOgrSaveResult
+    {
+        /// <summary>
+        /// No changes were found, i.e. there is no shape records with Shapefile.get_ShapeModified property set to true
+        /// in the underlying shapefile.
+        /// </summary>
+        osrNoChanges = 0,
+        /// <summary>
+        /// All shapes marked as modified were successfully saved.
+        /// </summary>
+        osrAllSaved = 1,
+        /// <summary>
+        /// Some of the shapes marked as modified were successfully saved, but for some the operation has failed.
+        /// </summary>
+        osrSomeSaved = 2,
+        /// <summary>
+        /// None of the shapes marked as modified were saved.
+        /// </summary>
+        osrNoneSaved = 3,
+    }
+    
+    /// <summary>
+    /// Possible metadata items which can be associated with particular GDAL driver.
+    /// </summary>
+    /// \new492b Added in version 4.9.2
+    public enum tkGdalDriverMetadata
+    {
+        dmdLONGNAME = 0,
+        dmdHELPTOPIC = 1,
+        dmdMIMETYPE = 2,
+        dmdEXTENSION = 3,
+        dmdEXTENSIONS = 4,
+        dmdCREATIONOPTIONLIST = 5,
+        dmdOPENOPTIONLIST = 6,
+        dmdCREATIONDATATYPES = 7,
+        dmdSUBDATASETS = 8,
+        dmdOPEN = 9,
+        dmdCREATE = 10,
+        dmdCREATECOPY = 11,
+        dmdVIRTUALIO = 12,
+        dmdLAYER_CREATIONOPTIONLIST = 13,
+        dmdOGR_DRIVER = 14,
+    }
+
+    /// <summary>
+    /// List of capabilities that might or might not be supported by particular OGR datasource.
+    /// </summary>
+    /// \new492b Added in version 4.9.2
+    public enum tkOgrDSCapability
+    {
+        odcCreateLayer = 0,
+        odcDeleteLayer = 1,
+        odcCreateGeomFieldAfterCreateLayer = 2,
+        odcCreateDataSource = 3,
+        odcDeleteDataSource = 4,
+    }
+
+    /// <summary>
+    /// Possible source types for instance of OgrLayer class.
+    /// </summary>
+    /// \new492b Added in version 4.9.2
+    public enum tkOgrSourceType
+    {
+        /// <summary>
+        /// The instance isn't bound to any datasource, i.e. it's empty. The default state for any newly created instance.
+        /// </summary>
+        ogrUninitialized = 0,
+        /// <summary>
+        /// The instance is bound to particular file-based format.
+        /// </summary>
+        ogrFile = 1,
+        /// <summary>
+        /// The instance is bound to a table of a spatial database.
+        /// </summary>
+        ogrDbTable = 2,
+        /// <summary>
+        /// The instance holds results of SQL query.
+        /// </summary>
+        ogrQuery = 3,
+    }
 #if nsp
 }
 #endif

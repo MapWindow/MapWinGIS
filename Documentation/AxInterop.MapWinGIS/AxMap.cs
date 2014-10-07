@@ -2005,12 +2005,26 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
+        /// Adds a layer from spatial database accessed via GDAL/OGR drivers.
+        /// </summary>
+        /// <remarks>This method will search if there is a layer with specified name in the datasource,
+        /// and if so will open it. Otherwise it will run OgrDatasource.RunQuery method with provided
+        /// layerNameOrQuery argument. 
+        /// Additional information on failure can be obtained through AxMap.FileManager property.</remarks>
+        /// <param name="connectionString">Connection string. See details for particular formats <a href ="http://www.gdal.org/ogr_formats.html">here</a>.</param>
+        /// <param name="layerNameOrQuery">Name of the layer (i.e. database table) or SQL query.</param>
+        /// <param name="visible">A value indicating whether a new layer will be visible.</param>
+        /// <returns>Handle of the newly added layer or -1 on failure.</returns>
+        /// \new492b Added in version 4.9.2
+        public int AddLayerFromDatabase(string connectionString, string layerNameOrQuery, bool visible);
+
+        /// <summary>
         /// Adds layer from the specified datasource.
         /// </summary>
+        /// <remarks>Additional information on failure can be obtained through AxMap.FileManager property.</remarks>
         /// <param name="filename">Filename of datasource</param>
         /// <param name="openStrategy">Open strategy (fosAutoDetect the default recommended value).</param>
         /// <param name="visible">A value indicating whether a new layer will be visible.</param>
-        /// <remarks>Additional information on failure can be obtained through AxMap.FileManager property.</remarks>
         /// <returns>Handle of the newly added layer or -1 on failure.</returns>
         /// \new491 Added in version 4.9.1
         public int AddLayerFromFilename(string filename, tkFileOpenStrategy openStrategy, bool visible)
@@ -2147,16 +2161,6 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Returns the layer object with the given handle. The object could be a Shapefile, Grid, or Image object.
-        /// </summary>
-        /// <param name="LayerHandle">The handle of the layer to be retrieved.</param>
-        /// <returns>A Shapefile, Grid, or Image object.</returns>
-        public object get_GetObject(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Gets image object associated with the layer.
         /// </summary>
         /// <remarks>This method along with AxMap.get_Shapefile() can used to substitute AxMap.get_GetObject().</remarks>
@@ -2203,6 +2207,26 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Returns the layer object with the given handle. The object could be a Shapefile, Grid, or Image object.
+        /// </summary>
+        /// <remarks>For OGR layers this method will return underlying shapefile from OgrLayer.GetData(). 
+        /// Use AxMap.get_OgrLayer to access instance of OgrLayer itself.</remarks>
+        /// <param name="LayerHandle">The handle of the layer to be retrieved.</param>
+        /// <returns>A Shapefile, Grid, or Image object.</returns>
+        public object get_GetObject(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets instance of OGR layer object associated with the specified layer.
+        /// </summary>
+        /// <param name="layerHandle">The handle of the layer.</param>
+        /// <returns>OGR layer or null in case of invalid layer index or wrong layer type.</returns>
+        /// \new492b Added in version 4.9.2
+        public OgrLayer get_OgrLayer(int layerHandle);
 
         /// @}
         #endregion

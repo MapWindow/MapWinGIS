@@ -11,7 +11,8 @@ digraph map_actions {
  sf     [label="Shapefile" URL="\ref Shapefile"];
  img    [label="Image" URL="\ref Image"];	
  grid    [label="Grid" URL="\ref Grid"];	
-
+ ogrds    [label="OgrDatasource" URL="\ref OgrDatasource"];	
+ 
  layer  [style = invis] 
 
  node   [shape= "tab", color = "gray", fillcolor = lightblue, width = 0.3, height = 0.3, color = gray]
@@ -41,6 +42,8 @@ digraph map_actions {
  gr_header [label="Grid header" URL="\ref GridHeader"];
  gr_scheme [label="Grid color \nscheme" URL="\ref GridColorScheme"];
 
+ ogr    [label="OgrLayer" URL="\ref OgrLayer"];	
+ 
  lb_gen [label="Generate" URL="\ref labels_management"];
  lb_cat [label="Categories" URL="\ref labels_categories"];
  lb_visual [label="Visualization" URL="\ref labels_visualization"];
@@ -60,13 +63,16 @@ digraph map_actions {
  sf -> sf_mng -> gpr -> attr -> sfviz -> sfsel -> charts;
  img -> img_open -> img_gdal -> img_data -> img_visual -> img_position;
  grid -> gr_header -> gr_scheme;
+ ogrds -> ogr;
  
  edge [constraint = false]
  sf -> img;
  img -> grid;
+ grid -> ogrds;
 
  edge [style = invis, constraint = true]
  layer -> sf;
  layer -> img;
  layer -> grid;
+ layer -> ogrds;
 }

@@ -329,9 +329,23 @@ namespace MapWinGIS
         /// Determines optimal open strategy for datasource.
         /// </summary>
         /// <param name="Filename">Filename of datasource.</param>
-       
         /// <returns>The optimal strategy to open datasource.</returns>
         public tkFileOpenStrategy get_OpenStrategy(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Opens a layer or runs a query against OGR spatial database.
+        /// </summary>
+        /// <remarks>This method will search if there is a layer with specified name in the datasource,
+        /// and if so will open it. Otherwise it will run OgrDatasource.RunQuery method with provided
+        /// layerNameOrQuery argument.</remarks>
+        /// <param name="connectionString">Connection string. See details for particular formats <a href ="http://www.gdal.org/ogr_formats.html">here</a>.</param>
+        /// <param name="layerNameOrQuery">Name of the layer (i.e. database table) or SQL query.</param>
+        /// <returns>Opened layer or null on failure.</returns>
+        /// \new492b Added in version 4.9.2
+        public OgrLayer OpenFromDatabase(string connectionString, string layerNameOrQuery)
         {
             throw new NotImplementedException();
         }

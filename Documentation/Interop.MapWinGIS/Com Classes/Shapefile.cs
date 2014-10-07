@@ -1864,6 +1864,37 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets a value indicating whether particular shape was modified after shapefile was opened.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>The value of modified flag.</returns>
+        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
+        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
+        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
+        /// must be set in the client code.</remarks>
+        /// \new492b Added in version 4.9.2 
+        public bool get_ShapeModified(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets a value indicating whether particular shape was modified after shapefile was opened.
+        /// </summary>
+        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
+        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
+        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
+        /// must be set in the client code.</remarks>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="newVal">New value of modified flag.</param>
+        /// <returns>New value of modified flag.</returns>
+        /// \new492b Added in version 4.9.2 
+        public void set_ShapeModified(int ShapeIndex, bool newVal)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

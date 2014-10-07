@@ -207,7 +207,7 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "new490=\xrefitem newpage490 \"New API 4.9.0\" \"New API 4.9.0\"" \
                          "new491=\xrefitem newpage491 \"New API 4.9.1\" \"New API 4.9.1\"" \
                          "new492=\xrefitem newpage492 \"New API 4.9.2\" \"New API 4.9.2\"" \
-                         "new493=\xrefitem newpage493 \"New API 4.9.3\" \"New API 4.9.3\""
+                         "new492b=\xrefitem newpage492b \"New API 4.9.2\" \"New API 4.9.2b\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only). 
 # A mapping has the form "name=value". For example adding 
@@ -928,7 +928,7 @@ HTML_HEADER            = header.html
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = 
+HTML_FOOTER            = footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -1760,7 +1760,7 @@ INTERACTIVE_SVG        = NO
 # The tag DOT_PATH can be used to specify the path where the dot tool can be 
 # found. If left blank, it is assumed the dot tool can be found in the path.
 
-DOT_PATH               = "c:/Program Files/Graphviz 2.28/bin"
+DOT_PATH               = "c:/Program Files (x86)/Graphviz 2.38/bin"
 
 # The DOTFILE_DIRS tag can be used to specify one or more directories that 
 # contain dot files that are included in the documentation (see the 

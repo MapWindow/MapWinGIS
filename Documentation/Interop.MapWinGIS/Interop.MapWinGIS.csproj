@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MapWinGIS</RootNamespace>
     <AssemblyName>Interop.MapWinGIS</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <StartupObject>
     </StartupObject>
@@ -87,6 +87,7 @@
     <Compile Include="Com Classes\ColorScheme.cs" />
     <Compile Include="Com Classes\ESRIGridManager.cs" />
     <Compile Include="Com Classes\Extents.cs" />
+    <Compile Include="Com Classes\OgrLayer.cs" />
     <Compile Include="Com Classes\ShapefileValidationInfo.cs" />
     <Compile Include="Com Classes\FieldStatOperations.cs" />
     <Compile Include="Com Classes\FileManager.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Com Classes\Vector.cs" />
     <Compile Include="Enumerations\Known extents.cs" />
     <Compile Include="Enumerations\Coordinate systems.cs" />
+    <Compile Include="Com Classes\OgrDatasource.cs" />
     <Compile Include="Related Pages\Version history.cs" />
     <Compile Include="Related Pages\Getting started.cs" />
     <Compile Include="Related Pages\examples_list.cs" />

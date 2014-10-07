@@ -10,6 +10,7 @@
 /// - <a href="class_file_manager.html#details" class="bold">File manager</a>
 /// - <a href="class_shapefile.html#details" class="bold">Shapefile datasources</a>
 /// - <a href="group__shapefile__validation.html#details" class="bold">Shapefile validation</a>
+/// - <a href="class_ogr_datasource.html#details" class="bold">GDAL/OGR vector datasources</a>
 /// - <a href="class_image.html#details" class="bold">Image datasources</a>
 /// - <a href="class_grid.html#details" class="bold">Grid datasources</a>
 /// - \ref a_grid_render "Grid rendering"

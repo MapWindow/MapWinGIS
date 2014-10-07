@@ -7,8 +7,7 @@ namespace MapWinGIS
 #endif
     /// \anchor a_tiles
     /// <summary>
-    /// Downloads and displays data from online tile services, like OpenStreetMap. 
-    /// Instance of Tiles class associated with AxMap control is accessible via AxMap.Tiles property which is read-only.
+    /// Downloads and displays data from online TMS tile services, like OpenStreetMap. 
     /// </summary>
     /// \attention MapWinGIS doesn't grant you any legal rights to use data from 
     /// particular online services. Please look for license information on acceptable usages of the data 
@@ -260,8 +259,8 @@ namespace MapWinGIS
     /// 
     /// 4. Server projection is GMercator, map projection is some sort of local projection (like WGS84 UTM zones):\n
     /// - the same behaviour as previous plus the following limitation;
-    /// - the smallest zoom levels (1-5) aren't available (can be changed with GlobalSettings.TilesMinZoomOnProjectionMismatch).
-    /// 
+    /// - the smallest zoom levels (1-5) aren't available (can be changed with GlobalSettings.TilesMinZoomOnProjectionMismatch).\n\n
+    /// Instance of Tiles class associated with AxMap control is accessible via AxMap.Tiles property which is read-only.
     /// \new490 Added in version 4.9.0
 #if nsp
     #if upd
