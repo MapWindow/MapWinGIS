@@ -44,7 +44,35 @@ namespace MapWinGIS
     /// An instance of %OgrDatasource can't be added to the map directly, but instances of OgrLayer class opened by its methods can.\n\n
     /// %OgrDatasource encapsulates an instance of GDALDataset C++ class. Check its 
     /// <a href = "http://www.gdal.org/classGDALDataset.html">documentation</a> to better understand what's going on under the hood. \n\n
-    /// Code samples can be found in description of particular methods.\n\n
+    /// Here is code sample which lists all layers available in PostGIS database.
+    /// \code
+    /// private static string CONNECTION_STRING = "PG:host=localhost dbname=london user=postgres password=1234";
+    /// 
+    /// var ds = new OgrDatasource();
+    /// 
+    /// if (!ds.Open(CONNECTION_STRING))
+    /// {
+    ///     Debug.Print("Failed to establish connection: " + ds.GdalLastErrorMsg);
+    /// }
+    /// else
+    /// {
+    ///     int count = ds.LayerCount;
+    ///     Debug.Print("Number of layers: " + count);
+    /// 
+    ///     Debug.Print("List of layers by name:");
+    ///     for (int i = 0; i < count; i++)
+    ///     {
+    ///         var lyr = ds.GetLayer(i);
+    ///         Debug.Print("Layer name: " + lyr.Name);
+    ///         Debug.Print("Projection: " + lyr.GeoProjection.ExportToProj4());
+    ///         Debug.Print("Shape type: " + lyr.ShapeType);
+    ///         lyr.Close();
+    ///     }
+    ///     ds.Close();
+    /// }
+    /// \endcode
+    /// See more samples in description of particular methods.\n\n
+    /// 
     /// Here is a diagram for the OgrDatasource class.
     /// \dot digraph ogr_diagram {
     /// nodesep = 0.3;
@@ -112,12 +140,11 @@ namespace MapWinGIS
         /// 
         /// private static bool DisplayAllLayers()
         /// {
-        ///     var gs = new GlobalSettings();
         ///     var ds = new OgrDatasource();
         ///     
         ///     if (!ds.Open(CONNECTION_STRING))
         ///     {
-        ///         Debug.WriteLine("Failed to establish connection: " + gs.GdalLastErrorMsg);
+        ///         Debug.WriteLine("Failed to establish connection: " + ds.GdalLastErrorMsg);
         ///     }
         ///     else
         ///     {
@@ -202,12 +229,11 @@ namespace MapWinGIS
         /// 
         /// private static bool TestSpatialQuery()
         /// {
-        ///     var gs = new GlobalSettings();
         ///     var ds = new OgrDatasource();
         ///     
         ///     if (!ds.Open(CONNECTION_STRING))
         ///     {
-        ///         Debug.WriteLine("Failed to establish connection: " + gs.GdalLastErrorMsg);
+        ///         Debug.WriteLine("Failed to establish connection: " + ds.GdalLastErrorMsg);
         ///     }
         ///     else
         ///     {
@@ -291,6 +317,29 @@ namespace MapWinGIS
         /// <param name="sql">SQL instruction.</param>
         /// <param name="errorMessage">Error message provided in case of failure.</param>
         /// <returns>True on success and false otherwise.</returns>
+        /// The following code deletes records from underlying database table with gid > 100.
+        /// \code
+        /// var ds = new OgrDatasource();
+        /// 
+        /// if (!ds.Open(CONNECTION_STRING))
+        /// {
+        ///     Debug.Pring("Failed to establish connection: " + ds.GdalLastErrorMsg);
+        /// }
+        /// else
+        /// {
+        ///     string errorMsg;
+        ///     bool result = ds.ExecuteSQL("DELETE FROM tableName WHERE gid > 100", out errorMsg);
+        ///     if (!result)
+        ///     {
+        ///         Debug.Pring("Error on running SQL: " + errorMsg);    
+        ///     }
+        ///     else
+        ///     {
+        ///         Debug.Pring("SQL was executed successfully.");    
+        ///     }
+        ///     ds.Close();
+        /// }
+        /// \endcode
         public bool ExecuteSQL(string sql, out string errorMessage)
         {
             throw new NotImplementedException();
@@ -343,6 +392,28 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="metadata">Type of metadata to be returned.</param>
         /// <returns>Metadata or empty string if requested type of metadata isn't set for the driver.</returns>
+        /// \code
+        /// var ds = new OgrDatasource();
+        /// 
+        /// if (!ds.Open(CONNECTION_STRING))
+        /// {
+        ///     Debug.Print("Failed to establish connection: " + ds.GdalLastErrorMsg);
+        /// }
+        /// else
+        /// {
+        ///     // first display couple of specific items
+        ///     Debug.Print("Layer creation options: " + ds.get_DriverMetadata(tkGdalDriverMetadata.dmdLAYER_CREATIONOPTIONLIST));
+        ///     Debug.Print("Long name: " + ds.get_DriverMetadata(tkGdalDriverMetadata.dmdLONGNAME));
+        /// 
+        ///     // now display all the available items
+        ///     Debug.Print("Metadata items: ");
+        ///     for (int i = 0; i < ds.DriverMetadataCount; i++)
+        ///     {
+        ///         Debug.Print(ds.get_DriverMetadataItem(i));
+        ///     }
+        ///     ds.Close();
+        /// }
+        /// \endcode
         public string get_DriverMetadata(tkGdalDriverMetadata metadata)
         {
             throw new NotImplementedException();
@@ -396,12 +467,11 @@ namespace MapWinGIS
         /// 
         /// private static bool ImportShapefileFromFolder()
         /// {
-        ///     var gs = new GlobalSettings();
         ///     var ds = new OgrDatasource();
         ///     
         ///     if (!ds.Open(CONNECTION_STRING))
         ///     {
-        ///         Write("Failed to establish connection: " + gs.GdalLastErrorMsg);
+        ///         Debug.Pring("Failed to establish connection: " + ds.GdalLastErrorMsg);
         ///     }
         ///     else
         ///     {
@@ -460,6 +530,14 @@ namespace MapWinGIS
         public bool CreateLayer(string layerName, ShpfileType ShpType, GeoProjection Projection = null, string creationOptions = "")
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Extracts the last error message reported by GDAL library.
+        /// </summary>
+        public string GdalLastErrorMsg
+        {
+            get { throw new NotImplementedException(); }
         }
     }
 #if nsp

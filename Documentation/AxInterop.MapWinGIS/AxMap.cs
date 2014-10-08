@@ -2015,6 +2015,35 @@ namespace AxMapWinGIS
         /// <param name="layerNameOrQuery">Name of the layer (i.e. database table) or SQL query.</param>
         /// <param name="visible">A value indicating whether a new layer will be visible.</param>
         /// <returns>Handle of the newly added layer or -1 on failure.</returns>
+        /// The following example opens a temporary layer by querying PostGIS datatabase,
+        /// adds the layer to the map and then accesses its data.
+        /// \code
+        /// private static string CONNECTION_STRING = "PG:host=localhost dbname=london user=postgres password=1234";
+        ///  
+        /// string sqlOrLayerName = "SELECT * FROM Buildings WHERE gid < 50";    
+        /// int handle = map.AddLayerFromDatabase(CONNECTION_STRING, sqlOrLayerName, true);
+        /// if (handle == -1)
+        /// {
+        ///     Debug.Print("Failed to open layer: " + map.FileManager.get_ErrorMsg(map.FileManager.LastErrorCode));
+        /// 
+        ///     // in case the reason of failure is still unclear, let's ask GDAL for details
+        ///     var gs = new GlobalSettings();
+        ///     Debug.Print("Last GDAL error: " + gs.GdalLastErrorMsg);
+        /// }
+        /// else
+        /// {
+        ///     // now let's access the opened layer
+        ///     var l = map.get_OgrLayer(handle);
+        ///     if (l != null)
+        ///     {
+        ///         Debug.Print("Number of features: " + l.FeatureCount);
+        /// 
+        ///         // no access the data
+        ///         var sf = l.GetData();
+        ///         Debug.Print("Number of shapes: " + sf.NumShapes);
+        ///     }
+        /// }
+        /// \endcode
         /// \new492b Added in version 4.9.2
         public int AddLayerFromDatabase(string connectionString, string layerNameOrQuery, bool visible);
 
