@@ -1126,5 +1126,13 @@ namespace TestApplication
       // Get the folder that's in
       return Path.GetDirectoryName(fullPath);
     }
+
+    private void RunOpenPostGISTest_Click(object sender, EventArgs e)
+    {
+        this.ResetMapSettings(false);
+        ((Button)sender).BackColor = System.Drawing.Color.Blue;
+        var retVal = OgrDatasetTests.RunOgrDatasourceTest(this.ReclassifyInput.Text, this);
+        ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+    }
   }
 }
