@@ -69,12 +69,12 @@ public:
 	STDMETHOD(get_SourceType)(tkOgrSourceType* retVal);
 	STDMETHOD(ReloadFromSource)(VARIANT_BOOL* retVal);
 	STDMETHOD(RedefineQuery)(BSTR newSql, VARIANT_BOOL* retVal);
-	STDMETHOD(get_ConnectionString)(BSTR* retVal);
-	STDMETHOD(get_SourceQuery)(BSTR* retVal);
+	STDMETHOD(GetConnectionString)(BSTR* retVal);
+	STDMETHOD(GetSourceQuery)(BSTR* retVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** retVal);
 	STDMETHOD(get_ShapeType)(ShpfileType* retVal);
 	STDMETHOD(get_DataIsReprojected)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_FidColumnName)(BSTR* retVal);
+	STDMETHOD(get_FIDColumnName)(BSTR* retVal);
 	STDMETHOD(SaveChanges)(int* savedCount, tkOgrSaveType saveType, VARIANT_BOOL validateShapes,  tkOgrSaveResult* retVal);
 	STDMETHOD(HasLocalChanges)(VARIANT_BOOL* retVal);
 	STDMETHOD(TestCapability)(tkOgrLayerCapability capability, VARIANT_BOOL* retVal);

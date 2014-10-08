@@ -359,7 +359,7 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 // *************************************************************
 //		get_ConnectionString()
 // *************************************************************
-STDMETHODIMP COgrLayer::get_ConnectionString(BSTR* retVal)
+STDMETHODIMP COgrLayer::GetConnectionString(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
@@ -370,7 +370,7 @@ STDMETHODIMP COgrLayer::get_ConnectionString(BSTR* retVal)
 // *************************************************************
 //		get_SourceQuery()
 // *************************************************************
-STDMETHODIMP COgrLayer::get_SourceQuery(BSTR* retVal)
+STDMETHODIMP COgrLayer::GetSourceQuery(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
@@ -437,7 +437,7 @@ STDMETHODIMP COgrLayer::get_DataIsReprojected(VARIANT_BOOL* retVal)
 // *************************************************************
 //		get_FIDColumn()
 // *************************************************************
-STDMETHODIMP COgrLayer::get_FidColumnName(BSTR* retVal)
+STDMETHODIMP COgrLayer::get_FIDColumnName(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (CheckState())

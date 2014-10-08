@@ -3455,7 +3455,7 @@ interface IShapefile : IDispatch{
 	[id(122)] HRESULT EditUpdateShape([in]long ShapeIndex, [in]IShape* shpNew, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[propput, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
-	[id(124)] HRESULT Validate([in]tkShapeValidationMode validationMode, [in]VARIANT_BOOL selectedOnly, [out, retval]IShapeValidationInfo** results);
+	//[id(124)] HRESULT Validate([in]tkShapeValidationMode shapeValidationMode, [in]VARIANT_BOOL selectedOnly, [out, retval]IShapeValidationInfo** results);
 };
 
 /****************************  Shape Interface ***********************/
@@ -5294,10 +5294,10 @@ interface IFileManager : IDispatch{
 	[propget, id(18)] HRESULT HasGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[id(19)] HRESULT ClearGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[id(20)] HRESULT BuildGdalOverviews([in]BSTR Filename, [in]ICallback* cBack, [out, retval] VARIANT_BOOL *pVal);
-	[propget, id(21)] HRESULT NeedsGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[id(22)] HRESULT RemoveProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[propget, id(23)] HRESULT HasValidProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[id(24)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerNameOrQuery, [out, retval]IOgrLayer** retVal);
+	//[propget, id(21)] HRESULT NeedsGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
@@ -5387,9 +5387,9 @@ interface IOgrDatasource : IDispatch{
 		[in, optional, defaultvalue(NULL)]IGeoProjection* projection, 
 		[in, optional,defaultvalue("")]BSTR creationOptions, [out, retval]VARIANT_BOOL* retVal);
 	[id(16)] HRESULT LayerIndexByName([in]BSTR layerName, [out, retval]int* retVal);
-	[id(17)] HRESULT ImportShapefile([in] IShapefile* shapefile, [in]BSTR layerName,
+	[id(17)] HRESULT ImportShapefile([in] IShapefile* sf, [in]BSTR layerName,
 		[in, optional, defaultvalue("")]BSTR creationOptions, 
-		[in, optional, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode validationMode, 
+		[in, optional, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode shapeValidationMode, 
 		[out, retval]VARIANT_BOOL* retVal);
 	[propget, id(18)] HRESULT DriverMetadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
 	[propget, id(19)] HRESULT DriverMetadataCount([out, retval]int* retVal);
@@ -5415,12 +5415,12 @@ interface IOgrLayer : IDispatch{
 	[id(7)] HRESULT GetData([out, retval]IShapefile** retVal);
 	[id(8)] HRESULT ReloadFromSource([out, retval]VARIANT_BOOL* retVal);
 	[id(9)] HRESULT RedefineQuery([in]BSTR newSql, [out, retval]VARIANT_BOOL* retVal);
-	[propget, id(10)] HRESULT ConnectionString([out, retval]BSTR* retVal);
-	[propget, id(11)] HRESULT SourceQuery([out, retval]BSTR* retVal);
+	[id(10)] HRESULT GetConnectionString([out, retval]BSTR* retVal);
+	[id(11)] HRESULT GetSourceQuery([out, retval]BSTR* retVal);
 	[propget, id(12)] HRESULT GeoProjection([out, retval]IGeoProjection** retVal);
 	[propget, id(13)] HRESULT ShapeType([out, retval]ShpfileType* retVal);
 	[propget, id(14)] HRESULT DataIsReprojected([out, retval]VARIANT_BOOL* retVal);
-	[propget, id(15)] HRESULT FidColumnName([out, retval]BSTR* retVal);
+	[propget, id(15)] HRESULT FIDColumnName([out, retval]BSTR* retVal);
 	[id(16)] HRESULT SaveChanges([out]int* savedCount, 
 								[in, optional, defaultvalue(ostSaveAll)]tkOgrSaveType saveType, 
 								[in, optional, defaultvalue(1)]VARIANT_BOOL validateShapes, [out, retval]tkOgrSaveResult* retVal);
@@ -5429,13 +5429,14 @@ interface IOgrLayer : IDispatch{
 	[propget, id(19)] HRESULT UpdateSourceErrorMsg([in]int errorIndex, [out, retval]BSTR* retVal);
 	[propget, id(20)] HRESULT UpdateSourceErrorShapeIndex([in]int errorIndex, [out, retval]int* retVal);
 	[propget, id(21)] HRESULT FeatureCount([in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]int* retVal);
-	[propget, id(22)] HRESULT Extents([out]IExtents** extents, [in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]VARIANT_BOOL *retVal);
+	[propget, id(22)] HRESULT Extents([out]IExtents** layerExtents, [in, optional, defaultvalue(0)]VARIANT_BOOL forceLoading, [out, retval]VARIANT_BOOL *retVal);
 	[propget, id(23)] HRESULT GeometryColumnName([out, retval]BSTR* retVal);
 	[propget, id(24)] HRESULT SupportsEditing([in]tkOgrSaveType editingType, [out, retval]VARIANT_BOOL* retVal);
 	[id(25)] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(26)] HRESULT Deserialize([in]BSTR newVal, [out, retval]VARIANT_BOOL* retVal);
 	[id(27)] HRESULT OpenFromQuery([in]BSTR connectionString, [in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
 	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerName, [in]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(29)] HRESULT SourceType([out, retval]tkOgrSourceType* retVal);
 };
 
 [ 
