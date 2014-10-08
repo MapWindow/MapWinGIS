@@ -18,6 +18,7 @@ public:
 		_key = A2BSTR("");
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
+		_encoding = m_globalSettings.ogrEncoding;
 		gReferenceCounter.AddRef(tkInterface::idOgrDatasource);
 	}
 	~COgrDatasource()
@@ -79,6 +80,7 @@ private:
 	BSTR _key;
 	GDALDataset* _dataset;
 	CStringW _connectionString;
+	tkOgrEncoding _encoding;
 
 	bool CheckState();
 	void DumpDriverInfo();

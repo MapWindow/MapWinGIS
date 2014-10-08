@@ -175,9 +175,11 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusCoordLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
@@ -1750,7 +1752,7 @@
             // 
             // PostGisGroupBox
             // 
-            this.PostGisGroupBox.BackColor = System.Drawing.Color.Salmon;
+            this.PostGisGroupBox.BackColor = System.Drawing.Color.LightCoral;
             this.PostGisGroupBox.Controls.Add(this.button1);
             this.PostGisGroupBox.Controls.Add(this.groupBox10);
             this.PostGisGroupBox.Location = new System.Drawing.Point(5, 2457);
@@ -1885,9 +1887,11 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.splitContainer2.Panel1.ResumeLayout(false);
             this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.MiscGroupBox.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);

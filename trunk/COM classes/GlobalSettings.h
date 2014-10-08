@@ -129,6 +129,8 @@ public:
 	STDMETHOD(put_GridUpsamplingMode)(tkInterpolationMode pVal);
 	STDMETHOD(get_GridDownsamplingMode)(tkInterpolationMode* newVal);
 	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode pVal);
+	STDMETHOD(get_OgrStringEncoding)(tkOgrEncoding* newVal);
+	STDMETHOD(put_OgrStringEncoding)(tkOgrEncoding pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

@@ -25,6 +25,7 @@ public:
 		_sourceType = ogrUninitialized;
 		_forUpdate = false;
 		_dataLoadingLock.Unlock();
+		_encoding = m_globalSettings.ogrEncoding;
 		gReferenceCounter.AddRef(tkInterface::idOgrLayer);
 	}
 	~COgrLayer()
@@ -111,6 +112,7 @@ private:
 	CStringW _connectionString;
 	CStringW _sourceQuery;
 	vector<OgrUpdateError> _updateErrors;
+	tkOgrEncoding _encoding;
 
 	bool CheckState();
 	void ErrorMessage(long ErrorCode);

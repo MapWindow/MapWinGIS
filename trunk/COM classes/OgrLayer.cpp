@@ -183,7 +183,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 	
 		USES_CONVERSION;
 		_connectionString = OLE2W(connectionString);
-		_sourceQuery = Utility::ConvertFromUtf8(layer->GetName());
+		_sourceQuery = OgrHelper::OgrString2Unicode(layer->GetName());
 		_dataset = ds;
 		_layer = layer;
 		_forUpdate = forUpdate == VARIANT_TRUE;
@@ -207,7 +207,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 	GDALDataset* ds = OpenDataset(connectionString, false);
 	if (ds)
 	{
-		OGRLayer* layer = ds->ExecuteSQL(Utility::Bstr2Char(sql), NULL, NULL);
+		OGRLayer* layer = ds->ExecuteSQL(OgrHelper::Bstr2OgrString(sql), NULL, NULL);
 		if (layer)
 		{
 			_connectionString = OLE2W(connectionString);
@@ -240,7 +240,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 	GDALDataset* ds = OpenDataset(connectionString, forUpdate ? true : false);
 	if (ds)
 	{
-		OGRLayer* layer = ds->GetLayerByName(Utility::Bstr2Char(layerName));
+		OGRLayer* layer = ds->GetLayerByName(OgrHelper::Bstr2OgrString(layerName));
 		if (layer)
 		{
 			_connectionString = OLE2W(connectionString);
@@ -254,6 +254,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 		}
 		else
 		{
+			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
 			GDALClose(_dataset);
 		}
 	}
@@ -276,7 +277,7 @@ STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)
 		CString cmnName = _layer->GetFIDColumn();
 		Debug::WriteLine("FID column: %s", cmnName);
 
-		CStringW name = Utility::ConvertFromUtf8(_layer->GetName());
+		CStringW name = OgrHelper::OgrString2Unicode(_layer->GetName());
 		*retVal = W2BSTR(name);
 		return S_OK;
 	}
@@ -333,7 +334,7 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 	if (!CheckState()) return S_FALSE;
 	if (_sourceType == ogrQuery)
 	{
-		OGRLayer* layer = _dataset->ExecuteSQL(Utility::Bstr2Char(newSql), NULL, NULL);
+		OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::Bstr2OgrString(newSql), NULL, NULL);
 		if (layer)
 		{
 			_dataset->ReleaseResultSet(_layer);
@@ -442,8 +443,8 @@ STDMETHODIMP COgrLayer::get_FIDColumnName(BSTR* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (CheckState())
 	{
-		char* s = const_cast<char*>(_layer->GetFIDColumn());
-		*retVal = A2BSTR(s);
+		CStringW s = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
+		*retVal = W2BSTR(s);
 		return S_OK;
 	}
 	*retVal = A2BSTR("");
@@ -544,11 +545,12 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 long COgrLayer::GetFidForShapefile()
 {
 	if (!_layer || !_shapefile) return -1;
-	char* fidName = const_cast<char*>(_layer->GetFIDColumn());
+	CComBSTR bstr;
+	get_FIDColumnName(&bstr);
 	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
 	long shapeCmnId;
-	table->get_FieldIndexByName(A2BSTR(fidName), &shapeCmnId);
+	table->get_FieldIndexByName(bstr, &shapeCmnId);
 	return shapeCmnId;
 }
 
@@ -587,7 +589,7 @@ STDMETHODIMP COgrLayer::get_UpdateSourceErrorMsg(int errorIndex, BSTR* retVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_FALSE;
 	}
-	*retVal = A2BSTR(_updateErrors[errorIndex].ErrorMsg);
+	*retVal = W2BSTR(_updateErrors[errorIndex].ErrorMsg);
 	return S_OK;
 }
 
@@ -649,9 +651,9 @@ STDMETHODIMP COgrLayer::get_GeometryColumnName(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (!CheckState()) return S_FALSE;
-	const char* name = _layer->GetGeometryColumn();
+	CStringW name = OgrHelper::OgrString2Unicode(_layer->GetGeometryColumn());
 	USES_CONVERSION;
-	*retVal = A2BSTR(name);
+	*retVal = W2BSTR(name);
 	return S_OK;
 }
 
@@ -833,7 +835,7 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 STDMETHODIMP COgrLayer::get_GdalLastErrorMsg(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CString s = CPLGetLastErrorMsg();
-	*pVal = A2BSTR(s);
+	CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
+	*pVal = W2BSTR(s);
 	return S_OK;
 }

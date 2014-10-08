@@ -648,3 +648,20 @@ STDMETHODIMP CGlobalSettings::put_GridDownsamplingMode(tkInterpolationMode newVa
 	m_globalSettings.gridDownsamplingMode = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     OgrStringEncoding
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_OgrStringEncoding(tkOgrEncoding* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = m_globalSettings.ogrEncoding;
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_OgrStringEncoding(tkOgrEncoding pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.ogrEncoding = pVal;
+	return S_OK;
+}

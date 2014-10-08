@@ -4,7 +4,7 @@
 #include "MapWinGIS_i.h"
 #include <map>
 
-#pragma warning(disable:4482)	// non-standard extention used - for names of enumerations
+#pragma warning(disable:4482)	// non-standard extension used - for names of enumerations
 
 struct GlobalSettingsInfo
 {
@@ -43,9 +43,11 @@ struct GlobalSettingsInfo
 	tkInterpolationMode imageDownsamplingMode;
 	tkInterpolationMode gridUpsamplingMode;			// currently not used
 	tkInterpolationMode gridDownsamplingMode;
+	tkOgrEncoding ogrEncoding;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		ogrEncoding = oseUtf8;
 		imageUpsamplingMode = imNone;
 		imageDownsamplingMode = imBilinear;
 		gridUpsamplingMode = imNone;

@@ -1131,7 +1131,7 @@ namespace TestApplication
     {
         this.ResetMapSettings(false);
         ((Button)sender).BackColor = System.Drawing.Color.Blue;
-        var retVal = OgrDatasetTests.RunOgrDatasourceTest(this.ReclassifyInput.Text, this);
+        var retVal = OgrLayerTests.RunOgrLayerTest(this.ReclassifyInput.Text, this);
         ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
   }

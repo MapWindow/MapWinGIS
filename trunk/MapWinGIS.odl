@@ -56,6 +56,18 @@ interface IEditShape;
 interface IOgrDatasource;
 interface IOgrLayer;
 
+/************************** tkOgrEncoding Enumeration **********************/
+typedef
+[
+	uuid(DD146D7F-E630-4113-9971-A36C6796C5D5),
+	helpstring("tkOgrEncoding"),
+]
+enum tkOgrEncoding
+{
+	oseUtf8 = 0,
+	oseAnsi = 1,
+} tkOgrEncoding;
+
 /************************** tkOgrSaveType Enumeration **********************/
 typedef
 [
@@ -5037,11 +5049,13 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(32)] HRESULT LoadSymbologyOnAddLayer( [in]VARIANT_BOOL newVal);
 	[propget, id(33)] HRESULT TilesMinZoomOnProjectionMismatch( [out, retval]int* retVal);
 	[propput, id(33)] HRESULT TilesMinZoomOnProjectionMismatch( [in]int newVal);
-
 	[propget, id(34)] HRESULT ImageUpsamplingMode( [out, retval]tkInterpolationMode* retVal);
 	[propput, id(34)] HRESULT ImageUpsamplingMode( [in]tkInterpolationMode newVal);
 	[propget, id(35)] HRESULT ImageDownsamplingMode( [out, retval]tkInterpolationMode* retVal);
 	[propput, id(35)] HRESULT ImageDownsamplingMode( [in]tkInterpolationMode newVal);
+	[propget, id(36)] HRESULT OgrStringEncoding([out, retval]tkOgrEncoding* retVal);
+	[propput, id(36)] HRESULT OgrStringEncoding([in]tkOgrEncoding newVal);
+
 	/*[propget, id(36)] HRESULT GridUpsamplingMode( [out, retval]tkInterpolationMode* retVal);
 	[propput, id(36)] HRESULT GridUpsamplingMode( [in]tkInterpolationMode newVal);
 	[propget, id(37)] HRESULT GridDownsamplingMode( [out, retval]tkInterpolationMode* retVal);

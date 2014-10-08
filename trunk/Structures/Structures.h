@@ -100,6 +100,6 @@ struct MeasurePoint
 struct OgrUpdateError
 {
 	int ShapeIndex;
-	CString ErrorMsg;
-	OgrUpdateError(int shapeIndex, const char* msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {	}
+	CStringW ErrorMsg;
+	OgrUpdateError(int shapeIndex, CStringW msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {}
 };

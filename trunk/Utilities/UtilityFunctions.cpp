@@ -8,20 +8,6 @@ namespace Utility
 	static _locale_t m_locale = _create_locale(LC_ALL, "C");
 
 #pragma region String conversion
-	// *************************************************************
-	//		Bstr2Char()
-	// *************************************************************
-	CStringA Bstr2Char(BSTR& bstr)
-	{
-		// check if UTF-8 conversion is needed
-		return Utility::ConvertToUtf8(OLE2W(bstr));
-	}
-
-	CStringA CComBstr2Char(CComBSTR& bstr)
-	{
-		// check if UTF-8 conversion is needed
-		return Utility::ConvertToUtf8(OLE2W(bstr));
-	}
 	
 	// ********************************************************
 	//    XmlFilenameToUnicode()

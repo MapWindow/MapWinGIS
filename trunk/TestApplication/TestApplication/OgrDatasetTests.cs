@@ -35,7 +35,7 @@ namespace TestApplication
 
             //ImportShapefilesFromFolder();
 
-            TestExecuteSQL();
+            //TestExecuteSQL();
             
             Debug.Print("End OGR datasource test");
             return true;
@@ -177,7 +177,7 @@ namespace TestApplication
                             var layer = ds.GetLayerByName(name);
                             if (layer != null)
                             {
-                                Debug.Print("Improted features count: " + layer.FeatureCount);
+                                Debug.Print("Imported features count: " + layer.FeatureCount);
                                 layer.Close();
                             }
                         }

@@ -245,15 +245,16 @@ bool OgrHelper::Shapefile2OgrLayer(IShapefile* sf, OGRLayer* poLayer, ICallback*
 	{
 		// copy field
 		long precision, width;
-		CComBSTR name;
+		BSTR name;
 		CComPtr<IField> fld = NULL;
 		sf->get_Field(i, &fld);
 		fld->get_Name(&name);
 		fld->get_Precision(&precision);
 		fld->get_Width(&width);
-		OGRFieldDefn oField(Utility::CComBstr2Char(name), GetFieldType(fld));
+		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name), GetFieldType(fld));
 		oField.SetWidth(width);
 		oField.SetPrecision(precision);
+		SysFreeString(name);
 
 		// insert it
 		if (poLayer->CreateField(&oField) != OGRERR_NONE)
@@ -384,7 +385,7 @@ int OgrHelper::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 			shapefile->get_CellValue(shapeCmnIndex, i, &var);
 			
 			OGRErr result;
-			CString validationError;
+			CString validationError;   // no need to store it in Unicode, it's almost certain uses ASCII only
 
 			lVal(var, featId);
 			OGRFeature* ft = poLayer->GetFeature(featId);
@@ -426,8 +427,9 @@ int OgrHelper::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 			}
 			else
 			{
-				
-				errors.push_back(OgrUpdateError(i, validation ? validationError : CPLGetLastErrorMsg()));
+				CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
+				USES_CONVERSION;
+				errors.push_back(OgrUpdateError(i, validation ? A2W(validationError) : s));
 			}
 		}
 	}
@@ -473,4 +475,46 @@ int OgrHelper::RemoveDeletedFeatures(OGRLayer* layer, IShapefile* sf, long shape
 		OGRFeature::DestroyFeature(ft);
 	}
 	return count;
+}
+
+// *************************************************************
+//		Bstr2OgrString()
+// *************************************************************
+CStringA OgrHelper::Bstr2OgrString(BSTR& inputString, tkOgrEncoding encoding)
+{
+	USES_CONVERSION;
+	switch (encoding)
+	{
+	case oseUtf8:
+		return Utility::ConvertToUtf8(OLE2W(inputString));
+	case oseAnsi:
+	default:
+		return OLE2A(inputString);
+	}
+}
+
+CStringA OgrHelper::Bstr2OgrString(BSTR& inputString)
+{
+	return Bstr2OgrString(inputString, m_globalSettings.ogrEncoding);
+}
+
+// *************************************************************
+//		OgrString2Unicode()
+// *************************************************************
+CStringW OgrHelper::OgrString2Unicode(const char* outputString, tkOgrEncoding encoding)
+{
+	switch (encoding)
+	{
+		case oseUtf8:
+			return Utility::ConvertFromUtf8(outputString);
+		case oseAnsi:
+		default:
+			USES_CONVERSION;
+			return A2W(outputString);
+	}
+}
+
+CStringW OgrHelper::OgrString2Unicode(const char* outputString)
+{
+	return OgrString2Unicode(outputString, m_globalSettings.ogrEncoding);
 }

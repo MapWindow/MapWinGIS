@@ -33,11 +33,50 @@ namespace TestApplication
 
             //TestDeserializeMap();
 
+            //AddLayer2Map();
+
             Debug.Print("\nEnd OGR layer test");
             return true;
         }
 
-        internal static void TestFileManager()
+        private static void AddLayer2Map()
+        {
+            string layerName = "SELECT * FROM здания1";
+
+            var gs = new GlobalSettings();
+
+            var layer = new OgrLayer();
+            if (!layer.OpenFromQuery(CONNECTION_STRING, layerName))
+            {
+                Debug.Print("Failed to open layer: " + layer.get_ErrorMsg(layer.LastErrorCode));
+                Debug.Print("GDAL last error: " + layer.GdalLastErrorMsg);
+            }
+            else
+            {
+                map.RemoveAllLayers();
+                // either a) set layer projection to the map
+                map.GrabProjectionFromData = true;
+
+                // or b) set map projection and reproject layer if needed
+                map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
+                map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
+
+                int layerHandle = map.AddLayer(layer, true);
+                if (layerHandle == -1)
+                {
+                    Debug.Print("Failed to add layer to the map");
+                }
+                else
+                {
+                    map.Redraw();
+
+                    // get the reference back from map
+                    var sameLayerFromMap = map.get_OgrLayer(layerHandle);
+                }
+            }
+        }
+
+        private static void TestFileManager()
         {
             string sql = "SELECT * FROM Buildings WHERE gid < 50";
             int handle = map.AddLayerFromDatabase(CONNECTION_STRING, sql, true);
@@ -111,40 +150,7 @@ namespace TestApplication
             }
         }
 
-        private static void AddLayer2Map()
-        {
-            string layerName = "waterways";
-
-            var layer = new OgrLayer();
-            if (!layer.OpenFromDatabase(CONNECTION_STRING, layerName, true))
-            {
-                Debug.Print("Failed to open layer: " + layer.get_ErrorMsg(layer.LastErrorCode));
-                Debug.Print("GDAL last error: " + layer.GdalLastErrorMsg);
-            }
-            else
-            {
-                map.RemoveAllLayers();
-                // either a) set layer projection to the map
-                map.GrabProjectionFromData = true;
-
-                // or b) set map projection and reproject layer if needed
-                map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-                map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
-
-                int layerHandle = map.AddLayer(layer, true);
-                if (layerHandle == -1)
-                {
-                    Debug.Print("Failed to add layer to the map");
-                }
-                else
-                {
-                    map.Redraw();
-
-                    // get the reference back from map
-                    var sameLayerFromMap = map.get_OgrLayer(layerHandle);
-                }
-            }
-        }
+        
 
         private static void DisplayUnderlyingData()
         {

@@ -237,7 +237,7 @@ STDMETHODIMP COgrDatasource::get_DriverName(BSTR* retVal)
 	}
 	else
 	{
-		*retVal = A2BSTR(_dataset->GetDriverName());
+		*retVal = A2BSTR(_dataset->GetDriverName());   // no need to convert from UTF-8: it's in ASCII
 		return S_OK;
 	}
 }
@@ -255,7 +255,7 @@ STDMETHODIMP COgrDatasource::GetLayerName(int index, BSTR* retVal)
 			OGRLayer* layer = _dataset->GetLayer(index);
 			if (layer)
 			{
-				CStringW name = Utility::ConvertFromUtf8(layer->GetName());
+				CStringW name = OgrHelper::OgrString2Unicode(layer->GetName());
 				*retVal = W2BSTR(name);
 				return S_OK;
 			}
@@ -324,7 +324,7 @@ STDMETHODIMP COgrDatasource::CreateLayer(BSTR layerName, ShpfileType shpType, IG
 	char** options = ParseLayerCreationOptions(creationOptions);
 	bool multiPart = (bool)CSLFetchBoolean(options, "MULTI_PART", 1);
 
-	OGRLayer* layer = _dataset->CreateLayer(Utility::Bstr2Char(layerName), ref, 
+	OGRLayer* layer = _dataset->CreateLayer(OgrHelper::Bstr2OgrString(layerName), ref,
 		GeometryConverter::ShapeType2GeometryType(shpType, multiPart), options);
 	CSLDestroy(options);
 
@@ -341,7 +341,7 @@ STDMETHODIMP COgrDatasource::LayerIndexByName(BSTR layerName, int* retVal)
 	*retVal = -1;
 	if (!CheckState()) return S_FALSE;
 
-	CStringA name = Utility::Bstr2Char(layerName);
+	CStringA name = OgrHelper::Bstr2OgrString(layerName);
 	for (int i = 0; i < _dataset->GetLayerCount(); i++)
 	{
 		OGRLayer* layer = _dataset->GetLayer(i);
@@ -370,7 +370,7 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 		return S_FALSE;
 	}
 
-	CStringA name = Utility::Bstr2Char(newLayerName);
+	CStringA name = OgrHelper::Bstr2OgrString(newLayerName);
 	if (name.GetLength() == 0)
 	{
 		ErrorMessage(tkINVALID_LAYER_NAME);
@@ -449,13 +449,13 @@ STDMETHODIMP COgrDatasource::ExecuteSQL(BSTR sql, BSTR* errorMessage, VARIANT_BO
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CPLErrorReset();
 	
-	OGRLayer* lyr = _dataset->ExecuteSQL(Utility::Bstr2Char(sql), NULL, NULL);
+	OGRLayer* lyr = _dataset->ExecuteSQL(OgrHelper::Bstr2OgrString(sql), NULL, NULL);
 	if (lyr)_dataset->ReleaseResultSet(lyr);
 
 	if (CPLGetLastErrorNo() != OGRERR_NONE)
 	{
-		CStringA s = CPLGetLastErrorMsg();
-		*errorMessage = A2BSTR(s);
+		CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
+		*errorMessage =W2BSTR(s);
 		*retVal = VARIANT_FALSE;
 		return S_FALSE;
 	}
@@ -498,7 +498,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadata(tkGdalDriverMetadata metadata, B
 		if (driver)
 		{
 			char* val = const_cast<char*>(driver->GetMetadataItem(GdalHelper::GetMetadataNameString(metadata)));
-			*retVal = A2BSTR(val);
+			*retVal = A2BSTR(val);		// no need to treat it as utf-8: it's in ASCII
 			return S_OK;
 		}
 	}
@@ -548,7 +548,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataItem(int metadataIndex, BSTR* ret
 			else
 			{
 				char* item = const_cast<char*>(CSLGetField(data, metadataIndex));
-				*retVal = A2BSTR(item);
+				*retVal = A2BSTR(item);    // no need to treat it as utf-8: it's in ASCII
 				return S_OK;
 			}
 		}
@@ -563,7 +563,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataItem(int metadataIndex, BSTR* ret
 STDMETHODIMP COgrDatasource::get_GdalLastErrorMsg(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CString s = CPLGetLastErrorMsg();
-	*pVal = A2BSTR(s);
+	CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
+	*pVal = W2BSTR(s);
 	return S_OK;
 }
