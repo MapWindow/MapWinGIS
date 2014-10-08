@@ -5395,6 +5395,7 @@ interface IOgrDatasource : IDispatch{
 	[propget, id(19)] HRESULT DriverMetadataCount([out, retval]int* retVal);
 	[propget, id(20)] HRESULT DriverMetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
 	[id(21)] HRESULT ExecuteSQL([in]BSTR sql, [out]BSTR* errorMessage, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(22)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 };
 [
 	object,
@@ -5435,8 +5436,9 @@ interface IOgrLayer : IDispatch{
 	[id(25)] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(26)] HRESULT Deserialize([in]BSTR newVal, [out, retval]VARIANT_BOOL* retVal);
 	[id(27)] HRESULT OpenFromQuery([in]BSTR connectionString, [in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
-	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerName, [in]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
+	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(29)] HRESULT SourceType([out, retval]tkOgrSourceType* retVal);
+	[propget, id(30)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 };
 
 [ 

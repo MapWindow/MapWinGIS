@@ -556,3 +556,14 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataItem(int metadataIndex, BSTR* ret
 	*retVal = A2BSTR("");
 	return S_OK;
 }
+
+// *************************************************************
+//		get_GdalLastErrorMsg()
+// *************************************************************
+STDMETHODIMP COgrDatasource::get_GdalLastErrorMsg(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = CPLGetLastErrorMsg();
+	*pVal = A2BSTR(s);
+	return S_OK;
+}

@@ -87,6 +87,7 @@ public:
 	STDMETHOD(get_SupportsEditing)(tkOgrSaveType editingType, VARIANT_BOOL* retVal);
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal, VARIANT_BOOL* retVal);
+	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 
 public:
 	void InjectShapefile(IShapefile* sfNew)

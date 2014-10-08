@@ -826,3 +826,14 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 	}
 	return vb == VARIANT_TRUE;
 }
+
+// *************************************************************
+//		get_GdalLastErrorMsg()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_GdalLastErrorMsg(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = CPLGetLastErrorMsg();
+	*pVal = A2BSTR(s);
+	return S_OK;
+}

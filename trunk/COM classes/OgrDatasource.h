@@ -71,6 +71,7 @@ public:
 	STDMETHOD(get_DriverMetadataCount)(int* retVal);
 	STDMETHOD(get_DriverMetadataItem)(int metadataIndex, BSTR* retVal);
 	STDMETHOD(ExecuteSQL)(BSTR sql, BSTR* errorMessage, VARIANT_BOOL* retVal);
+	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 
 private:
 	ICallback * _globalCallback;
