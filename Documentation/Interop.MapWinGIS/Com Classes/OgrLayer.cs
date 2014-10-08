@@ -569,6 +569,10 @@ namespace MapWinGIS
         /// 
         /// Errors during the saving operation are registered in the log which can be accessed using OgrLayer.get_UpdateSourceErrorMsg.\n
         /// 
+        /// OgrLayer.SaveChanges method may change the order of rows in the database table 
+        /// (for example PostgreSQL driver places the updated rows in the end of table). 
+        /// Therefore on reloading of layer after the SaveChanges operation indices of shapes may change.
+        /// 
         /// The following code demonstrates how various types of editing for OGR layer can be made
         /// with saving of changes back to the datasource.
         /// \code

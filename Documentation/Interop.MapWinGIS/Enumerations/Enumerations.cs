@@ -2265,6 +2265,21 @@ namespace MapWinGIS
         /// </summary>
         ogrQuery = 3,
     }
+
+    /// <summary>
+    /// Possible string encodings for OgrDatasource, OgrLayer classes.
+    /// </summary>
+    public enum tkOgrEncoding
+    {
+        /// <summary>
+        /// UTF-8 encoding.
+        /// </summary>
+        oseUtf8 = 0,
+        /// <summary>
+        /// Current ANSI codepage set in the OS for non-Unicode applications.
+        /// </summary>
+        oseAnsi = 1,
+    }
 #if nsp
 }
 #endif

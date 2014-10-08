@@ -73,6 +73,13 @@ namespace MapWinGIS
     /// \endcode
     /// See more samples in description of particular methods.\n\n
     /// 
+    /// <b>String encoding.</b>\n
+    /// 
+    /// %OgrDatasource and OgrLayer classes by default use UTF-8 string encoding to interact with underlying drivers.
+    /// This applies to connection strings, layer names, SQL queries and error messages. This behavior can be changed
+    /// by setting GlobalSettings.OgrStringEncoding property. The new setting will be used immediately by all existing
+    /// and new objects. See details about string encoding in the documentation of particular OGR driver.\n\n
+    /// 
     /// Here is a diagram for the OgrDatasource class.
     /// \dot digraph ogr_diagram {
     /// nodesep = 0.3;
@@ -519,7 +526,11 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>
         /// SRID will be set to 0 if null or empty GeoProjection object is passed.
-        /// See OgrDatasource.ImportShapefile for the details on creation options.</param>
+        /// See OgrDatasource.ImportShapefile for the details on creation options.\n
+        /// 
+        /// Known issues: creation of layer in nonexistent schema in PostGIS databases completes successfully, 
+        /// yet the neither schema nor objects in it are visible afterwards.
+        /// </param>
         /// </remarks>
         /// <param name="layerName">Name of the new layer.</param>
         /// <param name="ShpType">ShpType of the new layer. Will be converted to appropriate OGRwkbGeometryType.</param>

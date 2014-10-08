@@ -409,6 +409,15 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Gets or sets string encoding used to communicate with OGR drivers.
+        /// </summary>
+        public tkOgrEncoding OgrStringEncoding
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
     }
 #if nsp
 }
