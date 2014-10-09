@@ -478,6 +478,6 @@ public:
 	Coloring::ColorGraph* GeneratePolygonColors();
 	bool PointWithinShape(IShape* shape, double projX, double projY, double Tolerance);
 	void ReregisterShape(int shapeIndex);
-	
+	bool ForceProperShapeType(ShpfileType sfType, IShape* shape);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

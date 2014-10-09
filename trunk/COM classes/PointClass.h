@@ -40,12 +40,12 @@ public:
 		key = A2BSTR("");
 		globalCallback = NULL;
 		lastErrorCode = tkNO_ERROR;
-		gReferenceCounter.AddRef(tkInterface::idPoint);
+		//gReferenceCounter.AddRef(tkInterface::idPoint);     // it's additional overhead, use for debugging only
 	}
 	~CPointClass()
 	{	globalCallback = NULL;
 		::SysFreeString(key);
-		gReferenceCounter.Release(tkInterface::idPoint);
+		//gReferenceCounter.Release(tkInterface::idPoint);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()

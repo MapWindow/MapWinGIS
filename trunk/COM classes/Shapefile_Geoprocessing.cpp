@@ -553,10 +553,11 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	//   Creating output
 	// ----------------------------------------------
 	ShpfileType type = _shpfiletype;
-	//TODO!!!: set multipoint 
-	/*if (type == SHP_POINT) type = SHP_MULTIPOINT;
+	
+	// for points change to multi-point type, as there is no other way to group them
+	if (type == SHP_POINT) type = SHP_MULTIPOINT;
 	if (type == SHP_POINTZ) type = SHP_MULTIPOINTZ;
-	if (type == SHP_POINTM) type = SHP_MULTIPOINTM;*/
+	if (type == SHP_POINTM) type = SHP_MULTIPOINTM;
 	
 	CloneNoFields(sf, type);
 	CloneField(this, *sf, FieldIndex, -1);
@@ -827,6 +828,32 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 }
 
 // *************************************************************
+//     ForceProperShapeType()
+// *************************************************************
+// Checks if shape type match shapefile type and doing fixes if possible
+bool CShapefile::ForceProperShapeType(ShpfileType sfType, IShape* shp)
+{
+	ShpfileType shapeType;
+	shp->get_ShapeType(&shapeType);
+
+	if (Utility::ShapeTypeConvert2D(sfType) == SHP_MULTIPOINT && Utility::ShapeTypeConvert2D(shapeType) == SHP_POINT)
+	{
+		VARIANT_BOOL vb;
+		CComPtr<IPoint> pnt = NULL;
+		shp->get_Point(0, &pnt);
+		shp->Create(sfType, &vb);
+		if (vb)
+		{
+			long pointIndex = 0;
+			shp->InsertPoint(pnt, &pointIndex, &vb);
+		}
+		// extract it once more to make sure it has worked
+		shp->get_ShapeType(&shapeType);
+	}
+	return sfType == shapeType;
+}
+
+// *************************************************************
 //     DissolveGEOS()
 // *************************************************************
 void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IFieldStatOperations* operations, IShapefile* sf)
@@ -836,7 +863,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	map <CComVariant, vector<GEOSGeometry*>*> shapeMap;
 	
 	CComVariant val;	// VARIANT hasn't got comparison operators and therefore
-						// can't be used with assosiative containers
+						// can't be used with associative containers
 
 	bool calcStats = false;
 	if (operations)
@@ -894,6 +921,9 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	VARIANT_BOOL vbretval;
 	map <CComVariant, vector<GEOSGeometry*>*>::iterator p = shapeMap.begin();
 
+	ShpfileType targetType;
+	sf->get_ShapefileType(&targetType);
+
 	while(p != shapeMap.end())
 	{
 		Utility::DisplayProgress(globalCallback, i, size, "Merging shapes...", key, percent);
@@ -911,8 +941,12 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 					IShape* shp = vShapes[i];
 					if (shp != NULL)
 					{
+						ForceProperShapeType(targetType, shp);
+						
 						sf->EditInsertShape(shp, &count, &vbretval);
-						sf->EditCellValue(0, count, (VARIANT)p->first, &vbretval);
+						if (vbretval)
+							sf->EditCellValue(0, count, (VARIANT)p->first, &vbretval);
+						
 						shp->Release();
 						
 						if (calcStats)
@@ -958,7 +992,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 	map <CComVariant, ClipperLib::Clipper*> shapeMap;
 	
 	CComVariant val;	// VARIANT hasn't got comparison operators and therefore
-						// can't be used with assosiative containers
+						// can't be used with associative containers
 	long percent = 0;
 	int size = (int)_shapeData.size();
 	std::vector<ClipperLib::Polygons*> polygons;
@@ -1035,7 +1069,8 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 				if (numPoints > 0)
 				{
 					sf->EditInsertShape(shp, &count, &vbretval);
-					sf->EditCellValue(0, count, (VARIANT)p->first, &vbretval);
+					if (vbretval)
+						sf->EditCellValue(0, count, (VARIANT)p->first, &vbretval);
 
 					if (calcStats)
 					{
@@ -1119,7 +1154,14 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	// ----------------------------------------------
 	//   Creating output
 	// ----------------------------------------------
-	this->CloneNoFields(retval);
+	ShpfileType targetType = _shpfiletype;
+
+	// for points change to multi-point type, as there is no other way to group them
+	if (targetType == SHP_POINT) targetType = SHP_MULTIPOINT;
+	if (targetType == SHP_POINTZ) targetType = SHP_MULTIPOINTZ;
+	if (targetType == SHP_POINTM) targetType = SHP_MULTIPOINTM;
+
+	this->CloneNoFields(retval, targetType);
 	long newFieldIndex = 0;
 	CloneField(this, *retval, FieldIndex, newFieldIndex);
 
@@ -1205,7 +1247,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 				if (_isEditingShapes)
 				{
 					// in editing mode we share the shape with parent shapefile
-					// so a copy is needed to aviod conflicts
+					// so a copy is needed to avoid conflicts
 					(*shapes)[0]->Clone(&shpBase);
 					(*shapes)[0]->Release();
 				}
@@ -1216,37 +1258,58 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 				}
 				shpBase->get_NumPoints(&pntIndex);
 				shpBase->get_NumParts(&partIndex);
+
+				ForceProperShapeType(targetType, shpBase);
 			}
 			else
 			{
 				IShape* shp = (*shapes)[j];
-				long numParts;
-				shp->get_NumParts(&numParts);
-
-				for (long part = 0; part < numParts; part++)
+				
+				if (Utility::ShapeTypeConvert2D(targetType) == SHP_MULTIPOINT)
 				{
-					shpBase->InsertPart(pntIndex, &partIndex, &vbretval);
-					
-					long start, end;
-					shp->get_Part(part, &start);
-					shp->get_EndOfPart(part, &end);
-					
-					for (long point = start; point <= end; point++)
+					// in case of multi-point target type, simply copy all the points to base shape
+					// no need to deal with parts, multi-points don't have those
+					long numPoints = 0;
+					shp->get_NumPoints(&numPoints);
+					for (long n = 0; n < numPoints; n++)
 					{
-						IPoint* pnt = NULL;
-						shp->get_Point(point, &pnt);
-						if (pnt)
-						{
-							IPoint* pntNew = NULL;
-							pnt->Clone(&pntNew);
-							shpBase->InsertPoint( pntNew, &pntIndex, &vbretval );
-							pntIndex++;
-							pntNew->Release();
-							pnt->Release();
-						}
+						CComPtr<IPoint> pnt = NULL;
+						shp->get_Point(n, &pnt);
+						long pointCount;
+						shpBase->get_NumPoints(&pointCount);
+						shpBase->InsertPoint(pnt, &pointCount, &vbretval);
 					}
+				}
+				else
+				{
+					long numParts;
+					shp->get_NumParts(&numParts);
 
-					partIndex++;
+					for (long part = 0; part < numParts; part++)
+					{
+						shpBase->InsertPart(pntIndex, &partIndex, &vbretval);
+
+						long start, end;
+						shp->get_Part(part, &start);
+						shp->get_EndOfPart(part, &end);
+
+						for (long point = start; point <= end; point++)
+						{
+							IPoint* pnt = NULL;
+							shp->get_Point(point, &pnt);
+							if (pnt)
+							{
+								IPoint* pntNew = NULL;
+								pnt->Clone(&pntNew);
+								shpBase->InsertPoint(pntNew, &pntIndex, &vbretval);
+								pntIndex++;
+								pntNew->Release();
+								pnt->Release();
+							}
+						}
+
+						partIndex++;
+					}
 				}
 				shp->Release();
 			}

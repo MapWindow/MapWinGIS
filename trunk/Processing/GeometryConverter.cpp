@@ -409,7 +409,7 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
  *	@param oBaseType sub type of geometry collection. Geometry collection 
  *					 will be treated as object of this geometry type
  *
- *  @return pointer to shape on succes, or NULL otherwise
+ *  @return pointer to shape on success, or NULL otherwise
  */
 IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
 {
