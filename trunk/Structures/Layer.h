@@ -84,6 +84,7 @@ public:
 			}
 			return false;
 		}
+		return false;
 	}
 
 	bool IsShapefile()

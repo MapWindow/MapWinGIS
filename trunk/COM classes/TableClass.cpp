@@ -2540,7 +2540,9 @@ bool CTableClass::set_IndexValue(int rowIndex)
 		return false;
 
 	long fieldIndex = -1;
-	BSTR fieldName = A2BSTR("MWShapeID");
+	
+	CComBSTR fieldName("MWShapeID");
+
 	this->get_FieldIndexByName(fieldName, &fieldIndex);
 	if (fieldIndex == -1)
 		return false;

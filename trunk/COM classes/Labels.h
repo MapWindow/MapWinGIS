@@ -69,6 +69,8 @@ public:
 		m_positioning = lpNone;
 
 		m_textRenderingHint = HintAntiAlias;
+
+		gReferenceCounter.AddRef(tkInterface::idLabels);
 	}
 	~CLabels()
 	{
@@ -78,6 +80,8 @@ public:
 		::SysFreeString(m_expression);
 		
 		m_shapefile = NULL;
+
+		gReferenceCounter.Release(tkInterface::idLabels);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_LABELS)

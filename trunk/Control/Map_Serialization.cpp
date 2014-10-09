@@ -410,7 +410,7 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 					{
 						// getting relative name
 						CComBSTR layerName;
-						layerName = this->GetLayerFilename(handle);
+						layerName.Attach(this->GetLayerFilename(handle));
 						
 						USES_CONVERSION;
 						CStringW layerNameW = OLE2W(layerName);

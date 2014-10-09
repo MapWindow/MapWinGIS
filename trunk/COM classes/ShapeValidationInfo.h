@@ -22,6 +22,11 @@ public:
 		fixedCount = 0;
 		stillInvalidCount = 0;
 		skippedCount = 0;
+		gReferenceCounter.AddRef(tkInterface::idShapeValidationInfo);
+	}
+	~CShapeValidationInfo()
+	{
+		gReferenceCounter.Release(tkInterface::idShapeValidationInfo);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEVALIDATIONINFO)

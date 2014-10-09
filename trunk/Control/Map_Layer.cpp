@@ -453,10 +453,11 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	{
 		if (!l->IsInMemoryShapefile())
 		{
-			CComBSTR name = GetLayerFilename(layerHandle);
-			symbologyName = OLE2W(name);
+			CComBSTR bstr;
+			bstr.Attach(GetLayerFilename(layerHandle));
+			symbologyName = OLE2W(bstr);
 			symbologyName += L".mwsymb";
-			symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(name) : L"";
+			symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(bstr) : L"";
 		}
 	}
 
@@ -1587,7 +1588,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	BSTR layerName = A2BSTR("");;
+	BSTR filename;
 
 	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
 	{
@@ -1596,7 +1597,6 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 	else
 	{
 		// extracting object
-		CComBSTR filename;
 		Layer* layer = _allLayers[layerHandle];
 		if (layer && (layer->type == ShapefileLayer || layer->type == ImageLayer) )
 		{
@@ -1609,33 +1609,22 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 			{
 				tkShapefileSourceType shpSource;
 				sf->get_SourceType(&shpSource);
-				sf->get_Filename(&layerName);
+				sf->get_Filename(&filename);
 				sf->Release();
-
-				/*if (shpSource != sstDiskBased)
-				{
-					this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-				}*/
 			}
 			else if (img)
 			{
 				tkImageSourceType imgSource;
 				img->get_SourceType(&imgSource);
-				img->get_Filename(&layerName);
+				img->get_Filename(&filename);
 				img->Release();
-				
-				/*if (imgSource != istDiskBased && imgSource != istGDALBased)
-				{
-				this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-				}*/
 			}
-			/*else
-			{
-			this->ErrorMessage(tkINVALID_FOR_INMEMORY_OBJECT);
-			}*/
 		}
 	}
-	return layerName;
+	if (SysStringLen(filename) == 0)
+		filename = SysAllocString(L"");
+
+	return filename;
 }
 
 // *********************************************************
@@ -1669,8 +1658,8 @@ VARIANT_BOOL CMapView::RemoveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName)
 // *********************************************************
 CString CMapView::get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName)
 {
-	CComBSTR filename("");
-	filename = this->GetLayerFilename(LayerHandle);
+	CComBSTR filename;
+	filename.Attach(this->GetLayerFilename(LayerHandle));
 	
 	USES_CONVERSION;
 	CString name = OLE2CA(filename);
@@ -1792,7 +1781,7 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	CComBSTR filename;
-	filename = this->GetLayerFilename(LayerHandle);
+	filename.Attach(this->GetLayerFilename(LayerHandle));
 	
 	// constructing name
 	USES_CONVERSION;

@@ -137,6 +137,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 	}
 
 	OGRFeatureDefn *poFields = layer->GetLayerDefn();
+	
 	for (long iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
 	{
 		GetUtils()->CreateInstance(idField, (IDispatch**)&fld);
@@ -164,14 +165,13 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 	int count = 0;
 	long percent = 0;
 	USES_CONVERSION;
-	BSTR key = A2BSTR("");
+	CComBSTR key = L"";
 	
-	while ((poFeature = layer->GetNextFeature()) != NULL)
+	while ( (poFeature = layer->GetNextFeature()) != NULL)
 	{
-		Utility::DisplayProgress(callback, count, numFeatures, "Converting geometries...", key, percent);
+		Utility::DisplayProgress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
 		count++;
-		OGRGeometry *oGeom;
-		oGeom = poFeature->GetGeometryRef();
+		OGRGeometry *oGeom = poFeature->GetGeometryRef();
 		
 		IShape* shp = NULL;
 		if (oGeom)
@@ -189,7 +189,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 		sf->get_NumShapes(&numShapes);
 		sf->EditInsertShape(shp, &numShapes, &vbretval);
 		shp->Release();
-
+	
 		if (hasFID)
 		{
 			CComVariant var;
@@ -202,7 +202,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 		{
 			OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
 			OGRFieldType type = oField->GetType();
-			
+
 			CComVariant var;
 			if (type == OFTInteger)
 			{
@@ -217,14 +217,13 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 			else //if (type == OFTString )
 			{
 				var.vt = VT_BSTR;
-				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));
+				var.bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
 			}
 			sf->EditCellValue(hasFID ? iFld + 1 : iFld, numShapes, var, &vbretval);
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	Utility::DisplayProgressCompleted(callback);
-	SysFreeString(key);
 	
 	sf->RefreshExtents(&vbretval);
 	Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this

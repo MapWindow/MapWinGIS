@@ -170,6 +170,8 @@ public:
 		m_offsetY = 0;
 
 		m_savingMode = modeXML;
+
+		gReferenceCounter.AddRef(tkInterface::idCharts);
 	}
 	
 	// destructor
@@ -178,6 +180,8 @@ public:
 		::SysFreeString(_key);
 		::SysFreeString(_caption);
 		::SysFreeString(_expression);
+
+		gReferenceCounter.Release(tkInterface::idCharts);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_CHARTS)
