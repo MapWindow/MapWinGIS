@@ -633,15 +633,18 @@ public:
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
-	void FireShapeEditing(IDispatch* shapeData, tkShapeEditingAction action, VARIANT_BOOL* cancel)
-		{FireEvent(eventidShapeEditing,EVENT_PARAM(VTS_DISPATCH VTS_I4 VTS_PBOOL), shapeData, action, cancel);}
-	void FireSelectShape( double projX, double projY, long* layerHandle, long* shapeIndex, VARIANT_BOOL* handled)
-		{FireEvent(eventidSelectShape,EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4 VTS_PI4 VTS_PBOOL), 
+	void FireShapeEditing(IDispatch* shapeData, tkShapeEditingAction action, tkMwBoolean* cancel)
+		{FireEvent(eventidShapeEditing,EVENT_PARAM(VTS_DISPATCH VTS_I4 VTS_PI4), shapeData, action, cancel);}
+	void FireSelectShape(double projX, double projY, long* layerHandle, long* shapeIndex, tkMwBoolean* handled)
+		{FireEvent(eventidSelectShape,EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4 VTS_PI4 VTS_PI4), 
 		projX, projY, layerHandle, shapeIndex, handled);}
-
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
+
+	
+
+
 
 public:
 #pragma region Members
@@ -881,7 +884,7 @@ private:
 	{
 		return (layerHandle >= 0 && layerHandle < (int)allLayers.size()?(allLayers[layerHandle]!=NULL?TRUE:FALSE):FALSE);
 	}
-	
+public:	
 	// ---------------------------------------------
 	// Gdiplus startup/shutdown handling. 
 	// Please see *.cpp for more explanation.
@@ -889,9 +892,11 @@ private:
 	static void GdiplusStartup();
 	static void GdiplusShutdown();
 	static ULONG_PTR ms_gdiplusToken;
+	static ULONG_PTR ms_gdiplusBGThreadToken;
 	static unsigned ms_gdiplusCount;
 	static ::CCriticalSection ms_gdiplusLock;
-	
+	static Gdiplus::GdiplusStartupOutput ms_gdiplusStartupOutput;
+private:	
 	// ---------------------------------------------
 	//	 Init/terminate
 	// ---------------------------------------------
@@ -1034,6 +1039,7 @@ private:
 	int AddLayerCore(Layer* layer);
 
 #pragma endregion
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

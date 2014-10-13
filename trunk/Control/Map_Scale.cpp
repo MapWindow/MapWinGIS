@@ -264,10 +264,10 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
 		int zoom;
 		_tiles->get_CurrentZoom(&zoom);
-		Debug::WriteLine("SetExtentsCore; Requested zoom: %d", zoom);
+		//Debug::WriteLine("SetExtentsCore; Requested zoom: %d", zoom);
 		this->ZoomToTileLevel(zoom);
 		_tiles->get_CurrentZoom(&zoom);
-		Debug::WriteLine("SetExtentsCore; Zoomed to: %d", zoom);
+		//Debug::WriteLine("SetExtentsCore; Zoomed to: %d", zoom);
 		return;
 	}
 

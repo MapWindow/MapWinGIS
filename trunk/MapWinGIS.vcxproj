@@ -1,54 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Fast New Lib|Win32">
-      <Configuration>Release Fast New Lib</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Fast New Lib|x64">
-      <Configuration>Release Fast New Lib</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Fast|Win32">
-      <Configuration>Release Fast</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release Fast|x64">
-      <Configuration>Release Fast</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Tamas Release|Win32">
-      <Configuration>Tamas Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Tamas Release|x64">
-      <Configuration>Tamas Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="TamasDebug|Win32">
-      <Configuration>TamasDebug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="TamasDebug|x64">
-      <Configuration>TamasDebug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Tamas|Win32">
       <Configuration>Tamas</Configuration>
       <Platform>Win32</Platform>
@@ -64,85 +16,7 @@
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <UseOfMfc>false</UseOfMfc>
-    <UseOfAtl>false</UseOfAtl>
-    <CharacterSet>MultiByte</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <UseOfAtl>false</UseOfAtl>
@@ -151,773 +25,24 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\MapWindow4Dev\Bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\..\..\..\MapWindow4Dev\Bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">..\..\..\MapWindow4Dev\Bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">..\..\..\..\MapWindow4Dev\Bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\MapWindow4Dev\Bin\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">.\bin\$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">$(Platform)\$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">$(Platform)\$(Configuration)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">false</IgnoreImportLibrary>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">true</LinkIncremental>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">$(Configuration)\$(Platform)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">false</IgnoreImportLibrary>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">true</LinkIncremental>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">$(SolutionDir)\bin\$(Platform)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">$(Configuration)\$(Platform)\</IntDir>
-    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">false</IgnoreImportLibrary>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">false</LinkIncremental>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'" />
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'" />
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">AllRules.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'" />
-    <CodeAnalysisRules Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'" />
-    <CodeAnalysisRuleAssemblies Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'" />
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">
+    <OutDir>$(SolutionDir)\bin\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\</IntDir>
+    <IgnoreImportLibrary>false</IgnoreImportLibrary>
+    <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">
-    <TargetExt>.ocx</TargetExt>
-  </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/FD /GR- /Gs /Gy /Ob2 /Ot /vmb  %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>C:\Dev\SupportLibraries\include\atlhttp;C:\Dev\SupportLibraries\include\;C:\Dev\SupportLibraries\SpatialIndex\include;C:\Dev\SupportLibraries\SpatialIndex\include\spatialindex;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Projections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <FloatingPointExceptions>false</FloatingPointExceptions>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>true</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos.lib;proj.lib;netcdf.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9.0</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\Dev\SupportLibraries\bin\$(Platform);C:\Dev\SupportLibraries\lib\$(Platform);Utils;Image;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll;netcdf.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <SubSystem>Windows</SubSystem>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <AdditionalOptions>/FD /GR- /Gs /Gy /Ob2 /Ot /vmb %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>C:\Dev\SupportLibraries\include\atlhttp;C:\Dev\SupportLibraries\include\;C:\Dev\SupportLibraries\SpatialIndex\include;C:\Dev\SupportLibraries\SpatialIndex\include\spatialindex;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Tiles\Projections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal_debug.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos_debug.lib;proj_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.8.3</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\Dev\SupportLibraries\bin\$(Platform);C:\Dev\SupportLibraries\lib\$(Platform);Utils;Image;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <SubSystem>Windows</SubSystem>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\..\..\SupportLibraries\SpatialIndex\include;..\..\..\SupportLibraries\include\atlhttp;..\..\..\SupportLibraries\include\;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <OmitDefaultLibName>true</OmitDefaultLibName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>false</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCScnet4.lib;NCSEcw4_RO.lib;NCSUtil4.lib;geos.lib;proj.lib;netcdf.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\..\SupportLibraries\lib\$(Platform);..\..\..\SupportLibraries\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>mfcs90.lib;LIBC.lib;msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>..\..\..\MapWindow4Dev\Bin\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\tkutils;..\common\cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>C:\Dev\SupportLibraries\include\;C:\Dev\SupportLibraries\SpatialIndex\include;C:\Dev\SupportLibraries\SpatialIndex\include\spatialindex;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos_c_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.8.3</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\dev\SupportLibraries\bin\$(Platform);C:\dev\SupportLibraries\lib\$(Platform);Utils;Image;3dconnexionsdk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>..\MapWindow4Dev\Bin\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\..\..\SupportLibraries_old\SpatialIndex\include;..\..\..\SupportLibraries_old\SpatialIndex\include\spatialindex;..\..\..\SupportLibraries_old\include\atlhttp;..\..\..\SupportLibraries_old\include\;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>true</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal_debug.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex_debug.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos_debug.lib;proj_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\..\..\SupportLibraries_old\bin\$(Platform);..\..\..\SupportLibraries_old\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.lib;NCSUtil4.lib;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>c:\dev\MapWindow4Dev\Bin\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\tkutils;..\common\cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>C:\Dev\SupportLibraries\include\;C:\Dev\SupportLibraries\SpatialIndex\include;C:\Dev\SupportLibraries\SpatialIndex\include\spatialindex;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal_debug.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.8.3</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\dev\SupportLibraries\bin\$(Platform);C:\dev\SupportLibraries\lib\$(Platform);Utils;Image;3dconnexionsdk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;geos_c.dll;NCSEcw4_RO.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>..\MapWindow4Dev\Bin\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>SupportingLibraries\SpatialIndex\include;SupportingLibraries\include\atlhttp;SupportingLibraries\include\;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <OmitDefaultLibName>true</OmitDefaultLibName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>false</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex.lib;geos.lib;proj.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>SupportingLibraries\lib\$(Platform);SupportingLibraries\bin\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>mfcs90.lib;LIBC.lib;msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\bin\$(Platform)\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">
-    <PreBuildEvent>
-      <Message>Deleting old TLB file...</Message>
-      <Command>erase "$(IntDir)"\*.tlb</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\tkutils;..\common\cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>C:\Dev\SupportLibraries\include\;C:\Dev\SupportLibraries\SpatialIndex\include;C:\Dev\SupportLibraries\SpatialIndex\include\spatialindex;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>cqlib.lib;GdiPlus.lib;gdal.lib;version.lib;Crypt32.lib;Dbghelp.lib;lti_dsdk.lib;lti_lidar_dsdk.lib;SpatialIndex.lib;NCSEcw4_RO.lib;NCScnet4.lib;NCSUtil4.lib;geos_c_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.8.3</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\dev\SupportLibraries\bin\$(Platform);C:\dev\SupportLibraries\lib\$(Platform);Utils;Image;3dconnexionsdk;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>lti_dsdk.dll;lti_lidar_dsdk.dll;NCSEcw4_RO.dll;NCScnet4.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>..\MapWindow4Dev\Bin\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">
+  <!-- Common properties for all configurations and platforms -->
+  <ItemDefinitionGroup>
     <PreBuildEvent>
       <Message>Copying executables...</Message>
       <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
@@ -929,14 +54,17 @@
       </Command>
       <Outputs>%(Outputs)</Outputs>
     </CustomBuildStep>
+    <!-- type library options -->
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>0</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
+      <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+      <GenerateStublessProxies>true</GenerateStublessProxies>
+      <MkTypLibCompatible>false</MkTypLibCompatible>
     </Midl>
+    <!-- cpp compiler options -->
     <ClCompile>
       <AdditionalOptions>/MP  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
@@ -947,7 +75,7 @@
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -964,27 +92,31 @@
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <ShowIncludes>false</ShowIncludes>
       <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
+    <!-- resource options -->
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(intdir)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <!-- linker options -->
     <Link>
+      <Version>4.9.3</Version>
       <RegisterOutput>true</RegisterOutput>
       <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>mfcs100.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9.2</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\GDAL_SDK\VC2010\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\VC2010\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)MapWinGIS.pdb</ProgramDatabaseFile>
@@ -994,7 +126,8 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TypeLibraryFile>$(IntDir)MapWinGIS.tlb</TypeLibraryFile>
+      <TypeLibraryResourceID>2</TypeLibraryResourceID>
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -1004,409 +137,33 @@
       </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">
-    <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
+  <!-- Win32 platform definitions -->
+  <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
     </Midl>
     <ClCompile>
-      <AdditionalOptions>/MP  %(AdditionalOptions)</AdditionalOptions>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <ShowIncludes>false</ShowIncludes>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
     <Link>
-      <RegisterOutput>true</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs100.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9.2</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\GDAL_SDK\VC2010\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
+      <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">
-    <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
+  <!-- x64 platform definitions -->
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
     <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
+      <TargetEnvironment>x64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\Tamas\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <ShowIncludes>false</ShowIncludes>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
+      <PreprocessorDefinitions>WIN64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>false</RegisterOutput>
-      <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9.2</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\Tamas\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">
-    <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\Tamas\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <ShowIncludes>false</ShowIncludes>
-      <OmitDefaultLibName>false</OmitDefaultLibName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>false</RegisterOutput>
-      <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9.2</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\Tamas\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(OutDir)MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX64</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">
-    <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\Tamas\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_NDBGSYMBOLS;DEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <OmitDefaultLibName>true</OmitDefaultLibName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
-    <Link>
-      <RegisterOutput>false</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\Tamas\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>mfcs90.lib;LIBC.lib;msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\bin\$(Platform)\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
-      <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">
-    <PreBuildEvent>
-      <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
-    </PreBuildEvent>
-    <CustomBuildStep>
-      <Message>
-      </Message>
-      <Command>
-      </Command>
-      <Outputs>%(Outputs)</Outputs>
-    </CustomBuildStep>
-    <Midl>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <WarningLevel>0</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <TargetEnvironment>X64</TargetEnvironment>
-      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
-    </Midl>
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <OmitFramePointers>true</OmitFramePointers>
-      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\Tamas\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;WIN64;_NDBGSYMBOLS;NDEBUG;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <StringPooling>true</StringPooling>
-      <MinimalRebuild>false</MinimalRebuild>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <PrecompiledHeader>Create</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <ObjectFileName>$(IntDir)</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
-      <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CompileAs>Default</CompileAs>
-      <OmitDefaultLibName>true</OmitDefaultLibName>
-    </ClCompile>
-    <ResourceCompile>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <Culture>0x0409</Culture>
-    </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:x64 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>mfcs90.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ShowProgress>NotSet</ShowProgress>
-      <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
-      <Version>4.9</Version>
-      <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\Tamas\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <IgnoreSpecificDefaultLibraries>mfcs90.lib;LIBC.lib;msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ModuleDefinitionFile>.\MapWinGIS.def</ModuleDefinitionFile>
-      <DelayLoadDLLs>%(DelayLoadDLLs)</DelayLoadDLLs>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\bin\$(Platform)\MapWinGIS.pdb</ProgramDatabaseFile>
-      <SubSystem>Windows</SubSystem>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
-      <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
-    <Bscmake>
-      <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
-    </Bscmake>
   </ItemDefinitionGroup>
+  <!-- headers -->
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\EditShape.h" />
@@ -1623,6 +380,7 @@
     <ClInclude Include="Tiles\Projections\MercatorProjectionYandex.h" />
     <ClInclude Include="_ITableEvents_CP.H" />
   </ItemGroup>
+  <!-- source -->
   <ItemGroup>
     <ClCompile Include="COM classes\EditShape.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
@@ -1696,32 +454,11 @@
     <ClCompile Include="Image\tkGif.cpp" />
     <ClCompile Include="Image\tkJpg.cpp" />
     <ClCompile Include="Image\tkRaster.cpp" />
-    <ClCompile Include="Control\ErrorCodes.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">
-      </PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Control\ErrorCodes.cpp" />
     <ClCompile Include="Control\GlobalVars.cpp" />
     <ClCompile Include="Control\Map.cpp" />
-    <ClCompile Include="Control\Map_Core.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">stdafx.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Control\Map_Cursors.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">stdafx.h</PrecompiledHeaderFile>
-    </ClCompile>
+    <ClCompile Include="Control\Map_Core.cpp" />
+    <ClCompile Include="Control\Map_Cursors.cpp" />
     <ClCompile Include="Control\Map_DispatchMap.cpp" />
     <ClCompile Include="Control\Map_Drawing.cpp" />
     <ClCompile Include="Control\Map_DrawingLayer.cpp" />
@@ -1741,24 +478,14 @@
     <ClCompile Include="Control\MapPpg.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
-    <ClCompile Include="MapWinGIS.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Shapefile\ActiveShape.cpp" />
     <ClCompile Include="Shapefile\EditShapeBase.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
@@ -1780,47 +507,11 @@
     <ClCompile Include="Utilities\Debugging\MemLeakDetect.cpp" />
     <ClCompile Include="Utilities\Debugging\ReferenceCounter.cpp" />
     <ClCompile Include="Utilities\SQLite\shell.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">
+      <PrecompiledHeader>
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Utilities\SQLite\sqlite3.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">
+      <PrecompiledHeader>
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Grid\dGrid.cpp" />
@@ -1974,6 +665,7 @@
     <ClCompile Include="Tiles\Projections\BaseProjection.cpp" />
     <ClCompile Include="Tiles\Projections\CustomProjection.cpp" />
   </ItemGroup>
+  <!-- resource from .rc will processed with .rc file, therefore None as action here -->
   <ItemGroup>
     <None Include="COM classes\Chart.rgs" />
     <None Include="COM classes\ChartField.rgs" />
@@ -2017,9 +709,9 @@
     <None Include="COM classes\Tin.rgs" />
     <None Include="COM classes\Utils.rgs" />
     <None Include="COM classes\Vector.rgs" />
-    <None Include="MapWinGIS.def" />
     <None Include="Grid\fip\Makefile" />
     <None Include="Grid\fip\readme.123" />
+    <None Include="MapWinGIS.rgs" />
     <None Include="Resource\cursor1.cur" />
     <None Include="Resource\cursor2.cur" />
     <None Include="Resource\cursor3.cur" />
@@ -2030,101 +722,24 @@
     <None Include="Resource\zoom_in_16_2.ico" />
     <None Include="Resources\zoom_in_16_2.ico" />
   </ItemGroup>
+  <!-- type library -->
   <ItemGroup>
-    <Midl Include="MapWinGIS.odl">
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">0</WarningLevel>
-      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">0</WarningLevel>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">Win32</TargetEnvironment>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">true</GenerateStublessProxies>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">Win32</TargetEnvironment>
-      <TargetEnvironment Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">Win32</TargetEnvironment>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">true</GenerateStublessProxies>
-      <GenerateStublessProxies Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">true</GenerateStublessProxies>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <TypeLibraryName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">.\MapWinGIS.tlb</TypeLibraryName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">MapWinGIS_i.h</HeaderFileName>
-      <HeaderFileName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">MapWinGIS_i.h</HeaderFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
-      <InterfaceIdentifierFileName Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">MapWinGIS_i.c</InterfaceIdentifierFileName>
+    <Midl Include="MapWinGIS.idl">
+      <HeaderFileName>MapWinGIS_i.h</HeaderFileName>
+      <InterfaceIdentifierFileName>MapWinGIS_i.c</InterfaceIdentifierFileName>
+      <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
     </Midl>
   </ItemGroup>
+  <!-- resources -->
   <ItemGroup>
-    <ResourceCompile Include="MapWinGIS.rc">
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release Fast New Lib|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release Fast|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release Fast|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='TamasDebug|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='TamasDebug|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Tamas Release|Win32'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Tamas Release|x64'">$(OUTDIR)</AdditionalIncludeDirectories>
-    </ResourceCompile>
+    <ResourceCompile Include="MapWinGIS.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="MapWinGIS.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

@@ -11,8 +11,8 @@
 #include <olectl.h>
 #include <idispids.h>
 
-import "oaidl.idl";
 import "ocidl.idl";
+import "oaidl.idl";
 
 //forward declarations of interfaces
 interface IShapefileColorBreak;
@@ -55,6 +55,18 @@ interface IFileManager;
 interface IEditShape;
 interface IOgrDatasource;
 interface IOgrLayer;
+
+/************************** tkMwBoolean Enumeration **********************/
+typedef
+[
+	uuid(F8DA5C43-0B00-4EFB-BEAC-67C522925884),
+	helpstring("tkMwBoolean"),
+]
+enum tkMwBoolean
+{
+	blnFalse = 0,
+	blnTrue = 1,
+} tkMwBoolean;
 
 /************************** tkOgrEncoding Enumeration **********************/
 typedef
@@ -5872,10 +5884,10 @@ library MapWinGIS
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
-			[id(16)] void ShapeEditing(IEditShape* ShapeData, tkShapeEditingAction Action, VARIANT_BOOL* Cancel);
-			[id(17)] void ShapeSelected(double projX, double projY, long* layerHandle, long* shapeIndex, VARIANT_BOOL* handled);
+			[id(16)] void ShapeEditing(IEditShape* ShapeData, tkShapeEditingAction Action, tkMwBoolean* Cancel);
+			[id(17)] void ShapeSelected(double projX, double projY, long* layerHandle, long* shapeIndex, tkMwBoolean* handled);
 			[id(DISPID_DBLCLICK)] void DblClick(void);
-			//}}AFX_ODL_EVENT
+	//}}AFX_ODL_EVENT
 	};
 	[
 		object,

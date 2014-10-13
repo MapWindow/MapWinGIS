@@ -4,6 +4,7 @@
 // or project specific include files that are used frequently,
 // but are changed infrequently
 
+#define _ATL_APARTMENT_THREADED 
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
@@ -58,3 +59,5 @@
 
 #include "GlobalVars.h"
 
+
+#include <atlcom.h>

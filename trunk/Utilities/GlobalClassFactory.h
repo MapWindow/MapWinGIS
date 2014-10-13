@@ -1,5 +1,4 @@
 #pragma once
-#include "MapWinGIS_i.h"
 
 class GlobalClassFactory
 {

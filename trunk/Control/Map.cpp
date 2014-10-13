@@ -42,8 +42,6 @@ using namespace std;
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-
 #pragma region Control info
 IMPLEMENT_DYNCREATE(CMapView, COleControl)
 
@@ -121,6 +119,7 @@ CMapView::CMapView()
 	_penDarkGray(Gdiplus::Color::DarkSlateGray),
 	_propertyExchange(NULL)
 {
+	//this->GdiplusStartup();	       // commented intentionally; moved to ExitInstance; see comments below
 	Startup();
 	SetDefaults();
 }
@@ -137,6 +136,8 @@ CMapView::~CMapView()
 	ReleaseTempObjects();
 	
 	this->Shutdown();
+
+	//this->GdiplusShutdown();      // commented intentionally; moved to ExitInstance; see comments below
 }
 
 // **********************************************************************
@@ -162,7 +163,6 @@ void CMapView::Clear()
 // Must be called from constructor only
 void CMapView::Startup()
 {
-	this->GdiplusStartup();
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
 	
 	Gdiplus::FontFamily family(L"Courier New");
@@ -420,7 +420,7 @@ void CMapView::Shutdown()
 
 	delete _ttipCtrl;
 
-	this->GdiplusShutdown();
+	
 }
 
 // ********************************************************************
@@ -662,9 +662,18 @@ So, I decided on "gdiplus registration per control" strategy:
 2. when count goes from/to 0, we call GdiplusStartup/Shutdown.
 3. we protect GdiplusStartup/Shutdown calls by a critical section,
    to avoid multithreaded surprises (albeit multiple threads are, I think, highly unlikely).*/
+
+// IMPORTANT: the behavior is changed on 13 oct 14, startup/shutdown is moved back to
+// App::InitInstaance/App::ExitInstance because of issues with tile cache, which uses
+// GdiPlus::Bitmaps. It's desirable to keep it open even when the last CMapView contol
+// is destructed. Solution described at http://mikevdm.com/BlogEntry/Key/GdiplusShutdown-Hangs-Mysteriously
+// was implemented. Hopefully it will work.
+
 ULONG_PTR CMapView::ms_gdiplusToken=NULL;
+ULONG_PTR CMapView::ms_gdiplusBGThreadToken=NULL;
 unsigned CMapView::ms_gdiplusCount=0;
 ::CCriticalSection CMapView::ms_gdiplusLock;
+Gdiplus::GdiplusStartupOutput CMapView::ms_gdiplusStartupOutput;
 
 void CMapView::GdiplusStartup()
 {
@@ -672,12 +681,16 @@ void CMapView::GdiplusStartup()
 	if (ms_gdiplusCount == 0)
 	{
 		Gdiplus::GdiplusStartupInput gdiplusStartupInput;
-		Gdiplus::Status s = Gdiplus::GdiplusStartup(&ms_gdiplusToken, &gdiplusStartupInput, NULL);
+		gdiplusStartupInput.SuppressBackgroundThread = TRUE;
+		Gdiplus::Status s = Gdiplus::GdiplusStartup(&ms_gdiplusToken, &gdiplusStartupInput, &ms_gdiplusStartupOutput);
 		if (s != Gdiplus::Ok)
 		{
 			TRACE(_T("GdiplusStartup failed, error: %d, GetLastError = %d\n"), s, GetLastError());
 			ASSERT(FALSE);
 			AfxThrowResourceException();
+		}
+		else {
+			ms_gdiplusStartupOutput.NotificationHook(&ms_gdiplusBGThreadToken);
 		}
 	}
 	ms_gdiplusCount++;
@@ -692,6 +705,7 @@ void CMapView::GdiplusShutdown()
 	ms_gdiplusCount--;
 	if (ms_gdiplusCount == 0)
 	{
+		ms_gdiplusStartupOutput.NotificationUnhook(ms_gdiplusBGThreadToken);
 		Gdiplus::GdiplusShutdown(ms_gdiplusToken);
 		ms_gdiplusToken = NULL;
 	}

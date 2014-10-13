@@ -47,7 +47,7 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 
 	// check perhaps map projection is the same as the one for tiles
 	// then we don't have to use conversion to WGS84 decimal degrees
-	VARIANT_BOOL isSame;
+	VARIANT_BOOL isSame = VARIANT_FALSE;
 	CustomProjection* customProj = NULL;
 	if (tileProjection && mapProjection)
 	{

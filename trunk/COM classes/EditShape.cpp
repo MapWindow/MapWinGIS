@@ -319,7 +319,7 @@ STDMETHODIMP CEditShape::FinishShape(VARIANT_BOOL* retVal)
 	CMapView* map = (CMapView*)_editShape->GetMapView();
 	if (map)
 	{
-		VARIANT_BOOL cancel = VARIANT_FALSE;	
+		tkMwBoolean cancel = blnFalse;
 		map->FireShapeEditing(this, eaShapeCreated, &cancel);
 
 		if (!cancel) 

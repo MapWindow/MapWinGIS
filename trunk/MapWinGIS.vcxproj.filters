@@ -1688,18 +1688,13 @@
     <None Include="COM classes\EditShape.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
-    <None Include="MapWinGIS.def" />
     <None Include="COM classes\OgrDatasource.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\OgrLayer.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Midl Include="MapWinGIS.odl">
-      <Filter>Control</Filter>
-    </Midl>
+    <None Include="MapWinGIS.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />
@@ -1708,5 +1703,10 @@
     <CustomBuildStep Include="Utilities\Templates.h">
       <Filter>Utilities</Filter>
     </CustomBuildStep>
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="MapWinGIS.idl">
+      <Filter>Control</Filter>
+    </Midl>
   </ItemGroup>
 </Project>

@@ -65,6 +65,7 @@ IDR_FILEMANAGER         REGISTRY                "COM Classes/FileManager.rgs"
 IDR_EDITSHAPE           REGISTRY                "COM Classes/EditShape.rgs"
 IDR_OGRDATASOURCE       REGISTRY                "COM Classes/OgrDatasource.rgs"
 IDR_OGRLAYER            REGISTRY                "COM Classes/OgrLayer.rgs"
+IDR_MAPWINGIS           REGISTRY                "MapWinGIS.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

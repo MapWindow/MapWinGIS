@@ -367,8 +367,10 @@ bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeInd
 {
 	double projX, projY;
 	PixelToProj(x, y, &projX, &projY);
-	VARIANT_BOOL handled = VARIANT_FALSE;
-	FireSelectShape(projX, projY, &layerHandle, &shapeIndex, &handled);
+	tkMwBoolean handled = blnFalse;
+	
+	long handle = layerHandle, index = shapeIndex;
+	FireSelectShape(projX, projY, &handle, &index, &handled);
 	if (!handled)
 	{
 		HotTrackingInfo* info = FindShapeAtScreenPoint(CPoint(x, y), slctInMemorySf);
@@ -561,7 +563,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				ShpfileType shpType;
 				_editShape->get_ShapeType(&shpType);
 
-				VARIANT_BOOL cancel = VARIANT_FALSE;
+				tkMwBoolean cancel = blnFalse;
 				if (shpType == SHP_NULLSHAPE)
 				{
 					FireShapeEditing(_editShape, eaNewShape, &cancel);
@@ -601,7 +603,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		case cmMoveShape:
 		case cmEditShape:
 			{
-				long layerHandle, shapeIndex;
+				long layerHandle = -1, shapeIndex = -1;
 				if (GetEditShapeBase()->IsEmpty())
 				{
 					if (SelectSingleShape(x, y, layerHandle, shapeIndex))
@@ -623,7 +625,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 						bool handled = false;
 						if (m_cursorMode == cmMoveShape)
 						{
-							if (((CShapefile*)sf)->PointWithinShape(shp, projX, projY, MOUSE_CLICK_TOLERANCE))
+							if (((CShapefile*)sf)->PointWithinShape(shp, projX, projY, GetMouseTolerance(ToleranceSelect)))
 							{
 								this->SetCapture();
 								_dragging.Operation = DragMoveShape;
@@ -843,7 +845,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 				_dragging.Operation = DragNone;
 				Redraw2(tkRedrawType::RedrawSkipDataLayers);
 
-				VARIANT_BOOL cancel = VARIANT_FALSE;
+				tkMwBoolean cancel = blnFalse;
 				FireShapeEditing(_editShape, eaShapeMoved, &cancel);
 			}
 			break;	
@@ -1219,7 +1221,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (m_cursorMode == cmAddShape)
 		{
-			VARIANT_BOOL cancel = VARIANT_FALSE;
+			tkMwBoolean cancel = blnFalse;
 			FireShapeEditing(_editShape, eaUndoPoint, &cancel);
 			if (!cancel)
 			{
