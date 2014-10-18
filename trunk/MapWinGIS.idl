@@ -15,6 +15,7 @@ import "ocidl.idl";
 import "oaidl.idl";
 
 //forward declarations of interfaces
+interface IEditShape;
 interface IShapefileColorBreak;
 interface IGridHeader;
 interface IShape;
@@ -52,7 +53,6 @@ interface IImage;
 interface IShapeValidationInfo;
 interface IFieldStatOperations;
 interface IFileManager;
-interface IEditShape;
 interface IOgrDatasource;
 interface IOgrLayer;
 
@@ -3040,7 +3040,62 @@ enum tkScalebarUnits
 		Wgs84_UPS_South_NE = 32761,
 	}tkWgs84Projection;
 
-
+	[
+		object,
+		uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
+		dual,
+		nonextensible,
+		helpstring("IEditShape Interface"),
+		pointer_default(unique)
+	]
+	interface IEditShape : IDispatch{
+		
+		[propget, id(1), helpstring("")] HRESULT ShapeType([out, retval] ShpfileType* retVal);
+		[propput, id(1), helpstring("")] HRESULT ShapeType([in] ShpfileType newVal);
+		[propget, id(2), helpstring("")] HRESULT numPoints([out, retval] long* retVal);
+		[id(3)] HRESULT get_PointXY([in]long pointIndex, [out]double* x, [out]double* y, [out, retval]VARIANT_BOOL* retVal);
+		[propget, id(4), helpstring("")] HRESULT AsShape([out, retval] IShape** retVal);
+		[id(5), helpstring("")] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
+		[propget, id(6), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
+		[propget, id(7), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
+		[propget, id(8), helpstring("")] HRESULT GlobalCallback([out, retval]ICallback** retVal);
+		[propput, id(8), helpstring("")] HRESULT GlobalCallback([in]ICallback* newVal);
+		[propget, id(9), helpstring("")] HRESULT Key([out, retval]BSTR* retVal);
+		[propput, id(9), helpstring("")] HRESULT Key([in]BSTR newVal);
+		[id(10), helpstring("")] HRESULT Clear();
+		[id(11), helpstring("")] HRESULT FinishShape([out, retval] VARIANT_BOOL* retVal);
+		[propget, id(12), helpstring("")] HRESULT SegmentLength([in]int segmentIndex, [out, retval]double* retVal);
+		[propget, id(13), helpstring("")] HRESULT SegmentAngle([in]int segmentIndex, [out, retval]double* retVal);
+		[propget, id(14), helpstring("")] HRESULT AreaDisplayMode([out, retval]tkAreaDisplayMode* retVal);
+		[propput, id(14), helpstring("")] HRESULT AreaDisplayMode([in]tkAreaDisplayMode newVal);
+		[propget, id(17), helpstring("")] HRESULT CreationMode([out, retval]VARIANT_BOOL* retVal);
+		[propput, id(17), helpstring("")] HRESULT CreationMode([in]VARIANT_BOOL newVal);
+		[id(18), helpstring("")] HRESULT AddPoint([in]double xProj, [in]double yProj);
+		[propget, id(20), helpstring("")] HRESULT Area([out, retval]double* retVal);
+		[id(21), helpstring("")] HRESULT SetShape([in]IShape* shp);
+		[propget, id(22), helpstring("")] HRESULT AngleDisplayMode([out, retval]tkAngleDisplay* retVal);
+		[propput, id(22), helpstring("")] HRESULT AngleDisplayMode([in]tkAngleDisplay newVal);
+		[propget, id(23), helpstring("")] HRESULT AngleFormat([out, retval]tkAngleFormat* retVal);
+		[propput, id(23), helpstring("")] HRESULT AngleFormat([in]tkAngleFormat newVal);
+		[propget, id(24), helpstring("")] HRESULT LengthRounding([out, retval]int* retVal);
+		[propput, id(24), helpstring("")] HRESULT LengthRounding([in]int newVal);
+		[propget, id(25), helpstring("")] HRESULT AreaRounding([out, retval]int* retVal);
+		[propput, id(25), helpstring("")] HRESULT AreaRounding([in]int newVal);
+		[id(26)] HRESULT put_PointXY([in]long pointIndex, [in]double X, [in]double Y, [out, retval]VARIANT_BOOL* retVal);
+		[propget, id(27), helpstring("")] HRESULT LayerHandle([out, retval]int* retVal);
+		[propput, id(27), helpstring("")] HRESULT LayerHandle([in]int newVal);
+		[propget, id(28), helpstring("")] HRESULT ShapeIndex([out, retval]int* retVal);
+		[propput, id(28), helpstring("")] HRESULT ShapeIndex([in]int newVal);
+		[propget, id(30), helpstring("")] HRESULT AngleCorrection([out, retval]double* retVal);
+		[propput, id(30), helpstring("")] HRESULT AngleCorrection([in]double newVal);
+		[propget, id(31), helpstring("")] HRESULT Visible([out, retval]VARIANT_BOOL* retVal);
+		[propput, id(31), helpstring("")] HRESULT Visible([in]VARIANT_BOOL newVal);
+		[propget, id(32), helpstring("")] HRESULT DrawLabelsOnly([out, retval]VARIANT_BOOL* retVal);
+		[propput, id(32), helpstring("")] HRESULT DrawLabelsOnly([in]VARIANT_BOOL newVal);
+		[propget, id(33), helpstring("")] HRESULT HasValidShape([out, retval]VARIANT_BOOL* retVal);
+		[propget, id(34), helpstring("")] HRESULT SelectedVertex([out, retval]int* retVal);
+		[propput, id(34), helpstring("")] HRESULT SelectedVertex([in]int newVal);
+	};
 
 /****************************  Grid Interface ***********************/
 [
@@ -5322,7 +5377,7 @@ interface IFileManager : IDispatch{
 	[id(20)] HRESULT BuildGdalOverviews([in]BSTR Filename, [in]ICallback* cBack, [out, retval] VARIANT_BOOL *pVal);
 	[id(22)] HRESULT RemoveProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	[propget, id(23)] HRESULT HasValidProxyForGrid([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
-	[id(24)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerNameOrQuery, [out, retval]IOgrLayer** retVal);
+	[id(24)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR LayerNameOrQuery, [out, retval]IOgrLayer** retVal);
 	//[propget, id(21)] HRESULT NeedsGdalOverviews([in]BSTR Filename, [out, retval] VARIANT_BOOL *pVal);
 	//[propget, id(7), helpstring("HasProjection")] HRESULT HasProjection([in]BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
@@ -5330,61 +5385,7 @@ interface IFileManager : IDispatch{
 	//[id(13), helpstring("DeleteDatasource")] HRESULT DeleteDatasource([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
 };
 
-[
-	object,
-	uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
-	dual,
-	nonextensible,
-	helpstring("IEditShape Interface"),
-	pointer_default(unique)
-]
-interface IEditShape : IDispatch{
-	[propget, id(1), helpstring("")] HRESULT ShapeType([out, retval] ShpfileType* retVal);
-	[propput, id(1), helpstring("")] HRESULT ShapeType([in] ShpfileType newVal);
-	[propget, id(2), helpstring("")] HRESULT AsShape([out, retval] IShape** retVal);
-	[propget, id(3), helpstring("")] HRESULT NumPoints([out, retval] long* retVal);
-	[id(4), helpstring("")] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
-	[id(5)] HRESULT get_PointXY([in]long pointIndex, [out]double* X, [out]double* Y, [out, retval]VARIANT_BOOL* retVal);
-	[propget, id(6), helpstring("")] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
-	[propget, id(7), helpstring("")] HRESULT LastErrorCode([out, retval] long *pVal);
-	[propget, id(8), helpstring("")] HRESULT GlobalCallback( [out, retval]ICallback** retVal);
-	[propput, id(8), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
-	[propget, id(9), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
-	[propput, id(9), helpstring("")] HRESULT Key( [in]BSTR newVal);
-	[id(10), helpstring("")] HRESULT Clear();
-	[id(11), helpstring("")] HRESULT FinishShape([out, retval] VARIANT_BOOL* retVal);
-	[propget, id(12), helpstring("")] HRESULT SegmentLength( [in]int segmentIndex, [out, retval]double* retVal);
-	[propget, id(13), helpstring("")] HRESULT SegmentAngle( [in]int segmentIndex, [out, retval]double* retVal);
-	[propget, id(14), helpstring("")] HRESULT AreaDisplayMode( [out, retval]tkAreaDisplayMode* retVal);
-	[propput, id(14), helpstring("")] HRESULT AreaDisplayMode( [in]tkAreaDisplayMode newVal);
-	[propget, id(17), helpstring("")] HRESULT CreationMode( [out, retval]VARIANT_BOOL* retVal);
-	[propput, id(17), helpstring("")] HRESULT CreationMode( [in]VARIANT_BOOL newVal);
-	[id(18), helpstring("")] HRESULT AddPoint( [in]double xProj, [in]double yProj);
-	[propget, id(20), helpstring("")] HRESULT Area( [out, retval]double* retVal);
-	[id(21), helpstring("")] HRESULT SetShape( [in]IShape* shp);
-	[propget, id(22), helpstring("")] HRESULT AngleDisplayMode( [out, retval]tkAngleDisplay* retVal);
-	[propput, id(22), helpstring("")] HRESULT AngleDisplayMode( [in]tkAngleDisplay newVal);
-	[propget, id(23), helpstring("")] HRESULT AngleFormat( [out, retval]tkAngleFormat* retVal);
-	[propput, id(23), helpstring("")] HRESULT AngleFormat( [in]tkAngleFormat newVal);
-	[propget, id(24), helpstring("")] HRESULT LengthRounding( [out, retval]int* retVal);
-	[propput, id(24), helpstring("")] HRESULT LengthRounding( [in]int newVal);
-	[propget, id(25), helpstring("")] HRESULT AreaRounding( [out, retval]int* retVal);
-	[propput, id(25), helpstring("")] HRESULT AreaRounding( [in]int newVal);
-	[id(26)] HRESULT put_PointXY([in]long pointIndex, [in]double X, [in]double Y, [out, retval]VARIANT_BOOL* retVal);
-	[propget, id(27), helpstring("")] HRESULT LayerHandle( [out, retval]int* retVal);
-	[propput, id(27), helpstring("")] HRESULT LayerHandle( [in]int newVal);
-	[propget, id(28), helpstring("")] HRESULT ShapeIndex( [out, retval]int* retVal);
-	[propput, id(28), helpstring("")] HRESULT ShapeIndex( [in]int newVal);
-	[propget, id(30), helpstring("")] HRESULT AngleCorrection( [out, retval]double* retVal);
-	[propput, id(30), helpstring("")] HRESULT AngleCorrection( [in]double newVal);
-	[propget, id(31), helpstring("")] HRESULT Visible( [out, retval]VARIANT_BOOL* retVal);
-	[propput, id(31), helpstring("")] HRESULT Visible( [in]VARIANT_BOOL newVal);
-	[propget, id(32), helpstring("")] HRESULT DrawLabelsOnly( [out, retval]VARIANT_BOOL* retVal);
-	[propput, id(32), helpstring("")] HRESULT DrawLabelsOnly( [in]VARIANT_BOOL newVal);
-	[propget, id(33), helpstring("")] HRESULT HasValidShape( [out, retval]VARIANT_BOOL* retVal);
-	[propget, id(34), helpstring("")] HRESULT SelectedVertex( [out, retval]int* retVal);
-	[propput, id(34), helpstring("")] HRESULT SelectedVertex( [in]int newVal);
-};
+
 [
 	object,
 	uuid(EC7866BE-AE6C-46D6-8E9A-1F55D166F440),
@@ -5405,15 +5406,15 @@ interface IOgrDatasource : IDispatch{
 	[id(8)] HRESULT GetLayer([in]int index, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
 	[propget, id(9)] HRESULT DriverName([out, retval]BSTR* retVal);
 	[id(10)] HRESULT GetLayerName([in]int layerIndex, [out, retval]BSTR* retVal);
-	[id(11)] HRESULT GetLayerByName([in]BSTR layerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
+	[id(11)] HRESULT GetLayerByName([in]BSTR LayerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]IOgrLayer** retVal);
 	[id(12)] HRESULT RunQuery([in]BSTR sql, [out, retval]IOgrLayer** retVal);
 	[id(13)] HRESULT DeleteLayer([in]int layerIndex, [out, retval]VARIANT_BOOL* retVal);
 	[id(14)] HRESULT TestCapability([in]tkOgrDSCapability capability, [out, retval]VARIANT_BOOL* retVal);
-	[id(15)] HRESULT CreateLayer([in]BSTR layerName, [in]ShpfileType shpType, 
+	[id(15)] HRESULT CreateLayer([in]BSTR LayerName, [in]ShpfileType shpType,
 		[in, optional, defaultvalue(NULL)]IGeoProjection* projection, 
 		[in, optional,defaultvalue("")]BSTR creationOptions, [out, retval]VARIANT_BOOL* retVal);
-	[id(16)] HRESULT LayerIndexByName([in]BSTR layerName, [out, retval]int* retVal);
-	[id(17)] HRESULT ImportShapefile([in] IShapefile* sf, [in]BSTR layerName,
+	[id(16)] HRESULT LayerIndexByName([in]BSTR LayerName, [out, retval]int* retVal);
+	[id(17)] HRESULT ImportShapefile([in] IShapefile* sf, [in]BSTR LayerName,
 		[in, optional, defaultvalue("")]BSTR creationOptions, 
 		[in, optional, defaultvalue(TryFixSkipOnFailure)]tkShapeValidationMode shapeValidationMode, 
 		[out, retval]VARIANT_BOOL* retVal);
@@ -5462,7 +5463,7 @@ interface IOgrLayer : IDispatch{
 	[id(25)] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(26)] HRESULT Deserialize([in]BSTR newVal, [out, retval]VARIANT_BOOL* retVal);
 	[id(27)] HRESULT OpenFromQuery([in]BSTR connectionString, [in]BSTR sql, [out, retval]VARIANT_BOOL* retVal);
-	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR layerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
+	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR LayerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(29)] HRESULT SourceType([out, retval]tkOgrSourceType* retVal);
 	[propget, id(30)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
 };
@@ -5477,6 +5478,15 @@ library MapWinGIS
 { 
 	importlib(STDOLE_TLB);
 	importlib(STDTYPE_TLB);
+
+	[
+		uuid(130B7AEB-0350-437F-B044-4839AEC92F22),
+		helpstring("EditShape Class")
+	]
+	coclass EditShape
+	{
+		[default] interface IEditShape;
+	};
 
 	//  Primary dispatch interface for CMap
 	
@@ -5841,7 +5851,7 @@ library MapWinGIS
 			[id(234), propget] long ZoomBarMaxZoom();
 			[id(235), propget] IEditShape* EditShape();
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
-			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameOrQuery, VARIANT_BOOL Visible);
+			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
 			//}}AFX_ODL_METHOD
 	};
 
@@ -6258,14 +6268,7 @@ library MapWinGIS
 	{
 		[default] interface IFileManager;
 	};
-	[
-		uuid(130B7AEB-0350-437F-B044-4839AEC92F22),
-		helpstring("EditShape Class")
-	]
-	coclass EditShape
-	{
-		[default] interface IEditShape;
-	};
+	
 	[
 		uuid(33F91D20-8EBA-4033-AE3B-15A7041087BB)
 	]

@@ -265,7 +265,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	if (layersRedraw) {
 		_lastRedrawTime = (float)(endTick - startTick)/1000.0f;
 	}
-	this->ShowRedrawTime(gBuffer, _lastRedrawTime, layersRedraw);
+	this->ShowRedrawTime(_isSnapshot ? gPrinting : gBuffer, _lastRedrawTime, layersRedraw);
 
 	// -------------------------------------------
 	// distance measuring or persistent measuring

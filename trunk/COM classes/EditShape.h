@@ -55,7 +55,7 @@ public:
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	
 	STDMETHOD(Clear)();
-	STDMETHOD(get_NumPoints)(long* retVal);
+	STDMETHOD(get_numPoints)(long* retVal);
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);

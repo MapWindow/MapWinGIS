@@ -234,7 +234,7 @@ STDMETHODIMP CEditShape::put_PointXY(long pointIndex, double x, double y, VARIAN
 // *******************************************************
 //		get_PointCount()
 // *******************************************************
-STDMETHODIMP CEditShape::get_NumPoints(long* retVal)
+STDMETHODIMP CEditShape::get_numPoints(long* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _editShape->GetPointCount();
