@@ -151,6 +151,15 @@ public:
 		#endif
 	}
 
+	static GEOSGeometry* TopologyPreserveSimplify(const GEOSGeometry* gsGeom, double tolerance)
+	{
+		#ifdef GEOS_NEW
+			return GEOSTopologyPreserveSimplify_r(getGeosHandle(), gsGeom, tolerance);
+		#else
+			return GEOSTopologyPreserveSimplify(gsGeom, tolerance);
+		#endif
+	}
+
 	static char* GetGeometryType(GEOSGeometry* gsGeom)
 	{
 		#ifdef GEOS_NEW

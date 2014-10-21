@@ -968,11 +968,11 @@ GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>
 //		SimplifyPolygon()
 // *****************************************************
 // A polygon is expected as input 
-// (mutipolygons shoud be split into parts before treating with this routine)
+// (multi-polygons should be split into parts before treating with this routine)
 GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
 {
 	const GEOSGeometry* gsRing =  GeosHelper::GetExteriorRing(gsGeom);	// no memory is allocated there
-	GEOSGeom gsPoly = GeosHelper::Simplify(gsRing, tolerance);		// memory allocation
+	GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
 
 	if (!gsPoly)
 		return NULL;
@@ -983,7 +983,7 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 		gsRing = GeosHelper::GetInteriorRingN(gsGeom, n);				// no memory is allocated there
 		if (gsRing)
 		{
-			GEOSGeom gsOut = GeosHelper::Simplify(gsRing, tolerance);	// memory allocation
+			GEOSGeom gsOut = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);	// memory allocation
 			if (gsOut)
 			{
 				char* type = GeosHelper::GetGeometryType(gsOut);
@@ -994,7 +994,7 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 			}
 		}
 	}
-	
+
 	GEOSGeometry *gsNew = NULL;
 	if (holes.size() > 0)
 	{
@@ -1005,4 +1005,8 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 		gsNew = GeosHelper::CreatePolygon(gsPoly, NULL, 0);
 	}
 	return gsNew;
+
+	/*GEOSGeometry* result = GeosHelper::Simplify(gsGeom, tolerance);
+	char* type = GeosHelper::GetGeometryType(result);
+	return result;*/
 }
