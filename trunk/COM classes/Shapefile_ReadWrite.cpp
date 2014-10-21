@@ -1314,12 +1314,12 @@ BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
 
 				WriteExtentsXY(shape, shp);
 
-				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polilines and polygons
+				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polylines and polygons
 					fwrite(&numParts,sizeof(int),1,shp);
 
 				fwrite(&numPoints,sizeof(int),1,shp);
 
-				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polilines and polygons
+				if (shptype2D != SHP_MULTIPOINT)		// parts should be written for both polylines and polygons
 				{
 					for( int p = 0; p < numParts; p++ )
 					{
@@ -1341,7 +1341,7 @@ BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
 				}
 
 				// m
-				if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON || shptype == SHP_MULTIPOINTM)	// writing for both M and Z
+				if (shptype != SHP_POLYLINE && shptype != SHP_POLYGON && shptype != SHP_MULTIPOINT)	// writing for both M and Z
 				{
 					WriteExtentsM(shape, shp);
 					for( int i = 0; i < numPoints; i++ )
