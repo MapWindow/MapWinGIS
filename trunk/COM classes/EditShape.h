@@ -58,9 +58,9 @@ public:
 	STDMETHOD(get_numPoints)(long* retVal);
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
-	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
-	STDMETHOD(FinishShape)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_HasValidShape)(VARIANT_BOOL* retVal);
+	STDMETHOD(Undo)(VARIANT_BOOL* retVal);
+	STDMETHOD(Redo)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasEnoughPoints)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_SegmentAngle)(int segmentIndex, double* retVal);
 	STDMETHOD(get_CreationMode)(VARIANT_BOOL* retVal);
@@ -69,7 +69,7 @@ public:
 	STDMETHOD(put_ShapeType)(ShpfileType newVal);
 	STDMETHOD(AddPoint)(double xProj, double yProj);
 	STDMETHOD(SetShape)(IShape* shp);
-	STDMETHOD(get_AsShape)(IShape** retVal);
+	STDMETHOD(get_Shape)(VARIANT_BOOL fixup, IShape** retVal);
 	STDMETHOD(get_LayerHandle)(int* retVal);
 	STDMETHOD(put_LayerHandle)(int newVal);
 	STDMETHOD(get_ShapeIndex)(int* retVal);
@@ -81,20 +81,22 @@ public:
 	STDMETHOD(put_DrawLabelsOnly)(VARIANT_BOOL newVal);
 	STDMETHOD(get_SelectedVertex)(int* val);
 	STDMETHOD(put_SelectedVertex)(int newVal);
-	
-	// to be removed
+	STDMETHOD(get_RawData)(IShape** pVal);
+	STDMETHOD(get_FillColor)(OLE_COLOR* pVal);
+	STDMETHOD(put_FillColor)(OLE_COLOR newVal);
+	STDMETHOD(get_FillTransparency)(BYTE* pVal);
+	STDMETHOD(put_FillTransparency)(BYTE newVal);
+	STDMETHOD(get_LineColor)(OLE_COLOR* pVal);
+	STDMETHOD(put_LineColor)(OLE_COLOR newVal);
+	STDMETHOD(get_LineWidth)(FLOAT* pVal);
+	STDMETHOD(put_LineWidth)(FLOAT newVal);
+	STDMETHOD(CopyOptionsFrom)(IShapeDrawingOptions* options);
+
+	// TODO: perhaps remove
 	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
 	STDMETHOD(put_AreaDisplayMode)(tkAreaDisplayMode newVal);
 	STDMETHOD(get_AngleDisplayMode)(tkAngleDisplay* retVal);
 	STDMETHOD(put_AngleDisplayMode)(tkAngleDisplay newVal);
-	STDMETHOD(get_AngleFormat)(tkAngleFormat* retVal);
-	STDMETHOD(put_AngleFormat)(tkAngleFormat newVal);
-	STDMETHOD(get_AngleCorrection)(double* val);
-	STDMETHOD(put_AngleCorrection)(double newVal);
-	STDMETHOD(get_LengthRounding)(int* retVal);
-	STDMETHOD(put_LengthRounding)(int newVal);
-	STDMETHOD(get_AreaRounding)(int* retVal);
-	STDMETHOD(put_AreaRounding)(int newVal);
 private:
 	
 	BSTR _key;
@@ -104,12 +106,15 @@ private:
 	int _layerHandle;
 	int _shapeIndex;
 	long _lastErrorCode;
+	vector<IShape*> _undoList;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
+	void SaveState();
 public:
-	
 	EditShapeBase* GetBase() { return _editShape; }
+	void MoveVertex(double offsetX, double offsetY);
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(EditShape), CEditShape)

@@ -1145,43 +1145,77 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector se
 	return new HotTrackingInfo();
 }
 
+
+// ************************************************************
+//		SelectLayerHandles
+// ************************************************************
+bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& layers)
+{
+	IShapefile * sf = NULL;
+	for (int i = 0; i < (int)_activeLayers.size(); i++)
+	{
+		int handle = GetLayerHandle(i);
+		if (selector == slctAll)
+		{
+			layers.push_back(handle);
+			continue;
+		}
+
+		bool result = CheckLayer(selector, handle);
+		if (result)
+			layers.push_back(handle);
+	}
+	return layers.size() > 0;
+}
+
 // ************************************************************
 //		SelectLayers
 // ************************************************************
 bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
 {
-	IShapefile * sf = NULL;
-	for(int i = 0; i < (int)_activeLayers.size(); i++ )
+	for (int i = 0; i < (int)_activeLayers.size(); i++)
 	{
 		if (selector == slctAll)
 		{
 			layers.push_back(true);
 			continue;
 		}
-
-		Layer* layer = _allLayers[_activeLayers[i]];
-		if (layer->IsShapefile())
-		{
-			if (layer->QueryShapefile(&sf))
-			{
-				VARIANT_BOOL vb;
-				switch(selector)
-				{
-					case slctHotTracking:
-						sf->get_HotTracking(&vb);
-						
-					case slctInMemorySf:
-						sf->get_EditingShapes(&vb);
-				}
-				sf->Release();
-				layers.push_back(vb ? true : false);
-				continue;
-			}
-		}
-		layers.push_back(false);
+		bool result = CheckLayer(selector, _activeLayers[i]);
+		layers.push_back(result);
 	}
-	for(size_t i = 0; i < layers.size(); i++)
+	for (size_t i = 0; i < layers.size(); i++)
 		if (layers[i]) return true;
+	return false;
+}
+
+// ************************************************************
+//		CheckLayer
+// ************************************************************
+bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
+{
+	IShapefile * sf = NULL;
+	Layer* layer = _allLayers[layerHandle];
+	if (layer->IsShapefile())
+	{
+		if (layer->QueryShapefile(&sf))
+		{
+			VARIANT_BOOL vb;
+			switch (selector)
+			{
+			case slctHotTracking:
+				sf->get_HotTracking(&vb);
+				break;
+			case slctInMemorySf:
+				sf->get_EditingShapes(&vb);
+				break;
+			case slctInteractiveEditing:
+				sf->get_InteractiveEditing(&vb);
+				break;
+			}
+			sf->Release();
+			return vb;
+		}
+	}
 	return false;
 }
 

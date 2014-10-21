@@ -1,3 +1,5 @@
+
+
 #include "stdafx.h"
 #include "OgrLayer.h"
 #include "OgrHelper.h"
@@ -11,7 +13,12 @@
 //***********************************************************************
 IShapefile* COgrLayer::LoadShapefile()
 { 
-	return OgrHelper::Layer2Shapefile(_layer, _globalCallback); 
+	bool isTrimmed = false;	
+	IShapefile* sf = OgrHelper::Layer2Shapefile(_layer, isTrimmed, _globalCallback); 
+	if (isTrimmed) {
+		ErrorMessage(tkOGR_LAYER_TRIMMED);
+	}
+	return sf;
 }
 
 //***********************************************************************
@@ -155,7 +162,7 @@ GDALDataset* COgrLayer::OpenDataset(BSTR connectionString, bool forUpdate)
 }
 
 // *************************************************************
-//		OpenFromDatabase()
+//		OpenDatabaseLayer()
 // *************************************************************
 STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal)
 {
@@ -229,7 +236,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 }
 
 // *************************************************************
-//		OpenByLayerName()
+//		OpenFromDatabase()
 // *************************************************************
 STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal)
 {

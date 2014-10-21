@@ -17,6 +17,7 @@
 //********************************************************************************************************
                        
 #include "stdafx.h"
+#include <io.h>
 #include "Shapefile.h"
 #include "Labels.h"
 #include "Charts.h"
@@ -27,7 +28,7 @@
 #include "ShapeValidator.h"
 #include "ShapefileCategories.h"
 #include "Shape.h"
-#include <io.h>
+#include "UndoList.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -37,6 +38,7 @@
 
 CShapefile::CShapefile()
 {	
+	_interactiveEditing = VARIANT_FALSE;
 	_hotTracking = VARIANT_FALSE;
 	_geosGeometriesRead = false;
 	_useValidationList = false;
@@ -110,14 +112,17 @@ CShapefile::CShapefile()
 	CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
 	CoCreateInstance(CLSID_Charts,NULL,CLSCTX_INPROC_SERVER,IID_ICharts,(void**)&m_charts);
 	CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&m_geoProjection);
-
+	
 	this->put_ReferenceToLabels();
 	this->put_ReferenceToCategories();
 	this->put_ReferenceToCharts();
 
-	gReferenceCounter.AddRef(tkInterface::idShapefile);
+	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
+	((CUndoList*)_undoList)->Init(this);
 
+	gReferenceCounter.AddRef(tkInterface::idShapefile);
 }
+
 CShapefile::~CShapefile()
 {			
 	VARIANT_BOOL vbretval;
@@ -168,6 +173,10 @@ CShapefile::~CShapefile()
 	if (m_geoProjection)
 	{
 		m_geoProjection->Release();
+	}
+
+	if (_undoList) {
+		_undoList->Release();
 	}
 	gReferenceCounter.Release(tkInterface::idShapefile);
 	//Debug::WriteLine("Shapefile destructor: %d", sfCount);
@@ -2273,7 +2282,6 @@ void CShapefile::put_ReferenceToCategories(bool bNullReference)
 {
 	if (m_categories == NULL) return;
 	CShapefileCategories* coCategories = static_cast<CShapefileCategories*>(m_categories);
-	//CShapefile* coShapefile = static_cast<CShapefile*>(this);
 	if (!bNullReference)
 		coCategories->put_ParentShapefile(this);
 	else
@@ -3354,7 +3362,17 @@ STDMETHODIMP CShapefile::HasInvalidShapes(VARIANT_BOOL* result)
 			break;			
 		}
 	}
-
 	return S_OK;
 }
 
+// *****************************************************************
+//		get_UndoList()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_UndoList(IUndoList** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_undoList)
+		_undoList->AddRef();
+	*pVal = _undoList;
+	return S_OK;
+}

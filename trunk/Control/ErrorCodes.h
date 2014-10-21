@@ -91,6 +91,9 @@ const char * ErrorMsg( long ErrorCode );
 # define tkCOLOR_SCHEME_IS_EMPTY 231
 # define tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE 232
 # define tkNO_FIXING_IN_DISK_MODE 233
+# define tkUNDO_LIST_NO_SHAPEFILE 234
+# define tkALREADY_WITHIN_BATCH 235
+
 
 //301-400 = ogr layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301
@@ -107,6 +110,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkCANT_SAVE_REPROJECTED_GEOMETRIES 312
 # define tkOGR_RANDOM_WRITE_NOT_SUPPORTED 313
 # define tkOGR_ABORTED_INVALID_SHAPES 314
+# define tkOGR_LAYER_TRIMMED 315
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401
@@ -193,6 +197,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkMAP_MAPSTATE_LAYER_LOAD_FAILED 1212
 # define tkMAP_PROJECTION_NOT_SET 1213
 # define tkINVALID_GEOGRAPHIC_COORDINATES 1214
+# define tkNO_INTERACTIVE_SHAPEFILES 1215
 
 //1401-1600 = tktinvuc
 # define tkVALUE_MUST_BE_2_TO_N 1401

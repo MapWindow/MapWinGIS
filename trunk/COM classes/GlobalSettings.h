@@ -131,6 +131,8 @@ public:
 	STDMETHOD(put_GridDownsamplingMode)(tkInterpolationMode pVal);
 	STDMETHOD(get_OgrStringEncoding)(tkOgrEncoding* newVal);
 	STDMETHOD(put_OgrStringEncoding)(tkOgrEncoding pVal);
-};
+	STDMETHOD(get_OgrLayerMaxFeatureCount)(LONG* pVal);
+	STDMETHOD(put_OgrLayerMaxFeatureCount)(LONG newVal);
+	};
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

@@ -959,3 +959,18 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 }
 #pragma endregion
 
+// ****************************************************************
+//		get_InteractiveEditing
+// ****************************************************************
+STDMETHODIMP CShapefile::get_InteractiveEditing(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _interactiveEditing;
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_InteractiveEditing(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_interactiveEditing = newVal;
+	return S_OK;
+}

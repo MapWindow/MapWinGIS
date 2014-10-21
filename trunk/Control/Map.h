@@ -30,7 +30,6 @@
 # include "MeasuringBase.h"
 # include "EditShapeBase.h"
 
-
 # define SHOWTEXT 450
 # define HIDETEXT 451
 
@@ -590,7 +589,9 @@ protected:
 	afx_msg void SetZoomBarMinZoom(long newVal);
 	afx_msg long GetZoomBarMaxZoom();
 	afx_msg void SetZoomBarMaxZoom(long newVal);
-
+	afx_msg VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
+	afx_msg VARIANT_BOOL UndoEdit();
+	afx_msg VARIANT_BOOL RedoEdit();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -633,18 +634,22 @@ public:
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
-	void FireShapeEditing(IDispatch* shapeData, tkShapeEditingAction action, tkMwBoolean* cancel)
-		{FireEvent(eventidShapeEditing,EVENT_PARAM(VTS_DISPATCH VTS_I4 VTS_PI4), shapeData, action, cancel);}
-	void FireSelectShape(double projX, double projY, long* layerHandle, long* shapeIndex, tkMwBoolean* handled)
-		{FireEvent(eventidSelectShape,EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4 VTS_PI4 VTS_PI4), 
-		projX, projY, layerHandle, shapeIndex, handled);}
+	void FireBeforeShapeEdit(tkCursorMode action, LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
+		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_PI4), action, layerHandle, shapeIndex, Cancel);	}
+	void FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
+		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4), Action, LayerHandle, Shape, Cancel);	}
+	void FireAfterShapeEdit(tkCursorMode Action, LONG LayerHandle, LONG ShapeIndex)
+		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
+	void FireNewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
+		{FireEvent(eventidNewShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
+	void FireValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix)
+		{ FireEvent(eventidValidationMode, EVENT_PARAM(VTS_PI4 VTS_PI4), GeosCheck, TryFix);}
+	void FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage)
+		{ FireEvent(eventidValidationResults, EVENT_PARAM(VTS_BOOL VTS_BSTR), Success, ErrorMessage);}
+
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
 #pragma endregion
-
-	
-
-
 
 public:
 #pragma region Members
@@ -692,6 +697,7 @@ public:
 	std::deque<DrawList *> _allDrawLists;
 	std::deque<long> _drawingLayerInvisilbe; //stores all the invisible layer handles
 	long _currentDrawing;					//current Drawing
+	long _interactiveLayerHandle;			// shapefile edited by user
 
 	// --------------------------------------------
 	//	 Extents
@@ -752,7 +758,7 @@ public:
 	IEditShape* _editShape;
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
-	
+
 	// ---------------------------------------------
 	//	Projections
 	// ---------------------------------------------
@@ -857,6 +863,7 @@ public:
 	bool HasImages() ;
 	bool HasHotTracking();
 	bool HasVolatileShapefiles();
+	int GetInteractiveShapefileCount(long& layerHandle);
 	
 	DOUBLE GetPixelsPerDegree(void);
 	DOUBLE PixelsPerMapUnit(void);
@@ -1027,18 +1034,29 @@ private:
 	HotTrackingInfo* FindShapeCore(double projX, double projY, std::vector<bool>& layers);
 	MeasuringBase* GetMeasuringBase();
 	EditShapeBase* GetEditShapeBase();
-	ActiveShape* GetAtiveShape();
-	bool HandleCustomControlClick();
+	ActiveShape* GetActiveShape();
 	void DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer );
 	bool SelectLayers(LayerSelector selector, std::vector<bool>& layers);
+	bool SelectLayerHandles(LayerSelector selector, std::vector<int>& layers);
+	bool CheckLayer(LayerSelector selector, int layerHandle);
 	bool SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex);
 	void SetEditShape(long layerHandle, long shapeIndex);
-	void SaveEditShape();
+	bool SetEditShape(long layerHandle);
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
 	bool TryAddVertex(double projX, double projY);
 	int AddLayerCore(Layer* layer);
-
+	bool ChooseEditLayer(long x, long y);
+	tkMwBoolean DoFireValidateShape();
+	void DoFireAfterShapeEdit();
+	bool TrySaveEditShape();
+	void HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl);
+	void HandleOnLButtonDownEditShape(int x, int y, bool ctrl);
+	void ClearEditShape();
+	void MoveShapeVertex(int offsetX, int offsetY);
+	IShapefile* GetEditShapeShapefile();
+	bool RunShapefileUndoList(bool undo);
 #pragma endregion
+
 	
 };
 

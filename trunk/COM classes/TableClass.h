@@ -244,7 +244,7 @@ public:
 
 	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
 	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
-	void CTableClass::RemoveJoinedFields();
+	void RemoveJoinedFields();
 
 public:	
 	bool needToSaveAsNewFile;
@@ -252,7 +252,10 @@ public:
 	
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
-	void CloseUnderlyingFile();
+	void CloseUnderlyingFile(); 
+	TableRow* CloneTableRow(int rowIndex);
+	bool InsertTableRow(TableRow* row, long rowIndex);
+	TableRow* SwapTableRow(TableRow* row, long rowIndex);
 
 private:
 	DBFInfo * dbfHandle;	// underlying data structure
@@ -264,7 +267,6 @@ private:
 	ICallback * globalCallback;
 	BOOL isEditingTable;
 	CStringW filename;
-    
 	
 	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
 	void LoadDefault_fields();
@@ -279,7 +281,6 @@ private:
 	inline void ErrorMessage(long ErrorCode);
 	std::vector<CString>* get_FieldNames();
 	
-
 	struct JoinInfo
 	{
 		CStringW filename;

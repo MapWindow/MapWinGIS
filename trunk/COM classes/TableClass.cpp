@@ -417,7 +417,7 @@ bool CTableClass::Calculate_(CString Expression, std::vector<CString>& results, 
 // ****************************************************************
 //	  AnalyzeExpressions()
 // ****************************************************************
-// Analyses list of expressios and returns vector of size equal to numShapes where 
+// Analyzes list of expressions and returns vector of size equal to numShapes where 
 // for each shape index a category is specified. If the given shape didn't fall into
 // any category -1 is used. The first categories in the list have higher priority
 // Results vector with certain categories can be provided by caller; those categories won't be changed
@@ -1094,7 +1094,7 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 	for( long i = 0; i < RowCount(); i++ )
     {
         // lsu 29-oct-2009: fixing the bug 1459 (crash after adding field)
-		// force reading all the records in memory to get rid of the unitialized values
+		// force reading all the records in memory to get rid of the uninitialized values
 		if (_rows[i].row == NULL) 
 			ReadRecord(i);
 	
@@ -1259,6 +1259,55 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
     return S_OK;
 }
 
+// ********************************************************
+//     CloneTableRow()
+// ********************************************************
+TableRow* CTableClass::CloneTableRow(int rowIndex)
+{
+	if (ReadRecord(rowIndex)) {
+		TableRow* row = _rows[rowIndex].row;
+		if (row) {
+			return row->Clone();
+		}
+	}
+	return NULL;
+}
+
+// ********************************************************
+//     InsertTableRow()
+// ********************************************************
+bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
+{
+	if (!row) return false;
+	if (rowIndex < 0 || rowIndex >= _rows.size())
+		return false;
+	
+	row->SetDirty(TableRow::DATA_INSERTED);
+	RecordWrapper rw;
+	rw.row = row;
+	
+	_rows.insert(_rows.begin() + rowIndex, rw);
+
+	needToSaveAsNewFile = true;
+	return true;
+}
+
+// ********************************************************
+//     SwapTableRow()
+// ********************************************************
+TableRow* CTableClass::SwapTableRow(TableRow* newRow, long rowIndex)
+{
+	if (!newRow) return NULL;
+	if (rowIndex < 0 || rowIndex >= _rows.size())
+		return NULL;
+	if (ReadRecord(rowIndex)) {
+		TableRow* oldRow = _rows[rowIndex].row;
+		_rows[rowIndex].row = newRow;
+		newRow->SetDirty(TableRow::DATA_MODIFIED);
+		return oldRow;
+	}
+	return NULL;
+}
 
 // *******************************************************************
 //		ReadRecord()
@@ -1271,7 +1320,7 @@ bool CTableClass::ReadRecord(long RowIndex)
     if (RowIndex < 0 && RowIndex >= RowCount())
         return false;
 	
-	if (_rows[RowIndex].row != NULL)		// lsu: I think it's enough to test only this
+	if (_rows[RowIndex].row != NULL)
 		return true;
 
     if( dbfHandle == NULL )
@@ -3312,3 +3361,7 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 	}
 	return false;
 }
+
+
+
+

@@ -730,6 +730,9 @@
     <ClInclude Include="Utilities\OgrHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\UndoList.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Drawing\BaseDrawer.cpp">
@@ -1551,6 +1554,12 @@
     <ClCompile Include="Utilities\OgrHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\UndoList.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Edit.cpp">
+      <Filter>Control</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1695,6 +1704,9 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="MapWinGIS.rgs" />
+    <None Include="COM classes\UndoList.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />

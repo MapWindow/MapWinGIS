@@ -69,10 +69,12 @@ CString OgrHelper::GetDsCapabilityString(tkOgrDSCapability capability)
 // *************************************************************
 //		Layer2Shapefile()
 // *************************************************************
-IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= NULL*/)
+IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallback* callback /*= NULL*/)
 {
 	if (!layer)	return NULL;
 	layer->ResetReading();
+
+	isTrimmed = false;
 
 	IShapefile* sf;
 	VARIANT_BOOL vbretval;
@@ -171,6 +173,13 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, ICallback* callback /*= 
 	{
 		Utility::DisplayProgress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
 		count++;
+
+		if (count > m_globalSettings.ogrLayerMaxFeatureCount)
+		{
+			isTrimmed = true;
+			break;
+		}
+
 		OGRGeometry *oGeom = poFeature->GetGeometryRef();
 		
 		IShape* shp = NULL;

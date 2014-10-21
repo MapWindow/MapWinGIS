@@ -225,7 +225,9 @@ public:
 	STDMETHOD(get_ShapeModified)(long ShapeIndex, VARIANT_BOOL* retVal);
 	STDMETHOD(put_ShapeModified)(long ShapeIndex, VARIANT_BOOL newVal);
 	STDMETHOD(Validate)(tkShapeValidationMode validationMode, VARIANT_BOOL selectedOnly, IShapeValidationInfo** results);
-
+	STDMETHOD(get_UndoList)(IUndoList** pVal);
+	STDMETHOD(get_InteractiveEditing)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_InteractiveEditing)(VARIANT_BOOL newVal);
 private:
 	// data for point in shapefile test
 	struct ShapeHeader 
@@ -287,6 +289,7 @@ private:
 	IShapeDrawingOptions* m_defaultDrawOpt;
 	IShapeValidationInfo* _inputValidation;
 	IShapeValidationInfo* _outputValidation;
+	IUndoList* _undoList;
 	
 	VARIANT_BOOL _hotTracking;
 	bool _geosGeometriesRead;
@@ -298,6 +301,7 @@ private:
 	BSTR _expression;		// visibility expression
 	BOOL _isEditingShapes;		//Flag for Disk vs. Memory
 	long _nextShapeHandle;		// the next unique handle to assign
+	VARIANT_BOOL _interactiveEditing;
 	
 	// When this flag is on CShapeWrapper will be used in the Shape class to store the points
 	// otherwise usual COM points
@@ -479,5 +483,7 @@ public:
 	bool PointWithinShape(IShape* shape, double projX, double projY, double Tolerance);
 	void ReregisterShape(int shapeIndex);
 	bool ForceProperShapeType(ShpfileType sfType, IShape* shape);
+	
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

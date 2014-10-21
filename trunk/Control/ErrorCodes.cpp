@@ -179,6 +179,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Shape contains too few points for specified shape type.";
 		case tkNO_FIXING_IN_DISK_MODE:
 			return "Fixing of shapes for Shapefile.Validate method is available in edit mode only. Mode was switched to ReportWithoutFixing.";
+		case tkUNDO_LIST_NO_SHAPEFILE:
+			return "Undo list isn't attached to any shapefile.";
+		case tkALREADY_WITHIN_BATCH:
+			return "Already withing batch for undo list.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:
@@ -209,6 +213,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Random write operations aren't supported for this layer. It's either layer was opened without forUpdate flag or driver doesn't support it at all (check GDAL docs).";
 		case tkOGR_ABORTED_INVALID_SHAPES:
 			return "Operation aborted because of the invalid shapes. Consider changing shape validation mode.";
+		case tkOGR_LAYER_TRIMMED:
+			return "Number of features for the layer exceeds the limit. Only part of them will be available via OgrLayer.Data property. See GlobalSettings.OgrLayerMaxFeatureCount.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:
@@ -367,6 +373,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Map projection isn't set. See Map.SetGeoProjection method.";
 		case tkINVALID_GEOGRAPHIC_COORDINATES:
 			return "Invalid geographic coordinates.";
+		case tkNO_INTERACTIVE_SHAPEFILES:
+			return "No visible shapefiles with InteractiveEditing property set to true on the map.";
 
 		//1401-1600 = tktinvuc
 		case tkVALUE_MUST_BE_2_TO_N:

@@ -98,13 +98,13 @@ STDMETHODIMP CEditShape::put_ShapeType(ShpfileType newVal)
 }
 
 // *******************************************************
-//		AsShape()
+//		RawData()
 // *******************************************************
-STDMETHODIMP CEditShape::get_AsShape(IShape** retVal)
+STDMETHODIMP CEditShape::get_RawData(IShape** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
-	
+
 	ShpfileType shpType = _editShape->GetShapeType();
 	if (shpType == SHP_NULLSHAPE) return S_OK;
 
@@ -115,15 +115,33 @@ STDMETHODIMP CEditShape::get_AsShape(IShape** retVal)
 
 	CopyData(0, _editShape->GetPointCount(), *retVal);
 
-	// let's close the poly
-	bool doFixup = true;		// TODO: make a parameter
-	if (doFixup)
-	{
-		if (shpType == SHP_POLYGON)
-			((CShape*)(*retVal))->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
-		
-		(*retVal)->get_IsValid(&vb);
+	return S_OK;
+}
 
+// *******************************************************
+//		AsShape()
+// *******************************************************
+STDMETHODIMP CEditShape::get_Shape(VARIANT_BOOL geosFixup, IShape** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+
+	VARIANT_BOOL vb;
+	get_HasEnoughPoints(&vb);
+	if (!vb) {
+		return S_OK;
+	}
+
+	get_RawData(retVal);
+	ShpfileType shpType = _editShape->GetShapeType();
+
+	// add the last point automatically
+	if (shpType == SHP_POLYGON)
+		((CShape*)(*retVal))->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
+
+	if (geosFixup)
+	{
+		(*retVal)->get_IsValid(&vb);
 		IShape* shpNew = NULL;
 		if (!vb) {
 			(*retVal)->FixUp(&shpNew);
@@ -140,7 +158,7 @@ STDMETHODIMP CEditShape::get_AsShape(IShape** retVal)
 // *******************************************************
 //		HasValidShape()
 // *******************************************************
-STDMETHODIMP CEditShape::get_HasValidShape(VARIANT_BOOL* retVal)
+STDMETHODIMP CEditShape::get_HasEnoughPoints(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -160,8 +178,6 @@ STDMETHODIMP CEditShape::get_HasValidShape(VARIANT_BOOL* retVal)
 		ErrorMessage(tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE);
 		return S_FALSE;
 	}
-
-	// TODO: check validity with GEOS
 
 	*retVal = VARIANT_TRUE;
 	return S_OK;
@@ -252,17 +268,7 @@ STDMETHODIMP CEditShape::Clear()
 }
 
 // *******************************************************
-//		UndoPoint()
-// *******************************************************
-STDMETHODIMP CEditShape::UndoPoint(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _editShape->UndoPoint() ? VARIANT_TRUE: VARIANT_FALSE;
-	return S_OK;
-}
-
-// *******************************************************
-//		UndoPoint()
+//		AddPoint()
 // *******************************************************
 STDMETHODIMP CEditShape::AddPoint(double xProj, double yProj)
 {
@@ -295,38 +301,6 @@ STDMETHODIMP CEditShape::SetShape( IShape* shp )
 		shp->get_XY(i, &x, &y, &vb);
 		_editShape->AddPoint(x, y, -1, -1);
 	}
-	return S_OK;
-}
-
-// ***************************************************************
-//		FinishShape()
-// ***************************************************************
-STDMETHODIMP CEditShape::FinishShape(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-
-	// check whether there is a shape
-	IShape* shp = NULL;
-	get_AsShape(&shp);
-	if (shp) {
-		shp->Release();
-	}
-	else {
-		return S_FALSE;
-	}
-
-	CMapView* map = (CMapView*)_editShape->GetMapView();
-	if (map)
-	{
-		tkMwBoolean cancel = blnFalse;
-		map->FireShapeEditing(this, eaShapeCreated, &cancel);
-
-		if (!cancel) 
-			Clear();
-	}
-
-	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -385,23 +359,6 @@ STDMETHODIMP CEditShape::put_AngleDisplayMode(tkAngleDisplay newVal)
 }
 
 // *******************************************************
-//		AngleRounding()
-// *******************************************************
-STDMETHODIMP CEditShape::get_AngleFormat(tkAngleFormat* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _editShape->AngleFormat;
-	return S_OK;
-}
-
-STDMETHODIMP CEditShape::put_AngleFormat(tkAngleFormat newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_editShape->AngleFormat = newVal;
-	return S_OK;
-}
-
-// *******************************************************
 //		CreationMode()
 // *******************************************************
 STDMETHODIMP CEditShape::get_CreationMode(VARIANT_BOOL* retVal)
@@ -428,39 +385,9 @@ STDMETHODIMP CEditShape::get_Area(double* retVal)
 	return S_OK;
 }
 
-// *******************************************************
-//		LengthRounding()
-// *******************************************************
-STDMETHODIMP CEditShape::get_LengthRounding(int* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _editShape->_lengthRounding;
-	return S_OK;
-}
 
-STDMETHODIMP CEditShape::put_LengthRounding(int newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_editShape->_lengthRounding = newVal;
-	return S_OK;
-}
 
-// *******************************************************
-//		AreaRounding()
-// *******************************************************
-STDMETHODIMP CEditShape::get_AreaRounding(int* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _editShape->_areaRounding;
-	return S_OK;
-}
 
-STDMETHODIMP CEditShape::put_AreaRounding(int newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_editShape->_areaRounding = newVal;
-	return S_OK;
-}
 
 // *******************************************************
 //		LayerHandle()
@@ -479,7 +406,6 @@ STDMETHODIMP CEditShape::put_LayerHandle(int newVal)
 	return S_OK;
 }
 
-
 // *******************************************************
 //		ShapeIndex()
 // *******************************************************
@@ -494,22 +420,6 @@ STDMETHODIMP CEditShape::put_ShapeIndex(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_shapeIndex = newVal;
-	return S_OK;
-}
-
-// *******************************************************
-//		AngleCorrection()
-// *******************************************************
-STDMETHODIMP CEditShape::get_AngleCorrection(double* val)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*val = _editShape->_angleCorrection;
-	return S_OK;
-}
-STDMETHODIMP CEditShape::put_AngleCorrection(double newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_editShape->_angleCorrection = newVal;
 	return S_OK;
 }
 
@@ -559,5 +469,141 @@ STDMETHODIMP CEditShape::put_SelectedVertex(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_editShape->_selectedVertex = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		CopyOptionsFrom()
+// *******************************************************
+STDMETHODIMP CEditShape::CopyOptionsFrom(IShapeDrawingOptions* options)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	float lineWidth, tranparency;
+	OLE_COLOR fillColor, lineColor;
+	options->get_FillColor(&fillColor);
+	options->get_LineColor(&lineColor);
+	options->get_LineWidth(&lineWidth);
+	options->get_FillTransparency(&tranparency);
+
+	_editShape->FillColor = fillColor;
+	_editShape->LineColor = lineColor;
+	_editShape->LineWidth = lineWidth;
+	_editShape->FillTransparency = (BYTE)tranparency;
+	return S_OK;
+}
+
+// *******************************************************
+//		FillColor()
+// *******************************************************
+STDMETHODIMP CEditShape::get_FillColor(OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _editShape->FillColor;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_FillColor(OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_editShape->FillColor = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		FillTransparency()
+// *******************************************************
+STDMETHODIMP CEditShape::get_FillTransparency(BYTE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _editShape->FillTransparency;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_FillTransparency(BYTE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_editShape->FillTransparency = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		LineColor()
+// *******************************************************
+STDMETHODIMP CEditShape::get_LineColor(OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _editShape->LineColor;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_LineColor(OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_editShape->LineColor = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		LineWidth()
+// *******************************************************
+STDMETHODIMP CEditShape::get_LineWidth(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _editShape->LineWidth;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_LineWidth(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_editShape->LineWidth = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		MoveVertex()
+// *******************************************************
+void CEditShape::MoveVertex(double offsetX, double offsetY)
+{
+	SaveState();
+	_editShape->MoveVertex(offsetX, offsetY);
+}
+
+// *******************************************************
+//		SaveState()
+// *******************************************************
+void CEditShape::SaveState()
+{
+	IShape* shp = NULL;
+	get_RawData(&shp);
+	_undoList.push_back(shp);
+}
+
+// *******************************************************
+//		Undo()
+// *******************************************************
+STDMETHODIMP CEditShape::Undo(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	if (_editShape->GetCreationMode()) {
+		*retVal = _editShape->UndoPoint() ? VARIANT_TRUE : VARIANT_FALSE;
+	}
+	else {
+		if (_undoList.size() > 0) {
+			CComPtr<IShape> shp = _undoList[_undoList.size() - 1];
+			this->SetShape(shp);
+			_undoList.pop_back();
+			*retVal = VARIANT_TRUE;
+		}
+	}
+	return S_OK;
+}
+
+// *******************************************************
+//		Redo()
+// *******************************************************
+STDMETHODIMP CEditShape::Redo(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	// TODO: implement
 	return S_OK;
 }

@@ -174,6 +174,7 @@ enum LayerSelector
 	slctAll = 0,
 	slctInMemorySf = 1,
 	slctHotTracking = 2,
+	slctInteractiveEditing = 3,
 };
 
 enum OffsetType
@@ -188,5 +189,6 @@ enum MouseTolerance
 	ToleranceSelect = 0,
 	ToleranceInsert = 1,
 };
+
 
 # endif

@@ -3,6 +3,9 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	// NOTE: ClassWizard will add and remove enumeration elements here
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	// **ClassWizard is a thing of the past... feel free to edit this code.
+	dispidRedoEdit = 240L,
+	dispidUndoEdit = 239L,
+	dispidLayerVisibleAtCurrentScale = 238L,
 	dispidAddLayerFromDatabase = 237L,
 	dispidOgrLayer = 236L,
 	dispidEditShape = 235L,
@@ -250,7 +253,12 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidTilesLoaded = 13L,
 	eventidMeasuringChanged = 14L,
 	eventidLayersChanged = 15L,
-	eventidShapeEditing = 16L,
-	eventidSelectShape = 17L,
+	eventidBeforeShapeEdit = 16L,
+	eventidValidateShape = 17L,
+	eventidAfterShapeEdit = 18L,
+	eventidNewShape = 19L,
+	eventidValidationMode = 20L,
+	eventidValidationResults = 21L,
+	
 	//}}AFX_DISP_ID
 };

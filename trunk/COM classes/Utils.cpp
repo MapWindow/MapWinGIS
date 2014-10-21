@@ -4642,6 +4642,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idTin:
 			CoCreateInstance( CLSID_Tin, NULL, CLSCTX_INPROC_SERVER, IID_ITin, (void**)&val );
 			break;
+		case tkInterface::idUndoList:
+			CoCreateInstance(CLSID_UndoList, NULL, CLSCTX_INPROC_SERVER, IID_IUndoList, (void**)&val);
+			break;
 		case tkInterface::idUtils:
 			CoCreateInstance( CLSID_Utils, NULL, CLSCTX_INPROC_SERVER, IID_IUtils, (void**)&val );
 			break;

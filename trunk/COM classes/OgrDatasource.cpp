@@ -322,7 +322,7 @@ STDMETHODIMP COgrDatasource::CreateLayer(BSTR layerName, ShpfileType shpType, IG
 	OGRSpatialReference* ref = projection ? ((CGeoProjection*)projection)->get_SpatialReference() : NULL;
 
 	char** options = ParseLayerCreationOptions(creationOptions);
-	bool multiPart = (bool)CSLFetchBoolean(options, "MULTI_PART", 1);
+	bool multiPart = CSLFetchBoolean(options, "MULTI_PART", 1) != 0;
 
 	OGRLayer* layer = _dataset->CreateLayer(OgrHelper::Bstr2OgrString(layerName), ref,
 		GeometryConverter::ShapeType2GeometryType(shpType, multiPart), options);
@@ -401,8 +401,8 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	OGRSpatialReference* ref = gp ? ((CGeoProjection*)gp)->get_SpatialReference() : NULL;
 	
 	char** options = ParseLayerCreationOptions(creationOptions);
-	bool multiPart = (bool)CSLFetchBoolean(options, "MW_MULTI_PART", 1);
-	bool vacuum = (bool)CSLFetchBoolean(options, "MW_POSTGIS_VACUUM", 1);
+	bool multiPart = CSLFetchBoolean(options, "MW_MULTI_PART", 1) != 0;
+	bool vacuum = CSLFetchBoolean(options, "MW_POSTGIS_VACUUM", 1) != 0;
 
 	OGRLayer* layer = _dataset->CreateLayer(name, ref, GeometryConverter::ShapeType2GeometryType(shpType, multiPart), options);
 	

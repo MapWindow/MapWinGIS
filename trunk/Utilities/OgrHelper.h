@@ -6,7 +6,7 @@ class OgrHelper
 {
 public:
 	static bool OgrHelper::Shapefile2OgrLayer(IShapefile* sf, OGRLayer* poLayer, ICallback* callback = NULL);
-	static IShapefile* Layer2Shapefile(OGRLayer* layer, ICallback* callback = NULL);
+	static IShapefile* Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallback* callback = NULL);
 	static CString GetLayerCapabilityString(tkOgrLayerCapability capability);
 	static CString GetDsCapabilityString(tkOgrDSCapability capability);
 	static int SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, long shapeCmnIndex, tkOgrSaveType saveType, bool validateShapes, vector<OgrUpdateError>& errors);

@@ -169,6 +169,7 @@
     <ClInclude Include="COM classes\EditShape.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
+    <ClInclude Include="COM classes\UndoList.h" />
     <ClInclude Include="Image\cq.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
@@ -385,6 +386,8 @@
     <ClCompile Include="COM classes\EditShape.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
+    <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
@@ -707,6 +710,7 @@
     <None Include="COM classes\TileProviders.rgs" />
     <None Include="COM classes\Tiles.rgs" />
     <None Include="COM classes\Tin.rgs" />
+    <None Include="COM classes\UndoList.rgs" />
     <None Include="COM classes\Utils.rgs" />
     <None Include="COM classes\Vector.rgs" />
     <None Include="Grid\fip\Makefile" />
@@ -723,16 +727,16 @@
     <None Include="Resources\zoom_in_16_2.ico" />
   </ItemGroup>
   <!-- type library -->
+  <!-- resources -->
   <ItemGroup>
-    <Midl Include="MapWinGIS.idl">
+    <ResourceCompile Include="MapWinGIS.rc" />
+  </ItemGroup>
+  <ItemGroup>
+     <Midl Include="MapWinGIS.idl">
       <HeaderFileName>MapWinGIS_i.h</HeaderFileName>
       <InterfaceIdentifierFileName>MapWinGIS_i.c</InterfaceIdentifierFileName>
       <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>
     </Midl>
-  </ItemGroup>
-  <!-- resources -->
-  <ItemGroup>
-    <ResourceCompile Include="MapWinGIS.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

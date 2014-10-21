@@ -183,8 +183,19 @@ int ActiveShape::get_ScreenPoints(ScreenPointsType whichPoints, Gdiplus::PointF*
 	{
 		if (_selectedVertex >= 0 && _selectedVertex < size)
 		{
-			points[_selectedVertex].X += offsetX;
-			points[_selectedVertex].Y += offsetY;
+			bool polygon = Utility::ShapeTypeConvert2D(GetShapeType()) == SHP_POLYGON;
+			int index = _selectedVertex;
+			if (polygon && index == 0)
+				index = size - 1;
+
+			points[index].X += offsetX;
+			points[index].Y += offsetY;
+			
+			// coordinates of the first and the last points of polygon must be the same
+			if (polygon && index == size - 1) {
+				points[0].X = points[index].X;
+				points[0].Y = points[index].Y;
+			}
 		}
 	}
 	return size;
@@ -325,11 +336,24 @@ void ActiveShape::Move( double offsetXProj, double offsetYProj )
 // *******************************************************
 void ActiveShape::MoveVertex( double offsetXProj, double offsetYProj )
 {
-	if (_selectedVertex >= 0 && _selectedVertex < (int)_points.size())
+	int index = _selectedVertex;
+	bool polygon = Utility::ShapeTypeConvert2D(GetShapeType()) == SHP_POLYGON;
+	
+	if (polygon && _selectedVertex == 0)
+		index = _points.size() - 1;
+
+	if (index >= 0 && index < (int)_points.size())
 	{
-		_points[_selectedVertex]->Proj.x += offsetXProj;
-		_points[_selectedVertex]->Proj.y += offsetYProj;
-		UpdateLatLng(_selectedVertex);
+		_points[index]->Proj.x += offsetXProj;
+		_points[index]->Proj.y += offsetYProj;
+		UpdateLatLng(index);
+		
+		// coordinates of the first and last point of polygon must be the same
+		if (polygon && index == _points.size() - 1) {
+			_points[0]->Proj.x = _points[index]->Proj.x;
+			_points[0]->Proj.y = _points[index]->Proj.y;
+			UpdateLatLng(0);
+		}
 	}
 	_areaRecalcIsNeeded = true;
 }
@@ -369,6 +393,11 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 	bool hasLine = (HasDynamicLine() || HasStaticLine()); //(HasDynamicLine() && dynamicBuffer) || (HasStaticLine() && !dynamicBuffer);
 	bool hasPolygon = (HasDynamicPolygon() && dynamicBuffer) || (HasStaticPolygon() && !dynamicBuffer);
 
+
+	_fillBrush.SetColor(Gdiplus::Color(FillTransparency << 24 | BGR_TO_RGB(FillColor)));
+	_linePen.SetWidth(LineWidth);
+	_linePen.SetColor(Gdiplus::Color(255 << 24 | BGR_TO_RGB(LineColor)));
+
 	Gdiplus::PointF* polyData = NULL;
 	int polySize = 0;
 
@@ -377,11 +406,11 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 		polySize = get_ScreenPoints(ScreenPointsPolygonPart, &polyData, dynamicBuffer, offsetType, screenOffsetX, screenOffsetY);
 		if (polySize > 1)
 		{
-			_orangePen.SetLineJoin(Gdiplus::LineJoinRound);
+			_linePen.SetLineJoin(Gdiplus::LineJoinRound);
 			if (!_drawLabelsOnly)
 			{
-				g->FillPolygon(&_orangeBrush, polyData, polySize);
-				g->DrawPolygon(&_orangePen, polyData, polySize);
+				g->FillPolygon(&_fillBrush, polyData, polySize);
+				g->DrawPolygon(&_linePen, polyData, polySize);
 			}
 		}
 	}
@@ -416,7 +445,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 				}
 				
 				if (!_drawLabelsOnly)
-					g->DrawLines(&_orangePen, data, size);
+					g->DrawLines(&_linePen, data, size);
 
 				bool closedPoly = false;
 				if (_mixedLinePolyMode && _firstPolyPointIndex != -1 && _firstPolyPointIndex < size)
@@ -492,7 +521,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 					{
 						double dist = GetDynamicLineDistance();
 						DrawSegmentInfo(g, x, y, _mousePoint.x, _mousePoint.y, dist, 0.0, -1, false);
-						g->DrawLine(&_orangePen, (Gdiplus::REAL)x, (Gdiplus::REAL)y, 
+						g->DrawLine(&_linePen, (Gdiplus::REAL)x, (Gdiplus::REAL)y, 
 							(Gdiplus::REAL)_mousePoint.x, (Gdiplus::REAL)_mousePoint.y);
 					}
 				}
@@ -855,9 +884,9 @@ bool ActiveShape::TransformPoint(double& x, double& y) {
 }
 
 // ***************************************************************
-//		HandleSnappedPointAdd()
+//		HandleProjPointAdd()
 // ***************************************************************
-void ActiveShape::HandleSnappedPointAdd( double projX, double projY )
+void ActiveShape::HandleProjPointAdd( double projX, double projY )
 {
 	double pixelX, pixelY;
 	ProjToPixel(projX, projY, pixelX, pixelY);

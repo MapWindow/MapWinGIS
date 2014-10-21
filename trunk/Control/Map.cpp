@@ -104,6 +104,35 @@ BOOL CMapView::CMapViewFactory::UpdateRegistry(BOOL bRegister)
 		return AfxOleUnregisterClass(m_clsid, m_lpszProgID);
 }
 
+BEGIN_EVENT_MAP(CMapView, COleControl)
+	//{{AFX_EVENT_MAP(CMapView)
+	// NOTE - ClassWizard will add and remove event map entries
+	//    DO NOT EDIT what you see in these blocks of generated code !
+	EVENT_CUSTOM_ID("MouseDown", eventidMouseDown, FireMouseDown, VTS_I2  VTS_I2  VTS_I4  VTS_I4)
+	EVENT_CUSTOM_ID("MouseUp", eventidMouseUp, FireMouseUp, VTS_I2  VTS_I2  VTS_I4  VTS_I4)
+	EVENT_CUSTOM_ID("MouseMove", eventidMouseMove, FireMouseMove, VTS_I2  VTS_I2  VTS_I4  VTS_I4)
+	EVENT_CUSTOM_ID("FileDropped", eventidFileDropped, FireFileDropped, VTS_BSTR)
+	EVENT_CUSTOM_ID("SelectBoxFinal", eventidSelectBoxFinal, FireSelectBoxFinal, VTS_I4  VTS_I4  VTS_I4  VTS_I4)
+	EVENT_CUSTOM_ID("SelectBoxDrag", eventidSelectBoxDrag, FireSelectBoxDrag, VTS_I4  VTS_I4  VTS_I4  VTS_I4)
+	EVENT_CUSTOM_ID("ExtentsChanged", eventidExtentsChanged, FireExtentsChanged, VTS_NONE)
+	EVENT_CUSTOM_ID("MapState", eventidMapState, FireMapState, VTS_I4)
+	EVENT_CUSTOM_ID("OnDrawBackBuffer", eventidOnDrawBackBuffer, FireOnDrawBackBuffer, VTS_I4)
+	EVENT_CUSTOM_ID("ShapeHighlighted", eventidShapeHighlighted, FireShapeHighlighted, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("BeforeDrawing", eventidBeforeDrawing, FireBeforeDrawing, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL)
+	EVENT_CUSTOM_ID("AfterDrawing", eventidAfterDrawing, FireAfterDrawing, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL)
+	EVENT_CUSTOM_ID("TilesLoaded", eventidTilesLoaded, FireTilesLoaded, VTS_DISPATCH VTS_DISPATCH VTS_BOOL VTS_BSTR)
+	EVENT_CUSTOM_ID("MeasuringChanged", eventidMeasuringChanged, FireMeasuringChanged, VTS_DISPATCH VTS_I4)
+	EVENT_CUSTOM_ID("LayersChanged", eventidLayersChanged, FireLayersChanged, VTS_NONE)
+	EVENT_CUSTOM_ID("BeforeShapeEdit", eventidBeforeShapeEdit, FireBeforeShapeEdit, VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL)
+	EVENT_CUSTOM_ID("ValidateShape", eventidValidateShape, FireValidateShape, VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4)
+	EVENT_CUSTOM_ID("AfterShapeEdit", eventidAfterShapeEdit, FireAfterShapeEdit, VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("NewShape", eventidNewShape, FireNewShape, VTS_I4 VTS_I4 VTS_PI4 VTS_PI4)
+	EVENT_CUSTOM_ID("ValidationMode", eventidValidationMode, FireValidationMode, VTS_PI4 VTS_PI4)
+	EVENT_CUSTOM_ID("ValidationResults", eventidValidationResults, FireValidationResults, VTS_BOOL VTS_BSTR)
+	EVENT_STOCK_DBLCLICK()
+	//}}AFX_EVENT_MAP
+END_EVENT_MAP()
+
 #pragma region Constructor/destructor
 
 // ********************************************************************
@@ -171,6 +200,7 @@ void CMapView::Startup()
 	Gdiplus::FontFamily family2(L"Arial");
 	_fontArial = new Gdiplus::Font(&family2, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 	
+	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)
 	_panningAnimation = false;
 	_zoombarTargetZoom = -1;
 	_dragging.Move = CPoint(0,0);
@@ -754,14 +784,32 @@ EditShapeBase* CMapView::GetEditShapeBase()
 }
 
 // ***************************************************************
-//	GetAtiveShape
+//	GetACtiveShape
 // ***************************************************************
-ActiveShape* CMapView::GetAtiveShape()
+ActiveShape* CMapView::GetActiveShape()
 {
 	if (m_cursorMode == cmMeasure) return GetMeasuringBase();
 	if (m_cursorMode == cmAddShape) return GetEditShapeBase();
 	return NULL;		
 }
+
+// ***************************************************************
+//	GetLayerVisibleAtCurrentScale
+// ***************************************************************
+VARIANT_BOOL CMapView::GetLayerVisibleAtCurrentScale(LONG LayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!IsValidLayer(LayerHandle)) return VARIANT_FALSE;
+	Layer * l = _allLayers[LayerHandle];
+	if (IS_VALID_PTR(l))
+	{
+		double scale = GetCurrentScale();
+		int zoom = GetCurrentZoom();
+		return l->IsVisible(scale, zoom) ? VARIANT_TRUE: VARIANT_FALSE;
+	}
+	return VARIANT_FALSE;
+}
+
 
 
 

@@ -13,8 +13,10 @@ class TableRow
 {
 public:
     enum DataStatusType { DATA_CLEAN, DATA_INSERTED, DATA_MODIFIED };
+
 	TableRow();
 	virtual ~TableRow();
+
     DataStatusType status()
     {
         return _status;
@@ -23,6 +25,22 @@ public:
     {
         _status = nStatus;
     }
+	TableRow* Clone()
+	{
+		TableRow* row = new TableRow();
+		for (int i = 0; i < (int)values.size(); i++)
+		{
+			VARIANT* varNew = new VARIANT();
+			if (values[i] != NULL) {
+				VariantCopy(varNew, values[i]);
+			}
+			else {
+				VariantInit(varNew);
+			}
+			row->values.push_back(varNew);
+		}
+		return row;
+	}
 	std::vector<VARIANT *> values;
 
 private:

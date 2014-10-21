@@ -44,9 +44,11 @@ struct GlobalSettingsInfo
 	tkInterpolationMode gridUpsamplingMode;			// currently not used
 	tkInterpolationMode gridDownsamplingMode;
 	tkOgrEncoding ogrEncoding;
+	int ogrLayerMaxFeatureCount;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		ogrLayerMaxFeatureCount = 100000;
 		ogrEncoding = oseUtf8;
 		imageUpsamplingMode = imNone;
 		imageDownsamplingMode = imBilinear;

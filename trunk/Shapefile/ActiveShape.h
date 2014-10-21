@@ -6,7 +6,7 @@ class ActiveShape
 {
 public:	
 	ActiveShape(): _textBrush(Gdiplus::Color::Black), _whiteBrush(Gdiplus::Color::White),
-		_orangePen(Gdiplus::Color::Orange, 2.0f), _orangeBrush(Gdiplus::Color(100, 255, 165, 0)),
+		_linePen(Gdiplus::Color::Orange, 2.0f), _fillBrush(Gdiplus::Color(100, 255, 165, 0)),
 		_bluePen(Gdiplus::Color::Blue, 1.0f), _blueBrush(Gdiplus::Color::LightBlue),
 		_redPen(Gdiplus::Color::Red, 1.0f), _redBrush(Gdiplus::Color::LightCoral)
 	{
@@ -46,12 +46,13 @@ public:
 	void SetDefaults();
 	void ErrorMessage(long ErrorCode);
 private:
-	Gdiplus::Pen _orangePen;
+	Gdiplus::Pen _linePen;
 	Gdiplus::Pen _bluePen;
 	Gdiplus::Pen _redPen;
-	Gdiplus::SolidBrush _orangeBrush;
+	Gdiplus::SolidBrush _fillBrush;
 	Gdiplus::SolidBrush _blueBrush;
 	Gdiplus::SolidBrush _redBrush;
+	
 
 protected:
 	enum ScreenPointsType
@@ -63,16 +64,12 @@ protected:
 	
 	std::vector<MeasurePoint*> _points;		   // points in decimal degrees (in case transformation to WGS84 is possible)
 	ShapeInputMode _inputMode;
-	
 	bool _drawLineForPoly;
-	
 	void* _mapView;
-	
 	bool _isGeodesic;
 	bool _areaRecalcIsNeeded;		// geodesic area should be recalculated a new (after a point was added or removed)
 	IShape* _areaCalcShape;
 	Point2D _mousePoint;			// points entered by user (in map units, whatever they are)
-	
 	Gdiplus::Font* _fontArea;
 	Gdiplus::Font* _font;
 	Gdiplus::StringFormat _format;
@@ -90,11 +87,15 @@ public:
 	double _angleCorrection;
 	int _selectedVertex;
 public:
-
+	BYTE FillTransparency;
+	float LineWidth;
 	bool DisplayAngles;
 	tkAreaDisplayMode AreaDisplayMode;
 	tkAngleDisplay AngleDisplayMode;
 	tkAngleFormat AngleFormat;
+	OLE_COLOR FillColor;
+	OLE_COLOR LineColor;
+
 protected:
 
 	// abstract methods
@@ -111,12 +112,12 @@ public:
 	virtual bool IsDynamic() = 0;
 
 public:
-	void SetBlueFillColor()
+	/*void SetBlueFillColor()
 	{
 		_orangePen.SetColor(Gdiplus::Color(255, 30, 144, 255));
 		_orangeBrush.SetColor(Gdiplus::Color(100, 173, 216, 230));
-	}
-	
+	}*/
+
 	// -------------------------------------------------
 	//   Exposing properties
 	// -------------------------------------------------
@@ -219,7 +220,7 @@ public:
 	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, double area);
 	IPoint* GetPolygonCenter(Gdiplus::PointF* data, int length);
 	void DisplayPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly);
-	void HandleSnappedPointAdd( double projX, double projY );
+	void HandleProjPointAdd( double projX, double projY );
 	double GetDynamicLineDistance();
 	void UpdateLatLng( int pointIndex );
 	double GetBearing( int vertexIndex, bool clockwise );

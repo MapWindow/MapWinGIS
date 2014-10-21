@@ -665,3 +665,19 @@ STDMETHODIMP CGlobalSettings::put_OgrStringEncoding(tkOgrEncoding pVal)
 	m_globalSettings.ogrEncoding = pVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     OgrLayerMaxFeatureCount
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_OgrLayerMaxFeatureCount(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.ogrLayerMaxFeatureCount;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_OgrLayerMaxFeatureCount(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.ogrLayerMaxFeatureCount = newVal;
+	return S_OK;
+}
