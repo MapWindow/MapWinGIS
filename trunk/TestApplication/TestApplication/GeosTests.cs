@@ -93,10 +93,10 @@ namespace TestApplication
         theForm.Progress(string.Empty, 100, "Start buffering " + Path.GetFileName(shapefilename));
 
         // Make the distance depending on the projection.
-        var distance = 1000;
+        var distance = 1000.0;
         if (sf.GeoProjection.IsGeographic)
         {
-          distance = 1;
+          distance = 0.1;
         }
 
         var bufferedSf = sf.BufferByDistance(distance, 16, false, false);
@@ -205,13 +205,14 @@ namespace TestApplication
         var tolerance = 10d;
         if (sf.GeoProjection.IsGeographic)
         {
-          tolerance = 1;
+          tolerance = 0.1;
         }
 
         var simplifiedSf = sf.SimplifyLines(tolerance, false);
 
         // Do some checks:
         if (!Helper.CheckShapefile(sf, simplifiedSf, globalSettings.GdalLastErrorMsg, theForm))
+		{
         {
           return false;
         }
@@ -232,8 +233,8 @@ namespace TestApplication
         MyAxMap.Clear();
         if (MyAxMap.AddLayer(simplifiedSf, true) == -1)
         {
-          theForm.Error(string.Empty, "Could not add the simplified shapefile to the map");
-          return false;
+            theForm.Error(string.Empty, "Could not add the simplified shapefile to the map");
+            return false;
         }
 
         Fileformats.OpenShapefileAsLayer(shapefilename, theForm, false);
@@ -272,6 +273,7 @@ namespace TestApplication
       }
 
       theForm.Progress(string.Empty, 0, "-----------------------The GEOS Dissolve tests have started.");
+
 
       // Read text file:
       var lines = Helper.ReadTextfile(textfileLocation);
@@ -757,7 +759,7 @@ namespace TestApplication
         searchSf.set_ShapeSelected(foundShapeID, true);
 
         var link = pointShp.ClosestPoints(searchSf.get_Shape(foundShapeID));
-        if (link != null && link.NumPoints > 1)
+        if (link != null && link.numPoints > 1)
         {
           var shapeId = linksSf.EditAddShape(link);
           linksSf.EditCellValue(fieldIndex, shapeId, foundShapeID);
@@ -868,7 +870,15 @@ namespace TestApplication
         globalSettings.ResetGdalError();
         theForm.Progress(string.Empty, 0, "Start clipping " + Path.GetFileName(shapefilename));
 
-        var clippedSf = sf.Clip(false, overlaySf, false);
+        // selecting only part of overlay, then the check about the varying 
+	    // number of shapes in input/output will work
+        int max = Math.Max(overlaySf.NumShapes / 2, 10);
+        for (int i = 0; i < max; i++)
+		{
+            overlaySf.ShapeSelected[i] = true;
+	    }
+
+        var clippedSf = sf.Clip(false, overlaySf, true);
 
         // Do some checks:
         if (!Helper.CheckShapefile(sf, clippedSf, globalSettings.GdalLastErrorMsg, theForm))
