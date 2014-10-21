@@ -212,7 +212,6 @@ namespace TestApplication
 
         // Do some checks:
         if (!Helper.CheckShapefile(sf, simplifiedSf, globalSettings.GdalLastErrorMsg, theForm))
-		{
         {
           return false;
         }
