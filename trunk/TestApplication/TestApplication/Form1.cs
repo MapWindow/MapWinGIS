@@ -99,6 +99,11 @@ namespace TestApplication
       }
     }
 
+      public void Error(string errorMsg)
+      {
+          this.Error(string.Empty, errorMsg);
+      }
+
     /// <summary>The error callback</summary>
     /// <param name="keyOfSender">
     /// The key of sender.
@@ -119,7 +124,13 @@ namespace TestApplication
       }
     }
 
-    /// <summary>The progress callback</summary>
+
+      public void Progress(string message)
+      {
+          this.Progress(string.Empty, 100, message);
+      }
+
+      /// <summary>The progress callback</summary>
     /// <param name="keyOfSender">
     /// The key of sender.
     /// </param>
@@ -937,6 +948,8 @@ namespace TestApplication
       SetTextfileLocation(RasterCalculatorInput, path, "rasterCalulator.txt");
       SetTextfileLocation(ReclassifyInput, path, "reclassify.txt");
 
+        // PostGIS
+
       // Save all settings:
       Properties.Settings.Default.Save();
     }
@@ -1131,8 +1144,31 @@ namespace TestApplication
     {
         this.ResetMapSettings(false);
         ((Button)sender).BackColor = System.Drawing.Color.Blue;
-        var retVal = OgrLayerTests.RunOgrLayerTest(this.ReclassifyInput.Text, this);
+        var retVal = OgrLayerTests.RunOgrLayerTest(this.PostgisInput.Text, this);
         ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+    }
+
+    private void SelectRasterAInput_Click(object sender, EventArgs e)
+    {
+        Tests.SelectTextfile(RasterCalculatorInput, "Select text file with rasters and formulas");
+    }
+
+    private void SelectReclassifyInput_Click(object sender, EventArgs e)
+    {
+        Tests.SelectTextfile(RasterCalculatorInput, "Select text file with rasters");
+    }
+
+    private void RunPostGisCreateDb_Click(object sender, EventArgs e)
+    {
+        this.ResetMapSettings(false);
+        ((Button)sender).BackColor = System.Drawing.Color.Blue;
+        var retVal = OgrLayerTests.RunPostGisCreateDatabase(this.PostGisCreateDbInput.Text, this);
+        ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+    }
+
+    private void SelectPostGisCreateDb_Click(object sender, EventArgs e)
+    {
+        Tests.SelectTextfile(this.PostGisCreateDbInput, "Select text file with create queries");
     }
   }
 }

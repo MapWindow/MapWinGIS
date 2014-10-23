@@ -103,9 +103,16 @@ namespace TestApplication
           retVal = false;
         }
 
-        // Suddenly causes a SEH exception: 
-        Application.DoEvents();
-        Thread.Sleep(1000);
+        // Sometimes causes a SEH exception: 
+        try
+        {
+            Application.DoEvents();
+            Thread.Sleep(1000);
+        }
+        catch (Exception ex)
+        {
+            theForm.Error("Error in RunShapefileTest: " + ex.Message);
+        }
       }
 
       theForm.Progress(string.Empty, 100, "The shapefile open tests have finished.");
@@ -564,7 +571,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("-----------------------The Clip grid by polygon test has started.", Environment.NewLine));
+        string.Format("-----------------------The Clip grid by polygon test has started.{0}", Environment.NewLine));
 
       var retVal = true;
 
@@ -1267,7 +1274,7 @@ namespace TestApplication
       theForm.Progress(
         string.Empty,
         0,
-        string.Format("-----------------------The Aggregate shapefile test has started.", Environment.NewLine));
+        string.Format("-----------------------The Aggregate shapefile test has started.{0}", Environment.NewLine));
 
       var retVal = true;
 

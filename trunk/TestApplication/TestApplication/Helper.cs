@@ -293,11 +293,11 @@ namespace TestApplication
         return false;
       }
 
-      if (shp.NumPoints != shp2.NumPoints)
+      if (shp.numPoints != shp2.numPoints)
       {
         theForm.Error(
           string.Empty,
-          string.Format("The first shape has {0} points and the second shape has {1} points", shp.NumPoints, shp2.NumParts));
+          string.Format("The first shape has {0} points and the second shape has {1} points", shp.numPoints, shp2.NumParts));
         return false;
       }
 
@@ -362,7 +362,7 @@ namespace TestApplication
         theForm.Error(string.Empty, "The max values of X, Y, Z or M return different values");
       }
 
-      for (var i = 0; i < shp.NumPoints; i++)
+      for (var i = 0; i < shp.numPoints; i++)
       {
         if (shp.get_Point(i).M != shp2.get_Point(i).M)
         {

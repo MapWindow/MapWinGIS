@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApplication", "TestApplication\TestApplication.csproj", "{E813DA57-E5F5-48A6-A6B2-3545ECAAD7CB}"
 EndProject
@@ -24,7 +24,6 @@ Global
 		{E813DA57-E5F5-48A6-A6B2-3545ECAAD7CB}.Release|x86.ActiveCfg = Release|x86
 		{E813DA57-E5F5-48A6-A6B2-3545ECAAD7CB}.Release|x86.Build.0 = Release|x86
 		{5CD5386F-A286-45C8-A8CC-BCCABE80254C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5CD5386F-A286-45C8-A8CC-BCCABE80254C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CD5386F-A286-45C8-A8CC-BCCABE80254C}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{5CD5386F-A286-45C8-A8CC-BCCABE80254C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CD5386F-A286-45C8-A8CC-BCCABE80254C}.Release|Any CPU.Build.0 = Release|Any CPU

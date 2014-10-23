@@ -1,0 +1,20 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is connection string
+# Following lines are queries to execute
+
+# Connection string:
+PG:host=localhost dbname=postgres user=postgres
+
+# Drop database if it exists
+DROP DATABASE IF EXISTS MapWinGIS
+
+# Create database with PostGIS template:
+CREATE DATABASE aw_sampling WITH ENCODING='UTF8' OWNER=postgres TEMPLATE=postgis_template CONNECTION LIMIT=-1;  
+
+# Set grants
+GRANT ALL ON DATABASE MapWinGIS TO postgres;
+
+
