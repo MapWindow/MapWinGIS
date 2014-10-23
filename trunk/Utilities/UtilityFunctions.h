@@ -63,6 +63,7 @@ namespace Utility
 	bool SaveBitmap(int width, int height, unsigned char* pixels, BSTR outputName);
 	DWORD* cvtUCharToDword(long inp, int &num);
 	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);
+	Gdiplus::Color OleColor2GdiPlus(OLE_COLOR color, BYTE alpha);
 
 	// shapefile
 	void swapEndian(char* a,int size);

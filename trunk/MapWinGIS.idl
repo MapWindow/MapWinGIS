@@ -57,6 +57,17 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkSnapBehavior Enumeration **********************/
+typedef
+[
+	uuid(8ABD71D3-BE98-492F-9EE3-2E848D1FF2C4),
+	helpstring("tkSnapBehavior"),
+]
+enum tkSnapBehavior {
+	sbSnapByDefault = 0,
+	sbSnapWithShift = 1,
+}tkSnapBehavior;
+
 /************************** tkUndoOperation Enumeration **********************/
 typedef
 [
@@ -69,7 +80,6 @@ enum tkUndoOperation {
 	uoEditShape = 2,
 	uoSubEditShape = 3,
 }tkUndoOperation;
-
 
 /************************** tkMwBoolean Enumeration **********************/
 typedef
@@ -3111,6 +3121,13 @@ enum tkScalebarUnits
 		[propget, id(31)] HRESULT LineWidth([out, retval] FLOAT* pVal);
 		[propput, id(31)] HRESULT LineWidth([in] FLOAT newVal);
 		[id(32)] HRESULT Redo([out, retval] VARIANT_BOOL* retVal);
+		[propget, id(33)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
+		[propget, id(34)] HRESULT SnapTolerance([out, retval] DOUBLE* pVal);
+		[propput, id(34)] HRESULT SnapTolerance([in] DOUBLE newVal);
+		[propget, id(35)] HRESULT HotTracking([out, retval] VARIANT_BOOL* pVal);
+		[propput, id(35)] HRESULT HotTracking([in] VARIANT_BOOL newVal);
+		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
+		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
 	};
 
 	
@@ -3543,7 +3560,6 @@ interface IShapefile : IDispatch{
 		[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** sf);
 
 	[propget, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
-	[propput, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
 	[propget, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [out, retval] double* pVal);
 	[propput, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [in] double newVal);
 	[propget, id(121)] HRESULT Volatile([out, retval] VARIANT_BOOL* pVal);
@@ -3555,6 +3571,10 @@ interface IShapefile : IDispatch{
 	[propget, id(124)] HRESULT UndoList([out, retval] IUndoList** pVal);
 	[propget, id(125)] HRESULT InteractiveEditing([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(125)] HRESULT InteractiveEditing([in] VARIANT_BOOL newVal);
+	[propget, id(126)] HRESULT ShapeIsHidden([in] LONG shapeIndex, [out, retval] VARIANT_BOOL* pVal);
+	[propput, id(126)] HRESULT ShapeIsHidden([in] LONG shapeIndex, [in] VARIANT_BOOL newVal);
+	[propget, id(127)] HRESULT Snappable([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(127)] HRESULT Snappable([in] VARIANT_BOOL newVal);
 };
 
 /****************************  Shape Interface ***********************/
@@ -5937,15 +5957,15 @@ library MapWinGIS
 			[id(7)] void ExtentsChanged();
 			[id(8)] void MapState(long LayerHandle);
 			[id(9)] void OnDrawBackBuffer(long BackBuffer);
-			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex);
+			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex, long pointX, long pointY);
 			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
-			[id(16)] void BeforeShapeEdit(tkCursorMode Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
+			[id(16)] void BeforeShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
-			[id(18)] void AfterShapeEdit(tkCursorMode Action, LONG LayerHandle, LONG ShapeIndex);
+			[id(18)] void AfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex);
 			[id(19)] void NewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
 			[id(20)] void ValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix);
 			[id(21)] void ValidationResults(VARIANT_BOOL Success, BSTR ErrorMessage);

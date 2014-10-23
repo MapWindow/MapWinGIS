@@ -91,6 +91,9 @@
     <Filter Include="Tiles\Projections">
       <UniqueIdentifier>{fb74bb0b-2317-4100-9c1b-f3022a304ac1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{3a41669f-5b51-4a20-b150-590c68fa301a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -330,12 +333,6 @@
     <ClInclude Include="Control\MapTracker.h">
       <Filter>Control</Filter>
     </ClInclude>
-    <ClInclude Include="MapWinGIS.h">
-      <Filter>Control</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>Control</Filter>
-    </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Control</Filter>
     </ClInclude>
@@ -460,9 +457,6 @@
       <Filter>Grid</Filter>
     </ClInclude>
     <ClInclude Include="Grid\lHeader.h">
-      <Filter>Grid</Filter>
-    </ClInclude>
-    <ClInclude Include="Grid\RegistryKey.h">
       <Filter>Grid</Filter>
     </ClInclude>
     <ClInclude Include="Grid\sgrid.h">
@@ -732,6 +726,11 @@
     </ClInclude>
     <ClInclude Include="COM classes\UndoList.h">
       <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MapWinGIS.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Tiles\LoadingTask.h">
+      <Filter>Tiles\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1014,9 +1013,6 @@
     <ClCompile Include="Control\MapTracker.cpp">
       <Filter>Control</Filter>
     </ClCompile>
-    <ClCompile Include="MapWinGIS.cpp">
-      <Filter>Control</Filter>
-    </ClCompile>
     <ClCompile Include="StdAfx.cpp">
       <Filter>Control</Filter>
     </ClCompile>
@@ -1105,9 +1101,6 @@
       <Filter>Grid</Filter>
     </ClCompile>
     <ClCompile Include="Grid\lHeader.cpp">
-      <Filter>Grid</Filter>
-    </ClCompile>
-    <ClCompile Include="Grid\RegistryKey.cpp">
       <Filter>Grid</Filter>
     </ClCompile>
     <ClCompile Include="Grid\sgrid.cpp">
@@ -1560,6 +1553,10 @@
     <ClCompile Include="Control\Map_Edit.cpp">
       <Filter>Control</Filter>
     </ClCompile>
+    <ClCompile Include="MapWinGIS.cpp" />
+    <ClCompile Include="Tiles\LoadingTask.cpp">
+      <Filter>Tiles\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1685,15 +1682,7 @@
     <None Include="Grid\fip\readme.123">
       <Filter>Grid\fip</Filter>
     </None>
-    <None Include="Resource\cursor1.cur" />
-    <None Include="Resource\cursor2.cur" />
-    <None Include="Resource\cursor3.cur" />
-    <None Include="Resource\cursor4.cur" />
-    <None Include="Resource\cursor5.cur" />
-    <None Include="Resource\Map.bmp" />
     <None Include="ReadMe.txt" />
-    <None Include="Resource\zoom_in_16_2.ico" />
-    <None Include="Resources\zoom_in_16_2.ico" />
     <None Include="COM classes\EditShape.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
@@ -1707,6 +1696,30 @@
     <None Include="COM classes\UndoList.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
+    <None Include="Resource\cursor5.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\cursor1.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\cursor2.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\cursor3.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\cursor4.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\Map.bmp">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\zoom_in_16_2.ico">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resources\zoom_in_16_2.ico">
+      <Filter>Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />
@@ -1717,8 +1730,6 @@
     </CustomBuildStep>
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="MapWinGIS.idl">
-      <Filter>Control</Filter>
-    </Midl>
+    <Midl Include="MapWinGIS.idl" />
   </ItemGroup>
 </Project>

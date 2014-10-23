@@ -165,15 +165,25 @@ void CMapView::OnCursorModeChanged()
 		if (m_cursorMode != cmMeasure && !vb)
 			_measuring->Clear();
 	}
-	
-	VARIANT_BOOL vb;
-	_editShape->get_CreationMode(&vb);
-	bool clear = (vb && (m_cursorMode == cmEditShape || m_cursorMode == cmMoveShape)) ||
-				 (!vb && m_cursorMode == cmAddShape);
-		
-	if (clear) {
-		_editShape->Clear();
-		RedrawCore(RedrawSkipDataLayers, false, true);
+
+	VARIANT_BOOL empty;
+	_editShape->get_IsEmpty(&empty);
+
+	if (!empty) {
+		VARIANT_BOOL vb;
+		_editShape->get_CreationMode(&vb);
+
+		if (vb && (m_cursorMode == cmEditShape || m_cursorMode == cmMoveShape)) {
+			_editShape->Clear();
+			RedrawCore(RedrawSkipDataLayers, false, true);
+		}
+
+		if (!vb && m_cursorMode == cmAddShape) {
+			// TODO: check if we have changes			
+			ClearEditShape();
+			RedrawCore(RedrawSkipDataLayers, false, true);
+		}
+
 	}
 }
 

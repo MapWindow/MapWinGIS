@@ -66,7 +66,7 @@
     </Midl>
     <!-- cpp compiler options -->
     <ClCompile>
-      <AdditionalOptions>/MP  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -89,13 +89,14 @@
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(IntDir)</ProgramDataBaseFileName>
-      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformation>false</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
-      <SuppressStartupBanner>false</SuppressStartupBanner>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <ShowIncludes>false</ShowIncludes>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+	  <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <!-- resource options -->
     <ResourceCompile>
@@ -107,7 +108,7 @@
     <Link>
       <Version>4.9.3</Version>
       <RegisterOutput>true</RegisterOutput>
-      <AdditionalOptions>/MACHINE:I386 /ignore:4099  %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4099 /Ignore:4254  %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>mfcs100.lib;msvcrt.lib;cqlib.lib;GdiPlus.lib;gdal_i.lib;version.lib;Crypt32.lib;Dbghelp.lib;SpatialIndex-mw.lib;geos_c.lib;libtiff_i.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
@@ -128,6 +129,7 @@
       <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
       <TypeLibraryFile>$(IntDir)MapWinGIS.tlb</TypeLibraryFile>
       <TypeLibraryResourceID>2</TypeLibraryResourceID>
+	  
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -258,6 +260,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Control\ToolTipEx.h" />
+    <ClInclude Include="Tiles\LoadingTask.h" />
     <ClInclude Include="Utilities\ColoringGraph.h" />
     <ClInclude Include="Utilities\cppVector.h" />
     <ClInclude Include="Utilities\GdalHelper.h" />
@@ -302,7 +305,6 @@
     <ClInclude Include="Grid\GridManager.h" />
     <ClInclude Include="Grid\lGrid.h" />
     <ClInclude Include="Grid\lHeader.h" />
-    <ClInclude Include="Grid\RegistryKey.h" />
     <ClInclude Include="Grid\sgrid.h" />
     <ClInclude Include="Grid\sHeader.h" />
     <ClInclude Include="Grid\tkGridRaster.h" />
@@ -487,10 +489,10 @@
     <ClCompile Include="Shapefile\EditShapeBase.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tamas|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
+    <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />
@@ -528,7 +530,6 @@
     <ClCompile Include="Grid\GridManager.cpp" />
     <ClCompile Include="Grid\lGrid.cpp" />
     <ClCompile Include="Grid\lHeader.cpp" />
-    <ClCompile Include="Grid\RegistryKey.cpp" />
     <ClCompile Include="Grid\sgrid.cpp" />
     <ClCompile Include="Grid\sHeader.cpp" />
     <ClCompile Include="Grid\tkGridRaster.cpp" />
@@ -732,7 +733,7 @@
     <ResourceCompile Include="MapWinGIS.rc" />
   </ItemGroup>
   <ItemGroup>
-     <Midl Include="MapWinGIS.idl">
+    <Midl Include="MapWinGIS.idl">
       <HeaderFileName>MapWinGIS_i.h</HeaderFileName>
       <InterfaceIdentifierFileName>MapWinGIS_i.c</InterfaceIdentifierFileName>
       <TypeLibraryName>$(IntDir)MapWinGIS.tlb</TypeLibraryName>

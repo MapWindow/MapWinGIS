@@ -38,6 +38,7 @@
 
 CShapefile::CShapefile()
 {	
+	_snappable = VARIANT_TRUE;
 	_interactiveEditing = VARIANT_FALSE;
 	_hotTracking = VARIANT_FALSE;
 	_geosGeometriesRead = false;
@@ -2034,27 +2035,70 @@ STDMETHODIMP CShapefile::put_ShapeRotation(long ShapeIndex, double newVal)
 STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
-	{	
-		*pVal = -1;
+	*pVal = VARIANT_FALSE;
+	if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-		*pVal = _shapeData[ShapeIndex]->visible ? VARIANT_TRUE : VARIANT_FALSE; 
+	else {
+		// this particular shape was not hidden explicitly or via visibility expression
+		if (!_shapeData[ShapeIndex]->hidden && _shapeData[ShapeIndex]->isVisible) 
+		{
+			long ctIndex = -1;
+			get_ShapeCategory(ShapeIndex, &ctIndex);
+			if (ctIndex == -1) 
+			{
+				// no category, check default options
+				m_defaultDrawOpt->get_Visible(pVal);
+			}
+			else
+			{
+				// there is category, check whether it is visible
+				CComPtr<IShapefileCategory> ct = NULL;
+				get_ShapeCategory3(ShapeIndex, &ct);
+				if (ct) 
+				{
+					CComPtr<IShapeDrawingOptions> options = NULL;
+					ct->get_DrawingOptions(&options);
+					if (options) {
+						options->get_Visible(pVal);
+					}
+				}
+			}
+		}
+	}
 	return S_OK;
 }
-STDMETHODIMP CShapefile::put_ShapeVisible(long ShapeIndex, VARIANT_BOOL newVal)
+
+// *************************************************************
+//		ShapeIsHidden()
+// *************************************************************
+STDMETHODIMP CShapefile::get_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
-	{	
+	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	{
+		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else
-		_shapeData[ShapeIndex]->visible = newVal ? true: false;
+		*pVal = _shapeData[shapeIndex]->hidden ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else
+		_shapeData[shapeIndex]->hidden = newVal ? true : false;
 
 	return S_OK;
 }
+
 
 // *************************************************************
 //		get_ShapeModified()
@@ -3273,6 +3317,10 @@ bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::ve
 	double minDist = DBL_MAX;
 	for (size_t i = 0; i < ids.size(); i++)
 	{
+		VARIANT_BOOL visible;
+		get_ShapeVisible(ids[i], &visible);
+		if (!visible) continue;
+
 		IShape* shp = NULL;
 		this->get_Shape(ids[i], &shp);
 		if (shp)
@@ -3374,5 +3422,21 @@ STDMETHODIMP CShapefile::get_UndoList(IUndoList** pVal)
 	if (_undoList)
 		_undoList->AddRef();
 	*pVal = _undoList;
+	return S_OK;
+}
+
+// *****************************************************************
+//		Snappable()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_Snappable(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _snappable;
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_snappable = newVal;
 	return S_OK;
 }

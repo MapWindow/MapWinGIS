@@ -90,9 +90,6 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 			
 			if (width < 0 || height < 0) continue;		// there was problem with transformation (coordinates outside bounds, don't draw it)
 
-			//Debug::WriteLine("X: %f; y: %f", x, y);
-			Debug::WriteLine("Drawing; Width: %f; height: %f", width, height);
-
 			Gdiplus::RectF rect((Gdiplus::REAL)x, (Gdiplus::REAL)y, (Gdiplus::REAL)width, (Gdiplus::REAL)height);
 			
 			// actual drawing

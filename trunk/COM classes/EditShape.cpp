@@ -264,6 +264,9 @@ STDMETHODIMP CEditShape::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_editShape->Clear();
+	for (size_t i = 0; i < _undoList.size(); i++)
+		_undoList[i]->Release();
+	_undoList.clear();
 	return S_OK;
 }
 
@@ -384,10 +387,6 @@ STDMETHODIMP CEditShape::get_Area(double* retVal)
 	*retVal = _editShape->GetArea(false, 0.0, 0.0);
 	return S_OK;
 }
-
-
-
-
 
 // *******************************************************
 //		LayerHandle()
@@ -558,12 +557,55 @@ STDMETHODIMP CEditShape::put_LineWidth(FLOAT newVal)
 }
 
 // *******************************************************
-//		MoveVertex()
+//		MoveShape()
 // *******************************************************
-void CEditShape::MoveVertex(double offsetX, double offsetY)
+void CEditShape::MoveShape(double offsetX, double offsetY)
 {
 	SaveState();
-	_editShape->MoveVertex(offsetX, offsetY);
+	_editShape->Move(offsetX, offsetY);
+}
+
+// *******************************************************
+//		MoveVertex()
+// *******************************************************
+void CEditShape::MoveVertex(double offsetX, double offsetY, bool offset)
+{
+	SaveState();
+	_editShape->MoveVertex(offsetX, offsetY, offset);
+}
+
+// *******************************************************
+//		InsertVertex()
+// *******************************************************
+bool CEditShape::InsertVertex(double xProj, double yProj)
+{
+	IShape* shp = NULL;
+	get_RawData(&shp);
+	if (!shp) return false;
+		
+	if (_editShape->TryInsertVertex(xProj, yProj)) {
+		_undoList.push_back(shp);
+		return true;
+	}
+	shp->Release();
+	return false;
+}
+
+// *******************************************************
+//		RemoveVertex()
+// *******************************************************
+bool CEditShape::RemoveVertex()
+{
+	IShape* shp = NULL;
+	get_RawData(&shp);
+	if (!shp) return false;
+	
+	if (_editShape->RemoveSelectedVertex()) {
+		_undoList.push_back(shp);
+		return true;
+	}
+	shp->Release();
+	return false;
 }
 
 // *******************************************************
@@ -575,6 +617,21 @@ void CEditShape::SaveState()
 	get_RawData(&shp);
 	_undoList.push_back(shp);
 }
+
+// *******************************************************
+//		DiscardState()
+// *******************************************************
+void CEditShape::DiscardState()
+{
+	if (_undoList.size() > 0) {
+		IShape* shp = _undoList[_undoList.size() - 1];
+		if (shp) {
+			shp->Release();
+		}
+		_undoList.pop_back();
+	}
+}
+
 
 // *******************************************************
 //		Undo()
@@ -589,8 +646,9 @@ STDMETHODIMP CEditShape::Undo(VARIANT_BOOL* retVal)
 	}
 	else {
 		if (_undoList.size() > 0) {
-			CComPtr<IShape> shp = _undoList[_undoList.size() - 1];
+			IShape* shp = _undoList[_undoList.size() - 1];
 			this->SetShape(shp);
+			shp->Release();
 			_undoList.pop_back();
 			*retVal = VARIANT_TRUE;
 		}
@@ -604,6 +662,75 @@ STDMETHODIMP CEditShape::Undo(VARIANT_BOOL* retVal)
 STDMETHODIMP CEditShape::Redo(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	// TODO: implement
+	if (_editShape->GetCreationMode()) {
+		// TODO: consider whether to implement this
+	}
+	else {
+		// TODO: implement
+	}
+	*retVal = VARIANT_FALSE;
+	return S_OK;
+}
+
+// *******************************************************
+//		get_IsEmpty()
+// *******************************************************
+STDMETHODIMP CEditShape::get_IsEmpty(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _editShape->IsEmpty();
+	return S_OK;
+}
+
+// *******************************************************
+//		SnapTolerance()
+// *******************************************************
+STDMETHODIMP CEditShape::get_SnapTolerance(DOUBLE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _snapTolerance;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_SnapTolerance(DOUBLE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (newVal >= 0.0 && newVal <= 100.0) {
+		_snapTolerance = newVal;
+	}
+	else {
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+	}
+	return S_OK;
+}
+
+// *******************************************************
+//		get_HotTracking()
+// *******************************************************
+STDMETHODIMP CEditShape::get_HotTracking(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _hotTracking;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_HotTracking(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_hotTracking = newVal;
+	return S_OK;
+}
+
+// *******************************************************
+//		get_SnapBehavior()
+// *******************************************************
+STDMETHODIMP CEditShape::get_SnapBehavior(tkSnapBehavior* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _snapBehavior;
+	return S_OK;
+}
+STDMETHODIMP CEditShape::put_SnapBehavior(tkSnapBehavior newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_snapBehavior = newVal;
 	return S_OK;
 }

@@ -623,7 +623,7 @@ public:
 	void FireOnDrawBackBuffer(long BackBuffer)
 		{FireEvent(eventidOnDrawBackBuffer,EVENT_PARAM(VTS_I4), BackBuffer);}
 	void FireShapeHighlighted(long LayerHandle, long ShapeIndex, long pointX, long pointY)
-		{FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4  VTS_I4), LayerHandle, ShapeIndex, pointX, pointY);}
+		{ FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4  VTS_I4), LayerHandle, ShapeIndex, pointX, pointY);}
 	void FireBeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
 		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
@@ -634,11 +634,11 @@ public:
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
-	void FireBeforeShapeEdit(tkCursorMode action, LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
+	void FireBeforeShapeEdit(tkUndoOperation action, LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_PI4), action, layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4), Action, LayerHandle, Shape, Cancel);	}
-	void FireAfterShapeEdit(tkCursorMode Action, LONG LayerHandle, LONG ShapeIndex)
+	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireNewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
 		{FireEvent(eventidNewShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
@@ -808,7 +808,7 @@ public:
 	// ---------------------------------------------
 	//	temp state variable
 	// ---------------------------------------------
-	tkCursorMode _lastCursorMode;
+	tkCursorMode _lastCursorMode;   // last one set externally (OnCursorChanged callback)
 	double _lastWidthMeters;		// last width of the screen in meters (to avoid recalculation of scale bar on tile redraw)
 	int _activeLayerPosition;		// for zooming between layer
 	bool _rectTrackerIsActive;
@@ -1052,9 +1052,14 @@ private:
 	void HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl);
 	void HandleOnLButtonDownEditShape(int x, int y, bool ctrl);
 	void ClearEditShape();
-	void MoveShapeVertex(int offsetX, int offsetY);
 	IShapefile* GetEditShapeShapefile();
 	bool RunShapefileUndoList(bool undo);
+	bool RemoveSelectedShape();
+	long ParseKeyboardEventFlags(UINT nFlags);
+	long ParseMouseEventFlags(UINT nFlags);
+	bool HandleOnMouseMoveEditShape(int x, int y, long nFlags);
+	bool SnappingIsOn(long nFlags, tkSnapBehavior& behavior);
+	void HandleLButtonUpDragVertexOrShape(long nFlags);
 #pragma endregion
 
 	

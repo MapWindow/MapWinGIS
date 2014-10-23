@@ -22,7 +22,6 @@
 #include "Wininet.h"
 #include "BaseProvider.h"
 
-// init static members
 CString BaseProvider::m_proxyAddress = "";
 short BaseProvider::m_proxyPort = 0;
 Debug::Logger tilesLogger;
@@ -60,7 +59,6 @@ CMemoryBitmap* BaseProvider::DownloadBitmap(CPoint &pos, int zoom)
 	shortUrl.Format("\\zoom=%d\\x=%d\\y=%d", zoom, pos.x, pos.y);
 	CMemoryBitmap* bmp = this->GetTileImageUsingHttp(url, shortUrl);
 	return bmp;
-
 }
 
 // ************************************************************
@@ -86,21 +84,14 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
-	bool canReuseConnections = false; //this->CanReuseConnections();
+	bool canReuseConnections = false;
 	
-	// TODO: try reuse HTTP client
-	MyHttpClient* httpClient = /*canReuseConnections ? this->GetHttpClient():*/  new MyHttpClient();
+	MyHttpClient httpClient; //this->GetHttpClient();
 	CAtlNavigateData navData;
 	
-	if (!httpClient)
-	{
-		Debug::WriteLine("Can't retrieve http client");
-		return NULL;
-	}
-
 	if (m_proxyAddress.GetLength() > 0)
 	{
-		httpClient->SetProxy(m_proxyAddress, m_proxyPort);
+		httpClient.SetProxy(m_proxyAddress, m_proxyPort);
 	}
 
 	char* body = NULL;
@@ -110,24 +101,28 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	//navData.SetExtraHeaders("Connection: keep-alive\n");
 	//navData.SetExtraHeaders("Pragma: no-cache\nCache-Control: no-cache\nProxy-Connection: keep-alive\n");
 
-	bool result = httpClient->Navigate( urlStr, &navData );
-	httpStatus = httpClient->GetStatus();
+	bool result = httpClient.Navigate( urlStr, &navData );
+	if (IsStopped) {
+		return NULL;
+	}
+	httpStatus = httpClient.GetStatus();
 
 	if (result)
 	{
 		if (httpStatus == 200) // 200 = successful HTTP transaction
 		{
-			bodyLen = httpClient->GetBodyLength();
+			bodyLen = httpClient.GetBodyLength();
 			if (bodyLen > 0)
 			{
 				body = new char[bodyLen+1];
-				memcpy( body, httpClient->GetBody(), bodyLen );
+				memcpy( body, httpClient.GetBody(), bodyLen );
 				body[bodyLen] = 0;
 				
 				CString contentType;
-				httpClient->GetHeaderValue( _T("Content-Type"), contentType );
+				httpClient.GetHeaderValue( _T("Content-Type"), contentType );
 				imageData = contentType.Left(5).CompareNoCase( _T("image") ) == 0;
-				if (!imageData && this->Id == tkTileProvider::Rosreestr) {    // temporary fix
+				
+				if (!imageData && this->Id == tkTileProvider::Rosreestr) {    // ad-hoc fix
 					imageData = true;
 				}
 			}
@@ -146,24 +141,13 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		else
 		{
 			CString err;
-			err.Format("ERROR: %d; ", httpClient->GetLastError());
+			err.Format("ERROR: %d; ", httpClient.GetLastError());
 			CString s;
 			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), httpStatus, bodyLen, useShortUrl ? shortUrl : urlStr);
 			tilesLogger.Log(s);	// TODO: probably should be protected by critical section
 		}
 	}
 	
-	if (!canReuseConnections)
-	{
-		//httpClient->Close();
-		delete httpClient;
-	}
-	else
-	{
-		httpClient->Close();
-		ReleaseHttpClient(httpClient);
-	}
-
 	CMemoryBitmap* bmp = NULL;
 	if (imageData)
 	{

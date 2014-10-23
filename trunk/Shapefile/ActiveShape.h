@@ -29,6 +29,7 @@ public:
 		_drawLabelsOnly = false;
 		_geometryVisible = true;
 		_selectedVertex = -1;
+		_highlightedVertex = -1;
 
 		AreaDisplayMode = admMetric;
 		AngleDisplayMode = Azimuth;
@@ -86,6 +87,7 @@ public:
 	int _areaRounding;
 	double _angleCorrection;
 	int _selectedVertex;
+	int _highlightedVertex;
 public:
 	BYTE FillTransparency;
 	float LineWidth;
@@ -108,6 +110,7 @@ protected:
 	virtual void ClearIfStopped() = 0;
 	virtual bool SnapToPreviousVertex(int& vertexIndex, double screenX, double screenY) = 0;
 	virtual bool DrawAccumalatedLength() = 0;
+	virtual bool HasClosedPolygon() = 0;
 public:	
 	virtual bool IsDynamic() = 0;
 
@@ -167,18 +170,18 @@ public:
 	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
 	void AddPoint(double xProj, double yProj);
 	bool TryInsertVertex(double xProj, double yProj);
-	int FindSegementWithPoint(double xProj, double yProj);
+	int FindSegmentWithPoint(double xProj, double yProj);
 
 	virtual bool UndoPoint();
 	bool TransformPoint(double& x, double& y);
 	bool HandlePointAdd( double screenX, double screenY, bool ctrl);
-	void SetMousePosition(double x, double y)
+	void SetMousePosition(double xScreen, double yScreen)
 	{
-		_mousePoint.x = x;
-		_mousePoint.y = y;
+		_mousePoint.x = xScreen;
+		_mousePoint.y = yScreen;
 	}
 	void Move( double offsetXProj, double offsetYProj );
-	void MoveVertex( double offsetXProj, double offsetYProj );
+	void MoveVertex( double offsetXProj, double offsetYProj, bool offset = true );
 
 	int get_ScreenPoints(ScreenPointsType whichPoints, Gdiplus::PointF** data, bool dynamicPoint, OffsetType offsetType, int offsetX, int offsetY);
 	int get_ScreenPoints(ScreenPointsType whichPoints, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
@@ -200,14 +203,43 @@ public:
 		return size;
 	}
 
+	bool RemoveSelectedVertex() {
+		return RemoveVertex(_selectedVertex);
+	}
+
 	bool RemoveVertex(int vertexIndex)
 	{
 		if (vertexIndex < 0 && vertexIndex >= (int)_points.size())
 			return false;
+
+		bool polygon = GetShapeType() == SHP_POLYGON;
+		bool polyline = GetShapeType() == SHP_POLYLINE;
+
+		if (polygon && _points.size() <= 4) return false;
+		if (polyline && _points.size() <= 2) return false;
+
 		delete _points[vertexIndex];
 		_points.erase(_points.begin() + vertexIndex);
+		
+		// make sure that first and last points of poly are still the same		
+		if (polygon) {
+			MeasurePoint* target = NULL, *source = NULL;
+			if (vertexIndex == 0) {
+				 target = _points[_points.size() - 1];
+				 source = _points[0];
+			}
+			else if (vertexIndex == _points.size()) {
+				target = _points[0];
+				source = _points[_points.size() - 1];
+			}
+			if (target) {
+				source->CopyTo(*target);
+			}
+		}
+
 		if (vertexIndex == _selectedVertex)
 			_selectedVertex = -1;
+
 		return true;
 	}
 

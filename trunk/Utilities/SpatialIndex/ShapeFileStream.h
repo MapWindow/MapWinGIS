@@ -106,5 +106,5 @@ public:
     int idxID;
     int idxOffset;
     int idxLength;
-    int SHXIdxLen;
+	streamoff SHXIdxLen;
 };

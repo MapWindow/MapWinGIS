@@ -30,6 +30,7 @@
 #include "map.h"
 #include "DiskCache.h"
 #include "TileHelper.h"
+#include "LoadingTask.h"
 
 ::CCriticalSection m_tilesBufferSection;
 

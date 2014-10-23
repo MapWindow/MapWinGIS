@@ -124,6 +124,19 @@ public:
 				pointIndex = i;
 			}
 		}
+		if (pointIndex == 0 && HasClosedPolygon()) {
+			pointIndex = _points.size() - 1;
+		}
+
 		return min < tolerance ? pointIndex : -1;
+	}
+
+	bool HasClosedPolygon() 
+	{
+		if (GetShapeType() == SHP_POLYGON && _points.size() > 3) {
+			return (_points[0]->x == _points[_points.size() - 1]->x &&
+					_points[0]->y == _points[_points.size() - 1]->y);
+		}
+		return false;
 	}
 };

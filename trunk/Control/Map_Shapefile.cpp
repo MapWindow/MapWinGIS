@@ -1084,21 +1084,24 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 
 	for(long i = 0; i < this->GetNumLayers(); i++)
 	{
-		IShapefile* sf = this->GetShapefile(this->GetLayerHandle(i));
-		if (sf != NULL)
+		CComPtr<IShapefile> sf = this->GetShapefile(this->GetLayerHandle(i));
+		if (sf)
 		{
-			sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
-			if (vb)
-			{
-				if (distance < minDist)
+			VARIANT_BOOL snappable;
+			sf->get_Snappable(&snappable);
+			if (snappable) {
+				sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
+				if (vb)
 				{
-					minDist = distance;
-					foundShapefile = sf;
-					foundPointIndex = pointIndex;
-					foundShapeIndex = shapeIndex;
+					if (distance < minDist)
+					{
+						minDist = distance;
+						foundShapefile = sf;
+						foundPointIndex = pointIndex;
+						foundShapeIndex = shapeIndex;
+					}
 				}
 			}
-			sf->Release();
 		}
 	}
 
@@ -1115,15 +1118,6 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 		}
 	}
 	return result;
-}
-
-void CMapView::ClearHotTracking()
-{
-	VARIANT_BOOL vb;
-	_hotTracking.ShapeId = -1;
-	_hotTracking.LayerHandle = -1;
-	if (_hotTracking.Shapefile)
-		_hotTracking.Shapefile->Close(&vb);
 }
 
 // ************************************************************
@@ -1213,7 +1207,7 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 				break;
 			}
 			sf->Release();
-			return vb;
+			return vb ? true : false;
 		}
 	}
 	return false;
@@ -1228,6 +1222,9 @@ double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
 	double tol = 0;
 	switch(tolerance)
 	{
+		case ToleranceSnap:
+			_editShape->get_SnapTolerance(&tol);
+			break;	
 		case ToleranceSelect:
 			tol = 20;
 			break;
@@ -1254,29 +1251,28 @@ HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<b
 		{
 			if (layer->QueryShapefile(&sf))
 			{
-				bool proceed = true;
+				std::vector<long> shapes;
 
-				if (proceed)
+				double tol = 0.0;
+				ShpfileType type;
+				sf->get_ShapefileType(&type);
+				type = Utility::ShapeTypeConvert2D(type);
+				if (type == SHP_MULTIPOINT || type == SHP_POINT || type == SHP_POLYLINE)
+					tol = GetMouseTolerance(ToleranceSelect);
+
+				SelectMode mode = type == SHP_POLYGON ? INCLUSION : INTERSECTION;
+
+				((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), tol, mode, shapes);
+					
+				VARIANT_BOOL visible;
+				for (size_t j = 0; j < shapes.size(); j++)
 				{
-					std::vector<long> shapes;
-
-					double tol = 0.0;
-					ShpfileType type;
-					sf->get_ShapefileType(&type);
-					type = Utility::ShapeTypeConvert2D(type);
-					if (type == SHP_MULTIPOINT || type == SHP_POINT || type == SHP_POLYLINE)
-						tol = GetMouseTolerance(ToleranceSelect);
-
-					SelectMode mode = type == SHP_POLYGON ? INCLUSION : INTERSECTION;
-
-					((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), tol, mode, shapes);
-
-					if (shapes.size() > 0)
-					{
+					sf->get_ShapeVisible(shapes[j], &visible);    
+					if (visible) {
 						IShape* shape = NULL;
-						sf->get_Shape(shapes[0], &shape);
+						sf->get_Shape(shapes[j], &shape);
 						info = new HotTrackingInfo();
-						info->ShapeId = shapes[0];
+						info->ShapeId = shapes[j];
 						info->LayerHandle = _activeLayers[i];
 						info->Shapefile = sf;
 						info->Shape = shape;
@@ -1293,6 +1289,22 @@ HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<b
 		}
 	}
 	return NULL;
+}
+
+// ************************************************************
+//		ClearHotTracking
+// ************************************************************
+void CMapView::ClearHotTracking()
+{
+	if (_hotTracking.ShapeId != -1) {
+		_canUseMainBuffer = false;
+	}
+	VARIANT_BOOL vb;
+	_hotTracking.ShapeId = -1;
+	_hotTracking.LayerHandle = -1;
+	if (_hotTracking.Shapefile)
+		_hotTracking.Shapefile->Close(&vb);
+
 }
 
 // ************************************************************
@@ -1317,9 +1329,7 @@ bool CMapView::UpdateHotTracking(CPoint point)
 				if (shape)
 				{
 					IShape* shpClone = NULL;
-					shape->Clone(&shpClone);	// TODO: why are we crashing without it for in-memory shapefiles?
-					// on the first glance shape shouldn't be released on closing the shapefile
-					//ULONG cnt = shape->Release();
+					shape->Clone(&shpClone);
 
 					if (!_hotTracking.Shapefile)
 						CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(_hotTracking.Shapefile));
@@ -1338,18 +1348,34 @@ bool CMapView::UpdateHotTracking(CPoint point)
 						_hotTracking.LayerHandle = info->LayerHandle;
 						_hotTracking.ShapeId = info->ShapeId;
 
-						IShapeDrawingOptions* options = NULL;
-						info->Shapefile->get_SelectionDrawingOptions(&options);
-						if (options)
+						CComPtr<IShapeDrawingOptions> options = NULL;
+						VARIANT_BOOL interactiveEditing;
+						info->Shapefile->get_InteractiveEditing(&interactiveEditing);
+						if (interactiveEditing) 
 						{
-							/*options->put_FillVisible(VARIANT_FALSE);
-							options->put_LineColor(RGB(30, 144, 255));
-							options->put_LineWidth(2.0f);*/
-							_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-							options->Release();
+							// highlight vertices
+							_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
+							if (options) {
+								options->put_LineVisible(VARIANT_FALSE);
+								options->put_FillVisible(VARIANT_FALSE);
+								options->put_VerticesVisible(VARIANT_TRUE);
+							}
+						}
+						else
+						{
+							// copy selection from parent shapefile
+							info->Shapefile->get_SelectionDrawingOptions(&options);
+							if (options)
+							{
+								/*options->put_FillVisible(VARIANT_FALSE);
+								options->put_LineColor(RGB(30, 144, 255));
+								options->put_LineWidth(2.0f);*/
+								_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+
+							}
 						}
 					}
-					shpClone->Release();   // there is one reference in new shapefile
+					UINT refCount = shpClone->Release();   // there is one reference in new shapefile
 					found = true;
 				}
 			}

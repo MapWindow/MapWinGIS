@@ -218,7 +218,6 @@ public:
 	STDMETHOD(get_ShapeRotation)(long ShapeIndex, double* pVal);
 	STDMETHOD(put_ShapeRotation)(long ShapeIndex, double newVal);
 	STDMETHOD(get_ShapeVisible)(long ShapeIndex, VARIANT_BOOL* pVal);
-	STDMETHOD(put_ShapeVisible)(long ShapeIndex, VARIANT_BOOL newVal);
 	STDMETHOD(get_Volatile)(VARIANT_BOOL* retval);
 	STDMETHOD(put_Volatile)(VARIANT_BOOL newVal);
 	STDMETHOD(EditUpdateShape)(long shapeIndex, IShape* shpNew, VARIANT_BOOL* retVal);
@@ -228,6 +227,11 @@ public:
 	STDMETHOD(get_UndoList)(IUndoList** pVal);
 	STDMETHOD(get_InteractiveEditing)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_InteractiveEditing)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ShapeIsHidden)(LONG shapeIndex, VARIANT_BOOL* pVal);
+	STDMETHOD(put_ShapeIsHidden)(LONG shapeIndex, VARIANT_BOOL newVal);
+	STDMETHOD(get_Snappable)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_Snappable)(VARIANT_BOOL newVal);
+
 private:
 	// data for point in shapefile test
 	struct ShapeHeader 
@@ -302,6 +306,7 @@ private:
 	BOOL _isEditingShapes;		//Flag for Disk vs. Memory
 	long _nextShapeHandle;		// the next unique handle to assign
 	VARIANT_BOOL _interactiveEditing;
+	VARIANT_BOOL _snappable;
 	
 	// When this flag is on CShapeWrapper will be used in the Shape class to store the points
 	// otherwise usual COM points
@@ -483,6 +488,7 @@ public:
 	bool PointWithinShape(IShape* shape, double projX, double projY, double Tolerance);
 	void ReregisterShape(int shapeIndex);
 	bool ForceProperShapeType(ShpfileType sfType, IShape* shape);
+	
 	
 	
 };

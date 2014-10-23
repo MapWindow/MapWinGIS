@@ -347,7 +347,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		}
 		
 		// whether it was hidden explicitly by user
-		if (!(*_shapeData)[offset]->visible)
+		if ((*_shapeData)[offset]->hidden)
 			continue;
 
 		// marking shape as visible; it may still fall out of extents but it is inefficient to test it here
@@ -536,7 +536,7 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 	if (indices->size() == 0)
 		return;
 	
-	if ((!options->visible) || (!options->fillVisible && !options->linesVisible))
+	if ((!options->visible) || (!options->fillVisible && !options->linesVisible && !options->verticesVisible))
 	{
 		return;
 	}

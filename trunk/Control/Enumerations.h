@@ -188,6 +188,7 @@ enum MouseTolerance
 {
 	ToleranceSelect = 0,
 	ToleranceInsert = 1,
+	ToleranceSnap = 2,
 };
 
 

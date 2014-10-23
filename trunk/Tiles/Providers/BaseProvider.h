@@ -74,6 +74,7 @@ public:
 	int zoom;
 	bool Selected;	// is used by clients only
 	int httpStatus;
+	bool IsStopped;
 
 private:
 	CMemoryBitmap* GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive = false);
@@ -95,6 +96,7 @@ public:
 		m_initialized = false;
 		Selected = false;
 		_clientLock.Unlock();
+		IsStopped = false;
 	}
 
 	virtual ~BaseProvider(void)

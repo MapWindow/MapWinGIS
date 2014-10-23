@@ -286,7 +286,7 @@ void ActiveShape::AddPoint(double xProj, double yProj, double xScreen, double yS
 // *******************************************************
 bool ActiveShape::TryInsertVertex(double xProj, double yProj)
 {
-	int pntIndex = FindSegementWithPoint(xProj, yProj);
+	int pntIndex = FindSegmentWithPoint(xProj, yProj);
 	if (pntIndex != - 1)
 	{
 		MeasurePoint* pnt = new MeasurePoint();
@@ -305,7 +305,7 @@ bool ActiveShape::TryInsertVertex(double xProj, double yProj)
 // *******************************************************
 //		FindSegementWithPoint()
 // *******************************************************
-int ActiveShape::FindSegementWithPoint(double xProj, double yProj)
+int ActiveShape::FindSegmentWithPoint(double xProj, double yProj)
 {
 	// TODO: should we consider segment from the last to the first
 	for(size_t i = 0; i < _points.size() - 1; i++)
@@ -334,7 +334,7 @@ void ActiveShape::Move( double offsetXProj, double offsetYProj )
 // *******************************************************
 //		MoveVertex()
 // *******************************************************
-void ActiveShape::MoveVertex( double offsetXProj, double offsetYProj )
+void ActiveShape::MoveVertex( double offsetXProj, double offsetYProj, bool offset )
 {
 	int index = _selectedVertex;
 	bool polygon = Utility::ShapeTypeConvert2D(GetShapeType()) == SHP_POLYGON;
@@ -344,8 +344,14 @@ void ActiveShape::MoveVertex( double offsetXProj, double offsetYProj )
 
 	if (index >= 0 && index < (int)_points.size())
 	{
-		_points[index]->Proj.x += offsetXProj;
-		_points[index]->Proj.y += offsetYProj;
+		if (offset) {
+			_points[index]->Proj.x += offsetXProj;
+			_points[index]->Proj.y += offsetYProj;
+		}
+		else {
+			_points[index]->Proj.x = offsetXProj;
+			_points[index]->Proj.y = offsetYProj;
+		}
 		UpdateLatLng(index);
 		
 		// coordinates of the first and last point of polygon must be the same
@@ -393,10 +399,11 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 	bool hasLine = (HasDynamicLine() || HasStaticLine()); //(HasDynamicLine() && dynamicBuffer) || (HasStaticLine() && !dynamicBuffer);
 	bool hasPolygon = (HasDynamicPolygon() && dynamicBuffer) || (HasStaticPolygon() && !dynamicBuffer);
 
-
-	_fillBrush.SetColor(Gdiplus::Color(FillTransparency << 24 | BGR_TO_RGB(FillColor)));
+	_fillBrush.SetColor(Utility::OleColor2GdiPlus(FillColor, FillTransparency)) ;
 	_linePen.SetWidth(LineWidth);
-	_linePen.SetColor(Gdiplus::Color(255 << 24 | BGR_TO_RGB(LineColor)));
+	_linePen.SetColor(Utility::OleColor2GdiPlus(LineColor, 255));
+
+	bool editing = this->GetInputMode() == simEditing;
 
 	Gdiplus::PointF* polyData = NULL;
 	int polySize = 0;
@@ -460,7 +467,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 				CStringW s;
 				for(int i = 0; i < size; i++) 
 				{
-					if (i == _selectedVertex)
+					if (i == _selectedVertex || i == _highlightedVertex)
 					{
 						g->DrawRectangle(&_redPen, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
 					}
@@ -468,7 +475,8 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 					{
 						Gdiplus::SolidBrush* brush = i == _selectedVertex ? &_redBrush : &_blueBrush;
 						Gdiplus::Pen* pen = i == _selectedVertex ? &_redPen : &_bluePen;
-						if (i == 0 || (_drawLineForPoly && i == _firstPolyPointIndex))
+
+						if (i == 0 || (_drawLineForPoly && i == _firstPolyPointIndex) || editing)
 						{
 							g->FillRectangle(&_blueBrush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
 							g->DrawRectangle(&_bluePen, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);

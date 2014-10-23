@@ -64,14 +64,32 @@ void CMapView::DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer )
 	OffsetType offset = OffsetNone;
 	if (_dragging.Start != _dragging.Move && _leftButtonDown)
 	{
-		if (m_cursorMode == cmMoveShape && _dragging.Operation == DragMoveShape)
-			offset = OffsetShape;
-		if (m_cursorMode == cmEditShape && _dragging.Operation == DragMoveVertex)
-			offset = OffsetVertex;
+		if (_dragging.Operation == DragMoveShape) 	offset = OffsetShape;
+		if (_dragging.Operation == DragMoveVertex)	offset = OffsetVertex;
 	}
 	
 	int offsetX = offset != OffsetNone ? _dragging.Move.x - _dragging.Start.x : 0;
 	int offsetY = offset != OffsetNone ? _dragging.Move.y - _dragging.Start.y : 0;
+
+	if (_dragging.Operation == DragMoveVertex) 
+	{
+		EditShapeBase* edit = GetEditShapeBase();
+		MeasurePoint* pnt = edit->GetPoint(edit->_selectedVertex);
+		if (pnt) {
+			if (_dragging.Snapped) {
+				edit->MoveVertex(_dragging.Proj.x, _dragging.Proj.y, false);
+			}
+			else {
+				double x1, x2, y1, y2;
+				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
+				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+				edit->MoveVertex(x2, y2, false);
+			}
+			_dragging.Start = _dragging.Move;
+			offsetX = 0;
+			offsetY = 0;
+		}
+	}
 
 	GetEditShapeBase()->DrawData(g, dynamicBuffer, offset, offsetX, offsetY);
 }

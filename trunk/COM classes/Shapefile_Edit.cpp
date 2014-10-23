@@ -419,7 +419,7 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 		return S_FALSE;
 	}
 
-	if (shapeIndex < 0 || shapeIndex >= _shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_FALSE;
@@ -440,7 +440,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 {
 	if (!_isEditingShapes) return;
 
-	if (shapeIndex < 0  || shapeIndex >= _shapeData.size())
+	if (shapeIndex < 0  || shapeIndex >= (int)_shapeData.size())
 		return;
 
 	IShape* shp = _shapeData[shapeIndex]->shape;

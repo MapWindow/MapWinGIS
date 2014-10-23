@@ -123,5 +123,7 @@ public:
 			_closedPoly = true;
 	}
 	tkMeasuringType GetMeasuringType() { return _measuringType; };
-
+	bool HasClosedPolygon() {
+		return false;
+	}
 };

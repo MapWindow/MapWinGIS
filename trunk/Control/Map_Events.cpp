@@ -5,6 +5,34 @@
 #include "EditShape.h"
 #include "Shapefile.h"
 
+// ************************************************************
+//		ParseKeyboardEventFlags
+// ************************************************************
+long CMapView::ParseKeyboardEventFlags(UINT nFlags)
+{
+	long vbflags = 0;
+	if (nFlags & MK_SHIFT)
+		vbflags |= 1;
+	if (nFlags & MK_CONTROL)
+		vbflags |= 2;
+	return vbflags;
+}
+
+// ************************************************************
+//		ParseMouseEventFlags
+// ************************************************************
+long CMapView::ParseMouseEventFlags(UINT nFlags)
+{
+	long mbutton = 0;
+	if (nFlags & MK_LBUTTON)
+		mbutton = 1;
+	else if (nFlags & MK_RBUTTON)
+		mbutton = 2;
+	else if (nFlags & MK_MBUTTON)
+		mbutton = 3;
+	return mbutton;
+}
+
 #pragma region Keyboard events
 // ***************************************************************
 //		OnKeyUp
@@ -74,11 +102,18 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			{
 				if (m_cursorMode == cmEditShape)
 				{
-					EditShapeBase* base = GetEditShapeBase();
-					if (base->HasSelectedVertex())
-					{
-						base->RemoveVertex(base->_selectedVertex);
-						RedrawCore(RedrawSkipDataLayers, false, true);
+					bool vertex = GetEditShapeBase()->HasSelectedVertex();
+					if (vertex) {
+						if (((CEditShape*)_editShape)->RemoveVertex()) {
+							RedrawCore(RedrawSkipDataLayers, false, true);
+						}
+					}
+					else {
+						// whole shape
+						if (RemoveSelectedShape()) {
+							_editShape->Clear();
+							RedrawCore(RedrawSkipDataLayers, false, true);
+						}
 					}
 				}
 			}
@@ -375,7 +410,7 @@ bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeInd
 		delete info;
 		
 		tkMwBoolean cancel = blnFalse;
-		FireBeforeShapeEdit((tkCursorMode)m_cursorMode, layerHandle, shapeIndex, &cancel);
+		FireBeforeShapeEdit(uoEditShape, layerHandle, shapeIndex, &cancel);
 		return cancel == blnFalse;
 	}
 	return false;
@@ -402,9 +437,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	bool ctrl = nFlags & MK_CONTROL ? true: false;
 
-	long vbflags = 0;
-	if( nFlags & MK_SHIFT ) vbflags |= 1;
-	if( nFlags & MK_CONTROL ) vbflags |= 2;
+	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	long x = point.x;
 	long y = point.y - 1;
@@ -414,17 +447,23 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	bool snapping = (nFlags & MK_SHIFT) && (m_cursorMode == cmMeasure || m_cursorMode == cmAddShape);
+	//bool snapping = (nFlags & MK_SHIFT) && (m_cursorMode == cmMeasure || m_cursorMode == cmAddShape);
+	
+	tkSnapBehavior behavior;
+	bool snapping = (m_cursorMode == cmAddShape && SnappingIsOn(nFlags, behavior)) ||
+					(m_cursorMode == cmMeasure && (nFlags & MK_SHIFT));
 
-	if ( snapping )	
+	VARIANT_BOOL snapped = VARIANT_FALSE;
+	if (snapping)
 	{
-		// we seek for nearby point across all layers
-		if (!FindSnapPoint(SNAP_TOLERANCE, point.x, point.y, &projX, &projY))
-			return;
+		snapped = FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &projX, &projY);
+		if (!snapped && m_cursorMode == cmAddShape && behavior == sbSnapWithShift){
+			return;  // can't proceed in this mode without snapping
+		}
 	}
-	else {
+	
+	if (!snapped)
 		this->PixelToProjection(x, y, projX, projY);
-	}
 
 	switch(m_cursorMode)
 	{
@@ -442,7 +481,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
-		
 		case cmZoomIn:
 			{
 				this->SetCapture();
@@ -581,11 +619,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	if (HasRotation())
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	
-	long vbflags = 0;
-	if( nFlags & MK_SHIFT )
-		vbflags |= 1;
-	if( nFlags & MK_CONTROL )
-		vbflags |= 2;
+	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseUp == TRUE && _leftButtonDown )
 		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
@@ -599,32 +633,12 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	switch(operation)
 	{
 		case DragMoveVertex:
-			{
-				double x1, x2, y1, y2;
-				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
-				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
-
-				MoveShapeVertex(x2 - x1, y2 - y1);
-
-				_dragging.Operation = DragNone;
-				Redraw2(tkRedrawType::RedrawSkipDataLayers);
-				// TODO: fire event
-			}
-			break;
 		case DragMoveShape:
 			{
-				double x1, x2, y1, y2;
-				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
-				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
-				GetEditShapeBase()->Move(x2 - x1, y2 - y1);
-				
-				_dragging.Operation = DragNone;
-
-				//tkMwBoolean result = DoFireValidateShape();
-
+				HandleLButtonUpDragVertexOrShape(nFlags);
 				Redraw2(tkRedrawType::RedrawSkipDataLayers);
 			}
-			break;	
+			break;
 		case DragPanning:
 			if (m_cursorMode != cmPan)
 				Debug::WriteError("Wrong cursor mode when panning is expected");
@@ -794,6 +808,8 @@ void CMapView::DisplayPanningInertia( CPoint point )
 #pragma endregion
 
 #pragma region Mouse move
+
+
 // ************************************************************
 //		OnMouseMove
 // ************************************************************
@@ -826,22 +842,11 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		_ttip.RelayEvent(&pMsg);
 	}
 
-	long vbflags = 0;
-	if( nFlags & MK_SHIFT )
-		vbflags |= 1;
-	if( nFlags & MK_CONTROL )
-		vbflags |= 2;
-
+	long mbutton = ParseMouseEventFlags(nFlags);
+	long vbflags = ParseKeyboardEventFlags(nFlags);
+	
 	if( m_sendMouseMove == TRUE )
 	{	
-		long mbutton = 0;
-		if( nFlags & MK_LBUTTON )
-			mbutton = 1;
-		else if( nFlags & MK_RBUTTON )
-			mbutton = 2;
-		else if( nFlags & MK_MBUTTON )
-			mbutton = 3;
-
 		if( (m_cursorMode == cmPan) && (nFlags & MK_LBUTTON ))
 		{
 			//Do Not Send the Event
@@ -855,29 +860,10 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	bool refreshNeeded = false;
 	switch(m_cursorMode)
 	{
-		case cmEditShape:
-			{
-				bool hasVertex = GetEditShapeBase()->_selectedVertex != -1;
-				if( hasVertex && (nFlags & MK_LBUTTON) && _leftButtonDown )
-				{
-					_canUseMainBuffer = false;
-					refreshNeeded = true;
-				}	
-			}
-			break;
-		case cmMoveShape:
-			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
-			{
-				_canUseMainBuffer = false;
-				refreshNeeded = true;
-			}	
-			break;	
 		case cmZoomIn:
-				if( (nFlags & MK_LBUTTON) && _leftButtonDown )
-				{
-					refreshNeeded = true;
-				}
-				break;
+			if ((nFlags & MK_LBUTTON) && _leftButtonDown)
+				refreshNeeded = true;
+			break;
 		case cmPan:
 			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
 			{
@@ -898,17 +884,30 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				ActiveShape* shp = GetActiveShape();
 				if (shp->IsDynamic() && shp->GetPointCount() > 0)
 				{
-					double x, y;
-					this->PixelToProjection( point.x, point.y, x, y );
-					shp->SetMousePosition(point.x, point.y);
+					VARIANT_BOOL snapped = VARIANT_FALSE;
+					double x = point.x, y = point.y;
+					tkSnapBehavior behavior;
+					if (SnappingIsOn(nFlags, behavior))
+					{
+						snapped = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &x, &y);
+						if (snapped) {
+							ProjToPixel(x, y, &x, &y);
+						}
+					}
+					shp->SetMousePosition(x, y);
 					refreshNeeded = true;
 				}
 				break;
 			}
+		case cmEditShape:
+		{
+			if (HandleOnMouseMoveEditShape(point.x, point.y, nFlags))
+				refreshNeeded = true;
+		}
+		break;
 	}
 
-	if (!refreshNeeded)
-	{
+	if (!refreshNeeded || (m_cursorMode == cmEditShape || m_cursorMode == cmAddShape)) {
 		if (UpdateHotTracking(point))
 			refreshNeeded = true;
 	}
@@ -931,7 +930,7 @@ void CMapView::DoPanning(CPoint point)
 	double yAmount = (_dragging.Move.y - _dragging.Start.y) * _inversePixelPerProjectionY;
 
 	Debug::WriteWithTime("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y);
-	Debug::WriteWithTime("Cliecked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top);
+	Debug::WriteWithTime("Clicked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top);
 
 	_extents.left = _clickDownExtents.left + xAmount;
 	_extents.right = _clickDownExtents.right + xAmount;
@@ -977,11 +976,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 	if (part != ZoombarPart::ZoombarNone)
 		return;
 
-	long vbflags = 0;
-	if( nFlags & MK_SHIFT )
-		vbflags |= 1;
-	if( nFlags & MK_CONTROL )
-		vbflags |= 2;
+	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseDown == TRUE )
 		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
@@ -997,14 +992,8 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (m_cursorMode == cmAddShape)
 		{
-			tkMwBoolean cancel = blnFalse;
-			
-			/*FireShapeEditing(_editShape, eaUndoPoint, &cancel);
-			if (!cancel)
-			{*/
-				((CEditShape*)_editShape)->Undo(&redraw);
-				_canUseMainBuffer = false;
-			//}
+			((CEditShape*)_editShape)->Undo(&redraw);
+			_canUseMainBuffer = false;
 		}
 
 		_reverseZooming = true;
@@ -1066,11 +1055,7 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 	if (m_cursorMode == cmZoomIn) ::SetCursor( _cursorZoomin );
 	if (m_cursorMode == cmZoomOut) ::SetCursor( _cursorZoomout );
 
-	long vbflags = 0;
-	if( nFlags & MK_SHIFT )
-		vbflags |= 1;
-	if( nFlags & MK_CONTROL )
-		vbflags |= 2;
+	long vbflags = ParseKeyboardEventFlags(nFlags);
 
 	if( m_sendMouseUp == TRUE )
 		this->FireMouseUp( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );

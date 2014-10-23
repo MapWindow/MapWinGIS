@@ -23,6 +23,9 @@ public:
 		_layerHandle = -1;
 		_shapeIndex = -1;
 		_visible = true;
+		_hotTracking = VARIANT_TRUE;
+		_snapTolerance = 10;
+		_snapBehavior = sbSnapByDefault;
 	}
 	~CEditShape()
 	{
@@ -91,6 +94,13 @@ public:
 	STDMETHOD(get_LineWidth)(FLOAT* pVal);
 	STDMETHOD(put_LineWidth)(FLOAT newVal);
 	STDMETHOD(CopyOptionsFrom)(IShapeDrawingOptions* options);
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_SnapTolerance)(DOUBLE* pVal);
+	STDMETHOD(put_SnapTolerance)(DOUBLE newVal);
+	STDMETHOD(get_HotTracking)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_HotTracking)(VARIANT_BOOL newVal);
+	STDMETHOD(get_SnapBehavior)(tkSnapBehavior* pVal);
+	STDMETHOD(put_SnapBehavior)(tkSnapBehavior newVal);
 
 	// TODO: perhaps remove
 	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
@@ -102,6 +112,9 @@ private:
 	BSTR _key;
 	ICallback * _globalCallback;
 	VARIANT_BOOL _visible;
+	VARIANT_BOOL _hotTracking;
+	double _snapTolerance;
+	tkSnapBehavior _snapBehavior;
 	EditShapeBase* _editShape;
 	int _layerHandle;
 	int _shapeIndex;
@@ -110,11 +123,18 @@ private:
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
-	void SaveState();
+	
 public:
+	void DiscardState();
+	void SaveState();
 	EditShapeBase* GetBase() { return _editShape; }
-	void MoveVertex(double offsetX, double offsetY);
+	void MoveVertex(double offsetX, double offsetY, bool offset = true);
+	void MoveShape(double offsetX, double offsetY);
+	bool InsertVertex(double xProj, double yProj);
+	bool RemoveVertex();
+	vector<IShape*> GetUndoList() { return _undoList; }
 
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(EditShape), CEditShape)

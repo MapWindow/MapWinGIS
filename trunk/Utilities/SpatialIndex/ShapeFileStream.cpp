@@ -100,7 +100,7 @@
 	  int    intBuffer = 0;
 	  double low[2], high[2];
 	  
-	  int i = m_ShpFile.tellg();
+	  streamoff i = m_ShpFile.tellg();
 	  m_ShpFile.seekg(idxOffset * 2);
 	  if (!m_ShpFile.good())
 		{
@@ -155,7 +155,7 @@
 		{
 		return;
 		}
-	  int i = m_ShpIdx.tellg();
+	  streamoff i = m_ShpIdx.tellg();
 
 	  if (recordID == -1)
 		readSHXFileHeader();

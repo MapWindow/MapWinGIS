@@ -153,12 +153,9 @@ STDMETHODIMP CUndoList::AddSubOperation(tkUndoOperation operation, LONG ShapeInd
 // if we are not in the end of list, trim the undone items
 void CUndoList::TrimList()
 {
-	if (_position < _list.size() - 1)
-	{
-		for (size_t i = _list.size() - 1; i > _position; --i) {
-			delete _list[i];
-			_list.pop_back();
-		}
+	for (int i = (int)(_list.size() - 1); i > _position; --i) {
+		delete _list[i];
+		_list.pop_back();
 	}
 }
 

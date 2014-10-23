@@ -76,6 +76,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 
 	Gdiplus::Graphics* gBuffer = NULL;		// for control rendering
 	Gdiplus::Graphics* gPrinting = NULL;	// for snapshot drawing
+	Gdiplus::Graphics* g = NULL;			// the right one to draw
 
 	// ---------------------------------------
 	// preparing graphics (for snapshot drawing to output canvas directly; 
@@ -90,13 +91,17 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		Gdiplus::Color color(255, 255, 255, 255);
 		Gdiplus::SolidBrush brush(color);
 		gPrinting->Clear(color);
+		g = gPrinting;
 	}
 	else
 	{
 		gBuffer = Gdiplus::Graphics::FromImage(_bufferBitmap);
 		gBuffer->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
 		gBuffer->Clear(backColor);
+		g = gBuffer;
 	}
+
+	
 
 	// the main thing is to ensure that if new tile is coming it will trigger a new redraw,
 	// any tile after this moment will do it, otherwise a newcomer will be already in screen buffer
@@ -184,7 +189,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// volatile shapefile drawing
 	// -----------------------------------
 	if (HasVolatileShapefiles())
-		this->DrawLayers(rcBounds, _isSnapshot ? gPrinting : gBuffer, false);
+		this->DrawLayers(rcBounds, g, false);
 
 	// -----------------------------------
 	// shapefile hot tracking
@@ -245,17 +250,25 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		delete gDrawing;
 	}
 
+	// -------------------------------------------
+	// edit shape
+	// -------------------------------------------
+	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
+	{
+		DrawEditShape(g, false);
+	}
+
 	// -----------------------------------
 	//  rendering scale bar
 	// -----------------------------------
 	if (_scalebarVisible)
-		this->DrawScaleBar(_isSnapshot ? gPrinting : gBuffer);
+		this->DrawScaleBar(g);
 
 	// -----------------------------------
 	//  rendering zoom bar
 	// -----------------------------------
 	if (_zoombarVisible)
-		DrawZoombar(_isSnapshot ? gPrinting : gBuffer);
+		DrawZoombar(g);
 
 	// -----------------------------------
 	// redraw time and logo
@@ -265,22 +278,14 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	if (layersRedraw) {
 		_lastRedrawTime = (float)(endTick - startTick)/1000.0f;
 	}
-	this->ShowRedrawTime(_isSnapshot ? gPrinting : gBuffer, _lastRedrawTime, layersRedraw);
+	this->ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
 	// -------------------------------------------
 	// distance measuring or persistent measuring
 	// -------------------------------------------
 	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
 	{
-		GetMeasuringBase()->DrawData(_isSnapshot ? gPrinting : gBuffer, false, OffsetNone);
-	}
-
-	// -------------------------------------------
-	// edit shape
-	// -------------------------------------------
-	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
-	{
-		DrawEditShape(_isSnapshot ? gPrinting : gBuffer, false);
+		GetMeasuringBase()->DrawData(g, false, OffsetNone);
 	}
 	
 	// -------------------------------------------
@@ -1020,7 +1025,12 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			}
 		case tkDrawingDataAvailable::HotTracking:
 			{
-				return _hotTracking.Shapefile && !_isSnapshot;
+				if (_hotTracking.Shapefile && !_isSnapshot) {
+					long numShapes;
+					_hotTracking.Shapefile->get_NumShapes(&numShapes);
+					return numShapes > 0;
+				}
+				return false;
 			}
 		case tkDrawingDataAvailable::ZoomingAnimation:
 		case tkDrawingDataAvailable::PanningInertia:

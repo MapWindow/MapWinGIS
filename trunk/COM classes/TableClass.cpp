@@ -1279,7 +1279,7 @@ TableRow* CTableClass::CloneTableRow(int rowIndex)
 bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
 {
 	if (!row) return false;
-	if (rowIndex < 0 || rowIndex >= _rows.size())
+	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
 		return false;
 	
 	row->SetDirty(TableRow::DATA_INSERTED);
@@ -1298,7 +1298,7 @@ bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
 TableRow* CTableClass::SwapTableRow(TableRow* newRow, long rowIndex)
 {
 	if (!newRow) return NULL;
-	if (rowIndex < 0 || rowIndex >= _rows.size())
+	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
 		return NULL;
 	if (ReadRecord(rowIndex)) {
 		TableRow* oldRow = _rows[rowIndex].row;

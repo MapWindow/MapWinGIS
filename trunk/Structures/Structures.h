@@ -69,10 +69,13 @@ public:
 class DraggingState
 {
 public:	
-	DraggingState(): Start(0,0), Move(0,0), Operation(DragNone){};
+	DraggingState() : Start(0, 0), Move(0, 0), Operation(DragNone), HasMoved(false), Snapped(false){};
 	DraggingOperation Operation;
 	CPoint Start;
 	CPoint Move;
+	bool HasMoved;
+	bool Snapped;
+	Point2D Proj;
 	bool HasRectangle()
 	{
 		return !(abs(Start.x - Move.x) < 10 && abs(Start.y - Move.y) < 10);
@@ -85,8 +88,10 @@ public:
 	};
 	void Clear()
 	{
-		Start.x = Start.y = Move.x = Move.y = 0;
+		Proj.x = Proj.y = Start.x = Start.y = Move.x = Move.y = 0;
 		Operation = DragNone;
+		Snapped = false;
+		HasMoved = false;
 	}
 };
 
@@ -95,6 +100,11 @@ struct MeasurePoint
 	Point2D Proj;
 	double x;		// in decimal degrees
 	double y;
+	void CopyTo(MeasurePoint& pnt2) {
+		pnt2.x = x;
+		pnt2.y = y;
+		pnt2.Proj = Proj;
+	}
 };
 
 struct OgrUpdateError

@@ -62,7 +62,6 @@ BOOL CMapWinGISApp::InitInstance()
 
 	CMapView::GdiplusStartup();
 
-	//m_utils = NULL;
 	return COleControlModule::InitInstance() && InitATL();
 }
 
@@ -71,12 +70,10 @@ BOOL CMapWinGISApp::InitInstance()
 // *****************************************************
 int CMapWinGISApp::ExitInstance()
 {
-	//if (false)	{ AFX_MANAGE_STATE(NULL);}
-	
+	Debug::WriteLine("Exit instance");
+
 	if (m_utils)
-	{
 		m_utils->Release();
-	}
 
 	// both caches are stored in static variables; 
 	// we clear them explicitly to be able to use memory leaking detection tool;

@@ -94,16 +94,14 @@ public:
 
 	TileLoader::~TileLoader(void)
 	{
-		Debug::WriteLine("Tile loader destructor");
-		
 		CleanTasks();
 
 		if (m_pool != NULL) {
-			m_pool->Shutdown();
+			m_pool->Shutdown(50);   // will result in TerminateThread call after 50ms delay
 			delete m_pool;
 		}
 		if (m_pool2 != NULL) {
-			m_pool2->Shutdown();
+			m_pool2->Shutdown(50);  // will result in TerminateThread call after 50ms delay
 			delete m_pool2;
 		}
 	}
@@ -154,37 +152,4 @@ public:
 	void TileLoaded(TileCore* tile);
 	void CheckComplete();
 };
-
-// Represents a single loading task (a single tile to load)
-class LoadingTask: ITask
-{
-public:
-	int x;
-	int y;
-	int zoom;
-	int generation;
-	BaseProvider* Provider;
-	bool cacheOnly;
-	bool completed;
-	bool busy;
-	TileLoader* Loader;
-
-	LoadingTask(int x, int y, int zoom, BaseProvider* provider, int generation, bool cacheOnly)
-		: x(x), y(y), zoom(zoom), cacheOnly(cacheOnly)
-	{
-		Loader = NULL;
-		this->busy = false;
-		this->completed = false;
-		this->Provider = provider;
-		this->generation = generation;
-	}
-
-	bool Compare(LoadingTask* other) {
-		return this->x == other->x && this->y == other->y && this->zoom == other->zoom;
-	}
-
-	void DoTask();
-};
-
-
 

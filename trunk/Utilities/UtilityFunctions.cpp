@@ -884,7 +884,7 @@ namespace Utility
 	}
 
 	// ***********************************************************
-	//		DimColor
+	//		ChangeBrightness
 	// ***********************************************************
 	Gdiplus::Color Utility::ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha)
 	{
@@ -895,6 +895,16 @@ namespace Utility
 		Gdiplus::Color clr(alpha|BGR_TO_RGB(RGB(r,g,b)));
 		return clr;
 	}
+
+	// ***********************************************************
+	//		OleColor2GdiPlus
+	// ***********************************************************
+	Gdiplus::Color Utility::OleColor2GdiPlus(OLE_COLOR color, BYTE alpha)
+	{
+		Gdiplus::Color clr(alpha << 24 | BGR_TO_RGB(color));
+		return clr;
+	}
+
 #pragma endregion
 
 #pragma region Gdal
