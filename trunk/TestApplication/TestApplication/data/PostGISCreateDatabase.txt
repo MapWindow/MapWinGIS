@@ -5,16 +5,14 @@
 # First line is connection string
 # Following lines are queries to execute
 
-# Connection string:
+# Connection string to default database:
 PG:host=localhost dbname=postgres user=postgres
 
+# Create mapwingis user:
+do $body$ declare num_users integer; begin SELECT count(*) into num_users FROM pg_user WHERE usename = 'mapwingis'; IF num_users = 0 THEN CREATE ROLE mapwingis LOGIN PASSWORD 'test123'; END IF; end $body$ ;
+
 # Drop database if it exists
-DROP DATABASE IF EXISTS MapWinGIS
+DROP DATABASE IF EXISTS mapwingis;
 
 # Create database with PostGIS template:
-CREATE DATABASE aw_sampling WITH ENCODING='UTF8' OWNER=postgres TEMPLATE=postgis_template CONNECTION LIMIT=-1;  
-
-# Set grants
-GRANT ALL ON DATABASE MapWinGIS TO postgres;
-
-
+CREATE DATABASE mapwingis WITH ENCODING='UTF8' OWNER=postgres TEMPLATE=postgis_template CONNECTION LIMIT=-1;  

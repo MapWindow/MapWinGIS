@@ -103,16 +103,9 @@ namespace TestApplication
                 throw new FileNotFoundException("Cannot find text file.", textfileLocation);
             }
 
-            Map = Fileformats.Map;
-            Map.RemoveAllLayers();
-            Application.DoEvents();
-
             var numErrors = 0;
 
-            theForm.Progress(
-                string.Empty, 
-                100, 
-                "-----------------------The creation of a PostGIS database has started.");
+            theForm.Progress("-----------------------The creation of a PostGIS database has started." + Environment.NewLine);
 
             // Read text file:
             var lines = Helper.ReadTextfile(textfileLocation);
@@ -138,15 +131,21 @@ namespace TestApplication
                 string errorMsg;
                 if (!ds.ExecuteSQL(query, out errorMsg))
                 {
+                    if (ds.GdalLastErrorMsg.Contains("cannot run inside a transaction block"))
+                    {
+                        errorMsg += " You're probably using a too old version of GDAL v2, please update.";
+                    }
+
+
                     theForm.WriteError(string.Format("Error executing query [{0}]: {1}", query, errorMsg));
                     numErrors++;
                 }
             }
 
-            theForm.Progress(
-                string.Empty, 
-                100, 
-                string.Format("The postGIS create database test has finished, with {0} errors", numErrors));
+            // Close database connection:
+            ds.Close();
+
+            theForm.Progress(string.Format("The postGIS create database test has finished, with {0} errors", numErrors));
 
             return numErrors == 0;
         }
@@ -409,7 +408,7 @@ namespace TestApplication
                 {
                     Debug.Print("Number of features: " + l.FeatureCount);
 
-                    // no access the data
+                    // now access the data
                     Shapefile sf = l.GetData();
                     Debug.Print("Number of shapes: " + sf.NumShapes);
                 }
@@ -587,5 +586,161 @@ namespace TestApplication
         }
 
         #endregion
+
+        /// <summary>
+        /// Test setting PostGIS privileges.
+        /// </summary>
+        /// <param name="textfileLocation">
+        /// The textfile location.
+        /// </param>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        internal static bool RunPostGisPostGisPrivileges(string textfileLocation, Form1 theForm)
+        {
+            // Open text file:
+            if (!File.Exists(textfileLocation))
+            {
+                throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+            }
+
+            var numErrors = 0;
+
+            theForm.Progress(
+                "-----------------------The setting of the grants and privileges has started." + Environment.NewLine);
+
+            // Read text file:
+            var lines = Helper.ReadTextfile(textfileLocation);
+
+            // First line is connection string:
+            var connectionString = lines[0];
+            if (!connectionString.StartsWith("PG"))
+            {
+                throw new Exception(
+                    "Input file is not correct. The first line should be the connection string, starting with PG");
+            }
+
+            var ds = new OgrDatasource();
+            if (!ds.Open(connectionString))
+            {
+                throw new Exception("Failed to open datasource: " + ds.GdalLastErrorMsg);
+            }
+
+            // Get every first and second line:
+            for (var i = 1; i < lines.Count; i++)
+            {
+                var query = lines[i];
+                string errorMsg;
+                if (!ds.ExecuteSQL(query, out errorMsg))
+                {
+                    theForm.WriteError(string.Format("Error executing query [{0}]: {1}", query, errorMsg));
+                    numErrors++;
+                }
+            }
+
+            // Close database connection:
+            ds.Close();
+
+            theForm.Progress(
+                string.Format("The setting of the grants and privileges test has finished, with {0} errors", numErrors));
+
+            return numErrors == 0;
+        }
+
+        /// <summary>
+        /// Import shapefiles into the PostGIS database
+        /// </summary>
+        /// <param name="textfileLocation">
+        /// The textfile location.
+        /// </param>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        internal static bool RunPostGisImportSf(string textfileLocation, Form1 theForm)
+        {
+            // Open text file:
+            if (!File.Exists(textfileLocation))
+            {
+                throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+            }
+
+            var numErrors = 0;
+            Map = Fileformats.Map;
+            Map.RemoveAllLayers();
+            Application.DoEvents();
+
+            theForm.Progress(
+                "----------------------- Importing of shapefiles has started." + Environment.NewLine);
+
+            // Read text file:
+            var lines = Helper.ReadTextfile(textfileLocation);
+
+            // First line is connection string:
+            var connectionString = lines[0];
+            if (!connectionString.StartsWith("PG"))
+            {
+                throw new Exception(
+                    "Input file is not correct. The first line should be the connection string, starting with PG");
+            }
+
+            var ds = new OgrDatasource();
+            if (!ds.Open(connectionString))
+            {
+                throw new Exception("Failed to open datasource: " + ds.GdalLastErrorMsg);
+            }
+
+            // Get every first and second line:
+            for (var i = 1; i < lines.Count; i++)
+            {
+                var shapefileLocation = lines[i];
+                var layerName = Path.GetFileNameWithoutExtension(shapefileLocation);
+                if (!File.Exists(shapefileLocation))
+                {
+                    theForm.WriteError(shapefileLocation + " does not exists. Skipping");
+                    continue;
+                }
+
+                // Open shapefile:
+                theForm.Progress(string.Format("Reading {0} shapefile", layerName));
+                var fm = new FileManager();
+                var sf = fm.OpenShapefile(shapefileLocation, theForm);
+                theForm.Progress(string.Format("Importing {0} shapefile", layerName));
+                if (!ds.ImportShapefile(sf, layerName, "OVERWRITE=YES", tkShapeValidationMode.NoValidation))
+                {
+                    var errorMsg = fm.ErrorMsg[fm.LastErrorCode];
+
+                    // let's check GDAL error as well
+                    var gs = new GlobalSettings();
+                    errorMsg += " GDAL error message: " + gs.GdalLastErrorMsg;
+
+                    theForm.WriteError(string.Format("Error importing shapefile [{0}]: {1}", shapefileLocation, errorMsg));
+                    numErrors++;
+                }
+                else
+                {
+                    // Read layer and add to map:
+                    theForm.Progress(string.Format("Reading {0} layer from db", layerName));
+                    var handle = Map.AddLayerFromDatabase(connectionString, layerName, true);
+                    if (handle == -1)
+                    {
+                        theForm.WriteError("Failed to open database layer: " + layerName);
+                    }
+                }
+
+                // Close shapefile:
+                sf.Close();
+            }
+
+            theForm.Progress(
+                string.Format("Importing of shapefiles test has finished, with {0} errors", numErrors));
+
+            return numErrors == 0;
+        }
     }
 }

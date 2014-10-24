@@ -164,6 +164,16 @@
             this.ShapefileInputfile = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.PostGisGroupBox = new System.Windows.Forms.GroupBox();
+            this.groupBox19 = new System.Windows.Forms.GroupBox();
+            this.RunPostGisImportSf = new System.Windows.Forms.Button();
+            this.SelectPostGisImportSf = new System.Windows.Forms.Button();
+            this.PostGisImportSfInput = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.RunPostGisPrivileges = new System.Windows.Forms.Button();
+            this.SelectPostGisPrivileges = new System.Windows.Forms.Button();
+            this.PostGisPrivilegesInput = new System.Windows.Forms.TextBox();
+            this.label17 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.RunPostGisCreateDb = new System.Windows.Forms.Button();
             this.SelectPostGisCreateDb = new System.Windows.Forms.Button();
@@ -219,6 +229,8 @@
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.PostGisGroupBox.SuspendLayout();
+            this.groupBox19.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox10.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
@@ -1761,15 +1773,130 @@
             // PostGisGroupBox
             // 
             this.PostGisGroupBox.BackColor = System.Drawing.Color.LightCoral;
+            this.PostGisGroupBox.Controls.Add(this.groupBox19);
+            this.PostGisGroupBox.Controls.Add(this.groupBox8);
             this.PostGisGroupBox.Controls.Add(this.groupBox1);
             this.PostGisGroupBox.Controls.Add(this.button1);
             this.PostGisGroupBox.Controls.Add(this.groupBox10);
             this.PostGisGroupBox.Location = new System.Drawing.Point(5, 2457);
             this.PostGisGroupBox.Name = "PostGisGroupBox";
-            this.PostGisGroupBox.Size = new System.Drawing.Size(205, 241);
+            this.PostGisGroupBox.Size = new System.Drawing.Size(205, 459);
             this.PostGisGroupBox.TabIndex = 16;
             this.PostGisGroupBox.TabStop = false;
             this.PostGisGroupBox.Text = "PostGIS tests";
+            // 
+            // groupBox19
+            // 
+            this.groupBox19.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox19.Controls.Add(this.RunPostGisImportSf);
+            this.groupBox19.Controls.Add(this.SelectPostGisImportSf);
+            this.groupBox19.Controls.Add(this.PostGisImportSfInput);
+            this.groupBox19.Controls.Add(this.label20);
+            this.groupBox19.Location = new System.Drawing.Point(7, 224);
+            this.groupBox19.Name = "groupBox19";
+            this.groupBox19.Size = new System.Drawing.Size(194, 93);
+            this.groupBox19.TabIndex = 18;
+            this.groupBox19.TabStop = false;
+            this.groupBox19.Text = "Import shapefiles";
+            this.toolTip1.SetToolTip(this.groupBox19, "Import shapefiles into PostGIS database");
+            // 
+            // RunPostGisImportSf
+            // 
+            this.RunPostGisImportSf.Location = new System.Drawing.Point(11, 58);
+            this.RunPostGisImportSf.Name = "RunPostGisImportSf";
+            this.RunPostGisImportSf.Size = new System.Drawing.Size(177, 23);
+            this.RunPostGisImportSf.TabIndex = 21;
+            this.RunPostGisImportSf.Tag = "run";
+            this.RunPostGisImportSf.Text = "Run test";
+            this.RunPostGisImportSf.UseVisualStyleBackColor = true;
+            this.RunPostGisImportSf.Click += new System.EventHandler(this.RunPostGisImportSf_Click);
+            // 
+            // SelectPostGisImportSf
+            // 
+            this.SelectPostGisImportSf.Location = new System.Drawing.Point(162, 32);
+            this.SelectPostGisImportSf.Name = "SelectPostGisImportSf";
+            this.SelectPostGisImportSf.Size = new System.Drawing.Size(27, 20);
+            this.SelectPostGisImportSf.TabIndex = 20;
+            this.SelectPostGisImportSf.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectPostGisImportSf, "Select first raster file");
+            this.SelectPostGisImportSf.UseVisualStyleBackColor = true;
+            this.SelectPostGisImportSf.Click += new System.EventHandler(this.SelectPostGisImportSf_Click);
+            // 
+            // PostGisImportSfInput
+            // 
+            this.PostGisImportSfInput.AcceptsReturn = true;
+            this.PostGisImportSfInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostGisImportSfInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.PostGisImportSfInput.Location = new System.Drawing.Point(12, 32);
+            this.PostGisImportSfInput.Name = "PostGisImportSfInput";
+            this.PostGisImportSfInput.Size = new System.Drawing.Size(144, 20);
+            this.PostGisImportSfInput.TabIndex = 19;
+            this.PostGisImportSfInput.Text = global::TestApplication.Properties.Settings.Default.PostGisImportSfInput;
+            this.toolTip1.SetToolTip(this.PostGisImportSfInput, "Select text file with rasters and formulas");
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(9, 16);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(76, 13);
+            this.label20.TabIndex = 18;
+            this.label20.Text = "Select text file:";
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox8.Controls.Add(this.RunPostGisPrivileges);
+            this.groupBox8.Controls.Add(this.SelectPostGisPrivileges);
+            this.groupBox8.Controls.Add(this.PostGisPrivilegesInput);
+            this.groupBox8.Controls.Add(this.label17);
+            this.groupBox8.Location = new System.Drawing.Point(7, 125);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(194, 93);
+            this.groupBox8.TabIndex = 17;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Set grants and privileges";
+            // 
+            // RunPostGisPrivileges
+            // 
+            this.RunPostGisPrivileges.Location = new System.Drawing.Point(11, 58);
+            this.RunPostGisPrivileges.Name = "RunPostGisPrivileges";
+            this.RunPostGisPrivileges.Size = new System.Drawing.Size(177, 23);
+            this.RunPostGisPrivileges.TabIndex = 21;
+            this.RunPostGisPrivileges.Tag = "run";
+            this.RunPostGisPrivileges.Text = "Run test";
+            this.RunPostGisPrivileges.UseVisualStyleBackColor = true;
+            this.RunPostGisPrivileges.Click += new System.EventHandler(this.RunPostGisPrivilegesClick);
+            // 
+            // SelectPostGisPrivileges
+            // 
+            this.SelectPostGisPrivileges.Location = new System.Drawing.Point(162, 32);
+            this.SelectPostGisPrivileges.Name = "SelectPostGisPrivileges";
+            this.SelectPostGisPrivileges.Size = new System.Drawing.Size(27, 20);
+            this.SelectPostGisPrivileges.TabIndex = 20;
+            this.SelectPostGisPrivileges.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectPostGisPrivileges, "Select first raster file");
+            this.SelectPostGisPrivileges.UseVisualStyleBackColor = true;
+            this.SelectPostGisPrivileges.Click += new System.EventHandler(this.SelectPostGisPrivileges_Click);
+            // 
+            // PostGisPrivilegesInput
+            // 
+            this.PostGisPrivilegesInput.AcceptsReturn = true;
+            this.PostGisPrivilegesInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostGisPrivilegesInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.PostGisPrivilegesInput.Location = new System.Drawing.Point(12, 32);
+            this.PostGisPrivilegesInput.Name = "PostGisPrivilegesInput";
+            this.PostGisPrivilegesInput.Size = new System.Drawing.Size(144, 20);
+            this.PostGisPrivilegesInput.TabIndex = 19;
+            this.PostGisPrivilegesInput.Text = global::TestApplication.Properties.Settings.Default.PostGisPrivilegesInput;
+            this.toolTip1.SetToolTip(this.PostGisPrivilegesInput, "Select text file with rasters and formulas");
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(9, 16);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(76, 13);
+            this.label17.TabIndex = 18;
+            this.label17.Text = "Select text file:";
             // 
             // groupBox1
             // 
@@ -1805,7 +1932,7 @@
             this.SelectPostGisCreateDb.Text = "...";
             this.toolTip1.SetToolTip(this.SelectPostGisCreateDb, "Select first raster file");
             this.SelectPostGisCreateDb.UseVisualStyleBackColor = true;
-            this.SelectPostGisCreateDb.Click += new System.EventHandler(this.SelectPostGisCreateDb_Click);
+            this.SelectPostGisCreateDb.Click += new System.EventHandler(this.SelectPostGisCreateDbClick);
             // 
             // PostGisCreateDbInput
             // 
@@ -1847,7 +1974,7 @@
             this.groupBox10.Controls.Add(this.SelectPostgisInput);
             this.groupBox10.Controls.Add(this.PostgisInput);
             this.groupBox10.Controls.Add(this.label14);
-            this.groupBox10.Location = new System.Drawing.Point(7, 125);
+            this.groupBox10.Location = new System.Drawing.Point(7, 323);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Size = new System.Drawing.Size(194, 93);
             this.groupBox10.TabIndex = 6;
@@ -2012,6 +2139,10 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.PostGisGroupBox.ResumeLayout(false);
+            this.groupBox19.ResumeLayout(false);
+            this.groupBox19.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox10.ResumeLayout(false);
@@ -2176,6 +2307,16 @@
     private System.Windows.Forms.Button SelectPostGisCreateDb;
     private System.Windows.Forms.TextBox PostGisCreateDbInput;
     private System.Windows.Forms.Label label1;
+    private System.Windows.Forms.GroupBox groupBox8;
+    private System.Windows.Forms.Button RunPostGisPrivileges;
+    private System.Windows.Forms.Button SelectPostGisPrivileges;
+    private System.Windows.Forms.TextBox PostGisPrivilegesInput;
+    private System.Windows.Forms.Label label17;
+    private System.Windows.Forms.GroupBox groupBox19;
+    private System.Windows.Forms.Button RunPostGisImportSf;
+    private System.Windows.Forms.Button SelectPostGisImportSf;
+    private System.Windows.Forms.TextBox PostGisImportSfInput;
+    private System.Windows.Forms.Label label20;
   }
 }
 

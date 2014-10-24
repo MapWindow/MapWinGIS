@@ -490,5 +490,29 @@ namespace TestApplication.Properties {
                 this["PostGisCreateDb"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PostGisPrivilegesInput {
+            get {
+                return ((string)(this["PostGisPrivilegesInput"]));
+            }
+            set {
+                this["PostGisPrivilegesInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PostGisImportSfInput {
+            get {
+                return ((string)(this["PostGisImportSfInput"]));
+            }
+            set {
+                this["PostGisImportSfInput"] = value;
+            }
+        }
     }
 }

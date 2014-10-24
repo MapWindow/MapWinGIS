@@ -948,7 +948,10 @@ namespace TestApplication
       SetTextfileLocation(RasterCalculatorInput, path, "rasterCalulator.txt");
       SetTextfileLocation(ReclassifyInput, path, "reclassify.txt");
 
-        // PostGIS
+      // PostGIS
+      SetTextfileLocation(this.PostGisCreateDbInput, path, "PostGISCreateDatabase.txt");
+      SetTextfileLocation(this.PostGisPrivilegesInput, path, "PostGISDatabaseSettings.txt");
+      SetTextfileLocation(this.PostGisImportSfInput, path, "PostGisImportSf.txt");
 
       // Save all settings:
       Properties.Settings.Default.Save();
@@ -1142,10 +1145,7 @@ namespace TestApplication
 
     private void RunOpenPostGISTest_Click(object sender, EventArgs e)
     {
-        this.ResetMapSettings(false);
-        ((Button)sender).BackColor = System.Drawing.Color.Blue;
-        var retVal = OgrLayerTests.RunOgrLayerTest(this.PostgisInput.Text, this);
-        ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+        MessageBox.Show(@"Not implemented yet");
     }
 
     private void SelectRasterAInput_Click(object sender, EventArgs e)
@@ -1166,9 +1166,35 @@ namespace TestApplication
         ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
 
-    private void SelectPostGisCreateDb_Click(object sender, EventArgs e)
+    private void SelectPostGisCreateDbClick(object sender, EventArgs e)
     {
-        Tests.SelectTextfile(this.PostGisCreateDbInput, "Select text file with create queries");
+        Tests.SelectTextfile(this.PostGisCreateDbInput, "Select text file with create statements");
+    }
+
+    private void SelectPostGisPrivileges_Click(object sender, EventArgs e)
+    {
+        Tests.SelectTextfile(this.PostGisPrivilegesInput, "Select text file with queries to set grants and privileges");
+    }
+
+    private void RunPostGisPrivilegesClick(object sender, EventArgs e)
+    {
+        this.ResetMapSettings(false);
+        ((Button)sender).BackColor = System.Drawing.Color.Blue;
+        var retVal = OgrLayerTests.RunPostGisPostGisPrivileges(this.PostGisPrivilegesInput.Text, this);
+        ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+    }
+
+    private void SelectPostGisImportSf_Click(object sender, EventArgs e)
+    {
+        Tests.SelectTextfile(this.PostGisImportSfInput, "Select text file with locations of shapefiles to import");
+    }
+
+    private void RunPostGisImportSf_Click(object sender, EventArgs e)
+    {
+        this.ResetMapSettings(false);
+        ((Button)sender).BackColor = System.Drawing.Color.Blue;
+        var retVal = OgrLayerTests.RunPostGisImportSf(this.PostGisImportSfInput.Text, this);
+        ((Button)sender).BackColor = retVal ? System.Drawing.Color.Green : System.Drawing.Color.Red;
     }
   }
 }
