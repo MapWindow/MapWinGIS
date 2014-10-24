@@ -15,7 +15,7 @@ import "ocidl.idl";
 import "oaidl.idl";
 
 //forward declarations of interfaces
-interface IEditShape;
+interface IShapeEditor;
 interface IShapefileColorBreak;
 interface IGridHeader;
 interface IShape;
@@ -57,6 +57,31 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkLengthDisplayMode Enumeration **********************/
+typedef
+[
+	uuid(44655D89-500B-4B2E-90A5-5FC9762FEAA4),
+	helpstring("tkLengthDisplayMode"),
+]
+enum tkLengthDisplayMode {
+	ldmNone = 0,
+	ldmMetric = 1,
+	//ldmAmerican = 2,
+}tkLengthDisplayMode;
+
+/************************** tkShapeEditorState Enumeration **********************/
+typedef
+[
+	uuid(1C0301FF-127F-4329-B29B-0D068523FC8C),
+	helpstring("tkShapeEditorState"),
+]
+enum tkShapeEditorState {
+	EditorEmpty = 0,
+	EditorCreation = 1,
+	EditorEdit = 2,
+	EditorCreationUnbound = 3,
+}tkShapeEditorState;
+
 /************************** tkSnapBehavior Enumeration **********************/
 typedef
 [
@@ -77,8 +102,8 @@ typedef
 enum tkUndoOperation {
 	uoAddShape = 0,
 	uoRemoveShape = 1,
-	uoEditShape = 2,
-	uoSubEditShape = 3,
+	uoEditingShape = 2,
+	uoSubShapeEditor = 3,
 }tkUndoOperation;
 
 /************************** tkMwBoolean Enumeration **********************/
@@ -221,7 +246,7 @@ typedef
 ]
 enum tkShapeSelectAction
 {
-	saEditShape = 0,
+	saShapeEditor = 0,
 } tkShapeSelectAction;
 
 /************************** tkShapeEditingAction Enumeration **********************/
@@ -841,7 +866,7 @@ enum tkScalebarUnits
 		idMeasuring = 35,
 		idFileManager = 36,
 		idFieldStatOperations = 37,
-		idEditShape = 38,
+		idShapeEditor = 38,
 		idOgrDatasource = 39,
 		idOgrLayer = 40,
 		idUndoList = 41,
@@ -954,8 +979,9 @@ enum tkScalebarUnits
 		cmNone = 4,
 		cmMeasure = 5,
 		cmAddShape	= 6,
-		cmMoveShape	= 7,
 		cmEditShape = 8,
+		cmAddPart = 9,
+		cmRemovePart = 10,
 	} tkCursorMode;
 
 	typedef 
@@ -3069,10 +3095,10 @@ enum tkScalebarUnits
 		uuid(105018E5-A71A-4734-AC06-094A3ABCC7BA),
 		dual,
 		nonextensible,
-		helpstring("IEditShape Interface"),
+		helpstring("IShapeEditor Interface"),
 		pointer_default(unique)
 	]
-	interface IEditShape : IDispatch{
+	interface IShapeEditor : IDispatch{
 		
 		[propget, id(1)] HRESULT ShapeType([out, retval] ShpfileType* retVal);
 		[propput, id(1)] HRESULT ShapeType([in] ShpfileType newVal);
@@ -3100,7 +3126,7 @@ enum tkScalebarUnits
 		[id(18)] HRESULT AddPoint([in]double xProj, [in]double yProj);
 		[propget, id(19)] HRESULT HasEnoughPoints([out, retval]VARIANT_BOOL* retVal);
 		[propget, id(20)] HRESULT Area([out, retval]double* retVal);
-		[id(21)] HRESULT SetShape([in]IShape* shp);
+		//[id(21)] HRESULT SetShape([in]IShape* shp);
 		[propget, id(22)] HRESULT AngleDisplayMode([out, retval]tkAngleDisplay* retVal);
 		[propput, id(22)] HRESULT AngleDisplayMode([in]tkAngleDisplay newVal);
 		[id(23)] HRESULT put_PointXY([in]long pointIndex, [in]double X, [in]double Y, [out, retval]VARIANT_BOOL* retVal);
@@ -3128,6 +3154,19 @@ enum tkScalebarUnits
 		[propput, id(35)] HRESULT HotTracking([in] VARIANT_BOOL newVal);
 		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
 		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
+		[propget, id(37)] HRESULT EditorState([out, retval] tkShapeEditorState* pVal);
+		//[propput, id(37)] HRESULT EditorState([in] tkShapeEditorState newVal);
+		[id(38)] HRESULT StartEdit([in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval]VARIANT_BOOL* retVal);
+		[id(39)] HRESULT AddSubjectShape([in] LONG LayerHandle, [in] LONG ShapeIndex, [in] VARIANT_BOOL ClearExiting, [out, retval] VARIANT_BOOL* retVal);
+		[propget, id(40)] HRESULT PointLabelsVisible([out, retval] VARIANT_BOOL* pVal);
+		[propput, id(40)] HRESULT PointLabelsVisible([in] VARIANT_BOOL newVal);
+		[propget, id(41)] HRESULT LengthDisplayMode([out, retval] tkLengthDisplayMode* pVal);
+		[propput, id(41)] HRESULT LengthDisplayMode([in] tkLengthDisplayMode newVal);
+		[id(42)] HRESULT ClearSubjectShapes();
+		[propget, id(43)] HRESULT NumSubjectShapes([out, retval] LONG* pVal);
+		[id(44)] HRESULT StartUnboundShape([in] ShpfileType shpType, [out, retval] VARIANT_BOOL* retVal);
+		[propget, id(45)] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
+		[propput, id(45)] HRESULT VerticesVisible([in] VARIANT_BOOL newVal);
 	};
 
 	
@@ -3568,7 +3607,7 @@ interface IShapefile : IDispatch{
 	[propget, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[propput, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
 	//[id(124)] HRESULT Validate([in]tkShapeValidationMode shapeValidationMode, [in]VARIANT_BOOL selectedOnly, [out, retval]IShapeValidationInfo** results);
-	[propget, id(124)] HRESULT UndoList([out, retval] IUndoList** pVal);
+	//[propget, id(124)] HRESULT UndoList([out, retval] IUndoList** pVal);
 	[propget, id(125)] HRESULT InteractiveEditing([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(125)] HRESULT InteractiveEditing([in] VARIANT_BOOL newVal);
 	[propget, id(126)] HRESULT ShapeIsHidden([in] LONG shapeIndex, [out, retval] VARIANT_BOOL* pVal);
@@ -5522,16 +5561,16 @@ interface IUndoList : IDispatch{
 	[propget, id(2)] HRESULT LastErrorCode([out, retval] long *pVal);
 	[propget, id(3)] HRESULT Key([out, retval]BSTR* retVal);
 	[propput, id(3)] HRESULT Key([in]BSTR newVal);
-	[id(4)] HRESULT Undo([out, retval] VARIANT_BOOL* retVal);
-	[id(5)] HRESULT Redo([out, retval] VARIANT_BOOL* retVal);
+	[id(4)] HRESULT Undo([in, optional, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
+	[id(5)] HRESULT Redo([in, optional, defaultvalue(-1)]VARIANT_BOOL ZoomToShape, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(6)] HRESULT UndoCount([out, retval] LONG* pVal);
 	[propget, id(7)] HRESULT RedoCount([out, retval] LONG* pVal);
 	[propget, id(8)] HRESULT TotalLength([out, retval] LONG* pVal);
 	[id(9)] HRESULT BeginBatch([out, retval] VARIANT_BOOL* retVal);
 	[id(10)] HRESULT EndBatch([out, retval] LONG* retVal);
-	[id(11)] HRESULT Add([in] tkUndoOperation operationType, [in] LONG ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
+	[id(11)] HRESULT Add([in] tkUndoOperation operationType, [in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[id(12)] HRESULT Clear();
-	[id(13)] HRESULT AddSubOperation([in] tkUndoOperation operation, [in]LONG ShapeIndex, [in] IShape* shapeData, [out, retval] VARIANT_BOOL* retVal);
+	[id(13)] HRESULT AddSubOperation([in] tkUndoOperation operation, [in] LONG LayerHandle, [in]LONG ShapeIndex, [in] IShape* shapeData, [out, retval] VARIANT_BOOL* retVal);
 	[id(14)] HRESULT GetLastId([out, retval] LONG* retVal);
 };
 [ 
@@ -5547,11 +5586,11 @@ library MapWinGIS
 
 	[
 		uuid(130B7AEB-0350-437F-B044-4839AEC92F22),
-		helpstring("EditShape Class")
+		helpstring("ShapeEditor Class")
 	]
-	coclass EditShape
+	coclass ShapeEditor
 	{
-		[default] interface IEditShape;
+		[default] interface IShapeEditor;
 	};
 
 	//  Primary dispatch interface for CMap
@@ -5598,6 +5637,7 @@ library MapWinGIS
 			[id(195)] VARIANT_BOOL ScalebarVisible;
 			[id(205)] tkScalebarUnits ScalebarUnits;
 			[id(211), readonly] IFileManager* FileManager;
+			[id(241)] IUndoList* UndoList;
 			// changed to methods to hide from property grid
 			//[id(5)] long UDCursorHandle;
 			//[id(156)] DOUBLE CurrentScale;
@@ -5914,7 +5954,7 @@ library MapWinGIS
 			[id(233), propget] long ZoomBarMinZoom();
 			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
 			[id(234), propget] long ZoomBarMaxZoom();
-			[id(235), propget] IEditShape* EditShape();
+			[id(235), propget] IShapeEditor* ShapeEditor();
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
 			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
 			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);

@@ -91,8 +91,9 @@ const char * ErrorMsg( long ErrorCode );
 # define tkCOLOR_SCHEME_IS_EMPTY 231
 # define tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE 232
 # define tkNO_FIXING_IN_DISK_MODE 233
-# define tkUNDO_LIST_NO_SHAPEFILE 234
+# define tkUNDO_LIST_NO_MAP 234
 # define tkALREADY_WITHIN_BATCH 235
+# define tkSHAPE_EDITOR_NO_MAP 236
 
 
 //301-400 = ogr layers

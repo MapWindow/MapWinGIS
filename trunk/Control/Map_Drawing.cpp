@@ -255,7 +255,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// -------------------------------------------
 	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
 	{
-		DrawEditShape(g, false);
+		DrawShapeEditor(g, false);
 	}
 
 	// -----------------------------------
@@ -992,7 +992,9 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 	{
 		case ActShape:	
 			{
-				return GetEditShapeBase()->GetPointCount() > 0;
+				VARIANT_BOOL isEmpty;
+				_shapeEditor->get_IsEmpty(&isEmpty);
+				return !isEmpty ? true : false;
 			}	
 		case ZoomBox:
 			{
@@ -1000,9 +1002,9 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			}
 		case ShapeEditing:
 			{
-				if (!GetEditShapeBase()->GetCreationMode())
+				if (!GetEditorBase()->GetCreationMode())
 					return false;
-				return GetEditShapeBase()->GetPointCount() > 0;
+				return GetEditorBase()->GetPointCount() > 0;
 			}
 		case tkDrawingDataAvailable::LayersData:	
 			{

@@ -28,12 +28,12 @@
 # include "ImageGroup.h"
 # include "CollisionList.h"
 # include "MeasuringBase.h"
-# include "EditShapeBase.h"
+# include "ShapeEditorBase.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
 
-class CMapView : public COleControl
+class CMapView : public COleControl, IMapViewCallback
 {
 	DECLARE_DYNCREATE(CMapView)
 
@@ -97,7 +97,8 @@ protected:
 	//{{AFX_DISPATCH(CMapView)
 	// NOTE - ClassWizard will add and remove member functions here.
 	// DO NOT EDIT what you see in these blocks of generated code !
-	
+
+public:	
 	// a function is called on change of value	
 	#pragma region Notify properties  
 	OLE_COLOR m_backColor;
@@ -177,11 +178,11 @@ protected:
 	afx_msg void SetZoomBehavior(short nNewValue);
 	afx_msg short GetZoomBehavior();
 	
-	afx_msg LPDISPATCH GetGlobalCallback();
-	afx_msg void SetGlobalCallback(LPDISPATCH newValue);
+	afx_msg ICallback* GetGlobalCallback();
+	afx_msg void SetGlobalCallback(ICallback* newValue);
 	
-	afx_msg LPDISPATCH GetExtents();
-	afx_msg void SetExtents(LPDISPATCH newValue);
+	afx_msg IExtents* GetExtents();
+	afx_msg void SetExtents(IExtents* newValue);
 
 	afx_msg BSTR GetLayerKey(long LayerHandle);
 	afx_msg void SetLayerKey(long LayerHandle, LPCTSTR lpszNewValue);
@@ -246,7 +247,6 @@ protected:
 	afx_msg VARIANT_BOOL SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, VARIANT_BOOL Overwrite, LPCTSTR Description);
 	afx_msg VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
 
-public:
 	afx_msg IExtents* GetGeographicExtents();
 	afx_msg VARIANT_BOOL SetGeographicExtents(IExtents* extents);
 
@@ -257,7 +257,6 @@ public:
 	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
 	afx_msg void PixelToProj(double pixelX, double pixelY, double FAR* projX, double FAR* projY);
 
-protected:
 	afx_msg BSTR GetLayerDescription(LONG LayerHandle);
 	afx_msg void SetLayerDescription(LONG LayerHandle, LPCTSTR newVal);
 
@@ -546,7 +545,7 @@ protected:
 	afx_msg VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 	afx_msg VARIANT_BOOL ZoomToTileLevel(int zoom);
 	afx_msg IMeasuring* GetMeasuring(void);
-	afx_msg IEditShape* GetEditShape(void);
+	afx_msg IShapeEditor* GetShapeEditor(void);
 	afx_msg VARIANT_BOOL ZoomToWorld(void);
 	afx_msg VARIANT_BOOL FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound);
 	afx_msg long AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL visible);
@@ -592,6 +591,7 @@ protected:
 	afx_msg VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 	afx_msg VARIANT_BOOL UndoEdit();
 	afx_msg VARIANT_BOOL RedoEdit();
+	afx_msg IUndoList* GetUndoList();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -755,9 +755,10 @@ public:
 	// ---------------------------------------------
 	IFileManager* _fileManager;
 	IMeasuring* _measuring;
-	IEditShape* _editShape;
+	IShapeEditor* _shapeEditor;
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
+	IUndoList* _undoList;
 
 	// ---------------------------------------------
 	//	Projections
@@ -1033,35 +1034,55 @@ private:
 	HotTrackingInfo* FindShapeAtScreenPoint(CPoint point, LayerSelector selector);
 	HotTrackingInfo* FindShapeCore(double projX, double projY, std::vector<bool>& layers);
 	MeasuringBase* GetMeasuringBase();
-	EditShapeBase* GetEditShapeBase();
+	EditorBase* GetEditorBase();
 	ActiveShape* GetActiveShape();
-	void DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer );
+	void DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer );
 	bool SelectLayers(LayerSelector selector, std::vector<bool>& layers);
 	bool SelectLayerHandles(LayerSelector selector, std::vector<int>& layers);
 	bool CheckLayer(LayerSelector selector, int layerHandle);
 	bool SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex);
-	void SetEditShape(long layerHandle, long shapeIndex);
-	bool SetEditShape(long layerHandle);
+	bool SetShapeEditor(long layerHandle);
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
 	bool TryAddVertex(double projX, double projY);
 	int AddLayerCore(Layer* layer);
+	
+	// shapefile editor
 	bool ChooseEditLayer(long x, long y);
 	tkMwBoolean DoFireValidateShape();
 	void DoFireAfterShapeEdit();
-	bool TrySaveEditShape();
+	bool TrySaveShapeEditor();
 	void HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl);
-	void HandleOnLButtonDownEditShape(int x, int y, bool ctrl);
-	void ClearEditShape();
-	IShapefile* GetEditShapeShapefile();
+	void HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl);
+	IShapefile* GetShapeEditorShapefile();
 	bool RunShapefileUndoList(bool undo);
 	bool RemoveSelectedShape();
 	long ParseKeyboardEventFlags(UINT nFlags);
 	long ParseMouseEventFlags(UINT nFlags);
-	bool HandleOnMouseMoveEditShape(int x, int y, long nFlags);
+	bool HandleOnMouseMoveShapeEditor(int x, int y, long nFlags);
 	bool SnappingIsOn(long nFlags, tkSnapBehavior& behavior);
-	void HandleLButtonUpDragVertexOrShape(long nFlags);
+	bool HandleLButtonUpDragVertexOrShape(long nFlags);
+	VARIANT_BOOL ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_BOOL ifOutsideOnly = VARIANT_TRUE);
+	void SetExtentsWithPadding(Extent extents);
+	void HandleLButtonDownSelection(CPoint& point, long vbflags);
 #pragma endregion
 
+public:
+	// limited interface for callback from related classes
+	virtual IShapefile* _GetShapefile(LONG layerHandle) { return GetShapefile(layerHandle); }
+	virtual IShapeEditor* _GetShapeEditor() {return _shapeEditor; }
+	virtual ICallback* _GetGlobalCallback() {return _globalCallback; }
+	virtual void _ZoomToShape(long layerHandle, long shapeIndex) { ZoomToShape2(layerHandle, shapeIndex); }
+	virtual IGeoProjection* _GetWgs84Projection() { return GetWgs84Projection(); }
+	virtual IGeoProjection* _GetMapProjection() {return GetMapProjection(); }
+	virtual tkTransformationMode _GetTransformationMode() { return _transformationMode; }
+	void CMapView::_ProjectionToPixel(double projX, double projY, double* pixelX, double* pixelY)
+	{ 
+		ProjectionToPixel(projX, projY, *pixelX, *pixelY); 
+	}
+	void CMapView::_PixelToProjection(double pixelX, double pixelY, double* projX, double* projY)
+	{ 
+		PixelToProjection(pixelX, pixelY, *projX, *projY);
+	}
 	
 };
 

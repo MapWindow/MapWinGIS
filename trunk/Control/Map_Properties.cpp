@@ -111,14 +111,14 @@ BOOL CMapView::GetDisableWaitCursor()
 	return _disableWaitCursor;
 }
 
-LPDISPATCH CMapView::GetGlobalCallback()
+ICallback* CMapView::GetGlobalCallback()
 {
 	if( _globalCallback )
 		_globalCallback->AddRef();
 	return _globalCallback;
 }
 
-void CMapView::SetGlobalCallback(LPDISPATCH newValue)
+void CMapView::SetGlobalCallback(ICallback* newValue)
 {
 	ICallback * cback = NULL;
 	newValue->QueryInterface(IID_ICallback, (void**)&cback);

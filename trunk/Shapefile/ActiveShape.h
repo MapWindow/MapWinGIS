@@ -10,7 +10,7 @@ public:
 		_bluePen(Gdiplus::Color::Blue, 1.0f), _blueBrush(Gdiplus::Color::LightBlue),
 		_redPen(Gdiplus::Color::Red, 1.0f), _redBrush(Gdiplus::Color::LightCoral)
 	{
-		_mapView = NULL;
+		_mapCallback = NULL;
 		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&_areaCalcShape);
 
 		_font = Utility::GetGdiPlusFont("Times New Roman", 9);
@@ -21,6 +21,7 @@ public:
 		_formatLeft.SetAlignment(Gdiplus::StringAlignmentNear);
 		_formatLeft.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 
+		_verticesVisible = true;
 		_mixedLinePolyMode = true;		// TODO: set externally
 		_drawLineForPoly = true;
 		_lengthRounding = 1;
@@ -30,6 +31,9 @@ public:
 		_geometryVisible = true;
 		_selectedVertex = -1;
 		_highlightedVertex = -1;
+		_pointLabelsVisible = true;
+		FillTransparency = 100;
+		_lengthDisplayMode = ldmMetric;
 
 		AreaDisplayMode = admMetric;
 		AngleDisplayMode = Azimuth;
@@ -53,7 +57,6 @@ private:
 	Gdiplus::SolidBrush _fillBrush;
 	Gdiplus::SolidBrush _blueBrush;
 	Gdiplus::SolidBrush _redBrush;
-	
 
 protected:
 	enum ScreenPointsType
@@ -64,9 +67,10 @@ protected:
 	};
 	
 	std::vector<MeasurePoint*> _points;		   // points in decimal degrees (in case transformation to WGS84 is possible)
+	vector<int> _parts;
 	ShapeInputMode _inputMode;
 	bool _drawLineForPoly;
-	void* _mapView;
+	IMapViewCallback* _mapCallback;
 	bool _isGeodesic;
 	bool _areaRecalcIsNeeded;		// geodesic area should be recalculated a new (after a point was added or removed)
 	IShape* _areaCalcShape;
@@ -79,6 +83,9 @@ protected:
 public:
 	bool _geometryVisible;
 	bool _drawLabelsOnly;
+	bool _pointLabelsVisible;
+	bool _verticesVisible;
+	tkLengthDisplayMode _lengthDisplayMode;
 	bool _mixedLinePolyMode;
 	Gdiplus::SolidBrush _textBrush; // Black;
 	Gdiplus::SolidBrush _whiteBrush;// White;
@@ -146,7 +153,7 @@ public:
 	tkTransformationMode GetTransformationMode();
 	bool IsGeodesic() { return _isGeodesic;}
 	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
-	void SetMapView(void* mapView, ShapeInputMode inputMode);
+	void SetMapCallback(IMapViewCallback* mapView, ShapeInputMode inputMode);
 	void ProjToPixel(double projX, double projY, double& pixelX, double& pixelY);
 	void PixelToProj(double pixelX, double pixelY, double& projX, double& projY);
 	void* GetMapView();
@@ -167,7 +174,7 @@ public:
 	//	   Interaction
 	// -------------------------------------------------
 	// projection should be specified before any calculations are possible
-	void AddPoint(double xProj, double yProj, double xScreen, double yScreen);
+	void AddPoint(double xProj, double yProj, double xScreen, double yScreen, PointPart part = PartNone);
 	void AddPoint(double xProj, double yProj);
 	bool TryInsertVertex(double xProj, double yProj);
 	int FindSegmentWithPoint(double xProj, double yProj);
@@ -181,10 +188,11 @@ public:
 		_mousePoint.y = yScreen;
 	}
 	void Move( double offsetXProj, double offsetYProj );
-	void MoveVertex( double offsetXProj, double offsetYProj, bool offset = true );
+	void MoveVertex( double xProj, double yProj );
 
-	int get_ScreenPoints(ScreenPointsType whichPoints, Gdiplus::PointF** data, bool dynamicPoint, OffsetType offsetType, int offsetX, int offsetY);
-	int get_ScreenPoints(ScreenPointsType whichPoints, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
+	int GetNumParts();
+	int get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, Gdiplus::PointF** data, bool dynamicPoint, OffsetType offsetType, int offsetX, int offsetY);
+	int get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
 	
 	// TODO: merge
 	//int GetPolygonPoints(Gdiplus::PointF** data, bool dynamicPoly);
@@ -207,41 +215,8 @@ public:
 		return RemoveVertex(_selectedVertex);
 	}
 
-	bool RemoveVertex(int vertexIndex)
-	{
-		if (vertexIndex < 0 && vertexIndex >= (int)_points.size())
-			return false;
-
-		bool polygon = GetShapeType() == SHP_POLYGON;
-		bool polyline = GetShapeType() == SHP_POLYLINE;
-
-		if (polygon && _points.size() <= 4) return false;
-		if (polyline && _points.size() <= 2) return false;
-
-		delete _points[vertexIndex];
-		_points.erase(_points.begin() + vertexIndex);
-		
-		// make sure that first and last points of poly are still the same		
-		if (polygon) {
-			MeasurePoint* target = NULL, *source = NULL;
-			if (vertexIndex == 0) {
-				 target = _points[_points.size() - 1];
-				 source = _points[0];
-			}
-			else if (vertexIndex == _points.size()) {
-				target = _points[0];
-				source = _points[_points.size() - 1];
-			}
-			if (target) {
-				source->CopyTo(*target);
-			}
-		}
-
-		if (vertexIndex == _selectedVertex)
-			_selectedVertex = -1;
-
-		return true;
-	}
+	bool RemoveVertex(int vertexIndex);
+	
 
 	// -------------------------------------------------
 	//	   Drawing
@@ -258,4 +233,11 @@ public:
 	double GetBearing( int vertexIndex, bool clockwise );
 	double GetBearingLabelAngle( int vertexIndex, bool clockwise );
 	void GetExtents( Extent& extent );
+	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool editing, bool dynamicBuffer, int partIndex);
+	bool GetPartStartAndEnd(int partIndex, ScreenPointsType whichPoints, int& begin, int& end);
+	int GetPartStart(int partIndex);
+	int SeekPartEnd(int startSearchFrom);
+	int SeekPartStart(int startSearchFrom);
+	int GetCloseIndex(int startIndex);
+	
 };

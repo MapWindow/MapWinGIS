@@ -473,16 +473,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
 	{
 		if( _activeLayers.size() == 1 && pVisible)
-		{	
-			double xrange = l->extents.right - l->extents.left;			// TODO: add Extent.ApplyPad function
-			double yrange = l->extents.top - l->extents.bottom;
-			_extents.left = l->extents.left - xrange*m_extentPad;
-			_extents.right = l->extents.right + xrange*m_extentPad;
-			_extents.top = l->extents.top + yrange*m_extentPad;
-			_extents.bottom = l->extents.bottom - yrange*m_extentPad;
-
-			SetExtentsCore(_extents);
-		}
+			SetExtentsWithPadding(l->extents);
 	}
 
 	// loading symbology

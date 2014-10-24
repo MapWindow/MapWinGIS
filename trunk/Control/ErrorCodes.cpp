@@ -179,10 +179,12 @@ const char * ErrorMsg( long ErrorCode )
 			return "Shape contains too few points for specified shape type.";
 		case tkNO_FIXING_IN_DISK_MODE:
 			return "Fixing of shapes for Shapefile.Validate method is available in edit mode only. Mode was switched to ReportWithoutFixing.";
-		case tkUNDO_LIST_NO_SHAPEFILE:
-			return "Undo list isn't attached to any shapefile.";
+		case tkUNDO_LIST_NO_MAP:
+			return "Undo list is not attached to a map.";
 		case tkALREADY_WITHIN_BATCH:
 			return "Already withing batch for undo list.";
+		case tkSHAPE_EDITOR_NO_MAP:
+			return "Shape editor is not attached to a map.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

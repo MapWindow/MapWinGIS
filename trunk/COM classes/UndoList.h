@@ -17,7 +17,7 @@ class ATL_NO_VTABLE CUndoList :
 public:
 	CUndoList()
 	{
-		_shapefile = NULL;
+		_mapCallback = NULL;
 		_key = A2BSTR("");
 		_lastErrorCode = tkNO_ERROR;
 		_position = -1;
@@ -47,24 +47,24 @@ public:
 	}
 	
 public:
-	STDMETHOD(Undo)(VARIANT_BOOL* retVal);
-	STDMETHOD(Redo)(VARIANT_BOOL* retVal);
+	STDMETHOD(Undo)(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal);
+	STDMETHOD(Redo)(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal);
 	STDMETHOD(get_UndoCount)(LONG* pVal);
 	STDMETHOD(get_RedoCount)(LONG* pVal);
 	STDMETHOD(get_TotalLength)(LONG* pVal);
 	STDMETHOD(BeginBatch)(VARIANT_BOOL* retVal);
 	STDMETHOD(EndBatch)(LONG* retVal);
-	STDMETHOD(Add)(tkUndoOperation operation, LONG ShapeIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(Add)( /* [in] */ tkUndoOperation operationType, /* [in] */ LONG LayerHandle,  /* [in] */ LONG ShapeIndex, /* [retval][out] */ VARIANT_BOOL *retVal);
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(Clear)();
-	STDMETHOD(AddSubOperation)(tkUndoOperation operation, LONG ShapeIndex, IShape* shapeData, VARIANT_BOOL* retVal);
+	STDMETHOD(AddSubOperation)(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, IShape* shapeData, VARIANT_BOOL* retVal);
 	STDMETHOD(GetLastId)(LONG* retVal);
 public:
-	void Init(IShapefile* sf){
-		_shapefile = sf;	// no AddRef since the life span of this 2 objects is the same
+	void SetMapCallback(IMapViewCallback* callback){
+		_mapCallback = callback;
 	}
 
 private:
@@ -72,13 +72,14 @@ private:
 	{
 		int BatchId;          // globally unique across all lists but same within batch
 		long ShapeIndex;
+		long LayerHandle;
 		tkUndoOperation Operation;
 		IShape* Shape;
 		TableRow* Row;
 		bool Undone;
 
-		UndoListItem(int id, int shapeIndex, tkUndoOperation operation)
-			: Undone(false), Shape(NULL), Row(NULL), BatchId(id), ShapeIndex(shapeIndex), Operation(operation)
+		UndoListItem(int id, long layerHandle, long shapeIndex, tkUndoOperation operation)
+			: Undone(false), Shape(NULL), Row(NULL), BatchId(id), LayerHandle(layerHandle), ShapeIndex(shapeIndex), Operation(operation)
 		{
 			
 		}
@@ -94,21 +95,22 @@ private:
 
 	long _lastErrorCode;
 	BSTR _key;
-	IShapefile* _shapefile;
 	vector<UndoListItem*> _list;
-	
+	IMapViewCallback* _mapCallback;
 	int _batchId;
 	int _position;
 
-	bool UndoSingleItem(UndoListItem* item, ITable* tbl);
-	void CopyShapeState(int shapeIndex, UndoListItem* item);
+	bool UndoSingleItem(UndoListItem* item);
+	bool CopyShapeState(long layerHandle, long shapeIndex, UndoListItem* item);
 	void TrimList();
 	void ErrorMessage(long ErrorCode);
 	bool CheckState();
 	int NextId() { 
 		return ++g_UniqueId;
 	}
-	bool CheckShapeIndex(LONG shapeIndex);
+	bool CheckShapeIndex(long layerHandle, LONG shapeIndex);
+	IShapefile* GetShapefile(long layerHandle);
+	
 public:
 	
 };

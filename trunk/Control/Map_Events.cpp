@@ -2,7 +2,7 @@
 #include "Map.h"
 #include "Measuring.h"
 #include "MapTracker.h"
-#include "EditShape.h"
+#include "ShapeEditor.h"
 #include "Shapefile.h"
 
 // ************************************************************
@@ -102,16 +102,16 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			{
 				if (m_cursorMode == cmEditShape)
 				{
-					bool vertex = GetEditShapeBase()->HasSelectedVertex();
+					bool vertex = GetEditorBase()->HasSelectedVertex();
 					if (vertex) {
-						if (((CEditShape*)_editShape)->RemoveVertex()) {
+						if (((CShapeEditor*)_shapeEditor)->RemoveVertex()) {
 							RedrawCore(RedrawSkipDataLayers, false, true);
 						}
 					}
 					else {
 						// whole shape
 						if (RemoveSelectedShape()) {
-							_editShape->Clear();
+							_shapeEditor->Clear();
 							RedrawCore(RedrawSkipDataLayers, false, true);
 						}
 					}
@@ -410,12 +410,69 @@ bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeInd
 		delete info;
 		
 		tkMwBoolean cancel = blnFalse;
-		FireBeforeShapeEdit(uoEditShape, layerHandle, shapeIndex, &cancel);
+		FireBeforeShapeEdit(uoEditingShape, layerHandle, shapeIndex, &cancel);
 		return cancel == blnFalse;
 	}
 	return false;
 }
 
+// ************************************************************
+//		HandleLButtonDownSelection
+// ************************************************************
+void CMapView::HandleLButtonDownSelection(CPoint& point, long vbflags)
+{
+	long x = point.x;
+	long y = point.y - 1;
+
+	_ttip.Activate(FALSE);
+	CMapTracker selectBox = CMapTracker(this, CRect(0, 0, 0, 0), CRectTracker::solidLine + CRectTracker::resizeOutside);
+	selectBox.m_sizeMin = 0;
+
+	bool selected = selectBox.TrackRubberBand(this, point, TRUE) ? true : false;
+	_ttip.Activate(TRUE);
+
+	CRect rect = selectBox.m_rect;
+	rect.NormalizeRect();
+
+	if ((rect.BottomRight().x - rect.TopLeft().x) < 10 &&
+		(rect.BottomRight().y - rect.TopLeft().y) < 10)
+		selected = false;
+
+	if (!selected || !m_sendSelectBoxFinal)
+	{
+		if (m_sendMouseDown == TRUE)
+			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+	}
+
+	if (selected)
+	{
+		if (HasRotation())
+		{
+			CRect rectTmp = rect;
+			long tmpX = 0, tmpY = 0;
+			// adjust rectangle to unrotated coordinates
+			_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+			rectTmp.TopLeft().x = tmpX;
+			rectTmp.TopLeft().y = tmpY;
+			_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+			rectTmp.BottomRight().x = tmpX;
+			rectTmp.BottomRight().y = tmpY;
+			rect = rectTmp;
+		}
+
+		if (m_sendSelectBoxFinal == TRUE)
+		{
+			long iby = rect.BottomRight().y;
+			long ity = rect.TopLeft().y;
+			this->FireSelectBoxFinal(rect.TopLeft().x, rect.BottomRight().x, iby, ity);
+			return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
+		}
+	}
+
+	//the MapTracker interferes with the OnMouseUp event so we will call it manually
+	if (m_sendMouseUp == TRUE)
+		this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
+}
 
 // ************************************************************
 //		OnLButtonDown
@@ -470,7 +527,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		case cmZoomIn:
 		case cmZoomOut:
 		case cmPan:
-		case cmMoveShape:
 			if (m_sendMouseDown)
 				this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
 			break;
@@ -481,6 +537,35 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
+		case cmRemovePart:
+		case cmAddPart:
+		{
+			long numShapes;
+			_shapeEditor->get_NumSubjectShapes(&numShapes);
+			if (numShapes == 0) {
+				// let's choose the subject
+				long shapeIndex = -1, layerHandle = -1;
+				if (SelectSingleShape(x, y, layerHandle, shapeIndex)) {
+					VARIANT_BOOL vb;
+					_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);
+					RedrawCore(RedrawSkipDataLayers, false, true);
+				}
+			}
+			else {
+				VARIANT_BOOL vb;
+				ShpfileType shpType = m_cursorMode == cmAddPart ? SHP_NULLSHAPE : SHP_POLYGON;
+				_shapeEditor->StartUnboundShape(shpType, &vb);
+				HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+			}
+		}
+		break; 
+		case cmAddShape:
+			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+			break;
+		case cmEditShape:
+			HandleOnLButtonDownShapeEditor(x, y, ctrl);
+			break;
+		
 		case cmZoomIn:
 			{
 				this->SetCapture();
@@ -488,9 +573,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 			break;
 		case cmZoomOut:
-			{
-				ZoomOut( m_zoomPercent );
-			}
+			ZoomOut( m_zoomPercent );
 			break;
 		case cmPan:
 			{
@@ -501,56 +584,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 			break;
 		case cmSelection:
-			{
-				_ttip.Activate(FALSE);
-				CMapTracker selectBox = CMapTracker( this,	CRect(0,0,0,0), CRectTracker::solidLine + CRectTracker::resizeOutside );
-				selectBox.m_sizeMin = 0;
-
-				bool selected = selectBox.TrackRubberBand( this, point, TRUE ) ? true : false;
-				_ttip.Activate(TRUE);
-
-				CRect rect = selectBox.m_rect;
-				rect.NormalizeRect();
-
-				if( ( rect.BottomRight().x - rect.TopLeft().x ) < 10 &&
-					( rect.BottomRight().y - rect.TopLeft().y ) < 10 )
-					selected = false;
-
-				if (!selected || !m_sendSelectBoxFinal)
-				{
-					if( m_sendMouseDown == TRUE )
-						this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
-				}
-
-				if( selected )
-				{
-					if (HasRotation())
-					{
-						CRect rectTmp = rect;
-						long tmpX = 0, tmpY = 0;
-						// adjust rectangle to unrotated coordinates
-						_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
-						rectTmp.TopLeft().x = tmpX;
-						rectTmp.TopLeft().y = tmpY;
-						_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
-						rectTmp.BottomRight().x = tmpX;
-						rectTmp.BottomRight().y = tmpY;
-						rect = rectTmp;
-					}
-
-					if( m_sendSelectBoxFinal == TRUE )
-					{	
-						long iby = rect.BottomRight().y;
-						long ity = rect.TopLeft().y;
-						this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x,	iby, ity );
-						return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
-					}
-				}
-
-				//the MapTracker interferes with the OnMouseUp event so we will call it manually
-				if( m_sendMouseUp == TRUE )
-					this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
-			}
+			HandleLButtonDownSelection(point, vbflags);
 			break;
 		case cmMeasure:
 			{
@@ -570,13 +604,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				}
 			}
 			break;
-		case cmAddShape:
-			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
-			break;
-		case cmMoveShape:
-		case cmEditShape:
-			HandleOnLButtonDownEditShape(x, y, ctrl);
-			break;
+		
 	default: //if( m_cursorMode == cmNone )
 		{
 			SetCapture();
@@ -604,7 +632,7 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
    }
   /* else if (m_cursorMode == cmAddShape)
    {
-		EditShapeBase* editShape = GetEditShapeBase();
+		ShapeEditorBase* editShape = GetShapeEditorBase();
 		VARIANT_BOOL vb;
 		_editShape->FinishShape(&vb);
 		RedrawCore(RedrawSkipDataLayers, false, true);
@@ -635,8 +663,8 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragMoveVertex:
 		case DragMoveShape:
 			{
-				HandleLButtonUpDragVertexOrShape(nFlags);
-				Redraw2(tkRedrawType::RedrawSkipDataLayers);
+				if (HandleLButtonUpDragVertexOrShape(nFlags))
+					Redraw2(tkRedrawType::RedrawSkipDataLayers);
 			}
 			break;
 		case DragPanning:
@@ -878,8 +906,16 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				return;
 			}
 			break;
+		case cmEditShape:
+		{
+			if (HandleOnMouseMoveShapeEditor(point.x, point.y, nFlags))
+				refreshNeeded = true;
+		}
+		break;
 		case cmMeasure:
 		case cmAddShape:
+		case cmAddPart:
+		case cmRemovePart:
 			{
 				ActiveShape* shp = GetActiveShape();
 				if (shp->IsDynamic() && shp->GetPointCount() > 0)
@@ -899,12 +935,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				}
 				break;
 			}
-		case cmEditShape:
-		{
-			if (HandleOnMouseMoveEditShape(point.x, point.y, nFlags))
-				refreshNeeded = true;
-		}
-		break;
 	}
 
 	if (!refreshNeeded || (m_cursorMode == cmEditShape || m_cursorMode == cmAddShape)) {
@@ -992,7 +1022,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (m_cursorMode == cmAddShape)
 		{
-			((CEditShape*)_editShape)->Undo(&redraw);
+			((CShapeEditor*)_shapeEditor)->Undo(&redraw);
 			_canUseMainBuffer = false;
 		}
 

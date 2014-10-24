@@ -96,7 +96,7 @@
       <CompileAs>Default</CompileAs>
       <ShowIncludes>false</ShowIncludes>
       <OmitDefaultLibName>false</OmitDefaultLibName>
-	  <DisableSpecificWarnings>4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4503</DisableSpecificWarnings>
     </ClCompile>
     <!-- resource options -->
     <ResourceCompile>
@@ -129,7 +129,6 @@
       <ImportLibrary>$(IntDir)MapWinGIS.lib</ImportLibrary>
       <TypeLibraryFile>$(IntDir)MapWinGIS.tlb</TypeLibraryFile>
       <TypeLibraryResourceID>2</TypeLibraryResourceID>
-	  
     </Link>
     <Bscmake>
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
@@ -168,15 +167,16 @@
   <!-- headers -->
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
-    <ClInclude Include="COM classes\EditShape.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
+    <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
+    <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Image\cq.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
-    <ClInclude Include="Shapefile\EditShapeBase.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
+    <ClInclude Include="Shapefile\ShapeEditorBase.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -385,9 +385,9 @@
   </ItemGroup>
   <!-- source -->
   <ItemGroup>
-    <ClCompile Include="COM classes\EditShape.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
+    <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
     <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
@@ -486,8 +486,8 @@
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Shapefile\ActiveShape.cpp" />
-    <ClCompile Include="Shapefile\EditShapeBase.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
+    <ClCompile Include="Shapefile\ShapeEditorBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -675,7 +675,6 @@
     <None Include="COM classes\ChartField.rgs" />
     <None Include="COM classes\Charts.rgs" />
     <None Include="COM classes\ColorScheme.rgs" />
-    <None Include="COM classes\EditShape.rgs" />
     <None Include="COM classes\ESRIGridManager.rgs" />
     <None Include="COM classes\Extents.rgs" />
     <None Include="COM classes\Field.rgs" />
@@ -699,6 +698,7 @@
     <None Include="COM classes\PointClass.rgs" />
     <None Include="COM classes\Shape.rgs" />
     <None Include="COM classes\ShapeDrawingOptions.rgs" />
+    <None Include="COM classes\ShapeEditor.rgs" />
     <None Include="COM classes\Shapefile.rgs" />
     <None Include="COM classes\ShapefileCategories.rgs" />
     <None Include="COM classes\ShapefileCategory.rgs" />

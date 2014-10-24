@@ -119,7 +119,7 @@ CShapefile::CShapefile()
 	this->put_ReferenceToCharts();
 
 	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
-	((CUndoList*)_undoList)->Init(this);
+	//((CUndoList*)_undoList)->Init(this);
 
 	gReferenceCounter.AddRef(tkInterface::idShapefile);
 }
@@ -2098,7 +2098,6 @@ STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
 
 	return S_OK;
 }
-
 
 // *************************************************************
 //		get_ShapeModified()

@@ -17,6 +17,7 @@
 #include "Logger.h"
 #include "Extent.h"
 #include "VarH.h"
+# include "MapViewCallback.h"
 
 #pragma warning(disable:4482)	// non-standard extension used - for names of enumerations
 #pragma warning(disable:4099)	// missing program database

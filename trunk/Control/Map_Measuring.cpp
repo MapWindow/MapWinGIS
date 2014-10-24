@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "measuring.h"
 #include "GeometryOperations.h"
+#include "ShapeEditor.h"
 
 #pragma region DrawMouseMoves
 // ***************************************************************
@@ -37,7 +38,7 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 
 	if (HasDrawingData(tkDrawingDataAvailable::ShapeEditing))
 	{
-		DrawEditShape(gTemp, true);
+		DrawShapeEditor(gTemp, true);
 	}
 
 	DrawCoordinatesToScreenBuffer(gTemp);
@@ -57,9 +58,9 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 }
 
 // ***************************************************************
-//	DrawEditShape
+//	DrawShapeEditor
 // ***************************************************************
-void CMapView::DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer )
+void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 {
 	OffsetType offset = OffsetNone;
 	if (_dragging.Start != _dragging.Move && _leftButtonDown)
@@ -73,25 +74,27 @@ void CMapView::DrawEditShape( Gdiplus::Graphics* g, bool dynamicBuffer )
 
 	if (_dragging.Operation == DragMoveVertex) 
 	{
-		EditShapeBase* edit = GetEditShapeBase();
+		EditorBase* edit = GetEditorBase();
 		MeasurePoint* pnt = edit->GetPoint(edit->_selectedVertex);
 		if (pnt) {
 			if (_dragging.Snapped) {
-				edit->MoveVertex(_dragging.Proj.x, _dragging.Proj.y, false);
+				edit->MoveVertex(_dragging.Proj.x, _dragging.Proj.y);
 			}
 			else {
-				double x1, x2, y1, y2;
-				PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
-				PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
-				edit->MoveVertex(x2, y2, false);
+				if (_dragging.HasMoved) {
+					double x1, x2, y1, y2;
+					PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
+					PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+					edit->MoveVertex(x2, y2);
+				}
 			}
 			_dragging.Start = _dragging.Move;
 			offsetX = 0;
 			offsetY = 0;
 		}
 	}
-
-	GetEditShapeBase()->DrawData(g, dynamicBuffer, offset, offsetX, offsetY);
+	
+	((CShapeEditor*)_shapeEditor)->Render(g, dynamicBuffer, offset, offsetX, offsetY);
 }
 
 // ****************************************************************

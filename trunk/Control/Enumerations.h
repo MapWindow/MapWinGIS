@@ -191,5 +191,18 @@ enum MouseTolerance
 	ToleranceSnap = 2,
 };
 
+enum SubjectOperation
+{
+	SubjectAddPart = 0,
+	SubjectClip = 1,
+	SubjectSplit = 2,
+};
+
+enum PointPart
+{
+	PartNone = 0,
+	PartBegin = 1,
+	PartEnd = 2,
+};
 
 # endif

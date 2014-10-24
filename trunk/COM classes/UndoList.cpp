@@ -8,15 +8,26 @@ int CUndoList::g_UniqueId = -1;
 const int CUndoList::EMPTY_BATCH_ID = -1; 
 
 //***********************************************************************/
+//*			GetShapefile()
+//***********************************************************************/
+IShapefile* CUndoList::GetShapefile(long layerHandle)
+{
+	if (!CheckState()) return NULL;
+	return _mapCallback->_GetShapefile(layerHandle);
+}
+
+//***********************************************************************/
 //*			ErrorMessage()
 //***********************************************************************/
 void CUndoList::ErrorMessage(long ErrorCode)
 {
+	if (!CheckState()) return;
+
 	_lastErrorCode = ErrorCode;
 	USES_CONVERSION;
 	ICallback* cb;
 	if (_lastErrorCode != tkNO_ERROR) {
-		_shapefile->get_GlobalCallback(&cb);
+		cb = _mapCallback->_GetGlobalCallback();
 		if (cb) {
 			cb->Error(OLE2BSTR(_key), A2BSTR(ErrorMsg(_lastErrorCode)));
 			cb->Release();
@@ -28,10 +39,10 @@ void CUndoList::ErrorMessage(long ErrorCode)
 //*			CheckState()
 //***********************************************************************/
 bool CUndoList::CheckState() {
-	if (!_shapefile) {
-		ErrorMessage(tkUNDO_LIST_NO_SHAPEFILE);
+	if (!_mapCallback) {
+		ErrorMessage(tkUNDO_LIST_NO_MAP);
 	}
-	return _shapefile != NULL;
+	return _mapCallback != NULL;
 }
 
 //***********************************************************************
@@ -89,11 +100,13 @@ STDMETHODIMP CUndoList::Clear()
 // **********************************************************
 //		CheckShapeIndex
 // **********************************************************
-bool CUndoList::CheckShapeIndex(LONG ShapeIndex)
+bool CUndoList::CheckShapeIndex(long layerHandle, LONG shapeIndex)
 {
+	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	if (!sf) return false;
 	long numShapes;
-	_shapefile->get_NumShapes(&numShapes);
-	if (ShapeIndex < 0 || ShapeIndex >= numShapes) {
+	sf->get_NumShapes(&numShapes);
+	if (shapeIndex < 0 || shapeIndex >= numShapes) {
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return false;
 	}
@@ -103,29 +116,34 @@ bool CUndoList::CheckShapeIndex(LONG ShapeIndex)
 // **********************************************************
 //		Add
 // **********************************************************
-STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG ShapeIndex, VARIANT_BOOL* retVal)
+HRESULT STDMETHODCALLTYPE CUndoList::Add(tkUndoOperation operationType, LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	AddSubOperation(operation, ShapeIndex, NULL, retVal);
+	AddSubOperation(operationType, LayerHandle, ShapeIndex, NULL, retVal);
 	return S_OK;
 }
 
 // **********************************************************
 //		AddSubOperation
 // **********************************************************
-STDMETHODIMP CUndoList::AddSubOperation(tkUndoOperation operation, LONG ShapeIndex, IShape* shapeData, VARIANT_BOOL* retVal)
+STDMETHODIMP CUndoList::AddSubOperation(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, 
+					IShape* shapeData, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
-	if (!CheckShapeIndex(ShapeIndex)) return S_OK;
+	
+	if (operation != uoAddShape) {
+		if (!CheckShapeIndex(LayerHandle, ShapeIndex)) 
+			return S_OK;
+	}
 
 	TrimList();
 
 	int id = _batchId != EMPTY_BATCH_ID ? _batchId : NextId();
 
-	UndoListItem* item = new UndoListItem((int)id, (int)ShapeIndex, operation);
+	UndoListItem* item = new UndoListItem((int)id, LayerHandle, ShapeIndex, operation);
 
 	if (shapeData) {
 		// shape is in the middle of vertices editing; it wasn't saved to the shapefile yet
@@ -135,8 +153,8 @@ STDMETHODIMP CUndoList::AddSubOperation(tkUndoOperation operation, LONG ShapeInd
 	}
 	else {
 		// need to save current state before operation
-		if (operation == uoRemoveShape || operation == uoEditShape)
-			CopyShapeState(ShapeIndex, item);
+		if (operation == uoRemoveShape || operation == uoEditingShape)
+			CopyShapeState(LayerHandle, ShapeIndex, item);
 	}
 
 	_list.push_back(item);
@@ -159,48 +177,79 @@ void CUndoList::TrimList()
 	}
 }
 
+
 // **********************************************************
 //		CopyShapeState
 // **********************************************************
-void CUndoList::CopyShapeState(int shapeIndex, UndoListItem* undoItem)
+bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, UndoListItem* undoItem)
 {
+	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	if (!sf) return false;
+
 	IShape* shp = NULL;
-	_shapefile->get_Shape(shapeIndex, &shp);
+	sf->get_Shape(shapeIndex, &shp);
 	undoItem->Shape = shp;    // reference has been added in get_Shape
 
 	ITable* tbl = NULL;
-	_shapefile->get_Table(&tbl);
+	sf->get_Table(&tbl);
 	if (tbl) {
 		TableRow* row = ((CTableClass*)tbl)->CloneTableRow((int)shapeIndex);
 		undoItem->Row = row;
 		tbl->Release();
 	}
+	return true;
 }
 
 // **********************************************************
 //		Undo
 // **********************************************************
-STDMETHODIMP CUndoList::Undo(VARIANT_BOOL* retVal)
+STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
+	CComPtr<IShapeEditor> editor = _mapCallback->_GetShapeEditor();
+	
+	// clear the editor
+	VARIANT_BOOL isEmpty;
+	editor->get_IsEmpty(&isEmpty);
+	if (!isEmpty) 
+	{
+		CComPtr<IShape> shp = NULL;	
+		editor->get_RawData(&shp);
+
+		editor->Undo(retVal);
+		if (*retVal) {
+			if (zoomToShape) {
+				// TODO: do the zooming
+			}
+			return S_OK;
+		}
+		
+		editor->Clear();
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
 	if (_position >= 0) 
 	{
-		ITable* tbl = NULL;
-		_shapefile->get_Table(&tbl);
-		
 		int id = _list[_position]->BatchId;
-		
-		// undo the whole batch
+		UndoListItem* item = _list[_position];
+
+		// on undo add shape, zooming must be done beforehand
+		if (item->Operation == uoAddShape)
+			_mapCallback->_ZoomToShape(item->LayerHandle, item->ShapeIndex);
+
 		while (_position >= 0 && _list[_position]->BatchId == id)
   	    {
-			UndoSingleItem(_list[_position], tbl);
+			UndoSingleItem(_list[_position]);
 			_position--;
 		}
 
-		if (tbl) tbl->Release();
+		if (item->Operation != uoAddShape)
+			_mapCallback->_ZoomToShape(item->LayerHandle, item->ShapeIndex);
+
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -209,26 +258,47 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL* retVal)
 // **********************************************************
 //		Redo
 // **********************************************************
-STDMETHODIMP CUndoList::Redo(VARIANT_BOOL* retVal)
+STDMETHODIMP CUndoList::Redo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
+	CComPtr<IShapeEditor> editor = _mapCallback->_GetShapeEditor();
+
+	editor->Redo(retVal);
+	if (*retVal) return S_OK;
+
+	// one call to clear the edit shape
+	VARIANT_BOOL isEmpty;
+	editor->get_IsEmpty(&isEmpty);
+	if (!isEmpty) 
+	{
+		editor->Clear();
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
 	int maxIndex = (int)_list.size() - 1;
 	if (_position < maxIndex)
 	{
-		ITable* tbl = NULL;
-		_shapefile->get_Table(&tbl);
-		int id = _list[_position + 1]->BatchId;
+		int pos = _position + 1;
+		int id = _list[pos]->BatchId;
+		UndoListItem* item = _list[pos];
 
-		while (_position < maxIndex && _list[_position + 1]->BatchId == id)
+		// on redo remove shape, zooming must be done beforehand
+		if (item->Operation == uoRemoveShape)
+			_mapCallback->_ZoomToShape(item->LayerHandle, item->ShapeIndex);
+
+		while (_position < maxIndex && _list[pos]->BatchId == id)
 		{
-			UndoSingleItem(_list[_position + 1], tbl);
+			UndoSingleItem(_list[_position + 1]);
 			_position++;
 		}
+	
+		if (item->Operation != uoRemoveShape)
+			_mapCallback->_ZoomToShape(item->LayerHandle, item->ShapeIndex);
 
-		if (tbl) tbl->Release();
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -237,15 +307,19 @@ STDMETHODIMP CUndoList::Redo(VARIANT_BOOL* retVal)
 // **********************************************************
 //		UndoSingleItem
 // **********************************************************
-bool CUndoList::UndoSingleItem(UndoListItem* item, ITable* tbl)
+bool CUndoList::UndoSingleItem(UndoListItem* item)
 {
+	CComPtr<IShapefile> sf = GetShapefile(item->LayerHandle);
+	ITable* tbl = NULL;
+	sf->get_Table(&tbl);
+
 	VARIANT_BOOL vb;
 	switch (item->Operation)
 	{
 		case uoRemoveShape:
 		{
 			// restore removed shape
-			_shapefile->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
+			sf->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
 			if (vb) {
 				((CTableClass*)tbl)->InsertTableRow(item->Row, item->ShapeIndex);
 				item->Shape->Release(); // a reference was added in EditInsertShape
@@ -261,11 +335,11 @@ bool CUndoList::UndoSingleItem(UndoListItem* item, ITable* tbl)
 		{
 			// remove added shape
 			IShape* shp = NULL;
-			_shapefile->get_Shape(item->ShapeIndex, &shp);
+			sf->get_Shape(item->ShapeIndex, &shp);
 
 			if (shp) {
 				TableRow* row = ((CTableClass*)tbl)->CloneTableRow(item->ShapeIndex);
-				_shapefile->EditDeleteShape(item->ShapeIndex, &vb);
+				sf->EditDeleteShape(item->ShapeIndex, &vb);
 				item->Shape = shp;
 				item->Row = row;
 				item->Undone = true;
@@ -274,25 +348,26 @@ bool CUndoList::UndoSingleItem(UndoListItem* item, ITable* tbl)
 			}
 			break;
 		}
-		case uoSubEditShape:
-		case uoEditShape:
+		case uoSubShapeEditor:
+		case uoEditingShape:
 		{
 			// revert to the previous state
 			IShape* shp = NULL;
-			_shapefile->get_Shape(item->ShapeIndex, &shp);
+			sf->get_Shape(item->ShapeIndex, &shp);
 
 			if (shp) {
-				_shapefile->EditUpdateShape(item->ShapeIndex, item->Shape, &vb);
+				sf->EditUpdateShape(item->ShapeIndex, item->Shape, &vb);
 				item->Shape = shp;
 				item->Undone = true;
 				return true;
-
-				//TableRow* row = ((CTableClass*)tbl)->SwapTableRow(item->Row, item->ShapeIndex);
-				//item->Row = row;
 			}
 		}
 		break;
 	}
+	if (tbl) {
+		tbl->Release();
+	}
+
 	return false;
 }
 
@@ -375,3 +450,4 @@ STDMETHODIMP CUndoList::GetLastId(LONG* retVal)
 	*retVal = _list.size() > 0 ? _list.at(_list.size() - 1)->BatchId : -1;
 	return S_OK;
 }
+

@@ -1,20 +1,20 @@
 HKCR
 {
-	MapWinGIS.EditShape.1 = s 'EditShape Class'
+	MapWinGIS.ShapeEditor.1 = s 'ShapeEditor Class'
 	{
 		CLSID = s '{130B7AEB-0350-437F-B044-4839AEC92F22}'
 	}
-	MapWinGIS.EditShape = s 'EditShape Class'
+	MapWinGIS.ShapeEditor = s 'ShapeEditor Class'
 	{
 		CLSID = s '{130B7AEB-0350-437F-B044-4839AEC92F22}'
-		CurVer = s 'MapWinGIS.EditShape.1'
+		CurVer = s 'MapWinGIS.ShapeEditor.1'
 	}
 	NoRemove CLSID
 	{
-		ForceRemove {130B7AEB-0350-437F-B044-4839AEC92F22} = s 'EditShape Class'
+		ForceRemove {130B7AEB-0350-437F-B044-4839AEC92F22} = s 'ShapeEditor Class'
 		{
-			ProgID = s 'MapWinGIS.EditShape.1'
-			VersionIndependentProgID = s 'MapWinGIS.EditShape'
+			ProgID = s 'MapWinGIS.ShapeEditor.1'
+			VersionIndependentProgID = s 'MapWinGIS.ShapeEditor'
 			ForceRemove 'Programmable'
 			InprocServer32 = s '%MODULE%'
 			{

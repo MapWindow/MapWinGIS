@@ -697,9 +697,6 @@
     <ClInclude Include="Shapefile\ActiveShape.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\EditShapeBase.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities\GdiPlusHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
@@ -707,9 +704,6 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="COM classes\Callback.h">
-      <Filter>COM classes\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="COM classes\EditShape.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Image\cq.h">
@@ -731,6 +725,15 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Tiles\LoadingTask.h">
       <Filter>Tiles\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeEditorBase.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\ShapeEditor.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\MapViewCallback.h">
+      <Filter>Control</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1526,17 +1529,11 @@
     <ClCompile Include="Shapefile\ActiveShape.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\EditShapeBase.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Utilities\GdiPlusHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\GeographLibHelper.cpp">
       <Filter>Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="COM classes\EditShape.cpp">
-      <Filter>COM classes\Source</Filter>
     </ClCompile>
     <ClCompile Include="COM classes\OgrDatasource.cpp">
       <Filter>COM classes\Source</Filter>
@@ -1556,6 +1553,12 @@
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp">
       <Filter>Tiles\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeEditorBase.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\ShapeEditor.cpp">
+      <Filter>COM classes\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1683,9 +1686,6 @@
       <Filter>Grid\fip</Filter>
     </None>
     <None Include="ReadMe.txt" />
-    <None Include="COM classes\EditShape.rgs">
-      <Filter>COM classes\Resources</Filter>
-    </None>
     <None Include="COM classes\OgrDatasource.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
@@ -1719,6 +1719,9 @@
     </None>
     <None Include="Resources\zoom_in_16_2.ico">
       <Filter>Resources</Filter>
+    </None>
+    <None Include="COM classes\ShapeEditor.rgs">
+      <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

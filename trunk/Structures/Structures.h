@@ -1,5 +1,4 @@
 #pragma once
-#include "MapWinGIS_i.h"
 #include "Enumerations.h"
 #include "Extent.h"
 
@@ -93,10 +92,16 @@ public:
 		Snapped = false;
 		HasMoved = false;
 	}
+	void SetSnapped(double xProj, double yProj){
+		Snapped = true;
+		Proj.x = xProj;
+		Proj.y = yProj;
+	}
 };
 
 struct MeasurePoint
 {
+	PointPart Part;
 	Point2D Proj;
 	double x;		// in decimal degrees
 	double y;

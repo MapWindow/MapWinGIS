@@ -264,10 +264,8 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
 		int zoom;
 		_tiles->get_CurrentZoom(&zoom);
-		//Debug::WriteLine("SetExtentsCore; Requested zoom: %d", zoom);
 		this->ZoomToTileLevel(zoom);
 		_tiles->get_CurrentZoom(&zoom);
-		//Debug::WriteLine("SetExtentsCore; Zoomed to: %d", zoom);
 		return;
 	}
 
@@ -365,7 +363,7 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 	IExtents* box = NULL;
 	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
 	box->SetBounds(xCent - mapWidth/2.0, yCent - mapHeight/2.0, 0.0, xCent + mapWidth/2.0, yCent + mapHeight/2.0, 0.0);
-	this->SetExtents((LPDISPATCH)box);
+	this->SetExtents(box);
 	box->Release(); box = NULL;
 	return;
 }
@@ -375,7 +373,7 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 // ****************************************************
 //	   GetExtents()
 // ****************************************************
-LPDISPATCH CMapView::GetExtents()
+IExtents* CMapView::GetExtents()
 {
 	IExtents * box = NULL;
 	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
@@ -386,7 +384,7 @@ LPDISPATCH CMapView::GetExtents()
 // ****************************************************
 //	   SetExtents()
 // ****************************************************
-void CMapView::SetExtents(LPDISPATCH newValue)
+void CMapView::SetExtents(IExtents* newValue)
 {
 	if( !newValue )
 	{	
@@ -489,15 +487,15 @@ IMeasuring* CMapView::GetMeasuring()
 }
 
 // *****************************************************
-//		GetEditShape()
+//		GetShapeEditor()
 // *****************************************************
-IEditShape* CMapView::GetEditShape() 
+IShapeEditor* CMapView::GetShapeEditor() 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if(_editShape) {
-		_editShape->AddRef();
+	if(_shapeEditor) {
+		_shapeEditor->AddRef();
 	}
-	return _editShape;
+	return _shapeEditor;
 }
 
 // *****************************************************
@@ -912,14 +910,7 @@ void CMapView::ZoomToLayer(long LayerHandle)
 		
 		this->LogPrevExtent();
 		Layer * l = _allLayers[LayerHandle];
-		double xrange = l->extents.right - l->extents.left;
-		double yrange = l->extents.top - l->extents.bottom;
-		_extents.left = l->extents.left - xrange*m_extentPad;
-		_extents.right = l->extents.right + xrange*m_extentPad;
-		_extents.top = l->extents.top + yrange*m_extentPad;
-		_extents.bottom = l->extents.bottom - yrange*m_extentPad;
-		
-		this->SetExtentsCore(_extents);
+		SetExtentsWithPadding(l->extents);
 	}
 	else
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -930,48 +921,61 @@ void CMapView::ZoomToLayer(long LayerHandle)
 // ****************************************************************
 void CMapView::ZoomToShape(long LayerHandle, long Shape)
 {
-	if( IsValidShape(LayerHandle, Shape) )
-	{	
-		IShapefile * ishp = NULL;
-		Layer * l = _allLayers[LayerHandle];
-		//l->object->QueryInterface(IID_IShapefile,(void**)&ishp);
-		//if( ishp == NULL )
-		if (!l->QueryShapefile(&ishp))
-		{	
-			this->ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
-			return;
+	ZoomToShape2(LayerHandle, Shape, VARIANT_FALSE);
+}
+
+// ****************************************************************
+//		SetExtentsWithPadding()
+// ****************************************************************
+void CMapView::SetExtentsWithPadding(Extent ext)
+{
+	double xrange = ext.right - ext.left;
+	double yrange = ext.top - ext.bottom;
+
+	//if the minimum and maximum extents are the same, use a range of 1 for
+	// xrange and yrange to allow a point to be centered in the map window
+	// when ZoomToShape is used on a point shapefile.
+	if (xrange == 0)
+		xrange = 1;
+
+	if (yrange == 0)
+		yrange = 1;
+	
+	ext.left = ext.left - xrange * m_extentPad;
+	ext.right = ext.right + xrange * m_extentPad;
+	ext.top = ext.top + yrange * m_extentPad;
+	ext.bottom = ext.bottom - yrange * m_extentPad;
+
+	this->SetExtentsCore(ext);
+}
+
+// ****************************************************************
+//		ZoomToShape2()
+// ****************************************************************
+VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_BOOL ifOutsideOnly /*= VARIANT_TRUE*/)
+{
+	if (IsValidShape(LayerHandle, ShapeIndex))
+	{
+		IShapefile* sf = GetShapefile(LayerHandle);
+
+		double left, right, top, bottom;
+		((CShapefile*)sf)->QuickExtentsCore(ShapeIndex, &left, &bottom, &right, &top);
+		sf->Release();
+
+		Extent extNew(left, right, bottom, top);
+		if (ifOutsideOnly && extNew.Within(_extents)){
+			return VARIANT_FALSE;
 		}
 
 		this->LogPrevExtent();
-		
-		double left, right, top, bottom;
-		((CShapefile*)ishp)->QuickExtentsCore(Shape, &left, &bottom, &right, &top );
-		ishp->Release();
-		
-		double xrange = right - left;
-		double yrange = top - bottom;
-
-		//if the minimum and maximum extents are the same, use a range of 1 for
-		// xrange and yrange to allow a point to be centered in the map window
-		// when ZoomToShape is used on a point shapefile.
-		if(xrange == 0)
-			xrange = 1;
-		
-		if(yrange == 0)
-			yrange = 1;
-
-		_extents.left = left - xrange*m_extentPad;
-		_extents.right = right + xrange*m_extentPad;
-		_extents.top = top + yrange*m_extentPad;
-		_extents.bottom = bottom - yrange*m_extentPad;
-
-		this->SetExtentsCore(_extents);
+		SetExtentsWithPadding(extNew);
+		return VARIANT_TRUE;
 	}
 	else
-	{	
-		//Error Code set in func
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
+	{
+		if (_globalCallback != NULL)
+			_globalCallback->Error(m_key.AllocSysString(), A2BSTR(ErrorMsg(_lastErrorCode)));
+		return VARIANT_FALSE;
 	}
 }
 

@@ -4537,8 +4537,8 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idColorScheme:
 			CoCreateInstance( CLSID_ColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IColorScheme, (void**)&val );
 			break;
-		case tkInterface::idEditShape:
-			CoCreateInstance( CLSID_EditShape, NULL, CLSCTX_INPROC_SERVER, IID_IEditShape, (void**)&val );
+		case tkInterface::idShapeEditor:
+			CoCreateInstance( CLSID_ShapeEditor, NULL, CLSCTX_INPROC_SERVER, IID_IShapeEditor, (void**)&val );
 			break;
 		case tkInterface::idESRIGridManager:
 			CoCreateInstance( CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val );
@@ -4820,9 +4820,9 @@ void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 {
 	if (gdalCallback) {
 		CString s = msg;
-		s = "Gdal error: " + s;
+		s = "GDAL error: " + s;
 		USES_CONVERSION;
-		gdalCallback->Error(A2BSTR("Gdal"), A2BSTR(s));
+		gdalCallback->Error(A2BSTR("GDAL"), A2BSTR(s));
 	}
 }
 

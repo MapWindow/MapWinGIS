@@ -1223,7 +1223,7 @@ double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
 	switch(tolerance)
 	{
 		case ToleranceSnap:
-			_editShape->get_SnapTolerance(&tol);
+			_shapeEditor->get_SnapTolerance(&tol);
 			break;	
 		case ToleranceSelect:
 			tol = 20;

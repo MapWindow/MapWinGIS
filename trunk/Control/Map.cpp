@@ -26,7 +26,8 @@
 #include "MapPpg.h"
 #include "Measuring.h"
 #include "Tiles.h"
-#include "EditShape.h"
+#include "ShapeEditor.h"
+#include "UndoList.h"
 using namespace std;
 
 //disable some known warnings we don't care about
@@ -252,15 +253,16 @@ void CMapView::Startup()
 	((CTiles*)_tiles)->Init((void*)this);
 
 	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&_measuring);
-	GetUtils()->CreateInstance(idEditShape, (IDispatch**)&_editShape);
+	GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
 
 	GetUtils()->CreateInstance(idFileManager, (IDispatch**)&_fileManager);
+	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
+	((CUndoList*)_undoList)->SetMapCallback(this);
 
 	InitProjections();
 	
-	GetMeasuringBase()->SetMapView((void*)this, ShapeInputMode::simMeasuring);
-	GetEditShapeBase()->SetMapView((void*)this, ShapeInputMode::simEditing);
-	
+	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
+	((CShapeEditor*)_shapeEditor)->SetMapCallback(this);
 
 	if (_panningInertia != csFalse)
 		_panningLock.Unlock();
@@ -434,10 +436,11 @@ void CMapView::Shutdown()
 	if (_measuring)
 		_measuring->Release();
 
-	if (_editShape) {
-		_editShape->Release();
-		_editShape = NULL;
-	}
+	if (_shapeEditor)
+		_shapeEditor->Release();
+	
+	if (_undoList)
+		_undoList->Release();
 
 	if (_tiles)
 	{
@@ -449,8 +452,6 @@ void CMapView::Shutdown()
 		_hotTracking.Shapefile->Release();
 
 	delete _ttipCtrl;
-
-	
 }
 
 // ********************************************************************
@@ -776,11 +777,11 @@ MeasuringBase* CMapView::GetMeasuringBase()
 }
 
 // ***************************************************************
-//	GetEditShapeBase
+//	GetShapeEditorBase
 // ***************************************************************
-EditShapeBase* CMapView::GetEditShapeBase()
+EditorBase* CMapView::GetEditorBase()
 {
-	return ((CEditShape*)_editShape)->GetBase();
+	return ((CShapeEditor*)_shapeEditor)->GetBase();
 }
 
 // ***************************************************************
@@ -789,8 +790,7 @@ EditShapeBase* CMapView::GetEditShapeBase()
 ActiveShape* CMapView::GetActiveShape()
 {
 	if (m_cursorMode == cmMeasure) return GetMeasuringBase();
-	if (m_cursorMode == cmAddShape) return GetEditShapeBase();
-	return NULL;		
+	return GetEditorBase();
 }
 
 // ***************************************************************
@@ -809,10 +809,3 @@ VARIANT_BOOL CMapView::GetLayerVisibleAtCurrentScale(LONG LayerHandle)
 	}
 	return VARIANT_FALSE;
 }
-
-
-
-
-
-
-

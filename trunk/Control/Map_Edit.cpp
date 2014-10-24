@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Map.h"
 #include "Shapefile.h"
-#include "EditShape.h"
+#include "ShapeEditor.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
 // ************************************************************
-void CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
+bool CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
 {
 	double x1, x2, y1, y2;
 	PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
@@ -15,7 +15,8 @@ void CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
 	DraggingOperation operation = _dragging.Operation;
 
 	if (operation == DragMoveVertex && !_dragging.HasMoved) {
-		((CEditShape*)_editShape)->DiscardState();
+		((CShapeEditor*)_shapeEditor)->DiscardState();
+		return false;
 	}
 
 	if (_dragging.HasMoved && operation == DragMoveVertex)
@@ -25,16 +26,17 @@ void CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
 		{
 			VARIANT_BOOL result = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), _dragging.Move.x, _dragging.Move.y, &x2, &y2);
 			if ( !result && behavior == sbSnapWithShift )
-				return;		// can't proceed without snapping in this mode
+				return true;		// can't proceed without snapping in this mode
 		}
-		((CEditShape*)_editShape)->MoveVertex(x2, y2, false);
+		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
 	}
 
 	if (operation == DragMoveShape && (x2 - x1 != 0.0 || y2 - y1 != 0))
 	{
-		((CEditShape*)_editShape)->MoveShape(x2 - x1, y2 - y1);
+		((CShapeEditor*)_shapeEditor)->MoveShape(x2 - x1, y2 - y1);
 	}
 	_dragging.Operation = DragNone;
+	return true;
 }
 
 // ************************************************************
@@ -46,22 +48,21 @@ bool CMapView::SnappingIsOn(long nFlags, tkSnapBehavior& behavior)
 		behavior = tkSnapBehavior::sbSnapWithShift;
 	}
 	else {
-		_editShape->get_SnapBehavior(&behavior);
+		_shapeEditor->get_SnapBehavior(&behavior);
 		if (behavior == sbSnapByDefault) return true;
 	}
 	return (nFlags & MK_SHIFT) == 0;
 }
 
 // ************************************************************
-//		HandleOnMouseMoveEditShape
+//		HandleOnMouseMoveShapeEditor
 // ************************************************************
-bool CMapView::HandleOnMouseMoveEditShape(int x, int y, long nFlags)
+bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 {
 	if ((_dragging.Operation == DragMoveVertex || _dragging.Operation == DragMoveShape)
 		&& (nFlags & MK_LBUTTON) && _leftButtonDown)
 	{
 		_dragging.Snapped = false;
-
 		tkSnapBehavior behavior;
 		if (SnappingIsOn(nFlags, behavior) && _dragging.Operation == DragMoveVertex)
 		{
@@ -69,9 +70,7 @@ bool CMapView::HandleOnMouseMoveEditShape(int x, int y, long nFlags)
 			if (this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), x, y, &xFound, &yFound)) {
 				double xNew, yNew;
 				ProjToPixel(xFound, yFound, &xNew, &yNew);
-				_dragging.Snapped = true;
-				_dragging.Proj.x = xFound;
-				_dragging.Proj.y = yFound;
+				_dragging.SetSnapped(xFound, yFound);
 			}
 		}
 		_dragging.HasMoved = true;
@@ -80,13 +79,13 @@ bool CMapView::HandleOnMouseMoveEditShape(int x, int y, long nFlags)
 	}
 	else 
 	{
+		// highlighting of vertices
 		double projX, projY;
 		this->PixelToProjection(x, y, projX, projY);
-		EditShapeBase* base = GetEditShapeBase();
+		EditorBase* base = GetEditorBase();
 		int pntIndex = base->SelectVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
 		if (pntIndex != -1)
 		{
-			// start vertex moving
 			bool changed = base->_highlightedVertex != pntIndex;
 			base->_highlightedVertex = pntIndex;
 			if (changed) {
@@ -111,30 +110,26 @@ bool CMapView::HandleOnMouseMoveEditShape(int x, int y, long nFlags)
 bool CMapView::RemoveSelectedShape()
 {
 	VARIANT_BOOL isEmpty;
-	_editShape->get_IsEmpty(&isEmpty);
+	_shapeEditor->get_IsEmpty(&isEmpty);
 	if (!isEmpty) {
 		int layerHandle, shapeIndex;
-		_editShape->get_LayerHandle(&layerHandle);
-		_editShape->get_ShapeIndex(&shapeIndex);
+		_shapeEditor->get_LayerHandle(&layerHandle);
+		_shapeEditor->get_ShapeIndex(&shapeIndex);
 		
 		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
 		if (sf) {
-			CComPtr<IUndoList> undo = NULL;
-			sf->get_UndoList(&undo);
-			if (undo) {
-				
-				tkMwBoolean cancel = blnFalse;		
-				FireBeforeShapeEdit(uoRemoveShape, layerHandle, shapeIndex, &cancel);
-				if (cancel == blnTrue) return false;
+			tkMwBoolean cancel = blnFalse;
+			FireBeforeShapeEdit(uoRemoveShape, layerHandle, shapeIndex, &cancel);
+			if (cancel == blnTrue) return false;
 
-				VARIANT_BOOL vb;
-				undo->Add(uoRemoveShape, shapeIndex, &vb);
-				if (vb) {
-					sf->EditDeleteShape(shapeIndex, &vb);
-					FireAfterShapeEdit(uoRemoveShape, layerHandle, shapeIndex);
-					return true;
-				}
+			VARIANT_BOOL vb;
+			_undoList->Add(uoRemoveShape, layerHandle, shapeIndex, &vb);
+			if (vb) {
+				sf->EditDeleteShape(shapeIndex, &vb);
+				FireAfterShapeEdit(uoRemoveShape, layerHandle, shapeIndex);
+				return true;
 			}
+			
 		}
 	}
 	return false;
@@ -147,17 +142,19 @@ VARIANT_BOOL CMapView::UndoEdit()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	VARIANT_BOOL vb;
-	_editShape->Undo(&vb);
+	_shapeEditor->Undo(&vb);
 	if (vb) return vb;
 	
 	// one call to clear the edit shape
 	VARIANT_BOOL isEmpty;
-	_editShape->get_IsEmpty(&isEmpty);
+	_shapeEditor->get_IsEmpty(&isEmpty);
 	if (!isEmpty) {
-		ClearEditShape();
+		_shapeEditor->Clear();
 		return VARIANT_TRUE;
 	}
-	return RunShapefileUndoList(true) ?  VARIANT_TRUE: VARIANT_FALSE;
+	
+	return VARIANT_TRUE;
+	//return RunShapefileUndoList(true) ?  VARIANT_TRUE: VARIANT_FALSE;
 }
 
 // ************************************************************
@@ -167,93 +164,106 @@ VARIANT_BOOL CMapView::RedoEdit()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	VARIANT_BOOL vb;
-	_editShape->Redo(&vb);
+	_shapeEditor->Redo(&vb);
 	if (vb) return vb;
 
 	// one call to clear the edit shape
 	VARIANT_BOOL isEmpty;
-	_editShape->get_IsEmpty(&isEmpty);
+	_shapeEditor->get_IsEmpty(&isEmpty);
 	if (!isEmpty) {
-		ClearEditShape();
+		_shapeEditor->Clear();
 		return VARIANT_TRUE;
 	}
+	
+	return VARIANT_TRUE;
+	//return RunShapefileUndoList(false) ? VARIANT_TRUE : VARIANT_FALSE;
+}
 
-	return RunShapefileUndoList(false) ? VARIANT_TRUE : VARIANT_FALSE;
+// ************************************************************
+//		GetUndoList
+// ************************************************************
+IUndoList* CMapView::GetUndoList()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_undoList) {
+		_undoList->AddRef();
+	}
+	return _undoList;
 }
 
 // ************************************************************
 //		RunShapefileUndoList
 // ************************************************************
-bool CMapView::RunShapefileUndoList(bool undo)
-{
-	vector<int> layers;
-	SelectLayerHandles(slctInteractiveEditing, layers);
-	
-	int layerHandle = -1;
-	int maxId = -1;
-	for (size_t i = 0; i < layers.size(); i++) 
-	{
-		CComPtr<IShapefile> sf = GetShapefile(layers[i]);
-		if (sf) 
-		{
-			CComPtr<IUndoList> list;
-			sf->get_UndoList(&list);
-			if (list) 
-			{
-				long id = -1;
-				list->GetLastId(&id);
-				if (id > maxId) {
-					maxId = id;
-					layerHandle = layers[i];
-				}
-			}
-		}
-	}
-
-	if (layerHandle != -1) 
-	{
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
-		CComPtr<IUndoList> list;
-		sf->get_UndoList(&list);
-
-		VARIANT_BOOL vb;
-		if (undo) {
-			list->Undo(&vb);
-		}
-		else {
-			list->Redo(&vb);
-		}
-		return true;
-	}
-	return false;
-}
+//bool CMapView::RunShapefileUndoList(bool undo)
+//{
+//	vector<int> layers;
+//	SelectLayerHandles(slctInteractiveEditing, layers);
+//	
+//	int layerHandle = -1;
+//	int maxId = -1;
+//	for (size_t i = 0; i < layers.size(); i++) 
+//	{
+//		CComPtr<IShapefile> sf = GetShapefile(layers[i]);
+//		if (sf) 
+//		{
+//			CComPtr<IUndoList> list;
+//			sf->get_UndoList(&list);
+//			if (list) 
+//			{
+//				long id = -1;
+//				list->GetLastId(&id);
+//				if (id > maxId) {
+//					maxId = id;
+//					layerHandle = layers[i];
+//				}
+//			}
+//		}
+//	}
+//
+//	if (layerHandle != -1) 
+//	{
+//		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+//		CComPtr<IUndoList> list;
+//		sf->get_UndoList(&list);
+//
+//		VARIANT_BOOL vb;
+//		if (undo) {
+//			list->Undo(&vb);
+//		}
+//		else {
+//			list->Redo(&vb);
+//		}
+//		return true;
+//	}
+//	return false;
+//}
 
 // ************************************************************
-//		GetEditShapeShapefile
+//		GetShapeEditorShapefile
 // ************************************************************
-IShapefile* CMapView::GetEditShapeShapefile()
+IShapefile* CMapView::GetShapeEditorShapefile()
 {
 	int layerHandle;
-	_editShape->get_LayerHandle(&layerHandle);
+	_shapeEditor->get_LayerHandle(&layerHandle);
 	return GetShapefile(layerHandle);
 }
 
 // ************************************************************
-//		HandleOnLButtonDownEditShape
+//		HandleOnLButtonDownShapeEditor
 // ************************************************************
-void CMapView::HandleOnLButtonDownEditShape(int x, int y, bool ctrl)
+void CMapView::HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl)
 {
 	long layerHandle = -1, shapeIndex = -1;
 	bool handled = false;
-	bool hasEditShape = !GetEditShapeBase()->IsEmpty();
+	bool hasShapeEditor = !GetEditorBase()->IsEmpty();
 	
-	if (hasEditShape)
+	if (hasShapeEditor)
 	{
 		IShapefile* sf = GetTempShapefile();
 		if (sf != NULL)
 		{
 			CComPtr<IShape> shp = NULL;
-			_editShape->get_RawData(&shp);
+			_shapeEditor->get_RawData(&shp);
 			double projX, projY;
 			PixelToProj(x, y, &projX, &projY);
 		
@@ -269,7 +279,7 @@ void CMapView::HandleOnLButtonDownEditShape(int x, int y, bool ctrl)
 				}
 				else
 				{
-					EditShapeBase* base = GetEditShapeBase();
+					EditorBase* base = GetEditorBase();
 					int pntIndex = base->SelectVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
 					if (pntIndex != -1)
 					{
@@ -279,10 +289,9 @@ void CMapView::HandleOnLButtonDownEditShape(int x, int y, bool ctrl)
 
 						this->SetCapture();
 						_dragging.Operation = DragMoveVertex;
-						_dragging.HasMoved = false;
 						handled = true;
 
-						((CEditShape*)_editShape)->SaveState();
+						((CShapeEditor*)_shapeEditor)->SaveState();
 
 						if (changed)
 							RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
@@ -291,14 +300,8 @@ void CMapView::HandleOnLButtonDownEditShape(int x, int y, bool ctrl)
 						// start shape moving
 						if (((CShapefile*)sf)->PointWithinShape(shp, projX, projY, GetMouseTolerance(ToleranceSelect)))
 						{
-							/*if (GetEditShapeBase()->_selectedVertex != -1) {
-								GetEditShapeBase()->_selectedVertex = -1;
-								RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
-							}*/
-
 							this->SetCapture();
 							_dragging.Operation = DragMoveShape;
-							_dragging.HasMoved = false;
 							handled = true;
 						}
 					}
@@ -310,35 +313,20 @@ void CMapView::HandleOnLButtonDownEditShape(int x, int y, bool ctrl)
 	if (handled)
 		return;
 
-	if (hasEditShape)
+	if (hasShapeEditor)
 	{
-		if (!TrySaveEditShape())
+		if (!TrySaveShapeEditor())
 			return;
 	}
 	
-	ClearEditShape();
+	_shapeEditor->Clear();
 
-	if (SelectSingleShape(x, y, layerHandle, shapeIndex))
-		SetEditShape(layerHandle, shapeIndex);
+	if (SelectSingleShape(x, y, layerHandle, shapeIndex)) {
+		VARIANT_BOOL vb;
+		_shapeEditor->StartEdit(layerHandle, shapeIndex, &vb);
+	}
 
 	RedrawCore(RedrawAll, false, false);
-}
-
-// ************************************************************
-//		ClearEditShape
-// ************************************************************
-void CMapView::ClearEditShape() 
-{
-	int layerHandle, shapeIndex;
-	_editShape->get_LayerHandle(&layerHandle);
-	_editShape->get_ShapeIndex(&shapeIndex);
-	if (shapeIndex != -1) {
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
-		if (sf) {
-			sf->put_ShapeIsHidden(shapeIndex, VARIANT_FALSE);
-		}
-	}
-	_editShape->Clear();
 }
 
 // ************************************************************
@@ -346,8 +334,7 @@ void CMapView::ClearEditShape()
 // ************************************************************
 void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl)
 {
-	EditShapeBase* editShape = GetEditShapeBase();
-	editShape->SetCreationMode(true);
+	EditorBase* editShape = GetEditorBase();
 
 	// it's the first point; shape type and layer
 	ShpfileType shpType = editShape->GetShapeType();
@@ -361,7 +348,7 @@ void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double pr
 	bool succeed = false;
 	if (ctrl)
 	{
-		succeed = TrySaveEditShape();
+		succeed = TrySaveShapeEditor();
 		if (succeed) {
 			RedrawCore(RedrawSkipDataLayers, false, true);
 			return;
@@ -375,7 +362,7 @@ void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double pr
 	bool isPoint = shpType == SHP_POINT;
 	if (isPoint)
 	{
-		succeed = TrySaveEditShape();
+		succeed = TrySaveShapeEditor();
 		if (succeed) {
 			RedrawCore(RedrawAll, false, true);
 		}
@@ -404,16 +391,16 @@ bool CMapView::ChooseEditLayer(long x, long y)
 		return false;
 	}
 
-	SetEditShape(layerHandle);
+	SetShapeEditor(layerHandle);
 	
 	return true;
 }
 
 // ************************************************************
-//		SetEditShape
+//		SetShapeEditor
 // ************************************************************
 // the case of new shape
-bool CMapView::SetEditShape(long layerHandle)
+bool CMapView::SetShapeEditor(long layerHandle)
 {
 	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
 	if (!sf) {
@@ -424,71 +411,50 @@ bool CMapView::SetEditShape(long layerHandle)
 	ShpfileType shpType;
 	sf->get_ShapefileType(&shpType);
 
-	_editShape->Clear();
-	_editShape->put_ShapeType(shpType);
-	_editShape->put_LayerHandle(layerHandle);
+	_shapeEditor->Clear();
+	_shapeEditor->put_ShapeType(shpType);
+	_shapeEditor->put_LayerHandle(layerHandle);
 	
 	CComPtr<IShapeDrawingOptions> options = NULL;
 	sf->get_DefaultDrawingOptions(&options);
-	_editShape->CopyOptionsFrom(options);
+	_shapeEditor->CopyOptionsFrom(options);
 	return true;
 }
 
 // ************************************************************
-//		SetEditShape
+//		TrySaveShapeEditor
 // ************************************************************
-// the case of exiting shape
-void CMapView::SetEditShape(long layerHandle, long shapeIndex)
-{
-	if (layerHandle != -1 && shapeIndex != -1)
-	{
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
-		if (sf)
-		{
-			CComPtr<IShape> shp = NULL;
-			sf->get_Shape(shapeIndex, &shp);
-			if (shp)
-			{
-				_editShape->SetShape(shp);
-				_editShape->put_LayerHandle(layerHandle);
-				_editShape->put_ShapeIndex(shapeIndex);
-				sf->put_ShapeIsHidden(shapeIndex, VARIANT_TRUE);
-
-				CComPtr<IShapeDrawingOptions> options = NULL;
-				sf->get_DefaultDrawingOptions(&options);
-				_editShape->CopyOptionsFrom(options);
-			}
-		}
-	}
-}
-
-// ************************************************************
-//		TrySaveEditShape
-// ************************************************************
-bool CMapView::TrySaveEditShape()
+bool CMapView::TrySaveShapeEditor()
 {
 	int layerHandle, shapeIndex;
-	_editShape->get_LayerHandle(&layerHandle);
-	_editShape->get_ShapeIndex(&shapeIndex);
+	_shapeEditor->get_LayerHandle(&layerHandle);
+	_shapeEditor->get_ShapeIndex(&shapeIndex);
 	bool newShape = shapeIndex == -1;
 
 	// first check if it's enough points
 	VARIANT_BOOL enoughPoints;
-	_editShape->get_HasEnoughPoints(&enoughPoints);
+	_shapeEditor->get_HasEnoughPoints(&enoughPoints);
 	if (!enoughPoints) {
 		FireValidationResults(VARIANT_FALSE, "The shape doesn't have enough points");		// TODO: localize
 		return false;
 	}
 
 	CComPtr<IShape> shp = NULL;
-	VARIANT_BOOL valid = VARIANT_TRUE;
-	_editShape->get_Shape(VARIANT_FALSE, &shp);
-	
+	if (m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart) {
+		SubjectOperation op = m_cursorMode == cmAddPart ? SubjectAddPart: SubjectClip;
+		shp = ((CShapeEditor*)_shapeEditor)->ApplyOperation(op, layerHandle, shapeIndex);
+		newShape = false;
+	}
+	else {
+		_shapeEditor->get_Shape(VARIANT_FALSE, &shp);
+	}
+
 	// does user want to validate with GEOS?
 	tkMwBoolean geosCheck = blnTrue, tryFix = blnTrue;
 	FireValidationMode(&geosCheck, &tryFix);
 	
 	// if so validate and optionally fix
+	VARIANT_BOOL valid = VARIANT_TRUE;
 	if (geosCheck == blnTrue) 
 	{
 		shp->get_IsValid(&valid);
@@ -537,27 +503,26 @@ bool CMapView::TrySaveEditShape()
 		return false;
 	}
 
-	CComPtr<IUndoList> undoList = NULL;
-	sf->get_UndoList(&undoList);
+	long numShapes;
+	sf->get_NumShapes(&numShapes);
 
 	VARIANT_BOOL vb;
 	if (newShape)
 	{
 		// register with undo list
-		undoList->Add(uoAddShape, (long)shapeIndex, &vb);
+		_undoList->Add(uoAddShape, (long)layerHandle, (long)numShapes, &vb);
 	}
 	else  {
-		// copy all the actions from EditShape undo list
-		vector<IShape*> list = ((CEditShape*)_editShape)->GetUndoList();
+		// copy all the actions from ShapeEditor undo list
+		vector<IShape*> list = ((CShapeEditor*)_shapeEditor)->GetUndoList();
 		for (size_t i = 0; i < list.size(); i++) {
-			undoList->AddSubOperation(uoSubEditShape, (long)shapeIndex, list[i], &vb);
+			_undoList->AddSubOperation(uoSubShapeEditor, (long)layerHandle, (long)shapeIndex, list[i], &vb);
 		}
 	}
 
 	// add new shape
 	if (newShape) {
-		long numShapes;
-		sf->get_NumShapes(&numShapes);
+		
 		sf->EditInsertShape(shp, &numShapes, &vb);
 		shapeIndex = numShapes;
 	}
@@ -565,10 +530,10 @@ bool CMapView::TrySaveEditShape()
 		sf->EditUpdateShape(shapeIndex, shp, &vb);
 	}
 
-	ClearEditShape();
+	_shapeEditor->Clear();
 
 	// let the user set new attributes
-	FireAfterShapeEdit(uoEditShape, layerHandle, shapeIndex);
+	FireAfterShapeEdit(uoEditingShape, layerHandle, shapeIndex);
 	return true;
 }
 
@@ -578,9 +543,9 @@ bool CMapView::TrySaveEditShape()
 void CMapView::DoFireAfterShapeEdit()
 {
 	int layerHandle, shapeIndex;
-	_editShape->get_LayerHandle(&layerHandle);
-	_editShape->get_ShapeIndex(&shapeIndex);
-	FireAfterShapeEdit(uoEditShape, layerHandle, shapeIndex);
+	_shapeEditor->get_LayerHandle(&layerHandle);
+	_shapeEditor->get_ShapeIndex(&shapeIndex);
+	FireAfterShapeEdit(uoEditingShape, layerHandle, shapeIndex);
 }
 
 // ************************************************************
@@ -589,7 +554,7 @@ void CMapView::DoFireAfterShapeEdit()
 bool CMapView::TryAddVertex(double projX, double projY)
 {
 	ShpfileType shpType;
-	_editShape->get_ShapeType(&shpType);
+	_shapeEditor->get_ShapeType(&shpType);
 	shpType = Utility::ShapeTypeConvert2D(shpType);
 
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
@@ -597,7 +562,7 @@ bool CMapView::TryAddVertex(double projX, double projY)
 
 	bool success = false;
 	CComPtr<IShape> shp = NULL;
-	_editShape->get_Shape(VARIANT_TRUE, &shp);
+	_shapeEditor->get_Shape(VARIANT_TRUE, &shp);
 	if (shp)
 	{
 		if (shpType == SHP_POLYGON)
@@ -624,7 +589,7 @@ bool CMapView::TryAddVertex(double projX, double projY)
 			double dist = sqrt(pow(x - projX, 2.0) + pow(y - projY, 2.0));
 			if (dist < GetMouseTolerance(ToleranceSelect))
 			{
-				success = ((CEditShape*)_editShape)->InsertVertex(x, y);
+				success = ((CShapeEditor*)_shapeEditor)->InsertVertex(x, y);
 			}
 		}
 	}

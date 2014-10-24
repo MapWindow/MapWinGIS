@@ -71,6 +71,11 @@ public:
 		return (retVal.left <= retVal.right) && (retVal.top >= retVal.bottom);
 	}
 
+	bool Extent::Within(Extent& ext)
+	{
+		return this->left > ext.left && this->right < ext.right && this->top < ext.top && this->bottom > ext.bottom;
+	}
+
 	double Extent::getArea()
 	{
 		return ((this->right - this->left) * (this->top - this->bottom));

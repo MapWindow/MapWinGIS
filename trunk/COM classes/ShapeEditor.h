@@ -1,21 +1,21 @@
-// EditShape.h : Declaration of the CEditShape
+// ShapeEditor.h : Declaration of the CShapeEditor
 #pragma once
-#include "EditShapeBase.h"
+#include "ShapeEditorBase.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
-// CEditShape
-class ATL_NO_VTABLE CEditShape :
+// CShapeEditor
+class ATL_NO_VTABLE CShapeEditor :
 	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<CEditShape, &CLSID_EditShape>,
-	public IDispatchImpl<IEditShape, &IID_IEditShape, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
+	public CComCoClass<CShapeEditor, &CLSID_ShapeEditor>,
+	public IDispatchImpl<IShapeEditor, &IID_IShapeEditor, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	CEditShape()
+	CShapeEditor()
 	{
-		_editShape = new EditShapeBase();
+		_activeShape = new EditorBase();
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
 		USES_CONVERSION;
@@ -26,16 +26,19 @@ public:
 		_hotTracking = VARIANT_TRUE;
 		_snapTolerance = 10;
 		_snapBehavior = sbSnapByDefault;
+		_state = EditorEmpty;
+		_mapCallback = NULL;
 	}
-	~CEditShape()
+	~CShapeEditor()
 	{
-		delete _editShape;
+		Clear();
+		delete _activeShape;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_EDITSHAPE)
 
-	BEGIN_COM_MAP(CEditShape)
-		COM_INTERFACE_ENTRY(IEditShape)
+	BEGIN_COM_MAP(CShapeEditor)
+		COM_INTERFACE_ENTRY(IShapeEditor)
 		COM_INTERFACE_ENTRY(IDispatch)
 	END_COM_MAP()
 
@@ -56,7 +59,6 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
-	
 	STDMETHOD(Clear)();
 	STDMETHOD(get_numPoints)(long* retVal);
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
@@ -101,12 +103,23 @@ public:
 	STDMETHOD(put_HotTracking)(VARIANT_BOOL newVal);
 	STDMETHOD(get_SnapBehavior)(tkSnapBehavior* pVal);
 	STDMETHOD(put_SnapBehavior)(tkSnapBehavior newVal);
-
-	// TODO: perhaps remove
+	STDMETHOD(get_EditorState)(tkShapeEditorState* pVal);
+	STDMETHOD(put_EditorState)(tkShapeEditorState newVal);
+	STDMETHOD(StartEdit)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(AddSubjectShape)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL ClearExisting, VARIANT_BOOL* retVal);
+	STDMETHOD(get_PointLabelsVisible)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_PointLabelsVisible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
 	STDMETHOD(put_AreaDisplayMode)(tkAreaDisplayMode newVal);
 	STDMETHOD(get_AngleDisplayMode)(tkAngleDisplay* retVal);
 	STDMETHOD(put_AngleDisplayMode)(tkAngleDisplay newVal);
+	STDMETHOD(get_LengthDisplayMode)(tkLengthDisplayMode* pVal);
+	STDMETHOD(put_LengthDisplayMode)(tkLengthDisplayMode newVal);
+	STDMETHOD(ClearSubjectShapes)();
+	STDMETHOD(get_NumSubjectShapes)(LONG* pVal);
+	STDMETHOD(StartUnboundShape)(ShpfileType shpTYpe, VARIANT_BOOL* retVal);
+	STDMETHOD(get_VerticesVisible)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_VerticesVisible)(VARIANT_BOOL newVal);
 private:
 	
 	BSTR _key;
@@ -115,26 +128,34 @@ private:
 	VARIANT_BOOL _hotTracking;
 	double _snapTolerance;
 	tkSnapBehavior _snapBehavior;
-	EditShapeBase* _editShape;
+	EditorBase* _activeShape;
 	int _layerHandle;
 	int _shapeIndex;
 	long _lastErrorCode;
 	vector<IShape*> _undoList;
+	tkShapeEditorState _state;
+	vector<IShapeEditor*> _subjects;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
 	
 public:
+	IMapViewCallback* _mapCallback;
+	void SetMapCallback(IMapViewCallback* callback) {
+		_activeShape->SetMapCallback(callback, simEditing);
+		_mapCallback = callback;
+	}
+
 	void DiscardState();
 	void SaveState();
-	EditShapeBase* GetBase() { return _editShape; }
-	void MoveVertex(double offsetX, double offsetY, bool offset = true);
+	EditorBase* GetBase() { return _activeShape; }
 	void MoveShape(double offsetX, double offsetY);
 	bool InsertVertex(double xProj, double yProj);
 	bool RemoveVertex();
 	vector<IShape*> GetUndoList() { return _undoList; }
-
-	
+	bool CheckState();
+	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType offsetType, int screenOffsetX, int screenOffsetY);
+	IShape* ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex);
+	IShape* GetShape(long layerHandle, long shapeIndex);
 };
-
-OBJECT_ENTRY_AUTO(__uuidof(EditShape), CEditShape)
+OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

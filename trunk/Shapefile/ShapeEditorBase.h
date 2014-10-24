@@ -1,20 +1,21 @@
 #pragma once
 #include "ActiveShape.h"
 
-class EditShapeBase: public ActiveShape
+class EditorBase: public ActiveShape
 {
 private:
 	ShpfileType _shpType;
 	bool _creationMode;
 	
+
 public:
-	EditShapeBase(void) {
+	EditorBase(void) {
 		_shpType = SHP_NULLSHAPE;
 		_creationMode = false;
 		_mixedLinePolyMode = false;
 		DisplayAngles = true;
 	};
-	~EditShapeBase(void) {};
+	~EditorBase(void) {};
 
 public:
 	// implementation of abstract members
@@ -55,7 +56,7 @@ public:
 	}
 	bool HasStaticLine()
 	{
-		return _points.size() > 0;
+		return _points.size() > 0 && !_creationMode;
 	}
 	bool HasDynamicLine()
 	{
@@ -98,9 +99,7 @@ public:
 
 	void SetCreationMode(bool mode) 
 	{
-		if (mode != _creationMode) {
-			_creationMode = mode;
-		}
+		_creationMode = mode;
 	}
 	bool GetCreationMode() { return _creationMode;}
 

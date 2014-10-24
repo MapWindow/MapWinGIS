@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Map.h"
+#include "ShapeEditor.h"
 
 // *******************************************************
 //		OnSetCursor()
@@ -167,23 +168,22 @@ void CMapView::OnCursorModeChanged()
 	}
 
 	VARIANT_BOOL empty;
-	_editShape->get_IsEmpty(&empty);
+	_shapeEditor->get_IsEmpty(&empty);
 
 	if (!empty) {
 		VARIANT_BOOL vb;
-		_editShape->get_CreationMode(&vb);
-
-		if (vb && (m_cursorMode == cmEditShape || m_cursorMode == cmMoveShape)) {
-			_editShape->Clear();
-			RedrawCore(RedrawSkipDataLayers, false, true);
-		}
-
-		if (!vb && m_cursorMode == cmAddShape) {
+		_shapeEditor->get_CreationMode(&vb);
+		
+		if ((vb && m_cursorMode == cmEditShape) || (!vb && m_cursorMode == cmAddShape))
+		{
 			// TODO: check if we have changes			
-			ClearEditShape();
+			_shapeEditor->Clear();
 			RedrawCore(RedrawSkipDataLayers, false, true);
 		}
+	}
 
+	if (m_cursorMode == cmAddShape) {
+		((CShapeEditor*)_shapeEditor)->put_EditorState(EditorCreation);
 	}
 }
 
