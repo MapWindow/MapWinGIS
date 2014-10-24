@@ -1,6 +1,0 @@
-Download the files from Tamas Szekeres
-1500 means for VC2008
-
-The latest release: 
-http://www.gisinternals.com/sdk/Download.aspx?file=release-1500-gdal-mapserver.zip
-http://www.gisinternals.com/sdk/Download.aspx?file=release-1500-gdal-mapserver-libs.zip
