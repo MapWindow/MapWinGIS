@@ -1,97 +1,17 @@
 #include "stdafx.h"
 #include "ActiveShape.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "Shape.h"
 #include "GdiPlusHelper.h"
-#include "..\Processing\GeograpicLib\PolygonArea.hpp"
-#include "GeographLibHelper.h"
 #include "CollisionList.h"
 
 // *******************************************************
-//		TestAreaCalc()
+//		SetMapCallback()
 // *******************************************************
-void TestAreaCalc()
+void ActiveShape::SetMapCallback(IMapViewCallback* mapView, ShapeInputMode inputMode)
 {
-	std::vector<Point2D> points;
-
-	points.push_back(Point2D(5.1, 42.6));
-	points.push_back(Point2D(7.3, 41.6));
-	points.push_back(Point2D(4.2, 40.4));
-
-	//if (_points.size() > 0)
-	//points.push_back(Point2D(_points[0]->x, _points[0]->y));
-	double area = GeographLibHelper::CalcPolyGeodesicArea(points);
-	Debug::WriteLine("Area %f", area);
-};
-
-// *******************************************************
-//		GetGeodesicArea()
-// *******************************************************
-// The behavior of GeographicLib is sometimes erratic, GeographicLib::PolygonArea::_mask 
-// is initialized in constructor but is reset with no explicit call doing it. 
-// I haven't been able to find the reason. Perhaps conflicts with other include directives,
-// perhaps problems with memory management. Seems to be working now.
-namespace MeasuringNsp
-{
-	GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
-	GeographicLib::PolygonArea poly(geod);
-}
-
-double ActiveShape::GetGeodesicArea(bool closingPoint, double x, double y)
-{
-	unsigned int result;
-	double perimeter = 0.0, area = 0.0;
-	if (GetPolygonPointCount(closingPoint) > 1)
-	{
-recalc:			
-		if (_areaRecalcIsNeeded || !IsDynamic())
-		{
-			_areaRecalcIsNeeded = false;
-			
-			MeasuringNsp::poly.Clear();
-
-			for(int i = GetFirstPolyPointIndex(); i < (int)_points.size(); i++)
-			{
-				MeasuringNsp::poly.AddPoint(_points[i]->y, _points[i]->x);
-			}
-
-			result = MeasuringNsp::poly.Compute(true, true, perimeter, area);
-			if (closingPoint)
-				result = MeasuringNsp::poly.TestPoint(y, x, true, true, perimeter, area);
-		}
-		else
-		{
-			if (closingPoint)
-			{
-				result = MeasuringNsp::poly.TestPoint(y, x, true, true, perimeter, area);
-				if (perimeter == 0 && area == 0)
-				{
-					_areaRecalcIsNeeded = true;
-					goto recalc;
-				}
-			}
-			else
-			{
-				result = MeasuringNsp::poly.Compute(true, true, perimeter, area);
-			}	
-		}
-	}
-	return abs(area);
-}
-
-// *******************************************************
-//		SetDefaults()
-// *******************************************************
-void ActiveShape::SetDefaults()
-{
-	//TestAreaCalc();
-
-	_inputMode = simMeasuring;
-	DisplayAngles = false;
-	_isGeodesic = false;
-	_mousePoint.x = _mousePoint.y = 0;
-	_areaRecalcIsNeeded = true;
-	_firstPolyPointIndex = -1;
+	GeoShape::SetMapCallback(mapView);
+	_inputMode = inputMode;
 }
 
 // *******************************************************
@@ -99,79 +19,42 @@ void ActiveShape::SetDefaults()
 // *******************************************************
 void ActiveShape::Clear()
 {
+	_selectedPart = -1;
 	_selectedVertex = -1;
-	_firstPolyPointIndex = -1;
-	for(size_t i = 0; i < _points.size(); i++)
-		delete _points[i];
-	_points.clear();
-	MeasuringNsp::poly.Clear();
+	
+	GeoShape::Clear();
 }
-
-#pragma region MapView
-// *******************************************************
-//		SetMapView()
-// *******************************************************
-void ActiveShape::SetMapCallback(IMapViewCallback* mapView, ShapeInputMode inputMode)
-{
-	_mapCallback = mapView;
-	_inputMode = inputMode;
-}
-
-IGeoProjection* ActiveShape::GetWgs84Projection()
-{
-	return _mapCallback ? _mapCallback->_GetWgs84Projection() : NULL;
-}
-IGeoProjection* ActiveShape::GetMapProjection()
-{
-	return _mapCallback ? _mapCallback->_GetMapProjection() : NULL;
-}
-tkTransformationMode ActiveShape::GetTransformationMode()
-{
-	return _mapCallback ? _mapCallback->_GetTransformationMode() : tmNotDefined;
-}
-
-// ***************************************************************
-//		ProjToPixel()
-// ***************************************************************
-void ActiveShape::ProjToPixel(double projX, double projY, double& pixelX, double& pixelY)
-{
-	if (_mapCallback) {
-		_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
-	}
-	else {
-		Debug::WriteError("Measuring: map pointer is not initialized");
-	}
-}
-
-// ***************************************************************
-//		PixelToProj()
-// ***************************************************************
-void ActiveShape::PixelToProj(double pixelX, double pixelY, double& projX, double& projY)
-{
-	if (_mapCallback) {
-		_mapCallback->_PixelToProjection(pixelX, pixelY, &projX, &projY);
-	}
-	else {
-		Debug::WriteError("Measuring: map pointer is not initialized");
-	}
-}
-#pragma endregion
 
 // *******************************************************
 //		get_ScreenPoints()
 // *******************************************************
-int ActiveShape::get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, Gdiplus::PointF** data, 
-								  bool dynamicPoint, OffsetType offsetType, int offsetX, int offsetY)
+int ActiveShape::GetScreenPoints(int partIndex, MixedShapePart whichPoints, Gdiplus::PointF** data, 
+								  bool dynamicPoint, DraggingOperation offsetType, int offsetX, int offsetY)
 {
-	int size = get_ScreenPoints(partIndex, whichPoints, dynamicPoint, (int)_mousePoint.x, (int)_mousePoint.y, data);
+	int size = GetScreenPoints(partIndex, whichPoints, dynamicPoint, (int)_mousePoint.x, (int)_mousePoint.y, data);
 
 	Gdiplus::PointF* points = *data;
-	if (offsetType == OffsetShape)
+	if (offsetType == DragMoveShape || (offsetType == DragMovePart && partIndex == _selectedPart))
 	{
 		for(int i= 0; i < size; i++)
 		{
 			points[i].X += offsetX;
 			points[i].Y += offsetY;
+		}
+	}
+	else if (offsetType == DragMovePart && partIndex == -1) 
+	{
+		// rendering of a poly as a whole; adjust only the necessary part
+		int startIndex = GetPartStart(_selectedPart);
+		int endIndex = SeekPartEnd(startIndex);
+
+		if (startIndex != -1 && endIndex != -1)
+		{
+			for (int i = startIndex; i <= endIndex; i++)
+			{
+				points[i].X += offsetX;
+				points[i].Y += offsetY;
+			}
 		}
 	}
 	return size;
@@ -180,59 +63,30 @@ int ActiveShape::get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, G
 // *******************************************************
 //		GetPartStartAndEnd()
 // *******************************************************
-bool ActiveShape::GetPartStartAndEnd(int partIndex, ScreenPointsType whichPoints, int& startIndex, int& endIndex)
+bool ActiveShape::GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints, int& startIndex, int& endIndex)
 {
 	startIndex = 0;
 	endIndex = _points.size();		// actually the next after end one
 
-	if (_mixedLinePolyMode)
+	int partCount = GetNumParts();
+	if (partCount > 1 && partIndex != -1)
 	{
-		switch (whichPoints)
+		int count = -1;
+		startIndex = -1;
+		for (size_t i = 0; i < _points.size(); i++)
 		{
-			case ScreenPointsLinearPart:
-			{
-				if (!_drawLineForPoly) {
-					if (_firstPolyPointIndex != -1 && _firstPolyPointIndex < (int)_points.size())
-						endIndex = _firstPolyPointIndex + 1;
-				}
+			if (startIndex != -1 && _points[i]->Part == PartEnd) {
+				endIndex = i + 1;
 				break;
 			}
-			case ScreenPointsPolygonPart:
+			if (_points[i]->Part == PartBegin)
 			{
-				if (_firstPolyPointIndex == -1)
-					return 0;
-				if (_firstPolyPointIndex >(int)_points.size() - 1)
-				{
-					Debug::WriteError("Active shape; First poly point index outside bounds");
-					return 0;
-				}
-				startIndex = _firstPolyPointIndex;
-				endIndex = (int)_points.size();
-				break;
+				count++;
+				if (count == partIndex)
+					startIndex = i;
 			}
 		}
-	}
-	else {
-		int partCount = GetNumParts();
-		if (partCount > 1 && partIndex != -1) 
-		{
-			int count = -1;
-			startIndex = -1;
-			for (size_t i = 0; i < _points.size(); i++) 
-			{
-				if (startIndex != -1 && _points[i]->Part == PartEnd) {
-					endIndex = i + 1;
-					break;
-				}
-				if (_points[i]->Part == PartBegin) 
-				{
-					count++;
-					if (count == partIndex)
-						startIndex = i;
-				}
-			}
-			return startIndex != -1;
-		}
+		return startIndex != -1;
 	}
 	return true;
 }
@@ -240,7 +94,8 @@ bool ActiveShape::GetPartStartAndEnd(int partIndex, ScreenPointsType whichPoints
 // *******************************************************
 //		get_ScreenPoints()
 // *******************************************************
-int ActiveShape::get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data)
+int ActiveShape::GetScreenPoints(int partIndex, MixedShapePart whichPoints, bool hasLastPoint, int lastX, int lastY, 
+	Gdiplus::PointF** data)
 {
 	int startIndex, endIndex;
 	GetPartStartAndEnd(partIndex, whichPoints, startIndex, endIndex);
@@ -268,156 +123,43 @@ int ActiveShape::get_ScreenPoints(int partIndex, ScreenPointsType whichPoints, b
 	return totalSize;
 }
 
-// *******************************************************
-//		AddPoint()
-// *******************************************************
-void ActiveShape::AddPoint(double xProj, double yProj, double xScreen, double yScreen, PointPart part) 
-{
-	ClearIfStopped();
-
-	_mousePoint.x = xScreen;
-	_mousePoint.y = yScreen;
-
-	MeasurePoint* pnt = new MeasurePoint();
-	pnt->Proj.x = xProj;
-	pnt->Proj.y = yProj;
-	pnt->Part = part;
-	_points.push_back(pnt);	
-	
-	UpdateLatLng(_points.size() - 1);
-	
-	_areaRecalcIsNeeded = true;
-}
-
-// *******************************************************
-//		TryInsertVertex()
-// *******************************************************
-bool ActiveShape::TryInsertVertex(double xProj, double yProj)
-{
-	int pntIndex = FindSegmentWithPoint(xProj, yProj);
-	if (pntIndex != - 1)
-	{
-		MeasurePoint* pnt = new MeasurePoint();
-		pnt->Proj.x = xProj;
-		pnt->Proj.y = yProj;
-		_points.insert(_points.begin() + pntIndex + 1, pnt);
-		UpdateLatLng(pntIndex + 1);
-		UpdateLatLng(pntIndex + 2);
-
-		_areaRecalcIsNeeded = true;
-		return true;
-	}
-	return false;
-}
-
-// *******************************************************
-//		FindSegementWithPoint()
-// *******************************************************
-int ActiveShape::FindSegmentWithPoint(double xProj, double yProj)
-{
-	// TODO: should we consider segment from the last to the first
-	for(size_t i = 0; i < _points.size() - 1; i++)
-	{
-		if (PointOnSegment(_points[i]->Proj.x, _points[i]->Proj.y, 
-			_points[i + 1]->Proj.x, _points[i + 1]->Proj.y, xProj, yProj))
-			return i;
-	}
-	return -1;
-}
-
-// *******************************************************
-//		Move()
-// *******************************************************
-void ActiveShape::Move( double offsetXProj, double offsetYProj )
-{
-	for(size_t i = 0; i < _points.size(); i++)
-	{
-		_points[i]->Proj.x += offsetXProj;
-		_points[i]->Proj.y += offsetYProj;
-		UpdateLatLng(i);
-	}
-	_areaRecalcIsNeeded = true;
-}
-
-// *******************************************************
-//		MoveVertex()
-// *******************************************************
-void ActiveShape::MoveVertex( double xProj, double yProj )
-{
-	int index = _selectedVertex;
-	int closeIndex = GetCloseIndex(index);
-
-	if (index >= 0 && index < (int)_points.size())
-	{
-		_points[index]->Proj.x = xProj;
-		_points[index]->Proj.y = yProj;
-		UpdateLatLng(index);
-		
-		// coordinates of the first and last point of polygon must be the same
-		if (closeIndex >= 0 && closeIndex < (int)_points.size()) {
-			_points[closeIndex]->Proj.x = _points[index]->Proj.x;
-			_points[closeIndex]->Proj.y = _points[index]->Proj.y;
-			UpdateLatLng(closeIndex);
-		}
-	}
-	_areaRecalcIsNeeded = true;
-}
-
-// *******************************************************
-//		UpdateLatLng()
-// *******************************************************
-void ActiveShape::UpdateLatLng( int pointIndex )
-{
-	if (pointIndex < 0 || pointIndex >= (int)_points.size() ) return;
-
-	MeasurePoint* pnt = _points[pointIndex];
-	double x = pnt->Proj.x, y = pnt->Proj.y;
-	if (TransformPoint(x, y))
-	{
-		pnt->x = x;
-		pnt->y = y;
-	}
-}
-
-// *******************************************************
-//		AddPoint()
-// *******************************************************
-void ActiveShape::AddPoint(double xProj, double yProj) 
-{
-	double xScreen, yScreen;
-	ProjToPixel(xProj, yProj, xScreen, yScreen);
-	AddPoint(xProj, yProj, xScreen, yScreen);
-}
-
-
-#pragma region Drawing
 // ****************************************************************
-//		DrawMeasuringToScreenBuffer()
+//		DrawData()
 // ****************************************************************
-void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType offsetType, int screenOffsetX, int screenOffsetY )
+void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, 
+		DraggingOperation offsetType, int screenOffsetX /*= 0*/, int screenOffsetY /*= 0*/ )
 {
-	bool hasLine = (HasDynamicLine() || HasStaticLine()); //(HasDynamicLine() && dynamicBuffer) || (HasStaticLine() && !dynamicBuffer);
-	bool hasPolygon = (HasDynamicPolygon() && dynamicBuffer) || (HasStaticPolygon() && !dynamicBuffer);
+	bool hasLine = HasLine(dynamicBuffer);
+	bool hasPolygon = HasPolygon(dynamicBuffer); 
+	if (!hasLine && !hasPolygon) return;
 
 	_fillBrush.SetColor(Utility::OleColor2GdiPlus(FillColor, FillTransparency)) ;
 	_linePen.SetWidth(LineWidth);
 	_linePen.SetColor(Utility::OleColor2GdiPlus(LineColor, 255));
-
-	bool editing = this->GetInputMode() == simEditing;
 
 	Gdiplus::PointF* polyData = NULL;
 	int polySize = 0;
 
 	if (hasPolygon)
 	{
-		polySize = get_ScreenPoints(-1, ScreenPointsPolygonPart, &polyData, dynamicBuffer, offsetType, screenOffsetX, screenOffsetY);
-		if (polySize > 1)
+		if (!_drawLabelsOnly)
 		{
-			_linePen.SetLineJoin(Gdiplus::LineJoinRound);
-			if (!_drawLabelsOnly)
+			Gdiplus::GraphicsPath path;
+			path.SetFillMode(Gdiplus::FillModeWinding);
+			
+			int partCount = GetNumParts();
+			for (int n = 0; n < partCount; n++)
 			{
-				g->FillPolygon(&_fillBrush, polyData, polySize);
-				//g->DrawPolygon(&_linePen, polyData, polySize);
+				polySize = GetScreenPoints(n, PolygonPart, &polyData, dynamicBuffer, offsetType, screenOffsetX, screenOffsetY);
+				if (polySize > 1)
+				{
+					path.AddPolygon(polyData, polySize);
+				}
+			}
+			g->FillPath(&_fillBrush, &path);
+			
+			if (_inputMode == simMeasuring) {   // to display closing line
+				g->DrawPath(&_linePen, &path);
 			}
 		}
 	}
@@ -428,18 +170,15 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 		state.SetSmoothingMode(g, Gdiplus::SmoothingModeHighQuality);
 		state.SetTextRenderingHint(g, Gdiplus::TextRenderingHintAntiAlias);
 	
-		if (HasDynamicLine() == dynamicBuffer)
-		{
-			int partCount = GetNumParts();
+		int partCount = GetNumParts();
 
-			for (int n = 0; n < partCount; n++) 
+		for (int n = 0; n < partCount; n++)
+		{
+			Gdiplus::PointF* data = NULL;
+			int size = GetScreenPoints(n, LinearPart, &data, false, offsetType, screenOffsetX, screenOffsetY);
+			if (size > 0)
 			{
-				Gdiplus::PointF* data = NULL;
-				int size = get_ScreenPoints(n, ScreenPointsLinearPart, &data, false, offsetType, screenOffsetX, screenOffsetY);
-				if (size > 0)
-				{
-					DrawLines(g, size, data, editing, dynamicBuffer, n);
-				}
+				DrawLines(g, size, data, dynamicBuffer, n);
 			}
 		}
 
@@ -450,7 +189,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 	// draw area atop of everything else
 	if (polySize > 0)
 	{
-		DisplayPolygonArea(g, polyData, polySize, dynamicBuffer);
+		DrawPolygonArea(g, polyData, polySize, dynamicBuffer);
 		delete[] polyData;
 	}
 }
@@ -458,30 +197,25 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType
 // ****************************************************************
 //		DrawLines()
 // ****************************************************************
-void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool editing, bool dynamicBuffer, int partIndex)
+void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex)
 {
 	double length = 0.0, totalLength = 0.0;
 
 	int startIndex = GetPartStart(partIndex);
+	bool editing = this->GetInputMode() == simEditing;
 
-	for (int i = 0; i < size - 1; i++) {
+	long errorCode = tkNO_ERROR;
+	for (int i = 0; i < size - 1; i++) 
+	{
 		int realIndex = startIndex + i;
-		length = GetSegmentLength(realIndex);
+		length = GetSegmentLength(realIndex, errorCode);
 		totalLength += length;
 		DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, false);
 	}
 
+	Gdiplus::Pen* pen = partIndex != -1 && (_selectedPart == partIndex || _highlightedPart == partIndex ) ? &_redPen : &_linePen;
 	if (!_drawLabelsOnly)
-		g->DrawLines(&_linePen, data, size);
-
-	bool closedPoly = false;
-	if (_mixedLinePolyMode && _firstPolyPointIndex != -1 && _firstPolyPointIndex < size)
-	{
-		double POLYGON_CLOSE_TOLERANCE = 1.0;
-		closedPoly = (abs(data[_firstPolyPointIndex].X - data[size - 1].X) < POLYGON_CLOSE_TOLERANCE &&
-			abs(data[_firstPolyPointIndex].Y - data[size - 1].Y) < POLYGON_CLOSE_TOLERANCE);
-		if (_firstPolyPointIndex == size - 1) closedPoly = false;
-	}
+		g->DrawLines(pen, data, size);
 
 	// drawing points
 	CCollisionList collisionList;
@@ -494,17 +228,16 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 		{
 			if (realIndex == _selectedVertex || realIndex == _highlightedVertex)
 			{
-				g->DrawRectangle(&_redPen, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
+				g->DrawRectangle(&_redPen, (int)(data[i].X - 3.0f + 0.5f), (int)(data[i].Y - 3.0f + 0.5f), 6, 6);
 			}
 			else
 			{
 				Gdiplus::SolidBrush* brush = realIndex == _selectedVertex ? &_redBrush : &_blueBrush;
 				Gdiplus::Pen* pen = realIndex == _selectedVertex ? &_redPen : &_bluePen;
 
-				if (i == 0 || (_drawLineForPoly && i == _firstPolyPointIndex) || editing)
+				if (i == 0 || editing)
 				{
-					//g->FillRectangle(&_blueBrush, data[i].X - 3.0f, data[i].Y - 3.0f, 6.0f, 6.0f);
-					g->DrawRectangle(&_bluePen, (int)(data[i].X - 3.0f + 0.5), int(data[i].Y - 3.0f + 0.5), 6, 6);
+					g->DrawRectangle(&_bluePen, (int)(data[i].X - 3.0f + 0.5f), (int)(data[i].Y - 3.0f + 0.5f), 6, 6);
 				}
 				else
 				{
@@ -513,8 +246,6 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 				}
 			}
 		}
-
-		if (closedPoly && i == size - 1) continue;	// don't display the last one for the closed poly
 
 		// --------------------------------------
 		// display vertex index
@@ -566,61 +297,9 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 }
 
 // ****************************************************************
-//		GetMeasuringPolyCenter()
+//		DrawPolygonArea()
 // ****************************************************************
-IPoint* ActiveShape::GetPolygonCenter(Gdiplus::PointF* data, int length)
-{
-	IPoint* pnt = NULL;
-	if ( HasPolygon() && length > 2 )
-	{
-		// let's draw fill and area
-		Gdiplus::PointF* polyData = &data[0]; //&(data[_firstPolyPointIndex]);
-
-		// find position for label
-		IShape* shp = NULL;
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
-		if (shp)
-		{
-			long pointIndex;
-			VARIANT_BOOL vb;
-			shp->Create(ShpfileType::SHP_POLYGON, &vb);
-
-			//int sz = _measuring.Type == tkMeasuringType::MeasureDistance ? _points.size() - 1 - _firstPolyPointIndex : length;
-			int sz = length;			
-
-			for(int i = 0; i < sz; i++)
-			{
-				shp->AddPoint(polyData[i].X, polyData[i].Y, &pointIndex);
-			}
-			shp->AddPoint(polyData->X, polyData->Y, &pointIndex);	// close it
-
-			shp->get_Centroid(&pnt);
-
-			// make sure that centroid lies within extents of shapes; otherwise place it at the center
-			IExtents* ext = NULL;
-			shp->get_Extents(&ext);
-
-			double x, y;
-			pnt->get_X(&x);
-			pnt->get_Y(&y);
-
-			ext->PointIsWithin(x, y, &vb);
-			if (!vb)
-			{
-				pnt->Release();
-				pnt = NULL;
-				ext->get_Center(&pnt);
-			}
-			shp->Release();
-		}
-	}
-	return pnt;
-}
-
-// ****************************************************************
-//		DisplayPolygonArea()
-// ****************************************************************
-void ActiveShape::DisplayPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly)
+void ActiveShape::DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly)
 {
 	IPoint* pnt = GetPolygonCenter(data, size);
 	if (pnt)
@@ -653,17 +332,17 @@ void ActiveShape::DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, doubl
 				{
 					if (area < 1000.0)
 					{
-						str.Format(L"%.1f %s", area, m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsSquareMeters));
+						str.Format(L"%.1f %s", area, m_globalSettings.GetLocalizedString(lsSquareMeters));
 					}
 					else if(area < 10000000.0)
 					{
 						area /= 10000.0;
-						str.Format(L"%.2f %s", area, m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsHectars));
+						str.Format(L"%.2f %s", area, m_globalSettings.GetLocalizedString(lsHectars));
 					}
 					else
 					{
 						area /= 1000000.0;
-						str.Format(L"%.2f %s", area, m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsSquareKilometers));
+						str.Format(L"%.2f %s", area, m_globalSettings.GetLocalizedString(lsSquareKilometers));
 					}
 				}
 				break;
@@ -693,26 +372,22 @@ void ActiveShape::DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, doubl
 	g->DrawString(str, str.GetLength(), _fontArea, origin, &_format, &_textBrush);
 }
 
-
 // ***************************************************************
 //		DrawSegmentInfo()
 // ***************************************************************
 void ActiveShape::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, 
 								 double totalLength, int segmentIndex, bool rumbOnly)
 {
-	if (!_geometryVisible) return;
-	
 	CStringW s1, s2, s, sAz;
 
 	double x = xScr - xScr2;
 	double y = yScr - yScr2;
 
-	double angle = 360.0 - GetPointAngle(x, y) * 180.0 / pi_;
-	angle += _angleCorrection;							
+	double angle = 360.0 - GeometryHelper::GetPointAngle(x, y) * 180.0 / pi_;
 	
 	x = -x;
 	y = -y;
-	angle = GetPointAngle(x, y) * 180.0 / pi_;							
+	angle = GeometryHelper::GetPointAngle(x, y) * 180.0 / pi_;
 	angle = - (angle - 90.0);
 
 	if (HasProjection())
@@ -863,35 +538,6 @@ void ActiveShape::DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr
 		}
 	}
 }
-#pragma endregion
-
-// *******************************************************
-//		GetTransformedPoints()
-// *******************************************************
-// transforms input data to decimal degrees
-bool ActiveShape::TransformPoint(double& x, double& y) {
-
-	VARIANT_BOOL vb;
-	switch (GetTransformationMode())
-	{
-	case tkTransformationMode::tmDoTransformation:
-		GetMapProjection()->Transform(&x, &y, &vb);
-		return true;
-	case tkTransformationMode::tmWgs84Complied:	
-		return true;
-	}
-	return false;
-}
-
-// ***************************************************************
-//		HandleProjPointAdd()
-// ***************************************************************
-void ActiveShape::HandleProjPointAdd( double projX, double projY )
-{
-	double pixelX, pixelY;
-	ProjToPixel(projX, projY, pixelX, pixelY);
-	AddPoint(projX, projY, pixelX, pixelY);
-}
 
 // ***************************************************************
 //		HandlePointAdd()
@@ -937,120 +583,35 @@ bool ActiveShape::HandlePointAdd( double screenX, double screenY, bool ctrl )
 	return true;
 }
 
-#pragma region Calculate area
-
 // *******************************************************
-//		GetArea()
+//		AddPoint()
 // *******************************************************
-double ActiveShape::GetArea(bool closingPoint, double x, double y)
+void ActiveShape::AddPoint(double xProj, double yProj, double xScreen, double yScreen, PointPart part)
 {
-	if (GetPolygonPointCount(closingPoint) < 3)
-		return false;
+	ClearIfStopped();
 
-	if (GetTransformationMode() == tmNotDefined)
-	{
-		return GetEuclidianArea(closingPoint, x, y);   // x, y are projected
-	}
-	else
-	{
-		double xDeg = x, yDeg = y;
-		if (closingPoint) TransformPoint(xDeg, yDeg);
-		return GetGeodesicArea(closingPoint, xDeg, yDeg);	  // x, y are decimal degrees
-	}
-}
+	_mousePoint.x = xScreen;
+	_mousePoint.y = yScreen;
 
+	MeasurePoint* pnt = new MeasurePoint();
+	pnt->Proj.x = xProj;
+	pnt->Proj.y = yProj;
+	pnt->Part = part;
+	_points.push_back(pnt);
 
+	UpdateLatLng(_points.size() - 1);
 
-
-// *******************************************************
-//		GetEuclidianArea()
-// *******************************************************
-double ActiveShape::GetEuclidianArea(bool closingPoint, double x, double y) 
-{
-	double val = 0.0;
-	if (GetPolygonPointCount(closingPoint) > 2)
-	{
-		VARIANT_BOOL vb;
-		_areaCalcShape->Create(ShpfileType::SHP_POLYGON, &vb);		// this will clear points
-
-		long pointIndex = -1;
-
-		for (size_t i = GetFirstPolyPointIndex(); i < _points.size(); i++)
-		{
-			_areaCalcShape->AddPoint(_points[i]->Proj.x, _points[i]->Proj.y, &pointIndex);
-		}
-
-		if (closingPoint)
-			_areaCalcShape->AddPoint(x, y, &pointIndex);
-
-		_areaCalcShape->AddPoint(_points[0]->Proj.x, _points[0]->Proj.y, &pointIndex);   // we need to close the poly
-		_areaCalcShape->get_Area(&val);
-	}
-	return val;
-}
-#pragma endregion
-
-
-#pragma region Distance calculation
-// *******************************************************
-//		getDistance()
-// *******************************************************
-double ActiveShape::GetDistance() 
-{
-	if (GetTransformationMode() == tmNotDefined)
-	{
-		return GetEuclidianDistance();	// if there us undefined or incompatible projection; return distance on plane 
-	}
-	else
-	{
-		return GetGeodesicDistance();
-	}
+	_areaRecalcIsNeeded = true;
 }
 
 // *******************************************************
-//		GetEuclidianDistance()
+//		AddPoint()
 // *******************************************************
-// in map units specified by current projection
-double ActiveShape::GetEuclidianDistance()
+void ActiveShape::AddPoint(double xProj, double yProj)
 {
-	double dist = 0.0;
-	if (_points.size() > 0) 
-	{
-		for (size_t i = 0; i < _points.size() - 1; i++)
-		{
-			dist += _points[i]->Proj.GetDistance(_points[i + 1]->Proj);
-		}
-	}
-	return dist;
-}
-
-// *******************************************************
-//		GetGeodesicDistance()
-// *******************************************************
-// in meters with decimal degrees as input
-double ActiveShape::GetGeodesicDistance() 
-{
-	IUtils* utils = GetUtils();
-	double dist = 0.0;
-	if (_points.size() > 0) 
-	{
-		for (size_t i = 0; i < _points.size() - 1; i++)
-		{
-			double val;
-			utils->GeodesicDistance(_points[i]->y, _points[i]->x, _points[i + 1]->y, _points[i + 1]->x, &val);
-			dist += val;
-		}
-	}
-	return dist;
-}
-#pragma endregion
-
-// **************************************************************
-//		ErrorMessage()
-// **************************************************************
-void ActiveShape::ErrorMessage(long ErrorCode)
-{
-	// TODO!!!: report error through callback function
+	double xScreen, yScreen;
+	ProjToPixel(xProj, yProj, xScreen, yScreen);
+	AddPoint(xProj, yProj, xScreen, yScreen);
 }
 
 // **************************************************************
@@ -1059,7 +620,8 @@ void ActiveShape::ErrorMessage(long ErrorCode)
 bool ActiveShape::UndoPoint()
 {
 	bool result = false;
-	if (_points.size() > 0) {
+	if (_points.size() > 0) 
+	{
 		delete _points[_points.size() - 1];
 		result = true;
 		_points.pop_back();
@@ -1067,241 +629,4 @@ bool ActiveShape::UndoPoint()
 	}
 	UpdatePolyCloseState(false);
 	return result;
-}
-
-// ***************************************************************
-//		GetSegmentAngle()
-// ***************************************************************
-double ActiveShape::GetSegmentAngle(int segmentIndex)
-{
-	if (segmentIndex < 0 || segmentIndex >= (long)_points.size() - 1)
-	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return 0;
-	}
-	else
-	{
-		int i = segmentIndex;
-		double xScr, yScr, xScr2, yScr2;
-		ProjToPixel(_points[i]->Proj.x, _points[i]->Proj.y, xScr, yScr);
-		ProjToPixel(_points[i + 1]->Proj.x, _points[i + 1]->Proj.y, xScr2, yScr2);
-		double x = xScr - xScr2;
-		double y = yScr - yScr2;
-		double angle = 360.0 - GetPointAngle(x, y) * 180.0 / pi_;							
-		if (angle == 360.0) angle = 0.0;
-		return angle;
-	}
-}
-
-// **************************************************************
-//		GetSegmentLength()
-// **************************************************************
-double ActiveShape::GetSegmentLength(int segmentIndex)
-{
-	if (segmentIndex < 0 || segmentIndex >= (long)_points.size() - 1)
-	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return 0;
-	}
-	else
-	{
-		double result;
-		int i = segmentIndex;
-		if (GetTransformationMode() == tmNotDefined)
-		{
-			result = _points[i]->Proj.GetDistance(_points[i + 1]->Proj);;
-		}
-		else
-		{
-			IUtils* utils = GetUtils();
-			utils->GeodesicDistance(_points[i]->y, _points[i]->x, _points[i + 1]->y, _points[i + 1]->x, &result);
-		}
-		return result;
-	}
-}
-
-// **************************************************************
-//		GetDymanicLineDistance()
-// **************************************************************
-double ActiveShape::GetDynamicLineDistance()
-{
-	double dist;
-	double xLng, yLat;
-	PixelToProj(_mousePoint.x, _mousePoint.y, xLng, yLat);
-	if (TransformPoint(xLng, yLat))
-	{
-		GetUtils()->GeodesicDistance(_points[_points.size() - 1]->y, _points[_points.size() - 1]->x, yLat, xLng, &dist);
-	}
-	else
-	{
-		dist = _points[_points.size() - 1]->Proj.GetDistance(xLng, yLat);
-	}
-	return dist;
-}
-
-// ****************************************************************************/
-//   GetAzimuth()
-// ****************************************************************************/
-double GetAzimuth(MeasurePoint* pnt1, MeasurePoint* pnt2)
-{
-	double x = pnt2->Proj.x - pnt1->Proj.x;
-	double y = pnt2->Proj.y - pnt1->Proj.y;
-	return GetPointAngle(x, y)/pi_*180.0;
-}
-
-// ****************************************************************************/
-//   GetBearing()
-// ****************************************************************************/
-double ActiveShape::GetBearing( int vertexIndex, bool clockwise )
-{
-	double az1 = GetAzimuth(_points[vertexIndex - 1], _points[vertexIndex]);
-	double az2 = GetAzimuth(_points[vertexIndex], _points[vertexIndex + 1]);
-	if (az2 - 180 > az1) az1 = az1 + 360;
-	if (az1 - 180 > az2) az2 = az2 + 360;
-	return clockwise ? 180 + (az1 - az2) : 180 + (az2 - az1);
-}
-
-// ****************************************************************************/
-//   GetBearingLabelAngle()
-// ****************************************************************************/
-double ActiveShape::GetBearingLabelAngle( int vertexIndex, bool clockwise )
-{
-	double az;
-	double bearing = GetBearing(vertexIndex, clockwise);
-	if (clockwise)
-	{
-		az = GetAzimuth(_points[vertexIndex], _points[vertexIndex + 1]);
-		az += bearing / 2.0;
-	}
-	else
-	{
-		az = GetAzimuth(_points[vertexIndex], _points[vertexIndex + 1]);
-		az -= bearing / 2.0;
-	}
-	if (az > 360.0) az -= 360.0;
-	if (az < 0.0) az += 360.0;
-	return az;
-}
-
-// ****************************************************************************/
-//   GetExtents()
-// ****************************************************************************/
-void ActiveShape::GetExtents( Extent& extent )
-{
-	double xMin = DBL_MAX, xMax = -DBL_MAX, yMin = DBL_MAX, yMax = -DBL_MAX;
-	for(size_t i = 0; i < _points.size(); i++)
-	{
-		if (_points[i]->Proj.x > xMax) xMax = _points[i]->Proj.x;
-		if (_points[i]->Proj.x < xMin) xMin = _points[i]->Proj.x;
-		if (_points[i]->Proj.y > yMax) yMax = _points[i]->Proj.y;
-		if (_points[i]->Proj.y > yMin) yMin = _points[i]->Proj.y;
-	}
-	extent.left = xMin;
-	extent.right = xMax;
-	extent.top = yMax;
-	extent.bottom = yMin;
-}
-
-// ****************************************************************************/
-//   GetPartCount()
-// ****************************************************************************/
-int ActiveShape::GetNumParts()
-{
-	int count = 0;
-	for (size_t i = 0; i < _points.size(); i++) {
-		if (_points[i]->Part == PartBegin)
-			count++;
-	}
-	if (count == 0) count = 1;
-	return count;
-}
-
-// *******************************************************
-//		GetPartStart()
-// *******************************************************
-int ActiveShape::GetPartStart(int partIndex) {
-	int count = -1;
-	for (size_t i = 0; i < _points.size(); i++) {
-		if (_points[i]->Part == PartBegin) 
-			count++;
-		if (count == partIndex)
-			return i;
-	}
-	return 0;
-}
-
-// *******************************************************
-//		GetPartStart()
-// *******************************************************
-int ActiveShape::SeekPartEnd(int startSearchFrom) {
-	for (size_t i = startSearchFrom; i < _points.size(); i++) {
-		if (_points[i]->Part == PartEnd)
-			return i;
-	}
-	return _points.size() - 1;
-}
-
-// *******************************************************
-//		GetPartStart()
-// *******************************************************
-int ActiveShape::SeekPartStart(int startSearchFrom) {
-	for (size_t i = startSearchFrom; i >= 0; i--) {
-		if (_points[i]->Part == PartBegin)
-			return i;
-	}
-	return 0;
-}
-
-// *******************************************************
-//		GetCloseIndex()
-// *******************************************************
-int ActiveShape::GetCloseIndex(int startIndex)
-{
-	bool polygon = Utility::ShapeTypeConvert2D(GetShapeType()) == SHP_POLYGON;
-	int closeIndex = -1;
-	if (polygon) {
-		if (_points[startIndex]->Part == PartBegin) closeIndex = SeekPartEnd(startIndex);
-		if (_points[startIndex]->Part == PartEnd) closeIndex = SeekPartStart(startIndex);
-	}
-	return closeIndex;
-}
-
-// *******************************************************
-//		RemoveVertex()
-// *******************************************************
-bool ActiveShape::RemoveVertex(int vertexIndex)
-{
-	if (vertexIndex < 0 && vertexIndex >= (int)_points.size())
-		return false;
-
-	bool polygon = GetShapeType() == SHP_POLYGON;
-	bool polyline = GetShapeType() == SHP_POLYLINE;
-	
-	int startIndex = SeekPartStart(vertexIndex);
-	int numPoints = SeekPartEnd(startIndex) - startIndex + 1;
-
-	if (polygon && numPoints <= 4) return false;
-	if (polyline && numPoints <= 2) return false;
-
-	PointPart part = _points[vertexIndex]->Part;
-
-	delete _points[vertexIndex];
-	_points.erase(_points.begin() + vertexIndex);
-
-	if (vertexIndex == _selectedVertex)
-		_selectedVertex = -1;
-
-	if (part == PartEnd) vertexIndex--;
-	if (part != PartNone)
-		_points[vertexIndex]->Part = part;
-
-	// make sure that first and last points of poly are still the same		
-	int closeIndex = GetCloseIndex(vertexIndex);
-	
-	if (polygon && part != PartNone) {
-		MeasurePoint* source = _points[vertexIndex];
-		MeasurePoint* target = _points[closeIndex];
-		source->CopyTo(*target);
-	}
-	return true;
 }

@@ -845,7 +845,7 @@ BOOL CShapefile::get_MemShapePoints(IShape* shape, ShpfileType & ShapeType, std:
 			for( int p = 0; p < numParts; p++ )
 			{	
 				shape->get_Part(p,&part);				
-				parts.push_back(p);
+				parts.push_back(part);
 			}
 		}
 		else

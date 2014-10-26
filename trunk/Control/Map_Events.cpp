@@ -89,12 +89,13 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	double dx = (this->_extents.right - this->_extents.left)/4.0;
 	double dy = (this->_extents.top - this->_extents.bottom)/4.0;
 	
-	IExtents* box = NULL;
+	CComPtr<IExtents> box = NULL;
 	bool arrows = nChar == VK_LEFT || nChar == VK_RIGHT || nChar == VK_UP || nChar == VK_DOWN;
 	if (arrows)
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
+		GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);
 	
 	bool ctrl = GetKeyState(VK_CONTROL) & 0x8000 ? true: false;
+	bool shift = GetKeyState(VK_SHIFT) & 0x8000 ? true : false;
 
 	switch(nChar)
 	{
@@ -102,18 +103,8 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			{
 				if (m_cursorMode == cmEditShape)
 				{
-					bool vertex = GetEditorBase()->HasSelectedVertex();
-					if (vertex) {
-						if (((CShapeEditor*)_shapeEditor)->RemoveVertex()) {
-							RedrawCore(RedrawSkipDataLayers, false, true);
-						}
-					}
-					else {
-						// whole shape
-						if (RemoveSelectedShape()) {
-							_shapeEditor->Clear();
-							RedrawCore(RedrawSkipDataLayers, false, true);
-						}
+					if (_shapeEditor->HandleDelete()) {
+						RedrawCore(RedrawSkipDataLayers, false, true);
 					}
 				}
 			}
@@ -155,7 +146,28 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			UpdateCursor(cmPan);
 			break;
 		case 'Z':
-			UpdateCursor(cmZoomIn);
+			{
+				if(ctrl) 
+				{
+					tkUndoShortcut shortcut;
+					_undoList->get_ShortcutKey(&shortcut);
+					if (shortcut == usCtrlZ) 
+					{
+						VARIANT_BOOL vb;
+						if (shift) {
+							_undoList->Redo(VARIANT_TRUE, &vb);
+						}
+						else {
+							_undoList->Undo(VARIANT_TRUE, &vb);
+						}
+						if (vb) {
+							Redraw();    // TODO: run layers redraw only when necessary
+						}
+						return;
+					}
+				}
+				UpdateCursor(cmZoomIn);
+			}
 			break;
 		case 'M':
 			if (m_cursorMode == cmMeasure)
@@ -238,8 +250,6 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		default:
 			break;
 	}
-	if (box)
-		box->Release();
 } 
 #pragma endregion
 
@@ -410,7 +420,7 @@ bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeInd
 		delete info;
 		
 		tkMwBoolean cancel = blnFalse;
-		FireBeforeShapeEdit(uoEditingShape, layerHandle, shapeIndex, &cancel);
+		FireBeforeShapeEdit(uoEditShape, layerHandle, shapeIndex, &cancel);
 		return cancel == blnFalse;
 	}
 	return false;
@@ -507,7 +517,8 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	//bool snapping = (nFlags & MK_SHIFT) && (m_cursorMode == cmMeasure || m_cursorMode == cmAddShape);
 	
 	tkSnapBehavior behavior;
-	bool snapping = (m_cursorMode == cmAddShape && SnappingIsOn(nFlags, behavior)) ||
+	bool snapping = (m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart && 
+					SnappingIsOn(nFlags, behavior)) ||
 					(m_cursorMode == cmMeasure && (nFlags & MK_SHIFT));
 
 	VARIANT_BOOL snapped = VARIANT_FALSE;
@@ -548,13 +559,21 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				if (SelectSingleShape(x, y, layerHandle, shapeIndex)) {
 					VARIANT_BOOL vb;
 					_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);
-					RedrawCore(RedrawSkipDataLayers, false, true);
+					RedrawCore(RedrawAll, false, true);
 				}
 			}
 			else {
-				VARIANT_BOOL vb;
-				ShpfileType shpType = m_cursorMode == cmAddPart ? SHP_NULLSHAPE : SHP_POLYGON;
-				_shapeEditor->StartUnboundShape(shpType, &vb);
+				tkShapeEditorState state;
+				_shapeEditor->get_EditorState(&state);
+				if (state != EditorCreationUnbound) 
+				{
+					VARIANT_BOOL vb;
+					ShpfileType shpType = m_cursorMode == cmAddPart ? SHP_NULLSHAPE : SHP_POLYGON;
+					_shapeEditor->StartUnboundShape(shpType, &vb);
+					OLE_COLOR color;
+					GetUtils()->ColorByName(m_cursorMode == cmAddPart ? Green : Red, &color);
+					_shapeEditor->put_FillColor(color);
+				}
 				HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 			}
 		}
@@ -565,7 +584,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		case cmEditShape:
 			HandleOnLButtonDownShapeEditor(x, y, ctrl);
 			break;
-		
 		case cmZoomIn:
 			{
 				this->SetCapture();
@@ -620,23 +638,31 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 // ************************************************************
 void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
-   ZoombarPart part = ZoombarHitTest(point.x, point.y);
+	ZoombarPart part = ZoombarHitTest(point.x, point.y);
 	if (part != ZoombarPart::ZoombarNone)
 		return;
 
-   OnLButtonDown(nFlags, point);
-   if (m_cursorMode == cmMeasure)
-   {
-	   _measuring->FinishMeasuring();
-	   FireMeasuringChanged(_measuring, tkMeasuringAction::MesuringStopped);	
-   }
-  /* else if (m_cursorMode == cmAddShape)
-   {
-		ShapeEditorBase* editShape = GetShapeEditorBase();
-		VARIANT_BOOL vb;
-		_editShape->FinishShape(&vb);
-		RedrawCore(RedrawSkipDataLayers, false, true);
-   }*/
+	OnLButtonDown(nFlags, point);
+	if (m_cursorMode == cmMeasure)
+	{
+		_measuring->FinishMeasuring();
+		FireMeasuringChanged(_measuring, tkMeasuringAction::MesuringStopped);	
+		return;
+	}
+	
+	// add a vertex							
+	if (m_cursorMode == cmEditShape) 
+	{
+		double projX, projY;
+		PixelToProj(point.x, point.y, &projX, &projY);
+		if (_shapeEditor->GetClosestPoint(projX, projY, projX, projY))
+		{
+			if (_shapeEditor->InsertVertex(projX, projY)) {
+				RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+				return;
+			}
+		}
+	}
 }
 
 // ************************************************************
@@ -661,6 +687,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	switch(operation)
 	{
 		case DragMoveVertex:
+		case DragMovePart:
 		case DragMoveShape:
 			{
 				if (HandleLButtonUpDragVertexOrShape(nFlags))
@@ -836,7 +863,6 @@ void CMapView::DisplayPanningInertia( CPoint point )
 #pragma endregion
 
 #pragma region Mouse move
-
 
 // ************************************************************
 //		OnMouseMove
@@ -1020,9 +1046,9 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
-		else if (m_cursorMode == cmAddShape)
+		else if (m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart)
 		{
-			((CShapeEditor*)_shapeEditor)->Undo(&redraw);
+			_shapeEditor->Undo(&redraw);
 			_canUseMainBuffer = false;
 		}
 

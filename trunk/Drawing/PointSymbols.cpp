@@ -24,7 +24,7 @@
 
 #include "stdafx.h"
 #include "PointSymbols.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 
 // ***************************************************************
 //	  get_SimplePointShape()
@@ -190,7 +190,7 @@ float* get_ArrowShape(float sizeX, float sizeY, double rotation)
 		{
 			x = (double)points[i * 2];
 			y = (double)points[i * 2 + 1];
-			float angle = (float)GetPointAngle(x,y);
+			float angle = (float)GeometryHelper::GetPointAngle(x, y);
 			float dist = (float)sqrt(pow(x,2) + pow(y,2));
 			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi_));
 			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi_));
@@ -230,7 +230,7 @@ float* get_FlagShape(float sizeX, float sizeY, double rotation)
 		{
 			x = (double)points[i * 2];
 			y = (double)points[i * 2 + 1];
-			double angle = GetPointAngle(x,y);
+			double angle = GeometryHelper::GetPointAngle(x, y);
 			double dist = sqrt(pow(x,2) + pow(y,2));
 			points[i * 2] = (float)(dist * sin(angle - rotation/180.0*pi_));
 			points[i * 2 + 1] = (float)(dist * cos(angle - rotation/180.0*pi_));

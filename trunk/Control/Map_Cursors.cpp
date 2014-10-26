@@ -174,16 +174,17 @@ void CMapView::OnCursorModeChanged()
 		VARIANT_BOOL vb;
 		_shapeEditor->get_CreationMode(&vb);
 		
-		if ((vb && m_cursorMode == cmEditShape) || (!vb && m_cursorMode == cmAddShape))
+		if ((vb && m_cursorMode == cmEditShape) || (!vb && m_cursorMode == cmAddShape) ||
+			m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart)
 		{
-			// TODO: check if we have changes			
+			// TODO: check if we have changes and prompt to save them			
 			_shapeEditor->Clear();
 			RedrawCore(RedrawSkipDataLayers, false, true);
 		}
 	}
 
 	if (m_cursorMode == cmAddShape) {
-		((CShapeEditor*)_shapeEditor)->put_EditorState(EditorCreation);
+		_shapeEditor->put_EditorState(EditorCreation);
 	}
 }
 

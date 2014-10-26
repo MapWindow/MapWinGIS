@@ -22,7 +22,7 @@
 //********************************************************************************************************
 #include "stdafx.h"
 #include "Shape.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "Templates.h"
 #include "Utilities\GeosHelper.h"
 #include <algorithm>
@@ -1249,7 +1249,7 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 	// if extents don't cross, no need to seek further
 	if (!(Relation == srDisjoint))	
 	{	
-		if (RelateExtents(this, Shape) == erNone)		
+		if (GeometryHelper::RelateExtents(this, Shape) == erNone)
 			return S_OK;
 	}
 
@@ -1355,7 +1355,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	
 	if (Operation == clClip || Operation == clIntersection)
 	{
-		if (RelateExtents(this, Shape) == erNone)	
+		if (GeometryHelper::RelateExtents(this, Shape) == erNone)
 			return S_OK;
 	}
 
@@ -1582,7 +1582,7 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 		return S_OK;
 	} 
 	
-	if (RelateExtents(this, Shape) == erNone)	
+	if (GeometryHelper::RelateExtents(this, Shape) == erNone)
 		return S_OK;
 
 	OGRGeometry* oGeom1 = NULL;
@@ -1869,7 +1869,7 @@ double CShape::get_SegmentAngle( long segementIndex)
 	this->get_XY(segementIndex, &x1, &y1, &vbretval);
 	this->get_XY(segementIndex + 1, &x2, &y2, &vbretval);
 	dx = x2 -x1; dy = y2 - y1;
-	return GetPointAngle(dx, dy) / pi_ * 180.0;
+	return GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0;
 }
 
 // **********************************************

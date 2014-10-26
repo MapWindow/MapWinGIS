@@ -25,7 +25,7 @@
 
 #include "stdafx.h"
 #include "RotatedRectangle.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 
 // *****************************************************************
 //	Constructor
@@ -61,19 +61,19 @@ bool CRotatedRectangle::Intersects(CRotatedRectangle& r)
 			// if i or j == 3, we must consider segment from 3 to 0
 			if (i != 3 && j !=3 )
 			{
-				if (LineIntersection1(points[i], points[i+1], r.points[j], r.points[j+1])) return true;
+				if (GeometryHelper::LineIntersection1(points[i], points[i + 1], r.points[j], r.points[j + 1])) return true;
 			}
 			else if (i == 3 && j !=3 )	
 			{
-				if (LineIntersection1(points[i], points[0], r.points[j], r.points[j+1])) return true;
+				if (GeometryHelper::LineIntersection1(points[i], points[0], r.points[j], r.points[j + 1])) return true;
 			}
 			else if (i != 3 && j ==3 )	
 			{
-				if (LineIntersection1(points[i], points[i+1], r.points[j], r.points[0])) return true;
+				if (GeometryHelper::LineIntersection1(points[i], points[i + 1], r.points[j], r.points[0])) return true;
 			}
 			else if (i == 3 && j ==3 )	
 			{
-				if (LineIntersection1(points[i], points[0], r.points[j], r.points[0])) return true;
+				if (GeometryHelper::LineIntersection1(points[i], points[0], r.points[j], r.points[0])) return true;
 			}
 		}
 	}
@@ -88,10 +88,10 @@ bool CRotatedRectangle::Intersects(CRect& r)
 	for(int i = 0; i < 4; i++)
 	{
 		int i2 = (i != 3)? i+1:0;
-		if (LineIntersection1(points[i], points[i2], CPoint(r.left, r.bottom), CPoint(r.left, r.top))) return true;
-		if (LineIntersection1(points[i], points[i2], CPoint(r.left, r.top), CPoint(r.right, r.top))) return true;
-		if (LineIntersection1(points[i], points[i2], CPoint(r.right, r.top), CPoint(r.right, r.bottom))) return true;
-		if (LineIntersection1(points[i], points[i2], CPoint(r.right, r.bottom), CPoint(r.left, r.bottom))) return true;
+		if (GeometryHelper::LineIntersection1(points[i], points[i2], CPoint(r.left, r.bottom), CPoint(r.left, r.top))) return true;
+		if (GeometryHelper::LineIntersection1(points[i], points[i2], CPoint(r.left, r.top), CPoint(r.right, r.top))) return true;
+		if (GeometryHelper::LineIntersection1(points[i], points[i2], CPoint(r.right, r.top), CPoint(r.right, r.bottom))) return true;
+		if (GeometryHelper::LineIntersection1(points[i], points[i2], CPoint(r.right, r.bottom), CPoint(r.left, r.bottom))) return true;
 		
 		// currently if this rect is compeltely included by the r, we'll consider they intersect
 		CRect* box1 = this->BoundingBox();

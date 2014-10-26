@@ -4,6 +4,7 @@
 #include "ShapeEditor.h"
 #include "Shape.h"
 #include "map.h"
+#include "UndoList.h"
 #include <set>
 
 // *******************************************************
@@ -268,14 +269,8 @@ STDMETHODIMP CShapeEditor::put_PointXY(long pointIndex, double x, double y, VARI
 	}
 	else
 	{
-		MeasurePoint* pnt = _activeShape->GetPoint(pointIndex);
-		if (pnt)
-		{
-			pnt->Proj.x = x;
-			pnt->Proj.y = y;
-			_activeShape->UpdateLatLng(pointIndex);
-			*retVal = VARIANT_TRUE;
-		}
+		_activeShape->UpdatePoint(pointIndex, x, y);
+		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }
@@ -301,16 +296,14 @@ STDMETHODIMP CShapeEditor::Clear()
 	if (_state == EditorEdit) {
 		CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(_layerHandle);
 		if (sf) {
-			sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
+			if (!_isSubjectShape) {
+				sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
+			}
 		}
 	}
 
 	_activeShape->Clear();
 	
-	for (size_t i = 0; i < _undoList.size(); i++)
-		_undoList[i]->Release();
-	_undoList.clear();
-
 	ClearSubjectShapes();
 	
 	_shapeIndex = -1;
@@ -346,7 +339,8 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 			SetShape(shp);
 			_layerHandle = LayerHandle;
 			_shapeIndex = ShapeIndex;
-			sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
+			if (!_isSubjectShape)
+				sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
 
 			CComPtr<IShapeDrawingOptions> options = NULL;
 			sf->get_DefaultDrawingOptions(&options);
@@ -401,25 +395,14 @@ STDMETHODIMP CShapeEditor::AddSubjectShape(LONG LayerHandle, LONG ShapeIndex, VA
 		sf->get_Shape(ShapeIndex, &shp);
 		if (shp)
 		{
-			IShapeEditor* editor = NULL;
+			CShapeEditor* editor = NULL;
 			GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&editor);
-			((CShapeEditor*)editor)->SetMapCallback(_mapCallback);
-			editor->put_PointLabelsVisible(VARIANT_FALSE);
-			editor->put_LengthDisplayMode(ldmNone);
+			editor->SetIsSubject(true);
+			editor->SetMapCallback(_mapCallback);
 			editor->StartEdit(LayerHandle, ShapeIndex, retVal);
 			_subjects.push_back(editor);
 		}
 	}
-	return S_OK;
-}
-
-// *******************************************************
-//		AddPoint()
-// *******************************************************
-STDMETHODIMP CShapeEditor::AddPoint(double xProj, double yProj)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->AddPoint(xProj, yProj);
 	return S_OK;
 }
 
@@ -474,7 +457,8 @@ STDMETHODIMP CShapeEditor::SetShape( IShape* shp )
 STDMETHODIMP CShapeEditor::get_SegmentLength(int segmentIndex, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _activeShape->GetSegmentLength(segmentIndex);
+	long errorCode = tkNO_ERROR;
+	*retVal = _activeShape->GetSegmentLength(segmentIndex, errorCode);
 	return S_OK;
 }
 
@@ -484,7 +468,8 @@ STDMETHODIMP CShapeEditor::get_SegmentLength(int segmentIndex, double* retVal)
 STDMETHODIMP CShapeEditor::get_SegmentAngle(int segmentIndex, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _activeShape->GetSegmentAngle(segmentIndex);
+	long errorCode = tkNO_ERROR;
+	*retVal = _activeShape->GetSegmentAngle(segmentIndex, errorCode);
 	return S_OK;
 }
 
@@ -589,13 +574,13 @@ STDMETHODIMP CShapeEditor::put_ShapeIndex(int newVal)
 STDMETHODIMP CShapeEditor::get_Visible(VARIANT_BOOL* val)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*val = _activeShape->_geometryVisible;
+	//*val = _activeShape->_geometryVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeEditor::put_Visible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->_geometryVisible = newVal ? true: false;
+	//_activeShape->_geometryVisible = newVal ? true: false;
 	return S_OK;
 }
 
@@ -628,7 +613,7 @@ STDMETHODIMP CShapeEditor::get_SelectedVertex(int* retVal)
 STDMETHODIMP CShapeEditor::put_SelectedVertex(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->_selectedVertex = newVal;
+	_activeShape->SetSelectedVertex(newVal);
 	return S_OK;
 }
 
@@ -727,19 +712,22 @@ void CShapeEditor::MoveShape(double offsetX, double offsetY)
 }
 
 // *******************************************************
+//		MovePart()
+// *******************************************************
+void CShapeEditor::MovePart(double offsetX, double offsetY)
+{
+	SaveState();
+	_activeShape->MovePart(offsetX, offsetY);
+}
+
+// *******************************************************
 //		InsertVertex()
 // *******************************************************
 bool CShapeEditor::InsertVertex(double xProj, double yProj)
 {
-	IShape* shp = NULL;
-	get_RawData(&shp);
-	if (!shp) return false;
-		
-	if (_activeShape->TryInsertVertex(xProj, yProj)) {
-		_undoList.push_back(shp);
-		return true;
-	}
-	shp->Release();
+	SaveState();
+	if (_activeShape->TryInsertVertex(xProj, yProj)) return true;
+	DiscardState();
 	return false;
 }
 
@@ -748,15 +736,19 @@ bool CShapeEditor::InsertVertex(double xProj, double yProj)
 // *******************************************************
 bool CShapeEditor::RemoveVertex()
 {
-	IShape* shp = NULL;
-	get_RawData(&shp);
-	if (!shp) return false;
-	
-	if (_activeShape->RemoveSelectedVertex()) {
-		_undoList.push_back(shp);
-		return true;
-	}
-	shp->Release();
+	SaveState();
+	if (_activeShape->RemoveSelectedVertex()) return true;
+	DiscardState();
+	return false;
+}
+
+// *******************************************************
+//		RemovePart()
+// *******************************************************
+bool CShapeEditor::RemovePart()
+{
+	if (_activeShape->RemovePart()) return true;
+	DiscardState();
 	return false;
 }
 
@@ -765,10 +757,12 @@ bool CShapeEditor::RemoveVertex()
 // *******************************************************
 void CShapeEditor::SaveState()
 {
-	IShape* shp = NULL;
-	get_RawData(&shp);
-	_undoList.push_back(shp);
-	Debug::WriteLine("Shape editor save state: %d", _undoList.size());
+	IUndoList* undoList = _mapCallback->_GetUndoList();
+	if (undoList) 
+	{
+		VARIANT_BOOL vb;
+		undoList->Add(uoEditShape, _layerHandle, _shapeIndex, &vb);
+	}
 }
 
 // *******************************************************
@@ -776,16 +770,12 @@ void CShapeEditor::SaveState()
 // *******************************************************
 void CShapeEditor::DiscardState()
 {
-	if (_undoList.size() > 0) {
-		IShape* shp = _undoList[_undoList.size() - 1];
-		if (shp) {
-			shp->Release();
-		}
-		_undoList.pop_back();
-		Debug::WriteLine("Shape editor discard state: %d", _undoList.size());
+	IUndoList* undoList = _mapCallback->_GetUndoList();
+	if (undoList)
+	{
+		((CUndoList*)undoList)->DiscardOne();
 	}
 }
-
 
 // *******************************************************
 //		Undo()
@@ -800,15 +790,6 @@ STDMETHODIMP CShapeEditor::Undo(VARIANT_BOOL* retVal)
 
 	if (_activeShape->GetCreationMode()) {
 		*retVal = _activeShape->UndoPoint() ? VARIANT_TRUE : VARIANT_FALSE;
-	}
-	else {
-		if (_undoList.size() > 0) {
-			IShape* shp = _undoList[_undoList.size() - 1];
-			this->SetShape(shp);
-			shp->Release();
-			_undoList.pop_back();
-			*retVal = VARIANT_TRUE;
-		}
 	}
 	return S_OK;
 }
@@ -912,11 +893,11 @@ STDMETHODIMP CShapeEditor::put_EditorState(tkShapeEditorState newVal)
 // *******************************************************
 //		Render
 // *******************************************************
-void CShapeEditor::Render(Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType offsetType, int screenOffsetX, int screenOffsetY)
+void CShapeEditor::Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX, int screenOffsetY)
 {
 	for (size_t i = 0; i < _subjects.size(); i++) {
-		EditorBase* base = ((CShapeEditor*)_subjects[i])->GetBase();
-		base->DrawData(g, dynamicBuffer, OffsetShape);
+		EditorBase* base = _subjects[i]->GetActiveShape();
+		base->DrawData(g, dynamicBuffer, DragNone);
 	}
 	_activeShape->DrawData(g, dynamicBuffer, offsetType, screenOffsetX, screenOffsetY);
 }
@@ -985,17 +966,16 @@ STDMETHODIMP CShapeEditor::StartUnboundShape(ShpfileType shpType, VARIANT_BOOL* 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	if (shpType == SHP_NULLSHAPE ) {
+	if (shpType == SHP_NULLSHAPE ) 
+	{
 		if (_subjects.size() > 0) {
 			_subjects[0]->get_ShapeType(&shpType);
-			OLE_COLOR fill = 255, line;
-			//_subjects[0]->get_FillColor(&fill);
+			OLE_COLOR line;
 			_subjects[0]->get_LineColor(&line);
-			put_FillColor(fill);
 			put_LineColor(line);
-			put_PointLabelsVisible(VARIANT_FALSE);
-			put_LengthDisplayMode(ldmNone);
-			put_VerticesVisible(VARIANT_FALSE);
+			//put_PointLabelsVisible(VARIANT_FALSE);
+			//put_LengthDisplayMode(ldmNone);
+			//put_VerticesVisible(VARIANT_FALSE);
 		}
 		else {
 			ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -1068,4 +1048,281 @@ IShape* CShapeEditor::ApplyOperation(SubjectOperation operation, int& layerHandl
 	return result;
 }
 
+// *******************************************************
+//		GetClosestPoint
+// *******************************************************
+bool CShapeEditor::GetClosestPoint(double projX, double projY, double& xResult, double& yResult)
+{
+	ShpfileType shpType = Utility::ShapeTypeConvert2D(_activeShape->GetShapeType());
+
+	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+		return false;				// TODO: multi points should be supported
+
+	CComPtr<IShape> shp = NULL;
+	get_RawData(&shp);
+	if (shp)
+	{
+		// we need ClosestPoints method to return points on contour, and not inner points		
+		if (shpType == SHP_POLYGON)
+			shp->put_ShapeType(SHP_POLYLINE);
+
+		// creating temp shape
+		VARIANT_BOOL vb;
+		long pointIndex = 0;
+		CComPtr<IShape> shp2 = NULL;
+		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp2);
+		shp2->Create(SHP_POINT, &vb);
+		shp2->AddPoint(projX, projY, &pointIndex);
+
+		CComPtr<IShape> result = NULL;
+		shp->ClosestPoints(shp2, &result);
+		if (result)
+		{
+			result->get_XY(0, &xResult, &yResult, &vb);		// 0 = point lying on the line
+			return vb ? true : false;
+		}
+	}
+	return false;
+}
+
+// *******************************************************
+//		GetClosestPart
+// *******************************************************
+int CShapeEditor::GetClosestPart(double projX, double projY, double tolerance)
+{
+	double x, y;
+	if (GetClosestPoint(projX, projY, x, y)) {
+		double dist = sqrt(pow(x - projX, 2.0) + pow(y - projY, 2.0));
+		if (dist < tolerance) {
+			return _activeShape->SelectPart(x, y);
+		}
+	}
+	return -1;
+}
+
+// *******************************************************
+//		GetClosestPoint
+// *******************************************************
+bool CShapeEditor::HandleDelete()
+{
+	if (!CheckState()) return false;
+
+	tkDeleteTarget target = _activeShape->GetDeleteTarget();
+
+	if (target == dtNone) return false;
+
+	tkMwBoolean cancel = blnFalse;
+	_mapCallback->_FireBeforeDeleteShape(target, &cancel);
+	if (cancel == blnTrue) return false;
+
+	switch (target){
+		case  dtShape:
+			if (RemoveShape())	{
+				Clear();
+				return true;
+			}
+		case dtVertex:
+			return RemoveVertex();
+		case dtPart:
+			return RemovePart();
+	}
+	return false;
+}
+
+// ************************************************************
+//		RemoveShape
+// ************************************************************
+bool CShapeEditor::RemoveShape()
+{
+	if (!CheckState()) return false;
+	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(_layerHandle);
+	if (sf) 
+	{
+		tkMwBoolean cancel = blnFalse;
+		if (cancel == blnTrue) return false;
+
+		VARIANT_BOOL vb;
+		IUndoList* undoList = _mapCallback->_GetUndoList();
+		if (undoList != NULL) 
+		{
+			undoList->Add(uoRemoveShape, _layerHandle, _shapeIndex, &vb);
+			if (vb) 
+			{
+				sf->EditDeleteShape(_shapeIndex, &vb);
+				//FireAfterShapeEdit(uoRemoveShape, layerHandle, shapeIndex);			// TODO: restore
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+// ************************************************************
+//		TrySave
+// ************************************************************
+bool CShapeEditor::TrySave()
+{
+	if (!CheckState()) return false;
+
+	bool newShape = _shapeIndex == -1;
+
+	// first check if it's enough points
+	VARIANT_BOOL enoughPoints;
+	get_HasEnoughPoints(&enoughPoints);
+	if (!enoughPoints) {
+		_mapCallback->_FireValidationResults(VARIANT_FALSE, "The shape doesn't have enough points");		// TODO: localize
+		return false;
+	}
+
+	tkCursorMode cursorMode = _mapCallback->_GetCursorMode();
+	bool subjectOperation = cursorMode == cmAddPart || cursorMode == cmRemovePart;
+
+	int layerHandle = _layerHandle, shapeIndex = _shapeIndex;
+	CComPtr<IShape> shp = NULL;
+	if (subjectOperation) {
+		SubjectOperation op = cursorMode == cmAddPart ? SubjectAddPart : SubjectClip;
+		shp = ApplyOperation(op, layerHandle, shapeIndex);
+		newShape = false;
+	}
+	else {
+		get_Shape(VARIANT_FALSE, &shp);
+	}
+
+	// does user want to validate with GEOS?
+	tkMwBoolean geosCheck = blnTrue, tryFix = blnTrue;
+	_mapCallback->_FireValidationMode(&geosCheck, &tryFix);
+
+	// if so validate and optionally fix
+	VARIANT_BOOL valid = VARIANT_TRUE;
+	if (geosCheck == blnTrue)
+	{
+		shp->get_IsValid(&valid);
+		if (!valid && tryFix == blnTrue)
+		{
+			IShape* shpNew = NULL;
+			shp->FixUp(&shpNew);
+			if (shpNew) {
+				shp = NULL;				// TODO: will it release the shape?
+				shp = shpNew;
+				valid = true;
+			}
+		}
+
+		// report results back to user
+		CComBSTR reason;
+		if (!valid) {
+			shp->get_IsValidReason(&reason);
+		}
+		else {
+			reason = ::SysAllocString(L"");
+		}
+		USES_CONVERSION;
+		_mapCallback->_FireValidationResults(valid, OLE2A(reason));
+	}
+
+	if (!valid) {
+		return false;
+	}
+
+	// now let the user check custom validation rules
+	if (valid) {
+		tkMwBoolean cancel = blnFalse;
+		_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
+		if (cancel == blnTrue) {
+			return false;
+		}
+	}
+
+	//finally ready to save	
+	CComPtr<IShapefile> sf = NULL;
+	sf = _mapCallback->_GetShapefile(layerHandle);
+
+	if (!sf) {
+		// TODO: check it earlier on
+		return false;
+	}
+
+	long numShapes;
+	sf->get_NumShapes(&numShapes);
+
+	IUndoList* undoList = _mapCallback->_GetUndoList();
+
+	VARIANT_BOOL vb;
+	if (newShape) {
+		undoList->Add(uoAddShape, (long)layerHandle, (long)numShapes, &vb);
+	}
+
+	if (subjectOperation) {
+		undoList->Add(uoEditShape, (long)layerHandle, (long)shapeIndex, &vb);
+	}
+
+	// add new shape
+	if (newShape) {
+		sf->EditInsertShape(shp, &numShapes, &vb);
+		shapeIndex = numShapes;
+	}
+	else {
+		sf->EditUpdateShape(shapeIndex, shp, &vb);
+	}
+
+	Clear();
+
+	// let the user set new attributes
+	_mapCallback->_FireAfterShapeEdit(uoEditShape, layerHandle, shapeIndex);
+	return true;
+}
+
+// ************************************************************
+//		RestoreState
+// ************************************************************
+bool CShapeEditor::RestoreState(IShape* shp, long layerHandle, long shapeIndex)
+{
+	bool newShape = layerHandle != _layerHandle || shapeIndex != _shapeIndex;
+	bool hasShape = _layerHandle != -1;
+
+	if (hasShape && newShape) {
+		if (!TrySave())
+			return false;
+	}
+	
+	if (newShape) {
+		Clear();
+		VARIANT_BOOL vb;
+		StartEdit(layerHandle, shapeIndex, &vb);
+		if (!vb) return false;
+	}
+	
+	SetShape(shp);
+	_mapCallback->_SetMapCursor(cmEditShape);
+	return true;
+}
+
+// ***************************************************************
+//		HandleProjPointAdd()
+// ***************************************************************
+void CShapeEditor::HandleProjPointAdd(double projX, double projY)
+{
+	double pixelX, pixelY;
+	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
+	_activeShape->AddPoint(projX, projY, pixelX, pixelY);
+	
+	// TODO: revisit; isn't it better to set it on changing of map cursor
+	put_EditorState(_layerHandle != -1 ? EditorCreation : EditorCreationUnbound);    
+}
+
+// ***************************************************************
+//		HasSubjectShape()
+// ***************************************************************
+bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
+{
+	for (size_t i = 0; i < _subjects.size(); i++) 
+	{
+		int handle, index;
+		_subjects[i]->get_LayerHandle(&handle);
+		_subjects[i]->get_ShapeIndex(&index);
+		if (LayerHandle == handle && ShapeIndex == index)
+			return true;
+	}
+	return false;
+}
 

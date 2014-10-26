@@ -1,6 +1,6 @@
 // ShapeEditor.h : Declaration of the CShapeEditor
 #pragma once
-#include "ShapeEditorBase.h"
+#include "EditorBase.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -16,6 +16,7 @@ public:
 	CShapeEditor()
 	{
 		_activeShape = new EditorBase();
+		_activeShape->AreaDisplayMode = admNone;
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
 		USES_CONVERSION;
@@ -28,6 +29,7 @@ public:
 		_snapBehavior = sbSnapByDefault;
 		_state = EditorEmpty;
 		_mapCallback = NULL;
+		_isSubjectShape = false;
 	}
 	~CShapeEditor()
 	{
@@ -72,7 +74,7 @@ public:
 	STDMETHOD(put_CreationMode)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ShapeType)(ShpfileType* retVal);
 	STDMETHOD(put_ShapeType)(ShpfileType newVal);
-	STDMETHOD(AddPoint)(double xProj, double yProj);
+	//STDMETHOD(AddPoint)(double xProj, double yProj);
 	STDMETHOD(SetShape)(IShape* shp);
 	STDMETHOD(get_Shape)(VARIANT_BOOL fixup, IShape** retVal);
 	STDMETHOD(get_LayerHandle)(int* retVal);
@@ -132,9 +134,9 @@ private:
 	int _layerHandle;
 	int _shapeIndex;
 	long _lastErrorCode;
-	vector<IShape*> _undoList;
 	tkShapeEditorState _state;
-	vector<IShapeEditor*> _subjects;
+	vector<CShapeEditor*> _subjects;
+	bool _isSubjectShape;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
@@ -146,16 +148,28 @@ public:
 		_mapCallback = callback;
 	}
 
+	EditorBase* GetActiveShape() { return _activeShape; }
 	void DiscardState();
 	void SaveState();
-	EditorBase* GetBase() { return _activeShape; }
 	void MoveShape(double offsetX, double offsetY);
+	void MovePart(double offsetX, double offsetY);
 	bool InsertVertex(double xProj, double yProj);
 	bool RemoveVertex();
-	vector<IShape*> GetUndoList() { return _undoList; }
+	bool RemovePart();
 	bool CheckState();
-	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, OffsetType offsetType, int screenOffsetX, int screenOffsetY);
+	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX, int screenOffsetY);
 	IShape* ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex);
 	IShape* GetShape(long layerHandle, long shapeIndex);
+	bool GetClosestPoint(double projX, double projY, double& xResult, double& yResult);
+	bool HandleDelete();
+	bool RemoveShape();
+	int GetClosestPart(double projX, double projY, double tolerance);
+	bool RestoreState(IShape* shp, long layerHandle, long shapeIndex);
+	bool TrySave();
+	void HandleProjPointAdd(double projX, double projY);
+	void SetIsSubject(bool value) {
+		_isSubjectShape = value;
+	}
+	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

@@ -269,8 +269,6 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "ZoomBarMinZoom", dispidZoomBarMinZoom, GetZoomBarMinZoom, SetZoomBarMinZoom, VT_I4)
 	DISP_PROPERTY_EX_ID(CMapView, "ZoomBarMaxZoom", dispidZoomBarMaxZoom, GetZoomBarMaxZoom, SetZoomBarMaxZoom, VT_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "GetLayerVisibleAtCurrentScale", dispidLayerVisibleAtCurrentScale, GetLayerVisibleAtCurrentScale, SetNotSupported, VT_BOOL, VTS_I4)
-	DISP_FUNCTION_ID(CMapView, "UndoEdit", dispidUndoEdit, UndoEdit, VT_BOOL, VTS_NONE)
-	DISP_FUNCTION_ID(CMapView, "RedoEdit", dispidRedoEdit, RedoEdit, VT_BOOL, VTS_NONE)
 	DISP_PROPERTY_EX_ID(CMapView, "UndoList", dispidUndoList, GetUndoList, SetNotSupported, VT_DISPATCH)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

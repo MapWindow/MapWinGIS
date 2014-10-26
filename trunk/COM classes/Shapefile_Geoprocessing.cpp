@@ -29,7 +29,7 @@
 #include "FieldStatOperations.h"
 #include "Shape.h"
 #include "ColoringGraph.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 
 #ifdef SERIALIZE_POLYGONS
 	#include <fstream>
@@ -3808,7 +3808,7 @@ double CalcMinAngle(GEOSGeometry* geom, double& xCent, double& yCent)
 			{
 				x -= xCent;
 				y -= yCent;
-				double angle = GetPointAngle(x, y);
+				double angle = GeometryHelper::GetPointAngle(x, y);
 				if (angle < minAngle)
 					minAngle = angle;
 			}

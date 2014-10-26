@@ -154,6 +154,7 @@ enum DraggingOperation
 	DragZoombox = 3,
 	DragMoveShape = 4,
 	DragMoveVertex = 5,
+	DragMovePart = 6,
 };
 
 enum TileProjectionState
@@ -177,13 +178,6 @@ enum LayerSelector
 	slctInteractiveEditing = 3,
 };
 
-enum OffsetType
-{
-	OffsetNone = 0,
-	OffsetShape = 1,
-	OffsetVertex = 2,
-};
-
 enum MouseTolerance
 {
 	ToleranceSelect = 0,
@@ -203,6 +197,13 @@ enum PointPart
 	PartNone = 0,
 	PartBegin = 1,
 	PartEnd = 2,
+};
+
+enum EditorDeleteResult
+{
+	DeleteNone = 0,
+	DeleteShape = 1,
+	Delete
 };
 
 # endif

@@ -27,7 +27,7 @@
 #include "DrawingOptions.h"
 #include "Image.h"
 #include "ImageAttributes.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "PointSymbols.h"
 #include "macros.h"
 

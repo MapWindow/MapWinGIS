@@ -110,6 +110,7 @@ struct MeasurePoint
 		pnt2.y = y;
 		pnt2.Proj = Proj;
 	}
+	MeasurePoint() : Part(PartNone) {}
 };
 
 struct OgrUpdateError

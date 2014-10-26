@@ -173,10 +173,12 @@
     <ClInclude Include="COM classes\UndoList.h" />
     <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Processing\GeometryHelper.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
+    <ClInclude Include="Shapefile\EditorBase.h" />
+    <ClInclude Include="Shapefile\GeoShape.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
-    <ClInclude Include="Shapefile\ShapeEditorBase.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -344,7 +346,6 @@
     <ClInclude Include="Processing\ClipperConverter.h" />
     <ClInclude Include="Processing\Expression.h" />
     <ClInclude Include="Processing\GeometryConverter.h" />
-    <ClInclude Include="Processing\GeometryOperations.h" />
     <ClInclude Include="Processing\JenksBreaks.h" />
     <ClInclude Include="Processing\PointInPolygon.h" />
     <ClInclude Include="Processing\Projections.h" />
@@ -389,6 +390,7 @@
     <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="Control\Map_Dynamic.cpp" />
     <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
@@ -471,7 +473,6 @@
     <ClCompile Include="Control\Map_ImageGrouping.cpp" />
     <ClCompile Include="Control\Map_Labels.cpp" />
     <ClCompile Include="Control\Map_Layer.cpp" />
-    <ClCompile Include="Control\Map_Measuring.cpp" />
     <ClCompile Include="Control\Map_Obsolete.cpp" />
     <ClCompile Include="Control\Map_Projection.cpp" />
     <ClCompile Include="Control\Map_Properties.cpp" />
@@ -481,13 +482,15 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
+    <ClCompile Include="Processing\GeometryHelper.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Shapefile\ActiveShape.cpp" />
+    <ClCompile Include="Shapefile\EditorBase.cpp" />
+    <ClCompile Include="Shapefile\GeoShape.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
-    <ClCompile Include="Shapefile\ShapeEditorBase.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -651,7 +654,6 @@
     <ClCompile Include="Processing\ClipperConverter.cpp" />
     <ClCompile Include="Processing\Expression.cpp" />
     <ClCompile Include="Processing\GeometryConverter.cpp" />
-    <ClCompile Include="Processing\GeometryOperations.cpp" />
     <ClCompile Include="Processing\JenksBreaks.cpp" />
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />

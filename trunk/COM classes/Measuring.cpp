@@ -207,7 +207,8 @@ STDMETHODIMP CMeasuring::Clear()
 STDMETHODIMP CMeasuring::get_SegmentLength(int segmentIndex, double* retVal) 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _measuring->GetSegmentLength(segmentIndex);
+	long errorCode = tkNO_ERROR;
+	*retVal = _measuring->GetSegmentLength(segmentIndex, errorCode);
 	return S_OK;
 }
 
@@ -237,7 +238,6 @@ STDMETHODIMP CMeasuring::get_IsUsingEllipsoid(VARIANT_BOOL* retVal)
 	*retVal = _measuring->GetTransformationMode() != tmNotDefined;
 	return S_OK;
 }
-
 
 // *******************************************************
 //		AreaDisplayMode()

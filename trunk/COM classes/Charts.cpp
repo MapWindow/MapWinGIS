@@ -27,7 +27,7 @@
 #include "Charts.h"
 #include "Shapefile.h"
 #include "macros.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "Templates.h"
 #include "CollisionList.h"
 #include "Chart.h"
@@ -1335,7 +1335,7 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 		if ((*data)[i]->chart->isDrawn && (*data)[i]->chart->frame != NULL)
 		{
 			CRect* frame = (*data)[i]->chart->frame;
-			tkExtentsRelation relation  = RelateExtents(box, *frame);
+			tkExtentsRelation relation = GeometryHelper::RelateExtents(box, *frame);
 			if ((SelectMode == INTERSECTION) && (relation != erNone))
 			{
 				results.push_back(i);

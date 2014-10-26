@@ -576,9 +576,6 @@
     <ClInclude Include="Processing\GeometryConverter.h">
       <Filter>Processing\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Processing\GeometryOperations.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Processing\JenksBreaks.h">
       <Filter>Processing\Headers</Filter>
     </ClInclude>
@@ -726,14 +723,20 @@
     <ClInclude Include="Tiles\LoadingTask.h">
       <Filter>Tiles\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\ShapeEditorBase.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="COM classes\ShapeEditor.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
     <ClInclude Include="Control\MapViewCallback.h">
       <Filter>Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeometryHelper.h">
+      <Filter>Processing\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\EditorBase.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\GeoShape.h">
+      <Filter>Shapefile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -978,9 +981,6 @@
       <Filter>Control</Filter>
     </ClCompile>
     <ClCompile Include="Control\Map_Layer.cpp">
-      <Filter>Control</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\Map_Measuring.cpp">
       <Filter>Control</Filter>
     </ClCompile>
     <ClCompile Include="Control\Map_Obsolete.cpp">
@@ -1469,9 +1469,6 @@
     <ClCompile Include="Processing\GeometryConverter.cpp">
       <Filter>Processing\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\GeometryOperations.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Processing\JenksBreaks.cpp">
       <Filter>Processing\Source</Filter>
     </ClCompile>
@@ -1554,11 +1551,20 @@
     <ClCompile Include="Tiles\LoadingTask.cpp">
       <Filter>Tiles\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\ShapeEditorBase.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="COM classes\ShapeEditor.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeometryHelper.cpp">
+      <Filter>Processing\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\EditorBase.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\GeoShape.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Dynamic.cpp">
+      <Filter>Control</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

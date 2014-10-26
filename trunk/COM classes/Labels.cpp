@@ -24,7 +24,7 @@
  // lsu: jan 2010 - created the file.
 
 #include "stdafx.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "LabelCategory.h"
 #include "LabelClass.h"
 #include "Labels.h"
@@ -734,7 +734,7 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 				if (lbl->horizontalFrame)
 				{
 					CRect* frame = lbl->horizontalFrame;
-					tkExtentsRelation relation  = RelateExtents(box, *frame);
+					tkExtentsRelation relation = GeometryHelper::RelateExtents(box, *frame);
 					if ((SelectMode == INTERSECTION) && (relation != erNone))
 					{
 						indices.push_back(i);
@@ -752,7 +752,7 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 					//if (frame ==  NULL)
 					//	continue;
 
-					tkExtentsRelation relation  = RelateExtents(*frame->BoundingBox(), box);
+					tkExtentsRelation relation = GeometryHelper::RelateExtents(*frame->BoundingBox(), box);
 					if (relation == erNone) 
 					{
 						continue;

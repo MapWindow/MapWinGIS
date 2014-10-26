@@ -22,6 +22,7 @@ public:
 		_lastErrorCode = tkNO_ERROR;
 		_position = -1;
 		_batchId = EMPTY_BATCH_ID;
+		_shortcutKey = usCtrlZ;
 	}
 	~CUndoList()
 	{
@@ -60,12 +61,14 @@ public:
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
 	STDMETHOD(Clear)();
-	STDMETHOD(AddSubOperation)(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, IShape* shapeData, VARIANT_BOOL* retVal);
 	STDMETHOD(GetLastId)(LONG* retVal);
+	STDMETHOD(get_ShortcutKey)(tkUndoShortcut* pVal);
+	STDMETHOD(put_ShortcutKey)(tkUndoShortcut newVal);
 public:
 	void SetMapCallback(IMapViewCallback* callback){
 		_mapCallback = callback;
 	}
+	bool DiscardOne();
 
 private:
 	struct UndoListItem
@@ -76,10 +79,9 @@ private:
 		tkUndoOperation Operation;
 		IShape* Shape;
 		TableRow* Row;
-		bool Undone;
 
 		UndoListItem(int id, long layerHandle, long shapeIndex, tkUndoOperation operation)
-			: Undone(false), Shape(NULL), Row(NULL), BatchId(id), LayerHandle(layerHandle), ShapeIndex(shapeIndex), Operation(operation)
+			: Shape(NULL), Row(NULL), BatchId(id), LayerHandle(layerHandle), ShapeIndex(shapeIndex), Operation(operation)
 		{
 			
 		}
@@ -99,19 +101,18 @@ private:
 	IMapViewCallback* _mapCallback;
 	int _batchId;
 	int _position;
+	tkUndoShortcut _shortcutKey;
 
 	bool UndoSingleItem(UndoListItem* item);
-	bool CopyShapeState(long layerHandle, long shapeIndex, UndoListItem* item);
+	bool CopyShapeState(long layerHandle, long shapeIndex, bool copyAttributes, UndoListItem* item);
 	void TrimList();
 	void ErrorMessage(long ErrorCode);
 	bool CheckState();
-	int NextId() { 
-		return ++g_UniqueId;
-	}
+	int NextId() { return ++g_UniqueId;	}
 	bool CheckShapeIndex(long layerHandle, LONG shapeIndex);
 	IShapefile* GetShapefile(long layerHandle);
-	
-public:
-	
+	void ZoomToShape(VARIANT_BOOL zoomToShape, int itemIndex);
+	IShape* GetCurrentState(long layerHandle, long shapeIndex);
+	bool ShapeInEditor(long layerHandle, long shapeIndex);
 };
 OBJECT_ENTRY_AUTO(__uuidof(UndoList), CUndoList)

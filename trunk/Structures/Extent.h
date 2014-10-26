@@ -71,6 +71,11 @@ public:
 		return (retVal.left <= retVal.right) && (retVal.top >= retVal.bottom);
 	}
 
+	bool Extent::Intersects(Extent& ext)
+	{
+		return !(this->right < ext.left || this->left  > ext.right || this->bottom > ext.top || this->top < ext.bottom);
+	}
+
 	bool Extent::Within(Extent& ext)
 	{
 		return this->left > ext.left && this->right < ext.right && this->top < ext.top && this->bottom > ext.bottom;
@@ -99,6 +104,10 @@ public:
 		right = xCent + dx;
 		bottom = yCent - dy;
 		top = yCent + dy;
+	}
+
+	Point2D GetCenter () {
+		return Point2D((left + bottom) / 2.0, (top + right)/2.0);
 	}
 };
 

@@ -28,7 +28,8 @@
 # include "ImageGroup.h"
 # include "CollisionList.h"
 # include "MeasuringBase.h"
-# include "ShapeEditorBase.h"
+# include "EditorBase.h"
+# include "ShapeEditor.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -589,8 +590,6 @@ public:
 	afx_msg long GetZoomBarMaxZoom();
 	afx_msg void SetZoomBarMaxZoom(long newVal);
 	afx_msg VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
-	afx_msg VARIANT_BOOL UndoEdit();
-	afx_msg VARIANT_BOOL RedoEdit();
 	afx_msg IUndoList* GetUndoList();
 	#pragma endregion
 
@@ -646,6 +645,8 @@ public:
 		{ FireEvent(eventidValidationMode, EVENT_PARAM(VTS_PI4 VTS_PI4), GeosCheck, TryFix);}
 	void FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage)
 		{ FireEvent(eventidValidationResults, EVENT_PARAM(VTS_BOOL VTS_BSTR), Success, ErrorMessage);}
+	void FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel)
+		{FireEvent(eventidBeforeDeleteShape, EVENT_PARAM(VTS_I4 VTS_PI4), target, cancel);}
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -755,7 +756,7 @@ public:
 	// ---------------------------------------------
 	IFileManager* _fileManager;
 	IMeasuring* _measuring;
-	IShapeEditor* _shapeEditor;
+	CShapeEditor* _shapeEditor;
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
 	IUndoList* _undoList;
@@ -922,7 +923,7 @@ private:
 	//IPoint* GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
 	//void DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
 	//void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, double totalLength, int segmentIndex);
-	void DrawCoordinatesToScreenBuffer(Gdiplus::Graphics* g);
+	void DrawCoordinates(Gdiplus::Graphics* g);
 	void DrawScaleBar(Gdiplus::Graphics* g);
 	bool HasDrawingData(tkDrawingDataAvailable type);
 	void DrawTiles(Gdiplus::Graphics* g);
@@ -1021,7 +1022,7 @@ private:
 	void UpdateTileBuffer(CDC* dc, bool zoomingAnimation);
 	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target, bool zoomingAnimation);
 	void TurnOffPanning();
-	void DrawZoomboxToScreenBuffer(Gdiplus::Graphics* g);
+	void DrawZoombox(Gdiplus::Graphics* g);
 	bool CheckLayerProjection( Layer* layer );
 	void GrabLayerProjection( Layer* layer );
 	bool HaveDataLayersWithinView();
@@ -1043,14 +1044,10 @@ private:
 	bool SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex);
 	bool SetShapeEditor(long layerHandle);
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
-	bool TryAddVertex(double projX, double projY);
 	int AddLayerCore(Layer* layer);
 	
 	// shapefile editor
 	bool ChooseEditLayer(long x, long y);
-	tkMwBoolean DoFireValidateShape();
-	void DoFireAfterShapeEdit();
-	bool TrySaveShapeEditor();
 	void HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl);
 	void HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl);
 	IShapefile* GetShapeEditorShapefile();
@@ -1064,10 +1061,12 @@ private:
 	VARIANT_BOOL ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_BOOL ifOutsideOnly = VARIANT_TRUE);
 	void SetExtentsWithPadding(Extent extents);
 	void HandleLButtonDownSelection(CPoint& point, long vbflags);
+	void ZoomToEditor();
 #pragma endregion
 
 public:
 	// limited interface for callback from related classes
+	virtual IUndoList* _GetUndoList() { return _undoList; }
 	virtual IShapefile* _GetShapefile(LONG layerHandle) { return GetShapefile(layerHandle); }
 	virtual IShapeEditor* _GetShapeEditor() {return _shapeEditor; }
 	virtual ICallback* _GetGlobalCallback() {return _globalCallback; }
@@ -1075,14 +1074,19 @@ public:
 	virtual IGeoProjection* _GetWgs84Projection() { return GetWgs84Projection(); }
 	virtual IGeoProjection* _GetMapProjection() {return GetMapProjection(); }
 	virtual tkTransformationMode _GetTransformationMode() { return _transformationMode; }
-	void CMapView::_ProjectionToPixel(double projX, double projY, double* pixelX, double* pixelY)
-	{ 
-		ProjectionToPixel(projX, projY, *pixelX, *pixelY); 
-	}
-	void CMapView::_PixelToProjection(double pixelX, double pixelY, double* projX, double* projY)
-	{ 
-		PixelToProjection(pixelX, pixelY, *projX, *projY);
-	}
+	void _ProjectionToPixel(double projX, double projY, double* pixelX, double* pixelY){ ProjectionToPixel(projX, projY, *pixelX, *pixelY); }
+	void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ 	PixelToProjection(pixelX, pixelY, *projX, *projY);}
+	void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel);}
+	tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
+	void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
+	void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(Action, LayerHandle, ShapeIndex);	}
+	void _FireValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix) { FireValidationMode(GeosCheck, TryFix); }
+	void _FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage) { FireValidationResults(Success, ErrorMessage);}
+	void _ZoomToEditor(){ ZoomToEditor(); }
+	void _SetMapCursor(tkCursorMode mode) {  UpdateCursor(mode); }
+protected:
+
+
 	
 };
 

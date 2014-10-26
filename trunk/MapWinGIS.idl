@@ -57,6 +57,30 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkUndoShortcut Enumeration **********************/
+typedef
+[
+	uuid(E6B3C9D5-576D-4E72-A025-CD6987E31982),
+	helpstring("tkUndoShortcut"),
+]
+enum tkUndoShortcut {
+	usNone = 0,
+	usCtrlZ = 1,
+}tkUndoShortcut;
+
+/************************** tkDeleteTarget Enumeration **********************/
+typedef
+[
+	uuid(CC04FEF1-11BB-420F-8C32-5B7D7806BA46),
+	helpstring("tkDeleteTarget"),
+]
+enum tkDeleteTarget {
+	dtNone = 0,
+	dtShape = 1,
+	dtPart = 2,
+	dtVertex = 3,
+}tkDeleteTarget;
+
 /************************** tkLengthDisplayMode Enumeration **********************/
 typedef
 [
@@ -102,8 +126,8 @@ typedef
 enum tkUndoOperation {
 	uoAddShape = 0,
 	uoRemoveShape = 1,
-	uoEditingShape = 2,
-	uoSubShapeEditor = 3,
+	uoEditShape = 2,
+	//uoShapeEditor = 3,
 }tkUndoOperation;
 
 /************************** tkMwBoolean Enumeration **********************/
@@ -3123,7 +3147,6 @@ enum tkScalebarUnits
 		[propget, id(16)] HRESULT RawData([out, retval] IShape** pVal);
 		[propget, id(17)] HRESULT CreationMode([out, retval]VARIANT_BOOL* retVal);
 		[propput, id(17)] HRESULT CreationMode([in]VARIANT_BOOL newVal);
-		[id(18)] HRESULT AddPoint([in]double xProj, [in]double yProj);
 		[propget, id(19)] HRESULT HasEnoughPoints([out, retval]VARIANT_BOOL* retVal);
 		[propget, id(20)] HRESULT Area([out, retval]double* retVal);
 		//[id(21)] HRESULT SetShape([in]IShape* shp);
@@ -3134,8 +3157,8 @@ enum tkScalebarUnits
 		[propput, id(24)] HRESULT LayerHandle([in]int newVal);
 		[propget, id(25)] HRESULT ShapeIndex([out, retval]int* retVal);
 		[propput, id(25)] HRESULT ShapeIndex([in]int newVal);
-		[propget, id(26)] HRESULT Visible([out, retval]VARIANT_BOOL* retVal);
-		[propput, id(26)] HRESULT Visible([in]VARIANT_BOOL newVal);
+		/*[propget, id(26)] HRESULT Visible([out, retval]VARIANT_BOOL* retVal);
+		[propput, id(26)] HRESULT Visible([in]VARIANT_BOOL newVal);*/
 		[propget, id(27)] HRESULT DrawLabelsOnly([out, retval]VARIANT_BOOL* retVal);
 		[propput, id(27)] HRESULT DrawLabelsOnly([in]VARIANT_BOOL newVal);
 		[propget, id(28)] HRESULT FillColor([out, retval] OLE_COLOR* pVal);
@@ -5570,8 +5593,9 @@ interface IUndoList : IDispatch{
 	[id(10)] HRESULT EndBatch([out, retval] LONG* retVal);
 	[id(11)] HRESULT Add([in] tkUndoOperation operationType, [in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[id(12)] HRESULT Clear();
-	[id(13)] HRESULT AddSubOperation([in] tkUndoOperation operation, [in] LONG LayerHandle, [in]LONG ShapeIndex, [in] IShape* shapeData, [out, retval] VARIANT_BOOL* retVal);
 	[id(14)] HRESULT GetLastId([out, retval] LONG* retVal);
+	[propget, id(15)] HRESULT ShortcutKey([out, retval] tkUndoShortcut* pVal);
+	[propput, id(15)] HRESULT ShortcutKey([in] tkUndoShortcut newVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -5959,8 +5983,6 @@ library MapWinGIS
 			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
 			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(238), propput] void GetLayerVisibleAtCurrentScale(LONG LayerHandle, VARIANT_BOOL newVal);
-			[id(239)] VARIANT_BOOL UndoEdit();
-			[id(240)] VARIANT_BOOL RedoEdit();
 			//}}AFX_ODL_METHOD
 	};
 
@@ -5988,6 +6010,7 @@ library MapWinGIS
 			// NOTE - ClassWizard will maintain event information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_EVENT(CMapView)
+			[id(DISPID_DBLCLICK)] void DblClick(void);
 			[id(1)] void MouseDown(short Button, short Shift, long x, long y);
 			[id(2)] void MouseUp(short Button, short Shift, long x, long y);
 			[id(3)] void MouseMove(short Button, short Shift, long x, long y);
@@ -6009,8 +6032,8 @@ library MapWinGIS
 			[id(19)] void NewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
 			[id(20)] void ValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix);
 			[id(21)] void ValidationResults(VARIANT_BOOL Success, BSTR ErrorMessage);
-			[id(DISPID_DBLCLICK)] void DblClick(void);
-	//}}AFX_ODL_EVENT
+			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);
+		//}}AFX_ODL_EVENT
 	};
 	[
 		object,

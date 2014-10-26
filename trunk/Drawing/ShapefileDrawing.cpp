@@ -33,7 +33,7 @@
 #include "TableClass.h"
 #include "ShapefileReader.h"
 #include "Shape.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 #include "macros.h"
 #include "PointSymbols.h"
 #include "ShapefileCategories.h"
@@ -1055,7 +1055,7 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 {
 	ASSERT(_dc == NULL);
 	
-	if (_shptype == SHP_POLYLINE && options->linesVisible == false)
+	if (_shptype == SHP_POLYLINE && !options->linesVisible && !options->verticesVisible)
 		return;
 	
 	double xMin, xMax, yMin, yMax;
@@ -1788,11 +1788,11 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 								float angle = 0.0f;
 								if (orientation == lorParallel )
 								{
-									angle = (float)(GetPointAngle(dx, dy) / pi_ * 180.0 - 90.0);
+									angle = (float)(GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0 - 90.0);
 								}
 								else if (orientation == lorPerpindicular)
 								{
-									angle = (float)(GetPointAngle(dx, dy) / pi_ * 180.0); //+ 90.0);
+									angle = (float)(GeometryHelper::GetPointAngle(dx, dy) / pi_ * 180.0); //+ 90.0);
 								}
 								
 								//int size = (int)markerSize/2;

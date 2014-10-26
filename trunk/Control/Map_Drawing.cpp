@@ -9,7 +9,7 @@
 #include "ChartDrawing.h"
 #include "Image.h"
 #include "Measuring.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 
 #pragma region OnDraw
 // ***************************************************************
@@ -285,7 +285,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	// -------------------------------------------
 	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
 	{
-		GetMeasuringBase()->DrawData(g, false, OffsetNone);
+		GetMeasuringBase()->DrawData(g, false, DragNone);
 	}
 	
 	// -------------------------------------------

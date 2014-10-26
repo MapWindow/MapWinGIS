@@ -130,8 +130,10 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("NewShape", eventidNewShape, FireNewShape, VTS_I4 VTS_I4 VTS_PI4 VTS_PI4)
 	EVENT_CUSTOM_ID("ValidationMode", eventidValidationMode, FireValidationMode, VTS_PI4 VTS_PI4)
 	EVENT_CUSTOM_ID("ValidationResults", eventidValidationResults, FireValidationResults, VTS_BOOL VTS_BSTR)
+	EVENT_CUSTOM_ID("BeforeDeleteShape", eventidBeforeDeleteShape, FireBeforeDeleteShape, VTS_I4 VTS_PI4)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
+	
 END_EVENT_MAP()
 
 #pragma region Constructor/destructor
@@ -262,7 +264,7 @@ void CMapView::Startup()
 	InitProjections();
 	
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
-	((CShapeEditor*)_shapeEditor)->SetMapCallback(this);
+	_shapeEditor->SetMapCallback(this);
 
 	if (_panningInertia != csFalse)
 		_panningLock.Unlock();
@@ -781,7 +783,7 @@ MeasuringBase* CMapView::GetMeasuringBase()
 // ***************************************************************
 EditorBase* CMapView::GetEditorBase()
 {
-	return ((CShapeEditor*)_shapeEditor)->GetBase();
+	return _shapeEditor->GetActiveShape();
 }
 
 // ***************************************************************
@@ -808,4 +810,36 @@ VARIANT_BOOL CMapView::GetLayerVisibleAtCurrentScale(LONG LayerHandle)
 		return l->IsVisible(scale, zoom) ? VARIANT_TRUE: VARIANT_FALSE;
 	}
 	return VARIANT_FALSE;
+}
+
+// ***************************************************************
+//	ZoomToEditor
+// ***************************************************************
+void CMapView::ZoomToEditor()
+{
+	CComPtr<IShape> shp = NULL;
+	_shapeEditor->get_RawData(&shp);
+	if (shp) {
+		CComPtr<IExtents> ext = NULL;
+		shp->get_Extents(&ext);
+		if (ext) {
+			double xMin, xMax, yMin, yMax, zMin, zMax;
+			ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+			Extent temp(xMin, xMax, yMin, yMax);
+			if (_extents.Intersects(temp)) return;
+
+			CComPtr<IPoint> pnt = NULL;
+			ext->get_Center(&pnt);
+			if (pnt) {
+				double x, y;
+				pnt->get_X(&x);
+				pnt->get_Y(&y);
+				double ratio = 2.0;   // increase the size
+				double w = _extents.Width() * ratio;
+				double h = _extents.Height() * ratio;
+				Extent newExt(x - w/2.0, x + w/2.0, y - h/2.0, y + h / 2.0);
+				SetExtentsWithPadding(newExt);
+			}
+		}
+	}
 }

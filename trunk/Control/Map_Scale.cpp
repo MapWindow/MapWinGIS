@@ -963,7 +963,7 @@ VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_B
 		sf->Release();
 
 		Extent extNew(left, right, bottom, top);
-		if (ifOutsideOnly && extNew.Within(_extents)){
+		if (ifOutsideOnly && extNew.Intersects(_extents)){
 			return VARIANT_FALSE;
 		}
 

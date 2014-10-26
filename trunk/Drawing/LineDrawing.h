@@ -26,7 +26,7 @@
 #pragma once
 #include "ShapeDrawingOptions.h"
 #include "LinePattern.h"
-#include "GeometryOperations.h"
+#include "GeometryHelper.h"
 
 using namespace Gdiplus;
 

@@ -1322,7 +1322,11 @@ bool CMapView::UpdateHotTracking(CPoint point)
 		HotTrackingInfo* info = FindShapeAtScreenPoint(point, slctHotTracking);
 		if (info)
 		{
-			sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);
+			if (_shapeEditor->HasSubjectShape(info->LayerHandle, info->ShapeId))
+				sameShape = true;
+			else 
+				sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);
+
 			if (!sameShape)
 			{
 				IShape* shape = info->Shape;
@@ -1332,7 +1336,7 @@ bool CMapView::UpdateHotTracking(CPoint point)
 					shape->Clone(&shpClone);
 
 					if (!_hotTracking.Shapefile)
-						CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&(_hotTracking.Shapefile));
+						GetUtils()->CreateInstance(idShapefile, (IDispatch**)&(_hotTracking.Shapefile));
 					else
 						_hotTracking.Shapefile->Close(&vb);
 

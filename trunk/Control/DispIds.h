@@ -4,8 +4,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	// **ClassWizard is a thing of the past... feel free to edit this code.
 	dispidUndoList = 241L,
-	dispidRedoEdit = 240L,
-	dispidUndoEdit = 239L,
 	dispidLayerVisibleAtCurrentScale = 238L,
 	dispidAddLayerFromDatabase = 237L,
 	dispidOgrLayer = 236L,
@@ -260,6 +258,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidNewShape = 19L,
 	eventidValidationMode = 20L,
 	eventidValidationResults = 21L,
+	eventidBeforeDeleteShape = 22L,
 	
 	//}}AFX_DISP_ID
 };
