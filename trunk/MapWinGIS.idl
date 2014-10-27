@@ -3181,8 +3181,8 @@ enum tkScalebarUnits
 		[propget, id(33)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 		[propget, id(34)] HRESULT SnapTolerance([out, retval] DOUBLE* pVal);
 		[propput, id(34)] HRESULT SnapTolerance([in] DOUBLE newVal);
-		[propget, id(35)] HRESULT HotTracking([out, retval] VARIANT_BOOL* pVal);
-		[propput, id(35)] HRESULT HotTracking([in] VARIANT_BOOL newVal);
+		[propget, id(35)] HRESULT HighlightShapes([out, retval] VARIANT_BOOL* pVal);
+		[propput, id(35)] HRESULT HighlightShapes([in] VARIANT_BOOL newVal);
 		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
 		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
 		[propget, id(37)] HRESULT EditorState([out, retval] tkShapeEditorState* pVal);

@@ -34,7 +34,7 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	DISP_PROPERTY_NOTIFY(CMapView, "BackColor", m_backColor, OnBackColorChanged, VT_COLOR)
 	DISP_PROPERTY_NOTIFY(CMapView, "ZoomPercent", m_zoomPercent, OnZoomPercentChanged, VT_R8)
-	DISP_PROPERTY_NOTIFY(CMapView, "CursorMode", m_cursorMode, OnCursorModeChanged, VT_I2)
+	DISP_PROPERTY_EX(CMapView, "CursorMode", GetCursorMode, SetCursorMode, VT_I2)
 	DISP_PROPERTY_NOTIFY(CMapView, "MapCursor", m_mapCursor, OnMapCursorChanged, VT_I2)
 	DISP_PROPERTY_NOTIFY(CMapView, "UDCursorHandle", m_uDCursorHandle, OnUDCursorHandleChanged, VT_I4)
 	DISP_PROPERTY_NOTIFY(CMapView, "SendMouseDown", m_sendMouseDown, OnSendMouseDownChanged, VT_BOOL)

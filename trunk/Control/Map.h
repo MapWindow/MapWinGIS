@@ -108,9 +108,6 @@ public:
 	double m_zoomPercent;
 	afx_msg void OnZoomPercentChanged();
 
-	short m_cursorMode;
-	afx_msg void OnCursorModeChanged();
-
 	short m_mapCursor;
 	afx_msg void OnMapCursorChanged();
 
@@ -166,7 +163,10 @@ public:
 
 	// Regular properties
 	#pragma region Regular properties
-	
+
+	afx_msg tkCursorMode GetCursorMode();
+	afx_msg void SetCursorMode(tkCursorMode mode);
+
 	afx_msg BSTR GetVersionNumber(void);
 	//afx_msg void SetVersionNumber(LONG newVal);
 
@@ -678,6 +678,7 @@ public:
 	Gdiplus::Font* _fontCourier;
 	Gdiplus::Font* _fontArial;
 
+	short m_cursorMode;
 	HCURSOR _cursorPan;
 	HCURSOR _cursorZoomin;
 	HCURSOR _cursorZoomout;
@@ -1060,6 +1061,10 @@ private:
 	void SetExtentsWithPadding(Extent extents);
 	void HandleLButtonDownSelection(CPoint& point, long vbflags);
 	void ZoomToEditor();
+	void ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp);
+	void OnCursorModeChangedCore(bool clearEditor);
+	bool IsEditorCursor();
+	
 #pragma endregion
 
 public:
@@ -1081,10 +1086,8 @@ public:
 	void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage);}
 	void _ZoomToEditor(){ ZoomToEditor(); }
 	void _SetMapCursor(tkCursorMode mode) {  UpdateCursor(mode); }
-	void ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp);
+
 protected:
-
-
 	
 };
 

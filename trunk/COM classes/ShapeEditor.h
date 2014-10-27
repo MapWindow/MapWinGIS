@@ -24,7 +24,7 @@ public:
 		_layerHandle = -1;
 		_shapeIndex = -1;
 		_visible = true;
-		_hotTracking = VARIANT_TRUE;
+		_highlightShapes = VARIANT_TRUE;
 		_snapTolerance = 10;
 		_snapBehavior = sbSnapByDefault;
 		_state = EditorEmpty;
@@ -101,8 +101,8 @@ public:
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_SnapTolerance)(DOUBLE* pVal);
 	STDMETHOD(put_SnapTolerance)(DOUBLE newVal);
-	STDMETHOD(get_HotTracking)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_HotTracking)(VARIANT_BOOL newVal);
+	STDMETHOD(get_HighlightShapes)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_HighlightShapes)(VARIANT_BOOL newVal);
 	STDMETHOD(get_SnapBehavior)(tkSnapBehavior* pVal);
 	STDMETHOD(put_SnapBehavior)(tkSnapBehavior newVal);
 	STDMETHOD(get_EditorState)(tkShapeEditorState* pVal);
@@ -127,7 +127,7 @@ private:
 	BSTR _key;
 	ICallback * _globalCallback;
 	VARIANT_BOOL _visible;
-	VARIANT_BOOL _hotTracking;
+	VARIANT_BOOL _highlightShapes;
 	double _snapTolerance;
 	tkSnapBehavior _snapBehavior;
 	EditorBase* _activeShape;

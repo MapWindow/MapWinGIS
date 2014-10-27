@@ -1193,21 +1193,34 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 	{
 		if (layer->QueryShapefile(&sf))
 		{
-			VARIANT_BOOL vb;
+			VARIANT_BOOL result = VARIANT_FALSE;
 			switch (selector)
 			{
 			case slctHotTracking:
-				sf->get_HotTracking(&vb);
+				VARIANT_BOOL vb;
+				sf->get_InteractiveEditing(&vb);
+				if (vb) 
+				{
+					// only editor based highlighting in this mode
+					VARIANT_BOOL highlight;
+					_shapeEditor->get_HighlightShapes(&highlight);
+					if (IsEditorCursor() && highlight) {
+						result = VARIANT_TRUE;
+					}
+				}
+				else {
+					sf->get_HotTracking(&result);
+				}
 				break;
 			case slctInMemorySf:
-				sf->get_EditingShapes(&vb);
+				sf->get_EditingShapes(&result);
 				break;
 			case slctInteractiveEditing:
-				sf->get_InteractiveEditing(&vb);
+				sf->get_InteractiveEditing(&result);
 				break;
 			}
 			sf->Release();
-			return vb ? true : false;
+			return result ? true : false;
 		}
 	}
 	return false;

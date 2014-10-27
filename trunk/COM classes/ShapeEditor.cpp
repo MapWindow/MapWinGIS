@@ -805,18 +805,18 @@ STDMETHODIMP CShapeEditor::put_SnapTolerance(DOUBLE newVal)
 }
 
 // *******************************************************
-//		get_HotTracking()
+//		HighlightShapes()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_HotTracking(VARIANT_BOOL* pVal)
+STDMETHODIMP CShapeEditor::get_HighlightShapes(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _hotTracking;
+	*pVal = _highlightShapes;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_HotTracking(VARIANT_BOOL newVal)
+STDMETHODIMP CShapeEditor::put_HighlightShapes(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_hotTracking = newVal;
+	_highlightShapes = newVal;
 	return S_OK;
 }
 

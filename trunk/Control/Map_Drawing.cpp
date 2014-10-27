@@ -1082,23 +1082,8 @@ bool CMapView::HasImages()
 bool CMapView::HasHotTracking() 
 {
 	for(long i = _activeLayers.size() - 1; i >= 0; i-- )
-	{
-		Layer * l = _allLayers[_activeLayers[i]];
-		if( IS_VALID_PTR(l) )
-		{
-			if( l->IsShapefile())
-			{
-				IShapefile* sf = NULL;
-				l->QueryShapefile(&sf);
-				if (sf) {
-					VARIANT_BOOL vb;
-					sf->get_HotTracking(&vb);
-					sf->Release();
-					if (vb) return true;
-				}
-			}
-		}
-	}
+		if (CheckLayer(slctHotTracking, _activeLayers[i]))
+			return true;
 	return false;
 }
 

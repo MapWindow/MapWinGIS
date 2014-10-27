@@ -136,16 +136,6 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return TRUE;
 }
 
-// ***************************************************************
-//		UpdateCursor
-// ***************************************************************
-void CMapView::UpdateCursor(tkCursorMode cursor)
-{
-	m_cursorMode = cursor;
-	OnSetCursor(this,HTCLIENT,0);
-	OnCursorModeChanged();
-}
-
 // *******************************************************
 //		OnMapCursorChanged()
 // *******************************************************
@@ -154,10 +144,18 @@ void CMapView::OnMapCursorChanged()
 	OnSetCursor(this,0,0);
 }
 
-// *********************************************************
-//		OnCursorModeChanged 
-// *********************************************************
-void CMapView::OnCursorModeChanged()
+// *******************************************************
+//		GetCursorMode()
+// *******************************************************
+tkCursorMode CMapView::GetCursorMode()
+{
+	return (tkCursorMode)m_cursorMode;
+}
+
+// *******************************************************
+//		SetCursorMode()
+// *******************************************************
+void CMapView::SetCursorMode(tkCursorMode mode)
 {
 	if (_measuring)
 	{
@@ -170,22 +168,26 @@ void CMapView::OnCursorModeChanged()
 	VARIANT_BOOL empty;
 	_shapeEditor->get_IsEmpty(&empty);
 
-	if (!empty) {
-		VARIANT_BOOL vb;
-		_shapeEditor->get_CreationMode(&vb);
-		
-		if ((vb && m_cursorMode == cmEditShape) || (!vb && m_cursorMode == cmAddShape) ||
-			m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart)
-		{
-			// TODO: check if we have changes and prompt to save them			
-			_shapeEditor->Clear();
-			RedrawCore(RedrawSkipDataLayers, false, true);
-		}
+	if (!empty)
+	{
+		if (!_shapeEditor->TrySave())
+			return;	  // don't change cursor as use may loose some data
+		RedrawCore(RedrawSkipDataLayers, false, true);
 	}
 
 	if (m_cursorMode == cmAddShape) {
 		_shapeEditor->put_EditorState(EditorCreation);
 	}
+
+	m_cursorMode = mode;
+
+	OnSetCursor(this, HTCLIENT, 0);
+}
+
+// internal call; perhaps some additional logic will be needed
+void CMapView::UpdateCursor(tkCursorMode cursor)
+{
+	SetCursorMode(cursor);
 }
 
 // *********************************************************
@@ -213,4 +215,13 @@ HCURSOR CMapView::SetWaitCursor()
 	}
 
    return oldCursor;
+}
+
+// ************************************************************
+//		IsEditorCursor
+// ************************************************************
+bool CMapView::IsEditorCursor()
+{
+	return m_cursorMode == cmEditShape || m_cursorMode == cmAddShape ||
+		m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart || m_cursorMode == cmMeasure;
 }

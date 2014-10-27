@@ -333,7 +333,12 @@ STDMETHODIMP CShapefile::put_VisibilityExpression(BSTR newVal)
 STDMETHODIMP CShapefile::get_Volatile(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _volatile ? VARIANT_TRUE : VARIANT_FALSE;
+	if (_interactiveEditing) {
+		*pVal = VARIANT_TRUE;
+	}
+	else {
+		*pVal = _volatile ? VARIANT_TRUE : VARIANT_FALSE;
+	}
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Volatile(VARIANT_BOOL newVal)

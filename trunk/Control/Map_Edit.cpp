@@ -71,7 +71,7 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	{
 		_dragging.Snapped = false;
 		tkSnapBehavior behavior;
-		if (SnappingIsOn(nFlags, behavior) && _dragging.Operation == DragMoveVertex)
+		if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault && _dragging.Operation == DragMoveVertex)
 		{
 			double xFound, yFound;
 			if (this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), x, y, &xFound, &yFound)) {

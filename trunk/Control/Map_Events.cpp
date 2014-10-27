@@ -514,7 +514,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	bool shift = (nFlags & MK_SHIFT) == 0;
+	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	tkSnapBehavior behavior;
 	bool snapping = (SnappingIsOn(nFlags, behavior) && 
@@ -911,12 +911,15 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		}
 	}
 	
+	bool updateHotTracking = true;
 	bool refreshNeeded = false;
 	switch(m_cursorMode)
 	{
 		case cmZoomIn:
-			if ((nFlags & MK_LBUTTON) && _leftButtonDown)
+			if ((nFlags & MK_LBUTTON) && _leftButtonDown) {
 				refreshNeeded = true;
+				updateHotTracking = false;
+			}
 			break;
 		case cmPan:
 			if( (nFlags & MK_LBUTTON) && _leftButtonDown )
@@ -949,7 +952,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 					VARIANT_BOOL snapped = VARIANT_FALSE;
 					double x = point.x, y = point.y;
 					tkSnapBehavior behavior;
-					if (SnappingIsOn(nFlags, behavior))
+					if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault)
 					{
 						snapped = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &x, &y);
 						if (snapped) {
@@ -963,7 +966,8 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			}
 	}
 
-	if (!refreshNeeded || (m_cursorMode == cmEditShape || m_cursorMode == cmAddShape)) {
+	if (updateHotTracking) 
+	{
 		if (UpdateHotTracking(point))
 			refreshNeeded = true;
 	}
