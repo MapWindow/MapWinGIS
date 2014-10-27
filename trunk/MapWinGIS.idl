@@ -57,6 +57,18 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkEditorValidationMode Enumeration **********************/
+typedef
+[
+	uuid(2AD584B8-565E-4C31-B3C0-1E3B6470F781),
+	helpstring("tkEditorValidationMode"),
+]
+enum tkEditorValidationMode {
+	evRegular = 0,
+	evCheckWithGeos = 1,
+	evFixWithGeos = 2,
+}tkEditorValidationMode;
+
 /************************** tkUndoShortcut Enumeration **********************/
 typedef
 [
@@ -3128,7 +3140,7 @@ enum tkScalebarUnits
 		[propput, id(1)] HRESULT ShapeType([in] ShpfileType newVal);
 		[propget, id(2)] HRESULT numPoints([out, retval] long* retVal);
 		[id(3)] HRESULT get_PointXY([in]long pointIndex, [out]double* x, [out]double* y, [out, retval]VARIANT_BOOL* retVal);
-		[propget, id(4)] HRESULT Shape([in, optional, defaultvalue(-1)]VARIANT_BOOL doFixup, [out, retval] IShape** retVal);
+		[propget, id(4)] HRESULT ValidatedShape([out, retval] IShape** retVal);
 		[id(5)] HRESULT Undo([out, retval] VARIANT_BOOL* retVal);
 		[propget, id(6)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 		[propget, id(7)] HRESULT LastErrorCode([out, retval] long *pVal);
@@ -3147,9 +3159,7 @@ enum tkScalebarUnits
 		[propget, id(16)] HRESULT RawData([out, retval] IShape** pVal);
 		[propget, id(17)] HRESULT CreationMode([out, retval]VARIANT_BOOL* retVal);
 		[propput, id(17)] HRESULT CreationMode([in]VARIANT_BOOL newVal);
-		[propget, id(19)] HRESULT HasEnoughPoints([out, retval]VARIANT_BOOL* retVal);
 		[propget, id(20)] HRESULT Area([out, retval]double* retVal);
-		//[id(21)] HRESULT SetShape([in]IShape* shp);
 		[propget, id(22)] HRESULT AngleDisplayMode([out, retval]tkAngleDisplay* retVal);
 		[propput, id(22)] HRESULT AngleDisplayMode([in]tkAngleDisplay newVal);
 		[id(23)] HRESULT put_PointXY([in]long pointIndex, [in]double X, [in]double Y, [out, retval]VARIANT_BOOL* retVal);
@@ -3157,8 +3167,6 @@ enum tkScalebarUnits
 		[propput, id(24)] HRESULT LayerHandle([in]int newVal);
 		[propget, id(25)] HRESULT ShapeIndex([out, retval]int* retVal);
 		[propput, id(25)] HRESULT ShapeIndex([in]int newVal);
-		/*[propget, id(26)] HRESULT Visible([out, retval]VARIANT_BOOL* retVal);
-		[propput, id(26)] HRESULT Visible([in]VARIANT_BOOL newVal);*/
 		[propget, id(27)] HRESULT DrawLabelsOnly([out, retval]VARIANT_BOOL* retVal);
 		[propput, id(27)] HRESULT DrawLabelsOnly([in]VARIANT_BOOL newVal);
 		[propget, id(28)] HRESULT FillColor([out, retval] OLE_COLOR* pVal);
@@ -3178,7 +3186,6 @@ enum tkScalebarUnits
 		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
 		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
 		[propget, id(37)] HRESULT EditorState([out, retval] tkShapeEditorState* pVal);
-		//[propput, id(37)] HRESULT EditorState([in] tkShapeEditorState newVal);
 		[id(38)] HRESULT StartEdit([in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval]VARIANT_BOOL* retVal);
 		[id(39)] HRESULT AddSubjectShape([in] LONG LayerHandle, [in] LONG ShapeIndex, [in] VARIANT_BOOL ClearExiting, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(40)] HRESULT PointLabelsVisible([out, retval] VARIANT_BOOL* pVal);
@@ -3190,6 +3197,8 @@ enum tkScalebarUnits
 		[id(44)] HRESULT StartUnboundShape([in] ShpfileType shpType, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(45)] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
 		[propput, id(45)] HRESULT VerticesVisible([in] VARIANT_BOOL newVal);
+		[propget, id(46)] HRESULT ValidationMode([out, retval] tkEditorValidationMode* pVal);
+		[propput, id(46)] HRESULT ValidationMode([in] tkEditorValidationMode newVal);
 	};
 
 	
@@ -6030,8 +6039,7 @@ library MapWinGIS
 			[id(17)] void ValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex);
 			[id(19)] void NewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
-			[id(20)] void ValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix);
-			[id(21)] void ValidationResults(VARIANT_BOOL Success, BSTR ErrorMessage);
+			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);
 		//}}AFX_ODL_EVENT
 	};

@@ -641,10 +641,8 @@ public:
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireNewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
 		{FireEvent(eventidNewShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
-	void FireValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix)
-		{ FireEvent(eventidValidationMode, EVENT_PARAM(VTS_PI4 VTS_PI4), GeosCheck, TryFix);}
-	void FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage)
-		{ FireEvent(eventidValidationResults, EVENT_PARAM(VTS_BOOL VTS_BSTR), Success, ErrorMessage);}
+	void FireShapeValidationFailed(LPCTSTR ErrorMessage)
+		{ FireEvent(eventidShapeValidationFailed, EVENT_PARAM(VTS_BSTR), ErrorMessage);}
 	void FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel)
 		{FireEvent(eventidBeforeDeleteShape, EVENT_PARAM(VTS_I4 VTS_PI4), target, cancel);}
 
@@ -1080,10 +1078,10 @@ public:
 	tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
 	void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
 	void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(Action, LayerHandle, ShapeIndex);	}
-	void _FireValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix) { FireValidationMode(GeosCheck, TryFix); }
-	void _FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage) { FireValidationResults(Success, ErrorMessage);}
+	void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage);}
 	void _ZoomToEditor(){ ZoomToEditor(); }
 	void _SetMapCursor(tkCursorMode mode) {  UpdateCursor(mode); }
+	void ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp);
 protected:
 
 

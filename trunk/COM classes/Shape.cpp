@@ -359,53 +359,80 @@ STDMETHODIMP CShape::put_ShapeType(ShpfileType newVal)
 	return S_OK;
 }
 
-// *************************************************************
-//			get_IsValid	
-// *************************************************************
-// Checking validity of the geometry
-STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
+//*****************************************************************
+//*		ValidateBasics()
+//*****************************************************************
+bool CShape::ValidateBasics(ShapeValidityCheck& failedCheck, CString& errMsg)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = VARIANT_FALSE;
-		
-	if(_shp->get_PointCount() == 0)
+	if (_shp->get_PointCount() == 0)
 	{
-		_isValidReason = "Shape hasn't got points";
-		return S_OK;
+		errMsg = "Shape hasn't got points";
+		failedCheck = NoPoints;
+		return false;
 	}
-	
+
 	ShpfileType shptype = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
 
 	if (shptype == SHP_POLYGON || shptype == SHP_POLYLINE)
 	{
 		if (_shp->get_PartCount() == 0)
 		{
-			_isValidReason = "Shape hasn't got parts";
-			return S_OK;
+			errMsg = "Shape hasn't got parts";
+			failedCheck = NoParts;
+			return false;
 		}
 	}
-	
+
+	int minPointCount = 0;
+	if (shptype == SHP_POLYLINE) minPointCount = 2;
+	if (shptype == SHP_POLYGON) minPointCount = 4;   // including closing one
+
+	if (shptype == SHP_POLYLINE || shptype == SHP_POLYGON)
+	{
+		if (_shp->get_PointCount() < minPointCount) 
+		{
+			errMsg = "Shape doesn't have enough points for its type.";
+			failedCheck = NotEnoughPoints;
+			return false;
+		}
+		// the same check for parts
+		int beg_part, end_part;
+		for (long i = 0; i < _shp->get_PartCount(); i++)
+		{
+			beg_part = _shp->get_PartStartPoint(i);
+			end_part = _shp->get_PartEndPoint(i);
+			int count = end_part - beg_part + 1;
+			if (count < minPointCount) 
+			{
+				errMsg = "A part doesn't have enough points for a given shape type.";
+				failedCheck = EmptyParts;
+				return false;
+			}
+		}
+	}
+
 	if (shptype == SHP_POLYGON)
 	{
 		int beg_part, end_part;
 		double x1, x2, y1, y2;
 
-		for(long i = 0; i < _shp->get_PartCount(); i++)
+		for (long i = 0; i < _shp->get_PartCount(); i++)
 		{
 			beg_part = _shp->get_PartStartPoint(i);
 			end_part = _shp->get_PartEndPoint(i);
-			
+
 			_shp->get_PointXY(beg_part, x1, y1);
 			_shp->get_PointXY(end_part, x2, y2);
 
-			if (x1 != x2 || y1!= y2)
+			if (x1 != x2 || y1 != y2)
 			{
-				_isValidReason = "The first and the last point of the polygon part must be the same";
-				return S_OK;
+				errMsg = "The first and the last point of the polygon part must be the same";
+				failedCheck = FirstAndLastPointOfPartMatch;
+				return false;
 			}
 		}
 	}
-	
+
 	// checking the clockwise-order
 	if (shptype == SHP_POLYGON)
 	{
@@ -419,11 +446,27 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 				VARIANT_BOOL ret;
 				double x, y;
 				this->get_XY(0, &x, &y, &ret);
-				_isValidReason.Format("Polygon must be clockwise [%f %f]", x, y);
-				//_isValidReason = "";
-				return S_OK;
+				errMsg.Format("Polygon must be clockwise [%f %f]", x, y);
+				failedCheck = DirectionOfPolyRings;
+				return false;
 			}
 		}
+	}
+	return true;
+}
+
+// *************************************************************
+//			get_IsValid	
+// *************************************************************
+// Checking validity of the geometry
+STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	*retval = VARIANT_FALSE;
+		
+	ShapeValidityCheck validityCheck;
+	if (!ValidateBasics(validityCheck, _isValidReason)) {
+		return S_OK;
 	}
 
 	// -----------------------------------------------

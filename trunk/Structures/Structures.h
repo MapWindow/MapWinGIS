@@ -17,6 +17,16 @@ public:
 	IShape* Shape;
 	int ShapeId;
 	int LayerHandle;
+	void UpdateShapefile()
+	{
+		VARIANT_BOOL vb;
+		if (!Shapefile) {
+			CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&Shapefile);
+		}
+		else {
+			Shapefile->Close(&vb);
+		}
+	}
 	HotTrackingInfo(): Shape(NULL), Shapefile(NULL), ShapeId(-1), LayerHandle(-1) {}
 	~HotTrackingInfo()
 	{

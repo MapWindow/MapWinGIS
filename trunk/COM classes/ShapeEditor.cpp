@@ -10,7 +10,7 @@
 // *******************************************************
 //		GetShape
 // *******************************************************
-IShape* CShapeEditor::GetShape(long layerHandle, long shapeIndex)
+IShape* CShapeEditor::GetLayerShape(long layerHandle, long shapeIndex)
 {
 	if (!CheckState()) return NULL;
 	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(layerHandle);
@@ -148,67 +148,19 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 }
 
 // *******************************************************
-//		AsShape()
+//		get_ValidatedShape()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_Shape(VARIANT_BOOL geosFixup, IShape** retVal)
+STDMETHODIMP CShapeEditor::get_ValidatedShape(IShape** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
 
-	VARIANT_BOOL vb;
-	get_HasEnoughPoints(&vb);
-	if (!vb) {
-		return S_OK;
+	IShape* shp = NULL;
+	get_RawData(&shp);
+	
+	if (Validate(&shp)) {
+		*retVal = shp;
 	}
-
-	get_RawData(retVal);
-	ShpfileType shpType = _activeShape->GetShapeType();
-
-	// add the last point automatically
-	if (shpType == SHP_POLYGON)
-		((CShape*)(*retVal))->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
-
-	if (geosFixup)
-	{
-		(*retVal)->get_IsValid(&vb);
-		IShape* shpNew = NULL;
-		if (!vb) {
-			(*retVal)->FixUp(&shpNew);
-			if (shpNew)
-			{
-				(*retVal)->Release();
-				(*retVal) = shpNew;
-			}
-		}
-	}
-	return S_OK;
-}
-
-// *******************************************************
-//		HasValidShape()
-// *******************************************************
-STDMETHODIMP CShapeEditor::get_HasEnoughPoints(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-
-	ShpfileType type = Utility::ShapeTypeConvert2D(_activeShape->GetShapeType());
-	if (type == SHP_NULLSHAPE)
-	{
-		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return S_FALSE;
-	}
-
-	int pointCount = _activeShape->GetPointCount();
-	if (pointCount == 0 ||
-		(pointCount < 2 && type == SHP_POLYLINE) ||
-		(pointCount < 3 && type == SHP_POLYGON))
-	{
-		ErrorMessage(tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE);
-		return S_FALSE;
-	}
-
-	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 
@@ -296,7 +248,7 @@ STDMETHODIMP CShapeEditor::Clear()
 	if (_state == EditorEdit) {
 		CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(_layerHandle);
 		if (sf) {
-			if (!_isSubjectShape) {
+			if (ShapeShouldBeHidden()) {
 				sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
 			}
 		}
@@ -339,7 +291,7 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 			SetShape(shp);
 			_layerHandle = LayerHandle;
 			_shapeIndex = ShapeIndex;
-			if (!_isSubjectShape)
+			if (ShapeShouldBeHidden())
 				sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
 
 			CComPtr<IShapeDrawingOptions> options = NULL;
@@ -645,7 +597,6 @@ STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options)
 	_activeShape->FillColor = fillColor;
 	_activeShape->LineColor = lineColor;
 	_activeShape->LineWidth = lineWidth;
-	//_editShape->FillTransparency = (BYTE)tranparency;
 	return S_OK;
 }
 
@@ -1025,19 +976,12 @@ IShape* CShapeEditor::ApplyOperation(SubjectOperation operation, int& layerHandl
 		return NULL;
 	}
 
-	VARIANT_BOOL vb;
-	get_HasEnoughPoints(&vb);
-	if (!vb) {
-		ErrorMessage(tkNOT_ENOUGH_POINTS);
-		return NULL;
-	}
-
 	_subjects[0]->get_LayerHandle(&layerHandle);
 	_subjects[0]->get_ShapeIndex(&shapeIndex);
-	CComPtr<IShape> subject = GetShape(layerHandle, shapeIndex);
+	CComPtr<IShape> subject = GetLayerShape(layerHandle, shapeIndex);
 	
 	CComPtr<IShape> overlay = NULL;
-	get_Shape(VARIANT_FALSE, &overlay);
+	get_ValidatedShape(&overlay);
 	
 	if (!subject || !overlay) {
 		return NULL;
@@ -1169,6 +1113,72 @@ bool CShapeEditor::RemoveShape()
 }
 
 // ************************************************************
+//		Validate
+// ************************************************************
+bool CShapeEditor::Validate(IShape** shp)
+{
+	ShpfileType shpType;
+	(*shp)->get_ShapeType(&shpType);
+	
+	long numPoints;
+	(*shp)->get_NumPoints(&numPoints);
+
+	// close the poly automatically
+	if (shpType == SHP_POLYGON)
+		((CShape*)(*shp))->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
+
+	ShapeValidityCheck validityCheck;
+	CString errMsg;
+	if (!((CShape*)(*shp))->ValidateBasics(validityCheck, errMsg))
+	{
+		_mapCallback->_FireShapeValidationFailed(errMsg);
+		return false;
+	}
+	return ValidateWithGeos(shp);
+}
+
+// ************************************************************
+//		ValidateWithGeos
+// ************************************************************
+bool CShapeEditor::ValidateWithGeos(IShape** shp)
+{
+	VARIANT_BOOL valid = VARIANT_TRUE;
+
+	ShpfileType shpType;
+	(*shp)->get_ShapeType(&shpType);
+	Utility::ShapeTypeConvert2D(shpType);
+
+	bool skipGeosCheck = false;
+	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT || shpType == SHP_POLYLINE)
+		skipGeosCheck = true;     // there is hardly anything else to check for those
+
+	if ((_validationMode == evCheckWithGeos || _validationMode == evFixWithGeos) && !skipGeosCheck)
+	{
+		(*shp)->get_IsValid(&valid);
+
+		if (!valid && _validationMode == evFixWithGeos)
+		{
+			IShape* shpNew = NULL;
+			(*shp)->FixUp(&shpNew);
+			if (shpNew) {
+				(*shp) = NULL;				// TODO: will it release the shape?
+				(*shp) = shpNew;
+				valid = VARIANT_TRUE;
+			}
+		}
+
+		// report results back to user
+		CComBSTR reason;
+		if (!valid) {
+			(*shp)->get_IsValidReason(&reason);
+			USES_CONVERSION;
+			_mapCallback->_FireShapeValidationFailed(OLE2A(reason));
+		}
+	}
+	return valid ? true : false;
+}
+
+// ************************************************************
 //		TrySave
 // ************************************************************
 bool CShapeEditor::TrySave()
@@ -1177,74 +1187,28 @@ bool CShapeEditor::TrySave()
 
 	bool newShape = _shapeIndex == -1;
 
-	// first check if it's enough points
-	VARIANT_BOOL enoughPoints;
-	get_HasEnoughPoints(&enoughPoints);
-	if (!enoughPoints) {
-		// TODO: also run test for individual parts
-		_mapCallback->_FireValidationResults(VARIANT_FALSE, "The shape doesn't have enough points");		// TODO: localize
-		return false;
-	}
-
-	tkCursorMode cursorMode = _mapCallback->_GetCursorMode();
-	bool subjectOperation = cursorMode == cmAddPart || cursorMode == cmRemovePart;
-
 	int layerHandle = _layerHandle, shapeIndex = _shapeIndex;
+	tkCursorMode cursorMode = _mapCallback->_GetCursorMode();
 	CComPtr<IShape> shp = NULL;
-	if (subjectOperation) {
+
+	bool subjectOperation = cursorMode == cmAddPart || cursorMode == cmRemovePart;
+	if (subjectOperation)
+	{
 		SubjectOperation op = cursorMode == cmAddPart ? SubjectAddPart : SubjectClip;
 		shp = ApplyOperation(op, layerHandle, shapeIndex);
+		if (!shp) return false;
+
 		newShape = false;
+		if (!Validate(&shp)) 	
+			return false;
 	}
 	else {
-		get_Shape(VARIANT_FALSE, &shp);
+		get_ValidatedShape(&shp);
 	}
 
 	if (!shp) return false;
 
-	// does user want to validate with GEOS?
-	tkMwBoolean geosCheck = blnTrue, tryFix = blnTrue;
-	_mapCallback->_FireValidationMode(&geosCheck, &tryFix);     // TODO: make editor property
-
-	ShpfileType shpType;
-	shp->get_ShapeType(&shpType);
-	Utility::ShapeTypeConvert2D(shpType);
-	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT || shpType == SHP_POLYLINE)
-		geosCheck = blnFalse;     // there is hardly anything else to check for those
-
-	// if so validate and optionally fix
-	VARIANT_BOOL valid = VARIANT_TRUE;
-	if (geosCheck == blnTrue)
-	{
-		shp->get_IsValid(&valid);
-		if (!valid && tryFix == blnTrue)
-		{
-			IShape* shpNew = NULL;
-			shp->FixUp(&shpNew);
-			if (shpNew) {
-				shp = NULL;				// TODO: will it release the shape?
-				shp = shpNew;
-				valid = true;
-			}
-		}
-
-		// report results back to user
-		CComBSTR reason;
-		if (!valid) {
-			shp->get_IsValidReason(&reason);
-		}
-		else {
-			reason = ::SysAllocString(L"");
-		}
-		USES_CONVERSION;
-		_mapCallback->_FireValidationResults(valid, OLE2A(reason));
-	}
-
-	if (!valid) {
-		return false;
-	}
-
-	// now let the user check custom validation rules
+	// 3) custom validation
 	tkMwBoolean cancel = blnFalse;
 	_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
 	if (cancel == blnTrue) {
@@ -1342,3 +1306,26 @@ bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
 	return false;
 }
 
+// ***************************************************************
+//		ShouldBeHidden()
+// ***************************************************************
+bool CShapeEditor::ShapeShouldBeHidden()
+{
+	return !_isSubjectShape || _activeShape->GetShapeType() == SHP_MULTIPOINT || _activeShape->GetShapeType() == SHP_POINT;
+}
+
+// ***************************************************************
+//		ValidationMode()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_ValidationMode(tkEditorValidationMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _validationMode;
+	return S_OK;
+}
+STDMETHODIMP CShapeEditor::put_ValidationMode(tkEditorValidationMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_validationMode = newVal;
+	return S_OK;
+}

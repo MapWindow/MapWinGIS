@@ -291,8 +291,8 @@ void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double pr
 		succeed = _shapeEditor->TrySave();
 		if (succeed) {
 			RedrawCore(RedrawSkipDataLayers, false, true);
-			return;
 		}
+		return;
 	}
 
 	// add another point

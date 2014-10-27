@@ -1308,24 +1308,82 @@ void CMapView::ClearHotTracking()
 }
 
 // ************************************************************
+//		ApplyHotTrackingDisplayOptions
+// ************************************************************
+void CMapView::ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp)
+{
+	if (!_hotTracking.Shapefile) return;
+	ShpfileType type;
+	info->Shapefile->get_ShapefileType(&type);
+	type = Utility::ShapeTypeConvert2D(type);
+
+	VARIANT_BOOL vb;
+	((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
+	long index = 0;
+	_hotTracking.Shapefile->EditInsertShape(shp, &index, &vb);
+	_hotTracking.Shapefile->RefreshExtents(&vb);
+	_hotTracking.LayerHandle = info->LayerHandle;
+	_hotTracking.ShapeId = info->ShapeId;
+
+	CComPtr<IShapeDrawingOptions> options = NULL;
+	VARIANT_BOOL interactiveEditing;
+	info->Shapefile->get_InteractiveEditing(&interactiveEditing);
+
+	if (interactiveEditing)
+	{
+		if (type == SHP_POINT || type == SHP_MULTIPOINT)
+		{
+			info->Shapefile->get_SelectionDrawingOptions(&options);
+			if (options) {
+				CComPtr<IShapeDrawingOptions> newOptions = NULL;
+				options->Clone(&newOptions);
+				newOptions->put_FillColor(RGB(0,0,255));
+				_hotTracking.Shapefile->put_DefaultDrawingOptions(newOptions);
+			}
+		}
+		else {
+			_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
+			if (options) {
+				options->put_LineVisible(VARIANT_FALSE);
+				options->put_FillVisible(VARIANT_FALSE);
+				options->put_VerticesVisible(VARIANT_TRUE);
+			}
+		}
+	}
+	else
+	{
+		// copy selection from parent shapefile
+		info->Shapefile->get_SelectionDrawingOptions(&options);
+		if (options)
+		{
+			/*options->put_FillVisible(VARIANT_FALSE);
+			options->put_LineColor(RGB(30, 144, 255));
+			options->put_LineWidth(2.0f);*/
+			_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+		}
+	}
+}
+
+// ************************************************************
 //		UpdateHotTracking
 // ************************************************************
 bool CMapView::UpdateHotTracking(CPoint point)
 {
 	bool found = false;
-	bool refreshNeeded = false;
-	VARIANT_BOOL vb;
-	bool sameShape = false;
 
 	if (_hasHotTracking)
 	{
 		HotTrackingInfo* info = FindShapeAtScreenPoint(point, slctHotTracking);
 		if (info)
 		{
-			if (_shapeEditor->HasSubjectShape(info->LayerHandle, info->ShapeId))
+			bool sameShape = false;
+	
+			if (_shapeEditor->HasSubjectShape(info->LayerHandle, info->ShapeId)) {
 				sameShape = true;
-			else 
+			}
+			else {
 				sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);
+			}
 
 			if (!sameShape)
 			{
@@ -1335,68 +1393,20 @@ bool CMapView::UpdateHotTracking(CPoint point)
 					IShape* shpClone = NULL;
 					shape->Clone(&shpClone);
 
-					if (!_hotTracking.Shapefile)
-						GetUtils()->CreateInstance(idShapefile, (IDispatch**)&(_hotTracking.Shapefile));
-					else
-						_hotTracking.Shapefile->Close(&vb);
+					_hotTracking.UpdateShapefile();
 
-					if (_hotTracking.Shapefile)
-					{
-						ShpfileType type;
-						info->Shapefile->get_ShapefileType(&type);
-						type = Utility::ShapeTypeConvert2D(type);
-
-						((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
-						long index = 0;
-						_hotTracking.Shapefile->EditInsertShape(shpClone, &index, &vb);
-						_hotTracking.Shapefile->RefreshExtents(&vb);
-						_hotTracking.LayerHandle = info->LayerHandle;
-						_hotTracking.ShapeId = info->ShapeId;
-
-						CComPtr<IShapeDrawingOptions> options = NULL;
-						
-						VARIANT_BOOL interactiveEditing;
-						info->Shapefile->get_InteractiveEditing(&interactiveEditing);
-						if (interactiveEditing)
-						{
-							if (type == SHP_POINT || type == SHP_MULTIPOINT) 
-							{
-								info->Shapefile->get_SelectionDrawingOptions(&options);
-								if (options)
-									_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-							}
-							else {
-								_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
-								if (options) {
-									options->put_LineVisible(VARIANT_FALSE);
-									options->put_FillVisible(VARIANT_FALSE);
-									options->put_VerticesVisible(VARIANT_TRUE);
-								}
-							}
-						}
-						else
-						{
-							// copy selection from parent shapefile
-							info->Shapefile->get_SelectionDrawingOptions(&options);
-							if (options)
-							{
-								/*options->put_FillVisible(VARIANT_FALSE);
-								options->put_LineColor(RGB(30, 144, 255));
-								options->put_LineWidth(2.0f);*/
-								_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-							}
-						}
-					}
+					ApplyHotTrackingInfo(info, shpClone);
 					UINT refCount = shpClone->Release();   // there is one reference in new shapefile
 					found = true;
 				}
 			}
 			delete info;
+			
+			if (sameShape) return false;
 		}
 	}
 
-	if (sameShape) return false;
-
+	bool refreshNeeded = false;
 	if (found)
 	{
 		// passing event to the caller

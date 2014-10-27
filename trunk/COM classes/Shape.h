@@ -172,7 +172,7 @@ public:
 	bool get_XYZM(long PointIndex, double& x, double& y, double& z, double& m);
 	bool get_ExtentsXY(double& xMin, double& yMin, double& xMax, double& yMax);
 	bool get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& yMax, double& zMin, double& zMax, double& mMin, double& mMax);
-
+	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

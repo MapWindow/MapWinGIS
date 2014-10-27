@@ -30,6 +30,7 @@ public:
 		_state = EditorEmpty;
 		_mapCallback = NULL;
 		_isSubjectShape = false;
+		_validationMode = evCheckWithGeos;
 	}
 	~CShapeEditor()
 	{
@@ -67,7 +68,6 @@ public:
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
 	STDMETHOD(Undo)(VARIANT_BOOL* retVal);
 	STDMETHOD(Redo)(VARIANT_BOOL* retVal);
-	STDMETHOD(get_HasEnoughPoints)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_SegmentAngle)(int segmentIndex, double* retVal);
 	STDMETHOD(get_CreationMode)(VARIANT_BOOL* retVal);
@@ -76,7 +76,7 @@ public:
 	STDMETHOD(put_ShapeType)(ShpfileType newVal);
 	//STDMETHOD(AddPoint)(double xProj, double yProj);
 	STDMETHOD(SetShape)(IShape* shp);
-	STDMETHOD(get_Shape)(VARIANT_BOOL fixup, IShape** retVal);
+	STDMETHOD(get_ValidatedShape)(IShape** retVal);
 	STDMETHOD(get_LayerHandle)(int* retVal);
 	STDMETHOD(put_LayerHandle)(int newVal);
 	STDMETHOD(get_ShapeIndex)(int* retVal);
@@ -137,6 +137,7 @@ private:
 	tkShapeEditorState _state;
 	vector<CShapeEditor*> _subjects;
 	bool _isSubjectShape;
+	tkEditorValidationMode _validationMode;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
@@ -148,6 +149,7 @@ public:
 		_mapCallback = callback;
 	}
 
+	bool ShapeShouldBeHidden();
 	EditorBase* GetActiveShape() { return _activeShape; }
 	void DiscardState();
 	void SaveState();
@@ -159,7 +161,7 @@ public:
 	bool CheckState();
 	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX, int screenOffsetY);
 	IShape* ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex);
-	IShape* GetShape(long layerHandle, long shapeIndex);
+	IShape* GetLayerShape(long layerHandle, long shapeIndex);
 	bool GetClosestPoint(double projX, double projY, double& xResult, double& yResult);
 	bool HandleDelete();
 	bool RemoveShape();
@@ -171,5 +173,9 @@ public:
 		_isSubjectShape = value;
 	}
 	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
+	STDMETHOD(get_ValidationMode)(tkEditorValidationMode* pVal);
+	STDMETHOD(put_ValidationMode)(tkEditorValidationMode newVal);
+	bool ValidateWithGeos(IShape** shp);
+	bool Validate(IShape** shp);
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

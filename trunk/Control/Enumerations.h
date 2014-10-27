@@ -100,7 +100,12 @@ enum HandleImage
 
 enum ShapeValidityCheck
 {
-	FirstAndLastPointOfPartMatch = 0,
+	NoPoints = 0,
+	NotEnoughPoints = 1,
+	NoParts = 3,
+	EmptyParts = 4,
+	FirstAndLastPointOfPartMatch = 5,
+	DirectionOfPolyRings = 6,
 };
 
 enum ShapeValidationStatus

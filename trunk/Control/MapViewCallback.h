@@ -17,8 +17,7 @@ public:
 	virtual tkCursorMode _GetCursorMode() = 0;
 	virtual void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) = 0;
 	virtual void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) = 0;
-	virtual void _FireValidationMode(tkMwBoolean* GeosCheck, tkMwBoolean* TryFix) = 0;
-	virtual void _FireValidationResults(VARIANT_BOOL Success, LPCTSTR ErrorMessage) = 0;
+	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) = 0;
 	virtual void _ZoomToEditor() = 0;
 	virtual void _SetMapCursor(tkCursorMode mode) = 0;
 };

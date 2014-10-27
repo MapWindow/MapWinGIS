@@ -256,8 +256,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidValidateShape = 17L,
 	eventidAfterShapeEdit = 18L,
 	eventidNewShape = 19L,
-	eventidValidationMode = 20L,
-	eventidValidationResults = 21L,
+	eventidShapeValidationFailed = 21L,
 	eventidBeforeDeleteShape = 22L,
 	
 	//}}AFX_DISP_ID
