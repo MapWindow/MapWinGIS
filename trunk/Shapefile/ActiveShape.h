@@ -1,5 +1,6 @@
 #pragma once
 #include "GeoShape.h"
+#include <set>
 
 class ActiveShape: public GeoShape
 {
@@ -63,8 +64,7 @@ protected:
 		PolygonPart = 2,
 	};
 	
-	vector<int> _parts;
-	//bool _drawLineForPoly;
+	std::set<int> _selectedParts;
 	ShapeInputMode _inputMode;
 	Gdiplus::Font* _fontArea;
 	Gdiplus::Font* _font;
@@ -140,4 +140,5 @@ public:
 	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, double area);
 	void DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly);
 	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex);
+	bool PartIsSelected(int partIndex);
 };

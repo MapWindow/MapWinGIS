@@ -34,7 +34,7 @@ int ActiveShape::GetScreenPoints(int partIndex, MixedShapePart whichPoints, Gdip
 	int size = GetScreenPoints(partIndex, whichPoints, dynamicPoint, (int)_mousePoint.x, (int)_mousePoint.y, data);
 
 	Gdiplus::PointF* points = *data;
-	if (offsetType == DragMoveShape || (offsetType == DragMovePart && partIndex == _selectedPart))
+	if (offsetType == DragMoveShape || (offsetType == DragMovePart && PartIsSelected(partIndex)))
 	{
 		for(int i= 0; i < size; i++)
 		{
@@ -601,7 +601,7 @@ void ActiveShape::AddPoint(double xProj, double yProj, double xScreen, double yS
 
 	UpdateLatLng(_points.size() - 1);
 
-	_areaRecalcIsNeeded = true;
+	SetModified();
 }
 
 // *******************************************************
@@ -625,8 +625,16 @@ bool ActiveShape::UndoPoint()
 		delete _points[_points.size() - 1];
 		result = true;
 		_points.pop_back();
-		_areaRecalcIsNeeded = true;
+		SetModified();
 	}
 	UpdatePolyCloseState(false);
 	return result;
+}
+
+// **************************************************************
+//		PartIsSelected()
+// **************************************************************
+bool ActiveShape::PartIsSelected(int partIndex)
+{
+	return _selectedParts.find(partIndex) != _selectedParts.end();
 }

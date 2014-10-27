@@ -22,6 +22,7 @@ protected:
 	GeographicLib::Geodesic geod;
 	GeographicLib::PolygonArea poly;
 	std::vector<MeasurePoint*> _points;		   // points in decimal degrees (in case transformation to WGS84 is possible)	
+	
 	IMapViewCallback* _mapCallback;
 	bool _isGeodesic;
 	bool _areaRecalcIsNeeded;		// geodesic area should be recalculated a new (after a point was added or removed)
@@ -33,6 +34,7 @@ protected:
 	bool TransformPoint(double& x, double& y);
 	bool IsGeodesic() { return _isGeodesic; }
 	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
+	void SetModified() { _areaRecalcIsNeeded = true; }
 	void ProjToPixel(double projX, double projY, double& pixelX, double& pixelY);
 	void PixelToProj(double pixelX, double pixelY, double& projX, double& projY);
 	double GetGeodesicArea(bool closingPoint, double x, double y);

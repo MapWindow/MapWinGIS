@@ -141,12 +141,94 @@ bool EditorBase::SetHighlightedVertex(int index)
 bool EditorBase::SetSelectedPart(int index)
 {
 	_selectedVertex = -1;
-	if (_selectedPart != index) {
+	if (_selectedPart != index) 
+	{
 		_selectedPart = index;
+		SelectRelatedParts(_selectedPart);		// for inner rings of poly
 		return true;
 	}
 	_selectedPart = -1;
 	return false;
+}
+
+// ************************************************
+//     SelectRelatedParts
+// ************************************************
+void EditorBase::SelectRelatedParts(int partIndex) 
+{
+	_selectedParts.clear();
+
+	int numParts = GetNumParts();
+	for (int i = 0; i < numParts; i++) 
+	{
+		if (i == partIndex || PartIsWithin(partIndex, i))
+			_selectedParts.insert(i);
+	}
+}
+
+// ************************************************
+//     PartIsWithin
+// ************************************************
+bool EditorBase::PartIsWithin(int outerRing, int innerRing)
+{
+	if (GetShapeType() == SHP_POLYGON)
+	{
+		CComPtr<IShape> shp = GetPartAsShape(outerRing);
+		if (shp != NULL)
+		{
+			int startIndex, endIndex;
+			if (GetPart(innerRing, startIndex, endIndex))
+			{
+				VARIANT_BOOL vb;
+				for (int i = startIndex; i <= endIndex; i++)
+				{
+					CComPtr<IPoint> pnt = NULL;
+					GetUtils()->CreateInstance(idPoint, (IDispatch**)&pnt);
+					pnt->put_X(_points[i]->Proj.x);
+					pnt->put_Y(_points[i]->Proj.y);
+					shp->PointInThisPoly(pnt, &vb);
+					if (!vb) return false;
+				}
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+// ************************************************
+//     GetPartAsShape
+// ************************************************
+IShape* EditorBase::GetPartAsShape(int partIndex)
+{
+	int startIndex, endIndex;
+	if (GetPart(partIndex, startIndex, endIndex))
+	{
+		IShape* shp = NULL;
+		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp);
+		VARIANT_BOOL vb;
+		shp->Create(GetShapeType(), &vb);
+
+		long pointIndex = 0;
+		for (int i = startIndex; i <= endIndex; i++)
+		{
+			shp->AddPoint(_points[i]->Proj.x, _points[i]->Proj.y, &pointIndex);
+			pointIndex++;
+		}
+		return shp;
+	}
+	return NULL;
+}
+
+// ************************************************
+//     GetPart
+// ************************************************
+bool EditorBase::GetPart(int partIndex, int& startIndex, int& endIndex)
+{
+	startIndex = GetPartStart(partIndex);
+	endIndex = SeekPartEnd(startIndex);
+	if (startIndex >= (int)_points.size() && endIndex >= (int)_points.size()) return false;
+	return startIndex != -1 && endIndex != -1;
 }
 
 // ************************************************
@@ -191,7 +273,7 @@ bool EditorBase::RemoveVertex(int vertexIndex)
 		source->CopyTo(*target);
 	}
 
-	_areaRecalcIsNeeded = true;
+	SetModified();
 	return true;
 }
 
@@ -200,21 +282,33 @@ bool EditorBase::RemoveVertex(int vertexIndex)
 // *******************************************************
 bool EditorBase::RemovePart()
 {
-	// optionally remove the part with selected vertex
 	if (_selectedPart == -1 && _selectedVertex == -1) return false;
+	
+	// optionally remove the part with selected vertex	
 	int partIndex = _selectedPart == -1 ? GetPartForPoint(_selectedVertex) : _selectedPart;
-
-	int startIndex = GetPartStart(partIndex);
-	int endIndex = SeekPartEnd(startIndex);
-	if (startIndex != -1 && endIndex != -1)
+	
+	SelectRelatedParts(partIndex);   // mark inner rings as well
+	
+	bool success = false;
+	for (int n = GetNumParts() - 1; n >= 0; n--)
 	{
-		for (int i = endIndex; i >= startIndex; i--) {
-			delete _points[i];
-			_points.erase(_points.begin() + i);
+		if (!PartIsSelected(n)) continue;
+
+		int startIndex, endIndex;
+		if (GetPart(n, startIndex, endIndex))
+		{
+			for (int i = endIndex; i >= startIndex; i--) {
+				delete _points[i];
+				_points.erase(_points.begin() + i);
+			}
+			success = true;
 		}
+	}
+
+	if (success) {
 		_selectedPart = -1;
 		_selectedVertex = -1;
-		_areaRecalcIsNeeded = true;
+		SetModified();
 		return true;
 	}
 	return false;
@@ -231,7 +325,7 @@ void EditorBase::Move(double offsetXProj, double offsetYProj)
 		_points[i]->Proj.y += offsetYProj;
 		UpdateLatLng(i);
 	}
-	_areaRecalcIsNeeded = true;
+	SetModified();
 }
 
 // *******************************************************
@@ -240,18 +334,24 @@ void EditorBase::Move(double offsetXProj, double offsetYProj)
 void EditorBase::MovePart(double offsetXProj, double offsetYProj)
 {
 	if (_selectedPart == -1) return;
-	int startIndex = GetPartStart(_selectedPart);
-	int endIndex = SeekPartEnd(startIndex);
 
-	if (startIndex != -1 && endIndex != -1)
+	for (int n = 0; n < GetNumParts(); n++) 
 	{
-		for (int i = startIndex; i <= endIndex; i++)
+		if (!PartIsSelected(n)) continue;
+
+		int startIndex, endIndex;
+		GetPart(n, startIndex, endIndex);
+
+		if (startIndex != -1 && endIndex != -1)
 		{
-			_points[i]->Proj.x += offsetXProj;
-			_points[i]->Proj.y += offsetYProj;
-			UpdateLatLng(i);
+			for (int i = startIndex; i <= endIndex; i++)
+			{
+				_points[i]->Proj.x += offsetXProj;
+				_points[i]->Proj.y += offsetYProj;
+				UpdateLatLng(i);
+			}
+			SetModified();
 		}
-		_areaRecalcIsNeeded = true;
 	}
 }
 
@@ -276,7 +376,7 @@ void EditorBase::MoveVertex(double xProj, double yProj)
 			UpdateLatLng(closeIndex);
 		}
 	}
-	_areaRecalcIsNeeded = true;
+	SetModified();
 }
 
 // *******************************************************
@@ -294,7 +394,8 @@ bool EditorBase::TryInsertVertex(double xProj, double yProj)
 		UpdateLatLng(pntIndex + 1);
 		UpdateLatLng(pntIndex + 2);
 
-		_areaRecalcIsNeeded = true;
+		SetSelectedVertex(pntIndex + 1);
+		SetModified();
 		return true;
 	}
 	return false;
@@ -323,11 +424,14 @@ tkDeleteTarget EditorBase::GetDeleteTarget()
 {
 	if (HasSelectedVertex())
 	{
-		return CanDeleteVertex(_selectedVertex) ? dtVertex : dtPart;
+		if (CanDeleteVertex(_selectedVertex))
+			return dtVertex;
 	}
-	if (HasSelectedPart())
+	if (HasSelectedPart() || HasSelectedVertex())
 	{
-		return dtPart;
+		int partIndex = HasSelectedVertex() ? this->GetPartForPoint(_selectedVertex) : _selectedPart;
+		if (CanDeletePart(partIndex))
+			return dtPart;
 	}
 	return _points.size() > 0 ? dtShape : dtNone;
 }
@@ -346,6 +450,20 @@ bool EditorBase::CanDeleteVertex(int vertexIndex)
 	if (polygon && numPoints <= 4) return false;
 	if (polyline && numPoints <= 2) return false;
 	return true;
+}
+
+// *******************************************************
+//		CanDeletePart()
+// *******************************************************
+bool EditorBase::CanDeletePart(int partIndex)
+{
+	SelectRelatedParts(partIndex);
+	for (int i = 0; i < GetNumParts(); i++)
+	{
+		if (!PartIsSelected(i))
+			return true;		// at least one part will be left, so it's ok to delete the selection
+	}
+	return false;   // all parts are selected, should be elevated to delete whole shape
 }
 
 // ************************************************
@@ -376,5 +494,4 @@ bool EditorBase::HasLine(bool dynamicBuffer)
 	if (_points.size() == 0) return false;
 	return dynamicBuffer == _creationMode;
 }
-
 

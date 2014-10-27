@@ -747,6 +747,7 @@ bool CShapeEditor::RemoveVertex()
 // *******************************************************
 bool CShapeEditor::RemovePart()
 {
+	SaveState();
 	if (_activeShape->RemovePart()) return true;
 	DiscardState();
 	return false;
@@ -1121,10 +1122,10 @@ bool CShapeEditor::HandleDelete()
 				Clear();
 				return true;
 			}
-		case dtVertex:
-			return RemoveVertex();
 		case dtPart:
 			return RemovePart();
+		case dtVertex:
+			return RemoveVertex();
 	}
 	return false;
 }

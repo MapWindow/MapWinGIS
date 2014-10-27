@@ -52,4 +52,9 @@ public:
 	bool UpdatePoint(int pointIndex, double projX, double ProjY);
 	tkDeleteTarget GetDeleteTarget();
 	bool CanDeleteVertex(int vertexIndex);
+	bool PartIsWithin(int outerRing, int innerRing);
+	bool GetPart(int partIndex, int& startIndex, int& endIndex);
+	IShape* GetPartAsShape(int partIndex);
+	void SelectRelatedParts(int outerRing);
+	bool CanDeletePart(int partIndex);
 };
