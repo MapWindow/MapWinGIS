@@ -514,18 +514,18 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	double projX;
 	double projY;
-	//bool snapping = (nFlags & MK_SHIFT) && (m_cursorMode == cmMeasure || m_cursorMode == cmAddShape);
-	
+	bool shift = (nFlags & MK_SHIFT) == 0;
+
 	tkSnapBehavior behavior;
-	bool snapping = (m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart && 
-					SnappingIsOn(nFlags, behavior)) ||
-					(m_cursorMode == cmMeasure && (nFlags & MK_SHIFT));
+	bool snapping = (SnappingIsOn(nFlags, behavior) && 
+					(m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart))
+					|| (m_cursorMode == cmMeasure && shift);
 
 	VARIANT_BOOL snapped = VARIANT_FALSE;
 	if (snapping)
 	{
 		snapped = FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &projX, &projY);
-		if (!snapped && m_cursorMode == cmAddShape && behavior == sbSnapWithShift){
+		if (!snapped && behavior == sbSnapWithShift && shift){
 			return;  // can't proceed in this mode without snapping
 		}
 	}

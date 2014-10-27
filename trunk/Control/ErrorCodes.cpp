@@ -185,6 +185,12 @@ const char * ErrorMsg( long ErrorCode )
 			return "Already withing batch for undo list.";
 		case tkSHAPE_EDITOR_NO_MAP:
 			return "Shape editor is not attached to a map.";
+		case tkNOT_ENOUGH_POINTS:
+			return "Shape doesn't have enough points for its type.";
+		case tkSAME_SUBJECT_AND_OVERLAY_SHAPE:
+			return "The same shape was selected both for subject and overlay.";
+		case tkNO_LAYER_HANDLE_FOR_SHAPE_EDITOR:
+			return "No layer handle is set for shape editor.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

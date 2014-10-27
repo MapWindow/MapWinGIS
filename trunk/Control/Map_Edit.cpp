@@ -82,6 +82,9 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		}
 		_dragging.HasMoved = true;
 
+		// in case of vertex moving underlying data is changed in the process (to update displayed length);
+		// for other types of moving we simply display the shape with offset and modify the data when dragging
+		// has finished, i.e. LButtonMouseUp event
 		if (_dragging.Operation == DragMoveVertex) 
 		{
 			EditorBase* edit = GetEditorBase();
@@ -307,7 +310,6 @@ void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double pr
 	}
 
 	// otherwise update just the layer
-	// TODO: fire vertex added event
 	RedrawCore(RedrawSkipDataLayers, false, true);
 }
 

@@ -203,18 +203,22 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 
 	int startIndex = GetPartStart(partIndex);
 	bool editing = this->GetInputMode() == simEditing;
-
+	bool multiPoint = GetShapeType() == SHP_MULTIPOINT;
 	long errorCode = tkNO_ERROR;
-	for (int i = 0; i < size - 1; i++) 
+	
+	if (!multiPoint) 
 	{
-		int realIndex = startIndex + i;
-		length = GetSegmentLength(realIndex, errorCode);
-		totalLength += length;
-		DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, false);
+		for (int i = 0; i < size - 1; i++) 
+		{
+			int realIndex = startIndex + i;
+			length = GetSegmentLength(realIndex, errorCode);
+			totalLength += length;
+			DrawSegmentInfo(g, data[i].X, data[i].Y, data[i + 1].X, data[i + 1].Y, length, totalLength, i, false);
+		}
 	}
 
 	Gdiplus::Pen* pen = partIndex != -1 && (_selectedPart == partIndex || _highlightedPart == partIndex ) ? &_redPen : &_linePen;
-	if (!_drawLabelsOnly)
+	if (!_drawLabelsOnly && !multiPoint)
 		g->DrawLines(pen, data, size);
 
 	// drawing points
@@ -279,7 +283,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 	}
 
 	// drawing the last segment only
-	if (dynamicBuffer)
+	if (dynamicBuffer && !multiPoint)
 	{
 		double x, y;
 		ProjToPixel(_points[_points.size() - 1]->Proj.x, _points[_points.size() - 1]->Proj.y, x, y);

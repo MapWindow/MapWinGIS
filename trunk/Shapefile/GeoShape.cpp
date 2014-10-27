@@ -297,7 +297,7 @@ int GeoShape::GetPartStart(int partIndex) {
 //		GetPartStart()
 // *******************************************************
 int GeoShape::SeekPartEnd(int startSearchFrom) {
-	for (size_t i = startSearchFrom; i < _points.size(); i++) {
+	for (int i = startSearchFrom; i < (int)_points.size(); i++) {
 		if (_points[i]->Part == PartEnd)
 			return i;
 	}
@@ -308,7 +308,7 @@ int GeoShape::SeekPartEnd(int startSearchFrom) {
 //		GetPartStart()
 // *******************************************************
 int GeoShape::SeekPartStart(int startSearchFrom) {
-	for (size_t i = startSearchFrom; i >= 0; i--) {
+	for (int i = startSearchFrom; i >= 0; i--) {
 		if (_points[i]->Part == PartBegin)
 			return i;
 	}

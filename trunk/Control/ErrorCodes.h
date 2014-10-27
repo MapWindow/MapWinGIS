@@ -94,6 +94,9 @@ const char * ErrorMsg( long ErrorCode );
 # define tkUNDO_LIST_NO_MAP 234
 # define tkALREADY_WITHIN_BATCH 235
 # define tkSHAPE_EDITOR_NO_MAP 236
+# define tkNOT_ENOUGH_POINTS 237
+# define tkSAME_SUBJECT_AND_OVERLAY_SHAPE 238
+# define tkNO_LAYER_HANDLE_FOR_SHAPE_EDITOR 239
 
 
 //301-400 = ogr layers

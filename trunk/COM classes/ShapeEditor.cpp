@@ -367,8 +367,9 @@ STDMETHODIMP CShapeEditor::AddSubjectShape(LONG LayerHandle, LONG ShapeIndex, VA
 		return S_OK;
 	}
 
-	if (_layerHandle == LayerHandle && _shapeIndex == ShapeIndex) {
-		// TODO: report error
+	if (_layerHandle == LayerHandle && _shapeIndex == ShapeIndex) 
+	{
+		ErrorMessage(tkSAME_SUBJECT_AND_OVERLAY_SHAPE);
 		return S_OK;
 	}
 
@@ -384,13 +385,23 @@ STDMETHODIMP CShapeEditor::AddSubjectShape(LONG LayerHandle, LONG ShapeIndex, VA
 		}
 	}
 
-	if (ClearExisting) {
-		ClearSubjectShapes();
-	}
-
 	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(LayerHandle);
 	if (sf)
 	{
+		ShpfileType shpType;
+		sf->get_ShapefileType(&shpType);
+		shpType = Utility::ShapeTypeConvert2D(shpType);
+		if (shpType == SHP_POINT) 
+		{
+			// no add part/remove part operation for points
+			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+			return S_OK;
+		}
+
+		if (ClearExisting) {
+			ClearSubjectShapes();
+		}
+
 		CComPtr<IShape> shp = NULL;
 		sf->get_Shape(ShapeIndex, &shp);
 		if (shp)
@@ -1011,14 +1022,13 @@ STDMETHODIMP CShapeEditor::put_VerticesVisible(VARIANT_BOOL newVal)
 IShape* CShapeEditor::ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex)
 {
 	if (_subjects.size() != 1) {
-		// TODO: report error
 		return NULL;
 	}
 
 	VARIANT_BOOL vb;
 	get_HasEnoughPoints(&vb);
 	if (!vb) {
-		// TODO: report error
+		ErrorMessage(tkNOT_ENOUGH_POINTS);
 		return NULL;
 	}
 
@@ -1171,6 +1181,7 @@ bool CShapeEditor::TrySave()
 	VARIANT_BOOL enoughPoints;
 	get_HasEnoughPoints(&enoughPoints);
 	if (!enoughPoints) {
+		// TODO: also run test for individual parts
 		_mapCallback->_FireValidationResults(VARIANT_FALSE, "The shape doesn't have enough points");		// TODO: localize
 		return false;
 	}
@@ -1189,9 +1200,17 @@ bool CShapeEditor::TrySave()
 		get_Shape(VARIANT_FALSE, &shp);
 	}
 
+	if (!shp) return false;
+
 	// does user want to validate with GEOS?
 	tkMwBoolean geosCheck = blnTrue, tryFix = blnTrue;
-	_mapCallback->_FireValidationMode(&geosCheck, &tryFix);
+	_mapCallback->_FireValidationMode(&geosCheck, &tryFix);     // TODO: make editor property
+
+	ShpfileType shpType;
+	shp->get_ShapeType(&shpType);
+	Utility::ShapeTypeConvert2D(shpType);
+	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT || shpType == SHP_POLYLINE)
+		geosCheck = blnFalse;     // there is hardly anything else to check for those
 
 	// if so validate and optionally fix
 	VARIANT_BOOL valid = VARIANT_TRUE;
@@ -1226,20 +1245,16 @@ bool CShapeEditor::TrySave()
 	}
 
 	// now let the user check custom validation rules
-	if (valid) {
-		tkMwBoolean cancel = blnFalse;
-		_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
-		if (cancel == blnTrue) {
-			return false;
-		}
+	tkMwBoolean cancel = blnFalse;
+	_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
+	if (cancel == blnTrue) {
+		return false;
 	}
 
-	//finally ready to save	
 	CComPtr<IShapefile> sf = NULL;
 	sf = _mapCallback->_GetShapefile(layerHandle);
-
 	if (!sf) {
-		// TODO: check it earlier on
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return false;
 	}
 

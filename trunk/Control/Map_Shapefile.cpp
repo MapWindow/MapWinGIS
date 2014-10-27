@@ -1344,6 +1344,7 @@ bool CMapView::UpdateHotTracking(CPoint point)
 					{
 						ShpfileType type;
 						info->Shapefile->get_ShapefileType(&type);
+						type = Utility::ShapeTypeConvert2D(type);
 
 						((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
 						long index = 0;
@@ -1353,16 +1354,24 @@ bool CMapView::UpdateHotTracking(CPoint point)
 						_hotTracking.ShapeId = info->ShapeId;
 
 						CComPtr<IShapeDrawingOptions> options = NULL;
+						
 						VARIANT_BOOL interactiveEditing;
 						info->Shapefile->get_InteractiveEditing(&interactiveEditing);
-						if (interactiveEditing) 
+						if (interactiveEditing)
 						{
-							// highlight vertices
-							_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
-							if (options) {
-								options->put_LineVisible(VARIANT_FALSE);
-								options->put_FillVisible(VARIANT_FALSE);
-								options->put_VerticesVisible(VARIANT_TRUE);
+							if (type == SHP_POINT || type == SHP_MULTIPOINT) 
+							{
+								info->Shapefile->get_SelectionDrawingOptions(&options);
+								if (options)
+									_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+							}
+							else {
+								_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
+								if (options) {
+									options->put_LineVisible(VARIANT_FALSE);
+									options->put_FillVisible(VARIANT_FALSE);
+									options->put_VerticesVisible(VARIANT_TRUE);
+								}
 							}
 						}
 						else
@@ -1375,7 +1384,6 @@ bool CMapView::UpdateHotTracking(CPoint point)
 								options->put_LineColor(RGB(30, 144, 255));
 								options->put_LineWidth(2.0f);*/
 								_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
-
 							}
 						}
 					}
