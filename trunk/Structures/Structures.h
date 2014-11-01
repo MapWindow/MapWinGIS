@@ -1,6 +1,7 @@
 #pragma once
 #include "Enumerations.h"
 #include "Extent.h"
+#include "TableRow.h"
 
 struct Poly
 {	
@@ -128,4 +129,21 @@ struct OgrUpdateError
 	int ShapeIndex;
 	CStringW ErrorMsg;
 	OgrUpdateError(int shapeIndex, CStringW msg) : ShapeIndex(shapeIndex), ErrorMsg(msg) {}
+};
+
+struct ShapeRecordData
+{
+	VARIANT Shape;
+	TableRow* Row;
+	ShapeRecordData()
+	{
+		this->Row = new TableRow();
+		VariantInit(&Shape);
+	}
+	~ShapeRecordData()
+	{
+		VariantClear(&Shape);
+		if (Row)
+			delete Row;
+	}
 };

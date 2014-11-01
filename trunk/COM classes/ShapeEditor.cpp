@@ -6,6 +6,7 @@
 #include "map.h"
 #include "UndoList.h"
 #include <set>
+#include "GeosHelper.h"
 
 // *******************************************************
 //		GetShape
@@ -135,7 +136,9 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 	*retVal = NULL;
 
 	ShpfileType shpType = _activeShape->GetShapeType();
-	if (shpType == SHP_NULLSHAPE) return S_OK;
+	if (shpType == SHP_NULLSHAPE || _activeShape->GetPointCount() == 0) {
+		return S_OK;
+	}
 
 	GetUtils()->CreateInstance(idShape, (IDispatch**)retVal);
 
@@ -970,7 +973,7 @@ STDMETHODIMP CShapeEditor::put_VerticesVisible(VARIANT_BOOL newVal)
 // *******************************************************
 //		ApplyOperation
 // *******************************************************
-IShape* CShapeEditor::ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex)
+IShape* CShapeEditor::ApplyOperation(tkCursorMode operation, int& layerHandle, int& shapeIndex)
 {
 	if (_subjects.size() != 1) {
 		return NULL;
@@ -990,14 +993,14 @@ IShape* CShapeEditor::ApplyOperation(SubjectOperation operation, int& layerHandl
 	IShape* result = NULL;
 	switch (operation)
 	{
-		case SubjectAddPart:
+		case cmAddPart:
 			subject->Clip(overlay, tkClipOperation::clUnion, &result);
 			break;
-		case SubjectClip:
+		case cmRemovePart:
 			subject->Clip(overlay, tkClipOperation::clDifference, &result);
 			break;
-		case SubjectSplit:
-			subject->Clip(overlay, tkClipOperation::clDifference, &result);
+		case cmSplitByPolyline:
+			// TODO: implement
 			break;
 	}
 	return result;
@@ -1117,6 +1120,8 @@ bool CShapeEditor::RemoveShape()
 // ************************************************************
 bool CShapeEditor::Validate(IShape** shp)
 {
+	if (!(*shp)) return false;
+
 	ShpfileType shpType;
 	(*shp)->get_ShapeType(&shpType);
 	
@@ -1191,34 +1196,32 @@ bool CShapeEditor::TrySave()
 	tkCursorMode cursorMode = _mapCallback->_GetCursorMode();
 	CComPtr<IShape> shp = NULL;
 
-	bool subjectOperation = cursorMode == cmAddPart || cursorMode == cmRemovePart;
-	if (subjectOperation)
+	if (_mapCallback->_IsSubjectCursor())
 	{
-		SubjectOperation op = cursorMode == cmAddPart ? SubjectAddPart : SubjectClip;
-		shp = ApplyOperation(op, layerHandle, shapeIndex);
+		shp = ApplyOperation(cursorMode, layerHandle, shapeIndex);
 		if (!shp) return false;
-
 		newShape = false;
-		if (!Validate(&shp)) 	
+		if (!Validate(&shp))
 			return false;
 	}
 	else {
 		get_ValidatedShape(&shp);
+		if (!shp) return false;
 	}
 
-	if (!shp) return false;
-
-	// 3) custom validation
-	tkMwBoolean cancel = blnFalse;
-	_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
-	if (cancel == blnTrue) {
-		return false;
-	}
 
 	CComPtr<IShapefile> sf = NULL;
 	sf = _mapCallback->_GetShapefile(layerHandle);
 	if (!sf) {
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return false;
+	}
+	
+	
+	// 3) custom validation
+	tkMwBoolean cancel = blnFalse;
+	_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
+	if (cancel == blnTrue) {
 		return false;
 	}
 
@@ -1232,7 +1235,7 @@ bool CShapeEditor::TrySave()
 		undoList->Add(uoAddShape, (long)layerHandle, (long)numShapes, &vb);
 	}
 
-	if (subjectOperation) {
+	if (_mapCallback->_IsSubjectCursor()) {
 		undoList->Add(uoEditShape, (long)layerHandle, (long)shapeIndex, &vb);
 	}
 
@@ -1328,4 +1331,21 @@ STDMETHODIMP CShapeEditor::put_ValidationMode(tkEditorValidationMode newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_validationMode = newVal;
 	return S_OK;
+}
+
+// ***************************************************************
+//		GetOverlayTypeForSubjectOperation()
+// ***************************************************************
+ShpfileType CShapeEditor::GetOverlayTypeForSubjectOperation(tkCursorMode cursor)
+{
+	switch (cursor)
+	{
+		case cmAddPart:
+			return SHP_NULLSHAPE;
+		case cmRemovePart:
+			return SHP_POLYGON;
+		case cmSplitByPolyline:
+			return SHP_POLYLINE;
+	}
+	return SHP_NULLSHAPE;
 }

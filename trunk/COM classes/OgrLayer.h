@@ -3,6 +3,7 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include "afxmt.h"
+#include "OgrDynamicLoader.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -26,10 +27,14 @@ public:
 		_forUpdate = false;
 		_dataLoadingLock.Unlock();
 		_encoding = m_globalSettings.ogrEncoding;
+		_dynamicLoading = VARIANT_TRUE;
+		_envelope = NULL;
 		gReferenceCounter.AddRef(tkInterface::idOgrLayer);
 	}
 	~COgrLayer()
 	{
+		if (_envelope)
+			delete _envelope;
 		Close();
 		if (_globalCallback)
 			_globalCallback->Release();
@@ -89,6 +94,8 @@ public:
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal, VARIANT_BOOL* retVal);
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
+	STDMETHOD(get_DynamicLoading)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_DynamicLoading)(VARIANT_BOOL newVal);
 
 public:
 	void InjectShapefile(IShapefile* sfNew)
@@ -96,6 +103,7 @@ public:
 		CloseShapefile();
 		_shapefile = sfNew;
 	}
+	OGRLayer* GetDatasource() { return _layer; }
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);
 
@@ -113,13 +121,19 @@ private:
 	CStringW _sourceQuery;
 	vector<OgrUpdateError> _updateErrors;
 	tkOgrEncoding _encoding;
-
+	VARIANT_BOOL _dynamicLoading;
+	OGREnvelope* _envelope;
+	
 	bool CheckState();
 	void ErrorMessage(long ErrorCode);
 	void CloseShapefile();
 	GDALDataset* OpenDataset(BSTR connectionString, bool forUpdate);
 	long GetFidForShapefile();
 	IShapefile* LoadShapefile();
+	void CacheExtents();
+	void ForceCreateShapefile();
+public:
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

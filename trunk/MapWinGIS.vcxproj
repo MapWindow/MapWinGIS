@@ -179,6 +179,7 @@
     <ClInclude Include="Shapefile\EditorBase.h" />
     <ClInclude Include="Shapefile\GeoShape.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
+    <ClInclude Include="Shapefile\OgrDynamicLoader.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -491,10 +492,12 @@
     <ClCompile Include="Shapefile\EditorBase.cpp" />
     <ClCompile Include="Shapefile\GeoShape.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
+    <ClCompile Include="Shapefile\OgrDynamicLoader.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
+    <ClCompile Include="Structures\Layer.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />

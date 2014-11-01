@@ -613,8 +613,16 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 			Layer * l = _allLayers[_activeLayers[i]];
 			if( l != NULL )
 			{	
-				if (l->IsVisible(scale, zoom))
+				bool visible = l->IsVisible(scale, zoom);
+				l->wasRendered = visible;
+
+				if (visible)
 				{
+					if (l->IsDynamicOgrLayer())
+					{
+						l->UpdateShapefile();
+					}
+		
 					if(l->IsImage())
 					{
 						if (!layerBuffer) continue;
@@ -1262,19 +1270,6 @@ void CMapView::DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRe
 }
 #pragma endregion
 
-#pragma region Multithreading (unused)
-//void RunBacktreadDrawing() 
-//{
-	// a pointer ot member function	
-	/*UINT (CMapView::* ptrDrawLayers)(LPVOID) = &CMapView::StartDrawLayers;
-	 CMapView* map = this;
-	 (this->*ptrDrawLayers)(NULL);*/
-
-	 //DrawingParams* param = new  DrawingParams(this, gLayers, &rcBounds);
-	 //CWinThread* thread = AfxBeginThread(&StartThread, param);
-	 //delete param;
-//}
-
 // ******************************************************************
 //		InitMapRotation()
 // ******************************************************************
@@ -1293,51 +1288,7 @@ void CloseMapRotation()
 	// TODO: implement
 }
 
-// A structure to pass parameters to the background thread
-struct DrawingParams: CObject 
-{
-	Gdiplus::Graphics* graphics;
-	const CRect* bounds;
-	CMapView* map;
 
-	DrawingParams(CMapView* m, Gdiplus::Graphics* g, const CRect* b)
-	{
-		graphics = g;
-		bounds = b;
-		map = m;
-	};
-};
 
-// ***************************************************************
-//		StartDrawLayers()
-// ***************************************************************
-// Starts drawing in the background thread
-UINT CMapView::StartDrawLayers(LPVOID pParam)
-{
-	DrawingParams* options = (DrawingParams*)pParam;
-	if (!options || !options->IsKindOf(RUNTIME_CLASS(DrawingParams)))
-	{
-		return 0;   // if pObject is not valid
-	}
-	else
-	{
-		this->DrawLayers(options->bounds, options->graphics);
-		return 1;   // thread completed successfully
-	}
-}
 
-UINT StartThread(LPVOID pParam)
-{
-	DrawingParams* options = (DrawingParams*)pParam;
-	if (!options || !options->IsKindOf(RUNTIME_CLASS(DrawingParams)))
-	{
-		return 0;   // if pObject is not valid
-	}
-	else
-	{
-		CMapView* map = options->map;
-		map->DrawLayers(options->bounds, options->graphics);
-		return 1;   // thread completed successfully
-	}
-}
-#pragma endregion
+

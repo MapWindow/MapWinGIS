@@ -6,7 +6,16 @@ class GeosHelper
 public:
 	GeosHelper(void) {};
 	~GeosHelper(void) {};
-	
+
+	static GEOSGeometry* Polygonize(const GEOSGeometry* gsGeom)
+	{
+		#ifdef GEOS_NEW
+			return GEOSPolygonize_r(getGeosHandle(), &gsGeom, 1);
+		#else
+			return GEOSPolygonize(&gsGeom, 1);
+		#endif
+	}
+
 	static char* IsValidReason(GEOSGeometry* gsGeom)
 	{
 		#ifdef GEOS_NEW

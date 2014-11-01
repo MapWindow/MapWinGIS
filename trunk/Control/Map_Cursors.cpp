@@ -165,14 +165,23 @@ void CMapView::SetCursorMode(tkCursorMode mode)
 			_measuring->Clear();
 	}
 
-	VARIANT_BOOL empty;
-	_shapeEditor->get_IsEmpty(&empty);
+	CComPtr<IShape> shp = NULL;
+	_shapeEditor->get_RawData(&shp);
 
-	if (!empty)
+	if (shp)
 	{
 		if (!_shapeEditor->TrySave())
-			return;	  // don't change cursor as use may loose some data
+			return;	  // don't change cursor as user may loose some data
 		RedrawCore(RedrawSkipDataLayers, false, true);
+	}
+	else {
+		VARIANT_BOOL empty;
+		_shapeEditor->get_IsEmpty(&empty);
+		if (!empty) 
+		{
+			_shapeEditor->Clear();
+			RedrawCore(RedrawSkipDataLayers, false, true);
+		}
 	}
 
 	if (m_cursorMode == cmAddShape) {
@@ -222,6 +231,21 @@ HCURSOR CMapView::SetWaitCursor()
 // ************************************************************
 bool CMapView::IsEditorCursor()
 {
-	return m_cursorMode == cmEditShape || m_cursorMode == cmAddShape ||
-		m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart || m_cursorMode == cmMeasure;
+	return IsDigitizingCursor() || m_cursorMode == cmEditShape || m_cursorMode == cmMeasure;
+}
+
+// ************************************************************
+//		IsEditorCursor
+// ************************************************************
+bool CMapView::IsDigitizingCursor()
+{
+	return m_cursorMode == cmAddShape || _IsSubjectCursor();
+}
+
+// ************************************************************
+//		_IsEditorCursor
+// ************************************************************
+bool CMapView::_IsSubjectCursor()
+{
+	return m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart || m_cursorMode == cmSplitByPolyline;
 }

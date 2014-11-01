@@ -738,6 +738,9 @@
     <ClInclude Include="Shapefile\GeoShape.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
+    <ClInclude Include="Shapefile\OgrDynamicLoader.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Drawing\BaseDrawer.cpp">
@@ -1565,6 +1568,12 @@
     </ClCompile>
     <ClCompile Include="Control\Map_Dynamic.cpp">
       <Filter>Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\OgrDynamicLoader.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Layer.cpp">
+      <Filter>Structures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

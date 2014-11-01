@@ -615,8 +615,7 @@ public:
 		{FireEvent(eventidSelectBoxFinal,EVENT_PARAM(VTS_I4  VTS_I4  VTS_I4  VTS_I4), Left, Right, Bottom, Top);}
 	void FireSelectBoxDrag(long Left, long Right, long Bottom, long Top)
 		{FireEvent(eventidSelectBoxDrag,EVENT_PARAM(VTS_I4  VTS_I4  VTS_I4  VTS_I4), Left, Right, Bottom, Top);}
-	void FireExtentsChanged()
-		{FireEvent(eventidExtentsChanged,EVENT_PARAM(VTS_NONE));}
+	void FireExtentsChanged(){ FireEvent(eventidExtentsChanged,EVENT_PARAM(VTS_NONE));}
 	void FireMapState(long LayerHandle)
 		{FireEvent(eventidMapState,EVENT_PARAM(VTS_I4), LayerHandle);}
 	void FireOnDrawBackBuffer(long BackBuffer)
@@ -1064,6 +1063,8 @@ private:
 	void ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp);
 	void OnCursorModeChangedCore(bool clearEditor);
 	bool IsEditorCursor();
+	bool IsDigitizingCursor();
+	void HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl);
 	
 #pragma endregion
 
@@ -1086,6 +1087,8 @@ public:
 	void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage);}
 	void _ZoomToEditor(){ ZoomToEditor(); }
 	void _SetMapCursor(tkCursorMode mode) {  UpdateCursor(mode); }
+	bool _IsSubjectCursor();
+	void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 
 protected:
 	

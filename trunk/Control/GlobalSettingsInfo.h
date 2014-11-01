@@ -48,7 +48,7 @@ struct GlobalSettingsInfo
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
-		ogrLayerMaxFeatureCount = 100000;
+		ogrLayerMaxFeatureCount = 50000;
 		ogrEncoding = oseUtf8;
 		imageUpsamplingMode = imNone;
 		imageDownsamplingMode = imBilinear;

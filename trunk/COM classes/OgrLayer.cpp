@@ -1,5 +1,3 @@
-
-
 #include "stdafx.h"
 #include "OgrLayer.h"
 #include "OgrHelper.h"
@@ -7,6 +5,7 @@
 #include "GeoProjection.h"
 #include "GeometryConverter.h"
 #include "Shapefile.h"
+
 
 //***********************************************************************
 //*		LoadShapefile()
@@ -195,6 +194,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 		_layer = layer;
 		_forUpdate = forUpdate == VARIANT_TRUE;
 		_sourceType = ogrDbTable;
+		CacheExtents();
 		
 		*retVal = VARIANT_TRUE;
 		return S_OK;
@@ -223,6 +223,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 			_layer = layer;
 			_sourceType = ogrQuery;
 			_forUpdate = VARIANT_FALSE;
+			CacheExtents();
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -256,6 +257,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 			_dataset = ds;
 			_layer = layer;
 			_forUpdate = forUpdate == VARIANT_FALSE;
+			CacheExtents();
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -303,7 +305,12 @@ STDMETHODIMP COgrLayer::GetData(IShapefile** retVal)
 	_dataLoadingLock.Lock();
 	if (!_shapefile)
 	{
-		_shapefile = LoadShapefile();
+		if (_dynamicLoading) {
+			_shapefile = OgrHelper::CreateShapefile(_layer);
+		}
+		else {
+			_shapefile = LoadShapefile();
+		}
 	}
 	_dataLoadingLock.Unlock();
 
@@ -629,6 +636,31 @@ STDMETHODIMP COgrLayer::get_FeatureCount(VARIANT_BOOL forceLoading, int* retVal)
 }
 
 // *************************************************************
+//		CacheExtents()
+// *************************************************************
+// It's mandatory for dynamic loading, as the driver can be busy with background loading
+// with another extents
+void COgrLayer::CacheExtents()
+{
+	CComPtr<IExtents> extents;
+	VARIANT_BOOL vb;
+	get_Extents(&extents, VARIANT_FALSE, &vb);
+	ForceCreateShapefile();
+}
+
+// *************************************************************
+//		ForceCreateShapefile()
+// *************************************************************
+void COgrLayer::ForceCreateShapefile()
+{
+	tkOgrSourceType sourceType;
+	get_SourceType(&sourceType);
+	if (_dynamicLoading && !_shapefile && sourceType != ogrUninitialized) {
+		_shapefile = OgrHelper::CreateShapefile(_layer);
+	}
+}
+
+// *************************************************************
 //		get_Extents()
 // *************************************************************
 STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoading, VARIANT_BOOL *retVal)
@@ -637,17 +669,21 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	*extents = NULL;
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
+
+	if (!_envelope) {
+		_envelope = new OGREnvelope();
+		_layer->GetExtent(_envelope, forceLoading == VARIANT_TRUE);
+	}
 	
-	OGREnvelope env;
-	if (_layer->GetExtent(&env, forceLoading == VARIANT_TRUE) == OGRERR_NONE)
-	{
+	if (_envelope) {
 		IExtents* ext = NULL;
 		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
-		ext->SetBounds(env.MinX, env.MinY, 0.0, env.MaxX, env.MaxY, 0.0);
+		ext->SetBounds(_envelope->MinX, _envelope->MinY, 0.0, _envelope->MaxX, _envelope->MaxY, 0.0);
 		*extents = ext;
 		*retVal = VARIANT_TRUE;
 		return S_OK;
 	}
+	
 	return S_FALSE;
 }
 
@@ -846,3 +882,21 @@ STDMETHODIMP COgrLayer::get_GdalLastErrorMsg(BSTR* pVal)
 	*pVal = W2BSTR(s);
 	return S_OK;
 }
+
+// *************************************************************
+//		DynamicLoading()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_DynamicLoading(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _dynamicLoading;
+	return S_OK;
+}
+STDMETHODIMP COgrLayer::put_DynamicLoading(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_dynamicLoading = newVal;
+	ForceCreateShapefile();
+	return S_OK;
+}
+

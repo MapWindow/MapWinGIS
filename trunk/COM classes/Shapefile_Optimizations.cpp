@@ -655,7 +655,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 			{
 				if (_shapeData[ShapeIndex]->fastData)
 				{
-					_shapeData[ShapeIndex]->fastData->get_BoundsXY(result.left, result.bottom, result.right, result.top);
+					_shapeData[ShapeIndex]->fastData->get_BoundsXY(result.left, result.right, result.bottom, result.top);
 				}
 			}
 			else

@@ -362,30 +362,36 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
 			else if (oType == wkbPolygon25D)		bPoly25 = true;
 			else return false;		// we don't accept other types for now
 		}
-		if (bPoly25)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon25D);
+		if (bPoly25)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
-		else if (bPoly)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon);
+		else if (bPoly)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
-		
-		if (bLine25)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString25D);
+
+		if (bLine25)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
-		else if (bLine)		
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString);
+		else if (bLine)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
-		
-		if (bPoint25)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint25D);
+
+		if (bPoint25)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
-		else if (bPoint)	
-		{	shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint);
+		else if (bPoint)
+		{
+			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 	}

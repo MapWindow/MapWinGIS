@@ -1309,6 +1309,23 @@ TableRow* CTableClass::SwapTableRow(TableRow* newRow, long rowIndex)
 	return NULL;
 }
 
+// ********************************************************
+//     UpdateTableRow()
+// ********************************************************
+bool CTableClass::UpdateTableRow(TableRow* newRow, long rowIndex)
+{
+	if (!newRow) return false;
+	if (rowIndex < 0 || rowIndex >= (long)_rows.size())
+		return false;
+	
+	if (_rows[rowIndex].row)
+		delete _rows[rowIndex].row;
+
+	_rows[rowIndex].row = newRow;
+	newRow->SetDirty(TableRow::DATA_MODIFIED);
+	return true;
+}
+
 // *******************************************************************
 //		ReadRecord()
 // *******************************************************************
@@ -3362,6 +3379,38 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 	return false;
 }
 
+// ********************************************************
+//     GetUids()
+// ********************************************************
+bool CTableClass::GetUids(long fieldIndex, map<long, long>& results)
+{
+	CComPtr<IField> fld = NULL;
+	get_Field(fieldIndex, &fld);
+	if (!fld) return false;
 
+	if (fld) {
+		FieldType type;	
+		fld->get_Type(&type);
+		if (type != INTEGER_FIELD) return false;
+	}
 
+	results.clear();
 
+	long numRows;
+	get_NumRows(&numRows);
+	CComVariant var;
+	for (long i = 0; i < numRows; i++) 
+	{
+		get_CellValue(fieldIndex, i, &var);
+		long val;
+		lVal(var, val);
+		if (results.find(val) == results.end()) {
+			results[val] = i;
+		}
+		else {
+			results.clear();
+			return false;
+		}
+	}
+	return true;
+}

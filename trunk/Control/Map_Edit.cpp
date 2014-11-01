@@ -360,3 +360,40 @@ bool CMapView::SetShapeEditor(long layerHandle)
 	return true;
 }
 
+// ************************************************************
+//		HandleLButtonSubjectCursor
+// ************************************************************
+void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl)
+{
+	long numShapes;
+	_shapeEditor->get_NumSubjectShapes(&numShapes);
+	if (numShapes == 0) 
+	{
+		// let's choose the subject
+		long shapeIndex = -1, layerHandle = -1;
+		if (SelectSingleShape(x, y, layerHandle, shapeIndex)) 
+		{
+			VARIANT_BOOL vb;
+			_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);
+			RedrawCore(RedrawAll, false, true);
+		}
+	}
+	else {
+		tkShapeEditorState state;
+		_shapeEditor->get_EditorState(&state);
+		if (state != EditorCreationUnbound)
+		{
+			VARIANT_BOOL vb;
+			ShpfileType shpType = _shapeEditor->GetOverlayTypeForSubjectOperation((tkCursorMode)m_cursorMode);
+			_shapeEditor->StartUnboundShape(shpType, &vb);
+
+			OLE_COLOR color;
+			GetUtils()->ColorByName(m_cursorMode == cmAddPart ? Green : Red, &color);
+			_shapeEditor->put_FillColor(color);
+			if (m_cursorMode == cmSplitByPolyline) {
+				_shapeEditor->put_LineColor(RGB(255,0,0));
+			}
+		}
+		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+	}
+}

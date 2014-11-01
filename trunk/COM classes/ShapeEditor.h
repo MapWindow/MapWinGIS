@@ -122,6 +122,8 @@ public:
 	STDMETHOD(StartUnboundShape)(ShpfileType shpTYpe, VARIANT_BOOL* retVal);
 	STDMETHOD(get_VerticesVisible)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_VerticesVisible)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ValidationMode)(tkEditorValidationMode* pVal);
+	STDMETHOD(put_ValidationMode)(tkEditorValidationMode newVal);
 private:
 	
 	BSTR _key;
@@ -151,6 +153,7 @@ public:
 
 	bool ShapeShouldBeHidden();
 	EditorBase* GetActiveShape() { return _activeShape; }
+	void SetIsSubject(bool value) { _isSubjectShape = value; }
 	void DiscardState();
 	void SaveState();
 	void MoveShape(double offsetX, double offsetY);
@@ -160,7 +163,7 @@ public:
 	bool RemovePart();
 	bool CheckState();
 	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX, int screenOffsetY);
-	IShape* ApplyOperation(SubjectOperation operation, int& layerHandle, int& shapeIndex);
+	IShape* ApplyOperation(tkCursorMode operation, int& layerHandle, int& shapeIndex);
 	IShape* GetLayerShape(long layerHandle, long shapeIndex);
 	bool GetClosestPoint(double projX, double projY, double& xResult, double& yResult);
 	bool HandleDelete();
@@ -169,13 +172,9 @@ public:
 	bool RestoreState(IShape* shp, long layerHandle, long shapeIndex);
 	bool TrySave();
 	void HandleProjPointAdd(double projX, double projY);
-	void SetIsSubject(bool value) {
-		_isSubjectShape = value;
-	}
 	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
-	STDMETHOD(get_ValidationMode)(tkEditorValidationMode* pVal);
-	STDMETHOD(put_ValidationMode)(tkEditorValidationMode newVal);
 	bool ValidateWithGeos(IShape** shp);
 	bool Validate(IShape** shp);
+	ShpfileType GetOverlayTypeForSubjectOperation(tkCursorMode cursor);
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

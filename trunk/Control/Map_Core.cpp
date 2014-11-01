@@ -191,6 +191,7 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 	{	
 		Layer * l = _allLayers[LayerHandle];
 		if(l->object == NULL) return true;
+		if (l->IsDynamicOgrLayer())return false;
 		if (l->IsShapefile())
 		{
 			IShapefile * ishp = NULL;
@@ -215,42 +216,7 @@ BOOL CMapView::AdjustLayerExtents(long LayerHandle)
 	{	
 		Layer * l = _allLayers[LayerHandle];
 		if(l->object == NULL) return FALSE;
-		
-		if (l->IsImage())
-		{
-			IImage * iimg = NULL;
-			if (!l->QueryImage(&iimg)) return FALSE;
-			double xllCenter=0, yllCenter=0, dx=0, dy=0;
-			long width=0, height=0;
-			
-			iimg->get_OriginalXllCenter(&xllCenter);
-			iimg->get_OriginalYllCenter(&yllCenter);
-			iimg->get_OriginalDX(&dx);
-			iimg->get_OriginalDY(&dy);
-			iimg->get_OriginalWidth(&width);
-			iimg->get_OriginalHeight(&height);	
-			l->extents = Extent( xllCenter, xllCenter + dx*width, yllCenter, yllCenter + dy*height );
-			iimg->Release();
-			iimg = NULL;
-			return TRUE;
-		}
-		else if (l->IsShapefile())
-		{
-			IShapefile * ishp = NULL;
-			if (!l->QueryShapefile(&ishp)) return FALSE;
-			IExtents * box = NULL;
-			ishp->get_Extents(&box);
-			double xm,ym,zm,xM,yM,zM;
-			box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-			l->extents = Extent(xm,xM,ym,yM);
-			box->Release();
-			box = NULL;
-			ishp->Release();
-			ishp=NULL;
-			return TRUE;
-		}
-		else return FALSE;
-
+		return l->UpdateExtentsFromDatasource() ? TRUE: FALSE;
 	}
 	else
 	{	
@@ -323,7 +289,7 @@ void CMapView::Redraw2(tkRedrawType redrawType)
 }
 
 // *************************************************
-//			Redraw3()						  
+//			RedrawCore()						  
 // *************************************************
 void CMapView::RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce )
 {

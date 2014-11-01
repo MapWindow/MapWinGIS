@@ -283,6 +283,20 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			// reload the shx file
 			this->readShx();
 
+			// to clear the data as mapping between disk shapefile and in-memory one is lost
+			// TODO: use MWShapeId, preserve the mapping
+			if (shpOffsets.size() != _shapeData.size())
+			{
+				for (unsigned int i = 0; i < _shapeData.size(); i++)
+					delete _shapeData[i];	// all the releasing done in the destructor
+				_shapeData.clear();
+				_shapeData.reserve(shpOffsets.size());
+				for (size_t i = 0; i < shpOffsets.size(); i++)
+				{
+					_shapeData.push_back(new ShapeData());
+				}
+			}
+
 			if(StopEditTable != VARIANT_FALSE)
 			{
 				StopEditingTable(ApplyChanges,cBack,retval);

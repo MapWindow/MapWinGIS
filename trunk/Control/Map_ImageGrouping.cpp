@@ -2,6 +2,7 @@
 #include "map.h"
 #include "Image.h"
 #include "ImageDrawing.h"
+#include "OgrLayer.h"
 
 // *****************************************************************
 //		BuildImageGroups
@@ -390,18 +391,27 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 // ****************************************************************
 void CMapView::ReloadImageBuffers()
 {
+	int zoom = _currentZoom;
+	double scale = GetCurrentScale();
+
 	IImage * iimg = NULL;
 	for(size_t i = 0; i < _activeLayers.size(); i++ )
 	{
 		Layer * l = _allLayers[_activeLayers[i]];
+		if (!l->IsVisible(scale, zoom)) continue;
 
-		if ((l->IsImage()) && (l->flags & Visible))
+		if (l->IsImage())
 		{
 			if (l->QueryImage(&iimg))
 			{	
 				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
 				iimg->Release();
 			}
+		}
+
+		// reload dynamic OGR layers as well
+		if (l->GetLayerType() == OgrLayerSource) {
+			l->LoadAsync(this, _extents);
 		}
 	}
 }

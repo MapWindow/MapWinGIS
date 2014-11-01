@@ -72,22 +72,34 @@ CString OgrHelper::GetDsCapabilityString(tkOgrDSCapability capability)
 IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallback* callback /*= NULL*/)
 {
 	if (!layer)	return NULL;
-	layer->ResetReading();
+	
+	IShapefile* sf = CreateShapefile(layer);
 
-	isTrimmed = false;
+	if (sf) {
+		FillShapefile(layer, sf, callback, isTrimmed);
+	}
+	return sf;
+}
+
+// *************************************************************
+//		CreateShapefile()
+// *************************************************************
+IShapefile* OgrHelper::CreateShapefile(OGRLayer* layer)     // TODO: secure OGR layer
+{
+	layer->ResetReading();
 
 	IShapefile* sf;
 	VARIANT_BOOL vbretval;
 
 	OGRFeature *poFeature;
-	
+
 	ShpfileType shpType = GeometryConverter::GeometryType2ShapeType(layer->GetGeomType());
-		
+
 	// in case of queries or generic (untyped) geometry columns, type isn't defined
 	// as quick fix let's fetch it from the first shape
 	if (shpType == SHP_NULLSHAPE)
 	{
- 		OGRFeatureDefn* defn = layer->GetLayerDefn();
+		OGRFeatureDefn* defn = layer->GetLayerDefn();
 		while ((poFeature = layer->GetNextFeature()) != NULL)
 		{
 			// TODO: perhaps loop through all features and find out the most frequent type
@@ -109,7 +121,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 	OGRSpatialReference* sr = layer->GetSpatialRef();
 	if (sr)
 	{
-		// only if srid is specified for geometry field
+		// only if SRID is specified for geometry field
 		IGeoProjection* gp = NULL;
 		sf->get_GeoProjection(&gp);
 		if (gp)
@@ -139,7 +151,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 	}
 
 	OGRFeatureDefn *poFields = layer->GetLayerDefn();
-	
+
 	for (long iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
 	{
 		GetUtils()->CreateInstance(idField, (IDispatch**)&fld);
@@ -159,23 +171,49 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
 		fld->Release();
 	}
+	return sf;
+}
 
-	/* ----------------------------------------------------------------- */
-	/*		Converting of the shapes and cell values						 */
-	/* ----------------------------------------------------------------- */
+// *************************************************************
+//		FillShapefile()
+// *************************************************************
+bool OgrHelper::FillShapefile(OGRLayer* layer, IShapefile* sf, ICallback* callback, bool& isTrimmed)
+{
+	if (!sf || !layer) return false;
+	
+	layer->ResetReading();
+
 	int numFeatures = layer->GetFeatureCount();
+	/*
+	if (numFeatures > m_globalSettings.ogrLayerMaxFeatureCount) {
+		isTrimmed = true;
+		return false;
+	}*/
+
 	int count = 0;
 	long percent = 0;
 	USES_CONVERSION;
 	CComBSTR key = L"";
+
+	OGRFeature *poFeature;
+	VARIANT_BOOL vbretval;
+
+	CStringA name = layer->GetFIDColumn();
+	bool hasFID = name.GetLength() > 0;
+	ShpfileType shpType;
+	sf->get_ShapefileType(&shpType);
+
+	map<long, long> fids;
 	
-	while ( (poFeature = layer->GetNextFeature()) != NULL)
+	OGRFeatureDefn *poFields = layer->GetLayerDefn();
+
+	while ((poFeature = layer->GetNextFeature()) != NULL)
 	{
 		Utility::DisplayProgress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
 		count++;
 
-		if (count > m_globalSettings.ogrLayerMaxFeatureCount)
-		{
+		if (count > m_globalSettings.ogrLayerMaxFeatureCount) {
+			OGRFeature::DestroyFeature(poFeature);
 			isTrimmed = true;
 			break;
 		}
@@ -187,7 +225,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 		{
 			shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
 		}
-		
+
 		if (!shp)
 		{
 			// insert null shape so that client can still access it
@@ -198,7 +236,7 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 		sf->get_NumShapes(&numShapes);
 		sf->EditInsertShape(shp, &numShapes, &vbretval);
 		shp->Release();
-	
+
 		if (hasFID)
 		{
 			CComVariant var;
@@ -233,10 +271,120 @@ IShapefile* OgrHelper::Layer2Shapefile(OGRLayer* layer, bool& isTrimmed, ICallba
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	Utility::DisplayProgressCompleted(callback);
-	
+
 	sf->RefreshExtents(&vbretval);
 	Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
-	return sf;
+	return true;
+}
+
+// *************************************************************
+//		Layer2RawData()
+// *************************************************************
+bool OgrHelper::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader)
+{
+	if (!layer || !extents || !loader) return false;
+
+	Debug::WriteWithThreadId("View extents: %f %f %f %f", extents->left, extents->right, extents->bottom, extents->top);
+	layer->SetSpatialFilterRect(extents->left, extents->bottom, extents->right, extents->top);
+	
+	
+	int numFeatures = layer->GetFeatureCount();
+	if (!loader->CanLoad(numFeatures)) 
+	{
+		Debug::WriteWithThreadId("Too much features. Skip loading.");
+		return false;
+	}
+
+	// if th loading is aborted by next thread before it's actually loaded, it doesn't matter
+	// the new thread will update this variable
+	loader->LastSuccessExtents = *extents;
+
+	OGRFeature *poFeature;
+	VARIANT_BOOL vb;
+
+	CStringA name = layer->GetFIDColumn();
+	bool hasFID = name.GetLength() > 0;
+
+	map<long, long> fids;
+	OGRFeatureDefn *poFields = layer->GetLayerDefn();
+	
+	vector<ShapeRecordData*> list;
+	bool success = true;
+	layer->ResetReading();
+	while ((poFeature = layer->GetNextFeature()) != NULL)
+	{
+		if (loader->HaveWaitingTasks())  
+		{
+			Debug::WriteWithThreadId("Task was aborted.");
+			success = false;
+			break;
+		}
+
+		OGRGeometry *oGeom = poFeature->GetGeometryRef();
+
+		CComPtr<IShape> shp = NULL;
+		if (oGeom)
+			shp = GeometryConverter::GeometryToShape(oGeom, false);   // TODO: is it M shapefile?
+
+		if (!shp)
+		{
+			// insert null shape so that client can still access it
+			GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+		}
+
+		ShapeRecordData* data = new ShapeRecordData();
+		shp->ExportToBinary(&(data->Shape), &vb);
+		if (hasFID)
+		{
+			VARIANT* var = new VARIANT;
+			VariantInit(var);
+			var->vt = VT_I4;
+			var->lVal = poFeature->GetFID();
+			data->Row->values.push_back(var);
+		}
+
+		for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
+		{
+			OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
+			OGRFieldType type = oField->GetType();
+
+			VARIANT* var = new VARIANT;
+			VariantInit(var);
+			if (type == OFTInteger)
+			{
+				var->vt = VT_I4;
+				var->lVal = poFeature->GetFieldAsInteger(iFld);
+			}
+			else if (type == OFTReal)
+			{
+				var->vt = VT_R8;
+				var->dblVal = poFeature->GetFieldAsDouble(iFld);
+			}
+			else //if (type == OFTString )
+			{
+				var->vt = VT_BSTR;
+				var->bstrVal = A2BSTR(poFeature->GetFieldAsString(iFld));		// BSTR will be cleared by CComVariant destructor
+			}
+			data->Row->values.push_back(var);
+		}
+		
+		list.push_back(data);
+		OGRFeature::DestroyFeature(poFeature);
+	}
+	
+	if (list.size() > 0) 
+	{
+		// copy to the location accessible by map rendering
+		loader->LockData(true);
+		loader->Data.insert(loader->Data.end(), list.begin(), list.end());
+		loader->LockData(false);
+	}
+
+	if (success) {
+		Debug::WriteWithThreadId("Task succeeded.");
+	}
+
+	return success;
 }
 
 // *************************************************************
@@ -526,3 +674,5 @@ CStringW OgrHelper::OgrString2Unicode(const char* outputString)
 {
 	return OgrString2Unicode(outputString, m_globalSettings.ogrEncoding);
 }
+
+

@@ -517,8 +517,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	bool shift = (nFlags & MK_SHIFT) != 0;
 
 	tkSnapBehavior behavior;
-	bool snapping = (SnappingIsOn(nFlags, behavior) && 
-					(m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart))
+	bool snapping = (SnappingIsOn(nFlags, behavior) && IsDigitizingCursor())
 					|| (m_cursorMode == cmMeasure && shift);
 
 	VARIANT_BOOL snapped = VARIANT_FALSE;
@@ -543,41 +542,17 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 	}
 
+	if (_IsSubjectCursor())
+	{
+		HandleLButtonSubjectCursor(x, y, projX, projY, ctrl);
+		return;
+	}
+
 	// --------------------------------------------
 	//  Handling particular cursor modes
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
-		case cmRemovePart:
-		case cmAddPart:
-		{
-			long numShapes;
-			_shapeEditor->get_NumSubjectShapes(&numShapes);
-			if (numShapes == 0) {
-				// let's choose the subject
-				long shapeIndex = -1, layerHandle = -1;
-				if (SelectSingleShape(x, y, layerHandle, shapeIndex)) {
-					VARIANT_BOOL vb;
-					_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);
-					RedrawCore(RedrawAll, false, true);
-				}
-			}
-			else {
-				tkShapeEditorState state;
-				_shapeEditor->get_EditorState(&state);
-				if (state != EditorCreationUnbound) 
-				{
-					VARIANT_BOOL vb;
-					ShpfileType shpType = m_cursorMode == cmAddPart ? SHP_NULLSHAPE : SHP_POLYGON;
-					_shapeEditor->StartUnboundShape(shpType, &vb);
-					OLE_COLOR color;
-					GetUtils()->ColorByName(m_cursorMode == cmAddPart ? Green : Red, &color);
-					_shapeEditor->put_FillColor(color);
-				}
-				HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
-			}
-		}
-		break; 
 		case cmAddShape:
 			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 			break;
@@ -910,9 +885,30 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y );
 		}
 	}
-	
+
 	bool updateHotTracking = true;
 	bool refreshNeeded = false;
+
+	if (IsDigitizingCursor() || m_cursorMode == cmMeasure)
+	{
+		ActiveShape* shp = GetActiveShape();
+		if (shp->IsDynamic() && shp->GetPointCount() > 0)
+		{
+			VARIANT_BOOL snapped = VARIANT_FALSE;
+			double x = point.x, y = point.y;
+			tkSnapBehavior behavior;
+			if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault)
+			{
+				snapped = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &x, &y);
+				if (snapped) {
+					ProjToPixel(x, y, &x, &y);
+				}
+			}
+			shp->SetMousePosition(x, y);
+			refreshNeeded = true;
+		}
+	}
+	
 	switch(m_cursorMode)
 	{
 		case cmZoomIn:
@@ -941,29 +937,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				refreshNeeded = true;
 		}
 		break;
-		case cmMeasure:
-		case cmAddShape:
-		case cmAddPart:
-		case cmRemovePart:
-			{
-				ActiveShape* shp = GetActiveShape();
-				if (shp->IsDynamic() && shp->GetPointCount() > 0)
-				{
-					VARIANT_BOOL snapped = VARIANT_FALSE;
-					double x = point.x, y = point.y;
-					tkSnapBehavior behavior;
-					if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault)
-					{
-						snapped = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &x, &y);
-						if (snapped) {
-							ProjToPixel(x, y, &x, &y);
-						}
-					}
-					shp->SetMousePosition(x, y);
-					refreshNeeded = true;
-				}
-				break;
-			}
 	}
 
 	if (updateHotTracking) 
@@ -1050,7 +1023,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
-		else if (m_cursorMode == cmAddShape || m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart)
+		else if (IsDigitizingCursor())
 		{
 			_shapeEditor->Undo(&redraw);
 			_canUseMainBuffer = false;

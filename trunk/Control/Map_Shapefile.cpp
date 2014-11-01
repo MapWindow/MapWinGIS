@@ -1197,6 +1197,7 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 			switch (selector)
 			{
 			case slctHotTracking:
+				if (!layer->wasRendered) return false;
 				VARIANT_BOOL vb;
 				sf->get_InteractiveEditing(&vb);
 				if (vb) 
@@ -1257,8 +1258,10 @@ HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<b
 {
 	HotTrackingInfo* info = NULL;
 	IShapefile * sf = NULL;
-	for(int i = 0; i < (int)_activeLayers.size(); i++ )
+	for (int i = (int)_activeLayers.size() - 1; i >= 0; i--)
 	{
+		if (!layers[i]) continue;
+
 		Layer* layer = _allLayers[_activeLayers[i]];
 		if (layer->IsShapefile())
 		{

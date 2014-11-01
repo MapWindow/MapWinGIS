@@ -256,6 +256,8 @@ public:
 	TableRow* CloneTableRow(int rowIndex);
 	bool InsertTableRow(TableRow* row, long rowIndex);
 	TableRow* SwapTableRow(TableRow* row, long rowIndex);
+	bool GetUids(long fieldIndex, map<long, long>& resutls);
+	bool UpdateTableRow(TableRow* newRow, long rowIndex);
 
 private:
 	DBFInfo * dbfHandle;	// underlying data structure
@@ -297,6 +299,7 @@ public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

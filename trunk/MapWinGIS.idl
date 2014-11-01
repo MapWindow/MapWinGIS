@@ -1018,6 +1018,7 @@ enum tkScalebarUnits
 		cmEditShape = 8,
 		cmAddPart = 9,
 		cmRemovePart = 10,
+		cmSplitByPolyline = 11,
 	} tkCursorMode;
 
 	typedef 
@@ -5579,6 +5580,8 @@ interface IOgrLayer : IDispatch{
 	[id(28)] HRESULT OpenFromDatabase([in]BSTR connectionString, [in]BSTR LayerName, [in, optional, defaultvalue(0)]VARIANT_BOOL forUpdate, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(29)] HRESULT SourceType([out, retval]tkOgrSourceType* retVal);
 	[propget, id(30)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
+	[propget, id(31)] HRESULT DynamicLoading([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(31)] HRESULT DynamicLoading([in] VARIANT_BOOL newVal);
 };
 
 [

@@ -1214,6 +1214,25 @@ namespace Utility
 namespace Debug
 {
 	// ****************************************************************** 
+	//		WriteWithThreadId
+	// ****************************************************************** 
+	void WriteWithThreadId(CString format, ...)
+	{
+		TCHAR buffer[1024];
+		va_list args;
+		va_start(args, format);
+		vsprintf(buffer, format, args);
+
+		SYSTEMTIME time;
+		GetLocalTime(&time);
+		CString s2;
+		s2.Format("Id=%d; %02d:%02d:%02d.%-3d: ", GetCurrentThreadId(), time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+		CString s = buffer;
+		format = s2 + s + "\n";
+		OutputDebugStringA(format);
+	}
+
+	// ****************************************************************** 
 	//		WriteWithTime
 	// ****************************************************************** 
 	void WriteWithTime(CString format, ...)

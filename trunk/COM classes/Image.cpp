@@ -1901,13 +1901,15 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 		if( rasterDataset != NULL )
 		{
 			char * wkt = (char *)rasterDataset->GetProjectionRef();
-
 			if (wkt != NULL && _tcslen(wkt) != 0)
 			{
 				OGRSpatialReferenceH  hSRS;
 				hSRS = OSRNewSpatialReference(NULL);
 				
-				if( OSRImportFromESRI( hSRS, &wkt ) == CE_None ) 
+				char** list = NULL;
+
+				CSLAddString(list, wkt);
+				if (OSRImportFromESRI(hSRS, list) == CE_None)
 				{	
 					char * pszProj4 = NULL;				
 					OSRExportToProj4(hSRS, &pszProj4);
@@ -1919,7 +1921,7 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 				} 
 				else 
 				{
-					if( OSRImportFromWkt( hSRS, &wkt ) == CE_None )
+					if( OSRImportFromWkt( hSRS, list ) == CE_None )
 					{
 						char * pszProj4 = NULL;
 						OSRExportToProj4(hSRS, &pszProj4);
@@ -1931,6 +1933,7 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 					}
 				}
 				OSRDestroySpatialReference( hSRS );
+				CSLDestroy(list);
 			}
 
 			GDALClose(rasterDataset);
