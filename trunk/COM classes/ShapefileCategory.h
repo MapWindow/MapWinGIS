@@ -43,13 +43,12 @@ public:
 		m_name = A2BSTR("");
 		m_expression = A2BSTR("");
 		m_priority = - 1;
-		m_value.vt = VT_EMPTY;	// in case var type is different from this value, the value will be treated as the unique value of field
-								// so expression property will be ignored
 
 		m_drawingOptions = NULL;
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_drawingOptions);
 
 		_categories = NULL;
+		_categoryValue = cvExpression;
 		gReferenceCounter.AddRef(tkInterface::idShapefileCategory);
 	}
 	
@@ -92,6 +91,12 @@ public:
 	STDMETHOD(put_DrawingOptions)(IShapeDrawingOptions* newVal);
 	STDMETHOD(get_Priority)(LONG* retval)							{*retval = m_priority;			return S_OK;};
 	STDMETHOD(put_Priority)(LONG newVal)							{m_priority = newVal;			return S_OK;};
+	STDMETHOD(get_ValueType)(tkCategoryValue* pVal);
+	STDMETHOD(put_ValueType)(tkCategoryValue newVal);
+	STDMETHOD(get_MinValue)(VARIANT* pVal);
+	STDMETHOD(put_MinValue)(VARIANT newVal);
+	STDMETHOD(get_MaxValue)(VARIANT* pVal);
+	STDMETHOD(put_MaxValue)(VARIANT newVal);
 
 	// -------------------------------------------------------------
 	//	 Members
@@ -100,8 +105,10 @@ public:
 	BSTR m_expression;
 	IShapeDrawingOptions* m_drawingOptions;
 	long m_priority;
-	CComVariant m_value;
 	IShapefileCategories* _categories;
+	tkCategoryValue _categoryValue;
+	CComVariant _minValue;
+	CComVariant _maxValue;
 
 	// -------------------------------------------------------------
 	//	 Functions
@@ -109,11 +116,9 @@ public:
 public:
 	CDrawingOptionsEx* get_UnderlyingOptions();
 	void put_underlyingOptions(CDrawingOptionsEx*);
-
-	void put_parentCollection(IShapefileCategories* categories)
-	{
-		_categories = categories;
-	}
+	void put_parentCollection(IShapefileCategories* categories) {_categories = categories;}
+	tkCategoryValue GetCategoryValue() {return _categoryValue; }
+	CComVariant* GetMinValue() { return &_minValue; }
+	CComVariant* GetMaxValue() { return &_maxValue; }
 };
-
 OBJECT_ENTRY_AUTO(__uuidof(ShapefileCategory), CShapefileCategory)

@@ -1669,7 +1669,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	hDriver = GDALGetDriverByName (pszFormat);
 	if (hDriver == NULL)
 	{
-		CPLError(CE_Failure,0, "Output driver `%s' not recognised.", pszFormat );
+		CPLError(CE_Failure,0, "Output driver `%s' not recognized.", pszFormat );
 
 		// TODO: List valid drivers?
 

@@ -54,6 +54,8 @@ namespace Utility
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue);
+	void SerializeVariant(CPLXMLNode* node, CString elementName, VARIANT* val);
+	void DeserializeVariant(CString sValue, FieldType fieldType, VARIANT* var);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
 	CString GetFileVersionString();
 
@@ -70,6 +72,7 @@ namespace Utility
 	bool ShapeTypeIsM(ShpfileType shpType);
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType);
 	void ClearShapefileModifiedFlag(IShapefile* sf);
+	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType);
 
 	// units conversions
 	double getConversionFactor(tkUnitsOfMeasure Units);

@@ -223,6 +223,18 @@ const char * ErrorMsg( long ErrorCode )
 			return "Operation aborted because of the invalid shapes. Consider changing shape validation mode.";
 		case tkOGR_LAYER_TRIMMED:
 			return "Number of features for the layer exceeds the limit. Only part of them will be available via OgrLayer.Data property. See GlobalSettings.OgrLayerMaxFeatureCount.";
+		case tkNOT_ALLOWED_IN_OGR_DYNAMIC_MODE:
+			return "The method is not allowed in dynamic loading mode.";
+		case tkOGR_NO_STYLE_TABLE_CREATION:
+			return "Creation of style table is not supported for the current driver.";
+		case tkOGR_NO_STYLE_FOR_QUERIES:
+			return "Styles are supported for temporary OGR layers created from SQL queries.";
+		case tkOGR_FAILED_TO_CREATE_STYLE_TABLE:
+			return "Failed to create style table in the datasource.";
+		case tkOGR_INVALID_FIELD_NAME:
+			return "No field with specified name was found in datasource.";
+		case tkOGR_NO_SHAPEFILE:
+			return "Failed to access underlying shapefile.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

@@ -94,6 +94,9 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{3a41669f-5b51-4a20-b150-590c68fa301a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Ogr">
+      <UniqueIdentifier>{1b3ec4ec-9b54-444a-b327-5b9be51ac6f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -712,9 +715,6 @@
     <ClInclude Include="COM classes\OgrLayer.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\OgrHelper.h">
-      <Filter>Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="COM classes\UndoList.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
@@ -738,8 +738,29 @@
     <ClInclude Include="Shapefile\GeoShape.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\OgrDynamicLoader.h">
-      <Filter>Shapefile</Filter>
+    <ClInclude Include="Ogr\OgrHelper.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Ogr2Shape.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Shape2Ogr.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\Ogr2RawData.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrLabels.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrLoader.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrStyle.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\FieldClassification.h">
+      <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1541,9 +1562,6 @@
     <ClCompile Include="COM classes\OgrLayer.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\OgrHelper.cpp">
-      <Filter>Utilities</Filter>
-    </ClCompile>
     <ClCompile Include="COM classes\UndoList.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
@@ -1569,11 +1587,32 @@
     <ClCompile Include="Control\Map_Dynamic.cpp">
       <Filter>Control</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\OgrDynamicLoader.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Structures\Layer.cpp">
       <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrHelper.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Ogr2Shape.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Shape2Ogr.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\Ogr2RawData.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrLabels.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrLoader.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrStyle.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\FieldClassification.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

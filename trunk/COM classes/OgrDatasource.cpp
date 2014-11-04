@@ -5,6 +5,8 @@
 #include "GeoProjection.h"
 #include "GeometryConverter.h"
 #include "Shapefile.h"
+#include "OgrStyle.h"
+#include "Shape2Ogr.h"
 
 //***********************************************************************
 //*		get/put_Key()
@@ -355,7 +357,7 @@ STDMETHODIMP COgrDatasource::LayerIndexByName(BSTR layerName, int* retVal)
 }
 
 // *************************************************************
-//		CreateLayer()
+//		ImportShapefile()
 // *************************************************************
 STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLayerName, BSTR creationOptions, 
 	tkShapeValidationMode validationMode, VARIANT_BOOL* retVal)
@@ -416,7 +418,7 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	}
 
 	// copying fields and shapes
-	bool result = OgrHelper::Shapefile2OgrLayer(shapefile, layer, _globalCallback);
+	bool result = Shape2Ogr::Shapefile2OgrLayer(shapefile, layer, m_globalSettings.saveOgrLabels, _globalCallback);
 	if (result)
 	{
 		layer->SyncToDisk();
@@ -424,11 +426,19 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 
+	// saving current style as a default one
+	if (m_globalSettings.ogrUseStyles) 
+	{
+		CStringW layerName = OLE2W(newLayerName);
+		if (OgrStyleHelper::SupportsStyles(_dataset, layerName)) {
+			OgrStyleHelper::SaveStyle(_dataset, shapefile, layerName, "");
+		}
+	}
+
 	// run vacuum command for PostGis unless user canceled it explicitly
 	if (vacuum)
 	{
-		const char* driver = _dataset->GetDriverName();
-		if (_stricmp(driver, "PostgreSQL") == 0)
+		if (OgrHelper::IsPostGisDatasource(_dataset))
 		{
 			// if it fails just ignore it as it's not critical
 			name = "VACUUM FULL ANALYZE " + name;
@@ -485,7 +495,7 @@ char** COgrDatasource::ParseLayerCreationOptions(BSTR creationOptions)
 }
 
 // *************************************************************
-//		get_DriverMetadata2()
+//		get_DriverMetadata()
 // *************************************************************
 STDMETHODIMP COgrDatasource::get_DriverMetadata(tkGdalDriverMetadata metadata, BSTR* retVal)
 {

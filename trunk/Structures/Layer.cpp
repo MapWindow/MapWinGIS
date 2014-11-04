@@ -2,6 +2,39 @@
 #include "Layer.h"
 #include "OgrLayer.h"
 #include "OgrHelper.h"
+#include "Ogr2RawData.h"
+#include "ShapefileCategories.h"
+
+// ****************************************************
+//		CloseDatasources()
+// ****************************************************
+void Layer::CloseDatasources()
+{
+	// we don't release objects here, it's done in Layer destructor
+	VARIANT_BOOL vb;
+	if (IsOgrLayer())
+	{
+		CComPtr<IOgrLayer> layer = NULL;
+		if (QueryOgrLayer(&layer)) {
+			layer->Close();
+		}
+	}
+	else if (IsShapefile())
+	{
+		CComPtr<IShapefile> ishp = NULL;
+		if (QueryShapefile(&ishp))
+			ishp->Close(&vb);
+	}
+
+	CComPtr<IImage> iimg = NULL;
+	if (QueryImage(&iimg))
+		iimg->Close(&vb);
+
+	CComPtr<IGrid> igrid = NULL;
+	object->QueryInterface(IID_IGrid, (void**)&igrid);
+	if (igrid != NULL)
+		igrid->Close(&vb);
+}
 
 // ****************************************************
 //		IsInMemoryShapefile()
@@ -42,6 +75,22 @@ bool Layer::IsDynamicOgrLayer()
 }
 
 // ****************************************************
+//		GetOgrLoader()
+// ****************************************************
+OgrDynamicLoader* Layer::GetOgrLoader()
+{
+	if (type != OgrLayerSource) return NULL;
+	OgrDynamicLoader* loader = NULL;
+	IOgrLayer* layer = NULL;
+	if (QueryOgrLayer(&layer))
+	{
+		loader = ((COgrLayer*)layer)->GetDynamicLoader();
+		layer->Release();
+	}
+	return loader;
+}
+
+// ****************************************************
 //		QueryShapefile()
 // ****************************************************
 bool Layer::QueryShapefile(IShapefile** sf)
@@ -51,12 +100,11 @@ bool Layer::QueryShapefile(IShapefile** sf)
 	if (!(*sf))
 	{
 		// in case of OGR, we will return underlying shapefile
-		IOgrLayer* ogr = NULL;
+		CComPtr<IOgrLayer> ogr = NULL;
 		this->object->QueryInterface(IID_IOgrLayer, (void**)&ogr);
 		if (ogr)
 		{
 			ogr->GetData(sf);
-			ogr->Release();
 		}
 	}
 	return (*sf) != NULL;
@@ -244,44 +292,60 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		Layer* layer = options->layer;
 		if (layer)
 		{
-			OgrDynamicLoader* loader = &layer->_loader;
+			OgrDynamicLoader* loader = layer->GetOgrLoader();
 		
 			Debug::WriteWithThreadId("New task");
-			loader->AddWaitingTask();		// stop current loading task
-
-			loader->LockLoading(true);	// next one is allowed after previous is finished
-			Debug::WriteWithThreadId("Acquired lock");
-
-			loader->ReleaseWaitingTask();   // provide the way for the next one to stop it
-			if (loader->HaveWaitingTasks()) 
+			if (loader->AddWaitingTask())		// stop current loading task
 			{
-				Debug::WriteWithThreadId("Task was canceled");
+				loader->LockLoading(true);	// next one is allowed after previous is finished
+				Debug::WriteWithThreadId("Acquired lock");
+
+				loader->ReleaseWaitingTask();   // provide the way for the next one to stop it
+				if (loader->HaveWaitingTasks()) 
+				{
+					Debug::WriteWithThreadId("Task was canceled");
+					loader->LockLoading(false);
+					return 0;    // more of tasks further down the road, don't even start this
+				}
+
+				layer->_asyncLoading = true;
+				IOgrLayer* ogr = NULL;
+				layer->QueryOgrLayer(&ogr);
+				if (ogr) 
+				{
+					OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
+					ULONG count = ogr->Release();
+					IShapefile* sf = ((COgrLayer*)ogr)->GetShapefileNoRef();
+					
+					CComBSTR expr;
+					ogr->get_LabelExpression(&expr);
+					loader->LabelExpression = OLE2W(expr);
+					
+					bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, *options->categories);
+
+					// just quietly delete it for now
+					if (!success) {
+						loader->Clear();
+					}
+
+					if (success) {
+						options->map->_Redraw(RedrawAll, false, false);
+					}
+				}
 				loader->LockLoading(false);
-				return 0;    // more of tasks further down the road, don't even start this
+				Debug::WriteWithThreadId("Lock released. \n");
+				layer->_asyncLoading = false;
 			}
-
-			layer->_asyncLoading = true;
-			IOgrLayer* ogr = NULL;
-			layer->QueryOgrLayer(&ogr);
-			if (ogr) 
-			{
-				OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
-				bool success = OgrHelper::Layer2RawData(ds, &options->extents, &options->layer->_loader);
-
-				// just quietly delete it for now
-				if (!success) {
-					options->layer->_loader.Clear();
-				}
-
-				if (success) {
-					options->map->_Redraw(RedrawAll, false, false);
-				}
-			}
-			loader->LockLoading(false);
-			Debug::WriteWithThreadId("Lock released. \n");
-			layer->_asyncLoading = false;
 		}
 		
+		if (options->categories)
+		{
+			for (size_t i = 0; i < options->categories->size(); i++) {
+				delete (*options->categories)[i];
+			}
+			delete options->categories;
+		}
+			
 		delete options;
 		return 1;
 	}
@@ -294,14 +358,33 @@ void Layer::LoadAsync(IMapViewCallback* callback, Extent extents)
 {
 	if (IsDynamicOgrLayer()) 
 	{
-		if (extents == _loader.LastExtents) return;   // definitely no need to run it twice
-		_loader.LastExtents = extents;
+		OgrDynamicLoader* loader = GetOgrLoader();
+		if (!loader) return;
+
+		if (extents == loader->LastExtents) return;   // definitely no need to run it twice
+		loader->LastExtents = extents;
 
 		// if larger extents were requested previously and features were loaded, skip the new request
-		if (extents.Within(_loader.LastSuccessExtents)) return;	   
-		
-		AsyncLoadingParams* param = new AsyncLoadingParams(callback, extents, this);
-		_thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
+		if (extents.Within(loader->LastSuccessExtents)) return;	   
+
+		// get a copy of categories to apply them in the background thread
+		vector<CategoriesData*>* data = new vector<CategoriesData*>();
+		CComPtr<IShapefile> sf = NULL;
+		this->QueryShapefile(&sf);
+		if (sf) {
+			ShpfileType shpType;
+			sf->get_ShapefileType(&shpType);
+			loader->IsMShapefile = Utility::ShapeTypeIsM(shpType);
+			IShapefileCategories* categories = NULL;
+			sf->get_Categories(&categories);
+			if (categories) {
+				((CShapefileCategories*)categories)->GetCategoryData(*data);
+				categories->Release();
+			}
+		}
+
+		AsyncLoadingParams* param = new AsyncLoadingParams(callback, extents, this, data);
+		CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 	}
 }
 
@@ -310,52 +393,77 @@ void Layer::LoadAsync(IMapViewCallback* callback, Extent extents)
 //***********************************************************************
 void Layer::UpdateShapefile()
 {
-	if (_loader.Data.size() > 0) 
+	OgrDynamicLoader* loader = GetOgrLoader();
+	if (!loader) return;
+	
+	// grab the data
+	vector<ShapeRecordData*> data;
+	loader->LockData(true);
+	if (loader->Data.size() > 0) {
+		data.insert(data.end(), loader->Data.begin(), loader->Data.end());
+		loader->Data.clear();
+	}
+	loader->LockData(false);
+	if (data.size() == 0) return;
+	
+	USES_CONVERSION;
+	CComPtr<IShapefile> sf = NULL;
+	if (QueryShapefile(&sf)) 
 	{
-		CComPtr<IShapefile> sf = NULL;
-		if (QueryShapefile(&sf)) 
-		{
-			VARIANT_BOOL vb;
-			sf->EditClear(&vb);
-			ShpfileType shpType;
-			sf->get_ShapefileType(&shpType);
+		CSingleLock sfLock(&loader->ShapefileLock);
+		sfLock.Lock();
+
+		VARIANT_BOOL vb;
+		sf->EditClear(&vb);
+		ShpfileType shpType;
+		sf->get_ShapefileType(&shpType);
 		
-			Debug::WriteWithThreadId("Update shapefile: %d\n", _loader.Data.size());
-			
-			// copy to temp vector to minimize locking time			
-			_loader.LockData(true);
-			vector<ShapeRecordData*> data;
-			data.insert(data.end(), _loader.Data.begin(), _loader.Data.end());
-			_loader.Data.clear();
-			_loader.LockData(false);
+		Debug::WriteWithThreadId("Update shapefile: %d\n", data.size());
 
-			ITable* itable = NULL;
-			sf->get_Table(&itable);
+		ITable* itable = NULL;
+		sf->get_Table(&itable);
 
-			if (itable) {
-				CTableClass* tbl = (CTableClass*)itable;
-				long count = 0;
-				for (size_t i = 0; i < data.size(); i++)
+		CComPtr<ILabels> labels = NULL;
+		sf->get_Labels(&labels);
+		labels->Clear();
+
+		if (itable) 
+		{
+			CTableClass* tbl = (CTableClass*)itable;
+			long count = 0;
+			for (size_t i = 0; i < data.size(); i++)
+			{
+				CComPtr<IShape> shp = NULL;
+				GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+				if (shp)
 				{
-					IShape* shp = NULL;
-					GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
-					if (shp)
-					{
-						shp->Create(shpType, &vb);
-						shp->ImportFromBinary(data[i]->Shape, &vb);
-						sf->EditInsertShape(shp, &count, &vb);
-						tbl->UpdateTableRow(data[i]->Row, count);
-						data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
-						count++;
+					shp->Create(shpType, &vb);
+					shp->ImportFromBinary(data[i]->Shape, &vb);
+					sf->EditInsertShape(shp, &count, &vb);
+					sf->put_ShapeCategory(count, data[i]->CategoryIndex);
+					
+					tbl->UpdateTableRow(data[i]->Row, count);
+					data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
+					
+					if (data[i]->HasLabel()) {
+						CComBSTR bstr;
+						bstr.Attach(W2BSTR(data[i]->LabelText));
+						labels->AddLabel(bstr.m_str, data[i]->LabelX, data[i]->LabelY, data[i]->LabelRotation);
 					}
-				}
-				itable->Release();
-			}
 
-			// clean the data
-			for (size_t i = 0; i < data.size(); i++) {
-				delete data[i];
+					count++;
+				}
 			}
+			itable->Release();
+
+			Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 		}
+
+		sfLock.Unlock();
+	}
+
+	// clean the data
+	for (size_t i = 0; i < data.size(); i++) {
+		delete data[i];
 	}
 }

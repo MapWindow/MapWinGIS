@@ -262,6 +262,7 @@ public:
 	CExpressionValue* Calculate(CString& errorMessage);
 	bool ParseExpression(CString s, bool useFields, CString& error);
 	bool ReadFieldNames(ITable* tbl);
+	void SetFields(vector<CString>& fields);
 
 	// variable fields
 	int get_NumFields()								
@@ -328,6 +329,7 @@ private:
 	void SetFieldValues(ITable* tbl);
 	TwoArgOperator CExpression::GetMatrixOperation(tkOperation op);
 	CString CExpression::Test();
+	
 };
 
 

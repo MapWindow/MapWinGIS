@@ -45,9 +45,18 @@ struct GlobalSettingsInfo
 	tkInterpolationMode gridDownsamplingMode;
 	tkOgrEncoding ogrEncoding;
 	int ogrLayerMaxFeatureCount;
+	bool autoChooseOgrLoadingMode;
+	bool ogrUseStyles;
+	bool useSchemesForStyles;
+	bool saveOgrLabels;
+	int getOgrMaxLabelCount() { return ogrLayerMaxFeatureCount; }
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		saveOgrLabels = false;
+		useSchemesForStyles = false;
+		ogrUseStyles = false;
+		autoChooseOgrLoadingMode = true;
 		ogrLayerMaxFeatureCount = 50000;
 		ogrEncoding = oseUtf8;
 		imageUpsamplingMode = imNone;

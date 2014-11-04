@@ -133,6 +133,11 @@ public:
 	STDMETHOD(put_OgrStringEncoding)(tkOgrEncoding pVal);
 	STDMETHOD(get_OgrLayerMaxFeatureCount)(LONG* pVal);
 	STDMETHOD(put_OgrLayerMaxFeatureCount)(LONG newVal);
-	};
+	STDMETHOD(get_AutoChooseOgrLoadingMode)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AutoChooseOgrLoadingMode)(VARIANT_BOOL newVal);
+	STDMETHOD(get_OgrUseStyles)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_OgrUseStyles)(VARIANT_BOOL newVal);
+	
+};
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

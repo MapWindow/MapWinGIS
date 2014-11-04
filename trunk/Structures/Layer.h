@@ -25,7 +25,7 @@
 
 # include "Label.h"
 # include "BaseLayerInfo.h"
-# include "OgrDynamicLoader.h"
+# include "OgrLoader.h"
 
 class Layer;
 
@@ -35,12 +35,14 @@ struct AsyncLoadingParams : CObject
 	IMapViewCallback* map;
 	Extent extents;
 	Layer* layer;
+	vector<CategoriesData*>* categories;
 
-	AsyncLoadingParams(IMapViewCallback* m, Extent e, Layer* l)
+	AsyncLoadingParams(IMapViewCallback* m, Extent e, Layer* l, vector<CategoriesData*>* ct)
 	{
 		map = m;
 		extents = e;
 		layer = l;
+		categories = ct;
 	};
 };
 
@@ -63,14 +65,16 @@ public:
 		skipOnSaving = VARIANT_FALSE;
 		wasRendered = false;
 		_asyncLoading = false;
-		_thread = NULL;
 	}
 
 	~Layer()
 	{
 		::SysFreeString(key);
-		if( object != NULL )
-			int refcnt = object->Release();
+		if (object != NULL) 
+		{
+			ULONG refcnt = object->Release();
+			Debug::WriteLine("Releasing layer datasource; Remaining ref count: %d", refcnt);
+		}
 		object = NULL;
 	}	
 	
@@ -89,14 +93,14 @@ public:
 	VARIANT_BOOL skipOnSaving;
 	bool wasRendered;
 	bool _asyncLoading;
-	CWinThread* _thread;
-	OgrDynamicLoader _loader;
+	vector<CWinThread*> _threads;
 	
-	
+	OgrDynamicLoader* GetOgrLoader();
 	bool IsAsyncLoading() {return _asyncLoading; }
 	LayerType GetLayerType() { return type; }
 	bool IsShapefile() { return(type == ShapefileLayer || type == OgrLayerSource);	}
 	bool IsImage() { return type == ImageLayer;	}
+	bool IsOgrLayer() { return type == OgrLayerSource; }
 	bool IsInMemoryShapefile();
 	bool IsDynamicOgrLayer();
 	bool QueryShapefile(IShapefile** sf);
@@ -108,5 +112,6 @@ public:
 	bool UpdateExtentsFromDatasource();
 	void LoadAsync(IMapViewCallback* mapView, Extent extents);
 	void UpdateShapefile();
+	void CloseDatasources();
 };
 # endif

@@ -68,7 +68,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, B
 			}
 			
 			// if expression returns true for the given record we'll save the index 
-			CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
+			CExpressionValue* result = expr.Calculate(err);
 			if ( result )
 			{
 				if (result->type != returnType )
@@ -982,12 +982,13 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 void CTableClass::LoadDefault_fields()
 {
     USES_CONVERSION;
-    
-    for (size_t i = 0; i < _fields.size(); i++ )
+
+	if (dbfHandle == NULL) return;
+
+    for (size_t i = 0; i < _fields.size(); i++ )	// clear only for disk-based table; otherwise there is no way to restore them
 		delete _fields[i];
 	_fields.clear();
-    
-	if (dbfHandle == NULL) return;
+	
     long num_fields = DBFGetFieldCount(dbfHandle);
 	char * fname = new char[MAX_BUFFER];
 	int fwidth, fdecimals;
@@ -1056,6 +1057,7 @@ STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
     needToSaveAsNewFile = false;
 	*retval = VARIANT_TRUE;
 	return S_OK;
+	
 }
 
 // **************************************************************

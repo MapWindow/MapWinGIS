@@ -186,7 +186,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 						}
 					}	
 					
-					// Seeking the larges part of shape
+					// Seeking the largest part of shape
 					double value = 0.0;
 					if (shpType == SHP_POLYGON)
 					{

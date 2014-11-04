@@ -45,7 +45,7 @@ public:
 		m_caption = A2BSTR("");
 		m_globalCallback = NULL;
 		m_lastErrorCode = tkNO_ERROR;
-		m_classificationField = -1;
+		_classificationField = -1;
 		gReferenceCounter.AddRef(tkInterface::idShapefileCategories);
 	}
 
@@ -54,9 +54,9 @@ public:
 		::SysFreeString(m_key);
 		::SysFreeString(m_caption);
 		m_shapefile = NULL;
-		for(int i = 0; i< (int)m_categories.size(); i++)
-			m_categories[i]->Release();
-		m_categories.clear();
+		for(int i = 0; i< (int)_categories.size(); i++)
+			_categories[i]->Release();
+		_categories.clear();
 
 		if (m_globalCallback)
 		{
@@ -123,6 +123,8 @@ public:
 	STDMETHOD(get_CategoryIndex)(IShapefileCategory* category, int* categoryIndex);
 	STDMETHOD(GeneratePolygonColors)(IColorScheme* scheme, VARIANT_BOOL* retval);
 	STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ClassificationField)(LONG* pVal);
+	STDMETHOD(put_ClassificationField)(LONG newVal);
 
 	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressions);
 	CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName);
@@ -136,11 +138,11 @@ private:
 	long m_lastErrorCode;
 	ICallback * m_globalCallback;
 	IShapefile* m_shapefile;		// parent shapefile
-	long m_classificationField;		// used for fast processing of unique values classification; 
+	long _classificationField;		// used for fast processing of unique values classification; 
 									// m_value property of each category (with vt different from VT_EMPTY) will be used in this case
 									// should be set to -1 to use the common expression parsing
 
-	std::vector<IShapefileCategory*> m_categories;
+	std::vector<IShapefileCategory*> _categories;
 
 	// ------------------------------------------------------------------
 	//		Utility functions
@@ -154,6 +156,8 @@ public:
 	void put_ParentShapefile(IShapefile* newVal);
 	IShapefile* get_ParentShapefile();
 	CDrawingOptionsEx* get_UnderlyingOptions(int Index);
+	void GenerateCore(std::vector<CategoriesData>* categories, long FieldIndex, tkClassificationType ClassificationType, VARIANT_BOOL* retVal);
+	void GetCategoryData(vector<CategoriesData*>& data);
 	
 };
 

@@ -2072,7 +2072,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 		return S_OK;
 	}
 	
-	// angles aresaved only in case there is at least one label with non-zero angle
+	// angles are saved only in case there is at least one label with non-zero angle
 	bool saveAngle = false;
 	for (unsigned int i = 0; i < m_labels.size(); i++)
 	{
@@ -2485,8 +2485,9 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 	return S_OK;
 }
 
-#pragma region Rendering
-
+// *************************************************************
+//		TextRenderingHint()
+// *************************************************************
 STDMETHODIMP CLabels::get_TextRenderingHint(tkTextRenderingHint* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -2501,4 +2502,21 @@ STDMETHODIMP CLabels::put_TextRenderingHint(tkTextRenderingHint newVal)
 		m_textRenderingHint = newVal;
 	return S_OK;
 }
-#pragma endregion
+
+// *************************************************************
+//		HasRotation()
+// *************************************************************
+bool CLabels::HasRotation()
+{
+	for (unsigned int i = 0; i < m_labels.size(); i++)
+	{
+		vector<CLabelInfo*>* parts = m_labels[i];
+		for (int j = 0; j < (int)parts->size(); j++)
+		{
+			CLabelInfo* lbl = (*parts)[j];
+			if (lbl->rotation != 0.0)
+				return true;
+		}
+	}
+	return false;
+}

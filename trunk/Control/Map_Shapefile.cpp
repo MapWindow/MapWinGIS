@@ -1187,7 +1187,7 @@ bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
 // ************************************************************
 bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 {
-	IShapefile * sf = NULL;
+	 CComPtr<IShapefile> sf = NULL;
 	Layer* layer = _allLayers[layerHandle];
 	if (layer->IsShapefile())
 	{
@@ -1220,7 +1220,6 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 				sf->get_InteractiveEditing(&result);
 				break;
 			}
-			sf->Release();
 			return result ? true : false;
 		}
 	}

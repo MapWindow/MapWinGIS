@@ -1209,6 +1209,62 @@ namespace Utility
 		}
 	}
 
+	// ****************************************************************** 
+	//		LabelPositionForShapeType
+	// ****************************************************************** 
+	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType)
+	{
+		shpType = ShapeTypeConvert2D(shpType);
+		if (shpType == SHP_POLYGON)
+			return lpCentroid;
+		else if (shpType == SHP_POLYLINE)
+			return lpLongestSegement;
+		else
+			return lpCenter;
+	}
+	
+	// ****************************************************************** 
+	//		SerializeVariant
+	// ****************************************************************** 
+	void SerializeVariant(CPLXMLNode* node, CString elementName, VARIANT* val)
+	{
+		if (!node || !val) return;
+		if (val->vt == VT_BSTR)
+		{
+			USES_CONVERSION;
+			Utility::CPLCreateXMLAttributeAndValue(node, elementName, OLE2CA(val->bstrVal));
+		}
+		else if (val->vt == VT_R8)
+		{
+			Utility::CPLCreateXMLAttributeAndValue(node, elementName, CPLString().Printf("%f", val->dblVal));
+		}
+		else if (val->vt == VT_I4)
+		{
+			Utility::CPLCreateXMLAttributeAndValue(node, elementName, CPLString().Printf("%d", val->lVal));
+		}
+	}
+
+	// ****************************************************************** 
+	//		DeserializeVariant
+	// ****************************************************************** 
+	void DeserializeVariant(CString sValue, FieldType fieldType, VARIANT* var)
+	{
+		switch (fieldType)
+		{
+			case STRING_FIELD:
+				var->vt = VT_BSTR;
+				var->bstrVal = A2BSTR(sValue);
+				break;
+			case INTEGER_FIELD:
+				var->vt = VT_I4;
+				var->lVal = atoi(sValue);
+				break;
+			case DOUBLE_FIELD:
+				var->vt = VT_R8;
+				var->dblVal = Utility::atof_custom(sValue);
+				break;
+		}
+	}
 }
 
 namespace Debug

@@ -1029,7 +1029,6 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 	else
 	{
 		valRight = GetValue(part, operation.right);	// these are binary operators as we read left and right operands
-		Debug::WriteLine("%d", valRight->type);
 
 		valLeft = GetValue(part, operation.left);
 		elLeft = part->elements[operation.left];
@@ -1355,7 +1354,7 @@ void CExpression::ReplaceSubString(CString& s, int begin, int length, CString re
 }
 
 // ************************************************************
-//	 SetFieldNames()
+//	 ReadFieldNames()
 //************************************************************
 bool CExpression::ReadFieldNames(ITable* tbl)
 {
@@ -1387,4 +1386,13 @@ bool CExpression::ReadFieldNames(ITable* tbl)
 		}
 		return true;
 	}
+}
+
+// ************************************************************
+//	 SetFields()
+//************************************************************
+void CExpression::SetFields(vector<CString>& fields)
+{
+	_fields.clear();
+	_fields.insert(_fields.end(), fields.begin(), fields.end());
 }

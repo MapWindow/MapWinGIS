@@ -3,7 +3,7 @@
 #pragma once
 #include "ogrsf_frmts.h"
 #include "afxmt.h"
-#include "OgrDynamicLoader.h"
+#include "OgrLoader.h"
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -25,10 +25,11 @@ public:
 		_shapefile = NULL;
 		_sourceType = ogrUninitialized;
 		_forUpdate = false;
-		_dataLoadingLock.Unlock();
 		_encoding = m_globalSettings.ogrEncoding;
-		_dynamicLoading = VARIANT_TRUE;
+		_dynamicLoading = VARIANT_FALSE;
 		_envelope = NULL;
+		_featureCount = -1;
+		_loader.SetMaxCacheCount(m_globalSettings.ogrLayerMaxFeatureCount);
 		gReferenceCounter.AddRef(tkInterface::idOgrLayer);
 	}
 	~COgrLayer()
@@ -36,6 +37,10 @@ public:
 		if (_envelope)
 			delete _envelope;
 		Close();
+		if (_shapefile)  {
+			ULONG count = _shapefile->Release();
+			Debug::WriteLine("Shapefile is released: %d", count);
+		}
 		if (_globalCallback)
 			_globalCallback->Release();
 		gReferenceCounter.Release(tkInterface::idOgrLayer);
@@ -96,6 +101,22 @@ public:
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
 	STDMETHOD(get_DynamicLoading)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_DynamicLoading)(VARIANT_BOOL newVal);
+	STDMETHOD(get_MaxFeatureCount)(LONG* pVal);
+	STDMETHOD(put_MaxFeatureCount)(LONG newVal);
+	STDMETHOD(SaveStyle)(BSTR Name, VARIANT_BOOL* retVal);
+	STDMETHOD(get_SupportsStyles)(VARIANT_BOOL* pVal);
+	STDMETHOD(GetNumStyles)(LONG* pVal);
+	STDMETHOD(get_StyleName)(LONG styleIndex, BSTR* pVal);
+	STDMETHOD(ApplyStyle)(BSTR name, VARIANT_BOOL* retVal);
+	STDMETHOD(ClearStyles)(VARIANT_BOOL* retVal);
+	STDMETHOD(RemoveStyle)(BSTR styleName, VARIANT_BOOL* retVal);
+	STDMETHOD(get_LabelExpression)(BSTR* pVal);
+	STDMETHOD(put_LabelExpression)(BSTR newVal);
+	STDMETHOD(get_LabelPosition)(tkLabelPositioning* pVal);
+	STDMETHOD(put_LabelPosition)(tkLabelPositioning newVal);
+	STDMETHOD(get_LabelOrientation)(tkLineLabelOrientation* pVal);
+	STDMETHOD(put_LabelOrientation)(tkLineLabelOrientation newVal);
+	STDMETHOD(GenerateCategories)(BSTR FieldName, tkClassificationType classificationType, long numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType, VARIANT_BOOL* retVal);
 
 public:
 	void InjectShapefile(IShapefile* sfNew)
@@ -103,12 +124,15 @@ public:
 		CloseShapefile();
 		_shapefile = sfNew;
 	}
+	IShapefile* GetShapefileNoRef() { return _shapefile; }
 	OGRLayer* GetDatasource() { return _layer; }
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);
+	OgrDynamicLoader* GetDynamicLoader() { return &_loader; }
 
 private:
-	CCriticalSection _dataLoadingLock;
+	
+	VARIANT_BOOL _dynamicLoading;
 	tkOgrSourceType _sourceType;
 	IShapefile* _shapefile;
 	GDALDataset* _dataset;
@@ -121,8 +145,9 @@ private:
 	CStringW _sourceQuery;
 	vector<OgrUpdateError> _updateErrors;
 	tkOgrEncoding _encoding;
-	VARIANT_BOOL _dynamicLoading;
 	OGREnvelope* _envelope;
+	int _featureCount;
+	OgrDynamicLoader _loader;
 	
 	bool CheckState();
 	void ErrorMessage(long ErrorCode);
@@ -130,10 +155,17 @@ private:
 	GDALDataset* OpenDataset(BSTR connectionString, bool forUpdate);
 	long GetFidForShapefile();
 	IShapefile* LoadShapefile();
-	void CacheExtents();
+	void InitOpenedLayer();
 	void ForceCreateShapefile();
+	void StopBackgroundLoading();
+	void RestartBackgroundLoader() { _loader.Restart(); }
+	void ClearCachedValues();
+	bool HasStyleTable();
+	CStringW GetDbSchemeName(bool withTrailingPoint);
+	CStringW GetLayerName();
+	CStringW GetStyleTableName();
+	void GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<VARIANT*>& values);
 public:
 	
 };
-
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

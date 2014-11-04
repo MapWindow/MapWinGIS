@@ -2143,11 +2143,27 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 }
 
 /***********************************************************************/
+/*			get_LabelPositionAutoChooseMethod()
+/***********************************************************************/
+void CShape::get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation,
+	tkLineLabelOrientation orientation)
+{
+	if (method == lpNone)
+	{
+		ShpfileType type;
+		get_ShapeType(&type);
+		method = Utility::LabelPositionForShapeType(type);
+	}
+	get_LabelPosition(method, x, y, rotation, orientation);
+}
+
+/***********************************************************************/
 /*			get_LabelPosition()
 /***********************************************************************/
 // sub-function for GenerateLabels
 // returns coordinates of label and angle of segment rotation for polylines
-void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation)
+void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, 
+				tkLineLabelOrientation orientation)
 {
 	x = y = 0.0;
 	if (method == lpNone)

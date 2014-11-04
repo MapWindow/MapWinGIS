@@ -42,7 +42,9 @@ public:
 		return row;
 	}
 	std::vector<VARIANT *> values;
-
+	VARIANT* GetValue(int index) {
+		return (index >= 0 && index < (int)values.size()) ? values[index] : NULL;
+	}
 private:
     DataStatusType _status;
 };

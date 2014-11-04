@@ -5,7 +5,67 @@
 #include "GeoProjection.h"
 #include "GeometryConverter.h"
 #include "Shapefile.h"
+#include "OgrStyle.h"
+#include "Shape2Ogr.h"
+#include "Ogr2Shape.h"
+#include "FieldClassification.h"
+#include "ShapefileCategories.h"
 
+// *************************************************************
+//		InitOpenedLayer()
+// *************************************************************
+void COgrLayer::InitOpenedLayer()
+{
+	ClearCachedValues();
+	VARIANT_BOOL vb;
+
+	// Let's cache some values, as the driver can be busy with background loading
+	// later on, so the value may not be readily available
+	int featureCount;
+	get_FeatureCount(VARIANT_FALSE, &featureCount);
+	
+	CComPtr<IExtents> extents;
+	get_Extents(&extents, VARIANT_FALSE, &vb);
+
+	if (m_globalSettings.autoChooseOgrLoadingMode) {
+		long maxCount;
+		get_MaxFeatureCount(&maxCount);
+		put_DynamicLoading(featureCount > maxCount ? VARIANT_TRUE : VARIANT_FALSE);
+	}
+
+	ForceCreateShapefile();
+	RestartBackgroundLoader();
+
+	if (m_globalSettings.ogrUseStyles && _sourceType == ogrDbTable)
+	{
+		VARIANT_BOOL vb;
+		ApplyStyle(A2BSTR(""), &vb);
+	}
+}
+
+//***********************************************************************
+//*		ClearCachedValues()
+//***********************************************************************
+void COgrLayer::ClearCachedValues()
+{
+	if (_envelope)
+	{
+		delete _envelope;
+		_envelope = NULL;
+	}
+	if (_featureCount != -1) 
+		_featureCount = -1;
+}
+
+//***********************************************************************
+//*		StopBackgroundLoading()
+//***********************************************************************
+void COgrLayer::StopBackgroundLoading()
+{
+	_loader.AddWaitingTask(true);  // notify working thread that it's time is over
+	_loader.LockLoading(true);     // wait until it is finished
+	_loader.LockLoading(false);
+}
 
 //***********************************************************************
 //*		LoadShapefile()
@@ -13,7 +73,7 @@
 IShapefile* COgrLayer::LoadShapefile()
 { 
 	bool isTrimmed = false;	
-	IShapefile* sf = OgrHelper::Layer2Shapefile(_layer, isTrimmed, _globalCallback); 
+	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback); 
 	if (isTrimmed) {
 		ErrorMessage(tkOGR_LAYER_TRIMMED);
 	}
@@ -33,7 +93,7 @@ STDMETHODIMP COgrLayer::get_Key(BSTR *pVal)
 STDMETHODIMP COgrLayer::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		::SysFreeString(_key);
+	::SysFreeString(_key);
 	USES_CONVERSION;
 	_key = OLE2BSTR(newVal);
 	return S_OK;
@@ -113,6 +173,7 @@ STDMETHODIMP COgrLayer::get_SourceType(tkOgrSourceType* retVal)
 STDMETHODIMP COgrLayer::Close()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	StopBackgroundLoading();
 	if (_dataset)
 	{
 		if (_sourceType == ogrQuery && _layer)
@@ -194,8 +255,8 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 		_layer = layer;
 		_forUpdate = forUpdate == VARIANT_TRUE;
 		_sourceType = ogrDbTable;
-		CacheExtents();
-		
+		InitOpenedLayer();
+
 		*retVal = VARIANT_TRUE;
 		return S_OK;
 	}
@@ -223,7 +284,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 			_layer = layer;
 			_sourceType = ogrQuery;
 			_forUpdate = VARIANT_FALSE;
-			CacheExtents();
+			InitOpenedLayer();
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -257,7 +318,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 			_dataset = ds;
 			_layer = layer;
 			_forUpdate = forUpdate == VARIANT_FALSE;
-			CacheExtents();
+			InitOpenedLayer();
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
@@ -283,9 +344,6 @@ STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)
 	}
 	else
 	{
-		CString cmnName = _layer->GetFIDColumn();
-		Debug::WriteLine("FID column: %s", cmnName);
-
 		CStringW name = OgrHelper::OgrString2Unicode(_layer->GetName());
 		*retVal = W2BSTR(name);
 		return S_OK;
@@ -302,17 +360,22 @@ STDMETHODIMP COgrLayer::GetData(IShapefile** retVal)
 	*retVal = NULL;
 	if (!CheckState()) return S_FALSE;
 	
-	_dataLoadingLock.Lock();
+	CSingleLock sfLock(&_loader.ShapefileLock);
+	sfLock.Lock();
+	
 	if (!_shapefile)
 	{
 		if (_dynamicLoading) {
-			_shapefile = OgrHelper::CreateShapefile(_layer);
+			CSingleLock lock(&_loader.ProviderLock);
+			lock.Lock();
+			_shapefile = Ogr2Shape::CreateShapefile(_layer);
 		}
 		else {
 			_shapefile = LoadShapefile();
 		}
 	}
-	_dataLoadingLock.Unlock();
+	
+	sfLock.Unlock();
 
 	if (_shapefile)
 	{
@@ -330,10 +393,20 @@ STDMETHODIMP COgrLayer::ReloadFromSource(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
-	_dataLoadingLock.Lock();
+
+	if (_dynamicLoading) 
+	{
+		ErrorMessage(tkNOT_ALLOWED_IN_OGR_DYNAMIC_MODE);
+		return S_OK;		
+	}
+	
+	CSingleLock sfLock(&_loader.ShapefileLock);
+	sfLock.Lock();
+
 	CloseShapefile();
 	_shapefile = LoadShapefile();
-	_dataLoadingLock.Unlock();
+	
+	sfLock.Unlock();
 	*retVal = _shapefile ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -346,6 +419,13 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
+
+	if (_dynamicLoading)
+	{
+		ErrorMessage(tkNOT_ALLOWED_IN_OGR_DYNAMIC_MODE);
+		return S_OK;
+	}
+
 	if (_sourceType == ogrQuery)
 	{
 		OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::Bstr2OgrString(newSql), NULL, NULL);
@@ -354,6 +434,7 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 			_dataset->ReleaseResultSet(_layer);
 			_sourceQuery = OLE2W(newSql);
 			_layer = layer;
+			ClearCachedValues();
 			CloseShapefile();
 			return S_OK;
 		}
@@ -404,7 +485,10 @@ STDMETHODIMP COgrLayer::get_GeoProjection(IGeoProjection** retVal)
 	*retVal = gp;
 
 	if (!CheckState()) return S_OK;
-	
+
+	CSingleLock lock(&_loader.ProviderLock);
+	if (_dynamicLoading) lock.Lock();
+
 	OGRSpatialReference* sr = _layer->GetSpatialRef();		// owned by OGRLayer
 	if (sr)((CGeoProjection*)gp)->InjectSpatialReference(sr);
 	return S_OK;
@@ -506,7 +590,13 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 		return S_FALSE;
 	}
 
-	*savedCount = OgrHelper::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
+	CSingleLock lock(&_loader.ProviderLock);
+	if (_dynamicLoading) lock.Lock();
+
+	*savedCount = Shape2Ogr::SaveShapefileChanges(_layer, _shapefile, shapeCmnId, saveType, validateShapes ? true : false, _updateErrors);
+
+	lock.Unlock();
+
 	if (*savedCount == 0)
 	{
 		*retVal = osrNoneSaved;
@@ -527,10 +617,15 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
+
 	if (_shapefile)
 	{
 		long numShapes;
 		_shapefile->get_NumShapes(&numShapes);
+
+		CSingleLock lock(&_loader.ProviderLock);
+		if (_dynamicLoading) lock.Lock();
+
 		int featureCount = _layer->GetFeatureCount();
 		if (numShapes != featureCount)	   // i.e. deleted or inserted feature
 		{
@@ -631,22 +726,15 @@ STDMETHODIMP COgrLayer::get_FeatureCount(VARIANT_BOOL forceLoading, int* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = 0;
 	if (!CheckState()) return S_FALSE;
-	*retVal = _layer->GetFeatureCount(forceLoading == VARIANT_TRUE);
+	CSingleLock lock(&_loader.ProviderLock);
+	if (_dynamicLoading) lock.Lock();
+	if (_featureCount == -1 || forceLoading) {
+		_featureCount = _layer->GetFeatureCount(forceLoading == VARIANT_TRUE);
+	}
+	*retVal = _featureCount;
 	return S_OK;
 }
 
-// *************************************************************
-//		CacheExtents()
-// *************************************************************
-// It's mandatory for dynamic loading, as the driver can be busy with background loading
-// with another extents
-void COgrLayer::CacheExtents()
-{
-	CComPtr<IExtents> extents;
-	VARIANT_BOOL vb;
-	get_Extents(&extents, VARIANT_FALSE, &vb);
-	ForceCreateShapefile();
-}
 
 // *************************************************************
 //		ForceCreateShapefile()
@@ -655,8 +743,10 @@ void COgrLayer::ForceCreateShapefile()
 {
 	tkOgrSourceType sourceType;
 	get_SourceType(&sourceType);
-	if (_dynamicLoading && !_shapefile && sourceType != ogrUninitialized) {
-		_shapefile = OgrHelper::CreateShapefile(_layer);
+	if (_dynamicLoading && (!_shapefile) && (sourceType != ogrUninitialized)) {
+		CSingleLock lock(&_loader.ProviderLock);
+		lock.Lock();
+		_shapefile = Ogr2Shape::CreateShapefile(_layer);
 	}
 }
 
@@ -670,8 +760,10 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
 
-	if (!_envelope) {
+	if (!_envelope || forceLoading) {
 		_envelope = new OGREnvelope();
+		CSingleLock lock(&_loader.ProviderLock);
+		if (_dynamicLoading) lock.Lock();
 		_layer->GetExtent(_envelope, forceLoading == VARIANT_TRUE);
 	}
 	
@@ -784,12 +876,21 @@ CPLXMLNode* COgrLayer::SerializeCore(CString ElementName)
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceQuery", Utility::ConvertToUtf8(_sourceQuery));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceType", CPLString().Printf("%d", (int)_sourceType));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "ForUpdate", CPLString().Printf("%d", (int)_forUpdate));
+	if (_loader.LabelExpression.GetLength() > 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelExpression", Utility::ConvertToUtf8(_loader.LabelExpression));
+	if (_loader.LabelPosition != lpNone)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelPosition", CPLString().Printf("%d", (int)_loader.LabelPosition));
+	if (_loader.LabelOrientation != lorParallel)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LabelOrientation", CPLString().Printf("%d", (int)_loader.LabelOrientation));
+	if (_loader.GetMaxCacheCount() != m_globalSettings.ogrLayerMaxFeatureCount)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxFeatureCount", CPLString().Printf("%d", (int)_loader.GetMaxCacheCount()));
 	
 	if (_shapefile)
 	{
-		_dataLoadingLock.Lock();
-		CPLXMLNode* sfNode = ((CShapefile*)_shapefile)->SerializeCore(VARIANT_FALSE, "ShapefileData");
-		_dataLoadingLock.Unlock();
+		CSingleLock sfLock(&_loader.ShapefileLock);
+		sfLock.Lock();
+		CPLXMLNode* sfNode = ((CShapefile*)_shapefile)->SerializeCore(VARIANT_FALSE, "ShapefileData", true);
+		sfLock.Unlock();
 		CPLAddXMLChild(psTree, sfNode);
 	}
 	return psTree;
@@ -836,7 +937,18 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue(node, "ForUpdate", NULL);
 	bool forUpdate = (s != "") ? (atoi(s.GetString()) == 0 ? false : true) : false;
-	
+
+	_loader.LabelExpression = Utility::ConvertFromUtf8(CPLGetXMLValue(node, "LabelExpression", ""));
+
+	s = CPLGetXMLValue(node, "LabelPosition", NULL);
+	_loader.LabelPosition = (s != "") ? (tkLabelPositioning)atoi(s.GetString()) : lpNone;
+
+	s = CPLGetXMLValue(node, "LabelOrientation", NULL);
+	_loader.LabelOrientation = (s != "") ? (tkLineLabelOrientation)atoi(s.GetString()) : lorParallel;
+
+	s = CPLGetXMLValue(node, "MaxFeatureCount", NULL);
+	_loader.SetMaxCacheCount((s != "") ? atoi(s.GetString()) : m_globalSettings.ogrLayerMaxFeatureCount);
+
 	VARIANT_BOOL vb = VARIANT_FALSE;
 	if (sourceType == ogrDbTable)
 	{
@@ -896,7 +1008,416 @@ STDMETHODIMP COgrLayer::put_DynamicLoading(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_dynamicLoading = newVal;
-	ForceCreateShapefile();
+	if (newVal) {
+		ForceCreateShapefile();
+	}
 	return S_OK;
 }
 
+// *************************************************************
+//		MaxFeatureCount()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_MaxFeatureCount(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _loader.GetMaxCacheCount();
+	return S_OK;
+}
+STDMETHODIMP COgrLayer::put_MaxFeatureCount(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_loader.SetMaxCacheCount(newVal <= 0 ? m_globalSettings.ogrLayerMaxFeatureCount : newVal);
+	return S_OK;
+}
+
+// *************************************************************
+//		HasStyleTable()
+// *************************************************************
+bool COgrLayer::HasStyleTable()
+{
+	if (!CheckState()) return false;
+	return OgrStyleHelper::HasStyleTable(_dataset, GetLayerName());
+}
+
+// *************************************************************
+//		GetLayerName()
+// *************************************************************
+CStringW COgrLayer::GetLayerName()
+{
+	return OgrHelper::OgrString2Unicode(_layer->GetName());
+}
+
+// *************************************************************
+//		GetStyleTableName()
+// *************************************************************
+CStringW COgrLayer::GetStyleTableName()
+{
+	return OgrStyleHelper::GetStyleTableName(GetLayerName());
+}
+
+// *************************************************************
+//		SupportsStyles()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_SupportsStyles(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = VARIANT_FALSE;
+
+	if (!CheckState()) return S_OK;
+
+	if (_sourceType == ogrQuery) 
+	{
+		ErrorMessage(tkOGR_NO_STYLE_FOR_QUERIES);
+		return S_OK;
+	}
+
+	if (HasStyleTable()){
+		*pVal = VARIANT_TRUE;
+		return S_OK;
+	}
+	
+	OgrStyleHelper::CreateStyleTable(_dataset, GetLayerName());
+	return S_OK;
+}
+
+// *************************************************************
+//		SaveStyle()
+// *************************************************************
+STDMETHODIMP COgrLayer::SaveStyle(BSTR Name, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (!CheckState()) return S_OK;
+
+	if (!_shapefile) {
+		ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
+		return S_OK;
+	}
+
+	VARIANT_BOOL vb;
+	get_SupportsStyles(&vb);
+	if (!vb) {
+		return S_OK;
+	}
+
+	RemoveStyle(Name, &vb);
+	CPLErrorReset();
+
+	CStringW styleName = OLE2W(Name);
+
+	bool result = OgrStyleHelper::SaveStyle(_dataset, _shapefile, GetLayerName(), styleName);
+	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// *************************************************************
+//		StyleCount()
+// *************************************************************
+STDMETHODIMP COgrLayer::GetNumStyles(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = -1;
+
+	if (!CheckState()) return S_OK;
+
+	CStringW sql;
+	sql.Format(L"SELECT COUNT(*) FROM %s WHERE layername = '%s'", GetStyleTableName(), GetLayerName());
+
+	CPLErrorReset();
+	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	if (layer) {
+		layer->ResetReading();
+		OGRFeature* ft = layer->GetNextFeature();
+		if (ft) {
+			*pVal = ft->GetFieldAsInteger(0);
+			OGRFeature::DestroyFeature(ft);
+		}
+		_dataset->ReleaseResultSet(layer);
+	}
+	return S_OK;
+}
+
+// *************************************************************
+//		StyleName()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_StyleName(LONG styleIndex, BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!CheckState()) return S_OK;
+
+	CStringW sql;
+	sql.Format(L"SELECT styleName FROM %s WHERE layername = '%s'", GetStyleTableName(), GetLayerName());
+
+	bool found = false;
+	CPLErrorReset();
+	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	if (layer) {
+		layer->ResetReading();
+		OGRFeature* ft = NULL;
+		int count = 0;
+		while ((ft = layer->GetNextFeature()) != NULL)
+		{
+			if (count == styleIndex) {
+				CStringW name = OgrHelper::OgrString2Unicode(ft->GetFieldAsString(0));
+				*pVal = W2BSTR(name);
+				found = true;
+			}
+			count++;
+			OGRFeature::DestroyFeature(ft);
+		}
+		_dataset->ReleaseResultSet(layer);
+	}
+
+	if (!found) {
+		*pVal = SysAllocString(L"");
+	}
+	return S_OK;
+}
+
+// *************************************************************
+//		ApplyStyle()
+// *************************************************************
+STDMETHODIMP COgrLayer::ApplyStyle(BSTR name, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	
+	if (!CheckState()) return S_OK;
+
+	USES_CONVERSION;
+	CStringW styleName = OLE2W(name);
+	CStringW sql;
+	sql.Format(L"SELECT style FROM %s WHERE layername = '%s' AND stylename = '%s'", GetStyleTableName(), GetLayerName(), styleName);
+	
+	CStringW xml;
+
+	bool found = false;
+	CPLErrorReset();
+	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	if (layer) {
+		OGRFeature* ft = layer->GetNextFeature();
+		if (ft) {
+			xml = ft->GetFieldAsString(0);
+			*retVal = VARIANT_TRUE;
+			OGRFeature::DestroyFeature(ft);
+		}
+		_dataset->ReleaseResultSet(layer);
+	}
+
+	if (xml.GetLength() != 0)
+	{
+		CComPtr<IShapefile> sf = NULL;
+		GetData(&sf);
+		if (sf) {
+			CComBSTR bstr;
+			bstr.Attach(W2BSTR(xml));
+			sf->Deserialize(VARIANT_FALSE, bstr);	// TODO: Deserialize lacking any means to report the success or failure
+			*retVal = VARIANT_TRUE;
+		}
+	}
+	return S_OK;
+}
+
+// *************************************************************
+//		ClearStyles()
+// *************************************************************
+STDMETHODIMP COgrLayer::ClearStyles(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!CheckState() || !HasStyleTable())
+	{
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+		
+	USES_CONVERSION;
+	CStringW sql;
+	sql.Format(L"DELETE FROM %s WHERE layername = '%s'", GetStyleTableName(), GetLayerName());
+
+	CPLErrorReset();
+	_dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	*retVal = CPLGetLastErrorNo() == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		RemoveStyle()
+// *************************************************************
+STDMETHODIMP COgrLayer::RemoveStyle(BSTR styleName, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	if (!CheckState()) return S_OK;
+
+	USES_CONVERSION;
+	CStringW name = OLE2W(styleName);
+	CStringW sql;
+	sql.Format(L"DELETE FROM %s WHERE layername = '%s' AND stylename = '%s'", GetStyleTableName(), GetLayerName(), name);
+
+	CPLErrorReset();
+	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	_dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	*retVal = CPLGetLastErrorNo() == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// *************************************************************
+//		LabelExpression()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_LabelExpression(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	*pVal = W2BSTR(_loader.LabelExpression);
+	return S_OK;
+}
+STDMETHODIMP COgrLayer::put_LabelExpression(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	::SysFreeString(_key);
+	USES_CONVERSION;
+	_loader.LabelExpression = OLE2W(newVal);
+	return S_OK;
+}
+
+// *************************************************************
+//		LabelPosition()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_LabelPosition(tkLabelPositioning* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _loader.LabelPosition;
+	return S_OK;
+}
+STDMETHODIMP COgrLayer::put_LabelPosition(tkLabelPositioning newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_loader.LabelPosition = newVal;
+	return S_OK;
+}
+
+// *************************************************************
+//		LabelOrientation()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_LabelOrientation(tkLineLabelOrientation* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _loader.LabelOrientation;
+	return S_OK;
+}
+STDMETHODIMP COgrLayer::put_LabelOrientation(tkLineLabelOrientation newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_loader.LabelOrientation = newVal;
+	return S_OK;
+}
+
+// *************************************************************
+//		GetFieldValues()
+// *************************************************************
+void COgrLayer::GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<VARIANT*>& values)
+{
+	if (_sourceType == ogrDbTable || _sourceType == ogrFile) 
+	{
+		// load only the necessary column
+		CStringW sql;
+		sql.Format(L"SELECT %s FROM %s;", fieldName, GetLayerName());
+		OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+		if (layer)
+		{
+			OgrHelper::GetFieldValues(layer, _layer->GetFeatureCount(), fieldType, values, _globalCallback);
+			_dataset->ReleaseResultSet(layer);
+		}
+	}
+	else
+	{
+		// the column can be a computed one, so have to load feature as a whole
+		OgrHelper::GetFieldValues(_layer, _layer->GetFeatureCount(), fieldType, values, _globalCallback);
+	}
+}
+
+// *************************************************************
+//		GenerateCategories()
+// *************************************************************
+STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType classificationType, 
+				long numClasses, tkMapColor colorStart, tkMapColor colorEnd, 
+				tkColorSchemeType schemeType, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (!CheckState()) return S_OK;
+
+	OGRFeatureDefn* fields = _layer->GetLayerDefn();
+	int fieldIndex = fields->GetFieldIndex(OgrHelper::Bstr2OgrString(FieldName));
+	if (fieldIndex == -1) {
+		ErrorMessage(tkOGR_INVALID_FIELD_NAME);
+		return S_OK;
+	}
+
+	CStringW fid = OgrHelper::OgrString2Unicode(_layer->GetFIDColumn());
+	bool hasFid = fid.GetLength() > 0;
+
+	CComPtr<IShapefile> sf = NULL;
+	GetData(&sf);
+	if (!sf) {
+		ErrorMessage(tkOGR_NO_SHAPEFILE);
+		return S_OK;
+	}
+
+	OGRFieldDefn* fld = fields->GetFieldDefn(fieldIndex);
+	OGRFieldType ogrType = fld->GetType();
+	FieldType fieldType = OgrHelper::GetFieldType(ogrType);
+	
+	vector<VARIANT*>* values = new vector<VARIANT*>();
+	GetFieldValues(ogrType, FieldName, *values);
+	
+	long errorCode = tkNO_ERROR;
+	USES_CONVERSION;
+	vector<CategoriesData>* categories = FieldClassification::GenerateCategories(OLE2A(FieldName), 
+									fieldType, *values, classificationType, numClasses, errorCode);
+	
+	for (size_t i = 0; i < values->size(); i++) {
+		delete (*values)[i];
+	}
+	delete values;
+
+	if (!categories) {
+		ErrorMessage(errorCode);
+		return S_OK;
+	}
+
+	IShapefileCategories* ct = NULL;
+	sf->get_Categories(&ct);
+	if (ct)
+	{
+		if (hasFid)
+			fieldIndex++;   // there will be the first FID column in the data
+
+		VARIANT_BOOL vb;
+		((CShapefileCategories*)ct)->GenerateCore(categories, fieldIndex, classificationType, &vb);
+		if (vb) {
+			*retVal = VARIANT_TRUE;
+		}
+
+		CComPtr<IColorScheme> scheme = NULL;
+		GetUtils()->CreateInstance(idColorScheme, (IDispatch**)&scheme);
+		if (scheme) {
+			scheme->SetColors2(colorStart, colorEnd);
+			ct->ApplyColorScheme(schemeType, scheme);
+		}
+
+		long numShapes;
+		sf->get_NumShapes(&numShapes);
+		if (numShapes > 0)
+		{
+			ct->ApplyExpressions();
+		}
+		ct->Release();
+	}
+	delete categories;
+	return S_OK;
+}

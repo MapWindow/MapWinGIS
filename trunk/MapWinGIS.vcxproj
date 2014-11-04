@@ -74,7 +74,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;$(ProjectDir)\Ogr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -173,13 +173,19 @@
     <ClInclude Include="COM classes\UndoList.h" />
     <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Ogr\Ogr2RawData.h" />
+    <ClInclude Include="Ogr\Ogr2Shape.h" />
+    <ClInclude Include="Ogr\OgrHelper.h" />
+    <ClInclude Include="Ogr\OgrLabels.h" />
+    <ClInclude Include="Ogr\OgrLoader.h" />
+    <ClInclude Include="Ogr\OgrStyle.h" />
+    <ClInclude Include="Ogr\Shape2Ogr.h" />
     <ClInclude Include="Processing\GeometryHelper.h" />
     <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
     <ClInclude Include="Shapefile\EditorBase.h" />
     <ClInclude Include="Shapefile\GeoShape.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
-    <ClInclude Include="Shapefile\OgrDynamicLoader.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -266,6 +272,7 @@
     <ClInclude Include="Tiles\LoadingTask.h" />
     <ClInclude Include="Utilities\ColoringGraph.h" />
     <ClInclude Include="Utilities\cppVector.h" />
+    <ClInclude Include="Utilities\FieldClassification.h" />
     <ClInclude Include="Utilities\GdalHelper.h" />
     <ClInclude Include="Utilities\GdiPlusHelper.h" />
     <ClInclude Include="Utilities\GeographLibHelper.h" />
@@ -275,7 +282,6 @@
     <ClInclude Include="Utilities\LineBresenham.h" />
     <ClInclude Include="Utilities\Logger.h" />
     <ClInclude Include="Utilities\Matrix.h" />
-    <ClInclude Include="Utilities\OgrHelper.h" />
     <ClInclude Include="Utilities\RegistryKey.h" />
     <CustomBuildStep Include="Utilities\Templates.h" />
     <ClInclude Include="Utilities\Timer.h" />
@@ -483,6 +489,13 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
+    <ClCompile Include="Ogr\Ogr2RawData.cpp" />
+    <ClCompile Include="Ogr\Ogr2Shape.cpp" />
+    <ClCompile Include="Ogr\OgrHelper.cpp" />
+    <ClCompile Include="Ogr\OgrLabels.cpp" />
+    <ClCompile Include="Ogr\OgrLoader.cpp" />
+    <ClCompile Include="Ogr\OgrStyle.cpp" />
+    <ClCompile Include="Ogr\Shape2Ogr.cpp" />
     <ClCompile Include="Processing\GeometryHelper.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
@@ -492,7 +505,6 @@
     <ClCompile Include="Shapefile\EditorBase.cpp" />
     <ClCompile Include="Shapefile\GeoShape.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
-    <ClCompile Include="Shapefile\OgrDynamicLoader.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -501,6 +513,7 @@
     <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />
+    <ClCompile Include="Utilities\FieldClassification.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />
     <ClCompile Include="Utilities\GdiPlusHelper.cpp" />
     <ClCompile Include="Utilities\GeographLibHelper.cpp" />
@@ -508,7 +521,6 @@
     <ClCompile Include="Utilities\LineBresenham.cpp" />
     <ClCompile Include="Utilities\Logger.cpp" />
     <ClCompile Include="Utilities\Matrix.cpp" />
-    <ClCompile Include="Utilities\OgrHelper.cpp" />
     <ClCompile Include="Utilities\RegistryKey.cpp" />
     <ClCompile Include="Utilities\UtilityFunctions.cpp" />
     <ClCompile Include="Utilities\varH.cpp" />

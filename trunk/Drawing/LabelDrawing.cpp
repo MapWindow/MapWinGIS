@@ -261,7 +261,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	VARIANT_BOOL synchronized;
 	LabelsClass->get_Synchronized(&synchronized);
 
-	// do we need to enable auto offset? shapfile type must be point and labels mut be synchronized
+	// do we need to enable auto offset? shapefile type must be point and labels must be synchronized
 	VARIANT_BOOL autoOffset;
 	LabelsClass->get_AutoOffset(&autoOffset);
 	if (autoOffset && sf != NULL)
@@ -335,6 +335,11 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 
 		tkSmoothingMode smoothingMode = m_globalSettings.labelsSmoothingMode;
 		tkCompositingQuality compositingQuality = m_globalSettings.labelsCompositingQuality;
+
+		if (lbs->HasRotation()) {
+			if (textRenderingHint == AntiAliasGridFit)
+				textRenderingHint= ClearTypeGridFit;	// it looks better this way
+		}
 
 		_graphics->SetCompositingQuality((CompositingQuality)compositingQuality);
 		_graphics->SetSmoothingMode((SmoothingMode)smoothingMode);

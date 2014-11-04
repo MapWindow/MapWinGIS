@@ -65,9 +65,9 @@ public:
 		haloSize = 2;
 
 		// frame
-		frameType = lfPointedRectangle;
+		frameType = lfRectangle;
 		frameOutlineColor = RGB(150, 150, 150);
-		frameBackColor = 13952764; //RGB(255, 165, 0);		// orange
+		frameBackColor = RGB(255, 255, 255); // 13952764; //RGB(255, 165, 0);		// orange
 		frameBackColor2 = RGB(176,224,230);
 		frameGradientMode = gmNone;
 		frameOutlineStyle = dsSolid;			// PS_SOLID
@@ -75,7 +75,7 @@ public:
 		framePaddingX = 10;
 		framePaddingY = 0;
 		frameTransparency = 255;
-		frameVisible = false;
+		frameVisible = true;
 
 	}
 	~CLabelOptions()

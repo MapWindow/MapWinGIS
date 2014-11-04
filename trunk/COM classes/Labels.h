@@ -68,7 +68,7 @@ public:
 		m_savingMode = modeXML;
 		m_positioning = lpNone;
 
-		m_textRenderingHint = HintAntiAlias;
+		m_textRenderingHint = AntiAliasGridFit;
 
 		gReferenceCounter.AddRef(tkInterface::idLabels);
 	}
@@ -420,10 +420,8 @@ private:
 
 public:
 	void CLabels::ClearLabelFrames();
-	void SaveSourceField(int fieldIndex)
-	{
-		m_sourceField = fieldIndex;
-	}
+	void SaveSourceField(int fieldIndex) {	m_sourceField = fieldIndex;	}
+	bool HasRotation();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

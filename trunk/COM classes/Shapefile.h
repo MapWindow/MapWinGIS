@@ -188,6 +188,7 @@ public:
 	STDMETHOD(put_SelectionTransparency)(BYTE newVal);
 	STDMETHOD(put_StopExecution)(IStopExecution* stopper);
 	STDMETHOD(Serialize)(VARIANT_BOOL SaveSelection, BSTR* retVal);
+	STDMETHOD(Serialize2)(VARIANT_BOOL SaveSelection, VARIANT_BOOL SerializeCategories, BSTR* retVal);
 	STDMETHOD(Deserialize)(VARIANT_BOOL LoadSelection, BSTR newVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** retVal);
 	STDMETHOD(put_GeoProjection)(IGeoProjection* pVal);
@@ -431,7 +432,7 @@ public:
 	bool getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName);
+	CPLXMLNode* SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories);
 
 	void CopyFields(IShapefile* target);
 	void UpdateLabelsPositioning();

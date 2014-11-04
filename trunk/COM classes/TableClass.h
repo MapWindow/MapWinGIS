@@ -71,15 +71,6 @@ struct RecordWrapper
 	}
 };
 
-struct CategoriesData
-{
-public:
-	CComVariant minValue;
-	CComVariant maxValue;
-	CString expression;
-	CString name;
-};
-
 // -------------------------------------------------------
 // CTableClass
 // -------------------------------------------------------

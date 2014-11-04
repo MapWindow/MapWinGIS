@@ -681,3 +681,36 @@ STDMETHODIMP CGlobalSettings::put_OgrLayerMaxFeatureCount(LONG newVal)
 	m_globalSettings.ogrLayerMaxFeatureCount = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     AutoChooseOgrLoadingMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AutoChooseOgrLoadingMode(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.autoChooseOgrLoadingMode ? VARIANT_TRUE: VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_AutoChooseOgrLoadingMode(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.autoChooseOgrLoadingMode = newVal ? true : false;
+	return S_OK;
+}
+
+// *********************************************************
+//	     OgrAutoSaveStyles
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_OgrUseStyles(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.ogrUseStyles ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_OgrUseStyles(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.ogrUseStyles = newVal ? true : false;
+	return S_OK;
+}
+

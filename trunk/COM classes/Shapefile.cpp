@@ -1589,8 +1589,6 @@ void CShapefile::CloneCore(IShapefile** retVal, ShpfileType shpType, bool addSha
 			break;
 		}
 	}
-	
-	
 }
 #pragma endregion
 
@@ -2428,9 +2426,14 @@ STDMETHODIMP CShapefile::put_CollisionMode(tkCollisionMode newVal)
 // ********************************************************
 STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 {
+	return Serialize2(SaveSelection, VARIANT_FALSE, retVal);
+}
+
+STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL SerializeCategories, BSTR* retVal)
+{
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass");
+		USES_CONVERSION;
+	CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass", SerializeCategories ? true : false);
 	if (!psTree)
 	{
 		*retVal = A2BSTR("");
@@ -2447,7 +2450,7 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 // ********************************************************
 //     SerializeCore()
 // ********************************************************
- CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName)
+ CPLXMLNode* CShapefile::SerializeCore(VARIANT_BOOL SaveSelection, CString ElementName, bool serializeCategories)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;

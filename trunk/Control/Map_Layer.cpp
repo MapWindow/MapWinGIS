@@ -675,6 +675,7 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 	}
 }
 
+
 // ***************************************************************
 //		RemoveLayerCore()
 // ***************************************************************
@@ -685,39 +686,13 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 		if( IsValidLayer(LayerHandle) )
 		{
 			bool hadLayers = _activeLayers.size() > 0;
-			
-			IShapefile * ishp = NULL;
-			IImage * iimg = NULL;
-			IGrid * igrid = NULL;
-
 			if (LayerHandle >= (long)_allLayers.size()) return;
 			Layer * l = _allLayers[LayerHandle];
 			if (l == NULL) return;
 
-			l->QueryShapefile(&ishp);
-			l->QueryImage(&iimg);
-			l->object->QueryInterface(IID_IGrid, (void**)&igrid);
-
-			VARIANT_BOOL vb;
-			if (ishp != NULL)
-			{
-				if (closeDatasources)
-					ishp->Close(&vb);
-				ishp->Release();		// we release only once because one more release is in Layer destructor
-			}
-			if (iimg != NULL)
-			{
-				if (closeDatasources)
-					iimg->Close(&vb);
-				iimg->Release();		// we release only once because one more release is in Layer destructor
-			}
-			if (igrid != NULL)
-			{	
-				if (closeDatasources)
-					igrid->Close(&vb);
-				igrid->Release();
-			}
-
+			if (closeDatasources)
+				l->CloseDatasources();
+			
 			for(unsigned int i = 0; i < _activeLayers.size(); i++ )
 			{	
 				if( _activeLayers[i] == LayerHandle )
@@ -795,9 +770,6 @@ void CMapView::RemoveAllLayers()
 	//FireLayersChanged();
 
 	LockWindow( lmUnlock );
-
-	//if (hadLayers)
-	//	ClearMapProjectionWithLastLayer();		// it is removed in RemoveLayerCore
 
 	_activeLayerPosition = 0;
 	_canUseLayerBuffer = FALSE;
@@ -1258,14 +1230,16 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	{
 		IOgrLayer* layer = NULL;
 		GetUtils()->CreateInstance(idOgrLayer, (IDispatch**)&layer);
-
-		CPLXMLNode* nodeOgrLayer = CPLGetXMLNode(node, "OgrLayerClass");
-		if (nodeOgrLayer)
+		if (layer) 
 		{
-			((COgrLayer*)layer)->DeserializeCore(nodeOgrLayer);
-			AddLayer(layer, (BOOL)visible);
+			CPLXMLNode* nodeOgrLayer = CPLGetXMLNode(node, "OgrLayerClass");
+			if (nodeOgrLayer)
+			{
+				((COgrLayer*)layer)->DeserializeCore(nodeOgrLayer);
+				AddLayer(layer, (BOOL)visible);
+			}
+			layer->Release();
 		}
-		layer->Release();
 	}
 	else
 	{
@@ -1414,7 +1388,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 
 					if (sf)
 					{
-						node = ((CShapefile*)sf)->SerializeCore(VARIANT_TRUE, "ShapefileClass");
+						node = ((CShapefile*)sf)->SerializeCore(VARIANT_TRUE, "ShapefileClass", true);
 						sf->Release();
 					}
 					else
@@ -1538,8 +1512,6 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	if (layerType == ShapefileLayer)
 	{
 		IShapefile* sf = NULL;
-		//layer->object->QueryInterface(IID_IShapefile,(void**)&sf);
-		//if (sf)
 		if (layer->QueryShapefile(&sf))
 		{
 			node = CPLGetXMLNode(node, "ShapefileClass");
@@ -1553,8 +1525,6 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	else if (layerType == ImageLayer )
 	{
 		IImage* img = NULL;
-		//layer->object->QueryInterface(IID_IImage,(void**)&img);
-		//if (img)
 		if (layer->QueryImage(&img))
 		{
 			node = CPLGetXMLNode(node, "ImageClass");

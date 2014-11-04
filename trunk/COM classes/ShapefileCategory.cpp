@@ -65,7 +65,7 @@ STDMETHODIMP CShapefileCategory::put_Expression(BSTR newVal)
 	USES_CONVERSION;
 	::SysFreeString(m_expression);
 	m_expression = OLE2BSTR(newVal);
-	m_value.vt = VT_EMPTY;
+	_categoryValue = cvExpression;
 	return S_OK;
 }
 
@@ -116,29 +116,53 @@ void CShapefileCategory::put_underlyingOptions(CDrawingOptionsEx* newVal)
 }
 
 // ***************************************************************
-//		get_Count()
+//		ValueType()
 // ***************************************************************
-// Returns number of shapes that fall into current category
-//STDMETHODIMP CShapefileCategory::get_Count(LONG* retval)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	if (!_categories) return;
-//	
-//	IShapefile* sf = NULL;
-//	_categories->get_Shapefile(&sf);
-//	
-//	if (sf)
-//	{
-//		long numShapes;
-//		sf->get_NumShapes(&numShapes);
-//
-//		for (int i = 0; i < numShapes; i++ )
-//		{
-//			long val;
-//			sf->get_ShapeCategory(i, &val);
-//			if 
-//		}
-//	}
-//
-//	return S_OK;
-//}
+STDMETHODIMP CShapefileCategory::get_ValueType(tkCategoryValue* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _categoryValue;
+	return S_OK;
+}
+STDMETHODIMP CShapefileCategory::put_ValueType(tkCategoryValue newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_categoryValue = newVal;
+	return S_OK;
+}
+
+// ***************************************************************
+//		MinValue()
+// ***************************************************************
+STDMETHODIMP CShapefileCategory::get_MinValue(VARIANT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	VariantCopy(pVal, &_minValue);
+	return S_OK;
+}
+STDMETHODIMP CShapefileCategory::put_MinValue(VARIANT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (newVal.vt == VT_I4 || newVal.vt == VT_R8 || newVal.vt == VT_BSTR)
+		VariantCopy(&_minValue, &newVal);
+	return S_OK;
+}
+
+// ***************************************************************
+//		MaxValue()
+// ***************************************************************
+STDMETHODIMP CShapefileCategory::get_MaxValue(VARIANT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	VariantCopy(pVal, &_maxValue);
+	return S_OK;
+}
+STDMETHODIMP CShapefileCategory::put_MaxValue(VARIANT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (newVal.vt == VT_I4 || newVal.vt == VT_R8 || newVal.vt == VT_BSTR)
+		VariantCopy(&_maxValue, &newVal);
+	return S_OK;
+}
+
+
