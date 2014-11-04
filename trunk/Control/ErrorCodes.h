@@ -97,7 +97,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkNOT_ENOUGH_POINTS 237
 # define tkSAME_SUBJECT_AND_OVERLAY_SHAPE 238
 # define tkNO_LAYER_HANDLE_FOR_SHAPE_EDITOR 239
-
+# define tkFAILED_CREATE_BUFFER_PARAMS 240
 
 //301-400 = ogr layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301

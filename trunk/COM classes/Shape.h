@@ -174,6 +174,7 @@ public:
 	bool get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& yMax, double& zMin, double& zMax, double& mMin, double& mMax);
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
+	STDMETHOD(BufferWithParams)(DOUBLE Ditances, LONG numSegments, VARIANT_BOOL singleSided, tkBufferCap capStyle, tkBufferJoin joinStyle, DOUBLE mitreLimit, IShape** retVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

@@ -191,6 +191,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "The same shape was selected both for subject and overlay.";
 		case tkNO_LAYER_HANDLE_FOR_SHAPE_EDITOR:
 			return "No layer handle is set for shape editor.";
+		case tkFAILED_CREATE_BUFFER_PARAMS:
+			return "Failed to created buffer parameters.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

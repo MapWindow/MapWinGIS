@@ -7,6 +7,78 @@ public:
 	GeosHelper(void) {};
 	~GeosHelper(void) {};
 
+	static int BufferParams_setEndCapStyle(GEOSBufferParams* p, tkBufferCap style)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_setEndCapStyle_r(getGeosHandle(), p, (int)style);
+		#else
+			return GEOSBufferParams_setEndCapStyle(p, (int)style);
+		#endif
+	}
+
+	static int BufferParams_setJoinStyle(GEOSBufferParams* p, tkBufferJoin joinStyle)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_setJoinStyle_r(getGeosHandle(), p, (int)joinStyle);
+		#else
+			return GEOSBufferParams_setJoinStyle(p, (int)joinStyle);
+		#endif
+	}
+
+	static int BufferParams_setMitreLimit(GEOSBufferParams* p, double mitreLimit)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_setMitreLimit_r(getGeosHandle(), p, mitreLimit);
+		#else
+			return GEOSBufferParams_setMitreLimit(p, mitreLimit);
+		#endif
+	}
+
+	static int BufferParams_setQuadrantSegments(GEOSBufferParams* p, int quadSegs)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_setQuadrantSegments_r(getGeosHandle(), p, quadSegs);
+		#else
+			return GEOSBufferParams_setQuadrantSegments(p, quadSegs);
+		#endif
+	}
+
+	static int BufferParams_setSingleSided(GEOSBufferParams* p, bool singleSided)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_setSingleSided_r(getGeosHandle(), p, singleSided ? 1 : 0);
+		#else
+			return GEOSBufferParams_setSingleSided(p, singleSided ? 1 : 0);
+		#endif
+	}
+
+	static GEOSGeometry* BufferWithParams(const GEOSGeometry* g, const GEOSBufferParams* p, double width)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferWithParams_r(getGeosHandle(), g, p, width);
+		#else
+			return GEOSBufferWithParams(g, p, width);
+		#endif
+	}
+
+	static GEOSBufferParams* BufferParams_create()
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_create_r(getGeosHandle());
+		#else
+			return GEOSBufferParams_create();
+		#endif
+	}
+
+	static void BufferParams_destroy(GEOSBufferParams* params)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBufferParams_destroy_r(getGeosHandle(), params);
+		#else
+			return GEOSBufferParams_destroy(params);
+		#endif
+	}
+
 	static GEOSGeometry* Polygonize(const GEOSGeometry* gsGeom)
 	{
 		#ifdef GEOS_NEW

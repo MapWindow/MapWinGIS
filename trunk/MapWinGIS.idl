@@ -57,6 +57,31 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkBufferCap Enumeration **********************/
+typedef
+[
+	uuid(41BCBD8E-8F68-4E19-9FF4-8DDA388F5F2C),
+	helpstring("tkBufferCap"),
+]
+enum tkBufferCap {
+	bcROUND = 0,
+	bcFLAT = 1,
+	bcSQUARE = 2,
+}tkBufferCap;
+
+
+/************************** tkBufferJoin Enumeration **********************/
+typedef
+[
+	uuid(99A2C9DE-35B7-4079-88A5-B6B2358BA889),
+	helpstring("tkBufferJoin"),
+]
+enum tkBufferJoin {
+	bjROUND = 0,
+	bjMITRE = 1,
+	bjBEVEL = 2,
+}tkBufferJoin;
+
 /************************** tkCategoryValue Enumeration **********************/
 typedef
 [
@@ -3743,6 +3768,13 @@ interface IShape : IDispatch{
 	[id(59), helpstring("method put_Z")] HRESULT put_Z([in]LONG pointIndex, [in]double z, [out, retval]VARIANT_BOOL* retVal);
 	[id(60), helpstring("method get_M")] HRESULT get_M([in]LONG pointIndex, [out]double* m, [out, retval]VARIANT_BOOL* retVal);
 	[id(61), helpstring("method get_Z")] HRESULT get_Z([in]LONG pointIndex, [out]double* z, [out, retval]VARIANT_BOOL* retVal);
+	[id(62)] HRESULT BufferWithParams([in] DOUBLE Distance, 
+		[in, optional, defaultvalue(30)] LONG numSegments, 
+		[in, optional, defaultvalue(0)] VARIANT_BOOL singleSided, 
+		[in, optional, defaultvalue(0)] tkBufferCap capStyle, 
+		[in, optional, defaultvalue(0)] tkBufferJoin joinStyle, 
+		[in, optional, defaultvalue(5.0)] DOUBLE mitreLimit, 
+		[out, retval] IShape** retVal);
 };
 
 /****************************  Extents Interface ***********************/

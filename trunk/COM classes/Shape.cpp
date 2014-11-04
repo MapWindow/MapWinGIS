@@ -1537,6 +1537,60 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 }
 
 // *************************************************************
+//		BufferWithParams
+// *************************************************************
+STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT_BOOL singleSided, 
+	tkBufferCap capStyle, tkBufferJoin joinStyle, DOUBLE mitreLimit, IShape** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+
+	GEOSGeom gs = GeometryConverter::Shape2GEOSGeom(this);
+	if (!gs) 
+	{
+		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
+		return S_OK;
+	}
+
+	GEOSBufferParams* params = GeosHelper::BufferParams_create();
+	if (!params) {
+		GeosHelper::DestroyGeometry(gs);
+		ErrorMessage(tkFAILED_CREATE_BUFFER_PARAMS);
+		return S_OK;
+	}
+		
+	GeosHelper::BufferParams_setQuadrantSegments(params, numSegments);
+	GeosHelper::BufferParams_setMitreLimit(params, mitreLimit);
+	GeosHelper::BufferParams_setEndCapStyle(params, capStyle);
+	GeosHelper::BufferParams_setJoinStyle(params, joinStyle);
+	GeosHelper::BufferParams_setSingleSided(params, singleSided ? true : false);
+		
+	GEOSGeometry* gsNew = GeosHelper::BufferWithParams(gs, params, Ditances);
+	
+	GeosHelper::DestroyGeometry(gs);
+	GeosHelper::BufferParams_destroy(params);
+
+	if (gsNew) 
+	{
+		ShpfileType shpType;
+		get_ShapeType(&shpType);
+
+		vector<IShape*> shapes;
+		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
+		{
+			if (shapes.size() > 0) {
+				*retVal = shapes[0];
+				for (size_t i = 1; i < shapes.size(); i++) {
+					shapes[i]->Release();
+				}
+			}
+		}
+		GeosHelper::DestroyGeometry(gsNew);
+	}
+	return S_OK;
+}
+
+// *************************************************************
 //		Boundary
 // *************************************************************
 STDMETHODIMP CShape::Boundary(IShape** retval)
