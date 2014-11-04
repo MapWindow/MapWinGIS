@@ -5333,6 +5333,9 @@ STDMETHODIMP CUtils::get_ComUsageReport(VARIANT_BOOL unreleasedOnly, BSTR* retVa
 	CString s = gReferenceCounter.GetReport(unreleasedOnly ? true: false);
 	USES_CONVERSION;
 	*retVal = A2BSTR(s);
+
+	Debug::WriteLine("Constructor count: %d; %d", m_globalSettings.ctorCount, m_globalSettings.dtorCount);
+
 	return S_OK;
 }
 

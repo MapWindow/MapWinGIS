@@ -50,9 +50,13 @@ struct GlobalSettingsInfo
 	bool useSchemesForStyles;
 	bool saveOgrLabels;
 	int getOgrMaxLabelCount() { return ogrLayerMaxFeatureCount; }
+	int ctorCount;
+	int dtorCount;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		ctorCount = 0;
+		dtorCount = 0;
 		saveOgrLabels = false;
 		useSchemesForStyles = false;
 		ogrUseStyles = false;

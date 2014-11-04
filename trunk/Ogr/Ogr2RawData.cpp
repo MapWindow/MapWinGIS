@@ -54,9 +54,6 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	layer->ResetReading();
 	while ((poFeature = layer->GetNextFeature()) != NULL)
 	{
-		if (loader->HaveWaitingTasks())
-			break;
-
 		OGRGeometry *oGeom = poFeature->GetGeometryRef();
 
 		IShape* shp = NULL;
@@ -81,6 +78,9 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 
 		list.push_back(data);
 		OGRFeature::DestroyFeature(poFeature);
+
+		if (loader->HaveWaitingTasks())
+			break;
 	}
 
 	vector<CString> fields;
@@ -110,6 +110,11 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		loader->Data.insert(loader->Data.end(), list.begin(), list.end());
 		loader->LockData(false);
 		success = true;
+	}
+	else {
+		for (size_t i = 0; i < list.size(); i++) {
+			delete list[i];
+		}
 	}
 
 	if (success) {

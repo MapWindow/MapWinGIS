@@ -72,7 +72,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 
 	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
 	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
-	sf->put_FastMode(VARIANT_TRUE);    // despite the global setting
+	//sf->put_FastMode(VARIANT_TRUE);    // despite the global setting
 
 	// setting projection for shapefile
 	OGRSpatialReference* sr = layer->GetSpatialRef();
