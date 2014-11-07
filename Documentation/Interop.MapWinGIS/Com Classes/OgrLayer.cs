@@ -201,6 +201,9 @@ namespace MapWinGIS
     /// %OgrLayer encapsulates an instance of GDAL's %OGRLayer C++ class. Check its 
     /// <a href = "http://www.gdal.org/classOGRLayer.html">documentation</a> to better understand what's going on under the hood. \n
     /// 
+    /// \note Starting from version 4.9.3 OgrLayer will use dynamic loading for large layers. See details in
+    /// OgrLayer.DynamicLoading property.\n
+    /// 
     /// <b>D. How to edit the data.</b>\n
     /// 
     /// \note See description of editing in <a href = "group__ogrlayer__editing.html#details">this section</a>.\n
@@ -521,6 +524,238 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Applies style with the specified name.
+        /// </summary>
+        /// <param name="Name">Name of the style.</param>
+        /// <returns>True on success.</returns>
+        /// \new492c Added in version 4.9.2
+        public bool ApplyStyle(string Name)
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Clears all the styles stored for current layer in datasource.
+        /// </summary>
+        /// <returns>True on success.</returns>
+        /// \new492c Added in version 4.9.2
+        public bool ClearStyles()
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether features for large layers are to be loaded dynamically
+        /// when moving to the new portions of map.
+        /// </summary>
+        /// <remarks>When set to false only the number of features set by OgrLayer.MaxFeatureCount
+        /// is loaded into memory. No further attempts to load additional features will be done.\n
+        /// 
+        /// In dynamic loading mode after map extents change a check is made 
+        /// whether features for the requested extents are already in memory. If not the data loading 
+        /// is started in the background thread. When the loading is over all the features currently stored
+        /// in memory will be discarded. If the amount of features in new map extents exceeds
+        /// OgrLayer.MaxFeatureCount no background loading will be done. \n
+        /// 
+        /// The mode is chosen automatically when the layer is opened depending on the number of features.
+        /// But afterwards it's possible possible to change the value.</remarks>
+        /// \new492c Added in version 4.9.2
+        public bool DynamicLoading
+        {
+	        get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Generates visualization categories for OGR layer.
+        /// </summary>
+        /// <param name="Fieldname">%Field name to use as a base for classification.</param>
+        /// <param name="ClassificationType">Type of classification.</param>
+        /// <param name="numClasses">Number of classes (is not used with unique values classification type).</param>
+        /// <param name="colorStart">Starting color for the color scheme.</param>
+        /// <param name="colorEnd">End color for the color scheme.</param>
+        /// <param name="schemeType">Type of color scheme.</param>
+        /// <returns>True on success.</returns>
+        /// <remarks> The whole set of features will be used during classification, not only those currently loaded into memory. 
+        /// Therefore the method has definite advantage over calling OgrLayer.GetData.Categories.Generate 
+        /// directly for large layers.\n\n
+		///
+        /// Categories will be added to underlying shapefile (OgrLayer.GetData). This method
+        /// will trigger the population of this shapefile if it's not yet in memory. \n
+        /// 
+        /// The following code opens "buildings" layer, generates categories based on "population"
+        /// field and then saves them as a "new_style" to the datasource.\n
+        /// 
+        /// \code
+        /// var layer = new OgrLayer();
+        /// if (!layer.OpenFromDatabase(CONNECTION_STRING, "buildings"))
+        /// {
+        ///     Debug.WriteLine("Failed to open the layer: " + layer.GdalLastErrorMsg);
+        /// }
+        /// else
+        /// {
+        ///     layer.LabelExpression = "[Name]";
+        ///     layer.LabelPosition = tkLabelPositioning.lpCenter;
+        ///     layer.GlobalCallback = this;
+        /// 
+        ///     if (!layer.GenerateCategories("population", tkClassificationType.ctEqualIntervals,
+        ///         10, tkMapColor.Blue, tkMapColor.Yellow, tkColorSchemeType.ctSchemeGraduated))
+        ///     {
+        ///         Debug.WriteLine("Failed to generated categories: " + layer.get_ErrorMsg(layer.LastErrorCode));
+        ///     }
+        ///     else
+        ///     {
+        ///         var sf = layer.GetData();
+        ///         Debug.WriteLine("Number of generated categories: " + sf.Categories.Count);
+        /// 
+        ///         // save it as a new style
+        ///         if (!layer.SaveStyle("new_style"))
+        ///         {
+        ///             Debug.WriteLine("Failed to save style: " + layer.GdalLastErrorMsg);
+        ///         }
+        ///         else
+        ///         {
+        ///             Debug.WriteLine("The new style has been saved.");
+        ///         }
+        ///     }
+        ///     layer.Close();
+        /// }
+        /// \endcode
+		/// </remarks>
+        /// \new492c Added in version 4.9.2
+        public bool GenerateCategories(string Fieldname, tkClassificationType ClassificationType, int numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType)
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets number of styles stored for the layer in datasource.
+        /// </summary>
+        ///  MapWinGIS provides its own functionality to store visualization styles for OGR layers. Each 
+        /// style hold serialized state of underlying shapefile and is stored in <i>mw_styles</i> table of database.
+        /// The table will be created on the first call of OgrLayer.SaveStyle or on the first call of 
+        /// OgrDatasource.ImportShapefile when GlobalSettings.UseOgrStyles is set to true. \n
+        /// 
+        /// The default style has empty string name (""). When GlobalSettings.UseOgrStyles
+        /// is set to true, this style will be automatically created during shapefile import and 
+        /// then will be applied for the layer on further loadings. Alternative styles can be saved
+        /// and applied with OgrLayer.SaveStyle and OgrLayer.ApplyStyle respectively. \n
+        /// 
+        /// The style table has following definition for PostGIS datasource:
+        /// \code
+        /// CREATE Table mw_styles (
+        ///    StyleId serial primary key, 
+        ///    LayerName varchar(128), 
+        ///    StyleName varchar(128), 
+        ///    Style text, 
+        ///    CONSTRAINT layer_style_unique UNIQUE (LayerName,StyleName)
+        /// );
+        /// \endcode
+        /// <returns>Number of styles.</returns>
+        /// \new492c Added in version 4.9.2
+        public int GetNumStyles()
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets an expression for label generation for the layer.
+        /// </summary>
+        /// <remarks>The syntax of expression is the same as for Shapefile.Labels.Generate method. To 
+        /// generate labels based on single field use "[FieldName]" syntax. The property is supported
+        /// for dynamic loading mode, where labels will be generated on the fly after each zooming 
+        /// operation.
+        /// </remarks>
+        /// \new492c Added in version 4.9.2
+        public string LabelExpression
+        {
+	        get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets label orientation for polyline layers.
+        /// </summary>
+        /// \see OgrLayer.LabelExpression
+        /// \new492c Added in version 4.9.2
+        public tkLineLabelOrientation LabelOrientation
+        {
+	        get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets position of labels relative to their parent features.
+        /// </summary>
+        /// \see OgrLayer.LabelExpression
+        /// \new492c Added in version 4.9.2
+        public tkLabelPositioning LabelPosition
+        {
+	        get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets maximum number of features to be loaded in the memory.
+        /// </summary>
+        /// <remarks>If total number of features exceeds this number the layer will be rendered
+        /// in dynamic loading mode (see OgrLayer.DynamicLoading). During dynamic loading if 
+        /// number of features for the new map extents exceeds this number they won't be loaded. The default
+        /// value of property can be changed with GlobalSettings.OgrLayerMaxFeatureCount.
+        /// </remarks>
+        /// \see OgrLayer.GetData
+        /// \new492c Added in version 4.9.2
+        public int MaxFeatureCount
+        {
+	        get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Removes style with particular name from the datasource.
+        /// </summary>
+        /// <param name="StyleName">The name of the style.</param>
+        /// <returns>True on success.</returns>
+        /// \new492c Added in version 4.9.2
+        public bool RemoveStyle(string StyleName)
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Saves current state of the layer as a new style to the datasource.
+        /// </summary>
+        /// <param name="Name">Name of the new style.</param>
+        /// <returns>True on success.</returns>
+        /// \new492c Added in version 4.9.2
+        public bool SaveStyle(string Name)
+        {
+ 	        throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Checks whether the layers supports saving of styles to the datasource.
+        /// </summary>
+        /// <remarks>This property will check the presence of mw_styles table in the datasource and then
+        /// will try to create one if it's missing. If neither succeeds, false will be returned.</remarks>
+        /// \new492c Added in version 4.9.2
+        public bool SupportsStyles
+        {
+	        get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets name of the style with particular index.
+        /// </summary>
+        /// <param name="styleIndex">Index of style.</param>
+        /// <returns>Name of the style.</returns>
+        /// \new492c Added in version 4.9.2
+        public string get_StyleName(int styleIndex)
+        {
+ 	        throw new NotImplementedException();
+        }
+
         /// \addtogroup ogrlayer_editing OGR layer editing
         /// Here is a list of methods and properties to save changes made to OgrLayer back to datasource.
         /// The properties and methods described here belong to OgrLayer class.\n
@@ -778,7 +1013,7 @@ namespace MapWinGIS
 
         /// @}
         #endregion
-    }
+}
 #if nsp
 }
 #endif
