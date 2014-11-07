@@ -476,11 +476,21 @@ void CShapefileCategories::ApplyExpression_(long CategoryIndex)
 		std::vector<int> results;
 		results.resize(numShapes, -1);
 
+		bool uniqueValues = true;
+		for (unsigned int i = 0; i < _categories.size(); i++) {
+			tkCategoryValue value;
+			_categories[i]->get_ValueType(&value);
+			if (value != cvSingleValue) {
+				uniqueValues = false;
+				break;
+			}
+		}
+
 		// ----------------------------------------------------------------
 		// we got unique values classification and want to process it fast
 		// ----------------------------------------------------------------
 		bool parsingIsNeeded = true;	
-		if (_classificationField != -1)
+		if (_classificationField != -1 && uniqueValues)
 		{
 			parsingIsNeeded = false;	// in case there are unique values only we don't need any parsing
 			
@@ -528,13 +538,13 @@ void CShapefileCategories::ApplyExpression_(long CategoryIndex)
 				{
 					CComVariant val;
 					_categories[i]->get_MinValue(&val);
-					if (val.vt != VT_EMPTY && _classificationField != -1)
-					{
-						// we analyzed this one before, so just a dummy string here
-						CString str = "";
-						expressions.push_back(str);
-					}
-					else
+					//if (val.vt != VT_EMPTY && _classificationField != -1)
+					//{
+					//	// we analyzed this one before, so just a dummy string here
+					//	CString str = "";
+					//	expressions.push_back(str);
+					//}
+					//else
 					{
 						_categories[i]->get_Expression(&expr);
 						USES_CONVERSION;
