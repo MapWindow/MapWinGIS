@@ -489,12 +489,12 @@ void CShapefileCategories::ApplyExpression_(long CategoryIndex)
 			{
 				if (i == CategoryIndex || CategoryIndex == -1 )
 				{
-					CComVariant* val = NULL;
-					_categories[i]->get_MinValue(val);
-					if (val->vt != VT_EMPTY)
+					CComVariant val;
+					_categories[i]->get_MinValue(&val);
+					if (val.vt != VT_EMPTY)
 					{
 						CComVariant val2;
-						VariantCopy(&val2, val);
+						VariantCopy(&val2, &val);
 						myMap[val2] = i;
 					}
 				}
@@ -526,9 +526,9 @@ void CShapefileCategories::ApplyExpression_(long CategoryIndex)
 			{
 				if (i == CategoryIndex || CategoryIndex == -1 )
 				{
-					CComVariant* val = NULL;
-					_categories[i]->get_MinValue(val);
-					if (val->vt != VT_EMPTY && _classificationField != -1)
+					CComVariant val;
+					_categories[i]->get_MinValue(&val);
+					if (val.vt != VT_EMPTY && _classificationField != -1)
 					{
 						// we analyzed this one before, so just a dummy string here
 						CString str = "";

@@ -137,7 +137,10 @@ STDMETHODIMP CShapefileCategory::put_ValueType(tkCategoryValue newVal)
 STDMETHODIMP CShapefileCategory::get_MinValue(VARIANT* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	VariantCopy(pVal, &_minValue);
+	if (_minValue.vt == VT_EMPTY)
+		VariantInit(pVal);
+	else
+		VariantCopy(pVal, &_minValue);
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategory::put_MinValue(VARIANT newVal)
@@ -154,7 +157,10 @@ STDMETHODIMP CShapefileCategory::put_MinValue(VARIANT newVal)
 STDMETHODIMP CShapefileCategory::get_MaxValue(VARIANT* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	VariantCopy(pVal, &_maxValue);
+	if (_maxValue.vt == VT_EMPTY)
+		VariantInit(pVal);
+	else
+		VariantCopy(pVal, &_maxValue);
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategory::put_MaxValue(VARIANT newVal)
