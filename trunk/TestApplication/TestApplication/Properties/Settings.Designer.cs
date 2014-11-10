@@ -514,5 +514,29 @@ namespace TestApplication.Properties {
                 this["PostGisImportSfInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string PostGisDropDbInput {
+            get {
+                return ((string)(this["PostGisDropDbInput"]));
+            }
+            set {
+                this["PostGisDropDbInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SingleSidedBuffer {
+            get {
+                return ((string)(this["SingleSidedBuffer"]));
+            }
+            set {
+                this["SingleSidedBuffer"] = value;
+            }
+        }
     }
 }

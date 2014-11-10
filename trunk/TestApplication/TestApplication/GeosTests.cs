@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GeosTests.cs" company="MapWindow Open Source GIS Community">
-//   MapWindow Open Source GIS Community
+// <copyright file="GeosTests.cs" company="MapWindow Open Source GIS">
+//   MapWindow developers community - 2014
 // </copyright>
 // <summary>
 //   Static class to hold the tests methods for the GEOS functions
@@ -10,6 +10,7 @@
 namespace TestApplication
 {
   using System;
+  using System.Globalization;
   using System.IO;
   using System.Threading;
   using System.Windows.Forms;
@@ -24,13 +25,18 @@ namespace TestApplication
     /// </summary>
     internal static AxMapWinGIS.AxMap MyAxMap { get; set; }
 
-    /// <summary>Run the Buffer shapefile test</summary>
+    /// <summary>
+    /// Run the Buffer shapefile test
+    /// </summary>
     /// <param name="textfileLocation">
     /// The location of the text file.
     /// </param>
     /// <param name="theForm">
     /// The form.
     /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
     internal static bool RunBufferShapefileTest(string textfileLocation, Form1 theForm)
     {
       var numErrors = 0;
@@ -60,6 +66,102 @@ namespace TestApplication
       theForm.Progress(string.Empty, 100, string.Format("The GEOS Buffer tests have finished, with {0} errors", numErrors));
 
       return numErrors == 0;
+    }
+
+    /// <summary>Run the Single Sided Buffer test</summary>
+    /// <param name="textfileLocation">
+    /// The location of the text file.
+    /// </param>
+    /// <param name="theForm">
+    /// The form.
+    /// </param>
+    /// <returns>
+    /// True on success
+    /// </returns>
+    internal static bool RunSingleSidedBuffer(string textfileLocation, Form1 theForm)
+    {
+        var numErrors = 0;
+
+        // Open text file:
+        if (!File.Exists(textfileLocation))
+        {
+            throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+        }
+
+        theForm.Progress(string.Empty, 0, "-----------------------The GEOS Single Sided Buffer tests have started.");
+        
+        // Read text file:
+        var lines = Helper.ReadTextfile(textfileLocation);
+
+        // Create shapefile:
+        var bufferSf = new Shapefile { GlobalCallback = theForm };
+        bufferSf.CreateNewWithShapeID(string.Empty, ShpfileType.SHP_POLYGON);
+        var lineSf = new Shapefile { GlobalCallback = theForm };
+        lineSf.CreateNewWithShapeID(string.Empty, ShpfileType.SHP_POLYLINE);
+
+        // Get every first line and second line:
+        for (var i = 0; i < lines.Count; i = i + 2)
+        {
+            if (i + 1 > lines.Count)
+            {
+                theForm.Error(string.Empty, "Input file is incorrect.");
+                numErrors++;
+                break;
+            }
+
+            double distance;
+
+            if (!double.TryParse(lines[i + 1], NumberStyles.Number, CultureInfo.InvariantCulture, out distance))
+            {
+                theForm.Error(string.Empty, "Could not parse distance");
+                numErrors++;
+                continue;
+            }
+
+            // Convert line (wkt) to shapefile:
+            var shapeWkt = new Shape();
+            if (!shapeWkt.ImportFromWKT(lines[i]))
+            {
+                theForm.Error(
+                    string.Empty,
+                    "ImportFromWKT was unsuccessful: " + shapeWkt.ErrorMsg[shapeWkt.LastErrorCode]);
+                numErrors++;
+            }
+
+            // Create a single sided buffer:
+            var shapeBuffer = shapeWkt.BufferWithParams(distance, 30, true, tkBufferCap.bcFLAT);
+
+            // Add shapes to sf:
+            bufferSf.EditAddShape(shapeBuffer);
+            lineSf.EditAddShape(shapeWkt);
+        }
+
+        // Add sf to map:
+        var utils = new Utils { GlobalCallback = theForm };
+
+        bufferSf.DefaultDrawingOptions.FillVisible = true;
+        bufferSf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.Black);
+        if (MyAxMap.AddLayer(bufferSf, true) == -1)
+        {
+            theForm.Error(string.Empty, "Could not add the single-sided buffer to the map");
+            return false;
+        }
+
+        lineSf.DefaultDrawingOptions.LineColor = utils.ColorByName(tkMapColor.OrangeRed);
+        lineSf.DefaultDrawingOptions.LineWidth = 2;
+        if (MyAxMap.AddLayer(lineSf, true) == -1)
+        {
+            theForm.Error(string.Empty, "Could not add the input shapefile to the map");
+            return false;
+        }
+
+        // Wait a second to show something:
+        Application.DoEvents();
+        Thread.Sleep(1000);
+        
+        theForm.Progress(string.Empty, 100, string.Format("The GEOS Single Sided Buffer tests have finished, with {0} errors", numErrors));
+
+        return numErrors == 0;
     }
 
     /// <summary>Buffer the shapefile</summary>
@@ -179,7 +281,19 @@ namespace TestApplication
       return numErrors == 0;
     }
 
-    private static bool SimplifyShapefile(string shapefilename, Form1 theForm)
+      /// <summary>
+      /// The simplify shapefile.
+      /// </summary>
+      /// <param name="shapefilename">
+      /// The shapefilename.
+      /// </param>
+      /// <param name="theForm">
+      /// The form.
+      /// </param>
+      /// <returns>
+      /// The <see cref="bool"/>.
+      /// </returns>
+      private static bool SimplifyShapefile(string shapefilename, Form1 theForm)
     {
       try
       {
@@ -787,14 +901,12 @@ namespace TestApplication
         // Wait to show the map:
         Application.DoEvents();
 
-        theForm.Progress(
-          string.Empty,
-          100,
-          string.Format(
-            "The closest shape is{0}, has a value of {1} and a length of {2}",
-            closestIndex,
-            searchSf.get_CellValue(0, closestIndex),
-            minLength));
+          theForm.Progress(
+              string.Format(
+                  "The closest shape is{0}, has a value of {1} and a length of {2}",
+                  closestIndex,
+                  searchSf.CellValue[0, closestIndex],
+                  minLength));
 
         // Save result:
         var newFilename = pointSf.Filename.Replace(".shp", "-Closest.shp");
