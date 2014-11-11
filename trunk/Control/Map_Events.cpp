@@ -561,8 +561,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
+		case cmRotateShapes:
 		case cmMoveShapes:
-			HandleOnLButtonMoveShapes(x, y, projX, projY);
+			HandleOnLButtonMoveOrRotate(x, y);
 			break;
 		case cmAddShape:
 			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
@@ -672,15 +673,26 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	switch(operation)
 	{
+		case DragRotateShapes:
+			{
+				IShapefile* sf = _dragging.Shapefile;
+				if (sf)
+				{
+					double angle = GetDraggingRotationAngle();
+					((CShapefile*)sf)->Rotate(_dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
+					RegisterGroupOperation(operation);
+					Redraw();
+				}
+			}
+			break;
 		case DragMoveShapes:
 			{
-				Point2D pnt = GetDraggingProjOffset();
 				IShapefile* sf = _dragging.Shapefile;
 				if (sf) 
 				{
+					Point2D pnt = GetDraggingProjOffset();
 					((CShapefile*)sf)->Move(pnt.x, pnt.y);
-					Utility::ClosePointer(&_moveBitmap);
-					RegisterMoveOperation();
+					RegisterGroupOperation(operation);
 					Redraw();
 				}
 			}
@@ -761,6 +773,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 			break;
 	}
 	_dragging.Clear();
+	Utility::ClosePointer(&_moveBitmap);
 }
 
 // ************************************************************
@@ -936,32 +949,12 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	switch(m_cursorMode)
 	{
 		case cmMoveShapes:
-			if (_dragging.Operation == DragMoveShapes)
+		case cmRotateShapes:
+			if (_dragging.Operation == DragMoveShapes ||
+				_dragging.Operation == DragRotateShapes)
 			{
-				Debug::WriteLine("moving");
-				if (!_dragging.Shapefile)
+				if (InitDraggingShapefile())
 				{
-					IShapefile* sf = GetShapefile(_dragging.LayerHandle);
-					if (sf) 
-					{
-						IShapefile* sfNew = ((CShapefile*)sf)->CloneSelection();
-						ShpfileType shpType;
-						sf->get_ShapefileType(&shpType);
-						shpType = Utility::ShapeTypeConvert2D(shpType);
-						if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
-						{
-							// TODO: extract to a function
-							CComPtr<IShapeDrawingOptions> options = NULL;
-							sf->get_DefaultDrawingOptions(&options);
-							if (options) {
-								CComPtr<IShapeDrawingOptions> newOptions = NULL;
-								options->Clone(&newOptions);
-								sfNew->put_DefaultDrawingOptions(newOptions);
-							}
-						}
-						_dragging.SetShapefile(sfNew);
-						sf->Release();
-					}
 					this->Refresh();
 					return;
 				}

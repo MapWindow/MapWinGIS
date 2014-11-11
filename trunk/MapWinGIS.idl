@@ -176,7 +176,8 @@ enum tkUndoOperation {
 	uoAddShape = 0,
 	uoRemoveShape = 1,
 	uoEditShape = 2,
-	uoMoveShapes = 3
+	uoMoveShapes = 3,
+	uoRotateShapes = 4,
 }tkUndoOperation;
 
 /************************** tkMwBoolean Enumeration **********************/
@@ -1058,6 +1059,7 @@ enum tkScalebarUnits
 		cmSplitByPolyline = 11,
 		cmIdentify = 12,
 		cmMoveShapes = 13,
+		cmRotateShapes = 14,
 	} tkCursorMode;
 
 	typedef 
@@ -3778,6 +3780,7 @@ interface IShape : IDispatch{
 		[in, optional, defaultvalue(5.0)] DOUBLE mitreLimit, 
 		[out, retval] IShape** retVal);
 	[id(63)] HRESULT Move([in] DOUBLE xProjOffset, [in] DOUBLE yProjOffset);
+	[id(64)] HRESULT Rotate([in] DOUBLE originX, [in] DOUBLE originY, [in] DOUBLE angle);
 };
 
 /****************************  Extents Interface ***********************/

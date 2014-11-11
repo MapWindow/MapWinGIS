@@ -120,7 +120,7 @@ bool CUndoList::CheckShapeIndex(long layerHandle, LONG shapeIndex)
 // **********************************************************
 //		Add
 // **********************************************************
-HRESULT STDMETHODCALLTYPE CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL *retVal)
+STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -156,16 +156,35 @@ HRESULT STDMETHODCALLTYPE CUndoList::Add(tkUndoOperation operation, LONG LayerHa
 // **********************************************************
 bool CUndoList::AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset)
 {
+	return AddGroupOperation(uoMoveShapes, layerHandle, indices, xProjOffset, yProjOffset, 0.0);
+}
+
+// **********************************************************
+//		AddRotateOperation
+// **********************************************************
+bool CUndoList::AddRotateOperation(int layerHandle, vector<int>* indices, 
+							double xProjOrigin, double yProjOrigin, double angleDegrees)
+{
+	return AddGroupOperation(uoRotateShapes, layerHandle, indices, xProjOrigin, yProjOrigin, angleDegrees);
+}
+
+// **********************************************************
+//		AddGroupOperation
+// **********************************************************
+bool CUndoList::AddGroupOperation(tkUndoOperation operation, int layerHandle, vector<int>* indices,
+		double xProjOrigin, double yProjOrigin, double angleDegrees)
+{
 	if (!CheckState()) return false;
 
 	if (!indices) return false;
 
 	TrimList();
-	
+
 	int id = NextId();
-	UndoListItem* item = new UndoListItem(id, layerHandle, indices, uoMoveShapes);
-	item->ProjOffset.x = xProjOffset;
-	item->ProjOffset.y = yProjOffset;
+	UndoListItem* item = new UndoListItem(id, layerHandle, indices, operation);
+	item->ProjOffset.x = xProjOrigin;
+	item->ProjOffset.y = yProjOrigin;
+	item->RotationAngle = angleDegrees;
 
 	_list.push_back(item);
 	_position = _list.size() - 1;
@@ -313,6 +332,22 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 	VARIANT_BOOL vb;
 	switch (item->Operation)
 	{
+		case uoRotateShapes:
+			if (item->ShapeIndices)
+			{
+				int size = item->ShapeIndices->size();
+				for (int i = 0; i < size; i++)
+				{
+					int index = (*item->ShapeIndices)[i];
+					CComPtr<IShape> shp = NULL;
+					sf->get_Shape((long)index, &shp);
+					if (shp) {
+						shp->Rotate(item->ProjOffset.x, item->ProjOffset.y, -item->RotationAngle);
+					}
+				}
+				item->RotationAngle *= -1;
+			}
+			break;
 		case uoMoveShapes:
 			if (item->ShapeIndices)
 			{
@@ -592,3 +627,4 @@ STDMETHODIMP CUndoList::ClearForLayer(LONG LayerHandle)
 		FireUndoListChanged();
 	return S_OK;
 }
+

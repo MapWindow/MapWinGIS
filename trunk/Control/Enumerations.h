@@ -162,6 +162,7 @@ enum DraggingOperation
 	DragMoveVertex = 5,
 	DragMovePart = 6,
 	DragMoveShapes = 7,
+	DragRotateShapes = 8,
 };
 
 enum TileProjectionState

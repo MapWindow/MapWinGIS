@@ -741,36 +741,11 @@ VARIANT_BOOL CMapView::ZoomToSelected(LONG LayerHandle)
 		
 		if (numSelected > 0)
 		{
-			double xMin, xMax, yMin, yMax;
-			double _minX, _maxX, _minY, _maxY;
-			bool first = true;
-			for (int i = 0; i < numShapes; i++)
-			{
-				VARIANT_BOOL selected;
-				sf->get_ShapeSelected(i, &selected);
-				if (selected)
-				{
-					if (((CShapefile*)sf)->QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
-					{					
-						if (first)
-						{
-							_minX = xMin, _maxX = xMax;
-							_minY = yMin, _maxY = yMax;
-							first = false;
-						}
-						else	
-						{	if( xMin < _minX )	_minX = xMin; 
-							if( xMax > _maxX )	_maxX = xMax;
-							if( yMin < _minY )	_minY = yMin;
-							if( yMax > _maxY )	_maxY = yMax;
-						}
-					}
-				}
-			}
-			
+			double xMin, yMin, xMax, yMax;
+			((CShapefile*)sf)->GetSelectedExtents(xMin, yMin, xMax, yMax);
 			IExtents* bounds = NULL;
 			CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&bounds);
-			bounds->SetBounds(_minX, _minY, 0.0, _maxX, _maxY, 0.0);
+			bounds->SetBounds(xMin, yMin, 0.0, xMax, yMax, 0.0);
 			this->SetExtents(bounds);
 			bounds->Release();
 		}

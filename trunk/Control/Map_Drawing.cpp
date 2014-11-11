@@ -249,31 +249,12 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		gBuffer->DrawImage(_drawingBitmap, 0.0f, 0.0f);
 		delete gDrawing;
 	}
+	
+	DrawShapeEditor(g, false);
+	
+	DrawScaleBar(g);
 
-	// -------------------------------------------
-	// edit shape
-	// -------------------------------------------
-	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
-	{
-		DrawShapeEditor(g, false);
-	}
-
-	if (HasDrawingData(MovingShapes))
-	{
-		DrawMovingShapes(g, rcBounds, false);
-	}
-
-	// -----------------------------------
-	//  rendering scale bar
-	// -----------------------------------
-	if (_scalebarVisible)
-		this->DrawScaleBar(g);
-
-	// -----------------------------------
-	//  rendering zoom bar
-	// -----------------------------------
-	if (_zoombarVisible)
-		DrawZoombar(g);
+	DrawZoombar(g);
 
 	// -----------------------------------
 	// redraw time and logo
@@ -1006,7 +987,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 	{
 		case MovingShapes:
 			{
-				return _dragging.Operation == DragMoveShapes;
+				return _dragging.Operation == DragMoveShapes || _dragging.Operation == DragRotateShapes;
 			}
 		case ActShape:	
 			{

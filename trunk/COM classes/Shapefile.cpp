@@ -3453,6 +3453,7 @@ STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
 // *****************************************************************
 void CShapefile::Move(double xProjOffset, double yProjOffset)
 {
+	if (m_sourceType != sstInMemory) return;
 	long numShapes;
 	get_NumShapes(&numShapes);
 	for (long i = 0; i < numShapes; i++)
@@ -3497,4 +3498,52 @@ vector<int>* CShapefile::GetSelectedIndices()
 			result->push_back(i);
 	}
 	return result;
+}
+
+// *****************************************************************
+//		GetSelectedExtents()
+// *****************************************************************
+bool CShapefile::GetSelectedExtents(double& xMinRef, double& yMinRef, double& xMaxRef, double& yMaxRef)
+{
+	double xMin, xMax, yMin, yMax;
+	bool found = false;
+	for (size_t i = 0; i < _shapeData.size(); i++)
+	{
+		if (_shapeData[i]->selected)
+		{
+			if (QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
+			{
+				if (!found)
+				{
+					xMinRef = xMin, xMaxRef = xMax;
+					yMinRef = yMin, yMaxRef = yMax;
+					found = true;
+				}
+				else
+				{
+					if (xMin < xMinRef)	xMinRef = xMin;
+					if (xMax > xMaxRef)	xMaxRef = xMax;
+					if (yMin < yMinRef)	yMinRef = yMin;
+					if (yMax > yMaxRef)	yMaxRef = yMax;
+				}
+			}
+		}
+	}
+	return found;
+}
+
+// *****************************************************************
+//		Rotate()
+// *****************************************************************
+void CShapefile::Rotate(double originX, double originY, double angleDegree)
+{
+	if (m_sourceType != sstInMemory) return;
+	for (size_t i = 0; i < _shapeData.size(); i++) 
+	{
+		CComPtr<IShape> shp = NULL;
+		get_Shape(i, &shp);
+		if (shp) {
+			shp->Rotate(originX, originY, angleDegree);
+		}
+	}
 }

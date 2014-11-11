@@ -116,6 +116,8 @@ CStringW GetLocalizedUnitsText(tkUnitsOfMeasure units)
 // ****************************************************************
 void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 {
+	if (!_scalebarVisible) return;
+
 	int barWidth = 140;
 	int barHeight = 30;
 	int yPadding = 10;

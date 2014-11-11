@@ -165,6 +165,14 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 {
 	if (mode == m_cursorMode) return;
 
+	if (mode == cmRotateShapes)
+	{
+		if (!InitRotationTool())
+			return;
+	}
+
+	bool refreshNeeded = mode == cmRotateShapes || m_cursorMode == cmRotateShapes;
+
 	if (_measuring)
 	{
 		VARIANT_BOOL vb;
@@ -202,6 +210,9 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 	m_cursorMode = mode;
 
 	OnSetCursor(this, HTCLIENT, 0);
+	
+	if (refreshNeeded)
+		RedrawCore(RedrawTempObjectsOnly, false, true);
 }
 
 // *********************************************************

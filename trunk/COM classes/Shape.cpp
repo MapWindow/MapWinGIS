@@ -2859,3 +2859,34 @@ STDMETHODIMP CShape::Move(DOUBLE xProjOffset, DOUBLE yProjOffset)
 	}
 	return S_OK;
 }
+
+//*****************************************************************
+//*		Rotate()
+//*****************************************************************
+STDMETHODIMP CShape::Rotate(DOUBLE originX, DOUBLE originY, DOUBLE angle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (angle == 0.0) return S_OK;
+
+	angle *= -1;
+	double angleRad = angle / 180.0 * pi_;
+	double sine = sin(angleRad);
+	double cosine = cos(angleRad);
+
+	VARIANT_BOOL vb;
+	double x, y, dx, dy;
+	long numPoints;
+	get_NumPoints(&numPoints);
+	for (long i = 0; i < numPoints; i++)
+	{
+		if (get_XY(i, &x, &y)) 
+		{
+			dx = x - originX;
+			dy = y - originY;
+			x = originX + cosine * dx - sine * dy;
+			y = originY + sine * dx + cosine * dy;
+			put_XY(i, x, y, &vb);
+		}
+	}
+	return S_OK;
+}

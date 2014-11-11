@@ -1071,9 +1071,15 @@ private:
 	void HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl);
 	void AttachGlobalCallbackToLayers(IDispatch* object);
 	Point2D GetDraggingProjOffset();
-	void HandleOnLButtonMoveShapes(long x, long y, double projX, double projY);
+	void HandleOnLButtonMoveOrRotate(long x, long y);
 	void DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dynamicBuffer);
-	void RegisterMoveOperation();
+	void RegisterGroupOperation(DraggingOperation operation);
+	bool InitRotationTool();
+	void DrawRotationCenter(Gdiplus::Graphics* g);
+	bool InitDraggingShapefile();
+	double GetDraggingRotationAngle();
+	double GetDraggingRotationAngle(long screenX, long screenY);
+	void RegisterRotationOperation();
 #pragma endregion
 
 public:
@@ -1098,8 +1104,6 @@ public:
 	virtual bool _IsSubjectCursor();
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
-	
-
 
 protected:
 	

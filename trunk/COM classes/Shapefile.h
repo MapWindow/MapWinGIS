@@ -492,5 +492,7 @@ public:
 	void Move(double xProjOffset, double yProjOffset);
 	IShapefile* CloneSelection();
 	vector<int>* GetSelectedIndices();
+	bool GetSelectedExtents(double& xMin, double& yMin, double& xMax, double& yMax);
+	void Rotate(double originX, double originY, double angleDegree);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

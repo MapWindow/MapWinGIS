@@ -176,6 +176,7 @@ public:
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	
+	STDMETHOD(Rotate)(DOUBLE originX, DOUBLE originY, DOUBLE angle);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

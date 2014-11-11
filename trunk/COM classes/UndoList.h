@@ -71,6 +71,7 @@ public:
 	}
 	bool DiscardOne();
 	bool AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset);
+	bool AddRotateOperation(int layerHandle, vector<int>* indices, double xProjOrigin, double yProjOrigin, double angleDegrees);
 
 private:
 	struct UndoListItem
@@ -84,6 +85,7 @@ private:
 		bool WithinBatch;
 		vector<int>* ShapeIndices;
 		Point2D ProjOffset;
+		double RotationAngle;
 
 		UndoListItem(int id, long layerHandle, long shapeIndex, tkUndoOperation operation)
 		{
@@ -105,6 +107,7 @@ private:
 
 		void Init()
 		{
+			RotationAngle = 0.0;
 			ShapeIndex = -1;
 			Shape = NULL;
 			Row = NULL;
@@ -144,7 +147,8 @@ private:
 	void FireUndoListChanged();
 	long FindPosition(int postion);
 	bool WithinBatch(int position);
-	
+	bool AddGroupOperation(tkUndoOperation operation, int layerHandle, vector<int>* indices, double xProjOrigin, double yProjOrigin, double angleDegrees);
+
 public:
 	
 };

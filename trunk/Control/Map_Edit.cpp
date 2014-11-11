@@ -3,6 +3,7 @@
 #include "Shapefile.h"
 #include "ShapeEditor.h"
 #include "UndoList.h"
+#include "GeometryHelper.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -400,13 +401,13 @@ void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double pro
 }
 
 // ************************************************************
-//		HandleOnLButtonMoveShapes
+//		HandleOnLButtonMoveOrRotate
 // ************************************************************
-void CMapView::HandleOnLButtonMoveShapes(long x, long y, double projX, double projY)
+void CMapView::HandleOnLButtonMoveOrRotate(long x, long y)
 {
 	long layerHandle = -1;
 	tkMwBoolean cancel = tkMwBoolean::blnFalse;
-	FireChooseLayer(x, y, &layerHandle, &cancel);   //TODO: rename to choose layer
+	FireChooseLayer(x, y, &layerHandle, &cancel);
 	if (layerHandle != -1)
 	{
 		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
@@ -421,25 +422,46 @@ void CMapView::HandleOnLButtonMoveShapes(long x, long y, double projX, double pr
 			if (numSelected > 0)
 			{
 				SetCapture();
-				_dragging.Operation = DragMoveShapes;
 				_dragging.LayerHandle = layerHandle;
+				_dragging.Operation = m_cursorMode == cmMoveShapes ? DragMoveShapes : DragRotateShapes;
+				_dragging.InitAngle = GetDraggingRotationAngle(_dragging.Start.x, _dragging.Start.y);
 			}
 		}
 	}
 }
 
 // ************************************************************
-//		RegisterMoveOperation
+//		RegisterGroupOperation
 // ************************************************************
-void CMapView::RegisterMoveOperation()
+void CMapView::RegisterGroupOperation(DraggingOperation operation)
 {
+	if (operation != DragMoveShapes && operation != DragRotateShapes)
+		return;
+
 	int layerHandle = _dragging.LayerHandle;
 	IShapefile* source = GetShapefile(layerHandle);
-	if (source) {
+	if (source) 
+	{
 		vector<int>* selection = ((CShapefile*)source)->GetSelectedIndices();
 		if (!selection) return;
-		Point2D pnt = GetDraggingProjOffset();
-		bool added = ((CUndoList*)_undoList)->AddMoveOperation(_dragging.LayerHandle, selection, -pnt.x, -pnt.y);
+
+		bool added = false;
+		switch (operation) 
+		{
+			case DragMoveShapes:
+			{
+				Point2D pnt = GetDraggingProjOffset();
+				added = ((CUndoList*)_undoList)->AddMoveOperation(_dragging.LayerHandle, selection, -pnt.x, -pnt.y);
+				break;
+			}
+			case DragRotateShapes:
+			{
+				double angle = GetDraggingRotationAngle();
+				added = ((CUndoList*)_undoList)->AddRotateOperation(_dragging.LayerHandle, selection, 
+						_dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
+				break;
+			}
+		}
 		if (!added) delete selection;
 	}
 }
@@ -455,3 +477,89 @@ Point2D CMapView::GetDraggingProjOffset()
 	return Point2D(x2 - x1, y2 - y1);
 }
 
+// ***************************************************************
+//	InitRotationTool
+// ***************************************************************
+bool CMapView::InitRotationTool()
+{
+	long layerHandle = -1;
+	tkMwBoolean cancel = blnFalse;
+	FireChooseLayer(0, 0, &layerHandle, &cancel);
+
+	bool success = false;
+	if (layerHandle != -1)
+	{
+		IShapefile* sf = GetShapefile(layerHandle);
+		if (sf) 
+		{
+			VARIANT_BOOL editing;
+			sf->get_InteractiveEditing(&editing);
+			if (editing)
+			{
+				long numSelected;
+				sf->get_NumSelected(&numSelected);
+				if (numSelected > 0)
+				{
+					double xMin, yMin, xMax, yMax;
+					if (((CShapefile*)sf)->GetSelectedExtents(xMin, yMin, xMax, yMax))
+					{
+						_dragging.RotateCenter.x = (xMax + xMin) / 2.0;
+						_dragging.RotateCenter.y = (yMax + yMin) / 2.0;
+						success = true;
+					}
+				}
+				sf->Release();
+			}
+		}
+	}
+	return success;
+}
+
+// ***************************************************************
+//	InitDraggingShapefile
+// ***************************************************************
+bool CMapView::InitDraggingShapefile()
+{
+	if (!_dragging.Shapefile)
+	{
+		IShapefile* sf = GetShapefile(_dragging.LayerHandle);
+		if (sf)
+		{
+			IShapefile* sfNew = ((CShapefile*)sf)->CloneSelection();
+			ShpfileType shpType;
+			sf->get_ShapefileType(&shpType);
+			shpType = Utility::ShapeTypeConvert2D(shpType);
+			if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+			{
+				CComPtr<IShapeDrawingOptions> options = NULL;
+				sf->get_DefaultDrawingOptions(&options);
+				if (options) {
+					CComPtr<IShapeDrawingOptions> newOptions = NULL;
+					options->Clone(&newOptions);
+					sfNew->put_DefaultDrawingOptions(newOptions);
+				}
+			}
+			_dragging.SetShapefile(sfNew);
+			sf->Release();
+			return true;
+		}
+	}
+	return false;
+}
+
+// ***************************************************************
+//	GetDraggingRotationAngle
+// ***************************************************************
+double CMapView::GetDraggingRotationAngle()
+{
+	return GetDraggingRotationAngle(_dragging.Move.x, _dragging.Move.y) - _dragging.InitAngle;
+}
+double CMapView::GetDraggingRotationAngle(long screenX, long screenY)
+{
+	double x, y;
+	PixelToProj(screenX, screenY, &x, &y);
+	x -= _dragging.RotateCenter.x;
+	y -= _dragging.RotateCenter.y;
+	double angle = GeometryHelper::GetPointAngle(x, y);
+	return angle / pi_ * 180.0;
+}

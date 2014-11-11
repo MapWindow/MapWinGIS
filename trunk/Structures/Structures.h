@@ -80,15 +80,17 @@ class DraggingState
 {
 public:	
 	DraggingState() : Start(0, 0), Move(0, 0), Operation(DragNone), HasMoved(false), Snapped(false), 
-		LayerHandle(-1), Shapefile(NULL){};
+		LayerHandle(-1), Shapefile(NULL), InitAngle(0.0){};
 	DraggingOperation Operation;
 	CPoint Start;
 	CPoint Move;
 	bool HasMoved;
 	bool Snapped;
 	Point2D Proj;
+	Point2D RotateCenter;
 	int LayerHandle;
 	IShapefile* Shapefile;
+	double InitAngle;   // degrees
 	void CloseShapefile()
 	{
 		if (!Shapefile) return;
@@ -116,11 +118,13 @@ public:
 	void Clear()
 	{
 		Proj.x = Proj.y = Start.x = Start.y = Move.x = Move.y = 0;
+		RotateCenter.x = RotateCenter.y = 0.0;
 		Operation = DragNone;
 		Snapped = false;
 		HasMoved = false;
 		CloseShapefile();
 		LayerHandle = -1;
+		InitAngle = 0.0;
 	}
 	void SetSnapped(double xProj, double yProj){
 		Snapped = true;

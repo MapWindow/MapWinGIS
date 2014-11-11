@@ -35,20 +35,16 @@ void CMapView::DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInval
 	{
 		GetMeasuringBase()->DrawData(gTemp, true, DragNone);
 	}
+	
+	DrawShapeEditor(gTemp, true);
 
-	if (HasDrawingData(ShapeEditing))
-	{
-		DrawShapeEditor(gTemp, true);
-	}
+	DrawMovingShapes(gTemp, rcBounds, true);
 
-	if (HasDrawingData(MovingShapes))
-	{
-		DrawMovingShapes(gTemp, rcBounds, false);
-	}
+	DrawRotationCenter(gTemp);
+
+	DrawZoombox(gTemp);
 
 	DrawCoordinates(gTemp);
-	
-	DrawZoombox(gTemp);
 
 	if (drawBackBuffer)
 	{
@@ -63,21 +59,61 @@ void CMapView::DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInval
 }
 
 // ***************************************************************
+//	DrawRotationCenter
+// ***************************************************************
+void CMapView::DrawRotationCenter(Gdiplus::Graphics* g)
+{
+	if (m_cursorMode != cmRotateShapes) return;
+	Gdiplus::Pen pen(Gdiplus::Color::Red);
+	double x, y;
+	ProjToPixel(_dragging.RotateCenter.x, _dragging.RotateCenter.y, &x, &y);
+	int size = 6;
+	g->DrawLine(&pen, (int)x - size, (int)y, (int)x + size, (int)y);
+	g->DrawLine(&pen, (int)x, (int)y - size, (int)x, (int)y + size);
+}
+
+// ***************************************************************
 //	DrawMovingShapes
 // ***************************************************************
 void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dynamicBuffer)
 {
+	if (!HasDrawingData(MovingShapes)) return;
+
+	// somewhat enlarge temp bitmap, to include portions currently outside the screen
+	int sizeX = 2 * rect.Width();
+	int sizeY = 2 * rect.Height();
+	Gdiplus::REAL offsetX = (sizeX - rect.Width()) / 2.0f;
+	Gdiplus::REAL offsetY = (sizeY - rect.Height()) / 2.0f;
+
 	if (!_moveBitmap)
 	{
-		_moveBitmap = new Gdiplus::Bitmap(rect.Width(), rect.Height());
+		_moveBitmap = new Gdiplus::Bitmap(sizeX, sizeY);
 		Gdiplus::Graphics* gBuffer = Gdiplus::Graphics::FromImage(_moveBitmap);
+		gBuffer->TranslateTransform(offsetX, offsetY);
 		gBuffer->Clear(Gdiplus::Color::Transparent);
 		CCollisionList list;	
 		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), false);
 		drawer.Draw(rect, _dragging.Shapefile);
 	}
 	
-	g->DrawImage(_moveBitmap, _dragging.GetOffsetX(), _dragging.GetOffsetY());
+	switch (_dragging.Operation)
+	{
+		case DragMoveShapes:
+			g->DrawImage(_moveBitmap, _dragging.GetOffsetX() - offsetX, _dragging.GetOffsetY() - offsetY);
+			break;	
+		case DragRotateShapes:
+			double angle = GetDraggingRotationAngle();
+			double x, y;
+			ProjToPixel(_dragging.RotateCenter.x, _dragging.RotateCenter.y, &x, &y);
+			Gdiplus::Matrix m;
+			g->GetTransform(&m);
+			g->TranslateTransform((Gdiplus::REAL)(x), (Gdiplus::REAL)(y));
+			g->RotateTransform((Gdiplus::REAL)angle);
+			g->TranslateTransform((Gdiplus::REAL)(-x), (Gdiplus::REAL)(-y));
+			g->DrawImage(_moveBitmap, -offsetX, -offsetY);
+			g->SetTransform(&m);
+			break;
+	}
 }
 
 // ***************************************************************
@@ -85,6 +121,8 @@ void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dy
 // ***************************************************************
 void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 {
+	if (!HasDrawingData(ShapeEditing)) return;
+
 	int offsetX = _dragging.Move.x - _dragging.Start.x;
 	int offsetY = _dragging.Move.y - _dragging.Start.y;
 
