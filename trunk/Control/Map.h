@@ -638,12 +638,15 @@ public:
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4), Action, LayerHandle, Shape, Cancel);	}
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
-	void FireNewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
-		{FireEvent(eventidNewShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
+	void FireChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
+		{FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
 	void FireShapeValidationFailed(LPCTSTR ErrorMessage)
 		{ FireEvent(eventidShapeValidationFailed, EVENT_PARAM(VTS_BSTR), ErrorMessage);}
 	void FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel)
 		{FireEvent(eventidBeforeDeleteShape, EVENT_PARAM(VTS_I4 VTS_PI4), target, cancel);}
+	void FireProjectionChanged() { FireEvent(eventidProjectionChanged, EVENT_PARAM(VTS_NONE)); }
+	void FireUndoListChanged(){ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
+
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -667,6 +670,7 @@ public:
 	Gdiplus::Bitmap* _tilesBitmap;	   // tiles buffer
 	Gdiplus::Bitmap* _drawingBitmap;   // a back buffer for drawing objects, the stuff like rubber band lines, etc.
 	Gdiplus::Bitmap* _bufferBitmap;    // combined buffer, holds all the other ones (tiles, layers, drawing layers)
+	Gdiplus::Bitmap* _moveBitmap;      // shapes being moved are rendered to this bitmap
 	Gdiplus::Bitmap* _tempBitmap;	   // to scale contents of the rest bitmaps 
 
 	Gdiplus::SolidBrush _brushBlack;
@@ -931,7 +935,7 @@ private:
 	void DrawZoombar(Gdiplus::Graphics* g);
 	void DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType);
 	void DrawDrawing(Gdiplus::Graphics* graphics, DrawList * dlist);
-	void DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
+	void DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer = false, float offsetX = 0.0f, float offsetY = 0.0f);
 	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
 								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
 								  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
@@ -999,7 +1003,7 @@ private:
 	// ---------------------------------------------
 	//	Various
 	// ---------------------------------------------
-	void UpdateCursor(tkCursorMode cursor);
+	void UpdateCursor(tkCursorMode cursor, bool clearEditor);
 	void ResizeBuffers(int cx, int cy);
 	UINT StartDrawLayers(LPVOID pParam);
 	HCURSOR SetWaitCursor();
@@ -1065,7 +1069,11 @@ private:
 	bool IsEditorCursor();
 	bool IsDigitizingCursor();
 	void HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl);
-	
+	void AttachGlobalCallbackToLayers(IDispatch* object);
+	Point2D GetDraggingProjOffset();
+	void HandleOnLButtonMoveShapes(long x, long y, double projX, double projY);
+	void DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dynamicBuffer);
+	void RegisterMoveOperation();
 #pragma endregion
 
 public:
@@ -1078,17 +1086,20 @@ public:
 	virtual IGeoProjection* _GetWgs84Projection() { return GetWgs84Projection(); }
 	virtual IGeoProjection* _GetMapProjection() {return GetMapProjection(); }
 	virtual tkTransformationMode _GetTransformationMode() { return _transformationMode; }
-	void _ProjectionToPixel(double projX, double projY, double* pixelX, double* pixelY){ ProjectionToPixel(projX, projY, *pixelX, *pixelY); }
-	void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ 	PixelToProjection(pixelX, pixelY, *projX, *projY);}
-	void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel);}
-	tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
-	void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
-	void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(Action, LayerHandle, ShapeIndex);	}
-	void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage);}
-	void _ZoomToEditor(){ ZoomToEditor(); }
-	void _SetMapCursor(tkCursorMode mode) {  UpdateCursor(mode); }
-	bool _IsSubjectCursor();
-	void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
+	virtual void _ProjectionToPixel(double projX, double projY, double* pixelX, double* pixelY){ ProjectionToPixel(projX, projY, *pixelX, *pixelY); }
+	virtual void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ PixelToProjection(pixelX, pixelY, *projX, *projY); }
+	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
+	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
+	virtual void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
+	virtual void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(Action, LayerHandle, ShapeIndex); }
+	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
+	virtual void _ZoomToEditor(){ ZoomToEditor(); }
+	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
+	virtual bool _IsSubjectCursor();
+	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
+	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
+	
+
 
 protected:
 	

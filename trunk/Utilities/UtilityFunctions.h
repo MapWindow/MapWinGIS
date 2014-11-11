@@ -66,6 +66,7 @@ namespace Utility
 	DWORD* cvtUCharToDword(long inp, int &num);
 	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);
 	Gdiplus::Color OleColor2GdiPlus(OLE_COLOR color, BYTE alpha);
+	
 
 	// shapefile
 	void swapEndian(char* a,int size);
@@ -89,6 +90,7 @@ namespace Utility
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
 	CString GetInterfaceName(tkInterface id);
+	void ClosePointer(Gdiplus::Bitmap** bitmap);
 	
 	// time
 	int getCurrentYear();

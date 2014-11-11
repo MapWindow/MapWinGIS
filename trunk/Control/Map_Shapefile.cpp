@@ -1135,7 +1135,6 @@ HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector se
 	{
 		return FindShapeCore(prjX, prjY, layers);
 	}
-	
 	return new HotTrackingInfo();
 }
 
@@ -1210,7 +1209,9 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 					}
 				}
 				else {
-					sf->get_HotTracking(&result);
+					if (m_cursorMode == cmIdentify) {
+						sf->get_HotTracking(&result);
+					}
 				}
 				break;
 			case slctInMemorySf:
@@ -1341,40 +1342,38 @@ void CMapView::ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp)
 	_hotTracking.ShapeId = info->ShapeId;
 
 	CComPtr<IShapeDrawingOptions> options = NULL;
-	VARIANT_BOOL interactiveEditing;
-	info->Shapefile->get_InteractiveEditing(&interactiveEditing);
 
-	if (interactiveEditing)
+	info->Shapefile->get_DefaultDrawingOptions(&options);
+	if (options)
 	{
-		if (type == SHP_POINT || type == SHP_MULTIPOINT)
+		CComPtr<IShapeDrawingOptions> newOptions = NULL;
+		options->Clone(&newOptions);
+		if (newOptions)
 		{
-			info->Shapefile->get_SelectionDrawingOptions(&options);
-			if (options) {
-				CComPtr<IShapeDrawingOptions> newOptions = NULL;
-				options->Clone(&newOptions);
-				newOptions->put_FillColor(RGB(0,0,255));
-				_hotTracking.Shapefile->put_DefaultDrawingOptions(newOptions);
+			VARIANT_BOOL interactiveEditing;
+			info->Shapefile->get_InteractiveEditing(&interactiveEditing);
+
+			if (interactiveEditing)
+			{
+				if (type == SHP_POINT || type == SHP_MULTIPOINT)
+				{
+					newOptions->put_FillColor(RGB(0, 0, 255));   // blue
+					newOptions->put_FillVisible(VARIANT_TRUE);
+				}
+				else {
+					newOptions->put_LineVisible(VARIANT_FALSE);
+					newOptions->put_FillVisible(VARIANT_FALSE);
+					newOptions->put_VerticesVisible(VARIANT_TRUE);  // vertices only
+				}
 			}
-		}
-		else {
-			_hotTracking.Shapefile->get_DefaultDrawingOptions(&options);
-			if (options) {
-				options->put_LineVisible(VARIANT_FALSE);
-				options->put_FillVisible(VARIANT_FALSE);
-				options->put_VerticesVisible(VARIANT_TRUE);
+			else
+			{
+				bool point = type == SHP_POINT || type == SHP_MULTIPOINT;
+				newOptions->put_FillVisible(point ? VARIANT_TRUE : VARIANT_FALSE);
+				newOptions->put_LineColor(RGB(30, 144, 255));
+				newOptions->put_LineWidth(2.0f);
 			}
-		}
-	}
-	else
-	{
-		// copy selection from parent shapefile
-		info->Shapefile->get_SelectionDrawingOptions(&options);
-		if (options)
-		{
-			/*options->put_FillVisible(VARIANT_FALSE);
-			options->put_LineColor(RGB(30, 144, 255));
-			options->put_LineWidth(2.0f);*/
-			_hotTracking.Shapefile->put_DefaultDrawingOptions(options);
+			_hotTracking.Shapefile->put_DefaultDrawingOptions(newOptions);
 		}
 	}
 }
@@ -1386,7 +1385,7 @@ bool CMapView::UpdateHotTracking(CPoint point)
 {
 	bool found = false;
 
-	if (_hasHotTracking)
+	if (HasHotTracking())
 	{
 		HotTrackingInfo* info = FindShapeAtScreenPoint(point, slctHotTracking);
 		if (info)

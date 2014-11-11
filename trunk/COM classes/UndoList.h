@@ -64,11 +64,13 @@ public:
 	STDMETHOD(GetLastId)(LONG* retVal);
 	STDMETHOD(get_ShortcutKey)(tkUndoShortcut* pVal);
 	STDMETHOD(put_ShortcutKey)(tkUndoShortcut newVal);
+	STDMETHOD(ClearForLayer)(LONG LayerHandle);
 public:
 	void SetMapCallback(IMapViewCallback* callback){
 		_mapCallback = callback;
 	}
 	bool DiscardOne();
+	bool AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset);
 
 private:
 	struct UndoListItem
@@ -79,16 +81,41 @@ private:
 		tkUndoOperation Operation;
 		IShape* Shape;
 		TableRow* Row;
+		bool WithinBatch;
+		vector<int>* ShapeIndices;
+		Point2D ProjOffset;
 
 		UndoListItem(int id, long layerHandle, long shapeIndex, tkUndoOperation operation)
-			: Shape(NULL), Row(NULL), BatchId(id), LayerHandle(layerHandle), ShapeIndex(shapeIndex), Operation(operation)
 		{
-			
+			Init();
+			BatchId = id;
+			LayerHandle = layerHandle;
+			ShapeIndex = shapeIndex;
+			Operation = operation;
+		}
+
+		UndoListItem(int id, long layerHandle, vector<int>* shapeIndices, tkUndoOperation operation)
+		{
+			Init();
+			BatchId = id;
+			LayerHandle = layerHandle;
+			ShapeIndices = shapeIndices;
+			Operation = operation;
+		}
+
+		void Init()
+		{
+			ShapeIndex = -1;
+			Shape = NULL;
+			Row = NULL;
+			WithinBatch = false;
+			ShapeIndices = NULL;
 		}
 
 		~UndoListItem() {
 			if (Shape) Shape->Release();
 			if (Row) delete Row;
+			if (ShapeIndices) delete ShapeIndices;
 		}
 	};
 
@@ -114,5 +141,11 @@ private:
 	void ZoomToShape(VARIANT_BOOL zoomToShape, int itemIndex);
 	IShape* GetCurrentState(long layerHandle, long shapeIndex);
 	bool ShapeInEditor(long layerHandle, long shapeIndex);
+	void FireUndoListChanged();
+	long FindPosition(int postion);
+	bool WithinBatch(int position);
+	
+public:
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(UndoList), CUndoList)

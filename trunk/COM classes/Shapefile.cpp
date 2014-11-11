@@ -40,7 +40,7 @@ CShapefile::CShapefile()
 {	
 	_snappable = VARIANT_TRUE;
 	_interactiveEditing = VARIANT_FALSE;
-	_hotTracking = VARIANT_FALSE;
+	_hotTracking = VARIANT_TRUE;
 	_geosGeometriesRead = false;
 	_useValidationList = false;
 	_stopExecution = NULL;
@@ -3446,4 +3446,55 @@ STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_snappable = newVal;
 	return S_OK;
+}
+
+// *****************************************************************
+//		Move()
+// *****************************************************************
+void CShapefile::Move(double xProjOffset, double yProjOffset)
+{
+	long numShapes;
+	get_NumShapes(&numShapes);
+	for (long i = 0; i < numShapes; i++)
+	{
+		CComPtr<IShape> shp = NULL;
+		get_Shape(i, &shp);
+		if (shp) {
+			shp->Move(xProjOffset, yProjOffset);
+		}
+	}
+}
+
+// *****************************************************************
+//		CloneSelection()
+// *****************************************************************
+IShapefile* CShapefile::CloneSelection()
+{
+	IShapefile* sfNew = NULL;
+	Clone(&sfNew);
+	long numShapes, shapeIndex;
+	get_NumShapes(&numShapes);
+	for (long i = 0; i < numShapes; i++)
+	{
+		if (!_shapeData[i]->selected) continue;
+		CComPtr<IShape> shp = NULL;
+		get_Shape(i, &shp);
+		if (shp) {
+			sfNew->EditAddShape(shp, &shapeIndex);
+		}
+	}
+	return sfNew;
+}
+
+// *****************************************************************
+//		GetSelectedIndices()
+// *****************************************************************
+vector<int>* CShapefile::GetSelectedIndices()
+{
+	vector<int>* result = new vector<int>();
+	for (size_t i = 0; i < _shapeData.size(); i++) {
+		if (_shapeData[i]->selected)
+			result->push_back(i);
+	}
+	return result;
 }

@@ -1276,7 +1276,7 @@ bool CShapeEditor::RestoreState(IShape* shp, long layerHandle, long shapeIndex)
 	}
 	
 	SetShape(shp);
-	_mapCallback->_SetMapCursor(cmEditShape);
+	_mapCallback->_SetMapCursor(cmEditShape, false);
 	return true;
 }
 
@@ -1314,7 +1314,9 @@ bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
 // ***************************************************************
 bool CShapeEditor::ShapeShouldBeHidden()
 {
-	return !_isSubjectShape || _activeShape->GetShapeType() == SHP_MULTIPOINT || _activeShape->GetShapeType() == SHP_POINT;
+	return !(_isSubjectShape  
+			/*|| _activeShape->GetShapeType() == SHP_MULTIPOINT || 
+			_activeShape->GetShapeType() == SHP_POINT*/);
 }
 
 // ***************************************************************

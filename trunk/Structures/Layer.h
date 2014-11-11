@@ -113,5 +113,6 @@ public:
 	void LoadAsync(IMapViewCallback* mapView, Extent extents);
 	void UpdateShapefile();
 	void CloseDatasources();
+	bool IsEmpty();
 };
 # endif

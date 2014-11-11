@@ -109,6 +109,8 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			
 			Utility::DisplayProgress(globalCallback, i, size, "Reading shapes into memory", key, percent);
 		}
+		Utility::DisplayProgressCompleted(globalCallback);
+
 		*retval = VARIANT_TRUE;
 	
 		// releasing data for the fast non-edit mode
@@ -193,11 +195,12 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 				_isEditingShapes = VARIANT_FALSE;
 			}
 		}
-		else
-		{
-			// Note that we are no longer editing shapes
-			_isEditingShapes = VARIANT_FALSE;
-		}
+		//else
+		//{
+			// This will lead to problems on further access
+		//	// Note that we are no longer editing shapes
+		//	_isEditingShapes = VARIANT_FALSE;
+		//}
 	}
 	else
 	{
@@ -979,12 +982,18 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 STDMETHODIMP CShapefile::get_InteractiveEditing(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _interactiveEditing;
+	*pVal = _isEditingShapes && _interactiveEditing;
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_InteractiveEditing(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_interactiveEditing = newVal;
+	if (!_isEditingShapes && newVal)
+	{
+		// start edit mode; naturally no interactive editing without it
+		StartEditingShapes(VARIANT_TRUE, NULL, &_interactiveEditing);
+		return S_OK;  // error code in previous code
+	}
+	_interactiveEditing = newVal;   // don't stop edit mode; only interactive mode was stopped
 	return S_OK;
 }

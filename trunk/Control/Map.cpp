@@ -127,9 +127,11 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("BeforeShapeEdit", eventidBeforeShapeEdit, FireBeforeShapeEdit, VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL)
 	EVENT_CUSTOM_ID("ValidateShape", eventidValidateShape, FireValidateShape, VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4)
 	EVENT_CUSTOM_ID("AfterShapeEdit", eventidAfterShapeEdit, FireAfterShapeEdit, VTS_I4 VTS_I4 VTS_I4)
-	EVENT_CUSTOM_ID("NewShape", eventidNewShape, FireNewShape, VTS_I4 VTS_I4 VTS_PI4 VTS_PI4)
+	EVENT_CUSTOM_ID("ChooseLayer", eventidChooseLayer, FireChooseLayer, VTS_I4 VTS_I4 VTS_PI4 VTS_PI4)
 	EVENT_CUSTOM_ID("ShapeValidationFailed", eventidShapeValidationFailed, FireShapeValidationFailed, VTS_BSTR)
 	EVENT_CUSTOM_ID("BeforeDeleteShape", eventidBeforeDeleteShape, FireBeforeDeleteShape, VTS_I4 VTS_PI4)
+	EVENT_CUSTOM_ID("ProjectionChanged", eventidProjectionChanged, FireProjectionChanged, VTS_NONE)
+	EVENT_CUSTOM_ID("UndoListChanged", eventidUndoListChanged, FireUndoListChanged, VTS_NONE)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	
@@ -160,6 +162,8 @@ CMapView::CMapView()
 // ****************************************************
 CMapView::~CMapView()
 {
+	LockWindow(lmLock);   // we don't need any more redraws
+
 	this->RemoveAllLayers();
 
 	this->ClearDrawings();
@@ -356,7 +360,9 @@ void CMapView::SetDefaults()
 void CMapView::ReleaseTempObjects()
 {	
 	_collisionList.Clear();
-	
+
+	_dragging.CloseShapefile();
+
 	_rotateAngle = 0.0f;
 	if (_rotate)
 	{
@@ -376,6 +382,7 @@ void CMapView::ReleaseTempObjects()
 	}
 }
 
+
 // **********************************************************************
 //	Shutdown
 // **********************************************************************
@@ -393,40 +400,17 @@ void CMapView::Shutdown()
 	}
 	
 	((CTiles*)_tiles)->Stop();
-	if (_bufferBitmap)
-	{
-		delete _bufferBitmap;
-		_bufferBitmap = NULL;
-	}
-
-	if (_tempBitmap)
-	{
-		delete _tempBitmap;
-		_tempBitmap = NULL;
-	}
-
-	if (_tilesBitmap)
-	{
-		delete _tilesBitmap;
-		_tilesBitmap = NULL;
-	}
-
-	if (_drawingBitmap)
-	{
-		delete _drawingBitmap;
-		_drawingBitmap = NULL;
-	}
-
-	if (_layerBitmap)
-	{
-		delete _layerBitmap;
-		_layerBitmap = NULL;
-	}
 
 	if( _globalCallback )
 		_globalCallback->Release();
 
-	
+	Utility::ClosePointer(&_bufferBitmap);
+	Utility::ClosePointer(&_tilesBitmap);
+	Utility::ClosePointer(&_drawingBitmap);
+	Utility::ClosePointer(&_bufferBitmap);
+	Utility::ClosePointer(&_moveBitmap);
+	Utility::ClosePointer(&_tempBitmap);
+
 	ClearPanningList();
 
 	ReleaseProjections();
@@ -468,6 +452,7 @@ int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	_layerBitmap = NULL;
 	_drawingBitmap = NULL;
 	_tempBitmap = NULL;
+	_moveBitmap = NULL;
 
 	DragAcceptFiles( TRUE );
 
@@ -842,3 +827,4 @@ void CMapView::ZoomToEditor()
 		}
 	}
 }
+

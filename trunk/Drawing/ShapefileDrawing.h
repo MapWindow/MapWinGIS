@@ -119,7 +119,7 @@ protected:
 
 	std::vector<VertexPath> _vertexPathes;
 public:
-	void Draw(const CRect & rcBounds, IShapefile* sf, FILE* file);
+	void Draw(const CRect & rcBounds, IShapefile* sf);
 private:	
 	std::vector<long>* SelectShapesFromSpatialIndex(char* sFilename, Extent* extents);
 	

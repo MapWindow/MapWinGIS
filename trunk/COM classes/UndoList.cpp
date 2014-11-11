@@ -95,6 +95,9 @@ STDMETHODIMP CUndoList::Clear()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	for (size_t i = 0; i < _list.size(); i++)
 		delete _list[i];
+	_list.clear();
+	_position = -1;
+	FireUndoListChanged();
 	return S_OK;
 }
 
@@ -133,6 +136,7 @@ HRESULT STDMETHODCALLTYPE CUndoList::Add(tkUndoOperation operation, LONG LayerHa
 	int id = _batchId != EMPTY_BATCH_ID ? _batchId : NextId();
 
 	UndoListItem* item = new UndoListItem((int)id, LayerHandle, ShapeIndex, operation);
+	item->WithinBatch = _batchId != EMPTY_BATCH_ID;
 
 	bool copyAttributes = operation == uoRemoveShape || operation == uoEditShape;
 	CopyShapeState(LayerHandle, ShapeIndex, copyAttributes, item);
@@ -142,7 +146,32 @@ HRESULT STDMETHODCALLTYPE CUndoList::Add(tkUndoOperation operation, LONG LayerHa
 
 	_position = _list.size() - 1;
 
+	FireUndoListChanged();
+
 	return S_OK;
+}
+
+// **********************************************************
+//		AddMoveOperation
+// **********************************************************
+bool CUndoList::AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset)
+{
+	if (!CheckState()) return false;
+
+	if (!indices) return false;
+
+	TrimList();
+	
+	int id = NextId();
+	UndoListItem* item = new UndoListItem(id, layerHandle, indices, uoMoveShapes);
+	item->ProjOffset.x = xProjOffset;
+	item->ProjOffset.y = yProjOffset;
+
+	_list.push_back(item);
+	_position = _list.size() - 1;
+
+	FireUndoListChanged();
+	return true;
 }
 
 // **********************************************************
@@ -203,6 +232,7 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 
 		ZoomToShape(zoomToShape, item->Operation == uoAddShape ? _position: pos);
 
+		FireUndoListChanged();
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -235,6 +265,7 @@ STDMETHODIMP CUndoList::Redo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 
 		ZoomToShape(zoomToShape, item->Operation == uoRemoveShape ? _position: pos );
 
+		FireUndoListChanged();
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -282,6 +313,23 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 	VARIANT_BOOL vb;
 	switch (item->Operation)
 	{
+		case uoMoveShapes:
+			if (item->ShapeIndices)
+			{
+				int size = item->ShapeIndices->size();
+				for (int i = 0; i < size; i++)
+				{
+					int index = (*item->ShapeIndices)[i];
+					CComPtr<IShape> shp = NULL;
+					sf->get_Shape((long)index, &shp);
+					if (shp) {
+						shp->Move(item->ProjOffset.x, item->ProjOffset.y);
+					}
+				}
+				item->ProjOffset.x *= -1;	// simply change the sign for the redo
+				item->ProjOffset.y *= -1;
+			}
+			break;
 		case uoRemoveShape:
 		{
 			// restore removed shape
@@ -293,7 +341,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 				item->Row = NULL;		// the instance is used by table now
 				item->Operation = uoAddShape;
 				IShapeEditor* editor = _mapCallback->_GetShapeEditor();
-				if (editor) {
+				if (editor && !item->WithinBatch) {
 					IShape* shp = GetCurrentState(item->LayerHandle, item->ShapeIndex);
 					((CShapeEditor*)editor)->RestoreState(shp, item->LayerHandle, item->ShapeIndex);
 				}
@@ -305,8 +353,11 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 		{
 			// remove added shape
 			IShape* shp = GetCurrentState(item->LayerHandle, item->ShapeIndex);
-			if (ShapeInEditor(item->LayerHandle, item->ShapeIndex)) {
-				_mapCallback->_GetShapeEditor()->Clear();
+			if (!item->WithinBatch)
+			{
+				if (ShapeInEditor(item->LayerHandle, item->ShapeIndex)) {
+					_mapCallback->_GetShapeEditor()->Clear();
+				}
 			}
 
 			if (shp) {
@@ -375,7 +426,7 @@ IShape* CUndoList::GetCurrentState(long layerHandle, long shapeIndex)
 STDMETHODIMP CUndoList::get_UndoCount(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = CheckState() ? _position + 1  : - 1;
+	*pVal = CheckState() ? FindPosition(_position) : -1;
 	return S_OK;
 }
 
@@ -385,8 +436,43 @@ STDMETHODIMP CUndoList::get_UndoCount(LONG* pVal)
 STDMETHODIMP CUndoList::get_RedoCount(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = CheckState() ? (_list.size() - 1) - _position : -1;
+	long totalLength, undoCount;
+	get_TotalLength(&totalLength);
+	get_UndoCount(&undoCount);
+	*pVal = CheckState() ? totalLength - undoCount : -1;
 	return S_OK;
+}
+
+// **********************************************************
+//		FindPosition
+// **********************************************************
+long CUndoList::FindPosition(int position)
+{
+	int lastId = EMPTY_BATCH_ID;
+	long count = 0;
+	for (size_t i = 0; i < _list.size(); i++)
+	{
+		if (_list[i]->BatchId != lastId) {
+			lastId = _list[i]->BatchId;
+			count++;
+		}
+		if (i == position) return count;
+	}
+	return 0;
+}
+
+// **********************************************************
+//		FindPosition
+// **********************************************************
+bool CUndoList::WithinBatch(int position)
+{
+	if (position < 0 || position >= (int)_list.size()) return false;
+	int id = _list[position]->BatchId;
+	if (position + 1 < (int)_list.size() && _list[position + 1]->BatchId == id)
+		return true;
+	if (position - 1 >= 0 && _list[position - 1]->BatchId == id)
+		return true;
+	return false;
 }
 
 // **********************************************************
@@ -395,7 +481,16 @@ STDMETHODIMP CUndoList::get_RedoCount(LONG* pVal)
 STDMETHODIMP CUndoList::get_TotalLength(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = (long)_list.size();
+	int lastId = EMPTY_BATCH_ID;
+	long count = 0;
+	for (size_t i = 0; i < _list.size(); i++)
+	{
+		if (_list[i]->BatchId != lastId) {
+			lastId = _list[i]->BatchId;
+			count++;
+		}
+	}
+	*pVal = count;
 	return S_OK;
 }
 
@@ -428,7 +523,7 @@ STDMETHODIMP CUndoList::EndBatch(LONG* retVal)
 	}
 	else {
 		long count = 0;
-		for (size_t i = _list.size() - 1; i >= 0; --i)
+		for (int i = _list.size() - 1; i >= 0; --i)
 		{
 			if (_list[i]->BatchId == _batchId)
 				count++;
@@ -465,3 +560,35 @@ STDMETHODIMP CUndoList::put_ShortcutKey(tkUndoShortcut newVal)
 	return S_OK;
 }
 
+// **********************************************************
+//		FireUndoListChanged
+// **********************************************************
+void CUndoList::FireUndoListChanged()
+{
+	if (_mapCallback) {
+		_mapCallback->_FireUndoListChanged();
+	}
+}
+
+// **********************************************************
+//		ClearForLayer
+// **********************************************************
+STDMETHODIMP CUndoList::ClearForLayer(LONG LayerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	bool changed = false;
+	for (int i = (int)_list.size() - 1; i >= 0; i--)
+	{
+		if (_list[i]->LayerHandle == LayerHandle) 
+		{
+			delete _list[i];
+			_list.erase(_list.begin() + i);
+			changed = true;
+			if (_position >= i)
+				_position--;
+		}
+	}
+	if (changed)
+		FireUndoListChanged();
+	return S_OK;
+}

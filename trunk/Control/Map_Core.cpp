@@ -190,19 +190,8 @@ bool CMapView::LayerIsEmpty(long LayerHandle)
 	if( IS_VALID_LAYER(LayerHandle,_allLayers) )
 	{	
 		Layer * l = _allLayers[LayerHandle];
-		if(l->object == NULL) return true;
-		if (l->IsDynamicOgrLayer())return false;
-		if (l->IsShapefile())
-		{
-			IShapefile * ishp = NULL;
-			if (!l->QueryShapefile(&ishp)) return true;
-
-			long numShapes;
-			ishp->get_NumShapes(&numShapes);
-			ishp->Release();
-			if (numShapes == 0) return true;
-		}
-		return false;
+		if (!l) return true;
+		return l->IsEmpty();
 	}
 	return true;
 }
@@ -478,6 +467,14 @@ LPDISPATCH CMapView::GetColorScheme(long LayerHandle)
 			{
 				img->get_CustomColorScheme(&scheme);
 				img->Release();
+				if (!scheme)
+				{
+					VARIANT_BOOL vb;
+					img->get_IsGridProxy(&vb);
+					if (vb) {
+						img->get_GridProxyColorScheme(&scheme);
+					}
+				}
 			}
 			else
 			{

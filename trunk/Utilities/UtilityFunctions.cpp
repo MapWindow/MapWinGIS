@@ -363,7 +363,7 @@ namespace Utility
 				path += L"..\\";
 			}
 
-			// exluding folder part from the path
+			// excluding folder part from the path
 			path += Filename.Mid(list1[i].GetLength() + 1);
 			return path;
 		}
@@ -374,14 +374,18 @@ namespace Utility
 	// *********************************************************
 	CStringW Utility::GetFolderFromPath(CStringW path)
 	{
+		CStringW result = path;
 		for (int i = path.GetLength() - 1; i > 0; i--)
 		{
 			if (path.Mid(i, 1) == '\\')
 			{
-				return path.Left(i);	// -1
+				result = path.Left(i);	// -1
+				if (result.GetLength() == 2)
+					result += "\\";
+				break;
 			}
 		}
-		return path;
+		return result;
 	}
 
 	// *********************************************************
@@ -791,6 +795,14 @@ namespace Utility
 		Gdiplus::Font* font = new Gdiplus::Font(&family, (Gdiplus::REAL)size);
 		delete wFontName;
 		return font;
+	}
+
+	void Utility::ClosePointer(Gdiplus::Bitmap** ptr)
+	{
+		if (*ptr) {
+			delete *ptr;
+			*ptr = NULL;
+		}
 	}
 
 	// **************************************************

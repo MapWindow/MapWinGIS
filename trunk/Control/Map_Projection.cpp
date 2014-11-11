@@ -85,6 +85,8 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	if (!pVal)
 		return;
 
+	if (pVal == _projection) return;
+
 	bool preserveExtents = _activeLayers.size() == 0;
 	IExtents* ext = GetGeographicExtents();	// try to preserve extents
 
@@ -163,6 +165,9 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 			SetGeographicExtents(ext);
 		ext->Release();
 	}
+
+	if (_projection == pVal)
+		FireProjectionChanged();
 }
 
 // *****************************************************

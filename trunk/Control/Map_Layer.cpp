@@ -302,6 +302,55 @@ int CMapView::AddLayerCore(Layer* layer)
 }
 
 // ***************************************************************
+//		AttachGlobalCallbackToLayers()
+// ***************************************************************
+void CMapView::AttachGlobalCallbackToLayers(IDispatch* object)
+{
+	if (!m_globalSettings.attachMapCallbackToLayers || !_globalCallback) return;
+
+	CComPtr<IShapefile> ishp = NULL;
+	CComPtr<IImage> iimg = NULL;
+	CComPtr<IGrid> igrid = NULL;
+	CComPtr<IOgrLayer> iogr = NULL;
+
+	object->QueryInterface(IID_IShapefile, (void**)&ishp);
+	object->QueryInterface(IID_IImage, (void**)&iimg);
+	object->QueryInterface(IID_IGrid, (void**)&igrid);
+	object->QueryInterface(IID_IOgrLayer, (void**)&iogr);
+
+	CComPtr<ICallback> callback = NULL;
+	
+	if (igrid) {
+		igrid->get_GlobalCallback(&callback);
+		if (!callback) {
+			igrid->put_GlobalCallback(_globalCallback);
+		}
+	}
+
+	if (iimg) {
+		iimg->put_GlobalCallback(_globalCallback);
+		if (!callback) {
+			iimg->put_GlobalCallback(_globalCallback);
+		}
+	}
+
+	if (ishp) {
+		ishp->put_GlobalCallback(_globalCallback);
+		if (!callback) {
+			ishp->put_GlobalCallback(_globalCallback);
+		}
+	}
+
+	if (iogr)
+	{
+		iogr->put_GlobalCallback(_globalCallback);
+		if (!callback) {
+			iogr->put_GlobalCallback(_globalCallback);
+		}
+	}
+}
+
+// ***************************************************************
 //		AddLayer()
 // ***************************************************************
 long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
@@ -332,6 +381,8 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
 		return -1;
 	}
+
+	AttachGlobalCallbackToLayers(Object);
 
 	LockWindow( lmLock );
 
@@ -473,7 +524,10 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
 	{
 		if( _activeLayers.size() == 1 && pVisible)
-			SetExtentsWithPadding(l->extents);
+		{
+			if (!l->IsEmpty())
+				SetExtentsWithPadding(l->extents);
+		}
 	}
 
 	// loading symbology
@@ -675,7 +729,6 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 	}
 }
 
-
 // ***************************************************************
 //		RemoveLayerCore()
 // ***************************************************************
@@ -767,7 +820,6 @@ void CMapView::RemoveAllLayers()
 		}
 	}
 	_allLayers.clear();
-	//FireLayersChanged();
 
 	LockWindow( lmUnlock );
 

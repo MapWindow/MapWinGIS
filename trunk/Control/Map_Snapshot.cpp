@@ -356,7 +356,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	HandleNewDrawing(snapDC, rcBounds, *r, true, offsetX, offsetY);
 	
 	// drawing on the output canvas atop the previous drawing, naturally we don't care about flickering here
-	DrawMouseMoves(snapDC, rcBounds, *r, false, offsetX, offsetY);
+	DrawDynamic(snapDC, rcBounds, *r, false, offsetX, offsetY);
 
 	_canUseLayerBuffer=FALSE;
 	_isSnapshot = false;

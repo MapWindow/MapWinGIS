@@ -176,7 +176,7 @@ enum tkUndoOperation {
 	uoAddShape = 0,
 	uoRemoveShape = 1,
 	uoEditShape = 2,
-	//uoShapeEditor = 3,
+	uoMoveShapes = 3
 }tkUndoOperation;
 
 /************************** tkMwBoolean Enumeration **********************/
@@ -1056,6 +1056,8 @@ enum tkScalebarUnits
 		cmAddPart = 9,
 		cmRemovePart = 10,
 		cmSplitByPolyline = 11,
+		cmIdentify = 12,
+		cmMoveShapes = 13,
 	} tkCursorMode;
 
 	typedef 
@@ -3775,6 +3777,7 @@ interface IShape : IDispatch{
 		[in, optional, defaultvalue(0)] tkBufferJoin joinStyle, 
 		[in, optional, defaultvalue(5.0)] DOUBLE mitreLimit, 
 		[out, retval] IShape** retVal);
+	[id(63)] HRESULT Move([in] DOUBLE xProjOffset, [in] DOUBLE yProjOffset);
 };
 
 /****************************  Extents Interface ***********************/
@@ -5291,6 +5294,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(38)] HRESULT AutoChooseOgrLoadingMode([in] VARIANT_BOOL newVal);
 	[propget, id(39)] HRESULT OgrUseStyles([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(39)] HRESULT OgrUseStyles([in] VARIANT_BOOL newVal);
+	[propget, id(40)] HRESULT AttachMapCallbackToLayers([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(40)] HRESULT AttachMapCallbackToLayers([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -5677,6 +5682,7 @@ interface IUndoList : IDispatch{
 	[id(14)] HRESULT GetLastId([out, retval] LONG* retVal);
 	[propget, id(15)] HRESULT ShortcutKey([out, retval] tkUndoShortcut* pVal);
 	[propput, id(15)] HRESULT ShortcutKey([in] tkUndoShortcut newVal);
+	[id(16)] HRESULT ClearForLayer([in] LONG LayerHandle);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -6110,10 +6116,13 @@ library MapWinGIS
 			[id(16)] void BeforeShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex);
-			[id(19)] void NewShape(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
+			[id(19)] void ChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
 			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);
+			[id(23)] void ProjectionChanged();
+			[id(24)] void UndoListChanged();
 		//}}AFX_ODL_EVENT
+			
 	};
 	[
 		object,

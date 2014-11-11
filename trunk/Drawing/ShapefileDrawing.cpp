@@ -60,7 +60,7 @@ enum tkDrawingShape
 //*******************************************************************
 //	Draw()				          
 //*******************************************************************
-void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
+void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 {
 	#ifdef USE_TIMER
 		CTimer tmr;
@@ -75,7 +75,9 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf, FILE* file)
 		return;
 	}
 	_shapefile = reinterpret_cast<CShapefile*>(sf);
-	
+
+	FILE* file = ((CShapefile*)sf)->get_File();
+
 	#ifdef USE_TIMER
 	tmr.PrintTime("Before bounds");
 	#endif

@@ -39,6 +39,7 @@ public:
 		ServerLetters = "abc";
 		RefererUrl = "http://www.openstreetmap.org/";
 		UrlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		maxZoom = 19;
 
 		//_clientLock.Lock();
 		//for(int i = 0; i < 3; i++)

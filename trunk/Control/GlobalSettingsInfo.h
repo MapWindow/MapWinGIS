@@ -52,9 +52,11 @@ struct GlobalSettingsInfo
 	int getOgrMaxLabelCount() { return ogrLayerMaxFeatureCount; }
 	int ctorCount;
 	int dtorCount;
+	bool attachMapCallbackToLayers;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		attachMapCallbackToLayers = true;
 		ctorCount = 0;
 		dtorCount = 0;
 		saveOgrLabels = false;

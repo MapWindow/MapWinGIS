@@ -4,11 +4,12 @@
 #include "measuring.h"
 #include "GeometryHelper.h"
 #include "ShapeEditor.h"
+#include "ShapefileDrawing.h"
 
 // ***************************************************************
 //		DrawMouseMoves()
 // ***************************************************************
-void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer, float offsetX, float offsetY) 
+void CMapView::DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer /*= false*/, float offsetX /*= 0.0f*/, float offsetY /*= 0.0f*/)
 {
 	HDC hdc = pdc->GetSafeHdc();
 	Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
@@ -40,6 +41,11 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 		DrawShapeEditor(gTemp, true);
 	}
 
+	if (HasDrawingData(MovingShapes))
+	{
+		DrawMovingShapes(gTemp, rcBounds, false);
+	}
+
 	DrawCoordinates(gTemp);
 	
 	DrawZoombox(gTemp);
@@ -54,6 +60,24 @@ void CMapView::DrawMouseMoves(CDC* pdc, const CRect& rcBounds, const CRect& rcIn
 
 	g->ReleaseHDC(pdc->GetSafeHdc());
 	delete g;
+}
+
+// ***************************************************************
+//	DrawMovingShapes
+// ***************************************************************
+void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dynamicBuffer)
+{
+	if (!_moveBitmap)
+	{
+		_moveBitmap = new Gdiplus::Bitmap(rect.Width(), rect.Height());
+		Gdiplus::Graphics* gBuffer = Gdiplus::Graphics::FromImage(_moveBitmap);
+		gBuffer->Clear(Gdiplus::Color::Transparent);
+		CCollisionList list;	
+		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &list, GetCurrentScale(), false);
+		drawer.Draw(rect, _dragging.Shapefile);
+	}
+	
+	g->DrawImage(_moveBitmap, _dragging.GetOffsetX(), _dragging.GetOffsetY());
 }
 
 // ***************************************************************

@@ -2042,13 +2042,14 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 		// copying points
 		for (long i = 0; i < numPoints; i++)
 		{
-			IPoint* pnt = NULL;
+			CComPtr<IPoint> pnt = NULL;
 			this->get_Point(i, &pnt);
-			shp->InsertPoint(pnt, &i, &vbretval);
-			pnt->Release();
+			CComPtr<IPoint> pntNew = NULL;
+			pnt->Clone(&pntNew);
+			shp->InsertPoint(pntNew, &i, &vbretval);
 		}
 		
-		shp->put_Key(_key);
+		//shp->put_Key(_key);
 		(*retval) = shp;
 	}
 	return S_OK;
@@ -2839,3 +2840,22 @@ STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 	return S_OK;
 }
 
+//*****************************************************************
+//*		Move()
+//*****************************************************************
+STDMETHODIMP CShape::Move(DOUBLE xProjOffset, DOUBLE yProjOffset)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	long numPoints;
+	get_NumPoints(&numPoints);
+
+	VARIANT_BOOL vb;
+	double x, y;
+	for (long i = 0; i < numPoints; i++) 
+	{
+		if (get_XY(i, &x, &y)) {
+			put_XY(i, x + xProjOffset, y + yProjOffset, &vb);
+		}
+	}
+	return S_OK;
+}

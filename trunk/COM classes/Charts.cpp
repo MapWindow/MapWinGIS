@@ -1704,8 +1704,11 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 	_options.valuesFontItalic = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : opt.valuesFontItalic;
 
 	s = CPLGetXMLValue( node, "ValuesFontName", NULL );
-	SysFreeString(_options.valuesFontName);
-	_options.valuesFontName = A2BSTR(s);
+	if (s != "")
+	{
+		SysFreeString(_options.valuesFontName);
+		_options.valuesFontName = A2BSTR(s);
+	}
 	
 	s = CPLGetXMLValue( node, "ValuesFontSize", NULL );
 	_options.valuesFontSize = (s != "") ?  atoi(s.GetString()) : opt.valuesFontSize;

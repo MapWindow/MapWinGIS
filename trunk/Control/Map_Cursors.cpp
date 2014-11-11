@@ -157,6 +157,14 @@ tkCursorMode CMapView::GetCursorMode()
 // *******************************************************
 void CMapView::SetCursorMode(tkCursorMode mode)
 {
+	UpdateCursor(mode, true);
+}
+
+// internal call; perhaps some additional logic will be needed
+void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
+{
+	if (mode == m_cursorMode) return;
+
 	if (_measuring)
 	{
 		VARIANT_BOOL vb;
@@ -165,38 +173,35 @@ void CMapView::SetCursorMode(tkCursorMode mode)
 			_measuring->Clear();
 	}
 
-	CComPtr<IShape> shp = NULL;
-	_shapeEditor->get_RawData(&shp);
-
-	if (shp)
+	if (clearEditor)
 	{
-		if (!_shapeEditor->TrySave())
-			return;	  // don't change cursor as user may loose some data
-		RedrawCore(RedrawSkipDataLayers, false, true);
-	}
-	else {
-		VARIANT_BOOL empty;
-		_shapeEditor->get_IsEmpty(&empty);
-		if (!empty) 
+		CComPtr<IShape> shp = NULL;
+		_shapeEditor->get_RawData(&shp);
+
+		if (shp)
 		{
-			_shapeEditor->Clear();
+			if (!_shapeEditor->TrySave())
+				return;	  // don't change cursor as user may loose some data
 			RedrawCore(RedrawSkipDataLayers, false, true);
 		}
-	}
+		else {
+			VARIANT_BOOL empty;
+			_shapeEditor->get_IsEmpty(&empty);
+			if (!empty)
+			{
+				_shapeEditor->Clear();
+				RedrawCore(RedrawSkipDataLayers, false, true);
+			}
+		}
 
-	if (m_cursorMode == cmAddShape) {
-		_shapeEditor->put_EditorState(EditorCreation);
+		if (m_cursorMode == cmAddShape) {
+			_shapeEditor->put_EditorState(EditorCreation);
+		}
 	}
 
 	m_cursorMode = mode;
 
 	OnSetCursor(this, HTCLIENT, 0);
-}
-
-// internal call; perhaps some additional logic will be needed
-void CMapView::UpdateCursor(tkCursorMode cursor)
-{
-	SetCursorMode(cursor);
 }
 
 // *********************************************************

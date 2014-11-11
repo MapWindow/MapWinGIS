@@ -489,5 +489,8 @@ public:
 	bool PointWithinShape(IShape* shape, double projX, double projY, double Tolerance);
 	void ReregisterShape(int shapeIndex);
 	bool ForceProperShapeType(ShpfileType sfType, IShape* shape);
+	void Move(double xProjOffset, double yProjOffset);
+	IShapefile* CloneSelection();
+	vector<int>* GetSelectedIndices();
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

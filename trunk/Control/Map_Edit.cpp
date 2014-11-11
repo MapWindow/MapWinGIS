@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "Shapefile.h"
 #include "ShapeEditor.h"
+#include "UndoList.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -322,7 +323,7 @@ bool CMapView::ChooseEditLayer(long x, long y)
 	long layerHandle = -1;
 	if (GetInteractiveShapefileCount(layerHandle) > 0)
 	{
-		FireNewShape(x, y, &layerHandle, &cancel);
+		FireChooseLayer(x, y, &layerHandle, &cancel);
 		if (cancel == blnTrue) return false;
 	}
 	else {
@@ -397,3 +398,60 @@ void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double pro
 		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 	}
 }
+
+// ************************************************************
+//		HandleOnLButtonMoveShapes
+// ************************************************************
+void CMapView::HandleOnLButtonMoveShapes(long x, long y, double projX, double projY)
+{
+	long layerHandle = -1;
+	tkMwBoolean cancel = tkMwBoolean::blnFalse;
+	FireChooseLayer(x, y, &layerHandle, &cancel);   //TODO: rename to choose layer
+	if (layerHandle != -1)
+	{
+		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+		if (sf) 
+		{
+			VARIANT_BOOL editing;
+			sf->get_InteractiveEditing(&editing);
+			if (!editing) return;
+
+			long numSelected;
+			sf->get_NumSelected(&numSelected);
+			if (numSelected > 0)
+			{
+				SetCapture();
+				_dragging.Operation = DragMoveShapes;
+				_dragging.LayerHandle = layerHandle;
+			}
+		}
+	}
+}
+
+// ************************************************************
+//		RegisterMoveOperation
+// ************************************************************
+void CMapView::RegisterMoveOperation()
+{
+	int layerHandle = _dragging.LayerHandle;
+	IShapefile* source = GetShapefile(layerHandle);
+	if (source) {
+		vector<int>* selection = ((CShapefile*)source)->GetSelectedIndices();
+		if (!selection) return;
+		Point2D pnt = GetDraggingProjOffset();
+		bool added = ((CUndoList*)_undoList)->AddMoveOperation(_dragging.LayerHandle, selection, -pnt.x, -pnt.y);
+		if (!added) delete selection;
+	}
+}
+
+// ***************************************************************
+//	GetDraggingProjOffset
+// ***************************************************************
+Point2D CMapView::GetDraggingProjOffset()
+{
+	double x1, x2, y1, y2;
+	PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
+	PixelToProj(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+	return Point2D(x2 - x1, y2 - y1);
+}
+

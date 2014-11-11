@@ -40,7 +40,7 @@ GlobalClassFactory m_factory;	// make sure that this one is initialized after th
 // ******************************************************
 BOOL CMapWinGISApp::InitInstance()
 {
-	//Neio modified 2009, following http://www.mapwindow.org/phorum/read.php?7,12162 by gischai, for multi-language support
+	//Neio modified 2009, following http_://www.mapwindow.org/phorum/read.php?7,12162 by gischai, for multi-language support
 	//std::locale::global(std::locale(""));
 	//19-Oct-09 Rob Cairns: (See Bug 1446) - I hate doing this if it prevents our Chinese friends opening Chinese character shapefiles and data.
 	//However, there are just too many bugs associated with this change. See Bug 1446 for more information. Changing back to classic.
@@ -53,8 +53,11 @@ BOOL CMapWinGISApp::InitInstance()
 		gMemLeakDetect.stopped = false;
 	#endif
 
+	// http_://stackoverflow.com/questions/7659127/createex-causes-unhandled-exception-the-activation-context-being-deactivated-is
+	AfxSetAmbientActCtx(FALSE);
+
 	// UTF8 string are expected by default; the enviroment variable shoud be set to restore older behavior
-	// see more details here: http://trac.osgeo.org/gdal/wiki/ConfigOptions
+	// see more details here: http_://trac.osgeo.org/gdal/wiki/ConfigOptions
 	if( CSLTestBoolean(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
 	{
 		CPLSetConfigOption( "GDAL_FILENAME_IS_UTF8", "NO" );

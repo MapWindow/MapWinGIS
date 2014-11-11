@@ -134,6 +134,7 @@ enum tkDrawingDataAvailable
 	ActShape = 7,
 	ShapeEditing = 8,
 	ZoomBox = 9,
+	MovingShapes = 10,
 };
 
 enum SqliteOpenMode
@@ -160,6 +161,7 @@ enum DraggingOperation
 	DragMoveShape = 4,
 	DragMoveVertex = 5,
 	DragMovePart = 6,
+	DragMoveShapes = 7,
 };
 
 enum TileProjectionState

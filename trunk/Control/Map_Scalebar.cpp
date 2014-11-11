@@ -602,7 +602,7 @@ void CMapView::DrawZoombar(Gdiplus::Graphics* g)
 			Gdiplus::PointF tooltipOrigin(x + boxSize + tooltipOffset, handleY);
 			Gdiplus::RectF tooltipBox;
 			g->MeasureString(s, s.GetLength(), _fontArial, tooltipOrigin, &tooltipBox);
-			Gdiplus::SolidBrush tooltipBrush(Gdiplus::Color(246, 212, 178 ));
+			Gdiplus::SolidBrush tooltipBrush(Gdiplus::Color(255, 255, 255)/*Gdiplus::Color(246, 212, 178 )*/);
 			tooltipBox.Inflate(9.0f, 5.0f);
 			g->FillRectangle(&tooltipBrush, tooltipBox);
 			g->DrawRectangle(&_penGray, tooltipBox);

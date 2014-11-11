@@ -467,3 +467,23 @@ void Layer::UpdateShapefile()
 		delete data[i];
 	}
 }
+
+//****************************************************
+//*		IsEmpty()
+//****************************************************
+bool Layer::IsEmpty()
+{
+	if (this->object == NULL) return true;
+	if (this->IsDynamicOgrLayer())return false;
+	if (this->IsShapefile())
+	{
+		IShapefile * ishp = NULL;
+		if (!this->QueryShapefile(&ishp)) return true;
+
+		long numShapes;
+		ishp->get_NumShapes(&numShapes);
+		ishp->Release();
+		if (numShapes == 0) return true;
+	}
+	return false;
+}

@@ -5,6 +5,7 @@
 #include "ShapeEditor.h"
 #include "Shapefile.h"
 
+
 // ************************************************************
 //		ParseKeyboardEventFlags
 // ************************************************************
@@ -59,7 +60,7 @@ void CMapView::TurnOffPanning()
 {
 	if (m_cursorMode == cmPan && _lastCursorMode != cmNone)
 	{
-		UpdateCursor(_lastCursorMode);
+		UpdateCursor(_lastCursorMode, false);
 		_lastCursorMode = cmNone;
 
 		if (m_cursorMode == cmMeasure)
@@ -127,7 +128,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 							_measuring->put_Persistent(VARIANT_TRUE);
 						}
 						_lastCursorMode = (tkCursorMode)m_cursorMode;
-						UpdateCursor(cmPan);
+						UpdateCursor(cmPan, false);
 					}
 					else
 					{
@@ -143,7 +144,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			}
 			break;
 		case 'P':
-			UpdateCursor(cmPan);
+			UpdateCursor(cmPan, false);
 			break;
 		case 'Z':
 			{
@@ -166,7 +167,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 						return;
 					}
 				}
-				UpdateCursor(cmZoomIn);
+				UpdateCursor(cmZoomIn, false);
 			}
 			break;
 		case 'M':
@@ -181,7 +182,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			}
 			else
 			{
-				UpdateCursor(cmMeasure);
+				UpdateCursor(cmMeasure, false);
 			}
 			break;
 		case VK_BACK:
@@ -301,6 +302,13 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	double speed = _mouseWheelSpeed;
 	if (ForceDiscreteZoom()) {
 		speed = _mouseWheelSpeed > 1 ? 2.001 : 0.499;		// add some margin for rounding error and account for reversed wheeling
+
+		int zoom = GetCurrentZoom();
+		int maxZoom, minZoom;
+		GetMinMaxZoom(minZoom, maxZoom);
+		if (zDelta > 0 && zoom + 1 > maxZoom) {
+			return true;
+		}
 	}
 	
 	// new extents
@@ -524,7 +532,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (snapping)
 	{
 		snapped = FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &projX, &projY);
-		if (!snapped && behavior == sbSnapWithShift && shift){
+		if (!snapped && (behavior == sbSnapWithShift || m_cursorMode == cmMeasure) && shift){
 			return;  // can't proceed in this mode without snapping
 		}
 	}
@@ -553,6 +561,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
+		case cmMoveShapes:
+			HandleOnLButtonMoveShapes(x, y, projX, projY);
+			break;
 		case cmAddShape:
 			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 			break;
@@ -661,6 +672,19 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	switch(operation)
 	{
+		case DragMoveShapes:
+			{
+				Point2D pnt = GetDraggingProjOffset();
+				IShapefile* sf = _dragging.Shapefile;
+				if (sf) 
+				{
+					((CShapefile*)sf)->Move(pnt.x, pnt.y);
+					Utility::ClosePointer(&_moveBitmap);
+					RegisterMoveOperation();
+					Redraw();
+				}
+			}
+			break;
 		case DragMoveVertex:
 		case DragMovePart:
 		case DragMoveShape:
@@ -911,6 +935,39 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	
 	switch(m_cursorMode)
 	{
+		case cmMoveShapes:
+			if (_dragging.Operation == DragMoveShapes)
+			{
+				Debug::WriteLine("moving");
+				if (!_dragging.Shapefile)
+				{
+					IShapefile* sf = GetShapefile(_dragging.LayerHandle);
+					if (sf) 
+					{
+						IShapefile* sfNew = ((CShapefile*)sf)->CloneSelection();
+						ShpfileType shpType;
+						sf->get_ShapefileType(&shpType);
+						shpType = Utility::ShapeTypeConvert2D(shpType);
+						if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+						{
+							// TODO: extract to a function
+							CComPtr<IShapeDrawingOptions> options = NULL;
+							sf->get_DefaultDrawingOptions(&options);
+							if (options) {
+								CComPtr<IShapeDrawingOptions> newOptions = NULL;
+								options->Clone(&newOptions);
+								sfNew->put_DefaultDrawingOptions(newOptions);
+							}
+						}
+						_dragging.SetShapefile(sfNew);
+						sf->Release();
+					}
+					this->Refresh();
+					return;
+				}
+				refreshNeeded = true;
+			}
+			break;
 		case cmZoomIn:
 			if ((nFlags & MK_LBUTTON) && _leftButtonDown) {
 				refreshNeeded = true;

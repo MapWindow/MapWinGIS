@@ -54,13 +54,13 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 		if (hasMouseMoveData) 
 		{
 			// the main drawing will be taken from the buffer as it wasn't passed to output canvas yet
-			this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true);
+			this->DrawDynamic(pdc, rcBounds, rcInvalid, true);
 		}
 	}
 	else 
 	{
 		// always draw the main buffer, even if there is no measuring data
-		this->DrawMouseMoves(pdc, rcBounds, rcInvalid, true); 
+		this->DrawDynamic(pdc, rcBounds, rcInvalid, true); 
 	}
 	m_drawMutex.Unlock();
 }
@@ -198,7 +198,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	{
 		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, 
 			this->GetCurrentScale(), true);
-		drawer.Draw(rcBounds, _hotTracking.Shapefile, ((CShapefile*)_hotTracking.Shapefile)->get_File());
+		drawer.Draw(rcBounds, _hotTracking.Shapefile);
 	}
 
 	// -----------------------------------
@@ -256,6 +256,11 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	if (HasDrawingData(tkDrawingDataAvailable::ActShape))
 	{
 		DrawShapeEditor(g, false);
+	}
+
+	if (HasDrawingData(MovingShapes))
+	{
+		DrawMovingShapes(g, rcBounds, false);
 	}
 
 	// -----------------------------------
@@ -521,6 +526,7 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 #pragma endregion
 
 #pragma region Draw layers
+
 // ****************************************************************
 //		DrawLayers()
 // ****************************************************************
@@ -568,7 +574,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
 
 	// do we have shapefiles with hot tracking? check it once here and don't check on mouse move
-	_hasHotTracking = HasHotTracking();
+	//_hasHotTracking = HasHotTracking();
 
 	// ---------------------------------------------------
 	//	Drawing grouped images
@@ -746,7 +752,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 							sf->get_Volatile(&isVolatile);
 							if ((isVolatile ? true : false) != layerBuffer)
 							{
-								sfDrawer.Draw(rcBounds, sf, ((CShapefile*)sf)->get_File());
+								sfDrawer.Draw(rcBounds, sf);
 
 								// for old modes we shall mark all the shapes of shapefile as visible as no visibility expressions were analyzed
 								if (_shapeDrawingMethod != dmNewSymbology)
@@ -998,6 +1004,10 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 {
 	switch(type) 
 	{
+		case MovingShapes:
+			{
+				return _dragging.Operation == DragMoveShapes;
+			}
 		case ActShape:	
 			{
 				VARIANT_BOOL isEmpty;
