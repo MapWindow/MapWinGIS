@@ -130,17 +130,11 @@
   <data name="label-add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\label-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="plugin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plugin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="pan" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pan.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="layer_delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\layer-delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="categories3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\categories3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="attribute_show" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\attribute-show.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -150,15 +144,6 @@
   </data>
   <data name="zoom_in" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\zoom-in.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="layer-raster-add1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\layer-raster-add1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="categories2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\categories2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="plugin2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\plugin2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="zoom_max" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\zoom-extent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -171,12 +156,6 @@
   </data>
   <data name="layer-vector-add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\layer-vector-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="categories" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\categories.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="layer-create" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\layer-create1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="pan1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\pan1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -208,9 +187,6 @@
   <data name="zoom-selection" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\zoom-selection.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="categories4" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\categories4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="layer-raster-add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\layer-raster-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -234,5 +210,8 @@
   </data>
   <data name="folder1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\folder1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="layer_create" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\layer-create.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

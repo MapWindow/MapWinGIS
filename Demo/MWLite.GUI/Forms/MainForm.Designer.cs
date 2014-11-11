@@ -631,7 +631,7 @@ namespace MWLite.GUI.Forms
             // toolAddRaster
             // 
             this.toolAddRaster.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolAddRaster.Image = global::MWLite.GUI.Properties.Resources.layer_raster_add1;
+            this.toolAddRaster.Image = global::MWLite.GUI.Properties.Resources.layer_raster_add;
             this.toolAddRaster.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolAddRaster.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolAddRaster.Name = "toolAddRaster";

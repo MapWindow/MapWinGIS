@@ -83,46 +83,6 @@ namespace MWLite.GUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap categories {
-            get {
-                object obj = ResourceManager.GetObject("categories", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap categories2 {
-            get {
-                object obj = ResourceManager.GetObject("categories2", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap categories3 {
-            get {
-                object obj = ResourceManager.GetObject("categories3", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap categories4 {
-            get {
-                object obj = ResourceManager.GetObject("categories4", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap crs_change {
             get {
                 object obj = ResourceManager.GetObject("crs-change", resourceCulture);
@@ -175,7 +135,7 @@ namespace MWLite.GUI.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap layer_create {
             get {
-                object obj = ResourceManager.GetObject("layer-create", resourceCulture);
+                object obj = ResourceManager.GetObject("layer_create", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -206,16 +166,6 @@ namespace MWLite.GUI.Properties {
         internal static System.Drawing.Bitmap layer_raster_add {
             get {
                 object obj = ResourceManager.GetObject("layer-raster-add", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap layer_raster_add1 {
-            get {
-                object obj = ResourceManager.GetObject("layer-raster-add1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -306,26 +256,6 @@ namespace MWLite.GUI.Properties {
         internal static System.Drawing.Bitmap pan1 {
             get {
                 object obj = ResourceManager.GetObject("pan1", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap plugin {
-            get {
-                object obj = ResourceManager.GetObject("plugin", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap plugin2 {
-            get {
-                object obj = ResourceManager.GetObject("plugin2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
