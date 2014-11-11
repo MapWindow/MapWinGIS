@@ -7,6 +7,34 @@ public:
 	GeosHelper(void) {};
 	~GeosHelper(void) {};
 
+	static int RelatePattern(const GEOSGeometry* g1, const GEOSGeometry* g2, const char *pat)
+	{
+		
+		#ifdef GEOS_NEW
+			return GEOSRelatePattern_r(getGeosHandle(), g1, g2, pat);
+		#else
+			return GEOSRelatePattern(g1, g2, pat);
+		#endif
+	}
+
+	static int Area(const GEOSGeometry* g, double *area)
+	{
+		#ifdef GEOS_NEW
+			return GEOSArea_r(getGeosHandle(), g, area);
+		#else
+			return GEOSArea(g, area);
+		#endif
+	}
+
+	static GEOSGeometry* Boundary(const GEOSGeometry* g)
+	{
+		#ifdef GEOS_NEW
+			return GEOSBoundary_r(getGeosHandle(), g);
+		#else
+			return GEOSBoundary(g);
+		#endif
+	}
+
 	static int BufferParams_setEndCapStyle(GEOSBufferParams* p, tkBufferCap style)
 	{
 		#ifdef GEOS_NEW
@@ -277,7 +305,7 @@ public:
 		#endif
 	}
 
-	static GEOSGeometry* CloneGeometry(GEOSGeometry* gsGeom)
+	static GEOSGeometry* CloneGeometry(const GEOSGeometry* gsGeom)
 	{
 		#ifdef GEOS_NEW
 			return GEOSGeom_clone_r(getGeosHandle(), gsGeom);
@@ -286,7 +314,7 @@ public:
 		#endif
 	}
 
-	static GEOSGeometry* Intersection(GEOSGeometry* gsGeom1, GEOSGeometry* gsGeom2)
+	static GEOSGeometry* Intersection(const GEOSGeometry* gsGeom1, const GEOSGeometry* gsGeom2)
 	{
 		#ifdef GEOS_NEW
 			return GEOSIntersection_r(getGeosHandle(), gsGeom1, gsGeom2);

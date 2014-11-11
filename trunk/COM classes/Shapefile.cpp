@@ -3547,3 +3547,13 @@ void CShapefile::Rotate(double originX, double originY, double angleDegree)
 		}
 	}
 }
+
+// *****************************************************************
+//		ShapefileType2D()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = Utility::ShapeTypeConvert2D(_shpfiletype);
+	return S_OK;
+}

@@ -131,10 +131,9 @@ public:
 	STDMETHOD(get_Z)(LONG pointIndex, double* z, VARIANT_BOOL* retVal);
 	STDMETHOD(BufferWithParams)(DOUBLE Ditances, LONG numSegments, VARIANT_BOOL singleSided, tkBufferCap capStyle, tkBufferJoin joinStyle, DOUBLE mitreLimit, IShape** retVal);
 	STDMETHOD(Move)(DOUBLE xProjOffset, DOUBLE yProjOffset);
-
-	bool CShape::ExplodeCore(std::vector<IShape*>& vShapes);
-	CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld);
-	CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld);
+	STDMETHOD(Rotate)(DOUBLE originX, DOUBLE originY, DOUBLE angle);
+	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
+	STDMETHOD(SplitByPolyline)(IShape* polyline, VARIANT* results, VARIANT_BOOL* retVal);
 
 private:
 	// members
@@ -151,20 +150,21 @@ private:
 	
 	// functions
 	void ErrorMessage(long ErrorCode);
-	bool CShape::PointInThisPolyFast(IPoint * pt);
-	bool CShape::PointInThisPolyRegular(IPoint * pt);
-	
+	bool PointInThisPolyFast(IPoint * pt);
+	bool PointInThisPolyRegular(IPoint * pt);
 	
 public:
-	bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck);
+	bool ExplodeCore(std::vector<IShape*>& vShapes);
+	CShapeWrapperCOM* InitComWrapper(CShapeWrapper* shpOld);
+	CShapeWrapper* InitShapeWrapper(CShapeWrapperCOM* shpOld);
+	bool FixupShapeCore(ShapeValidityCheck validityCheck);
 	bool put_ShapeWrapper(CShapeWrapper* data);
 	IShapeWrapper* get_ShapeWrapper();
-	void CShape::put_fastMode(bool state);				// toggles the storing mode for the shape
-	bool CShape::get_fastMode();
-	double CShape::get_SegmentAngle( long segementIndex);
-	void CShape::put_fastModeAdd(bool state);
-	void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
-
+	void put_fastMode(bool state);				// toggles the storing mode for the shape
+	bool get_fastMode();
+	double get_SegmentAngle( long segementIndex);
+	void put_fastModeAdd(bool state);
+	void get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool get_Z(long PointIndex, double* z);
 	bool get_M(long PointIndex, double* m);
 	bool get_XY(long PointIndex, double* x, double* y);
@@ -175,8 +175,7 @@ public:
 	bool get_ExtentsXYZM(double& xMin, double& yMin, double& xMax, double& yMax, double& zMin, double& zMax, double& mMin, double& mMax);
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
-	
-	STDMETHOD(Rotate)(DOUBLE originX, DOUBLE originY, DOUBLE angle);
+	bool SplitByPolylineCore(IShape* polyline, vector<IShape*>& results);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

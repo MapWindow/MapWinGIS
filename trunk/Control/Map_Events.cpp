@@ -561,6 +561,18 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
+		case cmSplitByPolyline:
+			tkShapeEditorState state;
+			_shapeEditor->get_EditorState(&state);
+			if (state != EditorCreationUnbound)
+			{
+				VARIANT_BOOL vb;
+				ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
+				_shapeEditor->StartUnboundShape(shpType, &vb);
+				_shapeEditor->put_LineColor(RGB(255, 0, 0));
+			}
+			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+			break;
 		case cmRotateShapes:
 		case cmMoveShapes:
 			HandleOnLButtonMoveOrRotate(x, y);

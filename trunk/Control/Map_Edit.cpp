@@ -4,6 +4,7 @@
 #include "ShapeEditor.h"
 #include "UndoList.h"
 #include "GeometryHelper.h"
+#include "Shape.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -386,15 +387,11 @@ void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double pro
 		if (state != EditorCreationUnbound)
 		{
 			VARIANT_BOOL vb;
-			ShpfileType shpType = _shapeEditor->GetOverlayTypeForSubjectOperation((tkCursorMode)m_cursorMode);
+			ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
 			_shapeEditor->StartUnboundShape(shpType, &vb);
-
 			OLE_COLOR color;
 			GetUtils()->ColorByName(m_cursorMode == cmAddPart ? Green : Red, &color);
 			_shapeEditor->put_FillColor(color);
-			if (m_cursorMode == cmSplitByPolyline) {
-				_shapeEditor->put_LineColor(RGB(255,0,0));
-			}
 		}
 		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 	}
@@ -563,3 +560,117 @@ double CMapView::GetDraggingRotationAngle(long screenX, long screenY)
 	double angle = GeometryHelper::GetPointAngle(x, y);
 	return angle / pi_ * 180.0;
 }
+
+// ***************************************************************
+//	_UnboundShapeFinished
+// ***************************************************************
+void CMapView::_UnboundShapeFinished(IShape* polyline)
+{
+	if (!polyline) return;
+
+	_shapeEditor->Clear();
+
+	tkMwBoolean cancel;
+	long layerHandle = -1;
+	FireChooseLayer(0, 0, &layerHandle, &cancel);
+	if (layerHandle == -1) return;
+
+	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	if (!sf) {
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
+		return;
+	}
+
+	VARIANT_BOOL editing;
+	sf->get_InteractiveEditing(&editing);
+	if (!editing) {
+		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		return;
+	}
+
+	ShpfileType shpType;
+	sf->get_ShapefileType2D(&shpType);
+	if (m_cursorMode == cmSplitByPolyline && shpType != SHP_POLYGON && shpType != SHP_POLYLINE)
+	{
+		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+		return;
+	}
+
+	long numSelected, numShapes;;
+	sf->get_NumSelected(&numSelected);
+	sf->get_NumShapes(&numShapes);
+
+	CComPtr<IExtents> box = NULL;
+	polyline->get_Extents(&box);
+	
+	vector<long> indices;
+	IShapefile* isf = sf;
+	if (!((CShapefile*)isf)->SelectShapesCore(Extent(box), 0.0, SelectMode::INTERSECTION, indices)) 
+	{
+		// TODO: fire event: no subject shapes were found
+		return;
+	}
+
+	bool redrawNeeded = false;
+	if (m_cursorMode == cmSplitByPolyline)
+	{
+		redrawNeeded = SplitByPolyline(layerHandle, sf, indices, polyline);
+	}
+	
+	if (redrawNeeded)
+		Redraw();
+}
+
+// ***************************************************************
+//	SplitByPolyline
+// ***************************************************************
+bool CMapView::SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline)
+{
+	vector<long> deleteList;
+
+	VARIANT_BOOL vb;
+	_undoList->BeginBatch(&vb);
+	if (!vb) {
+		ErrorMessage(tkCANT_START_BATCH_OPERATION);
+		return false;
+	}
+
+	bool split = false;
+	for (long i = 0; i < (long)indices.size(); i++)
+	{
+		IShape* shp = NULL;
+		sf->get_Shape(indices[i], &shp);
+		if (shp)
+		{
+			vector<IShape*> shapes;
+			if (((CShape*)shp)->SplitByPolylineCore(polyline, shapes))
+			{
+				for (size_t j = 0; j < shapes.size(); j++)
+				{
+					long shapeIndex;
+					sf->EditAddShape(shapes[j], &shapeIndex);
+					// TODO: copy attributes
+					_undoList->Add(uoAddShape, layerHandle, shapeIndex, &vb);
+					shapes[j]->Release();
+				}
+				deleteList.push_back(indices[i]);
+				split = true;
+			}
+			shp->Release();
+		}
+	}
+	
+	for (int i = deleteList.size() - 1; i >= 0; i--) 
+	{
+		_undoList->Add(uoRemoveShape, layerHandle, deleteList[i], &vb);
+		if (vb) {
+			sf->EditDeleteShape(deleteList[i], &vb);
+		}
+	}
+
+	long count;
+	_undoList->EndBatch(&count);
+
+	return split;
+}
+

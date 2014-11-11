@@ -932,7 +932,7 @@ STDMETHODIMP CShapeEditor::StartUnboundShape(ShpfileType shpType, VARIANT_BOOL* 
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	if (shpType == SHP_NULLSHAPE ) 
+	if (shpType == SHP_NULLSHAPE )    // TODO: split subject operations and group overlay operations
 	{
 		if (_subjects.size() > 0) {
 			_subjects[0]->get_ShapeType(&shpType);
@@ -1204,11 +1204,16 @@ bool CShapeEditor::TrySave()
 		if (!Validate(&shp))
 			return false;
 	}
+	else if (_state == EditorCreationUnbound) 
+	{
+		get_ValidatedShape(&shp);
+		_mapCallback->_UnboundShapeFinished(shp);
+		return true;
+	}
 	else {
 		get_ValidatedShape(&shp);
 		if (!shp) return false;
 	}
-
 
 	CComPtr<IShapefile> sf = NULL;
 	sf = _mapCallback->_GetShapefile(layerHandle);
@@ -1216,7 +1221,6 @@ bool CShapeEditor::TrySave()
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return false;
 	}
-	
 	
 	// 3) custom validation
 	tkMwBoolean cancel = blnFalse;
@@ -1338,7 +1342,7 @@ STDMETHODIMP CShapeEditor::put_ValidationMode(tkEditorValidationMode newVal)
 // ***************************************************************
 //		GetOverlayTypeForSubjectOperation()
 // ***************************************************************
-ShpfileType CShapeEditor::GetOverlayTypeForSubjectOperation(tkCursorMode cursor)
+ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 {
 	switch (cursor)
 	{

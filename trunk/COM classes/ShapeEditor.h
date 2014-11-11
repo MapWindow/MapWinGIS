@@ -175,6 +175,6 @@ public:
 	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
 	bool ValidateWithGeos(IShape** shp);
 	bool Validate(IShape** shp);
-	ShpfileType GetOverlayTypeForSubjectOperation(tkCursorMode cursor);
+	ShpfileType GetShapeTypeForTool(tkCursorMode cursor);
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

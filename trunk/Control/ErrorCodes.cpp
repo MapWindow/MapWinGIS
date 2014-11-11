@@ -193,6 +193,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "No layer handle is set for shape editor.";
 		case tkFAILED_CREATE_BUFFER_PARAMS:
 			return "Failed to created buffer parameters.";
+		case tkSPLIT_LINEAR_INTERSECTION:
+			return "Split line has linear intersection with subject line.";
+		case tkCANT_START_BATCH_OPERATION:
+			return "New batch opearation attempted when the previous one is not finished.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

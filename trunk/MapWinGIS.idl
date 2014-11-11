@@ -3689,6 +3689,7 @@ interface IShapefile : IDispatch{
 	[propget, id(127)] HRESULT Snappable([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(127)] HRESULT Snappable([in] VARIANT_BOOL newVal);
 	[id(128)] HRESULT Serialize2([in]VARIANT_BOOL SaveSelection, [in]VARIANT_BOOL SerializeCategories, [out, retval]BSTR* retVal);
+	[propget, id(129)] HRESULT ShapefileType2D([out, retval] ShpfileType* pVal);
 };
 
 /****************************  Shape Interface ***********************/
@@ -3750,7 +3751,7 @@ interface IShape : IDispatch{
 	[id(40), helpstring("Changes the shape's part order of points (clockwise, counter clockwise)")] 
 		HRESULT ReversePointsOrder([in] long PartIndex,[out, retval] VARIANT_BOOL* retval);
 	[id(41), helpstring("Returns array of shape type with the results of intersection of 2 shapes. Resulting shapes can belong to different types.")] 
-		HRESULT GetIntersection([in] IShape* Shape, [out, out] VARIANT* Results, [out, retval]VARIANT_BOOL* retval);
+		HRESULT GetIntersection([in] IShape* Shape, [in, out] VARIANT* Results, [out, retval]VARIANT_BOOL* retval);
 	[propget, id(42), helpstring("property Center")] HRESULT Center([out, retval] IPoint** pVal);
 	[propget, id(43), helpstring("property EndOfPart")] HRESULT EndOfPart([in]long PartIndex, [out, retval] long* retval);
 	[propget, id(44), helpstring("property PartAsShape")] HRESULT PartAsShape([in]long PartIndex, [out, retval] IShape** retval);
@@ -3781,6 +3782,8 @@ interface IShape : IDispatch{
 		[out, retval] IShape** retVal);
 	[id(63)] HRESULT Move([in] DOUBLE xProjOffset, [in] DOUBLE yProjOffset);
 	[id(64)] HRESULT Rotate([in] DOUBLE originX, [in] DOUBLE originY, [in] DOUBLE angle);
+	[propget, id(65)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
+	[id(66)] HRESULT SplitByPolyline([in] IShape* polyline, [in,out]VARIANT* results, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Extents Interface ***********************/

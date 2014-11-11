@@ -333,7 +333,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryTyp
 bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, bool isM, OGRwkbGeometryType oForceType )
 {
 	IShape* shp;
-	if (!vShapes->empty()) vShapes->clear();
+	vShapes->clear();
 
 	if (oGeom == NULL) return false;
 	
@@ -1015,4 +1015,53 @@ GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, dou
 	/*GEOSGeometry* result = GeosHelper::Simplify(gsGeom, tolerance);
 	char* type = GeosHelper::GetGeometryType(result);
 	return result;*/
+}
+
+// *****************************************************
+//		NormalizeSplitResults()
+// *****************************************************
+void GeometryConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* subject, ShpfileType shpType, vector<GEOSGeometry*>& results)
+{
+	if (!result) return;
+
+	int numGeoms = GeosHelper::GetNumGeometries(result);
+	if (numGeoms > 1)
+	{
+		if (shpType == SHP_POLYGON)
+		{
+			for (int i = 0; i < numGeoms; i++)
+			{
+				const GEOSGeometry* polygon = GeosHelper::GetGeometryN(result, i);
+				GEOSGeometry* intersect = GeosHelper::Intersection(subject, polygon);
+
+				if (!intersect)
+					continue;
+
+				double intersectArea;
+				GeosHelper::Area(intersect, &intersectArea);
+				GeosHelper::DestroyGeometry(intersect);
+
+				double polyArea;
+				GeosHelper::Area(polygon, &polyArea);
+
+				double areaRatio = intersectArea / polyArea;
+				if (areaRatio > 0.99 && areaRatio < 1.01) {
+					GEOSGeometry* clone = GeosHelper::CloneGeometry(polygon);
+					if (clone) {
+						results.push_back(clone);
+					}
+				}
+			}
+
+		}
+		else {
+			for (int i = 0; i < numGeoms; i++) {
+				const GEOSGeometry* line = GeosHelper::GetGeometryN(result, i);
+				GEOSGeometry* clone = GeosHelper::CloneGeometry(line);
+				if (clone) {
+					results.push_back(clone);
+				}
+			}
+		}
+	}
 }

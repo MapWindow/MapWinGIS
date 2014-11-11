@@ -1080,6 +1080,8 @@ private:
 	double GetDraggingRotationAngle();
 	double GetDraggingRotationAngle(long screenX, long screenY);
 	void RegisterRotationOperation();
+	bool IsOverlayCursor();
+	bool SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline);
 #pragma endregion
 
 public:
@@ -1104,7 +1106,8 @@ public:
 	virtual bool _IsSubjectCursor();
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
-
+	virtual void _UnboundShapeFinished(IShape* shp);
+	
 protected:
 	
 };

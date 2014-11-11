@@ -2890,3 +2890,119 @@ STDMETHODIMP CShape::Rotate(DOUBLE originX, DOUBLE originY, DOUBLE angle)
 	}
 	return S_OK;
 }
+
+//*****************************************************************
+//*		ShapeType2D()
+//*****************************************************************
+STDMETHODIMP CShape::get_ShapeType2D(ShpfileType* pVal)
+{
+	*pVal = Utility::ShapeTypeConvert2D(_shp->get_ShapeType());
+	return S_OK;
+}
+
+//*****************************************************************
+//*		SplitByPolyline()
+//*****************************************************************
+STDMETHODIMP CShape::SplitByPolyline(IShape* polyline, VARIANT* results, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	vector<IShape*>	shapes;
+
+	if (!SplitByPolylineCore(polyline, shapes))
+		return S_OK;
+
+	if (shapes.size() != 0)
+	{
+		if (Templates::Vector2SafeArray(&shapes, results))
+			*retVal = VARIANT_TRUE;
+	}
+	return S_OK;
+}
+
+//*****************************************************************
+//*		SplitByPolyline()
+//*****************************************************************
+// Based on QGis implementation: https_://github.com/qgis/QGIS/blob/master/src/core/qgsgeometry.cpp
+bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
+{
+	if (shapes.size() > 0) return false;
+
+	ShpfileType shpType;
+	get_ShapeType2D(&shpType);
+	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+	{
+		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+		return S_OK;
+	}
+
+	int numSourceGeom = 0;
+	vector<GEOSGeometry*> results;
+
+	GEOSGeometry* result = NULL;
+	GEOSGeometry* line = GeometryConverter::Shape2GEOSGeom(polyline);
+	GEOSGeometry* s = GeometryConverter::Shape2GEOSGeom(this);
+	if (s && line)
+	{
+		if (GeosHelper::Intersects(s, line))
+		{
+			if (shpType == SHP_POLYGON)
+			{
+				GEOSGeometry* b = GeosHelper::Boundary(s);
+				if (b)
+				{
+					GEOSGeometry* un = GeosHelper::Union(line, b);
+					if (un) {
+						result = GeosHelper::Polygonize(un);
+						GeosHelper::DestroyGeometry(un);
+					}
+					GeosHelper::DestroyGeometry(b);
+				}
+			}
+			else {
+				int linearIntersect = GeosHelper::RelatePattern(s, line, "1********");
+				if (linearIntersect > 0) {
+					ErrorMessage(tkSPLIT_LINEAR_INTERSECTION);
+					goto cleaning;		
+				}
+				result = GeosHelper::Difference(s, line);
+			}
+		}
+		numSourceGeom = GeosHelper::GetNumGeometries(s);
+	}
+	
+	if (!result) goto cleaning;
+	
+	int numGeoms = GeosHelper::GetNumGeometries(result);
+	if (numGeoms > 1)
+	{
+		GeometryConverter::NormalizeSplitResults(result, s, shpType, results);
+		GeosHelper::DestroyGeometry(result);
+	}
+	else {
+		results.push_back(result);
+	}
+
+	// we expect to have more parts then initially
+	if ((int)results.size() > numSourceGeom) 
+	{
+		for (size_t i = 0; i < results.size(); i++)
+		{
+			vector<IShape*> shapesTemp;
+			GeometryConverter::GEOSGeomToShapes(results[i], &shapesTemp, false);
+			shapes.insert(shapes.end(), shapesTemp.begin(), shapesTemp.end());
+		}
+	}
+
+cleaning:
+	for (size_t i = 0; i < results.size(); i++)	{
+		GeosHelper::DestroyGeometry(results[i]);
+	}
+	if (s)	GeosHelper::DestroyGeometry(s);
+	if (line) GeosHelper::DestroyGeometry(line);
+
+	return shapes.size() > 0;
+}
+
+

@@ -251,11 +251,19 @@ bool CMapView::IsEditorCursor()
 }
 
 // ************************************************************
+//		IsOverlayCursor
+// ************************************************************
+bool CMapView::IsOverlayCursor()
+{
+	return m_cursorMode == cmSplitByPolyline;
+}
+
+// ************************************************************
 //		IsEditorCursor
 // ************************************************************
 bool CMapView::IsDigitizingCursor()
 {
-	return m_cursorMode == cmAddShape || _IsSubjectCursor();
+	return m_cursorMode == cmAddShape || _IsSubjectCursor() || IsOverlayCursor();
 }
 
 // ************************************************************
@@ -263,5 +271,5 @@ bool CMapView::IsDigitizingCursor()
 // ************************************************************
 bool CMapView::_IsSubjectCursor()
 {
-	return m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart || m_cursorMode == cmSplitByPolyline;
+	return m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart;
 }

@@ -23,6 +23,7 @@ public:
 	virtual bool _IsSubjectCursor() = 0;
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce) = 0;
 	virtual void _FireUndoListChanged() = 0;
+	virtual void _UnboundShapeFinished(IShape* shp) = 0;
 };
 
 

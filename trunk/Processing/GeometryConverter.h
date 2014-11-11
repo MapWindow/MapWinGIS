@@ -31,6 +31,8 @@ class GeometryConverter
 		static GEOSGeometry* SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance);
 		static ShpfileType GeometryType2ShapeType(OGRwkbGeometryType oType);
 		static OGRwkbGeometryType ShapeType2GeometryType(ShpfileType shpType, bool forceMulti = false);
+		static void NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* subject, ShpfileType shpType, 
+			vector<GEOSGeometry*>& results);
 	private:
 };
 

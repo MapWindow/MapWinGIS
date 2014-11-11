@@ -232,6 +232,7 @@ public:
 	STDMETHOD(put_ShapeIsHidden)(LONG shapeIndex, VARIANT_BOOL newVal);
 	STDMETHOD(get_Snappable)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_Snappable)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ShapefileType2D)(ShpfileType* pVal);
 
 private:
 	// data for point in shapefile test
@@ -494,5 +495,8 @@ public:
 	vector<int>* GetSelectedIndices();
 	bool GetSelectedExtents(double& xMin, double& yMin, double& xMax, double& yMax);
 	void Rotate(double originX, double originY, double angleDegree);
+	
+	
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

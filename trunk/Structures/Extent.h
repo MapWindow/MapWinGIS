@@ -35,6 +35,17 @@ public:
 		top = Top;
 	}
 
+	Extent(IExtents* box) 
+	{
+		if (!box) return;
+		double xMin, yMin, zMin, xMax, yMax, zMax;
+		box->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
+		left = xMin;
+		right = xMax;
+		bottom = yMin;
+		top = yMax;
+	}
+
 	double left;
 	double right;
 	double bottom;
