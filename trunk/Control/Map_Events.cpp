@@ -563,6 +563,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	switch(m_cursorMode)
 	{
 		case cmSplitByPolyline:
+		case cmSelectByPolygon:
 			tkShapeEditorState state;
 			_shapeEditor->get_EditorState(&state);
 			if (state != EditorCreationUnbound)
@@ -570,7 +571,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				VARIANT_BOOL vb;
 				ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
 				_shapeEditor->StartUnboundShape(shpType, &vb);
-				_shapeEditor->put_LineColor(RGB(255, 0, 0));
+				_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
 			}
 			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 			break;
@@ -891,6 +892,32 @@ void CMapView::DisplayPanningInertia( CPoint point )
 #pragma region Mouse move
 
 // ************************************************************
+//		ShowToolTipOnMouseMove
+// ************************************************************
+void CMapView::ShowToolTipOnMouseMove(UINT nFlags, CPoint point)
+{
+	if (_showingToolTip)
+	{
+		CToolInfo cti;
+		_ttip.GetToolInfo(cti, this, IDC_TTBTN);
+		cti.rect.left = point.x - 2;
+		cti.rect.right = point.x + 2;
+		cti.rect.top = point.y - 2;
+		cti.rect.bottom = point.y + 2;
+		_ttip.SetToolInfo(&cti);
+		_ttip.SetWindowPos(&wndTop, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+
+		MSG pMsg;
+		pMsg.hwnd = this->m_hWnd;
+		pMsg.message = WM_MOUSEMOVE;
+		pMsg.wParam = nFlags;
+		pMsg.lParam = MAKELPARAM(point.x, point.y);
+		pMsg.pt = point;
+		_ttip.RelayEvent(&pMsg);
+	}
+}
+
+// ************************************************************
 //		OnMouseMove
 // ************************************************************
 void CMapView::OnMouseMove(UINT nFlags, CPoint point)
@@ -902,25 +929,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	if (HandleOnZoombarMouseMove(point))
 		return;
 
-	if( _showingToolTip )
-	{
-		CToolInfo cti;
-		_ttip.GetToolInfo(cti,this,IDC_TTBTN);
-		cti.rect.left = point.x - 2;
-		cti.rect.right = point.x + 2;
-		cti.rect.top = point.y - 2;
-		cti.rect.bottom = point.y + 2;
-		_ttip.SetToolInfo(&cti);
-		_ttip.SetWindowPos(&wndTop,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-
-		MSG pMsg;
-		pMsg.hwnd = this->m_hWnd;
-		pMsg.message = WM_MOUSEMOVE;
-		pMsg.wParam = nFlags;
-		pMsg.lParam = MAKELPARAM(point.x, point.y);
-		pMsg.pt = point;
-		_ttip.RelayEvent(&pMsg);
-	}
+	ShowToolTipOnMouseMove(nFlags, point);
 
 	long mbutton = ParseMouseEventFlags(nFlags);
 	long vbflags = ParseKeyboardEventFlags(nFlags);

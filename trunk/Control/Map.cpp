@@ -132,9 +132,9 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("BeforeDeleteShape", eventidBeforeDeleteShape, FireBeforeDeleteShape, VTS_I4 VTS_PI4)
 	EVENT_CUSTOM_ID("ProjectionChanged", eventidProjectionChanged, FireProjectionChanged, VTS_NONE)
 	EVENT_CUSTOM_ID("UndoListChanged", eventidUndoListChanged, FireUndoListChanged, VTS_NONE)
+	EVENT_CUSTOM_ID("SelectionChanged", eventidSelectionChanged, FireSelectionChanged, VTS_I4)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
-	
 END_EVENT_MAP()
 
 #pragma region Constructor/destructor

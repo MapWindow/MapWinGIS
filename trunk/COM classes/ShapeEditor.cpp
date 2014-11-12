@@ -1349,9 +1349,40 @@ ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 		case cmAddPart:
 			return SHP_NULLSHAPE;
 		case cmRemovePart:
+		case cmSelectByPolygon:
 			return SHP_POLYGON;
 		case cmSplitByPolyline:
 			return SHP_POLYLINE;
 	}
 	return SHP_NULLSHAPE;
+}
+
+// ***************************************************************
+//		ApplyColoringForTool()
+// ***************************************************************
+void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
+{
+	OLE_COLOR color;
+	GetUtils()->ColorByName(LightSlateGray, &color);
+	put_LineColor(color);
+	put_LineWidth(1.0f);
+	switch (mode)
+	{
+		case cmAddPart:
+			GetUtils()->ColorByName(Green, &color);
+			put_FillColor(color);
+			break;
+		case cmRemovePart:
+			GetUtils()->ColorByName(Red, &color);
+			put_FillColor(color);
+			break;		
+		case cmSplitByPolyline:
+			put_LineColor(RGB(255, 0, 0));
+			break;
+		case cmSelectByPolygon:
+			GetUtils()->ColorByName(Yellow, &color);
+			put_FillColor(color);
+			put_LineColor(color);
+			break;
+	}
 }

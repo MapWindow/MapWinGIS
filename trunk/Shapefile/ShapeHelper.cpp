@@ -2,7 +2,27 @@
 #include "ShapeHelper.h"
 #include "SelectionHelper.h"
 
+// *****************************************************
+//		GetShapeType
+// *****************************************************
+ShpfileType ShapeHelper::GetShapeType(IShape* shp)
+{
+	if (!shp) return SHP_NULLSHAPE;
+	ShpfileType shpType;
+	shp->get_ShapeType(&shpType);
+	return shpType;
+}
 
+// *****************************************************
+//		GetShapeType2D
+// *****************************************************
+ShpfileType ShapeHelper::GetShapeType2D(IShape* shp)
+{
+	if (!shp) return SHP_NULLSHAPE;
+	ShpfileType shpType;
+	shp->get_ShapeType2D(&shpType);
+	return shpType;
+}
 
 // *****************************************************
 //		PointWithinShape

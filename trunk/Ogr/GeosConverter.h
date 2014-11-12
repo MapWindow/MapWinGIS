@@ -2,7 +2,7 @@
 class GeosConverter
 {
 public:
-	static bool GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM);
+	static bool GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM);
 	static GEOSGeom ShapeToGeom(IShape* shp);
 	static GEOSGeometry* MergeGeometries(vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput = true);
 	static GEOSGeometry* SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance);

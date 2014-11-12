@@ -8,6 +8,7 @@
 #include "ShapefileHelper.h"
 #include "GroupOperation.h"
 #include "ShapeHelper.h"
+#include "SelectionHelper.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -392,9 +393,7 @@ void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double pro
 			VARIANT_BOOL vb;
 			ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
 			_shapeEditor->StartUnboundShape(shpType, &vb);
-			OLE_COLOR color;
-			GetUtils()->ColorByName(m_cursorMode == cmAddPart ? Green : Red, &color);
-			_shapeEditor->put_FillColor(color);
+			_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
 		}
 		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
 	}
@@ -567,9 +566,9 @@ double CMapView::GetDraggingRotationAngle(long screenX, long screenY)
 // ***************************************************************
 //	_UnboundShapeFinished
 // ***************************************************************
-void CMapView::_UnboundShapeFinished(IShape* polyline)
+void CMapView::_UnboundShapeFinished(IShape* shp)
 {
-	if (!polyline) return;
+	if (!shp) return;
 
 	_shapeEditor->Clear();
 
@@ -584,11 +583,14 @@ void CMapView::_UnboundShapeFinished(IShape* polyline)
 		return;
 	}
 
-	VARIANT_BOOL editing;
-	sf->get_InteractiveEditing(&editing);
-	if (!editing) {
-		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
-		return;
+	if (m_cursorMode == cmSplitByPolyline)
+	{
+		VARIANT_BOOL editing;
+		sf->get_InteractiveEditing(&editing);
+		if (!editing) {
+			ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+			return;
+		}
 	}
 
 	ShpfileType shpType;
@@ -599,31 +601,30 @@ void CMapView::_UnboundShapeFinished(IShape* polyline)
 		return;
 	}
 
-	long numSelected, numShapes;;
-	sf->get_NumSelected(&numSelected);
-	sf->get_NumShapes(&numShapes);
-
-	CComPtr<IExtents> box = NULL;
-	polyline->get_Extents(&box);
-	
-	vector<long> indices;
-	IShapefile* isf = sf;
-	if (!((CShapefile*)isf)->SelectShapesCore(Extent(box), 0.0, SelectMode::INTERSECTION, indices)) 
-	{
-		// TODO: fire event: no subject shapes were found
-		return;
-	}
-
 	bool redrawNeeded = false;
-	if (m_cursorMode == cmSplitByPolyline)
+	int errorCode = tkNO_ERROR;
+
+	switch (m_cursorMode)
 	{
-		int errorCode = tkNO_ERROR;
-		redrawNeeded = GroupOperation::SplitByPolyline(layerHandle, sf, indices, polyline, _undoList, errorCode);
-		if (errorCode != tkNO_ERROR) {
-			ErrorMessage(errorCode);
-		}
+		case cmSplitByPolyline:
+			{
+				vector<long> indices;
+				if (!SelectionHelper::SelectWithShapeBounds(sf, shp, indices))
+					return;    // TODO: fire event
+				redrawNeeded = GroupOperation::SplitByPolyline(layerHandle, sf, indices, shp, _undoList, errorCode);
+			}
+			break;
+		case cmSelectByPolygon:
+			SelectionHelper::SelectByPolygon(sf, shp, errorCode);
+			FireSelectionChanged(layerHandle);
+			redrawNeeded = true;
+			break;
 	}
-	
+
+	if (errorCode != tkNO_ERROR) {
+		ErrorMessage(errorCode);
+	}
+
 	if (redrawNeeded)
 		Redraw();
 }

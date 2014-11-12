@@ -176,5 +176,6 @@ public:
 	bool ValidateWithGeos(IShape** shp);
 	bool Validate(IShape** shp);
 	ShpfileType GetShapeTypeForTool(tkCursorMode cursor);
+	void ApplyColoringForTool(tkCursorMode mode);
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

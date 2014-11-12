@@ -1060,6 +1060,7 @@ enum tkScalebarUnits
 		cmIdentify = 12,
 		cmMoveShapes = 13,
 		cmRotateShapes = 14,
+		cmSelectByPolygon = 15,
 	} tkCursorMode;
 
 	typedef 
@@ -6129,6 +6130,7 @@ library MapWinGIS
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);
 			[id(23)] void ProjectionChanged();
 			[id(24)] void UndoListChanged();
+			[id(25)] void SelectionChanged(LONG LayerHandle);
 		//}}AFX_ODL_EVENT
 			
 	};

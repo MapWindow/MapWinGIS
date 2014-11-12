@@ -188,7 +188,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 		bool isM = Utility::ShapeTypeIsM(shpType);
 		
 		std::vector<IShape*> shapes;
-		if (GeosConverter::GEOSGeomToShapes(gsNew, &shapes, isM))
+		if (GeosConverter::GeomToShapes(gsNew, &shapes, isM))
 		{
 			long index, numFields;
 			VARIANT_BOOL vbretval;
@@ -913,7 +913,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 		if (gsGeom != NULL)
 		{
 			std::vector<IShape*> vShapes;
-			if (GeosConverter::GEOSGeomToShapes(gsGeom, &vShapes, isM))
+			if (GeosConverter::GeomToShapes(gsGeom, &vShapes, isM))
 			{
 				for (unsigned int i = 0; i < vShapes.size(); i++)
 				{
@@ -1409,7 +1409,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			{
 				vector<IShape*> vShapes;
 
-				if (GeosConverter::GEOSGeomToShapes(oGeom2, &vShapes, isM))
+				if (GeosConverter::GeomToShapes(oGeom2, &vShapes, isM))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
@@ -1865,7 +1865,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 					if (gsResult != NULL)
 					{
 						vector<IShape* > vShapes;
-						bool result = GeosConverter::GEOSGeomToShapes(gsResult, &vShapes, isM);
+						bool result = GeosConverter::GeomToShapes(gsResult, &vShapes, isM);
 						GeosHelper::DestroyGeometry(gsResult);
 						this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL);
 					}
@@ -2083,7 +2083,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					
 					// saving the results
 					vector<IShape* > vShapes;
-					bool result = GeosConverter::GEOSGeomToShapes(geom, &vShapes, isM);
+					bool result = GeosConverter::GeomToShapes(geom, &vShapes, isM);
 					GeosHelper::DestroyGeometry(geom);
 
 					this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL, sfClip, clipId, fieldMap);	// shapes are released here
@@ -2425,7 +2425,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 			if (gsGeom1 != NULL)
 			{
 				vector<IShape* > vShapes;
-				bool result = GeosConverter::GEOSGeomToShapes(gsGeom1, &vShapes, isM);
+				bool result = GeosConverter::GeomToShapes(gsGeom1, &vShapes, isM);
 				if (deleteNeeded)
 					GeosHelper::DestroyGeometry(gsGeom1);
 				this->InsertShapesVector(sfResult, vShapes, sfSubject, subjectId, fieldMap);	// shapes are released here

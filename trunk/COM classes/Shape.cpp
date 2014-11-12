@@ -1577,7 +1577,7 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 		get_ShapeType(&shpType);
 
 		vector<IShape*> shapes;
-		if (GeosConverter::GEOSGeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
+		if (GeosConverter::GeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
 		{
 			if (shapes.size() > 0) {
 				*retVal = shapes[0];
@@ -2990,7 +2990,7 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 		for (size_t i = 0; i < results.size(); i++)
 		{
 			vector<IShape*> shapesTemp;
-			GeosConverter::GEOSGeomToShapes(results[i], &shapesTemp, false);
+			GeosConverter::GeomToShapes(results[i], &shapesTemp, false);
 			shapes.insert(shapes.end(), shapesTemp.begin(), shapesTemp.end());
 		}
 	}

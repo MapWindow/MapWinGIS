@@ -646,7 +646,7 @@ public:
 		{FireEvent(eventidBeforeDeleteShape, EVENT_PARAM(VTS_I4 VTS_PI4), target, cancel);}
 	void FireProjectionChanged() { FireEvent(eventidProjectionChanged, EVENT_PARAM(VTS_NONE)); }
 	void FireUndoListChanged(){ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
-
+	void FireSelectionChanged(LONG LayerHandle) { FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1082,6 +1082,7 @@ private:
 	void RegisterRotationOperation();
 	bool IsOverlayCursor();
 	bool SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline);
+	void ShowToolTipOnMouseMove(UINT nFlags, CPoint point);
 #pragma endregion
 
 public:
@@ -1107,9 +1108,7 @@ public:
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
-	
-protected:
-	
+
 };
 
 //{{AFX_INSERT_LOCATION}}

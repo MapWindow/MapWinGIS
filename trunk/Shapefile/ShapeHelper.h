@@ -8,6 +8,7 @@ public:
 	static bool PointInThisPoly(IShape* shp, double x, double y);
 	static bool BoundPointsInPolygon(IShape* shp, double b_minX, double b_minY, double b_maxX, double b_maxY);
 	static bool ForceProperShapeType(IShape* shp, ShpfileType sfType);
-
+	static ShpfileType GetShapeType(IShape* shp);
+	static ShpfileType GetShapeType2D(IShape* shp);
 };
 

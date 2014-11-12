@@ -1,5 +1,10 @@
 #include "stdafx.h"
 #include "SelectionHelper.h"
+#include "Shapefile.h"
+#include "ShapeHelper.h"
+#include "GeosConverter.h"
+#include "GeosHelper.h"
+#include "ShapefileHelper.h"
 
 // *****************************************************
 //		PolylineIntersection
@@ -176,4 +181,65 @@ bool SelectionHelper::PolygonIntersection(std::vector<double>& xPts, std::vector
 		}
 	}
 	return false;
+}
+
+/***********************************************************************/
+/*		SelectWithShapeBounds()
+/***********************************************************************/
+bool SelectionHelper::SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<long>& indices)
+{
+	if (!sf || !shp) return false;
+	CComPtr<IExtents> box = NULL;
+	shp->get_Extents(&box);
+	return ((CShapefile*)sf)->SelectShapesCore(Extent(box), 0.0, SelectMode::INTERSECTION, indices);
+}
+
+/***********************************************************************/
+/*		SelectByPolygon()
+/***********************************************************************/
+int SelectionHelper::SelectByPolygon(IShapefile* sf, IShape* poly, int& errorCode)
+{
+	errorCode = tkNO_ERROR;
+
+	if (!sf || !poly)  {
+		errorCode = tkUNEXPECTED_NULL_PARAMETER;
+		return 0;
+	}
+
+	if (ShapeHelper::GetShapeType2D(poly) != SHP_POLYGON) {
+		errorCode = tkUNEXPECTED_SHAPE_TYPE;
+		return 0;
+	}
+		
+	vector<long> indices;
+	if (!SelectWithShapeBounds(sf, poly, indices))
+		return 0;
+
+	GEOSGeometry* g = GeosConverter::ShapeToGeom(poly);
+	if (!g) {
+		errorCode = tkCANT_CONVERT_SHAPE_GEOS;
+		return 0;
+	}
+
+	sf->SelectNone();
+
+	for (size_t i = 0; i < indices.size(); i++) 
+	{
+		CComPtr<IShape> shp = NULL;
+		sf->get_Shape(indices[i], &shp);
+		if (shp) 
+		{
+			GEOSGeometry* g2 = GeosConverter::ShapeToGeom(shp);
+			if (g2) 
+			{
+				if (GeosHelper::Intersects(g, g2)) {
+					sf->put_ShapeSelected(indices[i], VARIANT_TRUE);
+				}
+				GeosHelper::DestroyGeometry(g2);
+			}
+		}
+	}
+
+	GeosHelper::DestroyGeometry(g);
+	return ShapefileHelper::GetNumSelected(sf);
 }

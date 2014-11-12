@@ -22,7 +22,7 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 // *********************************************************************
 //		GEOSGeom2Shape()
 // *********************************************************************
-bool GeosConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
+bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
 	bool substitute = false;
 	if (!GeosHelper::IsValid(gsGeom))
