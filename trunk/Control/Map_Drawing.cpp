@@ -997,7 +997,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			}	
 		case ZoomBox:
 			{
-				return _dragging.Operation == DragZoombox;
+				return _dragging.Operation == DragZoombox || _dragging.Operation == DragSelectionBox;
 			}
 		case ShapeEditing:
 			{

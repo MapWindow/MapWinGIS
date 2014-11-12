@@ -1083,6 +1083,8 @@ private:
 	bool IsOverlayCursor();
 	bool SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline);
 	void ShowToolTipOnMouseMove(UINT nFlags, CPoint point);
+	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
+	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 #pragma endregion
 
 public:
@@ -1108,6 +1110,7 @@ public:
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
+	
 
 };
 

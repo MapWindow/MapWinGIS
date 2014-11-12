@@ -90,3 +90,64 @@ void ShapeStyleHelper::ApplyRandomDrawingOptions(IShapefile* sf)
 		labels->Release();
 	}
 }
+
+// *****************************************************
+//		GetPointBounds()
+// *****************************************************
+bool ShapeStyleHelper::GetPointBounds(IShapefile* sf, Extent& extents)
+{
+	if (!sf) return false;
+	ShpfileType shpType = ShapefileHelper::GetShapeType2D(sf);
+	if (shpType != SHP_POINT) return false;
+	CComPtr<IShapeDrawingOptions> options = NULL;
+	sf->get_DefaultDrawingOptions(&options);
+	return GetPointBounds(options, extents);
+}
+
+// *****************************************************
+//		GetPointBounds()
+// *****************************************************
+bool ShapeStyleHelper::GetPointBounds(IShapeDrawingOptions* options, Extent& extents)
+{
+	if (!options) return false;
+	tkPointSymbolType pointType;
+	options->get_PointType(&pointType);
+
+	if (pointType == ptSymbolPicture) 
+	{
+		CComPtr<IImage> img = NULL;
+		options->get_Picture(&img);
+		if (img) {
+			long width, height;
+			img->get_Width(&width);
+			img->get_Height(&height);
+
+			double scaleX, scaleY;
+			options->get_PictureScaleX(&scaleX);
+			options->get_PictureScaleY(&scaleY);
+
+			extents.right = width / 2.0 * scaleX;
+			extents.left = -extents.left;
+
+			VARIANT_BOOL alignByBottom;
+			options->get_AlignPictureByBottom(&alignByBottom);
+			if (alignByBottom) {
+				extents.top = 0.0;;
+				extents.bottom = -height * scaleY;
+			}
+			else {
+				extents.top = height / 2.0 * scaleY;
+				extents.bottom = -extents.top;
+			}
+		}
+	}
+	else 
+	{
+		float pointSize;
+		options->get_PointSize(&pointSize);
+		pointSize /= 2.0f;
+		extents.right = extents.top = pointSize;
+		extents.left = extents.bottom = -pointSize;
+	}
+	return true;
+}

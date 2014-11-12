@@ -323,3 +323,16 @@ inline long Rotate::Round(float val)
 	  return((long)(val - 0.5));
 	}
 
+void Rotate::AdjustRect(CRect& rect)
+{
+	CRect rectTmp = rect;
+	long tmpX = 0, tmpY = 0;
+	this->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
+	rectTmp.TopLeft().x = tmpX;
+	rectTmp.TopLeft().y = tmpY;
+	this->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
+	rectTmp.BottomRight().x = tmpX;
+	rectTmp.BottomRight().y = tmpY;
+	rect = rectTmp;
+}
+

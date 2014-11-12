@@ -5,6 +5,8 @@
 #include "ShapeEditor.h"
 #include "Shapefile.h"
 #include "ShapefileHelper.h"
+#include "SelectionHelper.h"
+#include "ShapeStyleHelper.h"
 
 
 // ************************************************************
@@ -436,64 +438,6 @@ bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeInd
 }
 
 // ************************************************************
-//		HandleLButtonDownSelection
-// ************************************************************
-void CMapView::HandleLButtonDownSelection(CPoint& point, long vbflags)
-{
-	long x = point.x;
-	long y = point.y - 1;
-
-	_ttip.Activate(FALSE);
-	CMapTracker selectBox = CMapTracker(this, CRect(0, 0, 0, 0), CRectTracker::solidLine + CRectTracker::resizeOutside);
-	selectBox.m_sizeMin = 0;
-
-	bool selected = selectBox.TrackRubberBand(this, point, TRUE) ? true : false;
-	_ttip.Activate(TRUE);
-
-	CRect rect = selectBox.m_rect;
-	rect.NormalizeRect();
-
-	if ((rect.BottomRight().x - rect.TopLeft().x) < 10 &&
-		(rect.BottomRight().y - rect.TopLeft().y) < 10)
-		selected = false;
-
-	if (!selected || !m_sendSelectBoxFinal)
-	{
-		if (m_sendMouseDown == TRUE)
-			this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
-	}
-
-	if (selected)
-	{
-		if (HasRotation())
-		{
-			CRect rectTmp = rect;
-			long tmpX = 0, tmpY = 0;
-			// adjust rectangle to unrotated coordinates
-			_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
-			rectTmp.TopLeft().x = tmpX;
-			rectTmp.TopLeft().y = tmpY;
-			_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
-			rectTmp.BottomRight().x = tmpX;
-			rectTmp.BottomRight().y = tmpY;
-			rect = rectTmp;
-		}
-
-		if (m_sendSelectBoxFinal == TRUE)
-		{
-			long iby = rect.BottomRight().y;
-			long ity = rect.TopLeft().y;
-			this->FireSelectBoxFinal(rect.TopLeft().x, rect.BottomRight().x, iby, ity);
-			return; // exit out so that the FireMouseUp does not get called! DB 12/10/2002
-		}
-	}
-
-	//the MapTracker interferes with the OnMouseUp event so we will call it manually
-	if (m_sendMouseUp == TRUE)
-		this->FireMouseUp(MK_LBUTTON, (short)vbflags, x, y);
-}
-
-// ************************************************************
 //		OnLButtonDown
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
@@ -593,6 +537,12 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				_dragging.Operation = DragZoombox;
 			}
 			break;
+		case cmSelection:
+			{
+				this->SetCapture();
+				_dragging.Operation = DragSelectionBox;
+			}
+			break;
 		case cmZoomOut:
 			ZoomOut( m_zoomPercent );
 			break;
@@ -604,9 +554,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				_dragging.Operation = DragPanning;
 			}
 			break;
-		case cmSelection:
-			HandleLButtonDownSelection(point, vbflags);
-			break;
+		
 		case cmMeasure:
 			{
 				bool added = true;
@@ -678,12 +626,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 	
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 
-	if( m_sendMouseUp == TRUE && _leftButtonDown )
-		FireMouseUp( MK_LBUTTON, (short)vbflags, point.x, point.y - 1 );
-
 	DraggingOperation operation = _dragging.Operation;
-
-	_leftButtonDown = FALSE;
 	
 	ReleaseCapture();
 
@@ -723,74 +666,179 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 			break;
 		case DragPanning:
-			if (m_cursorMode != cmPan)
-				Debug::WriteError("Wrong cursor mode when panning is expected");
+			{
+				if (m_cursorMode != cmPan)
+					Debug::WriteError("Wrong cursor mode when panning is expected");
 
-			ReleaseCapture();
+				if (!_spacePressed)
+					DisplayPanningInertia(point);
 
-			if (!_spacePressed)
-				DisplayPanningInertia(point);
+				this->SetExtentsCore(this->_extents, false);
 
-			this->SetExtentsCore(this->_extents, false);
+				ClearPanningList();
 
-			ClearPanningList();
-
-			// we need to redraw the layers
-			_dragging.Operation = DragNone;		// don't clear dragging state until the end of animation; it won't offset the layers
-			Redraw2(tkRedrawType::RedrawAll);
+				_dragging.Operation = DragNone;		// don't clear dragging state until the end of animation; it won't offset the layers
+				Redraw2(tkRedrawType::RedrawAll);
+			}
 			break;
 		case DragZoombarHandle:
-			if (_zoombarTargetZoom == -1)
-				Debug::WriteError("Invalid target zoom for zoom bar");
-
-			ZoomToTileLevel(_zoombarTargetZoom);
-			_dragging.Operation = DragNone;
+			{
+				ZoomToTileLevel(_zoombarTargetZoom);
+				_dragging.Operation = DragNone;
+			}
 			break;
 		case DragZoombox:
-			_dragging.Operation = DragNone;
-			if (!_dragging.HasRectangle())
+		case DragSelectionBox:
 			{
-				ZoomIn( m_zoomPercent );
-			}
-			else
-			{
-				CRect rect = _dragging.GetRectangle();
-
-				if (HasRotation())	// TODO: wrap in class
-				{
-					CRect rectTmp = rect;
-					long tmpX = 0, tmpY = 0;
-					_rotate->getOriginalPixelPoint(rect.left, rect.top, &tmpX, &tmpY);
-					rectTmp.TopLeft().x = tmpX;
-					rectTmp.TopLeft().y = tmpY;
-					_rotate->getOriginalPixelPoint(rect.right, rect.bottom, &tmpX, &tmpY);
-					rectTmp.BottomRight().x = tmpX;
-					rectTmp.BottomRight().y = tmpY;
-					rect = rectTmp;
-				}
-				
-				double rx, by, lx, ty;
-				PixelToProjection( rect.TopLeft().x, rect.TopLeft().y, rx, by );
-				PixelToProjection( rect.BottomRight().x, rect.BottomRight().y, lx, ty );
-
-				double cLeft = MINIMUM( rx, lx );
-				double cRight = MAXIMUM( rx, lx );
-				double cBottom = MINIMUM( ty, by );
-				double cTop = MAXIMUM( ty, by );
-
-				SetNewExtentsWithForcedZooming(Extent(cLeft, cRight, cBottom, cTop), true);
-
-				if( m_sendSelectBoxFinal )
-				{
-					long iby = rect.BottomRight().y;
-					long ity = rect.TopLeft().y;
-					this->FireSelectBoxFinal( rect.TopLeft().x, rect.BottomRight().x, iby, ity );
-				}
+				HandleLButtonUpZoomBox(vbflags, point.x, point.y - 1);
 			}
 			break;
 	}
 	_dragging.Clear();
 	Utility::ClosePointer(&_moveBitmap);
+
+	// in case of selection mouse down event will be triggered in this function (to preserve backward compatibility); 
+	// so mouse up should be further on to preserve at least some logic
+	if (m_sendMouseUp && _leftButtonDown)
+		FireMouseUp(MK_LBUTTON, (short)vbflags, point.x, point.y - 1);
+	
+	_leftButtonDown = FALSE;
+}
+
+// ************************************************************
+//		GetSelectionProjTolerance
+// ************************************************************
+Extent CMapView::GetPointSelectionBox(IShapefile* sf, double xProj, double yProj)
+{
+	Extent box(xProj, xProj, yProj, yProj);
+	if (!sf) return box;
+
+	Extent tol;
+	ShpfileType shpType = ShapefileHelper::GetShapeType2D(sf);
+	if (shpType == SHP_POINT) 
+	{
+		double minVal = 16;		// TODO: make parameter
+		ShapeStyleHelper::GetPointBounds(sf, tol);
+		
+		// make sure that symbol is large enough
+		if (minVal - tol.Width() / 2 < minVal)
+		{
+			double dx = (minVal - tol.Width() / 2) / 2.0;
+			tol.left -= dx;
+			tol.right += dx;
+		}
+
+		if (minVal - tol.Height() / 2 < minVal)
+		{
+			double dy = (minVal - tol.Height() / 2) / 2.0;
+			tol.bottom -= dy;
+			tol.top += dy;
+		}
+
+		double ratio = this->PixelsPerMapUnit();
+		tol.left /= ratio;
+		tol.right /= ratio;
+		tol.top /= ratio;
+		tol.bottom /= ratio;
+	}
+	else {
+		double val = GetMouseTolerance(MouseTolerance::ToleranceSelect);
+		tol.right = tol.top = val;
+		tol.left = tol.bottom = -val;
+	}
+
+	box.left += tol.left;
+	box.right += tol.right;
+	box.top += tol.top;
+	box.bottom += tol.bottom;
+	return box;
+}
+
+// ************************************************************
+//		HandleLButtonUpZoomBox
+// ************************************************************
+void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
+{
+	bool ctrl = vbflags & 2 ? true : false;
+	long layerHandle = -1;
+	CComPtr<IShapefile> sf = NULL;
+
+	if (m_cursorMode == cmSelection)
+	{
+		tkMwBoolean cancel = blnFalse;
+		FireChooseLayer(x, y, &layerHandle, &cancel);
+		if (layerHandle != -1) {
+			sf = GetShapefile(layerHandle);
+		}
+	}
+
+	_dragging.Operation = DragNone;
+	if (!_dragging.HasRectangle())
+	{
+		switch (m_cursorMode)
+		{
+			case cmZoomIn:
+				ZoomIn(m_zoomPercent);
+				break;
+			case cmSelection:
+				if (sf) 
+				{
+					double xProj, yProj;
+					PixelToProjection(x, y, xProj, yProj);
+					Extent box = GetPointSelectionBox(sf, xProj, yProj);
+					if (SelectionHelper::SelectByPoint(sf, box, !ctrl)) 
+					{
+						FireSelectionChanged(layerHandle);
+						Redraw();
+						return;
+					}
+				}
+				else if (m_sendMouseDown) {
+					this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
+				}
+				break;
+		}
+	}
+	else
+	{
+		CRect rect = _dragging.GetRectangle();
+
+		if (HasRotation())
+			_rotate->AdjustRect(rect);
+
+		double rx, by, lx, ty;
+		PixelToProjection(rect.TopLeft().x, rect.TopLeft().y, rx, by);
+		PixelToProjection(rect.BottomRight().x, rect.BottomRight().y, lx, ty);
+
+		double cLeft = MINIMUM(rx, lx);
+		double cRight = MAXIMUM(rx, lx);
+		double cBottom = MINIMUM(ty, by);
+		double cTop = MAXIMUM(ty, by);
+
+		Extent box(cLeft, cRight, cBottom, cTop);
+		switch (m_cursorMode)
+		{
+			case cmZoomIn:
+				SetNewExtentsWithForcedZooming(box, true);
+				break;
+			case cmSelection:
+				if (sf) {
+					if (SelectionHelper::SelectByRectangle(sf, box)) {
+						FireSelectionChanged(layerHandle);
+						Redraw();
+						return;
+					}
+				}
+				break;
+		}
+
+		if (m_sendSelectBoxFinal)
+		{
+			long iby = rect.BottomRight().y;
+			long ity = rect.TopLeft().y;
+			this->FireSelectBoxFinal(rect.TopLeft().x, rect.BottomRight().x, iby, ity);
+		}
+	}
 }
 
 // ************************************************************
@@ -918,6 +966,7 @@ void CMapView::ShowToolTipOnMouseMove(UINT nFlags, CPoint point)
 		_ttip.RelayEvent(&pMsg);
 	}
 }
+
 
 // ************************************************************
 //		OnMouseMove

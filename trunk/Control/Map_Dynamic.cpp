@@ -140,66 +140,77 @@ void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 // ****************************************************************
 void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 {
-	bool drawZoombox = m_cursorMode == cmZoomIn && _leftButtonDown && _dragging.Operation == DragZoombox && _dragging.Start != _dragging.Move;
+	bool zooming = m_cursorMode == cmZoomIn && _dragging.Operation == DragZoombox;
+	bool selection = m_cursorMode == cmSelection && _dragging.Operation == DragSelectionBox;
+
+	bool drawZoombox =  _leftButtonDown && _dragging.Start != _dragging.Move && (zooming || selection);
 	if (drawZoombox)
 	{
 		CRect r = _dragging.GetRectangle();
 		Gdiplus::Rect rect(r.left, r.top, r.right - r.left, r.bottom - r.top);
 		
 		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
-
-		switch(_zoomBoxStyle)
+		if (selection)
 		{
-			case zbsRubberBand:
-				{
-					Gdiplus::Pen pen(Gdiplus::Color(255, 0, 0, 0), 1.0f);
-					pen.SetDashStyle(Gdiplus::DashStyle::DashStyleDot);
-					g->DrawRectangle(&pen, rect);
-				}
-				break;
-			case zbsGray:
-				{
-					Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
-					Gdiplus::Pen pen(Gdiplus::Color(255, 192, 192, 192));
-					g->FillRectangle(&brush, rect);
-					g->DrawRectangle(&pen, rect);
-				}
-				break;
-			case zbsOrange:
-				{
-					Gdiplus::SolidBrush brush(Gdiplus::Color(65, 255, 165, 0));
-					Gdiplus::Pen pen(Gdiplus::Color(255, 255, 165, 0));
-					g->FillRectangle(&brush, rect);
-					g->DrawRectangle(&pen, rect);
-				}
-				break;
-			case zbsBlue:
-				{
-					Gdiplus::SolidBrush brush(Gdiplus::Color(100, 173, 216, 230));
-					Gdiplus::Pen pen(Gdiplus::Color(255, 30, 144, 255));
-					g->FillRectangle(&brush, rect);
-					g->DrawRectangle(&pen, rect);
-				}
-				break;
-			case zbsGrayInverted:
-				{
-					Gdiplus::Rect r1(r.left, 0, r.Width(), r.top);
-					Gdiplus::Rect r2(0,0, r.left, _viewHeight);
-					Gdiplus::Rect r3(r.left, r.bottom, r.Width(), _viewHeight - r.bottom);
-					Gdiplus::Rect r4(r.right, 0, _viewWidth - r.right, _viewHeight);
-					Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
-					
-					g->FillRectangle(&brush, r1);
-					g->FillRectangle(&brush, r2);
-					g->FillRectangle(&brush, r3);
-					g->FillRectangle(&brush, r4);
-
-					Gdiplus::Pen pen(Gdiplus::Color(255, 192, 192, 192));
-					g->DrawRectangle(&pen, rect);
-				}
-				break;
+			Gdiplus::SolidBrush brush(Gdiplus::Color(100, 255, 255, 0));	// yellow
+			Gdiplus::Pen pen(Gdiplus::Color(255, 255, 255, 0));
+			g->FillRectangle(&brush, rect);
+			g->DrawRectangle(&pen, rect);
 		}
+		else
+		{
+			switch(_zoomBoxStyle)
+			{
+				case zbsRubberBand:
+					{
+						Gdiplus::Pen pen(Gdiplus::Color(255, 0, 0, 0), 1.0f);
+						pen.SetDashStyle(Gdiplus::DashStyle::DashStyleDot);
+						g->DrawRectangle(&pen, rect);
+					}
+					break;
+				case zbsGray:
+					{
+						Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
+						Gdiplus::Pen pen(Gdiplus::Color(255, 192, 192, 192));
+						g->FillRectangle(&brush, rect);
+						g->DrawRectangle(&pen, rect);
+					}
+					break;
+				case zbsOrange:
+					{
+						Gdiplus::SolidBrush brush(Gdiplus::Color(65, 255, 165, 0));
+						Gdiplus::Pen pen(Gdiplus::Color(255, 255, 165, 0));
+						g->FillRectangle(&brush, rect);
+						g->DrawRectangle(&pen, rect);
+					}
+					break;
+				case zbsBlue:
+					{
+						Gdiplus::SolidBrush brush(Gdiplus::Color(100, 173, 216, 230));
+						Gdiplus::Pen pen(Gdiplus::Color(255, 30, 144, 255));
+						g->FillRectangle(&brush, rect);
+						g->DrawRectangle(&pen, rect);
+					}
+					break;
+				case zbsGrayInverted:
+					{
+						Gdiplus::Rect r1(r.left, 0, r.Width(), r.top);
+						Gdiplus::Rect r2(0,0, r.left, _viewHeight);
+						Gdiplus::Rect r3(r.left, r.bottom, r.Width(), _viewHeight - r.bottom);
+						Gdiplus::Rect r4(r.right, 0, _viewWidth - r.right, _viewHeight);
+						Gdiplus::SolidBrush brush(Gdiplus::Color(100, 192, 192, 192));
+					
+						g->FillRectangle(&brush, r1);
+						g->FillRectangle(&brush, r2);
+						g->FillRectangle(&brush, r3);
+						g->FillRectangle(&brush, r4);
 
+						Gdiplus::Pen pen(Gdiplus::Color(255, 192, 192, 192));
+						g->DrawRectangle(&pen, rect);
+					}
+					break;
+			}
+		}
 		Gdiplus::PixelOffsetMode pixelOffsetMode = g->GetPixelOffsetMode();
 		g->SetPixelOffsetMode(pixelOffsetMode);
 	}

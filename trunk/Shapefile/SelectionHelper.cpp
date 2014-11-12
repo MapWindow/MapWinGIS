@@ -191,7 +191,67 @@ bool SelectionHelper::SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<
 	if (!sf || !shp) return false;
 	CComPtr<IExtents> box = NULL;
 	shp->get_Extents(&box);
-	return ((CShapefile*)sf)->SelectShapesCore(Extent(box), 0.0, SelectMode::INTERSECTION, indices);
+	return SelectShapes(sf, Extent(box), 0.0, SelectMode::INTERSECTION, indices);
+}
+
+/***********************************************************************/
+/*		SelectShapes()
+/***********************************************************************/
+bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult)
+{
+	return ((CShapefile*)sf)->SelectShapesCore((extents), 0.0, SelectMode, selectResult);
+}
+
+/***********************************************************************/
+/*		SelectByPoint()
+/***********************************************************************/
+bool SelectionHelper::SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevious)
+{
+	if (!sf) return false;
+
+	bool result = false;
+	long numSelected = ShapefileHelper::GetNumSelected(sf);
+
+	if (clearPrevious) {
+		sf->SelectNone();
+		if (numSelected > 0)
+			result = true;
+	}
+
+	vector<long> results;
+	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	{
+		if (results.size() > 0)
+		{
+			// change the state of the top most shape
+			long shapeIndex = results[results.size() - 1];
+			bool selected = ShapefileHelper::ShapeSelected(sf, shapeIndex);
+			sf->put_ShapeSelected(shapeIndex, (!selected) ? VARIANT_TRUE : VARIANT_FALSE );
+			result = true;
+		}
+	}
+	return result;
+}
+
+/***********************************************************************/
+/*		SelectByRectangle()
+/***********************************************************************/
+bool SelectionHelper::SelectByRectangle(IShapefile* sf, Extent& box)
+{
+	if (!sf) return false;
+	
+	sf->SelectNone();   // TODO: make a property to control it
+
+	vector<long> results;
+	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	{
+		for (size_t i = 0; i < results.size(); i++) 
+		{
+			sf->put_ShapeSelected(results[i], VARIANT_TRUE);
+		}
+		return true;		
+	}
+	return false;
 }
 
 /***********************************************************************/
@@ -210,7 +270,7 @@ int SelectionHelper::SelectByPolygon(IShapefile* sf, IShape* poly, int& errorCod
 		errorCode = tkUNEXPECTED_SHAPE_TYPE;
 		return 0;
 	}
-		
+
 	vector<long> indices;
 	if (!SelectWithShapeBounds(sf, poly, indices))
 		return 0;
@@ -221,16 +281,16 @@ int SelectionHelper::SelectByPolygon(IShapefile* sf, IShape* poly, int& errorCod
 		return 0;
 	}
 
-	sf->SelectNone();
+	sf->SelectNone();   // TODO: make a property to control it
 
-	for (size_t i = 0; i < indices.size(); i++) 
+	for (size_t i = 0; i < indices.size(); i++)
 	{
 		CComPtr<IShape> shp = NULL;
 		sf->get_Shape(indices[i], &shp);
-		if (shp) 
+		if (shp)
 		{
 			GEOSGeometry* g2 = GeosConverter::ShapeToGeom(shp);
-			if (g2) 
+			if (g2)
 			{
 				if (GeosHelper::Intersects(g, g2)) {
 					sf->put_ShapeSelected(indices[i], VARIANT_TRUE);

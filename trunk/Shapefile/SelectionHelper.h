@@ -7,5 +7,9 @@ public:
 		double& b_minX, double& b_maxX, double& b_minY, double& b_maxY, double& Tolerance);
 	static bool SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<long>& indices);
 	static int SelectByPolygon(IShapefile* sf, IShape* polygon, int& errorCode);
+	static bool SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevious);
+	static bool SelectByRectangle(IShapefile* sf, Extent& box);
+private:
+	static bool SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
 };
 

@@ -36,6 +36,8 @@ class Rotate
     void getOriginalPixelPoint(long rotatedX, long rotatedY, long *origX, long *origY);
     void getNewPixelPoint(long origX, long origY, long *rotatedX, long *rotatedY);
 
+	void AdjustRect(CRect& rect);
+
 		void setRotateAngle(float angle)
 			{
 			degAngle = angle;
