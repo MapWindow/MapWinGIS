@@ -219,6 +219,7 @@
     <ClInclude Include="Shapefile\ShapefileHelper.h" />
     <ClInclude Include="Shapefile\ShapeHelper.h" />
     <ClInclude Include="Shapefile\ShapeStyleHelper.h" />
+    <ClInclude Include="Shapefile\UndoListHelper.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -536,6 +537,7 @@
     <ClCompile Include="Shapefile\ShapefileHelper.cpp" />
     <ClCompile Include="Shapefile\ShapeHelper.cpp" />
     <ClCompile Include="Shapefile\ShapeStyleHelper.cpp" />
+    <ClCompile Include="Shapefile\UndoListHelper.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

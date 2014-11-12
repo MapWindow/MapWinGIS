@@ -1350,6 +1350,9 @@ ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 			return SHP_NULLSHAPE;
 		case cmRemovePart:
 		case cmSelectByPolygon:
+		case cmClipByPolygon:
+		case cmSplitByPolygon:
+		case cmEraseByPolygon:
 			return SHP_POLYGON;
 		case cmSplitByPolyline:
 			return SHP_POLYLINE;
@@ -1369,10 +1372,12 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 	switch (mode)
 	{
 		case cmAddPart:
+		case cmClipByPolygon:
 			GetUtils()->ColorByName(Green, &color);
 			put_FillColor(color);
 			break;
 		case cmRemovePart:
+		case cmEraseByPolygon:
 			GetUtils()->ColorByName(Red, &color);
 			put_FillColor(color);
 			break;		
@@ -1383,6 +1388,10 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 			GetUtils()->ColorByName(Yellow, &color);
 			put_FillColor(color);
 			put_LineColor(color);
+			break;
+		case cmSplitByPolygon:
+			put_FillColor(RGB(127, 127, 127));
+			put_LineColor(RGB(255, 255, 255));
 			break;
 	}
 }

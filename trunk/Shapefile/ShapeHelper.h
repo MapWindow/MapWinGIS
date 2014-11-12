@@ -10,5 +10,6 @@ public:
 	static bool ForceProperShapeType(IShape* shp, ShpfileType sfType);
 	static ShpfileType GetShapeType(IShape* shp);
 	static ShpfileType GetShapeType2D(IShape* shp);
+	static bool SplitByPolyline(IShape* subject, IShape* polyline, vector<IShape*>& shapes);
 };
 

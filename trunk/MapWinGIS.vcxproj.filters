@@ -781,6 +781,9 @@
     <ClInclude Include="Drawing\TilesDrawer.h">
       <Filter>Drawing</Filter>
     </ClInclude>
+    <ClInclude Include="Shapefile\UndoListHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1663,6 +1666,9 @@
     </ClCompile>
     <ClCompile Include="Drawing\TilesDrawer.cpp">
       <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\UndoListHelper.cpp">
+      <Filter>Shapefile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

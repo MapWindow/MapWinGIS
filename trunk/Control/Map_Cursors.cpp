@@ -255,7 +255,9 @@ bool CMapView::IsEditorCursor()
 // ************************************************************
 bool CMapView::IsOverlayCursor()
 {
-	return m_cursorMode == cmSplitByPolyline || m_cursorMode == cmSelectByPolygon;
+	return m_cursorMode == cmSplitByPolyline || m_cursorMode == cmSelectByPolygon ||
+		m_cursorMode == cmSplitByPolygon || m_cursorMode == cmEraseByPolygon || 
+		m_cursorMode == cmClipByPolygon;
 }
 
 // ************************************************************

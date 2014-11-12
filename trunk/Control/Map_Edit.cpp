@@ -583,7 +583,12 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 		return;
 	}
 
-	if (m_cursorMode == cmSplitByPolyline)
+	bool editing = m_cursorMode == cmSplitByPolyline ||
+		m_cursorMode == cmSplitByPolygon ||
+		m_cursorMode == cmEraseByPolygon ||
+		m_cursorMode == cmClipByPolygon;
+
+	if (editing)
 	{
 		VARIANT_BOOL editing;
 		sf->get_InteractiveEditing(&editing);
@@ -604,21 +609,14 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 	bool redrawNeeded = false;
 	int errorCode = tkNO_ERROR;
 
-	switch (m_cursorMode)
+	if (m_cursorMode == cmSelectByPolygon)
 	{
-		case cmSplitByPolyline:
-			{
-				vector<long> indices;
-				if (!SelectionHelper::SelectWithShapeBounds(sf, shp, indices))
-					return;    // TODO: fire event
-				redrawNeeded = GroupOperation::SplitByPolyline(layerHandle, sf, indices, shp, _undoList, errorCode);
-			}
-			break;
-		case cmSelectByPolygon:
-			SelectionHelper::SelectByPolygon(sf, shp, errorCode);
-			FireSelectionChanged(layerHandle);
-			redrawNeeded = true;
-			break;
+		SelectionHelper::SelectByPolygon(sf, shp, errorCode);
+		FireSelectionChanged(layerHandle);
+		redrawNeeded = true;
+	}
+	else {
+		redrawNeeded = GroupOperation::Run((tkCursorMode)m_cursorMode, layerHandle, sf, shp, _undoList, errorCode);
 	}
 
 	if (errorCode != tkNO_ERROR) {

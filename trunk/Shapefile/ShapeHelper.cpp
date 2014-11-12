@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ShapeHelper.h"
 #include "SelectionHelper.h"
+#include "Shape.h"
 
 // *****************************************************
 //		GetShapeType
@@ -293,4 +294,12 @@ bool ShapeHelper::ForceProperShapeType(IShape* shp, ShpfileType sfType)
 		shp->get_ShapeType(&shapeType);
 	}
 	return sfType == shapeType;
+}
+
+// *************************************************************
+//     SplitByPolyline()
+// *************************************************************
+bool ShapeHelper::SplitByPolyline(IShape* subject, IShape* polyline, vector<IShape*>& shapes)
+{
+	return ((CShape*)subject)->SplitByPolylineCore(polyline, shapes);
 }

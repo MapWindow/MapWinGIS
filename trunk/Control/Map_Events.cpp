@@ -557,24 +557,26 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
+	if (IsOverlayCursor())
+	{
+		tkShapeEditorState state;
+		_shapeEditor->get_EditorState(&state);
+		if (state != EditorCreationUnbound)
+		{
+			VARIANT_BOOL vb;
+			ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
+			_shapeEditor->StartUnboundShape(shpType, &vb);
+			_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
+		}
+		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+		return;
+	}
+
 	// --------------------------------------------
 	//  Handling particular cursor modes
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
-		case cmSplitByPolyline:
-		case cmSelectByPolygon:
-			tkShapeEditorState state;
-			_shapeEditor->get_EditorState(&state);
-			if (state != EditorCreationUnbound)
-			{
-				VARIANT_BOOL vb;
-				ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
-				_shapeEditor->StartUnboundShape(shpType, &vb);
-				_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
-			}
-			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
-			break;
 		case cmRotateShapes:
 		case cmMoveShapes:
 			HandleOnLButtonMoveOrRotate(x, y);

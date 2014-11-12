@@ -340,7 +340,6 @@ bool ShapefileHelper::GetClosestPoint(IShapefile* sf, double x, double y, double
 	return minDist < maxDistance;
 }
 
-
 // ********************************************************************
 //		PointInPolygon()
 // ********************************************************************
@@ -378,3 +377,14 @@ bool ShapefileHelper::BoundsWithinPolygon(IShapefile* sf, int shapeIndex, double
 	}
 	return false;
 }
+
+// ********************************************************************
+//		ShapeTypeIsM()
+// ********************************************************************
+bool ShapefileHelper::ShapeTypeIsM(IShapefile* sf)
+{
+	if (!sf) return false;
+	ShpfileType shpType = GetShapeType(sf);
+	return Utility::ShapeTypeIsM(shpType);
+}
+

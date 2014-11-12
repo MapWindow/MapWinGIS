@@ -21,5 +21,6 @@ public:
 	static bool GetClosestPoint(IShapefile* sf, double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist);
 	static bool PointInPolygon(IShapefile* sf, long ShapeIndex, double x, double y);
 	static bool BoundsWithinPolygon(IShapefile* sf, int shapeIndex, double b_minX, double b_minY, double b_maxX, double b_maxY);
+	static bool ShapeTypeIsM(IShapefile* sf);
 };
 

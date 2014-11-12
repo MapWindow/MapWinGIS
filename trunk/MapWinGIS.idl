@@ -1061,6 +1061,9 @@ enum tkScalebarUnits
 		cmMoveShapes = 13,
 		cmRotateShapes = 14,
 		cmSelectByPolygon = 15,
+		cmEraseByPolygon = 16,
+		cmSplitByPolygon = 17,
+		cmClipByPolygon = 18,
 	} tkCursorMode;
 
 	typedef 

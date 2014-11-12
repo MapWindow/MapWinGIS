@@ -323,7 +323,7 @@ public:
 		#endif
 	}
 
-	static GEOSGeometry* Difference(GEOSGeometry* gsGeom1, GEOSGeometry* gsGeom2)
+	static GEOSGeometry* Difference(const GEOSGeometry* gsGeom1, const GEOSGeometry* gsGeom2)
 	{
 		#ifdef GEOS_NEW
 			return GEOSDifference_r(getGeosHandle(), gsGeom1, gsGeom2);
