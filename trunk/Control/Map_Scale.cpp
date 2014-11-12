@@ -4,6 +4,7 @@
 #include "Tiles.h"
 #include "Utils.h"
 #include "TileHelper.h"
+#include "ShapefileHelper.h"
 
 #pragma region Scale
 // ****************************************************
@@ -742,7 +743,7 @@ VARIANT_BOOL CMapView::ZoomToSelected(LONG LayerHandle)
 		if (numSelected > 0)
 		{
 			double xMin, yMin, xMax, yMax;
-			((CShapefile*)sf)->GetSelectedExtents(xMin, yMin, xMax, yMax);
+			ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax);
 			IExtents* bounds = NULL;
 			CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&bounds);
 			bounds->SetBounds(xMin, yMin, 0.0, xMax, yMax, 0.0);

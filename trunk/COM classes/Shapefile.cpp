@@ -29,6 +29,10 @@
 #include "ShapefileCategories.h"
 #include "Shape.h"
 #include "UndoList.h"
+#include "GeosConverter.h"
+#include "ShapefileHelper.h"
+#include "LabelsHelper.h"
+#include "ShapeStyleHelper.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -52,26 +56,26 @@ CShapefile::CShapefile()
 	
 	_geometryEngine = m_globalSettings.geometryEngine;
 	
-	m_sourceType = sstUninitialized;
+	_sourceType = sstUninitialized;
 	
-	m_writing = false;
-	m_reading = false;
+	_writing = false;
+	_reading = false;
 	
 	_isEditingShapes = FALSE;
 	_fastMode = m_globalSettings.shapefileFastMode ? TRUE : FALSE;
 	_minDrawingSize = 1;
 	_volatile = false;
 
-    useSpatialIndex = TRUE;
-    hasSpatialIndex = FALSE;
-    spatialIndexLoaded = FALSE;
-	spatialIndexMaxAreaPercent = 0.5;
-	spatialIndexNodeCapacity = 100;
+    _useSpatialIndex = TRUE;
+    _hasSpatialIndex = FALSE;
+    _spatialIndexLoaded = FALSE;
+	_spatialIndexMaxAreaPercent = 0.5;
+	_spatialIndexNodeCapacity = 100;
 
 	//Neio 20090721
-	useQTree = VARIANT_FALSE;
-	cacheExtents = FALSE;
-	m_qtree = NULL;
+	_useQTree = VARIANT_FALSE;
+	_cacheExtents = FALSE;
+	_qtree = NULL;
 	_tempTree = NULL;
 
 	_shpfile = NULL;
@@ -90,29 +94,29 @@ CShapefile::CShapefile()
 	_maxM = 0.0;
 	
 	USES_CONVERSION;
-	key = A2BSTR("");
+	_key = A2BSTR("");
 	_expression = A2BSTR("");
-	globalCallback = NULL;
-	lastErrorCode = tkNO_ERROR;
-	dbf = NULL;
+	_globalCallback = NULL;
+	_lastErrorCode = tkNO_ERROR;
+	_table = NULL;
 	
 	// creation of children classes
-	m_selectDrawOpt = NULL;
-	m_defaultDrawOpt = NULL;
-	m_labels = NULL;
-	m_categories = NULL;
-	m_charts = NULL;
-	m_geoProjection = NULL;
+	_selectDrawOpt = NULL;
+	_defaultDrawOpt = NULL;
+	_labels = NULL;
+	_categories = NULL;
+	_charts = NULL;
+	_geoProjection = NULL;
 	
 	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
 	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
 
-	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_selectDrawOpt);
-	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_defaultDrawOpt);
-	CoCreateInstance(CLSID_ShapefileCategories,NULL,CLSCTX_INPROC_SERVER,IID_IShapefileCategories,(void**)&m_categories);
-	CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
-	CoCreateInstance(CLSID_Charts,NULL,CLSCTX_INPROC_SERVER,IID_ICharts,(void**)&m_charts);
-	CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&m_geoProjection);
+	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_selectDrawOpt);
+	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_defaultDrawOpt);
+	CoCreateInstance(CLSID_ShapefileCategories,NULL,CLSCTX_INPROC_SERVER,IID_IShapefileCategories,(void**)&_categories);
+	CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&_labels);
+	CoCreateInstance(CLSID_Charts,NULL,CLSCTX_INPROC_SERVER,IID_ICharts,(void**)&_charts);
+	CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&_geoProjection);
 	
 	this->put_ReferenceToLabels();
 	this->put_ReferenceToCategories();
@@ -129,40 +133,40 @@ CShapefile::~CShapefile()
 	VARIANT_BOOL vbretval;
 	this->Close(&vbretval);
 	
-	::SysFreeString(key);
+	::SysFreeString(_key);
 	::SysFreeString(_expression);
 
-	if (m_selectDrawOpt != NULL)
+	if (_selectDrawOpt != NULL)
 	{
-		m_selectDrawOpt->Release();
-		m_selectDrawOpt = NULL;
+		_selectDrawOpt->Release();
+		_selectDrawOpt = NULL;
 	}
 
-	if (m_defaultDrawOpt != NULL)
+	if (_defaultDrawOpt != NULL)
 	{
-		m_defaultDrawOpt->Release();
-		m_defaultDrawOpt = NULL;
+		_defaultDrawOpt->Release();
+		_defaultDrawOpt = NULL;
 	}
 
-	if (m_labels != NULL)
+	if (_labels != NULL)
 	{
 		put_ReferenceToLabels(true);	// labels class maybe referenced by client and won't be deleted as a result
-		m_labels->Release();			// therefore we must clear the reference to the parent as it will be invalid
-		m_labels = NULL;
+		_labels->Release();			// therefore we must clear the reference to the parent as it will be invalid
+		_labels = NULL;
 	}
 
-	if (m_categories != NULL)
+	if (_categories != NULL)
 	{
 		put_ReferenceToCategories(true);
-		m_categories->Release();
-		m_categories = NULL;
+		_categories->Release();
+		_categories = NULL;
 	}
 
-	if (m_charts != NULL)
+	if (_charts != NULL)
 	{
 		put_ReferenceToCharts(true);
-		m_charts->Release();
-		m_charts = NULL;
+		_charts->Release();
+		_charts = NULL;
 	}
 
 	if (_stopExecution)
@@ -171,9 +175,9 @@ CShapefile::~CShapefile()
 		_stopExecution = NULL;
 	}
 
-	if (m_geoProjection)
+	if (_geoProjection)
 	{
-		m_geoProjection->Release();
+		_geoProjection->Release();
 	}
 
 	if (_undoList) {
@@ -219,8 +223,8 @@ STDMETHODIMP CShapefile::get_EditingShapes(VARIANT_BOOL *pVal)
 STDMETHODIMP CShapefile::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -266,17 +270,17 @@ STDMETHODIMP CShapefile::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
+		_globalCallback->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
-	if( dbf != NULL )
-		dbf->put_GlobalCallback(newVal);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	if( _table != NULL )
+		_table->put_GlobalCallback(newVal);
 
 	return S_OK;
 }
@@ -298,14 +302,14 @@ STDMETHODIMP CShapefile::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -364,8 +368,8 @@ STDMETHODIMP CShapefile::get_NumShapes(long *pVal)
 STDMETHODIMP CShapefile::get_NumFields(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( dbf != NULL )
-		dbf->get_NumFields(pVal);
+	if( _table != NULL )
+		_table->get_NumFields(pVal);
 	else
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
@@ -429,16 +433,16 @@ STDMETHODIMP CShapefile::get_Filename(BSTR *pVal)
 // **************************************************************
 void CShapefile::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+	_lastErrorCode = ErrorCode;
+	if( _globalCallback != NULL) _globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 	return;
 }
 void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
 {
-	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+	_lastErrorCode = ErrorCode;
+	if( _globalCallback != NULL) _globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 	// in case additional callback was provided we shall use it as well
-	if( cBack != NULL) cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+	if( cBack != NULL) cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
 	return;
 }
 
@@ -464,100 +468,14 @@ STDMETHODIMP CShapefile::put_MinDrawingSize(LONG newVal)
 STDMETHODIMP CShapefile::get_SourceType(tkShapefileSourceType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_sourceType;
+	*pVal = _sourceType;
 	return S_OK;
 }
 
 #pragma endregion
 
 #pragma region CreateAndOpen
-// *****************************************************
-//		ApplyRandomDrawingOptions()
-// *****************************************************
-void CShapefile::ApplyRandomDrawingOptions()
-{
-	ShpfileType type = _shpfiletype;
-	
-	// setting default colors for shapefile layer
-	IShapeDrawingOptions* options = NULL;
-	this->get_DefaultDrawingOptions(&options);
-	if (options)
-	{
-		//srand( (unsigned)time( NULL ));
-		unsigned char r1, r2, g1, g2, b1, b2;
 
-		if( type == SHP_POLYLINE || type == SHP_POLYLINEZ || type == SHP_POLYLINEM )
-		{
-			r1 = g1 = b1 = 75;	 // dark colors
-			r2 = g2 = b2 = 150;
-			unsigned char r = r1 + unsigned char(double(rand()/double(RAND_MAX) * (r2 - r1)));
-			unsigned char g = g1 + unsigned char(double(rand()/double(RAND_MAX) * (g2 - g1)));
-			unsigned char b = b1 + unsigned char(double(rand()/double(RAND_MAX) * (b2 - b1)));
-			options->put_LineColor(RGB(r,g,b));
-			options->put_FillColor(RGB(255,255,255));
-		}
-		else if( type == SHP_POLYGON || type == SHP_POLYGONZ || type == SHP_POLYGONM )
-		{
-			r1 = g1 = b1 = 180;	// light colors
-			r2 = g2 = b2 = 230;
-			unsigned char r = r1 + unsigned char(double(rand()/double(RAND_MAX) * (r2 - r1)));
-			unsigned char g = g1 + unsigned char(double(rand()/double(RAND_MAX) * (g2 - g1)));
-			unsigned char b = b1 + unsigned char(double(rand()/double(RAND_MAX) * (b2 - b1)));
-			options->put_FillColor(RGB(r,g,b));
-
-			// gray color for outlines
-			options->put_LineColor(RGB(150,150,150));
-		}
-		else   // point and multipoints
-		{
-			r1 = g1 = b1 = 50;
-			r2 = g2 = b2 = 150;
-			unsigned char r = r1 + unsigned char(double(rand()/double(RAND_MAX) * (r2 - r1)));
-			unsigned char g = g1 + unsigned char(double(rand()/double(RAND_MAX) * (g2 - g1)));
-			unsigned char b = b1 + unsigned char(double(rand()/double(RAND_MAX) * (b2 - b1)));
-			options->put_FillColor(RGB(r,g,b));
-
-			// gray color for outlines
-			options->put_LineColor(RGB(150,150,150));
-		}
-		options->Release();
-		options = NULL;
-	}
-
-	this->get_SelectionDrawingOptions(&options);
-	if (options)
-	{
-		if( type == SHP_POLYLINE || type == SHP_POLYLINEZ || type == SHP_POLYLINEM )
-		{
-			options->put_LineColor(RGB(255,255,0));
-		}
-		else if( type == SHP_POLYGON || type == SHP_POLYGONZ || type == SHP_POLYGONM )
-		{
-			options->put_FillColor(RGB(255,255,0));
-			// gray color for outlines
-			options->put_LineColor(RGB(150,150,150));
-		}
-		else   // point and multipoints
-		{
-			options->put_FillColor(RGB(255, 255,0));
-			// gray color for outlines
-			options->put_LineColor(RGB(150,150,150));
-		}
-		options->Release();
-		options = NULL;
-	}
-
-	ILabels* labels;
-	this->get_Labels(&labels);
-	if (labels)
-	{
-		if (type == SHP_POINT || type == SHP_POINTZ || type == SHP_POINTM)
-		{
-			labels->put_Alignment(laCenterRight);
-		}
-		labels->Release();
-	}
-}
 
 // ************************************************************
 //		LoadDataFrom()
@@ -569,7 +487,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 	
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
-	if (m_sourceType != sstInMemory)
+	if (_sourceType != sstInMemory)
 	{
 		ErrorMessage(tkINMEMORY_SHAPEFILE_EXPECTED);
 		return S_FALSE;
@@ -591,7 +509,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 				CComVariant var;
 				for(size_t i = 0; i < _shapeData.size(); i++)
 				{
-					dbf->get_CellValue(0, i, &var);
+					_table->get_CellValue(0, i, &var);
 				}
 			}
 			
@@ -608,8 +526,8 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 				fclose(_shxfile);
 			_shxfile = NULL;
 			
-			if( dbf != NULL )
-				((CTableClass*)dbf)->CloseUnderlyingFile();
+			if( _table != NULL )
+				((CTableClass*)_table)->CloseUnderlyingFile();
 			
 			*retval = vb;
 		}
@@ -650,17 +568,17 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	
 	// opening dbf
 	//ASSERT(dbf == NULL);
-	if (!dbf)
+	if (!_table)
 	{
-		CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&dbf);
+		CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
 	}
 	else
 	{
 		VARIANT_BOOL vb;
-		dbf->Close(&vb);
+		_table->Close(&vb);
 	}
-	dbf->put_GlobalCallback(globalCallback);
-	dbf->Open(W2BSTR(_dbffileName), cBack, &vbretval);
+	_table->put_GlobalCallback(_globalCallback);
+	_table->Open(W2BSTR(_dbffileName), cBack, &vbretval);
 
 	if( _shpfile == NULL )
 	{
@@ -674,13 +592,13 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	}
 	else if( vbretval == VARIANT_FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
-		ErrorMessage(lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
+		ErrorMessage(_lastErrorCode);
 		this->Close(&vbretval);
 	}		
 	else
 	{	
-		if( !readShx())		// shapefile header is read here as well
+		if( !ReadShx())		// shapefile header is read here as well
 		{	
 			ErrorMessage(tkINVALID_SHX_FILE);
 			this->Close(&vbretval);
@@ -707,8 +625,8 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 			}
 			else
 			{
-				_shapeData.reserve(shpOffsets.size());
-				for (size_t i = 0; i < shpOffsets.size(); i++)
+				_shapeData.reserve(_shpOffsets.size());
+				for (size_t i = 0; i < _shpOffsets.size(); i++)
 				{
 					_shapeData.push_back(new ShapeData());
 				}
@@ -728,10 +646,10 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	*retval = VARIANT_FALSE;
 	VARIANT_BOOL vbretval;
 
-	if(globalCallback == NULL && cBack !=NULL)
+	if(_globalCallback == NULL && cBack !=NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 	
 	USES_CONVERSION;
@@ -765,13 +683,13 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 				this->put_FastMode(VARIANT_TRUE);
 			}
 
-			m_sourceType = sstDiskBased;
+			_sourceType = sstDiskBased;
 
 			// reading projection
-			m_geoProjection->ReadFromFile(W2BSTR(_prjfileName), &vbretval);
+			_geoProjection->ReadFromFile(W2BSTR(_prjfileName), &vbretval);
 
-			this->ApplyRandomDrawingOptions();
-			UpdateLabelsPositioning();
+			ShapeStyleHelper::ApplyRandomDrawingOptions(this);
+			LabelsHelper::UpdateLabelsPositioning(this);
 			*retval = VARIANT_TRUE;
 		}
 	}
@@ -827,32 +745,32 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 			
 			if( vbretval == VARIANT_TRUE )
 			{	
-				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&dbf);
-				if (!dbf)
+				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
+				if (!_table)
 				{
 					ErrorMessage(tkCANT_COCREATE_COM_INSTANCE);
 				}
 				else
 				{
 					BSTR newdbfName = A2BSTR("");
-					dbf->CreateNew(newdbfName, &vbretval);
+					_table->CreateNew(newdbfName, &vbretval);
 					
 					if (!vbretval)
 					{
 						long error;
-						dbf->get_LastErrorCode(&error);
+						_table->get_LastErrorCode(&error);
 						ErrorMessage(error);
-						dbf->Release();
-						dbf = NULL;
+						_table->Release();
+						_table = NULL;
 					}
 					else
 					{
 						_shpfiletype = ShapefileType;
 						_isEditingShapes = true;
-						m_sourceType = sstInMemory;
+						_sourceType = sstInMemory;
 
 						if (applyRandomOptions)
-							this->ApplyRandomDrawingOptions();
+							ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 
 						*retval = VARIANT_TRUE;
 					}
@@ -901,25 +819,25 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 			
 			if( vbretval == VARIANT_TRUE )
 			{	
-				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&dbf);
+				CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&_table);
 				
-				if (!dbf)
+				if (!_table)
 				{
 					ErrorMessage(tkCANT_COCREATE_COM_INSTANCE);
 				}
 				else
 				{
-					dbf->put_GlobalCallback(globalCallback);
+					_table->put_GlobalCallback(_globalCallback);
 					
 					CString newDbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-					dbf->CreateNew(A2BSTR(newDbfName), &vbretval);
+					_table->CreateNew(A2BSTR(newDbfName), &vbretval);
 					
 					if (!vbretval)
 					{
-						dbf->get_LastErrorCode(&lastErrorCode);
-						ErrorMessage(lastErrorCode);
-						dbf->Release();
-						dbf = NULL;
+						_table->get_LastErrorCode(&_lastErrorCode);
+						ErrorMessage(_lastErrorCode);
+						_table->Release();
+						_table = NULL;
 					}
 					else
 					{
@@ -930,9 +848,9 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 						
 						_shpfiletype = ShapefileType;
 						_isEditingShapes = true;
-						m_sourceType = sstInMemory;
+						_sourceType = sstInMemory;
 						if (applyRandomOptions)
-							this->ApplyRandomDrawingOptions();
+							ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 
 						*retval = VARIANT_TRUE;
 					}
@@ -940,7 +858,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 			}
 		}
 	}
-	UpdateLabelsPositioning();
+	LabelsHelper::UpdateLabelsPositioning(this);
 	return S_OK;
 }
 
@@ -993,13 +911,13 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 	
 	// stop editing table in case only it have been edited
 	VARIANT_BOOL isEditingTable = VARIANT_FALSE;
-	if( dbf )
+	if( _table )
 	{
-		dbf->get_EditingTable(&isEditingTable);
+		_table->get_EditingTable(&isEditingTable);
 		if (isEditingTable)
 		{
-			this->StopEditingTable(VARIANT_FALSE,globalCallback,retval);
-			dbf->get_EditingTable(&isEditingTable);
+			this->StopEditingTable(VARIANT_FALSE,_globalCallback,retval);
+			_table->get_EditingTable(&isEditingTable);
 		}
 	}
 
@@ -1011,12 +929,12 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 	}
 	_shapeData.clear();
 	
-	if (spatialIndexLoaded)
-		IndexSearching::unloadSpatialIndex(spatialIndexID);
+	if (_spatialIndexLoaded)
+		IndexSearching::unloadSpatialIndex(_spatialIndexID);
 
-	m_sourceType = sstUninitialized;
+	_sourceType = sstUninitialized;
 	_shpfiletype = SHP_NULLSHAPE;
-	this->UpdateLabelsPositioning();
+	LabelsHelper::UpdateLabelsPositioning(this);
 	
 	_shpfileName = "";
 	_shxfileName = "";
@@ -1049,25 +967,25 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 	if( _shxfile != NULL) fclose(_shxfile);
 	_shxfile = NULL;
 	
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
 		VARIANT_BOOL vbretval;
-		dbf->Close(&vbretval);
-		dbf->Release();
-		dbf = NULL;
+		_table->Close(&vbretval);
+		_table->Release();
+		_table = NULL;
 	}
-	if (m_labels)
+	if (_labels)
 	{
-		m_labels->Clear();
-		m_labels->ClearCategories();
+		_labels->Clear();
+		_labels->ClearCategories();
 	}
-	if (m_charts)
+	if (_charts)
 	{
-		m_charts->Clear();
+		_charts->Clear();
 	}
-	if (m_categories)
+	if (_categories)
 	{
-		m_categories->Clear();
+		_categories->Clear();
 	}
 	*retval = VARIANT_TRUE; 
 	
@@ -1083,21 +1001,21 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	bool callbackIsNull = (globalCallback == NULL);
-	if(globalCallback == NULL && cBack != NULL)
+	bool callbackIsNull = (_globalCallback == NULL);
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if (dbf == NULL || m_sourceType == sstUninitialized)
+	if (_table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 		return S_FALSE;
 	}
 
 	// in case someone else is writing, we leave
-	if (m_writing)
+	if (_writing)
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION);
 		return S_FALSE;
@@ -1143,7 +1061,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// -----------------------------------------------
 		if( _isEditingShapes )
 		{	
-			if( verifyMemShapes(cBack) == FALSE )
+			if( VerifyMemShapes(cBack) == FALSE )
 			{	
 				// error Code is set in function
 				return S_OK;
@@ -1177,8 +1095,8 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// ------------------------------------------------
 		//	writing the files
 		// ------------------------------------------------
-		this->writeShp(sa_shpfile,cBack);
-		this->writeShx(sa_shxfile,cBack);
+		this->WriteShp(sa_shpfile,cBack);
+		this->WriteShx(sa_shxfile,cBack);
 		
 		fclose(sa_shpfile);
 		fclose(sa_shxfile);
@@ -1188,24 +1106,24 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// ------------------------------------------------
 		//	saving dbf table
 		// ------------------------------------------------
-		dbf->Dump(sa_dbffileName.AllocSysString(), cBack, retval);
+		_table->Dump(sa_dbffileName.AllocSysString(), cBack, retval);
 		if( *retval == FALSE )
 		{	
-			dbf->get_LastErrorCode(&lastErrorCode);
+			_table->get_LastErrorCode(&_lastErrorCode);
 			return S_OK;
 		}
 
 		// saving projection in new format
 		VARIANT_BOOL vbretval;
 		CStringW prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + L"prj";
-		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
 		*retval = VARIANT_TRUE;
 	}
 	
 	// restoring callback
 	if (callbackIsNull)
-		globalCallback = NULL;
+		_globalCallback = NULL;
 	return S_OK;
 }
 
@@ -1218,21 +1136,21 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	bool callbackIsNull = (globalCallback == NULL);
-	if(globalCallback == NULL && cBack != NULL)
+	bool callbackIsNull = (_globalCallback == NULL);
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if (dbf == NULL || m_sourceType == sstUninitialized)
+	if (_table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 		return S_FALSE;
 	}
 
 	// in case someone else is writing, we leave
-	if (m_writing)
+	if (_writing)
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION);
 		return S_FALSE;
@@ -1278,7 +1196,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// -----------------------------------------------
 		if( _isEditingShapes )
 		{	
-			if( verifyMemShapes(cBack) == FALSE )
+			if( VerifyMemShapes(cBack) == FALSE )
 			{	
 				// error Code is set in function
 				return S_OK;
@@ -1312,8 +1230,8 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// ------------------------------------------------
 		//	writing the files
 		// ------------------------------------------------
-		this->writeShp(sa_shpfile,cBack);
-		this->writeShx(sa_shxfile,cBack);
+		this->WriteShp(sa_shpfile,cBack);
+		this->WriteShx(sa_shxfile,cBack);
 
 		fclose(sa_shpfile);
 		fclose(sa_shxfile);
@@ -1324,10 +1242,10 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// ------------------------------------------------
 		//	saving dbf table
 		// ------------------------------------------------
-		dbf->SaveAs(sa_dbffileName.AllocSysString(), cBack, retval);
+		_table->SaveAs(sa_dbffileName.AllocSysString(), cBack, retval);
 		if( *retval == FALSE )
 		{	
-			dbf->get_LastErrorCode(&lastErrorCode);
+			_table->get_LastErrorCode(&_lastErrorCode);
 			fclose(sa_shpfile);
 			fclose(sa_shxfile);
 			_unlink(sa_shpfileName);
@@ -1351,15 +1269,15 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		_prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "prj";
 
 		// projection will be written to the disk after this
-		m_sourceType = sstDiskBased;	
+		_sourceType = sstDiskBased;	
 
 		// saving projection in new format
 		VARIANT_BOOL vbretval, isEmpty;
-		m_geoProjection->get_IsEmpty(&isEmpty);
+		_geoProjection->get_IsEmpty(&isEmpty);
 		if(!isEmpty)
-			m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+			_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
-		if (useQTree)
+		if (_useQTree)
 			GenerateQTree();
 
 		*retval = VARIANT_TRUE;
@@ -1367,7 +1285,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 	
 	// restoring callback
 	if (callbackIsNull)
-		globalCallback = NULL;
+		_globalCallback = NULL;
 	return S_OK;
 }
 
@@ -1380,10 +1298,10 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	if (globalCallback == NULL && cBack != NULL)
+	if (_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 	
 	// no edits were made; it doesn't make sense to save it
@@ -1393,7 +1311,7 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 		return S_OK;
 	}
 
-	if( verifyMemShapes(globalCallback) == FALSE )
+	if( VerifyMemShapes(_globalCallback) == FALSE )
 	{	
 		// error Code is set in function
 		return S_OK;
@@ -1426,30 +1344,30 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 		{	
 			fclose( _shxfile );
 			_shxfile = NULL;
-			lastErrorCode = tkCANT_OPEN_SHX;
+			_lastErrorCode = tkCANT_OPEN_SHX;
 		}
 		if( _shpfile != NULL )
 		{	
 			fclose( _shpfile );
 			_shpfile = NULL;
-			lastErrorCode = tkCANT_OPEN_SHP;
+			_lastErrorCode = tkCANT_OPEN_SHP;
 		}
 		*retval = FALSE;
 		
-		ErrorMessage(lastErrorCode);
+		ErrorMessage(_lastErrorCode);
 		
 	}
 	else
 	{
-		m_writing = true;
+		_writing = true;
 
 		// -------------------------------------------------
 		//	Writing the files
 		// -------------------------------------------------
-		writeShp(_shpfile,cBack);
-		writeShx(_shxfile,cBack);
+		WriteShp(_shpfile,cBack);
+		WriteShx(_shxfile,cBack);
 		
-		if (useQTree)
+		if (_useQTree)
 			GenerateQTree();
 
 		// -------------------------------------------------
@@ -1464,34 +1382,34 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 			{	
 				fclose( _shxfile );
 				_shxfile = NULL;
-				lastErrorCode = tkCANT_OPEN_SHX;
+				_lastErrorCode = tkCANT_OPEN_SHX;
 			}
 			if( _shpfile != NULL )
 			{	
 				fclose( _shpfile );
 				_shpfile = NULL;
-				lastErrorCode = tkCANT_OPEN_SHP;
+				_lastErrorCode = tkCANT_OPEN_SHP;
 			}
 			*retval = FALSE;
 			
-			ErrorMessage( lastErrorCode );
+			ErrorMessage( _lastErrorCode );
 		}
 		else
 		{
 			//Save the table file
-			dbf->Save(cBack,retval);
+			_table->Save(cBack,retval);
 			
 			// projection will be written to the disk after this
-			m_sourceType = sstDiskBased;	
+			_sourceType = sstDiskBased;	
 
 			// saving projection in new format
 			VARIANT_BOOL vbretval;
-			m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+			_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 
 			*retval = VARIANT_TRUE;
 		}
 	}
-	m_writing = false;
+	_writing = false;
 	return S_OK;
 }
 
@@ -1507,45 +1425,6 @@ STDMETHODIMP CShapefile::Resource(BSTR newShpPath, VARIANT_BOOL *retval)
 }
 #pragma endregion
 
-#pragma region Clone
-// ***********************************************************************
-//		CloneNoFields()
-// ***********************************************************************
-void CShapefile::CloneNoFields(IShapefile** retVal, bool addShapeId)
-{
-	CloneNoFields(retVal, _shpfiletype, addShapeId);
-}
-
-// ***********************************************************************
-//		CloneNoFields()
-// ***********************************************************************
-void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType, bool addShapeId)
-{
-	IShapefile* sf = NULL;
-	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
-	
-	VARIANT_BOOL vb;
-	if(addShapeId)
-	{
-		sf->CreateNewWithShapeID(A2BSTR(""), shpType, &vb);
-	}
-	else {
-		sf->CreateNew(A2BSTR(""), shpType, &vb);
-	}
-	
-	// copying the projection string
-	BSTR pVal;
-	this->get_Projection(&pVal);
-	if (pVal != NULL)
-		sf->put_Projection(pVal);
-
-	ICallback* callback = NULL;
-	this->get_GlobalCallback(&callback);
-	sf->put_GlobalCallback(callback);
-
-	*retVal = sf;
-}
-
 // ***********************************************************************
 //		Clone()
 // ***********************************************************************
@@ -1553,46 +1432,10 @@ void CShapefile::CloneNoFields(IShapefile** retVal, ShpfileType shpType, bool ad
 STDMETHODIMP CShapefile::Clone(IShapefile** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	this->CloneCore(retVal, _shpfiletype);
+	ShapefileHelper::CloneCore(this, retVal, _shpfiletype);
 	return S_OK;
 }
 
-// ***********************************************************************
-//		CloneCore()
-// ***********************************************************************
-void CShapefile::CloneCore(IShapefile** retVal, ShpfileType shpType, bool addShapeId)
-{
-	CloneNoFields(retVal, shpType, addShapeId);
-	VARIANT_BOOL vbretval;
-
-	IShapefile* sf = *retVal;
-
-	long numFields;
-	this->get_NumFields(&numFields);
-
-	for (long i = 0; i < numFields; i++)
-	{
-		IField * fld = NULL;
-		IField * fldNew = NULL;
-		this->get_Field(i,&fld);
-		fld->Clone(&fldNew);
-		fld->Release();
-		
-		sf->EditInsertField(fldNew, &i, NULL, &vbretval);
-		fldNew->Release();
-
-		if (!vbretval)
-		{
-			sf->Close(&vbretval);
-			sf->Release(); 
-			sf = NULL; 
-			break;
-		}
-	}
-}
-#pragma endregion
-
-#pragma region Extents
 // ************************************************************
 //		get_Extents()
 // ************************************************************
@@ -1619,7 +1462,6 @@ STDMETHODIMP CShapefile::get_Extents(IExtents **pVal)
 
 	return S_OK;
 }
-#pragma endregion
 
 #pragma region AttributeTable
 // ****************************************************************
@@ -1629,25 +1471,25 @@ STDMETHODIMP CShapefile::EditInsertField(IField *NewField, long *FieldIndex, ICa
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if(cBack == NULL && globalCallback!=NULL)
-		cBack = globalCallback;	
+	if(cBack == NULL && _globalCallback!=NULL)
+		cBack = _globalCallback;	
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->EditInsertField(NewField,FieldIndex,cBack,retval);
+		_table->EditInsertField(NewField,FieldIndex,cBack,retval);
 	}
 	else
 	{	
 		*retval = VARIANT_FALSE;
-		lastErrorCode = tkFILE_NOT_OPEN;
+		_lastErrorCode = tkFILE_NOT_OPEN;
 		if( cBack != NULL )
-			cBack->Error( OLE2BSTR(key),  A2BSTR(ErrorMsg(lastErrorCode) ) );
+			cBack->Error( OLE2BSTR(_key),  A2BSTR(ErrorMsg(_lastErrorCode) ) );
 		return S_OK;
 	}
 
 	if( *retval == VARIANT_FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
 		*retval = VARIANT_FALSE;
 	}
 
@@ -1661,15 +1503,15 @@ STDMETHODIMP CShapefile::EditDeleteField(long FieldIndex, ICallback *cBack, VARI
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if(globalCallback == NULL && cBack != NULL)
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;	
-		globalCallback->AddRef();
+		_globalCallback = cBack;	
+		_globalCallback->AddRef();
 	}
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->EditDeleteField(FieldIndex,cBack,retval);
+		_table->EditDeleteField(FieldIndex,cBack,retval);
 	}
 	else
 	{	
@@ -1680,7 +1522,7 @@ STDMETHODIMP CShapefile::EditDeleteField(long FieldIndex, ICallback *cBack, VARI
 
 	if( *retval == VARIANT_FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
 		*retval = VARIANT_FALSE;
 	}
 
@@ -1694,9 +1536,9 @@ STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->EditCellValue(FieldIndex,ShapeIndex,NewVal,retval);
+		_table->EditCellValue(FieldIndex,ShapeIndex,NewVal,retval);
 	}
 	else
 	{	
@@ -1707,7 +1549,7 @@ STDMETHODIMP CShapefile::EditCellValue(long FieldIndex, long ShapeIndex, VARIANT
 
 	if( *retval == VARIANT_FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
 		*retval = VARIANT_FALSE;
 	}
 
@@ -1721,15 +1563,15 @@ STDMETHODIMP CShapefile::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retva
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if(globalCallback == NULL && cBack != NULL)
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->StartEditingTable(cBack,retval);
+		_table->StartEditingTable(cBack,retval);
 	}
 	else
 	{	
@@ -1740,7 +1582,7 @@ STDMETHODIMP CShapefile::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retva
 
 	if( *retval == VARIANT_FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
 		*retval = VARIANT_FALSE;
 	}
 
@@ -1754,15 +1596,15 @@ STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback *
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if(globalCallback == NULL && cBack!=NULL)
+	if(_globalCallback == NULL && cBack!=NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->StopEditingTable(ApplyChanges,cBack,retval);
+		_table->StopEditingTable(ApplyChanges,cBack,retval);
 	}
 	else
 	{	
@@ -1773,7 +1615,7 @@ STDMETHODIMP CShapefile::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback *
 
 	if( *retval == FALSE )
 	{	
-		dbf->get_LastErrorCode(&lastErrorCode);
+		_table->get_LastErrorCode(&_lastErrorCode);
 		*retval = VARIANT_FALSE;
 	}
 
@@ -1787,15 +1629,15 @@ STDMETHODIMP CShapefile::get_Field(long FieldIndex, IField **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->get_Field(FieldIndex,pVal);	
+		_table->get_Field(FieldIndex,pVal);	
 		if(*pVal != NULL)
 		{
 			// we need to report error from field class, and will use callback from this class for it
 			ICallback* cBack = NULL;
-			if ((*pVal)->get_GlobalCallback(&cBack) == NULL && this->globalCallback != NULL)
-				(*pVal)->put_GlobalCallback(globalCallback);
+			if ((*pVal)->get_GlobalCallback(&cBack) == NULL && this->_globalCallback != NULL)
+				(*pVal)->put_GlobalCallback(_globalCallback);
 			
 			if (cBack != NULL)
 				cBack->Release();	// we put a reference in field class so must release it here
@@ -1824,8 +1666,8 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 	CString strFieldname;
 	IField *testVal;
 	
-	dbf->get_NumFields(&max);
-	if( dbf != NULL )
+	_table->get_NumFields(&max);
+	if( _table != NULL )
 	{
         if( _tcslen( OLE2CA(Fieldname) ) > 0 )
 		{
@@ -1838,7 +1680,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 
 		for (int fld=0; fld < max; fld++)
 		{
-			dbf->get_Field(fld,&testVal);
+			_table->get_Field(fld,&testVal);
 			testVal->get_Name(&Testname);
 			strTestname = OLE2A(Testname);
 			if( strTestname.CompareNoCase(strFieldname) == 0)
@@ -1854,9 +1696,9 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 	}
 	else
 	{	
-		lastErrorCode = tkFILE_NOT_OPEN;
-		if( globalCallback != NULL )
-			globalCallback->Error( OLE2BSTR(key),  A2BSTR(ErrorMsg(lastErrorCode) ) );
+		_lastErrorCode = tkFILE_NOT_OPEN;
+		if( _globalCallback != NULL )
+			_globalCallback->Error( OLE2BSTR(_key),  A2BSTR(ErrorMsg(_lastErrorCode) ) );
 		return S_OK;
 	}
 	
@@ -1866,43 +1708,15 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 }
 
 // *****************************************************************
-//	   FindNewShapeID()
-// *****************************************************************
-long CShapefile::FindNewShapeID(long FieldIndex)
-{
-    if (dbf == NULL)
-	{
-		return 0;
-	}
-	else
-	{
-		long rt = -1;
-		long lo = 0;
-
-		int size = _shapeData.size();
-		for (int i = 0; i < size - 1; i++)
-		{
-			VARIANT pVal;
-			VariantInit(&pVal);
-			dbf->get_CellValue(FieldIndex, i, &pVal);
-			lVal(pVal, lo);
-			VariantClear(&pVal);
-			if (lo > rt) rt = lo;
-		}
-		return rt + 1;
-	}
-}
-
-// *****************************************************************
 //	   get_CellValue()
 // *****************************************************************
 STDMETHODIMP CShapefile::get_CellValue(long FieldIndex, long ShapeIndex, VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->get_CellValue(FieldIndex,ShapeIndex,pVal);
+		_table->get_CellValue(FieldIndex,ShapeIndex,pVal);
 	}
 	else
 	{	
@@ -1919,9 +1733,9 @@ STDMETHODIMP CShapefile::get_CellValue(long FieldIndex, long ShapeIndex, VARIANT
 STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( dbf != NULL )
+	if( _table != NULL )
 	{
-		dbf->get_EditingTable(pVal);
+		_table->get_EditingTable(pVal);
 	}
 	else
 	{	
@@ -1939,66 +1753,12 @@ STDMETHODIMP CShapefile::get_EditingTable(VARIANT_BOOL *pVal)
 STDMETHODIMP CShapefile::get_Table(ITable** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = dbf;
-	if ( dbf )
+	*retVal = _table;
+	if ( _table )
 	{
-		dbf->AddRef();
+		_table->AddRef();
 	}
 	return S_OK;
-}
-
-//*********************************************************************
-//*						UniqueFieldNames()				              
-//*********************************************************************
-// Makes name of fields in dbf table unique.	 
-// In case of duplicated names adds _# to them	 
-bool CShapefile::UniqueFieldNames(IShapefile* sf)
-{
-	VARIANT_BOOL editing;
-	USES_CONVERSION;
-
-	// Do we need edit mode for editing of the field names?
-	// Yes we do, shapelib doesn't allow it otherwise ;)
-	sf->get_EditingShapes(&editing);	
-	if (!editing) 
-		return false;
-	
-	long numFields;
-	sf->get_NumFields(&numFields);
-	
-	set<CString> fields;
-
-	for(long i = 0; i< numFields; i++)
-	{
-		BSTR name;
-		IField* fld;
-		sf->get_Field(i, &fld);
-		fld->get_Name(&name);
-
-		if (fields.find(OLE2CA(name)) == fields.end())
-		{
-			fields.insert(OLE2CA(name));
-		}
-		else
-		{	
-			bool found = false;
-			for(int j =0; !found ;j++)
-			{
-				CString temp = OLE2CA(name);
-				temp.AppendFormat("_%d", j);
-				if (fields.find(temp) == fields.end())
-				{	
-					fields.insert(temp);
-					name = temp.AllocSysString();
-					fld->put_Name(name);
-					found = true;
-				}
-			}
-		}
-		fld->Release();
-	}
-	fields.clear();
-	return true;
 }
 #pragma endregion
 
@@ -2052,7 +1812,7 @@ STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
 			if (ctIndex == -1) 
 			{
 				// no category, check default options
-				m_defaultDrawOpt->get_Visible(pVal);
+				_defaultDrawOpt->get_Visible(pVal);
 			}
 			else
 			{
@@ -2173,7 +1933,7 @@ STDMETHODIMP CShapefile::put_ShapeCategory2(long ShapeIndex, BSTR categoryName)
 	else
 	{
 		int index;
-		m_categories->get_CategoryIndexByName(categoryName, &index);
+		_categories->get_CategoryIndexByName(categoryName, &index);
 		if (index == -1)
 		{
 			ErrorMessage(tkCATEGORY_WASNT_FOUND);
@@ -2199,11 +1959,11 @@ STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
 	{
 		int index = _shapeData[ShapeIndex]->category;
 		long count;
-		m_categories->get_Count(&count);
+		_categories->get_Count(&count);
 		if (index >= 0 && index < count)
 		{
 			IShapefileCategory* ct;
-			m_categories->get_Item(index, &ct);
+			_categories->get_Item(index, &ct);
 			ct->get_Name(categoryName);
 			ct->Release();
 		}
@@ -2228,7 +1988,7 @@ STDMETHODIMP CShapefile::put_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 	else
 	{
 		int index;
-		m_categories->get_CategoryIndex(category, &index);
+		_categories->get_CategoryIndex(category, &index);
 		if (index == -1)
 		{
 			ErrorMessage(tkCATEGORY_WASNT_FOUND);
@@ -2253,11 +2013,11 @@ STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 	{
 		int index = _shapeData[ShapeIndex]->category;
 		long count;
-		m_categories->get_Count(&count);
+		_categories->get_Count(&count);
 		if (index >= 0 && index < count)
 		{
 			IShapefileCategory* ct;
-			m_categories->get_Item(index, &ct);
+			_categories->get_Item(index, &ct);
 			*category = ct;		// ref was added in the get_Item
 		}
 		else
@@ -2275,9 +2035,9 @@ STDMETHODIMP CShapefile::get_ShapeCategory3(long ShapeIndex, IShapefileCategory*
 STDMETHODIMP CShapefile::get_SelectionDrawingOptions(IShapeDrawingOptions** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_selectDrawOpt;
-	if (m_selectDrawOpt)
-		m_selectDrawOpt->AddRef();
+	*pVal = _selectDrawOpt;
+	if (_selectDrawOpt)
+		_selectDrawOpt->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVal)
@@ -2289,7 +2049,7 @@ STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVa
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&m_selectDrawOpt, false);
+		Utility::put_ComReference(newVal, (IDispatch**)&_selectDrawOpt, false);
 	}
 	return S_OK;
 }
@@ -2301,9 +2061,9 @@ STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVa
 STDMETHODIMP CShapefile::get_DefaultDrawingOptions(IShapeDrawingOptions** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_defaultDrawOpt;
-	if (m_defaultDrawOpt)
-		m_defaultDrawOpt->AddRef();
+	*pVal = _defaultDrawOpt;
+	if (_defaultDrawOpt)
+		_defaultDrawOpt->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
@@ -2316,7 +2076,7 @@ STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&m_defaultDrawOpt);
+		Utility::put_ComReference(newVal, (IDispatch**)&_defaultDrawOpt);
 	}
 	return S_OK;
 }
@@ -2326,8 +2086,8 @@ STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 /***********************************************************************/
 void CShapefile::put_ReferenceToCategories(bool bNullReference)
 {
-	if (m_categories == NULL) return;
-	CShapefileCategories* coCategories = static_cast<CShapefileCategories*>(m_categories);
+	if (_categories == NULL) return;
+	CShapefileCategories* coCategories = static_cast<CShapefileCategories*>(_categories);
 	if (!bNullReference)
 		coCategories->put_ParentShapefile(this);
 	else
@@ -2339,16 +2099,16 @@ void CShapefile::put_ReferenceToCategories(bool bNullReference)
 /***********************************************************************/
 STDMETHODIMP CShapefile::get_Categories(IShapefileCategories** pVal)
 {
-	*pVal = m_categories;
-	if (m_categories != NULL)
-		m_categories->AddRef();
+	*pVal = _categories;
+	if (_categories != NULL)
+		_categories->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Categories(IShapefileCategories* newVal)
 {
-	if (Utility::put_ComReference((IDispatch*)newVal, (IDispatch**) &m_categories, false))	
+	if (Utility::put_ComReference((IDispatch*)newVal, (IDispatch**) &_categories, false))	
 	{
-		((CShapefileCategories*)m_categories)->put_ParentShapefile(this);
+		((CShapefileCategories*)_categories)->put_ParentShapefile(this);
 	}
 	return S_OK;
 }
@@ -2466,8 +2226,8 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		if (_fastMode != FALSE)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "FastMode", CPLString().Printf("%d", (int)_fastMode));
 
-		if (useQTree != FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", (int)useQTree));
+		if (_useQTree != FALSE)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseQTree", CPLString().Printf("%d", (int)_useQTree));
 
 		if (_collisionMode != LocalList )
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "CollisionMode", CPLString().Printf("%d", (int)_collisionMode));
@@ -2485,11 +2245,11 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinDrawingSize", CPLString().Printf("%d", _minDrawingSize));
 
 		// for in-memory shapefiles only
-		if (m_sourceType == sstInMemory)
+		if (_sourceType == sstInMemory)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "ShpType", CPLString().Printf("%d", (int)this->_shpfiletype));
 
 		// drawing options
-		CPLXMLNode* node = ((CShapeDrawingOptions*)m_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
+		CPLXMLNode* node = ((CShapeDrawingOptions*)_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
@@ -2497,7 +2257,7 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		
 		if(_selectionAppearance == saDrawingOptions)
 		{
-			CPLXMLNode* node = ((CShapeDrawingOptions*)m_selectDrawOpt)->SerializeCore("SelectionDrawingOptions");
+			CPLXMLNode* node = ((CShapeDrawingOptions*)_selectDrawOpt)->SerializeCore("SelectionDrawingOptions");
 			if (node)
 			{
 				CPLAddXMLChild(psTree, node);
@@ -2505,21 +2265,21 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		}
 
 		// categories
-		node = ((CShapefileCategories*)m_categories)->SerializeCore("ShapefileCategoriesClass");
+		node = ((CShapefileCategories*)_categories)->SerializeCore("ShapefileCategoriesClass");
 		if (node)
 		{
 			CPLAddXMLChild(psTree, node);
 		}
 
 		// labels
-		CPLXMLNode* psLabels = ((CLabels*)m_labels)->SerializeCore("LabelsClass");
+		CPLXMLNode* psLabels = ((CLabels*)_labels)->SerializeCore("LabelsClass");
 		if (psLabels)
 		{
 			CPLAddXMLChild(psTree, psLabels);
 		}
 
 		// charts
-		CPLXMLNode* psCharts = ((CCharts*)m_charts)->SerializeCore("ChartsClass");
+		CPLXMLNode* psCharts = ((CCharts*)_charts)->SerializeCore("ChartsClass");
 		if (psCharts)
 		{
 			CPLAddXMLChild(psTree, psCharts);
@@ -2580,8 +2340,8 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		// ----------------------------------------------------
 		// table
 		// ----------------------------------------------------
-		if (dbf) {
-			CPLXMLNode* psTable = ((CTableClass*)dbf)->SerializeCore("TableClass");
+		if (_table) {
+			CPLXMLNode* psTable = ((CTableClass*)_table)->SerializeCore("TableClass");
 			if (psTable) {
 				CPLAddXMLChild(psTree, psTable);
 			}
@@ -2631,7 +2391,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	this->put_FastMode(fastMode);
 
 	s = CPLGetXMLValue( node, "UseQTree", NULL );
-	useQTree = (s != "") ? (BOOL)atoi(s.GetString()) : FALSE;
+	_useQTree = (s != "") ? (BOOL)atoi(s.GetString()) : FALSE;
 
 	s = CPLGetXMLValue( node, "CollisionMode", NULL );
 	_collisionMode = (s != "") ? (tkCollisionMode)atoi(s.GetString()) : LocalList;
@@ -2648,7 +2408,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "MinDrawingSize", NULL );
 	_minDrawingSize = (s != "") ? atoi(s.GetString()) : 1;
 
-	if (m_sourceType == sstInMemory)
+	if (_sourceType == sstInMemory)
 	{
 		s = CPLGetXMLValue( node, "ShpType", NULL );
 		if (s != "") {
@@ -2682,7 +2442,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	psChild = CPLGetXMLNode(node, "ShapefileCategoriesClass");
 	if (psChild)
 	{
-		((CShapefileCategories*)m_categories)->DeserializeCore(psChild, false);
+		((CShapefileCategories*)_categories)->DeserializeCore(psChild, false);
 	}
 
 	// category indices
@@ -2723,21 +2483,21 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	else
 	{
 		// for older versions of file without indices apply previously loaded cats
-		((CShapefileCategories*)m_categories)->ApplyExpressions();
+		((CShapefileCategories*)_categories)->ApplyExpressions();
 	}
 
 	// Labels
 	psChild = CPLGetXMLNode(node, "LabelsClass");
 	if (psChild)
 	{
-		((CLabels*)m_labels)->DeserializeCore(psChild);
+		((CLabels*)_labels)->DeserializeCore(psChild);
 	}
 
 	// Charts
 	psChild = CPLGetXMLNode(node, "ChartsClass");
 	if (psChild)
 	{
-		((CCharts*)m_charts)->DeserializeCore(psChild);
+		((CCharts*)_charts)->DeserializeCore(psChild);
 	}
 	
 	// selection
@@ -2764,46 +2524,19 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 	
 
 	// table
-	if (dbf) 
+	if (_table) 
 	{
 		psChild = CPLGetXMLNode(node, "TableClass");
 		if (psChild)
 		{
-			((CTableClass*)dbf)->DeserializeCore(psChild);
+			((CTableClass*)_table)->DeserializeCore(psChild);
 		}
 	}
 	return true;
 }
 #pragma endregion
 
-// ******************************************************* 
-//		UpdateLabelsPositioning()
-// ******************************************************* 
-// Should be called after change of shapefile type (CreateNew, Open, Resource, Close)
-void CShapefile::UpdateLabelsPositioning()
-{
-	ShpfileType type = Utility::ShapeTypeConvert2D(_shpfiletype);
-	
-	if (m_labels)
-	{
-		if (type == SHP_POINT || type == SHP_MULTIPOINT)
-		{
-			m_labels->put_Positioning(lpCenter);
-		}
-		else if (type == SHP_POLYLINE)
-		{
-			m_labels->put_Positioning(lpLongestSegement);
-		}
-		else if (type == SHP_POLYGON)
-		{
-			m_labels->put_Positioning(lpCentroid);
-		}
-		else
-		{
-			m_labels->put_Positioning(lpNone);
-		}
-	}
-}
+
 
 #pragma region Projection
 // *****************************************************************
@@ -2813,7 +2546,7 @@ STDMETHODIMP CShapefile::get_Projection(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	m_geoProjection->ExportToProj4(pVal);
+	_geoProjection->ExportToProj4(pVal);
 	return S_OK;
 }
 
@@ -2826,10 +2559,10 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 	USES_CONVERSION;
 	
 	VARIANT_BOOL vbretval;
-	m_geoProjection->ImportFromProj4(proj4Projection, &vbretval);
+	_geoProjection->ImportFromProj4(proj4Projection, &vbretval);
 	if (vbretval)
 	{
-		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 	}
 	return S_OK;
 }
@@ -2840,10 +2573,10 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (m_geoProjection)
-		m_geoProjection->AddRef();
+	if (_geoProjection)
+		_geoProjection->AddRef();
 
-	*retVal = m_geoProjection;
+	*retVal = _geoProjection;
 	return S_OK;
 }
 
@@ -2853,11 +2586,11 @@ STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	Utility::put_ComReference((IDispatch*)pVal, (IDispatch**)&m_geoProjection, false);
+	Utility::put_ComReference((IDispatch*)pVal, (IDispatch**)&_geoProjection, false);
 	if (_prjfileName.GetLength() != 0)
 	{
 		VARIANT_BOOL vbretval;
-		m_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
 	}
 	return S_OK;
 }
@@ -2908,7 +2641,7 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 			}
 			
 			// update qtree
-			if (useQTree)
+			if (_useQTree)
 				GenerateQTree();
 
 			VARIANT_BOOL vbretval;
@@ -2941,7 +2674,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
 	VARIANT_BOOL isEmpty1, isEmpty2;
 	newProjection->get_IsEmpty(&isEmpty1);
-	m_geoProjection->get_IsEmpty(&isEmpty2);
+	_geoProjection->get_IsEmpty(&isEmpty2);
 	if (isEmpty1 || isEmpty2)
 	{
 		ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
@@ -2952,7 +2685,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 		return false;
 	
 	m_globalSettings.gdalErrorMessage = "";
-	OGRSpatialReference* projSource = ((CGeoProjection*)m_geoProjection)->get_SpatialReference();
+	OGRSpatialReference* projSource = ((CGeoProjection*)_geoProjection)->get_SpatialReference();
 	OGRSpatialReference* projTarget = ((CGeoProjection*)newProjection)->get_SpatialReference();
 
 	OGRCoordinateTransformation* transf = OGRCreateCoordinateTransformation( projSource, projTarget );
@@ -2984,7 +2717,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Reprojecting...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);
@@ -3058,7 +2791,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	// setting new projection
 	if (reprojectInPlace)
 	{
-		m_geoProjection->CopyFrom(newProjection, &vb);
+		_geoProjection->CopyFrom(newProjection, &vb);
 	}
 	else
 	{
@@ -3076,7 +2809,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	// -------------------------------------- 
 	//	  Output validation
 	// -------------------------------------- 
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	ClearValidationList();
 	if (!reprojectInPlace)
 	{
@@ -3111,7 +2844,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 
 		for (int i = 0; i < numShapes; i++)
 		{
-			Utility::DisplayProgress(globalCallback, i, numShapes, "Fixing...", key, percent);
+			Utility::DisplayProgress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
@@ -3145,8 +2878,8 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 		}
 	}
 
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+	if( _globalCallback != NULL )
+		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
 
 	return S_OK;
 }
@@ -3215,7 +2948,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 	if(((CShape*)referenceShape)->get_ExtentsXY(xMin, yMin, xMax, yMax))
 	{
 		QTreeExtent query(xMin, xMax, yMax, yMin);
-		std::vector<int> shapes = this->m_qtree->GetNodes(query);
+		std::vector<int> shapes = this->_qtree->GetNodes(query);
 		std::vector<int> arr;
 		
 		GEOSGeom geomBase = NULL;
@@ -3225,7 +2958,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 		}
 		else
 		{
-			geomBase = GeometryConverter::Shape2GEOSGeom(referenceShape);
+			geomBase = GeosConverter::ShapeToGeom(referenceShape);
 		}
 
 		if (geomBase)
@@ -3290,13 +3023,13 @@ STDMETHODIMP CShapefile::put_HotTracking(VARIANT_BOOL newVal)
 STDMETHODIMP CShapefile::EditAddField(BSTR name, FieldType type, int precision, int width, long *fieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (!this->dbf)
+	if (!this->_table)
 	{
 		this->ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
 	}
 	else
 	{
-		dbf->EditAddField(name, type, precision, width, fieldIndex);
+		_table->EditAddField(name, type, precision, width, fieldIndex);
 	}
 	return S_OK;
 }
@@ -3315,43 +3048,6 @@ STDMETHODIMP CShapefile::EditAddShape(IShape* shape, long* shapeIndex)
 	return S_OK;
 }
 
-// *****************************************************************
-//		getClosestPoint()
-// *****************************************************************
-bool CShapefile::getClosestPoint(double x, double y, double maxDistance, std::vector<long>& ids, long* shapeIndex, long* pointIndex, double& dist)
-{
-	VARIANT_BOOL vb;
-	double minDist = DBL_MAX;
-	for (size_t i = 0; i < ids.size(); i++)
-	{
-		VARIANT_BOOL visible;
-		get_ShapeVisible(ids[i], &visible);
-		if (!visible) continue;
-
-		IShape* shp = NULL;
-		this->get_Shape(ids[i], &shp);
-		if (shp)
-		{
-			long numPoints;
-			shp->get_NumPoints(&numPoints);
-			double xPnt, yPnt;
-			for (long j = 0; j < numPoints; j++)
-			{
-				shp->get_XY(j, &xPnt, &yPnt, &vb);
-				double dist = sqrt(pow(x - xPnt, 2.0) + pow(y - yPnt, 2.0));
-				if (dist < minDist && dist < maxDistance)
-				{
-					minDist = dist;
-					*shapeIndex = ids[i];
-					*pointIndex = j;
-				}
-			}
-			shp->Release();
-		}
-	}
-	dist = minDist;
-	return minDist < maxDistance;
-}
 
 // *****************************************************************
 //		GetClosestVertex()
@@ -3373,7 +3069,7 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 		for (size_t i = 0; i < _shapeData.size(); i++) {
 			ids.push_back(i);
 		}
-		result = this->getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex, *distance);
+		result = ShapefileHelper::GetClosestPoint(this, x, y, maxDistance, ids, shapeIndex, pointIndex, *distance);
 	}
 	else 
 	{
@@ -3381,7 +3077,7 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 		Extent box(x - maxDistance, x + maxDistance, y - maxDistance, y + maxDistance);
 		if (this->SelectShapesCore(box, 0.0, SelectMode::INTERSECTION, ids))
 		{
-			result = getClosestPoint(x, y, maxDistance, ids, shapeIndex, pointIndex, *distance);
+			result = ShapefileHelper::GetClosestPoint(this, x, y, maxDistance, ids, shapeIndex, pointIndex, *distance);
 		}
 	}
 	*retVal = result ? VARIANT_TRUE: VARIANT_FALSE;
@@ -3449,11 +3145,37 @@ STDMETHODIMP CShapefile::put_Snappable(VARIANT_BOOL newVal)
 }
 
 // *****************************************************************
+//		ShapefileType2D()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = Utility::ShapeTypeConvert2D(_shpfiletype);
+	return S_OK;
+}
+
+// *****************************************************************
+//		FieldIndexByName()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_FieldIndexByName(BSTR FieldName, LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_table->get_FieldIndexByName(FieldName, pVal);
+	return S_OK;
+}
+
+// *****************************************************************
 //		Move()
 // *****************************************************************
-void CShapefile::Move(double xProjOffset, double yProjOffset)
+STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal)
 {
-	if (m_sourceType != sstInMemory) return;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (_sourceType != sstInMemory) 
+	{
+		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		return S_OK;
+	}	
 	long numShapes;
 	get_NumShapes(&numShapes);
 	for (long i = 0; i < numShapes; i++)
@@ -3464,96 +3186,6 @@ void CShapefile::Move(double xProjOffset, double yProjOffset)
 			shp->Move(xProjOffset, yProjOffset);
 		}
 	}
-}
-
-// *****************************************************************
-//		CloneSelection()
-// *****************************************************************
-IShapefile* CShapefile::CloneSelection()
-{
-	IShapefile* sfNew = NULL;
-	Clone(&sfNew);
-	long numShapes, shapeIndex;
-	get_NumShapes(&numShapes);
-	for (long i = 0; i < numShapes; i++)
-	{
-		if (!_shapeData[i]->selected) continue;
-		CComPtr<IShape> shp = NULL;
-		get_Shape(i, &shp);
-		if (shp) {
-			sfNew->EditAddShape(shp, &shapeIndex);
-		}
-	}
-	return sfNew;
-}
-
-// *****************************************************************
-//		GetSelectedIndices()
-// *****************************************************************
-vector<int>* CShapefile::GetSelectedIndices()
-{
-	vector<int>* result = new vector<int>();
-	for (size_t i = 0; i < _shapeData.size(); i++) {
-		if (_shapeData[i]->selected)
-			result->push_back(i);
-	}
-	return result;
-}
-
-// *****************************************************************
-//		GetSelectedExtents()
-// *****************************************************************
-bool CShapefile::GetSelectedExtents(double& xMinRef, double& yMinRef, double& xMaxRef, double& yMaxRef)
-{
-	double xMin, xMax, yMin, yMax;
-	bool found = false;
-	for (size_t i = 0; i < _shapeData.size(); i++)
-	{
-		if (_shapeData[i]->selected)
-		{
-			if (QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
-			{
-				if (!found)
-				{
-					xMinRef = xMin, xMaxRef = xMax;
-					yMinRef = yMin, yMaxRef = yMax;
-					found = true;
-				}
-				else
-				{
-					if (xMin < xMinRef)	xMinRef = xMin;
-					if (xMax > xMaxRef)	xMaxRef = xMax;
-					if (yMin < yMinRef)	yMinRef = yMin;
-					if (yMax > yMaxRef)	yMaxRef = yMax;
-				}
-			}
-		}
-	}
-	return found;
-}
-
-// *****************************************************************
-//		Rotate()
-// *****************************************************************
-void CShapefile::Rotate(double originX, double originY, double angleDegree)
-{
-	if (m_sourceType != sstInMemory) return;
-	for (size_t i = 0; i < _shapeData.size(); i++) 
-	{
-		CComPtr<IShape> shp = NULL;
-		get_Shape(i, &shp);
-		if (shp) {
-			shp->Rotate(originX, originY, angleDegree);
-		}
-	}
-}
-
-// *****************************************************************
-//		ShapefileType2D()
-// *****************************************************************
-STDMETHODIMP CShapefile::get_ShapefileType2D(ShpfileType* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = Utility::ShapeTypeConvert2D(_shpfiletype);
+	*retVal = VARIANT_TRUE;
 	return S_OK;
 }

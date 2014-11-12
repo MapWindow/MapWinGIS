@@ -20,7 +20,7 @@
 //********************************************************************************************************
 
 #pragma once
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "GridInterpolate.h"
 #include "XRedBlackTree.h"
 #include "YRedBlackTree.h"

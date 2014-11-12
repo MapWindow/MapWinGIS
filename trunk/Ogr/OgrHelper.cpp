@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "OgrHelper.h"
 #include "ogrsf_frmts.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "GeoProjection.h"
 #include <set>
 #include "Shapefile.h"

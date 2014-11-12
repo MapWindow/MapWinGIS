@@ -23,7 +23,7 @@
 #include <stack>
 #include "colour.h"
 #include "Projections.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "LineBresenham.h"
 #include "Image.h"
 #include "Shapefile.h"
@@ -39,6 +39,7 @@
 #include "Shape.h"
 #include "Vector.h"
 #include "Expression.h"
+#include "OgrConverter.h"
 
 #pragma warning(disable:4996)
 
@@ -3370,7 +3371,7 @@ void CUtils::Parse(CString sOrig, int * opts)
 STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICallback *cBack, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	(*sf) = GeometryConverter::Read_OGR_Layer(Filename, shpType);
+	(*sf) = OgrConverter::ReadOgrLayer(Filename, shpType);
 	if (*sf)
 	{
 		((CShapefile*)(*sf))->ValidateOutput(sf, "OGRLayerToShapefile", "Utils");
@@ -3412,10 +3413,10 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 
 	if (geos)
 	{
-		OGRGeometry* geomSubject = GeometryConverter::ShapeToGeometry(SubjectPolygon);
+		OGRGeometry* geomSubject = OgrConverter::ShapeToGeometry(SubjectPolygon);
 		if (geomSubject == NULL) return S_OK;
 
-		OGRGeometry* geomClip = GeometryConverter::ShapeToGeometry(ClipPolygon);
+		OGRGeometry* geomClip = OgrConverter::ShapeToGeometry(ClipPolygon);
 		if (geomClip == NULL)
 		{
 			OGRGeometryFactory::destroyGeometry(geomSubject);
@@ -3447,7 +3448,7 @@ STDMETHODIMP CUtils::ClipPolygon(PolygonOperation op, IShape* SubjectPolygon, IS
 			SubjectPolygon->get_ShapeType(&shptype);
 			
 			vector<IShape* > vShapes;
-			if (GeometryConverter::GeometryToShapes(oGeom, &vShapes, Utility::ShapeTypeIsM(shptype)))
+			if (OgrConverter::GeometryToShapes(oGeom, &vShapes, Utility::ShapeTypeIsM(shptype)))
 			{
 				*retval = vShapes[0];
 				

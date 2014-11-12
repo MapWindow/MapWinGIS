@@ -61,7 +61,7 @@ struct GlobalSettingsInfo
 		dtorCount = 0;
 		saveOgrLabels = false;
 		useSchemesForStyles = false;
-		ogrUseStyles = false;
+		ogrUseStyles = true;
 		autoChooseOgrLoadingMode = true;
 		ogrLayerMaxFeatureCount = 50000;
 		ogrEncoding = oseUtf8;

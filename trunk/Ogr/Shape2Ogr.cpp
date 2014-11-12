@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Shape2Ogr.h"
 #include "OgrLabels.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "OgrHelper.h"
 #include "OgrLabels.h"
 #include "Shapefile.h"
@@ -159,7 +159,7 @@ bool Shape2Ogr::ShapeRecord2Feature(IShapefile* sf, long shapeIndex, OGRFeature*
 				}
 			}
 
-			OGRGeometry* geom = GeometryConverter::ShapeToGeometry(shp, type);
+			OGRGeometry* geom = OgrConverter::ShapeToGeometry(shp, type);
 			feature->SetGeometry(geom);
 			OGRGeometryFactory::destroyGeometry(geom);
 		}

@@ -24,8 +24,9 @@
 #include "Shape.h"
 #include "GeometryHelper.h"
 #include "Templates.h"
-#include "Utilities\GeosHelper.h"
+#include "GeosHelper.h"
 #include <algorithm>
+#include "GeosConverter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -472,7 +473,7 @@ STDMETHODIMP CShape::get_IsValid(VARIANT_BOOL* retval)
 	// -----------------------------------------------
 	//  check through GEOS (common for both modes)
 	// -----------------------------------------------
-	OGRGeometry* oGeom = GeometryConverter::ShapeToGeometry(this);
+	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(this);
 	if (oGeom == NULL) 
 	{
 		_isValidReason = "Failed to convert to OGR geometry";
@@ -1299,10 +1300,10 @@ STDMETHODIMP CShape::Relates(IShape* Shape, tkSpatialRelation Relation, VARIANT_
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 	
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_OK;
 
-	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
+	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
 		OGRGeometryFactory::destroyGeometry(oGeom1);
@@ -1405,13 +1406,13 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) 
 		return S_OK;
 
 	OGRwkbGeometryType oReturnType = oGeom1->getGeometryType();
 	
-	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
+	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
 		OGRGeometryFactory::destroyGeometry(oGeom1);
@@ -1448,7 +1449,7 @@ STDMETHODIMP CShape::Clip(IShape* Shape, tkClipOperation Operation, IShape** ret
 	IShape* shp;
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
-	shp = GeometryConverter::GeometryToShape(oGeom3, Utility::ShapeTypeIsM(shpType), oReturnType);
+	shp = OgrConverter::GeometryToShape(oGeom3, Utility::ShapeTypeIsM(shpType), oReturnType);
 	
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
@@ -1474,10 +1475,10 @@ STDMETHODIMP CShape::Distance(IShape* Shape, double* retval)
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 	
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_OK;
 
-	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
+	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
 		OGRGeometryFactory::destroyGeometry(oGeom1);
@@ -1516,7 +1517,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_FALSE;
 		
 	oGeom2 = DoBuffer(Distance, nQuadSegments, oGeom1);
@@ -1528,7 +1529,7 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1545,7 +1546,7 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
 
-	GEOSGeom gs = GeometryConverter::Shape2GEOSGeom(this);
+	GEOSGeom gs = GeosConverter::ShapeToGeom(this);
 	if (!gs) 
 	{
 		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
@@ -1576,7 +1577,7 @@ STDMETHODIMP CShape::BufferWithParams(DOUBLE Ditances, LONG numSegments, VARIANT
 		get_ShapeType(&shpType);
 
 		vector<IShape*> shapes;
-		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
+		if (GeosConverter::GEOSGeomToShapes(gsNew, &shapes, Utility::ShapeTypeIsM(shpType)))
 		{
 			if (shapes.size() > 0) {
 				*retVal = shapes[0];
@@ -1602,7 +1603,7 @@ STDMETHODIMP CShape::Boundary(IShape** retval)
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_OK;
 	
 	oGeom2 = oGeom1->getBoundary();
@@ -1614,7 +1615,7 @@ STDMETHODIMP CShape::Boundary(IShape** retval)
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1634,7 +1635,7 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_OK;
 	
 	oGeom2 = oGeom1->ConvexHull();
@@ -1646,7 +1647,7 @@ STDMETHODIMP CShape::ConvexHull(IShape** retval)
 	this->get_ShapeType(&shpType);
 
 	IShape* shp;
-	shp = GeometryConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
+	shp = OgrConverter::GeometryToShape(oGeom2, Utility::ShapeTypeIsM(shpType));
 
 	*retval = shp;
 	OGRGeometryFactory::destroyGeometry(oGeom2);
@@ -1685,10 +1686,10 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	OGRGeometry* oGeom1 = NULL;
 	OGRGeometry* oGeom2 = NULL;
 
-	oGeom1 = GeometryConverter::ShapeToGeometry(this);
+	oGeom1 = OgrConverter::ShapeToGeometry(this);
 	if (oGeom1 == NULL) return S_OK;
 	
-	oGeom2 = GeometryConverter::ShapeToGeometry(Shape);
+	oGeom2 = OgrConverter::ShapeToGeometry(Shape);
 	if (oGeom2 == NULL) 
 	{	
 		OGRGeometryFactory::destroyGeometry(oGeom1);
@@ -1707,7 +1708,7 @@ STDMETHODIMP CShape::get_IsValidReason(BSTR* retval)
 	this->get_ShapeType(&shpType);
 
 	std::vector<IShape*> vShapes;
-	if (!GeometryConverter::GeometryToShapes(oGeom3, &vShapes, Utility::ShapeTypeIsM(shpType)))return S_OK;
+	if (!OgrConverter::GeometryToShapes(oGeom3, &vShapes, Utility::ShapeTypeIsM(shpType)))return S_OK;
 	OGRGeometryFactory::destroyGeometry(oGeom3);
 
 	if (vShapes.size()!=0) 
@@ -1731,7 +1732,7 @@ STDMETHODIMP CShape::get_InteriorPoint(IPoint** retval)
 	double xMin, xMax, yMin, yMax;
 	this->get_ExtentsXY(xMin, yMin, xMax, yMax);
 	
-	OGRGeometry* oGeom = GeometryConverter::ShapeToGeometry(this);
+	OGRGeometry* oGeom = OgrConverter::ShapeToGeometry(this);
 	if (oGeom == NULL)
 	{
 		ErrorMessage(tkCANT_CONVERT_SHAPE_GEOS);
@@ -1944,7 +1945,6 @@ STDMETHODIMP CShape::PointInThisPoly(IPoint * pt, VARIANT_BOOL *retval)
 	
 	GetUtils()->PointInPolygon(this, pt, retval);
 
-	//bool result = _useFastMode ? PointInThisPolyFast(pt) : PointInThisPolyRegular(pt);
 	return S_OK;
 }
 
@@ -2163,7 +2163,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 		
 		// for polygons holes should be treated, the main problem here is to determine 
 		// to which part the hole belong; OGR will be used for this
-		OGRGeometry* geom = GeometryConverter::ShapeToGeometry(this);
+		OGRGeometry* geom = OgrConverter::ShapeToGeometry(this);
 		if (geom)
 		{
 			OGRwkbGeometryType type = geom->getGeometryType();
@@ -2171,11 +2171,11 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 			{
 				std::vector<OGRGeometry*> polygons;		// polygons shouldn't be deleted as they are only 
 														// references to the parts of init multipolygon
-				if (GeometryConverter::MultiPolygon2Polygons(geom, &polygons))
+				if (OgrConverter::MultiPolygon2Polygons(geom, &polygons))
 				{
 					for (unsigned int i = 0; i < polygons.size(); i++)
 					{
-						IShape* poly = GeometryConverter::GeometryToShape(polygons[i], isM);
+						IShape* poly = OgrConverter::GeometryToShape(polygons[i], isM);
 						if (poly)
 						{
 							vShapes.push_back(poly);
@@ -2185,7 +2185,7 @@ bool CShape::ExplodeCore(std::vector<IShape*>& vShapes)
 			}
 			else
 			{
-				IShape* shp = GeometryConverter::GeometryToShape(geom, isM);
+				IShape* shp = OgrConverter::GeometryToShape(geom, isM);
 				if (shp)
 				{
 					vShapes.push_back(shp);
@@ -2726,7 +2726,7 @@ STDMETHODIMP CShape::ExportToWKT(BSTR * retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
-	OGRGeometry* geom = GeometryConverter::ShapeToGeometry(this);
+	OGRGeometry* geom = OgrConverter::ShapeToGeometry(this);
 	if (geom != NULL) 
 	{
 		char* s;
@@ -2763,7 +2763,7 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 	{
 		// if there is a geometry collection only the first shape will be taken
 		std::vector<IShape*> shapes;
-		if (GeometryConverter::GeometryToShapes(oGeom, &shapes, true))
+		if (OgrConverter::GeometryToShapes(oGeom, &shapes, true))
 		{
 			if (shapes.size() > 0 && shapes[0])
 			{
@@ -2794,10 +2794,10 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 //*****************************************************************
 STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	GEOSGeometry* g1 = GeometryConverter::Shape2GEOSGeom(this);
-	GEOSGeometry* g2 = GeometryConverter::Shape2GEOSGeom(shape2);
+	GEOSGeometry* g1 = GeosConverter::ShapeToGeom(this);
+	GEOSGeometry* g2 = GeosConverter::ShapeToGeom(shape2);
 	if (g1 && g2)
 	{
 		GEOSCoordSequence* coords = GeosHelper::ClosestPoints(g1, g2);
@@ -2941,8 +2941,8 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 	vector<GEOSGeometry*> results;
 
 	GEOSGeometry* result = NULL;
-	GEOSGeometry* line = GeometryConverter::Shape2GEOSGeom(polyline);
-	GEOSGeometry* s = GeometryConverter::Shape2GEOSGeom(this);
+	GEOSGeometry* line = GeosConverter::ShapeToGeom(polyline);
+	GEOSGeometry* s = GeosConverter::ShapeToGeom(this);
 	if (s && line)
 	{
 		if (GeosHelper::Intersects(s, line))
@@ -2977,7 +2977,7 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 	int numGeoms = GeosHelper::GetNumGeometries(result);
 	if (numGeoms > 1)
 	{
-		GeometryConverter::NormalizeSplitResults(result, s, shpType, results);
+		GeosConverter::NormalizeSplitResults(result, s, shpType, results);
 		GeosHelper::DestroyGeometry(result);
 	}
 	else {
@@ -2990,7 +2990,7 @@ bool CShape::SplitByPolylineCore(IShape* polyline, vector<IShape*>& shapes )
 		for (size_t i = 0; i < results.size(); i++)
 		{
 			vector<IShape*> shapesTemp;
-			GeometryConverter::GEOSGeomToShapes(results[i], &shapesTemp, false);
+			GeosConverter::GEOSGeomToShapes(results[i], &shapesTemp, false);
 			shapes.insert(shapes.end(), shapesTemp.begin(), shapesTemp.end());
 		}
 	}

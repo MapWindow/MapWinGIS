@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Ogr2RawData.h"
 #include "OgrHelper.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "Shape.h"
 #include "Expression.h"
 
@@ -58,7 +58,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 
 		IShape* shp = NULL;
 		if (oGeom)
-			shp = GeometryConverter::GeometryToShape(oGeom, loader->IsMShapefile);
+			shp = OgrConverter::GeometryToShape(oGeom, loader->IsMShapefile);
 
 		if (!shp)  // insert null shape so that client can still access it
 			GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);

@@ -5,6 +5,9 @@
 #include "UndoList.h"
 #include "GeometryHelper.h"
 #include "Shape.h"
+#include "ShapefileHelper.h"
+#include "GroupOperation.h"
+#include "ShapeHelper.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -246,7 +249,7 @@ void CMapView::HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl)
 				}
 
 				// start shape moving
-				if (((CShapefile*)sf)->PointWithinShape(shp, projX, projY, GetMouseTolerance(ToleranceSelect)))
+				if (ShapeHelper::PointWithinShape(shp, projX, projY, GetMouseTolerance(ToleranceSelect)))
 				{
 					// it's confusing to have both part and shape move depending on where you clicked
 					if (GetEditorBase()->HasSelectedPart()) return;   
@@ -439,7 +442,7 @@ void CMapView::RegisterGroupOperation(DraggingOperation operation)
 	IShapefile* source = GetShapefile(layerHandle);
 	if (source) 
 	{
-		vector<int>* selection = ((CShapefile*)source)->GetSelectedIndices();
+		vector<int>* selection = ShapefileHelper::GetSelectedIndices(source);
 		if (!selection) return;
 
 		bool added = false;
@@ -498,7 +501,7 @@ bool CMapView::InitRotationTool()
 				if (numSelected > 0)
 				{
 					double xMin, yMin, xMax, yMax;
-					if (((CShapefile*)sf)->GetSelectedExtents(xMin, yMin, xMax, yMax))
+					if (ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax))
 					{
 						_dragging.RotateCenter.x = (xMax + xMin) / 2.0;
 						_dragging.RotateCenter.y = (yMax + yMin) / 2.0;
@@ -522,7 +525,7 @@ bool CMapView::InitDraggingShapefile()
 		IShapefile* sf = GetShapefile(_dragging.LayerHandle);
 		if (sf)
 		{
-			IShapefile* sfNew = ((CShapefile*)sf)->CloneSelection();
+			IShapefile* sfNew = ShapefileHelper::CloneSelection(sf);
 			ShpfileType shpType;
 			sf->get_ShapefileType(&shpType);
 			shpType = Utility::ShapeTypeConvert2D(shpType);
@@ -614,63 +617,16 @@ void CMapView::_UnboundShapeFinished(IShape* polyline)
 	bool redrawNeeded = false;
 	if (m_cursorMode == cmSplitByPolyline)
 	{
-		redrawNeeded = SplitByPolyline(layerHandle, sf, indices, polyline);
+		int errorCode = tkNO_ERROR;
+		redrawNeeded = GroupOperation::SplitByPolyline(layerHandle, sf, indices, polyline, _undoList, errorCode);
+		if (errorCode != tkNO_ERROR) {
+			ErrorMessage(errorCode);
+		}
 	}
 	
 	if (redrawNeeded)
 		Redraw();
 }
 
-// ***************************************************************
-//	SplitByPolyline
-// ***************************************************************
-bool CMapView::SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline)
-{
-	vector<long> deleteList;
 
-	VARIANT_BOOL vb;
-	_undoList->BeginBatch(&vb);
-	if (!vb) {
-		ErrorMessage(tkCANT_START_BATCH_OPERATION);
-		return false;
-	}
-
-	bool split = false;
-	for (long i = 0; i < (long)indices.size(); i++)
-	{
-		IShape* shp = NULL;
-		sf->get_Shape(indices[i], &shp);
-		if (shp)
-		{
-			vector<IShape*> shapes;
-			if (((CShape*)shp)->SplitByPolylineCore(polyline, shapes))
-			{
-				for (size_t j = 0; j < shapes.size(); j++)
-				{
-					long shapeIndex;
-					sf->EditAddShape(shapes[j], &shapeIndex);
-					// TODO: copy attributes
-					_undoList->Add(uoAddShape, layerHandle, shapeIndex, &vb);
-					shapes[j]->Release();
-				}
-				deleteList.push_back(indices[i]);
-				split = true;
-			}
-			shp->Release();
-		}
-	}
-	
-	for (int i = deleteList.size() - 1; i >= 0; i--) 
-	{
-		_undoList->Add(uoRemoveShape, layerHandle, deleteList[i], &vb);
-		if (vb) {
-			sf->EditDeleteShape(deleteList[i], &vb);
-		}
-	}
-
-	long count;
-	_undoList->EndBatch(&count);
-
-	return split;
-}
 

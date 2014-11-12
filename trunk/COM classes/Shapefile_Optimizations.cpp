@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #pragma once 
 #include "stdafx.h"
@@ -84,13 +84,13 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 						delete[] data;
 					}
 
-					if (globalCallback != NULL)
+					if (_globalCallback != NULL)
 					{
 						newPercent = (long)((i + 1.0)/numShapes*100);
 						if( newPercent > percent )
 						{	
 							percent = newPercent;
-							globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading shapes..."));
+							_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Reading shapes..."));
 						}
 					}
 				}
@@ -132,9 +132,9 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 			}
 		}
 	}
-	if (globalCallback)
+	if (_globalCallback)
 	{
-		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
 	}
 	return S_OK;
 }
@@ -163,7 +163,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 		return S_OK;
 	}
 	// get the Info from the disk
-	fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+	fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 	int intbuf;
 	
 	fread(&intbuf,sizeof(int),1,_shpfile);
@@ -227,7 +227,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 		else
 		{	
 			//Get the Info from the disk
-			fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+			fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
@@ -439,7 +439,7 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 		else
 		{	
 			// get the Info from the disk
-			fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+			fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
@@ -661,7 +661,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 			else
 			{
 				//Get the Info from the disk
-				fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+				fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 				int intbuf;
 				fread(&intbuf,sizeof(int),1,_shpfile);

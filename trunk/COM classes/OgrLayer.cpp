@@ -3,7 +3,7 @@
 #include "OgrHelper.h"
 #include "UtilityFunctions.h"
 #include "GeoProjection.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "Shapefile.h"
 #include "OgrStyle.h"
 #include "Shape2Ogr.h"
@@ -502,7 +502,7 @@ STDMETHODIMP COgrLayer::get_ShapeType(ShpfileType* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = SHP_NULLSHAPE;
 	if (!CheckState()) return S_FALSE;
-	*retVal = GeometryConverter::GeometryType2ShapeType(_layer->GetGeomType());
+	*retVal = OgrConverter::GeometryType2ShapeType(_layer->GetGeomType());
 	return S_OK;
 }
 

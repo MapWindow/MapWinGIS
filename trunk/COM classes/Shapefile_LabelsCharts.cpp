@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #include "stdafx.h"
 #include "Shapefile.h"
@@ -49,7 +49,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		return S_OK;
 	} 
 	
-	m_labels->Clear();
+	_labels->Clear();
 	BSTR text;
 	double x = 0.0,y = 0.0;
 	long percent = 0;
@@ -62,11 +62,11 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 	this->get_NumShapes(&_numShapes);
 	
 	tkLineLabelOrientation orientation;
-	m_labels->get_LineOrientation(&orientation);
+	_labels->get_LineOrientation(&orientation);
 
 	for(int i = 0; i < _numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, _numShapes, "Calculating label positions...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, _numShapes, "Calculating label positions...", _key, percent);
 		
 		/* extracting field value */
 		if (FieldIndex != -1)
@@ -100,7 +100,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		{
 			// labeling the only part
 			((CShape*)shp)->get_LabelPosition(Method, x, y, rotation, orientation);
-			m_labels->AddLabel(text, x, y, rotation);
+			_labels->AddLabel(text, x, y, rotation);
 		}
 		else if (numParts == 0)
 		{
@@ -108,7 +108,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 			{
 				// points
 				((CShape*)shp)->get_LabelPosition(Method, x, y, rotation, orientation);
-				m_labels->AddLabel(text, x, y, rotation);
+				_labels->AddLabel(text, x, y, rotation);
 			}	
 			else
 			{
@@ -144,12 +144,12 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					
 					if (partCount == 0) 
 					{
-						m_labels->AddLabel(text, x, y, rotation);
+						_labels->AddLabel(text, x, y, rotation);
 						partCount++;
 					}
 					else		
 					{
-						m_labels->AddPart(i, text, x, y, rotation);
+						_labels->AddPart(i, text, x, y, rotation);
 					}
 					shpPart->Release(); 
 					shpPart = NULL;
@@ -211,7 +211,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 					if (shpPart)
 					{
 						((CShape*)shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
-						m_labels->AddLabel(text, x, y, rotation);
+						_labels->AddLabel(text, x, y, rotation);
 						shpPart->Release();
 					}
 					else
@@ -220,9 +220,9 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 				else
 				{
 add_empty_label:
-					m_labels->AddLabel(text, 0.0, 0.0, 0.0);
+					_labels->AddLabel(text, 0.0, 0.0, 0.0);
 					ILabel* lbl = NULL;
-					m_labels->get_Label((long)i, 0, &lbl);
+					_labels->get_Label((long)i, 0, &lbl);
 					if(lbl != NULL)
 					{
 						lbl->put_Visible(VARIANT_FALSE);
@@ -238,27 +238,27 @@ add_empty_label:
 	}
 	
 	long numLabels;
-	m_labels->get_Count(&numLabels);
+	_labels->get_Count(&numLabels);
 	*Count = numLabels;
-	m_labels->put_Synchronized(VARIANT_TRUE);
-	m_labels->put_Positioning(Method);
+	_labels->put_Synchronized(VARIANT_TRUE);
+	_labels->put_Positioning(Method);
 
 	if (FieldIndex == -1)
 	{
 		// in case there is label expression, reapply it
 		BSTR expr;
-		m_labels->get_Expression(&expr);
-		m_labels->put_Expression(A2BSTR(""));
-		m_labels->put_Expression(expr);
+		_labels->get_Expression(&expr);
+		_labels->put_Expression(A2BSTR(""));
+		_labels->put_Expression(expr);
 	}
 	else
 	{
 		// save it for deserialization
-		((CLabels*)m_labels)->SaveSourceField(FieldIndex);
+		((CLabels*)_labels)->SaveSourceField(FieldIndex);
 	}
 
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+	if( _globalCallback != NULL )
+		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
 	return S_OK;
 }
 
@@ -269,9 +269,9 @@ add_empty_label:
 STDMETHODIMP CShapefile::get_Labels(ILabels** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_labels;
-	if (m_labels)
-		m_labels->AddRef();
+	*pVal = _labels;
+	if (_labels)
+		_labels->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
@@ -283,7 +283,7 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&m_labels, false);
+		Utility::put_ComReference(newVal, (IDispatch**)&_labels, false);
 		this->put_ReferenceToLabels(false);
 	}
 	return S_OK;
@@ -294,8 +294,8 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 /***********************************************************************/
 void CShapefile::put_ReferenceToLabels(bool bNullReference)
 {
-	if (m_labels == NULL) return;
-	CLabels* coLabels = static_cast<CLabels*>(m_labels);
+	if (_labels == NULL) return;
+	CLabels* coLabels = static_cast<CLabels*>(_labels);
 	if (!bNullReference)
 		coLabels->put_ParentShapefile(this);
 	else
@@ -310,9 +310,9 @@ void CShapefile::put_ReferenceToLabels(bool bNullReference)
 STDMETHODIMP CShapefile::get_Charts (ICharts** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_charts;
-	if ( m_charts != NULL)
-		m_charts->AddRef();
+	*pVal = _charts;
+	if ( _charts != NULL)
+		_charts->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
@@ -324,15 +324,15 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 	}
 	else
 	{
-		if (newVal != m_charts)
+		if (newVal != _charts)
 		{
-			if (m_charts != NULL) 
+			if (_charts != NULL) 
 			{
-				m_charts->Release();
-				m_charts = NULL;
+				_charts->Release();
+				_charts = NULL;
 			}
-			m_charts = newVal;
-			m_charts->AddRef();
+			_charts = newVal;
+			_charts->AddRef();
 		}
 	}
 	return S_OK;
@@ -342,13 +342,9 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 /***********************************************************************/
 void CShapefile::put_ReferenceToCharts(bool bNullReference)
 {
-	if (m_charts == NULL) return;
-	CCharts* coCharts = static_cast<CCharts*>(m_charts);
-	//CShapefile* coShapefile = static_cast<CShapefile*>(this);
-	if (!bNullReference)
-		coCharts->put_ParentShapefile(this);
-	else
-		coCharts->put_ParentShapefile(NULL);
+	if (!_charts) return;
+	CCharts* coCharts = static_cast<CCharts*>(_charts);
+	coCharts->put_ParentShapefile(!bNullReference ? this : NULL);
 };
 
 // ********************************************************************
@@ -379,7 +375,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 	if (Method == lpNone)
 	{
 		// simply set 0 positions, the actual positions will be set externally; is needed for loading of previously saved labels
-		((CCharts*)m_charts)->_chartsExist = true;
+		((CCharts*)_charts)->_chartsExist = true;
 		for (unsigned int i = 0; i < _shapeData.size(); i++)
 		{
 			_shapeData[i]->chart->x = 0.0;
@@ -396,8 +392,8 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 			if( newpercent > percent )
 			{	
 				percent = newpercent;
-				if( globalCallback != NULL ) 
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating charts positions..."));
+				if( _globalCallback != NULL ) 
+					_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Calculating charts positions..."));
 			}
 			
 			IShape* shp = NULL;
@@ -472,121 +468,10 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 			shp->Release(); shp = NULL;
 		}
 		
-		if( globalCallback != NULL )
-			globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+		if( _globalCallback != NULL )
+			_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
 	}
 	return;
-}
-
-// *******************************************************************
-//		ReadChartFields()
-// *******************************************************************
-// Fills array with data values from the selected fields, returns number
-bool CShapefile::ReadChartFields(std::vector<double*>* values)
-{
-	struct FieldIndex
-	{
-		FieldType type;
-		int index;
-	};
-	
-	long numShapes;
-	this->get_NumShapes(&numShapes);
-	
-	long numBars;
-	m_charts->get_NumFields(&numBars);
-
-	if ( numBars == 0 ) return false;
-
-	// reading types of fields
-	std::vector<FieldIndex> fields;
-	for (int j = 0; j < numBars; j++)
-	{
-		long fieldIndex;
-		IChartField* chartField = NULL;
-		m_charts->get_Field(j, &chartField);
-		if (chartField)
-		{
-			chartField->get_Index(&fieldIndex);
-			chartField->Release();
-		}
-
-		//m_charts->get_FieldIndex(j, &fieldIndex);
-		IField* fld = NULL;
-		this->get_Field(fieldIndex, &fld);
-		if ( fld )
-		{
-			FieldIndex ind;
-			fld->get_Type(&ind.type);
-			ind.index = fieldIndex;
-			fields.push_back(ind);
-			fld->Release(); fld = NULL;
-		}
-		else
-		{
-			FieldIndex ind;
-			ind.index = -1;
-			ind.type = STRING_FIELD;
-			fields.push_back(ind);
-		}
-	}
-	
-	// reading data
-	VARIANT val;
-	VariantInit(&val);
-	
-	values->resize(numShapes);
-	for (int i = 0; i < numShapes; i++)
-	{	
-		(*values)[i] = new double[numBars];
-		double* arr = (*values)[i];
-		for (int j = 0; j < numBars; j++)
-		{
-			if (fields[j].type == INTEGER_FIELD || fields[j].type == DOUBLE_FIELD)
-			{
-				this->get_CellValue(fields[j].index, i, &val );
-				dVal(val, arr[j]);
-			}
-			else
-			{
-				arr[j] = 0.0;
-			}
-		}
-	}
-	VariantClear(&val);
-	return true;
-}
-
-// *******************************************************************
-//		ReadChartField()
-// *******************************************************************
-// ReadChartFields
-bool CShapefile::ReadChartField(std::vector<double>* values, int fieldIndex)
-{
-	IField* fld = NULL;
-	this->get_Field(fieldIndex, &fld);
-	if ( !fld )
-		return false;
-	FieldType type;
-	fld->get_Type(&type);
-	if (type != INTEGER_FIELD && type != DOUBLE_FIELD)
-		return false;
-	fld->Release(); fld = NULL;
-
-	// reading data
-	VARIANT val;
-	VariantInit(&val);
-	
-	long numShapes;
-	this->get_NumShapes(&numShapes);
-	values->resize(numShapes);
-	for (int i = 0; i < numShapes; i++)
-	{	
-		this->get_CellValue(fieldIndex, i, &val );
-		dVal(val, (*values)[i]);
-	}
-	VariantClear(&val);
-	return true;
 }
 
 // *************************************************************

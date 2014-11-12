@@ -4,6 +4,7 @@
 #include "MapTracker.h"
 #include "ShapeEditor.h"
 #include "Shapefile.h"
+#include "ShapefileHelper.h"
 
 
 // ************************************************************
@@ -691,7 +692,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 				if (sf)
 				{
 					double angle = GetDraggingRotationAngle();
-					((CShapefile*)sf)->Rotate(_dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
+					ShapefileHelper::Rotate(sf, _dragging.RotateCenter.x, _dragging.RotateCenter.y, angle);
 					RegisterGroupOperation(operation);
 					Redraw();
 				}
@@ -703,7 +704,8 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 				if (sf) 
 				{
 					Point2D pnt = GetDraggingProjOffset();
-					((CShapefile*)sf)->Move(pnt.x, pnt.y);
+					VARIANT_BOOL vb;
+					sf->Move(pnt.x, pnt.y, &vb);
 					RegisterGroupOperation(operation);
 					Redraw();
 				}

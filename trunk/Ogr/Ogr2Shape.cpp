@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Ogr2Shape.h"
 #include "OgrLabels.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "GeoProjection.h"
 
 // *************************************************************
@@ -49,7 +49,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 
 	OGRFeature *poFeature;
 
-	ShpfileType shpType = GeometryConverter::GeometryType2ShapeType(layer->GetGeomType());
+	ShpfileType shpType = OgrConverter::GeometryType2ShapeType(layer->GetGeomType());
 
 	// in case of queries or generic (untyped) geometry columns, type isn't defined
 	// as quick fix let's fetch it from the first shape
@@ -62,7 +62,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 			OGRGeometry* geom = poFeature->GetGeometryRef();
 			if (geom)
 			{
-				shpType = GeometryConverter::GeometryType2ShapeType(geom->getGeometryType());
+				shpType = OgrConverter::GeometryType2ShapeType(geom->getGeometryType());
 			}
 			OGRFeature::DestroyFeature(poFeature);
 			break;
@@ -183,7 +183,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		IShape* shp = NULL;
 		if (oGeom)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
+			shp = OgrConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
 		}
 
 		if (!shp)

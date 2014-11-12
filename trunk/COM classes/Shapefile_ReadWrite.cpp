@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here).
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #pragma once
 #include "stdafx.h"
@@ -52,7 +52,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 	// using fast mode?
 	if (_fastMode)
 	{
-		fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+		fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 		// read the shp from disk
 		int intbuf;
@@ -91,7 +91,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			IShape* shape = NULL;
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 			//((CShape*)shape)->put_fastMode(true);
 			//((CShape*)shape)->put_fastModeAdd(true);
 			((CShape*)shape)->put_ShapeWrapper(shp);
@@ -101,7 +101,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 	}
 
 	// read the shp from disk
-	fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+	fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 	int intbuf;
 	fread(&intbuf,sizeof(int),1,_shpfile);
@@ -139,7 +139,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 			{
 				CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 				shape->Create(shpType,&vbretval);
-				shape->put_GlobalCallback(globalCallback);
+				shape->put_GlobalCallback(_globalCallback);
 				*pVal = shape;
 			}
 		}
@@ -157,13 +157,13 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POINT )
 			{
 				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-				pnt->put_GlobalCallback(globalCallback);
+				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y;
 				fread(&x,sizeof(double),1,_shpfile);
@@ -191,13 +191,13 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POINTZ )
 			{
 				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-				pnt->put_GlobalCallback(globalCallback);
+				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y, z, m;
 				fread(&x,sizeof(double),1,_shpfile);
@@ -229,13 +229,13 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POINTM )
 			{
 				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-				pnt->put_GlobalCallback(globalCallback);
+				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y, m;
 				fread(&x,sizeof(double),1,_shpfile);
@@ -266,7 +266,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POLYLINE )
 			{
@@ -304,7 +304,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -330,7 +330,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYLINEZ )
 			{
 				VARIANT_BOOL retval;
@@ -366,7 +366,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -427,7 +427,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POLYLINEM )
 			{
@@ -464,7 +464,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -509,7 +509,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_POLYGON )
 			{
@@ -545,7 +545,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -570,7 +570,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYGONZ )
 			{
 				VARIANT_BOOL retval;
@@ -606,7 +606,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -665,7 +665,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYGONM )
 			{
 				VARIANT_BOOL retval;
@@ -703,7 +703,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -748,7 +748,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_MULTIPOINT )
 			{
@@ -769,7 +769,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -794,7 +794,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_MULTIPOINTZ )
 			{
@@ -815,7 +815,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -876,7 +876,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		{
 			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
 			shape->Create(shpType,&vbretval);
-			shape->put_GlobalCallback(globalCallback);
+			shape->put_GlobalCallback(_globalCallback);
 
 			if( shpType == SHP_MULTIPOINTM )
 			{
@@ -897,7 +897,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				{
 					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
 					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
-					pnt->put_GlobalCallback(globalCallback);
+					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
 					pnt->put_X(x);
@@ -943,11 +943,11 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 // **************************************************************
 //		readShx()
 // **************************************************************
-BOOL CShapefile::readShx()
+BOOL CShapefile::ReadShx()
 {
 	// guaranteed that .shx file is open
 	rewind(_shxfile);
-	shpOffsets.clear();
+	_shpOffsets.clear();
 
 	// file code
 	int intbuf;
@@ -996,7 +996,7 @@ BOOL CShapefile::readShx()
 		// offset
 		fread(&intbuf,sizeof(int),1,_shxfile);
 		Utility::swapEndian((char*)&intbuf,sizeof(int));
-		shpOffsets.push_back(intbuf*2);			// convert to (32 bit words)
+		_shpOffsets.push_back(intbuf*2);			// convert to (32 bit words)
 
 		// content length
 		fread(&intbuf,sizeof(int),1,_shxfile);
@@ -1011,7 +1011,7 @@ BOOL CShapefile::readShx()
 // **************************************************************
 //		writeShx()
 // **************************************************************
-BOOL CShapefile::writeShx(FILE * shx, ICallback * cBack)
+BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 {
 	//m_writing = true;
 	// guaranteed that .shx file is open
@@ -1067,12 +1067,12 @@ BOOL CShapefile::writeShx(FILE * shx, ICallback * cBack)
 
 	long percent = 0, newpercent = 0;
 
-	shpOffsets.clear();
+	_shpOffsets.clear();
 	int size  = (int)_shapeData.size();
 	for( int i = 0; i < size; i++)
 	{
 		// convert to (32 bit words)
-		shpOffsets.push_back(offset);
+		_shpOffsets.push_back(offset);
 
 		void * intbuf;
 		int sixteenBitOffset = offset/2;
@@ -1097,12 +1097,12 @@ BOOL CShapefile::writeShx(FILE * shx, ICallback * cBack)
 
 		shape->Release();
 
-		Utility::DisplayProgress(cBack, i, size, "Writing .shx file", key, percent);
-		Utility::DisplayProgress(globalCallback, i, size, "Writing .shx file", key, percent);
+		Utility::DisplayProgress(cBack, i, size, "Writing .shx file", _key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Writing .shx file", _key, percent);
 	}
 
-	Utility::DisplayProgressCompleted(cBack, key);
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(cBack, _key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	
 	fflush(shx);
 
@@ -1176,7 +1176,7 @@ void WriteExtentsZ(CShape* shape, FILE* file )
 // **************************************************************
 //		writeShp()
 // **************************************************************
-BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
+BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 {
 	// guaranteed that .shp file is open
 	rewind(shp);
@@ -1358,22 +1358,22 @@ BOOL CShapefile::writeShp(FILE * shp, ICallback * cBack)
 			percent = newpercent;
 			if( cBack )
 			{
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Writing .shp file"));
+				cBack->Progress(OLE2BSTR(_key),percent,A2BSTR("Writing .shp file"));
 			}
-			else if( globalCallback )
+			else if( _globalCallback )
 			{
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Writing .shp file"));
+				_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Writing .shp file"));
 			}
 		}
 	}
 
 	if( cBack != NULL )
 	{
-		cBack->Progress(OLE2BSTR(key),100,A2BSTR("Complete"));
+		cBack->Progress(OLE2BSTR(_key),100,A2BSTR("Complete"));
 	}
-	else if( globalCallback != NULL )
+	else if( _globalCallback != NULL )
 	{
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR("Complete"));
+		_globalCallback->Progress(OLE2BSTR(_key),100,A2BSTR("Complete"));
 	}
 
 	fflush(shp);

@@ -35,14 +35,14 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 	
-	bool callbackIsNull = (globalCallback == NULL);
-	if(cBack != NULL && globalCallback == NULL)
+	bool callbackIsNull = (_globalCallback == NULL);
+	if(cBack != NULL && _globalCallback == NULL)
 	{
-		globalCallback = cBack;	
-		globalCallback->AddRef();
+		_globalCallback = cBack;	
+		_globalCallback->AddRef();
 	}
 	
-	if( dbf == NULL || m_sourceType == sstUninitialized)
+	if( _table == NULL || _sourceType == sstUninitialized)
 	{	
 		// Error: shapefile is not initialized
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -52,7 +52,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		// editing is going on already
 		*retval = VARIANT_TRUE;
 	}
-	else if (m_writing) 
+	else if (_writing) 
 	{
 		ErrorMessage(tkSHP_READ_VIOLATION);
 	}
@@ -61,23 +61,23 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		// quad tree generation
 		IExtents * box = NULL;	
 		double xm,ym,zm,xM,yM,zM;
-		if(useQTree)
+		if(_useQTree)
 		{
-			if (m_qtree)
+			if (_qtree)
 			{
-				delete m_qtree;
-				m_qtree = NULL;
+				delete _qtree;
+				_qtree = NULL;
 			}
 			IExtents * box = NULL;	
 			this->get_Extents(&box);
 			box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
 			box->Release();
-			m_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
+			_qtree = new QTree(QTreeExtent(xm,xM,yM,ym));
 		}
 		
 		// reading shapes into memory
 		IShape * shp = NULL;
-		lastErrorCode = tkNO_ERROR;	
+		_lastErrorCode = tkNO_ERROR;	
 		long percent = 0, newpercent = 0; 
 		
 		int size = (int)_shapeData.size();
@@ -85,9 +85,9 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		{	
 			this->get_Shape(i, &shp);
 
-			if( lastErrorCode != tkNO_ERROR )
+			if( _lastErrorCode != tkNO_ERROR )
 			{	
-				ErrorMessage(lastErrorCode);
+				ErrorMessage(_lastErrorCode);
 				ReleaseMemoryShapes();
 				return S_OK;
 			}
@@ -96,7 +96,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			this->QuickExtentsCore(i, &xm,&ym,&xM,&yM);
 
 			// Neio 2009 07 21 QuadTree
-			if(useQTree)
+			if(_useQTree)
 			{
 				QTreeNode node;
 				node.Extent.left = xm;
@@ -104,12 +104,12 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 				node.Extent.top = yM;
 				node.Extent.bottom = ym;
 				node.index = i;
-				m_qtree->AddNode(node);
+				_qtree->AddNode(node);
 			}
 			
-			Utility::DisplayProgress(globalCallback, i, size, "Reading shapes into memory", key, percent);
+			Utility::DisplayProgress(_globalCallback, i, size, "Reading shapes into memory", _key, percent);
 		}
-		Utility::DisplayProgressCompleted(globalCallback);
+		Utility::DisplayProgressCompleted(_globalCallback);
 
 		*retval = VARIANT_TRUE;
 	
@@ -132,12 +132,12 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 		// ------------------------------------------
 		if(StartEditTable != VARIANT_FALSE)
 		{
-			StartEditingTable(globalCallback,retval);
+			StartEditingTable(_globalCallback,retval);
 		}
 		
 		if (*retval == VARIANT_FALSE)
 		{
-			ErrorMessage(dbf->get_LastErrorCode(&lastErrorCode));
+			ErrorMessage(_table->get_LastErrorCode(&_lastErrorCode));
 			ReleaseMemoryShapes();
 		}
 		else
@@ -148,7 +148,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 
 	if (callbackIsNull)
 	{
-		globalCallback = NULL;
+		_globalCallback = NULL;
 	}
 	return S_OK;
 }
@@ -164,14 +164,14 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	bool callbackIsNull = (globalCallback == NULL);
-	if(cBack != NULL && globalCallback == NULL)
+	bool callbackIsNull = (_globalCallback == NULL);
+	if(cBack != NULL && _globalCallback == NULL)
 	{
-		globalCallback = cBack;	
-		globalCallback->AddRef();
+		_globalCallback = cBack;	
+		_globalCallback->AddRef();
 	}
 	
-	if( dbf == NULL || m_sourceType == sstUninitialized)
+	if( _table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED, cBack);
 	}
@@ -179,11 +179,11 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	{	
 		*retval = VARIANT_TRUE;
 	}
-	else if ( m_writing )
+	else if ( _writing )
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION, cBack);
 	}
-	else if ( m_sourceType == sstInMemory )
+	else if ( _sourceType == sstInMemory )
 	{
 		// shapefile wasn't saved before
 		if(_shpfileName.GetLength() > 0)
@@ -208,10 +208,10 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 
 		if( ApplyChanges )
 		{	
-			m_writing = true;
+			_writing = true;
 			
 			// verify Shapefile Integrity
-			if( verifyMemShapes(cBack) == FALSE )
+			if( VerifyMemShapes(cBack) == FALSE )
 			{	
 				// error Code is set in function
 			}
@@ -241,8 +241,8 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 					VARIANT_BOOL vbretval;
 					this->RefreshExtents(&vbretval);
 
-					writeShp(_shpfile,cBack);
-					writeShx(_shxfile,cBack);
+					WriteShp(_shpfile,cBack);
+					WriteShx(_shxfile,cBack);
 
 					_shpfile = _wfreopen(_shpfileName,L"rb+", _shpfile);
 					_shxfile = _wfreopen(_shxfileName,L"rb+",_shxfile);
@@ -273,7 +273,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 					}
 				}
 			}
-			m_writing = false;
+			_writing = false;
 		}
 		else
 		{	
@@ -284,17 +284,17 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 			ReleaseMemoryShapes();
 
 			// reload the shx file
-			this->readShx();
+			this->ReadShx();
 
 			// to clear the data as mapping between disk shapefile and in-memory one is lost
 			// TODO: use MWShapeId, preserve the mapping
-			if (shpOffsets.size() != _shapeData.size())
+			if (_shpOffsets.size() != _shapeData.size())
 			{
 				for (unsigned int i = 0; i < _shapeData.size(); i++)
 					delete _shapeData[i];	// all the releasing done in the destructor
 				_shapeData.clear();
-				_shapeData.reserve(shpOffsets.size());
-				for (size_t i = 0; i < shpOffsets.size(); i++)
+				_shapeData.reserve(_shpOffsets.size());
+				for (size_t i = 0; i < _shpOffsets.size(); i++)
 				{
 					_shapeData.push_back(new ShapeData());
 				}
@@ -317,7 +317,7 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	
 	// restoring callback state
 	if (callbackIsNull)
-		globalCallback = NULL;
+		_globalCallback = NULL;
 
 	return S_OK;
 }
@@ -342,23 +342,23 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	}
 
 	VARIANT_BOOL bSynchronized;
-	m_labels->get_Synchronized(&bSynchronized);
+	_labels->get_Synchronized(&bSynchronized);
 
 	// updating labels
-	if (dbf) 
+	if (_table) 
 	{
 		double x = 0.0, y = 0.0, rotation = 0.0;
 		VARIANT_BOOL vbretval;
 
-		bool chartsExist = ((CCharts*)m_charts)->_chartsExist;
+		bool chartsExist = ((CCharts*)_charts)->_chartsExist;
 		if (bSynchronized || chartsExist)
 		{
 			// position
 			tkLabelPositioning positioning;
-			m_labels->get_Positioning(&positioning);
+			_labels->get_Positioning(&positioning);
 
 			tkLineLabelOrientation orientation;
-			m_labels->get_LineOrientation(&orientation);
+			_labels->get_LineOrientation(&orientation);
 			
 			((CShape*)Shape)->get_LabelPosition(positioning, x, y, rotation, orientation);
 		}
@@ -367,7 +367,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		{
 			// it doesn't make sense to recalculate expression as dbf cells are empty all the same
 			CString text;
-			m_labels->InsertLabel(ShapeIndex, A2BSTR(text), x, y, rotation, -1, &vbretval);
+			_labels->InsertLabel(ShapeIndex, A2BSTR(text), x, y, rotation, -1, &vbretval);
 		}
 
 		if (chartsExist)
@@ -409,7 +409,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	}
 
 	// Neio 07/23/2009 - add qtree
-	if(useQTree)
+	if(_useQTree)
 	{
 		QTreeNode node;
 		node.index = ShapeIndex;
@@ -417,7 +417,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		node.Extent.right = xM;
 		node.Extent.top = yM;
 		node.Extent.bottom = ym;
-		m_qtree->AddNode(node);
+		_qtree->AddNode(node);
 	}
 }
 
@@ -494,9 +494,9 @@ void CShapefile::ReregisterShape(int shapeIndex)
 		if (zM > _maxZ) _maxZ = zM;
 	}
 
-	if(useQTree)
+	if(_useQTree)
 	{
-		m_qtree->RemoveNode(shapeIndex);
+		_qtree->RemoveNode(shapeIndex);
 		
 		QTreeNode node;
 		node.index = shapeIndex;
@@ -504,7 +504,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 		node.Extent.right = xM;
 		node.Extent.top = yM;
 		node.Extent.bottom = ym;
-		m_qtree->AddNode(node);
+		_qtree->AddNode(node);
 	}
 }
 
@@ -521,7 +521,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 		Debug::WriteLine("Error: shape inserted when validation list in action");
 	}
 
- 	if( dbf == NULL || m_sourceType == sstUninitialized )
+ 	if( _table == NULL || _sourceType == sstUninitialized )
 	{	
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 	}
@@ -532,7 +532,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	else
 	{
 		VARIANT_BOOL isEditingTable;
-		dbf->get_EditingTable(&isEditingTable);
+		_table->get_EditingTable(&isEditingTable);
 		
 		if(!isEditingTable)
 		{
@@ -566,12 +566,12 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 					}
 					
 					// adding the row in table
-					dbf->EditInsertRow( ShapeIndex, retval );
+					_table->EditInsertRow( ShapeIndex, retval );
 					
 					if( *retval == VARIANT_FALSE )
 					{	
-						dbf->get_LastErrorCode(&lastErrorCode);
-						ErrorMessage(lastErrorCode);
+						_table->get_LastErrorCode(&_lastErrorCode);
+						ErrorMessage(_lastErrorCode);
 					}			
 					else
 					{	
@@ -586,7 +586,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 						*retval = VARIANT_TRUE;
 					}
 					
-					((CTableClass*)dbf)->set_IndexValue(*ShapeIndex);
+					((CTableClass*)_table)->set_IndexValue(*ShapeIndex);
 				
 				}
 			}
@@ -608,7 +608,7 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 		Debug::WriteLine("Error: EditDelete called when validation list in action");
 	}
 
-	if( dbf == NULL || m_sourceType == sstUninitialized )
+	if( _table == NULL || _sourceType == sstUninitialized )
 	{	
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 	}
@@ -619,7 +619,7 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 	else
 	{
 		VARIANT_BOOL isEditingTable;
-		dbf->get_EditingTable(&isEditingTable);
+		_table->get_EditingTable(&isEditingTable);
 		
 		if(!isEditingTable)
 		{
@@ -632,19 +632,19 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 		else
 		{
 			VARIANT_BOOL vbretval;
-			dbf->EditDeleteRow( ShapeIndex, &vbretval);
+			_table->EditDeleteRow( ShapeIndex, &vbretval);
 			
 			if(!vbretval)
 			{	
-				dbf->get_LastErrorCode(&lastErrorCode);
-				ErrorMessage(lastErrorCode);
+				_table->get_LastErrorCode(&_lastErrorCode);
+				ErrorMessage(_lastErrorCode);
 			}			
 			else
 			{	
 				VARIANT_BOOL bSynchronized;
-				m_labels->get_Synchronized(&bSynchronized);
+				_labels->get_Synchronized(&bSynchronized);
 				if (bSynchronized)
-					m_labels->RemoveLabel(ShapeIndex, &vbretval);
+					_labels->RemoveLabel(ShapeIndex, &vbretval);
 				
 				delete _shapeData[ShapeIndex];
 				_shapeData.erase( _shapeData.begin() + ShapeIndex );
@@ -671,7 +671,7 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		Debug::WriteLine("Error: EditClear called when validation list in action");
 	}
 
-	if (dbf == NULL || m_sourceType == sstUninitialized)
+	if (_table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
 	}
@@ -682,7 +682,7 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 	else
 	{
 		VARIANT_BOOL isEditingTable;
-		dbf->get_EditingTable(&isEditingTable);
+		_table->get_EditingTable(&isEditingTable);
 	
 		if( isEditingTable == FALSE )
 		{	
@@ -690,11 +690,11 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		}
 		else
 		{	
-			dbf->EditClear(retval);
+			_table->EditClear(retval);
 			if( *retval == VARIANT_FALSE )
 			{	
-				dbf->get_LastErrorCode(&lastErrorCode);
-				ErrorMessage(lastErrorCode);
+				_table->get_LastErrorCode(&_lastErrorCode);
+				ErrorMessage(_lastErrorCode);
 			}
 			
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
@@ -703,18 +703,18 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 			}
 			_shapeData.clear();
 			
-			if(useQTree == VARIANT_TRUE)
+			if(_useQTree == VARIANT_TRUE)
 			{
-				delete m_qtree;
-				m_qtree = NULL;
+				delete _qtree;
+				_qtree = NULL;
 			}
 
 			// deleting the labels
 			VARIANT_BOOL bSynchronized;
-			m_labels->get_Synchronized(&bSynchronized);
+			_labels->get_Synchronized(&bSynchronized);
 			if (bSynchronized)
 			{
-				m_labels->Clear();
+				_labels->Clear();
 			}
 			*retval = VARIANT_TRUE;
 		}
@@ -823,10 +823,10 @@ BOOL CShapefile::ReleaseMemoryShapes()
 		}
 	}
 
-	if(useQTree == VARIANT_TRUE)
+	if(_useQTree == VARIANT_TRUE)
 	{
-		delete m_qtree;
-		m_qtree = NULL;
+		delete _qtree;
+		_qtree = NULL;
 	}
 	return S_OK;
 }
@@ -835,7 +835,7 @@ BOOL CShapefile::ReleaseMemoryShapes()
 //		verifyMemShapes
 // ****************************************************************
 //Verify Shapefile Integrity
-BOOL CShapefile::verifyMemShapes(ICallback * cBack)
+BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 {
 	ShpfileType shapetype;
 	long numPoints;
@@ -844,10 +844,10 @@ BOOL CShapefile::verifyMemShapes(ICallback * cBack)
 	IPoint * lastPnt = NULL;
 	VARIANT_BOOL vbretval = VARIANT_FALSE;
 	
-	if (!globalCallback && cBack)
+	if (!_globalCallback && cBack)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
 	for( int i = 0; i < (int)_shapeData.size(); i++ )

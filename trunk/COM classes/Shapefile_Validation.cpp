@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Shapefile.h"
 #include "ShapeValidator.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
+#include "GeosConverter.h"
 #include "ShapeValidationInfo.h"
 
 #pragma region Validation
@@ -73,7 +74,7 @@ IShapeValidationInfo* CShapefile::ValidateInputCore(IShapefile* isf, CString met
 	}
 	
 	IShapeValidationInfo* iinfo = ShapeValidator::Validate(isf, validationMode, svtInput,
-			className, methodName, parameterName, globalCallback, key, selectedOnly ? true: false, reportOnly);
+			className, methodName, parameterName, _globalCallback, _key, selectedOnly ? true: false, reportOnly);
 	
 	CShapefile* sf = (CShapefile*)isf;
 	sf->SetValidationInfo(iinfo, svtInput);
@@ -117,7 +118,7 @@ clear_result:
 	else
 	{
 		IShapeValidationInfo* iinfo = ShapeValidator::Validate(*isf, m_globalSettings.outputValidation, svtOutput, 
-									className, methodName, "", globalCallback, key, false);
+									className, methodName, "", _globalCallback, _key, false);
 		CShapefile* sf = (CShapefile*)this;		// writing validation into this shapefile
 		sf->SetValidationInfo(iinfo, svtOutput);
 		CShapeValidationInfo* info = (CShapeValidationInfo*)iinfo;
@@ -300,7 +301,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 	int size = (int)_shapeData.size();
 	for (int i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Converting to geometries", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Converting to geometries", _key, percent);
 		
 		if (!ShapeAvailable(i, selectedOnly))
 			continue;
@@ -312,7 +313,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 		this->GetValidatedShape(i, &shp);
 		if (shp)
 		{
-			GEOSGeom geom = GeometryConverter::Shape2GEOSGeom(shp);
+			GEOSGeom geom = GeosConverter::ShapeToGeom(shp);
 			if (geom)
 			{
 				_shapeData[i]->geosGeom = geom;

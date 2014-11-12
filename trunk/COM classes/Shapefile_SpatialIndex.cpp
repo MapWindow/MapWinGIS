@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #include "stdafx.h"
 #include "Shapefile.h"
@@ -33,20 +33,20 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
     
     try 
 	{
-		hasSpatialIndex	= FALSE;
+		_hasSpatialIndex	= FALSE;
 		CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
 		CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
 		if (Utility::fileExists(mwdfileName) && Utility::fileExists(mwxfileName))
 		{
-			hasSpatialIndex = TRUE;
+			_hasSpatialIndex = TRUE;
 		}
 	}
 	catch (...)
 	{
-	    hasSpatialIndex = FALSE;
+	    _hasSpatialIndex = FALSE;
 	}
 
- 	*pVal = hasSpatialIndex?VARIANT_TRUE:VARIANT_FALSE;
+ 	*pVal = _hasSpatialIndex?VARIANT_TRUE:VARIANT_FALSE;
 
 	return S_OK;
 }
@@ -58,7 +58,7 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
 STDMETHODIMP CShapefile::put_HasSpatialIndex(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	hasSpatialIndex = pVal;	// CreateSpatialIndex should be used to create it
+	_hasSpatialIndex = pVal;	// CreateSpatialIndex should be used to create it
 	return S_OK;
 }
 
@@ -82,22 +82,22 @@ bool TestIndexSearching()
 STDMETHODIMP CShapefile::get_UseSpatialIndex(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (useSpatialIndex)
+	if (_useSpatialIndex)
 	{
 		//useSpatialIndex = TestIndexSearching();
 	}
-	*pVal = useSpatialIndex?VARIANT_TRUE:VARIANT_FALSE;
+	*pVal = _useSpatialIndex?VARIANT_TRUE:VARIANT_FALSE;
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	useSpatialIndex = pVal;
+	_useSpatialIndex = pVal;
 	
 	// Unload spatial index in case it needs to be recreated
-	if (!useSpatialIndex && spatialIndexLoaded) 
+	if (!_useSpatialIndex && _spatialIndexLoaded) 
 	{
-		IndexSearching::unloadSpatialIndex(spatialIndexID);
+		IndexSearching::unloadSpatialIndex(_spatialIndexID);
 	}
 	return S_OK;
 }
@@ -108,54 +108,13 @@ STDMETHODIMP CShapefile::put_UseSpatialIndex(VARIANT_BOOL pVal)
 //08-24-2009 (sm) spatial index performance
 STDMETHODIMP CShapefile::put_SpatialIndexMaxAreaPercent(DOUBLE newVal)
 {
-	spatialIndexMaxAreaPercent = newVal;
+	_spatialIndexMaxAreaPercent = newVal;
 	return S_OK;
 }
 STDMETHODIMP CShapefile::get_SpatialIndexMaxAreaPercent(DOUBLE* pVal)
 {
-	*pVal = spatialIndexMaxAreaPercent;
+	*pVal = _spatialIndexMaxAreaPercent;
 	return S_OK;
-}
-
-bool CShapefile::get_CanUseSpatialIndexCore(Extent& extents)
-{
-	if (!_isEditingShapes && useSpatialIndex)
-	{
-		VARIANT_BOOL spatialIndexExists;
-		get_HasSpatialIndex(&spatialIndexExists);
-		
-		if (spatialIndexExists)
-		{
-			double xM = min(_maxX, extents.right);
-			double xm = max(_minX, extents.left);
-			double yM = min(_maxY, extents.top);
-			double ym = max(_minY, extents.bottom);
-			
-			double shapeFileArea = (_maxX - _minX)*(_maxY-_minY);
-			double selectShapeArea = (xM - xm) * (yM - ym);
-			
-			if (selectShapeArea/shapeFileArea < spatialIndexMaxAreaPercent) 
-			{
-				//when large portions of the map are being drawn,
-				//the spatial index *probably* won't help, don't use it.
-				if (spatialIndexLoaded)
-				{
-					return true;
-				}
-				else
-				{
-					USES_CONVERSION;
-					string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
-					if (IndexSearching::loadSpatialIndex(baseName, false, spatialIndexNodeCapacity, spatialIndexID))
-					{
-						spatialIndexLoaded = true;
-						return true;
-					}
-				}
-			}
-		}
-	}
-	return false;
 }
 
 // *****************************************************************
@@ -166,10 +125,49 @@ STDMETHODIMP CShapefile::get_CanUseSpatialIndex(IExtents* pArea, VARIANT_BOOL* p
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*pVal = VARIANT_FALSE;
+	
 	double xm, xM, ym, yM, zm, zM;
 	pArea->GetBounds(&xm, &ym, &zm, &xM, &yM, &zM);
-	Extent box(xm, xM, ym, yM);
-	*pVal = this->get_CanUseSpatialIndexCore(box);
+	Extent extents(xm, xM, ym, yM);
+
+	if (!_isEditingShapes && _useSpatialIndex)
+	{
+		VARIANT_BOOL spatialIndexExists;
+		get_HasSpatialIndex(&spatialIndexExists);
+
+		if (spatialIndexExists)
+		{
+			double xM = min(_maxX, extents.right);
+			double xm = max(_minX, extents.left);
+			double yM = min(_maxY, extents.top);
+			double ym = max(_minY, extents.bottom);
+
+			double shapeFileArea = (_maxX - _minX)*(_maxY - _minY);
+			double selectShapeArea = (xM - xm) * (yM - ym);
+
+			if (selectShapeArea / shapeFileArea < _spatialIndexMaxAreaPercent)
+			{
+				//when large portions of the map are being drawn,
+				//the spatial index *probably* won't help, don't use it.
+				if (_spatialIndexLoaded)
+				{
+					*pVal = VARIANT_TRUE;
+					return S_OK;
+				}
+				else
+				{
+					USES_CONVERSION;
+					string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
+					if (IndexSearching::loadSpatialIndex(baseName, false, _spatialIndexNodeCapacity, _spatialIndexID))
+					{
+						_spatialIndexLoaded = true;
+						*pVal = VARIANT_TRUE;
+						return S_OK;
+					}
+				}
+			}
+		}
+	}
 	return S_OK;
 }
 
@@ -199,7 +197,7 @@ STDMETHODIMP CShapefile::CreateSpatialIndex(BSTR ShapefileName, VARIANT_BOOL *re
 		// Creates two files baseName.dat and baseName.idx
 		try 
 		{
-			if (!IndexSearching::createSpatialIndex(0.9, spatialIndexNodeCapacity, (char *)baseName.c_str()))
+			if (!IndexSearching::createSpatialIndex(0.9, _spatialIndexNodeCapacity, (char *)baseName.c_str()))
 			{	
 				*retval = VARIANT_FALSE;
 				ErrorMessage(tkINVALID_FILENAME);
@@ -227,7 +225,7 @@ STDMETHODIMP CShapefile::IsSpatialIndexValid(VARIANT_BOOL *retval)
 	{
 		USES_CONVERSION;
 		string baseName = W2A(_shpfileName.Left(_shpfileName.GetLength() - 4));		// TODO: use Unicode
-		bool bIsValid = IndexSearching::isValidSpatialIndex(baseName.c_str(), spatialIndexNodeCapacity);
+		bool bIsValid = IndexSearching::isValidSpatialIndex(baseName.c_str(), _spatialIndexNodeCapacity);
 		*retval = bIsValid ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 
@@ -250,12 +248,12 @@ STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result,
 		ErrorMessage( tkSHPFILE_NOT_IN_EDIT_MODE );
 		return S_OK;
 	}
-	else if( useQTree )
+	else if( _useQTree )
 	{	
 		double xMin, yMin, zMin, xMax, yMax, zMax;
 		BoundBox->GetBounds(&xMin,&yMin,&zMin,&xMax,&yMax,&zMax);
 
-		vector<int> r = m_qtree->GetNodes(QTreeExtent(xMin,xMax,yMax,yMin));
+		vector<int> r = _qtree->GetNodes(QTreeExtent(xMin,xMax,yMax,yMin));
 		int size = r.size();
 		*Result = new int[size];
 		
@@ -271,7 +269,7 @@ STDMETHODIMP CShapefile::QuickQueryInEditMode(IExtents *BoundBox, int ** Result,
 STDMETHODIMP CShapefile::get_UseQTree(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = (useQTree)?VARIANT_TRUE:VARIANT_FALSE;	
+	*pVal = (_useQTree)?VARIANT_TRUE:VARIANT_FALSE;	
 	return S_OK;
 }
 
@@ -282,20 +280,20 @@ STDMETHODIMP CShapefile::put_UseQTree(VARIANT_BOOL pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (pVal && !useQTree)
+	if (pVal && !_useQTree)
 	{
 		this->GenerateQTree();
-		useQTree = VARIANT_TRUE;
+		_useQTree = VARIANT_TRUE;
 	}
-	else if(!pVal && useQTree)
+	else if(!pVal && _useQTree)
 	{
-		delete m_qtree;
-		m_qtree = NULL;
-		useQTree = VARIANT_FALSE;
+		delete _qtree;
+		_qtree = NULL;
+		_useQTree = VARIANT_FALSE;
 	}
 	else
 	{
-		useQTree = pVal?VARIANT_TRUE:VARIANT_FALSE;
+		_useQTree = pVal?VARIANT_TRUE:VARIANT_FALSE;
 	}
 	return S_OK;
 }
@@ -305,13 +303,13 @@ STDMETHODIMP CShapefile::put_UseQTree(VARIANT_BOOL pVal)
 // **********************************************************
 void CShapefile::GenerateQTree()
 {
-	if(m_qtree)
+	if(_qtree)
 	{
-		delete m_qtree;
-		m_qtree = NULL;
+		delete _qtree;
+		_qtree = NULL;
 	}
 	
-	m_qtree = GenerateQTreeCore(false);
+	_qtree = GenerateQTreeCore(false);
 }
 
 // **********************************************************************
@@ -348,9 +346,9 @@ QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 		node.index = i;
 		qtree->AddNode(node);
 		
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Building index...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Building index...", _key, percent);
 	}
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	return qtree;
 }

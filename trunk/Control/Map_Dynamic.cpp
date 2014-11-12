@@ -121,7 +121,8 @@ void CMapView::DrawMovingShapes(Gdiplus::Graphics* g, const CRect& rect, bool dy
 // ***************************************************************
 void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 {
-	if (!HasDrawingData(ShapeEditing)) return;
+	tkDrawingDataAvailable data = dynamicBuffer ? ShapeEditing : ActShape;
+	if (!HasDrawingData(data)) return;
 
 	int offsetX = _dragging.Move.x - _dragging.Start.x;
 	int offsetY = _dragging.Move.y - _dragging.Start.y;

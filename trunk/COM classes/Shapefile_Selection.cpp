@@ -17,12 +17,16 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 // -------------------------------------------------------------------------------------------------------
-// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonble size
+// lsu 3-02-2011: split the initial Shapefile.cpp file to make entities of the reasonable size
 
 #include "stdafx.h"
 #include <afxmt.h>				// for CMutex
 #include "Shapefile.h"
 #include "Templates.h"
+#include "ShapeHelper.h"
+#include "SelectionHelper.h"
+#include "ExtentsHelper.h"
+#include "ShapefileHelper.h"
 
 #pragma region SelectShapes
 // ******************************************************************
@@ -84,7 +88,9 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	bool useSpatialIndexResults = false;
 	bool useQTreeResults = false;
 
-	bool useSpatialIndex = this->get_CanUseSpatialIndexCore(extents); // BoundBox, &useSpatialIndex);
+	VARIANT_BOOL useSpatialIndex;
+	CComPtr<IExtents> box = ExtentsHelper::Populate(extents);
+	this->get_CanUseSpatialIndex(box, &useSpatialIndex);
 	
 	if (useSpatialIndex)   //ajp Jun 2008 select records from spatial index
 	{
@@ -99,12 +105,12 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 		qType = (SelectMode == INTERSECTION) ? IndexSearching::intersection : IndexSearching::contained;
 		res = new IndexSearching::CIndexSearching();
 
-		int ret = selectShapesFromIndex(spatialIndexID, lowVals, highVals, qType, res);
+		int ret = selectShapesFromIndex(_spatialIndexID, lowVals, highVals, qType, res);
 		if (ret != 0)
 		{
-			hasSpatialIndex = false;
-			spatialIndexLoaded = false;
-			IndexSearching::unloadSpatialIndex(spatialIndexID);
+			_hasSpatialIndex = false;
+			_spatialIndexLoaded = false;
+			IndexSearching::unloadSpatialIndex(_spatialIndexID);
 			delete res;		//TODO throw error
 		}
 		else
@@ -113,16 +119,16 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 			useSpatialIndexResults = true;
 		}
 	}
-	else if(_isEditingShapes && useQTree)
+	else if(_isEditingShapes && _useQTree)
 	{
 		//07/23/2009 ,Neio fix the bug that select shapes in edit mode and add QTree
 		if(bPtSelection )
 		{
-			qtreeResult = m_qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
+			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
 		}
 		else
 		{
-			qtreeResult = m_qtree->GetNodes(QTreeExtent(b_minX,b_maxX,b_maxY,b_minY));
+			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_maxX,b_maxY,b_minY));
 		}
 
 		local_numShapes = qtreeResult.size();	
@@ -157,7 +163,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 					shapeVal = i;
 				}
 
-				if( this->pointInPolygon( shapeVal, b_minX, b_minY ) )
+				if( ShapefileHelper::PointInPolygon( this, shapeVal, b_minX, b_minY ) )
 				{	
 					selectResult.push_back( shapeVal );
 					continue;														
@@ -208,24 +214,27 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 			if( shpType2D == SHP_POLYLINE && SelectMode == INTERSECTION)
 			{
-				if( defineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
+				if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
 				{
-					if (PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
+					if (SelectionHelper::PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
 						selectResult.push_back( shapeVal );
 				}		
 			}
 			else if( shpType2D == SHP_POLYGON && SelectMode == INTERSECTION)
 			{		
 
-				if( defineShapePoints( shapeVal, ShapeType, parts, xPts, yPts) )
+				if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts) )
 				{
-					if( PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance, shapeVal))
+					if (SelectionHelper::PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
 						selectResult.push_back( shapeVal );
+
+					if (ShapefileHelper::BoundsWithinPolygon(this, shapeVal, b_minX, b_maxX, b_minY, b_maxY))
+						selectResult.push_back(shapeVal);
 				}	
 			}
 			else if( shpType2D == SHP_MULTIPOINT && SelectMode == INTERSECTION)
 			{	
-				if( this->defineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
+				if( this->DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts ) != FALSE )
 				{	
 					numpoints=xPts.size();
 					bool addShape = false;
@@ -257,305 +266,13 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	{
 		delete res;
 	}
-	else if( useQTree == VARIANT_TRUE && _isEditingShapes != FALSE)
+	else if( _useQTree == VARIANT_TRUE && _isEditingShapes != FALSE)
 	{
 		qtreeResult.clear();
 	}
 	return true;
 }
-
-// *****************************************************
-//		PointWithinShape
-// *****************************************************
-bool CShapefile::PointWithinShape(IShape* shape, double projX, double projY, double Tolerance)
-{
-	std::vector<double> xPts;
-	std::vector<double> yPts;
-	std::vector<long> parts;
-	ShpfileType ShapeType;
-	
-	ShpfileType shpType2D;
-	shape->get_ShapeType(&shpType2D);
-	shpType2D = Utility::ShapeTypeConvert2D(shpType2D);
-	
-	double halfTolerance = Tolerance*.5;
-	double b_minX = projX - halfTolerance;
-	double b_minY = projY - halfTolerance;
-	double b_maxX = projX + halfTolerance;
-	double b_maxY = projY + halfTolerance;				
-
-	if( shpType2D == SHP_POLYLINE)
-	{
-		if( get_MemShapePoints( shape, ShapeType, parts, xPts, yPts ) != FALSE )
-		{
-			if (PolylineIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
-				return true;
-		}		
-	}
-	else if( shpType2D == SHP_POLYGON)
-	{		
-
-		if( get_MemShapePoints( shape, ShapeType, parts, xPts, yPts) )
-		{
-			int shapeVal = -1;
-			if( PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance, shapeVal))
-				return true;
-
-			VARIANT_BOOL vb;
-			IPoint* pnt = NULL;
-			GetUtils()->CreateInstance(idPoint, (IDispatch**)&pnt);
-			
-			pnt->put_X(b_minX);
-			pnt->put_Y(b_minY);
-			GetUtils()->PointInPolygon(shape, pnt, &vb);
-
-			if (!vb)
-			{
-				pnt->put_X(b_maxX);
-				pnt->put_Y(b_maxY);
-				GetUtils()->PointInPolygon(shape, pnt, &vb);
-			}
-
-			if (!vb)
-			{
-				pnt->put_X(b_minX);
-				pnt->put_Y(b_maxY);
-				GetUtils()->PointInPolygon(shape, pnt, &vb);
-			}
-
-			if (!vb)
-			{
-				pnt->put_X(b_maxX);
-				pnt->put_Y(b_minY);
-				GetUtils()->PointInPolygon(shape, pnt, &vb);
-			}
-
-			pnt->Release();
-
-			return vb ? true: false;
-		}	
-	}
-	else if( shpType2D == SHP_MULTIPOINT)
-	{	
-		if( get_MemShapePoints( shape, ShapeType, parts, xPts, yPts ) != FALSE )
-		{	
-			bool addShape = false;
-			for(size_t j=0;j<xPts.size();j++ )
-			{
-				double px = xPts[j];
-				double py = yPts[j];
-
-				if( px >= b_minX && px <= b_maxX )
-				{	
-					if( py >= b_minY && py <= b_maxY )
-					{	
-						addShape = true;
-						break;
-					}
-				}
-			}
-			if (addShape) return true;
-		}
-	}
-	return false;
-}
-
 #pragma endregion
-
-// *****************************************************
-//		PolygonIntersection
-// *****************************************************
-bool CShapefile::PolygonIntersection(std::vector<double>& xPts, std::vector<double>& yPts, std::vector<long>& parts,
-						 double& b_minX, double& b_maxX, double& b_minY, double& b_maxY, double& Tolerance, int& shapeVal)
-{
-	double cy = ( b_minY + b_maxY ) * .5;
-	double cx = ( b_minX + b_maxX ) * .5;
-
-	int beg_part = 0;
-	int end_part = 0;						
-	
-	bool selected = false;
-	long numparts=parts.size();
-	size_t numpoints=xPts.size();						
-	
-	for(long j=0; j < numparts && !selected;j++)
-	{	
-		beg_part = parts[j];
-		if( beg_part < 0 )
-			beg_part = 0;
-
-		if( (int)(parts.size() - 1) > j )
-			end_part = parts[j+1];
-		else
-			end_part = numpoints;																						
-		
-		for(long k = beg_part; k < end_part - 1; k++)
-		{
-			double p1x = xPts[k];
-			double p1y = yPts[k];
-			double p2x = xPts[k+1];
-			double p2y = yPts[k+1];
-
-			// test for inclusion p1
-			if( p1y <= b_maxY &&
-				p1y >= b_minY &&
-				p1x <= b_maxX &&
-				p1x >= b_minX )
-				{
-					return true;
-				}								
-
-			// test the Y line
-			if( ( p1y > b_maxY && p2y > b_maxY ) ||
-				( p1y < b_minY && p2y < b_minY ) )
-			{	
-				continue;
-			}
-			
-			// test the X line
-			if( ( p1x > b_maxX && p2x > b_maxX ) ||
-				( p1x < b_minX && p2x < b_minX ) )
-			{
-				continue;
-			}
-
-			double dx = p2x - p1x;
-			double dy = p2y - p1y;
-			
-			// check for vertical lines
-			if( fabs( dy ) <= Tolerance )
-			{
-				return true;
-			}
-			
-			// check for horizontal lines
-			if( fabs( dx ) <= Tolerance )
-			{
-				return true;
-			}
-
-			// generate the equation of the line							
-			double m = dy/dx;
-			double b = p1y - m*p1x;
-
-			double pm = -1*(dx/dy);
-			double pb = cy - pm*cx;
-			double mx = (pb - b)/(m-pm);
-			double my = m*mx + b;							
-
-			// test for inclusion mx/my
-			if( my <= b_maxY &&
-				my >= b_minY &&
-				mx <= b_maxX &&
-				mx >= b_minX )
-				{
-					return true;
-				}								
-		}	
-	}
-
-	// test for Reverse inclusion
-	if( this->pointInPolygon( shapeVal, b_minX, b_minY ) )
-	{	
-		return true;
-	}
-	else if( this->pointInPolygon( shapeVal, b_maxX, b_maxY ) )
-	{	
-		return true;
-	}
-	else if( this->pointInPolygon( shapeVal, b_minX, b_maxY ) )
-	{	
-		return true;
-	}
-	else if( this->pointInPolygon( shapeVal, b_maxX, b_minY ) )
-	{	
-		return true;
-	}
-	return false;
-}
-
-// *****************************************************
-//		PolylineIntersection
-// *****************************************************
-bool CShapefile::PolylineIntersection(std::vector<double>& xPts, std::vector<double>& yPts, std::vector<long>& parts,
-						  double& b_minX, double& b_maxX, double& b_minY, double& b_maxY, double& Tolerance)
-{
-	double cy = ( b_minY + b_maxY ) * .5;
-	double cx = ( b_minX + b_maxX ) * .5;
-	
-	int beg_part = 0;
-	int end_part = 0;						
-
-	size_t numpoints = xPts.size();
-	long numparts=parts.size();
-	
-	for(long i=0; i < numparts;i++)
-	{	
-		beg_part = parts[i];
-		if( beg_part < 0 ) beg_part = 0;
-		end_part = (int)(parts.size() - 1) > i ? parts[i+1] : numpoints;
-		
-		//for(size_t j = 0; j < numpoints - 1; j++)
-		for(long j = beg_part; j < end_part - 1; j++)
-		{
-			double p1x = xPts[j];
-			double p1y = yPts[j];
-			double p2x = xPts[j+1];
-			double p2y = yPts[j+1];
-
-			//Test for inclusion p1
-			if( p1y <= b_maxY && p1y >= b_minY && p1x <= b_maxX && p1x >= b_minX )
-			{	
-				return true;
-			}							
-
-			// test the Y line
-			if( ( p1y > b_maxY && p2y > b_maxY ) || ( p1y < b_minY && p2y < b_minY ) )
-			{	
-				continue;
-			}
-			
-			// test the X line
-			if( ( p1x > b_maxX && p2x > b_maxX ) || ( p1x < b_minX && p2x < b_minX ) )
-			{	
-				continue;
-			}
-
-			double dx = p2x - p1x;
-			double dy = p2y - p1y;
-			
-			// check for vertical lines
-			if( fabs( dy ) <= Tolerance )
-			{
-				return true;
-			}
-			// check for horizontal lines
-			if( fabs( dx ) <= Tolerance )
-			{
-				return true;
-			}
-
-			// generate the equation of the line							
-			double m = dy/dx;
-			double b = p1y - m*p1x;
-
-			double pm = -1*(dx/dy);
-			double pb = cy - pm*cx;
-			double mx = (pb - b)/(m-pm);
-			double my = m*mx + b;							
-
-			// test for inclusion mx/my
-			if( my <= b_maxY &&
-				my >= b_minY &&
-				mx <= b_maxX &&
-				mx >= b_minX )
-			{
-				return true;
-			}								
-		}
-	}
-	return false;
-}
 
 #pragma region Selection
 /***********************************************************************/
@@ -646,15 +363,11 @@ STDMETHODIMP CShapefile::InvertSelection()
 }
 #pragma endregion
 
-#pragma region Utilities
-
 // **************************************************************
-//		defineShapePoints
+//		DefineShapePoints
 // **************************************************************
 // A fast method to retrieve bounds of the given shape
-// Used by SelectShapes procedure;
-// TODO: embed in CShapeWrapper class
-BOOL CShapefile::defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts )
+BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts )
 {	
 	long numPoints;
 	long numParts;
@@ -667,12 +380,12 @@ BOOL CShapefile::defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 	{	
 		IShape * shape = NULL;
 		shape = _shapeData[ShapeIndex]->shape;
-		return get_MemShapePoints(shape, ShapeType, parts, xPts, yPts);
+		return ShapeHelper::get_MemShapePoints(shape, ShapeType, parts, xPts, yPts);
 	}
 	else		// not editing
 	{	
 		//Get the Info from the disk
-		fseek(_shpfile,shpOffsets[ShapeIndex],SEEK_SET);
+		fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
 		int intbuf;
 		fread(&intbuf,sizeof(int),1,_shpfile);
@@ -799,113 +512,3 @@ BOOL CShapefile::defineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 	return TRUE;
 }
 
-// **************************************************************
-//		get_MemShapePoints
-// **************************************************************
-BOOL CShapefile::get_MemShapePoints(IShape* shape, ShpfileType & ShapeType, std::vector<long> & parts, std::vector<double> & xPts, std::vector<double> & yPts)
-{
-	double x, y;
-	long part;
-
-	long numPoints;
-	long numParts;
-	VARIANT_BOOL vbretval;
-
-	ShpfileType shapetype;
-	shape->get_ShapeType(&shapetype);
-
-	parts.clear();
-	xPts.clear();
-	yPts.clear();
-
-	if( shapetype == SHP_NULLSHAPE )
-	{	
-		ShapeType = shapetype;
-		return FALSE;
-	}
-	else if( shapetype == SHP_POINT || shapetype == SHP_POINTZ || shapetype == SHP_POINTM )
-	{	
-		shape->get_NumPoints(&numPoints);
-		if( numPoints != 1) return FALSE;
-
-		shape->get_XY(0, &x, &y, &vbretval);
-		xPts.push_back(x);
-		yPts.push_back(y);
-		ShapeType = shapetype;
-	}
-	else if( shapetype == SHP_POLYLINE || shapetype == SHP_POLYLINEZ || shapetype == SHP_POLYLINEM )
-	{	
-		shape->get_NumParts(&numParts);
-		shape->get_NumPoints(&numPoints);
-		if(numPoints < 2)	return FALSE;
-
-		// fill up parts: polyline must have at least 1 part	
-		if( numParts > 0 )
-		{	
-			for( int p = 0; p < numParts; p++ )
-			{	
-				shape->get_Part(p,&part);				
-				parts.push_back(part);
-			}
-		}
-		else
-			parts.push_back(0);				
-
-		// fill up xPts and yPts
-		VARIANT_BOOL vbretval;
-		for( int i = 0; i < numPoints; i++ )
-		{	
-			shape->get_XY(i, &x, &y, &vbretval);
-			xPts.push_back(x);
-			yPts.push_back(y);
-		}
-		ShapeType = shapetype;
-	}		
-	else if( shapetype == SHP_POLYGON || shapetype == SHP_POLYGONZ || shapetype == SHP_POLYGONM )
-	{	
-		shape->get_NumParts(&numParts);
-		shape->get_NumPoints(&numPoints);
-		if(numPoints < 2) return FALSE;
-
-		// fill up parts: polygon must have at least 1 part	
-		if( numParts > 0 )
-		{	
-			for( int p = 0; p < numParts; p++ )
-			{	
-				shape->get_Part(p,&part);				
-				parts.push_back(part);
-			}
-		}
-		else
-			parts.push_back(0);
-
-		// fill up xPts and yPts
-		for( int i = 0; i < numPoints; i++ )
-		{	
-			shape->get_XY(i, &x, &y, &vbretval);
-			xPts.push_back(x);
-			yPts.push_back(y);
-		}
-
-		ShapeType = shapetype;
-	}
-	else if( shapetype == SHP_MULTIPOINT || shapetype == SHP_MULTIPOINTZ || shapetype == SHP_MULTIPOINTM )
-	{	
-		shape->get_NumPoints(&numPoints);
-		if( numPoints < 1)	return FALSE;	
-
-		// fill up xPts and yPts
-		for( int i = 0; i < numPoints; i++ )
-		{	
-			shape->get_XY(i, &x, &y, &vbretval);
-			xPts.push_back(x);
-			yPts.push_back(y);
-		}
-		ShapeType = shapetype;
-	}
-	else
-		return FALSE;	
-
-	return TRUE;
-}
-#pragma endregion

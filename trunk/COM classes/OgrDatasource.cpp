@@ -3,7 +3,7 @@
 #include "OgrHelper.h"
 #include "OgrLayer.h"
 #include "GeoProjection.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "Shapefile.h"
 #include "OgrStyle.h"
 #include "Shape2Ogr.h"
@@ -327,7 +327,7 @@ STDMETHODIMP COgrDatasource::CreateLayer(BSTR layerName, ShpfileType shpType, IG
 	bool multiPart = CSLFetchBoolean(options, "MULTI_PART", 1) != 0;
 
 	OGRLayer* layer = _dataset->CreateLayer(OgrHelper::Bstr2OgrString(layerName), ref,
-		GeometryConverter::ShapeType2GeometryType(shpType, multiPart), options);
+		OgrConverter::ShapeType2GeometryType(shpType, multiPart), options);
 	CSLDestroy(options);
 
 	*retVal = layer != NULL ? VARIANT_TRUE : VARIANT_FALSE;
@@ -406,7 +406,7 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	bool multiPart = CSLFetchBoolean(options, "MW_MULTI_PART", 1) != 0;
 	bool vacuum = CSLFetchBoolean(options, "MW_POSTGIS_VACUUM", 1) != 0;
 
-	OGRLayer* layer = _dataset->CreateLayer(name, ref, GeometryConverter::ShapeType2GeometryType(shpType, multiPart), options);
+	OGRLayer* layer = _dataset->CreateLayer(name, ref, OgrConverter::ShapeType2GeometryType(shpType, multiPart), options);
 	
 	gp->Release();
 	CSLDestroy(options);

@@ -7,12 +7,6 @@
     <Filter Include="Drawing">
       <UniqueIdentifier>{23515828-dffe-443d-8e7b-f46f0dd4e9a6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Drawing\Source">
-      <UniqueIdentifier>{9c8cd1f0-4097-41e5-97cc-b2d6e96e4d75}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Drawing\Headers">
-      <UniqueIdentifier>{dbdc1cfc-1c73-4fc6-a385-197c930fd48c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="COM classes">
       <UniqueIdentifier>{92202faa-c74e-46af-b2ff-1d04f983e056}</UniqueIdentifier>
     </Filter>
@@ -67,12 +61,6 @@
     <Filter Include="Processing">
       <UniqueIdentifier>{f4d2fc99-8546-4817-a89d-93d6d7cb3fd4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Processing\Headers">
-      <UniqueIdentifier>{a294ddaf-3004-4161-9485-f445b25cd05d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Processing\Source">
-      <UniqueIdentifier>{fb99966f-2961-46df-bef0-c002dd2ad783}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Processing\GeographicLib">
       <UniqueIdentifier>{4d709ff4-8585-4ba4-a7ad-aaa6813bc8c7}</UniqueIdentifier>
     </Filter>
@@ -122,42 +110,6 @@
     </ClInclude>
     <ClInclude Include="Structures\Structures.h">
       <Filter>Structures</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\BaseDrawer.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\ChartDrawing.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\CollisionList.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\DrawingOptions.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\ImageDrawing.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\LabelDrawing.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\LabelOptions.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\LineDrawing.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\PointSymbols.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\RotatedRectangle.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\ShapefileDrawing.h">
-      <Filter>Drawing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Drawing\TilesDrawer.h">
-      <Filter>Drawing\Headers</Filter>
     </ClInclude>
     <ClInclude Include="COM classes\Chart.h">
       <Filter>COM classes\Headers</Filter>
@@ -349,9 +301,6 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\GdalHelper.h">
-      <Filter>Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities\GeosHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\GlobalClassFactory.h">
@@ -564,33 +513,6 @@
     <ClInclude Include="ShapeNetwork\heap_node.h">
       <Filter>ShapeNetwork</Filter>
     </ClInclude>
-    <ClInclude Include="Processing\Base64.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\clipper.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\ClipperConverter.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\Expression.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\GeometryConverter.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\JenksBreaks.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\PointInPolygon.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\Projections.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\QTree.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Processing\GeograpicLib\Accumulator.hpp">
       <Filter>Processing\GeographicLib</Filter>
     </ClInclude>
@@ -729,9 +651,6 @@
     <ClInclude Include="Control\MapViewCallback.h">
       <Filter>Control</Filter>
     </ClInclude>
-    <ClInclude Include="Processing\GeometryHelper.h">
-      <Filter>Processing\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Shapefile\EditorBase.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
@@ -762,44 +681,108 @@
     <ClInclude Include="Utilities\FieldClassification.h">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Shapefile\ShapefileHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\GroupOperation.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\GeosConverter.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\OgrConverter.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Base64.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\clipper.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\ClipperConverter.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Expression.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\GeometryHelper.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\JenksBreaks.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\PointInPolygon.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\Projections.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\QTree.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Ogr\GeosHelper.h">
+      <Filter>Ogr</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\SelectionHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\FieldHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\GeoProcessing.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\LabelsHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="ChartsHelper.h" />
+    <ClInclude Include="Shapefile\ExtentsHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ShapeStyleHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\BaseDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ChartDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\CollisionList.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\DrawingOptions.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ImageDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LabelDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LabelOptions.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\LineDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\PointSymbols.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\RotatedRectangle.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\ShapefileDrawing.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\TilesDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Drawing\BaseDrawer.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\ChartDrawing.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\CollisionList.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\DrawingOptions.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\ImageDrawing.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\LabelDrawing.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\LabelOptions.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\LineDrawing.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\PointSymbols.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\RotatedRectangle.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\ShapefileDrawing.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\TilesDrawer.cpp">
-      <Filter>Drawing\Source</Filter>
-    </ClCompile>
     <ClCompile Include="COM classes\Chart.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
@@ -1053,9 +1036,6 @@
       <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\GdalHelper.cpp">
-      <Filter>Utilities</Filter>
-    </ClCompile>
-    <ClCompile Include="Utilities\GeosHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\LineBresenham.cpp">
@@ -1478,30 +1458,6 @@
     <ClCompile Include="ShapeNetwork\heap.cpp">
       <Filter>ShapeNetwork</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\Base64.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\clipper.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\ClipperConverter.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\Expression.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\GeometryConverter.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\JenksBreaks.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\Projections.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\QTree.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Processing\GeograpicLib\Geodesic.cpp">
       <Filter>Processing\GeographicLib</Filter>
     </ClCompile>
@@ -1575,9 +1531,6 @@
     <ClCompile Include="COM classes\ShapeEditor.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\GeometryHelper.cpp">
-      <Filter>Processing\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Shapefile\EditorBase.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
@@ -1613,6 +1566,103 @@
     </ClCompile>
     <ClCompile Include="Utilities\FieldClassification.cpp">
       <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapefileHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\GroupOperation.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\GeosConverter.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\OgrConverter.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Base64.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\clipper.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ClipperConverter.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Expression.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\GeometryHelper.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\JenksBreaks.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Projections.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\QTree.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Ogr\GeosHelper.cpp">
+      <Filter>Ogr</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\SelectionHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\FieldHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\GeoProcessing.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\LabelsHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="ChartsHelper.cpp" />
+    <ClCompile Include="Shapefile\ExtentsHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ShapeStyleHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\BaseDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ChartDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\CollisionList.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\DrawingOptions.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ImageDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LabelDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LabelOptions.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LineDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\PointSymbols.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\RotatedRectangle.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\ShapefileDrawing.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\TilesDrawer.cpp">
+      <Filter>Drawing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

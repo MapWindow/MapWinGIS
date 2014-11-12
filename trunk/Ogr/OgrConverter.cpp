@@ -15,7 +15,7 @@
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 
 #include "stdafx.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "Shape.h"
 #include "Shapefile.h"
 #include "ogr_spatialref.h"
@@ -38,84 +38,14 @@ void ClipperConverter::SetConversionFactor(IShapefile* sf)
 	}
 }
 
-// *********************************************************************
-//			Shape2GEOSGeom()
-// *********************************************************************
-//  Converts MapWinGis shape to GEOS geometry
-GEOSGeom GeometryConverter::Shape2GEOSGeom(IShape* shp)
-{
-	OGRGeometry* oGeom = ShapeToGeometry(shp);
-	if (oGeom != NULL)
-	{
-		GEOSGeometry* result = GeosHelper::ExportToGeos(oGeom);
-		OGRGeometryFactory::destroyGeometry(oGeom);
-		return result;
-	}
-	else 
-		return NULL;
-}
 
-GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom)
-{
-	__try
-	{
-		return GeosHelper::Buffer(gsGeom, distance, nQuadSegments);
-	}
-	__except(1)
-	{
-		return NULL;
-	}
-}
 
-// *********************************************************************
-//		GEOSGeom2Shape()
-// *********************************************************************
-// Converts GEOSGeom to MapWinGIS shapes
-bool GeometryConverter::GEOSGeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
-{
-	bool substitute = false;
-	if ( !GeosHelper::IsValid(gsGeom))
-	{
-		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-		if (GeosHelper::IsValid(gsNew))
-		{
-			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
-			gsGeom = gsNew;
-			substitute = true;
-		}
-	}
-	
-	OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
-	if (oGeom)
-	{
-		char* type = GeosHelper::GetGeometryType(gsGeom);
-		CString s = type;
-		GeosHelper::Free(type);
-		
-		OGRwkbGeometryType oForceType = wkbNone;
-		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing )
-			oForceType = wkbLinearRing;
 
-		bool result = GeometryToShapes(oGeom, vShapes, isM);
-		OGRGeometryFactory::destroyGeometry(oGeom);
-
-		if (substitute)
-			GeosHelper::DestroyGeometry(gsGeom);
-		return result;
-	}
-	else
-	{
-		if (substitute)
-			GeosHelper::DestroyGeometry(gsGeom);
-
-		return false;
-	}
-}
 
 //**********************************************************************
 //							ExplodePolygon()			               
 //**********************************************************************
-bool GeometryConverter::MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>* results)
+bool OgrConverter::MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>* results)
 {
 	if (!geom || !results)
 		return false;
@@ -163,7 +93,7 @@ void AddPoints(CShape* shp, OGRLineString* geom, int startPointIndex, int endPoi
 //							ShapeToGeometry()			               
 //**********************************************************************
 // Converts MapWinGis shape object to OGR geometry object.
-OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType forceGeometryType)
+OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType forceGeometryType)
 {
 	if( shape == NULL)
 		return NULL;
@@ -330,7 +260,7 @@ OGRGeometry* GeometryConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryTyp
  *
  *  @return true when at least one shape was created, and false otherwise
  */
-bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, bool isM, OGRwkbGeometryType oForceType )
+bool OgrConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, bool isM, OGRwkbGeometryType oForceType )
 {
 	IShape* shp;
 	vShapes->clear();
@@ -364,40 +294,40 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
 		}
 		if (bPoly25)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon25D);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bPoly)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiPolygon);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 
 		if (bLine25)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString25D);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiLineString25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bLine)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiLineString);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiLineString);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 
 		if (bPoint25)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint25D);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiPoint25D);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 		else if (bPoint)
 		{
-			shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbMultiPoint);
+			shp = OgrConverter::GeometryToShape(oGeom, isM, wkbMultiPoint);
 			if (shp != NULL) vShapes->push_back(shp);
 		}
 	}
 	else
 	{
-		shp = GeometryConverter::GeometryToShape(oGeom, isM, wkbNone, oForceType );
+		shp = OgrConverter::GeometryToShape(oGeom, isM, wkbNone, oForceType );
 		if (shp != NULL) vShapes->push_back(shp);
 	}
 	return vShapes->size() > 0;
@@ -417,7 +347,7 @@ bool GeometryConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vS
  *
  *  @return pointer to shape on success, or NULL otherwise
  */
-IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
+IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
 {
 	if (oGeom == NULL)
 		return NULL;
@@ -714,7 +644,7 @@ IShape * GeometryConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkb
  *					 read from layer if none was specified.
  *  @return resulting shapefile pointer on success, or NULL otherwise
  */
-IShapefile* GeometryConverter::Read_OGR_Layer(BSTR Filename, ShpfileType shpType)
+IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ShpfileType shpType)
 {
 	return NULL;
 	//	USES_CONVERSION;
@@ -827,7 +757,7 @@ IShapefile* GeometryConverter::Read_OGR_Layer(BSTR Filename, ShpfileType shpType
 /*  Establish correspondence between the types of MapWinGis shapefile  
  *	layer and the types of ogr layers.
  */
-ShpfileType GeometryConverter::GeometryType2ShapeType(OGRwkbGeometryType oType)
+ShpfileType OgrConverter::GeometryType2ShapeType(OGRwkbGeometryType oType)
 {
 	switch ( oType )
 	{
@@ -851,7 +781,7 @@ ShpfileType GeometryConverter::GeometryType2ShapeType(OGRwkbGeometryType oType)
 	}
 	return SHP_NULLSHAPE;
 }
-OGRwkbGeometryType GeometryConverter::ShapeType2GeometryType(ShpfileType shpType, bool forceMulti /*= false*/)
+OGRwkbGeometryType OgrConverter::ShapeType2GeometryType(ShpfileType shpType, bool forceMulti /*= false*/)
 {
 	switch( shpType )
 	{
@@ -877,191 +807,12 @@ OGRwkbGeometryType GeometryConverter::ShapeType2GeometryType(ShpfileType shpType
 // **********************************************************************
 //  Writes memory shapefile to the file of specified format.
 //  Isn't implemented yet.
-bool GeometryConverter::Write_OGR_Layer(IShapefile* sf, BSTR Filename)
+bool OgrConverter::WriteOgrLayer(IShapefile* sf, BSTR Filename)
 {
 	return false;
 }
 
-// ********************************************************************
-//		MergeGeosGeometries
-// ********************************************************************
-// Returns GEOS geometry which is result of the union operation for the geometries passed
-GEOSGeometry* GeometryConverter::MergeGeosGeometries( std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput )
-{
-	if (data.size() == 0)
-		return NULL;
-	
-	USES_CONVERSION;
-	GEOSGeometry* g1 = NULL;
-	GEOSGeometry* g2 = NULL;
-	
-	bool stop = false;
-	int count = 0;	// number of union operation performed
-	long percent = 0;
-	
-	int size = data.size();
-	int depth = 0;
 
-	if (size == 1)
-	{
-		// no need for calculation
-		if (deleteInput)
-			return data[0];	 // no need to clone; it will be exactly the same
-		else
-		{
-			GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(data[0]);
-			return geomTemp;
-		}
-	}
 
-	BSTR key = A2BSTR("");
-	while (!stop)
-	{
-		stop = true;
 
-		for (int i = 0; i < size; i++)
-		{
-			if (data[i] != NULL)
-			{
-				if (!g1)
-				{
-					g1 = data[i];
-					data[i] = NULL;
-				}
-				else
-				{
-					g2 = data[i];
-					data[i] = NULL;
-				}
 
-				if (g2 != NULL)
-				{
-					GEOSGeometry* geom = GeosHelper::Union(g1, g2);
-					data[i] = geom;		// placing the resulting geometry back for further processing
-					
-					if (deleteInput || depth > 0)	// in clipping operation geometries are used several times
-													// so the intial geometries should be intact (depth == 0)
-													// in other cases (Buffer, Dissolve) the geometries can be deleted in place
-					{
-						GeosHelper::DestroyGeometry(g1);
-						GeosHelper::DestroyGeometry(g2);
-					}
-					
-					g1 = NULL;
-					g2 = NULL;
-					count++;
-					stop = false;		// in case there is at least one union occured, we shall run once more
-
-					Utility::DisplayProgress(callback, count, size, "Merging shapes...", key, percent);
-				}
-				
-				// it is the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
-				if (i == size -1 && stop == false && g2 == NULL && g1 != NULL && depth == 0 && !deleteInput)
-				{
-					// we need to clone it, to be able to apply unified memory management afterwards
-					// when depth > 0 all interim geometries are deleted, while this one should be preserved
-					GEOSGeometry* geomTemp = GeosHelper::CloneGeometry(g1);
-					g1 = geomTemp;
-				}
-			}
-		}
-		depth++;
-	}
-	return g1;
-}
-
-// *****************************************************
-//		SimplifyPolygon()
-// *****************************************************
-// A polygon is expected as input 
-// (multi-polygons should be split into parts before treating with this routine)
-GEOSGeometry* GeometryConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double tolerance)
-{
-	const GEOSGeometry* gsRing =  GeosHelper::GetExteriorRing(gsGeom);	// no memory is allocated there
-	GEOSGeom gsPoly = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);		// memory allocation
-
-	if (!gsPoly)
-		return NULL;
-	
-	std::vector<GEOSGeom> holes;
-	for (int n = 0; n < GeosHelper::GetNumInteriorRings(gsGeom); n++)
-	{
-		gsRing = GeosHelper::GetInteriorRingN(gsGeom, n);				// no memory is allocated there
-		if (gsRing)
-		{
-			GEOSGeom gsOut = GeosHelper::TopologyPreserveSimplify(gsRing, tolerance);	// memory allocation
-			if (gsOut)
-			{
-				char* type = GeosHelper::GetGeometryType(gsOut);
-				CString s = type;
-				GeosHelper::Free(type);
-				if (s == "LinearRing")
-					holes.push_back(gsOut);
-			}
-		}
-	}
-
-	GEOSGeometry *gsNew = NULL;
-	if (holes.size() > 0)
-	{
-		gsNew = GeosHelper::CreatePolygon(gsPoly, &(holes[0]), holes.size()); // memory allocation (should be released by caller)
-	}
-	else
-	{
-		gsNew = GeosHelper::CreatePolygon(gsPoly, NULL, 0);
-	}
-	return gsNew;
-
-	/*GEOSGeometry* result = GeosHelper::Simplify(gsGeom, tolerance);
-	char* type = GeosHelper::GetGeometryType(result);
-	return result;*/
-}
-
-// *****************************************************
-//		NormalizeSplitResults()
-// *****************************************************
-void GeometryConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* subject, ShpfileType shpType, vector<GEOSGeometry*>& results)
-{
-	if (!result) return;
-
-	int numGeoms = GeosHelper::GetNumGeometries(result);
-	if (numGeoms > 1)
-	{
-		if (shpType == SHP_POLYGON)
-		{
-			for (int i = 0; i < numGeoms; i++)
-			{
-				const GEOSGeometry* polygon = GeosHelper::GetGeometryN(result, i);
-				GEOSGeometry* intersect = GeosHelper::Intersection(subject, polygon);
-
-				if (!intersect)
-					continue;
-
-				double intersectArea;
-				GeosHelper::Area(intersect, &intersectArea);
-				GeosHelper::DestroyGeometry(intersect);
-
-				double polyArea;
-				GeosHelper::Area(polygon, &polyArea);
-
-				double areaRatio = intersectArea / polyArea;
-				if (areaRatio > 0.99 && areaRatio < 1.01) {
-					GEOSGeometry* clone = GeosHelper::CloneGeometry(polygon);
-					if (clone) {
-						results.push_back(clone);
-					}
-				}
-			}
-
-		}
-		else {
-			for (int i = 0; i < numGeoms; i++) {
-				const GEOSGeometry* line = GeosHelper::GetGeometryN(result, i);
-				GEOSGeometry* clone = GeosHelper::CloneGeometry(line);
-				if (clone) {
-					results.push_back(clone);
-				}
-			}
-		}
-	}
-}

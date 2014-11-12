@@ -30,6 +30,7 @@
 #include "Charts.h"
 #include "TableClass.h"
 #include "Macros.h"
+#include "ChartsHelper.h"
 
 // ******************************************************
 //		DrawCharts()
@@ -82,7 +83,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	// reading values
 	CShapefile* sfClass = (CShapefile*)sf;
 	std::vector<double*> values;
-	if (!sfClass->ReadChartFields(&values))
+	if (!ChartsHelper::ReadChartFields(sfClass, &values))
 	{
 		charts->Release();
 		return;
@@ -159,7 +160,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	charts->get_NumFields(&numBars);
 	std::vector<double> normalizationValues;
 	bool normalized = false;
-	if (sfClass->ReadChartField(&normalizationValues, _options->normalizationField))
+	if (ChartsHelper::ReadChartField(sfClass, &normalizationValues, _options->normalizationField))
 	{
 		double val;
 		for (unsigned int i = 0; i < values.size(); i++)
@@ -280,7 +281,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 		if ( _options->useVariableRadius )
 		{
-			if (sfClass->ReadChartField(&sizeValues, _options->sizeField))
+			if (ChartsHelper::ReadChartField(sfClass, &sizeValues, _options->sizeField))
 			{
 				for (unsigned int i = 0; i< sizeValues.size(); i++)
 				{

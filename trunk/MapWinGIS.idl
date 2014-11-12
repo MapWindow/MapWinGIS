@@ -3690,6 +3690,8 @@ interface IShapefile : IDispatch{
 	[propput, id(127)] HRESULT Snappable([in] VARIANT_BOOL newVal);
 	[id(128)] HRESULT Serialize2([in]VARIANT_BOOL SaveSelection, [in]VARIANT_BOOL SerializeCategories, [out, retval]BSTR* retVal);
 	[propget, id(129)] HRESULT ShapefileType2D([out, retval] ShpfileType* pVal);
+	[propget, id(130)] HRESULT FieldIndexByName([in] BSTR FieldName, [out, retval] LONG* pVal);
+	[id(131)] HRESULT Move([in] DOUBLE xProjOffset, [in] DOUBLE yProjOffset, [out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/

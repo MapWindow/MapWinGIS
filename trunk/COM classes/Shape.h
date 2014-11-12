@@ -21,7 +21,7 @@
 #pragma once
 //
 #include "ShapeInterfaces.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "ShapeWrapper.h"
 #include "ShapeWrapperCOM.h"
 #include "ShapePoint.h"

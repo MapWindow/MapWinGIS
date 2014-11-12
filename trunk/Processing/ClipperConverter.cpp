@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ClipperConverter.h"
+#include "ShapefileHelper.h"
 
 // *********************************************************************
 //			Shape2ClipperPolygon()
@@ -257,5 +258,32 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 	else
 	{
 		return NULL;
+	}
+}
+
+// ***************************************************
+//	   AddPolygonsToClipper
+// ***************************************************
+void ClipperConverter::AddPolygons(IShapefile* sf, ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly)
+{
+	if (!sf) return;
+
+	long numShapes;
+	sf->get_NumShapes(&numShapes);
+
+	ClipperConverter converter(sf);
+
+	IShape* shp = NULL;
+	for (long i = 0; i < numShapes; i++)
+	{
+		if (selectedOnly && !ShapefileHelper::ShapeSelected(sf, i))
+			continue;
+
+		sf->get_Shape(i, &shp);
+		if (shp) {
+			ClipperLib::Polygons* polys = converter.Shape2ClipperPolygon(shp);
+			clp.AddPolygons(*polys, clipType);
+			shp->Release();
+		}
 	}
 }

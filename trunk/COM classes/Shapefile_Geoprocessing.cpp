@@ -21,7 +21,7 @@
 
 #include "stdafx.h"
 #include "Shapefile.h"
-#include "GeometryConverter.h"
+#include "OgrConverter.h"
 #include "Templates.h"
 #include "Extents.h"
 #include "clipper.h"
@@ -36,6 +36,11 @@
 	#include <iostream>
 	using namespace std;
 #endif
+#include "GeosConverter.h"
+#include "ShapefileHelper.h"
+#include "FieldHelper.h"
+#include "ShapeHelper.h"
+#include "GeoProcessing.h"
 
 #pragma region Utilities
 
@@ -183,7 +188,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 		bool isM = Utility::ShapeTypeIsM(shpType);
 		
 		std::vector<IShape*> shapes;
-		if (GeometryConverter::GEOSGeomToShapes(gsNew, &shapes, isM))
+		if (GeosConverter::GEOSGeomToShapes(gsNew, &shapes, isM))
 		{
 			long index, numFields;
 			VARIANT_BOOL vbretval;
@@ -279,10 +284,10 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
 	
-	if(globalCallback == NULL && cBack != NULL)
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;	
-		globalCallback->AddRef();
+		_globalCallback = cBack;	
+		_globalCallback->AddRef();
 	}
 
 	if( sf == NULL)
@@ -316,7 +321,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	long percent = 0;
 	for(long shapeid2 = 0; shapeid2 < _numShapes2; shapeid2++)		
 	{
-		Utility::DisplayProgress(globalCallback, shapeid2, _numShapes2, "Calculating...", key, percent);
+		Utility::DisplayProgress(_globalCallback, shapeid2, _numShapes2, "Calculating...", _key, percent);
 		
 		if (SelectedOnly && !(*data)[shapeid2]->selected)
 			continue;
@@ -331,7 +336,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 			IShape* shp2 = NULL;
 			OGRGeometry* oGeom2 = NULL;
 			sf->get_Shape(shapeid2, &shp2);
-			oGeom2 = GeometryConverter::ShapeToGeometry(shp2);
+			oGeom2 = OgrConverter::ShapeToGeometry(shp2);
 			shp2->Release();
 
 			if (oGeom2 != NULL)
@@ -349,7 +354,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 						{
 							IShape* shp1 = NULL;
 							this->get_Shape(shapeId1, &shp1);
-							oGeom1 = GeometryConverter::ShapeToGeometry(shp1);
+							oGeom1 = OgrConverter::ShapeToGeometry(shp1);
 							shp1->Release();
 							vGeometries[shapeId1] = oGeom1;
 						}
@@ -413,7 +418,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	}
 	
 	//  cleaning
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vGeometries.size(); i++)
 	{	
@@ -472,7 +477,7 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 	IShape* temp = NULL;
 	OGRGeometry* oBox;
 	((CExtents*)BoundBox)->ToShape(&temp);
-	oBox = GeometryConverter::ShapeToGeometry(temp);
+	oBox = OgrConverter::ShapeToGeometry(temp);
 	temp->Release();
 
 	for(int i=0; i < (int)shapeIds.size(); i++)
@@ -481,7 +486,7 @@ VARIANT_BOOL CShapefile::SelectShapesAlt(IExtents *BoundBox, double Tolerance, S
 		OGRGeometry* oGeom;
 		OGRBoolean res = 0;
 		this->get_Shape((long)shapeIds[i], &shp);
-		oGeom = GeometryConverter::ShapeToGeometry(shp);
+		oGeom = OgrConverter::ShapeToGeometry(shp);
 		shp->Release();
 		
 		res = oBox->Contains(oGeom);
@@ -559,7 +564,7 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	if (type == SHP_POINTZ) type = SHP_MULTIPOINTZ;
 	if (type == SHP_POINTM) type = SHP_MULTIPOINTM;
 	
-	CloneNoFields(sf, type);
+	ShapefileHelper::CloneNoFields(this, sf, type);
 	CloneField(this, *sf, FieldIndex, -1);
 	
 	// -------------------------------------------
@@ -577,7 +582,7 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(sf, "Dissolve");
 	return;
@@ -660,7 +665,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 	}
 	
 	// make sure that output field names are unique
-	UniqueFieldNames(sf);
+	FieldHelper::UniqueFieldNames(sf);
 
 	// --------------------------------------------
 	//   calculating
@@ -684,7 +689,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 	map <int, vector<int>*>::iterator p = fieldMap.begin();	  // row in the output, rows in the input
 	while(p != fieldMap.end())
 	{
-		Utility::DisplayProgress(globalCallback, index, size, "Calculating stats", key,  percent);
+		Utility::DisplayProgress(_globalCallback, index, size, "Calculating stats", _key,  percent);
 		
 		for(size_t i = 0; i < operations->size(); i++)
 		{
@@ -824,33 +829,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 		++p;
 	}
 
-	Utility::DisplayProgressCompleted(globalCallback, key);
-}
-
-// *************************************************************
-//     ForceProperShapeType()
-// *************************************************************
-// Checks if shape type match shapefile type and doing fixes if possible
-bool CShapefile::ForceProperShapeType(ShpfileType sfType, IShape* shp)
-{
-	ShpfileType shapeType;
-	shp->get_ShapeType(&shapeType);
-
-	if (Utility::ShapeTypeConvert2D(sfType) == SHP_MULTIPOINT && Utility::ShapeTypeConvert2D(shapeType) == SHP_POINT)
-	{
-		VARIANT_BOOL vb;
-		CComPtr<IPoint> pnt = NULL;
-		shp->get_Point(0, &pnt);
-		shp->Create(sfType, &vb);
-		if (vb)
-		{
-			long pointIndex = 0;
-			shp->InsertPoint(pnt, &pointIndex, &vb);
-		}
-		// extract it once more to make sure it has worked
-		shp->get_ShapeType(&shapeType);
-	}
-	return sfType == shapeType;
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 // *************************************************************
@@ -879,7 +858,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	int size = (int)_shapeData.size();
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Grouping shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -926,22 +905,22 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 
 	while(p != shapeMap.end())
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Merging shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
-		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(*(p->second), NULL, false);
+		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(*(p->second), NULL, false);
 		delete p->second;	// deleting the vector
 
 		if (gsGeom != NULL)
 		{
 			std::vector<IShape*> vShapes;
-			if (GeometryConverter::GEOSGeomToShapes(gsGeom, &vShapes, isM ))
+			if (GeosConverter::GEOSGeomToShapes(gsGeom, &vShapes, isM))
 			{
 				for (unsigned int i = 0; i < vShapes.size(); i++)
 				{
 					IShape* shp = vShapes[i];
 					if (shp != NULL)
 					{
-						ForceProperShapeType(targetType, shp);
+						ShapeHelper::ForceProperShapeType(shp, targetType);
 						
 						sf->EditInsertShape(shp, &count, &vbretval);
 						if (vbretval)
@@ -979,7 +958,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	}
 
 	this->ClearCachedGeometries();
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 // *************************************************************
@@ -1010,7 +989,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Merging shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1096,7 +1075,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		}
 	}
 
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	shapeMap.clear();
 
 	if (calcStats)
@@ -1161,7 +1140,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	if (targetType == SHP_POINTZ) targetType = SHP_MULTIPOINTZ;
 	if (targetType == SHP_POINTM) targetType = SHP_MULTIPOINTM;
 
-	this->CloneNoFields(retval, targetType);
+	ShapefileHelper::CloneNoFields(this, retval, targetType);
 	long newFieldIndex = 0;
 	CloneField(this, *retval, FieldIndex, newFieldIndex);
 
@@ -1188,7 +1167,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Grouping shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1232,7 +1211,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 
 	while(p != shapeMap.end())
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Merging shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
 		// merging shapes
 		vector<IShape*>* shapes = p->second;
@@ -1259,7 +1238,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 				shpBase->get_NumPoints(&pntIndex);
 				shpBase->get_NumParts(&partIndex);
 
-				ForceProperShapeType(targetType, shpBase);
+				ShapeHelper::ForceProperShapeType(shpBase, targetType);
 			}
 			else
 			{
@@ -1359,7 +1338,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	//   Validating output
 	// ----------------------------------------------
 	this->ClearValidationList();
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "AggregateShapes");
 	return;
 }
@@ -1384,12 +1363,12 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// -------------------------------------------
 	if (MergeResults)
 	{
-		CloneNoFields(sf, SHP_POLYGON, true);
+		ShapefileHelper::CloneNoFields(this, sf, SHP_POLYGON, true);
 	}
 	else
 	{
 		// if not merging shapes, copy fields
-		CloneCore(sf, SHP_POLYGON, false);
+		ShapefileHelper::CloneCore(this, sf, SHP_POLYGON, false);
 	}
 
 	// -------------------------------------------
@@ -1409,7 +1388,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 	for (long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, size, "Buffering shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, size, "Buffering shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1430,7 +1409,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 			{
 				vector<IShape*> vShapes;
 
-				if (GeometryConverter::GEOSGeomToShapes(oGeom2, &vShapes, isM))
+				if (GeosConverter::GEOSGeomToShapes(oGeom2, &vShapes, isM))
 				{
 					this->InsertShapesVector(*sf, vShapes, this, i, NULL);
 					count += vShapes.size();
@@ -1445,7 +1424,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// -------------------------------------------
 	if (MergeResults)
 	{
-		GEOSGeometry* gsGeom = GeometryConverter::MergeGeosGeometries(results, globalCallback);	// geometries will be released in the process
+		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(results, _globalCallback);	// geometries will be released in the process
 		
 		if (gsGeom != NULL)		// the result should always be in g1
 		{
@@ -1461,11 +1440,11 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				{
 					std::vector<OGRGeometry*> polygons;
 					
-					if (GeometryConverter::MultiPolygon2Polygons(oGeom, &polygons))
+					if (OgrConverter::MultiPolygon2Polygons(oGeom, &polygons))
 					{
 						for (unsigned int i = 0; i < polygons.size(); i++)
 						{
-							IShape* shp = GeometryConverter::GeometryToShape(polygons[i], isM);
+							IShape* shp = OgrConverter::GeometryToShape(polygons[i], isM);
 							if (shp)
 							{
 								(*sf)->EditInsertShape(shp, &count, &vb);
@@ -1478,7 +1457,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 				else
 				{
 					// Doesn't use any GEOS functions:
-					IShape* shp = GeometryConverter::GeometryToShape(oGeom, isM);
+					IShape* shp = OgrConverter::GeometryToShape(oGeom, isM);
 					if (shp)
 					{
 						(*sf)->EditInsertShape(shp, &count, &vb);	
@@ -1496,7 +1475,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(sf, "BufferByDistance");
 	return S_OK;
@@ -1555,180 +1534,11 @@ STDMETHODIMP CShapefile::Union(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfO
 	return S_OK;
 }
 
-// ****************************************************************
-//		FieldsAreEqual()
-// ****************************************************************
-bool CShapefile::FieldsAreEqual(IField* field1, IField* field2)
-{
-	if (!field1 || !field2)
-	{
-		return false;
-	}
-	else
-	{
-		BSTR name1, name2;
-		field1->get_Name(&name1);
-		field2->get_Name(&name2);
-		
-		USES_CONVERSION;
-		CString s1 = OLE2CA(name1);
-		CString s2 = OLE2CA(name2);
-
-		bool equal = s1 == s2;
-		SysFreeString(name1);
-		SysFreeString(name2);
-
-		if (!equal)
-		{
-			return false;
-		}
-		else
-		{
-			FieldType type1, type2;
-			field1->get_Type(&type1);
-			field2->get_Type(&type2);
-			
-			if (type1 != type2)
-			{
-				return false;
-			}
-			else
-			{
-				if (type1 == INTEGER_FIELD)
-				{
-					return true;
-				}
-				else if (type1 == STRING_FIELD)
-				{
-					long width1, width2;
-					field1->get_Width(&width1);
-					field2->get_Width(&width2);
-					return width1 == width2;
-				}
-				else // DOUBLE_FIELD
-				{
-					/*long precision1, precision2;
-					field1->get_Precision(&precision1);
-					field2->get_Precision(&precision2);
-					return precision1 == precision2;*/
-					return true;
-				}
-			}
-		}
-	}
-}
-
-// ****************************************************************
-//		CopyFields()
-// ****************************************************************
-void CShapefile::CopyFields(IShapefile* source, IShapefile* target)
-{
-	LONG numFields, position;
-	VARIANT_BOOL vbretval;
-	source->get_NumFields(&numFields);
-
-	for (long i = 0; i < numFields; i++)
-	{
-		IField * field = NULL;
-		IField * fieldNew = NULL;
-		source->get_Field(i,&field);
-		field->Clone(&fieldNew);
-		
-		target->get_NumFields(&position);
-		target->EditInsertField(fieldNew, &position, NULL, &vbretval);
-
-		field->Release();
-		fieldNew->Release();
-	}
-}
-
-// ****************************************************************
-//		CopyFields()
-// ****************************************************************
-// Exposed publicly
-void CShapefile::CopyFields(IShapefile* target)
-{
-	if (!target)
-		return;
-	
-	LONG numFields, position;
-	VARIANT_BOOL vbretval;
-	this->get_NumFields(&numFields);
-
-	for (long i = 0; i < numFields; i++)
-	{
-		IField * field = NULL;
-		IField * fieldNew = NULL;
-		this->get_Field(i,&field);
-		field->Clone(&fieldNew);
-		
-		target->get_NumFields(&position);
-		target->EditInsertField(fieldNew, &position, NULL, &vbretval);
-
-		field->Release();
-		fieldNew->Release();
-	}
-}
-
-// ****************************************************************
-//		CopyFields()
-// ****************************************************************
-void CShapefile::CopyFields(IShapefile* sfSubject, IShapefile* sfOverlay, IShapefile* sfResult, map<long, long>& fieldMap, bool mergeFields)
-{
-	// fields of the subject shapefile
-	LONG numFields, position;
-	VARIANT_BOOL vbretval;
-	sfSubject->get_NumFields(&numFields);
-
-	CopyFields(sfSubject, sfResult);
-	
-	// passing the fields of overlay shapefile
-	if ( sfOverlay )
-	{
-		LONG numFields2;
-		sfOverlay->get_NumFields(&numFields2);
-		for (long i = 0; i < numFields2; i++)
-		{
-			IField * field1 = NULL;
-			sfOverlay->get_Field(i,&field1);
-			
-			// checking whether we have such field already
-			bool found = false;
-			if (mergeFields)
-			{
-				for (int j = 0; j < numFields; j++)
-				{
-					IField * field2 = NULL;
-					sfResult->get_Field(j,&field2);
-					if (FieldsAreEqual(field1, field2))
-					{
-						fieldMap[i] = j;
-						found = true;
-					}
-					field2->Release();
-				}
-			}
-			
-			if (!found)
-			{
-				IField* fieldNew = NULL;
-				field1->Clone(&fieldNew);
-				sfResult->get_NumFields(&position);
-				sfResult->EditInsertField(fieldNew, &position, NULL, &vbretval);
-				fieldNew->Release();
-
-				fieldMap[i] = position;
-			}
-			field1->Release();
-		}
-		this->UniqueFieldNames(sfResult);
-	}
-}
 
 // ****************************************************************
 //		GetClipOperationReturnType()
 // ****************************************************************
-// autochoosing the resulting type for intersection
+// auto choosing the resulting type for intersection
 ShpfileType GetClipOperationReturnType(ShpfileType type1, ShpfileType type2, tkClipOperation operation)
 {
 	switch (operation)
@@ -1850,14 +1660,14 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	//   Creating output
 	// ----------------------------------------------
 	// creation of resulting shapefile
-	this->CloneNoFields(retval, returnType);
+	ShapefileHelper::CloneNoFields(this, retval, returnType);
 
 	// do field mapping
 	std::map<long, long> fieldMap;
 
 	// fields from the overlay shapefile will be copied for the limited number of operation only
 	IShapefile* sfCopy = (operation == clIntersection || operation == clSymDifference || operation == clUnion)? sfOverlay : NULL;
-	this->CopyFields(this, sfCopy, *retval, fieldMap);
+	GeoProcessing::CopyFields(this, sfCopy, *retval, fieldMap);
 
 	// -------------------------------------------
 	//  processing
@@ -1868,9 +1678,9 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 
 	bool useClipper = (_geometryEngine == engineClipper && canUseClipper);
 	
-	if (globalCallback)
+	if (_globalCallback)
 	{
-		globalCallback->QueryInterface(IID_IStopExecution,(void**)&_stopExecution);
+		_globalCallback->QueryInterface(IID_IStopExecution,(void**)&_stopExecution);
 	}
 	
 	// building spatial index for the operation
@@ -1954,7 +1764,7 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	// cleaning
 	// -------------------------------------------
 cleaning:	
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	// clearing spatial index for the operation
 	((CShapefile*)sfOverlay)->ClearTempQTree();
@@ -1987,7 +1797,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Clipping shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
 		if (!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2041,7 +1851,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 				
 				if ((int)vUnion.size() > 1)
 				{
-					gsGeom2 = GeometryConverter::MergeGeosGeometries(vUnion, NULL, false);
+					gsGeom2 = GeosConverter::MergeGeometries(vUnion, NULL, false);
 					deleteNeeded = true;
 				}
 				else if ((int)vUnion.size() == 1)
@@ -2055,7 +1865,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 					if (gsResult != NULL)
 					{
 						vector<IShape* > vShapes;
-						bool result = GeometryConverter::GEOSGeomToShapes(gsResult, &vShapes, isM);
+						bool result = GeosConverter::GEOSGeomToShapes(gsResult, &vShapes, isM);
 						GeosHelper::DestroyGeometry(gsResult);
 						this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL);
 					}
@@ -2071,7 +1881,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 		}
 	}
 cleaning:	
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 // ********************************************************************
@@ -2094,7 +1904,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Clipping shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
 		if (!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2190,7 +2000,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	}
 
 cleaning:
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2225,7 +2035,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
 		if(!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2273,7 +2083,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 					
 					// saving the results
 					vector<IShape* > vShapes;
-					bool result = GeometryConverter::GEOSGeomToShapes(geom, &vShapes, isM);
+					bool result = GeosConverter::GEOSGeomToShapes(geom, &vShapes, isM);
 					GeosHelper::DestroyGeometry(geom);
 
 					this->InsertShapesVector(sfResult, vShapes, this, subjectId, NULL, sfClip, clipId, fieldMap);	// shapes are released here
@@ -2283,32 +2093,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 		}
 	}
 cleaning:
-	Utility::DisplayProgressCompleted(globalCallback, key);
-}
-
-// ***************************************************
-//	   AddPolygonsToClipper
-// ***************************************************
-void CShapefile::AddPolygonsToClipper(ClipperLib::Clipper& clp, ClipperLib::PolyType clipType, bool selectedOnly) 
-{
-	long numShapes;		
-	this->get_NumShapes(&numShapes);		
-
-	ClipperConverter converter(this);
-
-	IShape* shp =NULL;
-	for (long i = 0; i < numShapes; i++) 
-	{
-		if (selectedOnly && !(_shapeData)[i]->selected)
-			continue;
-
-		this->get_Shape(i, &shp);
-		if (shp) {
-			ClipperLib::Polygons* polys = converter.Shape2ClipperPolygon(shp);
-			clp.AddPolygons(*polys, clipType);
-			shp->Release();
-		}
-	}
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 // ******************************************************************
@@ -2323,8 +2108,8 @@ IShapefile* CShapefile::IntersectionClipperNoAttributes(VARIANT_BOOL SelectedOnl
 	this->Clone(&sfResult);
 
 	ClipperLib::Clipper clp;
-	this->AddPolygonsToClipper(clp, ClipperLib::PolyType::ptSubject, SelectedOnlySubject == VARIANT_TRUE);
-	((CShapefile*)sfClip)->AddPolygonsToClipper(clp, ClipperLib::PolyType::ptClip, SelectedOnlyClip == VARIANT_TRUE);
+	ClipperConverter::AddPolygons(this, clp, ClipperLib::PolyType::ptSubject, SelectedOnlySubject == VARIANT_TRUE);
+	ClipperConverter::AddPolygons(sfClip, clp, ClipperLib::PolyType::ptClip, SelectedOnlyClip == VARIANT_TRUE);
 	
 	ClipperLib::Polygons polyResult;
 	if (clp.Execute(ClipperLib::ClipType::ctIntersection, polyResult)) {
@@ -2393,7 +2178,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
 		if(!this->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2526,7 +2311,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	}
 
 cleaning:	
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2556,7 +2341,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Calculating difference...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
 
 		if(!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2618,7 +2403,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 			else if (vClip.size() > 1)
 			{
 				// union of the clipping shapes
-				gsClip = GeometryConverter::MergeGeosGeometries(vClip, NULL, false);
+				gsClip = GeosConverter::MergeGeometries(vClip, NULL, false);
 			}
 			
 			bool deleteNeeded = false;
@@ -2640,7 +2425,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 			if (gsGeom1 != NULL)
 			{
 				vector<IShape* > vShapes;
-				bool result = GeometryConverter::GEOSGeomToShapes(gsGeom1, &vShapes, isM);
+				bool result = GeosConverter::GEOSGeomToShapes(gsGeom1, &vShapes, isM);
 				if (deleteNeeded)
 					GeosHelper::DestroyGeometry(gsGeom1);
 				this->InsertShapesVector(sfResult, vShapes, sfSubject, subjectId, fieldMap);	// shapes are released here
@@ -2662,7 +2447,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	}
 
 cleaning:	
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 #ifdef SERIALIZE_POLYGONS
@@ -2715,7 +2500,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(globalCallback, subjectId, numShapesSubject, "Calculating difference...", key, percent);
+		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
 
 		if(!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2844,7 +2629,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	}
 
 cleaning:
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2878,16 +2663,7 @@ STDMETHODIMP CShapefile::put_GeometryEngine(tkGeometryEngine newVal)
 
 #pragma region PointInPolygon
 
-// ********************************************************************
-//		pointInPolygon()
-// ********************************************************************
-BOOL CShapefile::pointInPolygon( long ShapeIndex, double x, double y )
-{
-	VARIANT_BOOL InPolygon;
-	if (ShapeIndex < 0) return FALSE;
-	PointInShape(ShapeIndex, x, y, &InPolygon);
-	return -InPolygon;
-}
+
 
 // ********************************************************************
 //		PointInShape()
@@ -2944,7 +2720,7 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 	else
 	{
 		int shpType;
-		fseek(_shpfile, shpOffsets[ShapeIndex] + sizeof(int)*2, SEEK_SET);
+		fseek(_shpfile, _shpOffsets[ShapeIndex] + sizeof(int)*2, SEEK_SET);
 		fread(&shpType, sizeof(int), 1, _shpfile);
 
 		shpType = Utility::ShapeTypeConvert2D((ShpfileType)shpType);
@@ -3035,11 +2811,11 @@ STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	int nShapeCount = m_PolySF.size();
+	int nShapeCount = _polySf.size();
 	for(int nShape = nShapeCount - 1; nShape >= 0; nShape--) 
 	// for(int nShape = 0; nShape < ShapeCount; nShape++) see http://www.mapwindow.org/phorum/read.php?3,9745,9950#msg-9950
 	{
-		PolygonShapefile * sf = &m_PolySF[nShape];
+		PolygonShapefile * sf = &_polySf[nShape];
 
 		if(x < sf->shpHeader.MinX || y < sf->shpHeader.MinY || x > sf->shpHeader.MaxX || y > sf->shpHeader.MaxY)
 		{
@@ -3110,7 +2886,7 @@ STDMETHODIMP CShapefile::PointInShapefile(DOUBLE x, DOUBLE y, LONG* ShapeIndex)
 STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (m_writing)
+	if (_writing)
 	{
 		//AfxMessageBox("Can't read");
 		*retval = VARIANT_FALSE;
@@ -3125,10 +2901,10 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 	}
 	
 	int size = _shapeData.size();
-	m_PolySF.resize(size);
+	_polySf.resize(size);
 	for(int nShape = 0; nShape < size; nShape++)
 	{
-		fseek(_shpfile, shpOffsets[nShape]+sizeof(int)*2, SEEK_SET);
+		fseek(_shpfile, _shpOffsets[nShape]+sizeof(int)*2, SEEK_SET);
 		int shpType;
 		fread(&shpType, sizeof(int), 1, _shpfile);
 		if(shpType != SHP_POLYGON)
@@ -3138,7 +2914,7 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 			return S_OK;
 		}
 
-		PolygonShapefile & sf = m_PolySF[nShape];
+		PolygonShapefile & sf = _polySf[nShape];
 		fread(&sf.shpHeader, sizeof(ShapeHeader), 1, _shpfile);
 		
 		if (sf.shpHeader.NumPoints > 0 && sf.shpHeader.NumParts > 0) 
@@ -3167,7 +2943,7 @@ STDMETHODIMP CShapefile::EndPointInShapefile(void)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_PolySF.clear();
+	_polySf.clear();
 
 	return S_OK;
 }
@@ -3209,7 +2985,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Exploding...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Exploding...", _key, percent);
 		
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3243,7 +3019,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	// ----------------------------------------------
 	//   Output validation
 	// ----------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retval, "ExplodeShapes");
 	return S_OK;
@@ -3286,7 +3062,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Exporting...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Exporting...", _key, percent);
 
 		if (!_shapeData[i]->selected)
 			continue;
@@ -3325,7 +3101,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	// ----------------------------------------------
 	//   Validating output
 	// ----------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retval, "ExportSelection");
 	return S_OK;
@@ -3364,7 +3140,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	long percent = 0;
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Sorting...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Sorting...", _key, percent);
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);
@@ -3395,7 +3171,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 		
 		while(p != shapeMap.end())
 		{
-			Utility::DisplayProgress(globalCallback, count, numShapes, "Writing...", key, percent);
+			Utility::DisplayProgress(_globalCallback, count, numShapes, "Writing...", _key, percent);
 			
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
@@ -3407,7 +3183,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 		std::multimap <CComVariant, IShape*>::reverse_iterator p = shapeMap.rbegin();
 		while(p != shapeMap.rend())
 		{
-			Utility::DisplayProgress(globalCallback, count, numShapes, "Writing...", key, percent);
+			Utility::DisplayProgress(_globalCallback, count, numShapes, "Writing...", _key, percent);
 
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
@@ -3418,7 +3194,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "Sort");
 	this->ClearValidationList();
 	return S_OK;
@@ -3465,12 +3241,12 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// -----------------------------------------------
 	//	 Creating output
 	// -----------------------------------------------
-	this->CloneNoFields(retval);
+	ShapefileHelper::CloneNoFields(this, retval);
 	VARIANT_BOOL vbretval;
 
 	// copying fields from both shapefiles
 	std::map<long, long> fieldMap;
-	this->CopyFields(this, sf, *retval, fieldMap, true);
+	GeoProcessing::CopyFields(this, sf, *retval, fieldMap, true);
 
 	long numFields;
 	this->get_NumFields(&numFields);
@@ -3484,7 +3260,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 
 	for (int i = 0; i < numShapes1; i++)
 	{
-		Utility::DisplayProgress(globalCallback, count, numShapes1, "Writing...", key, percent);
+		Utility::DisplayProgress(_globalCallback, count, numShapes1, "Writing...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnlyThis))
 			continue;
@@ -3529,7 +3305,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 
 	for (int i = 0; i < numShapes2; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes2, "Writing...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes2, "Writing...", _key, percent);
 		
 		if (!((CShapefile*)sf)->ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3573,7 +3349,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	((CShapefile*)sf)->ClearValidationList();
 	ValidateOutput(retval, "Merge");
@@ -3623,7 +3399,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	int numShapes = (int )_shapeData.size();
 	for (int i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Calculating...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Calculating...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3650,7 +3426,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 
 			if (type != "MultiPolygon")
 			{
-				GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsGeom, Tolerance);
+				GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsGeom, Tolerance);
 				if (gsNew)
 				{
 					InsertGeosGeometry(sfNew, gsNew, this, i);
@@ -3662,7 +3438,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 				for (int n = 0; n < GeosHelper::GetNumGeometries(gsGeom); n++)
 				{
 					const GEOSGeometry* gsPart = GeosHelper::GetGeometryN(gsGeom, n);
-					GEOSGeom gsNew = GeometryConverter::SimplifyPolygon(gsPart, Tolerance);
+					GEOSGeom gsNew = GeosConverter::SimplifyPolygon(gsPart, Tolerance);
 					if (gsPart)
 					{
 						InsertGeosGeometry(sfNew, gsNew, this, i);
@@ -3680,7 +3456,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retVal, "SimplifyLines");
 	return S_OK;
@@ -3726,7 +3502,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 
 	for (long i = 0; i < shapeCount; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, shapeCount, "Segmentizing...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, shapeCount, "Segmentizing...", _key, percent);
 		
 		GEOSGeometry *geom1 = GetGeosGeometry(i);
 
@@ -3734,7 +3510,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 		if(this->QuickExtentsCore(i, &xMin, &yMin, &xMax, &yMax))
 		{
 			QTreeExtent query(xMin, xMax, yMax, yMin);
-			std::vector<int> shapes = this->m_qtree->GetNodes(query);
+			std::vector<int> shapes = this->_qtree->GetNodes(query);
 			
 			// calculation union of all geometries
 			if (shapes.size() > 0)
@@ -3781,7 +3557,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	this->ClearTempQTree();
 	this->ClearCachedGeometries();
 	this->ClearValidationList();
@@ -3837,7 +3613,7 @@ Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
 	//int missingAngleCount = 0;
 	for(size_t i = 0; i < _shapeData.size(); i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Calculating spatial relations...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Calculating spatial relations...", _key, percent);
 
 		vector<int> shapeIds;
 		double xMin, xMax, yMin, yMax;
