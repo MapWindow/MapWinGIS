@@ -38,8 +38,6 @@ bool GroupOperation::Run(tkCursorMode cursorMode, long layerHandle, IShapefile* 
 			result = SplitByPolyline(layerHandle, sf, indices, shp, undoList, errorCode);
 			break;	
 		case cmSplitByPolygon:
-			result = SplitByPolygon(layerHandle, sf, indices, shp, undoList, errorCode);
-			break;
 		case cmEraseByPolygon:
 		case cmClipByPolygon:
 			result = ClipByPolygon(cursorMode, layerHandle, sf, indices, shp, undoList, errorCode);
@@ -87,27 +85,50 @@ bool GroupOperation::ClipByPolygon(tkCursorMode cursorMode, long layerHandle, IS
 			{
 				if (GeosHelper::Intersects(g, gPoly)) 
 				{
-					GEOSGeometry* r = NULL;
-					switch (cursorMode)
+					if (GeosHelper::Contains(gPoly, g))
 					{
-						case cmEraseByPolygon:
-							r = GeosHelper::Difference(g, gPoly);
-							break;
-						case cmClipByPolygon:
-							r = GeosHelper::Intersection(g, gPoly);
-							break;
+						if (cursorMode == cmEraseByPolygon)
+							deleteList.push_back(indices[i]);
+						// for other modes simply leave the untouched
 					}
-					
-					if (r) {
-						vector<IShape*> shapes;
-						if (GeosConverter::GeomToShapes(r, &shapes, isM))
+					else 
+					{
+						vector<GEOSGeometry*> results;
+
+						GEOSGeometry* r = NULL;
+						switch (cursorMode)
 						{
-							UndoListHelper::AddShapes(sf, shapes, layerHandle, undoList, indices[i], mwShapeIdIndex);
-							success = true;
-							if (cursorMode == cmEraseByPolygon)
-								deleteList.push_back(indices[i]);
+							case cmEraseByPolygon:
+								r = GeosHelper::Difference(g, gPoly);
+								if (r) results.push_back(r);
+								break;
+							case cmClipByPolygon:
+								r = GeosHelper::Intersection(g, gPoly);
+								if (r) results.push_back(r);
+								break;	
+							case cmSplitByPolygon:
+								r = GeosHelper::Intersection(g, gPoly);
+								if (r) results.push_back(r);
+								r = GeosHelper::Difference(g, gPoly);
+								if (r) results.push_back(r);
+								break;
 						}
-						GeosHelper::DestroyGeometry(r);
+					
+						int count = 0;
+						for (size_t j = 0; j < results.size(); j++)
+						{
+							vector<IShape*> shapes;
+							if (GeosConverter::GeomToShapes(results[j], &shapes, isM))
+							{
+								UndoListHelper::AddShapes(sf, shapes, layerHandle, undoList, indices[i], mwShapeIdIndex);
+								success = true;
+								count++;
+							}
+							GeosHelper::DestroyGeometry(results[j]);
+						}
+
+						if (count > 0 && cursorMode != cmClipByPolygon)
+							deleteList.push_back(indices[i]);
 					}
 				}
 				GeosHelper::DestroyGeometry(g);
@@ -119,15 +140,6 @@ bool GroupOperation::ClipByPolygon(tkCursorMode cursorMode, long layerHandle, IS
 	UndoListHelper::DeleteShapes(sf, deleteList, layerHandle, undoList);
 
 	return success;
-}
-
-// ***************************************************************
-//	SplitByPolygon
-// ***************************************************************
-bool GroupOperation::SplitByPolygon(long layerHandle, IShapefile* sf, vector<long>& indices, IShape*polygon, IUndoList* undoList, int& errorCode)
-{
-	// TODO: implement
-	return false;
 }
 
 // ***************************************************************

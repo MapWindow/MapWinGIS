@@ -1391,7 +1391,7 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 			break;
 		case cmSplitByPolygon:
 			put_FillColor(RGB(127, 127, 127));
-			put_LineColor(RGB(255, 255, 255));
+			put_LineColor(RGB(255, 0, 0));
 			break;
 	}
 }
