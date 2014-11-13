@@ -181,7 +181,7 @@ enum ShapeInputMode
 
 enum LayerSelector
 {
-	slctAll = 0,
+	slctShapefiles = 0,
 	slctInMemorySf = 1,
 	slctHotTracking = 2,
 	slctInteractiveEditing = 3,

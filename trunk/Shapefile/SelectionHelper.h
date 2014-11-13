@@ -9,7 +9,9 @@ public:
 	static int SelectByPolygon(IShapefile* sf, IShape* polygon, int& errorCode);
 	static bool SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevious);
 	static bool SelectByRectangle(IShapefile* sf, Extent& box);
+	static bool SelectSingleShape(IShapefile* sf, Extent& box, long& shapeIndex);
 private:
 	static bool SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
+	
 };
 

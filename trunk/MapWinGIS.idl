@@ -6136,6 +6136,7 @@ library MapWinGIS
 			[id(25)] void SelectionChanged(LONG LayerHandle);
 		//}}AFX_ODL_EVENT
 			
+			[id(26)] void ShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY);
 	};
 	[
 		object,

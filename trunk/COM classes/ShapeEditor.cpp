@@ -1254,6 +1254,8 @@ bool CShapeEditor::TrySave()
 
 	Clear();
 
+	_mapCallback->_Redraw(tkRedrawType::RedrawAll, false, true);
+
 	// let the user set new attributes
 	_mapCallback->_FireAfterShapeEdit(uoEditShape, layerHandle, shapeIndex);
 	return true;

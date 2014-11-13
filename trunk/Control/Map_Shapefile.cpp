@@ -7,6 +7,7 @@
 #include "ShapeDrawingOptions.h"
 #include "Shapefile.h"
 #include "Labels.h"
+#include "SelectionHelper.h"
 
 // TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
@@ -1148,12 +1149,6 @@ bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& laye
 	for (int i = 0; i < (int)_activeLayers.size(); i++)
 	{
 		int handle = GetLayerHandle(i);
-		if (selector == slctAll)
-		{
-			layers.push_back(handle);
-			continue;
-		}
-
 		bool result = CheckLayer(selector, handle);
 		if (result)
 			layers.push_back(handle);
@@ -1168,11 +1163,6 @@ bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
 {
 	for (int i = 0; i < (int)_activeLayers.size(); i++)
 	{
-		if (selector == slctAll)
-		{
-			layers.push_back(true);
-			continue;
-		}
 		bool result = CheckLayer(selector, _activeLayers[i]);
 		layers.push_back(result);
 	}
@@ -1195,6 +1185,9 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 			VARIANT_BOOL result = VARIANT_FALSE;
 			switch (selector)
 			{
+			case slctShapefiles:
+				result = VARIANT_TRUE;
+				break;
 			case slctHotTracking:
 				if (!layer->wasRendered) return false;
 				VARIANT_BOOL vb;
@@ -1249,6 +1242,29 @@ double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
 	if (proj)
 		tol /= this->PixelsPerMapUnit();
 	return tol;
+}
+
+// ************************************************************
+//		DrillDownSelect
+// ************************************************************
+bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex )
+{
+	vector<int> handles;
+	SelectLayerHandles(slctShapefiles, handles);
+	for (int i = handles.size() - 1; i >= 0; i--)
+	{
+		CComPtr<IShapefile> sf = GetShapefile(handles[i]);
+		if (sf) {
+			Extent box = GetPointSelectionBox(sf, projX, projY);
+			
+			if (SelectionHelper::SelectSingleShape(sf, box, shapeIndex))
+			{
+				layerHandle = handles[i];
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 // ************************************************************

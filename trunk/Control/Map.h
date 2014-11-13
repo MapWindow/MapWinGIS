@@ -647,6 +647,7 @@ public:
 	void FireProjectionChanged() { FireEvent(eventidProjectionChanged, EVENT_PARAM(VTS_NONE)); }
 	void FireUndoListChanged(){ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
 	void FireSelectionChanged(LONG LayerHandle) { FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
+	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY) { FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), LayerHandle, ShapeIndex, pointX, pointY); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1085,6 +1086,7 @@ private:
 	void ShowToolTipOnMouseMove(UINT nFlags, CPoint point);
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
+	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 #pragma endregion
 
 public:
@@ -1110,7 +1112,6 @@ public:
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
-	
 
 };
 

@@ -738,7 +738,6 @@
     <ClInclude Include="Shapefile\LabelsHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
-    <ClInclude Include="ChartsHelper.h" />
     <ClInclude Include="Shapefile\ExtentsHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
@@ -782,6 +781,9 @@
       <Filter>Drawing</Filter>
     </ClInclude>
     <ClInclude Include="Shapefile\UndoListHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\ChartsHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1624,7 +1626,6 @@
     <ClCompile Include="Shapefile\LabelsHelper.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
-    <ClCompile Include="ChartsHelper.cpp" />
     <ClCompile Include="Shapefile\ExtentsHelper.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
@@ -1668,6 +1669,9 @@
       <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="Shapefile\UndoListHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\ChartsHelper.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
   </ItemGroup>

@@ -521,6 +521,13 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	// --------------------------------------------
 	switch(m_cursorMode)
 	{
+		case cmIdentify:
+			{
+				long layerHandle, shapeIndex;
+				if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
+					FireShapeIdentified(layerHandle, shapeIndex, x, y);
+			}
+			break;
 		case cmRotateShapes:
 		case cmMoveShapes:
 			HandleOnLButtonMoveOrRotate(x, y);

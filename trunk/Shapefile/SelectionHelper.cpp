@@ -203,6 +203,24 @@ bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, double Toler
 }
 
 /***********************************************************************/
+/*		SelectSingleShape()
+/***********************************************************************/
+bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, long& shapeIndex)
+{
+	vector<long> results;
+	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	{
+		if (results.size() > 0)
+		{
+			shapeIndex = results[results.size() - 1];
+			return true;
+		}
+			
+	}
+	return false;
+}
+
+/***********************************************************************/
 /*		SelectByPoint()
 /***********************************************************************/
 bool SelectionHelper::SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevious)
@@ -218,17 +236,13 @@ bool SelectionHelper::SelectByPoint(IShapefile* sf, Extent& box, bool clearPrevi
 			result = true;
 	}
 
-	vector<long> results;
-	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	long shapeIndex;
+	if (SelectSingleShape(sf, box, shapeIndex))
 	{
-		if (results.size() > 0)
-		{
-			// change the state of the top most shape
-			long shapeIndex = results[results.size() - 1];
-			bool selected = ShapefileHelper::ShapeSelected(sf, shapeIndex);
-			sf->put_ShapeSelected(shapeIndex, (!selected) ? VARIANT_TRUE : VARIANT_FALSE );
-			result = true;
-		}
+		// change the state of the top most shape
+		bool selected = ShapefileHelper::ShapeSelected(sf, shapeIndex);
+		sf->put_ShapeSelected(shapeIndex, (!selected) ? VARIANT_TRUE : VARIANT_FALSE);
+		result = true;
 	}
 	return result;
 }
@@ -303,3 +317,4 @@ int SelectionHelper::SelectByPolygon(IShapefile* sf, IShape* poly, int& errorCod
 	GeosHelper::DestroyGeometry(g);
 	return ShapefileHelper::GetNumSelected(sf);
 }
+

@@ -166,7 +166,6 @@
   </ItemDefinitionGroup>
   <!-- headers -->
   <ItemGroup>
-    <ClInclude Include="ChartsHelper.h" />
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
@@ -207,6 +206,7 @@
     <ClInclude Include="Processing\Projections.h" />
     <ClInclude Include="Processing\QTree.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
+    <ClInclude Include="Shapefile\ChartsHelper.h" />
     <ClInclude Include="Shapefile\EditorBase.h" />
     <ClInclude Include="Shapefile\ExtentsHelper.h" />
     <ClInclude Include="Shapefile\FieldHelper.h" />
@@ -405,7 +405,6 @@
   </ItemGroup>
   <!-- source -->
   <ItemGroup>
-    <ClCompile Include="ChartsHelper.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
@@ -525,6 +524,7 @@
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />
     <ClCompile Include="Shapefile\ActiveShape.cpp" />
+    <ClCompile Include="Shapefile\ChartsHelper.cpp" />
     <ClCompile Include="Shapefile\EditorBase.cpp" />
     <ClCompile Include="Shapefile\ExtentsHelper.cpp" />
     <ClCompile Include="Shapefile\FieldHelper.cpp" />
