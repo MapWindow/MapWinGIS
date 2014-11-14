@@ -1,0 +1,13 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is connection string
+# Following lines are queries to execute
+
+# Connection string to default database:
+PG:host=localhost dbname=postgres user=postgres
+
+# Drop database if it exists
+DROP DATABASE IF EXISTS mapwingis;
+

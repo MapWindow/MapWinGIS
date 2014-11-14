@@ -182,7 +182,7 @@
             this.groupBox10 = new System.Windows.Forms.GroupBox();
             this.RunPostGISTest = new System.Windows.Forms.Button();
             this.SelectPostgisInput = new System.Windows.Forms.Button();
-            this.PostgisInput = new System.Windows.Forms.TextBox();
+            this.PostGisInput = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.RunPostGisPrivileges = new System.Windows.Forms.Button();
@@ -1860,7 +1860,7 @@
             this.groupBox23.Controls.Add(this.SelectPostGisDropDb);
             this.groupBox23.Controls.Add(this.PostGisDropDbInput);
             this.groupBox23.Controls.Add(this.label28);
-            this.groupBox23.Location = new System.Drawing.Point(7, 487);
+            this.groupBox23.Location = new System.Drawing.Point(7, 422);
             this.groupBox23.Name = "groupBox23";
             this.groupBox23.Size = new System.Drawing.Size(194, 93);
             this.groupBox23.TabIndex = 19;
@@ -1971,14 +1971,14 @@
             this.groupBox10.BackColor = System.Drawing.Color.Transparent;
             this.groupBox10.Controls.Add(this.RunPostGISTest);
             this.groupBox10.Controls.Add(this.SelectPostgisInput);
-            this.groupBox10.Controls.Add(this.PostgisInput);
+            this.groupBox10.Controls.Add(this.PostGisInput);
             this.groupBox10.Controls.Add(this.label14);
-            this.groupBox10.Location = new System.Drawing.Point(3, 339);
+            this.groupBox10.Location = new System.Drawing.Point(7, 323);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Size = new System.Drawing.Size(194, 93);
             this.groupBox10.TabIndex = 6;
             this.groupBox10.TabStop = false;
-            this.groupBox10.Text = "Open PostGIS layer";
+            this.groupBox10.Text = "Open PostGIS layers";
             // 
             // RunPostGISTest
             // 
@@ -1997,20 +1997,22 @@
             this.SelectPostgisInput.Name = "SelectPostgisInput";
             this.SelectPostgisInput.Size = new System.Drawing.Size(27, 20);
             this.SelectPostgisInput.TabIndex = 20;
+            this.SelectPostgisInput.Tag = "Select text file with locations of PostGIS layers to open";
             this.SelectPostgisInput.Text = "...";
             this.toolTip1.SetToolTip(this.SelectPostgisInput, "Select first raster file");
             this.SelectPostgisInput.UseVisualStyleBackColor = true;
+            this.SelectPostgisInput.Click += new System.EventHandler(this.SelectPostgisInputClick);
             // 
-            // PostgisInput
+            // PostGisInput
             // 
-            this.PostgisInput.AcceptsReturn = true;
-            this.PostgisInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostgisInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.PostgisInput.Location = new System.Drawing.Point(12, 32);
-            this.PostgisInput.Name = "PostgisInput";
-            this.PostgisInput.Size = new System.Drawing.Size(144, 20);
-            this.PostgisInput.TabIndex = 19;
-            this.PostgisInput.Text = global::TestApplication.Properties.Settings.Default.PostgisInput;
-            this.toolTip1.SetToolTip(this.PostgisInput, "Select text file with rasters and formulas");
+            this.PostGisInput.AcceptsReturn = true;
+            this.PostGisInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostgisInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.PostGisInput.Location = new System.Drawing.Point(12, 32);
+            this.PostGisInput.Name = "PostGisInput";
+            this.PostGisInput.Size = new System.Drawing.Size(144, 20);
+            this.PostGisInput.TabIndex = 19;
+            this.PostGisInput.Text = global::TestApplication.Properties.Settings.Default.PostgisInput;
+            this.toolTip1.SetToolTip(this.PostGisInput, "Select text file with rasters and formulas");
             // 
             // label14
             // 
@@ -2428,7 +2430,7 @@
     private System.Windows.Forms.GroupBox groupBox10;
     private System.Windows.Forms.Button RunPostGISTest;
     private System.Windows.Forms.Button SelectPostgisInput;
-    private System.Windows.Forms.TextBox PostgisInput;
+    private System.Windows.Forms.TextBox PostGisInput;
     private System.Windows.Forms.Label label14;
     private System.Windows.Forms.GroupBox groupBox1;
     private System.Windows.Forms.Button RunPostGisCreateDb;

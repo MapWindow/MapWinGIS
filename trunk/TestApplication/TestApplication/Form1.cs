@@ -331,6 +331,7 @@ namespace TestApplication
             SetTextfileLocation(this.PostGisCreateDbInput, path, "PostGISCreateDatabase.txt");
             SetTextfileLocation(this.PostGisPrivilegesInput, path, "PostGISDatabaseSettings.txt");
             SetTextfileLocation(this.PostGisImportSfInput, path, "PostGisImportSf.txt");
+            SetTextfileLocation(this.PostGisInput, path, "PostGISLayers.txt");
 
             // Save all settings:
             Settings.Default.Save();
@@ -834,7 +835,10 @@ namespace TestApplication
         /// </param>
         private void RunOpenPostGisTestClick(object sender, EventArgs e)
         {
-            MessageBox.Show(@"Not implemented yet");
+            this.ResetMapSettings(false);
+            ((Button)sender).BackColor = Color.Blue;
+            var retVal = PostGisTests.RunOpenPostGisLayers(this.PostGisInput.Text, this);
+            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;            
         }
 
         /// <summary>
@@ -1334,6 +1338,20 @@ namespace TestApplication
         }
 
         /// <summary>
+        /// The select postgis input click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectPostgisInputClick(object sender, EventArgs e)
+        {
+            Tests.SelectTextfile(this.PostGisInput, "Select text file with locations of PostGIS layers to open");
+        }
+
+        /// <summary>
         /// The select post gis privileges_ click.
         /// </summary>
         /// <param name="sender">
@@ -1557,7 +1575,6 @@ namespace TestApplication
                 this.statusStrip1.Refresh();
             }
         }
-
         #endregion
     }
 }
