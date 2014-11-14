@@ -103,8 +103,14 @@ namespace TestApplication
             var numErrors = 0;
             Map = Fileformats.Map;
             Map.RemoveAllLayers();
-            Map.Projection = tkMapProjection.PROJECTION_WGS84;
             Map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
+            
+            // TODO: How to switch between these two:
+            //Map.Projection = tkMapProjection.PROJECTION_WGS84;
+            Map.GrabProjectionFromData = true;
+
+            var gs = new GlobalSettings();
+            theForm.Progress("OgrLayerMaxFeatureCount: " + gs.OgrLayerMaxFeatureCount);
 
             Application.DoEvents();
 
@@ -135,7 +141,7 @@ namespace TestApplication
                     continue;
                 }
 
-                layer.MaxFeatureCount = 20000;
+                layer.MaxFeatureCount = 10000;
                 layer.GlobalCallback = theForm;
 
                 theForm.Progress("Opening " + layerName);

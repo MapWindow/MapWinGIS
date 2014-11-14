@@ -835,7 +835,7 @@ namespace TestApplication
         /// </param>
         private void RunOpenPostGisTestClick(object sender, EventArgs e)
         {
-            this.ResetMapSettings(false);
+            this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunOpenPostGisLayers(this.PostGisInput.Text, this);
             ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;            
