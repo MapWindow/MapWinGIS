@@ -6,6 +6,8 @@ using System.Text;
 using System.Windows.Forms;
 using AxMapWinGIS;
 using MapWinGIS;
+using MWLite.Core.UI;
+using MWLite.ShapeEditor.Forms;
 
 namespace MWLite.ShapeEditor
 {
@@ -25,23 +27,12 @@ namespace MWLite.ShapeEditor
             _map.ShapeValidationFailed += _map_ShapeValidationFailed;
             _map.UndoListChanged += _map_UndoListChanged;
             _map.ValidateShape += _map_ValidateShape;
-            _map.PreviewKeyDown += _map_PreviewKeyDown;
         }
 
         static void _map_ChooseLayer(object sender, _DMapEvents_ChooseLayerEvent e)
         {
+            //if (_map.CursorMode == tkCursorMode.cmSelection) return;
             e.layerHandle = App.Instance.Legend.SelectedLayer;
-        }
-
-        static void _map_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            if (e.KeyCode == Keys.Escape)
-            {
-                if (!_map.ShapeEditor.IsEmpty)
-                {
-                    _map.ShapeEditor.Clear();
-                }
-            }
         }
 
         static void _map_BeforeDeleteShape(object sender, _DMapEvents_BeforeDeleteShapeEvent e)
@@ -64,9 +55,19 @@ namespace MWLite.ShapeEditor
 
         static void _map_AfterShapeEdit(object sender, _DMapEvents_AfterShapeEditEvent e)
         {
-            if (e.action == tkUndoOperation.uoRemoveShape)
+            //MessageHelper.Info("Shape was removed.");
+            //return;
+
+            if (e.newShape == tkMwBoolean.blnTrue)
             {
-                MessageBox.Show("Shape was removed");
+                var sf = _map.get_Shapefile(e.layerHandle);
+                if (sf != null)
+                {
+                    using (var form = new AttributesForm(sf, e.shapeIndex))
+                    {
+                        form.ShowDialog(App.MainForm);
+                    }
+                }
             }
         }
 

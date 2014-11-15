@@ -24,5 +24,9 @@ namespace MWLite.ShapeEditor
         CopyShapes = 14,
         PasteShapes = 15,
         CutShapes = 16,
+        SplitByPolyline = 17,
+        EraseByPolygon = 18,
+        ClipByPolygon = 19,
+        SplitByPolygon = 20,
     }
 }

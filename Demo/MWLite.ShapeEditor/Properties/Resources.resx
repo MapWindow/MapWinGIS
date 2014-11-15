@@ -139,6 +139,9 @@
   <data name="vector-create" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\vector-create.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="line-polygon-edit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\line-polygon-edit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="redo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\redo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -160,14 +163,17 @@
   <data name="vertex" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\vertex.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="merge" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\merge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="shape_rotate" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\shape_rotate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="table" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\table.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="edit-paste" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\edit-paste.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="merge" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\merge.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="edit-cut" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\edit-cut.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -181,7 +187,7 @@
   <data name="element-add" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\element-add.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="table" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\table.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="polygon_erase" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\polygon_erase.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

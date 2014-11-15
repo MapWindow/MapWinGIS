@@ -1,8 +1,11 @@
-﻿using System;
-using MapWinGIS;
+﻿using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.UI;
+using MWLite.Databases;
+using MWLite.Databases.Forms;
 using MWLite.GUI.Forms;
+using MWLite.ShapeEditor;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -28,6 +31,16 @@ namespace MWLite.GUI.Helpers
             }
         }
 
+        public static void AddLayer(object layer, string layerName)
+        {
+            var legend = App.Legend;
+            if (layer != null)
+            {
+                int handle = legend.Layers.Add(layer, true);
+                legend.Layers[handle].Name = layerName;
+            }
+        }
+
         public static void AddLayer(LayerType layerType)
         {
             var dlg = new OpenFileDialog {Filter = GetLayerFilter(layerType), Multiselect = true};
@@ -48,11 +61,7 @@ namespace MWLite.GUI.Helpers
                         // TODO: show progress
                         layerName = name;
                         var layer = fm.Open(name);
-                        if (layer != null)
-                        {
-                            int handle = legend.Layers.Add(layer, true);
-                            legend.Layers[handle].Name = Path.GetFileName(name);
-                        }
+                        AddLayer(layer, Path.GetFileName(layerName));
                     }
                 }
                 catch
@@ -72,10 +81,13 @@ namespace MWLite.GUI.Helpers
             int layerHandle = App.Legend.SelectedLayer;
             if (layerHandle != -1)
             {
-                if (MessageBox.Show("Do you want to remove layer?", "",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (Editor.StopLayerEditing(layerHandle))
                 {
-                    App.Legend.Layers.Remove(layerHandle);
+                    if (MessageHelper.Ask("Do you want to remove layer?") == DialogResult.Yes)
+                    {
+                        App.Legend.Layers.Remove(layerHandle);
+                    }
+                    App.Legend.Refresh();
                 }
             }
         }
@@ -101,6 +113,97 @@ namespace MWLite.GUI.Helpers
                 sf.SelectNone();
                 MainForm.Instance.RefreshUI();
                 App.Map.Redraw();
+            }
+        }
+
+        public static void OpenOgrLayer()
+        {
+            using (var form = new OgrLayerForm())
+            {
+                form.LayerAdded += (s, e) =>
+                {
+                    if (e.Layer == null) return;
+                    AddLayer(e.Layer, e.Layer.Name);
+                    Debug.Print("Layer projection: " + e.Layer.GeoProjection.ExportToProj4());
+                    App.Map.Refresh();
+                    App.Legend.Refresh();
+                };
+                form.ShowDialog(MainForm.Instance);
+            }
+        }
+
+        public static void ImportOgrLayer()
+        {
+            int layerHandle = App.Legend.SelectedLayer;
+            if (layerHandle == -1) return;
+
+            var sf = App.Map.get_Shapefile(layerHandle);
+            if (sf == null)
+            {
+                MessageHelper.Info("Selected layer is not a vector layer.");
+                return;
+            }
+
+            using (var form = new OgrConnectionForm())
+            {
+                if (form.ShowDialog(MainForm.Instance) == DialogResult.OK)
+                {
+                    var ds = new OgrDatasource();
+                    if (!OgrHelper.OpenDatasource(ds, form.ConnectionParams))
+                        return;
+
+                    string layerName = App.Map.get_LayerName(layerHandle);
+                    layerName = layerName.Replace(".", "_");
+
+                    using (var importForm = new OgrImportShapefile(layerName))
+                    {
+                        if (importForm.ShowDialog(MainForm.Instance) == DialogResult.OK)
+                        {
+                            layerName = importForm.LayerName;
+                            if (!ds.ImportShapefile(sf, layerName, "", tkShapeValidationMode.NoValidation))
+                            {
+                                MessageHelper.Warn("Failed to import shapefile: " + ds.GdalLastErrorMsg);
+                            }
+                            else
+                            {
+                                MessageHelper.Info("Layer was imported: " + layerName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void SaveOgrStyle()
+        {
+            var legend = App.Legend;
+            int layerHandle = legend.SelectedLayer;
+
+            var layer = App.Map.get_OgrLayer(layerHandle);
+            if (layer == null)
+            {
+                MessageHelper.Info("This method is only applicable to OGR layers");
+                return;
+            }
+            if (!layer.SaveStyle(""))
+            {
+                MessageHelper.Info("Failed to save style: " + layer.ErrorMsg[layer.LastErrorCode]);
+            }
+            else
+            {
+                MessageHelper.Info("Style saved successfully");
+            }
+        }
+
+        public static void SaveCurrentStyle()
+        {
+            var legend = App.Legend;
+            int layerHandle = legend.SelectedLayer;
+            if (layerHandle != -1)
+            {
+                MessageHelper.Info(App.Map.SaveLayerOptions(layerHandle, "", true, "")
+                    ? "Layer options are saved."
+                    : "Failed to save layer options.");
             }
         }
     }

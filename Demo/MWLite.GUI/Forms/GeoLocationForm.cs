@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MWLite.Core;
+using MWLite.Core.Events;
 using MWLite.Core.UI;
 
 namespace MWLite.GUI.Forms
@@ -19,7 +20,7 @@ namespace MWLite.GUI.Forms
             locationControl1.NewExtents += locationControl1_NewExtents;
         }
 
-        void locationControl1_NewExtents(object sender, Events.NewExtentsEventArgs e)
+        void locationControl1_NewExtents(object sender, NewExtentsEventArgs e)
         {
             if (!e.Validate())
             {

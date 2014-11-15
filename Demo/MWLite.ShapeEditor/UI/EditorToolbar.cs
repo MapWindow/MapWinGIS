@@ -3,7 +3,7 @@ using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.ShapeEditor.Properties;
 
-namespace MWLite.ShapeEditor.Forms
+namespace MWLite.ShapeEditor.UI
 {
     public partial class EditorToolbar : UserControl
     {
@@ -28,7 +28,7 @@ namespace MWLite.ShapeEditor.Forms
 
             toolSplitShapes.Enabled = false;
             toolMergeShapes.Enabled = false;
-            toolRotateShape.Enabled = false;
+            toolRotateShapes.Enabled = false;
 
             bool editing = false;
             if (hasShapefile)
@@ -37,7 +37,7 @@ namespace MWLite.ShapeEditor.Forms
                 int numSelected = sf.NumSelected;
                 toolSplitShapes.Enabled = numSelected > 0;
                 toolMergeShapes.Enabled = numSelected > 1;
-                toolRotateShape.Enabled = numSelected > 0;
+                toolRotateShapes.Enabled = numSelected > 0;
             }
 
             foreach (var item in _editToolStrip.Items.OfType<ToolStripItem>().
@@ -54,10 +54,26 @@ namespace MWLite.ShapeEditor.Forms
             toolEditShape.Checked = map.CursorMode == tkCursorMode.cmEditShape;
             toolRemovePart.Checked = map.CursorMode == tkCursorMode.cmRemovePart;
             toolMoveShapes.Checked = map.CursorMode == tkCursorMode.cmMoveShapes;
+            toolRotateShapes.Checked = map.CursorMode == tkCursorMode.cmRotateShapes;
+            toolSplitByPolyline.Checked = map.CursorMode == tkCursorMode.cmSplitByPolyline;
+            toolEraseByPolygon.Checked = map.CursorMode == tkCursorMode.cmEraseByPolygon;
+            toolClipByPolygon.Checked = map.CursorMode == tkCursorMode.cmClipByPolygon;
+            toolSplitByPolygon.Checked = map.CursorMode == tkCursorMode.cmSplitByPolygon;
            
             toolUndo.Enabled = map.UndoList.UndoCount > 0;
             toolRedo.Enabled = map.UndoList.RedoCount > 0;
             toolUndoCount.Text = string.Format("{0}\\{1}", map.UndoList.UndoCount, map.UndoList.TotalLength);
+
+            toolMergeShapes.Enabled = false;
+            toolSplitShapes.Enabled = false;
+            if (sf != null && sf.InteractiveEditing)
+            {
+                int selectedCount = sf.NumSelected;
+                toolMergeShapes.Enabled = selectedCount > 1;
+                toolSplitShapes.Enabled = selectedCount > 0;
+                toolMoveShapes.Enabled = selectedCount > 0;
+                toolRotateShapes.Enabled = selectedCount > 0;
+            }
         }
     }
 }

@@ -596,7 +596,7 @@ namespace MapWindow.Legend.Forms.Symbology
                 dgv.Rows.Add(_options.LinePattern.Count);
                 for (int i = 0; i < _options.LinePattern.Count; i++)
                 {
-                    dgv[CMN_TYPE, i].Value = _options.LinePattern.get_Line(i).LineType == tkLineType.lltSimple ? "линия" : "маркер";
+                    dgv[CMN_TYPE, i].Value = _options.LinePattern.get_Line(i).LineType == tkLineType.lltSimple ? "line" : "marker";
                     Bitmap bmp = new Bitmap(60, 14);
                     dgv[CMN_PICTURE, i].Value = bmp;
                 }

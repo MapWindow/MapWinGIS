@@ -27,7 +27,7 @@ namespace MWLite.Core.UI
 
             Debug.Print("Command not found: " + itemName);
 
-            var menu = item as ToolStripMenuItem;
+            var menu = item as ToolStripDropDownItem;
             if (menu != null && menu.DropDownItems.Count > 0)
                 return false;
 
@@ -53,7 +53,7 @@ namespace MWLite.Core.UI
             {
                 if (item.Tag == null)
                     item.Click += ItemClick;
-                var menuItem = item as ToolStripMenuItem;
+                var menuItem = item as ToolStripDropDownItem;
                 if (menuItem != null)
                 {
                     InitMenu(menuItem.DropDownItems);

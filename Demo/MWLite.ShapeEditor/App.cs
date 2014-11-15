@@ -9,6 +9,7 @@ using MapWindow.Legend.Controls.Legend;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.ShapeEditor.Forms;
+using MWLite.ShapeEditor.UI;
 
 namespace MWLite.ShapeEditor
 {
@@ -64,6 +65,11 @@ namespace MWLite.ShapeEditor
         internal static IMapApp Instance
         {
             get { return _app; }
+        }
+
+        internal static Form MainForm
+        {
+            get { return Instance as Form; }
         }
 
         internal static void RefreshUI()

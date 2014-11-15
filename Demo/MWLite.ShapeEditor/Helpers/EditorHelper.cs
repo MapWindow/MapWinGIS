@@ -31,11 +31,32 @@ namespace MWLite.ShapeEditor.Helpers
             }
         }
 
-        private static void SaveShapefileChanges(int layerHandle, Shapefile sf)
+        public static bool StopAllEditing()
         {
             var map = App.Map;
 
-            var result = MessageHelper.AskYesNoCancel("Save changes?");
+            for (int i = 0; i < map.NumLayers; i++)
+            {
+                int layerHandle = map.get_LayerHandle(i);
+                var sf = map.get_Shapefile(layerHandle);
+                if (sf != null)
+                {
+                    if (sf.InteractiveEditing)
+                    {
+                        if (!SaveShapefileChanges(layerHandle, sf))
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static bool SaveShapefileChanges(int layerHandle, Shapefile sf)
+        {
+            var map = App.Map;
+
+            string prompt = string.Format("Save changes for the layer: {0}?", map.get_LayerName(layerHandle));
+            var result = MessageHelper.AskYesNoCancel(prompt);
             switch (result)
             {
                 case DialogResult.Yes:
@@ -46,15 +67,12 @@ namespace MWLite.ShapeEditor.Helpers
                     {
                         map.ShapeEditor.Clear();
                         map.UndoList.ClearForLayer(layerHandle);
-                        if (save)
-                        {
-                            MessageHelper.Info("Changes were saved.");
-                        }
                     }
                     map.Redraw();
-                    break;
+                    return true;
                 case DialogResult.Cancel:
-                    break;   // do nothing
+                default:
+                    return false;
             }
         }
 
@@ -64,16 +82,24 @@ namespace MWLite.ShapeEditor.Helpers
             {
                 if (form.ShowDialog(App.Instance as Form) == DialogResult.OK)
                 {
-                    var sf = new Shapefile();
+                    var sf = form.Shapefile;
                     sf.GeoProjection.CopyFrom(App.Map.GeoProjection);
-                    sf.CreateNewWithShapeID(form.Filename, form.ShapefileType);
-                    sf.InteractiveEditing = true;
+                    sf.Save();
                     int handle = App.Legend.Layers.Add(sf, true);
-                    App.Map.set_LayerName(handle, Path.GetFileName(form.Filename));
+                    App.Map.set_LayerName(handle, Path.GetFileName(sf.Filename));
                 }
             }
         }
 
-        
+        public static bool StopLayerEditing(int layerHandle)
+        {
+            var map = App.Map;
+            var sf = map.get_Shapefile(layerHandle);
+            if (sf != null && sf.InteractiveEditing)
+            {
+                return SaveShapefileChanges(layerHandle, sf);
+            }
+            return true;
+        }
     }
 }

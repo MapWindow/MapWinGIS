@@ -51,6 +51,21 @@ namespace MWLite.ShapeEditor
         {
             switch (command)
             {
+                case EditorCommand.SplitByPolygon:
+                    SetMapCursor(tkCursorMode.cmSplitByPolygon);
+                    return true;
+                case EditorCommand.EraseByPolygon:
+                    SetMapCursor(tkCursorMode.cmEraseByPolygon);
+                    return true;
+                case EditorCommand.ClipByPolygon:
+                    SetMapCursor(tkCursorMode.cmClipByPolygon);
+                    return true;
+                case EditorCommand.SplitByPolyline:
+                    SetMapCursor(tkCursorMode.cmSplitByPolyline);
+                    return true;
+                case EditorCommand.RotateShapes:
+                    SetMapCursor(tkCursorMode.cmRotateShapes);
+                    return true;
                 case EditorCommand.MoveShapes:
                     SetMapCursor(tkCursorMode.cmMoveShapes);
                     return true;

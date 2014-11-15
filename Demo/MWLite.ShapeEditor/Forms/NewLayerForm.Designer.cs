@@ -33,10 +33,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.btnOk = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
             this.btnSelectPath = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.txtPath = new System.Windows.Forms.TextBox();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -83,16 +83,6 @@
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
-            // btnCancel
-            // 
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(301, 145);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 5;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.UseVisualStyleBackColor = true;
-            // 
             // btnSelectPath
             // 
             this.btnSelectPath.Location = new System.Drawing.Point(324, 102);
@@ -119,6 +109,16 @@
             this.txtPath.Size = new System.Drawing.Size(214, 20);
             this.txtPath.TabIndex = 10;
             // 
+            // btnCancel
+            // 
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.Location = new System.Drawing.Point(301, 145);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 5;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            // 
             // NewLayerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -139,7 +139,7 @@
             this.Name = "NewLayerForm";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "New layer";
+            this.Text = "New Layer";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -152,9 +152,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnOk;
-        private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnSelectPath;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtPath;
+        private System.Windows.Forms.Button btnCancel;
     }
 }

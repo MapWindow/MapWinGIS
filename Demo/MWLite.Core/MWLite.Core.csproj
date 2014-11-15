@@ -52,6 +52,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\NewExtentEventArgs.cs" />
+    <Compile Include="Events\OgrLayerArgs.cs" />
+    <Compile Include="Events\SelectionChangedArgs.cs" />
     <Compile Include="UI\CommandMap.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Exts\MapExt.cs" />

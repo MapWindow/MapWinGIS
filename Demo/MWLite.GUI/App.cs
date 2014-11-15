@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using AxMapWinGIS;
 using MapWindow.Legend;
-using MapWindow.Legend.Controls.Legend;
 using MWLite.Core;
 using MWLite.GUI.Classes;
 using MWLite.GUI.Forms;
@@ -20,7 +19,7 @@ namespace MWLite.GUI
             get { return MainForm.Instance.Map;  }
         }
 
-        public static Legend Legend
+        public static MapWindow.Legend.Controls.Legend.Legend Legend
         {
             get { return MainForm.Instance.Legend; }
         }

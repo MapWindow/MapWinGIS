@@ -91,7 +91,7 @@ namespace MapWindow.Legend.Forms
             ChartStyleForm form = new ChartStyleForm(m_legend, m_shapefile, false, m_layerHandle);
             form.ShowDialog();
 
-            // even if canсel was hit, a user could have applied the options
+            // even if cancel was hit, a user could have applied the options
             bool state = _noEvents;
             _noEvents = true;
             optChartBars.Checked = (m_shapefile.Charts.ChartType == tkChartType.chtBarChart);

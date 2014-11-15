@@ -25,6 +25,9 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using MapWindow.Legend.Classes;
+using MapWinGIS;
+using Image = System.Drawing.Image;
+using Point = System.Drawing.Point;
 
 namespace MapWindow.Legend.Controls.Legend
 {
@@ -1740,69 +1743,27 @@ namespace MapWindow.Legend.Controls.Legend
 
         private eLayerType GetLayerType(object newLayer)
         {
-            //see if this is a shapefile
-            MapWinGIS.Shapefile shpfile = null;
-            //MapWinGIS.Image img = null;
+            if (newLayer == null) return eLayerType.Invalid;
 
-            //try
-            //{
-            //    shpfile = (MapWinGIS.Shapefile)newLayer;
-            //}
-            //catch (System.InvalidCastException)
-            //{
-            //}
-
-            //try
-            //{
-            //    img = (MapWinGIS.Image)newLayer;
-            //}
-            //catch (System.InvalidCastException)
-            //{
-            //}
-
-            //Christian Degrassi 2010-03-15: This fixes dirty exceptions related to issue 1643
-            if (newLayer is MapWinGIS.Image && newLayer != null)
-            {
+            if (newLayer is MapWinGIS.Image)
                 return eLayerType.Image;
-            }
-            else if (newLayer is MapWinGIS.Shapefile && (shpfile = (MapWinGIS.Shapefile)newLayer) != null)
+
+            var sf = newLayer as Shapefile;
+            if (newLayer is IOgrLayer)
+                sf = (newLayer as IOgrLayer).GetData();
+            else if (newLayer is Shapefile)
+                sf = newLayer as Shapefile;
+
+            if (sf != null)
             {
-                if (shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINT
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINTM
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINTZ
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINT
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINTM
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINTZ)
+                var shpType = sf.ShapefileType2D;
+                if (shpType == ShpfileType.SHP_POINT || shpType == ShpfileType.SHP_MULTIPOINT)
                     return eLayerType.PointShapefile;
-                else if (shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINE
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINEM
-                    || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINEZ)
+                if (shpType == ShpfileType.SHP_POLYLINE)
                     return eLayerType.LineShapefile;
-                else
+                if (shpType == ShpfileType.SHP_POLYGON)
                     return eLayerType.PolygonShapefile;
             }
-
-            //if (img != null)
-            //{
-            //    return eLayerType.Image;
-            //}
-            //else if (shpfile != null)
-            //{
-            //    if (shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINT
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINTM
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POINTZ
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINT
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINTM
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_MULTIPOINTZ)
-            //        return eLayerType.PointShapefile;
-            //    else if (shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINE
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINEM
-            //        || shpfile.ShapefileType == MapWinGIS.ShpfileType.SHP_POLYLINEZ)
-            //        return eLayerType.LineShapefile;
-            //    else
-            //        return eLayerType.PolygonShapefile;
-            //}
-
             return eLayerType.Invalid;
         }
 

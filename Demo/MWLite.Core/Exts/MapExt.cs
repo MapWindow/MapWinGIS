@@ -44,7 +44,8 @@ namespace MWLite.Core.Exts
 
         public static int VerticalIconOffset(this AxMap map, ShapeDrawingOptions opt, ShpfileType shpType)
         {
-            if (shpType == ShpfileType.SHP_POINT && opt.Picture != null && opt.PointType == tkPointSymbolType.ptSymbolPicture)
+            if (shpType == ShpfileType.SHP_POINT && opt.Picture != null && 
+                opt.PointType == tkPointSymbolType.ptSymbolPicture)
             {
                 return (int)(((double)opt.Picture.Height * opt.PictureScaleY) / 2.0 + 0.5);
             }

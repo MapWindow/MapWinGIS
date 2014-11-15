@@ -53,18 +53,36 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="Forms\AttributesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AttributesForm.Designer.cs">
+      <DependentUpon>AttributesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\EditFieldsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EditFieldsForm.Designer.cs">
+      <DependentUpon>EditFieldsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FieldControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\FieldControl.Designer.cs">
+      <DependentUpon>FieldControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
-    <Compile Include="Forms\EditorContextMenu.cs">
+    <Compile Include="UI\EditorContextMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\EditorContextMenu.Designer.cs">
+    <Compile Include="UI\EditorContextMenu.Designer.cs">
       <DependentUpon>EditorContextMenu.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\EditorMenu.cs">
+    <Compile Include="UI\EditorMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\EditorMenu.Designer.cs">
+    <Compile Include="UI\EditorMenu.Designer.cs">
       <DependentUpon>EditorMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ShapefileEx.cs" />
@@ -72,10 +90,10 @@
     <Compile Include="Editor.cs" />
     <Compile Include="EditorDispatcher.cs" />
     <Compile Include="EditorCommand.cs" />
-    <Compile Include="Forms\EditorToolbar.cs">
+    <Compile Include="UI\EditorToolbar.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Forms\EditorToolbar.Designer.cs">
+    <Compile Include="UI\EditorToolbar.Designer.cs">
       <DependentUpon>EditorToolbar.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\NewLayerForm.cs">
@@ -108,14 +126,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Forms\EditorContextMenu.resx">
+    <EmbeddedResource Include="Forms\AttributesForm.resx">
+      <DependentUpon>AttributesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FieldControl.resx">
+      <DependentUpon>FieldControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\EditorContextMenu.resx">
       <DependentUpon>EditorContextMenu.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\EditorMenu.resx">
+    <EmbeddedResource Include="UI\EditorMenu.resx">
       <DependentUpon>EditorMenu.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\EditorToolbar.resx">
+    <EmbeddedResource Include="UI\EditorToolbar.resx">
       <DependentUpon>EditorToolbar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EditFieldsForm.resx">
+      <DependentUpon>EditFieldsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\NewLayerForm.resx">
       <DependentUpon>NewLayerForm.cs</DependentUpon>
@@ -196,6 +223,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\table.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\line-polygon-edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\polygon_erase.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

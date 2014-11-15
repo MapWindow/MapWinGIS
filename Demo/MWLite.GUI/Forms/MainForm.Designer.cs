@@ -58,7 +58,9 @@ namespace MWLite.GUI.Forms
             this.toolMeasure = new System.Windows.Forms.ToolStripButton();
             this.toolMeasureArea = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolSelect = new System.Windows.Forms.ToolStripButton();
+            this.toolSelection = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolSelect = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolSelectByPolygon = new System.Windows.Forms.ToolStripMenuItem();
             this.toolZoomToSelected = new System.Windows.Forms.ToolStripButton();
             this.toolClearSelection = new System.Windows.Forms.ToolStripButton();
             this._menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -95,6 +97,7 @@ namespace MWLite.GUI.Forms
             this.toolOpen = new System.Windows.Forms.ToolStripButton();
             this.toolAddVector = new System.Windows.Forms.ToolStripButton();
             this.toolAddRaster = new System.Windows.Forms.ToolStripButton();
+            this.toolAddDatabase = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolCreateLayer = new System.Windows.Forms.ToolStripButton();
             this.toolRemoveLayer = new System.Windows.Forms.ToolStripButton();
@@ -102,6 +105,7 @@ namespace MWLite.GUI.Forms
             this._menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
+            this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
             this._toolStripLayer.SuspendLayout();
@@ -121,14 +125,14 @@ namespace MWLite.GUI.Forms
             this.toolMeasure,
             this.toolMeasureArea,
             this.toolStripSeparator3,
-            this.toolSelect,
+            this.toolSelection,
             this.toolZoomToSelected,
             this.toolClearSelection});
             this._mainToolStrip.Location = new System.Drawing.Point(3, 0);
             this._mainToolStrip.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this._mainToolStrip.Name = "_mainToolStrip";
             this._mainToolStrip.Padding = new System.Windows.Forms.Padding(0);
-            this._mainToolStrip.Size = new System.Drawing.Size(441, 41);
+            this._mainToolStrip.Size = new System.Drawing.Size(450, 41);
             this._mainToolStrip.TabIndex = 0;
             this._mainToolStrip.Text = "toolStrip1";
             // 
@@ -235,17 +239,31 @@ namespace MWLite.GUI.Forms
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 41);
             // 
+            // toolSelection
+            // 
+            this.toolSelection.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolSelection.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolSelect,
+            this.toolSelectByPolygon});
+            this.toolSelection.Image = global::MWLite.GUI.Properties.Resources.select;
+            this.toolSelection.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolSelection.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolSelection.Name = "toolSelection";
+            this.toolSelection.Padding = new System.Windows.Forms.Padding(5);
+            this.toolSelection.Size = new System.Drawing.Size(47, 38);
+            this.toolSelection.Text = "Selection Tools";
+            // 
             // toolSelect
             // 
-            this.toolSelect.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolSelect.Image = global::MWLite.GUI.Properties.Resources.select;
-            this.toolSelect.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolSelect.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolSelect.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.toolSelect.Name = "toolSelect";
-            this.toolSelect.Padding = new System.Windows.Forms.Padding(5);
-            this.toolSelect.Size = new System.Drawing.Size(38, 39);
-            this.toolSelect.Text = "Select";
+            this.toolSelect.Size = new System.Drawing.Size(142, 22);
+            this.toolSelect.Text = "By Rectangle";
+            // 
+            // toolSelectByPolygon
+            // 
+            this.toolSelectByPolygon.Name = "toolSelectByPolygon";
+            this.toolSelectByPolygon.Size = new System.Drawing.Size(142, 22);
+            this.toolSelectByPolygon.Text = "By Polygon";
             // 
             // toolZoomToSelected
             // 
@@ -402,7 +420,7 @@ namespace MWLite.GUI.Forms
             this.mnuSetProjection.Image = global::MWLite.GUI.Properties.Resources.crs_change;
             this.mnuSetProjection.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.mnuSetProjection.Name = "mnuSetProjection";
-            this.mnuSetProjection.Size = new System.Drawing.Size(160, 30);
+            this.mnuSetProjection.Size = new System.Drawing.Size(157, 30);
             this.mnuSetProjection.Text = "Set Projection";
             // 
             // mnuSearch
@@ -411,7 +429,7 @@ namespace MWLite.GUI.Forms
             this.mnuSearch.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.mnuSearch.Name = "mnuSearch";
             this.mnuSearch.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F)));
-            this.mnuSearch.Size = new System.Drawing.Size(160, 30);
+            this.mnuSearch.Size = new System.Drawing.Size(157, 30);
             this.mnuSearch.Text = "Search";
             // 
             // mnuTiles
@@ -426,7 +444,7 @@ namespace MWLite.GUI.Forms
             this.statusSelectedCount,
             this.lblProgressMessage,
             this.progressBar1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 462);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 528);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(837, 22);
             this.statusStrip1.TabIndex = 3;
@@ -467,18 +485,21 @@ namespace MWLite.GUI.Forms
             // toolStripContainer1.ContentPanel
             // 
             this.toolStripContainer1.ContentPanel.Controls.Add(this.dockPanel1);
-            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(837, 356);
+            this.toolStripContainer1.ContentPanel.Size = new System.Drawing.Size(798, 463);
             this.toolStripContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            // 
+            // toolStripContainer1.LeftToolStripPanel
+            // 
+            this.toolStripContainer1.LeftToolStripPanel.Controls.Add(this._toolStripLayer);
             this.toolStripContainer1.Location = new System.Drawing.Point(0, 24);
             this.toolStripContainer1.Name = "toolStripContainer1";
-            this.toolStripContainer1.Size = new System.Drawing.Size(837, 438);
+            this.toolStripContainer1.Size = new System.Drawing.Size(837, 504);
             this.toolStripContainer1.TabIndex = 5;
             this.toolStripContainer1.Text = "toolStripContainer1";
             // 
             // toolStripContainer1.TopToolStripPanel
             // 
             this.toolStripContainer1.TopToolStripPanel.Controls.Add(this._mainToolStrip);
-            this.toolStripContainer1.TopToolStripPanel.Controls.Add(this._toolStripLayer);
             // 
             // dockPanel1
             // 
@@ -487,7 +508,7 @@ namespace MWLite.GUI.Forms
             this.dockPanel1.DocumentStyle = WeifenLuo.WinFormsUI.Docking.DocumentStyle.DockingSdi;
             this.dockPanel1.Location = new System.Drawing.Point(0, 0);
             this.dockPanel1.Name = "dockPanel1";
-            this.dockPanel1.Size = new System.Drawing.Size(837, 356);
+            this.dockPanel1.Size = new System.Drawing.Size(798, 463);
             dockPanelGradient1.EndColor = System.Drawing.SystemColors.ControlLight;
             dockPanelGradient1.StartColor = System.Drawing.SystemColors.ControlLight;
             autoHideStripSkin1.DockStripGradient = dockPanelGradient1;
@@ -548,12 +569,13 @@ namespace MWLite.GUI.Forms
             this.toolOpen,
             this.toolAddVector,
             this.toolAddRaster,
+            this.toolAddDatabase,
             this.toolStripSeparator1,
             this.toolCreateLayer,
             this.toolRemoveLayer});
-            this._toolStripLayer.Location = new System.Drawing.Point(3, 41);
+            this._toolStripLayer.Location = new System.Drawing.Point(0, 3);
             this._toolStripLayer.Name = "_toolStripLayer";
-            this._toolStripLayer.Size = new System.Drawing.Size(366, 41);
+            this._toolStripLayer.Size = new System.Drawing.Size(39, 431);
             this._toolStripLayer.TabIndex = 1;
             // 
             // toolCloseProject
@@ -564,7 +586,7 @@ namespace MWLite.GUI.Forms
             this.toolCloseProject.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolCloseProject.Name = "toolCloseProject";
             this.toolCloseProject.Padding = new System.Windows.Forms.Padding(5);
-            this.toolCloseProject.Size = new System.Drawing.Size(38, 38);
+            this.toolCloseProject.Size = new System.Drawing.Size(37, 38);
             this.toolCloseProject.Text = "New Project";
             // 
             // toolLoadProject
@@ -575,7 +597,7 @@ namespace MWLite.GUI.Forms
             this.toolLoadProject.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolLoadProject.Name = "toolLoadProject";
             this.toolLoadProject.Padding = new System.Windows.Forms.Padding(5);
-            this.toolLoadProject.Size = new System.Drawing.Size(38, 38);
+            this.toolLoadProject.Size = new System.Drawing.Size(37, 38);
             this.toolLoadProject.Text = "Load Project";
             // 
             // toolSaveProject
@@ -586,7 +608,7 @@ namespace MWLite.GUI.Forms
             this.toolSaveProject.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolSaveProject.Name = "toolSaveProject";
             this.toolSaveProject.Padding = new System.Windows.Forms.Padding(5);
-            this.toolSaveProject.Size = new System.Drawing.Size(38, 38);
+            this.toolSaveProject.Size = new System.Drawing.Size(37, 38);
             this.toolSaveProject.Text = "Save Project";
             // 
             // toolSaveProjectAs
@@ -597,13 +619,13 @@ namespace MWLite.GUI.Forms
             this.toolSaveProjectAs.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolSaveProjectAs.Name = "toolSaveProjectAs";
             this.toolSaveProjectAs.Padding = new System.Windows.Forms.Padding(5);
-            this.toolSaveProjectAs.Size = new System.Drawing.Size(38, 38);
+            this.toolSaveProjectAs.Size = new System.Drawing.Size(37, 38);
             this.toolSaveProjectAs.Text = "Save Project As...";
             // 
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(6, 41);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(37, 6);
             // 
             // toolOpen
             // 
@@ -614,7 +636,7 @@ namespace MWLite.GUI.Forms
             this.toolOpen.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.toolOpen.Name = "toolOpen";
             this.toolOpen.Padding = new System.Windows.Forms.Padding(5);
-            this.toolOpen.Size = new System.Drawing.Size(38, 39);
+            this.toolOpen.Size = new System.Drawing.Size(37, 38);
             this.toolOpen.Text = "Add Layer";
             // 
             // toolAddVector
@@ -625,7 +647,7 @@ namespace MWLite.GUI.Forms
             this.toolAddVector.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolAddVector.Name = "toolAddVector";
             this.toolAddVector.Padding = new System.Windows.Forms.Padding(5);
-            this.toolAddVector.Size = new System.Drawing.Size(38, 38);
+            this.toolAddVector.Size = new System.Drawing.Size(37, 38);
             this.toolAddVector.Text = "Add Vector Layer";
             // 
             // toolAddRaster
@@ -636,13 +658,24 @@ namespace MWLite.GUI.Forms
             this.toolAddRaster.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolAddRaster.Name = "toolAddRaster";
             this.toolAddRaster.Padding = new System.Windows.Forms.Padding(5);
-            this.toolAddRaster.Size = new System.Drawing.Size(38, 38);
+            this.toolAddRaster.Size = new System.Drawing.Size(37, 38);
             this.toolAddRaster.Text = "Add Raster Layer";
+            // 
+            // toolAddDatabase
+            // 
+            this.toolAddDatabase.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolAddDatabase.Image = global::MWLite.GUI.Properties.Resources.layer_db_add;
+            this.toolAddDatabase.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolAddDatabase.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolAddDatabase.Name = "toolAddDatabase";
+            this.toolAddDatabase.Padding = new System.Windows.Forms.Padding(5);
+            this.toolAddDatabase.Size = new System.Drawing.Size(37, 38);
+            this.toolAddDatabase.Text = "Add PostGIS Layer";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 41);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(37, 6);
             // 
             // toolCreateLayer
             // 
@@ -652,7 +685,7 @@ namespace MWLite.GUI.Forms
             this.toolCreateLayer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolCreateLayer.Name = "toolCreateLayer";
             this.toolCreateLayer.Padding = new System.Windows.Forms.Padding(5);
-            this.toolCreateLayer.Size = new System.Drawing.Size(38, 38);
+            this.toolCreateLayer.Size = new System.Drawing.Size(37, 38);
             this.toolCreateLayer.Text = "Create Layer";
             // 
             // toolRemoveLayer
@@ -664,12 +697,12 @@ namespace MWLite.GUI.Forms
             this.toolRemoveLayer.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
             this.toolRemoveLayer.Name = "toolRemoveLayer";
             this.toolRemoveLayer.Padding = new System.Windows.Forms.Padding(5);
-            this.toolRemoveLayer.Size = new System.Drawing.Size(38, 39);
+            this.toolRemoveLayer.Size = new System.Drawing.Size(37, 38);
             this.toolRemoveLayer.Text = "Remove Layer";
             // 
             // MainForm
             // 
-            this.ClientSize = new System.Drawing.Size(837, 484);
+            this.ClientSize = new System.Drawing.Size(837, 550);
             this.Controls.Add(this.toolStripContainer1);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.toolStripPanel1);
@@ -686,6 +719,8 @@ namespace MWLite.GUI.Forms
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.toolStripContainer1.ContentPanel.ResumeLayout(false);
+            this.toolStripContainer1.LeftToolStripPanel.ResumeLayout(false);
+            this.toolStripContainer1.LeftToolStripPanel.PerformLayout();
             this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();
             this.toolStripContainer1.ResumeLayout(false);
@@ -708,7 +743,6 @@ namespace MWLite.GUI.Forms
         private ToolStripButton toolZoomOut;
         private ToolStripButton toolZoomMax;
         private ToolStripButton toolPan;
-        private ToolStripButton toolSelect;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem mnuCloseProject;
         private ToolStripMenuItem mnuSaveProject;
@@ -750,6 +784,10 @@ namespace MWLite.GUI.Forms
         private ToolStripButton toolCloseProject;
         private ToolStripButton toolSaveProject;
         private ToolStripButton toolSaveProjectAs;
+        private ToolStripDropDownButton toolSelection;
+        private ToolStripMenuItem toolSelect;
+        private ToolStripMenuItem toolSelectByPolygon;
+        private ToolStripButton toolAddDatabase;
     }
 }
 

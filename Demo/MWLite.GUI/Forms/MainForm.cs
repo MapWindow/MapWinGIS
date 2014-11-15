@@ -4,8 +4,8 @@ using MapWindow.Legend.Controls.Legend;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.GUI.Classes;
-using MWLite.GUI.Forms.Dock;
 using MWLite.GUI.Helpers;
+using MWLite.GUI.MapLegend;
 using MWLite.GUI.Properties;
 using MWLite.ShapeEditor;
 using System.Diagnostics;
@@ -20,7 +20,7 @@ namespace MWLite.GUI.Forms
         private const string WINDOW_TITLE = "MapWinGIS Demo";
         private readonly AppDispatcher _dispatcher = new AppDispatcher();
         private static MainForm _form = null;
-        private MapDockForm _mapForm = null;
+        private MapForm _mapForm = null;
         private LegendDockForm _legendForm = null;
         private MapCallback _callback = null;
 
@@ -43,7 +43,7 @@ namespace MWLite.GUI.Forms
 
             PluginHelper.Init(this);
 
-            ToolStripManager.LoadSettings(this);
+            //ToolStripManager.LoadSettings(this);
 
             TilesHelper.Init(mnuTiles);
 
@@ -72,8 +72,8 @@ namespace MWLite.GUI.Forms
             {
                 e.Cancel = true;
                 return;
-            };
-
+            }
+            
             AppSettings.Instance.LastProject = lastProject;
             AppSettings.Save();
 
@@ -83,9 +83,8 @@ namespace MWLite.GUI.Forms
         private void InitLegend()
         {
             Legend.Map = Map.GetOcx() as Map;
-            Legend.AssignOrphanLayersToNewGroup(Classes.ProjectBase.DEFAULT_GROUP_NAME);
+            Legend.AssignOrphanLayersToNewGroup(ProjectBase.DEFAULT_GROUP_NAME);
             Legend.LayerSelected += (handle) => RefreshUI();
-            
         }
 
         private void IninMenus()
@@ -100,7 +99,7 @@ namespace MWLite.GUI.Forms
             _legendForm = new LegendDockForm();
             _legendForm.Show(dockPanel1, DockState.DockLeft);
 
-            _mapForm = new MapDockForm();
+            _mapForm = new MapForm();
             _mapForm.Show(dockPanel1, DockState.Document);
             _mapForm.SelectionChanged += (s, e) => RefreshUI();
         }
@@ -119,7 +118,7 @@ namespace MWLite.GUI.Forms
             get { return _dispatcher; }
         }
 
-        public MapDockForm MapForm
+        public MapForm MapForm
         {
             get { return _mapForm; }
         }
@@ -168,13 +167,17 @@ namespace MWLite.GUI.Forms
             toolZoomOut.Checked = Map.CursorMode == tkCursorMode.cmZoomOut;
             toolPan.Checked = Map.CursorMode == tkCursorMode.cmPan;
             toolSelect.Checked = Map.CursorMode == tkCursorMode.cmSelection;
-
-            toolSelect.Checked = Map.CursorMode == tkCursorMode.cmSelection;
+            toolSelectByPolygon.Checked = Map.CursorMode == tkCursorMode.cmSelectByPolygon;
             toolIdentify.Checked = Map.CursorMode == tkCursorMode.cmIdentify;
 
             bool distance = Map.Measuring.MeasuringType == tkMeasuringType.MeasureDistance;
             toolMeasure.Checked = Map.CursorMode == tkCursorMode.cmMeasure && distance;
             toolMeasureArea.Checked = Map.CursorMode == tkCursorMode.cmMeasure && !distance;
+
+            if (Map.CursorMode != tkCursorMode.cmIdentify)
+            {
+                MapForm.HideTooltip();
+            }
 
             bool hasShapefile = false;
             int layerHandle = App.Legend.SelectedLayer;

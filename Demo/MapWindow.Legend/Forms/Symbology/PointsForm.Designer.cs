@@ -49,16 +49,16 @@ namespace MapWindow.Legend.Forms.Symbology
             this.udSideRatio = new MapWindow.Legend.Controls.NumericUpDownExt(this.components);
             this.label19 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
-            this.symbolControl1 = new SymbolControl();
-            this.icbPointShape = new ImageCombo();
+            this.symbolControl1 = new MapWindow.Legend.Controls.ListControls.SymbolControl();
+            this.icbPointShape = new MapWindow.Legend.Controls.ImageCombo();
             this.label17 = new System.Windows.Forms.Label();
             this.tabCharacter = new System.Windows.Forms.TabPage();
             this.chkShowAllFonts = new System.Windows.Forms.CheckBox();
             this.label35 = new System.Windows.Forms.Label();
             this.cboFontName = new System.Windows.Forms.ComboBox();
-            this.characterControl1 = new CharacterControl();
+            this.characterControl1 = new MapWindow.Legend.Controls.ListControls.CharacterControl();
             this.tabIcon = new System.Windows.Forms.TabPage();
-            this.iconControl1 = new IconControl();
+            this.iconControl1 = new MapWindow.Legend.Controls.ListControls.IconControl();
             this.lblCopyright = new System.Windows.Forms.Label();
             this.chkScaleIcons = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -68,7 +68,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.lblNoOptions = new System.Windows.Forms.Label();
             this.chkFillVisible = new System.Windows.Forms.CheckBox();
             this.pnlFillHatch = new System.Windows.Forms.Panel();
-            this.icbHatchStyle = new ImageCombo();
+            this.icbHatchStyle = new MapWindow.Legend.Controls.ImageCombo();
             this.label6 = new System.Windows.Forms.Label();
             this.chkFillBgTransparent = new System.Windows.Forms.CheckBox();
             this.clpHatchBack = new Owf.Controls.Office2007ColorPicker(this.components);
@@ -80,8 +80,8 @@ namespace MapWindow.Legend.Forms.Symbology
             this.label21 = new System.Windows.Forms.Label();
             this.label22 = new System.Windows.Forms.Label();
             this.label23 = new System.Windows.Forms.Label();
-            this.icbLineWidth = new ImageCombo();
-            this.icbLineType = new ImageCombo();
+            this.icbLineWidth = new MapWindow.Legend.Controls.ImageCombo();
+            this.icbLineType = new MapWindow.Legend.Controls.ImageCombo();
             this.clpOutline = new Owf.Controls.Office2007ColorPicker(this.components);
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.pctPreview = new System.Windows.Forms.PictureBox();
@@ -338,7 +338,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.icbPointShape.Color1 = System.Drawing.Color.Orange;
             this.icbPointShape.Color2 = System.Drawing.Color.Honeydew;
             this.icbPointShape.ColorSchemes = null;
-            this.icbPointShape.ComboStyle = ImageComboStyle.Common;
+            this.icbPointShape.ComboStyle = MapWindow.Legend.Controls.ImageComboStyle.Common;
             this.icbPointShape.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.icbPointShape.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.icbPointShape.FormattingEnabled = true;
@@ -509,7 +509,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.groupBox3.Size = new System.Drawing.Size(386, 147);
             this.groupBox3.TabIndex = 133;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Заливка";
+            this.groupBox3.Text = "Fill";
             // 
             // lblNoOptions
             // 
@@ -548,7 +548,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.icbHatchStyle.Color1 = System.Drawing.Color.Blue;
             this.icbHatchStyle.Color2 = System.Drawing.Color.Honeydew;
             this.icbHatchStyle.ColorSchemes = null;
-            this.icbHatchStyle.ComboStyle = ImageComboStyle.Common;
+            this.icbHatchStyle.ComboStyle = MapWindow.Legend.Controls.ImageComboStyle.Common;
             this.icbHatchStyle.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.icbHatchStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.icbHatchStyle.FormattingEnabled = true;
@@ -677,7 +677,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.icbLineWidth.Color1 = System.Drawing.Color.Blue;
             this.icbLineWidth.Color2 = System.Drawing.Color.Honeydew;
             this.icbLineWidth.ColorSchemes = null;
-            this.icbLineWidth.ComboStyle = ImageComboStyle.Common;
+            this.icbLineWidth.ComboStyle = MapWindow.Legend.Controls.ImageComboStyle.Common;
             this.icbLineWidth.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.icbLineWidth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.icbLineWidth.FormattingEnabled = true;
@@ -692,7 +692,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.icbLineType.Color1 = System.Drawing.Color.Blue;
             this.icbLineType.Color2 = System.Drawing.Color.Honeydew;
             this.icbLineType.ColorSchemes = null;
-            this.icbLineType.ComboStyle = ImageComboStyle.Common;
+            this.icbLineType.ComboStyle = MapWindow.Legend.Controls.ImageComboStyle.Common;
             this.icbLineType.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.icbLineType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.icbLineType.FormattingEnabled = true;

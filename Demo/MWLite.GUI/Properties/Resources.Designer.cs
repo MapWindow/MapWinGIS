@@ -143,6 +143,16 @@ namespace MWLite.GUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap layer_db_add {
+            get {
+                object obj = ResourceManager.GetObject("layer-db-add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap layer_delete {
             get {
                 object obj = ResourceManager.GetObject("layer_delete", resourceCulture);
@@ -316,6 +326,16 @@ namespace MWLite.GUI.Properties {
         internal static System.Drawing.Bitmap select {
             get {
                 object obj = ResourceManager.GetObject("select", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap select_by_polygon {
+            get {
+                object obj = ResourceManager.GetObject("select_by_polygon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

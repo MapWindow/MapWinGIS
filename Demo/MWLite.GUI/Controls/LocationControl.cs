@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.Core;
+using MWLite.Core.Events;
 using MWLite.Core.GeoLocation;
 using MWLite.Core.UI;
-using MWLite.GUI.Events;
 using MWLite.GUI.Helpers;
 
 namespace MWLite.GUI.Controls

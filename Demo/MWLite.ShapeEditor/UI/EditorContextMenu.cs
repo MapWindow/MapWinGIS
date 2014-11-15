@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
+﻿using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using MWLite.ShapeEditor.Helpers;
 
-namespace MWLite.ShapeEditor.Forms
+namespace MWLite.ShapeEditor.UI
 {
     public partial class EditorContextMenu : UserControl
     {

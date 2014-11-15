@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using MapWindow.Legend.Controls.Legend;
+﻿using System.Windows.Forms;
 using MapWindow.Legend.Forms;
 using MapWindow.Legend.Forms.Labels;
 using MapWinGIS;
 using MWLite.Core.UI;
+using MWLite.GUI.Forms;
+using MWLite.GUI.Helpers;
 
-namespace MWLite.GUI.Forms.Dock
+namespace MWLite.GUI.MapLegend
 {
-    internal class LegendCommandMap : CommandMap<LegendCommand>
+    internal class LegendDispatcher : CommandMap<LegendCommand>
     {
         internal int LayerHandle = -1;
-        private Legend _legend = null;
+        private MapWindow.Legend.Controls.Legend.Legend _legend = null;
 
-        public LegendCommandMap(Legend legend)
+        public LegendDispatcher(MapWindow.Legend.Controls.Legend.Legend legend)
         {
             _legend = legend;
         }
@@ -32,6 +29,18 @@ namespace MWLite.GUI.Forms.Dock
 
             switch (command)
             {
+                case LegendCommand.RemoveLayer:
+                    LayerHelper.RemoveLayer();
+                    break;
+                case LegendCommand.SaveLayerStyle:
+                    LayerHelper.SaveCurrentStyle();
+                    break;
+                case LegendCommand.ImportOgrLayer:
+                    LayerHelper.ImportOgrLayer();
+                    break;
+                case LegendCommand.SaveOgrStyle:
+                    LayerHelper.SaveOgrStyle();
+                    break;
                 case LegendCommand.ZoomToLayer:
                     _legend.Map.ZoomToLayer(LayerHandle);
                     break;

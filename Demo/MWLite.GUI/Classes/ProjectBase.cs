@@ -63,7 +63,8 @@ namespace MWLite.GUI.Classes
             {
                 case ProjectState.NotSaved:
                 case ProjectState.HasChanges:
-                    var result = MessageHelper.AskYesNoCancel("Save project?");
+                    string prompt = string.Format("Save project: {0}?", Path.GetFileName(Filename));
+                    var result = MessageHelper.AskYesNoCancel(prompt);
                     if (result == DialogResult.Cancel) return false;
                     if (result == DialogResult.Yes)
                         SaveCurrentProject();

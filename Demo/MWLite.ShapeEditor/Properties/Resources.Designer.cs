@@ -143,6 +143,16 @@ namespace MWLite.ShapeEditor.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap line_polygon_edit {
+            get {
+                object obj = ResourceManager.GetObject("line-polygon-edit", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap merge {
             get {
                 object obj = ResourceManager.GetObject("merge", resourceCulture);
@@ -156,6 +166,16 @@ namespace MWLite.ShapeEditor.Properties {
         internal static System.Drawing.Bitmap move {
             get {
                 object obj = ResourceManager.GetObject("move", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap polygon_erase {
+            get {
+                object obj = ResourceManager.GetObject("polygon_erase", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

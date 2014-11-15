@@ -1,32 +1,21 @@
-﻿using System;
-using System.Windows.Forms;
-using MapWindow.Legend;
-using MapWindow.Legend.Controls.Legend;
-using MapWindow.Legend.Forms;
-using MapWindow.Legend.Forms.Categories;
-using MapWindow.Legend.Forms.Labels;
-using MWLite.Core;
-using MWLite.Core.UI;
-using MWLite.GUI.Events;
-using MWLite.GUI.Helpers;
+﻿using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
-using MapWinGIS;
 
-namespace MWLite.GUI.Forms.Dock
+namespace MWLite.GUI.MapLegend
 {
     public partial class LegendDockForm : DockContent
     {
-        private LegendCommandMap _commandMap = null;
+        private LegendDispatcher _dispatcher = null;
 
         public LegendDockForm()
         {
             InitializeComponent();
-            _commandMap = new LegendCommandMap(legend1);
-            _commandMap.InitMenu(contextMenuStrip1.Items);
+            _dispatcher = new LegendDispatcher(legend1);
+            _dispatcher.InitMenu(contextMenuStrip1.Items);
             legend1.LayerMouseUp += legend1_LayerMouseUp;
         }
 
-        public Legend Legend
+        public MapWindow.Legend.Controls.Legend.Legend Legend
         {
             get { return legend1;  }
         }
@@ -41,7 +30,7 @@ namespace MWLite.GUI.Forms.Dock
                     var sf = layer.GetObject() as MapWinGIS.Shapefile;
                     if (sf != null)
                     {
-                        _commandMap.LayerHandle = Handle;
+                        _dispatcher.LayerHandle = Handle;
                         contextMenuStrip1.Show(Control.MousePosition);        
                     }
                 }

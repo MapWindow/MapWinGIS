@@ -1,4 +1,4 @@
-﻿namespace MWLite.ShapeEditor.Forms
+﻿namespace MWLite.ShapeEditor.UI
 {
     partial class EditorMenu
     {

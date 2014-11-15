@@ -60,10 +60,8 @@
     <Compile Include="Controls\LocationControl.Designer.cs">
       <DependentUpon>LocationControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Events\NewExtentEventArgs.cs" />
-    <Compile Include="Events\SelectionChanged.cs" />
-    <Compile Include="Forms\Dock\LegendCommand.cs" />
-    <Compile Include="Forms\Dock\LegendCommandMap.cs" />
+    <Compile Include="MapLegend\LegendCommand.cs" />
+    <Compile Include="MapLegend\LegendDispatcher.cs" />
     <Compile Include="Forms\GeoLocationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,16 +85,16 @@
     <Compile Include="Forms\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Dock\MapDockForm.cs">
+    <Compile Include="Forms\MapForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\Dock\MapDockForm.Designer.cs">
-      <DependentUpon>MapDockForm.cs</DependentUpon>
+    <Compile Include="Forms\MapForm.Designer.cs">
+      <DependentUpon>MapForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Dock\LegendDockForm.cs">
+    <Compile Include="MapLegend\LegendDockForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\Dock\LegendDockForm.Designer.cs">
+    <Compile Include="MapLegend\LegendDockForm.Designer.cs">
       <DependentUpon>LegendDockForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Classes\AppDispatcher.cs" />
@@ -115,10 +113,10 @@
     <EmbeddedResource Include="Forms\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Dock\MapDockForm.resx">
-      <DependentUpon>MapDockForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\MapForm.resx">
+      <DependentUpon>MapForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Dock\LegendDockForm.resx">
+    <EmbeddedResource Include="MapLegend\LegendDockForm.resx">
       <DependentUpon>LegendDockForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -151,6 +149,10 @@
     <ProjectReference Include="..\MWLite.Core\MWLite.Core.csproj">
       <Project>{d34e2ea4-6b09-40ee-9829-208c2f27ed8e}</Project>
       <Name>MWLite.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MWLite.Databases\MWLite.Databases.csproj">
+      <Project>{59bbc0b6-0f82-4f27-b77f-1176a98d3f80}</Project>
+      <Name>MWLite.Databases</Name>
     </ProjectReference>
     <ProjectReference Include="..\MWLite.ShapeEditor\MWLite.ShapeEditor.csproj">
       <Project>{c1b26cf0-f7af-49e1-88f7-cb0c5500643e}</Project>
@@ -191,15 +193,6 @@
     <None Include="Resources\pan.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\zoom_in.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\zoom_max.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\zoom_out.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\area-measure.png" />
   </ItemGroup>
   <ItemGroup>
@@ -219,9 +212,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\measure.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\polygon.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\vertex.png" />
@@ -249,6 +239,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="license.txt" />
+    <None Include="Resources\layer-db-add.png" />
+    <None Include="Resources\select_by_polygon.png" />
     <None Include="Resources\layer-create.png" />
     <None Include="Resources\folder1.png" />
     <None Include="Resources\open1.png" />
@@ -260,21 +252,14 @@
     <None Include="Resources\crs-change.png" />
     <None Include="Resources\layer-more.png" />
     <None Include="Resources\layer-vector-thematic-add.png" />
-    <None Include="Resources\categories4.png" />
-    <None Include="Resources\categories3.png" />
-    <None Include="Resources\categories2.png" />
-    <None Include="Resources\categories.png" />
     <None Include="Resources\label-add.png" />
-    <None Include="Resources\plugin2.png" />
     <None Include="Resources\save1.png" />
-    <None Include="Resources\plugin.png" />
     <None Include="Resources\zoom-selection.png" />
     <None Include="Resources\selected-delete.png" />
-    <None Include="Resources\layer-create1.png" />
-    <None Include="Resources\layer-raster-add1.png" />
     <None Include="Resources\layer-vector-add.png" />
     <None Include="Resources\layer-raster-add.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,8 +1,10 @@
 ﻿using System.Windows.Forms;
+using MapWindow.Legend.Controls.Legend;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.Exts;
 using MWLite.Core.UI;
+using MWLite.Databases;
 using MWLite.GUI.Forms;
 using MWLite.GUI.Helpers;
 using MWLite.ShapeEditor;
@@ -18,12 +20,27 @@ namespace MWLite.GUI.Classes
             if (HandleLayers(command)) return;
 
             if (HandleProject(command)) return;
+
+            if (HandleContextMenu(command)) return;
+        }
+
+        private bool HandleContextMenu(AppCommand command)
+        {
+            switch (command)
+            {
+                case AppCommand.HighlightShapes:
+                    App.Map.HotTracking = !App.Map.HotTracking;
+                    App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+                    return true;
+            }
+            return false;
         }
 
         private bool HandleProject(AppCommand command)
         {
             switch (command)
             {
+                
                 case AppCommand.Search:
                     using (var form = new GeoLocationForm())
                     {
@@ -78,6 +95,9 @@ namespace MWLite.GUI.Classes
         {
             switch (command)
             {
+                case AppCommand.AddDatabase:
+                    LayerHelper.OpenOgrLayer();
+                    return true;
                 case AppCommand.Open:
                     LayerHelper.AddLayer(LayerType.All);
                     return true;
@@ -111,6 +131,8 @@ namespace MWLite.GUI.Classes
         {
             switch (command)
             {
+                case AppCommand.SelectByPolygon:
+                    return SetMapCursor(tkCursorMode.cmSelectByPolygon);
                 case AppCommand.Identify:
                     return SetMapCursor(tkCursorMode.cmIdentify);
                 case AppCommand.Measure:

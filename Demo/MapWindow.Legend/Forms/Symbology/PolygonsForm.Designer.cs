@@ -401,7 +401,7 @@ namespace MapWindow.Legend.Forms.Symbology
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(32, 13);
             this.label6.TabIndex = 87;
-            this.label6.Text = "Цвет";
+            this.label6.Text = "Color";
             // 
             // label1
             // 

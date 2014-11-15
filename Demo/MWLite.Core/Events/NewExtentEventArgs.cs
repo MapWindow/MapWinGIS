@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using MapWinGIS;
-using MWLite.Core;
 
-namespace MWLite.GUI.Events
+namespace MWLite.Core.Events
 {
     public class NewExtentsEventArgs : EventArgs
     {

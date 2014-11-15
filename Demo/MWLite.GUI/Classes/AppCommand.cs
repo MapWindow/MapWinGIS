@@ -25,5 +25,8 @@
         CloseApp = 20,
         LoadProject = 21,
         Search = 22,
+        SelectByPolygon = 23,
+        HighlightShapes =24,
+        AddDatabase = 25,
     }
 }

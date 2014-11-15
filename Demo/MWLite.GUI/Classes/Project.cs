@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using MWLite.Core;
 using MWLite.Core.Exts;
+using MWLite.ShapeEditor;
 
 namespace MWLite.GUI.Classes
 {
@@ -11,6 +12,9 @@ namespace MWLite.GUI.Classes
     {
         public bool TryClose()
         {
+            if (!Editor.StopAllEditing())
+                return false;
+            
             if (TryCloseProject())
             {
                 App.Map.ShapeEditor.Clear();
