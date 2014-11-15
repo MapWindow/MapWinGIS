@@ -207,12 +207,14 @@
     <ClInclude Include="Processing\QTree.h" />
     <ClInclude Include="Shapefile\ActiveShape.h" />
     <ClInclude Include="Shapefile\ChartsHelper.h" />
+    <ClInclude Include="Shapefile\DraggingState.h" />
     <ClInclude Include="Shapefile\EditorBase.h" />
     <ClInclude Include="Shapefile\ExtentsHelper.h" />
     <ClInclude Include="Shapefile\FieldHelper.h" />
     <ClInclude Include="Shapefile\GeoProcessing.h" />
     <ClInclude Include="Shapefile\GeoShape.h" />
     <ClInclude Include="Shapefile\GroupOperation.h" />
+    <ClInclude Include="Shapefile\HotTrackingInfo.h" />
     <ClInclude Include="Shapefile\LabelsHelper.h" />
     <ClInclude Include="Shapefile\MeasuringBase.h" />
     <ClInclude Include="Shapefile\SelectionHelper.h" />
@@ -531,6 +533,7 @@
     <ClCompile Include="Shapefile\GeoProcessing.cpp" />
     <ClCompile Include="Shapefile\GeoShape.cpp" />
     <ClCompile Include="Shapefile\GroupOperation.cpp" />
+    <ClCompile Include="Shapefile\HotTrackingInfo.cpp" />
     <ClCompile Include="Shapefile\LabelsHelper.cpp" />
     <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="Shapefile\SelectionHelper.cpp" />

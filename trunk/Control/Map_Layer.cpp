@@ -1288,7 +1288,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 			if (nodeOgrLayer)
 			{
 				((COgrLayer*)layer)->DeserializeCore(nodeOgrLayer);
-				AddLayer(layer, (BOOL)visible);
+				layerHandle = AddLayer(layer, (BOOL)visible);
 			}
 			layer->Release();
 		}
@@ -1611,32 +1611,42 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 	{
 		// extracting object
 		Layer* layer = _allLayers[layerHandle];
-		if (layer && (layer->type == ShapefileLayer || layer->type == ImageLayer) )
+		if (layer  )
 		{
-			IShapefile* sf = NULL;
-			IImage* img = NULL;
-			layer->QueryShapefile(&sf);
-			layer->QueryImage(&img);
-
-			if (sf)
+			switch (layer->type)
 			{
-				tkShapefileSourceType shpSource;
-				sf->get_SourceType(&shpSource);
-				sf->get_Filename(&filename);
-				sf->Release();
-			}
-			else if (img)
-			{
-				tkImageSourceType imgSource;
-				img->get_SourceType(&imgSource);
-				img->get_Filename(&filename);
-				img->Release();
+				case ShapefileLayer:
+				{
+					CComPtr<IShapefile> sf = NULL;
+					layer->QueryShapefile(&sf);
+					if (sf) {
+						tkShapefileSourceType shpSource;
+						sf->get_SourceType(&shpSource);
+						sf->get_Filename(&filename);
+						return filename;
+					}
+					break;
+				}
+				case ImageLayer:
+				{
+					CComPtr<IImage> img = NULL;
+					layer->QueryImage(&img);
+					if (img != NULL)
+					{
+						tkImageSourceType imgSource;
+						img->get_SourceType(&imgSource);
+						img->get_Filename(&filename);
+						return filename;
+					}
+					break;
+				}
+				case OgrLayerSource:
+					break;
 			}
 		}
 	}
-	if (SysStringLen(filename) == 0)
-		filename = SysAllocString(L"");
-
+	
+	filename = SysAllocString(L"");
 	return filename;
 }
 
@@ -1676,10 +1686,10 @@ CString CMapView::get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName)
 	
 	USES_CONVERSION;
 	CString name = OLE2CA(filename);
-	if (_stricmp(OptionsName, "") == 0)
-	{
-		return "";		// error code is in the function
-	}
+	//if (_stricmp(OptionsName, "") == 0)
+	//{
+	//	return "";		// error code is in the function
+	//}
 
 	// constructing name
 	CString dot = (_stricmp(OptionsName, "") == 0) ? "" : ".";

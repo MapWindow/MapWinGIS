@@ -215,4 +215,11 @@ enum EditorDeleteResult
 	Delete
 };
 
+enum HotTrackingResult
+{
+	NewShape = 0,
+	SameShape = 1,
+	NoShape = 2,
+};
+
 # endif

@@ -103,6 +103,14 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	switch(nChar)
 	{
+		case VK_ESCAPE:
+			VARIANT_BOOL isEmpty;
+			_shapeEditor->get_IsEmpty(&isEmpty);
+			if (!isEmpty) {
+				_shapeEditor->Clear();
+				Redraw2(tkRedrawType::RedrawAll);
+			}
+			break;
 		case VK_DELETE:
 			{
 				if (m_cursorMode == cmEditShape)
@@ -415,27 +423,6 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 
 #pragma region Left button
 
-// ************************************************************
-//		SelectSingleShape
-// ************************************************************
-bool CMapView::SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex)
-{
-	double projX, projY;
-	PixelToProj(x, y, &projX, &projY);
-
-	HotTrackingInfo* info = FindShapeAtScreenPoint(CPoint(x, y), slctInMemorySf);
-	if (info)
-	{
-		layerHandle = info->LayerHandle;
-		shapeIndex = info->ShapeId;
-		delete info;
-		
-		tkMwBoolean cancel = blnFalse;
-		FireBeforeShapeEdit(uoEditShape, layerHandle, shapeIndex, &cancel);
-		return cancel == blnFalse;
-	}
-	return false;
-}
 
 // ************************************************************
 //		OnLButtonDown
@@ -501,7 +488,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		return;
 	}
 
-	if (IsOverlayCursor())
+	if (IsOverlayCursor() || m_cursorMode == cmSelectByPolygon)
 	{
 		tkShapeEditorState state;
 		_shapeEditor->get_EditorState(&state);
@@ -525,7 +512,12 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			{
 				long layerHandle, shapeIndex;
 				if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
+				{
+					UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
+					RedrawCore(RedrawSkipDataLayers, false, true);
 					FireShapeIdentified(layerHandle, shapeIndex, x, y);
+					return;
+				}
 			}
 			break;
 		case cmRotateShapes:
@@ -747,6 +739,10 @@ Extent CMapView::GetPointSelectionBox(IShapefile* sf, double xProj, double yProj
 		tol.right /= ratio;
 		tol.top /= ratio;
 		tol.bottom /= ratio;
+	}
+	else if (shpType == SHP_POLYGON)
+	{
+		// empty box
 	}
 	else {
 		double val = GetMouseTolerance(MouseTolerance::ToleranceSelect);
@@ -1072,8 +1068,22 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 	if (updateHotTracking) 
 	{
-		if (UpdateHotTracking(point))
-			refreshNeeded = true;
+		LayerShape info;
+		HotTrackingResult result = RecalcHotTracking(point, info);
+		switch (result)
+		{
+			case NewShape:
+				UpdateHotTracking(info, true);
+				refreshNeeded = true;
+				break;
+			case NoShape:
+				refreshNeeded = !_hotTracking.IsEmpty();
+				ClearHotTracking();
+				break;
+			case SameShape:
+				// do nothing
+				break;
+		}
 	}
 
 	if (_showCoordinates != cdmNone) {
@@ -1344,6 +1354,8 @@ void CMapView::OnSendMouseUpChanged(){}
 void CMapView::OnSendMouseMoveChanged(){}
 void CMapView::OnSendSelectBoxDragChanged(){}
 void CMapView::OnSendSelectBoxFinalChanged(){}
+void CMapView::OnHotTrackingColorChanged() {}
+void CMapView::OnMouseToleranceChanged() {};
 #pragma endregion
 
 // *************************************************************

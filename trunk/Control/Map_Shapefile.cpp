@@ -8,6 +8,9 @@
 #include "Shapefile.h"
 #include "Labels.h"
 #include "SelectionHelper.h"
+#include "ShapeStyleHelper.h"
+#include "ShapefileHelper.h"
+#include "Structures.h"
 
 // TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
@@ -1122,25 +1125,6 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 }
 
 // ************************************************************
-//		FindShapeAtScreenPoint
-// ************************************************************
-HotTrackingInfo* CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector selector)
-{
-	double pixX = point.x;
-	double pixY = point.y;
-	double prjX, prjY;
-	this->PixelToProj(pixX, pixY, &prjX, &prjY);
-	
-	std::vector<bool> layers;
-	if (SelectLayers(selector, layers))
-	{
-		return FindShapeCore(prjX, prjY, layers);
-	}
-	return new HotTrackingInfo();
-}
-
-
-// ************************************************************
 //		SelectLayerHandles
 // ************************************************************
 bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& layers)
@@ -1154,21 +1138,6 @@ bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& laye
 			layers.push_back(handle);
 	}
 	return layers.size() > 0;
-}
-
-// ************************************************************
-//		SelectLayers
-// ************************************************************
-bool CMapView::SelectLayers(LayerSelector selector, std::vector<bool>& layers)
-{
-	for (int i = 0; i < (int)_activeLayers.size(); i++)
-	{
-		bool result = CheckLayer(selector, _activeLayers[i]);
-		layers.push_back(result);
-	}
-	for (size_t i = 0; i < layers.size(); i++)
-		if (layers[i]) return true;
-	return false;
 }
 
 // ************************************************************
@@ -1190,20 +1159,23 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 				break;
 			case slctHotTracking:
 				if (!layer->wasRendered) return false;
-				VARIANT_BOOL vb;
-				sf->get_InteractiveEditing(&vb);
-				if (vb) 
-				{
-					// only editor based highlighting in this mode
-					VARIANT_BOOL highlight;
-					_shapeEditor->get_HighlightShapes(&highlight);
-					if (IsEditorCursor() && highlight) {
-						result = VARIANT_TRUE;
+
+				if (m_cursorMode == cmIdentify) {
+					if (_useHotTracking) {
+						sf->get_HotTracking(&result);
 					}
 				}
 				else {
-					if (m_cursorMode == cmIdentify) {
-						sf->get_HotTracking(&result);
+					VARIANT_BOOL vb;
+					sf->get_InteractiveEditing(&vb);
+					if (vb) 
+					{
+						// only editor based highlighting in this mode
+						VARIANT_BOOL highlight;
+						_shapeEditor->get_HighlightShapes(&highlight);
+						if (IsEditorCursor() && highlight) {
+							result = VARIANT_TRUE;
+						}
 					}
 				}
 				break;
@@ -1233,7 +1205,7 @@ double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
 			_shapeEditor->get_SnapTolerance(&tol);
 			break;	
 		case ToleranceSelect:
-			tol = 20;    //TODO: make parameter
+			tol = _mouseTolerance;
 			break;
 		case ToleranceInsert:
 			tol = 10;
@@ -1268,59 +1240,80 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 }
 
 // ************************************************************
+//		FindShapeAtScreenPoint
+// ************************************************************
+LayerShape CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector selector)
+{
+	double pixX = point.x;
+	double pixY = point.y;
+	double prjX, prjY;
+	this->PixelToProj(pixX, pixY, &prjX, &prjY);
+
+	std::vector<int> layers;
+	if (SelectLayerHandles(selector, layers))
+	{
+		return FindShapeAtProjPoint(prjX, prjY, layers);
+	}
+	return LayerShape();
+}
+
+// ************************************************************
 //		FindShapeCore
 // ************************************************************
-HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<bool>& layers)
+LayerShape CMapView::FindShapeAtProjPoint(double prjX, double prjY, std::vector<int>& layers)
 {
-	HotTrackingInfo* info = NULL;
 	IShapefile * sf = NULL;
-	for (int i = (int)_activeLayers.size() - 1; i >= 0; i--)
+	for (int i = (int)layers.size() - 1; i >= 0; i--)
 	{
-		if (!layers[i]) continue;
+		CComPtr<IShapefile> sf = GetShapefile(layers[i]);
+		if (sf) {
+			double tol = 0.0;
+			ShpfileType type = ShapefileHelper::GetShapeType2D(sf);
+			if (type == SHP_MULTIPOINT || type == SHP_POINT || type == SHP_POLYLINE)
+				tol = GetMouseTolerance(ToleranceSelect);
 
-		Layer* layer = _allLayers[_activeLayers[i]];
-		if (layer->IsShapefile())
-		{
-			if (layer->QueryShapefile(&sf))
-			{
-				std::vector<long> shapes;
+			SelectMode mode = type == SHP_POLYGON ? INCLUSION : INTERSECTION;
 
-				double tol = 0.0;
-				ShpfileType type;
-				sf->get_ShapefileType(&type);
-				type = Utility::ShapeTypeConvert2D(type);
-				if (type == SHP_MULTIPOINT || type == SHP_POINT || type == SHP_POLYLINE)
-					tol = GetMouseTolerance(ToleranceSelect);
-
-				SelectMode mode = type == SHP_POLYGON ? INCLUSION : INTERSECTION;
-
-				((CShapefile*)sf)->SelectShapesCore(Extent(prjX , prjX , prjY , prjY ), tol, mode, shapes);
-					
-				VARIANT_BOOL visible;
-				for (size_t j = 0; j < shapes.size(); j++)
-				{
-					sf->get_ShapeVisible(shapes[j], &visible);    
-					if (visible) {
-						IShape* shape = NULL;
-						sf->get_Shape(shapes[j], &shape);
-						info = new HotTrackingInfo();
-						info->ShapeId = shapes[j];
-						info->LayerHandle = _activeLayers[i];
-						info->Shapefile = sf;
-						info->Shape = shape;
-
-						long numPoints;
-						shape->get_NumPoints(&numPoints);
-						return info;
-					}
-				}
-				sf->Release();
-				sf = NULL;
-				if (info) break;
+			long shapeIndex;
+			if (SelectionHelper::SelectSingleShape(sf, Extent(prjX, prjY, tol), mode, shapeIndex)) {
+				return LayerShape(_activeLayers[i], shapeIndex);
 			}
 		}
 	}
-	return NULL;
+	return LayerShape();
+}
+
+// ************************************************************
+//		SelectShapeForEditing
+// ************************************************************
+bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shapeIndex)
+{
+	double projX, projY;
+	PixelToProj(x, y, &projX, &projY);
+
+	LayerShape info = FindShapeAtScreenPoint(CPoint(x, y), slctInMemorySf);
+	if (!info.IsEmpty())
+	{
+		tkMwBoolean cancel = blnFalse;
+		FireBeforeShapeEdit(uoEditShape, info.LayerHandle, info.ShapeIndex, &cancel);
+		return cancel == blnFalse;
+	}
+	return false;
+}
+
+// ************************************************************
+//		RecalcHotTracking
+// ************************************************************
+HotTrackingResult CMapView::RecalcHotTracking(CPoint point, LayerShape& result)
+{
+	if (_shapeCountInView < m_globalSettings.hotTrackingMaxShapeCount && HasHotTracking())
+	{
+		result = FindShapeAtScreenPoint(point, slctHotTracking);
+		if (!result.IsEmpty()) {
+			return _hotTracking.IsSame(result) ? SameShape : NewShape;
+		}
+	}
+	return HotTrackingResult::NoShape;
 }
 
 // ************************************************************
@@ -1328,138 +1321,46 @@ HotTrackingInfo* CMapView::FindShapeCore(double prjX, double prjY, std::vector<b
 // ************************************************************
 void CMapView::ClearHotTracking()
 {
-	if (_hotTracking.ShapeId != -1) {
-		_canUseMainBuffer = false;
-	}
-	VARIANT_BOOL vb;
-	_hotTracking.ShapeId = -1;
-	_hotTracking.LayerHandle = -1;
-	if (_hotTracking.Shapefile)
-		_hotTracking.Shapefile->Close(&vb);
-
-}
-
-// ************************************************************
-//		ApplyHotTrackingDisplayOptions
-// ************************************************************
-void CMapView::ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp)
-{
-	if (!_hotTracking.Shapefile) return;
-	ShpfileType type;
-	info->Shapefile->get_ShapefileType(&type);
-	type = Utility::ShapeTypeConvert2D(type);
-
-	VARIANT_BOOL vb;
-	((CShapefile*)_hotTracking.Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
-	long index = 0;
-	_hotTracking.Shapefile->EditInsertShape(shp, &index, &vb);
-	_hotTracking.Shapefile->RefreshExtents(&vb);
-	_hotTracking.LayerHandle = info->LayerHandle;
-	_hotTracking.ShapeId = info->ShapeId;
-
-	CComPtr<IShapeDrawingOptions> options = NULL;
-
-	info->Shapefile->get_DefaultDrawingOptions(&options);
-	if (options)
+	if (!_hotTracking.IsEmpty())
 	{
-		CComPtr<IShapeDrawingOptions> newOptions = NULL;
-		options->Clone(&newOptions);
-		if (newOptions)
-		{
-			VARIANT_BOOL interactiveEditing;
-			info->Shapefile->get_InteractiveEditing(&interactiveEditing);
-
-			if (interactiveEditing)
-			{
-				if (type == SHP_POINT || type == SHP_MULTIPOINT)
-				{
-					newOptions->put_FillColor(RGB(0, 0, 255));   // blue
-					newOptions->put_FillVisible(VARIANT_TRUE);
-				}
-				else {
-					newOptions->put_LineVisible(VARIANT_FALSE);
-					newOptions->put_FillVisible(VARIANT_FALSE);
-					newOptions->put_VerticesVisible(VARIANT_TRUE);  // vertices only
-				}
-			}
-			else
-			{
-				bool point = type == SHP_POINT || type == SHP_MULTIPOINT;
-				newOptions->put_FillVisible(point ? VARIANT_TRUE : VARIANT_FALSE);
-				newOptions->put_LineColor(RGB(30, 144, 255));
-				newOptions->put_LineWidth(2.0f);
-			}
-			_hotTracking.Shapefile->put_DefaultDrawingOptions(newOptions);
-		}
+		_canUseMainBuffer = false;
+		_hotTracking.Clear();
+		this->FireShapeHighlighted(-1, -1);
 	}
 }
 
 // ************************************************************
 //		UpdateHotTracking
 // ************************************************************
-bool CMapView::UpdateHotTracking(CPoint point)
+void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 {
-	bool found = false;
+	if (_shapeEditor->HasSubjectShape(info.LayerHandle, info.ShapeIndex))
+		return;
 
-	if (HasHotTracking())
-	{
-		HotTrackingInfo* info = FindShapeAtScreenPoint(point, slctHotTracking);
-		if (info)
+	CComPtr<IShapefile> sf = GetShapefile(info.LayerHandle);
+	if (sf) {
+		CComPtr<IShape> shape = NULL;
+		sf->get_Shape(info.ShapeIndex, &shape);
+		if (shape) 
 		{
-			bool sameShape = false;
-	
-			if (_shapeEditor->HasSubjectShape(info->LayerHandle, info->ShapeId)) {
-				sameShape = true;
-			}
-			else {
-				sameShape = !(info->LayerHandle != _hotTracking.LayerHandle || info->ShapeId != _hotTracking.ShapeId);
-			}
+			CComPtr<IShape> shpClone = NULL;
+			shape->Clone(&shpClone);
+			_hotTracking.Update(sf, shpClone, info.LayerHandle, info.ShapeIndex);
 
-			if (!sameShape)
-			{
-				IShape* shape = info->Shape;
-				if (shape)
-				{
-					IShape* shpClone = NULL;
-					shape->Clone(&shpClone);
-
-					_hotTracking.UpdateShapefile();
-
-					ApplyHotTrackingInfo(info, shpClone);
-					UINT refCount = shpClone->Release();   // there is one reference in new shapefile
-					found = true;
-				}
+			CComPtr<IShapeDrawingOptions> options = ShapeStyleHelper::GetHotTrackingStyle(sf, _hotTrackingColor, m_cursorMode == cmIdentify);
+			if (options) {
+				_hotTracking.UpdateStyle(options);
 			}
-			delete info;
 			
-			if (sameShape) return false;
+			this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeIndex);
+			_canUseMainBuffer = false;
 		}
 	}
-
-	bool refreshNeeded = false;
-	if (found)
-	{
-		// passing event to the caller
-		this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeId, point.x, point.y);
-		_canUseMainBuffer = false;
-		refreshNeeded = true;
-	}
-
-	if (!found && _hotTracking.ShapeId != -1)
-	{
-		ClearHotTracking();
-
-		// passing event to the caller
-		this->FireShapeHighlighted(-1, -1, point.x, point.y);
-		refreshNeeded = true;
-	}
-	return refreshNeeded;
 }
 
 // **********************************************************
-//			GetDrawingLabels()
+//			ClearLabelFrames()
 // **********************************************************
-// Deletes dynamically alocated frames info for all layers; drops isDrawn flag
 void CMapView::ClearLabelFrames()
 {
 	// clear frames for regular labels
@@ -1468,7 +1369,6 @@ void CMapView::ClearLabelFrames()
 		Layer * l = _allLayers[_activeLayers[i]];
 		if( l != NULL )
 		{	
-			// charts
 			if (l->IsShapefile())
 			{
 				IShapefile * sf = NULL;

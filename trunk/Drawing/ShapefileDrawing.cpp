@@ -60,23 +60,19 @@ enum tkDrawingShape
 //*******************************************************************
 //	Draw()				          
 //*******************************************************************
-void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
+int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 {
-	#ifdef USE_TIMER
-		CTimer tmr;
-		tmr.Init("c:\\mw_output.txt");
-		tmr.Start();
-	#endif
-
-	if( sf == NULL )
-	{	
-		// TODO: return this error in some way
-		// ErrorMessage(sf, tkINTERFACE_NOT_SUPPORTED);
-		return;
-	}
+	if (!sf) return 0;
+	
 	_shapefile = reinterpret_cast<CShapefile*>(sf);
 
 	FILE* file = ((CShapefile*)sf)->get_File();
+
+	#ifdef USE_TIMER
+	CTimer tmr;
+	tmr.Init("c:\\mw_output.txt");
+	tmr.Start();
+	#endif
 
 	#ifdef USE_TIMER
 	tmr.PrintTime("Before bounds");
@@ -92,7 +88,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	box=NULL;
 
 	if ( _xMin>_extents->right || _xMax<_extents->left || _yMin>_extents->top || _yMax<_extents->bottom )
-		return;
+		return 0;
 
 	#ifdef USE_TIMER
 	tmr.PrintTime("After bounds");
@@ -124,7 +120,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	else if ( _shptype == SHP_POLYGONM || _shptype == SHP_POLYGONZ )	_shptype = SHP_POLYGON;
 	else if ( _shptype == SHP_MULTIPOINTM || _shptype == SHP_MULTIPOINTZ )	_shptype = SHP_MULTIPOINT;
 	
-	// clearing the pathes	
+	// clearing the paths	
 	_vertexPathes.clear();
 
 	#ifdef USE_TIMER
@@ -165,7 +161,6 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	_shapefile->get_Categories(&icategories);
 	CShapefileCategories* categories = (CShapefileCategories*)icategories;
 	icategories->Release();
-	ASSERT(categories != NULL);
 	
 	#ifdef USE_TIMER
 		tmr.PrintTime("Before reading drawing options");
@@ -185,8 +180,8 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	{		
 		if (file == NULL )
 		{
-			perror("Shapefile doesn't exist");
-			return;
+			Debug::WriteLine("Shapefile doesn't exist");
+			return 0;
 		}
 		else
 		{
@@ -200,7 +195,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 			if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
 			{
 				delete _sfReader; _sfReader = NULL;
-				return;
+				return 0;
 				// TODO: Add error handling
 			}
 
@@ -453,7 +448,7 @@ void CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		}
 		else
 		{
-			ASSERT(true);
+			Debug::WriteLine("Options for category aren't found");
 		}
 		
 		std::vector<int>* indices = &categoryIndices[i];
@@ -528,6 +523,7 @@ cleaning:
 			selectResult = NULL;
 		}
 	}
+	return 1;
 }
 
 // ********************************************************
@@ -632,8 +628,6 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 // *************************************************************
 void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection)
 {
-	ASSERT(_dc == NULL);
-	
 	IShapeWrapper* shp = NULL;
 	tkDrawingShape pntShape;
 	
@@ -832,197 +826,197 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 			x = points[i].x;
 			y = points[i].y;
 
-			if (!(x > _extents->right || x < _extents->left || y > _extents->top|| y < _extents->bottom))
-			{
-				// ------------------------------------------------------
-				//	 Collision avoidance
-				// ------------------------------------------------------
-				int xInt = static_cast<int>((x - _extents->left) * _dx);
-				int yInt = static_cast<int>((_extents->top - y) * _dy);
-				
-				
-				// preventing point collision
-				if (!collisionMode == AllowCollisions)
-				{
-					CCollisionList* list = collisionMode == LocalList ? &_localCollisionList : _collisionList;
-					
-					CRect* rect = NULL;
-					
-					if (options->pointSymbolType == ptSymbolPicture && options->picture != NULL)	
-					{
-						long width, height;
-						options->picture->get_Width(&width);
-						options->picture->get_Height(&height);
-						int wd = static_cast<int>((double)width * options->scaleX/2.0);
-						int ht = static_cast<int>((double)height * options->scaleY/2.0);
-						
-						if (!options->alignIconByBottom)
-						{
-							rect = new CRect(xInt - wd, yInt - ht, xInt + wd, yInt + ht);
-						}
-						else
-						{
-							rect = new CRect(xInt - wd, yInt - ht * 2, xInt + wd, yInt);
-						}
-					}
-					else
-					{
-						rect = new CRect(xInt - int(options->pointSize/2.0), 
-												yInt - int(options->pointSize/2.0),
-												xInt + int(options->pointSize/2.0), 
-												yInt + int(options->pointSize/2.0));
-					}
-					
-					if (list->HaveCollision(*rect) && _avoidCollisions)
-					{
-						delete rect; 
-						continue;
-					}
-					else
-					{
-						list->AddRectangle(rect, 0, 0);
-						delete rect;
-					}
-				}
+			if (x > _extents->right || x < _extents->left || y > _extents->top || y < _extents->bottom) continue;
 
-				// ------------------------------------------------------
-				//	 Drawing
-				// ------------------------------------------------------
-				if ( pntShape == pshPixel )
-				{
-					if (drawSelection)
-					{
-						_dc->SetPixelV(xInt, yInt, m_selectionColor);
-					}
-					else
-					{
-						if ( options->drawingMode == vdmGDIPlus )
-						{
-							_graphics->DrawImage(bmPixel, xInt, yInt);
-						}
-						else
-						{
-							_dc->SetPixelV(xInt, yInt, pixelColor);
-						}
-					}
-					(*_shapeData)[shapeIndex]->size = 1;
-				}
-				else if (pntShape == pshPicture)
-				{
-					Gdiplus::Matrix mtxInit;
-					_graphics->GetTransform(&mtxInit);
+			// ------------------------------------------------------
+			//	 Collision avoidance
+			// ------------------------------------------------------
+			int xInt = static_cast<int>((x - _extents->left) * _dx);
+			int yInt = static_cast<int>((_extents->top - y) * _dy);
+				
+			// preventing point collision
+			if (!collisionMode == AllowCollisions)
+			{
+				CCollisionList* list = collisionMode == LocalList ? &_localCollisionList : _collisionList;
 					
+				CRect* rect = NULL;
+					
+				if (options->pointSymbolType == ptSymbolPicture && options->picture != NULL)	
+				{
 					long width, height;
 					options->picture->get_Width(&width);
 					options->picture->get_Height(&height);
 					int wd = static_cast<int>((double)width * options->scaleX/2.0);
 					int ht = static_cast<int>((double)height * options->scaleY/2.0);
-					
-					_graphics->TranslateTransform((float)(xInt), (float)(yInt));
-					
-					float angle = (float)((*_shapeData)[points[i].id])->rotation;
-					
-					// if not set explicitly, try to grab it from category
-					if (angle == 0)
-						angle = (float)options->rotation;
-
-					_graphics->RotateTransform(angle);
-					
+						
 					if (!options->alignIconByBottom)
 					{
-						_graphics->TranslateTransform((float)-wd, (float)-ht);
+						rect = new CRect(xInt - wd, yInt - ht, xInt + wd, yInt + ht);
 					}
 					else
 					{
-						_graphics->TranslateTransform((float)-wd, (float)-ht * 2);
+						rect = new CRect(xInt - wd, yInt - ht * 2, xInt + wd, yInt);
 					}
-					
-					Gdiplus::Rect rect(0, 0, INT(options->bitmapPlus->GetWidth() * options->scaleX), INT(options->bitmapPlus->GetHeight() * options->scaleY));
-
-					if (!drawSelection || m_selectionTransparency <= 255)
-					{
-						_graphics->DrawImage(options->bitmapPlus, rect, 0, 0, options->bitmapPlus->GetWidth(), options->bitmapPlus->GetHeight(), Gdiplus::UnitPixel, options->imgAttributes);
-					}
-					
-					if (drawSelection)				
-					{
-						SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
-						_graphics->FillRectangle(&brush, rect);
-					}
-
-					//mtxInit.Reset();
-					_graphics->SetTransform(&mtxInit);
-
-					(*_shapeData)[shapeIndex]->size = MAX(wd, ht);
 				}
 				else
 				{
-					// GDI+ mode
-					if ( options->drawingMode == vdmGDIPlus || options->drawingMode == vdmGDIMixed )
-					{
-						Gdiplus::Matrix mtxInit;
-						_graphics->GetTransform(&mtxInit);
-						
-						_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
-
-						if (!drawSelection || m_selectionTransparency < 255)
-						{
-							if (options->pointSymbolType == ptSymbolFontCharacter && path2)
-							{
-								options->DrawGraphicPathWithFillColor(_graphics, path2, 2.0f);
-							}
-							
-							// drawing fill
-							if ( options->fillVisible )
-							{
-								_graphics->FillPath(options->brushPlus, path);
-							}
-							
-							// we'll draw outline but it'll be slow
-							if ( options->drawingMode == vdmGDIPlus && options->linesVisible)	
-							{
-								options->DrawGraphicPath(_graphics, path);
-							}
-						}
-						_graphics->SetTransform(&mtxInit);
-					}
-					
-					// GDI mode
-					if ( options->drawingMode == vdmGDI || options->drawingMode == vdmGDIMixed )
-					{
-						if (!drawSelection || m_selectionTransparency < 255)
-						{
-							if ( pntShape == pshPolygon )
-							{
-								_dc->SetWindowOrg(-xInt , -yInt);
-								_dc->Polygon(reinterpret_cast<LPPOINT>(data), numPoints);
-								_dc->SetWindowOrg(0 , 0);
-							}
-							else if ( pntShape = pshEllipse )
-							{
-								_dc->SetWindowOrg(-xInt , -yInt);
-								_dc->Ellipse( -size, -size, size, size);
-								_dc->SetWindowOrg(0 , 0);
-							}
-						}
-					}
-
-					// drawing transparent selection
-					if (drawSelection)
-					{
-						Gdiplus::Matrix mtxInit;
-						_graphics->GetTransform(&mtxInit);
-						
-						_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
-					
-						SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
-						_graphics->FillPath(&brush, path);
-
-						_graphics->SetTransform(&mtxInit);	
-					}
-
-					(*_shapeData)[shapeIndex]->size = (int)options->pointSize;
+					rect = new CRect(xInt - int(options->pointSize/2.0), 
+											yInt - int(options->pointSize/2.0),
+											xInt + int(options->pointSize/2.0), 
+											yInt + int(options->pointSize/2.0));
 				}
+					
+				if (list->HaveCollision(*rect) && _avoidCollisions)
+				{
+					delete rect; 
+					continue;
+				}
+				else
+				{
+					list->AddRectangle(rect, 0, 0);
+					delete rect;
+				}
+			}
+
+			_shapeCount++;
+
+			// ------------------------------------------------------
+			//	 Drawing
+			// ------------------------------------------------------
+			if ( pntShape == pshPixel )
+			{
+				if (drawSelection)
+				{
+					_dc->SetPixelV(xInt, yInt, m_selectionColor);
+				}
+				else
+				{
+					if ( options->drawingMode == vdmGDIPlus )
+					{
+						_graphics->DrawImage(bmPixel, xInt, yInt);
+					}
+					else
+					{
+						_dc->SetPixelV(xInt, yInt, pixelColor);
+					}
+				}
+				(*_shapeData)[shapeIndex]->size = 1;
+			}
+			else if (pntShape == pshPicture)
+			{
+				Gdiplus::Matrix mtxInit;
+				_graphics->GetTransform(&mtxInit);
+					
+				long width, height;
+				options->picture->get_Width(&width);
+				options->picture->get_Height(&height);
+				int wd = static_cast<int>((double)width * options->scaleX/2.0);
+				int ht = static_cast<int>((double)height * options->scaleY/2.0);
+					
+				_graphics->TranslateTransform((float)(xInt), (float)(yInt));
+					
+				float angle = (float)((*_shapeData)[points[i].id])->rotation;
+					
+				// if not set explicitly, try to grab it from category
+				if (angle == 0)
+					angle = (float)options->rotation;
+
+				_graphics->RotateTransform(angle);
+					
+				if (!options->alignIconByBottom)
+				{
+					_graphics->TranslateTransform((float)-wd, (float)-ht);
+				}
+				else
+				{
+					_graphics->TranslateTransform((float)-wd, (float)-ht * 2);
+				}
+					
+				Gdiplus::Rect rect(0, 0, INT(options->bitmapPlus->GetWidth() * options->scaleX), INT(options->bitmapPlus->GetHeight() * options->scaleY));
+
+				if (!drawSelection || m_selectionTransparency <= 255)
+				{
+					_graphics->DrawImage(options->bitmapPlus, rect, 0, 0, options->bitmapPlus->GetWidth(), options->bitmapPlus->GetHeight(), Gdiplus::UnitPixel, options->imgAttributes);
+				}
+					
+				if (drawSelection)				
+				{
+					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+					_graphics->FillRectangle(&brush, rect);
+				}
+
+				//mtxInit.Reset();
+				_graphics->SetTransform(&mtxInit);
+
+				(*_shapeData)[shapeIndex]->size = MAX(wd, ht);
+			}
+			else
+			{
+				// GDI+ mode
+				if ( options->drawingMode == vdmGDIPlus || options->drawingMode == vdmGDIMixed )
+				{
+					Gdiplus::Matrix mtxInit;
+					_graphics->GetTransform(&mtxInit);
+						
+					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+
+					if (!drawSelection || m_selectionTransparency < 255)
+					{
+						if (options->pointSymbolType == ptSymbolFontCharacter && path2)
+						{
+							options->DrawGraphicPathWithFillColor(_graphics, path2, 2.0f);
+						}
+							
+						// drawing fill
+						if ( options->fillVisible )
+						{
+							_graphics->FillPath(options->brushPlus, path);
+						}
+							
+						// we'll draw outline but it'll be slow
+						if ( options->drawingMode == vdmGDIPlus && options->linesVisible)	
+						{
+							options->DrawGraphicPath(_graphics, path);
+						}
+					}
+					_graphics->SetTransform(&mtxInit);
+				}
+					
+				// GDI mode
+				if ( options->drawingMode == vdmGDI || options->drawingMode == vdmGDIMixed )
+				{
+					if (!drawSelection || m_selectionTransparency < 255)
+					{
+						if ( pntShape == pshPolygon )
+						{
+							_dc->SetWindowOrg(-xInt , -yInt);
+							_dc->Polygon(reinterpret_cast<LPPOINT>(data), numPoints);
+							_dc->SetWindowOrg(0 , 0);
+						}
+						else if ( pntShape = pshEllipse )
+						{
+							_dc->SetWindowOrg(-xInt , -yInt);
+							_dc->Ellipse( -size, -size, size, size);
+							_dc->SetWindowOrg(0 , 0);
+						}
+					}
+				}
+
+				// drawing transparent selection
+				if (drawSelection)
+				{
+					Gdiplus::Matrix mtxInit;
+					_graphics->GetTransform(&mtxInit);
+						
+					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
+					
+					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+					_graphics->FillPath(&brush, path);
+
+					_graphics->SetTransform(&mtxInit);	
+				}
+
+				(*_shapeData)[shapeIndex]->size = (int)options->pointSize;
 			}
 		}
 	}
@@ -1055,8 +1049,6 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 // Polygon or polyline category
 void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection)
 {
-	ASSERT(_dc == NULL);
-	
 	if (_shptype == SHP_POLYLINE && !options->linesVisible && !options->verticesVisible)
 		return;
 	
@@ -1243,7 +1235,6 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 // *************************************************************
 //		DrawPolygonGDIPlus()
 // *************************************************************
-// Draws a single polygon choosing the correct mode
 bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath& path, double minSize, OLE_COLOR pointColor, tkVectorDrawingMode drawingMode,
 										 double& xMin, double& xMax, double& yMin, double& yMax)
 {
@@ -1330,8 +1321,6 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 		{
 			// regular mode with COM points
 			CShapeWrapperCOM* shp = (CShapeWrapperCOM*)((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
-			ASSERT(shp);
-
 			if (shp)
 			{
 				shp->get_BoundsXY(xMin, xMax, yMin, yMax);
@@ -1364,8 +1353,6 @@ bool CShapefileDrawer::DrawPolygonGDIPlus(int shapeIndex, Gdiplus::GraphicsPath&
 // GDI drawing
 void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection)
 {
-	ASSERT(_dc == NULL);
-	
 	IShapeData* shpData = NULL;
 
 	double xMin, xMax, yMin, yMax;
@@ -1475,8 +1462,6 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 			{
 				// regular mode with COM points
 				CShapeWrapperCOM* shp = (CShapeWrapperCOM*)((CShapefile*)_shapefile)->get_ShapeWrapper(shapeIndex);
-				ASSERT(shp);
-			
 				if (shp)
 				{
 					shp->get_BoundsXY(xMin, xMax, yMin, yMax);
@@ -1578,8 +1563,6 @@ void CShapefileDrawer::DrawVertices(Gdiplus::GraphicsPath* path, CDrawingOptions
 // GDI+ only; no HDC is required
 void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection)
 {
-	ASSERT(_dc == NULL);
-	
 	if (_shptype != SHP_POLYLINE )
 		return;
 	

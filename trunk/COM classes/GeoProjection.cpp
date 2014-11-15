@@ -1068,7 +1068,19 @@ STDMETHODIMP CGeoProjection::SetGoogleMercator(VARIANT_BOOL* retVal)
 STDMETHODIMP CGeoProjection::SetWgs84(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	this->ImportFromProj4(A2BSTR("+proj=longlat +datum=WGS84 +no_defs"), retVal);
+
+	CComBSTR bstr = L"GEOGCS[\"WGS 84\","
+		L"DATUM[\"WGS_1984\","
+		L"SPHEROID[\"WGS 84\", 6378137, 298.257223563,"
+		L"AUTHORITY[\"EPSG\", \"7030\"]],"
+		L"AUTHORITY[\"EPSG\", \"6326\"]],"
+		L"PRIMEM[\"Greenwich\", 0,"
+		L"AUTHORITY[\"EPSG\", \"8901\"]],"
+		L"UNIT[\"degree\", 0.01745329251994328,"
+		L"AUTHORITY[\"EPSG\", \"9122\"]],"
+		L"AUTHORITY[\"EPSG\", \"4326\"]]";
+
+	this->ImportFromWKT(bstr, retVal);
 	return S_OK;
 }
 

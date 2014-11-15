@@ -593,6 +593,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	// ---------------------------------------------------
 	//	Run drawing
 	// ---------------------------------------------------
+	int shapeCount = 0;
 	for(int i = startcondition; i < endcondition; i++)
 	{
 		if( isConcealed[i] == false )
@@ -715,10 +716,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 						// grab extents from shapefile in case they have changed
 						this->AdjustLayerExtents(_activeLayers[i]);
 
-						if( l->extents.left   < _extents.left   && l->extents.right < _extents.left )		continue;
-						if( l->extents.left   > _extents.right  && l->extents.right > _extents.right )	continue;
-						if( l->extents.bottom < _extents.bottom && l->extents.top   < _extents.bottom )	continue;
-						if( l->extents.bottom > _extents.top    && l->extents.top   > _extents.top )		continue;
+						if (l->extents.right < _extents.left || l->extents.left > _extents.right ||
+							l->extents.top < _extents.bottom || l->extents.bottom > _extents.top) continue;
 					
 						if( l->object == NULL )
 						{
@@ -784,7 +783,15 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 			}
 		}
 	}
-	
+
+	shapeCount = sfDrawer.GetShapeCount();
+
+	if (layerBuffer)
+		_shapeCountInView = shapeCount;
+
+	if (!layerBuffer && shapeCount > _shapeCountInView)
+		_shapeCountInView = shapeCount;
+
 	// -------------------------------------------------
 	//	Drawing labels and charts above the layers
 	// -------------------------------------------------

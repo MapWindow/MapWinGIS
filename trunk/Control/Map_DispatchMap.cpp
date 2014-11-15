@@ -27,7 +27,6 @@ BEGIN_MESSAGE_MAP(CMapView, COleControl)
 	ON_OLEVERB(AFX_IDS_VERB_PROPERTIES, OnProperties)
 END_MESSAGE_MAP()
 
-
 BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	//{{AFX_DISPATCH_MAP(CMapView)
 	// NOTE - ClassWizard will add and remove dispatch map entries
@@ -270,5 +269,8 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "ZoomBarMaxZoom", dispidZoomBarMaxZoom, GetZoomBarMaxZoom, SetZoomBarMaxZoom, VT_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "GetLayerVisibleAtCurrentScale", dispidLayerVisibleAtCurrentScale, GetLayerVisibleAtCurrentScale, SetNotSupported, VT_BOOL, VTS_I4)
 	DISP_PROPERTY_EX_ID(CMapView, "UndoList", dispidUndoList, GetUndoList, SetNotSupported, VT_DISPATCH)
+	DISP_PROPERTY_EX_ID(CMapView, "HotTracking", dispidHotTracking, GetHotTracking, SetHotTracking, VT_BOOL)
+	DISP_PROPERTY_NOTIFY_ID(CMapView, "HotTrackingColor", dispidHotTrackingColor, _hotTrackingColor, OnHotTrackingColorChanged, VT_COLOR)
+	DISP_PROPERTY_NOTIFY_ID(CMapView, "MouseTolerance", dispidMouseTolerance, _mouseTolerance, OnMouseToleranceChanged, VT_R8)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

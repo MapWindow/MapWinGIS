@@ -139,6 +139,8 @@ public:
 	STDMETHOD(put_OgrUseStyles)(VARIANT_BOOL newVal);
 	STDMETHOD(get_AttachMapCallbackToLayers)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AttachMapCallbackToLayers)(VARIANT_BOOL newVal);
+	STDMETHOD(get_HotTrackingMaxShapeCount)(LONG* pVal);
+	STDMETHOD(put_HotTrackingMaxShapeCount)(LONG newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

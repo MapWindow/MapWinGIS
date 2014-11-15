@@ -1132,13 +1132,23 @@ bool CShapeEditor::Validate(IShape** shp)
 	if (shpType == SHP_POLYGON)
 		((CShape*)(*shp))->FixupShapeCore(ShapeValidityCheck::FirstAndLastPointOfPartMatch);
 
+	VARIANT_BOOL vb;
 	ShapeValidityCheck validityCheck;
 	CString errMsg;
 	if (!((CShape*)(*shp))->ValidateBasics(validityCheck, errMsg))
 	{
+		if (validityCheck == DirectionOfPolyRings) 
+		{
+			(*shp)->ReversePointsOrder(0, &vb);
+		}
+	}
+
+	if (!((CShape*)(*shp))->ValidateBasics(validityCheck, errMsg)) {
 		_mapCallback->_FireShapeValidationFailed(errMsg);
 		return false;
 	}
+	
+
 	return ValidateWithGeos(shp);
 }
 
@@ -1257,7 +1267,7 @@ bool CShapeEditor::TrySave()
 	_mapCallback->_Redraw(tkRedrawType::RedrawAll, false, true);
 
 	// let the user set new attributes
-	_mapCallback->_FireAfterShapeEdit(uoEditShape, layerHandle, shapeIndex);
+	_mapCallback->_FireAfterShapeEdit(newShape ? blnTrue : blnFalse, layerHandle, shapeIndex);
 	return true;
 }
 

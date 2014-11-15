@@ -268,7 +268,7 @@ void CMapView::HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl)
 	
 	_shapeEditor->Clear();
 
-	if (SelectSingleShape(x, y, layerHandle, shapeIndex)) {
+	if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) {
 		VARIANT_BOOL vb;
 		_shapeEditor->StartEdit(layerHandle, shapeIndex, &vb);
 	}
@@ -378,7 +378,7 @@ void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double pro
 	{
 		// let's choose the subject
 		long shapeIndex = -1, layerHandle = -1;
-		if (SelectSingleShape(x, y, layerHandle, shapeIndex)) 
+		if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
 		{
 			VARIANT_BOOL vb;
 			_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);

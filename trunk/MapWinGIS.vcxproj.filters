@@ -786,6 +786,12 @@
     <ClInclude Include="Shapefile\ChartsHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
+    <ClInclude Include="Shapefile\HotTrackingInfo.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Shapefile\DraggingState.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1672,6 +1678,9 @@
       <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Shapefile\ChartsHelper.cpp">
+      <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\HotTrackingInfo.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
   </ItemGroup>

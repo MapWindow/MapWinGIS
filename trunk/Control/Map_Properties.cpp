@@ -486,3 +486,17 @@ void CMapView::SetZoomBarMaxZoom(long nNewValue)
 	_zoomBarMaxZoom = nNewValue;
 	RedrawCore(tkRedrawType::RedrawAll, true, false);
 }
+
+// *****************************************************
+//		HotTracking
+// *****************************************************
+VARIANT_BOOL CMapView::GetHotTracking()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	return _useHotTracking;
+}
+void CMapView::SetHotTracking(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_useHotTracking = newVal ? TRUE: FALSE;
+}

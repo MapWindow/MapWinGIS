@@ -729,3 +729,19 @@ STDMETHODIMP CGlobalSettings::put_AttachMapCallbackToLayers(VARIANT_BOOL newVal)
 	m_globalSettings.attachMapCallbackToLayers = newVal ? true : false;
 	return S_OK;
 }
+
+// *********************************************************
+//	     HotTrackingMaxShapeCount
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_HotTrackingMaxShapeCount(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.hotTrackingMaxShapeCount;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_HotTrackingMaxShapeCount(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.hotTrackingMaxShapeCount = newVal;
+	return S_OK;
+}

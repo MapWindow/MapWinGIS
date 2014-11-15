@@ -146,7 +146,9 @@ STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG Sh
 
 	_position = _list.size() - 1;
 
-	FireUndoListChanged();
+	if (!item->WithinBatch) {
+		FireUndoListChanged();
+	}
 
 	return S_OK;
 }
@@ -565,6 +567,10 @@ STDMETHODIMP CUndoList::EndBatch(LONG* retVal)
 		}
 		*retVal = count;
 		_batchId = EMPTY_BATCH_ID;
+
+		if (count > 0)
+			FireUndoListChanged();
+
 		return S_OK;
 	}
 }

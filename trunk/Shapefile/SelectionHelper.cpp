@@ -207,15 +207,23 @@ bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, double Toler
 /***********************************************************************/
 bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, long& shapeIndex)
 {
+	return SelectSingleShape(sf, box, SelectMode::INTERSECTION, shapeIndex);
+}
+bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex)
+{
 	vector<long> results;
-	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	if (SelectShapes(sf, box, 0.0, mode, results))
 	{
-		if (results.size() > 0)
+		for (int i = results.size() - 1; i >= 0; i--) 
 		{
-			shapeIndex = results[results.size() - 1];
-			return true;
+			VARIANT_BOOL visible;
+			sf->get_ShapeVisible(results[i], &visible);
+			if (visible) 
+			{
+				shapeIndex = results[results.size() - 1];
+				return true;
+			}
 		}
-			
 	}
 	return false;
 }

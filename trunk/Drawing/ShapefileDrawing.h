@@ -69,6 +69,7 @@ public:
 		_bmpPixel = new Gdiplus::Bitmap(1, 1);
 
 		_scale = scale;
+		_shapeCount = 0;
 	};
 
 	~CShapefileDrawer()
@@ -97,6 +98,7 @@ protected:
 	double _dx;
 	double _dy;
 	CShapefileReader* _sfReader;
+	int _shapeCount;
 	
 	double _xMin;
 	double _yMin;
@@ -119,7 +121,8 @@ protected:
 
 	std::vector<VertexPath> _vertexPathes;
 public:
-	void Draw(const CRect & rcBounds, IShapefile* sf);
+	int Draw(const CRect & rcBounds, IShapefile* sf);
+	int GetShapeCount() { return _shapeCount; }
 private:	
 	std::vector<long>* SelectShapesFromSpatialIndex(char* sFilename, Extent* extents);
 	
@@ -151,7 +154,9 @@ private:
 
 	bool WithinVisibleExtents(double xMin, double xMax, double yMin, double yMax)
 	{
-		return 	!(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
+		bool result = !(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
+		if (result) _shapeCount++;
+		return result;
 	};
 
 	void InitDC()

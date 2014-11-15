@@ -30,6 +30,8 @@
 # include "MeasuringBase.h"
 # include "EditorBase.h"
 # include "ShapeEditor.h"
+#include "HotTrackingInfo.h"
+#include "DraggingState.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -591,6 +593,10 @@ public:
 	afx_msg void SetZoomBarMaxZoom(long newVal);
 	afx_msg VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 	afx_msg IUndoList* GetUndoList();
+	afx_msg VARIANT_BOOL GetHotTracking();
+	afx_msg void SetHotTracking(VARIANT_BOOL newVal);
+	afx_msg void OnHotTrackingColorChanged();
+	afx_msg void OnMouseToleranceChanged();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -620,8 +626,8 @@ public:
 		{FireEvent(eventidMapState,EVENT_PARAM(VTS_I4), LayerHandle);}
 	void FireOnDrawBackBuffer(long BackBuffer)
 		{FireEvent(eventidOnDrawBackBuffer,EVENT_PARAM(VTS_I4), BackBuffer);}
-	void FireShapeHighlighted(long LayerHandle, long ShapeIndex, long pointX, long pointY)
-		{ FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4  VTS_I4), LayerHandle, ShapeIndex, pointX, pointY);}
+	void FireShapeHighlighted(long LayerHandle, long ShapeIndex)
+		{ FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4), LayerHandle, ShapeIndex);}
 	void FireBeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
 		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
@@ -636,7 +642,7 @@ public:
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_PI4), action, layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4), Action, LayerHandle, Shape, Cancel);	}
-	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
+	void FireAfterShapeEdit(tkMwBoolean Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
 		{FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
@@ -733,10 +739,12 @@ public:
 	BOOL _grabProjectionFromData;
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
+	BOOL _useHotTracking;
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			
-	
+	OLE_COLOR _hotTrackingColor;
+
 	tkZoomBoxStyle _zoomBoxStyle;
 	tkShapeDrawingMethod _shapeDrawingMethod;
 	tkUnitsOfMeasure _unitsOfMeasure;
@@ -753,7 +761,8 @@ public:
 	long _zoomBarMinZoom;
 	long _zoomBarMaxZoom;
 	long _lastErrorCode;
-	
+	DOUBLE _mouseTolerance;
+
 	// ---------------------------------------------
 	//	COM instances
 	// ---------------------------------------------
@@ -826,6 +835,7 @@ public:
 	bool _spacePressed;
 	float _lastRedrawTime;
 	int _projectionChangeCount;
+	int _shapeCountInView;
 
 	// ---------------------------------------------
 	//	various stuff
@@ -1011,8 +1021,9 @@ private:
 	tkInterpolationMode ChooseInterpolationMode(tkInterpolationMode mode1, tkInterpolationMode mode2);
 	void ClearMapProjectionWithLastLayer();
 	ZoombarPart ZoombarHitTest(int x, int y);
-	bool UpdateHotTracking(CPoint point);
+	HotTrackingResult RecalcHotTracking(CPoint point, LayerShape& result);
 	void ClearHotTracking();
+	void UpdateHotTracking(LayerShape info, bool fireEvent);
 	void DoPanning(CPoint point);
 	void DoUpdateTiles(bool isSnapshot = false, CString key = "");
 	bool HandleOnZoombarMouseDown( CPoint point );
@@ -1035,16 +1046,15 @@ private:
 	bool GetTileMismatchMinZoom( int& minZoom );
 	VARIANT_BOOL LoadLayerOptionsCore(CString baseName, LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description);
 	bool LayerIsEmpty(long LayerHandle);
-	HotTrackingInfo* FindShapeAtScreenPoint(CPoint point, LayerSelector selector);
-	HotTrackingInfo* FindShapeCore(double projX, double projY, std::vector<bool>& layers);
+	LayerShape FindShapeAtScreenPoint(CPoint point, LayerSelector selector);
+	LayerShape FindShapeAtProjPoint(double projX, double projY, std::vector<int>& layers);
 	MeasuringBase* GetMeasuringBase();
 	EditorBase* GetEditorBase();
 	ActiveShape* GetActiveShape();
 	void DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer );
-	bool SelectLayers(LayerSelector selector, std::vector<bool>& layers);
 	bool SelectLayerHandles(LayerSelector selector, std::vector<int>& layers);
 	bool CheckLayer(LayerSelector selector, int layerHandle);
-	bool SelectSingleShape(int x, int y, long& layerHandle, long& shapeIndex);
+	bool SelectShapeForEditing(int x, int y, long& layerHandle, long& shapeIndex);
 	bool SetShapeEditor(long layerHandle);
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
 	int AddLayerCore(Layer* layer);
@@ -1065,7 +1075,6 @@ private:
 	void SetExtentsWithPadding(Extent extents);
 	void HandleLButtonDownSelection(CPoint& point, long vbflags);
 	void ZoomToEditor();
-	void ApplyHotTrackingInfo(HotTrackingInfo* info, IShape* shp);
 	void OnCursorModeChangedCore(bool clearEditor);
 	bool IsEditorCursor();
 	bool IsDigitizingCursor();
@@ -1087,6 +1096,7 @@ private:
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
+	
 #pragma endregion
 
 public:
@@ -1104,7 +1114,7 @@ public:
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
 	virtual void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
-	virtual void _FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(Action, LayerHandle, ShapeIndex); }
+	virtual void _FireAfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
@@ -1112,7 +1122,7 @@ public:
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
-
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

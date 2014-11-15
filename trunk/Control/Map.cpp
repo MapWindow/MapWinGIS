@@ -133,10 +133,12 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("ProjectionChanged", eventidProjectionChanged, FireProjectionChanged, VTS_NONE)
 	EVENT_CUSTOM_ID("UndoListChanged", eventidUndoListChanged, FireUndoListChanged, VTS_NONE)
 	EVENT_CUSTOM_ID("SelectionChanged", eventidSelectionChanged, FireSelectionChanged, VTS_I4)
+	EVENT_CUSTOM_ID("ShapeIdentified", eventidShapeIdentified, ShapeIdentified, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
-	EVENT_CUSTOM_ID("ShapeIdentified", eventidShapeIdentified, ShapeIdentified, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 END_EVENT_MAP()
+
+
 
 #pragma region Constructor/destructor
 
@@ -284,13 +286,14 @@ void CMapView::Startup()
 void CMapView::SetDefaults()
 {
 	// temp state variables
+	_shapeCountInView = 0;
 	_currentDrawing = -1;
 	_rectTrackerIsActive = false;
 	_lastWidthMeters = 0.0;
 	_redrawId = 0;
 	_lastZooombarPart = ZoombarNone;
 	_hotTracking.LayerHandle = -1;
-	_hotTracking.ShapeId = -1;
+	_hotTracking.ShapeIndex = -1;
 	_isSizing = false;
 	_showingToolTip = FALSE;
 	_lockCount = 0;
@@ -303,8 +306,11 @@ void CMapView::SetDefaults()
 	_knownExtents = keNone;
 	_measuringPersistent = false;
 	_lastErrorCode = tkNO_ERROR;
+	_hotTrackingColor = RGB(30, 144, 255);
 
 	// public control properties
+	_mouseTolerance = 20.0;
+	_useHotTracking = TRUE;
 	m_sendMouseMove = FALSE;
 	m_sendMouseDown = FALSE;
 	m_sendMouseUp = FALSE;
@@ -618,6 +624,11 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
 		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
+
+		PX_Bool(pPX, "HotTracking", _useHotTracking, TRUE);
+		PX_Color(pPX, "HotTrackingColor", _hotTrackingColor, RGB(30, 144, 255));
+
+		PX_Double(pPX, "MouseTolerance", _mouseTolerance, 20);
 
 		m_mapCursor = 0;	// why not to save it?
 	}

@@ -151,3 +151,49 @@ bool ShapeStyleHelper::GetPointBounds(IShapeDrawingOptions* options, Extent& ext
 	}
 	return true;
 }
+
+// *****************************************************
+//		GetHotTrackingStyle()
+// *****************************************************
+IShapeDrawingOptions* ShapeStyleHelper::GetHotTrackingStyle(IShapefile* sf, OLE_COLOR outlineColor, bool identify)
+{
+	if (!sf) return NULL;
+
+	CComPtr<IShapeDrawingOptions> options = NULL;
+	sf->get_DefaultDrawingOptions(&options);
+	if (options)
+	{
+		IShapeDrawingOptions* newOptions = NULL;
+		options->Clone(&newOptions);
+		if (newOptions)
+		{
+			VARIANT_BOOL interactiveEditing;
+			sf->get_InteractiveEditing(&interactiveEditing);
+
+			ShpfileType type = ShapefileHelper::GetShapeType2D(sf);
+
+			if (identify || !interactiveEditing)
+			{
+				bool point = type == SHP_POINT || type == SHP_MULTIPOINT;
+				newOptions->put_FillVisible(point ? VARIANT_TRUE : VARIANT_FALSE);
+				newOptions->put_LineColor(outlineColor);
+				newOptions->put_LineWidth(2.0f);
+			}
+			else
+			{
+				if (type == SHP_POINT || type == SHP_MULTIPOINT)
+				{
+					newOptions->put_FillColor(RGB(0, 0, 255));   // blue
+					newOptions->put_FillVisible(VARIANT_TRUE);
+				}
+				else {
+					newOptions->put_LineVisible(VARIANT_FALSE);
+					newOptions->put_FillVisible(VARIANT_FALSE);
+					newOptions->put_VerticesVisible(VARIANT_TRUE);  // vertices only
+				}
+			}
+			return newOptions;
+		}
+	}
+	return NULL;
+}

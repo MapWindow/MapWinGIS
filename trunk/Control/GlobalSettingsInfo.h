@@ -53,9 +53,11 @@ struct GlobalSettingsInfo
 	int ctorCount;
 	int dtorCount;
 	bool attachMapCallbackToLayers;
+	int hotTrackingMaxShapeCount;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		hotTrackingMaxShapeCount = 200;
 		attachMapCallbackToLayers = true;
 		ctorCount = 0;
 		dtorCount = 0;

@@ -5308,6 +5308,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(39)] HRESULT OgrUseStyles([in] VARIANT_BOOL newVal);
 	[propget, id(40)] HRESULT AttachMapCallbackToLayers([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(40)] HRESULT AttachMapCallbackToLayers([in] VARIANT_BOOL newVal);
+	[propget, id(41)] HRESULT HotTrackingMaxShapeCount([out, retval] LONG* pVal);
+	[propput, id(41)] HRESULT HotTrackingMaxShapeCount([in] LONG newVal);
 };
 
 [
@@ -5731,7 +5733,6 @@ library MapWinGIS
 			[id(2)] double ZoomPercent;
 			[id(3)] tkCursorMode CursorMode;
 			[id(4)] tkCursor MapCursor;
-			
 			[id(6)] VARIANT_BOOL SendMouseDown;
 			[id(7)] VARIANT_BOOL SendMouseUp;
 			[id(8)] VARIANT_BOOL SendMouseMove;
@@ -5761,6 +5762,9 @@ library MapWinGIS
 			[id(205)] tkScalebarUnits ScalebarUnits;
 			[id(211), readonly] IFileManager* FileManager;
 			[id(241)] IUndoList* UndoList;
+			[id(242)] VARIANT_BOOL HotTracking;
+			[id(243)] OLE_COLOR HotTrackingColor;
+			[id(244)] DOUBLE MouseTolerance;
 			// changed to methods to hide from property grid
 			//[id(5)] long UDCursorHandle;
 			//[id(156)] DOUBLE CurrentScale;
@@ -6083,7 +6087,7 @@ library MapWinGIS
 			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(238), propput] void GetLayerVisibleAtCurrentScale(LONG LayerHandle, VARIANT_BOOL newVal);
 			//}}AFX_ODL_METHOD
-	};
+};
 
 	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),
 	 helpstring("Event interface for Table class") ]
@@ -6119,7 +6123,7 @@ library MapWinGIS
 			[id(7)] void ExtentsChanged();
 			[id(8)] void MapState(long LayerHandle);
 			[id(9)] void OnDrawBackBuffer(long BackBuffer);
-			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex, long pointX, long pointY);
+			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex);
 			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
@@ -6127,7 +6131,7 @@ library MapWinGIS
 			[id(15)] void LayersChanged();
 			[id(16)] void BeforeShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
-			[id(18)] void AfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex);
+			[id(18)] void AfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex);
 			[id(19)] void ChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
 			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);

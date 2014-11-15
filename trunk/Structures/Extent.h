@@ -14,9 +14,6 @@
 class Extent  
 {
 public:
-	/*Extent();
-	virtual ~Extent();
-	Extent( double Left, double Right, double Bottom, double Top );*/
 
 	Extent::Extent()
 	{	left = 0;
@@ -26,6 +23,14 @@ public:
 	}
 
 	Extent::~Extent() {}
+
+	Extent::Extent(double x, double y, double tol)
+	{
+		left = x - tol / 2;
+		right = x + tol / 2;
+		bottom = y - tol / 2;
+		top = y + tol / 2;
+	}
 
 	Extent::Extent( double Left, double Right, double Bottom, double Top )
 	{	

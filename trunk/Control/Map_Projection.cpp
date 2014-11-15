@@ -70,7 +70,8 @@ void CMapView::InitProjections()
 	_wgsProjection->SetWgs84(&vb);				// EPSG:4326
 	_gmercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 	
-	_projection = NULL;
+	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_projection);
+
 	IGeoProjection* p = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
@@ -82,34 +83,17 @@ void CMapView::InitProjections()
 void CMapView::SetGeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (!pVal)
+	if (!pVal || pVal == _projection)
 		return;
-
-	if (pVal == _projection) return;
 
 	bool preserveExtents = _activeLayers.size() == 0;
 	IExtents* ext = GetGeographicExtents();	// try to preserve extents
 
-	IGeoProjection* last = NULL;
-	if (pVal)
-	{
-		last = _projection;
-		if (last) last->AddRef();		// add temp reference; as it can be deleted in the next line
-	}
-	
-	Utility::put_ComReference(pVal, (IDispatch**)&_projection, false);
-	
-	if (last)
-	{
-		if (last != _projection)
-		{
-			((CGeoProjection*)last)->SetIsFrozen(false);
-			last->StopTransform();
-		}
-		ULONG refCount = last->Release();
-		last = NULL;
-	}
+	((CGeoProjection*)_projection)->SetIsFrozen(false);
+	_projection->StopTransform();
 
+	Utility::put_ComReference(pVal, (IDispatch**)&_projection);
+	
 	USES_CONVERSION;
 	CComBSTR str;
 	_projection->ExportToWKT(&str);
