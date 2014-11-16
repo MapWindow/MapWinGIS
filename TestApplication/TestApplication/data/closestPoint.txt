@@ -1,0 +1,25 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is point shapefile, second line is search shapefile
+
+# point to line
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+
+#  line to line
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+
+# Point to polygon
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# Line to polygon
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# polygon to polygon
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp

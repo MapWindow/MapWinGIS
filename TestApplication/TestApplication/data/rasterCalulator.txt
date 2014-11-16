@@ -1,0 +1,47 @@
+# Text file to test the raster calculator
+# First line is Raster A, second line is Raster B, third line is formula:
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]+[B]) * 5
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]-[B])
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]+[B])
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]*[B])
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]/[B])
+
+# Values > 50 will be set to 0:
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A] > 50) * [A]
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+([A]-[B])/([A]+[B])
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+[A] OR [B]
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+(50 < [A]) * [A]
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+-[A] + 100
+
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B5.tif
+%MW_SAMPLEDATA%\Grids\Formats\Clip_L7_20000423_B2.tif
+(([A]+[B]) * 5 - ([A]-[B]) * [A] * 5) / 6

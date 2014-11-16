@@ -1,0 +1,16 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is grid,  second line is clipping shapefile
+
+# North-East of The Netherlands:
+#%MW_SAMPLEDATA%\ClipGridByPolygon\AHN-10.asc
+#%MW_SAMPLEDATA%\ClipGridByPolygon\ClippingPolygon-AHN.shp
+
+# From Newton sample project:
+%MW_SAMPLEDATA%\MapWindow-Projects\World\Raster\NE2_50M_SR.jpg
+%MW_SAMPLEDATA%\MapWindow-Projects\World\Shapefiles\world_adm0.shp
+
+
+
