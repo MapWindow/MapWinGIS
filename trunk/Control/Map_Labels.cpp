@@ -56,10 +56,6 @@ IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 		if (layer->QueryShapefile(&sf))
 			return sf;
 	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}
 	return NULL;
 }
 

@@ -2,6 +2,7 @@
 #include "map.h"
 #include "GeoProjection.h"
 #include "Tiles.h"
+#include "ExtentsHelper.h"
 
 // some simple encapsulation for readability of code
 IGeoProjection* CMapView::GetMapToWgs84Transform() 
@@ -109,7 +110,8 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
-		_wgsProjection->get_IsSame(_projection, &isSame);
+		CComPtr<IExtents> box = ExtentsHelper::GetWorldBounds();
+		_wgsProjection->get_IsSameExt(_projection, box, 20, &isSame);
 		if (isSame)
 		{
 			_transformationMode = tmWgs84Complied;

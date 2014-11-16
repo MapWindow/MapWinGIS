@@ -17,7 +17,7 @@ public:
 	}
 	bool IsEmpty()
 	{
-		return ShapeIndex == 0;
+		return ShapeIndex == -1;
 	}
 	bool IsSame(LayerShape& info) {
 		return LayerHandle == info.LayerHandle && ShapeIndex == info.ShapeIndex;

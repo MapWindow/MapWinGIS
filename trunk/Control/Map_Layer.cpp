@@ -676,7 +676,7 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 			// let's try to do a transformation
 			if (layer->IsShapefile())
 			{
-				IShapefile* sf = NULL;
+				CComPtr<IShapefile> sf = NULL;
 				layer->QueryShapefile(&sf);
 				if (sf)
 				{
@@ -700,7 +700,7 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 					{
 						// let's substitute original file with this one
 						// don't close the original shapefile; use may still want to interact with it
-						sf->Release();				// release the original reference
+						sf.Release();				// release the original reference
 						if (layer->type == OgrLayerSource)
 						{
 							IOgrLayer* ogr;
@@ -718,7 +718,6 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 						return true;
 					}
 
-					sf->Release();
 					return result;
 				}
 			}
@@ -1228,8 +1227,8 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	if (layerType == ShapefileLayer)
 	{
 		// opening shapefile
-		IShapefile* sf = NULL;
-		CoCreateInstance( CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf );
+		CComPtr<IShapefile> sf = NULL;
+		GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
 		
 		if (sf) 
 		{
@@ -1246,12 +1245,12 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 			if (vb)
 			{
 				layerHandle = this->AddLayer(sf, (BOOL)visible);
-				sf->Release();	// Map.AddLayer added second reference
 				
 				CPLXMLNode* nodeShapefile = CPLGetXMLNode(node, "ShapefileClass");
 				if (nodeShapefile)
 				{
-					((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, nodeShapefile);
+					IShapefile* isf = sf;
+					((CShapefile*)isf)->DeserializeCore(VARIANT_TRUE, nodeShapefile);
 				}
 			}
 		}
@@ -1430,7 +1429,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 			{
 				// retrieving filename
 				IImage* img = NULL;
-				IShapefile* sf = NULL;
+				CComPtr<IShapefile> sf = NULL;
 				layer->QueryShapefile(&sf);
 				layer->QueryImage(&img);
 
@@ -1440,8 +1439,8 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 
 					if (sf)
 					{
-						node = ((CShapefile*)sf)->SerializeCore(VARIANT_TRUE, "ShapefileClass", true);
-						sf->Release();
+						IShapefile* isf = sf;
+						node = ((CShapefile*)isf)->SerializeCore(VARIANT_TRUE, "ShapefileClass", true);
 					}
 					else
 					{
@@ -1563,15 +1562,15 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	bool retVal = false;
 	if (layerType == ShapefileLayer)
 	{
-		IShapefile* sf = NULL;
+		CComPtr<IShapefile> sf = NULL;
 		if (layer->QueryShapefile(&sf))
 		{
 			node = CPLGetXMLNode(node, "ShapefileClass");
 			if (node)
 			{
-				retVal = ((CShapefile*)sf)->DeserializeCore(VARIANT_TRUE, node);
+				IShapefile* isf = sf;
+				retVal = ((CShapefile*)isf)->DeserializeCore(VARIANT_TRUE, node);
 			}
-			sf->Release();
 		}
 	}
 	else if (layerType == ImageLayer )

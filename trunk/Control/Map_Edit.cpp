@@ -268,7 +268,9 @@ void CMapView::HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl)
 	
 	_shapeEditor->Clear();
 
-	if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) {
+	if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
+	{
+		ClearHotTracking();
 		VARIANT_BOOL vb;
 		_shapeEditor->StartEdit(layerHandle, shapeIndex, &vb);
 	}
@@ -348,7 +350,8 @@ bool CMapView::ChooseEditLayer(long x, long y)
 // the case of new shape
 bool CMapView::SetShapeEditor(long layerHandle)
 {
-	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(layerHandle));
 	if (!sf) {
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return false;
@@ -409,7 +412,8 @@ void CMapView::HandleOnLButtonMoveOrRotate(long x, long y)
 	FireChooseLayer(x, y, &layerHandle, &cancel);
 	if (layerHandle != -1)
 	{
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layerHandle));
 		if (sf) 
 		{
 			VARIANT_BOOL editing;
@@ -488,7 +492,8 @@ bool CMapView::InitRotationTool()
 	bool success = false;
 	if (layerHandle != -1)
 	{
-		IShapefile* sf = GetShapefile(layerHandle);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layerHandle));
 		if (sf) 
 		{
 			VARIANT_BOOL editing;
@@ -507,7 +512,6 @@ bool CMapView::InitRotationTool()
 						success = true;
 					}
 				}
-				sf->Release();
 			}
 		}
 	}
@@ -521,7 +525,8 @@ bool CMapView::InitDraggingShapefile()
 {
 	if (!_dragging.Shapefile)
 	{
-		IShapefile* sf = GetShapefile(_dragging.LayerHandle);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(_dragging.LayerHandle));
 		if (sf)
 		{
 			IShapefile* sfNew = ShapefileHelper::CloneSelection(sf);
@@ -539,7 +544,6 @@ bool CMapView::InitDraggingShapefile()
 				}
 			}
 			_dragging.SetShapefile(sfNew);
-			sf->Release();
 			return true;
 		}
 	}
@@ -577,7 +581,8 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 	FireChooseLayer(0, 0, &layerHandle, &cancel);
 	if (layerHandle == -1) return;
 
-	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(layerHandle));
 	if (!sf) {
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return;

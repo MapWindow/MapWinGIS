@@ -440,9 +440,6 @@ void CMapView::Shutdown()
 		_tiles->Release();
 	}
 
-	if (_hotTracking.Shapefile)
-		_hotTracking.Shapefile->Release();
-
 	delete _ttipCtrl;
 }
 

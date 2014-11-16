@@ -1088,7 +1088,8 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 
 	for(long i = 0; i < this->GetNumLayers(); i++)
 	{
-		CComPtr<IShapefile> sf = this->GetShapefile(this->GetLayerHandle(i));
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(this->GetShapefile(this->GetLayerHandle(i)));
 		if (sf)
 		{
 			VARIANT_BOOL snappable;
@@ -1145,7 +1146,7 @@ bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& laye
 // ************************************************************
 bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 {
-	 CComPtr<IShapefile> sf = NULL;
+	CComPtr<IShapefile> sf = NULL;
 	Layer* layer = _allLayers[layerHandle];
 	if (layer->IsShapefile())
 	{
@@ -1225,7 +1226,8 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 	SelectLayerHandles(slctShapefiles, handles);
 	for (int i = handles.size() - 1; i >= 0; i--)
 	{
-		CComPtr<IShapefile> sf = GetShapefile(handles[i]);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(handles[i]));
 		if (sf) {
 			Extent box = GetPointSelectionBox(sf, projX, projY);
 			
@@ -1265,7 +1267,8 @@ LayerShape CMapView::FindShapeAtProjPoint(double prjX, double prjY, std::vector<
 	IShapefile * sf = NULL;
 	for (int i = (int)layers.size() - 1; i >= 0; i--)
 	{
-		CComPtr<IShapefile> sf = GetShapefile(layers[i]);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layers[i]));
 		if (sf) {
 			double tol = 0.0;
 			ShpfileType type = ShapefileHelper::GetShapeType2D(sf);
@@ -1276,7 +1279,7 @@ LayerShape CMapView::FindShapeAtProjPoint(double prjX, double prjY, std::vector<
 
 			long shapeIndex;
 			if (SelectionHelper::SelectSingleShape(sf, Extent(prjX, prjY, tol), mode, shapeIndex)) {
-				return LayerShape(_activeLayers[i], shapeIndex);
+				return LayerShape(layers[i], shapeIndex);
 			}
 		}
 	}
@@ -1291,11 +1294,13 @@ bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shap
 	double projX, projY;
 	PixelToProj(x, y, &projX, &projY);
 
-	LayerShape info = FindShapeAtScreenPoint(CPoint(x, y), slctInMemorySf);
+	LayerShape info = FindShapeAtScreenPoint(CPoint(x, y), slctInteractiveEditing);
 	if (!info.IsEmpty())
 	{
 		tkMwBoolean cancel = blnFalse;
 		FireBeforeShapeEdit(uoEditShape, info.LayerHandle, info.ShapeIndex, &cancel);
+		layerHandle = info.LayerHandle;
+		shapeIndex = info.ShapeIndex;
 		return cancel == blnFalse;
 	}
 	return false;
@@ -1337,7 +1342,8 @@ void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 	if (_shapeEditor->HasSubjectShape(info.LayerHandle, info.ShapeIndex))
 		return;
 
-	CComPtr<IShapefile> sf = GetShapefile(info.LayerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(info.LayerHandle));
 	if (sf) {
 		CComPtr<IShape> shape = NULL;
 		sf->get_Shape(info.ShapeIndex, &shape);

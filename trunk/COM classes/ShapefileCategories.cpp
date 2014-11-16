@@ -808,7 +808,7 @@ CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName)
 	FieldType type;
 	CComPtr<ITable> table = NULL;
 	m_shapefile->get_Table(&table);
-	if (table)
+	if (table && _classificationField != -1)
 	{
 		CComPtr<IField> fld = NULL;
 		table->get_Field(_classificationField, &fld);

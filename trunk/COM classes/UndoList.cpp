@@ -97,7 +97,8 @@ STDMETHODIMP CUndoList::Clear()
 		delete _list[i];
 	_list.clear();
 	_position = -1;
-	FireUndoListChanged();
+	if (!_dtor)
+		FireUndoListChanged();
 	return S_OK;
 }
 
@@ -106,7 +107,8 @@ STDMETHODIMP CUndoList::Clear()
 // **********************************************************
 bool CUndoList::CheckShapeIndex(long layerHandle, LONG shapeIndex)
 {
-	CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(layerHandle));
 	if (!sf) return false;
 	long numShapes;
 	sf->get_NumShapes(&numShapes);
@@ -215,7 +217,8 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 	item->Shape = GetCurrentState(layerHandle, shapeIndex);
 
 	if (copyAttributes) {
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layerHandle));
 		ITable* tbl = NULL;
 		sf->get_Table(&tbl);
 		if (tbl) {
@@ -327,7 +330,8 @@ bool CUndoList::DiscardOne()
 // **********************************************************
 bool CUndoList::UndoSingleItem(UndoListItem* item)
 {
-	CComPtr<IShapefile> sf = GetShapefile(item->LayerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(item->LayerHandle));
 	ITable* tbl = NULL;
 	sf->get_Table(&tbl);
 
@@ -449,7 +453,8 @@ IShape* CUndoList::GetCurrentState(long layerHandle, long shapeIndex)
 		editor->get_RawData(&shp);
 	}
 	else {
-		CComPtr<IShapefile> sf = GetShapefile(layerHandle);
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layerHandle));
 		if (sf) {
 			sf->get_Shape(shapeIndex, &shp);
 		}

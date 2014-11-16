@@ -771,7 +771,7 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 		tkMwBoolean cancel = blnFalse;
 		FireChooseLayer(x, y, &layerHandle, &cancel);
 		if (layerHandle != -1) {
-			sf = GetShapefile(layerHandle);
+			sf.Attach(GetShapefile(layerHandle));
 		}
 	}
 

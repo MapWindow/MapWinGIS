@@ -14,7 +14,8 @@
 IShape* CShapeEditor::GetLayerShape(long layerHandle, long shapeIndex)
 {
 	if (!CheckState()) return NULL;
-	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(layerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(layerHandle));
 	if (sf)
 	{
 		IShape* shp = NULL;
@@ -249,7 +250,10 @@ STDMETHODIMP CShapeEditor::Clear()
 	if (!CheckState()) return S_OK;
 	
 	if (_state == EditorEdit) {
-		CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(_layerHandle);
+
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
+
 		if (sf) {
 			if (ShapeShouldBeHidden()) {
 				sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
@@ -282,8 +286,10 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 	}
 
 	Clear();
-	
-	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(LayerHandle);
+
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
+
 	if (sf)
 	{
 		CComPtr<IShape> shp = NULL;
@@ -340,7 +346,9 @@ STDMETHODIMP CShapeEditor::AddSubjectShape(LONG LayerHandle, LONG ShapeIndex, VA
 		}
 	}
 
-	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(LayerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
+
 	if (sf)
 	{
 		ShpfileType shpType;
@@ -1093,7 +1101,8 @@ bool CShapeEditor::HandleDelete()
 bool CShapeEditor::RemoveShape()
 {
 	if (!CheckState()) return false;
-	CComPtr<IShapefile> sf = _mapCallback->_GetShapefile(_layerHandle);
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
 	if (sf) 
 	{
 		tkMwBoolean cancel = blnFalse;
@@ -1226,7 +1235,7 @@ bool CShapeEditor::TrySave()
 	}
 
 	CComPtr<IShapefile> sf = NULL;
-	sf = _mapCallback->_GetShapefile(layerHandle);
+	sf.Attach(_mapCallback->_GetShapefile(layerHandle));
 	if (!sf) {
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return false;

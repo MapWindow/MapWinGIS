@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "TileHelper.h"
 #include "ShapefileHelper.h"
+#include "ExtentsHelper.h"
 
 #pragma region Scale
 // ****************************************************
@@ -1262,6 +1263,8 @@ long CMapView::ZoomToPrev()
 	return _prevExtents.size();
 }
 
+
+
 // ****************************************************************
 //		ZoomToWorld()
 // ****************************************************************
@@ -1270,10 +1273,8 @@ VARIANT_BOOL CMapView::ZoomToWorld()
 	VARIANT_BOOL vb;
 	GetMapProjection()->get_IsEmpty(&vb);
 	if (!vb) {
-		IExtents* ext = NULL;
-		CoCreateInstance(CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
-		ext->SetBounds(-179.5, -85.0, 0.0, 179.5, 85.0, 0.0);
-		vb = this->SetGeographicExtents(ext);
+		CComPtr<IExtents> box = ExtentsHelper::GetWorldBounds();
+		vb = this->SetGeographicExtents(box);
 		if (vb)  {
 			this->Redraw();
 		}

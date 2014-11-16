@@ -23,9 +23,11 @@ public:
 		_position = -1;
 		_batchId = EMPTY_BATCH_ID;
 		_shortcutKey = usCtrlZ;
+		_dtor = false;
 	}
 	~CUndoList()
 	{
+		_dtor = true;
 		Clear();
 	}
 
@@ -132,7 +134,7 @@ private:
 	int _batchId;
 	int _position;
 	tkUndoShortcut _shortcutKey;
-
+	bool _dtor;
 	bool UndoSingleItem(UndoListItem* item);
 	bool CopyShapeState(long layerHandle, long shapeIndex, bool copyAttributes, UndoListItem* item);
 	void TrimList();
