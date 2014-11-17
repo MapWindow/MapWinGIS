@@ -11,18 +11,12 @@ bool OgrStyleHelper::HasStyleTable(GDALDataset* dataset, CStringW layerName)
 {
 	USES_CONVERSION;
 	CStringW sql;
-	CStringW schemeName = GetDbSchemeName(layerName, false);
-	if (schemeName.GetLength() == 0) schemeName = L"public";
-	sql.Format(L"SELECT * FROM pg_tables WHERE schemaname = '%s' and tablename = '%s'", schemeName, A2W(STYLES_TABLE_NAME));
-	OGRLayer* lyr = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
-
-	bool hasTable = false;
+	sql.Format(L"SELECT COUNT(*) FROM %s", A2W(STYLES_TABLE_NAME));
 	CPLErrorReset();
+	OGRLayer* lyr = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	bool hasTable = lyr != NULL;
 	if (lyr)
-	{
-		hasTable = lyr->GetFeatureCount() > 0;
 		dataset->ReleaseResultSet(lyr);
-	}
 	return hasTable;
 }
 
