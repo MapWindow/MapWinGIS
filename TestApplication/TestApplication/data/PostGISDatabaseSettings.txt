@@ -1,12 +1,14 @@
-# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
-# https://mapwingis.codeplex.com/releases
-# This installer will also correctly set the MW_SAMPLEDATA environment variable
+# This script will change the database created in 'PostGISCreateDatabase.txt' into a 
+# PostGIS database, adds the data schema and sets some grants
 
 # First line is connection string
 # Following lines are queries to execute
 
 # Connection string to mapwingis database:
 PG:host=localhost dbname=mapwingis user=postgres
+
+# Create PostGIS extention:
+CREATE EXTENSION postgis SCHEMA public
 
 # Create data schema , which will hold all new tables:
 CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION postgres

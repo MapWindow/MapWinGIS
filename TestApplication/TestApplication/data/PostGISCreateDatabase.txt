@@ -1,6 +1,8 @@
-# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
-# https://mapwingis.codeplex.com/releases
-# This installer will also correctly set the MW_SAMPLEDATA environment variable
+# This script will create an user 'mapwingis' if it doesn't yet exists 
+# Drops the database 'mapwingis' if it exists
+# And creates a new database called 'mapwingis'
+# Next run the script 'PostGISDatabaseSettings.txt' to change the database
+# to a PostGIS database with the correct rights
 
 # First line is connection string
 # Following lines are queries to execute
@@ -14,5 +16,5 @@ do $body$ declare num_users integer; begin SELECT count(*) into num_users FROM p
 # Drop database if it exists
 DROP DATABASE IF EXISTS mapwingis;
 
-# Create database with PostGIS template:
-CREATE DATABASE mapwingis WITH ENCODING='UTF8' OWNER=postgres TEMPLATE=postgis_template CONNECTION LIMIT=-1;  
+# Create standard PostgreSQL database:
+CREATE DATABASE mapwingis WITH ENCODING='UTF8' OWNER=postgres CONNECTION LIMIT=-1;  
