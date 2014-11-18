@@ -8,7 +8,7 @@ using MWLite.GUI.Helpers;
 
 namespace MWLite.GUI.MapLegend
 {
-    internal class LegendDispatcher : CommandMap<LegendCommand>
+    internal class LegendDispatcher : CommandDispatcher<LegendCommand>
     {
         internal int LayerHandle = -1;
         private MapWindow.Legend.Controls.Legend.Legend _legend = null;

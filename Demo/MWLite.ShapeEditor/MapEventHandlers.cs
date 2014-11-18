@@ -84,8 +84,6 @@ namespace MWLite.ShapeEditor
             Debug.Print("Custom validation");
         }
 
-        
-
         static void _map_ShapeValidationFailed(object sender, _DMapEvents_ShapeValidationFailedEvent e)
         {
             MessageBox.Show("Validation failed: " + e.errorMessage);
@@ -95,10 +93,20 @@ namespace MWLite.ShapeEditor
         {
             if (e.button == 2)
             {
-                if (_map.CursorMode == tkCursorMode.cmSelection)
+                switch (_map.CursorMode)
                 {
-                    var menu = App.ContextMenu;
-                    menu.Show(_map, e.x, e.y);
+                    case tkCursorMode.cmSelection:
+                    {
+                        var menu = App.SelectionContextMenu;
+                        menu.Show(_map, e.x, e.y);
+                        break;
+                    }
+                    case tkCursorMode.cmEditShape:
+                    {
+                        var menu = App.VertexContextMenu;
+                        menu.Show(_map, e.x, e.y);
+                        break;
+                    }
                 }
             }
         }

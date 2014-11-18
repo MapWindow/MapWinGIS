@@ -11,7 +11,7 @@ using MWLite.ShapeEditor.Operations;
 
 namespace MWLite.ShapeEditor
 {
-    internal class EditorDispatcher: CommandMap<EditorCommand>
+    internal class EditorDispatcher: CommandDispatcher<EditorCommand>
     {
         private void SetMapCursor(tkCursorMode mode)
         {
@@ -24,6 +24,8 @@ namespace MWLite.ShapeEditor
             if (HandleGroupOperation(command)) return;
 
             if (HandleChangeTool(command)) return;
+
+            if (HandleVertexEditor(command)) return;
 
             var map = App.Instance.Map;
             switch (command)
@@ -45,6 +47,28 @@ namespace MWLite.ShapeEditor
                
             }
             App.Instance.RefreshUI();
+        }
+
+        public bool HandleVertexEditor(EditorCommand command)
+        {
+            switch (command)
+            {
+                case EditorCommand.AddPart:
+                    App.Map.ShapeEditor.StartOverlay(tkEditorOverlay.eoAddPart);
+                    return true;
+                case EditorCommand.RemovePart:
+                    App.Map.ShapeEditor.StartOverlay(tkEditorOverlay.eoRemovePart);
+                    return true;
+                case EditorCommand.VertexEditor:
+                    App.Map.ShapeEditor.EditorBehavior = tkEditorBehavior.ebVertexEditor;
+                    App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+                    return true;
+                case EditorCommand.PartEditor:
+                    App.Map.ShapeEditor.EditorBehavior = tkEditorBehavior.ebPartEditor;
+                    App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+                    return true;
+            }
+            return false;
         }
 
         public bool HandleChangeTool(EditorCommand command)
@@ -69,12 +93,7 @@ namespace MWLite.ShapeEditor
                 case EditorCommand.MoveShapes:
                     SetMapCursor(tkCursorMode.cmMoveShapes);
                     return true;
-                case EditorCommand.AddPart:
-                    SetMapCursor(tkCursorMode.cmAddPart);
-                    return true;
-                case EditorCommand.RemovePart:
-                    SetMapCursor(tkCursorMode.cmRemovePart);
-                    return true;
+                
                 case EditorCommand.AddShape:
                     SetMapCursor(tkCursorMode.cmAddShape);
                     return true;
@@ -89,13 +108,13 @@ namespace MWLite.ShapeEditor
         {
             switch (command)
             {
-                case EditorCommand.CopyShapes:
+                case EditorCommand.Copy:
                     OperationHelper.CopyShapes();
                     return true;
-                case EditorCommand.PasteShapes:
+                case EditorCommand.Paste:
                     OperationHelper.PasteShapes();
                     return true;
-                case EditorCommand.CutShapes:
+                case EditorCommand.Cut:
                     OperationHelper.CutShapes();
                     return true;
                 case EditorCommand.SplitShapes:

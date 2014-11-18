@@ -55,7 +55,7 @@
     <Compile Include="Events\NewExtentEventArgs.cs" />
     <Compile Include="Events\OgrLayerArgs.cs" />
     <Compile Include="Events\SelectionChangedArgs.cs" />
-    <Compile Include="UI\CommandMap.cs" />
+    <Compile Include="UI\CommandDispatcher.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Exts\MapExt.cs" />
     <Compile Include="GeoLocation\DynamicJsonConverter.cs" />

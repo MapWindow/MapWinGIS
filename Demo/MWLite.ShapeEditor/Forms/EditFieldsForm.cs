@@ -33,8 +33,11 @@ namespace MWLite.ShapeEditor.Forms
         void EditFieldsForm_Shown(object sender, EventArgs e)
         {
             dataGridView1.Focus();
-            dataGridView1.CurrentCell = dataGridView1.Rows[0].Cells[0];
-            dataGridView1.BeginEdit(true);
+            if (_fields.Any())
+            {
+                dataGridView1.CurrentCell = dataGridView1.Rows[0].Cells[0];
+                dataGridView1.BeginEdit(true);
+            }
         }
 
         void dataGridView1_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
@@ -60,6 +63,18 @@ namespace MWLite.ShapeEditor.Forms
         {
             var row = dataGridView1.CurrentRow;
             btnRemove.Enabled = row != null && !row.IsNewRow;
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == -1 || e.ColumnIndex == -1) return;
+            if (dataGridView1.Columns[e.ColumnIndex] is DataGridViewComboBoxColumn)
+            {
+                dataGridView1.BeginEdit(true);
+                var combo = (dataGridView1.EditingControl as DataGridViewComboBoxEditingControl);
+                if (combo != null)
+                    combo.DroppedDown = true;
+            }
         }
     }
 }

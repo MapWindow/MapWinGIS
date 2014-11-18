@@ -26,6 +26,7 @@ namespace MWLite.ShapeEditor.Helpers
                 {
                     sf.InteractiveEditing = true;
                 }
+                App.Map.Redraw();
                 App.Legend.Refresh();
                 App.Instance.RefreshUI();
             }

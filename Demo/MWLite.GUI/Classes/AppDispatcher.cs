@@ -11,7 +11,7 @@ using MWLite.ShapeEditor;
 
 namespace MWLite.GUI.Classes
 {
-    internal class AppDispatcher : CommandMap<AppCommand>
+    internal class AppDispatcher : CommandDispatcher<AppCommand>
     {
         public override void Run(AppCommand command)
         {

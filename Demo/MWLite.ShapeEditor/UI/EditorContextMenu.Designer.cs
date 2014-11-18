@@ -35,9 +35,9 @@
             this.ctxRotateShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMoveShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.ctxCopyShapes = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctxCutShapes = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctxPasteShapes = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxCut = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxPaste = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxRemoveShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
@@ -53,9 +53,9 @@
             this.ctxRotateShapes,
             this.ctxMoveShapes,
             this.toolStripSeparator3,
-            this.ctxCopyShapes,
-            this.ctxCutShapes,
-            this.ctxPasteShapes,
+            this.ctxCopy,
+            this.ctxCut,
+            this.ctxPaste,
             this.toolStripSeparator1,
             this.ctxRemoveShapes,
             this.toolStripSeparator4,
@@ -100,29 +100,29 @@
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(159, 6);
             // 
-            // ctxCopyShapes
+            // ctxCopy
             // 
-            this.ctxCopyShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_copy;
-            this.ctxCopyShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.ctxCopyShapes.Name = "ctxCopyShapes";
-            this.ctxCopyShapes.Size = new System.Drawing.Size(162, 30);
-            this.ctxCopyShapes.Text = "Copy";
+            this.ctxCopy.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_copy;
+            this.ctxCopy.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.ctxCopy.Name = "ctxCopy";
+            this.ctxCopy.Size = new System.Drawing.Size(162, 30);
+            this.ctxCopy.Text = "Copy";
             // 
-            // ctxCutShapes
+            // ctxCut
             // 
-            this.ctxCutShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_cut;
-            this.ctxCutShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.ctxCutShapes.Name = "ctxCutShapes";
-            this.ctxCutShapes.Size = new System.Drawing.Size(162, 30);
-            this.ctxCutShapes.Text = "Cut";
+            this.ctxCut.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_cut;
+            this.ctxCut.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.ctxCut.Name = "ctxCut";
+            this.ctxCut.Size = new System.Drawing.Size(162, 30);
+            this.ctxCut.Text = "Cut";
             // 
-            // ctxPasteShapes
+            // ctxPaste
             // 
-            this.ctxPasteShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_paste;
-            this.ctxPasteShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.ctxPasteShapes.Name = "ctxPasteShapes";
-            this.ctxPasteShapes.Size = new System.Drawing.Size(162, 30);
-            this.ctxPasteShapes.Text = "Paste";
+            this.ctxPaste.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_paste;
+            this.ctxPaste.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.ctxPaste.Name = "ctxPaste";
+            this.ctxPaste.Size = new System.Drawing.Size(162, 30);
+            this.ctxPaste.Text = "Paste";
             // 
             // toolStripSeparator1
             // 
@@ -171,9 +171,9 @@
         private System.Windows.Forms.ToolStripMenuItem ctxRemoveShapes;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem ctxCopyShapes;
-        private System.Windows.Forms.ToolStripMenuItem ctxPasteShapes;
-        private System.Windows.Forms.ToolStripMenuItem ctxCutShapes;
+        private System.Windows.Forms.ToolStripMenuItem ctxCopy;
+        private System.Windows.Forms.ToolStripMenuItem ctxPaste;
+        private System.Windows.Forms.ToolStripMenuItem ctxCut;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
     }

@@ -89,7 +89,8 @@ namespace MWLite.GUI.Forms
 
         private void IninMenus()
         {
-            Dispatcher.InitMenu(_menuStrip1.Items);
+            Dispatcher.InitMenu(mnuFile.DropDownItems);
+            Dispatcher.InitMenu(mnuMap.DropDownItems);
             Dispatcher.InitMenu(_mainToolStrip.Items);
             Dispatcher.InitMenu(_toolStripLayer.Items);
         }

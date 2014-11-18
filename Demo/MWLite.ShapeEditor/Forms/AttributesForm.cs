@@ -22,68 +22,76 @@ namespace MWLite.ShapeEditor.Forms
             _shapeIndex = shapeIndex;
             InitializeComponent();
             Populate();
+
+            this.Shown += AttributesForm_Shown;
+        }
+
+        void AttributesForm_Shown(object sender, EventArgs e)
+        {
+            if (!_sf.InteractiveEditing)
+            {
+                btnOk.Focus();
+            }
         }
 
         private void Populate()
         {
-            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel1.AutoSize = true;
-            tableLayoutPanel1.RowStyles.Clear();
-            tableLayoutPanel1.RowCount = _sf.NumFields + 1;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tableLayoutPanel1.SuspendLayout();
 
             bool editing = _sf.InteractiveEditing;
 
-            var watch = new Stopwatch();
-            watch.Start();
+            tableLayoutPanel1.RowStyles.Clear();
+            tableLayoutPanel1.ColumnStyles.Clear();
 
-            tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tableLayoutPanel1.AutoSize = true;
+            
+            tableLayoutPanel1.RowCount = _sf.NumFields;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+
+            double maxRows = 15.0;
+            int columCount = (int)Math.Ceiling(_sf.NumFields / maxRows);
+            tableLayoutPanel1.ColumnCount = columCount*3;
+            for (int n = 0; n < columCount; n++)
+            {
+                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            }
+            
             int padding = editing ? 5 : 0;
             for (int i = 0; i < _sf.NumFields; i++)
             {
-                string name = _sf.Field[i].Name;
+                int cmnIndex = (int)(Math.Floor(i / maxRows) * 3);
+                int rowIndex = i % (int)maxRows;
+
+                string name = _sf.Field[i].Name.ToUpper();
                 var fieldType = _sf.Field[i].Type;
 
                 var lbl = new System.Windows.Forms.Label() {Text = name};
                 lbl.Dock = DockStyle.Fill;
-                lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+                lbl.TextAlign = ContentAlignment.MiddleLeft;
                 lbl.AutoSize = true;
                 lbl.Padding = new Padding(padding);
-                tableLayoutPanel1.Controls.Add(lbl, 0, i);
+                lbl.BackColor = Color.White;
+                tableLayoutPanel1.Controls.Add(lbl, cmnIndex, rowIndex);
 
-                lbl = new System.Windows.Forms.Label() { Text = GetShortFieldType(fieldType) };
+                lbl = new System.Windows.Forms.Label() { Text = editing ? GetShortFieldType(fieldType) : "" };
                 lbl.Dock = DockStyle.Fill;
-                lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+                lbl.TextAlign = ContentAlignment.MiddleLeft;
                 lbl.AutoSize = true;
-                lbl.Padding = new Padding(padding);
-                tableLayoutPanel1.Controls.Add(lbl, 2, i);
+                lbl.Padding = new Padding(0, padding, 0, padding);
+                tableLayoutPanel1.Controls.Add(lbl, cmnIndex + 2, rowIndex);
 
                 var value = _sf.CellValue[i, _shapeIndex] ?? GetDefaultValue(fieldType);
-                Control control = null;
-                if (editing)
-                {
-                    control = new ComboBox() {Text = value.ToString()};
-                }
-                else
-                {
-                    control = new System.Windows.Forms.Label() {Text = value.ToString(), 
-                    TextAlign = ContentAlignment.MiddleLeft};
-
-                }
+                var control = new TextBox() { ReadOnly = !editing,  Text = value.ToString() };;
                 control.Dock = DockStyle.Fill;
-                control.Margin = new Padding(padding);
+                control.Padding = new Padding(padding);
                 control.Tag = i;
-                tableLayoutPanel1.Controls.Add(control, 1, i);
+                tableLayoutPanel1.Controls.Add(control, cmnIndex + 1, rowIndex);
 
                 control.Enabled = name.ToLower() != "mwshapeid";
             }
-
-            var dummy = new System.Windows.Forms.Label();
-            dummy.AutoSize = false;
-            dummy.Height = 10;
-            tableLayoutPanel1.Controls.Add(dummy, 0, _sf.NumFields);
-
-            Debug.Print("Elapsed: " + watch.Elapsed);
             tableLayoutPanel1.ResumeLayout();
         }
 
@@ -106,39 +114,39 @@ namespace MWLite.ShapeEditor.Forms
             switch (type)
             {
                 case FieldType.INTEGER_FIELD:
-                    return "[Int]";
+                    return "i";
                 case FieldType.DOUBLE_FIELD:
-                    return "[Dbl]";
+                    return "d";
                 case FieldType.STRING_FIELD:
                 default:
-                    return "[Str]";
+                    return "s";
             }
         }
 
         private bool Save()
         {
-            var list = tableLayoutPanel1.Controls.OfType<ComboBox>();
-            foreach (var combo in list)
+            var list = tableLayoutPanel1.Controls.OfType<TextBox>();
+            foreach (var txt in list)
             {
-                if (!combo.Enabled) continue;
+                if (!txt.Enabled) continue;
 
-                int fieldIndex = (int)combo.Tag;
+                int fieldIndex = (int)txt.Tag;
                 var fld = _sf.Field[fieldIndex];
 
                 switch (fld.Type)
                 {
                     case FieldType.STRING_FIELD:
                         {
-                            _sf.EditCellValue(fieldIndex, _shapeIndex, combo.Text);
+                            _sf.EditCellValue(fieldIndex, _shapeIndex, txt.Text);
                             break;
                         }
                     case FieldType.INTEGER_FIELD:
                         {
                             int val;
-                            if (!Int32.TryParse(combo.Text, out val))
+                            if (!Int32.TryParse(txt.Text, out val))
                             {
-                                combo.Focus();
-                                MessageHelper.Info("Faield to parse integer value: " + combo.Text);
+                                txt.Focus();
+                                MessageHelper.Info("Failed to parse integer value: " + txt.Text);
                                 return false;
                             }
                             _sf.EditCellValue(fieldIndex, _shapeIndex, val);
@@ -147,10 +155,10 @@ namespace MWLite.ShapeEditor.Forms
                     case FieldType.DOUBLE_FIELD:
                         {
                             double val;
-                            if (!Double.TryParse(combo.Text, out val))
+                            if (!Double.TryParse(txt.Text, out val))
                             {
-                                combo.Focus();
-                                MessageHelper.Info("Faield to parse double value: " + combo.Text);
+                                txt.Focus();
+                                MessageHelper.Info("Faield to parse double value: " + txt.Text);
                                 return false;
                             }
                             _sf.EditCellValue(fieldIndex, _shapeIndex, val);

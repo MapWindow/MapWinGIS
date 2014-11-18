@@ -33,9 +33,12 @@ namespace MWLite.ShapeEditor.UI
                 ctxMoveShapes.Enabled = selectedCount > 0;
                 ctxRemoveShapes.Enabled = selectedCount > 0;
                 ctxRotateShapes.Enabled = selectedCount > 0;
-                ctxCopyShapes.Enabled = selectedCount > 0;
-                ctxCutShapes.Enabled = selectedCount > 0;
-                ctxPasteShapes.Enabled = !OperationHelper.BufferIsEmpty;
+            }
+
+            var list = new[] { ctxCopy, ctxCut, ctxPaste };
+            foreach (var item in list)
+            {
+                item.Enabled = StateHelper.GetEnabled(item);
             }
         }
 

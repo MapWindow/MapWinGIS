@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using MapWinGIS;
+using MWLite.ShapeEditor.Helpers;
 
 namespace MWLite.ShapeEditor.UI
 {
@@ -39,6 +40,12 @@ namespace MWLite.ShapeEditor.UI
             mnuEditorVertices.Checked = Map.ShapeEditor.VerticesVisible;
             mnuEditorAutoSnapping.Checked = Map.ShapeEditor.SnapBehavior == tkSnapBehavior.sbSnapByDefault;
             mnuEditorHighlightShapes.Checked = Map.ShapeEditor.HighlightShapes;
+
+            var list = new[] {mnuCopy, mnuPaste, mnuCut, mnuUndo, mnuRedo};
+            foreach (var item in list)
+            {
+                item.Enabled = StateHelper.GetEnabled(item);
+            }
         }
     }
 }

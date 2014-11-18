@@ -49,10 +49,8 @@ namespace MWLite.ShapeEditor.UI
             toolEditLayer.Text = editing ? "Save Changes" : "Edit Layer";
 
             var map = App.Instance.Map;
-            toolAddPart.Checked = map.CursorMode == tkCursorMode.cmAddPart;
             toolAddShape.Checked = map.CursorMode == tkCursorMode.cmAddShape;
             toolEditShape.Checked = map.CursorMode == tkCursorMode.cmEditShape;
-            toolRemovePart.Checked = map.CursorMode == tkCursorMode.cmRemovePart;
             toolMoveShapes.Checked = map.CursorMode == tkCursorMode.cmMoveShapes;
             toolRotateShapes.Checked = map.CursorMode == tkCursorMode.cmRotateShapes;
             toolSplitByPolyline.Checked = map.CursorMode == tkCursorMode.cmSplitByPolyline;
@@ -60,8 +58,6 @@ namespace MWLite.ShapeEditor.UI
             toolClipByPolygon.Checked = map.CursorMode == tkCursorMode.cmClipByPolygon;
             toolSplitByPolygon.Checked = map.CursorMode == tkCursorMode.cmSplitByPolygon;
            
-            toolUndo.Enabled = map.UndoList.UndoCount > 0;
-            toolRedo.Enabled = map.UndoList.RedoCount > 0;
             toolUndoCount.Text = string.Format("{0}\\{1}", map.UndoList.UndoCount, map.UndoList.TotalLength);
 
             toolMergeShapes.Enabled = false;
@@ -73,6 +69,12 @@ namespace MWLite.ShapeEditor.UI
                 toolSplitShapes.Enabled = selectedCount > 0;
                 toolMoveShapes.Enabled = selectedCount > 0;
                 toolRotateShapes.Enabled = selectedCount > 0;
+            }
+
+            var list = new[] { toolCopy, toolPaste, toolCut, toolUndo, toolRedo };
+            foreach (var item in list)
+            {
+                item.Enabled = StateHelper.GetEnabled(item);
             }
         }
     }

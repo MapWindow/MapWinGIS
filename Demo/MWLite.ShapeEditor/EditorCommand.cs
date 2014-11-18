@@ -21,12 +21,14 @@ namespace MWLite.ShapeEditor
         RotateShapes = 11,
         MoveShapes = 12,
         RemoveShapes = 13,
-        CopyShapes = 14,
-        PasteShapes = 15,
-        CutShapes = 16,
+        Copy = 14,
+        Paste = 15,
+        Cut = 16,
         SplitByPolyline = 17,
         EraseByPolygon = 18,
         ClipByPolygon = 19,
         SplitByPolygon = 20,
+        VertexEditor = 21,
+        PartEditor = 22,
     }
 }

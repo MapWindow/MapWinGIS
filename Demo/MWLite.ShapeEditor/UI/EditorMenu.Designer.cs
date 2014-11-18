@@ -33,6 +33,13 @@
             this.mnuEditorVertices = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuEditorAutoSnapping = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuEditorHighlightShapes = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuUndo = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuRedo = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuCut = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuPaste = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,12 +56,19 @@
             // mnuShapeEditor
             // 
             this.mnuShapeEditor.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuUndo,
+            this.mnuRedo,
+            this.toolStripSeparator2,
+            this.mnuCopy,
+            this.mnuCut,
+            this.mnuPaste,
+            this.toolStripSeparator1,
             this.mnuEditorVertices,
             this.mnuEditorAutoSnapping,
             this.mnuEditorHighlightShapes});
             this.mnuShapeEditor.Name = "mnuShapeEditor";
-            this.mnuShapeEditor.Size = new System.Drawing.Size(85, 20);
-            this.mnuShapeEditor.Text = "Shape Editor";
+            this.mnuShapeEditor.Size = new System.Drawing.Size(39, 20);
+            this.mnuShapeEditor.Text = "Edit";
             // 
             // mnuEditorVertices
             // 
@@ -73,6 +87,46 @@
             this.mnuEditorHighlightShapes.Name = "mnuEditorHighlightShapes";
             this.mnuEditorHighlightShapes.Size = new System.Drawing.Size(164, 22);
             this.mnuEditorHighlightShapes.Text = "Highlight Shapes";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(161, 6);
+            // 
+            // mnuUndo
+            // 
+            this.mnuUndo.Name = "mnuUndo";
+            this.mnuUndo.Size = new System.Drawing.Size(164, 22);
+            this.mnuUndo.Text = "Undo";
+            // 
+            // mnuRedo
+            // 
+            this.mnuRedo.Name = "mnuRedo";
+            this.mnuRedo.Size = new System.Drawing.Size(164, 22);
+            this.mnuRedo.Text = "Redo";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(161, 6);
+            // 
+            // mnuCopy
+            // 
+            this.mnuCopy.Name = "mnuCopy";
+            this.mnuCopy.Size = new System.Drawing.Size(164, 22);
+            this.mnuCopy.Text = "Copy";
+            // 
+            // mnuCut
+            // 
+            this.mnuCut.Name = "mnuCut";
+            this.mnuCut.Size = new System.Drawing.Size(164, 22);
+            this.mnuCut.Text = "Cut";
+            // 
+            // mnuPaste
+            // 
+            this.mnuPaste.Name = "mnuPaste";
+            this.mnuPaste.Size = new System.Drawing.Size(164, 22);
+            this.mnuPaste.Text = "Paste";
             // 
             // EditorMenu
             // 
@@ -95,5 +149,12 @@
         private System.Windows.Forms.ToolStripMenuItem mnuEditorVertices;
         private System.Windows.Forms.ToolStripMenuItem mnuEditorAutoSnapping;
         private System.Windows.Forms.ToolStripMenuItem mnuEditorHighlightShapes;
+        private System.Windows.Forms.ToolStripMenuItem mnuUndo;
+        private System.Windows.Forms.ToolStripMenuItem mnuRedo;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem mnuCopy;
+        private System.Windows.Forms.ToolStripMenuItem mnuCut;
+        private System.Windows.Forms.ToolStripMenuItem mnuPaste;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }

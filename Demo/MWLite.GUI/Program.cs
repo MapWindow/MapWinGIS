@@ -24,6 +24,7 @@ namespace MWLite.GUI
         {
             var gs = new GlobalSettings();
             gs.ZoomToFirstLayer = true;
+            gs.OgrUseStyles = true;
         }
     }
 }

@@ -73,6 +73,7 @@
     </Compile>
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
+    <Compile Include="StateHelper.cs" />
     <Compile Include="UI\EditorContextMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -114,6 +115,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="UI\VertexContextMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\VertexContextMenu.Designer.cs">
+      <DependentUpon>VertexContextMenu.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MapWindow.Legend\MapWindow.Legend.csproj">
@@ -150,6 +157,9 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\VertexContextMenu.resx">
+      <DependentUpon>VertexContextMenu.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
