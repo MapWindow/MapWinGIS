@@ -187,7 +187,7 @@ public:
 	bool Validate(IShape** shp);
 	ShpfileType GetShapeTypeForTool(tkCursorMode cursor);
 	void ApplyColoringForTool(tkCursorMode mode);
-	bool StartUnboundShape();
+	bool StartUnboundShape(tkCursorMode cursor);
 	CShapeEditor* Clone();
 	void ApplyOverlayColoring(tkEditorOverlay overlay);
 	bool TrySaveShape(IShape* shp);

@@ -218,7 +218,7 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 
 	if (EditorHelper::IsGroupOverlayCursor(mode))
 	{
-		_shapeEditor->StartUnboundShape();
+		_shapeEditor->StartUnboundShape(mode);
 	}
 
 	m_cursorMode = mode;

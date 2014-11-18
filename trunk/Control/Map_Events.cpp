@@ -1056,8 +1056,8 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			break;
 		case cmEditShape:
 		{
-			bool moved = _dragging.Start == _dragging.Move && !_dragging.HasMoved;
-			if (!moved)	return;
+			if (_dragging.Start == _dragging.Move && !_dragging.HasMoved)
+				return;
 			if (HandleOnMouseMoveShapeEditor(point.x, point.y, nFlags))
 				refreshNeeded = true;
 		}

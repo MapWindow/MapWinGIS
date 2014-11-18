@@ -305,7 +305,7 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 			SetShape(shp);
 			_layerHandle = LayerHandle;
 			_shapeIndex = ShapeIndex;
-			_activeShape->OverlayerTool = false;
+			//_activeShape->OverlayerTool = false;
 			if (ShapeShouldBeHidden()) {
 				sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
 			}
@@ -777,6 +777,7 @@ STDMETHODIMP CShapeEditor::put_EditorState(tkEditorState newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->SetCreationMode(newVal == esDigitize || newVal == esDigitizeUnbound || newVal == esOverlay);
+	_activeShape->OverlayerTool = newVal == esOverlay || newVal == esDigitizeUnbound;
 	_state = newVal;
 	return S_OK;
 }
@@ -853,9 +854,8 @@ STDMETHODIMP CShapeEditor::get_NumSubjectShapes(LONG* pVal)
 //		StartUnboundShape
 // *******************************************************
 // for built-in cursors
-bool CShapeEditor::StartUnboundShape()
+bool CShapeEditor::StartUnboundShape(tkCursorMode cursor)
 {
-	tkCursorMode cursor = _mapCallback->_GetCursorMode();
 	ShpfileType	shpType = GetShapeTypeForTool(cursor);
 	if (shpType == SHP_NULLSHAPE)
 	{
@@ -1271,9 +1271,6 @@ ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 	return SHP_NULLSHAPE;
 }
 
-
-
-
 // ***************************************************************
 //		ApplyColoringForTool()
 // ***************************************************************
@@ -1283,7 +1280,7 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 	GetUtils()->ColorByName(LightSlateGray, &color);
 	put_LineColor(color);
 	put_LineWidth(1.0f);
-	_activeShape->OverlayerTool = true;
+	//_activeShape->OverlayerTool = true;
 	switch (mode)
 	{
 		case cmClipByPolygon:
@@ -1316,6 +1313,7 @@ void CShapeEditor::ApplyOverlayColoring(tkEditorOverlay overlay)
 {
 	_overlayType =  overlay;
 	OLE_COLOR color;
+	//_activeShape->OverlayerTool = true;
 	switch (overlay)
 	{
 		case eoAddPart:
