@@ -72,6 +72,6 @@ public:
 	virtual bool IsDynamic() = 0;
 	virtual bool HasPolygon() = 0;
 	virtual int GetFirstPolyPointIndex() { return 0; };
-	virtual ShpfileType GetShapeType() { return SHP_POLYLINE; }
+	virtual ShpfileType GetShapeType2D() { return SHP_POLYLINE; }
 };
 

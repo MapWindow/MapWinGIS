@@ -136,6 +136,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 	_fillBrush.SetColor(Utility::OleColor2GdiPlus(FillColor, FillTransparency)) ;
 	_linePen.SetWidth(LineWidth);
 	_linePen.SetColor(Utility::OleColor2GdiPlus(LineColor, 255));
+	
 
 	Gdiplus::PointF* polyData = NULL;
 	int polySize = 0;
@@ -203,7 +204,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 
 	int startIndex = GetPartStart(partIndex);
 	bool editing = this->GetInputMode() == simEditing;
-	bool multiPoint = GetShapeType() == SHP_MULTIPOINT;
+	bool multiPoint = GetShapeType2D() == SHP_MULTIPOINT;
 	long errorCode = tkNO_ERROR;
 	
 	if (!multiPoint) 
@@ -218,8 +219,22 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 	}
 
 	Gdiplus::Pen* pen = partIndex != -1 && (_selectedPart == partIndex || _highlightedPart == partIndex ) ? &_redPen : &_linePen;
-	if (!_drawLabelsOnly && !multiPoint)
+
+	if (OverlayerTool)
+	{
+		_linePen.SetDashStyle(Gdiplus::DashStyleCustom);
+		Gdiplus::REAL dashValues[4] = { 8, 8 };
+		_linePen.SetDashPattern(dashValues, 2);
+	}
+	else
+	{
+		_linePen.SetDashStyle(Gdiplus::DashStyleSolid);
+	}
+
+	if (!_drawLabelsOnly && !multiPoint) 
+	{
 		g->DrawLines(pen, data, size);
+	}
 
 	// drawing points
 	CCollisionList collisionList;
@@ -228,7 +243,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 	{
 		int realIndex = startIndex + i;
 
-		if (_verticesVisible)
+		if (VerticesAreVisible())
 		{
 			if (realIndex == _selectedVertex || realIndex == _highlightedVertex)
 			{
@@ -254,7 +269,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 		// --------------------------------------
 		// display vertex index
 		// --------------------------------------
-		if (_pointLabelsVisible)
+		if (PointLabelsAreVisible())
 		{
 			int index = realIndex + 1;
 			Gdiplus::RectF bounds;
@@ -641,4 +656,14 @@ bool ActiveShape::UndoPoint()
 bool ActiveShape::PartIsSelected(int partIndex)
 {
 	return _selectedParts.find(partIndex) != _selectedParts.end();
+}
+
+bool ActiveShape::VerticesAreVisible()
+{
+	return _verticesVisible && !OverlayerTool;
+}
+
+bool ActiveShape::PointLabelsAreVisible()
+{
+	return _pointLabelsVisible && !OverlayerTool;
 }

@@ -41,7 +41,7 @@ int EditorBase::SelectPart(double xProj, double yProj)
 // ************************************************
 bool EditorBase::HasClosedPolygon()
 {
-	if (GetShapeType() == SHP_POLYGON && _points.size() > 3) {
+	if (GetShapeType2D() == SHP_POLYGON && _points.size() > 3) {
 		return (_points[0]->x == _points[_points.size() - 1]->x &&
 			_points[0]->y == _points[_points.size() - 1]->y);
 	}
@@ -107,8 +107,11 @@ bool EditorBase::SetSelectedVertex(int index)
 	_selectedPart = -1;
 	if (_selectedVertex != index)
 	{
-		if (_points[index]->Part == PartBegin)
-			index = SeekPartEnd(index);
+		if (GetShapeType2D() == SHP_POLYGON)
+		{
+			if (_points[index]->Part == PartBegin)
+				index = SeekPartEnd(index);
+		}
 		_selectedVertex = index;
 		return true;
 	}
@@ -125,8 +128,11 @@ bool EditorBase::SetHighlightedVertex(int index)
 
 	if (index != _highlightedVertex)
 	{
-		if (_points[index]->Part == PartBegin)
-			index = SeekPartEnd(index);
+		if (GetShapeType2D() == SHP_POLYGON)
+		{
+			if (_points[index]->Part == PartBegin)
+				index = SeekPartEnd(index);
+		}
 
 		_highlightedVertex = index;
 		_highlightedPart = -1;
@@ -147,8 +153,8 @@ bool EditorBase::SetSelectedPart(int index)
 		SelectRelatedParts(_selectedPart);		// for inner rings of poly
 		return true;
 	}
-	_selectedPart = -1;
-	return false;
+	//_selectedPart = -1;
+	return true;
 }
 
 // ************************************************
@@ -171,7 +177,7 @@ void EditorBase::SelectRelatedParts(int partIndex)
 // ************************************************
 bool EditorBase::PartIsWithin(int outerRing, int innerRing)
 {
-	if (GetShapeType() == SHP_POLYGON)
+	if (GetShapeType2D() == SHP_POLYGON)
 	{
 		CComPtr<IShape> shp = GetPartAsShape(outerRing);
 		if (shp != NULL)
@@ -207,7 +213,7 @@ IShape* EditorBase::GetPartAsShape(int partIndex)
 		IShape* shp = NULL;
 		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp);
 		VARIANT_BOOL vb;
-		shp->Create(GetShapeType(), &vb);
+		shp->Create(GetShapeType2D(), &vb);
 
 		long pointIndex = 0;
 		for (int i = startIndex; i <= endIndex; i++)
@@ -267,7 +273,7 @@ bool EditorBase::RemoveVertex(int vertexIndex)
 	// make sure that first and last points of poly are still the same		
 	int closeIndex = GetCloseIndex(vertexIndex);
 
-	if (GetShapeType() == SHP_POLYGON && part != PartNone) {
+	if (GetShapeType2D() == SHP_POLYGON && part != PartNone) {
 		MeasurePoint* source = _points[vertexIndex];
 		MeasurePoint* target = _points[closeIndex];
 		source->CopyTo(*target);
@@ -441,8 +447,8 @@ tkDeleteTarget EditorBase::GetDeleteTarget()
 // *******************************************************
 bool EditorBase::CanDeleteVertex(int vertexIndex)
 {
-	bool polygon = GetShapeType() == SHP_POLYGON;
-	bool polyline = GetShapeType() == SHP_POLYLINE;
+	bool polygon = GetShapeType2D() == SHP_POLYGON;
+	bool polyline = GetShapeType2D() == SHP_POLYLINE;
 
 	int startIndex = SeekPartStart(vertexIndex);
 	int numPoints = SeekPartEnd(startIndex) - startIndex + 1;

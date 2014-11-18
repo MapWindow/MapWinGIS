@@ -31,6 +31,7 @@ public:
 		_highlightedPart = -1;
 		_inputMode = simMeasuring;
 		_isGeodesic = false;
+		OverlayerTool = false;
 		FillTransparency = 100;
 		FillColor = RGB(255, 165, 0);
 		LineColor = RGB(255, 127, 0);
@@ -38,6 +39,8 @@ public:
 		AreaDisplayMode = admMetric;
 		AngleDisplayMode = Azimuth;
 		DisplayAngles = false;
+
+		
 	};
 
 	virtual ~ActiveShape(void) {
@@ -75,6 +78,7 @@ public:
 	bool _drawLabelsOnly;
 	bool _pointLabelsVisible;
 	bool _verticesVisible;
+	
 	tkLengthDisplayMode _lengthDisplayMode;
 	
 	Gdiplus::SolidBrush _textBrush; // Black;
@@ -88,7 +92,6 @@ public:
 	int _lengthRounding;
 	int _areaRounding;
 
-	
 public:
 	BYTE FillTransparency;
 	float LineWidth;
@@ -98,7 +101,7 @@ public:
 	tkAngleFormat AngleFormat;
 	OLE_COLOR FillColor;
 	OLE_COLOR LineColor;
-
+	bool OverlayerTool;
 protected:
 
 	// abstract methods
@@ -141,4 +144,6 @@ public:
 	void DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly);
 	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex);
 	bool PartIsSelected(int partIndex);
+	bool VerticesAreVisible();
+	bool PointLabelsAreVisible();
 };

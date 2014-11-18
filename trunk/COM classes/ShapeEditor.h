@@ -27,10 +27,13 @@ public:
 		_highlightShapes = VARIANT_TRUE;
 		_snapTolerance = 10;
 		_snapBehavior = sbSnapByDefault;
-		_state = EditorEmpty;
+		_state = esEmpty;
 		_mapCallback = NULL;
 		_isSubjectShape = false;
 		_validationMode = evCheckWithGeos;
+		_redrawNeeded = false;
+		_overlayType = eoAddPart;
+		_behavior = ebVertexEditor;
 	}
 	~CShapeEditor()
 	{
@@ -70,8 +73,8 @@ public:
 	STDMETHOD(Redo)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_SegmentAngle)(int segmentIndex, double* retVal);
-	STDMETHOD(get_CreationMode)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_CreationMode)(VARIANT_BOOL newVal);
+	STDMETHOD(get_IsDigitizing)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_IsDigitizing)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ShapeType)(ShpfileType* retVal);
 	STDMETHOD(put_ShapeType)(ShpfileType newVal);
 	//STDMETHOD(AddPoint)(double xProj, double yProj);
@@ -105,10 +108,9 @@ public:
 	STDMETHOD(put_HighlightShapes)(VARIANT_BOOL newVal);
 	STDMETHOD(get_SnapBehavior)(tkSnapBehavior* pVal);
 	STDMETHOD(put_SnapBehavior)(tkSnapBehavior newVal);
-	STDMETHOD(get_EditorState)(tkShapeEditorState* pVal);
-	STDMETHOD(put_EditorState)(tkShapeEditorState newVal);
+	STDMETHOD(get_EditorState)(tkEditorState* pVal);
+	STDMETHOD(put_EditorState)(tkEditorState newVal);
 	STDMETHOD(StartEdit)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL* retVal);
-	STDMETHOD(AddSubjectShape)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL ClearExisting, VARIANT_BOOL* retVal);
 	STDMETHOD(get_PointLabelsVisible)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_PointLabelsVisible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
@@ -124,6 +126,9 @@ public:
 	STDMETHOD(put_VerticesVisible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ValidationMode)(tkEditorValidationMode* pVal);
 	STDMETHOD(put_ValidationMode)(tkEditorValidationMode newVal);
+	STDMETHOD(StartOverlay)(tkEditorOverlay overlayType, VARIANT_BOOL* retVal);
+	STDMETHOD(get_EditorBehavior)(tkEditorBehavior* pVal);
+	STDMETHOD(put_EditorBehavior)(tkEditorBehavior newVal);
 private:
 	
 	BSTR _key;
@@ -136,10 +141,13 @@ private:
 	int _layerHandle;
 	int _shapeIndex;
 	long _lastErrorCode;
-	tkShapeEditorState _state;
+	tkEditorState _state;
 	vector<CShapeEditor*> _subjects;
 	bool _isSubjectShape;
 	tkEditorValidationMode _validationMode;
+	bool _redrawNeeded;
+	tkEditorOverlay _overlayType;
+	tkEditorBehavior _behavior;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
@@ -151,6 +159,8 @@ public:
 		_mapCallback = callback;
 	}
 
+	void SetRedrawNeeded(bool value) { _redrawNeeded  = value; }
+	bool GetRedrawNeeded() {return _redrawNeeded; }
 	bool ShapeShouldBeHidden();
 	EditorBase* GetActiveShape() { return _activeShape; }
 	void SetIsSubject(bool value) { _isSubjectShape = value; }
@@ -163,19 +173,34 @@ public:
 	bool RemovePart();
 	bool CheckState();
 	void Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX, int screenOffsetY);
-	IShape* ApplyOperation(tkCursorMode operation, int& layerHandle, int& shapeIndex);
+	void EndOverlay(IShape* overlayShape);
 	IShape* GetLayerShape(long layerHandle, long shapeIndex);
 	bool GetClosestPoint(double projX, double projY, double& xResult, double& yResult);
 	bool HandleDelete();
 	bool RemoveShape();
 	int GetClosestPart(double projX, double projY, double tolerance);
 	bool RestoreState(IShape* shp, long layerHandle, long shapeIndex);
-	bool TrySave();
+	bool TryStopDigitizing();
 	void HandleProjPointAdd(double projX, double projY);
 	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
 	bool ValidateWithGeos(IShape** shp);
 	bool Validate(IShape** shp);
 	ShpfileType GetShapeTypeForTool(tkCursorMode cursor);
 	void ApplyColoringForTool(tkCursorMode mode);
+	bool StartUnboundShape();
+	CShapeEditor* Clone();
+	void ApplyOverlayColoring(tkEditorOverlay overlay);
+	bool TrySaveShape(IShape* shp);
+	IShape* CalculateOverlay(IShape* overlay);
+	void CopyOptionsFromShapefile();
+	void CancelOverlay(bool restoreSubjectShape);
+	
+	// exposing active shape API
+	bool SetSelectedVertex(int vertexIndex) { return _activeShape->SetSelectedVertex(vertexIndex); }
+	bool SetSelectedPart(int partIndex) { return _activeShape->SetSelectedPart(partIndex); }
+	bool HasSelectedVertex() { return _activeShape->HasSelectedVertex(); }
+	bool HasSelectedPart() { return _activeShape->HasSelectedPart(); }
+	int SelectPart(double xProj, double yProj) { return _activeShape->SelectPart(xProj, yProj); }
+	int GetClosestVertex(double projX, double projY, double tolerance) { return _activeShape->GetClosestVertex(projX, projY, tolerance); }
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

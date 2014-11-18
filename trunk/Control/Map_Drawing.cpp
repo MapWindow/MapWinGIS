@@ -1120,39 +1120,6 @@ bool CMapView::HasVolatileShapefiles()
 }
 
 // ****************************************************************
-//		GetInteractiveShapefileCount()
-// ****************************************************************
-int CMapView::GetInteractiveShapefileCount(long& layerHandle)
-{
-	double scale = GetCurrentScale();
-	int zoom = GetCurrentZoom();
-	
-	int count = 0;
-	for (long i = _activeLayers.size() - 1; i >= 0; i--)
-	{
-		Layer * l = _allLayers[_activeLayers[i]];
-		if (IS_VALID_PTR(l))
-		{
-			if (l->IsVisible(scale, zoom) && l->IsShapefile())
-			{
-				IShapefile* sf = NULL;
-				l->QueryShapefile(&sf);
-				if (sf) {
-					VARIANT_BOOL vb;
-					sf->get_InteractiveEditing(&vb);
-					sf->Release();
-					if (vb) {
-						count++;
-						layerHandle = _activeLayers[i];
-					}
-				}
-			}
-		}
-	}
-	return count;
-}
-
-// ****************************************************************
 //		CheckForConcealedImages()
 // ****************************************************************
 void CMapView::CheckForConcealedImages(bool* isConcealed, long& startcondition, long& endcondition, double scale, int zoom) 

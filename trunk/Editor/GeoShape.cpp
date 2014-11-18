@@ -320,7 +320,7 @@ int GeoShape::SeekPartStart(int startSearchFrom) {
 // *******************************************************
 int GeoShape::GetCloseIndex(int startIndex)
 {
-	bool polygon = Utility::ShapeTypeConvert2D(GetShapeType()) == SHP_POLYGON;
+	bool polygon = Utility::ShapeTypeConvert2D(GetShapeType2D()) == SHP_POLYGON;
 	int closeIndex = -1;
 	if (polygon) {
 		if (_points[startIndex]->Part == PartBegin) closeIndex = SeekPartEnd(startIndex);

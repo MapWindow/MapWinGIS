@@ -74,7 +74,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;$(ProjectDir)\Ogr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -184,6 +184,15 @@
     <ClInclude Include="Drawing\RotatedRectangle.h" />
     <ClInclude Include="Drawing\ShapefileDrawing.h" />
     <ClInclude Include="Drawing\TilesDrawer.h" />
+    <ClInclude Include="Editor\ActiveShape.h" />
+    <ClInclude Include="Editor\Digitizer.h" />
+    <ClInclude Include="Editor\EditorBase.h" />
+    <ClInclude Include="Editor\EditorHelper.h" />
+    <ClInclude Include="Editor\GeoShape.h" />
+    <ClInclude Include="Editor\GroupOperation.h" />
+    <ClInclude Include="Editor\MeasuringBase.h" />
+    <ClInclude Include="Editor\UndoListHelper.h" />
+    <ClInclude Include="Editor\VertexEditor.h" />
     <ClInclude Include="Image\cq.h" />
     <ClInclude Include="Ogr\GeosConverter.h" />
     <ClInclude Include="Ogr\GeosHelper.h" />
@@ -205,23 +214,17 @@
     <ClInclude Include="Processing\PointInPolygon.h" />
     <ClInclude Include="Processing\Projections.h" />
     <ClInclude Include="Processing\QTree.h" />
-    <ClInclude Include="Shapefile\ActiveShape.h" />
     <ClInclude Include="Shapefile\ChartsHelper.h" />
     <ClInclude Include="Shapefile\DraggingState.h" />
-    <ClInclude Include="Shapefile\EditorBase.h" />
     <ClInclude Include="Shapefile\ExtentsHelper.h" />
     <ClInclude Include="Shapefile\FieldHelper.h" />
     <ClInclude Include="Shapefile\GeoProcessing.h" />
-    <ClInclude Include="Shapefile\GeoShape.h" />
-    <ClInclude Include="Shapefile\GroupOperation.h" />
     <ClInclude Include="Shapefile\HotTrackingInfo.h" />
     <ClInclude Include="Shapefile\LabelsHelper.h" />
-    <ClInclude Include="Shapefile\MeasuringBase.h" />
     <ClInclude Include="Shapefile\SelectionHelper.h" />
     <ClInclude Include="Shapefile\ShapefileHelper.h" />
     <ClInclude Include="Shapefile\ShapeHelper.h" />
     <ClInclude Include="Shapefile\ShapeStyleHelper.h" />
-    <ClInclude Include="Shapefile\UndoListHelper.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -474,6 +477,15 @@
     <ClCompile Include="Drawing\RotatedRectangle.cpp" />
     <ClCompile Include="Drawing\ShapefileDrawing.cpp" />
     <ClCompile Include="Drawing\TilesDrawer.cpp" />
+    <ClCompile Include="Editor\ActiveShape.cpp" />
+    <ClCompile Include="Editor\Digitizer.cpp" />
+    <ClCompile Include="Editor\EditorBase.cpp" />
+    <ClCompile Include="Editor\EditorHelper.cpp" />
+    <ClCompile Include="Editor\GeoShape.cpp" />
+    <ClCompile Include="Editor\GroupOperation.cpp" />
+    <ClCompile Include="Editor\MeasuringBase.cpp" />
+    <ClCompile Include="Editor\UndoListHelper.cpp" />
+    <ClCompile Include="Editor\VertexEditor.cpp" />
     <ClCompile Include="Image\colour.cpp" />
     <ClCompile Include="Image\ImageGroup.cpp" />
     <ClCompile Include="Image\ImageResamling.cpp" />
@@ -525,22 +537,16 @@
     <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />
-    <ClCompile Include="Shapefile\ActiveShape.cpp" />
     <ClCompile Include="Shapefile\ChartsHelper.cpp" />
-    <ClCompile Include="Shapefile\EditorBase.cpp" />
     <ClCompile Include="Shapefile\ExtentsHelper.cpp" />
     <ClCompile Include="Shapefile\FieldHelper.cpp" />
     <ClCompile Include="Shapefile\GeoProcessing.cpp" />
-    <ClCompile Include="Shapefile\GeoShape.cpp" />
-    <ClCompile Include="Shapefile\GroupOperation.cpp" />
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp" />
     <ClCompile Include="Shapefile\LabelsHelper.cpp" />
-    <ClCompile Include="Shapefile\MeasuringBase.cpp" />
     <ClCompile Include="Shapefile\SelectionHelper.cpp" />
     <ClCompile Include="Shapefile\ShapefileHelper.cpp" />
     <ClCompile Include="Shapefile\ShapeHelper.cpp" />
     <ClCompile Include="Shapefile\ShapeStyleHelper.cpp" />
-    <ClCompile Include="Shapefile\UndoListHelper.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

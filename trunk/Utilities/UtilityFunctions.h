@@ -91,7 +91,7 @@ namespace Utility
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
 	CString GetInterfaceName(tkInterface id);
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
-	
+
 	// time
 	int getCurrentYear();
 }

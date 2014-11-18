@@ -85,6 +85,9 @@
     <Filter Include="Ogr">
       <UniqueIdentifier>{1b3ec4ec-9b54-444a-b327-5b9be51ac6f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{7e2c1743-0255-48b3-9224-76fcf92f3661}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -610,15 +613,6 @@
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
     <ClInclude Include="_ITableEvents_CP.H" />
-    <ClInclude Include="Shapefile\MeasuringBase.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Processing\MeasuringTool.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\ActiveShape.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities\GdiPlusHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
@@ -651,12 +645,6 @@
     <ClInclude Include="Control\MapViewCallback.h">
       <Filter>Control</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\EditorBase.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\GeoShape.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Ogr\OgrHelper.h">
       <Filter>Ogr</Filter>
     </ClInclude>
@@ -682,9 +670,6 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="Shapefile\ShapefileHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\GroupOperation.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
     <ClInclude Include="Ogr\GeosConverter.h">
@@ -780,9 +765,6 @@
     <ClInclude Include="Drawing\TilesDrawer.h">
       <Filter>Drawing</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\UndoListHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Shapefile\ChartsHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
@@ -791,6 +773,36 @@
     </ClInclude>
     <ClInclude Include="Shapefile\DraggingState.h">
       <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\ActiveShape.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\Digitizer.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorBase.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\EditorHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GeoShape.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\GroupOperation.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\UndoListHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\VertexEditor.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\MeasuringTool.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor\MeasuringBase.h">
+      <Filter>Editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1508,15 +1520,6 @@
     <ClCompile Include="Tiles\Projections\CustomProjection.cpp">
       <Filter>Tiles\Projections</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\MeasuringBase.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Processing\MeasuringTool.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\ActiveShape.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Utilities\GdiPlusHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
@@ -1541,12 +1544,6 @@
     </ClCompile>
     <ClCompile Include="COM classes\ShapeEditor.cpp">
       <Filter>COM classes\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\EditorBase.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\GeoShape.cpp">
-      <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Control\Map_Dynamic.cpp">
       <Filter>Control</Filter>
@@ -1579,9 +1576,6 @@
       <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Shapefile\ShapefileHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\GroupOperation.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Ogr\GeosConverter.cpp">
@@ -1674,14 +1668,41 @@
     <ClCompile Include="Drawing\TilesDrawer.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\UndoListHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Shapefile\ChartsHelper.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp">
       <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\ActiveShape.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\Digitizer.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorBase.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\EditorHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GeoShape.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\GroupOperation.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\UndoListHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\VertexEditor.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\MeasuringTool.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor\MeasuringBase.cpp">
+      <Filter>Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -16,7 +16,7 @@ public:
 	virtual ~EditorBase(void) {};
 
 public:
-	ShpfileType GetShapeType() { return Utility::ShapeTypeConvert2D(_shpType); }
+	ShpfileType GetShapeType2D() { return Utility::ShapeTypeConvert2D(_shpType); }
 	bool DrawAccumalatedLength() { return false; }
 	bool CloseOnPreviousVertex() {	return false; }
 	void UpdatePolyCloseState(bool close, int pointIndex = -1) {}

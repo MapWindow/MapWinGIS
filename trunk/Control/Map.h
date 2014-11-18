@@ -640,12 +640,16 @@ public:
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
 	void FireBeforeShapeEdit(tkUndoOperation action, LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_PI4), action, layerHandle, shapeIndex, Cancel);	}
-	void FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
-		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4), Action, LayerHandle, Shape, Cancel);	}
+	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
+		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
 	void FireAfterShapeEdit(tkMwBoolean Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
-	void FireChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel)
-		{FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4 VTS_PI4), X, Y, LayerHandle, Cancel);	}
+	void FireChooseLayer(long x, long y, LONG* LayerHandle)
+	{
+		double xProj, yProj;
+		PixelToProjection(x, y, xProj, yProj);
+		FireEvent(eventidChooseLayer, EVENT_PARAM(VTS_R8 VTS_R8 VTS_PI4), xProj, yProj, LayerHandle);
+	}
 	void FireShapeValidationFailed(LPCTSTR ErrorMessage)
 		{ FireEvent(eventidShapeValidationFailed, EVENT_PARAM(VTS_BSTR), ErrorMessage);}
 	void FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel)
@@ -878,7 +882,6 @@ public:
 	bool HasImages() ;
 	bool HasHotTracking();
 	bool HasVolatileShapefiles();
-	int GetInteractiveShapefileCount(long& layerHandle);
 	
 	DOUBLE GetPixelsPerDegree(void);
 	DOUBLE PixelsPerMapUnit(void);
@@ -1055,14 +1058,11 @@ private:
 	bool SelectLayerHandles(LayerSelector selector, std::vector<int>& layers);
 	bool CheckLayer(LayerSelector selector, int layerHandle);
 	bool SelectShapeForEditing(int x, int y, long& layerHandle, long& shapeIndex);
-	bool SetShapeEditor(long layerHandle);
 	double GetMouseTolerance(MouseTolerance tolernace, bool proj = true);
 	int AddLayerCore(Layer* layer);
 	
 	// shapefile editor
-	bool ChooseEditLayer(long x, long y);
-	void HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl);
-	void HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl);
+	
 	IShapefile* GetShapeEditorShapefile();
 	bool RunShapefileUndoList(bool undo);
 	bool RemoveSelectedShape();
@@ -1076,9 +1076,6 @@ private:
 	void HandleLButtonDownSelection(CPoint& point, long vbflags);
 	void ZoomToEditor();
 	void OnCursorModeChangedCore(bool clearEditor);
-	bool IsEditorCursor();
-	bool IsDigitizingCursor();
-	void HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl);
 	void AttachGlobalCallbackToLayers(IDispatch* object);
 	Point2D GetDraggingProjOffset();
 	void HandleOnLButtonMoveOrRotate(long x, long y);
@@ -1090,12 +1087,12 @@ private:
 	double GetDraggingRotationAngle();
 	double GetDraggingRotationAngle(long screenX, long screenY);
 	void RegisterRotationOperation();
-	bool IsOverlayCursor();
 	bool SplitByPolyline(long layerHandle, IShapefile* sf, vector<long>& indices, IShape* polyline);
 	void ShowToolTipOnMouseMove(UINT nFlags, CPoint point);
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
+	bool StartNewBoundShape(long x, long y);
 	
 #pragma endregion
 
@@ -1113,15 +1110,19 @@ public:
 	virtual void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ PixelToProjection(pixelX, pixelY, *projX, *projY); }
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
-	virtual void _FireValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(Action, LayerHandle, Shape, Cancel); }
+	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(LayerHandle, Shape, Cancel); }
 	virtual void _FireAfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
-	virtual bool _IsSubjectCursor();
 	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
+	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }
+	virtual void _StartDragging(DraggingOperation operation) {
+		_dragging.Operation = operation;
+		SetCapture();
+	}
 	
 };
 

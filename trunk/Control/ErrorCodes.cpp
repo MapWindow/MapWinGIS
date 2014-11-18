@@ -196,7 +196,13 @@ const char * ErrorMsg( long ErrorCode )
 		case tkSPLIT_LINEAR_INTERSECTION:
 			return "Split line has linear intersection with subject line.";
 		case tkCANT_START_BATCH_OPERATION:
-			return "New batch opearation attempted when the previous one is not finished.";
+			return "New batch operation attempted when the previous one is not finished.";
+		case tkEDITOR_OVERLAY_NO_SUBJECT:
+			return "Editor must have a subject shape in order to start overlay operation.";
+		case tkEDITOR_OVERLAY_ALREADY_STARTED:
+			return "Overlay operation has been already started.";
+		case tkADD_SHAPE_MODE_ONLY:
+			return "Method can be called with cmAddShape cursor only";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

@@ -7,6 +7,9 @@
 #include "ShapefileHelper.h"
 #include "SelectionHelper.h"
 #include "ShapeStyleHelper.h"
+#include "VertexEditor.h"
+#include "EditorHelper.h"
+#include "Digitizer.h"
 
 
 // ************************************************************
@@ -456,8 +459,12 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	double projY;
 	bool shift = (nFlags & MK_SHIFT) != 0;
 
+	ClearHotTracking();
+
+	bool digitizingCursor = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
+
 	tkSnapBehavior behavior;
-	bool snapping = (SnappingIsOn(nFlags, behavior) && IsDigitizingCursor())
+	bool snapping = (SnappingIsOn(nFlags, behavior) && digitizingCursor)
 					|| (m_cursorMode == cmMeasure && shift);
 
 	VARIANT_BOOL snapped = VARIANT_FALSE;
@@ -472,42 +479,34 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	if (!snapped)
 		this->PixelToProjection(x, y, projX, projY);
 
-	switch(m_cursorMode)
+	// digitizing
+	if (digitizingCursor)
 	{
-		case cmZoomIn:
-		case cmZoomOut:
-		case cmPan:
-			if (m_sendMouseDown)
-				this->FireMouseDown(MK_LBUTTON, (short)vbflags, x, y);
-			break;
-	}
-
-	if (_IsSubjectCursor())
-	{
-		HandleLButtonSubjectCursor(x, y, projX, projY, ctrl);
-		return;
-	}
-
-	if (IsOverlayCursor() || m_cursorMode == cmSelectByPolygon)
-	{
-		tkShapeEditorState state;
-		_shapeEditor->get_EditorState(&state);
-		if (state != EditorCreationUnbound)
-		{
-			VARIANT_BOOL vb;
-			ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
-			_shapeEditor->StartUnboundShape(shpType, &vb);
-			_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
+		if (m_cursorMode == cmAddShape) {
+			if (!StartNewBoundShape(x, y)) return;
 		}
-		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
+		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl))
+			Redraw2(RedrawSkipDataLayers);
 		return;
 	}
 
-	// --------------------------------------------
-	//  Handling particular cursor modes
-	// --------------------------------------------
+	// other modes
 	switch(m_cursorMode)
 	{
+		case cmEditShape:
+			{
+				//HandleOnLButtonDownShapeEditor(x, y, ctrl);
+				_shapeEditor->SetRedrawNeeded(false);
+				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
+				{
+					long layerHandle, shapeIndex;
+					SelectShapeForEditing(x, y, layerHandle, shapeIndex);
+					VertexEditor::StartEdit(_shapeEditor, layerHandle, shapeIndex);
+				}
+				if (_shapeEditor->GetRedrawNeeded())
+					RedrawCore(RedrawSkipDataLayers, false, true);
+			}
+			break;
 		case cmIdentify:
 			{
 				long layerHandle, shapeIndex;
@@ -522,14 +521,11 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmRotateShapes:
 		case cmMoveShapes:
-			HandleOnLButtonMoveOrRotate(x, y);
-			break;
-		case cmAddShape:
-			HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
-			break;
-		case cmEditShape:
-			HandleOnLButtonDownShapeEditor(x, y, ctrl);
-			break;
+			{
+				HandleOnLButtonMoveOrRotate(x, y);
+				break;
+			}
+		
 		case cmZoomIn:
 			{
 				this->SetCapture();
@@ -543,17 +539,17 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 			break;
 		case cmZoomOut:
-			ZoomOut( m_zoomPercent );
-			break;
+			{
+				ZoomOut( m_zoomPercent );
+				break;
+			}
 		case cmPan:
 			{
-				CRect rcBounds(0,0,_viewWidth,_viewHeight);
 				this->LogPrevExtent();
 				this->SetCapture();
 				_dragging.Operation = DragPanning;
 			}
 			break;
-		
 		case cmMeasure:
 			{
 				bool added = true;
@@ -769,7 +765,7 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 	if (m_cursorMode == cmSelection)
 	{
 		tkMwBoolean cancel = blnFalse;
-		FireChooseLayer(x, y, &layerHandle, &cancel);
+		FireChooseLayer(x, y, &layerHandle);
 		if (layerHandle != -1) {
 			sf.Attach(GetShapefile(layerHandle));
 		}
@@ -1003,7 +999,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	bool updateHotTracking = true;
 	bool refreshNeeded = false;
 
-	if (IsDigitizingCursor() || m_cursorMode == cmMeasure)
+	if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure)
 	{
 		ActiveShape* shp = GetActiveShape();
 		if (shp->IsDynamic() && shp->GetPointCount() > 0)
@@ -1060,6 +1056,8 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			break;
 		case cmEditShape:
 		{
+			bool moved = _dragging.Start == _dragging.Move && !_dragging.HasMoved;
+			if (!moved)	return;
 			if (HandleOnMouseMoveShapeEditor(point.x, point.y, nFlags))
 				refreshNeeded = true;
 		}
@@ -1164,7 +1162,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
-		else if (IsDigitizingCursor())
+		else if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
 		{
 			_shapeEditor->Undo(&redraw);
 			_canUseMainBuffer = false;

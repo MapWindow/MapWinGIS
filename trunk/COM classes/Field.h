@@ -34,7 +34,7 @@ public:
 	{
 		USES_CONVERSION;
 		key = A2BSTR("");
-		name = A2BSTR("IField");
+		name = A2BSTR("");
 		globalCallback = NULL;
 		lastErrorCode = tkNO_ERROR;
 		width = 10;

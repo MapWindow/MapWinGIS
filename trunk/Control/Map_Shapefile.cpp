@@ -11,6 +11,7 @@
 #include "ShapeStyleHelper.h"
 #include "ShapefileHelper.h"
 #include "Structures.h"
+#include "EditorHelper.h"
 
 // TODO: the following properties for the new symbology must be implemented
 // ShapeLayerLineStipple
@@ -1156,14 +1157,13 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 			switch (selector)
 			{
 			case slctShapefiles:
-				result = VARIANT_TRUE;
-				break;
+				return layer->wasRendered;
 			case slctHotTracking:
 				if (!layer->wasRendered) return false;
 
 				if (m_cursorMode == cmIdentify) {
 					if (_useHotTracking) {
-						sf->get_HotTracking(&result);
+						result = VARIANT_TRUE;
 					}
 				}
 				else {
@@ -1174,7 +1174,8 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 						// only editor based highlighting in this mode
 						VARIANT_BOOL highlight;
 						_shapeEditor->get_HighlightShapes(&highlight);
-						if (IsEditorCursor() && highlight) {
+						bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmEditShape;
+						if (digitizing && highlight) {
 							result = VARIANT_TRUE;
 						}
 					}
@@ -1291,9 +1292,6 @@ LayerShape CMapView::FindShapeAtProjPoint(double prjX, double prjY, std::vector<
 // ************************************************************
 bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shapeIndex)
 {
-	double projX, projY;
-	PixelToProj(x, y, &projX, &projY);
-
 	LayerShape info = FindShapeAtScreenPoint(CPoint(x, y), slctInteractiveEditing);
 	if (!info.IsEmpty())
 	{
@@ -1339,9 +1337,6 @@ void CMapView::ClearHotTracking()
 // ************************************************************
 void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 {
-	if (_shapeEditor->HasSubjectShape(info.LayerHandle, info.ShapeIndex))
-		return;
-
 	CComPtr<IShapefile> sf = NULL;
 	sf.Attach(GetShapefile(info.LayerHandle));
 	if (sf) {
@@ -1358,7 +1353,8 @@ void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 				_hotTracking.UpdateStyle(options);
 			}
 			
-			this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeIndex);
+			if (fireEvent)
+				this->FireShapeHighlighted(_hotTracking.LayerHandle, _hotTracking.ShapeIndex);
 			_canUseMainBuffer = false;
 		}
 	}

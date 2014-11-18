@@ -12,11 +12,12 @@ bool OgrStyleHelper::HasStyleTable(GDALDataset* dataset, CStringW layerName)
 	USES_CONVERSION;
 	CStringW sql;
 	sql.Format(L"SELECT COUNT(*) FROM %s", A2W(STYLES_TABLE_NAME));
-	CPLErrorReset();
 	OGRLayer* lyr = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
 	bool hasTable = lyr != NULL;
 	if (lyr)
 		dataset->ReleaseResultSet(lyr);
+	else 
+		CPLErrorReset();
 	return hasTable;
 }
 

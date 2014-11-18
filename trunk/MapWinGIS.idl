@@ -57,6 +57,28 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 
+/************************** tkEditorBehavior Enumeration **********************/
+typedef
+[
+	uuid(31B4FFE8-29F4-4615-88BF-7CD232E52ED0),
+	helpstring("tkEditorBehavior"),
+]
+enum tkEditorBehavior {
+	ebVertexEditor = 0,
+	ebPartEditor = 1,
+}tkEditorBehavior;
+
+/************************** tkEditorOverlay Enumeration **********************/
+typedef
+[
+	uuid(05F55CFA-C1CC-4793-8622-995388E5E661),
+	helpstring("tkEditorOverlay"),
+]
+enum tkEditorOverlay {
+	eoAddPart = 0,
+	eoRemovePart = 1,
+}tkEditorOverlay;
+
 /************************** tkBufferCap Enumeration **********************/
 typedef
 [
@@ -148,12 +170,13 @@ typedef
 	uuid(1C0301FF-127F-4329-B29B-0D068523FC8C),
 	helpstring("tkShapeEditorState"),
 ]
-enum tkShapeEditorState {
-	EditorEmpty = 0,
-	EditorCreation = 1,
-	EditorEdit = 2,
-	EditorCreationUnbound = 3,
-}tkShapeEditorState;
+enum tkEditorState {
+	esEmpty = 0,
+	esDigitize = 1,
+	esEdit = 2,
+	esDigitizeUnbound = 3,
+	esOverlay = 4
+}tkEditorState;
 
 /************************** tkSnapBehavior Enumeration **********************/
 typedef
@@ -1054,16 +1077,14 @@ enum tkScalebarUnits
 		cmMeasure = 5,
 		cmAddShape	= 6,
 		cmEditShape = 8,
-		cmAddPart = 9,
-		cmRemovePart = 10,
-		cmSplitByPolyline = 11,
-		cmIdentify = 12,
-		cmMoveShapes = 13,
-		cmRotateShapes = 14,
-		cmSelectByPolygon = 15,
-		cmEraseByPolygon = 16,
-		cmSplitByPolygon = 17,
-		cmClipByPolygon = 18,
+		cmSplitByPolyline = 9,
+		cmIdentify = 10,
+		cmMoveShapes = 11,
+		cmRotateShapes = 12,
+		cmSelectByPolygon = 13,
+		cmEraseByPolygon = 14,
+		cmSplitByPolygon = 15,
+		cmClipByPolygon = 16,
 	} tkCursorMode;
 
 	typedef 
@@ -3203,8 +3224,8 @@ enum tkScalebarUnits
 		[propget, id(15)] HRESULT SelectedVertex([out, retval]int* retVal);
 		[propput, id(15)] HRESULT SelectedVertex([in]int newVal);
 		[propget, id(16)] HRESULT RawData([out, retval] IShape** pVal);
-		[propget, id(17)] HRESULT CreationMode([out, retval]VARIANT_BOOL* retVal);
-		[propput, id(17)] HRESULT CreationMode([in]VARIANT_BOOL newVal);
+		[propget, id(17)] HRESULT IsDigitizing([out, retval]VARIANT_BOOL* retVal);
+		//[propput, id(17)] HRESULT IsDigitizing([in]VARIANT_BOOL newVal);
 		[propget, id(20)] HRESULT Area([out, retval]double* retVal);
 		[propget, id(22)] HRESULT AngleDisplayMode([out, retval]tkAngleDisplay* retVal);
 		[propput, id(22)] HRESULT AngleDisplayMode([in]tkAngleDisplay newVal);
@@ -3231,20 +3252,20 @@ enum tkScalebarUnits
 		[propput, id(35)] HRESULT HighlightShapes([in] VARIANT_BOOL newVal);
 		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
 		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
-		[propget, id(37)] HRESULT EditorState([out, retval] tkShapeEditorState* pVal);
+		[propget, id(37)] HRESULT EditorState([out, retval] tkEditorState* pVal);
 		[id(38)] HRESULT StartEdit([in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval]VARIANT_BOOL* retVal);
-		[id(39)] HRESULT AddSubjectShape([in] LONG LayerHandle, [in] LONG ShapeIndex, [in] VARIANT_BOOL ClearExiting, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(40)] HRESULT PointLabelsVisible([out, retval] VARIANT_BOOL* pVal);
 		[propput, id(40)] HRESULT PointLabelsVisible([in] VARIANT_BOOL newVal);
 		[propget, id(41)] HRESULT LengthDisplayMode([out, retval] tkLengthDisplayMode* pVal);
 		[propput, id(41)] HRESULT LengthDisplayMode([in] tkLengthDisplayMode newVal);
-		[id(42)] HRESULT ClearSubjectShapes();
-		[propget, id(43)] HRESULT NumSubjectShapes([out, retval] LONG* pVal);
 		[id(44)] HRESULT StartUnboundShape([in] ShpfileType shpType, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(45)] HRESULT VerticesVisible([out, retval] VARIANT_BOOL* pVal);
 		[propput, id(45)] HRESULT VerticesVisible([in] VARIANT_BOOL newVal);
 		[propget, id(46)] HRESULT ValidationMode([out, retval] tkEditorValidationMode* pVal);
 		[propput, id(46)] HRESULT ValidationMode([in] tkEditorValidationMode newVal);
+		[id(47)] HRESULT StartOverlay([in] tkEditorOverlay overlayType, [out, retval] VARIANT_BOOL* retVal);
+		[propget, id(48)] HRESULT EditorBehavior([out, retval] tkEditorBehavior* pVal);
+		[propput, id(48)] HRESULT EditorBehavior([in] tkEditorBehavior newVal);
 	};
 
 	
@@ -6130,17 +6151,16 @@ library MapWinGIS
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
 			[id(16)] void BeforeShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
-			[id(17)] void ValidateShape(tkCursorMode Action, LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
+			[id(17)] void ValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex);
-			[id(19)] void ChooseLayer(LONG X, LONG Y, LONG* LayerHandle, tkMwBoolean* Cancel);
+			[id(19)] void ChooseLayer(double xProj, double yProj, LONG* LayerHandle);
 			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);
 			[id(23)] void ProjectionChanged();
 			[id(24)] void UndoListChanged();
 			[id(25)] void SelectionChanged(LONG LayerHandle);
-		//}}AFX_ODL_EVENT
-			
 			[id(26)] void ShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY);
+		//}}AFX_ODL_EVENT
 	};
 	[
 		object,

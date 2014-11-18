@@ -9,6 +9,8 @@
 #include "GroupOperation.h"
 #include "ShapeHelper.h"
 #include "SelectionHelper.h"
+#include "EditorHelper.h"
+#include "Digitizer.h"
 
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
@@ -116,29 +118,42 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 	}
 	else 
 	{
-		// highlighting of vertices
+		tkEditorBehavior behavior;
+		_shapeEditor->get_EditorBehavior(&behavior);
+		EditorBase* base = GetEditorBase();
 		bool handled = false;
 		double projX, projY;
 		this->PixelToProjection(x, y, projX, projY);
-		EditorBase* base = GetEditorBase();
-		int pntIndex = base->GetClosestVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
-		if (pntIndex != -1)
+
+		// highlighting of vertices
+		if (behavior == ebVertexEditor)
 		{
-			if (base->SetHighlightedVertex(pntIndex)) {
+			if (base->ClearHighlightedPart())
 				_canUseMainBuffer = false;
-				return true;
+
+			int pntIndex = base->GetClosestVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
+			if (pntIndex != -1)
+			{
+				if (base->SetHighlightedVertex(pntIndex)) {
+					_canUseMainBuffer = false;
+					return true;
+				}
+				return false;
 			}
-			return false;
-		}
-		else {
-			if (base->ClearHighlightedVertex()) {
-				_canUseMainBuffer = false;
-				return true;
+			else {
+				if (base->ClearHighlightedVertex()) {
+					_canUseMainBuffer = false;
+					return true;
+				}
 			}
 		}
 		
 		// highlighting parts
-		if (nFlags & MK_CONTROL) {
+		if (behavior == ebPartEditor)	//if (nFlags & MK_CONTROL) {
+		{
+			if (base->ClearHighlightedVertex())
+				_canUseMainBuffer = false;
+
 			int partIndex = _shapeEditor->GetClosestPart(projX, projY, GetMouseTolerance(ToleranceSelect));
 			if (partIndex != -1) 
 			{
@@ -147,11 +162,11 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 				}
 				return true;
 			}
-		}
-		
-		if (base->ClearHighlightedPart()){
-			_canUseMainBuffer = false;
-			handled = true;
+
+			if (base->ClearHighlightedPart()){
+				_canUseMainBuffer = false;
+				handled = true;
+			}
 		}
 	}
 	return false;
@@ -180,255 +195,30 @@ IShapefile* CMapView::GetShapeEditorShapefile()
 }
 
 // ************************************************************
-//		HandleOnLButtonDownShapeEditor
-// ************************************************************
-void CMapView::HandleOnLButtonDownShapeEditor(int x, int y, bool ctrl)
-{
-	long layerHandle = -1, shapeIndex = -1;
-	bool hasShapeEditor = !GetEditorBase()->IsEmpty();
-	
-	if (hasShapeEditor)
-	{
-		IShapefile* sf = GetTempShapefile();
-		if (sf != NULL)
-		{
-			CComPtr<IShape> shp = NULL;
-			_shapeEditor->get_RawData(&shp);
-			double projX, projY;
-			PixelToProj(x, y, &projX, &projY);
-		
-			if (m_cursorMode == cmEditShape)
-			{
-				// select vertex
-				if (!ctrl) {
-					EditorBase* base = GetEditorBase();
-					int pntIndex = base->GetClosestVertex(projX, projY, GetMouseTolerance(ToleranceSelect));
-					if (pntIndex != -1)
-					{
-						// start vertex moving
-						bool changed = base->SetSelectedVertex(pntIndex);
-
-						this->SetCapture();
-						_dragging.Operation = DragMoveVertex;
-						_shapeEditor->SaveState();
-
-						if (changed)
-							RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
-
-						return;
-					}
-				}
-
-				// add vertex or select part
-				double x, y;
-				if (_shapeEditor->GetClosestPoint(projX, projY, x, y))
-				{
-					double dist = sqrt(pow(x - projX, 2.0) + pow(y - projY, 2.0));
-					if (dist < GetMouseTolerance(ToleranceSelect))
-					{
-						EditorBase* base = GetEditorBase();
-						if (ctrl)
-						{
-							// select part
-							int partIndex = base->SelectPart(x, y);
-							if (partIndex != -1) 
-							{
-								if (base->SetSelectedPart(partIndex)) {
-									this->SetCapture();
-									_dragging.Operation = DragMovePart;
-								}
-								RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
-								return;
-							}
-						}
-						if (base->HasSelectedPart()) {
-							this->SetCapture();
-							_dragging.Operation = DragMovePart;
-							return;
-						}
-					}
-				}
-
-				// start shape moving
-				if (ShapeHelper::PointWithinShape(shp, projX, projY, GetMouseTolerance(ToleranceSelect)))
-				{
-					// it's confusing to have both part and shape move depending on where you clicked
-					if (GetEditorBase()->HasSelectedPart()) return;   
-
-					this->SetCapture();
-					_dragging.Operation = DragMoveShape;
-					return;
-				}
-			}
-		}
-
-		if (!_shapeEditor->TrySave())
-			return;
-	}
-	
-	_shapeEditor->Clear();
-
-	if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
-	{
-		ClearHotTracking();
-		VARIANT_BOOL vb;
-		_shapeEditor->StartEdit(layerHandle, shapeIndex, &vb);
-	}
-
-	RedrawCore(RedrawAll, false, false);
-}
-
-// ************************************************************
-//		HandleOnLButtonShapeAddMode
-// ************************************************************
-void CMapView::HandleOnLButtonShapeAddMode(int x, int y, double projX, double projY, bool ctrl)
-{
-	EditorBase* editShape = GetEditorBase();
-
-	// it's the first point; shape type and layer
-	ShpfileType shpType = editShape->GetShapeType();
-	if (shpType == SHP_NULLSHAPE)
-	{
-		if (!ChooseEditLayer(x, y)) return;
-		shpType = Utility::ShapeTypeConvert2D(editShape->GetShapeType());
-	}
-
-	// an attempt to finish shape
-	bool succeed = false;
-	if (ctrl)
-	{
-		succeed = _shapeEditor->TrySave();
-		if (succeed) {
-			RedrawCore(RedrawSkipDataLayers, false, true);
-		}
-		return;
-	}
-
-	// add another point
-	_shapeEditor->HandleProjPointAdd(projX, projY);
-
-	// for point layer it's also a shape
-	bool isPoint = shpType == SHP_POINT;
-	if (isPoint)
-	{
-		succeed = _shapeEditor->TrySave();
-		if (succeed) {
-			RedrawCore(RedrawAll, false, true);
-		}
-		return;
-	}
-
-	// otherwise update just the layer
-	RedrawCore(RedrawSkipDataLayers, false, true);
-}
-
-// ************************************************************
-//		ChooseEditLayer
-// ************************************************************
-bool CMapView::ChooseEditLayer(long x, long y)
-{
-	tkMwBoolean cancel = blnFalse;
-	long layerHandle = -1;
-	if (GetInteractiveShapefileCount(layerHandle) > 0)
-	{
-		FireChooseLayer(x, y, &layerHandle, &cancel);
-		if (cancel == blnTrue) return false;
-	}
-	else {
-		ErrorMessage(tkNO_INTERACTIVE_SHAPEFILES);
-		return false;
-	}
-
-	SetShapeEditor(layerHandle);
-	
-	return true;
-}
-
-// ************************************************************
-//		SetShapeEditor
-// ************************************************************
-// the case of new shape
-bool CMapView::SetShapeEditor(long layerHandle)
-{
-	CComPtr<IShapefile> sf = NULL;
-	sf.Attach(GetShapefile(layerHandle));
-	if (!sf) {
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return false;
-	}
-
-	ShpfileType shpType;
-	sf->get_ShapefileType(&shpType);
-
-	_shapeEditor->Clear();
-	_shapeEditor->put_ShapeType(shpType);
-	_shapeEditor->put_LayerHandle(layerHandle);
-	
-	CComPtr<IShapeDrawingOptions> options = NULL;
-	sf->get_DefaultDrawingOptions(&options);
-	_shapeEditor->CopyOptionsFrom(options);
-	return true;
-}
-
-// ************************************************************
-//		HandleLButtonSubjectCursor
-// ************************************************************
-void CMapView::HandleLButtonSubjectCursor(int x, int y, double projX, double projY, bool ctrl)
-{
-	long numShapes;
-	_shapeEditor->get_NumSubjectShapes(&numShapes);
-	if (numShapes == 0) 
-	{
-		// let's choose the subject
-		long shapeIndex = -1, layerHandle = -1;
-		if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
-		{
-			VARIANT_BOOL vb;
-			_shapeEditor->AddSubjectShape(layerHandle, shapeIndex, VARIANT_TRUE, &vb);
-			RedrawCore(RedrawAll, false, true);
-		}
-	}
-	else {
-		tkShapeEditorState state;
-		_shapeEditor->get_EditorState(&state);
-		if (state != EditorCreationUnbound)
-		{
-			VARIANT_BOOL vb;
-			ShpfileType shpType = _shapeEditor->GetShapeTypeForTool((tkCursorMode)m_cursorMode);
-			_shapeEditor->StartUnboundShape(shpType, &vb);
-			_shapeEditor->ApplyColoringForTool((tkCursorMode)m_cursorMode);
-		}
-		HandleOnLButtonShapeAddMode(x, y, projX, projY, ctrl);
-	}
-}
-
-// ************************************************************
 //		HandleOnLButtonMoveOrRotate
 // ************************************************************
 void CMapView::HandleOnLButtonMoveOrRotate(long x, long y)
 {
 	long layerHandle = -1;
-	tkMwBoolean cancel = tkMwBoolean::blnFalse;
-	FireChooseLayer(x, y, &layerHandle, &cancel);
-	if (layerHandle != -1)
+	FireChooseLayer(x, y, &layerHandle);
+	if (layerHandle == -1) return;
+	
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(layerHandle));
+	if (sf)
 	{
-		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(GetShapefile(layerHandle));
-		if (sf) 
-		{
-			VARIANT_BOOL editing;
-			sf->get_InteractiveEditing(&editing);
-			if (!editing) return;
+		VARIANT_BOOL editing;
+		sf->get_InteractiveEditing(&editing);
+		if (!editing) return;
 
-			long numSelected;
-			sf->get_NumSelected(&numSelected);
-			if (numSelected > 0)
-			{
-				SetCapture();
-				_dragging.LayerHandle = layerHandle;
-				_dragging.Operation = m_cursorMode == cmMoveShapes ? DragMoveShapes : DragRotateShapes;
-				_dragging.InitAngle = GetDraggingRotationAngle(_dragging.Start.x, _dragging.Start.y);
-			}
+		long numSelected;
+		sf->get_NumSelected(&numSelected);
+		if (numSelected > 0)
+		{
+			SetCapture();
+			_dragging.LayerHandle = layerHandle;
+			_dragging.Operation = m_cursorMode == cmMoveShapes ? DragMoveShapes : DragRotateShapes;
+			_dragging.InitAngle = GetDraggingRotationAngle(_dragging.Start.x, _dragging.Start.y);
 		}
 	}
 }
@@ -486,31 +276,28 @@ Point2D CMapView::GetDraggingProjOffset()
 bool CMapView::InitRotationTool()
 {
 	long layerHandle = -1;
-	tkMwBoolean cancel = blnFalse;
-	FireChooseLayer(0, 0, &layerHandle, &cancel);
+	FireChooseLayer(0, 0, &layerHandle);
+	if (layerHandle == -1) return false;
 
 	bool success = false;
-	if (layerHandle != -1)
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(GetShapefile(layerHandle));
+	if (sf)
 	{
-		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(GetShapefile(layerHandle));
-		if (sf) 
+		VARIANT_BOOL editing;
+		sf->get_InteractiveEditing(&editing);
+		if (editing)
 		{
-			VARIANT_BOOL editing;
-			sf->get_InteractiveEditing(&editing);
-			if (editing)
+			long numSelected;
+			sf->get_NumSelected(&numSelected);
+			if (numSelected > 0)
 			{
-				long numSelected;
-				sf->get_NumSelected(&numSelected);
-				if (numSelected > 0)
+				double xMin, yMin, xMax, yMax;
+				if (ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax))
 				{
-					double xMin, yMin, xMax, yMax;
-					if (ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax))
-					{
-						_dragging.RotateCenter.x = (xMax + xMin) / 2.0;
-						_dragging.RotateCenter.y = (yMax + yMin) / 2.0;
-						success = true;
-					}
+					_dragging.RotateCenter.x = (xMax + xMin) / 2.0;
+					_dragging.RotateCenter.y = (yMax + yMin) / 2.0;
+					success = true;
 				}
 			}
 		}
@@ -576,9 +363,8 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 
 	_shapeEditor->Clear();
 
-	tkMwBoolean cancel;
 	long layerHandle = -1;
-	FireChooseLayer(0, 0, &layerHandle, &cancel);
+	FireChooseLayer(0, 0, &layerHandle);
 	if (layerHandle == -1) return;
 
 	CComPtr<IShapefile> sf = NULL;
@@ -632,5 +418,28 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 		Redraw();
 }
 
+// ***************************************************************
+//	StartNewBoundShape
+// ***************************************************************
+bool CMapView::StartNewBoundShape(long x, long y)
+{
+	if (m_cursorMode == cmAddShape && EditorHelper::IsEmpty(_shapeEditor))
+	{
+		long layerHandle = -1;
+		FireChooseLayer(x, y, &layerHandle);
+		if (layerHandle == -1) return false;
 
-
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(layerHandle));
+		if (!sf) {
+			ErrorMessage(tkINVALID_LAYER_HANDLE);
+			return false;
+		}
+		else {
+			Digitizer::StartNewBoundShape(_shapeEditor, sf, layerHandle);
+			return true;
+		}
+		return false;
+	}
+	return true;   // no need to choose
+}

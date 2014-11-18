@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Map.h"
 #include "ShapeEditor.h"
+#include "EditorHelper.h"
 
 // *******************************************************
 //		OnSetCursor()
@@ -181,15 +182,23 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 			_measuring->Clear();
 	}
 
-	if (clearEditor)
+	if (clearEditor)		// TODO: move to shape editor
 	{
 		CComPtr<IShape> shp = NULL;
 		_shapeEditor->get_RawData(&shp);
 
 		if (shp)
 		{
-			if (!_shapeEditor->TrySave())
+			if (!_shapeEditor->TryStopDigitizing())
 				return;	  // don't change cursor as user may loose some data
+			tkEditorState state;
+			_shapeEditor->get_EditorState(&state);
+			if (state != esEmpty)
+			{
+				if (!_shapeEditor->TryStopDigitizing())
+					return;	  // don't change cursor as user may loose some data
+			}
+
 			RedrawCore(RedrawSkipDataLayers, false, true);
 		}
 		else {
@@ -203,8 +212,13 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 		}
 
 		if (m_cursorMode == cmAddShape) {
-			_shapeEditor->put_EditorState(EditorCreation);
+			_shapeEditor->put_EditorState(esDigitize);
 		}
+	}
+
+	if (EditorHelper::IsGroupOverlayCursor(mode))
+	{
+		_shapeEditor->StartUnboundShape();
 	}
 
 	m_cursorMode = mode;
@@ -242,37 +256,6 @@ HCURSOR CMapView::SetWaitCursor()
    return oldCursor;
 }
 
-// ************************************************************
-//		IsEditorCursor
-// ************************************************************
-bool CMapView::IsEditorCursor()
-{
-	return IsDigitizingCursor() || m_cursorMode == cmEditShape || m_cursorMode == cmMeasure;
-}
 
-// ************************************************************
-//		IsOverlayCursor
-// ************************************************************
-bool CMapView::IsOverlayCursor()
-{
-	return m_cursorMode == cmSplitByPolyline ||
-		m_cursorMode == cmSplitByPolygon || m_cursorMode == cmEraseByPolygon || 
-		m_cursorMode == cmClipByPolygon;
-}
 
-// ************************************************************
-//		IsEditorCursor
-// ************************************************************
-bool CMapView::IsDigitizingCursor()
-{
-	return m_cursorMode == cmAddShape || m_cursorMode == cmSelectByPolygon ||
-			_IsSubjectCursor() || IsOverlayCursor();
-}
 
-// ************************************************************
-//		_IsEditorCursor
-// ************************************************************
-bool CMapView::_IsSubjectCursor()
-{
-	return m_cursorMode == cmAddPart || m_cursorMode == cmRemovePart;
-}

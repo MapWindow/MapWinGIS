@@ -7,6 +7,8 @@
 #include "UndoList.h"
 #include <set>
 #include "GeosHelper.h"
+#include "EditorHelper.h"
+#include "ShapefileHelper.h"
 
 // *******************************************************
 //		GetShape
@@ -117,7 +119,7 @@ STDMETHODIMP CShapeEditor::put_Key(BSTR newVal)
 STDMETHODIMP CShapeEditor::get_ShapeType(ShpfileType* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _activeShape->GetShapeType();
+	*retVal = _activeShape->GetShapeType2D();
 	return S_OK;
 }
 
@@ -136,7 +138,7 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
 
-	ShpfileType shpType = _activeShape->GetShapeType();
+	ShpfileType shpType = _activeShape->GetShapeType2D();
 	if (shpType == SHP_NULLSHAPE || _activeShape->GetPointCount() == 0) {
 		return S_OK;
 	}
@@ -248,8 +250,13 @@ STDMETHODIMP CShapeEditor::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (!CheckState()) return S_OK;
-	
-	if (_state == EditorEdit) {
+
+	if (_state == esOverlay)
+	{
+		CancelOverlay(true);
+	}
+
+	if (_state == esEdit) {
 
 		CComPtr<IShapefile> sf = NULL;
 		sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
@@ -263,11 +270,9 @@ STDMETHODIMP CShapeEditor::Clear()
 
 	_activeShape->Clear();
 	
-	ClearSubjectShapes();
-	
 	_shapeIndex = -1;
 	_layerHandle = -1;
-	_state = EditorEmpty;
+	_state = esEmpty;
 	return S_OK;
 }
 
@@ -296,87 +301,19 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 		sf->get_Shape(ShapeIndex, &shp);
 		if (shp)
 		{
-			put_EditorState(EditorEdit);
+			put_EditorState(esEdit);
 			SetShape(shp);
 			_layerHandle = LayerHandle;
 			_shapeIndex = ShapeIndex;
-			if (ShapeShouldBeHidden())
+			_activeShape->OverlayerTool = false;
+			if (ShapeShouldBeHidden()) {
 				sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
-
-			CComPtr<IShapeDrawingOptions> options = NULL;
-			sf->get_DefaultDrawingOptions(&options);
-			CopyOptionsFrom(options);
+			}
+			EditorHelper::CopyOptionsFrom(this, sf);
 			*retVal = VARIANT_TRUE;
 		}
 	}
 
-	return S_OK;
-}
-
-// *******************************************************
-//		AddSubjectShape
-// *******************************************************
-STDMETHODIMP CShapeEditor::AddSubjectShape(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL ClearExisting, VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_OK;
-
-	if (LayerHandle == -1 || ShapeIndex == -1) {
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_OK;
-	}
-
-	if (_layerHandle == LayerHandle && _shapeIndex == ShapeIndex) 
-	{
-		ErrorMessage(tkSAME_SUBJECT_AND_OVERLAY_SHAPE);
-		return S_OK;
-	}
-
-	// check, maybe it's already there
-	for (size_t i = 0; i < _subjects.size(); i++) 
-	{
-		int handle, index;
-		_subjects[i]->get_LayerHandle(&handle);
-		_subjects[i]->get_ShapeIndex(&index);
-		if (handle == LayerHandle && index == ShapeIndex) {
-			*retVal = VARIANT_TRUE;
-			return S_OK;
-		}
-	}
-
-	CComPtr<IShapefile> sf = NULL;
-	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
-
-	if (sf)
-	{
-		ShpfileType shpType;
-		sf->get_ShapefileType(&shpType);
-		shpType = Utility::ShapeTypeConvert2D(shpType);
-		if (shpType == SHP_POINT) 
-		{
-			// no add part/remove part operation for points
-			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-			return S_OK;
-		}
-
-		if (ClearExisting) {
-			ClearSubjectShapes();
-		}
-
-		CComPtr<IShape> shp = NULL;
-		sf->get_Shape(ShapeIndex, &shp);
-		if (shp)
-		{
-			CShapeEditor* editor = NULL;
-			GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&editor);
-			editor->SetIsSubject(true);
-			editor->SetMapCallback(_mapCallback);
-			editor->StartEdit(LayerHandle, ShapeIndex, retVal);
-			_subjects.push_back(editor);
-		}
-	}
 	return S_OK;
 }
 
@@ -484,14 +421,14 @@ STDMETHODIMP CShapeEditor::put_AngleDisplayMode(tkAngleDisplay newVal)
 // *******************************************************
 //		CreationMode()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_CreationMode(VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeEditor::get_IsDigitizing(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _activeShape->GetCreationMode() ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
-STDMETHODIMP CShapeEditor::put_CreationMode(VARIANT_BOOL newVal)
+STDMETHODIMP CShapeEditor::put_IsDigitizing(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->SetCreationMode(newVal ? true: false);
@@ -588,26 +525,6 @@ STDMETHODIMP CShapeEditor::put_SelectedVertex(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->SetSelectedVertex(newVal);
-	return S_OK;
-}
-
-// *******************************************************
-//		CopyOptionsFrom()
-// *******************************************************
-STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-	float lineWidth, tranparency;
-	OLE_COLOR fillColor, lineColor;
-	options->get_FillColor(&fillColor);
-	options->get_LineColor(&lineColor);
-	options->get_LineWidth(&lineWidth);
-	options->get_FillTransparency(&tranparency);
-
-	_activeShape->FillColor = fillColor;
-	_activeShape->LineColor = lineColor;
-	_activeShape->LineWidth = lineWidth;
 	return S_OK;
 }
 
@@ -759,7 +676,7 @@ STDMETHODIMP CShapeEditor::Undo(VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	if (_state == EditorEmpty)
+	if (_state == esEmpty)
 		return VARIANT_FALSE;
 
 	if (_activeShape->GetCreationMode()) {
@@ -850,16 +767,16 @@ STDMETHODIMP CShapeEditor::put_SnapBehavior(tkSnapBehavior newVal)
 // *******************************************************
 //		EditorState
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_EditorState(tkShapeEditorState* pVal)
+STDMETHODIMP CShapeEditor::get_EditorState(tkEditorState* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _state;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_EditorState(tkShapeEditorState newVal)
+STDMETHODIMP CShapeEditor::put_EditorState(tkEditorState newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->SetCreationMode(newVal == EditorCreation || newVal == EditorCreationUnbound);
+	_activeShape->SetCreationMode(newVal == esDigitize || newVal == esDigitizeUnbound || newVal == esOverlay);
 	_state = newVal;
 	return S_OK;
 }
@@ -935,30 +852,47 @@ STDMETHODIMP CShapeEditor::get_NumSubjectShapes(LONG* pVal)
 // *******************************************************
 //		StartUnboundShape
 // *******************************************************
+// for built-in cursors
+bool CShapeEditor::StartUnboundShape()
+{
+	tkCursorMode cursor = _mapCallback->_GetCursorMode();
+	ShpfileType	shpType = GetShapeTypeForTool(cursor);
+	if (shpType == SHP_NULLSHAPE)
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return S_OK;
+	}
+	put_ShapeType(shpType);
+	put_EditorState(esDigitizeUnbound);
+	ApplyColoringForTool(cursor);
+	return S_OK;
+}
+
+// *******************************************************
+//		StartUnboundShape
+// *******************************************************
+// for custom digitizing
+// TODO: set the default coloring
 STDMETHODIMP CShapeEditor::StartUnboundShape(ShpfileType shpType, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	if (shpType == SHP_NULLSHAPE )    // TODO: split subject operations and group overlay operations
+	tkCursorMode cursor = _mapCallback->_GetCursorMode();
+	if (cursor != cmAddShape) {
+		ErrorMessage(tkADD_SHAPE_MODE_ONLY);
+		return S_OK;
+	}
+
+	if (shpType == SHP_NULLSHAPE)
 	{
-		if (_subjects.size() > 0) {
-			_subjects[0]->get_ShapeType(&shpType);
-			OLE_COLOR line;
-			_subjects[0]->get_LineColor(&line);
-			put_LineColor(line);
-			//put_PointLabelsVisible(VARIANT_FALSE);
-			//put_LengthDisplayMode(ldmNone);
-			//put_VerticesVisible(VARIANT_FALSE);
-		}
-		else {
-			ErrorMessage(tkINVALID_PARAMETER_VALUE);
-			return S_OK;
-		}
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return S_OK;
 	}
 	
 	put_ShapeType(shpType);
-	put_EditorState(EditorCreationUnbound);
+	put_EditorState(esDigitizeUnbound);
+
 	return S_OK;
 }
 
@@ -978,48 +912,14 @@ STDMETHODIMP CShapeEditor::put_VerticesVisible(VARIANT_BOOL newVal)
 	return S_OK;
 }
 
-// *******************************************************
-//		ApplyOperation
-// *******************************************************
-IShape* CShapeEditor::ApplyOperation(tkCursorMode operation, int& layerHandle, int& shapeIndex)
-{
-	if (_subjects.size() != 1) {
-		return NULL;
-	}
 
-	_subjects[0]->get_LayerHandle(&layerHandle);
-	_subjects[0]->get_ShapeIndex(&shapeIndex);
-	CComPtr<IShape> subject = GetLayerShape(layerHandle, shapeIndex);
-	
-	CComPtr<IShape> overlay = NULL;
-	get_ValidatedShape(&overlay);
-	
-	if (!subject || !overlay) {
-		return NULL;
-	}
-
-	IShape* result = NULL;
-	switch (operation)
-	{
-		case cmAddPart:
-			subject->Clip(overlay, tkClipOperation::clUnion, &result);
-			break;
-		case cmRemovePart:
-			subject->Clip(overlay, tkClipOperation::clDifference, &result);
-			break;
-		case cmSplitByPolyline:
-			// TODO: implement
-			break;
-	}
-	return result;
-}
 
 // *******************************************************
 //		GetClosestPoint
 // *******************************************************
 bool CShapeEditor::GetClosestPoint(double projX, double projY, double& xResult, double& yResult)
 {
-	ShpfileType shpType = Utility::ShapeTypeConvert2D(_activeShape->GetShapeType());
+	ShpfileType shpType = Utility::ShapeTypeConvert2D(_activeShape->GetShapeType2D());
 
 	if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 		return false;				// TODO: multi points should be supported
@@ -1203,71 +1103,66 @@ bool CShapeEditor::ValidateWithGeos(IShape** shp)
 }
 
 // ************************************************************
-//		TrySave
+//		TryStopDigitizing
 // ************************************************************
-bool CShapeEditor::TrySave()
+bool CShapeEditor::TryStopDigitizing()
 {
 	if (!CheckState()) return false;
-
-	bool newShape = _shapeIndex == -1;
-
-	int layerHandle = _layerHandle, shapeIndex = _shapeIndex;
-	tkCursorMode cursorMode = _mapCallback->_GetCursorMode();
+	
 	CComPtr<IShape> shp = NULL;
+	get_ValidatedShape(&shp);
 
-	if (_mapCallback->_IsSubjectCursor())
+	switch (_state)
 	{
-		shp = ApplyOperation(cursorMode, layerHandle, shapeIndex);
-		if (!shp) return false;
-		newShape = false;
-		if (!Validate(&shp))
-			return false;
+		case esDigitizeUnbound:
+			_mapCallback->_UnboundShapeFinished(shp);
+			return true;	
+		case esOverlay:
+			EndOverlay(shp);
+			return true;
+		case esDigitize:
+		case esEdit:
+			get_ValidatedShape(&shp);
+			if (!shp) return false;
+			return TrySaveShape(shp);
 	}
-	else if (_state == EditorCreationUnbound) 
-	{
-		get_ValidatedShape(&shp);
-		_mapCallback->_UnboundShapeFinished(shp);
-		return true;
-	}
-	else {
-		get_ValidatedShape(&shp);
-		if (!shp) return false;
-	}
+	return true;
+}
 
+// ************************************************************
+//		TrySaveShape
+// ************************************************************
+bool CShapeEditor::TrySaveShape(IShape* shp)
+{
 	CComPtr<IShapefile> sf = NULL;
-	sf.Attach(_mapCallback->_GetShapefile(layerHandle));
+	sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
 	if (!sf) {
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return false;
 	}
-	
+
 	// 3) custom validation
 	tkMwBoolean cancel = blnFalse;
-	_mapCallback->_FireValidateShape(cursorMode, layerHandle, shp, &cancel);
+	_mapCallback->_FireValidateShape(_layerHandle, shp, &cancel);
 	if (cancel == blnTrue) {
 		return false;
 	}
 
-	long numShapes;
-	sf->get_NumShapes(&numShapes);
-
-	IUndoList* undoList = _mapCallback->_GetUndoList();
-
 	VARIANT_BOOL vb;
-	if (newShape) {
-		undoList->Add(uoAddShape, (long)layerHandle, (long)numShapes, &vb);
-	}
+	int shapeIndex = _shapeIndex;
+	int layerHandle = _layerHandle;
+	bool newShape = _shapeIndex == -1;
 
-	if (_mapCallback->_IsSubjectCursor()) {
-		undoList->Add(uoEditShape, (long)layerHandle, (long)shapeIndex, &vb);
-	}
-
-	// add new shape
-	if (newShape) {
+	if (newShape)
+	{
+		long numShapes = ShapefileHelper::GetNumShapes(sf);
+		IUndoList* undoList = _mapCallback->_GetUndoList();
+		undoList->Add(uoAddShape, (long)_layerHandle, (long)numShapes, &vb);
 		sf->EditInsertShape(shp, &numShapes, &vb);
 		shapeIndex = numShapes;
 	}
-	else {
+	else 
+	{
 		sf->EditUpdateShape(shapeIndex, shp, &vb);
 	}
 
@@ -1277,6 +1172,7 @@ bool CShapeEditor::TrySave()
 
 	// let the user set new attributes
 	_mapCallback->_FireAfterShapeEdit(newShape ? blnTrue : blnFalse, layerHandle, shapeIndex);
+
 	return true;
 }
 
@@ -1289,7 +1185,7 @@ bool CShapeEditor::RestoreState(IShape* shp, long layerHandle, long shapeIndex)
 	bool hasShape = _layerHandle != -1;
 
 	if (hasShape && newShape) {
-		if (!TrySave())
+		if (!TryStopDigitizing())
 			return false;
 	}
 	
@@ -1313,9 +1209,6 @@ void CShapeEditor::HandleProjPointAdd(double projX, double projY)
 	double pixelX, pixelY;
 	_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
 	_activeShape->AddPoint(projX, projY, pixelX, pixelY);
-	
-	// TODO: revisit; isn't it better to set it on changing of map cursor
-	put_EditorState(_layerHandle != -1 ? EditorCreation : EditorCreationUnbound);    
 }
 
 // ***************************************************************
@@ -1367,9 +1260,6 @@ ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 {
 	switch (cursor)
 	{
-		case cmAddPart:
-			return SHP_NULLSHAPE;
-		case cmRemovePart:
 		case cmSelectByPolygon:
 		case cmClipByPolygon:
 		case cmSplitByPolygon:
@@ -1381,6 +1271,9 @@ ShpfileType CShapeEditor::GetShapeTypeForTool(tkCursorMode cursor)
 	return SHP_NULLSHAPE;
 }
 
+
+
+
 // ***************************************************************
 //		ApplyColoringForTool()
 // ***************************************************************
@@ -1390,14 +1283,13 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 	GetUtils()->ColorByName(LightSlateGray, &color);
 	put_LineColor(color);
 	put_LineWidth(1.0f);
+	_activeShape->OverlayerTool = true;
 	switch (mode)
 	{
-		case cmAddPart:
 		case cmClipByPolygon:
 			GetUtils()->ColorByName(Green, &color);
 			put_FillColor(color);
 			break;
-		case cmRemovePart:
 		case cmEraseByPolygon:
 			GetUtils()->ColorByName(Red, &color);
 			put_FillColor(color);
@@ -1415,4 +1307,198 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 			put_LineColor(RGB(255, 0, 0));
 			break;
 	}
+}
+
+// ***************************************************************
+//		ApplyOverlayColoring()
+// ***************************************************************
+void CShapeEditor::ApplyOverlayColoring(tkEditorOverlay overlay)
+{
+	_overlayType =  overlay;
+	OLE_COLOR color;
+	switch (overlay)
+	{
+		case eoAddPart:
+			GetUtils()->ColorByName(Green, &color);
+			put_FillColor(color);
+			break;
+		case eoRemovePart:
+			GetUtils()->ColorByName(Red, &color);
+			put_FillColor(color);
+			break;
+	}
+}
+
+// ***************************************************************
+//		Clone()
+// ***************************************************************
+CShapeEditor* CShapeEditor::Clone()
+{
+	CShapeEditor* editor = NULL;
+	GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&editor);
+	editor->SetIsSubject(true);
+	editor->SetMapCallback(_mapCallback);
+
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
+	if (sf) {
+		EditorHelper::CopyOptionsFrom(editor, sf);
+	}
+
+	CComPtr<IShape> shp = NULL;
+	get_RawData(&shp);
+	if (shp) {
+		editor->SetShape(shp);
+	}
+	return editor;
+}
+
+// ***************************************************************
+//		StartOverlay()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::StartOverlay(tkEditorOverlay overlayType, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	
+	if (_activeShape->IsEmpty())
+	{
+		ErrorMessage(tkEDITOR_OVERLAY_NO_SUBJECT);
+		return S_OK;
+	}
+
+	if (_subjects.size() > 0)
+	{
+		ErrorMessage(tkEDITOR_OVERLAY_ALREADY_STARTED);
+		return S_OK;
+	}
+	
+	CShapeEditor* editor = Clone();
+	_subjects.push_back(editor);
+	ShpfileType shpType = overlayType == eoRemovePart ? SHP_POLYGON: _activeShape->GetShapeType2D();
+
+	_activeShape->Clear();
+	put_ShapeType(shpType);
+	put_EditorState(esOverlay);
+	ApplyOverlayColoring(overlayType);
+
+	_mapCallback->_SetMapCursor(cmAddShape, false);
+
+	return S_OK;
+}
+
+// *******************************************************
+//		CalculateOverlay
+// *******************************************************
+IShape* CShapeEditor::CalculateOverlay(IShape* overlay)
+{
+	if (!overlay) return NULL;
+
+	if (_subjects.size() != 1) {
+		return NULL;
+	}
+
+	CComPtr<IShape> subject = NULL;
+	_subjects[0]->get_RawData(&subject);
+
+	if (!subject || !overlay) {
+		return NULL;
+	}
+
+	IShape* result = NULL;
+	switch (_overlayType)
+	{
+		case eoAddPart:
+			subject->Clip(overlay, tkClipOperation::clUnion, &result);
+			break;
+		case eoRemovePart:
+			subject->Clip(overlay, tkClipOperation::clDifference, &result);
+			break;
+	}
+	return result;
+}
+
+// *******************************************************
+//		ApplyOperation
+// *******************************************************
+void CShapeEditor::EndOverlay(IShape* overlay)
+{
+	CComPtr<IShape> result = NULL;
+	result.Attach(CalculateOverlay(overlay));
+
+	CancelOverlay(false);
+
+	if (result)
+	{
+		VARIANT_BOOL vb;
+		IUndoList* undoList = _mapCallback->_GetUndoList();
+		undoList->Add(uoEditShape, _layerHandle, _shapeIndex, &vb);
+		SetShape(result);
+	}
+}
+
+// ***************************************************************
+//		CancelOverlay()
+// ***************************************************************
+void CShapeEditor::CancelOverlay(bool restoreSubjectShape)
+{
+	if (_state == esOverlay)
+	{
+		if (_subjects.size() > 0)
+		{
+			CComPtr<IShape> shp = NULL;
+			_subjects[0]->get_RawData(&shp);
+			SetShape(shp);
+		}
+		ClearSubjectShapes();
+		put_EditorState(esEdit);
+		CopyOptionsFromShapefile();
+		_mapCallback->_SetMapCursor(cmEditShape, false);
+	}
+}
+
+// ***************************************************************
+//		CopyOptionsFromShapefile()
+// ***************************************************************
+void CShapeEditor::CopyOptionsFromShapefile()
+{
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
+	EditorHelper::CopyOptionsFrom(this, sf);
+}
+
+// ***************************************************************
+//		CopyOptionsFrom()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options)
+{
+	EditorHelper::CopyOptionsFrom(this, options);
+	return S_OK;
+}
+
+// ***************************************************************
+//		EditorBehavior()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_EditorBehavior(tkEditorBehavior* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _behavior;
+	return S_OK;
+}
+STDMETHODIMP CShapeEditor::put_EditorBehavior(tkEditorBehavior newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_behavior = newVal;
+	switch (newVal)
+	{
+		case ebVertexEditor:
+			SetSelectedPart(-1);
+			_redrawNeeded = true;
+			break;
+		case ebPartEditor:
+			SetSelectedVertex(-1);
+			_redrawNeeded = true;
+			break;
+	}
+	return S_OK;
 }
