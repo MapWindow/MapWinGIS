@@ -22,5 +22,6 @@ public:
 	static bool PointInPolygon(IShapefile* sf, long ShapeIndex, double x, double y);
 	static bool BoundsWithinPolygon(IShapefile* sf, int shapeIndex, double b_minX, double b_minY, double b_maxX, double b_maxY);
 	static bool ShapeTypeIsM(IShapefile* sf);
+	static CStringW GetSymbologyFilename(IShapefile* sf);
 };
 

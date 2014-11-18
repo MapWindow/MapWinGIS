@@ -992,6 +992,7 @@ private:
 	// shapefiles	
 	bool IsValidShape( long layerHandle, long shape );
 	Layer* get_ShapefileLayer(long layerHandle);
+	Layer* get_Layer(long layerHandle);
 	CDrawingOptionsEx* get_ShapefileDrawingOptions(long LayerHandle);
 	void AlignShapeLayerAndShapes(Layer * layer);
 	ShpfileType get_ShapefileType(long layerHandle);
@@ -1093,6 +1094,8 @@ private:
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 	bool StartNewBoundShape(long x, long y);
+	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
+	void LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
 	
 #pragma endregion
 
@@ -1124,6 +1127,8 @@ public:
 		SetCapture();
 	}
 	
+
+
 };
 
 //{{AFX_INSERT_LOCATION}}

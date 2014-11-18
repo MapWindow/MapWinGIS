@@ -36,11 +36,6 @@ void COgrLayer::InitOpenedLayer()
 	ForceCreateShapefile();
 	RestartBackgroundLoader();
 
-	if (m_globalSettings.ogrUseStyles && _sourceType == ogrDbTable)
-	{
-		VARIANT_BOOL vb;
-		ApplyStyle(A2BSTR(""), &vb);
-	}
 }
 
 //***********************************************************************
@@ -938,17 +933,6 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "ForUpdate", NULL);
 	bool forUpdate = (s != "") ? (atoi(s.GetString()) == 0 ? false : true) : false;
 
-	_loader.LabelExpression = Utility::ConvertFromUtf8(CPLGetXMLValue(node, "LabelExpression", ""));
-
-	s = CPLGetXMLValue(node, "LabelPosition", NULL);
-	_loader.LabelPosition = (s != "") ? (tkLabelPositioning)atoi(s.GetString()) : lpNone;
-
-	s = CPLGetXMLValue(node, "LabelOrientation", NULL);
-	_loader.LabelOrientation = (s != "") ? (tkLineLabelOrientation)atoi(s.GetString()) : lorParallel;
-
-	s = CPLGetXMLValue(node, "MaxFeatureCount", NULL);
-	_loader.SetMaxCacheCount((s != "") ? atoi(s.GetString()) : m_globalSettings.ogrLayerMaxFeatureCount);
-
 	VARIANT_BOOL vb = VARIANT_FALSE;
 	if (sourceType == ogrDbTable)
 	{
@@ -963,15 +947,37 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 		// TODO: implement
 	}
 	
+	vb = DeserializeOptions(node) ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return vb == VARIANT_TRUE;
+}
+
+// *************************************************************
+//		DeserializeOptions()
+// *************************************************************
+bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
+{
+	bool success = true;
+	_loader.LabelExpression = Utility::ConvertFromUtf8(CPLGetXMLValue(node, "LabelExpression", ""));
+
+	CString s = CPLGetXMLValue(node, "LabelPosition", NULL);
+	_loader.LabelPosition = (s != "") ? (tkLabelPositioning)atoi(s.GetString()) : lpNone;
+
+	s = CPLGetXMLValue(node, "LabelOrientation", NULL);
+	_loader.LabelOrientation = (s != "") ? (tkLineLabelOrientation)atoi(s.GetString()) : lorParallel;
+
+	s = CPLGetXMLValue(node, "MaxFeatureCount", NULL);
+	_loader.SetMaxCacheCount((s != "") ? atoi(s.GetString()) : m_globalSettings.ogrLayerMaxFeatureCount);
+
 	// let's populate data (in case it was populated before serialization)
-	if (vb && _sourceType != ogrUninitialized && _layer != NULL)
+	if (_sourceType != ogrUninitialized && _layer != NULL)
 	{
 		CPLXMLNode* psChild = CPLGetXMLNode(node, "ShapefileData");
 		if (psChild)
 		{
 			_shapefile = LoadShapefile();
 			bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
-			if (!result) vb = VARIANT_FALSE;
+			if (!result) success = false;
 		}
 	}
 
@@ -981,7 +987,7 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 		SysFreeString(_key);
 		_key = A2BSTR(key);
 	}
-	return vb == VARIANT_TRUE;
+	return success;
 }
 
 // *************************************************************
@@ -1083,7 +1089,7 @@ STDMETHODIMP COgrLayer::get_SupportsStyles(VARIANT_BOOL* pVal)
 // *************************************************************
 //		SaveStyle()
 // *************************************************************
-STDMETHODIMP COgrLayer::SaveStyle(BSTR Name, VARIANT_BOOL* retVal)
+STDMETHODIMP COgrLayer::SaveStyle(BSTR Name, CStringW xml, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
@@ -1105,7 +1111,7 @@ STDMETHODIMP COgrLayer::SaveStyle(BSTR Name, VARIANT_BOOL* retVal)
 
 	CStringW styleName = OLE2W(Name);
 
-	bool result = OgrStyleHelper::SaveStyle(_dataset, _shapefile, GetLayerName(), styleName);
+	bool result = OgrStyleHelper::SaveStyle(_dataset, xml, GetLayerName(), styleName);
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
@@ -1175,48 +1181,14 @@ STDMETHODIMP COgrLayer::get_StyleName(LONG styleIndex, BSTR* pVal)
 	return S_OK;
 }
 
+
 // *************************************************************
-//		ApplyStyle()
+//		LoadStyleXML()
 // *************************************************************
-STDMETHODIMP COgrLayer::ApplyStyle(BSTR name, VARIANT_BOOL* retVal)
+CStringW COgrLayer::LoadStyleXML(CStringW name)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-	
-	if (!CheckState()) return S_OK;
-
-	USES_CONVERSION;
-	CStringW styleName = OLE2W(name);
-	CStringW sql;
-	sql.Format(L"SELECT style FROM %s WHERE layername = '%s' AND stylename = '%s'", GetStyleTableName(), GetLayerName(), styleName);
-	
-	CStringW xml;
-
-	bool found = false;
-	CPLErrorReset();
-	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
-	if (layer) {
-		OGRFeature* ft = layer->GetNextFeature();
-		if (ft) {
-			xml = ft->GetFieldAsString(0);
-			*retVal = VARIANT_TRUE;
-			OGRFeature::DestroyFeature(ft);
-		}
-		_dataset->ReleaseResultSet(layer);
-	}
-
-	if (xml.GetLength() != 0)
-	{
-		CComPtr<IShapefile> sf = NULL;
-		GetData(&sf);
-		if (sf) {
-			CComBSTR bstr;
-			bstr.Attach(W2BSTR(xml));
-			sf->Deserialize(VARIANT_FALSE, bstr);	// TODO: Deserialize lacking any means to report the success or failure
-			*retVal = VARIANT_TRUE;
-		}
-	}
-	return S_OK;
+	if (!CheckState()) return L"";
+	return OgrStyleHelper::LoadStyle(_dataset, GetStyleTableName(), GetLayerName(), name);
 }
 
 // *************************************************************
@@ -1253,15 +1225,9 @@ STDMETHODIMP COgrLayer::RemoveStyle(BSTR styleName, VARIANT_BOOL* retVal)
 
 	if (!CheckState()) return S_OK;
 
-	USES_CONVERSION;
 	CStringW name = OLE2W(styleName);
-	CStringW sql;
-	sql.Format(L"DELETE FROM %s WHERE layername = '%s' AND stylename = '%s'", GetStyleTableName(), GetLayerName(), name);
-
-	CPLErrorReset();
-	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
-	_dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
-	*retVal = CPLGetLastErrorNo() == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
+	bool result = OgrStyleHelper::RemoveStyle(_dataset, GetStyleTableName(), GetLayerName(), name);
+	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1421,3 +1387,4 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 	delete categories;
 	return S_OK;
 }
+

@@ -1527,21 +1527,40 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "Positioning", NULL );
 	if (s != "") m_positioning =  (tkLabelPositioning)atoi(s.GetString());
 
+	bool inMemory = false;
+	if (m_shapefile)
+	{
+		tkShapefileSourceType sourceType;
+		m_shapefile->get_SourceType(&sourceType);
+		inMemory = sourceType != sstDiskBased;
+	}
+
+	CString expression = CPLGetXMLValue(node, "Expression", "");
+	expression.Replace("&#xA;", "\r\n");
+
 	// restoring labels
 	s = CPLGetXMLValue( node, "Generated", NULL );
 	bool loadLabels = atoi(s.GetString()) == 0 ? false : true;
 	if (loadLabels)
 	{
-		if (m_savingMode == modeNone)
+		bool xmlMode = m_savingMode == modeXML || m_savingMode == modeXMLOverwrite;
+
+		if ((xmlMode && inMemory) ||  m_savingMode == modeNone)
 		{
+			long count;
 			s = CPLGetXMLValue( node, "SourceField", NULL );
 			if (s != "") 
 			{
 				m_sourceField = atoi(s.GetString()) ? true : false;
 				if (m_sourceField != -1)
 				{
-					long count;
 					m_shapefile->GenerateLabels(m_sourceField, m_positioning, true, &count);
+				}
+			}
+			else {
+				if (expression.GetLength() != 0)
+				{
+					m_shapefile->GenerateLabels(-1, m_positioning, true, &count);
 				}
 			}
 		}
@@ -1562,27 +1581,18 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 		}
 		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
 		{
-			if (m_shapefile)
-			{
-				tkShapefileSourceType sourceType;
-				m_shapefile->get_SourceType(&sourceType);
-				
-				if (sourceType == sstDiskBased)
-				{
-					// constructing the name of .lbl file
-					BSTR name;
-					m_shapefile->get_Filename(&name);
-					USES_CONVERSION;
-					CString path = Utility::GetPathWOExtension(OLE2CA(name));
-					path += ".lbl";
+			// constructing the name of .lbl file
+			BSTR name;
+			m_shapefile->get_Filename(&name);
+			USES_CONVERSION;
+			CString path = Utility::GetPathWOExtension(OLE2CA(name));
+			path += ".lbl";
 					
-					// restoring labels
-					if (Utility::fileExists(path))
-					{
-						VARIANT_BOOL retVal;
-						this->LoadFromXML(A2BSTR(path), &retVal);
-					}
-				}
+			// restoring labels
+			if (Utility::fileExists(path))
+			{
+				VARIANT_BOOL retVal;
+				this->LoadFromXML(A2BSTR(path), &retVal);
 			}
 		}
 	}
@@ -1642,19 +1652,15 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue( node, "TextRenderingHint", NULL );
 	m_textRenderingHint = (s != "") ? (tkTextRenderingHint)atoi(s.GetString()) : HintAntiAlias;
-
-	// applying expression; should be done after label generation
-	s = CPLGetXMLValue( node, "Expression", "" );
 	
 	// applying the expressions
 	if (m_categories.size() > 0)
 	{
 		this->ApplyCategories();
 	}
-
-	// restoring new line sequences
-	s.Replace("&#xA;", "\r\n");
-	this->put_Expression(A2BSTR(s));
+	
+	// applying expression; should be done after label generation
+	this->put_Expression(A2BSTR(expression));
 
 	return true;
 }
@@ -1918,10 +1924,10 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 	}
 
 	
-	CPLXMLNode* node = GdalHelper::ParseXMLFile(name); // CPLParseXMLFile(name.GetString());
-	if (node)
+	CPLXMLNode* root = GdalHelper::ParseXMLFile(name); // CPLParseXMLFile(name.GetString());
+	if (root)
 	{
-		node = CPLGetXMLNode(node, "=MapWindow");
+		CPLXMLNode* node = CPLGetXMLNode(root, "=MapWindow");
 		if (node)
 		{
 			CString s = CPLGetXMLValue( node, "FileVersion", "0" );
@@ -1952,6 +1958,7 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 				DeserializeLabelData(node, loadRotation, loadText);
 			}
 		}
+		CPLDestroyXMLNode(root);
 	}
 	return S_OK;
 }

@@ -430,7 +430,9 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	if (m_globalSettings.ogrUseStyles) 
 	{
 		CStringW layerName = OLE2W(newLayerName);
-		if (OgrStyleHelper::SupportsStyles(_dataset, layerName)) {
+		if (OgrStyleHelper::SupportsStyles(_dataset, layerName)) 
+		{
+			OgrStyleHelper::RemoveStyle(_dataset, OgrStyleHelper::GetStyleTableName(layerName), layerName, "" );
 			OgrStyleHelper::SaveStyle(_dataset, shapefile, layerName, "");
 		}
 	}

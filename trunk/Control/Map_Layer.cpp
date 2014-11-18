@@ -12,6 +12,7 @@
 #include "Shapefile.h"
 #include "ImageLayerInfo.h"
 #include "OgrLayer.h"
+#include "OgrStyle.h"
 
 // ************************************************************
 //		GetNumLayers()
@@ -530,6 +531,11 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 	}
 
+	if (m_globalSettings.loadSymbologyOnAddLayer)
+	{
+		LoadOgrStyle(l, layerHandle, L"");
+	}
+
 	// loading symbology
 	if(symbologyName.GetLength() > 0)
 	{
@@ -542,6 +548,29 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	_canUseLayerBuffer = FALSE;
 	LockWindow( lmUnlock );
 	return layerHandle;
+}
+
+// ***************************************************************
+//		LoadOgrStyle()
+// ***************************************************************
+void CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
+{
+	if (layer->IsOgrLayer())
+	{
+		IOgrLayer* ogrLayer = NULL;
+		layer->QueryOgrLayer(&ogrLayer);
+		if (ogrLayer)
+		{
+			CStringW xml = ((COgrLayer*)ogrLayer)->LoadStyleXML(L"");
+			CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
+			if (root) {
+				CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
+				DeserializeLayerOptionsCore(layerHandle, node);
+				CPLDestroyXMLNode(root);
+			}
+			ogrLayer->Release();
+		}
+	}
 }
 
 // ***************************************************************
@@ -1518,6 +1547,8 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 		layerType = ShapefileLayer;
 	else if (_stricmp(s.GetString(), "Image") == 0)
 		layerType = ImageLayer;
+	else if (_stricmp(s.GetString(), "OgrLayer") == 0)
+		layerType = OgrLayerSource;
 
 	if (layerType == UndefinedLayer)
 	{
@@ -1526,8 +1557,13 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	}
 
 	// actual layer type
+	bool injectShapefileToOgr = false;	
 	Layer* layer = _allLayers[LayerHandle];
-	if (layer->type != layerType)
+	if (layer->IsOgrLayer() && layerType == ShapefileLayer)
+	{
+		injectShapefileToOgr = true;
+	}
+	else if (layer->type != layerType)
 	{
 		ErrorMessage(tkINVALID_FILE);
 		return VARIANT_FALSE;
@@ -1560,6 +1596,19 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	this->SetLayerDescription(LayerHandle, s);
 
 	bool retVal = false;
+	if (layerType == OgrLayerSource)
+	{
+		IOgrLayer* ogr = NULL;
+		if (layer->QueryOgrLayer(&ogr))
+		{
+			node = CPLGetXMLNode(node, "OgrLayerClass");
+			if (node)
+			{
+				((COgrLayer*)ogr)->DeserializeOptions(node);
+			}
+			ogr->Release();
+		}
+	}
 	if (layerType == ShapefileLayer)
 	{
 		CComPtr<IShapefile> sf = NULL;
@@ -1704,43 +1753,82 @@ CString CMapView::get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName)
 VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, VARIANT_BOOL Overwrite, LPCTSTR Description)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	bool result = false;
 
-	CString name = get_OptionsFilename(LayerHandle, OptionsName);
-
-	if (Utility::fileExists(name))
+	Layer* layer = get_Layer(LayerHandle);
+	if (layer) 
 	{
-		if (!Overwrite)
+		if (layer->IsOgrLayer())
 		{
-			ErrorMessage(tkCANT_CREATE_FILE);
-			return VARIANT_FALSE;
-		}
-		else
-		{
-			if( remove( name ) != 0 )
+			CPLXMLNode* psTree = LayerOptionsToXmlTree(LayerHandle);
+			if (psTree)
 			{
-				ErrorMessage(tkCANT_DELETE_FILE);
-				return VARIANT_FALSE;
+				CStringW xml = Utility::ConvertFromUtf8(CPLSerializeXMLTree(psTree));
+				CPLDestroyXMLNode(psTree);
+
+				IOgrLayer* ogrLayer = NULL;
+				layer->QueryOgrLayer(&ogrLayer);
+				if (ogrLayer) 
+				{
+					VARIANT_BOOL vb;
+					USES_CONVERSION;
+					((COgrLayer*)ogrLayer)->SaveStyle(A2W(OptionsName), xml, &vb);
+					if (vb) result = true;
+				}
+			}
+		}
+		else 
+		{
+			CString name = get_OptionsFilename(LayerHandle, OptionsName);
+
+			if (Utility::fileExists(name))
+			{
+				if (!Overwrite)
+				{
+					ErrorMessage(tkCANT_CREATE_FILE);
+					return VARIANT_FALSE;
+				}
+				else
+				{
+					if (remove(name) != 0)
+					{
+						ErrorMessage(tkCANT_DELETE_FILE);
+						return VARIANT_FALSE;
+					}
+				}
+			}
+
+			CPLXMLNode* psTree = LayerOptionsToXmlTree(LayerHandle);
+			if (psTree)
+			{
+				USES_CONVERSION;
+				result = GdalHelper::SerializeXMLTreeToFile(psTree, A2W(name)) != 0;		// TODO: use Unicode
+				CPLDestroyXMLNode(psTree);
 			}
 		}
 	}
-	
-	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWinGIS");
-	if (psTree) 
-	{
-		Utility::WriteXmlHeaderAttributes(psTree, "LayerFile");
+	return result ? VARIANT_TRUE : VARIANT_FALSE;
+}
 
-		CPLXMLNode* node = this->SerializeLayerCore(LayerHandle, "");
-		if (node)
+// *********************************************************
+//		LayerOptionsToXmlTree()
+// *********************************************************
+CPLXMLNode* CMapView::LayerOptionsToXmlTree(long layerHandle)
+{
+	CPLXMLNode* node = this->SerializeLayerCore(layerHandle, "");
+	if (node)
+	{
+		CPLXMLNode* psTree = CPLCreateXMLNode(NULL, CXT_Element, "MapWinGIS");
+		if (psTree)
 		{
+			Utility::WriteXmlHeaderAttributes(psTree, "LayerFile");
 			USES_CONVERSION;
 			CPLAddXMLChild(psTree, node);
-			bool result = GdalHelper::SerializeXMLTreeToFile(psTree, A2W(name)) != 0;		// TODO: use Unicode
-			CPLDestroyXMLNode(psTree);
-			return result ? VARIANT_TRUE : VARIANT_FALSE;
+			return psTree;
 		}
+		CPLDestroyXMLNode(node);
 	}
-	
-	return VARIANT_FALSE;
+	return NULL;
 }
 
 // *********************************************************
@@ -1801,7 +1889,17 @@ VARIANT_BOOL CMapView::LoadLayerOptionsCore(CString baseName, LONG LayerHandle, 
 VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, BSTR* Description)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
+	Layer* l = get_Layer(LayerHandle);
+	if (l)
+	{
+		if (l->IsOgrLayer())
+		{
+			USES_CONVERSION;
+			LoadOgrStyle(l, LayerHandle, A2W(OptionsName));
+		}
+	}
+
 	CComBSTR filename;
 	filename.Attach(this->GetLayerFilename(LayerHandle));
 	

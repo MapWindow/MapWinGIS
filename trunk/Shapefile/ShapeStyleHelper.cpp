@@ -197,3 +197,22 @@ IShapeDrawingOptions* ShapeStyleHelper::GetHotTrackingStyle(IShapefile* sf, OLE_
 	}
 	return NULL;
 }
+
+// *****************************************************
+//		GetSymbologyFileAsXml()
+// *****************************************************
+CStringW ShapeStyleHelper::GetSymbologyFileAsXml(IShapefile* sf)
+{
+	CStringW style = L"";
+	
+	CStringW filename = ShapefileHelper::GetSymbologyFilename(sf);
+	if (filename.GetLength() == 0) return style;
+	
+	CPLXMLNode* node = GdalHelper::ParseXMLFile(filename);
+	if (node) {
+		USES_CONVERSION;
+		style = Utility::ConvertFromUtf8(CPLSerializeXMLTree(node));
+		CPLDestroyXMLNode(node);
+	}
+	return style;
+}

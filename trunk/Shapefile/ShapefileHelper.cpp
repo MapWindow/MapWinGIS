@@ -388,3 +388,21 @@ bool ShapefileHelper::ShapeTypeIsM(IShapefile* sf)
 	return Utility::ShapeTypeIsM(shpType);
 }
 
+// ********************************************************************
+//		GetSymbologyFilename()
+// ********************************************************************
+CStringW ShapefileHelper::GetSymbologyFilename(IShapefile* sf)
+{
+	if (!sf) return L"";
+	CComBSTR bstr;
+	sf->get_Filename(&bstr);
+	CStringW name = OLE2W(bstr);
+	if (name.GetLength() > 0)
+	{
+		name += L".mwsymb";
+		if (Utility::fileExistsUnicode(name))
+			return name;
+	}
+	return L"";
+}
+

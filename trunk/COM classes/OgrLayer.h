@@ -103,11 +103,10 @@ public:
 	STDMETHOD(put_DynamicLoading)(VARIANT_BOOL newVal);
 	STDMETHOD(get_MaxFeatureCount)(LONG* pVal);
 	STDMETHOD(put_MaxFeatureCount)(LONG newVal);
-	STDMETHOD(SaveStyle)(BSTR Name, VARIANT_BOOL* retVal);
+	STDMETHOD(SaveStyle)(BSTR Name, CStringW xml, VARIANT_BOOL* retVal);
 	STDMETHOD(get_SupportsStyles)(VARIANT_BOOL* pVal);
 	STDMETHOD(GetNumStyles)(LONG* pVal);
 	STDMETHOD(get_StyleName)(LONG styleIndex, BSTR* pVal);
-	STDMETHOD(ApplyStyle)(BSTR name, VARIANT_BOOL* retVal);
 	STDMETHOD(ClearStyles)(VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveStyle)(BSTR styleName, VARIANT_BOOL* retVal);
 	STDMETHOD(get_LabelExpression)(BSTR* pVal);
@@ -129,6 +128,9 @@ public:
 	CPLXMLNode* SerializeCore(CString ElementName);
 	bool DeserializeCore(CPLXMLNode* node);
 	OgrDynamicLoader* GetDynamicLoader() { return &_loader; }
+	CStringW LoadStyleXML(CStringW name);
+	GDALDataset* GetDataset() {return _dataset; }
+	bool DeserializeOptions(CPLXMLNode* node);
 
 private:
 	
@@ -165,6 +167,8 @@ private:
 	CStringW GetLayerName();
 	CStringW GetStyleTableName();
 	void GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<VARIANT*>& values);
+	
+
 public:
 	
 };

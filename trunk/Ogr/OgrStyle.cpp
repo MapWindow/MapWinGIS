@@ -1,8 +1,38 @@
 #include "stdafx.h"
 #include "OgrStyle.h"
 #include "OgrHelper.h"
+#include "ShapefileHelper.h"
+#include "ShapeStyleHelper.h"
 
 char* STYLES_TABLE_NAME = "mw_styles";
+
+// *************************************************************
+//		LoadStyle()
+// *************************************************************
+CStringW OgrStyleHelper::LoadStyle(GDALDataset* dataset, CStringW styleTableName, CStringW layerName, CStringW styleName)
+{
+	USES_CONVERSION;
+	CStringW sql;
+	sql.Format(L"SELECT style FROM %s WHERE layername = '%s' AND stylename = '%s'", styleTableName, layerName, styleName);
+
+	CStringW xml = L"";
+
+	bool found = false;
+	CPLErrorReset();
+	OGRLayer* layer = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	if (layer) {
+		OGRFeature* ft = layer->GetNextFeature();
+		if (ft) {
+			const char* s = ft->GetFieldAsString(0);
+			if (s) {
+				xml = OgrHelper::OgrString2Unicode(s);
+			}
+			OGRFeature::DestroyFeature(ft);
+		}
+		dataset->ReleaseResultSet(layer);
+	}
+	return xml;
+}
 
 // *************************************************************
 //		HasStyleTable()
@@ -26,20 +56,26 @@ bool OgrStyleHelper::HasStyleTable(GDALDataset* dataset, CStringW layerName)
 // *************************************************************
 bool OgrStyleHelper::SaveStyle(GDALDataset* dataset, IShapefile* shapefile, CStringW layerName, CStringW styleName)
 {
-	CComBSTR bstr;
-	shapefile->Serialize2(VARIANT_FALSE, VARIANT_FALSE, &bstr);
+	CStringW xml = ShapeStyleHelper::GetSymbologyFileAsXml(shapefile);
+	return SaveStyle(dataset, xml, layerName, styleName);
+}
 
-	USES_CONVERSION;
-	CStringW style = OLE2W(bstr);
-	style.Replace(L"\n", L"");
-	style.Replace(L"'", L"''''");
+// *************************************************************
+//		SaveStyle()
+// *************************************************************
+bool OgrStyleHelper::SaveStyle(GDALDataset* dataset, CStringW xml, CStringW layerName, CStringW styleName)
+{
+	xml.Replace(L"\n", L"");
+	xml.Replace(L"'", L"''''");
+	if (xml.GetLength() == 0) return false;
 
 	CStringW sql;
 	sql.Format(L"INSERT INTO %s(layername, stylename, style) VALUES ('%s', '%s', '%s')", GetStyleTableName(layerName),
-		layerName, styleName, style);
+		layerName, styleName, xml);
 
 	CPLErrorReset();
 	OGRLayer* layer = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	const char* msg = CPLGetLastErrorMsg();
 	return CPLGetLastErrorNo() == OGRERR_NONE;
 }
 
@@ -93,7 +129,7 @@ int OgrStyleHelper::CreateStyleTable(GDALDataset* dataset, CStringW layerName)
 }
 
 // *************************************************************
-//		CreateStyleTable()
+//		SupportsStyles()
 // *************************************************************
 bool OgrStyleHelper::SupportsStyles(GDALDataset* dataset, CStringW layerName)
 {
@@ -104,4 +140,19 @@ bool OgrStyleHelper::SupportsStyles(GDALDataset* dataset, CStringW layerName)
 			return false;
 	}
 	return true;
+}
+
+// *************************************************************
+//		RemoveStyle()
+// *************************************************************
+bool OgrStyleHelper::RemoveStyle(GDALDataset* dataset, CStringW styleTableName, CStringW layerName, CStringW styleName)
+{
+	USES_CONVERSION;
+	CStringW sql;
+	sql.Format(L"DELETE FROM %s WHERE layername = '%s' AND stylename = '%s'", styleTableName, layerName, styleName);
+
+	CPLErrorReset();
+	OGRLayer* layer = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	return CPLGetLastErrorNo() == OGRERR_NONE;
 }

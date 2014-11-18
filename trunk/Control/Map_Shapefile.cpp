@@ -117,6 +117,22 @@ Layer* CMapView::get_ShapefileLayer(long layerHandle)
 }
 
 // ***************************************************************
+//		get_Layer()
+// ***************************************************************
+Layer* CMapView::get_Layer(long layerHandle)
+{
+	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
+	{
+		return _allLayers[layerHandle];
+	}
+	else
+	{
+		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+		return NULL;
+	}
+}
+
+// ***************************************************************
 //		IsValidLayer()
 // ***************************************************************
 bool CMapView::IsValidLayer( long layerHandle )

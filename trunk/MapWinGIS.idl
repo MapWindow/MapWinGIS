@@ -5675,11 +5675,11 @@ interface IOgrLayer : IDispatch{
 	[propget, id(32)] HRESULT MaxFeatureCount([out, retval] LONG* pVal);
 	[propput, id(32)] HRESULT MaxFeatureCount([in] LONG newVal);
 	
-	[id(33)] HRESULT SaveStyle([in] BSTR Name, [out, retval] VARIANT_BOOL* retVal);
+	//[id(33)] HRESULT SaveStyle([in] BSTR Name, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(34)] HRESULT SupportsStyles([out, retval] VARIANT_BOOL* pVal);
 	[id(35)] HRESULT GetNumStyles([out, retval] LONG* pVal);
 	[propget, id(36)] HRESULT StyleName([in] LONG styleIndex, [out, retval] BSTR* pVal);
-	[id(37)] HRESULT ApplyStyle([in] BSTR name, [out, retval]VARIANT_BOOL* retVal);
+	//[id(37)] HRESULT ApplyStyle([in] BSTR name, [out, retval]VARIANT_BOOL* retVal);
 	[id(38)] HRESULT ClearStyles([out, retval]VARIANT_BOOL* retVal);
 	[id(39)] HRESULT RemoveStyle([in] BSTR styleName, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(40)] HRESULT LabelExpression([out, retval] BSTR* pVal);
