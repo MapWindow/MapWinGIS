@@ -174,27 +174,6 @@ namespace MWLite.GUI.Helpers
             }
         }
 
-        public static void SaveOgrStyle()
-        {
-            var legend = App.Legend;
-            int layerHandle = legend.SelectedLayer;
-
-            var layer = App.Map.get_OgrLayer(layerHandle);
-            if (layer == null)
-            {
-                MessageHelper.Info("This method is only applicable to OGR layers");
-                return;
-            }
-            if (!layer.SaveStyle(""))
-            {
-                MessageHelper.Info("Failed to save style: " + layer.ErrorMsg[layer.LastErrorCode]);
-            }
-            else
-            {
-                MessageHelper.Info("Style saved successfully");
-            }
-        }
-
         public static void SaveCurrentStyle()
         {
             var legend = App.Legend;

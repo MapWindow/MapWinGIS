@@ -38,9 +38,6 @@ namespace MWLite.GUI.MapLegend
                 case LegendCommand.ImportOgrLayer:
                     LayerHelper.ImportOgrLayer();
                     break;
-                case LegendCommand.SaveOgrStyle:
-                    LayerHelper.SaveOgrStyle();
-                    break;
                 case LegendCommand.ZoomToLayer:
                     _legend.Map.ZoomToLayer(LayerHandle);
                     break;

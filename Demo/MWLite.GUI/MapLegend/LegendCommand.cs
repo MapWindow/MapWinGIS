@@ -6,8 +6,7 @@
         Properties = 2,
         ZoomToLayer = 3,
         ImportOgrLayer = 4,
-        SaveOgrStyle = 5,
-        SaveLayerStyle = 6,
-        RemoveLayer = 7,
+        SaveLayerStyle = 5,
+        RemoveLayer = 6,
     }
 }

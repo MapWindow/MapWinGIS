@@ -33,15 +33,14 @@
             this.ctxLabels = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxProperties = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.ctxSaveLayerStyle = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxPostGis = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxImportOgrLayer = new System.Windows.Forms.ToolStripMenuItem();
-            this.ctxSaveOgrStyle = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.legend1 = new MapWindow.Legend.Controls.Legend.Legend();
-            this.ctxSaveLayerStyle = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxRemoveLayer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.legend1 = new MapWindow.Legend.Controls.Legend.Legend();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,6 +78,12 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(154, 154);
             // 
+            // ctxSaveLayerStyle
+            // 
+            this.ctxSaveLayerStyle.Name = "ctxSaveLayerStyle";
+            this.ctxSaveLayerStyle.Size = new System.Drawing.Size(153, 22);
+            this.ctxSaveLayerStyle.Text = "Save layer style";
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -87,8 +92,7 @@
             // ctxPostGis
             // 
             this.ctxPostGis.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ctxImportOgrLayer,
-            this.ctxSaveOgrStyle});
+            this.ctxImportOgrLayer});
             this.ctxPostGis.Name = "ctxPostGis";
             this.ctxPostGis.Size = new System.Drawing.Size(153, 22);
             this.ctxPostGis.Text = "PostGIS";
@@ -96,19 +100,24 @@
             // ctxImportOgrLayer
             // 
             this.ctxImportOgrLayer.Name = "ctxImportOgrLayer";
-            this.ctxImportOgrLayer.Size = new System.Drawing.Size(166, 22);
+            this.ctxImportOgrLayer.Size = new System.Drawing.Size(152, 22);
             this.ctxImportOgrLayer.Text = "Import...";
-            // 
-            // ctxSaveOgrStyle
-            // 
-            this.ctxSaveOgrStyle.Name = "ctxSaveOgrStyle";
-            this.ctxSaveOgrStyle.Size = new System.Drawing.Size(166, 22);
-            this.ctxSaveOgrStyle.Text = "Save current style";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
+            // 
+            // ctxRemoveLayer
+            // 
+            this.ctxRemoveLayer.Name = "ctxRemoveLayer";
+            this.ctxRemoveLayer.Size = new System.Drawing.Size(153, 22);
+            this.ctxRemoveLayer.Text = "Remove layer";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(150, 6);
             // 
             // legend1
             // 
@@ -123,23 +132,6 @@
             this.legend1.ShowLabels = false;
             this.legend1.Size = new System.Drawing.Size(331, 358);
             this.legend1.TabIndex = 2;
-            // 
-            // ctxSaveLayerStyle
-            // 
-            this.ctxSaveLayerStyle.Name = "ctxSaveLayerStyle";
-            this.ctxSaveLayerStyle.Size = new System.Drawing.Size(153, 22);
-            this.ctxSaveLayerStyle.Text = "Save layer style";
-            // 
-            // ctxRemoveLayer
-            // 
-            this.ctxRemoveLayer.Name = "ctxRemoveLayer";
-            this.ctxRemoveLayer.Size = new System.Drawing.Size(153, 22);
-            this.ctxRemoveLayer.Text = "Remove layer";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(150, 6);
             // 
             // LegendDockForm
             // 
@@ -169,7 +161,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem ctxPostGis;
         private System.Windows.Forms.ToolStripMenuItem ctxImportOgrLayer;
-        private System.Windows.Forms.ToolStripMenuItem ctxSaveOgrStyle;
         private System.Windows.Forms.ToolStripMenuItem ctxSaveLayerStyle;
         private System.Windows.Forms.ToolStripMenuItem ctxRemoveLayer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
