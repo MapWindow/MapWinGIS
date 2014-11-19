@@ -68,6 +68,12 @@ namespace MWLite.GUI.Forms
         {
             string lastProject = App.Project.GetPath();
 
+            if (!App.Map.ShapeEditor.SaveChanges())
+            {
+                e.Cancel = true;
+                return;
+            }
+
             if (!App.Project.TryClose())
             {
                 e.Cancel = true;

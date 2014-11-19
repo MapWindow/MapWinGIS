@@ -31,10 +31,24 @@ namespace MWLite.ShapeEditor.UI
             bool hasShape = !App.Map.ShapeEditor.IsEmpty;
             ctxAddPart.Enabled = hasShape;
             ctxRemovePart.Enabled = hasShape;
+            ctxSaveShape.Enabled = hasShape;
+            ctxClearEditor.Enabled = hasShape;
             ctxVertexEditor.Enabled = true;
             ctxPartEditor.Enabled = true;
             ctxVertexEditor.Checked = App.Map.ShapeEditor.EditorBehavior == tkEditorBehavior.ebVertexEditor;
             ctxPartEditor.Checked = App.Map.ShapeEditor.EditorBehavior == tkEditorBehavior.ebPartEditor;
+
+            bool hasChanges = App.Map.ShapeEditor.HasChanges;
+            if (hasChanges)
+            {
+                ctxSaveShape.Enabled = true;
+                ctxClearEditor.Text = "Discard changes";
+            }
+            else
+            {
+                ctxSaveShape.Enabled = false;
+                ctxClearEditor.Text = "Stop editing";
+            }
         }
 
         public ContextMenuStrip Menu

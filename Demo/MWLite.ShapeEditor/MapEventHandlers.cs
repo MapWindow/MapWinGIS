@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using AxMapWinGIS;
+﻿using AxMapWinGIS;
 using MapWinGIS;
-using MWLite.Core.UI;
 using MWLite.ShapeEditor.Forms;
+using System;
+using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace MWLite.ShapeEditor
 {
@@ -31,7 +27,6 @@ namespace MWLite.ShapeEditor
 
         static void _map_ChooseLayer(object sender, _DMapEvents_ChooseLayerEvent e)
         {
-            //if (_map.CursorMode == tkCursorMode.cmSelection) return;
             e.layerHandle = App.Instance.Legend.SelectedLayer;
         }
 
@@ -55,10 +50,7 @@ namespace MWLite.ShapeEditor
 
         static void _map_AfterShapeEdit(object sender, _DMapEvents_AfterShapeEditEvent e)
         {
-            //MessageHelper.Info("Shape was removed.");
-            //return;
-
-            if (e.newShape == tkMwBoolean.blnTrue)
+            if (e.operation == tkUndoOperation.uoAddShape)
             {
                 var sf = _map.get_Shapefile(e.layerHandle);
                 if (sf != null)
@@ -69,14 +61,24 @@ namespace MWLite.ShapeEditor
                     }
                 }
             }
+            else
+            {
+                Debug.WriteLine("After shape edit: " + e.operation);
+            }
         }
 
         static void _map_BeforeShapeEdit(object sender, _DMapEvents_BeforeShapeEditEvent e)
         {
-            if (e.action == tkUndoOperation.uoRemoveShape)
-            {
-
-            }
+            // to prevent editing of particular shapes
+            //var sf = App.Map.get_Shapefile(e.layerHandle);
+            //if (sf != null)
+            //{
+            //    if (sf.ShapefileType2D == ShpfileType.SHP_POLYLINE)
+            //    {
+            //        MessageHelper.Info("Editing of polylines isn't allowed");
+            //        e.cancel = tkMwBoolean.blnTrue;
+            //    }
+            //}
         }
 
         static void _map_ValidateShape(object sender, _DMapEvents_ValidateShapeEvent e)

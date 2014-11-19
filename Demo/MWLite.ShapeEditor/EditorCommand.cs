@@ -30,5 +30,7 @@ namespace MWLite.ShapeEditor
         SplitByPolygon = 20,
         VertexEditor = 21,
         PartEditor = 22,
+        ClearEditor = 23,
+        SaveShape = 24,
     }
 }

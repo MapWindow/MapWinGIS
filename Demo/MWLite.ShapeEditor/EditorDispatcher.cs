@@ -53,6 +53,14 @@ namespace MWLite.ShapeEditor
         {
             switch (command)
             {
+                case EditorCommand.ClearEditor:
+                    App.Map.ShapeEditor.Clear();
+                    App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+                    return true;
+                case EditorCommand.SaveShape:
+                    App.Map.ShapeEditor.SaveChanges();
+                    App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+                    return true;
                 case EditorCommand.AddPart:
                     App.Map.ShapeEditor.StartOverlay(tkEditorOverlay.eoAddPart);
                     return true;
