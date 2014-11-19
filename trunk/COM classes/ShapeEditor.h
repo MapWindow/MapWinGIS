@@ -27,13 +27,14 @@ public:
 		_highlightShapes = VARIANT_TRUE;
 		_snapTolerance = 10;
 		_snapBehavior = sbSnapByDefault;
-		_state = esEmpty;
+		_state = esNone;
 		_mapCallback = NULL;
 		_isSubjectShape = false;
 		_validationMode = evCheckWithGeos;
 		_redrawNeeded = false;
 		_overlayType = eoAddPart;
 		_behavior = ebVertexEditor;
+		_startingUndoCount = -1;
 	}
 	~CShapeEditor()
 	{
@@ -69,15 +70,13 @@ public:
 	STDMETHOD(get_numPoints)(long* retVal);
 	STDMETHOD(get_PointXY)(long pointIndex, double* x, double* y, VARIANT_BOOL* retVal);
 	STDMETHOD(put_PointXY)(long pointIndex, double x, double y, VARIANT_BOOL* retVal);
-	STDMETHOD(Undo)(VARIANT_BOOL* retVal);
-	STDMETHOD(Redo)(VARIANT_BOOL* retVal);
+	STDMETHOD(UndoPoint)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_SegmentLength)(int segmentIndex, double* retVal);
 	STDMETHOD(get_SegmentAngle)(int segmentIndex, double* retVal);
 	STDMETHOD(get_IsDigitizing)(VARIANT_BOOL* retVal);
 	STDMETHOD(put_IsDigitizing)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ShapeType)(ShpfileType* retVal);
 	STDMETHOD(put_ShapeType)(ShpfileType newVal);
-	//STDMETHOD(AddPoint)(double xProj, double yProj);
 	STDMETHOD(SetShape)(IShape* shp);
 	STDMETHOD(get_ValidatedShape)(IShape** retVal);
 	STDMETHOD(get_LayerHandle)(int* retVal);
@@ -129,6 +128,8 @@ public:
 	STDMETHOD(StartOverlay)(tkEditorOverlay overlayType, VARIANT_BOOL* retVal);
 	STDMETHOD(get_EditorBehavior)(tkEditorBehavior* pVal);
 	STDMETHOD(put_EditorBehavior)(tkEditorBehavior newVal);
+	STDMETHOD(SaveChanges)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_HasChanges)(VARIANT_BOOL* pVal);
 private:
 	
 	BSTR _key;
@@ -148,6 +149,7 @@ private:
 	bool _redrawNeeded;
 	tkEditorOverlay _overlayType;
 	tkEditorBehavior _behavior;
+	long _startingUndoCount;
 
 	void ErrorMessage(long ErrorCode);
 	void CopyData(int firstIndex, int lastIndex, IShape* target );
@@ -161,7 +163,6 @@ public:
 
 	void SetRedrawNeeded(bool value) { _redrawNeeded  = value; }
 	bool GetRedrawNeeded() {return _redrawNeeded; }
-	bool ShapeShouldBeHidden();
 	EditorBase* GetActiveShape() { return _activeShape; }
 	void SetIsSubject(bool value) { _isSubjectShape = value; }
 	void DiscardState();
@@ -180,7 +181,7 @@ public:
 	bool RemoveShape();
 	int GetClosestPart(double projX, double projY, double tolerance);
 	bool RestoreState(IShape* shp, long layerHandle, long shapeIndex);
-	bool TryStopDigitizing();
+	bool TryStop();
 	void HandleProjPointAdd(double projX, double projY);
 	bool HasSubjectShape(int LayerHandle, int ShapeIndex);
 	bool ValidateWithGeos(IShape** shp);
@@ -194,6 +195,8 @@ public:
 	IShape* CalculateOverlay(IShape* overlay);
 	void CopyOptionsFromShapefile();
 	void CancelOverlay(bool restoreSubjectShape);
+	bool ClearCore(bool all);
+	void DiscardChangesFromUndoList();
 	
 	// exposing active shape API
 	bool SetSelectedVertex(int vertexIndex) { return _activeShape->SetSelectedVertex(vertexIndex); }
@@ -202,5 +205,7 @@ public:
 	bool HasSelectedPart() { return _activeShape->HasSelectedPart(); }
 	int SelectPart(double xProj, double yProj) { return _activeShape->SelectPart(xProj, yProj); }
 	int GetClosestVertex(double projX, double projY, double tolerance) { return _activeShape->GetClosestVertex(projX, projY, tolerance); }
+	
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

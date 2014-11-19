@@ -183,7 +183,7 @@ typedef
 	helpstring("tkShapeEditorState"),
 ]
 enum tkEditorState {
-	esEmpty = 0,
+	esNone = 0,
 	esDigitize = 1,
 	esEdit = 2,
 	esDigitizeUnbound = 3,
@@ -3221,7 +3221,7 @@ enum tkScalebarUnits
 		[propget, id(2)] HRESULT numPoints([out, retval] long* retVal);
 		[id(3)] HRESULT get_PointXY([in]long pointIndex, [out]double* x, [out]double* y, [out, retval]VARIANT_BOOL* retVal);
 		[propget, id(4)] HRESULT ValidatedShape([out, retval] IShape** retVal);
-		[id(5)] HRESULT Undo([out, retval] VARIANT_BOOL* retVal);
+		[id(5)] HRESULT UndoPoint([out, retval] VARIANT_BOOL* retVal);
 		[propget, id(6)] HRESULT ErrorMsg([in] long ErrorCode, [out, retval] BSTR *pVal);
 		[propget, id(7)] HRESULT LastErrorCode([out, retval] long *pVal);
 		[propget, id(8)] HRESULT GlobalCallback([out, retval]ICallback** retVal);
@@ -3257,7 +3257,6 @@ enum tkScalebarUnits
 		[propput, id(30)] HRESULT LineColor([in] OLE_COLOR newVal);
 		[propget, id(31)] HRESULT LineWidth([out, retval] FLOAT* pVal);
 		[propput, id(31)] HRESULT LineWidth([in] FLOAT newVal);
-		[id(32)] HRESULT Redo([out, retval] VARIANT_BOOL* retVal);
 		[propget, id(33)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 		[propget, id(34)] HRESULT SnapTolerance([out, retval] DOUBLE* pVal);
 		[propput, id(34)] HRESULT SnapTolerance([in] DOUBLE newVal);
@@ -3279,6 +3278,8 @@ enum tkScalebarUnits
 		[id(47)] HRESULT StartOverlay([in] tkEditorOverlay overlayType, [out, retval] VARIANT_BOOL* retVal);
 		[propget, id(48)] HRESULT EditorBehavior([out, retval] tkEditorBehavior* pVal);
 		[propput, id(48)] HRESULT EditorBehavior([in] tkEditorBehavior newVal);
+		[id(49)] HRESULT SaveChanges([out, retval] VARIANT_BOOL* retVal);
+		[propget, id(50)] HRESULT HasChanges([out, retval] VARIANT_BOOL* pVal);
 	};
 
 	
@@ -6161,9 +6162,9 @@ library MapWinGIS
 			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
-			[id(16)] void BeforeShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
+			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
-			[id(18)] void AfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex);
+			[id(18)] void AfterShapeEdit(tkUndoOperation Operation, LONG LayerHandle, LONG ShapeIndex);
 			[id(19)] void ChooseLayer(double xProj, double yProj, LONG* LayerHandle);
 			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);
 			[id(22)] void BeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel);

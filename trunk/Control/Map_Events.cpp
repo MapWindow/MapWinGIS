@@ -53,7 +53,6 @@ void CMapView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 			{
 				TurnOffPanning();
 				_spacePressed = false;
-				Debug::WriteWithTime("Space up");
 			}
 			break;
 	}
@@ -109,8 +108,9 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case VK_ESCAPE:
 			VARIANT_BOOL isEmpty;
 			_shapeEditor->get_IsEmpty(&isEmpty);
-			if (!isEmpty) {
-				_shapeEditor->Clear();
+			if (!isEmpty) 
+			{
+				_shapeEditor->ClearCore(false);   // first it may be needed to stop overlay operation
 				Redraw2(tkRedrawType::RedrawAll);
 			}
 			break;
@@ -495,13 +495,14 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				//HandleOnLButtonDownShapeEditor(x, y, ctrl);
 				_shapeEditor->SetRedrawNeeded(false);
 				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
 				{
 					long layerHandle, shapeIndex;
-					SelectShapeForEditing(x, y, layerHandle, shapeIndex);
-					VertexEditor::StartEdit(_shapeEditor, layerHandle, shapeIndex);
+					if (SelectShapeForEditing(x, y, layerHandle, shapeIndex)) 
+					{
+						VertexEditor::StartEdit(_shapeEditor, layerHandle, shapeIndex);
+					}
 				}
 				if (_shapeEditor->GetRedrawNeeded())
 					RedrawCore(RedrawSkipDataLayers, false, true);
@@ -1164,7 +1165,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
 		{
-			_shapeEditor->Undo(&redraw);
+			_shapeEditor->UndoPoint(&redraw);
 			_canUseMainBuffer = false;
 		}
 

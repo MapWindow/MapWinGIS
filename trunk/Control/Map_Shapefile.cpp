@@ -1336,7 +1336,7 @@ bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shap
 	if (!info.IsEmpty())
 	{
 		tkMwBoolean cancel = blnFalse;
-		FireBeforeShapeEdit(uoEditShape, info.LayerHandle, info.ShapeIndex, &cancel);
+		FireBeforeShapeEdit(info.LayerHandle, info.ShapeIndex, &cancel);
 		layerHandle = info.LayerHandle;
 		shapeIndex = info.ShapeIndex;
 		return cancel == blnFalse;

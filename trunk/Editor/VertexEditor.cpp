@@ -32,9 +32,17 @@ bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, doub
 	long layerHandle = -1, shapeIndex = -1;
 	if (!isEmpty)
 	{
+		if (ctrl)
+		{
+			bool stopped = editor->TryStop();
+			if (stopped)
+				editor->SetRedrawNeeded(true);
+			return true;
+		}
+		
 		if (!OnMouseDownEditing(map, editor, projX, projY, ctrl))
 		{
-			if (!editor->TryStopDigitizing())   // it was clicked outside shape; so clear it
+			if (!editor->TryStop())   // it was clicked outside shape; so clear it
 				return true;
 		}
 		else 

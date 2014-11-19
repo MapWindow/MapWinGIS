@@ -640,11 +640,11 @@ public:
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
 		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
-	void FireBeforeShapeEdit(tkUndoOperation action, LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
-		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_PI4), action, layerHandle, shapeIndex, Cancel);	}
+	void FireBeforeShapeEdit(LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
+		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4), layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)
 		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
-	void FireAfterShapeEdit(tkMwBoolean Action, LONG LayerHandle, LONG ShapeIndex)
+	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
 	{
@@ -1116,7 +1116,7 @@ public:
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
 	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(LayerHandle, Shape, Cancel); }
-	virtual void _FireAfterShapeEdit(tkMwBoolean NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
+	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }

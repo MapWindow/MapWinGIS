@@ -161,18 +161,20 @@ void CMapView::SetCursorMode(tkCursorMode mode)
 	UpdateCursor(mode, true);
 }
 
-// internal call; perhaps some additional logic will be needed
-void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
+// *******************************************************
+//		UpdateCursor()
+// *******************************************************
+void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 {
-	if (mode == m_cursorMode) return;
+	if (newCursor == m_cursorMode) return;
 
-	if (mode == cmRotateShapes)
+	if (newCursor == cmRotateShapes)
 	{
 		if (!InitRotationTool())
 			return;
 	}
 
-	bool refreshNeeded = mode == cmRotateShapes || m_cursorMode == cmRotateShapes;
+	bool refreshNeeded = newCursor == cmRotateShapes || m_cursorMode == cmRotateShapes;
 
 	if (_measuring)
 	{
@@ -182,46 +184,10 @@ void CMapView::UpdateCursor(tkCursorMode mode, bool clearEditor)
 			_measuring->Clear();
 	}
 
-	if (clearEditor)		// TODO: move to shape editor
-	{
-		CComPtr<IShape> shp = NULL;
-		_shapeEditor->get_RawData(&shp);
+	if (!EditorHelper::OnCursorChanged(_shapeEditor, clearEditor, newCursor, refreshNeeded))
+		return;
 
-		if (shp)
-		{
-			if (!_shapeEditor->TryStopDigitizing())
-				return;	  // don't change cursor as user may loose some data
-			tkEditorState state;
-			_shapeEditor->get_EditorState(&state);
-			if (state != esEmpty)
-			{
-				if (!_shapeEditor->TryStopDigitizing())
-					return;	  // don't change cursor as user may loose some data
-			}
-
-			RedrawCore(RedrawSkipDataLayers, false, true);
-		}
-		else {
-			VARIANT_BOOL empty;
-			_shapeEditor->get_IsEmpty(&empty);
-			if (!empty)
-			{
-				_shapeEditor->Clear();
-				RedrawCore(RedrawSkipDataLayers, false, true);
-			}
-		}
-
-		if (m_cursorMode == cmAddShape) {
-			_shapeEditor->put_EditorState(esDigitize);
-		}
-	}
-
-	if (EditorHelper::IsGroupOverlayCursor(mode))
-	{
-		_shapeEditor->StartUnboundShape(mode);
-	}
-
-	m_cursorMode = mode;
+	m_cursorMode = newCursor;
 
 	OnSetCursor(this, HTCLIENT, 0);
 	

@@ -244,16 +244,16 @@ STDMETHODIMP CShapeEditor::get_numPoints(long* retVal)
 }
 
 // *******************************************************
-//		Clear()
+//		ClearCore()
 // *******************************************************
-STDMETHODIMP CShapeEditor::Clear()
+bool CShapeEditor::ClearCore(bool all)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (!CheckState()) return S_OK;
+	if (!CheckState()) return true;
 
 	if (_state == esOverlay)
 	{
 		CancelOverlay(true);
+		if (!all) return false;    // clear overlay only; one more call is needed to finish it
 	}
 
 	if (_state == esEdit) {
@@ -262,17 +262,55 @@ STDMETHODIMP CShapeEditor::Clear()
 		sf.Attach(_mapCallback->_GetShapefile(_layerHandle));
 
 		if (sf) {
-			if (ShapeShouldBeHidden()) {
-				sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
-			}
+			sf->put_ShapeIsHidden(_shapeIndex, VARIANT_FALSE);
+		}
+
+		if (_startingUndoCount != -1) {
+			DiscardChangesFromUndoList();
 		}
 	}
 
 	_activeShape->Clear();
-	
+
+	_startingUndoCount = -1;
 	_shapeIndex = -1;
 	_layerHandle = -1;
-	_state = esEmpty;
+	_state = esNone;
+	return true;
+}
+
+// *******************************************************
+//		DiscardChanges()
+// *******************************************************
+void CShapeEditor::DiscardChangesFromUndoList()
+{
+	if (_startingUndoCount == -1) return;
+	
+	IUndoList* undoList = _mapCallback->_GetUndoList();
+	if (undoList)
+	{
+		// as we discard the changes, clear them from undo list;
+		// it's also possible to actually call Undo rather than DiscardState
+		// but there is no point in doing so, as we aren't going to substitute
+		// the underlying shape
+		long length;
+		undoList->get_UndoCount(&length);
+		long undoCount = length - _startingUndoCount;
+		for (long i = 0; i < undoCount; i++)
+			((CUndoList*)undoList)->DiscardOne();
+		if (undoCount > 0) {
+			_mapCallback->_FireUndoListChanged();
+		}
+	}
+}
+
+// *******************************************************
+//		Clear()
+// *******************************************************
+STDMETHODIMP CShapeEditor::Clear()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	ClearCore(true);
 	return S_OK;
 }
 
@@ -292,6 +330,11 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 
 	Clear();
 
+	IUndoList* list = _mapCallback->_GetUndoList();
+	if (list) {
+		list->get_UndoCount(&_startingUndoCount);
+	}
+
 	CComPtr<IShapefile> sf = NULL;
 	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
 
@@ -305,15 +348,11 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 			SetShape(shp);
 			_layerHandle = LayerHandle;
 			_shapeIndex = ShapeIndex;
-			//_activeShape->OverlayerTool = false;
-			if (ShapeShouldBeHidden()) {
-				sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
-			}
+			sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
 			EditorHelper::CopyOptionsFrom(this, sf);
 			*retVal = VARIANT_TRUE;
 		}
 	}
-
 	return S_OK;
 }
 
@@ -669,35 +708,19 @@ void CShapeEditor::DiscardState()
 }
 
 // *******************************************************
-//		Undo()
+//		UndoPoint()
 // *******************************************************
-STDMETHODIMP CShapeEditor::Undo(VARIANT_BOOL* retVal)
+STDMETHODIMP CShapeEditor::UndoPoint(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	if (_state == esEmpty)
-		return VARIANT_FALSE;
-
-	if (_activeShape->GetCreationMode()) {
+	VARIANT_BOOL digitizing;
+	get_IsDigitizing(&digitizing);
+	
+	if (digitizing) {
 		*retVal = _activeShape->UndoPoint() ? VARIANT_TRUE : VARIANT_FALSE;
 	}
-	return S_OK;
-}
-
-// *******************************************************
-//		Redo()
-// *******************************************************
-STDMETHODIMP CShapeEditor::Redo(VARIANT_BOOL* retVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_activeShape->GetCreationMode()) {
-		// TODO: consider whether to implement this
-	}
-	else {
-		// TODO: implement
-	}
-	*retVal = VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -1016,7 +1039,7 @@ bool CShapeEditor::RemoveShape()
 			if (vb) 
 			{
 				sf->EditDeleteShape(_shapeIndex, &vb);
-				//FireAfterShapeEdit(uoRemoveShape, layerHandle, shapeIndex);			// TODO: restore
+				_mapCallback->_FireAfterShapeEdit(uoRemoveShape, _layerHandle, _shapeIndex);
 				return true;
 			}
 		}
@@ -1105,7 +1128,7 @@ bool CShapeEditor::ValidateWithGeos(IShape** shp)
 // ************************************************************
 //		TryStopDigitizing
 // ************************************************************
-bool CShapeEditor::TryStopDigitizing()
+bool CShapeEditor::TryStop()
 {
 	if (!CheckState()) return false;
 	
@@ -1122,7 +1145,6 @@ bool CShapeEditor::TryStopDigitizing()
 			return true;
 		case esDigitize:
 		case esEdit:
-			get_ValidatedShape(&shp);
 			if (!shp) return false;
 			return TrySaveShape(shp);
 	}
@@ -1165,13 +1187,14 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 	{
 		sf->EditUpdateShape(shapeIndex, shp, &vb);
 	}
+	_startingUndoCount = -1;	// don't discard states; operation succeeded
 
 	Clear();
 
 	_mapCallback->_Redraw(tkRedrawType::RedrawAll, false, true);
 
 	// let the user set new attributes
-	_mapCallback->_FireAfterShapeEdit(newShape ? blnTrue : blnFalse, layerHandle, shapeIndex);
+	_mapCallback->_FireAfterShapeEdit(newShape ? uoAddShape : uoEditShape, layerHandle, shapeIndex);
 
 	return true;
 }
@@ -1185,7 +1208,7 @@ bool CShapeEditor::RestoreState(IShape* shp, long layerHandle, long shapeIndex)
 	bool hasShape = _layerHandle != -1;
 
 	if (hasShape && newShape) {
-		if (!TryStopDigitizing())
+		if (!TryStop())
 			return false;
 	}
 	
@@ -1225,16 +1248,6 @@ bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
 			return true;
 	}
 	return false;
-}
-
-// ***************************************************************
-//		ShouldBeHidden()
-// ***************************************************************
-bool CShapeEditor::ShapeShouldBeHidden()
-{
-	return !(_isSubjectShape  
-			/*|| _activeShape->GetShapeType() == SHP_MULTIPOINT || 
-			_activeShape->GetShapeType() == SHP_POINT*/);
 }
 
 // ***************************************************************
@@ -1280,7 +1293,6 @@ void CShapeEditor::ApplyColoringForTool(tkCursorMode mode)
 	GetUtils()->ColorByName(LightSlateGray, &color);
 	put_LineColor(color);
 	put_LineWidth(1.0f);
-	//_activeShape->OverlayerTool = true;
 	switch (mode)
 	{
 		case cmClipByPolygon:
@@ -1495,6 +1507,53 @@ STDMETHODIMP CShapeEditor::put_EditorBehavior(tkEditorBehavior newVal)
 		case ebPartEditor:
 			SetSelectedVertex(-1);
 			_redrawNeeded = true;
+			break;
+	}
+	return S_OK;
+}
+
+// ***************************************************************
+//		SaveChanges()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::SaveChanges(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (_state == esOverlay)
+	{
+		CancelOverlay(true);    // discard any overlay
+	}
+	bool result = TryStop();
+	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// ***************************************************************
+//		HasChanges()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_HasChanges(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = VARIANT_FALSE;
+	if (!CheckState()) return S_OK;
+	
+	switch (_state)
+	{
+		case esNone:
+			*pVal = VARIANT_FALSE;
+			break;
+		case esDigitizeUnbound:
+		case esDigitize:
+			*pVal = EditorHelper::IsEmpty(this) ? VARIANT_TRUE : VARIANT_FALSE;
+			break;
+		case esEdit:
+		case esOverlay:
+			IUndoList* list = _mapCallback->_GetUndoList();
+			if (list) {
+				long undoCount;
+				list->get_UndoCount(&undoCount);
+				*pVal = undoCount > _startingUndoCount ? VARIANT_TRUE : VARIANT_FALSE;
+			}
 			break;
 	}
 	return S_OK;

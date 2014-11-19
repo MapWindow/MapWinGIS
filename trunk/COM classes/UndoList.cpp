@@ -317,9 +317,11 @@ void CUndoList::ZoomToShape(VARIANT_BOOL zoomToShape, int itemIndex)
 // **********************************************************
 bool CUndoList::DiscardOne()
 {
-	if (_list.size() > 0) {
+	if (_list.size() > 0) 
+	{
 		delete _list[_list.size() - 1];
 		_list.pop_back();
+		_position--;
 		return true;
 	}
 	return false;

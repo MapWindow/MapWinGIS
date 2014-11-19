@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "EditorHelper.h"
+#include "ShapeEditor.h"
 
 // ************************************************************
 //		GetShapeType2D
@@ -62,4 +63,44 @@ void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* o
 	editor->put_FillColor(fillColor);
 	editor->put_LineColor(lineColor);
 	editor->put_LineWidth(lineWidth);
+}
+
+// *******************************************************
+//		OnCursorChanged()
+// *******************************************************
+bool EditorHelper::OnCursorChanged(CShapeEditor* editor, bool clearEditor, tkCursorMode newCursor, bool& redrawNeeded)
+{
+	if (!editor) return true;
+
+	if (clearEditor)
+	{
+		CComPtr<IShape> shp = NULL;
+		editor->get_RawData(&shp);
+
+		if (shp)
+		{
+			VARIANT_BOOL saved;
+			editor->SaveChanges(&saved);
+			if (!saved) return false;  // don't change cursor as user will loose unsaved changes
+
+			redrawNeeded = true;
+		}
+		else {
+			bool empty = EditorHelper::IsEmpty(editor);
+			editor->Clear();
+			if (!empty) {
+				redrawNeeded = true;
+			}
+		}
+
+		if (newCursor == cmAddShape) {
+			editor->put_EditorState(esDigitize);
+		}
+	}
+
+	if (EditorHelper::IsGroupOverlayCursor(newCursor))
+	{
+		editor->StartUnboundShape(newCursor);
+	}
+	return true;
 }

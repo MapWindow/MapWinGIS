@@ -33,7 +33,7 @@ bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bo
 
 	// an attempt to finish shape
 	if (ctrl) {
-		return editor->TryStopDigitizing();
+		return editor->TryStop();
 	}
 
 	// add another point
@@ -42,7 +42,7 @@ bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bo
 	// for point layer save the new shape at once
 	if (EditorHelper::GetShapeType2D(editor) == SHP_POINT)
 	{
-		return editor->TryStopDigitizing();
+		return editor->TryStop();
 	}
 
 	return true;
