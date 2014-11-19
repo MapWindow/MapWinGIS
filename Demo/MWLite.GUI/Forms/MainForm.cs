@@ -143,6 +143,11 @@ namespace MWLite.GUI.Forms
             get { return App.Project; }
         }
 
+        public void RunCommand(AppCommand command)
+        {
+            _dispatcher.Run(command);
+        }
+
         public Legend Legend
         {
             get { return _legendForm.Legend; }

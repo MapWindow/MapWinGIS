@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppCommand.cs" />
     <Compile Include="Events\NewExtentEventArgs.cs" />
     <Compile Include="Events\OgrLayerArgs.cs" />
     <Compile Include="Events\SelectionChangedArgs.cs" />

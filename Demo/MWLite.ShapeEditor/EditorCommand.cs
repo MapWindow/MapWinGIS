@@ -32,5 +32,7 @@ namespace MWLite.ShapeEditor
         PartEditor = 22,
         ClearEditor = 23,
         SaveShape = 24,
+        SelectByRectangle = 25,
+        ClearSelection = 26,
     }
 }

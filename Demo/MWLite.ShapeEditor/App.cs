@@ -19,13 +19,13 @@ namespace MWLite.ShapeEditor
         private static EditorMenu _menu = new EditorMenu();
         private static EditorToolbar _toolbar = new EditorToolbar();
         private static EditorDispatcher _dispatcher = new EditorDispatcher();
-        private static EditorContextMenu _contextMenu = new EditorContextMenu();
+        private static SelectionContextMenu _selectionContextMenu = new SelectionContextMenu();
         private static VertexContextMenu _vertexContextMenu = new VertexContextMenu();
 
         static App()
         {
             _dispatcher.InitMenu(_toolbar.Toolbar.Items);
-            _dispatcher.InitMenu(_contextMenu.Menu.Items);
+            _dispatcher.InitMenu(_selectionContextMenu.Menu.Items);
             _dispatcher.InitMenu(_vertexContextMenu.Menu.Items);
             _dispatcher.InitMenu(_menu.Menu.DropDownItems);
         }
@@ -62,7 +62,7 @@ namespace MWLite.ShapeEditor
 
         internal static ContextMenuStrip SelectionContextMenu
         {
-            get { return _contextMenu.Menu; }
+            get { return _selectionContextMenu.Menu; }
         }
 
         internal static ContextMenuStrip VertexContextMenu

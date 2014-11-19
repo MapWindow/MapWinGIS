@@ -64,7 +64,7 @@ namespace MWLite.ShapeEditor.Helpers
                 case DialogResult.No:
                     bool save = result == DialogResult.Yes;
                     sf.InteractiveEditing = false;
-                    if (sf.StopEditingShapes(save, save, null))
+                    if (sf.StopEditingShapes(save, true, null))
                     {
                         map.ShapeEditor.Clear();
                         map.UndoList.ClearForLayer(layerHandle);

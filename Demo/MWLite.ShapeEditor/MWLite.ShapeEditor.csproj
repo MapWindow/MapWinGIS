@@ -68,11 +68,11 @@
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="StateHelper.cs" />
-    <Compile Include="UI\EditorContextMenu.cs">
+    <Compile Include="UI\SelectionContextMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UI\EditorContextMenu.Designer.cs">
-      <DependentUpon>EditorContextMenu.cs</DependentUpon>
+    <Compile Include="UI\SelectionContextMenu.Designer.cs">
+      <DependentUpon>SelectionContextMenu.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\EditorMenu.cs">
       <SubType>UserControl</SubType>
@@ -129,8 +129,8 @@
     <EmbeddedResource Include="Forms\AttributesForm.resx">
       <DependentUpon>AttributesForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\EditorContextMenu.resx">
-      <DependentUpon>EditorContextMenu.cs</DependentUpon>
+    <EmbeddedResource Include="UI\SelectionContextMenu.resx">
+      <DependentUpon>SelectionContextMenu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EditorMenu.resx">
       <DependentUpon>EditorMenu.cs</DependentUpon>
@@ -229,6 +229,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\polygon_erase.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\select.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\selected-delete1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

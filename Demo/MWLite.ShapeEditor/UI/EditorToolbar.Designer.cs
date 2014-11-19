@@ -34,18 +34,18 @@
             this._editToolStrip = new System.Windows.Forms.ToolStrip();
             this.toolEditLayer = new System.Windows.Forms.ToolStripButton();
             this.toolAddShape = new System.Windows.Forms.ToolStripButton();
-            this.toolSplitByPolyline = new System.Windows.Forms.ToolStripButton();
-            this.toolPolygonOperation = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolEraseByPolygon = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolClipByPolygon = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolSplitByPolygon = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolEditShape = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator25 = new System.Windows.Forms.ToolStripSeparator();
             this.toolMergeShapes = new System.Windows.Forms.ToolStripButton();
             this.toolSplitShapes = new System.Windows.Forms.ToolStripButton();
             this.toolMoveShapes = new System.Windows.Forms.ToolStripButton();
             this.toolRotateShapes = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator28 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolEditShape = new System.Windows.Forms.ToolStripButton();
+            this.toolPolygonOperation = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolEraseByPolygon = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolClipByPolygon = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolSplitByPolygon = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolSplitByPolyline = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
             this.toolCopy = new System.Windows.Forms.ToolStripButton();
             this.toolCut = new System.Windows.Forms.ToolStripButton();
@@ -127,49 +127,17 @@
             this.toolAddShape.Size = new System.Drawing.Size(38, 39);
             this.toolAddShape.Text = "Add Shape";
             // 
-            // toolSplitByPolyline
+            // toolEditShape
             // 
-            this.toolSplitByPolyline.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolSplitByPolyline.Image = global::MWLite.ShapeEditor.Properties.Resources.line_polygon_edit;
-            this.toolSplitByPolyline.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolSplitByPolyline.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolSplitByPolyline.Name = "toolSplitByPolyline";
-            this.toolSplitByPolyline.Padding = new System.Windows.Forms.Padding(5);
-            this.toolSplitByPolyline.Size = new System.Drawing.Size(38, 38);
-            this.toolSplitByPolyline.Text = "Split By Polyline";
-            // 
-            // toolPolygonOperation
-            // 
-            this.toolPolygonOperation.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolPolygonOperation.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolEraseByPolygon,
-            this.toolClipByPolygon,
-            this.toolSplitByPolygon});
-            this.toolPolygonOperation.Image = global::MWLite.ShapeEditor.Properties.Resources.polygon_erase;
-            this.toolPolygonOperation.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolPolygonOperation.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolPolygonOperation.Name = "toolPolygonOperation";
-            this.toolPolygonOperation.Padding = new System.Windows.Forms.Padding(5);
-            this.toolPolygonOperation.Size = new System.Drawing.Size(47, 38);
-            this.toolPolygonOperation.Text = "Define By Polygon";
-            // 
-            // toolEraseByPolygon
-            // 
-            this.toolEraseByPolygon.Name = "toolEraseByPolygon";
-            this.toolEraseByPolygon.Size = new System.Drawing.Size(164, 22);
-            this.toolEraseByPolygon.Text = "Erase By Polygon";
-            // 
-            // toolClipByPolygon
-            // 
-            this.toolClipByPolygon.Name = "toolClipByPolygon";
-            this.toolClipByPolygon.Size = new System.Drawing.Size(164, 22);
-            this.toolClipByPolygon.Text = "Clip By Polygon";
-            // 
-            // toolSplitByPolygon
-            // 
-            this.toolSplitByPolygon.Name = "toolSplitByPolygon";
-            this.toolSplitByPolygon.Size = new System.Drawing.Size(164, 22);
-            this.toolSplitByPolygon.Text = "Split By Polygon";
+            this.toolEditShape.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolEditShape.Image = global::MWLite.ShapeEditor.Properties.Resources.vertex_tools;
+            this.toolEditShape.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolEditShape.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolEditShape.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
+            this.toolEditShape.Name = "toolEditShape";
+            this.toolEditShape.Padding = new System.Windows.Forms.Padding(5);
+            this.toolEditShape.Size = new System.Drawing.Size(38, 39);
+            this.toolEditShape.Text = "Vertex Editor";
             // 
             // toolStripSeparator25
             // 
@@ -225,17 +193,49 @@
             this.toolStripSeparator28.Name = "toolStripSeparator28";
             this.toolStripSeparator28.Size = new System.Drawing.Size(6, 41);
             // 
-            // toolEditShape
+            // toolPolygonOperation
             // 
-            this.toolEditShape.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolEditShape.Image = global::MWLite.ShapeEditor.Properties.Resources.vertex_tools;
-            this.toolEditShape.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolEditShape.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolEditShape.Margin = new System.Windows.Forms.Padding(0, 0, 0, 2);
-            this.toolEditShape.Name = "toolEditShape";
-            this.toolEditShape.Padding = new System.Windows.Forms.Padding(5);
-            this.toolEditShape.Size = new System.Drawing.Size(38, 39);
-            this.toolEditShape.Text = "Vertex Editor";
+            this.toolPolygonOperation.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolPolygonOperation.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolEraseByPolygon,
+            this.toolClipByPolygon,
+            this.toolSplitByPolygon});
+            this.toolPolygonOperation.Image = global::MWLite.ShapeEditor.Properties.Resources.polygon_erase;
+            this.toolPolygonOperation.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolPolygonOperation.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolPolygonOperation.Name = "toolPolygonOperation";
+            this.toolPolygonOperation.Padding = new System.Windows.Forms.Padding(5);
+            this.toolPolygonOperation.Size = new System.Drawing.Size(47, 38);
+            this.toolPolygonOperation.Text = "Polygon Overlay";
+            // 
+            // toolEraseByPolygon
+            // 
+            this.toolEraseByPolygon.Name = "toolEraseByPolygon";
+            this.toolEraseByPolygon.Size = new System.Drawing.Size(164, 22);
+            this.toolEraseByPolygon.Text = "Erase By Polygon";
+            // 
+            // toolClipByPolygon
+            // 
+            this.toolClipByPolygon.Name = "toolClipByPolygon";
+            this.toolClipByPolygon.Size = new System.Drawing.Size(164, 22);
+            this.toolClipByPolygon.Text = "Clip By Polygon";
+            // 
+            // toolSplitByPolygon
+            // 
+            this.toolSplitByPolygon.Name = "toolSplitByPolygon";
+            this.toolSplitByPolygon.Size = new System.Drawing.Size(164, 22);
+            this.toolSplitByPolygon.Text = "Split By Polygon";
+            // 
+            // toolSplitByPolyline
+            // 
+            this.toolSplitByPolyline.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolSplitByPolyline.Image = global::MWLite.ShapeEditor.Properties.Resources.line_polygon_edit;
+            this.toolSplitByPolyline.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolSplitByPolyline.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolSplitByPolyline.Name = "toolSplitByPolyline";
+            this.toolSplitByPolyline.Padding = new System.Windows.Forms.Padding(5);
+            this.toolSplitByPolyline.Size = new System.Drawing.Size(38, 38);
+            this.toolSplitByPolyline.Text = "Split By Polyline";
             // 
             // toolStripSeparator23
             // 

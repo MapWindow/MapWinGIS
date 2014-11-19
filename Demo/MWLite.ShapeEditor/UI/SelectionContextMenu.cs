@@ -1,13 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using MapWinGIS;
 using MWLite.ShapeEditor.Helpers;
 
 namespace MWLite.ShapeEditor.UI
 {
-    public partial class EditorContextMenu : UserControl
+    public partial class SelectionContextMenu : UserControl
     {
-        public EditorContextMenu()
+        public SelectionContextMenu()
         {
             InitializeComponent();
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
@@ -25,6 +26,11 @@ namespace MWLite.ShapeEditor.UI
 
             var sf = App.SelectedShapefile;
 
+            ctxSelectByRectangle.Enabled = true;
+            ctxSelectByRectangle.Checked = App.Map.CursorMode == tkCursorMode.cmSelection;
+            ctxMoveShapes.Checked = App.Map.CursorMode == tkCursorMode.cmMoveShapes;
+            ctxRotateShapes.Checked = App.Map.CursorMode == tkCursorMode.cmRotateShapes;
+
             if (sf != null && sf.InteractiveEditing)
             {
                 int selectedCount = sf.NumSelected;
@@ -33,6 +39,7 @@ namespace MWLite.ShapeEditor.UI
                 ctxMoveShapes.Enabled = selectedCount > 0;
                 ctxRemoveShapes.Enabled = selectedCount > 0;
                 ctxRotateShapes.Enabled = selectedCount > 0;
+                ctxClearSelection.Enabled = selectedCount > 0;
             }
 
             var list = new[] { ctxCopy, ctxCut, ctxPaste };

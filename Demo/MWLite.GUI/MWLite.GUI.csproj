@@ -81,7 +81,6 @@
       <DependentUpon>SetProjectionForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\AssemblyHelper.cs" />
-    <Compile Include="Classes\AppCommand.cs" />
     <Compile Include="Helpers\MapHelper.cs" />
     <Compile Include="Helpers\PluginHelper.cs" />
     <Compile Include="Helpers\TilesHelper.cs" />

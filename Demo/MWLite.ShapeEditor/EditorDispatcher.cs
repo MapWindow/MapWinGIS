@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.UI;
+using MWLite.GUI.Classes;
 using MWLite.ShapeEditor.Helpers;
 using MWLite.ShapeEditor.Operations;
 
@@ -44,7 +45,9 @@ namespace MWLite.ShapeEditor
                 case EditorCommand.CreateLayer:
                     EditorHelper.CreateLayer();
                     break;
-               
+                case EditorCommand.ClearSelection:
+                    App.Instance.RunCommand(AppCommand.ClearSelection);
+                    break;
             }
             App.Instance.RefreshUI();
         }
@@ -83,6 +86,9 @@ namespace MWLite.ShapeEditor
         {
             switch (command)
             {
+                case EditorCommand.SelectByRectangle:
+                    SetMapCursor(tkCursorMode.cmSelection);
+                    return true;
                 case EditorCommand.SplitByPolygon:
                     SetMapCursor(tkCursorMode.cmSplitByPolygon);
                     return true;

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using MapWindow.Legend;
 using MapWindow.Legend.Controls.Legend;
+using MWLite.GUI.Classes;
 
 namespace MWLite.Core
 {
@@ -16,7 +17,7 @@ namespace MWLite.Core
         void AddMenu(ToolStripMenuItem menu);
         void AddToolbar(ToolStrip toolbar);
         IProject Project { get; }
-        
+        void RunCommand(AppCommand command);
     }
 
     public interface IProject

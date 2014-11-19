@@ -97,6 +97,8 @@ namespace MWLite.ShapeEditor
             {
                 switch (_map.CursorMode)
                 {
+                    case tkCursorMode.cmRotateShapes:
+                    case tkCursorMode.cmMoveShapes:
                     case tkCursorMode.cmSelection:
                     {
                         var menu = App.SelectionContextMenu;

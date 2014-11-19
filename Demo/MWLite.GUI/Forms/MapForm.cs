@@ -4,6 +4,7 @@ using AxMapWinGIS;
 using MapWinGIS;
 using MWLite.Core.Events;
 using MWLite.Core.Exts;
+using MWLite.Core.UI;
 using MWLite.GUI.Classes;
 using MWLite.GUI.Controls;
 using MWLite.ShapeEditor.Forms;
@@ -73,6 +74,15 @@ namespace MWLite.GUI.Forms
             axMap1.ShapeIdentified += axMap1_ShapeIdentified;
             axMap1.MouseUpEvent += axMap1_MouseUpEvent;
             axMap1.ShapeHighlighted += axMap1_ShapeHighlighted;
+            axMap1.SelectBoxFinal += axMap1_SelectBoxFinal;
+        }
+
+        void axMap1_SelectBoxFinal(object sender, _DMapEvents_SelectBoxFinalEvent e)
+        {
+            if (axMap1.CursorMode == tkCursorMode.cmSelection)
+            {
+                MessageHelper.Info("No layer is selected.");
+            }
         }
 
         void axMap1_ShapeHighlighted(object sender, _DMapEvents_ShapeHighlightedEvent e)
