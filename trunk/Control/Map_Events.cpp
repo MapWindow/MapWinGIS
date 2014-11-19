@@ -1065,7 +1065,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		break;
 	}
 
-	if (updateHotTracking) 
+	if (updateHotTracking && _dragging.Operation == DragNone)
 	{
 		LayerShape info;
 		HotTrackingResult result = RecalcHotTracking(point, info);

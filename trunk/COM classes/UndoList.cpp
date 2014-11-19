@@ -219,12 +219,18 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 	if (copyAttributes) {
 		CComPtr<IShapefile> sf = NULL;
 		sf.Attach(GetShapefile(layerHandle));
-		ITable* tbl = NULL;
-		sf->get_Table(&tbl);
-		if (tbl) {
-			TableRow* row = ((CTableClass*)tbl)->CloneTableRow((int)shapeIndex);
-			item->Row = row;
-			tbl->Release();
+		if (sf) {
+			ITable* tbl = NULL;
+			sf->get_Table(&tbl);
+			if (tbl) {
+				TableRow* row = ((CTableClass*)tbl)->CloneTableRow((int)shapeIndex);
+				item->Row = row;
+				tbl->Release();
+			}
+			long category = -1;
+			sf->get_ShapeCategory(shapeIndex, &category);
+			item->StyleCategory = category;
+			
 		}
 	}
 	return true;
@@ -379,6 +385,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			sf->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
 			if (vb) {
 				((CTableClass*)tbl)->InsertTableRow(item->Row, item->ShapeIndex);
+				sf->put_ShapeCategory(item->ShapeIndex, item->StyleCategory);
 				item->Shape->Release(); // a reference was added in EditInsertShape
 				item->Shape = NULL;
 				item->Row = NULL;		// the instance is used by table now

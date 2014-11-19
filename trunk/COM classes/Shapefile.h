@@ -431,5 +431,6 @@ public:
 	IShapeValidationInfo* ValidateInputCore(IShapefile* isf, CString methodName, CString parameterName,	VARIANT_BOOL selectedOnly, tkShapeValidationMode validationMode, CString className = "Shapefile", bool reportOnly = false);
 	IShapeValidationInfo* ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
 	bool ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
+	void RestoreShapeRecordsMapping();
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

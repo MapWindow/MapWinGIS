@@ -192,6 +192,7 @@
     <ClInclude Include="Editor\GeoShape.h" />
     <ClInclude Include="Editor\GroupOperation.h" />
     <ClInclude Include="Editor\MeasuringBase.h" />
+    <ClInclude Include="Editor\MeasuringHelper.h" />
     <ClInclude Include="Editor\UndoListHelper.h" />
     <ClInclude Include="Editor\VertexEditor.h" />
     <ClInclude Include="Image\cq.h" />
@@ -211,7 +212,6 @@
     <ClInclude Include="Processing\Expression.h" />
     <ClInclude Include="Processing\GeometryHelper.h" />
     <ClInclude Include="Processing\JenksBreaks.h" />
-    <ClInclude Include="Processing\MeasuringTool.h" />
     <ClInclude Include="Processing\PointInPolygon.h" />
     <ClInclude Include="Processing\Projections.h" />
     <ClInclude Include="Processing\QTree.h" />
@@ -486,6 +486,7 @@
     <ClCompile Include="Editor\GeoShape.cpp" />
     <ClCompile Include="Editor\GroupOperation.cpp" />
     <ClCompile Include="Editor\MeasuringBase.cpp" />
+    <ClCompile Include="Editor\MeasuringHelper.cpp" />
     <ClCompile Include="Editor\UndoListHelper.cpp" />
     <ClCompile Include="Editor\VertexEditor.cpp" />
     <ClCompile Include="Image\colour.cpp" />
@@ -536,7 +537,6 @@
     <ClCompile Include="Processing\MapRotate.cpp" />
     <ClCompile Include="Control\MapTracker.cpp" />
     <ClCompile Include="MapWinGIS.cpp" />
-    <ClCompile Include="Processing\MeasuringTool.cpp" />
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />
     <ClCompile Include="Shapefile\ChartsHelper.cpp" />

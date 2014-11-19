@@ -1039,6 +1039,7 @@ bool CShapeEditor::RemoveShape()
 			if (vb) 
 			{
 				sf->EditDeleteShape(_shapeIndex, &vb);
+				_startingUndoCount = -1;
 				_mapCallback->_FireAfterShapeEdit(uoRemoveShape, _layerHandle, _shapeIndex);
 				return true;
 			}

@@ -1825,7 +1825,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
         }
         else
         {
-			// can edit the file inplace, no need to save to a temporary file
+			// can edit the file in place, no need to save to a temporary file
 			if (!SaveToFile(filename, true, cBack))
             {
 	        	ErrorMessage(tkCANT_CREATE_DBF);
@@ -1833,7 +1833,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
         }
     }
 
-	// Mark _fields as unchnaged
+	// Mark _fields as unchanged
 	for(int i = 0; i < (int)_fields.size(); i++)
 	{
 		CField* fld  = (CField*)_fields[i]->field;

@@ -100,6 +100,7 @@ private:
 	MeasuringBase* _measuring;
 public:
 	MeasuringBase* GetBase() { return _measuring; }
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Measuring), CMeasuring)

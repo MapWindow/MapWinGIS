@@ -84,6 +84,7 @@ private:
 		tkUndoOperation Operation;
 		IShape* Shape;
 		TableRow* Row;
+		int StyleCategory;
 		bool WithinBatch;
 		vector<int>* ShapeIndices;
 		Point2D ProjOffset;
@@ -109,6 +110,7 @@ private:
 
 		void Init()
 		{
+			StyleCategory = -1;
 			RotationAngle = 0.0;
 			ShapeIndex = -1;
 			Shape = NULL;

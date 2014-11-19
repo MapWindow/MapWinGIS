@@ -30,9 +30,10 @@ bool MeasuringBase::GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints
 // *******************************************************
 //		Clear()
 // *******************************************************
-void MeasuringBase::Clear() {
+void MeasuringBase::Clear() 
+{
 	ActiveShape::Clear();
-	_firstPolyPointIndex = -1;
+	_firstPolyPointIndex = _measuringType == MeasureArea ? 0 : -1;
 }
 
 // *******************************************************

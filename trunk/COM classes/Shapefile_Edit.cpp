@@ -93,6 +93,7 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			}
 			
 			_shapeData[i]->shape = shp;
+			_shapeData[i]->originalIndex = i;
 			this->QuickExtentsCore(i, &xm,&ym,&xM,&yM);
 
 			// Neio 2009 07 21 QuadTree
@@ -195,12 +196,6 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 				_isEditingShapes = VARIANT_FALSE;
 			}
 		}
-		//else
-		//{
-			// This will lead to problems on further access
-		//	// Note that we are no longer editing shapes
-		//	_isEditingShapes = VARIANT_FALSE;
-		//}
 	}
 	else
 	{
@@ -277,33 +272,20 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 		}
 		else
 		{	
-			// -----------------------------------------------------
-			// discard the Changes
-			// -----------------------------------------------------
+			// discard the changes
 			_isEditingShapes = FALSE;
 			ReleaseMemoryShapes();
 
 			// reload the shx file
 			this->ReadShx();
 
-			// to clear the data as mapping between disk shapefile and in-memory one is lost
-			// TODO: use MWShapeId, preserve the mapping
-			if (_shpOffsets.size() != _shapeData.size())
-			{
-				for (unsigned int i = 0; i < _shapeData.size(); i++)
-					delete _shapeData[i];	// all the releasing done in the destructor
-				_shapeData.clear();
-				_shapeData.reserve(_shpOffsets.size());
-				for (size_t i = 0; i < _shpOffsets.size(); i++)
-				{
-					_shapeData.push_back(new ShapeData());
-				}
-			}
-
 			if(StopEditTable != VARIANT_FALSE)
 			{
 				StopEditingTable(ApplyChanges,cBack,retval);
 			}
+
+			RestoreShapeRecordsMapping();
+
 			*retval = VARIANT_TRUE;
 		}
 		
@@ -321,11 +303,46 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 
 	return S_OK;
 }
+
+// ***********************************************************
+//		RestoreShapeRecordsMapping()
+// ***********************************************************
+void CShapefile::RestoreShapeRecordsMapping()
+{
+	// if in memory records still match the disk ones
+	bool clearRecords = _shpOffsets.size() != _shapeData.size();
+	for (size_t i = 0; i < _shapeData.size(); i++)
+	{
+		if (_shapeData[i]->originalIndex != i) {
+			clearRecords = true;
+			break;
+		}
+	}
+
+	// clear in-memory shape records as mapping between disk shapefile and in-memory one is lost
+	if (clearRecords)
+	{
+		for (unsigned int i = 0; i < _shapeData.size(); i++)
+			delete _shapeData[i];	// all the releasing done in the destructor
+		_shapeData.clear();
+		_shapeData.reserve(_shpOffsets.size());
+		for (size_t i = 0; i < _shpOffsets.size(); i++)
+		{
+			_shapeData.push_back(new ShapeData());
+		}
+
+		// reapply categories
+		long categoriesCount;
+		_categories->get_Count(&categoriesCount);
+		if (categoriesCount > 0) {
+			_categories->ApplyExpressions();
+		}
+	}
+}
+
 #pragma endregion
 
 #pragma region Operations
-
-///void CShapefile::Re
 
 // ***********************************************************
 //		RegisterNewShape()

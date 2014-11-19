@@ -255,3 +255,13 @@ STDMETHODIMP CMeasuring::put_AreaDisplayMode(tkAreaDisplayMode newVal)
 	_measuring->AreaDisplayMode;
 	return S_OK;
 }
+
+// *******************************************************
+//		get_IsEmpty()
+// *******************************************************
+STDMETHODIMP CMeasuring::get_IsEmpty(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _measuring->GetPointCount() == 0 ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}

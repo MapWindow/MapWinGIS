@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "ShapeEditor.h"
 #include "EditorHelper.h"
+#include "MeasuringHelper.h"
 
 // *******************************************************
 //		OnSetCursor()
@@ -173,17 +174,12 @@ void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 		if (!InitRotationTool())
 			return;
 	}
-
+	
 	bool refreshNeeded = newCursor == cmRotateShapes || m_cursorMode == cmRotateShapes;
 
-	if (_measuring)
-	{
-		VARIANT_BOOL vb;
-		_measuring->get_Persistent(&vb);
-		if (m_cursorMode != cmMeasure && !vb)
-			_measuring->Clear();
-	}
-
+	if (MeasuringHelper::OnCursorChanged(_measuring, newCursor))
+		refreshNeeded = true;
+	
 	if (!EditorHelper::OnCursorChanged(_shapeEditor, clearEditor, newCursor, refreshNeeded))
 		return;
 
@@ -192,7 +188,7 @@ void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 	OnSetCursor(this, HTCLIENT, 0);
 	
 	if (refreshNeeded)
-		RedrawCore(RedrawTempObjectsOnly, false, true);
+		RedrawCore(RedrawSkipDataLayers, false, true);
 }
 
 // *********************************************************

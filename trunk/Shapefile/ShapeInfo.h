@@ -42,7 +42,7 @@ struct ShapeData
 		geosGeom = NULL;
 
 		category = -1;
-		handle = -1;
+		originalIndex = -1;
 		size = 0;
 		
 		modified = false;
@@ -80,7 +80,7 @@ struct ShapeData
 			geosGeom = NULL;
 		}
 
-		if (/*status == ShapeValidationStatus::Fixed &&*/ fixedShape)
+		if (fixedShape)
 		{
 			fixedShape->Release();
 			fixedShape = NULL;
@@ -95,14 +95,14 @@ struct ShapeData
 	IShape* fixedShape;				// will be used as substitute of original in input shapefile
 	ShapeValidationStatus status;
 	
-	int handle;				// the unique handle of shape, assigned in the increasing order
+	int originalIndex;				// the unique handle of shape, assigned in the increasing order
 	int category;			// the ShapefileCategory to which the shape belongs: < 0 - default options
 	int size;				// size in pixels at current scale; the shape will be labeled or not considering this size
 	
 	bool selected;
 	bool isVisible;			// because of the visibility expression 		
 	bool hidden;			// set per shape explicitly
-	double rotation;
-	bool modified;
+	double rotation;        // for point icons only; TODO: quite a waste of 8 bytes
+	bool modified;			// for saving of OGR layers
 };
 

@@ -5509,6 +5509,7 @@ interface IMeasuring : IDispatch{
 	[propput, id(16), helpstring("")] HRESULT GlobalCallback( [in]ICallback* newVal);
 	[propget, id(17), helpstring("")] HRESULT Key( [out, retval]BSTR* retVal);
 	[propput, id(17), helpstring("")] HRESULT Key( [in]BSTR newVal);
+	[propget, id(18)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 };
 
 [
