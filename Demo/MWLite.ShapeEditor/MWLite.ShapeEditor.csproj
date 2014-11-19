@@ -65,12 +65,6 @@
     <Compile Include="Forms\EditFieldsForm.Designer.cs">
       <DependentUpon>EditFieldsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FieldControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Forms\FieldControl.Designer.cs">
-      <DependentUpon>FieldControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="StateHelper.cs" />
@@ -106,7 +100,6 @@
     <Compile Include="Operations\CopyOperation.cs" />
     <Compile Include="Operations\ExplodeOperation.cs" />
     <Compile Include="Operations\MergeOperation.cs" />
-    <Compile Include="Operations\OperationBase.cs" />
     <Compile Include="Helpers\Operations.cs" />
     <Compile Include="Operations\RemoveOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -135,9 +128,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AttributesForm.resx">
       <DependentUpon>AttributesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\FieldControl.resx">
-      <DependentUpon>FieldControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EditorContextMenu.resx">
       <DependentUpon>EditorContextMenu.cs</DependentUpon>

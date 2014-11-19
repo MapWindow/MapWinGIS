@@ -84,7 +84,11 @@ namespace MWLite.GUI.Forms
         {
             Legend.Map = Map.GetOcx() as Map;
             Legend.AssignOrphanLayersToNewGroup(ProjectBase.DEFAULT_GROUP_NAME);
-            Legend.LayerSelected += (handle) => RefreshUI();
+            Legend.LayerSelected += (handle) =>
+            {
+                RefreshUI();
+                Map.Identifier.ActiveLayer = handle;
+            };
         }
 
         private void IninMenus()

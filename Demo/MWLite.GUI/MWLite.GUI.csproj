@@ -54,6 +54,12 @@
     <Compile Include="Classes\ProjectBase.cs" />
     <Compile Include="Classes\Project.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Controls\IdentifierContextMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\IdentifierContextMenu.Designer.cs">
+      <DependentUpon>IdentifierContextMenu.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\LocationControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -101,6 +107,9 @@
     <Compile Include="Helpers\LayerHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="Controls\IdentifierContextMenu.resx">
+      <DependentUpon>IdentifierContextMenu.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\LocationControl.resx">
       <DependentUpon>LocationControl.cs</DependentUpon>
     </EmbeddedResource>

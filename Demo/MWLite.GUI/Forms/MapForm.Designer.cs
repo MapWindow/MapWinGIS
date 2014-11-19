@@ -34,11 +34,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblProjection = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.ctxHighlightShapes = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
             this.panel1.SuspendLayout();
-            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // axMap1
@@ -75,19 +72,6 @@
             this.toolTip1.AutomaticDelay = 300;
             this.toolTip1.ShowAlways = true;
             // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ctxHighlightShapes});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(165, 26);
-            // 
-            // ctxHighlightShapes
-            // 
-            this.ctxHighlightShapes.Name = "ctxHighlightShapes";
-            this.ctxHighlightShapes.Size = new System.Drawing.Size(164, 22);
-            this.ctxHighlightShapes.Text = "Highlight Shapes";
-            // 
             // MapForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -102,7 +86,6 @@
             this.Text = "Map";
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
             this.panel1.ResumeLayout(false);
-            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -113,8 +96,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lblProjection;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem ctxHighlightShapes;
 
 
     }

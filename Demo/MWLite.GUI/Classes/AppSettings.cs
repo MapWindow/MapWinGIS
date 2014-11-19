@@ -15,8 +15,10 @@ namespace MWLite.GUI.Classes
         public AppSettings()
         {
             LastProject = "";
+            ShowTooltip = true;
         }
 
+        public bool ShowTooltip { get; set; }
         public string LastProject { get; set;}
 
         private static AppSettings _settings;

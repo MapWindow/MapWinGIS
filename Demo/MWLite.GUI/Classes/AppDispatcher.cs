@@ -29,7 +29,7 @@ namespace MWLite.GUI.Classes
             switch (command)
             {
                 case AppCommand.HighlightShapes:
-                    App.Map.HotTracking = !App.Map.HotTracking;
+                    App.Map.Identifier.HotTracking = !App.Map.Identifier.HotTracking;
                     App.Map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
                     return true;
             }

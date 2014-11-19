@@ -4,6 +4,8 @@ using AxMapWinGIS;
 using MapWinGIS;
 using MWLite.Core.Events;
 using MWLite.Core.Exts;
+using MWLite.GUI.Classes;
+using MWLite.GUI.Controls;
 using MWLite.ShapeEditor.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -12,6 +14,7 @@ namespace MWLite.GUI.Forms
     public partial class MapForm : DockContent
     {
         public event EventHandler<SelectionChangedArgs> SelectionChanged;
+        private IdentifierContextMenu _identifierContextMenu = new IdentifierContextMenu();
 
         protected virtual void OnSelectionChanged(SelectionChangedArgs e)
         {
@@ -26,8 +29,6 @@ namespace MWLite.GUI.Forms
             RegisterEventHandlers();
 
             InitMap();
-
-            InitContextMenu();
         }
 
         internal AxMap Map
@@ -59,6 +60,8 @@ namespace MWLite.GUI.Forms
             axMap1.SendMouseUp = true;
             axMap1.InertiaOnPanning = tkCustomState.csFalse;
             axMap1.ShowRedrawTime = true;
+            Map.Identifier.IdentifierMode = tkIdentifierMode.imSingleLayer;
+            Map.Identifier.HotTracking = true;
         }
 
         private void RegisterEventHandlers()
@@ -74,23 +77,12 @@ namespace MWLite.GUI.Forms
 
         void axMap1_ShapeHighlighted(object sender, _DMapEvents_ShapeHighlightedEvent e)
         {
-            if (Map.CursorMode == tkCursorMode.cmIdentify)
+            if (Map.CursorMode == tkCursorMode.cmIdentify && AppSettings.Instance.ShowTooltip)
             {
                 string s = Map.GetAttributes(e.layerHandle, e.shapeIndex);
                 toolTip1.SetToolTip(Map, s);
                 Application.DoEvents();
             }
-        }
-
-        void InitContextMenu()
-        {
-            MainForm.Instance.Dispatcher.InitMenu(contextMenuStrip1.Items);
-            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
-        }
-
-        void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            ctxHighlightShapes.Checked = axMap1.HotTracking;
         }
 
         void axMap1_MouseUpEvent(object sender, _DMapEvents_MouseUpEvent e)
@@ -99,7 +91,7 @@ namespace MWLite.GUI.Forms
             {
                 if (axMap1.CursorMode == tkCursorMode.cmIdentify)
                 {
-                    contextMenuStrip1.Show(axMap1, e.x, e.y);
+                    _identifierContextMenu.Menu.Show(axMap1, e.x, e.y);
                 }
             }
         }
