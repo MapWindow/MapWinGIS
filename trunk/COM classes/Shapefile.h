@@ -198,8 +198,8 @@ public:
 	STDMETHOD(FixUpShapes)(IShapefile** retVal, VARIANT_BOOL* fixed);
 	STDMETHOD(GetRelatedShapes)(long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
 	STDMETHOD(GetRelatedShapes2)(IShape* referenceShape, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
-	STDMETHOD(get_HotTracking)(VARIANT_BOOL* retVal);
-	STDMETHOD(put_HotTracking)(VARIANT_BOOL newVal);
+	STDMETHOD(get_Identifiable)(VARIANT_BOOL* retVal);
+	STDMETHOD(put_Identifiable)(VARIANT_BOOL newVal);
 	STDMETHOD(HasInvalidShapes)(VARIANT_BOOL* result);
 	STDMETHOD(EditAddShape)(IShape* shape, long* shapeIndex);
 	STDMETHOD(EditAddField)(BSTR name, FieldType type, int precision, int width, long* fieldIndex);

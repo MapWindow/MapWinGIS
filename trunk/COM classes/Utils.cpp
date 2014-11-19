@@ -4574,6 +4574,9 @@ STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idGridHeader:
 			CoCreateInstance( CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, (void**)&val );
 			break;
+		case tkInterface::idIdentifier:
+			CoCreateInstance(CLSID_Identifier, NULL, CLSCTX_INPROC_SERVER, IID_IIdentifier, (void**)&val);
+			break;
 		case tkInterface::idImage:
 			CoCreateInstance( CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&val );
 			break;

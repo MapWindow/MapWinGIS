@@ -56,6 +56,18 @@ interface IFileManager;
 interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
+interface IIdentifier;
+
+/************************** tkIdentifierMode Enumeration **********************/
+typedef
+[
+	uuid(D8213DF7-FA5E-4F34-A3A7-F56CB09F5D25),
+	helpstring("tkIdentifierMode"),
+]
+enum tkIdentifierMode {
+	imAllLayers = 0,
+	imSingleLayer = 1,
+}tkIdentifierMode;
 
 /************************** tkEditorBehavior Enumeration **********************/
 typedef
@@ -967,6 +979,7 @@ enum tkScalebarUnits
 		idOgrDatasource = 39,
 		idOgrLayer = 40,
 		idUndoList = 41,
+		idIdentifier = 42,
 	} tkInterface;	
 
 	typedef		
@@ -3675,8 +3688,8 @@ interface IShapefile : IDispatch{
 		[in]int width, [out, retval]long* fieldIndex);
 	[id(103), helpstring("method GetRelatedShapes")] HRESULT GetRelatedShapes([in] long referenceIndex, [in] tkSpatialRelation relation, [in, out] VARIANT* resultArray, [out, retval] VARIANT_BOOL* retval);
 	[id(104), helpstring("method GetRelatedShapes2")] HRESULT GetRelatedShapes2([in] IShape* referenceShape, [in] tkSpatialRelation relation, [in, out] VARIANT* resultArray, [out, retval] VARIANT_BOOL* retval);
-	[propget, id(105), helpstring("property HotTracking")] HRESULT HotTracking([out, retval] VARIANT_BOOL* retVal);
-	[propput, id(105), helpstring("property HotTracking")] HRESULT HotTracking([in] VARIANT_BOOL newVal);
+	[propget, id(105)] HRESULT Identifiable([out, retval] VARIANT_BOOL* retVal);
+	[propput, id(105)] HRESULT Identifiable([in] VARIANT_BOOL newVal);
 	[id(106), helpstring("method Segmentize")] HRESULT Segmentize([out, retval] IShapefile** retVal);
 	[id(107), helpstring("method GetClosestVertex")] HRESULT GetClosestVertex([in]double x, [in]double y, [in]double maxDistance,
 		[out]long* shapeIndex, [out]long* pointIndex, [out] double* distance, [out, retval]VARIANT_BOOL* retVal);
@@ -3696,7 +3709,6 @@ interface IShapefile : IDispatch{
 		[in, optional, defaultvalue(-1)]LONG FieldIndex, [in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** retval);
 	[id(118), helpstring("method DissolveWithStats")] HRESULT DissolveWithStats([in]long FieldIndex, [in] VARIANT_BOOL SelectedOnly,
 		[in, optional, defaultvalue(NULL)]IFieldStatOperations* statOperations, [out, retval]IShapefile** sf);
-
 	[propget, id(119)] HRESULT ShapeVisible([in] long ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 	[propget, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [out, retval] double* pVal);
 	[propput, id(120)] HRESULT ShapeRotation([in] long ShapeIndex, [in] double newVal);
@@ -3705,8 +3717,6 @@ interface IShapefile : IDispatch{
 	[id(122)] HRESULT EditUpdateShape([in]long ShapeIndex, [in]IShape* shpNew, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[propput, id(123)] HRESULT ShapeModified([in] long ShapeIndex, [in] VARIANT_BOOL newVal);
-	//[id(124)] HRESULT Validate([in]tkShapeValidationMode shapeValidationMode, [in]VARIANT_BOOL selectedOnly, [out, retval]IShapeValidationInfo** results);
-	//[propget, id(124)] HRESULT UndoList([out, retval] IUndoList** pVal);
 	[propget, id(125)] HRESULT InteractiveEditing([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(125)] HRESULT InteractiveEditing([in] VARIANT_BOOL newVal);
 	[propget, id(126)] HRESULT ShapeIsHidden([in] LONG shapeIndex, [out, retval] VARIANT_BOOL* pVal);
@@ -5674,12 +5684,9 @@ interface IOgrLayer : IDispatch{
 	[propput, id(31)] HRESULT DynamicLoading([in] VARIANT_BOOL newVal);
 	[propget, id(32)] HRESULT MaxFeatureCount([out, retval] LONG* pVal);
 	[propput, id(32)] HRESULT MaxFeatureCount([in] LONG newVal);
-	
-	//[id(33)] HRESULT SaveStyle([in] BSTR Name, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(34)] HRESULT SupportsStyles([out, retval] VARIANT_BOOL* pVal);
 	[id(35)] HRESULT GetNumStyles([out, retval] LONG* pVal);
 	[propget, id(36)] HRESULT StyleName([in] LONG styleIndex, [out, retval] BSTR* pVal);
-	//[id(37)] HRESULT ApplyStyle([in] BSTR name, [out, retval]VARIANT_BOOL* retVal);
 	[id(38)] HRESULT ClearStyles([out, retval]VARIANT_BOOL* retVal);
 	[id(39)] HRESULT RemoveStyle([in] BSTR styleName, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(40)] HRESULT LabelExpression([out, retval] BSTR* pVal);
@@ -5718,6 +5725,23 @@ interface IUndoList : IDispatch{
 	[propget, id(15)] HRESULT ShortcutKey([out, retval] tkUndoShortcut* pVal);
 	[propput, id(15)] HRESULT ShortcutKey([in] tkUndoShortcut newVal);
 	[id(16)] HRESULT ClearForLayer([in] LONG LayerHandle);
+};
+[
+	object,
+	uuid(9D96582B-FA79-43E9-AD1E-282A18CB796D),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IIdentifier : IDispatch{
+	[propget, id(1)] HRESULT HotTracking([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(1)] HRESULT HotTracking([in] VARIANT_BOOL newVal);
+	[propget, id(2)] HRESULT IdentifierMode([out, retval] tkIdentifierMode* pVal);
+	[propput, id(2)] HRESULT IdentifierMode([in] tkIdentifierMode newVal);
+	[propget, id(3)] HRESULT OutlineColor([out, retval] OLE_COLOR* pVal);
+	[propput, id(3)] HRESULT OutlineColor([in] OLE_COLOR newVal);
+	[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
+	[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
@@ -5783,19 +5807,8 @@ library MapWinGIS
 			[id(205)] tkScalebarUnits ScalebarUnits;
 			[id(211), readonly] IFileManager* FileManager;
 			[id(241)] IUndoList* UndoList;
-			[id(242)] VARIANT_BOOL HotTracking;
-			[id(243)] OLE_COLOR HotTrackingColor;
-			[id(244)] DOUBLE MouseTolerance;
-			// changed to methods to hide from property grid
-			//[id(5)] long UDCursorHandle;
-			//[id(156)] DOUBLE CurrentScale;
-			//[id(188), readonly] DOUBLE PixelsPerDegree;
-			//[id(95), readonly] BSTR SerialNumber;
-			//[id(96), hidden, readonly] long LineSeparationFactor;
-			//[id(133), hidden, readonly] VARIANT_BOOL MultilineLabels;
-			//[id(154), readonly] tkShapeDrawingMethod ShapeDrawingMethod;
-			// end of changed to methods
-
+			[id(242)] DOUBLE MouseTolerance;
+			[id(243), readonly] IIdentifier* Identifier;
 			//}}AFX_ODL_PROP
 
 		methods:
@@ -6004,7 +6017,6 @@ library MapWinGIS
 			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
-			
 			[id(157), propget] ILabels* DrawingLabels(long DrawingLayerIndex);
 			[id(157), propput] void DrawingLabels(long DrawingLayerIndex, ILabels* newVal);
 			[id(160), helpstring("method DrawWideCircleEx")] void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
@@ -6042,7 +6054,6 @@ library MapWinGIS
 			[id(185), helpstring("method RemoveLayerOptions")] VARIANT_BOOL RemoveLayerOptions(LONG LayerHandle, BSTR OptionsName);
 			[id(186), propget, helpstring("property LayerSkipOnSaving")] VARIANT_BOOL LayerSkipOnSaving(LONG LayerHandle);
 			[id(186), propput, helpstring("property LayerSkipOnSaving")] void LayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal);
-			
 			[id(189), propget, helpstring("property LayerFilename")] BSTR LayerFilename(LONG layerHandle);
 			[id(190), helpstring("method ZoomToSelected")] VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 			[id(193), propget, helpstring("property GeographicExtents")] IExtents* GeographicExtents();
@@ -6108,7 +6119,7 @@ library MapWinGIS
 			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(238), propput] void GetLayerVisibleAtCurrentScale(LONG LayerHandle, VARIANT_BOOL newVal);
 			//}}AFX_ODL_METHOD
-};
+	};
 
 	[ uuid(94EC8DF4-6614-463a-B622-F65913BF98DE),
 	 helpstring("Event interface for Table class") ]
@@ -6186,8 +6197,6 @@ library MapWinGIS
 		[propget, id(10), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 		[propput, id(10), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 		[id(11), helpstring("method InsertAt")] HRESULT InsertAt([in] int Position, [in] IShapefileColorBreak *Break, [out, retval] long *result);
-		
-		
 	};
 	[
 		object,
@@ -6552,5 +6561,12 @@ library MapWinGIS
 	coclass UndoList
 	{
 		[default] interface IUndoList;
+	};
+	[
+		uuid(9A7CAA08-4DE0-439F-BA1D-3639513069BE)		
+	]
+	coclass Identifier
+	{
+		[default] interface IIdentifier;
 	};
 };

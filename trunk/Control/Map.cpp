@@ -263,6 +263,7 @@ void CMapView::Startup()
 	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&_measuring);
 	GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
 
+	GetUtils()->CreateInstance(idIdentifier, (IDispatch**)&_identifier);
 	GetUtils()->CreateInstance(idFileManager, (IDispatch**)&_fileManager);
 	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
 	((CUndoList*)_undoList)->SetMapCallback(this);
@@ -306,11 +307,8 @@ void CMapView::SetDefaults()
 	_knownExtents = keNone;
 	_measuringPersistent = false;
 	_lastErrorCode = tkNO_ERROR;
-	_hotTrackingColor = RGB(30, 144, 255);
-
 	// public control properties
 	_mouseTolerance = 20.0;
-	_useHotTracking = TRUE;
 	m_sendMouseMove = FALSE;
 	m_sendMouseDown = FALSE;
 	m_sendMouseUp = FALSE;
@@ -350,6 +348,7 @@ void CMapView::SetDefaults()
 	_zoomAnimation = csAuto;
 	_zoomBoxStyle = tkZoomBoxStyle::zbsBlue;
 	_projectionMismatchBehavior = mbIgnore;
+	_identifierMode = imAllLayers;
 	_zoomBarMinZoom = -1;
 	_zoomBarMaxZoom = -1;
 
@@ -421,6 +420,9 @@ void CMapView::Shutdown()
 	ClearPanningList();
 
 	ReleaseProjections();
+
+	if (_identifier)
+		_identifier->Release();
 
 	if (_fileManager)
 		_fileManager->Release();
@@ -621,9 +623,6 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
 		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
-
-		PX_Bool(pPX, "HotTracking", _useHotTracking, TRUE);
-		PX_Color(pPX, "HotTrackingColor", _hotTrackingColor, RGB(30, 144, 255));
 
 		PX_Double(pPX, "MouseTolerance", _mouseTolerance, 20);
 

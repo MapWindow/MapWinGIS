@@ -1159,6 +1159,26 @@ bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& laye
 }
 
 // ************************************************************
+//		LayerIsIdentifiable
+// ************************************************************
+VARIANT_BOOL CMapView::LayerIsIdentifiable(long layerHandle, IShapefile* sf)
+{
+	VARIANT_BOOL result = VARIANT_FALSE;
+	tkIdentifierMode mode;
+	_identifier->get_IdentifierMode(&mode);
+	if (mode == imAllLayers) {
+		sf->get_Identifiable(&result);
+	}
+	if (mode == imSingleLayer) {
+		long activeHandle;
+		_identifier->get_ActiveLayer(&activeHandle);
+		if (layerHandle == activeHandle)
+			result = VARIANT_TRUE;
+	}
+	return result;
+}
+
+// ************************************************************
 //		CheckLayer
 // ************************************************************
 bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
@@ -1174,13 +1194,17 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 			{
 			case slctShapefiles:
 				return layer->wasRendered;
+			case slctIdentify:
+				result = LayerIsIdentifiable(layerHandle, sf);
+				break;
 			case slctHotTracking:
 				if (!layer->wasRendered) return false;
-
-				if (m_cursorMode == cmIdentify) {
-					if (_useHotTracking) {
-						result = VARIANT_TRUE;
-					}
+				if (m_cursorMode == cmIdentify) 
+				{
+					VARIANT_BOOL hotTracking;
+					_identifier->get_HotTracking(&hotTracking);
+					if (hotTracking) 
+						result = LayerIsIdentifiable(layerHandle, sf);
 				}
 				else {
 					VARIANT_BOOL vb;
@@ -1240,7 +1264,7 @@ double CMapView::GetMouseTolerance(MouseTolerance tolerance, bool proj)
 bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex )
 {
 	vector<int> handles;
-	SelectLayerHandles(slctShapefiles, handles);
+	SelectLayerHandles(slctIdentify, handles);
 	for (int i = handles.size() - 1; i >= 0; i--)
 	{
 		CComPtr<IShapefile> sf = NULL;
@@ -1364,7 +1388,10 @@ void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 			shape->Clone(&shpClone);
 			_hotTracking.Update(sf, shpClone, info.LayerHandle, info.ShapeIndex);
 
-			CComPtr<IShapeDrawingOptions> options = ShapeStyleHelper::GetHotTrackingStyle(sf, _hotTrackingColor, m_cursorMode == cmIdentify);
+			OLE_COLOR color;
+			_identifier->get_OutlineColor(&color);
+
+			CComPtr<IShapeDrawingOptions> options = ShapeStyleHelper::GetHotTrackingStyle(sf, color, m_cursorMode == cmIdentify);
 			if (options) {
 				_hotTracking.UpdateStyle(options);
 			}

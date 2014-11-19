@@ -255,6 +255,7 @@ public:
 
 	afx_msg ITiles* GetTiles(void);
 	afx_msg IFileManager* GetFileManager(void);
+	afx_msg IIdentifier* GetIdentifier(void);
 	//afx_msg void SetTiles(ITiles* pVal);
 
 	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
@@ -595,8 +596,9 @@ public:
 	afx_msg IUndoList* GetUndoList();
 	afx_msg VARIANT_BOOL GetHotTracking();
 	afx_msg void SetHotTracking(VARIANT_BOOL newVal);
-	afx_msg void OnHotTrackingColorChanged();
+	afx_msg void OnIdentifierColorChanged();
 	afx_msg void OnMouseToleranceChanged();
+	afx_msg void OnIdentifierModeChanged();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -743,12 +745,9 @@ public:
 	BOOL _grabProjectionFromData;
 	BOOL _zoombarVisible;
 	BOOL _canUseImageGrouping;
-	BOOL _useHotTracking;
 	tkCustomState _panningInertia;			
 	BOOL _reuseTileBuffer;			
 	tkCustomState _zoomAnimation;			
-	OLE_COLOR _hotTrackingColor;
-
 	tkZoomBoxStyle _zoomBoxStyle;
 	tkShapeDrawingMethod _shapeDrawingMethod;
 	tkUnitsOfMeasure _unitsOfMeasure;
@@ -759,6 +758,7 @@ public:
 	tkScalebarUnits  _scalebarUnits;
 	tkZoomBarVerbosity _zoomBarVerbosity;
 	tkMismatchBehavior _projectionMismatchBehavior;
+	tkIdentifierMode _identifierMode;
 	
 	CString _versionNumber;
 	double _mouseWheelSpeed;
@@ -770,6 +770,7 @@ public:
 	// ---------------------------------------------
 	//	COM instances
 	// ---------------------------------------------
+	IIdentifier* _identifier;
 	IFileManager* _fileManager;
 	IMeasuring* _measuring;
 	CShapeEditor* _shapeEditor;
@@ -1096,6 +1097,7 @@ private:
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	void LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
+	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
 	
 #pragma endregion
 
@@ -1126,7 +1128,8 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-	
+
+
 
 
 };

@@ -338,6 +338,18 @@ IFileManager* CMapView::GetFileManager(void)
 }
 
 // *****************************************************
+//		GetIdentifier
+// *****************************************************
+IIdentifier* CMapView::GetIdentifier(void)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_identifier)
+		_identifier->AddRef();
+	return _identifier;
+}
+
+
+// *****************************************************
 //		ZoomBehavior
 // *****************************************************
 short CMapView::GetZoomBehavior()
@@ -485,18 +497,4 @@ void CMapView::SetZoomBarMaxZoom(long nNewValue)
 	if (nNewValue > 25)	nNewValue = 25;
 	_zoomBarMaxZoom = nNewValue;
 	RedrawCore(tkRedrawType::RedrawAll, true, false);
-}
-
-// *****************************************************
-//		HotTracking
-// *****************************************************
-VARIANT_BOOL CMapView::GetHotTracking()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _useHotTracking;
-}
-void CMapView::SetHotTracking(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_useHotTracking = newVal ? TRUE: FALSE;
 }

@@ -3003,14 +3003,14 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 // ***************************************************
 //		get_HotTracking
 // ***************************************************
-STDMETHODIMP CShapefile::get_HotTracking(VARIANT_BOOL* retVal)
+STDMETHODIMP CShapefile::get_Identifiable(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _hotTracking;
 	return S_OK;
 }
 
-STDMETHODIMP CShapefile::put_HotTracking(VARIANT_BOOL newVal)
+STDMETHODIMP CShapefile::put_Identifiable(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_hotTracking = newVal;

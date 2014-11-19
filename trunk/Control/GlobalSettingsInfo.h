@@ -54,9 +54,11 @@ struct GlobalSettingsInfo
 	int dtorCount;
 	bool attachMapCallbackToLayers;
 	int hotTrackingMaxShapeCount;
+	OLE_COLOR identifierColor;
 	
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		identifierColor = RGB(30, 144, 255);
 		hotTrackingMaxShapeCount = 200;
 		attachMapCallbackToLayers = true;
 		ctorCount = 0;

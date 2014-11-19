@@ -215,6 +215,18 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	s = CPLGetXMLValue( nodeState, "ShowVersionNumber", NULL );
 	_showVersionNumber = (s != "") ? (BOOL)atoi(s) : FALSE;
 
+	s = CPLGetXMLValue(nodeState, "IdentifierMode", NULL);
+	tkIdentifierMode mode = s != "" ? (tkIdentifierMode)atoi(s) : imAllLayers;
+	_identifier->put_IdentifierMode(mode);
+	
+	s = CPLGetXMLValue(nodeState, "HotTracking", NULL);
+	VARIANT_BOOL hotTracking = s != "" ? (VARIANT_BOOL)atoi(s) : VARIANT_TRUE;
+	_identifier->put_HotTracking(hotTracking);
+
+	s = CPLGetXMLValue(nodeState, "IdentifierColor", NULL);
+	OLE_COLOR outlineColor = s != "" ? (OLE_COLOR)atoi(s.GetString()) : m_globalSettings.identifierColor;
+	_identifier->put_OutlineColor(outlineColor);
+
 	IGeoProjection* gp = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
 	s = CPLGetXMLValue( nodeState, "Projection", NULL );
@@ -378,6 +390,21 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 
 			if (_showVersionNumber != FALSE)
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ShowVersionNumber", CPLString().Printf("%d", (int)_showVersionNumber));
+
+			tkIdentifierMode identifierMode;
+			_identifier->get_IdentifierMode(&identifierMode);
+			if (identifierMode != imAllLayers)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "IdentifierMode", CPLString().Printf("%d", (int)identifierMode));
+
+			VARIANT_BOOL hotTracking;
+			_identifier->get_HotTracking(&hotTracking);
+			if (hotTracking != VARIANT_TRUE)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "HotTracking", CPLString().Printf("%d", (int)hotTracking));
+
+			OLE_COLOR outlineColor;
+			_identifier->get_OutlineColor(&outlineColor);
+			if (outlineColor != m_globalSettings.identifierColor)
+				Utility::CPLCreateXMLAttributeAndValue(psState, "IdentifierColor", CPLString().Printf("%d", outlineColor));
 
 			IGeoProjection* gp = GetMapProjection();
 			VARIANT_BOOL isEmpty;

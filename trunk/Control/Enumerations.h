@@ -185,6 +185,7 @@ enum LayerSelector
 	slctInMemorySf = 1,
 	slctHotTracking = 2,
 	slctInteractiveEditing = 3,
+	slctIdentify = 4,
 };
 
 enum MouseTolerance

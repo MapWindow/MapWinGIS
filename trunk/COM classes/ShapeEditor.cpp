@@ -1313,7 +1313,6 @@ void CShapeEditor::ApplyOverlayColoring(tkEditorOverlay overlay)
 {
 	_overlayType =  overlay;
 	OLE_COLOR color;
-	//_activeShape->OverlayerTool = true;
 	switch (overlay)
 	{
 		case eoAddPart:

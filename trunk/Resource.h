@@ -49,6 +49,7 @@
 #define IDR_OGRDATASOURCE               147
 #define IDR_OGRLAYER                    148
 #define IDR_UNDOLIST                    149
+#define IDR_IDENTIFIER                  150
 #define IDS_MAP_PPG_CAPTION             200
 #define IDD_PROPPAGE_MAP                200
 #define IDC_ZOOMIN                      203
@@ -71,6 +72,6 @@
 #define _APS_NEXT_RESOURCE_VALUE        216
 #define _APS_NEXT_COMMAND_VALUE         32768
 #define _APS_NEXT_CONTROL_VALUE         201
-#define _APS_NEXT_SYMED_VALUE           150
+#define _APS_NEXT_SYMED_VALUE           151
 #endif
 #endif

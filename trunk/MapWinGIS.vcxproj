@@ -167,6 +167,7 @@
   <!-- headers -->
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
+    <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
@@ -410,6 +411,7 @@
   </ItemGroup>
   <!-- source -->
   <ItemGroup>
+    <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
@@ -736,6 +738,7 @@
     <None Include="COM classes\GridColorBreak.rgs" />
     <None Include="COM classes\GridColorScheme.rgs" />
     <None Include="COM classes\GridHeader.rgs" />
+    <None Include="COM classes\Identifier.rgs" />
     <None Include="COM classes\Image.rgs" />
     <None Include="COM classes\LabelCategory.rgs" />
     <None Include="COM classes\LabelClass.rgs" />
