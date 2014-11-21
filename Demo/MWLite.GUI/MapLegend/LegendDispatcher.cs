@@ -34,8 +34,6 @@ namespace MWLite.GUI.MapLegend
                     break;
                 case LegendCommand.LoadLayerStyle:
                     LayerHelper.LoadLayerStyle();
-                    App.Legend.Refresh();
-                    App.Map.Redraw();
                     break;
                 case LegendCommand.SaveLayerStyle:
                     LayerHelper.SaveCurrentStyle();

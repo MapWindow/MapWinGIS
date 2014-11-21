@@ -1,4 +1,5 @@
-﻿using MapWinGIS;
+﻿using System;
+using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.UI;
 using MWLite.Databases;
@@ -194,7 +195,26 @@ namespace MWLite.GUI.Helpers
             {
                 string description = "";
                 bool result = App.Map.LoadLayerOptions(layerHandle, "", ref description);
-                MessageHelper.Info("Options loaded: " + result);
+                if (result)
+                {
+                    App.Map.Redraw();
+                    App.Legend.Refresh();
+                    MessageHelper.Info("Options are loaded successfully.");
+                }
+                else
+                {
+                    string msg = "No options are loaded: " + App.Map.get_ErrorMsg(App.Map.LastErrorCode);
+                    var layer = App.Map.get_OgrLayer(layerHandle);
+                    if (layer != null)
+                    {
+                        msg += Environment.NewLine + "Last GDAL error message: " + layer.GdalLastErrorMsg;
+                    }
+                    MessageHelper.Info(msg);
+                }
+            }
+            else
+            {
+                MessageHelper.Info("No layer is selected.");
             }
         }
     }
