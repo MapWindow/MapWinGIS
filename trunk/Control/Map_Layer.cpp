@@ -553,8 +553,9 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 // ***************************************************************
 //		LoadOgrStyle()
 // ***************************************************************
-void CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
+VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
 {
+	VARIANT_BOOL result = VARIANT_FALSE;
 	if (layer->IsOgrLayer())
 	{
 		IOgrLayer* ogrLayer = NULL;
@@ -565,12 +566,13 @@ void CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
 			CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
 			if (root) {
 				CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
-				DeserializeLayerOptionsCore(layerHandle, node);
+				result = DeserializeLayerOptionsCore(layerHandle, node);
 				CPLDestroyXMLNode(root);
 			}
 			ogrLayer->Release();
 		}
 	}
+	return result;
 }
 
 // ***************************************************************
@@ -1604,12 +1606,12 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 			node = CPLGetXMLNode(node, "OgrLayerClass");
 			if (node)
 			{
-				((COgrLayer*)ogr)->DeserializeOptions(node);
+				retVal = ((COgrLayer*)ogr)->DeserializeOptions(node);
 			}
 			ogr->Release();
 		}
 	}
-	if (layerType == ShapefileLayer)
+	else if (layerType == ShapefileLayer)
 	{
 		CComPtr<IShapefile> sf = NULL;
 		if (layer->QueryShapefile(&sf))
@@ -1896,7 +1898,7 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 		if (l->IsOgrLayer())
 		{
 			USES_CONVERSION;
-			LoadOgrStyle(l, LayerHandle, A2W(OptionsName));
+			return LoadOgrStyle(l, LayerHandle, A2W(OptionsName));
 		}
 	}
 

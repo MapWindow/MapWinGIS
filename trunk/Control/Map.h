@@ -1096,7 +1096,7 @@ private:
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
-	void LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
+	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
 	
 #pragma endregion
