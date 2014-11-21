@@ -1083,15 +1083,30 @@ long CMapView::GetShapePointFontCharListID(long LayerHandle, long Shape)
 #pragma endregion
 
 #pragma region Loop through shapefiles
+
+// ************************************************************
+//		GetProjectedTolerance
+// ************************************************************
+double CMapView::GetProjectedTolerance(double xScreen, double yScreen, double tolerance)
+{
+	double x, y, x2, y2;
+	this->PixelToProjection(xScreen, yScreen, x, y);
+	this->PixelToProjection(xScreen + tolerance, yScreen + tolerance, x2, y2);
+	return sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
+}
+
 // ************************************************************
 //		FindSnapPoint
 // ************************************************************
+VARIANT_BOOL CMapView::FindSnapPointCore(double xScreen, double yScreen, double* xFound, double* yFound)
+{
+	return FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), xScreen, yScreen, xFound, yFound);
+}
 VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yScreen, double* xFound, double* yFound)
 {
-	double x, y, x2, y2;
-	this->PixelToProjection( xScreen, yScreen, x, y );
-	this->PixelToProjection( xScreen + tolerance, yScreen + tolerance, x2, y2 );
-	double maxDist = sqrt(pow(x - x2, 2.0) + pow(y - y2, 2.0));
+	double maxDist = GetProjectedTolerance(xScreen, yScreen, tolerance);
+	double x, y;
+	this->PixelToProjection(xScreen, yScreen, x, y);
 
 	long shapeIndex;
 	long pointIndex;
@@ -1103,15 +1118,28 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 	long foundShapeIndex;
 	long foundPointIndex;
 
+	bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
+	tkLayerSelection behavior;
+	_shapeEditor->get_SnapBehavior(&behavior);
+	int currentHandle = -1;
+	bool currentLayerOnly = behavior == lsCurrentLayer && digitizing;
+	if (currentLayerOnly)
+		_shapeEditor->get_LayerHandle(&currentHandle);
+
 	for(long i = 0; i < this->GetNumLayers(); i++)
 	{
+		long layerHandle = this->GetLayerHandle(i);
+		if (currentLayerOnly && layerHandle != currentHandle) 
+			continue;
+
 		CComPtr<IShapefile> sf = NULL;
-		sf.Attach(this->GetShapefile(this->GetLayerHandle(i)));
+		sf.Attach(this->GetShapefile(layerHandle));
 		if (sf)
 		{
 			VARIANT_BOOL snappable;
 			sf->get_Snappable(&snappable);
-			if (snappable) {
+			if (snappable) 
+			{
 				sf->GetClosestVertex(x, y, maxDist, &shapeIndex, &pointIndex, &distance, &vb);
 				if (vb)
 				{
@@ -1199,6 +1227,8 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 				break;
 			case slctHotTracking:
 				if (!layer->wasRendered) return false;
+				if (m_cursorMode == cmMeasure || m_cursorMode == cmSelectByPolygon) return false;
+
 				if (m_cursorMode == cmIdentify) 
 				{
 					VARIANT_BOOL hotTracking;
@@ -1207,16 +1237,35 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 						result = LayerIsIdentifiable(layerHandle, sf);
 				}
 				else {
-					VARIANT_BOOL vb;
-					sf->get_InteractiveEditing(&vb);
-					if (vb) 
+					VARIANT_BOOL interactive;
+					sf->get_InteractiveEditing(&interactive);
+
+					tkLayerSelection highlighting;
+					_shapeEditor->get_HighlightVertices(&highlighting);
+
+					bool editorEmpty = EditorHelper::IsEmpty(_shapeEditor);
+					bool editing = m_cursorMode == cmEditShape && !editorEmpty;
+					bool selection = m_cursorMode == cmEditShape && editorEmpty;
+					
+					if (selection) 
 					{
-						// only editor based highlighting in this mode
-						VARIANT_BOOL highlight;
-						_shapeEditor->get_HighlightShapes(&highlight);
-						bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmEditShape;
-						if (digitizing && highlight) {
+						// we are looking for new shape to select which can be at any editable layer
+						if (interactive && highlighting != lsNoLayer)
 							result = VARIANT_TRUE;
+					}
+					else if ((!editorEmpty && m_cursorMode == cmEditShape) ||
+						EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
+					{
+						// highlight vertices for easier snapping
+						switch (highlighting) {
+							case lsAllLayers:
+								return true;
+							case lsCurrentLayer:
+								int handle;
+								_shapeEditor->get_LayerHandle(&handle);
+								return handle == layerHandle;
+							case lsNoLayer:
+								return false;
 						}
 					}
 				}

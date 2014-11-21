@@ -1071,8 +1071,9 @@ private:
 	long ParseKeyboardEventFlags(UINT nFlags);
 	long ParseMouseEventFlags(UINT nFlags);
 	bool HandleOnMouseMoveShapeEditor(int x, int y, long nFlags);
-	bool SnappingIsOn(long nFlags, tkSnapBehavior& behavior);
-	bool HandleLButtonUpDragVertexOrShape(long nFlags);
+	bool SnappingIsOn(bool shift);
+	bool SnappingIsOn(UINT flags);
+	bool HandleLButtonUpDragVertexOrShape(UINT nFlags);
 	VARIANT_BOOL ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_BOOL ifOutsideOnly = VARIANT_TRUE);
 	void SetExtentsWithPadding(Extent extents);
 	void HandleLButtonDownSelection(CPoint& point, long vbflags);
@@ -1098,6 +1099,8 @@ private:
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
+	VARIANT_BOOL FindSnapPointCore(double xScreen, double yScreen, double* xFound, double* yFound);
+	double GetProjectedTolerance(double xScreen, double yScreen, double tolerance);
 	
 #pragma endregion
 
@@ -1128,7 +1131,7 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-
+	
 
 
 

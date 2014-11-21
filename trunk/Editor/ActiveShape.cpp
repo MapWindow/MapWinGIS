@@ -173,13 +173,15 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 	
 		int partCount = GetNumParts();
 
+		CCollisionList collisionList;
+
 		for (int n = 0; n < partCount; n++)
 		{
 			Gdiplus::PointF* data = NULL;
 			int size = GetScreenPoints(n, LinearPart, &data, false, offsetType, screenOffsetX, screenOffsetY);
 			if (size > 0)
 			{
-				DrawLines(g, size, data, dynamicBuffer, n);
+				DrawLines(g, size, data, dynamicBuffer, n, collisionList);
 			}
 		}
 
@@ -198,7 +200,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 // ****************************************************************
 //		DrawLines()
 // ****************************************************************
-void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex)
+void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex, CCollisionList& collisionList)
 {
 	double length = 0.0, totalLength = 0.0;
 
@@ -237,7 +239,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 	}
 
 	// drawing points
-	CCollisionList collisionList;
+	
 	CStringW s;
 	for (int i = 0; i < size; i++)
 	{

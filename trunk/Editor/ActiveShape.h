@@ -1,6 +1,7 @@
 #pragma once
 #include "GeoShape.h"
 #include <set>
+#include "CollisionList.h"
 
 class ActiveShape: public GeoShape
 {
@@ -142,7 +143,7 @@ public:
 		double length, double totalLength, int segmentIndex, bool rumbOnly);
 	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, double area);
 	void DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly);
-	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex);
+	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex, CCollisionList& collisionList);
 	bool PartIsSelected(int partIndex);
 	bool VerticesAreVisible();
 	bool PointLabelsAreVisible();

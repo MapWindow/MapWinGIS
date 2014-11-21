@@ -758,13 +758,12 @@ STDMETHODIMP CShapeEditor::put_SnapTolerance(DOUBLE newVal)
 // *******************************************************
 //		HighlightShapes()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_HighlightShapes(VARIANT_BOOL* pVal)
+STDMETHODIMP CShapeEditor::get_HighlightVertices(tkLayerSelection* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _highlightShapes;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_HighlightShapes(VARIANT_BOOL newVal)
+STDMETHODIMP CShapeEditor::put_HighlightVertices(tkLayerSelection newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_highlightShapes = newVal;
@@ -774,13 +773,13 @@ STDMETHODIMP CShapeEditor::put_HighlightShapes(VARIANT_BOOL newVal)
 // *******************************************************
 //		get_SnapBehavior()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_SnapBehavior(tkSnapBehavior* pVal)
+STDMETHODIMP CShapeEditor::get_SnapBehavior(tkLayerSelection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _snapBehavior;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_SnapBehavior(tkSnapBehavior newVal)
+STDMETHODIMP CShapeEditor::put_SnapBehavior(tkLayerSelection newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_snapBehavior = newVal;

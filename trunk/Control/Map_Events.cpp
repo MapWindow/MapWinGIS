@@ -164,6 +164,16 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			{
 				if(ctrl) 
 				{
+					if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
+					{
+						VARIANT_BOOL result = VARIANT_FALSE;
+						_shapeEditor->UndoPoint(&result);
+						if (result) {
+							Redraw2(RedrawSkipDataLayers);
+							return;
+						}
+					}
+
 					tkUndoShortcut shortcut;
 					_undoList->get_ShortcutKey(&shortcut);
 					if (shortcut == usCtrlZ) 
@@ -463,15 +473,12 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	bool digitizingCursor = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
 
-	tkSnapBehavior behavior;
-	bool snapping = (SnappingIsOn(nFlags, behavior) && digitizingCursor)
-					|| (m_cursorMode == cmMeasure && shift);
-
 	VARIANT_BOOL snapped = VARIANT_FALSE;
+	bool snapping = SnappingIsOn(nFlags);
 	if (snapping)
 	{
-		snapped = FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &projX, &projY);
-		if (!snapped && (behavior == sbSnapWithShift || m_cursorMode == cmMeasure) && shift){
+		snapped = FindSnapPointCore(point.x, point.y, &projX, &projY);
+		if (!snapped && shift){
 			return;  // can't proceed in this mode without snapping
 		}
 	}
@@ -967,7 +974,6 @@ void CMapView::ShowToolTipOnMouseMove(UINT nFlags, CPoint point)
 	}
 }
 
-
 // ************************************************************
 //		OnMouseMove
 // ************************************************************
@@ -1007,10 +1013,9 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			VARIANT_BOOL snapped = VARIANT_FALSE;
 			double x = point.x, y = point.y;
-			tkSnapBehavior behavior;
-			if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault)
+			if (SnappingIsOn(nFlags))
 			{
-				snapped = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), point.x, point.y, &x, &y);
+				snapped = this->FindSnapPointCore(point.x, point.y, &x, &y);
 				if (snapped) {
 					ProjToPixel(x, y, &x, &y);
 				}
@@ -1163,11 +1168,11 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
-		else if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
+		/*else if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
 		{
-			_shapeEditor->UndoPoint(&redraw);
-			_canUseMainBuffer = false;
-		}
+		_shapeEditor->UndoPoint(&redraw);
+		_canUseMainBuffer = false;
+		}*/
 
 		_reverseZooming = true;
 

@@ -24,9 +24,9 @@ public:
 		_layerHandle = -1;
 		_shapeIndex = -1;
 		_visible = true;
-		_highlightShapes = VARIANT_TRUE;
+		_highlightShapes = lsAllLayers;
 		_snapTolerance = 10;
-		_snapBehavior = sbSnapByDefault;
+		_snapBehavior = lsAllLayers;
 		_state = esNone;
 		_mapCallback = NULL;
 		_isSubjectShape = false;
@@ -103,10 +103,10 @@ public:
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_SnapTolerance)(DOUBLE* pVal);
 	STDMETHOD(put_SnapTolerance)(DOUBLE newVal);
-	STDMETHOD(get_HighlightShapes)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_HighlightShapes)(VARIANT_BOOL newVal);
-	STDMETHOD(get_SnapBehavior)(tkSnapBehavior* pVal);
-	STDMETHOD(put_SnapBehavior)(tkSnapBehavior newVal);
+	STDMETHOD(get_HighlightVertices)(tkLayerSelection* pVal);
+	STDMETHOD(put_HighlightVertices)(tkLayerSelection newVal);
+	STDMETHOD(get_SnapBehavior)(tkLayerSelection* pVal);
+	STDMETHOD(put_SnapBehavior)(tkLayerSelection newVal);
 	STDMETHOD(get_EditorState)(tkEditorState* pVal);
 	STDMETHOD(put_EditorState)(tkEditorState newVal);
 	STDMETHOD(StartEdit)(LONG LayerHandle, LONG ShapeIndex, VARIANT_BOOL* retVal);
@@ -135,9 +135,9 @@ private:
 	BSTR _key;
 	ICallback * _globalCallback;
 	VARIANT_BOOL _visible;
-	VARIANT_BOOL _highlightShapes;
+	tkLayerSelection _highlightShapes;
 	double _snapTolerance;
-	tkSnapBehavior _snapBehavior;
+	tkLayerSelection _snapBehavior;
 	EditorBase* _activeShape;
 	int _layerHandle;
 	int _shapeIndex;

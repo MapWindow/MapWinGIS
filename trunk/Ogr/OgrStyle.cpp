@@ -75,7 +75,6 @@ bool OgrStyleHelper::SaveStyle(GDALDataset* dataset, CStringW xml, CStringW laye
 
 	CPLErrorReset();
 	OGRLayer* layer = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
-	const char* msg = CPLGetLastErrorMsg();
 	return CPLGetLastErrorNo() == OGRERR_NONE;
 }
 

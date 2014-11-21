@@ -10,5 +10,6 @@ public:
 	static void CopyOptionsFrom(IShapeEditor* editor, IShapefile* sf);
 	static void CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options, ShpfileType shpType);
 	static bool OnCursorChanged(CShapeEditor* editor, bool clearEditor, tkCursorMode newCursor, bool& redrawNeeded);
+	static tkLayerSelection GetSnappingBehavior(IShapeEditor* editor);
 };
 

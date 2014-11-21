@@ -190,16 +190,17 @@ enum tkEditorState {
 	esOverlay = 4
 }tkEditorState;
 
-/************************** tkSnapBehavior Enumeration **********************/
+/************************** tkLayerSelection Enumeration **********************/
 typedef
 [
-	uuid(8ABD71D3-BE98-492F-9EE3-2E848D1FF2C4),
-	helpstring("tkSnapBehavior"),
+	uuid(AC54A94F-072E-4D91-BD22-E985BF2F956F),
+	helpstring("tkLayerSelection"),
 ]
-enum tkSnapBehavior {
-	sbSnapByDefault = 0,
-	sbSnapWithShift = 1,
-}tkSnapBehavior;
+enum tkLayerSelection {
+	lsAllLayers = 0,
+	lsNoLayer = 1,
+	lsCurrentLayer = 2,
+}tkLayerSelection;
 
 /************************** tkUndoOperation Enumeration **********************/
 typedef
@@ -3260,10 +3261,10 @@ enum tkScalebarUnits
 		[propget, id(33)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 		[propget, id(34)] HRESULT SnapTolerance([out, retval] DOUBLE* pVal);
 		[propput, id(34)] HRESULT SnapTolerance([in] DOUBLE newVal);
-		[propget, id(35)] HRESULT HighlightShapes([out, retval] VARIANT_BOOL* pVal);
-		[propput, id(35)] HRESULT HighlightShapes([in] VARIANT_BOOL newVal);
-		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkSnapBehavior* pVal);
-		[propput, id(36)] HRESULT SnapBehavior([in] tkSnapBehavior newVal);
+		[propget, id(35)] HRESULT HighlightVertices([out, retval] tkLayerSelection* pVal);
+		[propput, id(35)] HRESULT HighlightVertices([in] tkLayerSelection newVal);
+		[propget, id(36)] HRESULT SnapBehavior([out, retval] tkLayerSelection* pVal);
+		[propput, id(36)] HRESULT SnapBehavior([in] tkLayerSelection newVal);
 		[propget, id(37)] HRESULT EditorState([out, retval] tkEditorState* pVal);
 		[id(38)] HRESULT StartEdit([in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval]VARIANT_BOOL* retVal);
 		[propget, id(40)] HRESULT PointLabelsVisible([out, retval] VARIANT_BOOL* pVal);

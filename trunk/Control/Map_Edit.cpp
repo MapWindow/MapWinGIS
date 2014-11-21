@@ -15,7 +15,7 @@
 // ************************************************************
 //		HandleLeftButtonUpDragVertexOrShape
 // ************************************************************
-bool CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
+bool CMapView::HandleLButtonUpDragVertexOrShape(UINT nFlags)
 {
 	double x1, x2, y1, y2;
 	PixelToProj(_dragging.Start.x, _dragging.Start.y, &x1, &y1);
@@ -30,11 +30,11 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
 
 	if (_dragging.HasMoved && operation == DragMoveVertex)
 	{
-		tkSnapBehavior behavior;
-		if (SnappingIsOn(nFlags, behavior))
+		bool shift = (nFlags & MK_SHIFT) != 0;
+		if (SnappingIsOn(shift))
 		{
-			VARIANT_BOOL result = this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), _dragging.Move.x, _dragging.Move.y, &x2, &y2);
-			if ( !result && behavior == sbSnapWithShift )
+			VARIANT_BOOL result = this->FindSnapPointCore(_dragging.Move.x, _dragging.Move.y, &x2, &y2);
+			if (!result && shift)
 				return true;		// can't proceed without snapping in this mode
 		}
 		GetEditorBase()->MoveVertex(x2, y2);		// don't save state; it's already saved at the beginning of operation
@@ -57,16 +57,19 @@ bool CMapView::HandleLButtonUpDragVertexOrShape(long nFlags)
 // ************************************************************
 //		SnappingIsOn
 // ************************************************************
-bool CMapView::SnappingIsOn(long nFlags, tkSnapBehavior& behavior)
+bool CMapView::SnappingIsOn(UINT flags)
 {
-	if (m_cursorMode == cmMeasure) {
-		return false;
+	return SnappingIsOn((flags & MK_SHIFT) != 0);
+}
+
+bool CMapView::SnappingIsOn(bool shift)
+{
+	if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode)) 
+	{
+		tkLayerSelection behavior = EditorHelper::GetSnappingBehavior(_shapeEditor);
+		if (behavior == lsAllLayers || behavior == lsCurrentLayer) return true;
 	}
-	else {
-		_shapeEditor->get_SnapBehavior(&behavior);
-		if (behavior == sbSnapByDefault) return true;
-	}
-	return (nFlags & MK_SHIFT) == 0;
+	return shift;
 }
 
 // ************************************************************
@@ -79,11 +82,12 @@ bool CMapView::HandleOnMouseMoveShapeEditor(int x, int y, long nFlags)
 		_dragging.Operation == DragMovePart))      // && (nFlags & MK_LBUTTON) && _leftButtonDown
 	{
 		_dragging.Snapped = false;
-		tkSnapBehavior behavior;
-		if (SnappingIsOn(nFlags, behavior) && behavior == sbSnapByDefault && _dragging.Operation == DragMoveVertex)
+		tkLayerSelection behavior;
+		_shapeEditor->get_SnapBehavior(&behavior);
+		if (behavior == lsAllLayers && _dragging.Operation == DragMoveVertex)
 		{
 			double xFound, yFound;
-			if (this->FindSnapPoint(GetMouseTolerance(ToleranceSnap, false), x, y, &xFound, &yFound)) {
+			if (this->FindSnapPointCore(x, y, &xFound, &yFound)) {
 				double xNew, yNew;
 				ProjToPixel(xFound, yFound, &xNew, &yNew);
 				_dragging.SetSnapped(xFound, yFound);

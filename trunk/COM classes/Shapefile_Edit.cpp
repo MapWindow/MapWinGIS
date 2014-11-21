@@ -998,7 +998,6 @@ BOOL CShapefile::VerifyMemShapes(ICallback * cBack)
 // ****************************************************************
 STDMETHODIMP CShapefile::get_InteractiveEditing(VARIANT_BOOL* pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _isEditingShapes && _interactiveEditing;
 	return S_OK;
 }

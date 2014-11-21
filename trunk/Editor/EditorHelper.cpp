@@ -111,3 +111,14 @@ bool EditorHelper::OnCursorChanged(CShapeEditor* editor, bool clearEditor, tkCur
 	}
 	return true;
 }
+
+// *******************************************************
+//		GetSnappingBehavior()
+// *******************************************************
+tkLayerSelection EditorHelper::GetSnappingBehavior(IShapeEditor* editor)
+{
+	if (!editor) return lsNoLayer;
+	tkLayerSelection behavior;
+	editor->get_SnapBehavior(&behavior);
+	return behavior;
+}
