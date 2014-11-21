@@ -32,6 +32,11 @@ namespace MWLite.GUI.MapLegend
                 case LegendCommand.RemoveLayer:
                     LayerHelper.RemoveLayer();
                     break;
+                case LegendCommand.LoadLayerStyle:
+                    LayerHelper.LoadLayerStyle();
+                    App.Legend.Refresh();
+                    App.Map.Redraw();
+                    break;
                 case LegendCommand.SaveLayerStyle:
                     LayerHelper.SaveCurrentStyle();
                     break;

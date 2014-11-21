@@ -13,6 +13,12 @@ namespace MWLite.GUI.Helpers
         public static void Init(ToolStripMenuItem root)
         {
             root.DropDownItems.Clear();
+            var item = root.DropDownItems.Add("No tiles");
+            item.Click += item_Click;
+            item.Tag = -1;
+
+            root.DropDownItems.Add(new ToolStripSeparator());
+
             var except = new[]
             {
                 tkTileProvider.Rosreestr, tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
@@ -21,7 +27,7 @@ namespace MWLite.GUI.Helpers
             var list = Enum.GetValues(typeof(tkTileProvider)).Cast<tkTileProvider>().Except(except);
             foreach (var p in list)
             {
-                var item = root.DropDownItems.Add(p.ToString());
+                item = root.DropDownItems.Add(p.ToString());
                 item.Click += item_Click;
                 item.Tag = (int)p;
             }

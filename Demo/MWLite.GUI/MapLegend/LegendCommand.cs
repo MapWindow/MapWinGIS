@@ -8,5 +8,6 @@
         ImportOgrLayer = 4,
         SaveLayerStyle = 5,
         RemoveLayer = 6,
+        LoadLayerStyle = 7,
     }
 }

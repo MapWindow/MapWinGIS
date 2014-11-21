@@ -185,5 +185,17 @@ namespace MWLite.GUI.Helpers
                     : "Failed to save layer options.");
             }
         }
+
+        public static void LoadLayerStyle()
+        {
+            var legend = App.Legend;
+            int layerHandle = legend.SelectedLayer;
+            if (layerHandle != -1)
+            {
+                string description = "";
+                bool result = App.Map.LoadLayerOptions(layerHandle, "", ref description);
+                MessageHelper.Info("Options loaded: " + result);
+            }
+        }
     }
 }
