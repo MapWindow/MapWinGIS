@@ -255,8 +255,8 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 
 		while (_list[_position]->BatchId == id)
   	    {
-			UndoSingleItem(_list[_position]);
 			_position--;
+			UndoSingleItem(_list[_position + 1]);
 			if (_position < 0) break;
 		}
 
@@ -340,8 +340,9 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 {
 	CComPtr<IShapefile> sf = NULL;
 	sf.Attach(GetShapefile(item->LayerHandle));
-	ITable* tbl = NULL;
-	sf->get_Table(&tbl);
+	CComPtr<ITable> table = NULL;
+	sf->get_Table(&table);
+	ITable* tbl = table;
 
 	VARIANT_BOOL vb;
 	switch (item->Operation)
@@ -430,9 +431,6 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			}
 			break;
 		}
-	}
-	if (tbl) {
-		tbl->Release();
 	}
 
 	return false;

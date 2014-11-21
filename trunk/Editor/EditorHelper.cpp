@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "EditorHelper.h"
 #include "ShapeEditor.h"
+#include "ShapefileHelper.h"
 
 // ************************************************************
 //		GetShapeType2D
@@ -50,9 +51,10 @@ void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapefile* sf)
 	if (!sf || !editor) return;
 	CComPtr<IShapeDrawingOptions> options = NULL;
 	sf->get_DefaultDrawingOptions(&options);
-	CopyOptionsFrom(editor, options);
+	ShpfileType shpType = ShapefileHelper::GetShapeType2D(sf);
+	CopyOptionsFrom(editor, options, shpType);
 }
-void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options)
+void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options, ShpfileType shpType)
 {
 	if (!editor || !options) return;
 	float lineWidth;
@@ -61,6 +63,11 @@ void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* o
 	options->get_LineColor(&lineColor);
 	options->get_LineWidth(&lineWidth);
 	editor->put_FillColor(fillColor);
+	
+	if (Utility::ShapeTypeConvert2D(shpType) == SHP_POLYGON) {
+		lineColor = Utility::ChangeBrightness(fillColor, -50);
+		lineWidth = 1.0f;
+	}
 	editor->put_LineColor(lineColor);
 	editor->put_LineWidth(lineWidth);
 }

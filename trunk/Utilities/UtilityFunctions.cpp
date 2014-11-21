@@ -898,13 +898,26 @@ namespace Utility
 	// ***********************************************************
 	//		ChangeBrightness
 	// ***********************************************************
-	Gdiplus::Color Utility::ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha)
+	OLE_COLOR Utility::ChangeBrightness(OLE_COLOR color, int shiftValue)
 	{
 		short r = GetRValue(color) + shiftValue;	if (r< 0) r = 0;	if (r> 255) r = 255;
 		short g = GetGValue(color) + shiftValue;	if (g< 0) g = 0;	if (g> 255) g = 255;
 		short b = GetBValue(color) + shiftValue;	if (b< 0) b = 0;	if (b> 255) b = 255;
+		return RGB(r, g, b);
+	}
 
-		Gdiplus::Color clr(alpha|BGR_TO_RGB(RGB(r,g,b)));
+	byte Utility::GetBrightness(OLE_COLOR color)
+	{
+		return ((short)GetRValue(color) + (short)GetGValue(color) + (short)GetBValue(color))/3;
+	}
+
+	// ***********************************************************
+	//		ChangeBrightness
+	// ***********************************************************
+	Gdiplus::Color Utility::ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha)
+	{
+		OLE_COLOR clr2 = ChangeBrightness(color, shiftValue);
+		Gdiplus::Color clr(alpha | BGR_TO_RGB(clr2));
 		return clr;
 	}
 

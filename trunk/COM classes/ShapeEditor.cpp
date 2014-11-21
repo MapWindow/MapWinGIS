@@ -1146,6 +1146,9 @@ bool CShapeEditor::TryStop()
 			return true;
 		case esDigitize:
 		case esEdit:
+			VARIANT_BOOL isEmpty;
+			get_IsEmpty(&isEmpty);
+			if (isEmpty) return true;
 			if (!shp) return false;
 			return TrySaveShape(shp);
 	}
@@ -1480,9 +1483,9 @@ void CShapeEditor::CopyOptionsFromShapefile()
 // ***************************************************************
 //		CopyOptionsFrom()
 // ***************************************************************
-STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options)
+STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options, ShpfileType shpType)
 {
-	EditorHelper::CopyOptionsFrom(this, options);
+	EditorHelper::CopyOptionsFrom(this, options, shpType);
 	return S_OK;
 }
 

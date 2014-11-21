@@ -99,7 +99,7 @@ public:
 	STDMETHOD(put_LineColor)(OLE_COLOR newVal);
 	STDMETHOD(get_LineWidth)(FLOAT* pVal);
 	STDMETHOD(put_LineWidth)(FLOAT newVal);
-	STDMETHOD(CopyOptionsFrom)(IShapeDrawingOptions* options);
+	STDMETHOD(CopyOptionsFrom)(IShapeDrawingOptions* options, ShpfileType shpType);
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_SnapTolerance)(DOUBLE* pVal);
 	STDMETHOD(put_SnapTolerance)(DOUBLE newVal);

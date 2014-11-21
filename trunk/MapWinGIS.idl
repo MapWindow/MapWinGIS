@@ -3229,7 +3229,7 @@ enum tkScalebarUnits
 		[propget, id(9)] HRESULT Key([out, retval]BSTR* retVal);
 		[propput, id(9)] HRESULT Key([in]BSTR newVal);
 		[id(10)] HRESULT Clear();
-		[id(11)] HRESULT CopyOptionsFrom([in] IShapeDrawingOptions* options);
+		[id(11)] HRESULT CopyOptionsFrom([in] IShapeDrawingOptions* options, [in, optional, defaultvalue(SHP_NULLSHAPE)]ShpfileType shpType);
 		[propget, id(12)] HRESULT SegmentLength([in]int segmentIndex, [out, retval]double* retVal);
 		[propget, id(13)] HRESULT SegmentAngle([in]int segmentIndex, [out, retval]double* retVal);
 		[propget, id(14)] HRESULT AreaDisplayMode([out, retval]tkAreaDisplayMode* retVal);
