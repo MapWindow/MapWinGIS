@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.ShapeEditor.Helpers;
 
@@ -87,11 +88,18 @@ namespace MWLite.ShapeEditor.Operations
 
         #region Private methods
 
+        private void ShapefileToSystemClipboard(Shapefile sf)
+        {
+            string s = ShapefileEx.SerializeForClipboard(sf);
+            Clipboard.SetText(s);
+        }
+
         private void PopulateBuffer(Shapefile sf)
         {
             var buffer = sf.ExportSelection();
             Clear();
             _buffer = buffer;
+            ShapefileToSystemClipboard(buffer);
         }
 
         private void OffsetShapes()

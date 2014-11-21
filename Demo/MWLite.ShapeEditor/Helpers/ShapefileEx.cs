@@ -77,6 +77,33 @@ namespace MWLite.ShapeEditor.Helpers
             }
         }
 
-        
+        public static string SerializeForClipboard(Shapefile sf)
+        {
+            if (sf == null) return "";
+            int numFields = sf.NumFields;
+            var sb = new StringBuilder("wkt_geom\t");
+            for (int i = 0; i < numFields; i++)
+            {
+                sb.Append(sf.Field[i].Name);
+                if (i < numFields - 1)
+                    sb.Append("\t");
+            }
+            sb.Append(Environment.NewLine);
+
+            for (int i = 0; i < sf.NumShapes; i++)
+            {
+                sb.Append(sf.Shape[i].ExportToWKT() + "\t");
+                for (int j = 0; j < numFields; j++)
+                {
+                    var val = sf.CellValue[j, i];
+                    sb.Append(val ?? "NULL");
+                    if (j < numFields)
+                        sb.Append("\t");
+                }
+                if (i < sf.NumShapes - 1)
+                    sb.Append(Environment.NewLine);
+            }
+            return sb.ToString();
+        }
     }
 }
