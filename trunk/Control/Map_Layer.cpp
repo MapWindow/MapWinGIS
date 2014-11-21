@@ -563,11 +563,17 @@ VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW nam
 		if (ogrLayer)
 		{
 			CStringW xml = ((COgrLayer*)ogrLayer)->LoadStyleXML(L"");
-			CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
-			if (root) {
-				CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
-				result = DeserializeLayerOptionsCore(layerHandle, node);
-				CPLDestroyXMLNode(root);
+			if (xml.GetLength() == 0)
+			{
+				ErrorMessage(tkOGR_STYLE_NOT_FOUND);
+			}
+			else {
+				CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
+				if (root) {
+					CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
+					result = DeserializeLayerOptionsCore(layerHandle, node);
+					CPLDestroyXMLNode(root);
+				}
 			}
 			ogrLayer->Release();
 		}

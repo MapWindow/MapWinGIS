@@ -247,6 +247,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "No field with specified name was found in datasource.";
 		case tkOGR_NO_SHAPEFILE:
 			return "Failed to access underlying shapefile.";
+		case tkOGR_STYLE_NOT_FOUND:
+			return "OGR style with specified name wasn't found.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

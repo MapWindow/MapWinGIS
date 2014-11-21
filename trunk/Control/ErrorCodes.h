@@ -126,6 +126,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkOGR_FAILED_TO_CREATE_STYLE_TABLE 319
 # define tkOGR_INVALID_FIELD_NAME 320
 # define tkOGR_NO_SHAPEFILE 321
+# define tkOGR_STYLE_NOT_FOUND 322
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401
