@@ -299,6 +299,7 @@ void CMapView::SetDefaults()
 	_showingToolTip = FALSE;
 	_lockCount = 0;
 	_canUseLayerBuffer = FALSE;
+	_canUseVolatileBuffer = FALSE;
 	_canUseMainBuffer = false;
 	_leftButtonDown = FALSE;
 	_lastCursorMode = cmNone;
@@ -413,6 +414,7 @@ void CMapView::Shutdown()
 	Utility::ClosePointer(&_bufferBitmap);
 	Utility::ClosePointer(&_tilesBitmap);
 	Utility::ClosePointer(&_drawingBitmap);
+	Utility::ClosePointer(&_volatileBitmap);
 	Utility::ClosePointer(&_bufferBitmap);
 	Utility::ClosePointer(&_moveBitmap);
 	Utility::ClosePointer(&_tempBitmap);
@@ -459,6 +461,7 @@ int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	_drawingBitmap = NULL;
 	_tempBitmap = NULL;
 	_moveBitmap = NULL;
+	_volatileBitmap = NULL;
 
 	DragAcceptFiles( TRUE );
 

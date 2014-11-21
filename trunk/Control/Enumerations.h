@@ -223,4 +223,10 @@ enum HotTrackingResult
 	NoShape = 2,
 };
 
+enum RedrawTarget
+{
+	rtShapeEditor = 0,
+	rtVolatileLayer = 1,
+};
+
 # endif

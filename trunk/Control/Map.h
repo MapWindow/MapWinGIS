@@ -671,6 +671,7 @@ public:
 	//	  Drawing
 	// --------------------------------------------
 	BOOL _canUseLayerBuffer;			// the data layers can be drawn from buffer
+	BOOL _canUseVolatileBuffer;			// volatile shapefiles can be drawn from buffer
 	bool _canUseMainBuffer;				// all the stuff can taken from buffer (only mouse moves will be drawn above)
 	int _redrawId;					// the ordinal number of redraw request
 	bool _isSnapshot;					// used by SnapShots
@@ -680,9 +681,11 @@ public:
 	::CMutex m_drawMutex;
 
 	Gdiplus::Bitmap* _layerBitmap;	   // layer buffer
+	Gdiplus::Bitmap* _volatileBitmap;  // drawing layers and volatile shapefiles	
 	Gdiplus::Bitmap* _tilesBitmap;	   // tiles buffer
-	Gdiplus::Bitmap* _drawingBitmap;   // a back buffer for drawing objects, the stuff like rubber band lines, etc.
 	Gdiplus::Bitmap* _bufferBitmap;    // combined buffer, holds all the other ones (tiles, layers, drawing layers)
+	Gdiplus::Bitmap* _drawingBitmap;   // a back buffer for drawing objects, the stuff like rubber band lines, etc.
+	
 	Gdiplus::Bitmap* _moveBitmap;      // shapes being moved are rendered to this bitmap
 	Gdiplus::Bitmap* _tempBitmap;	   // to scale contents of the rest bitmaps 
 
@@ -944,6 +947,7 @@ private:
 	void DrawScaleBar(Gdiplus::Graphics* g);
 	bool HasDrawingData(tkDrawingDataAvailable type);
 	void DrawTiles(Gdiplus::Graphics* g);
+	void RedrawTiles(Gdiplus::Graphics* g, CDC* dc);
 	void DrawLayersRotated(CDC* pdc, Gdiplus::Graphics* gLayers, const CRect& rcBounds);
 	void DrawImageGroups();
 	void DrawStringWithShade(Gdiplus::Graphics* g, CStringW s, Gdiplus::Font *font, Gdiplus::PointF &point, Gdiplus::Brush *brush, Gdiplus::Brush *brushOutline);
@@ -1101,6 +1105,11 @@ private:
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
 	VARIANT_BOOL FindSnapPointCore(double xScreen, double yScreen, double* xFound, double* yFound);
 	double GetProjectedTolerance(double xScreen, double yScreen, double tolerance);
+	void RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds);
+	void RedrawTools(Gdiplus::Graphics* g, const CRect& rcBounds);
+	bool RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds);
+	void UpdateShapeEditor();
+	bool HasDrawLists();
 	
 #pragma endregion
 
@@ -1131,9 +1140,6 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-	
-
-
 
 };
 

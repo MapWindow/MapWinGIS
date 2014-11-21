@@ -26,7 +26,7 @@ void Digitizer::StartNewBoundShape(CShapeEditor* editor, IShapefile* sf, long la
 }
 
 // ************************************************************
-//		HandleOnLButtonShapeAddMode
+//		OnMouseDown
 // ************************************************************
 bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bool ctrl)
 {
@@ -39,6 +39,7 @@ bool Digitizer::OnMouseDown(CShapeEditor* editor, double projX, double projY, bo
 
 	// add another point
 	editor->HandleProjPointAdd(projX, projY);
+	editor->SetRedrawNeeded(rtShapeEditor);
 
 	// for point layer save the new shape at once
 	if (EditorHelper::GetShapeType2D(editor) == SHP_POINT)

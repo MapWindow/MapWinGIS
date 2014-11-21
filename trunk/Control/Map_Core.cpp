@@ -274,7 +274,7 @@ void CMapView::Resize(long Width, long Height)
 // *************************************************
 void CMapView::Redraw2(tkRedrawType redrawType)
 {
-	RedrawCore(redrawType, redrawType != RedrawTempObjectsOnly, false);
+	RedrawCore(redrawType, redrawType != RedrawMinimal, false);
 }
 
 // *************************************************
@@ -286,16 +286,20 @@ void CMapView::RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnc
 		DoUpdateTiles();
 	}
 
+	// no breaks are needed; it's intentional; redraw type of higher order leads to redraw of lower levels
 	switch (redrawType)
 	{
 		case tkRedrawType::RedrawAll:
 			_canUseLayerBuffer = FALSE;
 			ReloadImageBuffers();
-			break;
+
 		case tkRedrawType::RedrawSkipDataLayers:
+			_canUseVolatileBuffer = FALSE;
+
+		case tkRedrawType::RedrawDynamicTools:
 			_canUseMainBuffer = false;
-			break;
-		case tkRedrawType::RedrawTempObjectsOnly:
+
+		case tkRedrawType::RedrawMinimal:
 			// do nothing, simply invalidate control
 			break;
 	}

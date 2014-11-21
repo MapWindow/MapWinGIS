@@ -277,6 +277,8 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 	}
 
 	_canUseLayerBuffer = FALSE;
+	_canUseMainBuffer = false;
+	_canUseVolatileBuffer = FALSE;
 
 	this->FireExtentsChanged();
 	this->ReloadImageBuffers();

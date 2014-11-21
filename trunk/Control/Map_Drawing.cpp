@@ -11,7 +11,6 @@
 #include "Measuring.h"
 #include "GeometryHelper.h"
 
-#pragma region OnDraw
 // ***************************************************************
 //		OnDraw()
 // ***************************************************************
@@ -42,7 +41,7 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 
 	m_drawMutex.Lock();		// TODO: perhaps use lighter CCriticalSection
 
-	if (!_canUseMainBuffer || !_canUseLayerBuffer) 
+	if (!_canUseMainBuffer || !_canUseVolatileBuffer || !_canUseLayerBuffer) 
 	{
 		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || 
 								HasDrawingData(tkDrawingDataAvailable::Coordinates) ||
@@ -65,6 +64,7 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 	m_drawMutex.Unlock();
 }
 
+
 // ***************************************************************
 //		HandleNewDrawing()
 // ***************************************************************
@@ -78,10 +78,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	Gdiplus::Graphics* gPrinting = NULL;	// for snapshot drawing
 	Gdiplus::Graphics* g = NULL;			// the right one to draw
 
-	// ---------------------------------------
 	// preparing graphics (for snapshot drawing to output canvas directly; 
 	// for control rendering main buffer is used)
-	// ---------------------------------------
 	if (_isSnapshot)
 	{
 		gPrinting = Gdiplus::Graphics::FromHDC(pdc->GetSafeHdc());
@@ -101,183 +99,45 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		g = gBuffer;
 	}
 
-	
-
 	// the main thing is to ensure that if new tile is coming it will trigger a new redraw,
 	// any tile after this moment will do it, otherwise a newcomer will be already in screen buffer
 	_canUseMainBuffer = true;
 
-	// ---------------------------------------
-	// drawing of tiles
-	// ---------------------------------------
-	if (HasDrawingData(tkDrawingDataAvailable::TilesData))
-	{
-		CTiles* tiles = (CTiles*)_tiles;
-		if (_isSnapshot)
-		{
-			if (tiles->TilesAreInScreenBuffer((void*)this))
-			{
-				tiles->MarkUndrawn();	
-				DrawTiles(gPrinting);
-				tiles->MarkUndrawn();
-			}
-		}
-		else
-		{
-			bool zoomingAnimation = HasDrawingData(tkDrawingDataAvailable::ZoomingAnimation);
-			UpdateTileBuffer(pdc, zoomingAnimation);
-
-			// draw existing ones from buffer
-			//if (tiles->DrawnTilesExist())
-			{
-				gBuffer->DrawImage(_tilesBitmap, 0.0f, 0.0f);
-			}
-		}
-	}
+	RedrawTiles(g, pdc);
 	
 	DWORD startTick = ::GetTickCount();
 
-	// ---------------------------------------
-	// drawing of layers
-	// ---------------------------------------
-	bool layersRedraw = false;
-	if ( HasDrawingData(tkDrawingDataAvailable::LayersData) )
-	{
-		if (_isSnapshot)
-		{
-			this->DrawLayers(rcBounds, gPrinting);
-		}
-		else
-		{
-			if(_canUseLayerBuffer)
-			{	
-				bool dragging = _dragging.Operation == DragPanning &&
-								(_dragging.Start.x != 0 || _dragging.Start.y != 0 ||
-								 _dragging.Move.x != 0 || _dragging.Move.y != 0);
+	bool layersRedraw = RedrawLayers(g, pdc, rcBounds);
 
-				int x = dragging ? _dragging.Move.x - _dragging.Start.x : 0;
-				int y = dragging ? _dragging.Move.y - _dragging.Start.y : 0;
-				
-				// update from the layer buffer
-				gBuffer->DrawImage(_layerBitmap, (float)x, (float)y);
-			}
-			else
-			{
-				ClearHotTracking();
+	RedrawVolatileData(g, pdc, rcBounds);
 
-				layersRedraw = true;
-				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(_layerBitmap);
-				gLayers->Clear(Gdiplus::Color::Transparent);
-				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
-
-				bool useRotation = false;	// not implemented
-				if (useRotation) {
-					this->DrawLayersRotated(pdc, gLayers, rcBounds);
-				}
-				else {
-					this->DrawLayers(rcBounds, gLayers);
-				}
-
-				// passing layer buffer to the main buffer
-				gBuffer->DrawImage(_layerBitmap, 0.0f, 0.0f);
-			}
-		}
-	}
-	_canUseLayerBuffer = TRUE;
-	
-	// -----------------------------------
-	// volatile shapefile drawing
-	// -----------------------------------
-	if (HasVolatileShapefiles())
-		this->DrawLayers(rcBounds, g, false);
-
-	// -----------------------------------
-	// shapefile hot tracking
-	// -----------------------------------
-	if (HasDrawingData(tkDrawingDataAvailable::HotTracking))
-	{
-		CShapefileDrawer drawer(gBuffer, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, 
-			this->GetCurrentScale(), true);
-		drawer.Draw(rcBounds, _hotTracking.Shapefile);
-	}
-
-	// -----------------------------------
 	// passing main buffer to client for custom drawing
-	// -----------------------------------
 	if (m_sendOnDrawBackBuffer && !_isSnapshot)
 	{
 		HDC hdc = gBuffer->GetHDC();
 		this->FireOnDrawBackBuffer((long)hdc);
 		gBuffer->ReleaseHDC(hdc);
 	}
-
-	// -----------------------------------
-	//  rendering drawing layers
-	// -----------------------------------
-	if (_isSnapshot)
-	{
-		this->DrawLists(rcBounds, gPrinting, dlSpatiallyReferencedList);
-		this->DrawLists(rcBounds, gPrinting, dlScreenReferencedList);
-	}
-	else
-	{
-		// drawing layers
-		Gdiplus::Graphics* gDrawing = Gdiplus::Graphics::FromImage(_drawingBitmap);
-		gDrawing->Clear(Gdiplus::Color::Transparent);
-
-		// fire external drawing
-		{
-			HDC hdc = gBuffer->GetHDC();
-			VARIANT_BOOL retVal = VARIANT_FALSE;
-			this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
-			gBuffer->ReleaseHDC(hdc);
-		}
-
-		// temp objects
-		this->DrawLists(rcBounds, gDrawing, dlSpatiallyReferencedList);
-		this->DrawLists(rcBounds, gDrawing, dlScreenReferencedList);
-		
-		// fire external drawing code
-		{
-			HDC hdc = gBuffer->GetHDC();
-			VARIANT_BOOL retVal = VARIANT_FALSE;
-			this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
-			gBuffer->ReleaseHDC(hdc);
-		}
-
-		// passing layers to the main buffer
-		gBuffer->DrawImage(_drawingBitmap, 0.0f, 0.0f);
-		delete gDrawing;
-	}
 	
-	DrawShapeEditor(g, false);
-	
-	DrawScaleBar(g);
+	RedrawTools(g, rcBounds);
 
-	DrawZoombar(g);
-
-	// -----------------------------------
 	// redraw time and logo
-	// -----------------------------------
 	DWORD endTick = GetTickCount();
 
 	if (layersRedraw) {
-		_lastRedrawTime = (float)(endTick - startTick)/1000.0f;
+		_lastRedrawTime = (float)(endTick - startTick) / 1000.0f;
 	}
 	this->ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
-	// -------------------------------------------
-	// distance measuring or persistent measuring
-	// -------------------------------------------
-	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
-	{
-		GetMeasuringBase()->DrawData(g, false, DragNone);
-	}
-	
-	// -------------------------------------------
-	// passing the main buffer to the screen 
-	// if no other drawing will be needed
-	// -------------------------------------------
+	CLSID clsid;
+	Utility::GetEncoderClsid(L"image/png", &clsid);
+	_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
+	_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
+	_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
+	_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
+	_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
+
+	// passing the main buffer to the screen if no other drawing will be needed
 	if (!_isSnapshot)
 	{
 		if (drawToOutputCanvas) 
@@ -301,9 +161,163 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	}
 }
 
-#pragma endregion
+// ***************************************************************
+//		RedrawLayers()
+// ***************************************************************
+bool CMapView::RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds)
+{
+	bool layersRedraw = false;
+	if (HasDrawingData(tkDrawingDataAvailable::LayersData))
+	{
+		if (_isSnapshot)
+		{
+			this->DrawLayers(rcBounds, g);
+		}
+		else
+		{
+			if (_canUseLayerBuffer)
+			{
+				bool dragging = _dragging.Operation == DragPanning &&
+					(_dragging.Start.x != 0 || _dragging.Start.y != 0 ||
+					_dragging.Move.x != 0 || _dragging.Move.y != 0);
 
-#pragma region Tile drawing
+				int x = dragging ? _dragging.Move.x - _dragging.Start.x : 0;
+				int y = dragging ? _dragging.Move.y - _dragging.Start.y : 0;
+
+				// update from the layer buffer
+				g->DrawImage(_layerBitmap, (float)x, (float)y);
+			}
+			else
+			{
+				ClearHotTracking();
+
+				layersRedraw = true;
+				Gdiplus::Graphics* gLayers = Gdiplus::Graphics::FromImage(_layerBitmap);
+				gLayers->Clear(Gdiplus::Color::Transparent);
+				gLayers->SetCompositingMode(Gdiplus::CompositingModeSourceOver);
+
+				bool useRotation = false;	// not implemented
+				if (useRotation) {
+					this->DrawLayersRotated(dc, gLayers, rcBounds);
+				}
+				else {
+					this->DrawLayers(rcBounds, gLayers);
+				}
+
+				// passing layer buffer to the main buffer
+				g->DrawImage(_layerBitmap, 0.0f, 0.0f);
+			}
+		}
+	}
+	_canUseLayerBuffer = TRUE;
+	return layersRedraw;
+}
+
+// ***************************************************************
+//		DrawTiles()
+// ***************************************************************
+void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
+{
+	if (HasDrawingData(tkDrawingDataAvailable::TilesData))
+	{
+		CTiles* tiles = (CTiles*)_tiles;
+		if (_isSnapshot)
+		{
+			if (tiles->TilesAreInScreenBuffer((void*)this))
+			{
+				tiles->MarkUndrawn();
+				DrawTiles(g);
+				tiles->MarkUndrawn();
+			}
+		}
+		else
+		{
+			bool zoomingAnimation = HasDrawingData(tkDrawingDataAvailable::ZoomingAnimation);
+			UpdateTileBuffer(dc, zoomingAnimation);
+			g->DrawImage(_tilesBitmap, 0.0f, 0.0f);
+		}
+	}
+}
+
+// ***************************************************************
+//		DrawVolatileData()
+// ***************************************************************
+void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds)
+{
+	bool hasVolatile = HasVolatileShapefiles();
+
+	if (!hasVolatile && !HasDrawLists()) return;
+
+	if (_isSnapshot) 
+	{
+		if (hasVolatile)
+			this->DrawLayers(rcBounds, g, false);
+		this->DrawLists(rcBounds, g, dlSpatiallyReferencedList);
+		this->DrawLists(rcBounds, g, dlScreenReferencedList);
+		return;
+	}
+
+	if (_canUseVolatileBuffer) 
+	{
+		g->DrawImage(_volatileBitmap, 0.0f, 0.0f);
+	}
+	else {
+		// drawing layers
+		Gdiplus::Graphics* gDrawing = Gdiplus::Graphics::FromImage(_volatileBitmap);
+		gDrawing->Clear(Gdiplus::Color::Transparent);
+
+		// rendering of volatile shapefiles
+		if (HasVolatileShapefiles())
+			this->DrawLayers(rcBounds, gDrawing, false);
+
+		// fire external drawing
+		HDC hdc = g->GetHDC();
+		VARIANT_BOOL retVal = VARIANT_FALSE;
+		this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+		g->ReleaseHDC(hdc);
+
+		// temp objects
+		this->DrawLists(rcBounds, gDrawing, dlSpatiallyReferencedList);
+		this->DrawLists(rcBounds, gDrawing, dlScreenReferencedList);
+
+		// fire external drawing code
+		hdc = g->GetHDC();
+		this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+		g->ReleaseHDC(hdc);
+
+		// passing layers to the main buffer
+		g->DrawImage(_volatileBitmap, 0.0f, 0.0f);
+		delete gDrawing;
+		_canUseVolatileBuffer = TRUE;
+	}
+}
+
+// ***************************************************************
+//		RedrawTools()
+// ***************************************************************
+void CMapView::RedrawTools(Gdiplus::Graphics* g, const CRect& rcBounds)
+{
+	DrawShapeEditor(g, false);
+
+	DrawScaleBar(g);
+
+	DrawZoombar(g);
+
+	// distance measuring or persistent measuring
+	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
+	{
+		GetMeasuringBase()->DrawData(g, false, DragNone);
+	}
+
+	// hot tracking
+	if (HasDrawingData(tkDrawingDataAvailable::HotTracking))
+	{
+		CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList,
+			this->GetCurrentScale(), true);
+		drawer.Draw(rcBounds, _hotTracking.Shapefile);
+	}
+}
+
 // ***************************************************************
 //	UpdateTileBuffer
 // ***************************************************************
@@ -504,7 +518,6 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 	}
 	drawer.DrawTiles(_tiles, this->PixelsPerMapUnit(), GetMapProjection(), ((CTiles*)_tiles)->m_provider->Projection, _isSnapshot, _projectionChangeCount);
 }
-#pragma endregion
 
 #pragma region Draw layers
 
@@ -974,6 +987,13 @@ void CMapView::ResizeBuffers(int cx, int cy)
 		_drawingBitmap = NULL;
 	}
 	_drawingBitmap = new Gdiplus::Bitmap(cx, cy);
+
+	if (_volatileBitmap)
+	{
+		delete _volatileBitmap;
+		_volatileBitmap = NULL;
+	}
+	_volatileBitmap = new Gdiplus::Bitmap(cx, cy);
 
 	if (_layerBitmap)
 	{

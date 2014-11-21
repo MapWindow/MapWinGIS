@@ -14,7 +14,7 @@ void VertexEditor::StartEdit(CShapeEditor* editor, long layerHandle, long shapeI
 		VARIANT_BOOL vb;
 		editor->StartEdit(layerHandle, shapeIndex, &vb);
 		if (vb) {
-			editor->SetRedrawNeeded(true);
+			editor->SetRedrawNeeded(rtVolatileLayer);
 		}
 	}
 }
@@ -36,7 +36,7 @@ bool VertexEditor::OnMouseDown(IMapViewCallback* map, CShapeEditor* editor, doub
 		{
 			bool stopped = editor->TryStop();
 			if (stopped)
-				editor->SetRedrawNeeded(true);
+				editor->SetRedrawNeeded(rtVolatileLayer);
 			return true;
 		}
 		
@@ -74,7 +74,7 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 			bool changed = editor->SetSelectedVertex(pntIndex);
 			map->_StartDragging(DragMoveVertex);
 			editor->SaveState();
-			if (changed) editor->SetRedrawNeeded(true);
+			if (changed) editor->SetRedrawNeeded(rtShapeEditor);
 			return true;
 		}
 	}
@@ -95,7 +95,7 @@ bool VertexEditor::OnMouseDownEditing(IMapViewCallback* map, CShapeEditor* edito
 					if (editor->SetSelectedPart(partIndex)) {
 						map->_StartDragging(DragMovePart);
 					}
-					editor->SetRedrawNeeded(true);
+					editor->SetRedrawNeeded(rtShapeEditor);
 					return true;
 				}
 				

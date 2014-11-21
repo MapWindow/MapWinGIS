@@ -169,7 +169,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 						VARIANT_BOOL result = VARIANT_FALSE;
 						_shapeEditor->UndoPoint(&result);
 						if (result) {
-							Redraw2(RedrawSkipDataLayers);
+							Redraw2(RedrawDynamicTools);
 							return;
 						}
 					}
@@ -186,7 +186,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 							_undoList->Undo(VARIANT_TRUE, &vb);
 						}
 						if (vb) {
-							Redraw();    // TODO: run layers redraw only when necessary
+							Redraw2(RedrawSkipDataLayers);
 						}
 						return;
 					}
@@ -436,6 +436,16 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 
 #pragma region Left button
 
+// ************************************************************
+//		UpdateShapeEditor
+// ************************************************************
+void CMapView::UpdateShapeEditor()
+{
+	if (_shapeEditor->GetRedrawNeeded(rtVolatileLayer))
+		RedrawCore(RedrawSkipDataLayers, false, true);
+	else if (_shapeEditor->GetRedrawNeeded(rtShapeEditor))
+		RedrawCore(RedrawDynamicTools, false, true);
+}
 
 // ************************************************************
 //		OnLButtonDown
@@ -449,6 +459,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	_dragging.Move = point;
 	_clickDownExtents = _extents;
 	_leftButtonDown = TRUE;
+	_shapeEditor->ClearRedrawFlag();
 
 	// process zoombar before everything else; if zoom bar was clicked, 
 	// map must not receive the event at all
@@ -492,8 +503,9 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		if (m_cursorMode == cmAddShape) {
 			if (!StartNewBoundShape(x, y)) return;
 		}
+		
 		if (Digitizer::OnMouseDown(_shapeEditor, projX, projY, ctrl))
-			Redraw2(RedrawSkipDataLayers);
+			UpdateShapeEditor();
 		return;
 	}
 
@@ -502,7 +514,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	{
 		case cmEditShape:
 			{
-				_shapeEditor->SetRedrawNeeded(false);
 				if (!VertexEditor::OnMouseDown(this, _shapeEditor, projX, projY, ctrl))
 				{
 					long layerHandle, shapeIndex;
@@ -511,8 +522,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 						VertexEditor::StartEdit(_shapeEditor, layerHandle, shapeIndex);
 					}
 				}
-				if (_shapeEditor->GetRedrawNeeded())
-					RedrawCore(RedrawSkipDataLayers, false, true);
+				UpdateShapeEditor();
 			}
 			break;
 		case cmIdentify:
@@ -665,7 +675,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragMoveShape:
 			{
 				if (HandleLButtonUpDragVertexOrShape(nFlags))
-					Redraw2(tkRedrawType::RedrawSkipDataLayers);
+					Redraw2(tkRedrawType::RedrawDynamicTools);
 			}
 			break;
 		case DragPanning:

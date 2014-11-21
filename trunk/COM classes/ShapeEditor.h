@@ -32,6 +32,7 @@ public:
 		_isSubjectShape = false;
 		_validationMode = evCheckWithGeos;
 		_redrawNeeded = false;
+		_layerRedrawNeeded = false;
 		_overlayType = eoAddPart;
 		_behavior = ebVertexEditor;
 		_startingUndoCount = -1;
@@ -147,6 +148,7 @@ private:
 	bool _isSubjectShape;
 	tkEditorValidationMode _validationMode;
 	bool _redrawNeeded;
+	bool _layerRedrawNeeded;
 	tkEditorOverlay _overlayType;
 	tkEditorBehavior _behavior;
 	long _startingUndoCount;
@@ -161,8 +163,27 @@ public:
 		_mapCallback = callback;
 	}
 
-	void SetRedrawNeeded(bool value) { _redrawNeeded  = value; }
-	bool GetRedrawNeeded() {return _redrawNeeded; }
+	bool GetRedrawNeeded(RedrawTarget target) 
+	{ 
+		if (target == rtShapeEditor)
+			return _redrawNeeded; 
+		if (target == rtVolatileLayer)
+			return _layerRedrawNeeded;
+		return false;
+	}
+	void SetRedrawNeeded(RedrawTarget target) 
+	{ 
+		if (target == rtShapeEditor) 
+			_redrawNeeded = true;
+		if (target == rtVolatileLayer) 
+			_layerRedrawNeeded = true; 
+	}
+	void ClearRedrawFlag()
+	{
+		_redrawNeeded = false;
+		_layerRedrawNeeded = false;
+	}
+
 	EditorBase* GetActiveShape() { return _activeShape; }
 	void SetIsSubject(bool value) { _isSubjectShape = value; }
 	void DiscardState();
@@ -205,7 +226,6 @@ public:
 	bool HasSelectedPart() { return _activeShape->HasSelectedPart(); }
 	int SelectPart(double xProj, double yProj) { return _activeShape->SelectPart(xProj, yProj); }
 	int GetClosestVertex(double projX, double projY, double tolerance) { return _activeShape->GetClosestVertex(projX, projY, tolerance); }
-	
-	
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

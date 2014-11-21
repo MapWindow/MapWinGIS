@@ -1139,17 +1139,21 @@ bool CShapeEditor::TryStop()
 	{
 		case esDigitizeUnbound:
 			_mapCallback->_UnboundShapeFinished(shp);
-			return true;	
+			SetRedrawNeeded(rtShapeEditor);
+			break;
 		case esOverlay:
 			EndOverlay(shp);
-			return true;
+			SetRedrawNeeded(rtShapeEditor);
+			break;
 		case esDigitize:
 		case esEdit:
 			VARIANT_BOOL isEmpty;
 			get_IsEmpty(&isEmpty);
 			if (isEmpty) return true;
 			if (!shp) return false;
-			return TrySaveShape(shp);
+			bool result = TrySaveShape(shp);
+			SetRedrawNeeded(rtVolatileLayer);
+			break;
 	}
 	return true;
 }

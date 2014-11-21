@@ -248,6 +248,14 @@ void CMapView::SetDrawingStandardViewWidth(long drawHandle, double Width)
 #pragma region DrawingLayer
 
 // ******************************************************************
+//		HasDrawLists
+// ******************************************************************
+bool CMapView::HasDrawLists()
+{
+	return _activeDrawLists.size() > 0;
+}
+
+// ******************************************************************
 //		Draw the DrawLayers
 // ******************************************************************
 void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tkDrawReferenceList listType)
