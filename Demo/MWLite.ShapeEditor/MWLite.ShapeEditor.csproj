@@ -68,6 +68,12 @@
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
     <Compile Include="StateHelper.cs" />
+    <Compile Include="UI\DigitizingContextMenu.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\DigitizingContextMenu.Designer.cs">
+      <DependentUpon>DigitizingContextMenu.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SelectionContextMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -128,6 +134,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AttributesForm.resx">
       <DependentUpon>AttributesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\DigitizingContextMenu.resx">
+      <DependentUpon>DigitizingContextMenu.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SelectionContextMenu.resx">
       <DependentUpon>SelectionContextMenu.cs</DependentUpon>

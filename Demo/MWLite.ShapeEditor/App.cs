@@ -21,6 +21,7 @@ namespace MWLite.ShapeEditor
         private static EditorDispatcher _dispatcher = new EditorDispatcher();
         private static SelectionContextMenu _selectionContextMenu = new SelectionContextMenu();
         private static VertexContextMenu _vertexContextMenu = new VertexContextMenu();
+        private static DigitizingContextMenu _digitizingContextMenu = null;
 
         static App()
         {
@@ -58,6 +59,16 @@ namespace MWLite.ShapeEditor
         internal static EditorToolbar Toolbar
         {
             get { return _toolbar; }
+        }
+
+        internal static ContextMenuStrip DigitizingContextMenu
+        {
+            get
+            {
+                if (_digitizingContextMenu == null)
+                    _digitizingContextMenu = new DigitizingContextMenu();
+                return _digitizingContextMenu.Menu;
+            }
         }
 
         internal static ContextMenuStrip SelectionContextMenu

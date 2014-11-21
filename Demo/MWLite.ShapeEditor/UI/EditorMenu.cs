@@ -25,21 +25,12 @@ namespace MWLite.ShapeEditor.UI
 
         private void InitShapeEditorOptions()
         {
-            mnuEditorVertices.Click += (s, args) => { Map.ShapeEditor.VerticesVisible = !Map.ShapeEditor.VerticesVisible; };
-            mnuEditorHighlightShapes.Click += (s, args) => { Map.ShapeEditor.HighlightShapes = !Map.ShapeEditor.HighlightShapes; };
-            mnuEditorAutoSnapping.Click += (s, args) =>
-            {
-                Map.ShapeEditor.SnapBehavior =
-                    mnuEditorAutoSnapping.Checked ? tkSnapBehavior.sbSnapWithShift : tkSnapBehavior.sbSnapByDefault;
-            };
             mnuShapeEditor.DropDownOpening += mnuShapeEditor_DropDownOpening;
         }
 
         void mnuShapeEditor_DropDownOpening(object sender, EventArgs e)
         {
             mnuEditorVertices.Checked = Map.ShapeEditor.VerticesVisible;
-            mnuEditorAutoSnapping.Checked = Map.ShapeEditor.SnapBehavior == tkSnapBehavior.sbSnapByDefault;
-            mnuEditorHighlightShapes.Checked = Map.ShapeEditor.HighlightShapes;
 
             var list = new[] {mnuCopy, mnuPaste, mnuCut, mnuUndo, mnuRedo};
             foreach (var item in list)

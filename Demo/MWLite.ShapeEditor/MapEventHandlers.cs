@@ -111,6 +111,12 @@ namespace MWLite.ShapeEditor
                         menu.Show(_map, e.x, e.y);
                         break;
                     }
+                    case tkCursorMode.cmAddShape:
+                    {
+                        var menu = App.DigitizingContextMenu;
+                        menu.Show(_map, e.x, e.y);
+                        break;
+                    }
                 }
             }
         }
