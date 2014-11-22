@@ -271,5 +271,6 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "UndoList", dispidUndoList, GetUndoList, SetNotSupported, VT_DISPATCH)
 	DISP_PROPERTY_NOTIFY_ID(CMapView, "MouseTolerance", dispidMouseTolerance, _mouseTolerance, OnMouseToleranceChanged, VT_R8)
 	DISP_PROPERTY_EX_ID(CMapView, "Identifier", dispidIdentifier, GetIdentifier, SetNotSupported, VT_DISPATCH)
+	DISP_FUNCTION_ID(CMapView, "Undo", dispidUndo, Undo, VT_EMPTY, VTS_NONE)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

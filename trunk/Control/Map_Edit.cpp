@@ -64,7 +64,7 @@ bool CMapView::SnappingIsOn(UINT flags)
 
 bool CMapView::SnappingIsOn(bool shift)
 {
-	if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode)) 
+	if (EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode)) 
 	{
 		tkLayerSelection behavior = EditorHelper::GetSnappingBehavior(_shapeEditor);
 		if (behavior == lsAllLayers || behavior == lsCurrentLayer) return true;
@@ -366,6 +366,7 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 	if (!shp) return;
 
 	_shapeEditor->Clear();
+	_shapeEditor->StartUnboundShape((tkCursorMode)m_cursorMode);
 
 	long layerHandle = -1;
 	FireChooseLayer(0, 0, &layerHandle);

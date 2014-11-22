@@ -6122,6 +6122,7 @@ library MapWinGIS
 			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
 			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(238), propput] void GetLayerVisibleAtCurrentScale(LONG LayerHandle, VARIANT_BOOL newVal);
+			[id(244)] void Undo();
 			//}}AFX_ODL_METHOD
 	};
 

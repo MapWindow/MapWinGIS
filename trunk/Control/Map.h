@@ -599,6 +599,8 @@ public:
 	afx_msg void OnIdentifierColorChanged();
 	afx_msg void OnMouseToleranceChanged();
 	afx_msg void OnIdentifierModeChanged();
+	afx_msg bool Undo() { return UndoCore(false); }
+	
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -1110,6 +1112,7 @@ private:
 	bool RedrawLayers(Gdiplus::Graphics* g, CDC* dc, const CRect& rcBounds);
 	void UpdateShapeEditor();
 	bool HasDrawLists();
+	bool UndoCore(bool shift);
 	
 #pragma endregion
 
@@ -1140,7 +1143,7 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -893,8 +893,6 @@ bool CShapeEditor::StartUnboundShape(tkCursorMode cursor)
 // *******************************************************
 //		StartUnboundShape
 // *******************************************************
-// for custom digitizing
-// TODO: set the default coloring
 STDMETHODIMP CShapeEditor::StartUnboundShape(ShpfileType shpType, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -1435,7 +1433,7 @@ IShape* CShapeEditor::CalculateOverlay(IShape* overlay)
 }
 
 // *******************************************************
-//		ApplyOperation
+//		EndOverlay
 // *******************************************************
 void CShapeEditor::EndOverlay(IShape* overlay)
 {
@@ -1551,7 +1549,7 @@ STDMETHODIMP CShapeEditor::get_HasChanges(VARIANT_BOOL* pVal)
 			break;
 		case esDigitizeUnbound:
 		case esDigitize:
-			*pVal = EditorHelper::IsEmpty(this) ? VARIANT_TRUE : VARIANT_FALSE;
+			*pVal = EditorHelper::IsEmpty(this) ? VARIANT_FALSE : VARIANT_TRUE;
 			break;
 		case esEdit:
 		case esOverlay:

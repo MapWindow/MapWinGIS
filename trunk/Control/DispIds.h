@@ -3,6 +3,7 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	// NOTE: ClassWizard will add and remove enumeration elements here
 	//    DO NOT EDIT what you see in these blocks of generated code !
 	// **ClassWizard is a thing of the past... feel free to edit this code.
+	dispidUndo = 244L,
 	dispidIdentifier = 243L,
 	dispidMouseTolerance = 242L,
 	dispidUndoList = 241L,

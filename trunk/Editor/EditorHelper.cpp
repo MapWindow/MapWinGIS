@@ -40,7 +40,16 @@ bool EditorHelper::IsGroupOverlayCursor(tkCursorMode cursorMode)
 // ************************************************************
 bool EditorHelper::IsDigitizingCursor(tkCursorMode mode)
 {
-	return mode == cmAddShape /*|| mode == cmEditShape*/ || IsGroupOverlayCursor(mode);
+	return mode == cmAddShape || IsGroupOverlayCursor(mode);
+}
+
+// ************************************************************
+//		IsSnappableCursor
+// ************************************************************
+bool EditorHelper::IsSnappableCursor(tkCursorMode mode)
+{
+	return mode == cmAddShape || mode == cmSplitByPolyline || mode == cmSplitByPolygon ||
+		mode == cmEraseByPolygon || mode == cmClipByPolygon;
 }
 
 // *******************************************************

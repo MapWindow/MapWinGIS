@@ -18,7 +18,7 @@ public:
 	{
 		_hotTracking = VARIANT_TRUE;
 		_mode = imAllLayers;
-		_color = RGB(30, 144, 255);
+		_color = RGB(255, 0, 0); //RGB(30, 144, 255);
 		_activeLayer = -1;
 	}
 

@@ -88,6 +88,40 @@ void CMapView::TurnOffPanning()
 }
 
 // ***************************************************************
+//		Undo
+// ***************************************************************
+bool CMapView::UndoCore(bool shift)
+{
+	if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
+	{
+		VARIANT_BOOL result = VARIANT_FALSE;
+		_shapeEditor->UndoPoint(&result);
+		if (result) {
+			Redraw2(RedrawDynamicTools);
+			return true;
+		}
+	}
+
+	tkUndoShortcut shortcut;
+	_undoList->get_ShortcutKey(&shortcut);
+	if (shortcut == usCtrlZ)
+	{
+		VARIANT_BOOL vb;
+		if (shift) {
+			_undoList->Redo(VARIANT_TRUE, &vb);
+		}
+		else {
+			_undoList->Undo(VARIANT_TRUE, &vb);
+		}
+		if (vb) {
+			Redraw2(RedrawSkipDataLayers);
+		}
+		return true;
+	}
+	return false;
+}
+
+// ***************************************************************
 //		OnKeyDown
 // ***************************************************************
 void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags) 
@@ -162,34 +196,9 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		case 'Z':
 			{
-				if(ctrl) 
-				{
-					if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
-					{
-						VARIANT_BOOL result = VARIANT_FALSE;
-						_shapeEditor->UndoPoint(&result);
-						if (result) {
-							Redraw2(RedrawDynamicTools);
-							return;
-						}
-					}
-
-					tkUndoShortcut shortcut;
-					_undoList->get_ShortcutKey(&shortcut);
-					if (shortcut == usCtrlZ) 
-					{
-						VARIANT_BOOL vb;
-						if (shift) {
-							_undoList->Redo(VARIANT_TRUE, &vb);
-						}
-						else {
-							_undoList->Undo(VARIANT_TRUE, &vb);
-						}
-						if (vb) {
-							Redraw2(RedrawSkipDataLayers);
-						}
+				if (ctrl) {
+					if (UndoCore(shift))
 						return;
-					}
 				}
 				UpdateCursor(cmZoomIn, false);
 			}
@@ -1014,9 +1023,9 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	}
 
 	bool updateHotTracking = true;
-	bool refreshNeeded = false;
+	bool refreshNeeded = _dragging.Operation != DragNone;
 
-	if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure)
+	if ((EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmMeasure))
 	{
 		ActiveShape* shp = GetActiveShape();
 		if (shp->IsDynamic() && shp->GetPointCount() > 0)
@@ -1034,21 +1043,17 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			refreshNeeded = true;
 		}
 	}
-	
+
 	switch(m_cursorMode)
 	{
 		case cmMoveShapes:
 		case cmRotateShapes:
-			if (_dragging.Operation == DragMoveShapes ||
-				_dragging.Operation == DragRotateShapes)
+			if (InitDraggingShapefile())
 			{
-				if (InitDraggingShapefile())
-				{
-					this->Refresh();
-					return;
-				}
-				refreshNeeded = true;
+				this->Refresh();
+				return;
 			}
+			refreshNeeded = true;
 			break;
 		case cmZoomIn:
 			if ((nFlags & MK_LBUTTON) && _leftButtonDown) {
@@ -1091,7 +1096,8 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 				refreshNeeded = true;
 				break;
 			case NoShape:
-				refreshNeeded = !_hotTracking.IsEmpty();
+				if (!_hotTracking.IsEmpty())
+					refreshNeeded = true;
 				ClearHotTracking();
 				break;
 			case SameShape:

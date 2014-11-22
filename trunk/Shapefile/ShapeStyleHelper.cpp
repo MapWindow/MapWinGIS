@@ -172,11 +172,13 @@ IShapeDrawingOptions* ShapeStyleHelper::GetHotTrackingStyle(IShapefile* sf, OLE_
 
 			ShpfileType type = ShapefileHelper::GetShapeType2D(sf);
 
-			if (identify) // || !interactiveEditing
+			if (identify)
 			{
 				bool point = type == SHP_POINT || type == SHP_MULTIPOINT;
-				newOptions->put_FillVisible(point ? VARIANT_TRUE : VARIANT_FALSE);
+				newOptions->put_FillVisible(VARIANT_TRUE); //point ? VARIANT_TRUE : VARIANT_FALSE);
 				newOptions->put_LineColor(outlineColor);
+				newOptions->put_FillColor(outlineColor);
+				newOptions->put_FillTransparency(100);
 				newOptions->put_LineWidth(2.0f);
 			}
 			else

@@ -1132,6 +1132,9 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 		if (currentLayerOnly && layerHandle != currentHandle) 
 			continue;
 
+		Layer* l = get_Layer(layerHandle);
+		if (!l || !l->wasRendered) continue;
+
 		CComPtr<IShapefile> sf = NULL;
 		sf.Attach(this->GetShapefile(layerHandle));
 		if (sf)
@@ -1217,17 +1220,17 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 	{
 		if (layer->QueryShapefile(&sf))
 		{
+			if (!layer->wasRendered) return false;
 			VARIANT_BOOL result = VARIANT_FALSE;
 			switch (selector)
 			{
 			case slctShapefiles:
-				return layer->wasRendered;
+				return true;
 			case slctIdentify:
 				result = LayerIsIdentifiable(layerHandle, sf);
 				break;
 			case slctHotTracking:
-				if (!layer->wasRendered) return false;
-				if (m_cursorMode == cmMeasure || m_cursorMode == cmSelectByPolygon) return false;
+				
 
 				if (m_cursorMode == cmIdentify) 
 				{
@@ -1398,6 +1401,9 @@ bool CMapView::SelectShapeForEditing(int x, int y, long& layerHandle, long& shap
 // ************************************************************
 HotTrackingResult CMapView::RecalcHotTracking(CPoint point, LayerShape& result)
 {
+	bool cursorCheck = EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode) || m_cursorMode == cmEditShape || m_cursorMode == cmIdentify;
+	if (!cursorCheck) return NoShape;
+
 	if (_shapeCountInView < m_globalSettings.hotTrackingMaxShapeCount && HasHotTracking())
 	{
 		result = FindShapeAtScreenPoint(point, slctHotTracking);

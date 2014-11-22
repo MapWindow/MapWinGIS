@@ -45,7 +45,8 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 	{
 		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || 
 								HasDrawingData(tkDrawingDataAvailable::Coordinates) ||
-								HasDrawingData(tkDrawingDataAvailable::ZoomBox);
+								HasDrawingData(tkDrawingDataAvailable::ZoomBox) || 
+								HasDrawingData(tkDrawingDataAvailable::ShapeDigitizing);
 
 		// if there is no move data, draws to output canvas directly
 		this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
@@ -129,13 +130,13 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	}
 	this->ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
-	CLSID clsid;
-	Utility::GetEncoderClsid(L"image/png", &clsid);
-	_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
-	_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
-	_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
-	_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
-	_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
+	//CLSID clsid;
+	//Utility::GetEncoderClsid(L"image/png", &clsid);
+	//_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
+	////_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
+	//_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
+	//_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
+	//_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
 
 	// passing the main buffer to the screen if no other drawing will be needed
 	if (!_isSnapshot)
@@ -1026,7 +1027,7 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 			{
 				return _dragging.Operation == DragZoombox || _dragging.Operation == DragSelectionBox;
 			}
-		case ShapeEditing:
+		case ShapeDigitizing:
 			{
 				if (!GetEditorBase()->GetCreationMode())
 					return false;

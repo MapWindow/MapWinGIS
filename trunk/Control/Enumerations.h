@@ -132,7 +132,7 @@ enum tkDrawingDataAvailable
 	ZoomingAnimation = 5,
 	PanningInertia = 6,
 	ActShape = 7,
-	ShapeEditing = 8,
+	ShapeDigitizing = 8,
 	ZoomBox = 9,
 	MovingShapes = 10,
 };
