@@ -106,17 +106,22 @@ namespace MWLite.ShapeEditor
                         break;
                     }
                     case tkCursorMode.cmEditShape:
+                    case tkCursorMode.cmAddShape:
+                    case tkCursorMode.cmClipByPolygon:
+                    case tkCursorMode.cmEraseByPolygon:
+                    case tkCursorMode.cmSplitByPolygon:
+                    case tkCursorMode.cmSplitByPolyline:
+                    case tkCursorMode.cmSelectByPolygon:
                     {
                         var menu = App.VertexContextMenu;
                         menu.Show(_map, e.x, e.y);
                         break;
                     }
-                    case tkCursorMode.cmAddShape:
-                    {
-                        var menu = App.DigitizingContextMenu;
-                        menu.Show(_map, e.x, e.y);
-                        break;
-                    }
+                    //{
+                    //    var menu = App.DigitizingContextMenu;
+                    //    menu.Show(_map, e.x, e.y);
+                    //    break;
+                    //}
                 }
             }
         }

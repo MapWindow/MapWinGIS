@@ -66,6 +66,7 @@
     <Compile Include="UI\FileHelper.cs" />
     <Compile Include="UI\MessageHelper.cs" />
     <Compile Include="UI\PathHelper.cs" />
+    <Compile Include="WinApi.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MapWindow.Legend\MapWindow.Legend.csproj">

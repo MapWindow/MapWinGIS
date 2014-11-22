@@ -30,18 +30,18 @@
         {
             this.components = new System.ComponentModel.Container();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxSelectByRectangle = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxClearSelection = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxSplitShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMergeShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxRotateShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxMoveShapes = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxCut = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxPaste = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxRemoveShapes = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -63,101 +63,91 @@
             this.toolStripSeparator1,
             this.ctxRemoveShapes});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(182, 344);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(178, 6);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(178, 6);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(178, 6);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(174, 264);
             // 
             // ctxSelectByRectangle
             // 
-            this.ctxSelectByRectangle.Image = global::MWLite.ShapeEditor.Properties.Resources.select;
             this.ctxSelectByRectangle.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxSelectByRectangle.Name = "ctxSelectByRectangle";
-            this.ctxSelectByRectangle.Size = new System.Drawing.Size(181, 30);
+            this.ctxSelectByRectangle.Size = new System.Drawing.Size(173, 22);
             this.ctxSelectByRectangle.Text = "Select by rectangle";
             // 
             // ctxClearSelection
             // 
-            this.ctxClearSelection.Image = global::MWLite.ShapeEditor.Properties.Resources.selected_delete1;
             this.ctxClearSelection.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxClearSelection.Name = "ctxClearSelection";
-            this.ctxClearSelection.Size = new System.Drawing.Size(181, 30);
+            this.ctxClearSelection.Size = new System.Drawing.Size(173, 22);
             this.ctxClearSelection.Text = "Clear selection";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(170, 6);
             // 
             // ctxSplitShapes
             // 
-            this.ctxSplitShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.split;
             this.ctxSplitShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxSplitShapes.Name = "ctxSplitShapes";
-            this.ctxSplitShapes.Size = new System.Drawing.Size(181, 30);
+            this.ctxSplitShapes.Size = new System.Drawing.Size(173, 22);
             this.ctxSplitShapes.Text = "Split multi-part";
             // 
             // ctxMergeShapes
             // 
-            this.ctxMergeShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.merge;
             this.ctxMergeShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxMergeShapes.Name = "ctxMergeShapes";
-            this.ctxMergeShapes.Size = new System.Drawing.Size(181, 30);
+            this.ctxMergeShapes.Size = new System.Drawing.Size(173, 22);
             this.ctxMergeShapes.Text = "Merge";
             // 
             // ctxRotateShapes
             // 
-            this.ctxRotateShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.shape_rotate;
             this.ctxRotateShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxRotateShapes.Name = "ctxRotateShapes";
-            this.ctxRotateShapes.Size = new System.Drawing.Size(181, 30);
+            this.ctxRotateShapes.Size = new System.Drawing.Size(173, 22);
             this.ctxRotateShapes.Text = "Rotate";
             // 
             // ctxMoveShapes
             // 
-            this.ctxMoveShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.move;
             this.ctxMoveShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxMoveShapes.Name = "ctxMoveShapes";
-            this.ctxMoveShapes.Size = new System.Drawing.Size(181, 30);
+            this.ctxMoveShapes.Size = new System.Drawing.Size(173, 22);
             this.ctxMoveShapes.Text = "Move";
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(170, 6);
             // 
             // ctxCopy
             // 
-            this.ctxCopy.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_copy;
             this.ctxCopy.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxCopy.Name = "ctxCopy";
-            this.ctxCopy.Size = new System.Drawing.Size(181, 30);
+            this.ctxCopy.Size = new System.Drawing.Size(173, 22);
             this.ctxCopy.Text = "Copy";
             // 
             // ctxCut
             // 
-            this.ctxCut.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_cut;
             this.ctxCut.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxCut.Name = "ctxCut";
-            this.ctxCut.Size = new System.Drawing.Size(181, 30);
+            this.ctxCut.Size = new System.Drawing.Size(173, 22);
             this.ctxCut.Text = "Cut";
             // 
             // ctxPaste
             // 
-            this.ctxPaste.Image = global::MWLite.ShapeEditor.Properties.Resources.edit_paste;
             this.ctxPaste.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxPaste.Name = "ctxPaste";
-            this.ctxPaste.Size = new System.Drawing.Size(181, 30);
+            this.ctxPaste.Size = new System.Drawing.Size(173, 22);
             this.ctxPaste.Text = "Paste";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
             // 
             // ctxRemoveShapes
             // 
-            this.ctxRemoveShapes.Image = global::MWLite.ShapeEditor.Properties.Resources.element_delete;
             this.ctxRemoveShapes.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.ctxRemoveShapes.Name = "ctxRemoveShapes";
-            this.ctxRemoveShapes.Size = new System.Drawing.Size(181, 30);
+            this.ctxRemoveShapes.Size = new System.Drawing.Size(173, 22);
             this.ctxRemoveShapes.Text = "Delete";
             // 
             // SelectionContextMenu

@@ -34,5 +34,11 @@ namespace MWLite.ShapeEditor
         SaveShape = 24,
         SelectByRectangle = 25,
         ClearSelection = 26,
+        SnappingNone = 27,
+        SnappingCurrent = 28,
+        SnappingAll = 29,
+        HighlightingNone = 30,
+        HighlightingCurrent = 31,
+        HighlightingAll = 32,
     }
 }

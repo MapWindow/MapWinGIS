@@ -33,16 +33,41 @@ namespace MWLite.ShapeEditor.UI
             ctxRemovePart.Enabled = hasShape;
             ctxSaveShape.Enabled = hasShape;
             ctxClearEditor.Enabled = hasShape;
+            ctxUndo.Enabled = hasShape;
             ctxVertexEditor.Enabled = true;
             ctxPartEditor.Enabled = true;
             ctxVertexEditor.Checked = App.Map.ShapeEditor.EditorBehavior == tkEditorBehavior.ebVertexEditor;
             ctxPartEditor.Checked = App.Map.ShapeEditor.EditorBehavior == tkEditorBehavior.ebPartEditor;
 
+            ctxSnappingAll.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsAllLayers;
+            ctxSnappingNone.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsNoLayer;
+            ctxSnappingCurrent.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsCurrentLayer;
+
+            ctxHighlightingCurrent.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsCurrentLayer;
+            ctxHighlightingAll.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsAllLayers;
+            ctxHighlightingNone.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsNoLayer;
+
+            ctxHighlighting.Enabled = true;
+            ctxSnapping.Enabled = true;
+
+            bool editing = App.Map.CursorMode == tkCursorMode.cmEditShape;
+            ctxPartEditor.Visible = editing;
+            ctxVertexEditor.Visible = editing;
+            ctxAddPart.Visible = editing;
+            ctxRemovePart.Visible = editing;
+            editorSeparator1.Visible = editing;
+            editorSeparator2.Visible = editing;
+
+            digitizerSeparator.Visible = !editing;
+            ctxUndo.Visible = !editing;
+
+            ctxSaveShape.Text = editing ? "Save changes" : "Finish operation";
+
             bool hasChanges = App.Map.ShapeEditor.HasChanges;
             if (hasChanges)
             {
                 ctxSaveShape.Enabled = true;
-                ctxClearEditor.Text = "Discard changes";
+                ctxClearEditor.Text = editing ? "Discard changes" : "Cancel";
             }
             else
             {

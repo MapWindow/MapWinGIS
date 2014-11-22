@@ -28,11 +28,13 @@ namespace MWLite.ShapeEditor
 
             if (HandleVertexEditor(command)) return;
 
+            if (HandleSnappingAndHighlighting(command)) return;
+
             var map = App.Instance.Map;
             switch (command)
             {
                 case EditorCommand.Undo:
-                    map.UndoList.Undo();
+                    map.Undo();
                     map.Redraw2(tkRedrawType.RedrawSkipDataLayers);
                     break;
                 case EditorCommand.Redo:
@@ -50,6 +52,32 @@ namespace MWLite.ShapeEditor
                     break;
             }
             App.Instance.RefreshUI();
+        }
+
+        public bool HandleSnappingAndHighlighting(EditorCommand command)
+        {
+            switch (command)
+            {
+                case EditorCommand.SnappingNone:
+                    App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsNoLayer;
+                    break;
+                case EditorCommand.SnappingCurrent:
+                    App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsCurrentLayer;
+                    break;
+                case EditorCommand.SnappingAll:
+                    App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsAllLayers;
+                    break;
+                case EditorCommand.HighlightingNone:
+                    App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsNoLayer;
+                    break;
+                case EditorCommand.HighlightingCurrent:
+                    App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsCurrentLayer;
+                    break;
+                case EditorCommand.HighlightingAll:
+                    App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsAllLayers;
+                    break;
+            }
+            return false;
         }
 
         public bool HandleVertexEditor(EditorCommand command)

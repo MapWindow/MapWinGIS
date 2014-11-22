@@ -24,6 +24,7 @@ namespace MWLite.GUI.MapLegend
         {
             if (button == MouseButtons.Right && Handle != -1)
             {
+                legend1.SelectedLayer = Handle;
                 var layer = legend1.Layers.ItemByHandle(Handle);
                 if (layer != null)
                 {

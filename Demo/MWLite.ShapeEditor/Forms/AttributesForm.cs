@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MapWinGIS;
+using MWLite.Core;
 using MWLite.Core.UI;
 using System.IO;
 
@@ -31,6 +32,14 @@ namespace MWLite.ShapeEditor.Forms
             if (!_sf.InteractiveEditing)
             {
                 btnOk.Focus();
+            }
+            else
+            {
+                var box = WinApi.GetFocusedControl() as TextBox;
+                if (box != null)
+                {
+                    box.SelectAll();
+                }
             }
         }
 
