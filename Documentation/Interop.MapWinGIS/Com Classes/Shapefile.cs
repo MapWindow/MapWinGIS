@@ -92,7 +92,7 @@ namespace MapWinGIS
         }
        
         /// <summary>
-        /// Sets collision mode for labels of the shapefile.
+        /// Gets or sets collision mode for point symbols for point and multi-point shapefiles.
         /// </summary>
         /// <remarks>See tkCollisionMode enumeration.</remarks>
         /// \new48 Added in version 4.8
