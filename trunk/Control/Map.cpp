@@ -273,9 +273,6 @@ void CMapView::Startup()
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
 	_shapeEditor->SetMapCallback(this);
 
-	if (_panningInertia != csFalse)
-		_panningLock.Unlock();
-
 	#ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
 	#endif
