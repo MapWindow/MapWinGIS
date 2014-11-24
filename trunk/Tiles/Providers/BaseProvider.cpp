@@ -27,6 +27,7 @@ CString BaseProvider::_proxyUsername = "";
 CString BaseProvider::_proxyPassword = "";
 CString BaseProvider::_proxyDomain = "";
 short BaseProvider::m_proxyPort = 0;
+::CCriticalSection BaseProvider::_clientLock;
 Debug::Logger tilesLogger;
 
 #pragma region Load tile
@@ -107,11 +108,18 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	char* body = NULL;
 	int bodyLen = 0;
 	bool imageData = false;
-	
-	//navData.SetExtraHeaders("Connection: keep-alive\n");
-	//navData.SetExtraHeaders("Pragma: no-cache\nCache-Control: no-cache\nProxy-Connection: keep-alive\n");
+
+	CSingleLock lock(&_clientLock);
+	lock.Lock();
+	Sleep(5);      // there is info that ARP might have problems with simultaneous connections, 
+				   // discarding the next connection if the previous one is under resolution; 
+				   // since we experience periodic rertransmissions let's introduce
+				   // a small delay between connections http://stackoverflow.com/questions/1875151/delay-in-multiple-tcp-connections-from-java-to-the-same-machine
+
+	lock.Unlock();
 
 	bool result = httpClient.Navigate( urlStr, &navData );
+
 	if (IsStopped) {
 		return NULL;
 	}
