@@ -209,6 +209,7 @@ void CMapView::Startup()
 	Gdiplus::FontFamily family2(L"Arial");
 	_fontArial = new Gdiplus::Font(&family2, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
 	
+	m_mapCursor = crsrMapDefault;
 	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)
 	_panningAnimation = false;
 	_zoombarTargetZoom = -1;
@@ -241,6 +242,13 @@ void CMapView::Startup()
 	_cursorZoomout = AfxGetApp()->LoadCursor(IDC_ZOOMOUT);
 	_cursorSelect = AfxGetApp()->LoadCursor(IDC_SELECT);
 	_cursorMeasure = AfxGetApp()->LoadCursor(IDC_MEASURE);
+	_cursorDigitize = AfxGetApp()->LoadCursor(IDC_DIGITIZE_CURSOR);
+	_cursorVertex = AfxGetApp()->LoadCursor(IDC_VERTEX_CURSOR);
+	_cursorRotate = AfxGetApp()->LoadCursor(IDC_ROTATE_CURSOR);
+	_cursorMove = AfxGetApp()->LoadCursor(IDC_MOVE_CURSOR);
+	_cursorSelect2 = AfxGetApp()->LoadCursor(IDC_SELECT2_CURSOR);
+	_cursorIdentify = AfxGetApp()->LoadCursor(IDC_IDENTIFY_CURSOR);
+
 	_udCursor = NULL;
 
 	_ttipCtrl = new CButton();
@@ -625,8 +633,6 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
 
 		PX_Double(pPX, "MouseTolerance", _mouseTolerance, 20);
-
-		m_mapCursor = 0;	// why not to save it?
 	}
 	catch(...)
 	{

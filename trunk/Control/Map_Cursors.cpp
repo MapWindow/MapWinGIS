@@ -34,99 +34,11 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	if (!hasGuiCursor)
 	{
-		switch( m_mapCursor )
+		NewCursor = GetCursorIcon();
+		if (!NewCursor) 
 		{
-			case crsrMapDefault:
-
-				switch( m_cursorMode )
-				{
-					case cmZoomIn:
-						NewCursor = _reverseZooming ?  _cursorZoomout : _cursorZoomin;
-						break;
-
-					case cmZoomOut:
-						NewCursor = _reverseZooming ?  _cursorZoomin : _cursorZoomout;
-						break;
-
-					case cmPan:
-						NewCursor = _cursorPan;
-						break;
-
-					case cmSelection:
-						NewCursor = _cursorSelect;
-						break;
-					
-					case cmMeasure:
-						NewCursor = _cursorMeasure;
-						break;
-
-					case cmNone:
-						NewCursor = (HCURSOR)m_uDCursorHandle;
-						break;
-				}
-				break;
-		
-			case crsrAppStarting:
-				NewCursor = LoadCursor(NULL, IDC_APPSTARTING);
-				break;
-
-			case crsrArrow:
-				NewCursor = LoadCursor(NULL, IDC_ARROW);
-				break;
-
-			case crsrCross:
-				NewCursor = LoadCursor(NULL, IDC_CROSS);
-				break;
-
-			case crsrHelp:
-				NewCursor = LoadCursor(NULL, IDC_HELP);
-				break;
-
-			case crsrIBeam:
-				NewCursor = LoadCursor(NULL, IDC_IBEAM);
-				break;
-
-			case crsrNo:
-				NewCursor = LoadCursor(NULL, IDC_NO);
-				break;
-
-			case crsrSizeAll:
-				NewCursor = LoadCursor(NULL, IDC_SIZEALL);
-				break;
-
-			case crsrSizeNESW:
-				NewCursor = LoadCursor(NULL, IDC_SIZENESW);
-				break;
-
-			case crsrSizeNS:
-				NewCursor = LoadCursor(NULL, IDC_SIZENS);
-				break;
-
-			case crsrSizeNWSE:
-				NewCursor = LoadCursor(NULL, IDC_SIZENWSE);
-				break;
-
-			case crsrSizeWE:
-				NewCursor = LoadCursor(NULL, IDC_SIZEWE);
-				break;
-
-			case crsrUpArrow:
-				NewCursor = LoadCursor(NULL, IDC_UPARROW);
-				break;
-
-			case crsrHand:
-				NewCursor = LoadCursor(NULL, IDC_HAND);
-				break;
-			
-			case crsrWait:
-
-				if (!_disableWaitCursor)
-					NewCursor = LoadCursor(NULL, IDC_WAIT);
-				break;
-
-			case crsrUserDefined:
-				NewCursor = (HCURSOR)m_uDCursorHandle;
-				break;
+			m_mapCursor = crsrMapDefault;
+			NewCursor = GetCursorIcon();
 		}
 	}
 
@@ -136,6 +48,134 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		COleControl::OnSetCursor( pWnd, nHitTest, message );
 
 	return TRUE;
+}
+
+// *******************************************************
+//		GetCursorIcon()
+// *******************************************************
+HCURSOR CMapView::GetCursorIcon()
+{
+	HCURSOR newCursor = NULL; 
+	switch (m_mapCursor)
+	{
+		case crsrMapDefault:
+
+			switch (m_cursorMode)
+			{
+				case cmZoomIn:
+					newCursor = _reverseZooming ? _cursorZoomout : _cursorZoomin;
+					break;
+
+				case cmZoomOut:
+					newCursor = _reverseZooming ? _cursorZoomin : _cursorZoomout;
+					break;
+
+				case cmPan:
+					newCursor = _cursorPan;
+					break;
+
+				case cmSelection:
+					newCursor = _cursorSelect;
+					break;
+
+				case cmMeasure:
+					newCursor = _cursorMeasure;
+					break;
+
+				case cmAddShape:
+					newCursor = _cursorDigitize;
+					break;
+
+				case cmEditShape:
+					newCursor = _cursorVertex;
+					break;
+
+				case cmIdentify:
+					newCursor = _cursorIdentify;
+					break;
+
+					// don't look good enough
+					/*case cmSelectByPolygon:
+					NewCursor = _cursorSelect2;
+					break;
+
+					case cmRotateShapes:
+					NewCursor = _cursorRotate;
+					break;
+
+					case cmMoveShapes:
+					NewCursor = _cursorMove;
+					break;*/
+
+				case cmNone:
+					newCursor = (HCURSOR)m_uDCursorHandle;
+					break;
+			}
+			break;
+
+		case crsrAppStarting:
+			newCursor = LoadCursor(NULL, IDC_APPSTARTING);
+			break;
+
+		case crsrArrow:
+			newCursor = LoadCursor(NULL, IDC_ARROW);
+			break;
+
+		case crsrCross:
+			newCursor = LoadCursor(NULL, IDC_CROSS);
+			break;
+
+		case crsrHelp:
+			newCursor = LoadCursor(NULL, IDC_HELP);
+			break;
+
+		case crsrIBeam:
+			newCursor = LoadCursor(NULL, IDC_IBEAM);
+			break;
+
+		case crsrNo:
+			newCursor = LoadCursor(NULL, IDC_NO);
+			break;
+
+		case crsrSizeAll:
+			newCursor = LoadCursor(NULL, IDC_SIZEALL);
+			break;
+
+		case crsrSizeNESW:
+			newCursor = LoadCursor(NULL, IDC_SIZENESW);
+			break;
+
+		case crsrSizeNS:
+			newCursor = LoadCursor(NULL, IDC_SIZENS);
+			break;
+
+		case crsrSizeNWSE:
+			newCursor = LoadCursor(NULL, IDC_SIZENWSE);
+			break;
+
+		case crsrSizeWE:
+			newCursor = LoadCursor(NULL, IDC_SIZEWE);
+			break;
+
+		case crsrUpArrow:
+			newCursor = LoadCursor(NULL, IDC_UPARROW);
+			break;
+
+		case crsrHand:
+			newCursor = LoadCursor(NULL, IDC_HAND);
+			break;
+
+		case crsrWait:
+
+			if (!_disableWaitCursor)
+				newCursor = LoadCursor(NULL, IDC_WAIT);
+			break;
+
+		case crsrUserDefined:
+			newCursor = (HCURSOR)m_uDCursorHandle;
+			break;
+	}
+	return newCursor;
 }
 
 // *******************************************************

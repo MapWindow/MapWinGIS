@@ -1867,14 +1867,29 @@
     <None Include="Resource\zoom_in_16_2.ico">
       <Filter>Resources</Filter>
     </None>
-    <None Include="Resources\zoom_in_16_2.ico">
-      <Filter>Resources</Filter>
-    </None>
     <None Include="COM classes\ShapeEditor.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\Identifier.rgs">
       <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="Resource\digitize_cursor.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\identify_cursor.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\move_cursor.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\rotate_cursor.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\select_cursor.cur">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Resource\vertex_cursor.cur">
+      <Filter>Resources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

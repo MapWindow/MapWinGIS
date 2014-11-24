@@ -64,6 +64,12 @@
 #define IDB_GDI                         213
 #define IDI_ICON1                       214
 #define IDC_MEASURE                     215
+#define IDC_DIGITIZE_CURSOR             216
+#define IDC_VERTEX_CURSOR               217
+#define IDC_ROTATE_CURSOR               218
+#define IDC_MOVE_CURSOR                 219
+#define IDC_SELECT2_CURSOR              220
+#define IDC_IDENTIFY_CURSOR             221
 
 // Next default values for new objects
 // 

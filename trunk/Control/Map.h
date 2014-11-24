@@ -705,6 +705,13 @@ public:
 	HCURSOR _cursorZoomout;
 	HCURSOR _cursorSelect;
 	HCURSOR _cursorMeasure;
+	HCURSOR _cursorDigitize;
+	HCURSOR _cursorVertex;
+	HCURSOR _cursorSelect2;
+	HCURSOR _cursorIdentify;
+	HCURSOR _cursorRotate;
+	HCURSOR _cursorMove;
+
 	HCURSOR _udCursor;
 	
 	// --------------------------------------------
@@ -1114,6 +1121,7 @@ private:
 	bool HasDrawLists();
 	bool UndoCore(bool shift);
 	void ZoomToCursorPosition(bool zoomIn);
+	HCURSOR GetCursorIcon();
 	
 #pragma endregion
 

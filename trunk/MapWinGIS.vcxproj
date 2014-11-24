@@ -775,10 +775,15 @@
     <None Include="Resource\cursor3.cur" />
     <None Include="Resource\cursor4.cur" />
     <None Include="Resource\cursor5.cur" />
+    <None Include="Resource\digitize_cursor.cur" />
+    <None Include="Resource\identify_cursor.cur" />
     <None Include="Resource\Map.bmp" />
     <None Include="ReadMe.txt" />
+    <None Include="Resource\move_cursor.cur" />
+    <None Include="Resource\rotate_cursor.cur" />
+    <None Include="Resource\select_cursor.cur" />
+    <None Include="Resource\vertex_cursor.cur" />
     <None Include="Resource\zoom_in_16_2.ico" />
-    <None Include="Resources\zoom_in_16_2.ico" />
   </ItemGroup>
   <!-- type library -->
   <!-- resources -->
