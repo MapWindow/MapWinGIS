@@ -258,6 +258,27 @@ STDMETHODIMP CTiles::SetProxy(BSTR address, int port, VARIANT_BOOL* retVal)
 }
 
 // *********************************************************
+//	     SetProxyAuthorization()
+// *********************************************************
+STDMETHODIMP CTiles::SetProxyAuthorization(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	*retVal = m_provider->SetProxyAuthorization(username, password, domain) ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+
+// *********************************************************
+//	     ClearProxyAuthorization()
+// *********************************************************
+STDMETHODIMP CTiles::ClearProxyAuthorization()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_provider->ClearProxyAuthorization();
+	return S_OK;
+}
+
+// *********************************************************
 //	     get_Proxy()
 // *********************************************************
 STDMETHODIMP CTiles::get_Proxy(BSTR* retVal)
@@ -1972,3 +1993,5 @@ void CTiles::UpdateProjection()
 		map->UpdateTileProjection();
 	}
 }
+
+

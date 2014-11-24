@@ -43,6 +43,47 @@ public:
 	}
 };
 
+class TilesAuthentication : public ATL::IAuthInfo
+{
+private:
+	CString _username; 
+	CString _password;
+	CString _domain;
+public:
+	TilesAuthentication(CString username, CString password, CString domain)
+	{
+		_username = username;
+		_password = password;
+		_domain = domain;
+	}
+
+	virtual HRESULT GetPassword(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szPwd,
+	__inout DWORD *pdwBuffSize)
+	{
+		szPwd = _password.GetBuffer();
+		// from MSDN: CString.GetLength returns number of bytes in this CString object. The count does not include a null terminator
+		// IAuthInfo.GetPassword: On exit, pdwBuffSize should contain the size of the username including the NULL terminator
+		*pdwBuffSize = _password.GetLength() + 1;
+		return S_OK;
+	}
+
+	virtual HRESULT GetUsername(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szUid,
+		__inout DWORD *pdwBuffSize)
+	{
+		szUid = _username.GetBuffer();
+		*pdwBuffSize = _username.GetLength() + 1;
+		return S_OK;
+	}
+
+	virtual HRESULT GetDomain(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szDomain,
+		__inout DWORD *pdwBuffSize)
+	{
+		szDomain = _domain.GetBuffer();
+		*pdwBuffSize = _domain.GetLength() + 1;
+		return S_OK;
+	}
+};
+
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
 {
@@ -52,6 +93,9 @@ private:
 protected:
 	static CString m_proxyAddress;
 	static short m_proxyPort;
+	static CString _proxyUsername;
+	static CString _proxyPassword;
+	static CString _proxyDomain;
 	std::vector<MyHttpClient*> _httpClients;
 	::CCriticalSection _clientLock;
 public:
@@ -147,6 +191,8 @@ public:
 	short get_ProxyPort() {return m_proxyPort;}
 	CString get_ProxyAddress() {return m_proxyAddress;}
 	bool SetProxy(CString address, int port);
+	bool SetProxyAuthorization(CString username, CString password, CString domain);
+	void ClearProxyAuthorization();
 	bool AutodetectProxy();
 
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);

@@ -174,6 +174,8 @@ public:
 	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
 	STDMETHOD(get_ScalingRatio)(double* pVal);
 	STDMETHOD(put_ScalingRatio)(double newVal);
+	STDMETHOD(SetProxyAuthorization)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
+	STDMETHOD(ClearProxyAuthorization)();
 	#pragma endregion
 
 private:
@@ -251,6 +253,9 @@ private:
 	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
 	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
 	bool ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgs84Projection );
+	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
+public:
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

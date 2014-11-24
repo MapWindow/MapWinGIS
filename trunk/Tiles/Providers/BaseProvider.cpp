@@ -23,6 +23,9 @@
 #include "BaseProvider.h"
 
 CString BaseProvider::m_proxyAddress = "";
+CString BaseProvider::_proxyUsername = "";
+CString BaseProvider::_proxyPassword = "";
+CString BaseProvider::_proxyDomain = "";
 short BaseProvider::m_proxyPort = 0;
 Debug::Logger tilesLogger;
 
@@ -92,6 +95,13 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	if (m_proxyAddress.GetLength() > 0)
 	{
 		httpClient.SetProxy(m_proxyAddress, m_proxyPort);
+	}
+
+	if (_proxyUsername.GetLength() > 0)
+	{
+		CBasicAuthObject auth;
+		TilesAuthentication info(_proxyUsername, _proxyPassword, _proxyDomain);
+		httpClient.AddAuthObj("BASIC", &auth, &info);
 	}
 
 	char* body = NULL;
@@ -191,6 +201,40 @@ bool BaseProvider::SetProxy(CString address, int port)
 }
 
 // *************************************************************
+//			SetProxyAuthorization()
+// *************************************************************
+bool BaseProvider::SetProxyAuthorization(CString username, CString password, CString domain)
+{
+	bool ret = false;
+	CAtlHttpClient* httpClient = new CAtlHttpClient();
+	if (httpClient)
+	{
+		CBasicAuthObject auth;
+		TilesAuthentication info(username, password, domain);
+		if (httpClient->AddAuthObj("BASIC", &auth, &info))
+		{
+			_proxyUsername = username;
+			_proxyDomain = domain;
+			_proxyPassword = password;
+			ret = true;
+		}
+		httpClient->Close();
+		delete httpClient;
+	}
+	return ret;
+}
+
+// *************************************************************
+//			ClearProxyAuthorization()
+// *************************************************************
+void BaseProvider::ClearProxyAuthorization()
+{
+	_proxyUsername = "";
+	_proxyDomain = "";
+	_proxyPassword = "";
+}
+
+// *************************************************************
 //			GetProxyServer()
 // *************************************************************
 CString GetProxyServer()
@@ -266,4 +310,7 @@ bool BaseProvider::AutodetectProxy()
 	}
 	return ret;
 }
+
+
+
 #pragma endregion

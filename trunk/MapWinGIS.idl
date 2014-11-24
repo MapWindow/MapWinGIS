@@ -5435,8 +5435,8 @@ interface ITiles : IDispatch{
 	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
 	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]tkTileProjection* retVal);
 	[propget, id(50), helpstring("")] HRESULT ProjectionStatus( [out, retval]tkTilesProjectionStatus* retVal);
-	/*[propget, id(51), helpstring("")] HRESULT ScalingRatio( [out, retval]double* retVal);
-	[propput, id(51), helpstring("")] HRESULT ScalingRatio( [in]double newVal);*/
+	[id(51)] HRESULT SetProxyAuthorization([in] BSTR username, [in] BSTR password, [in] BSTR domain, [out, retval] VARIANT_BOOL* retVal);
+	[id(52)] HRESULT ClearProxyAuthorization();
 };
 
 [
