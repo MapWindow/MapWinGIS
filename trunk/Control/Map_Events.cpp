@@ -567,7 +567,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmZoomOut:
 			{
-				ZoomOut( m_zoomPercent );
+				ZoomToCursorPosition(false);
 				break;
 			}
 		case cmPan:
@@ -781,6 +781,52 @@ Extent CMapView::GetPointSelectionBox(IShapefile* sf, double xProj, double yProj
 }
 
 // ************************************************************
+//		ZoomToCursorPosition
+// ************************************************************
+void CMapView::ZoomToCursorPosition(bool zoomIn)
+{
+	POINT pt;
+	GetCursorPos(&pt);
+
+	RECT rect;
+	this->GetWindowRect(&rect);
+	if (pt.x < rect.left || pt.x > rect.right || pt.y < rect.top || pt.y > rect.bottom)
+		return;
+	if ((rect.right - rect.left == 0) && (rect.bottom - rect.top == 0))
+		return;
+
+	double xCent, yCent;
+	PixelToProj((double)(pt.x - rect.left), (double)(pt.y - rect.top), &xCent, &yCent);
+	double dx = (double)(pt.x - rect.left) / (rect.right - rect.left);
+	double dy = (double)(pt.y - rect.top) / (rect.bottom - rect.top);
+
+	double ratio;
+	if (ForceDiscreteZoom()) 
+	{
+		int zoom = GetCurrentZoom();
+		int maxZoom, minZoom;
+		GetMinMaxZoom(minZoom, maxZoom);
+		if ((zoomIn && zoom + 1 > maxZoom) || (!zoomIn && zoom - 1 < minZoom))
+			return;
+		ratio = zoomIn ? 0.499 : 2.001;		// add some margin for rounding error
+	}
+	else {
+		ratio = zoomIn ? 1 - m_zoomPercent : 1 + m_zoomPercent;
+	}
+	
+	double height = (_extents.top - _extents.bottom) * ratio;
+	double width = (_extents.right - _extents.left) * ratio;
+
+	Extent ext;
+	ext.left = xCent - width * dx;
+	ext.right = xCent + width * (1 - dx);
+	ext.bottom = yCent - height * (1 - dy);
+	ext.top = yCent + height * dy;
+
+	SetExtentsCore(ext);
+}
+
+// ************************************************************
 //		HandleLButtonUpZoomBox
 // ************************************************************
 void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
@@ -804,7 +850,7 @@ void CMapView::HandleLButtonUpZoomBox(long vbflags, long x, long y)
 		switch (m_cursorMode)
 		{
 			case cmZoomIn:
-				ZoomIn(m_zoomPercent);
+				ZoomToCursorPosition(true);
 				break;
 			case cmSelection:
 				if (sf) 
@@ -1194,41 +1240,13 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 
 		if( m_cursorMode == cmZoomOut )
 		{
-			double zx = _extents.left, zy = _extents.bottom;
-			PixelToProjection( point.x, point.y, zx, zy );
-
-			double halfxRange = (_extents.right - _extents.left)*.5;
-			double halfyRange = (_extents.top - _extents.bottom)*.5;
-
-			_extents.left = zx - halfxRange;
-			_extents.right = zx + halfxRange;
-			_extents.bottom = zy - halfyRange;
-			_extents.top = zy + halfyRange;
-
-			ZoomIn( m_zoomPercent );
+			ZoomToCursorPosition(true);
 			::SetCursor( _cursorZoomin );
-
-			FireExtentsChanged();
-			ReloadImageBuffers();
 		}
 		else if( m_cursorMode == cmZoomIn )
 		{
-			double zx = _extents.left, zy = _extents.bottom;
-			PixelToProjection( point.x, point.y, zx, zy );
-
-			double halfxRange = (_extents.right - _extents.left)*.5;
-			double halfyRange = (_extents.top - _extents.bottom)*.5;
-
-			_extents.left = zx - halfxRange;
-			_extents.right = zx + halfxRange;
-			_extents.bottom = zy - halfyRange;
-			_extents.top = zy + halfyRange;
-
-			ZoomOut( m_zoomPercent );
+			ZoomToCursorPosition(false);
 			::SetCursor( _cursorZoomout );
-
-			FireExtentsChanged();
-			ReloadImageBuffers();
 		}
 
 		if( redraw ) {

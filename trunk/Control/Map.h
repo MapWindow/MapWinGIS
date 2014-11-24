@@ -1113,6 +1113,7 @@ private:
 	void UpdateShapeEditor();
 	bool HasDrawLists();
 	bool UndoCore(bool shift);
+	void ZoomToCursorPosition(bool zoomIn);
 	
 #pragma endregion
 
@@ -1144,6 +1145,7 @@ public:
 		SetCapture();
 	}
 	
+
 };
 
 //{{AFX_INSERT_LOCATION}}
