@@ -573,13 +573,6 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		// map extents has changed but the list of tiles to be displayed is the same
 		tilesLogger.WriteLine("The same list of tiles can be used.");
 		
-		// mark them as not-drawn
-		_tilesBufferLock.Lock();
-		for (size_t i = 0; i < m_tiles.size(); i++ )
-		{
-			m_tiles[i]->m_drawn = false;
-		}
-		_tilesBufferLock.Unlock();
 		((CMapView*)mapView)->_tileBuffer.Initialized = false;
 		return;	
 	}

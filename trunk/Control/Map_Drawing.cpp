@@ -329,13 +329,16 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 	int tileProvider = GetTileProvider();
 	
 	bool initialization = !_tileBuffer.Initialized;
-	if (!_tileBuffer.Initialized)
+	if (initialization)
 	{
+		_tileBuffer.Initialized = true;
+
 		// it's the first tile for current extents, we need to initialize the buffer
 		bool canReuseBuffer = /*ForceDiscreteZoom() &&*/
 			GetTileProvider() == _tileBuffer.Provider &&			   
 			_currentZoom != _tileBuffer.Zoom && abs(_currentZoom - _tileBuffer.Zoom) <= 4;		// for larger difference it's not practical
 
+		bool wasReused = false;
 		if (canReuseBuffer && (_zoomAnimation || _reuseTileBuffer))
 		{
 			// reuse existing buffer
@@ -357,14 +360,13 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 					gTiles->Clear(Gdiplus::Color::Transparent);
 					gTiles->DrawImage(_tempBitmap, 0, 0 );
 					gTiles->Flush();
-					_tileBuffer.Initialized = true;
+					wasReused = true;
 				}
 				delete gTemp;
 			}
 		}
 		
-		if (!_tileBuffer.Initialized) 
-		{
+		if (!wasReused) {
 			gTiles->Clear(Gdiplus::Color::Transparent);
 		}
 
@@ -372,8 +374,10 @@ void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 		_tileBuffer.Extents = _extents;
 		_tileBuffer.Zoom = _currentZoom;
 		_tileBuffer.Provider = tileProvider;
-		_tileBuffer.Initialized = true;
 	}
+
+	if (initialization)
+		tiles->MarkUndrawn();
 
 	// drawing new tiles
 	if (initialization || tiles->UndrawnTilesExist())

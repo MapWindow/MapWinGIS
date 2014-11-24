@@ -10,6 +10,7 @@
 #include "VertexEditor.h"
 #include "EditorHelper.h"
 #include "Digitizer.h"
+#include "Tiles.h"
 
 
 // ************************************************************
@@ -1332,6 +1333,10 @@ void CMapView::OnSize(UINT nType, int cx, int cy)
 	else
 	{
 		_isSizing = false;
+		((CTiles*)_tiles)->Clear();		// this will clear screen buffer and current extents
+										// otherwise no change of extents will be detected
+										// hence tiles in the buffer won't marked as not drawn
+										// while the screen buffer is actually empty
 	}
 }
 
