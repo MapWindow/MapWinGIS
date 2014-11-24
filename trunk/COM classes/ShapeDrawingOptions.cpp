@@ -1594,6 +1594,15 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	if (opt->frameType != m_options.frameType)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameType", CPLString().Printf("%d", (int)m_options.frameType));
 
+	if (opt->dynamicVisibility != m_options.dynamicVisibility)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DynamicVisibility", CPLString().Printf("%d", (int)m_options.dynamicVisibility));
+	
+	if (opt->minVisibleScale != m_options.minVisibleScale)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleScale", CPLString().Printf("%f", m_options.minVisibleScale));
+	
+	if (opt->maxVisibleScale != m_options.maxVisibleScale)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", m_options.maxVisibleScale));
+	
 	delete opt;
 
 	if (m_options.linePattern)
@@ -1738,6 +1747,15 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "FrameType", NULL );
 	m_options.frameType = (s == "") ? opt->frameType : (tkLabelFrameType)atoi(s.GetString());
 
+	s = CPLGetXMLValue(node, "DynamicVisibility", NULL);
+	m_options.dynamicVisibility = (s == "") ? opt->dynamicVisibility : atoi(s.GetString()) == 0 ? false : true;
+	
+	s = CPLGetXMLValue(node, "MinVisibleScale", NULL);
+	m_options.minVisibleScale = (s == "") ? opt->minVisibleScale : Utility::atof_custom(s);
+	
+	s = CPLGetXMLValue(node, "MaxVisibleScale", NULL);
+	m_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
+
 	delete opt;
 
 	// restoring picture
@@ -1868,3 +1886,51 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxLineWidth (double newVal)
 	m_options.maxLineWidth = newVal;		
 	return S_OK;
 }
+
+// ****************************************************************
+//		get_DynamicVisibility
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_DynamicVisibility(VARIANT_BOOL* pVal)
+ {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_options.dynamicVisibility ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_DynamicVisibility(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_options.dynamicVisibility = newVal == VARIANT_TRUE;
+	return S_OK;
+};
+
+// ****************************************************************
+//		get_MinVisibleScale
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_MinVisibleScale(DOUBLE* pVal)
+ {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_options.minVisibleScale;
+	return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_MinVisibleScale(DOUBLE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_options.minVisibleScale = newVal;
+	return S_OK;
+};
+
+// ****************************************************************
+//		get_MaxVisibleScale
+// ****************************************************************
+STDMETHODIMP CShapeDrawingOptions::get_MaxVisibleScale(DOUBLE* pVal)
+ {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_options.maxVisibleScale;
+	return S_OK;
+};
+STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleScale(DOUBLE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_options.maxVisibleScale = newVal;
+	return S_OK;
+};

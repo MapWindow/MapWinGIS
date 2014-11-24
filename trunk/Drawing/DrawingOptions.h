@@ -107,6 +107,10 @@ public:
 	Gdiplus::ImageAttributes* imgAttributes;
 	bool m_needDeleteBitmapPlus;
 
+	bool dynamicVisibility;
+	double minVisibleScale;
+	double maxVisibleScale;
+
 	CPen* pen;
 	CPen* penOld;
 	CBrush* brush;
@@ -119,7 +123,11 @@ public:
 		m_needDeleteBitmapPlus = false;
 		//selectionColor = RGB(255, 255, 0);
 		//selectionTransparency = 180;
-		
+
+		dynamicVisibility = false;
+		maxVisibleScale = 100000000.0;
+		minVisibleScale = 0.0;
+
 		_shpType = tkSimpleShapeType::shpNone;
 
 		drawingMode = vdmGDIMixed;

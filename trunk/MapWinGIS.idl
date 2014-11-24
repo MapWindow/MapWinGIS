@@ -4414,17 +4414,14 @@ interface IShapeDrawingOptions : IDispatch{
 														   [in] int clipWidth, [in] int clipHeight,   
 														   [in, optional, defaultvalue(16777215)]OLE_COLOR backColor, [out, retval] VARIANT_BOOL* retVal );
 
-	[propget, id(58), helpstring("property MinScale")] HRESULT MinScale([out, retval] double* pVal);
-	[propput, id(58), helpstring("property MinScale")] HRESULT MinScale([in] double newVal);
-
-	[propget, id(59), helpstring("property MaxScale")] HRESULT MaxScale([out, retval] double* pVal);
-	[propput, id(59), helpstring("property MaxScale")] HRESULT MaxScale([in] double newVal);
-
-	[propget, id(60), helpstring("property MinScaleWidth")] HRESULT MinLineWidth([out, retval] double* pVal);
-	[propput, id(60), helpstring("property MinScaleWidth")] HRESULT MinLineWidth([in] double newVal);
-
-	[propget, id(61), helpstring("property MaxScaleWidth")] HRESULT MaxLineWidth([out, retval] double* pVal);
-	[propput, id(61), helpstring("property MaxScaleWidth")] HRESULT MaxLineWidth([in] double newVal);
+	[propget, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([out, retval]VARIANT_BOOL* retval);
+	[propput, id(58), helpstring("property DynamicVisibility")] HRESULT DynamicVisibility([in]VARIANT_BOOL newVal);
+	
+	[propget, id(59), helpstring("property MaxVisibleScale")] HRESULT MaxVisibleScale([out, retval]double* retval);
+	[propput, id(59), helpstring("property MaxVisibleScale")] HRESULT MaxVisibleScale([in]double newVal);
+	
+	[propget, id(60), helpstring("property MinVisibleScale")] HRESULT MinVisibleScale([out, retval]double* retval);
+	[propput, id(60), helpstring("property MinVisibleScale")] HRESULT MinVisibleScale([in]double newVal);
 
 	[propget, id(62), helpstring("property AlignPictureByBottom")] HRESULT AlignPictureByBottom([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(62), helpstring("property AlignPictureByBottom")] HRESULT AlignPictureByBottom([in] VARIANT_BOOL newVal);

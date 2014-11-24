@@ -95,7 +95,11 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	this->useLinePattern = opt.useLinePattern;
 	this->alignIconByBottom = opt.alignIconByBottom;
 	this->drawFrame = opt.drawFrame;
-	
+
+	this->dynamicVisibility = opt.dynamicVisibility;	
+	this->minVisibleScale = opt.minVisibleScale;
+	this->maxVisibleScale = opt.maxVisibleScale;
+
 	brushPlus = NULL;
 	if(pen) delete pen;
 	pen = new CPen();
@@ -104,26 +108,6 @@ CDrawingOptionsEx& CDrawingOptionsEx::operator=(const CDrawingOptionsEx& opt)
 	penOld = NULL;
 	brushOld = NULL;
 	
-	/*if (this->picture)
-	{
-		this->picture->Release();
-		this->picture = NULL;
-	}
-	if (opt.picture)
-	{
-		this->picture = opt.picture;
-		this->picture->AddRef();
-	}
-	if (this->linePattern)
-	{
-		this->linePattern->Release();
-		this->linePattern = NULL;
-	}
-	if (opt.linePattern)
-	{
-		this->linePattern = opt.linePattern;
-		this->linePattern->AddRef();
-	}*/
 	return *this;
 }
 #pragma endregion
@@ -242,8 +226,6 @@ void CDrawingOptionsEx::InitGdiPen(bool selection, OLE_COLOR selectionColor)
 			}
 		}
 	}
-
-	
 }
 
 // *********************************************************
@@ -501,7 +483,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 			
 			rect.AddPolygon(&points[0], 5);
 			
-			// darwing
+			// drawing
 			brushPlus = new PathGradientBrush(&rect);
 			Color colors[2];
 			colors[0] = Color(alpha | BGR_TO_RGB(this->fillColor));
@@ -698,7 +680,7 @@ void CDrawingOptionsEx::ReleaseGdiPlusBitmap()
 {
 	if (bitmapPlus && m_needDeleteBitmapPlus)
 	{
-		// deleting only in case it't not in-memory bitmap
+		// deleting only in case it's not in-memory bitmap
 		delete bitmapPlus; 
 	}
 	bitmapPlus = NULL;

@@ -539,6 +539,10 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 		return;
 	}
 
+	if (options->dynamicVisibility)
+		if (this->_scale < options->minVisibleScale || this->_scale > options->maxVisibleScale)
+			return;
+
 	if (_shptype == SHP_POINT || _shptype == SHP_MULTIPOINT)
 		options->_shpType = tkSimpleShapeType::shpPoint;
 	else if (_shptype == SHP_POLYLINE)

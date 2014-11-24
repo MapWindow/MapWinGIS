@@ -238,6 +238,13 @@ public:
 	STDMETHOD(get_MaxLineWidth)(double *pVal);
 	STDMETHOD(put_MaxLineWidth)(double newVal);
 
+	STDMETHOD(get_DynamicVisibility)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_DynamicVisibility)(VARIANT_BOOL newVal);
+	STDMETHOD(get_MinVisibleScale)(DOUBLE* pVal);
+	STDMETHOD(put_MinVisibleScale)(DOUBLE newVal);
+	STDMETHOD(get_MaxVisibleScale)(DOUBLE* pVal);
+	STDMETHOD(put_MaxVisibleScale)(DOUBLE newVal);
+
 	bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName);
 	
