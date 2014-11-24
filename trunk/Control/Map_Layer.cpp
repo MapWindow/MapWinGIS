@@ -1597,6 +1597,13 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
 	_allLayers[LayerHandle]->minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
 
+	s = CPLGetXMLValue(node, "MinVisibleZoom", NULL);
+	_allLayers[LayerHandle]->minVisibleZoom = (s != "") ? atoi(s) : 0;
+
+	s = CPLGetXMLValue(node, "MaxVisibleZoom", NULL);
+	_allLayers[LayerHandle]->maxVisibleZoom = (s != "") ? atoi(s) : 18;
+
+
 	s = CPLGetXMLValue( node, "LayerKey", NULL );
 	this->SetLayerKey(LayerHandle, s);
 
