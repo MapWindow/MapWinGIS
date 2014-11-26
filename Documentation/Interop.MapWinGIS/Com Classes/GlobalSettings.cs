@@ -442,6 +442,30 @@ namespace MapWinGIS
         /// \see OgrLayer.GetNumStyles
         /// \new492c Added in version 4.9.2
         public bool OgrUseStyles { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether AxMap.GlobalCallback object should be set as a 
+        /// layer callback (i.e. Shapefile.GlobalCallback, OgrLayer.GlobalCallback) in AxMap.AddLayer method 
+        /// if a layer object doesn't have any callback yet.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool AttachMapCallbackToLayers
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets maximum number of shapes within view for hot tracking functionality to work.
+        /// </summary>
+        /// <remarks>Hot tracking is used by cmIdentify tool and interactive editing tools.</remarks>
+        /// \see Identifier.HotTracking, ShapeEditor.HighlightVertices.
+        /// \new493 Added in version 4.9.3
+        public int HotTrackingMaxShapeCount
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
     }
 #if nsp
 }

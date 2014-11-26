@@ -342,9 +342,20 @@ namespace MapWinGIS
         /// although provides much better performance than precise implementations.
         /// </remarks>
         /// <returns>True on success.</returns>
+        /// \new492 Added in version 4.9.2
         public bool GeneratePolygonColors(ColorScheme Scheme = null)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets the index of classification that was used to generate categories.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public int ClassificationField
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
     }
 #if nsp

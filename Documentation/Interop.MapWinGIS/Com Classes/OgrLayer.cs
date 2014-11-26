@@ -232,9 +232,9 @@ namespace MapWinGIS
     /// 
     /// \new492b Added in version 4.9.2
 #if nsp
-    #if upd
-        public class OgrLayer : MapWinGIS.IOgrLayer
-    #else        
+#if upd
+    public class OgrLayer : MapWinGIS.IOgrLayer
+#else        
             public class IOgrLayer
     #endif
 #else
@@ -411,7 +411,7 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-       
+
 
         /// <summary>
         /// Serializes the state of layer to a string, which can be later restored with OgrLayer.Deserialize.
@@ -511,9 +511,9 @@ namespace MapWinGIS
         /// <remarks>Any new instance of class starts with ogrUninitialized. Successful call of OgrLayer.OpenFromDatabase
         /// method will set it to ogrDbTable, OgrLayer.OpenFromQuery - to ogrQuery.</remarks>
         /// <returns>Source type.</returns>
-        public tkOgrSourceType get_SourceType()
+        public tkOgrSourceType SourceType
         {
-            throw new NotImplementedException();
+            get { throw new NotImplementedException(); }
         }
 
         /// <summary>
@@ -525,24 +525,13 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Applies style with the specified name.
-        /// </summary>
-        /// <param name="Name">Name of the style.</param>
-        /// <returns>True on success.</returns>
-        /// \new492c Added in version 4.9.2
-        public bool ApplyStyle(string Name)
-        {
- 	        throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Clears all the styles stored for current layer in datasource.
         /// </summary>
         /// <returns>True on success.</returns>
         /// \new492c Added in version 4.9.2
         public bool ClearStyles()
         {
- 	        throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -563,7 +552,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public bool DynamicLoading
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
@@ -580,7 +569,7 @@ namespace MapWinGIS
         /// <remarks> The whole set of features will be used during classification, not only those currently loaded into memory. 
         /// Therefore the method has definite advantage over calling OgrLayer.GetData.Categories.Generate 
         /// directly for large layers.\n\n
-		///
+        ///
         /// Categories will be added to underlying shapefile (OgrLayer.GetData). This method
         /// will trigger the population of this shapefile if it's not yet in memory. \n
         /// 
@@ -622,11 +611,12 @@ namespace MapWinGIS
         ///     layer.Close();
         /// }
         /// \endcode
-		/// </remarks>
+        /// </remarks>
         /// \new492c Added in version 4.9.2
-        public bool GenerateCategories(string Fieldname, tkClassificationType ClassificationType, int numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType)
+        public bool GenerateCategories(string Fieldname, tkClassificationType ClassificationType, int numClasses,
+            tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType)
         {
- 	        throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -656,7 +646,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public int GetNumStyles()
         {
- 	        throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -670,7 +660,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public string LabelExpression
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
@@ -681,7 +671,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public tkLineLabelOrientation LabelOrientation
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
@@ -692,7 +682,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public tkLabelPositioning LabelPosition
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
@@ -708,7 +698,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public int MaxFeatureCount
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
@@ -720,18 +710,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public bool RemoveStyle(string StyleName)
         {
- 	        throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Saves current state of the layer as a new style to the datasource.
-        /// </summary>
-        /// <param name="Name">Name of the new style.</param>
-        /// <returns>True on success.</returns>
-        /// \new492c Added in version 4.9.2
-        public bool SaveStyle(string Name)
-        {
- 	        throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -742,7 +721,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public bool SupportsStyles
         {
-	        get { throw new NotImplementedException(); }
+            get { throw new NotImplementedException(); }
         }
 
         /// <summary>
@@ -753,7 +732,7 @@ namespace MapWinGIS
         /// \new492c Added in version 4.9.2
         public string get_StyleName(int styleIndex)
         {
- 	        throw new NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// \addtogroup ogrlayer_editing OGR layer editing
@@ -905,7 +884,7 @@ namespace MapWinGIS
         /// return false;
         /// \endcode
         /// @{
-        
+
         /// <summary>
         /// Gets a value indicating whether the layer supports editing.
         /// </summary>
@@ -946,7 +925,7 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
-        
+
         /// <summary>
         /// Gets the number of errors registered in the log during OgrLayer.SaveChanges call.
         /// </summary>
@@ -990,7 +969,7 @@ namespace MapWinGIS
         /// 
         /// The method works like this:\n
         /// 
-        /// 1) Underlying shapefile is analysed for changes, i.e. for shapes with Shapefile.get_ShapeModified property set to true. \n
+        /// 1) Underlying shapefile is analyzed for changes, i.e. for shapes with Shapefile.get_ShapeModified property set to true. \n
         /// 2) For each of such shapes UPDATE statement is generated by driver. 
         /// Shapes are identified in source by the value of Feature ID column.\n
         /// 3) If update operation for particular shape fails the error is registered in:
@@ -1006,14 +985,16 @@ namespace MapWinGIS
         /// <param name="validateShapes">Sets whether shapes will be validated before saving. Default value is true,
         /// i.e. invalid shapes won't be saved.</param>
         /// <returns>Result of the operation.</returns>
-        public tkOgrSaveResult SaveChanges(out int savedCount, tkOgrSaveType saveType = tkOgrSaveType.ostSaveAll, bool validateShapes = true)
+        public tkOgrSaveResult SaveChanges(out int savedCount, tkOgrSaveType saveType = tkOgrSaveType.ostSaveAll,
+            bool validateShapes = true)
         {
             throw new NotImplementedException();
         }
 
         /// @}
-        #endregion
-}
+
+    }
+
 #if nsp
 }
 #endif

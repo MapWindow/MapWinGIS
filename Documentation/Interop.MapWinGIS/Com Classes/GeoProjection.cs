@@ -477,8 +477,9 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Clears any imported projection, thus returning object to initial empty state.
+        /// Returns object to initial empty state.
         /// </summary>
+        /// \see GeoProjection.IsFrozen
         /// \new491 Added in version 4.9.1
         public void Clear()
         {
@@ -545,16 +546,6 @@ namespace MapWinGIS
         /// <returns>True on success.</returns>
         /// \new491 Added in version 4.9.1
         public bool TryAutoDetectEpsg(out int epsgCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns object to initial empty state.
-        /// </summary>
-        /// <returns>True on success.</returns>
-        /// \see GeoProjection.IsFrozen
-        bool Clear()
         {
             throw new NotImplementedException();
         }

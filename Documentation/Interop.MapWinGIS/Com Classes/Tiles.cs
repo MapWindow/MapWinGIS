@@ -792,6 +792,30 @@ namespace MapWinGIS
         {
             get { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Clears user name and password set by Tiles.SetProxyAuthorization method.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public void ClearProxyAuthorization()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets credentials for proxy authorization. 
+        /// </summary>
+        /// <remarks>HTTP client will use this credentials when 401 or 407 response is received for original request:
+        /// http://msdn.microsoft.com/en-us/library/7shxzbwb%28v=vs.80%29.aspx</remarks>
+        /// <param name="username">Username.</param>
+        /// <param name="password">Password.</param>
+        /// <param name="domain">Domain name.</param>
+        /// <returns>True on success.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool SetProxyAuthorization(string username, string password, string domain)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

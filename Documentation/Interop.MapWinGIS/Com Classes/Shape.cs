@@ -112,6 +112,8 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+       
+
         /// <summary>
         /// Creates a deep copy of this object with the same type, parts and points.
         /// </summary>
@@ -134,7 +136,7 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Builds a convex hull around the currnet shape.
+        /// Builds a convex hull around the current shape.
         /// </summary>
         /// <returns>A new shape with convex hull of the current shape or NULL reference on failure.</returns>
         /// \new48 Added in version 4.8
@@ -284,7 +286,7 @@ namespace MapWinGIS
         /// <param name="Results">The array of Shape type with the results of intersection.</param>
         /// <returns>True in case at least one shape is returned and false otherwise.</returns>
         /// \new48 Added in version 4.8
-        public bool GetIntersection(Shape Shape, out object Results)
+        public bool GetIntersection(Shape Shape, ref object Results)
         {
             throw new NotImplementedException();
         }
@@ -607,10 +609,12 @@ namespace MapWinGIS
         /// <summary>
         /// Gets the number of points contained in the shape. 
         /// </summary>
-        /// <remarks>The property used to be spelled as "Shape.numPoints" in .NET interop assemblies for MapWinGIS versions
-        /// prior to 4.9. However it was because of bug in PIA generation process, as the property has always spelled as 
-        /// "Shape.NumPoints" in MapWinGIS code itself.</remarks>
-        public int NumPoints
+        /// <remarks>There is a confusion with name casing for this property. 
+        /// It's actually spelled 'get_NumPoints' in the source code. 
+        /// However because of the known bug in PIA generation process the property 
+        /// ended up spelled 'get_numPoints' in earlier version of PIAs. After some hesitation we decided to keep it that way. 
+        /// See description of the bug here: http://stackoverflow.com/questions/3179676/c-exposed-property-for-com-in-idl-is-showing-as-lower-case-all-of-a-sudden </remarks>
+        public int numPoints
         {
             get { throw new NotImplementedException(); }
         }
@@ -755,6 +759,63 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Returns a new shape which constitutes a buffer around original one.
+        /// </summary>
+        /// <param name="Distance">Buffer width (same units as shape coordinates are set with).</param>
+        /// <param name="numSegments">Number of segments to approximate curves.</param>
+        /// <param name="singleSided">True if buffer if single sided buffer is needed (works for polylines only).</param>
+        /// <param name="capStyle">Type of caps.</param>
+        /// <param name="joinStyle">Type of joins.</param>
+        /// <param name="mitreLimit">Mitre limit.</param>
+        /// <returns>New buffered shape on success or null on failure.</returns>
+        /// \new493 Added in version 4.9.3
+        public Shape BufferWithParams(double Distance, int numSegments = 30, bool singleSided = false, tkBufferCap capStyle = tkBufferCap.bcROUND, tkBufferJoin joinStyle = tkBufferJoin.bjROUND, double mitreLimit = 5)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Moves shape at specified offset.
+        /// </summary>
+        /// <param name="xOffset">X component of offset.</param>
+        /// <param name="yOffset">Y component of offset.</param>
+        /// \new493 Added in version 4.9.3
+        public void Move(double xOffset, double yOffset)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Rotates shape around specified point.
+        /// </summary>
+        /// <param name="originX">X coordinate to rotate shape around.</param>
+        /// <param name="originY">Y coordinate to rotate shape around.</param>
+        /// <param name="angle">Angle in degrees.</param>
+        /// \new493 Added in version 4.9.3
+        public void Rotate(double originX, double originY, double angle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Splits shape with a provided polyline.
+        /// </summary>
+        /// <param name="polyline">Polyline shape to split with.</param>
+        /// <param name="Results">An array of Shape type.</param>
+        /// <returns>True on success.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool SplitByPolyline(Shape polyline, ref object Results)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets "flattened" shape type, i.e. Z and M components will be ignored.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public ShpfileType ShapeType2D { get; private set; }
     }
 #if nsp
 }

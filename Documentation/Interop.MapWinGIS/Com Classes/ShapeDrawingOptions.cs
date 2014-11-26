@@ -226,6 +226,7 @@ namespace MapWinGIS
     /// The class also provides a set of methods to draw map legend on the device context 
     /// other than AxMap: DrawShape(), DrawLine(), DrawPoint(), DrawRectangle().
     /// \new48 Added in version 4.8
+    
     #if nsp
         #if upd
             public class ShapeDrawingOptions : MapWinGIS.IShapeDrawingOptions
@@ -847,48 +848,33 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets or sets width of line to be used for polyline rendering when scale is larger that specified by MaxScale.
+        /// Gets or sets a value indicating whether the category will be displayed only
+        /// for scale range specified by MinVisibleScale and MaxVisibleScale properties
         /// </summary>
-        /// <remarks>The line scaling mechanism is intended for displaying polylines with width 
-        /// corresponding the width of actual geographic objects they represent (e.g. roads, rivers, etc.). 
-        /// However this properties haven't passed testing stage yet.</remarks>
-        /// \new490 Added in version 4.9.0
-        public double MaxLineWidth
+        /// \new493 Added in version 4.9.3
+        public bool DynamicVisibility
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
         /// <summary>
-        /// Map scale starting from which polyline should be rendered with width set by ShapeDrawingOptions.MaxLineWidth.
+        /// Gets or sets maximum map scale at which the category is visible 
+        /// when ShapeDrawingOptions.DynamicVisibility is set to true.
         /// </summary>
-        /// \new490 Added in version 4.9.0
-        public double MaxScale
+        /// \new493 Added in version 4.9.3
+        public double MaxVisibleScale
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
         /// <summary>
-        /// Gets or sets width of line to be used for polyline rendering when scale is smaller that specified by ShapeDrawingOptions.MinScale.
+        /// Gets or sets minimum map scale at which the category is visible
+        /// when ShapeDrawingOptions.DynamicVisibility is set to true.
         /// </summary>
-        /// Gets or sets width of line to be used for polyline rendering when scale is larger that specified by MaxScale.
-        /// </summary>
-        /// <remarks>The line scaling mechanism is intended for displaying polylines with width 
-        /// corresponding the width of actual geographic objects they represent (e.g. roads, rivers, etc.). 
-        /// However this properties haven't passed testing stage yet.</remarks>
-        /// \new490 Added in version 4.9.0
-        public double MinLineWidth
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Map scale at which polyline should be rendered with width set by ShapeDrawingOptions.MinLineWidth.
-        /// </summary>
-        /// \new490 Added in version 4.9.0
-        public double MinScale
+        /// \new493 Added in version 4.9.3
+        public double MinVisibleScale
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }

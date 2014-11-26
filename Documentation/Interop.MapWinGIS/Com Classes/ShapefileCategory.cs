@@ -45,7 +45,6 @@ namespace MapWinGIS
         public class ShapefileCategory
     #endif
     {
-        #region IShapefileCategory Members
         /// <summary>
         /// Gets or sets visualization options associated with the category.
         /// </summary>
@@ -73,7 +72,43 @@ namespace MapWinGIS
             set { throw new NotImplementedException(); }
         }
 
-        #endregion
+        /// <summary>
+        /// Gets or sets maximum value of the value range the category covers.
+        /// </summary>
+        /// <remarks>The value is used when cvRange is set as ShapefileCategory.ValueType.</remarks>
+        /// \new493 Added in version 4.9.3
+        public object MaxValue
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException();}
+        }
+
+        /// <summary>
+        /// Gets or sets minimum value of the value range the category covers.
+        /// </summary>
+        /// <remarks>The value is used when either cvSingleValue, cvRange 
+        /// is set for ShapefileCategory.ValueType.</remarks>
+        /// \new493 Added in version 4.9.3
+        public object MinValue
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets value type for the category. 
+        /// </summary>
+        /// <remarks>Depending on value type either ShapefileCategory.MinValue/ShapefileCategory.MaxValue properties
+        /// or ShapefileCategory.Expression are used in the calculation process. ShapefileCategories.Generate
+        /// method will set cvSingleValue for unique values classification and ctRange for any 
+        /// interval classification. These values are faster to apply. However manual setting of 
+        /// ShapefileCategory.Expression property will change it to cvExpression.</remarks>
+        /// \new493 Added in version 4.9.3
+        public tkCategoryValue ValueType
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
     }
 #if nsp
 }

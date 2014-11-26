@@ -31,7 +31,7 @@ namespace MapWinGIS
     /// (<a href = "http://geographiclib.sourceforge.net/html/">GeographicLib</a>);
     /// - otherwise - planar calculations using Euclidean geometry and AxMap.MapUnits property;
     /// .
-    /// Current implementation support only metric units (meters, kilometres). The abbreviated name of units can be changed to a localized one
+    /// Current implementation support only metric units (meters, kilometers). The abbreviated name of units can be changed to a localized one
     /// using GlobalSettings.set_LocalizedString:
     /// \code
     /// GlobalSettings gs = new GlobalSettings();
@@ -193,12 +193,61 @@ namespace MapWinGIS
 
         /// <summary>
         /// Gets a value indicating whether calculations are performed taking into account the shape of Earth 
-        /// (when map projection is defined), or on 2D plane (Euclidian geometry).
+        /// (when map projection is defined), or on 2D plane (Euclidean geometry).
         /// </summary>
         /// \new491 Added in version 4.9.1
         public bool IsUsingEllipsoid
         {
             get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a Callback object which handles progress and error messages.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public ICallback GlobalCallback
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Returns true if measured path contains at least one point.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool IsEmpty
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// A text string associated with object. Any value can be stored by developer in this property.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string Key
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets the code of last error which took place inside this object.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public int LastErrorCode
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets the description of the specific error code.
+        /// </summary>
+        /// <param name="ErrorCode">The error code returned by LastErrorCode property.</param>
+        /// <returns>String with the description.</returns>
+        /// \new493 Added in version 4.9.3
+        public string get_ErrorMsg(int ErrorCode)
+        {
+            throw new NotImplementedException();
         }
     }
 #if nsp

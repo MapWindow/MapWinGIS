@@ -2280,6 +2280,218 @@ namespace MapWinGIS
         /// </summary>
         oseAnsi = 1,
     }
+
+    /// <summary>
+    /// Possible modes for built-in cmIdentify tool.
+    /// </summary>
+    public enum tkIdentifierMode
+    {
+        /// <summary>
+        /// All shapefile layers with Shapefile.Identifiable property set to true will be analyzed. 
+        /// </summary>
+        imAllLayers = 0,
+        /// <summary>
+        /// Only shapefile defined by Identifier.ActiveLayer will be identified.
+        /// </summary>
+        imSingleLayer = 1,
+    }
+
+    /// <summary>
+    /// Possible behaviors for shape editor.
+    /// </summary>
+    public enum tkEditorBehavior
+    {
+        /// <summary>
+        /// User is allowed to move, add and delete vertices and move or delete the shape itself.
+        /// </summary>
+        ebVertexEditor = 0,
+        /// <summary>
+        /// User is allowed to move or delete parts of multi-part shape.
+        /// </summary>
+        ebPartEditor = 1,
+    }
+
+    /// <summary>
+    /// Possible overlay operations for shape editor.
+    /// </summary>
+    public enum tkEditorOverlay
+    {
+        /// <summary>
+        /// Adds part to the shape being edited.
+        /// </summary>
+        eoAddPart = 0,
+        /// <summary>
+        /// Removes parts of edited shape by arbitrary polygon.
+        /// </summary>
+        eoRemovePart = 1,
+    }
+
+    /// <summary>
+    /// Possible types of caps for GEOS buffering.
+    /// </summary>
+    public enum tkBufferCap
+    {
+        bcROUND = 0,
+        bcFLAT = 1,
+        bcSQUARE = 2,
+    }
+
+    /// <summary>
+    /// Possible types of joins for GEOS buffering.
+    /// </summary>
+    public enum tkBufferJoin
+    {
+        bjROUND = 0,
+        bjMITRE = 1,
+        bjBEVEL = 2,
+    }
+
+    /// <summary>
+    /// Possible ways to define values of shapefile category.
+    /// </summary>
+    public enum tkCategoryValue
+    {
+        /// <summary>
+        /// A shape falls into category if a given field exactly matches ShapefileCategory.MinValue.
+        /// </summary>
+        cvSingleValue = 0,
+        /// <summary>
+        /// A shapes falls into category if value of a given field is in interval between
+        /// ShapefileCategory.MinValue and ShapefileCategory.MaxValue. 
+        /// </summary>
+        cvRange = 1,
+        /// <summary>
+        /// A shape falls into category if its attribute values satisfy ShapefileCategory.Expression.
+        /// </summary>
+        cvExpression = 2,
+    }
+
+    /// <summary>
+    /// Possible validation modes for shape editor.
+    /// </summary>
+    public enum tkEditorValidation
+    {
+        /// <summary>
+        /// Some basic checks will be made: shape has enough points and parts for its type, ring direction for
+        /// polygon is correct, the first point of polygon matches the last one.
+        /// </summary>
+        /// <remarks>Invalid ring direction for polygon will be fixed automatically.</remarks>
+        evBasic = 0,
+        /// <summary>
+        /// GEOS validation will be used in addition to basic validation but no attempt to fix errors
+        /// will made on this stage.
+        /// </summary>
+        evCheckWithGeos = 1,
+        /// <summary>
+        /// Same as evCheckWithGeos, only Shape.FixUp method will be called if GEOS validation failed.
+        /// </summary>
+        evFixWithGeos = 2,
+    }
+
+    /// <summary>
+    /// Elements of shapes that can be deleted during interactive editing.
+    /// </summary>
+    public enum tkDeleteTarget
+    {
+        dtNone = 0,
+        dtShape = 1,
+        dtPart = 2,
+        dtVertex = 3,
+    }
+
+    /// <summary>
+    /// Possible ways to display length of segments for shape editor.
+    /// </summary>
+    public enum tkLengthDisplayMode
+    {
+        ldmNone = 0,
+        ldmMetric = 1,
+    }
+
+    /// <summary>
+    /// Possible editor states.
+    /// </summary>
+    public enum tkEditorState
+    {
+        /// <summary>
+        /// Editor isn't initialized.
+        /// </summary>
+        esNone = 0,
+        /// <summary>
+        /// Editor is in the process of creating a new shape which is bound to a certain shapefile.
+        /// </summary>
+        esDigitize = 1,
+        /// <summary>
+        /// Editor is in the process of editing an exiting shape of a certain shapefile.
+        /// </summary>
+        esEdit = 2,
+        /// <summary>
+        /// Editor is in the process of creating of shape which isn't bound to particular shapefile. 
+        /// </summary>
+        /// <remarks> This mode is used by built-in interactive tools, cmSelectByPolygon or cmSplitByPolyline.</remarks>
+        esDigitizeUnbound = 3,
+        /// <summary>
+        /// Editor is in the process of adding of an overlay for current shape (eoAddPart, eoRemovePart).
+        /// </summary>
+        esOverlay = 4,
+    }
+
+    /// <summary>
+    /// Defines a set of layers to be analyzed by certain tool.
+    /// </summary>
+    public enum tkLayerSelection
+    {
+        /// <summary>
+        /// All layers will be used.
+        /// </summary>
+        lsAllLayers = 0,
+        /// <summary>
+        /// No layers will be used, i.e, the functionality is off.
+        /// </summary>
+        lsNoLayer = 1,
+        /// <summary>
+        /// Only active layer will be used.
+        /// </summary>
+        lsActiveLayer = 2,
+    }
+
+    /// <summary>
+    /// Possible types of operations in undo list of shape editor.
+    /// </summary>
+    public enum tkUndoOperation
+    {
+        /// <summary>
+        /// Shape was added.
+        /// </summary>
+        uoAddShape = 0,
+        /// <summary>
+        /// Shape was removed.
+        /// </summary>
+        uoRemoveShape = 1,
+        /// <summary>
+        /// Shape was edited (i.e. vertices moved or deleted, parts added, etc).
+        /// </summary>
+        uoEditShape = 2,
+        /// <summary>
+        /// A number of selected shapes were moved.
+        /// </summary>
+        uoMoveShapes = 3,
+        /// <summary>
+        /// A number of selected shapes were rotated.
+        /// </summary>
+        uoRotateShapes = 4,
+    }
+
+    /// <summary>
+    /// Defines either true and false value.
+    /// </summary>
+    /// <remarks>Some erratic behavior was observed when passing VARIANT_BOOL values through dispatch interface by reference. 
+    /// Hence this enumeration is used.</remarks>
+    public enum tkMwBoolean
+    {
+        blnFalse = 0,
+        blnTrue = 1,
+    }
 #if nsp
 }
 #endif

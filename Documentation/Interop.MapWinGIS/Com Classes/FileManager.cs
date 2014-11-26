@@ -349,6 +349,57 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Clears overviews for a raster datasource managed by GDAL.
+        /// </summary>
+        /// <param name="Filename">Filename of datasource.</param>
+        /// <returns>True on success.</returns>
+        public bool ClearGdalOverviews(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Builds overviews for a raster datasource managed by GDAL.
+        /// </summary>
+        /// <param name="Filename">Filename of datasource.</param>
+        /// <returns></returns>
+        public bool BuildGdalOverviews(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Remove proxy images generated for grid rendering.
+        /// </summary>
+        /// <param name="Filename">Filename of grid datasource.</param>
+        /// <returns></returns>
+        public bool RemoveProxyForGrid(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns true if specified raster datasource managed by GDAL has overviews.
+        /// </summary>
+        /// <param name="Filename">Filename of datasource.</param>
+        /// <returns>True if overviews are exist.</returns>
+        public bool get_HasGdalOverviews(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns true if specified grid datasource has proxy images for its rendering.
+        /// </summary>
+        /// <param name="Filename">Filename of grid datasource.</param>
+        /// <returns>True if proxy images exist.</returns>
+        public bool get_HasValidProxyForGrid(string Filename)
+        {
+            throw new NotImplementedException();
+            
+        }
     }
 #if nsp
 }

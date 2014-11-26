@@ -42,7 +42,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;nsp upd</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;upd nsp</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\Interop.MapWinGIS.XML</DocumentationFile>
@@ -59,7 +59,8 @@
     <Reference Include="Interop.MapWinGIS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\AxInterop.MapWinGIS\obj\Debug\Interop.MapWinGIS.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <Private>False</Private>
     </Reference>
     <Reference Include="stdole, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <SpecificVersion>False</SpecificVersion>
@@ -87,7 +88,9 @@
     <Compile Include="Com Classes\ColorScheme.cs" />
     <Compile Include="Com Classes\ESRIGridManager.cs" />
     <Compile Include="Com Classes\Extents.cs" />
+    <Compile Include="Com Classes\Identifier.cs" />
     <Compile Include="Com Classes\OgrLayer.cs" />
+    <Compile Include="Com Classes\ShapeEditor.cs" />
     <Compile Include="Com Classes\ShapefileValidationInfo.cs" />
     <Compile Include="Com Classes\FieldStatOperations.cs" />
     <Compile Include="Com Classes\FileManager.cs" />
@@ -118,6 +121,7 @@
     <Compile Include="Com Classes\TileProviders.cs" />
     <Compile Include="Com Classes\Tiles.cs" />
     <Compile Include="Com Classes\Tin.cs" />
+    <Compile Include="Com Classes\UndoList.cs" />
     <Compile Include="Com Classes\Utils.cs" />
     <Compile Include="Com Classes\Vector.cs" />
     <Compile Include="Enumerations\Known extents.cs" />
