@@ -83,7 +83,7 @@ namespace Utility
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 
 	// display progress
-	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent);
+	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent);
 	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
 	void DisplayProgressCompleted(ICallback* callback);
 	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...);

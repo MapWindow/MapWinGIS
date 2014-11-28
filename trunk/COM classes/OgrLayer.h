@@ -34,6 +34,7 @@ public:
 	}
 	~COgrLayer()
 	{
+		SysFreeString(_key);
 		if (_envelope)
 			delete _envelope;
 		Close();

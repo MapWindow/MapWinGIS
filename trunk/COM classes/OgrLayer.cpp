@@ -933,14 +933,17 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "ForUpdate", NULL);
 	bool forUpdate = (s != "") ? (atoi(s.GetString()) == 0 ? false : true) : false;
 
+	CComBSTR bstrConnection = connectionString;
+	CComBSTR bstrQuery = sourceQuery;
+
 	VARIANT_BOOL vb = VARIANT_FALSE;
 	if (sourceType == ogrDbTable)
 	{
-		OpenFromDatabase(W2BSTR(connectionString), W2BSTR(sourceQuery), forUpdate ? VARIANT_TRUE: VARIANT_FALSE, &vb);
+		OpenFromDatabase(bstrConnection, bstrQuery, forUpdate ? VARIANT_TRUE : VARIANT_FALSE, &vb);
 	}
 	else if (sourceType == ogrQuery)
 	{
-		OpenFromQuery(W2BSTR(connectionString), W2BSTR(sourceQuery), &vb);
+		OpenFromQuery(bstrConnection, bstrQuery, &vb);
 	}
 	else if (sourceType == ogrFile)
 	{

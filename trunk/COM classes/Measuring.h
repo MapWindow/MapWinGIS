@@ -45,6 +45,7 @@ public:
 	}
 
 	~CMeasuring() {
+		SysFreeString(_key);
 		delete _measuring;
 	}
 

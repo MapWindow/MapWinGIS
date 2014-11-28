@@ -5,7 +5,14 @@
 
 namespace Utility
 {
-	static _locale_t m_locale = _create_locale(LC_ALL, "C");
+	_locale_t m_locale = NULL;
+	_locale_t GetLocale()
+	{
+		if (!m_locale) {
+			m_locale = _create_locale(LC_ALL, "C");
+		}
+		return m_locale;
+	}
 
 #pragma region String conversion
 	
@@ -1067,15 +1074,17 @@ namespace Utility
 	// ********************************************************************
 	//		DisplayProgress()
 	// ********************************************************************
-	void DisplayProgress(ICallback* callback, int index, int count, char* message, BSTR& key, long& lastPercent)
-	{
+	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent)
+{
 		if( callback != NULL ) 
 		{
 			long newpercent = (long)(((double)(index + 1)/count)*100);
 			if( newpercent > lastPercent )
 			{	
 				lastPercent = newpercent;
-				callback->Progress(OLE2BSTR(key),newpercent,A2BSTR(message));
+				USES_CONVERSION;
+				CComBSTR bstrMsg = A2W(message);
+				callback->Progress(key, newpercent, bstrMsg );   //OLE2BSTR(key)  A2BSTR(message)
 			}
 		}
 	}
@@ -1099,8 +1108,10 @@ namespace Utility
 	{
 		if( callback != NULL )
 		{
-			callback->Progress(A2BSTR(""),100,A2BSTR("Completed"));
-			callback->Progress(A2BSTR(""),0,A2BSTR(""));
+			CComBSTR bstrEmpty = L"";
+			CComBSTR bstrMsg = L"Completed";
+			callback->Progress(bstrEmpty, 100, bstrMsg);
+			callback->Progress(bstrEmpty, 0, bstrEmpty);
 		}
 	}
 
@@ -1310,7 +1321,8 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
-		vsprintf(buffer, format, args);
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
 
 		SYSTEMTIME time;
 		GetLocalTime(&time);
@@ -1331,8 +1343,9 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start( args, format);
-		vsprintf( buffer, format, args );
-		
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
+
 		SYSTEMTIME time;
 		GetLocalTime(&time);
 		CString s2;
@@ -1352,7 +1365,8 @@ namespace Debug
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
-		vsprintf( buffer, format, args );
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
 		CString s = buffer;
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
@@ -1368,7 +1382,8 @@ namespace Debug
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
-		vsprintf( buffer, format, args );
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
 		CString s = buffer;
 		format = "OCX ERROR: " + s + "\n";
 		OutputDebugStringA(format);

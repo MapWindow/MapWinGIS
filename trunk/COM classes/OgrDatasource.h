@@ -23,6 +23,7 @@ public:
 	}
 	~COgrDatasource()
 	{
+		SysFreeString(_key);
 		Close();
 		if (_globalCallback)
 			_globalCallback->Release();

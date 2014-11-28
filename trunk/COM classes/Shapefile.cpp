@@ -752,7 +752,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 				}
 				else
 				{
-					BSTR newdbfName = A2BSTR("");
+					CComBSTR newdbfName = L"";
 					_table->CreateNew(newdbfName, &vbretval);
 					
 					if (!vbretval)
@@ -2384,6 +2384,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 
 	CString s;
 	s = CPLGetXMLValue( node, "VisibilityExpression", NULL );
+	SysFreeString(_expression);
 	_expression = A2BSTR(s);
 	
 	s = CPLGetXMLValue( node, "FastMode", NULL );

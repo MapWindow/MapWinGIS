@@ -45,8 +45,8 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 	{
 		USES_CONVERSION;
 		CStringW nameW = A2W(Filename);		// TODO: use Unicode
-		CPLXMLNode* node = GdalHelper::ParseXMLFile(nameW);
-		if (node)
+		CPLXMLNode* root = GdalHelper::ParseXMLFile(nameW);
+		if (root)
 		{
 			IStopExecution* cb = NULL;
 			if (Callback)
@@ -55,23 +55,20 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 			}
 			
 			USES_CONVERSION;
-			bool result = DeserializeMapStateCore(node, nameW, VARIANT_TRUE, cb);
+			bool result = DeserializeMapStateCore(root, nameW, VARIANT_TRUE, cb);
 			
 			if (cb) 
 			{
 				cb->Release();
 			}
+
+			CPLDestroyXMLNode(root);
+
 			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}
-		else
-		{
-			return VARIANT_FALSE;
-		}
 	}
-	catch(...)
-	{
-		return VARIANT_FALSE;
-	}
+	catch(...) {}
+	return VARIANT_FALSE;
 }
 
 // ******************************************************************
@@ -227,17 +224,18 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	OLE_COLOR outlineColor = s != "" ? (OLE_COLOR)atoi(s.GetString()) : m_globalSettings.identifierColor;
 	_identifier->put_OutlineColor(outlineColor);
 
-	IGeoProjection* gp = NULL;
+	CComPtr<IGeoProjection> gp = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
 	s = CPLGetXMLValue( nodeState, "Projection", NULL );
 	if (s.GetLength() > 0)
 	{
-		USES_CONVERSION;
 		VARIANT_BOOL vb;
-		gp->ImportFromAutoDetect(A2BSTR(s), &vb);
+		CComBSTR bstr;
+		USES_CONVERSION;
+		bstr.Attach(A2BSTR(s));
+		gp->ImportFromAutoDetect(bstr, &vb);
 	}
 	SetGeoProjection(gp);
-	gp->Release();
 
 	if (LoadLayers)
 	{
@@ -297,8 +295,13 @@ BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
 	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, BasePath);
 	if (node)
 	{
-		strResult = CPLSerializeXMLTree(node);
+		char* buffer = CPLSerializeXMLTree(node);
 		CPLDestroyXMLNode(node);
+
+		strResult = buffer;
+		if (buffer) {
+			CPLFree(buffer);
+		}
 	}
 	return strResult.AllocSysString();
 }

@@ -58,6 +58,7 @@ public:
 
 	~CTiles()
 	{
+		SysFreeString(m_key);
 		ClearAll();
 		gReferenceCounter.Release(tkInterface::idTiles);
 	}

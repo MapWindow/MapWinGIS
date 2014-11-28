@@ -496,59 +496,59 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	{
 		ErrorMessage(tkFAILED_TO_REPROJECT);
 		*pVal = VARIANT_FALSE;
+		return S_OK;
 	}
-	else
+	
+	bool projected = projSource->IsProjected() != 0;
+		
+	*pVal = VARIANT_TRUE;
+	double* xs = new double[4];
+	double* ys = new double[4];
+		
+	// bounds first
+	xs[0] = xMin;
+	ys[0] = yMin;
+	xs[1] = xMin;
+	ys[1] = yMax;
+	xs[2] = xMax;
+	ys[2] = yMax;
+	xs[3] = xMax;
+	ys[3] = yMin;
+		
+	for (int i = 0; i< 4; i++)
 	{
-		bool projected = projSource->IsProjected() != 0;
-		
-		*pVal = VARIANT_TRUE;
-		double* xs = new double[4];
-		double* ys = new double[4];
-		
-		// bounds first
-		xs[0] = xMin;
-		ys[0] = yMin;
-		xs[1] = xMin;
-		ys[1] = yMax;
-		xs[2] = xMax;
-		ys[2] = yMax;
-		xs[3] = xMax;
-		ys[3] = yMin;
-		
-		for (int i = 0; i< 4; i++)
+		if (!this->IsSameProjection(transf, xs[i], ys[i], projected))
 		{
-			if (!this->IsSameProjection(transf, xs[i], ys[i], projected))
+			*pVal = VARIANT_FALSE;
+			break;
+		}
+	}
+	delete[] xs;
+	delete[] ys;
+
+	// let's take some more random points
+	if (numSamplingPoints < 0)
+		numSamplingPoints = 0;
+	else if (numSamplingPoints > 100)
+		numSamplingPoints = 100;
+		
+	if (*pVal != VARIANT_FALSE && numSamplingPoints > 0)
+	{
+		double dx = xMax - xMin;
+		double dy = yMax - yMin;
+			
+		for (int i =0; i< numSamplingPoints; i++)
+		{
+			if (!this->IsSameProjection(transf, xMin, yMin, projected))
 			{
 				*pVal = VARIANT_FALSE;
 				break;
 			}
 		}
-		delete[] xs;
-		delete[] ys;
-
-		// let's take some more random points
-		if (numSamplingPoints < 0)
-			numSamplingPoints = 0;
-		else if (numSamplingPoints > 100)
-			numSamplingPoints = 100;
-		
-		if (*pVal != VARIANT_FALSE && numSamplingPoints > 0)
-		{
-			double dx = xMax - xMin;
-			double dy = yMax - yMin;
-			
-			for (int i =0; i< numSamplingPoints; i++)
-			{
-				if (!this->IsSameProjection(transf, xMin, yMin, projected))
-				{
-					*pVal = VARIANT_FALSE;
-					break;
-				}
-			}
-		}
-
-		//*pVal is set to VARIANT_TRUE above;
 	}
+
+	OGRCoordinateTransformation::DestroyCT(transf);
+
 	return S_OK;
 }
 
@@ -709,7 +709,7 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 		}
 		else
 		{
-			BSTR s;
+			CComBSTR s;
 			sourceProj->ExportToWKT(&s);
 			USES_CONVERSION;
 			char* prj = OLE2A(s);
@@ -955,7 +955,7 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		if (!target)
 		{
 			this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_FALSE;
+			return S_OK;
 		}
 		
 		VARIANT_BOOL vbretval;
@@ -964,7 +964,7 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		if (vbretval)
 		{
 			this->ErrorMessage(tkPROJECTION_NOT_INITIALIZED);
-			return S_FALSE;
+			return S_OK;
 		}
 
 		OGRSpatialReference* projTarget = ((CGeoProjection*)target)->get_SpatialReference();
@@ -976,12 +976,11 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		if (!m_transformation)
 		{
 			ErrorMessage(tkFAILED_TO_REPROJECT);
-			return S_FALSE;
+			return S_OK;
 		}
-		else
-		{
-			*retval = VARIANT_TRUE;
-		}
+		
+		*retval = VARIANT_TRUE;
+		
 #ifdef _DEBUG
 	gMemLeakDetect.stopped = false;
 #endif
@@ -1016,7 +1015,6 @@ STDMETHODIMP CGeoProjection::StopTransform()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (m_transformation)
 	{
-		//delete m_transformation;		// better to do it using Gdal API
 		OGRCoordinateTransformation::DestroyCT(m_transformation);
 		m_transformation = NULL;
 	}
@@ -1030,29 +1028,30 @@ STDMETHODIMP CGeoProjection::SetGoogleMercator(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	this->ImportFromWKT(A2BSTR(
-		"PROJCS[\"WGS 84 / Pseudo-Mercator\","
-			"GEOGCS[\"WGS 84\","
-				"DATUM[\"WGS_1984\","
-					"SPHEROID[\"WGS 84\",6378137,298.257223563,"
-						"AUTHORITY[\"EPSG\",\"7030\"]],"
-					"AUTHORITY[\"EPSG\",\"6326\"]],"
-				"PRIMEM[\"Greenwich\",0,"
-					"AUTHORITY[\"EPSG\",\"8901\"]],"
-				"UNIT[\"degree\",0.0174532925199433,"
-					"AUTHORITY[\"EPSG\",\"9122\"]],"
-				"AUTHORITY[\"EPSG\",\"4326\"]],"
-			"PROJECTION[\"Mercator_1SP\"],"
-			"PARAMETER[\"central_meridian\",0],"
-			"PARAMETER[\"scale_factor\",1],"
-			"PARAMETER[\"false_easting\",0],"
-			"PARAMETER[\"false_northing\",0],"
-			"UNIT[\"metre\",1,"
-				"AUTHORITY[\"EPSG\",\"9001\"]],"
-			"AXIS[\"X\",EAST],"
-			"AXIS[\"Y\",NORTH],"
-			"EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs\"],"
-			"AUTHORITY[\"EPSG\",\"3857\"]]"), retVal);
+	CComBSTR bstr = L"PROJCS[\"WGS 84 / Pseudo-Mercator\","
+		L"GEOGCS[\"WGS 84\","
+		L"DATUM[\"WGS_1984\","
+		L"SPHEROID[\"WGS 84\",6378137,298.257223563,"
+		L"AUTHORITY[\"EPSG\",\"7030\"]],"
+		L"AUTHORITY[\"EPSG\",\"6326\"]],"
+		L"PRIMEM[\"Greenwich\",0,"
+		L"AUTHORITY[\"EPSG\",\"8901\"]],"
+		L"UNIT[\"degree\",0.0174532925199433,"
+		L"AUTHORITY[\"EPSG\",\"9122\"]],"
+		L"AUTHORITY[\"EPSG\",\"4326\"]],"
+		L"PROJECTION[\"Mercator_1SP\"],"
+		L"PARAMETER[\"central_meridian\",0],"
+		L"PARAMETER[\"scale_factor\",1],"
+		L"PARAMETER[\"false_easting\",0],"
+		L"PARAMETER[\"false_northing\",0],"
+		L"UNIT[\"metre\",1,"
+		L"AUTHORITY[\"EPSG\",\"9001\"]],"
+		L"AXIS[\"X\",EAST],"
+		L"AXIS[\"Y\",NORTH],"
+		L"EXTENSION[\"PROJ4\",\"+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs\"],"
+		L"AUTHORITY[\"EPSG\",\"3857\"]]";
+
+	this->ImportFromWKT(bstr, retVal);
 
 	return S_OK;
 }

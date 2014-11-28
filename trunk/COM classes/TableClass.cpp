@@ -2459,14 +2459,13 @@ STDMETHODIMP CTableClass::get_FieldIndexByName(BSTR FieldName, long* retval)
 		IField* field =_fields[i]->field;
 		if (field)
 		{
-			BSTR name;
+			CComBSTR name;
 			field->get_Name(&name);
 			if (_stricmp(OLE2CA(name), searchName.GetString()) == 0)
 			{
 				*retval = i;
 				break;
 			}
-			SysFreeString(name);
 		}
 	}
 

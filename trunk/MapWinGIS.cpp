@@ -46,8 +46,6 @@ BOOL CMapWinGISApp::InitInstance()
 	//However, there are just too many bugs associated with this change. See Bug 1446 for more information. Changing back to classic.
 	std::locale::global(std::locale("C"));
 
-	
-
 	// initialize all static variables, to keep our memory leaking report clean from them
 	#ifdef _DEBUG
 		gMemLeakDetect.stopped = true;
@@ -75,7 +73,9 @@ BOOL CMapWinGISApp::InitInstance()
 // *****************************************************
 int CMapWinGISApp::ExitInstance()
 {
-	Debug::WriteLine("Exit instance");
+	CPLErrorReset();
+
+	#ifndef RELEASE_MODE
 
 	CComBSTR bstr;
 	m_utils->get_ComUsageReport(VARIANT_TRUE, &bstr);
@@ -83,6 +83,8 @@ int CMapWinGISApp::ExitInstance()
 	USES_CONVERSION;
 	CString s = OLE2A(bstr);
 	Debug::WriteLine(s);
+
+	#endif
 
 	if (m_utils)
 		m_utils->Release();
@@ -94,8 +96,6 @@ int CMapWinGISApp::ExitInstance()
 	SQLiteCache::Close();
 
 	CMapView::GdiplusShutdown();
-
-	std::locale::global(std::locale::classic());
 
 	_Module.Term();
 	return COleControlModule::ExitInstance();

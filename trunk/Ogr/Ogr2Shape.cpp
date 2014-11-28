@@ -70,9 +70,9 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 		layer->ResetReading();
 	}
 
-	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
-	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
-	//sf->put_FastMode(VARIANT_TRUE);    // despite the global setting
+	GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
+	CComBSTR bstr = L"";
+	sf->CreateNew(bstr, shpType, &vbretval);
 
 	// setting projection for shapefile
 	OGRSpatialReference* sr = layer->GetSpatialRef();
@@ -101,7 +101,9 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 	{
 		GetUtils()->CreateInstance(idField, (IDispatch**)&fld);
 		fld->put_Type(INTEGER_FIELD);
-		fld->put_Name(A2BSTR(name));
+		CComBSTR bstrName;
+		bstrName.Attach(A2BSTR(name));
+		fld->put_Name(bstrName);
 		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
 		fld->Release();
 		hasFID = true;
@@ -120,7 +122,9 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 		else if (type == OFTReal)	fld->put_Type(DOUBLE_FIELD);
 		else if (type == OFTString)	fld->put_Type(STRING_FIELD);
 
-		fld->put_Name(A2BSTR(oField->GetNameRef()));
+		CComBSTR bstrName;
+		bstrName.Attach(A2BSTR(oField->GetNameRef()));
+		fld->put_Name(bstrName);
 		fld->put_Width((long)oField->GetWidth());
 		fld->put_Precision((long)oField->GetPrecision());
 

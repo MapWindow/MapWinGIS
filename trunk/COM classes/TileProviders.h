@@ -53,6 +53,7 @@ public:
 	}
 	~CTileProviders()
 	{
+		SysFreeString(m_key);
 		for (size_t i = 0; i < m_providers.size(); i++) {
 			m_providers[i]->ClearSubProviders();
 		}

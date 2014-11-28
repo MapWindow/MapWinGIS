@@ -27,6 +27,7 @@ public:
 	}
 	~CUndoList()
 	{
+		SysFreeString(_key);
 		_dtor = true;
 		Clear();
 	}

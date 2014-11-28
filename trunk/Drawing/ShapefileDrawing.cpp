@@ -235,7 +235,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	CString err;
 	bool useAll = true;
 	
-	BSTR expr;
+	CComBSTR expr;
 	_shapefile->get_VisibilityExpression(&expr);
 
 	if (SysStringLen(expr) > 0)

@@ -168,7 +168,8 @@ STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLay
 		GetUtils()->CreateInstance(idOgrLayer, (IDispatch**)&layer);
 		
 		VARIANT_BOOL vb;
-		((COgrLayer*)layer)->OpenDatabaseLayer(W2BSTR(_connectionString), index, forUpdate, &vb);
+		CComBSTR bstrConnection = _connectionString;
+		((COgrLayer*)layer)->OpenDatabaseLayer(bstrConnection, index, forUpdate, &vb);
 		if (!vb)
 		{
 			long errorCode;

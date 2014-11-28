@@ -39,6 +39,7 @@ public:
 	}
 	~CShapeEditor()
 	{
+		SysFreeString(_key);
 		Clear();
 		delete _activeShape;
 	}

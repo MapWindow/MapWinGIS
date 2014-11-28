@@ -131,6 +131,12 @@ struct ChartOptions
 		this->valuesFontName = SysAllocString(options.valuesFontName);
 		this->valuesStyle = options.valuesStyle;
 	}
+
+	~ChartOptions()
+	{
+		if (valuesFontName)
+			SysFreeString(valuesFontName);
+	}
 };
 
 // necessary for drawing values

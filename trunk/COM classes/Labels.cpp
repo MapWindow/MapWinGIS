@@ -1606,13 +1606,17 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	m_minDrawingSize = (s != "") ? atoi(s.GetString()) : 1;
 
 	s = CPLGetXMLValue( node, "VisibilityExpression", NULL );
-	this->put_VisibilityExpression(A2BSTR(s.GetString()));
+
+	USES_CONVERSION;
+	CComBSTR bstrExpression = A2W(s);
+	this->put_VisibilityExpression(bstrExpression);
 
 	/*s = CPLGetXMLValue( node, "ClassificationField", NULL );
 	m_classificationField = (s != "") ? (long)atoi(s.GetString()) : -1;*/
 
 	s = CPLGetXMLValue( node, "Key", NULL );
-	this->put_Key(A2BSTR(s.GetString()));
+	CComBSTR bstrKey = A2W(s);
+	this->put_Key(bstrKey);
 	
 	s = CPLGetXMLValue( node, "VerticalPosition", NULL );
 	m_verticalPosition = (s != "") ? (tkVerticalPosition)atoi(s.GetString()) : vpAboveAllLayers;
@@ -1660,7 +1664,8 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	}
 	
 	// applying expression; should be done after label generation
-	this->put_Expression(A2BSTR(expression));
+	CComBSTR bstr = A2W(expression);
+	this->put_Expression(bstr);
 
 	return true;
 }

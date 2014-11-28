@@ -20,6 +20,7 @@ public:
 	};
 	~CFileManager()
 	{
+		SysFreeString(m_key);
 		if (m_globalCallback)
 			m_globalCallback->Release();
 	};
