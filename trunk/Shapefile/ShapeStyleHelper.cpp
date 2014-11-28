@@ -213,7 +213,11 @@ CStringW ShapeStyleHelper::GetSymbologyFileAsXml(IShapefile* sf)
 	CPLXMLNode* node = GdalHelper::ParseXMLFile(filename);
 	if (node) {
 		USES_CONVERSION;
-		style = Utility::ConvertFromUtf8(CPLSerializeXMLTree(node));
+		char* buffer = CPLSerializeXMLTree(node);
+		if (buffer) {
+			style = Utility::ConvertFromUtf8(buffer);
+			CPLFree(buffer);
+		}
 		CPLDestroyXMLNode(node);
 	}
 	return style;

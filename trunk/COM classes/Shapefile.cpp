@@ -578,7 +578,8 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 		_table->Close(&vb);
 	}
 	_table->put_GlobalCallback(_globalCallback);
-	_table->Open(W2BSTR(_dbffileName), cBack, &vbretval);
+	CComBSTR bstrDbf(_dbffileName);
+	_table->Open(bstrDbf, cBack, &vbretval);
 
 	if( _shpfile == NULL )
 	{
@@ -686,7 +687,8 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 			_sourceType = sstDiskBased;
 
 			// reading projection
-			_geoProjection->ReadFromFile(W2BSTR(_prjfileName), &vbretval);
+			CComBSTR bstrPrj(_prjfileName);
+			_geoProjection->ReadFromFile(bstrPrj, &vbretval);
 
 			ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 			LabelsHelper::UpdateLabelsPositioning(this);
@@ -2192,18 +2194,8 @@ STDMETHODIMP CShapefile::Serialize(VARIANT_BOOL SaveSelection, BSTR* retVal)
 STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL SerializeCategories, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
 	CPLXMLNode* psTree = this->SerializeCore(VARIANT_TRUE, "ShapefileClass", SerializeCategories ? true : false);
-	if (!psTree)
-	{
-		*retVal = A2BSTR("");
-	}
-	else
-	{
-		CString str = CPLSerializeXMLTree(psTree);
-		CPLDestroyXMLNode(psTree);
-		*retVal = A2BSTR(str);
-	}
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 

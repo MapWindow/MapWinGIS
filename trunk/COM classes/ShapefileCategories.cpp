@@ -775,19 +775,8 @@ STDMETHODIMP CShapefileCategories::MoveDown (long Index, VARIANT_BOOL* retval)
 STDMETHODIMP CShapefileCategories::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-
-	CPLXMLNode* node = this->SerializeCore("ShapefileCategoriesClass");
-	if (node)
-	{
-		CString str = CPLSerializeXMLTree(node);	
-		CPLDestroyXMLNode(node);
-		*retVal = A2BSTR(str);
-	}
-	else
-	{
-		*retVal = A2BSTR("");
-	}
+	CPLXMLNode* psTree = this->SerializeCore("ShapefileCategoriesClass");
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 
@@ -917,13 +906,13 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 			{
 				CString str;
 				str = CPLGetXMLValue( node, "Name", NULL );
-				BSTR vbstr = A2BSTR( str );
+				CComBSTR bstrName( str );
 				IShapefileCategory* cat = NULL;
-				this->Add( vbstr, &cat );
+				this->Add(bstrName, &cat);
 
 				str = CPLGetXMLValue( node, "Expression", NULL );
-				vbstr = A2BSTR( str );
-				cat->put_Expression( vbstr );
+				CComBSTR bstrExpression(str);
+				cat->put_Expression(bstrExpression);
 
 				str = CPLGetXMLValue(node, "ValueType", NULL);
 				tkCategoryValue ctVal = (str != "") ? (tkCategoryValue)atoi(str.GetString()) : cvExpression;

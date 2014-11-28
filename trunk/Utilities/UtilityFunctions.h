@@ -58,6 +58,7 @@ namespace Utility
 	void DeserializeVariant(CString sValue, FieldType fieldType, VARIANT* var);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);
 	CString GetFileVersionString();
+	bool SerializeAndDestroyXmlTree(CPLXMLNode* psTree, BSTR* bstr);
 
 	// GDI
 	int GetEncoderClsid(const WCHAR* format, CLSID* pClsid);

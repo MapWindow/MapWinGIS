@@ -1269,14 +1269,17 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 		
 		if (sf) 
 		{
+			CComBSTR bstrFilename;
 			if (filename.GetLength() == 0)
 			{
 				// shapefile type is arbitrary; the correct one will be supplied on deserialization
-				sf->CreateNew(A2BSTR(""), ShpfileType::SHP_POLYGON, &vb);    
+				bstrFilename = L"";
+				sf->CreateNew(bstrFilename, ShpfileType::SHP_POLYGON, &vb);
 			}
 			else
 			{
-				sf->Open(W2BSTR(filename), NULL, &vb);
+				bstrFilename = filename;
+				sf->Open(bstrFilename, NULL, &vb);
 			}
 		
 			if (vb)
@@ -1778,8 +1781,12 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 			CPLXMLNode* psTree = LayerOptionsToXmlTree(LayerHandle);
 			if (psTree)
 			{
-				CStringW xml = Utility::ConvertFromUtf8(CPLSerializeXMLTree(psTree));
+				char* buffer = CPLSerializeXMLTree(psTree);
 				CPLDestroyXMLNode(psTree);
+
+				if (!buffer) return VARIANT_FALSE;
+				CStringW xml = Utility::ConvertFromUtf8(buffer);
+				CPLFree(buffer);
 
 				IOgrLayer* ogrLayer = NULL;
 				layer->QueryOgrLayer(&ogrLayer);
@@ -1879,23 +1886,24 @@ VARIANT_BOOL CMapView::LoadLayerOptionsCore(CString baseName, LONG LayerHandle, 
 		}
 	}
 
-	CPLXMLNode* node = CPLParseXMLFile(name);		// TODO: use Unicode
-	if (node)
+	VARIANT_BOOL success = VARIANT_FALSE;
+	CPLXMLNode* root = CPLParseXMLFile(name);		// TODO: use Unicode
+	if (root)
 	{
-		if (_stricmp( node->pszValue, "MapWinGIS") != 0)
+		if (_stricmp(root->pszValue, "MapWinGIS") != 0)
 		{
 			ErrorMessage(tkINVALID_FILE);
 		}
 		else
 		{
-			CString s = CPLGetXMLValue(node, "Description", NULL);
+			CString s = CPLGetXMLValue(root, "Description", NULL);
 			*Description = A2BSTR(s);
-			//*Description = s;
-			node = CPLGetXMLNode(node, "Layer");
-			return DeserializeLayerOptionsCore(LayerHandle, node);
+			CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
+			success = DeserializeLayerOptionsCore(LayerHandle, node);
 		}
+		CPLDestroyXMLNode(root);
 	}
-	return VARIANT_FALSE;
+	return success;
 }
 
 // *********************************************************

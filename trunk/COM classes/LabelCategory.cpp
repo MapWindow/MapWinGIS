@@ -254,19 +254,8 @@ void CLabelCategory::put_LabelOptions(CLabelOptions* newVal)
 STDMETHODIMP CLabelCategory::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-
 	CPLXMLNode* node = SerializeCore("LabelCategoryClass");
-	if (node)
-	{
-		CString str = CPLSerializeXMLTree(node);
-		CPLDestroyXMLNode(node);
-		*retVal = A2BSTR(str);
-	}
-	else
-	{
-		*retVal = A2BSTR("");
-	}
+	Utility::SerializeAndDestroyXmlTree(node, retVal);
 	return S_OK;
 }
 

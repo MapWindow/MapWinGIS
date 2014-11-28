@@ -1362,19 +1362,8 @@ STDMETHODIMP CCharts::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 STDMETHODIMP CCharts::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-
-	CPLXMLNode* node = SerializeCore("ChartsClass");
-	if (node)
-	{
-		CString str = CPLSerializeXMLTree(node);
-		CPLDestroyXMLNode(node);
-		*retVal = A2BSTR(str);
-	}
-	else
-	{
-		*retVal = A2BSTR("");
-	}
+	CPLXMLNode* psTree = SerializeCore("ChartsClass");
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 
@@ -1630,7 +1619,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 			if (sourceType == sstDiskBased)
 			{
 				// constructing the name of .lbl file
-				BSTR name;
+				CComBSTR name;
 				_shapefile->get_Filename(&name);
 				USES_CONVERSION;
 				CString path = Utility::GetPathWOExtension(OLE2CA(name));

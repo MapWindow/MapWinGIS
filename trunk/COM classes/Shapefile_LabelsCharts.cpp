@@ -246,9 +246,10 @@ add_empty_label:
 	if (FieldIndex == -1)
 	{
 		// in case there is label expression, reapply it
-		BSTR expr;
+		CComBSTR expr;
 		_labels->get_Expression(&expr);
-		_labels->put_Expression(A2BSTR(""));
+		CComBSTR bstrEmpty = L"";
+		_labels->put_Expression(bstrEmpty);
 		_labels->put_Expression(expr);
 	}
 	else

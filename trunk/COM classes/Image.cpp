@@ -3122,18 +3122,8 @@ STDMETHODIMP CImageClass::get_Warped(VARIANT_BOOL* retVal)
 STDMETHODIMP CImageClass::Serialize(VARIANT_BOOL SerializePixels, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
 	CPLXMLNode* psTree = this->SerializeCore(SerializePixels, "ImageClass");
-	if (!psTree)
-	{
-		*retVal = A2BSTR("");
-	}
-	else
-	{
-		CString str = CPLSerializeXMLTree(psTree);
-		CPLDestroyXMLNode(psTree);
-		*retVal = A2BSTR(str);
-	}
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 

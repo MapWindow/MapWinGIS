@@ -41,8 +41,7 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	try
-	{
+	try {
 		USES_CONVERSION;
 		CStringW nameW = A2W(Filename);		// TODO: use Unicode
 		CPLXMLNode* root = GdalHelper::ParseXMLFile(nameW);
@@ -54,9 +53,8 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 				Callback->QueryInterface(IID_IStopExecution, (void**)&cb);
 			}
 			
-			USES_CONVERSION;
 			bool result = DeserializeMapStateCore(root, nameW, VARIANT_TRUE, cb);
-			
+
 			if (cb) 
 			{
 				cb->Release();
@@ -67,7 +65,9 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 			return result ? VARIANT_TRUE : VARIANT_FALSE;
 		}
 	}
-	catch(...) {}
+	catch(...) {
+		Debug::WriteError("CMapView::LoadMapState exception");
+	}
 	return VARIANT_FALSE;
 }
 
@@ -291,19 +291,10 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 BSTR CMapView::SerializeMapState(VARIANT_BOOL RelativePaths, LPCTSTR BasePath)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	CString strResult;
 	CPLXMLNode* node = SerializeMapStateCore(RelativePaths, BasePath);
-	if (node)
-	{
-		char* buffer = CPLSerializeXMLTree(node);
-		CPLDestroyXMLNode(node);
-
-		strResult = buffer;
-		if (buffer) {
-			CPLFree(buffer);
-		}
-	}
-	return strResult.AllocSysString();
+	BSTR bstr;
+	Utility::SerializeAndDestroyXmlTree(node, &bstr);
+	return bstr;
 }
 
 // ************************************************************

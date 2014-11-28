@@ -1001,7 +1001,8 @@ void CTableClass::LoadDefault_fields()
 
 		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
 		field->put_GlobalCallback(globalCallback);
-		field->put_Name(A2BSTR(fname));
+		CComBSTR bstrName(fname);
+		field->put_Name(bstrName);
 		field->put_Width(fwidth);
 		field->put_Precision(fdecimals);
 		field->put_Type((FieldType)type);
@@ -3229,10 +3230,8 @@ STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 STDMETHODIMP CTableClass::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 	CPLXMLNode* psTree = this->SerializeCore("TableClass");
-	*retVal = A2BSTR(psTree ? CPLSerializeXMLTree(psTree) : "");
-	if (psTree) CPLDestroyXMLNode(psTree);
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 

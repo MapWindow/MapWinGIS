@@ -755,7 +755,13 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_FALSE;
 
-	if (!_envelope || forceLoading) {
+	if (_envelope && forceLoading) {
+		delete _envelope;
+		_envelope = NULL;
+	}
+
+	if (!_envelope) {
+		
 		_envelope = new OGREnvelope();
 		CSingleLock lock(&_loader.ProviderLock);
 		if (_dynamicLoading) lock.Lock();
@@ -844,16 +850,7 @@ STDMETHODIMP COgrLayer::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CPLXMLNode* psTree = this->SerializeCore("OgrLayerClass");
-	if (!psTree)
-	{
-		*retVal = A2BSTR("");
-	}
-	else
-	{
-		CString str = CPLSerializeXMLTree(psTree);
-		CPLDestroyXMLNode(psTree);
-		*retVal = A2BSTR(str);
-	}
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 
@@ -1253,7 +1250,6 @@ STDMETHODIMP COgrLayer::get_LabelExpression(BSTR* pVal)
 STDMETHODIMP COgrLayer::put_LabelExpression(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	::SysFreeString(_key);
 	USES_CONVERSION;
 	_loader.LabelExpression = OLE2W(newVal);
 	return S_OK;

@@ -1096,8 +1096,10 @@ namespace Utility
 	{
 		if( callback != NULL )
 		{
-			callback->Progress(OLE2BSTR(key),100,A2BSTR("Completed"));
-			callback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+			CComBSTR bstrMsg("Completed");
+			CComBSTR bstrEmpty("");
+			callback->Progress(key, 100, bstrMsg);
+			callback->Progress(key, 0, bstrEmpty);
 		}
 	}
 
@@ -1304,10 +1306,33 @@ namespace Utility
 		}
 	}
 
+	// ************************************************
+	//		InitGdiPlusFont
+	// ************************************************
 	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size)
 	{
 		*font = new Gdiplus::Font(name, size);
 	}
+
+	// ************************************************
+	//		SerializeXmlTree
+	// ************************************************
+	bool SerializeAndDestroyXmlTree(CPLXMLNode* psTree, BSTR* retVal)
+	{
+		if (psTree) 
+		{
+			char* buffer = CPLSerializeXMLTree(psTree);
+			CPLDestroyXMLNode(psTree);
+			if (buffer) {
+				*retVal = A2BSTR(buffer);
+				CPLFree(buffer);
+				return true;
+			}
+		}
+		*retVal = A2BSTR("");
+		return false;
+	}
+
 }
 
 namespace Debug

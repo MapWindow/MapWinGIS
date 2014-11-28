@@ -1365,7 +1365,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 				if (sourceType == sstDiskBased)
 				{
 					// constructing the name of .lbl file
-					BSTR name;
+					CComBSTR name;
 					m_shapefile->get_Filename(&name);
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".lbl";
@@ -1472,18 +1472,8 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 STDMETHODIMP CLabels::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
 	CPLXMLNode* psTree =this->SerializeCore("LabelsClass");
-	if (!psTree)
-	{
-		*retVal = A2BSTR("");
-	}
-	else
-	{
-		CString str = CPLSerializeXMLTree(psTree);
-		CPLDestroyXMLNode(psTree);
-		*retVal = A2BSTR(str);
-	}
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 
@@ -1582,17 +1572,18 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
 		{
 			// constructing the name of .lbl file
-			BSTR name;
+			CComBSTR name;
 			m_shapefile->get_Filename(&name);
 			USES_CONVERSION;
-			CString path = Utility::GetPathWOExtension(OLE2CA(name));
-			path += ".lbl";
+			CStringW path = Utility::GetPathWOExtension(OLE2W(name));
+			path += L".lbl";
 					
 			// restoring labels
-			if (Utility::fileExists(path))
+			if (Utility::fileExistsW(path))
 			{
 				VARIANT_BOOL retVal;
-				this->LoadFromXML(A2BSTR(path), &retVal);
+				CComBSTR bstrPath(path);
+				this->LoadFromXML(bstrPath, &retVal);
 			}
 		}
 	}
@@ -1973,55 +1964,48 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 // ********************************************************
 bool CLabels::DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loadText)
 {
-	if (node)
+	if (!node) return false;
+	
+	this->Clear();
+	CComBSTR bstrDefault("");
+	CString s;
+	CString text;
+	double x,y, angle;
+	node = CPLGetXMLNode(node, "Label");
+		
+	while (node)
 	{
-		this->Clear();
-		BSTR bstr = A2BSTR("");
-		BSTR bstrDefault = A2BSTR("");
-		CString s;
-		CString text;
-		double x,y, angle;
-		
-		node = CPLGetXMLNode(node, "Label");
-		
-		while (node)
+		s = CPLGetXMLValue(node, "X", "0.0");
+		x = Utility::atof_custom(s);
+
+		s = CPLGetXMLValue(node, "Y", "0.0");
+		y = Utility::atof_custom(s);
+
+		CComBSTR bstr;
+		if (loadText)
 		{
-			s = CPLGetXMLValue(node, "X", "0.0");
-			x = Utility::atof_custom(s);
-
-			s = CPLGetXMLValue(node, "Y", "0.0");
-			y = Utility::atof_custom(s);
-
-			if (loadText)
-			{
-				text = CPLGetXMLValue(node, "Name", "");
-				bstr = A2BSTR(text);
-			}
-			else
-			{
-				bstr = bstrDefault;
-			}
+			text = CPLGetXMLValue(node, "Name", "");
+			bstr.Attach(A2BSTR(text));
+		}
 			
-			if (loadRotation)
-			{
-				s = CPLGetXMLValue(node, "Rotation", "0.0");
-				angle = Utility::atof_custom(s);
-			}
-			else
-			{
-				angle = 0.0;
-			}
-		
-			this->AddLabel(bstr, x, y, angle);
-			node = node->psNext;
+		if (loadRotation)
+		{
+			s = CPLGetXMLValue(node, "Rotation", "0.0");
+			angle = Utility::atof_custom(s);
+		}
+		else
+		{
+			angle = 0.0;
 		}
 		
-		// let's try to sync
-		this->put_Synchronized(VARIANT_TRUE);
-		
-		return true;
+		this->AddLabel(loadText ?  bstr : bstrDefault, x, y, angle);
+		node = node->psNext;
 	}
-	return false;
+		
+	// let's try to sync
+	this->put_Synchronized(VARIANT_TRUE);
+		
+	return true;
 }
 
 #pragma region "DbfSerialization"

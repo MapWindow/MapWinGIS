@@ -71,7 +71,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 			// fill CShapeData objects
 			CShapefileReader* reader = new CShapefileReader();
 			int numShapes = _shapeData.size();
-			int percent = 0, newPercent = 0;
+			long percent = 0;
 
 			if (reader->ReadShapefileIndex(_shpfileName, _shpfile))
 			{
@@ -84,15 +84,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 						delete[] data;
 					}
 
-					if (_globalCallback != NULL)
-					{
-						newPercent = (long)((i + 1.0)/numShapes*100);
-						if( newPercent > percent )
-						{	
-							percent = newPercent;
-							_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Reading shapes..."));
-						}
-					}
+					Utility::DisplayProgress(_globalCallback, i, numShapes, "Reading shapes...", _key, percent);
 				}
 				_fastMode = TRUE;
 			}
@@ -132,10 +124,8 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 			}
 		}
 	}
-	if (_globalCallback)
-	{
-		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
-	}
+
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 #pragma endregion

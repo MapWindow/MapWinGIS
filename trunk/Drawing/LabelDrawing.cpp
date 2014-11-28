@@ -221,7 +221,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	// -----------------------------------------
 	// analyzing query expression
 	// -----------------------------------------
-	BSTR expr;
+	CComBSTR expr;
 	LabelsClass->get_VisibilityExpression(&expr);
 
 	std::vector<long> arrInit;

@@ -566,19 +566,8 @@ STDMETHODIMP CGridColorScheme::put_Key(BSTR newVal)
 STDMETHODIMP CGridColorScheme::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-
 	CPLXMLNode* node = SerializeCore("GridColorSchemeClass");
-	if (node)
-	{
-		CString str = CPLSerializeXMLTree(node);	
-		CPLDestroyXMLNode(node);
-		*retVal = A2BSTR(str);
-	}
-	else
-	{
-		*retVal = A2BSTR("");
-	}
+	Utility::SerializeAndDestroyXmlTree(node, retVal);
 	return S_OK;
 }
 

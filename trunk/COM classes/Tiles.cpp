@@ -1238,19 +1238,8 @@ STDMETHODIMP CTiles::get_CacheSize2(tkCacheType type, tkTileProvider provider, i
 STDMETHODIMP CTiles::Serialize(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-
-	CPLXMLNode* node = this->SerializeCore("TilesClass");
-	if (node)
-	{
-		CString str = CPLSerializeXMLTree(node);	
-		CPLDestroyXMLNode(node);
-		*retVal = A2BSTR(str);
-	}
-	else
-	{
-		*retVal = A2BSTR("");
-	}
+	CPLXMLNode* psTree = this->SerializeCore("TilesClass");
+	Utility::SerializeAndDestroyXmlTree(psTree, retVal);
 	return S_OK;
 }
 
