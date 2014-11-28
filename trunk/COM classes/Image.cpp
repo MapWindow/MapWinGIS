@@ -129,7 +129,8 @@ STDMETHODIMP CImageClass::Resource(BSTR newImgPath, VARIANT_BOOL *retval)
 STDMETHODIMP CImageClass::Open(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	OpenImage(ImageFileName, FileType, InRam, cBack, GA_ReadOnly, true, retval);
+	USES_CONVERSION;
+	OpenImage(OLE2W(ImageFileName), FileType, InRam, cBack, GA_ReadOnly, true, retval);
 	return S_OK;
 }
 
@@ -155,10 +156,9 @@ void CImageClass::LoadImageAttributesFromGridColorScheme(IGridColorScheme* schem
 // ************************************************************
 // checkForProxy = true; image is being opened by client directly and we don't know whether it proxy or not;
 // checkForProxy = false; image is being opened by grid code and we already know that it is a proxy, and all the logic will be executed in grid class
-void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval)
+void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval)
 {
-	USES_CONVERSION;
-	fileName = OLE2W(ImageFileName);	
+	fileName = ImageFileName;	
 	inRam = (InRam == VARIANT_TRUE)?true:false;
 	
 	// child classes will be deleted here
@@ -191,7 +191,7 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 	}
 	else
 	{
-		// GDAL will determine the format automatically, so no specific code for extentions is needed.
+		// GDAL will determine the format automatically, so no specific code for extensions is needed.
 		// Try it with GDAL - it handles new formats more quickly than
 		// we can keep up with. If all of its drivers fail, retval will be false anyway.
 		
@@ -218,7 +218,7 @@ void CImageClass::OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL
 				}
 				default:
 				{
-					ImgType = IMG_FILE;		// Use IMG_FILE as a flag (not techncially accurate)
+					ImgType = IMG_FILE;		// Use IMG_FILE as a flag (not technically accurate)
 					break;
 				}
 			}

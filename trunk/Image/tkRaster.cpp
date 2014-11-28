@@ -358,10 +358,11 @@ void tkRaster::Close()
 		poBandG = NULL;		// if somebody will want to open new dataset
 		poBandB = NULL;
 	}
-	if (predefinedColorScheme)
+	if (_predefinedColorScheme)
 	{
-		predefinedColorScheme->Clear();
-		predefinedColorScheme = NULL;
+		_predefinedColorScheme->Clear();
+		_predefinedColorScheme->Release();
+		_predefinedColorScheme = NULL;
 	}
 	allowAsGrid = grForGridsOnly;
 	activeBandIndex = 1;
@@ -1702,11 +1703,11 @@ IGridColorScheme* tkRaster::GetColorSchemeForRendering()
 	else
 	{
 		// make sure that at least everything is all right with predefined one
-		predefinedColorScheme->get_NumBreaks(&numBreaks);
+		_predefinedColorScheme->get_NumBreaks(&numBreaks);
 		if (numBreaks == 0) {
-			predefinedColorScheme->UsePredefined(dfMin, dfMax, _predefinedColors);
+			_predefinedColorScheme->UsePredefined(dfMin, dfMax, _predefinedColors);
 		}
-		return predefinedColorScheme;
+		return _predefinedColorScheme;
 	}
 }
 

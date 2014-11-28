@@ -359,7 +359,7 @@ public:
 	void ClearBuffer();
 	bool SaveNotNullPixels(bool forceSaving = false);
 	void ClearNotNullPixels();
-	void OpenImage(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
+	void OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
 	
 	int get_originalBufferWidth()
 	{

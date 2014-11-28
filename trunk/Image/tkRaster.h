@@ -24,7 +24,7 @@ public:
 		: transColor(RGB(0,0,0))
 	{	//Rob Cairns
 		rasterDataset=NULL;
-		predefinedColorScheme = NULL;
+		_predefinedColorScheme = NULL;
 		customColorScheme = NULL;
 		poBandR = NULL;
 		poBandG = NULL;
@@ -51,12 +51,12 @@ public:
 		allowAsGrid = grForGridsOnly;
 		activeBandIndex = 1;
 		_predefinedColors = FallLeaves;
-		CoCreateInstance(CLSID_GridColorScheme,NULL,CLSCTX_INPROC_SERVER,IID_IGridColorScheme,(void**)&predefinedColorScheme);
+		GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
 	~tkRaster()
 	{
-		if (predefinedColorScheme)
-			predefinedColorScheme->Release();
+		if (_predefinedColorScheme)
+			_predefinedColorScheme->Release();
 	};
 private:
 	struct BreakVal
@@ -149,7 +149,7 @@ public:
 	bool warped;	// a warped dataset was created on opening
 	
 	IGridColorScheme * customColorScheme;		// the one set by Image.GridColorScheme property
-	IGridColorScheme * predefinedColorScheme;		// the one set by Image.ImageColorScheme property
+	IGridColorScheme * _predefinedColorScheme;		// the one set by Image.ImageColorScheme property
 
 	// ---------------------------------------------
 	//   Methods
@@ -178,7 +178,7 @@ public:
 	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 	{
 		_predefinedColors = colorScheme;
-		predefinedColorScheme->UsePredefined(dfMin, dfMax, colorScheme);
+		_predefinedColorScheme->UsePredefined(dfMin, dfMax, colorScheme);
 	}
 	IGridColorScheme* get_CustomColorScheme() { return customColorScheme; }
 	GDALDataset* tkRaster::get_Dataset()	{return rasterDataset;}

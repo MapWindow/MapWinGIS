@@ -49,13 +49,16 @@ public:
 		lastErrorCode = tkNO_ERROR;
 		
 		USES_CONVERSION;
-		key = A2BSTR("");
+		_key = A2BSTR("");
+
+		gReferenceCounter.AddRef(tkInterface::idGridColorScheme);
 	}
 
 	~CGridColorScheme()
 	{
-		::SysFreeString(key);
+		::SysFreeString(_key);
 		Clear();
+		gReferenceCounter.Release(tkInterface::idGridColorScheme);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -128,7 +131,7 @@ private:
 private:
 	long lastErrorCode;
 	ICallback * globalCallback;
-	BSTR key;
+	BSTR _key;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GridColorScheme), CGridColorScheme)

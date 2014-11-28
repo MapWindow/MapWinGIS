@@ -631,7 +631,8 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 
 	// compare projection of layer with one for the map
 	VARIANT_BOOL isEmpty = VARIANT_FALSE;
-	IGeoProjection* gp =  layer->GetGeoProjection();
+	CComPtr<IGeoProjection> gp = NULL;
+	gp.Attach(layer->GetGeoProjection());
 	if (gp)
 	{
 		gp->get_IsEmpty(&isEmpty);
@@ -663,13 +664,11 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 				result = false;
 				break;
 		}
-		if (gp)
-			gp->Release();
 		return result;
 	}
 	else
 	{
-		IExtents* ext = NULL;
+		CComPtr<IExtents> ext = NULL;
 		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
 		ext->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
 
@@ -684,11 +683,6 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 
 		VARIANT_BOOL match;
 		GetMapProjection()->get_IsSameExt(gp, ext, 20, &match);
-		ext->Release();
-		if (gp) {
-			gp->Release();
-			gp = NULL;
-		}
 
 		if (match)
 		{

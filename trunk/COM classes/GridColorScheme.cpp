@@ -33,7 +33,7 @@ void CGridColorScheme::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
 	if( globalCallback != NULL) 
-		globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));
 	return;
 }
 
@@ -68,7 +68,7 @@ STDMETHODIMP CGridColorScheme::put_AmbientIntensity(double newVal)
 	else
 	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_1;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
 
 	return S_OK;
@@ -95,7 +95,7 @@ STDMETHODIMP CGridColorScheme::put_LightSourceIntensity(double newVal)
 	else
 	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_1;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
 
 	return S_OK;
@@ -128,14 +128,14 @@ STDMETHODIMP CGridColorScheme::SetLightSource(double Azimuth, double Elevation)
 	if (Elevation > 180 || Elevation < 0)
 	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_180;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 		return S_OK;
 	}
 
 	if (Azimuth > 360 || Azimuth < -360)
 	{	lastErrorCode = tkOUT_OF_RANGE_M360_TO_360;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 		return S_OK;
 	}
 
@@ -167,7 +167,7 @@ STDMETHODIMP CGridColorScheme::InsertBreak(IGridColorBreak *BrkInfo)
 	if( BrkInfo == NULL )
 	{	lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
 
 	BrkInfo->AddRef();
@@ -198,7 +198,7 @@ STDMETHODIMP CGridColorScheme::get_Break(long Index, IGridColorBreak **pVal)
 	{	*pVal = NULL;
 		lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
 
 	return S_OK;
@@ -216,7 +216,7 @@ STDMETHODIMP CGridColorScheme::DeleteBreak(long Index)
 	else
 	{	lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
 	}
 
 	return S_OK;
@@ -541,7 +541,7 @@ STDMETHODIMP CGridColorScheme::get_Key(BSTR *pVal)
 
 	USES_CONVERSION;
 
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -552,8 +552,8 @@ STDMETHODIMP CGridColorScheme::put_Key(BSTR newVal)
 
 	USES_CONVERSION;
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -583,7 +583,7 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	 
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", OLE2CA(key));
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", OLE2CA(_key));
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "NoDataColor", (int)NoDataColor);
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceIntensity", LightSourceIntensity);
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "AmbientIntensity", AmbientIntensity);
@@ -650,7 +650,10 @@ bool CGridColorScheme::DeserializeCore(CPLXMLNode* node)
 	
 	CString s;
 	s = CPLGetXMLValue( node, "Key", NULL );
-	if (s != "") this->put_Key(A2BSTR(s));
+	if (s != "") {
+		CComBSTR bstrKey(s);
+		this->put_Key(bstrKey);
+	}
 
 	s = CPLGetXMLValue( node, "NoDataColor", NULL );
 	if (s != "") NoDataColor = (OLE_COLOR)atoi(s);

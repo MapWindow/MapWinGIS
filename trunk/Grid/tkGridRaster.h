@@ -212,5 +212,6 @@ private:
 
 };
 
+#pragma pack(pop, gif2)
 
 #endif // !defined(tkJpg_H)

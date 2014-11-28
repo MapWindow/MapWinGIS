@@ -59,7 +59,7 @@ CGrid::CGrid()
 	globalCallback = NULL;
 	lastErrorCode = tkNO_ERROR;
 	key = A2BSTR("");
-	filename = A2BSTR("");
+	filename = L"";
 	preferedDisplayMode = gpmAuto;
 }
 
@@ -72,9 +72,9 @@ CGrid::~CGrid()
 	Close(&retval);
 
 	::SysFreeString(key);
-	key = NULL;
 
-	globalCallback = NULL;	
+	if (globalCallback)
+		globalCallback->Release();
 }
 
 // ***************************************************
@@ -2622,7 +2622,9 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 	CStringW gridName = GetFilename().MakeLower();
 
 	CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
-	img->Open(OLE2BSTR(gridName), ImageType::USE_FILE_EXTENSION, false, cBack, &vb);
+
+	CComBSTR bstr(gridName);
+	img->Open(bstr, ImageType::USE_FILE_EXTENSION, false, cBack, &vb);
 	if (vb)
 	{
 		*retVal = img;
