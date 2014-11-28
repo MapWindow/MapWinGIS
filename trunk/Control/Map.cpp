@@ -203,12 +203,9 @@ void CMapView::Startup()
 {
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
 	
-	Gdiplus::FontFamily family(L"Courier New");
-	_fontCourier = new Gdiplus::Font(&family, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
+	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
+	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
 
-	Gdiplus::FontFamily family2(L"Arial");
-	_fontArial = new Gdiplus::Font(&family2, (Gdiplus::REAL)9.0f, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
-	
 	m_mapCursor = crsrMapDefault;
 	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)
 	_panningAnimation = false;

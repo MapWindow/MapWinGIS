@@ -119,6 +119,7 @@ public:
 	bool Selected;	// is used by clients only
 	int httpStatus;
 	bool IsStopped;
+	bool DynamicOverlay;
 
 private:
 	CMemoryBitmap* GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive = false);
@@ -140,6 +141,7 @@ public:
 		m_initialized = false;
 		Selected = false;
 		IsStopped = false;
+		DynamicOverlay = false;
 	}
 
 	virtual ~BaseProvider(void)
@@ -154,38 +156,6 @@ public:
 		_httpClients.clear();
 	};
 
-	/*MyHttpClient* GetHttpClient()
-	{
-	_clientLock.Lock();
-	MyHttpClient* client = NULL;
-	for(size_t i = 0; i < _httpClients.size(); i++)
-	{
-	if(!_httpClients[i]->_inUse)
-	{
-	_httpClients[i]->_inUse = true;
-	client = _httpClients[i];
-	break;
-	}
-	}
-	_clientLock.Unlock();
-	return client;
-	}
-
-	void ReleaseHttpClient(MyHttpClient* client)
-	{
-	_clientLock.Lock();
-	client->_inUse = false;
-	_clientLock.Unlock();
-	}
-
-	bool CanReuseConnections()
-	{
-	_clientLock.Lock();
-	bool canReuse = _httpClients.size() > 0;
-	_clientLock.Unlock();
-	return canReuse;
-	}*/
-
 	// proxy support
 	short get_ProxyPort() {return m_proxyPort;}
 	CString get_ProxyAddress() {return m_proxyAddress;}
@@ -193,10 +163,9 @@ public:
 	bool SetProxyAuthorization(CString username, CString password, CString domain);
 	void ClearProxyAuthorization();
 	bool AutodetectProxy();
+	void AddDynamicOverlay(BaseProvider* p);
+	void ClearSubProviders();
 
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
-	
-
-	
 };

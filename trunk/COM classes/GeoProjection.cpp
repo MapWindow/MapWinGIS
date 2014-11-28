@@ -322,12 +322,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 	{
 		USES_CONVERSION;
 		char* str = OLE2A(proj);
-		
-		char** list = new char*[2];
-		list[0] = str;
-		list[1] = NULL;
-		OGRErr err = m_projection->importFromWkt(list);
-		// TODO: delete those 2 bytes; GDAL can change the pointer
+		OGRErr err = m_projection->importFromWkt((char**)&str);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -483,7 +478,7 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 		return S_FALSE;
 	}
 	
-	// first let's try standard aproach
+	// first let's try standard approach
 	this->get_IsSame(proj, pVal);
 	if (*pVal == VARIANT_TRUE)
 	{

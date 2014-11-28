@@ -467,13 +467,6 @@ STDMETHODIMP CShapeEditor::get_IsDigitizing(VARIANT_BOOL* retVal)
 	return S_OK;
 }
 
-STDMETHODIMP CShapeEditor::put_IsDigitizing(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->SetCreationMode(newVal ? true: false);
-	return S_OK;
-}
-
 // *******************************************************
 //		get_Area()
 // *******************************************************
@@ -487,14 +480,14 @@ STDMETHODIMP CShapeEditor::get_Area(double* retVal)
 // *******************************************************
 //		LayerHandle()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_LayerHandle(int* retVal)
+STDMETHODIMP CShapeEditor::get_LayerHandle(LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _layerHandle;
 	return S_OK;
 }
 
-STDMETHODIMP CShapeEditor::put_LayerHandle(int newVal)
+STDMETHODIMP CShapeEditor::put_LayerHandle(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_layerHandle = newVal;
@@ -504,14 +497,14 @@ STDMETHODIMP CShapeEditor::put_LayerHandle(int newVal)
 // *******************************************************
 //		ShapeIndex()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_ShapeIndex(int* retVal)
+STDMETHODIMP CShapeEditor::get_ShapeIndex(LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = _shapeIndex;
 	return S_OK;
 }
 
-STDMETHODIMP CShapeEditor::put_ShapeIndex(int newVal)
+STDMETHODIMP CShapeEditor::put_ShapeIndex(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_shapeIndex = newVal;
@@ -519,31 +512,15 @@ STDMETHODIMP CShapeEditor::put_ShapeIndex(int newVal)
 }
 
 // *******************************************************
-//		Visible()
-// *******************************************************
-STDMETHODIMP CShapeEditor::get_Visible(VARIANT_BOOL* val)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	//*val = _activeShape->_geometryVisible;
-	return S_OK;
-}
-STDMETHODIMP CShapeEditor::put_Visible(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	//_activeShape->_geometryVisible = newVal ? true: false;
-	return S_OK;
-}
-
-// *******************************************************
 //		LabelsOnly()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_DrawLabelsOnly(VARIANT_BOOL* val)
+STDMETHODIMP CShapeEditor::get_ShapeVisible(VARIANT_BOOL* val)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*val = _activeShape->_drawLabelsOnly;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_DrawLabelsOnly(VARIANT_BOOL newVal)
+STDMETHODIMP CShapeEditor::put_ShapeVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->_drawLabelsOnly = newVal ? true : false;
@@ -799,7 +776,7 @@ STDMETHODIMP CShapeEditor::put_EditorState(tkEditorState newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->SetCreationMode(newVal == esDigitize || newVal == esDigitizeUnbound || newVal == esOverlay);
-	_activeShape->OverlayerTool = newVal == esOverlay || newVal == esDigitizeUnbound;
+	_activeShape->OverlayTool = newVal == esOverlay || newVal == esDigitizeUnbound;
 	_state = newVal;
 	return S_OK;
 }
@@ -819,13 +796,13 @@ void CShapeEditor::Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOper
 // *******************************************************
 //		PointLabelsVisible
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_PointLabelsVisible(VARIANT_BOOL* pVal)
+STDMETHODIMP CShapeEditor::get_IndicesVisible(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _activeShape->_pointLabelsVisible ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_PointLabelsVisible(VARIANT_BOOL newVal)
+STDMETHODIMP CShapeEditor::put_IndicesVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_activeShape->_pointLabelsVisible = newVal ? true: false;
@@ -1077,7 +1054,6 @@ bool CShapeEditor::Validate(IShape** shp)
 		_mapCallback->_FireShapeValidationFailed(errMsg);
 		return false;
 	}
-	
 
 	return ValidateWithGeos(shp);
 }
@@ -1246,7 +1222,7 @@ bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
 {
 	for (size_t i = 0; i < _subjects.size(); i++) 
 	{
-		int handle, index;
+		LONG handle, index;
 		_subjects[i]->get_LayerHandle(&handle);
 		_subjects[i]->get_ShapeIndex(&index);
 		if (LayerHandle == handle && ShapeIndex == index)
@@ -1258,13 +1234,13 @@ bool CShapeEditor::HasSubjectShape(int LayerHandle, int ShapeIndex)
 // ***************************************************************
 //		ValidationMode()
 // ***************************************************************
-STDMETHODIMP CShapeEditor::get_ValidationMode(tkEditorValidationMode* pVal)
+STDMETHODIMP CShapeEditor::get_ValidationMode(tkEditorValidation* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _validationMode;
 	return S_OK;
 }
-STDMETHODIMP CShapeEditor::put_ValidationMode(tkEditorValidationMode newVal)
+STDMETHODIMP CShapeEditor::put_ValidationMode(tkEditorValidation newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_validationMode = newVal;
@@ -1484,9 +1460,9 @@ void CShapeEditor::CopyOptionsFromShapefile()
 // ***************************************************************
 //		CopyOptionsFrom()
 // ***************************************************************
-STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options, ShpfileType shpType)
+STDMETHODIMP CShapeEditor::CopyOptionsFrom(IShapeDrawingOptions* options)
 {
-	EditorHelper::CopyOptionsFrom(this, options, shpType);
+	EditorHelper::CopyOptionsFrom(this, options);
 	return S_OK;
 }
 

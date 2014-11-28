@@ -32,7 +32,7 @@ public:
 		_highlightedPart = -1;
 		_inputMode = simMeasuring;
 		_isGeodesic = false;
-		OverlayerTool = false;
+		OverlayTool = false;
 		FillTransparency = 100;
 		FillColor = RGB(255, 165, 0);
 		LineColor = RGB(255, 127, 0);
@@ -102,7 +102,7 @@ public:
 	tkAngleFormat AngleFormat;
 	OLE_COLOR FillColor;
 	OLE_COLOR LineColor;
-	bool OverlayerTool;
+	bool OverlayTool;
 protected:
 
 	// abstract methods

@@ -196,9 +196,9 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 			{
 				RosreestrProvider* pr1 = new RosreestrProvider(false);
 				pr1->subProviders.push_back(pr1);
-				pr1->subProviders.push_back(new RosreestrProvider(true));
-				pr1->subProviders.push_back(new RosreestrBordersProvider());
-				p = pr1;
+				pr1->AddDynamicOverlay(new RosreestrProvider(true));
+				pr1->AddDynamicOverlay(new RosreestrBordersProvider());
+				p = (BaseProvider*)pr1;
 			}
 			break;
 		case OpenHumanitarianMap:

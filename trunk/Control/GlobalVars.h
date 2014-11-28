@@ -17,7 +17,7 @@
 #include "Logger.h"
 #include "Extent.h"
 #include "VarH.h"
-# include "MapViewCallback.h"
+#include "MapViewCallback.h"
 
 #pragma warning(disable:4482)	// non-standard extension used - for names of enumerations
 #pragma warning(disable:4099)	// missing program database
@@ -45,6 +45,10 @@ const int EPSG_AMERSFOORT = 28992;
 const double SNAP_TOLERANCE = 20;  // pixels
 const double MOUSE_CLICK_TOLERANCE = 20;  // pixels
 const double POINT_INSERT_TOLERANCE = 10;  // pixels
+
+#ifdef VLD_FORCE_ENABLE
+	#include <vld.h>
+#endif
 
 // comment these lines to turn off the memory leaking detection tools
 #ifdef _DEBUG

@@ -53,12 +53,13 @@ public:
 		this->SetDefaults();
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
-		
+		gReferenceCounter.AddRef(tkInterface::idTiles);
 	}
 
 	~CTiles()
 	{
 		ClearAll();
+		gReferenceCounter.Release(tkInterface::idTiles);
 	}
 	
 	void ClearAll()

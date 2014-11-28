@@ -89,7 +89,8 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	bool useQTreeResults = false;
 
 	VARIANT_BOOL useSpatialIndex;
-	CComPtr<IExtents> box = ExtentsHelper::Populate(extents);
+	CComPtr<IExtents> box = NULL;
+	box.Attach(ExtentsHelper::Populate(extents));
 	this->get_CanUseSpatialIndex(box, &useSpatialIndex);
 	
 	if (useSpatialIndex)   //ajp Jun 2008 select records from spatial index

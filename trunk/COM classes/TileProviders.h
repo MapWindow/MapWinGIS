@@ -53,8 +53,10 @@ public:
 	}
 	~CTileProviders()
 	{
-		for (size_t i = 0; i < m_providers.size(); i++)
-		{
+		for (size_t i = 0; i < m_providers.size(); i++) {
+			m_providers[i]->ClearSubProviders();
+		}
+		for (size_t i = 0; i < m_providers.size(); i++)	{
 			delete m_providers[i];
 		}
 	}

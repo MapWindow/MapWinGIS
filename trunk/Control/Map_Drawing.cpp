@@ -561,8 +561,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	//	Check whether some layers are completely concealed by images 
 	//	no need to draw them then
 	// ------------------------------------------------------------------
-	bool * isConcealed = NULL;
-	isConcealed = new bool[endcondition];
+	bool * isConcealed = new bool[endcondition];
 	memset(isConcealed,0,endcondition*sizeof(bool));
 
 	double scale = this->GetCurrentScale();
@@ -572,18 +571,11 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	if (layerBuffer)
 		CheckForConcealedImages(isConcealed, startcondition, endcondition, scale, zoom);
 
-	// do we have shapefiles with hot tracking? check it once here and don't check on mouse move
-	//_hasHotTracking = HasHotTracking();
-
-	// ---------------------------------------------------
-	//	Drawing grouped images
-	// ---------------------------------------------------
+	// drawing grouped images
 	if (layerBuffer)
 		DrawImageGroups();
 	
-	// ---------------------------------------------------
-	//	Prepare for drawing
-	// ---------------------------------------------------
+	// prepare for drawing
 	double currentScale = this->GetCurrentScale();
 
 	bool useCommonCollisionListForCharts = true;
@@ -875,7 +867,7 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
    if (layerBuffer && oldCursor != NULL)
       ::SetCursor(oldCursor);
 
-   if (layerBuffer)
+   if (isConcealed)
 		delete[] isConcealed;
 }
 

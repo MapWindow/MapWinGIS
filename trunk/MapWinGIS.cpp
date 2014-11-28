@@ -45,7 +45,9 @@ BOOL CMapWinGISApp::InitInstance()
 	//19-Oct-09 Rob Cairns: (See Bug 1446) - I hate doing this if it prevents our Chinese friends opening Chinese character shapefiles and data.
 	//However, there are just too many bugs associated with this change. See Bug 1446 for more information. Changing back to classic.
 	std::locale::global(std::locale("C"));
+
 	
+
 	// initialize all static variables, to keep our memory leaking report clean from them
 	#ifdef _DEBUG
 		gMemLeakDetect.stopped = true;
@@ -75,6 +77,13 @@ int CMapWinGISApp::ExitInstance()
 {
 	Debug::WriteLine("Exit instance");
 
+	CComBSTR bstr;
+	m_utils->get_ComUsageReport(VARIANT_TRUE, &bstr);
+
+	USES_CONVERSION;
+	CString s = OLE2A(bstr);
+	Debug::WriteLine(s);
+
 	if (m_utils)
 		m_utils->Release();
 
@@ -85,6 +94,8 @@ int CMapWinGISApp::ExitInstance()
 	SQLiteCache::Close();
 
 	CMapView::GdiplusShutdown();
+
+	std::locale::global(std::locale::classic());
 
 	_Module.Term();
 	return COleControlModule::ExitInstance();

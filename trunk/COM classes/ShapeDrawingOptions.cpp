@@ -1756,8 +1756,6 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "MaxVisibleScale", NULL);
 	m_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
 
-	delete opt;
-
 	// restoring picture
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "Picture");
 	if (psChild)
@@ -1797,6 +1795,8 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "UseLinePattern", NULL );
 	m_options.useLinePattern = (s == "") ? opt->useLinePattern : atoi(s.GetString()) == 0 ? false : true;
+
+	delete opt;
 
 	return true;
 }

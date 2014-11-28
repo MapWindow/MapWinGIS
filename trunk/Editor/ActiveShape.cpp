@@ -222,7 +222,7 @@ void ActiveShape::DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* dat
 
 	Gdiplus::Pen* pen = partIndex != -1 && (_selectedPart == partIndex || _highlightedPart == partIndex ) ? &_redPen : &_linePen;
 
-	if (OverlayerTool)
+	if (OverlayTool)
 	{
 		_linePen.SetDashStyle(Gdiplus::DashStyleCustom);
 		Gdiplus::REAL dashValues[4] = { 8, 8 };
@@ -662,10 +662,10 @@ bool ActiveShape::PartIsSelected(int partIndex)
 
 bool ActiveShape::VerticesAreVisible()
 {
-	return _verticesVisible && !OverlayerTool;
+	return _verticesVisible && !OverlayTool;
 }
 
 bool ActiveShape::PointLabelsAreVisible()
 {
-	return _pointLabelsVisible && !OverlayerTool;
+	return _pointLabelsVisible && !OverlayTool;
 }

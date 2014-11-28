@@ -256,7 +256,6 @@ public:
 	afx_msg ITiles* GetTiles(void);
 	afx_msg IFileManager* GetFileManager(void);
 	afx_msg IIdentifier* GetIdentifier(void);
-	//afx_msg void SetTiles(ITiles* pVal);
 
 	afx_msg void ProjToPixel(double projX, double projY, double FAR* pixelX, double FAR* pixelY);
 	afx_msg void PixelToProj(double pixelX, double pixelY, double FAR* projX, double FAR* projY);

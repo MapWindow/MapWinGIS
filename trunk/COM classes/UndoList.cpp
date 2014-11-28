@@ -128,6 +128,12 @@ STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG Sh
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
+	if (operation == uoMoveShapes || operation == uoRotateShapes) 
+	{
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
+		return S_OK;
+	}
+
 	if (operation != uoAddShape) {
 		if (!CheckShapeIndex(LayerHandle, ShapeIndex))
 			return S_OK;
@@ -442,7 +448,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 bool CUndoList::ShapeInEditor(long layerHandle, long shapeIndex) 
 {
 	IShapeEditor* editor = _mapCallback->_GetShapeEditor();
-	int handle, index;
+	long handle, index;
 	editor->get_LayerHandle(&handle);
 	editor->get_ShapeIndex(&index);
 	return handle == layerHandle && shapeIndex == index;

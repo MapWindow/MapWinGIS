@@ -260,6 +260,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 			nodeLayer = nodeLayer->psNext;
 		}
 		_wchdir(cwd);
+		delete[] cwd;
 	}
 
 	// restoring tiles settings

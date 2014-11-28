@@ -68,7 +68,7 @@ public:
 	STDMETHOD(get_LastOpenIsSuccess)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(ClearGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
-	STDMETHOD(BuildGdalOverviews)(BSTR Filename, ICallback* callback, VARIANT_BOOL* retVal);
+	STDMETHOD(BuildGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(get_NeedsGdalOverviews)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasValidProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);

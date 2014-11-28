@@ -21,7 +21,7 @@ void Digitizer::StartNewBoundShape(CShapeEditor* editor, IShapefile* sf, long la
 
 	CComPtr<IShapeDrawingOptions> options = NULL;
 	sf->get_DefaultDrawingOptions(&options);
-	editor->CopyOptionsFrom(options, ShapefileHelper::GetShapeType2D(sf));
+	editor->CopyOptionsFrom(options);
 	return;
 }
 

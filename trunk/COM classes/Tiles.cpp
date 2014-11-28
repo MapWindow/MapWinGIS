@@ -800,7 +800,6 @@ void CTiles::HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoa
 	if ((CMapView*)m_provider->mapView != NULL)
 	{
 		LPCTSTR newStr = (LPCTSTR)key;
-		this->AddRef();
 		((CMapView*)m_provider->mapView)->FireTilesLoaded(this, NULL, isSnapshot, newStr);
 		tilesLogger.WriteLine("Tiles loaded event; Were loaded from server (y/n): %d", !nothingToLoad);
 	}

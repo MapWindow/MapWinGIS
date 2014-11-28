@@ -67,7 +67,7 @@ bool CMapView::SnappingIsOn(bool shift)
 	if (EditorHelper::IsSnappableCursor((tkCursorMode)m_cursorMode)) 
 	{
 		tkLayerSelection behavior = EditorHelper::GetSnappingBehavior(_shapeEditor);
-		if (behavior == lsAllLayers || behavior == lsCurrentLayer) return true;
+		if (behavior == lsAllLayers || behavior == lsActiveLayer) return true;
 	}
 	return shift;
 }
@@ -193,7 +193,7 @@ IUndoList* CMapView::GetUndoList()
 // ************************************************************
 IShapefile* CMapView::GetShapeEditorShapefile()
 {
-	int layerHandle;
+	long layerHandle;
 	_shapeEditor->get_LayerHandle(&layerHandle);
 	return GetShapefile(layerHandle);
 }

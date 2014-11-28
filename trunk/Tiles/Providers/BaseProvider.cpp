@@ -319,6 +319,28 @@ bool BaseProvider::AutodetectProxy()
 	return ret;
 }
 
+// *************************************************************
+//			AddDynamicOverlay()
+// *************************************************************
+void BaseProvider::AddDynamicOverlay(BaseProvider* p)
+{
+	if (p) {
+		p->DynamicOverlay = true;
+	}
+	subProviders.push_back(p);
+}
 
+// *************************************************************
+//			ClearSubProviders()
+// *************************************************************
+void BaseProvider::ClearSubProviders()
+{
+	for (size_t i = 0; i < subProviders.size(); i++)
+	{
+		if (subProviders[i]->DynamicOverlay)
+			delete subProviders[i];
+	}
+	subProviders.clear();
+}
 
 #pragma endregion

@@ -89,7 +89,7 @@ void CMapView::TurnOffPanning()
 }
 
 // ***************************************************************
-//		Undo
+//		UndoCore
 // ***************************************************************
 bool CMapView::UndoCore(bool shift)
 {
@@ -103,23 +103,17 @@ bool CMapView::UndoCore(bool shift)
 		}
 	}
 
-	tkUndoShortcut shortcut;
-	_undoList->get_ShortcutKey(&shortcut);
-	if (shortcut == usCtrlZ)
-	{
-		VARIANT_BOOL vb;
-		if (shift) {
-			_undoList->Redo(VARIANT_TRUE, &vb);
-		}
-		else {
-			_undoList->Undo(VARIANT_TRUE, &vb);
-		}
-		if (vb) {
-			Redraw2(RedrawSkipDataLayers);
-		}
-		return true;
+	VARIANT_BOOL vb;
+	if (shift) {
+		_undoList->Redo(VARIANT_TRUE, &vb);
 	}
-	return false;
+	else {
+		_undoList->Undo(VARIANT_TRUE, &vb);
+	}
+	if (vb) {
+		Redraw2(RedrawSkipDataLayers);
+	}
+	return true;
 }
 
 // ***************************************************************

@@ -60,12 +60,15 @@ void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapefile* sf)
 	if (!sf || !editor) return;
 	CComPtr<IShapeDrawingOptions> options = NULL;
 	sf->get_DefaultDrawingOptions(&options);
-	ShpfileType shpType = ShapefileHelper::GetShapeType2D(sf);
-	CopyOptionsFrom(editor, options, shpType);
+	CopyOptionsFrom(editor, options);
 }
-void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options, ShpfileType shpType)
+void EditorHelper::CopyOptionsFrom(IShapeEditor* editor, IShapeDrawingOptions* options)
 {
 	if (!editor || !options) return;
+
+	ShpfileType shpType;
+	editor->get_ShapeType(&shpType);
+
 	float lineWidth;
 	OLE_COLOR fillColor, lineColor;
 	options->get_FillColor(&fillColor);

@@ -202,7 +202,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkEDITOR_OVERLAY_ALREADY_STARTED:
 			return "Overlay operation has been already started.";
 		case tkADD_SHAPE_MODE_ONLY:
-			return "Method can be called with cmAddShape cursor only";
+			return "Method can be called with cmAddShape cursor only.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

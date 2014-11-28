@@ -2418,23 +2418,15 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 
 	// drawing options
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "DefaultDrawingOptions");
-	if (psChild)
-	{
-		IShapeDrawingOptions* options = NULL;
-		this->get_DefaultDrawingOptions(&options);
-		((CShapeDrawingOptions*)options)->DeserializeCore(psChild);
-		options->Release();
+	if (psChild) {
+		((CShapeDrawingOptions*)_defaultDrawOpt)->DeserializeCore(psChild);
 	}
 
 	if (_selectionAppearance == saDrawingOptions)
 	{
 		CPLXMLNode* psChild = CPLGetXMLNode(node, "SelectionDrawingOptions");
-		if (psChild)
-		{
-			IShapeDrawingOptions* options = NULL;
-			this->get_SelectionDrawingOptions(&options);
-			((CShapeDrawingOptions*)options)->DeserializeCore(psChild);
-			options->Release();
+		if (psChild) {
+			((CShapeDrawingOptions*)_selectDrawOpt)->DeserializeCore(psChild);
 		}
 	}
 	

@@ -73,7 +73,7 @@ void CMapView::InitProjections()
 	
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 
-	IGeoProjection* p = NULL;
+	CComPtr<IGeoProjection> p = NULL;
 	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 }
@@ -110,7 +110,8 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
-		CComPtr<IExtents> box = ExtentsHelper::GetWorldBounds();
+		CComPtr<IExtents> box = NULL;
+		box.Attach(ExtentsHelper::GetWorldBounds());
 		_wgsProjection->get_IsSameExt(_projection, box, 20, &isSame);
 		if (isSame)
 		{

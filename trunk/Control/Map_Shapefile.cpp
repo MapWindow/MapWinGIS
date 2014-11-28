@@ -1121,8 +1121,8 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 	bool digitizing = EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode);
 	tkLayerSelection behavior;
 	_shapeEditor->get_SnapBehavior(&behavior);
-	int currentHandle = -1;
-	bool currentLayerOnly = behavior == lsCurrentLayer && digitizing;
+	long currentHandle = -1;
+	bool currentLayerOnly = behavior == lsActiveLayer && digitizing;
 	if (currentLayerOnly)
 		_shapeEditor->get_LayerHandle(&currentHandle);
 
@@ -1263,8 +1263,8 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 						switch (highlighting) {
 							case lsAllLayers:
 								return true;
-							case lsCurrentLayer:
-								int handle;
+							case lsActiveLayer:
+								long handle;
 								_shapeEditor->get_LayerHandle(&handle);
 								return handle == layerHandle;
 							case lsNoLayer:
@@ -1446,7 +1446,8 @@ void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 			OLE_COLOR color;
 			_identifier->get_OutlineColor(&color);
 
-			CComPtr<IShapeDrawingOptions> options = ShapeStyleHelper::GetHotTrackingStyle(sf, color, m_cursorMode == cmIdentify);
+			CComPtr<IShapeDrawingOptions> options = NULL;
+			options.Attach(ShapeStyleHelper::GetHotTrackingStyle(sf, color, m_cursorMode == cmIdentify));
 			if (options) {
 				_hotTracking.UpdateStyle(options);
 			}

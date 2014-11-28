@@ -197,7 +197,7 @@ void COgrLayer::CloseShapefile()
 	{
 		VARIANT_BOOL vb;
 		_shapefile->Close(&vb);
-		_shapefile->Release();
+		ULONG count = _shapefile->Release();
 		_shapefile = NULL;
 	}
 }
@@ -975,7 +975,13 @@ bool COgrLayer::DeserializeOptions(CPLXMLNode* node)
 		CPLXMLNode* psChild = CPLGetXMLNode(node, "ShapefileData");
 		if (psChild)
 		{
-			_shapefile = LoadShapefile();
+			if (!_shapefile) {
+				IShapefile* sf = LoadShapefile();
+				CSingleLock sfLock(&_loader.ShapefileLock);
+				sfLock.Lock();
+				_shapefile = sf;
+				sfLock.Unlock();
+			}
 			bool result = ((CShapefile*)_shapefile)->DeserializeCore(VARIANT_FALSE, psChild);
 			if (!result) success = false;
 		}

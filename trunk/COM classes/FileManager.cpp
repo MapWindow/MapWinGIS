@@ -531,14 +531,10 @@ STDMETHODIMP CFileManager::ClearGdalOverviews(BSTR Filename, VARIANT_BOOL* retVa
 //****************************************************************
 //			CreateGdalOverviews()
 //****************************************************************
-STDMETHODIMP CFileManager::BuildGdalOverviews(BSTR Filename, ICallback* callback, VARIANT_BOOL* retVal)
+STDMETHODIMP CFileManager::BuildGdalOverviews(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if (callback && !m_globalCallback) {
-		Utility::put_ComReference(callback, (IDispatch**)&m_globalCallback, true);
-	}
-	*retVal = GdalHelper::BuildOverviewsIfNeeded(OLE2W(Filename), true, callback) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = GdalHelper::BuildOverviewsIfNeeded(OLE2W(Filename), true, m_globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 

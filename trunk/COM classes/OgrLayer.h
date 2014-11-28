@@ -37,10 +37,6 @@ public:
 		if (_envelope)
 			delete _envelope;
 		Close();
-		if (_shapefile)  {
-			ULONG count = _shapefile->Release();
-			Debug::WriteLine("Shapefile is released: %d", count);
-		}
 		if (_globalCallback)
 			_globalCallback->Release();
 		gReferenceCounter.Release(tkInterface::idOgrLayer);

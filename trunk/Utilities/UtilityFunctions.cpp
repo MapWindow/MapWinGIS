@@ -1217,6 +1217,8 @@ namespace Utility
 			}
 			delete[] verData;
 		}
+		delete[] path;
+
 		return result;
 	}
 
@@ -1290,6 +1292,11 @@ namespace Utility
 				break;
 		}
 	}
+
+	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size)
+	{
+		*font = new Gdiplus::Font(name, size);
+	}
 }
 
 namespace Debug
@@ -1299,6 +1306,7 @@ namespace Debug
 	// ****************************************************************** 
 	void WriteWithThreadId(CString format, ...)
 	{
+#ifndef RELEASE_MODE
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
@@ -1311,6 +1319,7 @@ namespace Debug
 		CString s = buffer;
 		format = s2 + s + "\n";
 		OutputDebugStringA(format);
+#endif
 	}
 
 	// ****************************************************************** 
@@ -1318,6 +1327,7 @@ namespace Debug
 	// ****************************************************************** 
 	void WriteWithTime(CString format, ...)
 	{
+#ifndef RELEASE_MODE
 		TCHAR buffer[1024];
 		va_list args;
 		va_start( args, format);
@@ -1330,6 +1340,7 @@ namespace Debug
 		CString s = buffer;
 		format = s2 + s + "\n";
 		OutputDebugStringA(format);
+#endif
 	}
 	
 	// ****************************************************************** 
@@ -1337,6 +1348,7 @@ namespace Debug
 	// ****************************************************************** 
 	void WriteLine(CString format, ...)
 	{
+#ifndef RELEASE_MODE		
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
@@ -1344,6 +1356,7 @@ namespace Debug
 		CString s = buffer;
 		format = "OCX: " + s + "\n";
 		OutputDebugStringA(format);
+#endif
 	}
 
 	// ****************************************************************** 
@@ -1351,6 +1364,7 @@ namespace Debug
 	// ****************************************************************** 
 	void WriteError(CString format, ...)
 	{
+#ifndef RELEASE_MODE				
 		TCHAR buffer[1024];
  		va_list args;
 		va_start( args, format);
@@ -1358,5 +1372,6 @@ namespace Debug
 		CString s = buffer;
 		format = "OCX ERROR: " + s + "\n";
 		OutputDebugStringA(format);
+#endif
 	}
 }

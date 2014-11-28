@@ -68,6 +68,7 @@ namespace Utility
 	OLE_COLOR ChangeBrightness(OLE_COLOR color, int shiftValue);
 	Gdiplus::Color OleColor2GdiPlus(OLE_COLOR color, BYTE alpha);
 	byte GetBrightness(OLE_COLOR color);
+	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size);
 
 	// shapefile
 	void swapEndian(char* a,int size);

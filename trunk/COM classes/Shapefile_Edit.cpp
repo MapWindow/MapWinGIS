@@ -450,20 +450,28 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 	if (!_isEditingShapes) 
 	{
 		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (shapeIndex < 0 || shapeIndex >= (long)_shapeData.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
-	}
-	else
-	{
-		Utility::put_ComReference(shpNew, (IDispatch**)&_shapeData[shapeIndex]->shape, false);
-		ReregisterShape(shapeIndex);
 		return S_OK;
 	}
+
+	ShpfileType shpType;
+	shpNew->get_ShapeType2D(&shpType);
+	if (shpType != Utility::ShapeTypeConvert2D(_shpfiletype) && shpType != SHP_NULLSHAPE)
+	{
+		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
+		return S_OK;
+	}
+
+	Utility::put_ComReference(shpNew, (IDispatch**)&_shapeData[shapeIndex]->shape, false);
+	ReregisterShape(shapeIndex);
+	*retval = VARIANT_TRUE;
+	return S_OK;
+	
 }
 
 // ***********************************************************
