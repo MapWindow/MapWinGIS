@@ -140,7 +140,7 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 		return S_OK;
 	}
 
-	GetUtils()->CreateInstance(idShape, (IDispatch**)retVal);
+	ComHelper::CreateInstance(idShape, (IDispatch**)retVal);
 
 	VARIANT_BOOL vb;
 	(*retVal)->Create(shpType, &vb);
@@ -930,7 +930,7 @@ bool CShapeEditor::GetClosestPoint(double projX, double projY, double& xResult, 
 		VARIANT_BOOL vb;
 		long pointIndex = 0;
 		CComPtr<IShape> shp2 = NULL;
-		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp2);
+		ComHelper::CreateInstance(idShape, (IDispatch**)&shp2);
 		shp2->Create(SHP_POINT, &vb);
 		shp2->AddPoint(projX, projY, &pointIndex);
 
@@ -1322,7 +1322,7 @@ void CShapeEditor::ApplyOverlayColoring(tkEditorOverlay overlay)
 CShapeEditor* CShapeEditor::Clone()
 {
 	CShapeEditor* editor = NULL;
-	GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&editor);
+	ComHelper::CreateInstance(idShapeEditor, (IDispatch**)&editor);
 	editor->SetIsSubject(true);
 	editor->SetMapCallback(_mapCallback);
 

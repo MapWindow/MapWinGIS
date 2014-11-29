@@ -1300,7 +1300,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude
 	else 
 	{
 		IExtents* box = NULL;
-		GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);
+		ComHelper::CreateInstance(idExtents, (IDispatch**)&box);
 
 		double dy = 0.0, dx = 0.0;				// meters per degree
 		GetUtils()->GeodesicDistance(yLatitude - 0.5, xLongitude, yLatitude + 0.5, xLongitude, &dy);
@@ -1325,7 +1325,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude
 IExtents* CMapView::GetKnownExtents(tkKnownExtents extents)
 {
 	IExtents* box = NULL;
-	GetUtils()->CreateInstance(idExtents, (IDispatch**)&box);
+	ComHelper::CreateInstance(idExtents, (IDispatch**)&box);
 
 	// generated from MW4 projection database
 	switch(extents) {
@@ -1778,7 +1778,7 @@ void CMapView::SetProjection(tkMapProjection projection)
 	tkTransformationMode prevMode = _transformationMode;
 
 	IGeoProjection* p = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	if (p)
 	{
 		VARIANT_BOOL vb;

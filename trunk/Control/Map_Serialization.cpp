@@ -225,7 +225,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	_identifier->put_OutlineColor(outlineColor);
 
 	CComPtr<IGeoProjection> gp = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
 	s = CPLGetXMLValue( nodeState, "Projection", NULL );
 	if (s.GetLength() > 0)
 	{

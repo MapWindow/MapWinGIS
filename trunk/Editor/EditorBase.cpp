@@ -189,7 +189,7 @@ bool EditorBase::PartIsWithin(int outerRing, int innerRing)
 				for (int i = startIndex; i <= endIndex; i++)
 				{
 					CComPtr<IPoint> pnt = NULL;
-					GetUtils()->CreateInstance(idPoint, (IDispatch**)&pnt);
+					ComHelper::CreateInstance(idPoint, (IDispatch**)&pnt);
 					pnt->put_X(_points[i]->Proj.x);
 					pnt->put_Y(_points[i]->Proj.y);
 					shp->PointInThisPoly(pnt, &vb);
@@ -211,7 +211,7 @@ IShape* EditorBase::GetPartAsShape(int partIndex)
 	if (GetPart(partIndex, startIndex, endIndex))
 	{
 		IShape* shp = NULL;
-		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp);
+		ComHelper::CreateInstance(idShape, (IDispatch**)&shp);
 		VARIANT_BOOL vb;
 		shp->Create(GetShapeType2D(), &vb);
 

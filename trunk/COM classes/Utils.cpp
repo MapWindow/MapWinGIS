@@ -4988,7 +4988,7 @@ HRESULT CUtils::TileProjectionToGeoProjectionCore(tkTileProjection projection, V
 	else
 	{
 		IGeoProjection* gp = NULL;
-		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
 		VARIANT_BOOL vb;
 		switch(projection)
 		{

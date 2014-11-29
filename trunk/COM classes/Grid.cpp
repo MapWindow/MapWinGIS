@@ -959,7 +959,7 @@ void CGrid::SaveProjectionAsWkt()
 	if (prjFilename.GetLength() > 0)
 	{
 		IGeoProjection* proj = NULL;
-		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 		if (proj)
 		{
 			VARIANT_BOOL vb;
@@ -2667,7 +2667,7 @@ IImage* CGrid::OpenImageProxy()
 	if (hasProxy)
 	{
 		VARIANT_BOOL vb;
-		GetUtils()->CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
+		ComHelper::CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
 		
 		iimg->Open(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb);
 		if (!vb) 

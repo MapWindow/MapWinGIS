@@ -23,7 +23,7 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 	VARIANT_BOOL vb;
 	
 	IShapeValidationInfo* iinfo = NULL;
-	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&iinfo);
+	ComHelper::CreateInstance(idShapeValidationInfo, (IDispatch**)&iinfo);
 	CShapeValidationInfo* info = (CShapeValidationInfo*)iinfo;
 	info->className = className;
 	info->methodName = methodName;

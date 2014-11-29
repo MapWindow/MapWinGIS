@@ -431,7 +431,7 @@ void tkGridRaster::ReadProjection()
 	if (wkt)
 	{
 		IGeoProjection* proj = NULL;
-		GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 		if (proj)
 		{
 			USES_CONVERSION;

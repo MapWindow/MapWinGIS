@@ -229,7 +229,7 @@ STDMETHODIMP CGeoProjection::Clone(IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
-	GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)retVal);
+	ComHelper::CreateInstance(tkInterface::idGeoProjection, (IDispatch**)retVal);
 	VARIANT_BOOL vb;
 	(*retVal)->CopyFrom(this, &vb);
 	if (!vb)

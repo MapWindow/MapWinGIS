@@ -70,7 +70,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 		layer->ResetReading();
 	}
 
-	GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
+	ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
 	CComBSTR bstr = L"";
 	sf->CreateNew(bstr, shpType, &vbretval);
 
@@ -99,7 +99,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 	CStringA name = layer->GetFIDColumn();
 	if (name.GetLength() > 0)
 	{
-		GetUtils()->CreateInstance(idField, (IDispatch**)&fld);
+		ComHelper::CreateInstance(idField, (IDispatch**)&fld);
 		fld->put_Type(INTEGER_FIELD);
 		CComBSTR bstrName;
 		bstrName.Attach(A2BSTR(name));
@@ -113,7 +113,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 
 	for (long iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
 	{
-		GetUtils()->CreateInstance(idField, (IDispatch**)&fld);
+		ComHelper::CreateInstance(idField, (IDispatch**)&fld);
 
 		OGRFieldDefn* oField = poFields->GetFieldDefn(iFld);
 		OGRFieldType type = oField->GetType();
@@ -193,7 +193,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		if (!shp)
 		{
 			// insert null shape so that client can still access it
-			GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+			ComHelper::CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
 		}
 
 		long numShapes;

@@ -272,7 +272,7 @@ bool CImageClass::CheckForProxy()
 
 					VARIANT_BOOL vb;
 					IGridColorScheme* scheme = NULL;
-					GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
+					ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
 					scheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
 					if (vb)
 					{
@@ -3500,7 +3500,7 @@ STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 		if (Utility::FileExistsW(legendName))
 		{
 			IGridColorScheme* scheme = NULL;
-			GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
+			ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
 			VARIANT_BOOL vb;
 			USES_CONVERSION;
 			scheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
@@ -3663,7 +3663,7 @@ STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 	CStringW filename = isGridProxy ? this->sourceGridName : this->_fileName;
 	if (Utility::FileExistsW(filename))
 	{
-		GetUtils()->CreateInstance(tkInterface::idGrid, (IDispatch**)retVal);
+		ComHelper::CreateInstance(tkInterface::idGrid, (IDispatch**)retVal);
 		VARIANT_BOOL vb;
 		USES_CONVERSION;
 

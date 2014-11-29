@@ -483,7 +483,7 @@ STDMETHODIMP COgrLayer::get_GeoProjection(IGeoProjection** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	IGeoProjection* gp = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&gp);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
 	*retVal = gp;
 
 	if (!CheckState()) return S_OK;
@@ -777,7 +777,7 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	
 	if (_envelope) {
 		IExtents* ext = NULL;
-		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
+		ComHelper::CreateInstance(idExtents, (IDispatch**)&ext);
 		ext->SetBounds(_envelope->MinX, _envelope->MinY, 0.0, _envelope->MaxX, _envelope->MaxY, 0.0);
 		*extents = ext;
 		*retVal = VARIANT_TRUE;
@@ -1382,7 +1382,7 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 		}
 
 		CComPtr<IColorScheme> scheme = NULL;
-		GetUtils()->CreateInstance(idColorScheme, (IDispatch**)&scheme);
+		ComHelper::CreateInstance(idColorScheme, (IDispatch**)&scheme);
 		if (scheme) {
 			scheme->SetColors2(colorStart, colorEnd);
 			ct->ApplyColorScheme(schemeType, scheme);

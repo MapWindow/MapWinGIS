@@ -189,7 +189,7 @@ void CMapView::Clear()
 	SetDefaults();
 
 	IGeoProjection* p = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 
 	Redraw();
@@ -262,15 +262,15 @@ void CMapView::Startup()
 	gMemLeakDetect.stopped = true;
 	#endif
 
-	GetUtils()->CreateInstance(idTiles, (IDispatch**)&_tiles);
+	ComHelper::CreateInstance(idTiles, (IDispatch**)&_tiles);
 	((CTiles*)_tiles)->Init((void*)this);
 
-	GetUtils()->CreateInstance(idMeasuring, (IDispatch**)&_measuring);
-	GetUtils()->CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
+	ComHelper::CreateInstance(idMeasuring, (IDispatch**)&_measuring);
+	ComHelper::CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
 
-	GetUtils()->CreateInstance(idIdentifier, (IDispatch**)&_identifier);
-	GetUtils()->CreateInstance(idFileManager, (IDispatch**)&_fileManager);
-	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
+	ComHelper::CreateInstance(idIdentifier, (IDispatch**)&_identifier);
+	ComHelper::CreateInstance(idFileManager, (IDispatch**)&_fileManager);
+	ComHelper::CreateInstance(idUndoList, (IDispatch**)&_undoList);
 	((CUndoList*)_undoList)->SetMapCallback(this);
 
 	InitProjections();

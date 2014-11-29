@@ -458,7 +458,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				iimg->get_IsGridProxy(&isProxy);
 				CStringW legendName = isProxy ? grid->GetProxyLegendName() : grid->GetLegendName();
 				IGridColorScheme* newScheme = NULL;
-				GetUtils()->CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
+				ComHelper::CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
 				newScheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
 				if (vb)
 				{
@@ -669,7 +669,7 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 	else
 	{
 		CComPtr<IExtents> ext = NULL;
-		GetUtils()->CreateInstance(idExtents, (IDispatch**)&ext);
+		ComHelper::CreateInstance(idExtents, (IDispatch**)&ext);
 		ext->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
 
 		IGeoProjection* gpMap = GetMapProjection();
@@ -1258,7 +1258,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	{
 		// opening shapefile
 		CComPtr<IShapefile> sf = NULL;
-		GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
+		ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
 		
 		if (sf) 
 		{
@@ -1313,7 +1313,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 	else if (layerType == OgrLayerSource)
 	{
 		IOgrLayer* layer = NULL;
-		GetUtils()->CreateInstance(idOgrLayer, (IDispatch**)&layer);
+		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 		if (layer) 
 		{
 			CPLXMLNode* nodeOgrLayer = CPLGetXMLNode(node, "OgrLayerClass");

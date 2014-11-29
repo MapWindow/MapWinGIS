@@ -316,7 +316,7 @@ STDMETHODIMP CExtents::PointIsWithin(double x, double y, VARIANT_BOOL* retVal)
 STDMETHODIMP CExtents::get_Center(IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	GetUtils()->CreateInstance(idPoint, (IDispatch**)retVal);
+	ComHelper::CreateInstance(idPoint, (IDispatch**)retVal);
 	(*retVal)->put_X((_xmin + _max) / 2);
 	(*retVal)->put_Y((_ymin + _ymax) / 2);
 	return S_OK;

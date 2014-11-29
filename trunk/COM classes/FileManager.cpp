@@ -333,7 +333,7 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 	if (vb) {
 		VARIANT_BOOL vb;
 		IShapefile* sf = NULL;
-		GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
+		ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
 		sf->Open(Filename, _globalCallback, &vb);
 		if (!vb)
 		{
@@ -388,7 +388,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 		case fosRgbImage:
 			{
 				IImage* img = NULL;
-				GetUtils()->CreateInstance(idImage, (IDispatch**)&img);
+				ComHelper::CreateInstance(idImage, (IDispatch**)&img);
 				if (img)
 				{
 					img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb );
@@ -419,7 +419,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 		case fosProxyForGrid:
 			{
 				IGrid* grid = NULL;
-				GetUtils()->CreateInstance(idGrid, (IDispatch**)&grid);
+				ComHelper::CreateInstance(idGrid, (IDispatch**)&grid);
 				if (grid)
 				{
 					// TODO: choose inRam mode
@@ -581,7 +581,7 @@ STDMETHODIMP CFileManager::OpenFromDatabase(BSTR connectionString, BSTR layerNam
 	*retVal = NULL;
 	
 	IOgrDatasource* source = NULL;
-	GetUtils()->CreateInstance(idOgrDatasource, (IDispatch**)&source);
+	ComHelper::CreateInstance(idOgrDatasource, (IDispatch**)&source);
 	VARIANT_BOOL vb;
 	source->Open(connectionString, &vb);
 	if (!vb)

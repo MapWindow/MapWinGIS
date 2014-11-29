@@ -78,7 +78,7 @@ IPoint* GeoShape::GetPolygonCenter(Gdiplus::PointF* data, int length)
 
 		// find position for label
 		CComPtr<IShape> shp = NULL;
-		GetUtils()->CreateInstance(idShape, (IDispatch**)&shp);
+		ComHelper::CreateInstance(idShape, (IDispatch**)&shp);
 		if (shp)
 		{
 			long pointIndex;

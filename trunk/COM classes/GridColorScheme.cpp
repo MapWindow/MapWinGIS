@@ -285,7 +285,7 @@ STDMETHODIMP CGridColorScheme::UsePredefined(double LowValue, double HighValue, 
 
 		for(int i = 0; i < 6; i++)
 		{
-			GetUtils()->CreateInstance(idGridColorBreak, (IDispatch**)&br);
+			ComHelper::CreateInstance(idGridColorBreak, (IDispatch**)&br);
 			br->put_LowValue(LowValue + i * step);
 			br->put_HighValue(LowValue + (i + 1) * step);
 			GetUtils()->ColorByName(colors[i], &clr1);

@@ -108,8 +108,8 @@ CShapefile::CShapefile()
 	_charts = NULL;
 	_geoProjection = NULL;
 	
-	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
-	GetUtils()->CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
+	ComHelper::CreateInstance(idShapeValidationInfo, (IDispatch**)&_inputValidation);
+	ComHelper::CreateInstance(idShapeValidationInfo, (IDispatch**)&_outputValidation);
 
 	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_selectDrawOpt);
 	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_defaultDrawOpt);
@@ -122,7 +122,7 @@ CShapefile::CShapefile()
 	this->put_ReferenceToCategories();
 	this->put_ReferenceToCharts();
 
-	GetUtils()->CreateInstance(idUndoList, (IDispatch**)&_undoList);
+	ComHelper::CreateInstance(idUndoList, (IDispatch**)&_undoList);
 	//((CUndoList*)_undoList)->Init(this);
 
 	gReferenceCounter.AddRef(tkInterface::idShapefile);

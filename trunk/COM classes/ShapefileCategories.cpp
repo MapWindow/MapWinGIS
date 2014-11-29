@@ -1032,7 +1032,7 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 	if (!scheme)
 	{
 		// let's create a scheme if none is provided
-		GetUtils()->CreateInstance(idColorScheme, (IDispatch**)&scheme);
+		ComHelper::CreateInstance(idColorScheme, (IDispatch**)&scheme);
 		scheme->AddBreak(0.0, RGB(255, 179, 71));
 		scheme->AddBreak(0.1, RGB(253, 253, 150));
 		scheme->AddBreak(0.2, RGB(119, 221, 119));

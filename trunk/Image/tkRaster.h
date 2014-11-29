@@ -51,7 +51,7 @@ public:
 		allowAsGrid = grForGridsOnly;
 		activeBandIndex = 1;
 		_predefinedColors = FallLeaves;
-		GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
+		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
 	~tkRaster()
 	{

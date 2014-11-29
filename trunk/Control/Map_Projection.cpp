@@ -62,19 +62,19 @@ void CMapView::ReleaseProjections()
 // *****************************************************
 void CMapView::InitProjections()
 {
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_tileProjection);
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_tileReverseProjection);
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_wgsProjection);
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_gmercProjection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_tileProjection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_tileReverseProjection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_wgsProjection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_gmercProjection);
 	_transformationMode = tmNotDefined;
 	VARIANT_BOOL vb;
 	_wgsProjection->SetWgs84(&vb);				// EPSG:4326
 	_gmercProjection->SetGoogleMercator(&vb);	// EPSG:3857
 	
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&_projection);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 
 	CComPtr<IGeoProjection> p = NULL;
-	GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&p);
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 }
 
@@ -226,7 +226,7 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		if (!isEmpty)
 		{
 			IGeoProjection* proj = NULL;
-			GetUtils()->CreateInstance(idGeoProjection, (IDispatch**)&proj);
+			ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 			if (proj)
 			{
 				SetGeoProjection(proj);
