@@ -31,139 +31,94 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-// CPointClass
 STDMETHODIMP CPointClass::get_X(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	*pVal = _x;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_X(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	_x = newVal;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_Y(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	*pVal = _y;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_Y(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	_y = newVal;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_Z(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	*pVal = _z;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_Z(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	_z = newVal;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
-	*pVal = _lastErrorCode;
-	_lastErrorCode = tkNO_ERROR;
-
+	*pVal = tkNO_ERROR;
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
 	USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _globalCallback;
-	if( _globalCallback != NULL )
-		_globalCallback->AddRef();
+	*pVal = NULL;
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	// do nothing
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	*pVal = OLE2BSTR(_key);
+	*pVal = SysAllocString(L"");
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	
-	::SysFreeString(_key);
-	_key = OLE2BSTR(newVal);
-
+	// do nothing
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::get_M(double *pVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	*pVal = _m;
-
 	return S_OK;
 }
 
 STDMETHODIMP CPointClass::put_M(double newVal)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
 	_m = newVal;
-
 	return S_OK;
 }
 
@@ -178,7 +133,5 @@ STDMETHODIMP CPointClass::Clone(IPoint** retVal)
 	(*retVal)->put_Y(_y);
 	(*retVal)->put_Z(_z);
 	(*retVal)->put_M(_m);
-	
-	if (_globalCallback != NULL)	(*retVal)->put_GlobalCallback(_globalCallback);
 	return S_OK;
 }

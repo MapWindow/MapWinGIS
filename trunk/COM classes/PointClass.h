@@ -32,19 +32,15 @@ class ATL_NO_VTABLE CPointClass :
 {
 public:
 	CPointClass()
-	{	USES_CONVERSION;
+	{	
 		_x = 0.0;
 		_y = 0.0;
 		_z = 0.0;
 		_m = 0.0;
-		_key = A2BSTR("");
-		_globalCallback = NULL;
-		_lastErrorCode = tkNO_ERROR;
 		//gReferenceCounter.AddRef(tkInterface::idPoint);     // it's additional overhead, use for debugging only
 	}
 	~CPointClass()
-	{	_globalCallback = NULL;
-		::SysFreeString(_key);
+	{	
 		//gReferenceCounter.Release(tkInterface::idPoint);
 	}
 
@@ -88,14 +84,11 @@ public:
 	STDMETHOD(Clone)(IPoint** retVal);
 
 private:
-
 	double _x;
 	double _y;
-	double _z;
+	double _z;      // TODO: it's quite a waste to allocate Z and M for flat types
 	double _m;
-	BSTR _key;
-	long _lastErrorCode;
-	ICallback * _globalCallback;	
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Point), CPointClass)
