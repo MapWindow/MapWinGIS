@@ -93,7 +93,7 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	((CGeoProjection*)_projection)->SetIsFrozen(false);
 	_projection->StopTransform();
 
-	Utility::put_ComReference(pVal, (IDispatch**)&_projection);
+	ComHelper::SetRef(pVal, (IDispatch**)&_projection);
 	
 	USES_CONVERSION;
 	CComBSTR str;

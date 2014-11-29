@@ -807,6 +807,9 @@
     <ClInclude Include="Editor\MeasuringHelper.h">
       <Filter>Editor</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\ComHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1709,6 +1712,9 @@
     </ClCompile>
     <ClCompile Include="Editor\MeasuringHelper.cpp">
       <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\ComHelper.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

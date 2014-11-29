@@ -195,7 +195,7 @@ STDMETHODIMP CLabels::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CLabels::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -313,7 +313,7 @@ STDMETHODIMP CLabels::put_Category(long Index, ILabelCategory* newVal)
 		}
 		else
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&_categories[Index], false);
+			ComHelper::SetRef(newVal, (IDispatch**)&_categories[Index], false);
 		}
 	}
 	return S_OK;

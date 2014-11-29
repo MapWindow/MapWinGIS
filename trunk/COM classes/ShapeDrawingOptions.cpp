@@ -127,7 +127,7 @@ STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 		
 		if (width > 0 && height > 0)
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&_options.picture);
+			ComHelper::SetRef(newVal, (IDispatch**)&_options.picture);
 		}
 	}
 	return S_OK;
@@ -881,7 +881,7 @@ STDMETHODIMP CShapeDrawingOptions::get_LinePattern(ILinePattern** retVal)
 STDMETHODIMP CShapeDrawingOptions::put_LinePattern(ILinePattern* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&(_options.linePattern), false);
+	ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&(_options.linePattern), false);
 	return S_OK;
 }
 

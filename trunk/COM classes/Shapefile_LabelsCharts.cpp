@@ -283,7 +283,7 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&_labels, false);
+		ComHelper::SetRef(newVal, (IDispatch**)&_labels, false);
 		this->put_ReferenceToLabels(false);
 	}
 	return S_OK;

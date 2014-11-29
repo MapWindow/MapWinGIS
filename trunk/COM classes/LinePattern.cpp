@@ -67,7 +67,7 @@ STDMETHODIMP CLinePattern::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CLinePattern::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -145,7 +145,7 @@ STDMETHODIMP CLinePattern::put_Line(int Index, ILineSegment* newVal)
 	{
 		if (newVal)
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&_lines[Index], false);
+			ComHelper::SetRef(newVal, (IDispatch**)&_lines[Index], false);
 		}
 		else
 		{

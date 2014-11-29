@@ -385,7 +385,7 @@ void CMapView::SetUDPointType(long LayerHandle, LPDISPATCH newValue)
 	{
 		IImage * iimg = NULL;
 		newValue->QueryInterface( IID_IImage, (void**)&iimg );
-		Utility::put_ComReference((IDispatch*)iimg, (IDispatch**)&options->picture, true);
+		ComHelper::SetRef((IDispatch*)iimg, (IDispatch**)&options->picture, true);
 		if (iimg)
 		{
 			iimg->Release();

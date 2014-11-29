@@ -88,7 +88,7 @@ STDMETHODIMP CShapefileCategory::put_DrawingOptions(IShapeDrawingOptions* newVal
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&_drawingOptions, false);
+		ComHelper::SetRef(newVal, (IDispatch**)&_drawingOptions, false);
 	}
 	return S_OK;
 }

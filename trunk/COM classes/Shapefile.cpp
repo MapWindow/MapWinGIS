@@ -201,7 +201,7 @@ IShapeData* CShapefile::get_ShapeData(int ShapeIndex)
 }
 void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
 {
-	Utility::put_ComReference(info, 
+	ComHelper::SetRef(info, 
 		(IDispatch**)&(validationType == svtInput ? _inputValidation : _outputValidation), true);
 }
 
@@ -278,7 +278,7 @@ STDMETHODIMP CShapefile::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CShapefile::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	if( _table != NULL )
 		_table->put_GlobalCallback(newVal);
 
@@ -291,7 +291,7 @@ STDMETHODIMP CShapefile::put_GlobalCallback(ICallback *newVal)
 STDMETHODIMP CShapefile::put_StopExecution(IStopExecution* stopper)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
+	ComHelper::SetRef((IDispatch*)stopper, (IDispatch**)&_stopExecution, true);
 	return S_OK;
 }
 
@@ -2046,7 +2046,7 @@ STDMETHODIMP CShapefile::put_SelectionDrawingOptions(IShapeDrawingOptions* newVa
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&_selectDrawOpt, false);
+		ComHelper::SetRef(newVal, (IDispatch**)&_selectDrawOpt, false);
 	}
 	return S_OK;
 }
@@ -2073,7 +2073,7 @@ STDMETHODIMP CShapefile::put_DefaultDrawingOptions(IShapeDrawingOptions* newVal)
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&_defaultDrawOpt);
+		ComHelper::SetRef(newVal, (IDispatch**)&_defaultDrawOpt);
 	}
 	return S_OK;
 }
@@ -2103,7 +2103,7 @@ STDMETHODIMP CShapefile::get_Categories(IShapefileCategories** pVal)
 }
 STDMETHODIMP CShapefile::put_Categories(IShapefileCategories* newVal)
 {
-	if (Utility::put_ComReference((IDispatch*)newVal, (IDispatch**) &_categories, false))	
+	if (ComHelper::SetRef((IDispatch*)newVal, (IDispatch**) &_categories, false))	
 	{
 		((CShapefileCategories*)_categories)->put_ParentShapefile(this);
 	}
@@ -2566,7 +2566,7 @@ STDMETHODIMP CShapefile::get_GeoProjection(IGeoProjection** retVal)
 STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	Utility::put_ComReference((IDispatch*)pVal, (IDispatch**)&_geoProjection, false);
+	ComHelper::SetRef((IDispatch*)pVal, (IDispatch**)&_geoProjection, false);
 	if (_prjfileName.GetLength() != 0)
 	{
 		VARIANT_BOOL vbretval;

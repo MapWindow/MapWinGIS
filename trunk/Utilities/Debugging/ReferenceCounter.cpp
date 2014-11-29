@@ -24,7 +24,7 @@ CString ReferenceCounter::GetReport(bool unreleasedOnly)
 		{
 			if (referenceCounts[i] != 0)	
 			{
-				temp.Format("Class %s: %d\n", Utility::GetInterfaceName((tkInterface)i), referenceCounts[i]);
+				temp.Format("Class %s: %d\n", ComHelper::GetInterfaceName((tkInterface)i), referenceCounts[i]);
 				s += temp;
 			}
 		}
@@ -32,7 +32,7 @@ CString ReferenceCounter::GetReport(bool unreleasedOnly)
 		{
 			if (totalCounts[i] != 0)	
 			{
-				temp.Format("Class %s: %d/%d\n", Utility::GetInterfaceName((tkInterface)i), referenceCounts[i], totalCounts[i]);
+				temp.Format("Class %s: %d/%d\n", ComHelper::GetInterfaceName((tkInterface)i), referenceCounts[i], totalCounts[i]);
 				s += temp;
 			}
 		}

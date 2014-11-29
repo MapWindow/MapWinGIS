@@ -12,6 +12,7 @@
 #include "structures.h"
 #include "UtilityFunctions.h"
 #include "GdalHelper.h"
+#include "ComHelper.h"
 #include "Utilities\Debugging\ReferenceCounter.h"
 #include "GlobalSettingsInfo.h"
 #include "Logger.h"

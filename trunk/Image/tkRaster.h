@@ -157,7 +157,7 @@ private:
 public:
 	bool SetActiveBandIndex(int bandIndex);
 	GDALRasterBand* get_RasterBand(int BandIndex);
-	void ApplyCustomColorScheme(IGridColorScheme * scheme) { Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&_customColorScheme, true);	}
+	void ApplyCustomColorScheme(IGridColorScheme * scheme) { ComHelper::SetRef((IDispatch*)scheme, (IDispatch**)&_customColorScheme, true);	}
 	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme);
 	IGridColorScheme* get_CustomColorScheme() { return _customColorScheme; }
 	GDALDataset* get_Dataset()	{return _rasterDataset;}

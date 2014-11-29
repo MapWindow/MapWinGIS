@@ -699,7 +699,7 @@ STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CUtils::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -4349,143 +4349,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 STDMETHODIMP CUtils::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	void* val = NULL;
-	switch (interfaceId)
-	{
-		case tkInterface::idChart:
-			CoCreateInstance( CLSID_Chart, NULL, CLSCTX_INPROC_SERVER, IID_IChart, (void**)&val );
-			break;
-		case tkInterface::idChartField:
-			CoCreateInstance( CLSID_ChartField, NULL, CLSCTX_INPROC_SERVER, IID_IChartField, (void**)&val );
-			break;
-		case tkInterface::idCharts:
-			CoCreateInstance( CLSID_Charts, NULL, CLSCTX_INPROC_SERVER, IID_ICharts, (void**)&val );
-			break;
-		case tkInterface::idColorScheme:
-			CoCreateInstance( CLSID_ColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IColorScheme, (void**)&val );
-			break;
-		case tkInterface::idShapeEditor:
-			CoCreateInstance( CLSID_ShapeEditor, NULL, CLSCTX_INPROC_SERVER, IID_IShapeEditor, (void**)&val );
-			break;
-		case tkInterface::idESRIGridManager:
-			CoCreateInstance( CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val );
-			break;
-		case tkInterface::idExtents:
-			CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&val );
-			break;
-		case tkInterface::idField:
-			CoCreateInstance( CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&val );
-			break;
-		case tkInterface::idFieldStatOperations:
-			CoCreateInstance( CLSID_FieldStatOperations, NULL, CLSCTX_INPROC_SERVER, IID_IFieldStatOperations, (void**)&val );
-			break;
-		case tkInterface::idFileManager:
-			CoCreateInstance( CLSID_FileManager, NULL, CLSCTX_INPROC_SERVER, IID_IFileManager, (void**)&val );
-			break;
-		case tkInterface::idGeoProjection:
-			CoCreateInstance( CLSID_GeoProjection, NULL, CLSCTX_INPROC_SERVER, IID_IGeoProjection, (void**)&val );
-			break;
-		case tkInterface::idGlobalSettings:
-			CoCreateInstance( CLSID_GlobalSettings, NULL, CLSCTX_INPROC_SERVER, IID_IGlobalSettings, (void**)&val );
-			break;
-		case tkInterface::idGrid:
-			CoCreateInstance( CLSID_Grid, NULL, CLSCTX_INPROC_SERVER, IID_IGrid, (void**)&val );
-			break;
-		case tkInterface::idGridColorBreak:
-			CoCreateInstance( CLSID_GridColorBreak, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorBreak, (void**)&val );
-			break;
-		case tkInterface::idGridColorScheme:
-			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&val );
-			break;
-		case tkInterface::idGridHeader:
-			CoCreateInstance( CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, (void**)&val );
-			break;
-		case tkInterface::idIdentifier:
-			CoCreateInstance(CLSID_Identifier, NULL, CLSCTX_INPROC_SERVER, IID_IIdentifier, (void**)&val);
-			break;
-		case tkInterface::idImage:
-			CoCreateInstance( CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&val );
-			break;
-		case tkInterface::idLabelCategory:
-			CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&val );
-			break;
-		case tkInterface::idLabel:
-			CoCreateInstance( CLSID_Label, NULL, CLSCTX_INPROC_SERVER, IID_ILabel, (void**)&val );
-			break;
-		case tkInterface::idLabels:
-			CoCreateInstance( CLSID_Labels, NULL, CLSCTX_INPROC_SERVER, IID_ILabels, (void**)&val );
-			break;
-		case tkInterface::idLinePattern:
-			CoCreateInstance( CLSID_LinePattern, NULL, CLSCTX_INPROC_SERVER, IID_ILinePattern, (void**)&val );
-			break;
-		case tkInterface::idLineSegment:
-			CoCreateInstance( CLSID_LineSegment, NULL, CLSCTX_INPROC_SERVER, IID_ILineSegment, (void**)&val );
-			break;
-		case tkInterface::idMeasuring:
-			CoCreateInstance( CLSID_Measuring, NULL, CLSCTX_INPROC_SERVER, IID_IMeasuring, (void**)&val );
-			break;
-		case tkInterface::idOgrDatasource:
-			CoCreateInstance(CLSID_OgrDatasource, NULL, CLSCTX_INPROC_SERVER, IID_IOgrDatasource, (void**)&val);
-			break;
-		case tkInterface::idOgrLayer:
-			CoCreateInstance(CLSID_OgrLayer, NULL, CLSCTX_INPROC_SERVER, IID_IOgrLayer, (void**)&val);
-			break;
-		case tkInterface::idPoint:
-			CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&val );
-			break;
-		case tkInterface::idShape:
-			CoCreateInstance( CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)&val );
-			break;
-		case tkInterface::idShapeDrawingOptions:
-			CoCreateInstance( CLSID_ShapeDrawingOptions, NULL, CLSCTX_INPROC_SERVER, IID_IShapeDrawingOptions, (void**)&val );
-			break;
-		case tkInterface::idShapefile:
-			CoCreateInstance( CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&val );
-			break;
-		case tkInterface::idShapefileCategories:
-			CoCreateInstance( CLSID_ShapefileCategories, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileCategories, (void**)&val );
-			break;
-		case tkInterface::idShapefileCategory:
-			CoCreateInstance( CLSID_ShapefileCategory, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&val );
-			break;
-		case tkInterface::idShapefileColorBreak:
-			CoCreateInstance( CLSID_ShapefileColorBreak, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileColorBreak, (void**)&val );
-			break;
-		case tkInterface::idShapefileColorScheme:
-			CoCreateInstance( CLSID_ShapefileColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileColorScheme, (void**)&val );
-			break;
-		case tkInterface::idShapeNetwork:
-			CoCreateInstance( CLSID_ShapeNetwork, NULL, CLSCTX_INPROC_SERVER, IID_IShapeNetwork, (void**)&val );
-			break;
-		case tkInterface::idShapeValidationInfo:
-			CoCreateInstance( CLSID_ShapeValidationInfo, NULL, CLSCTX_INPROC_SERVER, IID_IShapeValidationInfo, (void**)&val );
-			break;
-		case tkInterface::idTable:
-			CoCreateInstance( CLSID_Table, NULL, CLSCTX_INPROC_SERVER, IID_ITable, (void**)&val );
-			break;
-		case tkInterface::idTileProviders:
-			CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&val );
-			break;
-		case tkInterface::idTiles:
-			CoCreateInstance( CLSID_Tiles, NULL, CLSCTX_INPROC_SERVER, IID_ITiles, (void**)&val );
-			break;
-		case tkInterface::idTin:
-			CoCreateInstance( CLSID_Tin, NULL, CLSCTX_INPROC_SERVER, IID_ITin, (void**)&val );
-			break;
-		case tkInterface::idUndoList:
-			CoCreateInstance(CLSID_UndoList, NULL, CLSCTX_INPROC_SERVER, IID_IUndoList, (void**)&val);
-			break;
-		case tkInterface::idUtils:
-			CoCreateInstance( CLSID_Utils, NULL, CLSCTX_INPROC_SERVER, IID_IUtils, (void**)&val );
-			break;
-		case tkInterface::idVector:
-			CoCreateInstance( CLSID_Vector, NULL, CLSCTX_INPROC_SERVER, IID_IVector, (void**)&val );
-			break;
-		
-	}
-
-	*retVal = val ? (IDispatch*)val : NULL;
-	return S_OK;
+	return ComHelper::CreateInstance(interfaceId, retVal);
 }
 
 // ********************************************************

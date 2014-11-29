@@ -400,7 +400,7 @@ STDMETHODIMP CGridHeader::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGridHeader::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -464,7 +464,7 @@ STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 STDMETHODIMP CGridHeader::put_GeoProjection(IGeoProjection* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&_projection, false);
+	ComHelper::SetRef((IDispatch*)newVal, (IDispatch**)&_projection, false);
 	return S_OK;
 }
 

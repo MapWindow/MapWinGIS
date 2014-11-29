@@ -335,6 +335,7 @@
     <ClInclude Include="Control\ToolTipEx.h" />
     <ClInclude Include="Tiles\LoadingTask.h" />
     <ClInclude Include="Utilities\ColoringGraph.h" />
+    <ClInclude Include="Utilities\ComHelper.h" />
     <ClInclude Include="Utilities\cppVector.h" />
     <ClInclude Include="Utilities\FieldClassification.h" />
     <ClInclude Include="Utilities\GdalHelper.h" />
@@ -592,6 +593,7 @@
     <ClCompile Include="Structures\Layer.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
+    <ClCompile Include="Utilities\ComHelper.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />
     <ClCompile Include="Utilities\FieldClassification.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />

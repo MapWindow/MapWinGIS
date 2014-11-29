@@ -689,7 +689,7 @@ STDMETHODIMP CCharts::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CCharts::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 

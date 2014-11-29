@@ -928,7 +928,7 @@ STDMETHODIMP CGrid::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGrid::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -2554,7 +2554,7 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 	*retVal = NULL;
 	
 	if (!_globalCallback && cBack)
-		Utility::put_ComReference(cBack, (IDispatch**)&_globalCallback, false);
+		ComHelper::SetRef(cBack, (IDispatch**)&_globalCallback, false);
 
 	tkGridProxyMode mode = proxyMode;
 	if (mode == gpmAuto)

@@ -94,9 +94,6 @@ namespace Utility
 	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...);
 	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...);
 
-	// Sets new instance of COM object to the given pointer
-	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);
-	CString GetInterfaceName(tkInterface id);
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
 
 	// time

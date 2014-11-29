@@ -908,7 +908,7 @@ STDMETHODIMP CImageClass::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
+	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 
 	if (_bitmapImage)
 	{
@@ -2302,7 +2302,7 @@ STDMETHODIMP CImageClass::put_Labels(ILabels* newVal)
 		return S_OK;
 	}
 	
-	Utility::put_ComReference(newVal, (IDispatch**)&_labels, false);
+	ComHelper::SetRef(newVal, (IDispatch**)&_labels, false);
 	return S_OK;
 };
 
