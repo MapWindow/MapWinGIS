@@ -17,7 +17,7 @@
 //
 //Contributor(s): (Open source contributors should list themselves and their modifications here). 
 //3-28-2005 dpa - Updated for custom line stipples and label collision.
-//9-12-2005 Lain Chen - Solved the memory cruption problem.
+//9-12-2005 Lain Chen - Solved the memory corruption problem.
 //********************************************************************************************************
 
 #include "stdafx.h"
@@ -138,7 +138,7 @@ bool tkBitmap::WriteBitmap(const char * bmp_file, const colour * ImageData)
 		if( pad > 0 )
 			fwrite(padding,sizeof(BYTE),pad,fout);				
 		
-		Utility::DisplayProgress(globalCallback, ecnt, (long)total, "Saving Image", key, percent);
+		Utility::DisplayProgress(globalCallback, ecnt, total, "Saving Image", key, percent);
 		ecnt++;
 	} 
 
@@ -280,12 +280,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				BitmapBitsNoPad[cnt++] = ConvertBits[loc++];
 				BitmapBitsNoPad[cnt++] = ConvertBits[loc++];
 
-				newpercent = (long)(((ecnt++)/total)*100);
-				if( newpercent > percent )
-				{	percent = newpercent;
-					if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Opening Image"));
-				}
+				Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				loc++;
@@ -319,12 +314,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				BitmapBitsNoPad[cnt++] = bmiColors[index].rgbGreen;
 				BitmapBitsNoPad[cnt++] = bmiColors[index].rgbRed;
 
-				newpercent = (long)(((ecnt++)/total)*100);
-				if( newpercent > percent )
-				{	percent = newpercent;
-					if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Opening Image"));
-				}
+				Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );			
@@ -363,12 +353,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				}
 				
 				ecnt += 2;
-				newpercent = (long)((ecnt/total)*100);
-				if( newpercent > percent )
-				{	percent = newpercent;
-					if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Opening Image"));
-				}
+				Utility::DisplayProgress(globalCallback, ecnt, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );			
@@ -408,12 +393,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				}
 				
 				ecnt += 8;
-				newpercent = (long)((ecnt/total)*100);
-				if( newpercent > percent )
-				{	percent = newpercent;
-					if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Opening Image"));
-				}
+				Utility::DisplayProgress(globalCallback, ecnt, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );	
@@ -455,7 +435,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 	long curDataCell;
 	long loc = 0;
 
-	//loop throught the bitmap data and store the information into basic image storage
+	//loop through the bitmap data and store the information into basic image storage
 	for (curByte = 0, curDataCell = 0; curByte < arraySize; curByte++)
 	{
 		ImageData[curDataCell].blue = BitmapBitsNoPad[loc++];
@@ -463,16 +443,10 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 		ImageData[curDataCell].red = BitmapBitsNoPad[loc++];
 		curDataCell++;
 
-		newpercent = (long)(((ecnt++)/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Opening Image"));
-		}
+		Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 	}
 	
-	if( globalCallback != NULL )
-			globalCallback->Progress(OLE2BSTR(key),0,A2BSTR(""));
+	Utility::DisplayProgressCompleted(globalCallback, key);
 
 	/*********************************
 	End Conversion from Bitmap to the standard format (colour class)

@@ -1075,19 +1075,53 @@ namespace Utility
 	//		DisplayProgress()
 	// ********************************************************************
 	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent)
-{
-		if( callback != NULL ) 
+	{
+		DisplayProgress(callback, index, (double)count, message, key, lastPercent);
+	}
+
+	// ********************************************************************
+	//		DisplayProgress()
+	// ********************************************************************
+	void DisplayProgress(ICallback* callback, int index, double count, const char* message, BSTR& key, long& lastPercent)
+	{
+		if (callback != NULL)
 		{
-			long newpercent = (long)(((double)(index + 1)/count)*100);
-			if( newpercent > lastPercent )
-			{	
+			long newpercent = (long)(((double)(index + 1) / count) * 100);
+			if (newpercent > lastPercent)
+			{
 				lastPercent = newpercent;
-				USES_CONVERSION;
-				CComBSTR bstrMsg = A2W(message);
-				callback->Progress(key, newpercent, bstrMsg );   //OLE2BSTR(key)  A2BSTR(message)
+				CComBSTR bstrMsg(message);
+				callback->Progress(key, newpercent, bstrMsg);   //OLE2BSTR(key)  A2BSTR(message)
 			}
 		}
 	}
+
+	// ********************************************************************
+	//		DisplayProgress()
+	// ********************************************************************
+	void DisplayProgress(ICallback* callback, int percent, const char* message, BSTR& key)
+	{
+		if (callback != NULL)
+		{
+			CComBSTR bstrMsg(message);
+			callback->Progress(key, percent, bstrMsg);
+		}
+	}
+
+	// ********************************************************************
+	//		DisplayProgress()
+	// ********************************************************************
+	void DisplayProgress(ICallback* callback, int percent, const char* message)
+	{
+		if (callback)
+		{
+			if (!message) message = "";
+			CComBSTR bstrMsg(message);
+			callback->Progress(m_globalSettings.emptyBstr, percent, bstrMsg);
+		}
+	}
+
+	
 
 	// ********************************************************************
 	//		DisplayProgressCompleted()

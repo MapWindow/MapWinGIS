@@ -540,9 +540,9 @@ void tkGif::CompressGif()
 
 	int colorcode;
 	int curpos = 0;
-	int percent, oldpercent = 0;
+	long percent, oldpercent = 0;
 
-	BSTR msg = A2BSTR("Compressing Image");
+	char* msg = "Compressing Image";
 
 	PutCode(clear_code);
 
@@ -561,12 +561,7 @@ void tkGif::CompressGif()
 		}
 
 		curpos++;
-		if((percent = (curpos*100)/buffSize) > oldpercent)
-		{
-			if( cBack != NULL )
-				cBack->Progress(key,percent,msg);
-			oldpercent = percent;
-		}
+		Utility::DisplayProgress(cBack, curpos, buffSize, msg, key, percent);
 	}
 
 	PutCode(eof_code);
@@ -575,8 +570,7 @@ void tkGif::CompressGif()
 	fwrite(block,1,blocksize,fp);
 	fputc(0,fp);
 
-	if( cBack )	cBack->Progress(key,100,msg);
-	
+	Utility::DisplayProgressCompleted(cBack, key);
 }
 
 inline int tkGif::AddEntry(int prefix, colort c)

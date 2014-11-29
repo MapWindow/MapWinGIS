@@ -220,7 +220,7 @@ int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage,
 		long percent = long(dfComplete * 100.0);
 		ICallback* cback = (ICallback*)pData;
 		if (cback) {
-			cback->Progress(NULL,percent, A2BSTR("Building overviews"));
+			Utility::DisplayProgress(cback, percent, pszMessage);
 		}
 	}
 	return TRUE;

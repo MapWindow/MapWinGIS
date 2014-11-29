@@ -258,8 +258,7 @@ add_empty_label:
 		((CLabels*)_labels)->SaveSourceField(FieldIndex);
 	}
 
-	if( _globalCallback != NULL )
-		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 
@@ -389,13 +388,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 		long percent = 0;
 		for(int i = 0; i < _numShapes; i++)
 		{
-			long newpercent = (long)(((double)i/_numShapes)*100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				if( _globalCallback != NULL ) 
-					_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Calculating charts positions..."));
-			}
+			Utility::DisplayProgress(_globalCallback, i, _numShapes, "Calculating charts positions...", _key, percent);
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
@@ -469,8 +462,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 			shp->Release(); shp = NULL;
 		}
 		
-		if( _globalCallback != NULL )
-			_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
+		Utility::DisplayProgressCompleted(_globalCallback, _key);
 	}
 	return;
 }

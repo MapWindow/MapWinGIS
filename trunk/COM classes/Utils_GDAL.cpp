@@ -31,11 +31,7 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 	if( params != NULL && params->cBack != NULL )
 	{
 		long percent = long(dfComplete * 100.0);
-
-		if (params->sMsg != NULL)
-			params->cBack->Progress(NULL,percent,A2BSTR(params->sMsg));
-		else
-			params->cBack->Progress(NULL,percent,NULL);
+		Utility::DisplayProgress(params->cBack, percent, params->sMsg);
 	}
 	return TRUE;
 }
@@ -43,7 +39,7 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 /* -------------------------------------------------------------------- */
 /*                      CheckExtensionConsistency()                     */
 /*                                                                      */
-/*      Check that the target file extension is consistant with the     */
+/*      Check that the target file extension is consistent with the     */
 /*      requested driver. Actually, we only warn in cases where the     */
 /*      inconsistency is blatant (use of an extension declared by one   */
 /*      or several drivers, and not by the selected one)                */

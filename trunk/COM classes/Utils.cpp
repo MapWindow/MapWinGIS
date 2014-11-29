@@ -222,6 +222,8 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	if( Grid == NULL )
 	{	
 		*retval = NULL;
@@ -269,15 +271,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 			if( val == oldValue )
 				Grid->put_Value(i,j,NewValue);
 
-			newpercent = (long)((( j*ncols + i )/total)*100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key), percent, A2BSTR("GridReplace"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("GridReplace"));
-			}
+			Utility::DisplayProgress(callback, j*ncols + i, total, "GridReplace", key, percent);
 		}
 	}
 	
@@ -288,6 +282,8 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
+	ICallback* callback = cBack ? cBack : globalCallback;
 
 	if( Grid == NULL )
 	{
@@ -321,6 +317,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 	{
 		*retval = FALSE;
 		lastErrorCode = tkZERO_ROWS_OR_COLS;
+
 		if(cBack != NULL)
 		{
 			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
@@ -333,59 +330,24 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 	}//if
 
 	GridInterpolate gi(Grid,nodatavalue,nrows,ncols);
-	
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key), 0, A2BSTR("GridInterpolateNoData"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key), 0, A2BSTR("GridInterpolateNoData"));
-	}//else if
+
+	Utility::DisplayProgress(callback, 0, "GridInterpolateNoData", key );
 
 	gi.Interpolate(0,0);
 	
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key), 25, A2BSTR("GridInterpolateNoData"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key), 25, A2BSTR("GridInterpolateNoData"));
-	}//else if
+	Utility::DisplayProgress(callback, 25, "GridInterpolateNoData", key);
 	
 	gi.Interpolate(0,ncols-1);
 	
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key), 50, A2BSTR("GridInterpolateNoData"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key), 50, A2BSTR("GridInterpolateNoData"));
-	}//else if
+	Utility::DisplayProgress(callback, 50, "GridInterpolateNoData", key);
 	
 	gi.Interpolate(nrows-1,0);
 	
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key), 75, A2BSTR("GridInterpolateNoData"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key), 75, A2BSTR("GridInterpolateNoData"));
-	}//else if
+	Utility::DisplayProgress(callback, 75, "GridInterpolateNoData", key);
 	
 	gi.Interpolate(nrows-1,ncols-1);
 	
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(key), 100, A2BSTR("GridInterpolateNoData"));
-	}
-	else if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key), 100, A2BSTR("GridInterpolateNoData"));
-	}//else if
+	Utility::DisplayProgress(callback, 100, "GridInterpolateNoData", key);
 
 	*retval = VARIANT_TRUE;
 
@@ -405,6 +367,8 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return S_FALSE;
 	}
+
+	ICallback* callback = cBack ? cBack : globalCallback;
 
 	ShpfileType shptype;
 	Shapes->get_ShapefileType(&shptype);
@@ -505,14 +469,8 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 			}			
 				
 			cnt++;
-			int newpercent = (int)((cnt/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key), percent, A2BSTR("RemoveColinearPoints"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("RemoveColinearPoints"));
-			}			
+
+			Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", key, percent);
 				
 			std::deque< POINT > PointsToKeep;
 			for( currentShape = 0; currentShape < numShapes; currentShape++ )
@@ -556,15 +514,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				PointsToKeep.clear();
 
 				cnt++;
-				int newpercent = (int)((cnt/total)*100);
-				if( newpercent > percent )
-				{	
-					percent = newpercent;
-					if( cBack != NULL )
-						cBack->Progress(OLE2BSTR(key), percent, A2BSTR("RemoveColinearPoints"));
-					else if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("RemoveColinearPoints"));
-				}				
+				Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", key, percent);
 			}
 			
 			shape->Release();
@@ -808,6 +758,8 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	USES_CONVERSION;
 
 	BSTR final_projection = A2BSTR("");
+
+	ICallback* callback = cBack ? cBack : globalCallback;
 
 	//Check the Array Type
 	if( Grids.vt != (VT_ARRAY|VT_DISPATCH) )
@@ -1112,14 +1064,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				if( val != nodata_value && !(val < -2147483640 && nodata_value < -2147483640))
 					(*retval)->put_Value( i + xoffset, j + yoffset, vval );				
 
-				int newpercent = (int)((++cnt/total)*100);
-				if( newpercent > percent )
-				{	percent = newpercent;
-					if( cBack != NULL )
-						cBack->Progress(OLE2BSTR(key),percent,A2BSTR("GridMerge"));
-					else if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("GridMerge"));
-				}
+				Utility::DisplayProgress(callback, ++cnt, total, "GridMerge", key, percent);
 			}
 		}
 	}	
@@ -1152,6 +1097,8 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
+
+	ICallback* callback = cBack ? cBack : globalCallback;
 
 	if( Grid == NULL )
 	{	
@@ -1201,15 +1148,8 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 			Grid->get_Value(i,j,&val);
 			(*retval)->put_Value(i,j,val);	
 		}
-		newpercent = (long)((j / nrows)*100);
-		if( newpercent > percent )
-		{	
-			percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key), percent, A2BSTR("Grid2Grid"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("Grid2Grid"));
-		}
+	
+		Utility::DisplayProgress(callback, j, nrows, "Grid2Grid", key, percent);
 	}	
 
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
@@ -1330,6 +1270,8 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		return S_OK;
 	}
 
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	long numTriangles = 0;
 	Tin->get_NumTriangles(&numTriangles);
 	long numVertices = 0;
@@ -1422,14 +1364,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,pos,val,&vbretval);
 			
-			newpercent = (long)((i/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key), percent, A2BSTR("TinToShapefile"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("TinToShapefile"));
-			}
+			Utility::DisplayProgress(callback, i, total, "TinToShapefile", key, percent);
 
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 
@@ -1481,18 +1416,9 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,i,val,&vbretval);
 			
-			newpercent = (long)((i/total)*100);
-			if( newpercent > percent )
-			{	
-				percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key), percent, A2BSTR("TinToShapefile"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR("TinToShapefile"));
-			}
-	
-			VariantClear(&val); //added by Rob Cairns 4-Jan-06
+			Utility::DisplayProgress(callback, i, total, "TinToShapefile", key, percent);
 
+			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 		}
 	}
 
@@ -1540,7 +1466,9 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallback *cBack, IShapefile **retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
+		ICallback* callback = cBack ? cBack : globalCallback;
+
 	if( Grid == NULL )
 	{	*retval = NULL;
 		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
@@ -1769,14 +1697,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}
 		}			
 		
-		newpercent = (long)(( (double)( rows - y - 1 )/(total) )*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Expanding Grid" ));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Expanding Grid" ));
-		}			
+		Utility::DisplayProgress(callback, rows - y - 1, total, "Polygon Creation: Expanding Grid", key, percent);
 	}
 
 	//Mark edges of the expanded grid that have a polygon id as BORDER
@@ -1884,14 +1805,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}			
 		}
 
-		newpercent = (long)(( j/total )*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Marking Borders" ));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Marking Borders" ));
-		}	
+		Utility::DisplayProgress(callback, j, total, "Polygon Creation: Marking Borders", key, percent);
 	}
 
 	//Create the shapefile
@@ -2098,14 +2012,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}					
 		}
 
-		newpercent = (long)((double)py/(double)rows*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Creating Polygons"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Polygon Creation: Creating Polygons"));
-		}	
+		Utility::DisplayProgress(callback, py, rows, "Polygon Creation: Creating Polygons", key, percent);
 	}
 
 	expand_grid->Close(&vbretval);
@@ -3518,8 +3425,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		return S_OK;
 	}
 	
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key), 0, A2BSTR("Loading input images..."));
+	Utility::DisplayProgress(globalCallback, 0, "Loading input images...", key);
 
 	VARIANT_BOOL vbretval;
 	std::vector<IImage*> images;
@@ -3578,8 +3484,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		images[i]->get_Filename(&name);
 		s.Format("Processing image %d: %s", i + 1, OLE2A(name));
 		int percent = (int)((double)i/(double)(images.size() - 1)*100.0);
-		if( globalCallback != NULL )
-			globalCallback->Progress(OLE2BSTR(key), percent, A2BSTR(s));
+		Utility::DisplayProgress(globalCallback, percent, s, key);
 		
 		CImageClass* img  = (CImageClass*)images[i];
 		img->SaveNotNullPixels(true);
@@ -3594,16 +3499,14 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	}
 	
 	// saving the results
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key), 0, A2BSTR("Saving result..."));
+	Utility::DisplayProgress(globalCallback, 0, "Saving result...", key);
 	
 	unsigned char* bits = reinterpret_cast<unsigned char*>(pixels);
 	Utility::SaveBitmap(width, height, bits, OutputName);
 
 Cleaning:
 	// cleaning
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key), 0, A2BSTR(""));
+	Utility::DisplayProgressCompleted(globalCallback, key);
 
 	for (unsigned int i = 0; i < images.size(); i++)
 	{
@@ -4251,15 +4154,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 
 		for (long n = 0; n < numShapes; n++) 
 		{
-			if( globalCallback != NULL )
-			{
-				long newpercent = (long)(((double)(n + 1)/numShapes)*100);
-				if( newpercent > percent )
-				{	
-					percent = newpercent;
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
-				}
-			}
+			Utility::DisplayProgress(globalCallback, n, numShapes, "Calculating...", key, percent);
 			
 			sf->get_ShapeSelected(n, &vb);
 			if (selectedOnly && !vb)
@@ -4743,7 +4638,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 					if( newpercent > percent )
 					{	
 						percent = newpercent;
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Calculating..."));
+						Utility::DisplayProgress(globalCallback, percent, "Calculating...", key);
 					}
 				}
 				
@@ -4810,10 +4705,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 		delete dataset;
 	}
 
-	if( globalCallback != NULL )
-	{
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
-	}
+	Utility::DisplayProgressCompleted(globalCallback, key);
 	return S_OK;
 }
 
@@ -4924,7 +4816,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 								percent = newpercent;
 								CString s;
 								s.Format("Calculating band %d", i);
-								globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR(s));
+								Utility::DisplayProgress(globalCallback, percent, s, key);
 							}
 						}
 						
@@ -4997,10 +4889,12 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 	if (dsDest)
 		delete dsDest;
 
+	
+
 	if( globalCallback != NULL )
 	{
 		ClearGdalErrorHandler();
-		globalCallback->Progress(OLE2BSTR(key),100,A2BSTR(""));
+		Utility::DisplayProgressCompleted(globalCallback);
 	}
 	return S_OK;
 }

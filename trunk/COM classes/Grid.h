@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CGrid :
 public:
 	CGrid();
 	~CGrid();
-	void CallBack(long percent,BSTR message);
+	void CallBack(long percent,const char * message);
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 

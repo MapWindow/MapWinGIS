@@ -57,6 +57,8 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 
 	USES_CONVERSION;
 
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	Close(retval);
 	CString tinFile = OLE2CA(TinFile);
 
@@ -94,7 +96,7 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 		long b1, b2, b3;
 		
 		double total = numTriangles + numVertices;
-		int percent = 0;
+		long percent = 0;
 		int newpercent = 0;
 
 		//Triangles
@@ -112,14 +114,7 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 
 			triTable.addRow( r );
 
-			newpercent = (int)((t/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Reading Tin"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading Tin"));
-			}
+			Utility::DisplayProgress(callback, t, total, "Reading Tin", key, percent);
 		}
 		double x, y, z;
 		vertex ver;
@@ -131,14 +126,7 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 			ver = vertex( x, y, z );
 			vtxTable.add( ver );
 			
-			newpercent = (int)(((t+v)/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Reading Tin"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Reading Tin"));
-			}
+			Utility::DisplayProgress(callback, t + v, total, "Reading Tin", key, percent);
 		}
 
 		if( numTriangles > 0 )
@@ -223,6 +211,8 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	FILE * out = fopen( OLE2CA(TinFilename), "wb");
 	if( !out )
 	{	*retval = FALSE;
@@ -250,7 +240,7 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 		fwrite(&numVertices, sizeof(long), 1, out );
 		
 		double total = numVertices + numTriangles;
-		int percent = 0;
+		long percent = 0;
 		int newpercent = 0;
 
 		long i = 0;
@@ -273,14 +263,7 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&border_two, sizeof(long), 1, out );
 			fwrite(&border_three, sizeof(long), 1, out );	
 			
-			newpercent = (int)((i/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Saving Tin"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Saving Tin"));				
-			}
+			Utility::DisplayProgress(callback, i, total, "Saving Tin", key, percent);
 		}
 
 		long j = 0;
@@ -305,14 +288,7 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&v1_z, sizeof(double), 1, out );
 			*/
 
-			newpercent = (int)(((i+j)/total)*100);
-			if( newpercent > percent )
-			{	percent = newpercent;
-				if( cBack != NULL )
-					cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Saving Tin"));
-				else if( globalCallback != NULL )
-					globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Saving Tin"));
-			}
+			Utility::DisplayProgress(callback, i + j, total, "Saving Tin", key, percent);
 		}
 
 		if( numTriangles > 0 )
@@ -659,9 +635,9 @@ inline void CTin::createTin( double deviation, long meshDivisions, long maxTrian
 			newpercent1 = 100 - (int)(((triNode.value - deviation)/total)*100);
 			if( maxTriangles == MaxTriangles )
 			{	if( newpercent1 > percent )
-				{	percent = newpercent1;
-					if( globalCallback != NULL )
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Splitting Triangles"));											
+				{	
+					percent = newpercent1;
+					Utility::DisplayProgress(globalCallback, percent, "Splitting Triangles", key);
 				}				
 			}
 			else
@@ -670,9 +646,9 @@ inline void CTin::createTin( double deviation, long meshDivisions, long maxTrian
 					newpercent1 = newpercent2;
 
 				if( newpercent1 > percent )
-				{	percent = newpercent1;
-					if( globalCallback != NULL )					
-						globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Splitting Triangles"));
+				{	
+					percent = newpercent1;
+					Utility::DisplayProgress(globalCallback, percent, "Splitting Triangles", key);
 				}
 			}	
 			triNode = devHeap.top();

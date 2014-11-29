@@ -1246,6 +1246,8 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 	long percent = 0, newpercent = 0;
 
+	ICallback* callback = _globalCallback ? _globalCallback : cBack;
+
 	for( int k = 0; k < size; k++)
 	{
 		this->get_Shape(k,&sh);
@@ -1352,29 +1354,10 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 		shape->Release();
 
-		newpercent = (long)(((k+1.0)/size) * 100);
-		if( newpercent > percent )
-		{
-			percent = newpercent;
-			if( cBack )
-			{
-				cBack->Progress(OLE2BSTR(_key),percent,A2BSTR("Writing .shp file"));
-			}
-			else if( _globalCallback )
-			{
-				_globalCallback->Progress(OLE2BSTR(_key),percent,A2BSTR("Writing .shp file"));
-			}
-		}
+		Utility::DisplayProgress(callback, k, size, "Writing .shp file", _key, percent);
 	}
 
-	if( cBack != NULL )
-	{
-		cBack->Progress(OLE2BSTR(_key),100,A2BSTR("Complete"));
-	}
-	else if( _globalCallback != NULL )
-	{
-		_globalCallback->Progress(OLE2BSTR(_key),100,A2BSTR("Complete"));
-	}
+	Utility::DisplayProgressCompleted(callback, _key);
 
 	fflush(shp);
 	return TRUE;

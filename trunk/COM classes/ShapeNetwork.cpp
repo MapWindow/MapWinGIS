@@ -215,6 +215,8 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	long percent = 0, newpercent = 0;
 	double total = numShapes;
 
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	double x1, y1, x2, y2;
 	//Build the Undirected Graph
 	for( int i = 0; i < numShapes; i++ )
@@ -301,14 +303,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 		shape->Release();
 		shape = NULL;
 	
-		newpercent = (long)((i/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Building ShapeNetwork"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("Building ShapeNetwork"));
-		}
+		Utility::DisplayProgress(callback, i, total, "Building ShapeNetwork", key, percent);
 	}
 
 	//undir_graph.Save("graph.txt",dPRINT_DATA);
@@ -661,14 +656,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			insertedShapes++;			
 		}
 
-		newpercent = (long)((shpcnt/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Copying Shapefile"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Copying Shapefile"));
-		}
+		Utility::DisplayProgress(callback, shpcnt, total, "ShpNetwork::Copying Shapefile", key, percent);
 	}
 	currentNode = 0;
 
@@ -1456,7 +1444,9 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
+
+	ICallback* callback = cBack ? cBack : globalCallback;
+
 	if( sf == NULL )
 	{	*retval = FALSE;
 		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
@@ -1652,14 +1642,7 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			network[i].parentIndex = lval2;
 		}
 		
-		newpercent = (long)((i/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Open"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Open"));
-		}
+		Utility::DisplayProgress(callback, i, total, "ShpNetwork::Open", key, percent);
 	}
 	gen->Release();
 	gen = NULL;
@@ -1702,14 +1685,7 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 		
 		delete [] used;
 
-		newpercent = (long)((i/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Verifying Integrity of Network"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::Verifying Integrity of Network"));
-		}		
+		Utility::DisplayProgress(callback, i, total, "ShpNetwork::Verifying Integrity of Network", key, percent);
 	}
 
 	//Compute the distance to outlet
@@ -1779,6 +1755,8 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
+	ICallback * callback = globalCallback ? globalCallback : cBack;
+
 	if( IsAligned() == false )
 	{	*retval = NULL;
 		lastErrorCode = tkNOT_ALIGNED;
@@ -1836,10 +1814,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		VARIANT_BOOL vbretval = FALSE;
 		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
-		if( cBack != NULL )
-			cBack->Progress(OLE2BSTR(key),0,A2BSTR("ShpNetwork::RasterizeD8"));
-		else if( globalCallback != NULL )
-			globalCallback->Progress(OLE2BSTR(key),0,A2BSTR("ShpNetwork::RasterizeD8"));
+		Utility::DisplayProgress(globalCallback, 0, "ShpNetwork::RasterizeD8", key);
 
 		(*retval)->CreateNew(A2BSTR(""),nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		nbheader->Release();
@@ -1898,10 +1873,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		VARIANT_BOOL vbretval = FALSE;
 		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
-		if( cBack != NULL )
-			cBack->Progress(OLE2BSTR(key),0,A2BSTR("ShpNetwork::RasterizeD8"));
-		else if( globalCallback != NULL )
-			globalCallback->Progress(OLE2BSTR(key),0,A2BSTR("ShpNetwork::RasterizeD8"));
+		Utility::DisplayProgress(globalCallback, 0, "ShpNetwork::RasterizeD8", key);
 
 		(*retval)->CreateNew(A2BSTR(""),Header,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
@@ -2177,14 +2149,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		Rasterize.clear();	
 		
-		newpercent = (long)((s/total)*100);
-		if( newpercent > percent )
-		{	percent = newpercent;
-			if( cBack != NULL )
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::RasterizeD8"));
-			else if( globalCallback != NULL )
-				globalCallback->Progress(OLE2BSTR(key),percent,A2BSTR("ShpNetwork::RasterizeD8"));
-		}
+		Utility::DisplayProgress(callback, s, total, "ShpNetwork::RasterizeD8", key, percent);
 
 		VariantClear(&vval); //added by Rob Cairns 4-Jan-06
 	}

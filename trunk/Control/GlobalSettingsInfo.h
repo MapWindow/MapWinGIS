@@ -55,9 +55,16 @@ struct GlobalSettingsInfo
 	bool attachMapCallbackToLayers;
 	int hotTrackingMaxShapeCount;
 	OLE_COLOR identifierColor;
-	
+	BSTR emptyBstr;
+
+	~GlobalSettingsInfo()
+	{
+		SysFreeString(emptyBstr);
+	}
+
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		emptyBstr = SysAllocString(L"");
 		identifierColor = RGB(30, 144, 255);
 		hotTrackingMaxShapeCount = 200;
 		attachMapCallbackToLayers = true;

@@ -2863,9 +2863,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 		}
 	}
 
-	if( _globalCallback != NULL )
-		_globalCallback->Progress(OLE2BSTR(_key),0,A2BSTR(""));
-
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 

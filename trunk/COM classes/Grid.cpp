@@ -36,18 +36,26 @@ static char THIS_FILE[] = __FILE__;
 // CGrid
 CGrid * activeGridObject = NULL;
 
+// ***************************************************
+//		gridCOMCALLBACK()
+// ***************************************************
 void gridCOMCALLBACK( int number, const char * message )
-{	USES_CONVERSION;
+{	
 	if( activeGridObject != NULL )
-		activeGridObject->CallBack(number,A2BSTR(message));
+		activeGridObject->CallBack(number, message);
 }
 
-void CGrid::CallBack(long percent,BSTR message)
-{	USES_CONVERSION;
-	if( globalCallback != NULL )
-		globalCallback->Progress(OLE2BSTR(key),percent,message);
+// ***************************************************
+//		CallBack()
+// ***************************************************
+void CGrid::CallBack(long percent,const char * message)
+{	
+	Utility::DisplayProgress(globalCallback, percent, message, key);
 }
 
+// ***************************************************
+//		Ctor
+// ***************************************************
 CGrid::CGrid()
 {	
 	dgrid = NULL;
@@ -63,6 +71,9 @@ CGrid::CGrid()
 	preferedDisplayMode = gpmAuto;
 }
 
+// ***************************************************
+//		Dtor
+// ***************************************************
 CGrid::~CGrid()
 {	
 	if( activeGridObject == this )

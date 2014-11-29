@@ -864,16 +864,11 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	
 	long percent = 0, newpercent = 0;
 	long currentRowIndex = -1;
+	long rowCount = RowCount();
 
-	for( long rowIndex = 0; rowIndex < RowCount(); rowIndex++ )
+	for (long rowIndex = 0; rowIndex < rowCount; rowIndex++)
 	{
-		newpercent = static_cast<long>((rowIndex+1.0)/RowCount()*100); 
-		if( newpercent > percent)
-		{	
-			percent = newpercent;
-			if( cBack != NULL ) 
-				cBack->Progress(OLE2BSTR(key),percent,A2BSTR("Writing .dbf"));	
-		}
+		Utility::DisplayProgress(cBack, rowIndex, rowCount, "Writing .dbf", key, percent);
 
 		//if updating existing file, only write out modified records
 		if  (updateFileInPlace && 
@@ -896,6 +891,8 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 			ClearRow(rowIndex);		// it will break join
 		}
 	}
+
+	Utility::DisplayProgressCompleted(cBack, key);
 
 	//Flush all of the records
 	if (!updateFileInPlace)

@@ -574,66 +574,6 @@ inline void tkJpg::WritePalette()
 
 void tkJpg::CompressJpg()
 {
-	/*
-	int eof_code = 257;
-	int clear_code = 256;
-	codesize = 9;
-	max_code = 511;
-	ht = new HashTable();
-	ht->InitTable(ColorMap, ColorMapSize);
-
-	maxcode = 257;
-	bitshift = 0;
-	numread = 0;
-	blocksize = 255;
-	plotloc = 0;
-
-	ZeroMemory(&block, 256);
-	
-	colort * curcolor = buffer;
-	colort * endcolor = &buffer[buffSize+1];
-
-	int pre = ht->Find(*curcolor++, NULL);
-
-	int colorcode;
-	int curpos = 0;
-	int percent, oldpercent = 0;
-
-	BSTR msg = A2BSTR("Compressing Image");
-
-	PutCode(clear_code);
-
-	for(;curcolor < endcolor; curcolor++)
-	{
-		colorcode = ht->Find(*curcolor, ColorMap+pre);
-
-		if(colorcode >= 0)
-		{
-			pre = colorcode;
-		}
-		else
-		{
-			PutCode(pre);
-			pre = AddEntry(pre, *curcolor);
-		}
-
-		curpos++;
-		if((percent = (curpos*100)/buffSize) > oldpercent)
-		{
-			if( cBack != NULL )
-				cBack->Progress(key,percent,msg);
-			oldpercent = percent;
-		}
-	}
-
-	PutCode(eof_code);
-	blocksize = numread+1;
-	fputc(blocksize, fp);
-	fwrite(block,1,blocksize,fp);
-	fputc(0,fp);
-
-	if( cBack )	cBack->Progress(key,100,msg);
-	*/
 }
 
 inline int tkJpg::AddEntry(int prefix, colort c)
@@ -647,24 +587,6 @@ inline int tkJpg::AddEntry(int prefix, colort c)
 
 		ht->InsertEntry(&ColorMap[maxcode], maxcode);
 	}
-
-	// Faster but the compression is a little less
-	/*if( maxcode > max_code )
-	{
-		codesize++;
-		max_code <<= 1;
-		max_code++;
-
-		if(codesize==12)
-		{
-			PutCode(256);
-			codesize = 9;
-			max_code = 511;
-			maxcode = 257;
-			ht->Clear();
-			ht->InitTable(ColorMap, 256);
-		}
-	}*/
 
 	// This one has a slightly better compression
 	if( maxcode > max_code )
