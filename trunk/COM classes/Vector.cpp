@@ -35,14 +35,14 @@ static char THIS_FILE[] = __FILE__;
 STDMETHODIMP CVector::get_i(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = v.geti();
+	*pVal = _v.geti();
 	return S_OK;
 }
 
 STDMETHODIMP CVector::put_i(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	v.seti( newVal );
+	_v.seti( newVal );
 	return S_OK;
 }
 
@@ -50,7 +50,7 @@ STDMETHODIMP CVector::get_j(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = v.getj();
+	*pVal = _v.getj();
 	return S_OK;
 }
 
@@ -58,7 +58,7 @@ STDMETHODIMP CVector::put_j(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	v.setj( newVal );
+	_v.setj( newVal );
 	return S_OK;
 }
 
@@ -66,7 +66,7 @@ STDMETHODIMP CVector::get_k(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = v.getk();
+	*pVal = _v.getk();
 	return S_OK;
 }
 
@@ -74,7 +74,7 @@ STDMETHODIMP CVector::put_k(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	v.setk( newVal );
+	_v.setk( newVal );
 	return S_OK;
 }
 
@@ -82,7 +82,7 @@ STDMETHODIMP CVector::Normalize()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	v.Normalize();
+	_v.Normalize();
 	return S_OK;
 }
 
@@ -94,7 +94,7 @@ STDMETHODIMP CVector::Dot(IVector *V, double *result)
 	V->get_i( &i );
 	V->get_j( &j );
 	V->get_k( &k );
-	*result = v.dot( cppVector( i, j, k ) );
+	*result = _v.dot( cppVector( i, j, k ) );
 	return S_OK;
 }
 
@@ -108,7 +108,7 @@ STDMETHODIMP CVector::CrossProduct(IVector *V, IVector **result)
 	V->get_i( &i );
 	V->get_j( &j );
 	V->get_k( &k );
-	cppVector cp = v.crossProduct( cppVector( i, j, k ) );
+	cppVector cp = _v.crossProduct( cppVector( i, j, k ) );
 
 	normal->put_i( cp.geti() );
 	normal->put_j( cp.getj() );
@@ -125,8 +125,8 @@ STDMETHODIMP CVector::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -143,10 +143,10 @@ STDMETHODIMP CVector::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CVector::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
 	{	
-		globalCallback->AddRef();
+		_globalCallback->AddRef();
 	}
 	return S_OK;
 }
@@ -154,7 +154,7 @@ STDMETHODIMP CVector::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CVector::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -164,7 +164,7 @@ STDMETHODIMP CVector::get_Key(BSTR *pVal)
 
 	USES_CONVERSION;
 
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 
@@ -174,8 +174,8 @@ STDMETHODIMP CVector::put_Key(BSTR newVal)
 
 	USES_CONVERSION;
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }

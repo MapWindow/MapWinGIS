@@ -46,6 +46,8 @@ const double SNAP_TOLERANCE = 20;  // pixels
 const double MOUSE_CLICK_TOLERANCE = 20;  // pixels
 const double POINT_INSERT_TOLERANCE = 10;  // pixels
 
+# define MAX_BUFFER 512
+
 #ifdef VLD_FORCE_ENABLE
 	#include <vld.h>
 #endif

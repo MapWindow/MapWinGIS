@@ -27,37 +27,71 @@ extern "C"
 using namespace std;
 
 // *************************************************************
+//	  ApplyPredefinedColorScheme()
+// *************************************************************
+void tkRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
+{
+	_predefinedColors = colorScheme;
+	_predefinedColorScheme->UsePredefined(_dfMin, _dfMax, colorScheme);
+}
+
+// *************************************************************
+//	  SetActiveBandIndex()
+// *************************************************************
+bool tkRaster::SetActiveBandIndex(int bandIndex)
+{
+	if (_nBands < bandIndex || bandIndex < 1)
+		return false;
+	else
+	{
+		activeBandIndex = bandIndex;
+		return true;
+	}
+}
+
+// *************************************************************
+//	  get_RasterBand()
+// *************************************************************
+GDALRasterBand* tkRaster::get_RasterBand(int BandIndex)
+{
+	if (BandIndex == 1) return _poBandR;
+	else if (BandIndex == 1) return _poBandG;
+	else if (BandIndex == 1) return _poBandB;
+	else return NULL;
+}
+
+// *************************************************************
 //	  ComputeMinMax()
 // *************************************************************
 void tkRaster::ComputeBandMinMax()
 {
 	int bGotMin=false, bGotMax=false;
-	adfMinMax[0] = poBandR->GetMinimum( &bGotMin );
-	adfMinMax[1] = poBandR->GetMaximum( &bGotMax );
+	_adfMinMax[0] = _poBandR->GetMinimum( &bGotMin );
+	_adfMinMax[1] = _poBandR->GetMaximum( &bGotMax );
 	
 	//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
 	if( ! (bGotMin && bGotMax) )
 	{
-		if ((dataType == GDT_Byte) &&  (ImgType != ADF_FILE) && (hasColorTable==false) && (ImgType != PNG_FILE))
+		if ((_dataType == GDT_Byte) &&  (_imgType != ADF_FILE) && (hasColorTable==false) && (_imgType != PNG_FILE))
 			//Just guess the min and max
 			//For some reason gdal does not seem to pick up the color table of a png binary image
 		{
-			dfMin = 0.0;
-			dfMax = 255.0;
+			_dfMin = 0.0;
+			_dfMax = 255.0;
 		}
 		else 
 		{	
-			GDALComputeRasterMinMax((GDALRasterBandH)poBandR, FALSE, adfMinMax);
+			GDALComputeRasterMinMax((GDALRasterBandH)_poBandR, FALSE, _adfMinMax);
 		}
 	}
-	dfMin = adfMinMax[0];
+	_dfMin = _adfMinMax[0];
 
-	if (adfMinMax[1] > 0 )	{
-		dfMax = adfMinMax[1];
+	if (_adfMinMax[1] > 0 )	{
+		_dfMax = _adfMinMax[1];
 	}
 	else {
 		// If GDALComputeRasterMinMax fails
-		dfMax = 255.0;
+		_dfMax = 255.0;
 	}
 }
 
@@ -96,23 +130,23 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		//Rob JPEG2000 fails at this point with a nasty error if MapWinGIS is 
 		//compiled in debug mode. GIF images also crash here		
 		
-		if (rasterDataset == NULL)
-			rasterDataset = GdalHelper::OpenDatasetA(filename, accessType);
+		if (_rasterDataset == NULL)
+			_rasterDataset = GdalHelper::OpenDatasetA(filename, accessType);
 	
-		if( rasterDataset == NULL ) 
+		if( _rasterDataset == NULL ) 
 		{
 			retVal = false;
 			return retVal;
 		}
 
-		orig_Width = rasterDataset->GetRasterXSize();
-		orig_Height = rasterDataset->GetRasterYSize();			
+		orig_Width = _rasterDataset->GetRasterXSize();
+		orig_Height = _rasterDataset->GetRasterYSize();			
 		
 		m_globalSettings.SetGdalUtf8(true);		// otherwise there can be problems when reading world file
 												// as dataset filename is already stored as UTF8
 
 		double adfGeoTransform[6];
-		bool success = rasterDataset->GetGeoTransform( adfGeoTransform ) == CE_None;
+		bool success = _rasterDataset->GetGeoTransform( adfGeoTransform ) == CE_None;
 
 		m_globalSettings.SetGdalUtf8(false);
 
@@ -133,14 +167,14 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 			if ( adfGeoTransform[1] < 0.0 || adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0 || adfGeoTransform[5] > 0.0 )
 			{
 				GDALDataset* mGdalDataset = NULL;
-				mGdalDataset = (GDALDataset *)GDALAutoCreateWarpedVRT( rasterDataset, NULL, NULL, GRA_NearestNeighbour, 0.2, NULL );  
+				mGdalDataset = (GDALDataset *)GDALAutoCreateWarpedVRT( _rasterDataset, NULL, NULL, GRA_NearestNeighbour, 0.2, NULL );  
 				if (mGdalDataset)
 				{
-					rasterDataset->Dereference();
-					rasterDataset = mGdalDataset;
+					_rasterDataset->Dereference();
+					_rasterDataset = mGdalDataset;
 					warped = true;
 
-					if ( rasterDataset->GetGeoTransform( adfGeoTransform )== CE_None)
+					if ( _rasterDataset->GetGeoTransform( adfGeoTransform )== CE_None)
 					{
 						orig_dX = adfGeoTransform[1];
 						orig_dY  = adfGeoTransform[5];
@@ -148,8 +182,8 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 						orig_XllCenter = adfGeoTransform[0]+ orig_dX/2;
 						orig_YllCenter = adfGeoTransform[3] + orig_dY/2;
 						
-						orig_Width = rasterDataset->GetRasterXSize();
-						orig_Height = rasterDataset->GetRasterYSize();			
+						orig_Width = _rasterDataset->GetRasterXSize();
+						orig_Height = _rasterDataset->GetRasterYSize();			
 
 						// we got top corner and now we'll get coordinates of the bottom left corner; 
 						// dy should be changed respectively as map coordinates will be increasing while moving from bottom to top
@@ -182,22 +216,22 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
   		[NB] ... fill all of Red, green and Blue for an input view containing only 1 band, which ensures 
   		that a grayscale view will still appear correctly in your RGB or BGR based bitmap. */
 		
-		nBands = rasterDataset->GetRasterCount();
+		_nBands = _rasterDataset->GetRasterCount();
 		//nBands = nBands <= 3 ? nBands : 3;		// older behavior
 
 		/************************ INITIALISE BANDS AND KEEP THEM OPEN **************/
 
-		for (int band = 1; band <= nBands; band++)
+		for (int band = 1; band <= _nBands; band++)
 		{
-			if ((band == 1) && (poBandR == NULL))
-				poBandR = rasterDataset->GetRasterBand(band);
-			else if ((band == 2) && (poBandG == NULL))
-				poBandG = rasterDataset->GetRasterBand(band);
-			else if ((band == 3) && (poBandB == NULL))
-				poBandB = rasterDataset->GetRasterBand(band);
+			if ((band == 1) && (_poBandR == NULL))
+				_poBandR = _rasterDataset->GetRasterBand(band);
+			else if ((band == 2) && (_poBandG == NULL))
+				_poBandG = _rasterDataset->GetRasterBand(band);
+			else if ((band == 3) && (_poBandB == NULL))
+				_poBandB = _rasterDataset->GetRasterBand(band);
 		}
 
-		if (poBandR == NULL)
+		if (_poBandR == NULL)
 		{
 			retVal = false;
 			return retVal;
@@ -207,44 +241,44 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		/******************** GET THE DATA TYPE FROM THE FIRST BAND ***************/
 
-		dataType = poBandR->GetRasterDataType();
+		_dataType = _poBandR->GetRasterDataType();
 
-		if(!(	(dataType == GDT_Byte)||(dataType == GDT_UInt16)||
-		(dataType == GDT_Int16)||(dataType == GDT_UInt32)||
-		(dataType == GDT_Int32)||(dataType == GDT_Float32)||
-		(dataType == GDT_Float64)||(dataType == GDT_CInt16)||
-		(dataType == GDT_CInt32)||(dataType == GDT_CFloat32)||
-		(dataType == GDT_CFloat64) ) ) 
+		if(!(	(_dataType == GDT_Byte)||(_dataType == GDT_UInt16)||
+		(_dataType == GDT_Int16)||(_dataType == GDT_UInt32)||
+		(_dataType == GDT_Int32)||(_dataType == GDT_Float32)||
+		(_dataType == GDT_Float64)||(_dataType == GDT_CInt16)||
+		(_dataType == GDT_CInt32)||(_dataType == GDT_CFloat32)||
+		(_dataType == GDT_CFloat64) ) ) 
 			retVal = false;	
 
-		switch (dataType)
+		switch (_dataType)
 		{
 			case GDT_Float32: case GDT_Float64:	
-				genericType=GDT_Float32; break;
+				_genericType=GDT_Float32; break;
 			case GDT_Byte: case GDT_Int16: case GDT_UInt16:
-				genericType = GDT_Int32; break;
+				_genericType = GDT_Int32; break;
 			default: 
-				genericType = GDT_Int32; break;
+				_genericType = GDT_Int32; break;
 		}
 		
 		/******************** COLOR TABLE AND NUMBER OF BANDS ***************/
 
 		//Initialise
-		cPI = GPI_Gray;
-		histogramComputed = false;
-		allowHistogram = true;
+		_cPI = GPI_Gray;
+		_histogramComputed = false;
+		_allowHistogram = true;
 
 		//allowAsGrid = true;				// Allow the image to be read as grid (if appropriate)
 		imageQuality = 100;				// Image quality 10-100
 		_predefinedColors = FallLeaves;	// Set the default color scheme if read as grid
 		useHistogram = false;			// Use histogram equalization
 
-		poCT = poBandR->GetColorTable();
-		if (poCT != NULL)
+		_poCT = _poBandR->GetColorTable();
+		if (_poCT != NULL)
 		{
 			hasColorTable = true;
-			cPI = poCT->GetPaletteInterpretation();
-			ciName = GDALGetPaletteInterpretationName(paletteInterp);
+			_cPI = _poCT->GetPaletteInterpretation();
+			_ciName = GDALGetPaletteInterpretationName(paletteInterp);
 		}
 		else 
 			hasColorTable=false;
@@ -255,18 +289,18 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		ComputeBandMinMax();
 		
 		// choosing rendering method
-		handleImage = ChooseRenderingMethod();
+		_handleImage = ChooseRenderingMethod();
 
 		/********************* SET TRANSPARENCY COLOR AND GET THE COLOR INTERPRETATION **********************/
 
 		hasTransparency = false;
 		double nDV=0;
 		int pbSuccess = NULL;
-		nDV = poBandR->GetNoDataValue(&pbSuccess);
+		nDV = _poBandR->GetNoDataValue(&pbSuccess);
 		
 		if ((pbSuccess != NULL) && hasColorTable)
 		{
-			const GDALColorEntry * poCE = GDALGetColorEntry (poCT, (int) nDV);
+			const GDALColorEntry * poCE = GDALGetColorEntry (_poCT, (int) nDV);
 			if (poCE)
 				transColor = RGB(poCE->c1,poCE->c2,poCE->c3);
 			else
@@ -279,7 +313,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		else if ((pbSuccess != NULL))
 		{
 			unsigned char nDVr=0,nDVg=0,nDVb=0;
-			if (nBands == 1 )
+			if (_nBands == 1 )
 			{
 				// nDVr = nDVg = 0;
 				// nDVb = (unsigned char) nDV;
@@ -288,9 +322,9 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 			}
 			else
 			{
-				if (poBandR != NULL) nDVr = (unsigned char) poBandR->GetNoDataValue();
-				if (poBandG != NULL) nDVg = (unsigned char) poBandG->GetNoDataValue();
-				if (poBandB != NULL) nDVb = (unsigned char) poBandB->GetNoDataValue();
+				if (_poBandR != NULL) nDVr = (unsigned char) _poBandR->GetNoDataValue();
+				if (_poBandG != NULL) nDVg = (unsigned char) _poBandG->GetNoDataValue();
+				if (_poBandB != NULL) nDVb = (unsigned char) _poBandB->GetNoDataValue();
 				transColor = RGB(nDVr,nDVg,nDVb);
 				hasTransparency = true;
 			}
@@ -303,8 +337,8 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		// setting extents
 		RefreshExtents();
-		adfMinMax[0] = dfMin;
-		adfMinMax[1] = dfMax;
+		_adfMinMax[0] = _dfMin;
+		_adfMinMax[1] = _dfMax;
 
 		/*********************** END OF INITIALISING ************************************/
 		
@@ -338,8 +372,8 @@ void tkRaster::RefreshExtents()
 // *********************************************************
 int tkRaster::Dereference()
 {
-	if (rasterDataset != NULL)
-		return rasterDataset->Dereference();
+	if (_rasterDataset != NULL)
+		return _rasterDataset->Dereference();
 	else
 		return -1;
 }
@@ -349,14 +383,14 @@ int tkRaster::Dereference()
 // *********************************************************
 void tkRaster::Close()
 {
-	if (rasterDataset != NULL)
+	if (_rasterDataset != NULL)
 	{
-		rasterDataset->Dereference();
-		delete rasterDataset;
-		rasterDataset = NULL;
-		poBandR = NULL;		// lsu 28-may-2010 - we can't use this pointers any more
-		poBandG = NULL;		// if somebody will want to open new dataset
-		poBandB = NULL;
+		_rasterDataset->Dereference();
+		delete _rasterDataset;
+		_rasterDataset = NULL;
+		_poBandR = NULL;		// lsu 28-may-2010 - we can't use this pointers any more
+		_poBandG = NULL;		// if somebody will want to open new dataset
+		_poBandB = NULL;
 	}
 	if (_predefinedColorScheme)
 	{
@@ -375,10 +409,10 @@ void tkRaster::Close()
 bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double MaxX, double MaxY, CStringW filename,
 							   tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel)
 {
-	if (! rasterDataset ) 
-		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+	if (! _rasterDataset ) 
+		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 	
-	if (! rasterDataset ) 
+	if (! _rasterDataset ) 
 		return false;
 
 	if ((_extents.left > MaxX) || (_extents.right < MinX) || (_extents.top < MinY) || (_extents.bottom > MaxY))
@@ -399,39 +433,39 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		int hiddenPixels;
 
 		_visibleExtents.left = _extents.left;
-		_visibleRect.left = 0;
+		visibleRect.left = 0;
 		if (_extents.left < MinX) 
 		{	
 			hiddenPixels = int((MinX - _extents.left - orig_dX/2.0)/orig_dX);		// how many pixels are completely hidden: rounding in the lower side
 			_visibleExtents.left += hiddenPixels * orig_dX;
-			_visibleRect.left += hiddenPixels;
+			visibleRect.left += hiddenPixels;
 		}
 	    
 		_visibleExtents.bottom = _extents.bottom;
-		_visibleRect.bottom = orig_Height - 1;
+		visibleRect.bottom = orig_Height - 1;
 		if (_extents.bottom < MinY)
 		{	
 			hiddenPixels = int((MinY - _extents.bottom)/orig_dY);	// how many pixels are completely hidden: rounding in the lower side
 			_visibleExtents.bottom +=  hiddenPixels * orig_dY;
-			_visibleRect.bottom -= hiddenPixels;
+			visibleRect.bottom -= hiddenPixels;
 		}
 		
 		_visibleExtents.right = _extents.right;
-		_visibleRect.right = orig_Width - 1;
+		visibleRect.right = orig_Width - 1;
 		if (_extents.right > MaxX) 
 		{	
 			hiddenPixels = int((_extents.right - MaxX)/orig_dX);	// how many pixels are completely hidden: rounding in the lower side
 			_visibleExtents.right -= hiddenPixels * orig_dX;
-			_visibleRect.right -= hiddenPixels;
+			visibleRect.right -= hiddenPixels;
 		}
 
 		_visibleExtents.top = _extents.top;
-		_visibleRect.top = 0;
+		visibleRect.top = 0;
 		if (_extents.top > MaxY)
 		{	
 			hiddenPixels = int((_extents.top-MaxY)/orig_dY);		// how many pixels are completely hidden: rounding in the lower side
 			_visibleExtents.top -=  hiddenPixels * orig_dY;
-			_visibleRect.top += hiddenPixels;
+			visibleRect.top += hiddenPixels;
 		}
 		
 		// size of image buffer without scaling
@@ -439,8 +473,8 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		dY = orig_dY;
 		XllCenter = _visibleExtents.left + dX * 0.5;
 		YllCenter = _visibleExtents.bottom + dY * 0.5;
-		width = _visibleRect.right - _visibleRect.left + 1;
-		height = _visibleRect.bottom - _visibleRect.top + 1;
+		width = visibleRect.right - visibleRect.left + 1;
+		height = visibleRect.bottom - visibleRect.top + 1;
 		
 		int xBuff = width;
 		int yBuff = height;
@@ -495,25 +529,25 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		// ----------------------------------------------------
 		//   Building a histogram
 		// ----------------------------------------------------
-		if ((useHistogram) && (allowHistogram))
+		if ((useHistogram) && (_allowHistogram))
 		{
 			//Check all the conditions are met for histogram equalization compute the histogram once
-			if (nBands == 1 && !hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
+			if (_nBands == 1 && !hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
 			{
-				if (!histogramComputed)
+				if (!_histogramComputed)
 				{
-					nLUTBins = 256;
-					if(ComputeEqualizationLUTs(filename, &padfScaleMin, &padfScaleMax, &papanLUTs))
-						histogramComputed = true;	
+					_nLUTBins = 256;
+					if(ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
+						_histogramComputed = true;	
 					else 
 					{
-						histogramComputed = false;	//Failed - don't try again 
-						allowHistogram = false;
+						_histogramComputed = false;	//Failed - don't try again 
+						_allowHistogram = false;
 					}
 				}
 			}
 			else 
-				histogramComputed = false;
+				_histogramComputed = false;
 		}
 		
 		// ---------------------------------------------------------
@@ -523,10 +557,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		if ( this->WillBeRenderedAsGrid() )
 		{
 			// if user passed a color scheme, image will be opened as grid using the first band
-			success = ReadGridAsImage(ImageData, _visibleRect.left, _visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
+			success = ReadGridAsImage(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
 		}
 		else
-			success = ReadImage(ImageData, _visibleRect.left, _visibleRect.top, width, height, xBuff, yBuff);
+			success = ReadImage(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff);
 		
 		if ( success )
 		{
@@ -548,10 +582,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 // the whole image will be loaded
 bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize)
 {
-	if (! rasterDataset ) 
-		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+	if (! _rasterDataset ) 
+		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 	
-	if (! rasterDataset ) 
+	if (! _rasterDataset ) 
 		return false;
 	
 	// size of image buffer without scaling
@@ -587,17 +621,17 @@ bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxB
 	}
 	
 	// setting rectangles for consistency
-	_visibleRect.left = 0;
-	_visibleRect.right = orig_Width - 1;
-	_visibleRect.top = 0;
-	_visibleRect.bottom = orig_Height - 1;
+	visibleRect.left = 0;
+	visibleRect.right = orig_Width - 1;
+	visibleRect.top = 0;
+	visibleRect.bottom = orig_Height - 1;
 
 	_visibleExtents.left = _extents.left;
 	_visibleExtents.right = _extents.right;
 	_visibleExtents.top = _extents.top;
 	_visibleExtents.bottom = _extents.bottom;
 
-	return ReadImage(ImageData, _visibleRect.left, _visibleRect.top, orig_Width, orig_Height, width, height);
+	return ReadImage(ImageData, visibleRect.left, visibleRect.top, orig_Width, orig_Height, width, height);
 }
 
 // *********************************************************
@@ -612,9 +646,9 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	_int32 * srcDataInt = NULL;
 	float * srcDataFloat = NULL;
 	
-	if (handleImage == asComplex)
+	if (_handleImage == asComplex)
 	{
-		if (genericType == GDT_Int32)
+		if (_genericType == GDT_Int32)
 			srcDataInt =  (_int32 *) CPLMalloc( sizeof(_int32)*xBuff*yBuff );
 		else
 			srcDataFloat =  (float *) CPLMalloc( sizeof(float)*xBuff*yBuff );
@@ -642,10 +676,10 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	const GDALColorEntry * poCE = NULL;	
 
 	double shift = 0, range = 0;
-	if (handleImage == asComplex)
+	if (_handleImage == asComplex)
 	{
-		double dfMin = adfMinMax[0];
-		double dfMax = adfMinMax[1];
+		double dfMin = _adfMinMax[0];
+		double dfMax = _adfMinMax[1];
 		range = dfMax - dfMin;		
 		shift = 0 - dfMin;
 	}
@@ -655,24 +689,24 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 		shift=0;
 	}
 
-    for (int band = 1; band <= nBands; band++)
+    for (int band = 1; band <= _nBands; band++)
     {
 		// -----------------------------------------------
 		//   reading the band
 		// -----------------------------------------------
-		if (band == 1) poBand = poBandR; 
-		else if (band == 2) poBand = poBandG;
-		else if (band == 3) poBand = poBandB;
+		if (band == 1) poBand = _poBandR; 
+		else if (band == 2) poBand = _poBandG;
+		else if (band == 3) poBand = _poBandB;
 		
 		if (poBand == NULL)
 		{
-			poBand = rasterDataset->GetRasterBand(band);	// Keep it open until the dataset is destroyed
+			poBand = _rasterDataset->GetRasterBand(band);	// Keep it open until the dataset is destroyed
 		}
 		else
 		{
-			if (handleImage == asComplex)
+			if (_handleImage == asComplex)
 			{
-				if (genericType == GDT_Int32)
+				if (_genericType == GDT_Int32)
 				{
 					poBand->AdviseRead ( xOffset, yOffset, width, height, xBuff, yBuff, GDT_Int32, NULL);
 					poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataInt, xBuff, yBuff, GDT_Int32, 0, 0 );
@@ -691,14 +725,14 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 			}
 		}
 		double noDataValue = poBand->GetNoDataValue();
-		cInterp = poBand->GetColorInterpretation();
+		_cInterp = poBand->GetColorInterpretation();
 
 		// -----------------------------------------------------------
 		//   caching the color table; adding data to the second buffer
 		// -----------------------------------------------------------
 		int tableCount = 0;
 		if (hasColorTable)
-			tableCount = poCT->GetColorEntryCount();
+			tableCount = _poCT->GetColorEntryCount();
 		
 		if (hasColorTable && tableCount > 0)
 		{
@@ -706,7 +740,7 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 			colour* colorTable = new colour[tableCount];
 			for (int i = 0; i < tableCount; i++ )
 			{
-				poCE = poCT->GetColorEntry(i);
+				poCE = _poCT->GetColorEntry(i);
 				GDALColorEntry2Colour(band, i, shift, range, noDataValue, poCE, useHistogram, colorTable + i);	// possible to optimize further: no need to check all values
 			}
 			
@@ -731,9 +765,9 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 		// ------------------------------------------------------------
 		else
 		{
-			if (handleImage == asComplex)
+			if (_handleImage == asComplex)
 			{
-				if (genericType == GDT_Int32)
+				if (_genericType == GDT_Int32)
 					AddToBufferAlt<_int32>(ImageData, srcDataInt, xBuff, yBuff, band, shift, range, noDataValue, poCE, useHistogram);	
 				else
 					AddToBufferAlt<float>(ImageData, srcDataFloat, xBuff, yBuff, band, shift, range, noDataValue, poCE, useHistogram);
@@ -746,19 +780,19 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	// --------------------------------------------------------
 	//	  releasing GDAL cache
 	// --------------------------------------------------------
-	if (m_clearGDALCache)
+	if (clearGDALCache)
 	{
-		if (poBandR != NULL) poBandR->FlushCache();	
-		if (poBandG != NULL) poBandG->FlushCache();	
-		if (poBandB != NULL) poBandB->FlushCache();	
+		if (_poBandR != NULL) _poBandR->FlushCache();	
+		if (_poBandG != NULL) _poBandG->FlushCache();	
+		if (_poBandB != NULL) _poBandB->FlushCache();	
 	}
 
 	// --------------------------------------------------------
 	//		cleaning
 	// --------------------------------------------------------
-	if (handleImage == asComplex)
+	if (_handleImage == asComplex)
 	{
-		if (genericType == GDT_Int32) {
+		if (_genericType == GDT_Int32) {
 			if( srcDataInt != NULL ) {
 				CPLFree( srcDataInt );
 				srcDataInt = NULL;
@@ -789,7 +823,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 	colour* dst;	// position in the resulting buffer
 
 	// histogram image
-	if (useHistogram && nBands == 1 && !hasColorTable)
+	if (useHistogram && _nBands == 1 && !hasColorTable)
 	{
 		for (int i = 0; i < yBuff; i++) {
 			for (int j = 0; j < xBuff; j++)	
@@ -806,10 +840,10 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				}
 				else
 				{
-					double dfScale = nLUTBins / (padfScaleMax[band-1] - padfScaleMin[band-1]);
-					int iBin = (int) (((double)val - padfScaleMin[band-1]) * dfScale);
-					iBin = MAX(0,MIN(nLUTBins-1,iBin));
-					const int * panLUT = papanLUTs[band-1];
+					double dfScale = _nLUTBins / (_padfScaleMax[band-1] - _padfScaleMin[band-1]);
+					int iBin = (int) (((double)val - _padfScaleMin[band-1]) * dfScale);
+					iBin = MAX(0,MIN(_nLUTBins-1,iBin));
+					const int * panLUT = _papanLUTs[band-1];
 					if( panLUT )
 					{
 						dst->red = (unsigned char) panLUT[iBin];
@@ -828,7 +862,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 	}
 	
 	// comlex image
-	else if(handleImage == asComplex)
+	else if(_handleImage == asComplex)
 	{
 		double ratio = 255.0/(double)range;
 		
@@ -838,7 +872,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				val = data[(yBuff-i-1) * xBuff + j];	
 				dst = (*ImageData) + i * xBuff + j;
 				
-				if (nBands == 1)
+				if (_nBands == 1)
 				{
 					if (val == noDataValue)
 					{
@@ -882,7 +916,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				val = (unsigned char)data[(yBuff-i-1) * xBuff + j];	
 				dst = (*ImageData) + i * xBuff + j;
 				
-				if (nBands == 1)
+				if (_nBands == 1)
 				{
 					if (val == noDataValue)
 					{
@@ -931,7 +965,7 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 	// transparent color
 	if (colorValue == noDataValue)
 	{
-		if (nBands == 1)
+		if (_nBands == 1)
 		{
 			result->red = (unsigned char)	poCE->c1;
 			result->green = (unsigned char)	poCE->c2;
@@ -944,12 +978,12 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 			else if (band == 3)	result->blue = transColor.b;
 		}
 	}
-	else if (useHistogram && nBands == 1 && !hasColorTable)
+	else if (useHistogram && _nBands == 1 && !hasColorTable)
 	{
-		double dfScale = nLUTBins / (padfScaleMax[band-1] - padfScaleMin[band-1]);
-		int iBin = (int) ((colorValue - padfScaleMin[band-1]) * dfScale);
-		iBin = MAX(0,MIN(nLUTBins-1,iBin));
-		const int * panLUT = papanLUTs[band-1];
+		double dfScale = _nLUTBins / (_padfScaleMax[band-1] - _padfScaleMin[band-1]);
+		int iBin = (int) ((colorValue - _padfScaleMin[band-1]) * dfScale);
+		iBin = MAX(0,MIN(_nLUTBins-1,iBin));
+		const int * panLUT = _papanLUTs[band-1];
 		
 		if( panLUT )
 		{
@@ -966,13 +1000,13 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 	}
 	else if (hasColorTable && colorEntryExists)
 	{
-		if (cInterp == GCI_AlphaBand)
+		if (_cInterp == GCI_AlphaBand)
 		{
 			result->red = (unsigned char)poCE->c4;  
 			result->green = (unsigned char)poCE->c4;
 			result->blue = (unsigned char)poCE->c4; 
 		}
-		else if ( (cPI == GPI_Gray) || (cInterp == GCI_GrayIndex) )
+		else if ( (_cPI == GPI_Gray) || (_cInterp == GCI_GrayIndex) )
 		{
 			result->red = (unsigned char)poCE->c1;  
 			result->green = (unsigned char)poCE->c1;
@@ -986,9 +1020,9 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 		}
 	} 
 
-	else if (handleImage == asComplex)
+	else if (_handleImage == asComplex)
 	{
-		if (nBands == 1)
+		if (_nBands == 1)
 		{
 			result->red = (unsigned char)((colorValue + shift) * 255/range);
 			result->green = (unsigned char)((colorValue + shift) * 255/range);
@@ -1001,7 +1035,7 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 			else if (band == 3) result->blue = (unsigned char) ((colorValue + shift)  * 255/range);
 		}
 	}
-	else if (nBands == 1)
+	else if (_nBands == 1)
 	{
 		result->red = (unsigned char)(colorValue);
 		result->green = (unsigned char)(colorValue);
@@ -1037,21 +1071,21 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	//}
 	
 	Debug::WriteLine("ActiveBand: %d", activeBandIndex);
-	poBandR = rasterDataset->GetRasterBand(activeBandIndex);
-	if (poBandR == NULL) return false;
+	_poBandR = _rasterDataset->GetRasterBand(activeBandIndex);
+	if (_poBandR == NULL) return false;
 
 	try
 	{
 		// Some IMG files have no nodata value -- no way to tell except
 		// to try. A non-SEH exception is thrown if nodata isn't available
-		noDataValue = poBandR->GetNoDataValue();
+		noDataValue = _poBandR->GetNoDataValue();
 	}
 	catch(...)
 	{
 	}
     
-	dfMin = adfMinMax[0];
-    dfMax = adfMinMax[1];
+	dfMin = _adfMinMax[0];
+    dfMax = _adfMinMax[1];
 	range = dfMax - dfMin;		
 	shift = 0 - dfMin;
 	
@@ -1079,7 +1113,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
     (*ImageData) = new colour[xBuff*yBuff];
 
 
-	if (genericType == GDT_Int32)
+	if (_genericType == GDT_Int32)
 		pafScanAreaInt =  (_int32 *) CPLMalloc( sizeof(_int32)*xBuff*yBuff );
 	else
 		pafScanAreaFloat =  (float *) CPLMalloc( sizeof(float)*xBuff*yBuff );
@@ -1139,22 +1173,22 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	
 	colort ct;
 
-	if (genericType == GDT_Int32)
+	if (_genericType == GDT_Int32)
 	{
-		poBandR->AdviseRead ( xOff, yOff,width, height, xBuff, yBuff, GDT_Int32, NULL);
-		poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaInt, xBuff, yBuff, GDT_Int32,0, 0 );
+		_poBandR->AdviseRead ( xOff, yOff,width, height, xBuff, yBuff, GDT_Int32, NULL);
+		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaInt, xBuff, yBuff, GDT_Int32,0, 0 );
 	}
 	else
 	{
-		poBandR->AdviseRead ( xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
-		poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaFloat, xBuff, yBuff, GDT_Float32,0, 0 );
+		_poBandR->AdviseRead ( xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
+		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaFloat, xBuff, yBuff, GDT_Float32,0, 0 );
 	}
 
 	for (int i = 0; i < yBuff; i++)
 	{
 		for (int j = 0; j < xBuff; j++)
 		{
-			if (genericType == GDT_Int32)
+			if (_genericType == GDT_Int32)
 				tmp = (_int32)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
 			else
 				tmp = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
@@ -1184,7 +1218,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					continue;
 				}
 
-				if (genericType == GDT_Int32)
+				if (_genericType == GDT_Int32)
 				{					// Read in 3x3 window
 					win[0] = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j-1]);
 					win[1] = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
@@ -1317,7 +1351,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 						else if( j >= xBuff - 1 )
 						{	
 	
-							if (genericType == GDT_Int32)
+							if (_genericType == GDT_Int32)
 							{
 								yone = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j-1]);
 								ytwo = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j]);
@@ -1333,7 +1367,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 						else if( i >= yBuff-1 )
 						{	
 
-							if (genericType == GDT_Int32)
+							if (_genericType == GDT_Int32)
 							{
 								yone = (double)( pafScanAreaInt[(yBuff-i-1+1) * xBuff + j]);
 								ytwo = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j+1]);
@@ -1349,7 +1383,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					else
 					{	
 						yone = tmp;
-						if (genericType == GDT_Int32)
+						if (_genericType == GDT_Int32)
 						{
 							ytwo = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j+1]);
 							ythree = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j]);
@@ -1515,10 +1549,10 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	}
 	
 	// lsu: clearing cache    
-	if (m_clearGDALCache)
-		poBandR->FlushCache();		 
+	if (clearGDALCache)
+		_poBandR->FlushCache();		 
 	
-	if (genericType == GDT_Int32)
+	if (_genericType == GDT_Int32)
 	{
 		if( pafScanAreaInt != NULL )
 		{
@@ -1568,24 +1602,24 @@ bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
 	int iBand;
     int nHistSize = 0;
     int *panHistogram = NULL;
-	if (rasterDataset == NULL) 
-		rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+	if (_rasterDataset == NULL) 
+		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
 
 	GDALRasterBand * poBand;
     
 	// For now we always compute min/max
-    *ppadfScaleMin = (double *) CPLCalloc(sizeof(double),nBands);
-    *ppadfScaleMax = (double *) CPLCalloc(sizeof(double),nBands);
+    *ppadfScaleMin = (double *) CPLCalloc(sizeof(double),_nBands);
+    *ppadfScaleMax = (double *) CPLCalloc(sizeof(double),_nBands);
 
-    *ppapanLUTs = (int **) CPLCalloc(sizeof(int *),nBands);
+    *ppapanLUTs = (int **) CPLCalloc(sizeof(int *),_nBands);
 
 /* ==================================================================== */
 /*      Process all bands.                                              */
 /* ==================================================================== */
-    for( iBand = 0; iBand < nBands; iBand++ )
+    for( iBand = 0; iBand < _nBands; iBand++ )
     {
 		GDALColorInterp cInt; 
-		poBand = rasterDataset->GetRasterBand(iBand+1);
+		poBand = _rasterDataset->GetRasterBand(iBand+1);
 		cInt = poBand->GetColorInterpretation();
         CPLErr eErr;
 
@@ -1626,14 +1660,14 @@ bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
 /* -------------------------------------------------------------------- */
 /*      Now compute a LUT from the cumulative histogram.                */
 /* -------------------------------------------------------------------- */
-        int *panLUT = (int *) CPLCalloc(sizeof(int),nLUTBins);
+        int *panLUT = (int *) CPLCalloc(sizeof(int),_nLUTBins);
         int iLUT;
 
-        for( iLUT = 0; iLUT < nLUTBins; iLUT++ )
+        for( iLUT = 0; iLUT < _nLUTBins; iLUT++ )
         {
-            iHist = (iLUT * nHistSize) / nLUTBins;
-            int nValue = (int) ((panCumHist[iHist] * nLUTBins) / nTotal);
-            panLUT[iLUT] = MAX(0,MIN(nLUTBins-1,nValue));
+            iHist = (iLUT * nHistSize) / _nLUTBins;
+            int nValue = (int) ((panCumHist[iHist] * _nLUTBins) / nTotal);
+            panLUT[iLUT] = MAX(0,MIN(_nLUTBins-1,nValue));
         } 
 		(*ppapanLUTs)[iBand] = panLUT;
     }
@@ -1645,34 +1679,34 @@ bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
 // ***********************************************************
 bool tkRaster::SetNoDataValue(double Value)
 {
-	if (rasterDataset)
+	if (_rasterDataset)
 	{
-		if (nBands == 3 && genericType == GDT_Int32)
+		if (_nBands == 3 && _genericType == GDT_Int32)
 		{
 			OLE_COLOR val = (OLE_COLOR)Value;
 			unsigned char r = GetRValue(val);
 			unsigned char g = GetGValue(val);
 			unsigned char b = GetBValue(val);
-			if (poBandR->SetNoDataValue(double(r)) != CE_None) return false;
-			if (poBandG->SetNoDataValue(double(g)) != CE_None) return false;
-			if (poBandB->SetNoDataValue(double(b)) != CE_None) return false;
+			if (_poBandR->SetNoDataValue(double(r)) != CE_None) return false;
+			if (_poBandG->SetNoDataValue(double(g)) != CE_None) return false;
+			if (_poBandB->SetNoDataValue(double(b)) != CE_None) return false;
 			return true;
 		}
 		
 		// TODO: should we consider some other specific cases
 		else
 		{
-			if (nBands >= 1)
+			if (_nBands >= 1)
 			{
-				if (poBandR->SetNoDataValue(Value) != CE_None) return false;
+				if (_poBandR->SetNoDataValue(Value) != CE_None) return false;
 			}
-			if (nBands >= 2)
+			if (_nBands >= 2)
 			{
-				if (poBandG->SetNoDataValue(Value) != CE_None) return false;
+				if (_poBandG->SetNoDataValue(Value) != CE_None) return false;
 			}
-			if (nBands == 3)
+			if (_nBands == 3)
 			{
-				if (poBandB->SetNoDataValue(Value) != CE_None) return false;
+				if (_poBandB->SetNoDataValue(Value) != CE_None) return false;
 			}
 			return true;
 		}
@@ -1690,22 +1724,22 @@ IGridColorScheme* tkRaster::GetColorSchemeForRendering()
 {
 	long numBreaks;	
 	bool hasCustomScheme = false;
-	if (customColorScheme) {
-		customColorScheme->get_NumBreaks(&numBreaks);
+	if (_customColorScheme) {
+		_customColorScheme->get_NumBreaks(&numBreaks);
 		if (numBreaks > 0) {
 			hasCustomScheme = true;
 		}
 	}
 	
 	if (hasCustomScheme) {
-		return customColorScheme;
+		return _customColorScheme;
 	}
 	else
 	{
 		// make sure that at least everything is all right with predefined one
 		_predefinedColorScheme->get_NumBreaks(&numBreaks);
 		if (numBreaks == 0) {
-			_predefinedColorScheme->UsePredefined(dfMin, dfMax, _predefinedColors);
+			_predefinedColorScheme->UsePredefined(_dfMin, _dfMax, _predefinedColors);
 		}
 		return _predefinedColorScheme;
 	}
@@ -1716,7 +1750,7 @@ IGridColorScheme* tkRaster::GetColorSchemeForRendering()
 // *************************************************************
 bool tkRaster::CanUseExternalColorScheme()
 {
-	Debug::WriteLine("Data type: %d", dataType);
+	Debug::WriteLine("Data type: %d", _dataType);
 	// TODO: revisit; probably in some cases it's not possible after all
 	//return dataType == GDT_Int32 || dataType == GDT_Float32;
 	return true;
@@ -1728,15 +1762,15 @@ bool tkRaster::CanUseExternalColorScheme()
 HandleImage tkRaster::ChooseRenderingMethod()
 {
 	HandleImage method;
-	if (ImgType == IMG_FILE || ImgType == KAP_FILE || (ImgType == TIFF_FILE && dataType == GDT_UInt16) || hasColorTable )
+	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || hasColorTable )
 	{
 		method = asComplex;
 	}
-	else if	( dataType == GDT_Byte && ImgType != ADF_FILE && dfMax > 15)
+	else if	( _dataType == GDT_Byte && _imgType != ADF_FILE && _dfMax > 15)
 	{
 		method = asRGB;
 	}
-	else if (dfMax > 1 &&( nBands == 1 || ImgType == ADF_FILE || ImgType == ASC_FILE || ImgType == DEM_FILE)) 
+	else if (_dfMax > 1 &&( _nBands == 1 || _imgType == ADF_FILE || _imgType == ASC_FILE || _imgType == DEM_FILE)) 
 	{
 		method = asGrid;
 	}
@@ -1757,7 +1791,7 @@ HandleImage tkRaster::ChooseRenderingMethod()
 bool tkRaster::WillBeRenderedAsGrid()
 {
 	return (allowAsGrid == tkGridRendering::grForceForAllFormats ||
-		   (allowAsGrid == tkGridRendering::grForGridsOnly && handleImage == asGrid));
+		   (allowAsGrid == tkGridRendering::grForGridsOnly && _handleImage == asGrid));
 }
 #pragma endregion
 

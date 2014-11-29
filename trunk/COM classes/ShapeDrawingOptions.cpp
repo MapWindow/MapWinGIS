@@ -39,11 +39,11 @@
 STDMETHODIMP CShapeDrawingOptions::get_UseLinePattern(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!m_options.CanUseLinePattern() && m_options.useLinePattern)
+	if (!_options.CanUseLinePattern() && _options.useLinePattern)
 	{
-		m_options.useLinePattern = false;
+		_options.useLinePattern = false;
 	}
-	*retVal = m_options.useLinePattern ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = _options.useLinePattern ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -53,7 +53,7 @@ STDMETHODIMP CShapeDrawingOptions::get_UseLinePattern(VARIANT_BOOL* retVal)
 STDMETHODIMP CShapeDrawingOptions::put_UseLinePattern(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.useLinePattern = newVal && m_options.CanUseLinePattern();
+	_options.useLinePattern = newVal && _options.CanUseLinePattern();
 	return S_OK;
 }
 
@@ -89,9 +89,9 @@ STDMETHODIMP CShapeDrawingOptions::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CShapeDrawingOptions::get_Picture(IImage** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_options.picture;
-	if ( m_options.picture )
-		m_options.picture->AddRef();
+	*pVal = _options.picture;
+	if ( _options.picture )
+		_options.picture->AddRef();
 	return S_OK;
 };
 
@@ -127,7 +127,7 @@ STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 		
 		if (width > 0 && height > 0)
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&m_options.picture);
+			Utility::put_ComReference(newVal, (IDispatch**)&_options.picture);
 		}
 	}
 	return S_OK;
@@ -147,10 +147,10 @@ STDMETHODIMP CShapeDrawingOptions::DrawPoint(int** hdc, float x, float y, int cl
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	
 	if (clipWidth == 0)
-		clipWidth = (int)m_options.pointSize + 1;
+		clipWidth = (int)_options.pointSize + 1;
 	
 	if (clipHeight == 0)
-		clipHeight =  (int)m_options.pointSize + 1;
+		clipHeight =  (int)_options.pointSize + 1;
 
 	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor);
 	return S_OK;
@@ -165,10 +165,10 @@ STDMETHODIMP CShapeDrawingOptions::DrawPointVB(int hdc, float x, float y, int cl
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	
 	if (clipWidth == 0)
-		clipWidth = (int)m_options.pointSize + 1;
+		clipWidth = (int)_options.pointSize + 1;
 	
 	if (clipHeight == 0)
-		clipHeight =  (int)m_options.pointSize + 1;
+		clipHeight =  (int)_options.pointSize + 1;
 
 	*retVal = DrawPointCore(dc, x, y, clipWidth, clipHeight, backColor);
 	return S_OK;
@@ -281,9 +281,9 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 		
 		if ( i == 0 )
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
-				pnt->put_X(m_options.verticesSize/2); 
+				pnt->put_X(_options.verticesSize/2); 
 				pnt->put_Y(height/2);
 			}
 			else
@@ -294,14 +294,14 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 		}
 		else if ( i == 1 )
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
 				pnt->put_X(width); 
 				pnt->put_Y(height/2);
 			}
 			else
 			{
-				pnt->put_X(width - m_options.verticesSize/2); 
+				pnt->put_X(width - _options.verticesSize/2); 
 				pnt->put_Y(height/2);
 			}
 		}
@@ -386,10 +386,10 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		
 		if (i == 0 || i == 4)
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
-				pnt->put_X(m_options.verticesSize/2); 
-				pnt->put_Y(m_options.verticesSize/2);
+				pnt->put_X(_options.verticesSize/2); 
+				pnt->put_Y(_options.verticesSize/2);
 			}
 			else
 			{
@@ -399,10 +399,10 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		}
 		else if (i == 1)
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
-				pnt->put_X(width - m_options.verticesSize/2); 
-				pnt->put_Y(m_options.verticesSize/2);
+				pnt->put_X(width - _options.verticesSize/2); 
+				pnt->put_Y(_options.verticesSize/2);
 			}
 			else
 			{
@@ -412,10 +412,10 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		}
 		else if (i == 2)
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
-				pnt->put_X(width - m_options.verticesSize/2); 
-				pnt->put_Y(height - m_options.verticesSize/2); 
+				pnt->put_X(width - _options.verticesSize/2); 
+				pnt->put_Y(height - _options.verticesSize/2); 
 			}
 			else
 			{
@@ -425,10 +425,10 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 		}
 		else if (i == 3)
 		{
-			if (m_options.verticesVisible && drawVertices)
+			if (_options.verticesVisible && drawVertices)
 			{
-				pnt->put_X(m_options.verticesSize/2); 
-				pnt->put_Y(height - m_options.verticesSize/2); 
+				pnt->put_X(_options.verticesSize/2); 
+				pnt->put_Y(height - _options.verticesSize/2); 
 			}
 			else
 			{
@@ -527,14 +527,14 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	bool usePattern = false;
 	if (simpleType == SHP_POLYLINE)
 	{
-		usePattern = m_options.useLinePattern && m_options.CanUseLinePattern();
+		usePattern = _options.useLinePattern && _options.CanUseLinePattern();
 	}
 
 	if (usePattern)
 	{
 		VARIANT_BOOL vbretval;
 		HDC hdcTemp = g.GetHDC();
-		m_options.linePattern->Draw((int**)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, &vbretval);
+		_options.linePattern->Draw((int**)hdcTemp, 0.0f, 0.0f, clipWidth, clipHeight, backColor, &vbretval);
 		g.ReleaseHDC(hdcTemp);
 	}
 	else
@@ -553,9 +553,9 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 		// initializing
 		if (simpleType != SHP_POINT)
 		{
-			m_options.InitGdiPlusBrushAndPen(&rect);
-			if (m_options.penPlus)
-				m_options.penPlus->SetAlignment(Gdiplus::PenAlignmentInset);
+			_options.InitGdiPlusBrushAndPen(&rect);
+			if (_options.penPlus)
+				_options.penPlus->SetAlignment(Gdiplus::PenAlignmentInset);
 		}
 		
 		// drawing
@@ -570,61 +570,61 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 			{
 				Gdiplus::Rect r(points[0].X, points[0].Y, points[1].X, points[1].Y);
 				
-				if (m_options.fillVisible)
+				if (_options.fillVisible)
 				{
 					g.FillRectangle(&brushBackground, r);
-					g.FillRectangle(m_options.brushPlus, r);
+					g.FillRectangle(_options.brushPlus, r);
 				}
 				
-				if (m_options.penPlus)
-					g.DrawRectangle(m_options.penPlus, r);
+				if (_options.penPlus)
+					g.DrawRectangle(_options.penPlus, r);
 			}
 			else
 			{
-				if (m_options.fillVisible)
+				if (_options.fillVisible)
 				{
 					g.FillPolygon(&brushBackground, points, numPoints);
-					g.FillPolygon(m_options.brushPlus, points, numPoints);
+					g.FillPolygon(_options.brushPlus, points, numPoints);
 				}
 
-				if (m_options.penPlus)
-					g.DrawPolygon(m_options.penPlus, points, numPoints);
+				if (_options.penPlus)
+					g.DrawPolygon(_options.penPlus, points, numPoints);
 			}
 		}
 		else if (simpleType == SHP_POLYLINE)
 		{
 			g.SetSmoothingMode(Gdiplus::SmoothingModeDefault);
 
-			if (m_options.penPlus)
-				g.DrawLines(m_options.penPlus, points, numPoints);
+			if (_options.penPlus)
+				g.DrawLines(_options.penPlus, points, numPoints);
 		}
 		else if (simpleType == SHP_POINT)
 		{
 			g.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
 			
-			m_options.DrawPointSymbol(g, dc, points, NULL, 1);
+			_options.DrawPointSymbol(g, dc, points, NULL, 1);
 		}
 
 		// clearing
 		g.SetSmoothingMode(mode);
-		m_options.ReleaseGdiPlusBrush();
-		m_options.ReleaseGdiPlusPen();
+		_options.ReleaseGdiPlusBrush();
+		_options.ReleaseGdiPlusPen();
 	}
 
 	// -----------------------------------------
 	// drawing of vertices
 	// -----------------------------------------
-	if ( m_options.verticesVisible && drawVertices)
+	if ( _options.verticesVisible && drawVertices)
 	{
 		dc->EndPath();
-		m_options.InitGdiVerticesPen(dc);
+		_options.InitGdiVerticesPen(dc);
 		if (simpleType == SHP_POLYLINE || simpleType == SHP_POLYGON )
 		{
-			CPoint* square = m_options.GetVertex();
-			int size = m_options.verticesSize/2;
+			CPoint* square = _options.GetVertex();
+			int size = _options.verticesSize/2;
 			
-			Gdiplus::SolidBrush brush(255<<24 | BGR_TO_RGB(m_options.verticesColor));
-			Gdiplus::Pen pen(255<<24 | BGR_TO_RGB(m_options.verticesColor));
+			Gdiplus::SolidBrush brush(255<<24 | BGR_TO_RGB(_options.verticesColor));
+			Gdiplus::Pen pen(255<<24 | BGR_TO_RGB(_options.verticesColor));
 
 			for (int i = 0; i < numPoints; i++)
 			{
@@ -632,9 +632,9 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 				mtx.Translate((Gdiplus::REAL)points[i].X, (Gdiplus::REAL)points[i].Y);
 				g.SetTransform(&mtx);
 			
-				if ( m_options.verticesType == vtSquare )
+				if ( _options.verticesType == vtSquare )
 				{
-					if (m_options.verticesFillVisible )
+					if (_options.verticesFillVisible )
 					{
 						g.FillPolygon(&brush, reinterpret_cast<Gdiplus::Point*>( square), 4);
 					}
@@ -644,15 +644,15 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 					}
 
 				}
-				else if ( m_options.verticesType == vtCircle )
+				else if ( _options.verticesType == vtCircle )
 				{
-					if (m_options.verticesFillVisible)
+					if (_options.verticesFillVisible)
 					{
-						g.FillEllipse(&brush, -size, -size, m_options.verticesSize, m_options.verticesSize);
+						g.FillEllipse(&brush, -size, -size, _options.verticesSize, _options.verticesSize);
 					}
 					else
 					{
-						g.DrawEllipse(&pen, -size, -size, m_options.verticesSize, m_options.verticesSize);
+						g.DrawEllipse(&pen, -size, -size, _options.verticesSize, _options.verticesSize);
 					}
 				}
 
@@ -661,7 +661,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 			}
 			delete[] square;
 		}
-		m_options.ReleaseGdiBrushAndPen(dc);
+		_options.ReleaseGdiBrushAndPen(dc);
 	}
 	
 	Gdiplus::Graphics gResult(dc->GetSafeHdc());
@@ -689,13 +689,13 @@ STDMETHODIMP CShapeDrawingOptions::GetPointShape(IShape** retval)
 STDMETHODIMP CShapeDrawingOptions::get_PointCharacter (short* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = (short)m_options.pointCharcter;
+	*retVal = (short)_options.pointCharcter;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointCharacter (short newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.pointCharcter = (unsigned char)newVal;
+	_options.pointCharcter = (unsigned char)newVal;
 	return S_OK;
 }
 
@@ -706,14 +706,14 @@ STDMETHODIMP CShapeDrawingOptions::get_FontName(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = A2BSTR(m_options.fontName);
+	*retval = A2BSTR(_options.fontName);
 	return S_OK;
 };	
 STDMETHODIMP CShapeDrawingOptions::put_FontName(BSTR newVal)					
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	m_options.fontName = OLE2CA(newVal);
+	_options.fontName = OLE2CA(newVal);
 	return S_OK;
 };	
 
@@ -724,14 +724,14 @@ STDMETHODIMP CShapeDrawingOptions::get_Tag(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retVal = A2BSTR(m_options.tag);
+	*retVal = A2BSTR(_options.tag);
 	return S_OK;
 };	
 STDMETHODIMP CShapeDrawingOptions::put_Tag(BSTR newVal)					
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	m_options.tag = OLE2CA(newVal);
+	_options.tag = OLE2CA(newVal);
 	return S_OK;
 };	
 
@@ -746,7 +746,7 @@ STDMETHODIMP CShapeDrawingOptions::Clone(IShapeDrawingOptions** retval)
 	CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&sdo);
 	if (sdo)
 	{
-		((CShapeDrawingOptions*)sdo)->put_underlyingOptions(&m_options);
+		((CShapeDrawingOptions*)sdo)->put_underlyingOptions(&_options);
 	}
 	*retval = sdo;
 	return S_OK;
@@ -758,13 +758,13 @@ STDMETHODIMP CShapeDrawingOptions::Clone(IShapeDrawingOptions** retval)
 STDMETHODIMP CShapeDrawingOptions::get_VerticesVisible(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.verticesVisible;
+	*retval = _options.verticesVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_VerticesVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.verticesVisible = newVal;
+	_options.verticesVisible = newVal;
 	return S_OK;
 }
 
@@ -774,13 +774,13 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_VerticesSize(LONG* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.verticesSize;
+	*retval = _options.verticesSize;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_VerticesSize(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.verticesSize = newVal;
+	_options.verticesSize = newVal;
 	return S_OK;
 }
 
@@ -790,13 +790,13 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesSize(LONG newVal)
 STDMETHODIMP CShapeDrawingOptions::get_VerticesColor(OLE_COLOR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.verticesColor;
+	*retval = _options.verticesColor;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_VerticesColor(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.verticesColor = newVal;
+	_options.verticesColor = newVal;
 	return S_OK;
 }
 
@@ -806,13 +806,13 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesColor(OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_VerticesFillVisible(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.verticesFillVisible;
+	*retval = _options.verticesFillVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_VerticesFillVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.verticesFillVisible = newVal;
+	_options.verticesFillVisible = newVal;
 	return S_OK;
 }
 
@@ -822,13 +822,13 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesFillVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_VerticesType(tkVertexType* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.verticesType;
+	*retval = _options.verticesType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_VerticesType(tkVertexType newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.verticesType = newVal;
+	_options.verticesType = newVal;
 	return S_OK;
 }
 
@@ -838,13 +838,13 @@ STDMETHODIMP CShapeDrawingOptions::put_VerticesType(tkVertexType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FrameVisible(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.drawFrame;
+	*retval = _options.drawFrame;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FrameVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		m_options.drawFrame = newVal ? true: false;
+		_options.drawFrame = newVal ? true: false;
 	return S_OK;
 }
 
@@ -854,13 +854,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FrameVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FrameType(tkLabelFrameType* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.frameType;
+	*retval = _options.frameType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FrameType(tkLabelFrameType newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.frameType = newVal;
+	_options.frameType = newVal;
 	return S_OK;
 }
 
@@ -870,10 +870,10 @@ STDMETHODIMP CShapeDrawingOptions::put_FrameType(tkLabelFrameType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_LinePattern(ILinePattern** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = m_options.linePattern;
-	if (m_options.linePattern)
+	*retVal = _options.linePattern;
+	if (_options.linePattern)
 	{
-		m_options.linePattern->AddRef();
+		_options.linePattern->AddRef();
 	}
 
 	return S_OK;
@@ -881,7 +881,7 @@ STDMETHODIMP CShapeDrawingOptions::get_LinePattern(ILinePattern** retVal)
 STDMETHODIMP CShapeDrawingOptions::put_LinePattern(ILinePattern* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&(m_options.linePattern), false);
+	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&(_options.linePattern), false);
 	return S_OK;
 }
 
@@ -899,9 +899,9 @@ STDMETHODIMP CShapeDrawingOptions::SetGradientFill(OLE_COLOR color, short range)
 	unsigned char g = GetGValue(color);
 	unsigned char b = GetBValue(color);
 
-	m_options.fillColor = RGB(MAX(r - range/2, 0) , MAX(g - range/2, 0), MAX(b- range/2,0));
-	m_options.fillColor2 = RGB(MIN(r + range/2, 255) , MIN(g + range/2,255), MIN(b+ range/2,255));
-	m_options.fillType = ftGradient;
+	_options.fillColor = RGB(MAX(r - range/2, 0) , MAX(g - range/2, 0), MAX(b- range/2,0));
+	_options.fillColor2 = RGB(MIN(r + range/2, 255) , MIN(g + range/2,255), MIN(b+ range/2,255));
+	_options.fillType = ftGradient;
 	return S_OK;
 }
 
@@ -912,8 +912,8 @@ STDMETHODIMP CShapeDrawingOptions::SetGradientFill(OLE_COLOR color, short range)
 STDMETHODIMP CShapeDrawingOptions::SetDefaultPointSymbol (tkDefaultPointSymbol symbol)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_options.pointSymbolType = ptSymbolStandard;
-	m_options.rotation = 0.0;
+	_options.pointSymbolType = ptSymbolStandard;
+	_options.rotation = 0.0;
 
 	tkPointShapeType type;
 	double rotation;
@@ -922,10 +922,10 @@ STDMETHODIMP CShapeDrawingOptions::SetDefaultPointSymbol (tkDefaultPointSymbol s
 
 	get_DefaultSymbolOptions(symbol, type, rotation, numSides, sidesRatio);
 	
-	m_options.pointShapeType = type;
-	m_options.rotation = rotation;
-	m_options.pointNumSides = numSides;
-	m_options.pointShapeRatio = sidesRatio;
+	_options.pointShapeType = type;
+	_options.rotation = rotation;
+	_options.pointNumSides = numSides;
+	_options.pointShapeRatio = sidesRatio;
 
 	return S_OK;
 }
@@ -938,13 +938,13 @@ STDMETHODIMP CShapeDrawingOptions::SetDefaultPointSymbol (tkDefaultPointSymbol s
 STDMETHODIMP CShapeDrawingOptions::get_Visible(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = (VARIANT_BOOL)m_options.visible; 	
+	*pVal = (VARIANT_BOOL)_options.visible; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_Visible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.visible = newVal?true:false;	
+	_options.visible = newVal?true:false;	
 	return S_OK;
 }
 
@@ -954,13 +954,13 @@ STDMETHODIMP CShapeDrawingOptions::put_Visible(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillVisible (VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.fillVisible;
+	*pVal = _options.fillVisible;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillVisible (VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.fillVisible = newVal?true:false;	
+	_options.fillVisible = newVal?true:false;	
 	return S_OK;
 }
 
@@ -970,13 +970,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FillVisible (VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_LineVisible (VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.linesVisible; 				
+	*pVal = _options.linesVisible; 				
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineVisible (VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.linesVisible = newVal?true:false;	
+	_options.linesVisible = newVal?true:false;	
 	return S_OK;
 }
 
@@ -986,13 +986,13 @@ STDMETHODIMP CShapeDrawingOptions::put_LineVisible (VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillColor (OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillColor; 		
+	*pVal = _options.fillColor; 		
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillColor (OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.fillColor = newVal;
+	_options.fillColor = newVal;
 	return S_OK;
 }
 
@@ -1002,13 +1002,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FillColor (OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_LineColor (OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.lineColor;
+	*pVal = _options.lineColor;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineColor (OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.lineColor = newVal;		
+	_options.lineColor = newVal;		
 	return S_OK;
 }
 
@@ -1018,7 +1018,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineColor (OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_DrawingMode (tkVectorDrawingMode *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.drawingMode;
+	*pVal = _options.drawingMode;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)	
@@ -1035,7 +1035,7 @@ STDMETHODIMP CShapeDrawingOptions::put_DrawingMode (tkVectorDrawingMode newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillHatchStyle (tkGDIPlusHatchStyle *pVal)	
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillHatchStyle; 	
+	*pVal = _options.fillHatchStyle; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillHatchStyle (tkGDIPlusHatchStyle newVal)
@@ -1043,7 +1043,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillHatchStyle (tkGDIPlusHatchStyle newVa
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= -1 && newVal <= 52)
 	{
-		m_options.fillHatchStyle = newVal;	
+		_options.fillHatchStyle = newVal;	
 	}
 	else
 	{
@@ -1058,7 +1058,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillHatchStyle (tkGDIPlusHatchStyle newVa
 STDMETHODIMP CShapeDrawingOptions::get_LineStipple (tkDashStyle *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.lineStipple; 	
+	*pVal = _options.lineStipple; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)			
@@ -1066,7 +1066,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= 0 && newVal <= 5)
 	{
-		m_options.lineStipple = newVal;	
+		_options.lineStipple = newVal;	
 	}
 	else
 	{
@@ -1081,7 +1081,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineStipple (tkDashStyle newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointShape (tkPointShapeType *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.pointShapeType;
+	*pVal = _options.pointShapeType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointShape (tkPointShapeType newVal)
@@ -1089,7 +1089,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointShape (tkPointShapeType newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal >= 0 && newVal <= 5)
 	{
-		m_options.pointShapeType = newVal;	
+		_options.pointShapeType = newVal;	
 	}
 	else
 	{
@@ -1104,7 +1104,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointShape (tkPointShapeType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillTransparency (float *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.fillTransparency;
+	*pVal = _options.fillTransparency;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillTransparency (float newVal)
@@ -1112,7 +1112,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillTransparency (float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	m_options.fillTransparency = newVal;	
+	_options.fillTransparency = newVal;	
 	return S_OK;
 }
 
@@ -1122,7 +1122,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillTransparency (float newVal)
 STDMETHODIMP CShapeDrawingOptions::get_LineWidth (float *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.lineWidth; 			
+	*pVal = _options.lineWidth; 			
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
@@ -1130,7 +1130,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 1) newVal = 1;
 	if (newVal > 20) newVal = 20;
-	m_options.lineWidth = newVal;		
+	_options.lineWidth = newVal;		
 	return S_OK;
 }
 
@@ -1140,7 +1140,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineWidth (float newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointSize (float *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.pointSize; 							
+	*pVal = _options.pointSize; 							
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSize (float newVal)
@@ -1148,7 +1148,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSize (float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 1) newVal = 1;
 	if (newVal > 100) newVal = 100;
-	m_options.pointSize = newVal;							
+	_options.pointSize = newVal;							
 	return S_OK;
 }
 
@@ -1159,13 +1159,13 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSize (float newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillBgTransparent (VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillBgTransparent; 				
+	*pVal = _options.fillBgTransparent; 				
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillBgTransparent (VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.fillBgTransparent = newVal?true:false;	
+	_options.fillBgTransparent = newVal?true:false;	
 	return S_OK;
 }
 
@@ -1175,13 +1175,13 @@ STDMETHODIMP CShapeDrawingOptions::put_FillBgTransparent (VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillBgColor (OLE_COLOR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillBgColor; 					
+	*pVal = _options.fillBgColor; 					
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillBgColor (OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.fillBgColor = newVal;					
+	_options.fillBgColor = newVal;					
 	return S_OK;
 }
 
@@ -1191,7 +1191,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillBgColor (OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillType (tkFillType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillType; 	
+	*pVal = _options.fillType; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)					
@@ -1199,7 +1199,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= 0 && newVal <= 3)
 	{
-		m_options.fillType = newVal;		
+		_options.fillType = newVal;		
 	}
 	else
 	{
@@ -1214,7 +1214,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillType (tkFillType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillGradientType (tkGradientType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillGradientType; 	
+	*pVal = _options.fillGradientType; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillGradientType (tkGradientType newVal)
@@ -1222,7 +1222,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientType (tkGradientType newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= 0 && newVal <= 2)
 	{
-		m_options.fillGradientType = newVal;	
+		_options.fillGradientType = newVal;	
 	}
 	else
 	{
@@ -1237,7 +1237,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientType (tkGradientType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointType(tkPointSymbolType* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.pointSymbolType;
+	*pVal = _options.pointSymbolType;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)			
@@ -1245,7 +1245,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= 0 && newVal <= 2)
 	{
-		m_options.pointSymbolType = newVal;
+		_options.pointSymbolType = newVal;
 	}
 	else
 	{
@@ -1260,13 +1260,13 @@ STDMETHODIMP CShapeDrawingOptions::put_PointType (tkPointSymbolType newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillColor2 (OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillColor2; 		
+	*pVal = _options.fillColor2; 		
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillColor2 (OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.fillColor2 = newVal;		
+	_options.fillColor2 = newVal;		
 	return S_OK;
 }
 
@@ -1276,7 +1276,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillColor2 (OLE_COLOR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointRotation (double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.rotation; 		
+	*pVal = _options.rotation; 		
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
@@ -1288,7 +1288,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 	}
 	else
 	{
-		m_options.rotation = newVal;		
+		_options.rotation = newVal;		
 	}
 	return S_OK;
 }
@@ -1299,7 +1299,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointRotation (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesCount (long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.pointNumSides;	
+	*pVal = _options.pointNumSides;	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSidesCount (long newVal)
@@ -1307,7 +1307,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesCount (long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal > 20) newVal = 20;
 	if (newVal < 2) newVal = 2;
-	m_options.pointNumSides = newVal;	
+	_options.pointNumSides = newVal;	
 	return S_OK;
 }
 
@@ -1317,7 +1317,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesCount (long newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PointSidesRatio (float *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.pointShapeRatio;
+	*pVal = _options.pointShapeRatio;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PointSidesRatio (float newVal)
@@ -1325,7 +1325,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesRatio (float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 0.1f) newVal = 0.1f;
 	if (newVal > 1.0f) newVal = 1.0f;
-	m_options.pointShapeRatio = newVal;
+	_options.pointShapeRatio = newVal;
 	return S_OK;
 }
 
@@ -1335,7 +1335,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PointSidesRatio (float newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillRotation(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillGradientRotation;	
+	*pVal = _options.fillGradientRotation;	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillRotation (double newVal)
@@ -1347,7 +1347,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillRotation (double newVal)
 	}
 	else
 	{
-		m_options.fillGradientRotation = newVal;
+		_options.fillGradientRotation = newVal;
 	}
 	return S_OK;
 }
@@ -1358,7 +1358,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillRotation (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_FillGradientBounds (tkGradientBounds *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.fillGradientBounds;	
+	*pVal = _options.fillGradientBounds;	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_FillGradientBounds (tkGradientBounds newVal)
@@ -1366,7 +1366,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientBounds (tkGradientBounds newV
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal >= 0 && newVal <= 1)
 	{
-		m_options.fillGradientBounds = newVal;	
+		_options.fillGradientBounds = newVal;	
 	}
 	else
 	{
@@ -1381,7 +1381,7 @@ STDMETHODIMP CShapeDrawingOptions::put_FillGradientBounds (tkGradientBounds newV
 STDMETHODIMP CShapeDrawingOptions::get_LineTransparency(float *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.lineTransparency;
+	*pVal = _options.lineTransparency;
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_LineTransparency(float newVal)
@@ -1389,7 +1389,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineTransparency(float newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	m_options.lineTransparency = newVal;	
+	_options.lineTransparency = newVal;	
 	return S_OK;
 }
 
@@ -1399,7 +1399,7 @@ STDMETHODIMP CShapeDrawingOptions::put_LineTransparency(float newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PictureScaleX(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.scaleX; 	
+	*pVal = _options.scaleX; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PictureScaleX(double newVal)
@@ -1407,7 +1407,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleX(double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 0.1) newVal = 0.1;
 	if (newVal > 5.0) newVal = 5.0;
-	m_options.scaleX = newVal;	
+	_options.scaleX = newVal;	
 	return S_OK;
 }
 
@@ -1417,7 +1417,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleX(double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_PictureScaleY(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.scaleY; 	
+	*pVal = _options.scaleY; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
@@ -1425,7 +1425,7 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
 	if (newVal < 0.1) newVal = 0.1;
 	if (newVal > 5.0) newVal = 5.0;
-	m_options.scaleY = newVal;	
+	_options.scaleY = newVal;	
 	return S_OK;
 }
 #pragma endregion
@@ -1436,13 +1436,13 @@ STDMETHODIMP CShapeDrawingOptions::put_PictureScaleY(double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_AlignPictureByBottom(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.alignIconByBottom; 	
+	*pVal = _options.alignIconByBottom; 	
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_AlignPictureByBottom(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.alignIconByBottom = newVal ? true: false;	
+	_options.alignIconByBottom = newVal ? true: false;	
 	return S_OK;
 }
 
@@ -1469,140 +1469,140 @@ CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName)
 	
 	CDrawingOptionsEx* opt = new CDrawingOptionsEx();
 
-	if (opt->fillBgColor != m_options.fillBgColor)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillBgColor", CPLString().Printf("%d", m_options.fillBgColor));
+	if (opt->fillBgColor != _options.fillBgColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillBgColor", CPLString().Printf("%d", _options.fillBgColor));
 
-	if (opt->fillBgTransparent != m_options.fillBgTransparent)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillBgTransparent", CPLString().Printf("%d", (int)m_options.fillBgTransparent));
+	if (opt->fillBgTransparent != _options.fillBgTransparent)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillBgTransparent", CPLString().Printf("%d", (int)_options.fillBgTransparent));
 
-	if (opt->fillColor != m_options.fillColor)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillColor", CPLString().Printf("%d", m_options.fillColor));
+	if (opt->fillColor != _options.fillColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillColor", CPLString().Printf("%d", _options.fillColor));
 
-	if (opt->fillColor2 != m_options.fillColor2)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillColor2", CPLString().Printf("%d", m_options.fillColor2));
+	if (opt->fillColor2 != _options.fillColor2)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillColor2", CPLString().Printf("%d", _options.fillColor2));
 	
-	if (opt->fillGradientBounds != m_options.fillGradientBounds)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientBounds", CPLString().Printf("%d", (int)m_options.fillGradientBounds));
+	if (opt->fillGradientBounds != _options.fillGradientBounds)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientBounds", CPLString().Printf("%d", (int)_options.fillGradientBounds));
 	
-	if (opt->fillGradientRotation != m_options.fillGradientRotation)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientRotation", CPLString().Printf("%f", m_options.fillGradientRotation));
+	if (opt->fillGradientRotation != _options.fillGradientRotation)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientRotation", CPLString().Printf("%f", _options.fillGradientRotation));
 	
-	if (opt->fillGradientType != m_options.fillGradientType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientType", CPLString().Printf("%d", (int)m_options.fillGradientType));
+	if (opt->fillGradientType != _options.fillGradientType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillGradientType", CPLString().Printf("%d", (int)_options.fillGradientType));
 	
-	if (opt->fillHatchStyle != m_options.fillHatchStyle)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillHatchStyle", CPLString().Printf("%d", (int)m_options.fillHatchStyle));
+	if (opt->fillHatchStyle != _options.fillHatchStyle)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillHatchStyle", CPLString().Printf("%d", (int)_options.fillHatchStyle));
 	
-	if (opt->fillTransparency != m_options.fillTransparency)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillTransparency", CPLString().Printf("%f", m_options.fillTransparency));
+	if (opt->fillTransparency != _options.fillTransparency)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillTransparency", CPLString().Printf("%f", _options.fillTransparency));
 	
-	if (opt->fillType != m_options.fillType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillType", CPLString().Printf("%d", (int)m_options.fillType));
+	if (opt->fillType != _options.fillType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillType", CPLString().Printf("%d", (int)_options.fillType));
 	
-	if (opt->fillVisible != m_options.fillVisible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillVisible", CPLString().Printf("%d", (int)m_options.fillVisible));
+	if (opt->fillVisible != _options.fillVisible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FillVisible", CPLString().Printf("%d", (int)_options.fillVisible));
 	
-	if (opt->fontName != m_options.fontName)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FontName", m_options.fontName);
+	if (opt->fontName != _options.fontName)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FontName", _options.fontName);
 	
-	if (opt->lineColor != m_options.lineColor)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineColor", CPLString().Printf("%d", m_options.lineColor));
+	if (opt->lineColor != _options.lineColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineColor", CPLString().Printf("%d", _options.lineColor));
 
-	if (opt->lineTransparency != m_options.lineTransparency)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineTransparency", CPLString().Printf("%f", m_options.lineTransparency));
+	if (opt->lineTransparency != _options.lineTransparency)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineTransparency", CPLString().Printf("%f", _options.lineTransparency));
 	
-	if (opt->lineStipple != m_options.lineStipple)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineStipple", CPLString().Printf("%d", (int)m_options.lineStipple));
+	if (opt->lineStipple != _options.lineStipple)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineStipple", CPLString().Printf("%d", (int)_options.lineStipple));
 	
-	if (opt->linesVisible != m_options.linesVisible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LinesVisible", CPLString().Printf("%d", (int)m_options.linesVisible));
+	if (opt->linesVisible != _options.linesVisible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LinesVisible", CPLString().Printf("%d", (int)_options.linesVisible));
 	
-	if (opt->lineWidth != m_options.lineWidth)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineWidth", CPLString().Printf("%f", m_options.lineWidth));
+	if (opt->lineWidth != _options.lineWidth)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "LineWidth", CPLString().Printf("%f", _options.lineWidth));
 	
-	if (opt->pointCharcter != m_options.pointCharcter)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointCharcter", CPLString().Printf("%d", (int)m_options.pointCharcter));
+	if (opt->pointCharcter != _options.pointCharcter)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointCharcter", CPLString().Printf("%d", (int)_options.pointCharcter));
 	
-	if (opt->pointColor != m_options.pointColor)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointColor", CPLString().Printf("%d", m_options.pointColor));
+	if (opt->pointColor != _options.pointColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointColor", CPLString().Printf("%d", _options.pointColor));
 	
-	if (opt->pointNumSides != m_options.pointNumSides)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointNumSides", CPLString().Printf("%d", m_options.pointNumSides));
+	if (opt->pointNumSides != _options.pointNumSides)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointNumSides", CPLString().Printf("%d", _options.pointNumSides));
 	
-	if (opt->pointShapeRatio != m_options.pointShapeRatio)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeRatio", CPLString().Printf("%f", m_options.pointShapeRatio));
+	if (opt->pointShapeRatio != _options.pointShapeRatio)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeRatio", CPLString().Printf("%f", _options.pointShapeRatio));
 	
-	if (opt->pointShapeType != m_options.pointShapeType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeType", CPLString().Printf("%d", (int)m_options.pointShapeType));
+	if (opt->pointShapeType != _options.pointShapeType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointShapeType", CPLString().Printf("%d", (int)_options.pointShapeType));
 	
-	if (opt->pointSize != m_options.pointSize)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSize", CPLString().Printf("%f", m_options.pointSize));
+	if (opt->pointSize != _options.pointSize)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSize", CPLString().Printf("%f", _options.pointSize));
 	
-	if (opt->pointSymbolType != m_options.pointSymbolType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSymbolType", CPLString().Printf("%d", (int)m_options.pointSymbolType));
+	if (opt->pointSymbolType != _options.pointSymbolType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "PointSymbolType", CPLString().Printf("%d", (int)_options.pointSymbolType));
 	
-	if (opt->rotation != m_options.rotation)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "Rotation", CPLString().Printf("%f", m_options.rotation));
+	if (opt->rotation != _options.rotation)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Rotation", CPLString().Printf("%f", _options.rotation));
 	
-	if (opt->scaleX != m_options.scaleX)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleX", CPLString().Printf("%f", m_options.scaleX));
+	if (opt->scaleX != _options.scaleX)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleX", CPLString().Printf("%f", _options.scaleX));
 	
-	if (opt->scaleY != m_options.scaleY)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleY", CPLString().Printf("%f", m_options.scaleY));
+	if (opt->scaleY != _options.scaleY)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ScaleY", CPLString().Printf("%f", _options.scaleY));
 	
-	if (opt->verticesColor != m_options.verticesColor)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesColor", CPLString().Printf("%d", m_options.verticesColor));
+	if (opt->verticesColor != _options.verticesColor)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesColor", CPLString().Printf("%d", _options.verticesColor));
 	
-	if (opt->verticesFillVisible != m_options.verticesFillVisible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesFillVisible", CPLString().Printf("%d", (int)m_options.verticesFillVisible));
+	if (opt->verticesFillVisible != _options.verticesFillVisible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesFillVisible", CPLString().Printf("%d", (int)_options.verticesFillVisible));
 	
-	if (opt->verticesSize != m_options.verticesSize)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesSize", CPLString().Printf("%d", m_options.verticesSize));
+	if (opt->verticesSize != _options.verticesSize)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesSize", CPLString().Printf("%d", _options.verticesSize));
 	
-	if (opt->verticesType != m_options.verticesType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesType", CPLString().Printf("%d", (int)m_options.verticesType));
+	if (opt->verticesType != _options.verticesType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesType", CPLString().Printf("%d", (int)_options.verticesType));
 	
-	if (opt->verticesVisible != m_options.verticesVisible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesVisible", CPLString().Printf("%d", (int)m_options.verticesVisible));
+	if (opt->verticesVisible != _options.verticesVisible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "VerticesVisible", CPLString().Printf("%d", (int)_options.verticesVisible));
 		
-	if (opt->visible != m_options.visible)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)m_options.visible));
+	if (opt->visible != _options.visible)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_options.visible));
 
-	if (opt->useLinePattern != m_options.useLinePattern)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseLinePattern", CPLString().Printf("%d", (int)m_options.useLinePattern));
+	if (opt->useLinePattern != _options.useLinePattern)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseLinePattern", CPLString().Printf("%d", (int)_options.useLinePattern));
 
-	if (opt->alignIconByBottom != m_options.alignIconByBottom)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "AlignPictureByBottom", CPLString().Printf("%d", (int)m_options.alignIconByBottom));
+	if (opt->alignIconByBottom != _options.alignIconByBottom)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "AlignPictureByBottom", CPLString().Printf("%d", (int)_options.alignIconByBottom));
 
-	if (opt->drawFrame != m_options.drawFrame)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameVisible", CPLString().Printf("%d", (int)m_options.drawFrame));
+	if (opt->drawFrame != _options.drawFrame)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameVisible", CPLString().Printf("%d", (int)_options.drawFrame));
 
-	if (opt->frameType != m_options.frameType)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameType", CPLString().Printf("%d", (int)m_options.frameType));
+	if (opt->frameType != _options.frameType)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FrameType", CPLString().Printf("%d", (int)_options.frameType));
 
-	if (opt->dynamicVisibility != m_options.dynamicVisibility)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "DynamicVisibility", CPLString().Printf("%d", (int)m_options.dynamicVisibility));
+	if (opt->dynamicVisibility != _options.dynamicVisibility)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "DynamicVisibility", CPLString().Printf("%d", (int)_options.dynamicVisibility));
 	
-	if (opt->minVisibleScale != m_options.minVisibleScale)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleScale", CPLString().Printf("%f", m_options.minVisibleScale));
+	if (opt->minVisibleScale != _options.minVisibleScale)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleScale", CPLString().Printf("%f", _options.minVisibleScale));
 	
-	if (opt->maxVisibleScale != m_options.maxVisibleScale)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", m_options.maxVisibleScale));
+	if (opt->maxVisibleScale != _options.maxVisibleScale)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleScale", CPLString().Printf("%f", _options.maxVisibleScale));
 	
 	delete opt;
 
-	if (m_options.linePattern)
+	if (_options.linePattern)
 	{
-		CPLXMLNode* psNode = ((CLinePattern*)m_options.linePattern)->SerializeCore("LinePatternClass");
+		CPLXMLNode* psNode = ((CLinePattern*)_options.linePattern)->SerializeCore("LinePatternClass");
 		if (psNode)
 		{
 			CPLAddXMLChild(psTree, psNode);
 		}
 	}
 	
-	if (m_options.picture)
+	if (_options.picture)
 	{
-		CPLXMLNode* psNode = ((CImageClass*)m_options.picture)->SerializeCore(VARIANT_TRUE, "Picture");
+		CPLXMLNode* psNode = ((CImageClass*)_options.picture)->SerializeCore(VARIANT_TRUE, "Picture");
 		if (psNode)
 		{
 			CPLAddXMLChild(psTree, psNode);
@@ -1626,121 +1626,121 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	CString s;
 	
 	s = CPLGetXMLValue( node, "FillBgColor", NULL );
-	m_options.fillBgColor = (s == "") ? opt->fillBgColor : (OLE_COLOR)atoi(s.GetString());
+	_options.fillBgColor = (s == "") ? opt->fillBgColor : (OLE_COLOR)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "FillBgTransparent", NULL );
-	m_options.fillBgTransparent = (s == "") ? opt->fillBgTransparent : atoi(s.GetString()) == 0 ? false : true;
+	_options.fillBgTransparent = (s == "") ? opt->fillBgTransparent : atoi(s.GetString()) == 0 ? false : true;
 
 	s = CPLGetXMLValue( node, "FillColor", NULL );
-	m_options.fillColor = (s == "") ? opt->fillColor : (OLE_COLOR)atoi(s.GetString());
+	_options.fillColor = (s == "") ? opt->fillColor : (OLE_COLOR)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "FillColor2", NULL );
-	m_options.fillColor2 = (s == "") ? opt->fillColor2 : (OLE_COLOR)atoi(s.GetString());
+	_options.fillColor2 = (s == "") ? opt->fillColor2 : (OLE_COLOR)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "FillGradientBounds", NULL );
-	m_options.fillGradientBounds = (s == "") ? opt->fillGradientBounds : (tkGradientBounds)atoi(s.GetString());
+	_options.fillGradientBounds = (s == "") ? opt->fillGradientBounds : (tkGradientBounds)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "FillGradientRotation", NULL );
-	m_options.fillGradientRotation = (s == "") ? opt->fillGradientRotation : Utility::atof_custom(s);
+	_options.fillGradientRotation = (s == "") ? opt->fillGradientRotation : Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "FillGradientType", NULL );
-	m_options.fillGradientType = (s == "") ? opt->fillGradientType : (tkGradientType)atoi(s.GetString());
+	_options.fillGradientType = (s == "") ? opt->fillGradientType : (tkGradientType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "FillHatchStyle", NULL );
-	m_options.fillHatchStyle = (s == "") ? opt->fillHatchStyle : (tkGDIPlusHatchStyle)atoi(s.GetString());
+	_options.fillHatchStyle = (s == "") ? opt->fillHatchStyle : (tkGDIPlusHatchStyle)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "FillTransparency", NULL );
-	m_options.fillTransparency = (s == "") ? opt->fillTransparency : (float)Utility::atof_custom(s);
+	_options.fillTransparency = (s == "") ? opt->fillTransparency : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "FillType", NULL );
-	m_options.fillType = (s == "") ? opt->fillType : (tkFillType)atoi(s.GetString());
+	_options.fillType = (s == "") ? opt->fillType : (tkFillType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "FillVisible", NULL );
-	m_options.fillVisible = (s == "") ? opt->fillVisible : atoi(s.GetString()) == 0 ? false : true;
+	_options.fillVisible = (s == "") ? opt->fillVisible : atoi(s.GetString()) == 0 ? false : true;
 
 	s = CPLGetXMLValue( node, "FontName", NULL );
-	m_options.fontName = (s == "") ? opt->fontName : s.GetString();
+	_options.fontName = (s == "") ? opt->fontName : s.GetString();
 
 	s = CPLGetXMLValue( node, "LineColor", NULL );
-	m_options.lineColor = (s == "") ? opt->lineColor : (OLE_COLOR)atoi(s.GetString());
+	_options.lineColor = (s == "") ? opt->lineColor : (OLE_COLOR)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "LineStipple", NULL );
-	m_options.lineStipple = (s == "") ? opt->lineStipple : (tkDashStyle)atoi(s.GetString());
+	_options.lineStipple = (s == "") ? opt->lineStipple : (tkDashStyle)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "LineTransparency", NULL );
-	m_options.lineTransparency = (s == "") ? opt->lineTransparency : (float)Utility::atof_custom(s);
+	_options.lineTransparency = (s == "") ? opt->lineTransparency : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "LinesVisible", NULL );
-	m_options.linesVisible = (s == "") ? opt->linesVisible : atoi(s.GetString()) == 0 ? false : true;
+	_options.linesVisible = (s == "") ? opt->linesVisible : atoi(s.GetString()) == 0 ? false : true;
 
 	s = CPLGetXMLValue( node, "LineWidth", NULL );
-	m_options.lineWidth = (s == "") ? opt->lineWidth : (float)Utility::atof_custom(s);
+	_options.lineWidth = (s == "") ? opt->lineWidth : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "PointCharcter", NULL );
-	m_options.pointCharcter = (s == "") ? opt->pointCharcter : (unsigned char)atoi(s.GetString());
+	_options.pointCharcter = (s == "") ? opt->pointCharcter : (unsigned char)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "PointColor", NULL );
-	m_options.pointColor = (s == "") ? opt->pointColor : (OLE_COLOR)atoi(s.GetString());
+	_options.pointColor = (s == "") ? opt->pointColor : (OLE_COLOR)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "PointNumSides", NULL );
-	m_options.pointNumSides = (s == "") ? opt->pointNumSides : atoi(s.GetString());
+	_options.pointNumSides = (s == "") ? opt->pointNumSides : atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "PointShapeRatio", NULL );
-	m_options.pointShapeRatio = (s == "") ? opt->pointShapeRatio : (float)Utility::atof_custom(s);
+	_options.pointShapeRatio = (s == "") ? opt->pointShapeRatio : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "PointShapeType", NULL );
-	m_options.pointShapeType = (s == "") ? opt->pointShapeType : (tkPointShapeType)atoi(s.GetString());
+	_options.pointShapeType = (s == "") ? opt->pointShapeType : (tkPointShapeType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "PointSize", NULL );
-	m_options.pointSize = (s == "") ? opt->pointSize : (float)Utility::atof_custom(s);
+	_options.pointSize = (s == "") ? opt->pointSize : (float)Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "PointSymbolType", NULL );
-	m_options.pointSymbolType = (s == "") ? opt->pointSymbolType : (tkPointSymbolType)atoi(s.GetString());
+	_options.pointSymbolType = (s == "") ? opt->pointSymbolType : (tkPointSymbolType)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "Rotation", NULL );
-	m_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
+	_options.rotation = (s == "") ? opt->rotation : Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( node, "ScaleX", NULL );
-	m_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);
+	_options.scaleX = (s == "") ? opt->scaleX : Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( node, "ScaleY", NULL );
-	m_options.scaleY = (s == "") ? opt->scaleY : Utility::atof_custom(s);
+	_options.scaleY = (s == "") ? opt->scaleY : Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( node, "VerticesColor", NULL );
-	m_options.verticesColor = (s == "") ? opt->verticesColor : atoi(s);
+	_options.verticesColor = (s == "") ? opt->verticesColor : atoi(s);
 
 	s = CPLGetXMLValue( node, "VerticesFillVisible", NULL );
-	m_options.verticesFillVisible = (s == "") ? opt->verticesFillVisible : (VARIANT_BOOL)atoi(s.GetString());
+	_options.verticesFillVisible = (s == "") ? opt->verticesFillVisible : (VARIANT_BOOL)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "VerticesSize", NULL );
-	m_options.verticesSize = (s == "") ? opt->verticesSize : atoi(s.GetString());
+	_options.verticesSize = (s == "") ? opt->verticesSize : atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "VerticesType", NULL );
-	m_options.verticesSize = (s == "") ? opt->verticesSize : (tkVertexType)atoi(s.GetString());
+	_options.verticesSize = (s == "") ? opt->verticesSize : (tkVertexType)atoi(s.GetString());
 
 	s = CPLGetXMLValue( node, "VerticesVisible", NULL );
-	m_options.verticesVisible = (s == "") ? opt->verticesVisible : (VARIANT_BOOL)atoi(s.GetString());
+	_options.verticesVisible = (s == "") ? opt->verticesVisible : (VARIANT_BOOL)atoi(s.GetString());
 	
 	s = CPLGetXMLValue( node, "Visible", NULL );
-	m_options.visible = (s == "") ? opt->visible : atoi(s.GetString()) == 0 ? false : true;
+	_options.visible = (s == "") ? opt->visible : atoi(s.GetString()) == 0 ? false : true;
 	
 	s = CPLGetXMLValue( node, "AlignPictureByBottom", NULL );
-	m_options.alignIconByBottom = (s == "") ? opt->alignIconByBottom : atoi(s.GetString()) == 0 ? false : true;
+	_options.alignIconByBottom = (s == "") ? opt->alignIconByBottom : atoi(s.GetString()) == 0 ? false : true;
 
 	s = CPLGetXMLValue( node, "FrameVisible", NULL );
-	m_options.drawFrame = (s == "") ? opt->drawFrame : atoi(s.GetString()) == 0 ? false : true;
+	_options.drawFrame = (s == "") ? opt->drawFrame : atoi(s.GetString()) == 0 ? false : true;
 
 	s = CPLGetXMLValue( node, "FrameType", NULL );
-	m_options.frameType = (s == "") ? opt->frameType : (tkLabelFrameType)atoi(s.GetString());
+	_options.frameType = (s == "") ? opt->frameType : (tkLabelFrameType)atoi(s.GetString());
 
 	s = CPLGetXMLValue(node, "DynamicVisibility", NULL);
-	m_options.dynamicVisibility = (s == "") ? opt->dynamicVisibility : atoi(s.GetString()) == 0 ? false : true;
+	_options.dynamicVisibility = (s == "") ? opt->dynamicVisibility : atoi(s.GetString()) == 0 ? false : true;
 	
 	s = CPLGetXMLValue(node, "MinVisibleScale", NULL);
-	m_options.minVisibleScale = (s == "") ? opt->minVisibleScale : Utility::atof_custom(s);
+	_options.minVisibleScale = (s == "") ? opt->minVisibleScale : Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue(node, "MaxVisibleScale", NULL);
-	m_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
+	_options.maxVisibleScale = (s == "") ? opt->maxVisibleScale : Utility::atof_custom(s);
 
 	// restoring picture
 	CPLXMLNode* psChild = CPLGetXMLNode(node, "Picture");
@@ -1771,16 +1771,16 @@ bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node)
 	}
 	else
 	{
-		if (m_options.linePattern)
+		if (_options.linePattern)
 		{
-			m_options.linePattern->Clear();
-			m_options.linePattern->Release();
-			m_options.linePattern = NULL;
+			_options.linePattern->Clear();
+			_options.linePattern->Release();
+			_options.linePattern = NULL;
 		}
 	}
 
 	s = CPLGetXMLValue( node, "UseLinePattern", NULL );
-	m_options.useLinePattern = (s == "") ? opt->useLinePattern : atoi(s.GetString()) == 0 ? false : true;
+	_options.useLinePattern = (s == "") ? opt->useLinePattern : atoi(s.GetString()) == 0 ? false : true;
 
 	delete opt;
 
@@ -1815,13 +1815,13 @@ STDMETHODIMP CShapeDrawingOptions::Deserialize(BSTR newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MinScale (double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.minScale; 			
+	*pVal = _options.minScale; 			
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MinScale (double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.minScale = newVal;		
+	_options.minScale = newVal;		
 	return S_OK;
 }
 
@@ -1831,13 +1831,13 @@ STDMETHODIMP CShapeDrawingOptions::put_MinScale (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MaxScale (double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.maxScale; 			
+	*pVal = _options.maxScale; 			
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MaxScale (double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.maxScale = newVal;		
+	_options.maxScale = newVal;		
 	return S_OK;
 }
 
@@ -1847,13 +1847,13 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxScale (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MinLineWidth (double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.minLineWidth; 			
+	*pVal = _options.minLineWidth; 			
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MinLineWidth (double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.minLineWidth = newVal;		
+	_options.minLineWidth = newVal;		
 	return S_OK;
 }
 
@@ -1863,13 +1863,13 @@ STDMETHODIMP CShapeDrawingOptions::put_MinLineWidth (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MaxLineWidth (double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	*pVal = m_options.maxLineWidth; 			
+	*pVal = _options.maxLineWidth; 			
 	return S_OK;
 }
 STDMETHODIMP CShapeDrawingOptions::put_MaxLineWidth (double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()); 
-	m_options.maxLineWidth = newVal;		
+	_options.maxLineWidth = newVal;		
 	return S_OK;
 }
 
@@ -1879,13 +1879,13 @@ STDMETHODIMP CShapeDrawingOptions::put_MaxLineWidth (double newVal)
 STDMETHODIMP CShapeDrawingOptions::get_DynamicVisibility(VARIANT_BOOL* pVal)
  {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.dynamicVisibility ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = _options.dynamicVisibility ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 };
 STDMETHODIMP CShapeDrawingOptions::put_DynamicVisibility(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.dynamicVisibility = newVal == VARIANT_TRUE;
+	_options.dynamicVisibility = newVal == VARIANT_TRUE;
 	return S_OK;
 };
 
@@ -1895,13 +1895,13 @@ STDMETHODIMP CShapeDrawingOptions::put_DynamicVisibility(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MinVisibleScale(DOUBLE* pVal)
  {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.minVisibleScale;
+	*pVal = _options.minVisibleScale;
 	return S_OK;
 };
 STDMETHODIMP CShapeDrawingOptions::put_MinVisibleScale(DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.minVisibleScale = newVal;
+	_options.minVisibleScale = newVal;
 	return S_OK;
 };
 
@@ -1911,12 +1911,12 @@ STDMETHODIMP CShapeDrawingOptions::put_MinVisibleScale(DOUBLE newVal)
 STDMETHODIMP CShapeDrawingOptions::get_MaxVisibleScale(DOUBLE* pVal)
  {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_options.maxVisibleScale;
+	*pVal = _options.maxVisibleScale;
 	return S_OK;
 };
 STDMETHODIMP CShapeDrawingOptions::put_MaxVisibleScale(DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_options.maxVisibleScale = newVal;
+	_options.maxVisibleScale = newVal;
 	return S_OK;
 };

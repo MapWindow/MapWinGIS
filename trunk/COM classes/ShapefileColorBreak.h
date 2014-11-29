@@ -35,24 +35,24 @@ class ATL_NO_VTABLE CShapefileColorBreak :
 public:
 	CShapefileColorBreak()
 	{
-		VariantInit(&startValue);
-		VariantInit(&endValue);
-		m_Visible = VARIANT_TRUE;
+		VariantInit(&_startValue);
+		VariantInit(&_endValue);
+		_visible = VARIANT_TRUE;
 	}
 	~CShapefileColorBreak()
 	{	
-		VariantClear(&startValue);
-		VariantClear(&endValue);
+		VariantClear(&_startValue);
+		VariantClear(&_endValue);
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILELEGENDBREAK)
+	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILELEGENDBREAK)
 
-DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-BEGIN_COM_MAP(CShapefileColorBreak)
-	COM_INTERFACE_ENTRY(IShapefileColorBreak)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CShapefileColorBreak)
+		COM_INTERFACE_ENTRY(IShapefileColorBreak)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 // IShapefileColorBreak
 public:
@@ -66,17 +66,17 @@ public:
 	STDMETHOD(put_StartValue)(/*[in]*/ VARIANT newVal);
 	STDMETHOD(get_Visible)(/*[out, retval]*/ VARIANT_BOOL *pVal);
 	STDMETHOD(put_Visible)(/*[in]*/ VARIANT_BOOL newVal);
-
-private:
-	VARIANT startValue;
-	VARIANT endValue;
-	CString m_Caption;
-	OLE_COLOR startColor;
-	OLE_COLOR endColor;
-	VARIANT_BOOL m_Visible;
-public:
 	STDMETHOD(get_Caption)(BSTR* pVal);
 	STDMETHOD(put_Caption)(BSTR newVal);
+
+private:
+	VARIANT _startValue;
+	VARIANT _endValue;
+	CString _caption;
+	OLE_COLOR _startColor;
+	OLE_COLOR _endColor;
+	VARIANT_BOOL _visible;
+	
 };
 
 #endif //__SHAPEFILELEGENDBREAK_H_

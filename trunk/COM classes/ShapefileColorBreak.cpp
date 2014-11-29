@@ -38,15 +38,15 @@ STDMETHODIMP CShapefileColorBreak::get_StartValue(VARIANT *pVal)
 {
 	VariantClear(pVal);
 	VariantInit(pVal);
-	VariantCopy(pVal,&startValue);
+	VariantCopy(pVal,&_startValue);
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_StartValue(VARIANT newVal)
 {
-	VariantClear(&startValue);	
-	VariantInit(&startValue);	
-	VariantCopy(&startValue,&newVal);
+	VariantClear(&_startValue);	
+	VariantInit(&_startValue);	
+	VariantCopy(&_startValue,&newVal);
 	return S_OK;
 }
 
@@ -54,39 +54,39 @@ STDMETHODIMP CShapefileColorBreak::get_EndValue(VARIANT *pVal)
 {
 	VariantClear(pVal);
 	VariantInit(pVal);
-	VariantCopy(pVal,&endValue);
+	VariantCopy(pVal,&_endValue);
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_EndValue(VARIANT newVal)
 {
-	VariantClear(&endValue);
-	VariantInit(&endValue);	
-	VariantCopy(&endValue,&newVal);
+	VariantClear(&_endValue);
+	VariantInit(&_endValue);	
+	VariantCopy(&_endValue,&newVal);
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::get_StartColor(OLE_COLOR *pVal)
 {
-	*pVal = startColor;
+	*pVal = _startColor;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_StartColor(OLE_COLOR newVal)
 {
-	startColor = newVal;
+	_startColor = newVal;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::get_EndColor(OLE_COLOR *pVal)
 {
-	*pVal = endColor;
+	*pVal = _endColor;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorBreak::put_EndColor(OLE_COLOR newVal)
 {
-	endColor = newVal;
+	_endColor = newVal;
 	return S_OK;
 }
 
@@ -94,7 +94,7 @@ STDMETHODIMP CShapefileColorBreak::get_Visible(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = m_Visible;
+	*pVal = _visible;
 
 	return S_OK;
 }
@@ -103,7 +103,7 @@ STDMETHODIMP CShapefileColorBreak::put_Visible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_Visible = newVal;
+	_visible = newVal;
 
 	return S_OK;
 }
@@ -113,7 +113,7 @@ STDMETHODIMP CShapefileColorBreak::get_Caption(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = m_Caption.AllocSysString();
+	*pVal = _caption.AllocSysString();
 
 	return S_OK;
 }
@@ -122,7 +122,7 @@ STDMETHODIMP CShapefileColorBreak::put_Caption(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_Caption = newVal;
+	_caption = newVal;
 
 	return S_OK;
 }

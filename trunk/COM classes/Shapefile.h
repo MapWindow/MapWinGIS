@@ -237,8 +237,9 @@ public:
 	STDMETHOD(Move)(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal);
 
 private:
+
 	// data for point in shapefile test
-	struct ShapeHeader 
+	struct ShapeHeader
 	{
 		double MinX, MinY;
 		double MaxX, MaxY;
@@ -251,6 +252,9 @@ private:
 		std::vector<Point2D> Points;
 		std::vector<int> Parts;
 	};
+
+private:
+
 	std::vector<PolygonShapefile> _polySf;
 	
 	tkShapefileSourceType _sourceType;		// is it disk-based or in-memory?

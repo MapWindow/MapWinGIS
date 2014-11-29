@@ -33,7 +33,7 @@ class ATL_NO_VTABLE CESRIGridManager :
 {
 public:
 	CESRIGridManager()
-	{	globalCallback = NULL;
+	{	_globalCallback = NULL;
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -68,8 +68,8 @@ public:
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 
 private:
-	ICallback * globalCallback;
-	GridManager gm;
+	ICallback * _globalCallback;
+	GridManager _gm;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ESRIGridManager), CESRIGridManager)

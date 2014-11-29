@@ -166,7 +166,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 
 	CComBSTR bstr;
 	gridheader->get_Projection(&bstr);
-	rasterDataset->SetProjection(OLE2A(bstr));		// TODO: perhaps it should be converted into WKT format
+	_rasterDataset->SetProjection(OLE2A(bstr));		// TODO: perhaps it should be converted into WKT format
 
 	if (imageFormat == gpfTiffProxy)
 	{
@@ -178,7 +178,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		adfGeoTransform[GEOTRSFRM_TOPLEFT_Y] = yll + ((nrows - 0.5) * dy);
 		adfGeoTransform[GEOTRSFRM_ROTATION_PARAM2] = 0;
 		adfGeoTransform[GEOTRSFRM_NS_RES] = -dy;
-		rasterDataset->SetGeoTransform(adfGeoTransform);
+		_rasterDataset->SetGeoTransform(adfGeoTransform);
 	}
 
 	// the main processing
@@ -238,7 +238,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		}
 		else 
 		{
-			GdalHelper::BuildOverviewsIfNeeded(imageFile, false, globalCallback);		// built-in overviews
+			GdalHelper::BuildOverviewsIfNeeded(imageFile, false, _globalCallback);		// built-in overviews
 		}
 	}
 	return S_OK;
@@ -253,10 +253,10 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	USES_CONVERSION;
 	*retval = NULL;
 
-	if (globalCallback == NULL && cBack != NULL)
+	if (_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 	
 	CComPtr<IGridHeader> gridheader = NULL;
@@ -316,7 +316,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	}
 	else
 	{
-		CanScanlineBuffer = (MemoryAvailable(ncols * (sizeof(_int32)* 3)));
+		_canScanlineBuffer = (MemoryAvailable(ncols * (sizeof(_int32)* 3)));
 	}
 
 	std::deque<BreakVal> bvals;
@@ -328,7 +328,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	for( int j = nrows-1; j >= 0; j-- )
 	{				
 		// it could be more smooth in the nested cycle but better to spare performance 
-		Utility::DisplayProgress(globalCallback, (nrows - j - 1)*ncols - 1, (int)total, "GridToImage", key, percent);
+		Utility::DisplayProgress(_globalCallback, (nrows - j - 1)*ncols - 1, (int)total, "GridToImage", _key, percent);
 
 		for( int i = 0; i < ncols; i++ )
 		{	
@@ -563,15 +563,15 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 
 		FinalizeAndCloseBitmap(ncols);
 
-		if (rasterDataset != NULL)
+		if (_rasterDataset != NULL)
 		{
-			rasterDataset->FlushCache();
-			GDALClose(rasterDataset);
-			rasterDataset = NULL;
+			_rasterDataset->FlushCache();
+			GDALClose(_rasterDataset);
+			_rasterDataset = NULL;
 		}
 	}
 
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 }
 
 #pragma region Write disk-based
@@ -600,19 +600,19 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 	}
 
 	m_globalSettings.SetGdalUtf8(true);
-	rasterDataset = poDriver->Create(Utility::ConvertToUtf8(filename), cols, rows, 3, GDT_Byte, papszOptions);
+	_rasterDataset = poDriver->Create(Utility::ConvertToUtf8(filename), cols, rows, 3, GDT_Byte, papszOptions);
 	m_globalSettings.SetGdalUtf8(false);
 
 	if (hasOptions) {
 		CSLDestroy( papszOptions );
 	}
 
-	if (rasterDataset)
+	if (_rasterDataset)
 	{
-		poBand_R = rasterDataset->GetRasterBand(1);
-		poBand_G = rasterDataset->GetRasterBand(2);
-		poBand_B = rasterDataset->GetRasterBand(3);
-		if (poBand_R != NULL && poBand_G != NULL && poBand_B != NULL)
+		_poBandR = _rasterDataset->GetRasterBand(1);
+		_poBandG = _rasterDataset->GetRasterBand(2);
+		_poBandB = _rasterDataset->GetRasterBand(3);
+		if (_poBandR != NULL && _poBandG != NULL && _poBandB != NULL)
 		{
 			*retval = S_OK;
 			return;
@@ -626,116 +626,116 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 // *************************************************************
 inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gvalue, _int32 Bvalue, long totalWidth)
 {
-	if (BufferANum == row)
+	if (_bufferANum == row)
 	{
-		BufferA_R[col] = Rvalue;
-		BufferA_G[col] = Gvalue;
-		BufferA_B[col] = Bvalue;
-		BufferLastUsed = 'A';
+		_bufferA_R[col] = Rvalue;
+		_bufferA_G[col] = Gvalue;
+		_bufferA_B[col] = Bvalue;
+		_bufferLastUsed = 'A';
 	}
-	else if (BufferBNum == row)
+	else if (_bufferBNum == row)
 	{
-		BufferB_R[col] = Rvalue;
-		BufferB_G[col] = Gvalue;
-		BufferB_B[col] = Bvalue;
-		BufferLastUsed = 'B';
+		_bufferB_R[col] = Rvalue;
+		_bufferB_G[col] = Gvalue;
+		_bufferB_B[col] = Bvalue;
+		_bufferLastUsed = 'B';
 	}
-	else if (CanScanlineBuffer && BufferLastUsed != 'A') // If A wasn't the last used, replace it.
+	else if (_canScanlineBuffer && _bufferLastUsed != 'A') // If A wasn't the last used, replace it.
 	{
-		BufferLastUsed = 'A';
+		_bufferLastUsed = 'A';
 		// Write to row BufferANum
-		poBand_R->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_G->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_B->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandR->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandG->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandB->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Now that we're loading a different number into buffer,
 		// reset BufferANum
-		BufferANum = row;
+		_bufferANum = row;
 
 		// Fetch the buffer rather than creating anew; data may have been written to it out of order.
-		if (BufferA_R != NULL)
+		if (_bufferA_R != NULL)
 		{
-			CPLFree(BufferA_R);
-			BufferA_R = NULL;
+			CPLFree(_bufferA_R);
+			_bufferA_R = NULL;
 		}
 
-		BufferA_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_R->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferA_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandR->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (BufferA_G != NULL)
+		if (_bufferA_G != NULL)
 		{
-			CPLFree(BufferA_G);
-			BufferA_G = NULL;
+			CPLFree(_bufferA_G);
+			_bufferA_G = NULL;
 		}
 
-		BufferA_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_G->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferA_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandG->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (BufferA_B != NULL)
+		if (_bufferA_B != NULL)
 		{
-			CPLFree(BufferA_B);
-			BufferA_B = NULL;
+			CPLFree(_bufferA_B);
+			_bufferA_B = NULL;
 		}
 
-		BufferA_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_B->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferA_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandB->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Finally, put the value.
-		BufferA_R[col] = Rvalue;
-		BufferA_G[col] = Gvalue;
-		BufferA_B[col] = Bvalue;
+		_bufferA_R[col] = Rvalue;
+		_bufferA_G[col] = Gvalue;
+		_bufferA_B[col] = Bvalue;
 	}
-	else if (CanScanlineBuffer && BufferLastUsed != 'B') // If B wasn't the last used, replace it.
+	else if (_canScanlineBuffer && _bufferLastUsed != 'B') // If B wasn't the last used, replace it.
 	{
-		BufferLastUsed = 'B';
+		_bufferLastUsed = 'B';
 		// Write to row BufferANum
-		poBand_R->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_G->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_B->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandR->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandG->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandB->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Now that we're loading a different number into buffer,
 		// reset BufferBNum
-		BufferBNum = row;
+		_bufferBNum = row;
 
 		// Fetch the buffer rather than creating anew; data may have been written to it out of order.
-		if (BufferB_R != NULL)
+		if (_bufferB_R != NULL)
 		{
-			CPLFree(BufferB_R);
-			BufferB_R = NULL;
+			CPLFree(_bufferB_R);
+			_bufferB_R = NULL;
 		}
 
-		BufferB_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_R->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferB_R = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandR->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (BufferB_G != NULL)
+		if (_bufferB_G != NULL)
 		{
-			CPLFree(BufferB_G);
-			BufferB_G = NULL;
+			CPLFree(_bufferB_G);
+			_bufferB_G = NULL;
 		}
 
-		BufferB_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_G->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferB_G = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandG->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
 
-		if (BufferB_B != NULL)
+		if (_bufferB_B != NULL)
 		{
-			CPLFree(BufferB_B);
-			BufferB_B = NULL;
+			CPLFree(_bufferB_B);
+			_bufferB_B = NULL;
 		}
 
-		BufferB_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
-		poBand_B->RasterIO( GF_Read, 0, row, totalWidth, 1, BufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		_bufferB_B = (_int32*) CPLMalloc( sizeof(_int32)*totalWidth);
+		_poBandB->RasterIO( GF_Read, 0, row, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Finally, put the value.
-		BufferB_R[col] = Rvalue;
-		BufferB_G[col] = Gvalue;
-		BufferB_B[col] = Bvalue;
+		_bufferB_R[col] = Rvalue;
+		_bufferB_G[col] = Gvalue;
+		_bufferB_B[col] = Bvalue;
 	}
 	else
 	{
 		// Write directly to file
-		poBand_R->RasterIO( GF_Write, col, row, 1, 1, &Rvalue, 1, 1, GDT_Int32, 0, 0 );
-		poBand_G->RasterIO( GF_Write, col, row, 1, 1, &Gvalue, 1, 1, GDT_Int32, 0, 0 );
-		poBand_B->RasterIO( GF_Write, col, row, 1, 1, &Bvalue, 1, 1, GDT_Int32, 0, 0 );
+		_poBandR->RasterIO( GF_Write, col, row, 1, 1, &Rvalue, 1, 1, GDT_Int32, 0, 0 );
+		_poBandG->RasterIO( GF_Write, col, row, 1, 1, &Gvalue, 1, 1, GDT_Int32, 0, 0 );
+		_poBandB->RasterIO( GF_Write, col, row, 1, 1, &Bvalue, 1, 1, GDT_Int32, 0, 0 );
 	}
 }
 
@@ -744,54 +744,54 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 // *************************************************************
 void CUtils::FinalizeAndCloseBitmap(int totalWidth)
 {
-	if (BufferA_R != NULL && BufferA_G != NULL && BufferA_B != NULL && BufferANum != -1)
+	if (_bufferA_R != NULL && _bufferA_G != NULL && _bufferA_B != NULL && _bufferANum != -1)
 	{
-		poBand_R->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_G->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_B->RasterIO( GF_Write, 0, BufferANum, totalWidth, 1, BufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandR->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandG->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandB->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
 	}
-	if (BufferB_R != NULL && BufferB_G != NULL && BufferB_B != NULL && BufferBNum != -1)
+	if (_bufferB_R != NULL && _bufferB_G != NULL && _bufferB_B != NULL && _bufferBNum != -1)
 	{
-		poBand_R->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_G->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		poBand_B->RasterIO( GF_Write, 0, BufferBNum, totalWidth, 1, BufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
-	}
-
-	if (BufferA_R != NULL)
-	{
-		CPLFree(BufferA_R);
-		BufferA_R = NULL;
-	}
-	if (BufferA_G != NULL)
-	{
-		CPLFree(BufferA_G);
-		BufferA_G = NULL;
-	}
-	if (BufferA_B != NULL)
-	{
-		CPLFree(BufferA_B);
-		BufferA_B = NULL;
-	}
-	if (BufferB_R != NULL)
-	{
-		CPLFree(BufferB_R);
-		BufferB_R = NULL;
-	}
-	if (BufferB_G != NULL)
-	{
-		CPLFree(BufferB_G);
-		BufferB_G = NULL;
-	}
-	if (BufferB_B != NULL)
-	{
-		CPLFree(BufferB_B);
-		BufferB_B = NULL;
+		_poBandR->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandG->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
+		_poBandB->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
 	}
 
-	if (rasterDataset != NULL)
+	if (_bufferA_R != NULL)
 	{
-		delete rasterDataset;
-		rasterDataset = NULL;
+		CPLFree(_bufferA_R);
+		_bufferA_R = NULL;
+	}
+	if (_bufferA_G != NULL)
+	{
+		CPLFree(_bufferA_G);
+		_bufferA_G = NULL;
+	}
+	if (_bufferA_B != NULL)
+	{
+		CPLFree(_bufferA_B);
+		_bufferA_B = NULL;
+	}
+	if (_bufferB_R != NULL)
+	{
+		CPLFree(_bufferB_R);
+		_bufferB_R = NULL;
+	}
+	if (_bufferB_G != NULL)
+	{
+		CPLFree(_bufferB_G);
+		_bufferB_G = NULL;
+	}
+	if (_bufferB_B != NULL)
+	{
+		CPLFree(_bufferB_B);
+		_bufferB_B = NULL;
+	}
+
+	if (_rasterDataset != NULL)
+	{
+		delete _rasterDataset;
+		_rasterDataset = NULL;
 	}
 }
 

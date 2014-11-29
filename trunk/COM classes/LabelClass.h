@@ -39,14 +39,14 @@ class ATL_NO_VTABLE CLabelClass :
 public:
 	CLabelClass()
 	{
-		m_canDelete = true;
-		m_label = new CLabelInfo();
+		_canDelete = true;
+		_label = new CLabelInfo();
 		gReferenceCounter.AddRef(tkInterface::idLabel);
 	}
 	~CLabelClass()
 	{
-		if (m_label != NULL && m_canDelete) 
-			delete m_label;
+		if (_label != NULL && _canDelete) 
+			delete _label;
 		gReferenceCounter.Release(tkInterface::idLabel);
 	}
 
@@ -71,25 +71,25 @@ END_COM_MAP()
 	}
 
 public:
-	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)			{*retval = m_label->visible;			return S_OK;};
-	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)				{m_label->visible = newVal?true:false;	return S_OK;};		
+	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)			{*retval = _label->visible;			return S_OK;};
+	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)				{_label->visible = newVal?true:false;	return S_OK;};		
 	
-	STDMETHOD(get_Rotation)(double* retval)					{*retval = m_label->rotation;		return S_OK;};
-	STDMETHOD(put_Rotation)(double newVal)					{m_label->rotation = newVal;		return S_OK;};
+	STDMETHOD(get_Rotation)(double* retval)					{*retval = _label->rotation;		return S_OK;};
+	STDMETHOD(put_Rotation)(double newVal)					{_label->rotation = newVal;		return S_OK;};
 	
 	STDMETHOD(get_Text)(BSTR* retval);						
 	STDMETHOD(put_Text)(BSTR newVal);
 	
-	STDMETHOD(get_X)(double* retval)						{*retval = m_label->x;				return S_OK;};
-	STDMETHOD(put_X)(double newVal)							{m_label->x = newVal;				return S_OK;};
+	STDMETHOD(get_X)(double* retval)						{*retval = _label->x;				return S_OK;};
+	STDMETHOD(put_X)(double newVal)							{_label->x = newVal;				return S_OK;};
 	
-	STDMETHOD(get_Y)(double* retval)						{*retval = m_label->y;				return S_OK;};
-	STDMETHOD(put_Y)(double newVal)							{m_label->y = newVal;				return S_OK;};
+	STDMETHOD(get_Y)(double* retval)						{*retval = _label->y;				return S_OK;};
+	STDMETHOD(put_Y)(double newVal)							{_label->y = newVal;				return S_OK;};
 	
-	STDMETHOD(get_Category)(long* retval)					{*retval = m_label->category;		return S_OK;};
-	STDMETHOD(put_Category)(long newVal)					{m_label->category = newVal;		return S_OK;};
+	STDMETHOD(get_Category)(long* retval)					{*retval = _label->category;		return S_OK;};
+	STDMETHOD(put_Category)(long newVal)					{_label->category = newVal;		return S_OK;};
 
-	STDMETHOD(get_IsDrawn)(VARIANT_BOOL* retval)			{*retval = m_label->isDrawn;		return S_OK;};
+	STDMETHOD(get_IsDrawn)(VARIANT_BOOL* retval)			{*retval = _label->isDrawn;		return S_OK;};
 
 	STDMETHOD(get_ScreenExtents)(IExtents** retval);
 
@@ -97,8 +97,8 @@ public:
 	void put_LabelData(char* newVal);
 
 private:
-	CLabelInfo* m_label;
-	bool m_canDelete;		// CLabelInfo can be allocated locally, then we need to delete it
+	CLabelInfo* _label;
+	bool _canDelete;		// CLabelInfo can be allocated locally, then we need to delete it
 							// For example, when client create CLabel class with new command.
 							// In case CLabelInfo is a pointer to the element of CLabels vector we must not delete it
 							// For a example if a client receive reference to some existing label and then releases 

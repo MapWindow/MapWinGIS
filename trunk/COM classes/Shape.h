@@ -136,7 +136,6 @@ public:
 	STDMETHOD(SplitByPolyline)(IShape* polyline, VARIANT* results, VARIANT_BOOL* retVal);
 
 private:
-	// members
 	BSTR _key;
 	long _lastErrorCode;
 	ICallback * _globalCallback;
@@ -148,7 +147,7 @@ private:
 	// forces to use fast shape wrapper class to hold points information
 	bool _useFastMode;							
 	
-	// functions
+private:
 	void ErrorMessage(long ErrorCode);
 	bool PointInThisPolyFast(IPoint * pt);
 	bool PointInThisPolyRegular(IPoint * pt);

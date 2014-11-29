@@ -25,38 +25,17 @@
 #include "XRedBlackTree.h"
 #include "YRedBlackTree.h"
 
-extern "C"
-{	
-//# include "gpc.h"
-}
-
-struct BreakVal
-{	
-	double lowVal;
-	double highVal;
-	double newVal;
-};
-
 struct CallbackParams
 {
 	ICallback *cBack;
 	const char *sMsg;
 };
 
-struct RasterPoint
-{	
-public:
-	RasterPoint()
-	{	column = 0;
-		row = 0;
-	}
-	RasterPoint( long c, long r )
-	{	column = c;
-		row = r;
-	}
-
-	long row;
-	long column;
+struct BreakVal
+{
+	double lowVal;
+	double highVal;
+	double newVal;
 };
 
 #define GEOTRSFRM_TOPLEFT_X            0
@@ -67,7 +46,6 @@ public:
 #define GEOTRSFRM_NS_RES               5
 
 // CUtils
-
 class ATL_NO_VTABLE CUtils : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CUtils, &CLSID_Utils>,
@@ -78,27 +56,27 @@ public:
 	{
 		USES_CONVERSION;
 
-		pip_left = 0;
-		pip_right = 0;
-		pip_top = 0;
-		pip_bottom = 0;		
+		_pip_left = 0;
+		_pip_right = 0;
+		_pip_top = 0;
+		_pip_bottom = 0;		
 
-		lastErrorCode = tkNO_ERROR;
-		globalCallback = NULL;
-		key = A2BSTR("");
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
+		_key = A2BSTR("");
 			
-		BufferA_R = NULL;
-		BufferA_G = NULL;
-		BufferA_B = NULL;
-		BufferB_R = NULL;
-		BufferB_G = NULL;
-		BufferB_B = NULL;
-		BufferLastUsed = 'Z';
-		BufferANum = -1;
-		BufferBNum = -1;
-		rasterDataset = NULL;
+		_bufferA_R = NULL;
+		_bufferA_G = NULL;
+		_bufferA_B = NULL;
+		_bufferB_R = NULL;
+		_bufferB_G = NULL;
+		_bufferB_B = NULL;
+		_bufferLastUsed = 'Z';
+		_bufferANum = -1;
+		_bufferBNum = -1;
+		_rasterDataset = NULL;
 
-		bSubCall = FALSE;
+		_bSubCall = FALSE;
 		_tileProjections[0] = NULL;
 		_tileProjections[1] = NULL;
 	}
@@ -111,7 +89,7 @@ public:
 				_tileProjections[i] = NULL;
 			}
 		}
-		::SysFreeString(key);
+		::SysFreeString(_key);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -125,14 +103,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_UTILS)
+	DECLARE_REGISTRY_RESOURCEID(IDR_UTILS)
 
-DECLARE_NOT_AGGREGATABLE(CUtils)
+	DECLARE_NOT_AGGREGATABLE(CUtils)
 
-BEGIN_COM_MAP(CUtils)
-	COM_INTERFACE_ENTRY(IUtils)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CUtils)
+		COM_INTERFACE_ENTRY(IUtils)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IUtils
@@ -189,7 +167,6 @@ public:
 	STDMETHOD(GridStatisticsForPolygon)(IGrid* grid, IGridHeader* header, IExtents* gridExtents, IShape* shape, 
 										  double noDataValue, double* meanValue, double* minValue, double* maxValue, VARIANT_BOOL* retVal);
 	STDMETHOD(GridToImage2)(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, VARIANT_BOOL inRam, ICallback* cBack, IImage ** retval);
-	//STDMETHOD(GridToImageInRam)(IGrid * Grid, IGridColorScheme * ci, ICallback* cBack, IImage ** retval);
 	STDMETHOD(ErrorMsgFromObject)(IDispatch * comClass, BSTR* retVal);
 	STDMETHOD(TileProjectionToGeoProjection)(tkTileProjection projection, IGeoProjection** retVal);
 	STDMETHOD(get_ComUsageReport)(VARIANT_BOOL unreleasedOnly, BSTR* retVal);
@@ -199,69 +176,92 @@ public:
 		SAFEARRAY* UpperBounds, SAFEARRAY* NewValues, 
 		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
 
-	// must not be included in interface
-	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
 private:
-	inline long findBreak( std::deque<BreakVal> & bvals, double val );
-	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
+	struct RasterPoint
+	{
+		RasterPoint()
+		{
+			column = 0;
+			row = 0;
+		}
+		RasterPoint(long c, long r)
+		{
+			column = c;
+			row = r;
+		}
+
+		long row;
+		long column;
+	};
+
+private:
 	//Polygonal Algorithm
 	//Used to minimize stack in recursive call for trace_polygon
 	//Cell 4
-	long cell4_x;
-	long cell4_y;
+	long _cell4_x;
+	long _cell4_y;
 	//Cell 6
-	long cell6_x;
+	long _cell6_x;
 	long cell6_y;
 	//Cell 2
-	long cell2_x;
-	long cell2_y;
+	long _cell2_x;
+	long _cell2_y;
 	//Cell 8			
-	long cell8_x;
-	long cell8_y;
+	long _cell8_x;
+	long _cell8_y;
 	//Flow Directions
-	double flow2;
-	double flow8;
-	double flow4;
-	double flow6;
-	IGrid * expand_grid;
-	IGrid * connection_grid;
+	double _flow2;
+	double _flow8;
+	double _flow4;
+	double _flow6;
+	IGrid * _expand_grid;
+	IGrid * _connection_grid;
 
-		bool CanScanlineBuffer;
-	char BufferLastUsed;
-	int BufferANum;
-	int BufferBNum;
-	_int32 * BufferA_R;
-	_int32 * BufferA_G;
-	_int32 * BufferA_B;
-	_int32 * BufferB_R;
-	_int32 * BufferB_G;
-	_int32 * BufferB_B;
-	GDALRasterBand * poBand_R;
-	GDALRasterBand * poBand_G;
-	GDALRasterBand * poBand_B;
-	GDALDataset * rasterDataset;
-	vector<double> pip_xs;
-	vector<double> pip_xs_parts;
-	std::deque<long> pip_cache_parts;
-	std::deque<double> pip_cache_pointsX;
-	std::deque<double> pip_cache_pointsY;
-	double pip_left;
-	double pip_right;
-	double pip_top;
-	double pip_bottom;
-	long lastErrorCode;
-	ICallback * globalCallback;
-	BSTR key;
+	bool _canScanlineBuffer;
+	char _bufferLastUsed;
+	int _bufferANum;
+	int _bufferBNum;
+	_int32 * _bufferA_R;
+	_int32 * _bufferA_G;
+	_int32 * _bufferA_B;
+	_int32 * _bufferB_R;
+	_int32 * _bufferB_G;
+	_int32 * _bufferB_B;
+	GDALRasterBand * _poBandR;
+	GDALRasterBand * _poBandG;
+	GDALRasterBand * _poBandB;
+	GDALDataset * _rasterDataset;
+	vector<double> _pip_xs;
+	vector<double> _pip_xs_parts;
+	std::deque<long> _pip_cache_parts;
+	std::deque<double> _pip_cache_pointsX;
+	std::deque<double> _pip_cache_pointsY;
+	double _pip_left;
+	double _pip_right;
+	double _pip_top;
+	double _pip_bottom;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
 	IGeoProjection* _tileProjections[2];
 
-	void trace_polygon( long x, long y, std::deque<RasterPoint> & polygon );
-	inline bool is_joint( double cell2, double cell8, double cell4, double cell6 );
-	inline double getValue( IGrid * Grid, long column, long row );
-	inline void setValue( IGrid * Grid, long column, long row, double val );
-	void scan_fill_to_edge( double & nodata, long x, long y );
-	void mark_edge( double & polygon_id, long x, long y );
-	inline bool is_decision( IGrid * g, int x, int y );
+	/* GDAL/OGR variables */
+	int _bSubCall;
+	CStringArray _sArr;
+	CStringArray _sConfig;
+
 private:
+	inline long findBreak(std::deque<BreakVal> & bvals, double val);
+	bool PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue);
+
+	void trace_polygon(long x, long y, std::deque<RasterPoint> & polygon);
+	inline bool is_joint(double cell2, double cell8, double cell4, double cell6);
+	inline double getValue(IGrid * Grid, long column, long row);
+	inline void setValue(IGrid * Grid, long column, long row, double val);
+	void scan_fill_to_edge(double & nodata, long x, long y);
+	void mark_edge(double & polygon_id, long x, long y);
+	inline bool is_decision(IGrid * g, int x, int y);
+
 	inline bool does_cross( int SH, int NSH, double corner_oneX, double corner_oneY, double corner_twoX, double corner_twoY );
 	inline void set_sign( double val, int & SH );
 	bool is_clockwise( double x0, double y0, double x1, double y1, double x2, double y2); //ah 11/8/05
@@ -274,7 +274,7 @@ private:
 	bool MemoryAvailable(double bytes);
 	void FinalizeAndCloseBitmap(int totalWidth);
 
-	HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, 
+	HRESULT RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyFormat imageFormat, 
 								bool inRam, bool checkMemory, ICallback* callback, IImage ** retval);
 	void GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack, bool inRam, IImage ** retval);
 	inline void WritePixel(IImage* img, int row, int col, OLE_COLOR color, 
@@ -290,10 +290,8 @@ private:
 	BOOL ProcessGeneralOptions(int * opts);
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
 
-	/* GDAL/OGR variables */
-	int bSubCall;
-	CStringArray sArr;
-	CStringArray sConfig;
+public:
+	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);

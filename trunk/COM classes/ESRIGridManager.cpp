@@ -52,8 +52,8 @@ STDMETHODIMP CESRIGridManager::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	globalCallback->AddRef();
+	*pVal = _globalCallback;
+	_globalCallback->AddRef();
 
 	return S_OK;
 }
@@ -61,7 +61,7 @@ STDMETHODIMP CESRIGridManager::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CESRIGridManager::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -69,7 +69,7 @@ STDMETHODIMP CESRIGridManager::CanUseESRIGrids(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (gm.canUseEsriGrids())
+	if (_gm.canUseEsriGrids())
 		*retval = VARIANT_TRUE;
 	else
         *retval = VARIANT_FALSE;
@@ -83,7 +83,7 @@ STDMETHODIMP CESRIGridManager::DeleteESRIGrids(BSTR Filename, VARIANT_BOOL *retv
 
 	USES_CONVERSION;
 	
-	if (gm.deleteGrid(OLE2CA(Filename),ESRI_GRID))
+	if (_gm.deleteGrid(OLE2CA(Filename),ESRI_GRID))
         *retval = VARIANT_TRUE;
 	else
 		*retval = VARIANT_FALSE;
@@ -96,7 +96,7 @@ STDMETHODIMP CESRIGridManager::IsESRIGrid(BSTR Filename, VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	USES_CONVERSION;
-	if( gm.getGridType(OLE2CA(Filename)) == ESRI_GRID ) 
+	if( _gm.getGridType(OLE2CA(Filename)) == ESRI_GRID ) 
 		*retval = VARIANT_TRUE;
 	else
 		*retval = VARIANT_FALSE;

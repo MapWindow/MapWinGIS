@@ -33,26 +33,26 @@ public:
 	CField()
 	{
 		USES_CONVERSION;
-		key = A2BSTR("");
-		name = A2BSTR("");
-		globalCallback = NULL;
-		lastErrorCode = tkNO_ERROR;
-		width = 10;
-		precision = 10;
-		type = STRING_FIELD;
-		isUpdated = false;
+		_key = A2BSTR("");
+		_name = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
+		_width = 10;
+		_precision = 10;
+		_type = STRING_FIELD;
+		_isUpdated = false;
 		_table = NULL;
 		gReferenceCounter.AddRef(tkInterface::idField);
 	}
 
 	~CField()
 	{
-		::SysFreeString(key);
-		::SysFreeString(name);
+		::SysFreeString(_key);
+		::SysFreeString(_name);
 
-		if( globalCallback )
-			globalCallback->Release();
-		globalCallback = NULL;
+		if( _globalCallback )
+			_globalCallback->Release();
+		_globalCallback = NULL;
 		gReferenceCounter.Release(tkInterface::idField);
 	}
 
@@ -95,22 +95,24 @@ public:
 	STDMETHOD(put_Name)(/*[in]*/ BSTR newVal);
 	STDMETHOD(Clone)(/*[out, retval]*/ IField** retVal);
 	
-	// to use from table class
-	// If any changes were made that imply the rewriting of dbf file, it should be set to true
-	bool isUpdated;
-	ITable* _table;		// no references should be added here
-	void CField::ErrorMessage(long ErrorCode);
+	void ErrorMessage(long ErrorCode);
+	ITable* GetTable() { return _table; }
+	void SetTable(ITable* table) { _table = table; }
+	bool GetIsUpdated() {return _isUpdated; }
+	void SetIsUpdated(bool value) { _isUpdated = value; }
 
 private:
-	BSTR key;
-	long lastErrorCode;
-	ICallback * globalCallback;
+	ITable* _table;		// no references should be added here
+	ICallback * _globalCallback;
+	FieldType _type;
+	BSTR _key;
+	BSTR _name;
+	long _lastErrorCode;
+	long _precision;
+	long _width;
+	bool _isUpdated;
 
-	long precision;
-	long width;
-	FieldType type;
-	BSTR name;
-
+private:
 	bool CheckTableEditingState();
 };
 

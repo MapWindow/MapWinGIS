@@ -103,63 +103,63 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
 /* ==================================================================== */
 /*      Loop over all arguments.                                        */
 /* ==================================================================== */
-    for( iArg = 1; iArg < sArr.GetCount(); iArg++ )
+    for( iArg = 1; iArg < _sArr.GetCount(); iArg++ )
     {
 /* -------------------------------------------------------------------- */
 /*      --config                                                        */
 /* -------------------------------------------------------------------- */
-        if( EQUAL(sArr[iArg],"--config") )
+        if( EQUAL(_sArr[iArg],"--config") )
         {
-            if( iArg + 2 >= sArr.GetCount() )
+            if( iArg + 2 >= _sArr.GetCount() )
             {
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "--config option given without a key and value argument." );
                 return FALSE;
             }
 
-            CPLSetConfigOption( sArr[iArg+1], sArr[iArg+2] );
+            CPLSetConfigOption( _sArr[iArg+1], _sArr[iArg+2] );
 
-			sConfig.Add( sArr[iArg+1] );
-			sArr.RemoveAt( iArg, 3 );
+			_sConfig.Add( _sArr[iArg+1] );
+			_sArr.RemoveAt( iArg, 3 );
             iArg--;
         }
 
 /* -------------------------------------------------------------------- */
 /*      --debug                                                         */
 /* -------------------------------------------------------------------- */
-        else if( EQUAL(sArr[iArg],"--debug") )
+        else if( EQUAL(_sArr[iArg],"--debug") )
         {
-            if( iArg + 1 >= sArr.GetCount() )
+            if( iArg + 1 >= _sArr.GetCount() )
             {
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "--debug option given without debug level." );
                 return FALSE;
             }
 
-            CPLSetConfigOption( "CPL_DEBUG", sArr[iArg+1] );
+            CPLSetConfigOption( "CPL_DEBUG", _sArr[iArg+1] );
 
-			sConfig.Add( "CPL_DEBUG" );
-			sArr.RemoveAt( iArg, 2 );
+			_sConfig.Add( "CPL_DEBUG" );
+			_sArr.RemoveAt( iArg, 2 );
             iArg--;
         }
 
 /* -------------------------------------------------------------------- */
 /*      --optfile                                                       */
 /* -------------------------------------------------------------------- */
-        else if( EQUAL(sArr[iArg],"--optfile") )
+        else if( EQUAL(_sArr[iArg],"--optfile") )
         {
             const char *pszLine;
             FILE *fpOptFile;
 
-            if( iArg + 1 >= sArr.GetCount() )
+            if( iArg + 1 >= _sArr.GetCount() )
             {
                 CPLError( CE_Failure, CPLE_AppDefined, 
                           "--optfile option given without filename." );
                 return FALSE;
             }
 
-			CString sFileName = sArr[iArg+1];
-			sArr.RemoveAt( iArg, 2 );
+			CString sFileName = _sArr[iArg+1];
+			_sArr.RemoveAt( iArg, 2 );
             iArg--;
 
             fpOptFile = VSIFOpen( sFileName, "rb" );
@@ -182,7 +182,7 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
 
                 papszTokens = CSLTokenizeString( pszLine );
                 for( i = 0; papszTokens != NULL && papszTokens[i] != NULL; i++)
-                    sArr.Add( papszTokens[i] );
+                    _sArr.Add( papszTokens[i] );
                 CSLDestroy( papszTokens );
             }
 
@@ -190,20 +190,20 @@ BOOL CUtils::ProcessGeneralOptions(int * opts)
         }
 	}
 
-	*opts = sArr.GetCount();
+	*opts = _sArr.GetCount();
 
 	return TRUE;
 }
 
 HRESULT CUtils::ResetConfigOptions(long ErrorCode)
 {
-	for( int i = 0; i < sConfig.GetCount(); i++ )
-		CPLSetConfigOption( sConfig[i].GetBuffer(0), NULL);
+	for( int i = 0; i < _sConfig.GetCount(); i++ )
+		CPLSetConfigOption( _sConfig[i].GetBuffer(0), NULL);
 
-	sConfig.RemoveAll();
+	_sConfig.RemoveAll();
 
 	if (ErrorCode > 0)
-		this->lastErrorCode = ErrorCode;
+		this->_lastErrorCode = ErrorCode;
 
 	return 0L;
 }
@@ -264,49 +264,49 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
 	for( i = 1; i < argc; i++ )
 	{
-		if( EQUAL(sArr[i], "-mm") )
+		if( EQUAL(_sArr[i], "-mm") )
             bComputeMinMax = TRUE;
-        else if( EQUAL(sArr[i], "-hist") )
+        else if( EQUAL(_sArr[i], "-hist") )
             bReportHistograms = TRUE;
-        else if( EQUAL(sArr[i], "-proj4") )
+        else if( EQUAL(_sArr[i], "-proj4") )
             bReportProj4 = TRUE;
-        else if( EQUAL(sArr[i], "-stats") )
+        else if( EQUAL(_sArr[i], "-stats") )
         {
             bStats = TRUE;
             bApproxStats = FALSE;
         }
-        else if( EQUAL(sArr[i], "-approx_stats") )
+        else if( EQUAL(_sArr[i], "-approx_stats") )
         {
             bStats = TRUE;
             bApproxStats = TRUE;
         }
-        else if( EQUAL(sArr[i], "-sample") )
+        else if( EQUAL(_sArr[i], "-sample") )
             bSample = TRUE;
-        else if( EQUAL(sArr[i], "-checksum") )
+        else if( EQUAL(_sArr[i], "-checksum") )
             bComputeChecksum = TRUE;
-        else if( EQUAL(sArr[i], "-nogcp") )
+        else if( EQUAL(_sArr[i], "-nogcp") )
             bShowGCPs = FALSE;
-        else if( EQUAL(sArr[i], "-nomd") )
+        else if( EQUAL(_sArr[i], "-nomd") )
             bShowMetadata = FALSE;
-        else if( EQUAL(sArr[i], "-norat") )
+        else if( EQUAL(_sArr[i], "-norat") )
             bShowRAT = FALSE;
-        else if( EQUAL(sArr[i], "-noct") )
+        else if( EQUAL(_sArr[i], "-noct") )
             bShowColorTable = FALSE;
-        else if( EQUAL(sArr[i], "-mdd") && i < argc-1 )
+        else if( EQUAL(_sArr[i], "-mdd") && i < argc-1 )
             papszExtraMDDomains = CSLAddString( papszExtraMDDomains,
-                                                sArr[++i].GetBuffer(0) );
-        else if( EQUAL(sArr[i], "-nofl") )
+                                                _sArr[++i].GetBuffer(0) );
+        else if( EQUAL(_sArr[i], "-nofl") )
             bShowFileList = FALSE;
-        else if( EQUAL(sArr[i], "-sd") && i < argc-1 )
-            nSubdataset = atoi(sArr[++i].GetBuffer (0));
-		else if( EQUAL(sArr[i], "--version") )
+        else if( EQUAL(_sArr[i], "-sd") && i < argc-1 )
+            nSubdataset = atoi(_sArr[++i].GetBuffer (0));
+		else if( EQUAL(_sArr[i], "--version") )
 		{
 			sOutput += GDALVersionInfo( "--version" );
 
 			*bstrInfo = sOutput.AllocSysString();
 			return ResetConfigOptions();
 		}
-		else if( EQUAL(sArr[i], "--formats") )
+		else if( EQUAL(_sArr[i], "--formats") )
 		{
 			sOutput += "Supported Formats:\n";
 			for( int iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
@@ -331,7 +331,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 			*bstrInfo = sOutput.AllocSysString();
 			return ResetConfigOptions();
 		}
-		else if( EQUAL(sArr[i], "--format") )
+		else if( EQUAL(_sArr[i], "--format") )
 		{
 			GDALDriverH hDriver;
 			char **papszMD;
@@ -343,14 +343,14 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
-			hDriver = GDALGetDriverByName( sArr[i+1].GetBuffer(0) );
+			hDriver = GDALGetDriverByName( _sArr[i+1].GetBuffer(0) );
 			if( hDriver == NULL )
 			{
 				CPLError( CE_Failure, CPLE_AppDefined, 
 					"--format option given with format '%s', but that format not\n"
 					"recognised.  Use the --formats option to get a list of available formats,\n"
 					"and use the short code (ie. GTiff or HFA) as the format identifier.\n", 
-					sArr[i+1].GetBuffer(0) );
+					_sArr[i+1].GetBuffer(0) );
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
@@ -1190,7 +1190,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
 	GDALAllRegister();
 
-	if (!bSubCall)
+	if (!_bSubCall)
 	{
 		Parse(OLE2CA(bstrOptions), &argc);
 
@@ -1200,19 +1200,19 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		}
 	}
 	else
-		argc = sArr.GetCount();
+		argc = _sArr.GetCount();
 
 /* -------------------------------------------------------------------- */
 /*		Handle command line arguments.									*/
 /* -------------------------------------------------------------------- */
 	for( i = 1; i < argc; i++ )
 	{
-		if( EQUAL(sArr[i],"-of") && i < argc-1 )
+		if( EQUAL(_sArr[i],"-of") && i < argc-1 )
 		{
-			pszFormat = sArr[++i].GetBuffer (0);
+			pszFormat = _sArr[++i].GetBuffer (0);
 			bFormatExplicitelySet = TRUE;
 		}
-		else if( EQUAL(sArr[i],"-ot") && i < argc-1 )
+		else if( EQUAL(_sArr[i],"-ot") && i < argc-1 )
 		{
             int	iType;
             
@@ -1220,7 +1220,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				if (GDALGetDataTypeName((GDALDataType)iType) != NULL
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
-                             sArr[i+1]) )
+                             _sArr[i+1]) )
 				{
 					eOutputType = (GDALDataType) iType;
 				}
@@ -1228,14 +1228,14 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if (eOutputType == GDT_Unknown)
 			{
-				CPLError(CE_Failure,0,"Unknown output pixel type: %s", sArr[i+1]);
+				CPLError(CE_Failure,0,"Unknown output pixel type: %s", _sArr[i+1]);
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
 		}
-        else if( EQUAL(sArr[i],"-b") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-b") && i < argc-1 )
 		{
-			const char* pszBand = sArr[i+1].GetBuffer (0);
+			const char* pszBand = _sArr[i+1].GetBuffer (0);
 			int bMask = FALSE;
 			if (EQUAL(pszBand, "mask"))
 				pszBand = "mask,1";
@@ -1251,7 +1251,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			int nBand = atoi(pszBand);
 			if( nBand < 1 )
 			{
-				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", sArr[i+1]);
+				CPLError(CE_Failure,0,"Unrecognizable band number (%s).", _sArr[i+1]);
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
@@ -1266,10 +1266,10 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			if( panBandList[nBandCount-1] != nBandCount )
 				bDefBands = FALSE;
 		}
-        else if( EQUAL(sArr[i],"-mask") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-mask") && i < argc-1 )
 		{
 			bParsedMaskArgument = TRUE;
-			const char* pszBand = sArr[i+1].GetBuffer (0);
+			const char* pszBand = _sArr[i+1].GetBuffer (0);
 			if (EQUAL(pszBand, "none"))
 			{
 				eMaskMode = MASK_DISABLED;
@@ -1291,7 +1291,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				int nBand = atoi(pszBand);
 				if( nBand < 1 )
 				{
-					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", sArr[i+1]);
+					CPLError(CE_Failure, 0, "Unrecognizable band number (%s).", _sArr[i+1]);
 					return ResetConfigOptions(tkGDAL_ERROR);
 				}
 
@@ -1302,16 +1302,16 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			}
 			i ++;
 		}
-        else if( EQUAL(sArr[i],"-not_strict")  )
+        else if( EQUAL(_sArr[i],"-not_strict")  )
 			bStrict = FALSE;
 
-        else if( EQUAL(sArr[i],"-strict")  )
+        else if( EQUAL(_sArr[i],"-strict")  )
 			bStrict = TRUE;
 
-        else if( EQUAL(sArr[i],"-sds")  )
+        else if( EQUAL(_sArr[i],"-sds")  )
 			bCopySubDatasets = TRUE;
 
-        else if( EQUAL(sArr[i],"-gcp") && i < argc - 4 )
+        else if( EQUAL(_sArr[i],"-gcp") && i < argc - 4 )
 		{
 			char* endptr = NULL;
 			/* -gcp pixel line easting northing [elev] */
@@ -1321,67 +1321,67 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				CPLRealloc( pasGCPs, sizeof(GDAL_GCP) * nGCPCount );
 			GDALInitGCPs( 1, pasGCPs + nGCPCount - 1 );
 
-			pasGCPs[nGCPCount-1].dfGCPPixel = CPLAtofM(sArr[++i].GetBuffer (0));
-			pasGCPs[nGCPCount-1].dfGCPLine = CPLAtofM(sArr[++i].GetBuffer (0));
-			pasGCPs[nGCPCount-1].dfGCPX = CPLAtofM(sArr[++i].GetBuffer (0));
-			pasGCPs[nGCPCount-1].dfGCPY = CPLAtofM(sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPPixel = CPLAtofM(_sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPLine = CPLAtofM(_sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPX = CPLAtofM(_sArr[++i].GetBuffer (0));
+			pasGCPs[nGCPCount-1].dfGCPY = CPLAtofM(_sArr[++i].GetBuffer (0));
 			if( argc > i+1 && // TODO: Is this valid?
-				(CPLStrtod(sArr[i+1].GetBuffer (0), &endptr) != 0.0 || sArr[i+1][0] == '0') )
+				(CPLStrtod(_sArr[i+1].GetBuffer (0), &endptr) != 0.0 || _sArr[i+1][0] == '0') )
 			{
 				/* Check that last argument is really a number and not a filename */
 				/* looking like a number (see ticket #863) */
 				if (endptr && *endptr == 0)
-					pasGCPs[nGCPCount-1].dfGCPZ = CPLAtofM(sArr[++i].GetBuffer (0));
+					pasGCPs[nGCPCount-1].dfGCPZ = CPLAtofM(_sArr[++i].GetBuffer (0));
 			}
 
 			/* should set id and info? */
 		}   
 
-        else if( EQUAL(sArr[i],"-a_nodata") && i < argc - 1 )
+        else if( EQUAL(_sArr[i],"-a_nodata") && i < argc - 1 )
 		{
-            if (EQUAL(sArr[i+1], "none"))
+            if (EQUAL(_sArr[i+1], "none"))
 			{
 				bUnsetNoData = TRUE;
 			}
 			else
 			{
 				bSetNoData = TRUE;
-				dfNoDataReal = CPLAtofM(sArr[i+1].GetBuffer (0));
+				dfNoDataReal = CPLAtofM(_sArr[i+1].GetBuffer (0));
 			}
 			i += 1;
 		}   
 
-        else if( EQUAL(sArr[i],"-a_ullr") && i < argc - 4 )
+        else if( EQUAL(_sArr[i],"-a_ullr") && i < argc - 4 )
 		{
-			adfULLR[0] = CPLAtofM(sArr[i+1].GetBuffer (0));
-			adfULLR[1] = CPLAtofM(sArr[i+2].GetBuffer (0));
-			adfULLR[2] = CPLAtofM(sArr[i+3].GetBuffer (0));
-			adfULLR[3] = CPLAtofM(sArr[i+4].GetBuffer (0));
+			adfULLR[0] = CPLAtofM(_sArr[i+1].GetBuffer (0));
+			adfULLR[1] = CPLAtofM(_sArr[i+2].GetBuffer (0));
+			adfULLR[2] = CPLAtofM(_sArr[i+3].GetBuffer (0));
+			adfULLR[3] = CPLAtofM(_sArr[i+4].GetBuffer (0));
 
 			bGotBounds = TRUE;
 
 			i += 4;
 		} 
 
-        else if( EQUAL(sArr[i],"-co") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-co") && i < argc-1 )
 		{
-			papszCreateOptions = CSLAddString(papszCreateOptions, sArr[++i].GetBuffer(0));
+			papszCreateOptions = CSLAddString(papszCreateOptions, _sArr[++i].GetBuffer(0));
 		}
 
-        else if( EQUAL(sArr[i],"-scale") )
+        else if( EQUAL(_sArr[i],"-scale") )
 		{
 			bScale = TRUE;
-			if( i < argc-2 && ArgIsNumeric(sArr[i+1].GetBuffer (0)) )
+			if( i < argc-2 && ArgIsNumeric(_sArr[i+1].GetBuffer (0)) )
 			{
 				bHaveScaleSrc = TRUE;
-				dfScaleSrcMin = CPLAtofM(sArr[i+1].GetBuffer (0));
-				dfScaleSrcMax = CPLAtofM(sArr[i+2].GetBuffer (0));
+				dfScaleSrcMin = CPLAtofM(_sArr[i+1].GetBuffer (0));
+				dfScaleSrcMax = CPLAtofM(_sArr[i+2].GetBuffer (0));
 				i += 2;
 			}
-			if( i < argc-2 && bHaveScaleSrc && ArgIsNumeric(sArr[i+1].GetBuffer (0)) )
+			if( i < argc-2 && bHaveScaleSrc && ArgIsNumeric(_sArr[i+1].GetBuffer (0)) )
 			{
-				dfScaleDstMin = CPLAtofM(sArr[i+1].GetBuffer (0));
-				dfScaleDstMax = CPLAtofM(sArr[i+2].GetBuffer (0));
+				dfScaleDstMin = CPLAtofM(_sArr[i+1].GetBuffer (0));
+				dfScaleDstMax = CPLAtofM(_sArr[i+2].GetBuffer (0));
 				i += 2;
 			}
 			else
@@ -1391,46 +1391,46 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			}
 		}   
 
-        else if( EQUAL(sArr[i], "-unscale") )
+        else if( EQUAL(_sArr[i], "-unscale") )
 		{
 			bUnscale = TRUE;
 		}
 
-        else if( EQUAL(sArr[i],"-mo") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-mo") && i < argc-1 )
 		{
 			papszMetadataOptions = CSLAddString( papszMetadataOptions,
-				sArr[++i].GetBuffer (0) );
+				_sArr[++i].GetBuffer (0) );
 		}
 
-        else if( EQUAL(sArr[i],"-outsize") && i < argc-2 )
+        else if( EQUAL(_sArr[i],"-outsize") && i < argc-2 )
 		{
-			pszOXSize = sArr[++i].GetBuffer (0);
-			pszOYSize = sArr[++i].GetBuffer (0);
+			pszOXSize = _sArr[++i].GetBuffer (0);
+			pszOYSize = _sArr[++i].GetBuffer (0);
 		}   
 
-        else if( EQUAL(sArr[i],"-srcwin") && i < argc-4 )
+        else if( EQUAL(_sArr[i],"-srcwin") && i < argc-4 )
 		{
-			anSrcWin[0] = atoi(sArr[++i].GetBuffer (0));
-			anSrcWin[1] = atoi(sArr[++i].GetBuffer (0));
-			anSrcWin[2] = atoi(sArr[++i].GetBuffer (0));
-			anSrcWin[3] = atoi(sArr[++i].GetBuffer (0));
+			anSrcWin[0] = atoi(_sArr[++i].GetBuffer (0));
+			anSrcWin[1] = atoi(_sArr[++i].GetBuffer (0));
+			anSrcWin[2] = atoi(_sArr[++i].GetBuffer (0));
+			anSrcWin[3] = atoi(_sArr[++i].GetBuffer (0));
 		}   
 
-        else if( EQUAL(sArr[i],"-projwin") && i < argc-4 )
+        else if( EQUAL(_sArr[i],"-projwin") && i < argc-4 )
 		{
-			dfULX = CPLAtofM(sArr[++i].GetBuffer (0));
-			dfULY = CPLAtofM(sArr[++i].GetBuffer (0));
-			dfLRX = CPLAtofM(sArr[++i].GetBuffer (0));
-			dfLRY = CPLAtofM(sArr[++i].GetBuffer (0));
+			dfULX = CPLAtofM(_sArr[++i].GetBuffer (0));
+			dfULY = CPLAtofM(_sArr[++i].GetBuffer (0));
+			dfLRX = CPLAtofM(_sArr[++i].GetBuffer (0));
+			dfLRY = CPLAtofM(_sArr[++i].GetBuffer (0));
 		}   
 
-        else if( EQUAL(sArr[i],"-a_srs") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-a_srs") && i < argc-1 )
 		{
 			OGRSpatialReference oOutputSRS;
 
-			if( oOutputSRS.SetFromUserInput( sArr[i+1].GetBuffer (0) ) != OGRERR_NONE )
+			if( oOutputSRS.SetFromUserInput( _sArr[i+1].GetBuffer (0) ) != OGRERR_NONE )
 			{
-				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", sArr[i+1] );
+				CPLError(CE_Failure, 0, "Failed to process SRS definition: %s", _sArr[i+1] );
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 
@@ -1438,36 +1438,36 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			i++;
 		}   
 
-        else if( EQUAL(sArr[i],"-expand") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-expand") && i < argc-1 )
 		{
-            if (EQUAL(sArr[i+1], "gray"))
+            if (EQUAL(_sArr[i+1], "gray"))
 				nRGBExpand = 1;
-            else if (EQUAL(sArr[i+1], "rgb"))
+            else if (EQUAL(_sArr[i+1], "rgb"))
 				nRGBExpand = 3;
-            else if (EQUAL(sArr[i+1], "rgba"))
+            else if (EQUAL(_sArr[i+1], "rgba"))
 				nRGBExpand = 4;
 			else
 			{
-				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", sArr[i+1] );
+				CPLError(CE_Failure, 0, "Value %s unsupported. Only gray, rgb or rgba are supported.", _sArr[i+1] );
 				return ResetConfigOptions(tkGDAL_ERROR);
 			}
 			i++;
 		}
 
-        else if( EQUAL(sArr[i], "-stats") )
+        else if( EQUAL(_sArr[i], "-stats") )
 		{
 			bStats = TRUE;
 			bApproxStats = FALSE;
 		}
-        else if( EQUAL(sArr[i], "-approx_stats") )
+        else if( EQUAL(_sArr[i], "-approx_stats") )
 		{
 			bStats = TRUE;
 			bApproxStats = TRUE;
 		}
 
-		else if( sArr[i][0] == '-' )
+		else if( _sArr[i][0] == '-' )
 		{
-			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", sArr[i] );
+			CPLError(CE_Failure, 0, "Option %s incomplete, or not recognised.", _sArr[i] );
 			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 	}
@@ -1514,11 +1514,11 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		char **papszSubdatasets = GDALGetMetadata(hDataset, "SUBDATASETS");
 		char *pszSubDest = (char *) CPLMalloc (strlen (pszDest)+32);
         int i;
-		int bOldSubCall = bSubCall;
+		int bOldSubCall = _bSubCall;
 
 		(*retval) = VARIANT_TRUE;
 
-		bSubCall = TRUE;
+		_bSubCall = TRUE;
 		for ( i = 0; papszSubdatasets[i] != NULL; i += 2 )
 		{
 			sprintf (pszSubDest, "%s%d", pszDest, i/2 + 1);
@@ -1539,11 +1539,11 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			}
 		}
 
-		bSubCall = bOldSubCall;
+		_bSubCall = bOldSubCall;
 
 		GDALClose(hDataset);
 
-		if (!bSubCall)
+		if (!_bSubCall)
 		{
 			GDALDumpOpenDatasets(stderr); // TODO: what does this do?
 		}
@@ -1712,14 +1712,14 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		}
 		else
 		{
-			lastErrorCode = tkGDAL_ERROR;
+			_lastErrorCode = tkGDAL_ERROR;
 		}
 
 		GDALClose (hDataset);
 
 		CPLFree (panBandList);
 
-		if (!bSubCall)
+		if (!_bSubCall)
 		{
 			GDALDumpOpenDatasets (stderr);
 		}
@@ -2198,7 +2198,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 	CPLFree( pszOutputSRS );
 
-	if( !bSubCall )
+	if( !_bSubCall )
 	{
 		GDALDumpOpenDatasets( stderr );
 	}
@@ -2748,15 +2748,15 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     for( i = 1; i < argc; i++ )
     {
-		if( EQUAL(sArr[i],"-a") && i < argc-1 )
+		if( EQUAL(_sArr[i],"-a") && i < argc-1 )
         {
-            pszBurnAttribute = sArr[++i];
+            pszBurnAttribute = _sArr[++i];
         }
-        else if( EQUAL(sArr[i],"-b") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-b") && i < argc-1 )
         {
-            if (strchr(sArr[i+1], ' '))
+            if (strchr(_sArr[i+1], ' '))
             {
-                char** papszTokens = CSLTokenizeString( sArr[i+1] );
+                char** papszTokens = CSLTokenizeString( _sArr[i+1] );
                 char** papszIter = papszTokens;
                 while(papszIter && *papszIter)
                 {
@@ -2768,33 +2768,33 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             else
             {
-                while(i < argc-1 && ArgIsNumeric(sArr[i+1]))
+                while(i < argc-1 && ArgIsNumeric(_sArr[i+1]))
                 {
-                    anBandList.push_back(atoi(sArr[i+1]));
+                    anBandList.push_back(atoi(_sArr[i+1]));
                     i += 1;
                 }
             }
         }
-        else if( EQUAL(sArr[i],"-3d")  )
+        else if( EQUAL(_sArr[i],"-3d")  )
         {
             b3D = TRUE;
             papszRasterizeOptions = 
                 CSLSetNameValue( papszRasterizeOptions, "BURN_VALUE_FROM", "Z");
         }
-        else if( EQUAL(sArr[i],"-i")  )
+        else if( EQUAL(_sArr[i],"-i")  )
         {
             bInverse = TRUE;
         }
-        else if( EQUAL(sArr[i],"-at")  )
+        else if( EQUAL(_sArr[i],"-at")  )
         {
             papszRasterizeOptions = 
                 CSLSetNameValue( papszRasterizeOptions, "ALL_TOUCHED", "TRUE" );
         }
-        else if( EQUAL(sArr[i],"-burn") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-burn") && i < argc-1 )
         {
-            if (strchr(sArr[i+1], ' '))
+            if (strchr(_sArr[i+1], ' '))
             {
-                char** papszTokens = CSLTokenizeString( sArr[i+1] );
+                char** papszTokens = CSLTokenizeString( _sArr[i+1] );
                 char** papszIter = papszTokens;
                 while(papszIter && *papszIter)
                 {
@@ -2806,36 +2806,36 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             else
             {
-                while(i < argc-1 && ArgIsNumeric(sArr[i+1]))
+                while(i < argc-1 && ArgIsNumeric(_sArr[i+1]))
                 {
-                    adfBurnValues.push_back(atof(sArr[i+1]));
+                    adfBurnValues.push_back(atof(_sArr[i+1]));
                     i += 1;
                 }
             }
         }
-        else if( EQUAL(sArr[i],"-where") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-where") && i < argc-1 )
         {
-            pszWHERE = sArr[++i];
+            pszWHERE = _sArr[++i];
         }
-        else if( EQUAL(sArr[i],"-l") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-l") && i < argc-1 )
         {
-            papszLayers = CSLAddString( papszLayers, sArr[++i] );
+            papszLayers = CSLAddString( papszLayers, _sArr[++i] );
         }
-        else if( EQUAL(sArr[i],"-sql") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-sql") && i < argc-1 )
         {
-            pszSQL = sArr[++i];
+            pszSQL = _sArr[++i];
         }
-        else if( EQUAL(sArr[i],"-of") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-of") && i < argc-1 )
         {
-            pszFormat = sArr[++i];
+            pszFormat = _sArr[++i];
             bFormatExplicitelySet = TRUE;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-init") && i < argc - 1 )
+        else if( EQUAL(_sArr[i],"-init") && i < argc - 1 )
         {
-            if (strchr(sArr[i+1], ' '))
+            if (strchr(_sArr[i+1], ' '))
             {
-                char** papszTokens = CSLTokenizeString( sArr[i+1] );
+                char** papszTokens = CSLTokenizeString( _sArr[i+1] );
                 char** papszIter = papszTokens;
                 while(papszIter && *papszIter)
                 {
@@ -2847,29 +2847,29 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             else
             {
-                while(i < argc-1 && ArgIsNumeric(sArr[i+1]))
+                while(i < argc-1 && ArgIsNumeric(_sArr[i+1]))
                 {
-                    adfInitVals.push_back(atof(sArr[i+1]));
+                    adfInitVals.push_back(atof(_sArr[i+1]));
                     i += 1;
                 }
             }
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-a_nodata") && i < argc - 1 )
+        else if( EQUAL(_sArr[i],"-a_nodata") && i < argc - 1 )
         {
-            dfNoData = atof(sArr[i+1]);
+            dfNoData = atof(_sArr[i+1]);
             bNoDataSet = TRUE;
             i += 1;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-a_srs") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-a_srs") && i < argc-1 )
         {
             hSRS = OSRNewSpatialReference( NULL );
 
-            if( OSRSetFromUserInput(hSRS, sArr[i+1]) != OGRERR_NONE )
+            if( OSRSetFromUserInput(hSRS, _sArr[i+1]) != OGRERR_NONE )
             {
                 CPLError( CE_Failure, CPLE_AppDefined, "Failed to process SRS definition: %s\n", 
-                         sArr[i+1] );
+                         _sArr[i+1] );
                 return ResetConfigOptions(tkGDAL_ERROR);
             }
 
@@ -2877,30 +2877,30 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             bCreateOutput = TRUE;
         }   
 
-        else if( EQUAL(sArr[i],"-te") && i < argc - 4 )
+        else if( EQUAL(_sArr[i],"-te") && i < argc - 4 )
         {
-            sEnvelop.MinX = atof(sArr[++i]);
-            sEnvelop.MinY = atof(sArr[++i]);
-            sEnvelop.MaxX = atof(sArr[++i]);
-            sEnvelop.MaxY = atof(sArr[++i]);
+            sEnvelop.MinX = atof(_sArr[++i]);
+            sEnvelop.MinY = atof(_sArr[++i]);
+            sEnvelop.MaxX = atof(_sArr[++i]);
+            sEnvelop.MaxY = atof(_sArr[++i]);
             bGotBounds = TRUE;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-a_ullr") && i < argc - 4 )
+        else if( EQUAL(_sArr[i],"-a_ullr") && i < argc - 4 )
         {
-            sEnvelop.MinX = atof(sArr[++i]);
-            sEnvelop.MaxY = atof(sArr[++i]);
-            sEnvelop.MaxX = atof(sArr[++i]);
-            sEnvelop.MinY = atof(sArr[++i]);
+            sEnvelop.MinX = atof(_sArr[++i]);
+            sEnvelop.MaxY = atof(_sArr[++i]);
+            sEnvelop.MaxX = atof(_sArr[++i]);
+            sEnvelop.MinY = atof(_sArr[++i]);
             bGotBounds = TRUE;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-co") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-co") && i < argc-1 )
         {
-            papszCreateOptions = CSLAddString( papszCreateOptions, sArr[++i] );
+            papszCreateOptions = CSLAddString( papszCreateOptions, _sArr[++i] );
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-ot") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-ot") && i < argc-1 )
         {
             int	iType;
             
@@ -2908,7 +2908,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             {
                 if( GDALGetDataTypeName((GDALDataType)iType) != NULL
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
-                             sArr[i+1]) )
+                             _sArr[i+1]) )
                 {
                     eOutputType = (GDALDataType) iType;
                 }
@@ -2916,16 +2916,16 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eOutputType == GDT_Unknown )
             {
-                CPLError( CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+                CPLError( CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", _sArr[i+1] );
 				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
             bCreateOutput = TRUE;
         }
-        else if( (EQUAL(sArr[i],"-ts") || EQUAL(sArr[i],"-outsize")) && i < argc-2 )
+        else if( (EQUAL(_sArr[i],"-ts") || EQUAL(_sArr[i],"-outsize")) && i < argc-2 )
         {
-            nXSize = atoi(sArr[++i]);
-            nYSize = atoi(sArr[++i]);
+            nXSize = atoi(_sArr[++i]);
+            nYSize = atoi(_sArr[++i]);
             if (nXSize <= 0 || nYSize <= 0)
             {
                 CPLError( CE_Failure, CPLE_AppDefined, "Wrong value for -outsize parameters\n");
@@ -2933,10 +2933,10 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-tr") && i < argc-2 )
+        else if( EQUAL(_sArr[i],"-tr") && i < argc-2 )
         {
-            dfXRes = atof(sArr[++i]);
-            dfYRes = fabs(atof(sArr[++i]));
+            dfXRes = atof(_sArr[++i]);
+            dfYRes = fabs(atof(_sArr[++i]));
             if( dfXRes == 0 || dfYRes == 0 )
             {
                 CPLError( CE_Failure, CPLE_AppDefined, "Wrong value for -tr parameters\n");
@@ -2944,7 +2944,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-tap") )
+        else if( EQUAL(_sArr[i],"-tap") )
         {
             bTargetAlignedPixels = TRUE;
             bCreateOutput = TRUE;
@@ -3313,7 +3313,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 /* -------------------------------------------------------------------- */
     for( i = 1; i < argc; i++ )
     {
-        if( EQUAL(sArr[i],"-tps") || EQUAL(sArr[i],"-rpc") || EQUAL(sArr[i],"-geoloc")  )
+        if( EQUAL(_sArr[i],"-tps") || EQUAL(_sArr[i],"-rpc") || EQUAL(_sArr[i],"-geoloc")  )
         {
             const char* pszMethod = CSLFetchNameValue(papszTO, "METHOD");
             if (pszMethod)
@@ -3325,38 +3325,38 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                         pszMAX_GCP_ORDER);
         }
 
-        if( EQUAL(sArr[i],"-co") && i < argc-1 )
+        if( EQUAL(_sArr[i],"-co") && i < argc-1 )
         {
-            papszCreateOptions = CSLAddString( papszCreateOptions, sArr[++i] );
+            papszCreateOptions = CSLAddString( papszCreateOptions, _sArr[++i] );
             bCreateOutput = TRUE;
         }   
-        else if( EQUAL(sArr[i],"-wo") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-wo") && i < argc-1 )
         {
-            papszWarpOptions = CSLAddString( papszWarpOptions, sArr[++i] );
+            papszWarpOptions = CSLAddString( papszWarpOptions, _sArr[++i] );
         }   
-        else if( EQUAL(sArr[i],"-multi") )
+        else if( EQUAL(_sArr[i],"-multi") )
         {
             bMulti = TRUE;
         }   
-        else if( EQUAL(sArr[i],"-dstalpha") )
+        else if( EQUAL(_sArr[i],"-dstalpha") )
         {
             bEnableDstAlpha = TRUE;
         }
-        else if( EQUAL(sArr[i],"-srcalpha") )
+        else if( EQUAL(_sArr[i],"-srcalpha") )
         {
             bEnableSrcAlpha = TRUE;
         }
-        else if( EQUAL(sArr[i],"-of") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-of") && i < argc-1 )
         {
-            pszFormat = sArr[++i];
+            pszFormat = _sArr[++i];
             bFormatExplicitelySet = TRUE;
             bCreateOutput = TRUE;
             if( EQUAL(pszFormat,"VRT") )
                 bVRT = TRUE;
         }
-        else if( EQUAL(sArr[i],"-t_srs") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-t_srs") && i < argc-1 )
         {
-            char *pszSRS = SanitizeSRS(sArr[++i]);
+            char *pszSRS = SanitizeSRS(_sArr[++i]);
 
 			if (pszSRS == NULL)
 			{
@@ -3367,9 +3367,9 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             papszTO = CSLSetNameValue( papszTO, "DST_SRS", pszSRS );
             CPLFree( pszSRS );
         }
-        else if( EQUAL(sArr[i],"-s_srs") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-s_srs") && i < argc-1 )
         {
-            char *pszSRS = SanitizeSRS(sArr[++i]);
+            char *pszSRS = SanitizeSRS(_sArr[++i]);
 
 			if (pszSRS == NULL)
 			{
@@ -3380,71 +3380,71 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             papszTO = CSLSetNameValue( papszTO, "SRC_SRS", pszSRS );
             CPLFree( pszSRS );
         }
-        else if( EQUAL(sArr[i],"-order") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-order") && i < argc-1 )
         {
             const char* pszMethod = CSLFetchNameValue(papszTO, "METHOD");
             if (pszMethod)
                 CPLError( CE_Warning, CPLE_AppDefined, "Warning: only one METHOD can be used. Method %s is already defined\n",
                         pszMethod);
-            papszTO = CSLSetNameValue( papszTO, "MAX_GCP_ORDER", sArr[++i] );
+            papszTO = CSLSetNameValue( papszTO, "MAX_GCP_ORDER", _sArr[++i] );
         }
-        else if( EQUAL(sArr[i],"-refine_gcps") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-refine_gcps") && i < argc-1 )
         {
-            papszTO = CSLSetNameValue( papszTO, "REFINE_TOLERANCE", sArr[++i] );
-            if(atof(sArr[i]) < 0)
+            papszTO = CSLSetNameValue( papszTO, "REFINE_TOLERANCE", _sArr[++i] );
+            if(atof(_sArr[i]) < 0)
             {
                 CPLError(CE_Failure, CPLE_AppDefined, "The tolerance for -refine_gcps may not be negative\n");
 				return ResetConfigOptions(tkGDAL_ERROR);
             }
-            if (i < argc-1 && atoi(sArr[i+1]) >= 0 && isdigit(sArr[i+1][0]))
+            if (i < argc-1 && atoi(_sArr[i+1]) >= 0 && isdigit(_sArr[i+1][0]))
             {
-                papszTO = CSLSetNameValue( papszTO, "REFINE_MINIMUM_GCPS", sArr[++i] );
+                papszTO = CSLSetNameValue( papszTO, "REFINE_MINIMUM_GCPS", _sArr[++i] );
             }
             else
             {
                 papszTO = CSLSetNameValue( papszTO, "REFINE_MINIMUM_GCPS", "-1" );
             }
         }
-        else if( EQUAL(sArr[i],"-tps") )
+        else if( EQUAL(_sArr[i],"-tps") )
         {
             papszTO = CSLSetNameValue( papszTO, "METHOD", "GCP_TPS" );
         }
-        else if( EQUAL(sArr[i],"-rpc") )
+        else if( EQUAL(_sArr[i],"-rpc") )
         {
             papszTO = CSLSetNameValue( papszTO, "METHOD", "RPC" );
         }
-        else if( EQUAL(sArr[i],"-geoloc") )
+        else if( EQUAL(_sArr[i],"-geoloc") )
         {
             papszTO = CSLSetNameValue( papszTO, "METHOD", "GEOLOC_ARRAY" );
         }
-        else if( EQUAL(sArr[i],"-to") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-to") && i < argc-1 )
         {
-            papszTO = CSLAddString( papszTO, sArr[++i] );
+            papszTO = CSLAddString( papszTO, _sArr[++i] );
         }
-        else if( EQUAL(sArr[i],"-et") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-et") && i < argc-1 )
         {
-            dfErrorThreshold = CPLAtofM(sArr[++i]);
+            dfErrorThreshold = CPLAtofM(_sArr[++i]);
         }
-        else if( EQUAL(sArr[i],"-wm") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-wm") && i < argc-1 )
         {
-            if( CPLAtofM(sArr[i+1]) < 10000 )
-                dfWarpMemoryLimit = CPLAtofM(sArr[i+1]) * 1024 * 1024;
+            if( CPLAtofM(_sArr[i+1]) < 10000 )
+                dfWarpMemoryLimit = CPLAtofM(_sArr[i+1]) * 1024 * 1024;
             else
-                dfWarpMemoryLimit = CPLAtofM(sArr[i+1]);
+                dfWarpMemoryLimit = CPLAtofM(_sArr[i+1]);
             i++;
         }
-        else if( EQUAL(sArr[i],"-srcnodata") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-srcnodata") && i < argc-1 )
         {
-            pszSrcNodata = sArr[++i];
+            pszSrcNodata = _sArr[++i];
         }
-        else if( EQUAL(sArr[i],"-dstnodata") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-dstnodata") && i < argc-1 )
         {
-            pszDstNodata = sArr[++i];
+            pszDstNodata = _sArr[++i];
         }
-        else if( EQUAL(sArr[i],"-tr") && i < argc-2 )
+        else if( EQUAL(_sArr[i],"-tr") && i < argc-2 )
         {
-            dfXRes = CPLAtofM(sArr[++i]);
-            dfYRes = fabs(CPLAtofM(sArr[++i]));
+            dfXRes = CPLAtofM(_sArr[++i]);
+            dfYRes = fabs(CPLAtofM(_sArr[++i]));
             if( dfXRes == 0 || dfYRes == 0 )
             {
                 CPLError(CE_Failure, CPLE_AppDefined, "Wrong value for -tr parameters\n");
@@ -3452,11 +3452,11 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             }
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-tap") )
+        else if( EQUAL(_sArr[i],"-tap") )
         {
             bTargetAlignedPixels = TRUE;
         }
-        else if( EQUAL(sArr[i],"-ot") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-ot") && i < argc-1 )
         {
             int	iType;
             
@@ -3464,7 +3464,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             {
                 if( GDALGetDataTypeName((GDALDataType)iType) != NULL
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
-                             sArr[i+1]) )
+                             _sArr[i+1]) )
                 {
                     eOutputType = (GDALDataType) iType;
                 }
@@ -3472,13 +3472,13 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eOutputType == GDT_Unknown )
             {
-                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", _sArr[i+1] );
 				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-wt") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-wt") && i < argc-1 )
         {
             int	iType;
             
@@ -3486,7 +3486,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
             {
                 if( GDALGetDataTypeName((GDALDataType)iType) != NULL
                     && EQUAL(GDALGetDataTypeName((GDALDataType)iType),
-                             sArr[i+1]) )
+                             _sArr[i+1]) )
                 {
                     eWorkingType = (GDALDataType) iType;
                 }
@@ -3494,93 +3494,93 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
             if( eWorkingType == GDT_Unknown )
             {
-                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", sArr[i+1] );
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown output pixel type: %s\n", _sArr[i+1] );
 				return ResetConfigOptions(tkGDAL_ERROR);
             }
             i++;
         }
-        else if( EQUAL(sArr[i],"-ts") && i < argc-2 )
+        else if( EQUAL(_sArr[i],"-ts") && i < argc-2 )
         {
-            nForcePixels = atoi(sArr[++i]);
-            nForceLines = atoi(sArr[++i]);
+            nForcePixels = atoi(_sArr[++i]);
+            nForceLines = atoi(_sArr[++i]);
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-te") && i < argc-4 )
+        else if( EQUAL(_sArr[i],"-te") && i < argc-4 )
         {
-            dfMinX = CPLAtofM(sArr[++i]);
-            dfMinY = CPLAtofM(sArr[++i]);
-            dfMaxX = CPLAtofM(sArr[++i]);
-            dfMaxY = CPLAtofM(sArr[++i]);
+            dfMinX = CPLAtofM(_sArr[++i]);
+            dfMinY = CPLAtofM(_sArr[++i]);
+            dfMaxX = CPLAtofM(_sArr[++i]);
+            dfMaxY = CPLAtofM(_sArr[++i]);
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-rn") )
+        else if( EQUAL(_sArr[i],"-rn") )
             eResampleAlg = GRA_NearestNeighbour;
 
-        else if( EQUAL(sArr[i],"-rb") )
+        else if( EQUAL(_sArr[i],"-rb") )
             eResampleAlg = GRA_Bilinear;
 
-        else if( EQUAL(sArr[i],"-rc") )
+        else if( EQUAL(_sArr[i],"-rc") )
             eResampleAlg = GRA_Cubic;
 
-        else if( EQUAL(sArr[i],"-rcs") )
+        else if( EQUAL(_sArr[i],"-rcs") )
             eResampleAlg = GRA_CubicSpline;
 
-        else if( EQUAL(sArr[i],"-r") && i < argc - 1 )
+        else if( EQUAL(_sArr[i],"-r") && i < argc - 1 )
         {
-            if ( EQUAL(sArr[++i], "near") )
+            if ( EQUAL(_sArr[++i], "near") )
                 eResampleAlg = GRA_NearestNeighbour;
-            else if ( EQUAL(sArr[i], "bilinear") )
+            else if ( EQUAL(_sArr[i], "bilinear") )
                 eResampleAlg = GRA_Bilinear;
-            else if ( EQUAL(sArr[i], "cubic") )
+            else if ( EQUAL(_sArr[i], "cubic") )
                 eResampleAlg = GRA_Cubic;
-            else if ( EQUAL(sArr[i], "cubicspline") )
+            else if ( EQUAL(_sArr[i], "cubicspline") )
                 eResampleAlg = GRA_CubicSpline;
-            else if ( EQUAL(sArr[i], "lanczos") )
+            else if ( EQUAL(_sArr[i], "lanczos") )
                 eResampleAlg = GRA_Lanczos;
             else
             {
-                CPLError(CE_Failure, CPLE_AppDefined, "Unknown resampling method: \"%s\".\n", sArr[i] );
+                CPLError(CE_Failure, CPLE_AppDefined, "Unknown resampling method: \"%s\".\n", _sArr[i] );
 				return ResetConfigOptions(tkGDAL_ERROR);
             }
         }
 
-        else if( EQUAL(sArr[i],"-cutline") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-cutline") && i < argc-1 )
         {
-            pszCutlineDSName = sArr[++i].GetBuffer(0);
+            pszCutlineDSName = _sArr[++i].GetBuffer(0);
         }
-        else if( EQUAL(sArr[i],"-cwhere") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-cwhere") && i < argc-1 )
         {
-            pszCWHERE = sArr[++i].GetBuffer(0);
+            pszCWHERE = _sArr[++i].GetBuffer(0);
         }
-        else if( EQUAL(sArr[i],"-cl") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-cl") && i < argc-1 )
         {
-            pszCLayer = sArr[++i].GetBuffer(0);
+            pszCLayer = _sArr[++i].GetBuffer(0);
         }
-        else if( EQUAL(sArr[i],"-csql") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-csql") && i < argc-1 )
         {
-            pszCSQL = sArr[++i].GetBuffer(0);
+            pszCSQL = _sArr[++i].GetBuffer(0);
         }
-        else if( EQUAL(sArr[i],"-cblend") && i < argc-1 )
+        else if( EQUAL(_sArr[i],"-cblend") && i < argc-1 )
         {
             papszWarpOptions = 
                 CSLSetNameValue( papszWarpOptions, 
-                                 "CUTLINE_BLEND_DIST", sArr[++i] );
+                                 "CUTLINE_BLEND_DIST", _sArr[++i] );
         }
-        else if( EQUAL(sArr[i],"-crop_to_cutline")  )
+        else if( EQUAL(_sArr[i],"-crop_to_cutline")  )
         {
             bCropToCutline = TRUE;
             bCreateOutput = TRUE;
         }
-        else if( EQUAL(sArr[i],"-overwrite") )
+        else if( EQUAL(_sArr[i],"-overwrite") )
             bOverwrite = TRUE;
 
-        else if( sArr[i][0] == '-' )
+        else if( _sArr[i][0] == '-' )
 		{
             // Skip it.
 		}
 
         else 
-            papszSrcFiles = CSLAddString( papszSrcFiles, sArr[i] );
+            papszSrcFiles = CSLAddString( papszSrcFiles, _sArr[i] );
     }
 /* -------------------------------------------------------------------- */
 /*      Check that incompatible options are not used                    */
@@ -6131,20 +6131,20 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
     for( iArg = 1; iArg < nArgc; iArg++ )
     {
-        if( EQUAL(sArr[iArg],"-tileindex") &&
+        if( EQUAL(_sArr[iArg],"-tileindex") &&
                  iArg + 1 < nArgc)
         {
-            tile_index = sArr[++iArg];
+            tile_index = _sArr[++iArg];
         }
-        else if( EQUAL(sArr[iArg],"-resolution") &&
+        else if( EQUAL(_sArr[iArg],"-resolution") &&
                  iArg + 1 < nArgc)
         {
-            resolution = sArr[++iArg];
+            resolution = _sArr[++iArg];
         }
-        else if( EQUAL(sArr[iArg],"-input_file_list") &&
+        else if( EQUAL(_sArr[iArg],"-input_file_list") &&
                  iArg + 1 < nArgc)
         {
-            const char* input_file_list = sArr[++iArg];
+            const char* input_file_list = _sArr[++iArg];
             FILE* f = VSIFOpen(input_file_list, "r");
             if (f)
             {
@@ -6159,67 +6159,67 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
                 VSIFClose(f);
             }
         }
-        else if ( EQUAL(sArr[iArg],"-separate") )
+        else if ( EQUAL(_sArr[iArg],"-separate") )
         {
             bSeparate = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-allow_projection_difference") )
+        else if ( EQUAL(_sArr[iArg],"-allow_projection_difference") )
         {
             bAllowProjectionDifference = TRUE;
         }
         /* Alternate syntax for output file */
-        else if( EQUAL(sArr[iArg],"-o")  &&
+        else if( EQUAL(_sArr[iArg],"-o")  &&
                  iArg + 1 < nArgc)
         {
-            pszOutputFilename = sArr[++iArg];
+            pszOutputFilename = _sArr[++iArg];
         }
-        else if ( EQUAL(sArr[iArg],"-q") || EQUAL(sArr[iArg],"-quiet") )
+        else if ( EQUAL(_sArr[iArg],"-q") || EQUAL(_sArr[iArg],"-quiet") )
         {
             bQuiet = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-tr") && iArg + 2 < nArgc)
+        else if ( EQUAL(_sArr[iArg],"-tr") && iArg + 2 < nArgc)
         {
-            we_res = CPLAtofM(sArr[++iArg]);
-            ns_res = CPLAtofM(sArr[++iArg]);
+            we_res = CPLAtofM(_sArr[++iArg]);
+            ns_res = CPLAtofM(_sArr[++iArg]);
         }
-        else if( EQUAL(sArr[iArg],"-tap") )
+        else if( EQUAL(_sArr[iArg],"-tap") )
         {
             bTargetAlignedPixels = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-te") && iArg + 4 < nArgc)
+        else if ( EQUAL(_sArr[iArg],"-te") && iArg + 4 < nArgc)
         {
-            xmin = CPLAtofM(sArr[++iArg]);
-            ymin = CPLAtofM(sArr[++iArg]);
-            xmax = CPLAtofM(sArr[++iArg]);
-            ymax = CPLAtofM(sArr[++iArg]);
+            xmin = CPLAtofM(_sArr[++iArg]);
+            ymin = CPLAtofM(_sArr[++iArg]);
+            xmax = CPLAtofM(_sArr[++iArg]);
+            ymax = CPLAtofM(_sArr[++iArg]);
         }
-        else if ( EQUAL(sArr[iArg],"-addalpha") )
+        else if ( EQUAL(_sArr[iArg],"-addalpha") )
         {
             bAddAlpha = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-hidenodata") )
+        else if ( EQUAL(_sArr[iArg],"-hidenodata") )
         {
             bHideNoData = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-overwrite") )
+        else if ( EQUAL(_sArr[iArg],"-overwrite") )
         {
             bForceOverwrite = TRUE;
         }
-        else if ( EQUAL(sArr[iArg],"-srcnodata") && iArg + 1 < nArgc)
+        else if ( EQUAL(_sArr[iArg],"-srcnodata") && iArg + 1 < nArgc)
         {
-            pszSrcNoData = sArr[++iArg];
+            pszSrcNoData = _sArr[++iArg];
         }
-        else if ( EQUAL(sArr[iArg],"-vrtnodata") && iArg + 1 < nArgc)
+        else if ( EQUAL(_sArr[iArg],"-vrtnodata") && iArg + 1 < nArgc)
         {
-            pszVRTNoData = sArr[++iArg];
+            pszVRTNoData = _sArr[++iArg];
         }
-        else if ( sArr[iArg][0] == '-' )
+        else if ( _sArr[iArg][0] == '-' )
         {
-            CPLError(CE_Warning, CPLE_AppDefined,"Unrecognized option : %s\n", sArr[iArg]);
+            CPLError(CE_Warning, CPLE_AppDefined,"Unrecognized option : %s\n", _sArr[iArg]);
         }
         else
         {
-            add_file_to_list(sArr[iArg], tile_index,
+            add_file_to_list(_sArr[iArg], tile_index,
                              &nInputFiles, &ppszInputFilenames);
         }
     }
@@ -6228,14 +6228,14 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
 
     if( pszOutputFilename == NULL )
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, CPLE_AppDefined, "Invalid output file specified");
 		return ResetConfigOptions();
 	}
 		
 	if( nInputFiles == 0 )
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
 		CPLError(CE_Failure, CPLE_AppDefined, "No inputs files specified");
         return ResetConfigOptions();
 	}
@@ -6316,7 +6316,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     if (CE_None == oBuilder.Build(pfnProgress, &params))
 		(*retval) = VARIANT_TRUE;
 	else
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
 
     for(i=0;i<nInputFiles;i++)
     {
@@ -6371,11 +6371,11 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
 /* -------------------------------------------------------------------- */
     for( int iArg = 1; iArg < nArgc; iArg++ )
     {
-        if( EQUAL(sArr[iArg],"-r") && iArg < nArgc-1 )
-            pszResampling = sArr[++iArg];
-        else if( EQUAL(sArr[iArg],"-ro"))
+        if( EQUAL(_sArr[iArg],"-r") && iArg < nArgc-1 )
+            pszResampling = _sArr[++iArg];
+        else if( EQUAL(_sArr[iArg],"-ro"))
             bReadOnly = TRUE;
-        else if( EQUAL(sArr[iArg],"-clean"))
+        else if( EQUAL(_sArr[iArg],"-clean"))
 		{
             bClean = TRUE;
 			params.sMsg = "Cleaning overviews";
@@ -6431,7 +6431,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         GDALBuildOverviews( hDataset,pszResampling, 0, 0, 
                              0, NULL, pfnProgress, &params ) != CE_None )
     {
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"Cleaning overviews failed.");
         nResultStatus = 200;
     }
@@ -6443,7 +6443,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
         GDALBuildOverviews( hDataset,pszResampling, nLevelCount, anLevels,
                              0, NULL, pfnProgress, &params ) != CE_None )
     {
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError(CE_Failure,0,"Overview building failed.");
         nResultStatus = 100;
     }
@@ -6714,7 +6714,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     hBand = GDALGetRasterBand( hSrcDS, nBandIn );
     if( hBand == NULL )
     {
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError( CE_Failure, CPLE_AppDefined, 
                   "Band %d does not exist on dataset.", 
                   nBandIn );
@@ -6749,7 +6749,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 
     if( hDriver == NULL )
     {
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
         CPLError( CE_Failure, CPLE_AppDefined, "Unable to find format driver named %s.\n", 
                  pszFormat );
 		(*retval) = VARIANT_FALSE;
@@ -6759,7 +6759,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     hDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename), NULL );
     if( hDS == NULL )
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
         return S_FALSE;
 	}
@@ -6769,7 +6769,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
                                  NULL );
     if( hLayer == NULL )
 	{
-		this->lastErrorCode = tkGDAL_ERROR;
+		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
         return S_FALSE;
 	}

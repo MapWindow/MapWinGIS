@@ -39,12 +39,12 @@ class ATL_NO_VTABLE CTileProviders :
 {
 public:
 	CTileProviders()
-		: m_tiles(NULL)
+		: _tiles(NULL)
 	{
 		USES_CONVERSION;
-		m_key = A2BSTR("");
-		m_globalCallback = NULL;
-		m_lastErrorCode = tkNO_ERROR;
+		_key = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
 		for (int i = 0; i < TILE_PROVIDER_COUNT; i++)
 		{
 			// we don't care about the value returned; a provider is added to the list, that's all needed
@@ -53,12 +53,12 @@ public:
 	}
 	~CTileProviders()
 	{
-		SysFreeString(m_key);
-		for (size_t i = 0; i < m_providers.size(); i++) {
-			m_providers[i]->ClearSubProviders();
+		SysFreeString(_key);
+		for (size_t i = 0; i < _providers.size(); i++) {
+			_providers[i]->ClearSubProviders();
 		}
-		for (size_t i = 0; i < m_providers.size(); i++)	{
-			delete m_providers[i];
+		for (size_t i = 0; i < _providers.size(); i++)	{
+			delete _providers[i];
 		}
 	}
 
@@ -106,36 +106,22 @@ public:
 	STDMETHOD(get_IndexByProviderId)(int provider, int* retVal);
 	STDMETHOD(get_Language)(int Index, BSTR* retVal);
 	STDMETHOD(put_Language)(int Index, BSTR twoLetterCode);
+
 private:	
-	ITiles* m_tiles;	// reference the parent
-	vector<BaseProvider*> m_providers;
+	ITiles* _tiles;	// reference the parent
+	vector<BaseProvider*> _providers;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+
+private:
+	void ErrorMessage(long ErrorCode);
 	BaseProvider* getProviderCore(tkTileProvider providerId);
 
-	long m_lastErrorCode;
-	ICallback * m_globalCallback;
-	BSTR m_key;
-
-	void ErrorMessage(long ErrorCode);
 public:
-	vector<BaseProvider*>* GetList()
-	{
-		return &m_providers;
-	}
-
-	void put_Tiles(ITiles* tiles){
-		m_tiles = tiles;
-	}
-	BaseProvider* get_Provider(int providerId)
-	{
-		for (size_t i = 0; i < m_providers.size(); i++)
-		{
-			if (m_providers[i]->Id == providerId)
-			{
-				return m_providers[i];
-			}
-		}
-		return NULL;
-	}
+	vector<BaseProvider*>* GetList() { return &_providers;	}
+	void put_Tiles(ITiles* tiles){	_tiles = tiles;}
+	BaseProvider* get_Provider(int providerId);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TileProviders), CTileProviders)

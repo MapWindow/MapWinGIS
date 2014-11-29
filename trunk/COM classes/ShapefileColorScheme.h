@@ -34,31 +34,31 @@ class ATL_NO_VTABLE CShapefileColorScheme :
 {
 public:
 	CShapefileColorScheme()
-	{	globalCallback = NULL;
-		lastErrorCode = tkNO_ERROR;
-		layerHandle = -1;
-		key = A2BSTR("");
+	{	_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
+		_layerHandle = -1;
+		_key = A2BSTR("");
 	}
 	~CShapefileColorScheme()
-	{	for( int i = 0; i < (int)allBreaks.size(); i++ )
-		{	if( allBreaks[i] != NULL )
-				allBreaks[i]->Release();
-			allBreaks[i] = NULL;
+	{	for( int i = 0; i < (int)_allBreaks.size(); i++ )
+		{	if( _allBreaks[i] != NULL )
+				_allBreaks[i]->Release();
+			_allBreaks[i] = NULL;
 		}
-		SysFreeString(key);
-		if( globalCallback != NULL )
-			globalCallback->Release();
-		globalCallback = NULL;
+		SysFreeString(_key);
+		if( _globalCallback != NULL )
+			_globalCallback->Release();
+		_globalCallback = NULL;
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILELEGEND)
+	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILELEGEND)
 
-DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-BEGIN_COM_MAP(CShapefileColorScheme)
-	COM_INTERFACE_ENTRY(IShapefileColorScheme)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CShapefileColorScheme)
+		COM_INTERFACE_ENTRY(IShapefileColorScheme)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 // IShapefileColorScheme
 public:
@@ -79,14 +79,18 @@ public:
 	STDMETHOD(NumBreaks)(/*[out, retval]*/ long * result);
 	STDMETHOD(InsertAt)(/*[in]*/ int Position, /*[in]*/ IShapefileColorBreak *Break, /*[out,retval]*/ long *result);
 
-	void CShapefileColorScheme::ErrorMessage(long ErrorCode);
 private:
-	long fieldIndex;
-	long layerHandle;
-	std::vector<IShapefileColorBreak *> allBreaks;
-	long lastErrorCode;
-	ICallback * globalCallback;
-	BSTR key;
+
+	long _fieldIndex;
+	long _layerHandle;
+	std::vector<IShapefileColorBreak *> _allBreaks;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+
+public: 
+
+	void ErrorMessage(long ErrorCode);
 };
 
 #endif //__SHAPEFILELEGEND_H_

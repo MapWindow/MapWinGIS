@@ -167,15 +167,15 @@ public:
 		_chartsExist = false;
 		_globalCallback = NULL;
 
-		m_minVisibleScale = 0.0;
-		m_maxVisibleScale = 100000000.0;
-		m_dynamicVisibility = VARIANT_FALSE;
+		_minVisibleScale = 0.0;
+		_maxVisibleScale = 100000000.0;
+		_dynamicVisibility = VARIANT_FALSE;
 
-		m_collisionBuffer = 0;
-		m_offsetX = 0;
-		m_offsetY = 0;
+		_collisionBuffer = 0;
+		_offsetX = 0;
+		_offsetY = 0;
 
-		m_savingMode = modeXML;
+		_savingMode = modeXML;
 
 		gReferenceCounter.AddRef(tkInterface::idCharts);
 	}
@@ -265,12 +265,12 @@ public:
 	STDMETHOD(Generate)(tkLabelPositioning Position, VARIANT_BOOL* retVal);
 	STDMETHOD(Clear)();
 	STDMETHOD(DrawChart)(int** hdc, float xOrigin, float yOrigin, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
-	STDMETHOD(get_MaxVisibleScale)(double* retval)			{*retval = m_maxVisibleScale;		return S_OK;};		
-	STDMETHOD(put_MaxVisibleScale)(double newVal)			{m_maxVisibleScale = newVal;		return S_OK;};
-	STDMETHOD(get_MinVisibleScale)(double* retval)			{*retval = m_minVisibleScale;		return S_OK;};		
-	STDMETHOD(put_MinVisibleScale)(double newVal)			{m_minVisibleScale = newVal;		return S_OK;};
-	STDMETHOD(get_DynamicVisibility)(VARIANT_BOOL* retval)	{*retval = m_dynamicVisibility;		return S_OK;};		
-	STDMETHOD(put_DynamicVisibility)(VARIANT_BOOL newVal)	{m_dynamicVisibility = newVal;		return S_OK;};
+	STDMETHOD(get_MaxVisibleScale)(double* retval)			{*retval = _maxVisibleScale;		return S_OK;};		
+	STDMETHOD(put_MaxVisibleScale)(double newVal)			{_maxVisibleScale = newVal;		return S_OK;};
+	STDMETHOD(get_MinVisibleScale)(double* retval)			{*retval = _minVisibleScale;		return S_OK;};		
+	STDMETHOD(put_MinVisibleScale)(double newVal)			{_minVisibleScale = newVal;		return S_OK;};
+	STDMETHOD(get_DynamicVisibility)(VARIANT_BOOL* retval)	{*retval = _dynamicVisibility;		return S_OK;};		
+	STDMETHOD(put_DynamicVisibility)(VARIANT_BOOL newVal)	{_dynamicVisibility = newVal;		return S_OK;};
 
 	STDMETHOD(get_IconWidth)(long* retVal);
 	STDMETHOD(get_IconHeight)(long* retVal);
@@ -301,13 +301,13 @@ public:
 	STDMETHOD(get_VisibilityExpression)(BSTR* retval);
 	STDMETHOD(put_VisibilityExpression)(BSTR newVal);
 
-	STDMETHOD(get_CollisionBuffer)(long* retval)					{*retval = m_collisionBuffer;		return S_OK;};		
-	STDMETHOD(put_CollisionBuffer)(long newVal)						{m_collisionBuffer = newVal;		return S_OK;};
+	STDMETHOD(get_CollisionBuffer)(long* retval)					{*retval = _collisionBuffer;		return S_OK;};		
+	STDMETHOD(put_CollisionBuffer)(long newVal)						{_collisionBuffer = newVal;		return S_OK;};
 
-	STDMETHOD(get_OffsetX)(LONG* retval)							{*retval = m_offsetX;			return S_OK;};
-	STDMETHOD(put_OffsetX)(LONG newVal)								{m_offsetX = newVal;			return S_OK;};
-	STDMETHOD(get_OffsetY)(LONG* retval)							{*retval = m_offsetY;			return S_OK;};
-	STDMETHOD(put_OffsetY)(LONG newVal)								{m_offsetY = newVal;			return S_OK;};
+	STDMETHOD(get_OffsetX)(LONG* retval)							{*retval = _offsetX;			return S_OK;};
+	STDMETHOD(put_OffsetX)(LONG newVal)								{_offsetX = newVal;			return S_OK;};
+	STDMETHOD(get_OffsetY)(LONG* retval)							{*retval = _offsetY;			return S_OK;};
+	STDMETHOD(put_OffsetY)(LONG newVal)								{_offsetY = newVal;			return S_OK;};
 
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
@@ -320,23 +320,8 @@ public:
 	
 	STDMETHOD(DrawChartVB)(int hdc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor, VARIANT_BOOL* retVal);
 
-	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);
-	void put_ParentShapefile(IShapefile* newVal);
-	IShapefile* get_ParentShapefile();
-	bool _chartsExist;
-	ChartOptions* get_UnderlyingOptions()
-	{
-		return &_options;
-	}
-
-	CPLXMLNode* CCharts::SerializeCore(CString ElementName);
-	CPLXMLNode* CCharts::SerializeChartData(CString ElementName);
-	bool CCharts::DeserializeChartData(CPLXMLNode* node);
-	bool CCharts::DeserializeCore(CPLXMLNode* node);
-	VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor);
-
 private:
-	tkSavingMode m_savingMode;
+	tkSavingMode _savingMode;
 	
 	long _lastErrorCode;
 	ICallback * _globalCallback;
@@ -344,22 +329,35 @@ private:
 	BSTR _expression;
 	BSTR _caption;
 
-	// members
 	IShapefile* _shapefile;
 	std::vector<IChartField*> _bars;
 	ChartOptions _options;
 	
-	double m_maxVisibleScale;
-	double m_minVisibleScale;
-	VARIANT_BOOL m_dynamicVisibility;
+	double _maxVisibleScale;
+	double _minVisibleScale;
+	VARIANT_BOOL _dynamicVisibility;
 	
-	LONG m_collisionBuffer;
-	LONG m_offsetX;
-	LONG m_offsetY;
+	LONG _collisionBuffer;
+	LONG _offsetX;
+	LONG _offsetY;
 
-	// functions
+public:
+	bool _chartsExist;
+
+public:
 	inline void ErrorMessage(long ErrorCode);
 	void SetDefaultColorScheme();
+	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);
+	void put_ParentShapefile(IShapefile* newVal);
+	IShapefile* get_ParentShapefile();
+
+	ChartOptions* get_UnderlyingOptions() { return &_options; }
+
+	CPLXMLNode* SerializeCore(CString ElementName);
+	CPLXMLNode* SerializeChartData(CString ElementName);
+	bool DeserializeChartData(CPLXMLNode* node);
+	bool DeserializeCore(CPLXMLNode* node);
+	VARIANT_BOOL DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hideLabels, OLE_COLOR backColor);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Charts), CCharts)

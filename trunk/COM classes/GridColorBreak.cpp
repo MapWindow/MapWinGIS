@@ -33,7 +33,7 @@ STDMETHODIMP CGridColorBreak::get_HighColor(OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	*pVal = HighColor;
+	*pVal = _highColor;
 
 	return S_OK;
 }
@@ -42,7 +42,7 @@ STDMETHODIMP CGridColorBreak::put_HighColor(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	HighColor = newVal;
+	_highColor = newVal;
 
 	return S_OK;
 }
@@ -52,7 +52,7 @@ STDMETHODIMP CGridColorBreak::get_LowColor(OLE_COLOR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	*pVal = LowColor;
+	*pVal = _lowColor;
 
 	return S_OK;
 }
@@ -62,7 +62,7 @@ STDMETHODIMP CGridColorBreak::put_LowColor(OLE_COLOR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	LowColor = newVal;
+	_lowColor = newVal;
 
 	return S_OK;
 }
@@ -72,7 +72,7 @@ STDMETHODIMP CGridColorBreak::get_HighValue(double *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	*pVal = HighValue;
+	*pVal = _highValue;
 
 	return S_OK;
 }
@@ -82,7 +82,7 @@ STDMETHODIMP CGridColorBreak::put_HighValue(double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	HighValue = newVal;
+	_highValue = newVal;
 
 	return S_OK;
 }
@@ -92,7 +92,7 @@ STDMETHODIMP CGridColorBreak::get_LowValue(double *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	*pVal = LowValue;
+	*pVal = _lowValue;
 
 	return S_OK;
 }
@@ -102,7 +102,7 @@ STDMETHODIMP CGridColorBreak::put_LowValue(double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	LowValue = newVal;
+	_lowValue = newVal;
 
 	return S_OK;
 }
@@ -112,7 +112,7 @@ STDMETHODIMP CGridColorBreak::get_ColoringType(ColoringType *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	*pVal = ColorType;
+	*pVal = _colorType;
 
 	return S_OK;
 }
@@ -122,7 +122,7 @@ STDMETHODIMP CGridColorBreak::put_ColoringType(ColoringType newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	ColorType = newVal;
+	_colorType = newVal;
 
 	return S_OK;
 }
@@ -132,7 +132,7 @@ STDMETHODIMP CGridColorBreak::get_GradientModel(GradientModel *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	*pVal = GradModel;
+	*pVal = _gradModel;
 
 	return S_OK;
 }
@@ -142,7 +142,7 @@ STDMETHODIMP CGridColorBreak::put_GradientModel(GradientModel newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	
-	GradModel = newVal;
+	_gradModel = newVal;
 
 	return S_OK;
 }
@@ -152,8 +152,8 @@ STDMETHODIMP CGridColorBreak::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -171,10 +171,10 @@ STDMETHODIMP CGridColorBreak::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback )
+	*pVal = _globalCallback;
+	if( _globalCallback )
 	{	
-		globalCallback->AddRef();
+		_globalCallback->AddRef();
 	}
 	return S_OK;
 }
@@ -182,7 +182,7 @@ STDMETHODIMP CGridColorBreak::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGridColorBreak::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -192,7 +192,7 @@ STDMETHODIMP CGridColorBreak::get_Key(BSTR *pVal)
 
 	USES_CONVERSION;
 
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -203,8 +203,8 @@ STDMETHODIMP CGridColorBreak::put_Key(BSTR newVal)
 
 	USES_CONVERSION;
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -214,7 +214,7 @@ STDMETHODIMP CGridColorBreak::get_Caption(BSTR* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = m_Caption.AllocSysString();
+	*pVal = _caption.AllocSysString();
 
 	return S_OK;
 }
@@ -223,7 +223,7 @@ STDMETHODIMP CGridColorBreak::put_Caption(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_Caption = newVal;
+	_caption = newVal;
 
 	return S_OK;
 }

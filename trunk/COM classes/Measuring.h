@@ -93,15 +93,17 @@ public:
 	STDMETHOD(get_IsUsingEllipsoid)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_AreaDisplayMode)(tkAreaDisplayMode* retVal);
 	STDMETHOD(put_AreaDisplayMode)(tkAreaDisplayMode newVal);
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	
 private:
 	long _lastErrorCode;
 	ICallback * _globalCallback;
 	BSTR _key;
 	MeasuringBase* _measuring;
+
 public:
 	MeasuringBase* GetBase() { return _measuring; }
-	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Measuring), CMeasuring)

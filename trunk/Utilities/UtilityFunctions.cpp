@@ -754,6 +754,11 @@ namespace Utility
 	    
 		return doComplete5i / pow(doBase, (double) nPrecision);
 	}
+
+	bool FloatsEqual(const float &a, const float &b)
+	{
+		return (fabs(a - b) <= 1.0e-20f);
+	}
 #pragma endregion
 
 #pragma region Gdi	

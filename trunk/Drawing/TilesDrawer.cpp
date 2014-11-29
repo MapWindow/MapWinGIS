@@ -60,9 +60,9 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 	}
 	
 	// copy to temporary vector, for not lock the original one for the whole length of drawing	
-	((CTiles*)itiles)->_tilesBufferLock.Lock();
+	((CTiles*)itiles)->m_tilesBufferLock.Lock();
 	std::vector<TileCore*> tempTiles(tiles);
-	((CTiles*)itiles)->_tilesBufferLock.Unlock();
+	((CTiles*)itiles)->m_tilesBufferLock.Unlock();
 
 	// per tile drawing
 	for (size_t i = 0; i < tiles.size();i++)

@@ -53,14 +53,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_GRID)
+	DECLARE_REGISTRY_RESOURCEID(IDR_GRID)
 
-DECLARE_NOT_AGGREGATABLE(CGrid)
+	DECLARE_NOT_AGGREGATABLE(CGrid)
 
-BEGIN_COM_MAP(CGrid)
-	COM_INTERFACE_ENTRY(IGrid)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CGrid)
+		COM_INTERFACE_ENTRY(IGrid)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IGrid
@@ -112,81 +112,57 @@ public:
 	STDMETHOD(CreateImageProxy)(IGridColorScheme* colorScheme, IImage** retVal);
 	STDMETHOD(get_PreferedDisplayMode)( tkGridProxyMode *retVal);
 	STDMETHOD(put_PreferedDisplayMode)( tkGridProxyMode newVal);
-	//STDMETHOD(get_CanDisplayWithoutProxy)( tkCanDisplayGridWoProxy *retVal);
 	STDMETHOD(get_HasValidImageProxy)( VARIANT_BOOL *retVal);
 
-	// Gets name of the legend file associated with grid
-	CStringW GetFilename()
-	{
-		return filename;
-	}
-	
-	CStringW GetLegendName()
-	{
-		return Utility::GetPathWOExtension(filename) + L".mwleg";
-	}
-
-	CStringW GetProxyLegendName()
-	{
-		return GridManager::GetProxyLegendName(GetFilename());
-	}
-
-	CStringW GetProxyName()
-	{
-		return GridManager::GetProxyName(GetFilename());
-	}
-
-	CStringW GetProxyWorldFileName()
-	{
-		return GridManager::GetProxyWorldFileName(GetFilename());
-	}
-
-	bool CGrid::IsRgb();
-	IImage* CGrid::OpenImageProxy();
-	void SaveProjection(char* projection);
-	bool RemoveColorSchemeFile();
-	IGrid* CGrid::Clone(BSTR newFilename);
-	IGrid* CGrid::Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow, long lastRow);
-	void CGrid::ErrorMessage(long ErrorCode);
-
-	bool CGrid::BuildUniqueColorScheme(int maxValuesCount, PredefinedColorScheme colors, ColoringType coloringType, IGridColorScheme** newscheme);
-	IImage* CGrid::GridToImage(IGridColorScheme* scheme);
-
-	IGridColorScheme* BuildGradientColorSchemeCore(PredefinedColorScheme colors, ColoringType coloringType);
-	bool CGrid::GetUniqueValues(set<CComVariant>& values, int maxCount);
-	void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
-	void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
-	bool CGrid::PutRowDouble(long Row, double *Vals);
-	void CGrid::PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
-	void CGrid::GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 private:
-	dGrid * dgrid;
-	fGrid * fgrid;
-	lGrid * lgrid;
-	sGrid * sgrid;
-	tkGridRaster * trgrid;
+	ICallback * _globalCallback;
+	long _lastErrorCode;
+	CStringW _filename;
+	BSTR _key;
 
+	dGrid * _dgrid;
+	fGrid * _fgrid;
+	lGrid * _lgrid;
+	sGrid * _sgrid;
+	tkGridRaster * _trgrid;
+	tkGridProxyMode _preferedDisplayMode;
+
+private:
 	bool MemoryAvailable(double bytes);
-
-	long lastErrorCode;
-	CStringW filename;
-	BSTR key;
-	ICallback * globalCallback;
-
 	void set_ProjectionIntoHeader(char * projection);
 	void ResolveFileType(GridFileType &newFileType, CString extension);
-	void CGrid::SaveProjectionAsWkt();
-	bool CGrid::OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileType);
-	void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcingGDALUse);
+	void SaveProjectionAsWkt();
+	bool OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileType);
+	void TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcingGDALUse);
 	bool OpenAuxHeader(CStringW& filename);
-	void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage** retVal);
+	void OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage** retVal);
 
-	tkGridProxyMode preferedDisplayMode;
+public:
+	// Gets name of the legend file associated with grid
+	CStringW GetFilename() { return _filename; }
+	CStringW GetLegendName() {	return Utility::GetPathWOExtension(_filename) + L".mwleg"; }
+	CStringW GetProxyLegendName() {	return GridManager::GetProxyLegendName(GetFilename()); }
+	CStringW GetProxyName() {return GridManager::GetProxyName(GetFilename());}
+	CStringW GetProxyWorldFileName() {return GridManager::GetProxyWorldFileName(GetFilename());	}
 
-	inline bool FloatsEqual(const float &a, const float &b)
-	{
-		return (fabs(a - b) <= 1.0e-20f);
-	}
+	bool IsRgb();
+	IImage* OpenImageProxy();
+	void SaveProjection(char* projection);
+	bool RemoveColorSchemeFile();
+	IGrid* Clone(BSTR newFilename);
+	IGrid* Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow, long lastRow);
+	void ErrorMessage(long ErrorCode);
+
+	bool BuildUniqueColorScheme(int maxValuesCount, PredefinedColorScheme colors, ColoringType coloringType, IGridColorScheme** newscheme);
+	IImage* GridToImage(IGridColorScheme* scheme);
+
+	IGridColorScheme* BuildGradientColorSchemeCore(PredefinedColorScheme colors, ColoringType coloringType);
+	bool GetUniqueValues(set<CComVariant>& values, int maxCount);
+	void GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	void PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long EndCol, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	bool PutRowDouble(long Row, double *Vals);
+	void PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
+	void GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retval);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Grid), CGrid)

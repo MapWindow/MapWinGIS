@@ -73,8 +73,7 @@ private:
 	BSTR _name;
 	int _index;
 	OLE_COLOR _color;
-	
-	// TODO: add ShapeDrawingOptions later
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ChartField), CChartField)

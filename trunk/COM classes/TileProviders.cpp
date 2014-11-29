@@ -32,6 +32,21 @@
 #include "SQLiteCache.h"
 #include "RAMCache.h"
 
+// ************************************************************
+//		get_Provider()
+// ************************************************************
+BaseProvider* CTileProviders::get_Provider(int providerId)
+{
+	for (size_t i = 0; i < _providers.size(); i++)
+	{
+		if (_providers[i]->Id == providerId)
+		{
+			return _providers[i];
+		}
+	}
+	return NULL;
+}
+
 #pragma region "ErrorHandling"
 // ************************************************************
 //		get_GlobalCallback()
@@ -39,9 +54,9 @@
 STDMETHODIMP CTileProviders::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_globalCallback;
-	if( m_globalCallback != NULL )
-		m_globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
+		_globalCallback->AddRef();
 	return S_OK;
 }
 
@@ -51,7 +66,7 @@ STDMETHODIMP CTileProviders::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CTileProviders::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&m_globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -72,8 +87,8 @@ STDMETHODIMP CTileProviders::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CTileProviders::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_lastErrorCode;
-	m_lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -82,8 +97,8 @@ STDMETHODIMP CTileProviders::get_LastErrorCode(long *pVal)
 // **************************************************************
 void CTileProviders::ErrorMessage(long ErrorCode)
 {
-	m_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************
@@ -93,14 +108,14 @@ STDMETHODIMP CTileProviders::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(m_key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CTileProviders::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(m_key);
-	m_key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -113,10 +128,10 @@ STDMETHODIMP CTileProviders::put_Key(BSTR newVal)
 // Instantiate default providers
 BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 {
-	for (size_t i = 0; i < m_providers.size(); i++)
+	for (size_t i = 0; i < _providers.size(); i++)
 	{
-		if (m_providers[i]->Id == provider)
-			return m_providers[i];
+		if (_providers[i]->Id == provider)
+			return _providers[i];
 	}
 
 #ifdef _DEBUG
@@ -206,7 +221,7 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 
 	if (p) 
 	{
-		m_providers.push_back(p);
+		_providers.push_back(p);
 	}
 	else
 	{
@@ -242,21 +257,21 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 		}
 		else
 		{
-			if (m_tiles != NULL)
+			if (_tiles != NULL)
 			{
 				// check, probably the provider is currently in use 
 				int id = -1;
-				m_tiles->get_ProviderId(&id);
+				_tiles->get_ProviderId(&id);
 				if (p->Id == id)
-					m_tiles->put_Provider(tkTileProvider::OpenStreetMap);
+					_tiles->put_Provider(tkTileProvider::OpenStreetMap);
 			}
 			
-			for (size_t i = 0; i < m_providers.size(); i++)
+			for (size_t i = 0; i < _providers.size(); i++)
 			{
-				if (m_providers[i]->Id == providerId)
+				if (_providers[i]->Id == providerId)
 				{
-					delete m_providers[i];
-					m_providers.erase(m_providers.begin() + i);
+					delete _providers[i];
+					_providers.erase(_providers.begin() + i);
 					break;
 				}
 			}
@@ -279,16 +294,16 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	// make sure no provider is currently in use
-	if (m_tiles != NULL) {
+	if (_tiles != NULL) {
 		tkTileProvider provider;
-		m_tiles->get_Provider(&provider);
+		_tiles->get_Provider(&provider);
 		if(provider == tkTileProvider::ProviderCustom)
-			m_tiles->put_Provider(tkTileProvider::OpenStreetMap);
+			_tiles->put_Provider(tkTileProvider::OpenStreetMap);
 	}
 	
 	// default providers should remain untouched
-	std::vector<BaseProvider*>::iterator it = m_providers.begin();
-	while (it < m_providers.end())
+	std::vector<BaseProvider*>::iterator it = _providers.begin();
+	while (it < _providers.end())
 	{
 		CustomProvider* p = dynamic_cast<CustomProvider*>(*it);
 		if (p)
@@ -300,7 +315,7 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 			}
 
 			delete *it;
-			it = m_providers.erase(it);
+			it = _providers.erase(it);
 		}
 		else
 		{
@@ -316,7 +331,7 @@ STDMETHODIMP CTileProviders::Clear(VARIANT_BOOL clearCache)
 STDMETHODIMP CTileProviders::get_Count(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_providers.size();
+	*pVal = _providers.size();
 	return S_OK;
 }
 
@@ -345,7 +360,7 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 	try
 	{
 		CustomProvider* provider = new CustomProvider(Id, name, urlPattern, projection, minZoom, maxZoom);
-		m_providers.push_back(provider);
+		_providers.push_back(provider);
 		*retVal = VARIANT_TRUE;
 	}
 	catch(int val)
@@ -371,12 +386,12 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 STDMETHODIMP CTileProviders::get_Id(int Index, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size()){
+	if (Index < 0 || Index >= (int)_providers.size()){
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = -1;
 	}
 	else {
-		*retVal = (LONG)m_providers[Index]->Id;
+		*retVal = (LONG)_providers[Index]->Id;
 	}
 	return S_OK;
 }
@@ -388,13 +403,13 @@ STDMETHODIMP CTileProviders::get_Name(int Index, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
 	}
 	else {
-		*retVal = A2BSTR(m_providers[Index]->Name);
+		*retVal = A2BSTR(_providers[Index]->Name);
 	}	
 	return S_OK;
 }
@@ -402,7 +417,7 @@ STDMETHODIMP CTileProviders::get_Name(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Name(int Index, BSTR pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_FALSE;
@@ -410,7 +425,7 @@ STDMETHODIMP CTileProviders::put_Name(int Index, BSTR pVal)
 	else
 	{
 		USES_CONVERSION;
-		m_providers[Index]->Name = OLE2A(pVal);
+		_providers[Index]->Name = OLE2A(pVal);
 	}
 	return S_OK;
 }
@@ -422,13 +437,13 @@ STDMETHODIMP CTileProviders::get_Language(int Index, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
 	}
 	else {
-		*retVal = A2BSTR(m_providers[Index]->LanguageStr);
+		*retVal = A2BSTR(_providers[Index]->LanguageStr);
 	}	
 	return S_OK;
 }
@@ -436,7 +451,7 @@ STDMETHODIMP CTileProviders::get_Language(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Language(int Index, BSTR pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_FALSE;
@@ -444,7 +459,7 @@ STDMETHODIMP CTileProviders::put_Language(int Index, BSTR pVal)
 	else
 	{
 		USES_CONVERSION;
-		m_providers[Index]->LanguageStr = OLE2A(pVal);
+		_providers[Index]->LanguageStr = OLE2A(pVal);
 	}
 	return S_OK;
 }
@@ -465,13 +480,13 @@ STDMETHODIMP CTileProviders::get_Version(int Index, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
 	}
 	else {
-		*retVal = A2BSTR(m_providers[Index]->Version);
+		*retVal = A2BSTR(_providers[Index]->Version);
 	}	
 	return S_OK;
 }
@@ -482,7 +497,7 @@ STDMETHODIMP CTileProviders::get_Version(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_FALSE;
@@ -490,7 +505,7 @@ STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 	else
 	{
 		USES_CONVERSION;
-		m_providers[Index]->Version = OLE2A(pVal);
+		_providers[Index]->Version = OLE2A(pVal);
 	}
 	return S_OK;
 }
@@ -501,13 +516,13 @@ STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = A2BSTR("");
 	}
 	else {
-		*retVal = A2BSTR(m_providers[Index]->UrlFormat);
+		*retVal = A2BSTR(_providers[Index]->UrlFormat);
 	}	
 	return S_OK;
 }
@@ -518,13 +533,13 @@ STDMETHODIMP CTileProviders::get_UrlPattern(int Index, BSTR* retVal)
 STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = (tkTileProjection)-1;
 	}
 	else {
-		CustomProvider* p = dynamic_cast<CustomProvider*>(m_providers[Index]);
+		CustomProvider* p = dynamic_cast<CustomProvider*>(_providers[Index]);
 		*retVal = p ? p->m_projectionId :(tkTileProjection)-1;
 	}	
 	return S_OK;
@@ -536,13 +551,13 @@ STDMETHODIMP CTileProviders::get_Projection(int Index, tkTileProjection* retVal)
 STDMETHODIMP CTileProviders::get_MinZoom(int Index, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = -1;
 	}
 	else {
-		*retVal = m_providers[Index]->minZoom;
+		*retVal = _providers[Index]->minZoom;
 	}	
 	return S_OK;
 }
@@ -553,13 +568,13 @@ STDMETHODIMP CTileProviders::get_MinZoom(int Index, int* retVal)
 STDMETHODIMP CTileProviders::get_MaxZoom(int Index, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < 0 || Index >= (int)m_providers.size())
+	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = -1;
 	}
 	else {
-		*retVal = m_providers[Index]->maxZoom;
+		*retVal = _providers[Index]->maxZoom;
 	}	
 	return S_OK;
 }
@@ -579,9 +594,9 @@ STDMETHODIMP CTileProviders::get_IndexByProviderId(int providerId, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = -1;
-	for (size_t i = 0; i < m_providers.size(); i++)
+	for (size_t i = 0; i < _providers.size(); i++)
 	{
-		if (providerId == m_providers[i]->Id)
+		if (providerId == _providers[i]->Id)
 		{
 			*retVal = i;
 			break;

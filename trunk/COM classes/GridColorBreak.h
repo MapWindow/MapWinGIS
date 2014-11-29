@@ -33,18 +33,18 @@ class ATL_NO_VTABLE CGridColorBreak :
 public:
 	CGridColorBreak()
 	{
-		ColorType = Hillshade;
-		GradModel = Linear;
+		_colorType = Hillshade;
+		_gradModel = Linear;
 
 		USES_CONVERSION;
 
-		lastErrorCode = tkNO_ERROR;
-		globalCallback = NULL;
-		key = A2BSTR("");
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
+		_key = A2BSTR("");
 	}
 	~CGridColorBreak()
 	{
-		::SysFreeString(key);
+		::SysFreeString(_key);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -88,24 +88,20 @@ public:
 	STDMETHOD(put_LowColor)(/*[in]*/ OLE_COLOR newVal);
 	STDMETHOD(get_HighColor)(/*[out, retval]*/ OLE_COLOR *pVal);
 	STDMETHOD(put_HighColor)(/*[in]*/ OLE_COLOR newVal);
-
-	
-private:
-	OLE_COLOR HighColor;
-	OLE_COLOR LowColor;
-	double LowValue;
-	double HighValue;
-	CString m_Caption;
-	ColoringType ColorType;
-	GradientModel GradModel;
-
-private:
-	long lastErrorCode;
-	ICallback * globalCallback;
-	BSTR key;
-public:
 	STDMETHOD(get_Caption)(BSTR* pVal);
 	STDMETHOD(put_Caption)(BSTR newVal);
+	
+private:
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+	OLE_COLOR _highColor;
+	OLE_COLOR _lowColor;
+	double _lowValue;
+	double _highValue;
+	CString _caption;
+	ColoringType _colorType;
+	GradientModel _gradModel;
 };
 
 

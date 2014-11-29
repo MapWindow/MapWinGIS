@@ -34,14 +34,14 @@ STDMETHODIMP CLabelClass::get_Text(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = m_label->text.AllocSysString();
+	*retval = _label->text.AllocSysString();
 	return S_OK;
 };
 STDMETHODIMP CLabelClass::put_Text(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	m_label->text = OLE2CA(newVal);
+	_label->text = OLE2CA(newVal);
 	return S_OK;
 };
 
@@ -50,19 +50,19 @@ STDMETHODIMP CLabelClass::put_Text(BSTR newVal)
 // ***********************************************************
 char* CLabelClass::get_LabelData()
 {
-	return reinterpret_cast<char*>(m_label);
+	return reinterpret_cast<char*>(_label);
 }
 void CLabelClass::put_LabelData(char* newVal)
 {
 	if (newVal == NULL) return;
 	
 	// if the memory was allocated in this class we should free it;
-	if (m_canDelete)
-		delete m_label;
+	if (_canDelete)
+		delete _label;
 
-	m_label = reinterpret_cast<CLabelInfo*>(newVal);
+	_label = reinterpret_cast<CLabelInfo*>(newVal);
 	
-	m_canDelete = false; // we can't delete the object hereafter as we didn't allocate the memory;
+	_canDelete = false; // we can't delete the object hereafter as we didn't allocate the memory;
 }
 
 // ***********************************************************
@@ -72,17 +72,17 @@ STDMETHODIMP CLabelClass::get_ScreenExtents(IExtents** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	IExtents* ext = NULL;
-	if (m_label->horizontalFrame)
+	if (_label->horizontalFrame)
 	{
 		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
-		ext->SetBounds( m_label->horizontalFrame->left, m_label->horizontalFrame->top, 0.0,
-						m_label->horizontalFrame->right, m_label->horizontalFrame->bottom, 0.0);
+		ext->SetBounds( _label->horizontalFrame->left, _label->horizontalFrame->top, 0.0,
+						_label->horizontalFrame->right, _label->horizontalFrame->bottom, 0.0);
 		*retval = ext;
 	}
-	else if (m_label->rotatedFrame)
+	else if (_label->rotatedFrame)
 	{
 		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
-		CRect* rect = m_label->rotatedFrame->BoundingBox();
+		CRect* rect = _label->rotatedFrame->BoundingBox();
 		ext->SetBounds( rect->left, rect->top, 0.0, rect->right, rect->bottom, 0.0);
 		*retval = ext;
 	}

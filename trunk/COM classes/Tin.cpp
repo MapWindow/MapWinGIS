@@ -35,20 +35,20 @@ static char THIS_FILE[] = __FILE__;
 
 // CTin
 CTin::CTin()
-{	globalCallback = NULL;
-	lastErrorCode = tkNO_ERROR;
+{	_globalCallback = NULL;
+	_lastErrorCode = tkNO_ERROR;
 	USES_CONVERSION;
-	key = A2BSTR("");
-	filename = A2BSTR("");
-	ndTriangles = NULL;
+	_key = A2BSTR("");
+	_filename = A2BSTR("");
+	_dTriangles = NULL;
 }
 
 CTin::~CTin()
 {	VARIANT_BOOL retval;
 	Close(&retval);
-	globalCallback = NULL;
-	::SysFreeString(key);
-	::SysFreeString(filename);
+	_globalCallback = NULL;
+	::SysFreeString(_key);
+	::SysFreeString(_filename);
 }
 
 STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
@@ -57,13 +57,13 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 
 	USES_CONVERSION;
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	Close(retval);
 	CString tinFile = OLE2CA(TinFile);
 
-	triTable.clear();
-	vtxTable.clear();
+	_triTable.clear();
+	_vtxTable.clear();
 
 	FILE * in = fopen( tinFile, "rb" );
 
@@ -71,18 +71,18 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 	{	*retval = FALSE;		
 	}
 	else
-	{	filename = A2BSTR(tinFile);
+	{	_filename = A2BSTR(tinFile);
 	
 		//Bounding Box
 		double mvalx, mvaly, mvalz;
 		fread( &mvalx, sizeof(double), 1, in );
 		fread( &mvaly, sizeof(double), 1, in );
 		fread( &mvalz, sizeof(double), 1, in );
-		min = vertex( mvalx, mvaly, mvalz );
+		_min = vertex( mvalx, mvaly, mvalz );
 		fread( &mvalx, sizeof(double), 1, in );
 		fread( &mvaly, sizeof(double), 1, in );
 		fread( &mvalz, sizeof(double), 1, in );
-		max = vertex( mvalx, mvaly, mvalz );
+		_max = vertex( mvalx, mvaly, mvalz );
 		
 		//Number of Triangles
 		long numTriangles;
@@ -112,9 +112,9 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 
 			tinTableRow r( vtx1, vtx2, vtx3, b1, b2, b3 );
 
-			triTable.addRow( r );
+			_triTable.addRow( r );
 
-			Utility::DisplayProgress(callback, t, total, "Reading Tin", key, percent);
+			Utility::DisplayProgress(callback, t, total, "Reading Tin", _key, percent);
 		}
 		double x, y, z;
 		vertex ver;
@@ -124,17 +124,17 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 			fread( &y, sizeof(double), 1, in );
 			fread( &z, sizeof(double), 1, in );
 			ver = vertex( x, y, z );
-			vtxTable.add( ver );
+			_vtxTable.add( ver );
 			
-			Utility::DisplayProgress(callback, t + v, total, "Reading Tin", key, percent);
+			Utility::DisplayProgress(callback, t + v, total, "Reading Tin", _key, percent);
 		}
 
 		if( numTriangles > 0 )
-		{	ndTriangles = new char[numTriangles];
+		{	_dTriangles = new char[numTriangles];
 			if( feof(in) )
-				memset(ndTriangles,0,sizeof(char)*numTriangles);
+				memset(_dTriangles,0,sizeof(char)*numTriangles);
 			else
-				fread(ndTriangles,sizeof(char),numTriangles, in);
+				fread(_dTriangles,sizeof(char),numTriangles, in);
 		}
 
 		fclose( in );
@@ -153,18 +153,18 @@ STDMETHODIMP CTin::CreateNew(IGrid *Grid, double Deviation, SplitMethod SplitTes
 	}
 	else
 	{	Close(retval);
-		grid = Grid;
-		grid->get_Header(&gridHeader);
-		devHeap = TinHeap( Deviation );
-		triTable.clear();
-		vtxTable.clear();
+		_grid = Grid;
+		_grid->get_Header(&_gridHeader);
+		_devHeap = TinHeap( Deviation );
+		_triTable.clear();
+		_vtxTable.clear();
 
-		splitMethod = SplitTest;
-		splitParam = STParam;
+		_splitMethod = SplitTest;
+		_splitParam = STParam;
 
-		ICallback * tmpcallback = globalCallback;
+		ICallback * tmpcallback = _globalCallback;
 		if( cBack != NULL )
-			globalCallback = cBack;
+			_globalCallback = cBack;
 
 		createTin( Deviation, MeshDivisions, MaximumTriangles );
 
@@ -172,36 +172,36 @@ STDMETHODIMP CTin::CreateNew(IGrid *Grid, double Deviation, SplitMethod SplitTes
 		VARIANT vndv;
 		VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
 		double ndv;
-		gridHeader->get_NodataValue(&vndv);
+		_gridHeader->get_NodataValue(&vndv);
 		dVal(vndv,ndv);
-		if( triTable.size() > 0 )
-			ndTriangles=new char[triTable.size()];
+		if( _triTable.size() > 0 )
+			_dTriangles=new char[_triTable.size()];
 
-		for( long i = 0; i < triTable.size(); i++ )
-		{	long index_one = *((long*)triTable.getValue( VTX_ONE, i ) );
-			long index_two = *((long*)triTable.getValue( VTX_TWO, i ) );
-			long index_three = *((long*)triTable.getValue( VTX_THREE, i ) );
+		for( long i = 0; i < _triTable.size(); i++ )
+		{	long index_one = *((long*)_triTable.getValue( VTX_ONE, i ) );
+			long index_two = *((long*)_triTable.getValue( VTX_TWO, i ) );
+			long index_three = *((long*)_triTable.getValue( VTX_THREE, i ) );
 		
 			//Swap Polygon Order
-			triTable.setValue( VTX_THREE, i, (void*)&index_one);
-			triTable.setValue( VTX_TWO, i, (void*)&index_two);
-			triTable.setValue( VTX_ONE, i, (void*)&index_three);			
+			_triTable.setValue( VTX_THREE, i, (void*)&index_one);
+			_triTable.setValue( VTX_TWO, i, (void*)&index_two);
+			_triTable.setValue( VTX_ONE, i, (void*)&index_three);			
 
 			//Mark ndv Triangles
-			vertex v1 = vtxTable.getVertex( index_one );			
-			vertex v2 = vtxTable.getVertex( index_two );
-			vertex v3 = vtxTable.getVertex( index_three );
+			vertex v1 = _vtxTable.getVertex( index_one );			
+			vertex v2 = _vtxTable.getVertex( index_two );
+			vertex v3 = _vtxTable.getVertex( index_three );
 			if( v1.getZ() == ndv || v2.getZ() == ndv || v3.getZ() == ndv )
-				ndTriangles[i]=1;
+				_dTriangles[i]=1;
 			else
-				ndTriangles[i]=0;
+				_dTriangles[i]=0;
 		}
-		gridHeader->Release();
-		gridHeader = NULL;
-		grid = NULL;
+		_gridHeader->Release();
+		_gridHeader = NULL;
+		_grid = NULL;
 		*retval = TRUE;
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-		globalCallback = tmpcallback;
+		_globalCallback = tmpcallback;
 	}
 	return S_OK;
 }
@@ -211,32 +211,32 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	FILE * out = fopen( OLE2CA(TinFilename), "wb");
 	if( !out )
 	{	*retval = FALSE;
 	}
 	else
-	{	filename = OLE2BSTR(TinFilename);
+	{	_filename = OLE2BSTR(TinFilename);
 		//Bounding Box	
-		double mval = min.getX();
+		double mval = _min.getX();
 		fwrite(&mval, sizeof(double),1, out );
-		mval = min.getY();
+		mval = _min.getY();
 		fwrite(&mval, sizeof(double),1, out );
-		mval = min.getZ();
+		mval = _min.getZ();
 		fwrite(&mval, sizeof(double),1, out );
-		mval = max.getX();
+		mval = _max.getX();
 		fwrite(&mval, sizeof(double),1, out );
-		mval = max.getY();
+		mval = _max.getY();
 		fwrite(&mval, sizeof(double),1, out );
-		mval = max.getZ();
+		mval = _max.getZ();
 		fwrite(&mval, sizeof(double),1, out );
 
 		//Number of Triangles
-		long numTriangles = triTable.size();
+		long numTriangles = _triTable.size();
 		fwrite(&numTriangles, sizeof(long), 1, out );
-		long numVertices = vtxTable.size();
+		long numVertices = _vtxTable.size();
 		fwrite(&numVertices, sizeof(long), 1, out );
 		
 		double total = numVertices + numTriangles;
@@ -247,13 +247,13 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 		//Triangles
 		for(i = 0; i < numTriangles; i++ )
 		{	
-			long index_one = *((long*)triTable.getValue( VTX_ONE, i ) );
-			long index_two = *((long*)triTable.getValue( VTX_TWO, i ) );
-			long index_three = *((long*)triTable.getValue( VTX_THREE, i ) );
+			long index_one = *((long*)_triTable.getValue( VTX_ONE, i ) );
+			long index_two = *((long*)_triTable.getValue( VTX_TWO, i ) );
+			long index_three = *((long*)_triTable.getValue( VTX_THREE, i ) );
 		
-			long border_one = *((long*)triTable.getValue( BDR_ONE, i ) );
-			long border_two = *((long*)triTable.getValue( BDR_TWO, i ) );
-			long border_three = *((long*)triTable.getValue( BDR_THREE, i ) );
+			long border_one = *((long*)_triTable.getValue( BDR_ONE, i ) );
+			long border_two = *((long*)_triTable.getValue( BDR_TWO, i ) );
+			long border_three = *((long*)_triTable.getValue( BDR_THREE, i ) );
 			
 			fwrite(&index_one, sizeof(long), 1, out );	
 			fwrite(&index_two, sizeof(long), 1, out );
@@ -263,13 +263,13 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&border_two, sizeof(long), 1, out );
 			fwrite(&border_three, sizeof(long), 1, out );	
 			
-			Utility::DisplayProgress(callback, i, total, "Saving Tin", key, percent);
+			Utility::DisplayProgress(callback, i, total, "Saving Tin", _key, percent);
 		}
 
 		long j = 0;
 		for(j = 0; j < numVertices; j++ )
 		{
-			vertex v1 = vtxTable.getVertex( j );			
+			vertex v1 = _vtxTable.getVertex( j );			
 		
 			double v1_x = v1.getX();
 			double v1_y = v1.getY();
@@ -288,11 +288,11 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&v1_z, sizeof(double), 1, out );
 			*/
 
-			Utility::DisplayProgress(callback, i + j, total, "Saving Tin", key, percent);
+			Utility::DisplayProgress(callback, i + j, total, "Saving Tin", _key, percent);
 		}
 
 		if( numTriangles > 0 )
-			fwrite(ndTriangles,sizeof(char),numTriangles,out);
+			fwrite(_dTriangles,sizeof(char),numTriangles,out);
 		
 		fclose( out );
 		*retval = TRUE;
@@ -306,14 +306,14 @@ STDMETHODIMP CTin::Close(VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	::SysFreeString(filename);
-	filename = A2BSTR("");
+	::SysFreeString(_filename);
+	_filename = A2BSTR("");
 
-	if( ndTriangles != NULL )
-		delete [] ndTriangles;
-	ndTriangles = NULL;
-	triTable.clear();
-	vtxTable.clear();	
+	if( _dTriangles != NULL )
+		delete [] _dTriangles;
+	_dTriangles = NULL;
+	_triTable.clear();
+	_vtxTable.clear();	
 	*retval = TRUE;
 
 	return S_OK;
@@ -324,17 +324,17 @@ STDMETHODIMP CTin::Select(long * TriangleHint, double X, double Y, double *Z, VA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	//Make an initial test to see if the point is even in the TIN bounds
-	if( X < min.getX() || X > max.getX() )
+	if( X < _min.getX() || X > _max.getX() )
 		*retval = FALSE;
-	else if( Y < min.getY() || Y > max.getY() )
+	else if( Y < _min.getY() || Y > _max.getY() )
 		*retval = FALSE;
 	else
 	{	
 		std::deque<long> breadthTraverse;
 		breadthTraverse.push_back( *TriangleHint );
 
-		bool * checkedTriangle = new bool[ triTable.size() + 1];
-		memset( checkedTriangle, 0, triTable.size() + 1 );
+		bool * checkedTriangle = new bool[ _triTable.size() + 1];
+		memset( checkedTriangle, 0, _triTable.size() + 1 );
 
 		vertex triangle[3];
 		long findHeightBorder1;
@@ -359,9 +359,9 @@ STDMETHODIMP CTin::Select(long * TriangleHint, double X, double Y, double *Z, VA
 				{
 					checkedTriangle[ findHeightTriIndex ] = true;
 
-					triangle[0] = vtxTable.getVertex( *((long*)triTable.getValue( VTX_ONE, findHeightTriIndex ) ) );
-					triangle[1] = vtxTable.getVertex( *((long*)triTable.getValue( VTX_TWO, findHeightTriIndex ) ) );;
-					triangle[2] = vtxTable.getVertex( *((long*)triTable.getValue( VTX_THREE, findHeightTriIndex ) ) );;
+					triangle[0] = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_ONE, findHeightTriIndex ) ) );
+					triangle[1] = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_TWO, findHeightTriIndex ) ) );;
+					triangle[2] = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_THREE, findHeightTriIndex ) ) );;
 
 					if( vtxInTriangle( triangle, orthoVertex ) )
 					{	//Vertex is in triangle
@@ -395,9 +395,9 @@ STDMETHODIMP CTin::Select(long * TriangleHint, double X, double Y, double *Z, VA
 					else
 					{	//Breadth search tin
 						breadthTraverse.pop_front();
-						findHeightBorder1 = *((long*)triTable.getValue( BDR_ONE, findHeightTriIndex ) );
-						findHeightBorder2 = *((long*)triTable.getValue( BDR_TWO, findHeightTriIndex ) );
-						findHeightBorder3 = *((long*)triTable.getValue( BDR_THREE, findHeightTriIndex ) );
+						findHeightBorder1 = *((long*)_triTable.getValue( BDR_ONE, findHeightTriIndex ) );
+						findHeightBorder2 = *((long*)_triTable.getValue( BDR_TWO, findHeightTriIndex ) );
+						findHeightBorder3 = *((long*)_triTable.getValue( BDR_THREE, findHeightTriIndex ) );
 
 						breadthTraverse.push_back( findHeightBorder1 );
 						breadthTraverse.push_back( findHeightBorder2 );
@@ -419,7 +419,7 @@ STDMETHODIMP CTin::get_NumTriangles(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = triTable.size();
+	*pVal = _triTable.size();
 
 	return S_OK;
 }
@@ -428,7 +428,7 @@ STDMETHODIMP CTin::get_NumVertices(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = vtxTable.size();
+	*pVal = _vtxTable.size();
 
 	return S_OK;
 }
@@ -437,8 +437,8 @@ STDMETHODIMP CTin::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -467,9 +467,9 @@ STDMETHODIMP CTin::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
+		_globalCallback->AddRef();
 
 	return S_OK;
 }
@@ -477,7 +477,7 @@ STDMETHODIMP CTin::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CTin::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -486,7 +486,7 @@ STDMETHODIMP CTin::get_Key(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -495,8 +495,8 @@ STDMETHODIMP CTin::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -505,10 +505,10 @@ STDMETHODIMP CTin::Triangle(long TriIndex, long *vtx1Index, long *vtx2Index, lon
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( TriIndex >= 0 && TriIndex < triTable.size() )
-	{	*vtx1Index = *((long*)triTable.getValue( VTX_ONE, TriIndex ) );
-		*vtx2Index = *((long*)triTable.getValue( VTX_TWO, TriIndex ) );
-		*vtx3Index = *((long*)triTable.getValue( VTX_THREE, TriIndex ) );
+	if( TriIndex >= 0 && TriIndex < _triTable.size() )
+	{	*vtx1Index = *((long*)_triTable.getValue( VTX_ONE, TriIndex ) );
+		*vtx2Index = *((long*)_triTable.getValue( VTX_TWO, TriIndex ) );
+		*vtx3Index = *((long*)_triTable.getValue( VTX_THREE, TriIndex ) );
 	}
 	else
 	{	*vtx1Index = -1;
@@ -523,10 +523,10 @@ STDMETHODIMP CTin::TriangleNeighbors(long TriIndex, long *triIndex1, long *triIn
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( TriIndex >= 0 && TriIndex < triTable.size() )
-	{	*triIndex1 = *((long*)triTable.getValue( BDR_ONE, TriIndex ) );
-		*triIndex2 = *((long*)triTable.getValue( BDR_TWO, TriIndex ) );
-		*triIndex3 = *((long*)triTable.getValue( BDR_THREE, TriIndex ) );
+	if( TriIndex >= 0 && TriIndex < _triTable.size() )
+	{	*triIndex1 = *((long*)_triTable.getValue( BDR_ONE, TriIndex ) );
+		*triIndex2 = *((long*)_triTable.getValue( BDR_TWO, TriIndex ) );
+		*triIndex3 = *((long*)_triTable.getValue( BDR_THREE, TriIndex ) );
 	}
 	else
 	{	*triIndex1 = -1;
@@ -542,8 +542,8 @@ STDMETHODIMP CTin::Vertex(long VtxIndex, double *X, double *Y, double *Z)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( VtxIndex >= 0 && VtxIndex < vtxTable.size() )
-	{	vertex v = vtxTable.getVertex( VtxIndex );
+	if( VtxIndex >= 0 && VtxIndex < _vtxTable.size() )
+	{	vertex v = _vtxTable.getVertex( VtxIndex );
 		*X = v.getX();
 		*Y = v.getY();
 		*Z = v.getZ();
@@ -561,9 +561,9 @@ STDMETHODIMP CTin::Max(double *X, double *Y, double *Z)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*X = max.getX();
-	*Y = max.getY();
-	*Z = max.getZ();
+	*X = _max.getX();
+	*Y = _max.getY();
+	*Z = _max.getZ();
 
 	return S_OK;
 }
@@ -572,9 +572,9 @@ STDMETHODIMP CTin::Min(double *X, double *Y, double *Z)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*X = min.getX();
-	*Y = min.getY();
-	*Z = min.getZ();
+	*X = _min.getX();
+	*Y = _min.getY();
+	*Z = _min.getZ();
 
 	return S_OK;
 }
@@ -584,19 +584,19 @@ STDMETHODIMP CTin::get_Filename(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(filename);
+	*pVal = OLE2BSTR(_filename);
 
 	return S_OK;
 }
 
 inline long CTin::gridNcols()
 {	long cols = 0;
-	gridHeader->get_NumberCols(&cols);
+	_gridHeader->get_NumberCols(&cols);
 	return cols;
 }
 inline long CTin::gridNrows()
 {	long rows = 0;
-	gridHeader->get_NumberRows(&rows);
+	_gridHeader->get_NumberRows(&rows);
 	return rows;
 }
 
@@ -610,52 +610,52 @@ inline void CTin::createTin( double deviation, long meshDivisions, long maxTrian
 	vertex v3 = gridCoord( ncols-1, nrows-1 );
 	vertex v4 = gridCoord( 0, nrows-1 );	
 
-	min = gridCoord( 0, nrows-1 );
-	min.setZ( gridMin() );
-	max = gridCoord( ncols-1, 0 );
-	max.setZ( gridMax() );
+	_min = gridCoord( 0, nrows-1 );
+	_min.setZ( gridMin() );
+	_max = gridCoord( ncols-1, 0 );
+	_max.setZ( gridMax() );
 
 	createMesh( meshDivisions, v1, v2, v3, v4 );
 
 	//Split the triangles until a deviation or numTriangles
-	heapNode triNode = devHeap.top();
+	heapNode triNode = _devHeap.top();
 
 	int percent = 0, newpercent1, newpercent2 = 0;
 	double total = triNode.value;		
 	
-	while( triNode.value > deviation && triTable.size() < maxTriangles )
+	while( triNode.value > deviation && _triTable.size() < maxTriangles )
 	{
 		//The values are only pushed onto the heap, and not deleted
 		//	Check the stored deviation vertex against the triangles deviation vertex
-		vertex triVertex = *((vertex*)triTable.getValue( DEV_VERTEX, triNode.index ) );
+		vertex triVertex = *((vertex*)_triTable.getValue( DEV_VERTEX, triNode.index ) );
 		if( triNode.devVertex == triVertex )
 		{			
-			devHeap.pop();
+			_devHeap.pop();
 			splitTriangle( triNode.index );	
 			newpercent1 = 100 - (int)(((triNode.value - deviation)/total)*100);
 			if( maxTriangles == MaxTriangles )
 			{	if( newpercent1 > percent )
 				{	
 					percent = newpercent1;
-					Utility::DisplayProgress(globalCallback, percent, "Splitting Triangles", key);
+					Utility::DisplayProgress(_globalCallback, percent, "Splitting Triangles", _key);
 				}				
 			}
 			else
-			{	newpercent2 = (int)(((double)triTable.size()/maxTriangles)*100);
+			{	newpercent2 = (int)(((double)_triTable.size()/maxTriangles)*100);
 				if( newpercent2 > newpercent1 )
 					newpercent1 = newpercent2;
 
 				if( newpercent1 > percent )
 				{	
 					percent = newpercent1;
-					Utility::DisplayProgress(globalCallback, percent, "Splitting Triangles", key);
+					Utility::DisplayProgress(_globalCallback, percent, "Splitting Triangles", _key);
 				}
 			}	
-			triNode = devHeap.top();
+			triNode = _devHeap.top();
 		}
 		else
-		{	devHeap.pop();
-			triNode = devHeap.top();
+		{	_devHeap.pop();
+			triNode = _devHeap.top();
 		}
 	}
 }
@@ -729,9 +729,9 @@ inline void CTin::setSign( double val, int & SH )
 inline void CTin::computeTriangleEquation( long triIndex, double & A, double & B, double & C, double & D )
 {	
 	//plane equation in the form D = Ax + By + Cz
-	vertex v1 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_ONE, triIndex ) ) );
-	vertex v2 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_TWO, triIndex ) ) );
-	vertex v3 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_THREE, triIndex ) ) );
+	vertex v1 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_ONE, triIndex ) ) );
+	vertex v2 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_TWO, triIndex ) ) );
+	vertex v3 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_THREE, triIndex ) ) );
    
 	cppVector one( v2.getX() - v1.getX(),
 				v2.getY() - v1.getY(),
@@ -751,7 +751,7 @@ inline void CTin::computeTriangleEquation( long triIndex, double & A, double & B
 
 inline vertex CTin::gridCoord( long column, long row )
 {	double x = 0, y = 0;
-	grid->CellToProj(column,row,&x,&y);
+	_grid->CellToProj(column,row,&x,&y);
 	return vertex( x, y, gridValue( column, row ) );
 }
 
@@ -759,7 +759,7 @@ inline double CTin::gridValue( long column, long row )
 {	
 	VARIANT val;
 	VariantInit(&val); //added by Rob Cairns 4-Jan-06
-	grid->get_Value(column,row,&val);
+	_grid->get_Value(column,row,&val);
 	double dval;
 	dVal(val,dval);
 	VariantClear(&val); //added by Rob Cairns 4-Jan-06
@@ -769,7 +769,7 @@ inline double CTin::gridValue( long column, long row )
 inline double CTin::gridMin()
 {	VARIANT min;
 	VariantInit(&min); //added by Rob Cairns 4-Jan-06
-	grid->get_Minimum(&min);
+	_grid->get_Minimum(&min);
 	double dmin;
 	dVal(min,dmin);
 	VariantClear(&min); //added by Rob Cairns 4-Jan-06
@@ -779,7 +779,7 @@ inline double CTin::gridMin()
 inline double CTin::gridMax()
 {	VARIANT max;
 	VariantInit(&max); //added by Rob Cairns 4-Jan-06
-	grid->get_Minimum(&max);
+	_grid->get_Minimum(&max);
 	double dmax;
 	dVal(max,dmax);
 	VariantClear(&max); //added by Rob Cairns 4-Jan-06
@@ -813,7 +813,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 			xV = v1.getX() + x*xd;
 			yV = v4.getY() + y*yd;			
 			gridRaster( xV, yV, column, row );
-			vtxTable.add( vertex( xV, yV, gridValue( column, row) ) );
+			_vtxTable.add( vertex( xV, yV, gridValue( column, row) ) );
 		}
 	}
 
@@ -854,7 +854,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 					
 					//Triangle One
 					tinTableRow t1( v1i, v3i, v2i, n1, n2, n3 );
-					long rowt1 = triTable.addRow( t1 );
+					long rowt1 = _triTable.addRow( t1 );
 					computeMaxDev( rowt1 );
 					
 					n1 = 2*x + y*numTrianglesInRow;
@@ -865,7 +865,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 					
 					//Triangle Two
 					tinTableRow t2( v2i, v3i, v4i, n1, n2, n3 );
-					long rowt2 = triTable.addRow( t2 );
+					long rowt2 = _triTable.addRow( t2 );
 					computeMaxDev( rowt2 );
 				}	
 				//Odd Column
@@ -879,7 +879,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 				
 					//Triangle One
 					tinTableRow t1( v1i, v3i, v4i, n1, n2, n3 );
-					long rowt1 = triTable.addRow( t1 );
+					long rowt1 = _triTable.addRow( t1 );
 					computeMaxDev( rowt1 );
 		
 					n1 = 2*x + y*numTrianglesInRow;
@@ -891,7 +891,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 									
 					//Triangle Two
 					tinTableRow t2( v1i, v4i, v2i, n1, n2, n3 );
-					long rowt2 = triTable.addRow( t2 );
+					long rowt2 = _triTable.addRow( t2 );
 					computeMaxDev( rowt2 );
 				}						
 			}
@@ -911,7 +911,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 				
 					//Triangle One
 					tinTableRow t1( v1i, v3i, v4i, n1, n2, n3 );
-					long rowt1 = triTable.addRow( t1 );
+					long rowt1 = _triTable.addRow( t1 );
 					computeMaxDev( rowt1 );
 				
 					n1 = 2*x + y*numTrianglesInRow;
@@ -922,7 +922,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 					
 					//Triangle Two
 					tinTableRow t2( v1i, v4i, v2i, n1, n2, n3 );
-					long rowt2 = triTable.addRow( t2 );
+					long rowt2 = _triTable.addRow( t2 );
 					computeMaxDev( rowt2 );
 				
 				}	
@@ -935,7 +935,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 					
 					//Triangle One
 					tinTableRow t1( v1i, v3i, v2i, n1, n2, n3 );
-					long rowt1 = triTable.addRow( t1 );
+					long rowt1 = _triTable.addRow( t1 );
 					computeMaxDev( rowt1 );
 			
 					n1 = 2*x + y*numTrianglesInRow;
@@ -946,7 +946,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 				
 					//Triangle Two
 					tinTableRow t2( v2i, v3i, v4i, n1, n2, n3 );
-					long rowt2 = triTable.addRow( t2 );
+					long rowt2 = _triTable.addRow( t2 );
 					computeMaxDev( rowt2 );
 				}	
 			}
@@ -954,7 +954,7 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 			newPercent = (int)(((++percentCnt)/total)*100);
 			if( newPercent > percent )
 			{	percent = newPercent;
-				if( globalCallback != NULL )
+				if( _globalCallback != NULL )
 				{	//callback( percent, "Creating Tin Mesh" );
 				}
 			}							
@@ -964,17 +964,17 @@ void CTin::createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, verte
 
 inline void CTin::splitTriangle( long triIndex )
 {
-	long indexOne = *((long*)triTable.getValue( VTX_ONE, triIndex ) );
-	long indexTwo = *((long*)triTable.getValue( VTX_TWO, triIndex ) );
-	long indexThree = *((long*)triTable.getValue( VTX_THREE, triIndex ) );
-	vertex maxDevVertex = *((vertex*)triTable.getValue( DEV_VERTEX, triIndex ) );
-	long newVtxIndex = vtxTable.add( maxDevVertex );
+	long indexOne = *((long*)_triTable.getValue( VTX_ONE, triIndex ) );
+	long indexTwo = *((long*)_triTable.getValue( VTX_TWO, triIndex ) );
+	long indexThree = *((long*)_triTable.getValue( VTX_THREE, triIndex ) );
+	vertex maxDevVertex = *((vertex*)_triTable.getValue( DEV_VERTEX, triIndex ) );
+	long newVtxIndex = _vtxTable.add( maxDevVertex );
 
-	long borderOne = *((long*)triTable.getValue( BDR_ONE, triIndex ) );
-	long borderTwo = *((long*)triTable.getValue( BDR_TWO, triIndex ) );
-	long borderThree = *((long*)triTable.getValue( BDR_THREE, triIndex ) );
+	long borderOne = *((long*)_triTable.getValue( BDR_ONE, triIndex ) );
+	long borderTwo = *((long*)_triTable.getValue( BDR_TWO, triIndex ) );
+	long borderThree = *((long*)_triTable.getValue( BDR_THREE, triIndex ) );
 
-	long numTriangles = triTable.size();
+	long numTriangles = _triTable.size();
 	//Triangle One
 	tinTableRow triOne( indexOne, indexTwo, newVtxIndex,
 						borderOne,
@@ -994,9 +994,9 @@ inline void CTin::splitTriangle( long triIndex )
 						  numTriangles );	//Triangle Two
 
 	//Add the new triangles to the table
-	triTable.setRow( triOne, triIndex );
-	long triTwoIndex = triTable.addRow( triTwo );
-	long triThreeIndex = triTable.addRow( triThree );
+	_triTable.setRow( triOne, triIndex );
+	long triTwoIndex = _triTable.addRow( triTwo );
+	long triThreeIndex = _triTable.addRow( triThree );
 
 	//1.	Split to the edge perpendicularly or
 	//2.	Split the triangles across the old diagonal
@@ -1034,16 +1034,16 @@ inline void CTin::splitTriangle( long triIndex )
 }
 
 inline void CTin::gridRaster( double x, double y, long & column, long & row )
-{	grid->ProjToCell( x, y, &column, &row);
+{	_grid->ProjToCell( x, y, &column, &row);
 }
 
 inline void CTin::computeMaxDev( long triIndex )
 {
 	double A, B, C, D;
 	computeTriangleEquation( triIndex, A, B, C, D );
-	vertex v1 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_ONE, triIndex )) );
-	vertex v2 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_TWO, triIndex )) );
-	vertex v3 = vtxTable.getVertex( *((long*)triTable.getValue( VTX_THREE, triIndex )) );
+	vertex v1 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_ONE, triIndex )) );
+	vertex v2 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_TWO, triIndex )) );
+	vertex v3 = _vtxTable.getVertex( *((long*)_triTable.getValue( VTX_THREE, triIndex )) );
 
 	long r1c, r1r;
 	gridRaster( v1.getX(), v1.getY(), r1c, r1r );
@@ -1093,9 +1093,9 @@ inline void CTin::computeMaxDev( long triIndex )
 			}
 		}					
 	}	
-	triTable.setValue( MAX_DEV, triIndex, &maxDev );
-	triTable.setValue( DEV_VERTEX, triIndex, &devVertex );
-	devHeap.insert( triIndex, maxDev, devVertex );			
+	_triTable.setValue( MAX_DEV, triIndex, &maxDev );
+	_triTable.setValue( DEV_VERTEX, triIndex, &devVertex );
+	_devHeap.insert( triIndex, maxDev, devVertex );			
 }
 
 inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod perpSplitMethod )
@@ -1103,9 +1103,9 @@ inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod
 	if( perpSplitMethod == TinEdge )
 	{
 		//Find the points on the line
-		long indexOne = *((long*)triTable.getValue( VTX_ONE, triIndex ) );
-		long indexTwo = *((long*)triTable.getValue( VTX_TWO, triIndex ) );
-		long indexThree = *((long*)triTable.getValue( VTX_THREE, triIndex ) );
+		long indexOne = *((long*)_triTable.getValue( VTX_ONE, triIndex ) );
+		long indexTwo = *((long*)_triTable.getValue( VTX_TWO, triIndex ) );
+		long indexThree = *((long*)_triTable.getValue( VTX_THREE, triIndex ) );
 		
 		//Find the Vertices that define the line
 		long lineIndexOne, lineIndexTwo;
@@ -1118,9 +1118,9 @@ inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod
 		else
 			lineIndexTwo = indexTwo;
 
-		vertex lineVtx1 = vtxTable.getVertex( lineIndexOne );
-		vertex lineVtx2 = vtxTable.getVertex( lineIndexTwo );
-		vertex perpVtx = vtxTable.getVertex( perpPointIndex );
+		vertex lineVtx1 = _vtxTable.getVertex( lineIndexOne );
+		vertex lineVtx2 = _vtxTable.getVertex( lineIndexTwo );
+		vertex perpVtx = _vtxTable.getVertex( perpPointIndex );
 
 		long intersectionIndex;
 		vertex intersectionVtx;
@@ -1197,7 +1197,7 @@ inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod
 			long rc, rr;
 			gridRaster( intersectionVtx.getX(), intersectionVtx.getY(), rc, rr );
 			intersectionVtx.setZ( gridValue( rc, rr ) );
-			intersectionIndex = vtxTable.add( intersectionVtx );
+			intersectionIndex = _vtxTable.add( intersectionVtx );
 
 			//Triangle One
 			tinTableRow triOne;
@@ -1216,16 +1216,16 @@ inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod
 			else
 				triTwo.vertexTwo = lineIndexOne;
 			triTwo.vertexThree = perpPointIndex;
-			long triTwoIndex = triTable.addRow( triTwo );
+			long triTwoIndex = _triTable.addRow( triTwo );
 
 			//Update Triangle Index in the table
-			triTable.setValue( VTX_ONE, triIndex, &(triOne.vertexOne) );
-			triTable.setValue( VTX_TWO, triIndex, &(triOne.vertexTwo) );
-			triTable.setValue( VTX_THREE, triIndex, &(triOne.vertexThree) );
+			_triTable.setValue( VTX_ONE, triIndex, &(triOne.vertexOne) );
+			_triTable.setValue( VTX_TWO, triIndex, &(triOne.vertexTwo) );
+			_triTable.setValue( VTX_THREE, triIndex, &(triOne.vertexThree) );
 			
-			long possBorder1 = *((long*)triTable.getValue( BDR_ONE, triIndex ) );
-			long possBorder2 = *((long*)triTable.getValue( BDR_TWO, triIndex ) );
-			long possBorder3 = *((long*)triTable.getValue( BDR_THREE, triIndex ) );
+			long possBorder1 = *((long*)_triTable.getValue( BDR_ONE, triIndex ) );
+			long possBorder2 = *((long*)_triTable.getValue( BDR_TWO, triIndex ) );
+			long possBorder3 = *((long*)_triTable.getValue( BDR_THREE, triIndex ) );
 			long possBorder4 = triIndex;
 			long possBorder5 = triTwoIndex;
 			long possBorder6 = Undefined;
@@ -1233,30 +1233,30 @@ inline bool CTin::splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod
 			//Find the Borders for Triangle One
 			setBorders( triIndex, possBorder1, possBorder2, possBorder3,
 						 possBorder4, possBorder5, possBorder6, triTwoIndex );
-			long newBorder1 = *((long*)triTable.getValue( BDR_ONE, triIndex ) );
+			long newBorder1 = *((long*)_triTable.getValue( BDR_ONE, triIndex ) );
 			if( newBorder1 != triTwoIndex )
 				if( newBorder1 != -1 )
 					changeBorder( newBorder1, triTwoIndex, triIndex );
-			long newBorder2 = *((long*)triTable.getValue( BDR_TWO, triIndex ) );
+			long newBorder2 = *((long*)_triTable.getValue( BDR_TWO, triIndex ) );
 			if( newBorder2 != triTwoIndex )
 				if( newBorder2 != -1 )
 					changeBorder( newBorder2, triTwoIndex, triIndex );
-			long newBorder3 = *((long*)triTable.getValue( BDR_THREE, triIndex ) );
+			long newBorder3 = *((long*)_triTable.getValue( BDR_THREE, triIndex ) );
 			if( newBorder3 != triTwoIndex )
 				if( newBorder3 != -1 )
 					changeBorder( newBorder3, triTwoIndex, triIndex );
 			//Find the Borders for Triangle Two
 			setBorders( triTwoIndex, possBorder1, possBorder2, possBorder3,
 						 possBorder4, possBorder5, possBorder6, triIndex );
-			newBorder1 = *((long*)triTable.getValue( BDR_ONE, triTwoIndex ) );
+			newBorder1 = *((long*)_triTable.getValue( BDR_ONE, triTwoIndex ) );
 			if( newBorder1 != triIndex )
 				if( newBorder1 != -1 )
 					changeBorder( newBorder1, triIndex, triTwoIndex );
-			newBorder2 = *((long*)triTable.getValue( BDR_TWO, triTwoIndex ) );
+			newBorder2 = *((long*)_triTable.getValue( BDR_TWO, triTwoIndex ) );
 			if( newBorder2 != triIndex )
 				if( newBorder2 != -1 )
 					changeBorder( newBorder2, triIndex, triTwoIndex );
-			newBorder3 = *((long*)triTable.getValue( BDR_THREE, triTwoIndex ) );
+			newBorder3 = *((long*)_triTable.getValue( BDR_THREE, triTwoIndex ) );
 			if( newBorder3 != triIndex )
 				if( newBorder3 != -1 )
 					changeBorder( newBorder3, triIndex, triTwoIndex );
@@ -1308,34 +1308,34 @@ inline bool CTin::splitQuad( long triOneIndex, long triTwoIndex )
 			triTwo.vertexTwo = index2Shared;
 		triTwo.vertexThree = t1IndexUnshared;
 
-		long possBorder1 = *((long*)triTable.getValue( BDR_ONE, triOneIndex ) );
-		long possBorder2 = *((long*)triTable.getValue( BDR_TWO, triOneIndex ) );
-		long possBorder3 = *((long*)triTable.getValue( BDR_THREE, triOneIndex ) );
-		long possBorder4 = *((long*)triTable.getValue( BDR_ONE, triTwoIndex ) );
-		long possBorder5 = *((long*)triTable.getValue( BDR_TWO, triTwoIndex ) );
-		long possBorder6 = *((long*)triTable.getValue( BDR_THREE, triTwoIndex ) );
+		long possBorder1 = *((long*)_triTable.getValue( BDR_ONE, triOneIndex ) );
+		long possBorder2 = *((long*)_triTable.getValue( BDR_TWO, triOneIndex ) );
+		long possBorder3 = *((long*)_triTable.getValue( BDR_THREE, triOneIndex ) );
+		long possBorder4 = *((long*)_triTable.getValue( BDR_ONE, triTwoIndex ) );
+		long possBorder5 = *((long*)_triTable.getValue( BDR_TWO, triTwoIndex ) );
+		long possBorder6 = *((long*)_triTable.getValue( BDR_THREE, triTwoIndex ) );
 
 		
 		//Update Triangles in the table
-		triTable.setValue( VTX_ONE, triOneIndex, &(triOne.vertexOne ) );
-		triTable.setValue( VTX_TWO, triOneIndex, &(triOne.vertexTwo ) );
-		triTable.setValue( VTX_THREE, triOneIndex, &(triOne.vertexThree ) );
-		triTable.setValue( VTX_ONE, triTwoIndex, &(triTwo.vertexOne ) );
-		triTable.setValue( VTX_TWO, triTwoIndex, &(triTwo.vertexTwo ) );
-		triTable.setValue( VTX_THREE, triTwoIndex, &(triTwo.vertexThree ) );
+		_triTable.setValue( VTX_ONE, triOneIndex, &(triOne.vertexOne ) );
+		_triTable.setValue( VTX_TWO, triOneIndex, &(triOne.vertexTwo ) );
+		_triTable.setValue( VTX_THREE, triOneIndex, &(triOne.vertexThree ) );
+		_triTable.setValue( VTX_ONE, triTwoIndex, &(triTwo.vertexOne ) );
+		_triTable.setValue( VTX_TWO, triTwoIndex, &(triTwo.vertexTwo ) );
+		_triTable.setValue( VTX_THREE, triTwoIndex, &(triTwo.vertexThree ) );
 
 		//Find the Borders for Triangle One
 		setBorders( triOneIndex, possBorder1, possBorder2, possBorder3,
 					possBorder4, possBorder5, possBorder6, triTwoIndex );
-		long newBorder1 = *((long*)triTable.getValue( BDR_ONE, triOneIndex ) );
+		long newBorder1 = *((long*)_triTable.getValue( BDR_ONE, triOneIndex ) );
 		if( newBorder1 != triTwoIndex )
 			if( newBorder1 != -1 )
 				changeBorder( newBorder1, triTwoIndex, triOneIndex );
-		long newBorder2 = *((long*)triTable.getValue( BDR_TWO, triOneIndex ) );
+		long newBorder2 = *((long*)_triTable.getValue( BDR_TWO, triOneIndex ) );
 		if( newBorder2 != triTwoIndex )
 			if( newBorder2 != -1 )
 				changeBorder( newBorder2, triTwoIndex, triOneIndex );
-		long newBorder3 = *((long*)triTable.getValue( BDR_THREE, triOneIndex ) );
+		long newBorder3 = *((long*)_triTable.getValue( BDR_THREE, triOneIndex ) );
 		if( newBorder3 != triTwoIndex )
 			if( newBorder3 != -1 )
 				changeBorder( newBorder3, triTwoIndex, triOneIndex );
@@ -1343,15 +1343,15 @@ inline bool CTin::splitQuad( long triOneIndex, long triTwoIndex )
 		//Find the Borders for Triangle Two
 		setBorders( triTwoIndex, possBorder1, possBorder2, possBorder3,
 					possBorder4, possBorder5, possBorder6, triOneIndex );
-		newBorder1 = *((long*)triTable.getValue( BDR_ONE, triTwoIndex ) );
+		newBorder1 = *((long*)_triTable.getValue( BDR_ONE, triTwoIndex ) );
 		if( newBorder1 != triOneIndex )
 			if( newBorder1 != -1 )
 				changeBorder( newBorder1, triOneIndex, triTwoIndex );
-		newBorder2 = *((long*)triTable.getValue( BDR_TWO, triTwoIndex ) );
+		newBorder2 = *((long*)_triTable.getValue( BDR_TWO, triTwoIndex ) );
 		if( newBorder2 != triOneIndex )
 			if( newBorder2 != -1 )
 				changeBorder( newBorder2, triOneIndex, triTwoIndex );
-		newBorder3 = *((long*)triTable.getValue( BDR_THREE, triTwoIndex ) );
+		newBorder3 = *((long*)_triTable.getValue( BDR_THREE, triTwoIndex ) );
 		if( newBorder3 != triOneIndex )
 			if( newBorder3 != -1 )
 				changeBorder( newBorder3, triOneIndex, triTwoIndex );
@@ -1367,14 +1367,14 @@ inline bool CTin::splitQuad( long triOneIndex, long triTwoIndex )
 
 inline void CTin::changeBorder( long triIndex, long oldValue, long newValue )
 {	
-	if( *((long*)triTable.getValue( BDR_ONE, triIndex ) ) == oldValue )
-		triTable.setValue( BDR_ONE, triIndex, &newValue );
+	if( *((long*)_triTable.getValue( BDR_ONE, triIndex ) ) == oldValue )
+		_triTable.setValue( BDR_ONE, triIndex, &newValue );
 
-	else if( *((long*)triTable.getValue( BDR_TWO, triIndex ) ) == oldValue )
-		triTable.setValue( BDR_TWO, triIndex, &newValue );
+	else if( *((long*)_triTable.getValue( BDR_TWO, triIndex ) ) == oldValue )
+		_triTable.setValue( BDR_TWO, triIndex, &newValue );
 
-	else if( *((long*)triTable.getValue( BDR_THREE, triIndex ) ) == oldValue )
-		triTable.setValue( BDR_THREE, triIndex, &newValue );
+	else if( *((long*)_triTable.getValue( BDR_THREE, triIndex ) ) == oldValue )
+		_triTable.setValue( BDR_THREE, triIndex, &newValue );
 }
 
 //inline double CTin::MIN( double one, double two )
@@ -1396,7 +1396,7 @@ bool CTin::willCreateBadTriangles( vertex * triangle, vertex testVertex )
 	vertex v3 = triangle[2];
 	vertex v4 = testVertex;
 
-	if( splitMethod == AngleDeviation )
+	if( _splitMethod == AngleDeviation )
 	{
 		double a = v1.xyDistance( v2 );
 		double b = v2.xyDistance( v4 );
@@ -1425,7 +1425,7 @@ bool CTin::willCreateBadTriangles( vertex * triangle, vertex testVertex )
 		double cosa8 = - ( b*b - a*a - c*c )/(2*a*c);
 		double cosa9 = - ( c*c - a*a - b*b )/(2*a*b);
 		
-		double cosMinAngle = cos( splitParam*dTOr );
+		double cosMinAngle = cos( _splitParam*dTOr );
 
 		if( cosa1 > cosMinAngle ||
 			cosa2 > cosMinAngle ||
@@ -1440,15 +1440,15 @@ bool CTin::willCreateBadTriangles( vertex * triangle, vertex testVertex )
 		else
 			return false;
 	}
-	else if( splitMethod == InscribedRadius )
+	else if( _splitMethod == InscribedRadius )
 	{
 		double radiusOne = inscribedCircleRad( v1, v2, v4 );
 		double radiusTwo = inscribedCircleRad( v2, v3, v4 );
 		double radiusThree = inscribedCircleRad( v3, v1, v4 );
 
-		if( radiusOne < splitParam ||
-			radiusTwo < splitParam ||
-			radiusThree < splitParam )
+		if( radiusOne < _splitParam ||
+			radiusTwo < _splitParam ||
+			radiusThree < _splitParam )
 			return true;
 		else
 			return false;
@@ -1458,9 +1458,9 @@ bool CTin::willCreateBadTriangles( vertex * triangle, vertex testVertex )
 }
 
 inline long CTin::indexAfterClockwise( long triIndex, long vtxIndex )
-{	long indexOne = *((long*)triTable.getValue( VTX_ONE, triIndex ) );
-	long indexTwo = *((long*)triTable.getValue( VTX_TWO, triIndex ) );
-	long indexThree = *((long*)triTable.getValue( VTX_THREE, triIndex ) );	
+{	long indexOne = *((long*)_triTable.getValue( VTX_ONE, triIndex ) );
+	long indexTwo = *((long*)_triTable.getValue( VTX_TWO, triIndex ) );
+	long indexThree = *((long*)_triTable.getValue( VTX_THREE, triIndex ) );	
 
 	if( vtxIndex == indexOne )
 		return indexTwo;
@@ -1491,74 +1491,74 @@ inline void CTin::setBorders( long triIndex, long possBorder1, long possBorder2,
 	if( possBorder7 == triIndex )
 		possBorder7 = Undefined;
 
-	long indexOne = *((long*)triTable.getValue( VTX_ONE, triIndex ) );
-	long indexTwo = *((long*)triTable.getValue( VTX_TWO, triIndex ) );
-	long indexThree = *((long*)triTable.getValue( VTX_THREE, triIndex ) );
+	long indexOne = *((long*)_triTable.getValue( VTX_ONE, triIndex ) );
+	long indexTwo = *((long*)_triTable.getValue( VTX_TWO, triIndex ) );
+	long indexThree = *((long*)_triTable.getValue( VTX_THREE, triIndex ) );
 	long undefined = Undefined;
 
 	//BORDER 1
 	if( hasVertices( possBorder1, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder1 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder1 );
 	else if( hasVertices( possBorder2, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder2 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder2 );
 	else if( hasVertices( possBorder3, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder3 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder3 );
 	else if( hasVertices( possBorder4, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder4 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder4 );
 	else if( hasVertices( possBorder5, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder5 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder5 );
 	else if( hasVertices( possBorder6, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder6 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder6 );
 	else if( hasVertices( possBorder7, indexOne, indexTwo ) )
-		triTable.setValue( BDR_ONE, triIndex, &possBorder7 );
+		_triTable.setValue( BDR_ONE, triIndex, &possBorder7 );
 	else
-		triTable.setValue( BDR_ONE, triIndex, &undefined );
+		_triTable.setValue( BDR_ONE, triIndex, &undefined );
 
 	//BORDER 2
 	if( hasVertices( possBorder1, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder1 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder1 );
 	else if( hasVertices( possBorder2, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder2 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder2 );
 	else if( hasVertices( possBorder3, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder3 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder3 );
 	else if( hasVertices( possBorder4, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder4 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder4 );
 	else if( hasVertices( possBorder5, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder5 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder5 );
 	else if( hasVertices( possBorder6, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder6 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder6 );
 	else if( hasVertices( possBorder7, indexTwo, indexThree ) )
-		triTable.setValue( BDR_TWO, triIndex, &possBorder7 );
+		_triTable.setValue( BDR_TWO, triIndex, &possBorder7 );
 	else
-		triTable.setValue( BDR_TWO, triIndex, &undefined );
+		_triTable.setValue( BDR_TWO, triIndex, &undefined );
 	
 	//BORDER 3
 	if( hasVertices( possBorder1, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder1 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder1 );
 	else if( hasVertices( possBorder2, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder2 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder2 );
 	else if( hasVertices( possBorder3, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder3 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder3 );
 	else if( hasVertices( possBorder4, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder4 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder4 );
 	else if( hasVertices( possBorder5, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder5 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder5 );
 	else if( hasVertices( possBorder6, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder6 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder6 );
 	else if( hasVertices( possBorder7, indexThree, indexOne ) )
-		triTable.setValue( BDR_THREE, triIndex, &possBorder7 );
+		_triTable.setValue( BDR_THREE, triIndex, &possBorder7 );
 	else
-		triTable.setValue( BDR_THREE, triIndex, &undefined );
+		_triTable.setValue( BDR_THREE, triIndex, &undefined );
 }
 
 inline long CTin::unsharedIndex( long triOne, long triTwo )
-{	long t1_index_one = *((long*)triTable.getValue( VTX_ONE, triOne ) );
-	long t1_index_two = *((long*)triTable.getValue( VTX_TWO, triOne ) );
-	long t1_index_three = *((long*)triTable.getValue( VTX_THREE, triOne ) );
+{	long t1_index_one = *((long*)_triTable.getValue( VTX_ONE, triOne ) );
+	long t1_index_two = *((long*)_triTable.getValue( VTX_TWO, triOne ) );
+	long t1_index_three = *((long*)_triTable.getValue( VTX_THREE, triOne ) );
 
-	long t2_index_one = *((long*)triTable.getValue( VTX_ONE, triTwo ) );
-	long t2_index_two = *((long*)triTable.getValue( VTX_TWO, triTwo ) );
-	long t2_index_three = *((long*)triTable.getValue( VTX_THREE, triTwo ) );
+	long t2_index_one = *((long*)_triTable.getValue( VTX_ONE, triTwo ) );
+	long t2_index_two = *((long*)_triTable.getValue( VTX_TWO, triTwo ) );
+	long t2_index_three = *((long*)_triTable.getValue( VTX_THREE, triTwo ) );
 
 	if( t1_index_one != t2_index_one &&
 		t1_index_one != t2_index_two &&
@@ -1580,9 +1580,9 @@ inline void CTin::sharedIndexes( long triOne, long triTwo, long & index1, long &
 {	index1 = Undefined;
 	index2 = Undefined;
 
-	long t1_index_one = *((long*)triTable.getValue( VTX_ONE, triOne ) );
-	long t1_index_two = *((long*)triTable.getValue( VTX_TWO, triOne ) );
-	long t1_index_three = *((long*)triTable.getValue( VTX_THREE, triOne ) );
+	long t1_index_one = *((long*)_triTable.getValue( VTX_ONE, triOne ) );
+	long t1_index_two = *((long*)_triTable.getValue( VTX_TWO, triOne ) );
+	long t1_index_three = *((long*)_triTable.getValue( VTX_THREE, triOne ) );
 	
 	long unshared = unsharedIndex( triOne, triTwo );
 	if( t1_index_one == unshared )
@@ -1601,12 +1601,12 @@ inline void CTin::sharedIndexes( long triOne, long triTwo, long & index1, long &
 
 bool CTin::canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, long p2_shared )
 {	
-	vertex v1 = vtxTable.getVertex( p1_unshared );
-	vertex v2 = vtxTable.getVertex( p2_unshared );
-	vertex v3 = vtxTable.getVertex( p1_shared );
-	vertex v4 = vtxTable.getVertex( p2_shared );
+	vertex v1 = _vtxTable.getVertex( p1_unshared );
+	vertex v2 = _vtxTable.getVertex( p2_unshared );
+	vertex v3 = _vtxTable.getVertex( p1_shared );
+	vertex v4 = _vtxTable.getVertex( p2_shared );
 
-	if( splitMethod == AngleDeviation )
+	if( _splitMethod == AngleDeviation )
 	{
 		//Quad Triangles
 		double a = v1.xyDistance( v2 );
@@ -1628,7 +1628,7 @@ bool CTin::canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, lon
 		double cosa6 = - ( c*c - a*a - b*b )/(2*a*b);
 
 		//Check the Quad Triangles to see if they're good enough
-		double cosMinAngle = cos( splitParam*dTOr );
+		double cosMinAngle = cos( _splitParam*dTOr );
 
 		if( cosa1 > cosMinAngle ||
 			cosa2 > cosMinAngle ||
@@ -1692,7 +1692,7 @@ bool CTin::canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, lon
 		else
 			return false;
 	}
-	else if( splitMethod == InscribedRadius )
+	else if( _splitMethod == InscribedRadius )
 	{
 		//Find the inscribed Radius of the current triangles
 		double currRadiusOne = inscribedCircleRad( v1, v4, v3 );
@@ -1703,8 +1703,8 @@ bool CTin::canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, lon
 		double newRadiusTwo = inscribedCircleRad( v1, v2, v3 );
 
 		//Check the proposed triangles for initial qualifications
-		if( newRadiusOne < splitParam ||
-			newRadiusTwo < splitParam )
+		if( newRadiusOne < _splitParam ||
+			newRadiusTwo < _splitParam )
 			return false;
 		else
 		{	
@@ -1762,9 +1762,9 @@ inline bool CTin::hasVertices( long triIndex, long vtxOne, long vtxTwo )
 	if( triIndex == -1 )
 		return false;
 
-	long indexOne = *((long*)triTable.getValue( VTX_ONE, triIndex ) );
-	long indexTwo = *((long*)triTable.getValue( VTX_TWO, triIndex ) );
-	long indexThree = *((long*)triTable.getValue( VTX_THREE, triIndex ) );	
+	long indexOne = *((long*)_triTable.getValue( VTX_ONE, triIndex ) );
+	long indexTwo = *((long*)_triTable.getValue( VTX_TWO, triIndex ) );
+	long indexThree = *((long*)_triTable.getValue( VTX_THREE, triIndex ) );	
 
 	int numberPoints = 0;
 
@@ -1785,8 +1785,8 @@ STDMETHODIMP CTin::get_IsNDTriangle(long TriIndex, VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( TriIndex >= 0 && TriIndex < triTable.size() )
-		*pVal = ndTriangles[TriIndex];
+	if( TriIndex >= 0 && TriIndex < _triTable.size() )
+		*pVal = _dTriangles[TriIndex];
 	else
 		*pVal = TRUE;
 
@@ -2209,12 +2209,12 @@ void CTin::Prune(int &nv,XYZ v[])
 void CTin::BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin)
 {
 	//clear the tin tables
-	triTable.clear();
-	vtxTable.clear();
+	_triTable.clear();
+	_vtxTable.clear();
 
 	//Bounding Box	
-	min = vertex(vMin.x,vMin.y,vMin.z);
-	max = vertex(vMax.x,vMax.y,vMax.z);
+	_min = vertex(vMin.x,vMin.y,vMin.z);
+	_max = vertex(vMax.x,vMax.y,vMax.z);
 
 	//Triangles
 	long vtx1 ;
@@ -2234,7 +2234,7 @@ void CTin::BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin)
 		b3 = tri[i].b3;
 
 		tinTableRow r( vtx1, vtx2, vtx3, b1, b2, b3 );
-		triTable.addRow( r );
+		_triTable.addRow( r );
 	}
 
 	//Vertices
@@ -2247,11 +2247,11 @@ void CTin::BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin)
 		z = v[j].z;
 		
 		ver = vertex( x, y, z );
-		vtxTable.add( ver );
+		_vtxTable.add( ver );
 	}
 
-	ndTriangles = new char[ntri];
-	memset(ndTriangles,0,sizeof(char)*ntri);
+	_dTriangles = new char[ntri];
+	memset(_dTriangles,0,sizeof(char)*ntri);
 
 }
 

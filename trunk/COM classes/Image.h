@@ -39,32 +39,32 @@ public:
 	// constructor
 	CImageClass::CImageClass()
 	{
-		globalCallback = NULL;
-		ImageData = NULL;
+		_globalCallback = NULL;
+		_imageData = NULL;
 		
-		m_drawingMethod = 0;
-		m_drawingMethod |= idmNewWithResampling;
-		m_drawingMethod |= idmGDIPlusDrawing;
-		m_drawingMethod |= idmGDIPlusResampling;
+		_drawingMethod = 0;
+		_drawingMethod |= idmNewWithResampling;
+		_drawingMethod |= idmGDIPlusDrawing;
+		_drawingMethod |= idmGDIPlusResampling;
 
-		dX = dY = 1.0;
-		XllCenter = YllCenter = 0.0;
-		Width = Height = 0;
+		_dX = _dY = 1.0;
+		_xllCenter = _yllCenter = 0.0;
+		_width = _height = 0;
 
-		lastErrorCode = tkNO_ERROR;
+		_lastErrorCode = tkNO_ERROR;
 
 		USES_CONVERSION;
-		key = A2BSTR("");
+		_key = A2BSTR("");
 
-		m_labels = NULL;
-		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
+		_labels = NULL;
+		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&_labels);
 		
 		_bitmapImage = NULL;
 		_rasterImage = NULL;
 		
-		ImgType = USE_FILE_EXTENSION;
+		_imgType = USE_FILE_EXTENSION;
 		
-		gdalImage = false;
+		_gdalImage = false;
 
 		m_groupID = -1;
 		m_pixels = NULL;
@@ -79,7 +79,7 @@ public:
 		isGridProxy = false;
 		sourceGridName = "";
 
-		m_iconGdiPlus = NULL;
+		_iconGdiPlus = NULL;
 
 		SetDefaults();
 		
@@ -88,17 +88,17 @@ public:
 	
 	void CImageClass::SetDefaults()
 	{
-		m_downsamplingMode = m_globalSettings.imageDownsamplingMode;	// imNone
-		m_upsamplingMode = m_globalSettings.imageUpsamplingMode;		// imBilinear
+		_downsamplingMode = m_globalSettings.imageDownsamplingMode;	// imNone
+		_upsamplingMode = m_globalSettings.imageUpsamplingMode;		// imBilinear
 
-		m_transparencyPercent = 1.0;
+		_transparencyPercent = 1.0;
 
-		setRGBToGrey = false;
-		m_downSampling = false;
+		_setRGBToGrey = false;
+		_downSampling = false;
 
-		transColor = RGB(0,0,0);
-		transColor2 = RGB(0,0,0);
-		useTransColor = VARIANT_FALSE;
+		_transColor = RGB(0,0,0);
+		_transColor2 = RGB(0,0,0);
+		_useTransColor = VARIANT_FALSE;
 
 		_canUseGrouping = true;
 	}
@@ -109,18 +109,18 @@ public:
 		VARIANT_BOOL rt;
 		this->Close(&rt);
 		
-		::SysFreeString(key);
+		::SysFreeString(_key);
 
-		if( globalCallback )
+		if( _globalCallback )
 		{
-			globalCallback->Release();
-			globalCallback = NULL;
+			_globalCallback->Release();
+			_globalCallback = NULL;
 		}
 
-		if (m_labels != NULL)
+		if (_labels != NULL)
 		{
-			m_labels->Release();
-			m_labels = NULL;
+			_labels->Release();
+			_labels = NULL;
 		}
 
 		if (_screenBitmap)
@@ -129,10 +129,10 @@ public:
 			_screenBitmap = NULL;
 		}
 		
-		if (m_iconGdiPlus)
+		if (_iconGdiPlus)
 		{
-			delete m_iconGdiPlus;
-			m_iconGdiPlus = NULL;
+			delete _iconGdiPlus;
+			_iconGdiPlus = NULL;
 		}
 		gReferenceCounter.Release(tkInterface::idImage);
 	}
@@ -283,14 +283,48 @@ public:
 	STDMETHOD(put_SourceGridBandIndex)(int newVal);
 	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
 
-	//STDMETHOD(LoadBuffer)(double mapMinX, double mapMinY, double mapMaxX, double mapMaxY, double mapUnitsPerScreenPixel, VARIANT_BOOL* retVal);
-	//STDMETHOD(OpenForUpdate)(BSTR ImageFileName, ImageType FileType,  VARIANT_BOOL InRam, ICallback * cBack, VARIANT_BOOL * retval);
-	bool CImageClass::DeserializeCore(CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(VARIANT_BOOL SerializePixels, CString ElementName);
+private:
+	tkImageSourceType _sourceType;
+	
+	bool _inRam;
+	BSTR _key;
+	ICallback * _globalCallback;
+	long _lastErrorCode;
 
-// ---------------------------------------------------------
-//	Members
-// ---------------------------------------------------------
+	//world coordinate related variables
+	double _dY;			//change in Y (for size of cell or pixel)
+	double _dX;			//change in X (for size of cell or pixel)
+	double _yllCenter;	//Y coordinate of lower left corner of image (world coordinate)
+	double _xllCenter;	//X coordinate of lower left corner of image (world coordinate)
+
+	bool _gdalImage;
+	bool _dataLoaded;
+	bool _setRGBToGrey;			//Set a color RGB image or hillshade to gray
+	CStringW _fileName;			//For GDALOpen
+
+	//Image Variables
+	colour * _imageData;		//array storing generic image data
+	long _width;				//number of Columns in image
+	long _height;			//number of rows in image
+	ImageType _imgType;	    //enumeration stating type of image currently being used
+
+	//Image Objects
+	tkBitmap* _bitmapImage;
+	tkRaster* _rasterImage;
+
+	//Transparency
+	OLE_COLOR _transColor;
+	OLE_COLOR _transColor2;	// to specify range for GDI+
+	VARIANT_BOOL _useTransColor;
+
+	double _transparencyPercent;
+	tkInterpolationMode _downsamplingMode;
+	tkInterpolationMode _upsamplingMode;
+	short _drawingMethod;
+	bool _downSampling;	// the image in the buffer was produced by downsampling
+
+	ILabels* _labels;
+
 public:
 	int m_groupID;			// in case belong to the group of images which are to be treated as one
 	DataPixels* m_pixels;	// a structure to hold values of pixels with the value other than noDataValue
@@ -302,77 +336,7 @@ public:
 	ScreenBitmap* _screenBitmap;	// GDI+ bitmap on the screen
 	CStringW sourceGridName;
 	bool isGridProxy;
-
-private:
-	tkImageSourceType _sourceType;
-	
-	bool inRam;
-	BSTR key;
-	ICallback * globalCallback;
-	long lastErrorCode;		//definition of numbers found in "ErrorCodes.h"
-	//world coordinate related variables
-	double dY;			//change in Y (for size of cell or pixel)
-	double dX;			//change in X (for size of cell or pixel)
-	double YllCenter;	//Y coordinate of lower left corner of image (world coordinate)
-	double XllCenter;	//X coordinate of lower left corner of image (world coordinate)
-
-	bool gdalImage;
-	bool dataLoaded;
-	bool setRGBToGrey;			//Set a color RGB image or hillshade to grey
-	CStringW fileName;			//For GDALOpen
-
-	//Image Variables
-	colour * ImageData;		//array storing generic image data
-	long Width;				//number of Columns in image
-	long Height;			//number of rows in image
-	ImageType ImgType;	    //enumeration stating type of image currently being used
-
-	//Image Objects
-	tkBitmap* _bitmapImage;
-	tkRaster* _rasterImage;
-
-	//Transparency
-	OLE_COLOR transColor;
-	OLE_COLOR transColor2;	// to specify range for GDI+
-	VARIANT_BOOL useTransColor;
-
-	double m_transparencyPercent;
-	tkInterpolationMode m_downsamplingMode;
-	tkInterpolationMode m_upsamplingMode;
-	short m_drawingMethod;
-	bool m_downSampling;	// the image in the buffer was produced by downsampling
-
-	ILabels* m_labels;
-	
-// ---------------------------------------------------------
-//	Functions
-// ---------------------------------------------------------
-public:
-	// in-memory state of gdi plus image file (after deserialization)
-	CMemoryBitmap* m_iconGdiPlus;
-
-	bool SetDCBitsToImage(long hDC,BYTE* bits);
-	unsigned char* get_ImageData();
-	void put_ImageData(colour* data);
-	bool get_BufferIsDownsampled();
-	//int GDALProgressFunction( double dfComplete, const char *pszMessage, void *pData);
-	void ClearBuffer();
-	bool SaveNotNullPixels(bool forceSaving = false);
-	void ClearNotNullPixels();
-	void OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
-	
-	int get_originalBufferWidth()
-	{
-		if (gdalImage && _rasterImage)	return (_rasterImage->_visibleRect.right - _rasterImage->_visibleRect.left);
-		else							return 0;
-	}	
-	int get_originalBufferHeight()
-	{
-		if (gdalImage && _rasterImage)	return (_rasterImage->_visibleRect.right - _rasterImage->_visibleRect.left);
-		else							return 0;
-	}
-	void ErrorMessage(long ErrorCode);
-	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
+	CMemoryBitmap* _iconGdiPlus;	// in-memory state of GDI+ image file (after deserialization)
 
 private:
 	bool Resample();
@@ -381,24 +345,49 @@ private:
 	bool ReadJPEG(CString ImageFile);
 	bool ReadBMP(const CStringW ImageFile, bool InRam);
 	bool ReadRaster(const CStringW ImageFile, GDALAccess accessMode);
-	//bool LoadImage(double minx, double miny, double maxx, double maxy, double mapUnitsPerScreenPixel);
-	
+
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
 	bool WritePPM(CString ImageFile, bool WorldFile, ICallback *cBack);
 	bool WriteGIF(CString ImageFile, bool WorldFile, ICallback * cBack);
 	bool WriteBMP(CString FileName, bool WriteWorldFile, ICallback *cBack);
 	bool WriteGDIPlus(CString ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
-	bool CImageClass::CopyGDALImage(CStringW ImageFileName );
+	bool CopyGDALImage(CStringW ImageFileName);
 
 	VARIANT_BOOL WriteWorldFile(CStringW WorldFileName);
 	bool ReadWorldFile(CStringW WorldFileName);
+
+	bool IsGdalImageAvailable();
+	bool BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies, long* count);
+	bool SetImageBitsDCCore(HDC hdc);
+	bool CheckForProxy();
+
+public:
+	bool DeserializeCore(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(VARIANT_BOOL SerializePixels, CString ElementName);
+
+	bool SetDCBitsToImage(long hDC,BYTE* bits);
+	unsigned char* get_ImageData();
+	void put_ImageData(colour* data);
+	bool get_BufferIsDownsampled();
+
+	void ClearBuffer();
+	bool SaveNotNullPixels(bool forceSaving = false);
+	void ClearNotNullPixels();
+	void OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
 	
-	//void LoadImageStandard(double mapUnitsPerScreenPixel);
-	bool CImageClass::IsGdalImageAvailable();
-	bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies,  long* count);
-	bool CImageClass::SetImageBitsDCCore(HDC hdc);
-	bool CImageClass::CheckForProxy();
-	
+	int get_originalBufferWidth()
+	{
+		if (_gdalImage && _rasterImage)	return (_rasterImage->visibleRect.right - _rasterImage->visibleRect.left);
+		else							return 0;
+	}	
+	int get_originalBufferHeight()
+	{
+		if (_gdalImage && _rasterImage)	return (_rasterImage->visibleRect.right - _rasterImage->visibleRect.left);
+		else							return 0;
+	}
+	void ErrorMessage(long ErrorCode);
+	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)

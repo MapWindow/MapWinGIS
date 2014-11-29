@@ -29,51 +29,6 @@
 #include "Expression.h"
 #include "_ITableEvents_CP.H"
 
-using namespace std;
-
-# define MAX_BUFFER 512
-
-struct FieldWrapper
-{
-    IField* field;
-    long oldIndex;
-	long joinId;		// from which join operation a field originates
-
-	bool Joined() {
-		return joinId >= 0;
-	}
-
-	FieldWrapper()		// do we need to add destructor here?
-	{
-		field = NULL;
-		joinId = -1;
-		oldIndex = -1;
-	}
-
-	~FieldWrapper()
-	{
-		if (field) {
-			field->Release();
-			field = NULL;
-		}
-	}
-};
-
-struct RecordWrapper
-{
-    TableRow* row;
-    long oldIndex;
-
-	RecordWrapper()
-	{
-		row = NULL;
-		oldIndex = -1;
-	}
-};
-
-// -------------------------------------------------------
-// CTableClass
-// -------------------------------------------------------
 class ATL_NO_VTABLE CTableClass : 
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CTableClass, &CLSID_Table>,
@@ -85,11 +40,11 @@ public:
 	CTableClass()
 	{
 		USES_CONVERSION;
-		key = A2BSTR("");
-		globalCallback = NULL;
-		lastErrorCode = tkNO_ERROR;
-		isEditingTable = FALSE;
-		dbfHandle = NULL;
+		_key = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
+		_isEditingTable = FALSE;
+		_dbfHandle = NULL;
 		m_maxRowId = -1;
 		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
@@ -98,11 +53,11 @@ public:
 		VARIANT_BOOL vbretval;
 		this->Close(&vbretval);
 
-		for (int i = 0; i < (int)tempFiles.size(); i++ )
+		for (int i = 0; i < (int)_tempFiles.size(); i++ )
 		{
 			try
 			{
-				CString * a = tempFiles[i];
+				CString * a = _tempFiles[i];
 				_unlink(a->GetBuffer());
 				delete a;
 			}
@@ -111,13 +66,13 @@ public:
 				ASSERT(FALSE);
 			}
 		}
-		tempFiles.clear();
+		_tempFiles.clear();
 
-		::SysFreeString(key);
+		::SysFreeString(_key);
 
-		if( globalCallback )
-			globalCallback->Release();
-		globalCallback = NULL;
+		if( _globalCallback )
+			_globalCallback->Release();
+		_globalCallback = NULL;
 		gReferenceCounter.Release(tkInterface::idTable);
 	}
 
@@ -207,73 +162,7 @@ public:
 
 	STDMETHOD(Dump)(/*[in]*/ BSTR dbfFilename, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 
-
-	void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal);
-	
-	std::vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
-	std::vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses, 
-																  CComVariant minValue, CComVariant maxValue);
-	void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results );
-	bool CTableClass::Query_(CString Expression, std::vector<long>& indices, CString& ErrorString);
-	bool CTableClass::Calculate_(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex = -1);
-	
-	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
-	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);
-	bool get_FieldValuesString(int FieldIndex, std::vector<CString>& values);
-
-	bool set_IndexValue(int rowIndex);
-	
-	bool MakeUniqueFieldNames();
-
-	bool CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2);
-
-	struct FieldMapping
-	{
-		int srcIndex;
-		int destIndex;
-	};
-
-	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
-	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
-	void RemoveJoinedFields();
-
-public:	
-	bool needToSaveAsNewFile;
-	int m_maxRowId;	// maximum value in the MWShapeId field
-	
-	bool DeserializeCore(CPLXMLNode* node);
-	CPLXMLNode* SerializeCore(CString ElementName);
-	void CloseUnderlyingFile(); 
-	TableRow* CloneTableRow(int rowIndex);
-	bool InsertTableRow(TableRow* row, long rowIndex);
-	TableRow* SwapTableRow(TableRow* row, long rowIndex);
-	bool GetUids(long fieldIndex, map<long, long>& resutls);
-	bool UpdateTableRow(TableRow* newRow, long rowIndex);
-
 private:
-	DBFInfo * dbfHandle;	// underlying data structure
-	std::vector<FieldWrapper*> _fields;
-	std::vector<RecordWrapper> _rows;
-	std::deque<CString *> tempFiles;
-	BSTR key;
-	long lastErrorCode;
-	ICallback * globalCallback;
-	BOOL isEditingTable;
-	CStringW filename;
-	
-	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
-	void LoadDefault_fields();
-    void LoadDefault_rows();
-    long RowCount();
-    long FieldCount();
-	bool ReadRecord(long RowIndex);
-    bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex);
-    void ClearRow(long rowIndex);
-	FieldType GetFieldType(long fieldIndex);
-    long GetFieldPrecision(long fieldIndex);
-	inline void ErrorMessage(long ErrorCode);
-	std::vector<CString>* get_FieldNames();
-	
 	struct JoinInfo
 	{
 		CStringW filename;
@@ -283,10 +172,78 @@ private:
 		int joinId;
 		CString fields; // comma separated list
 	};
+
+	struct FieldMapping
+	{
+		int srcIndex;
+		int destIndex;
+	};
+	
+private:
+	DBFInfo * _dbfHandle;	// underlying data structure
+	std::vector<FieldWrapper*> _fields;
+	std::vector<RecordWrapper> _rows;
+	std::deque<CString *> _tempFiles;
+	BSTR _key;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BOOL _isEditingTable;
+	CStringW _filename;
 	vector<JoinInfo*> _joins;
 	int _lastJoinId;
+
 public:
-	
+	bool m_needToSaveAsNewFile;
+	int m_maxRowId;	// maximum value in the MWShapeId field
+
+private:
+	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
+	void LoadDefault_fields();
+	void LoadDefault_rows();
+	long RowCount();
+	long FieldCount();
+	bool ReadRecord(long RowIndex);
+	bool WriteRecord(DBFInfo* dbfHandle, long fromRowIndex, long toRowIndex);
+	void ClearRow(long rowIndex);
+	FieldType GetFieldType(long fieldIndex);
+	long GetFieldPrecision(long fieldIndex);
+	inline void ErrorMessage(long ErrorCode);
+	std::vector<CString>* get_FieldNames();
+
+public:	
+	bool DeserializeCore(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(CString ElementName);
+	void CloseUnderlyingFile(); 
+	TableRow* CloneTableRow(int rowIndex);
+	bool InsertTableRow(TableRow* row, long rowIndex);
+	TableRow* SwapTableRow(TableRow* row, long rowIndex);
+	bool GetUids(long fieldIndex, map<long, long>& resutls);
+	bool UpdateTableRow(TableRow* newRow, long rowIndex);
+
+	void ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal);
+
+	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
+	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses,
+		CComVariant minValue, CComVariant maxValue);
+	void AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results);
+	bool QueryCore(CString Expression, std::vector<long>& indices, CString& ErrorString);
+	bool CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex = -1);
+
+	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
+	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);
+	bool get_FieldValuesString(int FieldIndex, std::vector<CString>& values);
+
+	bool set_IndexValue(int rowIndex);
+
+	bool MakeUniqueFieldNames();
+
+	bool CheckJoinInput(ITable* table2, CString fieldTo, CString fieldFrom, long& index1, long& index2);
+
+	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
+	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
+	void RemoveJoinedFields();
+
+public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()

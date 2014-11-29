@@ -49,6 +49,7 @@ public:
 	STDMETHOD(put_OutlineColor)(OLE_COLOR newVal);
 	STDMETHOD(get_ActiveLayer)(LONG* pVal);
 	STDMETHOD(put_ActiveLayer)(LONG newVal);
+
 private:
 	VARIANT_BOOL _hotTracking;
 	tkIdentifierMode _mode;

@@ -12,6 +12,15 @@
 #include "ShapefileCategories.h"
 
 // *************************************************************
+//		InjectShapefile()
+// *************************************************************
+void COgrLayer::InjectShapefile(IShapefile* sfNew)
+{
+	CloseShapefile();
+	_shapefile = sfNew;
+}
+
+// *************************************************************
 //		InitOpenedLayer()
 // *************************************************************
 void COgrLayer::InitOpenedLayer()

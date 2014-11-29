@@ -39,23 +39,23 @@ public:
 	CGeoProjection()
 	{
 		USES_CONVERSION;
-		m_key = A2BSTR("");
-		m_globalCallback = NULL;
-		m_lastErrorCode = tkNO_ERROR;
-		m_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
-		m_transformation = NULL;	
+		_key = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
+		_projection = (OGRSpatialReference*)OSRNewSpatialReference(NULL);
+		_transformation = NULL;	
 		gReferenceCounter.AddRef(tkInterface::idGeoProjection);
-		m_isFrozen = false;
+		_isFrozen = false;
 	}
 
 	~CGeoProjection()
 	{
-		SysFreeString(m_key);
+		SysFreeString(_key);
 		StopTransform();
-		if (m_projection)
+		if (_projection)
 		{
-			m_projection->Clear();
-			OGRSpatialReference::DestroySpatialReference(m_projection);
+			_projection->Clear();
+			OGRSpatialReference::DestroySpatialReference(_projection);
 		}
 		gReferenceCounter.Release(tkInterface::idGeoProjection);
 	}
@@ -124,38 +124,22 @@ public:
 	STDMETHOD(TryAutoDetectEpsg)(int* epsgCode, VARIANT_BOOL* retVal);
 
 private:
-	// members
-	OGRSpatialReference* m_projection;
-	long m_lastErrorCode;
-	ICallback * m_globalCallback;
-	BSTR m_key;
-	bool m_isFrozen;
+	OGRSpatialReference* _projection;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
+	bool _isFrozen;
+	OGRCoordinateTransformation* _transformation;
 
-	// functions
+private:
 	void ErrorMessage(long ErrorCode);
-	bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
+	bool IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
+
 public:
-	OGRCoordinateTransformation* m_transformation;
-	OGRSpatialReference* get_SpatialReference() { return m_projection; }
-	bool get_IsSame(IGeoProjection* proj)
-	{
-		VARIANT_BOOL vbretval;
-		this->get_IsSame(proj, &vbretval); 
-		return vbretval ? true : false;
-	}
-	void SetIsFrozen(bool frozen)
-	{
-		m_isFrozen = frozen;
-	}
-	void InjectSpatialReference(OGRSpatialReference* sr)
-	{
-		if (m_projection)
-		{
-			m_projection->Clear();
-			OGRSpatialReference::DestroySpatialReference(m_projection);
-		}
-		m_projection = sr->Clone();
-	}
+	OGRSpatialReference* get_SpatialReference() { return _projection; }
+	bool get_IsSame(IGeoProjection* proj);
+	void SetIsFrozen(bool frozen) {	_isFrozen = frozen; }
+	void InjectSpatialReference(OGRSpatialReference* sr);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GeoProjection), CGeoProjection)

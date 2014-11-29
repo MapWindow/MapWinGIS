@@ -159,7 +159,7 @@ STDMETHODIMP CTableClass::Query(BSTR Expression, VARIANT* Result, BSTR* ErrorStr
 
 	std::vector<long> indices;
 	CString err;
-	if (Query_(str, indices, err))
+	if (QueryCore(str, indices, err))
 	{
 		*ErrorString = SysAllocString(L"");
 		if (indices.size() == 0)
@@ -255,7 +255,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 // ********************************************************************
 //			Query_()
 // ********************************************************************
-bool CTableClass::Query_(CString Expression, std::vector<long>& indices, CString& ErrorString)
+bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CString& ErrorString)
 {
 	indices.clear();
 	
@@ -326,7 +326,7 @@ bool CTableClass::Query_(CString Expression, std::vector<long>& indices, CString
 // ********************************************************************
 //			Calculate_()
 // ********************************************************************
-bool CTableClass::Calculate_(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex)
+bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex)
 {
 	results.clear();
 	
@@ -515,7 +515,7 @@ STDMETHODIMP CTableClass::get_Field(long FieldIndex, IField **pVal)
 	}
 	else
 	{
-		((CField*)_fields[FieldIndex]->field)->_table = this;
+		((CField*)_fields[FieldIndex]->field)->SetTable(this);
 		*pVal = _fields[FieldIndex]->field;
 		(*pVal)->AddRef();
 	}
@@ -584,7 +584,7 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 STDMETHODIMP CTableClass::get_EditingTable(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = isEditingTable?VARIANT_TRUE:VARIANT_FALSE;
+	*pVal = _isEditingTable?VARIANT_TRUE:VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -594,8 +594,8 @@ STDMETHODIMP CTableClass::get_EditingTable(VARIANT_BOOL *pVal)
 STDMETHODIMP CTableClass::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -627,15 +627,15 @@ STDMETHODIMP CTableClass::get_CdlgFilter(BSTR *pVal)
 STDMETHODIMP CTableClass::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = globalCallback;
-	if( globalCallback )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback )
+		_globalCallback->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CTableClass::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -646,7 +646,7 @@ STDMETHODIMP CTableClass::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 
@@ -654,8 +654,8 @@ STDMETHODIMP CTableClass::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -668,9 +668,9 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 	USES_CONVERSION;
 	
 	*retval = VARIANT_FALSE;
-	if ((cBack != NULL) && (globalCallback == NULL))
+	if ((cBack != NULL) && (_globalCallback == NULL))
 	{
-		globalCallback = cBack;
+		_globalCallback = cBack;
 		cBack->AddRef();
 	}
 
@@ -696,18 +696,18 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 		bool readOnly = (dwAttrs & FILE_ATTRIBUTE_READONLY);
 
 		if (!readOnly)
-			dbfHandle = DBFOpen_MW(name,"rb+");
+			_dbfHandle = DBFOpen_MW(name,"rb+");
 
-		if( dbfHandle == NULL )
-				dbfHandle = DBFOpen_MW(name,"rb");
+		if( _dbfHandle == NULL )
+				_dbfHandle = DBFOpen_MW(name,"rb");
 		
-		if( dbfHandle == NULL )
+		if( _dbfHandle == NULL )
 		{	
 			ErrorMessage(tkCANT_OPEN_DBF);
 			return S_OK;
 		}
 
-		filename = name;
+		_filename = name;
 		*retval = VARIANT_TRUE;
 	
 		//After open the dbf file, load all _fields info and create spatial row indices 
@@ -742,8 +742,8 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 			return S_OK;
 		}
 				
-		filename = OLE2CA(dbfFilename);
-		isEditingTable = TRUE;
+		_filename = OLE2CA(dbfFilename);
+		_isEditingTable = TRUE;
 		*retval = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -751,11 +751,11 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 
 void CTableClass::CloseUnderlyingFile()
 {
-	filename = "";
-	if( dbfHandle != NULL )
+	_filename = "";
+	if( _dbfHandle != NULL )
 	{
-		DBFClose(dbfHandle);
-		dbfHandle = NULL;
+		DBFClose(_dbfHandle);
+		_dbfHandle = NULL;
 	}
 }
 
@@ -767,22 +767,22 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	
-	if (globalCallback == NULL && cBack != NULL)
+	if (_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
+		_globalCallback = cBack;
 		cBack->AddRef();
 	}
 
-	if( dbfHandle == NULL && isEditingTable == FALSE )
+	if( _dbfHandle == NULL && _isEditingTable == FALSE )
 	{	
-		ErrorMessage(lastErrorCode);
+		ErrorMessage(_lastErrorCode);
 		return false;		
 	}
 
 	DBFInfo * newdbfHandle;
 	if(updateFileInPlace)
 	{
-		newdbfHandle = dbfHandle;
+		newdbfHandle = _dbfHandle;
 		
 		// DOESN'T WORK: dbfHandle can't be modified directly
 
@@ -868,7 +868,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 
 	for (long rowIndex = 0; rowIndex < rowCount; rowIndex++)
 	{
-		Utility::DisplayProgress(cBack, rowIndex, rowCount, "Writing .dbf", key, percent);
+		Utility::DisplayProgress(cBack, rowIndex, rowCount, "Writing .dbf", _key, percent);
 
 		//if updating existing file, only write out modified records
 		if  (updateFileInPlace && 
@@ -892,7 +892,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		}
 	}
 
-	Utility::DisplayProgressCompleted(cBack, key);
+	Utility::DisplayProgressCompleted(cBack, _key);
 
 	//Flush all of the records
 	if (!updateFileInPlace)
@@ -949,7 +949,7 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
         if (_fields[i]->field != NULL)
         {
 			// if the field is used somewhere else, we must not refer to this table - is it really needed ?
-			((CField*)_fields[i]->field)->_table = NULL;  
+			((CField*)_fields[i]->field)->SetTable(NULL);
         }
 		delete _fields[i];
 	}
@@ -962,11 +962,11 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 	}
 	_rows.clear();
 	
-	filename = "";
-	if( dbfHandle != NULL )
+	_filename = "";
+	if( _dbfHandle != NULL )
 	{
-		DBFClose(dbfHandle);
-		dbfHandle = NULL;
+		DBFClose(_dbfHandle);
+		_dbfHandle = NULL;
 	}
 	
 	*retval = VARIANT_TRUE;
@@ -980,13 +980,13 @@ void CTableClass::LoadDefault_fields()
 {
     USES_CONVERSION;
 
-	if (dbfHandle == NULL) return;
+	if (_dbfHandle == NULL) return;
 
     for (size_t i = 0; i < _fields.size(); i++ )	// clear only for disk-based table; otherwise there is no way to restore them
 		delete _fields[i];
 	_fields.clear();
 	
-    long num_fields = DBFGetFieldCount(dbfHandle);
+    long num_fields = DBFGetFieldCount(_dbfHandle);
 	char * fname = new char[MAX_BUFFER];
 	int fwidth, fdecimals;
 	DBFFieldType type;
@@ -994,10 +994,10 @@ void CTableClass::LoadDefault_fields()
 
     for( long i = 0; i < num_fields; i++ )
 	{
-		type = DBFGetFieldInfo(dbfHandle,i,fname,&fwidth,&fdecimals);
+		type = DBFGetFieldInfo(_dbfHandle,i,fname,&fwidth,&fdecimals);
 
 		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
-		field->put_GlobalCallback(globalCallback);
+		field->put_GlobalCallback(_globalCallback);
 		CComBSTR bstrName(fname);
 		field->put_Name(bstrName);
 		field->put_Width(fwidth);
@@ -1008,7 +1008,7 @@ void CTableClass::LoadDefault_fields()
         fw->oldIndex = i;
         fw->field = field;
 		_fields.push_back(fw);
-		((CField*)field)->_table = this;
+		((CField*)field)->SetTable(this);
 	}
 
 	if( fname != NULL) delete [] fname;
@@ -1030,8 +1030,8 @@ void CTableClass::LoadDefault_rows()
         _rows.clear();
     }
     
-	if (dbfHandle == NULL) return;
-	long num_rows = DBFGetRecordCount(dbfHandle);
+	if (_dbfHandle == NULL) return;
+	long num_rows = DBFGetRecordCount(_dbfHandle);
     for (long i = 0; i < num_rows; i++)
     {
         RecordWrapper rw;
@@ -1052,7 +1052,7 @@ STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
     this->LoadDefault_fields();
     this->LoadDefault_rows();
 
-    needToSaveAsNewFile = false;
+    m_needToSaveAsNewFile = false;
 	*retval = VARIANT_TRUE;
 	return S_OK;
 	
@@ -1066,13 +1066,13 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 	
-	if (cBack != NULL && globalCallback == NULL)
+	if (cBack != NULL && _globalCallback == NULL)
 	{
-		globalCallback = cBack;
+		_globalCallback = cBack;
 		cBack->AddRef();
 	}
 
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1122,9 +1122,9 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 	*retval = VARIANT_TRUE;	  
 	
 	// in the field class we should know about table editing state
-	((CField*)_fields[*FieldIndex]->field)->_table = this;
+	((CField*)_fields[*FieldIndex]->field)->SetTable(this);
 
-    needToSaveAsNewFile = true;
+    m_needToSaveAsNewFile = true;
 	return S_OK;
 }
 
@@ -1167,13 +1167,13 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 	
-	if(globalCallback == NULL && cBack != NULL)
+	if(_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1199,7 +1199,7 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
 	_fields.erase( _fields.begin() + FieldIndex );
 
 	//DeleteField operation can't be saved into the original dbf file.
-    needToSaveAsNewFile = true;
+    m_needToSaveAsNewFile = true;
 
 	*retval = VARIANT_TRUE;		
 	return S_OK;
@@ -1213,7 +1213,7 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 	
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1254,7 +1254,7 @@ STDMETHODIMP CTableClass::EditInsertRow(long * RowIndex, VARIANT_BOOL *retval)
 	rw.oldIndex = -1;
 	_rows.insert( _rows.begin() + *RowIndex, rw);
 
-    needToSaveAsNewFile = true;
+    m_needToSaveAsNewFile = true;
 	*retval = VARIANT_TRUE;		
     return S_OK;
 }
@@ -1288,7 +1288,7 @@ bool CTableClass::InsertTableRow(TableRow* row, long rowIndex)
 	
 	_rows.insert(_rows.begin() + rowIndex, rw);
 
-	needToSaveAsNewFile = true;
+	m_needToSaveAsNewFile = true;
 	return true;
 }
 
@@ -1340,7 +1340,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 	if (_rows[RowIndex].row != NULL)
 		return true;
 
-    if( dbfHandle == NULL )
+    if( _dbfHandle == NULL )
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
 		return false;
@@ -1361,7 +1361,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 		    bool isNull = false;
 		
     		//Rob Cairns 14/2/2006
-            if (DBFIsAttributeNULL(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) == 1)
+            if (DBFIsAttributeNULL(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) == 1)
 		    {	
 				isNull = true;
 		    }			
@@ -1376,7 +1376,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 			    else
 			    {	
 					val->vt = VT_BSTR;
-				    val->bstrVal = A2BSTR( DBFReadStringAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) );
+				    val->bstrVal = A2BSTR( DBFReadStringAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) );
 			    }
 		    }
 		    else if( type == INTEGER_FIELD )
@@ -1387,7 +1387,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 				}
 			    else
 			    {	
-					int res = DBFReadIntegerAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
+					int res = DBFReadIntegerAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
 				    val->vt = VT_I4;
 				    val->lVal = res;
 			    }
@@ -1400,7 +1400,7 @@ bool CTableClass::ReadRecord(long RowIndex)
 				}
 			    else
 			    {	
-					double res = DBFReadDoubleAttribute(dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
+					double res = DBFReadDoubleAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex);
 				    val->vt = VT_R8;
 				    val->dblVal = res;
 			    }
@@ -1535,7 +1535,7 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
 
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1713,23 +1713,23 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	if (isEditingTable)
+	if (_isEditingTable)
 	{
 		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
-	if( dbfHandle == NULL )
+	if( _dbfHandle == NULL )
 	{	
 		ErrorMessage(tkFILE_NOT_OPEN);
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
 
-	if( isEditingTable != TRUE )
+	if( _isEditingTable != TRUE )
 	{	
-		isEditingTable = TRUE;
-		needToSaveAsNewFile = false;
+		_isEditingTable = TRUE;
+		m_needToSaveAsNewFile = false;
 	}
 
 	*retval = VARIANT_TRUE;
@@ -1745,23 +1745,23 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	USES_CONVERSION;
 	*retval = VARIANT_FALSE;
 
-	if (globalCallback == NULL && cBack != NULL)
+	if (_globalCallback == NULL && cBack != NULL)
 	{
-		globalCallback = cBack;
-		globalCallback->AddRef();
+		_globalCallback = cBack;
+		_globalCallback->AddRef();
 	}
 
-	if( dbfHandle == NULL )
+	if( _dbfHandle == NULL )
 	{	
-		if( isEditingTable != FALSE )
+		if( _isEditingTable != FALSE )
 		{
 			if( ApplyChanges != VARIANT_FALSE )
-				SaveAs(filename.AllocSysString(),cBack,retval);
+				SaveAs(_filename.AllocSysString(),cBack,retval);
 			else
 				EditClear(retval);
 
 			// Note that we are no longer editing the table
-			isEditingTable = FALSE;
+			_isEditingTable = FALSE;
 			return S_OK;
 		}
 		else
@@ -1771,7 +1771,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 		}
 	}
 
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		*retval = VARIANT_TRUE;
 		return S_OK;
@@ -1780,20 +1780,20 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	if( ApplyChanges != VARIANT_FALSE )
 	{		
         // checking whether the chnages to _fields were made; we need to rewrite the whole file in this case
-		if (!needToSaveAsNewFile)
+		if (!m_needToSaveAsNewFile)
 		{
 			for(int i =0; i < (int)_fields.size(); i++)
 			{
 				CField* fld  = (CField*)_fields[i]->field;
-				if (fld->isUpdated)
+				if (fld->GetIsUpdated())
 				{
-					needToSaveAsNewFile = true;
+					m_needToSaveAsNewFile = true;
 					break;
 				}
 			}
 		}
 		
-		if (needToSaveAsNewFile)
+		if (m_needToSaveAsNewFile)
         {
 		    // generate a tmpfilename
 		    char * tmpfname = new char[MAX_BUFFER];
@@ -1801,7 +1801,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 		    _getcwd(tmppath,MAX_PATH);
 		    tmpnam(tmpfname);
 		    CString * tempFilename = new CString(tmpfname);
-		    tempFiles.push_back(tempFilename);
+		    _tempFiles.push_back(tempFilename);
 		    // Don't free tempFilename at the end of this function,
 		    // the CTableClass destructor will handle it
 
@@ -1809,7 +1809,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 		    strcat( tmppath, ".dbf" );
             if (SaveToFile(A2W(tmppath), false, cBack))		// TODO: use Unicode
             {
-		        BOOL result = CopyFile(tmppath, W2A(filename),FALSE);
+		        BOOL result = CopyFile(tmppath, W2A(_filename),FALSE);
 		        _unlink(tmppath);
 		        delete [] tmpfname;
 		        tmpfname = NULL;
@@ -1824,7 +1824,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
         else
         {
 			// can edit the file in place, no need to save to a temporary file
-			if (!SaveToFile(filename, true, cBack))
+			if (!SaveToFile(_filename, true, cBack))
             {
 	        	ErrorMessage(tkCANT_CREATE_DBF);
             }
@@ -1835,14 +1835,14 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	for(int i = 0; i < (int)_fields.size(); i++)
 	{
 		CField* fld  = (CField*)_fields[i]->field;
-		fld->isUpdated = false;
+		fld->SetIsUpdated(false);
 	}
 
-    isEditingTable = FALSE;
+    _isEditingTable = FALSE;
 
 	BSTR state;
 	this->Serialize(&state);
-    this->Open(W2BSTR(filename), cBack, retval);
+    this->Open(W2BSTR(_filename), cBack, retval);
 	this->Deserialize(state);	// restores joins
 	return S_OK;
 }
@@ -1855,7 +1855,7 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	if( isEditingTable == FALSE )
+	if( _isEditingTable == FALSE )
 	{	
 		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 		return S_OK;
@@ -1873,7 +1873,7 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
     _rows.erase(_rows.begin() + RowIndex);
 
 	*retval = VARIANT_TRUE;
-    needToSaveAsNewFile = true;
+    m_needToSaveAsNewFile = true;
 	return S_OK;
 }
 
@@ -2060,8 +2060,8 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 // *****************************************************************
 inline void CTableClass::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *****************************************************************
@@ -2506,7 +2506,7 @@ bool CTableClass::get_FieldValuesDouble(int FieldIndex, std::vector<double>& val
 		}
 		else
 		{
-			values.push_back(DBFReadDoubleAttribute(dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadDoubleAttribute(_dbfHandle,_rows[i].oldIndex,index));
 		}
 	}
 	return true;
@@ -2546,7 +2546,7 @@ bool CTableClass::get_FieldValuesInteger(int FieldIndex, std::vector<int>& value
 		}
 		else
 		{
-			values.push_back(DBFReadIntegerAttribute(dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadIntegerAttribute(_dbfHandle,_rows[i].oldIndex,index));
 		}
 	}
 	return true;
@@ -2589,7 +2589,7 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 		}
 		else
 		{
-			values.push_back(DBFReadStringAttribute(dbfHandle,_rows[i].oldIndex,index));
+			values.push_back(DBFReadStringAttribute(_dbfHandle,_rows[i].oldIndex,index));
 		}
 	}
 	return true;
@@ -2600,7 +2600,7 @@ bool CTableClass::get_FieldValuesString(int FieldIndex, std::vector<CString>& va
 // *****************************************************************
 bool CTableClass::set_IndexValue(int rowIndex)
 {
-	if (!isEditingTable)
+	if (!_isEditingTable)
 		return false;
 	
 	if (rowIndex < 0 || rowIndex > (int)_rows.size())
@@ -2940,7 +2940,7 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	VARIANT_BOOL editing;
 	this->get_EditingTable(&editing);
 	if (!editing) {
-		this->isEditingTable = TRUE;
+		this->_isEditingTable = TRUE;
 	}
 	
 	// reading list of fields specified by user
@@ -3009,7 +3009,7 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	Debug::WriteLine("Values copied: %d", count);
 
 	if (!editing) {
-		this->isEditingTable = FALSE;
+		this->_isEditingTable = FALSE;
 	}
 	
 	return true;
@@ -3025,7 +3025,7 @@ void CTableClass::RemoveJoinedFields()
 	VARIANT_BOOL editing;
 	this->get_EditingTable(&editing);
 	if (!editing) {
-		this->isEditingTable = TRUE;
+		this->_isEditingTable = TRUE;
 	}
 	
 	VARIANT_BOOL vb;
@@ -3037,7 +3037,7 @@ void CTableClass::RemoveJoinedFields()
 	}
 
 	if (!editing) {
-		this->isEditingTable = FALSE;
+		this->_isEditingTable = FALSE;
 	}
 }
 
@@ -3075,7 +3075,7 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 		VARIANT_BOOL editing;
 		this->get_EditingTable(&editing);
 		if (!editing)	 {
-			this->isEditingTable = TRUE;
+			this->_isEditingTable = TRUE;
 		}
 		
 		// remove all fields which belong to this join
@@ -3087,7 +3087,7 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 		}
 
 		if (!editing)
-			this->isEditingTable = FALSE;
+			this->_isEditingTable = FALSE;
 
 		delete _joins[joinIndex];
 		_joins.erase(_joins.begin() + joinIndex);
@@ -3273,10 +3273,10 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 			for (size_t i = 0; i < _joins.size(); i++)
 			{
 				CStringW name = _joins[i]->filename;
-				if (this->filename.GetLength() > 0)
+				if (this->_filename.GetLength() > 0)
 				{
 					
-					name = Utility::GetRelativePath(this->filename, name);
+					name = Utility::GetRelativePath(this->_filename, name);
 				}
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
@@ -3307,12 +3307,12 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 	{
 		CStringW folderName = "";
 		wchar_t* cwd = NULL;
-		if (this->filename != "")
+		if (this->_filename != "")
 		{
 			cwd = new wchar_t[4096];
 			_wgetcwd(cwd,4096);
 			
-			folderName = Utility::GetFolderFromPath(this->filename);
+			folderName = Utility::GetFolderFromPath(this->_filename);
 			_wchdir(folderName);
 		}
 		
@@ -3368,7 +3368,7 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 			node = node->psNext;
 		}
 
-		if (this->filename != "")
+		if (this->_filename != "")
 		{
 			_wchdir(cwd);
 		}

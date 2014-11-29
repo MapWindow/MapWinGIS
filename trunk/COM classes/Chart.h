@@ -77,8 +77,6 @@ public:
 	STDMETHOD(put_IsDrawn)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ScreenExtents)(IExtents** retval);
 	
-	char* CChart::get_ChartData();
-	void CChart::put_ChartData(char* newVal);
 private:
 	CChartInfo* _chartData;
 	bool _canDelete;		// CChartInfo can be allocated locally, then we need to delete it
@@ -86,6 +84,9 @@ private:
 							// In case CChartInfo is a pointer to the element of CShapefile vector we must not delete it
 							// For a example if a client receive reference to some existing chart and then releases 
 							// CChart class.
+public:
+	char* get_ChartData();
+	void put_ChartData(char* newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Chart), CChart)

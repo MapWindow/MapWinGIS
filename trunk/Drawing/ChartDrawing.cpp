@@ -127,7 +127,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	if (SysStringLen(expr) > 0)
 	{
 		USES_CONVERSION;
-		if (((CTableClass*)tbl)->Query_(OLE2CA(expr), arrInit, err))
+		if (((CTableClass*)tbl)->QueryCore(OLE2CA(expr), arrInit, err))
 		{
 			useAll = false;
 		}

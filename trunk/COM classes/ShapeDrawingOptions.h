@@ -244,16 +244,13 @@ public:
 	STDMETHOD(put_MinVisibleScale)(DOUBLE newVal);
 	STDMETHOD(get_MaxVisibleScale)(DOUBLE* pVal);
 	STDMETHOD(put_MaxVisibleScale)(DOUBLE newVal);
-
-	bool CShapeDrawingOptions::DeserializeCore(CPLXMLNode* node);
-	CPLXMLNode* CShapeDrawingOptions::SerializeCore(CString ElementName);
 	
 private:
-	CDrawingOptionsEx m_options;
+	CDrawingOptionsEx _options;
 	long _lastErrorCode;
 	bool _isLineDecoration;  // prevents the creation of child instances of CDrawingOptions class in case it's line decoration symbol, 
 							 // which could become endless loop
-	
+private:
 	VARIANT_BOOL DrawPointCore(CDC* dc, float x, float y, 
 							   int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
 
@@ -267,28 +264,15 @@ private:
 							  int clipWidth = 0, int clipHeight = 0, OLE_COLOR backColor = 16777215);
 
 public:	
-	void ErrorMessage(long ErrorCode)
-	{
-		_lastErrorCode = ErrorCode;
-	}
-	
-	// public functions for accesing underlying class from outside
-	CDrawingOptionsEx* get_UnderlyingOptions()
-	{
-		return &m_options;
-	}
-	void put_underlyingOptions(CDrawingOptionsEx* newVal)
-	{
-		m_options = *newVal;
-	}
-	void put_IsLineDecoration(bool newVal)
-	{
-		_isLineDecoration = newVal;
-	}
-	void get_IsLineDecoration(bool* retVal)
-	{
-		*retVal = _isLineDecoration;
-	}
+	bool DeserializeCore(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(CString ElementName);
+
+	void ErrorMessage(long ErrorCode) {	_lastErrorCode = ErrorCode;	}
+
+	CDrawingOptionsEx* get_UnderlyingOptions() {return &_options; }
+	void put_underlyingOptions(CDrawingOptionsEx* newVal) {	_options = *newVal; }
+	void put_IsLineDecoration(bool newVal){	_isLineDecoration = newVal;	}
+	void get_IsLineDecoration(bool* retVal)	{*retVal = _isLineDecoration;}
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ShapeDrawingOptions), CShapeDrawingOptions)

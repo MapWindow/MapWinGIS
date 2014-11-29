@@ -40,12 +40,12 @@ class ATL_NO_VTABLE CShapefileCategory :
 public:
 	CShapefileCategory()
 	{
-		m_name = A2BSTR("");
-		m_expression = A2BSTR("");
-		m_priority = - 1;
+		_name = A2BSTR("");
+		_expression = A2BSTR("");
+		_priority = - 1;
 
-		m_drawingOptions = NULL;
-		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_drawingOptions);
+		_drawingOptions = NULL;
+		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_drawingOptions);
 
 		_categories = NULL;
 		_categoryValue = cvExpression;
@@ -54,10 +54,10 @@ public:
 	
 	~CShapefileCategory()
 	{
-		::SysFreeString(m_name);
-		::SysFreeString(m_expression);
-		if(m_drawingOptions != NULL)
-			m_drawingOptions->Release();
+		::SysFreeString(_name);
+		::SysFreeString(_expression);
+		if(_drawingOptions != NULL)
+			_drawingOptions->Release();
 		gReferenceCounter.Release(tkInterface::idShapefileCategory);
 	}
 
@@ -80,17 +80,14 @@ public:
 	}
 
 public:
-	// -------------------------------------------------------------
-	//	 IShapefileCategory	interface
-	// -------------------------------------------------------------
 	STDMETHOD(get_Name)(BSTR* retval);
 	STDMETHOD(put_Name)(BSTR newVal);
 	STDMETHOD(get_Expression)(BSTR* retval);
 	STDMETHOD(put_Expression)(BSTR newVal);
 	STDMETHOD(get_DrawingOptions)(IShapeDrawingOptions** retval);
 	STDMETHOD(put_DrawingOptions)(IShapeDrawingOptions* newVal);
-	STDMETHOD(get_Priority)(LONG* retval)							{*retval = m_priority;			return S_OK;};
-	STDMETHOD(put_Priority)(LONG newVal)							{m_priority = newVal;			return S_OK;};
+	STDMETHOD(get_Priority)(LONG* retval)							{*retval = _priority;			return S_OK;};
+	STDMETHOD(put_Priority)(LONG newVal)							{_priority = newVal;			return S_OK;};
 	STDMETHOD(get_ValueType)(tkCategoryValue* pVal);
 	STDMETHOD(put_ValueType)(tkCategoryValue newVal);
 	STDMETHOD(get_MinValue)(VARIANT* pVal);
@@ -98,21 +95,16 @@ public:
 	STDMETHOD(get_MaxValue)(VARIANT* pVal);
 	STDMETHOD(put_MaxValue)(VARIANT newVal);
 
-	// -------------------------------------------------------------
-	//	 Members
-	// -------------------------------------------------------------
-	BSTR m_name;
-	BSTR m_expression;
-	IShapeDrawingOptions* m_drawingOptions;
-	long m_priority;
+private:
+	BSTR _name;
+	BSTR _expression;
+	IShapeDrawingOptions* _drawingOptions;
+	long _priority;
 	IShapefileCategories* _categories;
 	tkCategoryValue _categoryValue;
 	CComVariant _minValue;
 	CComVariant _maxValue;
-
-	// -------------------------------------------------------------
-	//	 Functions
-	// -------------------------------------------------------------
+	
 public:
 	CDrawingOptionsEx* get_UnderlyingOptions();
 	void put_underlyingOptions(CDrawingOptionsEx*);

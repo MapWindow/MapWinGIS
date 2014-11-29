@@ -111,74 +111,67 @@ public:
 	STDMETHOD(Save)(/*[in]*/ BSTR TinFilename, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(CreateNew)(/*[in]*/ IGrid * Grid, /*[in]*/ double Deviation, /*[in]*/ SplitMethod SplitTest, /*[in]*/ double STParam, /*[in]*/ long MeshDivisions, /*[in, optional, defaultvalue(1073741824)]*/ long MaximumTriangles, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(Open)(/*[in]*/ BSTR TinFile, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
-
-	//Data Members
-	private:
-		ICallback * globalCallback;
-		long lastErrorCode;
-		BSTR key;
-		BSTR filename;
-	private:		
-		triangleTable triTable;
-		vertexTable vtxTable;
-		vertex min;
-		vertex max;
-
-		TinHeap devHeap;
-		SplitMethod splitMethod;
-		double splitParam;
-		IGrid * grid;
-		IGridHeader * gridHeader;
-		char * ndTriangles;
-
-		//Grid Helper Functions
-	private:
-		inline long gridNcols();
-		inline long gridNrows();
-		inline void createTin( double deviation, long meshDivisions, long maxTriangles );
-		inline void computeTriangleEquation( long triIndex, double & A, double & B, double & C, double & D );
-		inline bool vtxInTriangle( vertex * triangle, vertex testVertex );
-		inline bool doesCross( int SH, int NSH, vertex & corner_one, vertex & corner_two );
-		inline void setSign( double val, int & SH );
-		inline vertex gridCoord( long column, long row );
-		inline double gridValue( long column, long row );
-		inline double gridMin();
-		inline double gridMax();
-		void createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, vertex v4 );
-		inline void splitTriangle( long triIndex );
-		inline void gridRaster( double x, double y, long & column, long & row );
-		inline void computeMaxDev( long triIndex );
-		inline bool splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod perpSplitMethod );
-		inline bool splitQuad( long triOneIndex, long triTwoIndex );
-		inline void changeBorder( long triIndex, long oldValue, long newValue );
-		/*inline double MIN( double one, double two );
-		inline double MAX( double one, double two );*/
-		bool willCreateBadTriangles( vertex * triangle, vertex testVertex );
-		inline long indexAfterClockwise( long triIndex, long vtxIndex );
-		inline void setBorders( long triIndex, long possBorder1, long possBorder2, long possBorder3,
-							 long possBorder4, long possBorder5, long possBorder6, long possBorder7 );
-		inline long unsharedIndex( long triOne, long triTwo );
-		inline void sharedIndexes( long triOne, long triTwo, long & index1, long & index2 );
-		bool canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, long p2_shared );
-		inline double inscribedCircleRad( vertex one, vertex two, vertex three );
-		inline bool hasVertices( long triIndex, long vtxOne, long vtxTwo );
-
-		//Added functions
-		void Prune(int &nv,XYZ v[]);
-		void BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin);
-		void FindAllBorders(int ntri,ITRIANGLE *tri);
-		int FindBorder(int ntri,int curIndex,ITRIANGLE *tri,int v1,int v2);
-		void FindMaxXYZAndMinXYZ(int nv,XYZ v[],XYZ &vMax,XYZ &vMin);
-		int CreateTin(int nv,XYZ *pxyz);
-		int Triangulate(int nv,XYZ *pxyz,ITRIANGLE *v,int *ntri);
-		int CircumCircle(double xp,double yp,
-			double x1,double y1,double x2,double y2,double x3,double y3,
-			double *xc,double *yc,double *r);
-
-	
-
-public:
 	STDMETHOD(CreateTinFromPoints)(SAFEARRAY * Points, VARIANT_BOOL* retval);
+
+private:
+	ICallback * _globalCallback;
+	long _lastErrorCode;
+	BSTR _key;
+	BSTR _filename;
+	
+	triangleTable _triTable;
+	vertexTable _vtxTable;
+	vertex _min;
+	vertex _max;
+
+	TinHeap _devHeap;
+	SplitMethod _splitMethod;
+	double _splitParam;
+	IGrid * _grid;
+	IGridHeader * _gridHeader;
+	char * _dTriangles;
+
+private:
+	inline long gridNcols();
+	inline long gridNrows();
+	inline void createTin( double deviation, long meshDivisions, long maxTriangles );
+	inline void computeTriangleEquation( long triIndex, double & A, double & B, double & C, double & D );
+	inline bool vtxInTriangle( vertex * triangle, vertex testVertex );
+	inline bool doesCross( int SH, int NSH, vertex & corner_one, vertex & corner_two );
+	inline void setSign( double val, int & SH );
+	inline vertex gridCoord( long column, long row );
+	inline double gridValue( long column, long row );
+	inline double gridMin();
+	inline double gridMax();
+	void createMesh( long numDivisions, vertex v1, vertex v2, vertex v3, vertex v4 );
+	inline void splitTriangle( long triIndex );
+	inline void gridRaster( double x, double y, long & column, long & row );
+	inline void computeMaxDev( long triIndex );
+	inline bool splitPerp( long triIndex, long perpPointIndex, PerpSplitMethod perpSplitMethod );
+	inline bool splitQuad( long triOneIndex, long triTwoIndex );
+	inline void changeBorder( long triIndex, long oldValue, long newValue );
+	/*inline double MIN( double one, double two );
+	inline double MAX( double one, double two );*/
+	bool willCreateBadTriangles( vertex * triangle, vertex testVertex );
+	inline long indexAfterClockwise( long triIndex, long vtxIndex );
+	inline void setBorders( long triIndex, long possBorder1, long possBorder2, long possBorder3,
+							long possBorder4, long possBorder5, long possBorder6, long possBorder7 );
+	inline long unsharedIndex( long triOne, long triTwo );
+	inline void sharedIndexes( long triOne, long triTwo, long & index1, long & index2 );
+	bool canSplitQuad( long p1_unshared, long p2_unshared, long p1_shared, long p2_shared );
+	inline double inscribedCircleRad( vertex one, vertex two, vertex three );
+	inline bool hasVertices( long triIndex, long vtxOne, long vtxTwo );
+
+	void Prune(int &nv,XYZ v[]);
+	void BuildTin(int nv, XYZ v[],int ntri,ITRIANGLE *tri,XYZ vMax,XYZ vMin);
+	void FindAllBorders(int ntri,ITRIANGLE *tri);
+	int FindBorder(int ntri,int curIndex,ITRIANGLE *tri,int v1,int v2);
+	void FindMaxXYZAndMinXYZ(int nv,XYZ v[],XYZ &vMax,XYZ &vMin);
+	int CreateTin(int nv,XYZ *pxyz);
+	int Triangulate(int nv,XYZ *pxyz,ITRIANGLE *v,int *ntri);
+	int CircumCircle(double xp,double yp,
+		double x1,double y1,double x2,double y2,double x3,double y3,
+		double *xc,double *yc,double *r);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tin), CTin)

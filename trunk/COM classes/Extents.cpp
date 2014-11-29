@@ -33,28 +33,28 @@ STDMETHODIMP CExtents::SetBounds(double xMin, double yMin, double zMin, double x
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	xmin = xMin;
-	xmax = xMax;
-	ymin = yMin;
-	ymax = yMax;
-	zmin = zMin;
-	zmax = zMax;
+	_xmin = xMin;
+	_max = xMax;
+	_ymin = yMin;
+	_ymax = yMax;
+	_zmin = zMin;
+	_zmax = zMax;
 
 	double tmp;
-	if( xmin > xmax )
-	{	tmp = xmax;
-		xmax = xmin;
-		xmin = tmp;
+	if( _xmin > _max )
+	{	tmp = _max;
+		_max = _xmin;
+		_xmin = tmp;
 	}
-	if( ymin > ymax )
-	{	tmp = ymax;
-		ymax = ymin;
-		ymin = tmp;
+	if( _ymin > _ymax )
+	{	tmp = _ymax;
+		_ymax = _ymin;
+		_ymin = tmp;
 	}
-	if( zmin > zmax )
-	{	tmp = zmax;
-	zmax = zmin;
-		zmin = tmp;
+	if( _zmin > _zmax )
+	{	tmp = _zmax;
+	_zmax = _zmin;
+		_zmin = tmp;
 	}
 
 	return S_OK;
@@ -64,12 +64,12 @@ STDMETHODIMP CExtents::GetBounds(double * xMin, double * yMin, double * zMin, do
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*xMin = xmin;
-	*xMax = xmax;
-	*yMin = ymin;
-	*yMax = ymax;
-	*zMin = zmin;
-	*zMax = zmax;
+	*xMin = _xmin;
+	*xMax = _max;
+	*yMin = _ymin;
+	*yMax = _ymax;
+	*zMin = _zmin;
+	*zMax = _zmax;
 
 	return S_OK;
 }
@@ -78,14 +78,14 @@ STDMETHODIMP CExtents::GetBounds(double * xMin, double * yMin, double * zMin, do
 STDMETHODIMP CExtents::get_xMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = xmin;
+	*pVal = _xmin;
 	return S_OK;
 }
 
 STDMETHODIMP CExtents::get_xMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = xmax;
+	*pVal = _max;
 	return S_OK;
 }
 
@@ -93,7 +93,7 @@ STDMETHODIMP CExtents::get_yMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = ymin;
+	*pVal = _ymin;
 	return S_OK;
 }
 
@@ -101,7 +101,7 @@ STDMETHODIMP CExtents::get_yMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = ymax;
+	*pVal = _ymax;
 	return S_OK;
 }
 
@@ -109,7 +109,7 @@ STDMETHODIMP CExtents::get_zMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = zmin;
+	*pVal = _zmin;
 	return S_OK;
 }
 
@@ -117,7 +117,7 @@ STDMETHODIMP CExtents::get_zMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = zmax;
+	*pVal = _zmax;
 	return S_OK;
 }
 
@@ -125,7 +125,7 @@ STDMETHODIMP CExtents::get_mMin(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = mmin;
+	*pVal = _mmin;
 
 	return S_OK;
 }
@@ -134,7 +134,7 @@ STDMETHODIMP CExtents::get_mMax(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = mmax;
+	*pVal = _mmax;
 
 	return S_OK;
 }
@@ -143,8 +143,8 @@ STDMETHODIMP CExtents::GetMeasureBounds(double *mMin, double *mMax)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*mMin = mmin;
-	*mMax = mmax;
+	*mMin = _mmin;
+	*mMax = _mmax;
 
 	return S_OK;
 }
@@ -153,14 +153,14 @@ STDMETHODIMP CExtents::SetMeasureBounds(double mMin, double mMax)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	mmin = mMin;
-	mmax = mMax;
+	_mmin = mMin;
+	_mmax = mMax;
 
 	double tmp;
-	if( mmin > mmax )
-	{	tmp = mmax;
-		mmax = mmin;
-		mmin = tmp;
+	if( _mmin > _mmax )
+	{	tmp = _mmax;
+		_mmax = _mmin;
+		_mmin = tmp;
 	}
 
 	return S_OK;
@@ -190,24 +190,24 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 
 		if (i == 0 || i ==4)
 		{	
-			pnt->put_X(this->xmin);
-			pnt->put_Y(this->ymin);
+			pnt->put_X(this->_xmin);
+			pnt->put_Y(this->_ymin);
 		}
 		else if (i ==1)
 		{
-			pnt->put_X(this->xmin);
-			pnt->put_Y(this->ymax);
+			pnt->put_X(this->_xmin);
+			pnt->put_Y(this->_ymax);
 			
 		}
 		else if (i ==2)
 		{
-			pnt->put_X(this->xmax);
-			pnt->put_Y(this->ymax);
+			pnt->put_X(this->_max);
+			pnt->put_Y(this->_ymax);
 		}
 		else if (i ==3)
 		{
-			pnt->put_X(this->xmax);
-			pnt->put_Y(this->ymin);
+			pnt->put_X(this->_max);
+			pnt->put_Y(this->_ymin);
 		}
 
 		shp->InsertPoint(pnt, &i, &vbretval);
@@ -225,7 +225,7 @@ STDMETHODIMP CExtents::Disjoint(IExtents* ext, VARIANT_BOOL* retVal)
 	if (ext) {
 		double xMin, yMin, zMin, xMax, yMax, zMax;
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		*retVal = (this->xmax < xMin || this->xmin > xMax || this->ymax < yMax || this->ymin > yMax);
+		*retVal = (this->_max < xMin || this->_xmin > xMax || this->_ymax < yMax || this->_ymin > yMax);
 	}
 	return S_OK;
 }
@@ -236,12 +236,12 @@ STDMETHODIMP CExtents::Union(IExtents* ext)
 	if (ext) {
 		double xMin, yMin, zMin, xMax, yMax, zMax;
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		this->xmin = MIN(xMin, this->xmin);
-		this->ymin = MIN(yMin, this->ymin);
-		this->zmin = MIN(zMin, this->zmin);
-		this->xmax = MAX(xMax, this->xmax);
-		this->ymax = MAX(yMax, this->ymax);
-		this->zmax = MAX(zMax, this->zmax);
+		this->_xmin = MIN(xMin, this->_xmin);
+		this->_ymin = MIN(yMin, this->_ymin);
+		this->_zmin = MIN(zMin, this->_zmin);
+		this->_max = MAX(xMax, this->_max);
+		this->_ymax = MAX(yMax, this->_ymax);
+		this->_zmax = MAX(zMax, this->_zmax);
 	}
 	return S_OK;
 }
@@ -253,12 +253,12 @@ STDMETHODIMP CExtents::GetIntersection(IExtents* ext, IExtents** retVal)
 	if (ext) {
 		double xMin, yMin, zMin, xMax, yMax, zMax;
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		xMin = MAX(xMin, this->xmin);
-		yMin = MAX(yMin, this->ymin);
-		zMin = MAX(zMin, this->zmin);
-		xMax = MIN(xMax, this->xmax);
-		yMax = MIN(yMax, this->ymax);
-		zMax = MIN(zMax, this->zmax);
+		xMin = MAX(xMin, this->_xmin);
+		yMin = MAX(yMin, this->_ymin);
+		zMin = MAX(zMin, this->_zmin);
+		xMax = MIN(xMax, this->_max);
+		yMax = MIN(yMax, this->_ymax);
+		zMax = MIN(zMax, this->_zmax);
 		
 		if (xMin <= xMax && yMin <= yMax && zMin <= zMax)
 		{
@@ -276,12 +276,12 @@ STDMETHODIMP CExtents::Intersects(IExtents* ext, VARIANT_BOOL* retVal)
 	if (ext) {
 		double xMin, yMin, zMin, xMax, yMax, zMax;
 		ext->GetBounds(&xMin, &yMin, &zMin, &xMax, &yMax, &zMax);
-		xMin = MAX(xMin, this->xmin);
-		yMin = MAX(yMin, this->ymin);
-		zMin = MAX(zMin, this->zmin);
-		xMax = MIN(xMax, this->xmax);
-		yMax = MIN(yMax, this->ymax);
-		zMax = MIN(zMax, this->zmax);
+		xMin = MAX(xMin, this->_xmin);
+		yMin = MAX(yMin, this->_ymin);
+		zMin = MAX(zMin, this->_zmin);
+		xMax = MIN(xMax, this->_max);
+		yMax = MIN(yMax, this->_ymax);
+		zMax = MIN(zMax, this->_zmax);
 		*retVal = (xMin <= xMax && yMin <= yMax && zMin <= zMax) ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	return S_OK;
@@ -294,7 +294,7 @@ STDMETHODIMP CExtents::ToDebugString(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	CString s;
-	s.Format("xMin=%f; xMax=%f; yMin=%f; yMax=%f", xmin, xmax, ymin, ymax);
+	s.Format("xMin=%f; xMax=%f; yMin=%f; yMax=%f", _xmin, _max, _ymin, _ymax);
 	USES_CONVERSION;
 	*retVal = A2BSTR(s);
 	return S_OK;
@@ -306,7 +306,7 @@ STDMETHODIMP CExtents::ToDebugString(BSTR* retVal)
 STDMETHODIMP CExtents::PointIsWithin(double x, double y, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal =  x >= xmin && x <= xmax && y >= ymin && y <= ymax ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal =  x >= _xmin && x <= _max && y >= _ymin && y <= _ymax ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
 
@@ -317,8 +317,8 @@ STDMETHODIMP CExtents::get_Center(IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	GetUtils()->CreateInstance(idPoint, (IDispatch**)retVal);
-	(*retVal)->put_X((xmin + xmax) / 2);
-	(*retVal)->put_Y((ymin + ymax) / 2);
+	(*retVal)->put_X((_xmin + _max) / 2);
+	(*retVal)->put_Y((_ymin + _ymax) / 2);
 	return S_OK;
 }
 
@@ -328,12 +328,12 @@ STDMETHODIMP CExtents::get_Center(IPoint** retVal)
 STDMETHODIMP CExtents::MoveTo(double x, double y)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	double dx = xmax - xmin;
-	double dy = ymax - ymin;
-	xmin = x - dx / 2.0;
-	xmax = x + dx / 2.0;
-	ymin = y - dy / 2.0;
-	ymax = y + dy / 2.0;
+	double dx = _max - _xmin;
+	double dy = _ymax - _ymin;
+	_xmin = x - dx / 2.0;
+	_max = x + dx / 2.0;
+	_ymin = y - dy / 2.0;
+	_ymax = y + dy / 2.0;
 	return S_OK;
 }
 

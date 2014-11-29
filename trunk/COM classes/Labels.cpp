@@ -44,15 +44,15 @@ STDMETHODIMP CLabels::get_FontName(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = OLE2BSTR(m_options.fontName);		
+	*retval = OLE2BSTR(_options.fontName);		
 	return S_OK;
 };	
 STDMETHODIMP CLabels::put_FontName(BSTR newVal)					
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	::SysFreeString(m_options.fontName);
-	m_options.fontName = OLE2BSTR(newVal);
+	::SysFreeString(_options.fontName);
+	_options.fontName = OLE2BSTR(newVal);
 	return S_OK;
 };	
 
@@ -62,7 +62,7 @@ STDMETHODIMP CLabels::put_FontName(BSTR newVal)
 STDMETHODIMP CLabels::get_FontTransparency(long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.fontTransparency;		
+	*retval = _options.fontTransparency;		
 	return S_OK;
 };		
 STDMETHODIMP CLabels::put_FontTransparency(long newVal)
@@ -70,13 +70,13 @@ STDMETHODIMP CLabels::put_FontTransparency(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	m_options.fontTransparency = newVal;
+	_options.fontTransparency = newVal;
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FrameTransparency(long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_options.frameTransparency;		
+	*retval = _options.frameTransparency;		
 	return S_OK;
 };		
 STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
@@ -84,7 +84,7 @@ STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	m_options.frameTransparency = newVal;
+	_options.frameTransparency = newVal;
 	return S_OK;
 };
 
@@ -93,46 +93,46 @@ STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 // *****************************************************************
 STDMETHODIMP CLabels::get_FontItalic(VARIANT_BOOL* retval)
 {
-	*retval = ((m_options.fontStyle & fstItalic)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options.fontStyle & fstItalic)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontItalic(VARIANT_BOOL newVal)
 {
-	if (newVal)		m_options.fontStyle |= fstItalic;
-	else			m_options.fontStyle &= (0xFFFFFFFF ^ fstItalic);
+	if (newVal)		_options.fontStyle |= fstItalic;
+	else			_options.fontStyle &= (0xFFFFFFFF ^ fstItalic);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontBold(VARIANT_BOOL* retval)
 {
-	*retval = ((m_options.fontStyle & fstBold)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options.fontStyle & fstBold)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontBold(VARIANT_BOOL newVal)
 {
-	if (newVal)		m_options.fontStyle |= fstBold;
-	else			m_options.fontStyle &= (0xFFFFFFFF ^ fstBold);
+	if (newVal)		_options.fontStyle |= fstBold;
+	else			_options.fontStyle &= (0xFFFFFFFF ^ fstBold);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontUnderline(VARIANT_BOOL* retval)
 {
-	*retval = ((m_options.fontStyle & fstUnderline)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options.fontStyle & fstUnderline)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontUnderline(VARIANT_BOOL newVal)
 {
-	if (newVal)		m_options.fontStyle |= fstUnderline;
-	else			m_options.fontStyle &= (0xFFFFFFFF ^ fstUnderline);
+	if (newVal)		_options.fontStyle |= fstUnderline;
+	else			_options.fontStyle &= (0xFFFFFFFF ^ fstUnderline);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontStrikeOut(VARIANT_BOOL* retval)
 {
-	*retval = ((m_options.fontStyle & fstStrikeout)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options.fontStyle & fstStrikeout)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontStrikeOut(VARIANT_BOOL newVal)
 {
-	if (newVal)		m_options.fontStyle |= fstStrikeout;
-	else			m_options.fontStyle &= (0xFFFFFFFF ^ fstStrikeout);
+	if (newVal)		_options.fontStyle |= fstStrikeout;
+	else			_options.fontStyle &= (0xFFFFFFFF ^ fstStrikeout);
 	return S_OK;
 };
 ////////////////////////////////////////////////////////////////
@@ -146,15 +146,15 @@ STDMETHODIMP CLabels::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(m_key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(m_key);
+	::SysFreeString(_key);
 	USES_CONVERSION;
-	m_key = OLE2BSTR(newVal);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -163,14 +163,14 @@ STDMETHODIMP CLabels::put_Key(BSTR newVal)
 //***********************************************************************/
 inline void CLabels::ErrorMessage(long ErrorCode)
 {
-	m_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 STDMETHODIMP CLabels::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_lastErrorCode;
-	m_lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 STDMETHODIMP CLabels::get_ErrorMsg(long ErrorCode, BSTR *pVal)
@@ -184,10 +184,10 @@ STDMETHODIMP CLabels::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CLabels::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_globalCallback;
-	if( m_globalCallback != NULL ) 
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL ) 
 	{
-		m_globalCallback->AddRef();
+		_globalCallback->AddRef();
 	}
 	return S_OK;
 }
@@ -195,7 +195,7 @@ STDMETHODIMP CLabels::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CLabels::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&m_globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -206,14 +206,14 @@ STDMETHODIMP CLabels::get_Label(long Index, long Part, ILabel** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( Index < 0 || Index >= (long)m_labels.size() )
+	if( Index < 0 || Index >= (long)_labels.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*pVal = NULL;
 	}
 	else
 	{
-		std::vector<CLabelInfo*>* parts = m_labels[Index];
+		std::vector<CLabelInfo*>* parts = _labels[Index];
 		if (Part < 0 || Part >= (long)parts->size())
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -237,7 +237,7 @@ STDMETHODIMP CLabels::get_Label(long Index, long Part, ILabel** pVal)
 STDMETHODIMP CLabels::get_NumCategories(long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_categories.size();
+	*pVal = _categories.size();
 	return S_OK;
 };
 
@@ -247,14 +247,14 @@ STDMETHODIMP CLabels::get_NumCategories(long* pVal)
 STDMETHODIMP CLabels::get_NumParts(long Index, long* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index >= (long)m_labels.size() )
+	if( Index < 0 || Index >= (long)_labels.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*pVal = -1;
 	}
 	else
 	{
-		std::vector<CLabelInfo*>* parts = m_labels[Index];
+		std::vector<CLabelInfo*>* parts = _labels[Index];
 		*pVal = parts->size();
 	}
 	return S_OK;
@@ -281,13 +281,13 @@ STDMETHODIMP CLabels::get_Category(long Index, ILabelCategory** retval)
 	//}
 	//else
 	{
-		if( Index < 0 || Index >= (long)m_categories.size() )
+		if( Index < 0 || Index >= (long)_categories.size() )
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
 		else
 		{
-			*retval	= m_categories[Index];
+			*retval	= _categories[Index];
 			if (*retval !=NULL)
 				(*retval)->AddRef();
 		}
@@ -301,7 +301,7 @@ STDMETHODIMP CLabels::put_Category(long Index, ILabelCategory* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if( Index < 0 || Index >= (long)m_categories.size() )
+	if( Index < 0 || Index >= (long)_categories.size() )
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -313,7 +313,7 @@ STDMETHODIMP CLabels::put_Category(long Index, ILabelCategory* newVal)
 		}
 		else
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&m_categories[Index], false);
+			Utility::put_ComReference(newVal, (IDispatch**)&_categories[Index], false);
 		}
 	}
 	return S_OK;
@@ -326,7 +326,7 @@ STDMETHODIMP CLabels::AddLabel(BSTR Text, double x, double y, double Rotation, l
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vbretval;
-	this->InsertLabel(m_labels.size(), Text, x, y, Rotation, Category, &vbretval);
+	this->InsertLabel(_labels.size(), Text, x, y, Rotation, Category, &vbretval);
 	return S_OK;
 }
 
@@ -336,7 +336,7 @@ STDMETHODIMP CLabels::AddLabel(BSTR Text, double x, double y, double Rotation, l
 STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, double Rotation, long Category, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index > (long)m_labels.size() )
+	if( Index < 0 || Index > (long)_labels.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = VARIANT_FALSE;
@@ -353,14 +353,14 @@ STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, dou
 	std::vector<CLabelInfo*>* parts = new std::vector<CLabelInfo*>;
 	parts->push_back(lbl);
 	
-	if (Index == m_labels.size())
+	if (Index == _labels.size())
 	{
-		m_labels.push_back(parts);
+		_labels.push_back(parts);
 		*retVal = VARIANT_TRUE;
 	}
 	else
 	{
-		m_labels.insert( m_labels.begin() + m_labels.size(), parts);
+		_labels.insert( _labels.begin() + _labels.size(), parts);
 		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -371,20 +371,20 @@ STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, dou
 STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index >= (long)m_labels.size() )
+	if( Index < 0 || Index >= (long)_labels.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*vbretval = VARIANT_FALSE;
 	}
 	else
 	{
-		std::vector<CLabelInfo*>* parts = m_labels[Index];
+		std::vector<CLabelInfo*>* parts = _labels[Index];
 		for(unsigned int i=0; i < parts->size(); i++)
 		{
 			delete parts->at(i);
 		}
 		parts->clear();
-		m_labels.erase(m_labels.begin() + Index);
+		_labels.erase(_labels.begin() + Index);
 		*vbretval = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -396,12 +396,12 @@ STDMETHODIMP CLabels::RemoveLabel(long Index, VARIANT_BOOL* vbretval)
 STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double Rotation, long Category)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index > (int)m_labels.size())
+	if( Index < 0 || Index > (int)_labels.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	} 
-	std::vector<CLabelInfo*>* parts = m_labels[Index];
+	std::vector<CLabelInfo*>* parts = _labels[Index];
 	
 	VARIANT_BOOL vbretval;
 	InsertPart(Index, parts->size(), Text, x, y, Rotation, Category, &vbretval);
@@ -414,12 +414,12 @@ STDMETHODIMP CLabels::AddPart(long Index, BSTR Text, double x, double y, double 
 STDMETHODIMP CLabels::InsertPart(long Index, long Part, BSTR Text, double x, double y, double Rotation, long Category, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if( Index < 0 || Index >=(int)m_labels.size())
+	if( Index < 0 || Index >=(int)_labels.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	} 
-	std::vector<CLabelInfo*>* parts = m_labels[Index];
+	std::vector<CLabelInfo*>* parts = _labels[Index];
 
 	CLabelInfo* lbl = new CLabelInfo();
 	
@@ -448,14 +448,14 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if( Index < 0 || Index >= (long)m_labels.size() )
+	if( Index < 0 || Index >= (long)_labels.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*vbretval = VARIANT_FALSE;
 	}
 	else
 	{
-		std::vector<CLabelInfo*>* parts = m_labels[Index];
+		std::vector<CLabelInfo*>* parts = _labels[Index];
 		if(Part < 0 || Part >= (long)parts->size())
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -477,7 +477,7 @@ STDMETHODIMP CLabels::RemovePart(long Index, long Part, VARIANT_BOOL* vbretval)
 // *****************************************************************
 STDMETHODIMP CLabels::AddCategory(BSTR Name, ILabelCategory** retVal)
 {
-	this->InsertCategory(m_categories.size(), Name, retVal);
+	this->InsertCategory(_categories.size(), Name, retVal);
 	return S_OK;
 }
 
@@ -488,7 +488,7 @@ STDMETHODIMP CLabels::InsertCategory(long Index, BSTR Name, ILabelCategory** ret
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if(Index < 0 || Index > (long)m_categories.size())
+	if(Index < 0 || Index > (long)_categories.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*retVal = NULL;
@@ -504,13 +504,13 @@ STDMETHODIMP CLabels::InsertCategory(long Index, BSTR Name, ILabelCategory** ret
 	((CLabelCategory*)cat)->put_LabelOptions(options);
 	cat->put_Name(Name);
 	
-	if (Index == m_categories.size())
+	if (Index == _categories.size())
 	{
-		m_categories.push_back(cat);
+		_categories.push_back(cat);
 	}
 	else
 	{
-		m_categories.insert( m_categories.begin() + Index, cat);
+		_categories.insert( _categories.begin() + Index, cat);
 	}
 
 	*retVal = cat;
@@ -526,16 +526,16 @@ STDMETHODIMP CLabels::RemoveCategory(long Index, VARIANT_BOOL* vbretval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*vbretval = VARIANT_FALSE;
 
-	if( Index < 0 || Index >= (long)m_categories.size() )
+	if( Index < 0 || Index >= (long)_categories.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		*vbretval = VARIANT_FALSE;
 	}
 	else
 	{
-		m_categories[Index]->Release();
-		m_categories[Index] = NULL;
-		m_categories.erase(m_categories.begin() + Index);
+		_categories[Index]->Release();
+		_categories[Index] = NULL;
+		_categories.erase(_categories.begin() + Index);
 		*vbretval = VARIANT_TRUE;
 	}
 	return S_OK;
@@ -548,15 +548,15 @@ STDMETHODIMP CLabels::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	for( size_t i = 0; i < m_labels.size(); i++ )
+	for( size_t i = 0; i < _labels.size(); i++ )
 	{	
-		for(size_t j = 0; j < m_labels[i]->size(); j++)
+		for(size_t j = 0; j < _labels[i]->size(); j++)
 		{
-			delete m_labels[i]->at(j);
+			delete _labels[i]->at(j);
 		}
-		delete m_labels[i];
+		delete _labels[i];
 	}
-	m_labels.clear();
+	_labels.clear();
 	return S_OK;
 };
 
@@ -566,15 +566,15 @@ STDMETHODIMP CLabels::Clear()
 STDMETHODIMP CLabels::ClearCategories()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	for (unsigned int i=0; i < m_categories.size(); i++ )
+	for (unsigned int i=0; i < _categories.size(); i++ )
 	{
-		m_categories[i]->Release();
+		_categories[i]->Release();
 	}
-	m_categories.clear();
+	_categories.clear();
 	
-	for (unsigned  int i = 0; i < m_labels.size(); i++)
+	for (unsigned  int i = 0; i < _labels.size(); i++)
 	{
-		(*m_labels[i])[0]->category = -1;
+		(*_labels[i])[0]->category = -1;
 	}
 	return S_OK;
 }
@@ -595,7 +595,7 @@ STDMETHODIMP CLabels::ApplyColorScheme (tkColorSchemeType Type, IColorScheme* Co
 STDMETHODIMP CLabels::ApplyColorScheme2 (tkColorSchemeType Type, IColorScheme* ColorScheme, tkLabelElements Element)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ApplyColorScheme3(Type, ColorScheme, Element, 0, m_categories.size() - 1);
+	ApplyColorScheme3(Type, ColorScheme, Element, 0, _categories.size() - 1);
 	return S_OK;
 }
 
@@ -612,7 +612,7 @@ STDMETHODIMP CLabels::ApplyColorScheme3 (tkColorSchemeType Type, IColorScheme* C
 
 	if (Element == leDefault)
 	{
-		if (m_options.frameVisible)
+		if (_options.frameVisible)
 			Element = leFrameBackground;
 		else
 			Element = leFont;
@@ -625,8 +625,8 @@ STDMETHODIMP CLabels::ApplyColorScheme3 (tkColorSchemeType Type, IColorScheme* C
 	}
 
 	// we'll correct inproper indices
-	if (CategoryEndIndex >= (long)m_categories.size())
-		CategoryEndIndex = (long)(m_categories.size() - 1);
+	if (CategoryEndIndex >= (long)_categories.size())
+		CategoryEndIndex = (long)(_categories.size() - 1);
 
 	if (CategoryStartIndex < 0)
 		CategoryStartIndex = 0;
@@ -651,22 +651,22 @@ STDMETHODIMP CLabels::ApplyColorScheme3 (tkColorSchemeType Type, IColorScheme* C
 		switch (Element)
 		{
 			case leFrameBackground:		
-				m_categories[i]->put_FrameBackColor(color);
+				_categories[i]->put_FrameBackColor(color);
 				break;
 			case leFrameOutline:		
-				m_categories[i]->put_FrameOutlineColor(color);
+				_categories[i]->put_FrameOutlineColor(color);
 				break;
 			case leFont:		
-				m_categories[i]->put_FontColor(color);
+				_categories[i]->put_FontColor(color);
 				break;
 			case leFontOutline :		
-				m_categories[i]->put_FontOutlineColor(color);
+				_categories[i]->put_FontOutlineColor(color);
 				break;
 			case leShadow:		
-				m_categories[i]->put_ShadowColor(color);
+				_categories[i]->put_ShadowColor(color);
 				break;
 			case leHalo:		
-				m_categories[i]->put_HaloColor(color);
+				_categories[i]->put_HaloColor(color);
 				break;
 		}
 	}
@@ -679,10 +679,10 @@ STDMETHODIMP CLabels::ApplyColorScheme3 (tkColorSchemeType Type, IColorScheme* C
 bool CLabels::GetMinMaxCategoryValue(double& globalMax, double& globalMin)
 {
 	CComVariant vMin, vMax;
-	for(unsigned int i = 0; i < m_categories.size(); i++)
+	for(unsigned int i = 0; i < _categories.size(); i++)
 	{
-		m_categories[i]->get_MinValue(&vMin);
-		m_categories[i]->get_MaxValue(&vMax);
+		_categories[i]->get_MinValue(&vMin);
+		_categories[i]->get_MaxValue(&vMax);
 
 		// TODO: it can be string value, we must not process it
 		double dMin, dMax;
@@ -722,9 +722,9 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 	IUtils* utils = NULL;
 	CoCreateInstance(CLSID_Utils,NULL,CLSCTX_INPROC_SERVER,IID_IUtils,(void**)&utils);
 
-	for (unsigned long i = 0; i < m_labels.size(); i++)
+	for (unsigned long i = 0; i < _labels.size(); i++)
 	{
-		vector<CLabelInfo*>* labelParts = m_labels[i];
+		vector<CLabelInfo*>* labelParts = _labels[i];
 		for (unsigned long j =0; j < labelParts->size(); j++ )
 		{
 			CLabelInfo* lbl = labelParts->at(j);
@@ -837,11 +837,11 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 // For inner use only
 void CLabels::put_ParentShapefile(IShapefile* newVal)
 {
-	m_shapefile = newVal;
+	_shapefile = newVal;
 }
 IShapefile* CLabels::get_ParentShapefile()
 {
-	return m_shapefile;
+	return _shapefile;
 }
 
 // *******************************************************************
@@ -850,11 +850,11 @@ IShapefile* CLabels::get_ParentShapefile()
 std::vector<std::vector<CLabelInfo*>*>* CLabels::get_LabelData()
 {
 	//return reinterpret_cast<char*>(&m_labels);
-	return &m_labels;
+	return &_labels;
 }
 CLabelOptions* CLabels::get_LabelOptions()
 {
-	return &m_options;
+	return &_options;
 }
 
 // *****************************************************************
@@ -866,13 +866,13 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
 
-	if(m_shapefile == NULL) 
+	if(_shapefile == NULL) 
 	{
 		return S_FALSE;
 	}
 	
 	ITable* tbl = NULL;
-	m_shapefile->get_Table(&tbl);
+	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_FALSE;
 		
@@ -881,7 +881,7 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 		return S_OK;
 
 	this->ClearCategories();
-	m_classificationField = -1;		// fast processing is off
+	_classificationField = -1;		// fast processing is off
 
 	ILabelCategory* cat = NULL;
 	
@@ -899,7 +899,7 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 	if (ClassificationType == ctUniqueValues)
 	{	
 		// fast processing of categories will be available (m_value will be used without parsing of expressions)
-		m_classificationField = FieldIndex;		
+		_classificationField = FieldIndex;		
 	}
 	
 	delete values;
@@ -913,7 +913,7 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 // *******************************************************************
 void CLabels::ApplyExpression_(long CategoryIndex)
 {
-	if (!m_shapefile)
+	if (!_shapefile)
 		return;
 	
 	VARIANT_BOOL synchronized;
@@ -925,11 +925,11 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 	}
 
 	ITable* tbl = NULL;
-	m_shapefile->get_Table(&tbl);
+	_shapefile->get_Table(&tbl);
 	if ( tbl )
 	{
 		long numShapes;
-		m_shapefile->get_NumShapes(&numShapes);
+		_shapefile->get_NumShapes(&numShapes);
 		
 		// vector of numShapes size with category index for each shape
 		std::vector<int> results;
@@ -939,16 +939,16 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 		// we got unique values classification and want to process it fast
 		// ----------------------------------------------------------------
 		bool parsingIsNeeded = true;	
-		if (m_classificationField != -1)
+		if (_classificationField != -1)
 		{
 			parsingIsNeeded = false;	// in case there are unique values only we don't need any parsing
 			
 			std::map<CComVariant, long> myMap;				// variant value as key and number of category as result
-			for (unsigned int i = 0; i < m_categories.size(); i++)
+			for (unsigned int i = 0; i < _categories.size(); i++)
 			{
 				if (i == CategoryIndex || CategoryIndex == -1 )
 				{
-					CComVariant* val = &(((CLabelCategory*)m_categories[i])->m_value);
+					CComVariant* val = &(((CLabelCategory*)_categories[i])->m_value);
 					if (val->vt != VT_EMPTY)
 					{
 						CComVariant val2;
@@ -963,7 +963,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 			VariantInit(&val);
 			for (long i = 0; i < numShapes; i++)
 			{
-				tbl->get_CellValue(m_classificationField, i, &val);
+				tbl->get_CellValue(_classificationField, i, &val);
 				if (myMap.find(val) != myMap.end())
 				{
 					results[i] = myMap[val];	// writing the index of category
@@ -980,12 +980,12 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 			// building list of expressions
 			BSTR expr;
 			std::vector<CString> expressions;
-			for (unsigned int i = 0; i < m_categories.size(); i++)
+			for (unsigned int i = 0; i < _categories.size(); i++)
 			{
 				if (i == CategoryIndex || CategoryIndex == -1 )
 				{
-					CComVariant* val = &(((CLabelCategory*)m_categories[i])->m_value);
-					if (val->vt != VT_EMPTY && m_classificationField != -1)
+					CComVariant* val = &(((CLabelCategory*)_categories[i])->m_value);
+					if (val->vt != VT_EMPTY && _classificationField != -1)
 					{
 						// we analyzed this one before, so just a dummy string here
 						CString str = "";
@@ -993,7 +993,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 					}
 					else
 					{
-						m_categories[i]->get_Expression(&expr);
+						_categories[i]->get_Expression(&expr);
 						USES_CONVERSION;
 						CString str = OLE2CA(expr);	
 						::SysFreeString(expr);
@@ -1017,7 +1017,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 		{
 			for (unsigned long i = 0; i < results.size(); i++)
 			{
-				(*m_labels[i])[0]->category = results[i];
+				(*_labels[i])[0]->category = results[i];
 				//m_shapefile->put_ShapeCategory(i, results[i]);
 			}
 		}
@@ -1027,7 +1027,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 			{
 				if (results[i] == CategoryIndex)	// wasn't tested !!!
 				{
-					(*m_labels[i])[0]->category = results[i];
+					(*_labels[i])[0]->category = results[i];
 				}
 					//m_shapefile->put_ShapeCategory(i, CategoryIndex);
 			}
@@ -1055,11 +1055,11 @@ void CLabels::RefreshExpressions()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if (m_shapefile == NULL) return ;
+	if (_shapefile == NULL) return ;
 	
 	long numFields;
-	m_shapefile->get_NumFields(&numFields);
-	if (m_classificationField < 0 || m_classificationField >= numFields)
+	_shapefile->get_NumFields(&numFields);
+	if (_classificationField < 0 || _classificationField >= numFields)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return;
@@ -1067,7 +1067,7 @@ void CLabels::RefreshExpressions()
 	
 	IField* fld = NULL;
 	BSTR name;
-	m_shapefile->get_Field(m_classificationField, &fld);
+	_shapefile->get_Field(_classificationField, &fld);
 	fld->get_Name(&name);
 	
 	USES_CONVERSION;
@@ -1076,11 +1076,11 @@ void CLabels::RefreshExpressions()
 	SysFreeString(name);
 	fieldName = "[" + fieldName + "]";
 
-	for(int i = 0; i < (int)m_categories.size(); i++)
+	for(int i = 0; i < (int)_categories.size(); i++)
 	{
 		CComVariant vMin, vMax;
-		m_categories[i]->get_MinValue(&vMin);
-		m_categories[i]->get_MaxValue(&vMax);
+		_categories[i]->get_MinValue(&vMin);
+		_categories[i]->get_MaxValue(&vMax);
 		
 		double dMax, dMin;
 		dVal(vMin, dMin);
@@ -1097,7 +1097,7 @@ void CLabels::RefreshExpressions()
 
 		BSTR result;
 		result = s.AllocSysString();
-		m_categories[i]->put_Expression(result);
+		_categories[i]->put_Expression(result);
 	}
 	return;
 }
@@ -1108,13 +1108,13 @@ void CLabels::RefreshExpressions()
 STDMETHODIMP CLabels::get_ClassificationField(long* FieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*FieldIndex = m_classificationField;
+	*FieldIndex = _classificationField;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_ClassificationField(long FieldIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_classificationField = FieldIndex;
+	_classificationField = FieldIndex;
 	return S_OK;
 }
 
@@ -1154,11 +1154,11 @@ STDMETHODIMP CLabels::get_Synchronized(VARIANT_BOOL* retval)
 // ****************************************************************
 bool CLabels::LabelsSynchronized()
 {
-	if (m_shapefile == NULL) return false;
+	if (_shapefile == NULL) return false;
 	
 	long numShapes;
-	m_shapefile->get_NumShapes(&numShapes);
-	if (numShapes != (long)m_labels.size())	return false;
+	_shapefile->get_NumShapes(&numShapes);
+	if (numShapes != (long)_labels.size())	return false;
 	return true;
 }
 // *****************************************************************
@@ -1173,7 +1173,7 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 	CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&cat);
 	if (cat == NULL) return S_OK;
 
-	((CLabelCategory*)cat)->put_LabelOptions(&m_options);
+	((CLabelCategory*)cat)->put_LabelOptions(&_options);
 
 	cat->put_Name(A2BSTR("Default"));
 	*retVal = cat;
@@ -1185,7 +1185,7 @@ STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)
 
 	CLabelCategory* coCat =	static_cast<CLabelCategory*>(newVal);
 	CLabelOptions* options =  coCat->get_LabelOptions();
-	m_options = *options;
+	_options = *options;
 	return S_OK;
 }
 
@@ -1196,9 +1196,9 @@ STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)
 // Must be called before the redraw (before the call of MapView::DrawLabelsAlt).
 void CLabels::ClearLabelFrames()
 {
-    for (int iLabel = 0; iLabel < (int)m_labels.size(); iLabel++)
+    for (int iLabel = 0; iLabel < (int)_labels.size(); iLabel++)
 	{
-		vector<CLabelInfo*>* parts = m_labels[iLabel];
+		vector<CLabelInfo*>* parts = _labels[iLabel];
 		for (int j =0; j < (int)parts->size(); j++ )
 		{
 			CLabelInfo* lbl = parts->at(j);
@@ -1224,15 +1224,15 @@ STDMETHODIMP CLabels::get_VisibilityExpression(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(m_expression);
+	*pVal = OLE2BSTR(_expression);
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_VisibilityExpression(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(m_expression);
+	::SysFreeString(_expression);
 	USES_CONVERSION;
-	m_expression = OLE2BSTR(newVal);
+	_expression = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -1242,13 +1242,13 @@ STDMETHODIMP CLabels::put_VisibilityExpression(BSTR newVal)
 STDMETHODIMP CLabels::get_MinDrawingSize(LONG* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = m_minDrawingSize;
+	*retval = _minDrawingSize;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_MinDrawingSize(LONG newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_minDrawingSize = newVal;
+	_minDrawingSize = newVal;
 	return S_OK;
 }
 
@@ -1258,11 +1258,11 @@ STDMETHODIMP CLabels::put_MinDrawingSize(LONG newVal)
 STDMETHODIMP CLabels::MoveCategoryUp (long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < (long)m_categories.size() && Index > 0)
+	if (Index < (long)_categories.size() && Index > 0)
 	{
-		ILabelCategory* catBefore = m_categories[Index - 1];
-		m_categories[Index - 1] = m_categories[Index];
-		m_categories[Index] = catBefore;
+		ILabelCategory* catBefore = _categories[Index - 1];
+		_categories[Index - 1] = _categories[Index];
+		_categories[Index] = catBefore;
 		*retval = VARIANT_TRUE;
 	}
 	else
@@ -1279,11 +1279,11 @@ STDMETHODIMP CLabels::MoveCategoryUp (long Index, VARIANT_BOOL* retval)
 STDMETHODIMP CLabels::MoveCategoryDown (long Index, VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (Index < (long)m_categories.size() - 1 && Index >= 0)
+	if (Index < (long)_categories.size() - 1 && Index >= 0)
 	{
-		ILabelCategory* catAfter = m_categories[Index + 1];
-		m_categories[Index + 1] = m_categories[Index];
-		m_categories[Index] = catAfter;
+		ILabelCategory* catAfter = _categories[Index + 1];
+		_categories[Index + 1] = _categories[Index];
+		_categories[Index] = catAfter;
 		*retval = VARIANT_TRUE;
 	}
 	else
@@ -1300,13 +1300,13 @@ STDMETHODIMP CLabels::MoveCategoryDown (long Index, VARIANT_BOOL* retval)
 STDMETHODIMP CLabels::get_AutoOffset(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_autoOffset;
+	*retval = _autoOffset;
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_autoOffset = newVal;
+	_autoOffset = newVal;
 	return S_OK;
 }
 
@@ -1319,19 +1319,19 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	CString str;
 	
 	// drawing options
-	CPLXMLNode* psTree = m_options.SerializeToTree(ElementName);
+	CPLXMLNode* psTree = _options.SerializeToTree(ElementName);
 	if (!psTree)
 	{
 		return NULL;
 	}
 	
 	// adding categories if any
-	if (m_categories.size() > 0)
+	if (_categories.size() > 0)
 	{
 		CPLXMLNode* psCategories = CPLCreateXMLNode(psTree, CXT_Element, "LabelCategories");
-		for (unsigned int i = 0; i < m_categories.size(); i++)
+		for (unsigned int i = 0; i < _categories.size(); i++)
 		{
-			CPLXMLNode* node = ((CLabelCategory*)m_categories[i])->SerializeCore("LabelCategoryClass");
+			CPLXMLNode* node = ((CLabelCategory*)_categories[i])->SerializeCore("LabelCategoryClass");
 			if (node)
 			{
 				CPLAddXMLChild(psCategories, node);
@@ -1340,9 +1340,9 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	}
 
 	// labels
-	if (m_labels.size() > 0)  		// positions should be saved only if there are labels
+	if (_labels.size() > 0)  		// positions should be saved only if there are labels
 	{
-		if (m_savingMode == modeStandard)
+		if (_savingMode == modeStandard)
 		{
 			bool saveRotation, saveText;
 			CPLXMLNode* nodeLabels = this->SerializeLabelData("Labels", saveRotation, saveText );
@@ -1355,21 +1355,21 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 				CPLAddXMLChild(psTree, nodeLabels);
 			}
 		}
-		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
+		else if (_savingMode == modeXML || _savingMode == modeXMLOverwrite)
 		{
-			if (m_shapefile)
+			if (_shapefile)
 			{
 				tkShapefileSourceType sourceType;
-				m_shapefile->get_SourceType(&sourceType);
+				_shapefile->get_SourceType(&sourceType);
 				if (sourceType == sstDiskBased)
 				{
 					// constructing the name of .lbl file
 					CComBSTR name;
-					m_shapefile->get_Filename(&name);
+					_shapefile->get_Filename(&name);
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".lbl";
 					
-					if (m_savingMode == modeXMLOverwrite && Utility::FileExists(path))
+					if (_savingMode == modeXMLOverwrite && Utility::FileExists(path))
 					{
 						if( remove( path ) != 0 )
 						{
@@ -1385,82 +1385,82 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 						SaveToXML(A2BSTR(path), &retVal);
 
 						// user will need to save modeXMLOverwrite once more to overwrite the file
-						if (m_savingMode == modeXMLOverwrite)
-							m_savingMode = modeXML;
+						if (_savingMode == modeXMLOverwrite)
+							_savingMode = modeXML;
 					}
 				}
 			}
 		}
-		else if (m_savingMode == modeDBF)
+		else if (_savingMode == modeDBF)
 		{
 			ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 		}
 	}
 
-	Utility::CPLCreateXMLAttributeAndValue( psTree, "Generated", CPLString().Printf("%d", m_labels.size() > 0 ));
+	Utility::CPLCreateXMLAttributeAndValue( psTree, "Generated", CPLString().Printf("%d", _labels.size() > 0 ));
 	
 	// start labels specific options
-	if (m_minDrawingSize != 1)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "MinDrawingSize", CPLString().Printf("%d", m_minDrawingSize ));
+	if (_minDrawingSize != 1)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "MinDrawingSize", CPLString().Printf("%d", _minDrawingSize ));
 
-	str = OLE2CA(m_expression);
+	str = OLE2CA(_expression);
 	if (str != "")
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "VisibilityExpression", str);
 	
-	str = OLE2CA(m_key);
+	str = OLE2CA(_key);
 	if (str != "")
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "Key", str);
 
-	if (m_verticalPosition != vpAboveAllLayers)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "VerticalPosition", CPLString().Printf("%d", (int)m_verticalPosition));
+	if (_verticalPosition != vpAboveAllLayers)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "VerticalPosition", CPLString().Printf("%d", (int)_verticalPosition));
 
-	if (m_basicScale != 0.0)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "BasicScale", CPLString().Printf("%f", m_basicScale));
+	if (_basicScale != 0.0)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "BasicScale", CPLString().Printf("%f", _basicScale));
 
-	if (m_maxVisibleScale != 100000000.0)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "MaxVisibleScale", CPLString().Printf("%f", m_maxVisibleScale));
+	if (_maxVisibleScale != 100000000.0)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "MaxVisibleScale", CPLString().Printf("%f", _maxVisibleScale));
 	
-	if (m_minVisibleScale != 0.0)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "MinVisibleScale", CPLString().Printf("%f", m_minVisibleScale));
+	if (_minVisibleScale != 0.0)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "MinVisibleScale", CPLString().Printf("%f", _minVisibleScale));
 
-	if (m_collisionBuffer != 0)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "CollisionBuffer", CPLString().Printf("%d", m_collisionBuffer));
+	if (_collisionBuffer != 0)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "CollisionBuffer", CPLString().Printf("%d", _collisionBuffer));
 
-	if (m_scale != false)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "ScaleLabels", CPLString().Printf("%d", (int)m_scale));
+	if (_scale != false)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "ScaleLabels", CPLString().Printf("%d", (int)_scale));
 
-	if (m_autoOffset != VARIANT_TRUE)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "AutoOffset", CPLString().Printf("%d", (int)m_autoOffset));
+	if (_autoOffset != VARIANT_TRUE)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "AutoOffset", CPLString().Printf("%d", (int)_autoOffset));
 
-	if (m_dynamicVisibility != VARIANT_FALSE)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "DynamicVisibility", CPLString().Printf("%d", (int)m_dynamicVisibility));
+	if (_dynamicVisibility != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "DynamicVisibility", CPLString().Printf("%d", (int)_dynamicVisibility));
 
 	if (m_globalSettings.labelsCollisionMode == tkCollisionMode::AllowCollisions)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "AvoidCollisions", CPLString().Printf("%d", (int)m_avoidCollisions));
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "AvoidCollisions", CPLString().Printf("%d", (int)_avoidCollisions));
 
-	if (m_useWidthLimits != VARIANT_FALSE)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "UseWidthLimits", CPLString().Printf("%d", (int)m_useWidthLimits));
+	if (_useWidthLimits != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "UseWidthLimits", CPLString().Printf("%d", (int)_useWidthLimits));
 
-	if (m_removeDuplicates != VARIANT_FALSE)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "RemoveDuplicates", CPLString().Printf("%d", (int)m_removeDuplicates));
+	if (_removeDuplicates != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "RemoveDuplicates", CPLString().Printf("%d", (int)_removeDuplicates));
 
-	if (m_gdiPlus != VARIANT_TRUE)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "UseGdiPlus", CPLString().Printf("%d", (int)m_gdiPlus));
+	if (_gdiPlus != VARIANT_TRUE)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "UseGdiPlus", CPLString().Printf("%d", (int)_gdiPlus));
 
-	if (m_savingMode != modeXML)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "SavingMode", CPLString().Printf("%d", (int)m_savingMode));
+	if (_savingMode != modeXML)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "SavingMode", CPLString().Printf("%d", (int)_savingMode));
 
-	if (m_positioning != lpNone)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "Positioning", CPLString().Printf("%d", (int)m_positioning));
+	if (_positioning != lpNone)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "Positioning", CPLString().Printf("%d", (int)_positioning));
 
-	if (m_textRenderingHint != HintAntiAlias)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "TextRenderingHint", CPLString().Printf("%d", (int)m_textRenderingHint));
+	if (_textRenderingHint != HintAntiAlias)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "TextRenderingHint", CPLString().Printf("%d", (int)_textRenderingHint));
 
-	if (m_labelExpression != "")
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "Expression", m_labelExpression);
+	if (_labelExpression != "")
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "Expression", _labelExpression);
 
-	if (m_sourceField != -1)
-		Utility::CPLCreateXMLAttributeAndValue( psTree, "SourceField",CPLString().Printf("%d", m_sourceField));
+	if (_sourceField != -1)
+		Utility::CPLCreateXMLAttributeAndValue( psTree, "SourceField",CPLString().Printf("%d", _sourceField));
 
 	return psTree;
 }
@@ -1486,12 +1486,12 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 		
 	CString s;
 	s = CPLGetXMLValue( node, "SavingMode", NULL );
-	m_savingMode = (s != "") ? (tkSavingMode)atoi(s.GetString()) : modeXML;
+	_savingMode = (s != "") ? (tkSavingMode)atoi(s.GetString()) : modeXML;
 
 	// restoring categories
 	this->ClearCategories();
 	
-	if (m_savingMode != modeNone)
+	if (_savingMode != modeNone)
 	{
 		this->Clear();
 	}
@@ -1514,13 +1514,13 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	}
 
 	s = CPLGetXMLValue( node, "Positioning", NULL );
-	if (s != "") m_positioning =  (tkLabelPositioning)atoi(s.GetString());
+	if (s != "") _positioning =  (tkLabelPositioning)atoi(s.GetString());
 
 	bool inMemory = false;
-	if (m_shapefile)
+	if (_shapefile)
 	{
 		tkShapefileSourceType sourceType;
-		m_shapefile->get_SourceType(&sourceType);
+		_shapefile->get_SourceType(&sourceType);
 		inMemory = sourceType != sstDiskBased;
 	}
 
@@ -1532,28 +1532,28 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	bool loadLabels = atoi(s.GetString()) == 0 ? false : true;
 	if (loadLabels)
 	{
-		bool xmlMode = m_savingMode == modeXML || m_savingMode == modeXMLOverwrite;
+		bool xmlMode = _savingMode == modeXML || _savingMode == modeXMLOverwrite;
 
-		if ((xmlMode && inMemory) ||  m_savingMode == modeNone)
+		if ((xmlMode && inMemory) ||  _savingMode == modeNone)
 		{
 			long count;
 			s = CPLGetXMLValue( node, "SourceField", NULL );
 			if (s != "") 
 			{
-				m_sourceField = atoi(s.GetString()) ? true : false;
-				if (m_sourceField != -1)
+				_sourceField = atoi(s.GetString()) ? true : false;
+				if (_sourceField != -1)
 				{
-					m_shapefile->GenerateLabels(m_sourceField, m_positioning, true, &count);
+					_shapefile->GenerateLabels(_sourceField, _positioning, true, &count);
 				}
 			}
 			else {
 				if (expression.GetLength() != 0)
 				{
-					m_shapefile->GenerateLabels(-1, m_positioning, true, &count);
+					_shapefile->GenerateLabels(-1, _positioning, true, &count);
 				}
 			}
 		}
-		else if (m_savingMode == modeStandard)
+		else if (_savingMode == modeStandard)
 		{
 			bool loadText, loadRotation;
 			s = CPLGetXMLValue( node, "RotationSaved", NULL );
@@ -1568,11 +1568,11 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 				DeserializeLabelData(nodeData, loadRotation, loadText);
 			}
 		}
-		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
+		else if (_savingMode == modeXML || _savingMode == modeXMLOverwrite)
 		{
 			// constructing the name of .lbl file
 			CComBSTR name;
-			m_shapefile->get_Filename(&name);
+			_shapefile->get_Filename(&name);
 			USES_CONVERSION;
 			CStringW path = Utility::GetPathWOExtension(OLE2W(name));
 			path += L".lbl";
@@ -1589,11 +1589,11 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	
 	// properties should be re read after labels were restored,
 	// as old .lbl file have their own properties, and we don't want to overwrite project information
-	m_options.DeserializeFromNode(node);
+	_options.DeserializeFromNode(node);
 	
 	// start labels specific options
 	s = CPLGetXMLValue( node, "MinDrawingSize", NULL );
-	m_minDrawingSize = (s != "") ? atoi(s.GetString()) : 1;
+	_minDrawingSize = (s != "") ? atoi(s.GetString()) : 1;
 
 	s = CPLGetXMLValue( node, "VisibilityExpression", NULL );
 
@@ -1609,46 +1609,46 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	this->put_Key(bstrKey);
 	
 	s = CPLGetXMLValue( node, "VerticalPosition", NULL );
-	m_verticalPosition = (s != "") ? (tkVerticalPosition)atoi(s.GetString()) : vpAboveAllLayers;
+	_verticalPosition = (s != "") ? (tkVerticalPosition)atoi(s.GetString()) : vpAboveAllLayers;
 
 	s = CPLGetXMLValue( node, "BasicScale", NULL );
-	m_basicScale = (s != "") ? Utility::atof_custom(s) : 0.0;
+	_basicScale = (s != "") ? Utility::atof_custom(s) : 0.0;
 
 	s = CPLGetXMLValue( node, "MaxVisibleScale", NULL );
-	m_maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;
+	_maxVisibleScale = (s != "") ? Utility::atof_custom(s) : 100000000.0;
 
 	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
-	m_minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
+	_minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
 
 	s = CPLGetXMLValue( node, "CollisionBuffer", NULL );
-	m_collisionBuffer = (s != "") ? atoi(s.GetString()) : 0;
+	_collisionBuffer = (s != "") ? atoi(s.GetString()) : 0;
 
 	s = CPLGetXMLValue( node, "ScaleLabels", NULL );
-	m_scale = (s != "") ? (atoi(s.GetString()) == 0? false : true) : false;
+	_scale = (s != "") ? (atoi(s.GetString()) == 0? false : true) : false;
 
 	s = CPLGetXMLValue( node, "AutoOffset", NULL );
-	m_autoOffset = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
+	_autoOffset = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
 
 	s = CPLGetXMLValue( node, "DynamicVisibility", NULL );
-	m_dynamicVisibility = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+	_dynamicVisibility = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
 
 	s = CPLGetXMLValue( node, "AvoidCollisions", NULL );
-	m_avoidCollisions = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
+	_avoidCollisions = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
 	
 	s = CPLGetXMLValue( node, "UseWidthLimits", NULL );
-	m_useWidthLimits = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+	_useWidthLimits = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
 	
 	s = CPLGetXMLValue( node, "RemoveDuplicates", NULL );
-	m_removeDuplicates = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+	_removeDuplicates = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
 
 	s = CPLGetXMLValue( node, "UseGdiPlus", NULL );
-	m_gdiPlus = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
+	_gdiPlus = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_TRUE;
 	
 	s = CPLGetXMLValue( node, "TextRenderingHint", NULL );
-	m_textRenderingHint = (s != "") ? (tkTextRenderingHint)atoi(s.GetString()) : HintAntiAlias;
+	_textRenderingHint = (s != "") ? (tkTextRenderingHint)atoi(s.GetString()) : HintAntiAlias;
 	
 	// applying the expressions
-	if (m_categories.size() > 0)
+	if (_categories.size() > 0)
 	{
 		this->ApplyCategories();
 	}
@@ -1689,7 +1689,7 @@ STDMETHODIMP CLabels::get_Expression(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retVal = A2BSTR(m_labelExpression.GetString());
+	*retVal = A2BSTR(_labelExpression.GetString());
 	return S_OK;
 }
 
@@ -1698,14 +1698,14 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	if (!m_shapefile)
+	if (!_shapefile)
 	{
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return S_OK;
 	}
 	
 	CString str = OLE2CA(newVal);
-	m_labelExpression = str;
+	_labelExpression = str;
 
 	if (!m_synchronized)
 	{
@@ -1714,20 +1714,20 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	else
 	{
 		ITable* table = NULL;
-		m_shapefile->get_Table(&table);
+		_shapefile->get_Table(&table);
 		if (table)
 		{
 			// analyzes expression
 			CString strError;
 			std::vector<CString> results;
-			if (((CTableClass*)table)->Calculate_(str, results, strError))
+			if (((CTableClass*)table)->CalculateCore(str, results, strError))
 			{
 				// updating labels
-				if (results.size() == m_labels.size())
+				if (results.size() == _labels.size())
 				{
-					for (unsigned int i = 0; i < m_labels.size(); i++)
+					for (unsigned int i = 0; i < _labels.size(); i++)
 					{
-						(*m_labels[i])[0]->text = results[i];
+						(*_labels[i])[0]->text = results[i];
 					}
 				}
 			}
@@ -1735,9 +1735,9 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 			{
 				if (str == "")
 				{
-					for (unsigned int i = 0; i < m_labels.size(); i++)
+					for (unsigned int i = 0; i < _labels.size(); i++)
 					{
-						(*m_labels[i])[0]->text = "";
+						(*_labels[i])[0]->text = "";
 					}
 				}
 				else
@@ -1783,7 +1783,7 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 
 		if (node)
 		{
-			Utility::CPLCreateXMLAttributeAndValue( node, "Count", CPLString().Printf("%d", (int)m_labels.size()));
+			Utility::CPLCreateXMLAttributeAndValue( node, "Count", CPLString().Printf("%d", (int)_labels.size()));
 			Utility::CPLCreateXMLAttributeAndValue( node, "RotationSaved", CPLString().Printf("%d", (int)saveRotation));
 			Utility::CPLCreateXMLAttributeAndValue( node, "TextSaved", CPLString().Printf("%d", (int)(saveText)));
 
@@ -1801,14 +1801,14 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 CPLXMLNode* CLabels::SerializeLabelData(CString ElementName, bool& saveRotation, bool& saveText)
 {
 	saveRotation = false;
-	saveText = m_labelExpression == "";
+	saveText = _labelExpression == "";
 	
 	CPLXMLNode* psLabels = CPLCreateXMLNode( NULL, CXT_Element, ElementName );
 	if (psLabels)
 	{
-		for (unsigned int i = 0; i < m_labels.size(); i++)
+		for (unsigned int i = 0; i < _labels.size(); i++)
 		{
-			CLabelInfo* info = (*m_labels[i])[0];
+			CLabelInfo* info = (*_labels[i])[0];
 			if (info->rotation != 0.0)
 			{
 				saveRotation = true;
@@ -1819,7 +1819,7 @@ CPLXMLNode* CLabels::SerializeLabelData(CString ElementName, bool& saveRotation,
 		CPLXMLNode* nodeOld = NULL;
 		CPLXMLNode* nodeNew = NULL;
 
-		for (unsigned int i = 0; i < m_labels.size(); i++)
+		for (unsigned int i = 0; i < _labels.size(); i++)
 		{
 			if (!nodeOld)
 			{
@@ -1832,7 +1832,7 @@ CPLXMLNode* CLabels::SerializeLabelData(CString ElementName, bool& saveRotation,
 				nodeOld = nodeNew;
 			}
 			
-			CLabelInfo* info = (*m_labels[i])[0];
+			CLabelInfo* info = (*_labels[i])[0];
 			Utility::CPLCreateXMLAttributeAndValue(nodeOld, "X", CPLString().Printf("%f", info->x));
 			Utility::CPLCreateXMLAttributeAndValue(nodeOld, "Y", CPLString().Printf("%f", info->y));
 			if (saveRotation)
@@ -1859,40 +1859,40 @@ void CLabels::LoadLblOptions(CPLXMLNode* node)
 	try
 	{
 		CString s = CPLGetXMLValue( node, "Font", NULL );
-		if (s != "") m_options.fontName = A2BSTR(s);
+		if (s != "") _options.fontName = A2BSTR(s);
 
 		s = CPLGetXMLValue( node, "Size", NULL );
-		if (s != "") m_options.fontSize = (int)Utility::atof_custom(s);
+		if (s != "") _options.fontSize = (int)Utility::atof_custom(s);
 
 		s = CPLGetXMLValue( node, "Color", NULL );
-		if (s != "") m_options.fontColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
+		if (s != "") _options.fontColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
 
 		s = CPLGetXMLValue( node, "Scaled", NULL );
-		if (s != "") m_scale = atoi(s) == 0? false : true;
+		if (s != "") _scale = atoi(s) == 0? false : true;
 
 		s = CPLGetXMLValue( node, "Scale", NULL );
-		if (s != "") m_basicScale = Utility::atof_custom(s);
+		if (s != "") _basicScale = Utility::atof_custom(s);
 
 		s = CPLGetXMLValue( node, "UseShadows", NULL );
-		if (s != "") m_options.shadowVisible = atoi(s) == 0 ? false : true;
+		if (s != "") _options.shadowVisible = atoi(s) == 0 ? false : true;
 
 		s = CPLGetXMLValue( node, "ShadowColor", NULL );
-		if (s != "") m_options.shadowColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
+		if (s != "") _options.shadowColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
 
 		s = CPLGetXMLValue( node, "UseLabelCollision", NULL );
-		if (s != "") m_avoidCollisions = atoi(s) == 0 ? false : true;
+		if (s != "") _avoidCollisions = atoi(s) == 0 ? false : true;
 
 		s = CPLGetXMLValue( node, "Bold", NULL );
 		if (_stricmp(s, "true") == 0)
-			m_options.fontStyle |= fstBold;
+			_options.fontStyle |= fstBold;
 
 		s = CPLGetXMLValue( node, "Italic", NULL );
 		if (_stricmp(s, "true") == 0)
-			m_options.fontStyle |= fstItalic;
+			_options.fontStyle |= fstItalic;
 
 		s = CPLGetXMLValue( node, "Underline", NULL );
 		if (_stricmp(s, "true") == 0)
-			m_options.fontStyle |= fstUnderline;
+			_options.fontStyle |= fstUnderline;
 	}
 	catch(...)
 	{
@@ -1938,7 +1938,7 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 				{
 					// old format
 					CLabelOptions opt;
-					m_options = opt;
+					_options = opt;
 					this->LoadLblOptions(node);
 				}
 				else
@@ -2024,7 +2024,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
 
-	if (!m_shapefile)
+	if (!_shapefile)
 	{
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return S_OK;
@@ -2038,7 +2038,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	}
 
 	tkShapefileSourceType sourceType;
-	m_shapefile->get_SourceType(&sourceType);
+	_shapefile->get_SourceType(&sourceType);
 	if (sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -2047,7 +2047,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 		
 	// extracting table
 	ITable* dbf = NULL;
-	m_shapefile->get_Table(&dbf);
+	_shapefile->get_Table(&dbf);
 	
 	// opening editing session
 	VARIANT_BOOL editing;
@@ -2069,9 +2069,9 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	
 	// angles are saved only in case there is at least one label with non-zero angle
 	bool saveAngle = false;
-	for (unsigned int i = 0; i < m_labels.size(); i++)
+	for (unsigned int i = 0; i < _labels.size(); i++)
 	{
-		CLabelInfo* info = (*(m_labels)[i])[0];
+		CLabelInfo* info = (*(_labels)[i])[0];
 		if (info->rotation != 0.0)
 		{
 			saveAngle = true;
@@ -2100,7 +2100,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 			continue;
 		
 		IField* field = NULL;
-		m_shapefile->get_FieldByName(fields[i], &field);
+		_shapefile->get_FieldByName(fields[i], &field);
 		if (!field)
 		{
 			// creating fields
@@ -2112,8 +2112,8 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 				field->put_Type(type);
 				
 				long numFields;
-				m_shapefile->get_NumFields(&numFields);
-				m_shapefile->EditInsertField(field, &numFields, NULL, retVal);		// not checking the result here; nothing can occur inside 
+				_shapefile->get_NumFields(&numFields);
+				_shapefile->EditInsertField(field, &numFields, NULL, retVal);		// not checking the result here; nothing can occur inside 
 																			//and we check the editing state previously
 			}
 		}
@@ -2139,7 +2139,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 
 	for (int i = 0; i < count; i++)
 	{
-		CLabelInfo* info = (*(m_labels)[i])[0];
+		CLabelInfo* info = (*(_labels)[i])[0];
 
 		// X
 		var.vt = VT_R8;
@@ -2210,14 +2210,14 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if (!m_shapefile)
+	if (!_shapefile)
 	{
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return S_OK;
 	}
 
 	tkShapefileSourceType sourceType;
-	m_shapefile->get_SourceType(&sourceType);
+	_shapefile->get_SourceType(&sourceType);
 	if (sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -2225,7 +2225,7 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 	}
 
 	ITable* dbf = NULL;
-	m_shapefile->get_Table(&dbf);
+	_shapefile->get_Table(&dbf);
 	if (!dbf)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -2310,13 +2310,13 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 		((CTableClass*)dbf)->get_FieldValuesInteger((int)indices[4], vCategory);
 
 	long numShapes;
-	m_shapefile->get_NumShapes(&numShapes);
+	_shapefile->get_NumShapes(&numShapes);
 
 	if (xValues.size() == yValues.size() && xValues.size() == numShapes)
 	{
 		for (int i = 0; i < numShapes; i++)
 		{
-			CLabelInfo* info =  (*(m_labels)[i])[0];
+			CLabelInfo* info =  (*(_labels)[i])[0];
 			info->x = xValues[i];
 			info->y = yValues[i];
 			
@@ -2344,7 +2344,7 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 // ************************************************************
 bool CLabels::GenerateEmptyLabels()
 {
-	if (!m_shapefile)
+	if (!_shapefile)
 	{
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return false;
@@ -2353,14 +2353,14 @@ bool CLabels::GenerateEmptyLabels()
 	this->Clear();
 	
 	long numShapes;
-	m_shapefile->get_NumShapes(&numShapes);
+	_shapefile->get_NumShapes(&numShapes);
 
 	for(int i = 0; i < numShapes; i++)
 	{
 		CLabelInfo* info = new CLabelInfo();
 		std::vector<CLabelInfo*>* parts = new std::vector<CLabelInfo*>;
 		parts->push_back(info);
-		m_labels.push_back(parts);
+		_labels.push_back(parts);
 	}
 	
 	this->put_Synchronized(VARIANT_TRUE);
@@ -2373,14 +2373,14 @@ bool CLabels::GenerateEmptyLabels()
 STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!m_shapefile)
+	if (!_shapefile)
 	{
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
 		return false;
 	}
 
 	tkShapefileSourceType sourceType;
-	m_shapefile->get_SourceType(&sourceType);
+	_shapefile->get_SourceType(&sourceType);
 	if (sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
@@ -2388,7 +2388,7 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 	}
 
 	ITable* table = NULL;
-	m_shapefile->get_Table(&table);
+	_shapefile->get_Table(&table);
 	
 	USES_CONVERSION;
 	BSTR errorString = A2BSTR("");
@@ -2403,7 +2403,7 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 	}
 
 	// generating without text
-	m_shapefile->GenerateLabels(-1, Method, LargestPartOnly, Count);
+	_shapefile->GenerateLabels(-1, Method, LargestPartOnly, Count);
 	if (*Count > 0)
 	{
 		this->put_Expression(Expression);
@@ -2417,7 +2417,7 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 STDMETHODIMP CLabels::get_SavingMode(tkSavingMode* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = m_savingMode;
+	*retVal = _savingMode;
 	return S_OK;
 }
 
@@ -2427,7 +2427,7 @@ STDMETHODIMP CLabels::get_SavingMode(tkSavingMode* retVal)
 STDMETHODIMP CLabels::put_SavingMode(tkSavingMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_savingMode = newVal;
+	_savingMode = newVal;
 	return S_OK;
 }
 
@@ -2437,7 +2437,7 @@ STDMETHODIMP CLabels::put_SavingMode(tkSavingMode newVal)
 STDMETHODIMP CLabels::get_Positioning(tkLabelPositioning* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_positioning;
+	*pVal = _positioning;
 	return S_OK;
 }
 
@@ -2447,10 +2447,10 @@ STDMETHODIMP CLabels::get_Positioning(tkLabelPositioning* pVal)
 STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (m_shapefile)
+	if (_shapefile)
 	{
 		ShpfileType type;
-		m_shapefile->get_ShapefileType(&type);
+		_shapefile->get_ShapefileType(&type);
 		type = Utility::ShapeTypeConvert2D(type);
 
 		bool polyline =false, polygon = false;
@@ -2476,7 +2476,7 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 			return S_FALSE;
 		}
 	}
-	m_positioning = newVal;
+	_positioning = newVal;
 	return S_OK;
 }
 
@@ -2486,7 +2486,7 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 STDMETHODIMP CLabels::get_TextRenderingHint(tkTextRenderingHint* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_textRenderingHint;
+	*pVal = _textRenderingHint;
 	return S_OK;
 }
 
@@ -2494,7 +2494,7 @@ STDMETHODIMP CLabels::put_TextRenderingHint(tkTextRenderingHint newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal >= 0 && newVal <= ClearTypeGridFit)
-		m_textRenderingHint = newVal;
+		_textRenderingHint = newVal;
 	return S_OK;
 }
 
@@ -2503,9 +2503,9 @@ STDMETHODIMP CLabels::put_TextRenderingHint(tkTextRenderingHint newVal)
 // *************************************************************
 bool CLabels::HasRotation()
 {
-	for (unsigned int i = 0; i < m_labels.size(); i++)
+	for (unsigned int i = 0; i < _labels.size(); i++)
 	{
-		vector<CLabelInfo*>* parts = m_labels[i];
+		vector<CLabelInfo*>* parts = _labels[i];
 		for (int j = 0; j < (int)parts->size(); j++)
 		{
 			CLabelInfo* lbl = (*parts)[j];

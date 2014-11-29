@@ -1549,9 +1549,9 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	}
 
 	char** papszArgv = NULL;
-	for (int i = 0; i < sArr.GetCount(); i++)
+	for (int i = 0; i < _sArr.GetCount(); i++)
 	{
-		papszArgv = CSLAddString(papszArgv, sArr[i]);
+		papszArgv = CSLAddString(papszArgv, _sArr[i]);
 	}
 
 	if (cBack)
@@ -3653,62 +3653,62 @@ STDMETHODIMP CUtils::OGRInfo(BSTR bstrSrcFilename, BSTR bstrOptions, BSTR bstrLa
 
 	for (int iArg = 1; iArg < nArgc; iArg++)
 	{
-		if( EQUAL(sArr[iArg],"-ro") )
+		if( EQUAL(_sArr[iArg],"-ro") )
             bReadOnly = TRUE;
-		else if( EQUAL(sArr[iArg],"-q") || EQUAL(sArr[iArg],"-quiet"))
+		else if( EQUAL(_sArr[iArg],"-q") || EQUAL(_sArr[iArg],"-quiet"))
             bVerbose = FALSE;
-        else if( EQUAL(sArr[iArg],"-fid") && iArg < nArgc-1 )
-            nFetchFID = atoi(sArr[++iArg]);
-        else if( EQUAL(sArr[iArg],"-spat") && iArg < nArgc-4 )
+        else if( EQUAL(_sArr[iArg],"-fid") && iArg < nArgc-1 )
+            nFetchFID = atoi(_sArr[++iArg]);
+        else if( EQUAL(_sArr[iArg],"-spat") && iArg < nArgc-4 )
         {
             OGRLinearRing  oRing;
 
-            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+2]) );
-            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+4]) );
-            oRing.addPoint( atof(sArr[iArg+3]), atof(sArr[iArg+4]) );
-            oRing.addPoint( atof(sArr[iArg+3]), atof(sArr[iArg+2]) );
-            oRing.addPoint( atof(sArr[iArg+1]), atof(sArr[iArg+2]) );
+            oRing.addPoint( atof(_sArr[iArg+1]), atof(_sArr[iArg+2]) );
+            oRing.addPoint( atof(_sArr[iArg+1]), atof(_sArr[iArg+4]) );
+            oRing.addPoint( atof(_sArr[iArg+3]), atof(_sArr[iArg+4]) );
+            oRing.addPoint( atof(_sArr[iArg+3]), atof(_sArr[iArg+2]) );
+            oRing.addPoint( atof(_sArr[iArg+1]), atof(_sArr[iArg+2]) );
 
             poSpatialFilter = OGRGeometryFactory::createGeometry(wkbPolygon);
             ((OGRPolygon *) poSpatialFilter)->addRing( &oRing );
             iArg += 4;
         }
-        else if( EQUAL(sArr[iArg],"-where") && iArg < nArgc-1 )
+        else if( EQUAL(_sArr[iArg],"-where") && iArg < nArgc-1 )
         {
-            pszWHERE = sArr[++iArg];
+            pszWHERE = _sArr[++iArg];
         }
-        else if( EQUAL(sArr[iArg],"-sql") && iArg < nArgc-1 )
+        else if( EQUAL(_sArr[iArg],"-sql") && iArg < nArgc-1 )
         {
-            pszSQLStatement = sArr[++iArg];
+            pszSQLStatement = _sArr[++iArg];
         }
-        else if( EQUAL(sArr[iArg],"-dialect") && iArg < nArgc-1 )
+        else if( EQUAL(_sArr[iArg],"-dialect") && iArg < nArgc-1 )
         {
-            pszDialect = sArr[++iArg];
+            pszDialect = _sArr[++iArg];
         }
-        else if( EQUAL(sArr[iArg],"-rc") && iArg < nArgc-1 )
+        else if( EQUAL(_sArr[iArg],"-rc") && iArg < nArgc-1 )
         {
-            nRepeatCount = atoi(sArr[++iArg]);
+            nRepeatCount = atoi(_sArr[++iArg]);
         }
-        else if( EQUAL(sArr[iArg],"-al") )
+        else if( EQUAL(_sArr[iArg],"-al") )
         {
             bAllLayers = TRUE;
         }
-        else if( EQUAL(sArr[iArg],"-so") 
-                 || EQUAL(sArr[iArg],"-summary")  )
+        else if( EQUAL(_sArr[iArg],"-so") 
+                 || EQUAL(_sArr[iArg],"-summary")  )
         {
             bSummaryOnly = TRUE;
         }
-        else if( EQUALN(sArr[iArg],"-fields=", strlen("-fields=")) )
+        else if( EQUALN(_sArr[iArg],"-fields=", strlen("-fields=")) )
         {
-            char* pszTemp = (char*)CPLMalloc(32 + strlen(sArr[iArg]));
-            sprintf(pszTemp, "DISPLAY_FIELDS=%s", sArr[iArg].GetBuffer(0) + strlen("-fields="));
+            char* pszTemp = (char*)CPLMalloc(32 + strlen(_sArr[iArg]));
+            sprintf(pszTemp, "DISPLAY_FIELDS=%s", _sArr[iArg].GetBuffer(0) + strlen("-fields="));
             papszOptions = CSLAddString(papszOptions, pszTemp);
             CPLFree(pszTemp);
         }
-        else if( EQUALN(sArr[iArg],"-geom=", strlen("-geom=")) )
+        else if( EQUALN(_sArr[iArg],"-geom=", strlen("-geom=")) )
         {
-            char* pszTemp = (char*)CPLMalloc(32 + strlen(sArr[iArg]));
-            sprintf(pszTemp, "DISPLAY_GEOMETRY=%s", sArr[iArg].GetBuffer(0) + strlen("-geom="));
+            char* pszTemp = (char*)CPLMalloc(32 + strlen(_sArr[iArg]));
+            sprintf(pszTemp, "DISPLAY_GEOMETRY=%s", _sArr[iArg].GetBuffer(0) + strlen("-geom="));
             papszOptions = CSLAddString(papszOptions, pszTemp);
             CPLFree(pszTemp);
         }

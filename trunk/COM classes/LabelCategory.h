@@ -39,22 +39,22 @@ class ATL_NO_VTABLE CLabelCategory :
 public:
 	CLabelCategory()
 	{
-		m_name = A2BSTR("");
-		m_expression = A2BSTR("");
-		VariantInit(&m_minValue);
-		VariantInit(&m_maxValue);
-		m_priority = 0;
-		m_enabled = VARIANT_TRUE;
+		_name = A2BSTR("");
+		_expression = A2BSTR("");
+		VariantInit(&_minValue);
+		VariantInit(&_maxValue);
+		_priority = 0;
+		_enabled = VARIANT_TRUE;
 		m_value.vt = VT_EMPTY;
 		gReferenceCounter.AddRef(tkInterface::idLabelCategory);
 	}
 	
 	~CLabelCategory()
 	{
-		::SysFreeString(m_name);
-		::SysFreeString(m_expression);
-		VariantClear(&m_minValue);
-		VariantClear(&m_maxValue);
+		::SysFreeString(_name);
+		::SysFreeString(_expression);
+		VariantClear(&_minValue);
+		VariantClear(&_maxValue);
 		gReferenceCounter.Release(tkInterface::idLabelCategory);
 	}
 
@@ -90,8 +90,8 @@ public:
 	STDMETHOD(get_MaxValue)(VARIANT* pVal);
 	STDMETHOD(put_MaxValue)(VARIANT newVal);
 
-	STDMETHOD(get_Priority)(LONG* retval)							{*retval = m_priority;			return S_OK;};
-	STDMETHOD(put_Priority)(LONG newVal)							{m_priority = newVal;			return S_OK;};
+	STDMETHOD(get_Priority)(LONG* retval)							{*retval = _priority;			return S_OK;};
+	STDMETHOD(put_Priority)(LONG newVal)							{_priority = newVal;			return S_OK;};
 	
 	// ---------------------------------------------------------------------------------
 	// Properties common for CLabels and CLabelCategory
@@ -103,24 +103,24 @@ public:
 	// CLabelOptions structure is used to hold the options, so delcarations can be just copied
 	// between CLabels and CLabelCategory, the names of properties should be the same in both classes
 	// ---------------------------------------------------------------------------------
-	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)					{*retval = m_options.visible;			return S_OK;};
-	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)						{m_options.visible = newVal?true:false;			return S_OK;};		
+	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)					{*retval = _options.visible;			return S_OK;};
+	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)						{_options.visible = newVal?true:false;			return S_OK;};		
 	
 	// position
-	STDMETHOD(get_OffsetX)(double* retval)							{*retval = m_options.offsetX;			return S_OK;};
-	STDMETHOD(put_OffsetX)(double newVal)							{m_options.offsetX = newVal;			return S_OK;};
-	STDMETHOD(get_OffsetY)(double* retval)							{*retval = m_options.offsetY;			return S_OK;};
-	STDMETHOD(put_OffsetY)(double newVal)							{m_options.offsetY = newVal;			return S_OK;};
-	STDMETHOD(get_Alignment)(tkLabelAlignment* retval)				{*retval = m_options.alignment;			return S_OK;};
-	STDMETHOD(put_Alignment)(tkLabelAlignment newVal)				{m_options.alignment = newVal;			return S_OK;};
-	STDMETHOD(get_LineOrientation)(tkLineLabelOrientation* retval)	{*retval = m_options.lineOrientation;	return S_OK;};		
-	STDMETHOD(put_LineOrientation)(tkLineLabelOrientation newVal)	{m_options.lineOrientation = newVal;	return S_OK;};
+	STDMETHOD(get_OffsetX)(double* retval)							{*retval = _options.offsetX;			return S_OK;};
+	STDMETHOD(put_OffsetX)(double newVal)							{_options.offsetX = newVal;			return S_OK;};
+	STDMETHOD(get_OffsetY)(double* retval)							{*retval = _options.offsetY;			return S_OK;};
+	STDMETHOD(put_OffsetY)(double newVal)							{_options.offsetY = newVal;			return S_OK;};
+	STDMETHOD(get_Alignment)(tkLabelAlignment* retval)				{*retval = _options.alignment;			return S_OK;};
+	STDMETHOD(put_Alignment)(tkLabelAlignment newVal)				{_options.alignment = newVal;			return S_OK;};
+	STDMETHOD(get_LineOrientation)(tkLineLabelOrientation* retval)	{*retval = _options.lineOrientation;	return S_OK;};		
+	STDMETHOD(put_LineOrientation)(tkLineLabelOrientation newVal)	{_options.lineOrientation = newVal;	return S_OK;};
 	
 	// font
 	STDMETHOD(get_FontName)(BSTR* retval);
 	STDMETHOD(put_FontName)(BSTR newVal);
-	STDMETHOD(get_FontSize)(LONG* retval)							{*retval = m_options.fontSize;			return S_OK;};
-	STDMETHOD(put_FontSize)(LONG newVal)							{m_options.fontSize = newVal;			return S_OK;};
+	STDMETHOD(get_FontSize)(LONG* retval)							{*retval = _options.fontSize;			return S_OK;};
+	STDMETHOD(put_FontSize)(LONG newVal)							{_options.fontSize = newVal;			return S_OK;};
 	
 	STDMETHOD(get_FontItalic)(VARIANT_BOOL* retval);
 	STDMETHOD(put_FontItalic)(VARIANT_BOOL newVal);
@@ -131,99 +131,98 @@ public:
 	STDMETHOD(get_FontStrikeOut)(VARIANT_BOOL* retval);
 	STDMETHOD(put_FontStrikeOut)(VARIANT_BOOL newVal);
 	
-	STDMETHOD(get_FontColor)(OLE_COLOR* retval)						{*retval = m_options.fontColor;			return S_OK;};
-	STDMETHOD(put_FontColor)(OLE_COLOR newVal)						{m_options.fontColor = newVal;			return S_OK;};
-	STDMETHOD(get_FontColor2)(OLE_COLOR* retval)					{*retval = m_options.fontColor2;		return S_OK;};
-	STDMETHOD(put_FontColor2)(OLE_COLOR newVal)						{m_options.fontColor2 = newVal;			return S_OK;};
-	STDMETHOD(get_FontGradientMode)(tkLinearGradientMode* retval)	{*retval = m_options.fontGradientMode;	return S_OK;};
-	STDMETHOD(put_FontGradientMode)(tkLinearGradientMode newVal)	{m_options.fontGradientMode = newVal;	return S_OK;};
+	STDMETHOD(get_FontColor)(OLE_COLOR* retval)						{*retval = _options.fontColor;			return S_OK;};
+	STDMETHOD(put_FontColor)(OLE_COLOR newVal)						{_options.fontColor = newVal;			return S_OK;};
+	STDMETHOD(get_FontColor2)(OLE_COLOR* retval)					{*retval = _options.fontColor2;		return S_OK;};
+	STDMETHOD(put_FontColor2)(OLE_COLOR newVal)						{_options.fontColor2 = newVal;			return S_OK;};
+	STDMETHOD(get_FontGradientMode)(tkLinearGradientMode* retval)	{*retval = _options.fontGradientMode;	return S_OK;};
+	STDMETHOD(put_FontGradientMode)(tkLinearGradientMode newVal)	{_options.fontGradientMode = newVal;	return S_OK;};
 
 	STDMETHOD(get_FontTransparency)(LONG* retval);
 	STDMETHOD(put_FontTransparency)(LONG newVal);
 	
 	// outlines
-	STDMETHOD(get_FontOutlineVisible)(VARIANT_BOOL* retval)			{*retval = m_options.fontOutlineVisible;			return S_OK;};
-	STDMETHOD(put_FontOutlineVisible)(VARIANT_BOOL newVal)			{m_options.fontOutlineVisible = newVal?true:false;	return S_OK;};		
-	STDMETHOD(get_ShadowVisible)(VARIANT_BOOL* retval)				{*retval = m_options.shadowVisible;					return S_OK;};
-	STDMETHOD(put_ShadowVisible)(VARIANT_BOOL newVal)				{m_options.shadowVisible = newVal?true:false;		return S_OK;};		
-	STDMETHOD(get_HaloVisible)(VARIANT_BOOL* retval)				{*retval = m_options.haloVisible;					return S_OK;};
-	STDMETHOD(put_HaloVisible)(VARIANT_BOOL newVal)					{m_options.haloVisible = newVal?true:false;			return S_OK;};		
+	STDMETHOD(get_FontOutlineVisible)(VARIANT_BOOL* retval)			{*retval = _options.fontOutlineVisible;			return S_OK;};
+	STDMETHOD(put_FontOutlineVisible)(VARIANT_BOOL newVal)			{_options.fontOutlineVisible = newVal?true:false;	return S_OK;};		
+	STDMETHOD(get_ShadowVisible)(VARIANT_BOOL* retval)				{*retval = _options.shadowVisible;					return S_OK;};
+	STDMETHOD(put_ShadowVisible)(VARIANT_BOOL newVal)				{_options.shadowVisible = newVal?true:false;		return S_OK;};		
+	STDMETHOD(get_HaloVisible)(VARIANT_BOOL* retval)				{*retval = _options.haloVisible;					return S_OK;};
+	STDMETHOD(put_HaloVisible)(VARIANT_BOOL newVal)					{_options.haloVisible = newVal?true:false;			return S_OK;};		
 	
-	STDMETHOD(get_FontOutlineColor)(OLE_COLOR* retval)				{*retval = m_options.fontOutlineColor;	return S_OK;};
-	STDMETHOD(put_FontOutlineColor)(OLE_COLOR newVal)				{m_options.fontOutlineColor = newVal;	return S_OK;};
-	STDMETHOD(get_ShadowColor)(OLE_COLOR* retval)					{*retval = m_options.shadowColor;		return S_OK;};
-	STDMETHOD(put_ShadowColor)(OLE_COLOR newVal)					{m_options.shadowColor = newVal;		return S_OK;};
-	STDMETHOD(get_HaloColor)(OLE_COLOR* retval)						{*retval = m_options.haloColor;			return S_OK;};
-	STDMETHOD(put_HaloColor)(OLE_COLOR newVal)						{m_options.haloColor = newVal;			return S_OK;};
+	STDMETHOD(get_FontOutlineColor)(OLE_COLOR* retval)				{*retval = _options.fontOutlineColor;	return S_OK;};
+	STDMETHOD(put_FontOutlineColor)(OLE_COLOR newVal)				{_options.fontOutlineColor = newVal;	return S_OK;};
+	STDMETHOD(get_ShadowColor)(OLE_COLOR* retval)					{*retval = _options.shadowColor;		return S_OK;};
+	STDMETHOD(put_ShadowColor)(OLE_COLOR newVal)					{_options.shadowColor = newVal;		return S_OK;};
+	STDMETHOD(get_HaloColor)(OLE_COLOR* retval)						{*retval = _options.haloColor;			return S_OK;};
+	STDMETHOD(put_HaloColor)(OLE_COLOR newVal)						{_options.haloColor = newVal;			return S_OK;};
 
-	STDMETHOD(get_FontOutlineWidth)(LONG* retval)					{*retval = m_options.fontOutlineWidth;	return S_OK;};
-	STDMETHOD(put_FontOutlineWidth)(LONG newVal)					{m_options.fontOutlineWidth = newVal;	return S_OK;};
-	STDMETHOD(get_ShadowOffsetX)(LONG* retval)						{*retval = m_options.shadowOffsetX;		return S_OK;};
-	STDMETHOD(put_ShadowOffsetX)(LONG newVal)						{m_options.shadowOffsetX = newVal;		return S_OK;};
-	STDMETHOD(get_ShadowOffsetY)(LONG* retval)						{*retval = m_options.shadowOffsetY;		return S_OK;};
-	STDMETHOD(put_ShadowOffsetY)(LONG newVal)						{m_options.shadowOffsetY = newVal;		return S_OK;};
+	STDMETHOD(get_FontOutlineWidth)(LONG* retval)					{*retval = _options.fontOutlineWidth;	return S_OK;};
+	STDMETHOD(put_FontOutlineWidth)(LONG newVal)					{_options.fontOutlineWidth = newVal;	return S_OK;};
+	STDMETHOD(get_ShadowOffsetX)(LONG* retval)						{*retval = _options.shadowOffsetX;		return S_OK;};
+	STDMETHOD(put_ShadowOffsetX)(LONG newVal)						{_options.shadowOffsetX = newVal;		return S_OK;};
+	STDMETHOD(get_ShadowOffsetY)(LONG* retval)						{*retval = _options.shadowOffsetY;		return S_OK;};
+	STDMETHOD(put_ShadowOffsetY)(LONG newVal)						{_options.shadowOffsetY = newVal;		return S_OK;};
 	
 	// haloSize - in 1/16 of font height
-	STDMETHOD(get_HaloSize)(LONG* retval)							{*retval = m_options.haloSize;			return S_OK;};
-	STDMETHOD(put_HaloSize)(LONG newVal)							{m_options.haloSize = newVal;			return S_OK;};
+	STDMETHOD(get_HaloSize)(LONG* retval)							{*retval = _options.haloSize;			return S_OK;};
+	STDMETHOD(put_HaloSize)(LONG newVal)							{_options.haloSize = newVal;			return S_OK;};
 	
 	// frame
-	STDMETHOD(get_FrameType)(tkLabelFrameType* retval)				{*retval = m_options.frameType;			return S_OK;};		
-	STDMETHOD(put_FrameType)(tkLabelFrameType newVal)				{m_options.frameType = newVal;			return S_OK;};
-	STDMETHOD(get_FrameOutlineColor)(OLE_COLOR* retval)				{*retval = m_options.frameOutlineColor;	return S_OK;};		
-	STDMETHOD(put_FrameOutlineColor)(OLE_COLOR newVal)				{m_options.frameOutlineColor = newVal;	return S_OK;};
-	STDMETHOD(get_FrameBackColor)(OLE_COLOR* retval)				{*retval = m_options.frameBackColor;	return S_OK;};		
-	STDMETHOD(put_FrameBackColor)(OLE_COLOR newVal)					{m_options.frameBackColor = newVal;		return S_OK;};
-	STDMETHOD(get_FrameBackColor2)(OLE_COLOR* retval)				{*retval = m_options.frameBackColor2;	return S_OK;};		
-	STDMETHOD(put_FrameBackColor2)(OLE_COLOR newVal)				{m_options.frameBackColor2 = newVal;	return S_OK;};
-	STDMETHOD(get_FrameGradientMode)(tkLinearGradientMode* retval)	{*retval = m_options.frameGradientMode;	return S_OK;};
-	STDMETHOD(put_FrameGradientMode)(tkLinearGradientMode newVal)	{m_options.frameGradientMode = newVal;	return S_OK;};
+	STDMETHOD(get_FrameType)(tkLabelFrameType* retval)				{*retval = _options.frameType;			return S_OK;};		
+	STDMETHOD(put_FrameType)(tkLabelFrameType newVal)				{_options.frameType = newVal;			return S_OK;};
+	STDMETHOD(get_FrameOutlineColor)(OLE_COLOR* retval)				{*retval = _options.frameOutlineColor;	return S_OK;};		
+	STDMETHOD(put_FrameOutlineColor)(OLE_COLOR newVal)				{_options.frameOutlineColor = newVal;	return S_OK;};
+	STDMETHOD(get_FrameBackColor)(OLE_COLOR* retval)				{*retval = _options.frameBackColor;	return S_OK;};		
+	STDMETHOD(put_FrameBackColor)(OLE_COLOR newVal)					{_options.frameBackColor = newVal;		return S_OK;};
+	STDMETHOD(get_FrameBackColor2)(OLE_COLOR* retval)				{*retval = _options.frameBackColor2;	return S_OK;};		
+	STDMETHOD(put_FrameBackColor2)(OLE_COLOR newVal)				{_options.frameBackColor2 = newVal;	return S_OK;};
+	STDMETHOD(get_FrameGradientMode)(tkLinearGradientMode* retval)	{*retval = _options.frameGradientMode;	return S_OK;};
+	STDMETHOD(put_FrameGradientMode)(tkLinearGradientMode newVal)	{_options.frameGradientMode = newVal;	return S_OK;};
 
-	STDMETHOD(get_FrameOutlineStyle)(tkDashStyle* retval)			{*retval = m_options.frameOutlineStyle;	return S_OK;};		
-	STDMETHOD(put_FrameOutlineStyle)(tkDashStyle newVal)			{m_options.frameOutlineStyle = newVal;	return S_OK;};
-	STDMETHOD(get_FrameOutlineWidth)(LONG* retval)					{*retval = m_options.frameOutlineWidth;	return S_OK;};		
-	STDMETHOD(put_FrameOutlineWidth)(LONG newVal)					{if (newVal >= 1) m_options.frameOutlineWidth = newVal;	return S_OK;};
+	STDMETHOD(get_FrameOutlineStyle)(tkDashStyle* retval)			{*retval = _options.frameOutlineStyle;	return S_OK;};		
+	STDMETHOD(put_FrameOutlineStyle)(tkDashStyle newVal)			{_options.frameOutlineStyle = newVal;	return S_OK;};
+	STDMETHOD(get_FrameOutlineWidth)(LONG* retval)					{*retval = _options.frameOutlineWidth;	return S_OK;};		
+	STDMETHOD(put_FrameOutlineWidth)(LONG newVal)					{if (newVal >= 1) _options.frameOutlineWidth = newVal;	return S_OK;};
 	
-	STDMETHOD(get_FramePaddingX)(LONG* retval)						{*retval = m_options.framePaddingX;		return S_OK;};		
-	STDMETHOD(put_FramePaddingX)(LONG newVal)						{m_options.framePaddingX = newVal;		return S_OK;};
-	STDMETHOD(get_FramePaddingY)(LONG* retval)						{*retval = m_options.framePaddingY;		return S_OK;};		
-	STDMETHOD(put_FramePaddingY)(LONG newVal)						{m_options.framePaddingY = newVal;		return S_OK;};
+	STDMETHOD(get_FramePaddingX)(LONG* retval)						{*retval = _options.framePaddingX;		return S_OK;};		
+	STDMETHOD(put_FramePaddingX)(LONG newVal)						{_options.framePaddingX = newVal;		return S_OK;};
+	STDMETHOD(get_FramePaddingY)(LONG* retval)						{*retval = _options.framePaddingY;		return S_OK;};		
+	STDMETHOD(put_FramePaddingY)(LONG newVal)						{_options.framePaddingY = newVal;		return S_OK;};
 	
 	STDMETHOD(get_FrameTransparency)(long* retval);	
 	STDMETHOD(put_FrameTransparency)(long newVal);
 
-	STDMETHOD(get_InboxAlignment)(tkLabelAlignment* retval)			{*retval = m_options.inboxAlignment;	return S_OK;};		
-	STDMETHOD(put_InboxAlignment)(tkLabelAlignment newVal)			{m_options.inboxAlignment = newVal;		return S_OK;};
+	STDMETHOD(get_InboxAlignment)(tkLabelAlignment* retval)			{*retval = _options.inboxAlignment;	return S_OK;};		
+	STDMETHOD(put_InboxAlignment)(tkLabelAlignment newVal)			{_options.inboxAlignment = newVal;		return S_OK;};
 
-	STDMETHOD(get_FrameVisible)(VARIANT_BOOL* retval)				{*retval = m_options.frameVisible;	return S_OK;};		
-	STDMETHOD(put_FrameVisible)(VARIANT_BOOL newVal)				{m_options.frameVisible = newVal;	return S_OK;};
+	STDMETHOD(get_FrameVisible)(VARIANT_BOOL* retval)				{*retval = _options.frameVisible;	return S_OK;};		
+	STDMETHOD(put_FrameVisible)(VARIANT_BOOL newVal)				{_options.frameVisible = newVal;	return S_OK;};
 
 	// ------------------------------------------------------------------
 	//	end of properties common for CLabels and CLabelCategory classes
 	// ------------------------------------------------------------------
 	
-	STDMETHOD(get_Enabled)(VARIANT_BOOL* retval)			{*retval = m_enabled;	return S_OK;};		
-	STDMETHOD(put_Enabled)(VARIANT_BOOL newVal)				{m_enabled = newVal;	return S_OK;};
+	STDMETHOD(get_Enabled)(VARIANT_BOOL* retval)			{*retval = _enabled;	return S_OK;};		
+	STDMETHOD(put_Enabled)(VARIANT_BOOL newVal)				{_enabled = newVal;	return S_OK;};
 
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
 
-	CLabelOptions* get_LabelOptions();	
+private:
+	BSTR _name;
+	BSTR _expression;
+	VARIANT _minValue;
+	VARIANT _maxValue;
+	VARIANT_BOOL _enabled;		// doesn't influence the drawing; is needed for symbology plug-in
+	long _priority;
+	CLabelOptions _options;
+
+public:
+	CLabelOptions* get_LabelOptions();
 	void put_LabelOptions(CLabelOptions* newVal);
 	CComVariant m_value;
-
-	void CLabelCategory::DeserializeFromNode(CPLXMLNode* node);
-	CPLXMLNode* CLabelCategory::SerializeCore(CString ElementName);
-
-private:
-	BSTR m_name;
-	BSTR m_expression;
-	VARIANT m_minValue;
-	VARIANT m_maxValue;
-	VARIANT_BOOL m_enabled;		// doesn't influence the drawing; is needed for symbology plug-in
-	long m_priority;
-	CLabelOptions m_options;
-	
+	void DeserializeFromNode(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(CString ElementName);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LabelCategory), CLabelCategory)

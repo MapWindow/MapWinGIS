@@ -49,4 +49,43 @@ private:
     DataStatusType _status;
 };
 
+struct FieldWrapper
+{
+	IField* field;
+	long oldIndex;
+	long joinId;		// from which join operation a field originates
+
+	bool Joined() {
+		return joinId >= 0;
+	}
+
+	FieldWrapper()		// do we need to add destructor here?
+	{
+		field = NULL;
+		joinId = -1;
+		oldIndex = -1;
+	}
+
+	~FieldWrapper()
+	{
+		if (field) {
+			field->Release();
+			field = NULL;
+		}
+	}
+};
+
+struct RecordWrapper
+{
+	TableRow* row;
+	long oldIndex;
+
+	RecordWrapper()
+	{
+		row = NULL;
+		oldIndex = -1;
+	}
+};
+
+
 #endif // !defined(AFX_TABLEROW_H__082441FB_7C83_40DE_B1EE_D560225A5D2F__INCLUDED_)

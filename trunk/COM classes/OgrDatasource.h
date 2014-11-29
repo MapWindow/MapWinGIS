@@ -83,6 +83,7 @@ private:
 	CStringW _connectionString;
 	tkOgrEncoding _encoding;
 
+private:
 	bool CheckState();
 	void DumpDriverInfo();
 	void ErrorMessage(long ErrorCode);

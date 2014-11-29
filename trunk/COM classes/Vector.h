@@ -36,13 +36,13 @@ public:
 	{
 		USES_CONVERSION;
 
-		lastErrorCode = tkNO_ERROR;
-		globalCallback = NULL;
-		key = A2BSTR("");
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
+		_key = A2BSTR("");
 	}
 	~CVector()
 	{
-		::SysFreeString(key);
+		::SysFreeString(_key);
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -56,14 +56,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_VECTOR)
+	DECLARE_REGISTRY_RESOURCEID(IDR_VECTOR)
 
-DECLARE_NOT_AGGREGATABLE(CVector)
+	DECLARE_NOT_AGGREGATABLE(CVector)
 
-BEGIN_COM_MAP(CVector)
-	COM_INTERFACE_ENTRY(IVector)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CVector)
+		COM_INTERFACE_ENTRY(IVector)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IVectro
@@ -85,12 +85,10 @@ public:
 	STDMETHOD(put_i)(/*[in]*/ double newVal);
 
 private:
-	cppVector v;
-
-	private:
-	long lastErrorCode;
-	ICallback * globalCallback;
-	BSTR key;
+	cppVector _v;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Vector), CVector)

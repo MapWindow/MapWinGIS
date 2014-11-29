@@ -37,15 +37,15 @@ STDMETHODIMP CShapefileCategory::get_Name(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = OLE2BSTR(m_name);
+	*retval = OLE2BSTR(_name);
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategory::put_Name(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	::SysFreeString(m_name);
-	m_name = OLE2BSTR(newVal);
+	::SysFreeString(_name);
+	_name = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -56,15 +56,15 @@ STDMETHODIMP CShapefileCategory::get_Expression(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = OLE2BSTR(m_expression);
+	*retval = OLE2BSTR(_expression);
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategory::put_Expression(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	::SysFreeString(m_expression);
-	m_expression = OLE2BSTR(newVal);
+	::SysFreeString(_expression);
+	_expression = OLE2BSTR(newVal);
 	_categoryValue = cvExpression;
 	return S_OK;
 }
@@ -75,8 +75,8 @@ STDMETHODIMP CShapefileCategory::put_Expression(BSTR newVal)
 STDMETHODIMP CShapefileCategory::get_DrawingOptions(IShapeDrawingOptions** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = m_drawingOptions;
-	m_drawingOptions->AddRef();
+	*retval = _drawingOptions;
+	_drawingOptions->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CShapefileCategory::put_DrawingOptions(IShapeDrawingOptions* newVal)
@@ -88,7 +88,7 @@ STDMETHODIMP CShapefileCategory::put_DrawingOptions(IShapeDrawingOptions* newVal
 	}
 	else
 	{
-		Utility::put_ComReference(newVal, (IDispatch**)&m_drawingOptions, false);
+		Utility::put_ComReference(newVal, (IDispatch**)&_drawingOptions, false);
 	}
 	return S_OK;
 }
@@ -98,21 +98,21 @@ STDMETHODIMP CShapefileCategory::put_DrawingOptions(IShapeDrawingOptions* newVal
 // ***************************************************************
 CDrawingOptionsEx* CShapefileCategory::get_UnderlyingOptions()
 {
-	if(m_drawingOptions != NULL)
+	if(_drawingOptions != NULL)
 	{
-		return ((CShapeDrawingOptions*)m_drawingOptions)->get_UnderlyingOptions();
+		return ((CShapeDrawingOptions*)_drawingOptions)->get_UnderlyingOptions();
 	}
 	else
 		return NULL;
 }
 void CShapefileCategory::put_underlyingOptions(CDrawingOptionsEx* newVal)
 {
-	if (m_drawingOptions == NULL)
+	if (_drawingOptions == NULL)
 	{
 		// this should not happen, but we still add it to be sure
-		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&m_drawingOptions);
+		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_drawingOptions);
 	}
-	((CShapeDrawingOptions*)m_drawingOptions)->put_underlyingOptions(newVal);
+	((CShapeDrawingOptions*)_drawingOptions)->put_underlyingOptions(newVal);
 }
 
 // ***************************************************************

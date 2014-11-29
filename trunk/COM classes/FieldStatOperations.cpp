@@ -10,15 +10,15 @@ STDMETHODIMP CFieldStatOperations::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(m_key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CFieldStatOperations::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(m_key);
+	::SysFreeString(_key);
 	USES_CONVERSION;
-	m_key = OLE2BSTR(newVal);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -27,15 +27,15 @@ STDMETHODIMP CFieldStatOperations::put_Key(BSTR newVal)
 //***********************************************************************/
 void CFieldStatOperations::ErrorMessage(long ErrorCode)
 {
-	m_lastErrorCode = ErrorCode;
+	_lastErrorCode = ErrorCode;
 	return;
 }
 
 STDMETHODIMP CFieldStatOperations::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_lastErrorCode;
-	m_lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 

@@ -34,8 +34,8 @@ static char THIS_FILE[] = __FILE__;
 // ****************************************************************
 void CGridHeader::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // CGridHeader
@@ -115,11 +115,11 @@ STDMETHODIMP CGridHeader::CopyFrom(IGridHeader * pVal)
 
 STDMETHODIMP CGridHeader::put_Owner(int * t, int * d, int * s, int * l, int * f)
 {
-	myowner_t = (tkGridRaster*) t;
-	myowner_d = (dHeader*) d;
-	myowner_s = (sHeader*) s;
-	myowner_l = (lHeader*) l;
-	myowner_f = (fHeader*) f;
+	_myowner_t = (tkGridRaster*) t;
+	_myowner_d = (dHeader*) d;
+	_myowner_s = (sHeader*) s;
+	_myowner_l = (lHeader*) l;
+	_myowner_f = (fHeader*) f;
 
 	return S_OK;
 }
@@ -129,62 +129,62 @@ void CGridHeader::AttemptSave()
 	USES_CONVERSION;
 
 	BSTR s;
-	m_geoProjection->ExportToProj4(&s);
+	_projection->ExportToProj4(&s);
 	CString projection = OLE2CA(s);
 	::SysFreeString(s);
 
-	if (myowner_t != NULL)
+	if (_myowner_t != NULL)
 	{
-		myowner_t->Projection = projection;
-		myowner_t->setDX(dx);
-		myowner_t->setDY(dy);
-		myowner_t->noDataValue = nodatavalue;
-		myowner_t->setXllCenter(xllcenter);
-		myowner_t->setYllCenter(yllcenter);
-		myowner_t->SaveHeaderInfo();
+		_myowner_t->Projection = projection;
+		_myowner_t->setDX(_dx);
+		_myowner_t->setDY(_dy);
+		_myowner_t->noDataValue = _nodatavalue;
+		_myowner_t->setXllCenter(_xllcenter);
+		_myowner_t->setYllCenter(_yllcenter);
+		_myowner_t->SaveHeaderInfo();
 	}
-	else if (myowner_d != NULL)
+	else if (_myowner_d != NULL)
 	{
-		myowner_d->setDx(dx);
-		myowner_d->setDy(dy);
-		myowner_d->setNodataValue(nodatavalue);
-		myowner_d->setNotes(W2A(notes));
-		myowner_d->setProjection(projection);
-		myowner_d->setXllcenter(xllcenter);
-		myowner_d->setYllcenter(yllcenter);
+		_myowner_d->setDx(_dx);
+		_myowner_d->setDy(_dy);
+		_myowner_d->setNodataValue(_nodatavalue);
+		_myowner_d->setNotes(W2A(_notes));
+		_myowner_d->setProjection(projection);
+		_myowner_d->setXllcenter(_xllcenter);
+		_myowner_d->setYllcenter(_yllcenter);
 		// Disallow setting rows or columns. Must recreate for that
 	}
-	else if (myowner_s != NULL)
+	else if (_myowner_s != NULL)
 	{
-		myowner_s->setDx(dx);
-		myowner_s->setDy(dy);
-		myowner_s->setNodataValue(static_cast<short>(nodatavalue));
-		myowner_s->setNotes(W2A(notes));
-		myowner_s->setProjection(projection);
-		myowner_s->setXllcenter(xllcenter);
-		myowner_s->setYllcenter(yllcenter);
+		_myowner_s->setDx(_dx);
+		_myowner_s->setDy(_dy);
+		_myowner_s->setNodataValue(static_cast<short>(_nodatavalue));
+		_myowner_s->setNotes(W2A(_notes));
+		_myowner_s->setProjection(projection);
+		_myowner_s->setXllcenter(_xllcenter);
+		_myowner_s->setYllcenter(_yllcenter);
 		// Disallow setting rows or columns. Must recreate for that
 	}
-	else if (myowner_f != NULL)
+	else if (_myowner_f != NULL)
 	{
-		myowner_f->setDx(dx);
-		myowner_f->setDy(dy);
-		myowner_f->setNodataValue(static_cast<float>(nodatavalue));
-		myowner_f->setNotes(W2A(notes));
-		myowner_f->setProjection(projection);
-		myowner_f->setXllcenter(xllcenter);
-		myowner_f->setYllcenter(yllcenter);
+		_myowner_f->setDx(_dx);
+		_myowner_f->setDy(_dy);
+		_myowner_f->setNodataValue(static_cast<float>(_nodatavalue));
+		_myowner_f->setNotes(W2A(_notes));
+		_myowner_f->setProjection(projection);
+		_myowner_f->setXllcenter(_xllcenter);
+		_myowner_f->setYllcenter(_yllcenter);
 		// Disallow setting rows or columns. Must recreate for that
 	}
-	else if (myowner_l != NULL)
+	else if (_myowner_l != NULL)
 	{
-		myowner_l->setDx(dx);
-		myowner_l->setDy(dy);
-		myowner_l->setNodataValue(static_cast<long>(nodatavalue));
-		myowner_l->setNotes(W2A(notes));
-		myowner_l->setProjection(projection);
-		myowner_l->setXllcenter(xllcenter);
-		myowner_l->setYllcenter(yllcenter);
+		_myowner_l->setDx(_dx);
+		_myowner_l->setDy(_dy);
+		_myowner_l->setNodataValue(static_cast<long>(_nodatavalue));
+		_myowner_l->setNotes(W2A(_notes));
+		_myowner_l->setProjection(projection);
+		_myowner_l->setXllcenter(_xllcenter);
+		_myowner_l->setYllcenter(_yllcenter);
 		// Disallow setting rows or columns. Must recreate for that
 	}
 }
@@ -193,7 +193,7 @@ STDMETHODIMP CGridHeader::get_NumberCols(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = numbercols;
+	*pVal = _numbercols;
 
 	return S_OK;
 }
@@ -203,7 +203,7 @@ STDMETHODIMP CGridHeader::put_NumberCols(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if( newVal >= 0 )
-		numbercols = newVal;
+		_numbercols = newVal;
 	else
 	{	
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -216,7 +216,7 @@ STDMETHODIMP CGridHeader::get_NumberRows(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = numberrows;
+	*pVal = _numberrows;
 
 	return S_OK;
 }
@@ -226,7 +226,7 @@ STDMETHODIMP CGridHeader::put_NumberRows(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if( newVal >= 0 )
-		numberrows = newVal;
+		_numberrows = newVal;
 	else
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 
@@ -238,7 +238,7 @@ STDMETHODIMP CGridHeader::get_NodataValue(VARIANT *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	pVal->vt = VT_R8;
-	pVal->dblVal = nodatavalue;
+	pVal->dblVal = _nodatavalue;
 	
 	return S_OK;
 }
@@ -254,7 +254,7 @@ STDMETHODIMP CGridHeader::put_NodataValue(VARIANT newVal)
 	}
 	else
 	{
-		nodatavalue = dval;
+		_nodatavalue = dval;
 		AttemptSave();
 	}
 	return S_OK;
@@ -264,7 +264,7 @@ STDMETHODIMP CGridHeader::get_dX(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = dx;
+	*pVal = _dx;
 
 	return S_OK;
 }
@@ -272,7 +272,7 @@ STDMETHODIMP CGridHeader::get_dX(double *pVal)
 STDMETHODIMP CGridHeader::put_dX(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	dx = newVal;
+	_dx = newVal;
 	AttemptSave();
 	return S_OK;
 }
@@ -281,7 +281,7 @@ STDMETHODIMP CGridHeader::get_dY(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = dy;
+	*pVal = _dy;
 
 	return S_OK;
 }
@@ -292,7 +292,7 @@ STDMETHODIMP CGridHeader::put_dY(double newVal)
 
 	if( newVal > 0 )
 	{
-		dy = newVal;
+		_dy = newVal;
 		AttemptSave();
 	}
 	else {	
@@ -306,7 +306,7 @@ STDMETHODIMP CGridHeader::get_XllCenter(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = xllcenter;
+	*pVal = _xllcenter;
 
 	return S_OK;
 }
@@ -315,7 +315,7 @@ STDMETHODIMP CGridHeader::put_XllCenter(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	xllcenter = newVal;
+	_xllcenter = newVal;
 	AttemptSave();
 
 	return S_OK;
@@ -325,7 +325,7 @@ STDMETHODIMP CGridHeader::get_YllCenter(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = yllcenter;
+	*pVal = _yllcenter;
 
 	return S_OK;
 }
@@ -334,7 +334,7 @@ STDMETHODIMP CGridHeader::put_YllCenter(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	yllcenter = newVal;
+	_yllcenter = newVal;
 	AttemptSave();
 
 	return S_OK;
@@ -345,7 +345,7 @@ STDMETHODIMP CGridHeader::get_Notes(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(notes);
+	*pVal = OLE2BSTR(_notes);
 
 	return S_OK;
 }
@@ -358,8 +358,8 @@ STDMETHODIMP CGridHeader::put_Notes(BSTR newVal)
 	//Rob Cairns 9 Nov 2009 Bug 1477
 	//::SysFreeString(OLE2BSTR(notes));
 	//notes = newVal;
-	::SysFreeString(notes);
-	notes = OLE2BSTR(newVal);
+	::SysFreeString(_notes);
+	_notes = OLE2BSTR(newVal);
 
 	AttemptSave();
 
@@ -370,8 +370,8 @@ STDMETHODIMP CGridHeader::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -390,9 +390,9 @@ STDMETHODIMP CGridHeader::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
+		_globalCallback->AddRef();
 
 	return S_OK;
 }
@@ -400,7 +400,7 @@ STDMETHODIMP CGridHeader::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGridHeader::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -409,7 +409,7 @@ STDMETHODIMP CGridHeader::get_Key(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -419,8 +419,8 @@ STDMETHODIMP CGridHeader::put_Key(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -430,7 +430,7 @@ STDMETHODIMP CGridHeader::get_ColorTable(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(colorTable);
+	*pVal = OLE2BSTR(_colorTable);
 
 	return S_OK;
 }
@@ -440,8 +440,8 @@ STDMETHODIMP CGridHeader::put_ColorTable(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	::SysFreeString(colorTable);
-	colorTable = OLE2BSTR(newVal);
+	::SysFreeString(_colorTable);
+	_colorTable = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -452,9 +452,9 @@ STDMETHODIMP CGridHeader::put_ColorTable(BSTR newVal)
 STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (m_geoProjection)
-		m_geoProjection->AddRef();
-	*pVal = m_geoProjection;
+	if (_projection)
+		_projection->AddRef();
+	*pVal = _projection;
 	return S_OK;
 }
 
@@ -464,14 +464,14 @@ STDMETHODIMP CGridHeader::get_GeoProjection(IGeoProjection** pVal)
 STDMETHODIMP CGridHeader::put_GeoProjection(IGeoProjection* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&m_geoProjection, false);
+	Utility::put_ComReference((IDispatch*)newVal, (IDispatch**)&_projection, false);
 	return S_OK;
 }
 
 STDMETHODIMP CGridHeader::get_Projection(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_geoProjection->ExportToProj4(pVal);
+	_projection->ExportToProj4(pVal);
 	return S_OK;
 }
 
@@ -481,10 +481,10 @@ STDMETHODIMP CGridHeader::put_Projection(BSTR newVal)
 	USES_CONVERSION;
 	
 	VARIANT_BOOL vbretval;
-	m_geoProjection->ImportFromProj4(newVal, &vbretval);
+	_projection->ImportFromProj4(newVal, &vbretval);
 	if (vbretval == VARIANT_FALSE)
 	{
-		m_geoProjection->ImportFromWKT(newVal, &vbretval);
+		_projection->ImportFromWKT(newVal, &vbretval);
 	}
 
 	//::SysFreeString(projection);

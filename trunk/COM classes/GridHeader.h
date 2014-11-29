@@ -38,42 +38,42 @@ class ATL_NO_VTABLE CGridHeader :
 public:
 	CGridHeader()
 	{	USES_CONVERSION;
-		dx = 1.0;
-		dy = 1.0;	
-		key = A2BSTR("");
-		notes = A2BSTR("");
+		_dx = 1.0;
+		_dy = 1.0;	
+		_key = A2BSTR("");
+		_notes = A2BSTR("");
 		//projection = A2BSTR("");
-		colorTable = A2BSTR("");
-		globalCallback = NULL;
-		numbercols = 0;
-		numberrows = 0;
-		nodatavalue = -1;
-		lastErrorCode = tkNO_ERROR;
+		_colorTable = A2BSTR("");
+		_globalCallback = NULL;
+		_numbercols = 0;
+		_numberrows = 0;
+		_nodatavalue = -1;
+		_lastErrorCode = tkNO_ERROR;
 
-		myowner_d = NULL;
-		myowner_f = NULL;
-		myowner_l = NULL;
-		myowner_t = NULL;
-		myowner_s = NULL;
+		_myowner_d = NULL;
+		_myowner_f = NULL;
+		_myowner_l = NULL;
+		_myowner_t = NULL;
+		_myowner_s = NULL;
 
-		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&m_geoProjection);
+		CoCreateInstance(CLSID_GeoProjection,NULL,CLSCTX_INPROC_SERVER,IID_IGeoProjection,(void**)&_projection);
 	}
 	~CGridHeader()
 	{	
-		::SysFreeString(key);
-		::SysFreeString(notes);
+		::SysFreeString(_key);
+		::SysFreeString(_notes);
 		//::SysFreeString(projection);
-		::SysFreeString(colorTable);
+		::SysFreeString(_colorTable);
 
 		// Note -- don't delete myowner_*, these are just references
 		// to things managed elsewhere
-		myowner_d = NULL;
-		myowner_f = NULL;
-		myowner_l = NULL;
-		myowner_t = NULL;
-		myowner_s = NULL;
+		_myowner_d = NULL;
+		_myowner_f = NULL;
+		_myowner_l = NULL;
+		_myowner_t = NULL;
+		_myowner_s = NULL;
 
-		m_geoProjection->Release();
+		_projection->Release();
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -131,27 +131,27 @@ public:
 	STDMETHOD(put_GeoProjection)(IGeoProjection* newVal);
 
 private:
-	ICallback * globalCallback;
-	long lastErrorCode;
-	BSTR key;	
-	BSTR notes;
-	//BSTR projection;
-	BSTR colorTable;
-	double yllcenter;
-	double xllcenter;
-	double dx;
-	double dy;
-	double nodatavalue;
-	long numberrows;
-	long numbercols;
-	IGeoProjection* m_geoProjection;
+	ICallback * _globalCallback;
+	long _lastErrorCode;
+	BSTR _key;	
+	BSTR _notes;
+	BSTR _colorTable;
+	double _yllcenter;
+	double _xllcenter;
+	double _dx;
+	double _dy;
+	double _nodatavalue;
+	long _numberrows;
+	long _numbercols;
+	IGeoProjection* _projection;
 
-	dHeader * myowner_d;
-	fHeader * myowner_f;
-	sHeader * myowner_s;
-	lHeader * myowner_l;
-	tkGridRaster * myowner_t;
+	dHeader * _myowner_d;
+	fHeader * _myowner_f;
+	sHeader * _myowner_s;
+	lHeader * _myowner_l;
+	tkGridRaster * _myowner_t;
 
+private:
 	void AttemptSave();
 	void ErrorMessage(long ErrorCode);
 };

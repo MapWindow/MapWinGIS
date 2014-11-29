@@ -11,18 +11,18 @@ public:
 	CFileManager()
 	{
 		USES_CONVERSION;
-		m_key = A2BSTR("");
-		m_lastErrorCode = tkNO_ERROR;
-		m_globalCallback = NULL;
+		_key = A2BSTR("");
+		_lastErrorCode = tkNO_ERROR;
+		_globalCallback = NULL;
 		_lastOpenStrategy = fosAutoDetect;
 		_lastOpenIsSuccess = true;
 		_lastOpenFilename = L"";
 	};
 	~CFileManager()
 	{
-		SysFreeString(m_key);
-		if (m_globalCallback)
-			m_globalCallback->Release();
+		SysFreeString(_key);
+		if (_globalCallback)
+			_globalCallback->Release();
 	};
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_FILEMANAGER)
@@ -76,17 +76,17 @@ public:
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerNameOrQuery, IOgrLayer** retVal);
 
 private:
-	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
-	//bool NeedProxyForGrid(CStringW filename);
-	
 	tkFileOpenStrategy _lastOpenStrategy;
 	bool _lastOpenIsSuccess;
 	CStringW _lastOpenFilename;
 	CString test;
-	ICallback * m_globalCallback;
+	ICallback * _globalCallback;
+	long _lastErrorCode;
+	BSTR _key;
+
+private:
+	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
 	void ErrorMessage(long ErrorCode);
-	long m_lastErrorCode;
-	BSTR m_key;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(FileManager), CFileManager)

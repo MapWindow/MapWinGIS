@@ -35,7 +35,7 @@ STDMETHODIMP CField::get_Name(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(name);
+	*pVal = OLE2BSTR(_name);
 	return S_OK;
 }
 
@@ -47,9 +47,9 @@ STDMETHODIMP CField::put_Name(BSTR newVal)
 	if( _tcslen( OLE2CA(newVal) ) > 0 )
 	{	
 		if (!CheckTableEditingState()) return S_OK;
-		::SysFreeString(name);
-		name = OLE2BSTR(newVal);
-		isUpdated = true;
+		::SysFreeString(_name);
+		_name = OLE2BSTR(newVal);
+		_isUpdated = true;
 	}
 	else
 		ErrorMessage(tkZERO_LENGTH_STRING);
@@ -63,7 +63,7 @@ STDMETHODIMP CField::put_Name(BSTR newVal)
 STDMETHODIMP CField::get_Width(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = width;
+	*pVal = _width;
 	return S_OK;
 }
 STDMETHODIMP CField::put_Width(long newVal)
@@ -73,8 +73,8 @@ STDMETHODIMP CField::put_Width(long newVal)
 	if( newVal >= 0 )
 	{
 		if (!CheckTableEditingState()) return S_OK;
-		width = newVal;
-		isUpdated = true;
+		_width = newVal;
+		_isUpdated = true;
 	}
 	else
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -88,7 +88,7 @@ STDMETHODIMP CField::put_Width(long newVal)
 STDMETHODIMP CField::get_Precision(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = precision;
+	*pVal = _precision;
 	return S_OK;
 }
 
@@ -98,8 +98,8 @@ STDMETHODIMP CField::put_Precision(long newVal)
 	if( newVal >= 0 )
 	{
 		if (!CheckTableEditingState()) return S_OK;
-		precision = newVal;
-		isUpdated = true;
+		_precision = newVal;
+		_isUpdated = true;
 	}
 	else
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
@@ -113,7 +113,7 @@ STDMETHODIMP CField::put_Precision(long newVal)
 STDMETHODIMP CField::get_Type(FieldType *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = type;
+	*pVal = _type;
 	return S_OK;
 }
 
@@ -121,8 +121,8 @@ STDMETHODIMP CField::put_Type(FieldType newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (!CheckTableEditingState()) return S_OK;
-	type = newVal;
-	isUpdated = true;
+	_type = newVal;
+	_isUpdated = true;
 	return S_OK;
 }
 
@@ -156,8 +156,8 @@ bool CField::CheckTableEditingState()
 STDMETHODIMP CField::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -179,9 +179,9 @@ STDMETHODIMP CField::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback )
+		_globalCallback->AddRef();
 
 	return S_OK;
 }
@@ -189,7 +189,7 @@ STDMETHODIMP CField::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CField::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -201,7 +201,7 @@ STDMETHODIMP CField::get_Key(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -211,8 +211,8 @@ STDMETHODIMP CField::put_Key(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -222,8 +222,8 @@ STDMETHODIMP CField::put_Key(BSTR newVal)
 // **************************************************************
 void CField::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // **************************************************************
@@ -234,10 +234,10 @@ STDMETHODIMP CField::Clone(/*[out, retval]*/ IField** retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	IField* fld = NULL;
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&fld);
-	fld->put_Precision(precision);
-	fld->put_Type(type);
-	fld->put_Name(name);
-	fld->put_Width(width);
+	fld->put_Precision(_precision);
+	fld->put_Type(_type);
+	fld->put_Name(_name);
+	fld->put_Width(_width);
 	*retVal = fld;
 	return S_OK;
 }

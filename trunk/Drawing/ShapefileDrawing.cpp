@@ -244,7 +244,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		_shapefile->get_Table(&tbl);
 		
 		USES_CONVERSION;
-		if (((CTableClass*)tbl)->Query_(OLE2CA(expr), arr, err))
+		if (((CTableClass*)tbl)->QueryCore(OLE2CA(expr), arr, err))
 		{
 			useAll = false;
 		}

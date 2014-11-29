@@ -31,15 +31,15 @@ static char THIS_FILE[] = __FILE__;
 
 void CGridColorScheme::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, _key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CGridColorScheme::get_NumBreaks(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = Breaks.size();
+	*pVal = _breaks.size();
 
 	return S_OK;
 }
@@ -48,7 +48,7 @@ STDMETHODIMP CGridColorScheme::get_AmbientIntensity(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = AmbientIntensity;
+	*pVal = _ambientIntensity;
 
 	return S_OK;
 }
@@ -61,7 +61,7 @@ STDMETHODIMP CGridColorScheme::put_AmbientIntensity(double newVal)
 	//Intensity must be between 0 and 1 	
 	if ( newVal >=0 && newVal <= 1)
 	{
-		AmbientIntensity = newVal;
+		_ambientIntensity = newVal;
 	}
 	else
 	{	
@@ -75,7 +75,7 @@ STDMETHODIMP CGridColorScheme::get_LightSourceIntensity(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = LightSourceIntensity;
+	*pVal = _lightSourceIntensity;
 
 	return S_OK;
 }
@@ -87,7 +87,7 @@ STDMETHODIMP CGridColorScheme::put_LightSourceIntensity(double newVal)
 	//Intensity must be between 0 and 1 
 	if ( newVal >=0 && newVal <= 1)
 	{
-		LightSourceIntensity = newVal;
+		_lightSourceIntensity = newVal;
 	}
 	else
 	{	
@@ -101,7 +101,7 @@ STDMETHODIMP CGridColorScheme::get_LightSourceAzimuth(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = LightSourceAzimuth;
+	*pVal = _lightSourceAzimuth;
 
 	return S_OK;
 }
@@ -110,7 +110,7 @@ STDMETHODIMP CGridColorScheme::get_LightSourceElevation(double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = LightSourceElevation;
+	*pVal = _lightSourceElevation;
 
 	return S_OK;
 }
@@ -133,8 +133,8 @@ STDMETHODIMP CGridColorScheme::SetLightSource(double Azimuth, double Elevation)
 		return S_OK;
 	}
 
-	LightSourceAzimuth = Azimuth;
-	LightSourceElevation = Elevation;
+	_lightSourceAzimuth = Azimuth;
+	_lightSourceElevation = Elevation;
 
 	Matrix ry;
 	ry.rotateMY((int)Azimuth);
@@ -144,12 +144,12 @@ STDMETHODIMP CGridColorScheme::SetLightSource(double Azimuth, double Elevation)
 
 	Matrix comp = rx*ry;
 
-	LightSource.seti(0);
-	LightSource.setj(0);
-	LightSource.setk(1);
+	_lightSource.seti(0);
+	_lightSource.setj(0);
+	_lightSource.setk(1);
 
-	LightSource = LightSource * comp;
-	LightSource.Normalize();
+	_lightSource = _lightSource * comp;
+	_lightSource.Normalize();
 
 	return S_OK;
 }
@@ -165,7 +165,7 @@ STDMETHODIMP CGridColorScheme::InsertBreak(IGridColorBreak *BrkInfo)
 	}
 
 	BrkInfo->AddRef();
-	Breaks.push_back( BrkInfo );
+	_breaks.push_back( BrkInfo );
 
 	return S_OK;
 }
@@ -176,7 +176,7 @@ STDMETHODIMP CGridColorScheme::InsertAt(int Position, IGridColorBreak *Break)
 		return S_OK;
 
 	Break->AddRef();
-	Breaks.insert(Breaks.begin() + Position, Break);
+	_breaks.insert(_breaks.begin() + Position, Break);
 	return S_OK;
 }
 
@@ -184,9 +184,9 @@ STDMETHODIMP CGridColorScheme::get_Break(long Index, IGridColorBreak **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( Index >= 0 && Index < (long)Breaks.size() )
-	{	Breaks[Index]->AddRef();
-		*pVal = Breaks[Index];
+	if( Index >= 0 && Index < (long)_breaks.size() )
+	{	_breaks[Index]->AddRef();
+		*pVal = _breaks[Index];
 	}
 	else
 	{	*pVal = NULL;
@@ -200,10 +200,10 @@ STDMETHODIMP CGridColorScheme::DeleteBreak(long Index)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if( Index >= 0 && Index < (long)Breaks.size() )
+	if( Index >= 0 && Index < (long)_breaks.size() )
 	{
-		Breaks[Index]->Release();
-		Breaks.erase( Breaks.begin() + Index );
+		_breaks[Index]->Release();
+		_breaks.erase( _breaks.begin() + Index );
 	}
 	else
 	{	
@@ -217,9 +217,9 @@ STDMETHODIMP CGridColorScheme::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	while( Breaks.size() > 0 )
-	{	Breaks[0]->Release();
-		Breaks.erase( Breaks.begin() );
+	while( _breaks.size() > 0 )
+	{	_breaks[0]->Release();
+		_breaks.erase( _breaks.begin() );
 	}
 
 	return S_OK;
@@ -229,7 +229,7 @@ STDMETHODIMP CGridColorScheme::get_NoDataColor(OLE_COLOR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = NoDataColor;
+	*pVal = _noDataColor;
 
 	return S_OK;
 }
@@ -238,7 +238,7 @@ STDMETHODIMP CGridColorScheme::put_NoDataColor(OLE_COLOR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	NoDataColor = newVal;
+	_noDataColor = newVal;
 
 	return S_OK;
 }
@@ -247,14 +247,14 @@ STDMETHODIMP CGridColorScheme::UsePredefined(double LowValue, double HighValue, 
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	AmbientIntensity = 0.7;
-	LightSourceIntensity = 0.7;
+	_ambientIntensity = 0.7;
+	_lightSourceIntensity = 0.7;
 	//Modified by Ted Dunsford 6/16/06 to normalize & match colorscheme application mechanism
 	//LightSource = vector(0,-0.707,1);
-	LightSource = cppVector(-.707, -.707, 0);
-	LightSourceIntensity = 0.7;
+	_lightSource = cppVector(-.707, -.707, 0);
+	_lightSourceIntensity = 0.7;
 
-	NoDataColor = 0;
+	_noDataColor = 0;
 	Clear();
 
 	if( LowValue > HighValue )
@@ -481,9 +481,9 @@ STDMETHODIMP CGridColorScheme::GetLightSource(IVector **result)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	CoCreateInstance(CLSID_Vector,NULL,CLSCTX_INPROC_SERVER,IID_IVector,(void**)result);
-	(*result)->put_i(LightSource.geti());
-	(*result)->put_j(LightSource.getj());
-	(*result)->put_k(LightSource.getk());
+	(*result)->put_i(_lightSource.geti());
+	(*result)->put_j(_lightSource.getj());
+	(*result)->put_k(_lightSource.getk());
 	return S_OK;
 }
 
@@ -492,8 +492,8 @@ STDMETHODIMP CGridColorScheme::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -511,10 +511,10 @@ STDMETHODIMP CGridColorScheme::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
 	{	
-		globalCallback->AddRef();
+		_globalCallback->AddRef();
 	}
 	return S_OK;
 }
@@ -522,7 +522,7 @@ STDMETHODIMP CGridColorScheme::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CGridColorScheme::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -575,54 +575,54 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	 
 	Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", OLE2CA(_key));
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "NoDataColor", (int)NoDataColor);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceIntensity", LightSourceIntensity);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "AmbientIntensity", AmbientIntensity);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceElevation", LightSourceElevation);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceAzimuth", LightSourceAzimuth);
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceI", LightSource.geti());
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceJ", LightSource.getj());
-	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceK", LightSource.getk());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "NoDataColor", (int)_noDataColor);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceIntensity", _lightSourceIntensity);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "AmbientIntensity", _ambientIntensity);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceElevation", _lightSourceElevation);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceAzimuth", _lightSourceAzimuth);
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceI", _lightSource.geti());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceJ", _lightSource.getj());
+	Utility::CPLCreateXMLAttributeAndValue(psTree, "LightSourceK", _lightSource.getk());
 
 	// color breaks
-	if (Breaks.size() > 0)
+	if (_breaks.size() > 0)
 	{
 		CPLXMLNode* psBreaks = CPLCreateXMLNode(psTree, CXT_Element, "GridColorBreaks");
 		if (psBreaks)
 		{
-			for (unsigned int i = 0; i < Breaks.size(); i++)
+			for (unsigned int i = 0; i < _breaks.size(); i++)
 			{
 				CPLXMLNode* psNode = CPLCreateXMLNode(psBreaks, CXT_Element, "GridColorBreakClass");
 
 				OLE_COLOR color;
-				Breaks[i]->get_HighColor(&color);
+				_breaks[i]->get_HighColor(&color);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighColor", (int)color);
 
-				Breaks[i]->get_LowColor(&color);
+				_breaks[i]->get_LowColor(&color);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowColor", (int)color);
 
 				double val;
-				Breaks[i]->get_LowValue(&val);
+				_breaks[i]->get_LowValue(&val);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "LowValue", val);
 
-				Breaks[i]->get_HighValue(&val);
+				_breaks[i]->get_HighValue(&val);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "HighValue", val);
 
 				BSTR caption;
-				Breaks[i]->get_Caption(&caption);
+				_breaks[i]->get_Caption(&caption);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Caption", OLE2CA(caption));
 				SysFreeString(caption);
 				
 				ColoringType colorType;
-				Breaks[i]->get_ColoringType(&colorType);
+				_breaks[i]->get_ColoringType(&colorType);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "ColoringType", (int)colorType);
 
 				GradientModel gradient;
-				Breaks[i]->get_GradientModel(&gradient);
+				_breaks[i]->get_GradientModel(&gradient);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", (int)gradient);
 				
 				BSTR key;
-				Breaks[i]->get_Key(&key);
+				_breaks[i]->get_Key(&key);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Key", OLE2CA(key));
 				SysFreeString(key);
 			}
@@ -647,28 +647,28 @@ bool CGridColorScheme::DeserializeCore(CPLXMLNode* node)
 	}
 
 	s = CPLGetXMLValue( node, "NoDataColor", NULL );
-	if (s != "") NoDataColor = (OLE_COLOR)atoi(s);
+	if (s != "") _noDataColor = (OLE_COLOR)atoi(s);
 
 	s = CPLGetXMLValue( node, "LightSourceIntensity", NULL );
-	if (s != "") LightSourceIntensity = Utility::atof_custom(s);
+	if (s != "") _lightSourceIntensity = Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( node, "AmbientIntensity", NULL );
-	if (s != "") AmbientIntensity = Utility::atof_custom(s);
+	if (s != "") _ambientIntensity = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "LightSourceElevation", NULL );
-	if (s != "") LightSourceElevation = Utility::atof_custom(s);
+	if (s != "") _lightSourceElevation = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "LightSourceAzimuth", NULL );
-	if (s != "") LightSourceAzimuth = Utility::atof_custom(s);
+	if (s != "") _lightSourceAzimuth = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( node, "LightSourceI", NULL );
-	if (s != "") LightSource.seti(Utility::atof_custom(s));
+	if (s != "") _lightSource.seti(Utility::atof_custom(s));
 
 	s = CPLGetXMLValue( node, "LightSourceJ", NULL );
-	if (s != "") LightSource.setj(Utility::atof_custom(s));
+	if (s != "") _lightSource.setj(Utility::atof_custom(s));
 
 	s = CPLGetXMLValue( node, "LightSourceK", NULL );
-	if (s != "") LightSource.setk(Utility::atof_custom(s));
+	if (s != "") _lightSource.setk(Utility::atof_custom(s));
 	
 	// restoring breaks
 	this->Clear();
@@ -825,9 +825,9 @@ STDMETHODIMP CGridColorScheme::WriteToFile(BSTR mwlegFilename, BSTR gridName, in
 STDMETHODIMP CGridColorScheme::ApplyColoringType(ColoringType coloringType)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for(size_t i = 0; i < Breaks.size(); i++)
+	for(size_t i = 0; i < _breaks.size(); i++)
 	{
-		Breaks[i]->put_ColoringType(coloringType);
+		_breaks[i]->put_ColoringType(coloringType);
 	}
 	return S_OK;
 }
@@ -838,9 +838,9 @@ STDMETHODIMP CGridColorScheme::ApplyColoringType(ColoringType coloringType)
 STDMETHODIMP CGridColorScheme::ApplyGradientModel(GradientModel gradientModel)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	for(size_t i = 0; i < Breaks.size(); i++)
+	for(size_t i = 0; i < _breaks.size(); i++)
 	{
-		Breaks[i]->put_GradientModel(gradientModel);
+		_breaks[i]->put_GradientModel(gradientModel);
 	}
 	return S_OK;
 }

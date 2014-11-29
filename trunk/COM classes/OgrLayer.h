@@ -114,23 +114,7 @@ public:
 	STDMETHOD(put_LabelOrientation)(tkLineLabelOrientation newVal);
 	STDMETHOD(GenerateCategories)(BSTR FieldName, tkClassificationType classificationType, long numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType, VARIANT_BOOL* retVal);
 
-public:
-	void InjectShapefile(IShapefile* sfNew)
-	{
-		CloseShapefile();
-		_shapefile = sfNew;
-	}
-	IShapefile* GetShapefileNoRef() { return _shapefile; }
-	OGRLayer* GetDatasource() { return _layer; }
-	CPLXMLNode* SerializeCore(CString ElementName);
-	bool DeserializeCore(CPLXMLNode* node);
-	OgrDynamicLoader* GetDynamicLoader() { return &_loader; }
-	CStringW LoadStyleXML(CStringW name);
-	GDALDataset* GetDataset() {return _dataset; }
-	bool DeserializeOptions(CPLXMLNode* node);
-
 private:
-	
 	VARIANT_BOOL _dynamicLoading;
 	tkOgrSourceType _sourceType;
 	IShapefile* _shapefile;
@@ -148,6 +132,7 @@ private:
 	int _featureCount;
 	OgrDynamicLoader _loader;
 	
+private:
 	bool CheckState();
 	void ErrorMessage(long ErrorCode);
 	void CloseShapefile();
@@ -164,9 +149,17 @@ private:
 	CStringW GetLayerName();
 	CStringW GetStyleTableName();
 	void GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<VARIANT*>& values);
-	
 
 public:
-	
+	void InjectShapefile(IShapefile* sfNew);
+	IShapefile* GetShapefileNoRef() { return _shapefile; }
+	OGRLayer* GetDatasource() { return _layer; }
+	CPLXMLNode* SerializeCore(CString ElementName);
+	bool DeserializeCore(CPLXMLNode* node);
+	OgrDynamicLoader* GetDynamicLoader() { return &_loader; }
+	CStringW LoadStyleXML(CStringW name);
+	GDALDataset* GetDataset() { return _dataset; }
+	bool DeserializeOptions(CPLXMLNode* node);
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

@@ -50,7 +50,7 @@ void gridCOMCALLBACK( int number, const char * message )
 // ***************************************************
 void CGrid::CallBack(long percent,const char * message)
 {	
-	Utility::DisplayProgress(globalCallback, percent, message, key);
+	Utility::DisplayProgress(_globalCallback, percent, message, _key);
 }
 
 // ***************************************************
@@ -58,17 +58,17 @@ void CGrid::CallBack(long percent,const char * message)
 // ***************************************************
 CGrid::CGrid()
 {	
-	dgrid = NULL;
-	fgrid = NULL;
-	lgrid = NULL;
-	sgrid = NULL;
-	trgrid = NULL;
+	_dgrid = NULL;
+	_fgrid = NULL;
+	_lgrid = NULL;
+	_sgrid = NULL;
+	_trgrid = NULL;
 
-	globalCallback = NULL;
-	lastErrorCode = tkNO_ERROR;
-	key = A2BSTR("");
-	filename = L"";
-	preferedDisplayMode = gpmAuto;
+	_globalCallback = NULL;
+	_lastErrorCode = tkNO_ERROR;
+	_key = A2BSTR("");
+	_filename = L"";
+	_preferedDisplayMode = gpmAuto;
 }
 
 // ***************************************************
@@ -82,10 +82,10 @@ CGrid::~CGrid()
 	VARIANT_BOOL retval;
 	Close(&retval);
 
-	::SysFreeString(key);
+	::SysFreeString(_key);
 
-	if (globalCallback)
-		globalCallback->Release();
+	if (_globalCallback)
+		_globalCallback->Release();
 }
 
 // ***************************************************
@@ -95,8 +95,8 @@ CGrid::~CGrid()
 // Builds unique values color scheme for GDAL integer grids
 STDMETHODIMP CGrid::get_RasterColorTableColoringScheme(IGridColorScheme **pVal)
 {
-	if (trgrid == NULL) 	return S_FALSE;
-	return trgrid->GetIntValueGridColorTable(pVal) ? S_OK : S_FALSE;
+	if (_trgrid == NULL) 	return S_FALSE;
+	return _trgrid->GetIntValueGridColorTable(pVal) ? S_OK : S_FALSE;
 }
 
 
@@ -108,107 +108,107 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
 		// Make grid header
 		CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
 
-		double dX = trgrid->getDX();
-		double dY = trgrid->getDY();
+		double dX = _trgrid->getDX();
+		double dY = _trgrid->getDY();
 		(*pVal)->put_dX(dX);
 		(*pVal)->put_dY(dY);
 		
 		VARIANT ndv;
 		VariantInit(&ndv); //added by Rob Cairns 4-Jan-06
 		ndv.vt = VT_R8;
-		ndv.dblVal = trgrid->noDataValue;
+		ndv.dblVal = _trgrid->noDataValue;
 		(*pVal)->put_NodataValue(ndv);
 		(*pVal)->put_Notes(A2BSTR(""));
-		(*pVal)->put_NumberCols(trgrid->getWidth());
-		(*pVal)->put_NumberRows(trgrid->getHeight());
-		(*pVal)->put_XllCenter(trgrid->getXllCenter());
-		(*pVal)->put_YllCenter(trgrid->getYllCenter());
-		(*pVal)->put_Projection(trgrid->Projection.AllocSysString());
+		(*pVal)->put_NumberCols(_trgrid->getWidth());
+		(*pVal)->put_NumberRows(_trgrid->getHeight());
+		(*pVal)->put_XllCenter(_trgrid->getXllCenter());
+		(*pVal)->put_YllCenter(_trgrid->getYllCenter());
+		(*pVal)->put_Projection(_trgrid->Projection.AllocSysString());
 		
 		BSTR cTbl;
-		if (trgrid->ColorTable2BSTR(&cTbl))
+		if (_trgrid->ColorTable2BSTR(&cTbl))
 			(*pVal)->put_ColorTable(cTbl);
 		::SysFreeString(cTbl);
 
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		(*pVal)->put_Owner((int*)(void*)trgrid, (int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL);
+		(*pVal)->put_Owner((int*)(void*)_trgrid, (int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL);
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
-		(*pVal)->put_dX(dgrid->getHeader().getDx());
-		(*pVal)->put_dY(dgrid->getHeader().getDy());
+		(*pVal)->put_dX(_dgrid->getHeader().getDx());
+		(*pVal)->put_dY(_dgrid->getHeader().getDy());
 		VARIANT ndv;
 		VariantInit(&ndv); //added by Rob Cairns 4-Jan-06
 		ndv.vt = VT_R8;
-		ndv.dblVal = dgrid->getHeader().getNodataValue();
+		ndv.dblVal = _dgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(dgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(dgrid->getHeader().getProjection()));
-		(*pVal)->put_NumberCols(dgrid->getHeader().getNumberCols());
-		(*pVal)->put_NumberRows(dgrid->getHeader().getNumberRows());
-		(*pVal)->put_XllCenter(dgrid->getHeader().getXllcenter());
-		(*pVal)->put_YllCenter(dgrid->getHeader().getYllcenter());
+		(*pVal)->put_Notes(A2BSTR(_dgrid->getHeader().getNotes()));
+		(*pVal)->put_Projection(A2BSTR(_dgrid->getHeader().getProjection()));
+		(*pVal)->put_NumberCols(_dgrid->getHeader().getNumberCols());
+		(*pVal)->put_NumberRows(_dgrid->getHeader().getNumberRows());
+		(*pVal)->put_XllCenter(_dgrid->getHeader().getXllcenter());
+		(*pVal)->put_YllCenter(_dgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		(*pVal)->put_Owner((int*)NULL, (int*)dgrid, (int*)NULL, (int*)NULL, (int*)NULL);
+		(*pVal)->put_Owner((int*)NULL, (int*)_dgrid, (int*)NULL, (int*)NULL, (int*)NULL);
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
-		(*pVal)->put_dX(fgrid->getHeader().getDx());
-		(*pVal)->put_dY(fgrid->getHeader().getDy());
+		(*pVal)->put_dX(_fgrid->getHeader().getDx());
+		(*pVal)->put_dY(_fgrid->getHeader().getDy());
 		VARIANT ndv;
 		VariantInit(&ndv); //added by Rob Cairns 4-Jan-06
 		ndv.vt = VT_R4;
-		ndv.fltVal = fgrid->getHeader().getNodataValue();
+		ndv.fltVal = _fgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(fgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(fgrid->getHeader().getProjection()));
-		(*pVal)->put_NumberCols(fgrid->getHeader().getNumberCols());
-		(*pVal)->put_NumberRows(fgrid->getHeader().getNumberRows());
-		(*pVal)->put_XllCenter(fgrid->getHeader().getXllcenter());
-		(*pVal)->put_YllCenter(fgrid->getHeader().getYllcenter());
+		(*pVal)->put_Notes(A2BSTR(_fgrid->getHeader().getNotes()));
+		(*pVal)->put_Projection(A2BSTR(_fgrid->getHeader().getProjection()));
+		(*pVal)->put_NumberCols(_fgrid->getHeader().getNumberCols());
+		(*pVal)->put_NumberRows(_fgrid->getHeader().getNumberRows());
+		(*pVal)->put_XllCenter(_fgrid->getHeader().getXllcenter());
+		(*pVal)->put_YllCenter(_fgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL, (int*)fgrid);
+		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL, (int*)_fgrid);
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
-		(*pVal)->put_dX(lgrid->getHeader().getDx());
-		(*pVal)->put_dY(lgrid->getHeader().getDy());
+		(*pVal)->put_dX(_lgrid->getHeader().getDx());
+		(*pVal)->put_dY(_lgrid->getHeader().getDy());
 		VARIANT ndv;
 		VariantInit(&ndv); //added by Rob Cairns 4-Jan-06
 		ndv.vt = VT_I4;
-		ndv.lVal = lgrid->getHeader().getNodataValue();
+		ndv.lVal = _lgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(lgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(lgrid->getHeader().getProjection()));
-		(*pVal)->put_NumberCols(lgrid->getHeader().getNumberCols());
-		(*pVal)->put_NumberRows(lgrid->getHeader().getNumberRows());
-		(*pVal)->put_XllCenter(lgrid->getHeader().getXllcenter());
-		(*pVal)->put_YllCenter(lgrid->getHeader().getYllcenter());
+		(*pVal)->put_Notes(A2BSTR(_lgrid->getHeader().getNotes()));
+		(*pVal)->put_Projection(A2BSTR(_lgrid->getHeader().getProjection()));
+		(*pVal)->put_NumberCols(_lgrid->getHeader().getNumberCols());
+		(*pVal)->put_NumberRows(_lgrid->getHeader().getNumberRows());
+		(*pVal)->put_XllCenter(_lgrid->getHeader().getXllcenter());
+		(*pVal)->put_YllCenter(_lgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)lgrid, (int*)NULL);
+		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)_lgrid, (int*)NULL);
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
-		(*pVal)->put_dX(sgrid->getHeader().getDx());
-		(*pVal)->put_dY(sgrid->getHeader().getDy());
+		(*pVal)->put_dX(_sgrid->getHeader().getDx());
+		(*pVal)->put_dY(_sgrid->getHeader().getDy());
 		VARIANT ndv;
 		VariantInit(&ndv); //added by Rob Cairns 4-Jan-06
 		ndv.vt = VT_I2;
-		ndv.iVal = sgrid->getHeader().getNodataValue();
+		ndv.iVal = _sgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(sgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(sgrid->getHeader().getProjection()));
-		(*pVal)->put_NumberCols(sgrid->getHeader().getNumberCols());
-		(*pVal)->put_NumberRows(sgrid->getHeader().getNumberRows());
-		(*pVal)->put_XllCenter(sgrid->getHeader().getXllcenter());
-		(*pVal)->put_YllCenter(sgrid->getHeader().getYllcenter());
+		(*pVal)->put_Notes(A2BSTR(_sgrid->getHeader().getNotes()));
+		(*pVal)->put_Projection(A2BSTR(_sgrid->getHeader().getProjection()));
+		(*pVal)->put_NumberCols(_sgrid->getHeader().getNumberCols());
+		(*pVal)->put_NumberRows(_sgrid->getHeader().getNumberRows());
+		(*pVal)->put_XllCenter(_sgrid->getHeader().getXllcenter());
+		(*pVal)->put_YllCenter(_sgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)sgrid, (int*)NULL, (int*)NULL);
+		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)_sgrid, (int*)NULL, (int*)NULL);
 	}
 	else
 	{	
@@ -276,33 +276,33 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if ( trgrid != NULL)
+	if ( _trgrid != NULL)
 	{
-		trgrid->Projection = A2BSTR(projection);
+		_trgrid->Projection = A2BSTR(projection);
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
-		dHeader hdr = dgrid->getHeader();
+		dHeader hdr = _dgrid->getHeader();
 		hdr.setProjection(projection);
-		dgrid->setHeader(hdr);
+		_dgrid->setHeader(hdr);
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
-		fHeader hdr = fgrid->getHeader();	
+		fHeader hdr = _fgrid->getHeader();	
 		hdr.setProjection(projection);
-		fgrid->setHeader(hdr);
+		_fgrid->setHeader(hdr);
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	
-		lHeader hdr = lgrid->getHeader();
+		lHeader hdr = _lgrid->getHeader();
 		hdr.setProjection(projection);
-		lgrid->setHeader(hdr);
+		_lgrid->setHeader(hdr);
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	
-		sHeader hdr = sgrid->getHeader();
+		sHeader hdr = _sgrid->getHeader();
 		hdr.setProjection(projection);
-		sgrid->setHeader(hdr);
+		_sgrid->setHeader(hdr);
 	}
 	else
 	{
@@ -332,85 +332,85 @@ void CGrid::GetRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retv
 	double* ValsDouble = reinterpret_cast<double*>(Vals);
 	float* ValsFloat = reinterpret_cast<float*>(Vals);
 
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
-		if (Row < 0 || Row >= trgrid->getHeight() )
+		if (Row < 0 || Row >= _trgrid->getHeight() )
 		{
-			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
 			*retval = FALSE;
 		}
 
-		int ncols = trgrid->getWidth();
+		int ncols = _trgrid->getWidth();
 
-		if (!trgrid->isInRam())
+		if (!_trgrid->isInRam())
 		{
-			trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
+			_trgrid->GetFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
 		}
 		else
 		{
 			for (int i = 0; i < ncols; i++)
 			{
 				if (useDouble) {
-					ValsDouble[i] = trgrid->getValue(Row, i);
+					ValsDouble[i] = _trgrid->getValue(Row, i);
 				}
 				else {
-					ValsFloat[i] = static_cast<float>(trgrid->getValue(Row, i));
+					ValsFloat[i] = static_cast<float>(_trgrid->getValue(Row, i));
 				}
 			}
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
-		int ncols = dgrid->getHeader().getNumberCols();
+		int ncols = _dgrid->getHeader().getNumberCols();
 
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				ValsDouble[i] = dgrid->getValue(i, Row);
+				ValsDouble[i] = _dgrid->getValue(i, Row);
 			}
 			else {
-				ValsFloat[i] = static_cast<float>(dgrid->getValue(i, Row));
+				ValsFloat[i] = static_cast<float>(_dgrid->getValue(i, Row));
 			}
 		}
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
-		int ncols = fgrid->getHeader().getNumberCols();
+		int ncols = _fgrid->getHeader().getNumberCols();
 
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				ValsDouble[i] = static_cast<double>(fgrid->getValue(i, Row));
+				ValsDouble[i] = static_cast<double>(_fgrid->getValue(i, Row));
 			}
 			else {
-				ValsFloat[i] = fgrid->getValue(i, Row);
+				ValsFloat[i] = _fgrid->getValue(i, Row);
 			}
 		}
 	}
-	else if( lgrid != NULL )
-	{	int ncols = lgrid->getHeader().getNumberCols();
+	else if( _lgrid != NULL )
+	{	int ncols = _lgrid->getHeader().getNumberCols();
 
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				ValsDouble[i] = static_cast<double>(lgrid->getValue(i, Row));
+				ValsDouble[i] = static_cast<double>(_lgrid->getValue(i, Row));
 			}
 			else {
-				ValsFloat[i] = static_cast<float>(lgrid->getValue(i, Row));
+				ValsFloat[i] = static_cast<float>(_lgrid->getValue(i, Row));
 			}
 		}
 	}
-	else if( sgrid != NULL )
-	{	int ncols = sgrid->getHeader().getNumberCols();
+	else if( _sgrid != NULL )
+	{	int ncols = _sgrid->getHeader().getNumberCols();
 
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				ValsDouble[i] = static_cast<double>(sgrid->getValue(i, Row));
+				ValsDouble[i] = static_cast<double>(_sgrid->getValue(i, Row));
 			}
 			else {
-				ValsFloat[i] = static_cast<float>(sgrid->getValue(i, Row));
+				ValsFloat[i] = static_cast<float>(_sgrid->getValue(i, Row));
 			}
 		}
 	}
@@ -450,86 +450,86 @@ void CGrid::PutRowCore(long Row, void *Vals, bool useDouble, VARIANT_BOOL * retv
 	double* ValsDouble = reinterpret_cast<double*>(Vals);
 	float* ValsFloat = reinterpret_cast<float*>(Vals);
 
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
-		if (Row < 0 || Row >= trgrid->getHeight() )
+		if (Row < 0 || Row >= _trgrid->getHeight() )
 		{
-			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
 			*retval = FALSE;
 		}
 
-		long ncols = trgrid->getWidth();
+		long ncols = _trgrid->getWidth();
 		
-		if (!trgrid->isInRam())
+		if (!_trgrid->isInRam())
 		{
-			trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
+			_trgrid->PutFloatWindow(Vals, Row, Row, 0, ncols-1, useDouble);
 		}
 		else
 		{
 			for (long i = 0; i < ncols; i++)
 			{
 				if (useDouble) {
-					trgrid->putValue(Row, i, ValsDouble[i]);
+					_trgrid->putValue(Row, i, ValsDouble[i]);
 				}
 				else
 				{
-					trgrid->putValue(Row, i, static_cast<double>(ValsFloat[i]));
+					_trgrid->putValue(Row, i, static_cast<double>(ValsFloat[i]));
 				}
 			}
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
-		int ncols = dgrid->getHeader().getNumberCols();
+		int ncols = _dgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				dgrid->setValue(i, Row, ValsDouble[i]);
+				_dgrid->setValue(i, Row, ValsDouble[i]);
 			}
 			else {
-				dgrid->setValue(i, Row, static_cast<double>(ValsFloat[i]));
+				_dgrid->setValue(i, Row, static_cast<double>(ValsFloat[i]));
 			}
 		}
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
-		int ncols = fgrid->getHeader().getNumberCols();
+		int ncols = _fgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				fgrid->setValue(i, Row, static_cast<float>(ValsDouble[i]));
+				_fgrid->setValue(i, Row, static_cast<float>(ValsDouble[i]));
 			}
 			else {
-				fgrid->setValue(i, Row, ValsFloat[i]);
+				_fgrid->setValue(i, Row, ValsFloat[i]);
 			}
 		}
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	
-		int ncols = lgrid->getHeader().getNumberCols();
+		int ncols = _lgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
 				double val = ValsDouble[i];
 				long lval = static_cast<long>(ValsDouble[i]);
-				lgrid->setValue(i, Row, static_cast<long>(ValsDouble[i]));
+				_lgrid->setValue(i, Row, static_cast<long>(ValsDouble[i]));
 			}
 			else {
-				lgrid->setValue(i, Row, static_cast<long>(ValsFloat[i]));
+				_lgrid->setValue(i, Row, static_cast<long>(ValsFloat[i]));
 			}
 		}
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	
-		int ncols = sgrid->getHeader().getNumberCols();
+		int ncols = _sgrid->getHeader().getNumberCols();
 		for (int i = 0; i < ncols; i++)
 		{
 			if (useDouble) {
-				sgrid->setValue(i, Row, static_cast<short>(ValsDouble[i]));
+				_sgrid->setValue(i, Row, static_cast<short>(ValsDouble[i]));
 			}
 			else {
-				sgrid->setValue(i, Row, static_cast<short>(ValsFloat[i]));
+				_sgrid->setValue(i, Row, static_cast<short>(ValsFloat[i]));
 			}
 		}
 	}
@@ -617,34 +617,34 @@ STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
-		if (Column < 0 || Column >= trgrid->getWidth() || Row< 0 || Row >= trgrid->getHeight() )
+		if (Column < 0 || Column >= _trgrid->getWidth() || Row< 0 || Row >= _trgrid->getHeight() )
 		{
-			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			pVal->vt = VT_R8;
-			pVal->dblVal = trgrid->noDataValue;
+			pVal->dblVal = _trgrid->noDataValue;
 			return S_OK;
 		}
 
 		pVal->vt = VT_R8;
-		pVal->dblVal = trgrid->getValue(Row, Column);
+		pVal->dblVal = _trgrid->getValue(Row, Column);
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	pVal->vt = VT_R8;
-		pVal->dblVal = dgrid->getValue( Column, Row );
+		pVal->dblVal = _dgrid->getValue( Column, Row );
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	pVal->vt = VT_R4;
-		pVal->fltVal = fgrid->getValue( Column, Row );
+		pVal->fltVal = _fgrid->getValue( Column, Row );
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	pVal->vt = VT_I4;
-		pVal->lVal = lgrid->getValue( Column, Row );
+		pVal->lVal = _lgrid->getValue( Column, Row );
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	pVal->vt = VT_I2;
-		pVal->iVal = sgrid->getValue( Column, Row );
+		pVal->iVal = _sgrid->getValue( Column, Row );
 	}
 	else
 	{	pVal->vt = VT_I2;
@@ -668,16 +668,16 @@ STDMETHODIMP CGrid::put_Value(long Column, long Row, VARIANT newVal)
 	}
 	else
 	{	
-		if ( trgrid != NULL)
+		if ( _trgrid != NULL)
 		{
-			if (Column < 0 || Column >= trgrid->getWidth() || Row< 0 || Row >= trgrid->getHeight() )
+			if (Column < 0 || Column >= _trgrid->getWidth() || Row< 0 || Row >= _trgrid->getHeight() )
 			{
-				lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+				_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 				return S_FALSE;
 			}
-			if (trgrid->CanCreate()) // Can Create == Can Write
+			if (_trgrid->CanCreate()) // Can Create == Can Write
 			{
-				trgrid->putValue(Row, Column, Value);
+				_trgrid->putValue(Row, Column, Value);
 				return S_OK;
 			}
 			else
@@ -686,14 +686,14 @@ STDMETHODIMP CGrid::put_Value(long Column, long Row, VARIANT newVal)
 				return S_FALSE;
 			}
 		}
-		else if( dgrid != NULL )
-			dgrid->setValue( Column, Row, Value );
-		else if( fgrid != NULL )
-			fgrid->setValue( Column, Row, (float)Value );
-		else if( lgrid != NULL )
-			lgrid->setValue( Column, Row, (long)Value );
-		else if( sgrid != NULL )
-			sgrid->setValue( Column, Row, (short)Value );
+		else if( _dgrid != NULL )
+			_dgrid->setValue( Column, Row, Value );
+		else if( _fgrid != NULL )
+			_fgrid->setValue( Column, Row, (float)Value );
+		else if( _lgrid != NULL )
+			_lgrid->setValue( Column, Row, (long)Value );
+		else if( _sgrid != NULL )
+			_sgrid->setValue( Column, Row, (short)Value );
 	}
 	return S_OK;
 }
@@ -705,16 +705,16 @@ STDMETHODIMP CGrid::get_InRam(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if ( trgrid != NULL)
-		*pVal = trgrid->isInRam()?VARIANT_TRUE:VARIANT_FALSE;
-	else if( dgrid != NULL )
-		*pVal = dgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
-	else if( fgrid != NULL )
-		*pVal = fgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
-	else if( lgrid != NULL )
-		*pVal = lgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
-	else if( sgrid != NULL )
-		*pVal = sgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
+	if ( _trgrid != NULL)
+		*pVal = _trgrid->isInRam()?VARIANT_TRUE:VARIANT_FALSE;
+	else if( _dgrid != NULL )
+		*pVal = _dgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
+	else if( _fgrid != NULL )
+		*pVal = _fgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
+	else if( _lgrid != NULL )
+		*pVal = _lgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
+	else if( _sgrid != NULL )
+		*pVal = _sgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
 	else
 	{	
 		*pVal = VARIANT_TRUE;
@@ -732,26 +732,26 @@ STDMETHODIMP CGrid::get_Maximum(VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
 		pVal->vt = VT_R8;
-		pVal->dblVal = trgrid->GetMaximum();
+		pVal->dblVal = _trgrid->GetMaximum();
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	pVal->vt = VT_R8;
-		pVal->dblVal = dgrid->maximum();
+		pVal->dblVal = _dgrid->maximum();
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	pVal->vt = VT_R4;
-		pVal->fltVal = fgrid->maximum();
+		pVal->fltVal = _fgrid->maximum();
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	pVal->vt = VT_I4;
-		pVal->lVal = lgrid->maximum();
+		pVal->lVal = _lgrid->maximum();
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	pVal->vt = VT_I2;
-		pVal->iVal = sgrid->maximum();
+		pVal->iVal = _sgrid->maximum();
 	}
 	else
 	{	pVal->vt = VT_I2;
@@ -768,7 +768,7 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
 		// GDAL doesn't always exclude nodata values.
 		// If nodata == minimum generate by brute force.
@@ -776,25 +776,25 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 		// to be a problem with ESRI tiffs (i.e., nodata is
 		// the default large negative)
 
-		double bruteForceResult = trgrid->GetMinimum();
-		float f1 = Utility::FloatRound(trgrid->GetMinimum(), 4);
-		float f2 = Utility::FloatRound(trgrid->noDataValue, 4);
+		double bruteForceResult = _trgrid->GetMinimum();
+		float f1 = Utility::FloatRound(_trgrid->GetMinimum(), 4);
+		float f2 = Utility::FloatRound(_trgrid->noDataValue, 4);
 		float v1;
-		float ndv = Utility::FloatRound(trgrid->noDataValue, 4);
-		if (FloatsEqual(f1, f2))
+		float ndv = Utility::FloatRound(_trgrid->noDataValue, 4);
+		if (Utility::FloatsEqual(f1, f2))
 		{
 			double currentMin = 9999999;
-			long w = trgrid->getWidth();
-			long h = trgrid->getHeight();
+			long w = _trgrid->getWidth();
+			long h = _trgrid->getHeight();
 			for (register long i = 0; i < w; i++)
 			{
 				for (register long j = 0; j < h; j++)
 				{
-					if (trgrid->getValue(j, i) < currentMin)
+					if (_trgrid->getValue(j, i) < currentMin)
 					{
-						v1 = Utility::FloatRound(trgrid->getValue(j, i), 4);
-						if (!FloatsEqual(v1, ndv))
-							currentMin = trgrid->getValue(j, i);
+						v1 = Utility::FloatRound(_trgrid->getValue(j, i), 4);
+						if (!Utility::FloatsEqual(v1, ndv))
+							currentMin = _trgrid->getValue(j, i);
 					}
 				}
 			}
@@ -808,24 +808,24 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 		else
 		{
 			pVal->vt = VT_R8;
-			pVal->dblVal = trgrid->GetMinimum();
+			pVal->dblVal = _trgrid->GetMinimum();
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	pVal->vt = VT_R8;
-		pVal->dblVal = dgrid->minimum();
+		pVal->dblVal = _dgrid->minimum();
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	pVal->vt = VT_R4;
-		pVal->fltVal = fgrid->minimum();
+		pVal->fltVal = _fgrid->minimum();
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	pVal->vt = VT_I4;
-		pVal->lVal = lgrid->minimum();
+		pVal->lVal = _lgrid->minimum();
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	pVal->vt = VT_I2;
-		pVal->iVal = sgrid->minimum();
+		pVal->iVal = _sgrid->minimum();
 	}
 	else
 	{	pVal->vt = VT_I2;
@@ -844,15 +844,15 @@ STDMETHODIMP CGrid::get_DataType(GridDataType *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if ( trgrid != NULL)
-		*pVal = trgrid->GetDataType();
-	else if( dgrid != NULL )
+	if ( _trgrid != NULL)
+		*pVal = _trgrid->GetDataType();
+	else if( _dgrid != NULL )
 		*pVal = DoubleDataType;
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 		*pVal = FloatDataType;
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 		*pVal = LongDataType;
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 		*pVal = ShortDataType;
 	else
 	{	
@@ -873,7 +873,7 @@ STDMETHODIMP CGrid::get_DataType(GridDataType *pVal)
 STDMETHODIMP CGrid::get_Filename(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = W2BSTR(filename);
+	*pVal = W2BSTR(_filename);
 	return S_OK;
 }
 
@@ -884,22 +884,22 @@ STDMETHODIMP CGrid::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
+	*pVal = _lastErrorCode;
 
 	if( *pVal != tkNO_ERROR )
-	{	if ( trgrid != NULL)
+	{	if ( _trgrid != NULL)
 			*pVal = 0; // todo -- trgrid ought to keep track of an error code
-		else if( dgrid != NULL )
-			*pVal = dgrid->LastErrorCode();
-		else if( fgrid != NULL )
-			*pVal = fgrid->LastErrorCode();
-		else if( lgrid != NULL )
-			*pVal = lgrid->LastErrorCode();
-		else if( sgrid != NULL )
-			*pVal = sgrid->LastErrorCode();
+		else if( _dgrid != NULL )
+			*pVal = _dgrid->LastErrorCode();
+		else if( _fgrid != NULL )
+			*pVal = _fgrid->LastErrorCode();
+		else if( _lgrid != NULL )
+			*pVal = _lgrid->LastErrorCode();
+		else if( _sgrid != NULL )
+			*pVal = _sgrid->LastErrorCode();
 	}
 
-	lastErrorCode = tkNO_ERROR;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -920,15 +920,15 @@ STDMETHODIMP CGrid::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CGrid::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
+		_globalCallback->AddRef();
 	return S_OK;
 }
 STDMETHODIMP CGrid::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -939,14 +939,14 @@ STDMETHODIMP CGrid::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CGrid::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -989,46 +989,46 @@ bool CGrid::OpenCustomGrid(GridDataType DataType, bool inRam, GridFileType FileT
 	bool result = false;
 	if( DataType == DoubleDataType )
 	{	
-		dgrid = new dGrid();
-		result = dgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		_dgrid = new dGrid();
+		result = _dgrid->open( W2A(_filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
 		if (!result)
 		{	
-			ErrorMessage(dgrid->LastErrorCode());
-			delete dgrid;
-			dgrid = NULL;
+			ErrorMessage(_dgrid->LastErrorCode());
+			delete _dgrid;
+			_dgrid = NULL;
 		}
 	}
 	else if( DataType == FloatDataType )
 	{	
-		fgrid = new fGrid();
-		result = fgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		_fgrid = new fGrid();
+		result = _fgrid->open( W2A(_filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
 		if (!result)
 		{
-			ErrorMessage(fgrid->LastErrorCode());
-			delete fgrid;
-			fgrid = NULL;
+			ErrorMessage(_fgrid->LastErrorCode());
+			delete _fgrid;
+			_fgrid = NULL;
 		}
 	}
 	else if( DataType == LongDataType )
 	{	
-		lgrid = new lGrid();
-		result = lgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
+		_lgrid = new lGrid();
+		result = _lgrid->open( W2A(_filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK );		// TODO: use Unicode
 		if (!result)
 		{	
-			ErrorMessage(lgrid->LastErrorCode());
-			delete lgrid;
-			lgrid = NULL;
+			ErrorMessage(_lgrid->LastErrorCode());
+			delete _lgrid;
+			_lgrid = NULL;
 		}
 	}
 	else if( DataType == ShortDataType )
 	{	
-		sgrid = new sGrid();
-		result = sgrid->open( W2A(filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK) ;		// TODO: use Unicode
+		_sgrid = new sGrid();
+		result = _sgrid->open( W2A(_filename), inRam, (GRID_TYPE)FileType, gridCOMCALLBACK) ;		// TODO: use Unicode
 		if (!result)
 		{	
-			ErrorMessage(sgrid->LastErrorCode());
-			delete sgrid;
-			sgrid = NULL;
+			ErrorMessage(_sgrid->LastErrorCode());
+			delete _sgrid;
+			_sgrid = NULL;
 		}
 	}
 	return result;
@@ -1041,10 +1041,10 @@ void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcing
 {
 	if (DataType == DoubleDataType)
 	{
-		dgrid = new dGrid();
-		ifstream fin(filename);
-		dgrid->asciiReadHeader(fin);
-		dHeader dhd = dgrid->getHeader();
+		_dgrid = new dGrid();
+		ifstream fin(_filename);
+		_dgrid->asciiReadHeader(fin);
+		dHeader dhd = _dgrid->getHeader();
 		long ncol, nrow;
 		ncol = dhd.getNumberCols();
 		nrow = dhd.getNumberRows();
@@ -1055,15 +1055,15 @@ void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcing
 			forcingGDALUse = true;
 		}
 		fin.close();
-		delete dgrid;
-		dgrid = NULL;
+		delete _dgrid;
+		_dgrid = NULL;
 	}
 	else if (DataType == FloatDataType)
 	{
-		fgrid = new fGrid();
-		ifstream fin(filename);
-		fgrid->asciiReadHeader(fin);
-		fHeader fhd = fgrid->getHeader();
+		_fgrid = new fGrid();
+		ifstream fin(_filename);
+		_fgrid->asciiReadHeader(fin);
+		fHeader fhd = _fgrid->getHeader();
 		long ncol, nrow;
 		ncol = fhd.getNumberCols();
 		nrow = fhd.getNumberRows();
@@ -1074,15 +1074,15 @@ void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcing
 			forcingGDALUse = true;
 		}
 		fin.close();
-		delete fgrid;
-		fgrid = NULL;
+		delete _fgrid;
+		_fgrid = NULL;
 	}
 	else if (DataType == ShortDataType)
 	{
-		sgrid = new sGrid();
-		ifstream fin(filename);
-		sgrid->asciiReadHeader(fin);
-		sHeader shd = sgrid->getHeader();
+		_sgrid = new sGrid();
+		ifstream fin(_filename);
+		_sgrid->asciiReadHeader(fin);
+		sHeader shd = _sgrid->getHeader();
 		long ncol, nrow;
 		ncol = shd.getNumberCols();
 		nrow = shd.getNumberRows();
@@ -1093,15 +1093,15 @@ void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcing
 			forcingGDALUse = true;
 		}
 		fin.close();
-		delete sgrid;
-		sgrid = NULL;
+		delete _sgrid;
+		_sgrid = NULL;
 	}
 	else if (DataType == LongDataType)
 	{
-		lgrid = new lGrid();
-		ifstream fin(filename);
-		lgrid->asciiReadHeader(fin);
-		lHeader lhd = lgrid->getHeader();
+		_lgrid = new lGrid();
+		ifstream fin(_filename);
+		_lgrid->asciiReadHeader(fin);
+		lHeader lhd = _lgrid->getHeader();
 		long ncol, nrow;
 		ncol = lhd.getNumberCols();
 		nrow = lhd.getNumberRows();
@@ -1112,8 +1112,8 @@ void CGrid::TryOpenAsAsciiGrid(GridDataType DataType, bool& inRam, bool& forcing
 			forcingGDALUse = true;
 		}
 		fin.close();
-		delete lgrid;
-		lgrid = NULL;
+		delete _lgrid;
+		_lgrid = NULL;
 	}
 }
 
@@ -1207,29 +1207,29 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 		return S_FALSE;
 	}
 
-	filename = OLE2BSTR(Filename);
-	ICallback * tmpCallback = globalCallback;
-	if( cBack != NULL )	globalCallback = cBack;
+	_filename = OLE2BSTR(Filename);
+	ICallback * tmpCallback = _globalCallback;
+	if( cBack != NULL )	_globalCallback = cBack;
 	bool inRam = InRam == VARIANT_TRUE ? true: false;
 	
 	// Are we handling ECWP imagery? 
-	CStringW ecwpTest = filename;
+	CStringW ecwpTest = _filename;
 	if (ecwpTest.MakeLower().Left(4) == L"ecwp") 
 	{
 		// e.g. ecwp://imagery.oregonexplorer.info/ecwimages/2005orthoimagery.ecw
-		trgrid = new tkGridRaster();
-		*retval = trgrid->LoadRaster(filename, true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
+		_trgrid = new tkGridRaster();
+		*retval = _trgrid->LoadRaster(_filename, true, FileType)?VARIANT_TRUE:VARIANT_FALSE;
 		return S_OK;
 	}
 	
 	// check or sta.adf file
-	bool isAuxHeader = OpenAuxHeader(filename);
+	bool isAuxHeader = OpenAuxHeader(_filename);
 
 	activeGridObject = this;
 	bool opened = false;
 
 	// get extension
-	CString extension = W2A(filename.Right( filename.GetLength() - 1 - filename.ReverseFind('.') ));
+	CString extension = W2A(_filename.Right( _filename.GetLength() - 1 - _filename.ReverseFind('.') ));
 	ResolveFileType(FileType, extension);
 	if (isAuxHeader) extension = "adf";
 
@@ -1253,27 +1253,27 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	}
 
 	// check whether it's binary and can be opened with our own grid classes
-	GetDataTypeFromBinaryGrid(DataType, FileType, filename);
+	GetDataTypeFromBinaryGrid(DataType, FileType, _filename);
 
 	// If opening an existing ASCII grid, this can be done with GDAL. GDAL doesn't
 	// support creation of ASCII grids however, so this will be done with our object
 	// for now. (This can be worked around using a virtual raster, but this will do for now)
 	if ( FileType == Esri || FileType == Flt || FileType == Ecw || FileType == Bil || FileType == MrSid || 
 		FileType == PAux || FileType == PCIDsk || FileType == DTed ||
-		(FileType == UseExtension && (((A2W(extension) == filename) && extension != "") 
+		(FileType == UseExtension && (((A2W(extension) == _filename) && extension != "") 
 		|| extension.CompareNoCase("adf") == 0 || extension.CompareNoCase("dem") == 0
 		|| extension.CompareNoCase("ecw") == 0 || extension.CompareNoCase("bil") == 0 
 		|| extension.CompareNoCase("sid") == 0 || extension.CompareNoCase("aux") == 0 
 		|| extension.CompareNoCase("pix") == 0 || extension.CompareNoCase("dhm") == 0 
 		|| extension.CompareNoCase("dt0") == 0 || extension.CompareNoCase("dt1") == 0)))
 	{
-		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(filename, inRam, FileType);
+		_trgrid = new tkGridRaster();
+		opened = _trgrid->LoadRaster(_filename, inRam, FileType);
 	}
 	else if ( forcingGDALUse || FileType == GeoTiff || (FileType == UseExtension && extension.CompareNoCase("tif") == 0))
 	{
-		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(filename, inRam, FileType);
+		_trgrid = new tkGridRaster();
+		opened = _trgrid->LoadRaster(_filename, inRam, FileType);
 	}
 	else if(OpenCustomGrid(DataType, inRam, FileType))
 	{
@@ -1281,20 +1281,20 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 	}
 	else
 	{
-		trgrid = new tkGridRaster();
-		opened = trgrid->LoadRaster(filename, inRam, FileType);
+		_trgrid = new tkGridRaster();
+		opened = _trgrid->LoadRaster(_filename, inRam, FileType);
 	}
 
 	if (opened)
 	{
 		SaveProjectionAsWkt();
-		globalCallback = tmpCallback;
+		_globalCallback = tmpCallback;
 	}
 	else
 	{
 		VARIANT_BOOL vb;
 		this->Close(&vb);
-		filename = "";
+		_filename = "";
 	}
 
 	*retval = opened ? VARIANT_TRUE: VARIANT_FALSE;
@@ -1324,9 +1324,9 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	ICallback * tmpCallback = globalCallback;
+	ICallback * tmpCallback = _globalCallback;
 	if( cBack != NULL )
-		globalCallback = cBack;
+		_globalCallback = cBack;
 
 	Close(retval);	
 
@@ -1340,7 +1340,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 	
 	activeGridObject = this;
 
-	filename = OLE2BSTR(Filename);
+	_filename = OLE2BSTR(Filename);
 	CString f_name = OLE2A(Filename);
 	CString extension = f_name.Right( f_name.GetLength() - 1 - f_name.ReverseFind('.') );
 
@@ -1373,13 +1373,13 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			|| extension.CompareNoCase("dhm") == 0 || extension.CompareNoCase("dt0") == 0
 			|| extension.CompareNoCase("dt1") == 0)))   // TODO: reuse the code from Open
 		{
-			trgrid = new tkGridRaster();
+			_trgrid = new tkGridRaster();
 
 			GridFileType newFileType = FileType;
 
 			ResolveFileType(newFileType, extension);
 
-			if (trgrid->CanCreate(newFileType))
+			if (_trgrid->CanCreate(newFileType))
 			{
 				double dx;
 				Header->get_dX(&dx);
@@ -1403,10 +1403,10 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				
 				BSTR cTbl;
 				Header->get_ColorTable(&cTbl);
-				trgrid->BSTR2ColorTable(cTbl);
+				_trgrid->BSTR2ColorTable(cTbl);
 				::SysFreeString(cTbl);
 
-				return trgrid->CreateNew(W2A(Filename), newFileType, dx, dy, xllcenter, yllcenter, 
+				return _trgrid->CreateNew(W2A(Filename), newFileType, dx, dy, xllcenter, yllcenter, 
 					dndv, OLE2A(projection), ncols, nrows, DataType, boolInRam, value, true)?S_OK:S_FALSE;
 				}
 			else
@@ -1417,7 +1417,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 		}
 		else if( DataType == DoubleDataType )
 		{	
-			dgrid = new dGrid();
+			_dgrid = new dGrid();
 			dHeader dhdr;
 			double dx;
 			Header->get_dX(&dx);
@@ -1450,16 +1450,16 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			dhdr.setYllcenter(yllcenter);
 
-			if( dgrid->initialize(OLE2CA(Filename),dhdr,value,boolInRam) == true )
+			if( _dgrid->initialize(OLE2CA(Filename),dhdr,value,boolInRam) == true )
 			{	
-				filename = OLE2W(Filename);
+				_filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
 			{	
-				dgrid = NULL;
+				_dgrid = NULL;
 				*retval = VARIANT_FALSE;
-				ErrorMessage(dgrid->LastErrorCode());
+				ErrorMessage(_dgrid->LastErrorCode());
 			}
 			
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
@@ -1467,7 +1467,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == FloatDataType )
-		{	fgrid = new fGrid();
+		{	_fgrid = new fGrid();
 			
 			fHeader fhdr;
 			double dx;
@@ -1502,23 +1502,23 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			fhdr.setYllcenter(yllcenter);
 
-			if( fgrid->initialize(OLE2CA(Filename),fhdr,(float)value,boolInRam) == true )
+			if( _fgrid->initialize(OLE2CA(Filename),fhdr,(float)value,boolInRam) == true )
 			{	
-				filename = OLE2W(Filename);
+				_filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
 			{	
-				fgrid = NULL;
+				_fgrid = NULL;
 				*retval = VARIANT_FALSE;
-				ErrorMessage(fgrid->LastErrorCode());
+				ErrorMessage(_fgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
 			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == LongDataType )
-		{	lgrid = new lGrid();
+		{	_lgrid = new lGrid();
 
 			lHeader lhdr;
 			double dx;
@@ -1552,23 +1552,23 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			lhdr.setYllcenter(yllcenter);
 
-			if( lgrid->initialize(OLE2CA(Filename),lhdr,(long)value,boolInRam) == true )
+			if( _lgrid->initialize(OLE2CA(Filename),lhdr,(long)value,boolInRam) == true )
 			{	
-				filename = OLE2W(Filename);
+				_filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
 			{	
-				lgrid = NULL;
+				_lgrid = NULL;
 				*retval = VARIANT_FALSE;
-				ErrorMessage(lgrid->LastErrorCode());
+				ErrorMessage(_lgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
 			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == ShortDataType )
-		{	sgrid = new sGrid();
+		{	_sgrid = new sGrid();
 
 			sHeader shdr;
 			double dx;
@@ -1602,16 +1602,16 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			Header->get_YllCenter(&yllcenter);
 			shdr.setYllcenter(yllcenter);
 
-			if( sgrid->initialize(OLE2CA(Filename),shdr,(short)value,boolInRam) == true )
+			if( _sgrid->initialize(OLE2CA(Filename),shdr,(short)value,boolInRam) == true )
 			{	
-				filename = OLE2W(Filename);
+				_filename = OLE2W(Filename);
 				*retval = VARIANT_TRUE;
 			}
 			else
 			{	
-				sgrid = NULL;
+				_sgrid = NULL;
 				*retval = VARIANT_FALSE;
-				ErrorMessage(sgrid->LastErrorCode());
+				ErrorMessage(_sgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
@@ -1622,7 +1622,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 		}
 	}
 
-	globalCallback = tmpCallback;
+	_globalCallback = tmpCallback;
 
 	return S_OK;
 }
@@ -1636,21 +1636,21 @@ STDMETHODIMP CGrid::Close(VARIANT_BOOL *retval)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	*retval = VARIANT_TRUE;
-	if ( trgrid != NULL)
-		*retval = trgrid->Close()?VARIANT_TRUE:VARIANT_FALSE;
-	trgrid = NULL;
-	if( dgrid != NULL )
-		*retval = dgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
-	dgrid = NULL;
-	if( fgrid != NULL )
-		*retval = fgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
-	fgrid = NULL;
-	if( lgrid != NULL )
-		*retval = lgrid->close()?VARIANT_TRUE:VARIANT_FALSE;	
-	lgrid = NULL;
-	if( sgrid != NULL )
-		*retval = sgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
-	sgrid = NULL;
+	if ( _trgrid != NULL)
+		*retval = _trgrid->Close()?VARIANT_TRUE:VARIANT_FALSE;
+	_trgrid = NULL;
+	if( _dgrid != NULL )
+		*retval = _dgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
+	_dgrid = NULL;
+	if( _fgrid != NULL )
+		*retval = _fgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
+	_fgrid = NULL;
+	if( _lgrid != NULL )
+		*retval = _lgrid->close()?VARIANT_TRUE:VARIANT_FALSE;	
+	_lgrid = NULL;
+	if( _sgrid != NULL )
+		*retval = _sgrid->close()?VARIANT_TRUE:VARIANT_FALSE;
+	_sgrid = NULL;
 	return S_OK;
 }
 
@@ -1665,11 +1665,11 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	*retval = VARIANT_FALSE;
 
 	if (Filename == L"" || Filename == NULL)
-		Filename = OLE2BSTR(filename);
+		Filename = OLE2BSTR(_filename);
 
-	ICallback * tmpCallback = globalCallback;
+	ICallback * tmpCallback = _globalCallback;
 	if( cBack != NULL )
-		globalCallback = cBack;
+		_globalCallback = cBack;
 	activeGridObject = this;
 
 	CString Filen(W2A(Filename));
@@ -1680,7 +1680,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	if (extension == Filen && Filen != "")
 		FileType = Esri;
 
-	CString origFilename(W2A(this->filename));
+	CString origFilename(W2A(this->_filename));
 	CString origExtension = origFilename.Right( origFilename.GetLength() - 1 - origFilename.ReverseFind('.') );
 	GridFileType origFileType;
 	ResolveFileType(origFileType, origExtension);
@@ -1690,14 +1690,14 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 
 	// (special conversion case) If they have a GDAL format and wish to save it to BGD, speed it up by writing
 	// directly from the tkGridRaster class. (Generic conversion can do anything, but very slowly.)
-	if (trgrid != NULL && FileType == Binary)
+	if (_trgrid != NULL && FileType == Binary)
 	{
-		*retval = trgrid->SaveToBGD(OLE2A(Filename), gridCOMCALLBACK) ? VARIANT_TRUE : VARIANT_FALSE; //? S_OK : S_FALSE;
+		*retval = _trgrid->SaveToBGD(OLE2A(Filename), gridCOMCALLBACK) ? VARIANT_TRUE : VARIANT_FALSE; //? S_OK : S_FALSE;
 	}
 	// (special conversion case) If they have a BGD and wish to save it to a GDAL format, speed it up by writing
 	// directly from the tkGridRaster class. (Generic conversion can do anything, but very slowly.)
-	else if (origFileType == Binary && trgrid == NULL && 
-		(dgrid != NULL || fgrid != NULL || sgrid != NULL || lgrid != NULL) &&
+	else if (origFileType == Binary && _trgrid == NULL && 
+		(_dgrid != NULL || _fgrid != NULL || _sgrid != NULL || _lgrid != NULL) &&
 		(FileType == Ecw || FileType == Bil
 		|| FileType == Esri || FileType == Flt || FileType == MrSid || FileType == PAux
 		|| FileType == PCIDsk || FileType == DTed || FileType == GeoTiff))
@@ -1706,7 +1706,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		DATA_TYPE bgdDataType = SHORT_TYPE;
 
 		// Read header info
-		bool bRetval = tempGrid->ReadBGDHeader(OLE2A(this->filename), bgdDataType);
+		bool bRetval = tempGrid->ReadBGDHeader(OLE2A(this->_filename), bgdDataType);
 		if (!bRetval) return false;
 
 		GridDataType newDataType = DoubleDataType;
@@ -1728,7 +1728,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		if (!bRetval) return S_FALSE;
 
 		// OK, load the data now that the destination grid is created
-		bRetval = tempGrid->ReadFromBGD(OLE2A(this->filename), gridCOMCALLBACK);
+		bRetval = tempGrid->ReadFromBGD(OLE2A(this->_filename), gridCOMCALLBACK);
 		if (!bRetval) return S_FALSE;
 
 		// SAve it again for good measure. Disk based, so will probably just return true -- but will be flushed, so worthwhile
@@ -1747,11 +1747,11 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 	// to save newly created ascii grids and use GDAL to save from GDAL formats
 	// to ascii grids. This block also handles saving existing ascii grids that
 	// were opened using the GDAL wrapper.
-	else if (trgrid != NULL && (FileType != Ecw && FileType != Bil
+	else if (_trgrid != NULL && (FileType != Ecw && FileType != Bil
 		&& FileType != MrSid && FileType != PAux
 		&& FileType != Esri && FileType != Flt && FileType != PCIDsk && FileType != DTed && FileType != GeoTiff)
 		||
-		(trgrid == NULL && (FileType == Ecw || FileType == Bil
+		(_trgrid == NULL && (FileType == Ecw || FileType == Bil
 		|| FileType == Esri || FileType == MrSid || FileType == PAux
 		|| FileType == Flt || FileType == PCIDsk || FileType == DTed || FileType == GeoTiff)))
 
@@ -1812,11 +1812,11 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 
 		*retval = rslt;
 	}
-	else if (trgrid != NULL)
+	else if (_trgrid != NULL)
 	{
-		if( trgrid->Save(W2A(Filename), FileType) )
+		if( _trgrid->Save(W2A(Filename), FileType) )
 		{	
-			filename = Filename;
+			_filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
@@ -1824,52 +1824,52 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 			ErrorMessage(tkFAILED_TO_SAVE_GRID);
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
-		if( dgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		if( _dgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
 		{	
-			filename = Filename;
+			_filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			ErrorMessage(dgrid->LastErrorCode());
+			ErrorMessage(_dgrid->LastErrorCode());
 		}
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
-		if( fgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		if( _fgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
 		{	
-			filename = Filename;
+			_filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			ErrorMessage(fgrid->LastErrorCode());
+			ErrorMessage(_fgrid->LastErrorCode());
 		}
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{	
-		if( lgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		if( _lgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
 		{	
-			filename = Filename;
+			_filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			ErrorMessage(lgrid->LastErrorCode());
+			ErrorMessage(_lgrid->LastErrorCode());
 		}
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{	
-		if( sgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
+		if( _sgrid->save(OLE2CA(Filename), (GRID_TYPE)FileType, gridCOMCALLBACK) == true )
 		{	
-			filename = Filename;
+			_filename = Filename;
 			*retval = VARIANT_TRUE;
 		}
 		else
 		{	
-			ErrorMessage(sgrid->LastErrorCode());
+			ErrorMessage(_sgrid->LastErrorCode());
 		}
 	}
 	else
@@ -1892,7 +1892,7 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		{
 			SaveProjection(W2A(bstrProj));
 		}
-		globalCallback = tmpCallback;
+		_globalCallback = tmpCallback;
 	}
 	catch(...)
 	{
@@ -1917,16 +1917,16 @@ STDMETHODIMP CGrid::Clear(VARIANT ClearValue, VARIANT_BOOL *retval)
 	else
 	{
 		*retval = VARIANT_TRUE;
-		if ( trgrid != NULL)
-			trgrid->clear(value);
-		if( dgrid != NULL )
-			dgrid->clear(value);
-		else if( fgrid != NULL )
-			fgrid->clear((float)value);
-		else if( lgrid != NULL )
-			lgrid->clear((long)value);
-		else if( sgrid != NULL )
-			sgrid->clear((short)value);
+		if ( _trgrid != NULL)
+			_trgrid->clear(value);
+		if( _dgrid != NULL )
+			_dgrid->clear(value);
+		else if( _fgrid != NULL )
+			_fgrid->clear((float)value);
+		else if( _lgrid != NULL )
+			_lgrid->clear((long)value);
+		else if( _sgrid != NULL )
+			_sgrid->clear((short)value);
 		else
 		{	*retval = VARIANT_FALSE;
 			ErrorMessage(tkGRID_NOT_INITIALIZED);
@@ -1942,16 +1942,16 @@ STDMETHODIMP CGrid::ProjToCell(double x, double y, long *Column, long *Row)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if ( trgrid != NULL )
-		trgrid->ProjToCell( x, y, *Column, *Row );
-	else if( dgrid != NULL )
-		dgrid->ProjToCell( x, y, *Column, *Row );
-	else if( fgrid != NULL )
-		fgrid->ProjToCell( x, y, *Column, *Row );
-	else if( lgrid != NULL )
-		lgrid->ProjToCell( x, y, *Column, *Row );
-	else if( sgrid != NULL )
-		sgrid->ProjToCell( x, y, *Column, *Row );
+	if ( _trgrid != NULL )
+		_trgrid->ProjToCell( x, y, *Column, *Row );
+	else if( _dgrid != NULL )
+		_dgrid->ProjToCell( x, y, *Column, *Row );
+	else if( _fgrid != NULL )
+		_fgrid->ProjToCell( x, y, *Column, *Row );
+	else if( _lgrid != NULL )
+		_lgrid->ProjToCell( x, y, *Column, *Row );
+	else if( _sgrid != NULL )
+		_sgrid->ProjToCell( x, y, *Column, *Row );
 	else
 	{	*Column = -1;
 		*Row = -1;
@@ -1967,16 +1967,16 @@ STDMETHODIMP CGrid::CellToProj(long Column, long Row, double *x, double *y)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (trgrid != NULL)
-		trgrid->CellToProj(Column, Row, *x, *y);
-	else if( dgrid != NULL )
-		dgrid->CellToProj(Column, Row, *x, *y);
-	else if( fgrid != NULL )
-		fgrid->CellToProj(Column, Row, *x, *y);
-	else if( lgrid != NULL )
-		lgrid->CellToProj(Column, Row, *x, *y);
-	else if( sgrid != NULL )
-		sgrid->CellToProj(Column, Row, *x, *y);
+	if (_trgrid != NULL)
+		_trgrid->CellToProj(Column, Row, *x, *y);
+	else if( _dgrid != NULL )
+		_dgrid->CellToProj(Column, Row, *x, *y);
+	else if( _fgrid != NULL )
+		_fgrid->CellToProj(Column, Row, *x, *y);
+	else if( _lgrid != NULL )
+		_lgrid->CellToProj(Column, Row, *x, *y);
+	else if( _sgrid != NULL )
+		_sgrid->CellToProj(Column, Row, *x, *y);
 	else
 	{	*x = 0;
 		*y = 0;
@@ -2102,9 +2102,9 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 	double* ValsDouble = reinterpret_cast<double*>(Vals);
 	float* ValsFloat = reinterpret_cast<float*>(Vals);
 	
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
-		if (StartRow < 0 || StartRow >= trgrid->getHeight() || EndRow < 0 || EndRow >= trgrid->getHeight() )
+		if (StartRow < 0 || StartRow >= _trgrid->getHeight() || EndRow < 0 || EndRow >= _trgrid->getHeight() )
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			Vals = NULL;
@@ -2112,12 +2112,12 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			*retval = FALSE;
 		}
 
-		if (!trgrid->GetFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
+		if (!_trgrid->GetFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
 		{
 			*retval = VARIANT_FALSE;
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
 		long position = 0;
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2126,16 +2126,16 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = dgrid->getValue(i, j);
+					ValsDouble[position++] = _dgrid->getValue(i, j);
 				}
 				else
 				{
-					ValsFloat[position++] = static_cast<float>(dgrid->getValue(i, j));
+					ValsFloat[position++] = static_cast<float>(_dgrid->getValue(i, j));
 				}
 			}
 		}
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
 		long position = 0;
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2144,16 +2144,16 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = static_cast<double>(fgrid->getValue(i, j));
+					ValsDouble[position++] = static_cast<double>(_fgrid->getValue(i, j));
 				}
 				else
 				{
-					ValsFloat[position++] = fgrid->getValue(i, j);
+					ValsFloat[position++] = _fgrid->getValue(i, j);
 				}
 			}
 		}
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{
 		long position = 0;
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2162,16 +2162,16 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = static_cast<double>(lgrid->getValue(i, j));
+					ValsDouble[position++] = static_cast<double>(_lgrid->getValue(i, j));
 				}
 				else
 				{
-					ValsFloat[position++] = static_cast<float>(lgrid->getValue(i, j));
+					ValsFloat[position++] = static_cast<float>(_lgrid->getValue(i, j));
 				}
 			}
 		}
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{
 		long position = 0;
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2180,11 +2180,11 @@ void CGrid::GetFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					ValsDouble[position++] = static_cast<double>(sgrid->getValue(i, j));
+					ValsDouble[position++] = static_cast<double>(_sgrid->getValue(i, j));
 				}
 				else
 				{
-					ValsFloat[position++] = static_cast<float>(sgrid->getValue(i, j));
+					ValsFloat[position++] = static_cast<float>(_sgrid->getValue(i, j));
 				}
 			}
 		}
@@ -2225,23 +2225,23 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 {
 	double* ValsDouble = reinterpret_cast<double*>(Vals);
 	float* ValsFloat = reinterpret_cast<float*>(Vals);
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
- 		if (StartRow < 0 || StartRow >= trgrid->getHeight() || EndRow < 0 || EndRow >= trgrid->getHeight())
+ 		if (StartRow < 0 || StartRow >= _trgrid->getHeight() || EndRow < 0 || EndRow >= _trgrid->getHeight())
 		{
-			lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
+			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			Vals = NULL;
 			*retval = FALSE;
 		}
 
-		if (!trgrid->PutFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
+		if (!_trgrid->PutFloatWindow(Vals, StartRow, EndRow, StartCol, EndCol, useDouble))
 		{
 			*retval = FALSE;
 		}
 	}
-	else if( dgrid != NULL )
+	else if( _dgrid != NULL )
 	{	
-		int ncols = dgrid->getHeader().getNumberCols();
+		int ncols = _dgrid->getHeader().getNumberCols();
 		long position = 0;
 
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2250,18 +2250,18 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					dgrid->setValue(i, j, ValsDouble[position++]);
+					_dgrid->setValue(i, j, ValsDouble[position++]);
 				}
 				else
 				{
-					dgrid->setValue(i, j, static_cast<float>(ValsFloat[position++]));
+					_dgrid->setValue(i, j, static_cast<float>(ValsFloat[position++]));
 				}
 			}
 		}
 	}
-	else if( fgrid != NULL )
+	else if( _fgrid != NULL )
 	{	
-		int ncols = fgrid->getHeader().getNumberCols();
+		int ncols = _fgrid->getHeader().getNumberCols();
 		long position = 0;
 
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2270,18 +2270,18 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					fgrid->setValue(i, j, static_cast<float>(ValsDouble[position++]));
+					_fgrid->setValue(i, j, static_cast<float>(ValsDouble[position++]));
 				}
 				else
 				{
-					fgrid->setValue(i, j, ValsFloat[position++]);
+					_fgrid->setValue(i, j, ValsFloat[position++]);
 				}
 			}
 		}
 	}
-	else if( lgrid != NULL )
+	else if( _lgrid != NULL )
 	{
-		int ncols = lgrid->getHeader().getNumberCols();
+		int ncols = _lgrid->getHeader().getNumberCols();
 		long position = 0;
 
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2290,18 +2290,18 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					lgrid->setValue(i, j, static_cast<long>(ValsDouble[position++]));
+					_lgrid->setValue(i, j, static_cast<long>(ValsDouble[position++]));
 				}
 				else
 				{
-					lgrid->setValue(i, j, static_cast<long>(ValsFloat[position++]));
+					_lgrid->setValue(i, j, static_cast<long>(ValsFloat[position++]));
 				}
 			}
 		}
 	}
-	else if( sgrid != NULL )
+	else if( _sgrid != NULL )
 	{
-		int ncols = sgrid->getHeader().getNumberCols();
+		int ncols = _sgrid->getHeader().getNumberCols();
 		long position = 0;
 
 		for (long j = StartRow; j <= EndRow; j++)
@@ -2310,11 +2310,11 @@ void CGrid::PutFloatWindowCore(long StartRow, long EndRow, long StartCol, long E
 			{
 				if (useDouble)
 				{
-					sgrid->setValue(i, j, static_cast<short>(ValsDouble[position++]));
+					_sgrid->setValue(i, j, static_cast<short>(ValsDouble[position++]));
 				}
 				else
 				{
-					sgrid->setValue(i, j, static_cast<short>(ValsFloat[position++]));
+					_sgrid->setValue(i, j, static_cast<short>(ValsFloat[position++]));
 				}
 			}
 		}
@@ -2450,11 +2450,11 @@ IGrid* CGrid::Clip(BSTR newFilename, long firstCol, long lastCol, long firstRow,
 STDMETHODIMP CGrid::get_NumBands(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (trgrid != NULL)
+	if (_trgrid != NULL)
 	{
-		*retVal = trgrid->getNumBands();
+		*retVal = _trgrid->getNumBands();
 	}
-	else if (dgrid || sgrid || fgrid || lgrid)
+	else if (_dgrid || _sgrid || _fgrid || _lgrid)
 	{
 		*retVal = 1;
 	}
@@ -2471,7 +2471,7 @@ STDMETHODIMP CGrid::get_NumBands(int *retVal)
 STDMETHODIMP CGrid::get_ActiveBandIndex(int *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = trgrid != NULL ? trgrid->GetActiveBandIndex() : 1;
+	*retVal = _trgrid != NULL ? _trgrid->GetActiveBandIndex() : 1;
 	return S_OK;
 }
 
@@ -2482,15 +2482,15 @@ STDMETHODIMP CGrid::OpenBand(int bandIndex, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	if (trgrid != NULL)		 // it works for GDAL-rooted grids
+	if (_trgrid != NULL)		 // it works for GDAL-rooted grids
 	{
-		if (bandIndex < 1 || bandIndex > trgrid->getNumBands())
+		if (bandIndex < 1 || bandIndex > _trgrid->getNumBands())
 		{
 			this->ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		}
 		else
 		{
-			if (trgrid->OpenBand(bandIndex))
+			if (_trgrid->OpenBand(bandIndex))
 			{
 				*retVal = VARIANT_TRUE;
 			}
@@ -2512,8 +2512,8 @@ STDMETHODIMP CGrid::OpenBand(int bandIndex, VARIANT_BOOL* retVal)
 // ****************************************************************
 void CGrid::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ****************************************************************
@@ -2522,11 +2522,11 @@ void CGrid::ErrorMessage(long ErrorCode)
 STDMETHODIMP CGrid::get_SourceType (tkGridSourceType* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())		
-	if (trgrid)
+	if (_trgrid)
 	{
 		*retVal = tkGridSourceType::gstGDALBased;
 	}
-	else if (dgrid || sgrid || fgrid || lgrid)
+	else if (_dgrid || _sgrid || _fgrid || _lgrid)
 	{
 		*retVal = tkGridSourceType::gstNative;
 	}
@@ -2542,7 +2542,7 @@ STDMETHODIMP CGrid::get_SourceType (tkGridSourceType* retVal)
 // ****************************************************************
 bool CGrid::IsRgb()
 {
-	return trgrid ? trgrid->IsRgb() : false;
+	return _trgrid ? _trgrid->IsRgb() : false;
 }
 
 // ****************************************************************
@@ -2553,8 +2553,8 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
 	
-	if (!globalCallback && cBack)
-		Utility::put_ComReference(cBack, (IDispatch**)&globalCallback, false);
+	if (!_globalCallback && cBack)
+		Utility::put_ComReference(cBack, (IDispatch**)&_globalCallback, false);
 
 	tkGridProxyMode mode = proxyMode;
 	if (mode == gpmAuto)
@@ -2587,7 +2587,7 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 	// ---------------------------------------------
 	if ( !needsProxy)
 	{
-		OpenAsDirectImage(scheme, globalCallback, retVal);
+		OpenAsDirectImage(scheme, _globalCallback, retVal);
 	}
 	else
 	{
@@ -2647,7 +2647,7 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 			}
 
 			// let's build overviews for direct grid
-			GdalHelper::BuildOverviewsIfNeeded(gridName, true, globalCallback);
+			GdalHelper::BuildOverviewsIfNeeded(gridName, true, _globalCallback);
 		}
 		else {
 			ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
@@ -2669,7 +2669,7 @@ IImage* CGrid::OpenImageProxy()
 		VARIANT_BOOL vb;
 		GetUtils()->CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
 		
-		iimg->Open(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, globalCallback, &vb);
+		iimg->Open(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb);
 		if (!vb) 
 		{
 			iimg->Close(&vb);
@@ -2704,13 +2704,13 @@ STDMETHODIMP CGrid::RemoveImageProxy(VARIANT_BOOL* retVal)
 STDMETHODIMP CGrid::get_PreferedDisplayMode(tkGridProxyMode *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = preferedDisplayMode;
+	*retVal = _preferedDisplayMode;
 	return S_OK;
 }
 STDMETHODIMP CGrid::put_PreferedDisplayMode(tkGridProxyMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	preferedDisplayMode = newVal;
+	_preferedDisplayMode = newVal;
 	return S_OK;
 }
 
@@ -2762,7 +2762,7 @@ STDMETHODIMP CGrid::CreateImageProxy(IGridColorScheme* colorScheme, IImage** ret
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	VARIANT_BOOL vb;
 	RemoveImageProxy(&vb);
-	GetUtils()->GridToImage2(this, colorScheme, m_globalSettings.gridProxyFormat, VARIANT_FALSE, this->globalCallback, retVal);
+	GetUtils()->GridToImage2(this, colorScheme, m_globalSettings.gridProxyFormat, VARIANT_FALSE, this->_globalCallback, retVal);
 	return S_OK;
 }
 

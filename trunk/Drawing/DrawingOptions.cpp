@@ -583,10 +583,10 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 	tkImageSourceType type;
 	this->picture->get_SourceType(&type);
 	
-	if (type == istGDIPlus && ((CImageClass*)this->picture)->m_iconGdiPlus)
+	if (type == istGDIPlus && ((CImageClass*)this->picture)->_iconGdiPlus)
 	{
 		// first let's check whether it is in-memory GDI+ icon after deserialization
-		bitmapPlus = ((CImageClass*)this->picture)->m_iconGdiPlus->m_bitmap;
+		bitmapPlus = ((CImageClass*)this->picture)->_iconGdiPlus->m_bitmap;
 		m_needDeleteBitmapPlus = false;
 	}
 	

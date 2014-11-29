@@ -34,19 +34,19 @@ class ATL_NO_VTABLE CGridColorScheme :
 public:
 	CGridColorScheme()
 	{
-		globalCallback = NULL;
+		_globalCallback = NULL;
 		
-		AmbientIntensity = 0.7;
-		LightSourceIntensity = 0.7;		
-		LightSourceIntensity = 0.7;
+		_ambientIntensity = 0.7;
+		_lightSourceIntensity = 0.7;		
+		_lightSourceIntensity = 0.7;
 
-		LightSourceAzimuth = 90;
-		LightSourceElevation = 45;
+		_lightSourceAzimuth = 90;
+		_lightSourceElevation = 45;
 		
-		NoDataColor = 0;		
-		LightSource = cppVector(0.0,-0.707,1.0);
+		_noDataColor = 0;		
+		_lightSource = cppVector(0.0,-0.707,1.0);
 
-		lastErrorCode = tkNO_ERROR;
+		_lastErrorCode = tkNO_ERROR;
 		
 		USES_CONVERSION;
 		_key = A2BSTR("");
@@ -114,24 +114,25 @@ public:
 	STDMETHOD(ApplyColoringType)(ColoringType coloringType);
 	STDMETHOD(ApplyGradientModel)(GradientModel gradientModel);
 
+public:
 	CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName);
 	bool CGridColorScheme::DeserializeCore(CPLXMLNode* node);
 	void ErrorMessage(long ErrorCode);
-private:
-	std::deque<IGridColorBreak *> Breaks;	//stack of breaks to be used
-	OLE_COLOR NoDataColor;				//color to be used when there is no data in the grid
-	cppVector LightSource;	 				//where is the light coming from?
-	double LightSourceIntensity;		//How bright is the light from the lightsource?
-										//valid values between 0 and 1, inclusive.
-	double AmbientIntensity;			//How bright is the overall lighting in the area?
-										//valid values between 0 and 1, inclusive.
-	double LightSourceAzimuth;
-	double LightSourceElevation;
 
 private:
-	long lastErrorCode;
-	ICallback * globalCallback;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
 	BSTR _key;
+
+	std::deque<IGridColorBreak *> _breaks;	//stack of breaks to be used
+	OLE_COLOR _noDataColor;				//color to be used when there is no data in the grid
+	cppVector _lightSource;	 				//where is the light coming from?
+	double _lightSourceIntensity;		//How bright is the light from the lightsource?
+										//valid values between 0 and 1, inclusive.
+	double _ambientIntensity;			//How bright is the overall lighting in the area?
+										//valid values between 0 and 1, inclusive.
+	double _lightSourceAzimuth;
+	double _lightSourceElevation;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GridColorScheme), CGridColorScheme)

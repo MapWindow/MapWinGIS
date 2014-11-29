@@ -118,7 +118,6 @@ private:
 	OLE_COLOR _lineColor;
 	float _lineWidth;
 	tkDashStyle _lineStyle;
-	//tkDashStyle _lineStiple;
 	tkDefaultPointSymbol _marker;
 	float _markerSize;
 	float _markerInterval;
@@ -127,5 +126,6 @@ private:
 	tkLineLabelOrientation _markerOrientation;
 	VARIANT_BOOL _markerFlipFirst;
 	IShapeDrawingOptions* _options;
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(LineSegment), CLineSegment)

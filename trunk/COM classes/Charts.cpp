@@ -1409,7 +1409,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 	// serializing data
 	if (_chartsExist)
 	{	
-		if (m_savingMode == modeStandard)
+		if (_savingMode == modeStandard)
 		{
 			CPLXMLNode* nodeCharts = this->SerializeChartData("Charts" );
 			if (nodeCharts)
@@ -1417,7 +1417,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 				CPLAddXMLChild(psTree, nodeCharts);
 			}
 		}
-		else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
+		else if (_savingMode == modeXML || _savingMode == modeXMLOverwrite)
 		{
 			if (_shapefile)
 			{
@@ -1431,7 +1431,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".chart";
 					
-					if (Utility::FileExists(path) && m_savingMode == modeXMLOverwrite)
+					if (Utility::FileExists(path) && _savingMode == modeXMLOverwrite)
 					{
 						if( remove( path ) != 0 )
 						{
@@ -1447,13 +1447,13 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 						this->SaveToXML(A2BSTR(path), &retVal);
 
 						// user will need to save modeXMLOverwrite once more to overwrite the file
-						if (m_savingMode == modeXMLOverwrite)
-							m_savingMode = modeXML;
+						if (_savingMode == modeXMLOverwrite)
+							_savingMode = modeXML;
 					}
 				}
 			}
 		}
-		else if (m_savingMode == modeDBF)
+		else if (_savingMode == modeDBF)
 		{
 			// TODO: implement
 			ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
@@ -1541,8 +1541,8 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 	if (_options.visible != opt.visible)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "Visible", CPLString().Printf("%d", (int)_options.visible));
 
-	if (m_savingMode !=  modeXML)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "SavingMode", CPLString().Printf("%d", (int)m_savingMode));
+	if (_savingMode !=  modeXML)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SavingMode", CPLString().Printf("%d", (int)_savingMode));
 
 	return psTree;
 }
@@ -1559,7 +1559,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 	this->ClearFields();
 	
 	// we don't touch charts in this mode
-	if (m_savingMode != modeNone)
+	if (_savingMode != modeNone)
 	{
 		this->Clear();
 	}
@@ -1600,7 +1600,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 	}
 	
 	// restoring labels
-	if (m_savingMode == modeStandard)
+	if (_savingMode == modeStandard)
 	{
 		node = CPLGetXMLNode( node, "Charts" );
 		if (node)
@@ -1608,7 +1608,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 			this->DeserializeChartData(node);
 		}
 	}
-	else if (m_savingMode == modeXML || m_savingMode == modeXMLOverwrite)
+	else if (_savingMode == modeXML || _savingMode == modeXMLOverwrite)
 	{
 		if (_shapefile)
 		{
@@ -1720,7 +1720,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 	_options.visible = (s != "") ?  (VARIANT_BOOL)atoi(s.GetString()) : opt.visible;
 
 	s = CPLGetXMLValue( node, "SavingMode", NULL );
-	m_savingMode = (s != "") ?  (tkSavingMode)atoi(s.GetString()) : modeXML;
+	_savingMode = (s != "") ?  (tkSavingMode)atoi(s.GetString()) : modeXML;
 
 	return true;
 }
@@ -1833,7 +1833,7 @@ CPLXMLNode* CCharts::SerializeChartData(CString ElementName)
 STDMETHODIMP CCharts::get_SavingMode(tkSavingMode* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = m_savingMode;
+	*retVal = _savingMode;
 	return S_OK;
 }
 
@@ -1843,7 +1843,7 @@ STDMETHODIMP CCharts::get_SavingMode(tkSavingMode* retVal)
 STDMETHODIMP CCharts::put_SavingMode(tkSavingMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	m_savingMode = newVal;
+	_savingMode = newVal;
 	return S_OK;
 }
 

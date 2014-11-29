@@ -11,15 +11,15 @@ STDMETHODIMP CFileManager::get_Key(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(m_key);
+	*pVal = OLE2BSTR(_key);
 	return S_OK;
 }
 STDMETHODIMP CFileManager::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	::SysFreeString(m_key);
+	::SysFreeString(_key);
 	USES_CONVERSION;
-	m_key = OLE2BSTR(newVal);
+	_key = OLE2BSTR(newVal);
 	return S_OK;
 }
 
@@ -28,16 +28,16 @@ STDMETHODIMP CFileManager::put_Key(BSTR newVal)
 //***********************************************************************/
 void CFileManager::ErrorMessage(long ErrorCode)
 {
-	m_lastErrorCode = ErrorCode;
-	if (m_lastErrorCode != tkNO_ERROR)
-		Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	if (_lastErrorCode != tkNO_ERROR)
+		Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CFileManager::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_lastErrorCode;
-	m_lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
 
@@ -55,15 +55,15 @@ STDMETHODIMP CFileManager::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP CFileManager::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = m_globalCallback;
-	if( m_globalCallback != NULL ) m_globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL ) _globalCallback->AddRef();
 	return S_OK;
 }
 
 STDMETHODIMP CFileManager::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&m_globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -119,7 +119,7 @@ STDMETHODIMP CFileManager::get_IsSupportedBy(BSTR Filename, tkSupportType suppor
 			*retVal = GdalHelper::CanOpenWithGdal(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
 			return S_OK;
 		case stGdalOverviews:
-			*retVal = GdalHelper::SupportsOverviews(OLE2W(Filename), m_globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
+			*retVal = GdalHelper::SupportsOverviews(OLE2W(Filename), _globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
 			return S_OK;
 	}
 	*retVal = VARIANT_FALSE;
@@ -334,12 +334,12 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 		VARIANT_BOOL vb;
 		IShapefile* sf = NULL;
 		GetUtils()->CreateInstance(idShapefile, (IDispatch**)&sf);
-		sf->Open(Filename, m_globalCallback, &vb);
+		sf->Open(Filename, _globalCallback, &vb);
 		if (!vb)
 		{
 			
-			sf->get_LastErrorCode(&m_lastErrorCode);
-			ErrorMessage(m_lastErrorCode);
+			sf->get_LastErrorCode(&_lastErrorCode);
+			ErrorMessage(_lastErrorCode);
 			sf->Release();
 			sf = NULL;
 		}
@@ -391,11 +391,11 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 				GetUtils()->CreateInstance(idImage, (IDispatch**)&img);
 				if (img)
 				{
-					img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, m_globalCallback, &vb );
+					img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb );
 					if (!vb)
 					{
-						img->get_LastErrorCode(&m_lastErrorCode);
-						ErrorMessage(m_lastErrorCode);
+						img->get_LastErrorCode(&_lastErrorCode);
+						ErrorMessage(_lastErrorCode);
 						img->Release();
 						img = NULL;
 					}
@@ -423,10 +423,10 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 				if (grid)
 				{
 					// TODO: choose inRam mode
-					grid->Open(Filename, GridDataType::UnknownDataType, VARIANT_FALSE, GridFileType::UseExtension, m_globalCallback, &vb);
+					grid->Open(Filename, GridDataType::UnknownDataType, VARIANT_FALSE, GridFileType::UseExtension, _globalCallback, &vb);
 					if (!vb) {
-						grid->get_LastErrorCode(&m_lastErrorCode);
-						ErrorMessage(m_lastErrorCode);
+						grid->get_LastErrorCode(&_lastErrorCode);
+						ErrorMessage(_lastErrorCode);
 						grid->Release();
 						grid = NULL;
 					}
@@ -441,12 +441,12 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						tkGridProxyMode mode = openStrategy == fosDirectGrid ? gpmNoProxy : gpmUseProxy;
 						
 						IImage* img = NULL;
-						grid->OpenAsImage(scheme, mode, m_globalCallback, &img);
+						grid->OpenAsImage(scheme, mode, _globalCallback, &img);
 						
 						if (!img) {
 							// TODO: perhaps use another mode on failure
-							grid->get_LastErrorCode(&m_lastErrorCode);
-							ErrorMessage(m_lastErrorCode);
+							grid->get_LastErrorCode(&_lastErrorCode);
+							ErrorMessage(_lastErrorCode);
 						}
 						else {
 							_lastOpenIsSuccess = true;
@@ -533,7 +533,7 @@ STDMETHODIMP CFileManager::ClearGdalOverviews(BSTR Filename, VARIANT_BOOL* retVa
 STDMETHODIMP CFileManager::BuildGdalOverviews(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = GdalHelper::BuildOverviewsIfNeeded(OLE2W(Filename), true, m_globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
+	*retVal = GdalHelper::BuildOverviewsIfNeeded(OLE2W(Filename), true, _globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 

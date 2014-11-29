@@ -31,17 +31,17 @@
 STDMETHODIMP CShapefileColorScheme::NumBreaks(long *result)
 {
 	
-	*result = allBreaks.size();	
+	*result = _allBreaks.size();	
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorScheme::Remove(long Index)
 {
 	
-	if( Index >= 0 && Index < (int)allBreaks.size() )
-	{	if( allBreaks[Index] != NULL )
-			allBreaks[Index]->Release();
-		allBreaks.erase( allBreaks.begin() + Index );
+	if( Index >= 0 && Index < (int)_allBreaks.size() )
+	{	if( _allBreaks[Index] != NULL )
+			_allBreaks[Index]->Release();
+		_allBreaks.erase( _allBreaks.begin() + Index );
 	}
 	else
 	{	
@@ -56,9 +56,9 @@ STDMETHODIMP CShapefileColorScheme::Add(IShapefileColorBreak *Break, long *resul
 		return S_OK;
 
 	
-	*result = allBreaks.size();
+	*result = _allBreaks.size();
 	Break->AddRef();
-	allBreaks.push_back( Break );
+	_allBreaks.push_back( Break );
 	return S_OK;
 }
 
@@ -68,20 +68,20 @@ STDMETHODIMP CShapefileColorScheme::InsertAt(int Position, IShapefileColorBreak 
 		return S_OK;
 
 	
-	*result = allBreaks.size();
+	*result = _allBreaks.size();
 	Break->AddRef();
-	allBreaks.insert(allBreaks.begin() + Position, Break);
+	_allBreaks.insert(_allBreaks.begin() + Position, Break);
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorScheme::get_ColorBreak(long Index, IShapefileColorBreak **pVal)
 {
 	
-	if( Index >= 0 && Index < (int)allBreaks.size() )
+	if( Index >= 0 && Index < (int)_allBreaks.size() )
 	{	
-		if( allBreaks[Index] != NULL )
-			allBreaks[Index]->AddRef();
-		*pVal = allBreaks[Index];
+		if( _allBreaks[Index] != NULL )
+			_allBreaks[Index]->AddRef();
+		*pVal = _allBreaks[Index];
 	}
 	else
 	{	*pVal = NULL;
@@ -92,7 +92,7 @@ STDMETHODIMP CShapefileColorScheme::get_ColorBreak(long Index, IShapefileColorBr
 
 STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBreak *newVal)
 {
-	if( Index >= 0 && Index < (int)allBreaks.size() )
+	if( Index >= 0 && Index < (int)_allBreaks.size() )
 	{	
 		if (!newVal)
 		{
@@ -100,7 +100,7 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 		}
 		else
 		{
-			Utility::put_ComReference(newVal, (IDispatch**)&allBreaks[Index], false);
+			Utility::put_ComReference(newVal, (IDispatch**)&_allBreaks[Index], false);
 		}
 	}
 	else
@@ -115,32 +115,32 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 //***********************************************************************/
 void CShapefileColorScheme::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CShapefileColorScheme::get_LayerHandle(long *pVal)
 {
 
-	*pVal = layerHandle;
+	*pVal = _layerHandle;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorScheme::put_LayerHandle(long newVal)
 {
-	layerHandle = newVal;
+	_layerHandle = newVal;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorScheme::get_FieldIndex(long *pVal)
 {
-	*pVal = fieldIndex;
+	*pVal = _fieldIndex;
 	return S_OK;
 }
 
 STDMETHODIMP CShapefileColorScheme::put_FieldIndex(long newVal)
 {
-	fieldIndex = newVal;
+	_fieldIndex = newVal;
 	return S_OK;
 }
 
@@ -148,9 +148,9 @@ STDMETHODIMP CShapefileColorScheme::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback )
-		globalCallback->AddRef();
+	*pVal = _globalCallback;
+	if( _globalCallback )
+		_globalCallback->AddRef();
 
 	return S_OK;
 }
@@ -158,7 +158,7 @@ STDMETHODIMP CShapefileColorScheme::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CShapefileColorScheme::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -176,8 +176,8 @@ STDMETHODIMP CShapefileColorScheme::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -187,7 +187,7 @@ STDMETHODIMP CShapefileColorScheme::get_Key(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	USES_CONVERSION;
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -196,8 +196,8 @@ STDMETHODIMP CShapefileColorScheme::put_Key(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }

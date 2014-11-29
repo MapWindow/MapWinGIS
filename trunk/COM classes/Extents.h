@@ -33,14 +33,14 @@ class ATL_NO_VTABLE CExtents :
 public:
 	CExtents()
 	{
-		xmin = 0.0;
-		xmax = 0.0;
-		ymin = 0.0;
-		ymax = 0.0;
-		zmin = 0.0;
-		zmax = 0.0;
-		mmin = 0.0;
-		mmax = 0.0;
+		_xmin = 0.0;
+		_max = 0.0;
+		_ymin = 0.0;
+		_ymax = 0.0;
+		_zmin = 0.0;
+		_zmax = 0.0;
+		_mmin = 0.0;
+		_mmax = 0.0;
 	}
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -88,14 +88,14 @@ public:
 	STDMETHOD(MoveTo)(double x, double y);
 	
 private:
-	double xmin;
-	double xmax;
-	double ymin;
-	double ymax;
-	double zmin;
-	double zmax;
-	double mmin;
-	double mmax;
+	double _xmin;
+	double _max;
+	double _ymin;
+	double _ymax;
+	double _zmin;
+	double _zmax;
+	double _mmin;
+	double _mmax;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Extents), CExtents)

@@ -40,16 +40,15 @@ class ATL_NO_VTABLE CTiles :
 	public IDispatchImpl<ITiles, &IID_ITiles, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	#pragma region Constructor/destructor
 	CTiles()
 	{
 		USES_CONVERSION;
-		m_key = A2BSTR("");
-		m_globalCallback = NULL;
-		m_lastErrorCode = tkNO_ERROR;
+		_key = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
 		
-		CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&m_providers);
-		((CTileProviders*)m_providers)->put_Tiles(this);
+		CoCreateInstance( CLSID_TileProviders, NULL, CLSCTX_INPROC_SERVER, IID_ITileProviders, (void**)&_providers);
+		((CTileProviders*)_providers)->put_Tiles(this);
 		this->SetDefaults();
 		_lastZoom = -1;
 		_lastProvider = tkTileProvider::ProviderNone;
@@ -58,7 +57,7 @@ public:
 
 	~CTiles()
 	{
-		SysFreeString(m_key);
+		SysFreeString(_key);
 		ClearAll();
 		gReferenceCounter.Release(tkInterface::idTiles);
 	}
@@ -67,26 +66,26 @@ public:
 	{
 		this->Stop();
 		this->Clear();
-		if (m_providers)
+		if (_providers)
 		{
-			m_providers->Release();
-			m_providers = NULL;
+			_providers->Release();
+			_providers = NULL;
 		}
 	}
 
 	void SetDefaults()
 	{
-		m_provider = ((CTileProviders*)m_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
-		m_visible = true;
-		m_gridLinesVisible = false;
-		m_doRamCaching = true;
-		m_doDiskCaching = false;
-		m_useRamCache = true;
-		m_useDiskCache = true;
-		m_useServer = true;
-		m_minScaleToCache = 0;
-		m_maxScaleToCache = 100;
-		m_projExtentsNeedUpdate = true;
+		m_provider = ((CTileProviders*)_providers)->get_Provider((int)tkTileProvider::OpenStreetMap);
+		_visible = true;
+		_gridLinesVisible = false;
+		_doRamCaching = true;
+		_doDiskCaching = false;
+		_useRamCache = true;
+		_useDiskCache = true;
+		_useServer = true;
+		_minScaleToCache = 0;
+		_maxScaleToCache = 100;
+		_projExtentsNeedUpdate = true;
 		_scalingRatio = 1.0;
 	}
 
@@ -95,7 +94,6 @@ public:
 	BEGIN_COM_MAP(CTiles)
 		COM_INTERFACE_ENTRY(ITiles)
 		COM_INTERFACE_ENTRY(IDispatch)
-		//COM_INTERFACE_ENTRY(IConnectionPointContainer)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -108,10 +106,8 @@ public:
 	void FinalRelease()
 	{
 	}
-	#pragma endregion
 
 public:
-	#pragma region "COM interface"
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_GlobalCallback)(/*[out, retval]*/ ICallback * *pVal);
@@ -178,36 +174,34 @@ public:
 	STDMETHOD(put_ScalingRatio)(double newVal);
 	STDMETHOD(SetProxyAuthorization)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
 	STDMETHOD(ClearProxyAuthorization)();
-	#pragma endregion
 
 private:
-	
-	long m_lastErrorCode;
-	ICallback * m_globalCallback;
-	BSTR m_key;
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	BSTR _key;
 
 	double _scalingRatio;
 
-	bool m_visible;
-	bool m_gridLinesVisible;
-	bool m_doRamCaching;
-	bool m_doDiskCaching;
-	bool m_useRamCache;
-	bool m_useDiskCache;
-	bool m_useServer;
+	bool _visible;
+	bool _gridLinesVisible;
+	bool _doRamCaching;
+	bool _doDiskCaching;
+	bool _useRamCache;
+	bool _useDiskCache;
+	bool _useServer;
 	
-	int m_minScaleToCache;
-	int m_maxScaleToCache;
+	int _minScaleToCache;
+	int _maxScaleToCache;
 	
-	ITileProviders* m_providers;
+	ITileProviders* _providers;
 	
-	TileLoader m_tileLoader;
-	TileLoader m_prefetchLoader;
+	TileLoader _tileLoader;
+	TileLoader _prefetchLoader;
 	
-	Extent m_projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
-	bool m_projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
-	CStringW m_logPath;
-	void* mapView;
+	Extent _projExtents;			// extents of the world under current projection; in WGS84 it'll be (-180, 180, -90, 90)
+	bool _projExtentsNeedUpdate;	// do we need to update bounds in m_projExtents on the next request?
+	CStringW _logPath;
+	void* _mapView;
 
 	// to avoid duplicate consecutive requests
 	int _lastZoom;
@@ -216,16 +210,22 @@ private:
 	Extent _lastMapExtents;
 
 public:
-	::CCriticalSection _tilesBufferLock;
+	::CCriticalSection m_tilesBufferLock;
 	std::vector<TileCore*> m_tiles;
 	BaseProvider* m_provider;
-	
+
+private:
+	void ErrorMessage(long ErrorCode);
+	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
+	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
+	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
+	bool ProjectionSupportsWorldWideTransform(IGeoProjection* mapProjection, IGeoProjection* wgs84Projection);
+	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
+
 public:	
-	void Init(void* map) {	mapView = map; }
+	void Init(void* map) {	_mapView = map; }
 	void MarkUndrawn();
-	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
-								  BSTR savePath, BSTR fileExt, IStopExecution* stop);
-	
+	long PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, BSTR savePath, BSTR fileExt, IStopExecution* stop);
 	void AddTileWithCaching(TileCore* tile);
 	void AddTileNoCaching(TileCore* tile);
 	void AddTileOnlyCaching(TileCore* tile);
@@ -245,19 +245,7 @@ public:
 	bool ProjectionBounds(BaseProvider* provider, IGeoProjection* mapProjection, IGeoProjection* wgsProjection,tkTransformationMode transformationMode, Extent& retVal);
 	void HandleOnTilesLoaded(bool isSnapshot, CString key, bool nothingToLoad);
 	void UpdateProjection();
-	void Stop() {
-		m_tileLoader.Stop(); 
-		this->m_visible = false;	// will prevent reloading tiles after remove all layers in map destructor
-	}
-private:	
-	void ErrorMessage(long ErrorCode);
-	int ChooseZoom(double xMin, double xMax, double yMin, double yMax, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
-	int ChooseZoom(IExtents* ext, double pixelPerDegree, bool limitByProvider, BaseProvider* provider);
-	void getRectangleXY(double xMinD, double xMaxD, double yMinD, double yMaxD, int zoom, CRect &rect, BaseProvider* provider);
-	bool ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection, IGeoProjection* wgs84Projection );
-	void SetAuthorization(BSTR userName, BSTR password, BSTR domain);
-public:
-	
+	void Stop();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Tiles), CTiles)

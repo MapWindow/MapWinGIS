@@ -33,18 +33,18 @@ class ATL_NO_VTABLE CPointClass :
 public:
 	CPointClass()
 	{	USES_CONVERSION;
-		x = 0.0;
-		y = 0.0;
-		z = 0.0;
-		m = 0.0;
-		key = A2BSTR("");
-		globalCallback = NULL;
-		lastErrorCode = tkNO_ERROR;
+		_x = 0.0;
+		_y = 0.0;
+		_z = 0.0;
+		_m = 0.0;
+		_key = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
 		//gReferenceCounter.AddRef(tkInterface::idPoint);     // it's additional overhead, use for debugging only
 	}
 	~CPointClass()
-	{	globalCallback = NULL;
-		::SysFreeString(key);
+	{	_globalCallback = NULL;
+		::SysFreeString(_key);
 		//gReferenceCounter.Release(tkInterface::idPoint);
 	}
 
@@ -59,14 +59,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_POINT)
+	DECLARE_REGISTRY_RESOURCEID(IDR_POINT)
 
-DECLARE_NOT_AGGREGATABLE(CPointClass)
+	DECLARE_NOT_AGGREGATABLE(CPointClass)
 
-BEGIN_COM_MAP(CPointClass)
-	COM_INTERFACE_ENTRY(IPoint)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CPointClass)
+		COM_INTERFACE_ENTRY(IPoint)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IPoint
@@ -86,14 +86,16 @@ public:
 	STDMETHOD(get_X)(/*[out, retval]*/ double *pVal);
 	STDMETHOD(put_X)(/*[in]*/ double newVal);
 	STDMETHOD(Clone)(IPoint** retVal);
+
 private:
-	double x;
-	double y;
-	double z;
-	double m;
-	BSTR key;
-	long lastErrorCode;
-	ICallback * globalCallback;	
+
+	double _x;
+	double _y;
+	double _z;
+	double _m;
+	BSTR _key;
+	long _lastErrorCode;
+	ICallback * _globalCallback;	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Point), CPointClass)

@@ -40,28 +40,28 @@ class ATL_NO_VTABLE CShapefileCategories :
 public:
 	CShapefileCategories()
 	{
-		m_shapefile = NULL;
-		m_key = A2BSTR("");
-		m_caption = A2BSTR("");
-		m_globalCallback = NULL;
-		m_lastErrorCode = tkNO_ERROR;
+		_shapefile = NULL;
+		_key = A2BSTR("");
+		_caption = A2BSTR("");
+		_globalCallback = NULL;
+		_lastErrorCode = tkNO_ERROR;
 		_classificationField = -1;
 		gReferenceCounter.AddRef(tkInterface::idShapefileCategories);
 	}
 
 	~CShapefileCategories()
 	{
-		::SysFreeString(m_key);
-		::SysFreeString(m_caption);
-		m_shapefile = NULL;
+		::SysFreeString(_key);
+		::SysFreeString(_caption);
+		_shapefile = NULL;
 		for(int i = 0; i< (int)_categories.size(); i++)
 			_categories[i]->Release();
 		_categories.clear();
 
-		if (m_globalCallback)
+		if (_globalCallback)
 		{
-			m_globalCallback->Release();
-			m_globalCallback = NULL;
+			_globalCallback->Release();
+			_globalCallback = NULL;
 		}
 		gReferenceCounter.Release(tkInterface::idShapefileCategories);
 	}
@@ -85,9 +85,6 @@ public:
 	}
 
 public:
-	// ------------------------------------------------------------------
-	//		IShapefileCategories Interface
-	// ------------------------------------------------------------------
 	STDMETHOD(get_Count)(long* pVal);
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Key)(/*[in]*/ BSTR newVal);
@@ -125,34 +122,30 @@ public:
 	STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ClassificationField)(LONG* pVal);
 	STDMETHOD(put_ClassificationField)(LONG newVal);
-
-	bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressions);
-	CPLXMLNode* CShapefileCategories::SerializeCore(CString ElementName);
+	
 private:
-	// ------------------------------------------------------------------
-	//		Private members
-	// ------------------------------------------------------------------
-	BSTR m_key;
-	BSTR m_caption;
+	BSTR _key;
+	BSTR _caption;
 
-	long m_lastErrorCode;
-	ICallback * m_globalCallback;
-	IShapefile* m_shapefile;		// parent shapefile
+	long _lastErrorCode;
+	ICallback * _globalCallback;
+	IShapefile* _shapefile;		// parent shapefile
 	long _classificationField;		// used for fast processing of unique values classification; 
 									// m_value property of each category (with vt different from VT_EMPTY) will be used in this case
 									// should be set to -1 to use the common expression parsing
 
 	std::vector<IShapefileCategory*> _categories;
 
-	// ------------------------------------------------------------------
-	//		Utility functions
-	// ------------------------------------------------------------------
-	void CShapefileCategories::ErrorMessage(long ErrorCode);
-	void CShapefileCategories::ApplyExpression_(long CategoryIndex);
-	bool CShapefileCategories::get_AreaValues(std::vector<double>* values);
-	bool CShapefileCategories::get_LengthValues(std::vector<double>* values);
+private:
+	void ErrorMessage(long ErrorCode);
+	void ApplyExpressionCore(long CategoryIndex);
+	bool get_AreaValues(std::vector<double>* values);
+	bool get_LengthValues(std::vector<double>* values);
 	
 public:	
+	bool DeserializeCore(CPLXMLNode* node, bool applyExpressions);
+	CPLXMLNode* SerializeCore(CString ElementName);
+
 	void put_ParentShapefile(IShapefile* newVal);
 	IShapefile* get_ParentShapefile();
 	CDrawingOptionsEx* get_UnderlyingOptions(int Index);

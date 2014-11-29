@@ -68,13 +68,6 @@ public:
 	STDMETHOD(get_ShortcutKey)(tkUndoShortcut* pVal);
 	STDMETHOD(put_ShortcutKey)(tkUndoShortcut newVal);
 	STDMETHOD(ClearForLayer)(LONG LayerHandle);
-public:
-	void SetMapCallback(IMapViewCallback* callback){
-		_mapCallback = callback;
-	}
-	bool DiscardOne();
-	bool AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset);
-	bool AddRotateOperation(int layerHandle, vector<int>* indices, double xProjOrigin, double yProjOrigin, double angleDegrees);
 
 private:
 	struct UndoListItem
@@ -127,9 +120,11 @@ private:
 		}
 	};
 
+private:
 	static int g_UniqueId;
 	static const int EMPTY_BATCH_ID;
 
+private:
 	long _lastErrorCode;
 	BSTR _key;
 	vector<UndoListItem*> _list;
@@ -138,6 +133,8 @@ private:
 	int _position;
 	tkUndoShortcut _shortcutKey;
 	bool _dtor;
+
+private:
 	bool UndoSingleItem(UndoListItem* item);
 	bool CopyShapeState(long layerHandle, long shapeIndex, bool copyAttributes, UndoListItem* item);
 	void TrimList();
@@ -155,6 +152,10 @@ private:
 	bool AddGroupOperation(tkUndoOperation operation, int layerHandle, vector<int>* indices, double xProjOrigin, double yProjOrigin, double angleDegrees);
 
 public:
+	void SetMapCallback(IMapViewCallback* callback){ _mapCallback = callback; }
+	bool DiscardOne();
+	bool AddMoveOperation(int layerHandle, vector<int>* indices, double xProjOffset, double yProjOffset);
+	bool AddRotateOperation(int layerHandle, vector<int>* indices, double xProjOrigin, double yProjOrigin, double angleDegrees);
 	
 };
 OBJECT_ENTRY_AUTO(__uuidof(UndoList), CUndoList)

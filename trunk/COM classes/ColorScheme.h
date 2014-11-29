@@ -96,13 +96,15 @@ private:
 		double value;
 		OLE_COLOR color;
 	};
-	
+
+private:	
 	std::vector<ColorBreak> _breaks;
 	BSTR _key;
 	long _lastErrorCode;
 	ICallback* _globalCallback;
 	tkColorSchemeType _type;
 
+public:
 	void ErrorMessage(long ErrorCode);
 };
 

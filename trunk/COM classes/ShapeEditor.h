@@ -129,8 +129,8 @@ public:
 	STDMETHOD(put_EditorBehavior)(tkEditorBehavior newVal);
 	STDMETHOD(SaveChanges)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasChanges)(VARIANT_BOOL* pVal);
+
 private:
-	
 	BSTR _key;
 	ICallback * _globalCallback;
 	VARIANT_BOOL _visible;
@@ -150,12 +150,14 @@ private:
 	tkEditorOverlay _overlayType;
 	tkEditorBehavior _behavior;
 	long _startingUndoCount;
-
-	void ErrorMessage(long ErrorCode);
-	void CopyData(int firstIndex, int lastIndex, IShape* target );
 	
 public:
 	IMapViewCallback* _mapCallback;
+
+public:
+	void ErrorMessage(long ErrorCode);
+	void CopyData(int firstIndex, int lastIndex, IShape* target);
+
 	void SetMapCallback(IMapViewCallback* callback) {
 		_activeShape->SetMapCallback(callback, simEditing);
 		_mapCallback = callback;

@@ -52,8 +52,8 @@ public:
 	CFieldStatOperations()
 	{
 		USES_CONVERSION;
-		m_lastErrorCode = tkNO_ERROR;
-		m_key = A2BSTR("stuff");
+		_lastErrorCode = tkNO_ERROR;
+		_key = A2BSTR("stuff");
 	}
 
 	~CFieldStatOperations()
@@ -95,10 +95,12 @@ public:
 	STDMETHOD(Validate)(IShapefile* sf, VARIANT_BOOL* retVal);
 	STDMETHOD(get_OperationIsValid)(int operationIndex, VARIANT_BOOL* retVal);
 	STDMETHOD(get_OperationIsValidReason)(int operationIndex, tkFieldOperationValidity* retVal);
+
 private:
 	void ErrorMessage(long ErrorCode);
-	long m_lastErrorCode;
-	BSTR m_key;
+	long _lastErrorCode;
+	BSTR _key;
+
 public:
 	std::vector<FieldOperation*> _operations;
 };

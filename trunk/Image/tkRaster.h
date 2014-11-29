@@ -23,13 +23,13 @@ public:
     tkRaster()
 		: transColor(RGB(0,0,0))
 	{	//Rob Cairns
-		rasterDataset=NULL;
+		_rasterDataset=NULL;
 		_predefinedColorScheme = NULL;
-		customColorScheme = NULL;
-		poBandR = NULL;
-		poBandG = NULL;
-		poBandB = NULL;
-		poCT = NULL;
+		_customColorScheme = NULL;
+		_poBandR = NULL;
+		_poBandG = NULL;
+		_poBandB = NULL;
+		_poCT = NULL;
 		hasColorTable = false;
 		hasTransparency = false;
 		cBack = NULL;
@@ -45,7 +45,7 @@ public:
 		orig_dY = 1.0;
 		orig_Width = 0;
 		orig_Height = 0;
-		m_clearGDALCache = false;
+		clearGDALCache = false;
 		warped = false;
 		allowHillshade = true;
 		allowAsGrid = grForGridsOnly;
@@ -58,6 +58,7 @@ public:
 		if (_predefinedColorScheme)
 			_predefinedColorScheme->Release();
 	};
+
 private:
 	struct BreakVal
 	{	
@@ -65,80 +66,73 @@ private:
 		double highVal;
 	};
 
-	double dfMin;
-	double dfMax;
-	double adfMinMax[2];	// holds the min and max values for grid images
+private:
+	double _dfMin;
+	double _dfMax;
+	double _adfMinMax[2];	// holds the min and max values for grid images
 	
-	GDALDataType dataType;
-	GDALDataset * rasterDataset;
-	GDALRasterBand * poBandR;
-	GDALRasterBand * poBandB;
-	GDALRasterBand * poBandG;
+	GDALDataType _dataType;
+	GDALDataset * _rasterDataset;
+	GDALRasterBand * _poBandR;
+	GDALRasterBand * _poBandB;
+	GDALRasterBand * _poBandG;
 
-	HandleImage handleImage;
-	GDALColorTable * poCT;
-	GDALPaletteInterp cPI;
-	GDALColorInterp cInterp;
-	GDALDataType genericType;
+	HandleImage _handleImage;
+	GDALColorTable * _poCT;
+	GDALPaletteInterp _cPI;
+	GDALColorInterp _cInterp;
+	GDALDataType _genericType;
 
 	//Histogram variables
-	bool	histogramComputed;	// Has the histogram been computed
-	bool	allowHistogram;		// It the computation fails don't allow again
-	int		nLUTBins;
-    double  *padfScaleMin;
-    double  *padfScaleMax;
-    int     **papanLUTs;
-	int nBands;					// No of bands in the image
+	bool	_histogramComputed;	// Has the histogram been computed
+	bool	_allowHistogram;		// It the computation fails don't allow again
+	int		_nLUTBins;
+    double  *_padfScaleMin;
+    double  *_padfScaleMax;
+    int     **_papanLUTs;
+	int _nBands;					// No of bands in the image
 
-	const char* ciName;			// Color interpretation name
-	int buffSize;
-	int ColorMapSize;
-	ColorEntry ColorMap[4096];
-
-	// ---------------------------------------------
-	//   Methods
-	// ---------------------------------------------
-	bool LoadRasterCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly); 
-	HandleImage tkRaster::ChooseRenderingMethod();
-	IGridColorScheme* tkRaster::GetColorSchemeForRendering();		// returns either of the 2 available
-	void tkRaster::ComputeBandMinMax();
-	bool ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
-	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
-	template <typename T> 
-	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff,	int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram);
-	bool ReadGridAsImage(colour ** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); // double dx, double dy, bool setRGBToGrey, PredefinedColorScheme imageColorScheme,bool clearGDALCache);
-	long findBreak( std::deque<BreakVal> & bvals, double val );
-	bool ComputeEqualizationLUTs( CStringW filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
-public:	
-	//world coordinate related variables
-	long width, height;
-	double dY;				// change in Y (for size of cell or pixel)
-	double dX;				// change in X (for size of cell or pixel)
-	double YllCenter;		// Y coordinate of lower left corner of image (world coordinate)
-	double XllCenter;		// X coordinate of lower left corner of image (world coordinate)
+	const char* _ciName;			// Color interpretation name
+	int _buffSize;
+	int _colorMapSize;
+	ColorEntry _colorMap[4096];
 
 	Extent _extents;		// full extents in map coordinates
 	Extent _visibleExtents;	// visible extents in map coordinates
-	CRect _visibleRect;		// indices of pixels of image that are visible at least partially
 	
-	BSTR key;
+	BSTR _key;
+	
+	float _pctTrans;
+
+	PredefinedColorScheme _predefinedColors; //Image color scheme if read as grid
+	ImageType _imgType;
+	
+	IGridColorScheme * _customColorScheme;		// the one set by Image.GridColorScheme property
+	IGridColorScheme * _predefinedColorScheme;		// the one set by Image.ImageColorScheme property
+
+public:
+	//world coordinate related variables
+	double dY;				// change in Y (for size of cell or pixel)
+	double dX;				// change in X (for size of cell or pixel)
+	double YllCenter;		// Y coordinate of lower left corner of image (world coordinate)
+	double XllCenter;		// X coordinate of lower left corner of image (world coordinate)	
+	long width, height;
+
+	bool warped;	// a warped dataset was created on opening
+	int activeBandIndex;
+	tkGridRendering allowAsGrid;		// Allow the image to be read as grid (if appropriate)
+	bool clearGDALCache;
+	int imageQuality;		// Set the image quality 0-100
+	bool hasColorTable;		// The image has a color table	
+	GDALPaletteInterp paletteInterp; // palette interpretation
+	bool allowHillshade;	// if false changes ColorType from Hillshade to gradient
+	bool useHistogram;		// Use histogram equalization
 	bool hasTransparency;
-	float pctTrans;
 	colort transColor;		// transparent color
+
+	CRect visibleRect;		// indices of pixels of image that are visible at least partially
 	ICallback * cBack;
 
-	int activeBandIndex;
-	PredefinedColorScheme _predefinedColors; //Image color scheme if read as grid
-	tkGridRendering allowAsGrid;		// Allow the image to be read as grid (if appropriate)
-	bool allowHillshade;	// if false changes ColorType from Hillshade to gradient
-	int imageQuality;		// Set the image quality 0-100
-	bool m_clearGDALCache;
-	bool hasColorTable;		// The image has a color table	
-	GDALPaletteInterp paletteInterp; //Pallette interpretation
-	bool useHistogram;		// Use histogram equalization
-	
-	ImageType ImgType;
-	
 	// original size and position
 	double orig_XllCenter;
 	double orig_YllCenter;
@@ -146,45 +140,30 @@ public:
 	double orig_dY;
 	long orig_Width;
 	long orig_Height;
-	bool warped;	// a warped dataset was created on opening
-	
-	IGridColorScheme * customColorScheme;		// the one set by Image.GridColorScheme property
-	IGridColorScheme * _predefinedColorScheme;		// the one set by Image.ImageColorScheme property
 
-	// ---------------------------------------------
-	//   Methods
-	// ---------------------------------------------
-	bool SetActiveBandIndex(int bandIndex)
-	{
-		if (nBands < bandIndex || bandIndex < 1)
-			return false;
-		else
-		{
-			activeBandIndex = bandIndex;
-			return true;
-		}
-	}
-	GDALRasterBand* get_RasterBand(int BandIndex)
-	{
-		if (BandIndex == 1) return poBandR;
-		else if (BandIndex == 1) return poBandG;
-		else if (BandIndex == 1) return poBandB;
-		else return NULL;
-	}
-	void ApplyCustomColorScheme(IGridColorScheme * scheme)
-	{
-		Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&customColorScheme, true);
-	}
-	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
-	{
-		_predefinedColors = colorScheme;
-		_predefinedColorScheme->UsePredefined(dfMin, dfMax, colorScheme);
-	}
-	IGridColorScheme* get_CustomColorScheme() { return customColorScheme; }
-	GDALDataset* tkRaster::get_Dataset()	{return rasterDataset;}
+private:
+	bool LoadRasterCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly);
+	HandleImage tkRaster::ChooseRenderingMethod();
+	IGridColorScheme* tkRaster::GetColorSchemeForRendering();		// returns either of the 2 available
+	void tkRaster::ComputeBandMinMax();
+	bool ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
+	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
+	template <typename T>
+	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram);
+	bool ReadGridAsImage(colour ** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); // double dx, double dy, bool setRGBToGrey, PredefinedColorScheme imageColorScheme,bool clearGDALCache);
+	long findBreak(std::deque<BreakVal> & bvals, double val);
+	bool ComputeEqualizationLUTs(CStringW filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
+
+public:
+	bool SetActiveBandIndex(int bandIndex);
+	GDALRasterBand* get_RasterBand(int BandIndex);
+	void ApplyCustomColorScheme(IGridColorScheme * scheme) { Utility::put_ComReference((IDispatch*)scheme, (IDispatch**)&_customColorScheme, true);	}
+	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme);
+	IGridColorScheme* get_CustomColorScheme() { return _customColorScheme; }
+	GDALDataset* get_Dataset()	{return _rasterDataset;}
 	bool get_HasColorTable(){return hasColorTable;};
-	GDALPaletteInterp get_PaletteInterpretation(){return cPI;};
-	int get_NoBands(){return nBands;};
+	GDALPaletteInterp get_PaletteInterpretation(){return _cPI;};
+	int get_NoBands(){return _nBands;};
 	double getDX() {return dX;} 
 	double getDY() {return dY;}
 	double getYllCenter() {return YllCenter;}

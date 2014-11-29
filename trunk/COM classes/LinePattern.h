@@ -108,14 +108,14 @@ public:
 	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);
 	
 private:
-	void ErrorMessage(long ErrorCode);	
-
-	// member variables
 	std::vector <ILineSegment*> _lines;
 	BSTR _key;
 	long _lastErrorCode;
 	ICallback* _globalCallback;
 	unsigned char _transparency;
+
+private:
+	void ErrorMessage(long ErrorCode);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LinePattern), CLinePattern)

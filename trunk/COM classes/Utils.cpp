@@ -55,9 +55,9 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 
 	if( Shape != NULL )
 	{	
-		pip_cache_parts.clear();
-		pip_cache_pointsX.clear();
-		pip_cache_pointsY.clear();
+		_pip_cache_parts.clear();
+		_pip_cache_pointsX.clear();
+		_pip_cache_pointsY.clear();
 	
 		ShpfileType shptype;
 		Shape->get_ShapeType(&shptype);
@@ -69,7 +69,7 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 			return S_OK;
 		}
 
-		((CShape*)Shape)->get_ExtentsXY(pip_left,pip_bottom,pip_right,pip_top);
+		((CShape*)Shape)->get_ExtentsXY(_pip_left,_pip_bottom,_pip_right,_pip_top);
 
 		long numParts = 0;
 		long numPoints = 0;
@@ -78,7 +78,7 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 		
 		if(numParts == 0)//ah 11/22/05, for in-memory shapes that have no parts
 		{
-			pip_cache_parts.push_back(0);			
+			_pip_cache_parts.push_back(0);			
 		}
 		else
 		{
@@ -86,7 +86,7 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 			for( int j = 0; j < numParts; j++ )
 			{	
 				Shape->get_Part(j,&part);
-				pip_cache_parts.push_back(part);
+				_pip_cache_parts.push_back(part);
 			}
 		}
 		
@@ -96,8 +96,8 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 		for( int i = 0; i < numPoints; i++ )
 		{	
 			Shape->get_XY(i, &pointX, &pointY, &vbretval);
-			pip_cache_pointsX.push_back(pointX);
-			pip_cache_pointsY.push_back(pointY);
+			_pip_cache_pointsX.push_back(pointX);
+			_pip_cache_pointsY.push_back(pointY);
 		}
 	}
 	
@@ -108,22 +108,22 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 		TestPoint->get_Y(&test_pointY);
 			
 		//Initial Test on Bounds
-		if( test_pointX < pip_left )
+		if( test_pointX < _pip_left )
 		{	
 			*retval = FALSE;
 			return S_OK;
 		}
-		else if( test_pointX > pip_right )
+		else if( test_pointX > _pip_right )
 		{	
 			*retval = FALSE;
 			return S_OK;
 		}
-		if( test_pointY < pip_bottom )
+		if( test_pointY < _pip_bottom )
 		{	
 			*retval = FALSE;
 			return S_OK;
 		}
-		else if( test_pointY > pip_top )
+		else if( test_pointY > _pip_top )
 		{	
 			*retval = FALSE;
 			return S_OK;
@@ -136,15 +136,15 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 		int end_part = 0;
 
 		int number_in_polygons = 0;
-		int numCacheParts = (int)pip_cache_parts.size();//ah 6/6/05
+		int numCacheParts = (int)_pip_cache_parts.size();//ah 6/6/05
 		
 		for( int j = 0; j < numCacheParts; j++ )
 		{
-			beg_part = pip_cache_parts[j];
+			beg_part = _pip_cache_parts[j];
 			if( (numCacheParts - 1) > j )
-				end_part = pip_cache_parts[j+1];
+				end_part = _pip_cache_parts[j+1];
 			else
-				end_part = pip_cache_pointsX.size();
+				end_part = _pip_cache_pointsX.size();
 
 			int SH = 0;
 			int NSH = 0;
@@ -153,14 +153,14 @@ STDMETHODIMP CUtils::PointInPolygon(IShape *Shape, IPoint *TestPoint, VARIANT_BO
 			for( int i = beg_part; i < end_part - 1; i++ )
 			{	
 				long corner_two_index = i + 1;
-				if( i == pip_cache_pointsX.size() - 1 )
+				if( i == _pip_cache_pointsX.size() - 1 )
 					corner_two_index = beg_part;
 				
 				//Translate points to origin centered on test_point
-				double corner_oneX = pip_cache_pointsX[i] - test_pointX;
-				double corner_oneY = pip_cache_pointsY[i] - test_pointY;
-				double corner_twoX = pip_cache_pointsX[corner_two_index] - test_pointX;
-				double corner_twoY = pip_cache_pointsY[corner_two_index] - test_pointY;
+				double corner_oneX = _pip_cache_pointsX[i] - test_pointX;
+				double corner_oneY = _pip_cache_pointsY[i] - test_pointY;
+				double corner_twoX = _pip_cache_pointsX[corner_two_index] - test_pointX;
+				double corner_twoY = _pip_cache_pointsY[corner_two_index] - test_pointY;
 				
 				set_sign( corner_oneY, SH );
 				set_sign( corner_twoY, NSH );
@@ -222,7 +222,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	if( Grid == NULL )
 	{	
@@ -263,7 +263,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 			if( val == oldValue )
 				Grid->put_Value(i,j,NewValue);
 
-			Utility::DisplayProgress(callback, j*ncols + i, total, "GridReplace", key, percent);
+			Utility::DisplayProgress(callback, j*ncols + i, total, "GridReplace", _key, percent);
 		}
 	}
 	
@@ -275,7 +275,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	if( Grid == NULL )
 	{
@@ -305,23 +305,23 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	GridInterpolate gi(Grid,nodatavalue,nrows,ncols);
 
-	Utility::DisplayProgress(callback, 0, "GridInterpolateNoData", key );
+	Utility::DisplayProgress(callback, 0, "GridInterpolateNoData", _key );
 
 	gi.Interpolate(0,0);
 	
-	Utility::DisplayProgress(callback, 25, "GridInterpolateNoData", key);
+	Utility::DisplayProgress(callback, 25, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(0,ncols-1);
 	
-	Utility::DisplayProgress(callback, 50, "GridInterpolateNoData", key);
+	Utility::DisplayProgress(callback, 50, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(nrows-1,0);
 	
-	Utility::DisplayProgress(callback, 75, "GridInterpolateNoData", key);
+	Utility::DisplayProgress(callback, 75, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(nrows-1,ncols-1);
 	
-	Utility::DisplayProgress(callback, 100, "GridInterpolateNoData", key);
+	Utility::DisplayProgress(callback, 100, "GridInterpolateNoData", _key);
 
 	*retval = VARIANT_TRUE;
 
@@ -342,7 +342,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		return S_FALSE;
 	}
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	ShpfileType shptype;
 	Shapes->get_ShapefileType(&shptype);
@@ -352,11 +352,11 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 		*retval = VARIANT_FALSE;
 		if( shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
 			shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM )
-			lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
+			_lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
 		else
-			lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
+			_lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
 
-		ErrorMessage(callback, lastErrorCode);
+		ErrorMessage(callback, _lastErrorCode);
 
 		return S_OK;
 	}
@@ -442,7 +442,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				
 			cnt++;
 
-			Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", key, percent);
+			Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 				
 			std::deque< POINT > PointsToKeep;
 			for( currentShape = 0; currentShape < numShapes; currentShape++ )
@@ -486,7 +486,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				PointsToKeep.clear();
 
 				cnt++;
-				Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", key, percent);
+				Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 			}
 			
 			shape->Release();
@@ -497,7 +497,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	// ---------------------------------------------------
 	//	 Validating output
 	// ---------------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	((CShapefile*)Shapes)->ClearValidationList();
 	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
 	if (Shapes)
@@ -668,8 +668,8 @@ STDMETHODIMP CUtils::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = lastErrorCode;
-	lastErrorCode = tkNO_ERROR;
+	*pVal = _lastErrorCode;
+	_lastErrorCode = tkNO_ERROR;
 
 	return S_OK;
 }
@@ -688,10 +688,10 @@ STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = globalCallback;
-	if( globalCallback != NULL )
+	*pVal = _globalCallback;
+	if( _globalCallback != NULL )
 	{	
-		globalCallback->AddRef();
+		_globalCallback->AddRef();
 	}
 	return S_OK;
 }
@@ -699,7 +699,7 @@ STDMETHODIMP CUtils::get_GlobalCallback(ICallback **pVal)
 STDMETHODIMP CUtils::put_GlobalCallback(ICallback *newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	Utility::put_ComReference(newVal, (IDispatch**)&globalCallback);
+	Utility::put_ComReference(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
 
@@ -708,7 +708,7 @@ STDMETHODIMP CUtils::get_Key(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	*pVal = OLE2BSTR(key);
+	*pVal = OLE2BSTR(_key);
 
 	return S_OK;
 }
@@ -718,8 +718,8 @@ STDMETHODIMP CUtils::put_Key(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	::SysFreeString(key);
-	key = OLE2BSTR(newVal);
+	::SysFreeString(_key);
+	_key = OLE2BSTR(newVal);
 
 	return S_OK;
 }
@@ -731,7 +731,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	BSTR final_projection = A2BSTR("");
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	//Check the Array Type
 	if( Grids.vt != (VT_ARRAY|VT_DISPATCH) )
@@ -1014,7 +1014,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				if( val != nodata_value && !(val < -2147483640 && nodata_value < -2147483640))
 					(*retval)->put_Value( i + xoffset, j + yoffset, vval );				
 
-				Utility::DisplayProgress(callback, ++cnt, total, "GridMerge", key, percent);
+				Utility::DisplayProgress(callback, ++cnt, total, "GridMerge", _key, percent);
 			}
 		}
 	}	
@@ -1048,7 +1048,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	if( Grid == NULL )
 	{	
@@ -1091,7 +1091,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 			(*retval)->put_Value(i,j,val);	
 		}
 	
-		Utility::DisplayProgress(callback, j, nrows, "Grid2Grid", key, percent);
+		Utility::DisplayProgress(callback, j, nrows, "Grid2Grid", _key, percent);
 	}	
 
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
@@ -1212,7 +1212,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 		return S_OK;
 	}
 
-	ICallback* callback = cBack ? cBack : globalCallback;
+	ICallback* callback = cBack ? cBack : _globalCallback;
 
 	long numTriangles = 0;
 	Tin->get_NumTriangles(&numTriangles);
@@ -1306,7 +1306,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,pos,val,&vbretval);
 			
-			Utility::DisplayProgress(callback, i, total, "TinToShapefile", key, percent);
+			Utility::DisplayProgress(callback, i, total, "TinToShapefile", _key, percent);
 
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 
@@ -1358,7 +1358,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,i,val,&vbretval);
 			
-			Utility::DisplayProgress(callback, i, total, "TinToShapefile", key, percent);
+			Utility::DisplayProgress(callback, i, total, "TinToShapefile", _key, percent);
 
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 		}
@@ -1409,7 +1409,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-		ICallback* callback = cBack ? cBack : globalCallback;
+		ICallback* callback = cBack ? cBack : _globalCallback;
 
 	if( Grid == NULL )
 	{	*retval = NULL;
@@ -1459,7 +1459,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	
 	VARIANT_BOOL vbretval = FALSE;
 	
-	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)&expand_grid);
+	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)&_expand_grid);
 	IGridHeader * expand_header = NULL;
 	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)&expand_header);
 	expand_header->put_dX( dx*.5 );
@@ -1477,12 +1477,12 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	tmpnam(tmpfname);
 	sprintf(tmpgname, "%s.bgd", tmpfname);
 
-	expand_grid->CreateNew(A2BSTR(tmpgname),expand_header,dType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
+	_expand_grid->CreateNew(A2BSTR(tmpgname),expand_header,dType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 
 	expand_header->Release();
 	expand_header = NULL;
 
-	connection_grid = ConnectionGrid;
+	_connection_grid = ConnectionGrid;
 	
 	double expand_value = 0;
 	for( int y = rows - 1; y>= 0; y-- )
@@ -1501,137 +1501,137 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 			//Mark the cell as a border if it already has a value
 			//Cell 0
-			expand_value = getValue( expand_grid, expand_x, expand_y );
+			expand_value = getValue( _expand_grid, expand_x, expand_y );
 			//Set the polygon_id
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x,     expand_y,     polygon_id );
+				setValue( _expand_grid, expand_x,     expand_y,     polygon_id );
 			
 			//Cell 1
-			expand_value = getValue( expand_grid, expand_x + 1, expand_y );
+			expand_value = getValue( _expand_grid, expand_x + 1, expand_y );
 			//set the polygon id
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x + 1, expand_y,     polygon_id );
+				setValue( _expand_grid, expand_x + 1, expand_y,     polygon_id );
 			//polygon_id already exists and is the same... reset it
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x + 1, expand_y,     polygon_id );										
+				setValue( _expand_grid, expand_x + 1, expand_y,     polygon_id );										
 			//set the cell as a border
 			else if( expand_value >= 0 )
-				setValue(expand_grid,  expand_x + 1, expand_y,     BORDER );
+				setValue(_expand_grid,  expand_x + 1, expand_y,     BORDER );
 			
 			//Cell 2
-			expand_value = getValue( expand_grid, expand_x + 1, expand_y + 1 );
+			expand_value = getValue( _expand_grid, expand_x + 1, expand_y + 1 );
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x + 1, expand_y + 1, polygon_id );
+				setValue( _expand_grid, expand_x + 1, expand_y + 1, polygon_id );
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x + 1, expand_y + 1, polygon_id );									
+				setValue( _expand_grid, expand_x + 1, expand_y + 1, polygon_id );									
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x + 1, expand_y + 1, BORDER );
+				setValue( _expand_grid, expand_x + 1, expand_y + 1, BORDER );
 			else if( expand_value == BORDER )
 			{	expand_value -= 1;
-				setValue( expand_grid, expand_x + 1, expand_y + 1,		expand_value );
+				setValue( _expand_grid, expand_x + 1, expand_y + 1,		expand_value );
 			}
 			else if( expand_value == DOUBLE_BORDER )
-			{	if( is_decision( expand_grid, expand_x + 1, expand_y + 1 ) )
-					setValue( expand_grid, expand_x + 1, expand_y + 1, DECISION );	
+			{	if( is_decision( _expand_grid, expand_x + 1, expand_y + 1 ) )
+					setValue( _expand_grid, expand_x + 1, expand_y + 1, DECISION );	
 				else
-					setValue( expand_grid, expand_x + 1, expand_y + 1, BORDER );	
+					setValue( _expand_grid, expand_x + 1, expand_y + 1, BORDER );	
 			}
 
 			//Cell 3
-			expand_value = getValue( expand_grid, expand_x, expand_y + 1 );
+			expand_value = getValue( _expand_grid, expand_x, expand_y + 1 );
 			//set the polygon id
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x,     expand_y + 1, polygon_id );
+				setValue( _expand_grid, expand_x,     expand_y + 1, polygon_id );
 			//polygon_id already exists and is the same... reset it
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x,     expand_y + 1, polygon_id );							
+				setValue( _expand_grid, expand_x,     expand_y + 1, polygon_id );							
 			//set the cell as a border
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x,     expand_y + 1, BORDER );
+				setValue( _expand_grid, expand_x,     expand_y + 1, BORDER );
 			
 			//Cell 4
-			expand_value = getValue( expand_grid, expand_x - 1, expand_y + 1 );
+			expand_value = getValue( _expand_grid, expand_x - 1, expand_y + 1 );
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x - 1, expand_y + 1, polygon_id );
+				setValue( _expand_grid, expand_x - 1, expand_y + 1, polygon_id );
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x - 1, expand_y + 1, polygon_id );				
+				setValue( _expand_grid, expand_x - 1, expand_y + 1, polygon_id );				
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x - 1, expand_y + 1, BORDER );
+				setValue( _expand_grid, expand_x - 1, expand_y + 1, BORDER );
 			else if( expand_value == BORDER )
 			{	expand_value -= 1;
-				setValue( expand_grid, expand_x - 1, expand_y + 1,	expand_value );
+				setValue( _expand_grid, expand_x - 1, expand_y + 1,	expand_value );
 			}
 			else if( expand_value == DOUBLE_BORDER )
-			{	if( is_decision( expand_grid, expand_x - 1, expand_y + 1 ) )
-					setValue( expand_grid, expand_x - 1, expand_y + 1, DECISION );	
+			{	if( is_decision( _expand_grid, expand_x - 1, expand_y + 1 ) )
+					setValue( _expand_grid, expand_x - 1, expand_y + 1, DECISION );	
 				else
-					setValue( expand_grid, expand_x - 1, expand_y + 1, BORDER );	
+					setValue( _expand_grid, expand_x - 1, expand_y + 1, BORDER );	
 			}
 
 			//Cell 5
-			expand_value = getValue( expand_grid, expand_x - 1, expand_y );
+			expand_value = getValue( _expand_grid, expand_x - 1, expand_y );
 			//set the polygon id
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x - 1, expand_y, polygon_id );
+				setValue( _expand_grid, expand_x - 1, expand_y, polygon_id );
 			//polygon_id already exists and is the same... reset it
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x - 1, expand_y, polygon_id );						
+				setValue( _expand_grid, expand_x - 1, expand_y, polygon_id );						
 			//set the cell as a border
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x - 1, expand_y, BORDER );
+				setValue( _expand_grid, expand_x - 1, expand_y, BORDER );
 			
 			//Cell 6
-			expand_value = getValue( expand_grid, expand_x - 1, expand_y - 1 );
+			expand_value = getValue( _expand_grid, expand_x - 1, expand_y - 1 );
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x - 1,     expand_y - 1, polygon_id );
+				setValue( _expand_grid, expand_x - 1,     expand_y - 1, polygon_id );
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x - 1,     expand_y - 1, polygon_id );								
+				setValue( _expand_grid, expand_x - 1,     expand_y - 1, polygon_id );								
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x - 1,     expand_y - 1, BORDER );
+				setValue( _expand_grid, expand_x - 1,     expand_y - 1, BORDER );
 			else if( expand_value == BORDER )
 			{	expand_value -= 1;
-				setValue( expand_grid, expand_x - 1,	  expand_y - 1,	expand_value );	
+				setValue( _expand_grid, expand_x - 1,	  expand_y - 1,	expand_value );	
 			}
 			else if( expand_value == DOUBLE_BORDER )
-			{	if( is_decision( expand_grid, expand_x - 1, expand_y - 1 ) )
-					setValue( expand_grid, expand_x - 1, expand_y - 1, DECISION );	
+			{	if( is_decision( _expand_grid, expand_x - 1, expand_y - 1 ) )
+					setValue( _expand_grid, expand_x - 1, expand_y - 1, DECISION );	
 				else
-					setValue( expand_grid, expand_x - 1, expand_y - 1, BORDER );	
+					setValue( _expand_grid, expand_x - 1, expand_y - 1, BORDER );	
 			}
 
 			//Cell 7
-			expand_value = getValue( expand_grid, expand_x, expand_y - 1 );
+			expand_value = getValue( _expand_grid, expand_x, expand_y - 1 );
 			//set the polygon id
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x, expand_y - 1, polygon_id );
+				setValue( _expand_grid, expand_x, expand_y - 1, polygon_id );
 			//polygon_id already exists and is the same... reset it
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x, expand_y - 1, polygon_id );						
+				setValue( _expand_grid, expand_x, expand_y - 1, polygon_id );						
 			//set the cell as a border
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x, expand_y - 1, BORDER );
+				setValue( _expand_grid, expand_x, expand_y - 1, BORDER );
 			
 			//Cell 8
-			expand_value = getValue( expand_grid, expand_x + 1, expand_y - 1 );
+			expand_value = getValue( _expand_grid, expand_x + 1, expand_y - 1 );
 			if( expand_value == expand_nodata_value )
-				setValue( expand_grid, expand_x + 1, expand_y - 1, polygon_id );
+				setValue( _expand_grid, expand_x + 1, expand_y - 1, polygon_id );
 			else if( expand_value == polygon_id )
-				setValue( expand_grid, expand_x + 1, expand_y - 1, polygon_id );					
+				setValue( _expand_grid, expand_x + 1, expand_y - 1, polygon_id );					
 			else if( expand_value >= 0 )
-				setValue( expand_grid, expand_x + 1, expand_y - 1, BORDER );		
+				setValue( _expand_grid, expand_x + 1, expand_y - 1, BORDER );		
 			else if( expand_value == BORDER )
 			{	expand_value -= 1;
-				setValue( expand_grid, expand_x + 1, expand_y - 1,	expand_value );	
+				setValue( _expand_grid, expand_x + 1, expand_y - 1,	expand_value );	
 			}
 			else if( expand_value == DOUBLE_BORDER )
-			{	if( is_decision( expand_grid, expand_x + 1, expand_y - 1 ) )
-					setValue( expand_grid, expand_x + 1, expand_y - 1, DECISION );	
+			{	if( is_decision( _expand_grid, expand_x + 1, expand_y - 1 ) )
+					setValue( _expand_grid, expand_x + 1, expand_y - 1, DECISION );	
 				else
-					setValue( expand_grid, expand_x + 1, expand_y - 1, BORDER );	
+					setValue( _expand_grid, expand_x + 1, expand_y - 1, BORDER );	
 			}
 		}			
 		
-		Utility::DisplayProgress(callback, rows - y - 1, total, "Polygon Creation: Expanding Grid", key, percent);
+		Utility::DisplayProgress(callback, rows - y - 1, total, "Polygon Creation: Expanding Grid", _key, percent);
 	}
 
 	//Mark edges of the expanded grid that have a polygon id as BORDER
@@ -1644,31 +1644,31 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	{
 		for( int i = 0; i < exp_cols; i++ )
 		{
-			polygon_id = getValue( expand_grid, i, j );
+			polygon_id = getValue( _expand_grid, i, j );
 			if( polygon_id != expand_nodata_value )
 			{
 				if( j == 0 )
-					setValue( expand_grid, i, 0, BORDER );
+					setValue( _expand_grid, i, 0, BORDER );
 				else if( j == exp_rows - 1 )
-					setValue( expand_grid, i, exp_rows - 1, BORDER );
+					setValue( _expand_grid, i, exp_rows - 1, BORDER );
 				else if( i == 0 )
-					setValue( expand_grid, 0, j, BORDER );
+					setValue( _expand_grid, 0, j, BORDER );
 				else if( i == exp_cols - 1 )
-					setValue( expand_grid, exp_cols - 1, j, BORDER );
+					setValue( _expand_grid, exp_cols - 1, j, BORDER );
 				else 
 				{					
 					if( polygon_id == DOUBLE_BORDER )
-						setValue( expand_grid, i, j, BORDER );
+						setValue( _expand_grid, i, j, BORDER );
 					//Convex polygon test
 					else if( polygon_id == DECISION )
 					{	
-						if (connection_grid != NULL)
+						if (_connection_grid != NULL)
 						{
 							long contract_x = ( i - 1 )/2;
 							long contract_y = ( j - 1 )/2;
 
 							IGridHeader * cHeader = NULL;
-							connection_grid->get_Header(&cHeader);
+							_connection_grid->get_Header(&cHeader);
 							VARIANT cndv;
 							VariantInit(&cndv); //added by Rob Cairns 4-Jan-06
 							cHeader->get_NodataValue(&cndv);
@@ -1680,9 +1680,9 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							
 							VariantClear(&cndv); //added by Rob Cairns 4-Jan-06
 							
-							double decision = getValue( connection_grid, contract_x, contract_y );
+							double decision = getValue( _connection_grid, contract_x, contract_y );
 							if( decision == nodata )
-							{	expand_grid->Close(&vbretval);							
+							{	_expand_grid->Close(&vbretval);							
 								*retval = NULL;
 								ErrorMessage(callback, tkCONCAVE_POLYGONS);
 								return S_OK;					
@@ -1696,21 +1696,21 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 						//6 7 8
 
 						//Cell 1
-						double cell1 = getValue( expand_grid, i+1, j );
+						double cell1 = getValue( _expand_grid, i+1, j );
 						//Cell 2
-						double cell2 = getValue( expand_grid, i+1, j-1 );
+						double cell2 = getValue( _expand_grid, i+1, j-1 );
 						//Cell 3
-						double cell3 = getValue( expand_grid, i, j-1 );
+						double cell3 = getValue( _expand_grid, i, j-1 );
 						//Cell 4
-						double cell4 = getValue( expand_grid, i-1, j-1 );
+						double cell4 = getValue( _expand_grid, i-1, j-1 );
 						//Cell 5
-						double cell5 = getValue( expand_grid, i-1, j );
+						double cell5 = getValue( _expand_grid, i-1, j );
 						//Cell 6
-						double cell6 = getValue( expand_grid, i-1, j+1 );
+						double cell6 = getValue( _expand_grid, i-1, j+1 );
 						//Cell 7
-						double cell7 = getValue( expand_grid, i, j+1 );
+						double cell7 = getValue( _expand_grid, i, j+1 );
 						//Cell 8
-						double cell8 = getValue( expand_grid, i+1, j+1 );
+						double cell8 = getValue( _expand_grid, i+1, j+1 );
 
 						if( cell1 == expand_nodata_value || 
 							cell2 == expand_nodata_value || 
@@ -1722,20 +1722,20 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							cell8 == expand_nodata_value )
 						{
 							if( i%2 == 0 && j%2 == 0 )
-							{	if( is_decision( expand_grid, i, j ) )
-									setValue( expand_grid, i, j, DECISION );
+							{	if( is_decision( _expand_grid, i, j ) )
+									setValue( _expand_grid, i, j, DECISION );
 								else
-									setValue( expand_grid, i, j, BORDER );
+									setValue( _expand_grid, i, j, BORDER );
 							}
 							else
-								setValue( expand_grid, i, j, BORDER );
+								setValue( _expand_grid, i, j, BORDER );
 						}
 					}					
 				}
 			}			
 		}
 
-		Utility::DisplayProgress(callback, j, total, "Polygon Creation: Marking Borders", key, percent);
+		Utility::DisplayProgress(callback, j, total, "Polygon Creation: Marking Borders", _key, percent);
 	}
 
 	//Create the shapefile
@@ -1769,7 +1769,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			//Expand as the center cell
 			long expand_x = 2*px + 1;
 			long expand_y = 2*py + 1;
-			polygon_id = getValue( expand_grid, expand_x, expand_y );		
+			polygon_id = getValue( _expand_grid, expand_x, expand_y );		
 
 			//Check to see if polygon id is a specially marked cell or nodata
 			if( polygon_id >= 0 )
@@ -1903,7 +1903,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 						if( write_point == true )
 						{	if( last_point_index < 0 )
 								last_point_index = point;
-							expand_grid->CellToProj( polygon[point].column, polygon[point].row, &poly_x, &poly_y );
+							_expand_grid->CellToProj( polygon[point].column, polygon[point].row, &poly_x, &poly_y );
 							IPoint * ipoint = NULL;
 							CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&ipoint);
 							ipoint->put_X(poly_x);
@@ -1915,7 +1915,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 						}
 					}
 					//Write the last point again
-					expand_grid->CellToProj( polygon[last_point_index].column, polygon[last_point_index].row, &poly_x, &poly_y );
+					_expand_grid->CellToProj( polygon[last_point_index].column, polygon[last_point_index].row, &poly_x, &poly_y );
 					IPoint * ipoint = NULL;
 					CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&ipoint);
 					ipoint->put_X(poly_x);
@@ -1942,12 +1942,12 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}					
 		}
 
-		Utility::DisplayProgress(callback, py, rows, "Polygon Creation: Creating Polygons", key, percent);
+		Utility::DisplayProgress(callback, py, rows, "Polygon Creation: Creating Polygons", _key, percent);
 	}
 
-	expand_grid->Close(&vbretval);
-	expand_grid->Release();
-	expand_grid = NULL;
+	_expand_grid->Close(&vbretval);
+	_expand_grid->Release();
+	_expand_grid = NULL;
 	
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
 	
@@ -2029,21 +2029,21 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 		//5 0 1
 		//6 7 8
 		//Cell 1
-		double cell1 = getValue( expand_grid, i+1, j );		
+		double cell1 = getValue( _expand_grid, i+1, j );		
 		//Cell 2
-		double cell2 = getValue( expand_grid, i+1, j-1 );		
+		double cell2 = getValue( _expand_grid, i+1, j-1 );		
 		//Cell 3
-		double cell3 = getValue( expand_grid, i, j-1 );		
+		double cell3 = getValue( _expand_grid, i, j-1 );		
 		//Cell 4
-		double cell4 = getValue( expand_grid, i-1, j-1 );		
+		double cell4 = getValue( _expand_grid, i-1, j-1 );		
 		//Cell 5
-		double cell5 = getValue( expand_grid, i-1, j );		
+		double cell5 = getValue( _expand_grid, i-1, j );		
 		//Cell 6
-		double cell6 = getValue( expand_grid, i-1, j+1 );		
+		double cell6 = getValue( _expand_grid, i-1, j+1 );		
 		//Cell 7
-		double cell7 = getValue( expand_grid, i, j+1 );		
+		double cell7 = getValue( _expand_grid, i, j+1 );		
 		//Cell 8
-		double cell8 = getValue( expand_grid, i+1, j+1 );		
+		double cell8 = getValue( _expand_grid, i+1, j+1 );		
 
 		if( cell1 == polygon_id || 
 			cell2 == polygon_id || 
@@ -2072,10 +2072,10 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 				stack.push( RasterPoint( i+1, j ));
 
 			//Don't reset if DECISION
-			if( getValue( expand_grid, i, j ) == BORDER )
-				setValue( expand_grid, i, j, TRACE_BORDER );
+			if( getValue( _expand_grid, i, j ) == BORDER )
+				setValue( _expand_grid, i, j, TRACE_BORDER );
 			//Push diagonals if this is a DECISION
-			else if( getValue( expand_grid, i, j ) == DECISION )
+			else if( getValue( _expand_grid, i, j ) == DECISION )
 			{	stack.push( RasterPoint( i+1, j+1 ) );
 				stack.push( RasterPoint( i-1, j+1 ) );
 				stack.push( RasterPoint( i-1, j-1 ) );
@@ -2098,44 +2098,44 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 		//5 0 1
 		//6 7 8
 		//Cell 1
-		double cell1 = getValue( expand_grid, i+1, j );
+		double cell1 = getValue( _expand_grid, i+1, j );
 		if( cell1 == polygon_id || cell1 == DECISION )
 			stack.push( RasterPoint( i+1, j ));
 		//Cell 2
-		double cell2 = getValue( expand_grid, i+1, j-1 );
+		double cell2 = getValue( _expand_grid, i+1, j-1 );
 		if( cell2 == polygon_id || cell2 == DECISION  )
 			stack.push( RasterPoint( i+1, j-1 ));
 		//Cell 3
-		double cell3 = getValue( expand_grid, i, j-1 );
+		double cell3 = getValue( _expand_grid, i, j-1 );
 		if( cell3 == polygon_id || cell3 == DECISION  )
 			stack.push( RasterPoint( i, j-1 ));
 		//Cell 4
-		double cell4 = getValue( expand_grid, i-1, j-1 );
+		double cell4 = getValue( _expand_grid, i-1, j-1 );
 		if( cell4 == polygon_id || cell4 == DECISION  )
 			stack.push( RasterPoint( i-1, j-1 ));
 		//Cell 5
-		double cell5 = getValue( expand_grid, i-1, j );
+		double cell5 = getValue( _expand_grid, i-1, j );
 		if( cell5 == polygon_id || cell5 == DECISION  )
 			stack.push( RasterPoint( i-1, j ));
 		//Cell 6
-		double cell6 = getValue( expand_grid, i-1, j+1 );
+		double cell6 = getValue( _expand_grid, i-1, j+1 );
 		if( cell6 == polygon_id || cell6 == DECISION  )
 			stack.push( RasterPoint( i-1, j+1 ));
 		//Cell 7
-		double cell7 = getValue( expand_grid, i, j+1 );
+		double cell7 = getValue( _expand_grid, i, j+1 );
 		if( cell7 == polygon_id || cell7 == DECISION  )
 			stack.push( RasterPoint( i, j+1 ));
 		//Cell 8
-		double cell8 = getValue( expand_grid, i+1, j+1 );
+		double cell8 = getValue( _expand_grid, i+1, j+1 );
 		if( cell8 == polygon_id || cell8 == DECISION  )
 			stack.push( RasterPoint( i+1, j+1 ));
 
 		//Don't reset if DECISION
-		if( getValue( expand_grid, i, j ) == polygon_id )
-			setValue( expand_grid, i, j, CURRENT_POLYGON );
+		if( getValue( _expand_grid, i, j ) == polygon_id )
+			setValue( _expand_grid, i, j, CURRENT_POLYGON );
 		//Push diagonals if this is a DECISION
-		else if( getValue( expand_grid, i, j ) == DECISION )
-		{	setValue( expand_grid, i, j, CURRENT_POLYGON );
+		else if( getValue( _expand_grid, i, j ) == DECISION )
+		{	setValue( _expand_grid, i, j, CURRENT_POLYGON );
 			decisions.push_back( RasterPoint( i, j ) );
 			stack.push( RasterPoint( i+1, j+1 ) );
 			stack.push( RasterPoint( i-1, j+1 ) );
@@ -2145,7 +2145,7 @@ void CUtils::mark_edge( double & polygon_id, long x, long y )
 	}
 	
 	for( int d1 = 0; d1 < (int)decisions.size(); d1++ )
-		setValue( expand_grid, decisions[d1].column, decisions[d1].row, DECISION );
+		setValue( _expand_grid, decisions[d1].column, decisions[d1].row, DECISION );
 }	
 
 //Erase the CurrenClipperLib::Polygon
@@ -2168,44 +2168,44 @@ void CUtils::scan_fill_to_edge( double & nodata, long x, long y )
 		//5 0 1
 		//6 7 8
 		//Cell 1
-		double cell1 = getValue( expand_grid, i+1, j );
+		double cell1 = getValue( _expand_grid, i+1, j );
 		if( cell1 == CURRENT_POLYGON || cell1 == DECISION )
 			stack.push( RasterPoint( i+1, j ));
 		//Cell 2
-		double cell2 = getValue( expand_grid, i+1, j-1 );
+		double cell2 = getValue( _expand_grid, i+1, j-1 );
 		if( cell2 == CURRENT_POLYGON || cell2 == DECISION  )
 			stack.push( RasterPoint( i+1, j-1 ));
 		//Cell 3
-		double cell3 = getValue( expand_grid, i, j-1 );
+		double cell3 = getValue( _expand_grid, i, j-1 );
 		if( cell3 == CURRENT_POLYGON || cell3 == DECISION  )
 			stack.push( RasterPoint( i, j-1 ));
 		//Cell 4
-		double cell4 = getValue( expand_grid, i-1, j-1 );
+		double cell4 = getValue( _expand_grid, i-1, j-1 );
 		if( cell4 == CURRENT_POLYGON || cell4 == DECISION  )
 			stack.push( RasterPoint( i-1, j-1 ));
 		//Cell 5
-		double cell5 = getValue( expand_grid, i-1, j );
+		double cell5 = getValue( _expand_grid, i-1, j );
 		if( cell5 == CURRENT_POLYGON || cell5 == DECISION  )
 			stack.push( RasterPoint( i-1, j ));
 		//Cell 6
-		double cell6 = getValue( expand_grid, i-1, j+1 );
+		double cell6 = getValue( _expand_grid, i-1, j+1 );
 		if( cell6 == CURRENT_POLYGON || cell6 == DECISION  )
 			stack.push( RasterPoint( i-1, j+1 ));
 		//Cell 7
-		double cell7 = getValue( expand_grid, i, j+1 );
+		double cell7 = getValue( _expand_grid, i, j+1 );
 		if( cell7 == CURRENT_POLYGON || cell7 == DECISION  )
 			stack.push( RasterPoint( i, j+1 ));
 		//Cell 8
-		double cell8 = getValue( expand_grid, i+1, j+1 );
+		double cell8 = getValue( _expand_grid, i+1, j+1 );
 		if( cell8 == CURRENT_POLYGON || cell8 == DECISION  )
 			stack.push( RasterPoint( i+1, j+1 ));
 
 		//Don't reset if DECISION
-		if( getValue( expand_grid, i, j ) == CURRENT_POLYGON )
-			setValue( expand_grid, i, j, nodata );
+		if( getValue( _expand_grid, i, j ) == CURRENT_POLYGON )
+			setValue( _expand_grid, i, j, nodata );
 		//Push diagonals if this is a DECISION
-		else if( getValue( expand_grid, i, j ) == DECISION )
-		{	setValue( expand_grid, i, j, nodata );
+		else if( getValue( _expand_grid, i, j ) == DECISION )
+		{	setValue( _expand_grid, i, j, nodata );
 			decisions.push_back( RasterPoint( i, j ) );
 			stack.push( RasterPoint( i+1, j+1 ) );
 			stack.push( RasterPoint( i-1, j+1 ) );
@@ -2215,7 +2215,7 @@ void CUtils::scan_fill_to_edge( double & nodata, long x, long y )
 	}
 	
 	for( int d1 = 0; d1 < (int)decisions.size(); d1++ )
-		setValue( expand_grid, decisions[d1].column, decisions[d1].row, DECISION );
+		setValue( _expand_grid, decisions[d1].column, decisions[d1].row, DECISION );
 }	
 
 inline double CUtils::getValue( IGrid * Grid, long column, long row )
@@ -2258,8 +2258,8 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		
 
 		//Reset the current grid value back to BORDER
-		if( getValue( expand_grid, x, y ) == TRACE_BORDER )
-			setValue( expand_grid, x, y, BORDER );
+		if( getValue( _expand_grid, x, y ) == TRACE_BORDER )
+			setValue( _expand_grid, x, y, BORDER );
 		
 		// ( x, y ) corresponds to 0
 		//4 3 2
@@ -2269,7 +2269,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		bool moved_turtle = false;
 		//Restrict to Cardinal Directions
 		//Cell 1
-		if( getValue( expand_grid, x + 1, y ) == TRACE_BORDER )
+		if( getValue( _expand_grid, x + 1, y ) == TRACE_BORDER )
 		{	
 			moved_turtle = true;
 			//trace_polygon( x + 1, y, polygon );
@@ -2277,7 +2277,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 			polygon.push_back(RasterPoint(x + 1, y));
 		}
 		//Cell 3
-		else if( getValue( expand_grid, x, y - 1 ) == TRACE_BORDER )
+		else if( getValue( _expand_grid, x, y - 1 ) == TRACE_BORDER )
 		{	
 			moved_turtle = true;
 			//trace_polygon( x, y - 1, polygon );
@@ -2285,7 +2285,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 			polygon.push_back(RasterPoint(x, y - 1));
 		}
 		//Cell 5
-		else if( getValue( expand_grid, x - 1, y ) == TRACE_BORDER )
+		else if( getValue( _expand_grid, x - 1, y ) == TRACE_BORDER )
 		{	
 			moved_turtle = true;
 			//trace_polygon( x - 1, y, polygon );
@@ -2293,7 +2293,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 			polygon.push_back(RasterPoint(x - 1, y));
 		}
 		//Cell 7
-		else if( getValue( expand_grid, x, y + 1 ) == TRACE_BORDER )
+		else if( getValue( _expand_grid, x, y + 1 ) == TRACE_BORDER )
 		{	
 			moved_turtle = true;
 			//trace_polygon( x, y + 1, polygon );
@@ -2305,9 +2305,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		//Cell 1
 		if( !moved_turtle )
 		{
-			if( getValue( expand_grid, x + 1, y ) == DECISION )
+			if( getValue( _expand_grid, x + 1, y ) == DECISION )
 			{
-				if( connection_grid == NULL )
+				if( _connection_grid == NULL )
 				{
 					polygon.clear();
 					return;
@@ -2321,27 +2321,27 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//6 7 8
 				
 				//Cell 2
-				cell2_x = ( (x+2) - 1 )/2;
-				cell2_y = ( (y-1) - 1 )/2;
+				_cell2_x = ( (x+2) - 1 )/2;
+				_cell2_y = ( (y-1) - 1 )/2;
 				//Cell 4
-				cell4_x = ( (x) - 1 )/2;
-				cell4_y = ( (y-1) - 1 )/2;
+				_cell4_x = ( (x) - 1 )/2;
+				_cell4_y = ( (y-1) - 1 )/2;
 				//Cell 6
-				cell6_x = ( (x) - 1 )/2;
+				_cell6_x = ( (x) - 1 )/2;
 				cell6_y = ( (y+1) - 1 )/2;			
 				//Cell 8			
-				cell8_x = ( (x+2) - 1 )/2;
-				cell8_y = ( (y+1) - 1 )/2;
+				_cell8_x = ( (x+2) - 1 )/2;
+				_cell8_y = ( (y+1) - 1 )/2;
 				
-				flow2 = getValue( connection_grid, cell2_x, cell2_y );
-				flow8 = getValue( connection_grid, cell8_x, cell8_y );
-				flow4 = getValue( connection_grid, cell4_x, cell4_y );
-				flow6 = getValue( connection_grid, cell6_x, cell6_y );
+				_flow2 = getValue( _connection_grid, _cell2_x, _cell2_y );
+				_flow8 = getValue( _connection_grid, _cell8_x, _cell8_y );
+				_flow4 = getValue( _connection_grid, _cell4_x, _cell4_y );
+				_flow6 = getValue( _connection_grid, _cell6_x, cell6_y );
 				
 				//Move to Up-Right ... maybe
-				if( flow2 == 6 || flow6 == 2 )
+				if( _flow2 == 6 || _flow6 == 2 )
 				{	
-					if( getValue( expand_grid, x + 1, y - 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x + 1, y - 1 ) == TRACE_BORDER )
 					{
 						moved_turtle = true;
 						//trace_polygon( x + 1, y - 1, polygon );
@@ -2350,9 +2350,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 					}
 				}
 				//Move to Down-Right ... maybe
-				else if( flow4 == 8 || flow8 == 4 )
+				else if( _flow4 == 8 || _flow8 == 4 )
 				{	
-					if( getValue( expand_grid, x + 1, y + 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x + 1, y + 1 ) == TRACE_BORDER )
 					{
 						moved_turtle = true;
 						//trace_polygon( x + 1, y + 1, polygon );
@@ -2363,7 +2363,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//Cannot be determined by flow directions
 				else
 				{	
-					if( getValue( expand_grid, x, y - 1 ) == CURRENT_POLYGON )
+					if( getValue( _expand_grid, x, y - 1 ) == CURRENT_POLYGON )
 					{
 						moved_turtle = true;
 						//trace_polygon( x + 1, y - 1, polygon );
@@ -2384,9 +2384,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		//Cell 3
 		if( !moved_turtle )
 		{
-			if( getValue( expand_grid, x, y - 1 ) == DECISION )
+			if( getValue( _expand_grid, x, y - 1 ) == DECISION )
 			{
-				if( connection_grid == NULL )
+				if( _connection_grid == NULL )
 				{
 					polygon.clear();
 					return;
@@ -2400,27 +2400,27 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//6 7 8
 				
 				//Cell 2
-				cell2_x = ( (x+1) - 1 )/2;
-				cell2_y = ( (y-2) - 1 )/2;
+				_cell2_x = ( (x+1) - 1 )/2;
+				_cell2_y = ( (y-2) - 1 )/2;
 				//Cell 4
-				cell4_x = ( (x-1) - 1 )/2;
-				cell4_y = ( (y-2) - 1 )/2;
+				_cell4_x = ( (x-1) - 1 )/2;
+				_cell4_y = ( (y-2) - 1 )/2;
 				//Cell 6
-				cell6_x = ( (x-1) - 1 )/2;
+				_cell6_x = ( (x-1) - 1 )/2;
 				cell6_y = ( (y) - 1 )/2;			
 				//Cell 8			
-				cell8_x = ( (x+1) - 1 )/2;
-				cell8_y = ( (y) - 1 )/2;
+				_cell8_x = ( (x+1) - 1 )/2;
+				_cell8_y = ( (y) - 1 )/2;
 				
-				flow2 = getValue( connection_grid, cell2_x, cell2_y );
-				flow8 = getValue( connection_grid, cell8_x, cell8_y );
-				flow4 = getValue( connection_grid, cell4_x, cell4_y );
-				flow6 = getValue( connection_grid, cell6_x, cell6_y );
+				_flow2 = getValue( _connection_grid, _cell2_x, _cell2_y );
+				_flow8 = getValue( _connection_grid, _cell8_x, _cell8_y );
+				_flow4 = getValue( _connection_grid, _cell4_x, _cell4_y );
+				_flow6 = getValue( _connection_grid, _cell6_x, cell6_y );
 				
 				//Move to Up-Right ... maybe
-				if( flow2 == 6 || flow6 == 2 )
+				if( _flow2 == 6 || _flow6 == 2 )
 				{	
-					if( getValue( expand_grid, x + 1, y - 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x + 1, y - 1 ) == TRACE_BORDER )
 					{
 						moved_turtle = true;
 						//trace_polygon( x + 1, y - 1, polygon );
@@ -2429,9 +2429,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 					}
 				}
 				//Move to Up-Left ... maybe
-				else if( flow4 == 8 || flow8 == 4 )
+				else if( _flow4 == 8 || _flow8 == 4 )
 				{
-					if( getValue( expand_grid, x - 1, y - 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x - 1, y - 1 ) == TRACE_BORDER )
 					{	
 						moved_turtle = true;
 						//trace_polygon( x - 1, y - 1, polygon );
@@ -2442,7 +2442,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//Cannot be determined by flow directions
 				else
 				{	
-					if( getValue( expand_grid, x - 1, y ) == CURRENT_POLYGON )
+					if( getValue( _expand_grid, x - 1, y ) == CURRENT_POLYGON )
 					{
 						moved_turtle = true;
 						//trace_polygon( x - 1, y - 1, polygon );
@@ -2463,9 +2463,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		//Cell 5
 		if( !moved_turtle )
 		{
-			if( getValue( expand_grid, x - 1, y ) == DECISION )
+			if( getValue( _expand_grid, x - 1, y ) == DECISION )
 			{
-				if( connection_grid == NULL )
+				if( _connection_grid == NULL )
 				{
 					polygon.clear();
 					return;
@@ -2479,27 +2479,27 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//6 7 8
 				
 				//Cell 2
-				cell2_x = ( (x) - 1 )/2;
-				cell2_y = ( (y-1) - 1 )/2;
+				_cell2_x = ( (x) - 1 )/2;
+				_cell2_y = ( (y-1) - 1 )/2;
 				//Cell 4
-				cell4_x = ( (x-2) - 1 )/2;
-				cell4_y = ( (y-1) - 1 )/2;
+				_cell4_x = ( (x-2) - 1 )/2;
+				_cell4_y = ( (y-1) - 1 )/2;
 				//Cell 6
-				cell6_x = ( (x-2) - 1 )/2;
+				_cell6_x = ( (x-2) - 1 )/2;
 				cell6_y = ( (y+1) - 1 )/2;			
 				//Cell 8			
-				cell8_x = ( (x) - 1 )/2;
-				cell8_y = ( (y+1) - 1 )/2;
+				_cell8_x = ( (x) - 1 )/2;
+				_cell8_y = ( (y+1) - 1 )/2;
 				
-				flow2 = getValue( connection_grid, cell2_x, cell2_y );
-				flow8 = getValue( connection_grid, cell8_x, cell8_y );
-				flow4 = getValue( connection_grid, cell4_x, cell4_y );
-				flow6 = getValue( connection_grid, cell6_x, cell6_y );
+				_flow2 = getValue( _connection_grid, _cell2_x, _cell2_y );
+				_flow8 = getValue( _connection_grid, _cell8_x, _cell8_y );
+				_flow4 = getValue( _connection_grid, _cell4_x, _cell4_y );
+				_flow6 = getValue( _connection_grid, _cell6_x, cell6_y );
 				
 				//Move to Down-Left ... maybe
-				if( flow2 == 6 || flow6 == 2 )
+				if( _flow2 == 6 || _flow6 == 2 )
 				{	
-					if( getValue( expand_grid, x - 1, y + 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x - 1, y + 1 ) == TRACE_BORDER )
 					{
 						moved_turtle = true;
 						//trace_polygon( x - 1, y + 1, polygon );
@@ -2508,9 +2508,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 					}
 				}
 				//Move to Up-Left ... maybe
-				else if( flow4 == 8 || flow8 == 4 )
+				else if( _flow4 == 8 || _flow8 == 4 )
 				{	
-					if( getValue( expand_grid, x - 1, y - 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x - 1, y - 1 ) == TRACE_BORDER )
 					{
 						moved_turtle = true;
 						//trace_polygon( x - 1, y - 1, polygon );
@@ -2521,7 +2521,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//Cannot be determined by flow directions
 				else
 				{	
-					if( getValue( expand_grid, x, y - 1 ) == CURRENT_POLYGON )
+					if( getValue( _expand_grid, x, y - 1 ) == CURRENT_POLYGON )
 					{	
 						moved_turtle = true;
 						//trace_polygon( x - 1, y - 1, polygon );
@@ -2541,9 +2541,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 		
 		//Cell 7
 		if( !moved_turtle )	{	
-			if( getValue( expand_grid, x, y + 1 ) == DECISION )
+			if( getValue( _expand_grid, x, y + 1 ) == DECISION )
 			{
-				if( connection_grid == NULL )
+				if( _connection_grid == NULL )
 				{
 					polygon.clear();
 					return;
@@ -2557,27 +2557,27 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//6 7 8
 				
 				//Cell 2
-				cell2_x = ( (x+1) - 1 )/2;
-				cell2_y = ( (y) - 1 )/2;
+				_cell2_x = ( (x+1) - 1 )/2;
+				_cell2_y = ( (y) - 1 )/2;
 				//Cell 4
-				cell4_x = ( (x-1) - 1 )/2;
-				cell4_y = ( (y) - 1 )/2;
+				_cell4_x = ( (x-1) - 1 )/2;
+				_cell4_y = ( (y) - 1 )/2;
 				//Cell 6
-				cell6_x = ( (x-1) - 1 )/2;
+				_cell6_x = ( (x-1) - 1 )/2;
 				cell6_y = ( (y+2) - 1 )/2;			
 				//Cell 8			
-				cell8_x = ( (x+1) - 1 )/2;
-				cell8_y = ( (y+2) - 1 )/2;
+				_cell8_x = ( (x+1) - 1 )/2;
+				_cell8_y = ( (y+2) - 1 )/2;
 				
-				flow2 = getValue( connection_grid, cell2_x, cell2_y );
-				flow8 = getValue( connection_grid, cell8_x, cell8_y );
-				flow4 = getValue( connection_grid, cell4_x, cell4_y );
-				flow6 = getValue( connection_grid, cell6_x, cell6_y );
+				_flow2 = getValue( _connection_grid, _cell2_x, _cell2_y );
+				_flow8 = getValue( _connection_grid, _cell8_x, _cell8_y );
+				_flow4 = getValue( _connection_grid, _cell4_x, _cell4_y );
+				_flow6 = getValue( _connection_grid, _cell6_x, cell6_y );
 				
 				//Move to Down-Left ... maybe
-				if( flow2 == 6 || flow6 == 2 )
+				if( _flow2 == 6 || _flow6 == 2 )
 				{	
-					if( getValue( expand_grid, x - 1, y + 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x - 1, y + 1 ) == TRACE_BORDER )
 					{	
 						moved_turtle = true;
 						//trace_polygon( x - 1, y + 1, polygon );
@@ -2586,9 +2586,9 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 					}
 				}
 				//Move to Down-Right ... maybe
-				else if( flow4 == 8 || flow8 == 4 )
+				else if( _flow4 == 8 || _flow8 == 4 )
 				{	
-					if( getValue( expand_grid, x + 1, y + 1 ) == TRACE_BORDER )
+					if( getValue( _expand_grid, x + 1, y + 1 ) == TRACE_BORDER )
 					{	
 						moved_turtle = true;
 						//trace_polygon( x + 1, y + 1, polygon );
@@ -2599,7 +2599,7 @@ void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
 				//Cannot be determined by flow directions
 				else
 				{	
-					if( getValue( expand_grid, x - 1, y ) == CURRENT_POLYGON )
+					if( getValue( _expand_grid, x - 1, y ) == CURRENT_POLYGON )
 					{
 						moved_turtle = true;
 						//trace_polygon( x - 1, y + 1, polygon );
@@ -2698,14 +2698,14 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			goto cleaning;
 		}
 
-		(*retval)->CreateNew(A2BSTR(""),GridHeader,ShortDataType ,vndv,VARIANT_TRUE,UseExtension,globalCallback,&result);
+		(*retval)->CreateNew(A2BSTR(""),GridHeader,ShortDataType ,vndv,VARIANT_TRUE,UseExtension,_globalCallback,&result);
 
 		if ( result == VARIANT_FALSE)
 		{ //failed to create new grid
-			(*retval)->get_LastErrorCode(&lastErrorCode);
+			(*retval)->get_LastErrorCode(&_lastErrorCode);
 			(*retval)->Release();
 			*retval = NULL;
-			ErrorMessage(lastErrorCode);
+			ErrorMessage(_lastErrorCode);
 			goto cleaning;
 		}
 
@@ -2785,17 +2785,17 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		LocalGridHeader->put_XllCenter(xllcenter );
 		LocalGridHeader->put_YllCenter(yllcenter);
 		
-		(*retval)->CreateNew(A2BSTR(""),LocalGridHeader,ShortDataType ,vndv,TRUE,UseExtension,globalCallback,&result);
+		(*retval)->CreateNew(A2BSTR(""),LocalGridHeader,ShortDataType ,vndv,TRUE,UseExtension,_globalCallback,&result);
 
 		bndbox->Release();
 		LocalGridHeader->Release();
 
 		if ( result == VARIANT_FALSE)
 		{ //failed to create new grid
-			(*retval)->get_LastErrorCode(&lastErrorCode);
+			(*retval)->get_LastErrorCode(&_lastErrorCode);
 			(*retval)->Release();
 			*retval = NULL;
-			ErrorMessage(lastErrorCode);
+			ErrorMessage(_lastErrorCode);
 			return S_OK;
 		}
 
@@ -2825,7 +2825,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 cleaning:
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	((CShapefile*)Shpfile)->ClearValidationList();
 	return S_OK;
 }
@@ -2878,8 +2878,8 @@ bool CUtils::PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue)
 		
 		if ( !shpPoint )
 		{
-			shape->get_LastErrorCode(&lastErrorCode);
-			ErrorMessage(lastErrorCode);
+			shape->get_LastErrorCode(&_lastErrorCode);
+			ErrorMessage(_lastErrorCode);
 			return false;
 		}
 		else
@@ -3143,7 +3143,7 @@ void CUtils::Parse(CString sOrig, int * opts)
 {
 	if (sOrig.IsEmpty())
 	{
-		sArr.RemoveAll();
+		_sArr.RemoveAll();
 		*opts = 0;
 		return;
 	}
@@ -3153,9 +3153,9 @@ void CUtils::Parse(CString sOrig, int * opts)
 	char chSeps[] = " ";
 
 	//set an initial max array size
-	sArr.RemoveAll();
+	_sArr.RemoveAll();
 	sOrig.TrimRight();
-	sArr.Add( "Dummy value at 0" );
+	_sArr.Add( "Dummy value at 0" );
 	while(1)
 	{
 		if (sOrig.GetLength() <= 0)
@@ -3175,28 +3175,28 @@ void CUtils::Parse(CString sOrig, int * opts)
 
 		if (m == -1)
 		{
-			sArr.Add( sOrig );
+			_sArr.Add( sOrig );
 			break;
 		}
 
 		sTemp = sOrig.Mid(0, m);
-		sArr.Add( sTemp );
+		_sArr.Add( sTemp );
 		sTrans = sOrig.Mid(m+1, sOrig.GetLength());
 		sOrig = sTrans;
 	}
 
-	for (int i = 0; i < sArr.GetCount(); i++)
+	for (int i = 0; i < _sArr.GetCount(); i++)
 	{
-		sTemp = sArr[i];
+		sTemp = _sArr[i];
 		length = sTemp.GetLength ();
 
 		if (length < 2 || sTemp[0] != '"' || sTemp[length - 1] != '"')
 			continue;
 
-		sArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
+		_sArr[i] = (sTemp.Left (length - 1)).Right (length - 2);
 	}
 
-	*opts = (int)sArr.GetCount();
+	*opts = (int)_sArr.GetCount();
 }
 
 // ***********************************************************
@@ -3352,7 +3352,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		return S_OK;
 	}
 	
-	Utility::DisplayProgress(globalCallback, 0, "Loading input images...", key);
+	Utility::DisplayProgress(_globalCallback, 0, "Loading input images...", _key);
 
 	VARIANT_BOOL vbretval;
 	std::vector<IImage*> images;
@@ -3411,7 +3411,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		images[i]->get_Filename(&name);
 		s.Format("Processing image %d: %s", i + 1, OLE2A(name));
 		int percent = (int)((double)i/(double)(images.size() - 1)*100.0);
-		Utility::DisplayProgress(globalCallback, percent, s, key);
+		Utility::DisplayProgress(_globalCallback, percent, s, _key);
 		
 		CImageClass* img  = (CImageClass*)images[i];
 		img->SaveNotNullPixels(true);
@@ -3426,14 +3426,14 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	}
 	
 	// saving the results
-	Utility::DisplayProgress(globalCallback, 0, "Saving result...", key);
+	Utility::DisplayProgress(_globalCallback, 0, "Saving result...", _key);
 	
 	unsigned char* bits = reinterpret_cast<unsigned char*>(pixels);
 	Utility::SaveBitmap(width, height, bits, OutputName);
 
 Cleaning:
 	// cleaning
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 
 	for (unsigned int i = 0; i < images.size(); i++)
 	{
@@ -3537,7 +3537,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(globalCallback, i, numShapes, "Reprojecting...", key, percent);
+		Utility::DisplayProgress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
 		
 		IShape* shp = NULL;
 		sf->get_Shape(i, &shp);
@@ -3587,7 +3587,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	// --------------------------------------------------
 	//    Validating output
 	// --------------------------------------------------
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	((CShapefile*)sf)->ClearValidationList();
 	((CShapefile*)sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
 	
@@ -3599,14 +3599,14 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 // **************************************************************
 void CUtils::ErrorMessage(long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
 {
-	lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(callback, key, ErrorMsg(lastErrorCode));
+	_lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(callback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
@@ -4054,7 +4054,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 		sf->get_EditingTable(&editing);
 		
 		if (!editing) {
-			sf->StartEditingTable(this->globalCallback, &vb);	// it's safe enough not to check the result
+			sf->StartEditingTable(this->_globalCallback, &vb);	// it's safe enough not to check the result
 		}
 
 		std::vector<long> fieldIndices;
@@ -4085,7 +4085,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 
 		for (long n = 0; n < numShapes; n++) 
 		{
-			Utility::DisplayProgress(globalCallback, n, numShapes, "Calculating...", key, percent);
+			Utility::DisplayProgress(_globalCallback, n, numShapes, "Calculating...", _key, percent);
 			
 			sf->get_ShapeSelected(n, &vb);
 			if (selectedOnly && !vb)
@@ -4326,7 +4326,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 		extGrid->Release();
 
 		if (!editing) {
-			sf->StopEditingTable(VARIANT_TRUE, this->globalCallback, &vb);
+			sf->StopEditingTable(VARIANT_TRUE, this->_globalCallback, &vb);
 			if (!vb) {
 				long code;
 				sf->get_LastErrorCode(&code);
@@ -4562,14 +4562,14 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 		{
 			for( int iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
 			{
-				if( globalCallback != NULL )
+				if( _globalCallback != NULL )
 				{
 					double count = iYBlock * nXBlocks + iXBlock;
 					long newpercent = (long)((double)count/(double)(nXBlocks * nYBlocks)*100.0);
 					if( newpercent > percent )
 					{	
 						percent = newpercent;
-						Utility::DisplayProgress(globalCallback, percent, "Calculating...", key);
+						Utility::DisplayProgress(_globalCallback, percent, "Calculating...", _key);
 					}
 				}
 				
@@ -4636,7 +4636,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 		delete dataset;
 	}
 
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	Utility::DisplayProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 
@@ -4674,8 +4674,8 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 	*retVal = VARIANT_FALSE;
 	GDALAllRegister();
 
-	if (globalCallback) {
-		SetGdalErrorHandler(globalCallback);
+	if (_globalCallback) {
+		SetGdalErrorHandler(_globalCallback);
 	}
 
 	USES_CONVERSION;
@@ -4737,7 +4737,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 				{
 					for( int iXBlock = 0; iXBlock < nXBlocks; iXBlock++ )
 					{
-						if( globalCallback != NULL )
+						if( _globalCallback != NULL )
 						{
 							double count = iYBlock * nXBlocks + iXBlock;
 							long newpercent = (long)((double)count/(double)(nXBlocks * nYBlocks)*100.0);
@@ -4746,7 +4746,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 								percent = newpercent;
 								CString s;
 								s.Format("Calculating band %d", i);
-								Utility::DisplayProgress(globalCallback, percent, s, key);
+								Utility::DisplayProgress(_globalCallback, percent, s, _key);
 							}
 						}
 						
@@ -4821,10 +4821,10 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 	
 
-	if( globalCallback != NULL )
+	if( _globalCallback != NULL )
 	{
 		ClearGdalErrorHandler();
-		Utility::DisplayProgressCompleted(globalCallback);
+		Utility::DisplayProgressCompleted(_globalCallback);
 	}
 	return S_OK;
 }
@@ -5279,7 +5279,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	BSTR* names;
 	if (!ValidateInputNames(InputNames,  lBound, uBound, &names))
 	{
-		*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+		*errorMsg = A2BSTR(ErrorMsg(_lastErrorCode));
 		return S_FALSE;
 	}
 
@@ -5287,7 +5287,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	if (count < 2)
 	{
 		ErrorMessage(tkAT_LEAST_TWO_DATASOURCES_EXPECTED);
-		*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+		*errorMsg = A2BSTR(ErrorMsg(_lastErrorCode));
 		return S_FALSE;
 	}
 
@@ -5349,7 +5349,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 			if (dt->GetRasterXSize() != xSize || dt->GetRasterYSize() != ySize )
 			{
 				ErrorMessage(tkIMAGES_MUST_HAVE_THE_SAME_SIZE);
-				*errorMsg = A2BSTR(ErrorMsg(lastErrorCode));
+				*errorMsg = A2BSTR(ErrorMsg(_lastErrorCode));
 				goto cleaning;
 			}
 		}
@@ -5358,7 +5358,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	if (datasets.size() < 2)
 	{
 		*errorMsg = A2BSTR(ErrorMsg(tkAT_LEAST_TWO_DATASOURCES_EXPECTED));
-		ErrorMessage(lastErrorCode);
+		ErrorMessage(_lastErrorCode);
 		goto cleaning;
 	}
 	
@@ -5445,7 +5445,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 
 	for(long i = 0; i < numRows; i++ )
 	{
-		Utility::DisplayProgress(callback, i, numRows, "Calculating", key, percent);
+		Utility::DisplayProgress(callback, i, numRows, "Calculating", _key, percent);
 
 		for(int j = 0; j < numFields; j++)
 		{
@@ -5681,7 +5681,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 
 	for(long i = 0; i < numRows; i++ )
 	{
-		Utility::DisplayProgress(cBack, i, numRows, "Calculating", key, percent);
+		Utility::DisplayProgress(cBack, i, numRows, "Calculating", _key, percent);
 		
 		band->RasterIO(GF_Read, 0, i, numColumns, 1, data, numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
 
