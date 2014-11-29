@@ -205,7 +205,7 @@ IGeoProjection* Layer::GetGeoProjection()
 			if (bstr.Length() > 0)
 			{
 				VARIANT_BOOL vb;
-				GetUtils()->CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&gp);
+				ComHelper::CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&gp);
 				gp->ImportFromAutoDetect(bstr, &vb);
 				if (!vb)
 				{
@@ -294,16 +294,17 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		{
 			OgrDynamicLoader* loader = layer->GetOgrLoader();
 		
-			Debug::WriteWithThreadId("New task");
+			Debug::WriteWithThreadId("New task", DebugOgrLoading);
+
 			if (loader->AddWaitingTask())		// stop current loading task
 			{
 				loader->LockLoading(true);	// next one is allowed after previous is finished
-				Debug::WriteWithThreadId("Acquired lock");
+				Debug::WriteWithThreadId("Acquired lock", DebugOgrLoading);
 
 				loader->ReleaseWaitingTask();   // provide the way for the next one to stop it
 				if (loader->HaveWaitingTasks()) 
 				{
-					Debug::WriteWithThreadId("Task was canceled");
+					Debug::WriteWithThreadId("Task was canceled", DebugOgrLoading);
 					loader->LockLoading(false);
 					return 0;    // more of tasks further down the road, don't even start this
 				}
@@ -333,7 +334,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 					}
 				}
 				loader->LockLoading(false);
-				Debug::WriteWithThreadId("Lock released. \n");
+				Debug::WriteWithThreadId("Lock released. \n", DebugOgrLoading);
 				layer->_asyncLoading = false;
 			}
 		}
@@ -418,7 +419,7 @@ void Layer::UpdateShapefile()
 		ShpfileType shpType;
 		sf->get_ShapefileType(&shpType);
 		
-		Debug::WriteWithThreadId("Update shapefile: %d\n", data.size());
+		Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
 
 		ITable* itable = NULL;
 		sf->get_Table(&itable);
@@ -434,7 +435,7 @@ void Layer::UpdateShapefile()
 			for (size_t i = 0; i < data.size(); i++)
 			{
 				CComPtr<IShape> shp = NULL;
-				GetUtils()->CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+				ComHelper::CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
 				if (shp)
 				{
 					shp->Create(shpType, &vb);

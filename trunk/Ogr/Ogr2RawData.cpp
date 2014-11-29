@@ -13,7 +13,8 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 {
 	if (!layer || !extents || !loader) return false;
 
-	Debug::WriteWithThreadId("View extents: %f %f %f %f", extents->left, extents->right, extents->bottom, extents->top);
+	Debug::WriteWithThreadId(Debug::Format("View extents: %f %f %f %f", extents->left, extents->right, extents->bottom, extents->top), DebugOgrLoading);
+
 	layer->SetSpatialFilterRect(extents->left, extents->bottom, extents->right, extents->top);
 
 	loader->LockProvider(true);
@@ -22,7 +23,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 
 	if (!loader->CanLoad(numFeatures))
 	{
-		Debug::WriteWithThreadId("Too much features. Skip loading.");
+		Debug::WriteWithThreadId("Too much features. Skip loading.", DebugOgrLoading);
 		return false;
 	}
 
@@ -118,7 +119,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	}
 
 	if (success) {
-		Debug::WriteWithThreadId("Task succeeded.");
+		Debug::WriteWithThreadId("Task succeeded.", DebugOgrLoading);
 	}
 
 	return success;

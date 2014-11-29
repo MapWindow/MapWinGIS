@@ -1029,8 +1029,6 @@ namespace Utility
 		}
 	}
 
-	
-
 	// ********************************************************************
 	//		DisplayProgressCompleted()
 	// ********************************************************************
@@ -1064,7 +1062,7 @@ namespace Utility
 	// ********************************************************************
 	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...)
 	{
-		if( callback )
+		if (callback || Debug::IsDebugMode())
 		{
 			if (strcmp(message, "No Error") == 0) return;
 
@@ -1073,26 +1071,20 @@ namespace Utility
 			va_start( args, message);
 			vsprintf( buffer, message, args );
 			CString s = buffer;
-			Debug::WriteLine(s);
+			Debug::WriteError(s);
 			CComBSTR bstr(message);
-			callback->Error(key, bstr);
+
+			if (callback) {
+				callback->Error(key, bstr);
+			}
 		}
 	}
 	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...)
 	{
-		if( callback )
+		if( callback || Debug::IsDebugMode() )
 		{
-			if (strcmp(message, "No Error") == 0) return;
-
-			TCHAR buffer[1024];
- 			va_list args;
-			va_start( args, message);
-			vsprintf( buffer, message, args );
-			CString s = buffer;
-			Debug::WriteLine(s);
 			CComBSTR bstrKey(key);
-			CComBSTR bstrMessage(s);
-			callback->Error(bstrKey, bstrMessage);
+			DisplayErrorMsg(callback, bstrKey.m_str, message);
 		}
 	}
 
@@ -1281,86 +1273,5 @@ namespace Utility
 		*retVal = A2BSTR("");
 		return false;
 	}
-
 }
 
-namespace Debug
-{
-	// ****************************************************************** 
-	//		WriteWithThreadId
-	// ****************************************************************** 
-	void WriteWithThreadId(CString format, ...)
-	{
-#ifndef RELEASE_MODE
-		TCHAR buffer[1024];
-		va_list args;
-		va_start(args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
-		va_end(args);
-
-		SYSTEMTIME time;
-		GetLocalTime(&time);
-		CString s2;
-		s2.Format("Id=%d; %02d:%02d:%02d.%-3d: ", GetCurrentThreadId(), time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
-		CString s = buffer;
-		format = s2 + s + "\n";
-		OutputDebugStringA(format);
-#endif
-	}
-
-	// ****************************************************************** 
-	//		WriteWithTime
-	// ****************************************************************** 
-	void WriteWithTime(CString format, ...)
-	{
-#ifndef RELEASE_MODE
-		TCHAR buffer[1024];
-		va_list args;
-		va_start( args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
-		va_end(args);
-
-		SYSTEMTIME time;
-		GetLocalTime(&time);
-		CString s2;
-		s2.Format("%02d:%02d:%02d.%-3d: ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
-		CString s = buffer;
-		format = s2 + s + "\n";
-		OutputDebugStringA(format);
-#endif
-	}
-	
-	// ****************************************************************** 
-	//		WriteLine
-	// ****************************************************************** 
-	void WriteLine(CString format, ...)
-	{
-#ifndef RELEASE_MODE		
-		TCHAR buffer[1024];
- 		va_list args;
-		va_start( args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
-		va_end(args);
-		CString s = buffer;
-		format = "OCX: " + s + "\n";
-		OutputDebugStringA(format);
-#endif
-	}
-
-	// ****************************************************************** 
-	//		WriteError
-	// ****************************************************************** 
-	void WriteError(CString format, ...)
-	{
-#ifndef RELEASE_MODE				
-		TCHAR buffer[1024];
- 		va_list args;
-		va_start( args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
-		va_end(args);
-		CString s = buffer;
-		format = "OCX ERROR: " + s + "\n";
-		OutputDebugStringA(format);
-#endif
-	}
-}

@@ -589,7 +589,6 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	int xMin, xMax, yMin, yMax, zoom;
 	if (!GetTilesForMap(mapView, provider->Id, xMin, xMax, yMin, yMax, zoom))
 	{
-		Debug::WriteLine("Can't calculate extents for tiles; zoom = %d", zoom);
 		this->Clear();
 		return;
 	}

@@ -209,6 +209,7 @@ CString ComHelper::GetInterfaceName(tkInterface id)
 		case idGridColorBreak:	return "GridColorBreak";
 		case idGridColorScheme:	return "GridColorScheme";
 		case idGridHeader:		return "GridHeader";
+		case idIdentifier:      return "Identifier";
 		case idImage:			return "Image";
 		case idLabelCategory:	return "LabelCategory";
 		case idLabel:			return "Label";
@@ -234,6 +235,8 @@ CString ComHelper::GetInterfaceName(tkInterface id)
 		case idVector:			return "Vector";
 		case idOgrDatasource:   return "OgrDatasource";
 		case idOgrLayer:		return "OgrLayer";
+		case idShapeEditor:		return "ShapeEditor";
+		case idUndoList:		return "UndoList";
 		default:				return "Unknown";
 	}
 }

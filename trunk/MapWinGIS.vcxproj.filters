@@ -810,6 +810,9 @@
     <ClInclude Include="Utilities\ComHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\DebugHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1714,6 +1717,9 @@
       <Filter>Editor</Filter>
     </ClCompile>
     <ClCompile Include="Utilities\ComHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\DebugHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>

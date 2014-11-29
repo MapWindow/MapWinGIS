@@ -94,19 +94,29 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	_projection->StopTransform();
 
 	ComHelper::SetRef(pVal, (IDispatch**)&_projection);
-	
-	USES_CONVERSION;
+	VARIANT_BOOL isEmpty;
+	_projection->get_IsEmpty(&isEmpty);
+
+#ifndef RELEASE_MODE
+
 	CComBSTR str;
-	_projection->ExportToWKT(&str);
-	Debug::WriteLine("New map projection is set: %s", OLE2A(str));
+	if (!isEmpty) {
+		_projection->ExportToProj4(&str);
+	}
+	else {
+		str = L"";
+	}
+	USES_CONVERSION;
+	CString s = str.Length() > 0 ? OLE2A(str) : "<empty>";
+	Debug::WriteLine("MAP PROJECTION SET: %s", s);
+
+#endif
 
 	_projectionChangeCount++;
 	IGeoProjection* gp = NULL;
 	
 	_wgsProjection->StopTransform();
 	
-	VARIANT_BOOL isEmpty;
-	_projection->get_IsEmpty(&isEmpty);
 	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
@@ -192,13 +202,17 @@ void CMapView::UpdateTileProjection()
 
 	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
 	{
+		VARIANT_BOOL empty;
+		_projection->get_IsEmpty(&empty);
+
 		_tileProjection->StartTransform(_projection, &vb);
-		if (!vb) {
-			Debug::WriteError("Failed to start tiles to map transformation.");
+		if (!vb && !empty) {
+			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
 		}
+		
 		_tileReverseProjection->StartTransform(_tileProjection, &vb);
-		if (!vb) {
-			Debug::WriteError("Failed to start map to tiles transformation.");
+		if (!vb && !empty) {
+			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
 		}
 	}
 }

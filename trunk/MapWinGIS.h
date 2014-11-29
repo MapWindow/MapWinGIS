@@ -12,7 +12,6 @@
 
 #define VERSION_MAJOR 4
 #define VERSION_MINOR 9
-#define FORCE_NEW_LABELS true	// new labels will be used regardless of the mode
 
 extern const GUID CDECL _tlid;
 extern const WORD _wVerMajor;

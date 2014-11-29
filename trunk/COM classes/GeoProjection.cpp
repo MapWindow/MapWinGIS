@@ -128,7 +128,12 @@ void CGeoProjection::ErrorMessage(long ErrorCode)
 	}
 	
 	_lastErrorCode = code;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	if (code != tkNO_ERROR) 
+	{
+		CString msg = "OGR: ";
+		msg += ErrorMsg(_lastErrorCode);
+		Utility::DisplayErrorMsg(_globalCallback, _key, msg);
+	}
 }
 
 // ************************************************************

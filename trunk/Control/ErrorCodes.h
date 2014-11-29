@@ -256,6 +256,7 @@ const char * ErrorMsg( long ErrorCode );
 #define tkINVALID_PROJECTION 2005
 #define tkINVALID_URL 2006
 #define tkINVALID_ZOOM_LEVEL 2007
-
+#define tkTILES_MAP_TRANSFORM_FAILED 2008
+#define tkMAP_TILES_TRANSFORM_FAILED 2009
 
 # endif

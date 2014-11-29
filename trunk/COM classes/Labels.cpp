@@ -1127,12 +1127,12 @@ STDMETHODIMP CLabels::put_Synchronized(VARIANT_BOOL newVal)
 	if (newVal)
 	{
 		if (LabelsSynchronized())
-			m_synchronized = VARIANT_TRUE;
+			_synchronized = VARIANT_TRUE;
 		else
 			ErrorMessage(tkLABELS_CANT_SYNCHRONIZE);
 	}
 	else
-		m_synchronized = VARIANT_FALSE;
+		_synchronized = VARIANT_FALSE;
 
 	return S_OK;
 }
@@ -1140,8 +1140,8 @@ STDMETHODIMP CLabels::get_Synchronized(VARIANT_BOOL* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	// the propety must be set and the number of labels/parts must correspond
-	if (LabelsSynchronized() && m_synchronized)
+	// the property must be set and the number of labels/parts must correspond
+	if (LabelsSynchronized() && _synchronized)
 		*retval = VARIANT_TRUE;
 	else
 		*retval = VARIANT_FALSE;
@@ -1707,7 +1707,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	CString str = OLE2CA(newVal);
 	_labelExpression = str;
 
-	if (!m_synchronized)
+	if (!_synchronized && _labels.size() > 0)
 	{
 		ErrorMessage(tkLABELS_NOT_SYNCHRONIZE);
 	}

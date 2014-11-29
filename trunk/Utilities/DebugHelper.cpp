@@ -1,0 +1,138 @@
+#include "stdafx.h"
+#include "DebugHelper.h"
+
+namespace Debug
+{
+	static const int INTERFACES_COUNT = 3;
+	bool targets[INTERFACES_COUNT];
+
+	void Init() {
+		targets[DebugAny] = true;
+		targets[DebugOgrLoading] = false;
+		targets[DebugPanning] = false;
+	}
+
+	bool CheckDebugTarget(DebugTarget target)
+	{
+		return targets[target];
+	}
+
+	CString GetDebugTargetName(DebugTarget target)
+	{
+		switch (target)
+		{
+			case DebugAny: return "";
+			case DebugOgrLoading: return "OGR: ";
+			case DebugPanning: return "PANNING";
+		}
+		return "";
+	}
+
+	void PrintOutput(DebugTarget target, CString& msg, bool error = false)
+	{
+		CString s;
+		if (target == DebugAny)
+			s = (error ? "OCX ERROR: " : "OCX: ");
+		else 
+			s = GetDebugTargetName(target);
+		s += msg + "\n";
+		OutputDebugStringA(s);
+	}
+
+	// ****************************************************************** 
+	//		Format
+	// ****************************************************************** 
+	CString Format(char* format, ...)
+	{
+#ifndef RELEASE_MODE		
+		TCHAR buffer[1024];
+		va_list args;
+		va_start(args, format);
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
+		CString s = buffer;
+		return s;
+#else
+		return "";
+#endif
+	}
+
+	// ****************************************************************** 
+	//		WriteWithTime
+	// ****************************************************************** 
+	void WriteWithTime(CString msg, DebugTarget target)
+	{
+#ifndef RELEASE_MODE		
+		SYSTEMTIME time;
+		GetLocalTime(&time);
+		CString sTime;
+		sTime.Format("%02d:%02d:%02d.%-3d: ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
+		msg = sTime + msg;
+		PrintOutput(target, msg);
+#endif
+	}
+
+	// ****************************************************************** 
+	//		WriteWithThreadId
+	// ****************************************************************** 
+	void WriteWithThreadId(CString msg, DebugTarget target)
+	{
+#ifndef RELEASE_MODE
+		if (!CheckDebugTarget(target)) return;
+
+		CString s;
+		s.Format("Id=%d: ", GetCurrentThreadId());
+		msg = s + msg;
+		WriteWithTime(msg, target);
+#endif
+	}
+
+	// ****************************************************************** 
+	//		WriteLine
+	// ****************************************************************** 
+	void WriteLine(CString format, ...)
+	{
+	#ifndef RELEASE_MODE	
+		if (!CheckDebugTarget(DebugAny)) return;
+
+		TCHAR buffer[1024];
+		va_list args;
+		va_start(args, format);
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
+
+		format = buffer;
+		PrintOutput(DebugAny, format);
+	#endif
+	}
+
+	// ****************************************************************** 
+	//		WriteError
+	// ****************************************************************** 
+	void WriteError(CString format, ...)
+	{
+	#ifndef RELEASE_MODE	
+		if (!CheckDebugTarget(DebugAny)) return;
+		TCHAR buffer[1024];
+		va_list args;
+		va_start(args, format);
+		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		va_end(args);
+
+		format = buffer;
+		PrintOutput(DebugAny, format, true);
+	#endif
+	}
+
+	// ***************************************************
+	//		IsDebugMode
+	// ***************************************************
+	bool IsDebugMode()
+	{
+		bool debug = true;
+	#ifdef RELEASE_MODE
+		debug = false;
+	#endif
+		return debug;
+	}
+}

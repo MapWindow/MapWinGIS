@@ -37,5 +37,9 @@ CString ReferenceCounter::GetReport(bool unreleasedOnly)
 			}
 		}
 	}
+	if (temp.GetLength() == 0) {
+		s += "<none>";
+	}
+
 	return s;
 }

@@ -1201,6 +1201,8 @@ STDMETHODIMP COgrLayer::get_StyleName(LONG styleIndex, BSTR* pVal)
 CStringW COgrLayer::LoadStyleXML(CStringW name)
 {
 	if (!CheckState()) return L"";
+	CSingleLock lock(&_loader.ProviderLock);
+	lock.Lock();
 	return OgrStyleHelper::LoadStyle(_dataset, GetStyleTableName(), GetLayerName(), name);
 }
 

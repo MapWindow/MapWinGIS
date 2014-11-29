@@ -19,6 +19,7 @@
 #include "Extent.h"
 #include "VarH.h"
 #include "MapViewCallback.h"
+#include "DebugHelper.h"
 
 #pragma warning(disable:4482)	// non-standard extension used - for names of enumerations
 #pragma warning(disable:4099)	// missing program database
@@ -47,7 +48,9 @@ const double SNAP_TOLERANCE = 20;  // pixels
 const double MOUSE_CLICK_TOLERANCE = 20;  // pixels
 const double POINT_INSERT_TOLERANCE = 10;  // pixels
 
-# define MAX_BUFFER 512
+#define MAX_BUFFER 512
+#define FORCE_NEW_LABELS true	// new labels will be used regardless of the mode
+#define DEBUG_OGR_LOADING
 
 #ifdef VLD_FORCE_ENABLE
 	#include <vld.h>

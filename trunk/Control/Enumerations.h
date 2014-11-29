@@ -229,4 +229,11 @@ enum RedrawTarget
 	rtVolatileLayer = 1,
 };
 
+enum DebugTarget
+{
+	DebugAny = 0,
+	DebugOgrLoading = 1,
+	DebugPanning = 2,
+};
+
 # endif

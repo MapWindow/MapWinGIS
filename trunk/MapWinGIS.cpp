@@ -40,6 +40,8 @@ GlobalClassFactory m_factory;	// make sure that this one is initialized after th
 // ******************************************************
 BOOL CMapWinGISApp::InitInstance()
 {
+	Debug::Init();
+
 	//Neio modified 2009, following http_://www.mapwindow.org/phorum/read.php?7,12162 by gischai, for multi-language support
 	//std::locale::global(std::locale(""));
 	//19-Oct-09 Rob Cairns: (See Bug 1446) - I hate doing this if it prevents our Chinese friends opening Chinese character shapefiles and data.
@@ -78,7 +80,7 @@ int CMapWinGISApp::ExitInstance()
 	#ifndef RELEASE_MODE
 
 	CComBSTR bstr;
-	m_utils->get_ComUsageReport(VARIANT_TRUE, &bstr);
+	GetUtils()->get_ComUsageReport(VARIANT_TRUE, &bstr);
 
 	USES_CONVERSION;
 	CString s = OLE2A(bstr);

@@ -571,8 +571,10 @@ VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW nam
 				CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
 				if (root) {
 					CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
-					result = DeserializeLayerOptionsCore(layerHandle, node);
-					CPLDestroyXMLNode(root);
+					if (node) {
+						result = DeserializeLayerOptionsCore(layerHandle, node);
+						CPLDestroyXMLNode(root);
+					}
 				}
 			}
 			ogrLayer->Release();

@@ -40,7 +40,7 @@ public:
 	CLabels()
 	{
 		_shapefile = NULL;
-		m_synchronized = VARIANT_FALSE;
+		_synchronized = VARIANT_FALSE;
 		USES_CONVERSION;
 		_key = A2BSTR("");
 		_expression = A2BSTR("");
@@ -392,6 +392,7 @@ private:
 	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
 
 	tkTextRenderingHint _textRenderingHint;
+	VARIANT_BOOL _synchronized;
 
 public:
 
@@ -411,7 +412,6 @@ public:
 	bool LabelsSynchronized();
 
 	void ApplyExpression_(long CategoryIndex);
-	VARIANT_BOOL m_synchronized;
 
 	CPLXMLNode* SerializeLabelData(CString ElementName, bool& saveRotation, bool& saveText);
 	bool DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loadText);

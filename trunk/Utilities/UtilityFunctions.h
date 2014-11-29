@@ -99,11 +99,3 @@ namespace Utility
 	// time
 	int GetCurrentYear();
 }
-
-namespace Debug
-{
-	void WriteWithThreadId(CString format, ...);
-	void WriteWithTime(CString format, ...);
-	void WriteLine(CString format, ...);
-	void WriteError(CString format, ...);
-}

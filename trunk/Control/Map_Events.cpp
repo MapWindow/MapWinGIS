@@ -1164,17 +1164,14 @@ void CMapView::DoPanning(CPoint point)
 	double xAmount = (_dragging.Start.x - _dragging.Move.x) * _inversePixelPerProjectionX;
 	double yAmount = (_dragging.Move.y - _dragging.Start.y) * _inversePixelPerProjectionY;
 
-	Debug::WriteWithTime("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y);
-	Debug::WriteWithTime("Clicked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top);
+	Debug::WriteWithTime(Debug::Format("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y), DebugPanning);
+	Debug::WriteWithTime(Debug::Format("Clicked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top), DebugPanning);
 
 	_extents.left = _clickDownExtents.left + xAmount;
 	_extents.right = _clickDownExtents.right + xAmount;
 	_extents.bottom = _clickDownExtents.bottom + yAmount;
 	_extents.top = _clickDownExtents.top + yAmount;
 	
-	// trigger redraw of scalebar; commented: doesn't look nice + additional computational burden
-	//m_lastWidthMeters = 0.0;	
-
 	if (_useSeamlessPan)
 	{
 		// complete redraw; bad for performance, especially for large layers

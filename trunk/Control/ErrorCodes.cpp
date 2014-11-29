@@ -467,19 +467,24 @@ const char * ErrorMsg( long ErrorCode )
 
 		//2001-2200 = tiles
 		case tkINVALID_PROVIDER_ID:
-			return "Invalid provider Id";
+			return "Invalid provider Id.";
 		case tkCANT_DELETE_DEFAULT_PROVIDER:
-			return "Can't delete default provider";
+			return "Can't delete default provider.";
 		case tkPROVIDER_ID_RESERVED:
-			return "Provider id is reserved";
+			return "Provider id is reserved.";
 		case tkPROVIDER_ID_IN_USE:
-			return "Provider id is in use";
+			return "Provider id is in use.";
 		case tkINVALID_PROJECTION:
-			return "Invalid projection id";
+			return "Invalid projection id.";
 		case tkINVALID_URL:
-			return "Invalid URL pattern";
+			return "Invalid URL pattern.";
 		case tkINVALID_ZOOM_LEVEL:
-			return "Invalid zoom level";
+			return "Invalid zoom level.";
+		case tkTILES_MAP_TRANSFORM_FAILED:
+			return "Failed to start tiles to map transformation.";
+		case tkMAP_TILES_TRANSFORM_FAILED:
+			return "Failed to start map to tiles transformation.";
+
 		//Default
 		default:
 			return "Invalid Error Code";
