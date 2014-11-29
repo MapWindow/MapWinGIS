@@ -284,7 +284,7 @@ STDMETHODIMP CFileManager::Open(BSTR Filename, tkFileOpenStrategy openStrategy, 
 	_lastOpenStrategy = openStrategy;
 
 	USES_CONVERSION;
-	if (!Utility::fileExistsW(OLE2W(Filename)))
+	if (!Utility::FileExistsW(OLE2W(Filename)))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
 		return S_FALSE;
@@ -323,7 +323,7 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 		put_GlobalCallback(callback);
 	}
 
-	if (!Utility::fileExistsW(OLE2W(Filename)))
+	if (!Utility::FileExistsW(OLE2W(Filename)))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
 		return S_FALSE;
@@ -368,7 +368,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 		put_GlobalCallback(callback);
 	}
 
-	if (!Utility::fileExistsW(OLE2W(Filename)))
+	if (!Utility::FileExistsW(OLE2W(Filename)))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
 		return S_FALSE;

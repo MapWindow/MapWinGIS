@@ -390,7 +390,7 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 
 		int intbuf;
 		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 		// shape records are 1 based
 		if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -401,7 +401,7 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 		else
 		{	
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::swapEndian((char*)&intbuf,sizeof(int));
+			Utility::SwapEndian((char*)&intbuf,sizeof(int));
 			int contentLength = intbuf*2;			//(16 to 32 bit words)
 
 			if( contentLength <= 0 )

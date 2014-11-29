@@ -29,7 +29,7 @@ public:
 	YahooBaseProvider() 
 	{
 		RefererUrl = "http://maps.yahoo.com/";
-		Copyright.Format("© Yahoo! Inc. - Map data & Imagery ©%d NAVTEQ", Utility::getCurrentYear());
+		Copyright.Format("© Yahoo! Inc. - Map data & Imagery ©%d NAVTEQ", Utility::GetCurrentYear());
 		this->Projection = new MercatorProjection();
 	}
 	

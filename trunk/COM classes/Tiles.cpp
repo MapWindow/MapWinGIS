@@ -1584,7 +1584,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 	
 	USES_CONVERSION;
 	CStringW path = OLE2W(savePath);
-	if (!Utility::dirExists(path))
+	if (!Utility::DirExists(path))
 	{
 		ErrorMessage(tkFOLDER_NOT_EXISTS);
 		*retVal = -1;

@@ -51,7 +51,7 @@ bool SQLiteCache::Initialize(SqliteOpenMode openMode)
 			if (_openNeeded)
 			{
 				CStringW s = get_DbName();
-				if (Utility::fileExistsW(s))
+				if (Utility::FileExistsW(s))
 				{
 					SQLiteCache::CreateDatabase();
 				}

@@ -795,22 +795,22 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 			prjName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "prj";
 			
 			// new file is created, so there must not be any files with this names
-			if( Utility::fileExists(shpName) != FALSE )
+			if( Utility::FileExists(shpName) != FALSE )
 			{	
 				ErrorMessage(tkSHP_FILE_EXISTS);
 				return S_OK;
 			}
-			if( Utility::fileExists(shxName) != FALSE )
+			if( Utility::FileExists(shxName) != FALSE )
 			{	
 				ErrorMessage(tkSHX_FILE_EXISTS);
 				return S_OK;
 			}
-			if( Utility::fileExists(dbfName) != FALSE )
+			if( Utility::FileExists(dbfName) != FALSE )
 			{	
 				ErrorMessage(tkDBF_FILE_EXISTS);
 				return S_OK;
 			}
-			if( Utility::fileExists(prjName) != FALSE )
+			if( Utility::FileExists(prjName) != FALSE )
 			{	
 				ErrorMessage(tkPRJ_FILE_EXISTS);	// lsu: probably it's ok to overwrite it blindly ?
 				return S_OK;
@@ -1042,17 +1042,17 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// -----------------------------------------------
 		// it's not allowed to rewrite the existing files
 		// -----------------------------------------------
-		if( Utility::fileExists(sa_shpfileName) )
+		if( Utility::FileExists(sa_shpfileName) )
 		{	
 			ErrorMessage(tkSHP_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::fileExists(sa_shxfileName) )
+		if( Utility::FileExists(sa_shxfileName) )
 		{	
 			ErrorMessage(tkSHX_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::fileExists(sa_dbffileName) )
+		if( Utility::FileExists(sa_dbffileName) )
 		{	
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return S_OK;
@@ -1177,17 +1177,17 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// -----------------------------------------------
 		// it's not allowed to rewrite the existing files
 		// -----------------------------------------------
-		if( Utility::fileExists(sa_shpfileName) )
+		if( Utility::FileExists(sa_shpfileName) )
 		{	
 			ErrorMessage(tkSHP_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::fileExists(sa_shxfileName) )
+		if( Utility::FileExists(sa_shxfileName) )
 		{	
 			ErrorMessage(tkSHX_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::fileExists(sa_dbffileName) )
+		if( Utility::FileExists(sa_dbffileName) )
 		{	
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return S_OK;
@@ -2615,12 +2615,12 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 		{
 			// spatial index must be deleted, as it became useful all the same
 			CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
-			if (Utility::fileExists(name))
+			if (Utility::FileExists(name))
 			{
 				remove(name);
 			}
 			name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
-			if (Utility::fileExists(name))
+			if (Utility::FileExists(name))
 			{
 				remove(name);
 			}

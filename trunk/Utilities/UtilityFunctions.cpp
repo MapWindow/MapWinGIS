@@ -188,7 +188,7 @@ namespace Utility
 	// **************************************************************
 	//		Utility::swapEndian()
 	// **************************************************************
-	void Utility::swapEndian(char* a,int size) 
+	void Utility::SwapEndian(char* a,int size) 
 	{
 		char hold;
 		for(int i = 0; i < size*.5; i++)
@@ -203,7 +203,7 @@ namespace Utility
 	// *******************************************************************
 	//		fileExists()
 	// *******************************************************************
-	BOOL Utility::fileExists(CString filename)
+	BOOL Utility::FileExists(CString filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -221,7 +221,7 @@ namespace Utility
 	// *******************************************************************
 	//		get_FileSize()
 	// *******************************************************************
-	long Utility::get_FileSize(CStringW filename)
+	long Utility::GetFileSize(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -242,7 +242,7 @@ namespace Utility
 	// *******************************************************************
 	//		dirExists()
 	// *******************************************************************
-	bool dirExists(CStringW path)
+	bool DirExists(CStringW path)
 	{
 		DWORD ftyp = GetFileAttributesW(path);
 		if (ftyp == INVALID_FILE_ATTRIBUTES)
@@ -253,7 +253,7 @@ namespace Utility
 	// *******************************************************************
 	//		Utility::fileExistsW()
 	// *******************************************************************
-	bool fileExistsW(CStringW filename)
+	bool FileExistsW(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -274,7 +274,7 @@ namespace Utility
 	// *******************************************************************
 	//		Utility::fileExistsUnicode()
 	// *******************************************************************
-	bool Utility::fileExistsUnicode(CStringW filename)
+	bool Utility::FileExistsUnicode(CStringW filename)
 	{
 		if( filename.GetLength() <= 0 )
 			return FALSE;
@@ -493,7 +493,7 @@ namespace Utility
 	bool IsFileYounger(CStringW filename, CStringW thanFilename)
 	{
 		FILETIME time1, time2;
-		if (get_FileCreationTime(filename, time1) && get_FileCreationTime(thanFilename, time2))
+		if (GetFileCreationTime(filename, time1) && GetFileCreationTime(thanFilename, time2))
 		{
 			// subtract several seconds
 			ULONGLONG qwResult;
@@ -517,7 +517,7 @@ namespace Utility
 	// ********************************************************
 	//     Utility::get_FileCreationTime()
 	// ********************************************************
-	bool get_FileCreationTime(CStringW filename, FILETIME& time)
+	bool GetFileCreationTime(CStringW filename, FILETIME& time)
 	{
 		_WIN32_FILE_ATTRIBUTE_DATA data;
 		if (GetFileAttributesExW(filename, GetFileExInfoStandard, &data))
@@ -533,7 +533,7 @@ namespace Utility
 	// ********************************************************
 	bool RemoveFile(CStringW filename)
 	{
-		if (Utility::fileExistsW(filename))
+		if (Utility::FileExistsW(filename))
 		{
 			return _wremove(filename) == 0;
 		}
@@ -545,7 +545,7 @@ namespace Utility
 	// ********************************************************
 	//    getProjectionFileName()
 	// ********************************************************
-	CStringW getProjectionFilename( CStringW dataSourceName )
+	CStringW GetProjectionFilename( CStringW dataSourceName )
 	{
 		return ChangeExtension(dataSourceName, L"prj");
 	}
@@ -598,7 +598,7 @@ namespace Utility
 	//			get_ConversionFactor()
 	// **********************************************************
 	/// Returns the conversion factor between the map units and inches
-	double Utility::getConversionFactor(tkUnitsOfMeasure Units)
+	double Utility::GetConversionFactor(tkUnitsOfMeasure Units)
 	{
 		switch (Units)
 		{
@@ -624,8 +624,8 @@ namespace Utility
 	// **********************************************************
 	bool Utility::ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value)
 	{
-		value *= Utility::getConversionFactor(source);	// in inches
-		double factor = Utility::getConversionFactor(target);
+		value *= Utility::GetConversionFactor(source);	// in inches
+		double factor = Utility::GetConversionFactor(target);
 		if (factor != 0.0)
 		{
 			value /= factor;
@@ -1186,7 +1186,7 @@ namespace Utility
 	// ********************************************************
 	//	  getCurrentYear
 	// ********************************************************
-	int getCurrentYear()
+	int GetCurrentYear()
 	{
 		const time_t curTime = time(NULL);
 		struct tm *tmData = localtime(&curTime);
@@ -1204,7 +1204,7 @@ namespace Utility
 			logger.close();
 		}
 
-		if (!Utility::dirExists(path))
+		if (!Utility::DirExists(path))
 			_wmkdir(path);
 
 		path += name;

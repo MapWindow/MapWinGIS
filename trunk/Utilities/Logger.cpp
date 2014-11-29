@@ -9,7 +9,7 @@ namespace Debug
 
 		USES_CONVERSION;
 		CStringW path = Utility::GetFolderFromPath(filename);
-		if (!Utility::dirExists(path))
+		if (!Utility::DirExists(path))
 			_wmkdir(path);
 
 		m_logger.open(filename);

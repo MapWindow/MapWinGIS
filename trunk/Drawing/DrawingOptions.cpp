@@ -601,7 +601,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 			BSTR filename;
 			this->picture->get_Filename(&filename);
 			USES_CONVERSION;
-			long size = Utility::get_FileSize(OLE2CA(filename));
+			long size = Utility::GetFileSize(OLE2CA(filename));
 			if (size < (long)(0x1 << 20))
 			{
 				useGDIPlusReading = true;

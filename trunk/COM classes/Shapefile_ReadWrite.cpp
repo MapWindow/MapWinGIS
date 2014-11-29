@@ -57,7 +57,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// read the shp from disk
 		int intbuf;
 		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 		if( intbuf != ShapeIndex + 1 )
 		{
@@ -67,7 +67,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		}
 
 		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 		int contentLength = intbuf * 2;	//(32 bit words)
 
 		// *2: for conversion from 16-bit words to 8-bit words
@@ -105,7 +105,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 
 	int intbuf;
 	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::swapEndian((char*)&intbuf,sizeof(int));
+	Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 	// shape records are 1 based - Allow for a mistake
 	if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -116,7 +116,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 	else
 	{
 		fread(&intbuf,sizeof(int),1,_shpfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 		int contentLength = intbuf * 2;//(32 bit words)
 
 		fread(&intbuf,sizeof(int),1,_shpfile);
@@ -952,7 +952,7 @@ BOOL CShapefile::ReadShx()
 	// file code
 	int intbuf;
 	fread(&intbuf,sizeof(int),1,_shxfile);
-	Utility::swapEndian((char*)&intbuf,sizeof(int));
+	Utility::SwapEndian((char*)&intbuf,sizeof(int));
 	if( intbuf != FILE_CODE )
 		return FALSE;
 
@@ -961,14 +961,14 @@ BOOL CShapefile::ReadShx()
 	for(int i=0; i < UNUSEDSIZE; i++)
 	{
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 		if( intbuf != unused )
 			return FALSE;
 	}
 
 	// file length (16 bit words)
 	fread(&intbuf,sizeof(int),1,_shxfile);
-	Utility::swapEndian((char*)&intbuf,sizeof(int));
+	Utility::SwapEndian((char*)&intbuf,sizeof(int));
 	int filelength = intbuf;
 
 	// version
@@ -995,12 +995,12 @@ BOOL CShapefile::ReadShx()
 	{
 		// offset
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 		_shpOffsets.push_back(intbuf*2);			// convert to (32 bit words)
 
 		// content length
 		fread(&intbuf,sizeof(int),1,_shxfile);
-		Utility::swapEndian((char*)&intbuf,sizeof(int));
+		Utility::SwapEndian((char*)&intbuf,sizeof(int));
 		readLength += 4;
 	}
 	//_numShapes = shpOffsets.size();
@@ -1021,7 +1021,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	void* intbuf;
 	int fileCode = FILE_CODE;
 	intbuf = (char*)&fileCode;
-	Utility::swapEndian((char*)intbuf,sizeof(int));
+	Utility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf,sizeof(int),1,shx);
 
 	// unused
@@ -1029,14 +1029,14 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 	{
 		int unused = UNUSEDVAL;
 		intbuf = (char*)&unused;
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shx);
 	}
 
 	// FILELENGTH (16 bit words)
 	int fileLength = HEADER_BYTES_16 + (int)_shapeData.size() * 4; //_numShapes*4;
 	intbuf = (char*)&fileLength;
-	Utility::swapEndian((char*)intbuf,sizeof(int));
+	Utility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf, sizeof(int),1,shx);
 
 	//VERSION
@@ -1077,7 +1077,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		void * intbuf;
 		int sixteenBitOffset = offset/2;
 		intbuf = (char*)&sixteenBitOffset;
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shx);
 
 		get_Shape(i,&shape);
@@ -1092,7 +1092,7 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 		contentLength = contentLength/2;
 		intbuf = (char*)&contentLength;
 
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shx);
 
 		shape->Release();
@@ -1185,7 +1185,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	void* intbuf;
 	int fileCode = FILE_CODE;
 	intbuf = (char*)&fileCode;
-	Utility::swapEndian((char*)intbuf,sizeof(int));
+	Utility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf,sizeof(int),1,shp);
 
 	//UNUSED
@@ -1193,7 +1193,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 	{
 		int unused = UNUSEDVAL;
 		intbuf = (char*)&unused;
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf,sizeof(int),1,shp);
 	}
 
@@ -1221,7 +1221,7 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 	filelength = filelength/2;
 	intbuf = (char*)&filelength;
-	Utility::swapEndian((char*)intbuf,sizeof(int));
+	Utility::SwapEndian((char*)intbuf,sizeof(int));
 	fwrite(intbuf, sizeof(int),1,shp);
 
 	//VERSION
@@ -1264,10 +1264,10 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 		//Write the Record Header
 		long recNum = k + 1;
 		intbuf = (char*)&recNum;
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shp);
 		intbuf = (char*)&contentLength;
-		Utility::swapEndian((char*)intbuf,sizeof(int));
+		Utility::SwapEndian((char*)intbuf,sizeof(int));
 		fwrite(intbuf, sizeof(int),1,shp);
 
 		if ( _fastMode && _isEditingShapes)

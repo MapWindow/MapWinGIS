@@ -679,7 +679,7 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 	if( *retval)
 	{	
 		CStringW name = OLE2W(dbfFilename);
-		if( !Utility::fileExistsW(name))
+		if( !Utility::FileExistsW(name))
 		{	
 			ErrorMessage(tkDBF_FILE_DOES_NOT_EXIST);
 			return S_OK;
@@ -735,7 +735,7 @@ STDMETHODIMP CTableClass::CreateNew(BSTR dbfFilename, VARIANT_BOOL *retval)
 	}
 	else
 	{	
-		if( Utility::fileExistsUnicode( OLE2A(dbfFilename) ) )
+		if( Utility::FileExistsUnicode( OLE2A(dbfFilename) ) )
 		{	
 			*retval = VARIANT_FALSE;
 			ErrorMessage(tkDBF_FILE_EXISTS);
@@ -819,7 +819,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 	}
 	else
 	{
-		if ( Utility::fileExistsW(dbfFilename) != FALSE )
+		if ( Utility::FileExistsW(dbfFilename) != FALSE )
 		{	
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return false;

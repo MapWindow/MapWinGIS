@@ -1370,7 +1370,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".lbl";
 					
-					if (m_savingMode == modeXMLOverwrite && Utility::fileExists(path))
+					if (m_savingMode == modeXMLOverwrite && Utility::FileExists(path))
 					{
 						if( remove( path ) != 0 )
 						{
@@ -1380,7 +1380,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 
 					// serialize only if there is no file, it's a responsibility 
 					// of user to keep this file updated
-					if (!Utility::fileExists(path))
+					if (!Utility::FileExists(path))
 					{
 						VARIANT_BOOL retVal;
 						SaveToXML(A2BSTR(path), &retVal);
@@ -1579,7 +1579,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 			path += L".lbl";
 					
 			// restoring labels
-			if (Utility::fileExistsW(path))
+			if (Utility::FileExistsW(path))
 			{
 				VARIANT_BOOL retVal;
 				CComBSTR bstrPath(path);
@@ -1913,7 +1913,7 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 	
 	USES_CONVERSION;
 	CStringW name = OLE2W(filename);
-	if (!Utility::fileExistsW(name))
+	if (!Utility::FileExistsW(name))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;

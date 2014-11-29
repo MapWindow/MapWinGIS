@@ -1432,7 +1432,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".chart";
 					
-					if (Utility::fileExists(path) && m_savingMode == modeXMLOverwrite)
+					if (Utility::FileExists(path) && m_savingMode == modeXMLOverwrite)
 					{
 						if( remove( path ) != 0 )
 						{
@@ -1442,7 +1442,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 
 					// serialize only if there is no file, it's a responsibility 
 					// of user to keep this file updated
-					if (!Utility::fileExists(path))
+					if (!Utility::FileExists(path))
 					{
 						VARIANT_BOOL retVal;
 						this->SaveToXML(A2BSTR(path), &retVal);
@@ -1626,7 +1626,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 				path += ".chart";
 				
 				// restoring labels
-				if (Utility::fileExists(path))
+				if (Utility::FileExists(path))
 				{
 					VARIANT_BOOL retVal;
 					this->LoadFromXML(A2BSTR(path), &retVal);
@@ -1858,7 +1858,7 @@ STDMETHODIMP CCharts::LoadFromXML(BSTR Filename, VARIANT_BOOL* retVal)
 	
 	USES_CONVERSION;
 	CStringW name = OLE2W(Filename);
-	if (!Utility::fileExistsW(name))
+	if (!Utility::FileExistsW(name))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;

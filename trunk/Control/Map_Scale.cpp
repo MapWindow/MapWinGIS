@@ -317,7 +317,7 @@ DOUBLE CMapView::GetCurrentScale(void)
 		double screenWidth =  fabs(maxX - minX)/(double)pixX;
 		
 		// size of map being displayed, inches
-		double convFact = Utility::getConversionFactor(_unitsOfMeasure);	
+		double convFact = Utility::GetConversionFactor(_unitsOfMeasure);	
 		if (convFact == 0) return 0.0;
 		double mapHeight = (_extents.top - _extents.bottom)*convFact;
 		double mapWidth = (_extents.right - _extents.left)*convFact;
@@ -361,8 +361,8 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 																// y = sqrt(b^2/(a^2 + 1))
 																// x = y*a
 	// converting to the map units
-	mapHeight /= Utility::getConversionFactor(_unitsOfMeasure);
-	mapWidth /= Utility::getConversionFactor(_unitsOfMeasure);
+	mapHeight /= Utility::GetConversionFactor(_unitsOfMeasure);
+	mapWidth /= Utility::GetConversionFactor(_unitsOfMeasure);
 
 	IExtents* box = NULL;
 	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);

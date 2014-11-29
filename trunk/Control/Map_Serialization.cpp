@@ -11,7 +11,7 @@ VARIANT_BOOL CMapView::SaveMapState(LPCTSTR Filename, VARIANT_BOOL RelativePaths
 	
 	USES_CONVERSION;
 	CStringW nameW = A2W(Filename);		// TODO: use Unicode
-	if (Utility::fileExistsW(nameW))
+	if (Utility::FileExistsW(nameW))
 	{
 		if (!Overwrite)
 		{

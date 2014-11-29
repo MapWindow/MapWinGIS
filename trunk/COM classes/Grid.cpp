@@ -241,7 +241,7 @@ void CGrid::SaveProjection(char* projection)
 {
 	try
 	{
-		CStringW  projectionFilename = Utility::getProjectionFilename(GetFilename());
+		CStringW  projectionFilename = Utility::GetProjectionFilename(GetFilename());
 
 		if (projectionFilename != "")
 		{
@@ -965,7 +965,7 @@ STDMETHODIMP CGrid::put_Key(BSTR newVal)
 // ***************************************************
 void CGrid::SaveProjectionAsWkt()
 {
-	CStringW prjFilename = Utility::getProjectionFilename(GetFilename());
+	CStringW prjFilename = Utility::GetProjectionFilename(GetFilename());
 	if (prjFilename.GetLength() > 0)
 	{
 		IGeoProjection* proj = NULL;
@@ -2843,7 +2843,7 @@ STDMETHODIMP CGrid::RetrieveColorScheme(tkGridSchemeRetrieval method, IGridColor
 	if (method == gsrAuto || method == gsrDiskBased)
 	{
 		CStringW legendName = this->GetLegendName();
-		if (Utility::fileExistsW(legendName))
+		if (Utility::FileExistsW(legendName))
 		{
 			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
 			scheme->ReadFromFile(OLE2BSTR(legendName), A2BSTR(""), &vb);

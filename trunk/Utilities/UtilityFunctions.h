@@ -29,25 +29,25 @@ namespace Utility
 	CStringW FormatAngle(double angle, bool withDecimals = false);
 
 	// files, !!! all parameters should be CStringW; we use Unicode !!!
-	bool fileExistsW(CStringW filename);
-	bool fileExistsUnicode(CStringW filename);		// obsolete; with check for Win98
-	bool get_FileCreationTime(CStringW filename, FILETIME& time);
+	bool FileExistsW(CStringW filename);
+	bool FileExistsUnicode(CStringW filename);		// obsolete; with check for Win98
+	bool GetFileCreationTime(CStringW filename, FILETIME& time);
 	bool IsFileYounger(CStringW filename1, CStringW thanFilename);
 	bool RemoveFile(CStringW filename);
-	bool dirExists(CStringW path);
+	bool DirExists(CStringW path);
 	bool EndsWith(CStringW path, CStringW ext);
 	CStringW GetRelativePath(CStringW ProjectName, CStringW Filename);
 	CStringW GetPathWOExtension(CStringW path);
 	int ReadFileToBuffer(CStringW filename, char** buffer);
 	int ReadFileToBuffer(CStringW filename, unsigned char** buffer);
-	long get_FileSize(CStringW filename);
-	CStringW getProjectionFilename( CStringW dataSourceName );
+	long GetFileSize(CStringW filename);
+	CStringW GetProjectionFilename( CStringW dataSourceName );
 	CStringW GetFolderFromPath(CStringW path);
 	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
 	
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
-	BOOL fileExists(CString filename);	
+	BOOL FileExists(CString filename);	
 
 	// GDAL XML
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, CStringW valueW);
@@ -72,14 +72,14 @@ namespace Utility
 	void InitGdiPlusFont(Gdiplus::Font** font, CStringW name, float size);
 
 	// shapefile
-	void swapEndian(char* a,int size);
+	void SwapEndian(char* a,int size);
 	bool ShapeTypeIsM(ShpfileType shpType);
 	ShpfileType ShapeTypeConvert2D(ShpfileType shpType);
 	void ClearShapefileModifiedFlag(IShapefile* sf);
 	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType);
 
 	// units conversions
-	double getConversionFactor(tkUnitsOfMeasure Units);
+	double GetConversionFactor(tkUnitsOfMeasure Units);
 	bool ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value);
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 
@@ -99,7 +99,7 @@ namespace Utility
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
 
 	// time
-	int getCurrentYear();
+	int GetCurrentYear();
 }
 
 namespace Debug

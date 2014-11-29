@@ -265,7 +265,7 @@ bool GridManager::NeedProxyForGrid(CStringW filename, tkGridProxyMode proxyMode,
 	// so, we have none of the two; if grid is small - nevermind - open directly
 	if (m_globalSettings.MaxDirectGridSizeMb > 0)	
 	{
-		long size = Utility::get_FileSize(filename) / (0x1 << 20);
+		long size = Utility::GetFileSize(filename) / (0x1 << 20);
 		if( size < m_globalSettings.MaxDirectGridSizeMb)
 			return false;
 	}
@@ -343,8 +343,8 @@ bool GridManager::HasValidProxy(CStringW gridFilename)
 {
 	CStringW proxyName = GetProxyName(gridFilename);
 	CStringW legendName = GetProxyLegendName(gridFilename);
-	return (Utility::fileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
-		    Utility::fileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
+	return (Utility::FileExistsW(proxyName) && Utility::IsFileYounger(proxyName, gridFilename) &&
+		    Utility::FileExistsW(legendName) && Utility::IsFileYounger(legendName, gridFilename));
 }
 
 // ****************************************************************** 

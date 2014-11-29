@@ -509,7 +509,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			bstr.Attach(GetLayerFilename(layerHandle));
 			symbologyName = OLE2W(bstr);
 			symbologyName += L".mwsymb";
-			symbologyName = Utility::fileExistsW(symbologyName) ? OLE2W(bstr) : L"";
+			symbologyName = Utility::FileExistsW(symbologyName) ? OLE2W(bstr) : L"";
 		}
 	}
 
@@ -1717,7 +1717,7 @@ VARIANT_BOOL CMapView::RemoveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CString name = get_OptionsFilename(LayerHandle, OptionsName);
-	if (Utility::fileExists(name))
+	if (Utility::FileExists(name))
 	{
 		if( remove( name ) != 0 )
 		{
@@ -1797,7 +1797,7 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 		{
 			CString name = get_OptionsFilename(LayerHandle, OptionsName);
 
-			if (Utility::fileExists(name))
+			if (Utility::FileExists(name))
 			{
 				if (!Overwrite)
 				{
@@ -1869,11 +1869,11 @@ VARIANT_BOOL CMapView::LoadLayerOptionsCore(CString baseName, LONG LayerHandle, 
 	name += OptionsName;
 	name += ".mwsymb";
 	
-	if (!Utility::fileExists(name))
+	if (!Utility::FileExists(name))
 	{
 		// shp.mwsymb
 		name = baseName + ".mwsymb";
-		if (!Utility::fileExists(name))
+		if (!Utility::FileExists(name))
 		{
 			ErrorMessage(tkINVALID_FILENAME);
 			return VARIANT_FALSE;

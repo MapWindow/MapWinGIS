@@ -157,7 +157,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	int intbuf;
 	
 	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::swapEndian((char*)&intbuf,sizeof(int));
+	Utility::SwapEndian((char*)&intbuf,sizeof(int));
 	
 	// shape records are 1 based
 	if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -169,7 +169,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
     
 	bool validPoint = true;
 	fread(&intbuf,sizeof(int),1,_shpfile);
-	Utility::swapEndian((char*)&intbuf,sizeof(int));
+	Utility::SwapEndian((char*)&intbuf,sizeof(int));
 	int contentLength = intbuf*2;//(16 to 32 bit words)
 	if( contentLength <= 0 )return FALSE;
 	long numParts=0, numPoints=0;
@@ -221,7 +221,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::swapEndian((char*)&intbuf,sizeof(int));
+			Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 			//Shape records are 1 based
 			if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -235,7 +235,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 				double x=0.0, y=0.0, z=0.0, m=0.0;
 				
 				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::swapEndian((char*)&intbuf,sizeof(int));
+				Utility::SwapEndian((char*)&intbuf,sizeof(int));
 				int contentLength = intbuf*2;	//(16 to 32 bit words)
 				
 				if( contentLength <= 0 )
@@ -433,7 +433,7 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 
 			int intbuf;
 			fread(&intbuf,sizeof(int),1,_shpfile);
-			Utility::swapEndian((char*)&intbuf,sizeof(int));
+			Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 			//Shape records are 1 based
 			if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -444,7 +444,7 @@ STDMETHODIMP CShapefile::QuickPoints(long ShapeIndex, long *NumPoints, SAFEARRAY
 			else
 			{
 				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::swapEndian((char*)&intbuf,sizeof(int));
+				Utility::SwapEndian((char*)&intbuf,sizeof(int));
 				int contentLength = intbuf*2;//(16 to 32 bit words)
 				
 				if( contentLength <= 0 )
@@ -655,7 +655,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 
 				int intbuf;
 				fread(&intbuf,sizeof(int),1,_shpfile);
-				Utility::swapEndian((char*)&intbuf,sizeof(int));
+				Utility::SwapEndian((char*)&intbuf,sizeof(int));
 
 				//Shape records are 1 based
 				if( intbuf != ShapeIndex + 1 && intbuf != ShapeIndex )
@@ -666,7 +666,7 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 				else
 				{
 					fread(&intbuf,sizeof(int),1,_shpfile);
-					Utility::swapEndian((char*)&intbuf,sizeof(int));
+					Utility::SwapEndian((char*)&intbuf,sizeof(int));
 					int contentLength = intbuf*2;//(16 to 32 bit words)
 					
 					if( contentLength <= 0 )

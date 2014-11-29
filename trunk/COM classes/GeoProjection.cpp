@@ -738,7 +738,7 @@ STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 		USES_CONVERSION;
 		CString name = OLE2A(filename);		// TODO!!!: use Unicode
 
-		if (!Utility::fileExists(name))
+		if (!Utility::FileExists(name))
 		{
 			return S_FALSE;
 		}

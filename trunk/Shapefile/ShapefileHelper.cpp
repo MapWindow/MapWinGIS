@@ -400,7 +400,7 @@ CStringW ShapefileHelper::GetSymbologyFilename(IShapefile* sf)
 	if (name.GetLength() > 0)
 	{
 		name += L".mwsymb";
-		if (Utility::fileExistsUnicode(name))
+		if (Utility::FileExistsUnicode(name))
 			return name;
 	}
 	return L"";

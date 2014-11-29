@@ -248,7 +248,7 @@ bool CImageClass::CheckForProxy()
 		Utility::EndsWith(fileName, L"_proxy.tif") )
 	{
 		CStringW legendName = fileName + ".mwleg";
-		if (Utility::fileExistsW(legendName))
+		if (Utility::FileExistsW(legendName))
 		{
 			CPLXMLNode* node = GdalHelper::ParseXMLFile(legendName);
 			
@@ -265,7 +265,7 @@ bool CImageClass::CheckForProxy()
 			if (nameW.GetLength() > 0)
 			{
 				CStringW gridName = Utility::GetFolderFromPath(legendName)  + "\\" + nameW;
-				if (Utility::fileExistsW(gridName))
+				if (Utility::FileExistsW(gridName))
 				{
 					this->sourceGridName = gridName;
 					this->isGridProxy = true;
@@ -1841,7 +1841,7 @@ STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 	*retval = VARIANT_FALSE;
 	try
 	{
-		CStringW projectionFilename = Utility::getProjectionFilename(fileName);
+		CStringW projectionFilename = Utility::GetProjectionFilename(fileName);
 		if (projectionFilename != "")
 		{
 			FILE * prjFile = NULL;
@@ -1876,7 +1876,7 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 	USES_CONVERSION;
 	
 	// If the .prj file exists, load it.
-	CStringW prjFilename = Utility::getProjectionFilename(fileName);
+	CStringW prjFilename = Utility::GetProjectionFilename(fileName);
 	if (prjFilename != "")
 	{
 		char * prj4 = NULL;
@@ -3222,7 +3222,7 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 				BSTR filename;
 				this->get_Filename(&filename);
 				USES_CONVERSION;
-				long size = Utility::get_FileSize(OLE2CA(filename));
+				long size = Utility::GetFileSize(OLE2CA(filename));
 				SysFreeString(filename);
 				if (size < (long)(0x1 << 20))
 				{
@@ -3499,7 +3499,7 @@ STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 	if (isGridProxy)
 	{
 		CStringW legendName = GridManager::GetProxyLegendName(sourceGridName);
-		if (Utility::fileExistsW(legendName))
+		if (Utility::FileExistsW(legendName))
 		{
 			IGridColorScheme* scheme = NULL;
 			GetUtils()->CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
@@ -3663,7 +3663,7 @@ STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
 	CStringW filename = isGridProxy ? this->sourceGridName : this->fileName;
-	if (Utility::fileExistsW(filename))
+	if (Utility::FileExistsW(filename))
 	{
 		GetUtils()->CreateInstance(tkInterface::idGrid, (IDispatch**)retVal);
 		VARIANT_BOOL vb;

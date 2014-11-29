@@ -3704,7 +3704,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon(BSTR inputGridfile, IShape* poly, BSTR 
 	
 	*retVal = VARIANT_FALSE;
 
-	if (!Utility::fileExistsUnicode(inputGridfile))
+	if (!Utility::FileExistsUnicode(inputGridfile))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_FALSE;
@@ -3741,7 +3741,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 		return S_FALSE;
 	}
 
-	if (Utility::fileExistsUnicode(resultGridfile))
+	if (Utility::FileExistsUnicode(resultGridfile))
 	{
 		ErrorMessage(tkFILE_EXISTS);
 		return S_FALSE;
@@ -5644,13 +5644,13 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	CStringW name = OLE2W(Filename);
 	CStringW outName = OLE2W(outputName);
 	
-	if (!Utility::fileExistsW(name))
+	if (!Utility::FileExistsW(name))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
 		return S_FALSE;
 	}
 
-	if (Utility::fileExistsW(outName))
+	if (Utility::FileExistsW(outName))
 	{
 		ErrorMessage(tkFILE_EXISTS);
 		return S_FALSE;

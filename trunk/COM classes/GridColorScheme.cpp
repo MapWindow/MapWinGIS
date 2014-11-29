@@ -783,7 +783,7 @@ STDMETHODIMP CGridColorScheme::ReadFromFile(BSTR mwlegFilename, BSTR nodeName, V
 	USES_CONVERSION;
 
 	CStringW name = OLE2W(mwlegFilename);
-	if (!Utility::fileExistsW(name))
+	if (!Utility::FileExistsW(name))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
 		return S_OK;

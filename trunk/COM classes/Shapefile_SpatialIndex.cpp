@@ -36,7 +36,7 @@ STDMETHODIMP CShapefile::get_HasSpatialIndex(VARIANT_BOOL *pVal)
 		_hasSpatialIndex	= FALSE;
 		CString mwdfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
 		CString mwxfileName = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
-		if (Utility::fileExists(mwdfileName) && Utility::fileExists(mwxfileName))
+		if (Utility::FileExists(mwdfileName) && Utility::FileExists(mwxfileName))
 		{
 			_hasSpatialIndex = TRUE;
 		}

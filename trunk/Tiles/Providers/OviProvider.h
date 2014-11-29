@@ -30,7 +30,7 @@ public:
 	OviBaseProvider() 
 	{
 		RefererUrl = "http://maps.ovi.com/";
-        int year = Utility::getCurrentYear();
+        int year = Utility::GetCurrentYear();
 		Copyright.Format("©%d OVI Nokia - Map data ©%d NAVTEQ, Imagery ©%d DigitalGlobe", year, year, year);
 		UrlServerLetters = "bcde";
 		this->Projection = new MercatorProjection();
