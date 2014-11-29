@@ -29,9 +29,8 @@ STDMETHODIMP CFileManager::put_Key(BSTR newVal)
 void CFileManager::ErrorMessage(long ErrorCode)
 {
 	m_lastErrorCode = ErrorCode;
-	USES_CONVERSION;
-	if( m_globalCallback != NULL && m_lastErrorCode != tkNO_ERROR)
-		m_globalCallback->Error( OLE2BSTR(m_key),  A2BSTR(ErrorMsg(m_lastErrorCode) ) );
+	if (m_lastErrorCode != tkNO_ERROR)
+		Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
 }
 
 STDMETHODIMP CFileManager::get_LastErrorCode(long *pVal)

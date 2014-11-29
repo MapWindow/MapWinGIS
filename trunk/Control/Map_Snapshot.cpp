@@ -46,8 +46,7 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 	Layer * l = _allLayers[ClippingLayerNbr];
 	if( !IS_VALID_PTR(l) )
 	{
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer"));
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
 		return NULL;
 	}
 	else
@@ -76,16 +75,14 @@ IDispatch* CMapView::SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth)
 		}
 		else
 		{
-			if( _globalCallback != NULL )
-				_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Cannot clip to selected layer type"));
+			ErrorMessage(tkUNEXPECTED_LAYER_TYPE);
 			return NULL;
 		}
 	}
 
 	if (Width <= 0 || Height <= 0)
 	{
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
+		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		return NULL;
 	}
 
@@ -104,8 +101,7 @@ LPDISPATCH CMapView::SnapShot3(double left, double right, double top, double bot
 	long Height = (long)((double)Width / ((right-left)/(top-bottom)));
 	if (Width <= 0 || Height <= 0)
 	{
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Invalid Width and/or Zoom"));
+		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		return NULL;
 	}
 
@@ -130,8 +126,7 @@ INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvide
 		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
 		if (WidthPixels <= 0 || Height <= 0)
 		{
-			if( _globalCallback != NULL )
-				_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+			ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		}
 		else
 		{
@@ -163,8 +158,7 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 		long Height = static_cast<long>((double)WidthPixels *(yMax - yMin) / (xMax - xMin));
 		if (WidthPixels <= 0 || Height <= 0)
 		{
-			if( _globalCallback != NULL )
-				_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+			ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		}
 		else
 		{
@@ -209,8 +203,7 @@ BOOL CMapView::SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float Off
 	long Height = static_cast<long>((double)Width *(yMax - yMin) / (xMax - xMin));
 	if (Width <= 0 || Height <= 0)
 	{
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(), A2BSTR("Invalid Width and/or Zoom"));
+		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
 		return FALSE;
 	}
 	
@@ -309,8 +302,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 		if (!bmp->CreateDiscardableBitmap(GetDC(), Width, Height))
 		{
 			delete bmp;
-			if( _globalCallback != NULL )
-				_globalCallback->Error(m_key.AllocSysString(),A2BSTR("Failed to create bitmap; not enough memory?"));
+			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
 			return NULL;
 		}
 	}

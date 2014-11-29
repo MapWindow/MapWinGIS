@@ -111,7 +111,7 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to read the names of input files";
 		case tkINVALID_PARAMETERS_ARRAY:
 			return "Failed to read array of input parameters";
-
+		
 			//201 - 300 = tkshp
 		case tkUNSUPPORTED_SHAPEFILE_TYPE:
 			return "Unsupported Shapefile Type";
@@ -377,6 +377,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to write GDAL band block";
 		case tkINPUT_RASTERS_DIFFER:
 			return "Input rasters must have the same size, number of bands and data type";
+		case tkGRID_MERGE_PROJECTION_MISMATCH:
+			return "Projection mismatch on merging grids";
 
 		//1201-1400 = tkmap
 		case tkINVALID_LAYER_HANDLE:

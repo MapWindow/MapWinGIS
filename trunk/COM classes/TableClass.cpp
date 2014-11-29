@@ -2055,11 +2055,13 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 	return S_OK;
 }
 
+// *****************************************************************
+//			ErrorMessage()
+// *****************************************************************
 inline void CTableClass::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
 }
 
 // *****************************************************************

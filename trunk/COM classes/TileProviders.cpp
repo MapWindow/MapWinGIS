@@ -83,9 +83,7 @@ STDMETHODIMP CTileProviders::get_LastErrorCode(long *pVal)
 void CTileProviders::ErrorMessage(long ErrorCode)
 {
 	m_lastErrorCode = ErrorCode;
-	if( m_globalCallback != NULL) 
-		m_globalCallback->Error(OLE2BSTR(m_key),A2BSTR(ErrorMsg(m_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
 }
 
 // ************************************************************

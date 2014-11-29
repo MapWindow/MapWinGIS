@@ -1045,9 +1045,8 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			InvalidateControl();
 	}
 	else
-	{	_lastErrorCode = tkINVALID_LAYER_HANDLE;
-		if( _globalCallback != NULL )
-			_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
+	{	
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
 }
 

@@ -172,6 +172,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkDBF_CANT_ADD_DBF_FIELD 807
 # define tkCANT_CHANGE_FIELD_TYPE 808
 # define tkSAME_FIELD_TYPE_EXPECTED 809
+# define tkGRID_MERGE_PROJECTION_MISMATCH 810
 
 //1001-1200 = tkutils
 # define tkOUT_OF_RANGE_0_TO_180 1001
@@ -244,7 +245,8 @@ const char * ErrorMsg( long ErrorCode );
 #define tkMISSING_GEOPROJECTION 1816
 #define tkPROJECTION_MISMATCH 1817
 #define tkNO_REPROJECTION_FOR_IMAGES 1818
-
+#define tkFAILED_TRANSFORM_WGS84_TO_MAP 1819
+#define tkFAILED_TRANSFORM_MAP_TO_WGS84 1820
 
 //2001-2200 = tiles
 #define tkINVALID_PROVIDER_ID 2001

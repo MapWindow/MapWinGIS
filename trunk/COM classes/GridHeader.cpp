@@ -29,8 +29,16 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-// CGridHeader
+// ****************************************************************
+//						ErrorMessage()						         
+// ****************************************************************
+void CGridHeader::ErrorMessage(long ErrorCode)
+{
+	lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+}
 
+// CGridHeader
 STDMETHODIMP CGridHeader::CopyFrom(IGridHeader * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -197,9 +205,8 @@ STDMETHODIMP CGridHeader::put_NumberCols(long newVal)
 	if( newVal >= 0 )
 		numbercols = newVal;
 	else
-	{	lastErrorCode = tkINVALID_PARAMETER_VALUE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 	}
 
 	return S_OK;
@@ -221,10 +228,7 @@ STDMETHODIMP CGridHeader::put_NumberRows(long newVal)
 	if( newVal >= 0 )
 		numberrows = newVal;
 	else
-	{	lastErrorCode = tkINVALID_PARAMETER_VALUE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-	}
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 
 	return S_OK;
 }
@@ -245,9 +249,8 @@ STDMETHODIMP CGridHeader::put_NodataValue(VARIANT newVal)
 
 	double dval;
 	if( dVal(newVal,dval) == false )
-	{	lastErrorCode = tkINVALID_VARIANT_TYPE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));			
+	{	
+		ErrorMessage(tkINVALID_VARIANT_TYPE);
 	}
 	else
 	{
@@ -269,16 +272,8 @@ STDMETHODIMP CGridHeader::get_dX(double *pVal)
 STDMETHODIMP CGridHeader::put_dX(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	//if( newVal > 0 )
-		dx = newVal;
-		AttemptSave();
-	//else
-	///{	lastErrorCode = tkINVALID_PARAMETER_VALUE;
-	//	if( globalCallback != NULL )
-	//		globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
-	//}
-
+	dx = newVal;
+	AttemptSave();
 	return S_OK;
 }
 
@@ -300,10 +295,8 @@ STDMETHODIMP CGridHeader::put_dY(double newVal)
 		dy = newVal;
 		AttemptSave();
 	}
-	else
-	{	lastErrorCode = tkINVALID_PARAMETER_VALUE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	else {	
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 	}
 
 	return S_OK;

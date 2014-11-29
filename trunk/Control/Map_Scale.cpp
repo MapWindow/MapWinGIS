@@ -952,8 +952,7 @@ VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_B
 	}
 	else
 	{
-		if (_globalCallback != NULL)
-			_globalCallback->Error(m_key.AllocSysString(), A2BSTR(ErrorMsg(_lastErrorCode)));
+		ErrorMessage(_lastErrorCode);
 		return VARIANT_FALSE;
 	}
 }

@@ -434,16 +434,14 @@ STDMETHODIMP CShapefile::get_Filename(BSTR *pVal)
 void CShapefile::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	if( _globalCallback != NULL) _globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
 {
 	_lastErrorCode = ErrorCode;
-	if( _globalCallback != NULL) _globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
-	// in case additional callback was provided we shall use it as well
-	if( cBack != NULL) cBack->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	if (cBack != _globalCallback)
+		Utility::DisplayErrorMsg(cBack, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************
@@ -1484,8 +1482,7 @@ STDMETHODIMP CShapefile::EditInsertField(IField *NewField, long *FieldIndex, ICa
 	{	
 		*retval = VARIANT_FALSE;
 		_lastErrorCode = tkFILE_NOT_OPEN;
-		if( cBack != NULL )
-			cBack->Error( OLE2BSTR(_key),  A2BSTR(ErrorMsg(_lastErrorCode) ) );
+		ErrorMessage(_lastErrorCode, cBack);
 		return S_OK;
 	}
 
@@ -1698,9 +1695,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 	}
 	else
 	{	
-		_lastErrorCode = tkFILE_NOT_OPEN;
-		if( _globalCallback != NULL )
-			_globalCallback->Error( OLE2BSTR(_key),  A2BSTR(ErrorMsg(_lastErrorCode) ) );
+		ErrorMessage(tkFILE_NOT_OPEN);
 		return S_OK;
 	}
 	

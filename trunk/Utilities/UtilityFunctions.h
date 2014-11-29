@@ -90,8 +90,8 @@ namespace Utility
 	void DisplayProgress(ICallback* callback, int percent, const char* message);
 	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
 	void DisplayProgressCompleted(ICallback* callback);
-	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...);
-	void DisplayErrorMsg(ICallback* callback, CString key, char* message, ...);
+	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...);
+	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...);
 
 	// Sets new instance of COM object to the given pointer
 	bool put_ComReference(IDispatch* newVal, IDispatch** oldVal, bool allowNull = true);

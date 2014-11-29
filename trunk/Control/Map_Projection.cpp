@@ -122,12 +122,12 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 			_wgsProjection->StartTransform(_projection, &vb);	// must always have transformation to current projection
 			_transformationMode = vb ? tmDoTransformation : tmNotDefined;
 			if (!vb) {
-				Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start WGS84 to map transformation.");
+				ErrorMessage(tkFAILED_TRANSFORM_WGS84_TO_MAP);
 			}
 
 			_projection->StartTransform(_wgsProjection, &vb);	// must always have transformation to WGS84
 			if (!vb) {
-				Utility::DisplayErrorMsg(_globalCallback, m_key, "Failed to start map to WGS84 transformation.");
+				ErrorMessage(tkFAILED_TRANSFORM_MAP_TO_WGS84);
 			}
 		}
 	}

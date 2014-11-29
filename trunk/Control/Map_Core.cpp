@@ -358,11 +358,8 @@ long CMapView::GetLastErrorCode()
 // *************************************************
 inline void CMapView::ErrorMessage(long ErrorCode)
 {
-	USES_CONVERSION;
 	_lastErrorCode = ErrorCode;
-	if( _globalCallback != NULL) 
-		_globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(_globalCallback, m_key, ErrorMsg(_lastErrorCode));
 }
 
 // *************************************************

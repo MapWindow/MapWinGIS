@@ -30,7 +30,7 @@ void CUndoList::ErrorMessage(long ErrorCode)
 	if (_lastErrorCode != tkNO_ERROR) {
 		cb = _mapCallback->_GetGlobalCallback();
 		if (cb) {
-			cb->Error(OLE2BSTR(_key), A2BSTR(ErrorMsg(_lastErrorCode)));
+			Utility::DisplayErrorMsg(cb, _key, ErrorMsg(_lastErrorCode));
 			cb->Release();
 		}
 	}

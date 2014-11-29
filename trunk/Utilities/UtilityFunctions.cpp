@@ -1154,30 +1154,37 @@ namespace Utility
 	// ********************************************************************
 	//		DisplayErrorMsg()
 	// ********************************************************************
-	void DisplayErrorMsg(ICallback* callback, BSTR& key, char* message, ...)
+	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...)
 	{
 		if( callback )
 		{
+			if (strcmp(message, "No Error") == 0) return;
+
 			TCHAR buffer[1024];
  			va_list args;
 			va_start( args, message);
 			vsprintf( buffer, message, args );
 			CString s = buffer;
 			Debug::WriteLine(s);
-			callback->Error(OLE2BSTR(key), A2BSTR(s));
+			CComBSTR bstr(message);
+			callback->Error(key, bstr);
 		}
 	}
-	void DisplayErrorMsg(ICallback* callback, CString key, char* message, ...)
+	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...)
 	{
 		if( callback )
 		{
+			if (strcmp(message, "No Error") == 0) return;
+
 			TCHAR buffer[1024];
  			va_list args;
 			va_start( args, message);
 			vsprintf( buffer, message, args );
 			CString s = buffer;
 			Debug::WriteLine(s);
-			callback->Error(A2BSTR(key), A2BSTR(s));
+			CComBSTR bstrKey(key);
+			CComBSTR bstrMessage(s);
+			callback->Error(bstrKey, bstrMessage);
 		}
 	}
 

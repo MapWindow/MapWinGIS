@@ -281,6 +281,7 @@ private:
 								int nodataColor_R, int nodataColor_G, int nodataColor_B, int ncols, bool inRam);
 	void WriteWorldFile(CStringW worldFile, CStringW imageFile, double dx, double dy, double xll, double yll, int nrows);
 	void ErrorMessage(long ErrorCode);
+	void ErrorMessage(ICallback* callback, long ErrorCode);
 	bool ValidateInputNames(SAFEARRAY* InputNames, LONG& lLBound, LONG& lUBound, BSTR **pbstr);
 	bool ParseSafeArray(SAFEARRAY* arr, LONG& lLBound, LONG& lUBound, void **pbstr);
 

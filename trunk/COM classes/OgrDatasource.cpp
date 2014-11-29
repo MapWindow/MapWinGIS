@@ -33,9 +33,7 @@ STDMETHODIMP COgrDatasource::put_Key(BSTR newVal)
 void COgrDatasource::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	USES_CONVERSION;
-	if (_globalCallback != NULL && _lastErrorCode != tkNO_ERROR)
-		_globalCallback->Error(OLE2BSTR(_key), A2BSTR(ErrorMsg(_lastErrorCode)));
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP COgrDatasource::get_LastErrorCode(long *pVal)

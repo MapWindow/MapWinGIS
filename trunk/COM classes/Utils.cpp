@@ -227,11 +227,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	if( Grid == NULL )
 	{	
 		*retval = NULL;
-		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
@@ -243,11 +239,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	if( ncols <= 0 || nrows <= 0 )
 	{	
 		*retval = FALSE;
-		lastErrorCode = tkZERO_ROWS_OR_COLS;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		return S_OK;
 	}
 	header->Release();
@@ -287,16 +279,7 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	if( Grid == NULL )
 	{
-		*retval = NULL;
-		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-		{
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		}
-		else if( globalCallback != NULL )
-		{
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		}//else if
+		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		*retval = VARIANT_FALSE;
 		return S_OK;
 	}//if
@@ -315,17 +298,8 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	if(ncols <= 0 || nrows <= 0)
 	{
-		*retval = FALSE;
-		lastErrorCode = tkZERO_ROWS_OR_COLS;
-
-		if(cBack != NULL)
-		{
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		}
-		else if(globalCallback != NULL)
-		{
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		}//else
+		*retval = VARIANT_FALSE;
+		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		return S_OK;
 	}//if
 
@@ -375,17 +349,15 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 
 	if( shptype != SHP_POLYLINE && shptype != SHP_POLYGON )
 	{
-		*retval = NULL;
+		*retval = VARIANT_FALSE;
 		if( shptype == SHP_POLYLINEZ || shptype == SHP_POLYGONZ ||
 			shptype == SHP_POLYLINEM || shptype == SHP_POLYGONM )
 			lastErrorCode = tkUNSUPPORTED_SHAPEFILE_TYPE;
 		else
 			lastErrorCode = tkINCOMPATIBLE_SHAPEFILE_TYPE;
 
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, lastErrorCode);
+
 		return S_OK;
 	}
 
@@ -765,11 +737,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	if( Grids.vt != (VT_ARRAY|VT_DISPATCH) )
 	{	
 		*retval = NULL;
-		lastErrorCode = tkINVALID_VARIANT_TYPE;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkINVALID_VARIANT_TYPE);
 		return S_OK;
 	}
 
@@ -800,12 +768,8 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		IGrid * grid = NULL;		
 		if( unknown->QueryInterface( IID_IGrid, (void**)&grid) != S_OK )
 		{	
-			*retval = NULL;			
-			lastErrorCode = tkINTERFACE_NOT_SUPPORTED;
-			if( cBack != NULL )
-				cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-			else if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+			*retval = NULL;		
+			ErrorMessage(callback, tkINTERFACE_NOT_SUPPORTED);
 			
 			gridSize = (int)allGrids.size(); //ah 6/6/05
 			for( int c = 0; c < gridSize; c++ )
@@ -847,10 +811,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 			char * nextProj = OLE2A(bstrProj);
 			if (!pt->IsSameProjection(currentComparingProj, nextProj))
 			{
-				if( cBack != NULL )
-					cBack->Error(A2BSTR("GridMerge"), A2BSTR("Warning: Projection mismatch on merged grids"));
-				else if( globalCallback != NULL )
-					globalCallback->Error(A2BSTR("GridMerge"), A2BSTR("Warning: Projection mismatch on merged grids"));
+				ErrorMessage(callback, tkGRID_MERGE_PROJECTION_MISMATCH);
 			}
 			header->Release();
 		}
@@ -927,12 +888,8 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 			if( ind_dx != final_dx )
 			{	
-				lastErrorCode = tkINCOMPATIBLE_DX;
 				*retval = NULL;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-				else if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+				ErrorMessage(callback, tkINCOMPATIBLE_DX);
 				
 				gridSize = (int)allGrids.size();
 				for( int c = 0; c < gridSize; c++ )
@@ -943,12 +900,9 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				return S_OK;				
 			}
 			else if( ind_dy != final_dy )
-			{	lastErrorCode = tkINCOMPATIBLE_DY;
+			{	
 				*retval = NULL;
-				if( cBack != NULL )
-					cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-				else if( globalCallback != NULL )
-					globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+				ErrorMessage(callback, tkINCOMPATIBLE_DY);
 				
 				gridSize = (int)allGrids.size();
 				for( int c = 0; c < gridSize; c++ )
@@ -974,12 +928,8 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 
 	if( final_dType == UnknownDataType || final_dType == InvalidDataType )
 	{	
-		lastErrorCode = tkINVALID_DATA_TYPE;
 		*retval = NULL;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkINVALID_DATA_TYPE);
 
 		gridSize = (int)allGrids.size();
 		
@@ -1103,11 +1053,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	if( Grid == NULL )
 	{	
 		*retval = NULL;
-		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
@@ -1121,11 +1067,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	if( ncols <= 0 || nrows <= 0 )
 	{	
 		*retval = NULL;
-		lastErrorCode = tkZERO_ROWS_OR_COLS;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		return S_OK;
 	}
 
@@ -1471,11 +1413,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 	if( Grid == NULL )
 	{	*retval = NULL;
-		lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
 
@@ -1503,11 +1441,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 	if( cols <= 0 || rows <= 0 )
 	{	*retval = NULL;
-		lastErrorCode = tkZERO_ROWS_OR_COLS;
-		if( cBack != NULL )
-			cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));	
-		else if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
 		return S_OK;
 	}
@@ -1750,11 +1684,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							if( decision == nodata )
 							{	expand_grid->Close(&vbretval);							
 								*retval = NULL;
-								lastErrorCode = tkCONCAVE_POLYGONS;
-								if( cBack != NULL )
-									cBack->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));	
-								else if( globalCallback != NULL )
-									globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+								ErrorMessage(callback, tkCONCAVE_POLYGONS);
 								return S_OK;					
 							}
 						}
@@ -2775,8 +2705,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			(*retval)->get_LastErrorCode(&lastErrorCode);
 			(*retval)->Release();
 			*retval = NULL;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+			ErrorMessage(lastErrorCode);
 			goto cleaning;
 		}
 
@@ -2866,8 +2795,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			(*retval)->get_LastErrorCode(&lastErrorCode);
 			(*retval)->Release();
 			*retval = NULL;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+			ErrorMessage(lastErrorCode);
 			return S_OK;
 		}
 
@@ -2951,8 +2879,7 @@ bool CUtils::PolygonToGrid(IShape * shape, IGrid ** grid, short cellValue)
 		if ( !shpPoint )
 		{
 			shape->get_LastErrorCode(&lastErrorCode);
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
+			ErrorMessage(lastErrorCode);
 			return false;
 		}
 		else
@@ -3673,9 +3600,13 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 void CUtils::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) 
-		globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
+}
+
+void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
+{
+	lastErrorCode = ErrorCode;
+	Utility::DisplayErrorMsg(callback, key, ErrorMsg(lastErrorCode));
 }
 
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
@@ -4717,8 +4648,7 @@ void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 	if (gdalCallback) {
 		CString s = msg;
 		s = "GDAL error: " + s;
-		USES_CONVERSION;
-		gdalCallback->Error(A2BSTR("GDAL"), A2BSTR(s));
+		Utility::DisplayErrorMsg(gdalCallback, "GDAL", s);
 	}
 }
 

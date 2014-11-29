@@ -211,10 +211,9 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)sgrid, (int*)NULL, (int*)NULL);
 	}
 	else
-	{	*pVal = NULL;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		*pVal = NULL;
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 
 	return S_OK;
@@ -307,9 +306,7 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 	}
 	else
 	{
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	SaveProjection(projection);
 }
@@ -652,9 +649,7 @@ STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 	else
 	{	pVal->vt = VT_I2;
 		pVal->iVal = 0;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	return S_OK;
 }
@@ -668,9 +663,8 @@ STDMETHODIMP CGrid::put_Value(long Column, long Row, VARIANT newVal)
 
 	double Value;
 	if( dVal(newVal, Value) == false )
-	{	lastErrorCode = tkINVALID_VARIANT_TYPE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkINVALID_VARIANT_TYPE);
 	}
 	else
 	{	
@@ -722,10 +716,9 @@ STDMETHODIMP CGrid::get_InRam(VARIANT_BOOL *pVal)
 	else if( sgrid != NULL )
 		*pVal = sgrid->inRam()?VARIANT_TRUE:VARIANT_FALSE;
 	else
-	{	*pVal = VARIANT_TRUE;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		*pVal = VARIANT_TRUE;
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	
 	return S_OK;
@@ -837,9 +830,7 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 	else
 	{	pVal->vt = VT_I2;
 		pVal->iVal = 0;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;		
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 
 	return S_OK;
@@ -864,10 +855,9 @@ STDMETHODIMP CGrid::get_DataType(GridDataType *pVal)
 	else if( sgrid != NULL )
 		*pVal = ShortDataType;
 	else
-	{	*pVal = UnknownDataType;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;			
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		*pVal = UnknownDataType;
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 
 	// Prevent returning unknown data type -- if there's data, it should have a type... default to double ala ASCII grids (as ascii grids do...)
@@ -1922,9 +1912,7 @@ STDMETHODIMP CGrid::Clear(VARIANT ClearValue, VARIANT_BOOL *retval)
 	double value; 
 	if( dVal(ClearValue,value) == false )
 	{	*retval = VARIANT_FALSE;
-		lastErrorCode = tkINVALID_VARIANT_TYPE;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkINVALID_VARIANT_TYPE);
 	}
 	else
 	{
@@ -1941,9 +1929,7 @@ STDMETHODIMP CGrid::Clear(VARIANT ClearValue, VARIANT_BOOL *retval)
 			sgrid->clear((short)value);
 		else
 		{	*retval = VARIANT_FALSE;
-			lastErrorCode = tkGRID_NOT_INITIALIZED;
-			if( globalCallback != NULL )
-				globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+			ErrorMessage(tkGRID_NOT_INITIALIZED);
 		}
 	}
 	return S_OK;
@@ -1969,9 +1955,7 @@ STDMETHODIMP CGrid::ProjToCell(double x, double y, long *Column, long *Row)
 	else
 	{	*Column = -1;
 		*Row = -1;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	return S_OK;
 }
@@ -1996,9 +1980,7 @@ STDMETHODIMP CGrid::CellToProj(long Column, long Row, double *x, double *y)
 	else
 	{	*x = 0;
 		*y = 0;
-		lastErrorCode = tkGRID_NOT_INITIALIZED;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkGRID_NOT_INITIALIZED);
 	}
 	return S_OK;
 }
@@ -2531,9 +2513,7 @@ STDMETHODIMP CGrid::OpenBand(int bandIndex, VARIANT_BOOL* retVal)
 void CGrid::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) 
-		globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
 }
 
 // ****************************************************************

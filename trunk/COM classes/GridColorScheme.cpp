@@ -32,9 +32,7 @@ static char THIS_FILE[] = __FILE__;
 void CGridColorScheme::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) 
-		globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, _key, ErrorMsg(lastErrorCode));
 }
 
 STDMETHODIMP CGridColorScheme::get_NumBreaks(long *pVal)
@@ -66,9 +64,8 @@ STDMETHODIMP CGridColorScheme::put_AmbientIntensity(double newVal)
 		AmbientIntensity = newVal;
 	}
 	else
-	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_1;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkOUT_OF_RANGE_0_TO_1);
 	}
 
 	return S_OK;
@@ -93,9 +90,8 @@ STDMETHODIMP CGridColorScheme::put_LightSourceIntensity(double newVal)
 		LightSourceIntensity = newVal;
 	}
 	else
-	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_1;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkOUT_OF_RANGE_0_TO_1);
 	}
 
 	return S_OK;
@@ -126,16 +122,14 @@ STDMETHODIMP CGridColorScheme::SetLightSource(double Azimuth, double Elevation)
 	// elevation is between 0-180
 	//azimuth is between 0-360 (mod if necessary)
 	if (Elevation > 180 || Elevation < 0)
-	{	lastErrorCode = tkOUT_OF_RANGE_0_TO_180;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkOUT_OF_RANGE_0_TO_180);
 		return S_OK;
 	}
 
 	if (Azimuth > 360 || Azimuth < -360)
-	{	lastErrorCode = tkOUT_OF_RANGE_M360_TO_360;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkOUT_OF_RANGE_M360_TO_360);
 		return S_OK;
 	}
 
@@ -165,9 +159,9 @@ STDMETHODIMP CGridColorScheme::InsertBreak(IGridColorBreak *BrkInfo)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	if( BrkInfo == NULL )
-	{	lastErrorCode = tkUNEXPECTED_NULL_PARAMETER;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
 	}
 
 	BrkInfo->AddRef();
@@ -196,9 +190,7 @@ STDMETHODIMP CGridColorScheme::get_Break(long Index, IGridColorBreak **pVal)
 	}
 	else
 	{	*pVal = NULL;
-		lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 
 	return S_OK;
@@ -214,9 +206,8 @@ STDMETHODIMP CGridColorScheme::DeleteBreak(long Index)
 		Breaks.erase( Breaks.begin() + Index );
 	}
 	else
-	{	lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
-		if( globalCallback != NULL )
-			globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(lastErrorCode)));		
+	{	
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 
 	return S_OK;

@@ -96,10 +96,7 @@ STDMETHODIMP CLinePattern::put_Key(BSTR newVal)
 void CLinePattern::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	if( _globalCallback != NULL) 
-	{
-		_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
-	}
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 #pragma endregion
 

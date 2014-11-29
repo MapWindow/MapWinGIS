@@ -2485,9 +2485,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 void CImageClass::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) 
-		globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
 }
 
 // **************************************************************

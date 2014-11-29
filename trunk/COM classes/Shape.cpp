@@ -310,8 +310,7 @@ STDMETHODIMP CShape::put_Key(BSTR newVal)
 inline void CShape::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	if( _globalCallback != NULL) _globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *************************************************************

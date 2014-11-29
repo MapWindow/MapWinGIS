@@ -171,8 +171,7 @@ void CMapView::SetMouseWheelSpeed(DOUBLE newVal)
 {
 	if(newVal < 0.1 || newVal > 10)
 	{
-		_lastErrorCode = tkINVALID_PARAMETER_VALUE;
-		if( _globalCallback != NULL ) _globalCallback->Error(m_key.AllocSysString(),A2BSTR(ErrorMsg(_lastErrorCode)));
+		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return;
 	}
 	_mouseWheelSpeed = newVal;

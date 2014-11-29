@@ -116,8 +116,7 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 void CShapefileColorScheme::ErrorMessage(long ErrorCode)
 {
 	lastErrorCode = ErrorCode;
-	if( globalCallback != NULL) globalCallback->Error(OLE2BSTR(key),A2BSTR(ErrorMsg(lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(globalCallback, key, ErrorMsg(lastErrorCode));
 }
 
 STDMETHODIMP CShapefileColorScheme::get_LayerHandle(long *pVal)

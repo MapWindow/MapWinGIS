@@ -77,7 +77,7 @@ STDMETHODIMP CGeoProjection::get_LastErrorCode(long *pVal)
 // **************************************************************
 void CGeoProjection::ErrorMessage(long ErrorCode)
 {
-	// onverting OGRErr code to MapWinGIS error code
+	// converting OGRErr code to MapWinGIS error code
 	long code = tkNO_ERROR;
 	switch(ErrorCode)
 	{
@@ -105,9 +105,7 @@ void CGeoProjection::ErrorMessage(long ErrorCode)
 	}
 	
 	m_lastErrorCode = code;
-	if( m_globalCallback != NULL) 
-		m_globalCallback->Error(OLE2BSTR(m_key),A2BSTR(ErrorMsg(m_lastErrorCode)));
-	return;
+	Utility::DisplayErrorMsg(m_globalCallback, m_key, ErrorMsg(m_lastErrorCode));
 }
 
 // ************************************************************

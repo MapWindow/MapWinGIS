@@ -153,6 +153,7 @@ private:
 	tkGridRaster * myowner_t;
 
 	void AttemptSave();
+	void ErrorMessage(long ErrorCode);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GridHeader), CGridHeader)
