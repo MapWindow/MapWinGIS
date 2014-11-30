@@ -937,8 +937,8 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "ForUpdate", NULL);
 	bool forUpdate = (s != "") ? (atoi(s.GetString()) == 0 ? false : true) : false;
 
-	CComBSTR bstrConnection = connectionString;
-	CComBSTR bstrQuery = sourceQuery;
+	CComBSTR bstrConnection(connectionString);
+	CComBSTR bstrQuery(sourceQuery);
 
 	VARIANT_BOOL vb = VARIANT_FALSE;
 	if (sourceType == ogrDbTable)

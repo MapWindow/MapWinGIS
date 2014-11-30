@@ -427,7 +427,7 @@ void tkGridRaster::ReadProjection()
 {
 	Projection = "";
 
-	char * wkt = (char *)rasterDataset->GetProjectionRef();
+	const char * wkt = rasterDataset->GetProjectionRef();
 	if (wkt)
 	{
 		IGeoProjection* proj = NULL;
@@ -436,7 +436,8 @@ void tkGridRaster::ReadProjection()
 		{
 			USES_CONVERSION;
 			VARIANT_BOOL vb;
-			proj->ImportFromAutoDetect(A2BSTR(wkt), &vb);
+			CComBSTR bstrWkt(wkt);
+			proj->ImportFromAutoDetect(bstrWkt, &vb);
 			if (vb)
 			{
 				CComBSTR bstr;

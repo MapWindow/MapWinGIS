@@ -1372,11 +1372,10 @@ bool CExpression::ReadFieldNames(ITable* tbl)
 			if ( fld )
 			{
 				USES_CONVERSION;
-				BSTR s;
-				fld->get_Name(&s);
-				CString str = OLE2CA(s);
+				CComBSTR bstr;
+				fld->get_Name(&bstr);
+				CString str = OLE2CA(bstr);
 				_fields.push_back(str.MakeLower());
-				SysFreeString(s);
 				fld->Release();
 			}
 		}

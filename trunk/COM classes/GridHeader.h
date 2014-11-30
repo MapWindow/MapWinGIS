@@ -42,7 +42,6 @@ public:
 		_dy = 1.0;	
 		_key = A2BSTR("");
 		_notes = A2BSTR("");
-		//projection = A2BSTR("");
 		_colorTable = A2BSTR("");
 		_globalCallback = NULL;
 		_numbercols = 0;
@@ -62,7 +61,6 @@ public:
 	{	
 		::SysFreeString(_key);
 		::SysFreeString(_notes);
-		//::SysFreeString(projection);
 		::SysFreeString(_colorTable);
 
 		// Note -- don't delete myowner_*, these are just references
@@ -87,14 +85,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_GRIDHEADER)
+	DECLARE_REGISTRY_RESOURCEID(IDR_GRIDHEADER)
 
-DECLARE_NOT_AGGREGATABLE(CGridHeader)
+	DECLARE_NOT_AGGREGATABLE(CGridHeader)
 
-BEGIN_COM_MAP(CGridHeader)
-	COM_INTERFACE_ENTRY(IGridHeader)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CGridHeader)
+		COM_INTERFACE_ENTRY(IGridHeader)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IGridHeader

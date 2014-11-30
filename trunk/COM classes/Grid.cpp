@@ -123,17 +123,16 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		ndv.vt = VT_R8;
 		ndv.dblVal = _trgrid->noDataValue;
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(""));
+		(*pVal)->put_Notes(m_globalSettings.emptyBstr);
 		(*pVal)->put_NumberCols(_trgrid->getWidth());
 		(*pVal)->put_NumberRows(_trgrid->getHeight());
 		(*pVal)->put_XllCenter(_trgrid->getXllCenter());
 		(*pVal)->put_YllCenter(_trgrid->getYllCenter());
 		(*pVal)->put_Projection(_trgrid->Projection.AllocSysString());
 		
-		BSTR cTbl;
+		CComBSTR cTbl;
 		if (_trgrid->ColorTable2BSTR(&cTbl))
 			(*pVal)->put_ColorTable(cTbl);
-		::SysFreeString(cTbl);
 
 		VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
 		(*pVal)->put_Owner((int*)(void*)_trgrid, (int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL);
@@ -147,8 +146,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		ndv.vt = VT_R8;
 		ndv.dblVal = _dgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(_dgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(_dgrid->getHeader().getProjection()));
+		CComBSTR bstrNotes(_dgrid->getHeader().getNotes());
+		(*pVal)->put_Notes(bstrNotes);
+		CComBSTR bstrProj(_dgrid->getHeader().getProjection());
+		(*pVal)->put_Projection(bstrProj);
 		(*pVal)->put_NumberCols(_dgrid->getHeader().getNumberCols());
 		(*pVal)->put_NumberRows(_dgrid->getHeader().getNumberRows());
 		(*pVal)->put_XllCenter(_dgrid->getHeader().getXllcenter());
@@ -165,8 +166,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		ndv.vt = VT_R4;
 		ndv.fltVal = _fgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(_fgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(_fgrid->getHeader().getProjection()));
+		CComBSTR bstrNotes(_fgrid->getHeader().getNotes());
+		(*pVal)->put_Notes(bstrNotes);
+		CComBSTR bstrProj(_fgrid->getHeader().getProjection());
+		(*pVal)->put_Projection(bstrProj);
 		(*pVal)->put_NumberCols(_fgrid->getHeader().getNumberCols());
 		(*pVal)->put_NumberRows(_fgrid->getHeader().getNumberRows());
 		(*pVal)->put_XllCenter(_fgrid->getHeader().getXllcenter());
@@ -183,8 +186,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		ndv.vt = VT_I4;
 		ndv.lVal = _lgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(_lgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(_lgrid->getHeader().getProjection()));
+		CComBSTR bstrNotes(_lgrid->getHeader().getNotes());
+		(*pVal)->put_Notes(bstrNotes);
+		CComBSTR bstrProj(_lgrid->getHeader().getProjection());
+		(*pVal)->put_Projection(bstrProj);
 		(*pVal)->put_NumberCols(_lgrid->getHeader().getNumberCols());
 		(*pVal)->put_NumberRows(_lgrid->getHeader().getNumberRows());
 		(*pVal)->put_XllCenter(_lgrid->getHeader().getXllcenter());
@@ -201,8 +206,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		ndv.vt = VT_I2;
 		ndv.iVal = _sgrid->getHeader().getNodataValue();
 		(*pVal)->put_NodataValue(ndv);
-		(*pVal)->put_Notes(A2BSTR(_sgrid->getHeader().getNotes()));
-		(*pVal)->put_Projection(A2BSTR(_sgrid->getHeader().getProjection()));
+		CComBSTR bstrNotes(_sgrid->getHeader().getNotes());
+		(*pVal)->put_Notes(bstrNotes);
+		CComBSTR bstrProj(_sgrid->getHeader().getProjection());
+		(*pVal)->put_Projection(bstrProj);
 		(*pVal)->put_NumberCols(_sgrid->getHeader().getNumberCols());
 		(*pVal)->put_NumberRows(_sgrid->getHeader().getNumberRows());
 		(*pVal)->put_XllCenter(_sgrid->getHeader().getXllcenter());
@@ -963,7 +970,8 @@ void CGrid::SaveProjectionAsWkt()
 		if (proj)
 		{
 			VARIANT_BOOL vb;
-			proj->ReadFromFile(W2BSTR(prjFilename), &vb);
+			CComBSTR bstrProj(prjFilename);
+			proj->ReadFromFile(bstrProj, &vb);
 			if (vb)
 			{
 				CComBSTR bstr;
@@ -1390,7 +1398,7 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				Header->get_NodataValue(&ndv);
 				double dndv;
 				dVal(ndv,dndv);
-				BSTR projection;
+				CComBSTR projection;
 				Header->get_Projection(&projection);
 				long ncols;
 				Header->get_NumberCols(&ncols);
@@ -1401,10 +1409,9 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				double yllcenter;
 				Header->get_YllCenter(&yllcenter);
 				
-				BSTR cTbl;
+				CComBSTR cTbl;
 				Header->get_ColorTable(&cTbl);
 				_trgrid->BSTR2ColorTable(cTbl);
-				::SysFreeString(cTbl);
 
 				return _trgrid->CreateNew(W2A(Filename), newFileType, dx, dy, xllcenter, yllcenter, 
 					dndv, OLE2A(projection), ncols, nrows, DataType, boolInRam, value, true)?S_OK:S_FALSE;
@@ -1431,10 +1438,10 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			double dndv;
 			dVal(ndv,dndv);
 			dhdr.setNodataValue(dndv);
-			BSTR notes;
+			CComBSTR notes;
 			Header->get_Notes(&notes);
 			dhdr.setNotes(OLE2CA(notes));
-			BSTR projection;
+			CComBSTR projection;
 			Header->get_Projection(&projection);
 			dhdr.setProjection(OLE2CA(projection));
 			long ncols;
@@ -1463,8 +1470,6 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			}
 			
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-		    ::SysFreeString(notes);  //Lailin Chen 12/20/2005 
-			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == FloatDataType )
 		{	_fgrid = new fGrid();
@@ -1483,10 +1488,10 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			float fndv;
 			fVal(ndv,fndv);
 			fhdr.setNodataValue(fndv);
-			BSTR notes;
+			CComBSTR notes;
 			Header->get_Notes(&notes);
 			fhdr.setNotes(OLE2CA(notes));
-			BSTR projection;
+			CComBSTR projection;
 			Header->get_Projection(&projection);
 			fhdr.setProjection(OLE2CA(projection));
 			long ncols;
@@ -1514,8 +1519,6 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				ErrorMessage(_fgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
-			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == LongDataType )
 		{	_lgrid = new lGrid();
@@ -1533,10 +1536,10 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			long lndv;
 			lVal(ndv,lndv);
 			lhdr.setNodataValue(lndv);
-			BSTR notes;
+			CComBSTR notes;
 			Header->get_Notes(&notes);
 			lhdr.setNotes(OLE2CA(notes));
-			BSTR projection;
+			CComBSTR projection;
 			Header->get_Projection(&projection);
 			lhdr.setProjection(OLE2CA(projection));
 			long ncols;
@@ -1564,8 +1567,6 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				ErrorMessage(_lgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
-			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else if( DataType == ShortDataType )
 		{	_sgrid = new sGrid();
@@ -1583,10 +1584,10 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 			short sndv;
 			sVal(ndv,sndv);
 			shdr.setNodataValue(sndv);
-			BSTR notes;
+			CComBSTR notes;
 			Header->get_Notes(&notes);
 			shdr.setNotes(OLE2CA(notes));
-			BSTR projection;
+			CComBSTR projection;
 			Header->get_Projection(&projection);
 			shdr.setProjection(OLE2CA(projection));
 			long ncols;
@@ -1614,8 +1615,6 @@ STDMETHODIMP CGrid::CreateNew(BSTR Filename, IGridHeader *Header, GridDataType D
 				ErrorMessage(_sgrid->LastErrorCode());
 			}
 			VariantClear(&ndv); //added by Rob Cairns 4-Jan-06
-			::SysFreeString(notes);  //Lailin Chen 12/20/2005 
-			::SysFreeString(projection);  //Lailin Chen 12/20/2005 
 		}
 		else
 		{	ErrorMessage(tkINVALID_DATA_TYPE);
@@ -1888,9 +1887,9 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 		header->Release();
 		header = NULL;
 
-		if (strcmp(W2A(bstrProj), "") != 0)
+		if (strcmp(OLE2A(bstrProj), "") != 0)
 		{
-			SaveProjection(W2A(bstrProj));
+			SaveProjection(OLE2A(bstrProj));
 		}
 		_globalCallback = tmpCallback;
 	}
@@ -2669,7 +2668,8 @@ IImage* CGrid::OpenImageProxy()
 		VARIANT_BOOL vb;
 		ComHelper::CreateInstance(tkInterface::idImage, (IDispatch**)&iimg);
 		
-		iimg->Open(OLE2BSTR(this->GetProxyName()), ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb);
+		CComBSTR bstrName(this->GetProxyName());
+		iimg->Open(bstrName, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb);
 		if (!vb) 
 		{
 			iimg->Close(&vb);

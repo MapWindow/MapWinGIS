@@ -108,7 +108,8 @@ void CShapeNetwork::CopyShape( bool reversePoints, IShape * oldshape, IShape * n
 }
 
 void CShapeNetwork::CopyField( IField * oldfield, IField * newfield )
-{	BSTR name;
+{	
+	CComBSTR name;
 	long precision = 0,width = 0;
 	FieldType ftype;
 	oldfield->get_Name(&name);
@@ -119,7 +120,6 @@ void CShapeNetwork::CopyField( IField * oldfield, IField * newfield )
 	newfield->put_Precision(precision);
 	newfield->put_Type(ftype);
 	newfield->put_Width(width);
-	::SysFreeString(name);
 }
 
 void CShapeNetwork::recPrintShpNetwork(shpNetNode * allnodes, long index, ofstream & out)
@@ -461,7 +461,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	//Create the shapefile
 	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&_netshpfile);
 	Shapefile->get_ShapefileType(&shpfiletype);
-	_netshpfile->CreateNew(A2BSTR(""),shpfiletype,&vbretval);
+	_netshpfile->CreateNew(m_globalSettings.emptyBstr,shpfiletype,&vbretval);
 
 	//Copy all of the Fields
 	long numFields = 0;
@@ -488,12 +488,14 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&id);
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&did);
 				
-	id->put_Name(A2BSTR("NET_ID"));
+	CComBSTR bstrNetId("NET_ID");
+	id->put_Name(bstrNetId);
 	id->put_Precision(0);
 	id->put_Type(INTEGER_FIELD);
 	id->put_Width(5);
 
-	did->put_Name(A2BSTR("NET_DID"));
+	CComBSTR bstrNetDid("NET_DID");
+	did->put_Name(bstrNetDid);
 	did->put_Precision(0);
 	did->put_Type(INTEGER_FIELD);
 	did->put_Width(5);
@@ -1816,7 +1818,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		Utility::DisplayProgress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
-		(*retval)->CreateNew(A2BSTR(""),nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr,nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		nbheader->Release();
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
 		if( vbretval == VARIANT_FALSE )
@@ -1875,7 +1877,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		Utility::DisplayProgress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
-		(*retval)->CreateNew(A2BSTR(""),Header,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr, Header, ShortDataType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
 		if( vbretval == FALSE )
 		{	(*retval)->Release();

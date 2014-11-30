@@ -645,8 +645,10 @@ void CMapView::AddDrawingLabel(long drawHandle, LPCTSTR Text, OLE_COLOR Color, d
 {
 	if( IsValidDrawList (drawHandle) )
 	{	
-		if (_allDrawLists[drawHandle]->m_labels)
-			_allDrawLists[drawHandle]->m_labels->AddLabel(A2BSTR(Text), x, y);
+		if (_allDrawLists[drawHandle]->m_labels) {
+			CComBSTR bstr(Text);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y);
+		}
 		
 		_canUseLayerBuffer = FALSE;
 		if( !_lockCount )
@@ -663,8 +665,11 @@ void CMapView::AddDrawingLabelEx(long drawHandle, LPCTSTR Text, OLE_COLOR Color,
 {
 	if( IsValidDrawList(drawHandle) )
 	{	
-		if (_allDrawLists[drawHandle]->m_labels)
-			_allDrawLists[drawHandle]->m_labels->AddLabel(A2BSTR(Text), x, y, Rotation );
+		if (_allDrawLists[drawHandle]->m_labels) {
+			CComBSTR bstr(Text);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, Rotation);
+		}
+			
 
 		_canUseLayerBuffer = FALSE;
 		if( !_lockCount )
@@ -700,7 +705,8 @@ void CMapView::DrawingFont(long drawHandle, LPCTSTR FontName, long FontSize)
 	if( IsValidDrawList(drawHandle) )
 	{
 		DrawList * dlist = _allDrawLists[drawHandle];
-		dlist->m_labels->put_FontName(A2BSTR(FontName));
+		CComBSTR bstr(FontName);
+		dlist->m_labels->put_FontName(bstr);
 		dlist->m_labels->put_FontSize(FontSize);
 		if (dlist->listType == dlSpatiallyReferencedList)
 		{

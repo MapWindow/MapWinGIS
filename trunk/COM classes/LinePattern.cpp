@@ -469,7 +469,11 @@ bool CLinePattern::DeserializeCore(CPLXMLNode* node)
 
 	CString s;
 	s = CPLGetXMLValue( node, "Key", NULL );
-	if (s != "") this->put_Key(A2BSTR(s));
+	if (s != "")
+	{
+		CComBSTR bstr(s);
+		this->put_Key(bstr);
+	}
 
 	s = CPLGetXMLValue( node, "Transparency", NULL );
 	if (s != "") _transparency = (unsigned char)atoi(s.GetString());

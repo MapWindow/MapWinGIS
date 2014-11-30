@@ -242,7 +242,8 @@ long CMapView::AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStr
 {
 	USES_CONVERSION;
 	IDispatch* layer = NULL;
-	_fileManager->Open(A2BSTR(Filename), openStrategy, _globalCallback, &layer);
+	CComBSTR bstr(Filename);
+	_fileManager->Open(bstr, openStrategy, _globalCallback, &layer);
 	if (layer) {
 		long handle = AddLayer(layer, visible);
 		layer->Release();
@@ -260,7 +261,9 @@ long CMapView::AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR layerNameO
 {
 	USES_CONVERSION;
 	IOgrLayer* layer = NULL;
-	_fileManager->OpenFromDatabase(A2BSTR(ConnectionString), A2BSTR(layerNameOrQuery), &layer);
+	CComBSTR bstrConnection(ConnectionString);
+	CComBSTR bstrQuery(layerNameOrQuery);
+	_fileManager->OpenFromDatabase(bstrConnection, bstrQuery, &layer);
 	if (layer) {
 		long handle = AddLayer(layer, visible);
 		layer->Release();
@@ -1001,14 +1004,14 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 	{	
 		Layer * l = _allLayers[LayerHandle];
 		CString newFile = newSrcPath;
+		CComBSTR bstrName(newFile);
 		VARIANT_BOOL rt;
+
 		if (l->IsShapefile())
 		{
 			IShapefile * sf = NULL;
-			//l->object->QueryInterface(IID_IShapefile, (void**)&sf);
-			//if (sf == NULL) return;
 			if (!l->QueryShapefile(&sf)) return;
-			sf->Resource(newFile.AllocSysString(), &rt);
+			sf->Resource(bstrName, &rt);
 
 			IExtents * box = NULL;
 			sf->get_Extents(&box);
@@ -1018,25 +1021,20 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 			box->Release();
 			box = NULL;
 			sf->Release();
-
-			/*if (l->file != NULL) fclose(l->file);
-			l->file = ::fopen(newFile.GetBuffer(),"rb");*/
 		}
 		else if(l->IsImage())
 		{
 			IImage * iimg = NULL;
 			
-			//if (iimg == NULL) return;
 			if (!l->QueryImage(&iimg)) return;
-			iimg->Resource(newFile.AllocSysString(), &rt);
+			
+			iimg->Resource(bstrName, &rt);
 			iimg->Release();
-
-			/*if (l->file != NULL) fclose(l->file);
-			l->file = ::fopen(newFile.GetBuffer(),"rb");*/
 		}
 		else
 			return;
 
+		
 		_canUseLayerBuffer = FALSE;
 		if( !_lockCount )
 			InvalidateControl();
@@ -1293,7 +1291,8 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 		
 		if (img) 
 		{
-			img->Open(W2BSTR(filename), USE_FILE_EXTENSION, VARIANT_FALSE, NULL, &vb);
+			CComBSTR name(filename);
+			img->Open(name, USE_FILE_EXTENSION, VARIANT_FALSE, NULL, &vb);
 		}
 		
 		if (vb)
@@ -1474,7 +1473,7 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 					}
 					else
 					{
-						BSTR bstr;
+						CComBSTR bstr;
 						img->get_SourceFilename(&bstr);
 						CStringW sourceName = Utility::GetNameFromPath(OLE2W(bstr));
 						Utility::CPLCreateXMLAttributeAndValue(psLayer, "SourceName", sourceName);
@@ -1783,8 +1782,8 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 				if (ogrLayer) 
 				{
 					VARIANT_BOOL vb;
-					USES_CONVERSION;
-					((COgrLayer*)ogrLayer)->SaveStyle(A2W(OptionsName), xml, &vb);
+					CComBSTR bstr(OptionsName);
+					((COgrLayer*)ogrLayer)->SaveStyle(bstr, xml, &vb);
 					if (vb) result = true;
 				}
 			}

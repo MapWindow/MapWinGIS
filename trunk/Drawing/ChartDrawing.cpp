@@ -104,7 +104,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 		return;
 	}
 	
-	// analysing visibility expression
+	// analyzing visibility expression
 	long numFields;
 	sf->get_NumFields(&numFields);
 	
@@ -114,7 +114,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	// -----------------------------------------
 	// analyzing query expression
 	// -----------------------------------------
-	BSTR expr;
+	CComBSTR expr;
 	charts->get_VisibilityExpression(&expr);
 
 	ITable* tbl = NULL;

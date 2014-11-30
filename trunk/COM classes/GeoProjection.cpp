@@ -261,12 +261,7 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
 		USES_CONVERSION;
 		char* str = OLE2A(proj);
 
-		char** list = new char*[2];
-		list[0] = str;
-		list[1] = NULL;
-
-		OGRErr err = _projection->importFromESRI(list);
-		// TODO: delete those 2 bytes; GDAL can change the pointer
+		OGRErr err = _projection->importFromESRI(&str);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -735,10 +730,10 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 		}
 		else
 		{
-			CComBSTR s;
-			sourceProj->ExportToWKT(&s);
+			CComBSTR bstr;
+			sourceProj->ExportToWKT(&bstr);
 			USES_CONVERSION;
-			char* prj = OLE2A(s);
+			char* prj = OLE2A(bstr);
 			_projection->importFromWkt(&prj);
 			*retVal = VARIANT_TRUE;
 			return S_OK;

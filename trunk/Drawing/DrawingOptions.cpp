@@ -598,7 +598,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 		this->picture->get_ImageType(&type);
 		if (type == JPEG_FILE || type == PNG_FILE || type == GIF_FILE)
 		{
-			BSTR filename;
+			CComBSTR filename;
 			this->picture->get_Filename(&filename);
 			USES_CONVERSION;
 			long size = Utility::GetFileSize(OLE2CA(filename));
@@ -610,9 +610,9 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 		
 		if (useGDIPlusReading)
 		{
-			BSTR filename;
+			CComBSTR filename;
 			this->picture->get_Filename(&filename);
-			bitmapPlus = new Gdiplus::Bitmap(filename);
+			bitmapPlus = new Gdiplus::Bitmap(OLE2W(filename));
 		}
 		else
 		{

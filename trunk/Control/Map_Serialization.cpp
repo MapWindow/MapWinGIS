@@ -230,9 +230,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	if (s.GetLength() > 0)
 	{
 		VARIANT_BOOL vb;
-		CComBSTR bstr;
-		USES_CONVERSION;
-		bstr.Attach(A2BSTR(s));
+		CComBSTR bstr(s);
 		gp->ImportFromAutoDetect(bstr, &vb);
 	}
 	SetGeoProjection(gp);

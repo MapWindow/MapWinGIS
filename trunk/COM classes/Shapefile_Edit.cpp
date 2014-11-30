@@ -383,8 +383,8 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		if (bSynchronized)
 		{
 			// it doesn't make sense to recalculate expression as dbf cells are empty all the same
-			CString text;
-			_labels->InsertLabel(ShapeIndex, A2BSTR(text), x, y, rotation, -1, &vbretval);
+			CComBSTR bstrText("");
+			_labels->InsertLabel(ShapeIndex, bstrText, x, y, rotation, -1, &vbretval);
 		}
 
 		if (chartsExist)

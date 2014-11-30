@@ -50,7 +50,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 	} 
 	
 	_labels->Clear();
-	BSTR text;
+	
 	double x = 0.0,y = 0.0;
 	long percent = 0;
 	
@@ -69,21 +69,22 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		Utility::DisplayProgress(_globalCallback, i, _numShapes, "Calculating label positions...", _key, percent);
 		
 		/* extracting field value */
+		CComBSTR text;
 		if (FieldIndex != -1)
 		{
 			VARIANT val;
 			VariantInit(&val);
 			this->get_CellValue(FieldIndex,i, &val);
 			
-			text = Utility::Variant2BSTR(&val);
+			text.Attach(Utility::Variant2BSTR(&val));
 			VariantClear(&val);
 		}
 		else
 		{
-			text = A2BSTR("");
+			text.Attach(A2BSTR(""));
 		}
 		
-		// fictitious label should be added even if an error occured while calculating position
+		// fictitious label should be added even if an error occurred while calculating position
 		// otherwise labels won't be synchronized and not a single label will be displayed at all
 
 		IShape* shp = NULL;

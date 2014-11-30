@@ -33,16 +33,15 @@ bool Shape2Ogr::ShapefileFieldsToOgr(IShapefile* sf, OGRLayer* poLayer)
 	{
 		// copy field
 		long precision, width;
-		BSTR name;
+		CComBSTR name;
 		CComPtr<IField> fld = NULL;
 		sf->get_Field(i, &fld);
 		fld->get_Name(&name);
 		fld->get_Precision(&precision);
 		fld->get_Width(&width);
-		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name), OgrHelper::GetFieldType(fld));
+		OGRFieldDefn oField(OgrHelper::Bstr2OgrString(name.m_str), OgrHelper::GetFieldType(fld));
 		oField.SetWidth(width);
 		oField.SetPrecision(precision);
-		SysFreeString(name);
 
 		// insert it
 		if (poLayer->CreateField(&oField) != OGRERR_NONE)

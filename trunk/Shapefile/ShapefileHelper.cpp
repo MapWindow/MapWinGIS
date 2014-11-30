@@ -9,7 +9,7 @@
 long ShapefileHelper::GetMWShapeIdIndex(IShapefile* sf)
 {
 	long index = -1;
-	CComBSTR bstr = L"mwshapeid";
+	CComBSTR bstr("MWShapeID");
 	sf->get_FieldIndexByName(bstr, &index);
 	return index;
 }
@@ -54,14 +54,14 @@ void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, S
 	VARIANT_BOOL vb;
 	if (addShapeId)
 	{
-		sf->CreateNewWithShapeID(A2BSTR(""), targetShapeType, &vb);
+		sf->CreateNewWithShapeID(m_globalSettings.emptyBstr, targetShapeType, &vb);
 	}
 	else {
-		sf->CreateNew(A2BSTR(""), targetShapeType, &vb);
+		sf->CreateNew(m_globalSettings.emptyBstr, targetShapeType, &vb);
 	}
 
 	// copying the projection string
-	BSTR pVal;
+	CComBSTR pVal;
 	sfSource->get_Projection(&pVal);
 	if (pVal != NULL)
 		sf->put_Projection(pVal);

@@ -1416,7 +1416,10 @@ bool CTiles::DeserializeCore(CPLXMLNode* node)
 				if (s != "") name = s;
 
 				VARIANT_BOOL vb;
-				_providers->Add(id, A2BSTR(name), A2BSTR(url), (tkTileProjection)projection, minZoom, maxZoom, &vb);
+				CComBSTR bstrName(name);
+				CComBSTR bstrUrl(url);
+
+				_providers->Add(id, bstrName, bstrUrl, (tkTileProjection)projection, minZoom, maxZoom, &vb);
 			}
 			nodeProvider = nodeProvider->psNext;
 		}

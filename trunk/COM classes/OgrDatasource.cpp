@@ -132,7 +132,8 @@ STDMETHODIMP COgrDatasource::GetLayerByName(BSTR name, VARIANT_BOOL forUpdate, I
 	ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 
 	VARIANT_BOOL vb;
-	((COgrLayer*)layer)->OpenFromDatabase(W2BSTR(_connectionString), name, forUpdate, &vb);
+	CComBSTR bstrConnection(_connectionString);
+	((COgrLayer*)layer)->OpenFromDatabase(bstrConnection, name, forUpdate, &vb);
 	if (!vb)
 	{
 		long errorCode;
@@ -166,7 +167,7 @@ STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLay
 		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 		
 		VARIANT_BOOL vb;
-		CComBSTR bstrConnection = _connectionString;
+		CComBSTR bstrConnection(_connectionString);
 		((COgrLayer*)layer)->OpenDatabaseLayer(bstrConnection, index, forUpdate, &vb);
 		if (!vb)
 		{
@@ -196,7 +197,8 @@ STDMETHODIMP COgrDatasource::RunQuery(BSTR sql, IOgrLayer** retVal)
 		ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
 
 		VARIANT_BOOL vb;
-		((COgrLayer*)layer)->OpenFromQuery(W2BSTR(_connectionString), sql, &vb);
+		CComBSTR bstr(_connectionString);
+		((COgrLayer*)layer)->OpenFromQuery(bstr, sql, &vb);
 		if (!vb)
 		{
 			long errorCode;

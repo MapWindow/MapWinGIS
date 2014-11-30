@@ -26,11 +26,11 @@ IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, int maxFeatureCount, boo
 			if (labels) 
 			{
 				labels->put_LineOrientation(loader->LabelOrientation);
-				USES_CONVERSION;
 				long count;
 				ShpfileType type;
 				sf->get_ShapefileType(&type);
-				labels->Generate(W2BSTR(loader->LabelExpression), loader->GetLabelPosition(type), VARIANT_TRUE, &count);
+				CComBSTR bstr(loader->LabelExpression);
+				labels->Generate(bstr, loader->GetLabelPosition(type), VARIANT_TRUE, &count);
 			}
 		}
 	}
@@ -101,8 +101,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 	{
 		ComHelper::CreateInstance(idField, (IDispatch**)&fld);
 		fld->put_Type(INTEGER_FIELD);
-		CComBSTR bstrName;
-		bstrName.Attach(A2BSTR(name));
+		CComBSTR bstrName(name);
 		fld->put_Name(bstrName);
 		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
 		fld->Release();
@@ -122,8 +121,7 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 		else if (type == OFTReal)	fld->put_Type(DOUBLE_FIELD);
 		else if (type == OFTString)	fld->put_Type(STRING_FIELD);
 
-		CComBSTR bstrName;
-		bstrName.Attach(A2BSTR(oField->GetNameRef()));
+		CComBSTR bstrName(oField->GetNameRef());
 		fld->put_Name(bstrName);
 		fld->put_Width((long)oField->GetWidth());
 		fld->put_Precision((long)oField->GetPrecision());
@@ -245,7 +243,8 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		}
 
 		if (loadLabels) {
-			labels->AddLabel(W2BSTR(text), x, y, rotation);
+			CComBSTR bstr(text);
+			labels->AddLabel(bstr, x, y, rotation);
 		}
 
 		OGRFeature::DestroyFeature(poFeature);

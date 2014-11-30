@@ -657,7 +657,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	if (tmp_shpfileName.GetLength() == 0)
 	{
 		// better to use CreateNew directly, but this call will be preserved for backward compatibility
-		this->CreateNew(A2BSTR(""), _shpfiletype, &vbretval);
+		this->CreateNew(m_globalSettings.emptyBstr, _shpfiletype, &vbretval);
 	}
 	else if( tmp_shpfileName.GetLength() <= 3 )
 	{	
@@ -752,8 +752,7 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 				}
 				else
 				{
-					CComBSTR newdbfName = L"";
-					_table->CreateNew(newdbfName, &vbretval);
+					_table->CreateNew(m_globalSettings.emptyBstr, &vbretval);
 					
 					if (!vbretval)
 					{
@@ -830,7 +829,8 @@ HRESULT CShapefile::CreateNewCore(BSTR ShapefileName, ShpfileType ShapefileType,
 					_table->put_GlobalCallback(_globalCallback);
 					
 					CString newDbfName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + "dbf";
-					_table->CreateNew(A2BSTR(newDbfName), &vbretval);
+					CComBSTR bstrName(newDbfName);
+					_table->CreateNew(bstrName, &vbretval);
 					
 					if (!vbretval)
 					{
@@ -877,7 +877,8 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR ShapefileName, ShpfileType Sh
 		IField * shapeIDField = NULL;
 		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&shapeIDField);
 		
-		shapeIDField->put_Name(A2BSTR("MWShapeID"));
+		CComBSTR bstr("MWShapeID");
+		shapeIDField->put_Name(bstr);
 		shapeIDField->put_Type(INTEGER_FIELD);
 		shapeIDField->put_Width(10);
 		shapeIDField->put_Precision(10);
@@ -1116,7 +1117,8 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		// saving projection in new format
 		VARIANT_BOOL vbretval;
 		CStringW prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + L"prj";
-		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		CComBSTR bstr(prjfileName);
+		_geoProjection->WriteToFile(bstr, &vbretval);
 
 		*retval = VARIANT_TRUE;
 	}
@@ -1274,8 +1276,10 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// saving projection in new format
 		VARIANT_BOOL vbretval, isEmpty;
 		_geoProjection->get_IsEmpty(&isEmpty);
-		if(!isEmpty)
-			_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		if (!isEmpty) {
+			CComBSTR bstr(_prjfileName);
+			_geoProjection->WriteToFile(bstr, &vbretval);
+		}
 
 		if (_useQTree)
 			GenerateQTree();
@@ -1404,7 +1408,8 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 
 			// saving projection in new format
 			VARIANT_BOOL vbretval;
-			_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+			CComBSTR bstr(_prjfileName);
+			_geoProjection->WriteToFile(bstr, &vbretval);
 
 			*retval = VARIANT_TRUE;
 		}
@@ -1660,7 +1665,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 	USES_CONVERSION;
 	
     long max;
-	BSTR Testname;
+	
 	CString strTestname;
 	CString strFieldname;
 	IField *testVal;
@@ -1680,6 +1685,7 @@ STDMETHODIMP CShapefile::get_FieldByName(BSTR Fieldname, IField **pVal)
 		for (int fld=0; fld < max; fld++)
 		{
 			_table->get_Field(fld,&testVal);
+			CComBSTR Testname;
 			testVal->get_Name(&Testname);
 			strTestname = OLE2A(Testname);
 			if( strTestname.CompareNoCase(strFieldname) == 0)
@@ -1946,8 +1952,6 @@ STDMETHODIMP CShapefile::put_ShapeCategory2(long ShapeIndex, BSTR categoryName)
 STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
-	*categoryName = A2BSTR("");
 	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -1963,12 +1967,14 @@ STDMETHODIMP CShapefile::get_ShapeCategory2(long ShapeIndex, BSTR* categoryName)
 			_categories->get_Item(index, &ct);
 			ct->get_Name(categoryName);
 			ct->Release();
+			return S_OK;
 		}
 		else
 		{
 			ErrorMessage(tkCATEGORY_WASNT_FOUND);
 		}
 	}
+	*categoryName = SysAllocString(L"");
 	return S_OK;
 }
 
@@ -2525,7 +2531,6 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 STDMETHODIMP CShapefile::get_Projection(BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
 	_geoProjection->ExportToProj4(pVal);
 	return S_OK;
 }
@@ -2542,7 +2547,8 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 	_geoProjection->ImportFromProj4(proj4Projection, &vbretval);
 	if (vbretval)
 	{
-		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		CComBSTR bstrFilename(_prjfileName);
+		_geoProjection->WriteToFile(bstrFilename, &vbretval);
 	}
 	return S_OK;
 }
@@ -2570,7 +2576,8 @@ STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 	if (_prjfileName.GetLength() != 0)
 	{
 		VARIANT_BOOL vbretval;
-		_geoProjection->WriteToFile(W2BSTR(_prjfileName), &vbretval);
+		CComBSTR bstr(_prjfileName);
+		_geoProjection->WriteToFile(bstr, &vbretval);
 	}
 	return S_OK;
 }

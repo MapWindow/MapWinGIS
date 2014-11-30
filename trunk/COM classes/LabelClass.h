@@ -50,13 +50,13 @@ public:
 		gReferenceCounter.Release(tkInterface::idLabel);
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_LABELCLASS)
+	DECLARE_REGISTRY_RESOURCEID(IDR_LABELCLASS)
 
 
-BEGIN_COM_MAP(CLabelClass)
-	COM_INTERFACE_ENTRY(ILabel)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CLabelClass)
+		COM_INTERFACE_ENTRY(ILabel)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -93,9 +93,6 @@ public:
 
 	STDMETHOD(get_ScreenExtents)(IExtents** retval);
 
-	char* get_LabelData();
-	void put_LabelData(char* newVal);
-
 private:
 	CLabelInfo* _label;
 	bool _canDelete;		// CLabelInfo can be allocated locally, then we need to delete it
@@ -103,6 +100,10 @@ private:
 							// In case CLabelInfo is a pointer to the element of CLabels vector we must not delete it
 							// For a example if a client receive reference to some existing label and then releases 
 							// CLabelClass.
+
+public:
+	char* get_LabelData();
+	void put_LabelData(char* newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Label), CLabelClass)

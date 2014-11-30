@@ -227,8 +227,10 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	{
 		CString strValue;
 
-		this->Add((*values)[i].name.AllocSysString(), &cat);
-		cat->put_Expression((*values)[i].expression.AllocSysString());
+		CComBSTR bstrName((*values)[i].name);
+		CComBSTR bstrExpression((*values)[i].expression);
+		this->Add(bstrName, &cat);
+		cat->put_Expression(bstrExpression);
 		cat->put_MinValue((*values)[i].minValue);
 		cat->put_MaxValue((*values)[i].maxValue);
 		cat->Release();
@@ -459,7 +461,7 @@ STDMETHODIMP CShapefileCategories::ApplyExpression(long CategoryIndex)
 }
 
 // *******************************************************************
-//		ApplyExpression_
+//		ApplyExpressionCore
 // *******************************************************************
 void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 {
@@ -531,7 +533,7 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 		if (parsingIsNeeded)
 		{
 			// building list of expressions
-			BSTR expr;
+			
 			std::vector<CString> expressions;
 			for (unsigned int i = 0; i < _categories.size(); i++)
 			{
@@ -547,10 +549,10 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 					//}
 					//else
 					{
+						CComBSTR expr;
 						_categories[i]->get_Expression(&expr);
 						USES_CONVERSION;
 						CString str = OLE2CA(expr);	
-						::SysFreeString(expr);
 						expressions.push_back(str);
 					}
 				}
@@ -1069,7 +1071,9 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 			CString s;
 			s.Format("Color %d", i + 1);
 			IShapefileCategory* ct = NULL;
-			this->Add(A2BSTR(s), &ct);
+
+			CComBSTR bstrName(s);
+			this->Add(bstrName, &ct);
 			CDrawingOptionsEx* opt = ((CShapefileCategory*)ct)->get_UnderlyingOptions();
 			
 			OLE_COLOR clr;

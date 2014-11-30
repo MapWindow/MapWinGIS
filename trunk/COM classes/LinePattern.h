@@ -101,11 +101,6 @@ public:
 
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
-
-	bool CLinePattern::DeserializeCore(CPLXMLNode* node);
-	CPLXMLNode* CLinePattern::SerializeCore(CString ElementName);
-
-	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);
 	
 private:
 	std::vector <ILineSegment*> _lines;
@@ -116,6 +111,11 @@ private:
 
 private:
 	void ErrorMessage(long ErrorCode);
+
+public:
+	bool DeserializeCore(CPLXMLNode* node);
+	CPLXMLNode* SerializeCore(CString ElementName);
+	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LinePattern), CLinePattern)

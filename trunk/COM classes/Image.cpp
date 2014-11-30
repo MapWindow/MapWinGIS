@@ -3217,11 +3217,10 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 			bool useGDIPlus = false;
 			if (_imgType == JPEG_FILE || _imgType == PNG_FILE || _imgType == GIF_FILE)
 			{
-				BSTR filename;
+				CComBSTR filename;
 				this->get_Filename(&filename);
 				USES_CONVERSION;
 				long size = Utility::GetFileSize(OLE2CA(filename));
-				SysFreeString(filename);
 				if (size < (long)(0x1 << 20))
 				{
 					useGDIPlus = true;
@@ -3231,13 +3230,12 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 			if (useGDIPlus)
 			{
 				// it will be serialized as GdiPlus and loaded as in-memory bitmap the next time
-				BSTR filename;
+				CComBSTR filename;
 				this->get_Filename(&filename);
 				USES_CONVERSION;
 				
 				unsigned char* buffer = NULL;
 				int size = Utility::ReadFileToBuffer(OLE2W(filename), &buffer);
-				SysFreeString(filename);
 
 				if (size > 0)
 				{
@@ -3667,7 +3665,8 @@ STDMETHODIMP CImageClass::OpenAsGrid(IGrid** retVal)
 		VARIANT_BOOL vb;
 		USES_CONVERSION;
 
-		(*retVal)->Open(OLE2BSTR(filename), GridDataType::UnknownDataType, true, GridFileType::UseExtension, _globalCallback, &vb);
+		CComBSTR bstr(filename);
+		(*retVal)->Open(bstr, GridDataType::UnknownDataType, true, GridFileType::UseExtension, _globalCallback, &vb);
 		if (!vb)
 		{
 			(*retVal)->Release();

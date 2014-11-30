@@ -225,10 +225,9 @@ void CopyShape(IShapefile* sfSource, IShape* shp, IShapefile* sfResult)
 	if (shp)
 	{
 		USES_CONVERSION;
-		BSTR key;
+		CComBSTR key;
 		shp->get_Key(&key);
 		CString str = OLE2CA(key);
-		SysFreeString(key);
 		int initIndex = atoi(str);
 		
 		VARIANT_BOOL isEditingShapes, vbretval;
@@ -655,7 +654,8 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 				field->get_Width(&width);
 
 				long fieldIndex;
-				sf->EditAddField(W2BSTR(name), type, precision, width, &fieldIndex);
+				CComBSTR bstrName(name);
+				sf->EditAddField(bstrName, type, precision, width, &fieldIndex);
 				
 				op->targetIndex = fieldIndex;
 				op->targetFieldType = type;

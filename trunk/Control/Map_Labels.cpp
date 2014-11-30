@@ -337,8 +337,7 @@ void CMapView::LayerFont(long LayerHandle, LPCTSTR FontName, long FontSize)
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		USES_CONVERSION;
-		BSTR name = A2BSTR(FontName);
+		CComBSTR name(FontName);
 		labels->put_FontName(name);
 		labels->put_FontSize(FontSize);
 		labels->Release();
@@ -353,8 +352,7 @@ void CMapView::LayerFontEx(long LayerHandle, LPCTSTR FontName, long FontSize, BO
 	ILabels* labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		USES_CONVERSION;
-		BSTR name = A2BSTR(FontName);
+		CComBSTR name(FontName);
 		labels->put_FontName(name);
 		labels->put_FontSize(FontSize);
 		
@@ -409,13 +407,11 @@ void CMapView::SetLayerStandardViewWidth(long LayerHandle, double Width)
 // **********************************************************
 void CMapView::AddLabel(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, double x, double y, short hJustification)
 {
-	ILabels* labels = GetLayerLabels(LayerHandle);
+	CComPtr<ILabels> labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		USES_CONVERSION;
-		BSTR s = A2BSTR(Text);
+		CComBSTR s(Text);
 		labels->AddLabel(s, x, y);
-		labels->Release();
 	}
 }
 
@@ -424,13 +420,11 @@ void CMapView::AddLabel(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, double 
 // **********************************************************
 void CMapView::AddLabelEx(long LayerHandle, LPCTSTR Text, OLE_COLOR Color, double x, double y, short hJustification, double Rotation)
 {
-	ILabels* labels = GetLayerLabels(LayerHandle);
+	CComPtr<ILabels> labels = GetLayerLabels(LayerHandle);
 	if (labels)
 	{
-		USES_CONVERSION;
-		BSTR s = A2BSTR(Text);
+		CComBSTR s(Text);
 		labels->AddLabel(s, x, y, Rotation);
-		labels->Release();
 	}
 }
 

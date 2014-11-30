@@ -2,6 +2,7 @@
 #include "FieldHelper.h"
 #include <set>
 #include "ShapefileHelper.h"
+#include "TableClass.h"
 
 // *****************************************************************
 //	   FindNewShapeID()
@@ -33,14 +34,20 @@ long FieldHelper::FindNewShapeID(IShapefile* sf, long FieldIndex)
 // Makes name of fields in the table unique. In case of duplicated names adds _# to them.
 bool FieldHelper::UniqueFieldNames(IShapefile* sf)
 {
-	VARIANT_BOOL editing;
-	USES_CONVERSION;
+	bool result = false;
+	ITable* table = NULL;
+	sf->get_Table(&table);
+	if (table) {
+		result = ((CTableClass*)table)->MakeUniqueFieldNames();
+		table->Release();
+	}
+	return result;
 
 	// Do we need edit mode for editing of the field names?
 	// Yes we do, shapelib doesn't allow it otherwise ;)
-	sf->get_EditingShapes(&editing);
+	/*sf->get_EditingShapes(&editing);
 	if (!editing)
-		return false;
+	return false;
 
 	long numFields;
 	sf->get_NumFields(&numFields);
@@ -49,35 +56,35 @@ bool FieldHelper::UniqueFieldNames(IShapefile* sf)
 
 	for (long i = 0; i< numFields; i++)
 	{
-		BSTR name;
-		IField* fld;
-		sf->get_Field(i, &fld);
-		fld->get_Name(&name);
+	CComBSTR name;
+	IField* fld;
+	sf->get_Field(i, &fld);
+	fld->get_Name(&name);
 
-		if (fields.find(OLE2CA(name)) == fields.end())
-		{
-			fields.insert(OLE2CA(name));
-		}
-		else
-		{
-			bool found = false;
-			for (int j = 0; !found; j++)
-			{
-				CString temp = OLE2CA(name);
-				temp.AppendFormat("_%d", j);
-				if (fields.find(temp) == fields.end())
-				{
-					fields.insert(temp);
-					name = temp.AllocSysString();
-					fld->put_Name(name);
-					found = true;
-				}
-			}
-		}
-		fld->Release();
+	if (fields.find(OLE2CA(name)) == fields.end())
+	{
+	fields.insert(OLE2CA(name));
+	}
+	else
+	{
+	bool found = false;
+	for (int j = 0; !found; j++)
+	{
+	CString temp = OLE2CA(name);
+	temp.AppendFormat("_%d", j);
+	if (fields.find(temp) == fields.end())
+	{
+	fields.insert(temp);
+	CComBSTR bstrNewName(temp);
+	fld->put_Name(bstrNewName);
+	found = true;
+	}
+	}
+	}
+	fld->Release();
 	}
 	fields.clear();
-	return true;
+	return true;*/
 }
 
 // ****************************************************************
@@ -88,7 +95,7 @@ bool FieldHelper::FieldsAreEqual(IField* field1, IField* field2)
 	if (!field1 || !field2)
 		return false;
 	
-	BSTR name1, name2;
+	CComBSTR name1, name2;
 	field1->get_Name(&name1);
 	field2->get_Name(&name2);
 
@@ -97,8 +104,6 @@ bool FieldHelper::FieldsAreEqual(IField* field1, IField* field2)
 	CString s2 = OLE2CA(name2);
 
 	bool equal = s1 == s2;
-	SysFreeString(name1);
-	SysFreeString(name2);
 
 	if (!equal)
 	{

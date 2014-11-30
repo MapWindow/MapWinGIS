@@ -1387,10 +1387,9 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 				CPLXMLNode* psNode = CPLCreateXMLNode(psFields, CXT_Element, "ChartFieldClass");
 				
 				// name				
-				BSTR name;
+				CComBSTR name;
 				_bars[i]->get_Name(&name);
 				str = OLE2CA(name);
-				SysFreeString(name);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Name", str);
 			
 				// color
@@ -1426,7 +1425,7 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 				if (sourceType == sstDiskBased)
 				{
 					// constructing the name of .lbl file
-					BSTR name;
+					CComBSTR name;
 					_shapefile->get_Filename(&name);
 					CString path = Utility::GetPathWOExtension(OLE2CA(name));
 					path += ".chart";
@@ -1444,7 +1443,8 @@ CPLXMLNode* CCharts::SerializeCore(CString ElementName)
 					if (!Utility::FileExists(path))
 					{
 						VARIANT_BOOL retVal;
-						this->SaveToXML(A2BSTR(path), &retVal);
+						CComBSTR bstrPath(path);
+						this->SaveToXML(bstrPath, &retVal);
 
 						// user will need to save modeXMLOverwrite once more to overwrite the file
 						if (_savingMode == modeXMLOverwrite)
@@ -1579,7 +1579,7 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 				
 				// name
 				s = CPLGetXMLValue( node, "Name", NULL );
-				BSTR vbstr = A2BSTR( s );
+				CComBSTR vbstr( s );
 				field->put_Name(vbstr);
 
 				s = CPLGetXMLValue( node, "Color", NULL );
@@ -1628,7 +1628,8 @@ bool CCharts::DeserializeCore(CPLXMLNode* node)
 				if (Utility::FileExists(path))
 				{
 					VARIANT_BOOL retVal;
-					this->LoadFromXML(A2BSTR(path), &retVal);
+					CComBSTR bstrPath(path);
+					this->LoadFromXML(bstrPath, &retVal);
 				}
 			}
 		}

@@ -889,8 +889,10 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 	{
 		CString strValue;
 
-		this->AddCategory((*values)[i].name.AllocSysString(), &cat);
-		cat->put_Expression((*values)[i].expression.AllocSysString());
+		CComBSTR bstrName((*values)[i].name);
+		this->AddCategory(bstrName, &cat);
+		CComBSTR bstrExpression((*values)[i].expression);
+		cat->put_Expression(bstrExpression);
 		((CLabelCategory*)cat)->m_value = (*values)[i].minValue;	// must be used after put_Expression, otherwise will be lost
 																		// does "=" operator work for variants?
 		cat->Release();
@@ -978,7 +980,6 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 		if (parsingIsNeeded)
 		{
 			// building list of expressions
-			BSTR expr;
 			std::vector<CString> expressions;
 			for (unsigned int i = 0; i < _categories.size(); i++)
 			{
@@ -993,10 +994,10 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 					}
 					else
 					{
+						CComBSTR expr;
 						_categories[i]->get_Expression(&expr);
 						USES_CONVERSION;
 						CString str = OLE2CA(expr);	
-						::SysFreeString(expr);
 						expressions.push_back(str);
 					}
 				}
@@ -1066,14 +1067,13 @@ void CLabels::RefreshExpressions()
 	}
 	
 	IField* fld = NULL;
-	BSTR name;
+	CComBSTR name;
 	_shapefile->get_Field(_classificationField, &fld);
 	fld->get_Name(&name);
 	
 	USES_CONVERSION;
 	CString fieldName = OLE2CA(name);
 	
-	SysFreeString(name);
 	fieldName = "[" + fieldName + "]";
 
 	for(int i = 0; i < (int)_categories.size(); i++)
@@ -1095,8 +1095,7 @@ void CLabels::RefreshExpressions()
 		
 		s = fieldName + " >= " + sMin + " AND " + fieldName + " <= " + sMax;
 
-		BSTR result;
-		result = s.AllocSysString();
+		CComBSTR result(s);
 		_categories[i]->put_Expression(result);
 	}
 	return;
@@ -1175,7 +1174,8 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 
 	((CLabelCategory*)cat)->put_LabelOptions(&_options);
 
-	cat->put_Name(A2BSTR("Default"));
+	CComBSTR bstr("Default");
+	cat->put_Name(bstr);
 	*retVal = cat;
 	return S_OK;
 }
@@ -1382,7 +1382,8 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 					if (!Utility::FileExists(path))
 					{
 						VARIANT_BOOL retVal;
-						SaveToXML(A2BSTR(path), &retVal);
+						CComBSTR bstrPath(path);
+						SaveToXML(bstrPath, &retVal);
 
 						// user will need to save modeXMLOverwrite once more to overwrite the file
 						if (_savingMode == modeXMLOverwrite)
@@ -1598,7 +1599,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue( node, "VisibilityExpression", NULL );
 
 	USES_CONVERSION;
-	CComBSTR bstrExpression = A2W(s);
+	CComBSTR bstrExpression(s);
 	this->put_VisibilityExpression(bstrExpression);
 
 	/*s = CPLGetXMLValue( node, "ClassificationField", NULL );
@@ -1654,7 +1655,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	}
 	
 	// applying expression; should be done after label generation
-	CComBSTR bstr = A2W(expression);
+	CComBSTR bstr(expression);
 	this->put_Expression(bstr);
 
 	return true;
@@ -2015,7 +2016,12 @@ bool CLabels::DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loa
 STDMETHODIMP CLabels::SaveToDbf(VARIANT_BOOL saveText, VARIANT_BOOL saveCategory, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	SaveToDbf2(A2BSTR("_LabelX"), A2BSTR("_LabelY"), A2BSTR("_LabelAngle"), A2BSTR("_LabelText"), A2BSTR("_LabelCategory"), saveText, saveCategory, retVal);
+	CComBSTR labelX("_LabelX");
+	CComBSTR labelY("_LabelY");
+	CComBSTR labelAngle("_LabelAngle");
+	CComBSTR labelText("_LabelText");
+	CComBSTR labelCategory("_LabelCategory");
+	SaveToDbf2(labelX, labelY, labelAngle, labelText, labelCategory, saveText, saveCategory, retVal);
 	return S_OK;
 }
 STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR textField, BSTR categoryField,  
@@ -2081,7 +2087,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	}
 
 	// checking fields, creating if necessary
-	BSTR fields[5];
+	CComBSTR fields[5];
 	fields[0] = xField;
 	fields[1] = yField;
 	fields[2] = angleField;
@@ -2201,7 +2207,12 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 STDMETHODIMP CLabels::LoadFromDbf(VARIANT_BOOL loadText, VARIANT_BOOL loadCategory, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	LoadFromDbf2(A2BSTR("_LabelX"), A2BSTR("_LabelY"), A2BSTR("_LabelAngle"), A2BSTR("_LabelText"), A2BSTR("_LabelCategory"), loadText, loadCategory, retVal);
+	CComBSTR labelX("_LabelX");
+	CComBSTR labelY("_LabelY");
+	CComBSTR labelAngle("_LabelAngle");
+	CComBSTR labelText("_LabelText");
+	CComBSTR labelCategory("_LabelCategory");
+	LoadFromDbf2(labelX, labelY, labelAngle, labelText, labelCategory, loadText, loadCategory, retVal);
 	return S_OK;
 }
 
@@ -2391,7 +2402,7 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 	_shapefile->get_Table(&table);
 	
 	USES_CONVERSION;
-	BSTR errorString = A2BSTR("");
+	BSTR errorString;
 	VARIANT_BOOL vbretval;
 	((CTableClass*)table)->ParseExpressionCore(Expression, vtString, &errorString, &vbretval);
 	table->Release();

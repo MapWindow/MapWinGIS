@@ -841,7 +841,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		{	
 			IField * field = NULL;
 			this->get_Field(i,&field);
-			BSTR fname;
+			CComBSTR fname;
 			FieldType type;
 			long width, precision;
 			field->get_Name(&fname);
@@ -859,7 +859,6 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 
 			DBFAddField(newdbfHandle,OLE2CA(fname),(DBFFieldType)type,width,precision);
 			field->Release(); 
-			::SysFreeString(fname);
 		}
 	}
 	
@@ -1754,10 +1753,13 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
 	if( _dbfHandle == NULL )
 	{	
-		if( _isEditingTable != FALSE )
+		if( _isEditingTable )
 		{
-			if( ApplyChanges != VARIANT_FALSE )
-				SaveAs(_filename.AllocSysString(),cBack,retval);
+			if (ApplyChanges)
+			{
+				CComBSTR bstr(_filename);
+				SaveAs(bstr, cBack, retval);
+			}
 			else
 				EditClear(retval);
 
@@ -1840,8 +1842,8 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
     _isEditingTable = FALSE;
 
 	CComBSTR state;
-	this->Serialize(&state);
 	CComBSTR bstrFilename(_filename);
+	this->Serialize(&state);
 	this->Open(bstrFilename, cBack, retval);
 	this->Deserialize(state);	// restores joins
 	return S_OK;
@@ -2094,11 +2096,10 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	this->get_Field(FieldIndex, &fld);
 	FieldType fieldType;
 	fld->get_Type(&fieldType);
-	BSTR str;
+	CComBSTR str;
 	fld->get_Name(&str);
 	USES_CONVERSION;
 	CString fieldName = OLE2CA(str);
-	SysFreeString(str);
 	fld->Release(); fld = NULL;
 	
 	/* we won't define intervals for string values */
@@ -2433,11 +2434,10 @@ std::vector<CString>* CTableClass::get_FieldNames()
 	std::vector<CString>* names = new std::vector<CString>;
 	for (unsigned  int i = 0; i < _fields.size(); i++ )
 	{
-		BSTR s;
-		_fields[i]->field->get_Name(&s);
+		CComBSTR bstr;
+		_fields[i]->field->get_Name(&bstr);
 		USES_CONVERSION;
-		CString str = OLE2CA(s);
-		SysFreeString(s);
+		CString str = OLE2CA(bstr);
 		names->push_back(str);
 	}
 	return names;
@@ -2695,34 +2695,35 @@ bool CTableClass::MakeUniqueFieldNames()
 
 	for(long i = 0; i< numFields; i++)
 	{
-		BSTR name;
+		CComBSTR name;
 		IField* fld;
 		this->get_Field(i, &fld);
 		fld->get_Name(&name);
 
-		if (fields.find(OLE2CA(name)) == fields.end())
+		CString temp = OLE2CA(name);
+
+		if (fields.find(temp) == fields.end())
 		{
-			fields.insert(OLE2CA(name));
+			fields.insert(temp);
 		}
 		else
 		{	
-			bool found = false;
-			for(int j =1; !found ;j++)
+			for(int j =1; ;j++)
 			{
-				CString temp = OLE2CA(name);
-				
+				CString newName = temp;
+
 				int maxLength = j > 10? 7 : 8;		//ensure that length of name is not longer than 10 characters
-				if (temp.GetLength() > maxLength) {
-					temp = temp.Left(maxLength);
+				if (newName.GetLength() > maxLength) {
+					newName = newName.Left(maxLength);
 				}
 
-				temp.AppendFormat("_%d", j);
-				if (fields.find(temp) == fields.end())
+				newName.AppendFormat("_%d", j);
+				if (fields.find(newName) == fields.end())
 				{	
-					fields.insert(temp);
-					name = temp.AllocSysString();
-					fld->put_Name(name);
-					found = true;
+					fields.insert(newName);
+					CComBSTR bstrNewName(newName);
+					fld->put_Name(bstrNewName);
+					break;
 				}
 			}
 		}
@@ -3333,15 +3334,19 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 					ITable* tableToFill = NULL;
 					CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&tableToFill);
 					
+					CComBSTR bstrFilename(filename);
 					if (filename.GetLength() > 4 && filename.Right(4) == ".dbf")
 					{
-						tableToFill->Open(A2BSTR(filename), NULL, &vb);
+						tableToFill->Open(bstrFilename, NULL, &vb);
 					}
 					else
 					{
 						// let the client handle all the rest formats
-						tableToFill->CreateNew(A2BSTR(""), &vb);
-						Fire_OnUpdateJoin(A2BSTR(filename), A2BSTR(fields), A2BSTR(options), tableToFill);
+						tableToFill->CreateNew(m_globalSettings.emptyBstr, &vb);
+						
+						CComBSTR bstrFields(fields);
+						CComBSTR bstrOptions(options);
+						Fire_OnUpdateJoin(bstrFilename, bstrFields, bstrOptions, tableToFill);
 					}
 					
 					long numRows, numCols;
@@ -3358,7 +3363,9 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 							fieldList.insert(field);
 							field = fields.Tokenize(",", pos);
 						}
-						this->JoinInternal(tableToFill, A2BSTR(fieldTo), A2BSTR(fieldFrom), A2BSTR(filename), A2BSTR(options), fieldList);
+
+						USES_CONVERSION;
+						this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), A2W(filename), options, fieldList);
 					}
 					tableToFill->Close(&vb);
 					tableToFill->Release();

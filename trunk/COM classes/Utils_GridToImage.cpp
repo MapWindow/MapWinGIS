@@ -143,7 +143,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 
 	if (inRam && checkMemory)
 	{
-		// Required memory -- colums times rows times size of colour struct	
+		// Required memory -- columns times rows times size of colour struct	
 		// Check against increasing sizes to prevent double wraparound
 		bool hasMemory = (MemoryAvailable(ncols * nrows) && MemoryAvailable(ncols * nrows * 2) &&
 			MemoryAvailable(static_cast<long>((ncols * nrows * sizeof(colour)))));
@@ -212,7 +212,8 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)retval);
 		if (*retval) {
 			CImageClass* img = (CImageClass*)*retval;
-			(*retval)->Open(OLE2BSTR(imageFile), ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
+			CComBSTR bstrName(imageFile);
+			(*retval)->Open(bstrName, ImageType::USE_FILE_EXTENSION, false, NULL, &vb);
 			if (!vb) {
 				(*retval)->Release();
 				(*retval) = NULL;

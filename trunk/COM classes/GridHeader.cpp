@@ -75,38 +75,21 @@ STDMETHODIMP CGridHeader::CopyFrom(IGridHeader * pVal)
 	this->put_NodataValue(ndv);
 	VariantClear(&ndv);
 
-	pVal->get_Key(&t3);
-	if (t3 != NULL)
-	{
-		BSTR n = OLE2BSTR(t3);
-		this->put_Key(n);
-		t3 = NULL;
-	}
+	CComBSTR bstrKey;            // hardly makes sense to copy key; but let's keep it as it is
+	pVal->get_Key(&bstrKey);
+	this->put_Key(bstrKey);
 
-	pVal->get_ColorTable(&t3);
-	if (t3 != NULL)
-	{
-		BSTR n = OLE2BSTR(t3);
-		this->put_ColorTable(n);
-		t3 = NULL;
-	}
+	CComBSTR colorTable;
+	pVal->get_ColorTable(&colorTable);
+	this->put_ColorTable(colorTable);
 	
-
-	pVal->get_Notes(&t3);
-	if (t3 != NULL)
-	{
-		BSTR n = OLE2BSTR(t3);
-		this->put_Notes(n);
-		t3 = NULL;
-	}
-
-	pVal->get_Projection(&t3);
-	if (t3 != NULL)
-	{
-		BSTR n = OLE2BSTR(t3);
-		this->put_Projection(n);
-		t3 = NULL;
-	}
+	CComBSTR bstrNote;
+	pVal->get_Notes(&bstrNote);
+	this->put_Notes(bstrNote);
+	
+	CComBSTR bstrProjection;
+	pVal->get_Projection(&bstrProjection);
+	this->put_Projection(bstrProjection);
 
 	this->AttemptSave();
 
@@ -128,10 +111,9 @@ void CGridHeader::AttemptSave()
 {
 	USES_CONVERSION;
 
-	BSTR s;
+	CComBSTR s;
 	_projection->ExportToProj4(&s);
 	CString projection = OLE2CA(s);
-	::SysFreeString(s);
 
 	if (_myowner_t != NULL)
 	{
@@ -487,8 +469,6 @@ STDMETHODIMP CGridHeader::put_Projection(BSTR newVal)
 		_projection->ImportFromWKT(newVal, &vbretval);
 	}
 
-	//::SysFreeString(projection);
-	//projection = OLE2BSTR(newVal);
 	this->AttemptSave();
 	return S_OK;
 }

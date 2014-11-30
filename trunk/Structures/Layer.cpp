@@ -440,9 +440,8 @@ void Layer::UpdateShapefile()
 					data[i]->Row = NULL;   // we no longer own it; it'll be cleared by Shapefile.EditClear
 					
 					if (data[i]->HasLabel()) {
-						CComBSTR bstr;
-						bstr.Attach(W2BSTR(data[i]->LabelText));
-						labels->AddLabel(bstr.m_str, data[i]->LabelX, data[i]->LabelY, data[i]->LabelRotation);
+						CComBSTR bstr(data[i]->LabelText);
+						labels->AddLabel(bstr, data[i]->LabelX, data[i]->LabelY, data[i]->LabelRotation);
 					}
 
 					count++;

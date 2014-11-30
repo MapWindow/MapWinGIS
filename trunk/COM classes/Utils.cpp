@@ -729,7 +729,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	BSTR final_projection = A2BSTR("");
+	CComBSTR final_projection("");
 
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
@@ -804,7 +804,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		}
 		else
 		{
-			BSTR bstrProj;
+			CComBSTR bstrProj;
 			IGridHeader * header = NULL;
 			allGrids[i]->get_Header(&header);
 			header->get_Projection(&bstrProj);
@@ -1077,7 +1077,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 
 	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 	VARIANT_BOOL vbretval;
-	(*retval)->CreateNew(A2BSTR(""),header,OutDataType,vndv,TRUE,UseExtension,cBack,&vbretval);
+	(*retval)->CreateNew(m_globalSettings.emptyBstr, header, OutDataType, vndv, TRUE, UseExtension, cBack, &vbretval);
 	header->Release();
 
 	VARIANT val;
@@ -1140,7 +1140,7 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 	ShpfileType shapetype = SHP_NULLSHAPE;
 	Shapefile->get_ShapefileType(&shapetype);
 	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)retval);
-	(*retval)->CreateNew(A2BSTR(""),shapetype,&vbretval);
+	(*retval)->CreateNew(m_globalSettings.emptyBstr,shapetype,&vbretval);
 	
 	long numFields = 0;
 	Shapefile->get_NumFields(&numFields);
@@ -1227,12 +1227,13 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 	{	
 		//Create shapefile
 		VARIANT_BOOL vbretval;
-		(*retval)->CreateNew(A2BSTR(""),Type,&vbretval);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 		
 		long pos = 0;
 		IField * field = NULL;
 		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
-		field->put_Name(A2BSTR("Tin"));
+		CComBSTR bstrName("Tin");
+		field->put_Name(bstrName);
 		field->put_Type(INTEGER_FIELD);
 		field->put_Width(5);
 		(*retval)->EditInsertField(field,&pos,cBack,&vbretval);
@@ -1316,12 +1317,14 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 	{	
 		//Create shapefile
 		VARIANT_BOOL vbretval;
-		(*retval)->CreateNew(A2BSTR(""),Type,&vbretval);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr, Type, &vbretval);
 		
 		long pos = 0;
 		IField * field = NULL;
 		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
-		field->put_Name(A2BSTR("Vertex"));
+
+		CComBSTR bstrName("Vertex");
+		field->put_Name(bstrName);
 		field->put_Type(INTEGER_FIELD);
 		field->put_Width(5);
 		(*retval)->EditInsertField(field,&pos,cBack,&vbretval);
@@ -1477,7 +1480,8 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	tmpnam(tmpfname);
 	sprintf(tmpgname, "%s.bgd", tmpfname);
 
-	_expand_grid->CreateNew(A2BSTR(tmpgname),expand_header,dType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
+	CComBSTR bstr(tmpgname);
+	_expand_grid->CreateNew(bstr, expand_header, dType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
 
 	expand_header->Release();
 	expand_header = NULL;
@@ -1740,12 +1744,13 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 
 	//Create the shapefile
 	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)retval);
-	(*retval)->CreateNew(A2BSTR(""),SHP_POLYGON,&vbretval);
+	(*retval)->CreateNew(m_globalSettings.emptyBstr, SHP_POLYGON, &vbretval);
 	
 	long fieldpos = 0;
 	IField * field = NULL;
 	CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&field);
-	field->put_Name(A2BSTR("PolygonID"));
+	CComBSTR bstrName("PolygonID");
+	field->put_Name(bstrName);
 	field->put_Type(INTEGER_FIELD);
 	field->put_Width(10);
 	(*retval)->EditInsertField(field,&fieldpos,cBack,&vbretval);
@@ -2698,7 +2703,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 			goto cleaning;
 		}
 
-		(*retval)->CreateNew(A2BSTR(""),GridHeader,ShortDataType ,vndv,VARIANT_TRUE,UseExtension,_globalCallback,&result);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr,GridHeader,ShortDataType ,vndv,VARIANT_TRUE,UseExtension,_globalCallback,&result);
 
 		if ( result == VARIANT_FALSE)
 		{ //failed to create new grid
@@ -2785,7 +2790,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		LocalGridHeader->put_XllCenter(xllcenter );
 		LocalGridHeader->put_YllCenter(yllcenter);
 		
-		(*retval)->CreateNew(A2BSTR(""),LocalGridHeader,ShortDataType ,vndv,TRUE,UseExtension,_globalCallback,&result);
+		(*retval)->CreateNew(m_globalSettings.emptyBstr,LocalGridHeader,ShortDataType ,vndv,TRUE,UseExtension,_globalCallback,&result);
 
 		bndbox->Release();
 		LocalGridHeader->Release();
@@ -3407,7 +3412,8 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	colour* pixels = new colour[width * height];
 	for (unsigned int i = 0; i < images.size(); i++ )
 	{
-		CString s; BSTR name;
+		CString s; 
+		CComBSTR name;
 		images[i]->get_Filename(&name);
 		s.Format("Processing image %d: %s", i + 1, OLE2A(name));
 		int percent = (int)((double)i/(double)(images.size() - 1)*100.0);
@@ -3454,7 +3460,7 @@ Cleaning:
 //		GetEncoderClsid()
 // ***********************************************************
 // Returns encoder for the specified image format
-// The following call should be used for PNG fromat, for example: GetEncoderClsid(L"png", &pngClsid);
+// The following call should be used for PNG format, for example: GetEncoderClsid(L"png", &pngClsid);
 //int CUtils::GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 //{
 //   UINT  num = 0;          // number of image encoders
@@ -3808,7 +3814,8 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 
 	if (overwrite) {
 		for (int i = 0; i < 13; i++) {
-			tbl->get_FieldIndexByName(A2BSTR(fields[i]), &index);
+			CComBSTR bstrName(fields[i]);
+			tbl->get_FieldIndexByName(bstrName, &index);
 			if (index != -1) {
 				tbl->EditDeleteField(index, NULL, &vb);
 			}
@@ -3816,17 +3823,18 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 	}
 	
 	for (int i = 0; i < 11; i++) {
-		sf->EditAddField(A2BSTR(fields[i]), FieldType::DOUBLE_FIELD, 12, 18, &index);
+		CComBSTR bstrName(fields[i]);
+		sf->EditAddField(bstrName, FieldType::DOUBLE_FIELD, 12, 18, &index);
 		resultIndices.push_back(index);
 	}
 	
 	for (int i = 11; i < 13; i++) {
-		sf->EditAddField(A2BSTR(fields[i]), FieldType::INTEGER_FIELD, 0, 18, &index);
+		CComBSTR bstrName(fields[i]);
+		sf->EditAddField(bstrName, FieldType::INTEGER_FIELD, 0, 18, &index);
 		resultIndices.push_back(index);
 	}
 	
 	((CTableClass*)tbl)->MakeUniqueFieldNames();
-	//((CShapefile*)sf)->MakeUniqueFieldNames();
 	tbl->Release();
 }
 
