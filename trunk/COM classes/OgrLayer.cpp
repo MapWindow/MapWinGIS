@@ -1361,6 +1361,7 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 									fieldType, *values, classificationType, numClasses, errorCode);
 	
 	for (size_t i = 0; i < values->size(); i++) {
+		VariantClear((*values)[i]);
 		delete (*values)[i];
 	}
 	delete values;

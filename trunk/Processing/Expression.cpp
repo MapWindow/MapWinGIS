@@ -207,17 +207,13 @@ bool CExpression::ParseExpressionPart(CString s)
       
 		// reading element
 		CElement* element = new CElement();
-		if ( readVal )
-		{
-			if (! ReadValue(s, i, element))
-				return false;
+		bool result = readVal ? ReadValue(s, i, element) : ReadOperation(s, i, *element);
+		if (!result) {
+			delete element;
+			delete part;
+			return false;
 		}
-		else
-		{
-			if (!ReadOperation(s, i, *element))
-				return false;
-		}
-		
+	
 		// saving element
 		part->elements.push_back(element);
 		

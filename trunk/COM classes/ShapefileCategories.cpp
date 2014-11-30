@@ -294,9 +294,11 @@ void CShapefileCategories::GenerateCore(std::vector<CategoriesData>* categories,
 	for (int i = 0; i < (int)categories->size(); i++)
 	{
 		CString strValue;
-
-		this->Add((*categories)[i].name.AllocSysString(), &icat);
-		icat->put_Expression((*categories)[i].expression.AllocSysString());
+		CComBSTR bstrName((*categories)[i].name);
+		CComBSTR bstrExpression((*categories)[i].expression);
+		
+		this->Add(bstrName, &icat);
+		icat->put_Expression(bstrExpression);
 
 		icat->put_ValueType(ClassificationType == tkClassificationType::ctUniqueValues ? cvSingleValue : cvRange);
 		icat->put_MinValue((*categories)[i].minValue);

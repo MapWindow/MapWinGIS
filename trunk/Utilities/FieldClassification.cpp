@@ -33,7 +33,7 @@ void FieldClassification::GetMinValue(vector<VARIANT*>& srcValues, CComVariant& 
 // *****************************************************************
 vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldName, FieldType fieldType, 
 		vector<VARIANT*>& srcValues, tkClassificationType ClassificationType, 
-		long numClasses, int errorCode)
+		long numClasses, long& errorCode)
 {
 	CComVariant minValue, maxValue;
 	minValue.vt = VT_EMPTY;
@@ -44,13 +44,13 @@ vector<CategoriesData>* FieldClassification::GenerateCategories(CString fieldNam
 	/* we won't define intervals for string values */
 	if (ClassificationType != ctUniqueValues && fieldType == STRING_FIELD)
 	{
-		errorCode = tkINVALID_PARAMETER_VALUE;
+		errorCode = tkNOT_UNIQUE_CLASSIFICATION_FOR_STRINGS;
 		return NULL;
 	}
 
 	if ((numClasses <= 0 || numClasses > 1000) && (ClassificationType != ctUniqueValues))
 	{
-		errorCode = tkINVALID_PARAMETER_VALUE;
+		errorCode = tkTOO_MANY_CATEGORIES;
 		return NULL;
 	}
 

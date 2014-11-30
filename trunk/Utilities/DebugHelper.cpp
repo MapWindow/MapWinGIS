@@ -3,8 +3,8 @@
 
 namespace Debug
 {
-	static const int INTERFACES_COUNT = 3;
-	bool targets[INTERFACES_COUNT];
+	static const int TARGETS_COUNT = 3;
+	bool targets[TARGETS_COUNT];
 
 	void Init() {
 		targets[DebugAny] = true;

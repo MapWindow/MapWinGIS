@@ -306,6 +306,7 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 				{
 					Debug::WriteWithThreadId("Task was canceled", DebugOgrLoading);
 					loader->LockLoading(false);
+					delete options;
 					return 0;    // more of tasks further down the road, don't even start this
 				}
 
@@ -337,14 +338,6 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 				Debug::WriteWithThreadId("Lock released. \n", DebugOgrLoading);
 				layer->_asyncLoading = false;
 			}
-		}
-		
-		if (options->categories)
-		{
-			for (size_t i = 0; i < options->categories->size(); i++) {
-				delete (*options->categories)[i];
-			}
-			delete options->categories;
 		}
 			
 		delete options;

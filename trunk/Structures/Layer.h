@@ -44,6 +44,17 @@ struct AsyncLoadingParams : CObject
 		layer = l;
 		categories = ct;
 	};
+
+	~AsyncLoadingParams()
+	{
+		if (categories)
+		{
+			for (size_t i = 0; i < categories->size(); i++) {
+				delete (*categories)[i];
+			}
+			delete categories;
+		}
+	}
 };
 
 class Layer

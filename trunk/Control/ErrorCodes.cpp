@@ -249,6 +249,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Failed to access underlying shapefile.";
 		case tkOGR_STYLE_NOT_FOUND:
 			return "OGR style with specified name wasn't found.";
+		case tkNOT_UNIQUE_CLASSIFICATION_FOR_STRINGS:
+			return "String fields don't support classification types other than unique values.";
+		case tkTOO_MANY_CATEGORIES:
+			return "The specified number of categories is too large.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:
