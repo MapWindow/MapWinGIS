@@ -236,7 +236,8 @@ void CMapView::RegisterGroupOperation(DraggingOperation operation)
 		return;
 
 	int layerHandle = _dragging.LayerHandle;
-	IShapefile* source = GetShapefile(layerHandle);
+	CComPtr<IShapefile> source = NULL;
+	source.Attach(GetShapefile(layerHandle));
 	if (source) 
 	{
 		vector<int>* selection = ShapefileHelper::GetSelectedIndices(source);

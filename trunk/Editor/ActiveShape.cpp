@@ -140,6 +140,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 
 	Gdiplus::PointF* polyData = NULL;
 	int polySize = 0;
+	int partCount = GetNumParts();
 
 	if (hasPolygon)
 	{
@@ -148,13 +149,17 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 			Gdiplus::GraphicsPath path;
 			path.SetFillMode(Gdiplus::FillModeWinding);
 			
-			int partCount = GetNumParts();
 			for (int n = 0; n < partCount; n++)
 			{
 				polySize = GetScreenPoints(n, PolygonPart, &polyData, dynamicBuffer, offsetType, screenOffsetX, screenOffsetY);
 				if (polySize > 1)
 				{
 					path.AddPolygon(polyData, polySize);
+				}
+
+				// for a single part shapes we potentially want to display area
+				if (partCount > 1 && polySize > 0) {
+					delete[] polyData;
 				}
 			}
 			g->FillPath(&_fillBrush, &path);
@@ -190,7 +195,7 @@ void ActiveShape::DrawData( Gdiplus::Graphics* g, bool dynamicBuffer,
 	}
 	
 	// draw area atop of everything else
-	if (polySize > 0)
+	if (partCount == 1 && polySize > 0)
 	{
 		DrawPolygonArea(g, polyData, polySize, dynamicBuffer);
 		delete[] polyData;

@@ -1201,7 +1201,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 
 	Close(retval);
 
-	if (Filename == A2BSTR(""))
+	if (SysStringLen(Filename) == 0)
 	{
 		ErrorMessage(tkINVALID_FILE);
 		return S_FALSE;
@@ -2826,7 +2826,8 @@ STDMETHODIMP CGrid::RetrieveColorScheme(tkGridSchemeRetrieval method, IGridColor
 		if (Utility::FileExistsW(legendName))
 		{
 			CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
-			scheme->ReadFromFile(OLE2BSTR(legendName), A2BSTR(""), &vb);
+			CComBSTR bstrLegendName(legendName);
+			scheme->ReadFromFile(bstrLegendName, m_globalSettings.emptyBstr, &vb);
 		}
 	}
 	
@@ -2841,7 +2842,8 @@ STDMETHODIMP CGrid::RetrieveColorScheme(tkGridSchemeRetrieval method, IGridColor
 			{
 				CStringW legendName = this->GetProxyLegendName();
 				CoCreateInstance( CLSID_GridColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IGridColorScheme, (void**)&scheme);
-				scheme->ReadFromFile(OLE2BSTR(legendName), A2BSTR(""), &vb);
+				CComBSTR bstrLegendName(legendName);
+				scheme->ReadFromFile(bstrLegendName, m_globalSettings.emptyBstr, &vb);
 			}
 		}
 	}

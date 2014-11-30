@@ -230,7 +230,7 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 			sf->get_Table(&tbl);
 			if (tbl) {
 				TableRow* row = ((CTableClass*)tbl)->CloneTableRow((int)shapeIndex);
-				item->Row = row;
+				item->SetRow(row);
 				tbl->Release();
 			}
 			long category = -1;
@@ -251,7 +251,7 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 	if (!CheckState()) return S_OK;
 
-	CComPtr<IShapeEditor> editor = _mapCallback->_GetShapeEditor();
+	IShapeEditor* editor = _mapCallback->_GetShapeEditor();
 
 	if (_position >= 0) 
 	{
@@ -393,8 +393,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			if (vb) {
 				((CTableClass*)tbl)->InsertTableRow(item->Row, item->ShapeIndex);
 				sf->put_ShapeCategory(item->ShapeIndex, item->StyleCategory);
-				item->Shape->Release(); // a reference was added in EditInsertShape
-				item->Shape = NULL;
+				item->SetShape(NULL);
 				item->Row = NULL;		// the instance is used by table now
 				item->Operation = uoAddShape;
 				IShapeEditor* editor = _mapCallback->_GetShapeEditor();
@@ -420,8 +419,8 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			if (shp) {
 				TableRow* row = ((CTableClass*)tbl)->CloneTableRow(item->ShapeIndex);
 				sf->EditDeleteShape(item->ShapeIndex, &vb);
-				item->Shape = shp;
-				item->Row = row;
+				item->SetShape(shp);
+				item->SetRow(row);
 				item->Operation = uoRemoveShape;
 				return true;
 			}
@@ -433,7 +432,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			if (editor) {
 				IShape* shp = GetCurrentState(item->LayerHandle, item->ShapeIndex);
 				((CShapeEditor*)editor)->RestoreState(item->Shape, item->LayerHandle, item->ShapeIndex);
-				item->Shape = shp;
+				item->SetShape(shp);
 			}
 			break;
 		}

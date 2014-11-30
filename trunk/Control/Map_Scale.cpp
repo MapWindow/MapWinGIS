@@ -1274,7 +1274,8 @@ VARIANT_BOOL CMapView::ZoomToWorld()
 	VARIANT_BOOL vb;
 	GetMapProjection()->get_IsEmpty(&vb);
 	if (!vb) {
-		CComPtr<IExtents> box = ExtentsHelper::GetWorldBounds();
+		CComPtr<IExtents> box = NULL;
+		box.Attach(ExtentsHelper::GetWorldBounds());
 		vb = this->SetGeographicExtents(box);
 		if (vb)  {
 			this->Redraw();

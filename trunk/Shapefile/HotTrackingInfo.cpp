@@ -19,7 +19,7 @@ void HotTrackingInfo::Update(IShapefile* source, IShape* shp, int layerHandle, i
 
 	ShpfileType type = ShapefileHelper::GetShapeType2D(source);
 
-	((CShapefile*)Shapefile)->CreateNewCore(A2BSTR(""), type, false, &vb);
+	((CShapefile*)Shapefile)->CreateNewCore(m_globalSettings.emptyBstr, type, false, &vb);
 
 	long index = 0;
 	Shapefile->EditInsertShape(shp, &index, &vb);

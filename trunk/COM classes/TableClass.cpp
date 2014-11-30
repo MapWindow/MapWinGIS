@@ -38,6 +38,7 @@ static char THIS_FILE[] = __FILE__;
 // *****************************************************
 //	ParseExpressionCore()
 // *****************************************************
+//TODO: change BSTR parameter
 void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
 	*retVal = VARIANT_FALSE;
@@ -1811,15 +1812,13 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
             {
 		        BOOL result = CopyFile(tmppath, W2A(_filename),FALSE);
 		        _unlink(tmppath);
-		        delete [] tmpfname;
-		        tmpfname = NULL;
-		        delete [] tmppath;
-		        tmppath = NULL;
             }
             else
             {
 	        	ErrorMessage(tkCANT_CREATE_DBF);
             }
+			delete[] tmpfname;
+			delete[] tmppath;
         }
         else
         {
@@ -1840,9 +1839,10 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
     _isEditingTable = FALSE;
 
-	BSTR state;
+	CComBSTR state;
 	this->Serialize(&state);
-    this->Open(W2BSTR(_filename), cBack, retval);
+	CComBSTR bstrFilename(_filename);
+	this->Open(bstrFilename, cBack, retval);
 	this->Deserialize(state);	// restores joins
 	return S_OK;
 }
@@ -1867,9 +1867,8 @@ STDMETHODIMP CTableClass::EditDeleteRow(long RowIndex, VARIANT_BOOL *retval)
 		return S_OK;
 	}
 
-	// lsu on 10-nov-2009: we should delete records in place, otherwise we get wrong data with get_CellValue call
-    //if( _rows[RowIndex].row != NULL )
-    //    delete _rows[RowIndex].row;
+    if( _rows[RowIndex].row != NULL )
+        delete _rows[RowIndex].row;
     _rows.erase(_rows.begin() + RowIndex);
 
 	*retval = VARIANT_TRUE;

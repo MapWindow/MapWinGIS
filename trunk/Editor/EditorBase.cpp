@@ -179,7 +179,8 @@ bool EditorBase::PartIsWithin(int outerRing, int innerRing)
 {
 	if (GetShapeType2D() == SHP_POLYGON)
 	{
-		CComPtr<IShape> shp = GetPartAsShape(outerRing);
+		CComPtr<IShape> shp = NULL;
+		shp.Attach(GetPartAsShape(outerRing));
 		if (shp != NULL)
 		{
 			int startIndex, endIndex;

@@ -1138,7 +1138,11 @@ public:
 	virtual void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ PixelToProjection(pixelX, pixelY, *projX, *projY); }
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
-	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	{ FireValidateShape(LayerHandle, Shape, Cancel); }
+	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	
+	{ 
+		FireValidateShape(LayerHandle, Shape, Cancel); 
+		ULONG refCount = Shape->Release();    // one reference is added during dispatching???
+	}
 	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }

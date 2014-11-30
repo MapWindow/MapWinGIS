@@ -1505,7 +1505,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 			if (strcmp(nodeCategories->pszValue, "LabelCategoryClass") == 0)
 			{
 				ILabelCategory* cat = NULL;
-				this->AddCategory(A2BSTR(""), &cat);
+				this->AddCategory(m_globalSettings.emptyBstr, &cat);
 				((CLabelCategory*)cat)->DeserializeFromNode(nodeCategories);
 				cat->Release();
 			}

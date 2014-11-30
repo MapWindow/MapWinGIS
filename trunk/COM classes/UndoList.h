@@ -102,6 +102,24 @@ private:
 			Operation = operation;
 		}
 
+		void SetShape(IShape* newShape)
+		{
+			if (Shape) {
+				Shape->Release();
+				Shape = NULL;
+			}
+			Shape = newShape;
+		}
+
+		void SetRow(TableRow* newRow)
+		{
+			if (Row) {
+				delete Row;
+				Row = NULL;
+			}
+			Row = newRow;
+		}
+
 		void Init()
 		{
 			StyleCategory = -1;

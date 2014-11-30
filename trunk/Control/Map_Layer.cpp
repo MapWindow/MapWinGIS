@@ -201,16 +201,11 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 			}
 		}
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-		{
-			InvalidateControl();
-		}
+		RedrawCore(RedrawAll, false, false);
 	}
 	else
 	{	
 		ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return;
 	}
 }
 

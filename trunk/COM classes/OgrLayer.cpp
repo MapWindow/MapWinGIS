@@ -33,7 +33,7 @@ void COgrLayer::InitOpenedLayer()
 	int featureCount;
 	get_FeatureCount(VARIANT_FALSE, &featureCount);
 	
-	CComPtr<IExtents> extents;
+	CComPtr<IExtents> extents = NULL;
 	get_Extents(&extents, VARIANT_FALSE, &vb);
 
 	if (m_globalSettings.autoChooseOgrLoadingMode) {
