@@ -19,8 +19,7 @@ public:
 		_activeShape->AreaDisplayMode = admNone;
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_layerHandle = -1;
 		_shapeIndex = -1;
 		_visible = true;

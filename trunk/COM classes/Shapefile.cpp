@@ -93,9 +93,8 @@ CShapefile::CShapefile()
 	_minM = 0.0;
 	_maxM = 0.0;
 	
-	USES_CONVERSION;
-	_key = A2BSTR("");
-	_expression = A2BSTR("");
+	_key = SysAllocString(L"");
+	_expression = SysAllocString(L"");
 	_globalCallback = NULL;
 	_lastErrorCode = tkNO_ERROR;
 	_table = NULL;

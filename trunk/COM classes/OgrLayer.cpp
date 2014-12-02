@@ -115,7 +115,7 @@ void COgrLayer::ErrorMessage(long ErrorCode)
 STDMETHODIMP COgrLayer::get_LastErrorCode(long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*pVal = _lastErrorCode;
+	*pVal = _lastErrorCode;
 	_lastErrorCode = tkNO_ERROR;
 	return S_OK;
 }
@@ -123,7 +123,7 @@ STDMETHODIMP COgrLayer::get_LastErrorCode(long *pVal)
 STDMETHODIMP COgrLayer::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		USES_CONVERSION;
+	USES_CONVERSION;
 	*pVal = A2BSTR(ErrorMsg(ErrorCode));
 	return S_OK;
 }
@@ -134,7 +134,7 @@ STDMETHODIMP COgrLayer::get_ErrorMsg(long ErrorCode, BSTR *pVal)
 STDMETHODIMP COgrLayer::get_GlobalCallback(ICallback **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-		*pVal = _globalCallback;
+	*pVal = _globalCallback;
 	if (_globalCallback != NULL) _globalCallback->AddRef();
 	return S_OK;
 }

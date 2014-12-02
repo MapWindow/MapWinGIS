@@ -38,8 +38,7 @@ class ATL_NO_VTABLE CChartField :
 public:
 	CChartField()
 	{
-		USES_CONVERSION;
-		_name =  A2BSTR("");
+		_name =  SysAllocString(L"");
 		_index = -1;
 		_color = RGB(255, 255, 255);
 	}

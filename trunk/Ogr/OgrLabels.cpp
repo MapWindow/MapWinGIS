@@ -26,10 +26,10 @@ bool OgrLabelsHelper::GetLabelFields(OGRLayer* ogrLayer, LabelFields& fields)
 bool OgrLabelsHelper::AddFieldsForLabels(OGRLayer* ogrLayer)
 {
 	CComBSTR fields[4];
-	fields[0] = A2BSTR(LABEL_X_FIELD);
-	fields[1] = A2BSTR(LABEL_Y_FIELD);
-	fields[2] = A2BSTR(LABEL_TEXT_FIELD);
-	fields[3] = A2BSTR(LABEL_ROTATION_FIELD);
+	fields[0].Attach(A2BSTR(LABEL_X_FIELD));
+	fields[1].Attach(A2BSTR(LABEL_Y_FIELD));
+	fields[2].Attach(A2BSTR(LABEL_TEXT_FIELD));
+	fields[3].Attach(A2BSTR(LABEL_ROTATION_FIELD));
 
 	for (int i = 0; i < 4; i++)
 	{

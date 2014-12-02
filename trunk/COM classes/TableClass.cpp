@@ -38,70 +38,62 @@ static char THIS_FILE[] = __FILE__;
 // *****************************************************
 //	ParseExpressionCore()
 // *****************************************************
-//TODO: change BSTR parameter
-void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal)
+void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, CString& errorString, VARIANT_BOOL* retVal)
 {
 	*retVal = VARIANT_FALSE;
-	//SysFreeString(*ErrorString);	// do we need it here?
+
 	USES_CONVERSION;
 	CString str = OLE2A(Expression);
 	CExpression expr;	
 	
-	if (expr.ReadFieldNames(this))
+	if (!expr.ReadFieldNames(this))
 	{
-		CString err;
-		if (expr.ParseExpression(str, true, err))
-		{
-			// testing with values of the first row; there can be inconsistent data types for example
-			CComVariant var;
-			int i = 0;
+		errorString = "Failed to read field names";
+		return;
+	}
+		
 
-			for (int j = 0; j< expr.get_NumFields(); j++)
-			{
-				int fieldIndex = expr.get_FieldIndex(j);
-				this->get_CellValue(fieldIndex, i, &var);
-				switch (var.vt)
-				{
-					case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
-					case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
-					case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
-				}
-			}
+	if (!expr.ParseExpression(str, true, errorString))
+	{
+		return;
+	}
+
+	// testing with values of the first row; there can be inconsistent data types for example
+	CComVariant var;
+	int i = 0;
+
+	for (int j = 0; j< expr.get_NumFields(); j++)
+	{
+		int fieldIndex = expr.get_FieldIndex(j);
+		this->get_CellValue(fieldIndex, i, &var);
+		switch (var.vt)
+		{
+			case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
+			case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
+			case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
+		}
+	}
 			
-			// if expression returns true for the given record we'll save the index 
-			CExpressionValue* result = expr.Calculate(err);
-			if ( result )
+	// if expression returns true for the given record we'll save the index 
+	CExpressionValue* result = expr.Calculate(errorString);
+	if ( result )
+	{
+		if (result->type != returnType )
+		{
+			if (returnType == vtString)
 			{
-				if (result->type != returnType )
-				{
-					if (returnType == vtString)
-					{
-						// there is no problem to convert any type to string						
-						*retVal = VARIANT_TRUE;
-					}
-					else
-					{
-						*ErrorString = SysAllocString(L"Invalid resulting type");
-					}
-				}
-				else if (result->type)
-				{
-					*retVal = VARIANT_TRUE;
-				}
+				// there is no problem to convert any type to string						
+				*retVal = VARIANT_TRUE;
 			}
 			else
 			{
-				*ErrorString = A2BSTR(err);
+				errorString = "Invalid resulting type";
 			}
 		}
-		else
+		else if (result->type)
 		{
-			*ErrorString = A2BSTR(err);
+			*retVal = VARIANT_TRUE;
 		}
-	}
-	else
-	{
-		*ErrorString = SysAllocString(L"Failed to read field names");
 	}
 }
 
@@ -143,7 +135,9 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 STDMETHODIMP CTableClass::TestExpression(BSTR Expression, tkValueType ReturnType, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	ParseExpressionCore(Expression, ReturnType, ErrorString, retVal);
+	CString err;
+	ParseExpressionCore(Expression, ReturnType, err, retVal);
+	*ErrorString = A2BSTR(err);
 	return S_OK;
 }
 
@@ -1093,8 +1087,6 @@ STDMETHODIMP CTableClass::EditInsertField(IField *Field, long *FieldIndex, ICall
 
 	for( long i = 0; i < RowCount(); i++ )
     {
-        // lsu 29-oct-2009: fixing the bug 1459 (crash after adding field)
-		// force reading all the records in memory to get rid of the uninitialized values
 		if (_rows[i].row == NULL) 
 			ReadRecord(i);
 	
@@ -2895,10 +2887,10 @@ bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldF
 		return false;
 	}
 	
-	USES_CONVERSION;
-
-	this->get_FieldIndexByName(A2BSTR(fieldTo), &index1 );
-	table2->get_FieldIndexByName(A2BSTR(fieldFrom), &index2 );
+	CComBSTR bstrTo(fieldTo);
+	CComBSTR bstrFrom(fieldFrom);
+	this->get_FieldIndexByName(bstrTo, &index1);
+	table2->get_FieldIndexByName(bstrFrom, &index2);
 	
 	if (index1 == -1 || index2 == -1)
 	{
@@ -2906,18 +2898,15 @@ bool CTableClass::CheckJoinInput(ITable* table2, CString fieldTo, CString fieldF
 		return false;
 	}
 
-	IField* fld1 = NULL;
+	CComPtr<IField> fld1 = NULL;
+	CComPtr<IField> fld2 = NULL;
 	this->get_Field(index1, &fld1 );
-
-	IField* fld2 = NULL;
 	table2->get_Field(index2, &fld2 );
 
 	FieldType type1;
 	FieldType type2;
 	fld1->get_Type(&type1);
 	fld2->get_Type(&type2);
-	fld1->Release();
-	fld2->Release();
 
 	if (type1 != type2)
 	{

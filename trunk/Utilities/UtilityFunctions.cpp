@@ -979,9 +979,15 @@ namespace Utility
 #pragma endregion
 
 #pragma region Progress
+
 	// ********************************************************************
 	//		DisplayProgress()
 	// ********************************************************************
+	void DisplayProgress(ICallback* callback, int index, int count, const char* message, long& lastPercent)
+	{
+		DisplayProgress(callback, index, (double)count, message, m_globalSettings.emptyBstr, lastPercent);
+	}
+	
 	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent)
 	{
 		DisplayProgress(callback, index, (double)count, message, key, lastPercent);
@@ -999,7 +1005,7 @@ namespace Utility
 			{
 				lastPercent = newpercent;
 				CComBSTR bstrMsg(message);
-				callback->Progress(key, newpercent, bstrMsg);   //OLE2BSTR(key)  A2BSTR(message)
+				callback->Progress(key, newpercent, bstrMsg);
 			}
 		}
 	}

@@ -4715,9 +4715,6 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 	}
 	long errorCode;
 
-	//IChart* Chart = NULL;
-	//IChartField* ChartField = NULL;
-
 	ICharts* Charts = NULL;
 	comClass->QueryInterface(IID_ICharts, (void**)(&Charts));
 	if (Charts) 
@@ -4725,6 +4722,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Charts->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Charts->Release();
+		return S_OK;
 	}
 
 	IColorScheme* ColorScheme = NULL;
@@ -4734,6 +4732,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ColorScheme->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ColorScheme->Release();
+		return S_OK;
 	}
 
 	IESRIGridManager* ESRIGridManager = NULL;
@@ -4743,6 +4742,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ESRIGridManager->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ESRIGridManager->Release();
+		return S_OK;
 	}
 
 	//IExtents* Extents = NULL;
@@ -4754,6 +4754,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Field->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Field->Release();
+		return S_OK;
 	}
 
 	IGeoProjection* GeoProjection = NULL;
@@ -4763,6 +4764,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		GeoProjection->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		GeoProjection->Release();
+		return S_OK;
 	}
 
 	//IGlobalSettings* GlobalSettings = NULL;
@@ -4774,6 +4776,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Grid->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Grid->Release();
+		return S_OK;
 	}
 
 	IGridColorBreak* GridColorBreak = NULL;
@@ -4783,6 +4786,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		GridColorBreak->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		GridColorBreak->Release();
+		return S_OK;
 	}
 
 	IGridColorScheme* GridColorScheme = NULL;
@@ -4792,6 +4796,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		GridColorScheme->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		GridColorScheme->Release();
+		return S_OK;
 	}
 
 	IGridHeader* GridHeader = NULL;
@@ -4801,6 +4806,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		GridHeader->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		GridHeader->Release();
+		return S_OK;
 	}
 
 	IImage* Image = NULL;
@@ -4810,6 +4816,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Image->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Image->Release();
+		return S_OK;
 	}
 
 	//ILabelCategory* LabelCategory = NULL;
@@ -4821,6 +4828,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Labels->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Labels->Release();
+		return S_OK;
 	}
 
 	ILinePattern* LinePattern = NULL;
@@ -4830,6 +4838,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		LinePattern->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		LinePattern->Release();
+		return S_OK;
 	}
 
 	//ILineSegment* LineSegment = NULL;
@@ -4843,6 +4852,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Point->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Point->Release();
+		return S_OK;
 	}
 
 	IShape* Shape = NULL;
@@ -4852,6 +4862,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Shape->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Shape->Release();
+		return S_OK;
 	}
 
 	IShapeDrawingOptions* ShapeDrawingOptions = NULL;
@@ -4861,6 +4872,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapeDrawingOptions->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ShapeDrawingOptions->Release();
+		return S_OK;
 	}
 
 	IShapefile* Shapefile = NULL;
@@ -4870,6 +4882,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Shapefile->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Shapefile->Release();
+		return S_OK;
 	}
 
 	IShapefileCategories* ShapefileCategories = NULL;
@@ -4879,6 +4892,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapefileCategories->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ShapefileCategories->Release();
+		return S_OK;
 	}
 
 	//IShapefileCategory* ShapefileCategory = NULL;
@@ -4892,6 +4906,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapefileColorScheme->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ShapefileColorScheme->Release();
+		return S_OK;
 	}
 
 	IShapeNetwork* ShapeNetwork = NULL;
@@ -4901,6 +4916,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapeNetwork->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		ShapeNetwork->Release();
+		return S_OK;
 	}
 
 	CComPtr<ITable> Table = NULL;
@@ -4909,6 +4925,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 	{
 		Table->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
+		return S_OK;
 	}
 
 	ITileProviders* TileProviders = NULL;
@@ -4918,6 +4935,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		TileProviders->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		TileProviders->Release();
+		return S_OK;
 	}
 
 	ITin* Tin = NULL;
@@ -4927,6 +4945,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Tin->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Tin->Release();
+		return S_OK;
 	}
 
 	IUtils* Utils = NULL;
@@ -4936,6 +4955,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Utils->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Utils->Release();
+		return S_OK;
 	}
 
 	IVector* Vector = NULL;
@@ -4945,6 +4965,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		Vector->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		Vector->Release();
+		return S_OK;
 	}
 
 	IFileManager* FileManager = NULL;
@@ -4954,6 +4975,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		FileManager->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		FileManager->Release();
+		return S_OK;
 	}
 
 	//IShapeValidationInfo* ShapeValidationInfo = NULL;
@@ -4965,15 +4987,11 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		FieldStatOperations->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
 		FieldStatOperations->Release();
+		return S_OK;
 	}
-
-	if (*retVal == A2BSTR(""))
-	{
-		*retVal = A2BSTR("Unknown class");
-		return S_FALSE;
-	}
-
-	return S_OK;
+	
+	*retVal = A2BSTR("Unknown class");
+	return S_FALSE;
 }
 
 // ********************************************************

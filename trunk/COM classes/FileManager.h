@@ -10,8 +10,7 @@ class ATL_NO_VTABLE CFileManager :
 public:
 	CFileManager()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
 		_lastOpenStrategy = fosAutoDetect;

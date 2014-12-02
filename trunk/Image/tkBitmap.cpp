@@ -558,30 +558,26 @@ bool tkBitmap::Open(CStringW FileName)
 	End Code for actual Bitmap file reading
 	********************************/
 
-	//everthing went ok, return true
+	//everything went ok, return true
 	//fclose(bmpfile);
 	return true;
 }
 
 tkBitmap::tkBitmap()
-{	USES_CONVERSION;
-//CGOH 	BitmapBits = NULL;
+{	
+	USES_CONVERSION;
 	bmpfile = NULL;
 	rowOne = NULL;
 	rowTwo = NULL;
 	rowThree = NULL;
 	bmiColors = NULL;
 	globalCallback = NULL;
-	key = A2BSTR("");
-	//bmpFileName = NULL;
+	key = SysAllocString(L"");
 }
 
 tkBitmap::~tkBitmap()
-{	Close();
-
-	//if (bmpFileName != NULL)
-	//	delete [] bmpFileName;
-
+{	
+	Close();
 	::SysFreeString(key);
 }
 

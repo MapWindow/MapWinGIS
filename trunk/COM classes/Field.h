@@ -32,9 +32,8 @@ class ATL_NO_VTABLE CField :
 public:
 	CField()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
-		_name = A2BSTR("");
+		_key = SysAllocString(L"");
+		_name = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_width = 10;

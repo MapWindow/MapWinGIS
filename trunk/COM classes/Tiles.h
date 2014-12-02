@@ -42,8 +42,7 @@ class ATL_NO_VTABLE CTiles :
 public:
 	CTiles()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		

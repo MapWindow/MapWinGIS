@@ -38,8 +38,8 @@ CTin::CTin()
 {	_globalCallback = NULL;
 	_lastErrorCode = tkNO_ERROR;
 	USES_CONVERSION;
-	_key = A2BSTR("");
-	_filename = A2BSTR("");
+	_key = SysAllocString(L"");
+	_filename = SysAllocString(L"");
 	_dTriangles = NULL;
 }
 

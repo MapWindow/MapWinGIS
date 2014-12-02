@@ -18,7 +18,7 @@ public:
 	COgrLayer()
 	{
 		_globalCallback = NULL;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
 		_dataset = NULL;
 		_layer = NULL;

@@ -158,10 +158,9 @@ public:
 	// constructor
 	CCharts()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
-		_caption = A2BSTR("");
-		_expression = A2BSTR("");
+		_key = SysAllocString(L"");
+		_caption = SysAllocString(L"");
+		_expression = SysAllocString(L"");
 		_shapefile = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_chartsExist = false;

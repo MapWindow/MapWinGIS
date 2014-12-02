@@ -41,8 +41,8 @@ public:
 	CShapefileCategories()
 	{
 		_shapefile = NULL;
-		_key = A2BSTR("");
-		_caption = A2BSTR("");
+		_key = SysAllocString(L"");
+		_caption = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_classificationField = -1;

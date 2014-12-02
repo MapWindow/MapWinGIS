@@ -1852,7 +1852,10 @@ void CLabels::LoadLblOptions(CPLXMLNode* node)
 	try
 	{
 		CString s = CPLGetXMLValue( node, "Font", NULL );
-		if (s != "") _options.fontName = A2BSTR(s);
+		if (s != "") {
+			SysFreeString(_options.fontName);
+			_options.fontName = A2BSTR(s);
+		}
 
 		s = CPLGetXMLValue( node, "Size", NULL );
 		if (s != "") _options.fontSize = (int)Utility::atof_custom(s);
@@ -2389,11 +2392,10 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
 	
-	USES_CONVERSION;
-	BSTR errorString;
+	CString error;
 	VARIANT_BOOL vbretval;
 	
-	TableHelper::Cast(table)->ParseExpressionCore(Expression, vtString, &errorString, &vbretval);
+	TableHelper::Cast(table)->ParseExpressionCore(Expression, vtString, error, &vbretval);
 
 	if (!vbretval)
 	{

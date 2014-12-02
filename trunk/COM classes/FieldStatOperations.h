@@ -51,9 +51,8 @@ class ATL_NO_VTABLE CFieldStatOperations :
 public:
 	CFieldStatOperations()
 	{
-		USES_CONVERSION;
 		_lastErrorCode = tkNO_ERROR;
-		_key = A2BSTR("stuff");
+		_key = SysAllocString(L"");
 	}
 
 	~CFieldStatOperations()

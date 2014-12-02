@@ -39,8 +39,8 @@ class ATL_NO_VTABLE CLabelCategory :
 public:
 	CLabelCategory()
 	{
-		_name = A2BSTR("");
-		_expression = A2BSTR("");
+		_name = SysAllocString(L"");
+		_expression = SysAllocString(L"");
 		VariantInit(&_minValue);
 		VariantInit(&_maxValue);
 		_priority = 0;

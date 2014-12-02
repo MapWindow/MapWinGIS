@@ -273,7 +273,10 @@ bool CImageClass::CheckForProxy()
 					VARIANT_BOOL vb;
 					IGridColorScheme* scheme = NULL;
 					ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
-					scheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
+
+					CComBSTR bstrName(legendName);
+					CComBSTR bstrElement("GridColoringScheme");
+					scheme->ReadFromFile(bstrName, bstrElement, &vb);
 					if (vb)
 					{
 						this->LoadImageAttributesFromGridColorScheme(scheme);
@@ -3146,9 +3149,6 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
 	
 	// properties
-	CString skey = OLE2CA(_key);
-	if (skey.GetLength() != 0)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "Key", skey);
 	if (_setRGBToGrey != false)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "SetToGrey", CPLString().Printf("%d", (int)_setRGBToGrey));
 	if (_transColor != RGB(0,0,0))
@@ -3358,9 +3358,6 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 		}
 	}
 
-	s = CPLGetXMLValue( node, "Key", NULL );
-	if (s != "") this->put_Key(A2BSTR(s));
-
 	s = CPLGetXMLValue( node, "SetToGrey", "0" );
 	if (s != "") _setRGBToGrey = atoi(s) == 0 ? false : true;
 
@@ -3500,8 +3497,10 @@ STDMETHODIMP CImageClass::get_GridProxyColorScheme(IGridColorScheme** retVal)
 			IGridColorScheme* scheme = NULL;
 			ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
 			VARIANT_BOOL vb;
-			USES_CONVERSION;
-			scheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
+			CComBSTR bstrName(legendName);
+			CComBSTR bstrElement("GridColoringScheme");
+
+			scheme->ReadFromFile(bstrName, bstrElement, &vb);
 			if (!vb) {
 				scheme->Release();
 			}

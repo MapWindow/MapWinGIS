@@ -42,8 +42,8 @@ public:
 		_shapefile = NULL;
 		_synchronized = VARIANT_FALSE;
 		USES_CONVERSION;
-		_key = A2BSTR("");
-		_expression = A2BSTR("");
+		_key = SysAllocString(L"");
+		_expression = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_scale = false;

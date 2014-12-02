@@ -63,7 +63,6 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 	long numShapes, percent = 0;
 
 	sf->get_NumShapes(&numShapes);
-	BSTR key = A2BSTR("");
 	CString validationError;
 
 	CComPtr<ILabels> labels = NULL;
@@ -76,7 +75,7 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(callback, i, numShapes, "Converting shapes...", key, percent);
+		Utility::DisplayProgress(callback, i, numShapes, "Converting shapes...", percent);
 
 		if (((CShapefile*)sf)->ShapeAvailable(i, VARIANT_FALSE))
 		{
@@ -92,7 +91,6 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 		}
 	}
 	Utility::DisplayProgressCompleted(callback);
-	SysFreeString(key);
 }
 
 // *************************************************************
@@ -275,7 +273,6 @@ int Shape2Ogr::RemoveDeletedFeatures(OGRLayer* layer, IShapefile* sf, long shape
 		std::multiset<long>::iterator it = fids.find(fid);
 		if (it == fids.end())
 		{
-			Debug::WriteLine("About to delete feature: %d", fid);
 			layer->DeleteFeature(fid);
 			count++;
 		}

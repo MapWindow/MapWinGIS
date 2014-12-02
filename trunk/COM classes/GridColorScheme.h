@@ -35,22 +35,15 @@ public:
 	CGridColorScheme()
 	{
 		_globalCallback = NULL;
-		
 		_ambientIntensity = 0.7;
 		_lightSourceIntensity = 0.7;		
 		_lightSourceIntensity = 0.7;
-
 		_lightSourceAzimuth = 90;
 		_lightSourceElevation = 45;
-		
 		_noDataColor = 0;		
 		_lightSource = cppVector(0.0,-0.707,1.0);
-
 		_lastErrorCode = tkNO_ERROR;
-		
-		USES_CONVERSION;
-		_key = A2BSTR("");
-
+		_key = SysAllocString(L"");
 		gReferenceCounter.AddRef(tkInterface::idGridColorScheme);
 	}
 

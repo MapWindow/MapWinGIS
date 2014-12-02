@@ -37,7 +37,7 @@ public:
 	{	_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_layerHandle = -1;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 	}
 	~CShapefileColorScheme()
 	{	for( int i = 0; i < (int)_allBreaks.size(); i++ )

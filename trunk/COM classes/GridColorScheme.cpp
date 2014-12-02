@@ -640,11 +640,6 @@ bool CGridColorScheme::DeserializeCore(CPLXMLNode* node)
 		return false;
 	
 	CString s;
-	s = CPLGetXMLValue( node, "Key", NULL );
-	if (s != "") {
-		CComBSTR bstrKey(s);
-		this->put_Key(bstrKey);
-	}
 
 	s = CPLGetXMLValue( node, "NoDataColor", NULL );
 	if (s != "") _noDataColor = (OLE_COLOR)atoi(s);
@@ -712,11 +707,8 @@ bool CGridColorScheme::DeserializeCore(CPLXMLNode* node)
 
 					// caption
 					s = CPLGetXMLValue( node, "Caption", NULL );
-					br->put_Caption(A2BSTR(s));
-					
-					// key
-					s = CPLGetXMLValue( node, "Key", NULL );
-					br->put_Key(A2BSTR(s));
+					CComBSTR bstrCaption(s);
+					br->put_Caption(bstrCaption);
 					
 					// coloring type
 					ColoringType type = Hillshade;

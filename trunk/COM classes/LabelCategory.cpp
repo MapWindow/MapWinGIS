@@ -311,8 +311,8 @@ void CLabelCategory::DeserializeFromNode(CPLXMLNode* node)
 	CString s = CPLGetXMLValue( node, "Name", NULL );
 	if (s != "")
 	{
-		SysFreeString(_name);
-		_name = A2BSTR(s);
+		CComBSTR bstr(s);
+		put_Name(bstr);
 	}
 
 	s = CPLGetXMLValue( node, "Expression", NULL );

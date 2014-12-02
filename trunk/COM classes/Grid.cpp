@@ -66,7 +66,7 @@ CGrid::CGrid()
 
 	_globalCallback = NULL;
 	_lastErrorCode = tkNO_ERROR;
-	_key = A2BSTR("");
+	_key = SysAllocString(L"");
 	_filename = L"";
 	_preferedDisplayMode = gpmAuto;
 }
@@ -285,7 +285,7 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 
 	if ( _trgrid != NULL)
 	{
-		_trgrid->Projection = A2BSTR(projection);
+		_trgrid->Projection = projection;
 	}
 	else if( _dgrid != NULL )
 	{	
@@ -2640,8 +2640,11 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 				CStringW legendName = this->GetLegendName();
 				int bandIndex;
 				this->get_ActiveBandIndex(&bandIndex);
-				if (m_globalSettings.saveGridColorSchemeToFile) {
-					scheme->WriteToFile(W2BSTR(legendName), W2BSTR(GetFilename()), bandIndex, &vb);
+				if (m_globalSettings.saveGridColorSchemeToFile) 
+				{
+					BSTR bstrName;
+					BSTR bstrGridName;
+					scheme->WriteToFile(bstrName, bstrGridName, bandIndex, &vb);
 				}
 			}
 

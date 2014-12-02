@@ -1866,6 +1866,7 @@ bool tkGridRaster::ColorTable2BSTR(BSTR *pVal)
 		}
 	}
 	stCT = stCT.Mid(0,stCT.GetLength()-1);
+	SysFreeString(*pVal);
 	*pVal = stCT.AllocSysString();
 	return true;
 }

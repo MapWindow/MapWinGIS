@@ -38,8 +38,7 @@ class ATL_NO_VTABLE CColorScheme :
 public:
 	CColorScheme()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_type = ctSchemeGraduated;

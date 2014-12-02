@@ -18,7 +18,7 @@ public:
 	CUndoList()
 	{
 		_mapCallback = NULL;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
 		_position = -1;
 		_batchId = EMPTY_BATCH_ID;

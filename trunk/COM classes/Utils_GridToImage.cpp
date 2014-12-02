@@ -205,7 +205,9 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		{
 			int bandIndex = 1;
 			g->get_ActiveBandIndex(&bandIndex);
-			ci->WriteToFile(OLE2BSTR(legendName), W2BSTR(gridName), bandIndex, &vb);
+			CComBSTR bstrName(legendName);
+			CComBSTR bstrGridName(gridName);
+			ci->WriteToFile(bstrName, bstrGridName, bandIndex, &vb);
 		}
 		
 		// open the created file

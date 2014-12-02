@@ -54,8 +54,6 @@ class ATL_NO_VTABLE CUtils :
 public:
 	CUtils()
 	{
-		USES_CONVERSION;
-
 		_pip_left = 0;
 		_pip_right = 0;
 		_pip_top = 0;
@@ -63,7 +61,7 @@ public:
 
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 			
 		_bufferA_R = NULL;
 		_bufferA_G = NULL;

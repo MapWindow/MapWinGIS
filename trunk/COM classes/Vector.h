@@ -34,11 +34,9 @@ class ATL_NO_VTABLE CVector :
 public:
 	CVector()
 	{
-		USES_CONVERSION;
-
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 	}
 	~CVector()
 	{

@@ -39,8 +39,7 @@ class ATL_NO_VTABLE CTableClass :
 public:
 	CTableClass()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_isEditingTable = FALSE;
@@ -220,7 +219,7 @@ public:
 	bool GetUids(long fieldIndex, map<long, long>& resutls);
 	bool UpdateTableRow(TableRow* newRow, long rowIndex);
 
-	void ParseExpressionCore(BSTR Expression, tkValueType returnType, BSTR* ErrorString, VARIANT_BOOL* retVal);
+	void ParseExpressionCore(BSTR Expression, tkValueType returnType, CString& ErrorString, VARIANT_BOOL* retVal);
 
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses);
 	std::vector<CategoriesData>* GenerateCategories(long FieldIndex, tkClassificationType ClassificationType, long numClasses,

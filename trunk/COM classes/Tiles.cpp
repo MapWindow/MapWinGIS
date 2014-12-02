@@ -1517,7 +1517,7 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 STDMETHODIMP CTiles::Prefetch2(int minX, int maxX, int minY, int maxY, int zoom, int providerId, IStopExecution* stop, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = PrefetchCore(minX, maxX, minY, maxY, zoom, providerId, A2BSTR(""), A2BSTR(""), stop);
+	*retVal = PrefetchCore(minX, maxX, minY, maxY, zoom, providerId, m_globalSettings.emptyBstr, m_globalSettings.emptyBstr, stop);
 	return S_OK;
 }
 

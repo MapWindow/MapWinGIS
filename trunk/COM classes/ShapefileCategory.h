@@ -40,13 +40,11 @@ class ATL_NO_VTABLE CShapefileCategory :
 public:
 	CShapefileCategory()
 	{
-		_name = A2BSTR("");
-		_expression = A2BSTR("");
+		_name = SysAllocString(L"");
+		_expression = SysAllocString(L"");
 		_priority = - 1;
-
 		_drawingOptions = NULL;
 		CoCreateInstance(CLSID_ShapeDrawingOptions,NULL,CLSCTX_INPROC_SERVER,IID_IShapeDrawingOptions,(void**)&_drawingOptions);
-
 		_categories = NULL;
 		_categoryValue = cvExpression;
 		gReferenceCounter.AddRef(tkInterface::idShapefileCategory);

@@ -56,9 +56,8 @@ class DrawList //: public LabelLayer
 {	
 public:
 	DrawList()
-	{	USES_CONVERSION;		
-		key = A2BSTR("");
-		
+	{	
+		key = SysAllocString(L"");
 		m_labels = NULL;
 		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&m_labels);
 	}

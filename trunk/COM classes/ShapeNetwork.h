@@ -41,11 +41,9 @@ class ATL_NO_VTABLE CShapeNetwork :
 public:
 	CShapeNetwork()
 	{
-		USES_CONVERSION;
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		_key = A2BSTR("");
-
+		_key = SysAllocString(L"");
 		_network = NULL;
 		_currentNode = -1;
 		_networkSize = 0;

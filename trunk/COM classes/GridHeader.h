@@ -40,9 +40,9 @@ public:
 	{	USES_CONVERSION;
 		_dx = 1.0;
 		_dy = 1.0;	
-		_key = A2BSTR("");
-		_notes = A2BSTR("");
-		_colorTable = A2BSTR("");
+		_key = SysAllocString(L"");
+		_notes = SysAllocString(L"");
+		_colorTable = SysAllocString(L"");
 		_globalCallback = NULL;
 		_numbercols = 0;
 		_numberrows = 0;

@@ -40,8 +40,7 @@ public:
 		_measuring = new MeasuringBase();
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 	}
 
 	~CMeasuring() {

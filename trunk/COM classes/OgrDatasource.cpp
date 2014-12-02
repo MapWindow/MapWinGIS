@@ -468,7 +468,7 @@ STDMETHODIMP COgrDatasource::ExecuteSQL(BSTR sql, BSTR* errorMessage, VARIANT_BO
 	if (CPLGetLastErrorNo() != OGRERR_NONE)
 	{
 		CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
-		*errorMessage =W2BSTR(s);
+		*errorMessage = W2BSTR(s);
 		*retVal = VARIANT_FALSE;
 		return S_FALSE;
 	}

@@ -3149,9 +3149,8 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 			// marking the index of shape
 			CString str;
 			str.Format("%dl", i);
-			BSTR index = A2BSTR(str);
-			shp->put_Key(index);
-			SysFreeString(index);
+			CComBSTR bstr(str);
+			shp->put_Key(bstr);
 			
 			this->get_CellValue(FieldIndex, i, &val);	
 			pair<CComVariant, IShape*> myPair(val, shp);	

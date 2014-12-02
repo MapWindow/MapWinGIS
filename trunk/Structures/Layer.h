@@ -62,11 +62,10 @@ class Layer
 public:
 	Layer()
 	{	
-		USES_CONVERSION;
 		type = UndefinedLayer;
 		object = NULL;
 		flags = 0;
-		key = A2BSTR("");
+		key = SysAllocString(L"");
 		dynamicVisibility = false;
 		maxVisibleScale = 100000000.0;
 		minVisibleScale = 0.0;

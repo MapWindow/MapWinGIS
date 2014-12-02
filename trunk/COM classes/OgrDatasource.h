@@ -15,7 +15,7 @@ public:
 	COgrDatasource()
 	{
 		_dataset = NULL;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
 		_encoding = m_globalSettings.ogrEncoding;

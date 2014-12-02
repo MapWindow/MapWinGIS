@@ -41,8 +41,7 @@ class ATL_NO_VTABLE CLinePattern :
 public:
 	CLinePattern()
 	{
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_transparency = 255;

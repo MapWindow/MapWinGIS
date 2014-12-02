@@ -457,7 +457,10 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				CStringW legendName = isProxy ? grid->GetProxyLegendName() : grid->GetLegendName();
 				IGridColorScheme* newScheme = NULL;
 				ComHelper::CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
-				newScheme->ReadFromFile(W2BSTR(legendName), A2BSTR("GridColoringScheme"), &vb);
+
+				CComBSTR bstrName(legendName);
+				CComBSTR bstrElementName("GridColoringScheme");
+				newScheme->ReadFromFile(bstrName, bstrElementName, &vb);
 				if (vb)
 				{
 					((CImageClass*)iimg)->LoadImageAttributesFromGridColorScheme(newScheme);

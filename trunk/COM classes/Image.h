@@ -53,10 +53,8 @@ public:
 
 		_lastErrorCode = tkNO_ERROR;
 
-		USES_CONVERSION;
-		_key = A2BSTR("");
+		_key = SysAllocString(L"");
 
-		_labels = NULL;
 		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&_labels);
 		
 		_bitmapImage = NULL;
