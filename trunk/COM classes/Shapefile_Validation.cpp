@@ -121,6 +121,7 @@ clear_result:
 									className, methodName, "", _globalCallback, _key, false);
 		CShapefile* sf = (CShapefile*)this;		// writing validation into this shapefile
 		sf->SetValidationInfo(iinfo, svtOutput);
+		iinfo->Release();
 		CShapeValidationInfo* info = (CShapeValidationInfo*)iinfo;
 		if (info->validationStatus == tkShapeValidationStatus::OperationAborted)
 			goto clear_result;

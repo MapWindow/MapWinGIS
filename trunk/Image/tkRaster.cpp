@@ -1301,11 +1301,9 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 
 			else
 			{ 
-				
-				
 				// Use the normal hillshade method
 				newpercent = (long)(((i * xBuff + j)/total)*100);
-				//Find the break
+				
 				break_index = findBreak( bvals, tmp );
 
 				if (break_index < 0) //A break is not defined for this value

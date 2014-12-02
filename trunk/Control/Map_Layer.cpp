@@ -713,11 +713,11 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 				{
 					long numShapes;
 					sf->get_NumShapes(&numShapes);
-					
+
 					long count;
 					IShapefile* sfNew = NULL;
 					sf->Reproject(GetMapProjection(), &count, &sfNew);
-
+					
 					result = false;
 					if (!sfNew || 
 						(numShapes != count && _projectionMismatchBehavior == mbCheckStrictAndReproject))
@@ -731,7 +731,10 @@ bool CMapView::CheckLayerProjection( Layer* layer )
 					{
 						// let's substitute original file with this one
 						// don't close the original shapefile; use may still want to interact with it
-						sf.Release();				// release the original reference
+						IShapefile* isf = sf;
+						isf->Release();				// need to call it on the object itself, as we want the smart pointer
+													// to release one more reference on return from function
+
 						if (layer->type == OgrLayerSource)
 						{
 							IOgrLayer* ogr;
