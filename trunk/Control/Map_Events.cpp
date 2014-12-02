@@ -430,8 +430,6 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 			_lastZooombarPart = part;		// update before calling OnSetCursor
 			OnSetCursor(this,HTCLIENT,0);
 			RedrawCore(RedrawSkipDataLayers, true);
-			_canUseMainBuffer = false;
-			this->Refresh();
 		}
 		return part != ZoombarNone;
 	}
@@ -1222,11 +1220,6 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
-		/*else if (EditorHelper::IsDigitizingCursor((tkCursorMode)m_cursorMode))
-		{
-		_shapeEditor->UndoPoint(&redraw);
-		_canUseMainBuffer = false;
-		}*/
 
 		_reverseZooming = true;
 

@@ -101,6 +101,11 @@ STDMETHODIMP CShapeDrawingOptions::get_Picture(IImage** pVal)
 STDMETHODIMP CShapeDrawingOptions::put_Picture(IImage* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	if (!newVal) {
+		ComHelper::SetRef(newVal, (IDispatch**)&_options.picture);
+		return S_OK;
+	}
+
 	tkImageSourceType type;
 	newVal->get_SourceType(&type);
 
