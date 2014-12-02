@@ -124,7 +124,7 @@ namespace Examples
                             box.Left = 80;
                             box.Top = label.Top;
                             box.Width = 80;
-                            box.Text = (string)sf.CellValue[i, shapes[0]];
+                            box.Text = sf.CellValue[i, shapes[0]].ToString();
                             box.Name = sf.Field[i].Name;
                             form.Controls.Add(box);
                         }

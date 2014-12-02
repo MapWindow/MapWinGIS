@@ -45,8 +45,8 @@ namespace Examples
         /// </summary>
         public void FillList()
         {
-            m_dataPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\Data\";
-            m_iconPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\icons\";
+            m_dataPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\Data\";
+            m_iconPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\icons\";
             if (!Directory.Exists(m_dataPath))
             {
                 MessageBox.Show("The directory with the data wasn't found:\n" + m_dataPath);
@@ -170,7 +170,7 @@ namespace Examples
         /// </summary>
         private void GenerateExamples()
         {
-            string path = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\Interop.MapWinGIS\Related pages\examples_list.cs";
+            string path = System.IO.Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\..\Interop.MapWinGIS\Related pages\examples_list.cs";
             StreamWriter writer = new StreamWriter(path);
             foreach (Example item in m_description.examples)
             {

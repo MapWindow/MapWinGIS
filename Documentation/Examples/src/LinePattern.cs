@@ -71,13 +71,13 @@ namespace Examples
                 Point pnt = new Point();
                 pnt.x = 0;
                 pnt.y = i * step;
-                int index = shp.NumPoints;
+                int index = shp.numPoints;
                 shp.InsertPoint(pnt, ref index);
 
                 pnt = new Point();
                 pnt.x = width;
                 pnt.y = i * step;
-                index = shp.NumPoints;
+                index = shp.numPoints;
                 shp.InsertPoint(pnt, ref index);
 
                 index = sf.NumShapes;

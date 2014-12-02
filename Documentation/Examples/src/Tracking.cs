@@ -76,7 +76,7 @@ namespace Examples
             double distance = 0.0;
             double x1, x2, y1, y2;
             x1= x2 = y1 = y2 = 0.0;
-            for (int i = 1; i < m_path.NumPoints; i++)
+            for (int i = 1; i < m_path.numPoints; i++)
             {
                 m_path.get_XY(i, ref x2, ref y2);
                 m_path.get_XY(i - 1, ref x1, ref y1);

@@ -54,7 +54,7 @@ namespace Examples
         // </summary>
         private Image OpenMarker()
         {
-            string path = @"..\..\icons\marker.png";
+            string path = @"..\..\..\icons\marker.png";
             if (!File.Exists(path))
             {
                 MessageBox.Show("Can't find the file: " + path);
@@ -91,7 +91,7 @@ namespace Examples
                 axMap1.PixelToProj(e.x, e.y, ref x, ref y);
                 pnt.x = x;
                 pnt.y = y;
-                int index = shp.NumPoints;
+                int index = shp.numPoints;
                 shp.InsertPoint(pnt, ref index);
 
                 index = sf.NumShapes;

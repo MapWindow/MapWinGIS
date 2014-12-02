@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using AxMapWinGIS;
 using MapWinGIS;
+using System.Diagnostics;
 
 namespace Examples
 {
@@ -112,7 +113,7 @@ namespace Examples
         }
 
         // <summary>
-        // Zoomes map to the object after user clicks the item on context menu.
+        // Zooms map to the object after user clicks the item on context menu.
         // </summary>
         private void ItemClick(object sender, EventArgs e)
         {
@@ -125,7 +126,9 @@ namespace Examples
                 {
                     for (int i = 0; i <sf.NumShapes; i++)
                     {
-                        if (sf.get_CellValue(_fieldIndex, i) == item.Text)
+                        string s = sf.get_CellValue(_fieldIndex, i).ToString();
+                        Debug.Print(s);
+                        if (s == item.Text)
                         {
                             axMap1.ZoomToShape(m_layerHandle, i);
                             axMap1.CurrentScale = 2000;

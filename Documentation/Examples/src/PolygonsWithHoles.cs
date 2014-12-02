@@ -76,8 +76,8 @@ namespace Examples
         private void AddRing(bool clockWise, double x, double y, double radius, ref Shape shp)
         {
             int partIndex = shp.NumParts;
-            if (shp.NumPoints > 0)
-                shp.InsertPart(shp.NumPoints, ref partIndex);
+            if (shp.numPoints > 0)
+                shp.InsertPart(shp.numPoints, ref partIndex);
 
             int count = 0;
             for (int j = 0; j < 37; j++)
@@ -92,7 +92,7 @@ namespace Examples
                 pnt.x = x + dx;
                 pnt.y = y + dy;
 
-                count = shp.NumPoints;
+                count = shp.numPoints;
                 shp.InsertPoint(pnt, ref count);
             }
         }

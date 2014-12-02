@@ -232,7 +232,7 @@ namespace Examples
             double x1, x2, y1, y2;
             x1 = x2 = y1 = y2 = 0.0;
 
-            for (int i = 1; i < Path.NumPoints; i++)
+            for (int i = 1; i < Path.numPoints; i++)
             {
                 Path.get_XY(i, ref x2, ref y2);
                 Path.get_XY(i - 1, ref x1, ref y1);
@@ -266,7 +266,7 @@ namespace Examples
     public class IconManager
     {
         private static Dictionary<CarType, Image> _dict = new Dictionary<CarType, Image>();
-        private static string _iconPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\icons\";
+        private static string _iconPath = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\icons\";
 
         static IconManager()
         {

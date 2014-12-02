@@ -24,9 +24,8 @@ namespace Examples
                 m_layerHandle = axMap1.AddLayer(sf, true);
                 sf = axMap1.get_Shapefile(m_layerHandle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
                 
-                sf.HotTracking = true;
                 axMap1.SendMouseMove = true;
-                axMap1.CursorMode = tkCursorMode.cmNone;
+                axMap1.CursorMode = tkCursorMode.cmIdentify;
                 axMap1.ShapeHighlighted += AxMap1ShapeHighlighted;
                 m_label = label;
             }
@@ -47,7 +46,7 @@ namespace Examples
                 string s = "";
                 for (int i = 0; i < sf.NumFields; i++)
                 {
-                    string val = (string)sf.get_CellValue(i, e.shapeIndex);
+                    string val = sf.get_CellValue(i, e.shapeIndex).ToString();
                     if (val == "") val = "null";
                     s += sf.Table.Field[i].Name + ":" + val + "; ";
                 }

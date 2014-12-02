@@ -80,7 +80,7 @@ namespace Examples
                         string s = "";
                         for (int i = 0; i < sf.NumFields; i++)
                         {
-                            s += sf.Field[i].Name + ": " + (string)sf.CellValue[i, shapes[0]] + "\n";
+                            s += sf.Field[i].Name + ": " + sf.CellValue[i, shapes[0]] + "\n";
                         }
                         labels.AddLabel(s, e.x + 80, e.y);
                     }
