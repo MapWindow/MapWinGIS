@@ -1308,15 +1308,17 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 				//Find the break
 				break_index = findBreak( bvals, tmp );
 
- 			    IGridColorBreak * bi = NULL;
-				gridColorScheme->get_Break( break_index, &bi );
-				if( break_index < 0 ) //A break is not defined for this value
-				{						
-					(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char) transColor.g;
-					(*ImageData)[i * xBuff + j].blue =  (unsigned char) transColor.b;
+				if (break_index < 0) //A break is not defined for this value
+				{
+					(*ImageData)[i * xBuff + j].red = (unsigned char)transColor.r;
+					(*ImageData)[i * xBuff + j].green = (unsigned char)transColor.g;
+					(*ImageData)[i * xBuff + j].blue = (unsigned char)transColor.b;
 					continue;
 				}
+
+ 			    IGridColorBreak * bi = NULL;
+				gridColorScheme->get_Break( break_index, &bi );
+				
 				OLE_COLOR hiColor, lowColor;
 				bi->get_HighColor(&hiColor);
 				bi->get_LowColor(&lowColor);
