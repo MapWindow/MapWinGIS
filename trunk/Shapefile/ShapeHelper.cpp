@@ -303,3 +303,14 @@ bool ShapeHelper::SplitByPolyline(IShape* subject, IShape* polyline, vector<ISha
 {
 	return ((CShape*)subject)->SplitByPolylineCore(polyline, shapes);
 }
+
+// *************************************************************
+//     IsEmpty()
+// *************************************************************
+bool ShapeHelper::IsEmpty(IShape* shp)
+{
+	if (!shp) return true;
+	VARIANT_BOOL vb;
+	shp->get_IsEmpty(&vb);
+	return vb ? true: false;
+}

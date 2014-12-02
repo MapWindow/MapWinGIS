@@ -156,7 +156,7 @@ bool CShapeWrapperCOM::get_BoundsXY(double& xMin, double& xMax, double& yMin, do
 // **********************************************************
 void CShapeWrapperCOM::RefreshBounds()
 {
-	if (_ShapeType2D == SHP_NULLSHAPE)
+	if (_ShapeType2D == SHP_NULLSHAPE || _allPoints.size() == 0)
 	{
 		_xMin = _xMax = _yMin = _yMax =	_zMin = _zMax = _mMin = _mMax = 0.0;
 	}

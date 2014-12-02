@@ -36,6 +36,7 @@ public:
 		_ShapeType2D = ShapeTypeConvert2D(_ShapeType);
 		_boundsChanged = true;
 		_lastErrorCode = tkNO_ERROR;
+		_xMin = _yMin = _xMax = _yMax = _zMin = _mMin = _zMax = _mMax = 0.0;
 	}
 
 	//	Destructor

@@ -24,6 +24,7 @@
 #include "TableClass.h"
 #include "Charts.h"
 #include "Shape.h"
+#include "ShapeHelper.h"
 
 #pragma region StartEditing
 
@@ -400,41 +401,44 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	
 	// extending the bounds of the shapefile we don't care if the bounds became less
 	// it's necessary to call RefreshExtents in this case, for zoom to layer working right
-	IExtents * box;
-	Shape->get_Extents(&box);
-	double xm,ym,zm,xM,yM,zM;
-	box->GetBounds(&xm,&ym,&zm,&xM,&yM,&zM);
-	box->Release();
+	if (!ShapeHelper::IsEmpty(Shape))
+	{
+		IExtents * box;
+		Shape->get_Extents(&box);
+		double xm, ym, zm, xM, yM, zM;
+		box->GetBounds(&xm, &ym, &zm, &xM, &yM, &zM);
+		box->Release();
 
-	if (_shapeData.size() == 1)
-	{
-		_minX = xm;
-		_maxX = xM;
-		_minY = ym;
-		_maxY = yM;
-		_minZ = zm;
-		_maxZ = zM;
-	}
-	else
-	{
-		if (xm < _minX) _minX = xm;
-		if (xM > _maxX) _maxX = xM;
-		if (ym < _minY) _minY = ym;
-		if (yM > _maxY) _maxY = yM;
-		if (zm < _minZ) _minZ = zm;
-		if (zM > _maxZ) _maxZ = zM;
-	}
+		if (_shapeData.size() == 1)
+		{
+			_minX = xm;
+			_maxX = xM;
+			_minY = ym;
+			_maxY = yM;
+			_minZ = zm;
+			_maxZ = zM;
+		}
+		else
+		{
+			if (xm < _minX) _minX = xm;
+			if (xM > _maxX) _maxX = xM;
+			if (ym < _minY) _minY = ym;
+			if (yM > _maxY) _maxY = yM;
+			if (zm < _minZ) _minZ = zm;
+			if (zM > _maxZ) _maxZ = zM;
+		}
 
-	// Neio 07/23/2009 - add qtree
-	if(_useQTree)
-	{
-		QTreeNode node;
-		node.index = ShapeIndex;
-		node.Extent.left = xm;
-		node.Extent.right = xM;
-		node.Extent.top = yM;
-		node.Extent.bottom = ym;
-		_qtree->AddNode(node);
+		// Neio 07/23/2009 - add qtree
+		if (_useQTree)
+		{
+			QTreeNode node;
+			node.index = ShapeIndex;
+			node.Extent.left = xm;
+			node.Extent.right = xM;
+			node.Extent.top = yM;
+			node.Extent.bottom = ym;
+			_qtree->AddNode(node);
+		}
 	}
 }
 
@@ -788,14 +792,12 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 		
 		for( int i = 0; i < (int)_shapeData.size(); i++ )
 		{	
+			if (ShapeHelper::IsEmpty(_shapeData[i]->shape))
+				continue;
+
 			CShape* shp = ((CShape*)_shapeData[i]->shape);
 			shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
 			
-			if (Xmin == 0.0) 
-			{
-				shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
-			}
-
 			// refresh shapefile extents
 			if (i==0)
 			{

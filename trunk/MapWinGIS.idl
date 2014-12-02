@@ -3819,6 +3819,7 @@ interface IShape : IDispatch{
 	[id(64)] HRESULT Rotate([in] DOUBLE originX, [in] DOUBLE originY, [in] DOUBLE angle);
 	[propget, id(65)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
 	[id(66)] HRESULT SplitByPolyline([in] IShape* polyline, [in,out]VARIANT* results, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(67)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 };
 
 /****************************  Extents Interface ***********************/

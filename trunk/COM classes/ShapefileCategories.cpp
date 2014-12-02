@@ -262,12 +262,13 @@ STDMETHODIMP CShapefileCategories::Generate(long FieldIndex, tkClassificationTyp
 	if(_shapefile == NULL) 
 		return S_FALSE;
 	
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_FALSE;
 		
-	std::vector<CategoriesData>* values = ((CTableClass*)tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
+	ITable* itbl = tbl;
+	std::vector<CategoriesData>* values = ((CTableClass*)itbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
 		return S_OK;
 

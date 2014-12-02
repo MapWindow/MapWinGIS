@@ -609,7 +609,7 @@ bool CShapeWrapper::get_Bounds(double& xMin, double& xMax, double& yMin, double&
 	}
 	else
 	{
-		if (_ShapeType2D == SHP_NULLSHAPE)
+		if (_ShapeType2D == SHP_NULLSHAPE || _points.size() == 0)
 		{
 			xMin = 0.0;
 			xMax = 0.0;

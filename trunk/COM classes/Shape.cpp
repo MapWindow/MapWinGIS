@@ -3004,4 +3004,12 @@ cleaning:
 	return shapes.size() > 0;
 }
 
-
+//*****************************************************************
+//*		get_IsEmpty()
+//*****************************************************************
+STDMETHODIMP CShape::get_IsEmpty(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _shp->get_PointCount() == 0;
+	return S_OK;
+}
