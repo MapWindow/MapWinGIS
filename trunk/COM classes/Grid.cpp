@@ -2642,8 +2642,8 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 				this->get_ActiveBandIndex(&bandIndex);
 				if (m_globalSettings.saveGridColorSchemeToFile) 
 				{
-					BSTR bstrName;
-					BSTR bstrGridName;
+					CComBSTR bstrName(legendName);
+					CComBSTR bstrGridName(gridName);
 					scheme->WriteToFile(bstrName, bstrGridName, bandIndex, &vb);
 				}
 			}
