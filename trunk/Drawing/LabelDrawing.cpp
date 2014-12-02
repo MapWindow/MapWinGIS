@@ -29,9 +29,9 @@
 #include <set>
 #include "Labels.h"
 #include "LabelCategory.h"
-#include "TableClass.h"
 #include "Shapefile.h"
 #include "macros.h"
+#include "TableHelper.h"
 
 using namespace std;
 using namespace Gdiplus;
@@ -233,11 +233,11 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		IShapefile* sf = lbs->get_ParentShapefile();
 		if (sf)
 		{
-			ITable* tbl = NULL;
+			CComPtr<ITable> tbl = NULL;
 			sf->get_Table(&tbl);
 			
 			USES_CONVERSION;
-			if (((CTableClass*)tbl)->QueryCore(OLE2CA(expr), arrInit, err))
+			if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arrInit, err))
 			{
 				useAll = false;
 			}

@@ -28,15 +28,14 @@
 #include "stdafx.h"
 #include "ShapefileDrawing.h"
 #include "LineDrawing.h"
-
 #include "LinePattern.h"
-#include "TableClass.h"
 #include "ShapefileReader.h"
 #include "Shape.h"
 #include "GeometryHelper.h"
 #include "macros.h"
 #include "PointSymbols.h"
 #include "ShapefileCategories.h"
+#include "TableHelper.h"
 
 // MEMO: there are several formats to hold shape data while drawing
 // there are 2 switches: regular/edit mode; and fast/slow mode
@@ -240,11 +239,11 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 
 	if (SysStringLen(expr) > 0)
 	{
-		ITable* tbl = NULL;
+		CComPtr<ITable> tbl = NULL;
 		_shapefile->get_Table(&tbl);
-		
+
 		USES_CONVERSION;
-		if (((CTableClass*)tbl)->QueryCore(OLE2CA(expr), arr, err))
+		if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arr, err))
 		{
 			useAll = false;
 		}
@@ -1598,7 +1597,7 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 
 		for (int i = 0; i < count; i++)
 		{
-			ILineSegment* line = NULL;
+			CComPtr<ILineSegment> line = NULL;
 			options->linePattern->get_Line(i, &line);
 			tkLineType style;
 			line->get_LineType(&style);
@@ -1611,7 +1610,6 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 					maxWidth = width;
 				}
 			}
-			line->Release();
 		}
 		
 		if (maxWidth > 0.0f)
@@ -1650,7 +1648,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 	if (numLines == 0)
 		return;
 	
-	ILineSegment* line = NULL;
+	
 	
 	// path related variables
 	bool dataRead = false;
@@ -1676,6 +1674,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 
 	for ( int i = 0; i < numLines; i++)
 	{
+		CComPtr<ILineSegment> line = NULL;
 		pattern->get_Line(i, &line);
 		tkLineType type;
 		OLE_COLOR color;

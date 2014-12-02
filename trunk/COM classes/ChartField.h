@@ -44,6 +44,11 @@ public:
 		_color = RGB(255, 255, 255);
 	}
 
+	~CChartField()
+	{
+		SysFreeString(_name);
+	}
+
 	DECLARE_REGISTRY_RESOURCEID(IDR_CHARTFIELD)
 	BEGIN_COM_MAP(CChartField)
 		COM_INTERFACE_ENTRY(IChartField)

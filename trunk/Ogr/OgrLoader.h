@@ -1,6 +1,5 @@
 #pragma once
 #include <algorithm>
-#include "TableClass.h"
 #include "WinBase.h"
 #include "afxmt.h"
 

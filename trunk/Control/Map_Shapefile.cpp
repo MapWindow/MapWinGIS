@@ -1458,6 +1458,35 @@ void CMapView::UpdateHotTracking(LayerShape info, bool fireEvent)
 }
 
 // **********************************************************
+//			ClearDrawingLabelFrames()
+// **********************************************************
+void CMapView::ClearDrawingLabelFrames()
+{
+	// clear frames for drawing labels
+	for (size_t j = 0; j < _activeDrawLists.size(); j++)
+	{
+		bool isSkip = false;
+		for (size_t i = 0; i < _drawingLayerInvisilbe.size(); i++)
+		{
+			if (_drawingLayerInvisilbe[i] == j)
+			{
+				isSkip = true;	// skip if this layer is set invisible
+				break;
+			}
+		}
+		if (isSkip)
+			continue;
+
+		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
+		if (IS_VALID_PTR(dlist))
+		{
+			CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
+			coLabels->ClearLabelFrames();
+		}
+	}
+}
+
+// **********************************************************
 //			ClearLabelFrames()
 // **********************************************************
 void CMapView::ClearLabelFrames()
@@ -1485,32 +1514,6 @@ void CMapView::ClearLabelFrames()
 			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
 			coLabels->ClearLabelFrames();
 			LabelsClass->Release(); LabelsClass = NULL;
-		}
-	}
-
-	// clear frames for drawing labels
-	for(size_t j = 0; j < _activeDrawLists.size(); j++ )
-	{
-		bool isSkip = false;
-		for (size_t i = 0; i < _drawingLayerInvisilbe.size(); i++)
-		{
-			if (_drawingLayerInvisilbe[i] == j)
-			{
-				isSkip = true;	// skip if this layer is set invisible
-				break;  
-			}
-		}
-		if(isSkip) 
-			continue;
-
-		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
-		if( IS_VALID_PTR(dlist) )
-		{
-			if (dlist->listType == dlSpatiallyReferencedList)
-			{
-				CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
-				coLabels->ClearLabelFrames();
-			}
 		}
 	}
 }

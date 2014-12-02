@@ -2,7 +2,7 @@
 #include "FieldHelper.h"
 #include <set>
 #include "ShapefileHelper.h"
-#include "TableClass.h"
+#include "TableHelper.h"
 
 // *****************************************************************
 //	   FindNewShapeID()
@@ -35,56 +35,12 @@ long FieldHelper::FindNewShapeID(IShapefile* sf, long FieldIndex)
 bool FieldHelper::UniqueFieldNames(IShapefile* sf)
 {
 	bool result = false;
-	ITable* table = NULL;
+	CComPtr<ITable> table = NULL;
 	sf->get_Table(&table);
 	if (table) {
-		result = ((CTableClass*)table)->MakeUniqueFieldNames();
-		table->Release();
+		result = TableHelper::Cast(table)->MakeUniqueFieldNames();
 	}
 	return result;
-
-	// Do we need edit mode for editing of the field names?
-	// Yes we do, shapelib doesn't allow it otherwise ;)
-	/*sf->get_EditingShapes(&editing);
-	if (!editing)
-	return false;
-
-	long numFields;
-	sf->get_NumFields(&numFields);
-
-	set<CString> fields;
-
-	for (long i = 0; i< numFields; i++)
-	{
-	CComBSTR name;
-	IField* fld;
-	sf->get_Field(i, &fld);
-	fld->get_Name(&name);
-
-	if (fields.find(OLE2CA(name)) == fields.end())
-	{
-	fields.insert(OLE2CA(name));
-	}
-	else
-	{
-	bool found = false;
-	for (int j = 0; !found; j++)
-	{
-	CString temp = OLE2CA(name);
-	temp.AppendFormat("_%d", j);
-	if (fields.find(temp) == fields.end())
-	{
-	fields.insert(temp);
-	CComBSTR bstrNewName(temp);
-	fld->put_Name(bstrNewName);
-	found = true;
-	}
-	}
-	}
-	fld->Release();
-	}
-	fields.clear();
-	return true;*/
 }
 
 // ****************************************************************

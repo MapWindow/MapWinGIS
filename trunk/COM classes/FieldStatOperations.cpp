@@ -202,14 +202,14 @@ STDMETHODIMP CFieldStatOperations::Validate(IShapefile* sf, VARIANT_BOOL* retVal
 			// searching index for name
 			if (op->hasName)
 			{
-				ITable* table = NULL;
+				CComPtr<ITable> table = NULL;
 				sf->get_Table(&table);
 				if (table)
 				{
 					long fieldIndex;
-					table->get_FieldIndexByName(W2BSTR(op->fieldName), &fieldIndex);
+					CComBSTR bstrName(op->fieldName);
+					table->get_FieldIndexByName(bstrName, &fieldIndex);
 					op->fieldIndex = fieldIndex;
-					table->Release();
 				}
 			}
 			

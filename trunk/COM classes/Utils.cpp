@@ -35,11 +35,11 @@
 #include "PointInPolygon.h"
 #include "Grid.h"
 #include "Extents.h"
-#include "TableClass.h"
 #include "Shape.h"
 #include "Vector.h"
 #include "Expression.h"
 #include "OgrConverter.h"
+#include "TableHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -3804,8 +3804,9 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 // ********************************************************
 //		CreateStatisticsFields()
 // ********************************************************
-void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bool overwrite) {
-	ITable* tbl = NULL;
+void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bool overwrite) 
+{
+	CComPtr<ITable> tbl = NULL;
 	sf->get_Table(&tbl);
 	
 	VARIANT_BOOL vb;
@@ -3834,8 +3835,7 @@ void CreateStatisticsFields(IShapefile* sf, std::vector<long>& resultIndices, bo
 		resultIndices.push_back(index);
 	}
 	
-	((CTableClass*)tbl)->MakeUniqueFieldNames();
-	tbl->Release();
+	TableHelper::Cast(tbl)->MakeUniqueFieldNames();
 }
 
 enum GridScanMethod
@@ -4903,13 +4903,12 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapeNetwork->Release();
 	}
 
-	ITable* Table = NULL;
+	CComPtr<ITable> Table = NULL;
 	comClass->QueryInterface(IID_ITable, (void**)(&Table));
 	if (Table) 
 	{
 		Table->get_LastErrorCode(&errorCode);
 		get_ErrorMsg(errorCode, retVal);
-		Table->Release();
 	}
 
 	ITileProviders* TileProviders = NULL;

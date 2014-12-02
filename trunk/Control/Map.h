@@ -1158,7 +1158,8 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-	
+	void ClearDrawingLabelFrames();
+
 
 
 

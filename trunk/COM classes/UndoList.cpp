@@ -2,8 +2,8 @@
 
 #include "stdafx.h"
 #include "UndoList.h"
-#include "TableClass.h"
 #include "ShapeEditor.h"
+#include "TableHelper.h"
 
 int CUndoList::g_UniqueId = -1;
 const int CUndoList::EMPTY_BATCH_ID = -1; 
@@ -226,17 +226,15 @@ bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttri
 		CComPtr<IShapefile> sf = NULL;
 		sf.Attach(GetShapefile(layerHandle));
 		if (sf) {
-			ITable* tbl = NULL;
+			CComPtr<ITable> tbl = NULL;
 			sf->get_Table(&tbl);
 			if (tbl) {
-				TableRow* row = ((CTableClass*)tbl)->CloneTableRow((int)shapeIndex);
+				TableRow* row = TableHelper::Cast(tbl)->CloneTableRow((int)shapeIndex);
 				item->SetRow(row);
-				tbl->Release();
 			}
 			long category = -1;
 			sf->get_ShapeCategory(shapeIndex, &category);
 			item->StyleCategory = category;
-			
 		}
 	}
 	return true;
@@ -348,7 +346,6 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 	sf.Attach(GetShapefile(item->LayerHandle));
 	CComPtr<ITable> table = NULL;
 	sf->get_Table(&table);
-	ITable* tbl = table;
 
 	VARIANT_BOOL vb;
 	switch (item->Operation)
@@ -391,7 +388,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			// restore removed shape
 			sf->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
 			if (vb) {
-				((CTableClass*)tbl)->InsertTableRow(item->Row, item->ShapeIndex);
+				TableHelper::Cast(table)->InsertTableRow(item->Row, item->ShapeIndex);
 				sf->put_ShapeCategory(item->ShapeIndex, item->StyleCategory);
 				item->SetShape(NULL);
 				item->Row = NULL;		// the instance is used by table now
@@ -417,7 +414,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			}
 
 			if (shp) {
-				TableRow* row = ((CTableClass*)tbl)->CloneTableRow(item->ShapeIndex);
+				TableRow* row = TableHelper::Cast(table)->CloneTableRow(item->ShapeIndex);
 				sf->EditDeleteShape(item->ShapeIndex, &vb);
 				item->SetShape(shp);
 				item->SetRow(row);

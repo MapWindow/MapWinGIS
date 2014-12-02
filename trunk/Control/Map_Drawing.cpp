@@ -249,6 +249,8 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 
 	if (!hasVolatile && !HasDrawLists()) return;
 
+	ClearDrawingLabelFrames();
+
 	if (_isSnapshot) 
 	{
 		if (hasVolatile)

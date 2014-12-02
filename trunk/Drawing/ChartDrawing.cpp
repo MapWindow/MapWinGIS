@@ -28,9 +28,9 @@
 #include <set>
 #include "Shapefile.h"
 #include "Charts.h"
-#include "TableClass.h"
 #include "Macros.h"
 #include "ChartsHelper.h"
+#include "TableHelper.h"
 
 // ******************************************************
 //		DrawCharts()
@@ -40,18 +40,16 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	if ( !sf )	return;
 
 	// reading chart properties
-	ICharts* charts = NULL;
+	CComPtr<ICharts> charts = NULL;
 	sf->get_Charts(&charts);
 	if (!charts)
 		return;
 
 	// the charts were cleared
-	if (!((CCharts*)charts)->_chartsExist)
-	{
-		charts->Release();
+	ICharts* icharts = charts;
+	if (!((CCharts*)icharts)->_chartsExist)
 		return;
-	}
-	
+
 	// checking scale for dynamic visibility
 	VARIANT_BOOL dynVisibility;
 	charts->get_DynamicVisibility(&dynVisibility);
@@ -72,37 +70,22 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	charts->get_OffsetX(&_offsetX);
 	charts->get_OffsetY(&_offsetY);
 	
-	ChartOptions* _options = ((CCharts*)charts)->get_UnderlyingOptions();
+	ChartOptions* _options = ((CCharts*)icharts)->get_UnderlyingOptions();
 
-	if ( !  _options->visible )
-	{
-		charts->Release();
+	if (!_options->visible )
 		return;
-	}
+
+	//positions
+	std::vector<ShapeData*>* positions;
+	positions = ((CShapefile*)sf)->get_ShapeVector();
+	if (!positions || positions->size() == 0)
+		return;
 
 	// reading values
 	CShapefile* sfClass = (CShapefile*)sf;
 	std::vector<double*> values;
 	if (!ChartsHelper::ReadChartFields(sfClass, &values))
-	{
-		charts->Release();
 		return;
-	}
-	
-	//positions
-	std::vector<ShapeData*>* positions;
-	positions = ((CShapefile*)sf)->get_ShapeVector();
-	if ( !positions) 
-	{
-		charts->Release();
-		return;
-	}
-	if ((positions->size() == 0 || values.size() == 0) ||
-		(positions->size()!= values.size()))
-	{
-		charts->Release();
-		return;
-	}
 	
 	// analyzing visibility expression
 	long numFields;
@@ -117,7 +100,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	CComBSTR expr;
 	charts->get_VisibilityExpression(&expr);
 
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	sf->get_Table(&tbl);
 	
 	std::vector<long> arrInit;
@@ -127,7 +110,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	if (SysStringLen(expr) > 0)
 	{
 		USES_CONVERSION;
-		if (((CTableClass*)tbl)->QueryCore(OLE2CA(expr), arrInit, err))
+		if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arrInit, err))
 		{
 			useAll = false;
 		}
@@ -196,12 +179,11 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 	for (long i = 0; i < numBars; i++)
 	{
-		IChartField* chartField = NULL;
+		CComPtr<IChartField> chartField = NULL;
 		charts->get_Field(i, &chartField);
 		
 		OLE_COLOR color;
 		chartField->get_Color(&color);
-		chartField->Release();
 
 		Gdiplus::Brush* br = new Gdiplus::SolidBrush(Gdiplus::Color(alpha|BGR_TO_RGB(color)));
 		brushes.push_back(br);
@@ -679,35 +661,33 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 							rect->MoveToXY(xShift, yShift);
 						}
 						
-						canDraw = true;
 						if ( _options->avoidCollisions && _collisionList != NULL)
 						{
 							if (_collisionList->HaveCollision(*rect))
 							{
-								canDraw = false;
 								delete rect;
+								continue;
 							}
 						}
 						
-						if (canDraw)
-						{
-							// we shall store the label, to keep the collision list clean
-							ValueRectangle value;
-							value.string = s;
+						// we shall store the label, to keep the collision list clean
+						ValueRectangle value;
+						value.string = s;
 							
-							// drawing frame							
-							if (!vertical)
-							{
-								CRect r(rect->left-2, rect->top, rect->right + 2, rect->bottom);
-								value.rect = r;
-							}
-							else
-							{
-								CRect r(rect->left, rect->top - 2, rect->right, rect->bottom + 2);
-								value.rect = r;
-							}
-							labels.push_back(value);
+						// drawing frame							
+						if (!vertical)
+						{
+							CRect r(rect->left-2, rect->top, rect->right + 2, rect->bottom);
+							value.rect = r;
 						}
+						else
+						{
+							CRect r(rect->left, rect->top - 2, rect->right, rect->bottom + 2);
+							value.rect = r;
+						}
+						labels.push_back(value);
+
+						delete rect;
 					}
 					xStart += _options->barWidth;
 				}
@@ -833,10 +813,10 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 	brushFrame.DeleteObject();
 
-	//cleaning
+	for (size_t i = 0; i < values.size(); i++)
+		delete values[i];
 	for (unsigned int i = 0; i < brushes.size(); i++ )
 		delete brushes[i];
 	for (unsigned int i = 0; i < brushesDimmed.size(); i++ )
 		delete brushesDimmed[i];
-	charts->Release();
 }

@@ -23,7 +23,6 @@
 #include "Charts.h"
 #include "GeoProjection.h"
 #include "Templates.h"
-#include "TableClass.h"
 #include <GeosHelper.h>
 #include "ShapeValidator.h"
 #include "ShapefileCategories.h"
@@ -33,6 +32,7 @@
 #include "ShapefileHelper.h"
 #include "LabelsHelper.h"
 #include "ShapeStyleHelper.h"
+#include "TableClass.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -137,48 +137,34 @@ CShapefile::~CShapefile()
 	::SysFreeString(_expression);
 
 	if (_selectDrawOpt != NULL)
-	{
 		_selectDrawOpt->Release();
-		_selectDrawOpt = NULL;
-	}
 
 	if (_defaultDrawOpt != NULL)
-	{
 		_defaultDrawOpt->Release();
-		_defaultDrawOpt = NULL;
-	}
 
 	if (_labels != NULL)
 	{
 		put_ReferenceToLabels(true);	// labels class maybe referenced by client and won't be deleted as a result
 		_labels->Release();			// therefore we must clear the reference to the parent as it will be invalid
-		_labels = NULL;
 	}
 
 	if (_categories != NULL)
 	{
 		put_ReferenceToCategories(true);
 		_categories->Release();
-		_categories = NULL;
 	}
 
 	if (_charts != NULL)
 	{
 		put_ReferenceToCharts(true);
 		_charts->Release();
-		_charts = NULL;
 	}
 
 	if (_stopExecution)
-	{
 		_stopExecution->Release();
-		_stopExecution = NULL;
-	}
 
 	if (_geoProjection)
-	{
 		_geoProjection->Release();
-	}
 
 	if (_undoList) {
 		_undoList->Release();

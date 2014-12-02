@@ -4,6 +4,7 @@
 #include "OgrHelper.h"
 #include "Ogr2RawData.h"
 #include "ShapefileCategories.h"
+#include "TableHelper.h"
 
 // ****************************************************
 //		CloseDatasources()
@@ -414,16 +415,17 @@ void Layer::UpdateShapefile()
 		
 		Debug::WriteWithThreadId(Debug::Format("Update shapefile: %d\n", data.size()), DebugOgrLoading);
 
-		ITable* itable = NULL;
-		sf->get_Table(&itable);
+		CComPtr<ITable> table = NULL;
+		sf->get_Table(&table);
 
 		CComPtr<ILabels> labels = NULL;
 		sf->get_Labels(&labels);
 		labels->Clear();
 
-		if (itable) 
+		if (table) 
 		{
-			CTableClass* tbl = (CTableClass*)itable;
+			CTableClass* tbl = TableHelper::Cast(table);
+
 			long count = 0;
 			for (size_t i = 0; i < data.size(); i++)
 			{
@@ -447,8 +449,6 @@ void Layer::UpdateShapefile()
 					count++;
 				}
 			}
-			itable->Release();
-
 			Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 		}
 

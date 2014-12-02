@@ -46,11 +46,13 @@ public:
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_transparency = 255;
+		gReferenceCounter.AddRef(idLinePattern);
 	}
 	~CLinePattern() 
 	{
 		::SysFreeString(_key);
 		Clear();
+		gReferenceCounter.Release(idLinePattern);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_LINEPATTERN)

@@ -3,6 +3,7 @@
 #include "ogr_feature.h"
 #include "OgrLoader.h"
 #include "OgrLabels.h"
+#include "Expression.h"
 
 class Ogr2RawData
 {

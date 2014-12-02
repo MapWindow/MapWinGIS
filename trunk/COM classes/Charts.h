@@ -187,6 +187,9 @@ public:
 		::SysFreeString(_caption);
 		::SysFreeString(_expression);
 
+		Clear();
+		ClearFields();
+
 		gReferenceCounter.Release(tkInterface::idCharts);
 	}
 

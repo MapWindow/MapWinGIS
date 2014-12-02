@@ -3331,8 +3331,8 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 				{
 					// ask client to provide the data once more
 					VARIANT_BOOL vb;
-					ITable* tableToFill = NULL;
-					CoCreateInstance(CLSID_Table,NULL,CLSCTX_INPROC_SERVER,IID_ITable,(void**)&tableToFill);
+					CComPtr<ITable> tableToFill = NULL;
+					ComHelper::CreateInstance(idTable, (IDispatch**)&tableToFill);
 					
 					CComBSTR bstrFilename(filename);
 					if (filename.GetLength() > 4 && filename.Right(4) == ".dbf")
@@ -3368,7 +3368,6 @@ bool CTableClass::DeserializeCore(CPLXMLNode* node)
 						this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), A2W(filename), options, fieldList);
 					}
 					tableToFill->Close(&vb);
-					tableToFill->Release();
 				}
 			}
 			node = node->psNext;

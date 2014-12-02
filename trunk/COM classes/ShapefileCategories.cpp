@@ -30,6 +30,7 @@
 #include "ShapeDrawingOptions.h"
 #include "Shapefile.h"
 #include "TableClass.h"
+#include "TableHelper.h"
 
 //***********************************************************************/
 //*			get_Count()
@@ -207,14 +208,12 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	if(_shapefile == NULL) 
 		return S_FALSE;
 	
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_FALSE;
 		
-	std::vector<CategoriesData>* values = ((CTableClass*)tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses, minValue, maxValue);
-	tbl->Release();
-	tbl = NULL;
+	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses, minValue, maxValue);
 	
 	if (!values)
 		return S_FALSE;
@@ -267,8 +266,7 @@ STDMETHODIMP CShapefileCategories::Generate(long FieldIndex, tkClassificationTyp
 	if (!tbl) 
 		return S_FALSE;
 		
-	ITable* itbl = tbl;
-	std::vector<CategoriesData>* values = ((CTableClass*)itbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
+	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
 		return S_OK;
 
@@ -469,123 +467,112 @@ void CShapefileCategories::ApplyExpressionCore(long CategoryIndex)
 	if (!_shapefile)
 		return;
 	
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
-	if ( tbl )
+	if ( !tbl )	return;
+	
+	long numShapes;
+	_shapefile->get_NumShapes(&numShapes);
+		
+	// vector of numShapes size with category index for each shape
+	std::vector<int> results;
+	results.resize(numShapes, -1);
+
+	bool uniqueValues = true;
+	for (unsigned int i = 0; i < _categories.size(); i++) {
+		tkCategoryValue value;
+		_categories[i]->get_ValueType(&value);
+		if (value != cvSingleValue) {
+			uniqueValues = false;
+			break;
+		}
+	}
+
+	// ----------------------------------------------------------------
+	// we got unique values classification and want to process it fast
+	// ----------------------------------------------------------------
+	bool parsingIsNeeded = true;	
+	if (_classificationField != -1 && uniqueValues)
 	{
-		long numShapes;
-		_shapefile->get_NumShapes(&numShapes);
-		
-		// vector of numShapes size with category index for each shape
-		std::vector<int> results;
-		results.resize(numShapes, -1);
-
-		bool uniqueValues = true;
-		for (unsigned int i = 0; i < _categories.size(); i++) {
-			tkCategoryValue value;
-			_categories[i]->get_ValueType(&value);
-			if (value != cvSingleValue) {
-				uniqueValues = false;
-				break;
-			}
-		}
-
-		// ----------------------------------------------------------------
-		// we got unique values classification and want to process it fast
-		// ----------------------------------------------------------------
-		bool parsingIsNeeded = true;	
-		if (_classificationField != -1 && uniqueValues)
-		{
-			parsingIsNeeded = false;	// in case there are unique values only we don't need any parsing
+		parsingIsNeeded = false;	// in case there are unique values only we don't need any parsing
 			
-			std::map<CComVariant, long> myMap;				// variant value as key and number of category as result
-			for (unsigned int i = 0; i < _categories.size(); i++)
+		std::map<CComVariant, long> myMap;				// variant value as key and number of category as result
+		for (unsigned int i = 0; i < _categories.size(); i++)
+		{
+			if (i == CategoryIndex || CategoryIndex == -1 )
 			{
-				if (i == CategoryIndex || CategoryIndex == -1 )
+				CComVariant val;
+				_categories[i]->get_MinValue(&val);
+				if (val.vt != VT_EMPTY)
 				{
-					CComVariant val;
-					_categories[i]->get_MinValue(&val);
-					if (val.vt != VT_EMPTY)
-					{
-						CComVariant val2;
-						VariantCopy(&val2, &val);
-						myMap[val2] = i;
-					}
+					CComVariant val2;
+					VariantCopy(&val2, &val);
+					myMap[val2] = i;
 				}
 			}
-		
-			// applying categories to shapes
-			VARIANT val;
-			VariantInit(&val);
-			for (long i = 0; i < numShapes; i++)
-			{
-				tbl->get_CellValue(_classificationField, i, &val);
-				if (myMap.find(val) != myMap.end())
-				{
-					results[i] = myMap[val];	// writing the index of category
-				}
-			}
-			VariantClear(&val);
 		}
 		
-		// -------------------------------------------------------------
-		//		Analyzing expressions
-		// -------------------------------------------------------------
-		if (parsingIsNeeded)
+		// applying categories to shapes
+		VARIANT val;
+		VariantInit(&val);
+		for (long i = 0; i < numShapes; i++)
 		{
-			// building list of expressions
-			
-			std::vector<CString> expressions;
-			for (unsigned int i = 0; i < _categories.size(); i++)
+			tbl->get_CellValue(_classificationField, i, &val);
+			if (myMap.find(val) != myMap.end())
 			{
-				if (i == CategoryIndex || CategoryIndex == -1 )
-				{
-					CComVariant val;
-					_categories[i]->get_MinValue(&val);
-					//if (val.vt != VT_EMPTY && _classificationField != -1)
-					//{
-					//	// we analyzed this one before, so just a dummy string here
-					//	CString str = "";
-					//	expressions.push_back(str);
-					//}
-					//else
-					{
-						CComBSTR expr;
-						_categories[i]->get_Expression(&expr);
-						USES_CONVERSION;
-						CString str = OLE2CA(expr);	
-						expressions.push_back(str);
-					}
-				}
-				else
-				{
-					// we don't need this categories, so dummy strings for them
-					CString str = "";
-					expressions.push_back(str);
-				}
+				results[i] = myMap[val];	// writing the index of category
 			}
+		}
+		VariantClear(&val);
+	}
+		
+	// -------------------------------------------------------------
+	//		Analyzing expressions
+	// -------------------------------------------------------------
+	if (parsingIsNeeded)
+	{
+		// building list of expressions
+		std::vector<CString> expressions;
+		for (unsigned int i = 0; i < _categories.size(); i++)
+		{
+			if (i == CategoryIndex || CategoryIndex == -1 )
+			{
+				CComVariant val;
+				_categories[i]->get_MinValue(&val);
+				
+				CComBSTR expr;
+				_categories[i]->get_Expression(&expr);
+				USES_CONVERSION;
+				CString str = OLE2CA(expr);
+				expressions.push_back(str);
+			}
+			else
+			{
+				// we don't need this categories, so dummy strings for them
+				CString str = "";
+				expressions.push_back(str);
+			}
+		}
 
-			// adding category indices for shapes in the results vector
-			((CTableClass*)tbl)->AnalyzeExpressions(expressions, results);
-		}
+		// adding category indices for shapes in the results vector
+		TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
+	}
 		
-		// saving results
-		if (CategoryIndex == -1 )
+	// saving results
+	if (CategoryIndex == -1 )
+	{
+		for (unsigned long i = 0; i < results.size(); i++)
 		{
-			for (unsigned long i = 0; i < results.size(); i++)
-			{
-				_shapefile->put_ShapeCategory(i, results[i]);
-			}
+			_shapefile->put_ShapeCategory(i, results[i]);
 		}
-		else
+	}
+	else
+	{
+		for (unsigned long i = 0; i < results.size(); i++)
 		{
-			for (unsigned long i = 0; i < results.size(); i++)
-			{
-				if (results[i] == CategoryIndex)
-					_shapefile->put_ShapeCategory(i, CategoryIndex);
-			}
+			if (results[i] == CategoryIndex)
+				_shapefile->put_ShapeCategory(i, CategoryIndex);
 		}
-		tbl->Release();
 	}
 }
 
@@ -878,7 +865,7 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 		{
 			int fieldIndex = atoi(s);
 
-			ITable* table = NULL;
+			CComPtr<ITable> table = NULL;
 			_shapefile->get_Table(&table);
 			if (table)
 			{
@@ -895,7 +882,6 @@ bool CShapefileCategories::DeserializeCore(CPLXMLNode* node, bool applyExpressio
 					}
 					fld->Release();
 				}
-				table->Release();
 			}
 		}
 	}
@@ -1135,12 +1121,9 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 		return S_OK;
 	}
 
-	ITable* table = NULL;
+	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
-	if (!table)
-	{
-		return S_OK;
-	}
+	if (!table) return S_OK;
 
 	IField* fld = NULL;
 	table->get_Field(FieldIndex, &fld);
@@ -1179,12 +1162,6 @@ STDMETHODIMP CShapefileCategories::Sort(LONG FieldIndex, VARIANT_BOOL Ascending,
 			pair<CComVariant, IShapefileCategory*> myPair(valDefault, _categories[i]);	
 			map.insert(myPair);	
 		}
-	}
-	
-	if (table)
-	{
-		table->Release();
-		table = NULL;
 	}
 	
 	// returning result

@@ -31,12 +31,11 @@ bool ChartsHelper::ReadChartFields(IShapefile* sf, std::vector<double*>* values)
 	for (int j = 0; j < numBars; j++)
 	{
 		long fieldIndex;
-		IChartField* chartField = NULL;
+		CComPtr<IChartField> chartField = NULL;
 		charts->get_Field(j, &chartField);
 		if (chartField)
 		{
 			chartField->get_Index(&fieldIndex);
-			chartField->Release();
 		}
 
 		//m_charts->get_FieldIndex(j, &fieldIndex);

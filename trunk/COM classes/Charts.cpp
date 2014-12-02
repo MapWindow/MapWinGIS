@@ -740,7 +740,6 @@ STDMETHODIMP CCharts::ClearFields()
 STDMETHODIMP CCharts::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	// deleting to save some memory
 	IShapefile* sf = this->get_ParentShapefile();
 	if (sf)
 	{
@@ -898,11 +897,9 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 			}
 			else
 			{
-				IChartField* fld = NULL;
+				CComPtr<IChartField> fld = NULL;
 				this->get_Field(j, &fld);
 				fld->get_Color(&color);
-				fld->Release();
-				fld = NULL;
 			}
 			
 			// initializing brushes

@@ -53,16 +53,12 @@ public:
 		_markerOffset = 0.0f;
 		_markerOrientation = lorParallel;
 		_markerFlipFirst = VARIANT_TRUE;
-		CoCreateInstance( CLSID_ShapeDrawingOptions, NULL, CLSCTX_INPROC_SERVER, IID_IShapeDrawingOptions, (void**)&_options );
+		gReferenceCounter.AddRef(idLineSegment);
 	}
 
 	~CLineSegment()
 	{
-		if (_options)
-		{
-			_options->Release();
-			_options = NULL;
-		}
+		gReferenceCounter.Release(idLineSegment);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_LINESEGMENT)
@@ -123,7 +119,6 @@ private:
 	OLE_COLOR _markerOutlineColor;
 	tkLineLabelOrientation _markerOrientation;
 	VARIANT_BOOL _markerFlipFirst;
-	IShapeDrawingOptions* _options;
 
 public:
 	VARIANT_BOOL DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor);

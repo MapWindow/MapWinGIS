@@ -29,8 +29,8 @@
 #include "LabelClass.h"
 #include "Labels.h"
 #include "Shapefile.h"
-#include "TableClass.h"
 #include "Templates.h"
+#include "TableHelper.h"
 
 // ////////////////////////////////////////////////////////////// //
 //	PROPERTIES COMMON FOR CLABELS AND CLABELCATEGORY
@@ -871,12 +871,12 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 		return S_FALSE;
 	}
 	
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
 		return S_FALSE;
 		
-	std::vector<CategoriesData>* values = ((CTableClass*)tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
+	std::vector<CategoriesData>* values =TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
 		return S_OK;
 
@@ -926,7 +926,7 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 		return;
 	}
 
-	ITable* tbl = NULL;
+	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if ( tbl )
 	{
@@ -1010,37 +1010,30 @@ void CLabels::ApplyExpression_(long CategoryIndex)
 			}
 
 			// adding category indices for shapes in the results vector
-			((CTableClass*)tbl)->AnalyzeExpressions(expressions, results);
+			TableHelper::Cast(tbl)->AnalyzeExpressions(expressions, results);
 		}
 		
 		// saving results
 		if (CategoryIndex == -1 )
 		{
 			for (unsigned long i = 0; i < results.size(); i++)
-			{
 				(*_labels[i])[0]->category = results[i];
-				//m_shapefile->put_ShapeCategory(i, results[i]);
-			}
 		}
 		else
 		{
 			for (unsigned long i = 0; i < results.size(); i++)
 			{
-				if (results[i] == CategoryIndex)	// wasn't tested !!!
-				{
+				if (results[i] == CategoryIndex)
 					(*_labels[i])[0]->category = results[i];
-				}
-					//m_shapefile->put_ShapeCategory(i, CategoryIndex);
 			}
 		}
-		tbl->Release();
 	}
 }
 
 // *****************************************************************
 //			ApplyCategories()
 // *****************************************************************
-// Detemines to which category belong individual labels
+// Determines to which category belong individual labels
 STDMETHODIMP CLabels::ApplyCategories()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -1714,14 +1707,14 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	}
 	else
 	{
-		ITable* table = NULL;
+		CComPtr<ITable> table = NULL;
 		_shapefile->get_Table(&table);
 		if (table)
 		{
 			// analyzes expression
 			CString strError;
 			std::vector<CString> results;
-			if (((CTableClass*)table)->CalculateCore(str, results, strError))
+			if (TableHelper::Cast(table)->CalculateCore(str, results, strError))
 			{
 				// updating labels
 				if (results.size() == _labels.size())
@@ -1746,7 +1739,6 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 					ErrorMessage(tkINVALID_EXPRESSION);
 				}
 			}
-			table->Release();
 		}
 	}
 	return S_OK;
@@ -2052,7 +2044,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	}
 		
 	// extracting table
-	ITable* dbf = NULL;
+	CComPtr<ITable> dbf = NULL;
 	_shapefile->get_Table(&dbf);
 	
 	// opening editing session
@@ -2068,7 +2060,6 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 	{
 		long errorCode;
 		dbf->get_LastErrorCode(&errorCode);
-		dbf->Release();
 		ErrorMessage(errorCode);
 		return S_OK;
 	}
@@ -2197,7 +2188,6 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 		}
 	}
 
-	dbf->Release();
 	return S_OK;
 }
 
@@ -2235,7 +2225,7 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 		return S_OK;
 	}
 
-	ITable* dbf = NULL;
+	CComPtr<ITable> dbf = NULL;
 	_shapefile->get_Table(&dbf);
 	if (!dbf)
 	{
@@ -2278,7 +2268,6 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 	if (indices[0] == -1 || indices[1] == -1)	
 	{
 		ErrorMessage(tkLABELS_NOT_SAVED);
-		dbf->Release();
 		return S_OK;
 	}
 
@@ -2294,31 +2283,30 @@ STDMETHODIMP CLabels::LoadFromDbf2(BSTR xField, BSTR yField, BSTR angleField, BS
 	{
 		this->Clear();
 		ErrorMessage(tkLABELS_NOT_SYNCHRONIZE);
-		dbf->Release();
 		return S_OK;
 	}
-	
+
 	// fast reading of the values from table
 	std::vector<double> xValues;
-	((CTableClass*)dbf)->get_FieldValuesDouble((int)indices[0], xValues);
+	TableHelper::Cast(dbf)->get_FieldValuesDouble((int)indices[0], xValues);
 
 	std::vector<double> yValues;
-	((CTableClass*)dbf)->get_FieldValuesDouble((int)indices[1], yValues);
+	TableHelper::Cast(dbf)->get_FieldValuesDouble((int)indices[1], yValues);
 	
 	//angles
 	std::vector<double> vAngles;
 	if (loadAngle)
-		((CTableClass*)dbf)->get_FieldValuesDouble((int)indices[2], vAngles);
+		TableHelper::Cast(dbf)->get_FieldValuesDouble((int)indices[2], vAngles);
 
 	// text
 	std::vector<CString> vText;
 	if (loadText)
-		((CTableClass*)dbf)->get_FieldValuesString((int)indices[3], vText);
+		TableHelper::Cast(dbf)->get_FieldValuesString((int)indices[3], vText);
 
 	// category
 	std::vector<int> vCategory;
 	if (loadCategory)
-		((CTableClass*)dbf)->get_FieldValuesInteger((int)indices[4], vCategory);
+		TableHelper::Cast(dbf)->get_FieldValuesInteger((int)indices[4], vCategory);
 
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
@@ -2398,14 +2386,14 @@ STDMETHODIMP CLabels::Generate(BSTR Expression, tkLabelPositioning Method, VARIA
 		return S_OK;
 	}
 
-	ITable* table = NULL;
+	CComPtr<ITable> table = NULL;
 	_shapefile->get_Table(&table);
 	
 	USES_CONVERSION;
 	BSTR errorString;
 	VARIANT_BOOL vbretval;
-	((CTableClass*)table)->ParseExpressionCore(Expression, vtString, &errorString, &vbretval);
-	table->Release();
+	
+	TableHelper::Cast(table)->ParseExpressionCore(Expression, vtString, &errorString, &vbretval);
 
 	if (!vbretval)
 	{

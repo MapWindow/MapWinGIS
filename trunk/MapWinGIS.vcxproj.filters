@@ -813,6 +813,9 @@
     <ClInclude Include="Utilities\DebugHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="Shapefile\TableHelper.h">
+      <Filter>Shapefile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1721,6 +1724,9 @@
     </ClCompile>
     <ClCompile Include="Utilities\DebugHelper.cpp">
       <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Shapefile\TableHelper.cpp">
+      <Filter>Shapefile</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
