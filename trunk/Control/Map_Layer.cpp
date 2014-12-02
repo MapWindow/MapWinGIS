@@ -201,7 +201,7 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 			}
 		}
 
-		RedrawCore(RedrawAll, false, false);
+		RedrawCore(RedrawAll, false);
 	}
 	else
 	{	
@@ -543,7 +543,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	if (l != NULL) FireLayersChanged();
-	_canUseLayerBuffer = FALSE;
+	ScheduleLayerRedraw();
 	LockWindow( lmUnlock );
 	return layerHandle;
 }
@@ -807,9 +807,7 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
 
 			FireLayersChanged();
 
-			_canUseLayerBuffer = FALSE;
-			if( !_lockCount )
-				InvalidateControl();
+			Redraw();
 		}
 		else
 			ErrorMessage(tkINVALID_LAYER_HANDLE);
@@ -854,10 +852,8 @@ void CMapView::RemoveAllLayers()
 	LockWindow( lmUnlock );
 
 	_activeLayerPosition = 0;
-	_canUseLayerBuffer = FALSE;
 
-	if( !_lockCount )
-		InvalidateControl();
+	Redraw();
 }
 
 // ***************************************************************
@@ -877,9 +873,7 @@ BOOL CMapView::MoveLayerUp(long InitialPosition)
 
 		_activeLayers.insert( _activeLayers.begin() + newPos, layerHandle );
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
 		return TRUE;
 	}
 	else
@@ -905,9 +899,7 @@ BOOL CMapView::MoveLayerDown(long InitialPosition)
 
 		_activeLayers.insert( _activeLayers.begin() + newPos, layerHandle );
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
 
 		return TRUE;
 	}
@@ -934,9 +926,7 @@ BOOL CMapView::MoveLayer(long InitialPosition, long TargetPosition)
 		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
 		_activeLayers.insert( _activeLayers.begin() + TargetPosition, layerHandle );
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
 
 		return TRUE;
 	}
@@ -958,9 +948,8 @@ BOOL CMapView::MoveLayerTop(long InitialPosition)
 		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
 		_activeLayers.push_back(layerHandle);
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
+
 		return TRUE;
 	}
 	else
@@ -981,9 +970,8 @@ BOOL CMapView::MoveLayerBottom(long InitialPosition)
 		_activeLayers.erase( _activeLayers.begin() + InitialPosition );
 		_activeLayers.push_front(layerHandle);
 
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
+
 		return TRUE;
 	}
 	else
@@ -1034,10 +1022,7 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 		else
 			return;
 
-		
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		Redraw();
 	}
 	else
 	{	

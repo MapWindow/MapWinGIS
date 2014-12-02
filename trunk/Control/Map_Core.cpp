@@ -274,18 +274,42 @@ void CMapView::Resize(long Width, long Height)
 // *************************************************
 void CMapView::Redraw2(tkRedrawType redrawType)
 {
-	RedrawCore(redrawType, redrawType != RedrawMinimal, false);
+	RedrawCore(redrawType, false);
+}
+
+// *************************************************
+//			ScheduleVolatileRedraw()						  
+// *************************************************
+void CMapView::ScheduleVolatileRedraw()
+{
+	_canUseVolatileBuffer = FALSE;
+	_canUseMainBuffer = false;
+}
+
+// *************************************************
+//			ScheduleLayerRedraw()						  
+// *************************************************
+void CMapView::ScheduleLayerRedraw()
+{
+	_canUseLayerBuffer = FALSE;
+	_canUseVolatileBuffer = FALSE;
+	_canUseMainBuffer = false;
+}
+
+// *************************************************
+//			RedrawWithTiles()						  
+// *************************************************
+void CMapView::RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers)
+{
+	DoUpdateTiles();
+	RedrawCore(redrawType, reloadBuffers);
 }
 
 // *************************************************
 //			RedrawCore()						  
 // *************************************************
-void CMapView::RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce )
+void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuffers /*= false */ )
 {
-	if (updateTiles) {
-		DoUpdateTiles();
-	}
-
 	// no breaks are needed; it's intentional; redraw type of higher order leads to redraw of lower levels
 	switch (redrawType)
 	{

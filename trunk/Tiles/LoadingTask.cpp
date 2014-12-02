@@ -68,7 +68,7 @@ void LoadingTask::DoTask()
 					else
 					{
 						tiles->AddTileWithCaching(tile);
-						mapView->RedrawCore(RedrawSkipDataLayers, false, false);
+						mapView->RedrawCore(RedrawSkipDataLayers, false);
 						this->Loader->RunCaching();		// if there is no pending tasks, the caching will be started		
 					}
 					this->busy = false;

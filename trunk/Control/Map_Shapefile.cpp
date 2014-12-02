@@ -249,7 +249,7 @@ void CMapView::SetShapeLayerDrawPoint(long LayerHandle, BOOL bNewValue)
 		{
 			options->verticesVisible = bNewValue;
 		}
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -277,7 +277,7 @@ void CMapView::SetShapeLayerPointSize(long LayerHandle, float newValue)
 	if (options)
 	{		
 		options->pointSize = newValue;
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -351,7 +351,7 @@ void CMapView::SetShapeLayerPointColor(long LayerHandle, OLE_COLOR nNewValue)
 		{
 			options->verticesColor = nNewValue;
 		}
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -416,7 +416,7 @@ void CMapView::SetShapeLayerDrawLine(long LayerHandle, BOOL bNewValue)
 	if (options)
 	{
 		options->linesVisible = (bNewValue == TRUE);
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }	
 
@@ -441,7 +441,7 @@ void CMapView::SetShapeLayerLineColor(long LayerHandle, OLE_COLOR nNewValue)
 	if (options)
 	{
 		options->lineColor = nNewValue;
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -473,9 +473,7 @@ void CMapView::SetShapeLayerLineWidth(long LayerHandle, float newValue)
 	if (options)
 	{
 		options->lineWidth = newValue;
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -502,7 +500,7 @@ void CMapView::SetShapeLayerLineStipple(long LayerHandle, short nNewValue)
 	if (options)
 	{	
 		options->lineStipple = (tkDashStyle)nNewValue;	// TODO: convert between enumerations
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}		
 }
 
@@ -547,7 +545,7 @@ void CMapView::SetShapeLayerDrawFill(long LayerHandle, BOOL bNewValue)
 	if (options)
 	{
 		options->fillVisible = (bNewValue == TRUE);
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -572,7 +570,7 @@ void CMapView::SetShapeLayerFillColor(long LayerHandle, OLE_COLOR nNewValue)
 	if (options)
 	{
 		options->fillColor = nNewValue;
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -604,7 +602,7 @@ void CMapView::SetShapeLayerFillTransparency(long LayerHandle, float newValue)
 	if (options)
 	{
 		options->fillTransparency = newValue * 255.0f;
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 #pragma endregion
@@ -637,7 +635,7 @@ void CMapView::SetShapeLayerFillStipple(long LayerHandle, short nNewValue)
 	if (options)	
 	{
 		// TODO: write conversion between tkFillStipple and tkGDIPlusHatchStyle enumerations
-		_canUseLayerBuffer = FALSE;		
+		ScheduleLayerRedraw();
 	}
 }	
 
@@ -662,7 +660,7 @@ void CMapView::SetShapeLayerStippleTransparent(long LayerHandle, BOOL nNewValue)
 	if (options)
 	{
 		options->fillBgTransparent = (nNewValue == TRUE ? true : false);
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 
@@ -687,7 +685,7 @@ void CMapView::SetShapeLayerStippleColor(long LayerHandle, OLE_COLOR nNewValue)
 	if (options)
 	{
 		options->fillBgColor = nNewValue;
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 	}
 }
 

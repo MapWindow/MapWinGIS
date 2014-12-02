@@ -228,7 +228,7 @@ void CMapView::UpdateCursor(tkCursorMode newCursor, bool clearEditor)
 	OnSetCursor(this, HTCLIENT, 0);
 	
 	if (refreshNeeded)
-		RedrawCore(RedrawSkipDataLayers, false, true);
+		RedrawCore(RedrawSkipDataLayers, true);
 }
 
 // *********************************************************

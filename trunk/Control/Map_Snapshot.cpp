@@ -174,7 +174,7 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 			{
 				// they are already here, no loading is needed
 				RestoreExtents();
-				FireTilesLoaded(_tiles, NULL, true, key);
+				FireTilesLoaded(_tiles, true, key);
 			}
 		}
 	}
@@ -330,7 +330,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	}
 	
 	// do the drawing
-	_canUseLayerBuffer=FALSE;
+	ScheduleLayerRedraw();
 	_isSnapshot = true;
 
 	
@@ -350,7 +350,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 	// drawing on the output canvas atop the previous drawing, naturally we don't care about flickering here
 	DrawDynamic(snapDC, rcBounds, *r, false, offsetX, offsetY);
 
-	_canUseLayerBuffer=FALSE;
+	ScheduleLayerRedraw();
 	_isSnapshot = false;
 
 	if (createDC)

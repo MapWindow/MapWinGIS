@@ -45,7 +45,6 @@ STDMETHODIMP CGridHeader::CopyFrom(IGridHeader * pVal)
 	USES_CONVERSION;
 	double t;
 	long t2;
-	BSTR t3;
 	VARIANT t4;
 	
 	pVal->get_dX(&t);

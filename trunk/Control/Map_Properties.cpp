@@ -35,9 +35,7 @@ void CMapView::SetShowVersionNumber(VARIANT_BOOL newVal)
 	if (_showVersionNumber != newVal)
 	{
 		_showVersionNumber = newVal;
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		RedrawCore(RedrawDynamicTools, false);
 	}
 }
 
@@ -59,9 +57,7 @@ void CMapView::SetShowRedrawTime(VARIANT_BOOL newVal)
 	if (_showRedrawTime != newVal)
 	{
 		_showRedrawTime = newVal;
-		_canUseLayerBuffer = FALSE;
-		if( !_lockCount )
-			InvalidateControl();
+		RedrawCore(RedrawDynamicTools, false);
 	}
 }
 
@@ -478,7 +474,7 @@ void CMapView::SetZoomBarMinZoom(long nNewValue)
 	if (nNewValue < 1)	nNewValue = -1;
 	if (nNewValue > 25)	nNewValue = 25;
 	_zoomBarMinZoom = nNewValue;
-	RedrawCore(tkRedrawType::RedrawAll, true, false);
+	RedrawWithTiles(tkRedrawType::RedrawAll, true, false);
 }
 
 // *****************************************************
@@ -495,5 +491,5 @@ void CMapView::SetZoomBarMaxZoom(long nNewValue)
 	if (nNewValue < 1)	nNewValue = -1;
 	if (nNewValue > 25)	nNewValue = 25;
 	_zoomBarMaxZoom = nNewValue;
-	RedrawCore(tkRedrawType::RedrawAll, true, false);
+	RedrawWithTiles(tkRedrawType::RedrawAll, true, false);
 }

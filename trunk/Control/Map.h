@@ -635,8 +635,8 @@ public:
 		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
 	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
 		{FireEvent(eventidAfterDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
-	void FireTilesLoaded(IDispatch* tiles, IDispatch* extents, VARIANT_BOOL snapshot, LPCTSTR key)
-		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, extents, snapshot,key);}
+	void FireTilesLoaded(IDispatch* tiles, VARIANT_BOOL snapshot, LPCTSTR key)
+		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, snapshot,key);}
 	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
 	void FireLayersChanged()
@@ -910,7 +910,7 @@ public:
 	IGeoProjection* GetGMercProjection();
 	IGeoProjection* GetMapProjection();
 	
-	void RedrawCore( tkRedrawType redrawType, bool updateTiles, bool atOnce );
+	void RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuffers = false );
 
 	void ReleaseProjections();
 	void InitProjections();
@@ -1121,6 +1121,9 @@ private:
 	bool UndoCore(bool shift);
 	void ZoomToCursorPosition(bool zoomIn);
 	HCURSOR GetCursorIcon();
+	void ScheduleLayerRedraw();
+	void ScheduleVolatileRedraw();
+	void RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers);
 	
 #pragma endregion
 
@@ -1147,7 +1150,7 @@ public:
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
 	virtual void _SetMapCursor(tkCursorMode mode, bool clearEditor) { UpdateCursor(mode, false); }
-	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, updateTiles, atOnce); };
+	virtual void _Redraw(tkRedrawType redrawType, bool updateTiles, bool atOnce){ RedrawCore(redrawType, atOnce); };
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
 	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }
@@ -1156,6 +1159,9 @@ public:
 		SetCapture();
 	}
 	
+
+
+
 
 };
 

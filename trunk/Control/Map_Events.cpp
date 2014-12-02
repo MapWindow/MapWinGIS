@@ -148,7 +148,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 				if (m_cursorMode == cmEditShape)
 				{
 					if (_shapeEditor->HandleDelete()) {
-						RedrawCore(RedrawSkipDataLayers, false, true);
+						RedrawCore(RedrawSkipDataLayers, true);
 					}
 				}
 			}
@@ -419,7 +419,7 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 {
 	if (_dragging.Operation == DragZoombarHandle)
 	{
-		RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+		RedrawCore(tkRedrawType::RedrawSkipDataLayers, true);
 		return true;
 	}
 	else
@@ -429,7 +429,7 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 		{
 			_lastZooombarPart = part;		// update before calling OnSetCursor
 			OnSetCursor(this,HTCLIENT,0);
-			RedrawCore(RedrawSkipDataLayers, false, true);
+			RedrawCore(RedrawSkipDataLayers, true);
 			_canUseMainBuffer = false;
 			this->Refresh();
 		}
@@ -446,9 +446,9 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 void CMapView::UpdateShapeEditor()
 {
 	if (_shapeEditor->GetRedrawNeeded(rtVolatileLayer))
-		RedrawCore(RedrawSkipDataLayers, false, true);
+		RedrawCore(RedrawSkipDataLayers, true);
 	else if (_shapeEditor->GetRedrawNeeded(rtShapeEditor))
-		RedrawCore(RedrawDynamicTools, false, true);
+		RedrawCore(RedrawDynamicTools, true);
 }
 
 // ************************************************************
@@ -535,7 +535,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
 				{
 					UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
-					RedrawCore(RedrawSkipDataLayers, false, true);
+					RedrawCore(RedrawSkipDataLayers, true);
 					FireShapeIdentified(layerHandle, shapeIndex, x, y);
 					return;
 				}
@@ -586,7 +586,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				{
 					FireMeasuringChanged(_measuring, tkMeasuringAction::PointAdded);
 					if( m_sendMouseDown ) this->FireMouseDown( MK_LBUTTON, (short)vbflags, x, y );
-					RedrawCore(RedrawSkipDataLayers, false, true);
+					RedrawCore(RedrawSkipDataLayers, true);
 				}
 			}
 			break;
@@ -626,7 +626,7 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 		if (_shapeEditor->GetClosestPoint(projX, projY, projX, projY))
 		{
 			if (_shapeEditor->InsertVertex(projX, projY)) {
-				RedrawCore(tkRedrawType::RedrawSkipDataLayers, false, true);
+				RedrawCore(tkRedrawType::RedrawSkipDataLayers, true);
 				return;
 			}
 		}
@@ -1177,7 +1177,7 @@ void CMapView::DoPanning(CPoint point)
 		// complete redraw; bad for performance, especially for large layers
 		// AxMap.LayerScreenBufferMode property should be used instead to mark
 		// layer for immediate redraw
-		_canUseLayerBuffer = FALSE;
+		ScheduleLayerRedraw();
 		LockWindow(lmUnlock);	
 		FireExtentsChanged(); 
 		ReloadImageBuffers(); 
@@ -1185,7 +1185,7 @@ void CMapView::DoPanning(CPoint point)
 	else
 	{
 		// layers stay the same, while all the rest must be updated
-		RedrawCore(RedrawSkipDataLayers, true, true);
+		RedrawWithTiles(RedrawSkipDataLayers, true, true);
 	}
 }
 #pragma endregion
@@ -1357,7 +1357,7 @@ void CMapView::OnDropFiles(HDROP hDropInfo)
 // *******************************************************
 void CMapView::OnBackColorChanged()
 {
-	_canUseLayerBuffer = FALSE;
+	ScheduleLayerRedraw();
 	if( !_lockCount )
 		InvalidateControl();
 }

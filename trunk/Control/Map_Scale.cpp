@@ -276,9 +276,7 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 		_currentZoom = GetCurrentZoom();
 	}
 
-	_canUseLayerBuffer = FALSE;
-	_canUseMainBuffer = false;
-	_canUseVolatileBuffer = FALSE;
+	ScheduleLayerRedraw();
 
 	this->FireExtentsChanged();
 	this->ReloadImageBuffers();

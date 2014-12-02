@@ -6152,7 +6152,7 @@ library MapWinGIS
 			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex);
 			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
-			[id(13)] void TilesLoaded(ITiles* tiles, IExtents* extents, VARIANT_BOOL snapshot, BSTR key);
+			[id(13)] void TilesLoaded(ITiles* tiles, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
 			[id(15)] void LayersChanged();
 			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
