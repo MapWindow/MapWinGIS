@@ -1098,7 +1098,7 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 	_extents.bottom = bottom;
 	_extents.top = top;
 	
-	if (xrange == 0)
+	if (xrange == 0 || _viewWidth == 0)
 	{
 		_pixelPerProjectionX = 0;
 		_inversePixelPerProjectionX = 0;
@@ -1109,7 +1109,7 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 		_inversePixelPerProjectionX = 1.0/_pixelPerProjectionX;
 	}
 
-	if (yrange == 0)
+	if (yrange == 0 || _viewHeight == 0)
 	{
 		_pixelPerProjectionY = 0;
 		_inversePixelPerProjectionY = 0;
