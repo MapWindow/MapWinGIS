@@ -3725,6 +3725,7 @@ interface IShapefile : IDispatch{
 	[propget, id(129)] HRESULT ShapefileType2D([out, retval] ShpfileType* pVal);
 	[propget, id(130)] HRESULT FieldIndexByName([in] BSTR FieldName, [out, retval] LONG* pVal);
 	[id(131)] HRESULT Move([in] DOUBLE xOffset, [in] DOUBLE yOffset, [out, retval]VARIANT_BOOL* retVal);
+	[id(132)] HRESULT RemoveSpatialIndex([out, retval]VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/

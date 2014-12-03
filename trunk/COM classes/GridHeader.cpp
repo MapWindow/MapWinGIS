@@ -336,9 +336,7 @@ STDMETHODIMP CGridHeader::put_Notes(BSTR newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	USES_CONVERSION;
-	//Rob Cairns 9 Nov 2009 Bug 1477
-	//::SysFreeString(OLE2BSTR(notes));
-	//notes = newVal;
+
 	::SysFreeString(_notes);
 	_notes = OLE2BSTR(newVal);
 

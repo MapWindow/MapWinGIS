@@ -27,7 +27,6 @@
 
 #include "stdafx.h"
 #include "ShapefileDrawing.h"
-#include "LineDrawing.h"
 #include "LinePattern.h"
 #include "ShapefileReader.h"
 #include "Shape.h"

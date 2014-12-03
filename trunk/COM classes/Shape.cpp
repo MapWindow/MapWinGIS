@@ -170,8 +170,7 @@ CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld)
 	
 	for (unsigned int i = 0; i < size; i++)
 	{
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance( CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&pnt);
+		ComHelper::CreatePoint(&pnt);
 		pnt->put_X(shpOld->_points[i].X);
 		pnt->put_Y(shpOld->_points[i].Y);
 		if (isZ || isM)
@@ -1243,7 +1242,7 @@ STDMETHODIMP CShape::get_Centroid(IPoint** pVal)
 			yPart = ySum / (6 * area);
 		}
 
-		// corrects for shapes in quadrants other than 1 or clockwise/counterclocwise sign errors
+		// corrects for shapes in quadrants other than 1 or clockwise/counter-clocwise sign errors
 		if (xMax + XShift < 0 && xPart > 0)  xPart = -1 * xPart;
 		if (xMin + XShift > 0 && xPart < 0)  xPart = -1 * xPart;
 		if (yMax + YShift < 0 && yPart > 0)  yPart = -1 * yPart;
@@ -1264,8 +1263,8 @@ STDMETHODIMP CShape::get_Centroid(IPoint** pVal)
 	}
 	
 	IPoint* pnt = NULL;
-	m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-	//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);	
+	ComHelper::CreatePoint(&pnt);
+
 	pnt->put_X(x);
 	pnt->put_Y(y);
 	*pVal = pnt;
@@ -3010,6 +3009,6 @@ cleaning:
 STDMETHODIMP CShape::get_IsEmpty(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _shp->get_PointCount() == 0;
+	*pVal = _shp->get_PointCount() == 0? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }

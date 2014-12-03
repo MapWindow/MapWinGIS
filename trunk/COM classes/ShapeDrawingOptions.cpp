@@ -204,7 +204,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 	}
 
 	IPoint* pnt = NULL;
-	m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+	ComHelper::CreatePoint(&pnt);
 	pnt->put_X(clipWidth/2.0); 
 	pnt->put_Y(clipHeight/2.0);
 	long position = 0;
@@ -281,8 +281,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 	
 	for (int i = 0; i < 2; i++)
 	{
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+		ComHelper::CreatePoint(&pnt);
 		
 		if ( i == 0 )
 		{
@@ -386,8 +385,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 	
 	for (int i = 0; i <= 4; i++)	// <=4
 	{
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+		ComHelper::CreatePoint(&pnt);
 		
 		if (i == 0 || i == 4)
 		{

@@ -109,7 +109,7 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Polygons* polygon)
 			for (; j >= 0; j--)
 			{
 				IPoint* pnt = NULL;
-				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+				ComHelper::CreatePoint(&pnt);
 				
 				x = (double)(*poly)[j].X;
 				y = (double)(*poly)[j].Y;
@@ -136,7 +136,7 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Polygons* polygon)
 					((*poly)[0]).Y != ((*poly)[size]).Y)
 				{
 					IPoint* pnt = NULL;
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					
 					x = (double)(*poly)[size].X;	// slightly inoptimal, this point was calculated already
 					y = (double)(*poly)[size].Y;

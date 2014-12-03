@@ -161,8 +161,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 
 			if( shpType == SHP_POINT )
 			{
-				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+				ComHelper::CreatePoint(&pnt);
 				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y;
@@ -195,8 +194,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 
 			if( shpType == SHP_POINTZ )
 			{
-				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+				ComHelper::CreatePoint(&pnt);
 				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y, z, m;
@@ -233,8 +231,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 
 			if( shpType == SHP_POINTM )
 			{
-				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-				//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+				ComHelper::CreatePoint(&pnt);
 				pnt->put_GlobalCallback(_globalCallback);
 
 				double x, y, m;
@@ -302,8 +299,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -364,8 +360,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				//Read the x, y part of the point
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -462,8 +457,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				//Read the x, y part of the point
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -543,8 +537,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -604,8 +597,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -701,8 +693,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -767,8 +758,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -813,8 +803,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);
@@ -824,8 +813,8 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 					shape->InsertPoint(pnt,&pointIndex,&retval);
 					if( retval == VARIANT_FALSE )
 					{	*pVal = NULL;
-					shape->Release();
-					return S_OK;
+						shape->Release();
+						return S_OK;
 					}
 					pnt->Release();
 				}
@@ -895,8 +884,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 				long pointIndex = 0;
 				for( int j = 0; j < numPoints; j++ )
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-					//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_GlobalCallback(_globalCallback);
 					fread(&x,sizeof(double),1,_shpfile);
 					fread(&y,sizeof(double),1,_shpfile);

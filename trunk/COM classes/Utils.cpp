@@ -475,7 +475,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				for( int i = 0; i < (int)PointsToKeep.size(); i++ )
 				{	
 					IPoint * pnt = NULL;
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					
 					pnt->put_X( PointsToKeep[i].x );
 					pnt->put_Y( PointsToKeep[i].y );
@@ -1260,7 +1260,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			shape->InsertPart(0,&pos,&vbretval);
 
 			IPoint * point = NULL;
-			CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&point);
+			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
 			point->put_Z(z1);
@@ -1269,7 +1269,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			point->Release();
 			point = NULL;
 
-			CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&point);
+			ComHelper::CreatePoint(&point);
 			point->put_X(x2);
 			point->put_Y(y2);
 			point->put_Z(z2);
@@ -1278,7 +1278,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			point->Release();
 			point = NULL;
 						
-			CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&point);
+			ComHelper::CreatePoint(&point);
 			point->put_X(x3);
 			point->put_Y(y3);
 			point->put_Z(z3);
@@ -1287,7 +1287,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			point->Release();
 			point = NULL;
 
-			CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&point);
+			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
 			point->put_Z(z1);
@@ -1342,7 +1342,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			shape->Create(Type,&vbretval);
 
 			IPoint * point = NULL;
-			CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&point);
+			ComHelper::CreatePoint(&point);
 			point->put_X(x1);
 			point->put_Y(y1);
 			point->put_Z(z1);
@@ -1910,7 +1910,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 								last_point_index = point;
 							_expand_grid->CellToProj( polygon[point].column, polygon[point].row, &poly_x, &poly_y );
 							IPoint * ipoint = NULL;
-							CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&ipoint);
+							ComHelper::CreatePoint(&ipoint);
 							ipoint->put_X(poly_x);
 							ipoint->put_Y(poly_y);
 							long pindex = point;
@@ -1922,7 +1922,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 					//Write the last point again
 					_expand_grid->CellToProj( polygon[last_point_index].column, polygon[last_point_index].row, &poly_x, &poly_y );
 					IPoint * ipoint = NULL;
-					CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&ipoint);
+					ComHelper::CreatePoint(&ipoint);
 					ipoint->put_X(poly_x);
 					ipoint->put_Y(poly_y);
 					long pindex = point + 1;

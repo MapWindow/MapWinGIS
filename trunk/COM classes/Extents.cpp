@@ -186,7 +186,7 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 	
 	for (long i = 0; i<=4; i++)
 	{
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+		ComHelper::CreatePoint(&pnt);
 
 		if (i == 0 || i ==4)
 		{	

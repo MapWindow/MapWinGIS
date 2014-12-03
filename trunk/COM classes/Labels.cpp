@@ -795,14 +795,14 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 									int k = n;
 									if (k == 4) k = 0;
 
-									m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+									ComHelper::CreatePoint(&pnt);			
 									pnt->put_X(double(frame->points[k].x));
 									pnt->put_Y(double(frame->points[k].y));
 									shp->InsertPoint(pnt,&n,&vbretval);
 									pnt->Release();
 								}
 
-								m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+								ComHelper::CreatePoint(&pnt);
 								pnt->put_X(double(box.left));
 								pnt->put_Y(double(box.bottom));
 

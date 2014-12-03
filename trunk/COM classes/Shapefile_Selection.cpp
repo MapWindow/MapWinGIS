@@ -32,7 +32,6 @@
 // ******************************************************************
 //		SelectShapes()
 // ******************************************************************
-//# include "Timer.h"
 CMutex selectShapesMutex(FALSE);
 STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, SelectMode SelectMode, VARIANT *Result, VARIANT_BOOL *retval)
 {

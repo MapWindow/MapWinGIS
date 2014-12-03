@@ -500,10 +500,6 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 				dY = dY * double(yBuff)/double(yTemp);
 				xBuff = xTemp;
 				yBuff = yTemp;
-				//xBuff /= 2;
-				//yBuff /= 2;
-				//dX *= 2.0;
-				//dY *= 2.0;
 			}
 			else
 			{
@@ -861,7 +857,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 		}
 	}
 	
-	// comlex image
+	// complex image
 	else if(_handleImage == asComplex)
 	{
 		double ratio = 255.0/(double)range;
@@ -1064,13 +1060,6 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	_int32 * pafScanAreaInt = NULL;
 	float * pafScanAreaFloat = NULL;
 
-	//if (poBandR == NULL)
-	//{
-	// poBandR = rasterDataset->GetRasterBand(1);
-	// Keep them open until the dataset is destroyed
-	//}
-	
-	Debug::WriteLine("ActiveBand: %d", activeBandIndex);
 	_poBandR = _rasterDataset->GetRasterBand(activeBandIndex);
 	if (_poBandR == NULL) return false;
 
@@ -1193,10 +1182,6 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 			else
 				tmp = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
 			
-			//13-Nov-08 Rob Cairns: crude image transparency
-			//if (pctTrans > 0)
-			//	makeTrPixel = UseNoDataValue(i,j);
-			//if ((makeTrPixel) || (tmp == noDataValue))
 			if (tmp == noDataValue)
 			{
 				(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
@@ -1487,7 +1472,6 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 							(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*leftPercent + (double)GetBValue(hiColor)*rightPercent )*I) %256;	
 						}
 						continue;
-						//ct = RGB((int)(((double)GetRValue(lowColor)*leftPercent + (double)GetRValue(hiColor)*rightPercent )*I) %256, (int)(((double)GetGValue(lowColor)*leftPercent + (double)GetGValue(hiColor)*rightPercent )*I) %256, (int)(((double)GetBValue(lowColor)*leftPercent + (double)GetBValue(hiColor)*rightPercent )*I) %256);
 					}
 				}
 				else if( colortype == Gradient )
@@ -1750,7 +1734,6 @@ IGridColorScheme* tkRaster::GetColorSchemeForRendering()
 // *************************************************************
 bool tkRaster::CanUseExternalColorScheme()
 {
-	Debug::WriteLine("Data type: %d", _dataType);
 	// TODO: revisit; probably in some cases it's not possible after all
 	//return dataType == GDT_Int32 || dataType == GDT_Float32;
 	return true;

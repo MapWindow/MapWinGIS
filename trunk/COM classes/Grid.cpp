@@ -2718,46 +2718,6 @@ STDMETHODIMP CGrid::put_PreferedDisplayMode(tkGridProxyMode newVal)
 }
 
 // ****************************************************************
-//			get_CanDisplayWithoutProxy()						         
-// ****************************************************************
-//STDMETHODIMP CGrid::get_CanDisplayWithoutProxy(tkCanDisplayGridWoProxy* retVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	CStringW gridName = GetFilename().MakeLower();
-//
-//	// ignore formats, it seems that almost any grid can be displayed directly, in some way or another
-//	//Utility::EndsWith(gridName, ".tif") || Utility::EndsWith(gridName, ".tiff") || 
-//	//Utility::EndsWith(gridName, ".img") || Utility::EndsWith(gridName, ".bil")
-//
-//	bool gdalFormat = GdalHelper::CanOpenWithGdal(GetFilename());
-//
-//	if (gdalFormat)
-//	{
-//		if (IsRgb())
-//		{
-//			*retVal = cdwYes;
-//		}
-//		else
-//		{
-//			if (m_globalSettings.MaxDirectGridSizeMb <= 0)	{
-//				// there is no limitation
-//				*retVal = cdwYes;
-//			}
-//			else
-//			{
-//				long size = Utility::get_FileSize(gridName) / (0x1 << 20);
-//				*retVal = size > m_globalSettings.MaxDirectGridSizeMb ? cdwSizeLimitation : cdwYes;
-//			}
-//		}
-//	}
-//	else
-//	{
-//		*retVal = cdwUnsupportedFormat;
-//	}
-//	return S_OK;
-//}
-
-// ****************************************************************
 //			CreateImageProxy()						         
 // ****************************************************************
 STDMETHODIMP CGrid::CreateImageProxy(IGridColorScheme* colorScheme, IImage** retVal)

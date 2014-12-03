@@ -132,7 +132,7 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			result = CoCreateInstance(CLSID_OgrLayer, NULL, CLSCTX_INPROC_SERVER, IID_IOgrLayer, (void**)&val);
 			break;
 		case tkInterface::idPoint:
-			result = CoCreateInstance(CLSID_Point, NULL, CLSCTX_INPROC_SERVER, IID_IPoint, (void**)&val);
+			ComHelper::CreatePoint((IPoint**)&val);
 			break;
 		case tkInterface::idShape:
 			result = CoCreateInstance(CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)&val);
@@ -239,4 +239,12 @@ CString ComHelper::GetInterfaceName(tkInterface id)
 		case idUndoList:		return "UndoList";
 		default:				return "Unknown";
 	}
+}
+
+// ********************************************************
+//     CreatePoint()
+// ********************************************************
+void ComHelper::CreatePoint(IPoint** point)
+{
+	m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)point);
 }

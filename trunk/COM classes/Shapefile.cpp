@@ -2601,16 +2601,8 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 		if (this->ReprojectCore(newProjection, reprojectedCount, NULL, true))
 		{
 			// spatial index must be deleted, as it became useful all the same
-			CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwd";
-			if (Utility::FileExists(name))
-			{
-				remove(name);
-			}
-			name = _shpfileName.Left(_shpfileName.GetLength() - 3) + "mwx";
-			if (Utility::FileExists(name))
-			{
-				remove(name);
-			}
+			VARIANT_BOOL vb;
+			RemoveSpatialIndex(&vb);
 			
 			// update qtree
 			if (_useQTree)

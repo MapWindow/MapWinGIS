@@ -369,7 +369,7 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 
 				if( validPoint == true )
 				{
-					CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)retval);
+					ComHelper::CreatePoint(retval);
 					(*retval)->put_X(x);
 					(*retval)->put_Y(y);
 					(*retval)->put_Z(z);

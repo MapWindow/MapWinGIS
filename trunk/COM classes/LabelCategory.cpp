@@ -211,31 +211,6 @@ STDMETHODIMP CLabelCategory::put_FontStrikeOut(VARIANT_BOOL newVal)
 //      END OF COMMON OPTIONS
 ////////////////////////////////////////////////////////////////
 
-//// ***********************************************************
-////		LabelOptions
-//// ***********************************************************
-//// Returning class options as pointer to CLabelInfo struture for easier access in CMapView
-//// Meant for inner use only
-//STDMETHODIMP CLabelCategory::get_LabelOptions(BYTE** pVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	*pVal = reinterpret_cast<BYTE*>(&m_options);
-//	return S_OK;
-//};
-//
-//// ***********************************************************
-////		LabelOptions
-//// ***********************************************************
-//// Passing pointer to CLabelInfo structure of parent class
-//// Meant for inner use only
-//STDMETHODIMP CLabelCategory::put_LabelOptions(BYTE* pVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//	CLabelOptions* lblInfo = reinterpret_cast<CLabelOptions*>(pVal);
-//	m_options =	*lblInfo;	// redefined operator
-//	return S_OK;
-//};
-
 // *************************************************************
 //		get_LabelOptions
 // *************************************************************

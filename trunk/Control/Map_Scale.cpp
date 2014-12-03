@@ -950,7 +950,8 @@ VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_B
 	}
 	else
 	{
-		ErrorMessage(_lastErrorCode);
+		if (!ifOutsideOnly)
+			ErrorMessage(_lastErrorCode);
 		return VARIANT_FALSE;
 	}
 }

@@ -387,4 +387,25 @@ QTree* CShapefile::GetTempQTree()
 	return _tempTree;
 }
 
+// **********************************************************************
+// 						RemoveSpatialIndex()				           
+// **********************************************************************
+STDMETHODIMP CShapefile::RemoveSpatialIndex(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_TRUE;
+	CStringW names[] = {L"mwd", L"mwx"};
 
+	for (int i = 0; i < 2; i++)
+	{
+		CString name = _shpfileName.Left(_shpfileName.GetLength() - 3) + names[i];
+		if (Utility::FileExists(name))
+		{
+			if (remove(name) != 0) {
+				ErrorMessage(tkCANT_DELETE_FILE);
+				*retVal = VARIANT_FALSE;
+			}
+		}
+	}
+	return S_OK;
+}

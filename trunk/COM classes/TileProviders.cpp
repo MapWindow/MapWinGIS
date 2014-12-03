@@ -134,10 +134,6 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 			return _providers[i];
 	}
 
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = true;
-#endif
-
 	BaseProvider* p = NULL;
 
 	switch (provider)

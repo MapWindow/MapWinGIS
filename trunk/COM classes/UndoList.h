@@ -104,6 +104,8 @@ private:
 
 		void SetShape(IShape* newShape)
 		{
+			if (Shape == newShape)
+				Debug::WriteError("Invalid shape reference");
 			if (Shape) {
 				Shape->Release();
 				Shape = NULL;
@@ -132,7 +134,8 @@ private:
 		}
 
 		~UndoListItem() {
-			if (Shape) Shape->Release();
+			if (Shape) 
+				Shape->Release();
 			if (Row) delete Row;
 			if (ShapeIndices) delete ShapeIndices;
 		}

@@ -147,7 +147,9 @@ STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG Sh
 	item->WithinBatch = _batchId != EMPTY_BATCH_ID;
 
 	bool copyAttributes = operation == uoRemoveShape || operation == uoEditShape;
-	CopyShapeState(LayerHandle, ShapeIndex, copyAttributes, item);
+	
+	if (operation != uoAddShape)
+		CopyShapeState(LayerHandle, ShapeIndex, copyAttributes, item);
 
 	_list.push_back(item);
 	*retVal = VARIANT_TRUE;
@@ -220,7 +222,8 @@ void CUndoList::TrimList()
 // **********************************************************
 bool CUndoList::CopyShapeState(long layerHandle, long shapeIndex, bool copyAttributes, UndoListItem* item)
 {
-	item->Shape = GetCurrentState(layerHandle, shapeIndex);
+	IShape* shp = GetCurrentState(layerHandle, shapeIndex);
+	item->SetShape(shp);
 
 	if (copyAttributes) {
 		CComPtr<IShapefile> sf = NULL;
@@ -384,7 +387,8 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			}
 			break;
 		case uoRemoveShape:
-		{
+		{	
+
 			// restore removed shape
 			sf->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
 			if (vb) {
@@ -395,7 +399,8 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 				item->Operation = uoAddShape;
 				IShapeEditor* editor = _mapCallback->_GetShapeEditor();
 				if (editor && !item->WithinBatch) {
-					IShape* shp = GetCurrentState(item->LayerHandle, item->ShapeIndex);
+					CComPtr<IShape> shp = NULL;
+					shp.Attach(GetCurrentState(item->LayerHandle, item->ShapeIndex));
 					((CShapeEditor*)editor)->RestoreState(shp, item->LayerHandle, item->ShapeIndex);
 				}
 				return true;
@@ -428,6 +433,7 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			IShapeEditor* editor = _mapCallback->_GetShapeEditor();
 			if (editor) {
 				IShape* shp = GetCurrentState(item->LayerHandle, item->ShapeIndex);
+		
 				((CShapeEditor*)editor)->RestoreState(item->Shape, item->LayerHandle, item->ShapeIndex);
 				item->SetShape(shp);
 			}

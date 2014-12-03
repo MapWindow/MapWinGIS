@@ -120,10 +120,6 @@ GEOSGeometry* GeosConverter::SimplifyPolygon(const GEOSGeometry *gsGeom, double 
 		gsNew = GeosHelper::CreatePolygon(gsPoly, NULL, 0);
 	}
 	return gsNew;
-
-	/*GEOSGeometry* result = GeosHelper::Simplify(gsGeom, tolerance);
-	char* type = GeosHelper::GetGeometryType(result);
-	return result;*/
 }
 
 // *****************************************************

@@ -26,7 +26,6 @@
 #include "stdafx.h"
 #include "LinePattern.h"
 #include "LineSegment.h"
-#include "LineDrawing.h"
 #include "macros.h"
 #include "PointSymbols.h"
 

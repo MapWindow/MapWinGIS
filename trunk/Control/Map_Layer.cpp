@@ -1732,10 +1732,6 @@ CString CMapView::get_OptionsFilename(LONG LayerHandle, LPCTSTR OptionsName)
 	
 	USES_CONVERSION;
 	CString name = OLE2CA(filename);
-	//if (_stricmp(OptionsName, "") == 0)
-	//{
-	//	return "";		// error code is in the function
-	//}
 
 	// constructing name
 	CString dot = (_stricmp(OptionsName, "") == 0) ? "" : ".";

@@ -523,7 +523,6 @@ STDMETHODIMP CTableClass::get_Field(long FieldIndex, IField **pVal)
 STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-    USES_CONVERSION;
 
 	if( FieldIndex < 0 || FieldIndex >= FieldCount() || RowIndex < 0 || RowIndex >= RowCount())
 	{	
@@ -531,7 +530,6 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 		VariantInit(&var);
 		var.vt = VT_EMPTY;
 		pVal = &var;
-		//pVal = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
@@ -552,24 +550,10 @@ STDMETHODIMP CTableClass::get_CellValue(long FieldIndex, long RowIndex, VARIANT 
 				var.vt = VT_EMPTY;
 				pVal = &var;
 			}
-		}
-		else
-		{
-			/*VARIANT var;
-			VariantInit(&var);
-			var.vt = VT_EMPTY;
-			pVal = &var;*/
-			pVal = NULL;
+			return S_OK;
 		}
 	}
-	else
-	{
-		/*VARIANT var;
-		VariantInit(&var);
-		var.vt = VT_EMPTY;
-		pVal = &var;*/
-		pVal = NULL;
-	}
+	pVal = NULL;
 	return S_OK;
 }
 

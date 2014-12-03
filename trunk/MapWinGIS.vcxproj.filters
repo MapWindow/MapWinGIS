@@ -750,9 +750,6 @@
     <ClInclude Include="Drawing\LabelOptions.h">
       <Filter>Drawing</Filter>
     </ClInclude>
-    <ClInclude Include="Drawing\LineDrawing.h">
-      <Filter>Drawing</Filter>
-    </ClInclude>
     <ClInclude Include="Drawing\PointSymbols.h">
       <Filter>Drawing</Filter>
     </ClInclude>
@@ -1663,9 +1660,6 @@
       <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="Drawing\LabelOptions.cpp">
-      <Filter>Drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="Drawing\LineDrawing.cpp">
       <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="Drawing\PointSymbols.cpp">

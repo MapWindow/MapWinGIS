@@ -295,16 +295,11 @@ IPoint* CShapeWrapper::get_Point(long Index)
 	else
 	{
 		IPoint* pnt = NULL;
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
-		//CoCreateInstance(CLSID_Point,NULL,CLSCTX_INPROC_SERVER,IID_IPoint,(void**)&pnt);	
+		ComHelper::CreatePoint(&pnt);
 		if (pnt)
 		{
 			pnt->put_X(_points[Index].X);
 			pnt->put_Y(_points[Index].Y);
-			//pnt->AddRef();			
-			// Z, M values aren't supported			
-			//pnt->put_Z(_pointsZ[Index]);
-			//pnt->put_M(_pointsM[Index]);
 		}
 		return pnt;
 	}

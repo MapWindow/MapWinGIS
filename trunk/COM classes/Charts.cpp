@@ -560,73 +560,12 @@ STDMETHODIMP CCharts::get_Chart(long ShapeIndex, IChart** retVal)
 			{
 				ShapeData* data = (*positions)[ShapeIndex];
 				((CChart*)chart)->put_ChartData(reinterpret_cast<char*>(data->chart));
-				
-				/*ShapeData* data = (*positions)[ShapeIndex];
-				VARIANT_BOOL isDrawn = data->chartIsDrawn;
-				VARIANT_BOOL visible = data->chartVisible;
-				chart->put_IsDrawn(isDrawn);
-				chart->put_Visible(visible);
-				chart->put_PositionX(data->chartX);
-				chart->put_PositionY(data->chartY);*/
 			}
 			*retVal = chart;
 		}
 	}
 	return S_OK;
 }
-
-// **********************************************************
-//		put_Chart
-// **********************************************************
-//STDMETHODIMP CCharts::put_Chart(long ShapeIndex, IChart* newVal)
-//{
-//	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-//	
-//	std::vector<ShapeData*>* positions = ((CShapefile*)_shapefile)->get_MetaData();
-//	if ( ShapeIndex < 0 || ShapeIndex > (long)positions->size())
-//	{
-//		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-//		return S_OK;
-//	}
-//
-//	if ( newVal )
-//	{
-//		char* options = ((CChart*)newVal)->get_ChartData();
-//		CChartInfo* newData = reinterpret_cast<CChartInfo*>(options);
-//
-//		ShapeData* data = (*positions)[ShapeIndex];
-//
-//		if (data->chart != NULL && (data->chart == newData))
-//		{
-//			// do nothing; options are the same
-//			AfxMessageBox("The same pointer");
-//		}
-//		else
-//		{
-//			if (data->chart)
-//			{
-//				delete data->chart;
-//				data->chart = NULL;
-//			}
-//			data->chart = newData;
-//		}
-//
-//		/*ShapeData* data = (*positions)[ShapeIndex];
-//		VARIANT_BOOL isDrawn;
-//		VARIANT_BOOL visible;
-//		newVal->get_IsDrawn(&isDrawn);
-//		newVal->get_Visible(&visible);
-//		newVal->get_PositionX(&data->chartX);
-//		newVal->get_PositionY(&data->chartY);
-//		data->chartIsDrawn = isDrawn?true:false;
-//		data->chartVisible = visible?true:false;*/
-//	}
-//	else
-//	{
-//		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-//	}
-//	return S_OK;
-//}
 
 // **********************************************************
 //		get_Field

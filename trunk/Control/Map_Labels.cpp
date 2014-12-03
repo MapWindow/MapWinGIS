@@ -8,7 +8,9 @@
 #include "LabelCategory.h"
 #include "Labels.h"
 
-#pragma region Properties
+// *************************************************************
+//		LineSeparationFactor()
+// *************************************************************
 void CMapView::SetLineSeparationFactor(long sepFactor)
 {
 	_lineSeparationFactor = sepFactor;
@@ -21,7 +23,6 @@ long CMapView::GetLineSeparationFactor(void)
     if (_lineSeparationFactor == 0) _lineSeparationFactor = 3;
 	return _lineSeparationFactor;
 }
-
 
 // *************************************************************
 //		GetOgrLayer()
@@ -277,11 +278,6 @@ void CMapView::SetLayerLabelsShadowColor(long LayerHandle, OLE_COLOR color)
 // **********************************************************
 bool CMapView::GetMultilineLabeling()
 {
-	if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
-	{
-		//ErrorMessage(tkPROPERTY_DEPRECATED);
-	}
-	// we shall save the value all the same
 	return _multilineLabeling?true:false;
 }
 
@@ -440,4 +436,4 @@ void CMapView::ClearLabels(long LayerHandle)
 		labels->Release();
 	}
 }
-#pragma endregion
+

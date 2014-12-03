@@ -235,6 +235,7 @@ public:
 	STDMETHOD(get_ShapefileType2D)(ShpfileType* pVal);
 	STDMETHOD(get_FieldIndexByName)(BSTR fieldName, LONG* pVal);
 	STDMETHOD(Move)(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal);
+	STDMETHOD(RemoveSpatialIndex)(VARIANT_BOOL* retVal);
 
 private:
 
@@ -436,5 +437,7 @@ public:
 	IShapeValidationInfo* ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);
 	bool ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
 	void RestoreShapeRecordsMapping();
+	
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

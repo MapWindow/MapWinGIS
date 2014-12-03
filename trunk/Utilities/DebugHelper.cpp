@@ -23,7 +23,7 @@ namespace Debug
 		{
 			case DebugAny: return "";
 			case DebugOgrLoading: return "OGR: ";
-			case DebugPanning: return "PANNING";
+			case DebugPanning: return "PANNING: ";
 		}
 		return "";
 	}

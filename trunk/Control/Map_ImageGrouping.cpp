@@ -21,8 +21,6 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 			if(l->IsImage())
 			{
 				IImage* iimg = NULL;
-				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
-				//if ( iimg != NULL )
 				if (l->QueryImage(&iimg))
 				{
 					CImageClass* img = (CImageClass*)iimg;
@@ -94,8 +92,6 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 			for (size_t j = 0; j < indices->size(); j++ )
 			{
 				Layer * l = _allLayers[_activeLayers[(*indices)[j]]];
-				//l->object->QueryInterface(IID_IImage, (void**)&iimg);
-				//if (iimg)
 				if (l->QueryImage(&iimg))
 				{
 					CImageClass* img = (CImageClass*)iimg;
@@ -124,8 +120,6 @@ void CMapView::BuildImageGroups(std::vector<ImageGroup*>& imageGroups)
 				if (imageIndex != -1)
 				{
 					Layer * l = _allLayers[_activeLayers[imageIndex]];
-					//l->object->QueryInterface(IID_IImage, (void**)&iimg);
-					//if (iimg)
 					if (l->QueryImage(&iimg))
 					{
 						CImageClass* img = (CImageClass*)iimg;
@@ -248,8 +242,6 @@ void CMapView::DrawImageGroups(const CRect& rcBounds, Gdiplus::Graphics* graphic
 					//if(l->type == ImageLayer && (l->flags & Visible))
 					if(l->IsImage() && l->IsVisible(scale, zoom))
 					{
-						//l->object->QueryInterface(IID_IImage, (void**)&iimg);
-						//if (iimg)
 						if (l->QueryImage(&iimg))
 						{
 							CImageClass* img = (CImageClass*)iimg;

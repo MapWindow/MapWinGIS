@@ -266,6 +266,18 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 
 						if(StopEditTable != VARIANT_FALSE)
 							StopEditingTable(ApplyChanges,cBack,retval);
+
+						// remove disk-based index, it's no longer valid
+						VARIANT_BOOL spatialIndex;
+						get_HasSpatialIndex(&spatialIndex);
+
+						if (spatialIndex) {
+							VARIANT_BOOL vb;
+							RemoveSpatialIndex(&vb);
+
+							CComBSTR bstr(_shpfileName);
+							CreateSpatialIndex(bstr, &vb);
+						}
 					}
 				}
 			}
@@ -403,12 +415,11 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 	// it's necessary to call RefreshExtents in this case, for zoom to layer working right
 	if (!ShapeHelper::IsEmpty(Shape))
 	{
-		IExtents * box;
+		CComPtr<IExtents> box = NULL;
 		Shape->get_Extents(&box);
 		double xm, ym, zm, xM, yM, zM;
 		box->GetBounds(&xm, &ym, &zm, &xM, &yM, &zM);
-		box->Release();
-
+		
 		if (_shapeData.size() == 1)
 		{
 			_minX = xm;

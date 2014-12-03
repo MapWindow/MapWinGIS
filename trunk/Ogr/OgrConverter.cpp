@@ -38,10 +38,6 @@ void ClipperConverter::SetConversionFactor(IShapefile* sf)
 	}
 }
 
-
-
-
-
 //**********************************************************************
 //							ExplodePolygon()			               
 //**********************************************************************
@@ -66,6 +62,9 @@ bool OgrConverter::MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>
 		return false;
 }
 
+//**********************************************************************
+//							AddPoints()			               
+//**********************************************************************
 void AddPoints(CShape* shp, OGRLineString* geom, int startPointIndex, int endPointIndex)
 {
 	ShpfileType shpType;
@@ -390,7 +389,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
 		shp->put_ShapeType(shptype);
 
-		m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+		ComHelper::CreatePoint(&pnt);
 		pnt->put_X(oPnt->getX());
 		pnt->put_Y(oPnt->getY());
 		if (isM)	pnt->put_M(oPnt->getZ());
@@ -418,7 +417,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 			{
 				if (oPnt->getGeometryType() == wkbPoint || oPnt->getGeometryType() == wkbPoint25D)
 				{
-					m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+					ComHelper::CreatePoint(&pnt);
 					pnt->put_X(oPnt->getX());
 					pnt->put_Y(oPnt->getY());
 					if (isM)	pnt->put_M(oPnt->getZ());
@@ -445,7 +444,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 	
 		for(long i = 0; i < oLine->getNumPoints(); i++ )
 		{
-			m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+			ComHelper::CreatePoint(&pnt);
 			pnt->put_X(oLine->getX(i));
 			pnt->put_Y(oLine->getY(i));
 			if (isM)	pnt->put_M(oLine->getZ(i));
@@ -481,7 +480,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 
 					for(long i = 0; i < oLine->getNumPoints(); i++ )
 					{
-						m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+						ComHelper::CreatePoint(&pnt);
 						pnt->put_X(oLine->getX(i));
 						pnt->put_Y(oLine->getY(i));
 						if (isM)	pnt->put_M(oLine->getZ(i));
@@ -514,7 +513,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 
 		for(long i=0; i< oRing->getNumPoints(); i++)
 		{
-			m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+			ComHelper::CreatePoint(&pnt);
 			pnt->put_X(oRing->getX(i));
 			pnt->put_Y(oRing->getY(i));
 			if (isM)	pnt->put_M(oRing->getZ(i));
@@ -599,7 +598,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 			
 			for(long i = 0; i < oRing->getNumPoints(); i++ )		
 			{
-				m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)&pnt);
+				ComHelper::CreatePoint(&pnt);
 				pnt->put_X(oRing->getX(i));
 				pnt->put_Y(oRing->getY(i));
 				if (isM)	pnt->put_M(oRing->getZ(i));
