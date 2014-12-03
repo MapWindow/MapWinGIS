@@ -236,6 +236,7 @@ public:
 	STDMETHOD(get_FieldIndexByName)(BSTR fieldName, LONG* pVal);
 	STDMETHOD(Move)(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveSpatialIndex)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_ShapeRendered)(LONG ShapeIndex, VARIANT_BOOL* pVal);
 
 private:
 
@@ -387,6 +388,7 @@ private:
 	void InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,	IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
 	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
 	
+	
 public:
 	// accessing shapes
 	bool ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
@@ -417,7 +419,7 @@ public:
 	void ClearChartFrames();
 	
 	// selection
-	bool SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
+	bool SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly);
 	bool QuickExtentsCore(long ShapeIndex, Extent& result);
 	bool QuickExtentsCore(long ShapeIndex, double* xMin, double* yMin, double* xMax, double* yMax);
 

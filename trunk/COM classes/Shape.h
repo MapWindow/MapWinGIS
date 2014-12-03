@@ -134,6 +134,7 @@ public:
 	STDMETHOD(Rotate)(DOUBLE originX, DOUBLE originY, DOUBLE angle);
 	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
 	STDMETHOD(SplitByPolyline)(IShape* polyline, VARIANT* results, VARIANT_BOOL* retVal);
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 
 private:
 	BSTR _key;
@@ -175,7 +176,8 @@ public:
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool SplitByPolylineCore(IShape* polyline, vector<IShape*>& results);
-	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
+	
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

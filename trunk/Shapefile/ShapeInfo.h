@@ -49,6 +49,7 @@ struct ShapeData
 		selected = false;
 		isVisible = false;
 		hidden = false;
+		wasRendered = false;
 		rotation = 0.0;
 
 		status = ShapeValidationStatus::Original;
@@ -104,5 +105,6 @@ struct ShapeData
 	bool hidden;			// set per shape explicitly
 	double rotation;        // for point icons only; TODO: quite a waste of 8 bytes
 	bool modified;			// for saving of OGR layers
+	bool wasRendered;
 };
 

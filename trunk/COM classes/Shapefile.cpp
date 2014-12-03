@@ -3037,7 +3037,7 @@ STDMETHODIMP CShapefile::GetClosestVertex(double x, double y, double maxDistance
 	{
 		std::vector<long> ids;
 		Extent box(x - maxDistance, x + maxDistance, y - maxDistance, y + maxDistance);
-		if (this->SelectShapesCore(box, 0.0, SelectMode::INTERSECTION, ids))
+		if (this->SelectShapesCore(box, 0.0, SelectMode::INTERSECTION, ids, false))
 		{
 			result = ShapefileHelper::GetClosestPoint(this, x, y, maxDistance, ids, shapeIndex, pointIndex, *distance);
 		}
@@ -3149,5 +3149,23 @@ STDMETHODIMP CShapefile::Move(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BO
 		}
 	}
 	*retVal = VARIANT_TRUE;
+	return S_OK;
+}
+
+// *****************************************************************
+//		get_ShapeRendered()
+// *****************************************************************
+STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = VARIANT_FALSE;
+	if (ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	}
+	else {
+		*pVal = _shapeData[ShapeIndex]->wasRendered ? VARIANT_TRUE : VARIANT_FALSE;
+	}
 	return S_OK;
 }

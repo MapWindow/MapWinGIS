@@ -1077,8 +1077,6 @@ private:
 	int AddLayerCore(Layer* layer);
 	
 	// shapefile editor
-	
-	IShapefile* GetShapeEditorShapefile();
 	bool RunShapefileUndoList(bool undo);
 	bool RemoveSelectedShape();
 	long ParseKeyboardEventFlags(UINT nFlags);
@@ -1143,10 +1141,7 @@ public:
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
 	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	
-	{ 
-		
-		FireValidateShape(LayerHandle, Shape, Cancel); 
-	}
+	{ FireValidateShape(LayerHandle, Shape, Cancel); }
 	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }

@@ -199,7 +199,7 @@ bool SelectionHelper::SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<
 /***********************************************************************/
 bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult)
 {
-	return ((CShapefile*)sf)->SelectShapesCore((extents), 0.0, SelectMode, selectResult);
+	return ((CShapefile*)sf)->SelectShapesCore((extents), 0.0, SelectMode, selectResult, true);
 }
 
 /***********************************************************************/

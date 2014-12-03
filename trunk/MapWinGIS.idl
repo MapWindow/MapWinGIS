@@ -3726,6 +3726,7 @@ interface IShapefile : IDispatch{
 	[propget, id(130)] HRESULT FieldIndexByName([in] BSTR FieldName, [out, retval] LONG* pVal);
 	[id(131)] HRESULT Move([in] DOUBLE xOffset, [in] DOUBLE yOffset, [out, retval]VARIANT_BOOL* retVal);
 	[id(132)] HRESULT RemoveSpatialIndex([out, retval]VARIANT_BOOL* retVal);
+	[propget, id(133)] HRESULT ShapeRendered([in] LONG ShapeIndex, [out, retval] VARIANT_BOOL* pVal);
 };
 
 /****************************  Shape Interface ***********************/
@@ -3821,6 +3822,7 @@ interface IShape : IDispatch{
 	[propget, id(65)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
 	[id(66)] HRESULT SplitByPolyline([in] IShape* polyline, [in,out]VARIANT* results, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(67)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
+	
 };
 
 /****************************  Extents Interface ***********************/

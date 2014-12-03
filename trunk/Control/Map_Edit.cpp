@@ -189,16 +189,6 @@ IUndoList* CMapView::GetUndoList()
 }
 
 // ************************************************************
-//		GetShapeEditorShapefile
-// ************************************************************
-IShapefile* CMapView::GetShapeEditorShapefile()
-{
-	long layerHandle;
-	_shapeEditor->get_LayerHandle(&layerHandle);
-	return GetShapefile(layerHandle);
-}
-
-// ************************************************************
 //		HandleOnLButtonMoveOrRotate
 // ************************************************************
 void CMapView::HandleOnLButtonMoveOrRotate(long x, long y)

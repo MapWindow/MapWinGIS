@@ -161,6 +161,7 @@
     </Midl>
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>

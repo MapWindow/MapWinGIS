@@ -46,7 +46,7 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 	// the core routine
 	std::vector<long> selectResult;
 	Extent box(b_minX, b_maxX, b_minY, b_maxY);
-	this->SelectShapesCore(box, Tolerance, SelectMode, selectResult);
+	this->SelectShapesCore(box, Tolerance, SelectMode, selectResult, false);
 
 	*retval  = Templates::Vector2SafeArray(&selectResult, VT_I4, Result) ? VARIANT_TRUE : VARIANT_FALSE;
 
@@ -57,7 +57,7 @@ STDMETHODIMP CShapefile::SelectShapes(IExtents *BoundBox, double Tolerance, Sele
 // ****************************************************************
 //		SelectShapesCore()
 // ****************************************************************
-bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult)
+bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult, bool renderedOnly)
 {
 	double b_minX = extents.left;
 	double b_maxX = extents.right;
@@ -188,6 +188,11 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 			{
 				shapeVal = i;
 			}
+
+			if (shapeVal < 0 || shapeVal >= (int)_shapeData.size()) continue;
+
+			if (renderedOnly && !_shapeData[shapeVal]->wasRendered)
+				continue;
 
 			// bounds
 			if (this->QuickExtentsCore(shapeVal, &s_minX, &s_minY, &s_maxX, &s_maxY))
