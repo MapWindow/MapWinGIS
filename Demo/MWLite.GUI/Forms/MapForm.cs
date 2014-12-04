@@ -9,6 +9,7 @@ using MWLite.GUI.Classes;
 using MWLite.GUI.Controls;
 using MWLite.ShapeEditor.Forms;
 using WeifenLuo.WinFormsUI.Docking;
+using System.Diagnostics;
 
 namespace MWLite.GUI.Forms
 {
@@ -54,7 +55,6 @@ namespace MWLite.GUI.Forms
         private void InitMap()
         {
             axMap1.GrabProjectionFromData = true;
-            axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckStrict;
             axMap1.CursorMode = tkCursorMode.cmZoomIn;
             axMap1.SendSelectBoxFinal = true;
             axMap1.SendMouseDown = true;
@@ -63,6 +63,8 @@ namespace MWLite.GUI.Forms
             axMap1.ShowRedrawTime = true;
             Map.Identifier.IdentifierMode = tkIdentifierMode.imSingleLayer;
             Map.Identifier.HotTracking = true;
+            Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsNoLayer;
+            Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsNoLayer;
         }
 
         private void RegisterEventHandlers()
@@ -75,6 +77,26 @@ namespace MWLite.GUI.Forms
             axMap1.MouseUpEvent += axMap1_MouseUpEvent;
             axMap1.ShapeHighlighted += axMap1_ShapeHighlighted;
             axMap1.SelectBoxFinal += axMap1_SelectBoxFinal;
+            axMap1.LayerProjectionIsEmpty += axMap1_LayerProjectionIsEmpty;
+            axMap1.ProjectionMismatch += axMap1_ProjectionMismatch;
+            axMap1.LayerReprojected += axMap1_LayerReprojected;
+        }
+
+        void axMap1_LayerReprojected(object sender, _DMapEvents_LayerReprojectedEvent e)
+        {
+            Debug.WriteLine("Layer reprojected:" + e.success);
+        }
+
+        void axMap1_ProjectionMismatch(object sender, _DMapEvents_ProjectionMismatchEvent e)
+        {
+            Debug.Print("Projection mismatch");
+            e.reproject = tkMwBoolean.blnTrue;
+            e.cancelAdding = tkMwBoolean.blnFalse;
+        }
+
+        void axMap1_LayerProjectionIsEmpty(object sender, _DMapEvents_LayerProjectionIsEmptyEvent e)
+        {
+            Debug.Print("Layer without projection");
         }
 
         void axMap1_SelectBoxFinal(object sender, _DMapEvents_SelectBoxFinalEvent e)

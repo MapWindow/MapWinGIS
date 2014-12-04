@@ -20,10 +20,10 @@ namespace MWLite.ShapeEditor.UI
 
             ctxNoHighlighting.Click += (s, e) => editor.HighlightVertices = tkLayerSelection.lsNoLayer;
             ctxHighlightAllLayers.Click += (s, e) => editor.HighlightVertices = tkLayerSelection.lsAllLayers;
-            ctxHighlightCurrentLayer.Click += (s, e) => editor.HighlightVertices = tkLayerSelection.lsCurrentLayer;
+            ctxHighlightCurrentLayer.Click += (s, e) => editor.HighlightVertices = tkLayerSelection.lsActiveLayer;
 
             ctxNoSnapping.Click += (s, e) => editor.SnapBehavior = tkLayerSelection.lsNoLayer;
-            ctxSnapCurrentLayer.Click += (s, e) => editor.SnapBehavior = tkLayerSelection.lsCurrentLayer;
+            ctxSnapCurrentLayer.Click += (s, e) => editor.SnapBehavior = tkLayerSelection.lsActiveLayer;
             ctxSnapAllLayers.Click += (s, e) => editor.SnapBehavior = tkLayerSelection.lsAllLayers;
 
             ctxFinishShape.Click += (s, e) => editor.SaveChanges();
@@ -41,9 +41,9 @@ namespace MWLite.ShapeEditor.UI
 
             ctxSnapAllLayers.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsAllLayers;
             ctxNoSnapping.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsNoLayer;
-            ctxSnapCurrentLayer.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsCurrentLayer;
+            ctxSnapCurrentLayer.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsActiveLayer;
 
-            ctxHighlightCurrentLayer.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsCurrentLayer;
+            ctxHighlightCurrentLayer.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsActiveLayer;
             ctxHighlightAllLayers.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsAllLayers;
             ctxNoHighlighting.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsNoLayer;
         }

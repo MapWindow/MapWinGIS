@@ -38,7 +38,9 @@ namespace MWLite.GUI.Helpers
             if (layer != null)
             {
                 int handle = legend.Layers.Add(layer, true);
-                legend.Layers[handle].Name = layerName;
+                if (handle != -1) { 
+                    legend.Layers[handle].Name = layerName;
+                }
             }
         }
 

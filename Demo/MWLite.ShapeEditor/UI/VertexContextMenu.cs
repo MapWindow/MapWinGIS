@@ -41,9 +41,9 @@ namespace MWLite.ShapeEditor.UI
 
             ctxSnappingAll.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsAllLayers;
             ctxSnappingNone.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsNoLayer;
-            ctxSnappingCurrent.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsCurrentLayer;
+            ctxSnappingCurrent.Checked = App.Map.ShapeEditor.SnapBehavior == tkLayerSelection.lsActiveLayer;
 
-            ctxHighlightingCurrent.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsCurrentLayer;
+            ctxHighlightingCurrent.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsActiveLayer;
             ctxHighlightingAll.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsAllLayers;
             ctxHighlightingNone.Checked = App.Map.ShapeEditor.HighlightVertices == tkLayerSelection.lsNoLayer;
 

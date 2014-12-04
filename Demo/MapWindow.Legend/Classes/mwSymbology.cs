@@ -720,7 +720,7 @@ namespace MapWindow.Legend.Classes
     //    }
 
     //    /// <summary>
-    //    /// Draws retangle around chosen label
+    //    /// Draws rectangle around chosen label
     //    /// </summary>
     //    /// <param name="rect"></param>
     //    private void DrawLabelRectangle(Rectangle rect)

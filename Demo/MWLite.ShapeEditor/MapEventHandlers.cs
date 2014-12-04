@@ -14,14 +14,14 @@ namespace MWLite.ShapeEditor
         public static void Init(AxMap map)
         {
             _map = map;
-            
+
+            _map.ChooseLayer += _map_ChooseLayer;
+            _map.MouseUpEvent += _map_MouseUpEvent;
+            _map.UndoListChanged += _map_UndoListChanged;
             _map.AfterShapeEdit += _map_AfterShapeEdit;
             _map.BeforeDeleteShape += _map_BeforeDeleteShape;
             _map.BeforeShapeEdit += _map_BeforeShapeEdit;
-            _map.MouseUpEvent += _map_MouseUpEvent;
-            _map.ChooseLayer += _map_ChooseLayer;
             _map.ShapeValidationFailed += _map_ShapeValidationFailed;
-            _map.UndoListChanged += _map_UndoListChanged;
             _map.ValidateShape += _map_ValidateShape;
         }
 

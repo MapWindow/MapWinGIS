@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.Core.UI;
 using System.IO;
+using System.Reflection;
 
 namespace MWLite.ShapeEditor.Forms
 {
@@ -24,11 +25,33 @@ namespace MWLite.ShapeEditor.Forms
             Array.Sort(values, (x, y) => String.Compare(x.ToString(), y.ToString(), StringComparison.Ordinal));
             comboBox1.Items.AddRange(values.Cast<object>().ToArray());
             comboBox1.SelectedIndex = 4;
-
-            txtPath.Text = _lastPath.Length > 0 ?_lastPath : Path.GetDirectoryName(App.Instance.Project.GetPath());
+            txtPath.Text = BasePath;
         }
 
         #region Properties
+
+        private string BasePath
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(_lastPath))
+                {
+                    return _lastPath;
+                }
+                else
+                {
+                    string path = App.Instance.Project.GetPath();
+                    if (!string.IsNullOrWhiteSpace(path))
+                    {
+                        return Path.GetDirectoryName(path);
+                    }
+                    else
+                    {
+                        return AppDomain.CurrentDomain.BaseDirectory;
+                    }
+                }
+            }
+        }
 
         private ShpfileType ShapefileType
         {

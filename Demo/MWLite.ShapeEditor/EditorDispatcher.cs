@@ -51,6 +51,7 @@ namespace MWLite.ShapeEditor
                     App.Instance.RunCommand(AppCommand.ClearSelection);
                     break;
             }
+            
             App.Instance.RefreshUI();
         }
 
@@ -62,7 +63,7 @@ namespace MWLite.ShapeEditor
                     App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsNoLayer;
                     break;
                 case EditorCommand.SnappingCurrent:
-                    App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsCurrentLayer;
+                    App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsActiveLayer;
                     break;
                 case EditorCommand.SnappingAll:
                     App.Map.ShapeEditor.SnapBehavior = tkLayerSelection.lsAllLayers;
@@ -71,7 +72,7 @@ namespace MWLite.ShapeEditor
                     App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsNoLayer;
                     break;
                 case EditorCommand.HighlightingCurrent:
-                    App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsCurrentLayer;
+                    App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsActiveLayer;
                     break;
                 case EditorCommand.HighlightingAll:
                     App.Map.ShapeEditor.HighlightVertices = tkLayerSelection.lsAllLayers;

@@ -66,6 +66,12 @@
     <Compile Include="Controls\LocationControl.Designer.cs">
       <DependentUpon>LocationControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\LoaderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\LoaderForm.Designer.cs">
+      <DependentUpon>LoaderForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MapLegend\LegendCommand.cs" />
     <Compile Include="MapLegend\LegendDispatcher.cs" />
     <Compile Include="Forms\GeoLocationForm.cs">
@@ -114,6 +120,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\GeoLocationForm.resx">
       <DependentUpon>GeoLocationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\LoaderForm.resx">
+      <DependentUpon>LoaderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SetProjectionForm.resx">
       <DependentUpon>SetProjectionForm.cs</DependentUpon>
