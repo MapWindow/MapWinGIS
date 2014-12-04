@@ -129,9 +129,31 @@ STDMETHODIMP CImageClass::Resource(BSTR newImgPath, VARIANT_BOOL *retval)
 STDMETHODIMP CImageClass::Open(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	USES_CONVERSION;
 	OpenImage(OLE2W(ImageFileName), FileType, InRam, cBack, GA_ReadOnly, true, retval);
+
+	ReadProjection();
+
 	return S_OK;
+}
+
+// ***************************************************************
+//		ReadProjection()
+// ***************************************************************
+void CImageClass::ReadProjection()
+{
+	CStringW prjFilename = Utility::GetProjectionFilename(_fileName);
+
+	VARIANT_BOOL vb;
+	CComBSTR bstr(prjFilename);
+	_projection->ReadFromFile(bstr, &vb);
+
+	CString wkt;
+	GdalHelper::GetProjection(_fileName, wkt);
+
+	CComBSTR bstrProjection;
+	_projection->ImportFromAutoDetect(bstrProjection, &vb);
 }
 
 // ***************************************************************
@@ -1873,104 +1895,24 @@ STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 // ****************************************************************
 //		GetProjection
 // ****************************************************************
-// TODO: rewrite using GeoProjection class
 STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 {
-	USES_CONVERSION;
-	
-	// If the .prj file exists, load it.
-	CStringW prjFilename = Utility::GetProjectionFilename(_fileName);
-	if (prjFilename != "")
-	{
-		char * prj4 = NULL;
-		ProjectionTools * p = new ProjectionTools();
-		p->GetProj4FromPRJFile( W2A(prjFilename), &prj4);		// TODO: use Unicode
-
-		if (prj4 != NULL) 
-			*Proj4 = A2BSTR(prj4);
-
-		delete prj4;
-		delete p; //added by Lailin Chen 12/30/2005
-	}
-	else
-		*Proj4 = A2BSTR("");
-
-	CString str = OLE2CA(*Proj4);
-	if (str == "")
-	{
-		// Try getting it from GDAL
-		GDALDataset * rasterDataset = GdalHelper::OpenDatasetW(_fileName);
-
-		if( rasterDataset != NULL )
-		{
-			char * wkt = (char *)rasterDataset->GetProjectionRef();
-			if (wkt != NULL && _tcslen(wkt) != 0)
-			{
-				OGRSpatialReferenceH  hSRS;
-				hSRS = OSRNewSpatialReference(NULL);
-				
-				char** list = NULL;
-
-				CSLAddString(list, wkt);
-				if (OSRImportFromESRI(hSRS, list) == CE_None)
-				{	
-					char * pszProj4 = NULL;				
-					OSRExportToProj4(hSRS, &pszProj4);
-					if (pszProj4 != NULL)	
-					{
-						*Proj4 = A2BSTR(pszProj4);
-						CPLFree(pszProj4);
-					}
-				} 
-				else 
-				{
-					if( OSRImportFromWkt( hSRS, list ) == CE_None )
-					{
-						char * pszProj4 = NULL;
-						OSRExportToProj4(hSRS, &pszProj4);
-						if (pszProj4 != NULL)	
-						{
-							*Proj4 = A2BSTR(pszProj4);
-							CPLFree(pszProj4);
-						}
-					}
-				}
-				OSRDestroySpatialReference( hSRS );
-				CSLDestroy(list);
-			}
-
-			GDALClose(rasterDataset);
-			rasterDataset = NULL;
-		}
-	}
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_projection->ExportToProj4(Proj4);
 	return S_OK;
 }
+
 STDMETHODIMP CImageClass::get_OriginalWidth(LONG* OriginalWidth)
-{   // added by t shanley 04/05/2007
+{   
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if ( this->_gdalImage )  
-	{
-		*OriginalWidth = _rasterImage->orig_Width;
-	}
-	else
-	{
-		*OriginalWidth = _width; 
-	}
+	*OriginalWidth = _gdalImage ? _rasterImage->orig_Width : _width;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::get_OriginalHeight(LONG* OriginalHeight)
-{  // added by t shanley 04/05/2007
+{  
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
-	if (_gdalImage)
-	{
-		*OriginalHeight = _rasterImage->orig_Height;
-	}
-	else
-	{
-		*OriginalHeight = _height;
-	}
+	*OriginalHeight = _gdalImage ? _rasterImage->orig_Height : _height;
 	return S_OK;
 }
 
@@ -1980,7 +1922,6 @@ STDMETHODIMP CImageClass::get_AllowHillshade(VARIANT_BOOL * pVal)
 	*pVal = _gdalImage ? _rasterImage->allowHillshade : VARIANT_FALSE;
 	return S_OK;
 }
-
 
 STDMETHODIMP CImageClass::put_AllowHillshade(VARIANT_BOOL newValue)
 {
@@ -3696,5 +3637,19 @@ STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 		else
 			this->_imageChanged = true;
 	}
+	return S_OK;
+}
+
+// ********************************************************
+//     GeoProjection
+// ********************************************************
+STDMETHODIMP CImageClass::get_GeoProjection(IGeoProjection** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_projection)
+		_projection->AddRef();
+
+	*pVal = _projection;
 	return S_OK;
 }

@@ -55,7 +55,8 @@ public:
 
 		_key = SysAllocString(L"");
 
-		CoCreateInstance(CLSID_Labels,NULL,CLSCTX_INPROC_SERVER,IID_ILabels,(void**)&_labels);
+		ComHelper::CreateInstance(idLabels, (IDispatch**)&_labels);
+		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 		
 		_bitmapImage = NULL;
 		_rasterImage = NULL;
@@ -110,16 +111,13 @@ public:
 		::SysFreeString(_key);
 
 		if( _globalCallback )
-		{
 			_globalCallback->Release();
-			_globalCallback = NULL;
-		}
 
-		if (_labels != NULL)
-		{
+		if (_labels)
 			_labels->Release();
-			_labels = NULL;
-		}
+
+		if (_projection)
+			_projection->Release();
 
 		if (_screenBitmap)
 		{
@@ -280,6 +278,7 @@ public:
 	STDMETHOD(get_SourceGridBandIndex)(int* retVal);
 	STDMETHOD(put_SourceGridBandIndex)(int newVal);
 	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
+	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -322,6 +321,7 @@ private:
 	bool _downSampling;	// the image in the buffer was produced by downsampling
 
 	ILabels* _labels;
+	IGeoProjection* _projection;
 
 public:
 	int m_groupID;			// in case belong to the group of images which are to be treated as one
@@ -358,6 +358,7 @@ private:
 	bool BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies, long* count);
 	bool SetImageBitsDCCore(HDC hdc);
 	bool CheckForProxy();
+	void ReadProjection();
 
 public:
 	bool DeserializeCore(CPLXMLNode* node);
@@ -385,9 +386,8 @@ public:
 	}
 	void ErrorMessage(long ErrorCode);
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
-
+	
 };
-
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 
 

@@ -752,42 +752,36 @@ STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 	if (_isFrozen)
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
-		return S_FALSE;
+		return S_OK;
 	}
-	else
-	{
-		USES_CONVERSION;
-		CString name = OLE2A(filename);		// TODO!!!: use Unicode
+	
+	USES_CONVERSION;
+	CStringW filenameW = OLE2W(filename);
 
-		if (!Utility::FileExists(name))
-		{
-			return S_FALSE;
-		}
-		else
-		{
-			char** papszPrj = CSLLoad(name);
-			if (papszPrj == NULL)
-				return S_FALSE;
+	if (!Utility::FileExistsW(filenameW))
+		return S_OK;
+	
+	char** papszPrj = GdalHelper::ReadFile(filenameW);
 
-			// passing the first string only
-			// to keep safe the initial pointer to array
-			char* pszWKT = CPLStrdup(papszPrj[0]);
+	if (!papszPrj) return S_OK;
 
-			OGRErr err = _projection->SetFromUserInput(pszWKT);
+	// passing the first string only
+	// to keep safe the initial pointer to array
+	char* pszWKT = CPLStrdup(papszPrj[0]);
+
+	OGRErr err = _projection->SetFromUserInput(pszWKT);
 		
-			CSLDestroy(papszPrj);
-			CPLFree(pszWKT);
+	CSLDestroy(papszPrj);
+	CPLFree(pszWKT);
 
-			if (err != OGRERR_NONE)
-			{
-				ErrorMessage(err);
-				return S_FALSE;
-			}
-
-			*retVal  = VARIANT_TRUE;
-			return S_OK;
-		}
+	if (err != OGRERR_NONE)
+	{
+		ErrorMessage(err);
+		return S_OK;
 	}
+
+	*retVal  = VARIANT_TRUE;
+	return S_OK;
 }
 
 // *******************************************************

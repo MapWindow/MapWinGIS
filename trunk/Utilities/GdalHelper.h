@@ -19,6 +19,8 @@ public:
 	static GDALDataset* OpenDatasetA(CStringA& filenameUtf8, GDALAccess accessType );
 	static GDALDataset* OpenDatasetW(CStringW filenameW, GDALAccess accessType );
 
+	static void GetProjection(CStringW filename, CString& projection);
+
 	static bool IsRgb(GDALDataset* dt);
 
 	static CPLXMLNode* ParseXMLFile(CStringW filename);
@@ -41,4 +43,6 @@ public:
 	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
 	void GetMetaData(GDALDriver* driver);
 	void DumpDriverInfo();
+
+	static char** ReadFile(CStringW filename);
 };

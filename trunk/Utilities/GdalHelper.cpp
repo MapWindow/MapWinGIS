@@ -443,3 +443,29 @@ void GdalHelper::GetMetaData(GDALDriver* driver)
 		}
 	}
 }
+
+// ****************************************************************
+//		GetProjection
+// ****************************************************************
+void GdalHelper::GetProjection(CStringW filename, CString& projection)
+{
+	GDALDataset * rasterDataset = GdalHelper::OpenDatasetW(filename);
+
+	if (!rasterDataset)	return;
+
+	const char * wkt = rasterDataset->GetProjectionRef();
+	projection = wkt;
+	GDALClose(rasterDataset);
+}
+
+// ****************************************************************
+//		ReadFile
+// ****************************************************************
+char** GdalHelper::ReadFile(CStringW filename)
+{
+	CStringA utf8filename = Utility::ConvertToUtf8(filename);
+	m_globalSettings.SetGdalUtf8(true);
+	char** papszPrj = CSLLoad(utf8filename);
+	m_globalSettings.SetGdalUtf8(false);
+	return papszPrj;
+}

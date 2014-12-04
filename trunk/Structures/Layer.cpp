@@ -188,34 +188,18 @@ IGeoProjection* Layer::GetGeoProjection()
 	IGeoProjection* gp = NULL;
 	if (this->IsShapefile())
 	{
-		IShapefile * sf = NULL;
+		CComPtr<IShapefile> sf = NULL;
 		if (this->QueryShapefile(&sf))
 		{
-			// simply grab the object from sf
 			sf->get_GeoProjection(&gp);
-			sf->Release(); sf = NULL;
 		}
 	}
 	else if (this->IsImage())
 	{
-		IImage * img = NULL;
+		CComPtr<IImage> img = NULL;
 		if (this->QueryImage(&img))
 		{
-			// there is no GeoProjection object; so create it from the string
-			CComBSTR bstr;
-			img->GetProjection(&bstr);
-			if (bstr.Length() > 0)
-			{
-				VARIANT_BOOL vb;
-				ComHelper::CreateInstance(tkInterface::idGeoProjection, (IDispatch**)&gp);
-				gp->ImportFromAutoDetect(bstr, &vb);
-				if (!vb)
-				{
-					gp->Release();
-					gp = NULL;
-				}
-			}
-			img->Release(); img = NULL;
+			img->get_GeoProjection(&gp);
 		}
 	}
 	return gp;
