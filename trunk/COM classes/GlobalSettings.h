@@ -135,8 +135,6 @@ public:
 	STDMETHOD(put_OgrLayerMaxFeatureCount)(LONG newVal);
 	STDMETHOD(get_AutoChooseOgrLoadingMode)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AutoChooseOgrLoadingMode)(VARIANT_BOOL newVal);
-	STDMETHOD(get_OgrUseStyles)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_OgrUseStyles)(VARIANT_BOOL newVal);
 	STDMETHOD(get_AttachMapCallbackToLayers)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AttachMapCallbackToLayers)(VARIANT_BOOL newVal);
 	STDMETHOD(get_HotTrackingMaxShapeCount)(LONG* pVal);
@@ -147,6 +145,8 @@ public:
 	STDMETHOD(put_AllowProjectionMismatch)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ReprojectLayersOnAdding)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ReprojectLayersOnAdding)(VARIANT_BOOL newVal);
+	STDMETHOD(get_MouseTolerance)(DOUBLE* pVal);
+	STDMETHOD(put_MouseTolerance)(DOUBLE newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

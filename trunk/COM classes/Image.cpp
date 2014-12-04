@@ -3248,7 +3248,7 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 			}
 			else
 			{
-				// only buffer wil be serialized
+				// only buffer will be serialized
 				long bufferWidth, bufferHeight;
 				
 				if (_gdalImage)

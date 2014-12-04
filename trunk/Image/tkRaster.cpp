@@ -388,8 +388,8 @@ void tkRaster::Close()
 		_rasterDataset->Dereference();
 		delete _rasterDataset;
 		_rasterDataset = NULL;
-		_poBandR = NULL;		// lsu 28-may-2010 - we can't use this pointers any more
-		_poBandG = NULL;		// if somebody will want to open new dataset
+		_poBandR = NULL;
+		_poBandG = NULL;
 		_poBandB = NULL;
 	}
 	if (_predefinedColorScheme)
@@ -398,6 +398,12 @@ void tkRaster::Close()
 		_predefinedColorScheme->Release();
 		_predefinedColorScheme = NULL;
 	}
+	if (_customColorScheme) {
+		_customColorScheme->Clear();
+		_customColorScheme->Release();
+		_customColorScheme = NULL;
+	}
+
 	allowAsGrid = grForGridsOnly;
 	activeBandIndex = 1;
 	warped = false;

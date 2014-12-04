@@ -406,6 +406,7 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	char** options = ParseLayerCreationOptions(creationOptions);
 	bool multiPart = CSLFetchBoolean(options, "MW_MULTI_PART", 1) != 0;
 	bool vacuum = CSLFetchBoolean(options, "MW_POSTGIS_VACUUM", 1) != 0;
+	bool saveStyles = CSLFetchBoolean(options, "MW_SAVE_STYLE", 1) != 0;
 
 	OGRLayer* layer = _dataset->CreateLayer(name, ref, OgrConverter::ShapeType2GeometryType(shpType, multiPart), options);
 	
@@ -428,7 +429,7 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 
 	// saving current style as a default one
-	if (m_globalSettings.ogrUseStyles) 
+	if (saveStyles)
 	{
 		CStringW layerName = OLE2W(newLayerName);
 		if (OgrStyleHelper::SupportsStyles(_dataset, layerName)) 

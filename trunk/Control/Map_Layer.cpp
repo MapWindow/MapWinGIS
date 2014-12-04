@@ -417,7 +417,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// grids aren't added directly; an image representation is created first 
 	// using particular color scheme
 	CStringW gridFilename = L"";
-	IGridColorScheme* gridColorScheme = NULL;
+	
 
 	if (igrid != NULL)
 	{
@@ -438,6 +438,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 		PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
 
+		CComPtr<IGridColorScheme> gridColorScheme = NULL;
 		igrid->RetrieveOrGenerateColorScheme(gsrAuto, gsgGradient, coloring, &gridColorScheme);
 		if (gridColorScheme)
 		{
@@ -458,7 +459,8 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				VARIANT_BOOL isProxy;
 				iimg->get_IsGridProxy(&isProxy);
 				CStringW legendName = isProxy ? grid->GetProxyLegendName() : grid->GetLegendName();
-				IGridColorScheme* newScheme = NULL;
+				
+				CComPtr<IGridColorScheme> newScheme = NULL;
 				ComHelper::CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
 
 				CComBSTR bstrName(legendName);
@@ -468,7 +470,6 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				{
 					((CImageClass*)iimg)->LoadImageAttributesFromGridColorScheme(newScheme);
 				}
-				newScheme->Release();
 			}
 		}
 	}

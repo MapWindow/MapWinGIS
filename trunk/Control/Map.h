@@ -777,7 +777,6 @@ public:
 	long _zoomBarMinZoom;
 	long _zoomBarMaxZoom;
 	long _lastErrorCode;
-	DOUBLE _mouseTolerance;
 
 	// ---------------------------------------------
 	//	COM instances

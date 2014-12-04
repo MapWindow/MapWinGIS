@@ -2811,7 +2811,7 @@ STDMETHODIMP CGrid::RetrieveColorScheme(tkGridSchemeRetrieval method, IGridColor
 		}
 	}
 	
-	// from Gdal color table
+	// from GDAL color table
 	if (method == gsrAuto || method == gsrGdalColorTable)
 	{
 		if (!schemeIsValid(&scheme))

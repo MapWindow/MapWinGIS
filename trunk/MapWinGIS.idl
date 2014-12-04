@@ -5315,8 +5315,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(37)] HRESULT OgrLayerMaxFeatureCount([in] LONG newVal);
 	[propget, id(38)] HRESULT AutoChooseOgrLoadingMode([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(38)] HRESULT AutoChooseOgrLoadingMode([in] VARIANT_BOOL newVal);
-	[propget, id(39)] HRESULT OgrUseStyles([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(39)] HRESULT OgrUseStyles([in] VARIANT_BOOL newVal);
+	[propget, id(39)] HRESULT ReprojectLayersOnAdding([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(39)] HRESULT ReprojectLayersOnAdding([in] VARIANT_BOOL newVal);
 	[propget, id(40)] HRESULT AttachMapCallbackToLayers([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(40)] HRESULT AttachMapCallbackToLayers([in] VARIANT_BOOL newVal);
 	[propget, id(41)] HRESULT HotTrackingMaxShapeCount([out, retval] LONG* pVal);
@@ -5325,8 +5325,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(42)] HRESULT AllowLayersWithoutProjections([in] VARIANT_BOOL newVal);
 	[propget, id(43)] HRESULT AllowProjectionMismatch([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(43)] HRESULT AllowProjectionMismatch([in] VARIANT_BOOL newVal);
-	[propget, id(44)] HRESULT ReprojectLayersOnAdding([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(44)] HRESULT ReprojectLayersOnAdding([in] VARIANT_BOOL newVal);
+	[propget, id(44)] HRESULT MouseTolerance([out, retval] DOUBLE* pVal);
+	[propput, id(44)] HRESULT MouseTolerance([in] DOUBLE newVal);
 };
 
 [
@@ -5791,7 +5791,6 @@ library MapWinGIS
 			[id(205)] tkScalebarUnits ScalebarUnits;
 			[id(211), readonly] IFileManager* FileManager;
 			[id(241)] IUndoList* UndoList;
-			[id(242)] DOUBLE MouseTolerance;
 			[id(243), readonly] IIdentifier* Identifier;
 			//}}AFX_ODL_PROP
 

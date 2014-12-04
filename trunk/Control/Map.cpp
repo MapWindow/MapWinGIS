@@ -314,7 +314,6 @@ void CMapView::SetDefaults()
 	_measuringPersistent = false;
 	_lastErrorCode = tkNO_ERROR;
 	// public control properties
-	_mouseTolerance = 20.0;
 	m_sendMouseMove = FALSE;
 	m_sendMouseDown = FALSE;
 	m_sendMouseUp = FALSE;
@@ -626,8 +625,6 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
 		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
-
-		PX_Double(pPX, "MouseTolerance", _mouseTolerance, 20);
 	}
 	catch(...)
 	{

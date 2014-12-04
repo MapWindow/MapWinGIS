@@ -46,7 +46,6 @@ struct GlobalSettingsInfo
 	tkOgrEncoding ogrEncoding;
 	int ogrLayerMaxFeatureCount;
 	bool autoChooseOgrLoadingMode;
-	bool ogrUseStyles;
 	bool useSchemesForStyles;
 	bool saveOgrLabels;
 	int getOgrMaxLabelCount() { return ogrLayerMaxFeatureCount; }
@@ -59,6 +58,7 @@ struct GlobalSettingsInfo
 	bool allowLayersWithoutProjection;
 	bool allowProjectionMismatch;
 	bool reprojectLayersOnAdding;
+	double mouseTolerance;
 
 	~GlobalSettingsInfo()
 	{
@@ -67,6 +67,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		mouseTolerance = 20;
 		allowLayersWithoutProjection = true;
 		allowProjectionMismatch = true;
 		reprojectLayersOnAdding = false;
@@ -78,7 +79,6 @@ struct GlobalSettingsInfo
 		dtorCount = 0;
 		saveOgrLabels = false;
 		useSchemesForStyles = false;
-		ogrUseStyles = true;
 		autoChooseOgrLoadingMode = true;
 		ogrLayerMaxFeatureCount = 50000;
 		ogrEncoding = oseUtf8;

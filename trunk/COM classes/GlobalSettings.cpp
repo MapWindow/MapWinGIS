@@ -699,22 +699,6 @@ STDMETHODIMP CGlobalSettings::put_AutoChooseOgrLoadingMode(VARIANT_BOOL newVal)
 }
 
 // *********************************************************
-//	     OgrAutoSaveStyles
-// *********************************************************
-STDMETHODIMP CGlobalSettings::get_OgrUseStyles(VARIANT_BOOL* pVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = m_globalSettings.ogrUseStyles ? VARIANT_TRUE : VARIANT_FALSE;
-	return S_OK;
-}
-STDMETHODIMP CGlobalSettings::put_OgrUseStyles(VARIANT_BOOL newVal)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_globalSettings.ogrUseStyles = newVal ? true : false;
-	return S_OK;
-}
-
-// *********************************************************
 //	     AttachMapCallbackToLayers
 // *********************************************************
 STDMETHODIMP CGlobalSettings::get_AttachMapCallbackToLayers(VARIANT_BOOL* pVal)
@@ -791,5 +775,21 @@ STDMETHODIMP CGlobalSettings::put_ReprojectLayersOnAdding(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	m_globalSettings.reprojectLayersOnAdding = newVal ? true : false;
-return S_OK;
+	return S_OK;
+}
+
+// *********************************************************
+//	     MouseTolerance
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_MouseTolerance(DOUBLE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.mouseTolerance ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_MouseTolerance(DOUBLE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.mouseTolerance = newVal ? true : false;
+	return S_OK;
 }

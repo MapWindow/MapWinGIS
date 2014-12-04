@@ -418,7 +418,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 		case fosDirectGrid:
 		case fosProxyForGrid:
 			{
-				IGrid* grid = NULL;
+				CComPtr<IGrid> grid = NULL;
 				ComHelper::CreateInstance(idGrid, (IDispatch**)&grid);
 				if (grid)
 				{
@@ -427,13 +427,11 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 					if (!vb) {
 						grid->get_LastErrorCode(&_lastErrorCode);
 						ErrorMessage(_lastErrorCode);
-						grid->Release();
-						grid = NULL;
 					}
 					else
 					{
 						PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
-						IGridColorScheme* scheme = NULL;
+						CComPtr<IGridColorScheme> scheme = NULL;
 						
 						grid->RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval::gsrAuto, 
 															tkGridSchemeGeneration::gsgGradient, coloring, &scheme);
@@ -453,7 +451,6 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 							*retVal = img;
 						}
 						grid->Close(&vb);
-						grid->Release();
 					}
 				}
 			}

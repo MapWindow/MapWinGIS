@@ -55,8 +55,7 @@ public:
 	};
 	~tkRaster()
 	{
-		if (_predefinedColorScheme)
-			_predefinedColorScheme->Release();
+		Close();
 	};
 
 private:
