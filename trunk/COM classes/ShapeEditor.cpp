@@ -325,30 +325,37 @@ STDMETHODIMP CShapeEditor::StartEdit(LONG LayerHandle, LONG ShapeIndex, VARIANT_
 		return S_OK;
 	}
 
+	CComPtr<IShapefile> sf = NULL;
+	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
+	if (!sf) {
+		ErrorMessage(tkINVALID_LAYER_HANDLE);
+		return S_OK;
+	}
+
+	if (!ShapefileHelper::InteractiveEditing(sf))
+	{
+		ErrorMessage(tkNO_INTERACTIVE_EDITING);
+		return S_OK;
+	}
+
 	Clear();
 
 	IUndoList* list = _mapCallback->_GetUndoList();
 	if (list) {
 		list->get_UndoCount(&_startingUndoCount);
 	}
-
-	CComPtr<IShapefile> sf = NULL;
-	sf.Attach(_mapCallback->_GetShapefile(LayerHandle));
-
-	if (sf)
+	
+	CComPtr<IShape> shp = NULL;
+	sf->get_Shape(ShapeIndex, &shp);
+	if (shp)
 	{
-		CComPtr<IShape> shp = NULL;
-		sf->get_Shape(ShapeIndex, &shp);
-		if (shp)
-		{
-			put_EditorState(esEdit);
-			SetShape(shp);
-			_layerHandle = LayerHandle;
-			_shapeIndex = ShapeIndex;
-			sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
-			EditorHelper::CopyOptionsFrom(this, sf);
-			*retVal = VARIANT_TRUE;
-		}
+		put_EditorState(esEdit);
+		SetShape(shp);
+		_layerHandle = LayerHandle;
+		_shapeIndex = ShapeIndex;
+		sf->put_ShapeIsHidden(ShapeIndex, VARIANT_TRUE);
+		EditorHelper::CopyOptionsFrom(this, sf);
+		*retVal = VARIANT_TRUE;
 	}
 	return S_OK;
 }

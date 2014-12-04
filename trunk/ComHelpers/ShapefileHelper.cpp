@@ -414,3 +414,14 @@ CShapefile* ShapefileHelper::Cast(CComPtr<IShapefile>& sf)
 	return (CShapefile*)&(*sf);
 }
 
+// ********************************************************************
+//		InteractiveEditing()
+// ********************************************************************
+bool ShapefileHelper::InteractiveEditing(IShapefile* sf)
+{
+	if (!sf) return false;
+	VARIANT_BOOL editing;
+	sf->get_InteractiveEditing(&editing);
+	return editing ? true : false;
+}
+

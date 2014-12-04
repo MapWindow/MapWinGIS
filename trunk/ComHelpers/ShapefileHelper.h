@@ -25,5 +25,6 @@ public:
 	static bool ShapeTypeIsM(IShapefile* sf);
 	static CStringW GetSymbologyFilename(IShapefile* sf);
 	static CShapefile* Cast(CComPtr<IShapefile>& sf);
+	static bool InteractiveEditing(IShapefile* sf);
 };
 

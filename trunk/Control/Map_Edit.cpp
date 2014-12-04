@@ -377,10 +377,9 @@ void CMapView::_UnboundShapeFinished(IShape* shp)
 
 	if (editing)
 	{
-		VARIANT_BOOL editing;
-		sf->get_InteractiveEditing(&editing);
-		if (!editing) {
-			ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		if (!ShapefileHelper::InteractiveEditing(sf))
+		{
+			ErrorMessage(tkNO_INTERACTIVE_EDITING);
 			return;
 		}
 	}
@@ -431,11 +430,15 @@ bool CMapView::StartNewBoundShape(long x, long y)
 			ErrorMessage(tkINVALID_LAYER_HANDLE);
 			return false;
 		}
-		else {
-			Digitizer::StartNewBoundShape(_shapeEditor, sf, layerHandle);
-			return true;
+
+		if (!ShapefileHelper::InteractiveEditing(sf))
+		{
+			ErrorMessage(tkNO_INTERACTIVE_EDITING);
+			return false;
 		}
-		return false;
+		
+		Digitizer::StartNewBoundShape(_shapeEditor, sf, layerHandle);
+		return true;
 	}
 	return true;   // no need to choose
 }

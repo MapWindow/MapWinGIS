@@ -203,6 +203,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Overlay operation has been already started.";
 		case tkADD_SHAPE_MODE_ONLY:
 			return "Method can be called with cmAddShape cursor only.";
+		case tkNO_INTERACTIVE_EDITING:
+			return "Shapefile.InteractiveEditing is supposed to be on.";
 		
 		//301-400 = ogr
 		case tkFAILED_TO_OPEN_OGR_LAYER:

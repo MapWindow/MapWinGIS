@@ -103,8 +103,9 @@ const char * ErrorMsg( long ErrorCode );
 # define tkEDITOR_OVERLAY_NO_SUBJECT 243
 # define tkEDITOR_OVERLAY_ALREADY_STARTED 244
 # define tkADD_SHAPE_MODE_ONLY 245
+# define tkNO_INTERACTIVE_EDITING 246
 
-//301-400 = ogr layers
+//301-400 = OGR layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301
 # define tkOGR_DATASOURCE_UNINITIALIZED 302
 # define tkOGR_LAYER_UNINITIALIZED 303
