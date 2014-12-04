@@ -33,7 +33,9 @@
             this.ctxLabels = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxProperties = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxSaveLayerStyle = new System.Windows.Forms.ToolStripMenuItem();
+            this.ctxLoadLayerStyle = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxPostGis = new System.Windows.Forms.ToolStripMenuItem();
             this.ctxImportOgrLayer = new System.Windows.Forms.ToolStripMenuItem();
@@ -41,8 +43,6 @@
             this.ctxRemoveLayer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.legend1 = new MapWindow.Legend.Controls.Legend.Legend();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.ctxLoadLayerStyle = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,13 +80,25 @@
             this.toolStripSeparator3,
             this.ctxProperties});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 182);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 204);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(152, 6);
             // 
             // ctxSaveLayerStyle
             // 
             this.ctxSaveLayerStyle.Name = "ctxSaveLayerStyle";
             this.ctxSaveLayerStyle.Size = new System.Drawing.Size(155, 22);
             this.ctxSaveLayerStyle.Text = "Save layer style";
+            // 
+            // ctxLoadLayerStyle
+            // 
+            this.ctxLoadLayerStyle.Name = "ctxLoadLayerStyle";
+            this.ctxLoadLayerStyle.Size = new System.Drawing.Size(155, 22);
+            this.ctxLoadLayerStyle.Text = "Load layer style";
             // 
             // toolStripSeparator2
             // 
@@ -136,17 +148,6 @@
             this.legend1.ShowLabels = false;
             this.legend1.Size = new System.Drawing.Size(331, 358);
             this.legend1.TabIndex = 2;
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(152, 6);
-            // 
-            // ctxLoadLayerStyle
-            // 
-            this.ctxLoadLayerStyle.Name = "ctxLoadLayerStyle";
-            this.ctxLoadLayerStyle.Size = new System.Drawing.Size(155, 22);
-            this.ctxLoadLayerStyle.Text = "Load layer style";
             // 
             // LegendDockForm
             // 

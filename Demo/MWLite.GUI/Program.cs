@@ -24,7 +24,6 @@ namespace MWLite.GUI
         {
             var gs = new GlobalSettings();
             gs.ZoomToFirstLayer = true;
-            gs.OgrUseStyles = true;
             gs.OgrLayerMaxFeatureCount = 25000;
             gs.AllowLayersWithoutProjections = true;
             gs.AllowProjectionMismatch = false;
