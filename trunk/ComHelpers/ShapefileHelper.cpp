@@ -425,3 +425,14 @@ bool ShapefileHelper::InteractiveEditing(IShapefile* sf)
 	return editing ? true : false;
 }
 
+// ********************************************************************
+//		IsVolatile()
+// ********************************************************************
+bool ShapefileHelper::IsVolatile(IShapefile* sf)
+{
+	if (!sf) return false;
+	VARIANT_BOOL isVolatile;
+	sf->get_Volatile(&isVolatile);
+	return isVolatile ? true : false;
+}
+

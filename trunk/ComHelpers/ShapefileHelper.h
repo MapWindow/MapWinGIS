@@ -26,5 +26,6 @@ public:
 	static CStringW GetSymbologyFilename(IShapefile* sf);
 	static CShapefile* Cast(CComPtr<IShapefile>& sf);
 	static bool InteractiveEditing(IShapefile* sf);
+	static bool IsVolatile(IShapefile* sf);
 };
 

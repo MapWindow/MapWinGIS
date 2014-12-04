@@ -280,10 +280,9 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		{
 			(*_shapeData)[i]->size = 0;
 			(*_shapeData)[i]->isVisible = false;
-			(*_shapeData)[i]->wasRendered = false;
 		}
 	}
-	
+
 	// --------------------------------------------------------------
 	//	 Building lists of shape indices for each category
 	// --------------------------------------------------------------

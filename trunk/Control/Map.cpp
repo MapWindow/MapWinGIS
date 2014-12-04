@@ -834,3 +834,12 @@ void CMapView::ZoomToEditor()
 	}
 }
 
+// ***************************************************************
+//	StartDragging
+// ***************************************************************
+void CMapView::StartDragging(DraggingOperation operation)
+{
+	_dragging.Operation = operation;
+	SetCapture();
+}
+

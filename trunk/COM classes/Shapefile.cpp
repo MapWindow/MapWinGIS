@@ -3169,3 +3169,12 @@ STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
 	}
 	return S_OK;
 }
+
+// *****************************************************************
+//		MarkUndrawn()
+// *****************************************************************
+void CShapefile::MarkUndrawn()
+{
+	for (size_t i = 0; i < _shapeData.size(); i++)
+		_shapeData[i]->wasRendered = false;
+}

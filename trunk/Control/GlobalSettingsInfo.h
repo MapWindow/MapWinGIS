@@ -59,6 +59,8 @@ struct GlobalSettingsInfo
 	bool allowProjectionMismatch;
 	bool reprojectLayersOnAdding;
 	double mouseTolerance;
+	bool commonCollisionListForCharts;
+	bool commonCollisionListForLabels;
 
 	~GlobalSettingsInfo()
 	{
@@ -115,6 +117,8 @@ struct GlobalSettingsInfo
 		tilesThreadPoolSize = 5;
 		loadSymbologyOnAddLayer = true;
 		tilesMaxZoomOnProjectionMismatch = 6;
+		commonCollisionListForCharts = true;
+		commonCollisionListForLabels = true;
 
 		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
 		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";

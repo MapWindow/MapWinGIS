@@ -78,7 +78,7 @@ public:
 		return true;
 	}
 
-	bool Extent::getIntersection(Extent& ext, Extent& retVal)
+	bool Extent::getIntersection(const Extent& ext, Extent& retVal)
 	{
 		retVal.left = MAX(ext.left, this->left);
 		retVal.right = MIN(ext.right, this->right);
@@ -87,12 +87,12 @@ public:
 		return (retVal.left <= retVal.right) && (retVal.top >= retVal.bottom);
 	}
 
-	bool Extent::Intersects(Extent& ext)
+	bool Extent::Intersects(const Extent& ext)
 	{
 		return !(this->right < ext.left || this->left  > ext.right || this->bottom > ext.top || this->top < ext.bottom);
 	}
 
-	bool Extent::Within(Extent& ext)
+	bool Extent::Within(const Extent& ext)
 	{
 		return this->left >= ext.left && this->right <= ext.right && this->top <= ext.top && this->bottom >= ext.bottom;
 	}

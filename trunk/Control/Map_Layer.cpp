@@ -1719,7 +1719,7 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	bool result = false;
 
-	Layer* layer = get_Layer(LayerHandle);
+	Layer* layer = GetLayer(LayerHandle);
 	if (layer) 
 	{
 		if (layer->IsOgrLayer())
@@ -1859,7 +1859,7 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	Layer* l = get_Layer(LayerHandle);
+	Layer* l = GetLayer(LayerHandle);
 	if (l)
 	{
 		if (l->IsOgrLayer())

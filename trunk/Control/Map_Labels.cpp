@@ -286,12 +286,8 @@ bool CMapView::GetMultilineLabeling()
 // **********************************************************
 void CMapView::SetMultilineLabeling(bool Value)
 {
-	if (_shapeDrawingMethod == dmNewWithLabels || _shapeDrawingMethod == dmNewSymbology  || FORCE_NEW_LABELS)
-	{
-		ErrorMessage(tkPROPERTY_DEPRECATED);
-	}
-	// we shall save the value all the same
-	_multilineLabeling = Value;
+	ErrorMessage(tkPROPERTY_DEPRECATED);
+	_multilineLabeling = Value;		// we shall save the value all the same
 }
 
 // **********************************************************

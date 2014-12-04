@@ -5,6 +5,7 @@
 #include "Ogr2RawData.h"
 #include "ShapefileCategories.h"
 #include "TableHelper.h"
+#include "ShapefileHelper.h"
 
 // ****************************************************
 //		CloseDatasources()
@@ -489,3 +490,4 @@ void Layer::GetExtentsAsNewInstance(IExtents** box)
 	ComHelper::CreateInstance(idExtents, (IDispatch**)box);
 	(*box)->SetBounds(extents.left, extents.bottom, 0.0, extents.right, extents.top, 0.0);
 }
+

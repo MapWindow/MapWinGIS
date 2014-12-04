@@ -791,45 +791,45 @@ STDMETHODIMP CShapefile::put_CacheExtents(VARIANT_BOOL newVal)
 STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_isEditingShapes)
-	{	
-		IExtents * box=NULL;
-		double Xmin, Ymin, Zmin, Mmin, Xmax, Ymax, Zmax, Mmax;
-		
-		_minX = 0.0, _maxX = 0.0;
-		_minY = 0.0, _maxY = 0.0;
-		_minZ = 0.0, _maxZ = 0.0;
-		_minM = 0.0, _maxM = 0.0;
-		
-		for( int i = 0; i < (int)_shapeData.size(); i++ )
-		{	
-			if (ShapeHelper::IsEmpty(_shapeData[i]->shape))
-				continue;
 
-			CShape* shp = ((CShape*)_shapeData[i]->shape);
-			shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
+	*retval = VARIANT_TRUE;
+	if (!_isEditingShapes)	return S_OK;
+
+	IExtents * box=NULL;
+	double Xmin, Ymin, Zmin, Mmin, Xmax, Ymax, Zmax, Mmax;
+		
+	_minX = 0.0, _maxX = 0.0;
+	_minY = 0.0, _maxY = 0.0;
+	_minZ = 0.0, _maxZ = 0.0;
+	_minM = 0.0, _maxM = 0.0;
+		
+	for( int i = 0; i < (int)_shapeData.size(); i++ )
+	{	
+		if (ShapeHelper::IsEmpty(_shapeData[i]->shape))
+			continue;
+
+		CShape* shp = ((CShape*)_shapeData[i]->shape);
+		shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
 			
-			// refresh shapefile extents
-			if (i==0)
-			{
-				_minX = Xmin, _maxX = Xmax;
-				_minY = Ymin, _maxY = Ymax;
-				_minZ = Zmin, _maxZ = Zmax;
-				_minM = Mmin, _maxM = Mmax;
-			}
-			else	
-			{	if( Xmin < _minX )	_minX = Xmin; 
-				if( Xmax > _maxX )	_maxX = Xmax;
-				if( Ymin < _minY )	_minY = Ymin;
-				if( Ymax > _maxY )	_maxY = Ymax;
-				if( Zmin < _minZ )	_minZ = Zmin;
-				if( Zmax > _maxZ )	_maxZ = Zmax;
-				if( Mmin < _minM )	_minM = Mmin;
-				if( Mmax > _maxM )	_maxM = Mmax;
-			}
+		// refresh shapefile extents
+		if (i==0)
+		{
+			_minX = Xmin, _maxX = Xmax;
+			_minY = Ymin, _maxY = Ymax;
+			_minZ = Zmin, _maxZ = Zmax;
+			_minM = Mmin, _maxM = Mmax;
+		}
+		else	
+		{	if( Xmin < _minX )	_minX = Xmin; 
+			if( Xmax > _maxX )	_maxX = Xmax;
+			if( Ymin < _minY )	_minY = Ymin;
+			if( Ymax > _maxY )	_maxY = Ymax;
+			if( Zmin < _minZ )	_minZ = Zmin;
+			if( Zmax > _maxZ )	_maxZ = Zmax;
+			if( Mmin < _minM )	_minM = Mmin;
+			if( Mmax > _maxM )	_maxM = Mmax;
 		}
 	}
-	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 

@@ -226,6 +226,7 @@
     <ClInclude Include="Drawing\ImageDrawing.h" />
     <ClInclude Include="Drawing\LabelDrawing.h" />
     <ClInclude Include="Drawing\LabelOptions.h" />
+    <ClInclude Include="Drawing\LayerDrawer.h" />
     <ClInclude Include="Drawing\PointSymbols.h" />
     <ClInclude Include="Drawing\RotatedRectangle.h" />
     <ClInclude Include="Drawing\ShapefileDrawing.h" />
@@ -523,6 +524,7 @@
     <ClCompile Include="Drawing\ImageDrawing.cpp" />
     <ClCompile Include="Drawing\LabelDrawing.cpp" />
     <ClCompile Include="Drawing\LabelOptions.cpp" />
+    <ClCompile Include="Drawing\LayerDrawer.cpp" />
     <ClCompile Include="Drawing\PointSymbols.cpp" />
     <ClCompile Include="Drawing\RotatedRectangle.cpp" />
     <ClCompile Include="Drawing\ShapefileDrawing.cpp" />

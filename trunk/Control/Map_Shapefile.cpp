@@ -94,7 +94,7 @@ ShpfileType CMapView::get_ShapefileType(long layerHandle)
 //		get_ShapefileLayer()
 // ***************************************************************
 // Returns pointer to the shapefile layer with the given index, checks it's type
-Layer* CMapView::get_ShapefileLayer(long layerHandle)
+Layer* CMapView::GetShapefileLayer(long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
@@ -119,7 +119,7 @@ Layer* CMapView::get_ShapefileLayer(long layerHandle)
 // ***************************************************************
 //		get_Layer()
 // ***************************************************************
-Layer* CMapView::get_Layer(long layerHandle)
+Layer* CMapView::GetLayer(long layerHandle)
 {
 	if (layerHandle >= 0 && layerHandle < (long)_allLayers.size())
 	{
@@ -1130,7 +1130,7 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 		if (currentLayerOnly && layerHandle != currentHandle) 
 			continue;
 
-		Layer* l = get_Layer(layerHandle);
+		Layer* l = GetLayer(layerHandle);
 		if (!l || !l->wasRendered) continue;
 
 		CComPtr<IShapefile> sf = NULL;

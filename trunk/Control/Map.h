@@ -32,6 +32,7 @@
 # include "ShapeEditor.h"
 #include "HotTrackingInfo.h"
 #include "DraggingState.h"
+#include "ImageDrawing.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -1004,8 +1005,8 @@ private:
 	
 	// shapefiles	
 	bool IsValidShape( long layerHandle, long shape );
-	Layer* get_ShapefileLayer(long layerHandle);
-	Layer* get_Layer(long layerHandle);
+	Layer* GetShapefileLayer(long layerHandle);
+	Layer* GetLayer(long layerHandle);
 	CDrawingOptionsEx* get_ShapefileDrawingOptions(long LayerHandle);
 	void AlignShapeLayerAndShapes(Layer * layer);
 	ShpfileType get_ShapefileType(long layerHandle);
@@ -1124,7 +1125,8 @@ private:
 	void RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers);
 	void ClearDrawingLabelFrames();
 	bool ReprojectLayer(Layer* layer, int layerHandle);
-
+	void StartDragging(DraggingOperation operation);
+	void DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics* graphics, CImageDrawer& imgDrawer);
 #pragma endregion
 
 public:
@@ -1151,10 +1153,7 @@ public:
 	virtual void _FireUndoListChanged() { FireUndoListChanged(); }
 	virtual void _UnboundShapeFinished(IShape* shp);
 	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }
-	virtual void _StartDragging(DraggingOperation operation) {
-		_dragging.Operation = operation;
-		SetCapture();
-	}
+	virtual void _StartDragging(DraggingOperation operation) {	StartDragging(operation); }
 	
 };
 

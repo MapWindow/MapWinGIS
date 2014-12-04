@@ -819,6 +819,9 @@
     <ClInclude Include="ComHelpers\TableHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="Drawing\LayerDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1730,6 +1733,9 @@
     </ClCompile>
     <ClCompile Include="ComHelpers\TableHelper.cpp">
       <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\LayerDrawer.cpp">
+      <Filter>Drawing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

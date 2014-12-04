@@ -440,6 +440,7 @@ public:
 	bool ValidateOutput(IShapefile* sf, CString methodName, CString className= "Shapefile", bool abortIfEmpty = true);
 	void RestoreShapeRecordsMapping();
 	
-	
+	// drawing 
+	void MarkUndrawn();
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)
