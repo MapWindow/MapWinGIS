@@ -90,7 +90,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\VC2010\include;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -208,7 +208,16 @@
     <ClInclude Include="COM classes\OgrLayer.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
+    <ClInclude Include="ComHelpers\ChartsHelper.h" />
+    <ClInclude Include="ComHelpers\ExtentsHelper.h" />
+    <ClInclude Include="ComHelpers\FieldHelper.h" />
+    <ClInclude Include="ComHelpers\LabelsHelper.h" />
     <ClInclude Include="ComHelpers\ProjectionHelper.h" />
+    <ClInclude Include="ComHelpers\SelectionHelper.h" />
+    <ClInclude Include="ComHelpers\ShapefileHelper.h" />
+    <ClInclude Include="ComHelpers\ShapeHelper.h" />
+    <ClInclude Include="ComHelpers\ShapeStyleHelper.h" />
+    <ClInclude Include="ComHelpers\TableHelper.h" />
     <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Drawing\BaseDrawer.h" />
     <ClInclude Include="Drawing\ChartDrawing.h" />
@@ -251,18 +260,9 @@
     <ClInclude Include="Processing\PointInPolygon.h" />
     <ClInclude Include="Processing\Projections.h" />
     <ClInclude Include="Processing\QTree.h" />
-    <ClInclude Include="Shapefile\ChartsHelper.h" />
     <ClInclude Include="Shapefile\DraggingState.h" />
-    <ClInclude Include="Shapefile\ExtentsHelper.h" />
-    <ClInclude Include="Shapefile\FieldHelper.h" />
     <ClInclude Include="Shapefile\GeoProcessing.h" />
     <ClInclude Include="Shapefile\HotTrackingInfo.h" />
-    <ClInclude Include="Shapefile\LabelsHelper.h" />
-    <ClInclude Include="Shapefile\SelectionHelper.h" />
-    <ClInclude Include="Shapefile\ShapefileHelper.h" />
-    <ClInclude Include="Shapefile\ShapeHelper.h" />
-    <ClInclude Include="Shapefile\ShapeStyleHelper.h" />
-    <ClInclude Include="Shapefile\TableHelper.h" />
     <ClInclude Include="Structures\BaseLayerInfo.h" />
     <ClInclude Include="Structures\DrawList.h" />
     <ClInclude Include="Structures\Extent.h" />
@@ -455,7 +455,16 @@
     <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="ComHelpers\ChartsHelper.cpp" />
+    <ClCompile Include="ComHelpers\ExtentsHelper.cpp" />
+    <ClCompile Include="ComHelpers\FieldHelper.cpp" />
+    <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
     <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
+    <ClCompile Include="ComHelpers\SelectionHelper.cpp" />
+    <ClCompile Include="ComHelpers\ShapefileHelper.cpp" />
+    <ClCompile Include="ComHelpers\ShapeHelper.cpp" />
+    <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp" />
+    <ClCompile Include="ComHelpers\TableHelper.cpp" />
     <ClCompile Include="Control\Map_Dynamic.cpp" />
     <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="COM classes\Chart.cpp" />
@@ -578,17 +587,8 @@
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />
-    <ClCompile Include="Shapefile\ChartsHelper.cpp" />
-    <ClCompile Include="Shapefile\ExtentsHelper.cpp" />
-    <ClCompile Include="Shapefile\FieldHelper.cpp" />
     <ClCompile Include="Shapefile\GeoProcessing.cpp" />
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp" />
-    <ClCompile Include="Shapefile\LabelsHelper.cpp" />
-    <ClCompile Include="Shapefile\SelectionHelper.cpp" />
-    <ClCompile Include="Shapefile\ShapefileHelper.cpp" />
-    <ClCompile Include="Shapefile\ShapeHelper.cpp" />
-    <ClCompile Include="Shapefile\ShapeStyleHelper.cpp" />
-    <ClCompile Include="Shapefile\TableHelper.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

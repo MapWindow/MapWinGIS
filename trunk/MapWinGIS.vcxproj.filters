@@ -672,9 +672,6 @@
     <ClInclude Include="Utilities\FieldClassification.h">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\ShapefileHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Ogr\GeosConverter.h">
       <Filter>Ogr</Filter>
     </ClInclude>
@@ -711,25 +708,7 @@
     <ClInclude Include="Ogr\GeosHelper.h">
       <Filter>Ogr</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\ShapeHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\SelectionHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\FieldHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="Shapefile\GeoProcessing.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\LabelsHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\ExtentsHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\ShapeStyleHelper.h">
       <Filter>Shapefile</Filter>
     </ClInclude>
     <ClInclude Include="Drawing\BaseDrawer.h">
@@ -764,9 +743,6 @@
     </ClInclude>
     <ClInclude Include="Drawing\TilesDrawer.h">
       <Filter>Drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="Shapefile\ChartsHelper.h">
-      <Filter>Shapefile</Filter>
     </ClInclude>
     <ClInclude Include="Shapefile\HotTrackingInfo.h">
       <Filter>Shapefile</Filter>
@@ -813,10 +789,34 @@
     <ClInclude Include="Utilities\DebugHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Shapefile\TableHelper.h">
-      <Filter>Shapefile</Filter>
-    </ClInclude>
     <ClInclude Include="ComHelpers\ProjectionHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ChartsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ExtentsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\FieldHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\LabelsHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\SelectionHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapefileHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapeHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ShapeStyleHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\TableHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1590,9 +1590,6 @@
     <ClCompile Include="Utilities\FieldClassification.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\ShapefileHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Ogr\GeosConverter.cpp">
       <Filter>Ogr</Filter>
     </ClCompile>
@@ -1626,25 +1623,7 @@
     <ClCompile Include="Ogr\GeosHelper.cpp">
       <Filter>Ogr</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\ShapeHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\SelectionHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\FieldHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="Shapefile\GeoProcessing.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\LabelsHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\ExtentsHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\ShapeStyleHelper.cpp">
       <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Drawing\BaseDrawer.cpp">
@@ -1679,9 +1658,6 @@
     </ClCompile>
     <ClCompile Include="Drawing\TilesDrawer.cpp">
       <Filter>Drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="Shapefile\ChartsHelper.cpp">
-      <Filter>Shapefile</Filter>
     </ClCompile>
     <ClCompile Include="Shapefile\HotTrackingInfo.cpp">
       <Filter>Shapefile</Filter>
@@ -1725,10 +1701,34 @@
     <ClCompile Include="Utilities\DebugHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Shapefile\TableHelper.cpp">
-      <Filter>Shapefile</Filter>
-    </ClCompile>
     <ClCompile Include="ComHelpers\ProjectionHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ChartsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ExtentsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\FieldHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\LabelsHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\SelectionHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapefileHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapeHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\TableHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
   </ItemGroup>
