@@ -141,6 +141,12 @@ public:
 	STDMETHOD(put_AttachMapCallbackToLayers)(VARIANT_BOOL newVal);
 	STDMETHOD(get_HotTrackingMaxShapeCount)(LONG* pVal);
 	STDMETHOD(put_HotTrackingMaxShapeCount)(LONG newVal);
+	STDMETHOD(get_AllowLayersWithoutProjections)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AllowLayersWithoutProjections)(VARIANT_BOOL newVal);
+	STDMETHOD(get_AllowProjectionMismatch)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AllowProjectionMismatch)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ReprojectLayersOnAdding)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_ReprojectLayersOnAdding)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

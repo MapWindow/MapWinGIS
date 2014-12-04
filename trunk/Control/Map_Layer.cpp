@@ -13,6 +13,9 @@
 #include "ImageLayerInfo.h"
 #include "OgrLayer.h"
 #include "OgrStyle.h"
+#include "ShapefileHelper.h"
+#include "OgrHelper.h"
+#include "ComHelpers\ProjectionHelper.h"
 
 // ************************************************************
 //		GetNumLayers()
@@ -515,7 +518,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	// do projection mismatch check
-	if (!CheckLayerProjection(l))
+	if (!CheckLayerProjection(l, layerHandle))
 	{
 		RemoveLayerCore(layerHandle, false);
 		LockWindow( lmUnlock );
@@ -623,146 +626,112 @@ void CMapView::GrabLayerProjection( Layer* layer )
 // ***************************************************************
 //		CheckLayerProjection()
 // ***************************************************************
-bool CMapView::CheckLayerProjection( Layer* layer )
+bool CMapView::CheckLayerProjection( Layer* layer, int layerHandle )
 {
-	if (_projectionMismatchBehavior == mbIgnore)
-		return true;
+	IGeoProjection* gpMap = GetMapProjection();
 
-	IGeoProjection* mapProj = GetMapProjection();
-	VARIANT_BOOL isGeographic;
-	mapProj->get_IsGeographic(&isGeographic);
-
-	// compare projection of layer with one for the map
-	VARIANT_BOOL isEmpty = VARIANT_FALSE;
 	CComPtr<IGeoProjection> gp = NULL;
 	gp.Attach(layer->GetGeoProjection());
-	if (gp)
+	
+	if (ProjectionHelper::IsEmpty(gp))
 	{
-		gp->get_IsEmpty(&isEmpty);
+		tkMwBoolean cancel = m_globalSettings.allowLayersWithoutProjection ? blnFalse : blnTrue;
+		FireLayerProjectionIsEmpty(layerHandle, &cancel);
+		if (cancel == blnTrue) {
+			ErrorMessage(tkMISSING_GEOPROJECTION);
+			return false;
+		}
+
+		// even if user accepted the layer but it clearly doesn't fit we will reject it
+		if (ProjectionHelper::IsGeographic(gpMap) && layer->extents.OutsideWorldBounds())
+		{
+			ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
+			return false;
+		}
+		return true;
 	}
 	
-	bool result = false;
-	if (isEmpty)
+	// makes no sense to do the matching
+	if (ProjectionHelper::IsEmpty(gpMap)) return true;     
+
+	// mismatch testing
+	CComPtr<IExtents> bounds = NULL;
+	layer->GetExtentsAsNewInstance(&bounds);
+
+	if (ProjectionHelper::IsSame(gpMap, gp, bounds, 20))
+		return true;
+
+	tkMwBoolean cancelAdding = m_globalSettings.allowProjectionMismatch ? blnFalse : blnTrue;
+	tkMwBoolean reproject = m_globalSettings.reprojectLayersOnAdding ? blnTrue : blnFalse;
+	FireProjectionMismatch(layerHandle, &cancelAdding, &reproject);
+
+	if (cancelAdding) 
 	{
-		switch (_projectionMismatchBehavior)
-		{
-			case mbCheckLoose:
-			case mbCheckLooseAndReproject:
-				if (isGeographic &&
-					(layer->extents.left < -180.0 || layer->extents.right > 180.0 || 
-					layer->extents.top > 90.0 || layer->extents.bottom < -90.0))
-				{
-					ErrorMessage(tkGEOGRAPHIC_PROJECTION_EXPECTED);
-					result = false;
-				}
-				else {
-					// nothing else to check; since it's loose check - let it be
-					result = true;
-				}
-				break;
-			case mbCheckStrict:
-			case mbCheckStrictAndReproject:
-				// since it's strict, we want to be sure
-				ErrorMessage(tkMISSING_GEOPROJECTION);
-				result = false;
-				break;
+		ErrorMessage(tkPROJECTION_MISMATCH);
+		return false;
+	}
+
+	if (!reproject)	return true;	//basically ignore it
+	
+	if (layer->IsImage())
+	{
+		ErrorMessage(tkNO_REPROJECTION_FOR_IMAGES);
+		return false;
+	}
+			
+	if (layer->IsShapefile())
+		return ReprojectLayer(layer, layerHandle);
+
+	// for other layer types potentially added in the future
+	return true;		
+}
+
+// ***************************************************************
+//		ReprojectLayer()
+// ***************************************************************
+bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
+{
+	// let's try to do a transformation
+	CComPtr<IShapefile> sf = NULL;
+	if (!layer->QueryShapefile(&sf))
+		return false;
+
+	long numShapes = ShapefileHelper::GetNumShapes(sf);
+
+	long count;
+	IShapefile* sfNew = NULL;
+	sf->Reproject(GetMapProjection(), &count, &sfNew);
+
+	if (!sfNew || numShapes != count)
+	{
+		FireLayerReprojected(layerHandle, VARIANT_FALSE);
+		if (sfNew) sfNew->Release();
+		ErrorMessage(tkFAILED_TO_REPROJECT);
+		return false;
+	}
+	
+	// let's substitute original file with this one
+	// don't close the original shapefile; use may still want to interact with it
+	// release should be called twice, smart pointer won't allow it
+	ShapefileHelper::Cast(sf)->Release();
+
+	if (layer->type == OgrLayerSource)
+	{
+		CComPtr<IOgrLayer> ogr = NULL;
+		layer->QueryOgrLayer(&ogr);
+		if (ogr) {
+			OgrHelper::Cast(ogr)->InjectShapefile(sfNew);
 		}
-		return result;
 	}
 	else
 	{
-		CComPtr<IExtents> ext = NULL;
-		ComHelper::CreateInstance(idExtents, (IDispatch**)&ext);
-		ext->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
-
-		IGeoProjection* gpMap = GetMapProjection();
-		VARIANT_BOOL isEmpty;
-		gpMap->get_IsEmpty(&isEmpty);
-		if (isEmpty && 
-			(_projectionMismatchBehavior == mbCheckLoose || _projectionMismatchBehavior == mbCheckLooseAndReproject)) 
-		{
-			return true;
-		}
-
-		VARIANT_BOOL match;
-		GetMapProjection()->get_IsSameExt(gp, ext, 20, &match);
-
-		if (match)
-		{
-			return true;
-		}
-		else
-		{
-			if (_projectionMismatchBehavior == mbCheckStrict || 
-				_projectionMismatchBehavior == mbCheckLoose)
-			{
-				// no transformation option is chosen, so give up
-				ErrorMessage(tkPROJECTION_MISMATCH);
-				return false;
-			}
-			
-			if (layer->IsImage())
-			{
-				ErrorMessage(tkNO_REPROJECTION_FOR_IMAGES);
-				return false;
-			}
-			
-			// let's try to do a transformation
-			if (layer->IsShapefile())
-			{
-				CComPtr<IShapefile> sf = NULL;
-				layer->QueryShapefile(&sf);
-				if (sf)
-				{
-					long numShapes;
-					sf->get_NumShapes(&numShapes);
-
-					long count;
-					IShapefile* sfNew = NULL;
-					sf->Reproject(GetMapProjection(), &count, &sfNew);
-					
-					result = false;
-					if (!sfNew || 
-						(numShapes != count && _projectionMismatchBehavior == mbCheckStrictAndReproject))
-					{
-						if (sfNew)
-							sfNew->Release();
-						ErrorMessage(tkFAILED_TO_REPROJECT);
-						return false;
-					}
-					else
-					{
-						// let's substitute original file with this one
-						// don't close the original shapefile; use may still want to interact with it
-						IShapefile* isf = sf;
-						isf->Release();				// need to call it on the object itself, as we want the smart pointer
-													// to release one more reference on return from function
-
-						if (layer->type == OgrLayerSource)
-						{
-							IOgrLayer* ogr;
-							layer->QueryOgrLayer(&ogr);
-							if (ogr) {
-								((COgrLayer*)ogr)->InjectShapefile(sfNew);
-								ogr->Release();
-							}
-						}
-						else
-						{
-							layer->object = sfNew;		// TODO: save it to the disk as an option
-						}
-						layer->UpdateExtentsFromDatasource();
-						return true;
-					}
-
-					return result;
-				}
-			}
-
-			// in case of some omissions or new layer types
-			return _projectionMismatchBehavior == mbCheckLooseAndReproject ? true : false;		
-		}
+		layer->object = sfNew;
 	}
+	layer->UpdateExtentsFromDatasource();
+
+	FireLayerReprojected(layerHandle, VARIANT_TRUE);
+
+	return true;
 }
 
 // ***************************************************************

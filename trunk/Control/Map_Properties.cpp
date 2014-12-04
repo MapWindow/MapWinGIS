@@ -446,21 +446,6 @@ void CMapView::SetZoomBoxStyle(tkZoomBoxStyle nNewValue)
 }
 
 // *****************************************************
-//		ProjectionMismatchBehavior
-// *****************************************************
-tkMismatchBehavior CMapView::GetProjectionMismatchBehavior()
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	return _projectionMismatchBehavior;
-}
-void CMapView::SetProjectionMismatchBehavior(tkMismatchBehavior nNewValue)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_projectionMismatchBehavior = nNewValue;
-}
-
-
-// *****************************************************
 //		ZoomBarMinZoom
 // *****************************************************
 long CMapView::GetZoomBarMinZoom()

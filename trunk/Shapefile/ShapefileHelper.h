@@ -1,4 +1,5 @@
 #pragma once
+#include "Shapefile.h"
 class ShapefileHelper
 {
 public:
@@ -23,5 +24,6 @@ public:
 	static bool BoundsWithinPolygon(IShapefile* sf, int shapeIndex, double b_minX, double b_minY, double b_maxX, double b_maxY);
 	static bool ShapeTypeIsM(IShapefile* sf);
 	static CStringW GetSymbologyFilename(IShapefile* sf);
+	static CShapefile* Cast(CComPtr<IShapefile>& sf);
 };
 

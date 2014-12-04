@@ -585,8 +585,6 @@ public:
 	afx_msg void SetZoomBarVerbosity(tkZoomBarVerbosity newVal);
 	afx_msg tkZoomBoxStyle GetZoomBoxStyle();
 	afx_msg void SetZoomBoxStyle(tkZoomBoxStyle newVal);
-	afx_msg tkMismatchBehavior GetProjectionMismatchBehavior();
-	afx_msg void SetProjectionMismatchBehavior(tkMismatchBehavior newVal);
 	afx_msg long GetZoomBarMinZoom();
 	afx_msg void SetZoomBarMinZoom(long newVal);
 	afx_msg long GetZoomBarMaxZoom();
@@ -662,6 +660,9 @@ public:
 	void FireUndoListChanged(){ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
 	void FireSelectionChanged(LONG LayerHandle) { FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
 	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY) { FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), LayerHandle, ShapeIndex, pointX, pointY); }
+	void FireLayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding) { FireEvent(eventidLayerProjectionIsEmpty, EVENT_PARAM(VTS_I4 VTS_PI4), LayerHandle, cancelAdding); }
+	void FireProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject) { FireEvent(eventidProjectionMismatch, EVENT_PARAM(VTS_I4 VTS_PI4 VTS_PI4), LayerHandle, cancelAdding, reproject); }
+	void FireLayerReprojected(LONG LayerHandle, VARIANT_BOOL Success){	FireEvent(eventidLayerReprojected, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, Success);	}
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -769,7 +770,6 @@ public:
 	tkCoordinatesDisplay _showCoordinates;
 	tkScalebarUnits  _scalebarUnits;
 	tkZoomBarVerbosity _zoomBarVerbosity;
-	tkMismatchBehavior _projectionMismatchBehavior;
 	tkIdentifierMode _identifierMode;
 	
 	CString _versionNumber;
@@ -1055,7 +1055,7 @@ private:
 	void DrawZoomingAnimation(Extent match, Gdiplus::Graphics* gTemp, CDC* dc, Gdiplus::RectF& source, Gdiplus::RectF& target, bool zoomingAnimation);
 	void TurnOffPanning();
 	void DrawZoombox(Gdiplus::Graphics* g);
-	bool CheckLayerProjection( Layer* layer );
+	bool CheckLayerProjection( Layer* layer, int layerHandle );
 	void GrabLayerProjection( Layer* layer );
 	bool HaveDataLayersWithinView();
 	void AdjustZoom(int zoom);
@@ -1123,7 +1123,9 @@ private:
 	void ScheduleLayerRedraw();
 	void ScheduleVolatileRedraw();
 	void RedrawWithTiles(tkRedrawType redrawType, bool atOnce, bool reloadBuffers);
-	
+	void ClearDrawingLabelFrames();
+	bool ReprojectLayer(Layer* layer, int layerHandle);
+
 #pragma endregion
 
 public:
@@ -1154,12 +1156,7 @@ public:
 		_dragging.Operation = operation;
 		SetCapture();
 	}
-	void ClearDrawingLabelFrames();
-
-
-
-
-
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

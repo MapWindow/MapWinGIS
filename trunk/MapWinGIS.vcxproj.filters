@@ -88,6 +88,9 @@
     <Filter Include="Editor">
       <UniqueIdentifier>{7e2c1743-0255-48b3-9224-76fcf92f3661}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ComHelpers">
+      <UniqueIdentifier>{a7a67483-9daa-467e-a255-4f511e28ff39}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Structures\BaseLayerInfo.h">
@@ -812,6 +815,9 @@
     </ClInclude>
     <ClInclude Include="Shapefile\TableHelper.h">
       <Filter>Shapefile</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\ProjectionHelper.h">
+      <Filter>ComHelpers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1721,6 +1727,9 @@
     </ClCompile>
     <ClCompile Include="Shapefile\TableHelper.cpp">
       <Filter>Shapefile</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\ProjectionHelper.cpp">
+      <Filter>ComHelpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

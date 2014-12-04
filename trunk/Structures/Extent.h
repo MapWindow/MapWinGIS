@@ -125,6 +125,12 @@ public:
 	Point2D GetCenter () {
 		return Point2D((left + bottom) / 2.0, (top + right)/2.0);
 	}
+
+	bool OutsideWorldBounds()
+	{
+		return left < -180.0 || right > 180.0 || top > 90.0 || bottom < -90.0;
+	}
+	
 };
 
 #endif // !defined(AFX_EXTENT_H__CCC7B001_1ECF_11D5_A566_00104BCC583E__INCLUDED_)

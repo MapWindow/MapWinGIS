@@ -406,3 +406,11 @@ CStringW ShapefileHelper::GetSymbologyFilename(IShapefile* sf)
 	return L"";
 }
 
+// ********************************************************************
+//		Cast()
+// ********************************************************************
+CShapefile* ShapefileHelper::Cast(CComPtr<IShapefile>& sf)
+{
+	return (CShapefile*)&(*sf);
+}
+

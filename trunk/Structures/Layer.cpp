@@ -480,3 +480,12 @@ bool Layer::IsEmpty()
 	}
 	return false;
 }
+
+//****************************************************
+//*		GetExtentsAsNewInstance()
+//****************************************************
+void Layer::GetExtentsAsNewInstance(IExtents** box)
+{
+	ComHelper::CreateInstance(idExtents, (IDispatch**)box);
+	(*box)->SetBounds(extents.left, extents.bottom, 0.0, extents.right, extents.top, 0.0);
+}

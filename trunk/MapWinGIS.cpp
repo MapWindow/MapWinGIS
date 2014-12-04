@@ -40,6 +40,12 @@ GlobalClassFactory m_factory;	// make sure that this one is initialized after th
 // ******************************************************
 BOOL CMapWinGISApp::InitInstance()
 {
+	// let's generate floating point exceptions
+	#ifndef RELEASE_MODE
+		_clearfp();
+		_controlfp(0, EM_ZERODIVIDE);
+	#endif
+
 	Debug::Init();
 
 	//Neio modified 2009, following http_://www.mapwindow.org/phorum/read.php?7,12162 by gischai, for multi-language support

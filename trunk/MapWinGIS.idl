@@ -427,21 +427,6 @@ enum tkCustomState
 	csFalse = 2,
 } tkCustomState;
 
-/************************** tkMismatchBehavior Enumerations **********************/
-typedef		
-[
-	uuid(DFBADBA7-93E8-4da2-AB02-432613A3699D),
-	helpstring("tkMismatchBehavior"),
-]
-enum tkMismatchBehavior
-{
-	mbIgnore = 0,
-	mbCheckLoose = 1,
-	mbCheckStrict = 2,
-	mbCheckLooseAndReproject = 3,
-	mbCheckStrictAndReproject = 4,
-} tkMismatchBehavior;
-
 /************************** tkZoomBarVerbosity Enumerations **********************/
 typedef		
 [
@@ -5326,10 +5311,6 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(35)] HRESULT ImageDownsamplingMode( [in]tkInterpolationMode newVal);
 	[propget, id(36)] HRESULT OgrStringEncoding([out, retval]tkOgrEncoding* retVal);
 	[propput, id(36)] HRESULT OgrStringEncoding([in]tkOgrEncoding newVal);
-	/*[propget, id(36)] HRESULT GridUpsamplingMode( [out, retval]tkInterpolationMode* retVal);
-	[propput, id(36)] HRESULT GridUpsamplingMode( [in]tkInterpolationMode newVal);
-	[propget, id(37)] HRESULT GridDownsamplingMode( [out, retval]tkInterpolationMode* retVal);
-	[propput, id(37)] HRESULT GridDownsamplingMode( [in]tkInterpolationMode newVal);*/
 	[propget, id(37)] HRESULT OgrLayerMaxFeatureCount([out, retval] LONG* pVal);
 	[propput, id(37)] HRESULT OgrLayerMaxFeatureCount([in] LONG newVal);
 	[propget, id(38)] HRESULT AutoChooseOgrLoadingMode([out, retval] VARIANT_BOOL* pVal);
@@ -5340,6 +5321,12 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(40)] HRESULT AttachMapCallbackToLayers([in] VARIANT_BOOL newVal);
 	[propget, id(41)] HRESULT HotTrackingMaxShapeCount([out, retval] LONG* pVal);
 	[propput, id(41)] HRESULT HotTrackingMaxShapeCount([in] LONG newVal);
+	[propget, id(42)] HRESULT AllowLayersWithoutProjections([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(42)] HRESULT AllowLayersWithoutProjections([in] VARIANT_BOOL newVal);
+	[propget, id(43)] HRESULT AllowProjectionMismatch([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(43)] HRESULT AllowProjectionMismatch([in] VARIANT_BOOL newVal);
+	[propget, id(44)] HRESULT ReprojectLayersOnAdding([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(44)] HRESULT ReprojectLayersOnAdding([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -6104,8 +6091,6 @@ library MapWinGIS
 			[id(230), propget] tkZoomBarVerbosity ZoomBarVerbosity();
 			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
 			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
-			[id(232), propput] void ProjectionMismatchBehavior(tkMismatchBehavior nNewValue);
-			[id(232), propget] tkMismatchBehavior ProjectionMismatchBehavior();
 			[id(233), propput] void ZoomBarMinZoom(long nNewValue);
 			[id(233), propget] long ZoomBarMinZoom();
 			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
@@ -6169,6 +6154,9 @@ library MapWinGIS
 			[id(24)] void UndoListChanged();
 			[id(25)] void SelectionChanged(LONG LayerHandle);
 			[id(26)] void ShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY);
+			[id(27)] void LayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding);
+			[id(28)] void ProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject);
+			[id(29)] void LayerReprojected(LONG LayerHandle, VARIANT_BOOL Success);
 		//}}AFX_ODL_EVENT
 	};
 	[

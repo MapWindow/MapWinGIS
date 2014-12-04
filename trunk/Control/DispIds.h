@@ -265,6 +265,8 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidUndoListChanged = 24L,
 	eventidSelectionChanged = 25L,
 	eventidShapeIdentified = 26L,
-
+	eventidLayerProjectionIsEmpty = 27L,
+	eventidProjectionMismatch = 28L,
+	eventidLayerReprojected = 29L,
 	//}}AFX_DISP_ID
 };

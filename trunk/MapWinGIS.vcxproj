@@ -161,7 +161,6 @@
     </Midl>
     <ClCompile>
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <FloatingPointModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Precise</FloatingPointModel>
     </ClCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
@@ -209,6 +208,7 @@
     <ClInclude Include="COM classes\OgrLayer.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
+    <ClInclude Include="ComHelpers\ProjectionHelper.h" />
     <ClInclude Include="Control\MapViewCallback.h" />
     <ClInclude Include="Drawing\BaseDrawer.h" />
     <ClInclude Include="Drawing\ChartDrawing.h" />
@@ -455,6 +455,7 @@
     <ClCompile Include="COM classes\OgrLayer.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
+    <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
     <ClCompile Include="Control\Map_Dynamic.cpp" />
     <ClCompile Include="Control\Map_Edit.cpp" />
     <ClCompile Include="COM classes\Chart.cpp" />

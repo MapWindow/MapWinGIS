@@ -56,6 +56,9 @@ struct GlobalSettingsInfo
 	int hotTrackingMaxShapeCount;
 	OLE_COLOR identifierColor;
 	BSTR emptyBstr;
+	bool allowLayersWithoutProjection;
+	bool allowProjectionMismatch;
+	bool reprojectLayersOnAdding;
 
 	~GlobalSettingsInfo()
 	{
@@ -64,6 +67,9 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		allowLayersWithoutProjection = true;
+		allowProjectionMismatch = true;
+		reprojectLayersOnAdding = false;
 		emptyBstr = SysAllocString(L"");
 		identifierColor = RGB(30, 144, 255);
 		hotTrackingMaxShapeCount = 200;

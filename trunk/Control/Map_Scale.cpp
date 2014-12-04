@@ -1097,7 +1097,7 @@ void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChan
 	_extents.right = right;
 	_extents.bottom = bottom;
 	_extents.top = top;
-	
+
 	if (xrange == 0 || _viewWidth == 0)
 	{
 		_pixelPerProjectionX = 0;

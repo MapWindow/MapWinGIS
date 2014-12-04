@@ -745,3 +745,51 @@ STDMETHODIMP CGlobalSettings::put_HotTrackingMaxShapeCount(LONG newVal)
 	m_globalSettings.hotTrackingMaxShapeCount = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     AllowLayersWithoutProjections
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AllowLayersWithoutProjections(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.allowLayersWithoutProjection ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_AllowLayersWithoutProjections(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.allowLayersWithoutProjection = newVal ? true : false;
+	return S_OK;
+}
+
+// *********************************************************
+//	     AllowProjectionMismatch
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AllowProjectionMismatch(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.allowProjectionMismatch ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_AllowProjectionMismatch(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.allowProjectionMismatch = newVal ? true : false;
+	return S_OK;
+}
+
+// *********************************************************
+//	     ReprojectLayersOnAdding
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_ReprojectLayersOnAdding(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.reprojectLayersOnAdding ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ReprojectLayersOnAdding(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.reprojectLayersOnAdding = newVal ? true : false;
+return S_OK;
+}

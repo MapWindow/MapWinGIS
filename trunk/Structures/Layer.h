@@ -119,6 +119,7 @@ public:
 	bool IsVisible(double scale, int zoom);
 	ILabels* get_Labels();
 	IGeoProjection* GetGeoProjection();
+	void GetExtentsAsNewInstance(IExtents** extents);
 	bool UpdateExtentsFromDatasource();
 	void LoadAsync(IMapViewCallback* mapView, Extent extents);
 	void UpdateShapefile();

@@ -217,3 +217,11 @@ bool OgrHelper::GetFieldList(OGRLayer* layer, vector<CString>& fields)
 	}
 	return true;
 }
+
+// *************************************************************
+//		Cast()
+// *************************************************************
+COgrLayer* OgrHelper::Cast(CComPtr<IOgrLayer>& layer)
+{
+	return (COgrLayer*)&(*layer);
+}
