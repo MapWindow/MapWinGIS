@@ -32,7 +32,7 @@ static char THIS_FILE[] = __FILE__;
 void CGridColorScheme::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("GridColorScheme", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CGridColorScheme::get_NumBreaks(long *pVal)

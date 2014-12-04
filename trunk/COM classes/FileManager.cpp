@@ -29,8 +29,7 @@ STDMETHODIMP CFileManager::put_Key(BSTR newVal)
 void CFileManager::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	if (_lastErrorCode != tkNO_ERROR)
-		Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("FileManager", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CFileManager::get_LastErrorCode(long *pVal)

@@ -147,6 +147,8 @@ public:
 	STDMETHOD(put_ReprojectLayersOnAdding)(VARIANT_BOOL newVal);
 	STDMETHOD(get_MouseTolerance)(DOUBLE* pVal);
 	STDMETHOD(put_MouseTolerance)(DOUBLE newVal);
+	STDMETHOD(get_ApplicationCallback)(ICallback** pVal);
+	STDMETHOD(put_ApplicationCallback)(ICallback* newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

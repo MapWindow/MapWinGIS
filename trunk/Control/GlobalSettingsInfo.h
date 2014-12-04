@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	ICallback* callback;
 	double minPolygonArea;
 	double minAreaToPerimeterRatio;
 	double clipperGcsMultiplicationFactor;
@@ -65,10 +66,13 @@ struct GlobalSettingsInfo
 	~GlobalSettingsInfo()
 	{
 		SysFreeString(emptyBstr);
+		if (callback)
+			callback->Release();
 	}
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		callback = NULL;
 		mouseTolerance = 20;
 		allowLayersWithoutProjection = true;
 		allowProjectionMismatch = true;

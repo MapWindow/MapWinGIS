@@ -419,14 +419,14 @@ STDMETHODIMP CShapefile::get_Filename(BSTR *pVal)
 void CShapefile::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 	if (cBack != _globalCallback)
-		Utility::DisplayErrorMsg(cBack, _key, ErrorMsg(_lastErrorCode));
+		Utility::DisplayErrorMsg("Shapefile", cBack, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************

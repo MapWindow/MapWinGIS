@@ -95,7 +95,7 @@ STDMETHODIMP CLinePattern::put_Key(BSTR newVal)
 void CLinePattern::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("LinePattern", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 #pragma endregion
 

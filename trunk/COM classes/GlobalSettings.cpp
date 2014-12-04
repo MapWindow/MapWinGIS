@@ -793,3 +793,19 @@ STDMETHODIMP CGlobalSettings::put_MouseTolerance(DOUBLE newVal)
 	m_globalSettings.mouseTolerance = newVal ? true : false;
 	return S_OK;
 }
+
+// *********************************************************
+//	     ApplicationCallback
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_ApplicationCallback(ICallback** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.callback;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ApplicationCallback(ICallback* newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	ComHelper::SetRef(newVal, (IDispatch**)&m_globalSettings.callback);
+	return S_OK;
+}

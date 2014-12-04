@@ -92,8 +92,8 @@ namespace Utility
 	void DisplayProgress(ICallback* callback, int percent, const char* message);
 	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
 	void DisplayProgressCompleted(ICallback* callback);
-	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...);
-	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...);
+	void DisplayErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...);
+	void DisplayErrorMsg(CString className, ICallback* localCback, CString key, const char* message, ...);
 
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
 

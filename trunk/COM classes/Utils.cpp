@@ -3607,13 +3607,13 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 void CUtils::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Utils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(callback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
@@ -4521,7 +4521,7 @@ void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 	if (gdalCallback) {
 		CString s = msg;
 		s = "GDAL error: " + s;
-		Utility::DisplayErrorMsg(gdalCallback, "GDAL", s);
+		Utility::DisplayErrorMsg("Utils", gdalCallback, "GDAL", s);
 	}
 }
 

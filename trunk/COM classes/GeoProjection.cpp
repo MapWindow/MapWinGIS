@@ -132,7 +132,7 @@ void CGeoProjection::ErrorMessage(long ErrorCode)
 	{
 		CString msg = "OGR: ";
 		msg += ErrorMsg(_lastErrorCode);
-		Utility::DisplayErrorMsg(_globalCallback, _key, msg);
+		Utility::DisplayErrorMsg("GeoProjection", _globalCallback, _key, msg);
 	}
 }
 

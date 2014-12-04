@@ -983,91 +983,86 @@ namespace Utility
 	// ********************************************************************
 	//		DisplayProgress()
 	// ********************************************************************
-	void DisplayProgress(ICallback* callback, int index, int count, const char* message, long& lastPercent)
+	void DisplayProgress(ICallback* localCback, int index, int count, const char* message, long& lastPercent)
 	{
-		DisplayProgress(callback, index, (double)count, message, m_globalSettings.emptyBstr, lastPercent);
+		DisplayProgress(localCback, index, (double)count, message, m_globalSettings.emptyBstr, lastPercent);
 	}
 	
-	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent)
+	void DisplayProgress(ICallback* localCback, int index, int count, const char* message, BSTR& key, long& lastPercent)
 	{
-		DisplayProgress(callback, index, (double)count, message, key, lastPercent);
+		DisplayProgress(localCback, index, (double)count, message, key, lastPercent);
 	}
 
 	// ********************************************************************
 	//		DisplayProgress()
 	// ********************************************************************
-	void DisplayProgress(ICallback* callback, int index, double count, const char* message, BSTR& key, long& lastPercent)
+	void DisplayProgress(ICallback* localCback, int index, double count, const char* message, BSTR& key, long& lastPercent)
 	{
-		if (callback != NULL)
+		ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+		if ( !callback ) return;
+		
+		long newpercent = (long)(((double)(index + 1) / count) * 100);
+		if (newpercent > lastPercent)
 		{
-			long newpercent = (long)(((double)(index + 1) / count) * 100);
-			if (newpercent > lastPercent)
-			{
-				lastPercent = newpercent;
-				CComBSTR bstrMsg(message);
-				callback->Progress(key, newpercent, bstrMsg);
-			}
-		}
-	}
-
-	// ********************************************************************
-	//		DisplayProgress()
-	// ********************************************************************
-	void DisplayProgress(ICallback* callback, int percent, const char* message, BSTR& key)
-	{
-		if (callback != NULL)
-		{
+			lastPercent = newpercent;
 			CComBSTR bstrMsg(message);
-			callback->Progress(key, percent, bstrMsg);
+			localCback->Progress(key, newpercent, bstrMsg);
 		}
 	}
 
 	// ********************************************************************
 	//		DisplayProgress()
 	// ********************************************************************
-	void DisplayProgress(ICallback* callback, int percent, const char* message)
+	void DisplayProgress(ICallback* localCback, int percent, const char* message, BSTR& key)
 	{
-		if (callback)
-		{
-			if (!message) message = "";
-			CComBSTR bstrMsg(message);
-			callback->Progress(m_globalSettings.emptyBstr, percent, bstrMsg);
-		}
+		ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+		if (!callback) return;
+		
+		CComBSTR bstrMsg(message);
+		callback->Progress(key, percent, bstrMsg);
+	}
+
+	// ********************************************************************
+	//		DisplayProgress()
+	// ********************************************************************
+	void DisplayProgress(ICallback* localCback, int percent, const char* message)
+	{
+		ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+		if (!callback) return;
+
+		if (!message) message = "";
+		CComBSTR bstrMsg(message);
+		callback->Progress(m_globalSettings.emptyBstr, percent, bstrMsg);
 	}
 
 	// ********************************************************************
 	//		DisplayProgressCompleted()
 	// ********************************************************************
-	void DisplayProgressCompleted(ICallback* callback, BSTR& key)
+	void DisplayProgressCompleted(ICallback* localCback, BSTR& key)
 	{
-		if( callback != NULL )
-		{
-			CComBSTR bstrMsg("Completed");
-			CComBSTR bstrEmpty("");
-			callback->Progress(key, 100, bstrMsg);
-			callback->Progress(key, 0, bstrEmpty);
-		}
+		ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+		if (!callback) return;
+		
+		CComBSTR bstrMsg("Completed");
+		callback->Progress(key, 100, bstrMsg);
+		callback->Progress(key, 0, m_globalSettings.emptyBstr);
 	}
 
 	// ********************************************************************
 	//		DisplayProgressCompleted()
 	// ********************************************************************
-	void DisplayProgressCompleted(ICallback* callback)
+	void DisplayProgressCompleted(ICallback* localCback)
 	{
-		if( callback != NULL )
-		{
-			CComBSTR bstrEmpty = L"";
-			CComBSTR bstrMsg = L"Completed";
-			callback->Progress(bstrEmpty, 100, bstrMsg);
-			callback->Progress(bstrEmpty, 0, bstrEmpty);
-		}
+		DisplayProgressCompleted(localCback, m_globalSettings.emptyBstr);
 	}
 
 	// ********************************************************************
 	//		DisplayErrorMsg()
 	// ********************************************************************
-	void DisplayErrorMsg(ICallback* callback, BSTR& key, const char* message, ...)
+	void DisplayErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...)
 	{
+		ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+
 		if (callback || Debug::IsDebugMode())
 		{
 			if (strcmp(message, "No Error") == 0) return;
@@ -1078,19 +1073,21 @@ namespace Utility
 			vsprintf( buffer, message, args );
 			CString s = buffer;
 			Debug::WriteError(s);
-			CComBSTR bstr(message);
+
+			s = className + ": " + s;
+			CComBSTR bstr(s);
 
 			if (callback) {
 				callback->Error(key, bstr);
 			}
 		}
 	}
-	void DisplayErrorMsg(ICallback* callback, CString key, const char* message, ...)
+	void DisplayErrorMsg(CString className, ICallback* localCallback, CString key, const char* message, ...)
 	{
-		if( callback || Debug::IsDebugMode() )
+		if (localCallback || Debug::IsDebugMode())
 		{
 			CComBSTR bstrKey(key);
-			DisplayErrorMsg(callback, bstrKey.m_str, message);
+			DisplayErrorMsg(className, localCallback, bstrKey.m_str, message);
 		}
 	}
 

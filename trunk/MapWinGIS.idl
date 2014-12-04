@@ -5327,6 +5327,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(43)] HRESULT AllowProjectionMismatch([in] VARIANT_BOOL newVal);
 	[propget, id(44)] HRESULT MouseTolerance([out, retval] DOUBLE* pVal);
 	[propput, id(44)] HRESULT MouseTolerance([in] DOUBLE newVal);
+	[propget, id(45)] HRESULT ApplicationCallback([out, retval] ICallback** pVal);
+	[propput, id(45)] HRESULT ApplicationCallback([in] ICallback* newVal);
 };
 
 [

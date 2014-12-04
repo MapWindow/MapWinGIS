@@ -116,7 +116,7 @@ STDMETHODIMP CShapefileColorScheme::put_ColorBreak(long Index, IShapefileColorBr
 void CShapefileColorScheme::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("ShapefileColorScheme", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CShapefileColorScheme::get_LayerHandle(long *pVal)

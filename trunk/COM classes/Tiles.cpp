@@ -179,7 +179,7 @@ STDMETHODIMP CTiles::get_LastErrorCode(long *pVal)
 void CTiles::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Tiles", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************

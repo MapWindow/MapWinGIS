@@ -351,7 +351,7 @@ STDMETHODIMP CCharts::Generate(tkLabelPositioning Position, VARIANT_BOOL* retVal
 inline void CCharts::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Charts", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *******************************************************************

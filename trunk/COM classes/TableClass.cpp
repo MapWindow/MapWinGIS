@@ -2038,7 +2038,7 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 inline void CTableClass::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Table", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *****************************************************************

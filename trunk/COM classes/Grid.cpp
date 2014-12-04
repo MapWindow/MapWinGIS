@@ -2512,7 +2512,7 @@ STDMETHODIMP CGrid::OpenBand(int bandIndex, VARIANT_BOOL* retVal)
 void CGrid::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("Grid", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ****************************************************************

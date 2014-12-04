@@ -33,7 +33,7 @@ STDMETHODIMP COgrDatasource::put_Key(BSTR newVal)
 void COgrDatasource::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("OgrDatasource", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP COgrDatasource::get_LastErrorCode(long *pVal)

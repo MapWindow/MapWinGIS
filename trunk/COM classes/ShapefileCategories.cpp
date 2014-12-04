@@ -355,7 +355,7 @@ STDMETHODIMP CShapefileCategories::put_Caption(BSTR newVal)
 void CShapefileCategories::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg(_globalCallback, _key, ErrorMsg(_lastErrorCode));
+	Utility::DisplayErrorMsg("ShapefileCategories", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CShapefileCategories::get_LastErrorCode(long *pVal)
