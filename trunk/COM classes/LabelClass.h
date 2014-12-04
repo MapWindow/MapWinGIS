@@ -71,7 +71,7 @@ public:
 	}
 
 public:
-	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)			{*retval = _label->visible;			return S_OK;};
+	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)			{*retval = _label->visible ? VARIANT_TRUE : VARIANT_FALSE;	return S_OK;};
 	STDMETHOD(put_Visible)(VARIANT_BOOL newVal)				{_label->visible = newVal?true:false;	return S_OK;};		
 	
 	STDMETHOD(get_Rotation)(double* retval)					{*retval = _label->rotation;		return S_OK;};

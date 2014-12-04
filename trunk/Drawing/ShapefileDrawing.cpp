@@ -113,11 +113,8 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	_useSpatialIndex = (_useSpatialIndex && _hasSpatilaIndex);
 		
 	// get 2D type for not checking it afterwards
-	if ( _shptype == SHP_POINTM || _shptype == SHP_POINTZ )	_shptype = SHP_POINT;
-	else if ( _shptype == SHP_POLYLINEM || _shptype == SHP_POLYLINEZ )	_shptype = SHP_POLYLINE;
-	else if ( _shptype == SHP_POLYGONM || _shptype == SHP_POLYGONZ )	_shptype = SHP_POLYGON;
-	else if ( _shptype == SHP_MULTIPOINTM || _shptype == SHP_MULTIPOINTZ )	_shptype = SHP_MULTIPOINT;
-	
+	_shptype = Utility::ShapeTypeConvert2D(_shptype);
+
 	// clearing the paths	
 	_vertexPathes.clear();
 
