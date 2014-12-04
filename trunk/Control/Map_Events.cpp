@@ -374,7 +374,7 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 				{
 					// zoom in
 					int zoom = GetCurrentZoom();
-					if (zoom <= maxZoom)
+					if (zoom + 1 <= maxZoom)
 					{
 						ZoomToTileLevel(zoom + 1);
 					}

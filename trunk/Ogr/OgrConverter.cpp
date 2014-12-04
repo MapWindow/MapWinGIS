@@ -20,6 +20,7 @@
 #include "Shapefile.h"
 #include "ogr_spatialref.h"
 #include <GeosHelper.h>
+#include "Ogr2Shape.h"
 
 // *********************************************************************
 //			SetConversionFactor()
@@ -643,110 +644,27 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
  *					 read from layer if none was specified.
  *  @return resulting shapefile pointer on success, or NULL otherwise
  */
-IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ShpfileType shpType)
+IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ICallback* callback)
 {
-	return NULL;
-	//	USES_CONVERSION;
-//	
-//	CString fname = W2CA(Filename);
-//	if (fname.GetLength() == 0) return NULL;
-//
-//	OGRRegisterAll();
-//    
-//	OGRDataSource*	oData;
-//    oData = OGRSFDriverRegistrar::Open(fname, FALSE);
-//    if( oData == NULL ) return NULL;
-//
-//	OGRLayer*	oLayer;
-//	OGRFeature* oFeature;
-//    
-//	oLayer = oData->GetLayer(0);
-//	OGRFeatureDefn* oLDefn = oLayer->GetLayerDefn();
-//	oLayer->ResetReading();
-//
-///* ----------------------------------------------------------------- */
-///*		Creation of shapefile										 */
-///* ----------------------------------------------------------------- */
-//	IShapefile* sf;
-//	VARIANT_BOOL vbretval;
-//	
-//	if (shpType == SHP_NULLSHAPE)
-//		shpType = GeometryType2ShapeType(oLDefn->GetGeomType());
-//	
-//	CoCreateInstance(CLSID_Shapefile,NULL,CLSCTX_INPROC_SERVER,IID_IShapefile,(void**)&sf);
-//	sf->CreateNew(A2BSTR(""), shpType, &vbretval);
-//    
-///* ----------------------------------------------------------------- */
-///*		Converting of fields										 */
-///* ----------------------------------------------------------------- */
-//    for(long iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
-//    {
-//		IField * fld = NULL;
-//		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&fld);
-//		
-//		OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
-//		OGRFieldType type = oField->GetType();
-//		
-//		if( type == OFTInteger )	fld->put_Type(INTEGER_FIELD);
-//        else if(type == OFTReal )	fld->put_Type(DOUBLE_FIELD);
-//        else if(type == OFTString )	fld->put_Type(STRING_FIELD);
-//
-//		fld->put_Name(A2BSTR(oField->GetNameRef()));
-//		fld->put_Width((long)oField->GetWidth());
-//		fld->put_Precision((long)oField->GetPrecision());
-//
-//		sf->EditInsertField(fld, &iFld, NULL, &vbretval);
-//		fld->Release();
-//    }
-//	
-///* ----------------------------------------------------------------- */
-///*		Converting of the shapes and cellvalues						 */
-///* ----------------------------------------------------------------- */
-//	while( (oFeature = oLayer->GetNextFeature()) != NULL )
-//    {
-//		OGRGeometry *oGeom;
-//        oGeom = oFeature->GetGeometryRef();
-//		if(oGeom == NULL) continue;
-//		
-//		IShape* shp =NULL;
-//		shp = GeometryConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
-//		
-//		long numShapes;
-//		sf->get_NumShapes(&numShapes);
-//		sf->EditInsertShape(shp, &numShapes, &vbretval);
-//
-//        for(int iFld = 0; iFld < oLDefn->GetFieldCount(); iFld++ )
-//        {
-//            OGRFieldDefn* oField = oLDefn->GetFieldDefn(iFld);
-//			OGRFieldType type = oField->GetType();
-//			VARIANT val;
-//			VariantInit(&val);
-//
-//			if(type == OFTInteger)	
-//			{
-//				val.vt = VT_I4;
-//				val.lVal = oFeature->GetFieldAsInteger(iFld);
-//			}
-//            else if(type == OFTReal)
-//			{
-//				val.vt = VT_R8;
-//				val.dblVal = oFeature->GetFieldAsDouble(iFld);
-//			}
-//		    else //if (type == OFTString )
-//			{	
-//				val.vt = VT_BSTR;
-//				val.bstrVal = A2BSTR(oFeature->GetFieldAsString(iFld));	
-//			}
-//            sf->EditCellValue(iFld, numShapes, val, &vbretval);
-//			VariantClear(&val);
-//        }
-//        OGRFeature::DestroyFeature(oFeature);
-//    }
-//	
-//    OGRDataSource::DestroyDataSource(oData);
-//
-//	sf->RefreshExtents(&vbretval);
-//	return sf;
+	IShapefile* sf = NULL;
+	GDALDataset* ds = GdalHelper::OpenOgrDatasetW(OLE2W(Filename), false);
+	if (!ds)
+	{
+		return NULL;
+	}
+	
+	OGRLayer* layer = ds->GetLayer(0);
+	if (layer)
+	{
+		sf = Ogr2Shape::CreateShapefile(layer);
+		if (sf) {
+			bool isTrimmed = false;
+			Ogr2Shape::FillShapefile(layer, sf, m_globalSettings.ogrLayerMaxFeatureCount, false, callback, isTrimmed);
+		}
+	}
+	GDALClose(ds);
+
+	return sf;
 }
 
 /***********************************************************************/

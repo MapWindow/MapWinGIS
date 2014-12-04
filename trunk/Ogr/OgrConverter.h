@@ -22,7 +22,7 @@ class OgrConverter
 		static IShape * GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
 		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, OGRwkbGeometryType oForceType = wkbNone);
 		static OGRGeometry* ShapeToGeometry(IShape* shp, OGRwkbGeometryType forceGeometryType = wkbNone);
-		static IShapefile* ReadOgrLayer(BSTR Filename, ShpfileType shpType = SHP_NULLSHAPE);
+		static IShapefile* ReadOgrLayer(BSTR Filename, ICallback* callback);
 		static bool WriteOgrLayer(IShapefile* sf, BSTR Filename);
 		static bool MultiPolygon2Polygons(OGRGeometry* geom, vector<OGRGeometry*>* results);
 		static ShpfileType GeometryType2ShapeType(OGRwkbGeometryType oType);

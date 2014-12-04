@@ -3210,7 +3210,8 @@ void CUtils::Parse(CString sOrig, int * opts)
 STDMETHODIMP CUtils::OGRLayerToShapefile(BSTR Filename, ShpfileType shpType, ICallback *cBack, IShapefile** sf)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	(*sf) = OgrConverter::ReadOgrLayer(Filename, shpType);
+	ICallback* callback = cBack ? cBack : _globalCallback;
+	(*sf) = OgrConverter::ReadOgrLayer(Filename, callback);
 	if (*sf)
 	{
 		((CShapefile*)(*sf))->ValidateOutput(sf, "OGRLayerToShapefile", "Utils");
