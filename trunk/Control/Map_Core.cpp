@@ -229,7 +229,7 @@ void CMapView::LockWindow(short LockMode)
 		{
 			_lockCount = 0;
 			DoUpdateTiles();
-			ReloadImageBuffers();
+			ReloadBuffers();
 			InvalidateControl();
 		}
 	}
@@ -315,7 +315,7 @@ void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuff
 	{
 		case tkRedrawType::RedrawAll:
 			_canUseLayerBuffer = FALSE;
-			ReloadImageBuffers();
+			ReloadBuffers();
 
 		case tkRedrawType::RedrawSkipDataLayers:
 			_canUseVolatileBuffer = FALSE;

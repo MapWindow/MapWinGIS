@@ -1503,14 +1503,11 @@ enum tkScalebarUnits
 	enum tkGDIPlusHatchStyle
 	{	       
 		hsNone = -1,
-		//hsMin = 0,
 		hsHorizontal = 0,
         hsVertical = 1,
         hsForwardDiagonal = 2,
         hsBackwardDiagonal = 3,
-        //hsMax = 4,
         hsCross = 4,
-        //hsLargeGrid = 4,
         hsDiagonalCross = 5,
         hsPercent05 = 6,
         hsPercent10 = 7,
@@ -6145,7 +6142,6 @@ library MapWinGIS
 			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
 			[id(13)] void TilesLoaded(ITiles* tiles, VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
-			[id(15)] void LayersChanged();
 			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkUndoOperation Operation, LONG LayerHandle, LONG ShapeIndex);
@@ -6159,6 +6155,10 @@ library MapWinGIS
 			[id(27)] void LayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding);
 			[id(28)] void ProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject);
 			[id(29)] void LayerReprojected(LONG LayerHandle, VARIANT_BOOL Success);
+			[id(30)] void LayerAdded(LONG LayerHandle);
+			[id(31)] void LayerRemoved(LONG LayerHandle, VARIANT_BOOL fromRemoveAllLayers);
+			[id(32)] void BackgroundLoadingStarted(LONG TaskId, LONG LayerHandle);
+			[id(33)] void BackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG NumFeatures, LONG NumLoaded);
 		//}}AFX_ODL_EVENT
 	};
 	[

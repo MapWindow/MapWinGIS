@@ -254,7 +254,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidAfterDrawing = 12L,
 	eventidTilesLoaded = 13L,
 	eventidMeasuringChanged = 14L,
-	eventidLayersChanged = 15L,
 	eventidBeforeShapeEdit = 16L,
 	eventidValidateShape = 17L,
 	eventidAfterShapeEdit = 18L,
@@ -268,5 +267,9 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidLayerProjectionIsEmpty = 27L,
 	eventidProjectionMismatch = 28L,
 	eventidLayerReprojected = 29L,
+	eventidLayerAdded = 30L,
+	eventidLayerRemoved = 31L,
+	eventidBackgroundLoadingStarted = 32L,
+	eventidBackgroundLoadingFinished = 33L,
 	//}}AFX_DISP_ID
 };

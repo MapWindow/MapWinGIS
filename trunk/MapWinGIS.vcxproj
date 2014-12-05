@@ -330,7 +330,6 @@
     <ClInclude Include="Control\Map.h" />
     <ClInclude Include="Control\MapPpg.h" />
     <ClInclude Include="Processing\MapRotate.h" />
-    <ClInclude Include="Control\MapTracker.h" />
     <ClInclude Include="MapWinGIS.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
@@ -585,7 +584,6 @@
     <ClCompile Include="Processing\GeometryHelper.cpp" />
     <ClCompile Include="Processing\JenksBreaks.cpp" />
     <ClCompile Include="Processing\MapRotate.cpp" />
-    <ClCompile Include="Control\MapTracker.cpp" />
     <ClCompile Include="MapWinGIS.cpp" />
     <ClCompile Include="Processing\Projections.cpp" />
     <ClCompile Include="Processing\QTree.cpp" />

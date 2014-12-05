@@ -313,7 +313,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	if (mm_newExtents)
 	{
-		ReloadImageBuffers();
+		ReloadBuffers();
 		((CTiles*)_tiles)->MarkUndrawn();		// otherwise they will be taken from screen buffer
 	}
 
@@ -379,7 +379,7 @@ IDispatch* CMapView::SnapShotCore(double left, double right, double top, double 
 
 	if (mm_newExtents)
 	{
-		this->ReloadImageBuffers();
+		this->ReloadBuffers();
 		mm_newExtents = false;
 	}
 

@@ -615,7 +615,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 	int shapeCount = 0;
 	for(int i = startcondition; i < endcondition; i++)
 	{
-		Layer * l = _allLayers[_activeLayers[i]];
+		long layerHandle = _activeLayers[i];
+		Layer * l = _allLayers[layerHandle];
 		if (!l || !l->object) continue;
 
 		bool visible = l->IsVisible(scale, zoom) && !isConcealed[i];
@@ -625,7 +626,24 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		{
 			if (l->IsDynamicOgrLayer())
 			{
-				l->UpdateShapefile();
+				l->UpdateShapefile(layerHandle);
+
+				OgrDynamicLoader* loader = l->GetOgrLoader();
+				if (loader) {
+					while (!loader->Queue.empty())
+					{
+						OgrLoadingTask* task = loader->Queue.front();
+						bool finished = task->Finished;
+						if (finished && !task->Cancelled)
+							FireBackgroundLoadingFinished(task->Id, layerHandle, task->FeatureCount, task->LoadedCount);
+
+						if (finished || task->Cancelled)
+						{
+							delete task;
+							loader->Queue.pop();
+						}
+					}
+				}
 			}
 
 			if (l->IsImage())

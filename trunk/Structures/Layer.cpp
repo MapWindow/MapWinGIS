@@ -273,109 +273,121 @@ UINT OgrAsyncLoadingThreadProc(LPVOID pParam)
 		// if pObject is not valid; return 0
 		return 0;
 	}
-	else
+	
+	Layer* layer = options->layer;
+	if (layer)
 	{
-		Layer* layer = options->layer;
-		if (layer)
-		{
-			OgrDynamicLoader* loader = layer->GetOgrLoader();
+		OgrDynamicLoader* loader = layer->GetOgrLoader();
 		
-			Debug::WriteWithThreadId("New task", DebugOgrLoading);
+		Debug::WriteWithThreadId("New task", DebugOgrLoading);
 
-			if (loader->AddWaitingTask())		// stop current loading task
+		if (loader->AddWaitingTask())		// stop current loading task
+		{
+			loader->LockLoading(true);	// next one is allowed after previous is finished
+			Debug::WriteWithThreadId("Acquired lock", DebugOgrLoading);
+
+			loader->ReleaseWaitingTask();   // provide the way for the next one to stop it
+			if (loader->HaveWaitingTasks()) 
 			{
-				loader->LockLoading(true);	// next one is allowed after previous is finished
-				Debug::WriteWithThreadId("Acquired lock", DebugOgrLoading);
-
-				loader->ReleaseWaitingTask();   // provide the way for the next one to stop it
-				if (loader->HaveWaitingTasks()) 
-				{
-					Debug::WriteWithThreadId("Task was canceled", DebugOgrLoading);
-					loader->LockLoading(false);
-					delete options;
-					return 0;    // more of tasks further down the road, don't even start this
-				}
-
-				layer->_asyncLoading = true;
-				IOgrLayer* ogr = NULL;
-				layer->QueryOgrLayer(&ogr);
-				if (ogr) 
-				{
-					OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
-					ULONG count = ogr->Release();
-					IShapefile* sf = ((COgrLayer*)ogr)->GetShapefileNoRef();
-					
-					CComBSTR expr;
-					ogr->get_LabelExpression(&expr);
-					loader->LabelExpression = OLE2W(expr);
-					
-					bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, *options->categories);
-
-					// just quietly delete it for now
-					if (!success) {
-						loader->Clear();
-					}
-
-					if (success) {
-						options->map->_Redraw(RedrawAll, false, false);
-					}
-				}
+				Debug::WriteWithThreadId("Task was canceled", DebugOgrLoading);
 				loader->LockLoading(false);
-				Debug::WriteWithThreadId("Lock released. \n", DebugOgrLoading);
-				layer->_asyncLoading = false;
+				delete options;
+				return 0;    // more of tasks further down the road, don't even start this
 			}
+
+			layer->_asyncLoading = true;
+			IOgrLayer* ogr = NULL;
+			layer->QueryOgrLayer(&ogr);
+			if (ogr) 
+			{
+				OGRLayer * ds = ((COgrLayer*)ogr)->GetDatasource();
+				ULONG count = ogr->Release();
+				IShapefile* sf = ((COgrLayer*)ogr)->GetShapefileNoRef();
+					
+				CComBSTR expr;
+				ogr->get_LabelExpression(&expr);
+				loader->LabelExpression = OLE2W(expr);
+					
+				bool success = Ogr2RawData::Layer2RawData(ds, &options->extents, loader, *options->categories, options->task);
+
+				options->task->Finished = true;
+				if (!success) {
+					options->task->Cancelled = true;
+					OgrLoadingTask* task = options->task;
+					options->map->_FireBackgroundLoadingFinished(task->Id, task->LayerHandle, task->FeatureCount, 0);
+				}
+
+				// just quietly delete it for now
+				if (!success) {
+					loader->Clear();
+				}
+
+				if (success) {
+					options->map->_Redraw(RedrawAll, false, false);
+				}
+			}
+			loader->LockLoading(false);
+			Debug::WriteWithThreadId("Lock released. \n", DebugOgrLoading);
+			layer->_asyncLoading = false;
 		}
-			
-		delete options;
-		return 1;
 	}
+			
+	delete options;
+	return 1;
 }
 
 // ****************************************************
 //		LoadAsync()
 // ****************************************************
-void Layer::LoadAsync(IMapViewCallback* callback, Extent extents)
+void Layer::LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandle)
 {
-	if (IsDynamicOgrLayer()) 
+	if (!IsDynamicOgrLayer())
+		return;
+	
+	OgrDynamicLoader* loader = GetOgrLoader();
+	if (!loader) return;
+
+	if (extents == loader->LastExtents) return;   // definitely no need to run it twice
+	loader->LastExtents = extents;
+
+	// if larger extents were requested previously and features were loaded, skip the new request
+	if (extents.Within(loader->LastSuccessExtents)) return;	   
+
+	// get a copy of categories to apply them in the background thread
+	vector<CategoriesData*>* data = new vector<CategoriesData*>();
+		
+	CComPtr<IShapefile> sf = NULL;
+	this->QueryShapefile(&sf);
+	if (sf) 
 	{
-		OgrDynamicLoader* loader = GetOgrLoader();
-		if (!loader) return;
+		ShpfileType shpType = ShapefileHelper::GetShapeType(sf);
+		loader->IsMShapefile = Utility::ShapeTypeIsM(shpType);
 
-		if (extents == loader->LastExtents) return;   // definitely no need to run it twice
-		loader->LastExtents = extents;
-
-		// if larger extents were requested previously and features were loaded, skip the new request
-		if (extents.Within(loader->LastSuccessExtents)) return;	   
-
-		// get a copy of categories to apply them in the background thread
-		vector<CategoriesData*>* data = new vector<CategoriesData*>();
-		CComPtr<IShapefile> sf = NULL;
-		this->QueryShapefile(&sf);
-		if (sf) {
-			ShpfileType shpType;
-			sf->get_ShapefileType(&shpType);
-			loader->IsMShapefile = Utility::ShapeTypeIsM(shpType);
-			IShapefileCategories* categories = NULL;
-			sf->get_Categories(&categories);
-			if (categories) {
-				((CShapefileCategories*)categories)->GetCategoryData(*data);
-				categories->Release();
-			}
+		IShapefileCategories* categories = NULL;
+		sf->get_Categories(&categories);
+		if (categories) 
+		{
+			((CShapefileCategories*)categories)->GetCategoryData(*data);
+			categories->Release();
 		}
-
-		AsyncLoadingParams* param = new AsyncLoadingParams(callback, extents, this, data);
-		CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 	}
+
+	OgrLoadingTask* task = new OgrLoadingTask(layerHandle);
+	loader->Queue.push(task);
+	mapView->_FireBackgroundLoadingStarted(task->Id, layerHandle);
+
+	AsyncLoadingParams* param = new AsyncLoadingParams(mapView, extents, this, data, task);
+	CWinThread* thread = AfxBeginThread(OgrAsyncLoadingThreadProc, (LPVOID)param);
 }
 
 //***********************************************************************
 //*		UpdateShapefile()
 //***********************************************************************
-void Layer::UpdateShapefile()
+void Layer::UpdateShapefile(long layerHandle)
 {
 	OgrDynamicLoader* loader = GetOgrLoader();
 	if (!loader) return;
-	
+
 	// grab the data
 	vector<ShapeRecordData*> data;
 	loader->LockData(true);

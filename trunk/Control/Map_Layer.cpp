@@ -521,10 +521,26 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// do projection mismatch check
 	if (!CheckLayerProjection(l, layerHandle))
 	{
-		RemoveLayerCore(layerHandle, false);
+		RemoveLayerCore(layerHandle, false, false, true);
 		LockWindow( lmUnlock );
 		return -1;
 	}
+
+	if (m_globalSettings.loadSymbologyOnAddLayer)
+	{
+		LoadOgrStyle(l, layerHandle, L"");
+	}
+
+	// loading symbology
+	if (symbologyName.GetLength() > 0)
+	{
+		CComBSTR desc;
+		USES_CONVERSION;
+		this->LoadLayerOptionsCore(W2A(symbologyName), layerHandle, "", &desc);
+	}
+
+	if (l != NULL)
+		FireLayerAdded(layerHandle);
 
 	// set initial extents
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
@@ -536,20 +552,6 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 	}
 
-	if (m_globalSettings.loadSymbologyOnAddLayer)
-	{
-		LoadOgrStyle(l, layerHandle, L"");
-	}
-
-	// loading symbology
-	if(symbologyName.GetLength() > 0)
-	{
-		CComBSTR desc;
-		USES_CONVERSION;
-		this->LoadLayerOptionsCore(W2A(symbologyName), layerHandle, "", &desc);
-	}
-
-	if (l != NULL) FireLayersChanged();
 	ScheduleLayerRedraw();
 	LockWindow( lmUnlock );
 	return layerHandle;
@@ -738,58 +740,60 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 // ***************************************************************
 //		RemoveLayerCore()
 // ***************************************************************
-void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources)
+void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fromRemoveAll, bool suppressEvent)
 {
 	try
 	{
-		if( IsValidLayer(LayerHandle) )
+		if( !IsValidLayer(LayerHandle) ) 
 		{
-			bool hadLayers = _activeLayers.size() > 0;
-			if (LayerHandle >= (long)_allLayers.size()) return;
-			Layer * l = _allLayers[LayerHandle];
-			if (l == NULL) return;
-
-			if (closeDatasources)
-				l->CloseDatasources();
-			
-			for(unsigned int i = 0; i < _activeLayers.size(); i++ )
-			{	
-				if( _activeLayers[i] == LayerHandle )
-				{	
-					_activeLayers.erase( _activeLayers.begin() + i );
-					break;
-				}
-			}
-
-			try
-			{
-				// This may have been deleted already.
-				if (_allLayers[LayerHandle] != NULL)
-				{
-					delete _allLayers[LayerHandle];
-				}
-			}
-			catch(...)
-			{
-				#ifdef _DEBUG
-						AfxMessageBox("CMapView::RemoveLayer: Exception while deleting Layer.");
-				#endif
-			}
-
-			_allLayers[LayerHandle] = NULL;
-
-			if (_activeLayers.size() == 0 && hadLayers)
-				ClearMapProjectionWithLastLayer();
-
-			FireLayersChanged();
-
-			Redraw();
-		}
-		else
 			ErrorMessage(tkINVALID_LAYER_HANDLE);
+			return;
+		}
+
+		bool hadLayers = _activeLayers.size() > 0;
+		if (LayerHandle >= (long)_allLayers.size()) return;
+		Layer * l = _allLayers[LayerHandle];
+		if (l == NULL) return;
+
+		if (closeDatasources)
+			l->CloseDatasources();
+			
+		for(unsigned int i = 0; i < _activeLayers.size(); i++ )
+		{	
+			if( _activeLayers[i] == LayerHandle )
+			{	
+				_activeLayers.erase( _activeLayers.begin() + i );
+				break;
+			}
+		}
+
+		try
+		{
+			// This may have been deleted already.
+			if (_allLayers[LayerHandle] != NULL)
+			{
+				delete _allLayers[LayerHandle];
+			}
+		}
+		catch(...)
+		{
+			Debug::WriteError("Exception during RemoveLayer");
+		}
+
+		_allLayers[LayerHandle] = NULL;
+
+		if (_activeLayers.size() == 0 && hadLayers)
+			ClearMapProjectionWithLastLayer();
+
+		if (!suppressEvent)
+			FireLayerRemoved(LayerHandle, fromRemoveAll ? VARIANT_TRUE : VARIANT_FALSE);
+
+		Redraw();
 	}
 	catch(...)
-	{}
+	{
+		Debug::WriteError("Exception during RemoveLayer");
+	}
 }
 
 // ***************************************************************
@@ -820,7 +824,7 @@ void CMapView::RemoveAllLayers()
 	{
 		if( IsValidLayer(i) )
 		{
-			RemoveLayer(i);
+			RemoveLayerCore(i, true, true);
 		}
 	}
 	_allLayers.clear();

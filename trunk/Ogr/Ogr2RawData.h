@@ -8,7 +8,7 @@
 class Ogr2RawData
 {
 public:
-	static bool Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, vector<CategoriesData*>& categories);
+	static bool Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, vector<CategoriesData*>& categories, OgrLoadingTask* callback);
 private:
 	static void FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFeature, ShapeRecordData* data, bool hasFid, bool hasLabels, OgrLabelsHelper::LabelFields& labelFields);
 	static bool GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>& fields, CStringW expression, CString& error, OgrDynamicLoader* loader);

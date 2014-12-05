@@ -9,7 +9,7 @@
 //		Layer2RawData()
 // *************************************************************
 bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoader* loader, 
-			vector<CategoriesData*>& categories)
+			vector<CategoriesData*>& categories, OgrLoadingTask* callback)
 {
 	if (!layer || !extents || !loader) return false;
 
@@ -20,6 +20,8 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	loader->LockProvider(true);
 	int numFeatures = layer->GetFeatureCount();
 	loader->LockProvider(false);
+
+	callback->FeatureCount = numFeatures;
 
 	if (!loader->CanLoad(numFeatures))
 	{
@@ -110,6 +112,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 		loader->LockData(true);
 		loader->Data.insert(loader->Data.end(), list.begin(), list.end());
 		loader->LockData(false);
+		callback->LoadedCount = list.size();
 		success = true;
 	}
 	else {

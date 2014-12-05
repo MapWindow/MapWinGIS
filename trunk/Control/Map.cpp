@@ -123,7 +123,6 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("AfterDrawing", eventidAfterDrawing, FireAfterDrawing, VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL)
 	EVENT_CUSTOM_ID("TilesLoaded", eventidTilesLoaded, FireTilesLoaded, VTS_DISPATCH VTS_BOOL VTS_BSTR)
 	EVENT_CUSTOM_ID("MeasuringChanged", eventidMeasuringChanged, FireMeasuringChanged, VTS_DISPATCH VTS_I4)
-	EVENT_CUSTOM_ID("LayersChanged", eventidLayersChanged, FireLayersChanged, VTS_NONE)
 	EVENT_CUSTOM_ID("BeforeShapeEdit", eventidBeforeShapeEdit, FireBeforeShapeEdit, VTS_I4 VTS_I4 VTS_PI4)
 	EVENT_CUSTOM_ID("ValidateShape", eventidValidateShape, FireValidateShape, VTS_I4 VTS_I4 VTS_DISPATCH VTS_PI4)
 	EVENT_CUSTOM_ID("AfterShapeEdit", eventidAfterShapeEdit, FireAfterShapeEdit, VTS_I4 VTS_I4 VTS_I4)
@@ -137,11 +136,13 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("LayerProjectionIsEmpty", eventidLayerProjectionIsEmpty, FireLayerProjectionIsEmpty, VTS_I4 VTS_PI4)
 	EVENT_CUSTOM_ID("ProjectionMismatch", eventidProjectionMismatch, FireProjectionMismatch, VTS_I4 VTS_PI4 VTS_PI4)
 	EVENT_CUSTOM_ID("LayerReprojected", eventidLayerReprojected, FireLayerReprojected, VTS_I4 VTS_BOOL)
+	EVENT_CUSTOM_ID("LayerAdded", eventidLayerAdded, FireLayerAdded, VTS_I4)
+	EVENT_CUSTOM_ID("LayerRemoved", eventidLayerRemoved, FireLayerRemoved, VTS_I4 VTS_BOOL)
+	EVENT_CUSTOM_ID("BackgroundLoadingStarted", eventidBackgroundLoadingStarted, FireBackgroundLoadingStarted, VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("BackgroundLoadingFinished", eventidBackgroundLoadingFinished, FireBackgroundLoadingFinished, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 END_EVENT_MAP()
-
-
 
 #pragma region Constructor/destructor
 

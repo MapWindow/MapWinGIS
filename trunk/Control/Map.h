@@ -638,13 +638,10 @@ public:
 		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, snapshot,key);}
 	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
 		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
-	void FireLayersChanged()
-		{FireEvent(eventidLayersChanged,EVENT_PARAM(VTS_NONE));}
 	void FireBeforeShapeEdit(LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4), layerHandle, shapeIndex, Cancel);	}
-	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)	{
-			FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	
-		}
+	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)	
+		{FireEvent(eventidValidateShape, EVENT_PARAM(VTS_I4 VTS_DISPATCH VTS_PI4), LayerHandle, Shape, Cancel);	}
 	void FireAfterShapeEdit(tkUndoOperation Action, LONG LayerHandle, LONG ShapeIndex)
 		{FireEvent(eventidAfterShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4), Action, LayerHandle, ShapeIndex); }
 	void FireChooseLayer(long x, long y, LONG* LayerHandle)
@@ -657,13 +654,31 @@ public:
 		{ FireEvent(eventidShapeValidationFailed, EVENT_PARAM(VTS_BSTR), ErrorMessage);}
 	void FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel)
 		{FireEvent(eventidBeforeDeleteShape, EVENT_PARAM(VTS_I4 VTS_PI4), target, cancel);}
-	void FireProjectionChanged() { FireEvent(eventidProjectionChanged, EVENT_PARAM(VTS_NONE)); }
-	void FireUndoListChanged(){ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
-	void FireSelectionChanged(LONG LayerHandle) { FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
-	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY) { FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), LayerHandle, ShapeIndex, pointX, pointY); }
-	void FireLayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding) { FireEvent(eventidLayerProjectionIsEmpty, EVENT_PARAM(VTS_I4 VTS_PI4), LayerHandle, cancelAdding); }
+	void FireProjectionChanged() 
+		{ FireEvent(eventidProjectionChanged, EVENT_PARAM(VTS_NONE)); }
+	void FireUndoListChanged()
+		{ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
+	void FireSelectionChanged(LONG LayerHandle) 
+		{ FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
+	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY) 
+		{ FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), LayerHandle, ShapeIndex, pointX, pointY); }
+	void FireLayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding) 
+		{ FireEvent(eventidLayerProjectionIsEmpty, EVENT_PARAM(VTS_I4 VTS_PI4), LayerHandle, cancelAdding); }
 	void FireProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject) { FireEvent(eventidProjectionMismatch, EVENT_PARAM(VTS_I4 VTS_PI4 VTS_PI4), LayerHandle, cancelAdding, reproject); }
-	void FireLayerReprojected(LONG LayerHandle, VARIANT_BOOL Success){	FireEvent(eventidLayerReprojected, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, Success);	}
+	void FireLayerReprojected(LONG LayerHandle, VARIANT_BOOL Success)
+		{ FireEvent(eventidLayerReprojected, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, Success);	}
+	void FireLayerAdded(LONG LayerHandle)
+		{ FireEvent(eventidLayerAdded, EVENT_PARAM(VTS_I4), LayerHandle); }
+	void FireLayerRemoved(LONG LayerHandle, VARIANT_BOOL fromRemoveAllLayers) 
+		{ FireEvent(eventidLayerRemoved, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, fromRemoveAllLayers);	}
+	void FireBackgroundLoadingStarted(LONG TaskId, LONG LayerHandle)	
+	{
+		FireEvent(eventidBackgroundLoadingStarted, EVENT_PARAM(VTS_I4 VTS_I4), TaskId, LayerHandle);
+	}
+	void FireBackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG numFeatures, LONG numLoaded)
+	{
+		FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);
+	}
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1001,7 +1016,7 @@ private:
 	// ---------------------------------------------
 	bool IsValidLayer( long layerHandle );
 	BSTR GetLayerFilename(LONG layerHandle);
-	void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources);
+	void RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fromRemoveAll = false, bool suppressEvent = false);
 	
 	// shapefiles	
 	bool IsValidShape( long layerHandle, long shape );
@@ -1012,7 +1027,7 @@ private:
 	ShpfileType get_ShapefileType(long layerHandle);
 	
 	// images
-	void ReloadImageBuffers();
+	void ReloadBuffers();
 	void CheckForConcealedImages(bool* isConcealed, long& startCondition, long& endCondition, double scale, int zoom) ;
 
 	// image grouping
@@ -1143,8 +1158,7 @@ public:
 	virtual void _PixelToProjection(double pixelX, double pixelY, double* projX, double* projY){ PixelToProjection(pixelX, pixelY, *projX, *projY); }
 	virtual void _FireBeforeDeleteShape(tkDeleteTarget target, tkMwBoolean* cancel) { FireBeforeDeleteShape(target, cancel); }
 	virtual tkCursorMode _GetCursorMode() { return (tkCursorMode)m_cursorMode; }
-	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) 	
-	{ FireValidateShape(LayerHandle, Shape, Cancel); }
+	virtual void _FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel) { FireValidateShape(LayerHandle, Shape, Cancel); }
 	virtual void _FireAfterShapeEdit(tkUndoOperation NewShape, LONG LayerHandle, LONG ShapeIndex) { FireAfterShapeEdit(NewShape, LayerHandle, ShapeIndex); }
 	virtual void _FireShapeValidationFailed(LPCTSTR ErrorMessage) { FireShapeValidationFailed(ErrorMessage); }
 	virtual void _ZoomToEditor(){ ZoomToEditor(); }
@@ -1154,7 +1168,10 @@ public:
 	virtual void _UnboundShapeFinished(IShape* shp);
 	virtual double _GetMouseProjTolerance() { return GetMouseTolerance(MouseTolerance::ToleranceSelect); }
 	virtual void _StartDragging(DraggingOperation operation) {	StartDragging(operation); }
-	
+	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
+	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
+	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
+
 };
 
 //{{AFX_INSERT_LOCATION}}

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Map.h"
 #include "Measuring.h"
-#include "MapTracker.h"
 #include "ShapeEditor.h"
 #include "Shapefile.h"
 #include "ShapefileHelper.h"
@@ -1178,7 +1177,7 @@ void CMapView::DoPanning(CPoint point)
 		ScheduleLayerRedraw();
 		LockWindow(lmUnlock);	
 		FireExtentsChanged(); 
-		ReloadImageBuffers(); 
+		ReloadBuffers(); 
 	}	
 	else
 	{

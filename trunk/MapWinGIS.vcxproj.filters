@@ -291,9 +291,6 @@
     <ClInclude Include="Processing\MapRotate.h">
       <Filter>Control</Filter>
     </ClInclude>
-    <ClInclude Include="Control\MapTracker.h">
-      <Filter>Control</Filter>
-    </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Control</Filter>
     </ClInclude>
@@ -1059,9 +1056,6 @@
       <Filter>Control</Filter>
     </ClCompile>
     <ClCompile Include="Processing\MapRotate.cpp">
-      <Filter>Control</Filter>
-    </ClCompile>
-    <ClCompile Include="Control\MapTracker.cpp">
       <Filter>Control</Filter>
     </ClCompile>
     <ClCompile Include="StdAfx.cpp">

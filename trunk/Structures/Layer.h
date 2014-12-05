@@ -36,13 +36,15 @@ struct AsyncLoadingParams : CObject
 	Extent extents;
 	Layer* layer;
 	vector<CategoriesData*>* categories;
+	OgrLoadingTask* task;  // not owned by this object
 
-	AsyncLoadingParams(IMapViewCallback* m, Extent e, Layer* l, vector<CategoriesData*>* ct)
+	AsyncLoadingParams(IMapViewCallback* m, Extent e, Layer* l, vector<CategoriesData*>* ct, OgrLoadingTask* cback)
 	{
 		map = m;
 		extents = e;
 		layer = l;
 		categories = ct;
+		task = cback;
 	};
 
 	~AsyncLoadingParams()
@@ -121,8 +123,8 @@ public:
 	IGeoProjection* GetGeoProjection();
 	void GetExtentsAsNewInstance(IExtents** extents);
 	bool UpdateExtentsFromDatasource();
-	void LoadAsync(IMapViewCallback* mapView, Extent extents);
-	void UpdateShapefile();
+	void LoadAsync(IMapViewCallback* mapView, Extent extents, long layerHandle);
+	void UpdateShapefile(long layerHandle);
 	void CloseDatasources();
 	bool IsEmpty();
 };

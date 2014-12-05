@@ -25,6 +25,8 @@ public:
 	virtual void _UnboundShapeFinished(IShape* shp) = 0;
 	virtual double _GetMouseProjTolerance() = 0;
 	virtual void _StartDragging(DraggingOperation operation) = 0;
+	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) = 0;
+	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) = 0;
 };
 
 

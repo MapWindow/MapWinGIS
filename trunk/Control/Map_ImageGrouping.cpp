@@ -381,7 +381,7 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 // ****************************************************************
 //		ReloadImageBuffers()
 // ****************************************************************
-void CMapView::ReloadImageBuffers()
+void CMapView::ReloadBuffers()
 {
 	int zoom = _currentZoom;
 	double scale = GetCurrentScale();
@@ -402,8 +402,9 @@ void CMapView::ReloadImageBuffers()
 		}
 
 		// reload dynamic OGR layers as well
-		if (l->GetLayerType() == OgrLayerSource) {
-			l->LoadAsync(this, _extents);
+		if (l->GetLayerType() == OgrLayerSource) 
+		{
+			l->LoadAsync(this, _extents, _activeLayers[i]);
 		}
 	}
 }

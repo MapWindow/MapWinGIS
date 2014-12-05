@@ -89,7 +89,6 @@ public:
 		m_totalCount = 0;
 		isSnapshot = false;
 		m_count = 0;
-		_requestLock.Unlock();
 	}
 
 	TileLoader::~TileLoader(void)

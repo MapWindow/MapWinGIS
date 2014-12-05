@@ -2,6 +2,24 @@
 #include <algorithm>
 #include "WinBase.h"
 #include "afxmt.h"
+#include <queue>
+
+struct OgrLoadingTask
+{
+	static long SeedId;
+	long LayerHandle;
+	long Id;
+	long FeatureCount;
+	long LoadedCount;
+	bool Finished;
+	bool Cancelled;
+	
+	OgrLoadingTask(long layerHandle) : Id(SeedId++), FeatureCount(0), LoadedCount(0), 
+					Finished(false), Cancelled(false)
+	{
+		LayerHandle = layerHandle;
+	}
+};
 
 class OgrDynamicLoader
 {
@@ -34,6 +52,7 @@ public:
 	::CCriticalSection DataLock;
 	::CCriticalSection ProviderLock;
 
+	std::queue<OgrLoadingTask*> Queue;
 	bool IsMShapefile;
 	CStringW LabelExpression;
 	vector<ShapeRecordData*> Data;

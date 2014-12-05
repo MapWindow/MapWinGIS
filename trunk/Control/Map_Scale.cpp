@@ -279,7 +279,7 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 	ScheduleLayerRedraw();
 
 	this->FireExtentsChanged();
-	this->ReloadImageBuffers();
+	this->ReloadBuffers();
 	
 	_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
 

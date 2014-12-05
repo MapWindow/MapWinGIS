@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "OgrLoader.h"
 
+long OgrLoadingTask::SeedId = 0;
+
 // **********************************************
 //		Restart()
 // **********************************************
@@ -29,6 +31,10 @@ bool OgrDynamicLoader::AddWaitingTask(bool terminate)
 // **********************************************
 void OgrDynamicLoader::Clear()
 {
+	while (!Queue.empty()) {
+		delete Queue.front();
+		Queue.pop();
+	}
 	for (size_t i = 0; i < Data.size(); i++) {
 		delete Data[i];
 	}
