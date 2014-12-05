@@ -38,7 +38,7 @@ namespace MWLite.GUI.MapLegend
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
              var layer = legend1.Layers.ItemByHandle(_dispatcher.LayerHandle);
-             if (!(layer.GetObject is Shapefile))
+             if (!(layer.GetObject() is Shapefile))
              {
                 ctxPostGis.Enabled = false;
                 ctxLabels.Enabled = false;

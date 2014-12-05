@@ -53,7 +53,8 @@ namespace MWLite.GUI.Forms
 
             RefreshUI();
 
-            Map.GlobalCallback = _callback;
+            var gs = new GlobalSettings();
+            gs.ApplicationCallback = _callback;
 
             Shown += (s, e) => Map.Focus();
 

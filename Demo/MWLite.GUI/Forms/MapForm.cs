@@ -80,6 +80,31 @@ namespace MWLite.GUI.Forms
             axMap1.LayerProjectionIsEmpty += axMap1_LayerProjectionIsEmpty;
             axMap1.ProjectionMismatch += axMap1_ProjectionMismatch;
             axMap1.LayerReprojected += axMap1_LayerReprojected;
+            axMap1.LayerAdded += axMap1_LayerAdded;
+            axMap1.LayerRemoved += axMap1_LayerRemoved;
+            axMap1.BackgroundLoadingStarted += axMap1_BackgroundLoadingStarted;
+            axMap1.BackgroundLoadingFinished += axMap1_BackgroundLoadingFinished;
+        }
+
+        void axMap1_BackgroundLoadingFinished(object sender, _DMapEvents_BackgroundLoadingFinishedEvent e)
+        {
+            Debug.Print("Loading finished: {0}; TaskId: {1}; LayerHandle: {2} Features: {3}; Loaded: {4}", 
+            DateTime.Now.TimeOfDay.ToString(), e.taskId, e.layerHandle, e.numFeatures, e.numLoaded);
+        }
+
+        void axMap1_BackgroundLoadingStarted(object sender, _DMapEvents_BackgroundLoadingStartedEvent e)
+        {
+            Debug.Print("Loading started: {0}; TaskId: {1}; LayerHandle: {2}", DateTime.Now.TimeOfDay.ToString(), e.taskId, e.layerHandle);
+        }
+
+        void axMap1_LayerRemoved(object sender, _DMapEvents_LayerRemovedEvent e)
+        {
+            Debug.Print("Layer removed.");
+        }
+
+        void axMap1_LayerAdded(object sender, _DMapEvents_LayerAddedEvent e)
+        {
+            Debug.Print("Layer added.");
         }
 
         void axMap1_LayerReprojected(object sender, _DMapEvents_LayerReprojectedEvent e)

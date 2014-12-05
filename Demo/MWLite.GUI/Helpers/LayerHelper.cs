@@ -127,7 +127,6 @@ namespace MWLite.GUI.Helpers
                 {
                     if (e.Layer == null) return;
                     AddLayer(e.Layer, e.Layer.Name);
-                    Debug.Print("Layer projection: " + e.Layer.GeoProjection.ExportToProj4());
                     App.Map.Refresh();
                     App.Legend.Refresh();
                 };

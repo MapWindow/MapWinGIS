@@ -35,10 +35,6 @@ namespace MWLite.Databases.Forms
         {
             if (_datasource == null) return;
 
-            var gs = new GlobalSettings();
-            bool styles = gs.OgrUseStyles;
-            gs.OgrUseStyles = false;
-
             listView1.Items.Clear();
             for (int i = 0; i < _datasource.LayerCount; i++)
             {
@@ -54,8 +50,6 @@ namespace MWLite.Databases.Forms
                 string srid = gp.TryAutoDetectEpsg(out epsg) ? epsg.ToString() : gp.ExportToProj4();
                 item.SubItems.Add(srid);
             }
-
-            gs.OgrUseStyles = styles;
         }
 
         private void btnChangeConnection_Click(object sender, EventArgs e)
