@@ -94,6 +94,7 @@ namespace Utility
 	void DisplayProgressCompleted(ICallback* callback);
 	void DisplayErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...);
 	void DisplayErrorMsg(CString className, ICallback* localCback, CString key, const char* message, ...);
+	void DisplayError(CString message);
 
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
 

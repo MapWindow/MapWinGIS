@@ -35,6 +35,7 @@
 #include "PointSymbols.h"
 #include "ShapefileCategories.h"
 #include "TableHelper.h"
+#include "ImageHelper.h"
 
 // MEMO: there are several formats to hold shape data while drawing
 // there are 2 switches: regular/edit mode; and fast/slow mode
@@ -637,9 +638,19 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	int numPoints = 0;
 	int size = int(options->pointSize/2.0);
 	OLE_COLOR pixelColor;
-	
+
+	bool missingIcon = false;
+	if (options->pointSymbolType == ptSymbolPicture)
+	{
+		if (ImageHelper::IsEmpty(options->picture))
+		{
+			Utility::DisplayError("ShapeDrawingOptions.Picture is empty when icon for point is expected.");
+			missingIcon = true;
+		}
+	}
+
 	// creating a symbol to draw
-	if (options->pointSymbolType == ptSymbolStandard || (options->pointSymbolType == ptSymbolPicture && options->picture == NULL))
+	if (options->pointSymbolType == ptSymbolStandard || missingIcon)
 	{
 		// receiving coordinates to define shape of symbol
 		if ( options->pointSize <= 1.0 )

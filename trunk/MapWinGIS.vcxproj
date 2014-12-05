@@ -211,6 +211,7 @@
     <ClInclude Include="ComHelpers\ChartsHelper.h" />
     <ClInclude Include="ComHelpers\ExtentsHelper.h" />
     <ClInclude Include="ComHelpers\FieldHelper.h" />
+    <ClInclude Include="ComHelpers\ImageHelper.h" />
     <ClInclude Include="ComHelpers\LabelsHelper.h" />
     <ClInclude Include="ComHelpers\ProjectionHelper.h" />
     <ClInclude Include="ComHelpers\SelectionHelper.h" />
@@ -458,6 +459,7 @@
     <ClCompile Include="ComHelpers\ChartsHelper.cpp" />
     <ClCompile Include="ComHelpers\ExtentsHelper.cpp" />
     <ClCompile Include="ComHelpers\FieldHelper.cpp" />
+    <ClCompile Include="ComHelpers\ImageHelper.cpp" />
     <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
     <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionHelper.cpp" />

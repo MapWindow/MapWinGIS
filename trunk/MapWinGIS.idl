@@ -3529,6 +3529,7 @@ interface IImage : IDispatch{
 	[propput, id(85), helpstring("property SourceGridBandIndex")] HRESULT SourceGridBandIndex([in] int newVal);
 	[propget, id(86), helpstring("property GridProxyColorScheme")] HRESULT GridProxyColorScheme([out, retval] IGridColorScheme** retVal);
 	[propget, id(87)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
+	[propget, id(88)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 };
 
 /****************************  Shapefile Interface ***********************/

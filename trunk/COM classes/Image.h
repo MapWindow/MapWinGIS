@@ -387,6 +387,7 @@ public:
 	void ErrorMessage(long ErrorCode);
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
 	
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

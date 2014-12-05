@@ -3653,3 +3653,13 @@ STDMETHODIMP CImageClass::get_GeoProjection(IGeoProjection** pVal)
 	*pVal = _projection;
 	return S_OK;
 }
+
+// ********************************************************
+//     get_IsEmpty
+// ********************************************************
+STDMETHODIMP CImageClass::get_IsEmpty(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _sourceType == istUninitialized ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}

@@ -1091,6 +1091,20 @@ namespace Utility
 		}
 	}
 
+	void DisplayError(CString message)
+	{
+		if (m_globalSettings.callback)
+		{
+			CComBSTR bstr(message);
+			m_globalSettings.callback->Error(m_globalSettings.emptyBstr, bstr);
+		}
+		else {
+			if (Debug::IsDebugMode())
+				Debug::WriteError(message);
+		}
+	}
+	
+
 #pragma endregion
 
 	// ********************************************************
