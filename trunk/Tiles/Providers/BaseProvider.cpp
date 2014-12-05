@@ -88,11 +88,9 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
-	bool canReuseConnections = false;
-	
 	MyHttpClient httpClient; //this->GetHttpClient();
 	CAtlNavigateData navData;
-	
+
 	if (m_proxyAddress.GetLength() > 0)
 	{
 		httpClient.SetProxy(m_proxyAddress, m_proxyPort);
@@ -124,7 +122,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		return NULL;
 	}
 	httpStatus = httpClient.GetStatus();
-
+	
 	if (result)
 	{
 		if (httpStatus == 200) // 200 = successful HTTP transaction
@@ -147,7 +145,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		}
 	}
 	
-	if (tilesLogger.IsOpened())
+	if (tilesLogger.IsOpened() || Debug::LogTiles())
 	{
 		bool hasError = httpStatus != 200;
 		bool useShortUrl = false;
@@ -161,8 +159,9 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 			CString err;
 			err.Format("ERROR: %d; ", httpClient.GetLastError());
 			CString s;
-			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), httpStatus, bodyLen, useShortUrl ? shortUrl : urlStr);
-			tilesLogger.Log(s);	// TODO: probably should be protected by critical section
+			s.Format("%sstatus %d size %6d b %s", (!hasError ? "": err), httpStatus, bodyLen, 
+					m_globalSettings.useShortUrlForTiles ? shortUrl : urlStr);
+			tilesLogger.Log(s);
 		}
 	}
 	
@@ -180,6 +179,7 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 	{
 		// let's try one more time
 		Sleep(20);
+		tilesLogger.Log("Reloading attempt: " + m_globalSettings.useShortUrlForTiles ? shortUrl : urlStr);
 		bmp = this->GetTileImageUsingHttp(urlStr, shortUrl, true);
 	}
 	return bmp;

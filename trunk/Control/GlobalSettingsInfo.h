@@ -63,7 +63,7 @@ struct GlobalSettingsInfo
 	double mouseTolerance;
 	bool commonCollisionListForCharts;
 	bool commonCollisionListForLabels;
-
+	bool useShortUrlForTiles;
 	~GlobalSettingsInfo()
 	{
 		SysFreeString(emptyBstr);
@@ -74,6 +74,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		useShortUrlForTiles = false;
 		callback = NULL;
 		mouseTolerance = 20;
 		allowLayersWithoutProjection = true;

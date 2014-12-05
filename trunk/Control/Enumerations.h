@@ -234,6 +234,7 @@ enum DebugTarget
 	DebugAny = 0,
 	DebugOgrLoading = 1,
 	DebugPanning = 2,
+	DebugTiles = 3,
 };
 
 # endif

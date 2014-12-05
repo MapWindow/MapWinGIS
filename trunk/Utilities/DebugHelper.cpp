@@ -3,7 +3,7 @@
 
 namespace Debug
 {
-	static const int TARGETS_COUNT = 3;
+	static const int TARGETS_COUNT = 4;
 	bool targets[TARGETS_COUNT];
 
 	// ****************************************************************** 
@@ -42,10 +42,13 @@ namespace Debug
 		}
 	}
 
+	bool LogTiles()	{ return targets[DebugTiles]; }
+
 	void Init() {
 		targets[DebugAny] = true;
 		targets[DebugOgrLoading] = false;
 		targets[DebugPanning] = false;
+		targets[DebugTiles] = false;
 		CPLSetErrorHandler(CustomCPLErrorHandler);
 	}
 
@@ -61,6 +64,7 @@ namespace Debug
 			case DebugAny: return "";
 			case DebugOgrLoading: return "OGR: ";
 			case DebugPanning: return "PANNING: ";
+			case DebugTiles: return "TILES: ";
 		}
 		return "";
 	}

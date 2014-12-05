@@ -29,7 +29,7 @@ namespace Debug
 
 	void Logger::WriteLine(CString format, ...)
 	{
-		if (IsOpened())
+		if (IsOpened() || Debug::IsDebugMode())
 		{
 			TCHAR buffer[1024];
 			va_list args;
@@ -44,6 +44,8 @@ namespace Debug
 				CString s2;
 				s2.Format("%02d:%02d:%02d.%-3d: ", time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
 				m_logger << s2 << s << endl;
+
+				Debug::WriteWithThreadId(s2 + s, DebugTiles);
 			}
 			else {
 				m_logger << endl;

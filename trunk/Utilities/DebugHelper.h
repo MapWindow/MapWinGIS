@@ -10,5 +10,6 @@ namespace Debug
 	void WriteLine(CString format, ...);
 	void WriteError(CString format, ...);
 	CString Format(char* format, ...);
+	bool LogTiles();
 }
 
