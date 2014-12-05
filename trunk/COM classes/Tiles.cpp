@@ -343,7 +343,7 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 	int bestZoom = provider->minZoom;
 	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)
 	{
-		bool isSame = map->_tileProjectionState == tpsNative;
+		VARIANT_BOOL isSame = precise ? VARIANT_TRUE : VARIANT_FALSE;
 		double tileSize = TileHelper::GetTileSizeProj(isSame, provider, map->GetWgs84ToMapTransform(), location, i);
 		if (tileSize == -1)
 			continue;

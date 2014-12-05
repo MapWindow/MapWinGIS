@@ -3,6 +3,7 @@
 #include "GeoProjection.h"
 #include "Tiles.h"
 #include "ExtentsHelper.h"
+#include "ProjectionHelper.h"
 
 // some simple encapsulation for readability of code
 IGeoProjection* CMapView::GetMapToWgs84Transform() 
@@ -190,10 +191,15 @@ void CMapView::UpdateTileProjection()
 	}
 	_tileReverseProjection->CopyFrom(_projection, &vb);
 
+	if (ProjectionHelper::IsEmpty(_projection)) 
+	{
+		_tileProjectionState = ProjectionDoTransform;
+		return;
+	}
+
 	_tileProjection->get_IsSame(_projection, &vb);
 	_tileProjectionState = vb ? ProjectionMatch : ProjectionDoTransform;
 
-	
 	if (_transformationMode == tmWgs84Complied && tp == SphericalMercator)
 	{
 		// transformation is needed, but it leads only to some vertical scaling which is quite acceptable
@@ -202,16 +208,13 @@ void CMapView::UpdateTileProjection()
 
 	if (_tileProjectionState == ProjectionDoTransform || _tileProjectionState == ProjectionCompatible)
 	{
-		VARIANT_BOOL empty;
-		_projection->get_IsEmpty(&empty);
-
 		_tileProjection->StartTransform(_projection, &vb);
-		if (!vb && !empty) {
+		if (!vb) {
 			ErrorMessage(tkTILES_MAP_TRANSFORM_FAILED);
 		}
 		
 		_tileReverseProjection->StartTransform(_tileProjection, &vb);
-		if (!vb && !empty) {
+		if (!vb) {
 			ErrorMessage(tkMAP_TILES_TRANSFORM_FAILED);
 		}
 	}

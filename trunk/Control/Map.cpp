@@ -262,10 +262,6 @@ void CMapView::Startup()
 	_hotTracking.Shapefile = NULL;
 	_rotate = NULL;
 
-	#ifdef _DEBUG
-	gMemLeakDetect.stopped = true;
-	#endif
-
 	ComHelper::CreateInstance(idTiles, (IDispatch**)&_tiles);
 	((CTiles*)_tiles)->Init((void*)this);
 
@@ -281,10 +277,6 @@ void CMapView::Startup()
 	
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
 	_shapeEditor->SetMapCallback(this);
-
-	#ifdef _DEBUG
-	gMemLeakDetect.stopped = false;
-	#endif
 }
 
 // **********************************************************************
