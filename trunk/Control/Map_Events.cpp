@@ -333,7 +333,7 @@ BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		int zoom = GetCurrentZoom();
 		int maxZoom, minZoom;
 		GetMinMaxZoom(minZoom, maxZoom);
-		if (zDelta > 0 && zoom + 1 > maxZoom) {
+		if ((zDelta > 0 && zoom + 1 > maxZoom) || (zDelta < 0 && zoom -1 < minZoom)) {
 			return true;
 		}
 	}

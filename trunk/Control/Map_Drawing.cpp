@@ -537,13 +537,7 @@ void CMapView::DrawTiles(Gdiplus::Graphics* g)
 void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, bool layerBuffer)
 {
 	if (_lockCount > 0 && !_isSnapshot)
-	{
 		return;
-	}
-	
-	HCURSOR oldCursor;
-	if (layerBuffer) 
-		oldCursor = this->SetWaitCursor();
 
 	// clear extents of drawn labels and charts
 	this->ClearLabelFrames();
@@ -554,10 +548,11 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 
 	//	nothing to draw
 	if (endcondition == 0)
-	{
-	     if (layerBuffer && oldCursor != NULL) 
-			 ::SetCursor(oldCursor);
 		 return;
+
+	HCURSOR oldCursor;
+	if (layerBuffer) {
+		oldCursor = this->SetWaitCursor();
 	}
 	
 	// ------------------------------------------------------------------
@@ -659,7 +654,8 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 				// grab extents from shapefile in case they changed
 				l->UpdateExtentsFromDatasource();
 
-				if (!l->extents.Intersects(_extents)) return;
+				if (!l->extents.Intersects(_extents))	
+					continue;
 
 				CComPtr<IShapefile> sf = NULL;
 				if (l->QueryShapefile(&sf) && ShapefileHelper::IsVolatile(sf) == layerBuffer)
@@ -700,8 +696,9 @@ void CMapView::DrawLayers(const CRect & rcBounds, Gdiplus::Graphics* graphics, b
 		LayerDrawer::DrawCharts(l, chartDrawer, vpAboveAllLayers);
 	}
 	
-   if (layerBuffer && oldCursor != NULL)
-      ::SetCursor(oldCursor);
+	if (layerBuffer && oldCursor != NULL) {
+		::SetCursor(oldCursor);
+	}
 
    if (isConcealed)
 		delete[] isConcealed;
