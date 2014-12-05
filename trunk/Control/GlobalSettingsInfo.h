@@ -56,6 +56,7 @@ struct GlobalSettingsInfo
 	int hotTrackingMaxShapeCount;
 	OLE_COLOR identifierColor;
 	BSTR emptyBstr;
+	BSTR gdalBstr;
 	bool allowLayersWithoutProjection;
 	bool allowProjectionMismatch;
 	bool reprojectLayersOnAdding;
@@ -66,6 +67,7 @@ struct GlobalSettingsInfo
 	~GlobalSettingsInfo()
 	{
 		SysFreeString(emptyBstr);
+		SysFreeString(gdalBstr);
 		if (callback)
 			callback->Release();
 	}
@@ -78,6 +80,7 @@ struct GlobalSettingsInfo
 		allowProjectionMismatch = true;
 		reprojectLayersOnAdding = false;
 		emptyBstr = SysAllocString(L"");
+		gdalBstr = SysAllocString(L"GDAL");
 		identifierColor = RGB(30, 144, 255);
 		hotTrackingMaxShapeCount = 200;
 		attachMapCallbackToLayers = true;

@@ -1006,7 +1006,7 @@ namespace Utility
 		{
 			lastPercent = newpercent;
 			CComBSTR bstrMsg(message);
-			localCback->Progress(key, newpercent, bstrMsg);
+			callback->Progress(key, newpercent, bstrMsg);
 		}
 	}
 

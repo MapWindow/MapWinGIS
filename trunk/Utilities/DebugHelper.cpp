@@ -6,10 +6,47 @@ namespace Debug
 	static const int TARGETS_COUNT = 3;
 	bool targets[TARGETS_COUNT];
 
+	// ****************************************************************** 
+	//		CustomCPLErrorHandler
+	// ****************************************************************** 
+	void CPL_STDCALL CustomCPLErrorHandler(CPLErr error, int errorCode, const char* message)
+	{
+		CString s = message;
+		switch (error)
+		{
+			case CE_Debug:
+				s = "GDAL DEBUG: " + s;
+				break;
+			case CE_Warning:
+				s = "GDAL WARNING: " + s;
+				break;
+			case CE_Failure:
+				s = "GDAL FAILURE: " + s;
+				break;
+			case CE_Fatal:
+				s = "GDAL FATAL: " + s;
+				break;
+			default:
+				s = "GDAL: " + s;
+		}
+
+		if (m_globalSettings.callback)
+		{
+			CComBSTR bstr(s);
+			m_globalSettings.callback->Error(m_globalSettings.gdalBstr, bstr);
+		}
+		else
+		{
+			if (Debug::IsDebugMode())
+				Debug::WriteError(s);
+		}
+	}
+
 	void Init() {
 		targets[DebugAny] = true;
 		targets[DebugOgrLoading] = false;
 		targets[DebugPanning] = false;
+		CPLSetErrorHandler(CustomCPLErrorHandler);
 	}
 
 	bool CheckDebugTarget(DebugTarget target)

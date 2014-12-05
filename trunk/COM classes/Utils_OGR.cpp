@@ -1537,6 +1537,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	GDAL_GCP    *pasGCPs = NULL;
 	int          nTransformOrder = 0;  /* Default to 0 for now... let the lib decide */
 
+	*retval = VARIANT_FALSE;
+
 	pszDataSource = OLE2CA(bstrSrcFilename);
 	pszDestDataSource = OLE2CA(bstrDstFilename);
 
@@ -2165,6 +2167,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			CPLError(CE_Failure,0, "  -> %s\n", poR->GetDriver(iDriver)->GetDescription());
 		}
 
+
 		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
@@ -2235,6 +2238,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 			{
 				CPLError(CE_Failure,0, "  -> `%s'\n", poR->GetDriver(iDriver)->GetDescription());
 			}
+
 			return ResetConfigOptions(tkGDAL_ERROR);
 		}
 
@@ -2943,6 +2947,8 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 #ifdef DBMALLOC
 	malloc_dump(1);
 #endif
+
+	*retval = nRetCode == 0 ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return ResetConfigOptions(tkNO_ERROR);
 }

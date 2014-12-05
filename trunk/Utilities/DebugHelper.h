@@ -2,6 +2,7 @@
 
 namespace Debug
 {
+	void CPL_STDCALL CustomCPLErrorHandler(CPLErr error, int errorCode, const char* message);
 	void Init();
 	bool IsDebugMode();
 	void WriteWithThreadId(CString format, DebugTarget target = DebugAny);
