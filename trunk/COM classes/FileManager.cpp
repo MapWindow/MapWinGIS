@@ -3,6 +3,8 @@
 #include "FileManager.h"
 #include "GridManager.h"
 #include "Grid.h"
+#include "OgrDatasource.h"
+#include "OgrHelper.h"
 
 //***********************************************************************
 //*		get/put_Key()
@@ -72,16 +74,14 @@ STDMETHODIMP CFileManager::put_GlobalCallback(ICallback *newVal)
 tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename)
 {
 	// shapefile
-	VARIANT_BOOL vb;
-	get_IsVectorLayer(Filename, &vb);
-	if (vb)
+	CStringW filenameW = OLE2W(Filename);
+	if (IsShapefile(Filename))
 	{
 		return tkFileOpenStrategy::fosVectorLayer;
 	}
 	
-	// gdal
-	CStringW name = OLE2W(Filename);
-	GdalSupport support = GdalHelper::TryOpenWithGdal(name);
+	// GDAL
+	GdalSupport support = GdalHelper::TryOpenWithGdal(filenameW);
 	if (support != GdalSupport::GdalSupportNone) {
 		if (support == GdalSupportRgb)
 		{
@@ -89,20 +89,32 @@ tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename)
 		}
 		else
 		{
-			return GridManager::NeedProxyForGrid(name, m_globalSettings.gridProxyMode) ? tkFileOpenStrategy::fosProxyForGrid : tkFileOpenStrategy::fosDirectGrid;
+			return GridManager::NeedProxyForGrid(filenameW, m_globalSettings.gridProxyMode) ? tkFileOpenStrategy::fosProxyForGrid : tkFileOpenStrategy::fosDirectGrid;
 		}
 	}
 
 	// it can be binary grid, handled by our own classes
 	USES_CONVERSION;
 	GridManager gm;
-	DATA_TYPE dType = gm.getGridDataType( W2A(name), USE_EXTENSION );
+	DATA_TYPE dType = gm.getGridDataType(W2A(filenameW), USE_EXTENSION);
 	if (dType != INVALID_DATA_TYPE)
 	{
 		return tkFileOpenStrategy::fosProxyForGrid;
 	}
 
-	return tkFileOpenStrategy::fosNotSupported;
+	// OGR vector
+	tkFileOpenStrategy strategy = fosNotSupported;
+	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filenameW, false);
+	if (dt)
+	{
+		int layerCount = dt->GetLayerCount();
+		if (layerCount > 0) {
+			strategy = layerCount == 1? fosVectorLayer : fosVectorDatasource;
+		}
+		dt->Dereference();
+		delete dt;
+	}
+	return strategy;
 }
 
 //****************************************************************
@@ -115,7 +127,7 @@ STDMETHODIMP CFileManager::get_IsSupportedBy(BSTR Filename, tkSupportType suppor
 	switch(supportType)
 	{
 		case stGdal:
-			*retVal = GdalHelper::CanOpenWithGdal(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
+			*retVal = GdalHelper::CanOpenAsGdalRaster(OLE2W(Filename)) ? VARIANT_TRUE: VARIANT_FALSE;
 			return S_OK;
 		case stGdalOverviews:
 			*retVal = GdalHelper::SupportsOverviews(OLE2W(Filename), _globalCallback) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -175,7 +187,7 @@ STDMETHODIMP CFileManager::get_IsRgbImage(BSTR Filename, VARIANT_BOOL* retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 	*retVal = VARIANT_FALSE;
-	GDALDataset* dt = GdalHelper::OpenDatasetW(OLE2W(Filename));
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(OLE2W(Filename));
 	if (dt)
 	{
 		*retVal = GdalHelper::IsRgb(dt) ? VARIANT_TRUE: VARIANT_FALSE;
@@ -217,8 +229,19 @@ STDMETHODIMP CFileManager::get_IsGrid(BSTR Filename, VARIANT_BOOL* retVal)
 STDMETHODIMP CFileManager::get_IsVectorLayer(BSTR Filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	*retVal = Utility::EndsWith(OLE2W(Filename), L"shp") ? VARIANT_TRUE: VARIANT_FALSE;
+	*retVal = VARIANT_FALSE;
+
+	CStringW filenameW = OLE2W(Filename);
+	if (IsShapefile(filenameW)) 
+	{
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+
+	if (GdalHelper::CanOpenAsOgrDataset(filenameW)) {
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
 	return S_OK;
 }
 
@@ -240,9 +263,9 @@ STDMETHODIMP CFileManager::get_CanOpenAs(BSTR Filename, tkFileOpenStrategy strat
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (strategy == fosDirectGrid)
 	{
-		// directs grids must be supported by gdal
+		// direct grids must be supported by GDAL
 		USES_CONVERSION;
-		*retVal = GdalHelper::CanOpenWithGdal(OLE2W(Filename));
+		*retVal = GdalHelper::CanOpenAsGdalRaster(OLE2W(Filename));
 		return S_OK;
 	}
 		
@@ -277,12 +300,14 @@ STDMETHODIMP CFileManager::Open(BSTR Filename, tkFileOpenStrategy openStrategy, 
 		put_GlobalCallback(callback);
 	}
 
+	CStringW filenameW = OLE2W(Filename);
+
 	_lastOpenIsSuccess = false;
-	_lastOpenFilename = Filename;
+	_lastOpenFilename = filenameW;
 	_lastOpenStrategy = openStrategy;
 
 	USES_CONVERSION;
-	if (!Utility::FileExistsW(OLE2W(Filename)))
+	if (!Utility::FileExistsW(filenameW))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
 		return S_FALSE;
@@ -298,11 +323,70 @@ STDMETHODIMP CFileManager::Open(BSTR Filename, tkFileOpenStrategy openStrategy, 
 			ErrorMessage(tkUNSUPPORTED_FORMAT);
 			break;
 		case fosVectorLayer:
-			OpenShapefile(Filename, NULL, (IShapefile**)retVal);
+			if (IsShapefile(filenameW)) {
+				OpenShapefile(Filename, NULL, (IShapefile**)retVal);
+			}
+			else {
+				OpenVectorLayer(Filename, SHP_NULLSHAPE, VARIANT_FALSE, (IOgrLayer**)retVal);
+			}
+			break;
+		case fosVectorDatasource:
+			OpenVectorDatasource(Filename, (IOgrDatasource**)retVal);
 			break;
 		default:
 			OpenRaster(Filename, openStrategy, NULL, (IImage**)retVal);
 	}
+	return S_OK;
+}
+
+//****************************************************************
+//			OpenVectorLayer()
+//****************************************************************
+STDMETHODIMP CFileManager::OpenVectorLayer(BSTR Filename, ShpfileType preferedShapeType, VARIANT_BOOL forUpdate, IOgrLayer** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+
+	CStringW filenameW = OLE2W(Filename);
+	_lastOpenFilename = filenameW;
+	_lastOpenStrategy = fosVectorLayer;
+
+	CComPtr<IOgrDatasource> ds = NULL;
+	ComHelper::CreateInstance(idOgrDatasource, (IDispatch**)&ds);
+	if (!ds)  return S_OK;
+		
+	VARIANT_BOOL vb;
+	ds->Open(Filename, &vb);		// error will be reported in the class
+
+	if (!vb) return S_OK;
+
+	int layerCount;
+	ds->get_LayerCount(&layerCount);
+	if (layerCount == 0)
+	{
+		ds->Close();
+		ErrorMessage(tkOGR_DATASOURCE_EMPTY);
+		return S_OK;
+	}
+	
+	IOgrLayer* layer = NULL;
+	int layerIndex = 0;
+	if (layerCount > 1 || preferedShapeType != SHP_NULLSHAPE)
+	{
+		// choose layer with proper type (for KML for example)
+		layer = OgrHelper::ChooseLayerByShapeType(ds, preferedShapeType, forUpdate);
+	}
+
+	if (!layer) {
+		ds->GetLayer(0, forUpdate, &layer);		// simply grab the first one
+	}
+
+	if (layer) {
+		*retVal = layer;
+		_lastOpenIsSuccess = true;
+	}
+	
+	ds->Close();
 	return S_OK;
 }
 
@@ -314,39 +398,37 @@ STDMETHODIMP CFileManager::OpenShapefile(BSTR Filename, ICallback* callback, ISh
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
 
-	_lastOpenFilename = Filename;
+	CStringW filenameW = OLE2W(Filename);
+	_lastOpenFilename = filenameW;
 	_lastOpenStrategy = fosVectorLayer;
 
 	if (callback) {
 		put_GlobalCallback(callback);
 	}
 
-	if (!Utility::FileExistsW(OLE2W(Filename)))
+	if (!Utility::FileExistsW(filenameW))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	VARIANT_BOOL vb;
-	get_IsVectorLayer(Filename, &vb);
-	if (vb) {
-		VARIANT_BOOL vb;
-		IShapefile* sf = NULL;
-		ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
-		sf->Open(Filename, _globalCallback, &vb);
-		if (!vb)
-		{
-			
-			sf->get_LastErrorCode(&_lastErrorCode);
-			ErrorMessage(_lastErrorCode);
-			sf->Release();
-			sf = NULL;
-		}
-		else
-		{
-			_lastOpenIsSuccess = true;
-			*retVal = sf;
-		}
+	if (!IsShapefile(filenameW))
+		return S_OK;
+	
+	IShapefile* sf = NULL;
+	ComHelper::CreateInstance(idShapefile, (IDispatch**)&sf);
+	sf->Open(Filename, _globalCallback, &vb);
+	if (!vb)
+	{
+		sf->get_LastErrorCode(&_lastErrorCode);
+		ErrorMessage(_lastErrorCode);
+		sf->Release();
+	}
+	else
+	{
+		_lastOpenIsSuccess = true;
+		*retVal = sf;
 	}
 	return S_OK;
 }
@@ -598,3 +680,37 @@ STDMETHODIMP CFileManager::OpenFromDatabase(BSTR connectionString, BSTR layerNam
 	return S_OK;
 }
 
+//****************************************************************
+//			IsShapefile()
+//****************************************************************
+bool CFileManager::IsShapefile(CStringW filename)
+{
+	return Utility::EndsWith(filename, L"shp");
+}
+
+//****************************************************************
+//			OpenVectorDatasource()
+//****************************************************************
+STDMETHODIMP CFileManager::OpenVectorDatasource(BSTR Filename, IOgrDatasource** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+
+	CStringW filenameW = OLE2W(Filename);
+	_lastOpenFilename = filenameW;
+	_lastOpenStrategy = fosVectorLayer;	    // TODO: perhaps fosVectorDatasource is more appropriate
+
+	IOgrDatasource* ds = NULL;
+	ComHelper::CreateInstance(idOgrDatasource, (IDispatch**)&ds);
+	if (!ds)  return S_OK;
+
+	VARIANT_BOOL vb;
+	ds->Open(Filename, &vb);		// error will be reported in the class
+	
+	if (vb) {
+		*retVal = ds;
+	}
+
+	return S_OK;
+}

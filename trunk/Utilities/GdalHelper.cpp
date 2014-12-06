@@ -14,7 +14,6 @@ GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
 	if (forUpdate) method |= GDAL_OF_UPDATE;
 	GDALDataset* dt = (GDALDataset *)GDALOpenEx(filenameUtf8, method, NULL, NULL, NULL);
 	m_globalSettings.SetGdalUtf8(false);
-	GDALAccess update = (method & GDAL_OF_UPDATE) ? GA_Update : GA_ReadOnly;		// TODO: remove
 	return dt;
 }
 
@@ -28,9 +27,24 @@ GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate)
 }
 
 // **************************************************************
-//		GdalOpen
+//		CanOpenAsOgrDataset
 // **************************************************************
-GDALDataset* GdalHelper::OpenDatasetA( char* filenameUtf8 )
+bool GdalHelper::CanOpenAsOgrDataset(CStringW filename)
+{
+	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filename, false);
+	bool success = dt != NULL;
+	if (dt)
+	{
+		dt->Dereference();
+		delete dt;
+	}
+	return success;
+}
+
+// **************************************************************
+//		OpenRasterDatasetA
+// **************************************************************
+GDALDataset* GdalHelper::OpenRasterDatasetA( char* filenameUtf8 )
 {
 	m_globalSettings.SetGdalUtf8(true);
 
@@ -45,38 +59,41 @@ GDALDataset* GdalHelper::OpenDatasetA( char* filenameUtf8 )
 	return dt;
 }
 
-GDALDataset* GdalHelper::OpenDatasetA( CStringA& filenameUtf8 )
-{
-	return OpenDatasetA(filenameUtf8.GetBuffer());
-}
-
-GDALDataset* GdalHelper::OpenDatasetW( CStringW filenameW )
-{
-	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
-	return OpenDatasetA(filenameA.GetBuffer());
-}
-
-GDALDataset* GdalHelper::OpenDatasetA(CStringA& filenameUtf8, GDALAccess accessType )
-{
-	return OpenDatasetA(filenameUtf8.GetBuffer(), accessType);
-}
-
-GDALDataset* GdalHelper::OpenDatasetA(char* filenameUtf8, GDALAccess accessType )
+GDALDataset* GdalHelper::OpenRasterDatasetA(char* filenameUtf8, GDALAccess accessType)
 {
 	m_globalSettings.SetGdalUtf8(true);
 
 	GDALAllRegister();
-	GDALDataset* dt = (GDALDataset *) GDALOpen(filenameUtf8, accessType );
+	GDALDataset* dt = (GDALDataset *)GDALOpen(filenameUtf8, accessType);
 
 	m_globalSettings.SetGdalUtf8(false);
 
 	return dt;
 }
 
-GDALDataset* GdalHelper::OpenDatasetW(CStringW filenameW, GDALAccess accessType )
+GDALDataset* GdalHelper::OpenRasterDatasetA( CStringA& filenameUtf8 )
+{
+	return OpenRasterDatasetA(filenameUtf8.GetBuffer());
+}
+
+GDALDataset* GdalHelper::OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess accessType )
+{
+	return OpenRasterDatasetA(filenameUtf8.GetBuffer(), accessType);
+}
+
+// **************************************************************
+//		OpenRasterDatasetW
+// **************************************************************
+GDALDataset* GdalHelper::OpenRasterDatasetW(CStringW filenameW, GDALAccess accessType )
 {
 	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
-	return OpenDatasetA(filenameA.GetBuffer(), accessType);
+	return OpenRasterDatasetA(filenameA.GetBuffer(), accessType);
+}
+
+GDALDataset* GdalHelper::OpenRasterDatasetW(CStringW filenameW)
+{
+	CStringA filenameA = Utility::ConvertToUtf8(filenameW);
+	return OpenRasterDatasetA(filenameA.GetBuffer());
 }
 
 // **************************************************************
@@ -146,12 +163,11 @@ void GdalHelper::CloseDataset(GDALDataset* dt)
 }
 
 // **************************************************************
-//		CanOpenWithGdal
+//		CanOpenAsGdalRaster
 // **************************************************************
-bool GdalHelper::CanOpenWithGdal(CStringW filename)
+bool GdalHelper::CanOpenAsGdalRaster(CStringW filename)
 {
-	GDALAllRegister();
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, GDALAccess::GA_ReadOnly);
 	bool gdalFormat = dt != NULL;
 	if (dt)
 	{
@@ -162,6 +178,9 @@ bool GdalHelper::CanOpenWithGdal(CStringW filename)
 	return gdalFormat;
 }
 
+// **************************************************************
+//		ClearOverviews
+// **************************************************************
 bool ClearOverviews(GDALDataset* dt, ICallback* cb, bool clear)
 {
 	int overviewList = clear ? 0 : 2;
@@ -176,7 +195,7 @@ bool GdalHelper::SupportsOverviews(CStringW filename, ICallback* callback)
 {
 	GDALAllRegister();
 	bool supports = false;
-	GDALDataset* dt = OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	GDALDataset* dt = OpenRasterDatasetW(filename, GDALAccess::GA_ReadOnly);
 	if (dt) {
 		supports = HasOverviews(dt);
 		if (!supports) {
@@ -195,8 +214,7 @@ bool GdalHelper::SupportsOverviews(CStringW filename, ICallback* callback)
 // **************************************************************
 GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
 {
-	GDALAllRegister();
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, GDALAccess::GA_ReadOnly);
 	if (!dt) {
 		return GdalSupport::GdalSupportNone;
 	}
@@ -205,7 +223,6 @@ GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
 		bool isRgb = IsRgb(dt);
 		dt->Dereference();
 		delete dt;
-		dt = NULL;
 		return isRgb ? GdalSupportRgb : GdalSupportGrid;
 	}
 }
@@ -247,7 +264,7 @@ bool GdalHelper::HasOverviews(GDALDataset* dt)
 // *******************************************************
 bool GdalHelper::RemoveOverviews(CStringW filename) 
 {
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, GDALAccess::GA_ReadOnly);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, GDALAccess::GA_ReadOnly);
 	if (dt ) {
 		bool result = ClearOverviews(dt, NULL, true);
 		CloseDataset(dt);
@@ -261,7 +278,7 @@ bool GdalHelper::RemoveOverviews(CStringW filename)
 // *******************************************************
 bool GdalHelper::HasOverviews(CStringW filename) 
 {
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename);
 	if (dt ) {
 		bool hasOverviews = GdalHelper::HasOverviews(dt);
 		GdalHelper::CloseDataset(dt);
@@ -293,7 +310,7 @@ bool GdalHelper::BuildOverviewsIfNeeded(CStringW filename, bool external, ICallb
 
 	// dataset must be opened in read-only mode, so that overviews are written in external ovr file
 	GDALAccess accessMode = external ? GDALAccess::GA_ReadOnly : GDALAccess::GA_Update;
-	GDALDataset* dt = GdalHelper::OpenDatasetW(filename, accessMode);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, accessMode);
 	if (dt) {
 		GdalHelper::BuildOverviewsIfNeeded(dt, callback);
 		GdalHelper::CloseDataset(dt);
@@ -449,7 +466,7 @@ void GdalHelper::GetMetaData(GDALDriver* driver)
 // ****************************************************************
 void GdalHelper::GetProjection(CStringW filename, CString& projection)
 {
-	GDALDataset * rasterDataset = GdalHelper::OpenDatasetW(filename);
+	GDALDataset * rasterDataset = GdalHelper::OpenRasterDatasetW(filename);
 
 	if (!rasterDataset)	return;
 

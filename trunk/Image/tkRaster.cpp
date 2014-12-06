@@ -131,7 +131,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		//compiled in debug mode. GIF images also crash here		
 		
 		if (_rasterDataset == NULL)
-			_rasterDataset = GdalHelper::OpenDatasetA(filename, accessType);
+			_rasterDataset = GdalHelper::OpenRasterDatasetA(filename, accessType);
 	
 		if( _rasterDataset == NULL ) 
 		{
@@ -416,7 +416,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 							   tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel)
 {
 	if (! _rasterDataset ) 
-		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 	
 	if (! _rasterDataset ) 
 		return false;
@@ -585,7 +585,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize)
 {
 	if (! _rasterDataset ) 
-		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 	
 	if (! _rasterDataset ) 
 		return false;
@@ -1593,7 +1593,7 @@ bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
     int nHistSize = 0;
     int *panHistogram = NULL;
 	if (_rasterDataset == NULL) 
-		_rasterDataset = GdalHelper::OpenDatasetW(filename, GA_ReadOnly);
+		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 
 	GDALRasterBand * poBand;
     

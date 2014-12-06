@@ -161,5 +161,6 @@ public:
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
 
+	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

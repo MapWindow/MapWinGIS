@@ -3000,7 +3000,7 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		
 		GDALAllRegister(); 
 
-		poDataset = GdalHelper::OpenDatasetW(OLE2W(bstrGridFilename), GA_ReadOnly);
+		poDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrGridFilename), GA_ReadOnly);
 		if( poDataset == NULL )
 		{
 			printf( "Couldn't open dataset %s\n", 
@@ -4399,7 +4399,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 	GDALAllRegister();
 
 	USES_CONVERSION;
-	GDALDataset* dataset = GdalHelper::OpenDatasetW(OLE2W(filename), GDALAccess::GA_Update);
+	GDALDataset* dataset = GdalHelper::OpenRasterDatasetW(OLE2W(filename), GDALAccess::GA_Update);
 	if (!dataset)
 	{
 		this->ErrorMessage(tkINVALID_FILE);
@@ -4553,9 +4553,9 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 
 	USES_CONVERSION;
 
-	GDALDataset* dsSource =  GdalHelper::OpenDatasetW(OLE2W(sourceFilename), GDALAccess::GA_ReadOnly);
+	GDALDataset* dsSource =  GdalHelper::OpenRasterDatasetW(OLE2W(sourceFilename), GDALAccess::GA_ReadOnly);
 	
-	GDALDataset* dsDest = GdalHelper::OpenDatasetW(OLE2W(destFilename), GDALAccess::GA_ReadOnly); 
+	GDALDataset* dsDest = GdalHelper::OpenRasterDatasetW(OLE2W(destFilename), GDALAccess::GA_ReadOnly); 
 
 	if (!dsSource || !dsDest)
 	{
@@ -5196,7 +5196,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		CString name = W2A(Utility::GetNameFromPath(path));
 		name = name.MakeLower();
 
-		GDALDataset* dt = GdalHelper::OpenDatasetW(path, GDALAccess::GA_ReadOnly);
+		GDALDataset* dt = GdalHelper::OpenRasterDatasetW(path, GDALAccess::GA_ReadOnly);
 		if (dt)
 		{
 			// perhaps check rotation and create north up dataset in case bounds should be supported
@@ -5516,7 +5516,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	// -------------------------------------------------------
 	//		Source
 	// -------------------------------------------------------
-	GDALDataset* dt = GdalHelper::OpenDatasetW(name, GDALAccess::GA_ReadOnly);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(name, GDALAccess::GA_ReadOnly);
 	if (!dt)
 	{
 		ErrorMessage(tkCANT_OPEN_FILE);

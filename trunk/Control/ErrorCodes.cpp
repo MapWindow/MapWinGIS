@@ -255,6 +255,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "String fields don't support classification types other than unique values.";
 		case tkTOO_MANY_CATEGORIES:
 			return "The specified number of categories is too large.";
+		case tkOGR_DATASOURCE_EMPTY:
+			return "OGR datasource has no layers.";
 
 		//401-600 = tkgrd
 		case tkGRID_NOT_INITIALIZED:

@@ -225,3 +225,56 @@ COgrLayer* OgrHelper::Cast(CComPtr<IOgrLayer>& layer)
 {
 	return (COgrLayer*)&(*layer);
 }
+
+// *************************************************************
+//		ShapeType2D()
+// *************************************************************
+ShpfileType OgrHelper::ShapeType2D(IOgrLayer* layer)
+{
+	if (!layer) return SHP_NULLSHAPE;
+	ShpfileType shpType;
+	layer->get_ShapeType2D(&shpType);
+	return shpType;
+}
+
+// *************************************************************
+//		ChooseLayerByShapeType()
+// *************************************************************
+IOgrLayer* OgrHelper::ChooseLayerByShapeType(IOgrDatasource* ds, ShpfileType shpType, VARIANT_BOOL forUpdate)
+{
+	int layerCount = GetLayerCount(ds);
+	if (layerCount == 0) return NULL;
+
+	for (int i = 0; i < layerCount; i++)
+	{
+		IOgrLayer* tempLayer = NULL;
+		ds->GetLayer(i, forUpdate, &tempLayer);
+		if (tempLayer)
+		{
+			if (OgrHelper::ShapeType2D(tempLayer) == shpType) {
+				return tempLayer;
+			}
+			tempLayer->Close();
+			tempLayer->Release();
+		}
+	}
+}
+
+// *************************************************************
+//		GetLayerCount()
+// *************************************************************
+int OgrHelper::GetLayerCount(IOgrDatasource* ds)
+{
+	if (!ds) return 0;
+	int layerCount;
+	ds->get_LayerCount(&layerCount);
+	return layerCount;
+}
+
+// *************************************************************
+//		CastDatasource()
+// *************************************************************
+static COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds)
+{
+	return (COgrDatasource*)&(*ds);
+}

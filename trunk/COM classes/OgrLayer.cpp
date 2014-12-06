@@ -509,6 +509,17 @@ STDMETHODIMP COgrLayer::get_ShapeType(ShpfileType* retVal)
 }
 
 // *************************************************************
+//		get_ShapeType2D()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_ShapeType2D(ShpfileType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	get_ShapeType(pVal);
+	*pVal = Utility::ShapeTypeConvert2D(*pVal);
+	return S_OK;
+}
+
+// *************************************************************
 //		get_DataIsReprojected()
 // *************************************************************
 STDMETHODIMP COgrLayer::get_DataIsReprojected(VARIANT_BOOL* retVal)

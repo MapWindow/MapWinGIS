@@ -130,6 +130,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkOGR_STYLE_NOT_FOUND 322
 # define tkNOT_UNIQUE_CLASSIFICATION_FOR_STRINGS 323
 # define tkTOO_MANY_CATEGORIES 324
+# define tkOGR_DATASOURCE_EMPTY 325
 
 //401-600 = tkgrd
 # define tkGRID_NOT_INITIALIZED 401

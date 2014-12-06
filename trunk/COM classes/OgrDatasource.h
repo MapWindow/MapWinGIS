@@ -89,6 +89,9 @@ private:
 	void ErrorMessage(long ErrorCode);
 	void GetMetaData(GDALDriver* driver);
 	char** ParseLayerCreationOptions(BSTR creationOptions);
+
+public:
+	GDALDataset* GetDataset() { return _dataset; }
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(OgrDatasource), COgrDatasource)

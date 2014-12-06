@@ -828,6 +828,7 @@ enum tkFileOpenStrategy
 	fosDirectGrid = 2,
 	fosProxyForGrid = 3,
 	fosVectorLayer = 4,
+	fosVectorDatasource = 5,
 } tkFileOpenStrategy;
 
 /**************************  tkFieldOperationValidity Enumerations **********************/
@@ -5585,6 +5586,11 @@ interface IFileManager : IDispatch{
 	//[propget, id(8), helpstring("GeoProjection")] HRESULT GeoProjection([in]BSTR Filename, [out, retval]IGeoProjection** retVal);
 	//[propget, id(9), helpstring("IsSameProjection")] HRESULT IsSameProjection([in]BSTR Filename, [in]IGeoProjection* projection,  [out, retval] VARIANT_BOOL* retVal);
 	//[id(13), helpstring("DeleteDatasource")] HRESULT DeleteDatasource([in]BSTR Filename, [out, retval]VARIANT_BOOL* retVal);
+	[id(25)] HRESULT OpenVectorLayer([in] BSTR Filename, 
+		[in, optional, defaultvalue(SHP_NULLSHAPE)] ShpfileType preferedShapeType,
+		[in, optional, defaultvalue(0)] VARIANT_BOOL forUpdate,
+		[out, retval] IOgrLayer** retVal);
+	[id(26)] HRESULT OpenVectorDatasource([in] BSTR Filename, [out, retval] IOgrDatasource** retVal);
 };
 
 
@@ -5686,6 +5692,7 @@ interface IOgrLayer : IDispatch{
 	[id(44)] HRESULT GenerateCategories([in] BSTR FieldName, [in] tkClassificationType classificationType, 
 			[in] long numClasses, [in]tkMapColor colorStart, [in] tkMapColor colorEnd, 
 			[in]tkColorSchemeType schemeType, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(45)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
 };
 
 [

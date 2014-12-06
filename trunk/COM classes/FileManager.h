@@ -73,6 +73,7 @@ public:
 	STDMETHOD(RemoveProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasValidProxyForGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerNameOrQuery, IOgrLayer** retVal);
+	STDMETHOD(OpenVectorLayer)(BSTR Filename, ShpfileType preferedShapeType, VARIANT_BOOL forUpdate, IOgrLayer** retVal);
 
 private:
 	tkFileOpenStrategy _lastOpenStrategy;
@@ -86,6 +87,10 @@ private:
 private:
 	tkFileOpenStrategy CFileManager::get_OpenStrategyCore(BSTR Filename);
 	void ErrorMessage(long ErrorCode);
+	bool IsShapefile(CStringW filename);
+	
+public:
+	STDMETHOD(OpenVectorDatasource)(BSTR Filename, IOgrDatasource** retVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(FileManager), CFileManager)

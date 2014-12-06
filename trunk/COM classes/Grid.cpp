@@ -2566,7 +2566,7 @@ STDMETHODIMP CGrid::OpenAsImage(IGridColorScheme* scheme, tkGridProxyMode proxyM
 	// ---------------------------------------------
 	//	Doing the checks
 	// ---------------------------------------------
-	if (!GdalHelper::CanOpenWithGdal(gridName) && mode == gpmNoProxy)
+	if (!GdalHelper::CanOpenAsGdalRaster(gridName) && mode == gpmNoProxy)
 	{
 		ErrorMessage(tkCANT_DISPLAY_WO_PROXY);
 		return S_FALSE;

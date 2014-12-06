@@ -228,7 +228,7 @@ void tkGridRaster::SaveHeaderInfo()
 	delete rasterDataset;
 	poBand = NULL;
 
-	rasterDataset = GdalHelper::OpenDatasetW(mFilename);
+	rasterDataset = GdalHelper::OpenRasterDatasetW(mFilename);
 
 	if( rasterDataset != NULL )
 	{
@@ -256,7 +256,7 @@ bool tkGridRaster::LoadRasterCore(char* filenameA, bool InRam, GridFileType file
 
 		GDALAllRegister();
 		
-		rasterDataset = GdalHelper::OpenDatasetA(filenameA);
+		rasterDataset = GdalHelper::OpenRasterDatasetA(filenameA);
 
 		if (!rasterDataset) {
 			return false;

@@ -79,15 +79,9 @@ VARIANT_BOOL CImageClass::WriteWorldFile(CStringW WorldFileName)
 // ************************************************************
 bool CImageClass::ReadWorldFile(CStringW WorldFileName)
 {
-	//int size = MultiByteToWideChar(CP_ACP, 0, WorldFileName.GetString(), -1, NULL, 0);
-	//WCHAR* wName = new WCHAR[size];
-	//MultiByteToWideChar(CP_ACP, 0, WorldFileName.GetString(), -1, wName, size);
-	
-	const int IOS_NOCREATE = 32; //std::ios::nocreate
+	const int IOS_NOCREATE = 32;
 	ifstream fin(WorldFileName,IOS_NOCREATE);
 	
-	//delete wName;
-
 	if (!fin)
 		return false;
 

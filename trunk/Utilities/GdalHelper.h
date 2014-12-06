@@ -6,18 +6,16 @@ int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage,
 class GdalHelper
 {
 public:
-	GdalHelper(void) {};
-	~GdalHelper(void) {};
-
 	static GDALDataset* OpenOgrDatasetW(CStringW filenameW, bool forUpdate);
 	static GDALDataset* OpenOgrDatasetA(char* filenameUtf8, bool forUpdate);
+	static bool CanOpenAsOgrDataset(CStringW filename);
 
-	static GDALDataset* OpenDatasetA( char* filenameUtf8 );
-	static GDALDataset* OpenDatasetA( CStringA& filenameUtf8 );
-	static GDALDataset* OpenDatasetW( CStringW filenameW );
-	static GDALDataset* OpenDatasetA(char* filenameUtf8, GDALAccess accessType );
-	static GDALDataset* OpenDatasetA(CStringA& filenameUtf8, GDALAccess accessType );
-	static GDALDataset* OpenDatasetW(CStringW filenameW, GDALAccess accessType );
+	static GDALDataset* OpenRasterDatasetA( char* filenameUtf8 );
+	static GDALDataset* OpenRasterDatasetA( CStringA& filenameUtf8 );
+	static GDALDataset* OpenRasterDatasetW( CStringW filenameW );
+	static GDALDataset* OpenRasterDatasetA(char* filenameUtf8, GDALAccess accessType );
+	static GDALDataset* OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess accessType );
+	static GDALDataset* OpenRasterDatasetW(CStringW filenameW, GDALAccess accessType );
 
 	static void GetProjection(CStringW filename, CString& projection);
 
@@ -27,7 +25,7 @@ public:
 	static int SerializeXMLTreeToFile(CPLXMLNode* psTree, CStringW filename);
 
 	static void CloseDataset(GDALDataset* dt);
-	static bool CanOpenWithGdal(CStringW filename);
+	static bool CanOpenAsGdalRaster(CStringW filename);
 	static bool SupportsOverviews(CStringW filename, ICallback* callback = NULL);
 
 	static GdalSupport TryOpenWithGdal(CStringW filename);

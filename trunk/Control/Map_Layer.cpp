@@ -360,12 +360,40 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 {
 	long layerHandle = -1;
 
-	if( Object == NULL )
+	if( ! Object )
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return layerHandle;
 	}
 
+	CComPtr<IOgrDatasource> ds = NULL;
+	Object->QueryInterface(IID_IOgrDatasource, (void**)&ds);
+	if (ds) 
+	{
+		int layerCount = OgrHelper::GetLayerCount(ds);
+		if (layerCount == 0) 
+		{
+			ErrorMessage(tkOGR_DATASOURCE_EMPTY);
+			return layerHandle;
+		}
+
+		LockWindow(lmLock);
+
+		for (int i = 0; i < layerCount; i++) 
+		{
+			CComPtr<IOgrLayer> layer = NULL;
+			ds->GetLayer(i, VARIANT_FALSE, &layer);
+			if (layer) {
+				layerHandle = AddLayer(layer, pVisible);		// recursion is here
+			}
+		}
+
+		LockWindow(lmUnlock);
+
+		return layerHandle;   // returning the last layer handle
+	}
+	
+	// TODO: move to separate function to avoid recursion
 	IShapefile * ishp = NULL;
 	Object->QueryInterface(IID_IShapefile,(void**)&ishp);
 

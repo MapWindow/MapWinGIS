@@ -408,7 +408,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
 	/* -------------------------------------------------------------------- */
 	/*      Open dataset.                                                   */
 	/* -------------------------------------------------------------------- */
-	hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
+	hDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
     if( hDataset == NULL )
     {
         CPLError(CE_Failure,0,
@@ -3079,8 +3079,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     }
     else
     {
-		//hDstDS = GDALOpen( pszDstFilename, GA_Update );
-		hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_Update);
+		hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_Update);
         if( hDstDS == NULL )
             return ResetConfigOptions();
     }
@@ -3639,8 +3638,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     }
 
     CPLPushErrorHandler( CPLQuietErrorHandler );
-    //hDstDS = GDALOpen( pszDstFilename, GA_Update );
-	hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_Update);
+	hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_Update);
     CPLPopErrorHandler();
 
     if( hDstDS != NULL && bOverwrite )
@@ -3665,8 +3663,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     if ( hDstDS == NULL && !bOverwrite )
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
-        hDstDS = GdalHelper::OpenDatasetW(OLE2W(bstrDstFilename), GA_ReadOnly);
-		//hDstDS = GDALOpen( pszDstFilename, GA_ReadOnly );
+        hDstDS = GdalHelper::OpenRasterDatasetW(OLE2W(bstrDstFilename), GA_ReadOnly);
         CPLPopErrorHandler();
         
         if (hDstDS)
@@ -6408,15 +6405,13 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
     else
     {
         CPLPushErrorHandler( CPLQuietErrorHandler );
-		//hDataset = GDALOpen( pszFilename, GA_Update );
-		hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_Update);
+		hDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrSrcFilename), GA_Update);
         CPLPopErrorHandler();
     }
 
     if( hDataset == NULL )
 	{
-        //hDataset = GDALOpen( pszFilename, GA_ReadOnly );
-		hDataset = GdalHelper::OpenDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
+		hDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrSrcFilename), GA_ReadOnly);
 	}
 
     if( hDataset == NULL )
@@ -6505,8 +6500,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Open source file.                                               */
 /* -------------------------------------------------------------------- */
-	//GDALDatasetH hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
-	GDALDatasetH hSrcDS = GdalHelper::OpenDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
+	GDALDatasetH hSrcDS = GdalHelper::OpenRasterDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
 	if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;
@@ -6534,8 +6528,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 	}
 	else
 	{
-		//hMaskDS = GDALOpen( OLE2A(pszMaskFilename), GA_ReadOnly );
-		hMaskDS = GdalHelper::OpenDatasetW(OLE2W(pszMaskFilename), GA_ReadOnly);
+		hMaskDS = GdalHelper::OpenRasterDatasetW(OLE2W(pszMaskFilename), GA_ReadOnly);
 		hMaskBand = GDALGetRasterBand( hMaskDS, 1 );
 	}
 
@@ -6703,8 +6696,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 /* -------------------------------------------------------------------- */
     GDALRasterBandH hBand;
 
-	//hSrcDS = GDALOpen( OLE2A(pszSrcFilename), GA_ReadOnly );
-	hSrcDS = GdalHelper::OpenDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
+	hSrcDS = GdalHelper::OpenRasterDatasetW(OLE2W(pszSrcFilename), GA_ReadOnly);
     if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;
