@@ -54,6 +54,8 @@ namespace MWLite.GUI.Forms
 
         private void InitMap()
         {
+            //axMap1.Tiles.SetProxy("127.0.0.1", 8888);
+            
             axMap1.GrabProjectionFromData = true;
             axMap1.CursorMode = tkCursorMode.cmZoomIn;
             axMap1.SendSelectBoxFinal = true;

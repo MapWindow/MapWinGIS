@@ -17,19 +17,23 @@ namespace MWLite.GUI.Helpers
     {
         private static string GetLayerFilter(LayerType layerType)
         {
+            string s = "";
             switch(layerType)
             {
                 case LayerType.Vector:
                     var sf = new Shapefile();
-                    return sf.CdlgFilter;
+                    s += sf.CdlgFilter;
+                    break;
                 case LayerType.Raster:
                     var gr = new Grid();
                     var im = new Image();
-                    return gr.CdlgFilter + "|" + im.CdlgFilter;
-                case LayerType.All:
-                default:
-                    return "All formats|*.*";
+                    s += gr.CdlgFilter + "|" + im.CdlgFilter;
+                    break;
             }
+            if (!string.IsNullOrWhiteSpace(s))
+                s += "|";
+            s +=  "All formats|*.*";
+            return s;
         }
 
         public static void AddLayer(object layer, string layerName)
@@ -39,7 +43,15 @@ namespace MWLite.GUI.Helpers
             {
                 int handle = legend.Layers.Add(layer, true);
                 if (handle != -1) { 
-                    legend.Layers[handle].Name = layerName;
+                    //legend.Layers[handle].Name = layerName;
+                    var sf = legend.Layers[handle].GetObject() as Shapefile;
+                    if (sf != null)
+                    {
+                        if (sf.NumShapes != sf.Table.NumRows)
+                        {
+                            MessageHelper.Info("Number of shapes doesn't match the number of records.");
+                        }
+                    }
                 }
             }
         }
@@ -61,10 +73,22 @@ namespace MWLite.GUI.Helpers
                     var fm = new FileManager();
                     foreach (var name in dlg.FileNames.ToList())
                     {
-                        // TODO: show progress
                         layerName = name;
                         var layer = fm.Open(name);
-                        AddLayer(layer, Path.GetFileName(layerName));
+                        if (layer is OgrDatasource)
+                        {
+                            var ds = layer as OgrDatasource;
+                            for (int i = 0; i < ds.LayerCount; i++)
+                            {
+                                var l = ds.GetLayer(i, false);
+                                AddLayer(l, l.Name);
+                            }
+                            map.ZoomToMaxExtents();
+                        }
+                        else
+                        { 
+                            AddLayer(layer, Path.GetFileName(layerName));
+                        }
                     }
                 }
                 catch
