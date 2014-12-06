@@ -339,6 +339,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "Can't change field type for the file that was added to the table";
 		case tkSAME_FIELD_TYPE_EXPECTED:
 			return "Fields of the same type are expected for this operation";
+		case tkDBF_RECORDS_SHAPES_MISMATCH:
+			return "Number of records in attribute table doesn't match the number of shapes in shapefile.";
 
 		//1001-1200 = tkutils
 		case tkOUT_OF_RANGE_0_TO_180:

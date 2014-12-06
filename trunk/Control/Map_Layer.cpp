@@ -16,6 +16,7 @@
 #include "ShapefileHelper.h"
 #include "OgrHelper.h"
 #include "ComHelpers\ProjectionHelper.h"
+#include "TableHelper.h"
 
 // ************************************************************
 //		GetNumLayers()
@@ -402,6 +403,14 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				LockWindow(lmUnlock);
 				return -1;
 			}
+
+			CComPtr<ITable> table = NULL;
+			ishp->get_Table(&table);
+			if (table) 
+			{
+				if (ShapefileHelper::GetNumShapes(ishp) != TableHelper::GetNumRows(table))
+					ErrorMessage(tkDBF_RECORDS_SHAPES_MISMATCH);   // report it but allow to proceed
+			}
 		}
 		
 		l = new Layer();
@@ -417,7 +426,6 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// grids aren't added directly; an image representation is created first 
 	// using particular color scheme
 	CStringW gridFilename = L"";
-	
 
 	if (igrid != NULL)
 	{

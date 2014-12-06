@@ -176,6 +176,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkCANT_CHANGE_FIELD_TYPE 808
 # define tkSAME_FIELD_TYPE_EXPECTED 809
 # define tkGRID_MERGE_PROJECTION_MISMATCH 810
+# define tkDBF_RECORDS_SHAPES_MISMATCH 811
 
 //1001-1200 = tkutils
 # define tkOUT_OF_RANGE_0_TO_180 1001

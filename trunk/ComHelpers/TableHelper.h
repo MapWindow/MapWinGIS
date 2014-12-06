@@ -4,9 +4,7 @@
 class TableHelper
 {
 public:
-	static CTableClass* Cast(CComPtr<ITable>& table)
-	{
-		return (CTableClass*)&(*table);
-	}
+	static CTableClass* Cast(CComPtr<ITable>& table);
+	static long GetNumRows(ITable* table);
 };
 
