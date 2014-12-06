@@ -320,7 +320,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	long percent = 0;
 	for(long shapeid2 = 0; shapeid2 < _numShapes2; shapeid2++)		
 	{
-		Utility::DisplayProgress(_globalCallback, shapeid2, _numShapes2, "Calculating...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, shapeid2, _numShapes2, "Calculating...", _key, percent);
 		
 		if (SelectedOnly && !(*data)[shapeid2]->selected)
 			continue;
@@ -417,7 +417,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	}
 	
 	//  cleaning
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vGeometries.size(); i++)
 	{	
@@ -581,7 +581,7 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(sf, "Dissolve");
 	return;
@@ -689,7 +689,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 	map <int, vector<int>*>::iterator p = fieldMap.begin();	  // row in the output, rows in the input
 	while(p != fieldMap.end())
 	{
-		Utility::DisplayProgress(_globalCallback, index, size, "Calculating stats", _key,  percent);
+		CallbackHelper::Progress(_globalCallback, index, size, "Calculating stats", _key,  percent);
 		
 		for(size_t i = 0; i < operations->size(); i++)
 		{
@@ -829,7 +829,7 @@ void CShapefile::CalculateFieldStats(map<int, vector<int>*>& fieldMap, IFieldSta
 		++p;
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 // *************************************************************
@@ -858,7 +858,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	int size = (int)_shapeData.size();
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -905,7 +905,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 
 	while(p != shapeMap.end())
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
 		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(*(p->second), NULL, false);
 		delete p->second;	// deleting the vector
@@ -958,7 +958,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	}
 
 	this->ClearCachedGeometries();
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 // *************************************************************
@@ -989,7 +989,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1075,7 +1075,7 @@ void CShapefile::DissolveClipper(long FieldIndex, VARIANT_BOOL SelectedOnly,  IF
 		}
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	shapeMap.clear();
 
 	if (calcStats)
@@ -1167,7 +1167,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 
 	for(long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Grouping shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1211,7 +1211,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 
 	while(p != shapeMap.end())
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Merging shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Merging shapes...", _key, percent);
 		
 		// merging shapes
 		vector<IShape*>* shapes = p->second;
@@ -1338,7 +1338,7 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	//   Validating output
 	// ----------------------------------------------
 	this->ClearValidationList();
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "AggregateShapes");
 	return;
 }
@@ -1388,7 +1388,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 
 	for (long i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Buffering shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Buffering shapes...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -1475,7 +1475,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(sf, "BufferByDistance");
 	return S_OK;
@@ -1764,7 +1764,7 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	// cleaning
 	// -------------------------------------------
 cleaning:	
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	// clearing spatial index for the operation
 	((CShapefile*)sfOverlay)->ClearTempQTree();
@@ -1797,7 +1797,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
 		if (!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -1881,7 +1881,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 		}
 	}
 cleaning:	
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 // ********************************************************************
@@ -1904,7 +1904,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Clipping shapes...", _key, percent);
 
 		if (!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2000,7 +2000,7 @@ void CShapefile::ClipClipper(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOve
 	}
 
 cleaning:
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2035,7 +2035,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
 		if(!ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2093,7 +2093,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 		}
 	}
 cleaning:
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 // ******************************************************************
@@ -2178,7 +2178,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Intersecting shapes...", _key, percent);
 
 		if(!this->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2311,7 +2311,7 @@ void CShapefile::IntersectionClipper( VARIANT_BOOL SelectedOnlySubject, IShapefi
 	}
 
 cleaning:	
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2341,7 +2341,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	long percent = 0;
 	for(long subjectId = 0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
 
 		if(!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2447,7 +2447,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 	}
 
 cleaning:	
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 #ifdef SERIALIZE_POLYGONS
@@ -2500,7 +2500,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	long percent = 0;
 	for(long subjectId =0; subjectId < numShapesSubject; subjectId++)		
 	{
-		Utility::DisplayProgress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, subjectId, numShapesSubject, "Calculating difference...", _key, percent);
 
 		if(!((CShapefile*)sfSubject)->ShapeAvailable(subjectId, SelectedOnlySubject))
 			continue;
@@ -2629,7 +2629,7 @@ void CShapefile::DifferenceClipper(IShapefile* sfSubject, VARIANT_BOOL SelectedO
 	}
 
 cleaning:
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	for(int i = 0; i < (int)vPolygons.size(); i++)
 	{	
@@ -2985,7 +2985,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Exploding...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Exploding...", _key, percent);
 		
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3019,7 +3019,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	// ----------------------------------------------
 	//   Output validation
 	// ----------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retval, "ExplodeShapes");
 	return S_OK;
@@ -3062,7 +3062,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Exporting...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Exporting...", _key, percent);
 
 		if (!_shapeData[i]->selected)
 			continue;
@@ -3101,7 +3101,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	// ----------------------------------------------
 	//   Validating output
 	// ----------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retval, "ExportSelection");
 	return S_OK;
@@ -3140,7 +3140,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	long percent = 0;
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Sorting...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Sorting...", _key, percent);
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);
@@ -3170,7 +3170,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 		
 		while(p != shapeMap.end())
 		{
-			Utility::DisplayProgress(_globalCallback, count, numShapes, "Writing...", _key, percent);
+			CallbackHelper::Progress(_globalCallback, count, numShapes, "Writing...", _key, percent);
 			
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
@@ -3182,7 +3182,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 		std::multimap <CComVariant, IShape*>::reverse_iterator p = shapeMap.rbegin();
 		while(p != shapeMap.rend())
 		{
-			Utility::DisplayProgress(_globalCallback, count, numShapes, "Writing...", _key, percent);
+			CallbackHelper::Progress(_globalCallback, count, numShapes, "Writing...", _key, percent);
 
 			IShape* shp = p->second;
 			CopyShape(this, shp, *retval);
@@ -3193,7 +3193,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "Sort");
 	this->ClearValidationList();
 	return S_OK;
@@ -3259,7 +3259,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 
 	for (int i = 0; i < numShapes1; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, count, numShapes1, "Writing...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, count, numShapes1, "Writing...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnlyThis))
 			continue;
@@ -3304,7 +3304,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 
 	for (int i = 0; i < numShapes2; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes2, "Writing...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes2, "Writing...", _key, percent);
 		
 		if (!((CShapefile*)sf)->ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3348,7 +3348,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	((CShapefile*)sf)->ClearValidationList();
 	ValidateOutput(retval, "Merge");
@@ -3398,7 +3398,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	int numShapes = (int )_shapeData.size();
 	for (int i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Calculating...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating...", _key, percent);
 
 		if (!ShapeAvailable(i, SelectedOnly))
 			continue;
@@ -3455,7 +3455,7 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearValidationList();
 	ValidateOutput(retVal, "SimplifyLines");
 	return S_OK;
@@ -3501,7 +3501,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 
 	for (long i = 0; i < shapeCount; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, shapeCount, "Segmentizing...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, shapeCount, "Segmentizing...", _key, percent);
 		
 		GEOSGeometry *geom1 = GetGeosGeometry(i);
 
@@ -3556,7 +3556,7 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	// -------------------------------------------
 	// output validation
 	// -------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	this->ClearTempQTree();
 	this->ClearCachedGeometries();
 	this->ClearValidationList();
@@ -3612,7 +3612,7 @@ Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
 	//int missingAngleCount = 0;
 	for(size_t i = 0; i < _shapeData.size(); i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Calculating spatial relations...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating spatial relations...", _key, percent);
 
 		vector<int> shapeIds;
 		double xMin, xMax, yMin, yMax;

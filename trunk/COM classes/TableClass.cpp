@@ -846,7 +846,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 
 	for (long rowIndex = 0; rowIndex < rowCount; rowIndex++)
 	{
-		Utility::DisplayProgress(cBack, rowIndex, rowCount, "Writing .dbf", _key, percent);
+		CallbackHelper::Progress(cBack, rowIndex, rowCount, "Writing .dbf", _key, percent);
 
 		//if updating existing file, only write out modified records
 		if  (updateFileInPlace && 
@@ -870,7 +870,7 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 		}
 	}
 
-	Utility::DisplayProgressCompleted(cBack, _key);
+	CallbackHelper::ProgressCompleted(cBack, _key);
 
 	//Flush all of the records
 	if (!updateFileInPlace)
@@ -2038,7 +2038,7 @@ STDMETHODIMP CTableClass::get_StandardDeviation(long FieldIndex, double* retval)
 inline void CTableClass::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Table", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Table", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *****************************************************************

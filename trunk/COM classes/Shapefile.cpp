@@ -419,14 +419,14 @@ STDMETHODIMP CShapefile::get_Filename(BSTR *pVal)
 void CShapefile::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 void CShapefile::ErrorMessage(long ErrorCode, ICallback* cBack)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Shapefile", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 	if (cBack != _globalCallback)
-		Utility::DisplayErrorMsg("Shapefile", cBack, _key, ErrorMsg(_lastErrorCode));
+		CallbackHelper::ErrorMsg("Shapefile", cBack, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************
@@ -2681,7 +2681,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);
@@ -2773,7 +2773,7 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	// -------------------------------------- 
 	//	  Output validation
 	// -------------------------------------- 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ClearValidationList();
 	if (!reprojectInPlace)
 	{
@@ -2808,7 +2808,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 
 		for (int i = 0; i < numShapes; i++)
 		{
-			Utility::DisplayProgress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
+			CallbackHelper::Progress(_globalCallback, i, numShapes, "Fixing...", _key, percent);
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
@@ -2842,7 +2842,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 		}
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 

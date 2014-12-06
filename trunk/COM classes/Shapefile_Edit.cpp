@@ -109,9 +109,9 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 				_qtree->AddNode(node);
 			}
 			
-			Utility::DisplayProgress(_globalCallback, i, size, "Reading shapes into memory", _key, percent);
+			CallbackHelper::Progress(_globalCallback, i, size, "Reading shapes into memory", _key, percent);
 		}
-		Utility::DisplayProgressCompleted(_globalCallback);
+		CallbackHelper::ProgressCompleted(_globalCallback);
 
 		*retval = VARIANT_TRUE;
 	

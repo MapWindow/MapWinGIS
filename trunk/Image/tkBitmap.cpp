@@ -138,7 +138,7 @@ bool tkBitmap::WriteBitmap(const char * bmp_file, const colour * ImageData)
 		if( pad > 0 )
 			fwrite(padding,sizeof(BYTE),pad,fout);				
 		
-		Utility::DisplayProgress(globalCallback, ecnt, total, "Saving Image", key, percent);
+		CallbackHelper::Progress(globalCallback, ecnt, total, "Saving Image", key, percent);
 		ecnt++;
 	} 
 
@@ -280,7 +280,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				BitmapBitsNoPad[cnt++] = ConvertBits[loc++];
 				BitmapBitsNoPad[cnt++] = ConvertBits[loc++];
 
-				Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
+				CallbackHelper::Progress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				loc++;
@@ -314,7 +314,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				BitmapBitsNoPad[cnt++] = bmiColors[index].rgbGreen;
 				BitmapBitsNoPad[cnt++] = bmiColors[index].rgbRed;
 
-				Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
+				CallbackHelper::Progress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );			
@@ -353,7 +353,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				}
 				
 				ecnt += 2;
-				Utility::DisplayProgress(globalCallback, ecnt, total, "Opening Image", key, percent);
+				CallbackHelper::Progress(globalCallback, ecnt, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );			
@@ -393,7 +393,7 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 				}
 				
 				ecnt += 8;
-				Utility::DisplayProgress(globalCallback, ecnt, total, "Opening Image", key, percent);
+				CallbackHelper::Progress(globalCallback, ecnt, total, "Opening Image", key, percent);
 			}
 			for( int p = 0; p < pad; p++ )
 				fread( &color, sizeof(char), 1, fin );	
@@ -443,10 +443,10 @@ bool tkBitmap::Open(CStringW FileName, colour *& ImageData)
 		ImageData[curDataCell].red = BitmapBitsNoPad[loc++];
 		curDataCell++;
 
-		Utility::DisplayProgress(globalCallback, ecnt++, total, "Opening Image", key, percent);
+		CallbackHelper::Progress(globalCallback, ecnt++, total, "Opening Image", key, percent);
 	}
 	
-	Utility::DisplayProgressCompleted(globalCallback, key);
+	CallbackHelper::ProgressCompleted(globalCallback, key);
 
 	/*********************************
 	End Conversion from Bitmap to the standard format (colour class)

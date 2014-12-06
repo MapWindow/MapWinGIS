@@ -84,7 +84,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 						delete[] data;
 					}
 
-					Utility::DisplayProgress(_globalCallback, i, numShapes, "Reading shapes...", _key, percent);
+					CallbackHelper::Progress(_globalCallback, i, numShapes, "Reading shapes...", _key, percent);
 				}
 				_fastMode = TRUE;
 			}
@@ -125,7 +125,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 		}
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 #pragma endregion

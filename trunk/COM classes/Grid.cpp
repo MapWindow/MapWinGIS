@@ -50,7 +50,7 @@ void gridCOMCALLBACK( int number, const char * message )
 // ***************************************************
 void CGrid::CallBack(long percent,const char * message)
 {	
-	Utility::DisplayProgress(_globalCallback, percent, message, _key);
+	CallbackHelper::Progress(_globalCallback, percent, message, _key);
 }
 
 // ***************************************************
@@ -2512,7 +2512,7 @@ STDMETHODIMP CGrid::OpenBand(int bandIndex, VARIANT_BOOL* retVal)
 void CGrid::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Grid", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Grid", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ****************************************************************

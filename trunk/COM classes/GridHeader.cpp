@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 void CGridHeader::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("GridHeader", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("GridHeader", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // CGridHeader

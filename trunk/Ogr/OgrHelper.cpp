@@ -24,7 +24,7 @@ void OgrHelper::GetFieldValues(OGRLayer* layer, int featureCount, OGRFieldType f
 	while ((ft = layer->GetNextFeature()) != NULL)
 	{
 		if (count % 50 == 0)
-			Utility::DisplayProgress(cback, count, featureCount, "Reading field values...", key.m_str, percent);
+			CallbackHelper::Progress(cback, count, featureCount, "Reading field values...", key.m_str, percent);
 		count++;
 
 		VARIANT* var = new VARIANT();
@@ -51,7 +51,7 @@ void OgrHelper::GetFieldValues(OGRLayer* layer, int featureCount, OGRFieldType f
 		OGRFeature::DestroyFeature(ft);
 	}
 
-	Utility::DisplayProgressCompleted(cback);
+	CallbackHelper::ProgressCompleted(cback);
 }
 
 // *************************************************************
@@ -258,6 +258,7 @@ IOgrLayer* OgrHelper::ChooseLayerByShapeType(IOgrDatasource* ds, ShpfileType shp
 			tempLayer->Release();
 		}
 	}
+	return NULL;
 }
 
 // *************************************************************

@@ -644,7 +644,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	{
 		if (ImageHelper::IsEmpty(options->picture))
 		{
-			Utility::DisplayError("ShapeDrawingOptions.Picture is empty when icon for point is expected.");
+			CallbackHelper::ErrorMsg("ShapeDrawingOptions.Picture is empty when icon for point is expected.");
 			missingIcon = true;
 		}
 	}

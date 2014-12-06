@@ -109,7 +109,7 @@ STDMETHODIMP COgrLayer::put_Key(BSTR newVal)
 void COgrLayer::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("OgrLayer", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("OgrLayer", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP COgrLayer::get_LastErrorCode(long *pVal)

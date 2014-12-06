@@ -416,7 +416,7 @@ STDMETHODIMP CColorScheme::put_Key(BSTR newVal)
 void CColorScheme::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("ColorScheme", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("ColorScheme", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 STDMETHODIMP CColorScheme::get_LastErrorCode(long *pVal)
 {

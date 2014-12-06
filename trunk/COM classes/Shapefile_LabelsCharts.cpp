@@ -66,7 +66,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 	for(int i = 0; i < _numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, _numShapes, "Calculating label positions...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, _numShapes, "Calculating label positions...", _key, percent);
 		
 		/* extracting field value */
 		CComBSTR text;
@@ -259,7 +259,7 @@ add_empty_label:
 		((CLabels*)_labels)->SaveSourceField(FieldIndex);
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 
@@ -389,7 +389,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 		long percent = 0;
 		for(int i = 0; i < _numShapes; i++)
 		{
-			Utility::DisplayProgress(_globalCallback, i, _numShapes, "Calculating charts positions...", _key, percent);
+			CallbackHelper::Progress(_globalCallback, i, _numShapes, "Calculating charts positions...", _key, percent);
 			
 			IShape* shp = NULL;
 			this->get_Shape(i, &shp);
@@ -463,7 +463,7 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 			shp->Release(); shp = NULL;
 		}
 		
-		Utility::DisplayProgressCompleted(_globalCallback, _key);
+		CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	}
 	return;
 }

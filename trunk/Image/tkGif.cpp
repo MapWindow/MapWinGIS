@@ -561,7 +561,7 @@ void tkGif::CompressGif()
 		}
 
 		curpos++;
-		Utility::DisplayProgress(cBack, curpos, buffSize, msg, key, percent);
+		CallbackHelper::Progress(cBack, curpos, buffSize, msg, key, percent);
 	}
 
 	PutCode(eof_code);
@@ -570,7 +570,7 @@ void tkGif::CompressGif()
 	fwrite(block,1,blocksize,fp);
 	fputc(0,fp);
 
-	Utility::DisplayProgressCompleted(cBack, key);
+	CallbackHelper::ProgressCompleted(cBack, key);
 }
 
 inline int tkGif::AddEntry(int prefix, colort c)

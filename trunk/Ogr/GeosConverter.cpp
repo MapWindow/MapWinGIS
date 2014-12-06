@@ -240,7 +240,7 @@ GEOSGeometry* GeosConverter::MergeGeometries(std::vector<GEOSGeometry*>& data, I
 					count++;
 					stop = false;		// in case there is at least one union occurred, we shall run once more
 
-					Utility::DisplayProgress(callback, count, size, "Merging shapes...", percent);
+					CallbackHelper::Progress(callback, count, size, "Merging shapes...", percent);
 				}
 
 				// it is the last geometry, unpaired one, not the only one, it's the initial and must not be deleted

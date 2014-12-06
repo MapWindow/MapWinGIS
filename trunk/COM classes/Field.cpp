@@ -223,7 +223,7 @@ STDMETHODIMP CField::put_Key(BSTR newVal)
 void CField::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Field", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Field", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // **************************************************************

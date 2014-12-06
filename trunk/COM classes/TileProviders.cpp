@@ -98,7 +98,7 @@ STDMETHODIMP CTileProviders::get_LastErrorCode(long *pVal)
 void CTileProviders::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("TileProviders", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("TileProviders", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // ************************************************************

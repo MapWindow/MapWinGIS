@@ -346,9 +346,9 @@ QTree* CShapefile::GenerateQTreeCore(bool SelectedOnly)
 		node.index = i;
 		qtree->AddNode(node);
 		
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Building index...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Building index...", _key, percent);
 	}
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	return qtree;
 }

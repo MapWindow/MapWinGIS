@@ -263,7 +263,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 			if( val == oldValue )
 				Grid->put_Value(i,j,NewValue);
 
-			Utility::DisplayProgress(callback, j*ncols + i, total, "GridReplace", _key, percent);
+			CallbackHelper::Progress(callback, j*ncols + i, total, "GridReplace", _key, percent);
 		}
 	}
 	
@@ -305,23 +305,23 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 
 	GridInterpolate gi(Grid,nodatavalue,nrows,ncols);
 
-	Utility::DisplayProgress(callback, 0, "GridInterpolateNoData", _key );
+	CallbackHelper::Progress(callback, 0, "GridInterpolateNoData", _key );
 
 	gi.Interpolate(0,0);
 	
-	Utility::DisplayProgress(callback, 25, "GridInterpolateNoData", _key);
+	CallbackHelper::Progress(callback, 25, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(0,ncols-1);
 	
-	Utility::DisplayProgress(callback, 50, "GridInterpolateNoData", _key);
+	CallbackHelper::Progress(callback, 50, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(nrows-1,0);
 	
-	Utility::DisplayProgress(callback, 75, "GridInterpolateNoData", _key);
+	CallbackHelper::Progress(callback, 75, "GridInterpolateNoData", _key);
 	
 	gi.Interpolate(nrows-1,ncols-1);
 	
-	Utility::DisplayProgress(callback, 100, "GridInterpolateNoData", _key);
+	CallbackHelper::Progress(callback, 100, "GridInterpolateNoData", _key);
 
 	*retval = VARIANT_TRUE;
 
@@ -442,7 +442,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				
 			cnt++;
 
-			Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+			CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 				
 			std::deque< POINT > PointsToKeep;
 			for( currentShape = 0; currentShape < numShapes; currentShape++ )
@@ -486,7 +486,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 				PointsToKeep.clear();
 
 				cnt++;
-				Utility::DisplayProgress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
+				CallbackHelper::Progress(callback, cnt, total, "RemoveColinearPoints", _key, percent);
 			}
 			
 			shape->Release();
@@ -497,7 +497,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	// ---------------------------------------------------
 	//	 Validating output
 	// ---------------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	((CShapefile*)Shapes)->ClearValidationList();
 	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
 	if (Shapes)
@@ -1014,7 +1014,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				if( val != nodata_value && !(val < -2147483640 && nodata_value < -2147483640))
 					(*retval)->put_Value( i + xoffset, j + yoffset, vval );				
 
-				Utility::DisplayProgress(callback, ++cnt, total, "GridMerge", _key, percent);
+				CallbackHelper::Progress(callback, ++cnt, total, "GridMerge", _key, percent);
 			}
 		}
 	}	
@@ -1091,7 +1091,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 			(*retval)->put_Value(i,j,val);	
 		}
 	
-		Utility::DisplayProgress(callback, j, nrows, "Grid2Grid", _key, percent);
+		CallbackHelper::Progress(callback, j, nrows, "Grid2Grid", _key, percent);
 	}	
 
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
@@ -1307,7 +1307,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,pos,val,&vbretval);
 			
-			Utility::DisplayProgress(callback, i, total, "TinToShapefile", _key, percent);
+			CallbackHelper::Progress(callback, i, total, "TinToShapefile", _key, percent);
 
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 
@@ -1361,7 +1361,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			val.lVal = i;
 			(*retval)->EditCellValue(0,i,val,&vbretval);
 			
-			Utility::DisplayProgress(callback, i, total, "TinToShapefile", _key, percent);
+			CallbackHelper::Progress(callback, i, total, "TinToShapefile", _key, percent);
 
 			VariantClear(&val); //added by Rob Cairns 4-Jan-06
 		}
@@ -1635,7 +1635,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}
 		}			
 		
-		Utility::DisplayProgress(callback, rows - y - 1, total, "Polygon Creation: Expanding Grid", _key, percent);
+		CallbackHelper::Progress(callback, rows - y - 1, total, "Polygon Creation: Expanding Grid", _key, percent);
 	}
 
 	//Mark edges of the expanded grid that have a polygon id as BORDER
@@ -1739,7 +1739,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}			
 		}
 
-		Utility::DisplayProgress(callback, j, total, "Polygon Creation: Marking Borders", _key, percent);
+		CallbackHelper::Progress(callback, j, total, "Polygon Creation: Marking Borders", _key, percent);
 	}
 
 	//Create the shapefile
@@ -1947,7 +1947,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 			}					
 		}
 
-		Utility::DisplayProgress(callback, py, rows, "Polygon Creation: Creating Polygons", _key, percent);
+		CallbackHelper::Progress(callback, py, rows, "Polygon Creation: Creating Polygons", _key, percent);
 	}
 
 	_expand_grid->Close(&vbretval);
@@ -2830,7 +2830,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 
 cleaning:
 	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	((CShapefile*)Shpfile)->ClearValidationList();
 	return S_OK;
 }
@@ -3358,7 +3358,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		return S_OK;
 	}
 	
-	Utility::DisplayProgress(_globalCallback, 0, "Loading input images...", _key);
+	CallbackHelper::Progress(_globalCallback, 0, "Loading input images...", _key);
 
 	VARIANT_BOOL vbretval;
 	std::vector<IImage*> images;
@@ -3418,7 +3418,7 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 		images[i]->get_Filename(&name);
 		s.Format("Processing image %d: %s", i + 1, OLE2A(name));
 		int percent = (int)((double)i/(double)(images.size() - 1)*100.0);
-		Utility::DisplayProgress(_globalCallback, percent, s, _key);
+		CallbackHelper::Progress(_globalCallback, percent, s, _key);
 		
 		CImageClass* img  = (CImageClass*)images[i];
 		img->SaveNotNullPixels(true);
@@ -3433,14 +3433,14 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	}
 	
 	// saving the results
-	Utility::DisplayProgress(_globalCallback, 0, "Saving result...", _key);
+	CallbackHelper::Progress(_globalCallback, 0, "Saving result...", _key);
 	
 	unsigned char* bits = reinterpret_cast<unsigned char*>(pixels);
 	Utility::SaveBitmap(width, height, bits, OutputName);
 
 Cleaning:
 	// cleaning
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 
 	for (unsigned int i = 0; i < images.size(); i++)
 	{
@@ -3544,7 +3544,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Reprojecting...", _key, percent);
 		
 		IShape* shp = NULL;
 		sf->get_Shape(i, &shp);
@@ -3594,7 +3594,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	// --------------------------------------------------
 	//    Validating output
 	// --------------------------------------------------
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	((CShapefile*)sf)->ClearValidationList();
 	((CShapefile*)sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
 	
@@ -3607,13 +3607,13 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 void CUtils::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Utils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Utils", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 void CUtils::ErrorMessage(ICallback* callback, long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Utils", callback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CUtils::ColorByName(tkMapColor name, OLE_COLOR* retVal)
@@ -4094,7 +4094,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 
 		for (long n = 0; n < numShapes; n++) 
 		{
-			Utility::DisplayProgress(_globalCallback, n, numShapes, "Calculating...", _key, percent);
+			CallbackHelper::Progress(_globalCallback, n, numShapes, "Calculating...", _key, percent);
 			
 			sf->get_ShapeSelected(n, &vb);
 			if (selectedOnly && !vb)
@@ -4442,7 +4442,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 					if( newpercent > percent )
 					{	
 						percent = newpercent;
-						Utility::DisplayProgress(_globalCallback, percent, "Calculating...", _key);
+						CallbackHelper::Progress(_globalCallback, percent, "Calculating...", _key);
 					}
 				}
 				
@@ -4509,7 +4509,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 		delete dataset;
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	return S_OK;
 }
 
@@ -4521,7 +4521,7 @@ void CPL_STDCALL GdalErrorHandler(CPLErr eErrClass, int err_no, const char *msg)
 	if (gdalCallback) {
 		CString s = msg;
 		s = "GDAL error: " + s;
-		Utility::DisplayErrorMsg("Utils", gdalCallback, "GDAL", s);
+		CallbackHelper::ErrorMsg("Utils", gdalCallback, "GDAL", s);
 	}
 }
 
@@ -4619,7 +4619,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 								percent = newpercent;
 								CString s;
 								s.Format("Calculating band %d", i);
-								Utility::DisplayProgress(_globalCallback, percent, s, _key);
+								CallbackHelper::Progress(_globalCallback, percent, s, _key);
 							}
 						}
 						
@@ -4697,7 +4697,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 	if( _globalCallback != NULL )
 	{
 		ClearGdalErrorHandler();
-		Utility::DisplayProgressCompleted(_globalCallback);
+		CallbackHelper::ProgressCompleted(_globalCallback);
 	}
 	return S_OK;
 }
@@ -5335,7 +5335,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 
 	for(long i = 0; i < numRows; i++ )
 	{
-		Utility::DisplayProgress(callback, i, numRows, "Calculating", _key, percent);
+		CallbackHelper::Progress(callback, i, numRows, "Calculating", _key, percent);
 
 		for(int j = 0; j < numFields; j++)
 		{
@@ -5395,7 +5395,7 @@ cleaning:
 		delete[] calcData;
 
 	expr.Clear();
-	Utility::DisplayProgressCompleted(callback);
+	CallbackHelper::ProgressCompleted(callback);
 	map<CString, GDALDataset*>::iterator it = datasets.begin();
 	while (it != datasets.end()) 
 	{
@@ -5571,7 +5571,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 
 	for(long i = 0; i < numRows; i++ )
 	{
-		Utility::DisplayProgress(cBack, i, numRows, "Calculating", _key, percent);
+		CallbackHelper::Progress(cBack, i, numRows, "Calculating", _key, percent);
 		
 		band->RasterIO(GF_Read, 0, i, numColumns, 1, data, numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
 

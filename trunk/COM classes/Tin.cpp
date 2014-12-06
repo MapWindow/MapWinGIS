@@ -114,7 +114,7 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 
 			_triTable.addRow( r );
 
-			Utility::DisplayProgress(callback, t, total, "Reading Tin", _key, percent);
+			CallbackHelper::Progress(callback, t, total, "Reading Tin", _key, percent);
 		}
 		double x, y, z;
 		vertex ver;
@@ -126,7 +126,7 @@ STDMETHODIMP CTin::Open(BSTR TinFile, ICallback *cBack, VARIANT_BOOL *retval)
 			ver = vertex( x, y, z );
 			_vtxTable.add( ver );
 			
-			Utility::DisplayProgress(callback, t + v, total, "Reading Tin", _key, percent);
+			CallbackHelper::Progress(callback, t + v, total, "Reading Tin", _key, percent);
 		}
 
 		if( numTriangles > 0 )
@@ -263,7 +263,7 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&border_two, sizeof(long), 1, out );
 			fwrite(&border_three, sizeof(long), 1, out );	
 			
-			Utility::DisplayProgress(callback, i, total, "Saving Tin", _key, percent);
+			CallbackHelper::Progress(callback, i, total, "Saving Tin", _key, percent);
 		}
 
 		long j = 0;
@@ -288,7 +288,7 @@ STDMETHODIMP CTin::Save(BSTR TinFilename, ICallback *cBack, VARIANT_BOOL *retval
 			fwrite(&v1_z, sizeof(double), 1, out );
 			*/
 
-			Utility::DisplayProgress(callback, i + j, total, "Saving Tin", _key, percent);
+			CallbackHelper::Progress(callback, i + j, total, "Saving Tin", _key, percent);
 		}
 
 		if( numTriangles > 0 )
@@ -637,7 +637,7 @@ inline void CTin::createTin( double deviation, long meshDivisions, long maxTrian
 			{	if( newpercent1 > percent )
 				{	
 					percent = newpercent1;
-					Utility::DisplayProgress(_globalCallback, percent, "Splitting Triangles", _key);
+					CallbackHelper::Progress(_globalCallback, percent, "Splitting Triangles", _key);
 				}				
 			}
 			else
@@ -648,7 +648,7 @@ inline void CTin::createTin( double deviation, long meshDivisions, long maxTrian
 				if( newpercent1 > percent )
 				{	
 					percent = newpercent1;
-					Utility::DisplayProgress(_globalCallback, percent, "Splitting Triangles", _key);
+					CallbackHelper::Progress(_globalCallback, percent, "Splitting Triangles", _key);
 				}
 			}	
 			triNode = _devHeap.top();

@@ -171,7 +171,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 	while ((poFeature = layer->GetNextFeature()) != NULL)
 	{
-		Utility::DisplayProgress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
+		CallbackHelper::Progress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
 		count++;
 
 		if (count > maxFeatureCount) {
@@ -249,7 +249,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 		OGRFeature::DestroyFeature(poFeature);
 	}
-	Utility::DisplayProgressCompleted(callback);
+	CallbackHelper::ProgressCompleted(callback);
 
 	sf->RefreshExtents(&vbretval);
 	Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this

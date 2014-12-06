@@ -31,7 +31,7 @@ int CPL_STDCALL GDALProgressCallback (double dfComplete, const char* pszMessage,
 	if( params != NULL && params->cBack != NULL )
 	{
 		long percent = long(dfComplete * 100.0);
-		Utility::DisplayProgress(params->cBack, percent, params->sMsg);
+		CallbackHelper::Progress(params->cBack, percent, params->sMsg);
 	}
 	return TRUE;
 }

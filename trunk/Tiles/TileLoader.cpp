@@ -194,7 +194,7 @@ void TileLoader::TileLoaded(TileCore* tile)
 	{
 		section.Lock();
 		USES_CONVERSION;
-		Utility::DisplayProgress(m_callback, this->m_count >= this->m_totalCount ? -1 : this->m_count, "Caching...");
+		CallbackHelper::Progress(m_callback, this->m_count >= this->m_totalCount ? -1 : this->m_count, "Caching...");
 		section.Unlock();
 	}
 
@@ -205,7 +205,7 @@ void TileLoader::TileLoaded(TileCore* tile)
 		if (stop && !this->stopped)
 		{
 			this->stopped = true;
-			Utility::DisplayProgress(m_callback, -2, "Caching...");
+			CallbackHelper::Progress(m_callback, -2, "Caching...");
 		}
 	}
 	

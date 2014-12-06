@@ -31,7 +31,7 @@ STDMETHODIMP CFileManager::put_Key(BSTR newVal)
 void CFileManager::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("FileManager", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("FileManager", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 STDMETHODIMP CFileManager::get_LastErrorCode(long *pVal)

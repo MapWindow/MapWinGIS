@@ -75,7 +75,7 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 
 	for (long i = 0; i < numShapes; i++)
 	{
-		Utility::DisplayProgress(callback, i, numShapes, "Converting shapes...", percent);
+		CallbackHelper::Progress(callback, i, numShapes, "Converting shapes...", percent);
 
 		if (((CShapefile*)sf)->ShapeAvailable(i, VARIANT_FALSE))
 		{
@@ -90,7 +90,7 @@ void Shape2Ogr::ShapesToOgr(IShapefile* sf, OGRLayer* poLayer, ICallback* callba
 			OGRFeature::DestroyFeature(poFeature);
 		}
 	}
-	Utility::DisplayProgressCompleted(callback);
+	CallbackHelper::ProgressCompleted(callback);
 }
 
 // *************************************************************

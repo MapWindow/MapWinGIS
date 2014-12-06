@@ -30,7 +30,7 @@ void CUndoList::ErrorMessage(long ErrorCode)
 	if (_lastErrorCode != tkNO_ERROR) {
 		cb = _mapCallback->_GetGlobalCallback();
 		if (cb) {
-			Utility::DisplayErrorMsg("UndoList", cb, _key, ErrorMsg(_lastErrorCode));
+			CallbackHelper::ErrorMsg("UndoList", cb, _key, ErrorMsg(_lastErrorCode));
 			cb->Release();
 		}
 	}

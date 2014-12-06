@@ -331,7 +331,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 	for( int j = nrows-1; j >= 0; j-- )
 	{				
 		// it could be more smooth in the nested cycle but better to spare performance 
-		Utility::DisplayProgress(_globalCallback, (nrows - j - 1)*ncols - 1, (int)total, "GridToImage", _key, percent);
+		CallbackHelper::Progress(_globalCallback, (nrows - j - 1)*ncols - 1, (int)total, "GridToImage", _key, percent);
 
 		for( int i = 0; i < ncols; i++ )
 		{	
@@ -574,7 +574,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 		}
 	}
 
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 }
 
 #pragma region Write disk-based

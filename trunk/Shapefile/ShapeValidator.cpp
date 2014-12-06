@@ -64,7 +64,7 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 		long percent = 0;
 		for (int i = numShapes - 1; i >= 0 ; i--)
 		{
-			Utility::DisplayProgress(callback, numShapes - 1 - i, numShapes, "Validating shapes...", key, percent);
+			CallbackHelper::Progress(callback, numShapes - 1 - i, numShapes, "Validating shapes...", key, percent);
 			
 			IShape* shp = NULL;
 			isf->get_Shape(i, &shp);

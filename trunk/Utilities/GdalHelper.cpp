@@ -237,7 +237,7 @@ int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage,
 		long percent = long(dfComplete * 100.0);
 		ICallback* cback = (ICallback*)pData;
 		if (cback) {
-			Utility::DisplayProgress(cback, percent, pszMessage);
+			CallbackHelper::Progress(cback, percent, pszMessage);
 		}
 	}
 	return TRUE;
@@ -380,7 +380,7 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 		if (dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, (GDALProgressFunc)GDALProgressFunction, callback) == CE_None)
 			return true;
 
-		Utility::DisplayProgressCompleted(callback);
+		CallbackHelper::ProgressCompleted(callback);
 	}
 	return false;
 }

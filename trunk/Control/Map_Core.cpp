@@ -383,7 +383,7 @@ long CMapView::GetLastErrorCode()
 inline void CMapView::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Map", _globalCallback, m_key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Map", _globalCallback, m_key, ErrorMsg(_lastErrorCode));
 }
 
 // *************************************************

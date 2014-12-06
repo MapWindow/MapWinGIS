@@ -164,7 +164,7 @@ STDMETHODIMP CLabels::put_Key(BSTR newVal)
 inline void CLabels::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Labels", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Labels", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 STDMETHODIMP CLabels::get_LastErrorCode(long *pVal)
 {

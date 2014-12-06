@@ -84,18 +84,6 @@ namespace Utility
 	bool ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value);
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 
-	// display progress
-	void DisplayProgress(ICallback* callback, int index, double count, const char* message, BSTR& key, long& lastPercent);
-	void DisplayProgress(ICallback* callback, int index, int count, const char* message, BSTR& key, long& lastPercent);
-	void DisplayProgress(ICallback* callback, int index, int count, const char* message, long& lastPercent);
-	void DisplayProgress(ICallback* callback, int percent, const char* message, BSTR& key);
-	void DisplayProgress(ICallback* callback, int percent, const char* message);
-	void DisplayProgressCompleted(ICallback* callback, BSTR& key);
-	void DisplayProgressCompleted(ICallback* callback);
-	void DisplayErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...);
-	void DisplayErrorMsg(CString className, ICallback* localCback, CString key, const char* message, ...);
-	void DisplayError(CString message);
-
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
 
 	// time

@@ -309,7 +309,7 @@ STDMETHODIMP CShape::put_Key(BSTR newVal)
 inline void CShape::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Shape", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Shape", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *************************************************************

@@ -822,6 +822,9 @@
     <ClInclude Include="ComHelpers\ImageHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="ComHelpers\CallbackHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1735,6 +1738,9 @@
       <Filter>Drawing</Filter>
     </ClCompile>
     <ClCompile Include="ComHelpers\ImageHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\CallbackHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
   </ItemGroup>

@@ -44,7 +44,7 @@ bool CShapeEditor::CheckState()
 void CShapeEditor::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("ShapeEditor", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("ShapeEditor", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // *****************************************************************

@@ -2423,7 +2423,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 void CImageClass::ErrorMessage(long ErrorCode)
 {
 	_lastErrorCode = ErrorCode;
-	Utility::DisplayErrorMsg("Image", _globalCallback, _key, ErrorMsg(_lastErrorCode));
+	CallbackHelper::ErrorMsg("Image", _globalCallback, _key, ErrorMsg(_lastErrorCode));
 }
 
 // **************************************************************

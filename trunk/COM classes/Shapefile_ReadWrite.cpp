@@ -1085,12 +1085,12 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 
 		shape->Release();
 
-		Utility::DisplayProgress(cBack, i, size, "Writing .shx file", _key, percent);
-		Utility::DisplayProgress(_globalCallback, i, size, "Writing .shx file", _key, percent);
+		CallbackHelper::Progress(cBack, i, size, "Writing .shx file", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Writing .shx file", _key, percent);
 	}
 
-	Utility::DisplayProgressCompleted(cBack, _key);
-	Utility::DisplayProgressCompleted(_globalCallback, _key);
+	CallbackHelper::ProgressCompleted(cBack, _key);
+	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	
 	fflush(shx);
 
@@ -1342,10 +1342,10 @@ BOOL CShapefile::WriteShp(FILE * shp, ICallback * cBack)
 
 		shape->Release();
 
-		Utility::DisplayProgress(callback, k, size, "Writing .shp file", _key, percent);
+		CallbackHelper::Progress(callback, k, size, "Writing .shp file", _key, percent);
 	}
 
-	Utility::DisplayProgressCompleted(callback, _key);
+	CallbackHelper::ProgressCompleted(callback, _key);
 
 	fflush(shp);
 	return TRUE;

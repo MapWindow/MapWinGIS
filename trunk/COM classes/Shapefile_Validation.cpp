@@ -302,7 +302,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 	int size = (int)_shapeData.size();
 	for (int i = 0; i < size; i++)
 	{
-		Utility::DisplayProgress(_globalCallback, i, size, "Converting to geometries", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, size, "Converting to geometries", _key, percent);
 		
 		if (!ShapeAvailable(i, selectedOnly))
 			continue;

@@ -303,7 +303,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 		shape->Release();
 		shape = NULL;
 	
-		Utility::DisplayProgress(callback, i, total, "Building ShapeNetwork", _key, percent);
+		CallbackHelper::Progress(callback, i, total, "Building ShapeNetwork", _key, percent);
 	}
 
 	//undir_graph.Save("graph.txt",dPRINT_DATA);
@@ -658,7 +658,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			insertedShapes++;			
 		}
 
-		Utility::DisplayProgress(callback, shpcnt, total, "ShpNetwork::Copying Shapefile", _key, percent);
+		CallbackHelper::Progress(callback, shpcnt, total, "ShpNetwork::Copying Shapefile", _key, percent);
 	}
 	_currentNode = 0;
 
@@ -1644,7 +1644,7 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			_network[i].parentIndex = lval2;
 		}
 		
-		Utility::DisplayProgress(callback, i, total, "ShpNetwork::Open", _key, percent);
+		CallbackHelper::Progress(callback, i, total, "ShpNetwork::Open", _key, percent);
 	}
 	gen->Release();
 	gen = NULL;
@@ -1687,7 +1687,7 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 		
 		delete [] used;
 
-		Utility::DisplayProgress(callback, i, total, "ShpNetwork::Verifying Integrity of Network", _key, percent);
+		CallbackHelper::Progress(callback, i, total, "ShpNetwork::Verifying Integrity of Network", _key, percent);
 	}
 
 	//Compute the distance to outlet
@@ -1816,7 +1816,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		VARIANT_BOOL vbretval = FALSE;
 		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
-		Utility::DisplayProgress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
+		CallbackHelper::Progress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr,nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		nbheader->Release();
@@ -1875,7 +1875,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		VARIANT_BOOL vbretval = FALSE;
 		CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
-		Utility::DisplayProgress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
+		CallbackHelper::Progress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Header, ShortDataType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
 		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
@@ -2151,7 +2151,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		Rasterize.clear();	
 		
-		Utility::DisplayProgress(callback, s, total, "ShpNetwork::RasterizeD8", _key, percent);
+		CallbackHelper::Progress(callback, s, total, "ShpNetwork::RasterizeD8", _key, percent);
 
 		VariantClear(&vval); //added by Rob Cairns 4-Jan-06
 	}
