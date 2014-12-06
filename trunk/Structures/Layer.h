@@ -128,5 +128,7 @@ public:
 	void CloseDatasources();
 	bool IsEmpty();
 	bool IsDiskBased();
+	void GrabLayerNameFromDatasource();
+	BSTR GetFilename();
 };
 # endif

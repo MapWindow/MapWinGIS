@@ -46,6 +46,7 @@ namespace Utility
 	CStringW GetFolderFromPath(CStringW path);
 	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
+	CStringW GetNameFromPathWoExtension(CStringW path);
 	
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL FileExists(CString filename);	

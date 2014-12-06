@@ -396,6 +396,15 @@ namespace Utility
 	}
 
 	// *********************************************************
+	//	     GetNameFromPathWoExtension()
+	// *********************************************************
+	CStringW Utility::GetNameFromPathWoExtension(CStringW path)
+	{
+		path = GetNameFromPath(path);
+		return GetPathWOExtension(path);
+	}
+
+	// *********************************************************
 	//	     GetNameFromPath()
 	// *********************************************************
 	CStringW Utility::GetNameFromPath(CStringW path)

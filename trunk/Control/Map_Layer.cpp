@@ -553,6 +553,8 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 		}
 	}
 
+	l->GrabLayerNameFromDatasource();
+
 	GrabLayerProjection(l);
 
 	bool diskSymbology = m_globalSettings.loadSymbologyOnAddLayer && l->IsDiskBased();
@@ -1685,42 +1687,7 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 	Layer* layer = _allLayers[layerHandle];
 	if (layer  )
 	{
-		switch (layer->type)
-		{
-			case ShapefileLayer:
-			{
-				CComPtr<IShapefile> sf = NULL;
-				if (layer->QueryShapefile(&sf)) 
-				{
-					sf->get_Filename(&filename);
-					return filename;
-				}
-				break;
-			}
-			case ImageLayer:
-			{
-				CComPtr<IImage> img = NULL;
-				if (layer->QueryImage(&img))
-				{
-					img->get_Filename(&filename);
-					return filename;
-				}
-				break;
-			}
-			case OgrLayerSource:
-			{
-				CComPtr<IOgrLayer> ogr = NULL;
-				if (layer->QueryOgrLayer(&ogr))
-				{
-					if (OgrHelper::GetSourceType(ogr) == ogrFile)
-					{
-						ogr->GetConnectionString(&filename);
-						return filename;
-					}
-				}
-				break;
-			}
-		}
+		return layer->GetFilename();
 	}
 	
 	filename = SysAllocString(L"");

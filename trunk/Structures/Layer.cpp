@@ -508,3 +508,74 @@ void Layer::GetExtentsAsNewInstance(IExtents** box)
 	(*box)->SetBounds(extents.left, extents.bottom, 0.0, extents.right, extents.top, 0.0);
 }
 
+//****************************************************
+//*		GrabLayerNameFromDatasource()
+//****************************************************
+void Layer::GrabLayerNameFromDatasource()
+{
+	if (this->name.GetLength() > 0)	return;
+
+	if (IsOgrLayer())
+	{
+		CComPtr<IOgrLayer> layer = NULL;
+		if (QueryOgrLayer(&layer))
+		{
+			CComBSTR name;
+			layer->get_Name(&name);
+			this->name = OLE2W(name);
+		}
+	}
+	else
+	{
+		CComBSTR bstr;
+		bstr.Attach(GetFilename());
+		CStringW path = OLE2W(bstr);
+		name = Utility::GetNameFromPathWoExtension(path);
+	}
+}
+
+//****************************************************
+//*		GetFilename()
+//****************************************************
+BSTR Layer::GetFilename()
+{
+	BSTR filename;	
+	switch (this->type)
+	{
+		case ShapefileLayer:
+		{
+			CComPtr<IShapefile> sf = NULL;
+			if (QueryShapefile(&sf))
+			{
+				sf->get_Filename(&filename);
+				return filename;
+			}
+			break;
+		}
+		case ImageLayer:
+		{
+			CComPtr<IImage> img = NULL;
+			if (QueryImage(&img))
+			{
+				img->get_Filename(&filename);
+				return filename;
+			}
+			break;
+		}
+		case OgrLayerSource:
+		{
+			CComPtr<IOgrLayer> ogr = NULL;
+			if (QueryOgrLayer(&ogr))
+			{
+				if (OgrHelper::GetSourceType(ogr) == ogrFile)
+				{
+					ogr->GetConnectionString(&filename);
+					return filename;
+				}
+			}
+			break;
+		}
+	}
+	return SysAllocString(L"");
+}
+
