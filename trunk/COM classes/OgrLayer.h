@@ -113,6 +113,7 @@ public:
 	STDMETHOD(get_LabelOrientation)(tkLineLabelOrientation* pVal);
 	STDMETHOD(put_LabelOrientation)(tkLineLabelOrientation newVal);
 	STDMETHOD(GenerateCategories)(BSTR FieldName, tkClassificationType classificationType, long numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
 
 private:
 	VARIANT_BOOL _dynamicLoading;
@@ -160,7 +161,6 @@ public:
 	CStringW LoadStyleXML(CStringW name);
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
-
-	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

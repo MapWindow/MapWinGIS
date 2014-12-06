@@ -3,6 +3,7 @@
 #include "OgrLabels.h"
 #include "OgrConverter.h"
 #include "GeoProjection.h"
+#include "ShapefileHelper.h"
 
 // *************************************************************
 //		Layer2Shapefile()
@@ -130,6 +131,12 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 		sf->EditInsertField(fld, &fieldIndex, NULL, &vbretval);
 		fld->Release();
 	}
+
+	long numFields = ShapefileHelper::GetNumFields(sf);
+
+	if (numFields == 0)
+		ShapefileHelper::InsertMwShapeIdField(sf);
+
 	return sf;
 }
 

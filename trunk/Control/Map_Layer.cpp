@@ -360,7 +360,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 {
 	long layerHandle = -1;
 
-	if( ! Object )
+	if( !Object )
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		return layerHandle;
@@ -370,6 +370,8 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	Object->QueryInterface(IID_IOgrDatasource, (void**)&ds);
 	if (ds) 
 	{
+		bool mapIsEmpty = GetNumLayers() == 0;
+
 		int layerCount = OgrHelper::GetLayerCount(ds);
 		if (layerCount == 0) 
 		{
@@ -384,29 +386,42 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			CComPtr<IOgrLayer> layer = NULL;
 			ds->GetLayer(i, VARIANT_FALSE, &layer);
 			if (layer) {
-				layerHandle = AddLayer(layer, pVisible);		// recursion is here
+				layerHandle = AddSingleLayer(layer, pVisible);		// recursion is here
 			}
 		}
+
+		if (mapIsEmpty && GetNumLayers() > 0 && m_globalSettings.zoomToFirstLayer)
+			ZoomToMaxExtents();
 
 		LockWindow(lmUnlock);
 
 		return layerHandle;   // returning the last layer handle
 	}
-	
-	// TODO: move to separate function to avoid recursion
+	else {
+		return AddSingleLayer(Object, pVisible);
+	}
+}
+
+// ***************************************************************
+//		AddSingleLayer()
+// ***************************************************************
+long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
+{
+	long layerHandle = -1;
+
 	IShapefile * ishp = NULL;
-	Object->QueryInterface(IID_IShapefile,(void**)&ishp);
+	Object->QueryInterface(IID_IShapefile, (void**)&ishp);
 
 	IImage * iimg = NULL;
-	Object->QueryInterface(IID_IImage,(void**)&iimg);
+	Object->QueryInterface(IID_IImage, (void**)&iimg);
 
 	IGrid * igrid = NULL;
-	Object->QueryInterface(IID_IGrid,(void**)&igrid);
+	Object->QueryInterface(IID_IGrid, (void**)&igrid);
 
 	IOgrLayer * iogr = NULL;
 	Object->QueryInterface(IID_IOgrLayer, (void**)&iogr);
-	
-	if(!igrid && !iimg && !ishp && !iogr)
+
+	if (!igrid && !iimg && !ishp && !iogr)
 	{
 		AfxMessageBox("Error: Interface Not Supported");
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
@@ -415,11 +430,11 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 	AttachGlobalCallbackToLayers(Object);
 
-	LockWindow( lmLock );
+	LockWindow(lmLock);
 
 	Layer * l = NULL;
 
-	if( ishp != NULL || iogr != NULL )
+	if (ishp != NULL || iogr != NULL)
 	{
 		if (ishp)
 		{
@@ -434,20 +449,20 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 
 			CComPtr<ITable> table = NULL;
 			ishp->get_Table(&table);
-			if (table) 
+			if (table)
 			{
 				if (ShapefileHelper::GetNumShapes(ishp) != TableHelper::GetNumRows(table))
 					ErrorMessage(tkDBF_RECORDS_SHAPES_MISMATCH);   // report it but allow to proceed
 			}
 		}
-		
+
 		l = new Layer();
 		if (ishp) l->object = ishp;
 		else l->object = iogr;
 		l->type = ishp ? ShapefileLayer : OgrLayerSource;
 		l->UpdateExtentsFromDatasource();
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
-		
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & (0xFFFFFFFF ^ Visible);
+
 		layerHandle = AddLayerCore(l);
 	}
 
@@ -495,7 +510,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				VARIANT_BOOL isProxy;
 				iimg->get_IsGridProxy(&isProxy);
 				CStringW legendName = isProxy ? grid->GetProxyLegendName() : grid->GetLegendName();
-				
+
 				CComPtr<IGridColorScheme> newScheme = NULL;
 				ComHelper::CreateInstance(tkInterface::idGridColorScheme, (IDispatch**)&newScheme);
 
@@ -511,7 +526,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	// it may be either directly opened image or the one created for the grid
-	if( iimg != NULL )
+	if (iimg != NULL)
 	{
 		tkImageSourceType type;
 		iimg->get_SourceType(&type);
@@ -521,15 +536,15 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 			LockWindow(lmUnlock);
 			return -1;
 		}
-		
+
 		l = new Layer();
 		l->object = iimg;
 		l->type = ImageLayer;
-		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & ( 0xFFFFFFFF ^ Visible );
+		l->flags = pVisible != FALSE ? l->flags | Visible : l->flags & (0xFFFFFFFF ^ Visible);
 		l->UpdateExtentsFromDatasource();
 
 		layerHandle = AddLayerCore(l);
-		
+
 		// try to save pixels in case image grouping is enabled
 		if (_canUseImageGrouping)
 		{
@@ -537,42 +552,43 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 				iimg->put_CanUseGrouping(VARIANT_FALSE);	//  don't try this image any more, before transparency values will be changed
 		}
 	}
-	
+
 	GrabLayerProjection(l);
 
-	// find out filename with symbology before file was substituted by reprojection
+	bool diskSymbology = m_globalSettings.loadSymbologyOnAddLayer && l->IsDiskBased();
 	CStringW symbologyName;
-	if (m_globalSettings.loadSymbologyOnAddLayer)
+	if (diskSymbology)
 	{
-		if (!l->IsInMemoryShapefile())
-		{
-			CComBSTR bstr;
-			bstr.Attach(GetLayerFilename(layerHandle));
-			symbologyName = OLE2W(bstr);
-			symbologyName += L".mwsymb";
-			symbologyName = Utility::FileExistsW(symbologyName) ? OLE2W(bstr) : L"";
-		}
+		// find out filename with symbology before file was substituted by reprojection
+		CComBSTR bstrFilename;
+		bstrFilename.Attach(GetLayerFilename(layerHandle));
+		symbologyName = OLE2W(bstrFilename);
+		symbologyName += L".mwsymb";
+		symbologyName = Utility::FileExistsW(symbologyName) ? OLE2W(bstrFilename) : L"";
 	}
 
 	// do projection mismatch check
 	if (!CheckLayerProjection(l, layerHandle))
 	{
 		RemoveLayerCore(layerHandle, false, false, true);
-		LockWindow( lmUnlock );
+		LockWindow(lmUnlock);
 		return -1;
 	}
 
 	if (m_globalSettings.loadSymbologyOnAddLayer)
 	{
-		LoadOgrStyle(l, layerHandle, L"");
-	}
-
-	// loading symbology
-	if (symbologyName.GetLength() > 0)
-	{
-		CComBSTR desc;
-		USES_CONVERSION;
-		this->LoadLayerOptionsCore(W2A(symbologyName), layerHandle, "", &desc);
+		// loading symbology
+		if (diskSymbology)
+		{
+			if (symbologyName.GetLength() > 0) {
+				CComBSTR desc;
+				USES_CONVERSION;
+				this->LoadLayerOptionsCore(W2A(symbologyName), layerHandle, "", &desc);
+			}
+		}
+		else {
+			LoadOgrStyle(l, layerHandle, L"");   // perhaps it's OGR database table
+		}
 	}
 
 	if (l != NULL)
@@ -581,7 +597,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	// set initial extents
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
 	{
-		if( _activeLayers.size() == 1 && pVisible)
+		if (_activeLayers.size() == 1 && pVisible)
 		{
 			if (!l->IsEmpty())
 				SetExtentsWithPadding(l->extents);
@@ -589,7 +605,7 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 	}
 
 	ScheduleLayerRedraw();
-	LockWindow( lmUnlock );
+	LockWindow(lmUnlock);
 	return layerHandle;
 }
 
@@ -599,29 +615,29 @@ long CMapView::AddLayer(LPDISPATCH Object, BOOL pVisible)
 VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
 {
 	VARIANT_BOOL result = VARIANT_FALSE;
-	if (layer->IsOgrLayer())
+	
+	CComPtr<IOgrLayer> ogrLayer = NULL;
+	layer->QueryOgrLayer(&ogrLayer);
+	if (!ogrLayer)
+		return result;
+
+	if (OgrHelper::GetSourceType(ogrLayer) != ogrDbTable) 
+		return result;
+
+	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(L"");
+	if (xml.GetLength() == 0)
 	{
-		IOgrLayer* ogrLayer = NULL;
-		layer->QueryOgrLayer(&ogrLayer);
-		if (ogrLayer)
-		{
-			CStringW xml = ((COgrLayer*)ogrLayer)->LoadStyleXML(L"");
-			if (xml.GetLength() == 0)
-			{
-				ErrorMessage(tkOGR_STYLE_NOT_FOUND);
-			}
-			else {
-				CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
-				if (root) {
-					CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
-					if (node) {
-						result = DeserializeLayerOptionsCore(layerHandle, node);
-					}
-					CPLDestroyXMLNode(root);
-				}
-			}
-			ogrLayer->Release();
+		ErrorMessage(tkOGR_STYLE_NOT_FOUND);
+		return result;
+	}
+	
+	CPLXMLNode* root = CPLParseXMLString(Utility::ConvertToUtf8(xml));
+	if (root) {
+		CPLXMLNode* node = CPLGetXMLNode(root, "Layer");
+		if (node) {
+			result = DeserializeLayerOptionsCore(layerHandle, node);
 		}
+		CPLDestroyXMLNode(root);
 	}
 	return result;
 }
@@ -1662,42 +1678,47 @@ BSTR CMapView::GetLayerFilename(LONG layerHandle)
 	if (layerHandle < 0 || layerHandle >= (long)_allLayers.size())
 	{
 		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+		filename = SysAllocString(L"");
+		return filename;
 	}
-	else
+
+	Layer* layer = _allLayers[layerHandle];
+	if (layer  )
 	{
-		// extracting object
-		Layer* layer = _allLayers[layerHandle];
-		if (layer  )
+		switch (layer->type)
 		{
-			switch (layer->type)
+			case ShapefileLayer:
 			{
-				case ShapefileLayer:
+				CComPtr<IShapefile> sf = NULL;
+				if (layer->QueryShapefile(&sf)) 
 				{
-					CComPtr<IShapefile> sf = NULL;
-					layer->QueryShapefile(&sf);
-					if (sf) {
-						tkShapefileSourceType shpSource;
-						sf->get_SourceType(&shpSource);
-						sf->get_Filename(&filename);
-						return filename;
-					}
-					break;
+					sf->get_Filename(&filename);
+					return filename;
 				}
-				case ImageLayer:
+				break;
+			}
+			case ImageLayer:
+			{
+				CComPtr<IImage> img = NULL;
+				if (layer->QueryImage(&img))
 				{
-					CComPtr<IImage> img = NULL;
-					layer->QueryImage(&img);
-					if (img != NULL)
+					img->get_Filename(&filename);
+					return filename;
+				}
+				break;
+			}
+			case OgrLayerSource:
+			{
+				CComPtr<IOgrLayer> ogr = NULL;
+				if (layer->QueryOgrLayer(&ogr))
+				{
+					if (OgrHelper::GetSourceType(ogr) == ogrFile)
 					{
-						tkImageSourceType imgSource;
-						img->get_SourceType(&imgSource);
-						img->get_Filename(&filename);
+						ogr->GetConnectionString(&filename);
 						return filename;
 					}
-					break;
 				}
-				case OgrLayerSource:
-					break;
+				break;
 			}
 		}
 	}
@@ -1762,30 +1783,7 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 	Layer* layer = GetLayer(LayerHandle);
 	if (layer) 
 	{
-		if (layer->IsOgrLayer())
-		{
-			CPLXMLNode* psTree = LayerOptionsToXmlTree(LayerHandle);
-			if (psTree)
-			{
-				char* buffer = CPLSerializeXMLTree(psTree);
-				CPLDestroyXMLNode(psTree);
-
-				if (!buffer) return VARIANT_FALSE;
-				CStringW xml = Utility::ConvertFromUtf8(buffer);
-				CPLFree(buffer);
-
-				IOgrLayer* ogrLayer = NULL;
-				layer->QueryOgrLayer(&ogrLayer);
-				if (ogrLayer) 
-				{
-					VARIANT_BOOL vb;
-					CComBSTR bstr(OptionsName);
-					((COgrLayer*)ogrLayer)->SaveStyle(bstr, xml, &vb);
-					if (vb) result = true;
-				}
-			}
-		}
-		else 
+		if (layer->IsDiskBased())
 		{
 			CString name = get_OptionsFilename(LayerHandle, OptionsName);
 
@@ -1812,6 +1810,29 @@ VARIANT_BOOL CMapView::SaveLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, V
 				USES_CONVERSION;
 				result = GdalHelper::SerializeXMLTreeToFile(psTree, A2W(name)) != 0;		// TODO: use Unicode
 				CPLDestroyXMLNode(psTree);
+			}
+		}
+		else if (layer->IsOgrLayer())
+		{
+			CPLXMLNode* psTree = LayerOptionsToXmlTree(LayerHandle);
+			if (psTree)
+			{
+				char* buffer = CPLSerializeXMLTree(psTree);
+				CPLDestroyXMLNode(psTree);
+
+				if (!buffer) return VARIANT_FALSE;
+				CStringW xml = Utility::ConvertFromUtf8(buffer);
+				CPLFree(buffer);
+
+				IOgrLayer* ogrLayer = NULL;
+				layer->QueryOgrLayer(&ogrLayer);
+				if (ogrLayer)
+				{
+					VARIANT_BOOL vb;
+					CComBSTR bstr(OptionsName);
+					((COgrLayer*)ogrLayer)->SaveStyle(bstr, xml, &vb);
+					if (vb) result = true;
+				}
 			}
 		}
 	}

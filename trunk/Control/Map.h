@@ -1142,6 +1142,7 @@ private:
 	bool ReprojectLayer(Layer* layer, int layerHandle);
 	void StartDragging(DraggingOperation operation);
 	void DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics* graphics, CImageDrawer& imgDrawer);
+	long AddSingleLayer(LPDISPATCH Object, BOOL pVisible);
 #pragma endregion
 
 public:
@@ -1171,7 +1172,7 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

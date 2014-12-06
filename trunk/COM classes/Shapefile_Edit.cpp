@@ -166,26 +166,25 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
 
-	bool callbackIsNull = (_globalCallback == NULL);
-	if(cBack != NULL && _globalCallback == NULL)
-	{
-		_globalCallback = cBack;	
-		_globalCallback->AddRef();
-	}
-	
+	if (!_globalCallback && cBack)
+		put_GlobalCallback(cBack);
+
 	if( _table == NULL || _sourceType == sstUninitialized)
-	{
-		ErrorMessage(tkSHAPEFILE_UNINITIALIZED, cBack);
-	}
-	else if( _isEditingShapes == FALSE )
+		return S_OK;		// don't report anything as StopEditingShapes will be called from Close for any InMemoryShapefile
+
+	if( _isEditingShapes == FALSE )
 	{	
 		*retval = VARIANT_TRUE;
+		return S_OK;
 	}
-	else if ( _writing )
+	
+	if ( _writing )
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION, cBack);
+		return S_OK;
 	}
-	else if ( _sourceType == sstInMemory )
+
+	if ( _sourceType == sstInMemory )
 	{
 		// shapefile wasn't saved before
 		if(_shpfileName.GetLength() > 0)
@@ -197,32 +196,59 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 				_isEditingShapes = VARIANT_FALSE;
 			}
 		}
+		return S_OK;
 	}
-	else
-	{
-		USES_CONVERSION;
+	
+	USES_CONVERSION;
 
-		if( ApplyChanges )
-		{	
-			_writing = true;
+	if( ApplyChanges )
+	{	
+		_writing = true;
 			
-			// verify Shapefile Integrity
-			if( VerifyMemShapes(cBack) == FALSE )
+		// verify Shapefile Integrity
+		if( VerifyMemShapes(cBack) == FALSE )
+		{	
+			// error Code is set in function
+		}
+		else
+		{
+			_shpfile = _wfreopen(_shpfileName, L"wb+", _shpfile);
+			_shxfile = _wfreopen(_shxfileName, L"wb+",_shxfile);
+
+			if( _shpfile == NULL || _shxfile == NULL )
 			{	
-				// error Code is set in function
+				if( _shxfile != NULL )
+				{	
+					fclose( _shxfile );
+					_shxfile = NULL;
+						
+				}
+				if( _shpfile != NULL )
+				{	
+					fclose( _shpfile );
+					_shpfile = NULL;
+					ErrorMessage(tkCANT_OPEN_SHP, cBack);
+				}
 			}
 			else
 			{
-				_shpfile = _wfreopen(_shpfileName, L"wb+", _shpfile);
-				_shxfile = _wfreopen(_shxfileName, L"wb+",_shxfile);
+				// force computation of Extents
+				VARIANT_BOOL vbretval;
+				this->RefreshExtents(&vbretval);
 
+				WriteShp(_shpfile,cBack);
+				WriteShx(_shxfile,cBack);
+
+				_shpfile = _wfreopen(_shpfileName,L"rb+", _shpfile);
+				_shxfile = _wfreopen(_shxfileName,L"rb+",_shxfile);
+					
 				if( _shpfile == NULL || _shxfile == NULL )
 				{	
 					if( _shxfile != NULL )
 					{	
 						fclose( _shxfile );
 						_shxfile = NULL;
-						
+						ErrorMessage(tkCANT_OPEN_SHX, cBack);
 					}
 					if( _shpfile != NULL )
 					{	
@@ -232,88 +258,56 @@ STDMETHODIMP CShapefile::StopEditingShapes(VARIANT_BOOL ApplyChanges, VARIANT_BO
 					}
 				}
 				else
-				{
-					// force computation of Extents
-					VARIANT_BOOL vbretval;
-					this->RefreshExtents(&vbretval);
+				{	
+					_isEditingShapes = FALSE;
+					ReleaseMemoryShapes();
+					*retval = VARIANT_TRUE;
 
-					WriteShp(_shpfile,cBack);
-					WriteShx(_shxfile,cBack);
+					if(StopEditTable != VARIANT_FALSE)
+						StopEditingTable(ApplyChanges,cBack,retval);
 
-					_shpfile = _wfreopen(_shpfileName,L"rb+", _shpfile);
-					_shxfile = _wfreopen(_shxfileName,L"rb+",_shxfile);
-					
-					if( _shpfile == NULL || _shxfile == NULL )
-					{	
-						if( _shxfile != NULL )
-						{	
-							fclose( _shxfile );
-							_shxfile = NULL;
-							ErrorMessage(tkCANT_OPEN_SHX, cBack);
-						}
-						if( _shpfile != NULL )
-						{	
-							fclose( _shpfile );
-							_shpfile = NULL;
-							ErrorMessage(tkCANT_OPEN_SHP, cBack);
-						}
-					}
-					else
-					{	
-						_isEditingShapes = FALSE;
-						ReleaseMemoryShapes();
-						*retval = VARIANT_TRUE;
+					// remove disk-based index, it's no longer valid
+					VARIANT_BOOL spatialIndex;
+					get_HasSpatialIndex(&spatialIndex);
 
-						if(StopEditTable != VARIANT_FALSE)
-							StopEditingTable(ApplyChanges,cBack,retval);
+					if (spatialIndex) {
+						VARIANT_BOOL vb;
+						RemoveSpatialIndex(&vb);
 
-						// remove disk-based index, it's no longer valid
-						VARIANT_BOOL spatialIndex;
-						get_HasSpatialIndex(&spatialIndex);
-
-						if (spatialIndex) {
-							VARIANT_BOOL vb;
-							RemoveSpatialIndex(&vb);
-
-							CComBSTR bstr(_shpfileName);
-							CreateSpatialIndex(bstr, &vb);
-						}
+						CComBSTR bstr(_shpfileName);
+						CreateSpatialIndex(bstr, &vb);
 					}
 				}
 			}
-			_writing = false;
 		}
-		else
-		{	
-			// discard the changes
-			_isEditingShapes = FALSE;
-			ReleaseMemoryShapes();
+		_writing = false;
+	}
+	else
+	{	
+		// discard the changes
+		_isEditingShapes = FALSE;
+		ReleaseMemoryShapes();
 
-			// reload the shx file
-			this->ReadShx();
+		// reload the shx file
+		this->ReadShx();
 
-			if(StopEditTable != VARIANT_FALSE)
-			{
-				StopEditingTable(ApplyChanges,cBack,retval);
-			}
-
-			RestoreShapeRecordsMapping();
-
-			*retval = VARIANT_TRUE;
-		}
-		
-		// restoring fast mode
-		if (*retval == VARIANT_TRUE && _fastMode)
+		if(StopEditTable != VARIANT_FALSE)
 		{
-			this->put_FastMode(VARIANT_FALSE);
-			this->put_FastMode(VARIANT_TRUE);
+			StopEditingTable(ApplyChanges,cBack,retval);
 		}
+
+		RestoreShapeRecordsMapping();
+
+		*retval = VARIANT_TRUE;
+	}
+		
+	// restoring fast mode
+	if (*retval == VARIANT_TRUE && _fastMode)
+	{
+		this->put_FastMode(VARIANT_FALSE);
+		this->put_FastMode(VARIANT_TRUE);
 	}
 	
-	// restoring callback state
-	if (callbackIsNull)
-		_globalCallback = NULL;
-
 	return S_OK;
 }
 

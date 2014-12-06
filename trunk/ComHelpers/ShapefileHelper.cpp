@@ -436,3 +436,34 @@ bool ShapefileHelper::IsVolatile(IShapefile* sf)
 	return isVolatile ? true : false;
 }
 
+// ********************************************************************
+//		InsertMwShapeIdField()
+// ********************************************************************
+void ShapefileHelper::InsertMwShapeIdField(IShapefile* sf)
+{
+	if (!sf) return;
+
+	CComPtr<IField> shapeIDField = NULL;
+	ComHelper::CreateInstance(idField, (IDispatch**)&shapeIDField);
+
+	CComBSTR bstr("MWShapeID");
+	shapeIDField->put_Name(bstr);
+	shapeIDField->put_Type(INTEGER_FIELD);
+	shapeIDField->put_Width(10);
+	shapeIDField->put_Precision(10);
+
+	long fldIndex = 0;
+	VARIANT_BOOL retVal;
+	sf->EditInsertField(shapeIDField, &fldIndex, NULL, &retVal);
+}
+
+// ********************************************************************
+//		GetSourceType()
+// ********************************************************************
+tkShapefileSourceType ShapefileHelper::GetSourceType(IShapefile* sf)
+{
+	if (!sf) return sstUninitialized;
+	tkShapefileSourceType type;
+	sf->get_SourceType(&type);
+	return type;
+}

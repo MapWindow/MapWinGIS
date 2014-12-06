@@ -273,9 +273,20 @@ int OgrHelper::GetLayerCount(IOgrDatasource* ds)
 }
 
 // *************************************************************
+//		GetSourceType()
+// *************************************************************
+tkOgrSourceType OgrHelper::GetSourceType(IOgrLayer* layer)
+{
+	if (!layer) return ogrUninitialized;
+	tkOgrSourceType type;
+	layer->get_SourceType(&type);
+	return type;
+}
+
+// *************************************************************
 //		CastDatasource()
 // *************************************************************
-static COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds)
+COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds)
 {
 	return (COgrDatasource*)&(*ds);
 }

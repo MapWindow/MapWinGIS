@@ -857,25 +857,12 @@ STDMETHODIMP CShapefile::CreateNewWithShapeID(BSTR ShapefileName, ShpfileType Sh
 
 	CreateNew(ShapefileName, ShapefileType, retval);
 	
-	if (*retval == VARIANT_TRUE)
-	{
-		IField * shapeIDField = NULL;
-		CoCreateInstance(CLSID_Field,NULL,CLSCTX_INPROC_SERVER,IID_IField,(void**)&shapeIDField);
-		
-		CComBSTR bstr("MWShapeID");
-		shapeIDField->put_Name(bstr);
-		shapeIDField->put_Type(INTEGER_FIELD);
-		shapeIDField->put_Width(10);
-		shapeIDField->put_Precision(10);
+	if (*retval)
+		ShapefileHelper::InsertMwShapeIdField(this);
 
-		long fldIndex = 0;
-		VARIANT_BOOL retVal;
-		EditInsertField(shapeIDField, &fldIndex, NULL, &retVal);
-
-		shapeIDField->Release();
-	}
 	return S_OK;
 }
+
 #pragma endregion
 
 #pragma region SaveAndClose

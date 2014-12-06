@@ -442,5 +442,6 @@ public:
 	
 	// drawing 
 	void MarkUndrawn();
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

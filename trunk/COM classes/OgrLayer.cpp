@@ -25,6 +25,10 @@ void COgrLayer::InjectShapefile(IShapefile* sfNew)
 // *************************************************************
 void COgrLayer::InitOpenedLayer()
 {
+	if (Utility::FileExistsW(_connectionString)) {
+		_sourceType = ogrFile;
+	}
+
 	ClearCachedValues();
 	VARIANT_BOOL vb;
 
@@ -44,7 +48,6 @@ void COgrLayer::InitOpenedLayer()
 
 	ForceCreateShapefile();
 	RestartBackgroundLoader();
-
 }
 
 //***********************************************************************
@@ -1413,4 +1416,3 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 	delete categories;
 	return S_OK;
 }
-

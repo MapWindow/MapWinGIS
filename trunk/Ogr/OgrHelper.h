@@ -18,6 +18,7 @@ public:
 	static void GetFieldValues(OGRLayer* layer, int featureCount, OGRFieldType fieldType, vector<VARIANT*>& values, ICallback* cback);
 	static COgrLayer* Cast(CComPtr<IOgrLayer>& layer);
 	static ShpfileType ShapeType2D(IOgrLayer* layer);
+	static tkOgrSourceType GetSourceType(IOgrLayer* layer);
 
 	static COgrDatasource* CastDatasource(CComPtr<IOgrDatasource>& ds);
 	static IOgrLayer* ChooseLayerByShapeType(IOgrDatasource* ds, ShpfileType shpType, VARIANT_BOOL forUpdate = VARIANT_FALSE);

@@ -48,14 +48,35 @@ bool Layer::IsInMemoryShapefile()
 	if (type == ShapefileLayer)
 	{
 		CComPtr<IShapefile> sf = NULL;
-		QueryShapefile(&sf);
-		if (sf)
+		if (QueryShapefile(&sf))
 		{
 			tkShapefileSourceType sourceType;
 			sf->get_SourceType(&sourceType);
 			return sourceType == sstInMemory;
 		}
-		return false;
+	}
+	return false;
+}
+
+// ****************************************************
+//		IsDiskBased()
+// ****************************************************
+bool Layer::IsDiskBased()
+{
+	if (type == ImageLayer)
+		return true;
+
+	if (type == OgrLayerSource)
+	{
+		CComPtr<IOgrLayer> layer = NULL;
+		if (QueryOgrLayer(&layer))
+			return OgrHelper::GetSourceType(layer) == ogrFile;
+	}
+	else if (type == ShapefileLayer) 
+	{
+		CComPtr<IShapefile> sf = NULL;
+		if (QueryShapefile(&sf))
+			return ShapefileHelper::GetSourceType(sf) == sstDiskBased;
 	}
 	return false;
 }

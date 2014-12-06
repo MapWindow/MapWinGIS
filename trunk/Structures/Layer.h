@@ -127,5 +127,6 @@ public:
 	void UpdateShapefile(long layerHandle);
 	void CloseDatasources();
 	bool IsEmpty();
+	bool IsDiskBased();
 };
 # endif

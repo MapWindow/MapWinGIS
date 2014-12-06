@@ -27,5 +27,7 @@ public:
 	static CShapefile* Cast(CComPtr<IShapefile>& sf);
 	static bool InteractiveEditing(IShapefile* sf);
 	static bool IsVolatile(IShapefile* sf);
+	static void InsertMwShapeIdField(IShapefile* sf);
+	static tkShapefileSourceType GetSourceType(IShapefile* sf);
 };
 
