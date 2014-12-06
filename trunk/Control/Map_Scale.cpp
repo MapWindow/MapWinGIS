@@ -931,29 +931,23 @@ void CMapView::SetExtentsWithPadding(Extent ext)
 // ****************************************************************
 VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_BOOL ifOutsideOnly /*= VARIANT_TRUE*/)
 {
-	if (IsValidShape(LayerHandle, ShapeIndex))
-	{
-		IShapefile* sf = GetShapefile(LayerHandle);
+	if (!IsValidShape(LayerHandle, ShapeIndex))
+		return VARIANT_FALSE;
 
-		double left, right, top, bottom;
-		((CShapefile*)sf)->QuickExtentsCore(ShapeIndex, &left, &bottom, &right, &top);
-		sf->Release();
+	IShapefile* sf = GetShapefile(LayerHandle);
 
-		Extent extNew(left, right, bottom, top);
-		if (ifOutsideOnly && extNew.Intersects(_extents)){
-			return VARIANT_FALSE;
-		}
+	double left, right, top, bottom;
+	((CShapefile*)sf)->QuickExtentsCore(ShapeIndex, &left, &bottom, &right, &top);
+	sf->Release();
 
-		this->LogPrevExtent();
-		SetExtentsWithPadding(extNew);
-		return VARIANT_TRUE;
-	}
-	else
-	{
-		if (!ifOutsideOnly)
-			ErrorMessage(_lastErrorCode);
+	Extent extNew(left, right, bottom, top);
+	if (ifOutsideOnly && extNew.Intersects(_extents)){
 		return VARIANT_FALSE;
 	}
+
+	this->LogPrevExtent();
+	SetExtentsWithPadding(extNew);
+	return VARIANT_TRUE;
 }
 
 #pragma endregion

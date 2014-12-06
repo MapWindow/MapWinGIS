@@ -20,7 +20,7 @@ bool GroupOperation::Run(tkCursorMode cursorMode, long layerHandle, IShapefile* 
 
 	vector<long> indices;
 	if (!SelectionHelper::SelectWithShapeBounds(sf, shp, indices))
-		return false;    // TODO: fire event
+		return false;
 
 	errorCode = tkNO_ERROR;
 

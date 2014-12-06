@@ -343,6 +343,8 @@ void ActiveShape::DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, i
 // ****************************************************************
 void ActiveShape::DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, double area)
 {
+	if (AreaDisplayMode == admNone) return;
+
 	double xOrig, yOrig;
 	pnt->get_X(&xOrig);
 	pnt->get_Y(&yOrig);
@@ -375,13 +377,9 @@ void ActiveShape::DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, doubl
 			case admHectars:
 				{
 					area /= 10000.0;
-					/*CString sArea = Utility::FormatNumber(area, _areaRounding);
-					USES_CONVERSION;
-					str.Format(L"%s %s", A2W(sArea), m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsHectars));*/
+					str.Format(L"%.2f %s", area, m_globalSettings.GetLocalizedString(lsHectars));
 				}
 				break;
-			case admNone:
-				return;
 		}
 	}
 	else

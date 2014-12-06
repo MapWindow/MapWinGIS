@@ -92,7 +92,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	box.Attach(ExtentsHelper::Populate(extents));
 	this->get_CanUseSpatialIndex(box, &useSpatialIndex);
 	
-	if (useSpatialIndex)   //ajp Jun 2008 select records from spatial index
+	if (useSpatialIndex)
 	{
 		double lowVals[2], highVals[2];
 		IndexSearching::QueryTypeFlags qType;
@@ -121,7 +121,6 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 	}
 	else if(_isEditingShapes && _useQTree)
 	{
-		//07/23/2009 ,Neio fix the bug that select shapes in edit mode and add QTree
 		if(bPtSelection )
 		{
 			qtreeResult = _qtree->GetNodes(QTreeExtent(b_minX,b_minX +1,b_minY + 1,b_minY));
@@ -230,11 +229,12 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 				if( DefineShapePoints( shapeVal, ShapeType, parts, xPts, yPts) )
 				{
-					if (SelectionHelper::PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance))
+					if (SelectionHelper::PolygonIntersection(xPts, yPts, parts, b_minX, b_maxX, b_minY, b_maxY, Tolerance)) {
 						selectResult.push_back( shapeVal );
-
-					if (ShapefileHelper::BoundsWithinPolygon(this, shapeVal, b_minX, b_maxX, b_minY, b_maxY))
+					}
+					else if (ShapefileHelper::BoundsWithinPolygon(this, shapeVal, b_minX, b_maxX, b_minY, b_maxY)) {
 						selectResult.push_back(shapeVal);
+					}
 				}	
 			}
 			else if( shpType2D == SHP_MULTIPOINT && SelectMode == INTERSECTION)
@@ -287,7 +287,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) //_numShapes)
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -299,7 +299,7 @@ STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) //_numShapes)
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size())
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}

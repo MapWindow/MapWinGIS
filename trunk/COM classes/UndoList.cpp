@@ -267,7 +267,8 @@ STDMETHODIMP CUndoList::Undo(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal)
 			if (_position < 0) break;
 		}
 
-		ZoomToShape(zoomToShape, item->Operation == uoAddShape ? _position: pos);
+		if (item->Operation != uoRemoveShape)
+			ZoomToShape(zoomToShape, item->Operation == uoAddShape ? _position: pos);
 
 		FireUndoListChanged();
 		*retVal = VARIANT_TRUE;
@@ -392,7 +393,8 @@ bool CUndoList::UndoSingleItem(UndoListItem* item)
 			// restore removed shape
 			sf->EditInsertShape(item->Shape, &(item->ShapeIndex), &vb);
 			if (vb) {
-				TableHelper::Cast(table)->InsertTableRow(item->Row, item->ShapeIndex);
+				TableRow* oldRow = TableHelper::Cast(table)->SwapTableRow(item->Row, item->ShapeIndex);
+				if (oldRow) delete oldRow;
 				sf->put_ShapeCategory(item->ShapeIndex, item->StyleCategory);
 				item->SetShape(NULL);
 				item->Row = NULL;		// the instance is used by table now
