@@ -358,7 +358,7 @@ STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)
 // *************************************************************
 //		get_Data()
 // *************************************************************
-STDMETHODIMP COgrLayer::GetData(IShapefile** retVal)
+STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
@@ -537,7 +537,7 @@ STDMETHODIMP COgrLayer::get_DataIsReprojected(VARIANT_BOOL* retVal)
 	if (!gp) return S_FALSE;
 
 	CComPtr<IShapefile> sf = NULL;
-	GetData(&sf);
+	GetBuffer(&sf);
 	if (sf)
 	{
 		CComPtr<IGeoProjection> gp2 = NULL;
@@ -955,17 +955,13 @@ bool COgrLayer::DeserializeCore(CPLXMLNode* node)
 	CComBSTR bstrQuery(sourceQuery);
 
 	VARIANT_BOOL vb = VARIANT_FALSE;
-	if (sourceType == ogrDbTable)
+	if (sourceType == ogrDbTable || sourceType == ogrFile)
 	{
 		OpenFromDatabase(bstrConnection, bstrQuery, forUpdate ? VARIANT_TRUE : VARIANT_FALSE, &vb);
 	}
 	else if (sourceType == ogrQuery)
 	{
 		OpenFromQuery(bstrConnection, bstrQuery, &vb);
-	}
-	else if (sourceType == ogrFile)
-	{
-		// TODO: implement
 	}
 	
 	vb = DeserializeOptions(node) ? VARIANT_TRUE : VARIANT_FALSE;
@@ -1356,7 +1352,7 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 	bool hasFid = fid.GetLength() > 0;
 
 	CComPtr<IShapefile> sf = NULL;
-	GetData(&sf);
+	GetBuffer(&sf);
 	if (!sf) {
 		ErrorMessage(tkOGR_NO_SHAPEFILE);
 		return S_OK;

@@ -73,7 +73,7 @@ public:
 	STDMETHOD(OpenFromDatabase)(BSTR connectionString, BSTR layerName, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
 	STDMETHOD(Close)();
 	STDMETHOD(get_Name)(BSTR* retVal);
-	STDMETHOD(GetData)(IShapefile** retVal);
+	STDMETHOD(GetBuffer)(IShapefile** retVal);
 	STDMETHOD(get_SourceType)(tkOgrSourceType* retVal);
 	STDMETHOD(ReloadFromSource)(VARIANT_BOOL* retVal);
 	STDMETHOD(RedefineQuery)(BSTR newSql, VARIANT_BOOL* retVal);

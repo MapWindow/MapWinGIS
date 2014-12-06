@@ -474,6 +474,9 @@ const char * ErrorMsg( long ErrorCode )
 			return "Can't add layer to the map. Layer projection doesn't match map projection.";
 		case tkNO_REPROJECTION_FOR_IMAGES:
 			return "Can't add layer to the map. Layer projection doesn't match map projection. Automatic transformation isn't supported for images.";
+		case tkREPROJECTION_TOO_MUCH_SHAPES:
+			return "Layer to be reprojected has too many shapes. Consider to open it in native projection or to save reprojection results as a new datasource. "
+					"Doing reprojection on the fly can be too costly. This behavior can be changed via GlobalSettings.MaxReprojectionShapeCount property.";
 
 		//2001-2200 = tiles
 		case tkINVALID_PROVIDER_ID:

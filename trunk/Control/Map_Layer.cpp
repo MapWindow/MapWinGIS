@@ -754,6 +754,12 @@ bool CMapView::ReprojectLayer(Layer* layer, int layerHandle)
 		return false;
 
 	long numShapes = ShapefileHelper::GetNumShapes(sf);
+	if (numShapes > m_globalSettings.maxReprojectionShapeCount) 
+	{
+		// OGR layers can potentially have millions of features, so let's be cautions not too start something to lengthy
+		ErrorMessage(tkREPROJECTION_TOO_MUCH_SHAPES);		
+		return false;
+	}
 
 	long count;
 	IShapefile* sfNew = NULL;

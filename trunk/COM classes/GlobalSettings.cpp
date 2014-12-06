@@ -809,3 +809,19 @@ STDMETHODIMP CGlobalSettings::put_ApplicationCallback(ICallback* newVal)
 	ComHelper::SetRef(newVal, (IDispatch**)&m_globalSettings.callback);
 	return S_OK;
 }
+
+// *********************************************************
+//	     MaxReprojectionShapeCount
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_MaxReprojectionShapeCount(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.maxReprojectionShapeCount;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_MaxReprojectionShapeCount(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.maxReprojectionShapeCount = newVal;
+	return S_OK;
+}

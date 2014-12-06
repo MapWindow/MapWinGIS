@@ -17,7 +17,7 @@ void HotTrackingInfo::Update(IShapefile* source, IShape* shp, int layerHandle, i
 		Shapefile->Close(&vb);
 	}
 
-	ShpfileType type = ShapefileHelper::GetShapeType2D(source);
+	ShpfileType type = ShapefileHelper::GetShapeType(source);
 
 	((CShapefile*)Shapefile)->CreateNewCore(m_globalSettings.emptyBstr, type, false, &vb);
 

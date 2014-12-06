@@ -149,6 +149,8 @@ public:
 	STDMETHOD(put_MouseTolerance)(DOUBLE newVal);
 	STDMETHOD(get_ApplicationCallback)(ICallback** pVal);
 	STDMETHOD(put_ApplicationCallback)(ICallback* newVal);
+	STDMETHOD(get_MaxReprojectionShapeCount)(LONG* pVal);
+	STDMETHOD(put_MaxReprojectionShapeCount)(LONG newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

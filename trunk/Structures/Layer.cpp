@@ -127,7 +127,7 @@ bool Layer::QueryShapefile(IShapefile** sf)
 		this->object->QueryInterface(IID_IOgrLayer, (void**)&ogr);
 		if (ogr)
 		{
-			ogr->GetData(sf);
+			ogr->GetBuffer(sf);
 		}
 	}
 	return (*sf) != NULL;

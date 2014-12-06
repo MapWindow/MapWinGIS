@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	long maxReprojectionShapeCount;
 	ICallback* callback;
 	double minPolygonArea;
 	double minAreaToPerimeterRatio;
@@ -74,6 +75,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		maxReprojectionShapeCount = 50000;
 		useShortUrlForTiles = false;
 		callback = NULL;
 		mouseTolerance = 20;

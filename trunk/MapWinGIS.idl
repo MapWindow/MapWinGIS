@@ -5329,6 +5329,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(44)] HRESULT MouseTolerance([in] DOUBLE newVal);
 	[propget, id(45)] HRESULT ApplicationCallback([out, retval] ICallback** pVal);
 	[propput, id(45)] HRESULT ApplicationCallback([in] ICallback* newVal);
+	[propget, id(46)] HRESULT MaxReprojectionShapeCount([out, retval] LONG* pVal);
+	[propput, id(46)] HRESULT MaxReprojectionShapeCount([in] LONG newVal);
 };
 
 [
@@ -5648,7 +5650,7 @@ interface IOgrLayer : IDispatch{
 	[propput, id(4)] HRESULT Key([in]BSTR newVal);
 	[id(5)] HRESULT Close();
 	[propget, id(6)] HRESULT Name([out, retval]BSTR* retVal);
-	[id(7)] HRESULT GetData([out, retval]IShapefile** retVal);
+	[id(7)] HRESULT GetBuffer([out, retval]IShapefile** retVal);
 	[id(8)] HRESULT ReloadFromSource([out, retval]VARIANT_BOOL* retVal);
 	[id(9)] HRESULT RedefineQuery([in]BSTR newSql, [out, retval]VARIANT_BOOL* retVal);
 	[id(10)] HRESULT GetConnectionString([out, retval]BSTR* retVal);
