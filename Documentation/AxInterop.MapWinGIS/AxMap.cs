@@ -3771,13 +3771,311 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+        /// @}
+        #endregion
+
+        #region
+
+        /// \addtogroup map_events Map events
+        /// \dot
+        /// digraph map_events_graph {
+        /// splines = true;
+        /// node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
+        /// lb [ label="AxMap" URL="\ref AxMap"];
+        /// node [shape = "ellipse", color = gray, width = 0.2, height = 0.2, style = filled]
+        /// gr  [label="Map events" URL="\ref map_events"];
+        /// edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
+        /// lb -> gr;
+        /// }
+        /// \enddot
+        /// <a href = "diagrams.html">Graph description</a>
+        /// @{
+
         /// <summary>
-        /// Gets or sets behavior to be used when projection of a layer being added to the map
-        /// doesn't match the projection of the map.
+        /// This event is fired after the rendering of drawing layers. Handle of device context is passed to allow the user to implement custom drawing. 
         /// </summary>
-        /// <remarks>The default value pmbIgnore. Automatic transformation for shapefile is avaiable as an option.</remarks>
-        /// \new492 Added in version 4.9.2
-        public tkMismatchBehavior ProjectionMismatchBehavior { get; set; }
+        /// <param name="hdc">Handle of device context of screen buffer.</param>
+        /// <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+        /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+        /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="handled">Passed by reference. 
+        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        public event _DMapEvents_AfterDrawingEventHandler AfterDrawing;
+
+        /// <summary>
+        /// This event is fired after interactive editing of shape is finished (AxMap.CursorMode is set to cmEditShape).
+        /// </summary>
+        /// <param name="operation">The type of editing operation that was performed.</param>
+        /// <param name="layerHandle">Handle of the layer the shape being edited belongs to.</param>
+        /// <param name="shapeIndex">Index of the shape withing layer.</param>
+        /// <remarks>The common use of the event is set attributes of the shape, update its label or style. 
+        /// The operation parameter can be one of the following values: uoAddShape, uoRemoveShape, uoEditShape.</remarks>
+        public event _DMapEvents_AfterShapeEditEventHandler AfterShapeEdit;
+
+        /// <summary>
+        /// This event is fired when background loading of data for OgrLayer.Finishes.
+        /// </summary>
+        /// <param name="taskId">Unique Id of the loading task.</param>
+        /// <param name="layerHandle">Handle of the layer the loading is peformed for.</param>
+        /// <param name="numFeatures">Number of features within current map extents.</param>
+        /// <param name="numLoaded">Number of features that were actually loaded.</param>
+        /// <remarks>The loading task may be finished without any features being loaded under the following circumstances:
+        /// - number of features within current extents is larger than GlobalSettings.OgrLayerMaxFeatureCount parameter;
+        /// - the extents of map have been changed since the loading was started so the data being loaded is no longer needed;
+        /// - there is a problem with accessing the datasource (e.g. lost network connection).\n
+        /// In case of failure, i.e. (numLoaded = 0) the event will be fired from background thread. In case 
+        /// of success - from the main thread before the rendering of the loaded data.
+        /// </remarks>
+        public event _DMapEvents_BackgroundLoadingFinishedEventHandler BackgroundLoadingFinished;
+
+        /// <summary>
+        /// This event is fired when background loading of data for OgrLayer starts.
+        /// </summary>
+        /// <param name="taskId">Unique Id of the loading task, 
+        /// which can be tracked down in BackgroundLoadingFinished to determine the results of the operation.</param>
+        /// <param name="layerHandle">Handle of the layer loading starts for.</param>
+        /// <remarks>The event is fired after map extents change for each OgrLayer with OgrLayer.DynamicLoading proprety set to true,
+        /// when the layer doesn't have the necessary data in its buffer (OgrLayer.GetBuffer). The event can be used
+        /// to display some kind of loading indicator to notify the user that some data is still being loaded.</remarks>
+        public event _DMapEvents_BackgroundLoadingStartedEventHandler BackgroundLoadingStarted;
+
+        /// <summary>
+        /// This event is fired before shape is deleted in interactive shape editor.
+        /// </summary>
+        /// <param name="target">What element of shape (whole shape, part, single vertex) is to be deleted.</param>
+        /// <param name="cancel">Passed by reference. To cancel the operation this value should be set to blnTrue.</param>
+        /// <remarks>This event is fired when shape (or some of its elements) is selected in shape editor (AxMap.CursorMode = cmEditShape)
+        /// and user presses Delete button. The common use of his event is to display a message box asking the user whether 
+        /// the operation should be performed.</remarks>
+        public event _DMapEvents_BeforeDeleteShapeEventHandler BeforeDeleteShape;
+
+        /// <summary>
+        /// This event is fired before the rendering of drawing layers. Handle of device context is passed to allow the user to implement custom drawing. 
+        /// </summary>
+        /// <param name="hdc">Handle of device context of screen buffer.</param>
+        /// <param name="xMin">Minimum X coordinate of the rectangle being rendered.</param>
+        /// <param name="xMax">Maximum X coordinate of the rectangle being rendered.</param>
+        /// <param name="yMin">Minimum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="yMax">Maximum Y coordinate of the rectangle being rendered.</param>
+        /// <param name="handled">Passed by reference. 
+        /// The value should be set to blnTrue in case some additional drawing is performed in client code.</param>
+        public event _DMapEvents_BeforeDrawingEventHandler BeforeDrawing;
+
+        /// <summary>
+        /// This event is fired before editing starts for particular shape (after user click on the shape when map cursor is set to cmEditShape). 
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer the shape was selected from.</param>
+        /// <param name="shapeIndex">Index of shape to be edited.</param>
+        /// <param name="cancel">Passed by reference. Allows user to cancel the editing operations by setting the value to blnTrue.</param>
+        public event _DMapEvents_BeforeShapeEditEventHandler BeforeShapeEdit;
+
+        /// <summary>
+        /// The event is fired when current map tool asks for the layer to work with.
+        /// </summary>
+        /// <param name="xProj">X coordinate of mouse click in map coordinates (if the event was triggered by mouse click).</param>
+        /// <param name="yProj">Y coordinate of mouse click in map coordinates (if the event was triggered by mouse click).</param>
+        /// <param name="layerHandle">Passed by reference. Handle of the layer to apply the tool to should be set.</param>
+        /// <remarks>LayerHadle parameter in most cases is initially set to -1, which means "layer not defined".
+        /// If this value is left unchanged the pending operation won't be preformed. Further details are provided 
+        /// in description of particular tools.</remarks>
+        public event _DMapEvents_ChooseLayerEventHandler ChooseLayer;
+
+        /// <summary>
+        /// The event is fired when user performs double click with left mouse button while cursor is within the map control.
+        /// </summary>
+        public event EventHandler DblClick;
+
+        /// <summary>
+        /// This event is fired when the extents of the map change. 
+        /// </summary>
+        public event EventHandler ExtentsChanged;
+
+        /// <summary>
+        /// This event is fired when a user drags a file and drops it on the map. 
+        /// </summary>
+        /// <param name="filename">The filename of the file dropped on the map.</param>
+        public event _DMapEvents_FileDroppedEventHandler FileDropped;
+
+        /// <summary>
+        /// This event is fired when a new layer has been added to the map.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the newly added layer.</param>
+        public event _DMapEvents_LayerAddedEventHandler LayerAdded;
+
+        /// <summary>
+        /// This event is fired when a new layer has been added to the map and it has no metadata about its coordinate system and projection.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="cancelAdding">Passed by reference. The value should be set to blnTrue to cancel the adding operation.</param>
+        /// <remarks>If this event is not handled then decision about the layer will be taken based on 
+        /// the value of GlobalSettings.AllowLayersWithoutProjections property.</remarks>
+        public event _DMapEvents_LayerProjectionIsEmptyEventHandler LayerProjectionIsEmpty;
+
+        /// <summary>
+        /// This event is fired when a layer has been removed from map.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="fromRemoveAllLayers">The value will be set to true in case layer removal is caused by AxMap.RemoveAllLayers call.</param>
+        public event _DMapEvents_LayerRemovedEventHandler LayerRemoved;
+
+        /// <summary>
+        /// This event is fired after a layer was reprojected (its original projection was different from the map projection).
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="success">True in case reprojection was peformed successfully. False</param>
+        /// <remarks>Automatic reprojection if peformed in case of projection mismatch for vector datasources.
+        /// Reprojected datasource will be represented by in-memory shapefile, no disk version will be saved automatically.
+        /// Raster datasource will be rejected without an attempt to reproject them. 
+        /// The projection mismatch behavior is controlled by GlobalSettings.AllowProjectionMismatch, 
+        /// GlobalSettings.ReprojectionLayerOnAdding properties.</remarks>
+        public event _DMapEvents_LayerReprojectedEventHandler LayerReprojected;
+
+        /// <summary>
+        /// This event is fired for each layer in the map when the map state is changed
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        public event _DMapEvents_MapStateEventHandler MapStateEvent;
+
+        /// <summary>
+        /// This event is fired after the user adds or removes a point from the path of measuring tool.
+        /// </summary>
+        /// <param name="action">Particular action performed by user.</param>
+        public event _DMapEvents_MeasuringChangedEventHandler MeasuringChanged;
+
+        /// <summary>
+        /// This event is fired when a user has pressed a mouse button while the cursor is inside the map control. 
+        /// The map property SendMouseDown must be set to True for this event to be fired.
+        /// </summary>
+        /// <remarks> </remarks>
+        /// <param name="Button">Mouse button that was pressed.</param>
+        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event. </param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        public event _DMapEvents_MouseDownEventHandler MouseDownEvent;
+
+        /// <summary>
+        /// This event is fired when the mouse is moved while the cursor is inside the map control. 
+        /// The map property SendMoveMouse must be set to True for this event to be fired. 
+        /// </summary>
+        /// <param name="Button">Mouse button that was pressed.</param>
+        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        public event _DMapEvents_MouseMoveEventHandler MouseMoveEvent;
+
+        /// <summary>
+        /// This event is fired when the mouse button is released while the cursor is in the map control. 
+        /// The map property SendMouseUp must be set to True for this event to be fired. 
+        /// </summary>
+        /// <param name="Button">Mouse button that was pressed.</param>
+        /// <param name="Shift">The shift/ctrl modifiers pressed during the creation of this event.</param>
+        /// <param name="x">X coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        /// <param name="y">Y coordinate of mouse cursor position in pixels relative to control's origin.</param>
+        public event _DMapEvents_MouseUpEventHandler MouseUpEvent;
+
+        /// <summary>
+        /// This event is fired during the rendering of map after data layers and drawing layers were rendered.
+        /// The map property SendMouseUp SendOnDrawBackBuffer must be set to True for this event to be fired. 
+        /// </summary>
+        /// <param name="BackBuffer">Handle of the device context of back buffer bitmap.</param>
+        public event _DMapEvents_OnDrawBackBufferEventHandler OnDrawBackBuffer;
+
+        /// <summary>
+        /// The event is fired when projection of the map control was changed.
+        /// </summary>
+        public event EventHandler ProjectionChanged;
+
+        /// <summary>
+        /// This event is fired when a layer was added to the map with projection / coordinate system different from 
+        /// those of the map control.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="cancelAdding">Passed by reference. The value should be set to blnTrue in case the adding of the layer should be cancelled.</param>
+        /// <param name="reproject">Passed by reference. The value should be set to blnTrue to instruct the control to run automatic reprojection of the layer.</param>
+        public event _DMapEvents_ProjectionMismatchEventHandler ProjectionMismatch;
+
+        /// <summary>
+        /// This event is fired while the user is dragging a selection box in the map control. 
+        /// The map property SendSelectBoxDrag must be set to True for this event to be fired. 
+        /// </summary>
+        /// <param name="left">The left boundary of the selection box in pixel coordinates.</param>
+        /// <param name="right">The right boundary of the selection box in pixel coordinates.</param>
+        /// <param name="bottom">The bottom boundary of the selection box in pixel coordinates.</param>
+        /// <param name="top">The top boundary of the selection box in pixel coordinates.</param>
+        public event _DMapEvents_SelectBoxDragEventHandler SelectBoxDrag;
+
+        /// <summary>
+        /// This event is fired when the user finishes dragging a selection box in the map control. 
+        /// The map property SendSelectBoxFinal must be set to True for this event to be fired. 
+        /// </summary>
+        /// <param name="left">The left boundary of the selection box in pixel coordinates.</param>
+        /// <param name="right">The right boundary of the selection box in pixel coordinates.</param>
+        /// <param name="bottom">The bottom boundary of the selection box in pixel coordinates.</param>
+        /// <param name="top">The top boundary of the selection box in pixel coordinates.</param>
+        public event _DMapEvents_SelectBoxFinalEventHandler SelectBoxFinal;
+
+        /// <summary>
+        /// This event is fired after shapes were selected with cmSelection tool.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer the shapes were selected on.</param>
+        /// <remarks>The event will be fired only when selection is done by AxMap control internally, i.e.
+        /// - AxMap.CursorMode set to cmSelection;
+        /// - a layer handle is passed to AxMap.ChooseLayer event handler;
+        /// - user changes selection by clicking on shapes or drawing selection box.
+        /// When Shapefile.ShapeSelected property is changed from client code no event is fired.</remarks>
+        public event _DMapEvents_SelectionChangedEventHandler SelectionChanged;
+
+        /// <summary>
+        /// This event is fired when mouse cursor is being moved by user and the cursor enters or leaves neighborhood of particular shape.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer the shape belongs to.</param>
+        /// <param name="shapeIndex">Index of the shape.</param>
+        /// <remarks>The event is fired when:
+        /// - AxMap.CursorMode is set to cmIdentify tool or one of the editing tools (cmAddShape, cmEditShape, etc.);
+        /// - number shapes within visible extents is smaller than GlobalSettings.HotTrackingMaxShapeCount.
+        /// 
+        /// For cmIdentify tool the shape will be automatically highlighted (see AxMap.Identifier for details);
+        /// For editing cursors vertices of the shape under cursor will be displayed (see ShapeEditor.HighlightVertices property).
+        /// </remarks>
+        public event _DMapEvents_ShapeHighlightedEventHandler ShapeHighlighted;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layerHandle"></param>
+        /// <param name="shapeIndex"></param>
+        /// <param name="pointX"></param>
+        /// <param name="pointY"></param>
+        public event _DMapEvents_ShapeIdentifiedEventHandler ShapeIdentified;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ErrorMessage"></param>
+        public event _DMapEvents_ShapeValidationFailedEventHandler ShapeValidationFailed;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tiles"></param>
+        /// <param name="snapShot"></param>
+        /// <param name="key"></param>
+        public event _DMapEvents_TilesLoadedEventHandler TilesLoaded;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public event EventHandler UndoListChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layerHandle"></param>
+        /// <param name="shape"></param>
+        /// <param name="cancel"></param>
+        public event _DMapEvents_ValidateShapeEventHandler ValidateShape;
+        
 
         /// @}
         #endregion

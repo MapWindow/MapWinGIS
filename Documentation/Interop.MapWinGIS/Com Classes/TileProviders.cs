@@ -6,7 +6,7 @@ namespace MapWinGIS
     using MapWinGIS;
 
     /// <summary>
-    /// Holds the list of tile providers associated with Tiles class.
+    /// Holds the list of tile providers associated with %Tiles class.
     /// </summary>
     /// \new490 Added in version 4.9.0
 #if nsp
