@@ -232,10 +232,10 @@ namespace MapWinGIS
     /// 
     /// \new492b Added in version 4.9.2
 #if nsp
-#if upd
-    public class OgrLayer : MapWinGIS.IOgrLayer
-#else        
-            public class IOgrLayer
+    #if upd
+        public class OgrLayer : MapWinGIS.IOgrLayer
+    #else        
+        public class IOgrLayer
     #endif
 #else
         public class OgrLayer

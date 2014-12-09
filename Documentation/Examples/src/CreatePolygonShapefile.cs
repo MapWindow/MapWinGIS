@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using AxMapWinGIS;
 using MapWinGIS;
+using System.Diagnostics;
 
 namespace Examples
 {
@@ -36,40 +37,33 @@ namespace Examples
                 // In a loop we are creating 100 different points using the box established above.
                 for (int i = 0; i < 100; i++)
                 {
-                    if (i % 10 == 0)
+                    double xCenter = xMin + (xMax - xMin) * rnd.NextDouble();
+                    double yCenter = yMin + (yMax - yMin) * rnd.NextDouble();
+
+                    // random radius from 10 to 100
+                    double radius = 10 + rnd.NextDouble() * 90;
+
+                    // polygons must be clockwise
+                    Shape shp = new Shape();
+                    shp.Create(ShpfileType.SHP_POLYGON);
+
+                    for (int j = 0; j < 37; j++)
                     {
-                        Shape shp1 = new Shape();
-                        shp1.Create(ShpfileType.SHP_POLYGON);
-                        sf.EditInsertShape(shp1, ref i);
+                        Point pnt = new Point();
+                        pnt.x = xCenter + radius * Math.Cos(j * Math.PI / 18);
+                        pnt.y = yCenter - radius * Math.Sin(j * Math.PI / 18);
+                        shp.InsertPoint(pnt, ref j);
                     }
-                    else
-                    {
-                        double xCenter = xMin + (xMax - xMin) * rnd.NextDouble();
-                        double yCenter = yMin + (yMax - yMin) * rnd.NextDouble();
+                    Debug.Print(shp.Extents.ToDebugString());
+                    sf.EditInsertShape(shp, ref i);
 
-                        // random radius from 10 to 100
-                        double radius = 10 + rnd.NextDouble() * 90;
-
-                        // polygons must be clockwise
-                        Shape shp = new Shape();
-                        shp.Create(ShpfileType.SHP_POLYGON);
-
-                        for (int j = 0; j < 37; j++)
-                        {
-                            Point pnt = new Point();
-                            pnt.x = xCenter + radius * Math.Cos(j * Math.PI / 18);
-                            pnt.y = yCenter - radius * Math.Sin(j * Math.PI / 18);
-                            shp.InsertPoint(pnt, ref j);
-                        }
-                        sf.EditInsertShape(shp, ref i);
-
-                        sf.EditCellValue(fldX, i, xCenter.ToString());
-                        sf.EditCellValue(fldY, i, yCenter.ToString());
-                        sf.EditCellValue(fldArea, i, Math.PI * radius * radius);
-                    }
+                    sf.EditCellValue(fldX, i, xCenter.ToString());
+                    sf.EditCellValue(fldY, i, yCenter.ToString());
+                    sf.EditCellValue(fldArea, i, Math.PI * radius * radius);
                 }
 
                 int handle = axMap1.AddLayer(sf, true);
+                string extents = sf.Extents.ToDebugString();
                 axMap1.ZoomToLayer(handle);
 
                 sf.Categories.Generate(fldArea, tkClassificationType.ctNaturalBreaks, 7);

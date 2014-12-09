@@ -594,6 +594,7 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>Both shapefile and attribute table must be in editing mode for the successful operation.
         /// Corresponding record will be removed from attribute table to ensure shapefile integrity.
+        /// Indices of shapes after the deleted one will be decreased by 1 after the operation. 
         /// </remarks>
         /// <param name="ShapeIndex">The index of shape to delete.</param>
         /// <returns>Returns true on success and false otherwise.</returns>

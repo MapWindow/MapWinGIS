@@ -41,7 +41,7 @@ namespace Examples
 
             ShapeDrawingOptions options = sf.DefaultDrawingOptions;
             options.PointType = tkPointSymbolType.ptSymbolPicture;
-            options.Picture = this.OpenMarker();
+            options.Picture = this.OpenMarker(dataPath);
             sf.CollisionMode = tkCollisionMode.AllowCollisions;
 
             axMap1.SendMouseDown = true;
@@ -52,9 +52,9 @@ namespace Examples
         // <summary>
         // Opens a marker from the file
         // </summary>
-        private Image OpenMarker()
+        private Image OpenMarker(string dataPath)
         {
-            string path = @"..\..\..\icons\marker.png";
+            string path = Path.GetDirectoryName(Application.ExecutablePath) + @"..\..\..\..\icons\marker.png";
             if (!File.Exists(path))
             {
                 MessageBox.Show("Can't find the file: " + path);

@@ -9,7 +9,7 @@ namespace Examples
     public partial class MapExamples
     {
         // <summary>
-        // This code calculates an area of polygons, writes it to the attribute table, and displayes as labels.
+        // This code calculates an area of polygons, writes it to the attribute table, and displays as labels.
         // </summary>
         public void CalculateArea(AxMap axMap1, string dataPath)
         {

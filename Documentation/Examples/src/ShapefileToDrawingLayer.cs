@@ -1,5 +1,9 @@
 ﻿using AxMapWinGIS;
 using MapWinGIS;
+using System;
+using System.Drawing;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Examples
 {
@@ -13,12 +17,17 @@ namespace Examples
             axMap1.Projection = tkMapProjection.PROJECTION_NONE;
             axMap1.GrabProjectionFromData = true;
 
-            string[] filenames = new string[2];
-            filenames[0] = dataPath + "buildings.shp";
-            filenames[1] = dataPath + "roads.shp";
+            string[] filenames = new []{"buildings.shp", "roads.shp",  "points.shp"};
+            for (int i = 0; i < filenames.Length; i++)
+            {
+                filenames[i] = dataPath + filenames[i];
+            }
             Extents extents = null;
 
-            axMap1.LockWindow(tkLockMode.lmLock);
+            var center =  (axMap1.Extents as Extents).Center;
+
+            
+
             try
             {
                 for (int n = 0; n < filenames.Length; n++)
@@ -30,7 +39,7 @@ namespace Examples
                             axMap1.GeoProjection = sf.GeoProjection.Clone();
                         
                         if (extents == null)
-                            extents = sf.Extents;   // the extents of the fist shapefile wil be used to setup display
+                            extents = sf.Extents;   // the extents of the fist shapefile will be used to setup display
 
                         int drawHandle = axMap1.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
                         for (int i = 0; i < sf.NumShapes; i++)
@@ -75,7 +84,8 @@ namespace Examples
             }
             finally 
             {
-                axMap1.Extents = extents;
+                if (extents != null)
+                    axMap1.Extents = extents;
                 axMap1.LockWindow(tkLockMode.lmUnlock);
                 axMap1.Redraw();
             }

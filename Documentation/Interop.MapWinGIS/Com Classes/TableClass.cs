@@ -29,41 +29,94 @@ namespace MapWinGIS
     /// }
     /// \enddot
     /// <a href = "diagrams.html">Graph description</a>\n\n
-    /// The following code will add the field in the table:
+    /// 
+    /// <b> %Table expressions. </b>
+    /// 
+    /// %Table class provides a built-in expression parser which is used at the time of writing these lines by the following methods:
+    /// - Charts.VisibilityExpression;
+    /// - LabelCategory.Expression;
+    /// - Labels.Expression;
+    /// - Labels.Generate;
+    /// - Labels.VisibilityExpression;
+    /// - OgrLayer.LabelExpression;
+    /// - Shapefile.VisibilityExpression;
+    /// - ShapefileCategories.Generate;
+    /// - ShapefileCategory.Expression;
+    /// - Table.Calculate;
+    /// - Table.ParseExpression;
+    /// - Table.Query;
+    /// - Table.TestExpression;
+    /// - Utils.CalculateRaster.
+    /// 
+    /// Expression may include:
+    /// - field names (in square brackets);
+    /// - arithmetic operators (+ (also works for concatenation of strings), -, *, /, \ (interger division), ^ (raising to power));
+    /// - comparison operators (&gt;, &lt;, &lt;=, &gt;=, &lt;&gt;, =);
+    /// - logical operators (AND, OR, XOR, NOT);
+    /// - logical constants (TRUE, FALSE);
+    /// - string constants (e.g. "my_string_constant");
+    /// - round brackets (to control order of evaluation);
+    /// 
+    /// The intermediate values during calculation and resulting values can be of one of the following types:
+    /// - double (integers are treated as doubles as well);
+    /// - string;
+    /// - boolean.
+    /// 
+    /// The parser doesn't rely on any DBMS, therefore it doesn't support standard SQL functions, both 
+    /// mathematic and string. Therefore for more complex expressions a column
+    /// should be added, where calculations can be made using Table.get_CellValue, Table.EditCellValue API members and 
+    /// programming language of your choice.
+    /// 
+    /// Examples:\n
     /// \code
-    /// Shapefile sf = some_shapefile;
-    /// if (sf.EditingTable)
-    /// {
-    ///     // string field
-    ///     Field fld = new Field();
-    ///     fld.Name = "New field";
-    ///     fld.Type = FieldType.STRING_FIELD;
-    ///     fld.Width = 15;      // 15 characters
-    ///
-    ///     // let's insert it
-    ///     int fieldIndex = sf.NumFields;      // it will be inserted as the last one
-    ///     sf.EditInsertField(fld, ref fieldIndex, null);
-    /// }
+    /// [Area] > 100 AND [Population] < 50  -- Area and Population are field names; resulting value is boolean
+    /// [Area] / 10000 + " ha"              -- Area is field name, " ha" - string constant, "+" - concatenation operator; 
+    ///                                     -- resulting value is string
+    /// ([Pop1990] + [Pop2005])/2           -- Pop1990 and Pop2005 are field names; resulting value is double
     /// \endcode
-    /// To find the index of field with the given name in the table:
+    /// 
+    /// Here is code sample demonstrating how to calculate a new field as an average of 2 existing fields:
     /// \code
-    /// Shapefile sf = some_shapefile;
-    ///    
-    /// // fast call
-    /// int fieldIndex = sf.Table.get_FieldIndexByName("New field");
-    ///
-    /// // to do the same "manually"
-    /// fieldIndex = -1;
-    /// for (int i = 0; i < sf.NumFields; i++)
+    /// string filename = @"D:\counties.dbf";
+    /// var tbl = new Table();
+    /// if (!tbl.Open(filename))
     /// {
-    ///     if (sf.get_Field(i).Name == "New field") {
-    ///         fieldIndex = i;
-    ///         break;
+    ///     MessageBox.Show("File not found: " + filename);
+    /// }
+    /// else
+    /// {
+    ///     tbl.StartEditingTable();
+    /// 
+    ///     int fldIndex = tbl.FieldIndexByName["Pop1990"];
+    ///     int fldIndex2 = tbl.FieldIndexByName["Pop1997"];
+    ///     if (fldIndex == -1 && fldIndex2 == -1)
+    ///     {
+    ///         MessageBox.Show("Source fields aren't found.");
     ///     }
+    ///     else
+    ///     {
+    ///         // adding a new field:
+    ///         // 2 - number of decimal places; 
+    ///         // 16 - total length (numbers are actually stored as strings inside DBF )
+    ///         int fldIndexNew = tbl.EditAddField("PopAvg", FieldType.DOUBLE_FIELD, 2, 16);
+    /// 
+    ///         for (int i = 0; i < tbl.NumRows; i++)
+    ///         {
+    ///             // it's assumed here that the source fields are numeric (either integer or double),
+    ///             // but if it's not known then a field type can be checked with Table.get_Field(fieldIndex).Type
+    ///             double val1 = Convert.ToDouble(tbl.get_CellValue(fldIndex, i));
+    ///             double val2 = Convert.ToDouble(tbl.get_CellValue(fldIndex2, i));
+    ///             tbl.EditCellValue(fldIndexNew, i, (val1 + val2)/2);
+    ///          }
+    ///         MessageBox.Show("New field is calculated.");
+    ///     }
+    /// 
+    ///     if( tbl.StopEditingTable(true))
+    ///         MessageBox.Show("Table is saved.");
     /// }
-    ///
-    /// Debug.Print("Field index: " + fieldIndex.ToString());
+    /// tbl.Close();
     /// \endcode
+    /// 
     #if nsp
         #if upd
             public class Table : MapWinGIS.ITable
