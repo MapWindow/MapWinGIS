@@ -102,7 +102,7 @@ namespace MapWinGIS
     /// \enddot
     /// <a href = "diagrams.html">Graph description</a>
     /// </remarks>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
 #if nsp
     #if upd
         public class OgrDatasource : MapWinGIS.IOgrDatasource

@@ -344,7 +344,7 @@ namespace MapWinGIS
         /// <param name="connectionString">Connection string. See details for particular formats <a href ="http://www.gdal.org/ogr_formats.html">here</a>.</param>
         /// <param name="layerNameOrQuery">Name of the layer (i.e. database table) or SQL query.</param>
         /// <returns>Opened layer or null on failure.</returns>
-        /// \new492b Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public OgrLayer OpenFromDatabase(string connectionString, string layerNameOrQuery)
         {
             throw new NotImplementedException();

@@ -1848,7 +1848,7 @@ namespace MapWinGIS
         /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
         /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
         /// must be set in the client code.</remarks>
-        /// \new492b Added in version 4.9.2 
+        /// \new493 Added in version 4.9.3 
         public bool get_ShapeModified(int ShapeIndex)
         {
             throw new NotImplementedException();
@@ -1864,7 +1864,7 @@ namespace MapWinGIS
         /// <param name="ShapeIndex">Index of shape.</param>
         /// <param name="newVal">New value of modified flag.</param>
         /// <returns>New value of modified flag.</returns>
-        /// \new492b Added in version 4.9.2 
+        /// \new493 Added in version 4.9.3 
         public void set_ShapeModified(int ShapeIndex, bool newVal)
         {
             throw new NotImplementedException();

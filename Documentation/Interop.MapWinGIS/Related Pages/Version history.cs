@@ -1,14 +1,74 @@
 ﻿/// \page version_history Version history
 /// 
 /// \section apichanges API changes.
-/// -  New API in version \link newpage492c 4.9.2c \endlink
-/// -  New API in version \link newpage492b 4.9.2b \endlink
+/// -  New API in version \link newpage493 4.9.3 \endlink
 /// -  New API in version \link newpage492 4.9.2 \endlink
 /// -  New API in version \link newpage491 4.9.1 \endlink
 /// -  New API in version \link newpage490 4.9.0 \endlink
 /// -  New API in version \link newpage48 4.8 \endlink
 /// -  API members that were \link deprecated Deprecated \endlink
 /// .
+/// 
+/// \section changes493 Changes in version 4.9.3.
+/// 
+/// 1. Added support for variety of vector datasources through GDAL/OGR drivers. 
+/// - spatial databases (PostGIS, MS SQL, SpatialLite, etc.)
+/// - commonly used vector formats (MapInfo TAB, KML, etc.);
+/// - listing of layers in datasource using OgrDatasource class;
+/// - adding of OGR layers on the map using OgrLayer class (AxMap.AddLayer); 
+/// - SQL queries against datasource (OgrDatasource.RunQuery, OgrDatasource.ExecuteSQL);
+/// - editing and saving of changes back to datasource (if particular driver supports it);
+/// - saving of style information (either .mwsymb file or as a table in RDMS datasource);
+/// - integration with all previously written shapefile-based client code;
+/// 
+/// 2. Built-in shape editor. Supports:
+/// - creation and editing of shapes, parts and vertices (cmAddShape and cmEditShape tools);
+/// - group operations on the number selected shapes (cmMoveShapes and cmRotateShapes tools);
+/// - overlay operations (cmSplitByPolyline, cmSplitByPolygon, cmClipByPolygon, cmEraseByPolygon);
+/// - undo/redo capability for all the operations (UndoList class);
+/// - snapping to the vertices of existing shapes (ShapeEditor.SnapBehavior);
+/// - dynamic display of area, length of segments and their bearing;
+/// - user events (AxMap.BeforeShapeEdit, AxMap.ValidateShape, AxMap.ValidationFailed, AxMap.AfterShapeEdit);
+/// - ShapeEditor class to control various settings (available via AxMap.ShapeEditor);
+/// 
+/// 3. .NET Demo application which demonstrates the usage of the latest API:
+/// - opening of shapefiles, rasters and OGR vector layers (PostGIS layer and diskbased formats);
+/// - complete Shape Editor;
+/// - TMS tiles from the range of servers;
+/// - geolocation dialog.
+/// 
+/// 4. Improved selection tool:
+/// - selection can be done automatically now (no need to handle SelectBoxFinal event );
+/// - a layer to select from can be specified by handling AxMap.ChooseLayer event;
+/// - nicer rendering of selection rectangle;
+/// - new cmSelectByPolygon tool;
+/// 
+/// 5. New tool to display shapefile attributes (cmIdentify ):
+/// - can highlight shapes under mouse cursor during mouse move operations (fires ShapeHightlighted event);
+/// - fires ShapeIdentified event, which can be handled by client code to display attributes;
+/// - works either for a selected layer or all layers at once (Identifier.tkIdentifierMode);
+/// 
+/// 6. Improved API to handle projection mismatch for layers:
+/// - AxMap events: LayerProjectionIsEmpty, ProjectionMismatch, LayerReprojected;
+/// - GlobalSettings properties: AllowLayersWithoutProjection, AllowProjectionMismatch, ReprojectLayersOnAdding;
+/// - decision about adding/rejecting layers can be taken on per-layer basis by handling events;
+/// 
+/// 7. Improved error reporting:
+/// - GlobalSettings.ApplicationCallback property (serves as callback each and every COM class);
+/// - reporting of GDAL errors meesages through the application callback;
+/// 
+/// 8. Major decrease of memory leaking:
+/// - thanks of Deleaker tool.
+/// 
+/// 10. Smaller API changes 
+/// - new methods in %Shape class: Shape.SplitByPolyline, Shape.BufferWithParams, Shape.Rotate;
+/// - DynamicVisibility for ShapefileCategories (ShapefileCategory.DynamicVisibility);
+/// - AxMap.AddLayer, AxMap.RemoveLayer events;
+/// - Tiles.SetProxyAuthorization method to set name/password when they are required;
+/// 
+/// 11. Fixes for a number of issues reported by users:
+/// - division by zero error in Borland C++ Builder;
+/// - TODO: list more;
 /// 
 /// \section changes492 Changes in version 4.9.2.
 /// 

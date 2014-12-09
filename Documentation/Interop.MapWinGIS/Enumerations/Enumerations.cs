@@ -2139,7 +2139,7 @@ namespace MapWinGIS
     /// <summary>
     /// Defines possible subjects of OgrLayer.SaveChanges method.
     /// </summary>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkOgrSaveType
     {
         /// <summary>
@@ -2160,7 +2160,7 @@ namespace MapWinGIS
     /// List of capabilities that might or might not be supported by particular OGR driver.
     /// </summary>
     /// <remarks>See description <a href="http://www.gdal.org/classOGRLayer.html#aeedbda1a62f9b89b8e5f24332cf22286">here</a></remarks>.
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkOgrLayerCapability
     {
         olcRandomRead = 0,
@@ -2184,7 +2184,7 @@ namespace MapWinGIS
     /// <summary>
     /// Possible results for OgrLayer.SaveChanges operation.
     /// </summary>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkOgrSaveResult
     {
         /// <summary>
@@ -2209,7 +2209,7 @@ namespace MapWinGIS
     /// <summary>
     /// Possible metadata items which can be associated with particular GDAL driver.
     /// </summary>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkGdalDriverMetadata
     {
         dmdLONGNAME = 0,
@@ -2232,7 +2232,7 @@ namespace MapWinGIS
     /// <summary>
     /// List of capabilities that might or might not be supported by particular OGR datasource.
     /// </summary>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkOgrDSCapability
     {
         odcCreateLayer = 0,
@@ -2245,7 +2245,7 @@ namespace MapWinGIS
     /// <summary>
     /// Possible source types for instance of OgrLayer class.
     /// </summary>
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
     public enum tkOgrSourceType
     {
         /// <summary>

@@ -413,7 +413,7 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets string encoding used to communicate with OGR drivers.
         /// </summary>
-        /// \new492b Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public tkOgrEncoding OgrStringEncoding
         {
             get { throw new NotImplementedException(); }
@@ -425,14 +425,14 @@ namespace MapWinGIS
         /// OGR layer.
         /// </summary>
         /// \see OgrLayer.MaxFeatureCount
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public int OgrLayerMaxFeatureCount { get; set; }
 
         /// <summary>
         /// Gets or sets a value which indicates whether OgrLayer.DynamicLoading mode will
         /// chosen automatically based on the number of features. The default value is true.
         /// </summary>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool AutoChooseOgrLoadingMode { get; set; }
 
         /// <summary>
@@ -440,7 +440,7 @@ namespace MapWinGIS
         /// into the datasource and used further on.
         /// </summary>
         /// \see OgrLayer.GetNumStyles
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool OgrUseStyles { get; set; }
 
         /// <summary>

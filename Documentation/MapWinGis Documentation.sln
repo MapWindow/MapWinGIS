@@ -9,7 +9,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AxInterop.MapWinGIS", "AxIn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Examples", "Examples\Examples.csproj", "{A9BC7069-2AC8-49CB-BB0C-8D5B04586D67}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Help", "Help", "{5843FE08-0B8C-4241-9E67-69E202025E7E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doxygen", "Doxygen", "{5843FE08-0B8C-4241-9E67-69E202025E7E}"
+	ProjectSection(SolutionItems) = preProject
+		doxygen.css = doxygen.css
+		DoxygenLayout.xml = DoxygenLayout.xml
+		footer.html = footer.html
+		header.html = header.html
+		MapWinGIS doxyfile = MapWinGIS doxyfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

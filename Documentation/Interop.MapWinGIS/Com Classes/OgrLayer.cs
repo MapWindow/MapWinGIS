@@ -230,7 +230,7 @@ namespace MapWinGIS
     /// \enddot
     /// <a href = "diagrams.html">Graph description</a>
     /// 
-    /// \new492b Added in version 4.9.2
+    /// \new493 Added in version 4.9.3
 #if nsp
     #if upd
         public class OgrLayer : MapWinGIS.IOgrLayer
@@ -528,7 +528,7 @@ namespace MapWinGIS
         /// Clears all the styles stored for current layer in datasource.
         /// </summary>
         /// <returns>True on success.</returns>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool ClearStyles()
         {
             throw new NotImplementedException();
@@ -549,7 +549,7 @@ namespace MapWinGIS
         /// 
         /// The mode is chosen automatically when the layer is opened depending on the number of features.
         /// But afterwards it's possible possible to change the value.</remarks>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool DynamicLoading
         {
             get { throw new NotImplementedException(); }
@@ -612,7 +612,7 @@ namespace MapWinGIS
         /// }
         /// \endcode
         /// </remarks>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool GenerateCategories(string Fieldname, tkClassificationType ClassificationType, int numClasses,
             tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType)
         {
@@ -643,7 +643,7 @@ namespace MapWinGIS
         /// );
         /// \endcode
         /// <returns>Number of styles.</returns>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public int GetNumStyles()
         {
             throw new NotImplementedException();
@@ -657,7 +657,7 @@ namespace MapWinGIS
         /// for dynamic loading mode, where labels will be generated on the fly after each zooming 
         /// operation.
         /// </remarks>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public string LabelExpression
         {
             get { throw new NotImplementedException(); }
@@ -668,7 +668,7 @@ namespace MapWinGIS
         /// Gets or sets label orientation for polyline layers.
         /// </summary>
         /// \see OgrLayer.LabelExpression
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public tkLineLabelOrientation LabelOrientation
         {
             get { throw new NotImplementedException(); }
@@ -679,7 +679,7 @@ namespace MapWinGIS
         /// Gets or sets position of labels relative to their parent features.
         /// </summary>
         /// \see OgrLayer.LabelExpression
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public tkLabelPositioning LabelPosition
         {
             get { throw new NotImplementedException(); }
@@ -695,7 +695,7 @@ namespace MapWinGIS
         /// value of property can be changed with GlobalSettings.OgrLayerMaxFeatureCount.
         /// </remarks>
         /// \see OgrLayer.GetData
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public int MaxFeatureCount
         {
             get { throw new NotImplementedException(); }
@@ -707,7 +707,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="StyleName">The name of the style.</param>
         /// <returns>True on success.</returns>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool RemoveStyle(string StyleName)
         {
             throw new NotImplementedException();
@@ -718,7 +718,7 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>This property will check the presence of mw_styles table in the datasource and then
         /// will try to create one if it's missing. If neither succeeds, false will be returned.</remarks>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public bool SupportsStyles
         {
             get { throw new NotImplementedException(); }
@@ -729,7 +729,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="styleIndex">Index of style.</param>
         /// <returns>Name of the style.</returns>
-        /// \new492c Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public string get_StyleName(int styleIndex)
         {
             throw new NotImplementedException();

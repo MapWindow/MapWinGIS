@@ -2044,7 +2044,7 @@ namespace AxMapWinGIS
         ///     }
         /// }
         /// \endcode
-        /// \new492b Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public int AddLayerFromDatabase(string connectionString, string layerNameOrQuery, bool visible);
 
         /// <summary>
@@ -2254,7 +2254,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>OGR layer or null in case of invalid layer index or wrong layer type.</returns>
-        /// \new492b Added in version 4.9.2
+        /// \new493 Added in version 4.9.3
         public OgrLayer get_OgrLayer(int layerHandle);
 
         /// @}
