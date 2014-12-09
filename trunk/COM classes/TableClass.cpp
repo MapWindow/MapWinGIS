@@ -1715,19 +1715,47 @@ STDMETHODIMP CTableClass::StartEditingTable(ICallback *cBack, VARIANT_BOOL *retv
 // *****************************************************************
 //		StopEditingTable()
 // *****************************************************************
+bool CTableClass::HasFieldChanges()
+{
+	for (int i = 0; i < (int)_fields.size(); i++)
+	{
+		CField* fld = (CField*)_fields[i]->field;
+		if (fld->GetIsUpdated())
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+// *****************************************************************
+//		MarkFieldsAsUnchanged()
+// *****************************************************************
+void CTableClass::MarkFieldsAsUnchanged()
+{
+	for (int i = 0; i < (int)_fields.size(); i++)
+	{
+		CField* fld = (CField*)_fields[i]->field;
+		fld->SetIsUpdated(false);
+	}
+}
+
+// *****************************************************************
+//		StopEditingTable()
+// *****************************************************************
 STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+	
 	*retval = VARIANT_FALSE;
 
-	if (_globalCallback == NULL && cBack != NULL)
+	if ( !_globalCallback  && cBack )
 	{
 		_globalCallback = cBack;
 		_globalCallback->AddRef();
 	}
 
-	if( _dbfHandle == NULL )
+	if( !_dbfHandle )
 	{	
 		if( _isEditingTable )
 		{
@@ -1741,62 +1769,39 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 
 			// Note that we are no longer editing the table
 			_isEditingTable = FALSE;
-			return S_OK;
 		}
 		else
 		{		
 			ErrorMessage(tkFILE_NOT_OPEN);
-			return S_OK;
 		}
+		return S_OK;
 	}
 
-	if( _isEditingTable == FALSE )
+	if( !_isEditingTable )
 	{	
 		*retval = VARIANT_TRUE;
 		return S_OK;
 	}
 
-	if( ApplyChanges != VARIANT_FALSE )
+	if( ApplyChanges )
 	{		
-        // checking whether the chnages to _fields were made; we need to rewrite the whole file in this case
-		if (!m_needToSaveAsNewFile)
-		{
-			for(int i =0; i < (int)_fields.size(); i++)
-			{
-				CField* fld  = (CField*)_fields[i]->field;
-				if (fld->GetIsUpdated())
-				{
-					m_needToSaveAsNewFile = true;
-					break;
-				}
-			}
-		}
-		
-		if (m_needToSaveAsNewFile)
+		if (m_needToSaveAsNewFile || HasFieldChanges())
         {
-		    // generate a tmpfilename
-		    char * tmpfname = new char[MAX_BUFFER];
-		    char * tmppath = new char[MAX_PATH + MAX_BUFFER + 1];
-		    _getcwd(tmppath,MAX_PATH);
-		    tmpnam(tmpfname);
-		    CString * tempFilename = new CString(tmpfname);
-		    _tempFiles.push_back(tempFilename);
-		    // Don't free tempFilename at the end of this function,
-		    // the CTableClass destructor will handle it
+			// file should be rewritten completely; writing to temp file first
+			CString tempFilename = Utility::GetTempFilename(".dbf");
 
-		    strcat( tmppath, tmpfname );
-		    strcat( tmppath, ".dbf" );
-            if (SaveToFile(A2W(tmppath), false, cBack))		// TODO: use Unicode
+			_tempFiles.push_back(new CString(tempFilename));		// will be released in destructor
+		    
+			USES_CONVERSION;
+			if (SaveToFile(A2W(tempFilename), false, cBack))
             {
-		        BOOL result = CopyFile(tmppath, W2A(_filename),FALSE);
-		        _unlink(tmppath);
+				BOOL result = CopyFile(tempFilename, W2A(_filename), FALSE);
+				_unlink(tempFilename);
             }
             else
             {
 	        	ErrorMessage(tkCANT_CREATE_DBF);
             }
-			delete[] tmpfname;
-			delete[] tmppath;
         }
         else
         {
@@ -1808,12 +1813,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
         }
     }
 
-	// Mark _fields as unchanged
-	for(int i = 0; i < (int)_fields.size(); i++)
-	{
-		CField* fld  = (CField*)_fields[i]->field;
-		fld->SetIsUpdated(false);
-	}
+	MarkFieldsAsUnchanged();
 
     _isEditingTable = FALSE;
 
@@ -1822,6 +1822,7 @@ STDMETHODIMP CTableClass::StopEditingTable(VARIANT_BOOL ApplyChanges, ICallback 
 	this->Serialize(&state);
 	this->Open(bstrFilename, cBack, retval);
 	this->Deserialize(state);	// restores joins
+
 	return S_OK;
 }
 

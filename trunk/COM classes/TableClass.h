@@ -241,6 +241,8 @@ public:
 	bool JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping, set<CString>& fieldList);
 	bool JoinInternal(ITable* table2, CString fieldTo, CString fieldFrom, CStringW filenameToReopen, CString options, set<CString>& fieldList);
 	void RemoveJoinedFields();
+	bool HasFieldChanges();
+	void MarkFieldsAsUnchanged();
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)

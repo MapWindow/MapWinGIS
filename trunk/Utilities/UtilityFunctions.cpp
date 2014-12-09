@@ -569,13 +569,36 @@ namespace Utility
 			return filename + ext;
 		return filename.Left(theDot + 1) + ext;
 	}
+
+	// ********************************************************
+	//    GetTempFilename()
+	// ********************************************************
+	CString Utility::GetTempFilename(CString extensionWithLeadingPoint)
+	{
+		char * tmpfname = new char[MAX_BUFFER];
+		char * tmppath = new char[MAX_PATH + MAX_BUFFER + 1];
+
+		GetTempPath(MAX_PATH, tmppath);
+	
+		tmpnam(tmpfname);
+
+		strcat(tmppath, tmpfname);
+		strcat(tmppath, extensionWithLeadingPoint);
+
+		CString result = tmppath;
+
+		delete[] tmpfname;
+		delete[] tmppath;
+
+		return result;
+	}
 #pragma endregion
 	
 #pragma region Unit conversion
 	// ****************************************************************
 	//		GetUnitOfMeasureText
 	// ****************************************************************
-	// Returns the short namó for units of measure
+	// Returns the short name for units of measure
 	CString Utility::GetUnitOfMeasureText(tkUnitsOfMeasure units)
 	{
 		switch(units)

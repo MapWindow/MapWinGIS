@@ -1473,14 +1473,8 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	expand_header->put_NumberCols( exp_cols );
 	expand_header->put_NumberRows( exp_rows );
 	
-	char * tmpgname = new char[512];
-	char * tmpfname = new char[512];
-	char * tmppath = new char[260 + 512 + 1];
-	_getcwd(tmppath,260);
-	tmpnam(tmpfname);
-	sprintf(tmpgname, "%s.bgd", tmpfname);
-
-	CComBSTR bstr(tmpgname);
+	CString tempFilename = Utility::GetTempFilename(".bgd");
+	CComBSTR bstr(tempFilename);
 	_expand_grid->CreateNew(bstr, expand_header, dType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
 
 	expand_header->Release();

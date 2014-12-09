@@ -50,6 +50,7 @@ namespace Utility
 	
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL FileExists(CString filename);	
+	CString GetTempFilename(CString extensionWithLeadingPoint);	 // only ASCII chars are used in this name; no need for CStringW
 
 	// GDAL XML
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, CStringW valueW);
