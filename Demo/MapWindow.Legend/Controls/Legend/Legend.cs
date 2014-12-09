@@ -1750,7 +1750,7 @@ namespace MapWindow.Legend.Controls.Legend
 
             var sf = newLayer as Shapefile;
             if (newLayer is IOgrLayer)
-                sf = (newLayer as IOgrLayer).GetData();
+                sf = (newLayer as IOgrLayer).GetBuffer();
             else if (newLayer is Shapefile)
                 sf = newLayer as Shapefile;
 

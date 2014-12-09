@@ -21,7 +21,7 @@ namespace MWLite.GUI.Helpers
 
             var except = new[]
             {
-                tkTileProvider.Rosreestr, tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
+                /*tkTileProvider.Rosreestr,*/ tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
                 tkTileProvider.Topomapper
             };
             var list = Enum.GetValues(typeof(tkTileProvider)).Cast<tkTileProvider>().Except(except);
