@@ -453,6 +453,7 @@ void CMapView::UpdateShapeEditor()
 // ************************************************************
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+
 	if (HasRotation()) {
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	}
@@ -607,7 +608,6 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	if (part != ZoombarPart::ZoombarNone)
 		return;
 
-	OnLButtonDown(nFlags, point);
 	if (m_cursorMode == cmMeasure)
 	{
 		_measuring->FinishMeasuring();
@@ -628,6 +628,8 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 			}
 		}
 	}
+
+	FireDblClick();
 }
 
 // ************************************************************
