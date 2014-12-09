@@ -210,7 +210,7 @@ namespace TestApplication
                 {
                     Debug.WriteLine("Number of features in a buffer: " + buffer.FeatureCount);
                     map.AddLayer(buffer, true);
-                    buffer.GetData().DefaultDrawingOptions.FillColor = 255;     // red
+                    buffer.GetBuffer().DefaultDrawingOptions.FillColor = 255;     // red
                 }
 
                 //layer

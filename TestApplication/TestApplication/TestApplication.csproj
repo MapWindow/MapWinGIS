@@ -103,6 +103,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="StartForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StartForm.Designer.cs">
+      <DependentUpon>StartForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="GeosTests.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="OgrDatasetTests.cs" />

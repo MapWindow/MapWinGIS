@@ -236,7 +236,7 @@
         Error("Failed to remove overviews.");
       }
 
-      fm.BuildGdalOverviews(filename, null);
+      fm.BuildGdalOverviews(filename);
       overviews = fm.get_HasGdalOverviews(filename);
       if (!overviews)
       {

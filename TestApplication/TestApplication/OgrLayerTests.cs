@@ -109,7 +109,6 @@ namespace TestApplication
 
                 // or b) set map projection and reproject layer if needed
                 Map.Projection = tkMapProjection.PROJECTION_WGS84;
-                Map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
 
                 int layerHandle = Map.AddLayer(layer, true);
                 if (layerHandle == -1)
@@ -146,7 +145,7 @@ namespace TestApplication
                 Debug.WriteLine("Feature count: " + layer.FeatureCount);
 
                 // now load the data locally and display the same info
-                Shapefile shapefile = layer.GetData();
+                Shapefile shapefile = layer.GetBuffer();
                 if (shapefile != null)
                 {
                     Debug.WriteLine("Extents from the loaded data: " + shapefile.Extents.ToDebugString());
@@ -243,7 +242,7 @@ namespace TestApplication
                 return false;
             }
 
-            Shapefile sf = layer.GetData();
+            Shapefile sf = layer.GetBuffer();
             if (sf != null)
             {
                 // possible types of editing
@@ -342,7 +341,7 @@ namespace TestApplication
                     Debug.Print("Number of features: " + l.FeatureCount);
 
                     // now access the data
-                    Shapefile sf = l.GetData();
+                    Shapefile sf = l.GetBuffer();
                     Debug.Print("Number of shapes: " + sf.NumShapes);
                 }
             }
@@ -438,7 +437,6 @@ namespace TestApplication
             Debug.Print("\nStart OGR test");
             AxMap map = Fileformats.Map;
             map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-            map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
 
             var gs = new GlobalSettings();
             gs.ShapeInputValidationMode = tkShapeValidationMode.NoValidation;

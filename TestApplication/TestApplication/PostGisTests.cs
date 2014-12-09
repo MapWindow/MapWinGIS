@@ -103,7 +103,6 @@ namespace TestApplication
             var numErrors = 0;
             Map = Fileformats.Map;
             Map.RemoveAllLayers();
-            Map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
             
             // TODO: How to switch between these two:
             //Map.Projection = tkMapProjection.PROJECTION_WGS84;
@@ -181,10 +180,6 @@ namespace TestApplication
             Map = Fileformats.Map;
             Map.RemoveAllLayers();
             Map.Projection = tkMapProjection.PROJECTION_WGS84;
-            Map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
-
-            // Add the symbology of the shapefile to the database during import:
-            var settings = new GlobalSettings { OgrUseStyles = true };
 
             Application.DoEvents();
 

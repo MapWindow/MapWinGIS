@@ -432,7 +432,6 @@ namespace TestApplication
             this.axMap1.Redraw();
             Application.DoEvents();
 
-            this.axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
             this.axMap1.ShowCoordinates = tkCoordinatesDisplay.cdmAuto;
             this.axMap1.ShowZoomBar = true;
 
@@ -450,7 +449,10 @@ namespace TestApplication
                              LabelsCollisionMode = tkCollisionMode.GlobalList, 
                              RasterOverviewCreation = tkRasterOverviewCreation.rocAuto, 
                              TiffCompression = tkTiffCompression.tkmJPEG, 
-                             RasterOverviewResampling = tkGDALResamplingMethod.grmGauss
+                             RasterOverviewResampling = tkGDALResamplingMethod.grmGauss,
+                             AllowLayersWithoutProjections = true,
+                             AllowProjectionMismatch = false,
+                             ReprojectLayersOnAdding = true,
                          };
         }
 
