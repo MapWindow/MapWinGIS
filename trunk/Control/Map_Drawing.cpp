@@ -277,7 +277,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 
 		// fire external drawing
 		HDC hdc = g->GetHDC();
-		VARIANT_BOOL retVal = VARIANT_FALSE;
+		tkMwBoolean retVal = blnFalse;
 		this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 		g->ReleaseHDC(hdc);
 
@@ -287,6 +287,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 
 		// fire external drawing code
 		hdc = g->GetHDC();
+		retVal = blnFalse;
 		this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
 		g->ReleaseHDC(hdc);
 

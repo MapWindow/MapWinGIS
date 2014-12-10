@@ -174,7 +174,7 @@ void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR
 			{
 				// they are already here, no loading is needed
 				RestoreExtents();
-				FireTilesLoaded(_tiles, true, key);
+				FireTilesLoaded(true, key);
 			}
 		}
 	}

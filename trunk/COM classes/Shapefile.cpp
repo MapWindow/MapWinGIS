@@ -122,7 +122,6 @@ CShapefile::CShapefile()
 	this->put_ReferenceToCharts();
 
 	ComHelper::CreateInstance(idUndoList, (IDispatch**)&_undoList);
-	//((CUndoList*)_undoList)->Init(this);
 
 	gReferenceCounter.AddRef(tkInterface::idShapefile);
 }

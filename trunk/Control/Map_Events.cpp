@@ -534,7 +534,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				{
 					UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
 					RedrawCore(RedrawSkipDataLayers, true);
-					FireShapeIdentified(layerHandle, shapeIndex, x, y);
+					FireShapeIdentified(layerHandle, shapeIndex, projX, projY);
 					return;
 				}
 			}
@@ -582,7 +582,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 				if (added)
 				{
-					FireMeasuringChanged(_measuring, tkMeasuringAction::PointAdded);
+					FireMeasuringChanged(tkMeasuringAction::PointAdded);
 					if( m_sendMouseDown ) this->FireMouseDown( MK_LBUTTON, (short)vbflags, x, y );
 					RedrawCore(RedrawSkipDataLayers, true);
 				}
@@ -611,7 +611,7 @@ void CMapView::OnLButtonDblClk(UINT nFlags, CPoint point)
 	if (m_cursorMode == cmMeasure)
 	{
 		_measuring->FinishMeasuring();
-		FireMeasuringChanged(_measuring, tkMeasuringAction::MesuringStopped);	
+		FireMeasuringChanged(tkMeasuringAction::MesuringStopped);	
 		return;
 	}
 	
@@ -1050,7 +1050,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	long mbutton = ParseMouseEventFlags(nFlags);
 	long vbflags = ParseKeyboardEventFlags(nFlags);
 	
-	if( m_sendMouseMove == TRUE )
+	if( m_sendMouseMove )
 	{	
 		if( (m_cursorMode == cmPan) && (nFlags & MK_LBUTTON ))
 		{
@@ -1060,6 +1060,12 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			this->FireMouseMove( (short)mbutton, (short)vbflags, point.x, point.y );
 		}
+	}
+
+	if (m_sendSelectBoxDrag && m_cursorMode == cmSelection && _dragging.Operation == DragSelectionBox) 
+	{
+		CRect r = _dragging.GetRectangle();
+		FireSelectBoxDrag(r.left, r.right, r.bottom, r.top);
 	}
 
 	bool updateHotTracking = true;
@@ -1218,7 +1224,7 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		if( m_cursorMode == cmMeasure)
 		{
 			((CMeasuring*)_measuring)->UndoPoint(&redraw);
-			FireMeasuringChanged(_measuring, tkMeasuringAction::PointRemoved);
+			FireMeasuringChanged(tkMeasuringAction::PointRemoved);
 			_canUseMainBuffer = false;
 		}
 

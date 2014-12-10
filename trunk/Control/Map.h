@@ -630,14 +630,14 @@ public:
 		{FireEvent(eventidOnDrawBackBuffer,EVENT_PARAM(VTS_I4), BackBuffer);}
 	void FireShapeHighlighted(long LayerHandle, long ShapeIndex)
 		{ FireEvent(eventidShapeHighlighted,EVENT_PARAM(VTS_I4 VTS_I4), LayerHandle, ShapeIndex);}
-	void FireBeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
-		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
-	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled)
-		{FireEvent(eventidAfterDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_PBOOL), hdc, xMin, xMax, yMin, yMax, Handled);}
-	void FireTilesLoaded(IDispatch* tiles, VARIANT_BOOL snapshot, LPCTSTR key)
-		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_DISPATCH VTS_BOOL VTS_BSTR ), tiles, snapshot,key);}
-	void FireMeasuringChanged(IDispatch* measuring, tkMeasuringAction action)
-		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_DISPATCH VTS_I4), measuring, action);}
+	void FireBeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
+		{FireEvent(eventidBeforeDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled);}
+	void FireAfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled)
+		{FireEvent(eventidAfterDrawing,EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4 VTS_I4), hdc, xMin, xMax, yMin, yMax, Handled);}
+	void FireTilesLoaded(VARIANT_BOOL snapshot, LPCTSTR key)
+		{FireEvent(eventidTilesLoaded,EVENT_PARAM(VTS_BOOL VTS_BSTR ), snapshot,key);}
+	void FireMeasuringChanged(tkMeasuringAction action)
+		{FireEvent(eventidMeasuringChanged,EVENT_PARAM(VTS_I4), action);}
 	void FireBeforeShapeEdit(LONG layerHandle, LONG shapeIndex, tkMwBoolean* Cancel)
 		{FireEvent(eventidBeforeShapeEdit, EVENT_PARAM(VTS_I4 VTS_I4 VTS_PI4), layerHandle, shapeIndex, Cancel);	}
 	void FireValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel)	
@@ -660,11 +660,12 @@ public:
 		{ FireEvent(eventidUndoListChanged, EVENT_PARAM(VTS_NONE)); }
 	void FireSelectionChanged(LONG LayerHandle) 
 		{ FireEvent(eventidSelectionChanged, EVENT_PARAM(VTS_I4), LayerHandle); }
-	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY) 
-		{ FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), LayerHandle, ShapeIndex, pointX, pointY); }
+	void FireShapeIdentified(LONG LayerHandle, LONG ShapeIndex, DOUBLE pointX, DOUBLE pointY)
+		{ FireEvent(eventidShapeIdentified, EVENT_PARAM(VTS_I4 VTS_I4 VTS_R8 VTS_R8), LayerHandle, ShapeIndex, pointX, pointY);	}
 	void FireLayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding) 
 		{ FireEvent(eventidLayerProjectionIsEmpty, EVENT_PARAM(VTS_I4 VTS_PI4), LayerHandle, cancelAdding); }
-	void FireProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject) { FireEvent(eventidProjectionMismatch, EVENT_PARAM(VTS_I4 VTS_PI4 VTS_PI4), LayerHandle, cancelAdding, reproject); }
+	void FireProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject) 
+		{ FireEvent(eventidProjectionMismatch, EVENT_PARAM(VTS_I4 VTS_PI4 VTS_PI4), LayerHandle, cancelAdding, reproject); }
 	void FireLayerReprojected(LONG LayerHandle, VARIANT_BOOL Success)
 		{ FireEvent(eventidLayerReprojected, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, Success);	}
 	void FireLayerAdded(LONG LayerHandle)
@@ -672,13 +673,9 @@ public:
 	void FireLayerRemoved(LONG LayerHandle, VARIANT_BOOL fromRemoveAllLayers) 
 		{ FireEvent(eventidLayerRemoved, EVENT_PARAM(VTS_I4 VTS_BOOL), LayerHandle, fromRemoveAllLayers);	}
 	void FireBackgroundLoadingStarted(LONG TaskId, LONG LayerHandle)	
-	{
-		FireEvent(eventidBackgroundLoadingStarted, EVENT_PARAM(VTS_I4 VTS_I4), TaskId, LayerHandle);
-	}
+		{ FireEvent(eventidBackgroundLoadingStarted, EVENT_PARAM(VTS_I4 VTS_I4), TaskId, LayerHandle); }
 	void FireBackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG numFeatures, LONG numLoaded)
-	{
-		FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);
-	}
+		{ FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);}
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()

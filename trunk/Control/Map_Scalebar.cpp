@@ -193,145 +193,145 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		}
 	}
 
-	if (width > 0.0)
+	if (width <= 0.0) return;
+
+	
+	// ----------------------------------------------------------
+	//    Choosing units
+	// ----------------------------------------------------------
+	double unitsPerPixel, unitsPerPixel2;
+	double step, power; int count;
+	double step2, power2; int count2;
+	double newWidth = width;
+
+	// metric calculations are performed for mixed mode as well
+	tkUnitsOfMeasure targetUnits = _scalebarUnits == American ? umMiles : umMeters;		
+	Utility::ConvertDistance(units, targetUnits, newWidth);
+	unitsPerPixel = newWidth/(maxX - minX);	  // target units on screen size
+	double distance = (barWidth - xPadding * 2) * unitsPerPixel;
+	ChooseScalebarUnits(units, targetUnits, distance, unitsPerPixel, step, count, power);
+
+	tkUnitsOfMeasure targetUnits2 = umMiles;
+	if (_scalebarUnits == GoogleStyle)
 	{
-		// ----------------------------------------------------------
-		//    Choosing units
-		// ----------------------------------------------------------
-		double unitsPerPixel, unitsPerPixel2;
-		double step, power; int count;
-		double step2, power2; int count2;
-		double newWidth = width;
-
-		// metric calculations are performed for mixed mode as well
-		tkUnitsOfMeasure targetUnits = _scalebarUnits == American ? umMiles : umMeters;		
-		Utility::ConvertDistance(units, targetUnits, newWidth);
-		unitsPerPixel = newWidth/(maxX - minX);	  // target units on screen size
-		double distance = (barWidth - xPadding * 2) * unitsPerPixel;
-		ChooseScalebarUnits(units, targetUnits, distance, unitsPerPixel, step, count, power);
-
-		tkUnitsOfMeasure targetUnits2 = umMiles;
-		if (_scalebarUnits == GoogleStyle)
-		{
-			// now do calculation for miles
-			newWidth = width;
-			Utility::ConvertDistance(units, umMiles, newWidth);
-			unitsPerPixel2 = newWidth/(maxX - minX);	  // target units on screen size
-			distance = (barWidth - xPadding * 2) * unitsPerPixel2;
-			ChooseScalebarUnits(units, targetUnits2, distance, unitsPerPixel2, step2, count2, power2);
-		}
-		
-		// ----------------------------------------------------------
-		//    Initialize drawing
-		// ----------------------------------------------------------
-		Gdiplus::Matrix mtx;
-		mtx.Translate((float)5, (float)_viewHeight - barHeight - yOffset);
-		g->SetTransform(&mtx);
-		Gdiplus::PixelOffsetMode pixelOffsetMode = g->GetPixelOffsetMode();
-		g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
-
-		Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)barWidth, (Gdiplus::REAL)barHeight);
-
-		// ----------------------------------------------------------
-		//    Drawing of segments
-		// ----------------------------------------------------------
-		std::vector<Gdiplus::Rect*> parts;
-		int length = (int)(step * count / unitsPerPixel + xPadding);
-
-		if (_scalebarUnits != GoogleStyle)
-		{
-			// horizontal line
-			parts.push_back(new Gdiplus::Rect(xPadding, barHeight - yPadding, length - xPadding, 0));
-			
-			// inner measures (shorter)
-			for (int i = 0; i <= count; i++ )
-			{
-				length = (int)(step * i / unitsPerPixel + xPadding);
-				int valHeight = (i == 0 || i == count) ? segmHeight * 2 : segmHeight;	// the height of the mark; side marks are longer
-				parts.push_back(new Gdiplus::Rect(length, barHeight - yPadding - valHeight, 0, valHeight));
-			}
-		}
-		else
-		{
-			int length2 = (int)(step2 * count2 / unitsPerPixel2 + xPadding);
-			
-			// horizontal line
-			parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding, length - xPadding, 0));
-			parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding, length2 - xPadding, 0));
-
-			// vertical lines for metric
-			int valHeight = segmHeight * 2;
-			parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding - valHeight, 0, valHeight));
-			parts.push_back(new Gdiplus::Rect(length,   barHeight/2 - yPadding - valHeight, 0, valHeight));
-
-			// vertical lines for USA
-			parts.push_back(new Gdiplus::Rect(xPadding,	barHeight/2 - yPadding, 0, valHeight));
-			parts.push_back(new Gdiplus::Rect(length2,  barHeight/2 - yPadding, 0, valHeight));
-		}
-
-		for(size_t i = 0; i < parts.size(); i++)				
-		{
-			g->FillRectangle(&_brushWhite, parts[i]->X - 2, parts[i]->Y - 2, parts[i]->Width + 4, parts[i]->Height + 4);
-		}
-
-		for(size_t i = 0; i < parts.size(); i++)				
-		{
-			g->FillRectangle(&_brushBlack, parts[i]->X - 1, parts[i]->Y - 1, parts[i]->Width + 2, parts[i]->Height + 2);
-		}
-
-		for(size_t i = 0; i < parts.size(); i++)				
-		{
-			delete parts[i];
-		}
-		parts.clear();
-
-		g->SetPixelOffsetMode(pixelOffsetMode);
-
-		// ----------------------------------------------------------
-		//    Drawing of text
-		// ----------------------------------------------------------
-		Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
-		g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
-		Gdiplus::FontFamily family(L"Arial");
-		Gdiplus::REAL fontSize = _scalebarUnits != GoogleStyle? 10.0f : 8.0f;
-		Gdiplus::Font font(&family, fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
-		CStringW s;
-		Gdiplus::StringFormat format; 
-
-		if (_scalebarUnits != GoogleStyle)
-		{
-			s.Format(L"0");
-			Gdiplus::PointF point(xPadding + 4.0f, -4.0f);
-			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
-			
-			// max
-			FormatUnits(s, step, power, count);
-			point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
-			point.Y = -4.0f;
-			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
-			
-			// units
-			s = GetLocalizedUnitsText(targetUnits);
-			point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
-			point.Y = (Gdiplus::REAL)(barHeight - yPadding - 12 + 1.0f);
-			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
-		}
-		else
-		{
-			// metric
-			USES_CONVERSION;
-			s.Format(L"%s %s", FormatUnits(s, step, power, count), GetLocalizedUnitsText(targetUnits));
-			Gdiplus::PointF point(xPadding + 8.0f, -10.0f);
-			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
-			
-			// miles
-			s.Format(L"%s %s", FormatUnits(s, step2, power2, count2), GetLocalizedUnitsText(targetUnits2));
-			point.Y = 8.0f;
-			DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
-		}
-		g->SetTextRenderingHint(hint);
-		g->ResetTransform();
+		// now do calculation for miles
+		newWidth = width;
+		Utility::ConvertDistance(units, umMiles, newWidth);
+		unitsPerPixel2 = newWidth/(maxX - minX);	  // target units on screen size
+		distance = (barWidth - xPadding * 2) * unitsPerPixel2;
+		ChooseScalebarUnits(units, targetUnits2, distance, unitsPerPixel2, step2, count2, power2);
 	}
+		
+	// ----------------------------------------------------------
+	//    Initialize drawing
+	// ----------------------------------------------------------
+	Gdiplus::Matrix mtx;
+	mtx.Translate((float)5, (float)_viewHeight - barHeight - yOffset);
+	g->SetTransform(&mtx);
+	Gdiplus::PixelOffsetMode pixelOffsetMode = g->GetPixelOffsetMode();
+	g->SetPixelOffsetMode(Gdiplus::PixelOffsetMode::PixelOffsetModeHighQuality);
+
+	Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)barWidth, (Gdiplus::REAL)barHeight);
+
+	// ----------------------------------------------------------
+	//    Drawing of segments
+	// ----------------------------------------------------------
+	std::vector<Gdiplus::Rect*> parts;
+	int length = (int)(step * count / unitsPerPixel + xPadding);
+
+	if (_scalebarUnits != GoogleStyle)
+	{
+		// horizontal line
+		parts.push_back(new Gdiplus::Rect(xPadding, barHeight - yPadding, length - xPadding, 0));
+			
+		// inner measures (shorter)
+		for (int i = 0; i <= count; i++ )
+		{
+			length = (int)(step * i / unitsPerPixel + xPadding);
+			int valHeight = (i == 0 || i == count) ? segmHeight * 2 : segmHeight;	// the height of the mark; side marks are longer
+			parts.push_back(new Gdiplus::Rect(length, barHeight - yPadding - valHeight, 0, valHeight));
+		}
+	}
+	else
+	{
+		int length2 = (int)(step2 * count2 / unitsPerPixel2 + xPadding);
+			
+		// horizontal line
+		parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding, length - xPadding, 0));
+		parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding, length2 - xPadding, 0));
+
+		// vertical lines for metric
+		int valHeight = segmHeight * 2;
+		parts.push_back(new Gdiplus::Rect(xPadding, barHeight/2 - yPadding - valHeight, 0, valHeight));
+		parts.push_back(new Gdiplus::Rect(length,   barHeight/2 - yPadding - valHeight, 0, valHeight));
+
+		// vertical lines for USA
+		parts.push_back(new Gdiplus::Rect(xPadding,	barHeight/2 - yPadding, 0, valHeight));
+		parts.push_back(new Gdiplus::Rect(length2,  barHeight/2 - yPadding, 0, valHeight));
+	}
+
+	for(size_t i = 0; i < parts.size(); i++)				
+	{
+		g->FillRectangle(&_brushWhite, parts[i]->X - 2, parts[i]->Y - 2, parts[i]->Width + 4, parts[i]->Height + 4);
+	}
+
+	for(size_t i = 0; i < parts.size(); i++)				
+	{
+		g->FillRectangle(&_brushBlack, parts[i]->X - 1, parts[i]->Y - 1, parts[i]->Width + 2, parts[i]->Height + 2);
+	}
+
+	for(size_t i = 0; i < parts.size(); i++)				
+	{
+		delete parts[i];
+	}
+	parts.clear();
+
+	g->SetPixelOffsetMode(pixelOffsetMode);
+
+	// ----------------------------------------------------------
+	//    Drawing of text
+	// ----------------------------------------------------------
+	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
+	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
+	Gdiplus::FontFamily family(L"Arial");
+	Gdiplus::REAL fontSize = _scalebarUnits != GoogleStyle? 10.0f : 8.0f;
+	Gdiplus::Font font(&family, fontSize, Gdiplus::FontStyleRegular, Gdiplus::UnitPoint);
+	CStringW s;
+	Gdiplus::StringFormat format; 
+
+	if (_scalebarUnits != GoogleStyle)
+	{
+		s.Format(L"0");
+		Gdiplus::PointF point(xPadding + 4.0f, -4.0f);
+		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
+			
+		// max
+		FormatUnits(s, step, power, count);
+		point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
+		point.Y = -4.0f;
+		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
+			
+		// units
+		s = GetLocalizedUnitsText(targetUnits);
+		point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
+		point.Y = (Gdiplus::REAL)(barHeight - yPadding - 12 + 1.0f);
+		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
+	}
+	else
+	{
+		// metric
+		USES_CONVERSION;
+		s.Format(L"%s %s", FormatUnits(s, step, power, count), GetLocalizedUnitsText(targetUnits));
+		Gdiplus::PointF point(xPadding + 8.0f, -10.0f);
+		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
+			
+		// miles
+		s.Format(L"%s %s", FormatUnits(s, step2, power2, count2), GetLocalizedUnitsText(targetUnits2));
+		point.Y = 8.0f;
+		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
+	}
+	g->SetTextRenderingHint(hint);
+	g->ResetTransform();
 }
 
 // ****************************************************************

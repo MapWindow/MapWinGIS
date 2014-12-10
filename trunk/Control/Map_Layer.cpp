@@ -1671,6 +1671,9 @@ VARIANT_BOOL CMapView::DeserializeLayerOptionsCore(LONG LayerHandle, CPLXMLNode*
 	{
 		return VARIANT_FALSE;
 	}
+
+	FireMapState(LayerHandle);
+
 	return retVal ? VARIANT_TRUE : VARIANT_FALSE;
 }
 

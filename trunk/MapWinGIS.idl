@@ -5317,8 +5317,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(38)] HRESULT AutoChooseOgrLoadingMode([in] VARIANT_BOOL newVal);
 	[propget, id(39)] HRESULT ReprojectLayersOnAdding([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(39)] HRESULT ReprojectLayersOnAdding([in] VARIANT_BOOL newVal);
-	[propget, id(40)] HRESULT AttachMapCallbackToLayers([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(40)] HRESULT AttachMapCallbackToLayers([in] VARIANT_BOOL newVal);
+	[propget, id(40)] HRESULT ApplicationCallback([out, retval] ICallback** pVal);
+	[propput, id(40)] HRESULT ApplicationCallback([in] ICallback* newVal);
 	[propget, id(41)] HRESULT HotTrackingMaxShapeCount([out, retval] LONG* pVal);
 	[propput, id(41)] HRESULT HotTrackingMaxShapeCount([in] LONG newVal);
 	[propget, id(42)] HRESULT AllowLayersWithoutProjections([out, retval] VARIANT_BOOL* pVal);
@@ -5327,10 +5327,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(43)] HRESULT AllowProjectionMismatch([in] VARIANT_BOOL newVal);
 	[propget, id(44)] HRESULT MouseTolerance([out, retval] DOUBLE* pVal);
 	[propput, id(44)] HRESULT MouseTolerance([in] DOUBLE newVal);
-	[propget, id(45)] HRESULT ApplicationCallback([out, retval] ICallback** pVal);
-	[propput, id(45)] HRESULT ApplicationCallback([in] ICallback* newVal);
-	[propget, id(46)] HRESULT MaxReprojectionShapeCount([out, retval] LONG* pVal);
-	[propput, id(46)] HRESULT MaxReprojectionShapeCount([in] LONG newVal);
+	[propget, id(45)] HRESULT MaxReprojectionShapeCount([out, retval] LONG* pVal);
+	[propput, id(45)] HRESULT MaxReprojectionShapeCount([in] LONG newVal);
 };
 
 [
@@ -5800,7 +5798,7 @@ library MapWinGIS
 			[id(195)] VARIANT_BOOL ScalebarVisible;
 			[id(205)] tkScalebarUnits ScalebarUnits;
 			[id(211), readonly] IFileManager* FileManager;
-			[id(241)] IUndoList* UndoList;
+			[id(241), readonly] IUndoList* UndoList;
 			[id(243), readonly] IIdentifier* Identifier;
 			//}}AFX_ODL_PROP
 
@@ -6107,8 +6105,7 @@ library MapWinGIS
 			[id(235), propget] IShapeEditor* ShapeEditor();
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
 			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
-			[id(238), propget] VARIANT_BOOL GetLayerVisibleAtCurrentScale(LONG LayerHandle);
-			[id(238), propput] void GetLayerVisibleAtCurrentScale(LONG LayerHandle, VARIANT_BOOL newVal);
+			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(244)] void Undo();
 			//}}AFX_ODL_METHOD
 	};
@@ -6148,10 +6145,10 @@ library MapWinGIS
 			[id(8)] void MapState(long LayerHandle);
 			[id(9)] void OnDrawBackBuffer(long BackBuffer);
 			[id(10)] void ShapeHighlighted(long LayerHandle, long ShapeIndex);
-			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
-			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, VARIANT_BOOL* Handled);
-			[id(13)] void TilesLoaded(ITiles* tiles, VARIANT_BOOL snapshot, BSTR key);
-			[id(14)] void MeasuringChanged(IMeasuring* measuring, tkMeasuringAction action);
+			[id(11)] void BeforeDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			[id(12)] void AfterDrawing(long hdc, long xMin, long xMax, long yMin, long yMax, tkMwBoolean* Handled);
+			[id(13)] void TilesLoaded(VARIANT_BOOL snapshot, BSTR key);
+			[id(14)] void MeasuringChanged(tkMeasuringAction action);
 			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
 			[id(17)] void ValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkUndoOperation Operation, LONG LayerHandle, LONG ShapeIndex);
@@ -6161,7 +6158,7 @@ library MapWinGIS
 			[id(23)] void ProjectionChanged();
 			[id(24)] void UndoListChanged();
 			[id(25)] void SelectionChanged(LONG LayerHandle);
-			[id(26)] void ShapeIdentified(LONG LayerHandle, LONG ShapeIndex, LONG pointX, LONG pointY);
+			[id(26)] void ShapeIdentified(LONG LayerHandle, LONG ShapeIndex, DOUBLE pointX, DOUBLE pointY);
 			[id(27)] void LayerProjectionIsEmpty(LONG LayerHandle, tkMwBoolean* cancelAdding);
 			[id(28)] void ProjectionMismatch(LONG LayerHandle, tkMwBoolean* cancelAdding, tkMwBoolean* reproject);
 			[id(29)] void LayerReprojected(LONG LayerHandle, VARIANT_BOOL Success);
