@@ -147,7 +147,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="operationIndex">Index of operation in list.</param>
         /// <returns>Field name in input shapefile.</returns>
-        public string get_Fieldname(int operationIndex)
+        public string get_FieldName(int operationIndex)
         {
             throw new NotImplementedException();
         }

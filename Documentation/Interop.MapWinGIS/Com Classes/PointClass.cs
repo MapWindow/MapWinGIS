@@ -30,7 +30,7 @@ namespace MapWinGIS
         #if upd
             public class Point : MapWinGIS.IPoint
         #else        
-                            public class IPoint
+            public class IPoint
         #endif
     #else
         public class Point

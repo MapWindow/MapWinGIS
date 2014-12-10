@@ -31,7 +31,8 @@ namespace MapWinGIS
     /// and the index of field in dbf table it is bound to. For example, in case the chart contains a single bar 
     /// which is mapped to the 5-th field of the dbf table, the index of bar for Charts.get_Field() property will be 0
     /// (as there is only one bar in the chart), while ChartField.Index() will return 5 (as it is mapped to the 5 field).
-    /// \code Shapefile sf = some_shapefile;
+    /// \code 
+    /// Shapefile sf = some_shapefile;
     /// Charts charts = sf.Charts;
     /// charts.ChartType = tkChartType.chtBarChart;
     /// charts.ClearFields();

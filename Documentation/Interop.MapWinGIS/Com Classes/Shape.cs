@@ -816,6 +816,15 @@ namespace MapWinGIS
         /// </summary>
         /// \new493 Added in version 4.9.3
         public ShpfileType ShapeType2D { get; private set; }
+
+        /// <summary>
+        /// Returns true if the shape doesn't have any points.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool IsEmpty
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 #if nsp
 }

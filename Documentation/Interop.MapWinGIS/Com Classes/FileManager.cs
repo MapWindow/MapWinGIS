@@ -111,7 +111,7 @@ namespace MapWinGIS
     /// 
     /// The default <b>tkFileOpenStrategy.fosAutoDetect</b> strategy works like this: \n\n
     /// 1) Shapefiles are checked by (.shp) extension and fosVectorLayer is chosen. \n\n
-    /// 2) It is analysed whether datasource can be opened with GDAL: 
+    /// 2) It is analyzed whether datasource can be opened with GDAL: 
     /// - if so and it is RGB image, fosRgbImage is chosen;
     /// - otherwise it is checked whether a proxy image exists for rendering this datasource,
     /// and whether its size exceeds GlobalSettings.MaxNoProxyGridSizeMb property; 
@@ -398,7 +398,32 @@ namespace MapWinGIS
         public bool get_HasValidProxyForGrid(string Filename)
         {
             throw new NotImplementedException();
-            
+        }
+
+        /// <summary>
+        /// Tries to open specified file as OGR datasource.
+        /// </summary>
+        /// <param name="Filename">Filename of the datasource to be opened.</param>
+        /// <returns>Instance of OgrDatasource or null on failure.</returns>
+        /// \new493 Added in version 4.9.3
+        public OgrDatasource OpenVectorDatasource(string Filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Tries to open specified file as OGR layer.
+        /// </summary>
+        /// <remarks>When preferedShapeType is set to default ShpfileType.SHP_NULLSHAPE value or there is no layer 
+        /// with preferedShapeType, then the first layer in datasource will be returned.</remarks>
+        /// <param name="Filename">Filename of the datasource to be opened.</param>
+        /// <param name="preferedShapeType">Sets type of layer to be returned from datasource in case there are multiple layers available.</param>
+        /// <param name="forUpdate">True in case layer should be open in read/write mode.</param>
+        /// <returns>Instance of OgrLayer or null on failure.</returns>
+        /// \new493 Added in version 4.9.3
+        public OgrLayer OpenVectorLayer(string Filename, ShpfileType preferedShapeType = ShpfileType.SHP_NULLSHAPE, bool forUpdate = false)
+        {
+            throw new NotImplementedException();
         }
     }
 #if nsp

@@ -272,7 +272,7 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets or sets snapping behavior for shape editor (snaps vertices to the vertices of 
+        /// Gets or sets snapping behavior for Shape Editor (snaps vertices to the vertices of 
         /// exiting shapes on other layers).
         /// </summary>
         public tkLayerSelection SnapBehavior
@@ -348,8 +348,8 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets validation mode for the editor. 
         /// </summary>
-        /// <remarks>See tkEditorValidationMode enumeration for details.</remarks>
-        public tkEditorValidationMode ValidationMode
+        /// <remarks>See tkEditorValidation enumeration for details.</remarks>
+        public tkEditorValidation ValidationMode
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }

@@ -62,12 +62,14 @@
     <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AxInterop.MapWinGIS">
-      <HintPath>..\AxInterop.MapWinGIS\obj\Debug\AxInterop.MapWinGIS.dll</HintPath>
+    <Reference Include="AxInterop.MapWinGIS, Version=4.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Demo\MWLite.GUI\obj\x86\Debug\AxInterop.MapWinGIS.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.MapWinGIS">
-      <HintPath>..\AxInterop.MapWinGIS\obj\Debug\Interop.MapWinGIS.dll</HintPath>
+    <Reference Include="Interop.MapWinGIS, Version=4.9.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>False</EmbedInteropTypes>
+      <HintPath>..\..\Demo\MWLite.GUI\obj\x86\Debug\Interop.MapWinGIS.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />

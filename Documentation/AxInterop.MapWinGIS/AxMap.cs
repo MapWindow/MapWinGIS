@@ -513,7 +513,25 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-       
+
+        /// <summary>
+        /// Gets list actions performed by user via interactive Shape Editor. Provides undo/redo capability.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public virtual UndoList UndoList
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets an %Identifier object which holds settings of cmIdentify tools.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public virtual Identifier Identifier
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         #endregion
 
         /// The modules listed here are parts of the documentation of AxMap class.
@@ -1536,6 +1554,17 @@ namespace AxMapWinGIS
         /// \new492 Added in version 4.9.2
         public int ZoomBarMaxZoom { get; set; }
 
+        /// <summary>
+        /// Reverts the last operation performed by user in interactive Shape Editor.
+        /// </summary>
+        /// <remarks>This method is preferable over AxMap.UndoList.Undo since it can 
+        /// also undo point added during creation of new shape, which are not registered in the undo list.</remarks>
+        /// \new493 Added in version 4.9.3
+        public virtual void Undo()
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         #endregion
 
@@ -2045,7 +2074,10 @@ namespace AxMapWinGIS
         /// }
         /// \endcode
         /// \new493 Added in version 4.9.3
-        public int AddLayerFromDatabase(string connectionString, string layerNameOrQuery, bool visible);
+        public int AddLayerFromDatabase(string connectionString, string layerNameOrQuery, bool visible)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Adds layer from the specified datasource.
@@ -2255,7 +2287,23 @@ namespace AxMapWinGIS
         /// <param name="layerHandle">The handle of the layer.</param>
         /// <returns>OGR layer or null in case of invalid layer index or wrong layer type.</returns>
         /// \new493 Added in version 4.9.3
-        public OgrLayer get_OgrLayer(int layerHandle);
+        public OgrLayer get_OgrLayer(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value which indicates whether a layer is visible at current map scale.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <returns>True in case the layer is visible.</returns>
+        /// <remarks>The property checks whether or not the layer is hidden because of AxMap.LayerDynamicVisibility property.
+        /// However it doesn't check that the layer has any objects within the current map extents.</remarks>
+        /// \new493 Added in version 4.9.3
+        public bool get_LayerVisibleAtCurrentScale(int layerHandle)
+        {
+            throw new NotImplementedException();
+        }
 
         /// @}
         #endregion
@@ -3841,11 +3889,11 @@ namespace AxMapWinGIS
         public event _DMapEvents_BackgroundLoadingStartedEventHandler BackgroundLoadingStarted;
 
         /// <summary>
-        /// This event is fired before shape is deleted in interactive shape editor.
+        /// This event is fired before shape is deleted in interactive Shape Editor.
         /// </summary>
         /// <param name="target">What element of shape (whole shape, part, single vertex) is to be deleted.</param>
         /// <param name="cancel">Passed by reference. To cancel the operation this value should be set to blnTrue.</param>
-        /// <remarks>This event is fired when shape (or some of its elements) is selected in shape editor (AxMap.CursorMode = cmEditShape)
+        /// <remarks>This event is fired when shape (or some of its elements) is selected in Shape Editor (AxMap.CursorMode = cmEditShape)
         /// and user presses Delete button. The common use of his event is to display a message box asking the user whether 
         /// the operation should be performed.</remarks>
         public event _DMapEvents_BeforeDeleteShapeEventHandler BeforeDeleteShape;
@@ -3992,7 +4040,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="layerHandle">Handle of the layer.</param>
         /// <param name="cancelAdding">Passed by reference. The value should be set to blnTrue in case the adding of the layer should be cancelled.</param>
-        /// <param name="reproject">Passed by reference. The value should be set to blnTrue to instruct the control to run automatic reprojection of the layer.</param>
+        /// <param name="reproject">Passed by reference. The value should be set to blnTrue to instruct the control 
+        /// to run automatic reprojection of the layer.</param>
         public event _DMapEvents_ProjectionMismatchEventHandler ProjectionMismatch;
 
         /// <summary>
@@ -4041,39 +4090,41 @@ namespace AxMapWinGIS
         public event _DMapEvents_ShapeHighlightedEventHandler ShapeHighlighted;
 
         /// <summary>
-        /// 
+        /// This event is fired when user click on a shape with cmIdentify tool active.
         /// </summary>
-        /// <param name="layerHandle"></param>
-        /// <param name="shapeIndex"></param>
-        /// <param name="pointX"></param>
-        /// <param name="pointY"></param>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="shapeIndex">Index of the shape.</param>
+        /// <param name="projX">X coordinate of mouse click position in map coordinates.</param>
+        /// <param name="projY">Y coordinate of mouse click position in map coordinates</param>
         public event _DMapEvents_ShapeIdentifiedEventHandler ShapeIdentified;
 
         /// <summary>
-        /// 
+        /// This event is fired when shape being created or edited has topological errors and therefore can't be saved to the layer.
         /// </summary>
-        /// <param name="ErrorMessage"></param>
+        /// <param name="errorMessage">Message about the reasons as to why the validation has failed.</param>
         public event _DMapEvents_ShapeValidationFailedEventHandler ShapeValidationFailed;
 
         /// <summary>
-        /// 
+        /// This event is fired when complete set of tiles has been loaded for the new map extents.
         /// </summary>
-        /// <param name="tiles"></param>
-        /// <param name="snapShot"></param>
-        /// <param name="key"></param>
+        /// <param name="snapshot">True in case the loading of tiles was done as a part of making snapshot of the map.</param>
+        /// <param name="key">A key of operation set in AxMap.LoadTilesForSnapshot method.</param>
         public event _DMapEvents_TilesLoadedEventHandler TilesLoaded;
 
         /// <summary>
-        /// 
+        /// This event is fired when an operations is added or removed from undo/redo list of interactive Shape Editor.
         /// </summary>
         public event EventHandler UndoListChanged;
 
         /// <summary>
-        /// 
+        /// This event is fired before a shape which is being created or edited is about to be saved back to the layer.
         /// </summary>
-        /// <param name="layerHandle"></param>
-        /// <param name="shape"></param>
-        /// <param name="cancel"></param>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="shape">Shape to be validated.</param>
+        /// <param name="cancel">Passed by reference. This value should be set to blnTrue in case shape don't pass custom validation.</param>
+        /// <remarks>Shape Editor performs its own validation determined by ShapeEditor.ValidationMode, so there is 
+        /// no need to run the same checks once again here (like Shape.IsValid). However is some form of custom
+        /// rules should be enforced, there is a right place to do it.</remarks>
         public event _DMapEvents_ValidateShapeEventHandler ValidateShape;
         
 

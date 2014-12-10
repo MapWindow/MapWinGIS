@@ -151,7 +151,7 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Returns the nubmer of bands of GDAL image.
+        /// Returns the number of bands of GDAL image.
         /// </summary>
         public int NoBands
         {
@@ -466,7 +466,7 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets a boolean value which indicates how images with identical size and position on the map will be drawn.
         /// </summary>
-        /// <remarks>When set to true such images will be merged into a single bitmap. This may improve performace 
+        /// <remarks>When set to true such images will be merged into a single bitmap. This may improve performance 
         /// in case of low number of data pixels (those which differ from the transparent color). The default value is false.</remarks>
         /// \new48 Added in version 4.8
         public bool CanUseGrouping
@@ -476,9 +476,28 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Returns file handle fro bmp image. For inner use only.
+        /// Returns file handle for BMP image. For inner use only.
         /// </summary>
         public int FileHandle
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Get or sets an instance of GeoProjection class associated with the image.
+        /// </summary>
+        /// <remarks>The property can't be set to NULL (there is always an instance of GeoProjection class associated with image).</remarks>
+        /// \new493 Added in version 4.9.3
+        public GeoProjection GeoProjection
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Returns true if image object is empty, i.e. not bound to some disk-based datasource and doesn't hold any in-memory data. 
+        /// This property is the same as checking Image.SourceType = istUninitialized.
+        /// </summary>
+        public bool IsEmpty
         {
             get { throw new NotImplementedException(); }
         }
@@ -1078,7 +1097,7 @@ namespace MapWinGIS
         /// The rendering of proxy image has no differences compared to any other RGB image. 
         /// Additional responsibilities of Image class in this case include:
         /// - identification of proxy image on opening;
-        /// - providing dignostic properties for user, so that original grid can be accessed.
+        /// - providing diagnostic properties for user, so that original grid can be accessed.
         /// 
         /// It's implemented like this:
         /// - Image.Open method will analyze filename for "_proxy" suffix and then will try to find .mwleg color scheme file for it;

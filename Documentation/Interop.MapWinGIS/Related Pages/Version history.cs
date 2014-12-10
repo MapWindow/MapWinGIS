@@ -21,7 +21,7 @@
 /// - saving of style information (either .mwsymb file or as a table in RDMS datasource);
 /// - integration with all previously written shapefile-based client code;
 /// 
-/// 2. Built-in shape editor. Supports:
+/// 2. Built-in Shape Editor. Supports:
 /// - creation and editing of shapes, parts and vertices (cmAddShape and cmEditShape tools);
 /// - group operations on the number selected shapes (cmMoveShapes and cmRotateShapes tools);
 /// - overlay operations (cmSplitByPolyline, cmSplitByPolygon, cmClipByPolygon, cmEraseByPolygon);

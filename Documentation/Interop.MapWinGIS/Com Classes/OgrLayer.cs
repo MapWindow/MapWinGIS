@@ -103,7 +103,7 @@ namespace MapWinGIS
     /// <b>B. How to add to the map.</b>\n
     /// 
     /// Instances of %OgrLayer class can be added to the map directly using AxMap.AddLayer method or opened 
-    /// internally using AxMap.OpenFromDatabase method. In each case OgrLayer.GetData method
+    /// internally using AxMap.OpenFromDatabase method. In each case OgrLayer.GetBuffer method
     /// will be called automatically which triggers the loading of data from datasource. Afterwards underlying in-memory
     /// %shapefile will be used for all rendering purposes.\n
     /// 
@@ -153,7 +153,7 @@ namespace MapWinGIS
     /// 
     /// %OgrLayer uses in-memory %shapefile to provide its data to clients. \n
     /// 
-    /// This %shapefile is populated on the first call to OgrLayer.GetData method. On subsequent calls 
+    /// This %shapefile is populated on the first call to OgrLayer.GetBuffer method. On subsequent calls 
     /// cached values will be used (lazy loading pattern). \n
     /// 
     /// \code
@@ -184,7 +184,7 @@ namespace MapWinGIS
     /// }
     /// \endcode
     /// 
-    /// OgrLayer.GetData method maps:
+    /// OgrLayer.GetBuffer method maps:
     /// - OGR geometry types -> shape types;
     /// - OGR features -> shape records (i.e. shape + associated attributes);
     /// - OGR geometries -> instances of Shape class;
@@ -224,7 +224,7 @@ namespace MapWinGIS
     /// lyr [ label="OgrLayer" URL="\ref OgrLayer"];
     /// 
     /// edge [dir = "none", dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
-    /// lyr -> sf [ URL="\ref OgrLayer.GetData()", tooltip = "OgrLayer.GetData()", headlabel = "   1"];
+    /// lyr -> sf [ URL="\ref OgrLayer.GetBuffer()", tooltip = "OgrLayer.GetBuffer()", headlabel = "   1"];
     /// ds -> lyr [URL="\ref OgrDatasource.GetLayer()", tooltip = "OgrDatasource.GetLayer()", headlabel = "   n"]
     /// }
     /// \enddot
@@ -241,6 +241,8 @@ namespace MapWinGIS
         public class OgrLayer
 #endif
     {
+       
+        
         /// <summary>
         /// Closes current layer and releases resources associated with it.
         /// </summary>
@@ -295,7 +297,7 @@ namespace MapWinGIS
         /// Gets the name of geometry column which was used to fetch geometry for current layer.
         /// </summary>
         /// <remarks>Depending on data format, a layer may support several geometry columns but 
-        /// only one will be used to provide shape data via OgrLayer.GetData(). By default
+        /// only one will be used to provide shape data via OgrLayer.GetBuffer(). By default
         /// the first column with geometry/geography type will be used. To access other columns 
         /// temporary layers can be opened via OgrDatasource.RunQuery.</remarks>
         public string GeometryColumnName
@@ -315,7 +317,7 @@ namespace MapWinGIS
         /// AxMap.AddLayer or AxMap.AddLayerFromDatabase.
         /// </remarks>
         /// <returns>Instance of shapefile with layer data or null on failure or for uninitialized layer.</returns>
-        public Shapefile GetData()
+        public Shapefile GetBuffer()
         {
             throw new NotImplementedException();
         }
@@ -411,8 +413,6 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-
-
         /// <summary>
         /// Serializes the state of layer to a string, which can be later restored with OgrLayer.Deserialize.
         /// </summary>
@@ -433,6 +433,14 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>The property automatically maps underlying OGRwkbGeometryType to corresponding shape type.</remarks>
         public ShpfileType ShapeType
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets "flattened" type of the current layer, i.e. Z and M components will be ignored.
+        /// </summary>
+        public ShpfileType ShapeType2D
         {
             get { throw new NotImplementedException(); }
         }
@@ -528,7 +536,6 @@ namespace MapWinGIS
         /// Clears all the styles stored for current layer in datasource.
         /// </summary>
         /// <returns>True on success.</returns>
-        /// \new493 Added in version 4.9.3
         public bool ClearStyles()
         {
             throw new NotImplementedException();
@@ -549,7 +556,6 @@ namespace MapWinGIS
         /// 
         /// The mode is chosen automatically when the layer is opened depending on the number of features.
         /// But afterwards it's possible possible to change the value.</remarks>
-        /// \new493 Added in version 4.9.3
         public bool DynamicLoading
         {
             get { throw new NotImplementedException(); }
@@ -567,10 +573,10 @@ namespace MapWinGIS
         /// <param name="schemeType">Type of color scheme.</param>
         /// <returns>True on success.</returns>
         /// <remarks> The whole set of features will be used during classification, not only those currently loaded into memory. 
-        /// Therefore the method has definite advantage over calling OgrLayer.GetData.Categories.Generate 
+        /// Therefore the method has definite advantage over calling OgrLayer.GetBuffer.Categories.Generate 
         /// directly for large layers.\n\n
         ///
-        /// Categories will be added to underlying shapefile (OgrLayer.GetData). This method
+        /// Categories will be added to underlying shapefile (OgrLayer.GetBuffer). This method
         /// will trigger the population of this shapefile if it's not yet in memory. \n
         /// 
         /// The following code opens "buildings" layer, generates categories based on "population"
@@ -612,7 +618,6 @@ namespace MapWinGIS
         /// }
         /// \endcode
         /// </remarks>
-        /// \new493 Added in version 4.9.3
         public bool GenerateCategories(string Fieldname, tkClassificationType ClassificationType, int numClasses,
             tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType)
         {
@@ -643,7 +648,6 @@ namespace MapWinGIS
         /// );
         /// \endcode
         /// <returns>Number of styles.</returns>
-        /// \new493 Added in version 4.9.3
         public int GetNumStyles()
         {
             throw new NotImplementedException();
@@ -657,7 +661,6 @@ namespace MapWinGIS
         /// for dynamic loading mode, where labels will be generated on the fly after each zooming 
         /// operation.
         /// </remarks>
-        /// \new493 Added in version 4.9.3
         public string LabelExpression
         {
             get { throw new NotImplementedException(); }
@@ -668,7 +671,6 @@ namespace MapWinGIS
         /// Gets or sets label orientation for polyline layers.
         /// </summary>
         /// \see OgrLayer.LabelExpression
-        /// \new493 Added in version 4.9.3
         public tkLineLabelOrientation LabelOrientation
         {
             get { throw new NotImplementedException(); }
@@ -679,7 +681,6 @@ namespace MapWinGIS
         /// Gets or sets position of labels relative to their parent features.
         /// </summary>
         /// \see OgrLayer.LabelExpression
-        /// \new493 Added in version 4.9.3
         public tkLabelPositioning LabelPosition
         {
             get { throw new NotImplementedException(); }
@@ -694,8 +695,7 @@ namespace MapWinGIS
         /// number of features for the new map extents exceeds this number they won't be loaded. The default
         /// value of property can be changed with GlobalSettings.OgrLayerMaxFeatureCount.
         /// </remarks>
-        /// \see OgrLayer.GetData
-        /// \new493 Added in version 4.9.3
+        /// \see OgrLayer.GetBuffer
         public int MaxFeatureCount
         {
             get { throw new NotImplementedException(); }
@@ -707,7 +707,6 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="StyleName">The name of the style.</param>
         /// <returns>True on success.</returns>
-        /// \new493 Added in version 4.9.3
         public bool RemoveStyle(string StyleName)
         {
             throw new NotImplementedException();
@@ -718,7 +717,6 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>This property will check the presence of mw_styles table in the datasource and then
         /// will try to create one if it's missing. If neither succeeds, false will be returned.</remarks>
-        /// \new493 Added in version 4.9.3
         public bool SupportsStyles
         {
             get { throw new NotImplementedException(); }
@@ -729,7 +727,6 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="styleIndex">Index of style.</param>
         /// <returns>Name of the style.</returns>
-        /// \new493 Added in version 4.9.3
         public string get_StyleName(int styleIndex)
         {
             throw new NotImplementedException();
@@ -920,7 +917,7 @@ namespace MapWinGIS
         /// from the log registered during OgrLayer.SaveChanges call.
         /// </summary>
         /// <param name="errorIndex">Error index.</param>
-        /// <returns>Index of shape in underlying in-memory shapefile (OgrLayer.GetData()).</returns>
+        /// <returns>Index of shape in underlying in-memory shapefile (OgrLayer.GetBuffer()).</returns>
         public int get_UpdateSourceErrorShapeIndex(int errorIndex)
         {
             throw new NotImplementedException();
@@ -951,7 +948,7 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets a value indicating whether underlying data ( OgrLayer.GetData ) was reprojected.
+        /// Gets a value indicating whether underlying data ( OgrLayer.GetBuffer ) was reprojected.
         /// </summary>
         /// <remarks>
         /// This may happen because of projection mismatch on adding it to the map. See AxMap.ProjectionMismatchBehavior for details.
@@ -993,6 +990,8 @@ namespace MapWinGIS
 
         /// @}
 
+        
+        
     }
 
 #if nsp

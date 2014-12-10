@@ -436,14 +436,6 @@ namespace MapWinGIS
         public bool AutoChooseOgrLoadingMode { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the default style of OGR layers will be saved 
-        /// into the datasource and used further on.
-        /// </summary>
-        /// \see OgrLayer.GetNumStyles
-        /// \new493 Added in version 4.9.3
-        public bool OgrUseStyles { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether AxMap.GlobalCallback object should be set as a 
         /// layer callback (i.e. Shapefile.GlobalCallback, OgrLayer.GlobalCallback) in AxMap.AddLayer method 
         /// if a layer object doesn't have any callback yet.
@@ -466,6 +458,55 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether layers without metadata about coordinate system / projection can be added to the map.
+        /// </summary>
+        /// <remarks>The default value is true. The decision can also be made on per-layer bases
+        /// by handling AxMap.LayerProjectionIsEmpty event.</remarks>
+        /// \new493 Added in version 4.9.3
+        public bool AllowLayersWithoutProjections { get; set;}
+
+        /// <summary>
+        /// Gets or sets a value indicating whether layers with coordinate system / projection different from those of the map can be added to the map.
+        /// </summary>
+        /// <remarks>In most cases it's not advisable to allow projection mismatch, since relative position of layers with different 
+        /// projections won't be correct. The default value is false. The decision can also be made on per-layer bases
+        /// by handling AxMap.ProjectionMismatch event.</remarks>
+        /// \new493 Added in version 4.9.3
+        public bool AllowProjectionMismatch { get; set;}
+
+        /// <summary>
+        /// Gets or sets global callback object to report information about progress and errors taking place inside MapWinGIS.
+        /// </summary>
+        /// <remarks>The callback object set by this property will override all callback set for particular classes 
+        /// (like Shapefile.GlobalCallback, AxMap.GlobalCallback). Also it will automatically display internal GDAL error messages.</remarks>
+        /// \note It's strongly recommended to use this property rather than setting callback for each and every class.
+        /// \new493 Added in version 4.9.3
+        public ICallback ApplicationCallback { get; set;}
+
+        /// <summary>
+        /// Gets or sets a value which limits the maximum number of shapes within a vector layer to run on-the-fly reprojection.
+        /// </summary>
+        /// <remarks>This property is taken into account when projection mismatch occurs on adding a new layer to the map.</remarks>
+        /// \new493 Added in version 4.9.3
+        public int MaxReprojectionShapeCount { get; set;}
+       
+        /// <summary>
+        /// Gets or sets a value which determines how close to a particular object mouse cursor should be 
+        /// in order to select it with mouse click. 
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public double MouseTolerance { get; set;}
+
+        /// <summary>
+        /// Gets or sets a value which determines whether automatic on-the-fly reprojection of the vector layer
+        /// will be performed on adding a new layer to the map with different projection.
+        /// </summary>
+        /// <remarks>The decision can also be made on per-layer bases by handling AxMap.ProjectionMismatch event.</remarks>
+        /// \see MaxReprojectionShapeCount
+        /// \new493 Added in version 4.9.3
+        public bool ReprojectLayersOnAdding { get; set;}
     }
 #if nsp
 }

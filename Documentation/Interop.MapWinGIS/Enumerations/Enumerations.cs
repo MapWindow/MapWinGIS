@@ -2297,7 +2297,7 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible behaviors for shape editor.
+    /// Possible behaviors for Shape Editor.
     /// </summary>
     public enum tkEditorBehavior
     {
@@ -2312,7 +2312,7 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible overlay operations for shape editor.
+    /// Possible overlay operations for Shape Editor.
     /// </summary>
     public enum tkEditorOverlay
     {
@@ -2367,7 +2367,7 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible validation modes for shape editor.
+    /// Possible validation modes for Shape Editor.
     /// </summary>
     public enum tkEditorValidation
     {
@@ -2400,7 +2400,7 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible ways to display length of segments for shape editor.
+    /// Possible ways to display length of segments for Shape Editor.
     /// </summary>
     public enum tkLengthDisplayMode
     {
@@ -2456,7 +2456,7 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible types of operations in undo list of shape editor.
+    /// Possible types of operations in undo list of Shape Editor.
     /// </summary>
     public enum tkUndoOperation
     {

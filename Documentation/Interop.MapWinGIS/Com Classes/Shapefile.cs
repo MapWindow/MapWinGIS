@@ -402,6 +402,134 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets "flattened" shapefile type, i.e. Z and M components will be ignored.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public ShpfileType ShapefileType2D
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets rotation angle for a shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>Angle in degrees (0-360).</returns>
+        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// \new492 Added in version 4.9.2
+        public double get_ShapeRotation(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets rotation angle for a shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="pVal">Angle in degrees (0-360).</param>
+        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
+        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
+        /// \new492 Added in version 4.9.2
+        public void set_ShapeRotation(int ShapeIndex, double pVal)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets visibility of shape.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>True if shape is visible.</returns>
+        /// <remarks>The property takes into account Shapefile.VisibilityExpression, 
+        /// Shapefile.get_ShapeIsHidden, ShapeDrawingOptions.Visible</remarks>
+        /// \new492 Added in version 4.9.2
+        public bool get_ShapeVisible(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        /// <summary>
+        /// Serializes the state shapefile object, but not the data itself.
+        /// </summary>
+        /// <param name="SaveSelection">True is selection on per-shape basis should be serialized.</param>
+        /// <param name="SerializeCategories">True if categories should be serialize on per-shape basis. 
+        /// The option should be used when categories were applied manually with Shapefile.put_ShapeCategory.</param>
+        /// <returns>XML string with serialized state.</returns>
+        /// \see Shapefile.Serialize
+        /// \new493 Added in version 4.9.3
+        public string Serialize2(bool SaveSelection, bool SerializeCategories)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether a shape is hidden.
+        /// </summary>
+        /// <remarks>Even when this property is set to false, the shape may still be invisible because of other settings. 
+        /// Use Shapefile.get_ShapeVisible to check if it will actually be displayed on the screen
+        ///  when corresponding portion of map is rendered.</remarks>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>True in case shape is hidden.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool get_ShapeIsHidden(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// When set to true prevents shape from being displayed.
+        /// </summary>
+        /// <remarks>This property is used internally by interactive editing tools.</remarks>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="pVal">Value indicating whether the shape is hidden.</param>
+        /// \new493 Added in version 4.9.3
+        public void set_ShapeIsHidden(int ShapeIndex, bool pVal)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this shapefile will be visible to cmIdentify tool.
+        /// </summary>
+        /// \see AxMap.CursorMode
+        /// \new493 Added in version 4.9.3
+        public bool Identifiable
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Moves shapefile at specified offset.
+        /// </summary>
+        /// <remarks>Shapefile must be in editing mode in order for this method to succeed.</remarks>
+        /// <param name="xOffset">X component of offset.</param>
+        /// <param name="yOffset">Y component of offset.</param>
+        /// <returns>True on success.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool Move(double xOffset, double yOffset)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether particular shape is currently displayed on the screen.
+        /// </summary>
+        /// <param name="ShapeIndex"></param>
+        /// <returns></returns>
+        /// <remarks>This property is set during the core rendering process, therefore 
+        /// it accounts for all possible ways for a certain shape to be hidden, like collision 
+        /// avoidance for point symbols or dynamic visibility for categories.</remarks>
+        /// \new493 Added in version 4.9.3
+        public bool get_ShapeRendered(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         /// The modules listed here are parts of the documentation of Shapefile class.
@@ -557,6 +685,17 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Gets index of field with specified name.
+        /// </summary>
+        /// <param name="FieldName">Field name.</param>
+        /// <returns>Index of field in attribute table or -1 if no such field is found.</returns>
+        /// \new493 Added in version 4.9.3
+        public int get_FieldIndexByName(string FieldName)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         #endregion
 
@@ -582,7 +721,7 @@ namespace MapWinGIS
         /// Deletes all the shapes from the shapefile.
         /// </summary>
         /// <remarks>Both shapefile and attribute table must be in editing mode for the successful operation.
-        /// The records of atribute table will be removed as well to ensure shapefile integrity.</remarks>
+        /// The records of attribute table will be removed as well to ensure shapefile integrity.</remarks>
         /// <returns>Returns true on success and false otherwise.</returns>
         public bool EditClear()
         {
@@ -663,6 +802,91 @@ namespace MapWinGIS
         public int EditAddShape(Shape Shape)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether particular shape was modified after shapefile was opened.
+        /// </summary>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <returns>The value of modified flag.</returns>
+        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
+        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
+        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
+        /// must be set in the client code.</remarks>
+        /// \new493 Added in version 4.9.3 
+        public bool get_ShapeModified(int ShapeIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets a value indicating whether particular shape was modified after shapefile was opened.
+        /// </summary>
+        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
+        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
+        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
+        /// must be set in the client code.</remarks>
+        /// <param name="ShapeIndex">Index of shape.</param>
+        /// <param name="newVal">New value of modified flag.</param>
+        /// <returns>New value of modified flag.</returns>
+        /// \new493 Added in version 4.9.3 
+        public void set_ShapeModified(int ShapeIndex, bool newVal)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /// <summary>
+        /// Substitutes shape at specified index with another instance. 
+        /// </summary>
+        /// <remarks>The method doesn't affect attribute table values.</remarks>
+        /// <param name="ShapeIndex">Index of shape to substitute.</param>
+        /// <param name="shpNew">New shape to substitute an existing one with.</param>
+        /// <returns>True on success.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool EditUpdateShape(int ShapeIndex, Shape shpNew)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether shapefile can be redrawn without redrawing other layer on the map.
+        /// </summary>
+        /// <remarks>
+        /// All volatile shapefiles will be placed in main screen buffer (along with drawing layers) rather than data layer buffer,
+        /// so that their redraw can be forced with AxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers). This can be recommended 
+        /// for in-memory shapefiles with constantly changing values to ensure rendering performance.
+        /// </remarks>
+        /// \new492 Added in version 4.9.2
+        public bool Volatile
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a shapefile can be edited with built-in interactive tools.
+        /// </summary>
+        /// <remarks>Setting the property to true will automatically call Shapefile.StartEditingShapes if 
+        /// shapefile hasn't been loaded in the memory already. Setting it false won't call Shapefile.StopEditingShapes,
+        /// only interactive tools will be disabled.
+        /// Interactive editing mode automatically sets Shapefile.Volatile property to true. </remarks>
+        /// \see ShapeEditor, AxMap.CursorMode
+        /// \new493 Added in version 4.9.3
+        public bool InteractiveEditing
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether interactive editing tools can snap to vertices of the shapefile.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool Snappable
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         /// @}
@@ -1365,9 +1589,6 @@ namespace MapWinGIS
             throw new NotImplementedException();
         }
 
-      
-
-
         /// @}
         #endregion
 
@@ -1643,6 +1864,16 @@ namespace MapWinGIS
             set { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Removes spatial index associated with shapefile (.mwd and .mwx files).
+        /// </summary>
+        /// <returns>True on success.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool RemoveSpatialIndex()
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
         
         #endregion
@@ -1783,215 +2014,6 @@ namespace MapWinGIS
         #endregion
 
         /// @}
-
-        
-        /// <summary>
-        /// Gets or sets a value indicating whether shapefile can be redrawn without redrawing other layer on the map.
-        /// </summary>
-        /// <remarks>
-        /// All volatile shapefiles will be placed in main screen buffer (along with drawing layers) rather than data layer buffer,
-        /// so that their redraw can be forced with AxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers). This can be recommended 
-        /// for in-memory shapefiles with constantly changing values to ensure rendering performance.
-        /// </remarks>
-        /// \new492 Added in version 4.9.2
-        public bool Volatile
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Gets rotation angle for a shape.
-        /// </summary>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <returns>Angle in degrees (0-360).</returns>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
-        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
-        /// \new492 Added in version 4.9.2
-        public double get_ShapeRotation(int ShapeIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets rotation angle for a shape.
-        /// </summary>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <param name="pVal">Angle in degrees (0-360).</param>
-        /// <remarks>This value will be applied for icons of point shapefiles only (ShapeDrawingOptions.PointType = ptSymbolPicture). 
-        /// Values other then 0.0 will override ShapeDrawingOptions.PointRotation property for shapefile and categories.</remarks>
-        /// \new492 Added in version 4.9.2
-        public void set_ShapeRotation(int ShapeIndex, double pVal)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets visibility of shape.
-        /// </summary>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <returns>True if shape is visible.</returns>
-        /// <remarks>The property takes into account Shapefile.VisibilityExpression, 
-        /// Shapefile.get_ShapeIsHidden, ShapeDrawingOptions.Visible</remarks>
-        /// \new492 Added in version 4.9.2
-        public bool get_ShapeVisible(int ShapeIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether particular shape was modified after shapefile was opened.
-        /// </summary>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <returns>The value of modified flag.</returns>
-        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
-        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
-        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
-        /// must be set in the client code.</remarks>
-        /// \new493 Added in version 4.9.3 
-        public bool get_ShapeModified(int ShapeIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets a value indicating whether particular shape was modified after shapefile was opened.
-        /// </summary>
-        /// <remarks>This property is used by OgrLayer.SaveChanges method to determine shape records
-        /// to be updated in datasource. The flag is set to true automatically only on insertion of a new
-        /// shape. For other types of edits (editing of vertices, editing of attributes) the flag
-        /// must be set in the client code.</remarks>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <param name="newVal">New value of modified flag.</param>
-        /// <returns>New value of modified flag.</returns>
-        /// \new493 Added in version 4.9.3 
-        public void set_ShapeModified(int ShapeIndex, bool newVal)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        /// <summary>
-        /// Substitutes shape at specified index with another instance. 
-        /// </summary>
-        /// <remarks>The method doesn't affect attribute table values.</remarks>
-        /// <param name="ShapeIndex">Index of shape to substitute.</param>
-        /// <param name="shpNew">New shape to substitute an existing one with.</param>
-        /// <returns>True on success.</returns>
-        /// \new493 Added in version 4.9.3
-        public bool EditUpdateShape(int ShapeIndex, Shape shpNew)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether a shapefile can be edited with built-in interactive tools.
-        /// </summary>
-        /// <remarks>Setting the property to true will automatically call Shapefile.StartEditingShapes if 
-        /// shapefile hasn't been loaded in the memory already. Setting it false won't call Shapefile.StopEditingShapes,
-        /// only interactive tools will be disabled.
-        /// Interactive editing mode automatically sets Shapefile.Volatile property to true. </remarks>
-        /// \see ShapeEditor, AxMap.CursorMode
-        /// \new493 Added in version 4.9.3
-        public bool InteractiveEditing
-        {
-            get { throw new NotImplementedException();}
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Serializes the state shapefile object, but not the data itself.
-        /// </summary>
-        /// <param name="SaveSelection">True is selection on per-shape basis should be serialized.</param>
-        /// <param name="SerializeCategories">True if categories should be serialize on per-shape basis. 
-        /// The option should be used when categories were applied manually with Shapefile.put_ShapeCategory.</param>
-        /// <returns>XML string with serialized state.</returns>
-        /// \see Shapefile.Serialize
-        /// \new493 Added in version 4.9.3
-        public string Serialize2(bool SaveSelection, bool SerializeCategories)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether interactive editing tools can snap to vertices of the shapefile.
-        /// </summary>
-        /// \new493 Added in version 4.9.3
-        public bool Snappable
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether a shape is hidden.
-        /// </summary>
-        /// <remarks>Even when this property is set to false, the shape may still be invisible because of other settings. 
-        /// Use Shapefile.get_ShapeVisible to check if it will actually be displayed on the screen
-        ///  when corresponding portion of map is rendered.</remarks>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <returns>True in case shape is hidden.</returns>
-        /// \new493 Added in version 4.9.3
-        public bool get_ShapeIsHidden(int ShapeIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// When set to true prevents shape from being displayed.
-        /// </summary>
-        /// <remarks>This property is used internally by interactive editing tools.</remarks>
-        /// <param name="ShapeIndex">Index of shape.</param>
-        /// <param name="pVal">Value indicating whether the shape is hidden.</param>
-        /// \new493 Added in version 4.9.3
-        public void set_ShapeIsHidden(int ShapeIndex, bool pVal)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this shapefile will be visible to cmIdentify tool.
-        /// </summary>
-        /// \see AxMap.CursorMode
-        /// \new493 Added in version 4.9.3
-        public bool Identifiable
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Moves shapefile at specified offset.
-        /// </summary>
-        /// <remarks>Shapefile must be in editing mode in order for this method to succeed.</remarks>
-        /// <param name="xOffset">X component of offset.</param>
-        /// <param name="yOffset">Y component of offset.</param>
-        /// <returns>True on success.</returns>
-        /// \new493 Added in version 4.9.3
-        public bool Move(double xOffset, double yOffset)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets "flattened" shapefile type, i.e. Z and M components will be ignored.
-        /// </summary>
-        /// \new493 Added in version 4.9.3
-        public ShpfileType ShapefileType2D
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
-        /// Gets index of field with specified name.
-        /// </summary>
-        /// <param name="FieldName">Field name.</param>
-        /// <returns>Index of field in attribute table or -1 if no such field is found.</returns>
-        /// \new493 Added in version 4.9.3
-        public int get_FieldIndexByName(string FieldName)
-        {
-            throw new NotImplementedException();
-        }
     }
 #if nsp
 }

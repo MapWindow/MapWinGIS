@@ -481,7 +481,7 @@ namespace MapWinGIS
         /// </summary>
         /// \see GeoProjection.IsFrozen
         /// \new491 Added in version 4.9.1
-        public void Clear()
+        public bool Clear()
         {
             throw new NotImplementedException();
         }
