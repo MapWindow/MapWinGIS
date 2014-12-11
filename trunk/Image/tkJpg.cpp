@@ -193,7 +193,7 @@ bool tkJpg::WriteJpg(const char *filename)
 	return true;
 }
 
-bool tkJpg::SaveByGdiPlus(const char *filename, wchar_t* format)
+Gdiplus::Status tkJpg::SaveByGdiPlus(CStringW filename, wchar_t* format)
 {
 	FlipBuffer();	
 	Gdiplus::Bitmap *bmap = new Gdiplus::Bitmap(width,height);
@@ -210,16 +210,13 @@ bool tkJpg::SaveByGdiPlus(const char *filename, wchar_t* format)
 			c++;
 		}
 	}
-
+	
 	CLSID  jpgClsid;
-	int    result;
-	result = GetEncoderClsid(format, &jpgClsid);
+	int    result = GetEncoderClsid(format, &jpgClsid);
 
-	USES_CONVERSION;
-	Status stat;
-	stat = bmap->Save(A2CW(filename),&jpgClsid);
+	Gdiplus::Status status = bmap->Save(filename, &jpgClsid);
 	delete bmap;
-	return true;
+	return status;
 }
 
 void tkJpg::Quantize()

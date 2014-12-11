@@ -31,7 +31,7 @@ public:
 	void FlipBuffer();
 	bool ReadPPM(const char * filename);
 	bool WriteGif(const char * filename); // Write To Gif File,  data must already be loaded
-	bool WritePPM(const char * filename); // Write To PPM File,  data must already be loaded
+	bool WritePPM(CStringW filename); // Write To PPM File,  data must already be loaded
 
 	tkGif():plotloc(0),buffer(NULL),blocksize(0),numread(0),bitshift(0),
 		transColor(0), hasTransparency(false),buffSize(0),cBack(NULL){} // Constructor

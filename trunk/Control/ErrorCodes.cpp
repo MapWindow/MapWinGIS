@@ -321,6 +321,12 @@ const char * ErrorMsg( long ErrorCode )
 			return "At least 2 datasources expected.";
 		case tkIMAGES_MUST_HAVE_THE_SAME_SIZE:
 			return "Images must have the same size.";
+		case tkGDAL_INVALID_SAVE_IMAGE_EXTENSION:
+			return "GDAL images can currently be saved in the same format only. Extension of the output file may be not valid for its format.";
+		case tkCOPYING_DISK_BASED_BMP_NOT_SUPPORTED:
+			return "Saving of disk-based (no in-memory) BMP to another location isn't supported.";
+		case tkGDIPLUS_SAVING_AVAILABLE_INRAM:
+			return "GDI+ saving is available only for in-RAM images.";
 
 		//801-1000 = tkdbf
 		case tkCANT_OPEN_DBF:

@@ -279,6 +279,7 @@ public:
 	STDMETHOD(put_SourceGridBandIndex)(int newVal);
 	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
+	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -345,11 +346,10 @@ private:
 	bool ReadRaster(const CStringW ImageFile, GDALAccess accessMode);
 
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
-	bool WritePPM(CString ImageFile, bool WorldFile, ICallback *cBack);
+	bool WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack);
 	bool WriteGIF(CString ImageFile, bool WorldFile, ICallback * cBack);
-	bool WriteBMP(CString FileName, bool WriteWorldFile, ICallback *cBack);
-	bool WriteGDIPlus(CString ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
-	bool CopyGDALImage(CStringW ImageFileName, bool writeWorldFile);
+	bool WriteBMP(CStringW FileName, bool WriteWorldFile, ICallback *cBack);
+	bool WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
 
 	VARIANT_BOOL WriteWorldFile(CStringW WorldFileName);
 	bool ReadWorldFile(CStringW WorldFileName);
@@ -359,6 +359,7 @@ private:
 	bool SetImageBitsDCCore(HDC hdc);
 	bool CheckForProxy();
 	void ReadProjection();
+	bool CopyGdalDataset(CStringW imageFilename, ImageType fileType, bool writeWorldFile);
 
 public:
 	bool DeserializeCore(CPLXMLNode* node);
@@ -387,7 +388,6 @@ public:
 	void ErrorMessage(long ErrorCode);
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
 	
-	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

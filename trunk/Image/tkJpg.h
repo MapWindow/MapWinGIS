@@ -38,13 +38,12 @@ public:
 	int getYllCenter() {return (int)YllCenter;}	
 	int getXllCenter() {return (int)XllCenter;}	
 
-
 	bool ReadPPM(const char * filename);
 	bool WriteJpg(const char * filename);
 	bool WriteTiff(const char * filename); // Write To Tiff File,  data must already be loaded
 	bool WriteGif(const char * filename); // Write To Gif File,  data must already be loaded
 	bool WritePPM(const char * filename); // Write To PPM File,  data must already be loaded
-	bool SaveByGdiPlus(const char *filename, wchar_t* format);
+	Gdiplus::Status SaveByGdiPlus(CStringW filename, wchar_t* format);
 
 	tkJpg():plotloc(0),buffer(NULL),blocksize(0),numread(0),bitshift(0),
 		transColor(0), hasTransparency(false),buffSize(0),cBack(NULL),dX(-1),dY(-1),
@@ -53,7 +52,7 @@ public:
 	{
 		if(buffer)
 			delete [] buffer;
-	} // Deconstructor
+	} 
 	void InitSize(int nWidth, int nHeight)
 	{
 		width=nWidth; height=nHeight;

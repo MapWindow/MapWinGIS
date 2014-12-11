@@ -670,7 +670,7 @@ inline void tkGif::PutCode(int code)
 }
 
 
-bool tkGif::WritePPM(const char *filename)
+bool tkGif::WritePPM(CStringW filename)
 {
 	FlipBuffer();
 

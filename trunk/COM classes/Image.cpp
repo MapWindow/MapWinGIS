@@ -344,12 +344,12 @@ bool CImageClass::ReadRaster(const CStringW ImageFile, GDALAccess accessMode)
 STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, ImageType FileType, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	CStringW ImageFile = OLE2CW( ImageFileName );
+	CStringW newName = OLE2CW( ImageFileName );
 	bool bWriteWorldFile = WriteWorldFile == VARIANT_TRUE;
 
 	if(FileType == USE_FILE_EXTENSION)
 	{
-		if(! getFileType(ImageFile, FileType))
+		if(! getFileType(newName, FileType))
 		{	
 			ErrorMessage(tkUNSUPPORTED_FILE_EXTENSION);
 			*retval = VARIANT_FALSE;
@@ -361,30 +361,34 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 	switch(FileType)
 	{
 		case BITMAP_FILE:
-			*retval = WriteBMP( OLE2A(ImageFileName), bWriteWorldFile, cBack)?VARIANT_TRUE:VARIANT_FALSE;		// TODO: use Unicode
+			*retval = WriteBMP(newName, bWriteWorldFile, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 			break;
 		case PPM_FILE:
-			*retval = WritePPM(OLE2A(ImageFileName), bWriteWorldFile, cBack)?VARIANT_TRUE:VARIANT_FALSE;		// TODO: use Unicode
+			*retval = WritePPM(newName, bWriteWorldFile, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 			break;	
 		case JPEG_FILE: 
 		case PNG_FILE:
 		case GIF_FILE:
 		case TIFF_FILE:
-			if (_rasterImage)
 			{
-				// first let's try GDAL, it will preserve the inner structure of the image more precisely
-				*retval = CopyGDALImage(OLE2CA(ImageFileName), bWriteWorldFile) ? VARIANT_TRUE : VARIANT_FALSE;
-				if (*retval) return S_OK;
+				if (CopyGdalDataset(newName, FileType, bWriteWorldFile))
+				{
+					*retval = VARIANT_TRUE;
+					return S_OK;
+				}
+				*retval = WriteGDIPlus(newName, bWriteWorldFile, FileType, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 			}
-			// let's try GDI+ both when GDAL has failed and when there is no GDAL dataset underneath
-			*retval = WriteGDIPlus(OLE2A(ImageFileName), bWriteWorldFile, FileType, cBack)?VARIANT_TRUE:VARIANT_FALSE;
 			break;
 		default:
-			// try GDAL for any other format
-			*retval = CopyGDALImage(OLE2CA(ImageFileName), bWriteWorldFile) ? VARIANT_TRUE : VARIANT_FALSE;
-			if (*retval == VARIANT_FALSE)
 			{
-				CallbackHelper::ErrorMsg("Creating copy of dataset is unsupported by the current GDAL driver");
+				if (!IsGdalImageAvailable())
+					return S_OK;
+
+				if (CopyGdalDataset(newName, FileType, bWriteWorldFile))
+				{
+					*retval = VARIANT_TRUE;
+					return S_OK;
+				}
 			}
 			break;
 	}
@@ -392,25 +396,33 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 }
 
 // ************************************************
-//       CopyGDALImage()
+//       CopyGdalDataset()
 // ************************************************
-bool CImageClass::CopyGDALImage(CStringW ImageFileName, bool writeWorldFile )
+bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bool writeWorldFile)
 {
 	if (!_rasterImage) return false;
 	
+	// report but don't abort the operations
+	if (fileType != _imgType)
+		ErrorMessage(tkGDAL_INVALID_SAVE_IMAGE_EXTENSION);
+
 	USES_CONVERSION;
-	if (_fileName.MakeLower() == ImageFileName.MakeLower())
+	if (_fileName.MakeLower() == imageFilename.MakeLower())
 	{
 		CallbackHelper::ErrorMsg("Only saving in new file is supported for GDAL datasets");
 		return false;
 	}
-	
+
 	GDALDataset* dataset = _rasterImage->get_Dataset();
 	if (!dataset) return false;
 
-	bool result = GdalHelper::CopyDataset(dataset, ImageFileName, _globalCallback, writeWorldFile);
+	bool result = GdalHelper::CopyDataset(dataset, imageFilename, _globalCallback, writeWorldFile);
 
-	GdalHelper::BuildOverviewsIfNeeded(ImageFileName, false, _globalCallback);		// built-in overviews
+	GdalHelper::BuildOverviewsIfNeeded(imageFilename, false, _globalCallback);		// built-in overviews
+
+	if (!result) {
+		CallbackHelper::ErrorMsg("Creating a copy of dataset is failed for the current GDAL driver");
+	}
 
 	return result;
 }
@@ -975,51 +987,40 @@ STDMETHODIMP CImageClass::get_Filename(BSTR *pVal)
 // **********************************************************
 //	  WriteBMP()
 // **********************************************************
-bool CImageClass::WriteBMP(CString ImageFile, bool WorldFile, ICallback *cBack)
+bool CImageClass::WriteBMP(CStringW ImageFile, bool WorldFile, ICallback *cBack)
 {
-	bool result;
+	if (ImageFile.GetLength() == 0) return false;
+
+	if( !_inRam )
+	{
+		if (ImageFile == _fileName) return true;
+		ErrorMessage(tkCOPYING_DISK_BASED_BMP_NOT_SUPPORTED);
+		return false;
+	}	
+	
+	tkBitmap bmp;
+	if( cBack )
+		bmp.globalCallback = cBack;
+
+	// Use bitmap conversion
+	bmp.setHeight(_height);
+	bmp.setWidth(_width);
+
+  	if (!bmp.WriteBitmap(ImageFile, _imageData))
+	{	
+		ErrorMessage(tkCANT_CREATE_FILE);
+		return false;
+	}
 
 	_fileName = ImageFile;
 
-	if( _inRam )
+	if (WorldFile)
 	{
-		if(ImageFile.GetLength() <= 0) return false;
-	
-		tkBitmap bmp;
-		if( cBack != NULL )
-			bmp.globalCallback = cBack;
-
-		// Use bitmap conversion
-		bmp.setHeight(_height);
-		bmp.setWidth(_width);
-		result = bmp.WriteBitmap(ImageFile, _imageData);
-
-		if( result == FALSE )
-		{	
-			ErrorMessage(tkCANT_CREATE_FILE);
-			return result;
-		}
-
-		if (WorldFile)
-		{
-			CStringW WorldFileName = Utility::ChangeExtension(_fileName, L".bpw");
-			result = WriteWorldFile(WorldFileName) == VARIANT_TRUE;
-			if(!result)
-			{
-				ErrorMessage(tkCANT_WRITE_WORLD_FILE);
-				return result;
-			}
-		}
+		CStringW worldFileName = Utility::ChangeExtension(ImageFile, L".bpw");
+		if (!WriteWorldFile(worldFileName))
+			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
 	}
-	else
-	{
-		// Technically it is -- but no action is required. putValue calls
-		// the _bitmapImage object directly to put the value.
-		USES_CONVERSION;
-		CStringA filenameA = W2A(_fileName);			// TODO: use Unicode
-		result = ImageFile == filenameA ? true : _bitmapImage->WriteDiskToDisk(filenameA,ImageFile);
-	}
-	return result;
+	return true;
 }
 
 // **********************************************************
@@ -1054,77 +1055,89 @@ bool CImageClass::WriteGIF(CString ImageFile, bool WorldFile, ICallback *cBack)
 // **********************************************************
 //	  WriteJPEG()
 // **********************************************************
-bool CImageClass::WriteGDIPlus(CString ImageFile, bool WorldFile, ImageType type, ICallback *cBack)
+bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack)
 {
-	bool result;
+	if (!_inRam) 
+	{
+		ErrorMessage(tkGDIPLUS_SAVING_AVAILABLE_INRAM);
+		return false;
+	}
+
+	if (_width == 0 || _height == 0) 
+	{
+		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
+		return false;
+	}
+
 	tkJpg jpg;
 	jpg.cBack = cBack;
 
 	jpg.InitSize(_width, _height);
 	memcpy(jpg.buffer, _imageData, _height*_width*3);
 
+	Gdiplus::Status status;
 	CString ext;
 	switch (type)
 	{
 		case PNG_FILE:
-			result = jpg.SaveByGdiPlus((LPCTSTR)ImageFile, L"image/png");
-			ext = ".pngw";
+			status = jpg.SaveByGdiPlus(ImageFile, L"image/png");
+			ext = "pngw";
 			break;
 		case JPEG_FILE:
-			result = jpg.SaveByGdiPlus((LPCTSTR)ImageFile, L"image/jpeg");
-			ext = ".jpgw";
+			status = jpg.SaveByGdiPlus(ImageFile, L"image/jpeg");
+			ext = "jpgw";
 			break;
 		case TIFF_FILE:
-			result = jpg.SaveByGdiPlus((LPCTSTR)ImageFile, L"image/tiff");
-			ext = ".tifw";
+			status = jpg.SaveByGdiPlus(ImageFile, L"image/tiff");
+			ext = "tifw";
 			break;
 		case GIF_FILE:
-			result = jpg.SaveByGdiPlus((LPCTSTR)ImageFile, L"image/gif");
-			ext = ".gifw";
+			status = jpg.SaveByGdiPlus(ImageFile, L"image/gif");
+			ext = "gifw";
 			break;
 		default:
 			return false;
 	}
 
+	if (status != Gdiplus::Ok) 
+	{
+		Debug::WriteError("Saving with GDI+ has failed. Error code: %d", status);
+		return false;
+	}
+
 	if(WorldFile)
 	{
 		USES_CONVERSION;
-		CStringW WorldFileName = Utility::ChangeExtension(_fileName, A2W(ext));
-		result = this->WriteWorldFile(WorldFileName) == VARIANT_TRUE;
-		if(!result)
-		{
+		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, A2W(ext));
+		if (!this->WriteWorldFile(WorldFileName))
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
-			return result;
-		}
 	}
-	return result;
+	return true;
 }
 
 // **********************************************************
 //	  WritePPM()
 // **********************************************************
-bool CImageClass::WritePPM(CString ImageFile, bool WorldFile, ICallback *cBack)
+bool CImageClass::WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack)
 {
-	bool result;
 	tkGif ppm;
 	
 	ppm.InitSize(_width, _height);
 	memcpy(ppm.buffer, _imageData, _height*_width*3);
 
-	result = ppm.WritePPM((LPCTSTR)ImageFile);
+	if (!ppm.WritePPM(ImageFile))
+		return false;
+	
+	_fileName = ImageFile;
 
 	if(WorldFile)
 	{
-		CStringW WorldFileName = Utility::ChangeExtension(_fileName, L".ppw");
-		result = WriteWorldFile(WorldFileName) == VARIANT_TRUE;
-		if(!result)
-		{
+		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, L".ppw");
+		if (!WriteWorldFile(WorldFileName))
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
-			return result;
-		}
 	}
-
-	return result;
+	return true;
+	
 }
 
 // **********************************************************

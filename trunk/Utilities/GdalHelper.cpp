@@ -477,6 +477,27 @@ char** GdalHelper::ReadFile(CStringW filename)
 	m_globalSettings.SetGdalUtf8(false);
 	return papszPrj;
 }
+
+// ****************************************************************
+//		SetCompressionRasterOptions
+// ****************************************************************
+char** GdalHelper::SetCompressionRasterOptions(GDALDataset* dataset, char** options)
+{
+	if (!dataset) return options;
+
+	CString driverName = dataset->GetDriverName();
+	if (_strcmpi(driverName, "GTiff") == 0)
+	{
+		options = CSLSetNameValue(options, "COMPRESS", m_globalSettings.GetTiffCompression());
+	}
+	if (_strcmpi(driverName, "HFA") == 0)
+	{
+		if (m_globalSettings.tiffCompression != tkmNONE)
+			options = CSLSetNameValue(options, "COMPRESSED", "YES");
+	}
+	return options;
+}
+
 // ****************************************************************
 //		CopyDataset
 // ****************************************************************
@@ -491,18 +512,10 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* 
 	CallbackHelper::FillGdalCallbackParams(params, localCallback, "Copying dataset");
 	
 	char **papszOptions = NULL;
+	papszOptions = SetCompressionRasterOptions(dataset, papszOptions);
+
 	if (createWorldFile)
 		papszOptions = CSLSetNameValue(papszOptions, "WORLDFILE", "YES");
-
-	bool compress = true;
-
-	// perhaps limit it to tifs only in case GDAL will report errors for other formats
-	/*CString driverName = dataset->GetDriverName();
-	if (strcmp(driverName, "GTiff") != 0)
-	compress = true;*/
-
-	if (compress)
-		papszOptions = CSLSetNameValue(papszOptions, "COMPRESS", m_globalSettings.GetTiffCompression());
 
 	m_globalSettings.SetGdalUtf8(true);
 	CStringA nameUtf8 = Utility::ConvertToUtf8(newName);

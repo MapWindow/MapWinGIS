@@ -45,7 +45,5 @@ public:
 	void DumpDriverInfo();
 
 	static char** ReadFile(CStringW filename);
-	
-	
-
+	static char** SetCompressionRasterOptions(GDALDataset* dataset, char** options);
 };

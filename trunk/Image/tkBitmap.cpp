@@ -32,11 +32,11 @@
 //WriteBitmap takes the name of the file to write to as a parameter
 // and then opens the file, writes the header information and then 
 // writes the bitmap info...
-bool tkBitmap::WriteBitmap(const char * bmp_file, const colour * ImageData)
+bool tkBitmap::WriteBitmap(CStringW bmp_file, const colour * ImageData)
 {	
 	USES_CONVERSION;
 
-	FILE* fout = fopen(bmp_file,"wb");
+	FILE* fout = _wfopen(bmp_file, L"wb");
 	
 	if( !fout )
 		return false; //if the output file can't be opened, stop...
@@ -150,7 +150,7 @@ bool tkBitmap::WriteBitmap(const char * bmp_file, const colour * ImageData)
 	return true;
 }
 
-bool tkBitmap::CreateBitmap(const char * bmp_file, const colour * ImageData) 
+bool tkBitmap::CreateBitmap(CStringW bmp_file, const colour * ImageData) 
 {
 	//constant values
 	bmfh.bfType = 19778;		//always BM   

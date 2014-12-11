@@ -28,8 +28,8 @@ public:
 	void getRow( long Row, long * result );
 	bool Open(CStringW FileName, colour *& ImageData);
 	bool Open(CStringW FileName);
-	bool CreateBitmap(const char * bmp_file, const colour * ImageData);
-	bool WriteBitmap(const char * bmp_file, const colour * ImageData);
+	bool CreateBitmap(CStringW bmp_file, const colour * ImageData);
+	bool WriteBitmap(CStringW bmp_file, const colour * ImageData);
 	bool WriteDiskToDisk(const char * SourceFile, const char * DestinationFile);
 	void Close();
 	long FileHandle();
