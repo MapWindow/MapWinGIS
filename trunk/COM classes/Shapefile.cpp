@@ -1133,32 +1133,36 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		return S_FALSE;
 
 	USES_CONVERSION;
-	CString sa_shpfileName;
-	sa_shpfileName = OLE2CA(ShapefileName);
+	CStringW newShpName;
+	newShpName = OLE2W(ShapefileName);
 
-	if( sa_shpfileName.GetLength() <= 3 )
+	if( newShpName.GetLength() <= 3 )
 	{	
 		ErrorMessage(tkINVALID_FILENAME);
 	}
+	else if (!Utility::EndsWith(newShpName, L"shp"))
+	{
+		ErrorMessage(tkINVALID_FILE_EXTENSION);
+	}
 	else
 	{
-		CString sa_shxfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "shx";
-		CString sa_dbffileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "dbf";
+		CStringW newShxName = newShpName.Left(newShpName.GetLength() - 3) + L"shx";
+		CStringW newDbfName = newShpName.Left(newShpName.GetLength() - 3) + L"dbf";
 	
 		// -----------------------------------------------
 		// it's not allowed to rewrite the existing files
 		// -----------------------------------------------
-		if( Utility::FileExists(sa_shpfileName) )
+		if( Utility::FileExistsW(newShpName) )
 		{	
 			ErrorMessage(tkSHP_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::FileExists(sa_shxfileName) )
+		if (Utility::FileExistsW(newShxName))
 		{	
 			ErrorMessage(tkSHX_FILE_EXISTS);
 			return S_OK;
 		}
-		if( Utility::FileExists(sa_dbffileName) )
+		if (Utility::FileExistsW(newDbfName))
 		{	
 			ErrorMessage(tkDBF_FILE_EXISTS);
 			return S_OK;
@@ -1183,7 +1187,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		// -----------------------------------------------
 		// opening files
 		// -----------------------------------------------
-		FILE * sa_shpfile = fopen( sa_shpfileName, "wb+" );		
+		FILE * sa_shpfile = _wfopen(newShpName, L"wb+");
 		if( sa_shpfile == NULL )
 		{	
 			ErrorMessage(tkCANT_CREATE_SHP);
@@ -1191,7 +1195,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		}
 		
 		//shx
-		FILE * sa_shxfile = fopen( sa_shxfileName, "wb+" );
+		FILE * sa_shxfile = _wfopen(newShxName, L"wb+");
 		if( sa_shxfile == NULL )
 		{	
 			fclose( sa_shpfile );
@@ -1209,20 +1213,21 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		fclose(sa_shpfile);
 		fclose(sa_shxfile);
 
-		sa_shpfile = fopen( sa_shpfileName, "rb" );		
-		sa_shxfile = fopen( sa_shxfileName, "rb" );		
+		sa_shpfile = _wfopen(newShpName, L"rb");
+		sa_shxfile = _wfopen(newShxName, L"rb");
 
 		// ------------------------------------------------
 		//	saving dbf table
 		// ------------------------------------------------
-		_table->SaveAs(sa_dbffileName.AllocSysString(), cBack, retval);
-		if( *retval == FALSE )
+		CComBSTR bstrDbf(newDbfName);
+		_table->SaveAs(bstrDbf, cBack, retval);
+		if( *retval != VARIANT_TRUE )
 		{	
 			_table->get_LastErrorCode(&_lastErrorCode);
 			fclose(sa_shpfile);
 			fclose(sa_shxfile);
-			_unlink(sa_shpfileName);
-			_unlink(sa_shxfileName);
+			_wunlink(newShpName);
+			_wunlink(newShxName);
 			return S_OK;
 		}
 		
@@ -1236,10 +1241,10 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		_shxfile = sa_shxfile;
 	
 		// update all filenames:
-		_shpfileName = sa_shpfileName;	// lsu: saving of shp filename should be done before writing the projection;
-		_shxfileName = sa_shxfileName;	// otherwise projection string will be written to the memory
-		_dbffileName = sa_dbffileName;
-		_prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + "prj";
+		_shpfileName = newShpName;	// saving of shp filename should be done before writing the projection;
+		_shxfileName = newShxName;	// otherwise projection string will be written to the memory
+		_dbffileName = newDbfName;
+		_prjfileName = newShpName.Left(newShpName.GetLength() - 3) + L"prj";
 
 		// projection will be written to the disk after this
 		_sourceType = sstDiskBased;	
