@@ -164,9 +164,14 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 	VARIANT_BOOL vb;
 	CreateBitmap(imageFile, ncols, nrows, imageFormat, &vb);
 
-	CComBSTR bstr;
+	// convert projection to WKT
+	CComBSTR bstr, bstrWkt;
 	gridheader->get_Projection(&bstr);
-	_rasterDataset->SetProjection(OLE2A(bstr));		// TODO: perhaps it should be converted into WKT format
+	CComPtr<IGeoProjection> gp = NULL;
+	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&gp);
+	gp->ImportFromAutoDetect(bstr, &vb);
+	gp->ExportToWKT(&bstrWkt);
+	_rasterDataset->SetProjection(OLE2A(bstrWkt));
 
 	if (imageFormat == gpfTiffProxy)
 	{
@@ -186,10 +191,10 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 
 	if (inRam)
 	{
-		(*retval)->put_XllCenter(xll);
-		(*retval)->put_YllCenter(yll);
-		(*retval)->put_dX(dx);
-		(*retval)->put_dY(dy);
+		(*retval)->put_OriginalXllCenter(xll);
+		(*retval)->put_OriginalYllCenter(yll);
+		(*retval)->put_OriginalDX(dx);
+		(*retval)->put_OriginalDY(dy);
 		
 		// marking that it's a proxy
 		CStringW gridName = ((CGrid*)Grid)->GetFilename();
@@ -223,10 +228,10 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 			}
 		}
 		
-		(*retval)->put_XllCenter(xll);
-		(*retval)->put_YllCenter(yll);
-		(*retval)->put_dX(dx);
-		(*retval)->put_dY(dy);
+		(*retval)->put_OriginalXllCenter(xll);
+		(*retval)->put_OriginalYllCenter(yll);
+		(*retval)->put_OriginalDX(dx);
+		(*retval)->put_OriginalDY(dy);
 
 		// saving the world file
 		CStringW WorldFile;
@@ -646,10 +651,16 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 	else if (_canScanlineBuffer && _bufferLastUsed != 'A') // If A wasn't the last used, replace it.
 	{
 		_bufferLastUsed = 'A';
+		
 		// Write to row BufferANum
-		_poBandR->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		_poBandG->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		_poBandB->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		if (_bufferA_R)
+			_poBandR->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_R, totalWidth, 1, GDT_Int32, 0, 0 );
+
+		if (_bufferA_G)
+			_poBandG->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_G, totalWidth, 1, GDT_Int32, 0, 0 );
+
+		if (_bufferA_B)
+			_poBandB->RasterIO( GF_Write, 0, _bufferANum, totalWidth, 1, _bufferA_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Now that we're loading a different number into buffer,
 		// reset BufferANum
@@ -692,9 +703,14 @@ inline void CUtils::PutBitmapValue(long col, long row, _int32 Rvalue, _int32 Gva
 	{
 		_bufferLastUsed = 'B';
 		// Write to row BufferANum
-		_poBandR->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
-		_poBandG->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
-		_poBandB->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
+		if (_bufferB_R)
+			_poBandR->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_R, totalWidth, 1, GDT_Int32, 0, 0 );
+		
+		if (_bufferB_G)
+			_poBandG->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_G, totalWidth, 1, GDT_Int32, 0, 0 );
+
+		if (_bufferB_B)
+			_poBandB->RasterIO( GF_Write, 0, _bufferBNum, totalWidth, 1, _bufferB_B, totalWidth, 1, GDT_Int32, 0, 0 );
 
 		// Now that we're loading a different number into buffer,
 		// reset BufferBNum

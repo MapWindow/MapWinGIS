@@ -163,7 +163,13 @@ STDMETHODIMP CGeoProjection::put_Key(BSTR newVal)
 STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	
+
+	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	if (!node) {
+		*retVal = A2BSTR("");
+		return S_OK;
+	}
+
 	char* proj = NULL;
 	OGRErr err = _projection->exportToProj4(&proj);
 
@@ -312,6 +318,13 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
 STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	OGR_SRSNode* node = _projection->GetRoot();		// no need to generate GDAL errors, if know that it's empty
+	if (!node) {
+		*retVal = A2BSTR("");
+		return S_OK;
+	}
+
 	char* proj = NULL;
 	OGRErr err = _projection->exportToWkt(&proj);
 	if (err == OGRERR_NONE)

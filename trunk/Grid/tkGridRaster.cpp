@@ -783,9 +783,6 @@ double tkGridRaster::GetMaximum()
 	cachedMax = adfMinMax[1];
 	cachedMin = adfMinMax[0];
 
-	Debug::WriteLine("Maximum: %f", cachedMax);
-	Debug::WriteLine("Minimum: %f", cachedMin);
-
 	return adfMinMax[1];
 }
 

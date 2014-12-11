@@ -146,7 +146,7 @@ void CImageClass::ReadProjection()
 	CString wkt;
 	GdalHelper::GetProjection(_fileName, wkt);
 
-	CComBSTR bstrProjection;
+	CComBSTR bstrProjection(wkt);
 	_projection->ImportFromAutoDetect(bstrProjection, &vb);
 }
 
