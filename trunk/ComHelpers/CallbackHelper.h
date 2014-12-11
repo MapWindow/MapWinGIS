@@ -11,6 +11,7 @@ namespace CallbackHelper
 	void ErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...);
 	void ErrorMsg(CString className, ICallback* localCback, CString key, const char* message, ...);
 	void ErrorMsg(CString message);
+	void FillGdalCallbackParams(CallbackParams& params, ICallback* localCallback, const char* message);
 };
 
 int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void *pData);

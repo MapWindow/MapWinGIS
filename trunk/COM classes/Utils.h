@@ -281,6 +281,7 @@ private:
 	void Parse(CString sOrig, int * opts);
 	BOOL ProcessGeneralOptions(int * opts);
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
+	ICallback* GetCallback() { return m_globalSettings.callback ? m_globalSettings.callback : _globalCallback; }
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);

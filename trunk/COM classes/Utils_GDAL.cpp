@@ -774,7 +774,7 @@ STDMETHODIMP CUtils::GDALInfo(BSTR bstrSrcFilename, BSTR bstrOptions,
         if( bReportHistograms )
         {
             int nBucketCount, *panHistogram = NULL;
-			struct CallbackParams params = { cBack, "Analyzing" };
+			struct CallbackParams params( GetCallback(), "Analyzing" );
 
             eErr = GDALGetDefaultHistogram( hBand, &dfMin, &dfMax, 
                                             &nBucketCount, &panHistogram, 
@@ -1687,7 +1687,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		&& pszOutputSRS == NULL && !bSetNoData && !bUnsetNoData
 		&& nRGBExpand == 0 && !bStats)
 	{
-		struct CallbackParams params = { cBack, "Translating" };
+		struct CallbackParams params(GetCallback(), "Translating");
 
 		hOutDS = GDALCreateCopy( hDriver, pszDest, hDataset,
                                  bStrict, papszCreateOptions,
@@ -2158,7 +2158,7 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	/* -------------------------------------------------------------------- */
 	/*      Write to the output file using CopyCreate().                    */
 	/* -------------------------------------------------------------------- */
-	struct CallbackParams params = { cBack, "Translating" };
+	struct CallbackParams params(GetCallback(), "Translating");
 
 	hOutDS = GDALCreateCopy( hDriver, pszDest, (GDALDatasetH) poVDS,
                              bStrict, papszCreateOptions,
@@ -2717,7 +2717,7 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     GDALProgressFunc pfnProgress = GDALProgressCallback;
     OGRSpatialReferenceH hSRS = NULL;
     int bTargetAlignedPixels = FALSE;
-	struct CallbackParams params = { cBack, "Rasterizing" };
+	struct CallbackParams params(GetCallback(), "Rasterizing");
     
 	(*retval) = VARIANT_FALSE;
 
@@ -3277,7 +3277,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
     int                  bHasGotErr = FALSE;
     int                  bCropToCutline = FALSE;
     int                  bOverwrite = FALSE;
-	struct CallbackParams params = { cBack, "Warping" };
+	struct CallbackParams params(GetCallback(), "Warping");
 
 /* -------------------------------------------------------------------- */
 /*      Register standard GDAL drivers, and process generic GDAL        */
@@ -6098,7 +6098,7 @@ STDMETHODIMP CUtils::GDALBuildVrt(BSTR bstrDstFilename, BSTR bstrOptions,
     int bHideNoData = FALSE;
     const char* pszSrcNoData = NULL;
     const char* pszVRTNoData = NULL;
-	CallbackParams params = { cBack, "Building Virtual Dataset" };
+	CallbackParams params(GetCallback(), "Building Virtual Dataset");
 
     GDALAllRegister();
 
@@ -6338,7 +6338,7 @@ STDMETHODIMP CUtils::GDALAddOverviews(BSTR bstrSrcFilename, BSTR bstrOptions,
     int              bReadOnly = FALSE;
     int              bClean = FALSE;
     GDALProgressFunc pfnProgress = (GDALProgressFunc) GDALProgressCallback;
-	struct CallbackParams params = { cBack, "Adding Overviews" };
+	struct CallbackParams params(GetCallback(), "Adding Overviews");
 
     GDALAllRegister();
 
@@ -6583,7 +6583,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 /* -------------------------------------------------------------------- */
 /*      Invoke algorithm.                                               */
 /* -------------------------------------------------------------------- */
-	struct CallbackParams params = { cBack, "Polygonizing" };
+	struct CallbackParams params(GetCallback(), "Polygonizing");
 
 	GDALPolygonize( hSrcBand, hMaskBand, hDstLayer, dst_field, NULL,
 					(GDALProgressFunc) GDALProgressCallback, &params );
@@ -6642,7 +6642,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     double adfFixedLevels[1000];
     int    nFixedLevelCount = 0;
 	GDALProgressFunc pfnProgress = (GDALProgressFunc) GDALProgressCallback;
-	struct CallbackParams params = { cBack, "Generating Contour" };
+	struct CallbackParams params(GetCallback(), "Generating Contour");
 
 	if (Is3D == VARIANT_TRUE)
 		b3D = TRUE;

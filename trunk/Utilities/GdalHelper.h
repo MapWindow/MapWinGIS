@@ -46,4 +46,6 @@ public:
 
 	static char** ReadFile(CStringW filename);
 	
+	
+
 };

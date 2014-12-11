@@ -408,7 +408,11 @@ bool CImageClass::CopyGDALImage(CStringW ImageFileName, bool writeWorldFile )
 	GDALDataset* dataset = _rasterImage->get_Dataset();
 	if (!dataset) return false;
 
-	return GdalHelper::CopyDataset(dataset, ImageFileName, _globalCallback, writeWorldFile);
+	bool result = GdalHelper::CopyDataset(dataset, ImageFileName, _globalCallback, writeWorldFile);
+
+	GdalHelper::BuildOverviewsIfNeeded(ImageFileName, false, _globalCallback);		// built-in overviews
+
+	return result;
 }
 
 // **********************************************************

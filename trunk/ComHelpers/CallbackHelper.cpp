@@ -139,3 +139,13 @@ void CallbackHelper::ErrorMsg(CString message)
 			Debug::WriteError(message);
 	}
 }
+
+// ****************************************************************
+//		FillGdalCallbackParams
+// ****************************************************************
+void CallbackHelper::FillGdalCallbackParams(CallbackParams& params, ICallback* localCallback, const char* message)
+{
+	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCallback;
+	params.cBack = callback;
+	params.sMsg = message;
+}

@@ -1475,7 +1475,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 {
 	USES_CONVERSION;
 
-	struct CallbackParams params = { cBack, "Converting" };
+	struct CallbackParams params(GetCallback(), "Converting");
 	int          nRetCode = 0;
 	int          bQuiet = FALSE;
 	int          bFormatExplicitelySet = FALSE;

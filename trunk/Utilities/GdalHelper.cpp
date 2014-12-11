@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GdalHelper.h"
 #include "ogrsf_frmts.h"
+#include "CallbackHelper.h"
 
 // **************************************************************
 //		OpenOgrDatasetA
@@ -183,8 +184,12 @@ bool GdalHelper::CanOpenAsGdalRaster(CStringW filename)
 // **************************************************************
 bool ClearOverviews(GDALDataset* dt, ICallback* cb, bool clear)
 {
+	CallbackParams params;
+	CallbackHelper::FillGdalCallbackParams(params, cb, "Clearing overviews");
+
 	int overviewList = clear ? 0 : 2;
-	bool success = dt->BuildOverviews("NONE", (clear ? 0 : 1), &overviewList, 0, NULL, (GDALProgressFunc)GDALProgressFunction, cb) == CPLErr::CE_None;
+	bool success = dt->BuildOverviews("NONE", (clear ? 0 : 1), &overviewList, 0, NULL, 
+			(GDALProgressFunc)GDALProgressCallback, &params) == CPLErr::CE_None;
 	return success;
 }
 
@@ -225,22 +230,6 @@ GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
 		delete dt;
 		return isRgb ? GdalSupportRgb : GdalSupportGrid;
 	}
-}
-
-// **************************************************************
-//		GDALProgressFunction
-// **************************************************************
-int CPL_STDCALL GDALProgressFunction( double dfComplete, const char* pszMessage, void *pData)
-{
-	if( pData != NULL )
-	{
-		long percent = long(dfComplete * 100.0);
-		ICallback* cback = (ICallback*)pData;
-		if (cback) {
-			CallbackHelper::Progress(cback, percent, pszMessage);
-		}
-	}
-	return TRUE;
 }
 
 // *******************************************************
@@ -316,9 +305,7 @@ bool GdalHelper::BuildOverviewsIfNeeded(CStringW filename, bool external, ICallb
 		GdalHelper::CloseDataset(dt);
 		return true;
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 // *******************************************************
@@ -377,7 +364,11 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 				pszResampling = "NONE";
 		}
 
-		if (dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, (GDALProgressFunc)GDALProgressFunction, callback) == CE_None)
+		CallbackParams params;
+		CallbackHelper::FillGdalCallbackParams(params, callback, "Building overviews");
+
+		if (dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, 
+			(GDALProgressFunc)GDALProgressCallback, &params) == CE_None)
 			return true;
 
 		CallbackHelper::ProgressCompleted(callback);
@@ -486,7 +477,6 @@ char** GdalHelper::ReadFile(CStringW filename)
 	m_globalSettings.SetGdalUtf8(false);
 	return papszPrj;
 }
-
 // ****************************************************************
 //		CopyDataset
 // ****************************************************************
@@ -497,12 +487,22 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* 
 	GDALDriver* drv = dataset->GetDriver();
 	if (!drv) return false;
 
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCallback;
-	struct CallbackParams params = { callback, "Copying dataset" };
-
+	CallbackParams params;
+	CallbackHelper::FillGdalCallbackParams(params, localCallback, "Copying dataset");
+	
 	char **papszOptions = NULL;
 	if (createWorldFile)
 		papszOptions = CSLSetNameValue(papszOptions, "WORLDFILE", "YES");
+
+	bool compress = true;
+
+	// perhaps limit it to tifs only in case GDAL will report errors for other formats
+	/*CString driverName = dataset->GetDriverName();
+	if (strcmp(driverName, "GTiff") != 0)
+	compress = true;*/
+
+	if (compress)
+		papszOptions = CSLSetNameValue(papszOptions, "COMPRESS", m_globalSettings.GetTiffCompression());
 
 	m_globalSettings.SetGdalUtf8(true);
 	CStringA nameUtf8 = Utility::ConvertToUtf8(newName);
