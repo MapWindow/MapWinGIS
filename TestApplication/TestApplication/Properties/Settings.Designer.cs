@@ -538,5 +538,17 @@ namespace TestApplication.Properties {
                 this["SingleSidedBuffer"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string GridToImageInput {
+            get {
+                return ((string)(this["GridToImageInput"]));
+            }
+            set {
+                this["GridToImageInput"] = value;
+            }
+        }
     }
 }

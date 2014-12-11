@@ -32,6 +32,18 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.WorkItemTestsGroupbox = new System.Windows.Forms.GroupBox();
+            this.groupBox34 = new System.Windows.Forms.GroupBox();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
+            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.groupBox35 = new System.Windows.Forms.GroupBox();
+            this.RunGridToImage = new System.Windows.Forms.Button();
+            this.SelectGridToImage = new System.Windows.Forms.Button();
+            this.GridToImageInput = new System.Windows.Forms.TextBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.button11 = new System.Windows.Forms.Button();
             this.RunAllTest = new System.Windows.Forms.Button();
             this.MiscGroupBox = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -194,7 +206,7 @@
             this.SelectPostGisCreateDb = new System.Windows.Forms.Button();
             this.PostGisCreateDbInput = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.RunAllPostGisTests = new System.Windows.Forms.Button();
             this.axMap1 = new AxMapWinGIS.AxMap();
             this.Progressbox = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
@@ -208,6 +220,9 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            this.WorkItemTestsGroupbox.SuspendLayout();
+            this.groupBox34.SuspendLayout();
+            this.groupBox35.SuspendLayout();
             this.MiscGroupBox.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox20.SuspendLayout();
@@ -277,6 +292,7 @@
             // splitContainer2.Panel1
             // 
             this.splitContainer2.Panel1.AutoScroll = true;
+            this.splitContainer2.Panel1.Controls.Add(this.WorkItemTestsGroupbox);
             this.splitContainer2.Panel1.Controls.Add(this.RunAllTest);
             this.splitContainer2.Panel1.Controls.Add(this.MiscGroupBox);
             this.splitContainer2.Panel1.Controls.Add(this.RasterToolsGroupBox);
@@ -295,6 +311,142 @@
             this.splitContainer2.Size = new System.Drawing.Size(986, 699);
             this.splitContainer2.SplitterDistance = 230;
             this.splitContainer2.TabIndex = 0;
+            // 
+            // WorkItemTestsGroupbox
+            // 
+            this.WorkItemTestsGroupbox.BackColor = System.Drawing.Color.DarkKhaki;
+            this.WorkItemTestsGroupbox.Controls.Add(this.groupBox34);
+            this.WorkItemTestsGroupbox.Controls.Add(this.groupBox35);
+            this.WorkItemTestsGroupbox.Controls.Add(this.button11);
+            this.WorkItemTestsGroupbox.Location = new System.Drawing.Point(5, 3088);
+            this.WorkItemTestsGroupbox.Name = "WorkItemTestsGroupbox";
+            this.WorkItemTestsGroupbox.Size = new System.Drawing.Size(205, 229);
+            this.WorkItemTestsGroupbox.TabIndex = 17;
+            this.WorkItemTestsGroupbox.TabStop = false;
+            this.WorkItemTestsGroupbox.Text = "WorkItem tests";
+            // 
+            // groupBox34
+            // 
+            this.groupBox34.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox34.Controls.Add(this.button7);
+            this.groupBox34.Controls.Add(this.button8);
+            this.groupBox34.Controls.Add(this.textBox4);
+            this.groupBox34.Controls.Add(this.label33);
+            this.groupBox34.Location = new System.Drawing.Point(7, 125);
+            this.groupBox34.Name = "groupBox34";
+            this.groupBox34.Size = new System.Drawing.Size(194, 93);
+            this.groupBox34.TabIndex = 17;
+            this.groupBox34.TabStop = false;
+            this.groupBox34.Text = "Set grants and privileges";
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(11, 58);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(177, 23);
+            this.button7.TabIndex = 36;
+            this.button7.Tag = "run";
+            this.button7.Text = "Run test";
+            this.button7.UseVisualStyleBackColor = true;
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(162, 32);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(27, 20);
+            this.button8.TabIndex = 20;
+            this.button8.Text = "...";
+            this.toolTip1.SetToolTip(this.button8, "Select first raster file");
+            this.button8.UseVisualStyleBackColor = true;
+            // 
+            // textBox4
+            // 
+            this.textBox4.AcceptsReturn = true;
+            this.textBox4.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostGisPrivilegesInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.textBox4.Location = new System.Drawing.Point(12, 32);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(144, 20);
+            this.textBox4.TabIndex = 19;
+            this.textBox4.Text = global::TestApplication.Properties.Settings.Default.PostGisPrivilegesInput;
+            this.toolTip1.SetToolTip(this.textBox4, "Select text file with rasters and formulas");
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(9, 16);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(76, 13);
+            this.label33.TabIndex = 18;
+            this.label33.Text = "Select text file:";
+            // 
+            // groupBox35
+            // 
+            this.groupBox35.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox35.Controls.Add(this.RunGridToImage);
+            this.groupBox35.Controls.Add(this.SelectGridToImage);
+            this.groupBox35.Controls.Add(this.GridToImageInput);
+            this.groupBox35.Controls.Add(this.label34);
+            this.groupBox35.Location = new System.Drawing.Point(7, 26);
+            this.groupBox35.Name = "groupBox35";
+            this.groupBox35.Size = new System.Drawing.Size(194, 93);
+            this.groupBox35.TabIndex = 16;
+            this.groupBox35.TabStop = false;
+            this.groupBox35.Text = "GridToImage (workitem: 25742)";
+            // 
+            // RunGridToImage
+            // 
+            this.RunGridToImage.Location = new System.Drawing.Point(11, 58);
+            this.RunGridToImage.Name = "RunGridToImage";
+            this.RunGridToImage.Size = new System.Drawing.Size(177, 23);
+            this.RunGridToImage.TabIndex = 35;
+            this.RunGridToImage.Tag = "run";
+            this.RunGridToImage.Text = "Run test";
+            this.RunGridToImage.UseVisualStyleBackColor = true;
+            this.RunGridToImage.Click += new System.EventHandler(this.RunGridToImageClick);
+            // 
+            // SelectGridToImage
+            // 
+            this.SelectGridToImage.Location = new System.Drawing.Point(162, 32);
+            this.SelectGridToImage.Name = "SelectGridToImage";
+            this.SelectGridToImage.Size = new System.Drawing.Size(27, 20);
+            this.SelectGridToImage.TabIndex = 20;
+            this.SelectGridToImage.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectGridToImage, "Select text file with raster filenames");
+            this.SelectGridToImage.UseVisualStyleBackColor = true;
+            this.SelectGridToImage.Click += new System.EventHandler(this.SelectGridToImageClick);
+            // 
+            // GridToImageInput
+            // 
+            this.GridToImageInput.AcceptsReturn = true;
+            this.GridToImageInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "GridToImageInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.GridToImageInput.Location = new System.Drawing.Point(12, 32);
+            this.GridToImageInput.Name = "GridToImageInput";
+            this.GridToImageInput.Size = new System.Drawing.Size(144, 20);
+            this.GridToImageInput.TabIndex = 19;
+            this.GridToImageInput.Text = global::TestApplication.Properties.Settings.Default.GridToImageInput;
+            this.toolTip1.SetToolTip(this.GridToImageInput, "Select text file with rasters files");
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(9, 16);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(76, 13);
+            this.label34.TabIndex = 18;
+            this.label34.Text = "Select text file:";
+            // 
+            // button11
+            // 
+            this.button11.BackColor = System.Drawing.Color.LawnGreen;
+            this.button11.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.button11.Location = new System.Drawing.Point(119, 0);
+            this.button11.Name = "button11";
+            this.button11.Size = new System.Drawing.Size(82, 20);
+            this.button11.TabIndex = 15;
+            this.button11.Tag = "RunAll";
+            this.button11.Text = "Run all tests";
+            this.toolTip1.SetToolTip(this.button11, "Run all fileformats tests");
+            this.button11.UseVisualStyleBackColor = false;
             // 
             // RunAllTest
             // 
@@ -619,7 +771,7 @@
             this.SelectReclassifyInput.Text = "...";
             this.toolTip1.SetToolTip(this.SelectReclassifyInput, "Select first raster file");
             this.SelectReclassifyInput.UseVisualStyleBackColor = true;
-            this.SelectReclassifyInput.Click += new System.EventHandler(this.SelectReclassifyInput_Click);
+            this.SelectReclassifyInput.Click += new System.EventHandler(this.SelectReclassifyInputClick);
             // 
             // ReclassifyInput
             // 
@@ -676,7 +828,7 @@
             this.SelectRasterAInput.Text = "...";
             this.toolTip1.SetToolTip(this.SelectRasterAInput, "Select first raster file");
             this.SelectRasterAInput.UseVisualStyleBackColor = true;
-            this.SelectRasterAInput.Click += new System.EventHandler(this.SelectRasterAInput_Click);
+            this.SelectRasterAInput.Click += new System.EventHandler(this.SelectRasterAInputClick);
             // 
             // RasterCalculatorInput
             // 
@@ -1845,10 +1997,10 @@
             this.PostGisGroupBox.Controls.Add(this.groupBox10);
             this.PostGisGroupBox.Controls.Add(this.groupBox8);
             this.PostGisGroupBox.Controls.Add(this.groupBox1);
-            this.PostGisGroupBox.Controls.Add(this.button1);
-            this.PostGisGroupBox.Location = new System.Drawing.Point(5, 2537);
+            this.PostGisGroupBox.Controls.Add(this.RunAllPostGisTests);
+            this.PostGisGroupBox.Location = new System.Drawing.Point(5, 2542);
             this.PostGisGroupBox.Name = "PostGisGroupBox";
-            this.PostGisGroupBox.Size = new System.Drawing.Size(205, 598);
+            this.PostGisGroupBox.Size = new System.Drawing.Size(205, 540);
             this.PostGisGroupBox.TabIndex = 16;
             this.PostGisGroupBox.TabStop = false;
             this.PostGisGroupBox.Text = "PostGIS tests";
@@ -1872,7 +2024,7 @@
             this.RunPostGisDropDb.Location = new System.Drawing.Point(11, 58);
             this.RunPostGisDropDb.Name = "RunPostGisDropDb";
             this.RunPostGisDropDb.Size = new System.Drawing.Size(177, 23);
-            this.RunPostGisDropDb.TabIndex = 21;
+            this.RunPostGisDropDb.TabIndex = 30;
             this.RunPostGisDropDb.Tag = "run";
             this.RunPostGisDropDb.Text = "Run test";
             this.RunPostGisDropDb.UseVisualStyleBackColor = true;
@@ -1898,7 +2050,7 @@
             this.PostGisDropDbInput.Size = new System.Drawing.Size(144, 20);
             this.PostGisDropDbInput.TabIndex = 19;
             this.PostGisDropDbInput.Text = global::TestApplication.Properties.Settings.Default.PostGisDropDbInput;
-            this.toolTip1.SetToolTip(this.PostGisDropDbInput, "Select text file with rasters and formulas");
+            this.toolTip1.SetToolTip(this.PostGisDropDbInput, "Select text file with drop statement");
             // 
             // label28
             // 
@@ -1929,7 +2081,7 @@
             this.RunPostGisImportSf.Location = new System.Drawing.Point(11, 58);
             this.RunPostGisImportSf.Name = "RunPostGisImportSf";
             this.RunPostGisImportSf.Size = new System.Drawing.Size(177, 23);
-            this.RunPostGisImportSf.TabIndex = 21;
+            this.RunPostGisImportSf.TabIndex = 28;
             this.RunPostGisImportSf.Tag = "run";
             this.RunPostGisImportSf.Text = "Run test";
             this.RunPostGisImportSf.UseVisualStyleBackColor = true;
@@ -1955,7 +2107,7 @@
             this.PostGisImportSfInput.Size = new System.Drawing.Size(144, 20);
             this.PostGisImportSfInput.TabIndex = 19;
             this.PostGisImportSfInput.Text = global::TestApplication.Properties.Settings.Default.PostGisImportSfInput;
-            this.toolTip1.SetToolTip(this.PostGisImportSfInput, "Select text file with rasters and formulas");
+            this.toolTip1.SetToolTip(this.PostGisImportSfInput, "Select text file with shapefiles");
             // 
             // label20
             // 
@@ -1985,7 +2137,7 @@
             this.RunPostGISTest.Location = new System.Drawing.Point(11, 58);
             this.RunPostGISTest.Name = "RunPostGISTest";
             this.RunPostGISTest.Size = new System.Drawing.Size(177, 23);
-            this.RunPostGISTest.TabIndex = 21;
+            this.RunPostGISTest.TabIndex = 29;
             this.RunPostGISTest.Tag = "run";
             this.RunPostGISTest.Text = "Run test";
             this.RunPostGISTest.UseVisualStyleBackColor = true;
@@ -2012,7 +2164,7 @@
             this.PostGisInput.Size = new System.Drawing.Size(144, 20);
             this.PostGisInput.TabIndex = 19;
             this.PostGisInput.Text = global::TestApplication.Properties.Settings.Default.PostgisInput;
-            this.toolTip1.SetToolTip(this.PostGisInput, "Select text file with rasters and formulas");
+            this.toolTip1.SetToolTip(this.PostGisInput, "Select text file with table names");
             // 
             // label14
             // 
@@ -2042,7 +2194,7 @@
             this.RunPostGisPrivileges.Location = new System.Drawing.Point(11, 58);
             this.RunPostGisPrivileges.Name = "RunPostGisPrivileges";
             this.RunPostGisPrivileges.Size = new System.Drawing.Size(177, 23);
-            this.RunPostGisPrivileges.TabIndex = 21;
+            this.RunPostGisPrivileges.TabIndex = 27;
             this.RunPostGisPrivileges.Tag = "run";
             this.RunPostGisPrivileges.Text = "Run test";
             this.RunPostGisPrivileges.UseVisualStyleBackColor = true;
@@ -2057,7 +2209,7 @@
             this.SelectPostGisPrivileges.Text = "...";
             this.toolTip1.SetToolTip(this.SelectPostGisPrivileges, "Select first raster file");
             this.SelectPostGisPrivileges.UseVisualStyleBackColor = true;
-            this.SelectPostGisPrivileges.Click += new System.EventHandler(this.SelectPostGisPrivileges_Click);
+            this.SelectPostGisPrivileges.Click += new System.EventHandler(this.SelectPostGisPrivilegesClick);
             // 
             // PostGisPrivilegesInput
             // 
@@ -2068,7 +2220,7 @@
             this.PostGisPrivilegesInput.Size = new System.Drawing.Size(144, 20);
             this.PostGisPrivilegesInput.TabIndex = 19;
             this.PostGisPrivilegesInput.Text = global::TestApplication.Properties.Settings.Default.PostGisPrivilegesInput;
-            this.toolTip1.SetToolTip(this.PostGisPrivilegesInput, "Select text file with rasters and formulas");
+            this.toolTip1.SetToolTip(this.PostGisPrivilegesInput, "Select text file grant statement");
             // 
             // label17
             // 
@@ -2098,7 +2250,7 @@
             this.RunPostGisCreateDb.Location = new System.Drawing.Point(11, 58);
             this.RunPostGisCreateDb.Name = "RunPostGisCreateDb";
             this.RunPostGisCreateDb.Size = new System.Drawing.Size(177, 23);
-            this.RunPostGisCreateDb.TabIndex = 21;
+            this.RunPostGisCreateDb.TabIndex = 26;
             this.RunPostGisCreateDb.Tag = "run";
             this.RunPostGisCreateDb.Text = "Run test";
             this.RunPostGisCreateDb.UseVisualStyleBackColor = true;
@@ -2124,7 +2276,7 @@
             this.PostGisCreateDbInput.Size = new System.Drawing.Size(144, 20);
             this.PostGisCreateDbInput.TabIndex = 19;
             this.PostGisCreateDbInput.Text = global::TestApplication.Properties.Settings.Default.PostGisCreateDb;
-            this.toolTip1.SetToolTip(this.PostGisCreateDbInput, "Select text file with rasters and formulas");
+            this.toolTip1.SetToolTip(this.PostGisCreateDbInput, "Select text file with create statement");
             // 
             // label1
             // 
@@ -2135,18 +2287,19 @@
             this.label1.TabIndex = 18;
             this.label1.Text = "Select text file:";
             // 
-            // button1
+            // RunAllPostGisTests
             // 
-            this.button1.BackColor = System.Drawing.Color.LawnGreen;
-            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.button1.Location = new System.Drawing.Point(119, 0);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(82, 20);
-            this.button1.TabIndex = 15;
-            this.button1.Tag = "RunAll";
-            this.button1.Text = "Run all tests";
-            this.toolTip1.SetToolTip(this.button1, "Run all fileformats tests");
-            this.button1.UseVisualStyleBackColor = false;
+            this.RunAllPostGisTests.BackColor = System.Drawing.Color.LawnGreen;
+            this.RunAllPostGisTests.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.RunAllPostGisTests.Location = new System.Drawing.Point(119, 0);
+            this.RunAllPostGisTests.Name = "RunAllPostGisTests";
+            this.RunAllPostGisTests.Size = new System.Drawing.Size(82, 20);
+            this.RunAllPostGisTests.TabIndex = 15;
+            this.RunAllPostGisTests.Tag = "RunAll";
+            this.RunAllPostGisTests.Text = "Run all tests";
+            this.toolTip1.SetToolTip(this.RunAllPostGisTests, "Run all fileformats tests");
+            this.RunAllPostGisTests.UseVisualStyleBackColor = false;
+            this.RunAllPostGisTests.Click += new System.EventHandler(this.RunAllPostGisTestsClick);
             // 
             // axMap1
             // 
@@ -2157,7 +2310,7 @@
             this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
             this.axMap1.Size = new System.Drawing.Size(752, 699);
             this.axMap1.TabIndex = 0;
-            this.axMap1.MouseMoveEvent += new AxMapWinGIS._DMapEvents_MouseMoveEventHandler(this.axMap1_MouseMoveEvent);
+            this.axMap1.MouseMoveEvent += new AxMapWinGIS._DMapEvents_MouseMoveEventHandler(this.AxMap1MouseMoveEvent);
             this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
             // 
             // Progressbox
@@ -2167,7 +2320,6 @@
             this.Progressbox.Location = new System.Drawing.Point(0, 0);
             this.Progressbox.Multiline = true;
             this.Progressbox.Name = "Progressbox";
-            this.Progressbox.ReadOnly = true;
             this.Progressbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.Progressbox.Size = new System.Drawing.Size(986, 153);
             this.Progressbox.TabIndex = 0;
@@ -2199,6 +2351,7 @@
             this.Location = global::TestApplication.Properties.Settings.Default.FormLocation;
             this.MinimumSize = new System.Drawing.Size(680, 520);
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Test application for MapWinGIS";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1FormClosing);
             this.Load += new System.EventHandler(this.Form1Load);
@@ -2211,6 +2364,11 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.WorkItemTestsGroupbox.ResumeLayout(false);
+            this.groupBox34.ResumeLayout(false);
+            this.groupBox34.PerformLayout();
+            this.groupBox35.ResumeLayout(false);
+            this.groupBox35.PerformLayout();
             this.MiscGroupBox.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
@@ -2426,7 +2584,7 @@
     private System.Windows.Forms.TextBox TilesInputfile;
     private System.Windows.Forms.Label label6;
     private System.Windows.Forms.GroupBox PostGisGroupBox;
-    private System.Windows.Forms.Button button1;
+    private System.Windows.Forms.Button RunAllPostGisTests;
     private System.Windows.Forms.GroupBox groupBox10;
     private System.Windows.Forms.Button RunPostGISTest;
     private System.Windows.Forms.Button SelectPostgisInput;
@@ -2457,6 +2615,18 @@
     private System.Windows.Forms.Button SelectSingleSidedBuffer;
     private System.Windows.Forms.TextBox SingleSidedBufferInput;
     private System.Windows.Forms.Label label29;
+    private System.Windows.Forms.GroupBox WorkItemTestsGroupbox;
+    private System.Windows.Forms.GroupBox groupBox34;
+    private System.Windows.Forms.Button button7;
+    private System.Windows.Forms.Button button8;
+    private System.Windows.Forms.TextBox textBox4;
+    private System.Windows.Forms.Label label33;
+    private System.Windows.Forms.GroupBox groupBox35;
+    private System.Windows.Forms.Button RunGridToImage;
+    private System.Windows.Forms.Button SelectGridToImage;
+    private System.Windows.Forms.TextBox GridToImageInput;
+    private System.Windows.Forms.Label label34;
+    private System.Windows.Forms.Button button11;
   }
 }
 

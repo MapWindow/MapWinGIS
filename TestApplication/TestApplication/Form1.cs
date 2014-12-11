@@ -1,11 +1,12 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Form1.cs" company="MapWindow developers community - 2014">
-//   MapWindow Open Source GIS
+// <copyright file="Form1.cs" company="MapWindow Open Source GIS">
+//   MapWindow developers community - 2014
 // </copyright>
 // <summary>
 //   Form to test some of the functionality of MapWinGIS
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace TestApplication
 {
     #region
@@ -152,7 +153,7 @@ namespace TestApplication
                         if (message != string.Empty)
                         {
                             this.Progressbox.AppendText(
-                                string.Format("{2}{0} - {1}{2}", DateTime.Now, message, Environment.NewLine));
+                                string.Format("{2}{2}{0} - {1}", DateTime.Now, message, Environment.NewLine));
                         }
 
                         break;
@@ -332,6 +333,10 @@ namespace TestApplication
             SetTextfileLocation(this.PostGisPrivilegesInput, path, "PostGISDatabaseSettings.txt");
             SetTextfileLocation(this.PostGisImportSfInput, path, "PostGisImportSf.txt");
             SetTextfileLocation(this.PostGisInput, path, "PostGISLayers.txt");
+            SetTextfileLocation(this.PostGisDropDbInput, path, "PostGISDropDatabase.txt");
+
+            // WorkItems
+            SetTextfileLocation(this.GridToImageInput, path, "gridToImage.txt");
 
             // Save all settings:
             Settings.Default.Save();
@@ -380,6 +385,8 @@ namespace TestApplication
             this.ResetMapSettings(false);
 
             this.axMap1.GlobalCallback = this;
+            var gs = new GlobalSettings();
+            gs.ApplicationCallback = this;
 
             // Copy the map reference to the test methods:
             Fileformats.Map = this.axMap1;
@@ -388,13 +395,11 @@ namespace TestApplication
             FileManagerTests.MyAxMap = this.axMap1;
 
             // Write version number:
-            this.Progress(
-                string.Empty,
-                100,
-                string.Format(
-                    "MapWinGIS version: {0} Test application version: {1}",
-                    this.axMap1.VersionNumber,
-                    Assembly.GetEntryAssembly().GetName().Version));
+            var msg = string.Format(
+                "MapWinGIS version: {0} Test application version: {1}",
+                this.axMap1.VersionNumber,
+                Assembly.GetEntryAssembly().GetName().Version);
+            this.Progress(msg);
 
             // Also write GDAL version
             var utils = new Utils();
@@ -403,10 +408,10 @@ namespace TestApplication
         }
 
         /// <summary>
-        /// The get folder of assembly.
+        ///     The get folder of assembly.
         /// </summary>
         /// <returns>
-        /// The <see cref="string"/>.
+        ///     The <see cref="string" />.
         /// </returns>
         private string GetFolderOfAssembly()
         {
@@ -449,10 +454,10 @@ namespace TestApplication
                              LabelsCollisionMode = tkCollisionMode.GlobalList, 
                              RasterOverviewCreation = tkRasterOverviewCreation.rocAuto, 
                              TiffCompression = tkTiffCompression.tkmJPEG, 
-                             RasterOverviewResampling = tkGDALResamplingMethod.grmGauss,
-                             AllowLayersWithoutProjections = true,
-                             AllowProjectionMismatch = false,
-                             ReprojectLayersOnAdding = true,
+                             RasterOverviewResampling = tkGDALResamplingMethod.grmGauss, 
+                             AllowLayersWithoutProjections = true, 
+                             AllowProjectionMismatch = false, 
+                             ReprojectLayersOnAdding = true, 
                          };
         }
 
@@ -822,7 +827,7 @@ namespace TestApplication
         {
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
-            var retVal = Tests.RunOGRInfoTest(this.OGRInfoInputfile.Text, this);
+            var retVal = Tests.RunOgrInfoTest(this.OGRInfoInputfile.Text, this);
             ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
         }
 
@@ -840,7 +845,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunOpenPostGisLayers(this.PostGisInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;            
+            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1340,6 +1345,22 @@ namespace TestApplication
         }
 
         /// <summary>
+        /// The select post gis privileges_ click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectPostGisPrivilegesClick(object sender, EventArgs e)
+        {
+            Tests.SelectTextfile(
+                this.PostGisPrivilegesInput, 
+                "Select text file with queries to set grants and privileges");
+        }
+
+        /// <summary>
         /// The select postgis input click.
         /// </summary>
         /// <param name="sender">
@@ -1352,37 +1373,7 @@ namespace TestApplication
         {
             Tests.SelectTextfile(this.PostGisInput, "Select text file with locations of PostGIS layers to open");
         }
-
-        /// <summary>
-        /// The select post gis privileges_ click.
-        /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
-        /// <param name="e">
-        /// The e.
-        /// </param>
-        private void SelectPostGisPrivileges_Click(object sender, EventArgs e)
-        {
-            Tests.SelectTextfile(
-                this.PostGisPrivilegesInput, 
-                "Select text file with queries to set grants and privileges");
-        }
-
-        /// <summary>
-        /// Click event
-        /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
-        /// <param name="e">
-        /// The e.
-        /// </param>
-        private void SelectRasterAInputClick(object sender, EventArgs e)
-        {
-            Tests.SelectTextfile(this.RasterCalculatorInput, "Select text file with rasters and formulas");
-        }
-
+ 
         /// <summary>
         /// The select raster a input_ click.
         /// </summary>
@@ -1392,7 +1383,7 @@ namespace TestApplication
         /// <param name="e">
         /// The e.
         /// </param>
-        private void SelectRasterAInput_Click(object sender, EventArgs e)
+        private void SelectRasterAInputClick(object sender, EventArgs e)
         {
             Tests.SelectTextfile(this.RasterCalculatorInput, "Select text file with rasters and formulas");
         }
@@ -1412,20 +1403,6 @@ namespace TestApplication
         }
 
         /// <summary>
-        /// Click event
-        /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
-        /// <param name="e">
-        /// The e.
-        /// </param>
-        private void SelectReclassifyInputClick(object sender, EventArgs e)
-        {
-            Tests.SelectTextfile(this.ReclassifyInput, "Select text file with grids (tiff)");
-        }
-
-        /// <summary>
         /// The select reclassify input_ click.
         /// </summary>
         /// <param name="sender">
@@ -1434,7 +1411,7 @@ namespace TestApplication
         /// <param name="e">
         /// The e.
         /// </param>
-        private void SelectReclassifyInput_Click(object sender, EventArgs e)
+        private void SelectReclassifyInputClick(object sender, EventArgs e)
         {
             Tests.SelectTextfile(this.RasterCalculatorInput, "Select text file with rasters");
         }
@@ -1497,23 +1474,7 @@ namespace TestApplication
         {
             Tests.SelectTextfile(this.SingleSidedBufferInput, "Select text file with WKT to buffer");
         }
-
-        /// <summary>
-        /// Click event
-        /// </summary>
-        /// <param name="sender">
-        /// The sender.
-        /// </param>
-        /// <param name="e">
-        /// The e.
-        /// </param>
-        private void SelectSpatialIndexInputfileClick(object sender, EventArgs e)
-        {
-            Tests.SelectTextfile(
-                this.SpatialIndexInputfile, 
-                "Select text file with on each line the location of the shapefiles");
-        }
-
+  
         /// <summary>
         /// Click event
         /// </summary>
@@ -1553,19 +1514,20 @@ namespace TestApplication
         /// <param name="e">
         /// The e.
         /// </param>
-        private void axMap1_MouseMoveEvent(object sender, _DMapEvents_MouseMoveEvent e)
+        private void AxMap1MouseMoveEvent(object sender, _DMapEvents_MouseMoveEvent e)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new _DMapEvents_MouseMoveEventHandler(this.axMap1_MouseMoveEvent), sender, e);
+                this.Invoke(new _DMapEvents_MouseMoveEventHandler(this.AxMap1MouseMoveEvent), sender, e);
             }
             else
             {
-                double Lat = 0.0, Lon = 0.0;
+                var lat = 0.0;
+                var lon = 0.0;
 
-                if (this.axMap1.PixelToDegrees(e.x, e.y, ref Lon, ref Lat))
+                if (this.axMap1.PixelToDegrees(e.x, e.y, ref lon, ref lat))
                 {
-                    this.toolStripStatusCoordLabel.Text = string.Format("{0:0.000}, {1:0.000}", Lat, Lon);
+                    this.toolStripStatusCoordLabel.Text = string.Format("{0:0.000}, {1:0.000}", lat, lon);
                 }
                 else
                 {
@@ -1577,6 +1539,53 @@ namespace TestApplication
                 this.statusStrip1.Refresh();
             }
         }
+
         #endregion
+
+        /// <summary>
+        /// The run all post gis tests click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void RunAllPostGisTestsClick(object sender, EventArgs e)
+        {
+            Helper.RunAllTestsInGroupbox(this.PostGisGroupBox);
+            this.Progress(string.Empty, 100, "Done running all PostGIS tests.");
+        }
+
+        /// <summary>
+        /// The select grid to image click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectGridToImageClick(object sender, EventArgs e)
+        {
+            Tests.SelectTextfile(this.GridToImageInput, "Select text file with locations of rasters to convert");
+        }
+
+        /// <summary>
+        /// The run grid to image click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void RunGridToImageClick(object sender, EventArgs e)
+        {
+            this.ResetMapSettings(false);
+            ((Button)sender).BackColor = Color.Blue;
+            var retVal = Tests.RunGridToImageTest(this.GridToImageInput.Text, this);
+            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+        }
     }
 }

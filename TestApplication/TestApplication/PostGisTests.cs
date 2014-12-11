@@ -105,7 +105,7 @@ namespace TestApplication
             Map.RemoveAllLayers();
             
             // TODO: How to switch between these two:
-            //Map.Projection = tkMapProjection.PROJECTION_WGS84;
+            // Map.Projection = tkMapProjection.PROJECTION_WGS84;
             Map.GrabProjectionFromData = true;
 
             var gs = new GlobalSettings();

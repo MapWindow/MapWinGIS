@@ -162,7 +162,7 @@ namespace TestApplication
                     var sf = new Shapefile();
                     if (!sf.Open(file))
                     {
-                        Debug.Print("Failed to open shapefile: {0}\n{1}", file, sf.get_ErrorMsg(sf.LastErrorCode));
+                        Debug.Print("Failed to open shapefile: {0}\n{1}", file, sf.ErrorMsg[sf.LastErrorCode]);
                     }
                     else
                     {
