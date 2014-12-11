@@ -25,12 +25,6 @@
 #include "XRedBlackTree.h"
 #include "YRedBlackTree.h"
 
-struct CallbackParams
-{
-	ICallback *cBack;
-	const char *sMsg;
-};
-
 struct BreakVal
 {
 	double lowVal;

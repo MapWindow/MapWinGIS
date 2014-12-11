@@ -13,3 +13,5 @@ namespace CallbackHelper
 	void ErrorMsg(CString message);
 };
 
+int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void *pData);
+

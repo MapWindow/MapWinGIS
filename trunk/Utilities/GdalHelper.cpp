@@ -486,3 +486,35 @@ char** GdalHelper::ReadFile(CStringW filename)
 	m_globalSettings.SetGdalUtf8(false);
 	return papszPrj;
 }
+
+// ****************************************************************
+//		CopyDataset
+// ****************************************************************
+bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* localCallback, bool createWorldFile)
+{
+	if (!dataset) return false;
+
+	GDALDriver* drv = dataset->GetDriver();
+	if (!drv) return false;
+
+	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCallback;
+	struct CallbackParams params = { callback, "Copying dataset" };
+
+	char **papszOptions = NULL;
+	if (createWorldFile)
+		papszOptions = CSLSetNameValue(papszOptions, "WORLDFILE", "YES");
+
+	m_globalSettings.SetGdalUtf8(true);
+	CStringA nameUtf8 = Utility::ConvertToUtf8(newName);
+	GDALDataset* dst = drv->CreateCopy(nameUtf8, dataset, 0, papszOptions, (GDALProgressFunc)GDALProgressCallback, &params);
+	m_globalSettings.SetGdalUtf8(false);
+
+	CSLDestroy(papszOptions);
+
+	if (dst)
+	{
+		GDALClose(dst);
+		return true;
+	}
+	return false;
+}

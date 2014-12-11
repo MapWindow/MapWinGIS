@@ -373,25 +373,18 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 			if (_rasterImage)
 			{
 				// first let's try GDAL, it will preserve the inner structure of the image more precisely
-				*retval = CopyGDALImage(OLE2CA(ImageFileName)) ? VARIANT_TRUE : VARIANT_FALSE;
-				if (*retval == VARIANT_FALSE)
-				{
-					// if it didn't work, let's try GDIPlus
-					*retval = WriteGDIPlus(OLE2A(ImageFileName), bWriteWorldFile, FileType, cBack)?VARIANT_TRUE:VARIANT_FALSE;
-				}
+				*retval = CopyGDALImage(OLE2CA(ImageFileName), bWriteWorldFile) ? VARIANT_TRUE : VARIANT_FALSE;
+				if (*retval) return S_OK;
 			}
-			else
-			{
-				// if there is no underlying GDAL dataset, Gdiplus is the only options
-				*retval = WriteGDIPlus(OLE2A(ImageFileName), bWriteWorldFile, FileType, cBack)?VARIANT_TRUE:VARIANT_FALSE;
-			}
+			// let's try GDI+ both when GDAL has failed and when there is no GDAL dataset underneath
+			*retval = WriteGDIPlus(OLE2A(ImageFileName), bWriteWorldFile, FileType, cBack)?VARIANT_TRUE:VARIANT_FALSE;
 			break;
 		default:
 			// try GDAL for any other format
-			*retval = CopyGDALImage(OLE2CA(ImageFileName)) ? VARIANT_TRUE : VARIANT_FALSE;
+			*retval = CopyGDALImage(OLE2CA(ImageFileName), bWriteWorldFile) ? VARIANT_TRUE : VARIANT_FALSE;
 			if (*retval == VARIANT_FALSE)
 			{
-				AfxMessageBox("Creating copy of dataset is unsupported by the current GDAL driver");
+				CallbackHelper::ErrorMsg("Creating copy of dataset is unsupported by the current GDAL driver");
 			}
 			break;
 	}
@@ -401,48 +394,21 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 // ************************************************
 //       CopyGDALImage()
 // ************************************************
-bool CImageClass::CopyGDALImage(CStringW ImageFileName )
+bool CImageClass::CopyGDALImage(CStringW ImageFileName, bool writeWorldFile )
 {
-	if (_rasterImage)
+	if (!_rasterImage) return false;
+	
+	USES_CONVERSION;
+	if (_fileName.MakeLower() == ImageFileName.MakeLower())
 	{
-		USES_CONVERSION;
-		CStringW newName = ImageFileName;
-		if (_fileName.MakeLower() == newName.MakeLower())
-		{
-			AfxMessageBox("Only saving in new file is supported for GDAL datasets");
-		}
-		else
-		{
-			GDALDataset* dataset = _rasterImage->get_Dataset();
-			if (dataset)
-			{
-				GDALDriver* drv = dataset->GetDriver();
-				if ( drv )
-				{
-					char **papszOptions = NULL;
-					papszOptions = CSLSetNameValue( papszOptions, "WORLDFILE", "YES" );	  // tested for PNG files only
-					
-					m_globalSettings.SetGdalUtf8(true);
-					GDALDataset* dst = drv->CreateCopy(Utility::ConvertToUtf8(newName), _rasterImage->get_Dataset(), 0, papszOptions, NULL, NULL);
-					m_globalSettings.SetGdalUtf8(false);
-					
-					CSLDestroy( papszOptions );
-
-					if (dst)
-					{
-						GDALClose(dst);
-						return true;
-					}
-					else
-					{
-						
-						return false;
-					}
-				}
-			}
-		}
+		CallbackHelper::ErrorMsg("Only saving in new file is supported for GDAL datasets");
+		return false;
 	}
-	return false;
+	
+	GDALDataset* dataset = _rasterImage->get_Dataset();
+	if (!dataset) return false;
+
+	return GdalHelper::CopyDataset(dataset, ImageFileName, _globalCallback, writeWorldFile);
 }
 
 // **********************************************************

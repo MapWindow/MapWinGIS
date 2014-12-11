@@ -17,6 +17,8 @@ public:
 	static GDALDataset* OpenRasterDatasetA(CStringA& filenameUtf8, GDALAccess accessType );
 	static GDALDataset* OpenRasterDatasetW(CStringW filenameW, GDALAccess accessType );
 
+	static bool CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* localCallback, bool createWorldFile);
+
 	static void GetProjection(CStringW filename, CString& projection);
 
 	static bool IsRgb(GDALDataset* dt);
@@ -43,4 +45,5 @@ public:
 	void DumpDriverInfo();
 
 	static char** ReadFile(CStringW filename);
+	
 };

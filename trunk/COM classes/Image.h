@@ -349,7 +349,7 @@ private:
 	bool WriteGIF(CString ImageFile, bool WorldFile, ICallback * cBack);
 	bool WriteBMP(CString FileName, bool WriteWorldFile, ICallback *cBack);
 	bool WriteGDIPlus(CString ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
-	bool CopyGDALImage(CStringW ImageFileName);
+	bool CopyGDALImage(CStringW ImageFileName, bool writeWorldFile);
 
 	VARIANT_BOOL WriteWorldFile(CStringW WorldFileName);
 	bool ReadWorldFile(CStringW WorldFileName);

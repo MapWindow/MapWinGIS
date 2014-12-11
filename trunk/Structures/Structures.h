@@ -119,3 +119,9 @@ struct LayerShape
 		return LayerHandle == -1 || ShapeIndex == -1;
 	}
 };
+
+struct CallbackParams
+{
+	ICallback *cBack;
+	const char *sMsg;
+};

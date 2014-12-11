@@ -1,6 +1,21 @@
 #include "stdafx.h"
 #include "CallbackHelper.h"
 
+// *****************************************************************
+//	   GDALProgressCallback()
+// *****************************************************************
+int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void *pData)
+{
+	CallbackParams* params = (CallbackParams*)pData;
+
+	if (params != NULL && params->cBack != NULL)
+	{
+		long percent = long(dfComplete * 100.0);
+		CallbackHelper::Progress(params->cBack, percent, params->sMsg);
+	}
+	return TRUE;
+}
+
 // ********************************************************************
 //		DisplayProgress()
 // ********************************************************************
