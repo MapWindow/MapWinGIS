@@ -460,11 +460,7 @@ STDMETHODIMP CGridHeader::put_Projection(BSTR newVal)
 	USES_CONVERSION;
 	
 	VARIANT_BOOL vbretval;
-	_projection->ImportFromProj4(newVal, &vbretval);
-	if (vbretval == VARIANT_FALSE)
-	{
-		_projection->ImportFromWKT(newVal, &vbretval);
-	}
+	_projection->ImportFromAutoDetect(newVal, &vbretval);
 
 	this->AttemptSave();
 	return S_OK;

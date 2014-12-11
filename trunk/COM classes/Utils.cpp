@@ -222,11 +222,11 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
+	*retval = VARIANT_FALSE;
 	ICallback* callback = cBack ? cBack : _globalCallback;
 
-	if( Grid == NULL )
+	if( !Grid )
 	{	
-		*retval = NULL;
 		ErrorMessage(callback, tkUNEXPECTED_NULL_PARAMETER);
 		return S_OK;
 	}
@@ -238,7 +238,6 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	header->get_NumberRows(&nrows);
 	if( ncols <= 0 || nrows <= 0 )
 	{	
-		*retval = FALSE;
 		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
 		return S_OK;
 	}
@@ -262,12 +261,12 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 			dVal(vval,val);
 			if( val == oldValue )
 				Grid->put_Value(i,j,NewValue);
-
-			CallbackHelper::Progress(callback, j*ncols + i, total, "GridReplace", _key, percent);
 		}
+		CallbackHelper::Progress(callback, j, nrows, "GridReplace", _key, percent);
 	}
 	
 	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	*retval = VARIANT_TRUE;
 	return S_OK;
 }
 
