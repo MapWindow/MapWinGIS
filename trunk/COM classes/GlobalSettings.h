@@ -151,6 +151,8 @@ public:
 	STDMETHOD(put_ApplicationCallback)(ICallback* newVal);
 	STDMETHOD(get_MaxReprojectionShapeCount)(LONG* pVal);
 	STDMETHOD(put_MaxReprojectionShapeCount)(LONG newVal);
+	STDMETHOD(get_PixelOffsetMode)(tkPixelOffsetMode* pVal);
+	STDMETHOD(put_PixelOffsetMode)(tkPixelOffsetMode newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

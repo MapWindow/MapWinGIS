@@ -46,3 +46,14 @@ CString LabelsHelper::GetFloatNumberFormat(ILabels* labels)
 		format = m_globalSettings.floatNumberFormat;
 	return format;
 }
+
+// ******************************************************* 
+//		GetCount()
+// ******************************************************* 
+long LabelsHelper::GetCount(ILabels* labels)
+{
+	if (!labels) return 0;
+	long count;
+	labels->get_Count(&count);
+	return count;
+}

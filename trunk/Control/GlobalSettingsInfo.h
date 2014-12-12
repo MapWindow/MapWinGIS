@@ -66,6 +66,7 @@ struct GlobalSettingsInfo
 	bool commonCollisionListForLabels;
 	bool useShortUrlForTiles;
 	CString floatNumberFormat;
+	tkPixelOffsetMode pixelOffsetMode;
 
 	~GlobalSettingsInfo()
 	{
@@ -77,6 +78,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		pixelOffsetMode = pomDefault;
 		floatNumberFormat = "%g";
 		maxReprojectionShapeCount = 50000;
 		useShortUrlForTiles = false;

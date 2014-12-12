@@ -181,8 +181,6 @@ public:
 						int clipWidth, int clipHeight, OLE_COLOR backColor, 
 						VARIANT_BOOL* retVal);
 
-	STDMETHOD(GetPointShape)(IShape** retval);
-	
 	STDMETHOD(get_PointCharacter)(short* retVal);
 	STDMETHOD(put_PointCharacter)(short newVal);
 

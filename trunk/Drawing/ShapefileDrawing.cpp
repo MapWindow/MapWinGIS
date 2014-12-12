@@ -1669,8 +1669,6 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 	if (numLines == 0)
 		return;
 	
-	
-	
 	// path related variables
 	bool dataRead = false;
 	int pointCount = 0;				// number of points in path
@@ -2268,25 +2266,4 @@ std::vector<long>* CShapefileDrawer::SelectShapesFromSpatialIndex(char* sFilenam
 	}
 }
 
-// *************************************************************
-//		HavePointCollision()
-// *************************************************************
-// Checks whether new point overlaps one of the existing points;
-// Bounds are treated there as rectangles without rotation
-//bool CShapefileDrawer::HavePointCollision(CRect* rect)
-//{
-//	for(int i=0; i < (int)_pointRectangles.size(); i++)
-//	{
-//		CRect* r = _pointRectangles[i];
-//		if ((rect->right < r->left) || 
-//			(rect->bottom < r->top)  || 
-//			(r->right < rect->left) || 
-//			(r->bottom < rect->top))
-//			continue;
-//		else
-//			return true;
-//	}
-//	_pointRectangles.push_back(rect);
-//	return false;
-//}
 #pragma endregion

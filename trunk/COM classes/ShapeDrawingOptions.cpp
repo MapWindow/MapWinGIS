@@ -676,16 +676,6 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 }
 #pragma endregion
 
-// ****************************************************
-//	 GetPointShape()
-// ****************************************************
-STDMETHODIMP CShapeDrawingOptions::GetPointShape(IShape** retval)
-{
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	return S_OK;
-}
-
 // *********************************************************
 //		get_PointCharacter
 // *********************************************************

@@ -1844,9 +1844,6 @@
     <None Include="COM classes\TableClass.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
-    <None Include="COM classes\Tile.rgs">
-      <Filter>COM classes\Resources</Filter>
-    </None>
     <None Include="COM classes\TileProviders.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>

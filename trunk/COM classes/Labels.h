@@ -425,6 +425,8 @@ public:
 	void AddEmptyLabel();
 
 	void LoadLblOptions(CPLXMLNode* node);
+
+	void ReapplyExpression();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

@@ -806,7 +806,6 @@
     <None Include="COM classes\ShapeNetwork.rgs" />
     <None Include="COM classes\ShapeValidationInfo.rgs" />
     <None Include="COM classes\TableClass.rgs" />
-    <None Include="COM classes\Tile.rgs" />
     <None Include="COM classes\TileProviders.rgs" />
     <None Include="COM classes\Tiles.rgs" />
     <None Include="COM classes\Tin.rgs" />

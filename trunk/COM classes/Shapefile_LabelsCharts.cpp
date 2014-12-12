@@ -51,7 +51,6 @@ void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR text, CSt
 // ************************************************************
 //			GenerateLabels
 // ************************************************************
-// Routine for generation of labels
 // FieldIndex == -1: labels without text will be generated; 
 // Method == lpNone: labels with (0.0,0.0) coordinates will be generated
 STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count)
@@ -161,24 +160,17 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		((CLabels*)_labels)->AddEmptyLabel();
 	}
 	
-	long numLabels;
-	_labels->get_Count(&numLabels);
-	*Count = numLabels;
+	*Count = LabelsHelper::GetCount(_labels);
 	_labels->put_Synchronized(VARIANT_TRUE);
 	_labels->put_Positioning(Method);
 
 	if (FieldIndex == -1)
 	{
-		// in case there is label expression, reapply it
-		CComBSTR expr;
-		_labels->get_Expression(&expr);
-		_labels->put_Expression(m_globalSettings.emptyBstr);
-		_labels->put_Expression(expr);
+		((CLabels*)_labels)->ReapplyExpression();
 	}
 	else
 	{
-		// save it for deserialization
-		((CLabels*)_labels)->SaveSourceField(FieldIndex);
+		((CLabels*)_labels)->SaveSourceField(FieldIndex);	// save it for deserialization
 	}
 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);

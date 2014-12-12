@@ -1140,7 +1140,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 	{	
 		ErrorMessage(tkINVALID_FILENAME);
 	}
-	else if (!Utility::EndsWith(newShpName, L"shp"))
+	else if (!Utility::EndsWith(newShpName, L".shp"))
 	{
 		ErrorMessage(tkINVALID_FILE_EXTENSION);
 	}

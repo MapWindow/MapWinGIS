@@ -978,7 +978,11 @@ void CDrawingOptionsEx::InitGdiPlusBrushAndPen(Gdiplus::RectF* bounds)
 void CDrawingOptionsEx::FillGraphicsPath(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::RectF& bounds)
 {
 	this->InitGdiPlusBrush( &bounds );
+	Gdiplus::PixelOffsetMode mode = graphics->GetPixelOffsetMode();
+	if (m_globalSettings.pixelOffsetMode != pomDefault)
+		graphics->SetPixelOffsetMode((Gdiplus::PixelOffsetMode)m_globalSettings.pixelOffsetMode);
 	graphics->FillPath(this->brushPlus, path);
+	graphics->SetPixelOffsetMode(mode);
 	ReleaseGdiPlusBrush();
 }
 

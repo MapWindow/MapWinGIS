@@ -825,3 +825,19 @@ STDMETHODIMP CGlobalSettings::put_MaxReprojectionShapeCount(LONG newVal)
 	m_globalSettings.maxReprojectionShapeCount = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     PixelOffsetMode
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_PixelOffsetMode(tkPixelOffsetMode* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.pixelOffsetMode;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_PixelOffsetMode(tkPixelOffsetMode newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.pixelOffsetMode = newVal;
+	return S_OK;
+}

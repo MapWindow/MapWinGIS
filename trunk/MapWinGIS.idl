@@ -58,6 +58,18 @@ interface IOgrLayer;
 interface IUndoList;
 interface IIdentifier;
 
+/************************** tkPixelOffsetMode Enumeration **********************/
+typedef
+[
+	uuid(33F78390-B2B8-4214-9952-6BDC5458940A),
+	helpstring("tkPixelOffsetMode"),
+]
+enum tkPixelOffsetMode {
+	pomDefault = 0,
+	pomHighPerformance = 1,
+	pomHighQuality = 2,
+}tkPixelOffsetMode;
+
 /************************** tkIdentifierMode Enumeration **********************/
 typedef
 [
@@ -5331,6 +5343,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(44)] HRESULT MouseTolerance([in] DOUBLE newVal);
 	[propget, id(45)] HRESULT MaxReprojectionShapeCount([out, retval] LONG* pVal);
 	[propput, id(45)] HRESULT MaxReprojectionShapeCount([in] LONG newVal);
+	[propget, id(46)] HRESULT PixelOffsetMode([out, retval] tkPixelOffsetMode* pVal);
+	[propput, id(46)] HRESULT PixelOffsetMode([in] tkPixelOffsetMode newVal);
 };
 
 [
