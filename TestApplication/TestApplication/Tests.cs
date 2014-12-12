@@ -73,10 +73,12 @@ namespace TestApplication
                 // Add the shapefile as a layer
                 Fileformats.OpenShapefileAsLayer(shapefileLocation, theForm, true);
                 Application.DoEvents();
+                Thread.Sleep(1000);
 
                 // Draw something on the map
                 var drawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlScreenReferencedList);
                 MyAxMap.DrawCircleEx(drawHandle, 50, 50, 50, 0x0, true);
+                MyAxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers);
                 Application.DoEvents();
                 Thread.Sleep(1000);
 
