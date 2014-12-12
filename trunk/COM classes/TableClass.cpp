@@ -321,7 +321,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 // ********************************************************************
 //			Calculate_()
 // ********************************************************************
-bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex)
+bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, CString floatFormat, int rowIndex /*= -1*/)
 {
 	results.clear();
 	
@@ -356,7 +356,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 							expr.put_FieldValue(j, str); 
 							break;
 						case VT_R8:	  
-							str.Format("%g", var.dblVal);
+							str.Format(floatFormat, var.dblVal);
 							expr.put_FieldValue(j, str); 
 							break;
 					}

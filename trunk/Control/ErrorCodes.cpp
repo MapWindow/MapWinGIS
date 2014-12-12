@@ -205,8 +205,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Method can be called with cmAddShape cursor only.";
 		case tkNO_INTERACTIVE_EDITING:
 			return "Shapefile.InteractiveEditing is supposed to be on.";
+		case tkEXPRESSION_NO_SHAPEFILE:
+			return "Expression can be set only for labels of shapefile layer.";
 		
-		//301-400 = ogr
+		//301-400 = OGR
 		case tkFAILED_TO_OPEN_OGR_LAYER:
 			return "Failed to open OGR layer.";
 		case tkOGR_DATASOURCE_UNINITIALIZED:
@@ -442,6 +444,9 @@ const char * ErrorMsg( long ErrorCode )
 			return "The method applicable when labels are synchronized only";
 		case tkLABELS_NOT_SAVED:
 			return "Failed to load labels as the positions weren't saved";
+		case tkINVALID_FLOAT_NUMBER_FORMAT:
+			return "Invalid format string for floating point numbers (see documentation of C printf function for valid formats, e.g. %g or %.2f).";
+			
 		
 		//1801-2000 = geoprojections
 		case tkOGR_NOT_ENOUGH_DATA:

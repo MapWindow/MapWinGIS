@@ -4703,6 +4703,8 @@ interface ILabels : IDispatch{
 	[propput, id(98), helpstring("property CompositingQuality")] HRESULT CompositingQuality([in] tkCompositingQuality newVal);
 	[propget, id(99), helpstring("property SmoothingMode")] HRESULT SmoothingMode([out, retval] tkSmoothingMode* pVal);
 	[propput, id(99), helpstring("property SmoothingMode")] HRESULT SmoothingMode([in] tkSmoothingMode newVal);*/
+	[propget, id(98)] HRESULT FloatNumberFormat([out, retval] BSTR* pVal);
+	[propput, id(98)] HRESULT FloatNumberFormat([in] BSTR newVal);
 };
 
 // *******************************  LabelCategory Interface  *****************************

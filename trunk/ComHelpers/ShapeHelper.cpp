@@ -314,3 +314,78 @@ bool ShapeHelper::IsEmpty(IShape* shp)
 	shp->get_IsEmpty(&vb);
 	return vb ? true: false;
 }
+
+// *************************************************************
+//		Cast()
+// *************************************************************
+CShape* ShapeHelper::Cast(CComPtr<IShape>& shp)
+{
+	return (CShape*)&(*shp);
+}
+
+// *************************************************************
+//		GetNumParts()
+// *************************************************************
+long ShapeHelper::GetNumParts(IShape* shp)
+{
+	if (!shp) return 0;
+	long numParts;
+	shp->get_NumParts(&numParts);
+	return numParts;
+}
+
+// *************************************************************
+//		GetLargestPart()
+// *************************************************************
+int ShapeHelper::GetLargestPart(IShape* shp)
+{
+	if (!shp) return -1;
+
+	int maxPart = -1;
+	double maxValue = 0;
+	
+	ShpfileType shpType = ShapeHelper::GetShapeType2D(shp);
+	long numParts = ShapeHelper::GetNumParts(shp);
+
+	for (int j = 0; j < numParts; j++)
+	{
+		CComPtr<IShape> shpPart = NULL;
+		shp->get_PartAsShape(j, &shpPart);
+		if (!shpPart) continue;
+
+		if (shpType == SHP_POLYGON)
+		{
+			VARIANT_BOOL vbretval;
+			shpPart->get_PartIsClockWise(0, &vbretval);
+			if (!vbretval) continue;   // holes of polygons must not be labeled
+		}
+
+		// Seeking the largest part of shape
+		double value = 0.0;
+		if (shpType == SHP_POLYGON)
+		{
+			shpPart->get_Area(&value);
+		}
+		else if (shpType == SHP_POLYLINE)
+		{
+			shpPart->get_Length(&value);
+		}
+		if (value > maxValue)
+		{
+			maxValue = value;
+			maxPart = j;
+		}
+	}
+	return maxPart;
+}
+
+// *************************************************************
+//		AddLabel()
+// *************************************************************
+void ShapeHelper::AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation)
+{
+	if (!shp || !labels) return;
+	double x, y, rotation = 0.0;
+	((CShape*)shp)->get_LabelPosition(method, x, y, rotation, orientation);
+	labels->AddLabel(text, x, y, rotation);
+}

@@ -267,16 +267,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	if (autoOffset && sf != NULL)
 	{
 		ShpfileType shpType;
-		sf->get_ShapefileType(&shpType);
-		if (shpType == SHP_POINT || shpType == SHP_POINTM || shpType == SHP_POINTZ ||
-			shpType == SHP_MULTIPOINT || shpType == SHP_MULTIPOINTZ || shpType == SHP_MULTIPOINTM)
-		{
-			autoOffset = synchronized;
-		}
-		else
-		{
-			autoOffset = VARIANT_FALSE;
-		}
+		sf->get_ShapefileType2D(&shpType);
+		autoOffset = shpType == SHP_POINT || shpType == SHP_MULTIPOINT ? synchronized : VARIANT_FALSE;
 	}
 	else
 	{

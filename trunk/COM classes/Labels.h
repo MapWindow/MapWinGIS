@@ -39,6 +39,7 @@ class ATL_NO_VTABLE CLabels :
 public:
 	CLabels()
 	{
+		_floatNumberFormat = m_globalSettings.floatNumberFormat;
 		_shapefile = NULL;
 		_synchronized = VARIANT_FALSE;
 		USES_CONVERSION;
@@ -343,6 +344,9 @@ public:
 	STDMETHOD(get_TextRenderingHint)(tkTextRenderingHint* pVal);
 	STDMETHOD(put_TextRenderingHint)(tkTextRenderingHint newVal);
 
+	STDMETHOD(get_FloatNumberFormat)(BSTR* pVal);
+	STDMETHOD(put_FloatNumberFormat)(BSTR newVal);
+
 private:
 	int _sourceField;
 
@@ -352,6 +356,7 @@ private:
 	
 	// expression to generate label text
 	CString _labelExpression;
+	CString _floatNumberFormat;
 
 	// the minimal size of shape to label
 	long _minDrawingSize;		
@@ -417,6 +422,7 @@ public:
 	bool DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loadText);
 
 	bool GenerateEmptyLabels();
+	void AddEmptyLabel();
 
 	void LoadLblOptions(CPLXMLNode* node);
 };

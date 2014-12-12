@@ -226,7 +226,7 @@ public:
 		CComVariant minValue, CComVariant maxValue);
 	void AnalyzeExpressions(std::vector<CString>& expressions, std::vector<int>& results);
 	bool QueryCore(CString Expression, std::vector<long>& indices, CString& ErrorString);
-	bool CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, int rowIndex = -1);
+	bool CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, CString floatFormat, int rowIndex = -1);
 
 	bool get_FieldValuesDouble(int FieldIndex, std::vector<double>& values);
 	bool get_FieldValuesInteger(int FieldIndex, std::vector<int>& values);

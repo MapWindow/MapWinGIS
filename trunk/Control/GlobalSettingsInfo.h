@@ -65,6 +65,8 @@ struct GlobalSettingsInfo
 	bool commonCollisionListForCharts;
 	bool commonCollisionListForLabels;
 	bool useShortUrlForTiles;
+	CString floatNumberFormat;
+
 	~GlobalSettingsInfo()
 	{
 		SysFreeString(emptyBstr);
@@ -75,6 +77,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		floatNumberFormat = "%g";
 		maxReprojectionShapeCount = 50000;
 		useShortUrlForTiles = false;
 		callback = NULL;

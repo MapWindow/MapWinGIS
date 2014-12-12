@@ -10,7 +10,7 @@ using namespace std;
 namespace Utility
 {
 	// string conversion
-	BSTR Variant2BSTR(VARIANT* val);
+	BSTR Variant2BSTR(VARIANT* val, CString floatFormat);
 	char * SYS2A(BSTR str);
 	WCHAR* StringToWideChar(CString s);
 	char* ConvertBSTRToLPSTR (BSTR bstrIn);

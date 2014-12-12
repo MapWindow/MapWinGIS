@@ -25,19 +25,38 @@
 #include "Charts.h"
 #include "TableClass.h"
 #include "Shape.h"
+#include "ShapeHelper.h"
+#include "ShapefileHelper.h"
+#include "LabelsHelper.h"
 
 #pragma region Labels
+
+// ************************************************************
+//			GetLabelValue
+// ************************************************************
+void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR text, CString floatNumberFormat)
+{
+	if (fieldIndex != -1)
+	{
+		CComVariant val;
+		get_CellValue(fieldIndex, shapeIndex, &val);
+		text = Utility::Variant2BSTR(&val, floatNumberFormat);
+	}
+	else
+	{
+		text = A2BSTR("");
+	}
+}
 
 // ************************************************************
 //			GenerateLabels
 // ************************************************************
 // Routine for generation of labels
-// FieldIndex == -1: labelswithout textwill be generated; 
+// FieldIndex == -1: labels without text will be generated; 
 // Method == lpNone: labels with (0.0,0.0) coordinates will be generated
 STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Method, VARIANT_BOOL LargestPartOnly, long* Count)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	USES_CONVERSION;
 	*Count = 0;
 	
 	long numFields;
@@ -51,191 +70,95 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 	
 	_labels->Clear();
 	
-	double x = 0.0,y = 0.0;
-	long percent = 0;
-	
-	ShpfileType shpType;
-	this->get_ShapefileType(&shpType);
-	shpType = Utility::ShapeTypeConvert2D(shpType);
-	
-	long _numShapes;
-	this->get_NumShapes(&_numShapes);
+	ShpfileType shpType = ShapefileHelper::GetShapeType2D(this);
+	long numShapes = ShapefileHelper::GetNumShapes(this);
 	
 	tkLineLabelOrientation orientation;
 	_labels->get_LineOrientation(&orientation);
+	CString floatFormat = LabelsHelper::GetFloatNumberFormat(_labels);
 
-	for(int i = 0; i < _numShapes; i++)
+	long percent = 0;
+
+	for(int i = 0; i < numShapes; i++)
 	{
-		CallbackHelper::Progress(_globalCallback, i, _numShapes, "Calculating label positions...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating label positions...", _key, percent);
 		
-		/* extracting field value */
 		CComBSTR text;
-		if (FieldIndex != -1)
-		{
-			VARIANT val;
-			VariantInit(&val);
-			this->get_CellValue(FieldIndex,i, &val);
-			
-			text.Attach(Utility::Variant2BSTR(&val));
-			VariantClear(&val);
-		}
-		else
-		{
-			text.Attach(A2BSTR(""));
-		}
+		GetLabelString(FieldIndex, i, text, floatFormat);
 		
-		// fictitious label should be added even if an error occurred while calculating position
-		// otherwise labels won't be synchronized and not a single label will be displayed at all
-
-		IShape* shp = NULL;
+		CComPtr<IShape> shp = NULL;
 		this->get_Shape(i, &shp);
-		if (shp == NULL)
-			goto add_empty_label;
-
-		long numParts;
-		shp->get_NumParts(&numParts);
-		VARIANT_BOOL vbretval;
-		double rotation = 0.0;
-
-		if( numParts == 1)
+		if (shp)
 		{
-			// labeling the only part
-			((CShape*)shp)->get_LabelPosition(Method, x, y, rotation, orientation);
-			_labels->AddLabel(text, x, y, rotation);
-		}
-		else if (numParts == 0)
-		{
-			if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
+			long numParts;
+			shp->get_NumParts(&numParts);
+			VARIANT_BOOL vb;
+			double rotation = 0.0;
+
+			if( numParts == 1)
 			{
-				// points
-				((CShape*)shp)->get_LabelPosition(Method, x, y, rotation, orientation);
-				_labels->AddLabel(text, x, y, rotation);
-			}	
-			else
-			{
-				// it's an invalid shape, we'll add a label but it is fictitious
-				goto add_empty_label;
-				
+				ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation);
+				continue;
 			}
-		}
-		else
-		{
-			//	labeling every part
-			if (!LargestPartOnly) 
+			else if (numParts == 0)
 			{
-				int partCount = 0;
-				for (int j = 0; j < numParts; j++)
+				if (shpType == SHP_POINT || shpType == SHP_MULTIPOINT)
 				{
-					IShape* shpPart = NULL;
-					shp->get_PartAsShape(j, &shpPart);
-					if (shpPart == NULL) 
-						continue;
-
-					if (shpType == SHP_POLYGON)
-					{
-						shpPart->get_PartIsClockWise(0, &vbretval);		// Holes of polygons must not be labeled
-						if(!vbretval) 
-						{
-							shpPart->Release();
-							continue;
-						}
-					}
-					
-					((CShape*)shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
-					
-					if (partCount == 0) 
-					{
-						_labels->AddLabel(text, x, y, rotation);
-						partCount++;
-					}
-					else		
-					{
-						_labels->AddPart(i, text, x, y, rotation);
-					}
-					shpPart->Release(); 
-					shpPart = NULL;
-				}
-
-				if (partCount == 0)
-				{
-					// if no parts valid parts were found, add fictitious label then
-					goto add_empty_label;
-				}
+					ShapeHelper::AddLabelToShape(shp, _labels, text, Method, orientation);
+					continue;
+				}	
 			}
 			else
 			{
-				// labeling only the largest/longest part
-				long maxPart = -1; 
-				double maxValue = 0;
-
-				for (int j = 0; j < numParts; j++)
+				if (!LargestPartOnly) 
 				{
-					IShape* shpPart = NULL;
-					shp->get_PartAsShape(j, &shpPart);
-					if (!shpPart) 
-						continue;
-					
-					if (shpType == SHP_POLYGON)
+					int partCount = 0;
+					for (int j = 0; j < numParts; j++)
 					{
-						// Holes of polygons must not be labeled
-						VARIANT_BOOL vbretval;
-						shpPart->get_PartIsClockWise(0, &vbretval);
-						if(!vbretval)
+						CComPtr<IShape> shpPart = NULL;
+						shp->get_PartAsShape(j, &shpPart);
+						if ( !shpPart ) continue;
+
+						if (shpType == SHP_POLYGON)
 						{
-							shpPart->Release();
-							continue;
+							shpPart->get_PartIsClockWise(0, &vb);		
+							if(!vb) continue;		// holes of polygons must not be labeled
 						}
-					}	
 					
-					// Seeking the largest part of shape
-					double value = 0.0;
-					if (shpType == SHP_POLYGON)
-					{
-						shpPart->get_Area(&value);
+						if (partCount == 0) 
+						{
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation);
+							partCount++;
+						}
+						else		
+						{
+							double x = 0.0, y = 0.0;
+							ShapeHelper::Cast(shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
+							_labels->AddPart(i, text, x, y, rotation);
+						}
 					}
-					else if (shpType == SHP_POLYLINE)
-					{
-						shpPart->get_Length(&value);
-					}
-					if(value > maxValue)
-					{
-						maxValue = value;
-						maxPart = j;
-					}
-					shpPart->Release();
-				}
 
-				if (maxPart >= 0)
-				{
-					IShape* shpPart = NULL;
-					shp->get_PartAsShape(maxPart, &shpPart);
-					if (shpPart)
-					{
-						((CShape*)shpPart)->get_LabelPosition(Method, x, y, rotation, orientation);
-						_labels->AddLabel(text, x, y, rotation);
-						shpPart->Release();
-					}
-					else
-						goto add_empty_label;
+					if (partCount > 0)
+						continue;
 				}
 				else
 				{
-add_empty_label:
-					_labels->AddLabel(text, 0.0, 0.0, 0.0);
-					ILabel* lbl = NULL;
-					_labels->get_Label((long)i, 0, &lbl);
-					if(lbl != NULL)
+					// only the largest/longest part
+					long maxPart = ShapeHelper::GetLargestPart(shp);
+					if (maxPart >= 0)
 					{
-						lbl->put_Visible(VARIANT_FALSE);
-						lbl->Release(); 
+						CComPtr<IShape> shpPart = NULL;
+						shp->get_PartAsShape(maxPart, &shpPart);
+						if (shpPart)
+						{
+							ShapeHelper::AddLabelToShape(shpPart, _labels, text, Method, orientation);
+							continue;
+						}
 					}
 				}
-			
-			} // LargestPartOnly
-		} // numParts > 1
-		
-		shp->Release(); 
-		shp = NULL;
+			} 
+		}
+		((CLabels*)_labels)->AddEmptyLabel();
 	}
 	
 	long numLabels;
@@ -249,8 +172,7 @@ add_empty_label:
 		// in case there is label expression, reapply it
 		CComBSTR expr;
 		_labels->get_Expression(&expr);
-		CComBSTR bstrEmpty = L"";
-		_labels->put_Expression(bstrEmpty);
+		_labels->put_Expression(m_globalSettings.emptyBstr);
 		_labels->put_Expression(expr);
 	}
 	else
@@ -351,7 +273,6 @@ void CShapefile::put_ReferenceToCharts(bool bNullReference)
 // ********************************************************************
 //			SetChartsPositions
 // ********************************************************************
-// Routine for generation of labels
 void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 {
 	USES_CONVERSION;

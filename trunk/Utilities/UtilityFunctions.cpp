@@ -107,8 +107,8 @@ namespace Utility
 	// ********************************************************
 	//	Converting variant to bstr; only several values are considered
 	// should be replaced by CComVariant.CopyTo
-	BSTR Variant2BSTR(VARIANT* val)
-	{
+	BSTR Variant2BSTR(VARIANT* val, CString floatFormat)
+{
 		if (val->vt == VT_BSTR) 
 		{
 			return OLE2BSTR(val->bstrVal);
@@ -122,7 +122,7 @@ namespace Utility
 		else if (val->vt == VT_R8)
 		{
 			CString str;
-			str.Format("%g", val->dblVal);
+			str.Format(floatFormat, val->dblVal);
 			return str.AllocSysString();
 		}
 		else //if( val.vt == VT_NULL )

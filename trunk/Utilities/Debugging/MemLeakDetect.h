@@ -39,7 +39,7 @@ using namespace std;
 #define MLD_CUSTOMSTACKWALK			1
 //
 #define MLD_MAX_NAME_LENGTH			256
-#define MLD_MAX_TRACEINFO			256
+#define MLD_MAX_TRACEINFO			512
 #define MLD_TRACEINFO_EMPTY			_T("")
 #define MLD_TRACEINFO_NOSYMBOL		_T("?(?)")
 

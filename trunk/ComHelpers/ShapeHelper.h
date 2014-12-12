@@ -1,4 +1,6 @@
 #pragma once
+#include "Shape.h"
+
 class ShapeHelper
 {
 public:
@@ -12,5 +14,9 @@ public:
 	static ShpfileType GetShapeType2D(IShape* shp);
 	static bool SplitByPolyline(IShape* subject, IShape* polyline, vector<IShape*>& shapes);
 	static bool IsEmpty(IShape* shp);
+	static CShape* Cast(CComPtr<IShape>& shp);
+	static long GetNumParts(IShape* shp);
+	static int GetLargestPart(IShape* shp);
+	static void AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLabelPositioning method, tkLineLabelOrientation orientation);
 };
 

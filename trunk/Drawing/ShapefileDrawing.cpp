@@ -96,7 +96,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	// --------------------------------------------------------
 	//	 reading shapefile properties
 	// --------------------------------------------------------
-	long _numShapes;
+	long numShapes;
 	
 	VARIANT_BOOL _useQTree;
 	VARIANT_BOOL _useSpatialIndex;
@@ -106,7 +106,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	_shapefile->get_SelectionAppearance(&selectionAppearance);
 	_shapefile->get_FastMode(&_fastMode);
 	_shapefile->get_ShapefileType(&_shptype);
-	_shapefile->get_NumShapes(&_numShapes);
+	_shapefile->get_NumShapes(&numShapes);
 	_shapefile->get_EditingShapes(&_isEditing);
 	_shapefile->get_UseQTree(&_useQTree);
 	_shapefile->get_UseSpatialIndex(&_useSpatialIndex);
@@ -163,7 +163,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	#endif
 
 	// --------------------------------------------------------
-	//	 Settings dc/graphics options
+	//	 Settings DC/graphics options
 	// --------------------------------------------------------
 	int* qtreeResult;					// results of quad tree selection
 	vector<long>* selectResult = NULL;	// results of spatial index selection
@@ -190,9 +190,11 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 			_sfReader = new CShapefileReader();
 			if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
 			{
-				delete _sfReader; _sfReader = NULL;
-				return 0;
-				// TODO: Add error handling
+				delete _sfReader; 
+				_sfReader = NULL;
+				CString error;
+				error.Format("Failed to read shape index: %s", OLE2A(fname));
+				CallbackHelper::ErrorMsg(error);
 			}
 
 			// ---------------------------------------------------------
@@ -207,7 +209,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 				}
 				else
 				{
-					_numShapes = selectResult->size();
+					numShapes = selectResult->size();
 					sort(selectResult->begin(), selectResult->end());
 				}
 			}
@@ -263,7 +265,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 			goto cleaning; 
 		}
 
-		_numShapes = (long)shapesCount;
+		numShapes = (long)shapesCount;
 	}
 	
 	// --------------------------------------------------------------------
@@ -285,7 +287,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	//	 Building lists of shape indices for each category
 	// --------------------------------------------------------------
 	unsigned int k = 0; // position in arr of visible shapes
-	for(int i = 0; i < (int)_numShapes; i++ )
+	for(int i = 0; i < (int)numShapes; i++ )
 	{
 		if(_useQTree && _isEditing)
 		{

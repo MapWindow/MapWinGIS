@@ -31,6 +31,7 @@
 #include "Shapefile.h"
 #include "Templates.h"
 #include "TableHelper.h"
+#include "LabelsHelper.h"
 
 // ////////////////////////////////////////////////////////////// //
 //	PROPERTIES COMMON FOR CLABELS AND CLABELCATEGORY
@@ -356,13 +357,12 @@ STDMETHODIMP CLabels::InsertLabel(long Index, BSTR Text, double x, double y, dou
 	if (Index == _labels.size())
 	{
 		_labels.push_back(parts);
-		*retVal = VARIANT_TRUE;
 	}
 	else
 	{
 		_labels.insert( _labels.begin() + _labels.size(), parts);
-		*retVal = VARIANT_TRUE;
 	}
+	*retVal = VARIANT_TRUE;
 	return S_OK;
 }
 //***********************************************************************/
@@ -1069,6 +1069,8 @@ void CLabels::RefreshExpressions()
 	
 	fieldName = "[" + fieldName + "]";
 
+	CString numberFormat = LabelsHelper::GetFloatNumberFormat(this);
+
 	for(int i = 0; i < (int)_categories.size(); i++)
 	{
 		CComVariant vMin, vMax;
@@ -1083,8 +1085,8 @@ void CLabels::RefreshExpressions()
 		CString sMin;
 		CString s;
 
-		sMin.Format("%g", dMin);
-		sMax.Format("%g", dMax);
+		sMin.Format(numberFormat, dMin);
+		sMax.Format(numberFormat, dMax);
 		
 		s = fieldName + " >= " + sMin + " AND " + fieldName + " <= " + sMax;
 
@@ -1694,7 +1696,8 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 
 	if (!_shapefile)
 	{
-		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
+		if (SysStringLen(newVal) > 0)
+			ErrorMessage(tkEXPRESSION_NO_SHAPEFILE);
 		return S_OK;
 	}
 	
@@ -1704,40 +1707,41 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	if (!_synchronized && _labels.size() > 0)
 	{
 		ErrorMessage(tkLABELS_NOT_SYNCHRONIZE);
+		return S_OK;
 	}
-	else
+
+	CString floatFormat = LabelsHelper::GetFloatNumberFormat(this);
+
+	CComPtr<ITable> table = NULL;
+	_shapefile->get_Table(&table);
+	if (table)
 	{
-		CComPtr<ITable> table = NULL;
-		_shapefile->get_Table(&table);
-		if (table)
+		// analyzes expression
+		CString strError;
+		std::vector<CString> results;
+		if (TableHelper::Cast(table)->CalculateCore(str, results, strError, floatFormat))
 		{
-			// analyzes expression
-			CString strError;
-			std::vector<CString> results;
-			if (TableHelper::Cast(table)->CalculateCore(str, results, strError))
+			// updating labels
+			if (results.size() == _labels.size())
 			{
-				// updating labels
-				if (results.size() == _labels.size())
+				for (unsigned int i = 0; i < _labels.size(); i++)
 				{
-					for (unsigned int i = 0; i < _labels.size(); i++)
-					{
-						(*_labels[i])[0]->text = results[i];
-					}
+					(*_labels[i])[0]->text = results[i];
+				}
+			}
+		}
+		else
+		{
+			if (str.GetLength() == 0)
+			{
+				for (unsigned int i = 0; i < _labels.size(); i++)
+				{
+					(*_labels[i])[0]->text = "";
 				}
 			}
 			else
 			{
-				if (str == "")
-				{
-					for (unsigned int i = 0; i < _labels.size(); i++)
-					{
-						(*_labels[i])[0]->text = "";
-					}
-				}
-				else
-				{
-					ErrorMessage(tkINVALID_EXPRESSION);
-				}
+				ErrorMessage(tkINVALID_EXPRESSION);
 			}
 		}
 	}
@@ -2515,4 +2519,46 @@ bool CLabels::HasRotation()
 		}
 	}
 	return false;
+}
+
+// *************************************************************
+//		AddEmptyLabel()
+// *************************************************************
+void CLabels::AddEmptyLabel()
+{
+	AddLabel(m_globalSettings.emptyBstr, 0.0, 0.0, 0.0);
+	if (_labels.size() == 0) return;
+	CLabelInfo* lbl = (*_labels[_labels.size() - 1])[0];
+	if (lbl) {
+		lbl->visible = false;
+	}
+}
+
+// *************************************************************
+//		get_FloatNumberFormat()
+// *************************************************************
+STDMETHODIMP CLabels::get_FloatNumberFormat(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = A2BSTR(_floatNumberFormat);
+	return S_OK;
+}
+
+// *************************************************************
+//		put_FloatNumberFormat()
+// *************************************************************
+STDMETHODIMP CLabels::put_FloatNumberFormat(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	CString format = OLE2A(newVal);
+	CString s;
+	s.Format(format, 1.1);
+	if (s != format) {
+		_floatNumberFormat = newVal;
+	}
+	else {
+		ErrorMessage(tkINVALID_FLOAT_NUMBER_FORMAT);
+	}
+	return S_OK;
 }

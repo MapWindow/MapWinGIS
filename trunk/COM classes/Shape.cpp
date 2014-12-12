@@ -2218,7 +2218,7 @@ void CShape::get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double
 void CShape::get_LabelPosition(tkLabelPositioning method, double& x, double& y, double& rotation, 
 				tkLineLabelOrientation orientation)
 {
-	x = y = 0.0;
+	x = y = rotation = 0.0;
 	if (method == lpNone)
 		return;
 

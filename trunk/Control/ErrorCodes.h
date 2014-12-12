@@ -104,6 +104,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkEDITOR_OVERLAY_ALREADY_STARTED 244
 # define tkADD_SHAPE_MODE_ONLY 245
 # define tkNO_INTERACTIVE_EDITING 246
+# define tkEXPRESSION_NO_SHAPEFILE 247
 
 //301-400 = OGR layers
 # define tkFAILED_TO_OPEN_OGR_LAYER 301
@@ -232,6 +233,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkLABELS_CANT_SYNCHRONIZE 1601
 # define tkLABELS_NOT_SYNCHRONIZE 1602
 # define tkLABELS_NOT_SAVED 1603
+# define tkINVALID_FLOAT_NUMBER_FORMAT 1604
 
 //1801-2000 = geoprojections
 #define tkOGR_NOT_ENOUGH_DATA			1801    /* not enough data to deserialize */

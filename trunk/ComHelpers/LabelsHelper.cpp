@@ -31,3 +31,18 @@ void LabelsHelper::UpdateLabelsPositioning(IShapefile* sf)
 		}
 	}
 }
+
+// ******************************************************* 
+//		GetFloatNumberFormat()
+// ******************************************************* 
+CString LabelsHelper::GetFloatNumberFormat(ILabels* labels)
+{
+	if (!labels) return m_globalSettings.floatNumberFormat;
+	USES_CONVERSION;
+	CComBSTR bstrFormat;
+	labels->get_FloatNumberFormat(&bstrFormat);
+	CString format = OLE2A(bstrFormat);
+	if (format.GetLength() == 0)
+		format = m_globalSettings.floatNumberFormat;
+	return format;
+}
