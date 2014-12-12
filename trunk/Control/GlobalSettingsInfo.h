@@ -101,7 +101,7 @@ struct GlobalSettingsInfo
 		rasterOverviewResampling = tkGDALResamplingMethod::grmNearest;
 		minOverviewWidth = 512;
 		rasterOverviewCreation = tkRasterOverviewCreation::rocAuto;
-		tiffCompression = tkTiffCompression::tkmAUTO;
+		tiffCompression = tkTiffCompression::tkmLZW;
 		labelsCollisionMode = tkCollisionMode::LocalList;
 		minPolygonArea = 1.0;
 		minAreaToPerimeterRatio = 0.0001;

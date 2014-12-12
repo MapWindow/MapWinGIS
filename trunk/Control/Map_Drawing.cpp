@@ -249,6 +249,9 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 {
 	bool hasVolatile = HasVolatileShapefiles();
 
+	bool canUseBuffer = _canUseVolatileBuffer ? true : false;
+	_canUseVolatileBuffer = TRUE;
+
 	if (!hasVolatile && !HasDrawLists()) return;
 
 	ClearDrawingLabelFrames();
@@ -262,7 +265,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 		return;
 	}
 
-	if (_canUseVolatileBuffer) 
+	if (canUseBuffer)
 	{
 		g->DrawImage(_volatileBitmap, 0.0f, 0.0f);
 	}
@@ -294,7 +297,7 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 		// passing layers to the main buffer
 		g->DrawImage(_volatileBitmap, 0.0f, 0.0f);
 		delete gDrawing;
-		_canUseVolatileBuffer = TRUE;
+		
 	}
 }
 
