@@ -550,5 +550,41 @@ namespace TestApplication.Properties {
                 this["GridToImageInput"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SfSaveAsInput {
+            get {
+                return ((string)(this["SfSaveAsInput"]));
+            }
+            set {
+                this["SfSaveAsInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DrawingLayerInput {
+            get {
+                return ((string)(this["DrawingLayerInput"]));
+            }
+            set {
+                this["DrawingLayerInput"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DrawingLayersInput {
+            get {
+                return ((string)(this["DrawingLayersInput"]));
+            }
+            set {
+                this["DrawingLayersInput"] = value;
+            }
+        }
     }
 }

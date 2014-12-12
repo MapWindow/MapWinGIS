@@ -33,10 +33,15 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.WorkItemTestsGroupbox = new System.Windows.Forms.GroupBox();
+            this.groupBox27 = new System.Windows.Forms.GroupBox();
+            this.RunDrawingLayer = new System.Windows.Forms.Button();
+            this.SelectDrawingLayer = new System.Windows.Forms.Button();
+            this.DrawingLayersInput = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
             this.groupBox34 = new System.Windows.Forms.GroupBox();
-            this.button7 = new System.Windows.Forms.Button();
-            this.button8 = new System.Windows.Forms.Button();
-            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.RunSfSaveAs = new System.Windows.Forms.Button();
+            this.SelectSfSaveAs = new System.Windows.Forms.Button();
+            this.SfSaveAsInput = new System.Windows.Forms.TextBox();
             this.label33 = new System.Windows.Forms.Label();
             this.groupBox35 = new System.Windows.Forms.GroupBox();
             this.RunGridToImage = new System.Windows.Forms.Button();
@@ -221,6 +226,7 @@
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
             this.WorkItemTestsGroupbox.SuspendLayout();
+            this.groupBox27.SuspendLayout();
             this.groupBox34.SuspendLayout();
             this.groupBox35.SuspendLayout();
             this.MiscGroupBox.SuspendLayout();
@@ -315,60 +321,118 @@
             // WorkItemTestsGroupbox
             // 
             this.WorkItemTestsGroupbox.BackColor = System.Drawing.Color.DarkKhaki;
+            this.WorkItemTestsGroupbox.Controls.Add(this.groupBox27);
             this.WorkItemTestsGroupbox.Controls.Add(this.groupBox34);
             this.WorkItemTestsGroupbox.Controls.Add(this.groupBox35);
             this.WorkItemTestsGroupbox.Controls.Add(this.button11);
             this.WorkItemTestsGroupbox.Location = new System.Drawing.Point(5, 3088);
             this.WorkItemTestsGroupbox.Name = "WorkItemTestsGroupbox";
-            this.WorkItemTestsGroupbox.Size = new System.Drawing.Size(205, 229);
+            this.WorkItemTestsGroupbox.Size = new System.Drawing.Size(205, 332);
             this.WorkItemTestsGroupbox.TabIndex = 17;
             this.WorkItemTestsGroupbox.TabStop = false;
             this.WorkItemTestsGroupbox.Text = "WorkItem tests";
             // 
+            // groupBox27
+            // 
+            this.groupBox27.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox27.Controls.Add(this.RunDrawingLayer);
+            this.groupBox27.Controls.Add(this.SelectDrawingLayer);
+            this.groupBox27.Controls.Add(this.DrawingLayersInput);
+            this.groupBox27.Controls.Add(this.label30);
+            this.groupBox27.Location = new System.Drawing.Point(7, 224);
+            this.groupBox27.Name = "groupBox27";
+            this.groupBox27.Size = new System.Drawing.Size(194, 93);
+            this.groupBox27.TabIndex = 18;
+            this.groupBox27.TabStop = false;
+            this.groupBox27.Text = "Drawing layers (workitem: 20727)";
+            // 
+            // RunDrawingLayer
+            // 
+            this.RunDrawingLayer.Location = new System.Drawing.Point(11, 58);
+            this.RunDrawingLayer.Name = "RunDrawingLayer";
+            this.RunDrawingLayer.Size = new System.Drawing.Size(177, 23);
+            this.RunDrawingLayer.TabIndex = 36;
+            this.RunDrawingLayer.Tag = "run";
+            this.RunDrawingLayer.Text = "Run test";
+            this.RunDrawingLayer.UseVisualStyleBackColor = true;
+            this.RunDrawingLayer.Click += new System.EventHandler(this.RunDrawingLayersClick);
+            // 
+            // SelectDrawingLayer
+            // 
+            this.SelectDrawingLayer.Location = new System.Drawing.Point(162, 32);
+            this.SelectDrawingLayer.Name = "SelectDrawingLayer";
+            this.SelectDrawingLayer.Size = new System.Drawing.Size(27, 20);
+            this.SelectDrawingLayer.TabIndex = 20;
+            this.SelectDrawingLayer.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectDrawingLayer, "Select first raster file");
+            this.SelectDrawingLayer.UseVisualStyleBackColor = true;
+            this.SelectDrawingLayer.Click += new System.EventHandler(this.SelectDrawingLayerClick);
+            // 
+            // DrawingLayersInput
+            // 
+            this.DrawingLayersInput.AcceptsReturn = true;
+            this.DrawingLayersInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "DrawingLayersInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.DrawingLayersInput.Location = new System.Drawing.Point(12, 32);
+            this.DrawingLayersInput.Name = "DrawingLayersInput";
+            this.DrawingLayersInput.Size = new System.Drawing.Size(144, 20);
+            this.DrawingLayersInput.TabIndex = 19;
+            this.DrawingLayersInput.Text = global::TestApplication.Properties.Settings.Default.DrawingLayersInput;
+            this.toolTip1.SetToolTip(this.DrawingLayersInput, "Select text file with rasters and formulas");
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(9, 16);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(76, 13);
+            this.label30.TabIndex = 18;
+            this.label30.Text = "Select text file:";
+            // 
             // groupBox34
             // 
             this.groupBox34.BackColor = System.Drawing.Color.Transparent;
-            this.groupBox34.Controls.Add(this.button7);
-            this.groupBox34.Controls.Add(this.button8);
-            this.groupBox34.Controls.Add(this.textBox4);
+            this.groupBox34.Controls.Add(this.RunSfSaveAs);
+            this.groupBox34.Controls.Add(this.SelectSfSaveAs);
+            this.groupBox34.Controls.Add(this.SfSaveAsInput);
             this.groupBox34.Controls.Add(this.label33);
             this.groupBox34.Location = new System.Drawing.Point(7, 125);
             this.groupBox34.Name = "groupBox34";
             this.groupBox34.Size = new System.Drawing.Size(194, 93);
             this.groupBox34.TabIndex = 17;
             this.groupBox34.TabStop = false;
-            this.groupBox34.Text = "Set grants and privileges";
+            this.groupBox34.Text = "SF.SaveAs (workitem: 23763)";
             // 
-            // button7
+            // RunSfSaveAs
             // 
-            this.button7.Location = new System.Drawing.Point(11, 58);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(177, 23);
-            this.button7.TabIndex = 36;
-            this.button7.Tag = "run";
-            this.button7.Text = "Run test";
-            this.button7.UseVisualStyleBackColor = true;
+            this.RunSfSaveAs.Location = new System.Drawing.Point(11, 58);
+            this.RunSfSaveAs.Name = "RunSfSaveAs";
+            this.RunSfSaveAs.Size = new System.Drawing.Size(177, 23);
+            this.RunSfSaveAs.TabIndex = 36;
+            this.RunSfSaveAs.Tag = "run";
+            this.RunSfSaveAs.Text = "Run test";
+            this.RunSfSaveAs.UseVisualStyleBackColor = true;
+            this.RunSfSaveAs.Click += new System.EventHandler(this.RunSfSaveAsClick);
             // 
-            // button8
+            // SelectSfSaveAs
             // 
-            this.button8.Location = new System.Drawing.Point(162, 32);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(27, 20);
-            this.button8.TabIndex = 20;
-            this.button8.Text = "...";
-            this.toolTip1.SetToolTip(this.button8, "Select first raster file");
-            this.button8.UseVisualStyleBackColor = true;
+            this.SelectSfSaveAs.Location = new System.Drawing.Point(162, 32);
+            this.SelectSfSaveAs.Name = "SelectSfSaveAs";
+            this.SelectSfSaveAs.Size = new System.Drawing.Size(27, 20);
+            this.SelectSfSaveAs.TabIndex = 20;
+            this.SelectSfSaveAs.Text = "...";
+            this.toolTip1.SetToolTip(this.SelectSfSaveAs, "Select first raster file");
+            this.SelectSfSaveAs.UseVisualStyleBackColor = true;
             // 
-            // textBox4
+            // SfSaveAsInput
             // 
-            this.textBox4.AcceptsReturn = true;
-            this.textBox4.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "PostGisPrivilegesInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.textBox4.Location = new System.Drawing.Point(12, 32);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(144, 20);
-            this.textBox4.TabIndex = 19;
-            this.textBox4.Text = global::TestApplication.Properties.Settings.Default.PostGisPrivilegesInput;
-            this.toolTip1.SetToolTip(this.textBox4, "Select text file with rasters and formulas");
+            this.SfSaveAsInput.AcceptsReturn = true;
+            this.SfSaveAsInput.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::TestApplication.Properties.Settings.Default, "SfSaveAsInput", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.SfSaveAsInput.Location = new System.Drawing.Point(12, 32);
+            this.SfSaveAsInput.Name = "SfSaveAsInput";
+            this.SfSaveAsInput.Size = new System.Drawing.Size(144, 20);
+            this.SfSaveAsInput.TabIndex = 19;
+            this.SfSaveAsInput.Text = global::TestApplication.Properties.Settings.Default.SfSaveAsInput;
+            this.toolTip1.SetToolTip(this.SfSaveAsInput, "Select text file with rasters and formulas");
             // 
             // label33
             // 
@@ -2365,6 +2429,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
             this.WorkItemTestsGroupbox.ResumeLayout(false);
+            this.groupBox27.ResumeLayout(false);
+            this.groupBox27.PerformLayout();
             this.groupBox34.ResumeLayout(false);
             this.groupBox34.PerformLayout();
             this.groupBox35.ResumeLayout(false);
@@ -2617,9 +2683,9 @@
     private System.Windows.Forms.Label label29;
     private System.Windows.Forms.GroupBox WorkItemTestsGroupbox;
     private System.Windows.Forms.GroupBox groupBox34;
-    private System.Windows.Forms.Button button7;
-    private System.Windows.Forms.Button button8;
-    private System.Windows.Forms.TextBox textBox4;
+    private System.Windows.Forms.Button RunSfSaveAs;
+    private System.Windows.Forms.Button SelectSfSaveAs;
+    private System.Windows.Forms.TextBox SfSaveAsInput;
     private System.Windows.Forms.Label label33;
     private System.Windows.Forms.GroupBox groupBox35;
     private System.Windows.Forms.Button RunGridToImage;
@@ -2627,6 +2693,11 @@
     private System.Windows.Forms.TextBox GridToImageInput;
     private System.Windows.Forms.Label label34;
     private System.Windows.Forms.Button button11;
+    private System.Windows.Forms.GroupBox groupBox27;
+    private System.Windows.Forms.Button RunDrawingLayer;
+    private System.Windows.Forms.Button SelectDrawingLayer;
+    private System.Windows.Forms.TextBox DrawingLayersInput;
+    private System.Windows.Forms.Label label30;
   }
 }
 

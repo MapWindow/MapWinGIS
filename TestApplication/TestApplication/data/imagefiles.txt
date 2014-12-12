@@ -25,6 +25,7 @@
 %MW_SAMPLEDATA%\Images\Formats\ECW-ERMapper-Compressed-Wavelets.ecw
 %MW_SAMPLEDATA%\Images\Formats\Greyscale.ecw
 %MW_SAMPLEDATA%\Images\Formats\RGBImage.ecw
+%MW_SAMPLEDATA%\Images\Formats\workitem-20972.ecw
 
 #MrSid
 %MW_SAMPLEDATA%\Images\Formats\mercator.sid

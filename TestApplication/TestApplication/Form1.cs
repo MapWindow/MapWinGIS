@@ -337,6 +337,8 @@ namespace TestApplication
 
             // WorkItems
             SetTextfileLocation(this.GridToImageInput, path, "gridToImage.txt");
+            SetTextfileLocation(this.SfSaveAsInput, path, "shapefiles.txt");
+            SetTextfileLocation(this.DrawingLayersInput, path, "drawingLayers.txt");
 
             // Save all settings:
             Settings.Default.Save();
@@ -1506,6 +1508,22 @@ namespace TestApplication
         }
 
         /// <summary>
+        /// The select drawing layer click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void SelectDrawingLayerClick(object sender, EventArgs e)
+        {
+            Tests.SelectTextfile(
+                this.DrawingLayersInput,
+                "Select text file with on each line the location of the shapefiles");
+        }
+
+        /// <summary>
         /// The ax map 1_ mouse move event.
         /// </summary>
         /// <param name="sender">
@@ -1582,9 +1600,43 @@ namespace TestApplication
         /// </param>
         private void RunGridToImageClick(object sender, EventArgs e)
         {
-            this.ResetMapSettings(false);
+            this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunGridToImageTest(this.GridToImageInput.Text, this);
+            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+        }
+
+        /// <summary>
+        /// The run sf save as click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void RunSfSaveAsClick(object sender, EventArgs e)
+        {
+            this.ResetMapSettings(true);
+            ((Button)sender).BackColor = Color.Blue;
+            var retVal = Tests.RunSfSaveAsTest(this.SfSaveAsInput.Text, this);
+            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+        }
+
+        /// <summary>
+        /// The run drawing layers click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void RunDrawingLayersClick(object sender, EventArgs e)
+        {
+            this.ResetMapSettings(false);
+            ((Button)sender).BackColor = Color.Blue;
+            var retVal = Tests.RunDrawingLayersTest(this.DrawingLayersInput.Text, this);
             ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
         }
     }

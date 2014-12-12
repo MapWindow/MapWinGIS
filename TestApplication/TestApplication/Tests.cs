@@ -12,6 +12,7 @@ namespace TestApplication
     #region
 
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
@@ -31,6 +32,11 @@ namespace TestApplication
     internal static class Tests
     {
         #region Static Fields
+
+        /// <summary>
+        /// The random generator.
+        /// </summary>
+        private static readonly Random RandomGenerator = new Random();
 
         /// <summary>Are the tiles loaded or not</summary>
         private static bool tilesAreLoaded;
@@ -622,6 +628,12 @@ namespace TestApplication
             theForm.Progress(string.Empty, 0, "-----------------------The GridToImage open tests have started.");
 
             var gs = new GlobalSettings { GridProxyFormat = tkGridProxyFormat.gpfTiffProxy };
+            
+            gs.ImageDownsamplingMode = tkInterpolationMode.imBicubic;
+            gs.ImageUpsamplingMode = tkInterpolationMode.imBicubic;
+            gs.RasterOverviewCreation = tkRasterOverviewCreation.rocYes;
+            gs.RasterOverviewResampling = tkGDALResamplingMethod.grmBicubic;
+            gs.TiffCompression = tkTiffCompression.tkmLZW;
 
             // Read text file:
             var lines = Helper.ReadTextfile(textfileLocation);
@@ -655,9 +667,15 @@ namespace TestApplication
 
                 var newFilename = Helper.CreateOutputFilename(line, "proxy");
                 newFilename = Path.ChangeExtension(newFilename, ".tif");
+                if (File.Exists(newFilename))
+                {
+                    File.Delete(newFilename);
+                }
+                
                 if (!img.Save(newFilename, true))
                 {
                     theForm.Error("Failed to save proxy: " + img.ErrorMsg[img.LastErrorCode]);
+                    img.Close();
                 }
                 else
                 {
@@ -676,11 +694,145 @@ namespace TestApplication
                     Thread.Sleep(1000);
                 }
 
-                img.Close();
+                // Don't close image because it is opened as layer:
+                // img.Close();
                 grid.Close();
             }
 
             theForm.Progress(string.Empty, 100, string.Format("The GridToImage tests have finished with {0} errors", numErrors));
+
+            return numErrors == 0;
+        }
+
+        /// <summary>
+        /// The run sf save as test.
+        /// </summary>
+        /// <param name="textfileLocation">
+        /// The textfile location.
+        /// </param>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        internal static bool RunSfSaveAsTest(string textfileLocation, Form1 theForm)
+        {
+            var numErrors = 0;
+
+            // Open text file:
+            if (!File.Exists(textfileLocation))
+            {
+                throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+            }
+
+            theForm.Progress(string.Empty, 0, "-----------------------The Shapefile SaveAs tests have started.");
+
+            // Read text file:
+            var lines = Helper.ReadTextfile(textfileLocation);
+            foreach (var line in lines)
+            {
+                var sf = Fileformats.OpenShapefile(line, theForm);
+                if (sf == null)
+                {
+                    numErrors++;
+                    continue;
+                }
+
+                var newFilename = Helper.CreateOutputFilename(line, "Домены");
+                Helper.DeleteShapefile(newFilename);
+                var newFilenameWithoutExtension = Path.GetFileNameWithoutExtension(newFilename);
+                if (File.Exists(newFilename))
+                {
+                    File.Delete(newFilename);
+                }
+
+                if (sf.SaveAs(newFilenameWithoutExtension, theForm))
+                {
+                    theForm.Error("Save as should not work, because no extention");
+                    numErrors++;
+                    continue;
+                }
+
+                if (!sf.SaveAs(newFilename, theForm))
+                {
+                    theForm.Error("Failed to save as: " + sf.ErrorMsg[sf.LastErrorCode]);
+                    numErrors++;
+                    continue;
+                }
+                
+                theForm.Progress("File name: " + sf.Filename);
+
+                // Add sf to map:
+                MyAxMap.AddLayer(sf, true);
+
+                // Wait a second to show something:
+                Application.DoEvents();
+                Thread.Sleep(1000);
+            }
+
+            theForm.Progress(string.Empty, 100, string.Format("The Shapefile SaveAs tests have finished with {0} errors", numErrors));
+
+            return numErrors == 0;
+        }
+
+        /// <summary>
+        /// The run drawing layers test.
+        /// </summary>
+        /// <param name="textfileLocation">
+        /// The textfile location.
+        /// </param>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// True on success
+        /// </returns>
+        internal static bool RunDrawingLayersTest(string textfileLocation, Form1 theForm)
+        {
+            var numErrors = 0;
+
+            // Open text file:
+            if (!File.Exists(textfileLocation))
+            {
+                throw new FileNotFoundException("Cannot find text file.", textfileLocation);
+            }
+
+            theForm.Progress(string.Empty, 0, "-----------------------The Drawing layers tests have started.");
+
+            // Read text file:
+            var lines = Helper.ReadTextfile(textfileLocation);
+            
+            // Read all shapefiles at once:
+            var filenames = lines.Where(File.Exists).ToList();
+
+            if (filenames.Count > 0)
+            {
+                // Add last shapefile as normal layer:
+                Fileformats.OpenShapefileAsLayer(filenames[filenames.Count - 1], theForm, true);
+
+                // Wait a second to show something:
+                Application.DoEvents();
+                Thread.Sleep(1000);
+
+                // Convert a few shapefiles to drawing layers:
+                if (!ShapefilesToDrawingLayer(filenames, theForm))
+                {
+                    numErrors++;
+                }
+
+                // Add some random drawing items:
+                if (!AddDrawingItems(theForm))
+                {
+                    numErrors++;
+                }
+
+                // Wait a second to show something:
+                Application.DoEvents();
+                Thread.Sleep(1000);
+            }
+
+            theForm.Progress(string.Empty, 100, string.Format("The Drawing layers tests have finished with {0} errors", numErrors));
 
             return numErrors == 0;
         }
@@ -2282,6 +2434,262 @@ namespace TestApplication
             }
 
             return selectTime;
+        }
+
+        /// <summary>
+        /// Shapefiles to drawing layer.
+        /// </summary>
+        /// <param name="shapefilenames">
+        /// The shapefilenames.
+        /// </param>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// True on success
+        /// </returns>
+        private static bool ShapefilesToDrawingLayer(IList<string> shapefilenames, Form1 theForm)
+        {
+            // Init:
+            MyAxMap.Projection = tkMapProjection.PROJECTION_NONE;
+            MyAxMap.GrabProjectionFromData = true;
+            MyAxMap.LockWindow(tkLockMode.lmLock);
+            Extents extents = null;
+
+            try
+            {
+                // Skip last filename
+                for (var s = 0; s < shapefilenames.Count() - 1; s++)
+                {
+                    var shapefilename = shapefilenames[s];
+                    var sf = Fileformats.OpenShapefile(shapefilename, theForm);
+                    if (sf == null)
+                    {
+                        continue;
+                    }
+
+                    if (MyAxMap.Projection == tkMapProjection.PROJECTION_NONE)
+                    {
+                        MyAxMap.GeoProjection = sf.GeoProjection.Clone();
+                    }
+
+                    if (extents == null)
+                    {
+                        extents = sf.Extents; // the extents of the fist shapefile will be used to setup display
+                    }
+
+                    var drawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+                    for (var i = 0; i < sf.NumShapes; i++)
+                    {
+                        var shp = sf.Shape[i];
+
+                        if (shp.ShapeType == ShpfileType.SHP_POINT)
+                        {
+                            var x = 0.0;
+                            var y = 0.0;
+                            if (shp.XY[0, ref x, ref y])
+                            {
+                                MyAxMap.DrawPointEx(drawHandle, x, y, 5, 0);
+                            }
+                        }
+                        else
+                        {
+                            for (var p = 0; p < shp.NumParts; p++)
+                            {
+                                var initIndex = shp.Part[p];
+                                var numPoints = shp.EndOfPart[p] - shp.Part[p] + 1;
+                                if (numPoints <= 0)
+                                {
+                                    continue;
+                                }
+
+                                var x = new double[numPoints];
+                                var y = new double[numPoints];
+
+                                for (var j = 0; j < numPoints; j++)
+                                {
+                                    var valueX = 0.0;
+                                    var valueY = 0.0;
+                                    if (shp.XY[j + initIndex, ref valueX, ref valueY])
+                                    {
+                                        x[j] = valueX;
+                                        y[j] = valueY;
+                                    }
+                                }
+
+                                object pointsX = x;
+                                object pointsY = y;
+                                var drawFill = shp.ShapeType == ShpfileType.SHP_POLYGON;
+                                var color = sf.ShapefileType == ShpfileType.SHP_POLYGON
+                                                ? sf.DefaultDrawingOptions.FillColor
+                                                : sf.DefaultDrawingOptions.LineColor;
+                                MyAxMap.DrawPolygonEx(drawHandle, ref pointsX, ref pointsY, numPoints, color, drawFill);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (extents != null)
+                {
+                    MyAxMap.Extents = extents;
+                }
+
+                MyAxMap.LockWindow(tkLockMode.lmUnlock);
+                MyAxMap.Redraw2(tkRedrawType.RedrawMinimal);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// The add drawing items.
+        /// </summary>
+        /// <param name="theForm">
+        /// The form.
+        /// </param>
+        /// <returns>
+        /// true on success
+        /// </returns>
+        private static bool AddDrawingItems(Form1 theForm)
+        {
+            // Create a drawing layer:
+            var drawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlSpatiallyReferencedList);
+
+            // init:
+            int randomX1;
+            int randomY1;
+            int randomX2;
+            int randomY2;
+            int count;
+            object pointsX;
+            object pointsY;
+
+            // For colors:
+            var utils = new UtilsClass();
+
+            // Draw circle:
+            GetRandomPoint(out randomX1, out randomY1);
+            MyAxMap.DrawCircleEx(drawHandle, randomX1, randomY1, 1000, utils.ColorByName(tkMapColor.Aquamarine), true);
+            theForm.Progress(string.Format("The circle is drawn at {0}, {1}", randomX1, randomY1));
+
+            // Draw line
+            GetRandomPoint(out randomX1, out randomY1);
+            GetRandomPoint(out randomX2, out randomY2);
+            MyAxMap.DrawLineEx(drawHandle, randomX1, randomY1, randomX2, randomY2, 10, utils.ColorByName(tkMapColor.BlueViolet));
+            theForm.Progress("The line is drawn");
+
+            // Draw point:
+            GetRandomPoint(out randomX1, out randomY1);
+            MyAxMap.DrawPointEx(drawHandle, randomX1, randomY1, 20, utils.ColorByName(tkMapColor.Bisque));
+            theForm.Progress("The point is drawn");
+
+            // Draw polygon:
+            GetRandomPoints(out pointsX, out pointsY, out count);
+            MyAxMap.DrawPolygonEx(
+                drawHandle,
+                ref pointsX,
+                ref pointsY,
+                count,
+                utils.ColorByName(tkMapColor.DarkGreen),
+                true);
+            theForm.Progress("The polygon is drawn");
+
+            // Draw wide circle:
+            GetRandomPoint(out randomX1, out randomY1);
+            MyAxMap.DrawWideCircleEx(drawHandle, randomX1, randomY1, 500, utils.ColorByName(tkMapColor.DarkRed), false, 5);
+            theForm.Progress("The wide circle is drawn");
+
+            // Draw wide polygon
+            GetRandomPoints(out pointsX, out pointsY, out count);
+            MyAxMap.DrawWidePolygon(
+                ref pointsX,
+                ref pointsY,
+                count,
+                utils.ColorByName(tkMapColor.YellowGreen),
+                false,
+                5);
+            theForm.Progress("The wide polygon is drawn");
+
+            // Draw label:
+            GetRandomPoint(out randomX1, out randomY1);
+            MyAxMap.AddDrawingLabelEx(
+                drawHandle,
+                "My Label",
+                utils.ColorByName(tkMapColor.Red),
+                randomX1,
+                randomY1,
+                tkHJustification.hjCenter,
+                45);
+            theForm.Progress("The label is drawn");
+
+            // Redraw just the drawing layers:
+            MyAxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers);
+            return true;
+        }
+
+        /// <summary>
+        /// The get random points.
+        /// </summary>
+        /// <param name="pointsX">
+        /// The points x.
+        /// </param>
+        /// <param name="pointsY">
+        /// The points y.
+        /// </param>
+        /// <param name="count">
+        /// The count.
+        /// </param>
+        private static void GetRandomPoints(out object pointsX, out object pointsY, out int count)
+        {
+            int randomX1;
+            int randomY1;
+            int randomX2;
+            int randomY2;
+
+            var x = new List<double>();
+            var y = new List<double>();
+
+            GetRandomPoint(out randomX1, out randomY1);
+            GetRandomPoint(out randomX2, out randomY2);
+
+            x.Add(randomX1);
+            y.Add(randomY1);
+            x.Add(randomX2);
+            y.Add(randomY1);
+            x.Add(randomX2);
+            y.Add(randomY2);
+            x.Add(randomX1);
+            y.Add(randomY2);
+            x.Add(randomX1);
+            y.Add(randomY1);
+
+            pointsX = x.ToArray();
+            pointsY = y.ToArray();
+            count = x.Count;
+        }
+
+        /// <summary>
+        /// The get random point.
+        /// </summary>
+        /// <param name="randomX1">
+        /// The random x 1.
+        /// </param>
+        /// <param name="randomY1">
+        /// The random y 1.
+        /// </param>
+        private static void GetRandomPoint(out int randomX1, out int randomY1)
+        {
+            var extents = (Extents)MyAxMap.Extents;
+            var minX = (int)Math.Round(extents.xMin);
+            var maxX = (int)Math.Round(extents.xMax);
+            var minY = (int)Math.Round(extents.yMin);
+            var maxY = (int)Math.Round(extents.yMax);
+
+            // Get some random locations:
+            randomX1 = RandomGenerator.Next(minX, maxX);
+            randomY1 = RandomGenerator.Next(minY, maxY);
         }
 
         #endregion

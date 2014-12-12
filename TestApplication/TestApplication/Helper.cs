@@ -402,12 +402,6 @@ namespace TestApplication
         /// </remarks>
         internal static void DeleteShapefile(string filename)
         {
-            if (!File.Exists(filename))
-            {
-                // Nothing to do:
-                return;
-            }
-
             var basename = Path.GetFileNameWithoutExtension(filename);
             var folder = Path.GetDirectoryName(filename);
             if (folder == null)
