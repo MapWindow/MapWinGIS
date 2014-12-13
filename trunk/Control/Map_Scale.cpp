@@ -19,19 +19,6 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 	if (_viewWidth == 0 || _viewHeight == 0)
 		return VARIANT_FALSE;
 
-	// for debugging only
-	/*if (_transformationMode != tmWgs84Complied)
-	{
-		int maxZoom, minZoom;
-		_tiles->get_MinZoom(&minZoom);
-		_tiles->get_MaxZoom(&maxZoom);
-		for(int i = minZoom; i <= maxZoom; i++ )
-		{
-			double tileSize = GetCurrentTileSize(i);
-			Debug::WriteLine("Zoom: %d; Tile size: %f", i, tileSize);
-		}
-	}*/
-
 	tkTileProjection tileProjection;
 	_tiles->get_ServerProjection(&tileProjection);
 
@@ -176,7 +163,7 @@ void CMapView::AdjustZoom(int zoom)
 	
 	double size = GetCurrentTileSize(zoom);
 	if (size < 0) return;
-	Debug::WriteLine("After zooming; tile size: %f", size);
+	Debug::WriteWithTime(Debug::Format("After zooming; tile size: %f", size), DebugTiles);
 
 	double scalingRatio;
 	((CTiles*)_tiles)->get_ScalingRatio(&scalingRatio);
@@ -198,7 +185,7 @@ void CMapView::AdjustZoom(int zoom)
 	}
 	
 	size = GetCurrentTileSize(zoom);
-	Debug::WriteLine("After adjusting; tile size: %f", size);
+	Debug::WriteWithTime(Debug::Format("After adjusting; tile size: %f", size), DebugTiles);
 }
 
 // ****************************************************

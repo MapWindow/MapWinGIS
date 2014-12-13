@@ -838,7 +838,7 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fro
 		}
 		catch(...)
 		{
-			Debug::WriteError("Exception during RemoveLayer");
+			Debug::WriteError("Exception during RemoveLayer.");
 		}
 
 		_allLayers[LayerHandle] = NULL;
@@ -853,7 +853,7 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fro
 	}
 	catch(...)
 	{
-		Debug::WriteError("Exception during RemoveLayer");
+		Debug::WriteError("Exception during RemoveLayer.");
 	}
 }
 

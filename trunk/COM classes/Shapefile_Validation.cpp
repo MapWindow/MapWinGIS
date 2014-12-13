@@ -145,7 +145,7 @@ bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString clas
 void CShapefile::CreateValidationList(bool selectedOnly)
 {
 	if (_useValidationList)
-		Debug::WriteError("Attempting to create validation list which exists");
+		CallbackHelper::AssertionFailed("Attempting to create validation list which exists.");
 	
 	if (!_useValidationList)
 	{
@@ -192,13 +192,13 @@ void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status,
 {
 	if (status == Original)
 	{
-		Debug::WriteLine("ERROR: Can't set Original status in SetValidatedShape");
+		CallbackHelper::AssertionFailed("Can't set Original status in SetValidatedShape.");
 		return;
 	}
 
 	if (shapeIndex > (int)_shapeData.size())
 	{
-		Debug::WriteLine("ERROR: Invalid index for validated shape: %d", shapeIndex);
+		CallbackHelper::AssertionFailed(Debug::Format("Invalid index for validated shape: %d.", shapeIndex));
 		return;
 	}
 
@@ -216,7 +216,8 @@ void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status,
 		// edit in place
 		if (!_isEditingShapes)
 		{
-			Debug::WriteLine("ERROR: attempt to substitute shape while not in edit mode");
+			CallbackHelper::AssertionFailed("Attempt to update shape while not in edit mode.");
+			return;
 		}
 		if (_shapeData[shapeIndex]->shape) _shapeData[shapeIndex]->shape->Release();
 		_shapeData[shapeIndex]->shape = shape;
@@ -294,7 +295,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 {
 	if (_geosGeometriesRead)
 	{
-		Debug::WriteError("Attempt to reread GEOS geometries while they are in memory");
+		CallbackHelper::AssertionFailed("Attempt to reread GEOS geometries while they are in memory.");
 		ClearCachedGeometries();
 	}
 	
@@ -308,7 +309,7 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 			continue;
 
 		if(_shapeData[i]->geosGeom)
-			Debug::WriteError("GEOS Geometry was expected to be empty");
+			CallbackHelper::AssertionFailed("GEOS Geometry during the reading was expected to be empty.");
 
 		IShape* shp = NULL;
 		this->GetValidatedShape(i, &shp);

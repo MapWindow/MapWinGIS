@@ -1011,10 +1011,6 @@ STDMETHODIMP CGeoProjection::StartTransform(IGeoProjection* target, VARIANT_BOOL
 		}
 		
 		*retval = VARIANT_TRUE;
-		
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = false;
-#endif
 	}
 	return S_OK;
 }

@@ -409,7 +409,7 @@ bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bo
 	USES_CONVERSION;
 	if (_fileName.MakeLower() == imageFilename.MakeLower())
 	{
-		CallbackHelper::ErrorMsg("Only saving in new file is supported for GDAL datasets");
+		CallbackHelper::ErrorMsg("Only saving in new file is supported for GDAL datasets.");
 		return false;
 	}
 
@@ -421,7 +421,7 @@ bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bo
 	GdalHelper::BuildOverviewsIfNeeded(imageFilename, false, _globalCallback);		// built-in overviews
 
 	if (!result) {
-		CallbackHelper::ErrorMsg("Creating a copy of dataset is failed for the current GDAL driver");
+		CallbackHelper::ErrorMsg("Creating a copy of dataset is failed for the current GDAL driver.");
 	}
 
 	return result;
@@ -499,7 +499,7 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 			}
 			else
 			{
-				Debug::WriteLine("Can't delete raster image because of the remaining references");
+				CallbackHelper::ErrorMsg("Can't delete GDAL raster datasource because of the remaining references.");
 			}
 		}
 	}
@@ -1101,7 +1101,7 @@ bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType typ
 
 	if (status != Gdiplus::Ok) 
 	{
-		Debug::WriteError("Saving with GDI+ has failed. Error code: %d", status);
+		CallbackHelper::ErrorMsg(Debug::Format("Saving with GDI+ has failed. Error code: %d", status));
 		return false;
 	}
 

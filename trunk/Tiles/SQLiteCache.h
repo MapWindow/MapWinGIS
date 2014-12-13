@@ -71,12 +71,6 @@ public:
 	}
 
 	static bool Initialize(SqliteOpenMode openMode);
-
-	// to monitor potential treed conflicts
-	static void PrintThread(CString msg)
-	{
-		//Debug::WriteLine("Thread id: %d; %s", GetCurrentThreadId(), msg);
-	}
 };
 
 	

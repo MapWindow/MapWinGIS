@@ -54,7 +54,7 @@ public:
 				this->Projection = new AmersfoortProjection();
 				break;
 			default:
-				Debug::WriteLine("Custom provider: invalid projection");
+				CallbackHelper::ErrorMsg("Invalid projection is set for custom tile provider.");
 				throw 1;
 				return;
 		}

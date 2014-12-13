@@ -192,7 +192,7 @@ void SQLiteCache::DoCaching(TileCore* tile)
 					
 					if (val != SQLITE_OK)
 					{
-						Debug::WriteLine("SQLiteCacheDoCaching: Failed to prepare statement");
+						CallbackHelper::ErrorMsg("SQLiteCache::DoCaching: Failed to prepare statement.");
 					}
 					else
 					{
@@ -232,7 +232,7 @@ void SQLiteCache::DoCaching(TileCore* tile)
 	}
 	catch(...)
 	{
-		Debug::WriteLine("SQLiteCache: exception on adding tiles");
+		CallbackHelper::ErrorMsg("SQLiteCache: exception on adding tiles.");
 	}
 	section.Unlock();
 	
@@ -292,7 +292,7 @@ void SQLiteCache::AutoClear()
 		}
 		catch(...)
 		{
-			Debug::WriteLine("SQLiteCache: exception on autoclear the tiles");
+			CallbackHelper::ErrorMsg("SQLiteCache: exception on clearing the tiles.");
 		}
 	}
 }
@@ -420,7 +420,7 @@ TileCore* SQLiteCache::get_Tile(BaseProvider* provider, LONG scale, LONG x, LONG
 	}
 	catch(...)
 	{
-		Debug::WriteLine("SQLiteCache: exception on getting tile");
+		CallbackHelper::ErrorMsg("SQLiteCache: exception on getting tile.");
 	}
 	section.Unlock();
 	return tile;
@@ -480,7 +480,7 @@ double SQLiteCache::get_FileSize()
 	
 	if (val != SQLITE_OK)
 	{
-		Debug::WriteLine("SQLiteCache::get_FileSize: Failed to prepare statement; %d", val);
+		CallbackHelper::ErrorMsg(Debug::Format("SQLiteCache::get_FileSize: Failed to prepare statement; %d.", val));
 	}
 	else
 	{
@@ -538,7 +538,7 @@ double SQLiteCache::get_FileSize(tkTileProvider provider, int scale)
 	}
 	catch(...)
 	{
-		Debug::WriteLine("SQLiteCache: exception on getting file size.");
+		CallbackHelper::ErrorMsg("SQLiteCache: exception on getting file size.");
 	}
 	return (double)size/(double)(0x1 << 20);
 }
@@ -579,7 +579,7 @@ int SQLiteCache::get_TileCount(int provider, int zoom, int xMin, int xMax, int y
 	}
 	catch(...)
 	{
-		Debug::WriteLine("SQLiteCache::get_TileCount: exception");
+		CallbackHelper::ErrorMsg("Exception in SQLiteCache::get_TileCount.");
 	}
 	return 0;
 }
@@ -619,7 +619,7 @@ bool SQLiteCache::get_TilesXY(int provider, int zoom, int xMin, int xMax, int yM
 	}
 	catch(...)
 	{
-		Debug::WriteLine("SQLiteCache::get_TilesXY: exception");
+		CallbackHelper::ErrorMsg("Exception on SQLiteCache::get_TilesXY.");
 	}
 	return false;
 }

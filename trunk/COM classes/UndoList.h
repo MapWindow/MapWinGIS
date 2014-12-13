@@ -105,7 +105,7 @@ private:
 		void SetShape(IShape* newShape)
 		{
 			if (Shape == newShape)
-				Debug::WriteError("Invalid shape reference");
+				CallbackHelper::AssertionFailed("Same shape reference in Undo list.");
 			if (Shape) {
 				Shape->Release();
 				Shape = NULL;

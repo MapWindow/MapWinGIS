@@ -18,13 +18,13 @@
 
 RasterMatrix::RasterMatrix(): mColumns( 0 ), mRows( 0 ), mData( 0 )
 {
-	Debug::WriteLine("Constr");
+	
 }
 
 RasterMatrix::RasterMatrix( int nCols, int nRows, float* data, double nodataValue ):
     mColumns( nCols ), mRows( nRows ), mData( data ), mNodataValue( nodataValue )
 {
-	Debug::WriteLine("No data value: %f", nodataValue);
+	
 }
 
 RasterMatrix::RasterMatrix( const RasterMatrix& m ): mColumns( 0 ), mRows( 0 ), mData( 0 )

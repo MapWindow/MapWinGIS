@@ -3609,7 +3609,6 @@ Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
 	// ---------------------------------------
 	//  spatial relations
 	// ---------------------------------------
-	//int missingAngleCount = 0;
 	for(size_t i = 0; i < _shapeData.size(); i++)
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating spatial relations...", _key, percent);
@@ -3653,7 +3652,7 @@ Coloring::ColorGraph* CShapefile::GeneratePolygonColors()
 									commonEdge = true;
 									break;
 								default:
-									Debug::WriteError("Unexpected geometry type: %d", geomType);
+									CallbackHelper::AssertionFailed(Debug::Format("Unexpected geometry type: %d.", geomType));
 									break;
 							}
 							GeosHelper::DestroyGeometry(g);

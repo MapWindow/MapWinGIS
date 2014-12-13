@@ -143,6 +143,23 @@ void CallbackHelper::ErrorMsg(CString message)
 }
 
 // ****************************************************************
+//		AssertionFailed
+// ****************************************************************
+void CallbackHelper::AssertionFailed(CString message)
+{
+	message = "Assertion failed: " + message;
+	if (m_globalSettings.callback)
+	{
+		CComBSTR bstr(message);
+		m_globalSettings.callback->Error(m_globalSettings.emptyBstr, bstr);
+	}
+	else {
+		if (Debug::IsDebugMode())
+			Debug::WriteError(message);
+	}
+}
+
+// ****************************************************************
 //		FillGdalCallbackParams
 // ****************************************************************
 void CallbackHelper::FillGdalCallbackParams(CallbackParams& params, ICallback* localCallback, const char* message)

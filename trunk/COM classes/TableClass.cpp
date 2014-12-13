@@ -2942,7 +2942,6 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	// joining fields
 	std::vector<FieldMapping*> mapping;
 	this->JoinFields(table2, mapping, fieldList);
-	Debug::WriteLine("Number of fields mapped: %d", mapping.size());
 
 	// building a maps for field of target table
 	std::map<CComVariant, int> vals;
@@ -2965,7 +2964,6 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 		std::map<CComVariant, int>::iterator it = vals.find(v);
 		if (it != vals.end())
 		{
-			//Debug::WriteLine("%d mapped to %d", i, it->second);
 			for (size_t j = 0; j < mapping.size(); j++)
 			{
 				table2->get_CellValue(mapping[j]->srcIndex, it->second, &v );
@@ -2980,7 +2978,6 @@ bool CTableClass::JoinInternal(ITable* table2, CString fieldTo, CString fieldFro
 	for (size_t i = 0; i < mapping.size(); i++ ) {
 		delete mapping[i];
 	}
-	Debug::WriteLine("Values copied: %d", count);
 
 	if (!editing) {
 		this->_isEditingTable = FALSE;

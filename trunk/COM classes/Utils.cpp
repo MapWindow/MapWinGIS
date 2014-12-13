@@ -4443,7 +4443,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 				err = poBand->ReadBlock( iXBlock, iYBlock, pabyData );
 				if (err != CPLErr::CE_None)
 				{
-					Debug::WriteLine("Error on reading band: %d; %d", iXBlock, iYBlock);
+					CallbackHelper::ErrorMsg(Debug::Format("Error on reading band: %d; %d.", iXBlock, iYBlock));
 					ErrorMessage(tkFAILED_READ_BLOCK);
 					*retVal = VARIANT_FALSE;
 					break;
@@ -4482,7 +4482,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 				err = poBand->WriteBlock(iXBlock, iYBlock, pabyData);
 				if (err != CPLErr::CE_None)
 				{
-					Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
+					CallbackHelper::ErrorMsg(Debug::Format("Error on writing band: %d; %d.", iXBlock, iYBlock));
 					ErrorMessage(tkFAILED_WRITE_BLOCK);
 					*retVal = VARIANT_FALSE;
 					break;
@@ -4621,7 +4621,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 						CPLErr err2 = bandDest->ReadBlock( iXBlock, iYBlock, pabyDataDest );
 						if (err1 != CPLErr::CE_None || err2 != CPLErr::CE_None)
 						{
-							Debug::WriteLine("Error on reading band: %d; %d", iXBlock, iYBlock);
+							CallbackHelper::ErrorMsg(Debug::Format("Error on reading band: %d; %d.", iXBlock, iYBlock));
 							ErrorMessage(tkFAILED_READ_BLOCK);
 							*retVal = VARIANT_FALSE;
 							break;
@@ -4661,7 +4661,7 @@ STDMETHODIMP CUtils::CopyNodataValues(BSTR sourceFilename, BSTR destFilename, VA
 						err = bandDest->WriteBlock(/*iXBlock*/ -1, iYBlock, pabyDataDest);
 						if (err != CPLErr::CE_None)
 						{
-							Debug::WriteLine("Error on writing band: %d; %d", iXBlock, iYBlock);
+							CallbackHelper::ErrorMsg(Debug::Format("Error on writing band: %d; %d.", iXBlock, iYBlock));
 							ErrorMessage(tkFAILED_WRITE_BLOCK);
 							*retVal = VARIANT_FALSE;
 							break;

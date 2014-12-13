@@ -302,7 +302,6 @@ CMemLeakDetect::CMemLeakDetect()
 
 CMemLeakDetect::~CMemLeakDetect()
 {
-	Debug::WriteLine("CMemLeakDetect destructor");
 	End();
 }
 

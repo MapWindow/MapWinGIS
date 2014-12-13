@@ -17,7 +17,6 @@ void LoadingTask::DoTask()
 	else if (this->generation < this->Loader->tileGeneration)
 	{
 		// this tile is no longer needed; another set of tiles was requested		
-		//Debug::WriteLine("Outdated tile loading: canceled");
 		tilesLogger.WriteLine("Outdated tile loading; cancelled: %d\\%d\\%d", this->zoom, this->x, this->y);
 	}
 	else

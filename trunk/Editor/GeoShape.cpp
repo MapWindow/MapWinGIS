@@ -14,10 +14,8 @@ void TestAreaCalc()
 	points.push_back(Point2D(7.3, 41.6));
 	points.push_back(Point2D(4.2, 40.4));
 
-	//if (_points.size() > 0)
-	//points.push_back(Point2D(_points[0]->x, _points[0]->y));
 	double area = GeographLibHelper::CalcPolyGeodesicArea(points);
-	Debug::WriteLine("Area %f", area);
+	Debug::WriteLine("Test area calc: %f", area);
 };
 
 // *******************************************************
@@ -144,7 +142,7 @@ void GeoShape::ProjToPixel(double projX, double projY, double& pixelX, double& p
 		_mapCallback->_ProjectionToPixel(projX, projY, &pixelX, &pixelY);
 	}
 	else {
-		Debug::WriteError("Measuring: map pointer is not initialized");
+		CallbackHelper::AssertionFailed("Map pointer is not initialized for measuring tool.");
 	}
 }
 
@@ -157,7 +155,7 @@ void GeoShape::PixelToProj(double pixelX, double pixelY, double& projX, double& 
 		_mapCallback->_PixelToProjection(pixelX, pixelY, &projX, &projY);
 	}
 	else {
-		Debug::WriteError("Measuring: map pointer is not initialized");
+		CallbackHelper::AssertionFailed("Map pointer is not initialized for measuring tool.");
 	}
 }
 

@@ -342,38 +342,37 @@ void GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback)
 // *******************************************************
 bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback) 
 {
-	if (dt)
-	{
-		if (numOverviews == 0) {
-			Debug::WriteLine("ERROR: no overviews passed to BuildOverviewsCore");
-			return false;
-		}
-
-		const char* pszResampling;
-		switch(resamlingMethod)			//"MODE", "AVERAGE_MAGPHASE"
-		{
-			case grmAverage: 
-				pszResampling = "AVERAGE"; break;
-			case grmBicubic: 
-				pszResampling = "CUBIC"; break;
-			case grmGauss:	
-				pszResampling = "GAUSS"; break;
-			case grmNearest: 
-				pszResampling = "NEAREST"; break;
-			default: 
-				pszResampling = "NONE";
-		}
-
-		CallbackParams params;
-		CallbackHelper::FillGdalCallbackParams(params, callback, "Building overviews");
-
-		if (dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, 
-			(GDALProgressFunc)GDALProgressCallback, &params) == CE_None)
-			return true;
-
-		CallbackHelper::ProgressCompleted(callback);
+	if (!dt) return false;
+	
+	if (numOverviews == 0) {
+		CallbackHelper::ErrorMsg("No overviews list is passed to BuildOverviews routine.");
+		return false;
 	}
-	return false;
+
+	const char* pszResampling;
+	switch(resamlingMethod)			//"MODE", "AVERAGE_MAGPHASE"
+	{
+		case grmAverage: 
+			pszResampling = "AVERAGE"; break;
+		case grmBicubic: 
+			pszResampling = "CUBIC"; break;
+		case grmGauss:	
+			pszResampling = "GAUSS"; break;
+		case grmNearest: 
+			pszResampling = "NEAREST"; break;
+		default: 
+			pszResampling = "NONE";
+	}
+
+	CallbackParams params;
+	CallbackHelper::FillGdalCallbackParams(params, callback, "Building overviews");
+
+	bool result = dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, 
+		(GDALProgressFunc)GDALProgressCallback, &params) == CE_None;
+		
+	CallbackHelper::ProgressCompleted(callback);
+
+	return result;
 }
 
 // *******************************************************

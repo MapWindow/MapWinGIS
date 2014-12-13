@@ -66,7 +66,7 @@ VARIANT_BOOL CMapView::LoadMapState(LPCTSTR Filename, LPDISPATCH Callback)
 		}
 	}
 	catch(...) {
-		Debug::WriteError("CMapView::LoadMapState exception");
+		CallbackHelper::ErrorMsg("Exception during LoadMapState.");
 	}
 	return VARIANT_FALSE;
 }

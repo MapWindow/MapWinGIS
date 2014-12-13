@@ -168,7 +168,6 @@ CShapefile::~CShapefile()
 		_undoList->Release();
 	}
 	gReferenceCounter.Release(tkInterface::idShapefile);
-	//Debug::WriteLine("Shapefile destructor: %d", sfCount);
 }
 
 std::vector<ShapeData*>* CShapefile::get_ShapeVector()

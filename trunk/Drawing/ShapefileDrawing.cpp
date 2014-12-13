@@ -176,7 +176,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	{		
 		if (file == NULL )
 		{
-			Debug::WriteLine("Shapefile doesn't exist");
+			CallbackHelper::AssertionFailed("Shapefile rendering: file doesn't exist.");
 			return 0;
 		}
 		else
@@ -446,7 +446,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		}
 		else
 		{
-			Debug::WriteLine("Options for category aren't found");
+			CallbackHelper::AssertionFailed("Drawing options for category aren't found.");
 		}
 		
 		std::vector<int>* indices = &categoryIndices[i];

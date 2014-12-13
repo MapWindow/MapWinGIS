@@ -449,8 +449,6 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 				y = i / steps * sy;
 				y2 = sy2 + (1 - sy2) * (1 - i/steps);
 
-				//Debug::WriteLine("Zoom in animation: x=%f; x2=%f; y=%f; y2=%f", x, x2, y, y2 );
-
 				x *= _tilesBitmap->GetWidth();
 				x2 *= _tilesBitmap->GetWidth();
 				y *= _tilesBitmap->GetHeight();
@@ -482,8 +480,6 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 				y = i / steps * ty;
 				y2 = ty2 + (1 - ty2) * (1 - i/steps);
 
-				Debug::WriteLine("Zoom out animation: x=%f; x2=%f; y=%f; y2=%f", x, x2, y, y2 );
-
 				tRect.X = (float)(x * _viewWidth);
 				tRect.Width = (float)(x2 * _viewWidth - tRect.X);
 				tRect.Y = (float)(y * _viewHeight);
@@ -508,8 +504,6 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 
 		g->ReleaseHDC(dc->GetSafeHdc());
 		delete g;
-
-		Debug::WriteLine("End animation");
 	}
 }
 

@@ -110,7 +110,7 @@ public:
 		this->GetTileSizeLatLon(pnt, zoom, size );
 
 		if (size.WidthLng == 0.0 || size.HeightLat == 0.0) {
-			Debug::WriteLine("Invalid tile size");
+			CallbackHelper::AssertionFailed("Invalid tile size on calculating geographic bounds.");
 		}
 
 		if (this->yInverse)

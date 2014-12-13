@@ -133,7 +133,7 @@ public:
 		InterlockedDecrement(&m_refCount);
 		
 		if (m_refCount < 0)
-			Debug::WriteLine("Invalid reference count for a tile");
+			CallbackHelper::AssertionFailed("Invalid reference count for a tile.");
 
 		if (this->m_refCount == 0)
 		{

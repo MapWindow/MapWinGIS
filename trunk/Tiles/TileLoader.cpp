@@ -107,7 +107,7 @@ bool TileLoader::InitPools()
 		m_pool = new CThreadPool<ThreadWorker>();
 		HRESULT hr = m_pool->Initialize(NULL, size);
 		if (!SUCCEEDED( hr ))
-			Debug::WriteLine("Failed to initialize pool 1");
+			CallbackHelper::ErrorMsg("Failed to initialize thread pool (1) for tile loading.");
 	}
 
 	if (!m_pool2)
@@ -115,7 +115,7 @@ bool TileLoader::InitPools()
 		m_pool2 = new CThreadPool<ThreadWorker>();
 		HRESULT hr = m_pool2->Initialize(NULL, size);
 		if(!SUCCEEDED( hr ))
-			Debug::WriteLine("Failed to initialize pool 2");
+			CallbackHelper::ErrorMsg("Failed to initialize thread pool (2) for tile loading.");
 	}
 	return m_pool && m_pool2;
 }

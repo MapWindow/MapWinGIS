@@ -58,15 +58,15 @@ public:
 			projCustom->ImportFromEPSG(28992, &ret2);
 
 			if (!ret1 || !ret2)
-				Debug::WriteLine("Failed to initialize projection for Amersfoort");
+				CallbackHelper::ErrorMsg("Failed to initialize projection for Amersfoort.");
 
 			projWGS84->StartTransform(projCustom, &ret1);
 			if (!ret1)
-				Debug::WriteLine("Failed to initialize transformation 1");
+				CallbackHelper::ErrorMsg("Failed to initialize WGS84 to Amersfoort transformation.");
 
 			projCustom->StartTransform(projWGS84, &ret2);
 			if (!ret2)
-				Debug::WriteLine("Failed to initialize transformation 2");
+				CallbackHelper::ErrorMsg("Failed to initialize Amersfoort to WGS84 transformation.");
 
 			MinLatitude = yMinLat;
 			MaxLatitude = yMaxLat;

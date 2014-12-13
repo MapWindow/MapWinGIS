@@ -318,7 +318,6 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
 						CString s(sub);
 						element->fieldName = s;
 						element->isField= true;
-						Debug::WriteLine(element->fieldName);
 					}
 					break;
 				}
@@ -1327,9 +1326,6 @@ inline CExpressionValue* CExpression::GetValue(CExpressionPart* part, int elemen
 	else if (element->partIndex != -1)	val = _parts[element->partIndex]->val;
 	else								val = element->val;
 	
-	//Debug::WriteLine("Type %d", (int)(element->val)->type);
-	//Debug::WriteLine("Type %d", (int)val->type);
-
 	return val;
 }
 

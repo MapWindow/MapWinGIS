@@ -185,10 +185,7 @@ class CExpression
 private:
 	
 public:
-	CExpression()
-	{
-		//Debug::WriteLine("Constructor");
-	}
+	CExpression() {}
 	~CExpression()
 	{
 		Clear();

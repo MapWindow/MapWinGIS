@@ -1044,8 +1044,6 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 	if (graph)
 	{
 		int colorCount = graph->GetColorCount();
-		Debug::WriteLine("Has non-colored nodes: %d", graph->HasNonColoredNodes());
-		Debug::WriteLine("Number of colors used: %d", colorCount);
 
 		// -------------------------------------------------
 		// create categories

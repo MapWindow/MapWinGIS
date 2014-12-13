@@ -552,7 +552,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 	
 	if(_useValidationList)
 	{
-		Debug::WriteLine("Error: shape inserted when validation list in action");
+		CallbackHelper::ErrorMsg("Error: shape inserted when validation list in action.");
 	}
 
  	if( _table == NULL || _sourceType == sstUninitialized )
@@ -639,7 +639,7 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 
 	if(_useValidationList)
 	{
-		Debug::WriteLine("Error: EditDelete called when validation list in action");
+		CallbackHelper::ErrorMsg("Error: EditDelete called when validation list in action.");
 	}
 
 	if( _table == NULL || _sourceType == sstUninitialized )
@@ -702,7 +702,7 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 
 	if(_useValidationList)
 	{
-		Debug::WriteLine("Error: EditClear called when validation list in action");
+		CallbackHelper::ErrorMsg("Error: EditClear called when validation list in action.");
 	}
 
 	if (_table == NULL || _sourceType == sstUninitialized)

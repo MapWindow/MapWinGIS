@@ -221,12 +221,8 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 	}
 	else
 	{
-		Debug::WriteLine("Provider wasn't found: %d", (int)provider);
+		CallbackHelper::AssertionFailed(Debug::Format("Provider wasn't found: %d.", (int)provider));
 	}
-#ifdef _DEBUG
-	gMemLeakDetect.stopped = false;
-#endif
-
 	return p;
 }
 #pragma endregion

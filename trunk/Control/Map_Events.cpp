@@ -159,8 +159,6 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 				{
 					if (m_cursorMode != cmPan)
 					{
-						Debug::WriteWithTime("Space down: start panning");
-
 						// starting panning
 						if (m_cursorMode == cmMeasure)
 						{
@@ -174,13 +172,11 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 					}
 					else
 					{
-						Debug::WriteWithTime("Space down: turn off panning");
 						TurnOffPanning();
 					}
 				}
 				else
 				{
-  					Debug::WriteWithTime("Holding space");
 					_spacePressed = true;
 				}
 			}
@@ -684,7 +680,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragPanning:
 			{
 				if (m_cursorMode != cmPan)
-					Debug::WriteError("Wrong cursor mode when panning is expected");
+					CallbackHelper::AssertionFailed("Wrong cursor mode when panning is expected.");
 
 				if (!_spacePressed)
 					DisplayPanningInertia(point);
@@ -981,7 +977,6 @@ void CMapView::DisplayPanningInertia( CPoint point )
 					_dragging.Move.x += Utility::Rint(dx * i * 3 / sum);
 					_dragging.Move.y += Utility::Rint(dy * i * 3 / sum);
 					DoPanning(_dragging.Move);
-					Debug::WriteWithTime("Drawing inertia");
 
 					// if rendering is too fast, let's introduce some artificial slowness
 					DWORD timeNow = GetTickCount();

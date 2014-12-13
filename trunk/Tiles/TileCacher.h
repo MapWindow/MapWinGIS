@@ -46,7 +46,7 @@ public:
 		myPool = new CThreadPool<ThreadWorker>();
 		HRESULT hr = myPool->Initialize((void*)322, POOL_SIZE);
 		if (!SUCCEEDED(hr))
-			Debug::WriteLine("Failed to initialize caching pool");
+			CallbackHelper::ErrorMsg("Failed to initialize thread pool for caching tiles.");
 		running = false;
 		stopped = false;
 	}
