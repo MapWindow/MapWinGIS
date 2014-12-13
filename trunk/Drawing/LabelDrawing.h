@@ -57,4 +57,5 @@ private:
 	void DrawLabelFrameGdi(CDC* dc,  CRect* rect, CLabelOptions* m_options );
 	inline UINT AlignmentToGDI(tkLabelAlignment alignment);
 	inline void AlignmentToGDIPlus(tkLabelAlignment alignment, Gdiplus::StringFormat& format);
+	void CalcRotation(CLabelInfo* lbl, double& angle);
 };

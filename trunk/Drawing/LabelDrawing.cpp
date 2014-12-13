@@ -594,48 +594,9 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					rect.bottom += (LONG)m_options->offsetY;
 				}
 
-				// START NEW CODE
-
-				double angle,angleRad;
-				if (lbl->rotation == 0.0 && _mapRotation != 0.0)
-				{
-					angle = long( _mapRotation) % 360;
-				}
-				else if (lbl->rotation != 0.0 && _mapRotation != 0.0)
-				{
-					if (lbl->rotation > 0)
-					{
- 						angle = long(lbl->rotation - _mapRotation) % 360;
-						if (angle > 90 && angle < 180 || angle < -90 && angle >= -180)
-							angle = long(lbl->rotation) % 360 + 180;
-						else if (angle >= 180.0 && angle < 270.0 || angle < -180.0 && angle >= -270.0)
-							angle = long( lbl->rotation) % 360 - 180;
-						else
-							angle = long( lbl->rotation) % 360;
-					}
-					else 
-					{
- 						angle = long( _mapRotation - lbl->rotation) % 360;
-						if (angle > 0.0 && angle < 90.0)
-							angle = long(lbl->rotation) % 360;
-						else if (angle > 90.0 && angle < 180.0)
-							angle = long(lbl->rotation) % 360 + 180.0;
-						else if (angle >= 180.0 && angle < 270.0)
-							angle = long( lbl->rotation) % 360  - 180.0;
-						else
-							angle = long(lbl->rotation) % 360;
-					  }
-				}
-				else
-				{
-					// we don't want our labels to be upside-down
-					angle = long(lbl->rotation) % 360;
-					if (angle > 90.0 && angle < 180)			angle += 180.0;
-					else if (angle >= 180.0 && angle < 270.0)	angle -= 180.0;
-				}
-				
-				angleRad = angle/180.0 * pi_;
-				//END OF NEW CODE
+				double angle;
+				CalcRotation(lbl, angle);
+				double angleRad = angle/180.0 * pi_;
 
 				if (angle != 0.0)
 				{
@@ -657,7 +618,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						}
 					}
 					// memory must be cleared at this point
-					ASSERT(!lbl->rotatedFrame);
 
 					lbl->rotatedFrame = rectNew;
 					lbl->isDrawn = VARIANT_TRUE;
@@ -683,7 +643,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						}
 					}
 					// memory must be cleared at this point
-					ASSERT(!lbl->horizontalFrame);
 
 					lbl->horizontalFrame = rectNew;
 					lbl->isDrawn = VARIANT_TRUE;
@@ -894,6 +853,51 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	if (bRemoveDuplicates)
 	{
 		uniqueValues.clear();
+	}
+}
+
+// ********************************************************************
+//		CalcRotation
+// ********************************************************************
+void CLabelDrawer::CalcRotation(CLabelInfo* lbl, double& angle )
+{
+	if (!lbl) return;
+
+	if (lbl->rotation == 0.0 && _mapRotation != 0.0)
+	{
+		angle = long(_mapRotation) % 360;
+	}
+	else if (lbl->rotation != 0.0 && _mapRotation != 0.0)
+	{
+		if (lbl->rotation > 0)
+		{
+			angle = long(lbl->rotation - _mapRotation) % 360;
+			if (angle > 90 && angle < 180 || angle < -90 && angle >= -180)
+				angle = long(lbl->rotation) % 360 + 180;
+			else if (angle >= 180.0 && angle < 270.0 || angle < -180.0 && angle >= -270.0)
+				angle = long(lbl->rotation) % 360 - 180;
+			else
+				angle = long(lbl->rotation) % 360;
+		}
+		else
+		{
+			angle = long(_mapRotation - lbl->rotation) % 360;
+			if (angle > 0.0 && angle < 90.0)
+				angle = long(lbl->rotation) % 360;
+			else if (angle > 90.0 && angle < 180.0)
+				angle = long(lbl->rotation) % 360 + 180.0;
+			else if (angle >= 180.0 && angle < 270.0)
+				angle = long(lbl->rotation) % 360 - 180.0;
+			else
+				angle = long(lbl->rotation) % 360;
+		}
+	}
+	else
+	{
+		// we don't want our labels to be upside-down
+		angle = long(lbl->rotation) % 360;
+		if (angle > 90.0 && angle < 180)			angle += 180.0;
+		else if (angle >= 180.0 && angle < 270.0)	angle -= 180.0;
 	}
 }
 

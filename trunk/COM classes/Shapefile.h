@@ -442,7 +442,7 @@ public:
 	
 	// drawing 
 	void MarkUndrawn();
-	void GetLabelString(long fieldIndex, long shapeIndex, BSTR text, CString floatNumberFormat);
+	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

@@ -34,17 +34,17 @@
 // ************************************************************
 //			GetLabelValue
 // ************************************************************
-void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR text, CString floatNumberFormat)
+void CShapefile::GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat)
 {
 	if (fieldIndex != -1)
 	{
 		CComVariant val;
 		get_CellValue(fieldIndex, shapeIndex, &val);
-		text = Utility::Variant2BSTR(&val, floatNumberFormat);
+		*text = Utility::Variant2BSTR(&val, floatNumberFormat);
 	}
 	else
 	{
-		text = A2BSTR("");
+		*text = A2BSTR("");
 	}
 }
 
@@ -83,7 +83,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Calculating label positions...", _key, percent);
 		
 		CComBSTR text;
-		GetLabelString(FieldIndex, i, text, floatFormat);
+		GetLabelString(FieldIndex, i, &text, floatFormat);
 		
 		CComPtr<IShape> shp = NULL;
 		this->get_Shape(i, &shp);
