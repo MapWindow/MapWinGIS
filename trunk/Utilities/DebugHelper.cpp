@@ -3,7 +3,7 @@
 
 namespace Debug
 {
-	static const int TARGETS_COUNT = 4;
+	static const int TARGETS_COUNT = 5;
 	bool targets[TARGETS_COUNT];
 
 	// ****************************************************************** 
@@ -11,6 +11,8 @@ namespace Debug
 	// ****************************************************************** 
 	void CPL_STDCALL CustomCPLErrorHandler(CPLErr error, int errorCode, const char* message)
 	{
+		if (m_globalSettings.suppressGdalErrors && !targets[DebugForceGdal]) return;
+
 		CString s = message;
 		switch (error)
 		{
@@ -30,7 +32,10 @@ namespace Debug
 				s = "GDAL: " + s;
 		}
 
-		if (m_globalSettings.callback)
+		if (m_globalSettings.suppressGdalErrors)
+			s = "SUPPRESSED " + s;
+
+		if (m_globalSettings.callback && !targets[DebugForceGdal])
 		{
 			CComBSTR bstr(s);
 			m_globalSettings.callback->Error(m_globalSettings.gdalBstr, bstr);
@@ -49,6 +54,7 @@ namespace Debug
 		targets[DebugOgrLoading] = false;
 		targets[DebugPanning] = false;
 		targets[DebugTiles] = false;
+		targets[DebugForceGdal] = false;
 		CPLSetErrorHandler(CustomCPLErrorHandler);
 	}
 

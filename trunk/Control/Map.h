@@ -1120,7 +1120,7 @@ private:
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
-	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name);
+	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);
 	VARIANT_BOOL LayerIsIdentifiable(long layerHandle, IShapefile* sf);
 	VARIANT_BOOL FindSnapPointCore(double xScreen, double yScreen, double* xFound, double* yFound);
 	double GetProjectedTolerance(double xScreen, double yScreen, double tolerance);

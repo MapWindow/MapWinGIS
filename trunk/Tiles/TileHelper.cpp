@@ -38,8 +38,11 @@ double TileHelper::GetTileSizeProj(VARIANT_BOOL isSameProjection, BaseProvider* 
 		if (wgsToMapTransformation)
 		{
 			VARIANT_BOOL vb1, vb2;
+			m_globalSettings.suppressGdalErrors = true;
 			wgsToMapTransformation->Transform(&xMin, &yMin, &vb1);
 			wgsToMapTransformation->Transform(&xMax, &yMax, &vb2);
+			m_globalSettings.suppressGdalErrors = false;
+
 			if (vb1 && vb2)
 			{
 				double val = xMax - xMin;

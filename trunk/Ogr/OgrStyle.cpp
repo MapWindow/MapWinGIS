@@ -42,7 +42,12 @@ bool OgrStyleHelper::HasStyleTable(GDALDataset* dataset, CStringW layerName)
 	USES_CONVERSION;
 	CStringW sql;
 	sql.Format(L"SELECT COUNT(*) FROM %s", A2W(STYLES_TABLE_NAME));
+
+	// we are checking the presence; it's normal to receive an error; no need to report it to user
+	m_globalSettings.suppressGdalErrors = true;
 	OGRLayer* lyr = dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	m_globalSettings.suppressGdalErrors = false;
+
 	bool hasTable = lyr != NULL;
 	if (lyr)
 		dataset->ReleaseResultSet(lyr);

@@ -67,6 +67,7 @@ struct GlobalSettingsInfo
 	bool useShortUrlForTiles;
 	CString floatNumberFormat;
 	tkPixelOffsetMode pixelOffsetMode;
+	bool suppressGdalErrors;
 
 	~GlobalSettingsInfo()
 	{
@@ -78,6 +79,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		suppressGdalErrors = false;
 		pixelOffsetMode = pomDefault;
 		floatNumberFormat = "%g";
 		maxReprojectionShapeCount = 50000;

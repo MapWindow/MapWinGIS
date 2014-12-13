@@ -108,30 +108,29 @@ void CGeoProjection::ErrorMessage(long ErrorCode)
 			code = tkOGR_CORRUPT_DATA;
          break;
 		case OGRERR_NOT_ENOUGH_MEMORY:
-			code = OGRERR_NOT_ENOUGH_MEMORY;
+			code = tkOGR_NOT_ENOUGH_MEMORY;
          break;
 		case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
-			code = OGRERR_UNSUPPORTED_GEOMETRY_TYPE;
+			code = tkOGR_UNSUPPORTED_GEOMETRY_TYPE;
          break;
 		case OGRERR_UNSUPPORTED_OPERATION:
-			code = OGRERR_UNSUPPORTED_OPERATION;
+			code = tkOGR_UNSUPPORTED_OPERATION;
          break;
 		case OGRERR_FAILURE:
-			code = OGRERR_FAILURE;
+			code = tkOGR_FAILURE;
          break;
 		case OGRERR_UNSUPPORTED_SRS:
-			code = OGRERR_UNSUPPORTED_SRS;
+			code = tkOGR_UNSUPPORTED_SRS;
          break;
 		case OGRERR_INVALID_HANDLE:
-			code = OGRERR_INVALID_HANDLE;
+			code = tkOGR_INVALID_HANDLE;
          break;
 	}
 	
 	_lastErrorCode = code;
 	if (code != tkNO_ERROR) 
 	{
-		CString msg = "OGR: ";
-		msg += ErrorMsg(_lastErrorCode);
+		CString msg = ErrorMsg(_lastErrorCode);
 		CallbackHelper::ErrorMsg("GeoProjection", _globalCallback, _key, msg);
 	}
 }
@@ -548,7 +547,10 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	ys[2] = yMax;
 	xs[3] = xMax;
 	ys[3] = yMin;
-		
+
+	// coordinates being tested may be outside bounds of projection; no need to report errors; we only testing after all
+	m_globalSettings.suppressGdalErrors = true;
+
 	for (int i = 0; i< 4; i++)
 	{
 		if (!this->IsSameProjection(transf, xs[i], ys[i], projected))
@@ -580,6 +582,7 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 			}
 		}
 	}
+	m_globalSettings.suppressGdalErrors = false;
 
 	OGRCoordinateTransformation::DestroyCT(transf);
 

@@ -589,7 +589,7 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 			}
 		}
 		else {
-			LoadOgrStyle(l, layerHandle, L"");   // perhaps it's OGR database table
+			LoadOgrStyle(l, layerHandle, L"", false);   // perhaps it's OGR database table
 		}
 	}
 
@@ -614,7 +614,7 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 // ***************************************************************
 //		LoadOgrStyle()
 // ***************************************************************
-VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name)
+VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError)
 {
 	VARIANT_BOOL result = VARIANT_FALSE;
 	
@@ -629,7 +629,8 @@ VARIANT_BOOL CMapView::LoadOgrStyle(Layer* layer, long layerHandle, CStringW nam
 	CStringW xml = OgrHelper::Cast(ogrLayer)->LoadStyleXML(L"");
 	if (xml.GetLength() == 0)
 	{
-		ErrorMessage(tkOGR_STYLE_NOT_FOUND);
+		if (reportError)
+			ErrorMessage(tkOGR_STYLE_NOT_FOUND);
 		return result;
 	}
 	
@@ -1902,7 +1903,7 @@ VARIANT_BOOL CMapView::LoadLayerOptions(LONG LayerHandle, LPCTSTR OptionsName, B
 		if (l->IsOgrLayer())
 		{
 			USES_CONVERSION;
-			return LoadOgrStyle(l, LayerHandle, A2W(OptionsName));
+			return LoadOgrStyle(l, LayerHandle, A2W(OptionsName), true);
 		}
 	}
 

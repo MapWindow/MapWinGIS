@@ -108,13 +108,15 @@ void CallbackHelper::ErrorMsg(CString className, ICallback* localCback, BSTR& ke
 		va_start(args, message);
 		vsprintf(buffer, message, args);
 		CString s = buffer;
-		Debug::WriteError(s);
 
 		s = className + ": " + s;
 		CComBSTR bstr(s);
 
 		if (callback) {
 			callback->Error(key, bstr);
+		}
+		else {
+			Debug::WriteError(s);
 		}
 	}
 }
