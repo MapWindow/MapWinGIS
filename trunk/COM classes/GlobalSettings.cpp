@@ -92,7 +92,7 @@ STDMETHODIMP CGlobalSettings::put_ClipperGcsMultiplicationFactor(DOUBLE newVal)
 STDMETHODIMP CGlobalSettings::CreatePoint(IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	m_factory.pointFactory->CreateInstance (NULL, IID_IPoint, (void**)retVal);
+	ComHelper::CreatePoint(retVal);
 	return S_OK;
 }
 

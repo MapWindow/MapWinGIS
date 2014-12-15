@@ -100,7 +100,7 @@ STDMETHODIMP CChart::get_ScreenExtents(IExtents** retval)
 
 	if (_chartData->frame)
 	{
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds( _chartData->frame->left,_chartData->frame->top, 0.0,
 						_chartData->frame->right, _chartData->frame->bottom, 0.0);
 		*retval = ext;

@@ -178,7 +178,7 @@ STDMETHODIMP CExtents::ToShape(IShape** retVal)
 	long PartIndex = 0;
 	VARIANT_BOOL vbretval;
 	
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+	ComHelper::CreateShape(&shp);
 	shp->put_ShapeType(SHP_POLYGON);
 	shp->InsertPart(0, &PartIndex, &vbretval);
 	
@@ -262,7 +262,7 @@ STDMETHODIMP CExtents::GetIntersection(IExtents* ext, IExtents** retVal)
 		
 		if (xMin <= xMax && yMin <= yMax && zMin <= zMax)
 		{
-			CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)retVal);
+			ComHelper::CreateExtents(retVal);
 			(*retVal)->SetBounds(xMin, yMin, zMin, xMax, yMax, zMax);
 		}
 	}
@@ -316,7 +316,7 @@ STDMETHODIMP CExtents::PointIsWithin(double x, double y, VARIANT_BOOL* retVal)
 STDMETHODIMP CExtents::get_Center(IPoint** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	ComHelper::CreateInstance(idPoint, (IDispatch**)retVal);
+	ComHelper::CreatePoint(retVal);
 	(*retVal)->put_X((_xmin + _max) / 2);
 	(*retVal)->put_Y((_ymin + _ymax) / 2);
 	return S_OK;

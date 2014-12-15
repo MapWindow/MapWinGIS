@@ -448,7 +448,7 @@ void Layer::UpdateShapefile(long layerHandle)
 			for (size_t i = 0; i < data.size(); i++)
 			{
 				CComPtr<IShape> shp = NULL;
-				ComHelper::CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+				ComHelper::CreateShape(&shp);
 				if (shp)
 				{
 					shp->Create(shpType, &vb);
@@ -504,7 +504,7 @@ bool Layer::IsEmpty()
 //****************************************************
 void Layer::GetExtentsAsNewInstance(IExtents** box)
 {
-	ComHelper::CreateInstance(idExtents, (IDispatch**)box);
+	ComHelper::CreateExtents(box);
 	(*box)->SetBounds(extents.left, extents.bottom, 0.0, extents.right, extents.top, 0.0);
 }
 

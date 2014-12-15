@@ -1424,7 +1424,7 @@ STDMETHODIMP CShapefile::get_Extents(IExtents **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
 	IExtents * bBox = NULL;
-	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&bBox );
+	ComHelper::CreateExtents(&bBox);
 	
 	// Extents could change because of the moving of points of a single shape
 	// It's difficult to track such changes, so we still need to recalculate them 

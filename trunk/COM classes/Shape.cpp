@@ -730,7 +730,7 @@ STDMETHODIMP CShape::get_PartAsShape(long PartIndex, IShape **pVal)
 	}
 	
 	IShape * shp = NULL;
-	CoCreateInstance( CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)&shp );
+	ComHelper::CreateShape(&shp);
 	
 	ShpfileType shptype = _shp->get_ShapeType();
 	shp->put_ShapeType(shptype);
@@ -1079,7 +1079,7 @@ STDMETHODIMP CShape::get_Extents(IExtents **pVal)
 	}
 
 	IExtents * bBox = NULL;
-	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&bBox );
+	ComHelper::CreateExtents(&bBox);
 	bBox->SetBounds(xMin,yMin,zMin,xMax,yMax,zMax);
 	bBox->SetMeasureBounds(mMin,mMax);
 	*pVal = bBox;
@@ -2015,7 +2015,7 @@ STDMETHODIMP CShape::Clone(IShape** retval)
 	(*retval) = NULL;
 
 	IShape* shp = NULL;
-	CoCreateInstance( CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)&shp);
+	ComHelper::CreateShape(&shp);
 	if (shp)
 	{
 		VARIANT_BOOL vbretval;
@@ -2811,7 +2811,7 @@ STDMETHODIMP CShape::ClosestPoints(IShape* shape2, IShape** result)
 				if (points.size() > 1) 
 				{
 					VARIANT_BOOL vb;
-					CoCreateInstance( CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)result );
+					ComHelper::CreateShape(result);
 					(*result)->Create(ShpfileType::SHP_POLYLINE, &vb);
 					long pointIndex;
 					for(size_t i = 0; i < points.size(); i++)

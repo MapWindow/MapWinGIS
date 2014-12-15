@@ -1469,7 +1469,7 @@ STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int prov
 		provider->Projection->FromLatLngToXY(PointLatLng(yMin, xMax), zoom, p2);
 
 		IExtents* ext = NULL;
-		CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds(p1.x, p1.y, 0.0, p2.x, p2.y, 0.0);
 		*retVal = ext;
 	}
@@ -1786,8 +1786,8 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 		PointLatLng p1, p2;
 		prov->Projection->FromXYToLatLng(pnt1, zoom, p1);
 		prov->Projection->FromXYToLatLng(pnt2, zoom, p2);
-		IExtents* ext;
-		CoCreateInstance(CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
+		IExtents* ext = NULL;
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
 		*retVal = ext;
 	}

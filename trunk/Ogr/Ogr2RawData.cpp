@@ -64,7 +64,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 			shp = OgrConverter::GeometryToShape(oGeom, loader->IsMShapefile);
 
 		if (!shp)  // insert null shape so that client can still access it
-			ComHelper::CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+			ComHelper::CreateShape(&shp);
 
 		ShapeRecordData* data = new ShapeRecordData();
 		shp->ExportToBinary(&(data->Shape), &vb);

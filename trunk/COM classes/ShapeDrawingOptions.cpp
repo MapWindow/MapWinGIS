@@ -191,7 +191,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawPointCore(CDC* dc, float x, float y, int 
 	}
 	
 	IShape* shp = NULL;
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+	ComHelper::CreateShape(&shp);
 	if (!shp) 
 		return VARIANT_FALSE;
 
@@ -268,7 +268,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawLineCore(CDC* dc, float x, float y, int w
 	}
 	
 	IShape* shp = NULL;
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+	ComHelper::CreateShape(&shp);
 	if (!shp) return VARIANT_FALSE;
 
 	VARIANT_BOOL vbretval;
@@ -372,7 +372,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawRectangleCore(CDC* dc, float x, float y, 
 	}
 	
 	IShape* shp = NULL;
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+	ComHelper::CreateShape(&shp);
 	if (!shp) return VARIANT_FALSE;
 
 	VARIANT_BOOL vbretval;

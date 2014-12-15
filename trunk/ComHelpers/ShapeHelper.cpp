@@ -32,7 +32,7 @@ bool ShapeHelper::PointInThisPoly(IShape* shp, double x, double y)
 {
 	if (!shp) return false;
 	CComPtr<IPoint> pnt = NULL;
-	ComHelper::CreateInstance(idPoint, (IDispatch**)&pnt);
+	ComHelper::CreatePoint(&pnt);
 	VARIANT_BOOL vb;
 	shp->PointInThisPoly(pnt, &vb);
 	return vb ? true : false;
@@ -103,7 +103,7 @@ bool ShapeHelper::PointWithinShape(IShape* shape, double projX, double projY, do
 
 			VARIANT_BOOL vb;
 			IPoint* pnt = NULL;
-			ComHelper::CreateInstance(idPoint, (IDispatch**)&pnt);
+			ComHelper::CreatePoint(&pnt);
 
 			pnt->put_X(b_minX);
 			pnt->put_Y(b_minY);

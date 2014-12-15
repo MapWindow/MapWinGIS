@@ -1247,7 +1247,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			Tin->Vertex(vtx3,&x2,&y2,&z2);
 				
 			IShape * shape = NULL;
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(Type,&vbretval);
 
 			pos = 0;
@@ -1332,7 +1332,7 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			Tin->Vertex(i,&x1,&y1,&z1);
 				
 			IShape * shape = NULL;
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(Type,&vbretval);
 
 			IPoint * point = NULL;
@@ -1814,7 +1814,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 					
 					//Write the final polygon
 					IShape * shape = NULL;
-					CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+					ComHelper::CreateShape(&shape);
 					shape->Create(SHP_POLYGON,&vbretval);
 					long ppos = 0;
 					shape->InsertPart(0,&ppos,&vbretval);

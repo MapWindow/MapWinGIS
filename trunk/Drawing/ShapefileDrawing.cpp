@@ -255,8 +255,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	{
 		int shapesCount;
 		IExtents * bBox = NULL;
-
-		CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&bBox );
+		ComHelper::CreateExtents(&bBox);
 		bBox->SetBounds(_extents->left,_extents->bottom,0,_extents->right, _extents->top,0);
 		((CShapefile*)sf)->QuickQueryInEditMode(bBox,&qtreeResult,&shapesCount);
 		if (qtreeResult == NULL) 

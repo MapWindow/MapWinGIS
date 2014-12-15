@@ -126,7 +126,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CComPtr<IExtents> box = NULL;
 	bool arrows = nChar == VK_LEFT || nChar == VK_RIGHT || nChar == VK_UP || nChar == VK_DOWN;
 	if (arrows)
-		ComHelper::CreateInstance(idExtents, (IDispatch**)&box);
+		ComHelper::CreateExtents(&box);
 	
 	bool ctrl = GetKeyState(VK_CONTROL) & 0x8000 ? true: false;
 	bool shift = GetKeyState(VK_SHIFT) & 0x8000 ? true : false;

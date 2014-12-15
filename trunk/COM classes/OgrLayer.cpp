@@ -791,7 +791,7 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	
 	if (_envelope) {
 		IExtents* ext = NULL;
-		ComHelper::CreateInstance(idExtents, (IDispatch**)&ext);
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds(_envelope->MinX, _envelope->MinY, 0.0, _envelope->MaxX, _envelope->MaxY, 0.0);
 		*extents = ext;
 		*retVal = VARIANT_TRUE;

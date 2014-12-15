@@ -9,7 +9,7 @@ public:
 		poly(geod)
 	{
 		_mapCallback = NULL;
-		ComHelper::CreateInstance(idShape, (IDispatch**)&_areaCalcShape);
+		ComHelper::CreateShape(&_areaCalcShape);
 		_mousePoint.x = _mousePoint.y = 0;
 		_areaRecalcIsNeeded = true;
 		

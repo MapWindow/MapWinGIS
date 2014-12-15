@@ -785,7 +785,7 @@ STDMETHODIMP CLabels::Select(IExtents* BoundingBox, long Tolerance, SelectMode S
 								// we shall make a point in polygon test; 
 								VARIANT_BOOL vbretval;
 								IShape* shp = NULL;
-								CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+								ComHelper::CreateShape(&shp);
 								shp->put_ShapeType(SHP_POLYGON);
 								long part = 0;
 								shp->InsertPart(0, &part, &vbretval);

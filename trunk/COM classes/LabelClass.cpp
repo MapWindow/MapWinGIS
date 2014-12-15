@@ -74,14 +74,14 @@ STDMETHODIMP CLabelClass::get_ScreenExtents(IExtents** retval)
 	IExtents* ext = NULL;
 	if (_label->horizontalFrame)
 	{
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds( _label->horizontalFrame->left, _label->horizontalFrame->top, 0.0,
 						_label->horizontalFrame->right, _label->horizontalFrame->bottom, 0.0);
 		*retval = ext;
 	}
 	else if (_label->rotatedFrame)
 	{
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+		ComHelper::CreateExtents(&ext);
 		CRect* rect = _label->rotatedFrame->BoundingBox();
 		ext->SetBounds( rect->left, rect->top, 0.0, rect->right, rect->bottom, 0.0);
 		*retval = ext;

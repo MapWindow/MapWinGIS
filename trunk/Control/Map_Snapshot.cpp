@@ -16,7 +16,7 @@ LPDISPATCH CMapView::SnapShot(LPDISPATCH BoundBox)
 	}
 
 	IExtents * box = NULL;
-	BoundBox->QueryInterface(IID_IExtents,(void**)&box);
+	ComHelper::CreateExtents(&box);
 
 	if( box == NULL )
 	{	

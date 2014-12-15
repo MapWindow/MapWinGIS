@@ -505,7 +505,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	did = NULL;
 
 	//Create the outlet shape
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&newshape);
+	ComHelper::CreateShape(&newshape);
 	Shapefile->get_Shape(ShapeIndex,&oldshape);	
 
 	dPOINT zeroPnt;
@@ -581,7 +581,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 			long childIndex = edgeNetwork[parent].up[i];
 			netPath.push_back(childIndex);			
 
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&newshape);
+			ComHelper::CreateShape(&newshape);
 			Shapefile->get_Shape(childIndex,&oldshape);				
 			
 			oldshape->get_Point(0,&izpnt);

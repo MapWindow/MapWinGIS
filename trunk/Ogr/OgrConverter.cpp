@@ -390,7 +390,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 		
 		OGRPoint* oPnt = (OGRPoint *) oGeom;
 
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 
 		ComHelper::CreatePoint(&pnt);
@@ -411,7 +411,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 		if (oMPnt->getNumGeometries() == 0)
 			return NULL;
 		
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 
 		for(long i = 0; i < oMPnt->getNumGeometries(); i++ )
@@ -442,7 +442,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 		if (oLine->getNumPoints() == 0)
 			return NULL;
 
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 		shp->InsertPart(0,&partIndex,&retval);
 	
@@ -467,7 +467,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 		if (oMLine->getNumGeometries() == 0) 
 			return NULL;
 
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 		
 		long count = 0;
@@ -511,7 +511,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 		if (oRing->getNumPoints() == 0) 
 			return NULL;
 		
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 		shp->InsertPart(0,&partIndex,&retval);
 
@@ -589,7 +589,7 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM,
 			return NULL;
 		}
 
-		CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+		ComHelper::CreateShape(&shp);
 		shp->put_ShapeType(shptype);
 		
 		OGRLinearRing *oRing;

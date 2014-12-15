@@ -140,7 +140,8 @@ STDMETHODIMP CShapeEditor::get_RawData(IShape** retVal)
 		return S_OK;
 	}
 
-	ComHelper::CreateInstance(idShape, (IDispatch**)retVal);
+	ComHelper::CreateShape(retVal);
+	
 
 	VARIANT_BOOL vb;
 	(*retVal)->Create(shpType, &vb);
@@ -937,7 +938,7 @@ bool CShapeEditor::GetClosestPoint(double projX, double projY, double& xResult, 
 		VARIANT_BOOL vb;
 		long pointIndex = 0;
 		CComPtr<IShape> shp2 = NULL;
-		ComHelper::CreateInstance(idShape, (IDispatch**)&shp2);
+		ComHelper::CreateShape(&shp2);
 		shp2->Create(SHP_POINT, &vb);
 		shp2->AddPoint(projX, projY, &pointIndex);
 

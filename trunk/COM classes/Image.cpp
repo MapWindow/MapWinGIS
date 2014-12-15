@@ -2227,7 +2227,7 @@ STDMETHODIMP CImageClass::get_Extents(IExtents** pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	IExtents * bBox = NULL;
-	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&bBox );
+	ComHelper::CreateExtents(&bBox);
 	
 	double minX, minY, maxX, maxY;
 	if( _gdalImage )

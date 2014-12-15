@@ -50,7 +50,7 @@ IExtents* CMapView::GetRotatedExtent()
 	IExtents * box = NULL;
 
 	rotExtent = _extents;
-	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
+	ComHelper::CreateExtents(&box);
   box->SetBounds( rotExtent.left, rotExtent.bottom, 0, rotExtent.right, rotExtent.top, 0 );
 
 	if (_rotateAngle == 0)

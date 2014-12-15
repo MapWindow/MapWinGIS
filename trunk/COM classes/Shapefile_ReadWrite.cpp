@@ -90,10 +90,8 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		if (shp != NULL)
 		{
 			IShape* shape = NULL;
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->put_GlobalCallback(_globalCallback);
-			//((CShape*)shape)->put_fastMode(true);
-			//((CShape*)shape)->put_fastModeAdd(true);
 			((CShape*)shape)->put_ShapeWrapper(shp);
 			*pVal = shape;
 		}
@@ -137,7 +135,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 			}
 			else
 			{
-				CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+							
 				shape->Create(shpType,&vbretval);
 				shape->put_GlobalCallback(_globalCallback);
 				*pVal = shape;
@@ -155,7 +153,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POINT )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -188,7 +186,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POINTZ )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -225,7 +223,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POINTM )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -261,7 +259,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYLINE )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -324,7 +322,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYLINEZ )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYLINEZ )
@@ -420,7 +418,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYLINEM )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -501,7 +499,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYGON )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -561,7 +559,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYGONZ )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYGONZ )
@@ -655,7 +653,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_POLYGONM )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 			if( shpType == SHP_POLYGONM )
@@ -737,7 +735,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_MULTIPOINT )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -782,7 +780,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_MULTIPOINTZ )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 
@@ -863,7 +861,7 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		// ------------------------------------------------------
 		else if( _shpfiletype == SHP_MULTIPOINTM )
 		{
-			CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shape);
+			ComHelper::CreateShape(&shape);
 			shape->Create(shpType,&vbretval);
 			shape->put_GlobalCallback(_globalCallback);
 

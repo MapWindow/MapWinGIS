@@ -596,7 +596,8 @@ STDMETHODIMP CShapefile::QuickExtents(long ShapeIndex, IExtents **retval)
 	if (this->QuickExtentsCore(ShapeIndex, ext))
 	{
 		IExtents* bounds = NULL;
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&bounds);
+		ComHelper::CreateExtents(&bounds);
+
 		bounds->SetBounds(ext.left, ext.bottom, 0, ext.right, ext.top, 0);
 		*retval = bounds;
 	}

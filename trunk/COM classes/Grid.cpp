@@ -2371,7 +2371,7 @@ STDMETHODIMP CGrid::get_Extents(IExtents** retVal)
 		double maxY = yll + (cellHeight * (rows - 1)) + (cellHeight / 2);
 
 		IExtents* ext = NULL;
-		CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+		ComHelper::CreateExtents(&ext);
 		ext->SetBounds(minX, minY, 0.0, maxX, maxY, 0.0);
 
 		*retVal = ext;

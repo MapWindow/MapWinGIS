@@ -86,7 +86,7 @@ IShape* ClipperConverter::ClipperPolygon2Shape(ClipperLib::Polygons* polygon)
 		return NULL;
 	
 	IShape* shp = NULL;
-	CoCreateInstance(CLSID_Shape,NULL,CLSCTX_INPROC_SERVER,IID_IShape,(void**)&shp);
+	ComHelper::CreateShape(&shp);
 	if (!shp) 
 		return NULL;
 	

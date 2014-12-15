@@ -350,7 +350,7 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 	mapWidth /= Utility::GetConversionFactor(_unitsOfMeasure);
 
 	IExtents* box = NULL;
-	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&box);
+	ComHelper::CreateExtents(&box);
 	box->SetBounds(xCent - mapWidth/2.0, yCent - mapHeight/2.0, 0.0, xCent + mapWidth/2.0, yCent + mapHeight/2.0, 0.0);
 	this->SetExtents(box);
 	box->Release(); box = NULL;
@@ -365,7 +365,7 @@ void CMapView::SetCurrentScale(DOUBLE newVal)
 IExtents* CMapView::GetExtents()
 {
 	IExtents * box = NULL;
-	CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
+	ComHelper::CreateExtents(&box);
 	box->SetBounds( _extents.left, _extents.bottom, 0, _extents.right, _extents.top, 0 );
 	return box;
 }
@@ -507,7 +507,7 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 	{
 		if (_transformationMode == tkTransformationMode::tmWgs84Complied)
 		{
-			CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
+			ComHelper::CreateExtents(&box);
 			box->SetBounds( _extents.left, _extents.bottom, 0, _extents.right, _extents.top, 0 );
 		}
 		else if (_transformationMode == tkTransformationMode::tmDoTransformation)
@@ -578,7 +578,7 @@ IExtents* CMapView::GetGeographicExtentsCore(bool clipForTiles, Extent* clipExte
 					}
 				}
 
-				CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&box);
+				ComHelper::CreateExtents(&box);
 				box->SetBounds( xTL, yBR, 0, xBR, yTL, 0 );		// TODO: return 4 point geographical extents as projections other that equirectangular can be used
 			}
 		}
@@ -733,7 +733,7 @@ VARIANT_BOOL CMapView::ZoomToSelected(LONG LayerHandle)
 			double xMin, yMin, xMax, yMax;
 			ShapefileHelper::GetSelectedExtents(sf, xMin, yMin, xMax, yMax);
 			IExtents* bounds = NULL;
-			CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&bounds);
+			ComHelper::CreateExtents(&bounds);
 			bounds->SetBounds(xMin, yMin, 0.0, xMax, yMax, 0.0);
 			this->SetExtents(bounds);
 			bounds->Release();
@@ -1149,7 +1149,7 @@ IExtents* CMapView::GetMaxExtents(void)
 	}
 	
 	IExtents* ext = NULL;
-	CoCreateInstance(CLSID_Extents,NULL,CLSCTX_INPROC_SERVER,IID_IExtents,(void**)&ext);
+	ComHelper::CreateExtents(&ext);
 	ext->SetBounds(maxExtents.left, maxExtents.bottom, 0.0, maxExtents.right, maxExtents.top, 0.0);
 	return ext;
 }
@@ -1281,7 +1281,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude
 	else 
 	{
 		IExtents* box = NULL;
-		ComHelper::CreateInstance(idExtents, (IDispatch**)&box);
+		ComHelper::CreateExtents(&box);
 
 		double dy = 0.0, dx = 0.0;				// meters per degree
 		GetUtils()->GeodesicDistance(yLatitude - 0.5, xLongitude, yLatitude + 0.5, xLongitude, &dy);
@@ -1306,7 +1306,7 @@ VARIANT_BOOL CMapView::SetGeographicExtents2(double xLongitude, double yLatitude
 IExtents* CMapView::GetKnownExtents(tkKnownExtents extents)
 {
 	IExtents* box = NULL;
-	ComHelper::CreateInstance(idExtents, (IDispatch**)&box);
+	ComHelper::CreateExtents(&box);
 
 	// generated from MW4 projection database
 	switch(extents) {

@@ -53,6 +53,21 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 	void* val = NULL;
 	switch (interfaceId)
 	{
+		case tkInterface::idPoint:
+			ComHelper::CreatePoint((IPoint**)&val);
+			break;
+		case tkInterface::idShape:
+			ComHelper::CreateShape((IShape**)&val);
+			break;
+		case tkInterface::idExtents:
+			ComHelper::CreateShape((IShape**)&val);
+			break;
+		case tkInterface::idField:
+			result = CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&val);
+			break;
+		case tkInterface::idLabel:
+			result = CoCreateInstance(CLSID_Label, NULL, CLSCTX_INPROC_SERVER, IID_ILabel, (void**)&val);
+			break;
 		case tkInterface::idChart:
 			result = CoCreateInstance(CLSID_Chart, NULL, CLSCTX_INPROC_SERVER, IID_IChart, (void**)&val);
 			break;
@@ -70,12 +85,6 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idESRIGridManager:
 			result = CoCreateInstance(CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val);
-			break;
-		case tkInterface::idExtents:
-			result = CoCreateInstance(CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&val);
-			break;
-		case tkInterface::idField:
-			result = CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&val);
 			break;
 		case tkInterface::idFieldStatOperations:
 			result = CoCreateInstance(CLSID_FieldStatOperations, NULL, CLSCTX_INPROC_SERVER, IID_IFieldStatOperations, (void**)&val);
@@ -110,9 +119,6 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idLabelCategory:
 			result = CoCreateInstance(CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&val);
 			break;
-		case tkInterface::idLabel:
-			result = CoCreateInstance(CLSID_Label, NULL, CLSCTX_INPROC_SERVER, IID_ILabel, (void**)&val);
-			break;
 		case tkInterface::idLabels:
 			result = CoCreateInstance(CLSID_Labels, NULL, CLSCTX_INPROC_SERVER, IID_ILabels, (void**)&val);
 			break;
@@ -130,12 +136,6 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idOgrLayer:
 			result = CoCreateInstance(CLSID_OgrLayer, NULL, CLSCTX_INPROC_SERVER, IID_IOgrLayer, (void**)&val);
-			break;
-		case tkInterface::idPoint:
-			ComHelper::CreatePoint((IPoint**)&val);
-			break;
-		case tkInterface::idShape:
-			result = CoCreateInstance(CLSID_Shape, NULL, CLSCTX_INPROC_SERVER, IID_IShape, (void**)&val);
 			break;
 		case tkInterface::idShapeDrawingOptions:
 			result = CoCreateInstance(CLSID_ShapeDrawingOptions, NULL, CLSCTX_INPROC_SERVER, IID_IShapeDrawingOptions, (void**)&val);
@@ -249,4 +249,20 @@ CString ComHelper::GetInterfaceName(tkInterface id)
 void ComHelper::CreatePoint(IPoint** point)
 {
 	m_factory.pointFactory->CreateInstance(NULL, IID_IPoint, (void**)point);
+}
+
+// ********************************************************
+//     CreateShape()
+// ********************************************************
+void ComHelper::CreateShape(IShape** shp)
+{
+	m_factory.shapeFactory->CreateInstance(NULL, IID_IShape, (void**)shp);
+}
+
+// ********************************************************
+//     CreateExtents()
+// ********************************************************
+void ComHelper::CreateExtents(IExtents** box)
+{
+	m_factory.extentsFactory->CreateInstance(NULL, IID_IExtents, (void**)box);
 }

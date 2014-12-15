@@ -198,7 +198,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		if (!shp)
 		{
 			// insert null shape so that client can still access it
-			ComHelper::CreateInstance(tkInterface::idShape, (IDispatch**)&shp);
+			ComHelper::CreateShape(&shp);
 		}
 
 		long numShapes;
