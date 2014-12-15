@@ -192,7 +192,7 @@ void CMapView::Clear()
 	ReleaseTempObjects();
 	SetDefaults();
 
-	IGeoProjection* p = NULL;
+	CComPtr<IGeoProjection> p = NULL;
 	ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&p);
 	SetGeoProjection(p);
 

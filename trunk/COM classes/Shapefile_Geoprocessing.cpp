@@ -208,6 +208,7 @@ bool InsertGeosGeometry(IShapefile* sfTarget, GEOSGeometry* gsNew, IShapefile* s
 						sfTarget->EditCellValue(f, index, val, &vbretval);
 					}
 				}
+				shapes[j]->Release();
 			}
 			return true;
 		}
@@ -893,7 +894,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 
 	// saving results							
 	long count = 0;	// number of shapes inserted
-	int i = 0;		// for progress bar
+	int shapeProcessed = 0;		// for progress bar
 	percent = 0;
 	size = shapeMap.size();
 
@@ -905,9 +906,9 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 
 	while(p != shapeMap.end())
 	{
-		CallbackHelper::Progress(_globalCallback, i, size, "Merging shapes...", _key, percent);
+		CallbackHelper::Progress(_globalCallback, shapeProcessed, size, "Merging shapes...", _key, percent);
 		
-		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(*(p->second), NULL, false);
+		GEOSGeometry* gsGeom = GeosConverter::MergeGeometries(*(p->second), NULL, false, false);
 		delete p->second;	// deleting the vector
 
 		if (gsGeom != NULL)
@@ -941,7 +942,7 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 			GeosHelper::DestroyGeometry(gsGeom);
 		}
 		++p;
-		i++;
+		shapeProcessed++;
 	}
 
 	if (calcStats)
@@ -949,11 +950,11 @@ void CShapefile::DissolveGEOS(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 		CalculateFieldStats(fieldMap, operations, sf);
 		
 		// delete indices map
-		map <CComVariant, vector<int>*>::iterator p = indicesMap.begin();
-		while(p != indicesMap.end())
+		map <CComVariant, vector<int>*>::iterator p2 = indicesMap.begin();
+		while(p2 != indicesMap.end())
 		{
-			delete p->second;
-			++p;
+			delete p2->second;
+			++p2;
 		}
 	}
 
@@ -1851,7 +1852,7 @@ void CShapefile::ClipGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* sfOverla
 				
 				if ((int)vUnion.size() > 1)
 				{
-					gsGeom2 = GeosConverter::MergeGeometries(vUnion, NULL, false);
+					gsGeom2 = GeosConverter::MergeGeometries(vUnion, NULL, false, false);
 					deleteNeeded = true;
 				}
 				else if ((int)vUnion.size() == 1)
@@ -2403,7 +2404,7 @@ void CShapefile::DifferenceGEOS(IShapefile* sfSubject, VARIANT_BOOL SelectedOnly
 			else if (vClip.size() > 1)
 			{
 				// union of the clipping shapes
-				gsClip = GeosConverter::MergeGeometries(vClip, NULL, false);
+				gsClip = GeosConverter::MergeGeometries(vClip, NULL, false, false);
 			}
 			
 			bool deleteNeeded = false;

@@ -43,19 +43,19 @@ void CMapView::ReleaseProjections()
 {
 	VARIANT_BOOL vb;
 	_projection->Clear(&vb);
-	_projection->Release();
+	UINT count = _projection->Release();
 
 	_tileProjection->Clear(&vb);
-	_tileProjection->Release();
+	count = _tileProjection->Release();
 
 	_tileReverseProjection->Clear(&vb);
-	_tileReverseProjection->Release();
+	count = _tileReverseProjection->Release();
 	
 	_wgsProjection->Clear(&vb);
-	_wgsProjection->Release();
+	count = _wgsProjection->Release();
 	
 	_gmercProjection->Clear(&vb);
-	_gmercProjection->Release();
+	count = _gmercProjection->Release();
 }
 
 // *****************************************************
@@ -242,12 +242,11 @@ void CMapView::ClearMapProjectionWithLastLayer()
 		_projection->get_IsEmpty(&isEmpty);
 		if (!isEmpty)
 		{
-			IGeoProjection* proj = NULL;
+			CComPtr<IGeoProjection> proj = NULL;
 			ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&proj);
 			if (proj)
 			{
 				SetGeoProjection(proj);
-				proj->Release();
 			}
 		}
 	}

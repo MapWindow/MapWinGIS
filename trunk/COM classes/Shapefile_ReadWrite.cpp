@@ -1001,6 +1001,8 @@ BOOL CShapefile::ReadShx()
 // **************************************************************
 BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 {
+	ICallback* callback = cBack ? cBack : _globalCallback;
+
 	//m_writing = true;
 	// guaranteed that .shx file is open
 	rewind(shx);
@@ -1085,13 +1087,11 @@ BOOL CShapefile::WriteShx(FILE * shx, ICallback * cBack)
 
 		shape->Release();
 
-		CallbackHelper::Progress(cBack, i, size, "Writing .shx file", _key, percent);
-		CallbackHelper::Progress(_globalCallback, i, size, "Writing .shx file", _key, percent);
+		CallbackHelper::Progress(callback, i, size, "Writing .shx file", _key, percent);
 	}
 
-	CallbackHelper::ProgressCompleted(cBack, _key);
-	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	
+	CallbackHelper::ProgressCompleted(callback, _key);
+
 	fflush(shx);
 
 	return TRUE;

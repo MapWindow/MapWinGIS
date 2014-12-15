@@ -2661,14 +2661,13 @@ bool CShape::get_XYM(long PointIndex, double* x, double* y, double* m)
 
 bool CShape::get_XYZ(long PointIndex, double* x, double* y, double* z)
 {
-	if(!_shp->get_PointXY(PointIndex, *x, *y) ||
-	   !_shp->get_PointZ(PointIndex, *z))
+	if(!_shp->get_PointXY(PointIndex, *x, *y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	_shp->get_PointZ(PointIndex, *z);   // ignore the error
+	return true;
 }
 
 // XYZM coordinates

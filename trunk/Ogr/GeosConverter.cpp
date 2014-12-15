@@ -174,7 +174,7 @@ void GeosConverter::NormalizeSplitResults(GEOSGeometry* result, GEOSGeometry* su
 //		MergeGeosGeometries
 // ********************************************************************
 // Returns GEOS geometry which is result of the union operation for the geometries passed
-GEOSGeometry* GeosConverter::MergeGeometries(std::vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput)
+GEOSGeometry* GeosConverter::MergeGeometries(vector<GEOSGeometry*>& data, ICallback* callback, bool deleteInput /*= true*/, bool displayProgress /*= true*/)
 {
 	if (data.size() == 0)
 		return NULL;
@@ -239,7 +239,8 @@ GEOSGeometry* GeosConverter::MergeGeometries(std::vector<GEOSGeometry*>& data, I
 					count++;
 					stop = false;		// in case there is at least one union occurred, we shall run once more
 
-					CallbackHelper::Progress(callback, count, size, "Merging shapes...", percent);
+					if (displayProgress)
+						CallbackHelper::Progress(callback, count, size, "Merging shapes...", percent);
 				}
 
 				// it is the last geometry, unpaired one, not the only one, it's the initial and must not be deleted
