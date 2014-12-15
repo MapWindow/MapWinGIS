@@ -224,19 +224,6 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 			return NULL;
 	}
 	
-	VARIANT_BOOL vbretval;
-	CString s;
-	
-	shapeSubject->get_PartIsClockWise(0, &vbretval);
-	s = "Subject: ";
-	s += vbretval ? "CW" : "CCW";
-	//AfxMessageBox(s);
-	
-	shapeClip->get_PartIsClockWise(0, &vbretval);
-	s = "Clip: ";
-	s += vbretval ? "CW" : "CCW";
-	//AfxMessageBox(s);
-
 	//shapeSubject
 	ClipperConverter ogr;
 	ClipperLib::Polygons* poly1 = ogr.Shape2ClipperPolygon(shapeClip);
@@ -250,15 +237,8 @@ IShape* ClipperConverter::ClipPolygon(IShape* shapeClip, IShape* shapeSubject, P
 			delete result;
 			return shp;
 		}
-		else
-		{
-			return NULL;
-		}
 	}
-	else
-	{
-		return NULL;
-	}
+	return NULL;
 }
 
 // ***************************************************

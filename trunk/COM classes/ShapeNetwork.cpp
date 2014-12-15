@@ -434,10 +434,6 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 		}
 	}
 	
-	//CString ccnt;
-	//ccnt.Format("%i",networkSize);
-	//AfxMessageBox(ccnt);
-
 	//PrintShpNetwork(edgeNetwork,ShapeIndex,"Network.txt");
 
 	//copy the network into a new shapefile
@@ -537,8 +533,8 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	newshape = NULL;
 
 	VARIANT cID,cDID;
-	VariantInit(&cID); //added by Rob Cairns 4-Jan-06
-	VariantInit(&cDID); //added by Rob Cairns 4-Jan-06
+	VariantInit(&cID); 
+	VariantInit(&cDID); 
 	cID.vt = VT_I4;
 	cDID.vt = VT_I4;
 
@@ -549,7 +545,7 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 
 	
 	VARIANT cVal;
-	VariantInit(&cVal); //added by Rob Cairns 4-Jan-06
+	VariantInit(&cVal); 
 	for( f = 0; f < numFields; f++ )
 	{	Shapefile->get_CellValue(f,ShapeIndex,&cVal);
 		//Adjust for the two new fields
@@ -675,9 +671,9 @@ STDMETHODIMP CShapeNetwork::Build(IShapefile *Shapefile, long ShapeIndex, long F
 	_netshpfile->AddRef();
 	*retval = _ambigShapeIndex.size() + 1; //ARA 02/03/06 Possible to have size() of 0 so needed to be incremented by 1 so it wasn't returning error code
 	
-	VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-	VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
-	VariantClear(&cVal); //added by Rob Cairns 4-Jan-06
+	VariantClear(&cID); 
+	VariantClear(&cDID); 
+	VariantClear(&cVal); 
 
 	return S_OK;
 }
@@ -792,8 +788,8 @@ STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 
 		//Reset the parents and id's in the dbf
 		VARIANT cID, cDID;
-		VariantInit(&cID); //added by Rob Cairns 4-Jan-06
-		VariantInit(&cDID); //added by Rob Cairns 4-Jan-06
+		VariantInit(&cID); 
+		VariantInit(&cDID); 
 		cID.vt = VT_I4;
 		cDID.vt = VT_I4;
 		for( int fn = 0; fn < _networkSize; fn++ )
@@ -803,8 +799,8 @@ STDMETHODIMP CShapeNetwork::DeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 			_netshpfile->EditCellValue(1,fn,cDID,&vbretval);
 		}		
 		
-		VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-		VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+		VariantClear(&cID); 
+		VariantClear(&cDID); 
 		
 		*retval = TRUE;
 	}
@@ -1399,7 +1395,7 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 
 			retval = FALSE;
 			VARIANT vnv;
-			VariantInit(&vnv); //added by Rob Cairns 4-Jan-06
+			VariantInit(&vnv); 
 			vnv.vt = VT_I4;
 			vnv.lVal = newVal;
 			_netshpfile->EditCellValue(1,_currentNode,vnv,&retval);
@@ -1416,7 +1412,7 @@ STDMETHODIMP CShapeNetwork::put_ParentIndex(long newVal)
 				_network[newVal].up.push_back(childIndex);
 			}
 			_network[_currentNode].up.clear();
-			VariantClear(&vnv); //added by Rob Cairns 4-Jan-06
+			VariantClear(&vnv); 
 		}
 		else
 		{	if( newVal == _currentNode )
@@ -1516,8 +1512,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	_network = new shpNetNode[numShapes];
 	ShpfileType shptype = SHP_NULLSHAPE;
 	VARIANT cID, cDID;
-	VariantInit(&cID); //added by Rob Cairns 4-Jan-06
-	VariantInit(&cDID); //added by Rob Cairns 4-Jan-06
+	VariantInit(&cID); 
+	VariantInit(&cDID); 
 	long lval1 = 0, lval2 = 0;
 
 	IUtils * gen = NULL;	
@@ -1543,8 +1539,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			else if( _globalCallback != NULL )
 				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 		
-			VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-			VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+			VariantClear(&cID); 
+			VariantClear(&cDID); 
 
 			return S_OK;
 		}
@@ -1566,8 +1562,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 			else if( _globalCallback != NULL )
 				_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 
-			VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-			VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+			VariantClear(&cID); 
+			VariantClear(&cDID); 
 
 			return S_OK;
 		}
@@ -1589,8 +1585,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 				else if( _globalCallback != NULL )
 					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 				
-				VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-				VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+				VariantClear(&cID); 
+				VariantClear(&cDID); 
 
 				return S_OK;
 			}		
@@ -1610,8 +1606,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 					else if( _globalCallback != NULL )
 						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 				
-					VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-					VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+					VariantClear(&cID); 
+					VariantClear(&cDID); 
 
 					return S_OK;
 				}	
@@ -1630,8 +1626,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 					else if( _globalCallback != NULL )
 						_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 					
-					VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-					VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+					VariantClear(&cID); 
+					VariantClear(&cDID); 
 
 					return S_OK;
 				}	
@@ -1677,8 +1673,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 				else if( _globalCallback != NULL )
 					_globalCallback->Error(OLE2BSTR(_key),A2BSTR(ErrorMsg(_lastErrorCode)));			
 				
-				VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-				VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+				VariantClear(&cID); 
+				VariantClear(&cDID); 
 
 				return S_OK;				
 			}
@@ -1706,8 +1702,8 @@ STDMETHODIMP CShapeNetwork::Open(IShapefile *sf, ICallback *cBack, VARIANT_BOOL 
 	}
 
 	*retval = TRUE;
-	VariantClear(&cID); //added by Rob Cairns 4-Jan-06
-	VariantClear(&cDID); //added by Rob Cairns 4-Jan-06
+	VariantClear(&cID); 
+	VariantClear(&cDID); 
 	return S_OK;
 }
 
@@ -1804,7 +1800,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		nbheader->put_dX(cellsize);
 		nbheader->put_dY(cellsize);
 		VARIANT vndv;
-		VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantInit(&vndv); 
 		vndv.vt = VT_I4;
 		vndv.lVal = nodata;
 		nbheader->put_NodataValue(vndv);
@@ -1820,7 +1816,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr,nbheader,ShortDataType,vndv,VARIANT_TRUE,UseExtension,cBack,&vbretval);
 		nbheader->Release();
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		if( vbretval == VARIANT_FALSE )
 		{	(*retval)->Release();
 			*retval = NULL;
@@ -1867,7 +1863,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		//Reset the nodata value
 		VARIANT vndv;
-		VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantInit(&vndv); 
 		vndv.vt = VT_I2;
 		vndv.iVal = nodata;
 		Header->put_NodataValue(vndv);
@@ -1878,7 +1874,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		CallbackHelper::Progress(_globalCallback, 0, "ShpNetwork::RasterizeD8", _key);
 
 		(*retval)->CreateNew(m_globalSettings.emptyBstr, Header, ShortDataType, vndv, VARIANT_TRUE, UseExtension, cBack, &vbretval);
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		if( vbretval == FALSE )
 		{	(*retval)->Release();
 			*retval = NULL;
@@ -2117,7 +2113,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 
 		bool first_point = true;
 		VARIANT vval;
-		VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+		VariantInit(&vval); 
 		short val;
 			
 		snraspnt last_raster = Rasterize[0];
@@ -2153,7 +2149,7 @@ STDMETHODIMP CShapeNetwork::RasterizeD8(VARIANT_BOOL UseNetworkBounds, IGridHead
 		
 		CallbackHelper::Progress(callback, s, total, "ShpNetwork::RasterizeD8", _key, percent);
 
-		VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vval); 
 	}
 
 	return S_OK;

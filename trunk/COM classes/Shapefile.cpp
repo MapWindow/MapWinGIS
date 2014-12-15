@@ -471,7 +471,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 	if (_sourceType != sstInMemory)
 	{
 		ErrorMessage(tkINMEMORY_SHAPEFILE_EXPECTED);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -654,7 +654,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		if( vbretval == VARIANT_FALSE )
 		{
 			// error code in the function
-			return S_FALSE;
+			return S_OK;
 		}
 
 		if (OpenCore(tmp_shpfileName, cBack))
@@ -982,18 +982,18 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 	if (_table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	// in case someone else is writing, we leave
 	if (_writing)
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	if (!this->ValidateOutput(this, "Dump", "Shapefile", false))
-		return S_FALSE;
+		return S_OK;
 
 	USES_CONVERSION;
 	CString sa_shpfileName;
@@ -1118,18 +1118,18 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 	if (_table == NULL || _sourceType == sstUninitialized)
 	{
 		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	// in case someone else is writing, we leave
 	if (_writing)
 	{
 		ErrorMessage(tkSHP_WRITE_VIOLATION);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	if (!this->ValidateOutput(this, "SaveAs", "Shapefile", false))
-		return S_FALSE;
+		return S_OK;
 
 	USES_CONVERSION;
 	CStringW newShpName;
@@ -1297,7 +1297,7 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 	}
 	
 	if (!this->ValidateOutput(this, "Save", "Shapefile", false))
-		return S_FALSE;
+		return S_OK;
 
 	// compute the extents
 	VARIANT_BOOL res;
@@ -2565,14 +2565,8 @@ STDMETHODIMP CShapefile::Reproject(IGeoProjection* newProjection, LONG* reprojec
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	if (!this->ReprojectCore(newProjection, reprojectedCount, retVal, false))
-	{
 		*retVal = NULL;
-		return S_FALSE;
-	}
-	else
-	{
-		return S_OK;
-	}
+	return S_OK;
 }
 
 // *****************************************************************
@@ -2603,11 +2597,7 @@ STDMETHODIMP CShapefile::ReprojectInPlace(IGeoProjection* newProjection, LONG* r
 			*retVal = VARIANT_TRUE;
 			return S_OK;
 		}
-		else
-		{
-			*retVal = NULL;
-			return S_FALSE;
-		}
+		*retVal = NULL;
 	}
 	return S_OK;
 }
@@ -2847,7 +2837,7 @@ STDMETHODIMP CShapefile::GetRelatedShapes(long referenceIndex, tkSpatialRelation
 	if (referenceIndex < 0 || referenceIndex > (long)_shapeData.size())	
 	{
 		this->ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	IShape* shp = NULL;
@@ -2870,7 +2860,7 @@ STDMETHODIMP CShapefile::GetRelatedShapes2(IShape* referenceShape, tkSpatialRela
 	if (!referenceShape)	
 	{
 		this->ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	this->GetRelatedShapeCore(referenceShape, -1, relation, resultArray, retval);

@@ -1516,12 +1516,12 @@ STDMETHODIMP CShape::Buffer(DOUBLE Distance, long nQuadSegments, IShape** retval
 	OGRGeometry* oGeom2 = NULL;
 
 	oGeom1 = OgrConverter::ShapeToGeometry(this);
-	if (oGeom1 == NULL) return S_FALSE;
+	if (oGeom1 == NULL) return S_OK;
 		
 	oGeom2 = DoBuffer(Distance, nQuadSegments, oGeom1);
 
 	OGRGeometryFactory::destroyGeometry(oGeom1);
-	if (oGeom2 == NULL)	return S_FALSE;
+	if (oGeom2 == NULL)	return S_OK;
 	
 	ShpfileType shpType;
 	this->get_ShapeType(&shpType);
@@ -2437,7 +2437,7 @@ STDMETHODIMP CShape::ExportToBinary(VARIANT* bytesArray, VARIANT_BOOL* retVal)
 	else
 	{
 		*retVal = NULL;
-		return S_FALSE;
+		return S_OK;
 	}
 }
 
@@ -2450,7 +2450,7 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 	*retVal = VARIANT_FALSE;
 	
 	if (bytesArray.vt != (VT_ARRAY|VT_UI1))
-		return S_FALSE;
+		return S_OK;
 	
 	unsigned char* p = NULL;
 	SafeArrayAccessData(bytesArray.parray,(void HUGEP* FAR*)(&p));

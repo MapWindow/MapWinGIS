@@ -1357,7 +1357,7 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	//  validating
 	// -------------------------------------------
 	if (!ValidateInput(this, "BufferByDistance", "this", SelectedOnly))
-		return S_FALSE;
+		return S_OK;
 
 	// -------------------------------------------
 	//  creating output
@@ -2962,7 +2962,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	//   Validation
 	// ----------------------------------------------
 	if (!ValidateInput(this, "ExplodeShapes", "this", SelectedOnly))
-		return S_FALSE;
+		return S_OK;
 
 	// ----------------------------------------------
 	//   Creating output
@@ -3039,7 +3039,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	//   Validation
 	// ----------------------------------------------
 	if(!ValidateInput(this, "Sort", "this", false))
-		return S_FALSE;
+		return S_OK;
 
 	// ----------------------------------------------
 	//   Creating output
@@ -3120,7 +3120,7 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	//   Validation
 	// ----------------------------------------------
 	if(!ValidateInput(this, "Sort", "this", false))
-		return S_FALSE;
+		return S_OK;
 
 	// ----------------------------------------------
 	//   Creating output
@@ -3211,7 +3211,7 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	if( sf == NULL)
 	{	
 		ErrorMessage( tkUNEXPECTED_NULL_PARAMETER );
-		return S_FALSE;
+		return S_OK;
 	} 
 
 	// do we have enough shapes, are they selected?
@@ -3226,16 +3226,16 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	if (type1  != type2 )
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (!ValidateInput(this, "Merge", "this", SelectedOnlyThis))
-		return S_FALSE;
+		return S_OK;
 
 	if (!ValidateInput(sf, "Merge", "sf", SelectedOnly))
 	{
 		this->ClearValidationList();
-		return S_FALSE;
+		return S_OK;
 	}
 
 	// -----------------------------------------------
@@ -3375,11 +3375,11 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	if (shpType != SHP_POLYLINE && shpType != SHP_POLYGON)
 	{
 		ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (!ValidateInput(this, "SimplifyLines", "this", SelectedOnly))
-		return S_FALSE;
+		return S_OK;
 
 	// ----------------------------------------------
 	//	  Creating output
@@ -3476,11 +3476,11 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	if (shpType != SHP_POLYLINE)
 	{
 		this->ErrorMessage(tkINCOMPATIBLE_SHAPEFILE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (!ValidateInput(this, "Segmentize", "this", VARIANT_FALSE))
-		return S_FALSE;
+		return S_OK;
 	
 	// ----------------------------------------------- 
 	//   Creating output

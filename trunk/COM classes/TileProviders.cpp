@@ -237,7 +237,7 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 	if (!p)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -245,7 +245,7 @@ STDMETHODIMP CTileProviders::Remove(LONG providerId, VARIANT_BOOL clearCache, VA
 		if (!custom)
 		{
 			ErrorMessage(tkCANT_DELETE_DEFAULT_PROVIDER);
-			return S_FALSE;
+			return S_OK;
 		}
 		else
 		{
@@ -340,13 +340,13 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 
 	if (Id < (int)tkTileProvider::ProviderCustom) {
 		this->ErrorMessage(tkPROVIDER_ID_RESERVED);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	BaseProvider* p = this->get_Provider(Id);
 	if (p) {
 		this->ErrorMessage(tkPROVIDER_ID_IN_USE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	try
@@ -366,7 +366,6 @@ STDMETHODIMP CTileProviders::Add(int Id, BSTR name, BSTR urlPattern, tkTileProje
 				this->ErrorMessage(tkINVALID_URL);
 				break;
 		}
-		return S_FALSE;
 	}
 	return S_OK;
 }
@@ -412,7 +411,7 @@ STDMETHODIMP CTileProviders::put_Name(int Index, BSTR pVal)
 	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -446,7 +445,6 @@ STDMETHODIMP CTileProviders::put_Language(int Index, BSTR pVal)
 	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
 	}
 	else
 	{
@@ -492,7 +490,6 @@ STDMETHODIMP CTileProviders::put_Version(int Index, BSTR pVal)
 	if (Index < 0 || Index >= (int)_providers.size())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
 	}
 	else
 	{

@@ -1906,13 +1906,6 @@ bool tkGridRaster::BSTR2ColorTable(BSTR cTbl)
 
 	for (int i = 0; i < numColors-1; i++)
 	{
-		//DEBUG
-		//if (i < 10)
-		//{
-		//	CString tmp;
-		//	tmp.Format("%d%s%s%s%s",i,vCT[(i+1)*4+0],vCT[(i+1)*4+1],vCT[(i+1)*4+2],vCT[(i+1)*4+3]);
-		//	AfxMessageBox((LPCTSTR)tmp);
-		//}
 		poCE.c1=atoi(vCT[(i+1)*4+0]);
 		poCE.c2=atoi(vCT[(i+1)*4+1]);
 		poCE.c3=atoi(vCT[(i+1)*4+2]);

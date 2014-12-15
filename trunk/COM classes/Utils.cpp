@@ -247,7 +247,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 	dVal(OldValue,oldValue);
 	
 	VARIANT vval;
-	VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vval); 
 	double val;
 
 	long percent = 0, newpercent = 0;
@@ -265,7 +265,7 @@ STDMETHODIMP CUtils::GridReplace(IGrid *Grid, VARIANT OldValue, VARIANT NewValue
 		CallbackHelper::Progress(callback, j, nrows, "GridReplace", _key, percent);
 	}
 	
-	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vval); 
 	*retval = VARIANT_TRUE;
 	return S_OK;
 }
@@ -287,13 +287,13 @@ STDMETHODIMP CUtils::GridInterpolateNoData(IGrid *Grid, ICallback *cBack, VARIAN
 	double nodatavalue;
 	IGridHeader * header = NULL;
 	VARIANT nodataval_variant;
-	VariantInit(&nodataval_variant); //added by Rob Cairns 4-Jan-06
+	VariantInit(&nodataval_variant); 
 	Grid->get_Header(&header);
 	header->get_NumberCols(&ncols);
 	header->get_NumberRows(&nrows);
 	header->get_NodataValue(&nodataval_variant);
 	dVal(nodataval_variant, nodatavalue);
-	VariantClear(&nodataval_variant); //added by Rob Cairns 4-Jan-06
+	VariantClear(&nodataval_variant); 
 
 	if(ncols <= 0 || nrows <= 0)
 	{
@@ -338,7 +338,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	{
 		*retval = NULL;
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	ICallback* callback = cBack ? cBack : _globalCallback;
@@ -361,7 +361,7 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	}
 
 	if (!((CShapefile*)Shapes)->ValidateInput(Shapes, "RemoveColinearPoints", "Shapes", VARIANT_FALSE, "Utils"))
-		return S_FALSE;
+		return S_OK;
 
 	VARIANT_BOOL vbretval;
 	Shapes->StartEditingShapes(FALSE,cBack,&vbretval);
@@ -836,7 +836,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	GridDataType ind_dType = UnknownDataType;
 	long ind_ncols, ind_nrows;
 	VARIANT vndv;
-	VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vndv); 
 	double ndv;
 
 	long percent = 0, cnt = 0;
@@ -895,7 +895,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				{	allGrids[c]->Release();
 					allGrids[c] = NULL;
 				}
-				VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+				VariantClear(&vndv); 
 				return S_OK;				
 			}
 			else if( ind_dy != final_dy )
@@ -908,7 +908,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 				{	allGrids[c]->Release();
 					allGrids[c] = NULL;
 				}
-				VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+				VariantClear(&vndv); 
 				return S_OK;	
 			}
 	
@@ -936,7 +936,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		{	allGrids[c]->Release();
 			allGrids[c] = NULL;
 		}
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		return S_OK;
 	}
 
@@ -950,7 +950,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 			allGrids[c]->Release();
 			allGrids[c] = NULL;
 		}
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		return S_OK;
 	}
 
@@ -978,7 +978,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		{	allGrids[c]->Release();
 			allGrids[c] = NULL;
 		}
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		return S_OK;
 	}
 
@@ -986,7 +986,7 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 	long xoffset = 0, yoffset = 0;
 	double val, nodata_value;
 	VARIANT vval;
-	VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vval); 
 
 	gridSize = (int)allGrids.size();
 	for( int n = gridSize - 1; n >= 0; n-- )
@@ -1024,21 +1024,16 @@ STDMETHODIMP CUtils::GridMerge(VARIANT Grids, BSTR MergeFilename, VARIANT_BOOL I
 		allGrids[c] = NULL;
 	}
 
-	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vndv); 
+	VariantClear(&vval); 
 	
 	return S_OK;
 }
 
 STDMETHODIMP CUtils::ShapeMerge(IShapefile *Shapes, long IndexOne, long IndexTwo, ICallback *cBack, IShape **retval)
 {
-	//This function is being replaced by the GPC clip function either in the UTILS object or in 
-	//a separate dll... 
-	//dpa 6/3/05
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	AfxMessageBox("Not Implemented");
-
+	ErrorMessage(tkMETHOD_NOT_IMPLEMENTED);
 	return S_OK;
 }
 
@@ -1071,7 +1066,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	}
 
 	VARIANT vndv;
-	VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vndv); 
 	header->get_NodataValue(&vndv);
 
 	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
@@ -1080,7 +1075,7 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 	header->Release();
 
 	VARIANT val;
-	VariantInit(&val); //added by Rob Cairns 4-Jan-06
+	VariantInit(&val); 
 	long percent = 0, newpercent = 0;
 	
 	for( int j = 0; j < nrows; j++ )
@@ -1093,8 +1088,8 @@ STDMETHODIMP CUtils::GridToGrid(IGrid *Grid, GridDataType OutDataType, ICallback
 		CallbackHelper::Progress(callback, j, nrows, "Grid2Grid", _key, percent);
 	}	
 
-	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
-	VariantClear(&val); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vndv); 
+	VariantClear(&val); 
 
 	return S_OK;
 }
@@ -1177,23 +1172,23 @@ STDMETHODIMP CUtils::ShapeToShapeZ(IShapefile * Shapefile, IGrid *Grid, ICallbac
 			long col = 0, row = 0;
 			Grid->ProjToCell(x,y,&col,&row);
 			VARIANT val;
-			VariantInit(&val); //added by Rob Cairns 4-Jan-06
+			VariantInit(&val); 
 			Grid->get_Value(col,row,&val);
 			dVal(val,z);
-			VariantClear(&val); //added by Rob Cairns 4-Jan-06
+			VariantClear(&val); 
 		}
 		long spos = p;
 		(*retval)->EditInsertShape(shape,&spos,&vbretval);
 		shape->Release();
 
 		VARIANT cval;
-		VariantInit(&cval); //added by Rob Cairns 4-Jan-06
+		VariantInit(&cval); 
 		for( int k = 0; k < numFields; k++ )
 		{	
 			Shapefile->get_CellValue(k,j,&cval);
 			(*retval)->EditCellValue(k,j,cval,&vbretval);
 		}
-		VariantClear(&cval); //added by Rob Cairns 4-Jan-06
+		VariantClear(&cval); 
 	}
 
 	return S_OK;
@@ -1301,14 +1296,14 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			shape = NULL;
 
 			VARIANT val;
-			VariantInit(&val); //added by Rob Cairns 4-Jan-06
+			VariantInit(&val); 
 			val.vt = VT_I4;
 			val.lVal = i;
 			(*retval)->EditCellValue(0,pos,val,&vbretval);
 			
 			CallbackHelper::Progress(callback, i, total, "TinToShapefile", _key, percent);
 
-			VariantClear(&val); //added by Rob Cairns 4-Jan-06
+			VariantClear(&val); 
 
 		}		
 	}
@@ -1355,14 +1350,14 @@ STDMETHODIMP CUtils::TinToShapefile(ITin *Tin, ShpfileType Type, ICallback *cBac
 			shape = NULL;
 
 			VARIANT val;
-			VariantInit(&val); //added by Rob Cairns 4-Jan-06
+			VariantInit(&val); 
 			val.vt = VT_I4;
 			val.lVal = i;
 			(*retval)->EditCellValue(0,i,val,&vbretval);
 			
 			CallbackHelper::Progress(callback, i, total, "TinToShapefile", _key, percent);
 
-			VariantClear(&val); //added by Rob Cairns 4-Jan-06
+			VariantClear(&val); 
 		}
 	}
 
@@ -1432,7 +1427,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	double dx, dy, xllCenter, yllCenter;
 
 	VARIANT vndv;
-	VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vndv); 
 	header->get_NodataValue(&vndv);
 	header->get_dX(&dx);
 	header->get_dY(&dy);
@@ -1444,7 +1439,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	if( cols <= 0 || rows <= 0 )
 	{	*retval = NULL;
 		ErrorMessage(callback, tkZERO_ROWS_OR_COLS);
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		return S_OK;
 	}
 	
@@ -1667,7 +1662,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							IGridHeader * cHeader = NULL;
 							_connection_grid->get_Header(&cHeader);
 							VARIANT cndv;
-							VariantInit(&cndv); //added by Rob Cairns 4-Jan-06
+							VariantInit(&cndv); 
 							cHeader->get_NodataValue(&cndv);
 							cHeader->Release();
 							cHeader = NULL;
@@ -1675,7 +1670,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 							double nodata = -1;
 							dVal(cndv,nodata);
 							
-							VariantClear(&cndv); //added by Rob Cairns 4-Jan-06
+							VariantClear(&cndv); 
 							
 							double decision = getValue( _connection_grid, contract_x, contract_y );
 							if( decision == nodata )
@@ -1930,12 +1925,12 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 					shape = NULL;
 
 					VARIANT cval;
-					VariantInit(&cval); //added by Rob Cairns 4-Jan-06
+					VariantInit(&cval); 
 					cval.vt = VT_I4;
 					cval.lVal = (LONG)polygon_id;
 					(*retval)->EditCellValue(fieldpos,sindex,cval,&vbretval);				
 					number_polygons++;
-					VariantClear(&cval); //added by Rob Cairns 4-Jan-06
+					VariantClear(&cval); 
 				}
 			}					
 		}
@@ -1947,7 +1942,7 @@ STDMETHODIMP CUtils::GridToShapefile(IGrid *Grid, IGrid *ConnectionGrid, ICallba
 	_expand_grid->Release();
 	_expand_grid = NULL;
 	
-	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vndv); 
 	
 	if (*retval)
 	{
@@ -1979,11 +1974,11 @@ inline bool CUtils::is_decision( IGrid * g, int x, int y )
 	IGridHeader * header = NULL;
 	g->get_Header(&header);
 	VARIANT vval;
-	VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vval); 
 	header->get_NodataValue(&vval);
 	double nodata = -1;
 	dVal(vval,nodata);
-	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vval); 
 	header->Release();
 	header = NULL;
 
@@ -2218,21 +2213,21 @@ void CUtils::scan_fill_to_edge( double & nodata, long x, long y )
 
 inline double CUtils::getValue( IGrid * Grid, long column, long row )
 {	VARIANT vval;
-	VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vval); 
 	Grid->get_Value(column,row,&vval);
 	double val = 0;
 	dVal(vval,val);
-	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vval); 
 	return val;
 }
 
 inline void CUtils::setValue( IGrid * Grid, long column, long row, double val )
 {	VARIANT vval;
-	VariantInit(&vval); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vval); 
 	vval.vt = VT_R8;
 	vval.dblVal = val;
 	Grid->put_Value(column,row,vval);
-	VariantClear(&vval); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vval); 
 }
 
 void CUtils::trace_polygon( long x, long y, std::deque<RasterPoint> & polygon )
@@ -2660,13 +2655,13 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 	}
 	
 	if (!((CShapefile*)Shpfile)->ValidateInput(Shpfile, "ShapefileToGrid", "Shpfile", VARIANT_FALSE, "Utils"))
-		return S_FALSE;
+		return S_OK;
 
 	CoCreateInstance(CLSID_Grid,NULL,CLSCTX_INPROC_SERVER,IID_IGrid,(void**)retval);
 
 	VARIANT_BOOL result = VARIANT_FALSE;
 	VARIANT vndv; //no data value
-	VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantInit(&vndv); 
 	vndv.vt = VT_I2;
 	short NoData;
 
@@ -2775,7 +2770,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 		LocalGridHeader->put_dX(Cellsize);
 		LocalGridHeader->put_dY(Cellsize);
 		VARIANT vndv;
-		VariantInit(&vndv); //added by Rob Cairns 4-Jan-06 - is this code reachable?
+		VariantInit(&vndv);  // is this code reachable?
 		vndv.iVal = NoData;
 		LocalGridHeader->put_NodataValue(vndv);
 		LocalGridHeader->put_NumberCols(ncols);
@@ -2822,7 +2817,7 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 	}
 
 cleaning:
-	VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+	VariantClear(&vndv); 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	((CShapefile*)Shpfile)->ClearValidationList();
 	return S_OK;
@@ -2974,8 +2969,9 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
     int         n;
     int         containsNull;
 	const char *pszFormat = "GTiff";
-	bool		retVal = false;
-    
+
+	*retval = VARIANT_FALSE;
+
 	try
 	{	
 		/* ----------------------------------- 
@@ -2996,9 +2992,8 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		poDataset = GdalHelper::OpenRasterDatasetW(OLE2W(bstrGridFilename), GA_ReadOnly);
 		if( poDataset == NULL )
 		{
-			printf( "Couldn't open dataset %s\n", 
-					pszGridFilename );
-			return retVal;
+			CallbackHelper::ErrorMsg(Debug::Format("Generate hill shade: couldn't open dataset %s\n", pszGridFilename));
+			return S_OK;
 		}
 		GDALRasterBand  *poBnd;       
 		poBnd = poDataset->GetRasterBand( 1 );
@@ -3024,13 +3019,12 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		GDALRasterBand   *poShadeBand; 
 		char **papszOptions = NULL;
 		
-		printf("XSize %d\n",nXSize);
-
 		poShadeDS = poDriver->Create(pszShadeFilename,nXSize,nYSize,1,GDT_Byte, 
 									papszOptions );
 
-		if (poShadeDS == NULL)
-			return retVal;
+		if ( !poShadeDS)
+			return S_OK;
+
 		poShadeDS->SetGeoTransform( adfGeoTransf );    
 		poShadeDS->SetProjection( poDataset->GetProjectionRef() );
 		poShadeBand = poShadeDS->GetRasterBand(1);
@@ -3119,19 +3113,15 @@ STDMETHODIMP CUtils::GenerateHillShade(BSTR  bstrGridFilename, BSTR  bstrShadeFi
 		}
 
 		delete poShadeDS;
-		retVal = true;
+		*retval = VARIANT_TRUE;
 	}	
 	
 	catch(exception e)
 	{
-		retVal = false;
+		CallbackHelper::ErrorMsg("Exception in GenerateHillshade.");
 	}
 
-	if (retVal)
-		return S_OK;
-	else
-		return S_FALSE;
-
+	return S_OK;
 }
 
 /************************************************************************/
@@ -3358,7 +3348,6 @@ STDMETHODIMP CUtils::MergeImages(/*[in]*/SAFEARRAY* InputNames, /*[in]*/BSTR Out
 	cElements = lUBound-lLBound + 1;
     for (int i = 0; i < cElements; i++)
     {
-		//AfxMessageBox(OLE2A(s));
 		IImage* img = NULL;
 		CoCreateInstance(CLSID_Image,NULL,CLSCTX_INPROC_SERVER,IID_IImage,(void**)&img);
 		img->Open(pbstr[i], USE_FILE_EXTENSION, VARIANT_FALSE, NULL, &vbretval);
@@ -3502,7 +3491,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		*result = NULL;
-		return S_FALSE;
+		return S_OK;
 	}
 
 	OGRSpatialReference* ref1 = ((CGeoProjection*)source)->get_SpatialReference();
@@ -3513,11 +3502,11 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	{
 		ErrorMessage(tkFAILED_TO_REPROJECT);
 		*result = NULL;
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if(!((CShapefile*)sf)->ValidateInput(sf, "ReprojectShapefile", "sf", VARIANT_FALSE, "Utils"))
-		return S_FALSE;
+		return S_OK;
 
 	// ------------------------------------------------
 	//	Creating output
@@ -3568,7 +3557,7 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 					(*result)->Release();
 					(*result) = NULL;
 					ErrorMessage(tkFAILED_TO_REPROJECT);
-					return S_FALSE;
+					return S_OK;
 				}
 			}
 
@@ -3638,7 +3627,7 @@ STDMETHODIMP CUtils::ClipGridWithPolygon(BSTR inputGridfile, IShape* poly, BSTR 
 	if (!Utility::FileExistsUnicode(inputGridfile))
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	IGrid* grid = NULL;
@@ -3669,13 +3658,13 @@ STDMETHODIMP CUtils::ClipGridWithPolygon2(IGrid* grid, IShape* poly, BSTR result
 
 	if (!poly || !grid) {
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (Utility::FileExistsUnicode(resultGridfile))
 	{
 		ErrorMessage(tkFILE_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	VARIANT_BOOL vb;
@@ -3992,14 +3981,14 @@ STDMETHODIMP CUtils::GridStatisticsForPolygon(IGrid* grid, IGridHeader* header, 
 	*retVal = VARIANT_FALSE;
 	if (!grid || !header || !shape) {
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	ShpfileType type;
 	shape->get_ShapeType(&type);
 	if (type != SHP_POLYGON && type != SHP_POLYGONM && type != SHP_POLYGONZ) {
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	double xMin, xMax, yMin, yMax, zMin, zMax;
@@ -4027,14 +4016,14 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 	*retVal = VARIANT_FALSE;
 	if (!grid || !sf) {
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	ShpfileType type;
 	sf->get_ShapefileType(&type);
 	if (type != SHP_POLYGON && type != SHP_POLYGONM && type != SHP_POLYGONZ) {
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	IExtents* extSf = NULL;
@@ -4049,7 +4038,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 	
 	if (!vb) {
 		ErrorMessage(tkBOUNDS_NOT_INTERSECT);
-		return S_FALSE;
+		return S_OK;
 	}
 	else {
 		VARIANT_BOOL editing;
@@ -4333,7 +4322,7 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 				long code;
 				sf->get_LastErrorCode(&code);
 				this->ErrorMessage(code);	
-				return S_FALSE;
+				return S_OK;
 			}
 		}
 		
@@ -4396,7 +4385,7 @@ STDMETHODIMP CUtils::MaskRaster(BSTR filename, BYTE newPerBandValue, VARIANT_BOO
 	if (!dataset)
 	{
 		this->ErrorMessage(tkINVALID_FILE);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	GByte* pabyData; 
@@ -4705,7 +4694,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 	{
 		ErrorMsg(tkUNEXPECTED_NULL_PARAMETER);
 		*retVal = A2BSTR("");
-		return S_FALSE;
+		return S_OK;
 	}
 	long errorCode;
 
@@ -4987,7 +4976,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 	}
 	
 	*retVal = A2BSTR("Unknown class");
-	return S_FALSE;
+	return S_OK;
 }
 
 // ********************************************************
@@ -4998,7 +4987,7 @@ HRESULT CUtils::TileProjectionToGeoProjectionCore(tkTileProjection projection, V
 	*retVal = NULL;
 
 	if (projection != Amersfoort && projection != SphericalMercator)
-		return S_FALSE;
+		return S_OK;
 
 	if (_tileProjections[projection] && useCache)
 	{
@@ -5165,7 +5154,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	if (!ValidateInputNames(InputNames,  lBound, uBound, &names))
 	{
 		*errorMsg = A2BSTR(ErrorMsg(_lastErrorCode));
-		return S_FALSE;
+		return S_OK;
 	}
 
 	int count = uBound - lBound + 1;
@@ -5173,7 +5162,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	{
 		ErrorMessage(tkAT_LEAST_TWO_DATASOURCES_EXPECTED);
 		*errorMsg = A2BSTR(ErrorMsg(_lastErrorCode));
-		return S_FALSE;
+		return S_OK;
 	}
 
 	int xSize = 0;
@@ -5462,30 +5451,30 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	if (!Utility::FileExistsW(name))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (Utility::FileExistsW(outName))
 	{
 		ErrorMessage(tkFILE_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	double* lows, *highs, *vals;
 	LONG lb1, ub1, lb2, ub2, lb3, ub3; 
 	if (!ParseSafeArray(LowBounds, lb1, ub1, (void**)&lows))
 	{
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (!ParseSafeArray(HighBounds, lb2, ub2, (void**)&highs))
 	{
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (!ParseSafeArray(NewValues, lb3, ub3, (void**)&vals))
 	{
-		return S_FALSE;
+		return S_OK;
 	}
 
 	long length = ub1 - lb1;
@@ -5515,7 +5504,7 @@ STDMETHODIMP CUtils::ReclassifyRaster(BSTR Filename, int bandIndex, BSTR outputN
 	if (!dt)
 	{
 		ErrorMessage(tkCANT_OPEN_FILE);
-		return S_FALSE;
+		return S_OK;
 	}
 	int	xSize = dt->GetRasterXSize();
 	int ySize = dt->GetRasterYSize();

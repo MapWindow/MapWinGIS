@@ -5,9 +5,8 @@
 # include "grid.h"
 
 GridManager::GridManager()
-{	//AfxMessageBox("GridManager::GridManager()");
+{
 	initialize_esri();
-	//AfxMessageBox("Exiting GridManager::GridManager()");
 }
 
 GridManager::~GridManager()
@@ -45,8 +44,6 @@ DATA_TYPE GridManager::getGridDataType( const char * cfilename, GRID_TYPE GridTy
 				if(bitsPerSample == 32)
 				{
 					type = FLOAT_TYPE;
-					//this is what we should get for our sample data
-					//AfxMessageBox("GeoTIFF grid data is of type FLOAT");
 				}
 				else if(bitsPerSample == 64)
 				{

@@ -28,8 +28,8 @@ void GridInterpolate::Interpolate(int startrow, int startcol){
 	int row = startrow, col = startcol, nextrow = 0, nextcol = 0, current_index = 0, temp = 0,
 		corner_count = 0, side_count = 0, search_direction = 0, i = 0;
 	VARIANT nodata_variant, value_variant;
-	VariantInit(&nodata_variant); //added by Rob Cairns 4-Jan-06
-	VariantInit(&value_variant); //added by Rob Cairns 4-Jan-06
+	VariantInit(&nodata_variant); 
+	VariantInit(&value_variant); 
 	double value, weighted_sum = 0, distance_weighted_average = 0, sqrt_2 = sqrt(2.0);
 	int neighbor_index[8];
 	struct neighbor_cell neighbors[8];
@@ -216,8 +216,8 @@ void GridInterpolate::Interpolate(int startrow, int startcol){
 			Grid->put_Value(col,row,value_variant);
 		}//if
 	}//while
-	VariantClear(&value_variant); //added by Rob Cairns 4-Jan-06
-	VariantClear(&nodata_variant); //added by Rob Cairns 4-Jan-06
+	VariantClear(&value_variant); 
+	VariantClear(&nodata_variant); 
 }//Interpolate
 
 int GridInterpolate::GetPossiblePathCount(int row, int col){
@@ -228,7 +228,7 @@ int GridInterpolate::GetPossiblePathCount(int row, int col){
 int GridInterpolate::GetNeighboringNDCount(int row, int col){
 	int count = 0;
 	VARIANT nodata_variant;
-	VariantInit(&nodata_variant); //added by Rob Cairns 4-Jan-06
+	VariantInit(&nodata_variant); 
 	double current_nodatavalue;
 
 	//Check the neighboring cells to the right of the current cell
@@ -294,14 +294,14 @@ int GridInterpolate::GetNeighboringNDCount(int row, int col){
 			count++;
 		}//if
 	}//if
-	VariantClear(&nodata_variant); //added by Rob Cairns 4-Jan-06
+	VariantClear(&nodata_variant); 
 	return count;
 }//GetNeighboringNDCount
 
 int GridInterpolate::GetNeighboringValidDataCount(int row, int col){
 	int count = 0;
 	VARIANT nodata_variant;
-	VariantInit(&nodata_variant); //added by Rob Cairns 4-Jan-06
+	VariantInit(&nodata_variant); 
 	double current_nodatavalue;
 
 	//Check the neighboring cells to the right of the current cell
@@ -367,13 +367,13 @@ int GridInterpolate::GetNeighboringValidDataCount(int row, int col){
 			count++;
 		}//if
 	}//if
-	VariantClear(&nodata_variant); //added by Rob Cairns 4-Jan-06
+	VariantClear(&nodata_variant); 
 	return count;
 }//GetNeighboringValidDataCount
 
 void GridInterpolate::GetNeighbors(int row, int col, struct neighbor_cell * neighbors){
 	VARIANT value_variant;
-	VariantInit(&value_variant); //added by Rob Cairns 4-Jan-06
+	VariantInit(&value_variant); 
 	double current_value;
 	//Add neighboring cells to the right of the starting cell
 	if(col+1 < numcols){
@@ -433,5 +433,5 @@ void GridInterpolate::GetNeighbors(int row, int col, struct neighbor_cell * neig
 		}//if
 	}//for
 
-	VariantClear(&value_variant); //added by Rob Cairns 4-Jan-06
+	VariantClear(&value_variant); 
 }//GetNeighbors

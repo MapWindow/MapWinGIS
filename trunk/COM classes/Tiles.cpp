@@ -235,7 +235,7 @@ STDMETHODIMP CTiles::put_ScalingRatio(double newVal)
 	if (newVal < 0.5 || newVal > 4.0)
 	{
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
-		return S_FALSE;
+		return S_OK;
 	}
 	_scalingRatio = newVal;
 	return S_OK;
@@ -886,7 +886,7 @@ STDMETHODIMP CTiles::put_Provider(tkTileProvider newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if (newVal < 0 || newVal >= tkTileProvider::ProviderCustom)
-		return S_FALSE;
+		return S_OK;
 
 	if (m_provider->Id != newVal && newVal != tkTileProvider::ProviderCustom) 
 	{
@@ -1453,7 +1453,7 @@ STDMETHODIMP CTiles::GetTilesIndices(IExtents* boundsDegrees, int zoom, int prov
 	if (!boundsDegrees)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	double xMin, xMax, yMin, yMax, zMin, zMax;
@@ -1491,7 +1491,7 @@ STDMETHODIMP CTiles::Prefetch(double minLat, double maxLat, double minLng, doubl
 	if (!p)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -1592,7 +1592,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 	{
 		ErrorMessage(tkFOLDER_NOT_EXISTS);
 		*retVal = -1;
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (tilesLogger.IsOpened())
@@ -1608,7 +1608,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
 		*retVal = -1;
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -1636,100 +1636,98 @@ long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int 
 	if (!provider)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_FALSE;
+		return 0;
 	}
 	else if (provider->maxZoom < zoom) 
 	{
 		ErrorMessage(tkINVALID_ZOOM_LEVEL);
-		return S_FALSE;
+		return 0;
 	}
-	else
-	{
-		CSize size1, size2;
-		provider->Projection->GetTileMatrixMinXY(zoom, size1);
-		provider->Projection->GetTileMatrixMaxXY(zoom, size2);
+	
+	CSize size1, size2;
+	provider->Projection->GetTileMatrixMinXY(zoom, size1);
+	provider->Projection->GetTileMatrixMaxXY(zoom, size2);
 
-		minX = (int)BaseProjection::Clip(minX, size1.cx, size2.cx);
-		maxX = (int)BaseProjection::Clip(maxX, size1.cy, size2.cy);
-		minY = (int)BaseProjection::Clip(minY, size1.cx, size2.cx);
-		maxY = (int)BaseProjection::Clip(maxY, size1.cy, size2.cy);
+	minX = (int)BaseProjection::Clip(minX, size1.cx, size2.cx);
+	maxX = (int)BaseProjection::Clip(maxX, size1.cy, size2.cy);
+	minY = (int)BaseProjection::Clip(minY, size1.cx, size2.cx);
+	maxY = (int)BaseProjection::Clip(maxY, size1.cy, size2.cy);
 		
-		int centX = (maxX + minX)/2;
-		int centY = (maxY + minY)/2;
+	int centX = (maxX + minX)/2;
+	int centY = (maxY + minY)/2;
 
-		USES_CONVERSION;
-		CStringW path = OLE2W(savePath);
-		if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
-		{
-			path += L"\\";
-		}
-		CacheType type = path.GetLength() > 0 ? CacheType::DiskCache : CacheType::SqliteCache;
+	USES_CONVERSION;
+	CStringW path = OLE2W(savePath);
+	if (path.GetLength() > 0 && path.GetAt(path.GetLength() - 1) != L'\\')
+	{
+		path += L"\\";
+	}
+	CacheType type = path.GetLength() > 0 ? CacheType::DiskCache : CacheType::SqliteCache;
 
-		if (type == CacheType::DiskCache)
-		{
-			CString ext = OLE2A(fileExt);
-			DiskCache::ext = ext;
-			DiskCache::rootPath = path;
-			DiskCache::encoder = "image/png";	// default
+	if (type == CacheType::DiskCache)
+	{
+		CString ext = OLE2A(fileExt);
+		DiskCache::ext = ext;
+		DiskCache::rootPath = path;
+		DiskCache::encoder = "image/png";	// default
 			
-			if (ext.GetLength() >= 4)
-			{
-				CStringW s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
-				if (s == ".png")
-				{
-					DiskCache::encoder = "image/png";
-				}
-				else if (s == ".jpg")
-				{
-					DiskCache::encoder = "image/jpeg";
-				}
-			}
-		}
-
-		std::vector<CTilePoint*> points;
-		for (int x = minX; x <= maxX; x++)
+		if (ext.GetLength() >= 4)
 		{
-			for (int y = minY; y <= maxY; y++)
+			CStringW s = ext.Mid(0, 4).MakeLower(); // try to guess it from input
+			if (s == ".png")
 			{
-				if ((type == CacheType::SqliteCache && !SQLiteCache::get_Exists(provider, zoom, x, y)) || 
-					 type == CacheType::DiskCache && !DiskCache::get_TileExists(zoom, x, y))
-				{
-					CTilePoint* pnt = new CTilePoint(x, y);
-					pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
-					points.push_back(pnt);
-				}
+				DiskCache::encoder = "image/png";
+			}
+			else if (s == ".jpg")
+			{
+				DiskCache::encoder = "image/jpeg";
 			}
 		}
+	}
 
-		if (points.size() > 0)
+	std::vector<CTilePoint*> points;
+	for (int x = minX; x <= maxX; x++)
+	{
+		for (int y = minY; y <= maxY; y++)
 		{
-			_prefetchLoader.doCacheSqlite = type == CacheType::SqliteCache;
-			_prefetchLoader.doCacheDisk = type == CacheType::DiskCache;
-			
-			if (type == CacheType::SqliteCache)
+			if ((type == CacheType::SqliteCache && !SQLiteCache::get_Exists(provider, zoom, x, y)) || 
+					type == CacheType::DiskCache && !DiskCache::get_TileExists(zoom, x, y))
 			{
-				SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
+				CTilePoint* pnt = new CTilePoint(x, y);
+				pnt->dist = sqrt(pow((pnt->x - centX), 2.0) + pow((pnt->y - centY), 2.0));
+				points.push_back(pnt);
 			}
-			else 
-			{
-				DiskCache::CreateFolders(zoom, points);
-			}
-			_prefetchLoader.m_stopCallback = stop;
-
-			if (_globalCallback)
-			{
-				_prefetchLoader.m_callback = this->_globalCallback;
-			}
-			
-			// actual call to do the job
-			_prefetchLoader.Load(points, zoom, provider, (void*)this, false, "", 0, true);
-
-			for (size_t i = 0; i < points.size(); i++)
-			{
-				delete points[i];
-			}
-			return points.size();
 		}
+	}
+
+	if (points.size() > 0)
+	{
+		_prefetchLoader.doCacheSqlite = type == CacheType::SqliteCache;
+		_prefetchLoader.doCacheDisk = type == CacheType::DiskCache;
+			
+		if (type == CacheType::SqliteCache)
+		{
+			SQLiteCache::Initialize(SqliteOpenMode::OpenIfExists);
+		}
+		else 
+		{
+			DiskCache::CreateFolders(zoom, points);
+		}
+		_prefetchLoader.m_stopCallback = stop;
+
+		if (_globalCallback)
+		{
+			_prefetchLoader.m_callback = this->_globalCallback;
+		}
+			
+		// actual call to do the job
+		_prefetchLoader.Load(points, zoom, provider, (void*)this, false, "", 0, true);
+
+		for (size_t i = 0; i < points.size(); i++)
+		{
+			delete points[i];
+		}
+		return points.size();
 	}
 	return 0;
 }
@@ -1772,28 +1770,26 @@ STDMETHODIMP CTiles::GetTileBounds(int provider, int zoom, int tileX, int tileY,
 	if (!prov)
 	{
 		ErrorMessage(tkINVALID_PROVIDER_ID);
-		return S_FALSE;
+		return S_OK;
+	}
+	
+	CSize size;
+	prov->Projection->GetTileMatrixSizeXY(zoom, size);
+	if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else
 	{
-		CSize size;
-		prov->Projection->GetTileMatrixSizeXY(zoom, size);
-		if (tileX < 0 || tileX > size.cx - 1 || tileY < 0 || tileY > size.cy - 1)
-		{
-			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		}
-		else 
-		{
-			CPoint pnt1(tileX, tileY);
-			CPoint pnt2(tileX + 1, tileY + 1);
-			PointLatLng p1, p2;
-			prov->Projection->FromXYToLatLng(pnt1, zoom, p1);
-			prov->Projection->FromXYToLatLng(pnt2, zoom, p2);
-			IExtents* ext;
-			CoCreateInstance( CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
-			ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
-			*retVal = ext;
-		}
+		CPoint pnt1(tileX, tileY);
+		CPoint pnt2(tileX + 1, tileY + 1);
+		PointLatLng p1, p2;
+		prov->Projection->FromXYToLatLng(pnt1, zoom, p1);
+		prov->Projection->FromXYToLatLng(pnt2, zoom, p2);
+		IExtents* ext;
+		CoCreateInstance(CLSID_Extents, NULL, CLSCTX_INPROC_SERVER, IID_IExtents, (void**)&ext);
+		ext->SetBounds(p1.Lng, p1.Lat, 0.0, p2.Lng, p2.Lat, 0.0);
+		*retVal = ext;
 	}
 	return S_OK;
 }

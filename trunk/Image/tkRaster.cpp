@@ -74,7 +74,7 @@ void tkRaster::ComputeBandMinMax()
 	{
 		if ((_dataType == GDT_Byte) &&  (_imgType != ADF_FILE) && (hasColorTable==false) && (_imgType != PNG_FILE))
 			//Just guess the min and max
-			//For some reason gdal does not seem to pick up the color table of a png binary image
+			//For some reason GDAL does not seem to pick up the color table of a png binary image
 		{
 			_dfMin = 0.0;
 			_dfMax = 255.0;
@@ -109,7 +109,6 @@ bool tkRaster::LoadRaster(CStringW filename, GDALAccess accessType)
 // *************************************************************
 bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 {
-	//AfxMessageBox("In LoadRaster");
 	// Chris M 11/15/2005 - This function doesn't use any AFX calls,
 	// and getting a static module state will make this function require unwinding.
 	// This will mean that SEH exception handing can't be used, and we'll be unable
@@ -347,7 +346,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 	}
 	__except(1)
 	{
-		AfxMessageBox("Exception in LoadRaster function");
+		CallbackHelper::ErrorMsg("Exception in LoadRaster function.");
 		retVal = false;
 	}
 

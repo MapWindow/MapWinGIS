@@ -318,7 +318,7 @@ bool stringVal( const VARIANT& v, CString & string )
 			break;
 		default:
 			string.Format("%i",v.vt);
-			AfxMessageBox((LPCTSTR)string);
+			CallbackHelper::ErrorMsg(Debug::Format("Unable to convert variant to string. Variant type: %s", string));
 			return false;
 	}
 	return true;
@@ -327,7 +327,7 @@ bool stringVal( const VARIANT& v, CString & string )
 VARIANT toVariant(double d)
 {
 	VARIANT v;
-	VariantInit(&v); //added by Rob Cairns 4-Jan-06
+	VariantInit(&v); 
 	v.dblVal = d;
 	v.vt = VT_R8;
 	return v;
@@ -336,7 +336,7 @@ VARIANT toVariant(double d)
 VARIANT toVariant(float f)
 {
 	VARIANT v;
-	VariantInit(&v); //added by Rob Cairns 4-Jan-06
+	VariantInit(&v); 
 	v.fltVal = f;
 	v.vt = VT_R4;
 	return v;
@@ -345,7 +345,7 @@ VARIANT toVariant(float f)
 VARIANT toVariant(long l)
 {
 	VARIANT v;
-	VariantInit(&v); //added by Rob Cairns 4-Jan-06
+	VariantInit(&v); 
 	v.lVal = l;
 	v.vt = VT_I4;
 	return v;
@@ -354,7 +354,7 @@ VARIANT toVariant(long l)
 VARIANT toVariant(short s)
 {
 	VARIANT v;
-	VariantInit(&v); //added by Rob Cairns 4-Jan-06
+	VariantInit(&v); 
 	v.iVal = s;
 	v.vt = VT_I2;
 	return v;

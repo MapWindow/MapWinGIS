@@ -438,15 +438,14 @@ STDMETHODIMP CImageClass::CreateNew(long NewWidth, long NewHeight, VARIANT_BOOL 
 	//Check the NewWidth and NewHeight to see if they are valid numbers
 	//Note that any information stored in ImageData will be lost unless 
 	//it is written to a file first.
+	*retval = VARIANT_FALSE;
 
 	if (NewWidth > 0 && NewHeight > 0)
 	{
 		this->Close(retval);
 		
 		if (!retval)
-		{
-			return S_FALSE;
-		}
+			return S_OK;
 		
 		try
 		{
@@ -455,7 +454,6 @@ STDMETHODIMP CImageClass::CreateNew(long NewWidth, long NewHeight, VARIANT_BOOL 
 		catch(...)
 		{
 			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
-			*retval = VARIANT_FALSE;
 			return S_OK;
 		}
 		
@@ -469,7 +467,6 @@ STDMETHODIMP CImageClass::CreateNew(long NewWidth, long NewHeight, VARIANT_BOOL 
 	{
 		//can't create an array with Width <= 0 or Height <= 0
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
-		*retval = VARIANT_FALSE;
 	}
 	return S_OK;
 }
@@ -754,11 +751,11 @@ STDMETHODIMP CImageClass::put_Value(long row, long col, long newVal)
 			}
 			else if (_gdalImage) 
 			{
-				AfxMessageBox("Writing of gdal formats is not yet supported.");
+				CallbackHelper::ErrorMsg("Writing of GDAL formats is not yet supported.");
 			}	
 			else
 			{	
-				//only BMP files can set values diskbased
+				//only BMP files can set values disk-based
 				ErrorMessage(tkUNAVAILABLE_IN_DISK_MODE);
 			}
 		}
@@ -1603,7 +1600,7 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 	
 	if (_gdalImage && !_dataLoaded)
 	{
-		// lsu 18-07-2010: excluded the code for loading the buffer; I prefer to separate
+		// excluded the code for loading the buffer; I prefer to separate
 		// the operations of loading buffer and subsequent calls
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 		*retval = VARIANT_FALSE;
@@ -1686,10 +1683,6 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 		*retval = VARIANT_TRUE;
 		delete [] bits; //--Lailin Chen 2006/4/12, Fixed a piece of memory leak.
 		bits = NULL;
-
-		#ifdef _DEBUG
-		   AfxMessageBox("end CImageClass::GetImageBitsDC");
-		#endif
 	}
 
 	return S_OK;

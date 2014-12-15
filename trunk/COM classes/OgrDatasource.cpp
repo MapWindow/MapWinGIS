@@ -84,7 +84,7 @@ STDMETHODIMP COgrDatasource::Open(BSTR connectionString, VARIANT_BOOL* retVal)
 	{
 		// clients should extract last GDAL error
 		ErrorMessage(tkFAILED_TO_OPEN_OGR_DATASOURCE);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -126,7 +126,7 @@ STDMETHODIMP COgrDatasource::GetLayerByName(BSTR name, VARIANT_BOOL forUpdate, I
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	
 	IOgrLayer* layer = NULL;
 	ComHelper::CreateInstance(idOgrLayer, (IDispatch**)&layer);
@@ -155,11 +155,11 @@ STDMETHODIMP COgrDatasource::GetLayer(int index, VARIANT_BOOL forUpdate, IOgrLay
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = NULL;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	if (index < 0 && index >= _dataset->GetLayerCount())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -236,7 +236,7 @@ STDMETHODIMP COgrDatasource::get_DriverName(BSTR* retVal)
 	if (!CheckState())
 	{
 		*retVal = A2BSTR("");
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -269,7 +269,7 @@ STDMETHODIMP COgrDatasource::GetLayerName(int index, BSTR* retVal)
 		}
 	}
 	*retVal = A2BSTR("");
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -301,7 +301,7 @@ STDMETHODIMP COgrDatasource::TestCapability(tkOgrDSCapability capability, VARIAN
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	int val = _dataset->TestCapability(OgrHelper::GetDsCapabilityString(capability));
 	*retVal = val ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
@@ -314,12 +314,12 @@ STDMETHODIMP COgrDatasource::CreateLayer(BSTR layerName, ShpfileType shpType, IG
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	
 	if (shpType == SHP_NULLSHAPE)
 	{
 		ErrorMessage(tkUNSUPPORTED_SHAPEFILE_TYPE);
-		return S_FALSE;;
+		return S_OK;
 	}
 
 	OGRSpatialReference* ref = projection ? ((CGeoProjection*)projection)->get_SpatialReference() : NULL;
@@ -342,7 +342,7 @@ STDMETHODIMP COgrDatasource::LayerIndexByName(BSTR layerName, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = -1;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	CStringA name = OgrHelper::Bstr2OgrString(layerName);
 	for (int i = 0; i < _dataset->GetLayerCount(); i++)
@@ -365,19 +365,19 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	if (!shapefile)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	CStringA name = OgrHelper::Bstr2OgrString(newLayerName);
 	if (name.GetLength() == 0)
 	{
 		ErrorMessage(tkINVALID_LAYER_NAME);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (validationMode != NoValidation)
@@ -471,7 +471,7 @@ STDMETHODIMP COgrDatasource::ExecuteSQL(BSTR sql, BSTR* errorMessage, VARIANT_BO
 		CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
 		*errorMessage = W2BSTR(s);
 		*retVal = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -517,7 +517,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadata(tkGdalDriverMetadata metadata, B
 		}
 	}
 	*retVal = A2BSTR("");
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -537,7 +537,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataCount(int* retVal)
 		}
 	}
 	*retVal = 0;
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -557,7 +557,7 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataItem(int metadataIndex, BSTR* ret
 			if (metadataIndex < 0 || metadataIndex >= CSLCount(data))
 			{
 				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-				return S_FALSE;
+				return S_OK;
 			}
 			else
 			{

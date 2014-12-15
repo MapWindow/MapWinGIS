@@ -1165,7 +1165,7 @@ STDMETHODIMP CTableClass::EditDeleteField(long FieldIndex, ICallback *cBack, VAR
     {	
         if( _rows[i].row != NULL && _rows[i].row->values[FieldIndex] != NULL )
         {
-			VariantClear(_rows[i].row->values[FieldIndex]); //added by Rob Cairns 4-Jan-06
+			VariantClear(_rows[i].row->values[FieldIndex]); 
             _rows[i].row->values[FieldIndex] = NULL;
             _rows[i].row->values.erase( _rows[i].row->values.begin() + FieldIndex );		
         }

@@ -1697,13 +1697,13 @@ STDMETHODIMP CCharts::SaveToXML(BSTR Filename, VARIANT_BOOL* retVal)
 	if (s.GetLength() < 7)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (s.Right(6).MakeLower() != L".chart")
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWindow" );

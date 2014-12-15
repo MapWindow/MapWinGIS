@@ -212,11 +212,11 @@ STDMETHODIMP CLineSegment::put_MarkerOffset(float newVal)
 // *************************************************************
 STDMETHODIMP CLineSegment::Draw (int** hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
 {
-	if (!hdc)
-	{
-		
-		return S_FALSE;
+	if (!hdc) {
+		CallbackHelper::ErrorMsg("Invalid handle of device context.");
+		return S_OK;
 	}
+
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
 	return S_OK;
@@ -227,11 +227,11 @@ STDMETHODIMP CLineSegment::Draw (int** hdc, float x, float y, int clipWidth, int
 // *************************************************************
 STDMETHODIMP CLineSegment::DrawVB (int hdc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor, VARIANT_BOOL* retVal)
 {
-	if (!hdc)
-	{
-		// TODO: report error
-		return S_FALSE;
+	if (!hdc) {
+		CallbackHelper::ErrorMsg("Invalid handle of device context.");
+		return S_OK;
 	}
+
 	CDC* dc = CDC::FromHandle((HDC)hdc);
 	*retVal = this->DrawCore(dc, x, y, clipWidth, clipHeight, backColor);
 	return S_OK;
@@ -242,10 +242,9 @@ STDMETHODIMP CLineSegment::DrawVB (int hdc, float x, float y, int clipWidth, int
 // *************************************************************
 VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, int clipHeight, OLE_COLOR backColor )
 {
-	if (!dc)
-	{
-		// TODO: report error
-		return S_FALSE;
+	if (!dc) {
+		CallbackHelper::ErrorMsg("Invalid handle of device context.");
+		return S_OK;
 	}
 
 	Gdiplus::Bitmap bmp(clipWidth, clipHeight, PixelFormat32bppARGB);

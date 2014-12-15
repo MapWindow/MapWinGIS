@@ -170,7 +170,7 @@ STDMETHODIMP CTin::CreateNew(IGrid *Grid, double Deviation, SplitMethod SplitTes
 
 		//Mark ndv triangles
 		VARIANT vndv;
-		VariantInit(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantInit(&vndv); 
 		double ndv;
 		_gridHeader->get_NodataValue(&vndv);
 		dVal(vndv,ndv);
@@ -200,7 +200,7 @@ STDMETHODIMP CTin::CreateNew(IGrid *Grid, double Deviation, SplitMethod SplitTes
 		_gridHeader = NULL;
 		_grid = NULL;
 		*retval = TRUE;
-		VariantClear(&vndv); //added by Rob Cairns 4-Jan-06
+		VariantClear(&vndv); 
 		_globalCallback = tmpcallback;
 	}
 	return S_OK;
@@ -758,31 +758,31 @@ inline vertex CTin::gridCoord( long column, long row )
 inline double CTin::gridValue( long column, long row )
 {	
 	VARIANT val;
-	VariantInit(&val); //added by Rob Cairns 4-Jan-06
+	VariantInit(&val); 
 	_grid->get_Value(column,row,&val);
 	double dval;
 	dVal(val,dval);
-	VariantClear(&val); //added by Rob Cairns 4-Jan-06
+	VariantClear(&val); 
 	return dval;
 }
 
 inline double CTin::gridMin()
 {	VARIANT min;
-	VariantInit(&min); //added by Rob Cairns 4-Jan-06
+	VariantInit(&min); 
 	_grid->get_Minimum(&min);
 	double dmin;
 	dVal(min,dmin);
-	VariantClear(&min); //added by Rob Cairns 4-Jan-06
+	VariantClear(&min); 
 	return dmin;
 }
 
 inline double CTin::gridMax()
 {	VARIANT max;
-	VariantInit(&max); //added by Rob Cairns 4-Jan-06
+	VariantInit(&max); 
 	_grid->get_Minimum(&max);
 	double dmax;
 	dVal(max,dmax);
-	VariantClear(&max); //added by Rob Cairns 4-Jan-06
+	VariantClear(&max); 
 	return dmax;
 }
 

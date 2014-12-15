@@ -423,7 +423,6 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 
 	if (!igrid && !iimg && !ishp && !iogr)
 	{
-		AfxMessageBox("Error: Interface Not Supported");
 		ErrorMessage(tkINTERFACE_NOT_SUPPORTED);
 		return -1;
 	}

@@ -126,7 +126,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 	if( Grid == NULL || ci == NULL )
 	{	
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	CComPtr<IGridHeader> gridheader = NULL;
@@ -152,7 +152,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 			// inRam version was requested explicitly, so we return error 
 			// rather than substitute it with the disk version
 			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
-			return S_FALSE;
+			return S_OK;
 		}
 	}
 		
@@ -224,7 +224,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 			if (!vb) {
 				(*retval)->Release();
 				(*retval) = NULL;
-				return S_FALSE;
+				return S_OK;
 			}
 		}
 		
@@ -589,7 +589,7 @@ void CUtils::GridToImageCore(IGrid *Grid, IGridColorScheme *ci, ICallback *cBack
 // *******************************************************
 void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFormat format, VARIANT_BOOL * retval)
 {
-	*retval = S_FALSE;
+	*retval = VARIANT_FALSE;
 
 	GDALAllRegister();
 
@@ -622,11 +622,11 @@ void CUtils::CreateBitmap(CStringW filename, long cols, long rows, tkGridProxyFo
 		_poBandB = _rasterDataset->GetRasterBand(3);
 		if (_poBandR != NULL && _poBandG != NULL && _poBandB != NULL)
 		{
-			*retval = S_OK;
+			*retval = VARIANT_TRUE;
 			return;
 		}
 	}
-	*retval = S_FALSE;
+	*retval = VARIANT_FALSE;
 }
 
 // *************************************************************

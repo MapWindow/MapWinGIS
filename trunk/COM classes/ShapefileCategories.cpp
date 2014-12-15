@@ -173,14 +173,14 @@ STDMETHODIMP CShapefileCategories::put_Item(long Index, IShapefileCategory* newV
 	if( Index < 0 || Index >= (long)_categories.size() )
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
 		if (!newVal)
 		{
 			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-			return S_FALSE;
+			return S_OK;
 		}
 		else
 		{
@@ -206,17 +206,17 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	*retVal = VARIANT_FALSE;
 	
 	if(_shapefile == NULL) 
-		return S_FALSE;
+		return S_OK;
 	
 	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
-		return S_FALSE;
+		return S_OK;
 		
 	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses, minValue, maxValue);
 	
 	if (!values)
-		return S_FALSE;
+		return S_OK;
 	
 	_classificationField = -1;		// fast processing is off
 
@@ -259,12 +259,12 @@ STDMETHODIMP CShapefileCategories::Generate(long FieldIndex, tkClassificationTyp
 	*retVal = VARIANT_FALSE;
 	
 	if(_shapefile == NULL) 
-		return S_FALSE;
+		return S_OK;
 	
 	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
-		return S_FALSE;
+		return S_OK;
 		
 	std::vector<CategoriesData>* values = TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
@@ -1009,7 +1009,7 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 	// -------------------------------------------------
 	if(!_shapefile) {
 		ErrorMessage(tkPARENT_SHAPEFILE_NOT_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	ShpfileType shpType;
@@ -1017,7 +1017,7 @@ STDMETHODIMP CShapefileCategories::GeneratePolygonColors(IColorScheme* scheme, V
 	if (Utility::ShapeTypeConvert2D(shpType) != SHP_POLYGON)
 	{
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	bool tempScheme = false;

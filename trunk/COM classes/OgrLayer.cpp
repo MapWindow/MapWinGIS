@@ -242,7 +242,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 		{
 			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 			GDALClose(ds);
-			return S_FALSE;
+			return S_OK;
 		}
 		
 		OGRLayer* layer = ds->GetLayer(layerIndex);
@@ -250,7 +250,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 		{
 			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
 			GDALClose(ds);
-			return S_FALSE;
+			return S_OK;
 		}
 	
 		USES_CONVERSION;
@@ -265,7 +265,7 @@ STDMETHODIMP COgrLayer::OpenDatabaseLayer(BSTR connectionString, int layerIndex,
 		*retVal = VARIANT_TRUE;
 		return S_OK;
 	}
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -299,7 +299,7 @@ STDMETHODIMP COgrLayer::OpenFromQuery(BSTR connectionString, BSTR sql, VARIANT_B
 			GDALClose(_dataset);
 		}
 	}
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -333,7 +333,7 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 			GDALClose(_dataset);
 		}
 	}
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -345,7 +345,7 @@ STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)
 	if (!CheckState())
 	{
 		*retVal = A2BSTR("");
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -363,7 +363,7 @@ STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	*retVal = NULL;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	
 	CSingleLock sfLock(&_loader.ShapefileLock);
 	sfLock.Lock();
@@ -397,7 +397,7 @@ STDMETHODIMP COgrLayer::ReloadFromSource(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	if (_dynamicLoading) 
 	{
@@ -423,7 +423,7 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	if (_dynamicLoading)
 	{
@@ -446,13 +446,13 @@ STDMETHODIMP COgrLayer::RedefineQuery(BSTR newSql, VARIANT_BOOL* retVal)
 		else
 		{
 			ErrorMessage(tkOGR_QUERY_FAILED);
-			return S_FALSE;
+			return S_OK;
 		}
 	}
 	else
 	{
 		ErrorMessage(tkUNEXPECTED_OGR_SOURCE_TYPE);
-		return S_FALSE;
+		return S_OK;
 	}
 	return S_OK;
 }
@@ -506,7 +506,7 @@ STDMETHODIMP COgrLayer::get_ShapeType(ShpfileType* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = SHP_NULLSHAPE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	*retVal = OgrConverter::GeometryType2ShapeType(_layer->GetGeomType());
 	return S_OK;
 }
@@ -529,12 +529,12 @@ STDMETHODIMP COgrLayer::get_DataIsReprojected(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
-	if (!_shapefile) return S_FALSE;		// data wasn't loaded yet
+	if (!CheckState()) return S_OK;
+	if (!_shapefile) return S_OK;		// data wasn't loaded yet
 
 	CComPtr<IGeoProjection> gp = NULL;
 	get_GeoProjection(&gp);
-	if (!gp) return S_FALSE;
+	if (!gp) return S_OK;
 
 	CComPtr<IShapefile> sf = NULL;
 	GetBuffer(&sf);
@@ -562,7 +562,7 @@ STDMETHODIMP COgrLayer::get_FIDColumnName(BSTR* retVal)
 		return S_OK;
 	}
 	*retVal = A2BSTR("");
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -575,11 +575,11 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	*retVal = osrNoChanges;
 	_updateErrors.clear();
 
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	if (!_shapefile)
 	{
 		ErrorMessage(tkNO_OGR_DATA_WAS_LOADED);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	VARIANT_BOOL hasChanges;
@@ -587,7 +587,7 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	if (!hasChanges)
 	{
 		ErrorMessage(tkOGR_NO_MODIFICATIONS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	*retVal = osrNoneSaved;
@@ -595,7 +595,7 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	if (shapeCmnId == -1)
 	{
 		ErrorMessage(tkFID_COLUMN_NOT_FOUND);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	VARIANT_BOOL reprojected;
@@ -603,7 +603,7 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	if (reprojected && saveType != tkOgrSaveType::ostAttributesOnly)
 	{
 		ErrorMessage(tkFID_COLUMN_NOT_FOUND);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	CSingleLock lock(&_loader.ProviderLock);
@@ -632,7 +632,7 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	if (_shapefile)
 	{
@@ -686,7 +686,7 @@ STDMETHODIMP COgrLayer::TestCapability(tkOgrLayerCapability capability, VARIANT_
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	int val = _layer->TestCapability(OgrHelper::GetLayerCapabilityString(capability));
 	*retVal = val ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
@@ -712,7 +712,7 @@ STDMETHODIMP COgrLayer::get_UpdateSourceErrorMsg(int errorIndex, BSTR* retVal)
 	{
 		*retVal = A2BSTR("");
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 	*retVal = W2BSTR(_updateErrors[errorIndex].ErrorMsg);
 	return S_OK;
@@ -728,7 +728,7 @@ STDMETHODIMP COgrLayer::get_UpdateSourceErrorShapeIndex(int errorIndex, int* ret
 	{
 		*retVal = -1;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_FALSE;
+		return S_OK;
 	}
 	*retVal = _updateErrors[errorIndex].ShapeIndex;
 	return S_OK;
@@ -741,7 +741,7 @@ STDMETHODIMP COgrLayer::get_FeatureCount(VARIANT_BOOL forceLoading, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = 0;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	CSingleLock lock(&_loader.ProviderLock);
 	if (_dynamicLoading) lock.Lock();
 	if (_featureCount == -1 || forceLoading) {
@@ -774,7 +774,7 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*extents = NULL;
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 
 	if (_envelope && forceLoading) {
 		delete _envelope;
@@ -798,7 +798,7 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 		return S_OK;
 	}
 	
-	return S_FALSE;
+	return S_OK;
 }
 
 // *************************************************************
@@ -807,7 +807,7 @@ STDMETHODIMP COgrLayer::get_Extents(IExtents** extents, VARIANT_BOOL forceLoadin
 STDMETHODIMP COgrLayer::get_GeometryColumnName(BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	CStringW name = OgrHelper::OgrString2Unicode(_layer->GetGeometryColumn());
 	USES_CONVERSION;
 	*retVal = W2BSTR(name);
@@ -821,7 +821,7 @@ STDMETHODIMP COgrLayer::get_SupportsEditing(tkOgrSaveType editingType, VARIANT_B
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-	if (!CheckState()) return S_FALSE;
+	if (!CheckState()) return S_OK;
 	
 	// is it supported by driver?
 	VARIANT_BOOL randomWrite;

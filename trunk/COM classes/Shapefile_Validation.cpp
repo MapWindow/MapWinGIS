@@ -16,7 +16,7 @@ STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_
 	*results = NULL;
 
 	if (validationMode == NoValidation)
-		return S_FALSE;
+		return S_OK;
 
 	VARIANT_BOOL editing;
 	get_EditingShapes(&editing);

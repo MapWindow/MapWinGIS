@@ -508,7 +508,7 @@ STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bound
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 		*pVal = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	// first let's try standard approach
@@ -734,7 +734,7 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 	{
 		ErrorMessage(tkPROJECTION_IS_FROZEN);
 		*retVal = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
 	}
 	else
 	{
@@ -742,7 +742,6 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 		{
 			ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
 			*retVal = VARIANT_FALSE;
-			return S_FALSE;
 		}
 		else
 		{
@@ -752,9 +751,9 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 			char* prj = OLE2A(bstr);
 			_projection->importFromWkt(&prj);
 			*retVal = VARIANT_TRUE;
-			return S_OK;
 		}		
 	}
+	return S_OK;
 }
 
 // *******************************************************
@@ -813,7 +812,7 @@ STDMETHODIMP CGeoProjection::WriteToFile(BSTR filename, VARIANT_BOOL* retVal)
 	CString name = OLE2CA(filename);
 
 	if (name.CompareNoCase("") == 0)
-		return S_FALSE;
+		return S_OK;
 	
 	FILE * prjFile = fopen(name, "wb");
 	if (prjFile)
@@ -830,10 +829,8 @@ STDMETHODIMP CGeoProjection::WriteToFile(BSTR filename, VARIANT_BOOL* retVal)
 		prjFile = NULL;
 		
 		*retVal  = VARIANT_TRUE;
-		return S_OK;
 	}
-	else
-		return S_FALSE;
+	return S_OK;
 }
 
 // *******************************************************

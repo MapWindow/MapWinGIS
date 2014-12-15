@@ -11,6 +11,7 @@ namespace CallbackHelper
 	void ErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...);
 	void ErrorMsg(CString className, ICallback* localCback, CString key, const char* message, ...);
 	void ErrorMsg(CString message);
+	void ErrorMsg(const char* message);
 	void AssertionFailed(CString message);
 	void FillGdalCallbackParams(CallbackParams& params, ICallback* localCallback, const char* message);
 };

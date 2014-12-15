@@ -129,6 +129,12 @@ void CallbackHelper::ErrorMsg(CString className, ICallback* localCallback, CStri
 	}
 }
 
+void CallbackHelper::ErrorMsg(const char* message)
+{
+	CString s = message;
+	ErrorMsg(s);
+}
+
 void CallbackHelper::ErrorMsg(CString message)
 {
 	if (m_globalSettings.callback)

@@ -104,10 +104,10 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 		}
 		else
 		{
-			if (_shpfileName == "")
+			if (_shpfileName.GetLength() == 0)
 			{
-				// TODO Error: it's impossible to set regular mode while there is no underlying shapefile
-				return S_FALSE;
+				CallbackHelper::AssertionFailed("Shapefile.put_FastMode: No disk shapefile when editing mode is on.");
+				return S_OK;
 			}
 			else
 			{

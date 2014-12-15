@@ -310,7 +310,7 @@ STDMETHODIMP CFileManager::Open(BSTR Filename, tkFileOpenStrategy openStrategy, 
 	if (!Utility::FileExistsW(filenameW))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (openStrategy == fosAutoDetect) {
@@ -451,7 +451,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 	if (!Utility::FileExistsW(OLE2W(Filename)))
 	{
 		ErrorMessage(tkFILE_NOT_EXISTS);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	VARIANT_BOOL vb;
@@ -667,7 +667,7 @@ STDMETHODIMP CFileManager::OpenFromDatabase(BSTR connectionString, BSTR layerNam
 		long errorCode;
 		source->get_LastErrorCode(&errorCode);
 		ErrorMessage(errorCode);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	source->GetLayerByName(layerNameOrQuery, VARIANT_FALSE, retVal);

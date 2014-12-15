@@ -868,13 +868,13 @@ STDMETHODIMP CLabels::GenerateCategories(long FieldIndex, tkClassificationType C
 
 	if(_shapefile == NULL) 
 	{
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	CComPtr<ITable> tbl = NULL;
 	_shapefile->get_Table(&tbl);
 	if (!tbl) 
-		return S_FALSE;
+		return S_OK;
 		
 	std::vector<CategoriesData>* values =TableHelper::Cast(tbl)->GenerateCategories(FieldIndex, ClassificationType, numClasses);
 	if (!values)
@@ -1761,13 +1761,13 @@ STDMETHODIMP CLabels::SaveToXML(BSTR filename, VARIANT_BOOL* retVal)
 	if (s.GetLength() < 5)
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_FALSE;
+		return S_OK;
 	}
 
 	if (s.Right(4).MakeLower() != L".lbl")
 	{
 		ErrorMessage(tkINVALID_FILENAME);
-		return S_FALSE;
+		return S_OK;
 	}
 	
 	CPLXMLNode *psTree = CPLCreateXMLNode( NULL, CXT_Element, "MapWindow" );
@@ -2478,7 +2478,7 @@ STDMETHODIMP CLabels::put_Positioning(tkLabelPositioning newVal)
 			(type == SHP_POLYGON && !polygon))
 		{
 			ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
-			return S_FALSE;
+			return S_OK;
 		}
 	}
 	_positioning = newVal;

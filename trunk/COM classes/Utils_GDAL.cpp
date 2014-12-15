@@ -6492,7 +6492,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 	if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
 	}
 
 	GDALRasterBandH hSrcBand = GDALGetRasterBand( hSrcDS, iSrcBand );
@@ -6501,7 +6501,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
         CPLError( CE_Failure, CPLE_AppDefined,
 			      "Band %d does not exist on dataset.", iSrcBand );
 		(*retval) = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
     }
 
 	GDALRasterBandH hMaskBand;
@@ -6536,7 +6536,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 		if( hDriver == NULL )
 		{
 			(*retval) = VARIANT_FALSE;
-			return S_FALSE;
+			return S_OK;
 		}
 
 		hDstDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename),
@@ -6544,7 +6544,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 		if( hDstDS == NULL )
 		{
 			(*retval) = VARIANT_FALSE;
-			return S_FALSE;
+			return S_OK;
 		}
 	}
 
@@ -6569,7 +6569,7 @@ STDMETHODIMP CUtils::Polygonize(BSTR pszSrcFilename, BSTR pszDstFilename,
 		if( hDstLayer == NULL )
 		{
 			(*retval) = VARIANT_FALSE;
-			return S_FALSE;
+			return S_OK;
 		}
 
 		OGRFieldDefnH hFld = OGR_Fld_Create( OLE2A(pszPixValFieldName),
@@ -6676,7 +6676,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     if( dfInterval == 0.0 && nFixedLevelCount == 0 )
     {
 		(*retval) = VARIANT_FALSE;
-        return S_FALSE;
+        return S_OK;
     }
 
 /* -------------------------------------------------------------------- */
@@ -6688,7 +6688,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
     if( hSrcDS == NULL )
 	{
 		(*retval) = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
 	}
 
     hBand = GDALGetRasterBand( hSrcDS, nBandIn );
@@ -6699,7 +6699,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
                   "Band %d does not exist on dataset.", 
                   nBandIn );
 		(*retval) = VARIANT_FALSE;
-		return S_FALSE;
+		return S_OK;
     }
 
     //if( !bNoDataSet && !bIgnoreNoData )
@@ -6733,7 +6733,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
         CPLError( CE_Failure, CPLE_AppDefined, "Unable to find format driver named %s.\n", 
                  pszFormat );
 		(*retval) = VARIANT_FALSE;
-        return S_FALSE;
+        return S_OK;
     }
 
     hDS = OGR_Dr_CreateDataSource( hDriver, OLE2A(pszDstFilename), NULL );
@@ -6741,7 +6741,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 	{
 		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
-        return S_FALSE;
+        return S_OK;
 	}
 
     hLayer = OGR_DS_CreateLayer( hDS, "contour", hSRS, 
@@ -6751,7 +6751,7 @@ STDMETHODIMP CUtils::GenerateContour(BSTR pszSrcFilename, BSTR pszDstFilename, d
 	{
 		this->_lastErrorCode = tkGDAL_ERROR;
 		(*retval) = VARIANT_FALSE;
-        return S_FALSE;
+        return S_OK;
 	}
 
     hFld = OGR_Fld_Create( "ID", OFTInteger );
