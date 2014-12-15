@@ -20,6 +20,7 @@ namespace TestApplication
     using AxMapWinGIS;
 
     using MapWinGIS;
+    using System.Diagnostics;
 
     #endregion
 
@@ -783,7 +784,7 @@ namespace TestApplication
 
                 // selecting only part of overlay, then the check about the varying 
                 // number of shapes in input/output will work
-                var max = Math.Max(overlaySf.NumShapes / 2, 10);
+                var max = Math.Max(overlaySf.NumShapes / 2, 1);
                 for (var i = 0; i < max; i++)
                 {
                     overlaySf.ShapeSelected[i] = true;

@@ -57,9 +57,11 @@ namespace TestApplication
                 return false;
             }
 
-            if (shp.ExportToWKT() != shp2.ExportToWKT())
+            var wkt = shp.ExportToWKT();
+            var wkt2 = shp2.ExportToWKT();
+            if (wkt != wkt2)
             {
-                theForm.Error(string.Empty, "Export to WKT for new shape is different from original one");
+                theForm.Error(string.Empty, "Export to WKT for new shape is different from original one: \n" + wkt + "\n\n" + wkt2);
                 return false;
             }
 
@@ -269,7 +271,7 @@ namespace TestApplication
 
             if (!Directory.Exists(folder))
             {
-                theForm.Error(string.Empty, "Output folder doesn't exists");
+                theForm.Error(string.Empty, "Output folder doesn't exists: " + folder);
                 return false;
             }
 

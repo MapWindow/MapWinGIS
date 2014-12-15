@@ -1857,7 +1857,7 @@ namespace TestApplication
 
                 if (!Directory.Exists(folder))
                 {
-                    theForm.Error(string.Empty, "Output folder doesn't exists");
+                    theForm.Error(string.Empty, "Output folder doesn't exists: " + folder);
                     return false;
                 }
 
@@ -2166,7 +2166,7 @@ namespace TestApplication
 
                 if (!Directory.Exists(folder))
                 {
-                    theForm.Error(string.Empty, "Output folder doesn't exists");
+                    theForm.Error(string.Empty, "Output folder doesn't exists: " + folder);
                     return false;
                 }
 

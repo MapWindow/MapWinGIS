@@ -26,7 +26,6 @@ namespace TestApplication
             using (var form =new Form1())
             {
                 form.ShowDialog(this);
-                form.Close();
             }
 
             GC.Collect();
