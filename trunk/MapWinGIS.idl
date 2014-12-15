@@ -5796,13 +5796,12 @@ library MapWinGIS
 			[id(11)] double ExtentPad;
 			[id(12)] long ExtentHistory;
 			[id(13)] BSTR Key;
-			[id(14)] VARIANT_BOOL DoubleBuffer;
 			[id(15)] IDispatch* GlobalCallback;
 			[id(16), readonly] long NumLayers;
 			[id(17)] IDispatch* Extents;
 			[id(18), readonly] long LastErrorCode;
 			[id(19)] tkLockMode IsLocked;
-			[id(20), readonly] BSTR MapState;
+			
 			[id(118)] VARIANT_BOOL SendOnDrawBackBuffer;
 			[id(151)] VARIANT_BOOL UseSeamlessPan;
 			[id(152)] DOUBLE MouseWheelSpeed;
@@ -5813,7 +5812,6 @@ library MapWinGIS
 			[id(192)] IGeoProjection* GeoProjection;
 			[id(195)] VARIANT_BOOL ScalebarVisible;
 			[id(205)] tkScalebarUnits ScalebarUnits;
-
 			[id(187), readonly] IExtents* MaxExtents;
 			[id(191), readonly] ITiles* Tiles;
 			[id(211), readonly] IFileManager* FileManager;
@@ -5821,6 +5819,12 @@ library MapWinGIS
 			[id(243), readonly] IIdentifier* Identifier;
 			[id(235), readonly] IShapeEditor* ShapeEditor;
 			[id(196), readonly] IMeasuring* Measuring;
+
+#ifdef OLD_API
+			[id(14)] VARIANT_BOOL DoubleBuffer;
+			[id(20), readonly] BSTR MapState;
+#endif
+
 			//}}AFX_ODL_PROP
 
 		methods:
@@ -5924,7 +5928,7 @@ library MapWinGIS
 			[id(174), propput] void Shapefile(LONG LayerHandle, IShapefile* pVal);
 			[id(175), propget] IImage* Image(LONG LayerHandle);
 			[id(175), propput] void Image(LONG LayerHandle, IImage* pVal);
-			[id(150)] VARIANT_BOOL AdjustLayerExtents(long LayerHandle);
+			
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
@@ -6112,6 +6116,7 @@ library MapWinGIS
 			[id(165), propput, nonbrowsable] void CanUseImageGrouping(VARIANT_BOOL nNewValue);
 			[id(80), propget] VARIANT_BOOL ShapeVisible(long LayerHandle, long Shape);
 			[id(80), propput] void ShapeVisible(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
+			[id(150)] VARIANT_BOOL AdjustLayerExtents(long LayerHandle);
 #endif
 #endif
 		
