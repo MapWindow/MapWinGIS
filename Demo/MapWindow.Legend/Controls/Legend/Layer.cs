@@ -158,7 +158,7 @@ namespace MapWindow.Legend.Controls.Legend
             m_Legend = leg;
             //The previous line MUST GO FIRST in the constructor
 
-            Expanded = (m_Legend.m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology);
+            Expanded = true; //(m_Legend.m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology);
             //Expanded = false;
 
             ColorLegend = new ArrayList();
@@ -294,22 +294,16 @@ namespace MapWindow.Legend.Controls.Legend
         {
             get
             {
-                if (m_Legend.m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
-                    return m_UseDynamicVisibility;
-                else
-                    return m_Legend.m_Map.get_LayerDynamicVisibility(this.Handle);
+                return m_Legend.m_Map.get_LayerDynamicVisibility(this.Handle);
             }
             set
             {
-                if (m_Legend.m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
-                    m_UseDynamicVisibility = value;
-                else
-                    m_Legend.m_Map.set_LayerDynamicVisibility(this.Handle, value);
+                m_Legend.m_Map.set_LayerDynamicVisibility(this.Handle, value);
             }
         }
 
         /// <summary>
-        /// Gets or sets the maximium scale at which the layer is still visible when dynamic visiblity is used
+        /// Gets or sets the maximum scale at which the layer is still visible when dynamic visibility is used
         /// </summary>
         public double MaxVisibleScale
         {
@@ -318,7 +312,7 @@ namespace MapWindow.Legend.Controls.Legend
         }
 
         /// <summary>
-        /// Gets or sets the maximium zoom at which the layer is still visible when dynamic visiblity is used
+        /// Gets or sets the maximum zoom at which the layer is still visible when dynamic visibility is used
         /// </summary>
         public int MaxVisibleZoom
         {
@@ -327,7 +321,7 @@ namespace MapWindow.Legend.Controls.Legend
         }
 
         /// <summary>
-        /// Gets or sets the minimum scale at which the layer is still visible when dynamic visiblity is used
+        /// Gets or sets the minimum scale at which the layer is still visible when dynamic visibility is used
         /// </summary>
         public double MinVisibleScale
         {
@@ -336,7 +330,7 @@ namespace MapWindow.Legend.Controls.Legend
         }
 
         /// <summary>
-        /// Gets or sets the minimum zoom at which the layer is still visible when dynamic visiblity is used
+        /// Gets or sets the minimum zoom at which the layer is still visible when dynamic visibility is used
         /// </summary>
         public int MinVisibleZoom
         {
@@ -360,99 +354,8 @@ namespace MapWindow.Legend.Controls.Legend
         /// </summary>
         public void Refresh()
         {
-            NewColorLegend = m_Legend.m_Map.GetColorScheme(this.Handle);
+            //NewColorLegend = m_Legend.m_Map.GetColorScheme(this.Handle);
             m_Legend.Redraw();
-        }
-
-        private object NewColorLegend
-        {
-            set
-            {
-                object ColorScheme = value;
-
-                ColorLegend.Clear();
-
-                Color startColor, endColor;
-                string startVal, endVal;
-                string Caption;
-                int NumBreaks;
-                ColorInfo ci;
-
-                this.HasTransparency = m_Legend.HasTransparency((object)m_Legend.Map.get_GetObject(this.Handle));
-
-                if (ColorScheme != null)
-                {
-                    MapWinGIS.ShapefileColorScheme sfcs = ColorScheme as MapWinGIS.ShapefileColorScheme;
-                    if (sfcs != null)
-                    {
-                        MapWinGIS.ShapefileColorBreak Break = null;
-                        NumBreaks = sfcs.NumBreaks();
-                        for (int i = 0; i < NumBreaks; i++)
-                        {
-                            //get the break
-                            Break = sfcs.get_ColorBreak(i);
-
-                            //get the start and end colors
-                            startColor = Colors.UintToColor(Break.StartColor);
-                            endColor = Colors.UintToColor(Break.EndColor);
-
-                            Caption = Break.Caption;
-                            if (Caption.Length < 1)
-                            {
-                                //get the values for the caption
-                                startVal = ((object)Break.StartValue).ToString();
-
-                                endVal = ((object)Break.EndValue).ToString();
-
-                                if (startVal.CompareTo(endVal) == 0)
-                                    Caption = startVal;
-                                else
-                                    Caption = startVal + " - " + endVal;
-                            }
-
-                            //add to the list
-                            ci = new ColorInfo(startColor, endColor, Caption);
-
-                            ColorLegend.Add(ci);
-                        }
-                    }
-                    else
-                    {
-                        MapWinGIS.GridColorScheme gcs = ColorScheme as MapWinGIS.GridColorScheme;
-                        if (gcs != null)
-                        {
-                            MapWinGIS.GridColorBreak gcBreak;
-                            NumBreaks = gcs.NumBreaks;
-                            for (int i = 0; i < NumBreaks; i++)
-                            {
-                                //get the break
-                                gcBreak = gcs.get_Break(i);
-
-                                //get the start and end colors
-                                startColor = Colors.UintToColor(gcBreak.LowColor);
-                                endColor = Colors.UintToColor(gcBreak.HighColor);
-
-                                Caption = gcBreak.Caption;
-                                if (Caption.Length < 1)
-                                {
-                                    //get the values for the caption
-                                    startVal = Math.Round(gcBreak.LowValue, 3).ToString();
-                                    endVal = Math.Round(gcBreak.HighValue, 3).ToString();
-                                    Caption = startVal + " - " + endVal;//generate a caption
-                                }
-
-                                //add to the list
-                                ci = new ColorInfo(startColor, endColor, Caption);
-                                ColorLegend.Add(ci);
-                            }
-
-                            //now add the NoDataColor information
-                            ci = new ColorInfo(Colors.UintToColor(gcs.NoDataColor), Colors.UintToColor(gcs.NoDataColor), "No Data", HasTransparency);
-                            ColorLegend.Add(ci);
-                        }
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -500,8 +403,7 @@ namespace MapWindow.Legend.Controls.Legend
 
             int ret = 0;
 
-            if (m_Legend.m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology ||
-               (this.Type == eLayerType.Grid || this.Type == eLayerType.Image))
+            if (this.Type == eLayerType.Grid || this.Type == eLayerType.Image)
             {
                 // Our own calculation
                 if (UseExpandedHeight == false && (m_Expanded == false || ColorLegend.Count == 0)) //|| (this.Type == eLayerType.Image))
@@ -513,11 +415,7 @@ namespace MapWindow.Legend.Controls.Legend
                 if (UseExpandedHeight || m_Expanded)
                     ret += (ColorSchemeFieldCaption.Trim() != "" ? Constants.CS_ITEM_HEIGHT : 0) + (StippleSchemeFieldCaption.Trim() != "" ? Constants.CS_ITEM_HEIGHT : 0);
             }
-
-            // --------------------------------------------------------
-            //      new drawing procedure
-            // --------------------------------------------------------
-            else if (m_Legend.m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
+            else
             {
                 var sf = m_Legend.m_Map.get_Shapefile(this.Handle);
 
@@ -580,7 +478,7 @@ namespace MapWindow.Legend.Controls.Legend
                 //    ret += (ColorSchemeFieldCaption.Trim() != "" ? Constants.CS_ITEM_HEIGHT : 0) + (StippleSchemeFieldCaption.Trim() != "" ? Constants.CS_ITEM_HEIGHT : 0);
             }
 
-            m_height = ret;  // cahching height here to get ri of recalculation when there are lots of categories
+            m_height = ret;  // caching height here to get it of recalculation when there are lots of categories
 
             return ret;
         }

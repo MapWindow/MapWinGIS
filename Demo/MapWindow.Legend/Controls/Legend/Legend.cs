@@ -3,7 +3,7 @@
 //you may not use this file except in compliance with the License. You may obtain a copy of the License at
 //http://www.mozilla.org/MPL/
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF
-//ANY KIND, either express or implied. See the License for the specificlanguage governing rights and
+//ANY KIND, either express or implied. See the License for the specific language governing rights and
 //limitations under the License.
 //
 //The Original Code is MapWindow Open Source.
@@ -1076,7 +1076,7 @@ namespace MapWindow.Legend.Controls.Legend
                 DrawGrayCheckbox = true;
             //BoxBackColor = Color.LightGray;
 
-            if (IsSnapshot == false && grp.Expanded == true && grp.Layers.Count > 0 && Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
+            if (IsSnapshot == false && grp.Expanded == true && grp.Layers.Count > 0)
             {
                 int endY = grp.Top + Constants.ITEM_HEIGHT;
 
@@ -1129,7 +1129,7 @@ namespace MapWindow.Legend.Controls.Legend
             }
 
             // group icon
-            if (Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology && m_showGroupFolders)
+            if (m_showGroupFolders)
             {
                 int size = 16;
                 Bitmap bmp = grp.Expanded ? MapWindow.Legend.Properties.Resources.folder_open : MapWindow.Legend.Properties.Resources.folder;
@@ -1140,7 +1140,7 @@ namespace MapWindow.Legend.Controls.Legend
             }
 
             // group name
-            if (grp.Handle == m_SelectedGroupHandle && IsSnapshot == false)
+            if (grp.Handle == m_SelectedGroupHandle && !IsSnapshot)
                 DrawText(DrawTool, grp.Text, rect, m_BoldFont);
             else
                 DrawText(DrawTool, grp.Text, rect, m_Font);
@@ -1178,9 +1178,9 @@ namespace MapWindow.Legend.Controls.Legend
 
                         DrawLayer(DrawTool, lyr, rect, IsSnapshot);
 
-                        bool drawLines = (m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology);
+                        bool drawLines = false;
 
-                        if (IsSnapshot == false && drawLines == true)
+                        if (IsSnapshot == false && drawLines)
                         {
                             //draw sub-item vertical line
                             if (i != 0 && !((Layer)grp.Layers[i - 1]).HideFromLegend)//not the last visible layer
@@ -1223,7 +1223,7 @@ namespace MapWindow.Legend.Controls.Legend
                             rect.Y += lyr.Height;
                             rect.Height -= lyr.Height;
                         }
-                        else if (IsSnapshot == true)
+                        else if (IsSnapshot)
                         {
                             rect.Y += lyr.CalcHeight(true);
                             rect.Height -= lyr.CalcHeight(true);
@@ -1963,218 +1963,6 @@ namespace MapWindow.Legend.Controls.Legend
         }
 
         /// <summary>
-        /// Provides a high-quality snapshot with adjustable resolution and number of columns.
-        /// </summary>
-        /// <param name="LayerHandle">Layer handle.</param>
-        /// <param name="Width">Desired width of image.</param>
-        /// <param name="Columns">Number of desired columns.</param>
-        /// <param name="FontFamily">Font family to use, e.g. "Arial"</param>
-        /// <param name="MinFontSize">Min font size - will start from here and increae until used all width.</param>
-        /// <param name="MaxFontSize">Max font size - will go no higher than this.</param>
-        /// <param name="UnderlineLayerTitles">Underline the main layer titles?</param>
-        /// <param name="BoldLayerTitles">Make the main layer titles bold?</param>
-        /// <returns></returns>
-        /// Chris Michaelis, January 2008
-        public System.Drawing.Bitmap SnapshotHQ(int LayerHandle, int Width, int Columns, string FontFamily, int MinFontSize, int MaxFontSize, bool UnderlineLayerTitles, bool BoldLayerTitles)
-        {
-            int CurLeft = 0,
-                CurTop = 0;
-
-            Layer lyr = m_LayerManager.ItemByHandle(LayerHandle);
-            Bitmap b = new Bitmap(Width, 1000);
-
-            // Establish the size of this image
-            string TestString = m_Map.get_LayerName(lyr.Handle); // ...width estimate - start with layer name, move out to largest break caption
-            object o = m_Map.GetColorScheme(lyr.Handle);
-            if (o != null && o is MapWinGIS.GridColorScheme)
-            {
-                MapWinGIS.GridColorScheme t = (MapWinGIS.GridColorScheme)o;
-                for (int i = 0; i < t.NumBreaks; i++)
-                {
-                    if (t.get_Break(i).Caption.Length > TestString.Length) TestString = t.get_Break(i).Caption;
-                }
-            }
-            else if (o != null && o is MapWinGIS.ShapefileColorScheme)
-            {
-                MapWinGIS.ShapefileColorScheme t = (MapWinGIS.ShapefileColorScheme)o;
-                for (int i = 0; i < t.NumBreaks(); i++)
-                {
-                    if (t.get_ColorBreak(i).Caption.Length > TestString.Length) TestString = t.get_ColorBreak(i).Caption;
-                }
-            }
-
-            Graphics g = Graphics.FromImage(b);
-            int currSize = MinFontSize;
-            SizeF estSize = g.MeasureString(TestString.ToUpper(), new Font(FontFamily, currSize));
-            // Multicolumn sizing mode - font must fit in single column - if Cols > 1
-            // If cols == 1, width/1 = width
-            while (estSize.Width < ((Width / Columns) * .95)) // slight tolerance
-            {
-                if (currSize + 1 > MaxFontSize) break;
-                currSize += 1;
-                estSize = g.MeasureString(TestString, new Font(FontFamily, currSize));
-            }
-
-            Font f = new Font(FontFamily, currSize);
-            int LineSpacing = (int)(estSize.Height * 0.25); // one quarter line height = spacing
-            int boxSize = (int)g.MeasureString("X", f).Width;
-
-            // Recreate image with desired size
-            int itemMultiplier = (Math.Max(1, lyr.ColorLegend.Count) / Columns);
-            // Add in either the height of the breaks + spacig, or spacing + the one box for the color
-            int newHeight = (int)(estSize.Height + (lyr.ColorLegend.Count > 1 ? (estSize.Height * 1.25 * (lyr.ColorLegend.Count)) : estSize.Height * 1.25));
-            // Do we have multiple columns and enough legend items for it to matter?
-            if (Columns > 1 && lyr.ColorLegend.Count > 1)
-            {
-                // Subtract off some height to account for multi column mode
-                // Done with three temporary ints to make this more readible
-                int MaxPerCol = (int)Math.Ceiling((double)lyr.ColorLegend.Count / Columns);
-                int SubtractPerExtraItem = (int)(estSize.Height * 1.25);
-                int ExcessItemsPerCol = lyr.ColorLegend.Count - MaxPerCol;
-                newHeight -= SubtractPerExtraItem * ExcessItemsPerCol;
-            }
-            estSize = new SizeF(Width, newHeight);
-            g.Dispose();
-            b.Dispose();
-            b = new Bitmap((int)estSize.Width, (int)estSize.Height);
-            g = Graphics.FromImage(b);
-
-            // Layer Title
-            g.DrawString(m_Map.get_LayerName(lyr.Handle), new Font(f.FontFamily, f.Size, (BoldLayerTitles ? FontStyle.Bold : FontStyle.Regular) | (UnderlineLayerTitles ? FontStyle.Underline : FontStyle.Regular)), Brushes.Black, CurLeft, CurTop);
-            CurTop += (int)g.MeasureString(m_Map.get_LayerName(lyr.Handle), f).Height + LineSpacing;
-
-            int ColumnCurTop = CurTop; // Layer name covers all columns of the legend
-            int ItemsPerColumn = (lyr.ColorLegend.Count > 0 ? ((int)Math.Floor((lyr.ColorLegend.Count / Columns) + 0.5)) : lyr.ColorLegend.Count);
-
-            int LastColumnUsed = 1;
-
-            // Draw a single symbol if there are no breaks
-            if (lyr.ColorLegend.Count == 0)
-            {
-                DrawHQLayerSymbol(g, lyr, CurLeft + 4, CurTop, boxSize);
-            }
-            else
-            {
-                // Otherwise, draw the breaks into the columns
-                long NumBreaks = lyr.ColorLegend.Count;
-                int CurrentColumn = 1;
-
-                CurLeft = LineSpacing;
-
-                for (int p = 0; p < NumBreaks; p++)
-                {
-                    ColorInfo ci = (ColorInfo)lyr.ColorLegend[p];
-                    if (ci.IsTransparent == false)
-                    {
-                        if (lyr.Type == eLayerType.Grid || lyr.Type == eLayerType.Image)
-                        {
-                            DrawColorPatch(g, ci.StartColor, ci.EndColor, CurTop, CurLeft, boxSize, boxSize, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), false);
-                        }
-                        else
-                        {
-                            System.Drawing.Color sc = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.StartColor);
-                            System.Drawing.Color ec = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.EndColor);
-                            DrawColorPatch(g, sc, ec, CurTop, CurLeft, boxSize, boxSize, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), (m_Map.get_ShapeLayerLineWidth(lyr.Handle) != 0));
-                        }
-                    }
-                    else
-                    {
-                        DrawTransparentPatch(g, CurTop, CurLeft, boxSize, boxSize, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), (m_Map.get_ShapeLayerLineWidth(lyr.Handle) != 0));
-                    }
-
-                    // Old - Untrimmed to column width:
-                    // g.DrawString(ci.Caption, f, Brushes.Black, CurLeft + boxSize, CurTop);
-
-                    // New - Trimmed to column width:
-                    string ActualText = ci.Caption;
-                    while (g.MeasureString(ActualText, f).Width >= (Width / Columns) - LineSpacing - boxSize)
-                    {
-                        ActualText = ActualText.Remove(ActualText.Length - 1, 1);
-                    }
-                    g.DrawString(ActualText, f, Brushes.Black, CurLeft + boxSize, CurTop);
-
-                    LastColumnUsed = CurrentColumn;
-
-                    CurTop += boxSize + LineSpacing;
-                    if (p % ItemsPerColumn == 0 && p != 0) // Last one in this column
-                    {
-                        CurrentColumn += 1;
-                        CurTop = ColumnCurTop;
-                        CurLeft = ((Width / Columns) * (CurrentColumn - 1)) + LineSpacing;
-                    }
-                }
-            }
-
-            g.Dispose();
-
-            if (LastColumnUsed < Columns)
-            {
-                // Image will be bigger than it needs to be. Shrink
-                // it by columns - lastcolumnused
-                System.Drawing.Bitmap newB = new Bitmap(b.Width - ((Width / Columns) * (Columns - LastColumnUsed)), b.Height);
-                Graphics newG = Graphics.FromImage(newB);
-                newG.DrawImageUnscaled(b, 1, 1);
-                newG.Dispose();
-                return newB;
-            }
-
-            return b;
-        }
-
-        //BM Wrote this stuff to allow getting a single color patch from the reports interface
-        //May. 18, 2009
-        public void DrawHQLayerSymbolBreaks(Graphics g, int LayerHandle, int category, int CurTop, int CurLeft, int Width, int Height)
-        {
-            Layer lyr = m_LayerManager.ItemByHandle(LayerHandle);
-            ColorInfo ci = new ColorInfo();
-            if (lyr.ColorLegend.Count >= 1)
-                ci = (ColorInfo)lyr.ColorLegend[category];
-            else
-            {
-                ci.StartColor = Colors.UintToColor(m_Map.get_ShapeLayerFillColor(lyr.Handle));
-                ci.EndColor = Colors.UintToColor(m_Map.get_ShapeLayerLineColor(lyr.Handle));
-            }
-            if (lyr.Type == eLayerType.Grid || lyr.Type == eLayerType.Image)
-            {
-                DrawColorPatch(g, ci.StartColor, ci.EndColor, CurTop, CurLeft, Width, Height, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), false);
-            }
-            else
-            {
-                System.Drawing.Color sc = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.StartColor);
-                System.Drawing.Color ec = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.EndColor);
-                DrawLayerSymbolHQ(g, lyr, CurLeft, CurTop, Width, sc, ec);
-            }
-        }
-
-        private void DrawHQLayerSymbol(Graphics g, Layer lyr, int Left, int Top, int Dimension)
-        {
-            //draw Layer Type symbol
-            if (lyr.Icon == null)
-            {
-                uint Fill = 0,
-                    Line = 0;
-
-                if (lyr.Type == eLayerType.LineShapefile)
-                    Fill = m_Map.get_ShapeLayerLineColor(lyr.Handle);
-                else if (lyr.Type == eLayerType.PointShapefile)
-                    Fill = m_Map.get_ShapeLayerPointColor(lyr.Handle);
-                else if (lyr.Type == eLayerType.PolygonShapefile)
-                {
-                    Fill = m_Map.get_ShapeLayerFillColor(lyr.Handle);
-                    Line = m_Map.get_ShapeLayerLineColor(lyr.Handle);
-                }
-
-                Color FillColor = Colors.UintToColor(Fill);
-                Color LineColor = Colors.UintToColor(Line);
-                DrawLayerSymbolHQ(g, lyr, Left, Top, Dimension, FillColor, LineColor);
-            }
-            else
-            {
-                DrawPicture(g, Left, Top, Dimension, Dimension, lyr.Icon);
-            }
-        }
-
-        /// <summary>
         /// Drawing procedure for the new symbology
         /// </summary>
         /// <param name="DrawTool"></param>
@@ -2224,10 +2012,7 @@ namespace MapWindow.Legend.Controls.Legend
                 if (lyr.Handle == m_SelectedLayerHandle && bounds.Width > 25)
                 {
                     // selects the title only
-                    if (m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
-                        rect.Height = Constants.ITEM_HEIGHT;
-                    else
-                        rect.Height = CurHeight;
+                    rect.Height = Constants.ITEM_HEIGHT;
 
                     if (CurTop + rect.Height > 0 || CurTop < this.ClientRectangle.Height)
                     {
@@ -2256,19 +2041,12 @@ namespace MapWindow.Legend.Controls.Legend
                 CurLeft = bounds.Left + Constants.CHECK_LEFT_PAD;
 
                 bool visible = true;
-                if (m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
+                if (lyr.UseDynamicVisibility)
                 {
-                    visible = m_Map.get_LayerVisible(lyr.Handle);
+                    visible = (m_Map.CurrentScale >= lyr.MinVisibleScale) && (m_Map.CurrentScale <= lyr.MaxVisibleScale)
+                                && m_Map.Tiles.CurrentZoom >= lyr.MinVisibleZoom && m_Map.Tiles.CurrentZoom <= lyr.MaxVisibleZoom;
                 }
-                else
-                {
-                    if (lyr.UseDynamicVisibility)
-                    {
-                        visible = (m_Map.CurrentScale >= lyr.MinVisibleScale) && (m_Map.CurrentScale <= lyr.MaxVisibleScale)
-                                   && m_Map.Tiles.CurrentZoom >= lyr.MinVisibleZoom && m_Map.Tiles.CurrentZoom <= lyr.MaxVisibleZoom;
-                    }
-                    visible = visible && m_Map.get_LayerVisible(lyr.Handle);
-                }
+                visible = visible && m_Map.get_LayerVisible(lyr.Handle);
 
                 DrawCheckBox(DrawTool, CurTop, CurLeft, visible, lyr.UseDynamicVisibility); // draw a grey background if the layer is in dynamic visibility mode.
             }
@@ -2303,52 +2081,49 @@ namespace MapWindow.Legend.Controls.Legend
             // -------------------------------------------------------------
             //    Drawing layer icon
             // -------------------------------------------------------------
-            if (m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
+            if (bounds.Width > 60 && bounds.Right - CurLeft - 41 > textSize.Width)  // -5 (offset)
             {
-                if (bounds.Width > 60 && bounds.Right - CurLeft - 41 > textSize.Width)  // -5 (offset)
+                int top = bounds.Top + Constants.ICON_TOP_PAD;
+                int left = bounds.Right - 36;
+                Image icon;
+
+                if (lyr.Icon != null)
                 {
-                    int top = bounds.Top + Constants.ICON_TOP_PAD;
-                    int left = bounds.Right - 36;
-                    Image icon;
-
-                    if (lyr.Icon != null)
+                    DrawPicture(DrawTool, left, CurTop, Constants.ICON_SIZE, Constants.ICON_SIZE, lyr.Icon);
+                }
+                else if (lyr.Type == eLayerType.Image)
+                {
+                    icon = Icons.Images[cImageIcon];
+                    DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
+                }
+                else if (lyr.Type == eLayerType.Grid)
+                {
+                    icon = Icons.Images[cGridIcon];
+                    DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
+                }
+                else
+                {
+                    // drawing shapefile symbology preview, but only in case the layer is collapsed
+                    if (!lyr.Expanded)
                     {
-                        DrawPicture(DrawTool, left, CurTop, Constants.ICON_SIZE, Constants.ICON_SIZE, lyr.Icon);
-                    }
-                    else if (lyr.Type == eLayerType.Image)
-                    {
-                        icon = Icons.Images[cImageIcon];
-                        DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
-                    }
-                    else if (lyr.Type == eLayerType.Grid)
-                    {
-                        icon = Icons.Images[cGridIcon];
-                        DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
-                    }
-                    else
-                    {
-                        // drawing shapefile symbology preview, but only in case the layer is collapsed
-                        if (!lyr.Expanded)
-                        {
-                            lyr.m_smallIconWasDrawn = true;
-                            Rectangle iconBounds = new Rectangle(left, top, Constants.ICON_SIZE, Constants.ICON_SIZE);
+                        lyr.m_smallIconWasDrawn = true;
+                        Rectangle iconBounds = new Rectangle(left, top, Constants.ICON_SIZE, Constants.ICON_SIZE);
 
-                            // drawing category symbol
-                            IntPtr hdc = DrawTool.GetHdc();
-                            Color clr = (lyr.Handle == m_SelectedLayerHandle && bounds.Width > 25) ? m_SelectedColor : this.BackColor;
-                            uint backColor = Convert.ToUInt32(ColorTranslator.ToOle(clr));
+                        // drawing category symbol
+                        IntPtr hdc = DrawTool.GetHdc();
+                        Color clr = (lyr.Handle == m_SelectedLayerHandle && bounds.Width > 25) ? m_SelectedColor : this.BackColor;
+                        uint backColor = Convert.ToUInt32(ColorTranslator.ToOle(clr));
 
-                            MapWinGIS.Shapefile sf = m_Map.get_GetObject(lyr.Handle) as MapWinGIS.Shapefile;
+                        MapWinGIS.Shapefile sf = m_Map.get_GetObject(lyr.Handle) as MapWinGIS.Shapefile;
 
-                            if (lyr.Type == eLayerType.PointShapefile)
-                                sf.DefaultDrawingOptions.DrawPoint(hdc, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
-                            else if (lyr.Type == eLayerType.LineShapefile)
-                                sf.DefaultDrawingOptions.DrawLine(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
-                            else if (lyr.Type == eLayerType.PolygonShapefile)
-                                sf.DefaultDrawingOptions.DrawRectangle(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                        if (lyr.Type == eLayerType.PointShapefile)
+                            sf.DefaultDrawingOptions.DrawPoint(hdc, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                        else if (lyr.Type == eLayerType.LineShapefile)
+                            sf.DefaultDrawingOptions.DrawLine(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
+                        else if (lyr.Type == eLayerType.PolygonShapefile)
+                            sf.DefaultDrawingOptions.DrawRectangle(hdc, left, top, Constants.ICON_SIZE - 1, Constants.ICON_SIZE - 1, false, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);
 
-                            DrawTool.ReleaseHdc(hdc);
-                        }
+                        DrawTool.ReleaseHdc(hdc);
                     }
                 }
 
@@ -2358,15 +2133,15 @@ namespace MapWindow.Legend.Controls.Legend
                     var sf = m_Map.Shapefile[lyr.Handle];
                     if (sf != null)
                     {
-                        int top = bounds.Top + Constants.ICON_TOP_PAD;
-                        int left = bounds.Right - 56;
+                        int top2 = bounds.Top + Constants.ICON_TOP_PAD;
+                        int left2 = bounds.Right - 56;
 
                         //Image icon = null;
                         double scale = m_Map.CurrentScale;
                         bool labelsVisible = sf.Labels.Count > 0 && sf.Labels.Visible && sf.Labels.Expression.Trim() != "";
                         labelsVisible &= scale >= sf.Labels.MinVisibleScale && scale <= sf.Labels.MaxVisibleScale;
-                        Image icon = labelsVisible ? Icons.Images[cActiveLabelIcon] : Icons.Images[cDimmedLabelIcon];
-                        DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
+                        Image icon2 = labelsVisible ? Icons.Images[cActiveLabelIcon] : Icons.Images[cDimmedLabelIcon];
+                        DrawPicture(DrawTool, left2, top2, Constants.ICON_SIZE, Constants.ICON_SIZE, icon2);
                     }
                 }
 
@@ -2376,46 +2151,9 @@ namespace MapWindow.Legend.Controls.Legend
                     var sf = m_Map.Shapefile[lyr.Handle];
                     if (sf != null && sf.InteractiveEditing)
                     {
-                        int top = bounds.Top + Constants.ICON_TOP_PAD;
-                        int left = bounds.Right - 76;
-
-                        Image icon = Icons.Images[cEditing];
-                        DrawPicture(DrawTool, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
-                    }
-                }
-            }
-            else
-            {
-                if (bounds.Width > 60)
-                {
-                    //draw Layer Type symbol
-                    if (lyr.Icon == null)
-                    {
-                        uint Fill = 0,
-                            Line = 0;
-
-                        if (lyr.Type == eLayerType.LineShapefile)
-                            Fill = m_Map.get_ShapeLayerLineColor(lyr.Handle);
-                        else if (lyr.Type == eLayerType.PointShapefile)
-                            Fill = m_Map.get_ShapeLayerPointColor(lyr.Handle);
-                        else if (lyr.Type == eLayerType.PolygonShapefile)
-                        {
-                            Fill = m_Map.get_ShapeLayerFillColor(lyr.Handle);
-                            Line = m_Map.get_ShapeLayerLineColor(lyr.Handle);
-                        }
-
-                        CurTop = bounds.Top + Constants.ICON_TOP_PAD;
-                        CurLeft = bounds.Right - Constants.ICON_RIGHT_PAD;
-
-                        Color FillColor = Colors.UintToColor(Fill);
-                        Color LineColor = Colors.UintToColor(Line);
-                        DrawLayerSymbol(DrawTool, lyr.Type, CurTop, CurLeft, FillColor, LineColor, lyr.Handle);
-                    }
-                    else
-                    {
-                        CurTop = bounds.Top + Constants.ICON_TOP_PAD;
-                        CurLeft = bounds.Right - Constants.ICON_RIGHT_PAD;
-                        DrawPicture(DrawTool, CurLeft, CurTop, Constants.ICON_SIZE, Constants.ICON_SIZE, lyr.Icon);
+                        int top2 = bounds.Top + Constants.ICON_TOP_PAD;
+                        int left2 = bounds.Right - 76;
+                        DrawPicture(DrawTool, left2, top2, Constants.ICON_SIZE, Constants.ICON_SIZE, Icons.Images[cEditing]);
                     }
                 }
             }
@@ -2423,10 +2161,9 @@ namespace MapWindow.Legend.Controls.Legend
             // -------------------------------------------------------------
             //    Drawing categories and expansion box for shapefiles
             // -------------------------------------------------------------
-            if (m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology &&
-                                                    (lyr.Type == eLayerType.PointShapefile ||
-                                                    lyr.Type == eLayerType.LineShapefile ||
-                                                    lyr.Type == eLayerType.PolygonShapefile))
+            if (lyr.Type == eLayerType.PointShapefile || 
+                lyr.Type == eLayerType.LineShapefile || 
+                lyr.Type == eLayerType.PolygonShapefile)
             {
                 if (bounds.Width > 17 && IsSnapshot == false)
                 {
@@ -2457,71 +2194,6 @@ namespace MapWindow.Legend.Controls.Legend
                         //SetRect(&LocalBounds, bounds.left + LIST_ITEM_INDENT,Top,bounds.right-ITEM_PAD,Top+lyr.Height);
                         rect = new Rectangle(bounds.Left, bounds.Top, bounds.Width - Constants.ITEM_RIGHT_PAD, bounds.Height);
                         DrawExpansionBox(DrawTool, rect.Top + Constants.EXPAND_BOX_TOP_PAD, rect.Left + Constants.EXPAND_BOX_LEFT_PAD, lyr.Expanded);
-                    }
-                }
-
-                // -------------------------------------------------------------
-                //    Drawing old style legend
-                // -------------------------------------------------------------
-                int p = 0;
-                if (!Handled && (lyr.ColorLegend.Count > 0 || lyr.Icon != null))
-                {
-                    if ((IsSnapshot == true || lyr.Expanded == true) && bounds.Width > 47)
-                    {
-                        //figure out if we can clip any of the breaks at the top
-                        if (bounds.Top + Constants.ITEM_HEIGHT < this.ClientRectangle.Top && IsSnapshot == false)
-                        {
-                            int Difference = this.ClientRectangle.Top - (bounds.Top + Constants.ITEM_HEIGHT);
-                            p = Difference / Constants.CS_ITEM_HEIGHT;
-                        }
-
-                        
-                        // Header Text
-                        if (lyr.ColorSchemeFieldCaption != "")
-                        {
-                            rect = new Rectangle(bounds.Left + 7, bounds.Top + Constants.ITEM_HEIGHT + p * Constants.CS_ITEM_HEIGHT, bounds.Width - Constants.TEXT_RIGHT_PAD_NO_ICON - Constants.CS_TEXT_LEFT_INDENT, Constants.TEXT_HEIGHT);
-
-                            if (lyr.StippleSchemeFieldCaption != "")
-                            {
-                                DrawText(DrawTool, "Fill: " + lyr.ColorSchemeFieldCaption, rect, m_Font, Color.Black);
-                            }
-                            else
-                            {
-                                DrawText(DrawTool, lyr.ColorSchemeFieldCaption, rect, m_Font, Color.Black);
-                            }
-                        }
-                        rect = new Rectangle(Constants.CS_PATCH_LEFT_INDENT, bounds.Top + Constants.ITEM_HEIGHT, rect.Width - Constants.CS_PATCH_LEFT_INDENT, lyr.CalcHeight(IsSnapshot));
-
-                        long NumBreaks = lyr.ColorLegend.Count;
-
-                        for (; p < NumBreaks; p++)
-                        {
-                            int offset = p + (lyr.ColorSchemeFieldCaption != "" ? 1 : 0);
-                            ColorInfo ci = (ColorInfo)lyr.ColorLegend[p];
-                            if (ci.IsTransparent == false)
-                            {
-                                if (lyr.Type == eLayerType.Grid || lyr.Type == eLayerType.Image)
-                                {
-                                    DrawColorPatch(DrawTool, ci.StartColor, ci.EndColor, bounds.Top + Constants.ITEM_HEIGHT + offset * Constants.CS_ITEM_HEIGHT, bounds.Left + Constants.CS_PATCH_LEFT_INDENT, Constants.CS_PATCH_HEIGHT, Constants.CS_PATCH_WIDTH, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), true);
-                                }
-                                else
-                                {
-                                    System.Drawing.Color sc = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.StartColor);
-                                    System.Drawing.Color ec = System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), ci.EndColor);
-                                    DrawColorPatch(DrawTool, sc, ec, bounds.Top + Constants.ITEM_HEIGHT + offset * Constants.CS_ITEM_HEIGHT, bounds.Left + Constants.CS_PATCH_LEFT_INDENT, Constants.CS_PATCH_HEIGHT, Constants.CS_PATCH_WIDTH, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), (m_Map.get_ShapeLayerLineWidth(lyr.Handle) != 0), lyr.Type);
-                                }
-                            }
-                            else
-                            {
-                                DrawTransparentPatch(DrawTool, bounds.Top + Constants.ITEM_HEIGHT + offset * Constants.CS_ITEM_HEIGHT, bounds.Left + Constants.CS_PATCH_LEFT_INDENT, Constants.CS_PATCH_HEIGHT, Constants.CS_PATCH_WIDTH, System.Drawing.ColorTranslator.FromOle(Convert.ToInt32(m_Map.get_ShapeLayerLineColor(lyr.Handle))), (m_Map.get_ShapeLayerLineWidth(lyr.Handle) != 0));
-                            }
-
-                            rect = new Rectangle(bounds.Left + Constants.CS_TEXT_LEFT_INDENT, bounds.Top + Constants.ITEM_HEIGHT + offset * Constants.CS_ITEM_HEIGHT, bounds.Width - Constants.TEXT_RIGHT_PAD_NO_ICON - Constants.CS_TEXT_LEFT_INDENT, Constants.TEXT_HEIGHT);
-                            DrawText(DrawTool, ci.Caption, rect, m_Font, Color.Black);
-
-                            if (rect.Top >= this.ClientRectangle.Bottom && IsSnapshot == false)
-                                break;
-                        }
                     }
                 }
             }
@@ -2803,25 +2475,6 @@ namespace MapWindow.Legend.Controls.Legend
             DrawText(DrawTool, name, rect, m_Font, this.ForeColor);
         }
 
-        private System.Drawing.Drawing2D.HatchStyle GetHatchStyle(MapWinGIS.tkFillStipple stip)
-        {
-            switch (stip)
-            {
-                case MapWinGIS.tkFillStipple.fsDiagonalDownLeft:
-                    return System.Drawing.Drawing2D.HatchStyle.DarkDownwardDiagonal;
-                case MapWinGIS.tkFillStipple.fsDiagonalDownRight:
-                    return System.Drawing.Drawing2D.HatchStyle.DarkUpwardDiagonal;
-                case MapWinGIS.tkFillStipple.fsHorizontalBars:
-                    return System.Drawing.Drawing2D.HatchStyle.DarkHorizontal;
-                case MapWinGIS.tkFillStipple.fsPolkaDot:
-                    return System.Drawing.Drawing2D.HatchStyle.OutlinedDiamond;
-                case MapWinGIS.tkFillStipple.fsVerticalBars:
-                    return System.Drawing.Drawing2D.HatchStyle.DarkVertical;
-                default:
-                    return System.Drawing.Drawing2D.HatchStyle.Max;
-            }
-        }
-
         /// <summary>
         /// Drawing icon for the new symbology
         /// </summary>
@@ -2881,384 +2534,6 @@ namespace MapWindow.Legend.Controls.Legend
             }
 
             DrawTool.SmoothingMode = OldSmoothingMode;
-        }
-
-        /// <summary>
-        /// Drawing icon for the old symbology
-        /// </summary>
-        /// <param name="DrawTool"></param>
-        /// <param name="LayerType"></param>
-        /// <param name="TopPos"></param>
-        /// <param name="LeftPos"></param>
-        /// <param name="FillColor"></param>
-        /// <param name="OutlineColor"></param>
-        /// <param name="LayerHandle"></param>
-        private void DrawLayerSymbol(Graphics DrawTool, eLayerType LayerType, int TopPos, int LeftPos, Color FillColor, Color OutlineColor, int LayerHandle)
-        {
-            System.Drawing.Drawing2D.SmoothingMode OldSmoothingMode;
-            OldSmoothingMode = DrawTool.SmoothingMode;
-
-            try
-            {
-                DrawTool.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                Image icon;
-                Pen pen;
-
-                switch (LayerType)
-                {
-                    case eLayerType.Grid:
-                        icon = Icons.Images[cGridIcon];
-                        DrawPicture(DrawTool, LeftPos, TopPos, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
-                        break;
-                    case eLayerType.Image:
-                        icon = Icons.Images[cImageIcon];
-                        DrawPicture(DrawTool, LeftPos, TopPos, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
-                        break;
-                    case eLayerType.LineShapefile:
-                        pen = new Pen(FillColor, 2);
-
-                        OldSmoothingMode = DrawTool.SmoothingMode;
-                        DrawTool.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-                        DrawTool.DrawLine(pen, LeftPos, TopPos + 8, LeftPos + 4, TopPos + 3);
-                        DrawTool.DrawLine(pen, LeftPos + 4, TopPos + 3, LeftPos + 9, TopPos + 10);
-                        DrawTool.DrawLine(pen, LeftPos + 9, TopPos + 10, LeftPos + 13, TopPos + 4);
-
-                        DrawTool.SmoothingMode = OldSmoothingMode;
-
-                        break;
-                    case eLayerType.PointShapefile:
-                        pen = new Pen(FillColor);
-
-                        float offset;
-                        MapWinGIS.tkPointType pntType;
-                        pntType = m_Map.get_ShapeLayerPointType(LayerHandle);
-                        Point[] pnts;
-
-                        switch (pntType)
-                        {
-                            case MapWinGIS.tkPointType.ptCircle:
-                                offset = (float)(.2 * Constants.ICON_SIZE);
-                                DrawTool.FillEllipse(pen.Brush, (float)LeftPos + offset, TopPos + offset, 7, 7);
-                                break;
-                            case MapWinGIS.tkPointType.ptDiamond:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[4];
-
-                                //top
-                                pnts[0] = new Point((int)(LeftPos + offset), TopPos + 2);
-                                //left
-                                pnts[1] = new Point(LeftPos + 2, (int)(TopPos + offset));
-                                //bottom
-                                pnts[2] = new Point((int)(LeftPos + offset), TopPos + Constants.ICON_SIZE - 3);
-                                //right
-                                pnts[3] = new Point(LeftPos + Constants.ICON_SIZE - 3, (int)(TopPos + offset));
-
-                                DrawTool.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptSquare:
-                                offset = (float)(.25 * Constants.ICON_SIZE);
-                                DrawTool.FillRectangle(pen.Brush, (int)(LeftPos + offset), (int)(TopPos + offset), 6, 6);
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleDown:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[3];
-
-                                //bottom middle
-                                pnts[0] = new Point((int)(LeftPos + offset), TopPos + Constants.ICON_SIZE - 3);
-                                //top right
-                                pnts[1] = new Point(LeftPos + Constants.ICON_SIZE - 3, TopPos + 3);
-                                //top left
-                                pnts[2] = new Point((int)(LeftPos + 3), TopPos + 3);
-
-                                DrawTool.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleLeft:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[3];
-
-                                //left middle
-                                pnts[0] = new Point(LeftPos + 3, (int)(TopPos + offset));
-                                //top right
-                                pnts[1] = new Point(LeftPos + Constants.ICON_SIZE - 3, TopPos + 3);
-                                //bottom right
-                                pnts[2] = new Point(LeftPos + Constants.ICON_SIZE - 3, TopPos + Constants.ICON_SIZE - 3);
-
-                                DrawTool.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleRight:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[3];
-
-                                //right middle
-                                pnts[0] = new Point(LeftPos + Constants.ICON_SIZE - 3, (int)(TopPos + offset));
-                                //top left
-                                pnts[1] = new Point(LeftPos + 3, TopPos + 3);
-                                //bottom left
-                                pnts[2] = new Point(LeftPos + 3, TopPos + Constants.ICON_SIZE - 3);
-
-                                DrawTool.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleUp:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[3];
-
-                                //top middle
-                                pnts[0] = new Point((int)(LeftPos + offset), TopPos + 3);
-                                //bottom right
-                                pnts[1] = new Point(LeftPos + Constants.ICON_SIZE - 3, TopPos + Constants.ICON_SIZE - 3);
-                                //bottom left
-                                pnts[2] = new Point((int)(LeftPos + 3), TopPos + Constants.ICON_SIZE - 3);
-
-                                DrawTool.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptUserDefined:
-                                object img = m_Map.get_UDPointType(LayerHandle);
-                                DrawPicture(DrawTool, LeftPos, TopPos, Constants.ICON_SIZE, Constants.ICON_SIZE, img);
-                                img = null;
-                                break;
-                        }
-                        break;
-                    case eLayerType.PolygonShapefile:
-                        bool DrawFill = m_Map.get_ShapeLayerDrawFill(LayerHandle);
-                        MapWinGIS.tkFillStipple fillStyle = m_Map.get_ShapeLayerFillStipple(LayerHandle);
-
-                        Pen FillPen;
-                        Pen OutlinePen = new Pen(OutlineColor, 2);
-
-                        Rectangle rect = new Rectangle(LeftPos + 1, TopPos + 1, Constants.ICON_SIZE - 2, Constants.ICON_SIZE - 2);
-
-                        if (DrawFill == true)
-                        {
-                            switch (fillStyle)
-                            {
-                                case MapWinGIS.tkFillStipple.fsNone:
-                                    // Chris Michaelis 7/5/2007 - Changed this coloring to take into account transparency "paleness"
-                                    FillPen = new Pen(System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(LayerHandle) * 255), FillColor));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsDiagonalDownLeft:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightUpwardDiagonal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsDiagonalDownRight:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsHorizontalBars:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightHorizontal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsPolkaDot:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.SmallCheckerBoard, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsVerticalBars:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightVertical, Color.Black, Color.White));
-                                    break;
-                                default:
-                                    // Chris Michaelis 7/5/2007 - Changed this coloring to take into account transparency "paleness"
-                                    FillPen = new Pen(System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(LayerHandle) * 255), FillColor));
-                                    break;
-                            }
-
-                            DrawTool.FillRectangle(FillPen.Brush, rect);
-                        }
-                        else
-                        {
-                            //							Color HatchColor;
-                            //							globals.GetHSL(FillColor,out hue, out sat, out lum);
-                            //
-                            //							if(lum >= .75)
-                            //								HatchColor = globals.HSLtoColor(0f,0f,lum -.5f);
-                            //							else if (lum >= .5)
-                            //								HatchColor = globals.HSLtoColor(0f,0f,lum -.25f);
-                            //							else if (lum >= .25)
-                            //								HatchColor = globals.HSLtoColor(0f,0f,lum +.25f);
-                            //							else
-                            //								HatchColor = globals.HSLtoColor(0f,0f,lum +.5f);
-                            //
-                            //                          FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightUpwardDiagonal,HatchColor,FillColor));
-                            //							DrawTool.FillRectangle(FillPen.Brush,rect);
-                        }
-
-                        if (m_Map.get_ShapeLayerLineWidth(LayerHandle) > 0) DrawTool.DrawRectangle(OutlinePen, rect);
-
-                        break;
-                }
-            }
-            catch (System.Exception ex)
-            {
-                string temp = ex.Message;
-            }
-
-            DrawTool.SmoothingMode = OldSmoothingMode;
-        }
-
-        private void DrawLayerSymbolHQ(Graphics g, Layer lyr, int Left, int Top, int Dimension, Color FillColor, Color OutlineColor)
-        {
-            System.Drawing.Drawing2D.SmoothingMode OldSmoothingMode;
-            OldSmoothingMode = g.SmoothingMode;
-
-            try
-            {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                Image icon;
-                Pen pen;
-
-                switch (lyr.Type)
-                {
-                    case eLayerType.Grid:
-                        icon = Icons.Images[cGridIcon];
-                        DrawPicture(g, Left, Top, Dimension, Dimension, icon);
-                        break;
-                    case eLayerType.Image:
-                        icon = Icons.Images[cImageIcon];
-                        DrawPicture(g, Left, Top, Dimension, Dimension, icon);
-                        break;
-                    case eLayerType.LineShapefile:
-                        pen = new Pen(FillColor, 2);
-
-                        OldSmoothingMode = g.SmoothingMode;
-                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-                        g.DrawLine(pen, Left, Top + (Dimension / 2), Left + (Dimension / 3), Top);
-                        g.DrawLine(pen, Left + (Dimension / 3), Top, (int)(Left + (Dimension * (2.0 / 3.0))), Top + Dimension);
-                        g.DrawLine(pen, (int)(Left + (Dimension * (2.0 / 3.0))), Top + Dimension, Left + Dimension, Top + (Dimension / 2));
-
-                        g.SmoothingMode = OldSmoothingMode;
-
-                        break;
-                    case eLayerType.PointShapefile:
-                        pen = new Pen(FillColor);
-
-                        float offset;
-                        MapWinGIS.tkPointType pntType;
-                        pntType = m_Map.get_ShapeLayerPointType(lyr.Handle);
-                        Point[] pnts;
-
-                        switch (pntType)
-                        {
-                            case MapWinGIS.tkPointType.ptCircle:
-                                g.FillEllipse(pen.Brush, Left, Top, Dimension, Dimension);
-                                break;
-
-                            case MapWinGIS.tkPointType.ptDiamond:
-                                pnts = new Point[4];
-
-                                //top
-                                pnts[0] = new Point(Left, Top + (Dimension / 2));
-                                //left
-                                pnts[1] = new Point(Left + (Dimension / 2), Top + Dimension);
-                                //bottom
-                                pnts[2] = new Point(Left + Dimension, Top + (Dimension / 2));
-                                //right
-                                pnts[3] = new Point(Left + (Dimension / 2), Top);
-
-                                g.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptSquare:
-                                g.FillRectangle(pen.Brush, Left, Top, Left + Dimension, Top + Dimension);
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleDown:
-                                offset = (float)(.5 * Constants.ICON_SIZE);
-                                pnts = new Point[3];
-
-                                pnts[0] = new Point(Left, Top);
-                                pnts[1] = new Point(Left + (Dimension / 2), Top + Dimension);
-                                pnts[2] = new Point(Left + Dimension, Top);
-
-                                g.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleLeft:
-                                pnts = new Point[3];
-
-                                pnts[0] = new Point(Left + Dimension, Top);
-                                pnts[1] = new Point(Left, Top + (Dimension / 2));
-                                pnts[2] = new Point(Left + Dimension, Top + Dimension);
-
-                                g.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleRight:
-                                pnts = new Point[3];
-
-                                pnts[0] = new Point(Left, Top);
-                                pnts[1] = new Point(Left + Dimension, Top + (Dimension / 2));
-                                pnts[2] = new Point(Left, Top + Dimension);
-
-                                g.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptTriangleUp:
-                                pnts = new Point[3];
-
-                                pnts[0] = new Point(Left, Top + Dimension);
-                                pnts[1] = new Point(Left + (Dimension / 2), Top);
-                                pnts[2] = new Point(Left + Dimension, Top + Dimension);
-
-                                g.FillPolygon(pen.Brush, pnts);
-                                pnts = null;
-                                break;
-                            case MapWinGIS.tkPointType.ptUserDefined:
-                                object img = m_Map.get_UDPointType(lyr.Handle);
-                                DrawPicture(g, Left, Top, Dimension, Dimension, img);
-                                img = null;
-                                break;
-                        }
-                        break;
-                    case eLayerType.PolygonShapefile:
-                        bool DrawFill = m_Map.get_ShapeLayerDrawFill(lyr.Handle);
-                        MapWinGIS.tkFillStipple fillStyle = m_Map.get_ShapeLayerFillStipple(lyr.Handle);
-
-                        Pen FillPen;
-                        Pen OutlinePen = new Pen(OutlineColor, 2);
-                        Rectangle rect = new Rectangle(Left, Top, Dimension, Dimension);
-
-                        if (DrawFill == true)
-                        {
-                            switch (fillStyle)
-                            {
-                                case MapWinGIS.tkFillStipple.fsNone:
-                                    FillPen = new Pen(System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), FillColor));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsDiagonalDownLeft:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightUpwardDiagonal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsDiagonalDownRight:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightDownwardDiagonal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsHorizontalBars:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightHorizontal, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsPolkaDot:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.SmallCheckerBoard, Color.Black, Color.White));
-                                    break;
-                                case MapWinGIS.tkFillStipple.fsVerticalBars:
-                                    FillPen = new Pen(new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LightVertical, Color.Black, Color.White));
-                                    break;
-                                default:
-                                    // Chris Michaelis 7/5/2007 - Changed this coloring to take into account transparency "paleness"
-                                    FillPen = new Pen(System.Drawing.Color.FromArgb((int)(m_Map.get_ShapeLayerFillTransparency(lyr.Handle) * 255), FillColor));
-                                    break;
-                            }
-
-                            g.FillRectangle(FillPen.Brush, rect);
-                        }
-
-                        if (m_Map.get_ShapeLayerLineWidth(lyr.Handle) > 0) g.DrawRectangle(OutlinePen, rect);
-
-                        break;
-                }
-            }
-            catch (System.Exception ex)
-            {
-                string temp = ex.Message;
-            }
-
-            g.SmoothingMode = OldSmoothingMode;
         }
 
         /// <summary>
@@ -3435,8 +2710,7 @@ namespace MapWindow.Legend.Controls.Legend
                             CurHeight = Constants.EXPAND_BOX_SIZE;
                             bounds = new Rectangle(CurLeft, CurTop, CurWidth, CurHeight);
 
-                            if (m_Map.ShapeDrawingMethod != MapWinGIS.tkShapeDrawingMethod.dmNewSymbology ||
-                               (lyr.Type == eLayerType.Image || lyr.Type == eLayerType.Grid))
+                            if (lyr.Type == eLayerType.Image || lyr.Type == eLayerType.Grid)
                             {
                                 if (bounds.Contains(point) == true && (lyr.ColorLegend.Count > 0 || lyr.ExpansionBoxForceAllowed ))
                                 {
@@ -3450,7 +2724,7 @@ namespace MapWindow.Legend.Controls.Legend
                                     return lyr;
                                 }
                             }
-                            else if (m_Map.ShapeDrawingMethod == MapWinGIS.tkShapeDrawingMethod.dmNewSymbology)
+                            else
                             {
                                 
                                 if (bounds.Contains(point))
@@ -3610,174 +2884,14 @@ namespace MapWindow.Legend.Controls.Legend
             return null;
         }
 
-        /// <summary>
-        /// Locates the layer that was clicked on in the legend, based on the coordinate within the legend (0,0) being top left of legend)
-        /// </summary>
-        /// <param name="point">The point inside of the legend that was clicked.</param>
-        /// <param name="InCheckBox">(by reference/out) Indicates whether a layer visibilty check box was clicked.</param>
-        /// <param name="InExpansionBox">(by reference/out) Indicates whether the expand box next to a layer was clicked.</param>
-        /// <param name="ContainingGroupIndex">(by reference/out) Indicates the group ID of the layer that was clicked, if any.</param>
-        /// <param name="CategoryIndex">(by reference/out) The index of category that was clicked (-1 by default)</param>
-        /// <returns>Returns the group that was clicked on or null/nothing.</returns>
-        //public Layer FindClickedLayer(Point point,out bool InCheckBox,out bool InExpansionBox, out bool InColorBox, out bool InCharts,
-        //                              out int ContainingGroupIndex, out int CategoryIndex, out int ChartFieldIndex)
-        //{
-        //    int GroupCount = m_AllGroups.Count;
-        //    int LayerCount;
-
-        //    InCheckBox = InExpansionBox = InColorBox = InCharts = false;
-        //    ContainingGroupIndex = -1;
-        //    CategoryIndex = -1;
-        //    ChartFieldIndex = - 1;
-
-        //    Layer lyr = null;
-        //    Group grp = null;
-
-        //    int CurLeft =0,
-        //        CurTop =0,
-        //        CurWidth =0,
-        //        CurHeight =0;
-        //    Rectangle bounds;
-
-        //    for (int i = 0; i < GroupCount; i++)
-        //    {
-        //        grp = (Group)m_AllGroups[i];
-
-        //        if(grp.Expanded == false)
-        //            continue;
-
-        //        LayerCount = grp.Layers.Count;
-
-        //        for(int j = 0; j < LayerCount; j++)
-        //        {
-        //            lyr = (Layer)grp.Layers[j];
-
-        //            //see if we are inside the current Layer
-        //            CurLeft = Constants.LIST_ITEM_INDENT;
-        //            CurTop = lyr.Top;
-        //            CurWidth = this.Width - CurLeft - Constants.ITEM_RIGHT_PAD;
-        //            CurHeight = lyr.Height;
-        //            bounds = new Rectangle(CurLeft,CurTop,CurWidth,CurHeight);
-
-        //            if( bounds.Contains(point))
-        //            {
-        //                //we are inside the Layer boundaries,
-        //                //but we need to narrow down the search
-        //                ContainingGroupIndex = i;
-
-        //                //check to see if in the check box
-        //                CurLeft = Constants.LIST_ITEM_INDENT + Constants.CHECK_LEFT_PAD + 1;
-        //                CurTop = lyr.Top + Constants.CHECK_TOP_PAD + 1;
-        //                CurWidth = Constants.CHECK_BOX_SIZE-1;
-        //                CurHeight = Constants.CHECK_BOX_SIZE-1;
-        //                bounds = new Rectangle(CurLeft,CurTop,CurWidth,CurHeight);
-
-        //                if(bounds.Contains(point))
-        //                {
-        //                    //we are in the check box
-        //                    InCheckBox = true;
-        //                    return lyr;
-        //                }
-        //                else
-        //                {
-        //                    //check to see if we are in the expansion box for this item
-        //                    CurLeft = Constants.LIST_ITEM_INDENT + Constants.EXPAND_BOX_LEFT_PAD + 1;
-        //                    CurTop = lyr.Top + Constants.EXPAND_BOX_TOP_PAD + 1;
-        //                    CurWidth = Constants.EXPAND_BOX_SIZE;
-        //                    CurHeight = Constants.EXPAND_BOX_SIZE;
-        //                    bounds = new Rectangle(CurLeft,CurTop,CurWidth,CurHeight);
-
-        //                    if (m_Map.VersionNumber == 0 || (lyr.Type == eLayerType.Image || lyr.Type == eLayerType.Grid))
-        //                    {
-        //                        if (bounds.Contains(point) == true && (lyr.ColorLegend.Count > 0 || lyr.ExpansionBoxForceAllowed ||
-        //                                                               (lyr.HatchingScheme != null && lyr.HatchingScheme.NumHatches() > 0) ||
-        //                                                               (lyr.PointImageScheme != null && lyr.PointImageScheme.NumberItems > 0)))
-        //                        {
-        //                            //We are in the Expansion box
-        //                            InExpansionBox = true;
-        //                            return lyr;
-        //                        }
-        //                        else
-        //                        {
-        //                            //we aren't in the checkbox or the expansion box
-        //                            return lyr;
-        //                        }
-        //                    }
-        //                    else if (m_Map.VersionNumber == 1)
-        //                    {
-        //                        MapWinGIS.Shapefile sf = m_Map.get_GetObject(lyr.Handle) as MapWinGIS.Shapefile;
-        //                        if (bounds.Contains(point))
-        //                        {
-        //                            //We are in the Expansion box
-        //                            InExpansionBox = true;
-        //                            return lyr;
-        //                        }
-        //                        else
-        //                        {
-        //                            // check to see if we are in the default color box
-        //                            CurHeight = lyr.get_CategoryHeight(sf.DefaultDrawingOptions);
-        //                            CurWidth = lyr.get_CategoryWidth(sf.DefaultDrawingOptions);
-        //                            CurTop = lyr.Top + Constants.ITEM_HEIGHT + 2;
-        //                            CurLeft = Constants.LIST_ITEM_INDENT + Constants.TEXT_LEFT_PAD;
-        //                            if (CurWidth != Constants.ICON_WIDTH)
-        //                            {
-        //                                CurLeft -= ((CurWidth - Constants.ICON_WIDTH) / 2);
-        //                            }
-        //                            bounds = new Rectangle(CurLeft, CurTop, CurWidth, CurHeight);
-
-        //                            if (bounds.Contains(point))
-        //                            {
-        //                                InColorBox = true;
-        //                                return lyr;
-        //                            }
-        //                            else
-        //                            {
-        //                                CurLeft = Constants.LIST_ITEM_INDENT + Constants.TEXT_LEFT_PAD;
-        //                                CurTop = lyr.Top + Constants.ITEM_HEIGHT + 2;   // name
-        //                                CurTop += CurHeight + 2;                        // default symbology
-        //                                CurTop += Constants.CS_ITEM_HEIGHT + 2;         // categories caption
-
-        //                                for (int cat = 0; cat < sf.Categories.NumCategories; cat++)
-        //                                {
-        //                                    MapWinGIS.ShapeDrawingOptions options = sf.Categories.get_Item(cat).DrawingOptions;
-        //                                    CurWidth = lyr.get_CategoryWidth(options);
-        //                                    CurHeight = lyr.get_CategoryHeight(options);
-        //                                    bounds = new Rectangle(CurLeft, CurTop, CurWidth, CurHeight);
-
-        //                                    CurTop += CurHeight;
-
-        //                                    if (bounds.Contains(point))
-        //                                    {
-        //                                        InColorBox = true;
-        //                                        CategoryIndex = cat;
-        //                                        return lyr;
-        //                                    }
-        //                                }
-
-        //                                //we aren't in the checkbox, expansion box or colorbox
-        //                                return lyr;
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return null;
-        //}
+        
 
         /// <summary>
         /// Gets whether or not the legend is locked.  See Lock() function for description
         /// </summary>
         public bool Locked
         {
-            get
-            {
-                if (m_LockCount > 0)
-                    return true;
-                else
-                    return false;
-            }
+            get { return m_LockCount > 0; }
         }
 
         /// <summary>
@@ -4681,112 +3795,6 @@ namespace MapWindow.Legend.Controls.Legend
                 }
             }
         }
-
-        //Christian Degrassi 2010-03-12: Method refactored to fix issues 1642
-        /// <summary>
-        /// Move a layer to a new location and/or group
-        /// </summary>
-        /// <param name="TargetGroupHandle">Handle of group into which to move the layer</param>
-        /// <param name="LayerHandle">Handle of layer to move</param>
-        /// <param name="NewPos">0-based index into list of layers within target group</param>
-        /// <returns>True on success, False otherwise</returns>
-        //protected internal bool MoveLayer( int TargetGroupHandle, int LayerHandle, int NewPos)
-        //{
-        //    Group SrcGrp = null,
-        //        TargetGrp = null;
-        //    int SrcGroupIndex = 0, LayerIndex = 0 ;
-
-        //    int OldMapPos = m_Map.get_LayerPosition(LayerHandle);
-
-        //    Layer lyr = null;
-        //    lyr = FindLayerByHandle(LayerHandle,out SrcGroupIndex,out LayerIndex);
-
-        //    if(lyr == null)
-        //    {
-        //        globals.LastError = "Invalid Layer Handle";
-        //        return false;
-        //    }
-
-        //    SrcGrp = m_GroupManager[SrcGroupIndex];
-        //    TargetGrp = m_GroupManager.ItemByHandle(TargetGroupHandle);
-
-        //    if(TargetGrp == null)
-        //    {
-        //        globals.LastError = "Invalid Handle (TargetGroupHandle)";
-        //        return false;
-        //    }
-
-        //    if(SrcGrp.Handle != TargetGrp.Handle)
-        //    {
-        //        SrcGrp.Layers.RemoveAt(LayerIndex);
-
-        //        if(NewPos >= TargetGrp.Layers.Count)
-        //            TargetGrp.Layers.Add(lyr);
-        //        else if (NewPos <= 0)
-        //            TargetGrp.Layers.Insert(0,lyr);
-        //        else
-        //            TargetGrp.Layers.Insert(NewPos,lyr);
-
-        //        SrcGrp.RecalcHeight();
-        //        TargetGrp.RecalcHeight();
-        //        m_SelectedGroupHandle = TargetGrp.Handle;
-
-        //        TargetGrp.UpdateGroupVisibility();
-        //        SrcGrp.UpdateGroupVisibility();
-        //    }
-        //    else
-        //    {
-        //        if(LayerIndex == NewPos)
-        //            return true;
-
-        //        //				if(NewPos > LayerIndex)
-        //        //				{
-        //        //					if(NewPos >= SrcGrp.Layers.Count)
-        //        //						SrcGrp.Layers.Add(lyr);
-        //        //					else if (NewPos <= 0)
-        //        //						SrcGrp.Layers.Insert(0,lyr);
-        //        //					else
-        //        //						SrcGrp.Layers.Insert(NewPos,lyr);
-        //        //					SrcGrp.Layers.RemoveAt(LayerIndex);
-        //        //				}
-        //        //				else
-        //        //{
-        //        SrcGrp.Layers.RemoveAt(LayerIndex);
-        //        if(NewPos >= SrcGrp.Layers.Count)
-        //            SrcGrp.Layers.Add(lyr);
-        //        else if (NewPos <= 0)
-        //            SrcGrp.Layers.Insert(0,lyr);
-        //        else
-        //            SrcGrp.Layers.Insert(NewPos,lyr);
-        //        //}
-
-        //        SrcGrp.RecalcHeight();
-        //        SrcGrp.UpdateGroupVisibility();
-
-        //    }
-
-        //    UpdateMapLayerPositions();
-
-        //    int NewMapPos = m_Map.get_LayerPosition(LayerHandle);
-
-        //    if(OldMapPos != NewMapPos)
-        //    {
-        //        int CurHandle, CurPos, EndPos;
-        //        CurPos = Math.Min(OldMapPos,NewMapPos);
-        //        EndPos = Math.Max(OldMapPos,NewMapPos);
-
-        //        while(CurPos <= EndPos)
-        //        {
-        //            CurHandle = m_Map.get_LayerHandle(CurPos);
-        //            FireLayerPositionChanged(CurHandle);
-        //            CurPos += 1;
-        //        }
-        //    }
-
-        //    Redraw();
-        //    return true;
-
-        //}
 
         /// <summary>
         /// Handles Layer position changes within groups
