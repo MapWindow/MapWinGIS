@@ -4893,6 +4893,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 
 	//IShapefileColorBreak* ShapefileColorBreak = NULL;
 
+#ifdef OLD_API
 	IShapefileColorScheme* ShapefileColorScheme = NULL;
 	comClass->QueryInterface(IID_IShapefileColorScheme, (void**)(&ShapefileColorScheme));
 	if (ShapefileColorScheme) 
@@ -4902,6 +4903,7 @@ STDMETHODIMP CUtils::ErrorMsgFromObject(IDispatch * comClass, BSTR* retVal)
 		ShapefileColorScheme->Release();
 		return S_OK;
 	}
+#endif
 
 	IShapeNetwork* ShapeNetwork = NULL;
 	comClass->QueryInterface(IID_IShapeNetwork, (void**)(&ShapeNetwork));

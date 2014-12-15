@@ -22,6 +22,8 @@
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
 
+#ifdef OLD_API
+
 #ifndef __SHAPEFILELEGEND_H_
 #define __SHAPEFILELEGEND_H_
 
@@ -95,5 +97,4 @@ public:
 
 #endif //__SHAPEFILELEGEND_H_
 
-
-
+#endif

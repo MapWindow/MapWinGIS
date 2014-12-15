@@ -401,6 +401,7 @@ BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 // *************************************************
 //			IsTIFFGrid()						  
 // *************************************************
+// TODO: move to Utils
 BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 {
 	try

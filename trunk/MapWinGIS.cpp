@@ -226,8 +226,10 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 // Provides support for the registration, initialization, and creation of instances of ATL COM classes
 // According to MSDN this macro is obsolete. OBJECT_ENTRY_AUTO should be used instead
 BEGIN_OBJECT_MAP(ObjectMap)
+#ifdef OLD_API
 	OBJECT_ENTRY(CLSID_ShapefileColorScheme, CShapefileColorScheme)
 	OBJECT_ENTRY(CLSID_ShapefileColorBreak, CShapefileColorBreak)
+#endif
 END_OBJECT_MAP()
 
 // *****************************************************************

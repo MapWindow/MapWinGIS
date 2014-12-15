@@ -2666,22 +2666,21 @@ bool CShape::get_XYZ(long PointIndex, double* x, double* y, double* z)
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	_shp->get_PointZ(PointIndex, *z);   // ignore the error
+	_shp->get_PointZ(PointIndex, *z);   // ignore possible error for 2D type
 	return true;
 }
 
 // XYZM coordinates
 bool CShape::get_XYZM(long PointIndex, double& x, double& y, double& z, double& m)
 {
-	if(!_shp->get_PointXY(PointIndex, x, y) ||
-	   !_shp->get_PointZ(PointIndex, z) ||
-	   !_shp->get_PointM(PointIndex, m))
+	if(!_shp->get_PointXY(PointIndex, x, y))
 	{
 		this->ErrorMessage(_shp->get_LastErrorCode());
 		return false;
 	}
-	else
-		return true;
+	_shp->get_PointZ(PointIndex, z);   // ignore possible error for 2D type
+	_shp->get_PointM(PointIndex, m);
+	return true;
 }
 
 // extents XY

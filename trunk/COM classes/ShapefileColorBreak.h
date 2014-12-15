@@ -21,7 +21,9 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- 
+
+#ifdef OLD_API 
+
 #ifndef __SHAPEFILELEGENDBREAK_H_
 #define __SHAPEFILELEGENDBREAK_H_
 
@@ -81,3 +83,4 @@ private:
 
 #endif //__SHAPEFILELEGENDBREAK_H_
 
+#endif

@@ -149,12 +149,14 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idShapefileCategory:
 			result = CoCreateInstance(CLSID_ShapefileCategory, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileCategory, (void**)&val);
 			break;
+#ifdef OLD_API
 		case tkInterface::idShapefileColorBreak:
 			result = CoCreateInstance(CLSID_ShapefileColorBreak, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileColorBreak, (void**)&val);
 			break;
 		case tkInterface::idShapefileColorScheme:
 			result = CoCreateInstance(CLSID_ShapefileColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IShapefileColorScheme, (void**)&val);
 			break;
+#endif
 		case tkInterface::idShapeNetwork:
 			result = CoCreateInstance(CLSID_ShapeNetwork, NULL, CLSCTX_INPROC_SERVER, IID_IShapeNetwork, (void**)&val);
 			break;

@@ -3468,13 +3468,15 @@ interface IImage : IDispatch{
 	[propget, id(32), helpstring("method OriginalHeight")] HRESULT OriginalHeight([out, retval]LONG* OriginalHeight);
 	[id(33), helpstring("method Resource")] HRESULT Resource([in] BSTR newImgPath, [out, retval] VARIANT_BOOL *pVal);
 	[id(34), helpstring("method _pushSchemetkRaster")] HRESULT _pushSchemetkRaster([in] IGridColorScheme * cScheme, [out, retval] VARIANT_BOOL * retval);
-	
+
+#ifdef OLD_API	
 	[id(35), helpstring("method GetOriginalXllCenter"), hidden] HRESULT GetOriginalXllCenter([out, retval] double *pVal);
 	[id(36), helpstring("method GetOriginalYllCenter"), hidden] HRESULT GetOriginalYllCenter([out, retval] double *pVal);
 	[id(37), helpstring("method GetOriginal_dX"), hidden] HRESULT GetOriginal_dX([out, retval] double *pVal);
 	[id(38), helpstring("method GetOriginal_dY"), hidden] HRESULT GetOriginal_dY([out, retval] double *pVal);
 	[id(39), helpstring("method GetOriginalHeight"), hidden] HRESULT GetOriginalHeight([out, retval] long *pVal);
 	[id(40), helpstring("method GetOriginalWidth"), hidden] HRESULT GetOriginalWidth([out, retval] long *pVal);
+#endif
 	
 	[propget, id(41), helpstring("property AllowHillshade")] HRESULT AllowHillshade([out, retval] VARIANT_BOOL *pVal);
 	[propput, id(41), helpstring("property AllowHillshade")] HRESULT AllowHillshade([in] VARIANT_BOOL newValue);
@@ -5803,42 +5805,51 @@ library MapWinGIS
 			[id(20), readonly] BSTR MapState;
 			[id(118)] VARIANT_BOOL SendOnDrawBackBuffer;
 			[id(151)] VARIANT_BOOL UseSeamlessPan;
-			[id(152), helpstring("Determines the speed and direction of zooming with mouse wheel. Use values smaller than 1 to zoom in while wheeling forward and greater than 1 to zoom out. Zooming is turned off when speed equals 1. Acceptable range: 0.1-10 (default 0.5).")] DOUBLE MouseWheelSpeed;
+			[id(152)] DOUBLE MouseWheelSpeed;
 			[id(158)] tkUnitsOfMeasure MapUnits;			
 			[id(166), readonly] BSTR VersionNumber;
 			[id(172)] VARIANT_BOOL ShowRedrawTime;
 			[id(173)] VARIANT_BOOL ShowVersionNumber;
-			[id(187), readonly] IExtents* MaxExtents;
-			[id(191), readonly] ITiles* Tiles;
 			[id(192)] IGeoProjection* GeoProjection;
 			[id(195)] VARIANT_BOOL ScalebarVisible;
 			[id(205)] tkScalebarUnits ScalebarUnits;
+
+			[id(187), readonly] IExtents* MaxExtents;
+			[id(191), readonly] ITiles* Tiles;
 			[id(211), readonly] IFileManager* FileManager;
 			[id(241), readonly] IUndoList* UndoList;
 			[id(243), readonly] IIdentifier* Identifier;
+			[id(235), readonly] IShapeEditor* ShapeEditor;
+			[id(196), readonly] IMeasuring* Measuring;
 			//}}AFX_ODL_PROP
 
 		methods:
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(CMapView)
-			// used to properties; changed to methods to apply nonbrowsable attribute (doesn't work for properties in .NET)
-			[id(5), propput, nonbrowsable] void UDCursorHandle(long nNewValue);
-			[id(5), propget, nonbrowsable] long UDCursorHandle();
-			[id(95), propput, nonbrowsable] void SerialNumber(BSTR nNewValue);
-			[id(95), propget, nonbrowsable] BSTR SerialNumber();
-			[id(96), propput, nonbrowsable] void LineSeparationFactor(long nNewValue);
-			[id(96), propget, nonbrowsable] long LineSeparationFactor();
-			[id(133), propput, nonbrowsable] void MultilineLabels(VARIANT_BOOL nNewValue);
-			[id(133), propget, nonbrowsable] VARIANT_BOOL MultilineLabels();
-			[id(154), propput, nonbrowsable] void ShapeDrawingMethod(tkShapeDrawingMethod nNewValue);
-			[id(154), propget, nonbrowsable] tkShapeDrawingMethod ShapeDrawingMethod();
-			[id(156), propput, nonbrowsable] void CurrentScale(double nNewValue);
-			[id(156), propget, nonbrowsable] double CurrentScale();
-			[id(188), propget, nonbrowsable] double PixelsPerDegree();
-			// end of used to properties; changed to methods to apply nonbrowsable attribute (doesn't work for properties in .NET)
 			
+#define REDRAW_API		
+#ifdef REDRAW_API	
 			[id(21)] void Redraw();
+			[id(42)] void LockWindow(tkLockMode LockMode);
+			[id(220)] void Redraw2(tkRedrawType redrawType);
+#endif			
+
+#define COORDINATES_API
+#ifdef COORDINATES_API
+			[id(217), propput] void Projection(tkMapProjection nNewValue);
+			[id(217), propget] tkMapProjection Projection();
+			[id(36)] void ProjToPixel(double projX, double projY, double* pixelX, double* pixelY);
+			[id(37)] void PixelToProj(double pixelX, double pixelY, double* projX, double* projY);
+			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
+			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
+			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+			[id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+			[id(188), propget, nonbrowsable] double PixelsPerDegree();
+#endif		
+
+#define LAYERS_API
+#ifdef LAYERS_API
 			[id(22)] long AddLayer(IDispatch* Object, VARIANT_BOOL Visible);
 			[id(23)] void RemoveLayer(long LayerHandle);
 			[id(138)] void RemoveLayerWithoutClosing(long LayerHandle);
@@ -5848,144 +5859,179 @@ library MapWinGIS
 			[id(27)] VARIANT_BOOL MoveLayer(long InitialPosition, long TargetPosition);
 			[id(28)] VARIANT_BOOL MoveLayerTop(long InitialPosition);
 			[id(29)] VARIANT_BOOL MoveLayerBottom(long InitialPosition);
+			[id(56), propget] long LayerHandle(long LayerPosition);
+			[id(210)] LONG AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL Visible);
+			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
+#endif
+
+#define ZOOMING_API
+#ifdef ZOOMING_API
 			[id(30)] void ZoomToMaxExtents();
 			[id(31)] void ZoomToLayer(long LayerHandle);
 			[id(32)] void ZoomToShape(long LayerHandle, long Shape);
 			[id(33)] void ZoomIn(double Percent);
 			[id(34)] void ZoomOut(double Percent);
 			[id(35)] long ZoomToPrev();
-			[id(36)] void ProjToPixel(double projX, double projY, double* pixelX, double* pixelY);
-			[id(37)] void PixelToProj(double pixelX, double pixelY, double* projX, double* projY);
+			[id(190)] VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
+			[id(200)] VARIANT_BOOL ZoomToWorld();
+			[id(193), propget] IExtents* GeographicExtents();
+			[id(194)] VARIANT_BOOL SetGeographicExtents(IExtents* pVal);
+			[id(107)] void ZoomToMaxVisibleExtents(void);
+			[id(197)] VARIANT_BOOL ZoomToTileLevel(int zoom);
+
+			
+
+			[id(214), propput] void CurrentZoom(int nNewValue);
+			[id(214), propget] int CurrentZoom();
+			[id(156), propput, nonbrowsable] void CurrentScale(double nNewValue);
+			[id(156), propget, nonbrowsable] double CurrentScale();
+
+			[id(208)] VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
+			[id(209)] IExtents* GetKnownExtents(tkKnownExtents extents);
+			[id(212), propput] void Latitude(float nNewValue);
+			[id(212), propget] float Latitude();
+			[id(213), propput] void Longitude(float nNewValue);
+			[id(213), propget] float Longitude();
+			[id(218), propput] void KnownExtents(tkKnownExtents nNewValue);
+			[id(218), propget] tkKnownExtents KnownExtents();
+#endif
+			
+#define LAYER_API
+#ifdef LAYER_API
+			[id(57), propget] VARIANT_BOOL LayerVisible(long LayerHandle);
+			[id(57), propput] void LayerVisible(long LayerHandle, VARIANT_BOOL bNewValue);
+			[id(54), propget] BSTR LayerKey(long LayerHandle);
+			[id(54), propput] void LayerKey(long LayerHandle, BSTR lpszNewValue);
+			[id(55), propget] long LayerPosition(long LayerHandle);
+			
+			[id(91), propget] BSTR LayerName(LONG LayerHandle);
+			[id(91), propput] void LayerName(LONG LayerHandle, BSTR newVal);
+			[id(143)] void ReSourceLayer(long LayerHandle, BSTR newSrcPath);
+			[id(189), propget] BSTR LayerFilename(LONG layerHandle);
+			[id(167), propget] DOUBLE LayerMaxVisibleScale(LONG LayerHandle);
+			[id(167), propput] void LayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal);
+			[id(168), propget] DOUBLE LayerMinVisibleScale(LONG LayerHandle);
+			[id(168), propput] void LayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal);
+			[id(169), propget] VARIANT_BOOL LayerDynamicVisibility(LONG LayerHandle);
+			[id(169), propput] void LayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal);
+			[id(198), propget] int LayerMaxVisibleZoom(LONG LayerHandle);
+			[id(198), propput] void LayerMaxVisibleZoom(LONG LayerHandle, int newVal);
+			[id(199), propget] int LayerMinVisibleZoom(LONG LayerHandle);
+			[id(199), propput] void LayerMinVisibleZoom(LONG LayerHandle, int newVal);
+			[id(171), propget] ILabels* LayerLabels(LONG LayerHandle);
+			[id(171), propput] void LayerLabels(LONG LayerHandle, ILabels* pVal);
+			[id(174), propget] IShapefile* Shapefile(LONG LayerHandle);
+			[id(174), propput] void Shapefile(LONG LayerHandle, IShapefile* pVal);
+			[id(175), propget] IImage* Image(LONG LayerHandle);
+			[id(175), propput] void Image(LONG LayerHandle, IImage* pVal);
+			[id(150)] VARIANT_BOOL AdjustLayerExtents(long LayerHandle);
+			[id(90), propget] IDispatch* GetObject(long LayerHandle);
+			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
+			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
+#endif 
+
+#define DRAWING_API
+#ifdef DRAWING_API
 			[id(38)] void ClearDrawing(long DrawHandle);
 			[id(39)] void ClearDrawings();
-			[id(40)] IDispatch* SnapShot(IDispatch* BoundBox);
-			[id(41)] VARIANT_BOOL ApplyLegendColors(IDispatch* Legend);
-			[id(42)] void LockWindow(tkLockMode LockMode);
-			[id(43)] void Resize(long Width, long Height);
-			[id(44)] void ShowToolTip(BSTR Text, long Milliseconds);
-			[id(45)] void AddLabel(long LayerHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification);
-			[id(46)] void ClearLabels(long LayerHandle);
-			[id(47)] void LayerFont(long LayerHandle, BSTR FontName, long FontSize);
-			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(49)] long NewDrawing(tkDrawReferenceList Projection);
 			[id(50)] void DrawPoint(double x, double y, long pixelSize, OLE_COLOR color);
 			[id(51)] void DrawLine(double x1, double y1, double x2, double y2, long pixelWidth, OLE_COLOR color);
 			[id(52)] void DrawCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
 			[id(53)] void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill);
-			[id(54), propget] BSTR LayerKey(long LayerHandle);
-			[id(54), propput] void LayerKey(long LayerHandle, BSTR lpszNewValue);
-			[id(55), propget] long LayerPosition(long LayerHandle);
-			[id(56), propget] long LayerHandle(long LayerPosition);
-			[id(57), propget] VARIANT_BOOL LayerVisible(long LayerHandle);
-			[id(57), propput] void LayerVisible(long LayerHandle, VARIANT_BOOL bNewValue);
-			[id(58), propget, hidden] OLE_COLOR ShapeLayerFillColor(long LayerHandle);
-			[id(58), propput, hidden] void ShapeLayerFillColor(long LayerHandle, OLE_COLOR nNewValue);
-			[id(59), propget, hidden] OLE_COLOR ShapeFillColor(long LayerHandle, long Shape);
-			[id(59), propput, hidden] void ShapeFillColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
-			[id(60), propget, hidden] OLE_COLOR ShapeLayerLineColor(long LayerHandle);
-			[id(60), propput, hidden] void ShapeLayerLineColor(long LayerHandle, OLE_COLOR nNewValue);
-			[id(61), propget, hidden] OLE_COLOR ShapeLineColor(long LayerHandle, long Shape);
-			[id(61), propput, hidden] void ShapeLineColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
-			[id(62), propget, hidden] OLE_COLOR ShapeLayerPointColor(long LayerHandle);
-			[id(62), propput, hidden] void ShapeLayerPointColor(long LayerHandle, OLE_COLOR nNewValue);
-			[id(63), propget, hidden] OLE_COLOR ShapePointColor(long LayerHandle, long Shape);
-			[id(63), propput, hidden] void ShapePointColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
-			[id(64), propget, hidden] VARIANT_BOOL ShapeLayerDrawFill(long LayerHandle);
-			[id(64), propput, hidden] void ShapeLayerDrawFill(long LayerHandle, VARIANT_BOOL bNewValue);
-			[id(65), propget, hidden] VARIANT_BOOL ShapeDrawFill(long LayerHandle, long Shape);
-			[id(65), propput, hidden] void ShapeDrawFill(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
-			[id(66), propget, hidden] VARIANT_BOOL ShapeLayerDrawLine(long LayerHandle);
-			[id(66), propput, hidden] void ShapeLayerDrawLine(long LayerHandle, VARIANT_BOOL bNewValue);
-			[id(67), propget, hidden] VARIANT_BOOL ShapeDrawLine(long LayerHandle, long Shape);
-			[id(67), propput, hidden] void ShapeDrawLine(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
-			[id(68), propget, hidden] VARIANT_BOOL ShapeLayerDrawPoint(long LayerHandle);
-			[id(68), propput, hidden] void ShapeLayerDrawPoint(long LayerHandle, VARIANT_BOOL bNewValue);
-			[id(69), propget, hidden] VARIANT_BOOL ShapeDrawPoint(long LayerHandle, long Shape);
-			[id(69), propput, hidden] void ShapeDrawPoint(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
-			[id(70), propget, hidden] float ShapeLayerLineWidth(long LayerHandle);
-			[id(70), propput, hidden] void ShapeLayerLineWidth(long LayerHandle, float newValue);
-			[id(71), propget, hidden] float ShapeLineWidth(long LayerHandle, long Shape);
-			[id(71), propput, hidden] void ShapeLineWidth(long LayerHandle, long Shape, float newValue);
-			[id(72), propget, hidden] float ShapeLayerPointSize(long LayerHandle);
-			[id(72), propput, hidden] void ShapeLayerPointSize(long LayerHandle, float newValue);
-			[id(73), propget, hidden] float ShapePointSize(long LayerHandle, long Shape);
-			[id(73), propput, hidden] void ShapePointSize(long LayerHandle, long Shape, float newValue);
-			[id(74), propget, hidden] float ShapeLayerFillTransparency(long LayerHandle);
-			[id(74), propput, hidden] void ShapeLayerFillTransparency(long LayerHandle, float newValue);
-			[id(75), propget, hidden] float ShapeFillTransparency(long LayerHandle, long Shape);
-			[id(75), propput, hidden] void ShapeFillTransparency(long LayerHandle, long Shape, float newValue);
-			[id(76), propget, hidden] tkLineStipple ShapeLayerLineStipple(long LayerHandle);
-			[id(76), propput, hidden] void ShapeLayerLineStipple(long LayerHandle, tkLineStipple nNewValue);
-			[id(77), propget, hidden] tkLineStipple ShapeLineStipple(long LayerHandle, long Shape);
-			[id(77), propput, hidden] void ShapeLineStipple(long LayerHandle, long Shape, tkLineStipple nNewValue);
-			[id(78), propget, hidden] tkFillStipple ShapeLayerFillStipple(long LayerHandle);
-			[id(78), propput, hidden] void ShapeLayerFillStipple(long LayerHandle, tkFillStipple nNewValue);
-			[id(79), propget, hidden] tkFillStipple ShapeFillStipple(long LayerHandle, long Shape);
-			[id(79), propput, hidden] void ShapeFillStipple(long LayerHandle, long Shape, tkFillStipple nNewValue);
-			[id(80), propget] VARIANT_BOOL ShapeVisible(long LayerHandle, long Shape);
-			[id(80), propput] void ShapeVisible(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
-			[id(81), propget] float ImageLayerPercentTransparent(long LayerHandle);
-			[id(81), propput] void ImageLayerPercentTransparent(long LayerHandle, float newValue);
-			[id(82), propget] BSTR ErrorMsg(long ErrorCode);
+			[id(115)] void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color);
+			[id(116)] void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
+			[id(117)] void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
+			[id(120)] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
+			[id(134)] void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short Width);
+			[id(135)] void DrawWideCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, short Width);
+			[id(155)] void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
+			[id(160)] void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
+			[id(161)] void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
+			[id(157), propget] ILabels* DrawingLabels(long DrawingLayerIndex);
+			[id(157), propput] void DrawingLabels(long DrawingLayerIndex, ILabels* newVal);
 			[id(83), propget] BSTR DrawingKey(long DrawHandle);
 			[id(83), propput] void DrawingKey(long DrawHandle, BSTR lpszNewValue);
+#endif
+
+#ifdef OLD_API
+
+#define SHAPE_LAYER_API
+#ifdef SHAPE_LAYER_API
+			[id(58), propget, hidden] OLE_COLOR ShapeLayerFillColor(long LayerHandle);
+			[id(58), propput, hidden] void ShapeLayerFillColor(long LayerHandle, OLE_COLOR nNewValue);
+			[id(60), propget, hidden] OLE_COLOR ShapeLayerLineColor(long LayerHandle);
+			[id(60), propput, hidden] void ShapeLayerLineColor(long LayerHandle, OLE_COLOR nNewValue);
+			[id(62), propget, hidden] OLE_COLOR ShapeLayerPointColor(long LayerHandle);
+			[id(62), propput, hidden] void ShapeLayerPointColor(long LayerHandle, OLE_COLOR nNewValue);
+			[id(64), propget, hidden] VARIANT_BOOL ShapeLayerDrawFill(long LayerHandle);
+			[id(64), propput, hidden] void ShapeLayerDrawFill(long LayerHandle, VARIANT_BOOL bNewValue);
+			[id(66), propget, hidden] VARIANT_BOOL ShapeLayerDrawLine(long LayerHandle);
+			[id(66), propput, hidden] void ShapeLayerDrawLine(long LayerHandle, VARIANT_BOOL bNewValue);
+			[id(68), propget, hidden] VARIANT_BOOL ShapeLayerDrawPoint(long LayerHandle);
+			[id(68), propput, hidden] void ShapeLayerDrawPoint(long LayerHandle, VARIANT_BOOL bNewValue);
+			[id(70), propget, hidden] float ShapeLayerLineWidth(long LayerHandle);
+			[id(70), propput, hidden] void ShapeLayerLineWidth(long LayerHandle, float newValue);
+			[id(72), propget, hidden] float ShapeLayerPointSize(long LayerHandle);
+			[id(72), propput, hidden] void ShapeLayerPointSize(long LayerHandle, float newValue);
+			[id(74), propget, hidden] float ShapeLayerFillTransparency(long LayerHandle);
+			[id(74), propput, hidden] void ShapeLayerFillTransparency(long LayerHandle, float newValue);
+			[id(76), propget, hidden] tkLineStipple ShapeLayerLineStipple(long LayerHandle);
+			[id(76), propput, hidden] void ShapeLayerLineStipple(long LayerHandle, tkLineStipple nNewValue);
+			[id(78), propget, hidden] tkFillStipple ShapeLayerFillStipple(long LayerHandle);
+			[id(78), propput, hidden] void ShapeLayerFillStipple(long LayerHandle, tkFillStipple nNewValue);
 			[id(84), propget] tkPointType ShapeLayerPointType(long LayerHandle);
 			[id(84), propput] void ShapeLayerPointType(long LayerHandle, tkPointType nNewValue);
-			[id(85), propget] tkPointType ShapePointType(long LayerHandle, long Shape);
-			[id(85), propput] void ShapePointType(long LayerHandle, long Shape, tkPointType nNewValue);
+			[id(144), propget] OLE_COLOR ShapeLayerStippleColor(long LayerHandle);
+			[id(144), propput] void ShapeLayerStippleColor(long LayerHandle, OLE_COLOR nNewValue);
+			[id(147), propget] VARIANT_BOOL ShapeLayerStippleTransparent(long LayerHandle);
+			[id(147), propput] void ShapeLayerStippleTransparent(long LayerHandle, VARIANT_BOOL nNewValue);
+#endif
+
+#define IMAGE_LAYER_API
+#ifdef IMAGE_LAYER_API
+			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
+			[id(81), propget] float ImageLayerPercentTransparent(long LayerHandle);
+			[id(81), propput] void ImageLayerPercentTransparent(long LayerHandle, float newValue);
+			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
+			[id(94)] void UpdateImage(LONG LayerHandle);
+			[id(93), propget] BSTR GridFileName(LONG LayerHandle);
+			[id(93), propput] void GridFileName(LONG LayerHandle, BSTR newVal);
+			[id(105)] VARIANT_BOOL IsTIFFGrid(BSTR Filename);    // TODO: copy to utils
+#endif
+
+#define LABELS_API
+#ifdef LABELS_API
+			[id(45)] void AddLabel(long LayerHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification);
+			[id(46)] void ClearLabels(long LayerHandle);
+			[id(47)] void LayerFont(long LayerHandle, BSTR FontName, long FontSize);
+			[id(99)] void AddLabelEx(long LayerHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
 			[id(86), propget] VARIANT_BOOL LayerLabelsVisible(long LayerHandle);
 			[id(86), propput] void LayerLabelsVisible(long LayerHandle, VARIANT_BOOL bNewValue);
-			[id(87), propget] long UDLineStipple(long LayerHandle);
-			[id(87), propput] void UDLineStipple(long LayerHandle, long nNewValue);
-			[id(88), propget] long UDFillStipple(long LayerHandle, long StippleRow);
-			[id(88), propput] void UDFillStipple(long LayerHandle, long StippleRow, long nNewValue);
-			[id(89), propget] IDispatch* UDPointType(long LayerHandle);
-			[id(89), propputref] void UDPointType(long LayerHandle, IDispatch* newValue);
-			[id(90), propget] IDispatch* GetObject(long LayerHandle);
-			[id(91), propget, helpstring("property LayerName")] BSTR LayerName(LONG LayerHandle);
-			[id(91), propput, helpstring("property LayerName")] void LayerName(LONG LayerHandle, BSTR newVal);
-			[id(92), helpstring("method SetImageLayerColorScheme")] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
-			[id(93), propget, helpstring("property GridFileName")] BSTR GridFileName(LONG LayerHandle);
-			[id(93), propput, helpstring("property GridFileName")] void GridFileName(LONG LayerHandle, BSTR newVal);
-			[id(94), helpstring("method UpdateImage")] void UpdateImage(LONG LayerHandle);
 			[id(97), propget] VARIANT_BOOL LayerLabelsShadow(long LayerHandle);
 			[id(97), propput] void LayerLabelsShadow(long LayerHandle, VARIANT_BOOL bNewValue);
 			[id(98), propget] VARIANT_BOOL LayerLabelsScale(long LayerHandle);
-			[id(98), propput] void LayerLabelsScale(long LayerHandle, VARIANT_BOOL bNewValue);			
-			[id(99)] void AddLabelEx(long LayerHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
-			[id(100)] void GetLayerStandardViewWidth(long LayerHandle, double * Width);
-			[id(101)] void SetLayerStandardViewWidth(long LayerHandle, double Width);
+			[id(98), propput] void LayerLabelsScale(long LayerHandle, VARIANT_BOOL bNewValue);
+			[id(119)] void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
 			[id(102), propget, hidden] long LayerLabelsOffset(long LayerHandle);
 			[id(102), propput, hidden] void LayerLabelsOffset(long LayerHandle, long Offset);
 			[id(103), propget, hidden] OLE_COLOR LayerLabelsShadowColor(long LayerHandle);
 			[id(103), propput, hidden] void LayerLabelsShadowColor(long LayerHandle, OLE_COLOR color);
 			[id(104), propget, hidden] VARIANT_BOOL UseLabelCollision(long LayerHandle);
 			[id(104), propput, hidden] void UseLabelCollision(long LayerHandle, VARIANT_BOOL Value);
-			[id(105)] VARIANT_BOOL IsTIFFGrid(BSTR Filename);
-			[id(106)] VARIANT_BOOL IsSameProjection(BSTR proj4_a, BSTR proj4_b);
-			[id(107)] void ZoomToMaxVisibleExtents(void);	
-			[id(108), propput] void MapResizeBehavior(tkResizeBehavior nNewValue);
-			[id(108), propget] tkResizeBehavior MapResizeBehavior();
-			[id(109)] long HWnd(void);
-			[id(110)] long set_UDPointImageListAdd(long LayerHandle, IDispatch* newValue);
-			[id(111), propget] long ShapePointImageListID(long LayerHandle, long Shape);
-			[id(111), propput] void ShapePointImageListID(long LayerHandle, long Shape, long ImageIndex);
-			[id(112)] long get_UDPointImageListCount(long LayerHandle);
-			[id(113)] IDispatch* get_UDPointImageListItem(long LayerHandle, long ImageIndex);
-			[id(114)] void ClearUDPointImageList(long LayerHandle);
-  		    [id(115), helpstring("method DrawLineEx")] void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color);
-			[id(116), helpstring("method DrawPointEx")] void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
-			[id(117), helpstring("method DrawCircleEx")] void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
-			[id(119), helpstring("method LabelColor")] void LabelColor(LONG LayerHandle, OLE_COLOR LabelFontColor);
-			[id(120), helpstring("method SetDrawingLayerVisible")] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
-			[id(121), helpstring("method ClearDrawingLabels")] void ClearDrawingLabels(long drawHandle);
-			[id(122), helpstring("method DrawingFont")] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
-			[id(123), helpstring("method AddDrawingLabelEx")] void AddDrawingLabelEx(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
-			[id(124), helpstring("method AddDrawingLabel")] void AddDrawingLabel(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification);			
+			[id(137)] void LayerFontEx(long LayerHandle, BSTR FontName, long FontSize, VARIANT_BOOL isBold, VARIANT_BOOL isItalic, VARIANT_BOOL isUnderline); //ajp (30/11/07)
+#endif
+
+#define DRAWING_LABELS_API
+#ifdef DRAWING_LABELS_API
+			[id(121)] void ClearDrawingLabels(long drawHandle);
+			[id(122)] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
+			[id(123)] void AddDrawingLabelEx(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
+			[id(124)] void AddDrawingLabel(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification);
 			[id(125), propget] long DrawingLabelsOffset(long drawHandle);
 			[id(125), propput] void DrawingLabelsOffset(long drawHandle, long Offset);
 			[id(126), propget] VARIANT_BOOL DrawingLabelsScale(long drawHandle);
-			[id(126), propput] void DrawingLabelsScale(long drawHandle, VARIANT_BOOL bNewValue);			
+			[id(126), propput] void DrawingLabelsScale(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(127), propget] VARIANT_BOOL DrawingLabelsShadow(long drawHandle);
 			[id(127), propput] void DrawingLabelsShadow(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(128), propget] OLE_COLOR DrawingLabelsShadowColor(long drawHandle);
@@ -5994,135 +6040,159 @@ library MapWinGIS
 			[id(129), propput] void UseDrawingLabelCollision(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(130), propget] VARIANT_BOOL DrawingLabelsVisible(long drawHandle);
 			[id(130), propput] void DrawingLabelsVisible(long drawHandle, VARIANT_BOOL bNewValue);
-			[id(131)] void GetDrawingStandardViewWidth(long drawHandle, double * Width);
-			[id(132)] void SetDrawingStandardViewWidth(long drawHandle, double Width);
-			[id(134)] void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short Width);
-			[id(135)] void DrawWideCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, short Width);
-			[id(136), helpstring("method SnapShot2")] IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
-			[id(137)] void LayerFontEx(long LayerHandle, BSTR FontName, long FontSize, VARIANT_BOOL isBold, VARIANT_BOOL isItalic, VARIANT_BOOL isUnderline); //ajp (30/11/07)
+#endif
+
+#define OBSOLETE_API
+#ifdef OBSOLETE_API
+			// excluded from public API in v4.9.3 Beta
+			[id(95), propput, nonbrowsable] void SerialNumber(BSTR nNewValue);
+			[id(95), propget, nonbrowsable] BSTR SerialNumber();
+			[id(96), propput, nonbrowsable] void LineSeparationFactor(long nNewValue);
+			[id(96), propget, nonbrowsable] long LineSeparationFactor();
+			[id(133), propput, nonbrowsable] void MultilineLabels(VARIANT_BOOL nNewValue);
+			[id(133), propget, nonbrowsable] VARIANT_BOOL MultilineLabels();
+			[id(154), propput, nonbrowsable] void ShapeDrawingMethod(tkShapeDrawingMethod nNewValue);
+			[id(154), propget, nonbrowsable] tkShapeDrawingMethod ShapeDrawingMethod();
+			[id(41)] VARIANT_BOOL ApplyLegendColors(IDispatch* Legend);
+			[id(65), propget, hidden] VARIANT_BOOL ShapeDrawFill(long LayerHandle, long Shape);
+			[id(65), propput, hidden] void ShapeDrawFill(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
+			[id(59), propget, hidden] OLE_COLOR ShapeFillColor(long LayerHandle, long Shape);
+			[id(59), propput, hidden] void ShapeFillColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
+			[id(61), propget, hidden] OLE_COLOR ShapeLineColor(long LayerHandle, long Shape);
+			[id(61), propput, hidden] void ShapeLineColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
+			[id(63), propget, hidden] OLE_COLOR ShapePointColor(long LayerHandle, long Shape);
+			[id(63), propput, hidden] void ShapePointColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
+			[id(67), propget, hidden] VARIANT_BOOL ShapeDrawLine(long LayerHandle, long Shape);
+			[id(67), propput, hidden] void ShapeDrawLine(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
+			[id(69), propget, hidden] VARIANT_BOOL ShapeDrawPoint(long LayerHandle, long Shape);
+			[id(69), propput, hidden] void ShapeDrawPoint(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
+			[id(71), propget, hidden] float ShapeLineWidth(long LayerHandle, long Shape);
+			[id(71), propput, hidden] void ShapeLineWidth(long LayerHandle, long Shape, float newValue);
+			[id(73), propget, hidden] float ShapePointSize(long LayerHandle, long Shape);
+			[id(73), propput, hidden] void ShapePointSize(long LayerHandle, long Shape, float newValue);
+			[id(75), propget, hidden] float ShapeFillTransparency(long LayerHandle, long Shape);
+			[id(75), propput, hidden] void ShapeFillTransparency(long LayerHandle, long Shape, float newValue);
+			[id(77), propget, hidden] tkLineStipple ShapeLineStipple(long LayerHandle, long Shape);
+			[id(77), propput, hidden] void ShapeLineStipple(long LayerHandle, long Shape, tkLineStipple nNewValue);
+			[id(79), propget, hidden] tkFillStipple ShapeFillStipple(long LayerHandle, long Shape);
+			[id(79), propput, hidden] void ShapeFillStipple(long LayerHandle, long Shape, tkFillStipple nNewValue);
+			[id(85), propget] tkPointType ShapePointType(long LayerHandle, long Shape);
+			[id(85), propput] void ShapePointType(long LayerHandle, long Shape, tkPointType nNewValue);
+			[id(106)] VARIANT_BOOL IsSameProjection(BSTR proj4_a, BSTR proj4_b);
+			[id(110)] long set_UDPointImageListAdd(long LayerHandle, IDispatch* newValue);
+			[id(111), propget] long ShapePointImageListID(long LayerHandle, long Shape);
+			[id(111), propput] void ShapePointImageListID(long LayerHandle, long Shape, long ImageIndex);
+			[id(112)] long get_UDPointImageListCount(long LayerHandle);
+			[id(113)] IDispatch* get_UDPointImageListItem(long LayerHandle, long ImageIndex);
+			[id(114)] void ClearUDPointImageList(long LayerHandle);
 			[id(139)] void set_UDPointFontCharFont(long LayerHandle, BSTR FontName, float FontSize, VARIANT_BOOL isBold, VARIANT_BOOL isItalic, VARIANT_BOOL isUnderline); //ajp (01/10/08)
 			[id(140)] long set_UDPointFontCharListAdd(long LayerHandle, long newValue, OLE_COLOR color);
 			[id(141)] void set_UDPointFontCharFontSize(long LayerHandle, float FontSize);
 			[id(142), propget] long ShapePointFontCharListID(long LayerHandle, long Shape);
 			[id(142), propput] void ShapePointFontCharListID(long LayerHandle, long Shape, long FontCharIndex);
-			[id(143)] void ReSourceLayer(long LayerHandle, BSTR newSrcPath);
-			[id(144), propget] OLE_COLOR ShapeLayerStippleColor(long LayerHandle);
-			[id(144), propput] void ShapeLayerStippleColor(long LayerHandle, OLE_COLOR nNewValue);
 			[id(145), propget] OLE_COLOR ShapeStippleColor(long LayerHandle, long Shape);
 			[id(145), propput] void ShapeStippleColor(long LayerHandle, long Shape, OLE_COLOR nNewValue);
 			[id(146), propget] VARIANT_BOOL ShapeStippleTransparent(long LayerHandle, long Shape);
 			[id(146), propput] void ShapeStippleTransparent(long LayerHandle, long Shape, VARIANT_BOOL nNewValue);
-			[id(147), propget] VARIANT_BOOL ShapeLayerStippleTransparent(long LayerHandle);
-			[id(147), propput] void ShapeLayerStippleTransparent(long LayerHandle, VARIANT_BOOL nNewValue);
-			[id(148), propget] VARIANT_BOOL TrapRMouseDown();
-			[id(148), propput] void TrapRMouseDown(VARIANT_BOOL nNewValue);
-			[id(149), propput] void DisableWaitCursor(VARIANT_BOOL nNewValue);
-			[id(149), propget] VARIANT_BOOL DisableWaitCursor();
-			[id(150)] VARIANT_BOOL AdjustLayerExtents(long LayerHandle);
-			[id(153)] IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
-			[id(155)] void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
-			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
-			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
-												 float ClipX, float ClipY, float clipWidth, float clipHeight);
-			[id(157), propget] ILabels* DrawingLabels(long DrawingLayerIndex);
-			[id(157), propput] void DrawingLabels(long DrawingLayerIndex, ILabels* newVal);
-			[id(160), helpstring("method DrawWideCircleEx")] void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
-			[id(161)] void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
+			[id(87), propget] long UDLineStipple(long LayerHandle);
+			[id(87), propput] void UDLineStipple(long LayerHandle, long nNewValue);
+			[id(88), propget] long UDFillStipple(long LayerHandle, long StippleRow);
+			[id(88), propput] void UDFillStipple(long LayerHandle, long StippleRow, long nNewValue);
+			[id(89), propget] IDispatch* UDPointType(long LayerHandle);
+			[id(89), propputref] void UDPointType(long LayerHandle, IDispatch* newValue);
+			[id(100)] void GetLayerStandardViewWidth(long LayerHandle, double * Width);
+			[id(101)] void SetLayerStandardViewWidth(long LayerHandle, double Width);
+			[id(131)] void GetDrawingStandardViewWidth(long drawHandle, double * Width);
+			[id(132)] void SetDrawingStandardViewWidth(long drawHandle, double Width);
 			[id(162), propget, nonbrowsable] double MapRotationAngle();
 			[id(162), propput, nonbrowsable] void MapRotationAngle(double nNewValue);
 			[id(163)] IExtents* GetRotatedExtent();
 			[id(164)] IPoint* GetBaseProjectionPoint(double rotX, double rotY);
 			[id(165), propget, nonbrowsable] VARIANT_BOOL CanUseImageGrouping();
 			[id(165), propput, nonbrowsable] void CanUseImageGrouping(VARIANT_BOOL nNewValue);
-			[id(167), propget, helpstring("property LayerMaxVisibleScale")] DOUBLE LayerMaxVisibleScale(LONG LayerHandle);
-			[id(167), propput, helpstring("property LayerMaxVisibleScale")] void LayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal);
-			[id(168), propget, helpstring("property LayerMinVisibleScale")] DOUBLE LayerMinVisibleScale(LONG LayerHandle);
-			[id(168), propput, helpstring("property LayerMinVisibleScale")] void LayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal);
-			[id(169), propget, helpstring("property LayerDynamicVisibility")] VARIANT_BOOL LayerDynamicVisibility(LONG LayerHandle);
-			[id(169), propput, helpstring("property LayerDynamicVisibility")] void LayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal);
+			[id(80), propget] VARIANT_BOOL ShapeVisible(long LayerHandle, long Shape);
+			[id(80), propput] void ShapeVisible(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
+#endif
+#endif
+		
+#define SNAPSHOT_API
+#ifdef SNAPSHOT_API
+			[id(40)] IDispatch* SnapShot(IDispatch* BoundBox);
+			[id(136)] IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
+			[id(153)] IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
+			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
+			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
+												 float ClipX, float ClipY, float clipWidth, float clipHeight);
 			[id(170)] void DrawBackBuffer(int** hdc, int ImageWidth, int ImageHeight);
-			[id(171), propget, helpstring("property LayerLabels")] ILabels* LayerLabels(LONG LayerHandle);
-			[id(171), propput, helpstring("property LayerLabels")] void LayerLabels(LONG LayerHandle, ILabels* pVal);
+			[id(201)] void LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
+			[id(204)] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
+#endif			
 
-			[id(174), propget, helpstring("property Shapefile")] IShapefile* Shapefile(LONG LayerHandle);
-			[id(174), propput, helpstring("property Shapefile")] void Shapefile(LONG LayerHandle, IShapefile* pVal);
-			[id(175), propget, helpstring("property Image")] IImage* Image(LONG LayerHandle);
-			[id(175), propput, helpstring("property Image")] void Image(LONG LayerHandle, IImage* pVal);
-			[id(176), helpstring("method SerializeLayer")] BSTR SerializeLayer(LONG LayerHandle);
-			[id(177), helpstring("method DeserializeLayer")] VARIANT_BOOL DeserializeLayer(LONG LayerHandle, BSTR newVal);
-			[id(178), helpstring("method SaveMapState")] VARIANT_BOOL SaveMapState(BSTR Filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite);
-			[id(179), helpstring("method LoadMapState")] VARIANT_BOOL LoadMapState(BSTR Filename, IDispatch* Callback);
-			[id(180), helpstring("method SaveLayerOptions")] VARIANT_BOOL SaveLayerOptions(LONG LayerHandle, BSTR OptionsName, VARIANT_BOOL Overwrite, BSTR Description);
-			[id(181), helpstring("method LoadLayerOptions")] VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, BSTR OptionsName, BSTR* Description);
-			[id(182), propget, helpstring("property LayerDescription")] BSTR LayerDescription(LONG LayerHandle);
-			[id(182), propput, helpstring("property LayerDescription")] void LayerDescription(LONG LayerHandle, BSTR newVal);
-			[id(183), helpstring("method DeserializeMapStateCore")] VARIANT_BOOL DeserializeMapState(BSTR State, VARIANT_BOOL LoadLayers, BSTR BasePath);
-			[id(184), helpstring("method SerializeMapState")] BSTR SerializeMapState(VARIANT_BOOL RelativePaths, BSTR BasePath);
-			[id(185), helpstring("method RemoveLayerOptions")] VARIANT_BOOL RemoveLayerOptions(LONG LayerHandle, BSTR OptionsName);
-			[id(186), propget, helpstring("property LayerSkipOnSaving")] VARIANT_BOOL LayerSkipOnSaving(LONG LayerHandle);
-			[id(186), propput, helpstring("property LayerSkipOnSaving")] void LayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal);
-			[id(189), propget, helpstring("property LayerFilename")] BSTR LayerFilename(LONG layerHandle);
-			[id(190), helpstring("method ZoomToSelected")] VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
-			[id(193), propget, helpstring("property GeographicExtents")] IExtents* GeographicExtents();
-			[id(194), helpstring("method SetGeographicExtents")] VARIANT_BOOL SetGeographicExtents(IExtents* pVal);
-			[id(196), propget, helpstring("property Measuring")] IMeasuring* Measuring();
-			[id(197), helpstring("method ZoomToTileLevel")] VARIANT_BOOL ZoomToTileLevel(int zoom);
-			[id(198), propget, helpstring("property LayerMaxVisibleZoom")] int LayerMaxVisibleZoom(LONG LayerHandle);
-			[id(198), propput, helpstring("property LayerMaxVisibleZoom")] void LayerMaxVisibleZoom(LONG LayerHandle, int newVal);
-			[id(199), propget, helpstring("property LayerMinVisibleZoom")] int LayerMinVisibleZoom(LONG LayerHandle);
-			[id(199), propput, helpstring("property LayerMinVisibleZoom")] void LayerMinVisibleZoom(LONG LayerHandle, int newVal);
-			[id(200), helpstring("method ZoomToWorld")] VARIANT_BOOL ZoomToWorld();
-			[id(201), helpstring("method LoadTilesForSnapshot")] void LoadTilesForSnapshot(IExtents* Extents, long Width, LPCTSTR Key, tkTileProvider provider);
-			[id(203), helpstring("method FindSnapPoint")] VARIANT_BOOL FindSnapPoint([in]double tolerance, [in]double xScreen, [in]double yScreen, [in, out]double* xFound, [in, out]double* yFound);
-			[id(204), helpstring("method TilesAreInCache")] INT TilesAreInCache(IExtents* Extents, long Width, tkTileProvider provider);
-			[id(206), helpstring("method Clear")] void Clear();
-			[id(208), helpstring("method SetGeographicExtents2")] VARIANT_BOOL SetGeographicExtents2(double xLongitude, double yLatitude, double widthKilometers);
-			[id(209), helpstring("method GetKnownExtents")] IExtents* GetKnownExtents(tkKnownExtents extents);
-			[id(210), helpstring("method AddLayerFromFilename")] LONG AddLayerFromFilename(LPCTSTR Filename, tkFileOpenStrategy openStrategy, VARIANT_BOOL Visible);
-			[id(207), propput, helpstring("property ZoomBehavior")] void ZoomBehavior(tkZoomBehavior nNewValue);
-			[id(207), propget, helpstring("property ZoomBehavior")] tkZoomBehavior ZoomBehavior();
-			[id(212), propput] void Latitude(float nNewValue);
-			[id(212), propget] float Latitude();
-			[id(213), propput] void Longitude(float nNewValue);
-			[id(213), propget] float Longitude();
-			[id(214), propput] void CurrentZoom(int nNewValue);
-			[id(214), propget] int CurrentZoom();
-			[id(216), propput] void TileProvider(tkTileProvider nNewValue);
-			[id(216), propget] tkTileProvider TileProvider();
-			[id(217), propput] void Projection(tkMapProjection nNewValue);
-			[id(217), propget] tkMapProjection Projection();
-			[id(218), propput] void KnownExtents(tkKnownExtents nNewValue);
-			[id(218), propget] tkKnownExtents KnownExtents();
+#define SERIALIZE_API
+#ifdef SERIALIZE_API
+			[id(176)] BSTR SerializeLayer(LONG LayerHandle);
+			[id(177)] VARIANT_BOOL DeserializeLayer(LONG LayerHandle, BSTR newVal);
+			[id(178)] VARIANT_BOOL SaveMapState(BSTR Filename, VARIANT_BOOL RelativePaths, VARIANT_BOOL Overwrite);
+			[id(179)] VARIANT_BOOL LoadMapState(BSTR Filename, IDispatch* Callback);
+			[id(180)] VARIANT_BOOL SaveLayerOptions(LONG LayerHandle, BSTR OptionsName, VARIANT_BOOL Overwrite, BSTR Description);
+			[id(181)] VARIANT_BOOL LoadLayerOptions(LONG LayerHandle, BSTR OptionsName, BSTR* Description);
+			[id(182), propget] BSTR LayerDescription(LONG LayerHandle);
+			[id(182), propput] void LayerDescription(LONG LayerHandle, BSTR newVal);
+			[id(183)] VARIANT_BOOL DeserializeMapState(BSTR State, VARIANT_BOOL LoadLayers, BSTR BasePath);
+			[id(184)] BSTR SerializeMapState(VARIANT_BOOL RelativePaths, BSTR BasePath);
+			[id(185)] VARIANT_BOOL RemoveLayerOptions(LONG LayerHandle, BSTR OptionsName);
+			[id(186), propget] VARIANT_BOOL LayerSkipOnSaving(LONG LayerHandle);
+			[id(186), propput] void LayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal);
+#endif
+
+#define BEHAVIOR_API
+#ifdef BEHAVIOR_API
+			[id(44)] void ShowToolTip(BSTR Text, long Milliseconds);
+
+			[id(108), propput] void MapResizeBehavior(tkResizeBehavior nNewValue);
+			[id(108), propget] tkResizeBehavior MapResizeBehavior();
+			[id(148), propget] VARIANT_BOOL TrapRMouseDown();
+			[id(148), propput] void TrapRMouseDown(VARIANT_BOOL nNewValue);
+			[id(149), propput] void DisableWaitCursor(VARIANT_BOOL nNewValue);
+			[id(149), propget] VARIANT_BOOL DisableWaitCursor();
 			[id(219), propput] void ShowCoordinates(tkCoordinatesDisplay nNewValue);
 			[id(219), propget] tkCoordinatesDisplay ShowCoordinates();
-			[id(220)] void Redraw2(tkRedrawType redrawType);
 			[id(221), propput] void GrabProjectionFromData(VARIANT_BOOL nNewValue);
 			[id(221), propget] VARIANT_BOOL GrabProjectionFromData();
-			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
-			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
-			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
- 	        [id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
-			[id(226), propput] void ShowZoomBar(VARIANT_BOOL nNewValue);
-			[id(226), propget] VARIANT_BOOL ShowZoomBar();
-			[id(227), propput] void AnimationOnZooming(tkCustomState nNewValue);
-			[id(227), propget] tkCustomState AnimationOnZooming();
 			[id(228), propput] void InertiaOnPanning(tkCustomState nNewValue);
 			[id(228), propget] tkCustomState InertiaOnPanning();
 			[id(229), propput] void ReuseTileBuffer(VARIANT_BOOL nNewValue);
 			[id(229), propget] VARIANT_BOOL ReuseTileBuffer();
 			[id(230), propput] void ZoomBarVerbosity(tkZoomBarVerbosity nNewValue);
 			[id(230), propget] tkZoomBarVerbosity ZoomBarVerbosity();
-			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
-			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
 			[id(233), propput] void ZoomBarMinZoom(long nNewValue);
 			[id(233), propget] long ZoomBarMinZoom();
 			[id(234), propput] void ZoomBarMaxZoom(long nNewValue);
 			[id(234), propget] long ZoomBarMaxZoom();
-			[id(235), propget] IShapeEditor* ShapeEditor();
-			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
-			[id(237)] LONG AddLayerFromDatabase(LPCTSTR ConnectionString, LPCTSTR LayerNameOrQuery, VARIANT_BOOL Visible);
-			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
+			[id(207), propput] void ZoomBehavior(tkZoomBehavior nNewValue);
+			[id(207), propget] tkZoomBehavior ZoomBehavior();
+			[id(226), propput] void ShowZoomBar(VARIANT_BOOL nNewValue);
+			[id(226), propget] VARIANT_BOOL ShowZoomBar();
+			[id(227), propput] void AnimationOnZooming(tkCustomState nNewValue);
+			[id(227), propget] tkCustomState AnimationOnZooming();
+			[id(231), propput] void ZoomBoxStyle(tkZoomBoxStyle nNewValue);
+			[id(231), propget] tkZoomBoxStyle ZoomBoxStyle();
+#endif			
+
+			[id(43)] void Resize(long Width, long Height);
+			[id(206)] void Clear();
+			[id(82), propget] BSTR ErrorMsg(long ErrorCode);
+			[id(109)] long HWnd(void);
+
+			[id(5), propput, nonbrowsable] void UDCursorHandle(long nNewValue);
+			[id(5), propget, nonbrowsable] long UDCursorHandle();
+			[id(216), propput] void TileProvider(tkTileProvider nNewValue);
+			[id(216), propget] tkTileProvider TileProvider();
+
+			
+			[id(203)] VARIANT_BOOL FindSnapPoint([in]double tolerance, [in]double xScreen, [in]double yScreen, [in, out]double* xFound, [in, out]double* yFound);
 			[id(244)] void Undo();
+
 			//}}AFX_ODL_METHOD
 	};
 
@@ -6184,6 +6254,8 @@ library MapWinGIS
 			[id(33)] void BackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG NumFeatures, LONG NumLoaded);
 		//}}AFX_ODL_EVENT
 	};
+
+#ifdef OLD_API
 	[
 		object,
 		uuid(FAE1B21A-10C5-4C33-8DC2-931EDC9FBF82),
@@ -6230,6 +6302,7 @@ library MapWinGIS
 		[propget, id(6), helpstring("property Visible")] HRESULT Visible([out, retval] VARIANT_BOOL *pVal);
 		[propput, id(6), helpstring("property Visible")] HRESULT Visible([in] VARIANT_BOOL newVal);
 	};
+#endif
 
 	//  Class information for CMap
 
@@ -6243,6 +6316,7 @@ library MapWinGIS
 
 	//{{AFX_APPEND_ODL}}
 	//}}AFX_APPEND_ODL}}
+#ifdef OLD_API
 	[
 		uuid(A038D3E9-46CB-4F95-A40A-88826BF71BA6),
 		helpstring("ShapefileColorScheme Class")
@@ -6259,6 +6333,7 @@ library MapWinGIS
 	{
 		[default] interface IShapefileColorBreak;
 	};
+#endif
 	[
 		uuid(B4A353E3-D3DF-455C-8E4D-CFC937800820),
 		helpstring("Grid Class")

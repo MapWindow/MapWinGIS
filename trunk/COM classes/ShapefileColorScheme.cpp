@@ -25,6 +25,8 @@
 #include "stdafx.h"
 #include "ShapefileColorScheme.h"
 
+#ifdef OLD_API
+
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorScheme
 
@@ -202,3 +204,4 @@ STDMETHODIMP CShapefileColorScheme::put_Key(BSTR newVal)
 	return S_OK;
 }
 
+#endif

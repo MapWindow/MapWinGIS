@@ -31,6 +31,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#ifdef OLD_API
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorBreak
 
@@ -126,3 +127,5 @@ STDMETHODIMP CShapefileColorBreak::put_Caption(BSTR newVal)
 
 	return S_OK;
 }
+
+#endif

@@ -471,7 +471,6 @@ BSTR CMapView::GetMapState()
 // ******************************************************************
 //	   SetMapState()
 // ******************************************************************
-// TODO: write support for the new symbology
 void CMapView::SetMapState(LPCTSTR lpszNewValue)
 {
 	_mapstateMutex.Lock();	
