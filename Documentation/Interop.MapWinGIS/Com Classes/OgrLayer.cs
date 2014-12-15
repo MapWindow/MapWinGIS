@@ -169,7 +169,7 @@ namespace MapWinGIS
     ///     Debug.WriteLine("Feature count: " + layer.FeatureCount);
     /// 
     ///     // now load the data locally and display the same info
-    ///     var shapefile = layer.GetData();
+    ///     var shapefile = layer.GetBuffer();
     ///     if (shapefile != null)
     ///     {
     ///         Debug.WriteLine("Extents from the loaded data: " + shapefile.Extents.ToDebugString());
@@ -601,7 +601,7 @@ namespace MapWinGIS
         ///     }
         ///     else
         ///     {
-        ///         var sf = layer.GetData();
+        ///         var sf = layer.GetBuffer();
         ///         Debug.WriteLine("Number of generated categories: " + sf.Categories.Count);
         /// 
         ///         // save it as a new style
@@ -811,7 +811,7 @@ namespace MapWinGIS
         ///     return false;
         /// }
         /// 
-        /// var sf = layer.GetData();
+        /// var sf = layer.GetBuffer();
         /// if (sf != null)
         /// {
         ///     // possible types of editing

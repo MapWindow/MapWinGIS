@@ -14,7 +14,6 @@ namespace Examples
         public void CalculateArea(AxMap axMap1, string dataPath)
         {
             axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-            axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
 
             string filename = dataPath + "buildings.shp";
 

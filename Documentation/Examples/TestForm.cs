@@ -37,6 +37,19 @@ namespace Examples
             this.treeView1.SelectedNode = this.treeView1.Nodes[0];
             GenerateExamples();
             btnClear_Click_1(null, null);
+
+            axMap1.ProjectionMismatch += axMap1_ProjectionMismatch;
+            axMap1.LayerReprojected += axMap1_LayerReprojected;
+        }
+
+        void axMap1_LayerReprojected(object sender, AxMapWinGIS._DMapEvents_LayerReprojectedEvent e)
+        {
+            Debug.WriteLine("Layer reprojected: " + e.layerHandle);
+        }
+
+        void axMap1_ProjectionMismatch(object sender, AxMapWinGIS._DMapEvents_ProjectionMismatchEvent e)
+        {
+            Debug.WriteLine("Projection mismatch:" + e.layerHandle);
         }
 
         #region Example list
@@ -195,7 +208,6 @@ namespace Examples
             MapEvents.Clear();
 
             axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-            axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
             axMap1.ZoomBehavior = tkZoomBehavior.zbUseTileLevels;
             axMap1.TileProvider = tkTileProvider.OpenStreetMap;
             axMap1.GrabProjectionFromData = false;

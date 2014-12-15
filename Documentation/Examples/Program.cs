@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MapWinGIS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,7 +16,14 @@ namespace Examples
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            InitGlobalSettings();
             Application.Run(new StartForm());
+        }
+
+        static void InitGlobalSettings()
+        {
+            var gs = new GlobalSettings();
+            gs.ReprojectLayersOnAdding = true;
         }
     }
 

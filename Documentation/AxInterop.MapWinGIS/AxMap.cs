@@ -569,6 +569,7 @@ namespace AxMapWinGIS
         /// <param name="x">The x coordinate in projected map units which determines where the label will be added on the map.</param>
         /// <param name="y">The y coordinate in projected map units which determines where the label will be added on the map.</param>
         /// <param name="hJustification">Specifies whether to justify the label's text right, left, or center. </param>
+        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interfaces ( AxMap.get_LayerLabels ) to change these settings.
         public void AddLabel(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification)
         {
             throw new NotImplementedException();
@@ -585,6 +586,7 @@ namespace AxMapWinGIS
         /// <param name="hJustification">Specifies whether to justify the label's text right, left, or center.</param>
         /// <param name="Rotation">The number of degrees to rotate the label. Positive angles rotate the text counter-clockwise, and
         /// negative angles rotate the text clockwise</param>
+        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interfaces ( AxMap.get_LayerLabels ) to change these settings.
         public void AddLabelEx(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification, double Rotation)
         {
             throw new NotImplementedException();
@@ -593,7 +595,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Clears all labels that have been added to the specified layer.
         /// </summary>
-        /// <param name="LayerHandle"></param>
+        /// <param name="LayerHandle">Handle of the layer.</param>
         public void ClearLabels(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -2068,7 +2070,7 @@ namespace AxMapWinGIS
         ///         Debug.Print("Number of features: " + l.FeatureCount);
         /// 
         ///         // no access the data
-        ///         var sf = l.GetData();
+        ///         var sf = l.GetBuffer();
         ///         Debug.Print("Number of shapes: " + sf.NumShapes);
         ///     }
         /// }
@@ -2272,7 +2274,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Returns the layer object with the given handle. The object could be a Shapefile, Grid, or Image object.
         /// </summary>
-        /// <remarks>For OGR layers this method will return underlying shapefile from OgrLayer.GetData(). 
+        /// <remarks>For OGR layers this method will return underlying shapefile from OgrLayer.GetBuffer(). 
         /// Use AxMap.get_OgrLayer to access instance of OgrLayer itself.</remarks>
         /// <param name="LayerHandle">The handle of the layer to be retrieved.</param>
         /// <returns>A Shapefile, Grid, or Image object.</returns>

@@ -129,11 +129,14 @@ namespace Examples
             for (int i = 0; i < service.Cars.Count; i++)
             {
                 var car = service.Cars[i];
-                _carShapefile.Shape[i].put_XY(0, car.X, car.Y);
-                _carShapefile.ShapeRotation[i] = car.Direction;
-                var lbl = _carShapefile.Labels.Label[i, 0];
-                lbl.x = car.X + 20;
-                lbl.y = car.Y;
+                if (i < _carShapefile.NumShapes)
+                { 
+                    _carShapefile.Shape[i].put_XY(0, car.X, car.Y);
+                    _carShapefile.ShapeRotation[i] = car.Direction;
+                    var lbl = _carShapefile.Labels.Label[i, 0];
+                    lbl.x = car.X + 20;
+                    lbl.y = car.Y;
+                }
             }
             axMap1.Redraw2(tkRedrawType.RedrawSkipDataLayers);
         }

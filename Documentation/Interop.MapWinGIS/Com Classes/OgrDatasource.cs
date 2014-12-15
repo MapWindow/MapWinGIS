@@ -96,7 +96,7 @@ namespace MapWinGIS
     /// lyr [ label="OgrLayer" URL="\ref OgrLayer"];
     /// 
     /// edge [dir = "none", dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
-    /// lyr -> sf [ URL="\ref OgrLayer.GetData()", tooltip = "OgrLayer.GetData()", headlabel = "   1"];
+    /// lyr -> sf [ URL="\ref OgrLayer.GetBuffer()", tooltip = "OgrLayer.GetBuffer()", headlabel = "   1"];
     /// ds -> lyr [URL="\ref OgrDatasource.GetLayer()", tooltip = "OgrDatasource.GetLayer()", headlabel = "   n"]
     /// }
     /// \enddot
@@ -258,7 +258,7 @@ namespace MapWinGIS
         ///         {
         ///             Debug.WriteLine("Number of features in a buffer: " + buffer.FeatureCount);
         ///             map.AddLayer(buffer, true);
-        ///             buffer.GetData().DefaultDrawingOptions.FillColor = 255;     // red
+        ///             buffer.GetBuffer().DefaultDrawingOptions.FillColor = 255;     // red
         ///         }
         /// 
         ///         // simply extract unaltered source features in the second query and display them above the buffer

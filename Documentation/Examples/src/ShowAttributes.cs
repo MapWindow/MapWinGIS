@@ -15,7 +15,6 @@ namespace Examples
         public void ShowAttributes(AxMap axMap1, string dataPath, ToolStripStatusLabel label)
         {
             axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-            axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
 
             string filename = dataPath + "landuse.shp";
             Shapefile sf = new Shapefile(); 

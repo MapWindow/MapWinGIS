@@ -14,7 +14,6 @@ namespace Examples
         public void PointIcons(AxMap axMap1, string dataPath, string iconPath)
         {
             axMap1.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-            axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
 
             if (!Directory.Exists(iconPath))
             {

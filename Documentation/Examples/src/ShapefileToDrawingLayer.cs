@@ -26,8 +26,6 @@ namespace Examples
 
             var center =  (axMap1.Extents as Extents).Center;
 
-            
-
             try
             {
                 for (int n = 0; n < filenames.Length; n++)
