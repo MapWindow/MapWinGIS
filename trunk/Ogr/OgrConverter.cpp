@@ -260,7 +260,8 @@ OGRGeometry* OgrConverter::ShapeToGeometry(IShape* shape, OGRwkbGeometryType for
  *
  *  @return true when at least one shape was created, and false otherwise
  */
-bool OgrConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes, bool isM, OGRwkbGeometryType oForceType )
+bool OgrConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, 
+			OGRwkbGeometryType oForceType /*= wkbNone*/, bool force25D /*= false*/ )
 {
 	IShape* shp;
 	vShapes->clear();
@@ -327,7 +328,7 @@ bool OgrConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes
 	}
 	else
 	{
-		shp = OgrConverter::GeometryToShape(oGeom, isM, wkbNone, oForceType );
+		shp = OgrConverter::GeometryToShape(oGeom, isM, wkbNone, oForceType, force25D );
 		if (shp != NULL) vShapes->push_back(shp);
 	}
 	return vShapes->size() > 0;
@@ -347,7 +348,9 @@ bool OgrConverter::GeometryToShapes(OGRGeometry* oGeom, vector<IShape*>* vShapes
  *
  *  @return pointer to shape on success, or NULL otherwise
  */
-IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType, OGRwkbGeometryType oForceType)
+IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, 
+		OGRwkbGeometryType oBaseType /*= wkbNone*/, OGRwkbGeometryType oForceType /*= wkbNone*/, 
+		bool force25D /*= false*/)
 {
 	if (oGeom == NULL)
 		return NULL;
@@ -530,9 +533,9 @@ IShape * OgrConverter::GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeome
 		OGRLinearRing**  papoRings=NULL;
 		int nRings = 0;
 		
-		if		(oType == wkbPolygon || oType == wkbMultiPolygon)			shptype = SHP_POLYGON;
-		else if (oType == wkbPolygon25D || oType == wkbMultiPolygon25D)		shptype = isM ? SHP_POLYGONM : SHP_POLYGONZ;
-	
+		if ((oType == wkbPolygon25D || oType == wkbMultiPolygon25D) || force25D)	shptype = isM ? SHP_POLYGONM : SHP_POLYGONZ;
+		else if (oType == wkbPolygon || oType == wkbMultiPolygon)		shptype = SHP_POLYGON;
+		
 		if (oType == wkbPolygon || oType == wkbPolygon25D)
 		{
 			oPoly = (OGRPolygon *) oGeom;

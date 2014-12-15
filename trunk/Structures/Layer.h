@@ -85,7 +85,7 @@ public:
 		if (object != NULL) 
 		{
 			ULONG refcnt = object->Release();
-			Debug::WriteLine("Releasing layer; Remaining ref count: %d", refcnt);
+			//Debug::WriteLine("Releasing layer; Remaining ref count: %d", refcnt);
 		}
 		object = NULL;
 	}	

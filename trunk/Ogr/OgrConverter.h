@@ -19,8 +19,8 @@ using namespace std;
 class OgrConverter
 {
 	public:
-		static IShape * GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone);
-		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, OGRwkbGeometryType oForceType = wkbNone);
+		static IShape * GeometryToShape(OGRGeometry* oGeom, bool isM, OGRwkbGeometryType oBaseType = wkbNone, OGRwkbGeometryType oForceType = wkbNone, bool is25D = false);
+		static bool GeometryToShapes(OGRGeometry* oGeom, vector<IShape *>* vShapes, bool isM, OGRwkbGeometryType oForceType = wkbNone, bool force25D = false);
 		static OGRGeometry* ShapeToGeometry(IShape* shp, OGRwkbGeometryType forceGeometryType = wkbNone);
 		static IShapefile* ReadOgrLayer(BSTR Filename, ICallback* callback);
 		static bool WriteOgrLayer(IShapefile* sf, BSTR Filename);

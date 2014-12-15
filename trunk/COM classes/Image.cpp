@@ -868,7 +868,6 @@ STDMETHODIMP CImageClass::get_CdlgFilter(BSTR *pVal)
 	USES_CONVERSION;
 
 	// NOTE: These need to match the grid filter for any duplicates.
-	//"ECW Images (*.ecw)|*.ecw|" 
 	*pVal = A2BSTR( "All Supported Image Types|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.vrt;*.tif;*.ntf|" \
 					"ArcInfo Grid Images (hdr.adf)|hdr.adf|" \
 					"ASCII Grid Images (*.asc)|*.asc|" \

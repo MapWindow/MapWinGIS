@@ -25,17 +25,22 @@ GEOSGeometry* DoBuffer(DOUBLE distance, long nQuadSegments, GEOSGeometry* gsGeom
 bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool isM)
 {
 	bool substitute = false;
+	bool has25D = false;	
+
 	if (!GeosHelper::IsValid(gsGeom))
 	{
+		// during buffer operation shape looses its Z coordinate, but during conversion back to 
+		// shape it should be restored or shape type check won't be passed 
+		has25D = GeosHelper::HasZ(gsGeom);
 		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
-		if (GeosHelper::IsValid(gsNew))
+		if (gsNew && GeosHelper::IsValid(gsNew))
 		{
-			//GEOSGeom_destroy(gsGeom);   // it should be deleted by caller as it can be a part of larger geometry
 			gsGeom = gsNew;
-			substitute = true;
+			substitute = true;    // it will be deleted below
 		}
 	}
 
+	bool result = false;
 	OGRGeometry* oGeom = GeosHelper::CreateFromGEOS(gsGeom);
 	if (oGeom)
 	{
@@ -47,20 +52,14 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		if (s == "LinearRing" && oGeom->getGeometryType() != wkbLinearRing)
 			oForceType = wkbLinearRing;
 
-		bool result = OgrConverter::GeometryToShapes(oGeom, vShapes, isM);
+		result = OgrConverter::GeometryToShapes(oGeom, vShapes, isM, wkbNone, has25D);
 		OGRGeometryFactory::destroyGeometry(oGeom);
-
-		if (substitute)
-			GeosHelper::DestroyGeometry(gsGeom);
-		return result;
 	}
-	else
-	{
-		if (substitute)
-			GeosHelper::DestroyGeometry(gsGeom);
 
-		return false;
-	}
+	if (substitute)
+		GeosHelper::DestroyGeometry(gsGeom);
+
+	return result;
 }
 
 // *********************************************************************

@@ -2082,12 +2082,14 @@ vector<CategoriesData>* CTableClass::GenerateCategories(long FieldIndex, tkClass
 	/* we won't define intervals for string values */
 	if (ClassificationType != ctUniqueValues && fieldType == STRING_FIELD)
 	{
+		CallbackHelper::ErrorMsg("String fields support only unique values classification for categories.");
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
 		return S_OK;
 	}
 	
 	if ((numClasses <= 0 || numClasses > 1000) && (ClassificationType != ctUniqueValues))
 	{
+		CallbackHelper::ErrorMsg("Too many categories for non-unique values classification type.");
 		ErrorMessage(tkINVALID_PARAMETER_VALUE); 
 		return S_OK;
 	}

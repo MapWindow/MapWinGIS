@@ -632,6 +632,7 @@ STDMETHODIMP CShapefileCategories::ApplyColorScheme3 (tkColorSchemeType Type, IC
 
 	if ( CategoryEndIndex == CategoryStartIndex )
 	{
+		CallbackHelper::ErrorMsg("Can't apply color scheme to a single a single category (start index and end index are the same.)");
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}

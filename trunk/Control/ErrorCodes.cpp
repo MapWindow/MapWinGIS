@@ -76,7 +76,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkOUT_OF_RANGE_0_TO_1:
 			return "Value was out of range (0 to 1)";
 		case tkCANT_COCREATE_COM_INSTANCE:
-			return "Unable to retrieve COM object from dll";
+			return "Unable to retrieve COM object from DLL.";
 		case tkFAILED_TO_ALLOCATE_MEMORY:
 			return "Failed to allocate memory";
 		case tkUNSUPPORTED_FORMAT:
@@ -432,49 +432,49 @@ const char * ErrorMsg( long ErrorCode )
 
 		//1401-1600 = tktinvuc
 		case tkVALUE_MUST_BE_2_TO_N:
-			return "The value must be 2^n";
+			return "The value must be 2^n.";
 		case tkNOT_INITIALIZED:
-			return "The viewer is not initialized";
+			return "The viewer is not initialized.";
 			//1501-1600 = Itkfeature
 		
 		//1601-1800 = labels
 		case tkLABELS_CANT_SYNCHRONIZE:
 			return "Failed to synchronize labels with shapefile. Number of the objects differs.";
 		case tkLABELS_NOT_SYNCHRONIZE:
-			return "The method applicable when labels are synchronized only";
+			return "The method applicable when labels are synchronized only.";
 		case tkLABELS_NOT_SAVED:
-			return "Failed to load labels as the positions weren't saved";
+			return "Failed to load labels as the positions weren't saved.";
 		case tkINVALID_FLOAT_NUMBER_FORMAT:
 			return "Invalid format string for floating point numbers (see documentation of C printf function for valid formats, e.g. %g or %.2f).";
 			
 		
 		//1801-2000 = geoprojections
 		case tkOGR_NOT_ENOUGH_DATA:
-			return "OGR: not enough data";
+			return "OGR: not enough data.";
 		case tkOGR_NOT_ENOUGH_MEMORY:
-			return "OGR: not enough memory";
+			return "OGR: not enough memory.";
 		case tkOGR_UNSUPPORTED_GEOMETRY_TYPE:
-			return "OGR: unsupported geometry type";
+			return "OGR: unsupported geometry type.";
 		case tkOGR_UNSUPPORTED_OPERATION:
-			return "OGR: unsupported operation";
+			return "OGR: unsupported operation.";
 		case tkOGR_CORRUPT_DATA:
-			return "OGR: corrupt data";
+			return "OGR: corrupt data.";
 		case tkOGR_FAILURE:
-			return "OGR: undefined failure";
+			return "OGR: undefined failure.";
 		case tkOGR_UNSUPPORTED_SRS:
-			return "OGR: unsupported spatial reference";
+			return "OGR: unsupported spatial reference.";
 		case tkOGR_INVALID_HANDLE:
-			return "OGR: invalid handle";
+			return "OGR: invalid handle.";
 		case tkFAILED_TO_REPROJECT:
 			return "Failed to reproject shapefile.";
 		case tkPROJECTION_NOT_INITIALIZED:
-			return "Geoprojection is not initialized";
+			return "Geoprojection is not initialized.";
 		case tkPRJ_FILE_EXISTS:
-			return "Projection file with such name already exists";
+			return "Projection file with such name already exists.";
 		case tkTRANSFORMATION_NOT_INITIALIZED:
-			return "Transformation isn't initialized";
+			return "Transformation isn't initialized.";
 		case tkFAILED_TO_COPY_PROJECTION:
-			return "Failed to copy projection";
+			return "Failed to copy projection.";
 		case tkPROJECTION_IS_FROZEN:
 			return "It's not allowed to change GeoProjection object which is used by map.";
 		case tkGEOGRAPHIC_PROJECTION_EXPECTED:
@@ -485,6 +485,10 @@ const char * ErrorMsg( long ErrorCode )
 			return "Can't add layer to the map. Layer projection doesn't match map projection.";
 		case tkNO_REPROJECTION_FOR_IMAGES:
 			return "Can't add layer to the map. Layer projection doesn't match map projection. Automatic transformation isn't supported for images.";
+		case tkFAILED_TRANSFORM_WGS84_TO_MAP:
+			return "Failed to start transformation from WGS84 to map coordinate system.";
+		case tkFAILED_TRANSFORM_MAP_TO_WGS84:
+			return "Failed to start transformation from map coordinate system to WGS84.";
 		case tkREPROJECTION_TOO_MUCH_SHAPES:
 			return "Layer to be reprojected has too many shapes. Consider to open it in native projection or to save reprojection results as a new datasource. "
 					"Doing reprojection on the fly can be too costly. This behavior can be changed via GlobalSettings.MaxReprojectionShapeCount property.";

@@ -4,8 +4,14 @@
 class GeosHelper
 {
 public:
-	GeosHelper(void) {};
-	~GeosHelper(void) {};
+	static bool HasZ(const GEOSGeometry* g)
+	{
+		#ifdef GEOS_NEW
+			return GEOSHasZ_r(getGeosHandle(), g) != 0;
+		#else
+			return GEOSHasZ(g) != 0;
+		#endif
+	}
 
 	static int RelatePattern(const GEOSGeometry* g1, const GEOSGeometry* g2, const char *pat)
 	{

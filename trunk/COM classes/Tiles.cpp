@@ -1816,8 +1816,10 @@ bool CTiles::ProjectionSupportsWorldWideTransform( IGeoProjection* mapProjection
 		VARIANT_BOOL vb1, vb2;
 		double minLng = -180.0, maxLng = 180.0, minLat = -85.05112878, maxLat = 85.05112878;
 		double x1 = minLng, x2 = maxLng, y1 = minLat, y2 = maxLat;
+		m_globalSettings.suppressGdalErrors = true;
 		wgsProjection->Transform(&x1, &y1, &vb1);
 		wgsProjection->Transform(&x2, &y2, &vb2);
+		m_globalSettings.suppressGdalErrors = false;
 		if (vb1 && vb2)
 		{
 			mapProjection->Transform(&x1, &y1, &vb1);
