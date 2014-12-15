@@ -122,6 +122,7 @@ public:
 	STDMETHOD(Sort)(LONG FieldIndex, VARIANT_BOOL Ascending, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ClassificationField)(LONG* pVal);
 	STDMETHOD(put_ClassificationField)(LONG newVal);
+	STDMETHOD(Generate2)(BSTR fieldName, tkClassificationType ClassificationType, LONG numClasses, VARIANT_BOOL* retVal);
 	
 private:
 	BSTR _key;
@@ -151,7 +152,6 @@ public:
 	CDrawingOptionsEx* get_UnderlyingOptions(int Index);
 	void GenerateCore(std::vector<CategoriesData>* categories, long FieldIndex, tkClassificationType ClassificationType, VARIANT_BOOL* retVal);
 	void GetCategoryData(vector<CategoriesData*>& data);
-	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ShapefileCategories), CShapefileCategories)

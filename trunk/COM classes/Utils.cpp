@@ -40,6 +40,7 @@
 #include "Expression.h"
 #include "OgrConverter.h"
 #include "TableHelper.h"
+#include "xtiffio.h"
 
 #pragma warning(disable:4996)
 
@@ -5587,3 +5588,51 @@ cleaning:
 
 	return S_OK;
 }
+
+// *************************************************
+//			IsTiffGrid()						  
+// *************************************************
+STDMETHODIMP CUtils::IsTiffGrid(BSTR Filename, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	try
+	{
+		USES_CONVERSION;
+		const char* name = OLE2CA(Filename);
+		TIFF *tiff = XTIFFOpen(name, "r"); // TIFF-level descriptor
+		if (tiff)
+		{
+			int w = 0, h = 0;
+
+			tdir_t d = 0;
+			TIFFSetDirectory(tiff, d);
+
+			uint32 SamplesPerPixel = 0;
+
+			TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &w);
+			TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &h);
+			TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &SamplesPerPixel);
+
+			uint16 photo = 0;
+			// If it's a color-mapped palette, consider it an image --
+			// it's probably an image (USGS DLG or USGS Quad Map most commonly)
+			TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &photo);
+
+			XTIFFClose(tiff);
+
+			if (photo == PHOTOMETRIC_PALETTE){}
+			else if (SamplesPerPixel == 1) 
+			{
+				*retVal = VARIANT_TRUE;
+			}
+		}
+	}
+	catch (...)
+	{
+		CallbackHelper::ErrorMsg("Exception in Utils.IsTiffGrid");
+	}
+	return S_OK;
+}
+

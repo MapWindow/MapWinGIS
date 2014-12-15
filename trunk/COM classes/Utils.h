@@ -282,9 +282,12 @@ private:
 	BOOL ProcessGeneralOptions(int * opts);
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
 	ICallback* GetCallback() { return m_globalSettings.callback ? m_globalSettings.callback : _globalCallback; }
+	BOOL IsTIFFGrid(LPCTSTR Filename);
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
+	
+	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);

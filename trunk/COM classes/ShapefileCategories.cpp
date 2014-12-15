@@ -249,6 +249,28 @@ STDMETHODIMP CShapefileCategories::AddRange(long FieldIndex, tkClassificationTyp
 	return S_OK;
 }
 
+// ********************************************************
+//     Generate2()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::Generate2(BSTR fieldName, tkClassificationType ClassificationType, LONG numClasses, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	if (!_shapefile) return S_OK;
+
+	CComPtr<ITable> tbl = NULL;
+	_shapefile->get_Table(&tbl);
+	if (!tbl) return S_OK;
+
+	long fieldIndex;
+	tbl->get_FieldIndexByName(fieldName, &fieldIndex);
+
+	Generate(fieldIndex, ClassificationType, numClasses, retVal);
+
+	return S_OK;
+}
+
 // ***************************************************************
 //		Generate()
 // ***************************************************************
@@ -1217,3 +1239,4 @@ void CShapefileCategories::GetCategoryData(vector<CategoriesData*>& data)
 		data.push_back(ct);
 	}
 }
+

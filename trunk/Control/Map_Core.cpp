@@ -401,53 +401,13 @@ BOOL CMapView::IsSameProjection(LPCTSTR proj4_a, LPCTSTR proj4_b)
 // *************************************************
 //			IsTIFFGrid()						  
 // *************************************************
-// TODO: move to Utils
 BOOL CMapView::IsTIFFGrid(LPCTSTR Filename)
 {
-	try
-	{
-		TIFF *tiff = XTIFFOpen((char *)Filename, "r"); // TIFF-level descriptor
-		if (tiff)
-		{
-			int w=0, h=0;
-
-			tdir_t d = 0;
-			TIFFSetDirectory(tiff,d);
-
-			uint32 SamplesPerPixel = 0;
-
-			TIFFGetField(tiff,TIFFTAG_IMAGEWIDTH, &w);
-			TIFFGetField(tiff,TIFFTAG_IMAGELENGTH, &h);
-			TIFFGetField(tiff,TIFFTAG_SAMPLESPERPIXEL, &SamplesPerPixel);
-
-			uint16 photo = 0;
-			// If it's a color-mapped palette, consider it an image --
-			// it's probably an image (USGS DLG or USGS Quad Map most commonly)
-			TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &photo);
-
-			XTIFFClose(tiff);
-
-			if(photo == PHOTOMETRIC_PALETTE) // && SamplesPerPixel != 1)
-			{
-				return false;
-			}
-
-			else if (SamplesPerPixel == 1)
-				return true;
-			else
-				return false;
-		}
-	}
-	catch(...)
-	{
-		return false;
-	}
-	return false;
+	CComBSTR bstrName(Filename);
+	VARIANT_BOOL vb;
+	GetUtils()->IsTiffGrid(bstrName, &vb);
+	return vb ? TRUE: FALSE;
 }
-#pragma endregion
-
-#pragma region LayerUpdate
-
 #pragma endregion
 
 #pragma region Obsolete

@@ -4124,6 +4124,7 @@ interface IUtils : IDispatch{
 	[id(52)] HRESULT ReclassifyRaster([in]BSTR Filename, [in]int bandIndex, [in]BSTR outputName, 
 		[in]SAFEARRAY(double) LowerBounds, [in]SAFEARRAY(double) UpperBounds, 
 		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
+	[id(53)] HRESULT IsTiffGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Vector Interface ***********************/
@@ -4895,6 +4896,7 @@ interface IShapefileCategories : IDispatch{
 	
 	[propget, id(27)] HRESULT ClassificationField([out, retval] LONG* pVal);
 	[propput, id(27)] HRESULT ClassificationField([in] LONG newVal);
+	[id(28)] HRESULT Generate2([in] BSTR fieldName, [in] tkClassificationType ClassificationType, [in] LONG numClasses, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /**********************  ShapefileCategory Interface  **************************/
