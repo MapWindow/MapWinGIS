@@ -9,6 +9,7 @@ namespace MapWinGIS
     /// Defines a part of shapefile color scheme and specifies how a certain region of a shapefile will be colored. 
     /// </summary>
     /// \deprecated in v. 4.8. Use ShapefileCategories, ShapefileCategory, ColorScheme classes instead.
+    /// \removed493 Removed in 4.9.3
     #if nsp
         #if upd
             public class ShapefileColorBreak : MapWinGIS.IShapefileColorBreak

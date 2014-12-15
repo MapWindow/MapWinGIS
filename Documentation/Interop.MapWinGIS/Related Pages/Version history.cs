@@ -6,6 +6,7 @@
 /// -  New API in version \link newpage491 4.9.1 \endlink
 /// -  New API in version \link newpage490 4.9.0 \endlink
 /// -  New API in version \link newpage48 4.8 \endlink
+/// -  Removed in version \link removed493 4.9.3 \endlink
 /// -  API members that were \link deprecated Deprecated \endlink
 /// .
 /// 

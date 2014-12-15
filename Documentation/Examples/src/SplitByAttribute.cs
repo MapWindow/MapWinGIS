@@ -93,7 +93,9 @@ namespace Examples
 
                 // adds text
                 string text = axMap1.get_LayerName(layerHandle) + ".shp";
-                axMap1.AddDrawingLabelEx(drawHandle, text, 0, padding * 2 + width, top + padding, tkHJustification.hjLeft, 0.0);
+                var dlbls = axMap1.get_DrawingLabels(drawHandle);
+                if (dlbls != null)
+                    dlbls.AddLabel(text, padding * 2 + width, top + padding);
 
                 // the position of text (for debugging)
                 axMap1.DrawPointEx(drawHandle, padding * 2 + width, top, 2, 255);
