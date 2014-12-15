@@ -2614,14 +2614,12 @@ namespace TestApplication
 
             // Draw label:
             GetRandomPoint(out randomX1, out randomY1);
-            MyAxMap.AddDrawingLabelEx(
-                drawHandle,
-                "My Label",
-                utils.ColorByName(tkMapColor.Red),
-                randomX1,
-                randomY1,
-                tkHJustification.hjCenter,
-                45);
+            var labels = MyAxMap.get_DrawingLabels(drawHandle);
+            if (labels != null)
+            {
+                labels.AddLabel("My Label", randomX1, randomY1, 45);
+                labels.FontColor = utils.ColorByName(tkMapColor.Red);
+            }
             theForm.Progress("The label is drawn");
 
             // Redraw just the drawing layers:
