@@ -339,7 +339,19 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 				continue;
 			}
 		}
-		
+
+		if (offset >= (int)_shapeData->size())
+		{
+			// TODO: is is possible to check that the index has the same number of shapes as shapefile?
+			if (!_isEditing && _useSpatialIndex) {
+				CallbackHelper::ErrorMsg("Invalid spatial index. Index of shape is outside bounds.");
+			}
+			else {
+				CallbackHelper::ErrorMsg("Shapefile drawing: index of shape is outside bounds.");
+			}
+			break;
+		}
+
 		// whether it was hidden explicitly by user
 		if ((*_shapeData)[offset]->hidden)
 			continue;
