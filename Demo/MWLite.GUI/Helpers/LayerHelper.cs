@@ -16,8 +16,6 @@ namespace MWLite.GUI.Helpers
 {
     internal static class LayerHelper
     {
-       
-
         public static void AddLayer(object layer, string layerName)
         {
             var legend = App.Legend;
@@ -44,46 +42,45 @@ namespace MWLite.GUI.Helpers
 
             var dlg = new OpenFileDialog { Filter = map.GetLayerFilter(layerType), Multiselect = true };
 
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                var legend = App.Legend;
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            
+            var legend = App.Legend;
                 
-                legend.Lock();
-                map.LockWindow(tkLockMode.lmLock);
+            legend.Lock();
+            map.LockWindow(tkLockMode.lmLock);
 
-                string layerName = "";
-                try
+            string layerName = "";
+            try
+            {
+                var fm = new FileManager();
+                foreach (var name in dlg.FileNames.ToList())
                 {
-                    var fm = new FileManager();
-                    foreach (var name in dlg.FileNames.ToList())
+                    layerName = name;
+                    var layer = fm.Open(name);
+                    if (layer is OgrDatasource)
                     {
-                        layerName = name;
-                        var layer = fm.Open(name);
-                        if (layer is OgrDatasource)
+                        var ds = layer as OgrDatasource;
+                        for (int i = 0; i < ds.LayerCount; i++)
                         {
-                            var ds = layer as OgrDatasource;
-                            for (int i = 0; i < ds.LayerCount; i++)
-                            {
-                                var l = ds.GetLayer(i, false);
-                                AddLayer(l, l.Name);
-                            }
-                            map.ZoomToMaxExtents();
+                            var l = ds.GetLayer(i, false);
+                            AddLayer(l, l.Name);
                         }
-                        else
-                        { 
-                            AddLayer(layer, Path.GetFileName(layerName));
-                        }
+                        map.ZoomToMaxExtents();
+                    }
+                    else
+                    { 
+                        AddLayer(layer, Path.GetFileName(layerName));
                     }
                 }
-                catch
-                {
-                    MessageHelper.Warn("There was a problem opening layer: " + layerName);
-                }
-                finally
-                {
-                    legend.Unlock();
-                    map.LockWindow(tkLockMode.lmUnlock);
-                }
+            }
+            catch
+            {
+                MessageHelper.Warn("There was a problem opening layer: " + layerName);
+            }
+            finally
+            {
+                legend.Unlock();
+                map.LockWindow(tkLockMode.lmUnlock);
             }
         }
 

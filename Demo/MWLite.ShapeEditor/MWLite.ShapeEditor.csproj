@@ -67,7 +67,7 @@
     </Compile>
     <Compile Include="Helpers\EditorHelper.cs" />
     <Compile Include="Enum.cs" />
-    <Compile Include="StateHelper.cs" />
+    <Compile Include="Helpers\StateHelper.cs" />
     <Compile Include="UI\DigitizingContextMenu.cs">
       <SubType>UserControl</SubType>
     </Compile>

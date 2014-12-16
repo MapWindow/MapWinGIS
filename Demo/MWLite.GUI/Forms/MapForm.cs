@@ -167,7 +167,7 @@ namespace MWLite.GUI.Forms
             var sf = axMap1.get_Shapefile(e.layerHandle);
             if (sf != null)
             {
-                using (var form = new AttributesForm(sf, e.shapeIndex))
+                using (var form = new AttributesForm(sf, e.shapeIndex, e.layerHandle))
                 {
                     form.ShowDialog(MainForm.Instance);
                 }

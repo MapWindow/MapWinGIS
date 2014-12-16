@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.Core.UI;
@@ -16,14 +18,29 @@ namespace MWLite.ShapeEditor.Helpers
 
             int handle = legend.SelectedLayer;
             var sf = map.get_Shapefile(handle);
+            var ogrLayer = map.get_OgrLayer(handle);
+
             if (sf != null)
             {
                 if (sf.InteractiveEditing)
                 {
-                    SaveShapefileChanges(handle, sf);
+                    SaveLayerChanges(handle);
                 }
                 else
                 {
+                    if (ogrLayer != null )
+                    {
+                        if (ogrLayer.DynamicLoading)
+                        {
+                            MessageHelper.Info("Editing of dynamically loaded OGR layers isn't allowed.");
+                            return;
+                        }
+                        if (!ogrLayer.SupportsEditing[tkOgrSaveType.ostSaveAll])
+                        {
+                            MessageHelper.Info("OGR layer doesn't support editing: " + ogrLayer.ErrorMsg[ogrLayer.LastErrorCode]);
+                            return;
+                        }
+                    }
                     sf.InteractiveEditing = true;
                 }
                 App.Map.Redraw();
@@ -44,7 +61,7 @@ namespace MWLite.ShapeEditor.Helpers
                 {
                     if (sf.InteractiveEditing)
                     {
-                        if (!SaveShapefileChanges(layerHandle, sf))
+                        if (!SaveLayerChanges(layerHandle))
                             return false;
                     }
                 }
@@ -52,7 +69,24 @@ namespace MWLite.ShapeEditor.Helpers
             return true;
         }
 
-        public static bool SaveShapefileChanges(int layerHandle, Shapefile sf)
+        public static string GetSaveResultString(tkOgrSaveResult saveResult)
+        {
+            switch (saveResult)
+            {
+                case tkOgrSaveResult.osrNoChanges:
+                    return "OGR layer has no changes";
+                case tkOgrSaveResult.osrAllSaved:
+                    return "All changes saved";
+                case tkOgrSaveResult.osrSomeSaved:
+                    return "Some changes saved";
+                case tkOgrSaveResult.osrNoneSaved:
+                    return "Changes aren't saved";
+            }
+            return "";
+        }
+         
+
+        public static bool SaveLayerChanges(int layerHandle)
         {
             var map = App.Map;
 
@@ -62,10 +96,27 @@ namespace MWLite.ShapeEditor.Helpers
             {
                 case DialogResult.Yes:
                 case DialogResult.No:
+                    var sf = map.get_Shapefile(layerHandle);
+                    var ogrLayer = map.get_OgrLayer(layerHandle);
+                    
                     bool save = result == DialogResult.Yes;
-                    sf.InteractiveEditing = false;
-                    if (sf.StopEditingShapes(save, true, null))
+                    bool success = false;
+                    if (ogrLayer != null)
                     {
+                        int savedCount;
+                        tkOgrSaveResult saveResult = ogrLayer.SaveChanges(out savedCount);
+                        success = saveResult == tkOgrSaveResult.osrAllSaved || saveResult == tkOgrSaveResult.osrNoChanges;
+                        string msg = string.Format("{0}: {1}; features: {2}", GetSaveResultString(saveResult), ogrLayer.Name, savedCount);
+                        MessageHelper.Info(msg);
+                    }
+                    else
+                    {
+                        success = sf.StopEditingShapes(save, true, null);
+                    }
+                        
+                    if (success)
+                    {
+                        sf.InteractiveEditing = false;
                         map.ShapeEditor.Clear();
                         map.UndoList.ClearForLayer(layerHandle);
                     }
@@ -98,7 +149,7 @@ namespace MWLite.ShapeEditor.Helpers
             var sf = map.get_Shapefile(layerHandle);
             if (sf != null && sf.InteractiveEditing)
             {
-                return SaveShapefileChanges(layerHandle, sf);
+                return SaveLayerChanges(layerHandle);
             }
             return true;
         }

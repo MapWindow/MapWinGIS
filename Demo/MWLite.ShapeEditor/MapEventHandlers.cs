@@ -55,7 +55,7 @@ namespace MWLite.ShapeEditor
                 var sf = _map.get_Shapefile(e.layerHandle);
                 if (sf != null)
                 {
-                    using (var form = new AttributesForm(sf, e.shapeIndex))
+                    using (var form = new AttributesForm(sf, e.shapeIndex, e.layerHandle))
                     {
                         form.ShowDialog(App.MainForm);
                     }

@@ -16,11 +16,13 @@ namespace MWLite.ShapeEditor.Forms
     {
         private readonly Shapefile _sf;
         private readonly int _shapeIndex;
+        private readonly int _layerHandle;
 
-        public AttributesForm(Shapefile sf, int shapeIndex)
+        public AttributesForm(Shapefile sf, int shapeIndex, int layerHandle)
         {
             _sf = sf;
             _shapeIndex = shapeIndex;
+            _layerHandle = layerHandle;
             InitializeComponent();
             Populate();
 
@@ -40,6 +42,16 @@ namespace MWLite.ShapeEditor.Forms
                 {
                     box.SelectAll();
                 }
+            }
+        }
+
+        private string OgrFidName
+        {
+            get
+            {
+                var layer = App.Map.get_OgrLayer(_layerHandle);
+                if (layer == null) return "";
+                return layer.FIDColumnName;
             }
         }
 
@@ -99,7 +111,7 @@ namespace MWLite.ShapeEditor.Forms
                 control.Tag = i;
                 tableLayoutPanel1.Controls.Add(control, cmnIndex + 1, rowIndex);
 
-                control.Enabled = name.ToLower() != "mwshapeid";
+                control.Enabled = name.ToLower() != "mwshapeid" && name.ToLower() != OgrFidName.ToLower();
             }
             tableLayoutPanel1.ResumeLayout();
         }

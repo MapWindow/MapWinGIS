@@ -28,6 +28,7 @@ namespace MWLite.GUI
             gs.AllowLayersWithoutProjections = true;
             gs.AllowProjectionMismatch = false;
             gs.ReprojectLayersOnAdding = false;
+            gs.OgrLayerForceUpdateMode = true;
         }
     }
 }
