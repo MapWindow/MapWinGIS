@@ -338,7 +338,7 @@ int CTiles::ChooseZoom(double xMin, double xMax, double yMin, double yMax,
 		return 1;
 
 	bool precise = map->_tileProjectionState == ProjectionMatch;
-	double ratio = precise ? 0.99: 0.75;		// 0.99 = set some error margin for rounding issues
+	double ratio = precise ? 0.99: 0.90;		// 0.99 = set some error margin for rounding issues
 
 	int bestZoom = provider->minZoom;
 	for (int i = provider->minZoom; i <= (limitByProvider ? provider->maxZoom : 20); i++)

@@ -31,7 +31,6 @@ public:
 		_selectedPart = -1;
 		_highlightedPart = -1;
 		_inputMode = simMeasuring;
-		_isGeodesic = false;
 		OverlayTool = false;
 		FillTransparency = 100;
 		FillColor = RGB(255, 165, 0);

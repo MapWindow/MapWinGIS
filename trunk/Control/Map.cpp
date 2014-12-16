@@ -267,6 +267,7 @@ void CMapView::Startup()
 
 	ComHelper::CreateInstance(idMeasuring, (IDispatch**)&_measuring);
 	ComHelper::CreateInstance(idShapeEditor, (IDispatch**)&_shapeEditor);
+	ComHelper::CreateInstance(idShapeEditor, (IDispatch**)&_geodesicShape);
 
 	ComHelper::CreateInstance(idIdentifier, (IDispatch**)&_identifier);
 	ComHelper::CreateInstance(idFileManager, (IDispatch**)&_fileManager);
@@ -277,6 +278,7 @@ void CMapView::Startup()
 	
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
 	_shapeEditor->SetMapCallback(this);
+	_geodesicShape->SetMapCallback(this);
 }
 
 // **********************************************************************
@@ -430,6 +432,9 @@ void CMapView::Shutdown()
 
 	if (_shapeEditor)
 		_shapeEditor->Release();
+
+	if (_geodesicShape)
+		_geodesicShape->Release();
 	
 	if (_undoList)
 		_undoList->Release();

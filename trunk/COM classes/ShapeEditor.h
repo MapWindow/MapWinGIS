@@ -128,6 +128,8 @@ public:
 	STDMETHOD(put_EditorBehavior)(tkEditorBehavior newVal);
 	STDMETHOD(SaveChanges)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_HasChanges)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_IsUsingEllipsoid)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_Length)(DOUBLE* pVal);
 
 private:
 	BSTR _key;
@@ -225,6 +227,5 @@ public:
 	bool HasSelectedPart() { return _activeShape->HasSelectedPart(); }
 	int SelectPart(double xProj, double yProj) { return _activeShape->SelectPart(xProj, yProj); }
 	int GetClosestVertex(double projX, double projY, double tolerance) { return _activeShape->GetClosestVertex(projX, projY, tolerance); }
-
 };
 OBJECT_ENTRY_AUTO(__uuidof(ShapeEditor), CShapeEditor)

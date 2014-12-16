@@ -600,6 +600,10 @@ public:
 	afx_msg bool Undo() { return UndoCore(false); }
 	afx_msg LONG DrawLabel(LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
 	afx_msg LONG DrawLabelEx(LONG layerHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
+	afx_msg DOUBLE GeodesicLength(IShape* polyline);
+	afx_msg DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
+	afx_msg DOUBLE GeodesicArea(IShape* polygon);
+
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -799,6 +803,7 @@ public:
 	IFileManager* _fileManager;
 	IMeasuring* _measuring;
 	CShapeEditor* _shapeEditor;
+	CShapeEditor* _geodesicShape;
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
 	IUndoList* _undoList;

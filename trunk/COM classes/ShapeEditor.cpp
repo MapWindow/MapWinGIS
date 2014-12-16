@@ -1544,3 +1544,23 @@ STDMETHODIMP CShapeEditor::get_HasChanges(VARIANT_BOOL* pVal)
 	}
 	return S_OK;
 }
+
+// ***************************************************************
+//		get_IsUsingEllipsoid()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_IsUsingEllipsoid(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->GetTransformationMode() != tmNotDefined;
+	return S_OK;
+}
+
+// ***************************************************************
+//		get_Length()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_Length(DOUBLE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->GetDistance();
+	return S_OK;
+}

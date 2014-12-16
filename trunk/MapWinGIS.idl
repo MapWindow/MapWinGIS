@@ -3272,6 +3272,8 @@ enum tkScalebarUnits
 		[propput, id(48)] HRESULT EditorBehavior([in] tkEditorBehavior newVal);
 		[id(49)] HRESULT SaveChanges([out, retval] VARIANT_BOOL* retVal);
 		[propget, id(50)] HRESULT HasChanges([out, retval] VARIANT_BOOL* pVal);
+		[propget, id(51)] HRESULT IsUsingEllipsoid([out, retval] VARIANT_BOOL* pVal);
+		[propget, id(52)] HRESULT Length([out, retval] DOUBLE* pVal);
 	};
 
 	
@@ -5854,6 +5856,9 @@ library MapWinGIS
 			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
 			[id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
 			[id(188), propget, nonbrowsable] double PixelsPerDegree();
+			[id(247)] DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
+			[id(248)] DOUBLE GeodesicLength(IShape* polyline);
+			[id(249)] DOUBLE GeodesicArea(IShape* polygon);
 #endif		
 
 #define LAYERS_API

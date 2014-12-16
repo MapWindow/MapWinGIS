@@ -272,5 +272,8 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "Undo", dispidUndo, Undo, VT_EMPTY, VTS_NONE)
 	DISP_FUNCTION_ID(CMapView, "DrawLabel", dispidDrawLabel, DrawLabel, VT_I4, VTS_BSTR VTS_R8 VTS_R8 VTS_R8)
 	DISP_FUNCTION_ID(CMapView, "DrawLabelEx", dispidDrawLabelEx, DrawLabelEx, VT_I4, VTS_I4 VTS_BSTR VTS_R8 VTS_R8 VTS_R8)
+	DISP_FUNCTION_ID(CMapView, "GeodesicLength", dispidGeodesicLength, GeodesicLength, VT_R8, VTS_DISPATCH)
+	DISP_FUNCTION_ID(CMapView, "GeodesicDistance", dispidGeodesicDistance, GeodesicDistance, VT_R8, VTS_R8 VTS_R8 VTS_R8 VTS_R8)
+	DISP_FUNCTION_ID(CMapView, "GeodesicArea", dispidGeodesicArea, GeodesicArea, VT_R8, VTS_DISPATCH)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

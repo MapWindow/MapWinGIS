@@ -24,7 +24,6 @@ protected:
 	std::vector<MeasurePoint*> _points;		   // points in decimal degrees (in case transformation to WGS84 is possible)	
 	
 	IMapViewCallback* _mapCallback;
-	bool _isGeodesic;
 	bool _areaRecalcIsNeeded;		// geodesic area should be recalculated a new (after a point was added or removed)
 	IShape* _areaCalcShape;
 	Point2D _mousePoint;			// points entered by user (in map units, whatever they are)
@@ -32,7 +31,6 @@ protected:
 	IGeoProjection* GetMapProjection();
 	IGeoProjection* GetWgs84Projection();
 	bool TransformPoint(double& x, double& y);
-	bool IsGeodesic() { return _isGeodesic; }
 	bool HasProjection() { return GetTransformationMode() != tmNotDefined; }
 	void SetModified() { _areaRecalcIsNeeded = true; }
 	void ProjToPixel(double projX, double projY, double& pixelX, double& pixelY);
