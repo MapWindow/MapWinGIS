@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	bool autoChooseRenderingHintForLabels;
 	long maxReprojectionShapeCount;
 	ICallback* callback;
 	double minPolygonArea;
@@ -79,6 +80,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		autoChooseRenderingHintForLabels = true;
 		suppressGdalErrors = false;
 		pixelOffsetMode = pomDefault;
 		floatNumberFormat = "%g";

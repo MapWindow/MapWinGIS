@@ -5349,6 +5349,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(45)] HRESULT MaxReprojectionShapeCount([in] LONG newVal);
 	[propget, id(46)] HRESULT PixelOffsetMode([out, retval] tkPixelOffsetMode* pVal);
 	[propput, id(46)] HRESULT PixelOffsetMode([in] tkPixelOffsetMode newVal);
+	[propget, id(47)] HRESULT AutoChooseRenderingHintForLabels([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(47)] HRESULT AutoChooseRenderingHintForLabels([in] VARIANT_BOOL newVal);
 };
 
 [

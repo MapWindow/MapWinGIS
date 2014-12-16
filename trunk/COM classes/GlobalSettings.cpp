@@ -841,3 +841,19 @@ STDMETHODIMP CGlobalSettings::put_PixelOffsetMode(tkPixelOffsetMode newVal)
 	m_globalSettings.pixelOffsetMode = newVal;
 	return S_OK;
 }
+
+// *********************************************************
+//	     AutoChooseRenderingHintForLabels
+// *********************************************************
+STDMETHODIMP CGlobalSettings::get_AutoChooseRenderingHintForLabels(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.autoChooseOgrLoadingMode ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_AutoChooseRenderingHintForLabels(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.autoChooseOgrLoadingMode = newVal ? true : false;
+	return S_OK;
+}

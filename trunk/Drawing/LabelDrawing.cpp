@@ -311,6 +311,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	Gdiplus::SmoothingMode smoothingModeInit = Gdiplus::SmoothingModeDefault;
 	Gdiplus::TextRenderingHint textRenderingHintInit = Gdiplus::TextRenderingHintSystemDefault;
 
+	bool hasRotation = lbs->HasRotation();
+
 	if (!useGdiPlus)
 	{
 		_dc->SaveDC();
@@ -327,11 +329,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 
 		tkSmoothingMode smoothingMode = m_globalSettings.labelsSmoothingMode;
 		tkCompositingQuality compositingQuality = m_globalSettings.labelsCompositingQuality;
-
-		if (lbs->HasRotation()) {
-			if (textRenderingHint == AntiAliasGridFit)
-				textRenderingHint= ClearTypeGridFit;	// it looks better this way
-		}
 
 		_graphics->SetCompositingQuality((CompositingQuality)compositingQuality);
 		_graphics->SetSmoothingMode((SmoothingMode)smoothingMode);
@@ -443,6 +440,22 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			this->AlignmentToGDIPlus(m_options->inboxAlignment, gpStringFormat);
 
 			gpStringFormat.SetFormatFlags(StringFormatFlagsNoClip);	// doesn't work?
+
+			if (m_globalSettings.autoChooseRenderingHintForLabels)
+			{
+				TextRenderingHint hint = TextRenderingHintSystemDefault;
+				if (hasRotation)
+				{
+					if (m_options->frameVisible && m_options->frameTransparency == 255) {
+						hint = TextRenderingHintClearTypeGridFit;
+					}
+					else {
+						hint = TextRenderingHintAntiAlias;
+					}
+					
+				}
+				_graphics->SetTextRenderingHint(hint);
+			}
 		}
 		else
 		{

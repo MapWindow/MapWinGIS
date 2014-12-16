@@ -153,6 +153,8 @@ public:
 	STDMETHOD(put_MaxReprojectionShapeCount)(LONG newVal);
 	STDMETHOD(get_PixelOffsetMode)(tkPixelOffsetMode* pVal);
 	STDMETHOD(put_PixelOffsetMode)(tkPixelOffsetMode newVal);
+	STDMETHOD(get_AutoChooseRenderingHintForLabels)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AutoChooseRenderingHintForLabels)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)
