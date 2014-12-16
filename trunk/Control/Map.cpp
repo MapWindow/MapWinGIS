@@ -140,8 +140,10 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_CUSTOM_ID("LayerRemoved", eventidLayerRemoved, FireLayerRemoved, VTS_I4 VTS_BOOL)
 	EVENT_CUSTOM_ID("BackgroundLoadingStarted", eventidBackgroundLoadingStarted, FireBackgroundLoadingStarted, VTS_I4 VTS_I4)
 	EVENT_CUSTOM_ID("BackgroundLoadingFinished", eventidBackgroundLoadingFinished, FireBackgroundLoadingFinished, VTS_I4 VTS_I4 VTS_I4 VTS_I4)
+	EVENT_CUSTOM_ID("GridOpened", eventidGridOpened, FireGridOpened, VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
+	
 END_EVENT_MAP()
 
 #pragma region Constructor/destructor

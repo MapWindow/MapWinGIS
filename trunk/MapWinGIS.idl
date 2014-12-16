@@ -6271,6 +6271,7 @@ library MapWinGIS
 			[id(31)] void LayerRemoved(LONG LayerHandle, VARIANT_BOOL fromRemoveAllLayers);
 			[id(32)] void BackgroundLoadingStarted(LONG TaskId, LONG LayerHandle);
 			[id(33)] void BackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG NumFeatures, LONG NumLoaded);
+			[id(34)] void GridOpened(LONG LayerHandle, BSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy);
 		//}}AFX_ODL_EVENT
 	};
 

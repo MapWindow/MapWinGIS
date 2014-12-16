@@ -681,6 +681,8 @@ public:
 		{ FireEvent(eventidBackgroundLoadingStarted, EVENT_PARAM(VTS_I4 VTS_I4), TaskId, LayerHandle); }
 	void FireBackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG numFeatures, LONG numLoaded)
 		{ FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);}
+	void FireGridOpened(LONG LayerHandle, LPCTSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy)
+		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1176,7 +1178,6 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-	
 
 };
 

@@ -595,6 +595,23 @@ long CMapView::AddSingleLayer(LPDISPATCH Object, BOOL pVisible)
 	if (l != NULL)
 		FireLayerAdded(layerHandle);
 
+	// grid opened event
+	if (iimg)
+	{
+		VARIANT_BOOL rgb, isProxy;
+		iimg->get_IsRgb(&rgb);
+		iimg->get_IsGridProxy(&isProxy);
+		if (!rgb || isProxy) 
+		{
+			int bandIndex = -1;
+			CComBSTR bstrName;
+			iimg->get_SourceGridName(&bstrName);
+			iimg->get_SourceGridBandIndex(&bandIndex);
+			USES_CONVERSION;
+			FireGridOpened(layerHandle, OLE2A(bstrName), bandIndex, isProxy);
+		}
+	}
+
 	// set initial extents
 	if (l != NULL && m_globalSettings.zoomToFirstLayer)
 	{
