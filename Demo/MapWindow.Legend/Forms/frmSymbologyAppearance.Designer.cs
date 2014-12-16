@@ -37,7 +37,7 @@ namespace MapWindow.Legend.Forms
         private void InitAppearanceTab()
         {
             // default options
-            MapWinGIS.ShapeDrawingOptions options = m_shapefile.DefaultDrawingOptions;
+            MapWinGIS.ShapeDrawingOptions options = _shapefile.DefaultDrawingOptions;
 
             groupPoint.Top = groupFill.Top;
             groupPoint.Left = groupFill.Left;
@@ -52,7 +52,7 @@ namespace MapWindow.Legend.Forms
             icbFillStyle.ComboStyle = ImageComboStyle.HatchStyleWithNone;
             icbLineWidth.ComboStyle = ImageComboStyle.LineWidth;
 
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
             if (type == ShpfileType.SHP_POINT || type == ShpfileType.SHP_MULTIPOINT)
             {
                 groupPoint.Visible = true;
@@ -76,27 +76,27 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void Appearance2Controls()
         {
-            ShapeDrawingOptions options = m_shapefile.DefaultDrawingOptions;
-            clpSelection.Color = Colors.UintToColor(m_shapefile.SelectionColor);
-            transpSelection.Value = m_shapefile.SelectionTransparency;
+            ShapeDrawingOptions options = _shapefile.DefaultDrawingOptions;
+            clpSelection.Color = Colors.UintToColor(_shapefile.SelectionColor);
+            transpSelection.Value = _shapefile.SelectionTransparency;
 
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
             if (type == ShpfileType.SHP_POINT || type == ShpfileType.SHP_MULTIPOINT)
             {
-                transpMain.Value  = (byte)m_shapefile.DefaultDrawingOptions.FillTransparency;
+                transpMain.Value  = (byte)_shapefile.DefaultDrawingOptions.FillTransparency;
                 clpPointFill.Color = Colors.UintToColor(options.FillColor);
                 udDefaultSize.SetValue(options.PointSize);
 
             }
             else if (type == ShpfileType.SHP_POLYLINE)
             {
-                transpMain.Value = (byte)m_shapefile.DefaultDrawingOptions.LineTransparency;
+                transpMain.Value = (byte)_shapefile.DefaultDrawingOptions.LineTransparency;
                 icbLineWidth.SelectedIndex = (int)options.LineWidth - 1;
                 clpDefaultOutline.Color = Colors.UintToColor(options.LineColor);
             }
             else if (type == ShpfileType.SHP_POLYGON)
             {
-                clpPolygonFill.Color = Colors.UintToColor(m_shapefile.DefaultDrawingOptions.FillColor);
+                clpPolygonFill.Color = Colors.UintToColor(_shapefile.DefaultDrawingOptions.FillColor);
                 icbFillStyle.SelectedIndex = options.FillType == tkFillType.ftHatch ? (int)options.FillHatchStyle : 0;
             }
         }
@@ -106,7 +106,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnDrawingOptions_Click(object sender, EventArgs e)
         {
-            Form form = FormHelper.GetSymbologyForm(m_legend, m_layerHandle, m_shapefile.ShapefileType, m_shapefile.DefaultDrawingOptions, true);
+            Form form = FormHelper.GetSymbologyForm(_legend, _layerHandle, _shapefile.ShapefileType, _shapefile.DefaultDrawingOptions, true);
             form.Text = "Default drawing options";
             if (form.ShowDialog(this) == DialogResult.OK)
             {
@@ -128,14 +128,14 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void DrawAppearancePreview()
         {
-            ShpfileType shapeType = m_shapefile.ShapefileType;
+            ShpfileType shapeType = _shapefile.ShapefileType;
             for (int i = 0; i < 2; i++)
             {
                 ShapeDrawingOptions sdo = new ShapeDrawingOptions();
                 PictureBox pct = new PictureBox();
                 
                 pct = pictureBox1;
-                sdo = m_shapefile.DefaultDrawingOptions;
+                sdo = _shapefile.DefaultDrawingOptions;
 
                 if (pct.Image != null) pct.Image.Dispose();
 
@@ -206,9 +206,9 @@ namespace MapWindow.Legend.Forms
         private void Controls2Appearance()
         {
             // default options
-            MapWinGIS.ShapeDrawingOptions options = m_shapefile.DefaultDrawingOptions;
+            MapWinGIS.ShapeDrawingOptions options = _shapefile.DefaultDrawingOptions;
             
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
             if (type == ShpfileType.SHP_POLYGON)
             {
                 options.FillColor = Colors.ColorToUInteger(clpPolygonFill.Color);
@@ -239,8 +239,8 @@ namespace MapWindow.Legend.Forms
                 }
             }
 
-            m_shapefile.SelectionColor = Colors.ColorToUInteger(clpSelection.Color);
-            m_shapefile.SelectionTransparency = transpSelection.Value;
+            _shapefile.SelectionColor = Colors.ColorToUInteger(clpSelection.Color);
+            _shapefile.SelectionTransparency = transpSelection.Value;
             
             DrawAppearancePreview();
         }
@@ -250,20 +250,20 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void transpMain_ValueChanged(object sender, byte value)
         {
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
             if (type == ShpfileType.SHP_POINT || type == ShpfileType.SHP_MULTIPOINT)
             {
-                m_shapefile.DefaultDrawingOptions.FillTransparency = value;
-                m_shapefile.DefaultDrawingOptions.LineTransparency = value;
+                _shapefile.DefaultDrawingOptions.FillTransparency = value;
+                _shapefile.DefaultDrawingOptions.LineTransparency = value;
             }
             else if (type == ShpfileType.SHP_POLYLINE)
             {
-                m_shapefile.DefaultDrawingOptions.LineTransparency = value;
+                _shapefile.DefaultDrawingOptions.LineTransparency = value;
             }
             else if (type == ShpfileType.SHP_POLYGON)
             {
-                m_shapefile.DefaultDrawingOptions.FillTransparency = value;
-                m_shapefile.DefaultDrawingOptions.LineTransparency = value;
+                _shapefile.DefaultDrawingOptions.FillTransparency = value;
+                _shapefile.DefaultDrawingOptions.LineTransparency = value;
             }
             DrawAppearancePreview();
             RedrawMap();
@@ -274,7 +274,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void transpSelection_ValueChanged(object sender, byte value)
         {
-            m_shapefile.SelectionTransparency = value;
+            _shapefile.SelectionTransparency = value;
             DrawAppearancePreview();
             RedrawMap();
         }
@@ -287,7 +287,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
 
-            ShapeDrawingOptions options = m_shapefile.DefaultDrawingOptions;
+            ShapeDrawingOptions options = _shapefile.DefaultDrawingOptions;
             if (icbFillStyle.SelectedIndex == 0 && options.FillType == tkFillType.ftHatch)
             {
                 options.FillType = tkFillType.ftStandard;
@@ -306,7 +306,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void clpSelection_SelectedColorChanged(object sender, EventArgs e)
         {
-            m_shapefile.SelectionColor = Colors.ColorToUInteger(clpSelection.Color);
+            _shapefile.SelectionColor = Colors.ColorToUInteger(clpSelection.Color);
             transpSelection.BandColor = clpSelection.Color;
             DrawAppearancePreview();
             RedrawMap();

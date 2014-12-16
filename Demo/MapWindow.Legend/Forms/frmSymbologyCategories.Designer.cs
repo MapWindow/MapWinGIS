@@ -57,37 +57,37 @@ namespace MapWindow.Legend.Forms
 
             // layer settings
 
-            chkSetGradient.Checked = m_settings.CategoriesUseGradient;
-            chkRandomColors.Checked = m_settings.CategoriesRandomColors;
-            udNumCategories.Value = m_settings.CategoriesCount;
-            chkUniqueValues.Checked = (m_settings.CategoriesClassification == tkClassificationType.ctUniqueValues);
-            chkUseVariableSize.Checked = m_settings.CategoriesVariableSize;
+            chkSetGradient.Checked = _settings.CategoriesUseGradient;
+            chkRandomColors.Checked = _settings.CategoriesRandomColors;
+            udNumCategories.Value = _settings.CategoriesCount;
+            chkUniqueValues.Checked = (_settings.CategoriesClassification == tkClassificationType.ctUniqueValues);
+            chkUseVariableSize.Checked = _settings.CategoriesVariableSize;
 
             // fills in the list of fields
-            FillFieldList(m_settings.CategoriesFieldName);
+            FillFieldList(_settings.CategoriesFieldName);
 
             // setting the color scheme that is in use
             for (int i = 0; i < icbCategories.Items.Count; i++)
             {
-                //if (m_plugin.LayerColors.List[i] == m_settings.CategoriesColorScheme)
+                //if (m_plugin.LayerColors.List[i] == _settings.CategoriesColorScheme)
                 //{
                 //    icbCategories.SelectedIndex = i;
                 //    break;
                 //}
             }
 
-            MapWinGIS.ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            MapWinGIS.ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
             groupVariableSize.Visible = (type == ShpfileType.SHP_POINT || type == ShpfileType.SHP_POLYLINE);
 
             if (type == ShpfileType.SHP_POINT)
             {
-                udMinSize.SetValue(m_shapefile.DefaultDrawingOptions.PointSize);
+                udMinSize.SetValue(_shapefile.DefaultDrawingOptions.PointSize);
             }
             else if (type == ShpfileType.SHP_POLYLINE)
             {
-                udMinSize.SetValue(m_shapefile.DefaultDrawingOptions.LineWidth);
+                udMinSize.SetValue(_shapefile.DefaultDrawingOptions.LineWidth);
             }
-            udMaxSize.SetValue((double)udMinSize.Value + m_settings.CategoriesSizeRange);
+            udMaxSize.SetValue((double)udMinSize.Value + _settings.CategoriesSizeRange);
 
             RefreshCategoriesList();
 
@@ -103,15 +103,15 @@ namespace MapWindow.Legend.Forms
         private void btnCategoryGenerate_Click(object sender, EventArgs e)
         {
             int count = Convert.ToInt32(udNumCategories.Value);
-            MapWinGIS.ShapefileCategories categories = m_shapefile.Categories;
+            MapWinGIS.ShapefileCategories categories = _shapefile.Categories;
 
             if (lstFields1.SelectedItem == null) return;
             string name = lstFields1.SelectedItem.ToString().ToLower().Trim();
 
             int index = -1;
-            for (int i = 0; i < m_shapefile.NumFields; i++)
+            for (int i = 0; i < _shapefile.NumFields; i++)
             {
-                if (m_shapefile.get_Field(i).Name.ToLower() == name)
+                if (_shapefile.get_Field(i).Name.ToLower() == name)
                 {
                     index = i;
                     break;
@@ -128,9 +128,9 @@ namespace MapWindow.Legend.Forms
             if (classification == tkClassificationType.ctUniqueValues)
             {
                 HashSet<object> set = new HashSet<object>();
-                for (int i = 0; i < m_shapefile.NumShapes; i++)
+                for (int i = 0; i < _shapefile.NumShapes; i++)
                 {
-                    object val = m_shapefile.get_CellValue(index, i);
+                    object val = _shapefile.get_CellValue(index, i);
                     set.Add(val);
                 }
 
@@ -159,7 +159,7 @@ namespace MapWindow.Legend.Forms
 
             // generating
             categories.Generate(index, classification, count);
-            categories.Caption = "Categories: " + m_shapefile.get_Field(index).Name;
+            categories.Caption = "Categories: " + _shapefile.get_Field(index).Name;
             ApplyColorScheme2Categories();
 
             if (chkUseVariableSize.Checked)
@@ -167,23 +167,23 @@ namespace MapWindow.Legend.Forms
                 ApplyVariablePointSize();
             }
 
-            m_shapefile.Categories.ApplyExpressions();
+            _shapefile.Categories.ApplyExpressions();
 
             // updating labels
-            //LabelUtilities.GenerateCategories(m_mapWin, m_layerHandle);
+            //LabelUtilities.GenerateCategories(m_mapWin, _layerHandle);
 
             RefreshCategoriesList();
             RedrawMap();
 
             // saving the settings
 
-            m_settings.CategoriesClassification = classification;
-            m_settings.CategoriesFieldName = name;
-            m_settings.CategoriesSizeRange = (int)(udMaxSize.Value - udMinSize.Value);
-            m_settings.CategoriesCount = (int)udNumCategories.Value;
-            m_settings.CategoriesRandomColors = chkRandomColors.Checked;
-            m_settings.CategoriesUseGradient = chkSetGradient.Checked;
-            m_settings.CategoriesVariableSize = chkUseVariableSize.Checked;
+            _settings.CategoriesClassification = classification;
+            _settings.CategoriesFieldName = name;
+            _settings.CategoriesSizeRange = (int)(udMaxSize.Value - udMinSize.Value);
+            _settings.CategoriesCount = (int)udNumCategories.Value;
+            _settings.CategoriesRandomColors = chkRandomColors.Checked;
+            _settings.CategoriesUseGradient = chkSetGradient.Checked;
+            _settings.CategoriesVariableSize = chkUseVariableSize.Checked;
 
             // cleaning
             if (showWaiting)
@@ -205,7 +205,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void MarkStateChanged()
         {
-            m_stateChanged = true;
+            _stateChanged = true;
             btnSaveChanges.Enabled = true;
         }
 
@@ -224,8 +224,8 @@ namespace MapWindow.Legend.Forms
         {
             if (chkUseVariableSize.Checked && (udMinSize.Value != udMaxSize.Value))
             {
-                MapWinGIS.ShapefileCategories categories = m_shapefile.Categories;
-                if (m_shapefile.ShapefileType == ShpfileType.SHP_POINT || m_shapefile.ShapefileType == ShpfileType.SHP_MULTIPOINT)
+                MapWinGIS.ShapefileCategories categories = _shapefile.Categories;
+                if (_shapefile.ShapefileType == ShpfileType.SHP_POINT || _shapefile.ShapefileType == ShpfileType.SHP_MULTIPOINT)
                 {
                     double step = (double)(udMaxSize.Value - udMinSize.Value) / ((double)categories.Count - 1);
                     for (int i = 0; i < categories.Count; i++)
@@ -233,7 +233,7 @@ namespace MapWindow.Legend.Forms
                         categories.get_Item(i).DrawingOptions.PointSize = (int)udMinSize.Value + Convert.ToInt32(i * step);
                     }
                 }
-                else if (m_shapefile.ShapefileType == ShpfileType.SHP_POLYLINE)
+                else if (_shapefile.ShapefileType == ShpfileType.SHP_POLYLINE)
                 {
                     double step = (double)(udMaxSize.Value + udMinSize.Value) / (double)categories.Count;
                     for (int i = 0; i < categories.Count; i++)
@@ -270,7 +270,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void ApplyColorScheme2Categories()
         {
-            if (m_shapefile.Categories.Count > 0)
+            if (_shapefile.Categories.Count > 0)
             {
                 MapWinGIS.ColorScheme scheme = null;
                 if (icbCategories.SelectedIndex >= 0)
@@ -279,22 +279,22 @@ namespace MapWindow.Legend.Forms
                     scheme = ColorSchemes.ColorBlend2ColorScheme(blend);
 
                     // saving the settings
-                    //MapWindow.Legend.Layer layer = Globals.Legend.Layers.ItemByHandle(m_layerHandle);
-                    //m_settings.CategoriesColorScheme = blend;
+                    //MapWindow.Legend.Layer layer = Globals.Legend.Layers.ItemByHandle(_layerHandle);
+                    //_settings.CategoriesColorScheme = blend;
                 }
                 else
                     return;
 
                 if (chkRandomColors.Checked)
                 {
-                    m_shapefile.Categories.ApplyColorScheme(MapWinGIS.tkColorSchemeType.ctSchemeRandom, scheme);
+                    _shapefile.Categories.ApplyColorScheme(MapWinGIS.tkColorSchemeType.ctSchemeRandom, scheme);
                 }
                 else
                 {
-                    m_shapefile.Categories.ApplyColorScheme(MapWinGIS.tkColorSchemeType.ctSchemeGraduated, scheme);
+                    _shapefile.Categories.ApplyColorScheme(MapWinGIS.tkColorSchemeType.ctSchemeGraduated, scheme);
                 }
 
-                MapWinGIS.ShapefileCategories categories = m_shapefile.Categories;
+                MapWinGIS.ShapefileCategories categories = _shapefile.Categories;
                 if (chkSetGradient.Checked)
                 {
                     for (int i = 0; i < categories.Count; i++)
@@ -329,7 +329,7 @@ namespace MapWindow.Legend.Forms
                     int index = dgvCategories.CurrentRow.Index;
 
                     int realIndex = (int)dgvCategories[CMN_CATEGORYID, dgvCategories.CurrentRow.Index].Value;
-                    m_shapefile.Categories.Remove(realIndex);
+                    _shapefile.Categories.Remove(realIndex);
                     RefreshCategoriesList();
 
                     if (index >= 0 && index < dgvCategories.Rows.Count)
@@ -342,7 +342,7 @@ namespace MapWindow.Legend.Forms
                     }
 
                     // updating the map
-                    m_shapefile.Categories.ApplyExpressions();
+                    _shapefile.Categories.ApplyExpressions();
 
                     RedrawMap();
                 }
@@ -368,11 +368,11 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnCategoryClear_Click(object sender, EventArgs e)
         {
-            m_shapefile.Categories.Clear();
+            _shapefile.Categories.Clear();
             RefreshCategoriesList();
 
-            Layer layer = m_legend.Layers.ItemByHandle(m_layerHandle);
-            m_settings.CategoriesClassification = chkUniqueValues.Checked ? tkClassificationType.ctUniqueValues : tkClassificationType.ctNaturalBreaks;
+            Layer layer = _legend.Layers.ItemByHandle(_layerHandle);
+            _settings.CategoriesClassification = chkUniqueValues.Checked ? tkClassificationType.ctUniqueValues : tkClassificationType.ctNaturalBreaks;
 
             RedrawMap();
         }
@@ -385,7 +385,7 @@ namespace MapWindow.Legend.Forms
             dgvCategories.SuspendLayout();
             dgvCategories.Rows.Clear();
 
-            int numCategories = m_shapefile.Categories.Count;
+            int numCategories = _shapefile.Categories.Count;
             if (numCategories == 0)
             {
                 dgvCategories.ColumnHeadersVisible = false;
@@ -407,9 +407,9 @@ namespace MapWindow.Legend.Forms
             Dictionary<int, int> values = new Dictionary<int, int>();  // id of category, count
             int category;
 
-            for (int i = 0; i < m_shapefile.NumShapes; i++)
+            for (int i = 0; i < _shapefile.NumShapes; i++)
             {
-                category = m_shapefile.get_ShapeCategory(i);
+                category = _shapefile.get_ShapeCategory(i);
                 if (values.ContainsKey(category))
                 {
                     values[category] += 1;
@@ -422,7 +422,7 @@ namespace MapWindow.Legend.Forms
 
             for (int i = 0; i < numCategories; i++)
             {
-                MapWinGIS.ShapefileCategory cat = m_shapefile.Categories.get_Item(i);
+                MapWinGIS.ShapefileCategory cat = _shapefile.Categories.get_Item(i);
                 dgvCategories[CMN_CATEGORYID, i].Value = i;
                 dgvCategories[CMN_VISIBLE, i].Value = cat.DrawingOptions.Visible;
                 dgvCategories[CMN_STYLE, i].Value = new Bitmap(dgvCategories.Columns[CMN_STYLE].Width - 20, dgvCategories.Rows[i].Height - 8);
@@ -454,10 +454,10 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void ChangeCategoryStyle(int row)
         {
-            ShapefileCategory cat = m_shapefile.Categories.get_Item(row);
+            ShapefileCategory cat = _shapefile.Categories.get_Item(row);
             if (cat == null) return;
 
-            Form form = FormHelper.GetSymbologyForm(m_legend, m_layerHandle, m_shapefile.ShapefileType, cat.DrawingOptions, true);
+            Form form = FormHelper.GetSymbologyForm(_legend, _layerHandle, _shapefile.ShapefileType, cat.DrawingOptions, true);
             form.Text = "Category drawing options";
 
             if (form.ShowDialog(this) == DialogResult.OK)
@@ -485,12 +485,12 @@ namespace MapWindow.Legend.Forms
         private void dgvCategories_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.ColumnIndex != CMN_STYLE) return;
-            if (e.RowIndex >= 0 && e.RowIndex < m_shapefile.Categories.Count)
+            if (e.RowIndex >= 0 && e.RowIndex < _shapefile.Categories.Count)
             {
                 System.Drawing.Image img = e.Value as System.Drawing.Image;
                 if (img == null) return;
 
-                ShapefileCategory cat = m_shapefile.Categories.get_Item(e.RowIndex);
+                ShapefileCategory cat = _shapefile.Categories.get_Item(e.RowIndex);
                 if (cat == null) return;
                 ShapeDrawingOptions sdo = cat.DrawingOptions;
 
@@ -499,15 +499,15 @@ namespace MapWindow.Legend.Forms
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.SmoothingMode = SmoothingMode.HighQuality;
 
-                if (m_shapefile.ShapefileType == ShpfileType.SHP_POLYGON)
+                if (_shapefile.ShapefileType == ShpfileType.SHP_POLYGON)
                 {
                     sdo.DrawRectangle(g.GetHdc(), 0, 0, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                 }
-                else if (m_shapefile.ShapefileType == ShpfileType.SHP_POLYLINE)
+                else if (_shapefile.ShapefileType == ShpfileType.SHP_POLYLINE)
                 {
                     sdo.DrawLine(g.GetHdc(), 0, 0, img.Width - 1, img.Height - 1, true, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                 }
-                else if (m_shapefile.ShapefileType == ShpfileType.SHP_POINT)
+                else if (_shapefile.ShapefileType == ShpfileType.SHP_POINT)
                 {
                     sdo.DrawPoint(g.GetHdc(), 0.0f, 0.0f, img.Width, img.Height, Colors.ColorToUInteger(dgvCategories.BackgroundColor));
                 }
@@ -551,10 +551,10 @@ namespace MapWindow.Legend.Forms
             if (e.ColumnIndex == CMN_VISIBLE)
             {
                 int index = (int)dgvCategories[CMN_CATEGORYID, e.RowIndex].Value;
-                m_shapefile.Categories.get_Item(index).DrawingOptions.Visible = (bool)dgvCategories[e.ColumnIndex, e.RowIndex].Value;
+                _shapefile.Categories.get_Item(index).DrawingOptions.Visible = (bool)dgvCategories[e.ColumnIndex, e.RowIndex].Value;
 
                 // toggle labels in case they are present
-                MapWinGIS.LabelCategory cat = m_shapefile.Labels.get_Category(index);
+                MapWinGIS.LabelCategory cat = _shapefile.Labels.get_Category(index);
                 if (cat != null && cat.Enabled)
                 {
                     cat.Visible = (bool)dgvCategories[e.ColumnIndex, e.RowIndex].Value;
@@ -596,7 +596,7 @@ namespace MapWindow.Legend.Forms
 
             if (e.ColumnIndex == CMN_NAME)
             {
-                m_shapefile.Categories.get_Item(e.RowIndex).Name = dgvCategories[CMN_NAME, e.RowIndex].Value.ToString();
+                _shapefile.Categories.get_Item(e.RowIndex).Name = dgvCategories[CMN_NAME, e.RowIndex].Value.ToString();
                 RedrawLegend();
             }
         }
@@ -623,15 +623,15 @@ namespace MapWindow.Legend.Forms
             lstFields1.Items.Clear();
 
             // adding names
-            for (int i = 0; i < m_shapefile.NumFields; i++)
+            for (int i = 0; i < _shapefile.NumFields; i++)
             {
-                if (!chkUniqueValues.Checked && m_shapefile.get_Field(i).Type == FieldType.STRING_FIELD ||
-                     chkUniqueValues.Checked && m_shapefile.get_Field(i).Type != FieldType.STRING_FIELD)
+                if (!chkUniqueValues.Checked && _shapefile.get_Field(i).Type == FieldType.STRING_FIELD ||
+                     chkUniqueValues.Checked && _shapefile.get_Field(i).Type != FieldType.STRING_FIELD)
                 {
                     continue;
                 }
 
-                lstFields1.Items.Add("  " + m_shapefile.get_Field(i).Name);
+                lstFields1.Items.Add("  " + _shapefile.get_Field(i).Name);
             }
 
             // setting the selected field back

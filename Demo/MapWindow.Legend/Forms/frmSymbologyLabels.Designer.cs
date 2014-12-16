@@ -32,7 +32,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void InitLabelsTab()
         {
-            MapWinGIS.Labels lb = m_shapefile.Labels;
+            MapWinGIS.Labels lb = _shapefile.Labels;
             chkShowLabels.Checked = lb.Visible;
             
             chkLabelFrame.Checked = lb.FrameVisible;
@@ -45,12 +45,12 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnGenerateLabels_Click(object sender, EventArgs e)
         {
-            //frmGenerateLabels form = new frmGenerateLabels(m_mapWin, m_shapefile, layer, LabelAction.ChangeAll);
+            //frmGenerateLabels form = new frmGenerateLabels(m_mapWin, _shapefile, layer, LabelAction.ChangeAll);
 
-            LabelStyleForm form = new LabelStyleForm(m_legend, sfPreview, m_layerHandle);
+            LabelStyleForm form = new LabelStyleForm(_legend, _shapefile, _layerHandle);
             if (form.ShowDialog(this) == DialogResult.OK)
             {           
-                m_shapefile.Labels.Visible = true;
+                _shapefile.Labels.Visible = true;
                 DrawLabelsPreview();
                 RefreshControlsState(null, null);
                 RedrawMap();
@@ -63,7 +63,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void DrawLabelsPreview()
         {
-            LabelUtilities.DrawPreview(m_shapefile.Labels.Options, m_shapefile, pctLabelPreview, false);
+            LabelUtilities.DrawPreview(_shapefile.Labels.Options, _shapefile, pctLabelPreview, false);
         }
 
         /// <summary>
@@ -71,11 +71,11 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnLabelsAppearance_Click(object sender, EventArgs e)
         {
-            LabelStyleForm styleFormForm = new LabelStyleForm(m_legend, m_shapefile, m_layerHandle );
+            LabelStyleForm styleFormForm = new LabelStyleForm(_legend, _shapefile, _layerHandle );
             styleFormForm.ShowDialog();
 
             // updating controls (even if cancel was hit, a user could have applied the options)
-            MapWinGIS.LabelCategory options = m_shapefile.Labels.Options;
+            MapWinGIS.LabelCategory options = _shapefile.Labels.Options;
             udLabelFontSize.Value = options.FontSize;
             clpLabelFrame.Color = Colors.UintToColor(options.FrameBackColor);
             chkLabelFrame.Checked = options.FrameVisible;
@@ -98,8 +98,8 @@ namespace MapWindow.Legend.Forms
         {
             if (MessageBox.Show("Do you want to delete labels?", Legend.Controls.Legend.Legend.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                m_shapefile.Labels.Clear();
-                m_shapefile.Labels.Expression = "";
+                _shapefile.Labels.Clear();
+                _shapefile.Labels.Expression = "";
                 DrawLabelsPreview();
                 RefreshControlsState(null, null);
                 RedrawMap();
@@ -114,7 +114,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
 
-            m_shapefile.Labels.FontSize = (int)udLabelFontSize.Value;
+            _shapefile.Labels.FontSize = (int)udLabelFontSize.Value;
             DrawLabelsPreview();
             RedrawMap();
         }
@@ -127,7 +127,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
            
-            m_shapefile.Labels.FrameBackColor = Colors.ColorToUInteger(clpLabelFrame.Color);
+            _shapefile.Labels.FrameBackColor = Colors.ColorToUInteger(clpLabelFrame.Color);
             DrawLabelsPreview();
             RedrawMap();
         }
@@ -140,7 +140,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
 
-            m_shapefile.Labels.FrameVisible = chkLabelFrame.Checked;
+            _shapefile.Labels.FrameVisible = chkLabelFrame.Checked;
             DrawLabelsPreview();
             RedrawMap();
         }
@@ -150,13 +150,13 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void UpdateLabels()
         {
-            MapWinGIS.Labels lb = m_shapefile.Labels;
+            MapWinGIS.Labels lb = _shapefile.Labels;
             lb.Visible = chkShowLabels.Checked;
 
             // categories will have the same alignment
-            for (int i = 0; i < m_shapefile.Labels.NumCategories; i++)
+            for (int i = 0; i < _shapefile.Labels.NumCategories; i++)
             {
-                MapWinGIS.LabelCategory cat = m_shapefile.Labels.get_Category(i);
+                MapWinGIS.LabelCategory cat = _shapefile.Labels.get_Category(i);
                 cat.Alignment = lb.Alignment;
                 cat.OffsetX = lb.OffsetX;
                 cat.OffsetY = lb.OffsetY;

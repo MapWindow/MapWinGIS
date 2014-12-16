@@ -276,6 +276,7 @@ namespace MapWindow.Legend.Controls.Legend
         private const int cActiveLabelIcon = 6;
         private const int cDimmedLabelIcon = 7;
         private const int cEditing = 8;
+        private const int cDatabase = 9;
         private ImageList Icons;
         private System.Windows.Forms.VScrollBar vScrollBar;
 
@@ -737,6 +738,7 @@ namespace MapWindow.Legend.Controls.Legend
             this.Icons.Images.SetKeyName(6, "tag_blue.png");
             this.Icons.Images.SetKeyName(7, "tag_gray.png");
             this.Icons.Images.SetKeyName(8, "pen.png");
+            this.Icons.Images.SetKeyName(9, "database5.png");
             // 
             // Legend
             // 
@@ -2054,11 +2056,11 @@ namespace MapWindow.Legend.Controls.Legend
             // ----------------------------------------------------------
             //    Drawing text
             // ----------------------------------------------------------
-            SizeF textSize = new SizeF(0.0f, 0.0f);
+            var textSize = new SizeF(0.0f, 0.0f);
             if (bounds.Width > 60)
             {
                 //draw text
-                string text = m_Map.get_LayerName(lyr.Handle);
+                string text = m_Map.LayerName[lyr.Handle];
                 textSize = DrawTool.MeasureString(text, m_Font);
 
                 if (IsSnapshot == true)
@@ -2074,7 +2076,7 @@ namespace MapWindow.Legend.Controls.Legend
                 rect = new Rectangle(CurLeft, CurTop, CurWidth, CurHeight);
                 DrawText(DrawTool, text, rect, m_Font, this.ForeColor);
 
-                LayerElement el = new LayerElement(LayerElementType.Name, rect, text);
+                var el = new LayerElement(LayerElementType.Name, rect, text);
                 lyr.Elements.Add(el);
             }
 
@@ -2087,7 +2089,13 @@ namespace MapWindow.Legend.Controls.Legend
                 int left = bounds.Right - 36;
                 Image icon;
 
-                if (lyr.Icon != null)
+                var ogrLayer = lyr.OgrLayer;
+                if (ogrLayer != null)
+                {
+                    icon = Icons.Images[cDatabase];
+                    DrawPicture(DrawTool, left, CurTop, Constants.ICON_SIZE, Constants.ICON_SIZE, icon);
+                }
+                else if (lyr.Icon != null)
                 {
                     DrawPicture(DrawTool, left, CurTop, Constants.ICON_SIZE, Constants.ICON_SIZE, lyr.Icon);
                 }
@@ -2107,14 +2115,14 @@ namespace MapWindow.Legend.Controls.Legend
                     if (!lyr.Expanded)
                     {
                         lyr.m_smallIconWasDrawn = true;
-                        Rectangle iconBounds = new Rectangle(left, top, Constants.ICON_SIZE, Constants.ICON_SIZE);
+                        var iconBounds = new Rectangle(left, top, Constants.ICON_SIZE, Constants.ICON_SIZE);
 
                         // drawing category symbol
                         IntPtr hdc = DrawTool.GetHdc();
                         Color clr = (lyr.Handle == m_SelectedLayerHandle && bounds.Width > 25) ? m_SelectedColor : this.BackColor;
                         uint backColor = Convert.ToUInt32(ColorTranslator.ToOle(clr));
 
-                        MapWinGIS.Shapefile sf = m_Map.get_GetObject(lyr.Handle) as MapWinGIS.Shapefile;
+                        var sf = m_Map.GetObject[lyr.Handle] as Shapefile;
 
                         if (lyr.Type == eLayerType.PointShapefile)
                             sf.DefaultDrawingOptions.DrawPoint(hdc, left, top, Constants.ICON_SIZE, Constants.ICON_SIZE, backColor);

@@ -33,28 +33,53 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void InitGeneralTab()
         {
-            chkLayerVisible.Checked = m_layer.Visible;
-            chkLayerPreview.Checked = m_settings.ShowLayerPreview;
+            chkLayerVisible.Checked = _layer.Visible;
+            chkLayerPreview.Checked = _settings.ShowLayerPreview;
 
-            txtLayerName.Text = m_layer.Name;
+            txtLayerName.Text = _layer.Name;
 
-            MapWinGIS.Map map = m_legend.Map;
+            txtLayerSource.Text = GetLayerDescription();
+        }
+
+        private string GetLayerDescription()
+        {
+            string s = "";
+
+            MapWinGIS.Map map = _legend.Map;
             if (map != null)
             {
-                txtComments.Text = map.get_LayerDescription(m_layerHandle);
+                txtComments.Text = map.get_LayerDescription(_layerHandle);
             }
 
-            MapWinGIS.Extents ext = m_shapefile.Extents;
+            MapWinGIS.Extents ext = _shapefile.Extents;
             //string units = Globals.get_MapUnits();
             string units = "";
-            string type = m_shapefile.ShapefileType.ToString().Substring(4).ToLower() + " shapefile";
-            txtLayerSource.Text = "Type: " + type + Environment.NewLine +
-                                  "Number of shapes: " + m_shapefile.NumShapes + Environment.NewLine +
-                                  "Selected: " + m_shapefile.NumSelected + Environment.NewLine +
-                                  "Source: " + m_shapefile.Filename + Environment.NewLine +
-                                  "Bounds X: " + String.Format("{0:F2}", ext.xMin) + " to " + String.Format("{0:F2}", ext.xMax) + units + Environment.NewLine +
-                                  "Bounds Y: " + String.Format("{0:F2}", ext.yMin) + " to " + String.Format("{0:F2}", ext.yMax) + units + Environment.NewLine +
-                                  "Projection: " + m_shapefile.Projection;
+            string type = _shapefile.ShapefileType.ToString().Substring(4).ToLower() + " shapefile";
+
+            var layer = map.get_OgrLayer(_layerHandle);
+            if (layer != null)
+            {
+                s += "Datasource type: OGR layer" + Environment.NewLine;
+                s += "Driver name: " + layer.DriverName + Environment.NewLine;
+                s += "Connection string: " + layer.GetConnectionString() + Environment.NewLine;
+                s += "Layer type: " + layer.SourceType.ToString() + Environment.NewLine;
+                s += "Name or query: " + layer.GetSourceQuery() + Environment.NewLine;
+                s += "Support editing: " + layer.SupportsEditing[tkOgrSaveType.ostSaveAll] + Environment.NewLine;
+                s += "Dynamic loading: " + layer.DynamicLoading + "\n";
+            }
+            else
+            {
+                s += "Datasource type: ESRI Shapefile" + Environment.NewLine;
+            }
+
+            s += "Type: " + type + Environment.NewLine +
+                        "Number of shapes: " + _shapefile.NumShapes + Environment.NewLine +
+                        "Selected: " + _shapefile.NumSelected + Environment.NewLine +
+                        "Source: " + _shapefile.Filename + Environment.NewLine +
+                        "Bounds X: " + String.Format("{0:F2}", ext.xMin) + " to " + String.Format("{0:F2}", ext.xMax) + units + Environment.NewLine +
+                        "Bounds Y: " + String.Format("{0:F2}", ext.yMin) + " to " + String.Format("{0:F2}", ext.yMax) + units + Environment.NewLine +
+                        "Projection: " + _shapefile.Projection;
+            return s;
         }
 
         /// <summary>
@@ -62,7 +87,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void txtLayerName_Validated(object sender, EventArgs e)
         {
-            m_layer.Name = txtLayerName.Text;
+            _layer.Name = txtLayerName.Text;
             MarkStateChanged();
             RedrawLegend();
         }
@@ -74,7 +99,7 @@ namespace MapWindow.Legend.Forms
         {
             if (e.KeyChar == (char)Keys.Enter)
             {
-                m_layer.Name = txtLayerName.Text;
+                _layer.Name = txtLayerName.Text;
                 MarkStateChanged();
                 RedrawLegend();
             }
@@ -85,10 +110,10 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void txtComments_Validated(object sender, EventArgs e)
         {
-            MapWinGIS.Map map = m_legend.Map;
+            MapWinGIS.Map map = _legend.Map;
             if (map != null)
             {
-                map.set_LayerDescription(m_layerHandle, txtComments.Text);
+                map.set_LayerDescription(_layerHandle, txtComments.Text);
                 MarkStateChanged();
             }
         }
@@ -98,12 +123,12 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void txtComments_KeyPress(object sender, KeyPressEventArgs e)
         {
-            MapWinGIS.Map map = m_legend.Map;
+            MapWinGIS.Map map = _legend.Map;
             if (map != null)
             {
                 if (e.KeyChar == (char)Keys.Enter)
                 {
-                    map.set_LayerDescription(m_layerHandle, txtComments.Text);
+                    map.set_LayerDescription(_layerHandle, txtComments.Text);
                     MarkStateChanged();
                 }
             }
@@ -130,32 +155,12 @@ namespace MapWindow.Legend.Forms
         private void ShowLayerPreview()
         {
             axMap1.Visible = true;
-            sfPreview = new Shapefile();
-            sfPreview.Open(m_shapefile.Filename, null);
+            
+            var sf = new Shapefile();
+            axMap1.AddLayer(_shapefile, true);
 
             axMap1.CursorMode = tkCursorMode.cmNone;
             axMap1.MouseWheelSpeed = 1.0;
-
-            Thread thread = new Thread(new ThreadStart(LoadPreviewLayer));
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
-        }
-
-        /// <summary>
-        /// Shows preview of the layer in the own map control on the general tab
-        /// </summary>
-        private void LoadPreviewLayer()
-        {
-            if (sfPreview.SourceType != tkShapefileSourceType.sstUninitialized)
-            {
-                if (sfPreview.ShapefileType == ShpfileType.SHP_POINT || sfPreview.ShapefileType == ShpfileType.SHP_POINTM || sfPreview.ShapefileType == ShpfileType.SHP_POINTZ)
-                {
-                    sfPreview.DefaultDrawingOptions.PointSize = 4;
-                }
-                int handle = axMap1.AddLayer(sfPreview, true);
-                axMap1.ZoomToMaxExtents();
-                axMap1.MapCursor = tkCursor.crsrArrow;
-            }
         }
         #endregion
     }

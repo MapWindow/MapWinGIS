@@ -179,6 +179,12 @@ namespace MapWindow.Legend.Controls.Legend
         #endregion
 
         #region Properties
+
+        public OgrLayer OgrLayer
+        {
+            get { return m_Legend.Map.OgrLayer[Handle]; }
+        }
+
         /// <summary>
         /// Gets a snapshot (bitmap) of the layer
         /// </summary>

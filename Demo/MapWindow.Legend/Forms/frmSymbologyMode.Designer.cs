@@ -32,25 +32,26 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void InitModeTab()
         {
-            if (Globals.ShapefileType2D(m_shapefile.ShapefileType) == ShpfileType.SHP_POINT)
+            if (Globals.ShapefileType2D(_shapefile.ShapefileType) == ShpfileType.SHP_POINT)
             {
                 cboCollisionMode.Enabled = true;
                 cboCollisionMode.Items.Clear();
                 cboCollisionMode.Items.Add("Allow collisions");
                 cboCollisionMode.Items.Add("Avoid point vs point collisions");
                 cboCollisionMode.Items.Add("Avoid point vs label collisions");
-                cboCollisionMode.SelectedIndex = (int)m_shapefile.CollisionMode;
+                cboCollisionMode.SelectedIndex = (int)_shapefile.CollisionMode;
             }
             else
             {
                 cboCollisionMode.Enabled = false;
             }
 
-            chkFastMode.Checked = m_shapefile.FastMode;
-            chkSpatialIndex.Checked = m_shapefile.UseSpatialIndex && m_shapefile.IsSpatialIndexValid();
-            chkEditMode.Checked = m_shapefile.EditingShapes;
-            udMinDrawingSize.SetValue((double)m_shapefile.MinDrawingSize);
-            udMinLabelingSize.SetValue((double)m_shapefile.Labels.MinDrawingSize);
+            chkFastMode.Checked = _shapefile.FastMode;
+            chkSpatialIndex.Checked = _shapefile.UseSpatialIndex && _shapefile.IsSpatialIndexValid();
+            chkInMemory.Checked = _shapefile.EditingShapes;
+            chkEditMode.Checked = _shapefile.InteractiveEditing;
+            udMinDrawingSize.SetValue((double)_shapefile.MinDrawingSize);
+            udMinLabelingSize.SetValue((double)_shapefile.Labels.MinDrawingSize);
 
             // displaying help string default help
             chkFastMode_Enter(chkFastMode, null);
@@ -72,20 +73,20 @@ namespace MapWindow.Legend.Forms
             {
                 this.Enabled = false;
                 this.Cursor = Cursors.WaitCursor;
-                oldCallback = m_shapefile.GlobalCallback;
+                oldCallback = _shapefile.GlobalCallback;
                 CallbackLocal callback = new CallbackLocal(this.progressBar1);
-                m_shapefile.GlobalCallback = callback;
+                _shapefile.GlobalCallback = callback;
                 this.progressBar1.Visible = true;
                 //groupModeDescription.Height = 267;
             }
 
-            m_shapefile.FastMode = chkFastMode.Checked;
+            _shapefile.FastMode = chkFastMode.Checked;
 
             if (chkFastMode.Checked)
             {
                 this.Cursor = Cursors.Default;
                 this.Enabled = true;
-                m_shapefile.GlobalCallback = oldCallback;
+                _shapefile.GlobalCallback = oldCallback;
                 this.progressBar1.Visible = false;
                 //groupModeDescription.Height = 293;
             }
@@ -98,55 +99,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void chkEditMode_CheckedChanged(object sender, EventArgs e)
         {
-            if (_noEvents)
-            {
-                return;
-            }
 
-            MapWinGIS.ICallback oldCallback = null;
-
-            bool Start = chkEditMode.Checked && !m_shapefile.EditingShapes;
-            bool Stop = !chkEditMode.Checked && m_shapefile.EditingShapes;
-
-            bool save = false;
-            if (Stop)
-            {
-                DialogResult result = MessageBox.Show("Do you want to save changes to the shapefile?", "MapWindow 4", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                if (result == DialogResult.Cancel)
-                {
-                    chkEditMode.Checked = true;
-                    return;
-                }
-                save = (result == DialogResult.Yes);
-            }
-
-            if (Start) //|| Stop)
-            {
-                this.Enabled = false;
-                this.Cursor = Cursors.WaitCursor;
-                oldCallback = m_shapefile.GlobalCallback;
-                CallbackLocal callback = new CallbackLocal(this.progressBar1);
-                m_shapefile.GlobalCallback = callback;
-                this.progressBar1.Visible = true;
-            }
-
-            if (Start)
-            {
-                m_shapefile.StartEditingShapes(true, null);
-            }
-            if (Stop)
-            {
-                m_shapefile.StopEditingShapes(save, true, null);
-            }
-
-            if (Start) //|| Stop)
-            {
-                this.Cursor = Cursors.Default;
-                this.Enabled = true;
-                m_shapefile.GlobalCallback = oldCallback;
-                this.progressBar1.Visible = false;
-                RedrawMap();
-            }
         }
 
         /// <summary>
@@ -161,11 +114,11 @@ namespace MapWindow.Legend.Forms
 
             if (chkSpatialIndex.Checked)
             {
-                if (!m_shapefile.HasSpatialIndex)
+                if (!_shapefile.HasSpatialIndex)
                 {
                     this.Enabled = false;
                     this.Cursor = Cursors.WaitCursor;
-                    if (m_shapefile.CreateSpatialIndex(m_shapefile.Filename))
+                    if (_shapefile.CreateSpatialIndex(_shapefile.Filename))
                     {
                         MessageBox.Show("Spatial index was successfully created");
                     }
@@ -174,12 +127,12 @@ namespace MapWindow.Legend.Forms
                 }
                 else
                 {
-                    m_shapefile.UseSpatialIndex = true;
+                    _shapefile.UseSpatialIndex = true;
                 }
             }
             else
             {
-                m_shapefile.UseSpatialIndex = false;
+                _shapefile.UseSpatialIndex = false;
             }
 
             RedrawMap();
@@ -190,7 +143,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void udMinDrawingSize_ValueChanged(object sender, EventArgs e)
         {
-            m_shapefile.MinDrawingSize = (int)udMinDrawingSize.Value;
+            _shapefile.MinDrawingSize = (int)udMinDrawingSize.Value;
             RedrawMap();
         }
 
@@ -199,7 +152,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void udMinLabelingSize_ValueChanged(object sender, EventArgs e)
         {
-            m_shapefile.Labels.MinDrawingSize = (int)udMinLabelingSize.Value;
+            _shapefile.Labels.MinDrawingSize = (int)udMinLabelingSize.Value;
             RedrawMap();
         }
 
@@ -218,10 +171,10 @@ namespace MapWindow.Legend.Forms
                 //Globals.Legend.Unlock();
             }
 
-            //m_redrawModeIsChanging = true;
+            //_redrawModeIsChanging = true;
             //GUI2Settings(null, null);
             //RedrawMap();
-            //m_redrawModeIsChanging = false;
+            //_redrawModeIsChanging = false;
         }
 
         private void chkFastMode_MouseMove(object sender, MouseEventArgs e)
@@ -232,7 +185,11 @@ namespace MapWindow.Legend.Forms
         private void chkFastMode_Enter(object sender, EventArgs e)
         {
             string s = string.Empty;
-            if ((Control)sender == (Control)chkEditMode)
+            if ((Control)sender == (Control)chkInMemory)
+            {
+                s += "In memory: shapefile data is current loaded into RAM.";
+            }
+            else if ((Control) sender == (Control) chkEditMode)
             {
                 s += "Editing mode: starts or stops the editing session for the shapefile. The changes can be saved or discarded while closing.";
             }
@@ -267,7 +224,7 @@ namespace MapWindow.Legend.Forms
             txtModeDescription.SelectAll();
             txtModeDescription.SelectionFont = font;
 
-            string[] str = { "Fast mode:", "Editing mode:", "Spatial index:", "Minimal drawing size: ", "Minimal labeling size:", "GDI mode for labels:", "Collision mode" };
+            string[] str = { "Fast mode:", "Editing mode:", "In memory:", "Spatial index:", "Minimal drawing size: ", "Minimal labeling size:", "GDI mode for labels:", "Collision mode" };
             font = new Font("Arial", 10.0f, FontStyle.Bold);
 
             for (int i = 0; i < str.Length; i++)

@@ -33,11 +33,11 @@ namespace MapWindow.Legend.Forms
         private void btnLayerExpression_Click(object sender, EventArgs e)
         {
             string s = txtLayerExpression.Text;
-            frmQueryBuilder form = new frmQueryBuilder(m_shapefile, m_layerHandle, s, false);
+            frmQueryBuilder form = new frmQueryBuilder(_shapefile, _layerHandle, s, false);
             if (form.ShowDialog() == DialogResult.OK)
             {
                 txtLayerExpression.Text = form.Tag.ToString();
-                m_shapefile.VisibilityExpression = txtLayerExpression.Text;
+                _shapefile.VisibilityExpression = txtLayerExpression.Text;
                 RedrawMap();
             }
             form.Dispose();
@@ -49,7 +49,7 @@ namespace MapWindow.Legend.Forms
         private void btnClearLayerExpression_Click(object sender, EventArgs e)
         {
             txtLayerExpression.Clear();
-            m_shapefile.VisibilityExpression = "";
+            _shapefile.VisibilityExpression = "";
             RedrawMap();
         }
 

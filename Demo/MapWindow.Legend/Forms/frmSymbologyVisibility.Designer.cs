@@ -34,16 +34,16 @@ namespace MapWindow.Legend.Forms
         {
             scaleLayer.Locked = true;
 
-            Layer layer = m_layer;
+            Layer layer = _layer;
             scaleLayer.MaximumScale = layer.MaxVisibleScale;
             scaleLayer.MinimimScale = layer.MinVisibleScale;
             scaleLayer.UseDynamicVisibility = layer.UseDynamicVisibility;
 
-            MapWinGIS.Map map = m_legend.Map;
+            MapWinGIS.Map map = _legend.Map;
             scaleLayer.CurrentScale = map.CurrentScale;
             
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
-            uint color = (type == ShpfileType.SHP_POLYLINE)? m_shapefile.DefaultDrawingOptions.LineColor : m_shapefile.DefaultDrawingOptions.FillColor;
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
+            uint color = (type == ShpfileType.SHP_POLYLINE)? _shapefile.DefaultDrawingOptions.LineColor : _shapefile.DefaultDrawingOptions.FillColor;
             scaleLayer.FillColor = Colors.UintToColor(color);
 
             scaleLayer.Locked = false;
@@ -57,7 +57,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
 
-            Layer lyr = m_layer;
+            Layer lyr = _layer;
             lyr.MaxVisibleScale = scaleLayer.MaximumScale;
             lyr.MinVisibleScale = scaleLayer.MinimimScale;
             lyr.UseDynamicVisibility = scaleLayer.UseDynamicVisibility;

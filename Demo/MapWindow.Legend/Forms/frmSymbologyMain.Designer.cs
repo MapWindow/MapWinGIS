@@ -50,19 +50,6 @@ namespace MapWindow.Legend.Forms
             this.label20 = new System.Windows.Forms.Label();
             this.txtLayerName = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
-            this.tabMode = new System.Windows.Forms.TabPage();
-            this.groupBox21 = new System.Windows.Forms.GroupBox();
-            this.cboCollisionMode = new System.Windows.Forms.ComboBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
-            this.groupBox19 = new System.Windows.Forms.GroupBox();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.groupModeDescription = new System.Windows.Forms.GroupBox();
-            this.txtModeDescription = new System.Windows.Forms.RichTextBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.chkEditMode = new System.Windows.Forms.CheckBox();
-            this.chkSpatialIndex = new System.Windows.Forms.CheckBox();
-            this.chkFastMode = new System.Windows.Forms.CheckBox();
             this.tabDefault = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.groupLine = new System.Windows.Forms.GroupBox();
@@ -133,6 +120,20 @@ namespace MapWindow.Legend.Forms
             this.btnClearLayerExpression = new System.Windows.Forms.Button();
             this.btnLayerExpression = new System.Windows.Forms.Button();
             this.txtLayerExpression = new System.Windows.Forms.TextBox();
+            this.tabMode = new System.Windows.Forms.TabPage();
+            this.groupBox21 = new System.Windows.Forms.GroupBox();
+            this.cboCollisionMode = new System.Windows.Forms.ComboBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.groupBox19 = new System.Windows.Forms.GroupBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupModeDescription = new System.Windows.Forms.GroupBox();
+            this.txtModeDescription = new System.Windows.Forms.RichTextBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chkEditMode = new System.Windows.Forms.CheckBox();
+            this.chkInMemory = new System.Windows.Forms.CheckBox();
+            this.chkSpatialIndex = new System.Windows.Forms.CheckBox();
+            this.chkFastMode = new System.Windows.Forms.CheckBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.chkRedrawMap = new System.Windows.Forms.CheckBox();
             this.btnSaveChanges = new System.Windows.Forms.Button();
@@ -163,11 +164,6 @@ namespace MapWindow.Legend.Forms
             this.groupBox4.SuspendLayout();
             this.groupBox10.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
-            this.tabMode.SuspendLayout();
-            this.groupBox21.SuspendLayout();
-            this.groupBox19.SuspendLayout();
-            this.groupModeDescription.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.tabDefault.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupLine.SuspendLayout();
@@ -196,6 +192,11 @@ namespace MapWindow.Legend.Forms
             this.tabVisibility.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox13.SuspendLayout();
+            this.tabMode.SuspendLayout();
+            this.groupBox21.SuspendLayout();
+            this.groupBox19.SuspendLayout();
+            this.groupModeDescription.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udDefaultSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMaxSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMinSize)).BeginInit();
@@ -209,7 +210,7 @@ namespace MapWindow.Legend.Forms
             // 
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(421, 355);
+            this.btnOk.Location = new System.Drawing.Point(417, 355);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(93, 26);
             this.btnOk.TabIndex = 0;
@@ -221,7 +222,7 @@ namespace MapWindow.Legend.Forms
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(520, 355);
+            this.btnCancel.Location = new System.Drawing.Point(516, 355);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(93, 26);
             this.btnCancel.TabIndex = 1;
@@ -241,12 +242,11 @@ namespace MapWindow.Legend.Forms
             this.tabControl1.Location = new System.Drawing.Point(7, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(609, 349);
+            this.tabControl1.Size = new System.Drawing.Size(603, 349);
             this.tabControl1.TabIndex = 6;
             // 
             // tabGeneral
             // 
-            this.tabGeneral.Controls.Add(this.groupBox7);
             this.tabGeneral.Controls.Add(this.groupBox4);
             this.tabGeneral.Controls.Add(this.groupBox10);
             this.tabGeneral.Controls.Add(this.chkLayerPreview);
@@ -256,7 +256,7 @@ namespace MapWindow.Legend.Forms
             this.tabGeneral.Controls.Add(this.label18);
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
-            this.tabGeneral.Size = new System.Drawing.Size(601, 323);
+            this.tabGeneral.Size = new System.Drawing.Size(595, 323);
             this.tabGeneral.TabIndex = 10;
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
@@ -264,7 +264,7 @@ namespace MapWindow.Legend.Forms
             // groupBox7
             // 
             this.groupBox7.Controls.Add(this.txtComments);
-            this.groupBox7.Location = new System.Drawing.Point(293, 203);
+            this.groupBox7.Location = new System.Drawing.Point(638, 67);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(289, 81);
             this.groupBox7.TabIndex = 166;
@@ -290,7 +290,7 @@ namespace MapWindow.Legend.Forms
             this.groupBox4.Controls.Add(this.txtLayerSource);
             this.groupBox4.Location = new System.Drawing.Point(293, 57);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(289, 140);
+            this.groupBox4.Size = new System.Drawing.Size(289, 227);
             this.groupBox4.TabIndex = 165;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Source";
@@ -303,7 +303,7 @@ namespace MapWindow.Legend.Forms
             this.txtLayerSource.Location = new System.Drawing.Point(3, 16);
             this.txtLayerSource.Name = "txtLayerSource";
             this.txtLayerSource.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedVertical;
-            this.txtLayerSource.Size = new System.Drawing.Size(283, 121);
+            this.txtLayerSource.Size = new System.Drawing.Size(283, 208);
             this.txtLayerSource.TabIndex = 1;
             this.txtLayerSource.Text = "";
             // 
@@ -378,149 +378,6 @@ namespace MapWindow.Legend.Forms
             this.label18.TabIndex = 21;
             this.label18.Text = "Name";
             // 
-            // tabMode
-            // 
-            this.tabMode.Controls.Add(this.groupBox21);
-            this.tabMode.Controls.Add(this.progressBar1);
-            this.tabMode.Controls.Add(this.groupBox19);
-            this.tabMode.Controls.Add(this.groupModeDescription);
-            this.tabMode.Controls.Add(this.groupBox2);
-            this.tabMode.Location = new System.Drawing.Point(4, 22);
-            this.tabMode.Name = "tabMode";
-            this.tabMode.Size = new System.Drawing.Size(601, 323);
-            this.tabMode.TabIndex = 13;
-            this.tabMode.Text = "Mode";
-            this.tabMode.UseVisualStyleBackColor = true;
-            // 
-            // groupBox21
-            // 
-            this.groupBox21.Controls.Add(this.cboCollisionMode);
-            this.groupBox21.Location = new System.Drawing.Point(244, 115);
-            this.groupBox21.Name = "groupBox21";
-            this.groupBox21.Size = new System.Drawing.Size(227, 72);
-            this.groupBox21.TabIndex = 182;
-            this.groupBox21.TabStop = false;
-            this.groupBox21.Text = "Collision mode";
-            // 
-            // cboCollisionMode
-            // 
-            this.cboCollisionMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboCollisionMode.FormattingEnabled = true;
-            this.cboCollisionMode.Location = new System.Drawing.Point(23, 28);
-            this.cboCollisionMode.Name = "cboCollisionMode";
-            this.cboCollisionMode.Size = new System.Drawing.Size(185, 21);
-            this.cboCollisionMode.TabIndex = 184;
-            this.cboCollisionMode.SelectedIndexChanged += new System.EventHandler(this.GUI2Settings);
-            this.cboCollisionMode.MouseEnter += new System.EventHandler(this.chkFastMode_Enter);
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(15, 290);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(456, 20);
-            this.progressBar1.TabIndex = 181;
-            this.progressBar1.Visible = false;
-            // 
-            // groupBox19
-            // 
-            this.groupBox19.Controls.Add(this.label12);
-            this.groupBox19.Controls.Add(this.udMinDrawingSize);
-            this.groupBox19.Controls.Add(this.udMinLabelingSize);
-            this.groupBox19.Controls.Add(this.label6);
-            this.groupBox19.Location = new System.Drawing.Point(244, 14);
-            this.groupBox19.Name = "groupBox19";
-            this.groupBox19.Size = new System.Drawing.Size(227, 95);
-            this.groupBox19.TabIndex = 180;
-            this.groupBox19.TabStop = false;
-            this.groupBox19.Text = "Minimal shape size, pixels";
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(24, 65);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(48, 13);
-            this.label12.TabIndex = 177;
-            this.label12.Text = "To label:";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(23, 31);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(49, 13);
-            this.label6.TabIndex = 175;
-            this.label6.Text = "To draw:";
-            // 
-            // groupModeDescription
-            // 
-            this.groupModeDescription.Controls.Add(this.txtModeDescription);
-            this.groupModeDescription.Location = new System.Drawing.Point(15, 193);
-            this.groupModeDescription.Name = "groupModeDescription";
-            this.groupModeDescription.Size = new System.Drawing.Size(456, 91);
-            this.groupModeDescription.TabIndex = 169;
-            this.groupModeDescription.TabStop = false;
-            // 
-            // txtModeDescription
-            // 
-            this.txtModeDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtModeDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.txtModeDescription.Location = new System.Drawing.Point(6, 14);
-            this.txtModeDescription.Name = "txtModeDescription";
-            this.txtModeDescription.Size = new System.Drawing.Size(444, 71);
-            this.txtModeDescription.TabIndex = 0;
-            this.txtModeDescription.Text = "";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.chkEditMode);
-            this.groupBox2.Controls.Add(this.chkSpatialIndex);
-            this.groupBox2.Controls.Add(this.chkFastMode);
-            this.groupBox2.Location = new System.Drawing.Point(15, 14);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(214, 173);
-            this.groupBox2.TabIndex = 167;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Options";
-            // 
-            // chkEditMode
-            // 
-            this.chkEditMode.AutoSize = true;
-            this.chkEditMode.Enabled = false;
-            this.chkEditMode.Location = new System.Drawing.Point(27, 78);
-            this.chkEditMode.Name = "chkEditMode";
-            this.chkEditMode.Size = new System.Drawing.Size(87, 17);
-            this.chkEditMode.TabIndex = 43;
-            this.chkEditMode.Text = "Editing mode";
-            this.chkEditMode.UseVisualStyleBackColor = true;
-            this.chkEditMode.CheckedChanged += new System.EventHandler(this.chkEditMode_CheckedChanged);
-            this.chkEditMode.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
-            // 
-            // chkSpatialIndex
-            // 
-            this.chkSpatialIndex.AutoSize = true;
-            this.chkSpatialIndex.Location = new System.Drawing.Point(27, 114);
-            this.chkSpatialIndex.Name = "chkSpatialIndex";
-            this.chkSpatialIndex.Size = new System.Drawing.Size(86, 17);
-            this.chkSpatialIndex.TabIndex = 42;
-            this.chkSpatialIndex.Text = "Spatial index";
-            this.chkSpatialIndex.UseVisualStyleBackColor = true;
-            this.chkSpatialIndex.CheckedChanged += new System.EventHandler(this.chkSpatialIndex_CheckedChanged);
-            this.chkSpatialIndex.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
-            // 
-            // chkFastMode
-            // 
-            this.chkFastMode.AutoSize = true;
-            this.chkFastMode.Location = new System.Drawing.Point(27, 42);
-            this.chkFastMode.Name = "chkFastMode";
-            this.chkFastMode.Size = new System.Drawing.Size(115, 17);
-            this.chkFastMode.TabIndex = 39;
-            this.chkFastMode.Text = "Fast drawing mode";
-            this.chkFastMode.UseVisualStyleBackColor = true;
-            this.chkFastMode.CheckedChanged += new System.EventHandler(this.chkFastEditingMode_CheckedChanged);
-            this.chkFastMode.Enter += new System.EventHandler(this.chkFastMode_Enter);
-            this.chkFastMode.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
-            // 
             // tabDefault
             // 
             this.tabDefault.Controls.Add(this.groupBox3);
@@ -532,7 +389,7 @@ namespace MapWindow.Legend.Forms
             this.tabDefault.Controls.Add(this.btnDefaultChange);
             this.tabDefault.Location = new System.Drawing.Point(4, 22);
             this.tabDefault.Name = "tabDefault";
-            this.tabDefault.Size = new System.Drawing.Size(601, 323);
+            this.tabDefault.Size = new System.Drawing.Size(595, 323);
             this.tabDefault.TabIndex = 6;
             this.tabDefault.Text = "Appearance";
             this.tabDefault.UseVisualStyleBackColor = true;
@@ -725,7 +582,7 @@ namespace MapWindow.Legend.Forms
             this.tabCategories.Controls.Add(this.btnCategoryGenerate);
             this.tabCategories.Location = new System.Drawing.Point(4, 22);
             this.tabCategories.Name = "tabCategories";
-            this.tabCategories.Size = new System.Drawing.Size(601, 323);
+            this.tabCategories.Size = new System.Drawing.Size(595, 323);
             this.tabCategories.TabIndex = 8;
             this.tabCategories.Text = "Categories";
             this.tabCategories.UseVisualStyleBackColor = true;
@@ -913,7 +770,7 @@ namespace MapWindow.Legend.Forms
             // btnCategoryClear
             // 
             this.btnCategoryClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCategoryClear.Location = new System.Drawing.Point(497, 112);
+            this.btnCategoryClear.Location = new System.Drawing.Point(491, 112);
             this.btnCategoryClear.Name = "btnCategoryClear";
             this.btnCategoryClear.Size = new System.Drawing.Size(93, 26);
             this.btnCategoryClear.TabIndex = 93;
@@ -990,7 +847,7 @@ namespace MapWindow.Legend.Forms
             // btnCategoryRemove
             // 
             this.btnCategoryRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCategoryRemove.Location = new System.Drawing.Point(497, 80);
+            this.btnCategoryRemove.Location = new System.Drawing.Point(491, 80);
             this.btnCategoryRemove.Name = "btnCategoryRemove";
             this.btnCategoryRemove.Size = new System.Drawing.Size(93, 26);
             this.btnCategoryRemove.TabIndex = 95;
@@ -1001,7 +858,7 @@ namespace MapWindow.Legend.Forms
             // btnCategoryAppearance
             // 
             this.btnCategoryAppearance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCategoryAppearance.Location = new System.Drawing.Point(497, 48);
+            this.btnCategoryAppearance.Location = new System.Drawing.Point(491, 48);
             this.btnCategoryAppearance.Name = "btnCategoryAppearance";
             this.btnCategoryAppearance.Size = new System.Drawing.Size(93, 26);
             this.btnCategoryAppearance.TabIndex = 91;
@@ -1012,7 +869,7 @@ namespace MapWindow.Legend.Forms
             // btnCategoryGenerate
             // 
             this.btnCategoryGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnCategoryGenerate.Location = new System.Drawing.Point(497, 16);
+            this.btnCategoryGenerate.Location = new System.Drawing.Point(491, 16);
             this.btnCategoryGenerate.Name = "btnCategoryGenerate";
             this.btnCategoryGenerate.Size = new System.Drawing.Size(93, 26);
             this.btnCategoryGenerate.TabIndex = 90;
@@ -1028,7 +885,7 @@ namespace MapWindow.Legend.Forms
             this.tabLabels.Controls.Add(this.btnLabelsAppearance);
             this.tabLabels.Location = new System.Drawing.Point(4, 22);
             this.tabLabels.Name = "tabLabels";
-            this.tabLabels.Size = new System.Drawing.Size(601, 323);
+            this.tabLabels.Size = new System.Drawing.Size(595, 323);
             this.tabLabels.TabIndex = 5;
             this.tabLabels.Text = "Labels";
             this.tabLabels.UseVisualStyleBackColor = true;
@@ -1036,7 +893,7 @@ namespace MapWindow.Legend.Forms
             // btnLabelsClear
             // 
             this.btnLabelsClear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLabelsClear.Location = new System.Drawing.Point(265, 62);
+            this.btnLabelsClear.Location = new System.Drawing.Point(259, 62);
             this.btnLabelsClear.Name = "btnLabelsClear";
             this.btnLabelsClear.Size = new System.Drawing.Size(93, 26);
             this.btnLabelsClear.TabIndex = 170;
@@ -1122,7 +979,7 @@ namespace MapWindow.Legend.Forms
             // btnLabelsAppearance
             // 
             this.btnLabelsAppearance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLabelsAppearance.Location = new System.Drawing.Point(265, 30);
+            this.btnLabelsAppearance.Location = new System.Drawing.Point(259, 30);
             this.btnLabelsAppearance.Name = "btnLabelsAppearance";
             this.btnLabelsAppearance.Size = new System.Drawing.Size(93, 26);
             this.btnLabelsAppearance.TabIndex = 125;
@@ -1138,7 +995,7 @@ namespace MapWindow.Legend.Forms
             this.tabCharts.Controls.Add(this.groupCharts);
             this.tabCharts.Location = new System.Drawing.Point(4, 22);
             this.tabCharts.Name = "tabCharts";
-            this.tabCharts.Size = new System.Drawing.Size(601, 323);
+            this.tabCharts.Size = new System.Drawing.Size(595, 323);
             this.tabCharts.TabIndex = 14;
             this.tabCharts.Text = "Charts";
             this.tabCharts.UseVisualStyleBackColor = true;
@@ -1258,7 +1115,7 @@ namespace MapWindow.Legend.Forms
             this.tabVisibility.Location = new System.Drawing.Point(4, 22);
             this.tabVisibility.Name = "tabVisibility";
             this.tabVisibility.Padding = new System.Windows.Forms.Padding(3);
-            this.tabVisibility.Size = new System.Drawing.Size(601, 323);
+            this.tabVisibility.Size = new System.Drawing.Size(595, 323);
             this.tabVisibility.TabIndex = 11;
             this.tabVisibility.Text = "Visibility";
             this.tabVisibility.UseVisualStyleBackColor = true;
@@ -1316,6 +1173,162 @@ namespace MapWindow.Legend.Forms
             this.toolTip1.SetToolTip(this.txtLayerExpression, "Only shapes which agree with the following expression will be visible");
             this.txtLayerExpression.TextChanged += new System.EventHandler(this.txtLayerExpression_TextChanged);
             // 
+            // tabMode
+            // 
+            this.tabMode.Controls.Add(this.groupBox21);
+            this.tabMode.Controls.Add(this.progressBar1);
+            this.tabMode.Controls.Add(this.groupBox19);
+            this.tabMode.Controls.Add(this.groupModeDescription);
+            this.tabMode.Controls.Add(this.groupBox2);
+            this.tabMode.Location = new System.Drawing.Point(4, 22);
+            this.tabMode.Name = "tabMode";
+            this.tabMode.Size = new System.Drawing.Size(595, 323);
+            this.tabMode.TabIndex = 13;
+            this.tabMode.Text = "Mode";
+            this.tabMode.UseVisualStyleBackColor = true;
+            // 
+            // groupBox21
+            // 
+            this.groupBox21.Controls.Add(this.cboCollisionMode);
+            this.groupBox21.Location = new System.Drawing.Point(244, 115);
+            this.groupBox21.Name = "groupBox21";
+            this.groupBox21.Size = new System.Drawing.Size(227, 72);
+            this.groupBox21.TabIndex = 182;
+            this.groupBox21.TabStop = false;
+            this.groupBox21.Text = "Collision mode";
+            // 
+            // cboCollisionMode
+            // 
+            this.cboCollisionMode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCollisionMode.FormattingEnabled = true;
+            this.cboCollisionMode.Location = new System.Drawing.Point(23, 28);
+            this.cboCollisionMode.Name = "cboCollisionMode";
+            this.cboCollisionMode.Size = new System.Drawing.Size(185, 21);
+            this.cboCollisionMode.TabIndex = 184;
+            this.cboCollisionMode.SelectedIndexChanged += new System.EventHandler(this.GUI2Settings);
+            this.cboCollisionMode.MouseEnter += new System.EventHandler(this.chkFastMode_Enter);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(15, 290);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(456, 20);
+            this.progressBar1.TabIndex = 181;
+            this.progressBar1.Visible = false;
+            // 
+            // groupBox19
+            // 
+            this.groupBox19.Controls.Add(this.label12);
+            this.groupBox19.Controls.Add(this.udMinDrawingSize);
+            this.groupBox19.Controls.Add(this.udMinLabelingSize);
+            this.groupBox19.Controls.Add(this.label6);
+            this.groupBox19.Location = new System.Drawing.Point(244, 14);
+            this.groupBox19.Name = "groupBox19";
+            this.groupBox19.Size = new System.Drawing.Size(227, 95);
+            this.groupBox19.TabIndex = 180;
+            this.groupBox19.TabStop = false;
+            this.groupBox19.Text = "Minimal shape size, pixels";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(24, 65);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(48, 13);
+            this.label12.TabIndex = 177;
+            this.label12.Text = "To label:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(23, 31);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(49, 13);
+            this.label6.TabIndex = 175;
+            this.label6.Text = "To draw:";
+            // 
+            // groupModeDescription
+            // 
+            this.groupModeDescription.Controls.Add(this.txtModeDescription);
+            this.groupModeDescription.Location = new System.Drawing.Point(15, 193);
+            this.groupModeDescription.Name = "groupModeDescription";
+            this.groupModeDescription.Size = new System.Drawing.Size(456, 91);
+            this.groupModeDescription.TabIndex = 169;
+            this.groupModeDescription.TabStop = false;
+            // 
+            // txtModeDescription
+            // 
+            this.txtModeDescription.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtModeDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.txtModeDescription.Location = new System.Drawing.Point(6, 14);
+            this.txtModeDescription.Name = "txtModeDescription";
+            this.txtModeDescription.Size = new System.Drawing.Size(444, 71);
+            this.txtModeDescription.TabIndex = 0;
+            this.txtModeDescription.Text = "";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.chkEditMode);
+            this.groupBox2.Controls.Add(this.chkInMemory);
+            this.groupBox2.Controls.Add(this.chkSpatialIndex);
+            this.groupBox2.Controls.Add(this.chkFastMode);
+            this.groupBox2.Location = new System.Drawing.Point(15, 14);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(214, 173);
+            this.groupBox2.TabIndex = 167;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Options";
+            // 
+            // chkEditMode
+            // 
+            this.chkEditMode.AutoSize = true;
+            this.chkEditMode.Enabled = false;
+            this.chkEditMode.Location = new System.Drawing.Point(25, 98);
+            this.chkEditMode.Name = "chkEditMode";
+            this.chkEditMode.Size = new System.Drawing.Size(87, 17);
+            this.chkEditMode.TabIndex = 44;
+            this.chkEditMode.Text = "Editing mode";
+            this.chkEditMode.UseVisualStyleBackColor = true;
+            this.chkEditMode.CheckedChanged += new System.EventHandler(this.chkEditMode_CheckedChanged);
+            this.chkEditMode.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
+            // 
+            // chkInMemory
+            // 
+            this.chkInMemory.AutoSize = true;
+            this.chkInMemory.Enabled = false;
+            this.chkInMemory.Location = new System.Drawing.Point(25, 65);
+            this.chkInMemory.Name = "chkInMemory";
+            this.chkInMemory.Size = new System.Drawing.Size(107, 17);
+            this.chkInMemory.TabIndex = 43;
+            this.chkInMemory.Text = "Stored in memory";
+            this.chkInMemory.UseVisualStyleBackColor = true;
+            this.chkInMemory.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
+            // 
+            // chkSpatialIndex
+            // 
+            this.chkSpatialIndex.AutoSize = true;
+            this.chkSpatialIndex.Location = new System.Drawing.Point(25, 131);
+            this.chkSpatialIndex.Name = "chkSpatialIndex";
+            this.chkSpatialIndex.Size = new System.Drawing.Size(86, 17);
+            this.chkSpatialIndex.TabIndex = 42;
+            this.chkSpatialIndex.Text = "Spatial index";
+            this.chkSpatialIndex.UseVisualStyleBackColor = true;
+            this.chkSpatialIndex.CheckedChanged += new System.EventHandler(this.chkSpatialIndex_CheckedChanged);
+            this.chkSpatialIndex.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
+            // 
+            // chkFastMode
+            // 
+            this.chkFastMode.AutoSize = true;
+            this.chkFastMode.Location = new System.Drawing.Point(25, 32);
+            this.chkFastMode.Name = "chkFastMode";
+            this.chkFastMode.Size = new System.Drawing.Size(115, 17);
+            this.chkFastMode.TabIndex = 39;
+            this.chkFastMode.Text = "Fast drawing mode";
+            this.chkFastMode.UseVisualStyleBackColor = true;
+            this.chkFastMode.CheckedChanged += new System.EventHandler(this.chkFastEditingMode_CheckedChanged);
+            this.chkFastMode.Enter += new System.EventHandler(this.chkFastMode_Enter);
+            this.chkFastMode.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chkFastMode_MouseMove);
+            // 
             // chkRedrawMap
             // 
             this.chkRedrawMap.AutoSize = true;
@@ -1332,7 +1345,7 @@ namespace MapWindow.Legend.Forms
             // 
             this.btnSaveChanges.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSaveChanges.Enabled = false;
-            this.btnSaveChanges.Location = new System.Drawing.Point(322, 355);
+            this.btnSaveChanges.Location = new System.Drawing.Point(318, 355);
             this.btnSaveChanges.Name = "btnSaveChanges";
             this.btnSaveChanges.Size = new System.Drawing.Size(93, 26);
             this.btnSaveChanges.TabIndex = 134;
@@ -1644,7 +1657,8 @@ namespace MapWindow.Legend.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(620, 385);
+            this.ClientSize = new System.Drawing.Size(616, 385);
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.btnSaveChanges);
             this.Controls.Add(this.chkRedrawMap);
             this.Controls.Add(this.tabControl1);
@@ -1665,13 +1679,6 @@ namespace MapWindow.Legend.Forms
             this.groupBox4.ResumeLayout(false);
             this.groupBox10.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
-            this.tabMode.ResumeLayout(false);
-            this.groupBox21.ResumeLayout(false);
-            this.groupBox19.ResumeLayout(false);
-            this.groupBox19.PerformLayout();
-            this.groupModeDescription.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.tabDefault.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupLine.ResumeLayout(false);
@@ -1711,6 +1718,13 @@ namespace MapWindow.Legend.Forms
             this.groupBox1.ResumeLayout(false);
             this.groupBox13.ResumeLayout(false);
             this.groupBox13.PerformLayout();
+            this.tabMode.ResumeLayout(false);
+            this.groupBox21.ResumeLayout(false);
+            this.groupBox19.ResumeLayout(false);
+            this.groupBox19.PerformLayout();
+            this.groupModeDescription.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udDefaultSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMaxSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMinSize)).EndInit();
@@ -1789,7 +1803,7 @@ namespace MapWindow.Legend.Forms
         private Owf.Controls.Office2007ColorPicker clpPointFill;
         private System.Windows.Forms.TabPage tabMode;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckBox chkEditMode;
+        private System.Windows.Forms.CheckBox chkInMemory;
         private System.Windows.Forms.CheckBox chkSpatialIndex;
         private System.Windows.Forms.CheckBox chkFastMode;
         private Owf.Controls.Office2007ColorPicker clpDefaultOutline;
@@ -1847,5 +1861,6 @@ namespace MapWindow.Legend.Forms
         private System.Windows.Forms.GroupBox groupCharts;
         private System.Windows.Forms.PictureBox pctCharts;
         private System.Windows.Forms.GroupBox groupBox13;
+        private System.Windows.Forms.CheckBox chkEditMode;
     }
 }

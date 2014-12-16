@@ -46,7 +46,7 @@ namespace MapWindow.Legend.Forms
                 icbChartColorScheme.SelectedIndex = 0;
             }
 
-            MapWinGIS.Charts charts = m_shapefile.Charts;
+            MapWinGIS.Charts charts = _shapefile.Charts;
             chkChartsVisible.Checked = charts.Visible;
             //cboChartVerticalPosition.SelectedIndex = (int)charts.VerticalPosition;
 
@@ -62,7 +62,7 @@ namespace MapWindow.Legend.Forms
             Rectangle rect = pctCharts.ClientRectangle;
             Bitmap bmp = new Bitmap(rect.Width, rect.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            if (m_shapefile.Charts.Count > 0 && m_shapefile.Charts.NumFields > 0)
+            if (_shapefile.Charts.Count > 0 && _shapefile.Charts.NumFields > 0)
             {
                 Graphics g = Graphics.FromImage(bmp);
                 IntPtr ptr = g.GetHdc();
@@ -70,7 +70,7 @@ namespace MapWindow.Legend.Forms
                 int width = rect.Width;
                 int height = rect.Height;
 
-                MapWinGIS.Charts charts = m_shapefile.Charts;
+                MapWinGIS.Charts charts = _shapefile.Charts;
 
                 if (charts.ChartType == MapWinGIS.tkChartType.chtPieChart)
                     charts.DrawChart(ptr, (width - charts.IconWidth) / 2, (height - charts.IconHeight) / 2, false, Colors.ColorToUInteger(Color.White));
@@ -88,14 +88,14 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnChartAppearance_Click(object sender, EventArgs e)
         {
-            ChartStyleForm form = new ChartStyleForm(m_legend, m_shapefile, false, m_layerHandle);
+            ChartStyleForm form = new ChartStyleForm(_legend, _shapefile, false, _layerHandle);
             form.ShowDialog();
 
             // even if cancel was hit, a user could have applied the options
             bool state = _noEvents;
             _noEvents = true;
-            optChartBars.Checked = (m_shapefile.Charts.ChartType == tkChartType.chtBarChart);
-            optChartsPie.Checked = (m_shapefile.Charts.ChartType == tkChartType.chtPieChart);
+            optChartBars.Checked = (_shapefile.Charts.ChartType == tkChartType.chtBarChart);
+            optChartsPie.Checked = (_shapefile.Charts.ChartType == tkChartType.chtPieChart);
             _noEvents = state;
 
             DrawChartsPreview();
@@ -110,8 +110,8 @@ namespace MapWindow.Legend.Forms
         {
             if (MessageBox.Show("Do you want to delete charts?", Legend.Controls.Legend.Legend.AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                m_shapefile.Charts.ClearFields();
-                m_shapefile.Charts.Clear();
+                _shapefile.Charts.ClearFields();
+                _shapefile.Charts.Clear();
                 RefreshControlsState(null, null);
                 DrawChartsPreview();
                 RedrawMap();
@@ -146,7 +146,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void UpdateCharts()
         {
-            MapWinGIS.Charts charts = m_shapefile.Charts;
+            MapWinGIS.Charts charts = _shapefile.Charts;
             charts.Visible = chkChartsVisible.Checked;
             charts.ChartType = optChartBars.Checked ? MapWinGIS.tkChartType.chtBarChart : MapWinGIS.tkChartType.chtPieChart;
             this.UpdateFieldColors();
@@ -162,10 +162,10 @@ namespace MapWindow.Legend.Forms
                 MapWinGIS.ColorScheme scheme = ColorSchemes.ColorBlend2ColorScheme(blend);
                 if (scheme != null)
                 {
-                    for (int i = 0; i < m_shapefile.Charts.NumFields; i++)
+                    for (int i = 0; i < _shapefile.Charts.NumFields; i++)
                     {
-                        MapWinGIS.ChartField field = m_shapefile.Charts.get_Field(i);
-                        double value = (double)(i) / (double)(m_shapefile.Charts.NumFields - 1);
+                        MapWinGIS.ChartField field = _shapefile.Charts.get_Field(i);
+                        double value = (double)(i) / (double)(_shapefile.Charts.NumFields - 1);
                         field.Color = scheme.get_GraduatedColor(value);
                     }
                 }

@@ -85,7 +85,7 @@ namespace MapWindow.Legend.Forms.Categories
         /// </summary>
         private void LoadOptions()
         {
-            SymbologySettings settings = null;//m_plugin.get_LayerSettings(m_layerHandle);
+            SymbologySettings settings = null;//m_plugin.get_LayerSettings(_layerHandle);
 
             cboClassificationType.SelectedIndex = (int)settings.LabelsClassification;
             cboCategoriesCount.Text = settings.LabelsCategoriesCount.ToString();

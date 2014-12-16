@@ -484,7 +484,7 @@ namespace MapWindow.Legend.Classes
     //        {
     //            try
     //            {
-    //                if (m_mainForm.m_layerHandle != Handle)
+    //                if (m_mainForm._layerHandle != Handle)
     //                    m_mainForm.Close();
     //            }
     //            catch { }

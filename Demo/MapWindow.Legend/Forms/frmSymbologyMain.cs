@@ -43,38 +43,35 @@ namespace MapWindow.Legend.Forms
         #region Member variables
 
         // A reference to the plug-in
-        private Controls.Legend.Legend m_legend;
+        private readonly Controls.Legend.Legend _legend;
 
         // Handle of the shapefile layer
-        public int m_layerHandle = -1;
+        private readonly int _layerHandle = -1;
 
         // MW the layer being edited
-        Layer m_layer = null;
+        private readonly Layer _layer = null;
 
         // the plug-in settings will be held in legend; 
         // but it's possible to add them in the layer interface if needed
-        SymbologySettings m_settings = null;
+        private readonly SymbologySettings _settings = null;
         
         // Reference to the shapefile
-        private MapWinGIS.Shapefile m_shapefile = null;
-        
-        // Temporary shapefile used to show preview (there are problems when trying to create it in back thread)
-        private MapWinGIS.Shapefile sfPreview = null;
+        private readonly Shapefile _shapefile = null;
         
         // The tab index to show on the loading
-        static int m_tabIndex = 0;
+        static int _tabIndex = 0;
         
         // Prevents controls from triggering events when managed from code
         private bool _noEvents = false;
 
         // init state for serialization
-        private string m_initState = "";
+        private string _initState = "";
 
         // changes flag
-        private bool m_stateChanged = false;
+        private bool _stateChanged = false;
         
         // redraw map at once is being changed
-        private bool m_redrawModeIsChanging = false;
+        private const bool _redrawModeIsChanging = false;
 
         #endregion
 
@@ -87,23 +84,25 @@ namespace MapWindow.Legend.Forms
             // Required for Windows Form Designer support
             InitializeComponent();
 
-            // setting member variables (some of them for faster access)
-            m_legend = legend;
-            m_layerHandle = layerHandle;
-            m_layer = m_legend.GetLayer(m_layerHandle);
-            m_shapefile = m_layer.GetObject() as MapWinGIS.Shapefile;
+            var gs = new GlobalSettings();
+            gs.ForceHideLabels = true;
 
-            m_settings = Globals.get_LayerSettings(m_layerHandle);
-            this.Text = "Layer properties: " + m_layer.Name;
+            // setting member variables (some of them for faster access)
+            _legend = legend;
+            _layerHandle = layerHandle;
+            _layer = _legend.GetLayer(_layerHandle);
+            _shapefile = _layer.GetObject() as Shapefile;
+
+            _settings = Globals.get_LayerSettings(_layerHandle);
+            this.Text = "Layer properties: " + _layer.Name;
 
             // update map at once button is off by default which is equal to locked state of the map
-            //m_mapWin.View.LockMap();
-            //m_mapWin.View.LockLegend();
+            LockLegendAndMap(true);
 
-            m_initState = SaveState();
+            _initState = SaveState();
            
             // the first color in color scheme should be the fill/line color of the shapefile
-            Globals.LayerColors.SetDefaultColorScheme(m_shapefile);
+            Globals.LayerColors.SetDefaultColorScheme(_shapefile);
 
             _noEvents = true;
 
@@ -126,23 +125,46 @@ namespace MapWindow.Legend.Forms
             UpdateColorSchemes();
             
             // the state should be set after the loading as otherwise we can trigger unnecessary redraws
-            chkRedrawMap.Checked = false; //m_settings.UpdateMapAtOnce;
+            chkRedrawMap.Checked = false; //_settings.UpdateMapAtOnce;
 
             _noEvents = false;
             
             // sets the enabled state of the controls
             RefreshControlsState(null, null);
 
-            DrawAllPreviews();
+            //DrawAllPreviews();
             
             AddTooltips();
 
             // displaying the last tab
-            tabControl1.SelectedIndex = m_tabIndex;
+            tabControl1.SelectedIndex = _tabIndex;
 
             tabControl1.TabPages.Remove(tabCharts);
             tabControl1.TabPages.Remove(tabLabels);
             tabControl1.TabPages.Remove(tabDefault);
+
+            this.Shown += frmSymbologyMain_Shown;
+        }
+
+        private void LockLegendAndMap( bool state)
+        {
+            if (state)
+            {
+                _legend.Lock();
+                _legend.Map.LockWindow(tkLockMode.lmLock);
+            }
+            else
+            {
+                _legend.Unlock();
+                _legend.Map.LockWindow(tkLockMode.lmUnlock);
+            }
+        }
+
+        void frmSymbologyMain_Shown(object sender, EventArgs e)
+        {
+            Application.DoEvents();
+            var gs = new GlobalSettings();
+            gs.ForceHideLabels = false;
         }
 
         /// <summary>
@@ -150,7 +172,7 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void InitExpressionTab()
         {
-            txtLayerExpression.Text = m_shapefile.VisibilityExpression;
+            txtLayerExpression.Text = _shapefile.VisibilityExpression;
         }
        
         #endregion
@@ -165,17 +187,17 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
 
-            m_stateChanged = true;
+            _stateChanged = true;
             btnSaveChanges.Enabled = true;
 
             if (tabControl1.SelectedTab.Name.ToLower() == "tabmode")
             {
-                m_shapefile.CollisionMode = (tkCollisionMode)cboCollisionMode.SelectedIndex;
+                _shapefile.CollisionMode = (tkCollisionMode)cboCollisionMode.SelectedIndex;
             }
             if (tabControl1.SelectedTab.Name.ToLower() == "tabgeneral")
             {
-                m_layer.Visible = chkLayerVisible.Checked;
-                m_layer.Name = txtLayerName.Text;
+                _layer.Visible = chkLayerVisible.Checked;
+                _layer.Name = txtLayerName.Text;
             }
             else if (tabControl1.SelectedTab.Name.ToLower() == "tabdefault")
             {
@@ -191,7 +213,7 @@ namespace MapWindow.Legend.Forms
                 this.UpdateCharts();
             }
 
-            m_shapefile.VisibilityExpression = txtLayerExpression.Text;
+            _shapefile.VisibilityExpression = txtLayerExpression.Text;
 
             RefreshControlsState(null, null);
             RedrawMap();
@@ -205,7 +227,7 @@ namespace MapWindow.Legend.Forms
             if (_noEvents)
                 return;
             
-            ShpfileType type = Globals.ShapefileType2D(m_shapefile.ShapefileType);
+            ShpfileType type = Globals.ShapefileType2D(_shapefile.ShapefileType);
            
             // appearance
             udDefaultSize.Enabled = (type == ShpfileType.SHP_POINT || type == ShpfileType.SHP_MULTIPOINT);
@@ -213,7 +235,7 @@ namespace MapWindow.Legend.Forms
             clpSelection.Enabled = (type != ShpfileType.SHP_POLYLINE);
 
             // provide the options if there are a single line pattern, otherwise extednded options are needed
-            ShapeDrawingOptions options = m_shapefile.DefaultDrawingOptions;
+            ShapeDrawingOptions options = _shapefile.DefaultDrawingOptions;
             if (options.UseLinePattern)
             {
                 if (options.LinePattern.Count <= 1)
@@ -246,7 +268,7 @@ namespace MapWindow.Legend.Forms
             btnCategoryClear.Enabled = (dgvCategories.Rows.Count > 0);
 
             // labels
-            MapWinGIS.Labels labels = m_shapefile.Labels;
+            MapWinGIS.Labels labels = _shapefile.Labels;
 
             //btnLabelsAppearance.Enabled = (labels.Count > 0);
             btnLabelsClear.Enabled = (labels.Count > 0);
@@ -254,11 +276,11 @@ namespace MapWindow.Legend.Forms
             groupLabelStyle.Enabled = (labels.Count > 0);
             chkShowLabels.Enabled = (labels.Count > 0);
             panelLabels.Enabled = (labels.Count > 0);
-            groupChartAppearance.Enabled = m_shapefile.Charts.Count > 0;
+            groupChartAppearance.Enabled = _shapefile.Charts.Count > 0;
 
             // charts
-            bool enabled = (m_shapefile.Charts.Count > 0); //&& (m_shapefile.Charts.NumFields > 0);
-            btnClearCharts.Enabled = (m_shapefile.Charts.Count > 0);
+            bool enabled = (_shapefile.Charts.Count > 0); //&& (_shapefile.Charts.NumFields > 0);
+            btnClearCharts.Enabled = (_shapefile.Charts.Count > 0);
             icbChartColorScheme.Enabled = enabled;
             groupCharts.Enabled = enabled;
             optChartBars.Enabled = enabled;
@@ -275,11 +297,11 @@ namespace MapWindow.Legend.Forms
         private void RedrawMap()
         {
             //if (chkRedrawMap.Checked && !_noEvents)
-            m_legend.Map.Redraw();
-            m_legend.Refresh();
+            _legend.Map.Redraw();
+            _legend.Refresh();
             
             // it's assumed that we call redraw when state changed only
-            if (!_noEvents && !m_redrawModeIsChanging)
+            if (!_noEvents && !_redrawModeIsChanging)
             {
                 MarkStateChanged();
             }
@@ -292,7 +314,7 @@ namespace MapWindow.Legend.Forms
         {
             if (chkRedrawMap.Checked && !_noEvents)
             {
-                m_legend.Refresh();
+                _legend.Refresh();
             }
         }
 
@@ -324,40 +346,27 @@ namespace MapWindow.Legend.Forms
             {
                 CancelChanges();
             }
-            
-            //while (m_mapWin.View.IsMapLocked)
-            //{
-            //    m_mapWin.View.UnlockMap();
-            //}
 
-            //while (Globals.Legend.Locked)
-            //{
-            //    Globals.Legend.Unlock();
-            //}
-            
-            Layer lyr = m_layer;
+            LockLegendAndMap(false);
+
+            Layer lyr = _layer;
             if (lyr != null)
             {
                 lyr.Name = txtLayerName.Text;
-                m_tabIndex = tabControl1.SelectedIndex;
+                _tabIndex = tabControl1.SelectedIndex;
 
                 if (!chkRedrawMap.Checked)      // we presume here that the map is in actual state in case the checkbox is set
                 {
-                    m_legend.Map.Redraw();
-                    m_legend.Refresh();
+                    _legend.Map.Redraw();
+                    _legend.Refresh();
                 }
 
-                Layer layer = m_legend.Layers.ItemByHandle(m_layerHandle);
-                m_settings.ShowLayerPreview = chkLayerPreview.Checked;
-                m_settings.UpdateMapAtOnce = chkRedrawMap.Checked;
-                m_settings.Comments = txtComments.Text;
+                Layer layer = _legend.Layers.ItemByHandle(_layerHandle);
+                _settings.ShowLayerPreview = chkLayerPreview.Checked;
+                _settings.UpdateMapAtOnce = chkRedrawMap.Checked;
+                _settings.Comments = txtComments.Text;
 
-                axMap1.RemoveAllLayers();
-                if (sfPreview != null)
-                {
-                    sfPreview.Close();
-                    sfPreview = null;
-                }
+                axMap1.RemoveLayerWithoutClosing(0);
             }
         }
 
@@ -381,7 +390,7 @@ namespace MapWindow.Legend.Forms
             // categories
             toolTip1.SetToolTip(lstFields1, "List of fields from the attribute table");
             toolTip1.SetToolTip(udNumCategories, "Specifies the number of classes to be generated");
-            toolTip1.SetToolTip(chkUniqueValues, "A separate category will be generated for every unique value of the field");
+            toolTip1.SetToolTip(chkUniqueValues, "A separate category will be generated for every unique lock of the field");
             toolTip1.SetToolTip(icbCategories, "List of available color schemes. \nNew color schemes can be added by clicking <...> button");
             toolTip1.SetToolTip(chkSetGradient, "Sets color gradient for particular shapes");
             toolTip1.SetToolTip(chkRandomColors, "Chooses the colors from color scheme randomly");
@@ -414,39 +423,31 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void CancelChanges()
         {
-            MapWinGIS.Map map = m_legend.Map;
+            var map = _legend.Map;
             if (map != null)
             {
-                string state = map.SerializeLayer(m_layerHandle);
+                string state = map.SerializeLayer(_layerHandle);
 
-                if (state != m_initState)
+                if (state != _initState)
                 {
                     // label and chart data must not be serialized
-                    tkSavingMode mode1 = m_shapefile.Labels.SavingMode;
-                    tkSavingMode mode2 = m_shapefile.Charts.SavingMode;
+                    tkSavingMode mode1 = _shapefile.Labels.SavingMode;
+                    tkSavingMode mode2 = _shapefile.Charts.SavingMode;
 
-                    m_shapefile.Labels.SavingMode = tkSavingMode.modeNone;
-                    m_shapefile.Charts.SavingMode = tkSavingMode.modeNone;
+                    _shapefile.Labels.SavingMode = tkSavingMode.modeNone;
+                    _shapefile.Charts.SavingMode = tkSavingMode.modeNone;
 
-                    bool res = map.DeserializeLayer(m_layerHandle, m_initState);
+                    bool res = map.DeserializeLayer(_layerHandle, _initState);
 
-                    m_shapefile.Labels.SavingMode = mode1;
-                    m_shapefile.Charts.SavingMode = mode2;
+                    _shapefile.Labels.SavingMode = mode1;
+                    _shapefile.Charts.SavingMode = mode2;
 
-                    m_legend.Map.Redraw();
-                    //Globals.Legend.Refresh();
+                    _legend.Map.Redraw();
+                    _legend.Refresh();
                 }
             }
 
-            //while (m_mapWin.View.IsMapLocked)
-            //{
-            //    m_mapWin.View.UnlockMap();
-            //}
-
-            //while (Globals.Legend.Locked)
-            //{
-            //    Globals.Legend.Unlock();
-            //}
+            LockLegendAndMap(false);
         }
 
         /// <summary>
@@ -454,38 +455,28 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnSaveChanges_Click(object sender, EventArgs e)
         {
-            if (m_stateChanged)
+            if (_stateChanged)
             {
                 GUI2Settings(null, null);
 
                 // triggering redraw
                 if (!chkRedrawMap.Checked)
                 {
-                    MapWinGIS.Map map = m_legend.Map;
-                    
-                    //while (m_mapWin.View.IsMapLocked)
-                    //{
-                    //    m_mapWin.View.UnlockMap();
-                    //}
+                    Map map = _legend.Map;
 
-                    //while (Globals.Legend.Locked)
-                    //{
-                    //    Globals.Legend.Unlock();
-                    //}
+                    LockLegendAndMap(false);
                     
-                    //m_legend.AxMap.Redraw();
-                    //Globals.Legend.Refresh();
+                    _legend.Map.Redraw();
+                    _legend.Refresh();
                     Application.DoEvents();
 
-                    //m_legend.AxMap.LockWindow(tkLockMode.lmLock);
-                    //m_mapWin.View.LockMap();
-                    //Globals.Legend.Lock();
+                    LockLegendAndMap(true);
                 }
 
                 // saving new state
-                m_initState = SaveState();
+                _initState = SaveState();
 
-                m_stateChanged = false;
+                _stateChanged = false;
                 btnSaveChanges.Enabled = false;
 
                 //m_mapWin.Project.Modified = true;
@@ -497,23 +488,15 @@ namespace MapWindow.Legend.Forms
         /// </summary>
         private void btnOk_Click(object sender, EventArgs e)
         {
-            if (m_initState != SaveState())
+            if (_initState != SaveState())
             {
                 //m_mapWin.Project.Modified = true;
             }
-            
-            //while (m_mapWin.View.IsMapLocked)
-            //{
-            //    m_mapWin.View.UnlockMap();
-            //}
 
-            //while (Globals.Legend.Locked)
-            //{
-            //    Globals.Legend.Unlock();
-            //}
+            LockLegendAndMap(false);
             
             // saves options for default loading behavior
-            Globals.SaveLayerOptions(m_layerHandle);
+            Globals.SaveLayerOptions(_layerHandle);
         }
 
         /// <summary>
@@ -522,20 +505,20 @@ namespace MapWindow.Legend.Forms
         private string SaveState()
         {
             string state = "";
-            MapWinGIS.Map map = m_legend.Map;
+            var map = _legend.Map;
             if (map != null)
             {
                 // serializing for undo (label and chart data must not be serialized)
-                tkSavingMode mode1 = m_shapefile.Labels.SavingMode;
-                tkSavingMode mode2 = m_shapefile.Charts.SavingMode;
+                tkSavingMode mode1 = _shapefile.Labels.SavingMode;
+                tkSavingMode mode2 = _shapefile.Charts.SavingMode;
 
-                m_shapefile.Labels.SavingMode = tkSavingMode.modeNone;
-                m_shapefile.Charts.SavingMode = tkSavingMode.modeNone;
+                _shapefile.Labels.SavingMode = tkSavingMode.modeNone;
+                _shapefile.Charts.SavingMode = tkSavingMode.modeNone;
 
-                state = map.SerializeLayer(m_layerHandle);
+                state = map.SerializeLayer(_layerHandle);
 
-                m_shapefile.Labels.SavingMode = mode1;
-                m_shapefile.Charts.SavingMode = mode2;
+                _shapefile.Labels.SavingMode = mode1;
+                _shapefile.Charts.SavingMode = mode2;
             }
             return state;
         }
