@@ -159,7 +159,7 @@ public:
 	afx_msg BSTR GetErrorMsg(long ErrorCode);
 	afx_msg long GetLayerPosition(long LayerHandle);
 	afx_msg long GetLayerHandle(long LayerPosition);
-	afx_msg LPDISPATCH GetColorScheme(long LayerHandle);
+	afx_msg IGridColorScheme* GetColorScheme(long LayerHandle);
 	afx_msg VARIANT_BOOL get_Fileame(LONG LayerHandle, BSTR* layerName );
 
 	#pragma endregion
@@ -603,7 +603,6 @@ public:
 	afx_msg DOUBLE GeodesicLength(IShape* polyline);
 	afx_msg DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
 	afx_msg DOUBLE GeodesicArea(IShape* polygon);
-	afx_msg BSTR GetGdalVersion();
 
 	#pragma endregion
 

@@ -857,3 +857,15 @@ STDMETHODIMP CGlobalSettings::put_AutoChooseRenderingHintForLabels(VARIANT_BOOL 
 	m_globalSettings.autoChooseOgrLoadingMode = newVal ? true : false;
 	return S_OK;
 }
+
+// ***************************************************************
+//	get_GdalVersion
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_GdalVersion(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CComBSTR bstr("");
+	CComBSTR bstrOptions("--version");
+	GetUtils()->GDALInfo(bstr, bstrOptions, NULL, retVal);
+	return S_OK;
+}

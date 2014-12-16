@@ -5353,6 +5353,7 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(46)] HRESULT PixelOffsetMode([in] tkPixelOffsetMode newVal);
 	[propget, id(47)] HRESULT AutoChooseRenderingHintForLabels([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(47)] HRESULT AutoChooseRenderingHintForLabels([in] VARIANT_BOOL newVal);
+	[propget, id(48)] HRESULT GdalVersion([out, retval] BSTR* pVal);
 };
 
 [
@@ -5806,12 +5807,9 @@ library MapWinGIS
 			[id(11)] double ExtentPad;
 			[id(12)] long ExtentHistory;
 			[id(13)] BSTR Key;
-			[id(15)] IDispatch* GlobalCallback;
 			[id(16), readonly] long NumLayers;
-			[id(17)] IDispatch* Extents;
 			[id(18), readonly] long LastErrorCode;
 			[id(19)] tkLockMode IsLocked;
-			
 			[id(118)] VARIANT_BOOL SendOnDrawBackBuffer;
 			[id(151)] VARIANT_BOOL UseSeamlessPan;
 			[id(152)] DOUBLE MouseWheelSpeed;
@@ -5829,7 +5827,6 @@ library MapWinGIS
 			[id(243), readonly] IIdentifier* Identifier;
 			[id(235), readonly] IShapeEditor* ShapeEditor;
 			[id(196), readonly] IMeasuring* Measuring;
-			[id(250), readonly] BSTR GdalVersion;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;
@@ -5842,7 +5839,11 @@ library MapWinGIS
 			// NOTE - ClassWizard will maintain method information here.
 			//    Use extreme caution when editing this section.
 			//{{AFX_ODL_METHOD(CMapView)
-			
+			[id(15), propput, nonbrowsable] void GlobalCallback(IDispatch* nNewValue);
+			[id(15), propget, nonbrowsable] IDispatch* GlobalCallback();
+			[id(17), propput, nonbrowsable] void Extents(IDispatch* nNewValue);
+			[id(17), propget, nonbrowsable] IDispatch* Extents();
+
 #define REDRAW_API		
 #ifdef REDRAW_API	
 			[id(21)] void Redraw();
@@ -5946,7 +5947,8 @@ library MapWinGIS
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
-			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
+			[id(48)] IGridColorScheme* GetColorScheme(long LayerHandle);
+			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
 #endif 
 
 #define DRAWING_API
@@ -6016,7 +6018,7 @@ library MapWinGIS
 			
 			[id(81), propget] float ImageLayerPercentTransparent(long LayerHandle);
 			[id(81), propput] void ImageLayerPercentTransparent(long LayerHandle, float newValue);
-			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
+			
 			[id(94)] void UpdateImage(LONG LayerHandle);
 			[id(93), propget] BSTR GridFileName(LONG LayerHandle);
 			[id(93), propput] void GridFileName(LONG LayerHandle, BSTR newVal);
@@ -6141,9 +6143,9 @@ library MapWinGIS
 		
 #define SNAPSHOT_API
 #ifdef SNAPSHOT_API
-			[id(40)] IDispatch* SnapShot(IDispatch* BoundBox);
-			[id(136)] IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
-			[id(153)] IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
+			[id(40)] IImage* SnapShot(IDispatch* BoundBox);
+			[id(136)] IImage* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
+			[id(153)] IImage* SnapShot3(double left, double right, double top, double bottom, long Width);
 			[id(159)] VARIANT_BOOL SnapShotToDC(PVOID hdc, IExtents* Extents, long Width);
 			[id(202)] VARIANT_BOOL SnapShotToDC2(PVOID hdc, IExtents* Extents, LONG Width, float OffsetX, float OffsetY, 
 												 float ClipX, float ClipY, float clipWidth, float clipHeight);
@@ -6260,7 +6262,7 @@ library MapWinGIS
 			[id(13)] void TilesLoaded(VARIANT_BOOL snapshot, BSTR key);
 			[id(14)] void MeasuringChanged(tkMeasuringAction action);
 			[id(16)] void BeforeShapeEdit(LONG LayerHandle, LONG ShapeIndex, tkMwBoolean* Cancel);
-			[id(17)] void ValidateShape(LONG LayerHandle, IDispatch* Shape, tkMwBoolean* Cancel);
+			[id(17)] void ValidateShape(LONG LayerHandle, IShape* Shape, tkMwBoolean* Cancel);
 			[id(18)] void AfterShapeEdit(tkUndoOperation Operation, LONG LayerHandle, LONG ShapeIndex);
 			[id(19)] void ChooseLayer(double xProj, double yProj, LONG* LayerHandle);
 			[id(21)] void ShapeValidationFailed(BSTR ErrorMessage);

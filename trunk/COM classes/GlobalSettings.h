@@ -155,6 +155,7 @@ public:
 	STDMETHOD(put_PixelOffsetMode)(tkPixelOffsetMode newVal);
 	STDMETHOD(get_AutoChooseRenderingHintForLabels)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AutoChooseRenderingHintForLabels)(VARIANT_BOOL newVal);
+	STDMETHOD(get_GdalVersion)(BSTR* retVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)
