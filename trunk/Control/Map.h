@@ -159,7 +159,7 @@ public:
 	afx_msg BSTR GetErrorMsg(long ErrorCode);
 	afx_msg long GetLayerPosition(long LayerHandle);
 	afx_msg long GetLayerHandle(long LayerPosition);
-	afx_msg IGridColorScheme* GetColorScheme(long LayerHandle);
+	afx_msg LPDISPATCH GetColorScheme(long LayerHandle);
 	afx_msg VARIANT_BOOL get_Fileame(LONG LayerHandle, BSTR* layerName );
 
 	#pragma endregion

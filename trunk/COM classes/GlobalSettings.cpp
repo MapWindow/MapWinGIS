@@ -869,3 +869,19 @@ STDMETHODIMP CGlobalSettings::get_GdalVersion(BSTR* retVal)
 	GetUtils()->GDALInfo(bstr, bstrOptions, NULL, retVal);
 	return S_OK;
 }
+
+// ***************************************************************
+//	OgrLayerForceUpdateMode
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_OgrLayerForceUpdateMode(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.ogrLayerForceUpdateMode ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_OgrLayerForceUpdateMode(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.ogrLayerForceUpdateMode = newVal ? true : false;
+	return S_OK;
+}

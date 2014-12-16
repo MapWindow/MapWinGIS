@@ -5354,6 +5354,8 @@ interface IGlobalSettings : IDispatch{
 	[propget, id(47)] HRESULT AutoChooseRenderingHintForLabels([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(47)] HRESULT AutoChooseRenderingHintForLabels([in] VARIANT_BOOL newVal);
 	[propget, id(48)] HRESULT GdalVersion([out, retval] BSTR* pVal);
+	[propget, id(49)] HRESULT OgrLayerForceUpdateMode([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(49)] HRESULT OgrLayerForceUpdateMode([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -5947,7 +5949,7 @@ library MapWinGIS
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
-			[id(48)] IGridColorScheme* GetColorScheme(long LayerHandle);
+			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
 #endif 
 

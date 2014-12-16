@@ -12,8 +12,18 @@ GDALDataset* GdalHelper::OpenOgrDatasetA(char* filenameUtf8, bool forUpdate)
 
 	GDALAllRegister();
 	int method = GDAL_OF_VECTOR;
-	if (forUpdate) method |= GDAL_OF_UPDATE;
+
+	bool forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
+	if (forUpdate || forceUpdate) 
+		method |= GDAL_OF_UPDATE;
+	
 	GDALDataset* dt = (GDALDataset *)GDALOpenEx(filenameUtf8, method, NULL, NULL, NULL);
+	
+	if (!dt && forceUpdate)  {	// let's try again without the update flag
+		method = GDAL_OF_VECTOR;
+		dt = (GDALDataset *)GDALOpenEx(filenameUtf8, method, NULL, NULL, NULL);
+	}
+	
 	m_globalSettings.SetGdalUtf8(false);
 	return dt;
 }
@@ -32,7 +42,13 @@ GDALDataset* GdalHelper::OpenOgrDatasetW(CStringW filenameW, bool forUpdate)
 // **************************************************************
 bool GdalHelper::CanOpenAsOgrDataset(CStringW filename)
 {
+	bool forceUpdate = m_globalSettings.ogrLayerForceUpdateMode;
+	m_globalSettings.ogrLayerForceUpdateMode = false;
+
 	GDALDataset* dt = GdalHelper::OpenOgrDatasetW(filename, false);
+
+	m_globalSettings.ogrLayerForceUpdateMode = forceUpdate;
+
 	bool success = dt != NULL;
 	if (dt)
 	{

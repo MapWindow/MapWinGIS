@@ -156,6 +156,8 @@ public:
 	STDMETHOD(get_AutoChooseRenderingHintForLabels)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AutoChooseRenderingHintForLabels)(VARIANT_BOOL newVal);
 	STDMETHOD(get_GdalVersion)(BSTR* retVal);
+	STDMETHOD(get_OgrLayerForceUpdateMode)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_OgrLayerForceUpdateMode)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

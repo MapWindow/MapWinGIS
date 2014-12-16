@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	bool ogrLayerForceUpdateMode;
 	bool autoChooseRenderingHintForLabels;
 	long maxReprojectionShapeCount;
 	ICallback* callback;
@@ -80,6 +81,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		ogrLayerForceUpdateMode = false;
 		autoChooseRenderingHintForLabels = true;
 		suppressGdalErrors = false;
 		pixelOffsetMode = pomDefault;
