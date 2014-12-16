@@ -5615,6 +5615,10 @@ interface IFileManager : IDispatch{
 		[in, optional, defaultvalue(0)] VARIANT_BOOL forUpdate,
 		[out, retval] IOgrLayer** retVal);
 	[id(26)] HRESULT OpenVectorDatasource([in] BSTR Filename, [out, retval] IOgrDatasource** retVal);
+	[propget, id(27)] HRESULT CdlgFilter([out, retval] BSTR* pVal);
+	[propget, id(28)] HRESULT CdlgRasterFilter([out, retval] BSTR* pVal);
+	[propget, id(29)] HRESULT CdlgVectorFilter([out, retval] BSTR* pVal);
+	[propget, id(30)] HRESULT SupportedGdalFormats([out, retval] BSTR* pVal);
 };
 
 
@@ -5825,6 +5829,7 @@ library MapWinGIS
 			[id(243), readonly] IIdentifier* Identifier;
 			[id(235), readonly] IShapeEditor* ShapeEditor;
 			[id(196), readonly] IMeasuring* Measuring;
+			[id(250), readonly] BSTR GdalVersion;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;

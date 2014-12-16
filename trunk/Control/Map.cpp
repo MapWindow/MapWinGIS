@@ -843,3 +843,15 @@ void CMapView::StartDragging(DraggingOperation operation)
 	SetCapture();
 }
 
+// ***************************************************************
+//	GetGdalVersion
+// ***************************************************************
+BSTR CMapView::GetGdalVersion()
+{
+	CComBSTR bstr("");
+	CComBSTR bstrOptions("--version");
+	BSTR result;
+	GetUtils()->GDALInfo(bstr, bstrOptions, NULL, &result);
+	return result;
+}
+

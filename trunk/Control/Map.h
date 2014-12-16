@@ -603,6 +603,7 @@ public:
 	afx_msg DOUBLE GeodesicLength(IShape* polyline);
 	afx_msg DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
 	afx_msg DOUBLE GeodesicArea(IShape* polygon);
+	afx_msg BSTR GetGdalVersion();
 
 	#pragma endregion
 

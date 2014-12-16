@@ -406,6 +406,7 @@ CStringA GdalHelper::GetMetadataNameString(tkGdalDriverMetadata metadata)
 // ******************************************************
 void GdalHelper::DumpDriverInfo()
 {
+	GDALAllRegister();
 	GDALDriverManager* manager = GetGDALDriverManager();
 	manager->AutoLoadDrivers();
 	int count = manager->GetDriverCount();
@@ -422,7 +423,7 @@ void GdalHelper::DumpDriverInfo()
 		{
 			Debug::WriteLine("GDAL Driver: %s", description);
 		}
-		GetMetaData(driver);
+		//GetMetaData(driver);
 	}
 }
 

@@ -714,3 +714,78 @@ STDMETHODIMP CFileManager::OpenVectorDatasource(BSTR Filename, IOgrDatasource** 
 
 	return S_OK;
 }
+
+//****************************************************************
+//			GetFilter()
+//****************************************************************
+CString CFileManager::GetFilter(OpenFileDialogFilter filter)
+{
+	switch (filter)
+	{
+		case FilterImage:
+			return "Image Formats|hdr.adf;*.asc;*.bt;*.bil;*.bmp;*.dem;*.ecw;*.img;*.gif;*.map;*.jp2;*.jpg;*.sid;*.pgm;*.pnm;*.png;*.ppm;*.vrt;*.tif;*.ntf|";
+		case FilterGrid:
+			return "Grid Formats|sta.adf;*.bgd;*.asc;*.tif;????cel0.ddf;*.arc;*.aux;*.pix;*.dem;*.dhm;*.dt0;*.img;*.dt1;*.bil;*.nc|";
+		case FilterOgr:
+			// TODO: add more formats; this list is just for a start;
+			return "Vector formats|*.dgn;*.dxf;*.gml;*.kml;*.mif;*.tab;*.shp|";
+		case FilterShapefile:
+			return "ESRI Shapefiles (*.shp)|*.shp|";
+		case FilterAll:
+			return "All files|*.*";
+	}
+	return "";
+}
+
+//****************************************************************
+//			get_CdlgFilter()
+//****************************************************************
+STDMETHODIMP CFileManager::get_CdlgFilter(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = GetFilter(FilterShapefile) + 
+				GetFilter(FilterOgr) +
+				GetFilter(FilterImage) +
+				GetFilter(FilterGrid) +
+				GetFilter(FilterAll);
+	*pVal = A2BSTR(s);
+	return S_OK;
+}
+
+//****************************************************************
+//			get_CdlgRasterFilter()
+//****************************************************************
+STDMETHODIMP CFileManager::get_CdlgRasterFilter(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = GetFilter(FilterImage) +
+				GetFilter(FilterGrid) +
+				GetFilter(FilterAll);
+	*pVal = A2BSTR(s);
+	return S_OK;
+}
+
+//****************************************************************
+//			get_CdlgVectorFilter()
+//****************************************************************
+STDMETHODIMP CFileManager::get_CdlgVectorFilter(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CString s = GetFilter(FilterShapefile) +
+				GetFilter(FilterOgr) +
+				GetFilter(FilterAll);
+	*pVal = A2BSTR(s);
+	return S_OK;
+}
+
+//****************************************************************
+//			get_SupportedGdalFormats()
+//****************************************************************
+STDMETHODIMP CFileManager::get_SupportedGdalFormats(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CComBSTR bstr("");
+	CComBSTR bstrOptions("--formats");
+	GetUtils()->GDALInfo(bstr, bstrOptions, NULL, pVal);
+	return S_OK;
+}

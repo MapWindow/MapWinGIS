@@ -95,7 +95,7 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		int len = vsnprintf(buffer, _countof(buffer), format, args);
 		va_end(args);
 		CString s = buffer;
 		return s;
@@ -145,7 +145,7 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		int len = vsnprintf(buffer, _countof(buffer), format, args);
 		va_end(args);
 
 		format = buffer;
@@ -163,7 +163,7 @@ namespace Debug
 		TCHAR buffer[1024];
 		va_list args;
 		va_start(args, format);
-		int len = vsnprintf_s(buffer, _countof(buffer), format, args);
+		int len = vsnprintf(buffer, _countof(buffer), format, args);
 		va_end(args);
 
 		format = buffer;

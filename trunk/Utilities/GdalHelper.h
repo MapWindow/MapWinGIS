@@ -41,8 +41,8 @@ public:
 	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback);
 
 	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
-	void GetMetaData(GDALDriver* driver);
-	void DumpDriverInfo();
+	static void GetMetaData(GDALDriver* driver);
+	static void DumpDriverInfo();
 
 	static char** ReadFile(CStringW filename);
 	static char** SetCompressionRasterOptions(GDALDataset* dataset, char** options);

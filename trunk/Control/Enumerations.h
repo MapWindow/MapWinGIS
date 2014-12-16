@@ -238,4 +238,13 @@ enum DebugTarget
 	DebugForceGdal = 4,
 };
 
+enum OpenFileDialogFilter
+{
+	FilterImage = 0, 
+	FilterGrid = 1, 
+	FilterOgr = 2,
+	FilterShapefile = 3,
+	FilterAll = 4,
+};
+
 # endif
