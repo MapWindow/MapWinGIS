@@ -5934,6 +5934,7 @@ library MapWinGIS
 			[id(90), propget] IDispatch* GetObject(long LayerHandle);
 			[id(238), propget] VARIANT_BOOL LayerVisibleAtCurrentScale(LONG LayerHandle);
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
+			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
 #endif 
 
 #define DRAWING_API
@@ -5945,23 +5946,27 @@ library MapWinGIS
 			[id(51)] void DrawLine(double x1, double y1, double x2, double y2, long pixelWidth, OLE_COLOR color);
 			[id(52)] void DrawCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
 			[id(53)] void DrawPolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill);
+			[id(134)] void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short Width);
+			[id(135)] void DrawWideCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, short Width);
 			[id(115)] void DrawLineEx(LONG LayerHandle, DOUBLE x1, DOUBLE y1, DOUBLE x2, DOUBLE y2, LONG pixelWidth, OLE_COLOR color);
 			[id(116)] void DrawPointEx(LONG LayerHandle, DOUBLE x, DOUBLE y, LONG pixelSize, OLE_COLOR color);
 			[id(117)] void DrawCircleEx(LONG LayerHandle, DOUBLE x, DOUBLE y, DOUBLE pixelRadius, OLE_COLOR color, VARIANT_BOOL fill);
-			[id(120)] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
-			[id(134)] void DrawWidePolygon(VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short Width);
-			[id(135)] void DrawWideCircle(double x, double y, double pixelRadius, OLE_COLOR color, VARIANT_BOOL fill, short Width);
 			[id(155)] void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
 			[id(160)] void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
 			[id(161)] void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
+			[id(120)] void SetDrawingLayerVisible(LONG LayerHandle, VARIANT_BOOL Visible);
 			[id(157), propget] ILabels* DrawingLabels(long DrawingLayerIndex);
 			[id(157), propput] void DrawingLabels(long DrawingLayerIndex, ILabels* newVal);
 			[id(83), propget] BSTR DrawingKey(long DrawHandle);
 			[id(83), propput] void DrawingKey(long DrawHandle, BSTR lpszNewValue);
+			[id(245)] LONG DrawLabel(BSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
+			[id(246)] LONG DrawLabelEx(LONG drawHandle, BSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
+			[id(121)] void ClearDrawingLabels(long drawHandle);
+			[id(130), propput] void DrawingLabelsVisible(long drawHandle, VARIANT_BOOL bNewValue);
 #endif
 
-#ifdef OLD_API
-
+#ifdef OLD_API   // excluded from public API in v4.9.3 Beta
+			
 #define SHAPE_LAYER_API
 #ifdef SHAPE_LAYER_API
 			[id(58), propget, hidden] OLE_COLOR ShapeLayerFillColor(long LayerHandle);
@@ -5996,7 +6001,7 @@ library MapWinGIS
 
 #define IMAGE_LAYER_API
 #ifdef IMAGE_LAYER_API
-			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
+			
 			[id(81), propget] float ImageLayerPercentTransparent(long LayerHandle);
 			[id(81), propput] void ImageLayerPercentTransparent(long LayerHandle, float newValue);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
@@ -6030,10 +6035,10 @@ library MapWinGIS
 
 #define DRAWING_LABELS_API
 #ifdef DRAWING_LABELS_API
-			[id(121)] void ClearDrawingLabels(long drawHandle);
-			[id(122)] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
+			
 			[id(123)] void AddDrawingLabelEx(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification, double Rotation);
 			[id(124)] void AddDrawingLabel(long drawHandle, BSTR Text, OLE_COLOR Color, double x, double y, tkHJustification hJustification);
+			[id(122)] void DrawingFont(long drawHandle, BSTR FontName, long FontSize);
 			[id(125), propget] long DrawingLabelsOffset(long drawHandle);
 			[id(125), propput] void DrawingLabelsOffset(long drawHandle, long Offset);
 			[id(126), propget] VARIANT_BOOL DrawingLabelsScale(long drawHandle);
@@ -6045,12 +6050,12 @@ library MapWinGIS
 			[id(129), propget] VARIANT_BOOL UseDrawingLabelCollision(long drawHandle);
 			[id(129), propput] void UseDrawingLabelCollision(long drawHandle, VARIANT_BOOL bNewValue);
 			[id(130), propget] VARIANT_BOOL DrawingLabelsVisible(long drawHandle);
-			[id(130), propput] void DrawingLabelsVisible(long drawHandle, VARIANT_BOOL bNewValue);
+			
 #endif
 
 #define OBSOLETE_API
 #ifdef OBSOLETE_API
-			// excluded from public API in v4.9.3 Beta
+			
 			[id(95), propput, nonbrowsable] void SerialNumber(BSTR nNewValue);
 			[id(95), propget, nonbrowsable] BSTR SerialNumber();
 			[id(96), propput, nonbrowsable] void LineSeparationFactor(long nNewValue);
@@ -6120,7 +6125,7 @@ library MapWinGIS
 			[id(80), propput] void ShapeVisible(long LayerHandle, long Shape, VARIANT_BOOL bNewValue);
 			[id(150)] VARIANT_BOOL AdjustLayerExtents(long LayerHandle);
 #endif
-#endif
+#endif  // end of excluded from public API in v4.9.3 Beta
 		
 #define SNAPSHOT_API
 #ifdef SNAPSHOT_API

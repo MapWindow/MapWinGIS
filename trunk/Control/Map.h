@@ -598,7 +598,8 @@ public:
 	afx_msg void OnMouseToleranceChanged();
 	afx_msg void OnIdentifierModeChanged();
 	afx_msg bool Undo() { return UndoCore(false); }
-	
+	afx_msg LONG DrawLabel(LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
+	afx_msg LONG DrawLabelEx(LONG layerHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation);
 	#pragma endregion
 
 	//}}AFX_DISPATCH

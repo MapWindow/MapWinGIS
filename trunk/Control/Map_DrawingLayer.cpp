@@ -635,6 +635,35 @@ void CMapView::ClearDrawing(long Drawing)
 //STAN 30.09.2006
 //Label handing for Drawings
 
+// ***************************************************************
+//		DrawLabel()
+// ***************************************************************
+LONG CMapView::DrawLabel(LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation)
+{
+	return DrawLabelEx(_currentDrawing, text, x, y, rotation);
+}
+
+// ***************************************************************
+//		DrawLabelEx()
+// ***************************************************************
+LONG CMapView::DrawLabelEx(LONG drawHandle, LPCTSTR text, DOUBLE x, DOUBLE y, DOUBLE rotation)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (IsValidDrawList(drawHandle))
+	{
+		if (_allDrawLists[drawHandle]->m_labels) 
+		{
+			CComBSTR bstr(text);
+			_allDrawLists[drawHandle]->m_labels->AddLabel(bstr, x, y, rotation);
+			OnDrawingLayersChanged();
+			return drawHandle;
+		}
+	}
+	else
+		ErrorMessage(tkINVALID_DRAW_HANDLE);
+	return -1;
+}
+
 // *****************************************************************
 //		AddDrawingLabel()
 // *****************************************************************
@@ -1094,4 +1123,5 @@ void CMapView::SetDrawingLabels(long DrawingLayerIndex, ILabels* newVal)
 		ErrorMessage(tkINVALID_DRAW_HANDLE);
 }
 #pragma endregion
+
 
