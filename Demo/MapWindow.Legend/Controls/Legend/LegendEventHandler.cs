@@ -85,17 +85,18 @@ namespace MapWindow.Legend.Controls.Legend
             MapWinGIS.Shapefile sf = m_legend.m_Map.get_Shapefile(Handle);
             if (sf != null)
             {
-                Form form = new LabelStyleForm(m_legend, sf, Handle);
-                if (form.ShowDialog() == DialogResult.OK)
-                {
-                    // do something
+                using (Form form = new LabelStyleForm(m_legend, sf, Handle))
+                { 
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        m_legend.Refresh();
+                    }
                 }
-                form.Dispose();
             }
         }
 
         /// <summary>
-        /// Hanlding the clicking on the category preview
+        /// Handling the clicking on the category preview
         /// </summary>
         void m_legend_LayerCategoryClicked(int Handle, int Category)
         {

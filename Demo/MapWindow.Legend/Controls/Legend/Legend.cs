@@ -2431,7 +2431,7 @@ namespace MapWindow.Legend.Controls.Legend
         }
 
         /// <summary>
-        /// Draws shapefile category. It's asumed here that GetHDC and ReleaseHDC calls are made by caller
+        /// Draws shapefile category. It's assumed here that GetHDC and ReleaseHDC calls are made by caller
         /// </summary>
         private void DrawShapefileCategorySymbology(Graphics DrawTool, MapWinGIS.ShapeDrawingOptions options, Layer layer,
                                            Rectangle bounds, int top, int maxWidth, int index, IntPtr hdc)

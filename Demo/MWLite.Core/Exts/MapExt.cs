@@ -24,6 +24,23 @@ namespace MWLite.Core.Exts
             string name = map.get_LayerName(layerHandle);
             s += "Layer: " + name + "\n";
             s += "Shape ID: " + shapeIndex + "\n\n";
+
+
+            var shp = sf.Shape[shapeIndex];
+            if (shp != null && map.ShapeEditor.IsUsingEllipsoid)
+            {
+                var type = shp.ShapeType2D;
+                if (type == ShpfileType.SHP_POLYLINE)
+                {
+                    s += "Length, m: " + map.GeodesicLength(shp).ToString("0.0") + "\n\n";
+                }
+                if (type == ShpfileType.SHP_POLYGON)
+                {
+                    s += "Perimeter, m: " + map.GeodesicLength(shp).ToString("0.0") + "\n";
+                    s += "Area, ha: " + (map.GeodesicArea(shp) / 10000).ToString("0.0") + "\n\n";
+                }
+            }
+
             s += "Attributes:\n";
 
             for (int i = 0; i < Math.Min(sf.NumFields, 10); i++)
@@ -67,7 +84,19 @@ namespace MWLite.Core.Exts
                     return 0.0;
             }
         }
+
+        public static string GetLayerFilter(this AxMap map, LayerType layerType)
+        {
+            switch (layerType)
+            {
+                case LayerType.All:
+                    return map.FileManager.CdlgFilter;
+                case LayerType.Raster:
+                return map.FileManager.CdlgRasterFilter;
+                case LayerType.Vector:
+                return map.FileManager.CdlgVectorFilter;
+            }
+            return "All files|*.*";
+        }
     }
-
-
 }

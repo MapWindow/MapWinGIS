@@ -55,7 +55,6 @@ namespace MWLite.GUI.Forms
         private void InitMap()
         {
             //axMap1.Tiles.SetProxy("127.0.0.1", 8888);
-            
             axMap1.GrabProjectionFromData = true;
             axMap1.CursorMode = tkCursorMode.cmZoomIn;
             axMap1.SendSelectBoxFinal = true;
@@ -83,9 +82,17 @@ namespace MWLite.GUI.Forms
             axMap1.ProjectionMismatch += axMap1_ProjectionMismatch;
             axMap1.LayerReprojected += axMap1_LayerReprojected;
             axMap1.LayerAdded += axMap1_LayerAdded;
+            axMap1.GridOpened += axMap1_GridOpened;
             axMap1.LayerRemoved += axMap1_LayerRemoved;
             axMap1.BackgroundLoadingStarted += axMap1_BackgroundLoadingStarted;
             axMap1.BackgroundLoadingFinished += axMap1_BackgroundLoadingFinished;
+        }
+
+        void axMap1_GridOpened(object sender, _DMapEvents_GridOpenedEvent e)
+        {
+            Debug.Print("Grid is opened: " + e.gridFilename);
+            Debug.Print("Using proxy: " + e.isUsingProxy);
+            Debug.Print("BandIndex: " + e.bandIndex);
         }
 
         void axMap1_BackgroundLoadingFinished(object sender, _DMapEvents_BackgroundLoadingFinishedEvent e)
@@ -130,7 +137,7 @@ namespace MWLite.GUI.Forms
         {
             if (axMap1.CursorMode == tkCursorMode.cmSelection)
             {
-                MessageHelper.Info("No layer is selected.");
+                MessageHelper.Info("No shapefile layer is selected.");
             }
         }
 

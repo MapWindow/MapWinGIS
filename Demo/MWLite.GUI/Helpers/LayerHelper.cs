@@ -10,31 +10,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using MWLite.Core.Exts;
 
 namespace MWLite.GUI.Helpers
 {
     internal static class LayerHelper
     {
-        private static string GetLayerFilter(LayerType layerType)
-        {
-            string s = "";
-            switch(layerType)
-            {
-                case LayerType.Vector:
-                    var sf = new Shapefile();
-                    s += sf.CdlgFilter;
-                    break;
-                case LayerType.Raster:
-                    var gr = new Grid();
-                    var im = new Image();
-                    s += gr.CdlgFilter + "|" + im.CdlgFilter;
-                    break;
-            }
-            if (!string.IsNullOrWhiteSpace(s))
-                s += "|";
-            s +=  "All formats|*.*";
-            return s;
-        }
+       
 
         public static void AddLayer(object layer, string layerName)
         {
@@ -58,12 +40,14 @@ namespace MWLite.GUI.Helpers
 
         public static void AddLayer(LayerType layerType)
         {
-            var dlg = new OpenFileDialog {Filter = GetLayerFilter(layerType), Multiselect = true};
+            var map = App.Map;
+
+            var dlg = new OpenFileDialog { Filter = map.GetLayerFilter(layerType), Multiselect = true };
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 var legend = App.Legend;
-                var map = App.Map;
+                
                 legend.Lock();
                 map.LockWindow(tkLockMode.lmLock);
 

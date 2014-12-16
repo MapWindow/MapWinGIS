@@ -72,7 +72,7 @@
             // 
             this.ctxHotTracking.Name = "ctxHotTracking";
             this.ctxHotTracking.Size = new System.Drawing.Size(152, 22);
-            this.ctxHotTracking.Text = "Hot Tracking";
+            this.ctxHotTracking.Text = "Highlight shapes";
             this.ctxHotTracking.Click += new System.EventHandler(this.ctxHotTracking_Click);
             // 
             // ctxShowTooltip
