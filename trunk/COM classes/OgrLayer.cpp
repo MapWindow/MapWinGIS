@@ -1412,3 +1412,22 @@ STDMETHODIMP COgrLayer::GenerateCategories(BSTR FieldName, tkClassificationType 
 	delete categories;
 	return S_OK;
 }
+
+// *************************************************************
+//		DriverName()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_DriverName(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!CheckState())
+	{
+		*pVal = A2BSTR("");
+		return S_OK;
+	}
+	else
+	{
+		*pVal = A2BSTR(_dataset->GetDriverName());   // no need to convert from UTF-8: it's in ASCII
+		return S_OK;
+	}
+	return S_OK;
+}

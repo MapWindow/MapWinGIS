@@ -78,6 +78,9 @@ CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollis
 // *********************************************************************
 void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 {
+	if (m_globalSettings.forceHideLabels)
+		return;
+
 	long numLabels;
 	LabelsClass->get_Count(&numLabels);
 	if (numLabels == 0)

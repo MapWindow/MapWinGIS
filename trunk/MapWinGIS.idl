@@ -5356,6 +5356,8 @@ interface IGlobalSettings : IDispatch{
 	[propget, id(48)] HRESULT GdalVersion([out, retval] BSTR* pVal);
 	[propget, id(49)] HRESULT OgrLayerForceUpdateMode([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(49)] HRESULT OgrLayerForceUpdateMode([in] VARIANT_BOOL newVal);
+	[propget, id(50)] HRESULT ForceHideLabels([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(50)] HRESULT ForceHideLabels([in] VARIANT_BOOL newVal);
 };
 
 [
@@ -5724,6 +5726,7 @@ interface IOgrLayer : IDispatch{
 			[in] long numClasses, [in]tkMapColor colorStart, [in] tkMapColor colorEnd, 
 			[in]tkColorSchemeType schemeType, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(45)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
+	[propget, id(46)] HRESULT DriverName([out, retval] BSTR* pVal);
 };
 
 [

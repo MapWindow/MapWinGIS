@@ -885,3 +885,19 @@ STDMETHODIMP CGlobalSettings::put_OgrLayerForceUpdateMode(VARIANT_BOOL newVal)
 	m_globalSettings.ogrLayerForceUpdateMode = newVal ? true : false;
 	return S_OK;
 }
+
+// ***************************************************************
+//		ForceHideLabels
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_ForceHideLabels(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = m_globalSettings.forceHideLabels ? VARIANT_TRUE : VARIANT_FALSE;
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_ForceHideLabels(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.forceHideLabels = newVal ? true : false;
+	return S_OK;
+}

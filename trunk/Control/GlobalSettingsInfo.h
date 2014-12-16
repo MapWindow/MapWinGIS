@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	bool forceHideLabels;
 	bool ogrLayerForceUpdateMode;
 	bool autoChooseRenderingHintForLabels;
 	long maxReprojectionShapeCount;
@@ -81,6 +82,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		forceHideLabels = false;
 		ogrLayerForceUpdateMode = false;
 		autoChooseRenderingHintForLabels = true;
 		suppressGdalErrors = false;
