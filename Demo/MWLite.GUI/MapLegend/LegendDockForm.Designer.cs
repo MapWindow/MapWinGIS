@@ -1,4 +1,5 @@
-﻿namespace MWLite.GUI.MapLegend
+﻿using MWLite.Symbology.LegendControl;
+namespace MWLite.GUI.MapLegend
 {
     partial class LegendDockForm
     {
@@ -42,7 +43,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxRemoveLayer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.legend1 = new MapWindow.Legend.Controls.Legend.Legend();
+            this.legend1 = new Legend();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -173,7 +174,7 @@
         private System.Windows.Forms.ToolStripMenuItem ctxProperties;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private MapWindow.Legend.Controls.Legend.Legend legend1;
+        private Legend legend1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem ctxPostGis;
         private System.Windows.Forms.ToolStripMenuItem ctxImportOgrLayer;

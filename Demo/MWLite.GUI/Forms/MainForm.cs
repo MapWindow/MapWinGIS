@@ -1,6 +1,6 @@
 ﻿using AxMapWinGIS;
-using MapWindow.Legend;
-using MapWindow.Legend.Controls.Legend;
+using MWLite.Symbology;
+using MWLite.Symbology.LegendControl;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.GUI.Classes;

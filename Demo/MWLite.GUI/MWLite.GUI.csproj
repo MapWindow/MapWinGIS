@@ -159,9 +159,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MapWindow.Legend\MapWindow.Legend.csproj">
+    <ProjectReference Include="..\MWLite.Symbology\MWLite.Symbology.csproj">
       <Project>{4a169101-b908-4f1e-bf5a-ff2b551926b7}</Project>
-      <Name>MapWindow.Legend</Name>
+      <Name>MWLite.Symbology</Name>
     </ProjectReference>
     <ProjectReference Include="..\MWLite.Core\MWLite.Core.csproj">
       <Project>{d34e2ea4-6b09-40ee-9829-208c2f27ed8e}</Project>

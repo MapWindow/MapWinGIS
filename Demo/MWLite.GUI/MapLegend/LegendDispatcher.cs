@@ -1,19 +1,20 @@
 ﻿using System.Windows.Forms;
-using MapWindow.Legend.Forms;
-using MapWindow.Legend.Forms.Labels;
+using MWLite.Symbology.Forms;
+using MWLite.Symbology.Forms.Labels;
 using MapWinGIS;
 using MWLite.Core.UI;
 using MWLite.GUI.Forms;
 using MWLite.GUI.Helpers;
+using MWLite.Symbology.LegendControl;
 
 namespace MWLite.GUI.MapLegend
 {
     internal class LegendDispatcher : CommandDispatcher<LegendCommand>
     {
         internal int LayerHandle = -1;
-        private MapWindow.Legend.Controls.Legend.Legend _legend = null;
+        private Legend _legend = null;
 
-        public LegendDispatcher(MapWindow.Legend.Controls.Legend.Legend legend)
+        public LegendDispatcher(Legend legend)
         {
             _legend = legend;
         }

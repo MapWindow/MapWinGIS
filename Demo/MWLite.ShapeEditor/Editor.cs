@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using AxMapWinGIS;
-using MapWindow.Legend;
+using MWLite.Symbology;
 using MWLite.Core;
 using MWLite.ShapeEditor.Forms;
 using MWLite.ShapeEditor.Helpers;

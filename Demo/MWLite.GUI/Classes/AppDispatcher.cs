@@ -1,5 +1,5 @@
 ﻿using System.Windows.Forms;
-using MapWindow.Legend.Controls.Legend;
+using MWLite.Symbology.LegendControl;
 using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.Exts;

@@ -69,9 +69,9 @@
     <Compile Include="WinApi.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MapWindow.Legend\MapWindow.Legend.csproj">
+    <ProjectReference Include="..\MWLite.Symbology\MWLite.Symbology.csproj">
       <Project>{4A169101-B908-4F1E-BF5A-FF2B551926B7}</Project>
-      <Name>MapWindow.Legend</Name>
+      <Name>MWLite.Symbology</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

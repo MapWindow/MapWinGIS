@@ -1,4 +1,5 @@
 ﻿using MapWinGIS;
+using MWLite.Symbology.LegendControl;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
@@ -16,7 +17,7 @@ namespace MWLite.GUI.MapLegend
             legend1.LayerMouseUp += legend1_LayerMouseUp;
         }
 
-        public MapWindow.Legend.Controls.Legend.Legend Legend
+        public Legend Legend
         {
             get { return legend1;  }
         }

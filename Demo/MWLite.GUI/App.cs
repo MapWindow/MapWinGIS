@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AxMapWinGIS;
-using MapWindow.Legend;
+using MWLite.Symbology;
 using MWLite.Core;
 using MWLite.GUI.Classes;
 using MWLite.GUI.Forms;
+using MWLite.Symbology.LegendControl;
 
 namespace MWLite.GUI
 {
@@ -19,7 +20,7 @@ namespace MWLite.GUI
             get { return MainForm.Instance.Map;  }
         }
 
-        public static MapWindow.Legend.Controls.Legend.Legend Legend
+        public static Legend Legend
         {
             get { return MainForm.Instance.Legend; }
         }

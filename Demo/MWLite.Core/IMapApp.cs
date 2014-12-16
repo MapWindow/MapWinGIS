@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using MapWindow.Legend;
-using MapWindow.Legend.Controls.Legend;
+using MWLite.Symbology.LegendControl;
 using MWLite.GUI.Classes;
 
 namespace MWLite.Core

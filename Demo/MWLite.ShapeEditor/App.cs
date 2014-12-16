@@ -1,15 +1,14 @@
-﻿using System;
+﻿using AxMapWinGIS;
+using MapWinGIS;
+using MWLite.Core;
+using MWLite.Symbology.LegendControl;
+using MWLite.ShapeEditor.Forms;
+using MWLite.ShapeEditor.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using AxMapWinGIS;
-using MapWindow.Legend;
-using MapWindow.Legend.Controls.Legend;
-using MapWinGIS;
-using MWLite.Core;
-using MWLite.ShapeEditor.Forms;
-using MWLite.ShapeEditor.UI;
 
 namespace MWLite.ShapeEditor
 {

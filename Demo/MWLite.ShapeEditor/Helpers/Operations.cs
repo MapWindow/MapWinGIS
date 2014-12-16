@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using MapWindow.Legend.Controls.Legend;
+using MWLite.Symbology.LegendControl;
 using MapWinGIS;
 using MWLite.Core.UI;
 using MWLite.ShapeEditor.Operations;
