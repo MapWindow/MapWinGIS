@@ -404,9 +404,7 @@ namespace TestApplication
             this.Progress(msg);
 
             // Also write GDAL version
-            var utils = new Utils();
-            var version = utils.GDALInfo(string.Empty, "--version", this);
-            this.Progress(string.Empty, 100, string.Format("GDAL version: {0}", version));
+            this.Progress(string.Empty, 100, string.Format("GDAL version: {0}", gs.GdalVersion));
         }
 
         /// <summary>

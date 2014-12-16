@@ -84,7 +84,6 @@ namespace TestApplication
                 // Draw something on the map
                 var drawHandle = MyAxMap.NewDrawing(tkDrawReferenceList.dlScreenReferencedList);
                 MyAxMap.DrawCircleEx(drawHandle, 50, 50, 50, 0x0, true);
-                MyAxMap.Redraw2(tkRedrawType.RedrawSkipDataLayers);
                 Application.DoEvents();
                 Thread.Sleep(1000);
 
@@ -2614,10 +2613,10 @@ namespace TestApplication
 
             // Draw label:
             GetRandomPoint(out randomX1, out randomY1);
+            MyAxMap.DrawLabel("My Label", randomX1, randomY1, 45);
             var labels = MyAxMap.get_DrawingLabels(drawHandle);
             if (labels != null)
             {
-                labels.AddLabel("My Label", randomX1, randomY1, 45);
                 labels.FontColor = utils.ColorByName(tkMapColor.Red);
             }
             theForm.Progress("The label is drawn");
