@@ -191,6 +191,7 @@ namespace MapWinGIS
         /// </summary>
         /// <remarks>An instance of the class which implements ICallback interface should be passed.
         /// The class must be implemented by caller.</remarks>
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }

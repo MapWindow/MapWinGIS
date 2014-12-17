@@ -18,7 +18,7 @@ namespace AxMapWinGIS
         /// Gets or sets line separation factor.
         /// </summary>
         /// \deprecated v4.8. Use LinePattern class, and ShapeDrawingOptions.LinePattern property instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int LineSeparationFactor
         {
             get { throw new NotImplementedException(); }
@@ -35,7 +35,7 @@ namespace AxMapWinGIS
         /// <returns>The custom fill stipple as an integer value where the stipple is defined 
         /// by arranging the 32 bits in desired pattern.</returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.FillHatchStyle instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_UDFillStipple(int LayerHandle, int StippleRow)
         {
             throw new NotImplementedException();
@@ -48,11 +48,11 @@ namespace AxMapWinGIS
         /// The stipple is created by setting patterns in the bits contained in each row.</remarks>
         /// <param name="LayerHandle">The handle of the layer for which the fill stipple is to be set. </param>
         /// <param name="StippleRow">The row in the custom stipple for which the pattern is to be set. </param>
-        /// <param name="__p3">The custom fill stipple as an integer value where the stipple is defined 
+        /// <param name="newValue">The custom fill stipple as an integer value where the stipple is defined 
         /// by arranging the 32 bits in desired pattern</param>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.FillHatchStyle instead.
-        /// \removed493 Removed in 4.9.3
-        public void set_UDFillStipple(int LayerHandle, int StippleRow, int __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_UDFillStipple(int LayerHandle, int StippleRow, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -70,7 +70,7 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The handle of the layer for which the user defined shape line stipple is to be set.</param>
         /// <returns>The user defined line stipple.</returns>
         /// \deprecated v.4.8. Use LinePattern class instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_UDLineStipple(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -88,10 +88,10 @@ namespace AxMapWinGIS
         /// will result in overflow. A line stipple value less than 111 will result in a solid line. 
         /// </remarks>
         /// <param name="LayerHandle">The handle of the layer for which the user defined shape line stipple is to be set.</param>
-        /// <param name="__p2">The user defined line stipple.</param>
+        /// <param name="newValue">The user defined line stipple.</param>
         /// \deprecated v.4.8. Use LinePattern class instead.
-        /// \removed493 Removed in 4.9.3
-        public void set_UDLineStipple(int LayerHandle, int __p2)
+        /// \removed493 Removed in v4.9.3
+        public void set_UDLineStipple(int LayerHandle, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -106,7 +106,7 @@ namespace AxMapWinGIS
         /// <param name="isItalic">A boolean value which indicates whether the font is italic.</param>
         /// <param name="isUnderline">A boolean value which indicates whether the font is underlined.</param>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public void set_UDPointFontCharFont(int LayerHandle, string FontName, float FontSize, bool isBold, bool isItalic, bool isUnderline)
         {
             throw new NotImplementedException();
@@ -118,7 +118,7 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <param name="FontSize">The size of the font.</param>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public void set_UDPointFontCharFontSize(int LayerHandle, float FontSize)
         {
             throw new NotImplementedException();
@@ -132,7 +132,7 @@ namespace AxMapWinGIS
         /// <param name="Color">The color of the marker.</param>
         /// <returns>The index of the new font character in the list of markers.</returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.PointCharacter and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int set_UDPointFontCharListAdd(int LayerHandle, int newValue, uint Color)
         {
             throw new NotImplementedException();
@@ -145,7 +145,7 @@ namespace AxMapWinGIS
         /// <param name="newValue">The Integer index for the image to retrieve </param>
         /// <returns>The image object which is used as the point image for the specified layer.</returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int set_UDPointImageListAdd(int LayerHandle, object newValue)
         {
             throw new NotImplementedException();
@@ -159,7 +159,7 @@ namespace AxMapWinGIS
         /// Remember to subtract 1 from this count when indexing the 0 based image list. 
         /// </returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_UDPointImageListCount(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -172,7 +172,7 @@ namespace AxMapWinGIS
         /// <param name="ImageIndex">The Integer index for the image to retrieve</param>
         /// <returns>The image object which is used as the point image for the specified layer.</returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.Picture and ShapefileCategories instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public object get_UDPointImageListItem(int LayerHandle, int ImageIndex)
         {
             throw new NotImplementedException();
@@ -184,7 +184,7 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The layer handle of the layer for which the point type is required.</param>
         /// <returns>The image object which is used as the point image for the specified layer.</returns>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.PointType instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public object get_UDPointType(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -194,10 +194,10 @@ namespace AxMapWinGIS
         /// Sets the image used when drawing points on the specified layer.
         /// </summary>
         /// <param name="LayerHandle">The layer handle of the layer for which the point type is required.</param>
-        /// <param name="__p2">The image object which is used as the point image for the specified layer.</param>
+        /// <param name="newValue">The image object which is used as the point image for the specified layer.</param>
         /// \deprecated v.4.8. Use ShapeDrawingOptions.PointType instead.
-        /// \removed493 Removed in 4.9.3
-        public void set_UDPointType(int LayerHandle, object __p2)
+        /// \removed493 Removed in v4.9.3
+        public void set_UDPointType(int LayerHandle, object newValue)
         {
             throw new NotImplementedException();
         }
@@ -210,7 +210,7 @@ namespace AxMapWinGIS
         /// <returns>Sets whether the shape is drawn with a fill or not.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillVisible property. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool get_ShapeDrawFill(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -221,11 +221,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the fill is to be set. </param>
         /// <param name="Shape">Handle of the shape for which the fill is to be set.</param>
-        /// <param name="__p3">Sets whether the shape is drawn with a fill or not. </param>
+        /// <param name="newValue">Sets whether the shape is drawn with a fill or not. </param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillVisible property. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeDrawFill(int LayerHandle, int Shape, bool __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeDrawFill(int LayerHandle, int Shape, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -238,7 +238,7 @@ namespace AxMapWinGIS
         /// <returns>Sets whether the shape is drawn with lines or not.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineVisible instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool get_ShapeDrawLine(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -249,11 +249,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the lines are to be set.</param>
         /// <param name="Shape">Handle of the shape for which the lines are to be set. </param>
-        /// <param name="__p3">Sets whether the shape is drawn with lines or not.</param>
+        /// <param name="newValue">Sets whether the shape is drawn with lines or not.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineVisible instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeDrawLine(int LayerHandle, int Shape, bool __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeDrawLine(int LayerHandle, int Shape, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -266,7 +266,7 @@ namespace AxMapWinGIS
         /// <returns>Sets whether the shape is drawn with points or not.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Visible instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool get_ShapeDrawPoint(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -277,11 +277,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the points are to be set.</param>
         /// <param name="Shape">Handle of the shape for which the points are to be set.</param>
-        /// <param name="__p3">Sets whether the shape is drawn with points or not.</param>
+        /// <param name="newValue">Sets whether the shape is drawn with points or not.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Visible instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeDrawPoint(int LayerHandle, int Shape, bool __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeDrawPoint(int LayerHandle, int Shape, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -294,7 +294,7 @@ namespace AxMapWinGIS
         /// <returns>Fill color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillColor instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public uint get_ShapeFillColor(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -305,11 +305,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the fill color is to be set.</param>
         /// <param name="Shape">Handle for the shape for which the fill color is to be set. </param>
-        /// <param name="__p3">Fill color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
+        /// <param name="newValue">Fill color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillColor instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeFillColor(int LayerHandle, int Shape, uint __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeFillColor(int LayerHandle, int Shape, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -322,7 +322,7 @@ namespace AxMapWinGIS
         /// <returns>Gets the fill stipple for the specified shape.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillHatchStyle instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public MapWinGIS.tkFillStipple get_ShapeFillStipple(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -333,11 +333,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the fill stipple is to be set.</param>
         /// <param name="Shape">Handle of the shape for which the fill stipple is to be set.</param>
-        /// <param name="__p3">Sets fill stipple for the specified shape.</param>
+        /// <param name="newValue">Sets fill stipple for the specified shape.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillHatchStyle instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeFillStipple(int LayerHandle, int Shape, MapWinGIS.tkFillStipple __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeFillStipple(int LayerHandle, int Shape, MapWinGIS.tkFillStipple newValue)
         {
             throw new NotImplementedException();
         }
@@ -350,7 +350,7 @@ namespace AxMapWinGIS
         /// <returns>Gets the percentage of fill transparency for the specified shape.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillTransparency instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public float get_ShapeFillTransparency(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -361,11 +361,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the fill transparency is to be set. </param>
         /// <param name="Shape">Handle of the shape for which the fill transparency is to be set. </param>
-        /// <param name="__p3">Sets the percentage of fill transparency for the specified shape. </param>
+        /// <param name="newValue">Sets the percentage of fill transparency for the specified shape. </param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillTransparency instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeFillTransparency(int LayerHandle, int Shape, float __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeFillTransparency(int LayerHandle, int Shape, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -378,7 +378,7 @@ namespace AxMapWinGIS
         /// <returns>Line color for the shape in the polygon shapefile.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineColor instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public uint get_ShapeLineColor(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -389,11 +389,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the line color is to be set.</param>
         /// <param name="Shape">Handle of the shape for which the line color is to be set.</param>
-        /// <param name="__p3">Line color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
+        /// <param name="newValue">Line color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineColor instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLineColor(int LayerHandle, int Shape, uint __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeLineColor(int LayerHandle, int Shape, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -406,7 +406,7 @@ namespace AxMapWinGIS
         /// <returns>Line stipple for the shape in the shapefile. </returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineStipple instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public MapWinGIS.tkLineStipple get_ShapeLineStipple(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -417,11 +417,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the line stipple is to be set. </param>
         /// <param name="Shape">Handle of the shape for which the line stipple is to be set.</param>
-        /// <param name="__p3">Line stipple for the shape in the shapefile.</param>
+        /// <param name="newValue">Line stipple for the shape in the shapefile.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineStipple instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLineStipple(int LayerHandle, int Shape, MapWinGIS.tkLineStipple __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeLineStipple(int LayerHandle, int Shape, MapWinGIS.tkLineStipple newValue)
         {
             throw new NotImplementedException();
         }
@@ -435,7 +435,7 @@ namespace AxMapWinGIS
         /// <returns>Line width for the shape in the shapefile.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineWidth instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public float get_ShapeLineWidth(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -447,11 +447,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the line width is to be set.</param>
         /// <param name="Shape">Handle of the shape for which the line width is to be set</param>
-        /// <param name="__p3">Line width for the shape in the shapefile.</param>
+        /// <param name="newValue">Line width for the shape in the shapefile.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.LineWidth instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLineWidth(int LayerHandle, int Shape, float __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeLineWidth(int LayerHandle, int Shape, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -465,7 +465,7 @@ namespace AxMapWinGIS
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillColor for point shapefiles and ShapeDrawingOptions.VerticesColor  
         /// for polylines and polygons instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public uint get_ShapePointColor(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -476,12 +476,12 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the point color is to be set.</param>
         /// <param name="Shape">Handle of the shape for which the point color is to be set. </param>
-        /// <param name="__p3">Point color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
+        /// <param name="newValue">Point color for the shape in the polygon shapefile. This is a System.UInt32 representation of an RGB color</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillColor for point shapefiles and ShapeDrawingOptions.VerticesColor  
         /// for polylines and polygons instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapePointColor(int LayerHandle, int Shape, uint __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapePointColor(int LayerHandle, int Shape, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -494,7 +494,7 @@ namespace AxMapWinGIS
         /// <returns>The index of the marker associated with shape.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointCharacter instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_ShapePointFontCharListID(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -505,11 +505,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <param name="Shape">The index of the shape.</param>
-        /// <param name="__p3">The index of the marker associated with shape.</param>
+        /// <param name="newValue">The index of the marker associated with shape.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointCharacter instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapePointFontCharListID(int LayerHandle, int Shape, int __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapePointFontCharListID(int LayerHandle, int Shape, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -522,7 +522,7 @@ namespace AxMapWinGIS
         /// <returns>The index in the image list of user defined images.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Picture instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_ShapePointImageListID(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -533,11 +533,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The layer handle of the layer containing the list to specify an image from.</param>
         /// <param name="Shape">The specific shape to be assigned a value in the layer. </param>
-        /// <param name="__p3">The index of the image in the imagelist that you want to assign to the specified shape</param>
+        /// <param name="newValue">The index of the image in the imagelist that you want to assign to the specified shape</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Picture instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapePointImageListID(int LayerHandle, int Shape, int __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapePointImageListID(int LayerHandle, int Shape, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -550,7 +550,7 @@ namespace AxMapWinGIS
         /// <returns>Point/vertex size for the shape in the shapefile.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointSize instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public float get_ShapePointSize(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -561,11 +561,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the point/vertex size is to be set.</param>
         /// <param name="Shape">Handle of the shape for which the point/vertex size is to be set.</param>
-        /// <param name="__p3">Point/vertex size for the shape in the shapefile.</param>
+        /// <param name="newValue">Point/vertex size for the shape in the shapefile.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointSize instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapePointSize(int LayerHandle, int Shape, float __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapePointSize(int LayerHandle, int Shape, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -575,11 +575,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the point type is to be set. </param>
         /// <param name="Shape">Handle of the shape for which the point type is to be set.</param>
-        /// <param name="__p3">Point type for the shape in the shapefile.</param>
+        /// <param name="newValue">Point type for the shape in the shapefile.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointType instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapePointType(int LayerHandle, int Shape, MapWinGIS.tkPointType __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapePointType(int LayerHandle, int Shape, MapWinGIS.tkPointType newValue)
         {
             throw new NotImplementedException();
         }
@@ -592,7 +592,7 @@ namespace AxMapWinGIS
         /// <returns>Point type for the shape in the shapefile.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.PointType instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public MapWinGIS.tkPointType get_ShapePointType(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -606,7 +606,7 @@ namespace AxMapWinGIS
         /// <returns>The color of stipple.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillHatchStyle instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public uint get_ShapeStippleColor(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -617,11 +617,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <param name="Shape">The index of the shape.</param>
-        /// <param name="__p3">The color of stipple.</param>
+        /// <param name="newValue">The color of stipple.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillHatchStyle instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeStippleColor(int LayerHandle, int Shape, uint __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeStippleColor(int LayerHandle, int Shape, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -634,7 +634,7 @@ namespace AxMapWinGIS
         /// <returns>True in case the background is transparent and false otherwise.</returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillBgTransparent instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool get_ShapeStippleTransparent(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -645,11 +645,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <param name="Shape">The index of the shape.</param>
-        /// <param name="__p3">True in case the background is transparent and false otherwise.</param>
+        /// <param name="newValue">True in case the background is transparent and false otherwise.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.FillBgTransparent instead. See ShapefileCategories, Shapefile.set_ShapeCategory to setup 
         /// visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeStippleTransparent(int LayerHandle, int Shape, bool __p3)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeStippleTransparent(int LayerHandle, int Shape, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -662,7 +662,7 @@ namespace AxMapWinGIS
         /// <returns>Boolean value representing whether the the shape is visible or not. </returns>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Visible and Shapefile.VisibilityExpression instead. 
         /// See ShapefileCategories, Shapefile.set_ShapeCategory to setup visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool get_ShapeVisible(int LayerHandle, int Shape)
         {
             throw new NotImplementedException();
@@ -673,328 +673,11 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer containing the shape for which the visibility is to be set</param>
         /// <param name="Shape">Handle of the shape for which the visibility is to be set.</param>
-        /// <param name="__p3">Boolean value representing whether the shape is to be visible or not.</param>
+        /// <param name="newValue">Boolean value representing whether the shape is to be visible or not.</param>
         /// \deprecated v. 4.8. Use ShapeDrawingOptions.Visible and Shapefile.VisibilityExpression instead. 
         /// See ShapefileCategories, Shapefile.set_ShapeCategory to setup visualization of individual shapes.
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeVisible(int LayerHandle, int Shape, bool __p3)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets whether the specified layer is drawn with a fill. Only works on polygon shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set.</param>
-        /// <returns>Gets whether the layer is being drawn with a fill or not.</returns>
-        /// \removed493 Removed in 4.9.3
-        public bool get_ShapeLayerDrawFill(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets whether the specified layer is drawn with a fill. Only works on polygon shapefiles. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set. </param>
-        /// <param name="__p2">Sets whether the layer is drawn with a fill or not.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerDrawFill(int LayerHandle, bool __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets whether the lines for the shapefile in specified layer are drawn. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a lines or not.</param>
-        /// <returns>Gets whether the layer is being drawn with lines or not.</returns>
-        /// \removed493 Removed in 4.9.3
-        public bool get_ShapeLayerDrawLine(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets whether the lines for the shapefile in specified layer are drawn. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the lines are to be set.</param>
-        /// <param name="__p2">Sets whether the layer is drawn with lines or not.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerDrawLine(int LayerHandle, bool __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets whether the points/vertices for the shapefile in specified layer are drawn. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a points or not.</param>
-        /// <returns>Gets whether the layer is being drawn with points or not.</returns>
-        /// \removed493 Removed in 4.9.3
-        public bool get_ShapeLayerDrawPoint(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets whether the points/vertices for the shapefile in specified layer are drawn.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the points are to be set.</param>
-        /// <param name="__p2">Sets whether the layer is drawn with points or not.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerDrawPoint(int LayerHandle, bool __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the fill color for the specified layer. Only works on polygon shapefiles. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill color is required. </param>
-        /// <returns>Fill color for the polygon shapefile.</returns>
-        /// \removed493 Removed in 4.9.3
-        public uint get_ShapeLayerFillColor(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the fill color for the specified layer. Only works on polygon shapefiles
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill color is to be set.</param>
-        /// <param name="__p2">Fill color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerFillColor(int LayerHandle, uint __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the fill stipple for the specified layer. Only works on polygon shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is required. </param>
-        /// <returns>Gets the fill stipple for the specified layer.</returns>
-        /// \removed493 Removed in 4.9.3
-        public MapWinGIS.tkFillStipple get_ShapeLayerFillStipple(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the fill stipple for the specified layer. Only works on polygon shapefiles. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is to be set.</param>
-        /// <param name="__p2">Sets fill stipple for the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerFillStipple(int LayerHandle, MapWinGIS.tkFillStipple __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles. 
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer to get percentage of fill transparency. </param>
-        /// <returns>Gets the percentage of fill transparency for the specified layer.</returns>
-        /// \removed493 Removed in 4.9.3
-        public float get_ShapeLayerFillTransparency(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the fill transparency is to be set. </param>
-        /// <param name="__p2">Sets the percentage of fill transparency for the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerFillTransparency(int LayerHandle, float __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the line color for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line color is required. </param>
-        /// <returns>Line color for the polygon shapefile. </returns>
-        /// \removed493 Removed in 4.9.3
-        public uint get_ShapeLayerLineColor(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the line color for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line color is to be set.</param>
-        /// <param name="__p2">Line color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerLineColor(int LayerHandle, uint __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-
-        /// <summary>
-        /// Gets the line stipple for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
-        /// <returns>Line stipple for the shapefile.</returns>
-        /// \removed493 Removed in 4.9.3
-        public MapWinGIS.tkLineStipple get_ShapeLayerLineStipple(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the line stipple for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
-        /// <param name="__p2">Line stipple for the shapefile.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerLineStipple(int LayerHandle, MapWinGIS.tkLineStipple __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the line width for the specified layer. Only works on shapefiles.
-        /// Suggested values for line width: 1 - 5
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line width is required.</param>
-        /// <returns>Line width for the shapefile.</returns>
-        /// \removed493 Removed in 4.9.3
-        public float get_ShapeLayerLineWidth(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the line width for the specified layer. Only works on shapefiles.
-        /// Suggested values for line width: 1 - 5
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the line width is to be set.</param>
-        /// <param name="__p2">Line width for the shapefile.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerLineWidth(int LayerHandle, float __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the point color for the specified layer. Only works on shapefiles
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point color is required. </param>
-        /// <returns>Point color for the polygon shapefile. </returns>
-        /// \removed493 Removed in 4.9.3
-        public uint get_ShapeLayerPointColor(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the point color for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point color is to be set.</param>
-        /// <param name="__p2">Point color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerPointColor(int LayerHandle, uint __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the line point/vertex size for the specified layer. Only works on shapefiles. 
-        /// </summary>
-        /// <param name="LayerHandle">Gets or sets the line point/vertex size for the specified layer. Only works on shapefiles. </param>
-        /// <returns>Point/vertex size for the shapefile. </returns>
-        /// \removed493 Removed in 4.9.3
-        public float get_ShapeLayerPointSize(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the line point/vertex size for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point/vertex size is to be set.</param>
-        /// <param name="__p2">Point/vertex size for the shapefile.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerPointSize(int LayerHandle, float __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the line point type for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point type is required.</param>
-        /// <returns>%Point type for the shapefile.</returns>
-        /// \removed493 Removed in 4.9.3
-        public MapWinGIS.tkPointType get_ShapeLayerPointType(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the line point type for the specified layer. Only works on shapefiles.
-        /// </summary>
-        /// <param name="LayerHandle">Handle of the layer for which the point type is to be set.</param>
-        /// <param name="__p2">%Point type for the shapefile.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerPointType(int LayerHandle, MapWinGIS.tkPointType __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets the color of the polygon stipple for shapefile layer.
-        /// </summary>
-        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
-        /// <returns>The color of stipple.</returns>
-        /// \removed493 Removed in 4.9.3
-        public uint get_ShapeLayerStippleColor(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the color of the polygon stipple for shapefile layer.
-        /// </summary>
-        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
-        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
-        /// <param name="__p2">The color of stipple.</returns>
-        /// \see Shapefile.DefaultDrawingOptions
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerStippleColor(int LayerHandle, uint __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
-        /// </summary>
-        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
-        /// <returns>True in case the background is transparent and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
-        public bool get_ShapeLayerStippleTransparent(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
-        /// </summary>
-        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
-        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
-        /// <param name="__p2">True in case the background is transparent and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_ShapeLayerStippleTransparent(int LayerHandle, bool __p2)
+        /// \removed493 Removed in v4.9.3
+        public void set_ShapeVisible(int LayerHandle, int Shape, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1005,7 +688,8 @@ namespace AxMapWinGIS
         /// <remarks>Deprecated for shapefile layers.</remarks>
         /// <param name="Legend">The coloring scheme to apply.</param>
         /// <returns>Boolean value indicating the successful application when true, unsuccessful application when false.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 No longer used.
+        /// \removed493 Removed in v4.9.3.
         public bool ApplyLegendColors(object Legend)
         {
             throw new NotImplementedException();
@@ -1016,7 +700,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="Filename">The name of the file.</param>
         /// <returns>True on success and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3. Use Utils.IsTiffGrid instead.
+        /// \deprecated v4.9.3 Use Utils.IsTiffGrid instead.
+        /// \removed493 Removed in v4.9.3.
         public bool IsTIFFGrid(string Filename)
         {
             throw new NotImplementedException();
@@ -1027,8 +712,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The default value is vdmNewSymbology. From the version 4.8 this is the only value supported.</remarks>
         /// \new48 Added in version 4.8
-        /// \deprecated v 4.8 The default value of the property must be used.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.8 No longer used.
+        /// \removed493 Removed in v4.9.3
         public tkShapeDrawingMethod ShapeDrawingMethod
         {
             get { throw new NotImplementedException(); }
@@ -1042,7 +727,8 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The handle of the image layer to attach the coloring scheme to.</param>
         /// <param name="ColorScheme">The coloring scheme to attach to the specified image layer.</param>
         /// <returns>Boolean value representing success when true, failure when false.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.8 Use Image.CustomColorScheme instead.
+        /// \removed493 Removed in v4.9.3
         public bool SetImageLayerColorScheme(int LayerHandle, object ColorScheme)
         {
             throw new NotImplementedException();
@@ -1052,7 +738,8 @@ namespace AxMapWinGIS
         /// Updates the display of the specified image object.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 No longer used.
+        /// \removed493 Removed in v4.9.3
         public void UpdateImage(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1063,8 +750,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the grid filename is to be set.</param>
         /// <returns>The grid filename to be associated with the specified layer.</returns>
-        /// \deprecated v 4.9.1 Use Image.SourceGridName instead.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.1 Use AxMap.get_Image, Image.SourceGridName instead.
+        /// \removed493 Removed in v4.9.3
         public string get_GridFileName(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1075,7 +762,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The layer handle of the Image layer for which the transparency is to be set.</param>
         /// <returns>The percentage of transparency for the specified image layer.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_Image, Image.TransparencyPercent instead.
+        /// \removed493 Removed in v4.9.3
         public float get_ImageLayerPercentTransparent(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1086,10 +774,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>MapWinGIS will create a bitmap representation for the grid and use instance of Image class for display.</remarks>
         /// <param name="LayerHandle">The layer handle.</param>
-        /// <param name="__p2">The name of the file with grid.</param>
+        /// <param name="newValue">The name of the file with grid.</param>
         /// \deprecated v 4.9.1 Use Image.SourceGridName instead.
-        /// \removed493 Removed in 4.9.3
-        public void set_GridFileName(int LayerHandle, string __p2)
+        /// \removed493 Removed in v4.9.3
+        public void set_GridFileName(int LayerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1103,8 +791,8 @@ namespace AxMapWinGIS
         /// <param name="x">The x coordinate in projected map units which determines where the label will be added on the map.</param>
         /// <param name="y">The y coordinate in projected map units which determines where the label will be added on the map.</param>
         /// <param name="hJustification">Specifies whether to justify the label's text right, left, or center. </param>
-        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interfaces ( AxMap.get_LayerLabels ) to change these settings.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
+        /// \removed493 Removed in v4.9.3
         public void AddLabel(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification)
         {
             throw new NotImplementedException();
@@ -1121,8 +809,8 @@ namespace AxMapWinGIS
         /// <param name="hJustification">Specifies whether to justify the label's text right, left, or center.</param>
         /// <param name="Rotation">The number of degrees to rotate the label. Positive angles rotate the text counter-clockwise, and
         /// negative angles rotate the text clockwise</param>
-        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interfaces ( AxMap.get_LayerLabels ) to change these settings.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
+        /// \removed493 Removed in v4.9.3
         public void AddLabelEx(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification, double Rotation)
         {
             throw new NotImplementedException();
@@ -1132,7 +820,8 @@ namespace AxMapWinGIS
         /// Clears all labels that have been added to the specified layer.
         /// </summary>
         /// <param name="LayerHandle">Handle of the layer.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Clear instead.
+        /// \removed493 Removed in v4.9.3
         public void ClearLabels(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1144,7 +833,8 @@ namespace AxMapWinGIS
         /// <remarks>The offset is the distance in pixels from the label point to the text.</remarks>
         /// <param name="LayerHandle">The handle of the layer for which the offset is to be set.</param>
         /// <returns>The offset for the labels on the specified layer.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.OffsetX, Labels.OffsetY instead.
+        /// \removed493 Removed in v4.9.3
         public int get_LayerLabelsOffset(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1155,9 +845,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The offset is the distance in pixels from the label point to the text.</remarks>
         /// <param name="LayerHandle">The handle of the layer for which the offset is to be set. </param>
-        /// <param name="__p2">The offset for the labels on the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_LayerLabelsOffset(int LayerHandle, int __p2)
+        /// <param name="newValue">The offset for the labels on the specified layer.</param>
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.OffsetX, Labels.OffsetY instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_LayerLabelsOffset(int LayerHandle, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -1167,7 +858,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the scaling of labels is to be set.</param>
         /// <returns>A boolean value representing whether or not to scale the labels on the specified layer.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.ScaleLabels instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_LayerLabelsScale(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1177,9 +869,10 @@ namespace AxMapWinGIS
         /// Sets whether to scale the labels on the layer
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the scaling of labels is to be set.</param>
-        /// <param name="__p2">A boolean value representing whether or not to scale the labels on the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_LayerLabelsScale(int LayerHandle, bool __p2)
+        /// <param name="newValue">A boolean value representing whether or not to scale the labels on the specified layer.</param>
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.ScaleLabels instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_LayerLabelsScale(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1189,7 +882,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the use of label shadows is to be set.</param>
         /// <returns>A boolean value representing whether or not label shadows will be used for the specified layer. </returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloVisible instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_LayerLabelsShadow(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1199,9 +893,10 @@ namespace AxMapWinGIS
         /// Sets whether to use shadows for the labels on the layer.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the use of label shadows is to be set. </param>
-        /// <param name="__p2">A boolean value representing whether or not label shadows will be used for the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_LayerLabelsShadow(int LayerHandle, bool __p2)
+        /// <param name="newValue">A boolean value representing whether or not label shadows will be used for the specified layer.</param>
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloVisible instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_LayerLabelsShadow(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1212,7 +907,8 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The handle of the layer for which the shadow color is to be set.</param>
         /// <returns>The color to use the shadow color of the specified layer. 
         /// This is a System.UInt32 representation of an RGB color.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloColor instead.
+        /// \removed493 Removed in v4.9.3
         public uint get_LayerLabelsShadowColor(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1222,10 +918,11 @@ namespace AxMapWinGIS
         /// Sets the shadow color for the labels on the layer. 
         /// </summary>
         /// <param name="LayerHandle">The layer handle of the layer for which the shadow color is to be set.</param>
-        /// <param name="__p2">The color of use as the shadow color of the specified layer. 
+        /// <param name="newValue">The color of use as the shadow color of the specified layer. 
         /// This is a System.UInt32 representation of an RGB color.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_LayerLabelsShadowColor(int LayerHandle, uint __p2)
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.HaloColor instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_LayerLabelsShadowColor(int LayerHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -1235,7 +932,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle for the layer for which its label's visibility are to be set.</param>
         /// <returns>A boolean value which determines whether the specified layer's labels are visible or not.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Visible instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_LayerLabelsVisible(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1245,9 +943,10 @@ namespace AxMapWinGIS
         /// Sets label visibility for the specified layer.
         /// </summary>
         /// <param name="LayerHandle">The layer handle for the layer for which its label's visibility are to be set.</param>
-        /// <param name="__p2">A boolean value which determines whether the specified layer's labels are visible or not. </param>
-        /// \removed493 Removed in 4.9.3
-        public void set_LayerLabelsVisible(int LayerHandle, bool __p2)
+        /// <param name="newValue">A boolean value which determines whether the specified layer's labels are visible or not. </param>
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.Visible instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_LayerLabelsVisible(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1257,7 +956,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the standard view width is required.</param>
         /// <param name="Width">Reference parameter. The standard view width for the specified layer is returned through this parameter.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.BasicScale instead.
+        /// \removed493 Removed in v4.9.3
         public void GetLayerStandardViewWidth(int LayerHandle, ref double Width)
         {
             throw new NotImplementedException();
@@ -1268,7 +968,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the standard view width is to be set.</param>
         /// <param name="Width">The new standard view width for the specified layer.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.BasicScale instead.
+        /// \removed493 Removed in v4.9.3
         public void SetLayerStandardViewWidth(int LayerHandle, double Width)
         {
             throw new NotImplementedException();
@@ -1279,7 +980,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <returns>True in case overlapping labels will be prevented and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.AvoidCollisions instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_UseLabelCollision(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1289,9 +991,10 @@ namespace AxMapWinGIS
         /// Sets a boolean value which indicates whether overlapping labels will be allowed for the layer.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">True in case overlapping labels will be forbidden and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_UseLabelCollision(int LayerHandle, bool __p2)
+        /// <param name="newValue">True in case overlapping labels will be forbidden and false otherwise.</param>
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.AvoidCollisions instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_UseLabelCollision(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1301,7 +1004,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <param name="LabelFontColor">The color of the labels font.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontColor instead.
+        /// \removed493 Removed in v4.9.3
         public void LabelColor(int LayerHandle, uint LabelFontColor)
         {
             throw new NotImplementedException();
@@ -1313,7 +1017,8 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">Layer handle of the layer for which the label fonts are to be set.</param>
         /// <param name="FontName">Name of the font to use for the labels. (Ex: "Arial") </param>
         /// <param name="FontSize">Size of the font to use for the labels.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontName, Labels.FontSize instead.
+        /// \removed493 Removed in v4.9.3
         public void LayerFont(int LayerHandle, string FontName, int FontSize)
         {
             throw new NotImplementedException();
@@ -1328,7 +1033,8 @@ namespace AxMapWinGIS
         /// <param name="isBold">A boolean value which indicates whether the font is bold.</param>
         /// <param name="isItalic">A boolean value which indicates whether the font is italic.</param>
         /// <param name="isUnderline">A boolean value which indicates whether the font is underlined.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.get_LayerLabels, Labels.FontName, Labels.FontSize, Labels.FontBold, Labels.FontItalic, Labels.FontUnderline instead.
+        /// \removed493 Removed in v4.9.3
         public void LayerFontEx(int LayerHandle, string FontName, int FontSize, bool isBold, bool isItalic, bool isUnderline)
         {
             throw new NotImplementedException();
@@ -1339,7 +1045,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// \deprecated v 4.8. Multiline labels will be drawn after specification of appropriate label expression. 
         /// \see Labels.Expression.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool MultilineLabels
         {
             get { throw new NotImplementedException(); }
@@ -1356,7 +1062,8 @@ namespace AxMapWinGIS
         /// <param name="x">The x coordinate of the label.</param>
         /// <param name="y">The y coordinate of the label.</param>
         /// <param name="hJustification">The justification of the label.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.DrawLabel, AxMap.DrawLabelEx instead.
+        /// \removed493 Removed in v4.9.3
         public void AddDrawingLabel(int DrawHandle, string Text, uint Color, double x, double y, tkHJustification hJustification)
         {
             throw new NotImplementedException();
@@ -1373,44 +1080,21 @@ namespace AxMapWinGIS
         /// <param name="y">The y coordinate of the label.</param>
         /// <param name="hJustification">The justification of the label.</param>
         /// <param name="Rotation">The angle of rotation in degrees.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use AxMap.DrawLabel, AxMap.DrawLabelEx instead.
+        /// \removed493 Removed in v4.9.3
         public void AddDrawingLabelEx(int DrawHandle, string Text, uint Color, double x, double y, tkHJustification hJustification, double Rotation)
         {
             throw new NotImplementedException();
         }
-
-       
 
         /// <summary>
         /// Gets the value which affects the scaling of labels.
         /// </summary>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <param name="Width">The standard width of the view in pixels to use normal size of labels.</param>
-        /// \deprecated v 4.8. Use Labels.ScaleLabels, Labels.BaseScale instead.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.8. Use AxMap.get_DrawingLabels, Labels.BasicScale instead.
+        /// \removed493 Removed in v4.9.3
         public void GetDrawingStandardViewWidth(int DrawHandle, ref double Width)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets labels associated with the drawing layer.
-        /// </summary>
-        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <returns>The reference to the Labels class or NULL reference on the invalid handle.</returns>
-        /// \removed493 Removed in 4.9.3
-        public Labels get_DrawingLabels(int DrawingLayerIndex)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Replaces the labels associated with the drawing layer.
-        /// </summary>
-        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">The new instance of the Labels class to associate with the layer.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabels(int DrawingLayerIndex, Labels __p2)
         {
             throw new NotImplementedException();
         }
@@ -1421,7 +1105,7 @@ namespace AxMapWinGIS
         /// <param name="DrawHandle">The index of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>The offset in pixels.</returns>
         /// \deprecated v. 4.8. Use AxMap.get_DrawingLabels and Labels.OffsetX, Labels.OffsetY instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public int get_DrawingLabelsOffset(int DrawHandle)
         {
             throw new NotImplementedException();
@@ -1431,10 +1115,10 @@ namespace AxMapWinGIS
         /// Sets the vertical offset of the labels for the specified drawing layer in pixels.
         /// </summary>
         /// <param name="DrawHandle">The index of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">The offset in pixels.</param>
+        /// <param name="newValue">The offset in pixels.</param>
         /// \deprecated v. 4.8. Use AxMap.get_DrawingLabels and Labels.OffsetX, Labels.OffsetY instead.
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabelsOffset(int DrawHandle, int __p2)
+        /// \removed493 Removed in v4.9.3
+        public void set_DrawingLabelsOffset(int DrawHandle, int newValue)
         {
             throw new NotImplementedException();
         }
@@ -1445,7 +1129,8 @@ namespace AxMapWinGIS
         /// <remarks>This property corresponds to the Labels.ScaleLabels property.</remarks>
         /// <param name="DrawHandle">he index of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>True if the labels are scaled and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.ScaleLabels instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_DrawingLabelsScale(int DrawHandle)
         {
             throw new NotImplementedException();
@@ -1456,9 +1141,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the Labels.ScaleLabels property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">True if the labels are scaled and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabelsScale(int DrawHandle, bool __p2)
+        /// <param name="newValue">True if the labels are scaled and false otherwise.</param>
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.ScaleLabels instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_DrawingLabelsScale(int DrawHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1469,7 +1155,8 @@ namespace AxMapWinGIS
         /// <remarks>This property corresponds to the Labels.HaloVisible property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>True if the shadow is displayed and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloVisible instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_DrawingLabelsShadow(int DrawHandle)
         {
             throw new NotImplementedException();
@@ -1480,9 +1167,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the Labels.HaloVisible property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">True if the shadow is displayed and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabelsShadow(int DrawHandle, bool __p2)
+        /// <param name="newValue">True if the shadow is displayed and false otherwise.</param>
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloVisible instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_DrawingLabelsShadow(int DrawHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1493,7 +1181,8 @@ namespace AxMapWinGIS
         /// <remarks>This property corresponds to the Labels.HaloColor property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>The color of shadow.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloColor instead.
+        /// \removed493 Removed in v4.9.3
         public uint get_DrawingLabelsShadowColor(int DrawHandle)
         {
             throw new NotImplementedException();
@@ -1504,9 +1193,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the Labels.HaloColor property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">The color of shadow.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabelsShadowColor(int DrawHandle, uint __p2)
+        /// <param name="newValue">The color of shadow.</param>
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.HaloColor instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_DrawingLabelsShadowColor(int DrawHandle, uint newValue)
         {
             throw new NotImplementedException();
         }
@@ -1517,7 +1207,8 @@ namespace AxMapWinGIS
         /// <remarks>This property corresponds to the Labels.AvoidCollisions property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <returns>True in case overlapping labels are removed and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.AvoidCollisions instead.
+        /// \removed493 Removed in v4.9.3
         public bool get_UseDrawingLabelCollision(int DrawHandle)
         {
             throw new NotImplementedException();
@@ -1528,9 +1219,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the Labels.AllowCollisions property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">True in case overlapping labels are removed and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_UseDrawingLabelCollision(int DrawHandle, bool __p2)
+        /// <param name="newValue">True in case overlapping labels are removed and false otherwise.</param>
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.AvoidCollisions instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_UseDrawingLabelCollision(int DrawHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1541,7 +1233,8 @@ namespace AxMapWinGIS
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
         /// <param name="FontName">The name of the font.</param>
         /// <param name="FontSize">The size of the font.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v 4.9.3 Use AxMap.get_DrawingLabels, Labels.FontName, Labels.FontSize instead.
+        /// \removed493 Removed in v4.9.3
         public void DrawingFont(int DrawHandle, string FontName, int FontSize)
         {
             throw new NotImplementedException();
@@ -1550,7 +1243,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets the angle of map rotation in degrees.
         /// </summary>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.9.3 The functionality is no longer supported.
+        /// \removed493 Removed in v4.9.3
         public double MapRotationAngle
         {
             get { throw new NotImplementedException(); }
@@ -1562,10 +1256,10 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>It is recommended to the properties of the Image class directly.</remarks>
         /// <param name="LayerHandle">The handle of the layer with the image.</param>
-        /// <param name="__p2">The value ranging from 0.0(transparent) to 1.0(opaque).</param>
-        /// \see AxMap.get_Image()
-        /// \removed493 Removed in 4.9.3
-        public void set_ImageLayerPercentTransparent(int LayerHandle, float __p2)
+        /// <param name="newValue">The value ranging from 0.0(transparent) to 1.0(opaque).</param>
+        /// \deprecated v4.9.3 Use AxMap.get_Image(), Image.TransparencyPercent instead.
+        /// \removed493 Removed in v4.9.3
+        public void set_ImageLayerPercentTransparent(int LayerHandle, float newValue)
         {
             throw new NotImplementedException();
         }
@@ -1575,8 +1269,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="DrawHandle">The handle of the drawing layer.</param>
         /// <param name="Width">The width in pixels.</param>
-        /// \deprecated v.4.8. Use Labels.BasicScale and Labels.ScaleLabels instead.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.8. Use AxMap.get_DrawingLabels, Labels.BasicScale and Labels.ScaleLabels instead.
+        /// \removed493 Removed in v4.9.3
         public void SetDrawingStandardViewWidth(int DrawHandle, double Width)
         {
             throw new NotImplementedException();
@@ -1586,7 +1280,8 @@ namespace AxMapWinGIS
         /// Clears the images from the user defined list of point symbols.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use ShapeDrawingOptions.Picture instead.
+        /// \removed493 Removed in v4.9.3
         public void ClearUDPointImageList(int LayerHandle)
         {
             throw new NotImplementedException();
@@ -1599,7 +1294,8 @@ namespace AxMapWinGIS
         /// <param name="rotY">The y coordinate of the rotation point in map units.</param>
         /// <returns>The base point for rotation.</returns>
         /// \new48 Added in version 4.8
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.9.3 The functionality is no longer supported.
+        /// \removed493 Removed in v4.9.3
         public MapWinGIS.Point GetBaseProjectionPoint(double rotX, double rotY)
         {
             throw new NotImplementedException();
@@ -1612,7 +1308,8 @@ namespace AxMapWinGIS
         /// map extents if the angle differs from it.</remarks>
         /// <returns>The bounding box of the rotated extents.</returns>
         /// \new48 Added in version 4.8
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.9.3 The functionality is no longer supported.
+        /// \removed493 Removed in v4.9.3
         public MapWinGIS.Extents GetRotatedExtent()
         {
             throw new NotImplementedException();
@@ -1624,8 +1321,8 @@ namespace AxMapWinGIS
         /// <param name="proj4_a">The first projection string.</param>
         /// <param name="proj4_b">The second projection string.</param>
         /// <returns></returns>
-        /// \see GeoProjection.get_IsSame, GeoProjection.get_IsSameExt.
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.9.3 Use GeoProjection.get_IsSame, GeoProjection.get_IsSameExt instead.
+        /// \removed493 Removed in v4.9.3
         public bool IsSameProjection(string proj4_a, string proj4_b)
         {
             throw new NotImplementedException();
@@ -1637,7 +1334,8 @@ namespace AxMapWinGIS
         /// <remarks>When set to true such images will be merged into a single bitmap. This may improve performance 
         /// in case of low number of data pixels (those which differ from the transparent color). The default value is false.</remarks>
         /// \new48 Added in version 4.8
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.9.3 The functionality is no longer supported.
+        /// \removed493 Removed in v4.9.3
         public bool CanUseImageGrouping
         {
             get { throw new NotImplementedException(); }
@@ -1649,7 +1347,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>Double buffering uses a little more memory, but allows the view to be smoother with less flickering.
         /// The default value is true. It's not recommended to change it.</remarks>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v.4.9.3 Double buffer is used in all cases.
+        /// \removed493 Removed in v4.9.3
         public bool DoubleBuffer
         {
             get { throw new NotImplementedException(); }
@@ -1661,7 +1360,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This includes layer information and coloring schemes.</remarks>
         /// \deprecated v.4.8 Use AxMap.SerializeMapState instead.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public string MapState
         {
             get { throw new NotImplementedException(); }
@@ -1671,7 +1370,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Serial number functionality is deprecated as MapWindow is now Open Source. This property may be left unset. 
         /// </summary>
-        /// \removed493 Removed in 4.9.3
+        /// \deprecated v4.8 This property is no longer used.
+        /// \removed493 Removed in v4.9.3
         public string SerialNumber
         {
             get { throw new NotImplementedException(); }
@@ -1684,11 +1384,13 @@ namespace AxMapWinGIS
         /// <param name="LayerHandle">The handle of the layer.</param>
         /// <returns>True on success and false in case of invalid layer handle.</returns>
         /// \deprecated v.4.8. The call is incorporated into drawing routine.
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in v4.9.3
         public bool AdjustLayerExtents(int LayerHandle)
         {
             throw new NotImplementedException();
         }
+
+
     }
 #if nsp
 }

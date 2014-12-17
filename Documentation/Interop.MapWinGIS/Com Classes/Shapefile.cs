@@ -224,6 +224,7 @@ namespace MapWinGIS
         /// <remarks>
         /// It's recommended to set it in case time consuming operation will be used (geoprocessing, generation of labels, etc).
         /// The property is equal to NULL by default.</remarks>
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }

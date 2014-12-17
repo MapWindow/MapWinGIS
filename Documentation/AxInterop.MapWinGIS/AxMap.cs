@@ -95,6 +95,7 @@ namespace AxMapWinGIS
         /// class COM visible by setting ComVisible(true) attribute. In fact ComVisible(true) is set by default 
 		/// for public classes, so it's enough to make sure that it isn't explicitly set to false for the class
 		/// or assembly where the class is defined. Otherwise InvalidCastException may occur at runtime.</remarks>
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public object GlobalCallback
         {
             get { throw new NotImplementedException(); }
@@ -1003,9 +1004,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The information will be stored in .mwsymb file associated with data layer.</remarks>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The description of the layer.</param>
+        /// <param name="newValue">The description of the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerDescription(int LayerHandle, string __p2)
+        public void set_LayerDescription(int LayerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1037,10 +1038,10 @@ namespace AxMapWinGIS
         /// Sets the boolean value which indicates whether the layer will be displayed at all scales or only within the chosen range of scales.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">True in case the layer will be displayed between specified scales only.</param>
+        /// <param name="newValue">True in case the layer will be displayed between specified scales only.</param>
         /// \see set_LayerMaxVisibleScale, set_LayerMinVisibleScale
         /// \new48 Added in version 4.8
-        public void set_LayerDynamicVisibility(int LayerHandle, bool __p2)
+        public void set_LayerDynamicVisibility(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1061,8 +1062,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This string can be used to store any string data desired by the developer.</remarks>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The string to be associated with layer.</param>
-        public void set_LayerKey(int LayerHandle, string __p2)
+        /// <param name="newValue">The string to be associated with layer.</param>
+        public void set_LayerKey(int LayerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1083,9 +1084,9 @@ namespace AxMapWinGIS
         /// Sets the labels associated with the layer.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The new instance of the Labels class to be associated with the layer.</param>
+        /// <param name="newValue">The new instance of the Labels class to be associated with the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerLabels(int LayerHandle, MapWinGIS.Labels __p2)
+        public void set_LayerLabels(int LayerHandle, MapWinGIS.Labels newValue)
         {
             throw new NotImplementedException();
         }
@@ -1105,9 +1106,9 @@ namespace AxMapWinGIS
         /// Sets the maximum scale at which the layer is visible on the map.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The maximum visible scale for the layer.</param>
+        /// <param name="newValue">The maximum visible scale for the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerMaxVisibleScale(int LayerHandle, double __p2)
+        public void set_LayerMaxVisibleScale(int LayerHandle, double newValue)
         {
             throw new NotImplementedException();
         }
@@ -1127,9 +1128,9 @@ namespace AxMapWinGIS
         /// Sets the minimum scale at which the layer is visible on the map.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The minimum visible scale for the layer.</param>
+        /// <param name="newValue">The minimum visible scale for the layer.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerMinVisibleScale(int LayerHandle, double __p2)
+        public void set_LayerMinVisibleScale(int LayerHandle, double newValue)
         {
             throw new NotImplementedException();
         }
@@ -1148,8 +1149,8 @@ namespace AxMapWinGIS
         /// Sets the name of the specified layer.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the name is to be set.</param>
-        /// <param name="__p2">The name to be set for the layer.</param>
-        public void set_LayerName(int LayerHandle, string __p2)
+        /// <param name="newValue">The name to be set for the layer.</param>
+        public void set_LayerName(int LayerHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1171,9 +1172,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property affects AxMap.SaveMapState, AxMap.SerializeMapState.</remarks>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">True in case the layer will be excluded from serialization and false otherwise.</param>
+        /// <param name="newValue">True in case the layer will be excluded from serialization and false otherwise.</param>
         /// \new48 Added in version 4.8
-        public void set_LayerSkipOnSaving(int LayerHandle, bool __p2)
+        public void set_LayerSkipOnSaving(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1192,8 +1193,8 @@ namespace AxMapWinGIS
         /// Sets the visibility of the specified layer.
         /// </summary>
         /// <param name="LayerHandle">The handle of the layer for which the visibility is returned. </param>
-        /// <param name="__p2">A boolean value representing whether the layer is to be visible or not.</param>
-        public void set_LayerVisible(int LayerHandle, bool __p2)
+        /// <param name="newValue">A boolean value representing whether the layer is to be visible or not.</param>
+        public void set_LayerVisible(int LayerHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1443,9 +1444,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The old image will not be closed.</remarks>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The new image object.</param>
+        /// <param name="newValue">The new image object.</param>
         /// \new48 Added in version 4.8
-        public void set_Image(int LayerHandle, Image __p2)
+        public void set_Image(int LayerHandle, Image newValue)
         {
             throw new NotImplementedException();
         }
@@ -1467,9 +1468,9 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>The old shapefile will not be closed.</remarks>
         /// <param name="LayerHandle">The handle of the layer.</param>
-        /// <param name="__p2">The new shapefile object.</param>
+        /// <param name="newValue">The new shapefile object.</param>
         /// \new48 Added in version 4.8
-        public void set_Shapefile(int LayerHandle, Shapefile __p2)
+        public void set_Shapefile(int LayerHandle, Shapefile newValue)
         {
             throw new NotImplementedException();
         }
@@ -1529,6 +1530,26 @@ namespace AxMapWinGIS
         /// \enddot
         /// <a href = "diagrams.html">Graph description</a>
         /// @{
+
+        /// <summary>
+        /// Replaces the labels associated with the drawing layer.
+        /// </summary>
+        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="newValue">The new instance of the Labels class to associate with the layer.</param>
+        public void set_DrawingLabels(int DrawingLayerIndex, Labels newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets labels associated with the drawing layer.
+        /// </summary>
+        /// <param name="DrawingLayerIndex">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <returns>The reference to the Labels class or NULL reference on the invalid handle.</returns>
+        public Labels get_DrawingLabels(int DrawingLayerIndex)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Clears all the drawings on the drawing layer specified.
@@ -1738,8 +1759,8 @@ namespace AxMapWinGIS
         /// Sets the drawing key may be used by the programmer to store any string for a drawing layer with specified handle.
         /// </summary>
         /// <param name="DrawHandle">The handle of the drawing layer.</param>
-        /// <param name="__p2">The string associated with the layer.</param>
-        public void set_DrawingKey(int DrawHandle, string __p2)
+        /// <param name="newValue">The string associated with the layer.</param>
+        public void set_DrawingKey(int DrawHandle, string newValue)
         {
             throw new NotImplementedException();
         }
@@ -1779,8 +1800,8 @@ namespace AxMapWinGIS
         /// </summary>
         /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
         /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">True in case labels are visible and false otherwise.</param>
-        public void set_DrawingLabelsVisible(int DrawHandle, bool __p2)
+        /// <param name="newValue">True in case labels are visible and false otherwise.</param>
+        public void set_DrawingLabelsVisible(int DrawHandle, bool newValue)
         {
             throw new NotImplementedException();
         }
@@ -1794,7 +1815,7 @@ namespace AxMapWinGIS
         /// <param name="Rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        int DrawLabel(string Text, double x, double y, double Rotation);
+        public int DrawLabel(string Text, double x, double y, double Rotation);
 
         /// <summary>
         /// Draws a label on the specified drawing layer.
@@ -1806,7 +1827,7 @@ namespace AxMapWinGIS
         /// <param name="Rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation);
+        public int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation);
 
         /// @}
         #endregion
@@ -1853,6 +1874,294 @@ namespace AxMapWinGIS
         /// \enddot
         /// <a href = "diagrams.html">Graph description</a>
         /// @{
+
+        /// <summary>
+        /// Gets whether the specified layer is drawn with a fill. Only works on polygon shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set.</param>
+        /// <returns>Gets whether the layer is being drawn with a fill or not.</returns>
+        public bool get_ShapeLayerDrawFill(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets whether the specified layer is drawn with a fill. Only works on polygon shapefiles. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill is to be set. </param>
+        /// <param name="newValue">Sets whether the layer is drawn with a fill or not.</param>
+        public void set_ShapeLayerDrawFill(int LayerHandle, bool newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets whether the lines for the shapefile in specified layer are drawn. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a lines or not.</param>
+        /// <returns>Gets whether the layer is being drawn with lines or not.</returns>
+        public bool get_ShapeLayerDrawLine(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets whether the lines for the shapefile in specified layer are drawn. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the lines are to be set.</param>
+        /// <param name="newValue">Sets whether the layer is drawn with lines or not.</param>
+        public void set_ShapeLayerDrawLine(int LayerHandle, bool newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets whether the points/vertices for the shapefile in specified layer are drawn. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer to test if it is being drawn with a points or not.</param>
+        /// <returns>Gets whether the layer is being drawn with points or not.</returns>
+        public bool get_ShapeLayerDrawPoint(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets whether the points/vertices for the shapefile in specified layer are drawn.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the points are to be set.</param>
+        /// <param name="newValue">Sets whether the layer is drawn with points or not.</param>
+        public void set_ShapeLayerDrawPoint(int LayerHandle, bool newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the fill color for the specified layer. Only works on polygon shapefiles. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill color is required. </param>
+        /// <returns>Fill color for the polygon shapefile.</returns>
+        public uint get_ShapeLayerFillColor(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the fill color for the specified layer. Only works on polygon shapefiles
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill color is to be set.</param>
+        /// <param name="newValue">Fill color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
+        public void set_ShapeLayerFillColor(int LayerHandle, uint newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the fill stipple for the specified layer. Only works on polygon shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is required. </param>
+        /// <returns>Gets the fill stipple for the specified layer.</returns>
+        public MapWinGIS.tkFillStipple get_ShapeLayerFillStipple(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the fill stipple for the specified layer. Only works on polygon shapefiles. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill stipple is to be set.</param>
+        /// <param name="newValue">Sets fill stipple for the specified layer.</param>
+        public void set_ShapeLayerFillStipple(int LayerHandle, MapWinGIS.tkFillStipple newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles. 
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer to get percentage of fill transparency. </param>
+        /// <returns>Gets the percentage of fill transparency for the specified layer.</returns>
+        public float get_ShapeLayerFillTransparency(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the percentage of fill transparency for the specified layer. Only works on polygon shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the fill transparency is to be set. </param>
+        /// <param name="newValue">Sets the percentage of fill transparency for the specified layer.</param>
+        public void set_ShapeLayerFillTransparency(int LayerHandle, float newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the line color for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line color is required. </param>
+        /// <returns>Line color for the polygon shapefile. </returns>
+        public uint get_ShapeLayerLineColor(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the line color for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line color is to be set.</param>
+        /// <param name="newValue">Line color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
+        public void set_ShapeLayerLineColor(int LayerHandle, uint newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the line stipple for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
+        /// <returns>Line stipple for the shapefile.</returns>
+        public MapWinGIS.tkLineStipple get_ShapeLayerLineStipple(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the line stipple for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line stipple is required.</param>
+        /// <param name="newValue">Line stipple for the shapefile.</param>
+        public void set_ShapeLayerLineStipple(int LayerHandle, MapWinGIS.tkLineStipple newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the line width for the specified layer. Only works on shapefiles.
+        /// Suggested values for line width: 1 - 5
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line width is required.</param>
+        /// <returns>Line width for the shapefile.</returns>
+        public float get_ShapeLayerLineWidth(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the line width for the specified layer. Only works on shapefiles.
+        /// Suggested values for line width: 1 - 5
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the line width is to be set.</param>
+        /// <param name="newValue">Line width for the shapefile.</param>
+        public void set_ShapeLayerLineWidth(int LayerHandle, float newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the point color for the specified layer. Only works on shapefiles
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the point color is required. </param>
+        /// <returns>Point color for the polygon shapefile. </returns>
+        public uint get_ShapeLayerPointColor(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the point color for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the point color is to be set.</param>
+        /// <param name="newValue">Point color for the polygon shapefile. This is a System.UInt32 representation of an RGB color.</param>
+        public void set_ShapeLayerPointColor(int LayerHandle, uint newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the line point/vertex size for the specified layer. Only works on shapefiles. 
+        /// </summary>
+        /// <param name="LayerHandle">Gets or sets the line point/vertex size for the specified layer. Only works on shapefiles. </param>
+        /// <returns>Point/vertex size for the shapefile. </returns>
+        public float get_ShapeLayerPointSize(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the line point/vertex size for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the point/vertex size is to be set.</param>
+        /// <param name="newValue">Point/vertex size for the shapefile.</param>
+        public void set_ShapeLayerPointSize(int LayerHandle, float newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the line point type for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the point type is required.</param>
+        /// <returns>%Point type for the shapefile.</returns>
+        public MapWinGIS.tkPointType get_ShapeLayerPointType(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the line point type for the specified layer. Only works on shapefiles.
+        /// </summary>
+        /// <param name="LayerHandle">Handle of the layer for which the point type is to be set.</param>
+        /// <param name="newValue">%Point type for the shapefile.</param>
+        public void set_ShapeLayerPointType(int LayerHandle, MapWinGIS.tkPointType newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets the color of the polygon stipple for shapefile layer.
+        /// </summary>
+        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
+        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <returns>The color of stipple.</returns>
+        public uint get_ShapeLayerStippleColor(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets the color of the polygon stipple for shapefile layer.
+        /// </summary>
+        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
+        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillHatchStyle property.</remarks>
+        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="newValue">The color of stipple.</returns>
+        /// \see Shapefile.DefaultDrawingOptions
+        public void set_ShapeLayerStippleColor(int LayerHandle, uint newValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
+        /// </summary>
+        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
+        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <returns>True in case the background is transparent and false otherwise.</returns>
+        public bool get_ShapeLayerStippleTransparent(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets a boolean value which indicates whether the background of fill stipple for polygon shapefile layer will be transparent.
+        /// </summary>
+        /// <remarks>This property corresponds to the ShapeDrawingOptions.FillBgTransparent property.</remarks>
+        /// <param name="LayerHandle">The handle of the shapefile layer.</param>
+        /// <param name="newValue">True in case the background is transparent and false otherwise.</param>
+        public void set_ShapeLayerStippleTransparent(int LayerHandle, bool newValue)
+        {
+            throw new NotImplementedException();
+        }
 
         /// @}
 

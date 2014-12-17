@@ -419,6 +419,7 @@ namespace MapWinGIS
         /// <summary>
         /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications.
         /// </summary>
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }
@@ -550,72 +551,6 @@ namespace MapWinGIS
         {
             get { throw new NotImplementedException(); }
         }
-
-        ///// <summary>
-        ///// Returns the height of the image. 
-        ///// </summary>
-        ///// <returns>The height of the image.</returns>
-        ///// \deprecated v 4.8. Use Image.OriginalHeight instead.
-        ///// \removed493 Removed in 4.9.3
-        //public int GetOriginalHeight()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        ///// <summary>
-        ///// Returns the width of the image. 
-        ///// </summary>
-        ///// <returns>The width of the image.</returns>
-        ///// \deprecated v 4.8. Use Image.OriginalWidth instead.
-        ///// \removed493 Removed in 4.9.3
-        //public int GetOriginalWidth()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        ///// <summary>
-        ///// Returns the x coordinate of center of the lower left corner of the images.
-        ///// </summary>
-        ///// <returns>Y coordinate of the corner.</returns>
-        ///// \deprecated v 4.8. Use Image.OriginalXllCenter instead.
-        ///// \removed493 Removed in 4.9.3
-        //public double GetOriginalXllCenter()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        ///// <summary>
-        ///// Returns the y coordinate of the center of lower left corner of the images.
-        ///// </summary>
-        ///// <returns>X coordinate of the corner.</returns>
-        ///// \deprecated v 4.8. Use Image.OriginalYllCenter instead.
-        ///// \removed493 Removed in 4.9.3
-        //public double GetOriginalYllCenter()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        ///// <summary>
-        ///// Gets or sets the number of map units per image pixel for x axis.
-        ///// </summary>
-        ///// <remarks>The changes of this value will result in scaling of the image horizontally.</remarks>
-        ///// \deprecated v 4.8. Use Image.OriginalDX instead.
-        ///// \removed493 Removed in 4.9.3
-        //public double GetOriginal_dX()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        ///// <summary>
-        ///// Gets or sets the number of map units per image pixel for y axis.
-        ///// </summary>
-        ///// <remarks>The changes of this value will result in scaling of the image vertically.</remarks>
-        ///// \deprecated v 4.8. Use Image.OriginalDY instead.
-        ///// \removed493 Removed in 4.9.3
-        //public double GetOriginal_dY()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         /// <summary>
         /// Gets the height of the image in pixels.

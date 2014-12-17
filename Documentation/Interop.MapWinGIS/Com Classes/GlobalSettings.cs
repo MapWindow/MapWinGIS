@@ -468,7 +468,7 @@ namespace MapWinGIS
         /// Gets or sets global callback object to report information about progress and errors taking place inside MapWinGIS.
         /// </summary>
         /// <remarks>The callback object set by this property will override all callback set for particular classes 
-        /// (like Shapefile.GlobalCallback, AxMap.GlobalCallback). Also it will automatically display internal GDAL error messages.</remarks>
+        /// (like %Shapefile.GlobalCallback, %AxMap.GlobalCallback). Also it will automatically display internal GDAL error messages.</remarks>
         /// \note It's strongly recommended to use this property rather than setting callback for each and every class.
         /// \new493 Added in version 4.9.3
         public ICallback ApplicationCallback { get; set;}

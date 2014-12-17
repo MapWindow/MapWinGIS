@@ -205,6 +205,7 @@ namespace MapWinGIS
         /// Gets or sets a Callback object which handles progress and error messages.
         /// </summary>
         /// \new493 Added in version 4.9.3
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }

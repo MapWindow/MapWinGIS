@@ -46,6 +46,7 @@ namespace MapWinGIS
         /// <summary>
         /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications.
         /// </summary>
+        /// \deprecated v4.9.3 Use GlobalSettings.ApplicationCallback instead.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }
