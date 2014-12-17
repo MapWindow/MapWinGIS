@@ -120,6 +120,17 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets a value indicating whether calculations are performed taking into account the shape of Earth 
+        /// (when map projection is defined), or on 2D plane (Euclidean geometry).
+        /// </summary>
+        public bool IsUsingEllipsoid { get; private set; }
+
+        /// <summary>
+        /// Gets the length of measured path (in meters if WGS84 compatible projection is set for map and in current map units otherwise).
+        /// </summary>
+        public double Length { get; private set; }
+
+        /// <summary>
         /// Gets or sets value indicating whether vertices of shapes will be highlighted 
         /// on mouse move when interactive editing tools are used.
         /// </summary>

@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+#if nsp
 namespace AxMapWinGIS
 {
+#endif
+
+    /// <summary>
+    /// Holds members that once were a part of %AxMap class. 
+    /// New API members to substitute deprecated ones are listed in description.
+    /// </summary>
     class AxMap_Deprecated
     {
         /// <summary>
@@ -1009,7 +1016,7 @@ namespace AxMapWinGIS
         /// </summary>
         /// <param name="Filename">The name of the file.</param>
         /// <returns>True on success and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
+        /// \removed493 Removed in 4.9.3. Use Utils.IsTiffGrid instead.
         public bool IsTIFFGrid(string Filename)
         {
             throw new NotImplementedException();
@@ -1022,7 +1029,7 @@ namespace AxMapWinGIS
         /// \new48 Added in version 4.8
         /// \deprecated v 4.8 The default value of the property must be used.
         /// \removed493 Removed in 4.9.3
-        public MapWinGIS.tkShapeDrawingMethod ShapeDrawingMethod
+        public tkShapeDrawingMethod ShapeDrawingMethod
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
@@ -1372,15 +1379,7 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Clears labels on the specified drawing layer.
-        /// </summary>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// \removed493 Removed in 4.9.3
-        public void ClearDrawingLabels(int DrawHandle)
-        {
-            throw new NotImplementedException();
-        }
+       
 
         /// <summary>
         /// Gets the value which affects the scaling of labels.
@@ -1513,30 +1512,6 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Gets a boolean value which indicates whether labels of the drawing layer are visible.
-        /// </summary>
-        /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <returns>True in case labels are visible and false otherwise.</returns>
-        /// \removed493 Removed in 4.9.3
-        public bool get_DrawingLabelsVisible(int DrawHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets a boolean value which indicates whether labels of the drawing layer are visible.
-        /// </summary>
-        /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
-        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
-        /// <param name="__p2">True in case labels are visible and false otherwise.</param>
-        /// \removed493 Removed in 4.9.3
-        public void set_DrawingLabelsVisible(int DrawHandle, bool __p2)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Gets a boolean value which indicates whether overlapping labels will be allowed for drawing layer.
         /// </summary>
         /// <remarks>This property corresponds to the Labels.AvoidCollisions property.</remarks>
@@ -1631,17 +1606,6 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Returns a color scheme for the specified layer.
-        /// </summary>
-        /// <param name="LayerHandle">The layer handle of the layer for which the coloring scheme is required</param>
-        /// <returns>The color scheme for the specified layer</returns>
-        /// \removed493 Removed in 4.9.3
-        public object GetColorScheme(int LayerHandle)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Gets the bounding box which holds the extents of the map when rotation is applied.
         /// </summary>
         /// <remarks>The bounding box is equal to the map extents when rotation angle is 0 and larger than 
@@ -1726,4 +1690,6 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
     }
+#if nsp
 }
+#endif

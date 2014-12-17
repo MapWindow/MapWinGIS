@@ -207,7 +207,8 @@ ALIASES                = "new48=\xrefitem newpage48 \"New API 4.8\" \"New API 4.
                          "new490=\xrefitem newpage490 \"New API 4.9.0\" \"New API 4.9.0\"" \
                          "new491=\xrefitem newpage491 \"New API 4.9.1\" \"New API 4.9.1\"" \
                          "new492=\xrefitem newpage492 \"New API 4.9.2\" \"New API 4.9.2\"" \
-                         "new493=\xrefitem newpage493 \"New API 4.9.3\" \"New API 4.9.3\""
+                         "new493=\xrefitem newpage493 \"New API 4.9.3\" \"New API 4.9.3\"" \
+                         "removed493=\xrefitem removed493 \"Removed in 4.9.3\" \"Removed in 4.9.3\""
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only). 
 # A mapping has the form "name=value". For example adding 

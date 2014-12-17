@@ -741,6 +741,17 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Returns a boolean value which indicates whether the specified file holds tiff grid.
+        /// </summary>
+        /// <param name="Filename">The name of the file.</param>
+        /// <returns>True on success and false otherwise.</returns>
+        /// \new493 Added in version 4.9.3 (is moved from AxMap.IsTiffGrid)
+        public bool IsTiffGrid(string Filename)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

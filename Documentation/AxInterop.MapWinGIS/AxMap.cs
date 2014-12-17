@@ -355,6 +355,8 @@ namespace AxMapWinGIS
         /// \addtogroup map_modules Map modules
         /// @{
 
+       
+
         #region Labels
         /// \addtogroup map_labels Map labels
         /// Here is a list of properties and methods to add and remove labels on the map.
@@ -1195,7 +1197,17 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-       
+
+        /// <summary>
+        /// Returns a color scheme for the specified layer.
+        /// </summary>
+        /// <param name="LayerHandle">The layer handle of the layer for which the coloring scheme is required</param>
+        /// <returns>The color scheme for the specified layer</returns>
+        public object GetColorScheme(int LayerHandle)
+        {
+            throw new NotImplementedException();
+        }
+
         /// @}
 
         #endregion
@@ -1742,6 +1754,59 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Clears labels on the specified drawing layer.
+        /// </summary>
+        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        public void ClearDrawingLabels(int DrawHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a boolean value which indicates whether labels of the drawing layer are visible.
+        /// </summary>
+        /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
+        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <returns>True in case labels are visible and false otherwise.</returns>
+        public bool get_DrawingLabelsVisible(int DrawHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Sets a boolean value which indicates whether labels of the drawing layer are visible.
+        /// </summary>
+        /// <remarks>This property corresponds to the Labels.Visible property.</remarks>
+        /// <param name="DrawHandle">The handle of the drawing layer returned by AxMap.NewDrawing method.</param>
+        /// <param name="__p2">True in case labels are visible and false otherwise.</param>
+        public void set_DrawingLabelsVisible(int DrawHandle, bool __p2)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Draws a label on the current drawing layer.
+        /// </summary>
+        /// <param name="Text">Text of the label.</param>
+        /// <param name="x">X coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
+        /// <param name="y">Y coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
+        /// <param name="Rotation">Rotation angle in degrees.</param>
+        /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
+        /// \new493 Added in version 4.9.3
+        int DrawLabel(string Text, double x, double y, double Rotation);
+
+        /// <summary>
+        /// Draws a label on the specified drawing layer.
+        /// </summary>
+        /// <param name="DrawHandle">Handle of the layer.</param>
+        /// <param name="Text">Text of the label.</param>
+        /// <param name="x">X coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
+        /// <param name="y">Y coordinate, in either screen or map units depending on the parameters of AxMap.NewDrawing used to create the layer.</param>
+        /// <param name="Rotation">Rotation angle in degrees.</param>
+        /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
+        /// \new493 Added in version 4.9.3
+        int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation);
 
         /// @}
         #endregion
@@ -2246,10 +2311,53 @@ namespace AxMapWinGIS
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Calculates area of polygon taking into account the shape of Earth.
+        /// </summary>
+        /// <remarks>For the time being only single-part polygons are accepted as input. Calculation are made using 
+        /// <a href = "http://geographiclib.sourceforge.net/html/">GeographicLib</a>.</remarks>
+        /// <param name="polygon">Single part polygon shape defined in coordinates of map.</param>
+        /// <returns>Area of shape in square meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
+        /// \new493 Added in version 4.9.3
+        public double GeodesicArea(Shape polygon)
+        {
+            throw new NotImplementedException();
+        }
+        
+        /// <summary>
+        /// Calculates geodesic distance between 2 points defined in map coordinate system.
+        /// </summary>
+        /// <remarks>To calculate geodesic distance between 2 points in screen coordinates use AxMap.PixelToProj first.
+        ///  Calculation are made using <a href = "http://geographiclib.sourceforge.net/html/">GeographicLib</a>.</remarks>
+        /// <param name="projX1">X coordinate of the first point.</param>
+        /// <param name="projY1">Y coordinate of the first point.</param>
+        /// <param name="projX2">X coordinate of the second point.</param>
+        /// <param name="projY2">Y coordinate of the second point.</param>
+        /// <returns>Distance between 2 points in meters 0.0 if current map projection doesn't support transformation to WGS84</returns>
+        /// \new493 Added in version 4.9.3
+        public double GeodesicDistance(double projX1, double projY1, double projX2, double projY2)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Calculates length of polyline or perimeter of polygon taking into account the shape of Earth.
+        /// </summary>
+        /// <remarks>For the time being only single-part shapes are accepted as input. Calculation are made using 
+        /// <a href = "http://geographiclib.sourceforge.net/html/">GeographicLib</a>.</remarks>
+        /// <param name="polyline">Single part polygon or polyline shape defined in coordinates of map.</param>
+        /// <returns>Length of polyline or perimeter of polygon in meters or 0.0 if current map projection doesn't support transformation to WGS84.</returns>
+        /// \new493 Added in version 4.9.3
+        public double GeodesicLength(Shape polyline)
+        {
+            throw new NotImplementedException();
+        }
+        
+
         /// @}
         #endregion
 
-        #region
+        #region Events
 
         /// \addtogroup map_events Map events
         /// \dot
@@ -2553,7 +2661,16 @@ namespace AxMapWinGIS
         /// no need to run the same checks once again here (like Shape.IsValid). However is some form of custom
         /// rules should be enforced, there is a right place to do it.</remarks>
         public event _DMapEvents_ValidateShapeEventHandler ValidateShape;
-        
+
+        /// <summary>
+        /// This event is fired after grid datasource was added to the map.
+        /// </summary>
+        /// <param name="layerHandle">Handle of the layer.</param>
+        /// <param name="gridFilename">The filename of the original datasource.</param>
+        /// <param name="bandIndex">Index of band which is used for visualization.</param>
+        /// <param name="isUsingProxy">Whether the datasource is rendered by Image class directly or
+        /// by using an RBG image that was created to serve as proxy.</param>
+        public event _DMapEvents_GridOpenedEventHandler GridOpened;
 
         /// @}
         #endregion

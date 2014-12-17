@@ -364,7 +364,7 @@ namespace MapWinGIS
         /// Builds overviews for a raster datasource managed by GDAL.
         /// </summary>
         /// <param name="Filename">Filename of datasource.</param>
-        /// <returns></returns>
+        /// <returns>True on success.</returns>
         public bool BuildGdalOverviews(string Filename)
         {
             throw new NotImplementedException();
@@ -399,6 +399,30 @@ namespace MapWinGIS
         {
             throw new NotImplementedException();
         }
+
+        /// <summary>
+        /// Gets expression to be set for OpenFileDialog.Filter property to select supported datasources.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string CdlgFilter { get; private set; }
+
+        /// <summary>
+        /// Gets expression to be set for OpenFileDialog.Filter property to select raster datasources (both RGB images and grids).
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string CdlgRasterFilter { get; private set; }
+
+        /// <summary>
+        /// Gets expression to be set for OpenFileDialog.Filter property to select vector datasources.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string CdlgVectorFilter { get; private set; }
+
+        /// <summary>
+        /// Gets string with the list of supported GDAL formats.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string SupportedGdalFormats { get; private set; }
 
         /// <summary>
         /// Tries to open specified file as OGR datasource.

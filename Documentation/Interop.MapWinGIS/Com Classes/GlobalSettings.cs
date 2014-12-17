@@ -436,18 +436,6 @@ namespace MapWinGIS
         public bool AutoChooseOgrLoadingMode { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether AxMap.GlobalCallback object should be set as a 
-        /// layer callback (i.e. Shapefile.GlobalCallback, OgrLayer.GlobalCallback) in AxMap.AddLayer method 
-        /// if a layer object doesn't have any callback yet.
-        /// </summary>
-        /// \new493 Added in version 4.9.3
-        public bool AttachMapCallbackToLayers
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
         /// Gets or sets maximum number of shapes within view for hot tracking functionality to work.
         /// </summary>
         /// <remarks>Hot tracking is used by cmIdentify tool and interactive editing tools.</remarks>
@@ -507,6 +495,39 @@ namespace MapWinGIS
         /// \see MaxReprojectionShapeCount
         /// \new493 Added in version 4.9.3
         public bool ReprojectLayersOnAdding { get; set;}
+
+        /// <summary>
+        /// When set to true rendering hint for Labels will be chosen automatically to ensure better performance and visual quality.
+        /// </summary>
+        /// \see Labels.TextRednderingHint
+        /// \new493 Added in version 4.9.3
+        public bool AutoChooseRenderingHintForLabels { get; set;}
+
+        /// <summary>
+        /// When set to true, any labels added to any instance of AxMap won't be rendered.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool ForceHideLabels { get; set;}
+
+        /// <summary>
+        /// Gets the version of GDAL library which current build of MapWinGIS uses.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string GdalVersion { get { throw new NotImplementedException(); } }
+
+        /// <summary>
+        /// When set to true the opening of any OGR layer will be first made with forUpdate parameter. 
+        /// If this first attempt fails, the layer will be opened without update flag.
+        /// </summary>
+        /// \see OgrLayer.SupportsEditing
+        /// \new493 Added in version 4.9.3
+        public bool OgrLayerForceUpdateMode { get; set;}
+
+        /// <summary>
+        /// Gets or set pixel offset mode to be used during the rendering of vector layers.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public tkPixelOffsetMode PixelOffsetMode { get; set;}
     }
 #if nsp
 }

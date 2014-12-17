@@ -51,6 +51,7 @@ namespace MapWinGIS
         /// <summary>
         /// The global callback is the interface used by MapWinGIS to pass progress and error events to interested applications.
         /// </summary>
+        /// \deprecated v 4.9.3 %Point class doesn't define any callback or error messages.
         public ICallback GlobalCallback
         {
             get { throw new NotImplementedException(); }
@@ -60,6 +61,7 @@ namespace MapWinGIS
         /// <summary>
         /// The key may be used by the programmer to store any string data associated with the object.
         /// </summary>
+        /// \deprecated v 4.9.3 Key string is no longer stored for performance reasons and to spare RAM.
         public string Key
         {
             get { throw new NotImplementedException(); }
@@ -69,6 +71,7 @@ namespace MapWinGIS
         /// <summary>
         /// Retrieves the last error generated in the object. 
         /// </summary>
+        /// \deprecated v 4.9.3 %Point class doesn't define any error messages.
         public int LastErrorCode
         {
             get { throw new NotImplementedException(); }
@@ -97,6 +100,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="ErrorCode">The error code for which the error message is required.</param>
         /// <returns>The error message description for the specified error code.</returns>
+        /// \deprecated v 4.9.3 %Point class doesn't define any error messages.
         public string get_ErrorMsg(int ErrorCode)
         {
             throw new NotImplementedException();

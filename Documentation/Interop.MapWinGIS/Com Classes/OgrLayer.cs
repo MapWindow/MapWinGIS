@@ -446,6 +446,14 @@ namespace MapWinGIS
         }
 
         /// <summary>
+        /// Gets name of the driver which is used to access layer datasource.
+        /// </summary>
+        public string DriverName
+       {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// Gets layer name or SQL query which was used to open this layer.
         /// </summary>
         public string GetSourceQuery()

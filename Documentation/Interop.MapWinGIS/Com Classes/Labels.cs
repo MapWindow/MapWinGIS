@@ -1272,14 +1272,24 @@ namespace MapWinGIS
         /// <summary>
         /// Gets or sets rendering hint to be used during GDI+ rendering.
         /// </summary>
+        /// <remarks>This property will be ignored if GlobalSettings.AutoChooseRenderingHintForLabels is set to true.</remarks>
         public tkTextRenderingHint TextRenderingHint
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Gets or sets the formatting to be used for floating point numbers during generation of labels.
+        /// </summary>
+        /// <remarks>See acceptable formats in description of <a href = "http://www.cplusplus.com/reference/cstdio/printf/">C printf function</a>.
+        /// The commonly used values may be: %g (shortest representation), %.2f (two decimal points).</remarks>
+        /// \new493 Added in version 4.9.3
+        public string FloatNumberFormat { get; set; }
+
         /// @}
         #endregion
+
         /// @}
     }
 #if nsp

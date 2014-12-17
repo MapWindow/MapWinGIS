@@ -6,7 +6,7 @@ namespace MapWinGIS
     using System;
 
     /// <summary>
-    /// Holds information about a single line or marker in the line pattern represented by LinePattern class.
+    /// Holds information about a single line or marker in the line pattern represented by %LinePattern class.
     /// </summary>
     /// Here is a diagram for the LineSegment class.
     /// \dot
