@@ -331,7 +331,7 @@ namespace AxMapWinGIS
         }
 
         /// <summary>
-        /// Gets list actions performed by user via interactive Shape Editor. Provides undo/redo capability.
+        /// Gets list actions performed by user via interactive shape editor. Provides undo/redo capability.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public virtual UndoList UndoList
@@ -344,6 +344,15 @@ namespace AxMapWinGIS
         /// </summary>
         /// \new493 Added in version 4.9.3
         public virtual Identifier Identifier
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets instance of shape editor class associated with map which stores data entered by interactive editing tools.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public virtual ShapeEditor ShapeEditor
         {
             get { throw new NotImplementedException(); }
         }
@@ -746,7 +755,7 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets minimum zoom level to be used by zoom bar.
         /// </summary>
-        /// <remarks>This property won't increase the number of avaialbe levels, 
+        /// <remarks>This property won't increase the number of available levels, 
         /// if certain levels aren't supported by the provider they still won't be displayed.</remarks>
         /// \new492 Added in version 4.9.2
         public int ZoomBarMinZoom { get; set; }
@@ -754,13 +763,13 @@ namespace AxMapWinGIS
         /// <summary>
         /// Gets or sets maximum zoom level to be used by zoom bar.
         /// </summary>
-        /// <remarks>This property won't increase the number of avaialbe levels, 
+        /// <remarks>This property won't increase the number of available levels, 
         /// if certain levels aren't supported by the provider they still won't be displayed.</remarks>
         /// \new492 Added in version 4.9.2
         public int ZoomBarMaxZoom { get; set; }
 
         /// <summary>
-        /// Reverts the last operation performed by user in interactive Shape Editor.
+        /// Reverts the last operation performed by user in interactive shape editor.
         /// </summary>
         /// <remarks>This method is preferable over AxMap.UndoList.Undo since it can 
         /// also undo point added during creation of new shape, which are not registered in the undo list.</remarks>

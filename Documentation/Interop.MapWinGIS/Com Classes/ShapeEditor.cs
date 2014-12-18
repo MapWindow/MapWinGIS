@@ -5,8 +5,114 @@ namespace MapWinGIS
 {
 #endif
     /// <summary>
-    /// Provides means for interactive creation and editing of vector shapes.
+    /// Facilitates interactive creation and editing of vector shapes.
     /// </summary>
+    /// <remarks>
+    /// 
+    /// 
+    /// <b>A. General:</b>
+    /// 
+    /// Editor work with layers which have their Shapefile.InteractiveEditing property set to true.
+    /// This may be both regular shapefile layers and OGR layers (shapefile buffer is accessible via OgrLayer.GetBuffer property for them).\n
+    /// 
+    /// <i>In case of OGR layers some other preconditions must also be met to ensure that the changes can be saved back to datasource (see 
+    /// OgrLayer.get_SupportsEditing) even if the interactive editing itself is working.</i>
+    /// 
+    /// Each AxMap control has a single instance of shape editor associated with it available by AxMap.ShapeEditor property. \n
+    /// 
+    /// To start editing operation it's enough to set appropriate tool to AxMap.CursorMode property. The following editing tools are 
+    /// currently available: 
+    /// - cmAddShape, 
+    /// - cmEditShape, 
+    /// - cmMoveShapes, 
+    /// - cmRotateShapes, 
+    /// - cmSplitByPolyline, 
+    /// - cmSplitByPolygon, 
+    /// - cmEraseByPolygon,
+    /// - cmClipByPolygon.
+    /// 
+    /// <b>B. Internal data storage.</b>
+    /// 
+    /// Editor can store points and parts of only a single shape at a time. It supports all major shape types: points, multipoints, 
+    /// polylines, polygons. Points entered by user with mouse are stored in internal buffer which can be accessed with
+    /// ShapeEditor.RawData property. \n
+    /// 
+    /// The data can be validated with ShapeEditor.ValidatedShape. All built-in tools perform validation before saving a new shape to the layer. 
+    /// If validation fails AxMap.ShapeValidationFailed event will be fired to notify the user. 
+    /// Invalid data can be be discarded by pressing Esc button or by calling ShapeEditor.Clear.\n
+    /// 
+    /// <i>This validation behavior will also prevent changing the active tool (AxMap.CursorMode) while the editing operation is in progress.</i>
+    /// 
+    /// The rendering of the point data is carried out independently of the layer. Visualization options can be changed by ShapeEditor.FillColor, 
+    /// ShapeEditor.LineColor, ShapeEditor.FillTransparency. When editing of a new shape starts this properties
+    /// will automatically be set with the values from the parent layer, so the shape being edited will look similar to its layer.
+    /// To force redraw of the editor programatically it's enough to call AxMap.Redraw2 with RedrawDynamicTools parameter. 
+    /// 
+    /// <b>C. Creation of new shapes.</b>
+    /// 
+    /// - activated by settings AxMap.CursorMode = cmAddShape;
+    /// - only creation of single part shapes supported;
+    /// - layer to add the shape to is determined after the first mouse click by handling AxMap.ChooseLayer event;
+    /// - new points can be added by left mouse button;
+    /// - previous points can be removed by Ctrl+Z shortcut;
+    /// - newly entered points by default are snapped to the vertices of exiting shapes (see ShapeEditor.SnapBehavior);
+    /// - to finish the creation of shape Ctrl + left mouse click is used;
+    /// - if the data passes validation, a new shape will automatically be inserted to the specified layer;
+    /// 
+    /// <b>D. Editing of vertices and parts.</b>
+    /// 
+    /// The data from existing shapes during the editing is copied to the editor while the original shape
+    /// is hidden by setting Shapefile.set_ShapeIsHidden to true. After editing is finished and data in ShapeEditor is successfully validated
+    /// original shape is substituted with this new data. If the changes are discarded then Shapefile.set_ShapeIsHidden 
+    /// property of the original shape is simply set to false.
+    /// 
+    /// Editing mode can be activated by settings AxMap.CursorMode = cmEditShape. Clicking on a shape from any layer with interactive 
+    /// editing enabled will start editing session for this shape. After clicking on blank spot of the map without shapes
+    /// an attempt to validate the shape and save the changes will be made. Vertices of shapes available for editing are highlighted
+    /// under mouse cursor (ShapeEditor.HighlightVertices).
+    /// 
+    /// cmEditShape cursor supports 2 behaviors which can be set by ShapeEditor.EditorBehavior property:
+    /// - vertex editor - adding, moving, deleting of vertices; moving a shape as a whole;
+    /// - part editor - moving and deleting of separate shape parts.
+    /// 
+    /// To add new parts to the shape or create holes in polygon, ShapeEditor.StartOverlay method can be used. 
+    /// It allows user to digitize a new polygon which afterwards will be overlayed with original shape in
+    /// either union (eoAddPart) or difference mode (eoRemovePart).
+    /// 
+    /// <b>E. Polyline and polygon overlays:</b>
+    /// 
+    /// Overlays a single vector layer with custom digitized polygon or polyline. Currently the following tools of this type are available:
+    /// - cmSplitByPolyline - splits polylines or polygons into multiple shapes;
+    /// - cmSplitByPolygon - can be used to create a whole in polygon and a separate polygon shape to fill this hole;
+    /// - cmEraseByPolygon - shapes and parts of shapes that intersect with the polygon will be removed from the layer;
+    /// - cmClipByPolygon - only parts of shapes that intersect the polygon will remain, all other shapes will be removed.
+    /// 
+    /// At first the tools work like cmAddShape tool, i.e. allow to digitize either polyline or polygon. After it's finished 
+    /// (Ctrl + left mouse button) and the newly digitized shape is checked for validity, AxMap.ChooseLayer event will be fired.
+    /// If the layer handle provided by user in this event represents vector layer in interactive editing mode, then the requested
+    /// operation will be performed on this layer.
+    /// 
+    /// <b>F. Group operations.</b>
+    /// 
+    /// These operations work on a number of selected shapes within a single layer. The layer can be selected by handing AxMap.ChooseLayer event.
+    /// 
+    /// Currently there are 2 built-in tools available:
+    /// - cmRotateShapes - can rotate selected shapes around the centre of the bounding box;
+    /// - cmMoveShapes - can move selected shapes.
+    /// 
+    /// <i>Technically group operations aren't related to the ShapeEditor class, however they are mentioned here to cover all the available tools.</i>
+    /// 
+    /// <b>G. Undo list.</b>
+    /// 
+    /// All the operations performed by user are registered in so called Undo list (AxMap.UndoList). User can revert them (Ctrl+Z 
+    /// or UndoList.Undo) or apply once again (Ctrl+Shift+Z or UndoList.Redo).
+    /// When interactive editing session is taking place no other editing must be done programatically without registering
+    /// in the Undo list. Otherwise Undo list will become invalid.\n
+    /// 
+    /// \note The fully working implementation of the shape editor can be examined in the the Demo application 
+    /// included in MapWinGIS installation (starting from v4.9.3). The source code for this application is available in
+    /// the <a href = "http://mapwingis.codeplex.com/SourceControl/latest#NET%20Assemblies/Demo/MapWinGIS.Demo.sln">repository</a>.
+    /// </remarks>
     /// \new493 Added in version 4.9.3
     #if nsp
         #if upd
