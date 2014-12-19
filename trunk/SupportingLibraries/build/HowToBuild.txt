@@ -5,17 +5,19 @@
 * October 19, 2014
 ***************************************************
 Since MapWinGIS v4.9.1 we use the pre-build binaries
-of Tamas (http://www.gisinternals.com/sdk).
+of Tamas (http://www.gisinternals.com/).
 This has dramatically simplyfied the build process.
 First download the bins and libs from GisInternals.
 Since MapWinGIS v4.9.3 we use the GDALv2 library.
 At this moment it is not yet formally released so we now use the -development files.
-Browse to http://www.gisinternals.com/sdk/PackageList.aspx?file=release-1600-gdal-mapserver.zip (this is a link not a file!)
+Browse to http://www.gisinternals.com/query.html?content=filelist&file=release-1600-gdal-mapserver.zip (this is a link not a file!)
 and download 
-http://www.gisinternals.com/sdk/Download.aspx?file=release-1600-gdal-mapserver.zip
-http://www.gisinternals.com/sdk/Download.aspx?file=release-1600-gdal-mapserver-libs.zip
+http://download.gisinternals.com/sdk/downloads/release-1600-gdal-mapserver.zip
+http://download.gisinternals.com/sdk/downloads/release-1600-gdal-mapserver-libs.zip
 Because Tamas does not yet provide VS2013 binaries we use his VS2010 (1600) binaries.
-Unzip these files in \MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{platform}\
+Unzip these files in \MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\bin\{platform}\
+\MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\lib\{platform}\
+and \MapWinGIS\trunk\SupportingLibraries\GDAL_SDK\{VS-version}\include
 
 Now you can compile the ocx, using VS2010.
 Don't forget to register it using \MapWinGIS\trunk\bin\Win32\regMapWinGIS.cmd and you are
