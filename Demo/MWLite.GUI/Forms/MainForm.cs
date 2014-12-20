@@ -139,6 +139,16 @@ namespace MWLite.GUI.Forms
             _mapForm = new MapForm();
             _mapForm.Show(dockPanel1, DockState.Document);
             _mapForm.SelectionChanged += (s, e) => RefreshUI();
+            _mapForm.CloseButton = false;
+            
+
+            var form = new DonationForm();
+            form.Show(dockPanel1, DockState.Document);
+            form.CloseButton = false;
+
+            _mapForm.Activate();
+
+            
         }
 
         #endregion

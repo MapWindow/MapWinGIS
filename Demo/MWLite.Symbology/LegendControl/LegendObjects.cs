@@ -18,7 +18,6 @@
 
 using System.Drawing;
 using MWLite.Symbology.Classes;
-using MWLite.Symbology.Classes;
 
 namespace MWLite.Symbology.LegendControl
 {
