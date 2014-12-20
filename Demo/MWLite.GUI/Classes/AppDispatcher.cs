@@ -40,7 +40,9 @@ namespace MWLite.GUI.Classes
         {
             switch (command)
             {
-                
+                case AppCommand.Snapshot:
+                    App.Map.MakeScreenshot(MainForm.Instance);
+                    break;
                 case AppCommand.Search:
                     using (var form = new GeoLocationForm())
                     {

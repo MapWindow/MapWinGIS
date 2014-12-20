@@ -267,6 +267,7 @@
     <Content Include="license.txt" />
     <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.dll" />
     <Content Include="obj\x86\Debug\Interop.MapWinGIS.dll" />
+    <None Include="Resources\Snapshot.png" />
     <None Include="Resources\layer-db-add.png" />
     <None Include="Resources\select_by_polygon.png" />
     <None Include="Resources\layer-create.png" />

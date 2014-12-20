@@ -1,5 +1,4 @@
 ﻿using AxMapWinGIS;
-using MWLite.Symbology;
 using MWLite.Symbology.LegendControl;
 using MapWinGIS;
 using MWLite.Core;
@@ -8,17 +7,11 @@ using MWLite.GUI.Helpers;
 using MWLite.GUI.MapLegend;
 using MWLite.GUI.Properties;
 using MWLite.ShapeEditor;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
 namespace MWLite.GUI.Forms
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
-
     public partial class MainForm : DockContent, IMapApp
     {
         private const string WINDOW_TITLE = "MapWinGIS Demo";
@@ -45,25 +38,25 @@ namespace MWLite.GUI.Forms
 
         private void Init()
         {
-            this.LoadNagscreen();
+            //this.LoadNagscreen();
 
-            this.nagscreen.ProgressLabel.Text = @"Initialize docking ...";
+            //this.nagscreen.ProgressLabel.Text = @"Initialize docking ...";
             InitDockLayout();
 
             PluginHelper.Init(this);
 
             //ToolStripManager.LoadSettings(this);
 
-            this.nagscreen.ProgressLabel.Text = @"Initialize tiling ...";
+            //this.nagscreen.ProgressLabel.Text = @"Initialize tiling ...";
             TilesHelper.Init(mnuTiles);
 
-            this.nagscreen.ProgressLabel.Text = @"Initialize legend ...";
+            //this.nagscreen.ProgressLabel.Text = @"Initialize legend ...";
             InitLegend();
 
-            this.nagscreen.ProgressLabel.Text = @"Initialize menus ...";
+            //this.nagscreen.ProgressLabel.Text = @"Initialize menus ...";
             this.InitMenus();
 
-            this.nagscreen.ProgressLabel.Text = @"Initialize screen ...";
+            //this.nagscreen.ProgressLabel.Text = @"Initialize screen ...";
             RefreshUI();
 
             var gs = new GlobalSettings();
@@ -75,16 +68,16 @@ namespace MWLite.GUI.Forms
 
             App.Project.ProjectChanged += (s, e) => RefreshUI();
 
-            this.nagscreen.ProgressLabel.Text = @"Loading last project ...";
+            //this.nagscreen.ProgressLabel.Text = @"Loading last project ...";
             App.Project.Load(AppSettings.Instance.LastProject);
-            this.nagscreen.ProgressLabel.Text = @"Ready ...";
+            //this.nagscreen.ProgressLabel.Text = @"Ready ...";
         }
 
         private void LoadNagscreen()
         {
             // TODO: Make this somehow async, because the webpage is shown after the MainForm is shown
             this.nagscreen = new Nagscreen { Owner = this };
-            if (Settings.Default.ShowNagScreen)
+            if (false) // Settings.Default.ShowNagScreen)
             {
                 this.nagscreen.Show(this);
                 Application.DoEvents();

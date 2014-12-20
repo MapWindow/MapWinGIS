@@ -28,5 +28,6 @@
         SelectByPolygon = 23,
         HighlightShapes =24,
         AddDatabase = 25,
+        Snapshot = 26,
     }
 }

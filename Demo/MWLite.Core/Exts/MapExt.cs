@@ -1,6 +1,8 @@
 ﻿using System;
 using AxMapWinGIS;
 using MapWinGIS;
+using System.Windows.Forms;
+using MWLite.Core.UI;
 
 namespace MWLite.Core.Exts
 {
@@ -97,6 +99,31 @@ namespace MWLite.Core.Exts
                 return map.FileManager.CdlgVectorFilter;
             }
             return "All files|*.*";
+        }
+
+        public static void MakeScreenshot(this AxMap map, Form parentForm)
+        {
+            var ext = map.Extents as MapWinGIS.Extents;
+
+            var img = map.SnapShot3(ext.xMin, ext.xMax, ext.yMax, ext.yMin, map.Width);
+            if (img != null)
+            {
+                using (var dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "*.jpg|*.jpg";
+                    if (dlg.ShowDialog(parentForm) == DialogResult.OK)
+                    {
+                        if (!img.Save(dlg.FileName, false, ImageType.JPEG_FILE))
+                        {
+                            MessageHelper.Warn("Failed to save image: " + img.get_ErrorMsg(img.LastErrorCode));
+                        }
+                        else
+                        {
+                            MessageHelper.Warn("Image is saved: " + dlg.FileName);
+                        }
+                   }
+                }
+            }
         }
     }
 }

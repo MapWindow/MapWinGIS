@@ -176,7 +176,7 @@ namespace MWLite.Symbology.Forms.Utilities
             {
                 lblDescription.Text = Globals.GetSymbologyDescription(SymbologyType.Random);
                 lblDescription.Refresh();
-                MapWinGIS.Shapefile sf = axMap1.get_Shapefile(handle);
+                var sf = axMap1.get_Shapefile(handle);
                 if (!axMap1.DeserializeLayer(handle, m_initState))
                 {
                     Globals.MessageBoxError("Error while loading options");
