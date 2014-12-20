@@ -20,9 +20,15 @@
         .domain::before {
             content: "\0040"; /* Unicode character for @ symbol */
         }
-  #dummy {
-    display: none;
-  }
+		#dummy {
+			display: none;
+		}
+		.lastrow {
+			margin-bottom: 0px;
+		}
+		.contents{
+			margin-top:0px;
+		}
     </style>
 
 </head>
@@ -30,103 +36,121 @@
 
     <div class="header">
         <div class="headertitle">
-            <div class="title">MapWindow Open Source GIS Lite v4.9</div>
+            <!--<div class="title">MapWindow Open Source GIS Lite v4.9</div>-->
         </div>
     </div><!--header-->
-    <div class="contents">
-        <div class="textblock" style="max-width: 700px; float:left;">
-            <p>
-                Thank you for using MapWindow GIS Lite v4.9<br />
-                This version is a Lite version of <a href="https://mapwindow4.codeplex.com/releases/" target="_blank" title="Click here to download MapWindow v4.8.8.exe">MapWindow v4.8.8</a>, 
-                but uses <a href="https://mapwingis.codeplex.com/releases" target="_blank" title="Click here to download MapWinGIS v4.9 ocx">MapWinGIS v4.9</a> (the ActiveX control).
-            </p>
-            <img src="MapWindow49.png" width="640" height="387" alt="Screenshot MapWindow v4.9" />
+    <div class="contents" style="margin-top:0px;">
+        <div class="textblock" style="max-width: 960px; float:left;">
+			<p>This is demo of the <a href="http://mapwingis.codeplex.com" target="_blank" title="MapWinGIS.ocx is used to provide GIS and mapping functionality to any Windows Forms based application.">MapWinGIS ActiveX control</a>. 
+      Similar custom GIS application can be built based on this app or on the barebone MapWinGIS control in a matter of days. 
+      Here is the <a href="http://mapwingis.codeplex.com/SourceControl/latest#NET Assemblies/Demo/MapWinGIS.Demo.sln" target="_blank">source code</a> of this project.</p>
+			
+			<p>The development of this project depends on the public donations. Our plans include further development of MapWinGIS core library and also releasing a new version of MapWindow desktop GIS based on it, 
+      which will be called <a href="http://mapwindow5.codeplex.com" target="_blank">MapWindow 5</a>. This demo can be considered the first version of it.  Below is an overview of perspective features for each project.
+			</p>
+      <p></p>
 
-            <h2>MapWindow v5</h2>
+			<table cellpadding= "5">
+				<tr>
+					<td valign="bottom">
+						<img width = "300" src="https://download-codeplex.sec.s-msft.com/Download?ProjectName=mapwindow5&DownloadId=826103&Build=20959" />
+					</td>
+					<td>
+						<img width = "300" src="http://download-codeplex.sec.s-msft.com/Download?ProjectName=mapwingis&DownloadId=169766&Build=20959" />
+					</td>
+				</tr>
+				<tr>
+					<td valign="top" width="50%">
+						<b>Basic architecture:</b><br /><br />
+						a) .NET wrappers for MapWinGIS classes;<br/>
+						<ul>
+							<li> more object oriented (Layer, Feature classes);
+							<li> the use of .NET interfaces (IEnumerable, IDisposable);
+							<li> possible support of <a href="https://github.com/NetTopologySuite/GeoAPI" target="_blank">GeoAPI library;</a>
+						</ul>
+						b) Flexible plug-in and GIS toolbox interfaces using <a href="http://en.wikipedia.org/wiki/Managed_Extensibility_Framework" target="_blank">MEF</a>;
+						<br/>
+						c) Written completely in C#/.NET 4.5;<br/>
+            d) <a href="http://www.jetbrains.com/resharper/" target="_blank">ReSharper</a> and StyleCop compliant;<br/>
+						
+
+						<br/>
+						<b>Existing functionality to be reworked under new architecture:</b><br/>
+						<ul>
+							<li> Table Editor (<a href="http://www.syncfusion.com/products/windows-forms/grid-control" target="_blank">Syncfusion's Grid control</a>);</li>
+							<li> Projections support, including easy search by EPSG-code;</li>
+							<li> GIS toolbox based on MEF interfaces;</li>
+							<li> Printing / layout plug-in;</li>
+              <li> Legend control;</li>
+              <li> Symbology editor;</li>
+              <li> Tiles support;</li>
+						</ul>
+
+						<b>New functionality:</b><br/>
+						<ul class="lastrow">
+              <li> Make the ocx registry-free using a manifest file as mentioned <a href="http://msdn.microsoft.com/en-us/library/fh1h056h.aspx" target="_blank" title="Registration-Free COM Interop">here</a>;</li>
+              <li> Make a ClickOnce deployment with automated updates;</li>
+							<li> GUI to set up visualization of raster layers;</li> 
+							<li> Data repository/browser for files, databases and servers;</li> 
+							<li> New add layer GUI, to set option before loading; </li> 
+              <li> Add logging using <a href="http://logging.apache.org/log4net/" target="_blank" title="The Apache log4net library is a tool to help the programmer output log statements to a variety of output targets">Log4Net</a> or <a href="https://github.com/nlog/NLog/" target="_blank" title="NLog is a free logging platform for .NET with rich log routing and management capabilities">NLog</a>;</li>
+						</ul>
+					</td>
+					<td valign="top" width="50%">
+						<b>Improvement of the existing functionality:</b>
+						<ul>
+							<li> Further integration with OGR (better support of large layers); </li>
+							<li> Asynchronous rendering for large datasources; </li>                      
+							<li> Extending Unicode support (it's not complete yet);</li>
+              <li> Add support for the new <a href="http://www.geopackage.org/spec/" target="_blank" title="OGC® GeoPackage Encoding Standard">GeoPackage format</a>, which is already supported bij GDAL/OGR;</li>
+              <li> Implement missing GDAL/OGR tools, like <a href="http://www.gdal.org/gdal_grid.html" target="_blank" title="Creates regular grid from the scattered data">gdal_grid.exe</a></li>
+						</ul class="lastrow">
+						<b>Support of various GIS Web Services:</b>
+						<ul>
+              <li><a href="http://en.wikipedia.org/wiki/Web_Feature_Service" target="_blank">Web Feature Service (WFS);</a></li>
+              <li><a href="http://en.wikipedia.org/wiki/Web_Map_Service" target="_blank">Web Map Service (WMS);</a></li>
+              <li><a href="http://en.wikipedia.org/wiki/Web_Coverage_Service" target="_blank">Web Coverage Service (WCF);</a></li>
+              <li><a href="http://en.wikipedia.org/wiki/Web_Map_Tile_Service" target="_blank">Web Map Tile Service (WMTS);</a></li>
+              <li><a href="http://en.wikipedia.org/wiki/Catalog_Service_for_the_Web" target="_blank">Catalog Service for the Web (CSW);</a></li>
+						</ul>
+					</td>
+				</tr>
+			</table>
+		
+			<p>
+				To make new MapWindow 5 GIS possible we need to raise $6000. Assuming enough funding will be donated before the end of January 2015, 
+        we can have the first beta of MapWindow v5 ready for downloading late May 2015.<br />
+        When donating you not only have the good feeling that you are part of the new MapWindow, but you also get some benefits.<br />
+        Your name or your companies name will be listed on this page. For every $25 you can send in an wish for the MapWindow v5 wishlist.<br />
+			</p>
             <p>
-                In 2015 we would like to start with the development of MapWindow v5.<br />
-                This version will be a complete rewritten version of the .NET part of MapWindow. The lasts years we've investigated a lot of time and effort in optimizing the C++ part of MapWindow:
-                <a href="https://mapwingis.codeplex.com/" target="_blank" title="MapWinGIS.ocx is a FREE and OPEN SOURCE C++ based geographic information system programming ActiveX Control and
-                   application programmer interface (API)">MapWinGIS</a> and it is now time to start with the overhaul of the .NET part.
-            </p>
-            <h3>Donations</h3>
-            <p>
-                To be able to start with the development we need some funding. With just $6,000 we can build the first beta of MapWindow v5, which will
-                include the new architecture, the features of MapWindow v4.9 (PostGIS support, Shapefile Editor, grid proxy files, GDALv2.0) and at least 1 plug-in and 1 tool for the toolkit.<br />
-                Assuming enough funding will be donated before the end of Januari 2015, we can have the first beta of MapWindow v5 ready for downloading late May 2015.
-            </p>
-            <p>
-                Donating is simple using PayPal:
+				Donating is simple using PayPal:
+			</p>
+			<p>
 <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
 <input type="hidden" name="cmd" value="_s-xclick">
 <input type="hidden" name="hosted_button_id" value="MVKZBU3TK72DC">
 <input type="image" src="https://www.paypalobjects.com/en_US/GB/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online.">
 <img alt="" border="0" src="https://www.paypalobjects.com/nl_NL/i/scr/pixel.gif" width="1" height="1">
 </form>                
-                If you can't use PayPal you can send me <a href="mailto:infoATmapwindowDOTnl" onclick="this.href=this.href.replace(/AT/,'&#64;').replace(/DOT/,'&#46;')">
+                
+				<br /><i>If you can't use PayPal you can send me <a href="mailto:infoATmapwindowDOTnl" onclick="this.href=this.href.replace(/AT/,'&#64;').replace(/DOT/,'&#46;')">
                                                             a message
-                                                        </a> and I'll send you a bank account number you can use instead.                                                        
-            </p>
-            <p>
-              We have a user base of over 10,000 users so it should be able to raise the needed funds. If only 12% of our users would donate just $5 we would have enough to start.<br />
-              When donating you not only have the good feeling that you are part of the new MapWindow, but you also get some benefits.<br />
-              Your name or your companies name will be listed on this page. For every $25 you can send in an wish for the MapWindow v5 wishlist.<br />
-              When we raised enough money we will put this wishlist up for voting and everybody can vote for it and the wishes with the highest votes will be developed first.
+                                                        </a> and I'll send you a bank account number you can use instead.</i>                                                        
             </p>
             
-            <p>          
-              If you are not in a position to donate, you can also go reguarly to this page or the <a href="http://www.mapwindow.org/documentation/mapwingis4.9/" target="_blank">documentation pages</a>.
-              They have some ads at the bottom you can click. For just showing the ad we already get a small fee.
-            </p>
-            
+			
+			
+			<p>
+				If you are a developer using MapWinGIS and would like to see certain new functionality to be implemented in a speedy fashion
+				please contact us on the matter using <a href="mailto:infoATmapwindowDOTnl" onclick="this.href=this.href.replace(/AT/,'&#64;').replace(/DOT/,'&#46;')">this address</a>.
+			</p>
+			
             <p>
               If you are an experienced C# developer, a software architect or a software tester you could also donate some of your time and help us with the development. 
-              We can always use more enthousiastic people that are willing to help out for free or a very small fee.<br />
+              We can always use more enthusiastic people that are willing to help.<br />
               Being part of an Open Source project looks great on your resume and on LinkedIn ;)
             </p>
-
-            <h2>Donators</h2>
-            <ul>
-                <li>Sergei Leschinsky</li>
-                <li>Paul Meems</li>
-                <li>You?</li>
-            </ul>
-
-            <h2>Wish list</h2>
-            Mid Januari 2015 this list will be up for voting. The list below is still unordered.
-            <ul>
-                <li>Loose coupling of MapWindow and MapWinGIS using a wrapper</li>
-                <li>Enhancing new wrapper with IEnumerable, IDisposable interfaces, hiding obsolete members, supplying some additional logic - things useful for plugin writers</li>
-                <li>Legend control, like in MWv4.8.8</li>
-                <li>Projections support, like in MWv4.8.8, including easy searching on EPSG-code</li>
-                <li>Tiles support, like in MWv4.8.8</li>
-                <li>Symbology support, like in MWv4.8.8</li>
-                <li>Enhance Symbology GUI, for raster layers</li>
-                <li>Print/lay-out control, like in MWv4.8.8</li>
-                <li>Add GUI for opening images and grids</li>
-                <li>Add GUI for opening shapefiles</li>
-                <li>Add a fast table editor that can handle large data. Perhaps use <a href="http://www.syncfusion.com/products/windows-forms/grid-control" target="_blank">Syncfusion's Grid control</a></li>
-                <li>Layer class to communicate with map control</li>
-                <li>Data repository/browser for files, databases and servers</li>
-                <li>Make the code ReSharper and StyleCop compliant</li>
-                <li>Investigate if we can make the ocx registry-free using a manifest file as mentioned <a href="http://msdn.microsoft.com/en-us/library/fh1h056h.aspx" target="_blank" title="Registration-Free COM Interop">here</a>.</li>
-                <li>Investigate if we can make a ClickOnce deployment with automated updates, releated to making the ocx registry-free.</li>
-                <li>Investigate how to best support the new <a href="http://www.geopackage.org/spec/" target="_blank" title="OGC® GeoPackage Encoding Standard">GeoPackage format</a>, which is already supported bij GDAL/OGR.</li>
-                <li>Add logging like <a href="http://logging.apache.org/log4net/" target="_blank" title="The Apache log4net library is a tool to help the programmer output log statements to a variety of output targets">Log4Net</a> or <a href="https://github.com/nlog/NLog/" target="_blank" title="NLog is a free logging platform for .NET with rich log routing and management capabilities">NLog</a></li>
-                <li>Investigate if we can/should use the <a href="https://github.com/NetTopologySuite/GeoAPI" target="_blank" title="GeoAPI.NET project provides a common framework based on OGC/ISO standards to improve interoperability among .NET GIS projects">GeoAPI library</a></li>
-                <li>Use the <a href="http://msdn.microsoft.com/en-us/library/dd460648%28v=vs.110%29.aspx" target="_blank" title="The Managed Extensibility Framework or MEF is a library for creating lightweight, extensible applications.">Managed Extensibility Framework</a> for the plug-ins and tools of the toolbox</li>
-                <li>Use the new features of .NET framework, like the <a href="http://msdn.microsoft.com/en-us/library/hh191443.aspx" target="_blank" title="Asynchronous Programming with Async and Await">async/await design pattern</a>, <a href="http://msdn.microsoft.com/en-us/library/dd264736.aspx" target="_blank" title="Using Type dynamic">dynamic variables</a> and <a href="http://msdn.microsoft.com/en-us/library/ms171868%28v=vs.110%29.aspx#v452" target="_blank" title="What's new in the .NET Framework 4.5.2">such</a>.</li>
-                <li>Make tools for the toolbox of most <a href="http://www.gdal.org/gdal_utilities.html" target="_blank">GDAL/OGR</a> options</li>
-                <li>Make tools for the toolbox of most <a href="http://geos.osgeo.org/doxygen/index.html" target="_blank">GEOS</a> options</li>
-                <li>Support <a href="http://en.wikipedia.org/wiki/Web_Feature_Service" target="_blank">WFS – Web Feature Service: for retrieving or altering feature descriptions</li>
-                <li>Support <a href="http://en.wikipedia.org/wiki/Web_Map_Service" target="_blank">WMS – Web Map Service: provides map images</li>
-                <li>Support <a href="http://en.wikipedia.org/wiki/Web_Coverage_Service" target="_blank">WCS – Web Coverage Service: provides access, subsetting, and processing on coverage objects</li>
-                <li>Support <a href="http://en.wikipedia.org/wiki/Web_Map_Tile_Service" target="_blank">WMTS – Web Map Tile Service: provides map image tiles</li>
-                <li>Support <a href="http://en.wikipedia.org/wiki/Catalog_Service_for_the_Web" target="_blank">CSW</a> – Catalog Service for the Web: access to catalog information</li>
-                <li>Implement <a href="http://www.gdal.org/gdal_grid.html" target="_blank" title="Creates regular grid from the scattered data">gdal_grid.exe</a></li>
-                <li>Support the <a href="http://erouault.blogspot.fr/2014/12/gdal-geopackage-raster-support.html" target="_blank" title="GDAL GeoPackage raster format">GDAL GeoPackage raster format</a></li>
-                <li>Show usefull tips on start-up, like QGis does</li>
-            </ul>
         </div>
         
         <div id="ads" style="float:left; padding-left:10px;text-align:right;">
