@@ -71,6 +71,7 @@
             this.axMap1.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axMap1.OcxState")));
             this.axMap1.Size = new System.Drawing.Size(402, 264);
             this.axMap1.TabIndex = 3;
+            this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
             // 
             // MapForm
             // 

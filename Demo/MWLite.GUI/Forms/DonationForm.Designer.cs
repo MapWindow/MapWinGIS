@@ -43,7 +43,7 @@
             this.webBrowser1.Size = new System.Drawing.Size(284, 261);
             this.webBrowser1.TabIndex = 3;
             this.webBrowser1.Url = new System.Uri("http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=M" +
-        "Wv49&utm_medium=cpc&utm_campaign=nagscreen", System.UriKind.Absolute);
+        "Wv49&utm_medium=cpc&utm_campaign=MWv5Promotions", System.UriKind.Absolute);
             this.webBrowser1.WebBrowserShortcutsEnabled = false;
             // 
             // DonationForm

@@ -21,8 +21,6 @@ namespace MWLite.GUI.Forms
         private LegendDockForm _legendForm = null;
         private MapCallback _callback = null;
 
-        private Nagscreen nagscreen;
-
         public MainForm()
         {
             InitializeComponent();
@@ -38,25 +36,18 @@ namespace MWLite.GUI.Forms
 
         private void Init()
         {
-            //this.LoadNagscreen();
-
-            //this.nagscreen.ProgressLabel.Text = @"Initialize docking ...";
             InitDockLayout();
 
             PluginHelper.Init(this);
 
             //ToolStripManager.LoadSettings(this);
 
-            //this.nagscreen.ProgressLabel.Text = @"Initialize tiling ...";
             TilesHelper.Init(mnuTiles);
 
-            //this.nagscreen.ProgressLabel.Text = @"Initialize legend ...";
             InitLegend();
 
-            //this.nagscreen.ProgressLabel.Text = @"Initialize menus ...";
             this.InitMenus();
 
-            //this.nagscreen.ProgressLabel.Text = @"Initialize screen ...";
             RefreshUI();
 
             var gs = new GlobalSettings();
@@ -68,26 +59,7 @@ namespace MWLite.GUI.Forms
 
             App.Project.ProjectChanged += (s, e) => RefreshUI();
 
-            //this.nagscreen.ProgressLabel.Text = @"Loading last project ...";
             App.Project.Load(AppSettings.Instance.LastProject);
-            //this.nagscreen.ProgressLabel.Text = @"Ready ...";
-        }
-
-        private void LoadNagscreen()
-        {
-            // TODO: Make this somehow async, because the webpage is shown after the MainForm is shown
-            this.nagscreen = new Nagscreen { Owner = this };
-            if (false) // Settings.Default.ShowNagScreen)
-            {
-                this.nagscreen.Show(this);
-                Application.DoEvents();
-            }
-            else
-            {
-                // Still show for the ads, but hidden:
-                this.nagscreen.Visible = false;
-                var dummy = this.nagscreen.Handle; // forces the form Control to be created
-            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)

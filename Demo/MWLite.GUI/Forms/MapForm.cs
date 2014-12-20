@@ -13,6 +13,8 @@ using System.Diagnostics;
 
 namespace MWLite.GUI.Forms
 {
+    using System.IO;
+
     public partial class MapForm : DockContent
     {
         public event EventHandler<SelectionChangedArgs> SelectionChanged;
@@ -207,6 +209,20 @@ namespace MWLite.GUI.Forms
         public void HideTooltip()
         {
             toolTip1.SetToolTip(Map, "");
+        }
+
+        /// <summary>
+        /// The file dropped of the map control
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void AxMap1FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
+        {
+            Helpers.LayerHelper.AddLayer(this.axMap1.FileManager.Open(e.filename), Path.GetFileNameWithoutExtension(e.filename));
         }
     }
 }

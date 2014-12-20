@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MWLite.GUI</RootNamespace>
-    <AssemblyName>MWLite.GUI</AssemblyName>
+    <AssemblyName>MapWindowLite</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,6 +29,9 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\MapWindow.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -66,7 +69,9 @@
     <Compile Include="Controls\LocationControl.Designer.cs">
       <DependentUpon>LocationControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\DonationForm.cs" />
+    <Compile Include="Forms\DonationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\DonationForm.Designer.cs">
       <DependentUpon>DonationForm.cs</DependentUpon>
     </Compile>
@@ -75,12 +80,6 @@
     </Compile>
     <Compile Include="Forms\LoaderForm.Designer.cs">
       <DependentUpon>LoaderForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Nagscreen.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Nagscreen.Designer.cs">
-      <DependentUpon>Nagscreen.cs</DependentUpon>
     </Compile>
     <Compile Include="MapLegend\LegendCommand.cs" />
     <Compile Include="MapLegend\LegendDispatcher.cs" />
@@ -136,9 +135,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LoaderForm.resx">
       <DependentUpon>LoaderForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Nagscreen.resx">
-      <DependentUpon>Nagscreen.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SetProjectionForm.resx">
       <DependentUpon>SetProjectionForm.cs</DependentUpon>
@@ -274,6 +270,7 @@
     <Content Include="license.txt" />
     <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.dll" />
     <Content Include="obj\x86\Debug\Interop.MapWinGIS.dll" />
+    <Content Include="Resources\MapWindow.ico" />
     <None Include="Resources\Snapshot.png" />
     <None Include="Resources\layer-db-add.png" />
     <None Include="Resources\select_by_polygon.png" />
