@@ -5984,7 +5984,7 @@ library MapWinGIS
 			[id(130), propput] void DrawingLabelsVisible(long drawHandle, VARIANT_BOOL bNewValue);
 #endif
 
-#ifdef OLD_API   // excluded from public API in v4.9.3 Beta
+
 			
 #define SHAPE_LAYER_API
 #ifdef SHAPE_LAYER_API
@@ -6017,6 +6017,8 @@ library MapWinGIS
 			[id(147), propget] VARIANT_BOOL ShapeLayerStippleTransparent(long LayerHandle);
 			[id(147), propput] void ShapeLayerStippleTransparent(long LayerHandle, VARIANT_BOOL nNewValue);
 #endif
+
+#ifdef OLD_API   // excluded from public API in v4.9.3 Beta
 
 #define IMAGE_LAYER_API
 #ifdef IMAGE_LAYER_API

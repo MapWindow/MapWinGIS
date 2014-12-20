@@ -226,7 +226,7 @@ void CMapView::RedrawTiles(Gdiplus::Graphics* g, CDC* dc)
 		CTiles* tiles = (CTiles*)_tiles;
 		if (_isSnapshot)
 		{
-			if (tiles->TilesAreInScreenBuffer((void*)this))
+			//if (tiles->TilesAreInScreenBuffer((void*)this))
 			{
 				tiles->MarkUndrawn();
 				DrawTiles(g);
