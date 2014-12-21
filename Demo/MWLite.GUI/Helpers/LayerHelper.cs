@@ -16,24 +16,10 @@ namespace MWLite.GUI.Helpers
 {
     internal static class LayerHelper
     {
-        public static void AddLayer(object layer, string layerName)
+        public static void AddLayer(object layer)
         {
-            var legend = App.Legend;
-            if (layer != null)
-            {
-                int handle = legend.Layers.Add(layer, true);
-                if (handle != -1) { 
-                    //legend.Layers[handle].Name = layerName;
-                    var sf = legend.Layers[handle].GetObject() as Shapefile;
-                    if (sf != null)
-                    {
-                        if (sf.NumShapes != sf.Table.NumRows)
-                        {
-                            MessageHelper.Info("Number of shapes doesn't match the number of records.");
-                        }
-                    }
-                }
-            }
+            if (layer == null) return;
+            App.Legend.Layers.Add(layer, true);
         }
 
         public static void AddLayer(LayerType layerType)
@@ -57,19 +43,24 @@ namespace MWLite.GUI.Helpers
                 {
                     layerName = name;
                     var layer = fm.Open(name);
-                    if (layer is OgrDatasource)
+                    if (layer == null)
+                    {
+                        string msg = string.Format("Failed to open datasource: {0} \n {1}", name, fm.ErrorMsg[fm.LastErrorCode]);
+                        MessageHelper.Warn(msg);
+                    }
+                    else if (layer is OgrDatasource)
                     {
                         var ds = layer as OgrDatasource;
                         for (int i = 0; i < ds.LayerCount; i++)
                         {
                             var l = ds.GetLayer(i, false);
-                            AddLayer(l, l.Name);
+                            AddLayer(l);
                         }
                         map.ZoomToMaxExtents();
                     }
                     else
                     { 
-                        AddLayer(layer, Path.GetFileName(layerName));
+                        AddLayer(layer);
                     }
                 }
             }
@@ -131,7 +122,7 @@ namespace MWLite.GUI.Helpers
                 form.LayerAdded += (s, e) =>
                 {
                     if (e.Layer == null) return;
-                    AddLayer(e.Layer, e.Layer.Name);
+                    AddLayer(e.Layer);
                     App.Map.Refresh();
                     App.Legend.Refresh();
                 };

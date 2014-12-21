@@ -120,14 +120,30 @@ namespace MWLite.GUI.Forms
 
         void axMap1_LayerReprojected(object sender, _DMapEvents_LayerReprojectedEvent e)
         {
-            Debug.WriteLine("Layer reprojected:" + e.success);
+            if (!e.success)
+            {
+                string filename = axMap1.get_LayerFilename(e.layerHandle);
+                MessageHelper.Warn("Failed to reproject the layer: " + filename);
+            }
+            else
+            {
+                Debug.WriteLine("Layer reprojected:" + e.success);    
+            }
         }
 
         void axMap1_ProjectionMismatch(object sender, _DMapEvents_ProjectionMismatchEvent e)
         {
-            Debug.Print("Projection mismatch");
-            e.reproject = tkMwBoolean.blnTrue;
-            e.cancelAdding = tkMwBoolean.blnFalse;
+            var sf = axMap1.get_Shapefile(e.layerHandle);
+            if (sf != null)
+            {
+                e.reproject = tkMwBoolean.blnTrue;
+                e.cancelAdding = tkMwBoolean.blnFalse;
+            }
+            else
+            {
+                string filename = axMap1.get_LayerFilename(e.layerHandle);
+                MessageHelper.Info("Layer projection doesn't match the projection of the map: " + filename);
+            }
         }
 
         void axMap1_LayerProjectionIsEmpty(object sender, _DMapEvents_LayerProjectionIsEmptyEvent e)
@@ -222,7 +238,7 @@ namespace MWLite.GUI.Forms
         /// </param>
         private void AxMap1FileDropped(object sender, _DMapEvents_FileDroppedEvent e)
         {
-            Helpers.LayerHelper.AddLayer(this.axMap1.FileManager.Open(e.filename), Path.GetFileNameWithoutExtension(e.filename));
+            Helpers.LayerHelper.AddLayer(this.axMap1.FileManager.Open(e.filename));
         }
     }
 }
