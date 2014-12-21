@@ -160,6 +160,10 @@ public:
 	STDMETHOD(put_OgrLayerForceUpdateMode)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ForceHideLabels)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ForceHideLabels)(VARIANT_BOOL newVal);
+	STDMETHOD(get_GdalPluginPath)(BSTR* pVal);
+	STDMETHOD(put_GdalPluginPath)(BSTR newVal);
+	STDMETHOD(get_GdalDataPath)(BSTR* pVal);
+	STDMETHOD(put_GdalDataPath)(BSTR newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

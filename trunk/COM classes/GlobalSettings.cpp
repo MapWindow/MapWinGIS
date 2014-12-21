@@ -901,3 +901,37 @@ STDMETHODIMP CGlobalSettings::put_ForceHideLabels(VARIANT_BOOL newVal)
 	m_globalSettings.forceHideLabels = newVal ? true : false;
 	return S_OK;
 }
+
+// ***************************************************************
+//		GdalPluginPath
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_GdalPluginPath(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CStringW path = GdalHelper::GetConfigPath(PathGdalPlugins);
+	*pVal = W2BSTR(path);
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GdalPluginPath(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	GdalHelper::SetConfigPath(PathGdalPlugins, OLE2W(newVal));
+	return S_OK;
+}
+
+// ***************************************************************
+//		GdalDataPath
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_GdalDataPath(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	CStringW path = GdalHelper::GetConfigPath(PathGdalData);
+	*pVal = W2BSTR(path);
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_GdalDataPath(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	GdalHelper::SetConfigPath(PathGdalData, OLE2W(newVal));
+	return S_OK;
+}

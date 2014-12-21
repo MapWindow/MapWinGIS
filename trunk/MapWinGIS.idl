@@ -5358,6 +5358,10 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(49)] HRESULT OgrLayerForceUpdateMode([in] VARIANT_BOOL newVal);
 	[propget, id(50)] HRESULT ForceHideLabels([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(50)] HRESULT ForceHideLabels([in] VARIANT_BOOL newVal);
+	[propget, id(51)] HRESULT GdalPluginPath([out, retval] BSTR* pVal);
+	[propput, id(51)] HRESULT GdalPluginPath([in] BSTR newVal);
+	[propget, id(52)] HRESULT GdalDataPath([out, retval] BSTR* pVal);
+	[propput, id(52)] HRESULT GdalDataPath([in] BSTR newVal);
 };
 
 [

@@ -602,6 +602,7 @@ void GdalHelper::SetConfigPath(GdalPath option, CStringW newPath)
 	m_globalSettings.SetGdalUtf8(false);
 
 	if (option == PathGdalPlugins) {
+		SetDllDirectoryW(L"");
 		CStringW ocxPath = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
 		SetDllDirectoryW(ocxPath);
 	}
