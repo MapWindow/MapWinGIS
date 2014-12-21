@@ -566,7 +566,7 @@ CStringW GdalHelper::GetDefaultConfigPath(GdalPath option)
 			path += L"\\gdal-data\\";
 			break;
 		case PathGdalPlugins:
-			path += L"\\gdal\\plugins\\";
+			path += L"\\gdalplugins\\";
 			break;
 	}
 	return path;
@@ -605,6 +605,12 @@ void GdalHelper::SetConfigPath(GdalPath option, CStringW newPath)
 		SetDllDirectoryW(L"");
 		CStringW ocxPath = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
 		SetDllDirectoryW(ocxPath);
+	}
+
+	if (!Utility::DirExists(newPath)) 
+	{
+		USES_CONVERSION;
+		CallbackHelper::ErrorMsg(Debug::Format("The specified folder doesn't exist: %s", W2A(newPath)));
 	}
 
 	USES_CONVERSION;

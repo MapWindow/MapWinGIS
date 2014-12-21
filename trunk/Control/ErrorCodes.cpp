@@ -80,7 +80,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkFAILED_TO_ALLOCATE_MEMORY:
 			return "Failed to allocate memory";
 		case tkUNSUPPORTED_FORMAT:
-			return "Operation isn't supported for this file format";
+			return "Unsupported datasource format. It may be caused by GlobalSettings.GdalPluginPath pointing to the wrong folder.";
 		case tkPROPERTY_DEPRECATED:
 			return "The property you called is deprecated";
 		case tkPROPERTY_NOT_IMPLEMENTED:
