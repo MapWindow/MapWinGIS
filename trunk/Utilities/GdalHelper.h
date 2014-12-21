@@ -46,4 +46,11 @@ public:
 
 	static char** ReadFile(CStringW filename);
 	static char** SetCompressionRasterOptions(GDALDataset* dataset, char** options);
+
+	static CString GetConfigPathString(GdalPath option);
+	static CStringW GetDefaultConfigPath(GdalPath option);
+	static void SetConfigPath(GdalPath option, CStringW newPath);
+	static CStringW GetConfigPath(GdalPath option);
+	static void SetDefaultConfigPaths();
+	static void SetDirectory(CStringW path);
 };

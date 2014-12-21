@@ -1193,5 +1193,19 @@ namespace Utility
 		*retVal = A2BSTR("");
 		return false;
 	}
+
+	// ************************************************
+	//		GetMapWinGISPath
+	// ************************************************
+	CStringW GetMapWinGISPath()
+	{
+		wchar_t* path = new wchar_t[MAX_PATH + 1];
+		GetModuleFileNameW(GetModuleInstance(), path, MAX_PATH);
+		CStringW pathW = path;
+		delete[] path;
+		return pathW;
+	}
+
+	
 }
 

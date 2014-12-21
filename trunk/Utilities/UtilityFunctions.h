@@ -47,6 +47,7 @@ namespace Utility
 	CStringW GetNameFromPath(CStringW path);
 	CStringW ChangeExtension( CStringW filename, CStringW ext);
 	CStringW GetNameFromPathWoExtension(CStringW path);
+	CStringW GetMapWinGISPath();
 	
 	// these are still ANSI, there is some cases of LPCTString in API which can't be changed
 	BOOL FileExists(CString filename);	
@@ -90,4 +91,13 @@ namespace Utility
 
 	// time
 	int GetCurrentYear();
+
+	// http_://stackoverflow.com/questions/1963992/check-windows-version
+	double GetWindowsVersion(){
+		OSVERSIONINFO osvi;
+		ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+		GetVersionEx(&osvi);
+		return (double)osvi.dwMajorVersion + osvi.dwMinorVersion / 10.0;
+	}
 }

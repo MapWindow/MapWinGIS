@@ -2,6 +2,7 @@
 #include "GdalHelper.h"
 #include "ogrsf_frmts.h"
 #include "CallbackHelper.h"
+#include "windows.h"
 
 // **************************************************************
 //		OpenOgrDatasetA
@@ -551,4 +552,88 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* 
 		return true;
 	}
 	return false;
+}
+
+// ****************************************************************
+//		GetDefaultConfigPath
+// ****************************************************************
+CStringW GdalHelper::GetDefaultConfigPath(GdalPath option)
+{
+	CStringW path = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
+	switch (option)
+	{
+		case PathGdalData:
+			path += L"\\gdal-data\\";
+			break;
+		case PathGdalPlugins:
+			path += L"\\gdal\\plugins\\";
+			break;
+	}
+	return path;
+}
+
+// ****************************************************************
+//		GetConfigPathString
+// ****************************************************************
+CString GdalHelper::GetConfigPathString(GdalPath option)
+{
+	switch (option)
+	{
+		case PathGdalData:
+			return "GDAL_DATA";
+		case PathGdalPlugins:
+			return "GDAL_DRIVER_PATH";
+	}
+	return "";
+}
+
+// ****************************************************************
+//		SetConfigPath
+// ****************************************************************
+void GdalHelper::SetConfigPath(GdalPath option, CStringW newPath)
+{
+	CString optionName = GetConfigPathString(option);
+
+	m_globalSettings.SetGdalUtf8(true);
+	CStringA pathA = Utility::ConvertToUtf8(newPath);
+
+	CPLSetConfigOption(optionName, pathA);
+
+	m_globalSettings.SetGdalUtf8(false);
+
+	if (option == PathGdalPlugins) {
+		CStringW ocxPath = Utility::GetFolderFromPath(Utility::GetMapWinGISPath());
+		SetDllDirectoryW(ocxPath);
+	}
+
+	USES_CONVERSION;
+	Debug::WriteLine("GDAL Config is set: %s = %s", optionName, W2A(newPath));
+}
+
+// ****************************************************************
+//		GetConfigPath
+// ****************************************************************
+CStringW GdalHelper::GetConfigPath(GdalPath option)
+{
+	CString optionName = GetConfigPathString(option);
+
+	m_globalSettings.SetGdalUtf8(true);
+	CStringA pathA = CPLGetConfigOption(optionName, "");
+	m_globalSettings.SetGdalUtf8(false);
+	
+	return Utility::ConvertFromUtf8(pathA);
+}
+
+// ****************************************************************
+//		SetDefaultConfigPaths
+// ****************************************************************
+void GdalHelper::SetDefaultConfigPaths()
+{
+	GdalPath options[] = { PathGdalData, PathGdalPlugins };
+
+	for (int i = 0; i < 2; i++)
+	{
+		CStringW path = GetDefaultConfigPath(options[i]);
+		SetConfigPath(options[i], path);
+	}
 }

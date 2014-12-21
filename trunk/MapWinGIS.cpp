@@ -54,22 +54,21 @@ BOOL CMapWinGISApp::InitInstance()
 	//However, there are just too many bugs associated with this change. See Bug 1446 for more information. Changing back to classic.
 	std::locale::global(std::locale("C"));
 
-	// initialize all static variables, to keep our memory leaking report clean from them
-	#ifdef _DEBUG
-		gMemLeakDetect.stopped = true;
-		GDALAllRegister();
-		gMemLeakDetect.stopped = false;
-	#endif
-
 	// http_://stackoverflow.com/questions/7659127/createex-causes-unhandled-exception-the-activation-context-being-deactivated-is
 	AfxSetAmbientActCtx(FALSE);
 
 	// UTF8 string are expected by default; the enviroment variable shoud be set to restore older behavior
 	// see more details here: http_://trac.osgeo.org/gdal/wiki/ConfigOptions
-	if( CSLTestBoolean(CPLGetConfigOption( "GDAL_FILENAME_IS_UTF8", "YES" ) ) )
-	{
-		CPLSetConfigOption( "GDAL_FILENAME_IS_UTF8", "NO" );
-	}
+	m_globalSettings.SetGdalUtf8(false);
+	
+	GdalHelper::SetDefaultConfigPaths();
+
+	// initialize all static variables, to keep our memory leaking report clean from them
+#ifdef _DEBUG
+	gMemLeakDetect.stopped = true;
+	GDALAllRegister();
+	gMemLeakDetect.stopped = false;
+#endif
 
 	CMapView::GdiplusStartup();
 

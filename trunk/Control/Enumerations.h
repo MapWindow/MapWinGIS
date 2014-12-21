@@ -247,4 +247,10 @@ enum OpenFileDialogFilter
 	FilterAll = 4,
 };
 
+enum GdalPath
+{
+	PathGdalData = 0,
+	PathGdalPlugins =1,
+};
+
 # endif
