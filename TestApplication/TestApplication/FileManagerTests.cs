@@ -217,6 +217,7 @@ namespace TestApplication
                         if (rst != null)
                         {
                             MyAxMap.Clear();
+                            MyAxMap.Tiles.Visible = false;
                             if (MyAxMap.AddLayer(rst, true) == -1)
                             {
                                 Error("Cannot add the raster file to the map");

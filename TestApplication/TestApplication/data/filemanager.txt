@@ -57,4 +57,4 @@
 %MW_SAMPLEDATA%\Images\Formats\NITF-National-Imagery-Transmission-Format.LF2
 
 #JPEG2000
-%MW_SAMPLEDATA%\Images\Formats\RGBImage2.jp2
+%MW_SAMPLEDATA%\Images\Formats\JP2ECW-ERMapper-JPEG2000.jp2

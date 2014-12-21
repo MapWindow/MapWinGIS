@@ -325,13 +325,38 @@ namespace TestApplication
                 sf.DefaultDrawingOptions.LineWidth = 3;
             }
 
-            if (!forceUnique && sf.NumShapes > 10)
+            if (sf.NumShapes == 1)
             {
-                sf.Categories.Generate(fieldIndex, tkClassificationType.ctNaturalBreaks, 9);
+                // No need to create categories:
+                return;
+            }
+
+            if (sf.CellValue[fieldIndex, 0].ToString() == sf.CellValue[fieldIndex, 1].ToString())
+            {
+                // The same values in the field, so skip:
+                return;
+            }
+
+            // String fields support only unique values classification for categories:
+            if (sf.Table.Field[fieldIndex].Type == FieldType.STRING_FIELD)
+            {
+                forceUnique = true;
+            }
+
+            if (forceUnique)
+            {
+                sf.Categories.Generate(fieldIndex, tkClassificationType.ctUniqueValues, 0);
             }
             else
             {
-                sf.Categories.Generate(fieldIndex, tkClassificationType.ctUniqueValues, 0);
+                if (sf.NumShapes > 10)
+                {
+                    sf.Categories.Generate(fieldIndex, tkClassificationType.ctNaturalBreaks, 9);
+                }
+                else
+                {
+                    sf.Categories.Generate(fieldIndex, tkClassificationType.ctUniqueValues, 0);
+                }
             }
 
             sf.Categories.ApplyExpressions();

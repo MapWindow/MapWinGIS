@@ -184,6 +184,7 @@ namespace TestApplication
                     return false;
                 }
 
+                theForm.Progress("Coloring the resulting shapefile.");
                 Helper.ColorShapes(ref intersectedSf, 0, tkMapColor.BlueViolet, tkMapColor.DarkRed, true);
 
                 // Save result:
@@ -697,7 +698,7 @@ namespace TestApplication
                     return false;
                 }
 
-                Helper.ColorShapes(ref bufferedSf, 0, tkMapColor.LightBlue, tkMapColor.LightYellow, false);
+                Helper.ColorShapes(ref bufferedSf, 0, tkMapColor.LightBlue, tkMapColor.LightYellow, true);
 
                 // Save result:
                 var newFilename = shapefilename.Replace(".shp", "-buffered.shp");

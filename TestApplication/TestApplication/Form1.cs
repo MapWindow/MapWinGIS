@@ -79,6 +79,11 @@ namespace TestApplication
         /// </summary>
         public static Form1 Instance { get; private set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether test has errors.
+        /// </summary>
+        public bool TestHasErrors { get; set; }
+
         #endregion
 
         #region Public Methods and Operators
@@ -105,6 +110,14 @@ namespace TestApplication
         /// </param>
         public void Error(string keyOfSender, string errorMsg)
         {
+            if (errorMsg.StartsWith("GDAL WARNING:"))
+            {
+                // Not a real error:
+                this.Progress(errorMsg);
+                return;
+            }
+
+            this.TestHasErrors = true;
             Debug.WriteLine(errorMsg);
             if (this.InvokeRequired)
             {
@@ -433,6 +446,8 @@ namespace TestApplication
         /// </param>
         private void ResetMapSettings(bool showTiles)
         {
+            this.TestHasErrors = false;
+
             this.axMap1.Clear();
 
             this.axMap1.Tiles.Visible = showTiles;
@@ -478,7 +493,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunAggregateShapefileTest(this.AggregateShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -625,7 +640,7 @@ namespace TestApplication
             ((Button)sender).BackColor = Color.Blue;
             var result = FileManagerTests.RunAnalyzeFilesTest(this.AnalyzeFilesInput.Text, this);
             this.Progress(string.Empty, 100, "TEST RESULTS: " + (result ? "sucess" : "failed"));
-            ((Button)sender).BackColor = result ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = result && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -642,7 +657,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunAxMapClearTest(this.AxMapClearInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -659,7 +674,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunBufferShapefileTest(this.BufferShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -676,7 +691,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunClipGridByPolygonTest(this.ClipGridByPolygonInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -693,7 +708,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunClipShapefileTest(this.ClipShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -710,7 +725,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunClosestPointTest(this.ClosestPointInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -727,7 +742,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunDissolveShapefileTest(this.DissolveShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -745,7 +760,7 @@ namespace TestApplication
             ((Button)sender).BackColor = Color.Blue;
             var retVal = FileManagerTests.RunGridOpenTest(this.GridOpenInput.Text, this);
             this.Progress(string.Empty, 100, "TEST RESULTS: " + (retVal ? "sucess" : "failed"));
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -762,7 +777,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunGridProxyTest(this.GridProxyInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -779,7 +794,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunGridfileTest(this.GridInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -794,10 +809,9 @@ namespace TestApplication
         private void RunImageTestClick(object sender, EventArgs e)
         {
             this.ResetMapSettings(false);
-
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunImagefileTest(this.ImageInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -814,7 +828,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunIntersectionShapefileTest(this.IntersectionShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -831,7 +845,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunOgrInfoTest(this.OGRInfoInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -848,7 +862,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunOpenPostGisLayers(this.PostGisInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -865,7 +879,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunPostGisCreateDatabase(this.PostGisCreateDbInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -882,7 +896,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunPostGisDropDatabase(this.PostGisDropDbInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -899,7 +913,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunPostGisImportSf(this.PostGisImportSfInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -916,7 +930,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = PostGisTests.RunPostGisPostGisPrivileges(this.PostGisPrivilegesInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -933,7 +947,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunRasterCalculatorTest(this.RasterCalculatorInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -950,7 +964,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunRasterizeTest(this.RasterizeInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -967,7 +981,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunReclassifyTest(this.ReclassifyInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -982,10 +996,9 @@ namespace TestApplication
         private void RunShapefileTestClick(object sender, EventArgs e)
         {
             this.ResetMapSettings(false);
-
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunShapefileTest(this.ShapefileInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1002,7 +1015,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunShapefileToGridTest(this.ShapefileToGridInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1019,7 +1032,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunSimplifyShapefileTest(this.SimplifyShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1036,7 +1049,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunSingleSidedBuffer(this.SingleSidedBufferInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1053,7 +1066,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunSpatialIndexTest(this.SpatialIndexInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1070,7 +1083,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunTilesLoadTest(this.TilesInputfile.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1087,7 +1100,7 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = GeosTests.RunWktShapefileTest(this.WktShapefileInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1604,7 +1617,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunGridToImageTest(this.GridToImageInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1621,7 +1634,7 @@ namespace TestApplication
             this.ResetMapSettings(true);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunSfSaveAsTest(this.SfSaveAsInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
         }
 
         /// <summary>
@@ -1638,7 +1651,22 @@ namespace TestApplication
             this.ResetMapSettings(false);
             ((Button)sender).BackColor = Color.Blue;
             var retVal = Tests.RunDrawingLayersTest(this.DrawingLayersInput.Text, this);
-            ((Button)sender).BackColor = retVal ? Color.Green : Color.Red;
+            ((Button)sender).BackColor = retVal && !this.TestHasErrors ? Color.Green : Color.Red;
+        }
+
+        /// <summary>
+        /// The run all work item tests click.
+        /// </summary>
+        /// <param name="sender">
+        /// The sender.
+        /// </param>
+        /// <param name="e">
+        /// The e.
+        /// </param>
+        private void RunAllWorkItemTestsClick(object sender, EventArgs e)
+        {
+            Helper.RunAllTestsInGroupbox(this.WorkItemTestsGroupbox);
+            this.Progress(string.Empty, 100, "Done running all Work items tests.");
         }
     }
 }

@@ -48,7 +48,7 @@
             this.SelectGridToImage = new System.Windows.Forms.Button();
             this.GridToImageInput = new System.Windows.Forms.TextBox();
             this.label34 = new System.Windows.Forms.Label();
-            this.button11 = new System.Windows.Forms.Button();
+            this.RunAllWorkItemTests = new System.Windows.Forms.Button();
             this.RunAllTest = new System.Windows.Forms.Button();
             this.MiscGroupBox = new System.Windows.Forms.GroupBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
@@ -324,7 +324,7 @@
             this.WorkItemTestsGroupbox.Controls.Add(this.groupBox27);
             this.WorkItemTestsGroupbox.Controls.Add(this.groupBox34);
             this.WorkItemTestsGroupbox.Controls.Add(this.groupBox35);
-            this.WorkItemTestsGroupbox.Controls.Add(this.button11);
+            this.WorkItemTestsGroupbox.Controls.Add(this.RunAllWorkItemTests);
             this.WorkItemTestsGroupbox.Location = new System.Drawing.Point(5, 3088);
             this.WorkItemTestsGroupbox.Name = "WorkItemTestsGroupbox";
             this.WorkItemTestsGroupbox.Size = new System.Drawing.Size(205, 332);
@@ -499,18 +499,19 @@
             this.label34.TabIndex = 18;
             this.label34.Text = "Select text file:";
             // 
-            // button11
+            // RunAllWorkItemTests
             // 
-            this.button11.BackColor = System.Drawing.Color.LawnGreen;
-            this.button11.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.button11.Location = new System.Drawing.Point(119, 0);
-            this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(82, 20);
-            this.button11.TabIndex = 15;
-            this.button11.Tag = "RunAll";
-            this.button11.Text = "Run all tests";
-            this.toolTip1.SetToolTip(this.button11, "Run all fileformats tests");
-            this.button11.UseVisualStyleBackColor = false;
+            this.RunAllWorkItemTests.BackColor = System.Drawing.Color.LawnGreen;
+            this.RunAllWorkItemTests.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.RunAllWorkItemTests.Location = new System.Drawing.Point(119, 0);
+            this.RunAllWorkItemTests.Name = "RunAllWorkItemTests";
+            this.RunAllWorkItemTests.Size = new System.Drawing.Size(82, 20);
+            this.RunAllWorkItemTests.TabIndex = 15;
+            this.RunAllWorkItemTests.Tag = "RunAll";
+            this.RunAllWorkItemTests.Text = "Run all tests";
+            this.toolTip1.SetToolTip(this.RunAllWorkItemTests, "Run all fileformats tests");
+            this.RunAllWorkItemTests.UseVisualStyleBackColor = false;
+            this.RunAllWorkItemTests.Click += new System.EventHandler(this.RunAllWorkItemTestsClick);
             // 
             // RunAllTest
             // 
@@ -2692,7 +2693,7 @@
     private System.Windows.Forms.Button SelectGridToImage;
     private System.Windows.Forms.TextBox GridToImageInput;
     private System.Windows.Forms.Label label34;
-    private System.Windows.Forms.Button button11;
+    private System.Windows.Forms.Button RunAllWorkItemTests;
     private System.Windows.Forms.GroupBox groupBox27;
     private System.Windows.Forms.Button RunDrawingLayer;
     private System.Windows.Forms.Button SelectDrawingLayer;

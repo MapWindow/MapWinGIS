@@ -752,6 +752,14 @@ namespace TestApplication
                     numErrors++;
                     continue;
                 }
+                
+                // sf.SaveAs should report an error in this case, but don't mark it as such
+                // because else this test fails incorrectly:
+                if (numErrors == 0)
+                {
+                    // No errors yet so reset:
+                    theForm.TestHasErrors = false;
+                }
 
                 if (!sf.SaveAs(newFilename, theForm))
                 {
@@ -1688,7 +1696,7 @@ namespace TestApplication
             string rasterB, 
             string resultRaster, 
             string formula, 
-            ICallback theForm)
+            Form1 theForm)
         {
             var retVal = false;
             var grdA = new Grid { GlobalCallback = theForm };
@@ -1704,7 +1712,7 @@ namespace TestApplication
                 if (!grdA.Open(rasterA, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
                 {
                     theForm.Error(
-                        string.Empty, 
+                        string.Empty,
                         "Something went wrong opening the first raster: " + grdA.ErrorMsg[grdA.LastErrorCode]);
                     return false;
                 }
@@ -1712,7 +1720,7 @@ namespace TestApplication
                 if (!grdB.Open(rasterB, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
                 {
                     theForm.Error(
-                        string.Empty, 
+                        string.Empty,
                         "Something went wrong opening the second raster: " + grdB.ErrorMsg[grdB.LastErrorCode]);
                     return false;
                 }
@@ -1720,7 +1728,7 @@ namespace TestApplication
                 if (!grdC.Open(resultRaster, GridDataType.UnknownDataType, false, GridFileType.UseExtension, theForm))
                 {
                     theForm.Error(
-                        string.Empty, 
+                        string.Empty,
                         "Something went wrong opening the resulting raster: " + grdC.ErrorMsg[grdC.LastErrorCode]);
                     return false;
                 }
@@ -1765,7 +1773,7 @@ namespace TestApplication
                 var result = e.Evaluate(); // Returns an object
                 if (result == null)
                 {
-                    theForm.Error(string.Empty, "Could not check this expression using NCalc: " + e.Error);
+                    theForm.Progress("Warning! Could not check this expression using NCalc: " + e.Error);
                     return false;
                 }
 
@@ -1774,8 +1782,8 @@ namespace TestApplication
                 if (goodCalculation)
                 {
                     theForm.Progress(
-                        string.Empty, 
-                        100, 
+                        string.Empty,
+                        100,
                         string.Format("Checking some random values was correct: {0} = {1}", expression, result));
                     retVal = true;
                 }
@@ -1799,6 +1807,10 @@ namespace TestApplication
                     randomColumn,
                     randomRow);
                 theForm.Error(string.Empty, msg);
+            }
+            catch (EvaluationException ex)
+            {
+                theForm.Progress("Warning NCalc evaluation exception: " + ex.Message);
             }
             catch (Exception ex)
             {
@@ -1832,7 +1844,7 @@ namespace TestApplication
         /// </returns>
         private static bool ClipGridByPolygon(string gridFilename, string shapefilename, Form1 theForm)
         {
-            var retVal = true;
+            var numErrors = 0;
 
             try
             {
@@ -1892,6 +1904,7 @@ namespace TestApplication
                     if (globalSettings.GdalLastErrorMsg != string.Empty)
                     {
                         msg += Environment.NewLine + "GdalLastErrorMsg: " + globalSettings.GdalLastErrorMsg;
+                        numErrors++;
                     }
 
                     theForm.Error(string.Empty, msg);
@@ -1911,16 +1924,16 @@ namespace TestApplication
                 else
                 {
                     theForm.Error(string.Empty, "No grid was created");
-                    retVal = false;
+                    numErrors++;
                 }
             }
             catch (Exception exception)
             {
                 theForm.Error(string.Empty, "Exception: " + exception.Message);
-                retVal = false;
+                numErrors++;
             }
 
-            return retVal;
+            return numErrors == 0;
         }
 
         /// <summary>
