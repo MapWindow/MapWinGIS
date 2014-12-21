@@ -139,7 +139,7 @@ INT CMapView::TilesAreInCache(IExtents* Extents, LONG WidthPixels, tkTileProvide
 }
 
 // *********************************************************************
-//    LoadTiles()
+//    LoadTilesForSnapshot()
 // *********************************************************************
 // Loads tiles for specified extents
 void CMapView::LoadTilesForSnapshot(IExtents* Extents, LONG WidthPixels, LPCTSTR Key, tkTileProvider provider)

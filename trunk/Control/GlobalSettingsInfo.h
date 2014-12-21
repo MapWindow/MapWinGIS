@@ -71,6 +71,7 @@ struct GlobalSettingsInfo
 	CString floatNumberFormat;
 	tkPixelOffsetMode pixelOffsetMode;
 	bool suppressGdalErrors;
+	bool forceReadOnlyModeForGdalRasters;
 
 	~GlobalSettingsInfo()
 	{
@@ -82,6 +83,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		forceReadOnlyModeForGdalRasters = false;
 		forceHideLabels = false;
 		ogrLayerForceUpdateMode = false;
 		autoChooseRenderingHintForLabels = true;

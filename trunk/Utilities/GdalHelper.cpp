@@ -52,8 +52,7 @@ bool GdalHelper::CanOpenAsOgrDataset(CStringW filename)
 	bool success = dt != NULL;
 	if (dt)
 	{
-		dt->Dereference();
-		delete dt;
+		GdalHelper::CloseDataset(dt);
 	}
 	return success;
 }
@@ -66,7 +65,16 @@ GDALDataset* GdalHelper::OpenRasterDatasetA( char* filenameUtf8 )
 	m_globalSettings.SetGdalUtf8(true);
 
 	GDALAllRegister();
-	GDALDataset* dt = (GDALDataset *) GDALOpen(filenameUtf8, GA_Update );
+	
+	// let's report the failure on the second attempt only
+	m_globalSettings.suppressGdalErrors = true;
+
+	GDALDataset* dt = NULL;
+	
+	if (!m_globalSettings.forceReadOnlyModeForGdalRasters)
+		dt = (GDALDataset *) GDALOpen(filenameUtf8, GA_Update );
+	
+	m_globalSettings.suppressGdalErrors = false;
 
 	if (dt == NULL) 
 		dt = (GDALDataset *) GDALOpen(filenameUtf8, GA_ReadOnly );
@@ -188,9 +196,7 @@ bool GdalHelper::CanOpenAsGdalRaster(CStringW filename)
 	bool gdalFormat = dt != NULL;
 	if (dt)
 	{
-		dt->Dereference();
-		delete dt;
-		dt = NULL;
+		GdalHelper::CloseDataset(dt);
 	}
 	return gdalFormat;
 }
@@ -242,8 +248,7 @@ GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
 	else
 	{
 		bool isRgb = IsRgb(dt);
-		dt->Dereference();
-		delete dt;
+		GdalHelper::CloseDataset(dt);
 		return isRgb ? GdalSupportRgb : GdalSupportGrid;
 	}
 }
@@ -283,7 +288,7 @@ bool GdalHelper::RemoveOverviews(CStringW filename)
 // *******************************************************
 bool GdalHelper::HasOverviews(CStringW filename) 
 {
-	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename);
+	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 	if (dt ) {
 		bool hasOverviews = GdalHelper::HasOverviews(dt);
 		GdalHelper::CloseDataset(dt);
@@ -479,7 +484,7 @@ void GdalHelper::GetProjection(CStringW filename, CString& projection)
 
 	const char * wkt = rasterDataset->GetProjectionRef();
 	projection = wkt;
-	GDALClose(rasterDataset);
+	GdalHelper::CloseDataset(rasterDataset);
 }
 
 // ****************************************************************
@@ -542,7 +547,7 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* 
 
 	if (dst)
 	{
-		GDALClose(dst);
+		GdalHelper::CloseDataset(dst);
 		return true;
 	}
 	return false;

@@ -330,7 +330,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		}
 		else
 		{
-			transColor = RGB(0,0,0);	// lsu 30-apr-2010: changed from RGB(0,0,1) as I see no logic in this
+			transColor = RGB(0,0,0);
 			hasTransparency = false;
 		}
 
@@ -357,7 +357,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 //		RefreshExtents()
 // *********************************************************
 // When loading buffer the extents are used, so they should be refreshed after each 
-// chage of orig_XllCenter, orig_YllCenter, orig_dX, orig_dY
+// change of orig_XllCenter, orig_YllCenter, orig_dX, orig_dY
 void tkRaster::RefreshExtents()
 {
 	_extents.left = orig_XllCenter - orig_dX * 0.5;

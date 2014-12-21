@@ -1145,7 +1145,7 @@ bool CGrid::OpenAuxHeader(CStringW& filename)
 			{
 				// Chris M 1/27/2007
 				// Only make this replacement if sta.adf actually exists;
-				// there are a few rara cases where EHFA_HEADER exists but
+				// there are a few rare cases where EHFA_HEADER exists but
 				// opening the current file is correct.
 				CStringW str = filename;
 				str.Delete(str.GetLength() - 4, 4);

@@ -327,7 +327,7 @@ bool CImageClass::ReadRaster(const CStringW ImageFile, GDALAccess accessMode)
 	
 	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
 	
-	_transColor = (int)_rasterImage->transColor;		// default is RGB(0,0,0) if no data value wasn't't set
+	_transColor = (int)_rasterImage->transColor;		// default is RGB(0,0,0) if no data value wasn't set
 	_transColor2 = (int)_rasterImage->transColor;
 
 	// TODO: it's possible to add code to determine transparency by the prevailing color

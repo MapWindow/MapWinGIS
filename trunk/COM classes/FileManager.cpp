@@ -503,8 +503,13 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 				ComHelper::CreateInstance(idGrid, (IDispatch**)&grid);
 				if (grid)
 				{
+					m_globalSettings.forceReadOnlyModeForGdalRasters = true;
+					
 					// TODO: choose inRam mode
 					grid->Open(Filename, GridDataType::UnknownDataType, VARIANT_FALSE, GridFileType::UseExtension, _globalCallback, &vb);
+
+					m_globalSettings.forceReadOnlyModeForGdalRasters = false;
+
 					if (!vb) {
 						grid->get_LastErrorCode(&_lastErrorCode);
 						ErrorMessage(_lastErrorCode);
