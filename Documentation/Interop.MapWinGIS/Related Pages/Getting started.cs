@@ -1,4 +1,4 @@
-/// \page getting_started Getting started with MapWinGIS 4.9.2
+/// \page getting_started Getting started with MapWinGIS 4.9.3
 ///
 /// \section gs1 A. Adding control control to .NET WinForms project.
 ///
