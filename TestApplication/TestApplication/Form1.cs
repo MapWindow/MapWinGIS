@@ -405,6 +405,9 @@ namespace TestApplication
 
             // Also write GDAL version
             this.Progress(string.Empty, 100, string.Format("GDAL version: {0}", gs.GdalVersion));
+
+            this.Progress("GDAL data path: " + gs.GdalDataPath);
+            this.Progress("GDAL plug-in path: " + gs.GdalPluginPath);
         }
 
         /// <summary>
