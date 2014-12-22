@@ -20,7 +20,7 @@ FOR %%G IN (gdal_ECW_JP2ECW.dll gdal_MrSID.dll gdal_netCDF.dll) DO (
 )
 
 REM Copy PROJ4 data:
-xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%..\gdal-data\
+xcopy /v /c /r /y %_from_dir%\gdal-data\*.* %_to_dir%gdal-data\
 xcopy /v /c /r /y %_from_dir%\proj\SHARE\*.* %_to_dir%..\PROJ_NAD\
 
 REM Copy needed Tamas binaries:
@@ -32,6 +32,9 @@ FOR %%G IN (cfitsio.dll gdal200.dll geos.dll geos_c.dll hdf5.dll hdf5_hl.dll lib
     xcopy /v /c /r /y %_from_dir%\%%G  %_to_dir%
 	)
 )
+
+REM Copy licenses:
+xcopy /v /c /r /y %_from_dir%\..\..\*.rtf %_to_dir%..\Licenses\
 
  
 GOTO EOF
