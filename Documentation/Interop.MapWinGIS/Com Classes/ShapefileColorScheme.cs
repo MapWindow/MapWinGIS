@@ -26,7 +26,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="Break"></param>
         /// <returns></returns>
-        public int Add(ShapefileColorBreak Break)
+        public int Add(IShapefileColorBreak Break)
         {
             throw new NotImplementedException();
         }
@@ -56,7 +56,7 @@ namespace MapWinGIS
         /// <param name="Position">The position to insert color break at.</param>
         /// <param name="Break">The color break to insert.</param>
         /// <returns>The actual position color break was inserted at.</returns>
-        public int InsertAt(int Position, ShapefileColorBreak Break)
+        public int InsertAt(int Position, IShapefileColorBreak Break)
         {
             throw new NotImplementedException();
         }
@@ -110,7 +110,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="Index">The index of the break.</param>
         /// <returns>The color break object or NULL reference on failure.</returns>
-        public ShapefileColorBreak get_ColorBreak(int Index)
+        public IShapefileColorBreak get_ColorBreak(int Index)
         {
             throw new NotImplementedException();
         }
@@ -130,7 +130,7 @@ namespace MapWinGIS
         /// </summary>
         /// <param name="Index">The index of color break to replace.</param>
         /// <param name="pVal">The reference to the new color break.</param>
-        public void set_ColorBreak(int Index, ShapefileColorBreak pVal)
+        public void set_ColorBreak(int Index, IShapefileColorBreak pVal)
         {
             throw new NotImplementedException();
         }

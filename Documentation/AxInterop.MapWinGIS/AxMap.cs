@@ -60,7 +60,7 @@ namespace AxMapWinGIS
         /// Gets FileManager object associated with map. The object is used by AxMap.AddLayerFromFilename methods.
         /// </summary>
         /// \new491 Added in version 4.9.1
-        public FileManager FileManager 
+        public MapWinGIS.FileManager FileManager 
         {
             get { throw new NotImplementedException();}
         }
@@ -1824,7 +1824,10 @@ namespace AxMapWinGIS
         /// <param name="Rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        public int DrawLabel(string Text, double x, double y, double Rotation);
+        public int DrawLabel(string Text, double x, double y, double Rotation)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Draws a label on the specified drawing layer.
@@ -1836,7 +1839,10 @@ namespace AxMapWinGIS
         /// <param name="Rotation">Rotation angle in degrees.</param>
         /// <returns>Layer handle if the label was added successfully or -1 on failure.</returns>
         /// \new493 Added in version 4.9.3
-        public int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation);
+        public int DrawLabelEx(int DrawHandle, string Text, double x, double y, double Rotation)
+        {
+            throw new NotImplementedException();
+        }
 
         /// @}
         #endregion

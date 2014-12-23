@@ -2492,6 +2492,29 @@ namespace MapWinGIS
         blnFalse = 0,
         blnTrue = 1,
     }
+
+    /// <summary>
+    /// Possible mode / format for angles (bearings) displayed by the measuring tool and shape editor.
+    /// </summary>
+    public enum tkAngleDisplay
+    {
+        Azimuth = 0,
+        RussianRhumb = 1,
+        ClockwiseBearing = 2,
+        CounterClockwiseBearing = 3,
+        AngleNone = 4,
+    }
+
+    /// <summary>
+    /// Possible mode / format for area displayed by the measuring tool and shape editor.
+    /// </summary>
+    public enum tkAreaDisplayMode
+    {
+        admMetric = 0,
+        admHectars = 1,
+        admNone = 2,
+    }
+
 #if nsp
 }
 #endif

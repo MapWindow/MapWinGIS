@@ -517,7 +517,7 @@ namespace MapWinGIS
         /// }
         /// \endcode
         public bool ImportShapefile(Shapefile shapefile, string layerName, string creationOptions = "",
-            tkShapeValidationMode validationMode = TryFixSkipOnFailure)
+            tkShapeValidationMode validationMode = tkShapeValidationMode.TryFixSkipOnFailure)
         {
             throw new NotImplementedException();
         }

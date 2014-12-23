@@ -793,7 +793,7 @@ namespace AxMapWinGIS
         /// <param name="hJustification">Specifies whether to justify the label's text right, left, or center. </param>
         /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
         /// \removed493 Removed in v4.9.3
-        public void AddLabel(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification)
+        public void AddLabel(int LayerHandle, string Text, uint Color, double x, double y, tkHJustification hJustification)
         {
             throw new NotImplementedException();
         }
@@ -811,7 +811,7 @@ namespace AxMapWinGIS
         /// negative angles rotate the text clockwise</param>
         /// \deprecated v.4.8 The method will ignore Color and hJustification parameters. Use Labels interface ( AxMap.get_LayerLabels ) to change these settings.
         /// \removed493 Removed in v4.9.3
-        public void AddLabelEx(int LayerHandle, string Text, uint Color, double x, double y, MapWinGIS.tkHJustification hJustification, double Rotation)
+        public void AddLabelEx(int LayerHandle, string Text, uint Color, double x, double y, tkHJustification hJustification, double Rotation)
         {
             throw new NotImplementedException();
         }
@@ -1051,6 +1051,8 @@ namespace AxMapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
+
+        
 
         /// <summary>
         /// Adds label to the specified drawing layer.
