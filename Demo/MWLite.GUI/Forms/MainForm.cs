@@ -40,7 +40,7 @@ namespace MWLite.GUI.Forms
 
             PluginHelper.Init(this);
 
-            //ToolStripManager.LoadSettings(this);
+            ToolStripManager.LoadSettings(this);
 
             TilesHelper.Init(mnuTiles);
 
@@ -120,7 +120,7 @@ namespace MWLite.GUI.Forms
 
             _mapForm.Activate();
 
-            
+           
         }
 
         #endregion
