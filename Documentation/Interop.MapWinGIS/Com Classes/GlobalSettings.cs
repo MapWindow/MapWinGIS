@@ -524,10 +524,26 @@ namespace MapWinGIS
         public bool OgrLayerForceUpdateMode { get; set;}
 
         /// <summary>
-        /// Gets or set pixel offset mode to be used during the rendering of vector layers.
+        /// Gets or sets pixel offset mode to be used during the rendering of vector layers.
         /// </summary>
         /// \new493 Added in version 4.9.3
         public tkPixelOffsetMode PixelOffsetMode { get; set;}
+
+        /// <summary>
+        /// Gets or sets the path where data necessary for GDAL coordinate systems / projections will be searched for.
+        /// </summary>
+        /// <remarks>This property effectively overrides GDAL_DATA environment variable. By default
+        /// it's set to \gdal-data folder in the directory where MapWinGIS is installed.</remarks>
+        /// \new493 Added in version 4.9.3
+        public string GdalDataPath { get; set;}
+
+        /// <summary>
+        /// Gets or sets the path where GDAL plug-ins will be searched for.
+        /// </summary>
+        /// <remarks>This property effectively overrides GDAL_DRIVER_PATH environment variable. By default
+        /// it's set to \gdalplugins folder in the directory where MapWinGIS is installed.</remarks>
+        /// \new493 Added in version 4.9.3
+        public string GdalPluginPath { get; set;}
     }
 #if nsp
 }
