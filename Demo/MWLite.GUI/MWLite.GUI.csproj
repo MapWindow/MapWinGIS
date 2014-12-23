@@ -269,7 +269,9 @@
   <ItemGroup>
     <Content Include="license.txt" />
     <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.dll" />
+    <Content Include="obj\x86\Debug\AxInterop.MapWinGIS.XML" />
     <Content Include="obj\x86\Debug\Interop.MapWinGIS.dll" />
+    <Content Include="obj\x86\Debug\Interop.MapWinGIS.XML" />
     <Content Include="Resources\MapWindow.ico" />
     <None Include="Resources\Snapshot.png" />
     <None Include="Resources\layer-db-add.png" />
