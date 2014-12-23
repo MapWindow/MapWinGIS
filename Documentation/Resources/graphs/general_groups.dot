@@ -50,14 +50,13 @@ digraph map_actions {
  lb_vis [label="Visibility" URL="\ref labels_visibility"];
 
  drlyr [label="Drawing layers" URL="\ref map_drawing_layers"];
- drlb  [label="Drawing labels" URL="\ref map_drawing_labels"];
-
+ 
  proj [label = "GeoProjection" URL="\ref GeoProjection"]
  ext [label = "Extents" URL="\ref Extents"]
 
  edge [dir = none, arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#808080", constraint = true]
  m -> map4 -> proj -> ext -> map1 -> int -> ser;  
- m -> map2 -> drlyr -> drlb -> lbs -> lb_visual -> lb_cat -> lb_gen -> lb_vis;
+ m -> map2 -> drlyr -> lbs -> lb_visual -> lb_cat -> lb_gen -> lb_vis;
  m -> map3 -> sf;
 
  sf -> sf_mng -> gpr -> attr -> sfviz -> sfsel -> charts;

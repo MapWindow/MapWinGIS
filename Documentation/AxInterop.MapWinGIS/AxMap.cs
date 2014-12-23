@@ -14,7 +14,7 @@ namespace AxMapWinGIS
     /// ranksep = 0.3;
     /// splines = ortho;
     /// 
-    /// node [shape= "component", peripheries = 1, fontname=Helvetica, fontsize=9, color = lightsalmon, style = filled, height = 0.3, width = 1.0];
+    /// node [shape= "polygon", peripheries = 1, fontname=Helvetica, fontsize=9, color = lightsalmon, style = filled, height = 0.3, width = 1.0];
     /// map [ label="AxMap" URL="\ref AxMap"];
     /// 
     /// node [shape = "polygon", color = gray, peripheries = 3, style = filled, height = 0.2, width = 0.8]
@@ -26,15 +26,17 @@ namespace AxMapWinGIS
     /// meas [ label="Measuring" URL="\ref Measuring"];
     /// tiles [ label="Tiles" URL="\ref Tiles"];
     /// fm [ label="FileManager" URL="\ref FileManager"];
+    /// se [ label="ShapeEditor" URL="\ref ShapeEditor"];
     /// 
     /// edge [ dir = "none", style = solid, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", labeldistance = 0.6 ]
     /// map -> sf [ URL="\ref AxMap.get_Shapefile()", tooltip = "AxMap.get_Shapefile()", headlabel = "   n"];
     /// map -> img [URL="\ref AxMap.get_Image()", tooltip = "AxMap.get_Image()", headlabel = "   n"]
     /// 
-    /// gp -> map [ URL="\ref AxMap.GeoProjection", tooltip = "AxMap.GeoProjection", taillabel = "1"];
-    /// meas -> map [URL="\ref AxMap.Measuring", tooltip = "AxMap.Measuring", headlabel = "   1"]
-    /// tiles -> map [URL="\ref AxMap.Tiles", tooltip = "AxMap.Tiles", headlabel = "   1"]
-    /// fm -> map [URL="\ref AxMap.FileManager", tooltip = "AxMap.FileManager", taillabel = "1"]
+    /// gp -> map [ URL="\ref AxMap.GeoProjection", tooltip = "AxMap.GeoProjection", taillabel = "1 "];
+    /// meas -> map [URL="\ref AxMap.Measuring", tooltip = "AxMap.Measuring", taillabel = "1 "]
+    /// tiles -> map [URL="\ref AxMap.Tiles", tooltip = "AxMap.Tiles", taillabel = "1 "]
+    /// fm -> map [URL="\ref AxMap.FileManager", tooltip = "AxMap.FileManager", taillabel = "1 "]
+    /// se -> map [URL="\ref AxMap.ShapeEditor", tooltip = "AxMap.ShapeEditor", taillabel = "1 "]
     /// 
     /// }
     /// \enddot
@@ -45,6 +47,15 @@ namespace AxMapWinGIS
     public class AxMap
     {
         #region _DMap Members
+
+        /// <summary>
+        /// Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
+        /// </summary>
+        public int UDCursorHandle
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
 
         /// <summary>
         /// Gets or sets the object of Tiles class associated with map.
@@ -364,89 +375,6 @@ namespace AxMapWinGIS
         /// <a href = "diagrams.html">Graph description</a>
         /// \addtogroup map_modules Map modules
         /// @{
-
-       
-
-        #region Labels
-        /// \addtogroup map_labels Map labels
-        /// Here is a list of properties and methods to add and remove labels on the map.
-        /// All these method are redirected to the instances of the Labels class for particular layers.
-        /// Consider referring to those instances directly to improve performance (see Shapefile.Labels and Image.Labels).
-        /// This module is a part of the documentation of AxMap class.
-        /// \dot
-        /// digraph map_labels {
-        /// splines = true;
-        /// node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
-        /// lb [ label="AxMap" URL="\ref AxMap"];
-        /// node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
-        /// gr  [label="Map Labels" URL="\ref map_labels"];
-        /// edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
-        /// lb -> gr;
-        /// }
-        /// \enddot
-        /// <a href = "diagrams.html">Graph description</a>
-        /// @{
-
-        
-        
-        /// @}
-        #endregion
-
-        #region Drawing labels
-        /// \addtogroup map_drawing_labels Drawing labels
-        /// Here is a list of properties and methods to add and remove labels on drawing layer of the map. It's possible to change even more
-        ///  properties using instance of Labels class obtained by AxMap.get_DrawingLabels() property. 
-        ///  This module is a part of the documentation of AxMap class.
-        /// \dot
-        /// digraph map_drawing_labels {
-        /// splines = true;
-        /// node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
-        /// lb [ label="AxMap" URL="\ref AxMap"];
-        /// node [shape = "ellipse", color = khaki, width = 0.2, height = 0.2, style = filled]
-        /// gr  [label="Drawing Labels" URL="\ref map_drawing_labels"];
-        /// edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
-        /// lb -> gr;
-        /// }
-        /// \enddot
-        /// <a href = "diagrams.html">Graph description</a>
-        /// @{
-
-        
-
-        /// @}
-        #endregion
-
-        #region User-defined symbology
-        /// \addtogroup map_user_defined User-defined symbology
-        /// Here is a list of properties and methods to create a custom symbology for shapefile layers. 
-        /// This module is a part of the documentation of AxMap class.\n\n
-        /// Most of the properties listed here are deprecated. Consider using ShapeDrawingOptions class instead.
-        /// \dot
-        /// digraph map_user_defined {
-        /// splines = true;
-        /// node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
-        /// lb [ label="AxMap" URL="\ref AxMap"];
-        /// node [shape = "ellipse", color = gray, width = 0.2, height = 0.2, style = filled]
-        /// gr  [label="User-Defined Symbology" URL="\ref map_user_defined"];
-        /// edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
-        /// lb -> gr;
-        /// }
-        /// \enddot
-        /// <a href = "diagrams.html">Graph description</a>
-        /// @{
-
-        /// <summary>
-        /// Gets or sets the user defined cursor handle. The handle is a windows cursor handle. 
-        /// </summary>
-        public int UDCursorHandle
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-       
-
-        /// @}
-        #endregion
 
         #region Map interaction
         /// \addtogroup map_interaction Map interaction
@@ -1843,30 +1771,6 @@ namespace AxMapWinGIS
         {
             throw new NotImplementedException();
         }
-
-        /// @}
-        #endregion
-
-        #region Shape properties
-        /// \addtogroup map_shape_properties Shape properties
-        /// Here is a list of properties for changing appearance of individual shapes of shapefile layer added to the map. 
-        /// The properties listed here are deprecated.
-        /// This module is a part of the documentation of AxMap class.
-        /// \dot
-        /// digraph map_shape_properties {
-        /// splines = true;
-        /// node [shape= "polygon", fontname=Helvetica, fontsize=9, style = filled, color = palegreen, height = 0.3, width = 1.2];
-        /// lb [ label="AxMap" URL="\ref AxMap"];
-        /// node [shape = "ellipse", color = gray, width = 0.2, height = 0.2, style = filled]
-        /// gr  [label="Shape properties" URL="\ref map_shape_properties"];
-        /// edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
-        /// lb -> gr;
-        /// }
-        /// \enddot
-        /// <a href = "diagrams.html">Graph description</a>
-        /// @{
-        
-        
 
         /// @}
         #endregion

@@ -3,39 +3,28 @@ digraph map_actions {
  
  node [shape= "polygon", peripheries = 1, fontname=Helvetica, fontsize=9, color = palegreen, style = filled, height = 0.35, width = 1.2];
  map [ label="Map" URL="\ref AxMap"];
- sfile [label="Shapefile layer"             URL="\ref Shapefile"];
  
- node  [shape = "ellipse", color = khaki, width = 0.2, height = 0.2 ]
+ node  [shape = "ellipse", color = khaki, width = 1.4, height = 0.2 ]
 
- ext   [label="Extents"               URL="\ref map_extents"];
+ ext   [label="Zoom and extents"               URL="\ref map_extents"];
  gp   [label="Projection "               URL="\ref map_coordinates"];
  ser   [label="Serialization"               URL="\ref map_serialization"];
  drw   [label="Drawing layers"              URL="\ref map_drawing_layers"];
- drlb  [label="Labels on \ndrawing layers" URL="\ref map_drawing_labels"];
-  int   [label="User \ninteraction"          URL="\ref map_interaction"];
- lyr   [label="Data layers"                 URL="\ref map_layer_management"];
- lbs   [label="Labels on \ndata layers"     URL="\ref map_labels"];
- lyrpr [label="Layer \nproperties"          URL="\ref map_layer_properties"];
- sf    [label="Shapefile \nvisualization"   URL="\ref map_shapefile"];
-
- node [color = gray];
- shp   [label="Per-shape \nproperties"      URL="\ref map_shape_properties"];
- ud    [label="User-defined \nsymbology"    URL="\ref map_user_defined"];
-
- edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060" ]
- map -> ext;
- map -> gp;
- map -> ser;
- map -> drw;
- map -> int;
- map -> lyr;
+ int   [label="User interaction"          URL="\ref map_interaction"];
+ lyr   [label="DATA LAYERS"                 URL="\ref map_layer_management"];
+ lyrpr [label="Layer properties"          URL="\ref map_layer_properties"];
+ events [label="Events"          			URL="\ref map_events"];
  
- drw -> drlb;
- lyr -> sfile
- sfile -> sf;
- lyr -> lbs;
- lyr -> lyrpr;
- sfile -> shp;
- sfile -> ud;
-
+ edge [ arrowhead="open", style = solid, arrowsize = 0.6, fontname = "Arial", fontsize = 9, fontcolor = blue, color = "#606060", dir = "back"]
+ ext -> map;
+ gp -> map;
+ events -> map;
+ int -> map;
+  
+ edge [dir = "forward"]
+ map -> drw;
+ map -> lyr;
+ map -> lyrpr;
+ map -> ser;
+ 
  }
