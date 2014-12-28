@@ -3388,7 +3388,7 @@ interface IGridHeader : IDispatch{
 	[propput, id(12), helpstring("property GlobalCallback")] HRESULT GlobalCallback([in] ICallback * newVal);
 	[propget, id(13), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(13), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
-	[propput, id(14), helpstring("property Owner")] HRESULT Owner([in] int * t, [in] int * d, [in] int * s, [in] int * l, [in] int * f);
+	//[propput, id(14), helpstring("property Owner")] HRESULT Owner([in] int * t, [in] int * d, [in] int * s, [in] int * l, [in] int * f);
 	[id(15), helpstring("method CopyFrom")] HRESULT CopyFrom([in] IGridHeader * pVal);
 	[propget, id(16), helpstring("property ColorTable")] HRESULT ColorTable([out, retval] BSTR *pVal);
 	[propput, id(16), helpstring("property ColorTable")] HRESULT ColorTable([in] BSTR newVal);

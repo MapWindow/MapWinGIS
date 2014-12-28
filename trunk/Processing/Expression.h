@@ -186,7 +186,7 @@ private:
 	
 public:
 	CExpression() {
-		_floatFormat = "%g";
+		_floatFormat = m_globalSettings.floatNumberFormat;
 	}
 	~CExpression()
 	{

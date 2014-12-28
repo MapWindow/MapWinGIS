@@ -26,6 +26,7 @@
 #include "cpl_string.h"
 #include "comutil.h"
 #include "Image.h"
+#include "GridHeader.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -109,11 +110,12 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
+	CoCreateInstance(CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, (void**)pVal);
+	CGridHeader* header = (CGridHeader*)(*pVal);
+
 	if (_trgrid != NULL)
 	{
 		// Make grid header
-		CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
-
 		double dX = _trgrid->getDX();
 		double dY = _trgrid->getDY();
 		(*pVal)->put_dX(dX);
@@ -136,10 +138,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 			(*pVal)->put_ColorTable(cTbl);
 
 		VariantClear(&ndv); 
-		(*pVal)->put_Owner((int*)(void*)_trgrid, (int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL);
+		header->put_Owner((int*)(void*)_trgrid, (int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL);
 	}
 	else if( _dgrid != NULL )
-	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
+	{	
 		(*pVal)->put_dX(_dgrid->getHeader().getDx());
 		(*pVal)->put_dY(_dgrid->getHeader().getDy());
 		VARIANT ndv;
@@ -156,10 +158,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		(*pVal)->put_XllCenter(_dgrid->getHeader().getXllcenter());
 		(*pVal)->put_YllCenter(_dgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); 
-		(*pVal)->put_Owner((int*)NULL, (int*)_dgrid, (int*)NULL, (int*)NULL, (int*)NULL);
+		header->put_Owner((int*)NULL, (int*)_dgrid, (int*)NULL, (int*)NULL, (int*)NULL);
 	}
 	else if( _fgrid != NULL )
-	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
+	{	
 		(*pVal)->put_dX(_fgrid->getHeader().getDx());
 		(*pVal)->put_dY(_fgrid->getHeader().getDy());
 		VARIANT ndv;
@@ -176,10 +178,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		(*pVal)->put_XllCenter(_fgrid->getHeader().getXllcenter());
 		(*pVal)->put_YllCenter(_fgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); 
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL, (int*)_fgrid);
+		header->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)NULL, (int*)_fgrid);
 	}
 	else if( _lgrid != NULL )
-	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
+	{	
 		(*pVal)->put_dX(_lgrid->getHeader().getDx());
 		(*pVal)->put_dY(_lgrid->getHeader().getDy());
 		VARIANT ndv;
@@ -196,10 +198,10 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		(*pVal)->put_XllCenter(_lgrid->getHeader().getXllcenter());
 		(*pVal)->put_YllCenter(_lgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); 
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)_lgrid, (int*)NULL);
+		header->put_Owner((int*)NULL, (int*)NULL, (int*)NULL, (int*)_lgrid, (int*)NULL);
 	}
 	else if( _sgrid != NULL )
-	{	CoCreateInstance(CLSID_GridHeader,NULL,CLSCTX_INPROC_SERVER,IID_IGridHeader,(void**)pVal);
+	{	
 		(*pVal)->put_dX(_sgrid->getHeader().getDx());
 		(*pVal)->put_dY(_sgrid->getHeader().getDy());
 		VARIANT ndv;
@@ -216,7 +218,7 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		(*pVal)->put_XllCenter(_sgrid->getHeader().getXllcenter());
 		(*pVal)->put_YllCenter(_sgrid->getHeader().getYllcenter());
 		VariantClear(&ndv); 
-		(*pVal)->put_Owner((int*)NULL, (int*)NULL, (int*)_sgrid, (int*)NULL, (int*)NULL);
+		header->put_Owner((int*)NULL, (int*)NULL, (int*)_sgrid, (int*)NULL, (int*)NULL);
 	}
 	else
 	{	

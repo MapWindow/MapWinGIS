@@ -741,15 +741,25 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 					bmp->viewWidth == _viewWidth &&
 					bmp->viewHeight == _viewHeight && !((CImageClass*)iimg)->_imageChanged)
 				{
-					graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
-
 					// TODO: choose interpolation mode more precisely
 					// TODO: set image attributes
 
+					Gdiplus::SmoothingMode smoothing = graphics->GetSmoothingMode();
+					Gdiplus::InterpolationMode interpolation = graphics->GetInterpolationMode();
+					Gdiplus::CompositingMode compositingMode = graphics->GetCompositingMode();
+					Gdiplus::PixelOffsetMode offsetMode = graphics->GetPixelOffsetMode();
+
+					graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
 					graphics->SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
 					graphics->SetSmoothingMode(Gdiplus::SmoothingModeDefault);
 					graphics->SetCompositingQuality(Gdiplus::CompositingQualityHighSpeed);
 					graphics->DrawImage(bmp->bitmap, Gdiplus::REAL(bmp->left), Gdiplus::REAL(bmp->top));
+
+					graphics->SetSmoothingMode(smoothing);
+					graphics->SetInterpolationMode(interpolation);
+					graphics->SetCompositingMode(compositingMode);
+					graphics->SetPixelOffsetMode(offsetMode);
+
 					wasDrawn = true;
 				}
 			}
