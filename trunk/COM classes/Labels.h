@@ -189,7 +189,7 @@ public:
 	// Also it's possible to treat CLabels basic options like Category with index 0
 	// but again the code outside will be easier if we use just Labels.FontColor rather than 
 	// Labels.Category[0].FontColor or Labels.Options.FontColor, therefore such disposition
-	// CLabelOptions structure is used to hold the options, so delcarations can be just copied
+	// CLabelOptions structure is used to hold the options, so declarations can be just copied
 	// between CLabels and CLabelCategory, the names of properties should be the same in both classes
 	// ---------------------------------------------------------------------------------
 	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)					{*retval = _options.visible;			return S_OK;};
@@ -347,6 +347,8 @@ public:
 	STDMETHOD(get_FloatNumberFormat)(BSTR* pVal);
 	STDMETHOD(put_FloatNumberFormat)(BSTR newVal);
 
+	STDMETHOD(ForceRecalculateExpression)();
+
 private:
 	int _sourceField;
 
@@ -392,15 +394,15 @@ private:
 	VARIANT_BOOL _useWidthLimits;
 	VARIANT_BOOL _removeDuplicates;
 	VARIANT_BOOL _gdiPlus;
-	
-	inline void ErrorMessage(long ErrorCode);
-	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
 
 	tkTextRenderingHint _textRenderingHint;
 	VARIANT_BOOL _synchronized;
 
-public:
+private:
+	inline void ErrorMessage(long ErrorCode);
+	bool GetMinMaxCategoryValue(double& globalMax, double& globalMin);
 
+public:
 	void ClearLabelFrames();
 	void SaveSourceField(int fieldIndex) {	_sourceField = fieldIndex;	}
 	bool HasRotation();
@@ -425,8 +427,6 @@ public:
 	void AddEmptyLabel();
 
 	void LoadLblOptions(CPLXMLNode* node);
-
-	void ReapplyExpression();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

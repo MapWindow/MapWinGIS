@@ -2566,10 +2566,11 @@ STDMETHODIMP CLabels::put_FloatNumberFormat(BSTR newVal)
 // *************************************************************
 //		ReapplyExpression()
 // *************************************************************
-void CLabels::ReapplyExpression()
+STDMETHODIMP CLabels::ForceRecalculateExpression()
 {
 	CComBSTR expr;
 	get_Expression(&expr);
 	put_Expression(m_globalSettings.emptyBstr);
 	put_Expression(expr);
+	return S_OK;
 }

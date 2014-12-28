@@ -4722,6 +4722,7 @@ interface ILabels : IDispatch{
 	[propput, id(99), helpstring("property SmoothingMode")] HRESULT SmoothingMode([in] tkSmoothingMode newVal);*/
 	[propget, id(98)] HRESULT FloatNumberFormat([out, retval] BSTR* pVal);
 	[propput, id(98)] HRESULT FloatNumberFormat([in] BSTR newVal);
+	[id(99)] HRESULT ForceRecalculateExpression();
 };
 
 // *******************************  LabelCategory Interface  *****************************

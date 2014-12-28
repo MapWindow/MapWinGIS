@@ -166,7 +166,7 @@ STDMETHODIMP CShapefile::GenerateLabels(long FieldIndex, tkLabelPositioning Meth
 
 	if (FieldIndex == -1)
 	{
-		((CLabels*)_labels)->ReapplyExpression();
+		((CLabels*)_labels)->ForceRecalculateExpression();
 	}
 	else
 	{
