@@ -26,6 +26,7 @@
 #include "Templates.h"
 #include "JenksBreaks.h"
 #include "Field.h"
+#include "TableHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -59,20 +60,9 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 	}
 
 	// testing with values of the first row; there can be inconsistent data types for example
-	CComVariant var;
 	int i = 0;
 
-	for (int j = 0; j< expr.get_NumFields(); j++)
-	{
-		int fieldIndex = expr.get_FieldIndex(j);
-		this->get_CellValue(fieldIndex, i, &var);
-		switch (var.vt)
-		{
-			case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
-			case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
-			case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
-		}
-	}
+	TableHelper::SetFieldValue(this, i, expr);
 			
 	// if expression returns true for the given record we'll save the index 
 	CExpressionValue* result = expr.Calculate(errorString);
@@ -200,18 +190,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 		CString err;
 		if (expr.ParseExpression(Expression, true, err))
 		{
-			CComVariant var;
-			for (int j = 0; j< expr.get_NumFields(); j++)
-			{
-				int fieldIndex = expr.get_FieldIndex(j);
-				this->get_CellValue(fieldIndex, RowIndex, &var);
-				switch (var.vt)
-				{
-					case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
-					case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
-					case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
-				}
-			}
+			TableHelper::SetFieldValue(this, RowIndex, expr);
 				
 			// no need to delete the result
 			CExpressionValue* val = expr.Calculate(err);
@@ -260,23 +239,10 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 		CString err;
 		if (expr.ParseExpression(Expression, true, err))
 		{
-			VARIANT var;
-			VariantInit(&var);
-			
 			bool error = false;
 			for (unsigned int i = 0; i < _rows.size(); i++)
 			{
-				for (int j = 0; j< expr.get_NumFields(); j++)
-				{
-					int fieldIndex = expr.get_FieldIndex(j);
-					this->get_CellValue(fieldIndex, i, &var);
-					switch (var.vt)
-					{
-						case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
-						case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
-						case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
-					}
-				}
+				TableHelper::SetFieldValue(this, i, expr);
 				
 				// if expression returns true for the given record we'll save the index 
 				CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
@@ -302,8 +268,6 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 					break;
 				}
 			}
-			VariantClear(&var);
-
 			return true;
 		}
 		else
@@ -319,95 +283,67 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 }
 
 // ********************************************************************
-//			Calculate_()
+//			CalculateCore()
 // ********************************************************************
-bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, CString floatFormat, int rowIndex /*= -1*/)
+bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, 
+								CString floatFormat, int rowIndex /*= -1*/)
 {
 	results.clear();
 	
 	CExpression expr;	
-	if (expr.ReadFieldNames(this))
+	expr.SetFloatFormat(floatFormat);
+	if (!expr.ReadFieldNames(this))
 	{
-		CString err;
-		if (expr.ParseExpression(Expression, true, err))
-		{
-			VARIANT var;
-			VariantInit(&var);
-			
-			bool error = false;
-			CString str;
+		ErrorString = "Failed to read field names";
+		return false;
+	}
 
-			int start = (rowIndex == -1) ? 0 : rowIndex;
-			int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
+	CString err;
+	if (!expr.ParseExpression(Expression, true, err))
+	{
+		ErrorString = err;
+		return false;
+	}
 
-			for (int i = start; i < end; i++)
-			{
-				for (int j = 0; j< expr.get_NumFields(); j++)
-				{
-					int fieldIndex = expr.get_FieldIndex(j);
-					this->get_CellValue(fieldIndex, i, &var);
-					switch (var.vt)
-					{
-						case VT_BSTR:
-							expr.put_FieldValue(j, var.bstrVal); 
-							break;
-						case VT_I4:	  
-							str.Format("%d", var.lVal);
-							expr.put_FieldValue(j, str); 
-							break;
-						case VT_R8:	  
-							str.Format(floatFormat, var.dblVal);
-							expr.put_FieldValue(j, str); 
-							break;
-					}
-				}
+	bool error = false;
+	CString str;
+
+	int start = (rowIndex == -1) ? 0 : rowIndex;
+	int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
+
+	for (int i = start; i < end; i++)
+	{
+		TableHelper::SetFieldValue(this, i, expr);
 				
-				// if expression returns true for the given record we'll save the index 
-				CExpressionValue* result = expr.Calculate(err);
-				if ( result )
-				{
-					if (result->type == vtString)
-					{
-						str = result->str;
-						results.push_back(str);
-					}
-					else if (result->type == vtBoolean)
-					{
-						str = result->bln ? "true" : "false";
-						results.push_back(str);
-					}
-					else
-					{
-						str.Format("%f", result->dbl);
-						results.push_back(str);
-						
-						//ErrorString = "Invalid result type";
-						//error = true;
-					}
-				}
-				else
-				{
-					ErrorString = err;
-					error = true;
-					break;
-				}
+		// if expression returns true for the given record we'll save the index 
+		CExpressionValue* result = expr.Calculate(err);
+		if ( result )
+		{
+			if (result->type == vtString)
+			{
+				str = result->str;
+				results.push_back(str);
 			}
-			VariantClear(&var);
-
-			return true;
+			else if (result->type == vtBoolean)
+			{
+				str = result->bln ? "true" : "false";
+				results.push_back(str);
+			}
+			else
+			{
+				str.Format(floatFormat, result->dbl);
+				results.push_back(str);
+			}
 		}
 		else
 		{
 			ErrorString = err;
+			error = true;
+			break;
 		}
 	}
-	else
-	{
-		ErrorString = "Failed to read field names";
-	}
-	return false;
+	return true;
 }
-
 
 // ****************************************************************
 //	  AnalyzeExpressions()
@@ -431,24 +367,11 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 				CString err;
 				if (expr.ParseExpression(expressions[categoryId], true, err))
 				{
-					VARIANT var;
-					VariantInit(&var);
-					
 					for (unsigned int i = 0; i < _rows.size(); i++)
 					{
 						if (results[i] == -1)
 						{
-							for (long j = 0; j< expr.get_NumFields(); j++)
-							{
-								int fieldIndex = expr.get_FieldIndex(j);
-								this->get_CellValue(fieldIndex, i, &var);
-								switch (var.vt)
-								{
-									case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
-									case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
-									case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
-								}
-							}
+							TableHelper::SetFieldValue(this, i, expr);
 						
 							// if expression returns true for the given record we'll save the index 
 							CExpressionValue* result = expr.Calculate(err);
@@ -461,7 +384,6 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 							}
 						}
 					}
-					VariantClear(&var);
 				}
 			}
 		}

@@ -1200,14 +1200,14 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 					else if ( valLeft->type == vtDouble && valRight->type == vtString)
 					{
 						CString s;
-						s.Format("%g", valLeft->dbl);
+						s.Format(_floatFormat, valLeft->dbl);
 						elLeft->calcVal->type = vtString;
 						elLeft->calcVal->str = s + valRight->str;
 					}
 					else if ( valLeft->type == vtString && valRight->type == vtDouble)
 					{
 						CString s;
-						s.Format("%g", valRight->dbl);
+						s.Format(_floatFormat, valRight->dbl);
 						elLeft->calcVal->type = vtString;
 						elLeft->calcVal->str = valLeft->str + s;
 					}

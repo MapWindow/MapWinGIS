@@ -185,7 +185,9 @@ class CExpression
 private:
 	
 public:
-	CExpression() {}
+	CExpression() {
+		_floatFormat = "%g";
+	}
 	~CExpression()
 	{
 		Clear();
@@ -234,12 +236,6 @@ public:
 					}
 				}
 			}
-
-			/*if (_parts[i]->val->matrix)
-			{
-				delete _parts[i]->val->matrix;
-				_parts[i]->val->matrix = NULL;
-			}*/
 		}
 	}
 
@@ -254,8 +250,11 @@ private:
 	CString _errorMessage;	// the description of error
 	int _errorPosition;		// the position of error
 	int _errorLength;		// the length sub string with error
+	CString _floatFormat;
 	
 public:
+	CString GetFloatFormat() {	return _floatFormat;	}
+	void SetFloatFormat(CString value) { _floatFormat = value; }
 	CExpressionValue* Calculate(CString& errorMessage);
 	bool ParseExpression(CString s, bool useFields, CString& error);
 	bool ReadFieldNames(ITable* tbl);
