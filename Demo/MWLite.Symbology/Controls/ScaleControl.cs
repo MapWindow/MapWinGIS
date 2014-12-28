@@ -542,8 +542,8 @@ namespace MWLite.Symbology.Controls
 
                 //g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 //g.SmoothingMode = SmoothingMode.AntiAlias;
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
-                Font font = new Font("Microsoft Sans Serif", 7.5f);
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                Font font = new Font("Microsoft Sans Serif", 7.5f, FontStyle.Bold);
 
                 for (int i = 0; i < 10; i++)
                 {

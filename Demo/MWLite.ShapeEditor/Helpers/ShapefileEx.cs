@@ -3,11 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MapWinGIS;
+using MWLite.Core.UI;
 
 namespace MWLite.ShapeEditor.Helpers
 {
     public static class ShapefileEx
     {
+        public static void CalculateArea(this Shapefile sf)
+        {
+            if (sf == null) return;
+            if (sf.ShapefileType2D != ShpfileType.SHP_POLYGON)
+            {
+                MessageHelper.Info("Area can be calculated for polygon shapefiles only.");
+                return;
+            }
+
+            bool editing = sf.EditingTable;
+            if (!editing)
+            {
+                if (!sf.StartEditingTable())
+                {
+                    MessageHelper.Warn("Failed to start editing mode for table.");
+                    return;
+                }
+            }
+
+            int fieldIndex = sf.EditAddField("GeoArea", FieldType.DOUBLE_FIELD, 6, 18);
+            for (int i = 0; i < sf.NumShapes; i++)
+			{
+    			    double area = App.Map.GeodesicArea(sf.Shape[i]);
+                    sf.EditCellValue(fieldIndex, i, area);
+			}
+            
+            if (!editing) 
+            {
+                if (!sf.StopEditingTable())
+                {
+                    MessageHelper.Warn("Failed to save calculated area to the datasource.");
+                    return;
+                }
+            }
+
+            MessageHelper.Info("Area was calculated in GeoArea field.");
+        }
+        
         public static void CopyAttributes(this Shapefile sf, int sourceIndex, int targetIndex)
         {
             sf.CopyAttributes(sourceIndex, sf, targetIndex);

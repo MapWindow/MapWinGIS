@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using MWLite.Symbology.Classes;
 using MWLite.Symbology.Forms;
 using MWLite.Symbology.Forms.Labels;
+using MapWinGIS;
 
 namespace MWLite.Symbology.LegendControl
 {
@@ -48,6 +49,12 @@ namespace MWLite.Symbology.LegendControl
                         // do something
                     }
                 }
+            }
+            else
+            {
+                var utils = new Utils();
+                string s = utils.GDALInfo(m_legend.m_Map.LayerFilename[Handle], "");
+                MessageBox.Show(s, "GDAL info:", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
         

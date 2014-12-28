@@ -6,6 +6,7 @@ using MWLite.Core.UI;
 using MWLite.GUI.Forms;
 using MWLite.GUI.Helpers;
 using MWLite.Symbology.LegendControl;
+using MWLite.ShapeEditor.Helpers;
 
 namespace MWLite.GUI.MapLegend
 {
@@ -30,6 +31,9 @@ namespace MWLite.GUI.MapLegend
 
             switch (command)
             {
+                case LegendCommand.CalculateArea:
+                    sf.CalculateArea();
+                    break;
                 case LegendCommand.RemoveLayer:
                     LayerHelper.RemoveLayer();
                     break;

@@ -9,5 +9,6 @@
         SaveLayerStyle = 5,
         RemoveLayer = 6,
         LoadLayerStyle = 7,
+        CalculateArea = 8,
     }
 }

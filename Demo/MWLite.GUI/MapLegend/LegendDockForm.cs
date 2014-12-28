@@ -44,6 +44,7 @@ namespace MWLite.GUI.MapLegend
                 ctxPostGis.Enabled = false;
                 ctxLabels.Enabled = false;
                 ctxProperties.Enabled = false;
+                ctxCalculateArea.Enabled = false;
              }
         }
     }

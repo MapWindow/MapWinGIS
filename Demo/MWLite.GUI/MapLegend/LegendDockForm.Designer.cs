@@ -43,7 +43,9 @@ namespace MWLite.GUI.MapLegend
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ctxRemoveLayer = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.legend1 = new Legend();
+            this.legend1 = new MWLite.Symbology.LegendControl.Legend();
+            this.ctxCalculateArea = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -71,6 +73,8 @@ namespace MWLite.GUI.MapLegend
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ctxLabels,
             this.ctxZoomToLayer,
+            this.toolStripSeparator5,
+            this.ctxCalculateArea,
             this.toolStripSeparator4,
             this.ctxSaveLayerStyle,
             this.ctxLoadLayerStyle,
@@ -81,7 +85,7 @@ namespace MWLite.GUI.MapLegend
             this.toolStripSeparator3,
             this.ctxProperties});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 204);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 232);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // toolStripSeparator4
@@ -150,6 +154,17 @@ namespace MWLite.GUI.MapLegend
             this.legend1.Size = new System.Drawing.Size(331, 358);
             this.legend1.TabIndex = 2;
             // 
+            // ctxCalculateArea
+            // 
+            this.ctxCalculateArea.Name = "ctxCalculateArea";
+            this.ctxCalculateArea.Size = new System.Drawing.Size(155, 22);
+            this.ctxCalculateArea.Text = "Calculate area";
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(152, 6);
+            // 
             // LegendDockForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -183,6 +198,8 @@ namespace MWLite.GUI.MapLegend
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem ctxLoadLayerStyle;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem ctxCalculateArea;
 
     }
 }

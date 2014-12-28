@@ -135,6 +135,11 @@ namespace MWLite.Symbology.Forms.Labels
                 cboFontName.Items.Add(family.Name);
             }
 
+            cboDecimalPlaces.Items.Add("Auto");
+            for (int i = 1; i <= 6; i++)
+                cboDecimalPlaces.Items.Add(i.ToString());
+            cboDecimalPlaces.SelectedIndex = 0;
+
             icbLineType.ComboStyle = ImageComboStyle.LineStyle;
             icbLineWidth.ComboStyle = ImageComboStyle.LineWidth;
 
@@ -421,11 +426,22 @@ namespace MWLite.Symbology.Forms.Labels
             btnApply.Enabled = true;
 
             m_shapefile.Labels.TextRenderingHint = (tkTextRenderingHint)cboTextRenderingHint.SelectedIndex;
-            // TODO: implement
-            //this.labelList1.TextRenderingHint = (TextRenderingHint)cboTextRenderingHint.SelectedIndex;
 
+            string format = m_shapefile.Labels.FloatNumberFormat;
+            string newFormat = GetFloatFormat();
+            m_shapefile.Labels.FloatNumberFormat = newFormat;
+            if (newFormat != format)
+            {
+                m_shapefile.Labels.ForceRecalculateExpression();
+            }
             DrawPreview(null, null);
             return;
+        }
+
+        private string GetFloatFormat()
+        {
+            if (cboDecimalPlaces.SelectedIndex == 0) return "%g";
+            return string.Format("%.{0}f", cboDecimalPlaces.SelectedIndex);
         }
 
         /// <summary>
@@ -433,7 +449,7 @@ namespace MWLite.Symbology.Forms.Labels
         /// </summary>
         private void DrawPreview(object sender, EventArgs e)
         {
-            // this function is called after each chnage of state, therefore it makes sense to update availability of controls here
+            // this function is called after each change of state, therefore it makes sense to update availability of controls here
             RefreshControls();
 
             if (!m_NoEvents)
@@ -457,7 +473,7 @@ namespace MWLite.Symbology.Forms.Labels
         }
 
         /// <summary>
-        /// Enables or disables controls which are dependant upon others
+        /// Enables or disables controls which are dependent upon others
         /// </summary>
         private void RefreshControls()
         {
@@ -618,6 +634,7 @@ namespace MWLite.Symbology.Forms.Labels
                     m_shapefile.Labels.Expression = MWLite.Symbology.Classes.LabelUtilities.FixExpression(richTextBox1.Text);
                 }
             }
+
             return true;
         }
 

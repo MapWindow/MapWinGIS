@@ -136,12 +136,13 @@ namespace MWLite.Symbology.Forms.Labels
             this.optAlignTopLeft = new System.Windows.Forms.RadioButton();
             this.tabVisibility = new System.Windows.Forms.TabPage();
             this.groupBox13 = new System.Windows.Forms.GroupBox();
-            this.btnSetMinScale = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.btnSetMaxScale = new System.Windows.Forms.Button();
             this.cboMaxScale = new System.Windows.Forms.ComboBox();
-            this.cboMinScale = new System.Windows.Forms.ComboBox();
+            this.btnSetMinScale = new System.Windows.Forms.Button();
             this.label20 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
+            this.cboMinScale = new System.Windows.Forms.ComboBox();
             this.chkDynamicVisibility = new System.Windows.Forms.CheckBox();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
             this.txtLabelExpression = new System.Windows.Forms.TextBox();
@@ -179,7 +180,8 @@ namespace MWLite.Symbology.Forms.Labels
             this.udFontSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.lblResult = new System.Windows.Forms.Label();
             this.btnApply = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.cboDecimalPlaces = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabExpression.SuspendLayout();
             this.groupBox10.SuspendLayout();
@@ -206,6 +208,7 @@ namespace MWLite.Symbology.Forms.Labels
             ((System.ComponentModel.ISupportInitialize)(this.udLabelsBuffer)).BeginInit();
             this.tabVisibility.SuspendLayout();
             this.groupBox13.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.groupBox11.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pctPreview)).BeginInit();
@@ -213,7 +216,6 @@ namespace MWLite.Symbology.Forms.Labels
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox10)).BeginInit();
             this.groupBox6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udFontSize)).BeginInit();
-            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -231,6 +233,8 @@ namespace MWLite.Symbology.Forms.Labels
             // 
             // tabExpression
             // 
+            this.tabExpression.Controls.Add(this.label18);
+            this.tabExpression.Controls.Add(this.cboDecimalPlaces);
             this.tabExpression.Controls.Add(this.groupBox10);
             this.tabExpression.Controls.Add(this.groupBox9);
             this.tabExpression.Controls.Add(this.btnClear);
@@ -249,9 +253,9 @@ namespace MWLite.Symbology.Forms.Labels
             // groupBox10
             // 
             this.groupBox10.Controls.Add(this.label13);
-            this.groupBox10.Location = new System.Drawing.Point(229, 256);
+            this.groupBox10.Location = new System.Drawing.Point(227, 273);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Size = new System.Drawing.Size(163, 52);
+            this.groupBox10.Size = new System.Drawing.Size(163, 34);
             this.groupBox10.TabIndex = 46;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Description";
@@ -261,14 +265,14 @@ namespace MWLite.Symbology.Forms.Labels
             this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label13.Location = new System.Drawing.Point(3, 16);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(157, 33);
+            this.label13.Size = new System.Drawing.Size(157, 15);
             this.label13.TabIndex = 0;
-            this.label13.Text = "[Area]  - field name                        \"ha\" - constant string";
+            this.label13.Text = "[Area]  - field \"ha\" - constant";
             // 
             // groupBox9
             // 
             this.groupBox9.Controls.Add(this.label11);
-            this.groupBox9.Location = new System.Drawing.Point(229, 198);
+            this.groupBox9.Location = new System.Drawing.Point(227, 215);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Size = new System.Drawing.Size(163, 52);
             this.groupBox9.TabIndex = 45;
@@ -296,9 +300,9 @@ namespace MWLite.Symbology.Forms.Labels
             // 
             // btnNewLine
             // 
-            this.btnNewLine.Location = new System.Drawing.Point(297, 165);
+            this.btnNewLine.Location = new System.Drawing.Point(292, 156);
             this.btnNewLine.Name = "btnNewLine";
-            this.btnNewLine.Size = new System.Drawing.Size(92, 25);
+            this.btnNewLine.Size = new System.Drawing.Size(97, 25);
             this.btnNewLine.TabIndex = 42;
             this.btnNewLine.Text = "New line";
             this.btnNewLine.UseVisualStyleBackColor = true;
@@ -306,7 +310,7 @@ namespace MWLite.Symbology.Forms.Labels
             // 
             // btnQuotes
             // 
-            this.btnQuotes.Location = new System.Drawing.Point(263, 165);
+            this.btnQuotes.Location = new System.Drawing.Point(258, 156);
             this.btnQuotes.Name = "btnQuotes";
             this.btnQuotes.Size = new System.Drawing.Size(28, 25);
             this.btnQuotes.TabIndex = 41;
@@ -316,7 +320,7 @@ namespace MWLite.Symbology.Forms.Labels
             // 
             // btnPlus
             // 
-            this.btnPlus.Location = new System.Drawing.Point(229, 165);
+            this.btnPlus.Location = new System.Drawing.Point(224, 156);
             this.btnPlus.Name = "btnPlus";
             this.btnPlus.Size = new System.Drawing.Size(28, 25);
             this.btnPlus.TabIndex = 40;
@@ -1221,15 +1225,18 @@ namespace MWLite.Symbology.Forms.Labels
             this.groupBox13.TabStop = false;
             this.groupBox13.Text = "Dynamic visibility";
             // 
-            // btnSetMinScale
+            // panel1
             // 
-            this.btnSetMinScale.Location = new System.Drawing.Point(258, 10);
-            this.btnSetMinScale.Name = "btnSetMinScale";
-            this.btnSetMinScale.Size = new System.Drawing.Size(87, 24);
-            this.btnSetMinScale.TabIndex = 6;
-            this.btnSetMinScale.Text = "Current";
-            this.btnSetMinScale.UseVisualStyleBackColor = true;
-            this.btnSetMinScale.Click += new System.EventHandler(this.btnSetMinScale_Click);
+            this.panel1.Controls.Add(this.btnSetMaxScale);
+            this.panel1.Controls.Add(this.cboMaxScale);
+            this.panel1.Controls.Add(this.btnSetMinScale);
+            this.panel1.Controls.Add(this.label20);
+            this.panel1.Controls.Add(this.label16);
+            this.panel1.Controls.Add(this.cboMinScale);
+            this.panel1.Location = new System.Drawing.Point(10, 55);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(351, 77);
+            this.panel1.TabIndex = 136;
             // 
             // btnSetMaxScale
             // 
@@ -1250,14 +1257,15 @@ namespace MWLite.Symbology.Forms.Labels
             this.cboMaxScale.TabIndex = 4;
             this.cboMaxScale.TextChanged += new System.EventHandler(this.Gui2LabelStyle);
             // 
-            // cboMinScale
+            // btnSetMinScale
             // 
-            this.cboMinScale.FormattingEnabled = true;
-            this.cboMinScale.Location = new System.Drawing.Point(136, 13);
-            this.cboMinScale.Name = "cboMinScale";
-            this.cboMinScale.Size = new System.Drawing.Size(110, 21);
-            this.cboMinScale.TabIndex = 3;
-            this.cboMinScale.TextChanged += new System.EventHandler(this.Gui2LabelStyle);
+            this.btnSetMinScale.Location = new System.Drawing.Point(258, 10);
+            this.btnSetMinScale.Name = "btnSetMinScale";
+            this.btnSetMinScale.Size = new System.Drawing.Size(87, 24);
+            this.btnSetMinScale.TabIndex = 6;
+            this.btnSetMinScale.Text = "Current";
+            this.btnSetMinScale.UseVisualStyleBackColor = true;
+            this.btnSetMinScale.Click += new System.EventHandler(this.btnSetMinScale_Click);
             // 
             // label20
             // 
@@ -1276,6 +1284,15 @@ namespace MWLite.Symbology.Forms.Labels
             this.label16.Size = new System.Drawing.Size(102, 13);
             this.label16.TabIndex = 1;
             this.label16.Text = "Minimal visible scale";
+            // 
+            // cboMinScale
+            // 
+            this.cboMinScale.FormattingEnabled = true;
+            this.cboMinScale.Location = new System.Drawing.Point(136, 13);
+            this.cboMinScale.Name = "cboMinScale";
+            this.cboMinScale.Size = new System.Drawing.Size(110, 21);
+            this.cboMinScale.TabIndex = 3;
+            this.cboMinScale.TextChanged += new System.EventHandler(this.Gui2LabelStyle);
             // 
             // chkDynamicVisibility
             // 
@@ -1625,18 +1642,24 @@ namespace MWLite.Symbology.Forms.Labels
             this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Click += new System.EventHandler(this.btnApply_Click);
             // 
-            // panel1
+            // cboDecimalPlaces
             // 
-            this.panel1.Controls.Add(this.btnSetMaxScale);
-            this.panel1.Controls.Add(this.cboMaxScale);
-            this.panel1.Controls.Add(this.btnSetMinScale);
-            this.panel1.Controls.Add(this.label20);
-            this.panel1.Controls.Add(this.label16);
-            this.panel1.Controls.Add(this.cboMinScale);
-            this.panel1.Location = new System.Drawing.Point(10, 55);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(351, 77);
-            this.panel1.TabIndex = 136;
+            this.cboDecimalPlaces.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboDecimalPlaces.FormattingEnabled = true;
+            this.cboDecimalPlaces.Location = new System.Drawing.Point(318, 188);
+            this.cboDecimalPlaces.Name = "cboDecimalPlaces";
+            this.cboDecimalPlaces.Size = new System.Drawing.Size(69, 21);
+            this.cboDecimalPlaces.TabIndex = 47;
+            this.cboDecimalPlaces.SelectedIndexChanged += new System.EventHandler(this.Gui2LabelStyle);
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(230, 191);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(82, 13);
+            this.label18.TabIndex = 48;
+            this.label18.Text = "Decimal places:";
             // 
             // LabelStyleForm
             // 
@@ -1663,6 +1686,7 @@ namespace MWLite.Symbology.Forms.Labels
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmLabelStyle_FormClosing);
             this.tabControl1.ResumeLayout(false);
             this.tabExpression.ResumeLayout(false);
+            this.tabExpression.PerformLayout();
             this.groupBox10.ResumeLayout(false);
             this.groupBox9.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);
@@ -1696,6 +1720,8 @@ namespace MWLite.Symbology.Forms.Labels
             this.tabVisibility.ResumeLayout(false);
             this.groupBox13.ResumeLayout(false);
             this.groupBox13.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -1705,8 +1731,6 @@ namespace MWLite.Symbology.Forms.Labels
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udFontSize)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1843,6 +1867,8 @@ namespace MWLite.Symbology.Forms.Labels
         private System.Windows.Forms.ComboBox cboTextRenderingHint;
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.ComboBox cboDecimalPlaces;
 
     }
 }
