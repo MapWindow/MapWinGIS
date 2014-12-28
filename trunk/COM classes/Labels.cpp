@@ -1458,6 +1458,9 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	if (_sourceField != -1)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "SourceField",CPLString().Printf("%d", _sourceField));
 
+	if (_floatNumberFormat != m_globalSettings.floatNumberFormat)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FloatNumberFormat", _floatNumberFormat);
+
 	return psTree;
 }
 
@@ -1642,7 +1645,11 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	
 	s = CPLGetXMLValue( node, "TextRenderingHint", NULL );
 	_textRenderingHint = (s != "") ? (tkTextRenderingHint)atoi(s.GetString()) : HintAntiAlias;
-	
+
+	s = CPLGetXMLValue(node, "FloatNumberFormat", NULL);
+	CComBSTR bstrFormat(s);
+	put_FloatNumberFormat(bstrFormat);
+
 	// applying the expressions
 	if (_categories.size() > 0)
 	{
