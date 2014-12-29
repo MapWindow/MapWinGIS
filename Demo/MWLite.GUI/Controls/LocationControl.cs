@@ -35,6 +35,11 @@ namespace MWLite.GUI.Controls
             RefreshControls();
         }
 
+        public void SetFocus()
+        {
+            txtFindLocation.Focus();
+        }
+
         private void RefreshControls()
         {
             cboKnownExtents.Enabled = optKnownExtents.Checked;
@@ -50,6 +55,11 @@ namespace MWLite.GUI.Controls
         {
             if (optFindLocation.Checked)
             {
+                if (App.Map.GeoProjection.IsEmpty && App.Map.NumLayers == 0)
+                {
+                    App.Map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
+                }
+                
                 if (string.IsNullOrWhiteSpace(txtFindLocation.Text))
                 {
                     MessageHelper.Info("Enter the name of location.");

@@ -28,10 +28,12 @@ namespace MWLite.ShapeEditor.Helpers
                 }
             }
 
-            int fieldIndex = sf.EditAddField("GeoArea", FieldType.DOUBLE_FIELD, 6, 18);
+            bool ellipsoid = App.Map.Measuring.IsUsingEllipsoid;
+            string fieldName = ellipsoid ? "GeoArea" : "Area";
+            int fieldIndex = sf.EditAddField(fieldName, FieldType.DOUBLE_FIELD, 6, 18);
             for (int i = 0; i < sf.NumShapes; i++)
 			{
-    			    double area = App.Map.GeodesicArea(sf.Shape[i]);
+                double area = ellipsoid ? App.Map.GeodesicArea(sf.Shape[i]) : sf.Shape[i].Area;
                     sf.EditCellValue(fieldIndex, i, area);
 			}
             
@@ -44,7 +46,7 @@ namespace MWLite.ShapeEditor.Helpers
                 }
             }
 
-            MessageHelper.Info("Area was calculated in GeoArea field.");
+            MessageHelper.Info(string.Format("Area was calculated in {0} field.", fieldName));
         }
         
         public static void CopyAttributes(this Shapefile sf, int sourceIndex, int targetIndex)

@@ -11,11 +11,37 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using MWLite.Core.Exts;
+using MWLite.Symbology.Forms;
 
 namespace MWLite.GUI.Helpers
 {
     internal static class LayerHelper
     {
+        public static void ShowLayerProperties(int layerHandle)
+        {
+            var sf = App.Map.get_Shapefile(layerHandle);
+            if (sf != null)
+            {
+                using (var form = new frmSymbologyMain(App.Legend, layerHandle))
+                {
+                    if (form.ShowDialog(MainForm.Instance) == DialogResult.OK)
+                    {
+                        // do something
+                    }
+                }
+            }
+            else
+            {
+                using (var imageForm = new ImagePropertiesForm(layerHandle))
+                {
+                    if (imageForm.ShowDialog(MainForm.Instance) == DialogResult.OK)
+                    {
+                        
+                    }
+                }
+            }
+        }
+        
         public static void AddLayer(object layer)
         {
             if (layer == null) return;

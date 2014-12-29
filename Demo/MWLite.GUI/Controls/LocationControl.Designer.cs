@@ -41,9 +41,9 @@
             this.optKnownExtents.AutoSize = true;
             this.optKnownExtents.Location = new System.Drawing.Point(19, 91);
             this.optKnownExtents.Name = "optKnownExtents";
-            this.optKnownExtents.Size = new System.Drawing.Size(96, 17);
+            this.optKnownExtents.Size = new System.Drawing.Size(147, 17);
             this.optKnownExtents.TabIndex = 0;
-            this.optKnownExtents.Text = "Known Extents";
+            this.optKnownExtents.Text = "Known extents (countries)";
             this.optKnownExtents.UseVisualStyleBackColor = true;
             // 
             // optFindLocation
@@ -52,10 +52,10 @@
             this.optFindLocation.Checked = true;
             this.optFindLocation.Location = new System.Drawing.Point(19, 22);
             this.optFindLocation.Name = "optFindLocation";
-            this.optFindLocation.Size = new System.Drawing.Size(89, 17);
+            this.optFindLocation.Size = new System.Drawing.Size(260, 17);
             this.optFindLocation.TabIndex = 1;
             this.optFindLocation.TabStop = true;
-            this.optFindLocation.Text = "Find Location";
+            this.optFindLocation.Text = "Find location (e.g. Boston, Spain, Black Sea, etc.)";
             this.optFindLocation.UseVisualStyleBackColor = true;
             // 
             // txtFindLocation

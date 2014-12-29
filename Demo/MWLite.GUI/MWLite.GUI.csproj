@@ -75,6 +75,12 @@
     <Compile Include="Forms\DonationForm.Designer.cs">
       <DependentUpon>DonationForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\ImagePropertiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\ImagePropertiesForm.Designer.cs">
+      <DependentUpon>ImagePropertiesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\LoaderForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -132,6 +138,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\GeoLocationForm.resx">
       <DependentUpon>GeoLocationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\ImagePropertiesForm.resx">
+      <DependentUpon>ImagePropertiesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LoaderForm.resx">
       <DependentUpon>LoaderForm.cs</DependentUpon>

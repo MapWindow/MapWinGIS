@@ -72,13 +72,13 @@
             this.optEmpty.Name = "optEmpty";
             this.optEmpty.Size = new System.Drawing.Size(219, 17);
             this.optEmpty.TabIndex = 5;
-            this.optEmpty.TabStop = true;
             this.optEmpty.Text = "Empty (will be grabbed from the first layer)";
             this.optEmpty.UseVisualStyleBackColor = true;
             // 
             // optWellKnown
             // 
             this.optWellKnown.AutoSize = true;
+            this.optWellKnown.Checked = true;
             this.optWellKnown.Location = new System.Drawing.Point(16, 52);
             this.optWellKnown.Name = "optWellKnown";
             this.optWellKnown.Size = new System.Drawing.Size(130, 17);
@@ -99,12 +99,10 @@
             // optDefinition
             // 
             this.optDefinition.AutoSize = true;
-            this.optDefinition.Checked = true;
             this.optDefinition.Location = new System.Drawing.Point(16, 85);
             this.optDefinition.Name = "optDefinition";
             this.optDefinition.Size = new System.Drawing.Size(358, 17);
             this.optDefinition.TabIndex = 8;
-            this.optDefinition.TabStop = true;
             this.optDefinition.Text = "Enter projection definition in any form (e.g. PROJ4, WKT, EPSG code):";
             this.optDefinition.UseVisualStyleBackColor = true;
             // 

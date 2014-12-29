@@ -1,4 +1,5 @@
 ﻿using MapWinGIS;
+using MWLite.GUI.Helpers;
 using MWLite.Symbology.LegendControl;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
@@ -15,11 +16,17 @@ namespace MWLite.GUI.MapLegend
             _dispatcher = new LegendDispatcher(legend1);
             _dispatcher.InitMenu(contextMenuStrip1.Items);
             legend1.LayerMouseUp += legend1_LayerMouseUp;
+            legend1.LayerDoubleClick += legend1_LayerDoubleClick;
         }
 
         public Legend Legend
         {
             get { return legend1;  }
+        }
+
+        private void legend1_LayerDoubleClick(int Handle)
+        {
+            LayerHelper.ShowLayerProperties(Handle);
         }
 
         private void legend1_LayerMouseUp(int Handle, MouseButtons button)
@@ -43,7 +50,6 @@ namespace MWLite.GUI.MapLegend
              {
                 ctxPostGis.Enabled = false;
                 ctxLabels.Enabled = false;
-                ctxProperties.Enabled = false;
                 ctxCalculateArea.Enabled = false;
              }
         }

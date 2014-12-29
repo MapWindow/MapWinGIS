@@ -59,13 +59,7 @@ namespace MWLite.GUI.MapLegend
                     }
                     break;
                 case LegendCommand.Properties:
-                    {
-                        using (var form = new frmSymbologyMain(_legend, LayerHandle))
-                        {
-                            form.ShowDialog(MainForm.Instance);
-                            _legend.Refresh();
-                        }
-                    }
+                    LayerHelper.ShowLayerProperties(LayerHandle);
                     break;
             }
         }

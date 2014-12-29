@@ -18,6 +18,8 @@ namespace MWLite.GUI.Forms
         {
             InitializeComponent();
             locationControl1.NewExtents += locationControl1_NewExtents;
+
+            Shown += (s, e) => locationControl1.SetFocus();
         }
 
         void locationControl1_NewExtents(object sender, NewExtentsEventArgs e)

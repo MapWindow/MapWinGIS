@@ -27,37 +27,8 @@ namespace MWLite.Symbology.LegendControl
             m_legend.LayerColorboxClicked += m_legend_LayerColorboxClicked;
             m_legend.LayerLabelsClicked += m_legend_LayerLabelsClicked;
             m_legend.LayerCategoryClicked += m_legend_LayerCategoryClicked;
-            m_legend.LayerDoubleClick += m_legend_LayerDoubleClick;
         }
 
-        /// <summary>
-        /// Opens list of categories for the layer
-        /// </summary>
-        /// <param name="Handle"></param>
-        void m_legend_LayerDoubleClick(int Handle)
-        {
-            if (m_legend == null || m_legend.m_Map == null)
-                return;
-
-            MapWinGIS.Shapefile sf = m_legend.m_Map.get_Shapefile(Handle);
-            if (sf != null)
-            {
-                using (var form = new frmSymbologyMain(m_legend, Handle))
-                {
-                    if (form.ShowDialog() == DialogResult.OK)
-                    {
-                        // do something
-                    }
-                }
-            }
-            else
-            {
-                var utils = new Utils();
-                string s = utils.GDALInfo(m_legend.m_Map.LayerFilename[Handle], "");
-                MessageBox.Show(s, "GDAL info:", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-        
         /// <summary>
         /// Handles the clicking on the layer color box
         /// </summary>

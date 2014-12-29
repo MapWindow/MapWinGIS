@@ -186,7 +186,20 @@ namespace MWLite.GUI.Forms
             Text = WINDOW_TITLE;
             if (!App.Project.IsEmpty)
                  Text += " - " + App.Project.GetPath();
-            
+
+            toolSetProjection.Enabled = App.Map.NumLayers == 0;
+            toolSetProjection.Text = App.Map.NumLayers == 0
+                ? "Set coordinate system and projection"
+                : "It's not allowed to change projection when layers are already added to the map.";
+
+            toolSearch.Enabled = true;
+            toolSearch.Text = "Find location";
+            if (App.Map.NumLayers > 0 && !App.Map.Measuring.IsUsingEllipsoid)
+            {
+                toolSearch.Enabled = false;
+                toolSearch.Text = "Unsupported projection. Search isn't allowed.";
+            }
+
             toolZoomIn.Checked = Map.CursorMode == tkCursorMode.cmZoomIn;
             toolZoomOut.Checked = Map.CursorMode == tkCursorMode.cmZoomOut;
             toolPan.Checked = Map.CursorMode == tkCursorMode.cmPan;
