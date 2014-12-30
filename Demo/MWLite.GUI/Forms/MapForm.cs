@@ -62,7 +62,7 @@ namespace MWLite.GUI.Forms
             axMap1.SendSelectBoxFinal = true;
             axMap1.SendMouseDown = true;
             axMap1.SendMouseUp = true;
-            axMap1.InertiaOnPanning = tkCustomState.csFalse;
+            axMap1.InertiaOnPanning = tkCustomState.csAuto;
             axMap1.ShowRedrawTime = false;
             Map.Identifier.IdentifierMode = tkIdentifierMode.imSingleLayer;
             Map.Identifier.HotTracking = true;

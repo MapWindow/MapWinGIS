@@ -37,7 +37,7 @@
             this.locationControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.locationControl1.Location = new System.Drawing.Point(0, 0);
             this.locationControl1.Name = "locationControl1";
-            this.locationControl1.Size = new System.Drawing.Size(375, 213);
+            this.locationControl1.Size = new System.Drawing.Size(381, 201);
             this.locationControl1.TabIndex = 4;
             // 
             // button1
@@ -54,7 +54,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button1;
-            this.ClientSize = new System.Drawing.Size(375, 213);
+            this.ClientSize = new System.Drawing.Size(381, 201);
             this.Controls.Add(this.locationControl1);
             this.Controls.Add(this.button1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
