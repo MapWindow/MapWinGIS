@@ -718,6 +718,7 @@ public:
 	Gdiplus::Pen _penGray;
 	Gdiplus::Pen _penDarkGray;
 	Gdiplus::Font* _fontCourier;
+	Gdiplus::Font* _fontCourierSmall;
 	Gdiplus::Font* _fontArial;
 
 	short m_cursorMode;

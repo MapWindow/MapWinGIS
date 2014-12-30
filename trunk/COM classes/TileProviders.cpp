@@ -597,3 +597,16 @@ STDMETHODIMP CTileProviders::get_IndexByProviderId(int providerId, int* retVal)
 	return S_OK;
 }
 
+// *******************************************************
+//			get_CopyrightNotice()
+// *******************************************************
+CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
+{
+	int index = -1;
+	get_IndexByProviderId((int)provider, &index);
+	if (index >= 0 && index < (int)_providers.size()) {
+		return _providers[index]->Copyright;
+	}
+	return L"";
+}
+

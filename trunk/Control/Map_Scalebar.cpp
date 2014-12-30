@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "map.h"
+#include "TileProviders.h"
 
 // ****************************************************************
 //		DrawStringWithShade()
@@ -342,28 +343,39 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 {
 	bool showRedrawTime = _showRedrawTime && time > 0.01 && !_isSnapshot;
 	
-	if (!showRedrawTime && !_showVersionNumber) return;
+	
+	CStringW s;
+	tkTileProvider provider = GetTileProvider();
+	if (provider != tkTileProvider::ProviderNone && _transformationMode != tmNotDefined)
+	{
+		CComPtr<ITileProviders> providers = NULL;
+		_tiles->get_Providers(&providers);
+		s = ((CTileProviders*)&(*providers))->get_CopyrightNotice(provider);
+	}
+
+	if (!showRedrawTime && s.GetLength() == 0) return;
 
 	// preparing canvas
 	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
 	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
 	Gdiplus::PointF point(0.0f, 0.0f);
 	Gdiplus::StringFormat format; 
-	
-	CStringW s;
 	Gdiplus::RectF rect;
 
-	if (_showVersionNumber)
+	//USES_CONVERSION;
+	//s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
+	if (s.GetLength() > 0)
 	{
-		USES_CONVERSION;
-		s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
-		g->MeasureString(s, s.GetLength(), _fontCourier, point, &format, &rect);
+		g->MeasureString(s, s.GetLength(), _fontCourierSmall, point, &format, &rect);
 		
-		if (rect.Width + 10 < _viewWidth)		// control must be big enough to host the string
+		if (rect.Width < _viewWidth)		// control must be big enough to host the string
 		{
-			point.X = (float)(_viewWidth - rect.Width - 10);
-			point.Y = (float)(_viewHeight - rect.Height - 10);
-			DrawStringWithShade(g, s, _fontCourier, point, &_brushBlack, &_brushWhite);
+			point.X = (float)(_viewWidth - rect.Width);
+			point.Y = (float)(_viewHeight - rect.Height);
+			rect.X += point.X;
+			rect.Y += point.Y;
+			g->FillRectangle(&_brushGray, rect);
+			g->DrawString(s.GetString(), s.GetLength(), _fontCourierSmall, point, &_brushBlack);
 		}
 	}
 

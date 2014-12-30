@@ -121,6 +121,7 @@ public:
 	vector<BaseProvider*>* GetList() { return &_providers;	}
 	void put_Tiles(ITiles* tiles){	_tiles = tiles;}
 	BaseProvider* get_Provider(int providerId);
+	CStringW get_CopyrightNotice(tkTileProvider provider);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TileProviders), CTileProviders)

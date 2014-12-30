@@ -31,7 +31,7 @@ public:
 		Version = "790";
 		RefererUrl = "http://www.bing.com/maps/";
 		int year = Utility::GetCurrentYear();
-		Copyright.Format("©%d Microsoft Corporation, ©%d NAVTEQ, ©%d Image courtesy of NASA", year, year, year);
+		Copyright.Format(L"©%d Microsoft Corporation, ©%d NAVTEQ, ©%d Image courtesy of NASA", year, year, year);
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
 	}

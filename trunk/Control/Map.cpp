@@ -210,6 +210,7 @@ void CMapView::Startup()
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
 	
 	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
+	Utility::InitGdiPlusFont(&_fontCourierSmall, L"Courier New", 8.0f);
 	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
 
 	m_mapCursor = crsrMapDefault;
@@ -399,6 +400,11 @@ void CMapView::Shutdown()
 	if (_fontCourier) {
 		delete _fontCourier;
 		_fontCourier = NULL;
+	}
+
+	if (_fontCourierSmall) {
+		delete _fontCourierSmall;
+		_fontCourierSmall = NULL;
 	}
 
 	if (_fontArial) {

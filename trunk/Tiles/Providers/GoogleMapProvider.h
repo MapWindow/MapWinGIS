@@ -37,7 +37,7 @@ public:
 		server = "google.com";
 		RefererUrl.Format("http://maps.%s/", server);
 		int year = Utility::GetCurrentYear();
-		Copyright.Format("©%d Google - Map data ©%d Tele Atlas, Imagery ©%d TerraMetrics", year, year, year);
+		Copyright.Format(L"©%d Google - Map data ©%d Tele Atlas, Imagery ©%d TerraMetrics", year, year, year);
 		this->Projection = new MercatorProjection();
 		this->maxZoom = 20;
 	}

@@ -106,7 +106,7 @@ public:
 	int Id;
 	CString LanguageStr;
 	CString RefererUrl;
-	CString Copyright;
+	CStringW Copyright;
 	CString ServerLetters;
 	CString Name;
 	CString UrlFormat;

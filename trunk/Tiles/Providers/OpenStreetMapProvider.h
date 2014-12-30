@@ -32,7 +32,7 @@ public:
 		count = 0;
 		Id = tkTileProvider::OpenStreetMap;
 		Name = "OpenStreetMap";
-		Copyright.Format("© OpenStreetMap - Map data ©%d OpenStreetMap", Utility::GetCurrentYear());
+		Copyright.Format(L"© OpenStreetMap contributors");
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
 		ServerLetters = "abc";
