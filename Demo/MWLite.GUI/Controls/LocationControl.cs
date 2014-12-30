@@ -16,6 +16,9 @@ namespace MWLite.GUI.Controls
 
         protected virtual void OnNewExtents(NewExtentsEventArgs e)
         {
+            if (!string.IsNullOrWhiteSpace(GeoLocationHelper.License))
+                lblLicense.Text = GeoLocationHelper.License;
+            
             var handler = NewExtents;
             if (handler != null) handler(this, e);
         }

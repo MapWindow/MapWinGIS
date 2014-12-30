@@ -10,6 +10,13 @@ namespace MWLite.Core.GeoLocation
 {
     public static class GeoLocationHelper
     {
+        private static string _license = "";
+
+        public static string License
+        {
+            get { return _license; }
+        }
+
         public static Extents FindLocation(string query)
         {
             string json = ResquestLocation(query);
@@ -18,15 +25,15 @@ namespace MWLite.Core.GeoLocation
 
         private static string ResquestLocation(string query)
         {
-            var url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + query;
+            //var url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + query;
+            var url = string.Format("http://nominatim.openstreetmap.org/search/{0}?format=json&limit=1", query);
             var request = (HttpWebRequest)WebRequest.Create(url);
-            const string UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7";
-            const string requestAccept = "*/*";
-
-            request.UserAgent = UserAgent;
+            
+            request.Referer = "mapwingis.codeplex.com";
+            request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.7) Gecko/20091221 Firefox/3.5.7";
             request.Timeout = 5000;
             request.ReadWriteTimeout = request.Timeout * 6;
-            request.Accept = requestAccept;
+            request.Accept = "*/*";
             string result = "";
 
             try
@@ -69,21 +76,34 @@ namespace MWLite.Core.GeoLocation
 
                 var numbers = new List<double>();
                 var list = new List<string>();
-                numbers.Add((double)obj.results[0].geometry.bounds.northeast.lat);
-                numbers.Add((double)obj.results[0].geometry.bounds.northeast.lng);
-                numbers.Add((double)obj.results[0].geometry.bounds.southwest.lat);
-                numbers.Add((double)obj.results[0].geometry.bounds.southwest.lng);
+                
+                for (int i = 0; i < 4; i++)
+			    {
+                    numbers.Add(double.Parse(obj[0].boundingbox[i]));
+			    }
 
+                //numbers.Add((double)obj.results[0].geometry.bounds.northeast.lat);
+                //numbers.Add((double)obj.results[0].geometry.bounds.northeast.lng);
+                //numbers.Add((double)obj.results[0].geometry.bounds.southwest.lat);
+                //numbers.Add((double)obj.results[0].geometry.bounds.southwest.lng);
+
+                Extents box = null;
                 if (numbers.Count == 4)
                 {
                     double lat1 = numbers[0];
-                    double lng1 = numbers[1];
-                    double lat2 = numbers[2];
+                    double lat2 = numbers[1];
+                    double lng1 = numbers[2];
                     double lng2 = numbers[3];
-                    var box = new Extents();
-                    box.SetBounds(lng1, lat2, 0.0, lng2, lat1, 0.0);
-                    return box;
+                    box = new Extents();
+                    box.SetBounds(lng1, lat1, 0.0, lng2, lat2, 0.0);
                 }
+
+                try { 
+                    _license = obj[0].licence;
+                }
+                catch {}
+
+                return box;
             }
             catch
             {
