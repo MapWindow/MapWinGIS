@@ -1,6 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-using AxMapWinGIS;
+﻿using AxMapWinGIS;
 using MapWinGIS;
 using MWLite.Core.Events;
 using MWLite.Core.Exts;
@@ -8,12 +6,13 @@ using MWLite.Core.UI;
 using MWLite.GUI.Classes;
 using MWLite.GUI.Controls;
 using MWLite.ShapeEditor.Forms;
-using WeifenLuo.WinFormsUI.Docking;
+using System;
 using System.Diagnostics;
+using System.Windows.Forms;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace MWLite.GUI.Forms
 {
-    using System.IO;
 
     public partial class MapForm : DockContent
     {

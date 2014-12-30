@@ -69,6 +69,12 @@
     <Compile Include="Controls\LocationControl.Designer.cs">
       <DependentUpon>LocationControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\BingApiKeyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BingApiKeyForm.Designer.cs">
+      <DependentUpon>BingApiKeyForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\DonationForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -132,6 +138,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\LocationControl.resx">
       <DependentUpon>LocationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BingApiKeyForm.resx">
+      <DependentUpon>BingApiKeyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DonationForm.resx">
       <DependentUpon>DonationForm.cs</DependentUpon>

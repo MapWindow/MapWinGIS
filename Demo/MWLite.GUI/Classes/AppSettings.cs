@@ -14,12 +14,14 @@ namespace MWLite.GUI.Classes
     {
         public AppSettings()
         {
+            BingApiKey = "";
             LastProject = "";
             ShowTooltip = true;
         }
 
         public bool ShowTooltip { get; set; }
         public string LastProject { get; set;}
+        public string BingApiKey { get; set; }
 
         private static AppSettings _settings;
 

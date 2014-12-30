@@ -5,11 +5,19 @@ using System.Text;
 using System.Windows.Forms;
 using MapWinGIS;
 using MWLite.GUI.Forms;
+using MWLite.GUI.Classes;
+using MWLite.Symbology.Classes;
+using MWLite.Core.UI;
 
 namespace MWLite.GUI.Helpers
 {
     internal static class TilesHelper
     {
+        private enum Commands
+        {
+            SetBingApiKey = -2,
+        }
+        
         public static void Init(ToolStripMenuItem root)
         {
             root.DropDownItems.Clear();
@@ -19,18 +27,12 @@ namespace MWLite.GUI.Helpers
 
             root.DropDownItems.Add(new ToolStripSeparator());
 
-            //var except = new[]
-            //{
-            //    /*tkTileProvider.Rosreestr,*/ tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
-            //    tkTileProvider.Topomapper
-            //};
-            //var list = Enum.GetValues(typeof(tkTileProvider)).Cast<tkTileProvider>().Except(except);
-
             var list = new tkTileProvider[]
             {
                 tkTileProvider.OpenStreetMap, tkTileProvider.OpenTransportMap,
                 tkTileProvider.OpenHumanitarianMap, tkTileProvider.OpenCycleMap,
-                tkTileProvider.MapQuestAerial
+                tkTileProvider.MapQuestAerial, tkTileProvider.BingMaps,
+                tkTileProvider.BingHybrid, tkTileProvider.BingSatellite
             };
             foreach (var p in list)
             {
@@ -38,6 +40,13 @@ namespace MWLite.GUI.Helpers
                 item.Click += item_Click;
                 item.Tag = (int)p;
             }
+
+            root.DropDownItems.Add(new ToolStripSeparator());
+
+            item = root.DropDownItems.Add("Set Bing Maps API key");
+            item.Click += item_Click;
+            item.Tag = Commands.SetBingApiKey;
+
             root.DropDownOpening += root_DropDownOpening;
             App.Map.Tiles.DoCaching[tkCacheType.Disk] = true;
             App.Map.Tiles.UseCache[tkCacheType.Disk] = true;
@@ -62,9 +71,45 @@ namespace MWLite.GUI.Helpers
             var item = sender as ToolStripItem;
             if (item != null && item.Tag != null)
             {
+                if ((int)item.Tag == (int)Commands.SetBingApiKey)
+                {
+                    SetBingApiKey();
+                    return;
+                }
+                
+                tkTileProvider provider = (tkTileProvider)item.Tag;
+                switch(provider)
+                {
+                    case tkTileProvider.BingSatellite:
+                    case tkTileProvider.BingMaps:
+                    case tkTileProvider.BingHybrid:
+                        var gs = new GlobalSettings();
+                        if (string.IsNullOrWhiteSpace(gs.BingApiKey))
+                        {
+                            if (!string.IsNullOrWhiteSpace(AppSettings.Instance.BingApiKey))
+                            {
+                                gs.BingApiKey = AppSettings.Instance.BingApiKey;
+                            }
+                            else
+                            {
+                                if (!SetBingApiKey()) return;
+                            }
+                        }
+                        break;
+                }
                 App.Map.TileProvider = (tkTileProvider)item.Tag;
                 App.Map.Redraw();
             }
+        }
+
+        private static bool SetBingApiKey()
+        {
+            using (var form = new BingApiKeyForm())
+            {
+                if (form.ShowDialog(MainForm.Instance) != DialogResult.OK)
+                    return false;
+            }
+            return true;
         }
     }
 }
