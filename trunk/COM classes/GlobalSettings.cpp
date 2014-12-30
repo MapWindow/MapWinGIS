@@ -25,6 +25,7 @@
 
 #include "stdafx.h"
 #include "GlobalSettings.h"
+#include "BingMapProvider.h"
 
 // ****************************************************
 //	    get_MinPolygonArea()
@@ -933,5 +934,45 @@ STDMETHODIMP CGlobalSettings::put_GdalDataPath(BSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	GdalHelper::SetConfigPath(PathGdalData, OLE2W(newVal));
+	return S_OK;
+}
+
+// ***************************************************************
+//		BingApiKey
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_BingApiKey(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = A2BSTR(m_globalSettings.bingApiKey);
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_BingApiKey(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	m_globalSettings.bingApiKey = OLE2A(newVal);
+	return S_OK;
+}
+
+// ***************************************************************
+//		TestBingApiKey
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	
+	CString previosKey = m_globalSettings.bingApiKey;
+	m_globalSettings.bingApiKey = key;
+
+	BingMapProvider provider;
+	if (provider.Initialize()) {
+		m_globalSettings.bingApiKey = key;
+		*retVal = VARIANT_TRUE;
+	}
+	else {
+		m_globalSettings.bingApiKey = previosKey;
+	}
+
 	return S_OK;
 }

@@ -20,54 +20,37 @@
   
 #pragma once
 #include "BaseProvider.h"
+#include "MercatorProjection.h"
 
 class BingBaseProvider: public BaseProvider
 {
-    CString ClientKey;		// Bing Maps Customer Identification, more info here: http://msdn.microsoft.com/en-us/library/bb924353.aspx
+protected:
+	CString _imagerySet;
 public:
-
 	BingBaseProvider() 
 	{
-		Version = "790";
-		RefererUrl = "http://www.bing.com/maps/";
-		int year = Utility::GetCurrentYear();
-		Copyright.Format(L"©%d Microsoft Corporation, ©%d NAVTEQ, ©%d Image courtesy of NASA", year, year, year);
+		RefererUrl = "mapwingis.codeplex.com";
+		Copyright = L"Copyright © 2014 Microsoft and its suppliers.";
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
 	}
 
+	bool Initialize();
+	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
+
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
+		// http://ecn.{subdomain}.tiles.virtualearth.net/tiles/r{quadkey}.jpeg?g=3179&mkt={culture}&shading=hill
 		CString key = TileXYToQuadKey(pos.x, pos.y, zoom);
-		CString client = ClientKey == "" ? "" : "&key=" + ClientKey;
-		int num = GetServerNum(pos, 4);
-		CString s;
-		s.Format(UrlFormat, num, key, Version, LanguageStr, client);
-		return s;
-	}
+		CString subDomain;
+		subDomain.Format("t%d", GetServerNum(pos, 4));
 
-	// Converts tile XY coordinates into a QuadKey at a specified level of detail.
-	// LevelOfDetail: Level of detail, from 1 (lowest detail) to 23 (highest detail).
-	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail)
-	{
-		CString s;
-		for(int i = levelOfDetail; i > 0; i--)
-		{
-			char digit = '0';
-			int mask = 1 << (i - 1);
-			if((tileX & mask) != 0)
-			{
-			   digit++;
-			}
-			if((tileY & mask) != 0)
-			{
-			   digit++;
-			   digit++;
-			}
+		CString temp = UrlFormat;
+		temp.Replace("{quadkey}", key);
+		temp.Replace("{culture}", LanguageStr);
+		temp.Replace("{subdomain}", subDomain);
 
-			s.AppendChar(digit);
-		}
-		return s;
+		return temp;
 	}
 };
 
@@ -76,9 +59,9 @@ class BingMapProvider: public BingBaseProvider
 public:
 	BingMapProvider() 
 	{
+		_imagerySet = "Road";
 		Id = tkTileProvider::BingMaps;
 		Name = "BingMaps";
-		UrlFormat = "http://ecn.t%d.tiles.virtualearth.net/tiles/r%s.png?g=%s&mkt=%s&lbl=l1&stl=h&shading=hill&n=z%s";
 	}
 };
 
@@ -87,9 +70,9 @@ class BingSatelliteProvider: public BingBaseProvider
 public:
 	BingSatelliteProvider() 
 	{
+		_imagerySet = "Aerial";
 		Id = tkTileProvider::BingSatellite;
 		Name = "BingSatellite";
-		UrlFormat = "http://ecn.t%d.tiles.virtualearth.net/tiles/a%s.jpeg?g=%s&mkt=%s%s";		// the last %s is actually not needed; added for uniformity with BingMap
 	}
 };
 
@@ -98,10 +81,9 @@ class BingHybridProvider: public BingBaseProvider
 public:
 	BingHybridProvider() 
 	{
+		_imagerySet = "AerialWithLabels";
 		Id = tkTileProvider::BingHybrid;
 		Name = "BingHybrid";
-		UrlFormat = "http://ecn.t%d.tiles.virtualearth.net/tiles/h%s.jpeg?g=%s&mkt=%s%s";
-		
 	}
 };
 

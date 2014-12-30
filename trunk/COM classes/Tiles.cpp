@@ -567,9 +567,8 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, CString key)
 void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString key)
 {
 	CMapView* map = (CMapView*)mapView;
-	if (_lastMapExtents.left == map->_extents.left && _lastMapExtents.right == map->_extents.right &&
-		_lastMapExtents.top == map->_extents.top && _lastMapExtents.bottom == map->_extents.bottom &&
-		_lastProvider == providerId)
+
+	if (_lastMapExtents == map->_extents && _lastProvider == providerId)
 	{
 		tilesLogger.WriteLine("Duplicate request dropped.");
 		return;	
@@ -580,6 +579,9 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		this->Clear();
 		return;
 	}
+
+	if (!provider->Initialize())
+		return;		// the error is inside
 
 	int xMin, xMax, yMin, yMax, zoom;
 	if (!GetTilesForMap(mapView, provider->Id, xMin, xMax, yMin, yMax, zoom))
@@ -594,7 +596,6 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	{
 		// map extents has changed but the list of tiles to be displayed is the same
 		tilesLogger.WriteLine("The same list of tiles can be used.");
-		
 		((CMapView*)mapView)->_tileBuffer.Initialized = false;
 		return;	
 	}

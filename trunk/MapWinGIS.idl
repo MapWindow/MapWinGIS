@@ -5364,6 +5364,9 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(51)] HRESULT GdalPluginPath([in] BSTR newVal);
 	[propget, id(52)] HRESULT GdalDataPath([out, retval] BSTR* pVal);
 	[propput, id(52)] HRESULT GdalDataPath([in] BSTR newVal);
+	[propget, id(53)] HRESULT BingApiKey([out, retval] BSTR* pVal);
+	[propput, id(53)] HRESULT BingApiKey([in] BSTR newVal);
+	[id(54)] HRESULT TestBingApiKey([in] BSTR key, [out, retval] VARIANT_BOOL* retVal);
 };
 
 [

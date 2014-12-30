@@ -30,11 +30,11 @@
 // ********************************************************
 void CLabelOptions::DeserializeFromNode(CPLXMLNode* node)
 {
-	if (node)	// it's assumed here that a coorect node is passed
+	if (node)	// it's assumed here that a correct node is passed
 	{
 		CString s;
 		
-		// setting deafult options first
+		// setting default options first
 		CLabelOptions opt;
 		*this = opt;
 		

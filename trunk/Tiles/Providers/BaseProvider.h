@@ -89,6 +89,7 @@ class BaseProvider
 {
 private:
 	bool m_initialized;
+	
 
 protected:
 	static CString m_proxyAddress;
@@ -98,6 +99,7 @@ protected:
 	static CString _proxyDomain;
 	std::vector<MyHttpClient*> _httpClients;
 	static ::CCriticalSection _clientLock;
+	int _initAttemptCount;
 public:
 	bool BaseProvider::CheckConnection(CString url);
 	std::vector<BaseProvider*> subProviders;	// for complex providers with more than one source bitmap per tile
@@ -126,6 +128,7 @@ private:
 
 protected:
 	virtual CString MakeTileImageUrl(CPoint &pos, int zoom) = 0;
+	
 
 	int GetServerNum(CPoint &pos, int max)
 	{
@@ -142,6 +145,7 @@ public:
 		Selected = false;
 		IsStopped = false;
 		DynamicOverlay = false;
+		_initAttemptCount = 0;
 	}
 
 	virtual ~BaseProvider(void)
@@ -165,7 +169,9 @@ public:
 	bool AutodetectProxy();
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-
+	
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
+	virtual bool Initialize() { return true; };
+	void InitHttpClient(MyHttpClient& httpClient);
 };

@@ -72,6 +72,7 @@ struct GlobalSettingsInfo
 	tkPixelOffsetMode pixelOffsetMode;
 	bool suppressGdalErrors;
 	bool forceReadOnlyModeForGdalRasters;
+	CString bingApiKey;
 
 	~GlobalSettingsInfo()
 	{
@@ -83,6 +84,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		bingApiKey = "";
 		forceReadOnlyModeForGdalRasters = false;
 		forceHideLabels = false;
 		ogrLayerForceUpdateMode = false;

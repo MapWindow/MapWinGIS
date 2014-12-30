@@ -445,7 +445,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkLABELS_NOT_SAVED:
 			return "Failed to load labels as the positions weren't saved.";
 		case tkINVALID_FLOAT_NUMBER_FORMAT:
-			return "Invalid format string for floating point numbers (see documentation of C printf function for valid formats, e.g. %g or %.2f).";
+			return "Invalid format string for floating point numbers (see documentation of C printf function for valid formats, e.g. %%g or %%.2f).";
 			
 		
 		//1801-2000 = geoprojections

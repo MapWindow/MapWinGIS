@@ -1743,6 +1743,9 @@
     <ClCompile Include="ComHelpers\CallbackHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
+    <ClCompile Include="Tiles\Providers\BingMapProvider.cpp">
+      <Filter>Tiles\Providers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">

@@ -86,11 +86,8 @@ bool BaseProvider::CheckConnection(CString url)
 // ************************************************************
 //		GetTileImageUsingHttp()
 // ************************************************************
-CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
+void BaseProvider::InitHttpClient(MyHttpClient& httpClient)
 {
-	MyHttpClient httpClient; //this->GetHttpClient();
-	CAtlNavigateData navData;
-
 	if (m_proxyAddress.GetLength() > 0)
 	{
 		httpClient.SetProxy(m_proxyAddress, m_proxyPort);
@@ -102,6 +99,17 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		TilesAuthentication info(_proxyUsername, _proxyPassword, _proxyDomain);
 		httpClient.AddAuthObj("BASIC", &auth, &info);
 	}
+}
+
+// ************************************************************
+//		GetTileImageUsingHttp()
+// ************************************************************
+CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
+{
+	MyHttpClient httpClient; //this->GetHttpClient();
+	CAtlNavigateData navData;
+
+	InitHttpClient(httpClient);
 
 	char* body = NULL;
 	int bodyLen = 0;
@@ -342,5 +350,6 @@ void BaseProvider::ClearSubProviders()
 	}
 	subProviders.clear();
 }
+
 
 #pragma endregion

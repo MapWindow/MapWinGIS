@@ -40,8 +40,6 @@ public:
 		s.Format(UrlFormat, UrlServer, GetServerNum(pos, 4) + 1, Version, pos.x, pos.y, zoom);
 		return s;
 	}
-
-	void Initialize();	// overrides method of the BaseProvider
 };
 
 class YandexMapProvider: public YandexBaseProvider
