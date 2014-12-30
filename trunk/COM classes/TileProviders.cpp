@@ -213,6 +213,9 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 		case OpenHumanitarianMap:
 			p = (BaseProvider*)new OpenHumanitarianMapProvider();
 			break;
+		case MapQuestAerial:
+			p = (BaseProvider*)new MapQuestProvider();
+			break;
 	}
 
 	if (p) 

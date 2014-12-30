@@ -1036,6 +1036,7 @@ enum tkScalebarUnits
 		[helpstring("")] Topomapper = 20,
 		[helpstring("")] Rosreestr = 21,
 		[helpstring("")] OpenHumanitarianMap = 22,
+		[helpstring("")] MapQuestAerial = 23,
 		[helpstring("")] ProviderCustom = 1024,
 	} tkTileProvider;
 

@@ -35,10 +35,10 @@ public:
 		Copyright.Format("© OpenStreetMap - Map data ©%d OpenStreetMap", Utility::GetCurrentYear());
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
-
 		ServerLetters = "abc";
 		RefererUrl = "http://www.openstreetmap.org/";
 		UrlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
+		
 		maxZoom = 19;
 
 		//_clientLock.Lock();
@@ -100,5 +100,20 @@ public:
 		Name = "OpenHumanitarianMap";
 		RefererUrl = "http://www.openstreetmap.org/";
 		UrlFormat = "http://%c.tile.openstreetmap.fr/hot/%d/%d/%d.png";
+	}
+};
+
+
+class MapQuestProvider : public OpenStreetMapProvider
+{
+public:
+	MapQuestProvider()
+	{
+		Id = tkTileProvider::MapQuestAerial;
+		Name = "MapQuest";
+		RefererUrl = "http://www.mapquest.com/";
+		UrlFormat = "http://otile%c.mqcdn.com/tiles/1.0.0/sat/%d/%d/%d.png";
+		ServerLetters = "1234";
+		Copyright = "Tiles Courtesy of MapQuest";
 	}
 };

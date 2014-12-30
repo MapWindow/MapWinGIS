@@ -57,11 +57,14 @@
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+  </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
     <PreBuildEvent>
       <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\Tamas\bin\$(Platform) $(TargetDir)</Command>
+      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\GDAL_SDK\VC2010\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Message>

@@ -44,7 +44,7 @@ public:
 		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
-		for (int i = 0; i < TILE_PROVIDER_COUNT; i++)
+		for (int i = 0; i <= TILE_PROVIDER_COUNT; i++)
 		{
 			// we don't care about the value returned; a provider is added to the list, that's all needed
 			getProviderCore((tkTileProvider)i);
