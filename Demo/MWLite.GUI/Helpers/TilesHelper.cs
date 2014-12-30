@@ -29,7 +29,8 @@ namespace MWLite.GUI.Helpers
             var list = new tkTileProvider[]
             {
                 tkTileProvider.OpenStreetMap, tkTileProvider.OpenTransportMap,
-                tkTileProvider.OpenHumanitarianMap, tkTileProvider.OpenCycleMap
+                tkTileProvider.OpenHumanitarianMap, tkTileProvider.OpenCycleMap,
+                tkTileProvider.MapQuestAerial
             };
             foreach (var p in list)
             {
