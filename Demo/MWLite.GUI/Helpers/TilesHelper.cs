@@ -19,12 +19,18 @@ namespace MWLite.GUI.Helpers
 
             root.DropDownItems.Add(new ToolStripSeparator());
 
-            var except = new[]
+            //var except = new[]
+            //{
+            //    /*tkTileProvider.Rosreestr,*/ tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
+            //    tkTileProvider.Topomapper
+            //};
+            //var list = Enum.GetValues(typeof(tkTileProvider)).Cast<tkTileProvider>().Except(except);
+
+            var list = new tkTileProvider[]
             {
-                /*tkTileProvider.Rosreestr,*/ tkTileProvider.ProviderNone, tkTileProvider.ProviderCustom,
-                tkTileProvider.Topomapper
+                tkTileProvider.OpenStreetMap, tkTileProvider.OpenTransportMap,
+                tkTileProvider.OpenHumanitarianMap, tkTileProvider.OpenCycleMap
             };
-            var list = Enum.GetValues(typeof(tkTileProvider)).Cast<tkTileProvider>().Except(except);
             foreach (var p in list)
             {
                 item = root.DropDownItems.Add(p.ToString());
@@ -56,6 +62,7 @@ namespace MWLite.GUI.Helpers
             if (item != null && item.Tag != null)
             {
                 App.Map.TileProvider = (tkTileProvider)item.Tag;
+                App.Map.Redraw();
             }
         }
     }

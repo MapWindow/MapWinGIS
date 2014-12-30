@@ -39,22 +39,23 @@
             // optKnownExtents
             // 
             this.optKnownExtents.AutoSize = true;
-            this.optKnownExtents.Location = new System.Drawing.Point(19, 91);
+            this.optKnownExtents.Checked = true;
+            this.optKnownExtents.Location = new System.Drawing.Point(17, 22);
             this.optKnownExtents.Name = "optKnownExtents";
             this.optKnownExtents.Size = new System.Drawing.Size(147, 17);
             this.optKnownExtents.TabIndex = 0;
+            this.optKnownExtents.TabStop = true;
             this.optKnownExtents.Text = "Known extents (countries)";
             this.optKnownExtents.UseVisualStyleBackColor = true;
             // 
             // optFindLocation
             // 
             this.optFindLocation.AutoSize = true;
-            this.optFindLocation.Checked = true;
-            this.optFindLocation.Location = new System.Drawing.Point(19, 22);
+            this.optFindLocation.Enabled = false;
+            this.optFindLocation.Location = new System.Drawing.Point(17, 94);
             this.optFindLocation.Name = "optFindLocation";
             this.optFindLocation.Size = new System.Drawing.Size(260, 17);
             this.optFindLocation.TabIndex = 1;
-            this.optFindLocation.TabStop = true;
             this.optFindLocation.Text = "Find location (e.g. Boston, Spain, Black Sea, etc.)";
             this.optFindLocation.UseVisualStyleBackColor = true;
             // 
@@ -62,7 +63,8 @@
             // 
             this.txtFindLocation.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFindLocation.Location = new System.Drawing.Point(19, 45);
+            this.txtFindLocation.Enabled = false;
+            this.txtFindLocation.Location = new System.Drawing.Point(17, 117);
             this.txtFindLocation.Name = "txtFindLocation";
             this.txtFindLocation.Size = new System.Drawing.Size(258, 20);
             this.txtFindLocation.TabIndex = 3;
@@ -73,7 +75,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cboKnownExtents.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboKnownExtents.FormattingEnabled = true;
-            this.cboKnownExtents.Location = new System.Drawing.Point(19, 114);
+            this.cboKnownExtents.Location = new System.Drawing.Point(17, 45);
             this.cboKnownExtents.Name = "cboKnownExtents";
             this.cboKnownExtents.Size = new System.Drawing.Size(258, 21);
             this.cboKnownExtents.TabIndex = 4;
@@ -111,7 +113,7 @@
             this.Controls.Add(this.optFindLocation);
             this.Controls.Add(this.optKnownExtents);
             this.Name = "LocationControl";
-            this.Size = new System.Drawing.Size(293, 202);
+            this.Size = new System.Drawing.Size(293, 201);
             this.ResumeLayout(false);
             this.PerformLayout();
 

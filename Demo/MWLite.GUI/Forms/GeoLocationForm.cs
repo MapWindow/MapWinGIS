@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using MapWinGIS;
 using MWLite.Core;
 using MWLite.Core.Events;
 using MWLite.Core.UI;
@@ -31,6 +32,11 @@ namespace MWLite.GUI.Forms
             }
 
             var map = App.Map;
+
+            if (App.Map.GeoProjection.IsEmpty && App.Map.NumLayers == 0)
+            {
+                App.Map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
+            }
 
             switch (e.ExtentsType)
             {
