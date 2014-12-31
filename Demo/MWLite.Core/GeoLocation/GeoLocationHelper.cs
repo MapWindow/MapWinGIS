@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Web.Script.Serialization;
 using MapWinGIS;
+using System.Globalization;
 
 namespace MWLite.Core.GeoLocation
 {
@@ -79,13 +80,8 @@ namespace MWLite.Core.GeoLocation
                 
                 for (int i = 0; i < 4; i++)
 			    {
-                    numbers.Add(double.Parse(obj[0].boundingbox[i]));
+                    numbers.Add(double.Parse(obj[0].boundingbox[i], CultureInfo.InvariantCulture));
 			    }
-
-                //numbers.Add((double)obj.results[0].geometry.bounds.northeast.lat);
-                //numbers.Add((double)obj.results[0].geometry.bounds.northeast.lng);
-                //numbers.Add((double)obj.results[0].geometry.bounds.southwest.lat);
-                //numbers.Add((double)obj.results[0].geometry.bounds.southwest.lng);
 
                 Extents box = null;
                 if (numbers.Count == 4)
