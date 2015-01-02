@@ -154,8 +154,10 @@ END_EVENT_MAP()
 CMapView::CMapView() 
 	: _vals("AZ0CY1EX2GV3IT4KR5MP6ON7QL8SJ9UH0WF1DB2"), 
 	_valsLen(39), _isSnapshot(false),
+	_brushBlue(Gdiplus::Color::Blue),
 	_brushBlack(Gdiplus::Color::Black), 
 	_brushWhite(Gdiplus::Color::White), 
+	_brushLightGray(Gdiplus::Color::LightGray),
 	_penGray(Gdiplus::Color::Gray),
 	_brushGray(Gdiplus::Color::Gray), 
 	_penDarkGray(Gdiplus::Color::DarkSlateGray),
@@ -210,8 +212,9 @@ void CMapView::Startup()
 	InitializeIIDs(&IID_DMap, &IID_DMapEvents);
 	
 	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
-	Utility::InitGdiPlusFont(&_fontCourierSmall, L"Courier New", 8.0f);
 	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
+	_fontCourierSmall = new Gdiplus::Font(L"Courier New", 8.0f);
+	_fontCourierLink = new Gdiplus::Font(L"Courier New", 8.0f, Gdiplus::FontStyleBold);
 
 	m_mapCursor = crsrMapDefault;
 	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)
@@ -290,6 +293,9 @@ void CMapView::Startup()
 void CMapView::SetDefaults()
 {
 	// temp state variables
+	_mouseTracking = false;
+	_copyrightLinkActive = FALSE;
+	_copyrightRect = Gdiplus::RectF(0.0F, 0.0F, 0.0F, 0.0F);
 	_shapeCountInView = 0;
 	_currentDrawing = -1;
 	_rectTrackerIsActive = false;
@@ -353,6 +359,7 @@ void CMapView::SetDefaults()
 	_identifierMode = imAllLayers;
 	_zoomBarMinZoom = -1;
 	_zoomBarMaxZoom = -1;
+	
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -397,20 +404,10 @@ void CMapView::ReleaseTempObjects()
 // Must be called from destructor only
 void CMapView::Shutdown()
 {
-	if (_fontCourier) {
-		delete _fontCourier;
-		_fontCourier = NULL;
-	}
-
-	if (_fontCourierSmall) {
-		delete _fontCourierSmall;
-		_fontCourierSmall = NULL;
-	}
-
-	if (_fontArial) {
-		delete _fontArial;
-		_fontArial = NULL;
-	}
+	Utility::ClosePointer(&_fontCourier);
+	Utility::ClosePointer(&_fontCourierSmall);
+	Utility::ClosePointer(&_fontCourierLink);
+	Utility::ClosePointer(&_fontArial);
 	
 	((CTiles*)_tiles)->Stop();
 
@@ -848,6 +845,5 @@ void CMapView::StartDragging(DraggingOperation operation)
 	_dragging.Operation = operation;
 	SetCapture();
 }
-
 
 

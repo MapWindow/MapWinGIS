@@ -610,3 +610,17 @@ CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
 	return L"";
 }
 
+// *******************************************************
+//			get_LicenseUrl()
+// *******************************************************
+CString CTileProviders::get_LicenseUrl(tkTileProvider provider)
+{
+	int index = -1;
+	get_IndexByProviderId((int)provider, &index);
+	if (index >= 0 && index < (int)_providers.size()) {
+		return _providers[index]->LicenseUrl;
+	}
+	return "";
+}
+
+

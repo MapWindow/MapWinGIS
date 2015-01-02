@@ -29,8 +29,9 @@ protected:
 public:
 	BingBaseProvider() 
 	{
-		RefererUrl = "mapwingis.codeplex.com";
-		Copyright = L"Copyright © 2014 Microsoft and its suppliers.";
+		RefererUrl = "http://www.bing.com/maps/";
+		LicenseUrl = "http://www.microsoft.com/maps/product/terms.html";
+		Copyright = L"Copyright © 2014 Microsoft and its suppliers";
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
 	}

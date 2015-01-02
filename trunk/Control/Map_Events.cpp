@@ -97,7 +97,7 @@ bool CMapView::UndoCore(bool shift)
 		VARIANT_BOOL result = VARIANT_FALSE;
 		_shapeEditor->UndoPoint(&result);
 		if (result) {
-			Redraw2(RedrawDynamicTools);
+			Redraw2(RedrawSkipAllLayers);
 			return true;
 		}
 	}
@@ -410,6 +410,45 @@ bool CMapView::HandleOnZoombarMouseDown( CPoint point )
 // ************************************************************
 //		HandleOnZoombarMouseMove
 // ************************************************************
+bool CMapView::HandleOnCopyrightMouseMove(CPoint point)
+{
+	BOOL active = _copyrightRect.Contains((Gdiplus::REAL)point.x, (Gdiplus::REAL)point.y);
+	if (_copyrightLinkActive != active) 
+	{
+		_copyrightLinkActive = active;
+		OnSetCursor(this, HTCLIENT, 0);
+		RedrawCore(tkRedrawType::RedrawSkipAllLayers, true);
+		return true;
+	}
+	return false;
+}
+
+// ************************************************************
+//		HandleCopyrighMouseDown
+// ************************************************************
+bool CMapView::HandleOnCopyrighMouseDown(CPoint point)
+{
+	BOOL active = _copyrightRect.Contains((Gdiplus::REAL)point.x, (Gdiplus::REAL)point.y);
+	if (active) {
+
+		tkTileProvider provider = GetTileProvider();
+		if (provider != tkTileProvider::ProviderNone && _transformationMode != tmNotDefined)
+		{
+			CComPtr<ITileProviders> providers = NULL;
+			_tiles->get_Providers(&providers);
+			CString s = ((CTileProviders*)&(*providers))->get_LicenseUrl(provider);
+			_copyrightLinkActive = false;
+			RedrawCore(tkRedrawType::RedrawSkipDataLayers, true);
+			ShellExecute(0, NULL, s, NULL, NULL, SW_SHOWDEFAULT);
+			return true;
+		}
+	}
+	return false;
+}
+
+// ************************************************************
+//		HandleOnZoombarMouseMove
+// ************************************************************
 bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 {
 	if (_dragging.Operation == DragZoombarHandle)
@@ -417,17 +456,15 @@ bool CMapView::HandleOnZoombarMouseMove( CPoint point )
 		RedrawCore(tkRedrawType::RedrawSkipDataLayers, true);
 		return true;
 	}
-	else
+	
+	ZoombarPart part = ZoombarHitTest(point.x, point.y);
+	if (part != _lastZooombarPart)
 	{
-		ZoombarPart part = ZoombarHitTest(point.x, point.y);
-		if (part != _lastZooombarPart)
-		{
-			_lastZooombarPart = part;		// update before calling OnSetCursor
-			OnSetCursor(this,HTCLIENT,0);
-			RedrawCore(RedrawSkipDataLayers, true);
-		}
-		return part != ZoombarNone;
+		_lastZooombarPart = part;		// update before calling OnSetCursor
+		OnSetCursor(this,HTCLIENT,0);
+		RedrawCore(RedrawSkipDataLayers, true);
 	}
+	return part != ZoombarNone;
 }
 #pragma endregion
 
@@ -441,7 +478,7 @@ void CMapView::UpdateShapeEditor()
 	if (_shapeEditor->GetRedrawNeeded(rtVolatileLayer))
 		RedrawCore(RedrawSkipDataLayers, true);
 	else if (_shapeEditor->GetRedrawNeeded(rtShapeEditor))
-		RedrawCore(RedrawDynamicTools, true);
+		RedrawCore(RedrawSkipAllLayers, true);
 }
 
 // ************************************************************
@@ -461,7 +498,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 	// process zoombar before everything else; if zoom bar was clicked, 
 	// map must not receive the event at all
-	if (HandleOnZoombarMouseDown(point))
+	if (HandleOnZoombarMouseDown(point) || HandleOnCopyrighMouseDown(point))
 		return;
 
 	bool ctrl = nFlags & MK_CONTROL ? true: false;
@@ -674,7 +711,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 		case DragMoveShape:
 			{
 				if (HandleLButtonUpDragVertexOrShape(nFlags))
-					Redraw2(tkRedrawType::RedrawDynamicTools);
+					Redraw2(tkRedrawType::RedrawSkipAllLayers);
 			}
 			break;
 		case DragPanning:
@@ -1029,6 +1066,33 @@ void CMapView::ShowToolTipOnMouseMove(UINT nFlags, CPoint point)
 }
 
 // ************************************************************
+//		StartMouseTracking
+// ************************************************************
+void CMapView::StartMouseTracking()
+{
+	if (_mouseTracking) return;
+	TRACKMOUSEEVENT tme;
+	tme.cbSize = sizeof(TRACKMOUSEEVENT);
+	tme.dwFlags = TME_LEAVE;
+	tme.hwndTrack = this->m_hWnd;
+	TrackMouseEvent(&tme);
+	_mouseTracking = true;
+}
+
+// ************************************************************
+//		OnMouseLeave
+// ************************************************************
+void CMapView::OnMouseLeave()
+{
+	if (_copyrightLinkActive) {
+		_copyrightLinkActive = FALSE;
+		_mouseTracking = false;
+		RedrawCore(tkRedrawType::RedrawSkipAllLayers, true);
+	}
+	__super::OnMouseLeave();
+}
+
+// ************************************************************
 //		OnMouseMove
 // ************************************************************
 void CMapView::OnMouseMove(UINT nFlags, CPoint point)
@@ -1037,7 +1101,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		_rotate->getOriginalPixelPoint(point.x, point.y, &(point.x), &(point.y));
 	_dragging.Move = point;
 
-	if (HandleOnZoombarMouseMove(point))
+	if (HandleOnCopyrightMouseMove(point) || HandleOnZoombarMouseMove(point))
 		return;
 
 	ShowToolTipOnMouseMove(nFlags, point);

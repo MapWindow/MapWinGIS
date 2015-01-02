@@ -18,18 +18,24 @@ BOOL CMapView::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 
 	bool hasGuiCursor = true;
-	switch(_lastZooombarPart)
+	if (_copyrightLinkActive) {
+		NewCursor = LoadCursor(NULL, IDC_HAND);
+	}
+	else
 	{
-		case ZoombarHandle:
-			NewCursor = LoadCursor(NULL, IDC_SIZENS);
-			break;
-		case ZoombarMinus:
-		case ZoombarPlus:
-		case ZoombarBar:
-			NewCursor = LoadCursor(NULL, IDC_HAND);
-			break;
-		default:
-			hasGuiCursor = false;
+		switch (_lastZooombarPart)
+		{
+			case ZoombarHandle:
+				NewCursor = LoadCursor(NULL, IDC_SIZENS);
+				break;
+			case ZoombarMinus:
+			case ZoombarPlus:
+			case ZoombarBar:
+				NewCursor = LoadCursor(NULL, IDC_HAND);
+				break;
+			default:
+				hasGuiCursor = false;
+		}
 	}
 
 	if (!hasGuiCursor)

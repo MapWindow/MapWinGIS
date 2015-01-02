@@ -130,7 +130,7 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	if (layersRedraw) {
 		_lastRedrawTime = (float)(endTick - startTick) / 1000.0f;
 	}
-	this->ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
+	ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
 	//CLSID clsid;
 	//Utility::GetEncoderClsid(L"image/png", &clsid);

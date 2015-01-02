@@ -122,6 +122,7 @@ public:
 	void put_Tiles(ITiles* tiles){	_tiles = tiles;}
 	BaseProvider* get_Provider(int providerId);
 	CStringW get_CopyrightNotice(tkTileProvider provider);
+	CString get_LicenseUrl(tkTileProvider provider);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(TileProviders), CTileProviders)

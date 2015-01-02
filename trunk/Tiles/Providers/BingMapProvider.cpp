@@ -45,9 +45,10 @@ bool BingBaseProvider::Initialize()
 		memcpy(body, httpClient.GetBody(), bodyLen);
 		CString s = body;
 		delete[] body;
+		s = s.MakeLower();
 
-		int pos = s.Find("<ImageUrl>");
-		int pos2 = s.Find("</ImageUrl>");
+		int pos = s.Find("<imageurl>");
+		int pos2 = s.Find("</imageurl>");
 		s = s.Mid(pos + 10, pos2 - pos - 10);
 		s.Replace("&amp;", "&");
 

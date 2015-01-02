@@ -108,6 +108,7 @@ public:
 	int Id;
 	CString LanguageStr;
 	CString RefererUrl;
+	CString LicenseUrl;
 	CStringW Copyright;
 	CString ServerLetters;
 	CString Name;
@@ -146,6 +147,7 @@ public:
 		IsStopped = false;
 		DynamicOverlay = false;
 		_initAttemptCount = 0;
+		LicenseUrl = "http://mapwingis.codeplex.com";
 	}
 
 	virtual ~BaseProvider(void)

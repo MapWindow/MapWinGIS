@@ -603,7 +603,7 @@ public:
 	afx_msg DOUBLE GeodesicLength(IShape* polyline);
 	afx_msg DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
 	afx_msg DOUBLE GeodesicArea(IShape* polygon);
-
+	afx_msg void OnMouseLeave();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -712,13 +712,16 @@ public:
 	Gdiplus::Bitmap* _moveBitmap;      // shapes being moved are rendered to this bitmap
 	Gdiplus::Bitmap* _tempBitmap;	   // to scale contents of the rest bitmaps 
 
+	Gdiplus::SolidBrush _brushBlue;
 	Gdiplus::SolidBrush _brushBlack;
 	Gdiplus::SolidBrush _brushWhite;
+	Gdiplus::SolidBrush _brushLightGray;
 	Gdiplus::SolidBrush _brushGray;
 	Gdiplus::Pen _penGray;
 	Gdiplus::Pen _penDarkGray;
 	Gdiplus::Font* _fontCourier;
 	Gdiplus::Font* _fontCourierSmall;
+	Gdiplus::Font* _fontCourierLink;
 	Gdiplus::Font* _fontArial;
 
 	short m_cursorMode;
@@ -856,6 +859,10 @@ public:
 	ZoombarParts _zoombarParts;
 	CCollisionList _collisionList;	// global collision list for labels and charts
 	HotTrackingInfo _hotTracking;	// temporary shapefile to display hot tracking
+
+	Gdiplus::RectF _copyrightRect;
+	BOOL _copyrightLinkActive;
+	bool _mouseTracking;
 	
 	// ---------------------------------------------
 	//	temp state variable
@@ -1150,6 +1157,9 @@ private:
 	void DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics* graphics, CImageDrawer& imgDrawer);
 	long AddSingleLayer(LPDISPATCH Object, BOOL pVisible);
 	void OnDrawingLayersChanged();
+	bool HandleOnCopyrightMouseMove(CPoint point);
+	void StartMouseTracking();
+	bool HandleOnCopyrighMouseDown(CPoint point);
 #pragma endregion
 
 public:
@@ -1179,7 +1189,6 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-
 };
 
 //{{AFX_INSERT_LOCATION}}

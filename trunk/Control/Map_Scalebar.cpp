@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "map.h"
 #include "TileProviders.h"
+#include "GdiPlusHelper.h"
 
 // ****************************************************************
 //		DrawStringWithShade()
@@ -338,11 +339,12 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 // ****************************************************************
 //		ShowRedrawTime()
 // ****************************************************************
-// Displays redraw time in the bottom left corner
+// Displays redraw time in the bottom right corner
 void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message )
 {
+	_copyrightRect = Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f);
+
 	bool showRedrawTime = _showRedrawTime && time > 0.01 && !_isSnapshot;
-	
 	
 	CStringW s;
 	tkTileProvider provider = GetTileProvider();
@@ -355,27 +357,36 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 
 	if (!showRedrawTime && s.GetLength() == 0) return;
 
-	// preparing canvas
-	Gdiplus::TextRenderingHint hint = g->GetTextRenderingHint();
-	g->SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
+	POINT mousePnt;
+	if (GetCursorPos(&mousePnt))
+		ScreenToClient(&mousePnt);
+
+	Gdiplus::GraphicsStateHelper gstate;
+	gstate.SetTextRenderingHint(g, Gdiplus::TextRenderingHintAntiAliasGridFit);
 	Gdiplus::PointF point(0.0f, 0.0f);
 	Gdiplus::StringFormat format; 
-	Gdiplus::RectF rect;
 
-	//USES_CONVERSION;
-	//s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
 	if (s.GetLength() > 0)
 	{
-		g->MeasureString(s, s.GetLength(), _fontCourierSmall, point, &format, &rect);
+		g->MeasureString(s, s.GetLength(), _fontCourierLink, point, &format, &_copyrightRect);
+		_copyrightRect.Height += 5;
+		_copyrightRect.Width += 5;
 		
-		if (rect.Width < _viewWidth)		// control must be big enough to host the string
+		if (_copyrightRect.Width < _viewWidth)		// control must be big enough to host the string
 		{
-			point.X = (float)(_viewWidth - rect.Width);
-			point.Y = (float)(_viewHeight - rect.Height);
-			rect.X += point.X;
-			rect.Y += point.Y;
-			g->FillRectangle(&_brushGray, rect);
-			g->DrawString(s.GetString(), s.GetLength(), _fontCourierSmall, point, &_brushBlack);
+			point.X = (float)(_viewWidth - _copyrightRect.Width);
+			point.Y = (float)(_viewHeight - _copyrightRect.Height);
+			_copyrightRect.X += point.X;
+			_copyrightRect.Y += point.Y;
+
+			//bool active = _copyrightRect.Contains((Gdiplus::REAL)mousePnt.x, (Gdiplus::REAL)mousePnt.y);
+			Gdiplus::SolidBrush* textBrush = _copyrightLinkActive ? &_brushBlue : &_brushBlack;
+			Gdiplus::Font* font = _copyrightLinkActive ? _fontCourierLink : _fontCourierSmall;
+			
+			format.SetAlignment(Gdiplus::StringAlignmentCenter);
+			format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
+			g->FillRectangle(&_brushLightGray, _copyrightRect);
+			g->DrawString(s.GetString(), s.GetLength(), font, _copyrightRect, &format, textBrush);
 		}
 	}
 
@@ -390,6 +401,7 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 			s.Format(L"Redraw time: %.3fs", time);
 		}
 
+		Gdiplus::RectF rect;
 		g->MeasureString(s, s.GetLength(), _fontCourier, point, &format, &rect);
 		if (rect.Width + 15 < _viewWidth)		// control must be big enough to host the string
 		{
@@ -398,7 +410,7 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 			DrawStringWithShade(g, s, _fontCourier, point, &_brushBlack, &_brushWhite);
 		}
 	}
-	g->SetTextRenderingHint(hint);
+	gstate.RestoreTextRenderingHint(g);
 }
 
 #pragma region Zoombar

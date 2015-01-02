@@ -35,7 +35,7 @@ void CMapView::SetShowVersionNumber(VARIANT_BOOL newVal)
 	if (_showVersionNumber != newVal)
 	{
 		_showVersionNumber = newVal;
-		RedrawCore(RedrawDynamicTools, false);
+		RedrawCore(RedrawSkipAllLayers, false);
 	}
 }
 
@@ -57,7 +57,7 @@ void CMapView::SetShowRedrawTime(VARIANT_BOOL newVal)
 	if (_showRedrawTime != newVal)
 	{
 		_showRedrawTime = newVal;
-		RedrawCore(RedrawDynamicTools, false);
+		RedrawCore(RedrawSkipAllLayers, false);
 	}
 }
 

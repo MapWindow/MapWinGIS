@@ -849,6 +849,14 @@ namespace Utility
 		}
 	}
 
+	void Utility::ClosePointer(Gdiplus::Font** ptr)
+	{
+		if (*ptr) {
+			delete *ptr;
+			*ptr = NULL;
+		}
+	}
+
 	// **************************************************
 	//	SaveBitmap
 	// **************************************************

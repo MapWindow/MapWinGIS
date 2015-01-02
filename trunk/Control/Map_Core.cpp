@@ -320,7 +320,7 @@ void CMapView::RedrawCore( tkRedrawType redrawType, bool atOnce, bool reloadBuff
 		case tkRedrawType::RedrawSkipDataLayers:
 			_canUseVolatileBuffer = FALSE;
 
-		case tkRedrawType::RedrawDynamicTools:
+		case tkRedrawType::RedrawSkipAllLayers:
 			_canUseMainBuffer = false;
 
 		case tkRedrawType::RedrawMinimal:

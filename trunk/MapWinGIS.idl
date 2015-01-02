@@ -523,7 +523,7 @@ enum tkRedrawType
 	RedrawAll = 1,
 	RedrawSkipDataLayers = 2,
 	RedrawMinimal = 3,
-	RedrawDynamicTools = 4,
+	RedrawSkipAllLayers = 4,
 } tkRedrawType;
 
 /************************** tkCoordinatesDisplay Enumerations **********************/

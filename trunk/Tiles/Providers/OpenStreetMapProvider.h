@@ -24,7 +24,6 @@
 class OpenStreetMapProvider: public BaseProvider
 {
 public:
-	~OpenStreetMapProvider(void){};
 	int count;
 
 	OpenStreetMapProvider() 
@@ -38,8 +37,8 @@ public:
 		ServerLetters = "abc";
 		RefererUrl = "http://www.openstreetmap.org/";
 		UrlFormat = "http://%c.tile.openstreetmap.org/%d/%d/%d.png";
-		
 		maxZoom = 19;
+		LicenseUrl = "http://wiki.openstreetmap.org/wiki/Tile_usage_policy";
 
 		//_clientLock.Lock();
 		//for(int i = 0; i < 3; i++)
@@ -57,7 +56,6 @@ public:
 
 	CString MakeTileImageUrl(CPoint &pos, int zoom)
 	{
-		//char letter = ServerLetters[GetServerNum(pos, 3)];
 		char letter = ServerLetters[count % 3];
 		count++;
 		CString s; 
@@ -74,6 +72,7 @@ public:
 		Id = tkTileProvider::OpenCycleMap;
 		Name = "OpenCycleMap";
 		RefererUrl = "http://www.opencyclemap.org/";
+		LicenseUrl = "http://www.opencyclemap.org/docs/";
 		UrlFormat = "http://%c.tile.opencyclemap.org/cycle/%d/%d/%d.png";
 	}
 };
@@ -112,6 +111,7 @@ public:
 		Id = tkTileProvider::MapQuestAerial;
 		Name = "MapQuest";
 		RefererUrl = "http://www.mapquest.com/";
+		LicenseUrl = "http://developer.mapquest.com/web/products/open/map";
 		UrlFormat = "http://otile%c.mqcdn.com/tiles/1.0.0/sat/%d/%d/%d.png";
 		ServerLetters = "1234";
 		Copyright = "Tiles Courtesy of MapQuest";

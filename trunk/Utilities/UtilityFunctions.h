@@ -88,6 +88,7 @@ namespace Utility
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);
 
 	void ClosePointer(Gdiplus::Bitmap** bitmap);
+	void ClosePointer(Gdiplus::Font** font);
 
 	// time
 	int GetCurrentYear();
