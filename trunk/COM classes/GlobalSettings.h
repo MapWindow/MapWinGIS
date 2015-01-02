@@ -167,6 +167,7 @@ public:
 	STDMETHOD(get_BingApiKey)(BSTR* pVal);
 	STDMETHOD(put_BingApiKey)(BSTR newVal);
 	STDMETHOD(TestBingApiKey)(BSTR key, VARIANT_BOOL* retVal);
+	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

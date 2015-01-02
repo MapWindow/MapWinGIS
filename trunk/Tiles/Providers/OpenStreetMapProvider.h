@@ -109,7 +109,7 @@ public:
 	MapQuestProvider()
 	{
 		Id = tkTileProvider::MapQuestAerial;
-		Name = "MapQuest";
+		Name = "MapQuest Aerial";
 		RefererUrl = "http://www.mapquest.com/";
 		LicenseUrl = "http://developer.mapquest.com/web/products/open/map";
 		UrlFormat = "http://otile%c.mqcdn.com/tiles/1.0.0/sat/%d/%d/%d.png";

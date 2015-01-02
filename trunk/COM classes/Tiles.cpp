@@ -580,9 +580,6 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 		return;
 	}
 
-	if (!provider->Initialize())
-		return;		// the error is inside
-
 	int xMin, xMax, yMin, yMax, zoom;
 	if (!GetTilesForMap(mapView, provider->Id, xMin, xMax, yMin, yMax, zoom))
 	{
@@ -610,6 +607,13 @@ void CTiles::LoadTiles(void* mapView, bool isSnapshot, int providerId, CString k
 	_lastTileExtents.bottom = yMin;
 	_lastProvider = providerId;
 	_lastZoom = zoom;
+
+	if (!provider->Initialize())
+	{
+		this->Clear();
+		((CMapView*)mapView)->_tileBuffer.Initialized = false;
+		return;
+	}
 
 	tilesLogger.WriteLine("");
 	tilesLogger.WriteLine("LOAD TILES: xMin=%d; xMax=%d; yMin=%d; yMax=%d; zoom =%d", xMin, xMax, yMin, yMax, zoom);

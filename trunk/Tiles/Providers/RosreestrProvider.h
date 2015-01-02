@@ -31,6 +31,7 @@ public:
 		Name = "Rosreestr";
 		Copyright = "";
 		ServerLetters = "abc";
+		LicenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
 		RefererUrl = "http://maps.rosreestr.ru/";
 		CString type = labels ? "Anno" : "BaseMap";
 		UrlFormat = "http://%c.maps.rosreestr.ru/arcgis/rest/services/BaseMaps/" + type + "/MapServer/tile/%d/%d/%d";
@@ -56,6 +57,7 @@ public:
 		Id = tkTileProvider::Rosreestr;
 		Name = "Rosreestr";
 		Copyright = "";
+		LicenseUrl = "http://maps.rosreestr.ru/PortalOnline/terms.html";
 		RefererUrl = "http://maps.rosreestr.ru/";
 		UrlFormat = "http://maps.rosreestr.ru/arcgis/rest/services/Cadastre/Cadastre/MapServer/export?dpi=96&transparent=true&format=png32&bbox=";
 		url2 = "&bboxSR=102100&imageSR=102100&size=256%2C256&f=image";

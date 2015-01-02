@@ -214,7 +214,7 @@ void CMapView::Startup()
 	Utility::InitGdiPlusFont(&_fontCourier, L"Courier New", 9.0f);
 	Utility::InitGdiPlusFont(&_fontArial, L"Arial", 9.0f);
 	_fontCourierSmall = new Gdiplus::Font(L"Courier New", 8.0f);
-	_fontCourierLink = new Gdiplus::Font(L"Courier New", 8.0f, Gdiplus::FontStyleBold);
+	_fontCourierLink = new Gdiplus::Font(L"Courier New", 8.0f); 
 
 	m_mapCursor = crsrMapDefault;
 	_interactiveLayerHandle = -1;			// TODO: remove (currently not used)

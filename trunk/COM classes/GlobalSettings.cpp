@@ -976,3 +976,15 @@ STDMETHODIMP CGlobalSettings::TestBingApiKey(BSTR key, VARIANT_BOOL* retVal)
 
 	return S_OK;
 }
+
+// ***************************************************************
+//		SetHereMapsApiKey
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::SetHereMapsApiKey(BSTR appId, BSTR appCode)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+	m_globalSettings.hereAppCode = OLE2A(appCode);
+	m_globalSettings.hereAppId = OLE2A(appId);
+	return S_OK;
+}

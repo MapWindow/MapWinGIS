@@ -442,10 +442,7 @@
     <ClInclude Include="Tiles\Providers\OpenStreetMapProvider.h" />
     <ClInclude Include="Tiles\Providers\OviProvider.h" />
     <ClInclude Include="Tiles\Providers\RosreestrProvider.h" />
-    <ClInclude Include="Tiles\Providers\TopoMapperProvider.h" />
     <ClInclude Include="Tiles\Providers\WMSGMercProvider.h" />
-    <ClInclude Include="Tiles\Providers\YahooProvider.h" />
-    <ClInclude Include="Tiles\Providers\YandexProvider.h" />
     <ClInclude Include="Tiles\Projections\AmersfoortProjection.h" />
     <ClInclude Include="Tiles\Projections\BaseProjection.h" />
     <ClInclude Include="Tiles\Projections\CustomProjection.h" />

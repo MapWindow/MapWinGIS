@@ -2561,6 +2561,7 @@ STDMETHODIMP CLabels::put_FloatNumberFormat(BSTR newVal)
 	CString format = OLE2A(newVal);
 	CString s;
 	s.Format(format, 1.1);
+	if (SysStringLen(newVal) == 0) return S_OK;
 	if (s != format) {
 		_floatNumberFormat = newVal;
 	}

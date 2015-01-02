@@ -17,17 +17,13 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 8 june 2012 - created the file.
-
+ 
 #include "stdafx.h"
 #include "TileProviders.h"
 #include "BingMapProvider.h"
 #include "OpenStreetMapProvider.h"
 #include "OviProvider.h"
-#include "YahooProvider.h"
-#include "YandexProvider.h"
 #include "GoogleMapProvider.h"
-#include "TopomapperProvider.h"
 #include "RosreestrProvider.h"
 #include "SQLiteCache.h"
 #include "RAMCache.h"
@@ -150,35 +146,17 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 		case OpenStreetMap:
 			p = (BaseProvider*)new OpenStreetMapProvider();
 			break;
-		case OviMaps:
+		case HereMaps:
 			p = (BaseProvider*)new OviMapProvider();
 			break;
-		case OviSatellite:
+		case HereSatellite:
 			p = (BaseProvider*)new OviSatelliteProvider();
 			break;
-		case OviHybrid:			
+		case HereHybrid:
 			p = (BaseProvider*)new OviHybridProvider();
 			break;
-		case OviTerrain:			
+		case HereTerrain:
 			p = (BaseProvider*)new OviTerrainProvider();
-			break;
-		case YahooMaps:
-			p = (BaseProvider*)new YahooMapProvider();
-			break;
-		case YahooSatellite:
-			p = (BaseProvider*)new YahooSatelliteProvider();
-			break;
-		case YahooHybrid:
-			p = (BaseProvider*)new YahooHybridProvider(this);
-			break;
-		case YandexMaps:
-			p = (BaseProvider*)new YandexMapProvider();
-			break;
-		case YandexSatellite:
-			p = (BaseProvider*)new YandexSatelliteProvider();
-			break;
-		case YandexHybrid:
-			p = (BaseProvider*)new YandexHybridProvider(this);
 			break;
 		case GoogleMaps:
 			p = (BaseProvider*)new GoogleMapProvider();
@@ -197,9 +175,6 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 			break;
 		case OpenCycleMap:
 			p = (BaseProvider*)new OpenCycleMapProvider();
-			break;
-		case Topomapper:
-			p = (BaseProvider*)new TopomapperProvider();
 			break;
 		case Rosreestr:
 			{

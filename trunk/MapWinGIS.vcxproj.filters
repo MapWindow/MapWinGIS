@@ -585,16 +585,7 @@
     <ClInclude Include="Tiles\Providers\RosreestrProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
-    <ClInclude Include="Tiles\Providers\TopoMapperProvider.h">
-      <Filter>Tiles\Providers</Filter>
-    </ClInclude>
     <ClInclude Include="Tiles\Providers\WMSGMercProvider.h">
-      <Filter>Tiles\Providers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\Providers\YahooProvider.h">
-      <Filter>Tiles\Providers</Filter>
-    </ClInclude>
-    <ClInclude Include="Tiles\Providers\YandexProvider.h">
       <Filter>Tiles\Providers</Filter>
     </ClInclude>
     <ClInclude Include="Tiles\Projections\AmersfoortProjection.h">

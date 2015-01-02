@@ -36,7 +36,8 @@ public:
 		Sec1 = "&s=";
 		server = "google.com";
 		RefererUrl.Format("http://maps.%s/", server);
-		Copyright = L"© Google (for private use only)";
+		int year = Utility::GetCurrentYear();
+		Copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
 		this->Projection = new MercatorProjection();
 		this->maxZoom = 20;
 	}

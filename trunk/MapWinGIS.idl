@@ -1023,17 +1023,17 @@ enum tkScalebarUnits
 		[helpstring("")] GoogleSatellite = 7,
 		[helpstring("")] GoogleHybrid = 8,
 		[helpstring("")] GoogleTerrain = 9,
-		[helpstring("")] OviMaps = 10,
-		[helpstring("")] OviSatellite = 11,
-		[helpstring("")] OviHybrid = 12,
-		[helpstring("")] OviTerrain = 13,
-		[helpstring("")] YandexMaps = 14,
+		[helpstring("")] HereMaps = 10,
+		[helpstring("")] HereSatellite = 11,
+		[helpstring("")] HereHybrid = 12,
+		[helpstring("")] HereTerrain = 13,
+		/*[helpstring("")] YandexMaps = 14,
 		[helpstring("")] YandexSatellite = 15,
 		[helpstring("")] YandexHybrid = 16,
 		[helpstring("")] YahooMaps = 17,
 		[helpstring("")] YahooSatellite = 18,
-		[helpstring("")] YahooHybrid = 19,
-		[helpstring("")] Topomapper = 20,
+		[helpstring("")] YahooHybrid = 19,*/
+		/*[helpstring("")] Topomapper = 20,*/
 		[helpstring("")] Rosreestr = 21,
 		[helpstring("")] OpenHumanitarianMap = 22,
 		[helpstring("")] MapQuestAerial = 23,
@@ -5367,6 +5367,7 @@ interface IGlobalSettings : IDispatch{
 	[propget, id(53)] HRESULT BingApiKey([out, retval] BSTR* pVal);
 	[propput, id(53)] HRESULT BingApiKey([in] BSTR newVal);
 	[id(54)] HRESULT TestBingApiKey([in] BSTR key, [out, retval] VARIANT_BOOL* retVal);
+	[id(55)] HRESULT SetHereMapsApiKey([in] BSTR appId, [in] BSTR appCode);
 };
 
 [

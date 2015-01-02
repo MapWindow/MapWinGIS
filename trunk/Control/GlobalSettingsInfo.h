@@ -73,6 +73,8 @@ struct GlobalSettingsInfo
 	bool suppressGdalErrors;
 	bool forceReadOnlyModeForGdalRasters;
 	CString bingApiKey;
+	CString hereAppId;
+	CString hereAppCode;
 
 	~GlobalSettingsInfo()
 	{
@@ -84,6 +86,8 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		hereAppId = "";
+		hereAppCode = "";
 		bingApiKey = "";
 		forceReadOnlyModeForGdalRasters = false;
 		forceHideLabels = false;
