@@ -161,7 +161,14 @@ CMapView::CMapView()
 	_penGray(Gdiplus::Color::Gray),
 	_brushGray(Gdiplus::Color::Gray), 
 	_penDarkGray(Gdiplus::Color::DarkSlateGray),
-	_propertyExchange(NULL)
+	_propertyExchange(NULL),
+	_bufferBitmap(NULL),
+	_tilesBitmap(NULL),
+	_layerBitmap(NULL),
+	_drawingBitmap(NULL),
+	_tempBitmap(NULL),
+	_moveBitmap(NULL),
+	_volatileBitmap(NULL)
 {
 	//this->GdiplusStartup();	       // commented intentionally; moved to ExitInstance; see comments below
 	Startup();
@@ -418,9 +425,9 @@ void CMapView::Shutdown()
 	Utility::ClosePointer(&_tilesBitmap);
 	Utility::ClosePointer(&_drawingBitmap);
 	Utility::ClosePointer(&_volatileBitmap);
-	Utility::ClosePointer(&_bufferBitmap);
 	Utility::ClosePointer(&_moveBitmap);
 	Utility::ClosePointer(&_tempBitmap);
+	Utility::ClosePointer(&_layerBitmap);
 
 	ClearPanningList();
 
@@ -461,13 +468,7 @@ int CMapView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (COleControl::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
-	_bufferBitmap = NULL;
-	_tilesBitmap = NULL;
-	_layerBitmap = NULL;
-	_drawingBitmap = NULL;
-	_tempBitmap = NULL;
-	_moveBitmap = NULL;
-	_volatileBitmap = NULL;
+	
 
 	DragAcceptFiles( TRUE );
 
