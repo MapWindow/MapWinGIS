@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.3"
+#define MyAppVersion "4.9.3.2"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\MapWinGIS\trunk\InnoSetup"
@@ -12,7 +12,7 @@
 
 #ifdef x64BitVersion
   #define CPU "x64"
-  #define vcredist "vcredist_x64_2008_sp1.exe"
+  #define vcredist "vcredist_x64_2010_sp1.exe"
   #define MySourceDir "C:\dev\MapWinGIS4Dev\MapWinGIS\trunk\bin\x64\"
   #define SystemFlag "64bit"
 #else
