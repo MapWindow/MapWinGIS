@@ -48,7 +48,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir>$(SolutionDir)\bin\$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\</IntDir>
     <IgnoreImportLibrary>false</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
@@ -56,9 +56,7 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+	<PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>

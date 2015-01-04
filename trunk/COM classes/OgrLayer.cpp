@@ -337,6 +337,41 @@ STDMETHODIMP COgrLayer::OpenFromDatabase(BSTR connectionString, BSTR layerName, 
 }
 
 // *************************************************************
+//		OpenFromFile()
+// *************************************************************
+STDMETHODIMP COgrLayer::OpenFromFile(BSTR Filename, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+	Close();
+
+	GDALDataset* ds = OpenDataset(Filename, forUpdate ? true : false);
+	if (ds)
+	{
+		OGRLayer* layer = ds->GetLayer(0);
+		if (layer)
+		{
+			_connectionString = OLE2W(Filename);
+			_sourceQuery = OgrHelper::OgrString2Unicode(layer->GetName());
+			_sourceType = ogrFile;
+			_dataset = ds;
+			_layer = layer;
+			_forUpdate = forUpdate == VARIANT_FALSE;
+			InitOpenedLayer();
+			*retVal = VARIANT_TRUE;
+			return S_OK;
+		}
+		else
+		{
+			ErrorMessage(tkFAILED_TO_OPEN_OGR_LAYER);
+			GDALClose(_dataset);
+		}
+	}
+	return S_OK;
+}
+
+// *************************************************************
 //		get_Name()
 // *************************************************************
 STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)

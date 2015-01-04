@@ -147,7 +147,7 @@ public:
 		IsStopped = false;
 		DynamicOverlay = false;
 		_initAttemptCount = 0;
-		LicenseUrl = "http://mapwingis.codeplex.com";
+		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=tiles";
 	}
 
 	virtual ~BaseProvider(void)

@@ -36,6 +36,7 @@ public:
 		Sec1 = "&s=";
 		server = "google.com";
 		RefererUrl.Format("http://maps.%s/", server);
+		LicenseUrl = "https://mapwingis.codeplex.com/wikipage?title=googletiles";
 		int year = Utility::GetCurrentYear();
 		Copyright.Format(L"©%d Google (FOR PRIVATE USE ONLY)", year);
 		this->Projection = new MercatorProjection();

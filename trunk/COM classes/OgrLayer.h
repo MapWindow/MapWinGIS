@@ -114,6 +114,8 @@ public:
 	STDMETHOD(put_LabelOrientation)(tkLineLabelOrientation newVal);
 	STDMETHOD(GenerateCategories)(BSTR FieldName, tkClassificationType classificationType, long numClasses, tkMapColor colorStart, tkMapColor colorEnd, tkColorSchemeType schemeType, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
+	STDMETHOD(get_DriverName)(BSTR* pVal);
+	STDMETHOD(OpenFromFile)(BSTR Filename, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
 
 private:
 	VARIANT_BOOL _dynamicLoading;
@@ -162,6 +164,6 @@ public:
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
 	
-	STDMETHOD(get_DriverName)(BSTR* pVal);
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)
