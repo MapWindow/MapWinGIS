@@ -1,4 +1,5 @@
-﻿using MapWinGIS;
+﻿using System.Diagnostics;
+using MapWinGIS;
 using MWLite.Core.UI;
 using MWLite.GUI.Classes;
 using System;
@@ -33,6 +34,12 @@ namespace MWLite.GUI.Forms
                 AppSettings.Instance.BingApiKey = key;
                 DialogResult = DialogResult.OK;
             }
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            const string url = "http://www.microsoft.com/maps/create-a-bing-maps-key.aspx";
+            Process.Start(url);
         }
     }
 }

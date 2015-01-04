@@ -30,6 +30,7 @@ namespace MWLite.GUI
             gs.AllowProjectionMismatch = false;
             gs.ReprojectLayersOnAdding = false;
             gs.OgrLayerForceUpdateMode = true;
+            //gs.SetHereMapsApiKey("", "");
         }
     }
 }
