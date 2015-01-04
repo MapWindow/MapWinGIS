@@ -44,7 +44,7 @@ namespace Examples
 
                 // adding to map
                 int handle = axMap1.AddLayer(sf, true);
-                sf = axMap1.get_Shapefile(handle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
+                sf = axMap1.get_Shapefile(handle);     // in case a copy of shapefile was created by GlobalSettings.ReprojectLayersOnAdding
 
                 double mean = sf.Table.MeanValue[fieldIndex];
                 double stDev = sf.Table.StandardDeviation[fieldIndex];

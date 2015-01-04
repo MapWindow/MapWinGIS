@@ -544,6 +544,38 @@ namespace MapWinGIS
         /// it's set to gdalplugins folder in the directory where MapWinGIS is installed.</remarks>
         /// \new493 Added in version 4.9.3
         public string GdalPluginPath { get; set;}
+
+
+        /// <summary>
+        /// Gets or sets API key to access Bing maps. Without API key Bing Maps provider isn't available. See 
+        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public string BingApiKey { get; set;}
+       
+        /// <summary>
+        /// Sets application credentials for Here Maps online tiles. 
+        /// Without these credentials Here Maps providers are not available. See 
+        /// <a href = "https://mapwingis.codeplex.com/wikipage?title=onlinetiles">details here</a>. 
+        /// </summary>
+        /// <param name="appId">Application Id. Can be obtained by registering on the site of the service.</param>
+        /// <param name="appCode">Application code. Can be obtained by registering on the site of the service.</param>
+        /// \new493 Added in version 4.9.3
+        public void SetHereMapsApiKey(string appId, string appCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Requests URL address for tiles download from Bing Maps server. 
+        /// </summary>
+        /// <param name="Key">API key to test.</param>
+        /// <returns>True if the Url for downloading for obtained.</returns>
+        /// \new493 Added in version 4.9.3
+        public bool TestBingApiKey(string Key)
+        {
+            throw new NotImplementedException();
+        }
     }
 #if nsp
 }

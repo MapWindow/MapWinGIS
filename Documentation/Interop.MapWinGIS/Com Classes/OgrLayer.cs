@@ -123,7 +123,7 @@ namespace MapWinGIS
     /// 
     ///     // or b) set map projection and reproject layer if needed
     ///     map.Projection = tkMapProjection.PROJECTION_GOOGLE_MERCATOR;
-    ///     map.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
+    ///     new GlobalSettings() {ReprojectLayersOnAdding = true};
     /// 
     ///     int layerHandle = map.AddLayer(layer, true);
     ///     if (layerHandle == -1)
@@ -141,7 +141,8 @@ namespace MapWinGIS
     /// \endcode
     /// AxMap.AddLayerFromDatabase provides a short-cut for both 2 operations: opening a layer and adding it to the map.\n
     /// 
-    /// OGR layers support AxMap.ProjectionMismatchBehavior and AxMap.GrabProjectionFromData properties.
+    /// OGR layers support built reprojection of layers (GlobalSettings.ReprojectLayersOnAdding) 
+    /// and AxMap.GrabProjectionFromData properties.
     /// Depending on their values underlying shapefile data 
     /// may be reprojected on adding it to the map. Use OgrLayer.DataIsReprojected property to test
     /// whether it happened.\n
@@ -960,7 +961,7 @@ namespace MapWinGIS
         /// Gets a value indicating whether underlying data ( OgrLayer.GetBuffer ) was reprojected.
         /// </summary>
         /// <remarks>
-        /// This may happen because of projection mismatch on adding it to the map. See AxMap.ProjectionMismatchBehavior for details.
+        /// This may happen because of projection mismatch on adding it to the map. See GlobalSettings.ReprojectLayersOnAdding for details.
         /// </remarks>
         public bool DataIsReprojected
         {

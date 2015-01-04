@@ -27,7 +27,7 @@ namespace Examples
             Shapefile sf = new Shapefile();
             sf.Open(filename, null);
             m_layerHandle = axMap1.AddLayer(sf, true);
-            sf = axMap1.get_Shapefile(m_layerHandle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
+            sf = axMap1.get_Shapefile(m_layerHandle);     // in case a copy of shapefile was created by GlobalSettings.ReprojectLayersOnAdding
 
             // let's add labels consisting of Name and type of building on a separate lines
             sf.Labels.Generate("[Type]", tkLabelPositioning.lpCenter, false);

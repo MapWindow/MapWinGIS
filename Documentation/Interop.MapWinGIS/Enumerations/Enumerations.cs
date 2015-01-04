@@ -369,6 +369,67 @@ namespace MapWinGIS
         /// Measuring of area or distance will take place. See Measuring class for details.
         /// </summary>
         cmMeasure = 5,
+
+        /// <summary>
+        /// Allows to add shapes to vector layers (Shapefile or OgrLayer) in interactive mode. 
+        /// See description of ShapeEditor class.
+        /// </summary>
+        cmAddShape = 6,
+
+        /// <summary>
+        /// Allows to edit shapes of vector layers (Shapefile or OgrLayer) in interactive mode. 
+        /// See description of ShapeEditor class.
+        /// </summary>
+        cmEditShape = 8,
+
+        /// <summary>
+        /// Splits polylines or polygons of a single layers with interactive drawn polyline.
+        /// AxMap.ChooseLayer event must be handled to select the layer.
+        /// </summary>
+        cmSplitByPolyline = 9,
+
+        /// <summary>
+        /// Fires AxMap.ShapeHighlighted and AxMap.ShapeIdentified events. Optionally visually 
+        /// highlights shapes under cursor. See Identifier class for available options. 
+        /// The functioning can be tested in the Demo app.
+        /// </summary>
+        cmIdentify = 10,
+
+        /// <summary>
+        /// Allows to moves selected shapes of a single vector layers. AxMap.ChooseLayer event must be handled to 
+        /// select the layer.
+        /// </summary>
+        cmMoveShapes = 11,
+
+        /// <summary>
+        /// Allows to rotates selected shapes of a single vector layers. AxMap.ChooseLayer event must be handled to 
+        /// select the layer.
+        /// </summary>
+        cmRotateShapes = 12,
+
+        /// <summary>
+        /// Selects shapes of a single vector layer with interactively drawn polygon. 
+        /// AxMap.ChooseLayer event must be handled to select the layer.
+        /// </summary>
+        cmSelectByPolygon = 13,
+
+        /// <summary>
+        /// Erases parts of shapes shapes of a single vector that intersects with interactive drawn polygon.
+        /// AxMap.ChooseLayer event must be handled to select the layer.
+        /// </summary>
+        cmEraseByPolygon = 14,
+
+        /// <summary>
+        /// Splits polygons or polylines of a single layer with interactively drawn polygon.
+        /// AxMap.ChooseLayer event must be handled to select the layer.
+        /// </summary>
+        cmSplitByPolygon = 15,
+
+        /// <summary>
+        /// Removes all shapes of a selected layers which don't intersect with interactively drawn polygon.
+        /// AxMap.ChooseLayer event must be handled to select the layer.
+        /// </summary>
+        cmClipByPolygon = 16,
     }
 
     /// <summary>
@@ -1596,10 +1657,15 @@ namespace MapWinGIS
         RedrawSkipDataLayers = 2,
 
         /// <summary>
-        /// All map will be rendered from the main buffer. Only are measurements and coordinate display will be rendered anew.
+        /// Updates shape editor and measuring tool. Data layers, drawing layers and layers in interactive editing mode will be rendered from screen buffer.
+        /// </summary>
+        RedrawSkipAllLayers = 4,
+
+        /// <summary>
+        /// Map will be rendered from the main buffer. Only measurements and coordinate display will be rendered anew.
         /// </summary>
         /// <remarks>Corresponds to AxMap.Refresh/AxMap.Invalidate.</remarks>
-        RedrawTempObjectsOnly = 3,
+        RedrawMinimal = 3,
     }
 
     /// <summary>
@@ -1721,9 +1787,17 @@ namespace MapWinGIS
         fosProxyForGrid = 3,
 
         /// <summary>
-        /// Datasource will be opened as vector layer (i.e. Shapefile; as in current version no other vector formats are supported).
+        /// A single layer from vector datasource will be opened 
+        /// (for shapefiles Shapefile class will be used; for other vector formats - OgrLayer; for multilayer datasources a first layer 
+        /// will be returned).
         /// </summary>
         fosVectorLayer = 4,
+
+        /// <summary>
+        /// Opens vector datasource using OgrDatasource class. Should be used with multi-layer vector formats, like KML to add all layers 
+        /// to the map with a single call.
+        /// </summary>
+        fosVectorDatasource = 5,
     }
 
     /// <summary>
@@ -2034,36 +2108,6 @@ namespace MapWinGIS
         csAuto = 0,
         csTrue = 1,
         csFalse = 2,
-    }
-
-    /// <summary>
-    /// Possible behaviours to be used when a layer with different or missing projection is added to the map.
-    /// </summary>
-    /// \new492 Added in version 4.9.2
-    public enum tkMismatchBehavior
-    {
-        /// <summary>
-        /// Absence or difference of projection is ignored, layer is added regardless of it. Default one.
-        /// </summary>
-        mbIgnore = 0,
-        /// <summary>
-        /// Layer won't be added to the map if it has different projection, however it will in case projection metadata is missing.
-        /// </summary>
-        mbCheckLoose = 1,
-        /// <summary>
-        /// Layer won't be added to the map in case of both missing or different projections.
-        /// </summary>
-        mbCheckStrict = 2,
-        /// <summary>
-        /// The same as mbCheckLoose, only an attempt will be made to transform coordinates to the target projection.
-        /// Transformation can be performed shapefiles only. New instance of shapefile is created as in-memory one.
-        /// </summary>
-        mbCheckLooseAndReproject = 3,
-        /// <summary>
-        /// The same as mbCheckStrict, only an attempt will be made to transform coordinates to the target projection.
-        /// Transformation can be performed shapefiles only. New instance of shapefile is created as in-memory one.
-        /// </summary>
-        mbCheckStrictAndReproject = 4,
     }
 
     /// <summary>

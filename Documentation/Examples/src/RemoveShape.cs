@@ -23,10 +23,10 @@ namespace Examples
                 return;
             }
 
-            var sf = new Shapefile();
+                        var sf = new Shapefile();
             sf.Open(filename, null);
             int layerHandle = axMap1.AddLayer(sf, true);
-            sf = axMap1.get_Shapefile(layerHandle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
+            sf = axMap1.get_Shapefile(layerHandle);     // in case a copy of shapefile was created by GlobalSettings.ReprojectLayersOnAdding
 
             if (!sf.StartEditingShapes(true, null))
             {

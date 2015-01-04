@@ -35,7 +35,7 @@ namespace Examples
             else
             {
                 int layerHandle = axMap1.AddLayer(sf, true);
-                sf = axMap1.get_Shapefile(layerHandle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
+                sf = axMap1.get_Shapefile(layerHandle);     // in case a copy of shapefile was created by GlobalSettings.ReprojectLayersOnAdding
 
                 int fldIndex = sf.Table.FieldIndexByName["CalcArea"];
                 if (fldIndex != -1)

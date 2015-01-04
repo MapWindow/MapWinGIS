@@ -67,9 +67,16 @@
 /// - AxMap.AddLayer, AxMap.RemoveLayer events;
 /// - Tiles.SetProxyAuthorization method to set name/password when they are required;
 /// 
-/// 11. Fixes for a number of issues reported by users:
+/// 11. Important fixes for unmanaged IDEs:
 /// - division by zero error in Borland C++ Builder;
-/// - TODO: list more;
+/// - correct shutdown of GDI+ (affected MFC and VB6);
+/// - a fix for MS Access form designer;
+/// 
+/// 12. Update of tile providers:
+/// - methods to set API keys for Bing Maps and Here Maps (GlobalSettings.BingApiKey, GlobalSettings.SetHereMapsApiKey);
+/// - free MapQuestAerial provider was added;
+/// - Yahoo maps and Topomapper providers were removed (services were discontinued);
+/// - Yandex maps providers were removed (license limitations);
 /// 
 /// \section changes492 Changes in version 4.9.2.
 /// 
@@ -102,6 +109,7 @@
 /// - if datasource projection doesn't match map projection layer adding operation can be cancelled;
 /// - reprojection on the fly is available as an option for shapefiles;
 /// - default behaviour is pmbIgnore which is the same as behaviour in previous versions.
+/// \note Substituted with another set of API members in version 4.9.3.
 /// 
 /// 5. New polygon coloring algorithm, which works on assumptions defined in 
 /// <a href="http://en.wikipedia.org/wiki/Four_color_theorem">Four color theorem</a>,

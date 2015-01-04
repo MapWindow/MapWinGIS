@@ -170,13 +170,14 @@
 /// \endcode
 /// 
 /// \section gs7 F. Projection mismatch testing.
-/// Adding of layer to the map may fail because of projection mismatch testing (AxMap.ProjectionMismatchBehavior).
-/// It's turned off by default (pmbIgnore), so any layer will be added to the map even if its projection doesn't match.  
-/// If projection mismatch testing is on and reprojection option is chosen (mbCheckLooseAndReproject 
-/// or mbCheckStrictAndReproject), a copy of datasource may be created in AxMap.AddLayer. 
+/// Adding of layer to the map may fail because of projection mismatch testing (GlobalSettings.AllowProjectMismatch).
+/// It's turned off by default (i.e. set to true; mismatch is allowed), 
+/// so any layer will be added to the map even if its projection doesn't match.  
+/// If projection mismatch testing is on and reprojection option is chosen (GlobalSettings.ReprojectLayersOnAdding),
+/// a copy of datasource may be created in AxMap.AddLayer. 
 /// Any initialization logic in this case should be run after layer was added to the map.
 /// \code
-/// axMap1.ProjectionMismatchBehavior = tkMismatchBehavior.mbCheckLooseAndReproject;
+/// new GlobalSettings() { AllowProjectMismatch = false, ReprojectLayersOnAdding = true };
 /// var sf = new Shapefile();
 /// if (sf.Open(filename, null)) {
 ///     //sf.GenerateLabels(0, tkLabelPositioning.lpCentroid); // don't call it here as labels may be lost

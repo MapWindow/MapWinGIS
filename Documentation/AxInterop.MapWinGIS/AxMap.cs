@@ -334,7 +334,16 @@ namespace AxMapWinGIS
         /// Performs specific type of map redraw. 
         /// </summary>
         /// <param name="redrawType">Type of redraw.</param>
-        /// <remarks>Map.Redraw is the same as AxMap.Redraw(tkRedrawType.RedrawAll).</remarks>
+        /// <remarks>Different types of redraw are necessary for performance reasons. If it's known that
+        /// only a specific part of map content has changed there is no need to run the full rendering, 
+        /// screen buffer can be used instead. According to the amount of content being redrawn the different 
+        /// types can be ordered like this (from minimum to the full one):  
+        /// RedrawMinimal -> RedrawSkipAllLayers -> RedrawSkipDataLayers -> RedrawAll.
+        /// Each subsequent type includes preceding types, so it's never necessary to call two types in a row. 
+        /// If it's not clear which type of redraw is appropriate for particular situation,
+        /// start with the minimal one and then go to the subsequent types until the changes 
+        /// which were made are rendered. Also if datasource being used are small it's easier to ignore this method
+        /// altogether and call AxMap.Redraw instead ( equivalent to AxMap.Redraw2(tkRedrawType.RedrawAll)). </remarks>
         /// \new491 Added in version 4.9.1
         public void Redraw2(tkRedrawType redrawType)
         {
@@ -1225,7 +1234,8 @@ namespace AxMapWinGIS
         /// <summary>
         /// Adds layer from the specified datasource.
         /// </summary>
-        /// <remarks>Additional information on failure can be obtained through AxMap.FileManager property.</remarks>
+        /// <remarks>Additional information on failure can be obtained through AxMap.FileManager property. 
+        /// </remarks>
         /// <param name="filename">Filename of datasource</param>
         /// <param name="openStrategy">Open strategy (fosAutoDetect the default recommended value).</param>
         /// <param name="visible">A value indicating whether a new layer will be visible.</param>
@@ -1239,7 +1249,10 @@ namespace AxMapWinGIS
         /// <summary>
         /// Adds a layer to the map.
         /// </summary>
-        /// <param name="Object">The object (either Image or Shapefile) to add to the map.</param>
+        /// <remarks>In case of OgrDatasource all layers will be added to the map. For grid datasources 
+        /// an instance of Image class created with Grid.OpenAsImage will be used for rendering.</remarks>
+        /// <param name="Object">The object to add to the map. The following types are supported: 
+        /// Shapefile, Image, Grid, OgrLayer, OgrDatasource.</param>
         /// <param name="Visible">Sets whether the layer is visible after being added to the map.</param>
         /// <returns>Returns the integer handle for the layer added to the map.</returns>
         public int AddLayer(object Object, bool Visible)
@@ -2372,7 +2385,7 @@ namespace AxMapWinGIS
         /// But it should be considered whether it is worth the effort.
         /// 
         /// Starting from version 4.9.2. built-in projection mismatch testing is implemented + optional 
-        /// transformation for shapefiles. See AxMap.ProjectionMismatchBehavior.
+        /// transformation for shapefiles. See GlobalSettings.AllowProjectionMismatch, GlobalSettings.ReprojectLayersOnAdding. 
         /// 
         /// @{
 

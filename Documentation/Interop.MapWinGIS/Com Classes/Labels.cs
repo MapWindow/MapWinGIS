@@ -130,7 +130,16 @@ namespace MapWinGIS
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }
         }
-       
+
+        /// <summary>
+        /// For labels attached to shapefile layer updates the text of each label based on Expression property.
+        /// </summary>
+        /// <remarks>The method is necessary when the values in underlying DBF table have changed, 
+        /// since Labels class doesn't track these changes automatically.</remarks>
+        public void ForceRecalculateExpression()
+        {
+            throw new NotImplementedException();
+        }
        
         #endregion
 
@@ -1292,6 +1301,9 @@ namespace MapWinGIS
         #endregion
 
         /// @}
+
+
+        
     }
 #if nsp
 }

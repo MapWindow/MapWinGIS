@@ -21,7 +21,7 @@ namespace Examples
             if (sf.Open(filename))
             {
                 m_layerHandle = axMap1.AddLayer(sf, true);
-                sf = axMap1.get_Shapefile(m_layerHandle);     // in case a copy of shapefile was created by AxMap.ProjectionMismatchBehavior
+                sf = axMap1.get_Shapefile(m_layerHandle);     // in case a copy of shapefile was created by GlobalSettings.ReprojectLayersOnAdding
                 
                 axMap1.SendMouseMove = true;
                 axMap1.CursorMode = tkCursorMode.cmIdentify;
