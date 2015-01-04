@@ -405,25 +405,25 @@ namespace MapWinGIS
         /// Gets expression to be set for OpenFileDialog.Filter property to select supported datasources.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string CdlgFilter { get; private set; }
+        public string CdlgFilter { get { throw new NotImplementedException(); } }
 
         /// <summary>
         /// Gets expression to be set for OpenFileDialog.Filter property to select raster datasources (both RGB images and grids).
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string CdlgRasterFilter { get; private set; }
+        public string CdlgRasterFilter { get { throw new NotImplementedException(); } }
 
         /// <summary>
         /// Gets expression to be set for OpenFileDialog.Filter property to select vector datasources.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string CdlgVectorFilter { get; private set; }
+        public string CdlgVectorFilter { get { throw new NotImplementedException(); } }
 
         /// <summary>
         /// Gets string with the list of supported GDAL formats.
         /// </summary>
         /// \new493 Added in version 4.9.3
-        public string SupportedGdalFormats { get; private set; }
+        public string SupportedGdalFormats { get { throw new NotImplementedException();} }
 
         /// <summary>
         /// Tries to open specified file as OGR datasource.

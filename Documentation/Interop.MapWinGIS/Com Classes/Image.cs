@@ -1127,7 +1127,7 @@ namespace MapWinGIS
                 }
 
                 /// <summary>
-                /// Gets the name of the source grid in case the image representation a visualization proxy for a grid.
+                /// Gets the name of the source grid in case the image represent a visualization proxy for a grid.
                 /// </summary>
                 /// \new490 Added in version 4.9.0
                 public string SourceGridName

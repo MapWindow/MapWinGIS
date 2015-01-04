@@ -242,8 +242,6 @@ namespace MapWinGIS
         public class OgrLayer
 #endif
     {
-       
-        
         /// <summary>
         /// Closes current layer and releases resources associated with it.
         /// </summary>
@@ -390,6 +388,18 @@ namespace MapWinGIS
         /// <param name="sql">SQL query.</param>
         /// <returns>True on success.</returns>
         public bool OpenFromQuery(string connectionString, string sql)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Opens OGR layer from specified file. If the datasource holds several layers only the first one will be opened.
+        /// </summary>
+        /// <param name="Filename">Filename of the datasource to open.</param>
+        /// <param name="forUpdate">Indicates whether the returned layer will support saving of changes back to source
+        /// (the functionality should be supported by particular driver).</param>
+        /// <returns>True on success.</returns>
+        public bool OpenFromFile(string Filename, bool forUpdate)
         {
             throw new NotImplementedException();
         }
@@ -1000,7 +1010,10 @@ namespace MapWinGIS
 
         /// @}
 
-        
+
+
+
+
         
     }
 
