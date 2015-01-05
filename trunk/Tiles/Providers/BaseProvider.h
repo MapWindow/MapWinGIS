@@ -87,10 +87,6 @@ public:
 // Downloads map tiles via HTTP; this is abstract class to inherit from
 class BaseProvider
 {
-private:
-	bool m_initialized;
-	
-
 protected:
 	static CString m_proxyAddress;
 	static short m_proxyPort;
@@ -129,7 +125,6 @@ private:
 
 protected:
 	virtual CString MakeTileImageUrl(CPoint &pos, int zoom) = 0;
-	
 
 	int GetServerNum(CPoint &pos, int max)
 	{
@@ -142,7 +137,6 @@ public:
 		mapView = NULL;
 		LanguageStr = "en";
 		Projection = NULL;
-		m_initialized = false;
 		Selected = false;
 		IsStopped = false;
 		DynamicOverlay = false;
@@ -171,7 +165,9 @@ public:
 	bool AutodetectProxy();
 	void AddDynamicOverlay(BaseProvider* p);
 	void ClearSubProviders();
-	
+	virtual CStringW GetCopyright() {
+		return Copyright;
+	}
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
 	virtual bool Initialize() { return true; };

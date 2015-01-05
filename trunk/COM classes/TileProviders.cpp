@@ -580,7 +580,7 @@ CStringW CTileProviders::get_CopyrightNotice(tkTileProvider provider)
 	int index = -1;
 	get_IndexByProviderId((int)provider, &index);
 	if (index >= 0 && index < (int)_providers.size()) {
-		return _providers[index]->Copyright;
+		return _providers[index]->GetCopyright();
 	}
 	return L"";
 }

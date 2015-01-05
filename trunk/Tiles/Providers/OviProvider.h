@@ -31,7 +31,6 @@ public:
 	{
 		RefererUrl = "https://www.here.com/";
         int year = Utility::GetCurrentYear();
-	    LicenseUrl = "https://developer.here.com/get-started#/";
 		Copyright.Format(L"©%d Here, DigitalGlobe", year);
 		UrlServerLetters = "1234";
 		this->Projection = new MercatorProjection();
@@ -54,6 +53,17 @@ public:
 			return false;
 		}
 		return true;
+	}
+
+	virtual CStringW GetCopyright()
+	{
+		if (m_globalSettings.hereAppCode.GetLength() == 0 ||
+			m_globalSettings.hereAppId.GetLength() == 0) {
+			return "INVALID HERE MAPS APP_ID";
+		}
+		else {
+			return Copyright;
+		}
 	}
 };
 

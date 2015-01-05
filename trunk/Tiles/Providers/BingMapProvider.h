@@ -30,12 +30,11 @@ public:
 	BingBaseProvider() 
 	{
 		RefererUrl = "http://www.bing.com/maps/";
-		LicenseUrl = "http://www.microsoft.com/maps/product/terms.html";
 		Copyright = L"Copyright © 2014 Microsoft and its suppliers";
 		this->Projection = new MercatorProjection();
 		subProviders.push_back(this);
 	}
-
+	
 	bool Initialize();
 	CString TileXYToQuadKey(int tileX, int tileY, int levelOfDetail);
 
@@ -52,6 +51,16 @@ public:
 		temp.Replace("{subdomain}", subDomain);
 
 		return temp;
+	}
+
+	virtual CStringW GetCopyright()
+	{
+		if (UrlFormat.GetLength() == 0) {
+			return "INVALID BING MAPS API KEY";
+		}
+		else {
+			return Copyright;
+		}
 	}
 };
 
