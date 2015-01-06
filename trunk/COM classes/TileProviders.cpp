@@ -197,10 +197,10 @@ BaseProvider* CTileProviders::getProviderCore(tkTileProvider provider )
 	{
 		_providers.push_back(p);
 	}
-	else
+	/*else
 	{
 		CallbackHelper::AssertionFailed(Debug::Format("Provider wasn't found: %d.", (int)provider));
-	}
+	}*/
 	return p;
 }
 #pragma endregion
