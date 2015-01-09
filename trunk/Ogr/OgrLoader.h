@@ -32,10 +32,6 @@ public:
 		LabelPosition = lpNone;
 		_lockCounter = 0;
 		IsMShapefile = false;
-		LoadingLock.Unlock();
-		DataLock.Unlock();
-		ProviderLock.Unlock();
-		ShapefileLock.Unlock();
 	}
 	~OgrDynamicLoader() {
 		Clear();
