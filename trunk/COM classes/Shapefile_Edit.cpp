@@ -797,6 +797,7 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 	_minZ = 0.0, _maxZ = 0.0;
 	_minM = 0.0, _maxM = 0.0;
 		
+	bool first = true;
 	for( int i = 0; i < (int)_shapeData.size(); i++ )
 	{	
 		if (ShapeHelper::IsEmpty(_shapeData[i]->shape))
@@ -806,12 +807,13 @@ STDMETHODIMP CShapefile::RefreshExtents(VARIANT_BOOL *retval)
 		shp->get_ExtentsXYZM(Xmin, Ymin, Xmax, Ymax, Zmin, Zmax, Mmin, Mmax);
 			
 		// refresh shapefile extents
-		if (i==0)
+		if (first)
 		{
 			_minX = Xmin, _maxX = Xmax;
 			_minY = Ymin, _maxY = Ymax;
 			_minZ = Zmin, _maxZ = Zmax;
 			_minM = Mmin, _maxM = Mmax;
+			first = false;
 		}
 		else	
 		{	if( Xmin < _minX )	_minX = Xmin; 
