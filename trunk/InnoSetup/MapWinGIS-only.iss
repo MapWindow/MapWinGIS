@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "MapWinGIS"
-#define MyAppVersion "4.9.3.2"
+#define MyAppVersion "4.9.3.3"
 #define MyAppPublisher "MapWindow Open Source GIS Community"
 #define MyAppURL "http://www.mapwindow.org"
 #define SetupLocation "D:\dev\MapwinGIS\MapWinGIS\trunk\InnoSetup"
