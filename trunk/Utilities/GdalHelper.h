@@ -36,7 +36,7 @@ public:
 	static bool HasOverviews(GDALDataset* dt);
 	static bool HasOverviews(CStringW filename);
 	static bool RemoveOverviews(CStringW filename);
-	static void BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback);
+	static bool BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback);
 	static bool BuildOverviewsIfNeeded(CStringW filename, bool external = true, ICallback* callback = NULL);
 	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback);
 

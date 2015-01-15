@@ -323,9 +323,9 @@ bool GdalHelper::BuildOverviewsIfNeeded(CStringW filename, bool external, ICallb
 	GDALAccess accessMode = external ? GDALAccess::GA_ReadOnly : GDALAccess::GA_Update;
 	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, accessMode);
 	if (dt) {
-		GdalHelper::BuildOverviewsIfNeeded(dt, callback);
+		bool result = GdalHelper::BuildOverviewsIfNeeded(dt, callback);
 		GdalHelper::CloseDataset(dt);
-		return true;
+		return result;
 	}
 	return false;
 }
@@ -333,8 +333,9 @@ bool GdalHelper::BuildOverviewsIfNeeded(CStringW filename, bool external, ICallb
 // *******************************************************
 //		BuildOverviewsIfNeeded()
 // *******************************************************
-void GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback) 
+bool GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback) 
 {
+	bool result = false;
 	if (m_globalSettings.rasterOverviewCreation == rocAuto || 
 		m_globalSettings.rasterOverviewCreation == rocYes)
 	{
@@ -353,10 +354,10 @@ void GdalHelper::BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback)
 				ratio *= 2;
 			}
 
-			bool result = BuildOverviewsCore(dt, m_globalSettings.rasterOverviewResampling, &(overviews[0]), overviews.size(), callback);
+			result = BuildOverviewsCore(dt, m_globalSettings.rasterOverviewResampling, &(overviews[0]), overviews.size(), callback);
 		}
 	}
-	return;
+	return result;
 }
 
 // *******************************************************
