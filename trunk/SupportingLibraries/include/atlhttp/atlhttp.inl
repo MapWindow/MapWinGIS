@@ -2103,16 +2103,33 @@ inline bool CAtlHttpClientT<TSocketClass>::ReconnectIfRequired() throw()
 		if (!strValue.CompareNoCase(_T("keep-alive")))
 			return true; // server said keep connection open.
 	}
-	else
-	{
-		return true; // there was no 'Connection' header
-	}
 
-	if (!strValue.CompareNoCase(_T("close")))
-	{
-		Close();
-		ConnectSocket();
-	}   
+	// MAPWINGIS CHANGES
+	// ----------------------------------------
+	// Originally it was reopened only if Connection: close header is specified.
+	// This seem to be a problem, at least with CCProxy I tested
+	// as 10053 (WSAECONNABORTED) was returned later on by socket.
+	Close();
+	ConnectSocket();
+
+	//else
+	//{
+	//	return true; // there was no 'Connection' header
+	//}
+
+	/*if (!strValue.CompareNoCase(_T("close")))
+	{*/
+		//Close();
+		//ConnectSocket();
+	//}   
+	
+	//else
+	//{
+	//	return true; // there was no 'Connection' header
+	//}
+	// ----------------------------------------
+	// END MAPWINGIS CHANGES
+	
 	return false;
 }
 
