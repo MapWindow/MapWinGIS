@@ -171,8 +171,10 @@ public:
 	STDMETHOD(get_ProjectionStatus)(tkTilesProjectionStatus* retVal);
 	STDMETHOD(get_ScalingRatio)(double* pVal);
 	STDMETHOD(put_ScalingRatio)(double newVal);
-	STDMETHOD(SetProxyAuthorization)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
+	STDMETHOD(SetProxyAuthentication)(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal);
 	STDMETHOD(ClearProxyAuthorization)();
+	STDMETHOD(get_ProxyAuthenticationScheme)(tkProxyAuthentication* pVal);
+	STDMETHOD(put_ProxyAuthenticationScheme)(tkProxyAuthentication newVal);
 
 private:
 	long _lastErrorCode;

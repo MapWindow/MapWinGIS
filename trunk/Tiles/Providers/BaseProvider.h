@@ -27,12 +27,12 @@
 
 extern Debug::Logger tilesLogger;
 
-class MyHttpClient: public CAtlHttpClient
+class HttpClientEx: public CAtlHttpClient
 {
 public:
 	bool _inUse;
 
-	MyHttpClient()
+	HttpClientEx()
 	{
 		_inUse = false;
 	}
@@ -43,43 +43,51 @@ public:
 	}
 };
 
-class TilesAuthentication : public ATL::IAuthInfo
+class BasicAuth : public CBasicAuthObject, public ATL::IAuthInfo
 {
 private:
 	CString _username; 
 	CString _password;
 	CString _domain;
 public:
-	TilesAuthentication(CString username, CString password, CString domain)
+	void SetCredentials(CString username, CString password, CString domain)
 	{
 		_username = username;
 		_password = password;
 		_domain = domain;
 	}
 
-	virtual HRESULT GetPassword(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szPwd,
-	__inout DWORD *pdwBuffSize)
+	void Init(CAtlHttpClient *pSocket, IAuthInfo *pAuthInfo)
 	{
-		szPwd = _password.GetBuffer();
-		// from MSDN: CString.GetLength returns number of bytes in this CString object. The count does not include a null terminator
-		// IAuthInfo.GetPassword: On exit, pdwBuffSize should contain the size of the username including the NULL terminator
-		*pdwBuffSize = _password.GetLength() + 1;
-		return S_OK;
+		CBasicAuthObject::Init(pSocket, pAuthInfo);
 	}
 
-	virtual HRESULT GetUsername(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szUid,
-		__inout DWORD *pdwBuffSize)
+	bool Authenticate(LPCTSTR szAuthTypes, bool bProxy)
 	{
-		szUid = _username.GetBuffer();
-		*pdwBuffSize = _username.GetLength() + 1;
-		return S_OK;
+		bool result = CBasicAuthObject::Authenticate(szAuthTypes, bProxy);
+		if (!result) {
+			CallbackHelper::ErrorMsg("Tiles proxy authentication failed. Check if proper credentials are set for Tiles.SetProxyAuthentication.");
+		}
+		return result;
 	}
 
-	virtual HRESULT GetDomain(__out_ecount_part_z_opt(*pdwBuffSize, *pdwBuffSize) LPTSTR szDomain,
-		__inout DWORD *pdwBuffSize)
+	HRESULT GetPassword(LPTSTR szPwd, DWORD* dwBuffSize)
 	{
-		szDomain = _domain.GetBuffer();
-		*pdwBuffSize = _domain.GetLength() + 1;
+		if (CopyCString(_password, szPwd, dwBuffSize))
+			return S_OK;
+		return E_FAIL;
+	}
+
+	HRESULT GetUsername(LPTSTR szUid, DWORD* dwBuffSize)
+	{
+		if (CopyCString(_username, szUid, dwBuffSize))
+			return S_OK;
+		return E_FAIL;
+	}
+	HRESULT GetDomain(LPTSTR szDomain, DWORD* dwBuffSize)
+	{
+		// MS sample indicates that it's not expected to be called at all
+		// http_://msdn.microsoft.com/en-us/library/f3wxbf3f%28v=vs.80%29.aspx
 		return S_OK;
 	}
 };
@@ -93,7 +101,7 @@ protected:
 	static CString _proxyUsername;
 	static CString _proxyPassword;
 	static CString _proxyDomain;
-	std::vector<MyHttpClient*> _httpClients;
+	std::vector<HttpClientEx*> _httpClients;
 	static ::CCriticalSection _clientLock;
 	int _initAttemptCount;
 public:
@@ -171,5 +179,5 @@ public:
 	CMemoryBitmap* DownloadBitmap(CPoint &pos, int zoom);
 	TileCore* GetTileImage(CPoint &pos, int zoom);	
 	virtual bool Initialize() { return true; };
-	void InitHttpClient(MyHttpClient& httpClient);
+	bool InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth);
 };

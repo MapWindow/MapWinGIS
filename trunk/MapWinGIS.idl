@@ -58,6 +58,17 @@ interface IOgrLayer;
 interface IUndoList;
 interface IIdentifier;
 
+/************************** tkProxyAuthentication Enumeration **********************/
+typedef
+[
+	uuid(7704CDEC-89D2-4C9A-A1F0-57C2154D5E48),
+	helpstring("tkProxyAuthentication"),
+]
+enum tkProxyAuthentication {
+	asBasic = 0,
+	asNtlm = 1,
+}tkProxyAuthentication;
+
 /************************** tkPixelOffsetMode Enumeration **********************/
 typedef
 [
@@ -5462,8 +5473,10 @@ interface ITiles : IDispatch{
 	[propget, id(48), helpstring("")] HRESULT MinZoom( [out, retval]int* retVal);
 	[propget, id(49), helpstring("")] HRESULT ServerProjection( [out, retval]tkTileProjection* retVal);
 	[propget, id(50), helpstring("")] HRESULT ProjectionStatus( [out, retval]tkTilesProjectionStatus* retVal);
-	[id(51)] HRESULT SetProxyAuthorization([in] BSTR username, [in] BSTR password, [in] BSTR domain, [out, retval] VARIANT_BOOL* retVal);
+	[id(51)] HRESULT SetProxyAuthentication([in] BSTR username, [in] BSTR password, [in] BSTR domain, [out, retval] VARIANT_BOOL* retVal);
 	[id(52)] HRESULT ClearProxyAuthorization();
+	[propget, id(53)] HRESULT ProxyAuthenticationScheme([out, retval] tkProxyAuthentication* pVal);
+	[propput, id(53)] HRESULT ProxyAuthenticationScheme([in] tkProxyAuthentication newVal);
 };
 
 [

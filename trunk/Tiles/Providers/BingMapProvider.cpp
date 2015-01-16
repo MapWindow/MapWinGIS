@@ -22,8 +22,11 @@ bool BingBaseProvider::Initialize()
 		return false;
 	}
 
-	MyHttpClient httpClient;
-	InitHttpClient(httpClient);
+	HttpClientEx httpClient;
+	BasicAuth basicAuth;
+	CNTLMAuthObject ntlmAuth;
+
+	InitHttpClient(httpClient, basicAuth, ntlmAuth);
 
 	CAtlNavigateData navData;
 

@@ -267,7 +267,7 @@ STDMETHODIMP CTiles::SetProxy(BSTR address, int port, VARIANT_BOOL* retVal)
 // *********************************************************
 //	     SetProxyAuthorization()
 // *********************************************************
-STDMETHODIMP CTiles::SetProxyAuthorization(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal)
+STDMETHODIMP CTiles::SetProxyAuthentication(BSTR username, BSTR password, BSTR domain, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
@@ -1989,4 +1989,18 @@ void CTiles::UpdateProjection()
 	}
 }
 
-
+// ************************************************************
+//		ProxyAuthenticationScheme
+// ************************************************************
+STDMETHODIMP CTiles::get_ProxyAuthenticationScheme(tkProxyAuthentication* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal  = m_globalSettings.proxyAuthentication;
+	return S_OK;
+}
+STDMETHODIMP CTiles::put_ProxyAuthenticationScheme(tkProxyAuthentication newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	m_globalSettings.proxyAuthentication = newVal;
+	return S_OK;
+}

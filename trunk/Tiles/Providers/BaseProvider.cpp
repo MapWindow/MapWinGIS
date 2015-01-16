@@ -84,20 +84,58 @@ bool BaseProvider::CheckConnection(CString url)
 }
 
 // ************************************************************
-//		GetTileImageUsingHttp()
+//		InitHttpClient()
 // ************************************************************
-void BaseProvider::InitHttpClient(MyHttpClient& httpClient)
+// passing authorization object in such way it ugly, but allocating them dynamically might 
+// give even more troubles
+bool BaseProvider::InitHttpClient(HttpClientEx& httpClient, BasicAuth& basicAuth, CNTLMAuthObject& ntlmAuth)
 {
+	// otherwise it will query zone settings in IE for that URL
+	// if the setting is anything other than URLPOLICY_CREDENTIALS_SILENT_LOGON_OK it will fail
+	httpClient.SetSilentLogonOk(true);
+	
 	if (m_proxyAddress.GetLength() > 0)
 	{
-		httpClient.SetProxy(m_proxyAddress, m_proxyPort);
+		if (!httpClient.SetProxy(m_proxyAddress, m_proxyPort))
+			return false;
 	}
 
-	if (_proxyUsername.GetLength() > 0)
+	basicAuth.SetCredentials(_proxyUsername, _proxyPassword, _proxyDomain);
+
+	if (m_globalSettings.proxyAuthentication == tkProxyAuthentication::asNtlm)
 	{
-		CBasicAuthObject auth;
-		TilesAuthentication info(_proxyUsername, _proxyPassword, _proxyDomain);
-		httpClient.AddAuthObj("BASIC", &auth, &info);
+		// We're using the standard CNLMAuthObject class here because it automatically uses the current user's
+		// credentials if no IAuthInfo implementation is given.
+			return httpClient.AddAuthObj(_T("NTLM"), &ntlmAuth);
+	}
+	return httpClient.AddAuthObj("BASIC", &basicAuth, &basicAuth);
+}
+
+// ************************************************************
+//		ReportHttpError()
+// ************************************************************
+void ReportHttpError(int httpStatus, DWORD socketError)
+{
+	LPVOID lpMsgBuf;
+	// http_://msdn.microsoft.com/en-us/library/windows/desktop/ms680582(v=vs.85).aspx
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		socketError,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf,
+		0, NULL);
+
+	CString s = (char*)lpMsgBuf;
+	LocalFree(lpMsgBuf);
+
+	if (httpStatus == -1) {
+		CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. WSA error: %d. %s", socketError, s));
+	}
+	else {
+		CallbackHelper::ErrorMsg(Debug::Format("Failed to retrieve tile. HTTP status: %d", httpStatus));
 	}
 }
 
@@ -106,10 +144,12 @@ void BaseProvider::InitHttpClient(MyHttpClient& httpClient)
 // ************************************************************
 CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString shortUrl, bool recursive)
 {
-	MyHttpClient httpClient; //this->GetHttpClient();
+	HttpClientEx httpClient; //this->GetHttpClient();
 	CAtlNavigateData navData;
 
-	InitHttpClient(httpClient);
+	BasicAuth basicAuth; 
+	CNTLMAuthObject ntlmAuth;
+	InitHttpClient(httpClient, basicAuth, ntlmAuth);
 
 	char* body = NULL;
 	int bodyLen = 0;
@@ -130,7 +170,13 @@ CMemoryBitmap* BaseProvider::GetTileImageUsingHttp(CString urlStr, CString short
 		return NULL;
 	}
 	httpStatus = httpClient.GetStatus();
-	
+
+	if (!result) 
+	{
+		DWORD socketError = httpClient.GetLastError();
+		ReportHttpError(httpStatus, socketError);
+	}
+
 	if (result)
 	{
 		if (httpStatus == 200) // 200 = successful HTTP transaction
@@ -221,23 +267,17 @@ bool BaseProvider::SetProxy(CString address, int port)
 // *************************************************************
 bool BaseProvider::SetProxyAuthorization(CString username, CString password, CString domain)
 {
-	bool ret = false;
-	CAtlHttpClient* httpClient = new CAtlHttpClient();
-	if (httpClient)
-	{
-		CBasicAuthObject auth;
-		TilesAuthentication info(username, password, domain);
-		if (httpClient->AddAuthObj("BASIC", &auth, &info))
-		{
-			_proxyUsername = username;
-			_proxyDomain = domain;
-			_proxyPassword = password;
-			ret = true;
-		}
-		httpClient->Close();
-		delete httpClient;
-	}
-	return ret;
+	HttpClientEx httpClient;
+
+	CString oldProxy = _proxyUsername;
+	CString oldDomain = _proxyDomain;
+	CString oldPassword = _proxyPassword;
+
+	_proxyUsername = username;
+	_proxyDomain = domain;
+	_proxyPassword = password;
+
+	return true;
 }
 
 // *************************************************************

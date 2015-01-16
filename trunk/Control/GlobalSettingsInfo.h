@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	tkProxyAuthentication proxyAuthentication;
 	bool forceHideLabels;
 	bool ogrLayerForceUpdateMode;
 	bool autoChooseRenderingHintForLabels;
@@ -86,6 +87,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		proxyAuthentication = asBasic;
 		hereAppId = "";
 		hereAppCode = "";
 		bingApiKey = "";
