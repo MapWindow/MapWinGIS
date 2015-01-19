@@ -345,6 +345,7 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 	_copyrightRect = Gdiplus::RectF(0.0f, 0.0f, 0.0f, 0.0f);
 
 	bool showRedrawTime = _showRedrawTime && time > 0.01 && !_isSnapshot;
+	bool showVersionNumber = _showVersionNumber && !_isSnapshot;
 	
 	CStringW s;
 	tkTileProvider provider = GetTileProvider();
@@ -355,7 +356,7 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 		s = ((CTileProviders*)&(*providers))->get_CopyrightNotice(provider);
 	}
 
-	if (!showRedrawTime && s.GetLength() == 0) return;
+	if (!showRedrawTime && !showVersionNumber && s.GetLength() == 0) return;
 
 	POINT mousePnt;
 	if (GetCursorPos(&mousePnt))
@@ -387,6 +388,21 @@ void CMapView::ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw
 			format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 			g->FillRectangle(&_brushLightGray, _copyrightRect);
 			g->DrawString(s.GetString(), s.GetLength(), font, _copyrightRect, &format, textBrush);
+		}
+	}
+
+	if (showVersionNumber)
+	{
+		USES_CONVERSION;
+		Gdiplus::RectF rect;
+		s.Format(L"MapWinGIS %s", OLE2W(GetVersionNumber()));
+		g->MeasureString(s, s.GetLength(), _fontCourierSmall, point, &format, &rect);
+		
+		if (rect.Width < _viewWidth)	  	// 	control must be	big	enough to host the string
+		{
+			point.X = (float)(_viewWidth - rect.Width);
+			point.Y = (float)(_viewHeight - rect.Height - _copyrightRect.Height - 3);
+			DrawStringWithShade(g, s, _fontCourierSmall, point, &_brushBlack, &_brushWhite);
 		}
 	}
 
