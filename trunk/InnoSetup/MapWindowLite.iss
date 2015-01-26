@@ -157,11 +157,14 @@ Filename: "{app}\MapWinGIS\unregMapWinGIS.cmd"; WorkingDir: "{app}"; Flags: runh
 
 [Registry]
 ;; Add location of MapWinGIS to path, needed for netcdf.dll
-Root: "HKLM"; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: "expandsz"; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
+;; Root: "HKLM"; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: "expandsz"; ValueName: "Path"; ValueData: "{olddata};{app}"; Check: NeedsAddPath(ExpandConstant('{app}'))
 
 [Icons]
+;; In start menu:
 Name: "{group}\{#MyAppName}"; Filename: "{app}\MapWindowLite.exe"; WorkingDir: "{app}"; Comment: "Start MapWindow GIS Lite"; Components: MapWindowLite
 Name: "{group}\MapWindow v5"; Filename: "http://www.mapwindow.org/documentation/mapwingis4.9/MapWindow49.html?utm_source=MWv49&utm_medium=cpc&utm_campaign=MWv5Promotions"; Comment: "Read about the future of MapWinGIS/MapWindow v5"; Components: MapWindowLite
+;; On desktop:
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\MapWindowLite.exe"; WorkingDir: "{app}"; Comment: "Start MapWindow GIS Lite"; Components: MapWindowLite
 
 [Code]
 #IFDEF UNICODE
