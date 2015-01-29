@@ -60,7 +60,7 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			ComHelper::CreateShape((IShape**)&val);
 			break;
 		case tkInterface::idExtents:
-			ComHelper::CreateShape((IShape**)&val);
+			ComHelper::CreateExtents((IExtents**)&val);
 			break;
 		case tkInterface::idField:
 			result = CoCreateInstance(CLSID_Field, NULL, CLSCTX_INPROC_SERVER, IID_IField, (void**)&val);
