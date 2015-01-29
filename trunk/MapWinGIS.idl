@@ -5888,8 +5888,8 @@ library MapWinGIS
 			[id(37)] void PixelToProj(double pixelX, double pixelY, double* projX, double* projY);
 			[id(222)] VARIANT_BOOL ProjToDegrees(double projX, double projY, double* degreesLngX, double * degreesLatY);
 			[id(223)] VARIANT_BOOL DegreesToProj(double degreesLngX, double degreesLatY, double* projX, double* projY);
-			[id(224)] VARIANT_BOOL DegreesToPixel(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
-			[id(225)] VARIANT_BOOL PixelToDegrees(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
+			[id(224)] VARIANT_BOOL PixelToDegrees(double pixelX, double pixelY, double* degreesLngX, double * degreesLatY);
+			[id(225)] VARIANT_BOOL DegreesToPixel(double degreesLngX, double degreesLatY, double* pixelX, double* pixelY);
 			[id(188), propget, nonbrowsable] double PixelsPerDegree();
 			[id(247)] DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
 			[id(248)] DOUBLE GeodesicLength(IShape* polyline);
