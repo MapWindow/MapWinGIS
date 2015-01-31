@@ -670,12 +670,6 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		{
 			pntShape = pshPixel;
 			pixelColor = options->linesVisible? options->lineColor: options->fillColor;
-			
-			if (options->drawingMode == vdmGDIMixed || options->drawingMode == vdmGDI)
-			{
-				m_hdc = _graphics->GetHDC();
-				_dc = CDC::FromHandle(m_hdc);
-			}
 		}
 		else if ( options->pointShapeType == ptShapeCircle )
 		{
@@ -725,7 +719,8 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		{
 			m_hdc = _graphics->GetHDC();
 			_dc = CDC::FromHandle(m_hdc);
-			options->InitGdiBrushAndPen(_dc);
+			if (pntShape != pshPixel)
+				options->InitGdiBrushAndPen(_dc);
 		}
 	}
 	else if ( options->pointSymbolType == ptSymbolPicture )
