@@ -312,7 +312,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 
 	Gdiplus::CompositingQuality compositingQualityInit = Gdiplus::CompositingQualityDefault;
 	Gdiplus::SmoothingMode smoothingModeInit = Gdiplus::SmoothingModeDefault;
-	Gdiplus::TextRenderingHint textRenderingHintInit = Gdiplus::TextRenderingHintSystemDefault;
+	Gdiplus::TextRenderingHint textRenderingHintInit = Gdiplus::TextRenderingHintSingleBitPerPixelGridFit;
 
 	bool hasRotation = lbs->HasRotation();
 
@@ -446,7 +446,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 
 			if (m_globalSettings.autoChooseRenderingHintForLabels)
 			{
-				TextRenderingHint hint = TextRenderingHintSystemDefault;
+				TextRenderingHint hint = TextRenderingHintSingleBitPerPixelGridFit;
 				if (hasRotation)
 				{
 					if (m_options->frameVisible && m_options->frameTransparency == 255) {
