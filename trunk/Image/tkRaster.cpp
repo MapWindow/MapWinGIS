@@ -558,7 +558,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		if ( this->WillBeRenderedAsGrid() )
 		{
 			// if user passed a color scheme, image will be opened as grid using the first band
-			success = ReadGridAsImage(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
+			if (_genericType == GDT_Int32)
+				success =  ReadGridAsImage<_int32>(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
+			else
+				success =  ReadGridAsImage<float>(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
 		}
 		else
 			success = ReadImage(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff);
@@ -1051,91 +1054,146 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 	return;
 }
 
+namespace {
+	struct GradientPercent
+	{
+		float left;
+		float right;
+	};
+
+	GradientPercent computeGradient(float val, float lowVal, float biRange, GradientModel gradmodel)
+	{
+		GradientPercent result;
+
+		//Linear
+		if( gradmodel == Linear )
+		{	
+			result.right = ( ( val - lowVal ) / biRange );
+			result.left = 1.0f - result.right;			
+		}
+		//Log
+		else if( gradmodel == Logorithmic )
+		{	
+			float dLog = 0.0f;
+			if( val < 1.0f )
+				val = 1.0f;
+			if( biRange > 1.0f && val - lowVal > 1.0f )
+			{
+				result.right = ( log( val - lowVal)/log(biRange) );
+				result.left = 1.0f - result.right;					
+			}					
+			else
+			{	
+				result.right = 0.0f;
+				result.left = 1.0f;						
+			}						
+		}
+		//Exp
+		else if( gradmodel == Exponential )
+		{	
+			float dLog = 0.0f;
+			if( val < 1.0f )
+				val = 1.0f;
+			if( biRange > 1.0f )
+			{
+				result.right = ( pow(val - lowVal, 2)/pow(biRange, 2) );
+				result.left = 1.0f - result.right;
+			}					
+			else
+			{
+				result.right = 0.0f;
+				result.left = 1.0f;						
+			}		
+		}
+		return result;
+	}
+}
+
 // *********************************************************
 //		ReadGridAsImage()
 // *********************************************************
+template <typename DataType>
 bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
 {
-	double      dfMin = 0.0, dfMax = 255.0, shift=0.0, range=255.0;
-    int         bGotMin=false, bGotMax=false;
-	
-	double noDataValue = 0;
-	bool makeTrPixel=false;
-	double tmp=0;
-	_int32 * pafScanAreaInt = NULL;
-	float * pafScanAreaFloat = NULL;
+	for (int i = 0; i < 100; ++i)
+		ReadGridAsImage2<DataType>(ImageData, xOff, yOff, width, height, xBuff, yBuff, setRGBToGrey);
+	return ReadGridAsImage2<DataType>(ImageData, xOff, yOff, width, height, xBuff, yBuff, setRGBToGrey);
+}
 
+template <typename DataType>
+bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
+{
 	_poBandR = _rasterDataset->GetRasterBand(activeBandIndex);
 	if (_poBandR == NULL) return false;
 
+	float noDataValue = 0;
 	try
 	{
 		// Some IMG files have no nodata value -- no way to tell except
 		// to try. A non-SEH exception is thrown if nodata isn't available
-		noDataValue = _poBandR->GetNoDataValue();
+		noDataValue = static_cast<float>(_poBandR->GetNoDataValue());
 	}
 	catch(...)
 	{
-	}
-    
-	dfMin = _adfMinMax[0];
-    dfMax = _adfMinMax[1];
-	range = dfMax - dfMin;		
-	shift = 0 - dfMin;
-	
-	/* Hillshade variables */
+	}	
 
-	const double radiansToDegrees = (double)(180.0 / 3.14159);  
-	const double degreesToRadians = (double)(3.14159 / 180.0); 
-	double  *win;
-	double  x;
-	double  y;
-	double  aspect;
-	double  slope;
-	double  cang; 
-	int    n;
-	int    containsNull;
-	win = (double *) CPLMalloc(sizeof(double)*9);
+	const float dfMin = static_cast<float>(_adfMinMax[0]);
+    const float dfMax = static_cast<float>(_adfMinMax[1]);
+	const float range = static_cast<float>(dfMax - dfMin);
+	const float shift = static_cast<float>(0 - dfMin);	
 
-	double z = 1.0; 
-	double scale = 1.0;
-	double az = 315.0;
-	double alt = 45.0;
+	const float radiansToDegrees = (float)(180.0 / 3.14159);  
+	const float degreesToRadians = (float)(3.14159 / 180.0); 
+
+	const float z = 1.0; 
+	const float scale = 1.0;
+	const float az = 315.0;
+	const float alt = 45.0;
 	
 	if(*ImageData)
-		delete [] (*ImageData);
+		delete[] (*ImageData);
     (*ImageData) = new colour[xBuff*yBuff];
 
 
-	if (_genericType == GDT_Int32)
-		pafScanAreaInt =  (_int32 *) CPLMalloc( sizeof(_int32)*xBuff*yBuff );
-	else
-		pafScanAreaFloat =  (float *) CPLMalloc( sizeof(float)*xBuff*yBuff );
+	DataType* pafScanArea = (DataType*)CPLMalloc( sizeof(DataType)*xBuff*yBuff );
 
-	double xll=XllCenter, yll=YllCenter;
+	const float xll = static_cast<float>(XllCenter);
+	const float yll = static_cast<float>(YllCenter);
 
 	//Hard code csize, so that the vectors are normal
-	double csize = 30;
-	long break_index = 0;
+	const float csize = 30;
 
-	//Hillshade code
-	double leftPercent = 0.0;
-	double rightPercent = 0.0;
-	long cnt = 0;
-
-	double ka = .7;
-	double kd = .8;
-	
 	IGridColorScheme* gridColorScheme = GetColorSchemeForRendering();
 	long numBreaks = 0;
 	gridColorScheme->get_NumBreaks(&numBreaks);
 	
+	std::vector<BreakVal> bvals;	
+	for(int i = 0; i < numBreaks; i++ )
+	{	
+		IGridColorBreak * bi = NULL;
+		gridColorScheme->get_Break(i, &bi);
+		BreakVal bv(bi);
+
+		bvals.push_back( bv );
+	}
+
 	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
 	gridColorScheme->put_NoDataColor(transColor);
 
-	double ai = 0.0, li = 0.0;
-	gridColorScheme->get_AmbientIntensity(&ai);
-	gridColorScheme->get_LightSourceIntensity(&li);
+	float ai = 0.0;
+	float li = 0.0;
+	{
+		const double ka = .7;
+		const double kd = .8;
+
+		double val;
+		gridColorScheme->get_AmbientIntensity(&val);
+		ai = static_cast<float>(val * ka);
+
+		gridColorScheme->get_LightSourceIntensity(&val);
+		li = static_cast<float>(val * kd);
+	}
+
 	double lsi, lsj, lsk;					
 	IVector * v = NULL;
 	gridColorScheme->GetLightSource(&v);
@@ -1145,47 +1203,24 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	v->Release();
 	cppVector lightsource(lsi,lsj,lsk);
 
-	std::deque<BreakVal> bvals;
-	
-	double lowval, highval;
-	for( int i = 0; i < numBreaks; i++ )
-	{	
-		IGridColorBreak * bi = NULL;
-		gridColorScheme->get_Break(i, &bi);
-		bi->get_LowValue(&lowval);
-		bi->get_HighValue(&highval);
-		bi->Release();
-
-		BreakVal bv;
-		bv.lowVal = lowval;
-		bv.highVal = highval;
-		bvals.push_back( bv );
-	}
-
-	double total = yBuff * xBuff;
-	long newpercent = 0, percent = 0;
-	
-	colort ct;
+	const float total = static_cast<float>(yBuff * xBuff);
 
 	if (_genericType == GDT_Int32)
 	{
 		_poBandR->AdviseRead ( xOff, yOff,width, height, xBuff, yBuff, GDT_Int32, NULL);
-		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaInt, xBuff, yBuff, GDT_Int32,0, 0 );
+		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanArea, xBuff, yBuff, GDT_Int32,0, 0 );
 	}
 	else
 	{
 		_poBandR->AdviseRead ( xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
-		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanAreaFloat, xBuff, yBuff, GDT_Float32,0, 0 );
+		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanArea, xBuff, yBuff, GDT_Float32,0, 0 );
 	}
 
 	for (int i = 0; i < yBuff; i++)
 	{
 		for (int j = 0; j < xBuff; j++)
 		{
-			if (_genericType == GDT_Int32)
-				tmp = (_int32)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
-			else
-				tmp = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
+			float tmp = (float)pafScanArea[(yBuff-i-1) * xBuff + j];
 			
 			if (tmp == noDataValue)
 			{
@@ -1196,7 +1231,7 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 			else if ( setRGBToGrey == true )
 			//Use Matt Perry's Method
 			{
-				containsNull = 0;				
+				int containsNull = 0;
 				// Exclude the edges 
 				if (i == 0 || j == 0 || i == yBuff-1 || j == xBuff-1 ) 
 				{
@@ -1208,32 +1243,20 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					continue;
 				}
 
-				if (_genericType == GDT_Int32)
-				{					// Read in 3x3 window
-					win[0] = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j-1]);
-					win[1] = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
-					win[2] = (double)( pafScanAreaInt[(yBuff-i-1+1) * xBuff + j+1]);
-					win[3] = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j-1]);
-					win[4] = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
-					win[5] = (double)( pafScanAreaInt[(yBuff-i-1+1) * xBuff + j+1]);
-					win[6] = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j-1]);
-					win[7] = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j]);
-					win[8] = (double)( pafScanAreaInt[(yBuff-i-1+1) * xBuff + j+1]);
-				}
-				else
-				{
-					win[0] = (double)( pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j-1]);
-					win[1] = (double)( pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
-					win[2] = (double)( pafScanAreaFloat[(yBuff-i-1+1) * xBuff + j+1]);
-					win[3] = (double)( pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j-1]);
-					win[4] = (double)( pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
-					win[5] = (double)( pafScanAreaFloat[(yBuff-i-1+1) * xBuff + j+1]);
-					win[6] = (double)( pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j-1]);
-					win[7] = (double)( pafScanAreaFloat[(yBuff-i-1) * xBuff + j]);
-					win[8] = (double)( pafScanAreaFloat[(yBuff-i-1+1) * xBuff + j+1]);
-				}
+				float win[9];
+				// Read in 3x3 window
+				win[0] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
+				win[1] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
+				win[2] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
+				win[3] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
+				win[4] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
+				win[5] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
+				win[6] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
+				win[7] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
+				win[8] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
+				
 				// Check if window has null value
-				for ( n = 0; n <= 8; n++) 
+				for (int n = 0; n <= 8; n++) 
 				{
 					if(win[n] == noDataValue) 
 					{
@@ -1254,21 +1277,21 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 				{
 					// We have a valid 3x3 window. Compute Hillshade
 					// First Slope ...
-					x = (double)(((z*win[0] + z*win[3] + z*win[3] + z*win[6]) - 
+					float x = (float)(((z*win[0] + z*win[3] + z*win[3] + z*win[6]) - 
 						(z*win[2] + z*win[5] + z*win[5] + z*win[8])) /
 						(8.0 * dX * scale));
 
-					y = (double)(((z*win[6] + z*win[7] + z*win[7] + z*win[8]) - 
+					float y = (float)(((z*win[6] + z*win[7] + z*win[7] + z*win[8]) - 
 						(z*win[0] + z*win[1] + z*win[1] + z*win[2])) /
 						(8.0 * dY * scale));
 
-					slope = (double)(90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees);
+					float slope = (float)(90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees);
 					
 					// ... then aspect...
-					aspect = atan2(x,y);			
+					float aspect = atan2(x,y);			
 					
 					// ... then the shade value
-					cang = (double)(sin(alt*degreesToRadians) * sin(slope*degreesToRadians) + 
+					float cang = (float)(sin(alt*degreesToRadians) * sin(slope*degreesToRadians) + 
 						cos(alt*degreesToRadians) * cos(slope*degreesToRadians) * 
 						cos((az-90.0)*degreesToRadians - aspect));
 
@@ -1281,22 +1304,19 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					}
 					else
 					{
-						cang = (double)(255.0 * cang);
+						cang = (float)(255.0 * cang);
 						(*ImageData)[i * xBuff + j].red = (unsigned char) (cang);
 						(*ImageData)[i * xBuff + j].green = (unsigned char) (cang);
 						(*ImageData)[i * xBuff + j].blue = (unsigned char) (cang);
 					}
 				}
 			}
-
 			else
 			{ 
-				// Use the normal hillshade method
-				newpercent = (long)(((i * xBuff + j)/total)*100);
-				
-				break_index = findBreak( bvals, tmp );
+				// Use the normal hillshade method				
+				auto colorBreak = findBreak( bvals, tmp );
 
-				if (break_index < 0) //A break is not defined for this value
+				if (colorBreak == nullptr) //A break is not defined for this value
 				{
 					(*ImageData)[i * xBuff + j].red = (unsigned char)transColor.r;
 					(*ImageData)[i * xBuff + j].green = (unsigned char)transColor.g;
@@ -1304,94 +1324,60 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					continue;
 				}
 
- 			    IGridColorBreak * bi = NULL;
-				gridColorScheme->get_Break( break_index, &bi );
-				
-				OLE_COLOR hiColor, lowColor;
-				bi->get_HighColor(&hiColor);
-				bi->get_LowColor(&lowColor);
-				double hiVal, lowVal;
-				bi->get_HighValue(&hiVal);
-				bi->get_LowValue(&lowVal);
-				double biRange = hiVal - lowVal;
+ 				OLE_COLOR hiColor = colorBreak->hiColor;
+				OLE_COLOR lowColor = colorBreak->lowColor;
+
+				float hiVal = colorBreak->highVal;
+				float lowVal = colorBreak->lowVal;
+				float biRange = hiVal - lowVal;
 				if( biRange <= 0.0 )
 					biRange = 1.0;
 
-				ColoringType colortype;
-				bi->get_ColoringType(&colortype);
-				GradientModel gradmodel;
-				bi->get_GradientModel(&gradmodel);
-				bi->Release();
+				ColoringType colortype = colorBreak->colortype;
+				GradientModel gradmodel = colorBreak->gradmodel;
 				
 				if (!allowHillshade && colortype == Hillshade)
 					colortype = Gradient;
 
+				colort ct;
 				if( colortype == Hillshade )
 				{
-					double yone = 0, ytwo = 0, ythree = 0;
+					float yone = 0, ytwo = 0, ythree = 0;
 					//Cannot Compute Polygon ... Make the best guess
-					if( j >= xBuff - 1 || i >= yBuff-1 )
+					if( j >= xBuff - 1 && i >= yBuff-1)
 					{	
-						if( j >= xBuff - 1 && i >= yBuff-1)
-						{	
-							yone = tmp;
-							ytwo = tmp;
-							ythree = tmp;
-						}
-						else if( j >= xBuff - 1 )
-						{	
+						yone = tmp;
+						ytwo = tmp;
+						ythree = tmp;
+					}
+					else if( j >= xBuff - 1 )
+					{	
 	
-							if (_genericType == GDT_Int32)
-							{
-								yone = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j-1]);
-								ytwo = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j]);
-								ythree = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j-1]);
-							}
-							else
-							{
-								yone = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j-1]);
-								ytwo = (double)(pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j]);
-								ythree = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j-1]);
-							}	
-						}
-						else if( i >= yBuff-1 )
-						{	
+						yone =   (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j-1]);
+						ytwo =   (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j  ]);
+						ythree = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j-1]);
+					}
+					else if( i >= yBuff-1 )
+					{	
 
-							if (_genericType == GDT_Int32)
-							{
-								yone = (double)( pafScanAreaInt[(yBuff-i-1+1) * xBuff + j]);
-								ytwo = (double)( pafScanAreaInt[(yBuff-i-1) * xBuff + j+1]);
-							}
-							else
-							{
-								yone = (double)(pafScanAreaFloat[(yBuff-i-1+1) * xBuff + j]);
-								ytwo = (double)(pafScanAreaFloat[(yBuff-i-1) * xBuff + j+1]);
-							}	
-							ythree = tmp;
-						}
+						yone = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j  ]);
+						ytwo = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j+1]);	
+						ythree = tmp;
 					}
 					else
 					{	
 						yone = tmp;
-						if (_genericType == GDT_Int32)
-						{
-							ytwo = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j+1]);
-							ythree = (double)( pafScanAreaInt[(yBuff-i-1-1) * xBuff + j]);
-						}
-						else
-						{
-							ytwo = (double)(pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j+1]);
-							ythree = (double)(pafScanAreaFloat[(yBuff-i-1-1) * xBuff + j]);
-						}			
+						ytwo =   (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j+1]);
+						ythree = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j  ]);			
 					}
 				
-					double xone = xll + csize * (yBuff-i-1);
-					double xtwo = xone + csize;
-					double xthree = xone;
+					float xone = xll + csize * (yBuff-i-1);
+					float xtwo = xone + csize;
+					float xthree = xone;
 					
-					double zone = yll + csize * j;
-					double ztwo = zone;
-					double zthree = zone - csize;
+					float zone = yll + csize * j;
+					float ztwo = zone;
+					float zthree = zone - csize;
 
 					//check for nodata on triangle corners
 					if( yone == noDataValue || ytwo == noDataValue || ythree == noDataValue )
@@ -1403,67 +1389,6 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 					}
 					else
 					{
-						//Make Two Vectors
-						cppVector one;
-						one.seti( xone - xtwo );
-						one.setj( yone - ytwo );
-						one.setk( zone - ztwo );
-						one.Normalize();
-						cppVector two;
-						two.seti( xone - xthree );
-						two.setj( yone - ythree );
-						two.setk( zone - zthree );
-						two.Normalize();
-
-						//Compute Normal
-						cppVector normal = two.crossProduct( one );					
-
-						//Compute I
-						double I = ai*ka + li*kd*( lightsource.dot( normal ) );
-						//Compute Gradient * I
-						if( I > 1.0 )
-							I = 1.0;
-						//Two Color Gradient					
-						//Linear
-						if( gradmodel == Linear )
-						{	
-							rightPercent = ( ( tmp - lowVal ) / biRange );
-							leftPercent = 1.0 - rightPercent;					
-						}
-						//Log
-						else if( gradmodel == Logorithmic )
-						{	
-							double dLog = 0.0;
-							double ht = tmp;
-							if( ht < 1 )
-								ht = 1.0;
-							if( biRange > 1.0 && ht - lowVal > 1.0 )
-							{	rightPercent = ( log( ht - lowVal)/log(biRange) );
-								leftPercent = 1.0 - rightPercent;							
-							}					
-							else
-							{	rightPercent = 0.0;
-								leftPercent = 1.0;							
-							}
-								
-						}
-						//Exp
-						else if( gradmodel == Exponential )
-						{	
-							double dLog = 0.0;
-							double ht = tmp;
-							if( ht < 1 )
-								ht = 1.0;
-							if( biRange > 1.0 )
-							{	rightPercent = ( pow( ht - lowVal, 2)/pow(biRange, 2) );
-								leftPercent = 1.0 - rightPercent;						
-							}					
-							else
-							{	rightPercent = 0.0;
-								leftPercent = 1.0;							
-							}		
-						}
-
 						if (lowColor == hiColor)
 						{
 							(*ImageData)[i * xBuff + j].red = (unsigned char)(GetRValue(lowColor) % 256);
@@ -1472,57 +1397,41 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 						}
 						else
 						{
-							(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*leftPercent + (double)GetRValue(hiColor)*rightPercent )*I) %256;
-							(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*leftPercent + (double)GetGValue(hiColor)*rightPercent )*I) %256;
-							(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*leftPercent + (double)GetBValue(hiColor)*rightPercent )*I) %256;	
+							//Make Two Vectors
+							cppVector one(
+								xone - xtwo,
+								yone - ytwo,
+								zone - ztwo );
+							cppVector two(
+								xone - xthree,
+								yone - ythree,
+								zone - zthree );
+						
+							//Compute Normal
+							cppVector normal = two.crossProduct( one );
+
+							//Compute I
+							float I = ai + li * lightsource.dot(normal);
+							if( I > 1.0f )
+								I = 1.0f;
+
+							GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
+
+							(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*gradient.left + (double)GetRValue(hiColor)*gradient.right )*I) %256;
+							(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*gradient.left + (double)GetGValue(hiColor)*gradient.right )*I) %256;
+							(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*gradient.left + (double)GetBValue(hiColor)*gradient.right )*I) %256;
 						}
 						continue;
 					}
 				}
 				else if( colortype == Gradient )
 				{
-					//Linear
-					if( gradmodel == Linear )
-					{	
-						rightPercent = ( ( tmp - lowVal ) / biRange );
-						leftPercent = 1.0 - rightPercent;			
-					}
-					//Log
-					else if( gradmodel == Logorithmic )
-					{	
-						double dLog = 0.0;
-						double ht = tmp;
-						if( ht < 1 )
-							ht = 1.0;
-						if( biRange > 1.0 && ht - lowVal > 1.0 )
-						{	rightPercent = ( log( ht - lowVal)/log(biRange) );
-							leftPercent = 1.0 - rightPercent;					
-						}					
-						else
-						{	
-							rightPercent = 0.0;
-							leftPercent = 1.0;						
-						}						
-					}
-					//Exp
-					else if( gradmodel == Exponential )
-					{	
-						double dLog = 0.0;
-						double ht = tmp;
-						if( ht < 1 )
-							ht = 1.0;
-						if( biRange > 1.0 )
-						{
-							rightPercent = ( pow( ht - lowVal, 2)/pow(biRange, 2) );
-							leftPercent = 1.0 - rightPercent;
-						}					
-						else
-						{
-							rightPercent = 0.0;
-							leftPercent = 1.0;						
-						}		
-					}
-					ct = RGB((int)((double)GetRValue(lowColor)*leftPercent + (double)GetRValue(hiColor)*rightPercent ) %256, (int)((double)GetGValue(lowColor)*leftPercent + (double)GetGValue(hiColor)*rightPercent ) %256, (int)((double)GetBValue(lowColor)*leftPercent + (double)GetBValue(hiColor)*rightPercent ) %256);
+					GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
+
+					ct = RGB(
+						(int)((float)GetRValue(lowColor)*gradient.left + (float)GetRValue(hiColor)*gradient.right ) %256,
+						(int)((float)GetGValue(lowColor)*gradient.left + (float)GetGValue(hiColor)*gradient.right ) %256,
+						(int)((float)GetBValue(lowColor)*gradient.left + (float)GetBValue(hiColor)*gradient.right ) %256);
 				}
 				else if( colortype == Random )
 				{
@@ -1541,39 +1450,24 @@ bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width
 	if (clearGDALCache)
 		_poBandR->FlushCache();		 
 	
-	if (_genericType == GDT_Int32)
-	{
-		if( pafScanAreaInt != NULL )
-		{
-			CPLFree( pafScanAreaInt );
-			pafScanAreaInt = NULL;
-		}
-	}
-	else
-	{
-		if( pafScanAreaFloat != NULL )
-		{
-			CPLFree( pafScanAreaFloat );
-			pafScanAreaFloat = NULL;
-		} 
-	}	
+	CPLFree( pafScanArea );
 	return true;
 }
 
 // *************************************************************
 //	  findBreak
 // *************************************************************
-inline long tkRaster::findBreak( std::deque<BreakVal> & bVals, double val )
+inline const tkRaster::BreakVal* tkRaster::findBreak(const std::vector<BreakVal> & bvals, double val) const
 {
-	register int sizeBVals = (int)bVals.size();
+	register int sizeBVals = (int)bvals.size();
 	for(register int i = 0; i < sizeBVals; i++ )
 	{	
-		if( val >= bVals[i].lowVal &&
-			val <= bVals[i].highVal )
-			return i;
+		if( val >= bvals[i].lowVal &&
+			val <= bvals[i].highVal )
+			return &bvals[i];
 	}
 
-	return -1;
+	return nullptr;
 }
 
 /************************************************************************/

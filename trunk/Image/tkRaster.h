@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include <cassert>
 #include "colour.h"
 #include "ImageStructs.h"
 
@@ -61,8 +62,27 @@ public:
 private:
 	struct BreakVal
 	{	
-		double lowVal;
-		double highVal;
+		float lowVal;
+		float highVal;
+		OLE_COLOR hiColor;
+		OLE_COLOR lowColor;
+				
+		ColoringType colortype;
+		GradientModel gradmodel;
+		
+		BreakVal(IGridColorBreak* bi)
+		{
+			assert(bi != nullptr);
+			double val;
+			bi->get_LowValue(&val);
+			lowVal = static_cast<float>(val);
+			bi->get_HighValue(&val);
+			highVal = static_cast<float>(val);
+			bi->get_HighColor(&hiColor);
+			bi->get_LowColor(&lowColor);
+			bi->get_ColoringType(&colortype);
+			bi->get_GradientModel(&gradmodel);
+		}
 	};
 
 private:
@@ -149,8 +169,11 @@ private:
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
 	template <typename T>
 	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram);
-	bool ReadGridAsImage(colour ** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); // double dx, double dy, bool setRGBToGrey, PredefinedColorScheme imageColorScheme,bool clearGDALCache);
-	long findBreak(std::deque<BreakVal> & bvals, double val);
+	template <typename DataType>
+	bool ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
+	template <typename DataType>
+	bool ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
+	const BreakVal* findBreak(const std::vector<BreakVal> & bvals, double val) const;
 	bool ComputeEqualizationLUTs(CStringW filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
 
 public:
