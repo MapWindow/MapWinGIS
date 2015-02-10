@@ -12,25 +12,8 @@ colour::colour(unsigned char r, unsigned char g, unsigned char b) :red(r),green(
 
 }
 
-colour::colour( const colour & c )
-{	red = c.red;
-	green = c.green;
-	blue = c.blue;
-}
-
-colour::~colour()
-{
-}
-
 bool colour::operator==( const colour & c )
 {	if( red == c.red && green == c.green && blue == c.blue )
 		return true;
 	return false;
-}
-
-colour colour::operator=( const colour & c )
-{	red = c.red;
-	green = c.green;
-	blue = c.blue;
-	return *this;
 }

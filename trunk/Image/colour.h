@@ -7,15 +7,12 @@ class colour
 public:
 	colour();
 	colour(unsigned char r, unsigned char g, unsigned char b);
-	colour( const colour & c );
-	~colour();
-
+	
 	unsigned char	blue;
 	unsigned char	green;
 	unsigned char	red;	
 
 	bool operator==( const colour & c );
-	colour operator=( const colour & c );
 };
 # pragma pack(pop)
 
