@@ -1,0 +1,34 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# First line is shapefile, second line is overlay shapefile
+# Call will be sf.Clip(false, sfOverlay, false);
+
+# Clip lines with polygons:
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# Clip polygons with lines
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+
+# Clip polygons with polygons
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\Shapefiles\LargePolygon.shp
+
+# Clip polygons with polygons (switched)
+# In order to pass the test only part of the states in which the polygon lies must be selected
+# if all are selected - the same polygon will be returned;
+# if none - no shapefile at all;
+# For now skip this test until better test data
+# %MW_SAMPLEDATA%\Shapefiles\LargePolygon.shp
+# %MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+
+# Clip polygons M with polygons
+# TODO
+
+# Clip lines with lines
+# TODO
+
+

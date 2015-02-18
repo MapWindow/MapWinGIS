@@ -1,0 +1,57 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# The first line is the grid file location
+# The second line is the color scheme ID:
+# PredefinedColorScheme
+# FallLeaves = 0,
+# SummerMountains = 1,
+# Desert = 2,		
+# Glaciers = 3,	
+# Meadow = 4,	
+# ValleyFires = 5,	
+# DeadSea = 6,	
+# Highway1 = 7,	
+# Rainbow = 8,	
+# ReversedRainbow = 9
+
+#FallLeaves 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+0
+
+#SummerMountains 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+1
+
+#Desert 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+2
+
+#Glaciers 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+3
+
+#Meadow 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+4
+
+#ValleyFires 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+5
+
+#DeadSea 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+6
+
+#Highway1 
+%MW_SAMPLEDATA%\Grids\Formats\Grid.tif
+7
+
+#ReversedRainbow 
+%MW_SAMPLEDATA%\Grids\Formats\Histogram.tif
+9
+
+#Rainbow 
+%MW_SAMPLEDATA%\Grids\Formats\Histogram.tif
+8

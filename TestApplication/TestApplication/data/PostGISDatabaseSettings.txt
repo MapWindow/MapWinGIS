@@ -1,0 +1,24 @@
+# This script will change the database created in 'PostGISCreateDatabase.txt' into a 
+# PostGIS database, adds the data schema and sets some grants
+
+# First line is connection string
+# Following lines are queries to execute
+
+# Connection string to mapwingis database:
+PG:host=localhost dbname=mapwingis user=postgres
+
+# Create PostGIS extention:
+CREATE EXTENSION postgis SCHEMA public
+
+# Create data schema , which will hold all new tables:
+CREATE SCHEMA IF NOT EXISTS data AUTHORIZATION postgres
+
+# Set grants:
+GRANT ALL ON SCHEMA data TO mapwingis;
+
+# Set privileges:
+ALTER DEFAULT PRIVILEGES GRANT INSERT, SELECT, UPDATE, DELETE ON TABLES TO mapwingis;
+ALTER DEFAULT PRIVILEGES GRANT SELECT, UPDATE, USAGE ON SEQUENCES TO mapwingis;
+
+# Update search path:
+ALTER DATABASE "mapwingis" SET SEARCH_PATH=data,public;

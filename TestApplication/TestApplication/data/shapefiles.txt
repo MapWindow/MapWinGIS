@@ -1,0 +1,17 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\cities.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\counties.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\lakes.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\rivers.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\UnitedStates\Shapefiles\states.shp
+%MW_SAMPLEDATA%\MapWindow-Projects\TheNetherlands\Buurtkaart.shp
+
+# Polygon M
+%MW_SAMPLEDATA%\Shapefiles\PolygonM.shp
+
+# Multi points:
+%MW_SAMPLEDATA%\Shapefiles\MultiPoints.shp

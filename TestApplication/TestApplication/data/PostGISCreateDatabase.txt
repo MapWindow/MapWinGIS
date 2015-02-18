@@ -1,0 +1,20 @@
+# This script will create an user 'mapwingis' if it doesn't yet exists 
+# Drops the database 'mapwingis' if it exists
+# And creates a new database called 'mapwingis'
+# Next run the script 'PostGISDatabaseSettings.txt' to change the database
+# to a PostGIS database with the correct rights
+
+# First line is connection string
+# Following lines are queries to execute
+
+# Connection string to default database:
+PG:host=localhost dbname=postgres user=postgres
+
+# Create mapwingis user:
+do $body$ declare num_users integer; begin SELECT count(*) into num_users FROM pg_user WHERE usename = 'mapwingis'; IF num_users = 0 THEN CREATE ROLE mapwingis LOGIN PASSWORD 'test123'; END IF; end $body$ ;
+
+# Drop database if it exists
+DROP DATABASE IF EXISTS mapwingis;
+
+# Create standard PostgreSQL database:
+CREATE DATABASE mapwingis WITH ENCODING='UTF8' OWNER=postgres CONNECTION LIMIT=-1;  

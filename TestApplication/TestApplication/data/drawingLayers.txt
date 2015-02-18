@@ -1,0 +1,11 @@
+# These sample data can be installed using MapWindow-sample-data-with-test-data.exe from 
+# https://mapwingis.codeplex.com/releases
+# This installer will also correctly set the MW_SAMPLEDATA environment variable
+
+# All shapefiles will be used at once:
+%MW_SAMPLEDATA%\Shapefiles\buildings.shp
+%MW_SAMPLEDATA%\Shapefiles\roads.shp
+%MW_SAMPLEDATA%\Shapefiles\points.shp
+
+# The last one will be opened as shapefile:
+%MW_SAMPLEDATA%\Shapefiles\railways.shp
