@@ -123,6 +123,8 @@ public:
 	STDMETHOD(get_ClassificationField)(LONG* pVal);
 	STDMETHOD(put_ClassificationField)(LONG newVal);
 	STDMETHOD(Generate2)(BSTR fieldName, tkClassificationType ClassificationType, LONG numClasses, VARIANT_BOOL* retVal);
+	STDMETHOD(Add2)(IShapefileCategory* category);
+	STDMETHOD(Insert2)(LONG index, IShapefileCategory* category, VARIANT_BOOL* retVal);
 	
 private:
 	BSTR _key;

@@ -4912,6 +4912,8 @@ interface IShapefileCategories : IDispatch{
 	[propget, id(27)] HRESULT ClassificationField([out, retval] LONG* pVal);
 	[propput, id(27)] HRESULT ClassificationField([in] LONG newVal);
 	[id(28)] HRESULT Generate2([in] BSTR fieldName, [in] tkClassificationType ClassificationType, [in] LONG numClasses, [out, retval] VARIANT_BOOL* retVal);
+	[id(29)] HRESULT Add2([in] IShapefileCategory* category);
+	[id(30)] HRESULT Insert2([in] LONG index, [in] IShapefileCategory* category, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /**********************  ShapefileCategory Interface  **************************/

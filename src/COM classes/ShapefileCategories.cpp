@@ -1240,3 +1240,40 @@ void CShapefileCategories::GetCategoryData(vector<CategoriesData*>& data)
 	}
 }
 
+// ********************************************************
+//     Add2()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::Add2(IShapefileCategory* category)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (!category)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+	_categories.push_back(category);
+	category->AddRef();
+	return S_OK;
+}
+
+// ********************************************************
+//     Insert2()
+// ********************************************************
+STDMETHODIMP CShapefileCategories::Insert2(LONG index, IShapefileCategory* category, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+	if (!category)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+	if (index < 0 || index >= (long)_categories.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+	_categories.insert(_categories.begin() + index, category);
+	category->AddRef();
+	return S_OK;
+}

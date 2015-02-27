@@ -1632,7 +1632,7 @@ STDMETHODIMP CTiles::PrefetchToFolder(IExtents* ext, int zoom, int providerId, B
 }
 
 // *********************************************************
-//	     PrefetchToFolder()
+//	     PrefetchCore()
 // *********************************************************
 long CTiles::PrefetchCore(int minX, int maxX, int minY, int maxY, int zoom, int providerId, 
 								  BSTR savePath, BSTR fileExt, IStopExecution* stop)

@@ -45,15 +45,15 @@ STDMETHODIMP CLabels::get_FontName(BSTR* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	*retval = OLE2BSTR(_options.fontName);		
+	*retval = OLE2BSTR(_options->fontName);		
 	return S_OK;
 };	
 STDMETHODIMP CLabels::put_FontName(BSTR newVal)					
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
-	::SysFreeString(_options.fontName);
-	_options.fontName = OLE2BSTR(newVal);
+	::SysFreeString(_options->fontName);
+	_options->fontName = OLE2BSTR(newVal);
 	return S_OK;
 };	
 
@@ -63,7 +63,7 @@ STDMETHODIMP CLabels::put_FontName(BSTR newVal)
 STDMETHODIMP CLabels::get_FontTransparency(long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = _options.fontTransparency;		
+	*retval = _options->fontTransparency;		
 	return S_OK;
 };		
 STDMETHODIMP CLabels::put_FontTransparency(long newVal)
@@ -71,13 +71,13 @@ STDMETHODIMP CLabels::put_FontTransparency(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	_options.fontTransparency = newVal;
+	_options->fontTransparency = newVal;
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FrameTransparency(long* retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retval = _options.frameTransparency;		
+	*retval = _options->frameTransparency;		
 	return S_OK;
 };		
 STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
@@ -85,7 +85,7 @@ STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	if (newVal < 0) newVal = 0;
 	if (newVal > 255) newVal = 255;
-	_options.frameTransparency = newVal;
+	_options->frameTransparency = newVal;
 	return S_OK;
 };
 
@@ -94,46 +94,46 @@ STDMETHODIMP CLabels::put_FrameTransparency(long newVal)
 // *****************************************************************
 STDMETHODIMP CLabels::get_FontItalic(VARIANT_BOOL* retval)
 {
-	*retval = ((_options.fontStyle & fstItalic)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options->fontStyle & fstItalic)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontItalic(VARIANT_BOOL newVal)
 {
-	if (newVal)		_options.fontStyle |= fstItalic;
-	else			_options.fontStyle &= (0xFFFFFFFF ^ fstItalic);
+	if (newVal)		_options->fontStyle |= fstItalic;
+	else			_options->fontStyle &= (0xFFFFFFFF ^ fstItalic);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontBold(VARIANT_BOOL* retval)
 {
-	*retval = ((_options.fontStyle & fstBold)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options->fontStyle & fstBold)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontBold(VARIANT_BOOL newVal)
 {
-	if (newVal)		_options.fontStyle |= fstBold;
-	else			_options.fontStyle &= (0xFFFFFFFF ^ fstBold);
+	if (newVal)		_options->fontStyle |= fstBold;
+	else			_options->fontStyle &= (0xFFFFFFFF ^ fstBold);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontUnderline(VARIANT_BOOL* retval)
 {
-	*retval = ((_options.fontStyle & fstUnderline)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options->fontStyle & fstUnderline)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontUnderline(VARIANT_BOOL newVal)
 {
-	if (newVal)		_options.fontStyle |= fstUnderline;
-	else			_options.fontStyle &= (0xFFFFFFFF ^ fstUnderline);
+	if (newVal)		_options->fontStyle |= fstUnderline;
+	else			_options->fontStyle &= (0xFFFFFFFF ^ fstUnderline);
 	return S_OK;
 };
 STDMETHODIMP CLabels::get_FontStrikeOut(VARIANT_BOOL* retval)
 {
-	*retval = ((_options.fontStyle & fstStrikeout)?VARIANT_TRUE:VARIANT_FALSE);
+	*retval = ((_options->fontStyle & fstStrikeout)?VARIANT_TRUE:VARIANT_FALSE);
 	return S_OK;
 };
 STDMETHODIMP CLabels::put_FontStrikeOut(VARIANT_BOOL newVal)
 {
-	if (newVal)		_options.fontStyle |= fstStrikeout;
-	else			_options.fontStyle &= (0xFFFFFFFF ^ fstStrikeout);
+	if (newVal)		_options->fontStyle |= fstStrikeout;
+	else			_options->fontStyle &= (0xFFFFFFFF ^ fstStrikeout);
 	return S_OK;
 };
 ////////////////////////////////////////////////////////////////
@@ -612,7 +612,7 @@ STDMETHODIMP CLabels::ApplyColorScheme3 (tkColorSchemeType Type, IColorScheme* C
 
 	if (Element == leDefault)
 	{
-		if (_options.frameVisible)
+		if (_options->frameVisible)
 			Element = leFrameBackground;
 		else
 			Element = leFont;
@@ -854,7 +854,7 @@ std::vector<std::vector<CLabelInfo*>*>* CLabels::get_LabelData()
 }
 CLabelOptions* CLabels::get_LabelOptions()
 {
-	return &_options;
+	return _options;
 }
 
 // *****************************************************************
@@ -1162,25 +1162,34 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	*retVal = NULL;
-	ILabelCategory* cat = NULL;
-	CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&cat);
-	if (cat == NULL) return S_OK;
+		/**retVal = NULL;
+		ILabelCategory* cat = NULL;
+		CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&cat);
+		if (cat == NULL) return S_OK;
 
-	((CLabelCategory*)cat)->put_LabelOptions(&_options);
+		((CLabelCategory*)cat)->put_LabelOptions(&_options);
 
-	CComBSTR bstr("Default");
-	cat->put_Name(bstr);
-	*retVal = cat;
+		CComBSTR bstr("Default");
+		cat->put_Name(bstr);
+		*retVal = cat;*/
+
+	*retVal = _category;
+	if (_category)
+		_category->AddRef();
+
 	return S_OK;
 }
 STDMETHODIMP CLabels::put_Options(ILabelCategory* newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	CLabelCategory* coCat =	static_cast<CLabelCategory*>(newVal);
-	CLabelOptions* options =  coCat->get_LabelOptions();
-	_options = *options;
+		/*CLabelCategory* coCat =	static_cast<CLabelCategory*>(newVal);
+		CLabelOptions* options =  coCat->get_LabelOptions();
+		_options = *options;*/
+
+	ComHelper::SetRef(newVal, (IDispatch**)&_category, false);
+	_options = ((CLabelCategory*)_category)->get_LabelOptions();
+
 	return S_OK;
 }
 
@@ -1314,7 +1323,7 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	CString str;
 	
 	// drawing options
-	CPLXMLNode* psTree = _options.SerializeToTree(ElementName);
+	CPLXMLNode* psTree = _options->SerializeToTree(ElementName);
 	if (!psTree)
 	{
 		return NULL;
@@ -1588,7 +1597,7 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	
 	// properties should be re read after labels were restored,
 	// as old .lbl file have their own properties, and we don't want to overwrite project information
-	_options.DeserializeFromNode(node);
+	_options->DeserializeFromNode(node);
 	
 	// start labels specific options
 	s = CPLGetXMLValue( node, "MinDrawingSize", NULL );
@@ -1864,15 +1873,15 @@ void CLabels::LoadLblOptions(CPLXMLNode* node)
 	{
 		CString s = CPLGetXMLValue( node, "Font", NULL );
 		if (s != "") {
-			SysFreeString(_options.fontName);
-			_options.fontName = A2BSTR(s);
+			SysFreeString(_options->fontName);
+			_options->fontName = A2BSTR(s);
 		}
 
 		s = CPLGetXMLValue( node, "Size", NULL );
-		if (s != "") _options.fontSize = (int)Utility::atof_custom(s);
+		if (s != "") _options->fontSize = (int)Utility::atof_custom(s);
 
 		s = CPLGetXMLValue( node, "Color", NULL );
-		if (s != "") _options.fontColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
+		if (s != "") _options->fontColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
 
 		s = CPLGetXMLValue( node, "Scaled", NULL );
 		if (s != "") _scale = atoi(s) == 0? false : true;
@@ -1881,25 +1890,25 @@ void CLabels::LoadLblOptions(CPLXMLNode* node)
 		if (s != "") _basicScale = Utility::atof_custom(s);
 
 		s = CPLGetXMLValue( node, "UseShadows", NULL );
-		if (s != "") _options.shadowVisible = atoi(s) == 0 ? false : true;
+		if (s != "") _options->shadowVisible = atoi(s) == 0 ? false : true;
 
 		s = CPLGetXMLValue( node, "ShadowColor", NULL );
-		if (s != "") _options.shadowColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
+		if (s != "") _options->shadowColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
 
 		s = CPLGetXMLValue( node, "UseLabelCollision", NULL );
 		if (s != "") _avoidCollisions = atoi(s) == 0 ? false : true;
 
 		s = CPLGetXMLValue( node, "Bold", NULL );
 		if (_stricmp(s, "true") == 0)
-			_options.fontStyle |= fstBold;
+			_options->fontStyle |= fstBold;
 
 		s = CPLGetXMLValue( node, "Italic", NULL );
 		if (_stricmp(s, "true") == 0)
-			_options.fontStyle |= fstItalic;
+			_options->fontStyle |= fstItalic;
 
 		s = CPLGetXMLValue( node, "Underline", NULL );
 		if (_stricmp(s, "true") == 0)
-			_options.fontStyle |= fstUnderline;
+			_options->fontStyle |= fstUnderline;
 	}
 	catch(...)
 	{
@@ -1945,7 +1954,7 @@ STDMETHODIMP CLabels::LoadFromXML(BSTR filename, VARIANT_BOOL* retVal)
 				{
 					// old format
 					CLabelOptions opt;
-					_options = opt;
+					*_options = opt;
 					this->LoadLblOptions(node);
 				}
 				else

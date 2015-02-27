@@ -1105,7 +1105,7 @@ bool CShapeEditor::ValidateWithGeos(IShape** shp)
 }
 
 // ************************************************************
-//		TryStopDigitizing
+//		TryStop
 // ************************************************************
 bool CShapeEditor::TryStop()
 {

@@ -210,12 +210,8 @@ STDMETHODIMP CShapefile::put_Labels(ILabels* newVal)
 void CShapefile::put_ReferenceToLabels(bool bNullReference)
 {
 	if (_labels == NULL) return;
-	CLabels* coLabels = static_cast<CLabels*>(_labels);
-	if (!bNullReference)
-		coLabels->put_ParentShapefile(this);
-	else
-		coLabels->put_ParentShapefile(NULL);
-};
+	((CLabels*)_labels)->put_ParentShapefile(bNullReference ? NULL : this);
+}
 #pragma endregion
 
 #pragma region Charts
@@ -239,16 +235,7 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 	}
 	else
 	{
-		if (newVal != _charts)
-		{
-			if (_charts != NULL) 
-			{
-				_charts->Release();
-				_charts = NULL;
-			}
-			_charts = newVal;
-			_charts->AddRef();
-		}
+		ComHelper::SetRef(newVal, (IDispatch**)&_charts, false);
 	}
 	return S_OK;
 }
@@ -258,8 +245,7 @@ STDMETHODIMP CShapefile::put_Charts (ICharts* newVal)
 void CShapefile::put_ReferenceToCharts(bool bNullReference)
 {
 	if (!_charts) return;
-	CCharts* coCharts = static_cast<CCharts*>(_charts);
-	coCharts->put_ParentShapefile(!bNullReference ? this : NULL);
+	((CCharts*)_charts)->put_ParentShapefile(bNullReference ? NULL: this);
 };
 
 // ********************************************************************
