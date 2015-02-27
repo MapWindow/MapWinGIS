@@ -96,8 +96,10 @@ CGrid::~CGrid()
 // Builds unique values color scheme for GDAL integer grids
 STDMETHODIMP CGrid::get_RasterColorTableColoringScheme(IGridColorScheme **pVal)
 {
-	if (!_trgrid) 	
+	*pVal = NULL;
+	if (!_trgrid) {
 		return S_OK;
+	}
 	_trgrid->GetIntValueGridColorTable(pVal);
 	return S_OK;
 }
