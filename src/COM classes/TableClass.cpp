@@ -1543,62 +1543,63 @@ STDMETHODIMP CTableClass::EditCellValue(long FieldIndex, long RowIndex, VARIANT 
 	if( newVal.vt != VT_I4 && newVal.vt != VT_R8 && newVal.vt != VT_BSTR && newVal.vt != VT_NULL )
 	{	
 		ErrorMessage(tkINCORRECT_VARIANT_TYPE);
+		return S_OK;
 	}
-	else
-    {	
-        if (_rows[RowIndex].row == NULL)
-            ReadRecord(RowIndex);
+	
+	if (_rows[RowIndex].row == NULL)
+	{
+		ReadRecord(RowIndex);
+	}
         
-        if (_rows[RowIndex].row != NULL)
-        {
-            if( _rows[RowIndex].row->values[FieldIndex] == NULL )
-		    {   
-				// tws  6/7/7 : VariantInit DOES NOT free any old value, but VariantClear and VariantCopy DO 
-			    // so only use VariantInit when it is NEW, otherwise it will leak BSTRs
-			    // this pair of braces saved 80MB of mem leak on table edit 50k shapes with 40 _fields
-			    _rows[RowIndex].row->values[FieldIndex] = new VARIANT;
-			    VariantInit(_rows[RowIndex].row->values[FieldIndex]);
-		    }
-		    VariantCopy(_rows[RowIndex].row->values[FieldIndex], &newVal);
+    if (_rows[RowIndex].row != NULL)
+    {
+        if( _rows[RowIndex].row->values[FieldIndex] == NULL )
+		{   
+			// tws  6/7/7 : VariantInit DOES NOT free any old value, but VariantClear and VariantCopy DO 
+			// so only use VariantInit when it is NEW, otherwise it will leak BSTRs
+			// this pair of braces saved 80MB of mem leak on table edit 50k shapes with 40 _fields
+			_rows[RowIndex].row->values[FieldIndex] = new VARIANT;
+			VariantInit(_rows[RowIndex].row->values[FieldIndex]);
+		}
+		VariantCopy(_rows[RowIndex].row->values[FieldIndex], &newVal);
 
-		    //Change the width of the field
-		    IField * field = NULL;
-		    this->get_Field(FieldIndex,&field);
-		    FieldType type;
-		    long precision, width;
-		    field->get_Type(&type);
-		    field->get_Width(&width);
-		    field->get_Precision(&precision);
+		//Change the width of the field
+		IField * field = NULL;
+		this->get_Field(FieldIndex,&field);
+		FieldType type;
+		long precision, width;
+		field->get_Type(&type);
+		field->get_Width(&width);
+		field->get_Precision(&precision);
 
-		    long valWidth = 0;
-		    if( newVal.vt == VT_BSTR )
-		    {	
-				CString cval(OLE2CA(newVal.bstrVal));
-			    valWidth = cval.GetLength();
-		    }
-		    else if( newVal.vt == VT_I4 )
-		    {	
-				CString cval;
-			    cval.Format("%i",newVal.lVal);
-			    valWidth = cval.GetLength();
-		    }
-		    else if( newVal.vt == VT_R8 )
-		    {	
-				CString cval;
-			    CString fmat;
-			    fmat.Format("%ld",precision);
-			    cval.Format("%." + fmat + "d",precision,newVal.dblVal);	
-			    valWidth = cval.GetLength();
-		    }
-		    if( valWidth > width )
-			    field->put_Width(valWidth);
+		long valWidth = 0;
+		if( newVal.vt == VT_BSTR )
+		{	
+			CString cval(OLE2CA(newVal.bstrVal));
+			valWidth = cval.GetLength();
+		}
+		else if( newVal.vt == VT_I4 )
+		{	
+			CString cval;
+			cval.Format("%i",newVal.lVal);
+			valWidth = cval.GetLength();
+		}
+		else if( newVal.vt == VT_R8 )
+		{	
+			CString cval;
+			CString fmat;
+			fmat.Format("%ld",precision);
+			cval.Format("%." + fmat + "d",precision,newVal.dblVal);	
+			valWidth = cval.GetLength();
+		}
+		if( valWidth > width )
+			field->put_Width(valWidth);
 
-		    field->Release();  
-            _rows[RowIndex].row->SetDirty(TableRow::DATA_MODIFIED);
-        }
-	}
+		field->Release();  
+        _rows[RowIndex].row->SetDirty(TableRow::DATA_MODIFIED);
 
-	*retval = VARIANT_TRUE;
+		*retval = VARIANT_TRUE;
+    }
 	return S_OK;
 }
 
