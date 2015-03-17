@@ -144,6 +144,7 @@ BEGIN_EVENT_MAP(CMapView, COleControl)
 	EVENT_STOCK_DBLCLICK()
 	//}}AFX_EVENT_MAP
 	
+	EVENT_CUSTOM_ID("ShapesIdentified", eventidShapesIdentified, FireShapesIdentified, VTS_DISPATCH VTS_R8 VTS_R8)
 END_EVENT_MAP()
 
 #pragma region Constructor/destructor
@@ -846,5 +847,6 @@ void CMapView::StartDragging(DraggingOperation operation)
 	_dragging.Operation = operation;
 	SetCapture();
 }
+
 
 

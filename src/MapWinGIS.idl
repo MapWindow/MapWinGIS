@@ -991,6 +991,7 @@ enum tkScalebarUnits
 		idOgrLayer = 40,
 		idUndoList = 41,
 		idIdentifier = 42,
+		idSelectionList = 43,
 	} tkInterface;	
 
 	typedef		
@@ -5795,6 +5796,20 @@ interface IIdentifier : IDispatch{
 	[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
 	[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
 };
+[
+	object,
+	uuid(19A5F3CC-C366-4565-8463-9029DA068B33),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface ISelectionList : IDispatch{
+	[id(1)] HRESULT Add([in] LONG layerHandle, [in] LONG shapeIndex);
+	[propget, id(2)] HRESULT NumLayers([out, retval] LONG* pVal);
+	[propget, id(3)] HRESULT LayerHandle([in] LONG index, [out, retval] LONG* pVal);
+	[propget, id(4)] HRESULT ShapeIndices([in] LONG index, [in, out] VARIANT* pVal, [out, retval]VARIANT_BOOL* retVal);
+	[id(5)] HRESULT Clear();
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -6312,7 +6327,9 @@ library MapWinGIS
 			[id(32)] void BackgroundLoadingStarted(LONG TaskId, LONG LayerHandle);
 			[id(33)] void BackgroundLoadingFinished(LONG TaskId, LONG LayerHandle, LONG NumFeatures, LONG NumLoaded);
 			[id(34)] void GridOpened(LONG LayerHandle, BSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy);
+			[id(35)] void ShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY);
 		//}}AFX_ODL_EVENT
+			
 	};
 
 #ifdef OLD_API
@@ -6714,5 +6731,12 @@ library MapWinGIS
 	coclass Identifier
 	{
 		[default] interface IIdentifier;
+	};
+	[
+		uuid(85EA46DF-FCB8-44A2-BFB0-2F5B0162768D)		
+	]
+	coclass SelectionList
+	{
+		[default] interface ISelectionList;
 	};
 };

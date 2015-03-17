@@ -277,5 +277,6 @@ enum {		//{{AFX_DISP_ID(CMapView)
 	eventidBackgroundLoadingStarted = 32L,
 	eventidBackgroundLoadingFinished = 33L,
 	eventidGridOpened = 34L,
+	eventidShapesIdentified = 35L,
 	//}}AFX_DISP_ID
 };

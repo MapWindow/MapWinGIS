@@ -136,6 +136,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idOgrLayer:
 			result = CoCreateInstance(CLSID_OgrLayer, NULL, CLSCTX_INPROC_SERVER, IID_IOgrLayer, (void**)&val);
+			break;	
+		case tkInterface::idSelectionList:
+			result = CoCreateInstance(CLSID_SelectionList, NULL, CLSCTX_INPROC_SERVER, IID_ISelectionList, (void**)&val);
 			break;
 		case tkInterface::idShapeDrawingOptions:
 			result = CoCreateInstance(CLSID_ShapeDrawingOptions, NULL, CLSCTX_INPROC_SERVER, IID_IShapeDrawingOptions, (void**)&val);

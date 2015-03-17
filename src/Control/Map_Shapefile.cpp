@@ -1333,6 +1333,41 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 }
 
 // ************************************************************
+//		DrillDownSelect
+// ************************************************************
+bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list)
+{
+	vector<int> handles;
+	SelectLayerHandles(slctIdentify, handles);
+
+	vector<long> results;
+	for (int i = handles.size() - 1; i >= 0; i--)
+	{
+		CComPtr<IShapefile> sf = NULL;
+		sf.Attach(GetShapefile(handles[i]));
+		if (sf) 
+		{
+			Extent box = GetPointSelectionBox(sf, projX, projY);
+		
+			results.clear();
+			if (SelectionHelper::SelectShapes(sf, box, SelectMode::INTERSECTION, results))
+			{
+				for (size_t j = 0; j < results.size(); j++)
+				{
+					list->Add(handles[i], results[j]);
+				}
+				
+			}
+		}
+	}
+	
+	long numLayers;
+	list->get_NumLayers(&numLayers);
+	return numLayers > 0;
+}
+
+
+// ************************************************************
 //		FindShapeAtScreenPoint
 // ************************************************************
 LayerShape CMapView::FindShapeAtScreenPoint(CPoint point, LayerSelector selector)

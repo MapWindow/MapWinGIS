@@ -816,6 +816,9 @@
     <ClInclude Include="ComHelpers\CallbackHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\SelectionList.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1737,6 +1740,9 @@
     <ClCompile Include="Tiles\Providers\BingMapProvider.cpp">
       <Filter>Tiles\Providers</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\SelectionList.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1914,6 +1920,9 @@
     </None>
     <None Include="Resource\vertex_cursor.cur">
       <Filter>Resources</Filter>
+    </None>
+    <None Include="COM classes\SelectionList.rgs">
+      <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

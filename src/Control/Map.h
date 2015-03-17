@@ -683,6 +683,8 @@ public:
 		{ FireEvent(eventidBackgroundLoadingFinished, EVENT_PARAM(VTS_I4 VTS_I4 VTS_I4 VTS_I4), TaskId, LayerHandle, numFeatures, numLoaded);}
 	void FireGridOpened(LONG LayerHandle, LPCTSTR gridFilename, LONG bandIndex, VARIANT_BOOL isUsingProxy)
 		{ FireEvent(eventidGridOpened, EVENT_PARAM(VTS_I4 VTS_BSTR VTS_I4 VTS_BOOL), LayerHandle, gridFilename, bandIndex, isUsingProxy);	}
+	void FireShapesIdentified(ISelectionList* selectedShapes, DOUBLE projX, DOUBLE projY)
+	    { FireEvent(eventidShapesIdentified, EVENT_PARAM(VTS_DISPATCH VTS_R8 VTS_R8), selectedShapes, projX, projY); }
 
 	//}}AFX_EVENT
 	DECLARE_EVENT_MAP()
@@ -1134,6 +1136,7 @@ private:
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
+	bool DrillDownSelect(double projX, double projY, ISelectionList* list);
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);
@@ -1189,6 +1192,8 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
+protected:
+	
 };
 
 //{{AFX_INSERT_LOCATION}}

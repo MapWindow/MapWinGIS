@@ -2805,7 +2805,7 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 	{
 		std::map<OLE_COLOR, long> myMap;				// color as key and frequency as value
 		
-		// building list of colors and frequneces
+		// building list of colors and frequencies
 		for (int i = 0; i < size; i++)
 		{
 			colour* p = data + i;

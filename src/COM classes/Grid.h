@@ -138,7 +138,6 @@ private:
 	void OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage** retVal);
 
 public:
-	// Gets name of the legend file associated with grid
 	CStringW GetFilename() { return _filename; }
 	CStringW GetLegendName() {	return Utility::GetPathWOExtension(_filename) + L".mwleg"; }
 	CStringW GetProxyLegendName() {	return GridManager::GetProxyLegendName(GetFilename()); }

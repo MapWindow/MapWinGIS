@@ -52,7 +52,7 @@ STDMETHODIMP CIdentifier::put_OutlineColor(OLE_COLOR newVal)
 }
 
 //****************************************************************
-//			IdentifierColor()
+//			ActiveLayer()
 //****************************************************************
 STDMETHODIMP CIdentifier::get_ActiveLayer(LONG* pVal)
 {

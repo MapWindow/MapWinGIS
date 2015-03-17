@@ -11,8 +11,7 @@ public:
 	static bool SelectByRectangle(IShapefile* sf, Extent& box);
 	static bool SelectSingleShape(IShapefile* sf, Extent& box, long& shapeIndex);
 	static bool SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex);
+	static bool SelectShapes(IShapefile* sf, Extent& extents, SelectMode SelectMode, std::vector<long>& selectResult);
 private:
-	static bool SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult);
-	
 };
 

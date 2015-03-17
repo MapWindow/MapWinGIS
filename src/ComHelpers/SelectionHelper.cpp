@@ -191,13 +191,13 @@ bool SelectionHelper::SelectWithShapeBounds(IShapefile* sf, IShape* shp, vector<
 	if (!sf || !shp) return false;
 	CComPtr<IExtents> box = NULL;
 	shp->get_Extents(&box);
-	return SelectShapes(sf, Extent(box), 0.0, SelectMode::INTERSECTION, indices);
+	return SelectShapes(sf, Extent(box), SelectMode::INTERSECTION, indices);
 }
 
 /***********************************************************************/
 /*		SelectShapes()
 /***********************************************************************/
-bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, double Tolerance, SelectMode SelectMode, std::vector<long>& selectResult)
+bool SelectionHelper::SelectShapes(IShapefile* sf, Extent& extents, SelectMode SelectMode, std::vector<long>& selectResult)
 {
 	return ((CShapefile*)sf)->SelectShapesCore((extents), 0.0, SelectMode, selectResult, true);
 }
@@ -212,7 +212,7 @@ bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, long& shape
 bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, SelectMode mode, long& shapeIndex)
 {
 	vector<long> results;
-	if (SelectShapes(sf, box, 0.0, mode, results))
+	if (SelectShapes(sf, box, mode, results))
 	{
 		for (int i = results.size() - 1; i >= 0; i--) 
 		{
@@ -265,7 +265,7 @@ bool SelectionHelper::SelectByRectangle(IShapefile* sf, Extent& box)
 	sf->SelectNone();   // TODO: make a property to control it
 
 	vector<long> results;
-	if (SelectShapes(sf, box, 0.0, SelectMode::INTERSECTION, results))
+	if (SelectShapes(sf, box, SelectMode::INTERSECTION, results))
 	{
 		for (size_t i = 0; i < results.size(); i++) 
 		{

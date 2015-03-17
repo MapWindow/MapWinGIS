@@ -56,7 +56,7 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
-    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
@@ -208,6 +208,7 @@
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
+    <ClInclude Include="COM classes\SelectionList.h" />
     <ClInclude Include="COM classes\ShapeEditor.h" />
     <ClInclude Include="COM classes\UndoList.h" />
     <ClInclude Include="ComHelpers\CallbackHelper.h" />
@@ -454,6 +455,7 @@
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
+    <ClCompile Include="COM classes\SelectionList.cpp" />
     <ClCompile Include="COM classes\ShapeEditor.cpp" />
     <ClCompile Include="COM classes\UndoList.cpp" />
     <ClCompile Include="ComHelpers\CallbackHelper.cpp" />
@@ -795,6 +797,7 @@
     <None Include="COM classes\OgrDatasource.rgs" />
     <None Include="COM classes\OgrLayer.rgs" />
     <None Include="COM classes\PointClass.rgs" />
+    <None Include="COM classes\SelectionList.rgs" />
     <None Include="COM classes\Shape.rgs" />
     <None Include="COM classes\ShapeDrawingOptions.rgs" />
     <None Include="COM classes\ShapeEditor.rgs" />

@@ -68,6 +68,7 @@ IDR_OGRLAYER            REGISTRY                "COM Classes/OgrLayer.rgs"
 IDR_MAPWINGIS           REGISTRY                "MapWinGIS.rgs"
 IDR_UNDOLIST            REGISTRY                "COM Classes/UndoList.rgs"
 IDR_IDENTIFIER          REGISTRY                "COM Classes/Identifier.rgs"
+IDR_SELECTIONLIST       REGISTRY                "COM Classes/SelectionList.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

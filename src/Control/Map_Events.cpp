@@ -562,14 +562,33 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmIdentify:
 			{
-				long layerHandle, shapeIndex;
-				if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
+				ISelectionList* selectionList = NULL;
+				ComHelper::CreateInstance(idSelectionList, (IDispatch**)&selectionList);
+
+				tkIdentifierMode mode;
+				_identifier->get_IdentifierMode(&mode);
+				
+				
+				if (mode == imSingleLayer)
 				{
-					UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
-					RedrawCore(RedrawSkipDataLayers, true);
-					FireShapeIdentified(layerHandle, shapeIndex, projX, projY);
-					return;
+					long layerHandle, shapeIndex;
+					if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
+					{
+						UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
+						RedrawCore(RedrawSkipDataLayers, true);
+						FireShapeIdentified(layerHandle, shapeIndex, projX, projY);
+						return;
+					}
 				}
+				else
+				{
+					if (DrillDownSelect(projX, projY, selectionList))
+					{
+						FireShapesIdentified(selectionList, projX, projY);
+						return;
+					}
+				}
+				
 			}
 			break;
 		case cmRotateShapes:
