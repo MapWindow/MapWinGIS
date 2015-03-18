@@ -1176,13 +1176,36 @@ VARIANT_BOOL CMapView::FindSnapPoint(double tolerance, double xScreen, double yS
 // ************************************************************
 bool CMapView::SelectLayerHandles(LayerSelector selector, std::vector<int>& layers)
 {
+	// for single layer identification, request the selected layer from the client
+	if (selector == slctIdentify) 
+	{
+		tkIdentifierMode mode;
+		_identifier->get_IdentifierMode(&mode);
+		if (mode == imSingleLayer)
+		{
+			long layerHandle = -1;
+			FireChooseLayer(0, 0, &layerHandle);
+			if (layerHandle != -1) 
+			{
+				Layer* layer = GetLayer(layerHandle);
+				if (layer && layer->wasRendered) 
+				{
+					layers.push_back(layerHandle);
+				}
+				return true;
+			}
+			return false;
+		}
+	}
+
 	IShapefile * sf = NULL;
 	for (int i = 0; i < (int)_activeLayers.size(); i++)
 	{
 		int handle = GetLayerHandle(i);
 		bool result = CheckLayer(selector, handle);
-		if (result)
+		if (result) {
 			layers.push_back(handle);
+		}
 	}
 	return layers.size() > 0;
 }
@@ -1195,15 +1218,7 @@ VARIANT_BOOL CMapView::LayerIsIdentifiable(long layerHandle, IShapefile* sf)
 	VARIANT_BOOL result = VARIANT_FALSE;
 	tkIdentifierMode mode;
 	_identifier->get_IdentifierMode(&mode);
-	if (mode == imAllLayers) {
-		sf->get_Identifiable(&result);
-	}
-	if (mode == imSingleLayer) {
-		long activeHandle;
-		_identifier->get_ActiveLayer(&activeHandle);
-		if (layerHandle == activeHandle)
-			result = VARIANT_TRUE;
-	}
+	sf->get_Identifiable(&result);
 	return result;
 }
 
@@ -1228,8 +1243,6 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 				result = LayerIsIdentifiable(layerHandle, sf);
 				break;
 			case slctHotTracking:
-				
-
 				if (m_cursorMode == cmIdentify) 
 				{
 					VARIANT_BOOL hotTracking;
@@ -1335,7 +1348,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, long& layerHandle, lo
 // ************************************************************
 //		DrillDownSelect
 // ************************************************************
-bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list)
+bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst)
 {
 	vector<int> handles;
 	SelectLayerHandles(slctIdentify, handles);
@@ -1354,15 +1367,22 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list)
 			{
 				for (size_t j = 0; j < results.size(); j++)
 				{
-					list->Add(handles[i], results[j]);
+					VARIANT_BOOL visible;
+					sf->get_ShapeVisible(results[j], &visible);
+					if (visible)
+					{
+						list->Add(handles[i], results[j]);
+					}
 				}
-				
+				if (results.size() > 0 && stopOnFirst) {
+					return true;
+				}
 			}
 		}
 	}
 	
 	long numLayers;
-	list->get_NumLayers(&numLayers);
+	list->get_Count(&numLayers);
 	return numLayers > 0;
 }
 

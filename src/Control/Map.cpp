@@ -288,6 +288,9 @@ void CMapView::Startup()
 	ComHelper::CreateInstance(idUndoList, (IDispatch**)&_undoList);
 	((CUndoList*)_undoList)->SetMapCallback(this);
 
+	ComHelper::CreateInstance(idSelectionList, (IDispatch**)&_identifiedShapes);
+	ComHelper::CreateInstance(idShapefile, (IDispatch**)&_identifiedShapefile);
+	
 	InitProjections();
 	
 	GetMeasuringBase()->SetMapCallback(this, ShapeInputMode::simMeasuring);
@@ -451,6 +454,12 @@ void CMapView::Shutdown()
 	
 	if (_undoList)
 		_undoList->Release();
+
+	if (_identifiedShapes)
+		_identifiedShapes->Release();
+
+	if (_identifiedShapefile)
+		_identifiedShapefile->Release();
 
 	if (_tiles)
 	{
@@ -848,5 +857,14 @@ void CMapView::StartDragging(DraggingOperation operation)
 	SetCapture();
 }
 
-
-
+// ************************************************************
+//		GetIdentifiedShapes
+// ************************************************************
+ISelectionList* CMapView::GetIdentifiedShapes()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_identifiedShapes) {
+		_identifiedShapes->AddRef();
+	}
+	return _identifiedShapes;
+}

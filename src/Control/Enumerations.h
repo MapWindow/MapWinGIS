@@ -135,6 +135,7 @@ enum tkDrawingDataAvailable
 	ShapeDigitizing = 8,
 	ZoomBox = 9,
 	MovingShapes = 10,
+	IdentifiedShapes = 11,
 };
 
 enum SqliteOpenMode

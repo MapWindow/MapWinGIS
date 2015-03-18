@@ -1,7 +1,6 @@
 // SelectionList.h : Declaration of the CSelectionList
 #pragma once
 using namespace std;
-#include <set>
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
@@ -39,14 +38,23 @@ public:
 
 public:
 	STDMETHOD(Add)(LONG layerHandle, LONG shapeIndex);
-	STDMETHOD(get_NumLayers)(LONG* pVal);
+	STDMETHOD(get_Count)(LONG* pVal);
 	STDMETHOD(get_LayerHandle)(LONG index, LONG* pVal);
-	STDMETHOD(get_ShapeIndices)(LONG index, VARIANT* pVal, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ShapeIndex)(LONG index, LONG* pVal);
+	STDMETHOD(Clear)();
+	STDMETHOD(RemoveByLayerHandle)(LONG layerHandle);
 
 private:
-	map<long, vector<long>> _shapes;		// layer handle, indices of shapes
+	struct SelectedItem {
+		long LayerHandle;
+		long ShapeIndex;
+		
+		SelectedItem(long layerHandle, long shapeIndex) {
+			LayerHandle = layerHandle;
+			ShapeIndex = shapeIndex;
+		}
+	};
 
-public:
-	STDMETHOD(Clear)();
+	vector<SelectedItem> _shapes;
 };
 OBJECT_ENTRY_AUTO(__uuidof(SelectionList), CSelectionList)

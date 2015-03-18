@@ -90,6 +90,7 @@ typedef
 enum tkIdentifierMode {
 	imAllLayers = 0,
 	imSingleLayer = 1,
+	imAllLayersStopOnFirst = 2,
 }tkIdentifierMode;
 
 /************************** tkEditorBehavior Enumeration **********************/
@@ -5793,8 +5794,8 @@ interface IIdentifier : IDispatch{
 	[propput, id(2)] HRESULT IdentifierMode([in] tkIdentifierMode newVal);
 	[propget, id(3)] HRESULT OutlineColor([out, retval] OLE_COLOR* pVal);
 	[propput, id(3)] HRESULT OutlineColor([in] OLE_COLOR newVal);
-	[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
-	[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
+	//[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
+	//[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
 };
 [
 	object,
@@ -5805,11 +5806,13 @@ interface IIdentifier : IDispatch{
 ]
 interface ISelectionList : IDispatch{
 	[id(1)] HRESULT Add([in] LONG layerHandle, [in] LONG shapeIndex);
-	[propget, id(2)] HRESULT NumLayers([out, retval] LONG* pVal);
+	[propget, id(2)] HRESULT Count([out, retval] LONG* pVal);
 	[propget, id(3)] HRESULT LayerHandle([in] LONG index, [out, retval] LONG* pVal);
-	[propget, id(4)] HRESULT ShapeIndices([in] LONG index, [in, out] VARIANT* pVal, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(4)] HRESULT ShapeIndex([in] LONG index, [out, retval] LONG* pVal);
 	[id(5)] HRESULT Clear();
+	[id(6)] HRESULT RemoveByLayerHandle([in]LONG layerHandle);
 };
+
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -5873,6 +5876,7 @@ library MapWinGIS
 			[id(243), readonly] IIdentifier* Identifier;
 			[id(235), readonly] IShapeEditor* ShapeEditor;
 			[id(196), readonly] IMeasuring* Measuring;
+			[id(250), readonly] ISelectionList* IdentifiedShapes;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;

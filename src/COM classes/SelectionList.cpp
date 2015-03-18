@@ -9,14 +9,14 @@
 STDMETHODIMP CSelectionList::Add(LONG layerHandle, LONG shapeIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_shapes[layerHandle].push_back(shapeIndex);
+	_shapes.push_back(SelectedItem(layerHandle, shapeIndex));
 	return S_OK;
 }
 
 // ****************************************************************
 //						get_NumLayers()						         
 // ****************************************************************
-STDMETHODIMP CSelectionList::get_NumLayers(LONG* pVal)
+STDMETHODIMP CSelectionList::get_Count(LONG* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _shapes.size();
@@ -26,43 +26,30 @@ STDMETHODIMP CSelectionList::get_NumLayers(LONG* pVal)
 // ****************************************************************
 //						get_LayerHandle()						         
 // ****************************************************************
-STDMETHODIMP CSelectionList::get_LayerHandle(LONG index, LONG* pVal)
+STDMETHODIMP CSelectionList::get_LayerHandle(LONG index, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = -1;
-	int i = 0;
-	std::map <long, vector<long>>::iterator p = _shapes.begin();
-	while (p != _shapes.end())
+	if (index < 0 || index >= (long)_shapes.size())
 	{
-		if (i == index)
-		{
-			*pVal = p->first;
-			break;
-		}
-		i++;
-		p++;
+		*retVal = -1;
+		return S_OK;
 	}
+	*retVal = _shapes[index].LayerHandle;
 	return S_OK;
 }
 
 // ****************************************************************
-//						get_ShapeIndices()						         
+//						get_ShapeIndex()						         
 // ****************************************************************
-STDMETHODIMP CSelectionList::get_ShapeIndices(LONG index, VARIANT* pVal, VARIANT_BOOL* retVal)
+STDMETHODIMP CSelectionList::get_ShapeIndex(LONG index, LONG* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
-	int i = 0;
-	std::map <long, vector<long>>::iterator p = _shapes.begin();
-	while (p != _shapes.end())
+	if (index < 0 || index >= (long)_shapes.size())
 	{
-		if (i == index)
-		{
-			*retVal = Templates::Vector2SafeArray(&p->second, VT_I4, pVal) ? VARIANT_TRUE : VARIANT_FALSE;
-			break;
-		}
-		i++;
+		*retVal = -1;
+		return S_OK;
 	}
+	*retVal = _shapes[index].ShapeIndex;
 	return S_OK;
 }
 
@@ -73,5 +60,21 @@ STDMETHODIMP CSelectionList::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_shapes.clear();
+	return S_OK;
+}
+
+// ****************************************************************
+//				RemoveByLayerHandle()						         
+// ****************************************************************
+STDMETHODIMP CSelectionList::RemoveByLayerHandle(LONG layerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	for (long i = (long)_shapes.size() - 1; i >= 0; i--) 
+	{
+		if (_shapes[i].LayerHandle == layerHandle) 
+		{
+			_shapes.erase(_shapes.begin() + i);
+		}
+	}
 	return S_OK;
 }

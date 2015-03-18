@@ -12,6 +12,8 @@
 #include "GeometryHelper.h"
 #include "LayerDrawer.h"
 #include "ShapefileHelper.h"
+#include "SelectionListHelper.h"
+#include "ShapeStyleHelper.h"
 
 // ***************************************************************
 //		OnDraw()
@@ -318,12 +320,43 @@ void CMapView::RedrawTools(Gdiplus::Graphics* g, const CRect& rcBounds)
 		GetMeasuringBase()->DrawData(g, false, DragNone);
 	}
 
-	// hot tracking
-	if (HasDrawingData(tkDrawingDataAvailable::HotTracking))
+	bool hotTracking = HasDrawingData(tkDrawingDataAvailable::HotTracking);
+	bool identified = HasDrawingData(tkDrawingDataAvailable::IdentifiedShapes);
+	
+	if (hotTracking || identified)
 	{
-		CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList,
-			this->GetCurrentScale(), true);
-		drawer.Draw(rcBounds, _hotTracking.Shapefile);
+		CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), true);
+		
+		if (hotTracking)
+		{
+			drawer.Draw(rcBounds, _hotTracking.Shapefile);
+		}
+		
+		if (identified)
+		{
+			VARIANT_BOOL vb;
+			vector<long> handles;
+			if (SelectionListHelper::GetUniqueLayers(_identifiedShapes, handles))
+			{
+				for (size_t i = 0; i < handles.size(); i++)
+				{
+					Layer* layer = GetLayer(handles[i]);
+					if (!layer->wasRendered) continue;
+					
+					IShapefile* sf = GetShapefile(handles[i]);
+					if (!sf) continue;
+					
+					// Shapefile.Create is called to change the ShapeType
+					SelectionListHelper::PopulateShapefile(_identifiedShapes, sf, _identifiedShapefile, handles[i]);
+					sf->Release();
+
+					// Shapefile.Create was called which cleared the style settings
+					ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
+					drawer.Draw(rcBounds, _identifiedShapefile);
+					_identifiedShapefile->EditClear(&vb);
+				}
+			}
+		}
 	}
 }
 
@@ -939,6 +972,10 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 {
 	switch(type) 
 	{
+		case IdentifiedShapes:
+			{
+				return SelectionListHelper::GetCount(_identifiedShapes) > 0;
+			}
 		case MovingShapes:
 			{
 				return _dragging.Operation == DragMoveShapes || _dragging.Operation == DragRotateShapes;
@@ -1034,9 +1071,13 @@ bool CMapView::HasImages()
 // ****************************************************************
 bool CMapView::HasHotTracking() 
 {
-	for(long i = _activeLayers.size() - 1; i >= 0; i-- )
-		if (CheckLayer(slctHotTracking, _activeLayers[i]))
+	for (long i = _activeLayers.size() - 1; i >= 0; i--) 
+	{
+		if (CheckLayer(slctHotTracking, _activeLayers[i])) 
+		{
 			return true;
+		}
+	}
 	return false;
 }
 

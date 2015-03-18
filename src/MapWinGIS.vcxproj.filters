@@ -819,6 +819,9 @@
     <ClInclude Include="COM classes\SelectionList.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="ComHelpers\SelectionListHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1742,6 +1745,9 @@
     </ClCompile>
     <ClCompile Include="COM classes\SelectionList.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\SelectionListHelper.cpp">
+      <Filter>ComHelpers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

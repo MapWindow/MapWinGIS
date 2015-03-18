@@ -604,6 +604,8 @@ public:
 	afx_msg DOUBLE GeodesicDistance(DOUBLE projX1, DOUBLE projY1, DOUBLE projX2, DOUBLE projY2);
 	afx_msg DOUBLE GeodesicArea(IShape* polygon);
 	afx_msg void OnMouseLeave();
+	afx_msg ISelectionList* GetIdentifiedShapes();
+
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -815,6 +817,8 @@ public:
 	ITiles* _tiles;						// the list of tiles (in-memory GDI+ bitmaps)
 	ICallback * _globalCallback;
 	IUndoList* _undoList;
+	ISelectionList* _identifiedShapes;
+	IShapefile* _identifiedShapefile;
 
 	// ---------------------------------------------
 	//	Projections
@@ -1136,7 +1140,7 @@ private:
 	void HandleLButtonUpZoomBox(long vbflags, long x, long y);
 	Extent GetPointSelectionBox(IShapefile* sf, double xProj, double yProj);
 	bool DrillDownSelect(double projX, double projY, long& layerHandle, long& shapeIndex);
-	bool DrillDownSelect(double projX, double projY, ISelectionList* list);
+	bool DrillDownSelect(double projX, double projY, ISelectionList* list, bool stopOnFirst);
 	bool StartNewBoundShape(long x, long y);
 	CPLXMLNode* LayerOptionsToXmlTree(long layerHandle);
 	VARIANT_BOOL LoadOgrStyle(Layer* layer, long layerHandle, CStringW name, bool reportError);

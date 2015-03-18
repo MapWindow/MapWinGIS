@@ -222,3 +222,20 @@ CStringW ShapeStyleHelper::GetSymbologyFileAsXml(IShapefile* sf)
 	}
 	return style;
 }
+
+// *****************************************************
+//		ApplyIdentifiedShapesStyle()
+// *****************************************************
+void ShapeStyleHelper::ApplyIdentifiedShapesStyle(IIdentifier* identifier, IShapefile* sf)
+{
+	OLE_COLOR outlineColor;
+	identifier->get_OutlineColor(&outlineColor);
+
+	CComPtr<IShapeDrawingOptions> options = NULL;
+	sf->get_DefaultDrawingOptions(&options);
+	options->put_FillColor(outlineColor);
+	options->put_LineColor(outlineColor);
+	options->put_FillTransparency(100.0f);
+	options->put_LineTransparency(100.0f);
+	options->put_LineWidth(4.0f);
+}

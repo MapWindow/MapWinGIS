@@ -219,6 +219,7 @@
     <ClInclude Include="ComHelpers\LabelsHelper.h" />
     <ClInclude Include="ComHelpers\ProjectionHelper.h" />
     <ClInclude Include="ComHelpers\SelectionHelper.h" />
+    <ClInclude Include="ComHelpers\SelectionListHelper.h" />
     <ClInclude Include="ComHelpers\ShapefileHelper.h" />
     <ClInclude Include="ComHelpers\ShapeHelper.h" />
     <ClInclude Include="ComHelpers\ShapeStyleHelper.h" />
@@ -466,6 +467,7 @@
     <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
     <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionHelper.cpp" />
+    <ClCompile Include="ComHelpers\SelectionListHelper.cpp" />
     <ClCompile Include="ComHelpers\ShapefileHelper.cpp" />
     <ClCompile Include="ComHelpers\ShapeHelper.cpp" />
     <ClCompile Include="ComHelpers\ShapeStyleHelper.cpp" />

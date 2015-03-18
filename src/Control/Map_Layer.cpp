@@ -859,6 +859,8 @@ void CMapView::RemoveLayerCore(long LayerHandle, bool closeDatasources, bool fro
 
 		_allLayers[LayerHandle] = NULL;
 
+		_identifiedShapes->RemoveByLayerHandle(LayerHandle);
+
 		if (_activeLayers.size() == 0 && hadLayers)
 			ClearMapProjectionWithLastLayer();
 

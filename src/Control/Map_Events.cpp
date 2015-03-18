@@ -10,6 +10,7 @@
 #include "EditorHelper.h"
 #include "Digitizer.h"
 #include "Tiles.h"
+#include "SelectionListHelper.h"
 
 
 // ************************************************************
@@ -562,33 +563,30 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			break;
 		case cmIdentify:
 			{
-				ISelectionList* selectionList = NULL;
-				ComHelper::CreateInstance(idSelectionList, (IDispatch**)&selectionList);
+				long layerHandle = -1;
+				long shapeIndex = -1;
+				bool needRedraw = SelectionListHelper::GetCount(_identifiedShapes) > 0;
+				_identifiedShapes->Clear();
 
 				tkIdentifierMode mode;
 				_identifier->get_IdentifierMode(&mode);
-				
-				
-				if (mode == imSingleLayer)
+				bool stopOnFirst = mode != tkIdentifierMode::imAllLayers;
+
+				if (DrillDownSelect(projX, projY, _identifiedShapes, stopOnFirst))
 				{
-					long layerHandle, shapeIndex;
-					if (DrillDownSelect(projX, projY, layerHandle, shapeIndex))
+					long numShapes = SelectionListHelper::GetCount(_identifiedShapes);
+					if (numShapes == 1)
 					{
-						UpdateHotTracking(LayerShape(layerHandle, shapeIndex), false);
-						RedrawCore(RedrawSkipDataLayers, true);
-						FireShapeIdentified(layerHandle, shapeIndex, projX, projY);
-						return;
+						_identifiedShapes->get_LayerHandle(0, &layerHandle);
+						_identifiedShapes->get_ShapeIndex(0, &shapeIndex);
 					}
+					needRedraw = true;
 				}
-				else
-				{
-					if (DrillDownSelect(projX, projY, selectionList))
-					{
-						FireShapesIdentified(selectionList, projX, projY);
-						return;
-					}
+
+				if (needRedraw){
+					FireShapeIdentified(layerHandle, shapeIndex, projX, projY);
+					RedrawCore(RedrawSkipDataLayers, true);
 				}
-				
 			}
 			break;
 		case cmRotateShapes:
