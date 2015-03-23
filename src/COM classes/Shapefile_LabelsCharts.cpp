@@ -275,7 +275,6 @@ void CShapefile::SetChartsPositions(tkLabelPositioning Method)
 	if (Method == lpNone)
 	{
 		// simply set 0 positions, the actual positions will be set externally; is needed for loading of previously saved labels
-		((CCharts*)_charts)->_chartsExist = true;
 		for (unsigned int i = 0; i < _shapeData.size(); i++)
 		{
 			_shapeData[i]->chart->x = 0.0;

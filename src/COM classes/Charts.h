@@ -342,11 +342,10 @@ private:
 	LONG _collisionBuffer;
 	LONG _offsetX;
 	LONG _offsetY;
-
-public:
 	bool _chartsExist;
 
 public:
+	bool GetChartsExist() { return _chartsExist; }
 	inline void ErrorMessage(long ErrorCode);
 	void SetDefaultColorScheme();
 	Gdiplus::Color ChangeBrightness(OLE_COLOR color, int shiftValue, long alpha);

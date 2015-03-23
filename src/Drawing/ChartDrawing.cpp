@@ -47,7 +47,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 	// the charts were cleared
 	ICharts* icharts = charts;
-	if (!((CCharts*)icharts)->_chartsExist)
+	if (!((CCharts*)icharts)->GetChartsExist())
 		return;
 
 	// checking scale for dynamic visibility
@@ -288,6 +288,9 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			}
 		}
 			
+		std::vector<ValueRectangle> allLabels;		// all labels
+		size_t initLabelIndex = 0;
+
 		for (size_t k = 0; k < arr.size(); k++)
 		{
 			int i = arr[k];		// extracting index from array of visible shapes
@@ -356,7 +359,9 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			if (_options->valuesVisible)
 			{
 				startAngle = 0.0;
-				
+				int labelCount = 0;
+
+				initLabelIndex = allLabels.size();
 				for (int j = 0; j < numBars; j++)
 				{
 					sweepAngle = (Gdiplus::REAL)(values[i][j]/sum * 360.0);
@@ -367,9 +372,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 
 					value.string = Utility::FormatNumber(values[i][j], sFormat);
 					
-					HDC hdc = _graphics->GetHDC();
 					_dc->DrawText(value.string, rect, DT_CALCRECT);	// add alignment
-					_graphics->ReleaseHDC(hdc);
 					
 					Gdiplus::REAL labelAngle = startAngle + sweepAngle/2.0f + 90.0f;
 					if (labelAngle > 360.0f)
@@ -409,21 +412,16 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 						{
 							continue;
 						}
-						else
-						{
-							labels.push_back(value);
-						}
 					}
-					else
-					{
-						// saving the rect and text; we shall draw it when make sure that all the values don't have collisions
-						labels.push_back(value);
-					}
+					
+					// saving the rect and text; we shall draw it when make sure that all the values don't have collisions
+					labels.push_back(value);
+					labelCount++;
 				}
 				
-				// some values will have collisions
-				if (labels.size() != numBars)
+				if (labelCount != numBars)
 				{
+					// if there are collisions for values, all the chart won't be rendered
 					if (chartRect)
 					{
 						delete chartRect;
@@ -431,7 +429,13 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 					}
 					continue;
 				}
-			}
+				else
+				{
+					for (size_t n = 0; n < labels.size(); n++) {
+						allLabels.push_back(labels[n]);
+					}
+				}
+			}	// valuesVisible
 			
 			// ---------------------------------------
 			// drawing the pie
@@ -486,45 +490,52 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 			// drawing the values
 			if (_options->valuesVisible)
 			{
-				HDC hdc = _graphics->GetHDC();
-
-				for (unsigned int i = 0; i < labels.size(); i++)
+				for (unsigned int i = initLabelIndex; i < allLabels.size(); i++)
 				{
-					CRect* rect = &labels[i].rect;
+					CRect* rect = &allLabels[i].rect;
 					_collisionList->AddRectangle(rect, _collisionBuffer, _collisionBuffer);
-						
-					// drawing frame							
-					if (_options->valuesFrameVisible)
-					{
-						CBrush* oldBrush = _dc->SelectObject(&brushFrame);
-						CPen* oldPen = _dc->SelectObject(&penFrame);
-						
-						CRect r(rect->left -3, rect->top, rect->right +2, rect->bottom);
-						_dc->Rectangle(r);
-						
-						_dc->SelectObject(oldBrush);
-						_dc->SelectObject(oldPen);
-					}
-
-					_dc->DrawText(labels[i].string, rect, DT_CENTER | DT_VCENTER);
 				}
-
-				_graphics->ReleaseHDC(hdc);
 			}
 			
-			// storing rectangle for drawing operations
 			ShapeData* info = (*positions)[i];
 			if (info)
 			{
+				// storing rectangle for dragging operations				
 				info->chart->frame = chartRect;
 				info->chart->isDrawn = true;
 			}
 			
-			// storing rectangle for collision avoidance
 			if ( _options->avoidCollisions && _collisionList != NULL)
 			{
 				_collisionList->AddRectangle(chartRect, _collisionBuffer, _collisionBuffer);
 			}
+		}		// chart cycle
+
+		if (_options->valuesVisible)
+		{
+			// now drawing all labels at once			
+			HDC hdc = _graphics->GetHDC();
+
+			for (unsigned int i = 0; i < allLabels.size(); i++)
+			{
+				CRect* rect = &allLabels[i].rect;
+
+				if (_options->valuesFrameVisible)
+				{
+					CBrush* oldBrush = _dc->SelectObject(&brushFrame);
+					CPen* oldPen = _dc->SelectObject(&penFrame);
+
+					CRect r(rect->left - 3, rect->top, rect->right + 2, rect->bottom);
+					_dc->Rectangle(r);
+
+					_dc->SelectObject(oldBrush);
+					_dc->SelectObject(oldPen);
+				}
+
+				_dc->DrawText(allLabels[i].string, rect, DT_CENTER | DT_VCENTER);
+			}
+
+			_graphics->ReleaseHDC(hdc);
 		}
 	}
 

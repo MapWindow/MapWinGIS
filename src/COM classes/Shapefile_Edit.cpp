@@ -374,7 +374,7 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 		double x = 0.0, y = 0.0, rotation = 0.0;
 		VARIANT_BOOL vbretval;
 
-		bool chartsExist = ((CCharts*)_charts)->_chartsExist;
+		bool chartsExist = ((CCharts*)_charts)->GetChartsExist();
 		if (bSynchronized || chartsExist)
 		{
 			// position
