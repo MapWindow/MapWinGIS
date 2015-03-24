@@ -80,8 +80,8 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idColorScheme:
 			result = CoCreateInstance(CLSID_ColorScheme, NULL, CLSCTX_INPROC_SERVER, IID_IColorScheme, (void**)&val);
 			break;
-		case tkInterface::idShapeEditor:
-			result = CoCreateInstance(CLSID_ShapeEditor, NULL, CLSCTX_INPROC_SERVER, IID_IShapeEditor, (void**)&val);
+		case tkInterface::idDrawingRectangle:
+			result = CoCreateInstance(CLSID_DrawingRectangle, NULL, CLSCTX_INPROC_SERVER, IID_IDrawingRectangle, (void**)&val);
 			break;
 		case tkInterface::idESRIGridManager:
 			result = CoCreateInstance(CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val);
@@ -142,6 +142,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 			break;
 		case tkInterface::idShapeDrawingOptions:
 			result = CoCreateInstance(CLSID_ShapeDrawingOptions, NULL, CLSCTX_INPROC_SERVER, IID_IShapeDrawingOptions, (void**)&val);
+			break;
+		case tkInterface::idShapeEditor:
+			result = CoCreateInstance(CLSID_ShapeEditor, NULL, CLSCTX_INPROC_SERVER, IID_IShapeEditor, (void**)&val);
 			break;
 		case tkInterface::idShapefile:
 			result = CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&val);

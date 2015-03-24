@@ -605,6 +605,7 @@ public:
 	afx_msg DOUBLE GeodesicArea(IShape* polygon);
 	afx_msg void OnMouseLeave();
 	afx_msg ISelectionList* GetIdentifiedShapes();
+	afx_msg IDrawingRectangle* GetFocusRectangle();
 
 	#pragma endregion
 
@@ -819,6 +820,7 @@ public:
 	IUndoList* _undoList;
 	ISelectionList* _identifiedShapes;
 	IShapefile* _identifiedShapefile;
+	IDrawingRectangle* _focusRectangle;
 
 	// ---------------------------------------------
 	//	Projections
@@ -982,10 +984,7 @@ private:
 	// ---------------------------------------------
 	void HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawToOutputCanvas, float offsetX = 0.0f, float offsetY = 0.0f);
 	void ShowRedrawTime(Gdiplus::Graphics* g, float time, bool layerRedraw, CStringW message = L"");
-	//void DrawMeasuringToMainBuffer(Gdiplus::Graphics* g );
-	//IPoint* GetMeasuringPolyCenter(Gdiplus::PointF* data, int length);
-	//void DrawMeasuringPolyArea(Gdiplus::Graphics* g, bool lastPoint, double lastGeogX, double lastGeogY, IPoint* pnt);
-	//void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, double length, double totalLength, int segmentIndex);
+	void DrawFocusRectangle(Gdiplus::Graphics* g);
 	void DrawCoordinates(Gdiplus::Graphics* g);
 	void DrawScaleBar(Gdiplus::Graphics* g);
 	bool HasDrawingData(tkDrawingDataAvailable type);
@@ -1001,6 +1000,7 @@ private:
 	IDispatch* SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, 
 								  CDC* snapDC = NULL, float offsetX = 0.0f, float offsetY = 0.0f,
 								  float clipX = 0.0f, float clipY = 0.0f, float clipWidth = 0.0f, float clipHeight = 0.0f);
+	
 
 	// ---------------------------------------------
 	//	 Serialization

@@ -46,6 +46,8 @@ void CMapView::DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInval
 
 	DrawCoordinates(gTemp);
 
+	DrawFocusRectangle(gTemp);
+
 	if (drawBackBuffer)
 	{
 		// it's not snapshot so we are using temp buffer to avoid flickering;
@@ -136,7 +138,7 @@ void CMapView::DrawShapeEditor( Gdiplus::Graphics* g, bool dynamicBuffer )
 }
 
 // ****************************************************************
-//		DrawZoomboxToScreenBuffer()
+//		DrawZoombox()
 // ****************************************************************
 void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 {
@@ -217,7 +219,7 @@ void CMapView::DrawZoombox(Gdiplus::Graphics* g)
 }
 
 // ****************************************************************
-//		DrawCoordinatesToScreenBuffer()
+//		DrawCoordinates()
 // ****************************************************************
 void CMapView::DrawCoordinates(Gdiplus::Graphics* g) 
 {
@@ -268,4 +270,30 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
 			}
 		}
 	}
+}
+
+// ****************************************************************
+//		DrawFocusRectangle()
+// ****************************************************************
+void CMapView::DrawFocusRectangle(Gdiplus::Graphics* g)
+{
+	VARIANT_BOOL vb;
+	_focusRectangle->get_Visible(&vb);
+	if (!vb) {
+		return;
+	}
+
+	double x, y, width, height;
+	_focusRectangle->get_X(&x);
+	_focusRectangle->get_Y(&y);
+	_focusRectangle->get_Width(&width);
+	_focusRectangle->get_Height(&height);
+
+	// TODO: add style properties and support of spatial referenced coordinates
+	Gdiplus::Pen pen(Gdiplus::Color(192, 255, 0, 0), 2.0f);
+
+	Gdiplus::SolidBrush brush(Gdiplus::Color(128, 255, 0, 0));
+
+	g->DrawRectangle(&pen, (int)x, (int)y, (int)width, (int)height);
+	g->FillRectangle(&brush, (int)x, (int)y, (int)width, (int)height);
 }

@@ -822,6 +822,9 @@
     <ClInclude Include="ComHelpers\SelectionListHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\DrawingRectangle.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1749,6 +1752,9 @@
     <ClCompile Include="ComHelpers\SelectionListHelper.cpp">
       <Filter>ComHelpers</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\DrawingRectangle.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1928,6 +1934,9 @@
       <Filter>Resources</Filter>
     </None>
     <None Include="COM classes\SelectionList.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\DrawingRectangle.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

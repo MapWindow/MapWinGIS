@@ -993,6 +993,7 @@ enum tkScalebarUnits
 		idUndoList = 41,
 		idIdentifier = 42,
 		idSelectionList = 43,
+		idDrawingRectangle = 44,
 	} tkInterface;	
 
 	typedef		
@@ -5813,6 +5814,27 @@ interface ISelectionList : IDispatch{
 	[id(6)] HRESULT RemoveByLayerHandle([in]LONG layerHandle);
 };
 
+[
+	object,
+	uuid(1FE926AB-1F1E-4058-8B1C-60AD2AF92096),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IDrawingRectangle : IDispatch{
+	[propget, id(1)] HRESULT X([out, retval] DOUBLE* pVal);
+	[propput, id(1)] HRESULT X([in] DOUBLE newVal);
+	[propget, id(2)] HRESULT Y([out, retval] DOUBLE* pVal);
+	[propput, id(2)] HRESULT Y([in] DOUBLE newVal);
+	[propget, id(3)] HRESULT Width([out, retval] DOUBLE* pVal);
+	[propput, id(3)] HRESULT Width([in] DOUBLE newVal);
+	[propget, id(4)] HRESULT Height([out, retval] DOUBLE* pVal);
+	[propput, id(4)] HRESULT Height([in] DOUBLE newVal);
+	[propget, id(5)] HRESULT Visible([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(5)] HRESULT Visible([in] VARIANT_BOOL newVal);
+	[propget, id(6)] HRESULT ReferenceType([out, retval] tkDrawReferenceList* pVal);
+	[propput, id(6)] HRESULT ReferenceType([in] tkDrawReferenceList newVal);
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -5877,6 +5899,7 @@ library MapWinGIS
 			[id(235), readonly] IShapeEditor* ShapeEditor;
 			[id(196), readonly] IMeasuring* Measuring;
 			[id(250), readonly] ISelectionList* IdentifiedShapes;
+			[id(251), readonly] IDrawingRectangle* FocusRectangle;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;
@@ -6742,5 +6765,12 @@ library MapWinGIS
 	coclass SelectionList
 	{
 		[default] interface ISelectionList;
+	};
+	[
+		uuid(60C40EC8-F1C5-4197-918C-CF2CEFCAB554)		
+	]
+	coclass DrawingRectangle
+	{
+		[default] interface IDrawingRectangle;
 	};
 };

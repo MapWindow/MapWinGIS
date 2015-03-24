@@ -205,6 +205,7 @@
   <!-- headers -->
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
+    <ClInclude Include="COM classes\DrawingRectangle.h" />
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
@@ -453,6 +454,7 @@
   </ItemGroup>
   <!-- source -->
   <ItemGroup>
+    <ClCompile Include="COM classes\DrawingRectangle.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
@@ -777,6 +779,7 @@
     <None Include="COM classes\ChartField.rgs" />
     <None Include="COM classes\Charts.rgs" />
     <None Include="COM classes\ColorScheme.rgs" />
+    <None Include="COM classes\DrawingRectangle.rgs" />
     <None Include="COM classes\ESRIGridManager.rgs" />
     <None Include="COM classes\Extents.rgs" />
     <None Include="COM classes\Field.rgs" />

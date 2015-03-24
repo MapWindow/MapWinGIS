@@ -278,5 +278,6 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_FUNCTION_ID(CMapView, "GeodesicDistance", dispidGeodesicDistance, GeodesicDistance, VT_R8, VTS_R8 VTS_R8 VTS_R8 VTS_R8)
 	DISP_FUNCTION_ID(CMapView, "GeodesicArea", dispidGeodesicArea, GeodesicArea, VT_R8, VTS_DISPATCH)
 	DISP_PROPERTY_EX_ID(CMapView, "IdentifiedShapes", dispidIdentifiedShapes, GetIdentifiedShapes, SetNotSupported, VT_DISPATCH)
+	DISP_PROPERTY_EX_ID(CMapView, "FocusRectangle", dispidFocusRectangle, GetFocusRectangle, SetNotSupported, VT_DISPATCH)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

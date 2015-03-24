@@ -290,6 +290,8 @@ void CMapView::Startup()
 
 	ComHelper::CreateInstance(idSelectionList, (IDispatch**)&_identifiedShapes);
 	ComHelper::CreateInstance(idShapefile, (IDispatch**)&_identifiedShapefile);
+	ComHelper::CreateInstance(idDrawingRectangle, (IDispatch**)&_focusRectangle);
+	_focusRectangle->put_Visible(VARIANT_TRUE);
 	
 	InitProjections();
 	
@@ -460,6 +462,9 @@ void CMapView::Shutdown()
 
 	if (_identifiedShapefile)
 		_identifiedShapefile->Release();
+
+	if (_focusRectangle)
+		_focusRectangle->Release();
 
 	if (_tiles)
 	{
@@ -867,4 +872,16 @@ ISelectionList* CMapView::GetIdentifiedShapes()
 		_identifiedShapes->AddRef();
 	}
 	return _identifiedShapes;
+}
+
+// ************************************************************
+//		GetFocusRectangle
+// ************************************************************
+IDrawingRectangle* CMapView::GetFocusRectangle()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (_focusRectangle) {
+		_focusRectangle->AddRef();
+	}
+	return _focusRectangle;
 }
