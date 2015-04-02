@@ -292,6 +292,11 @@ void CMapView::RestoreExtents()
 IDispatch* CMapView::SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, CDC* snapDC,
 								  float offsetX, float offsetY, float clipX, float clipY, float clipWidth, float clipHeight)
 {
+	if (left == right || top == bottom)
+	{
+		return NULL;
+	}
+
 	bool createDC = (snapDC == NULL);
 	CBitmap * bmp = NULL;
 	

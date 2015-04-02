@@ -310,10 +310,13 @@ void CMapView::RedrawTools(Gdiplus::Graphics* g, const CRect& rcBounds)
 {
 	DrawShapeEditor(g, false);
 
-	DrawScaleBar(g);
+	if (!_isSnapshot)
+	{
+		DrawScaleBar(g);
 
-	DrawZoombar(g);
-
+		DrawZoombar(g);
+	}
+	
 	// distance measuring or persistent measuring
 	if (HasDrawingData(tkDrawingDataAvailable::MeasuringData))
 	{
