@@ -18,6 +18,9 @@ public:
 		_x = _y = _width = _height = 0.0;
 		_visible = VARIANT_TRUE;
 		_referenceType = dlScreenReferencedList;
+		_transparency = 255;
+		_color = 255;	// Red
+		_lineWidth = 2;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_DRAWINGRECTANGLE)
@@ -52,6 +55,12 @@ public:
 	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ReferenceType)(tkDrawReferenceList* pVal);
 	STDMETHOD(put_ReferenceType)(tkDrawReferenceList newVal);
+	STDMETHOD(get_FillTransparency)(BYTE* pVal);
+	STDMETHOD(put_FillTransparency)(BYTE newVal);
+	STDMETHOD(get_Color)(OLE_COLOR* pVal);
+	STDMETHOD(put_Color)(OLE_COLOR newVal);
+	STDMETHOD(get_LineWidth)(float* pVal);
+	STDMETHOD(put_LineWidth)(float newVal);
 
 private:
 	double _x;
@@ -60,7 +69,10 @@ private:
 	double _height;
     VARIANT_BOOL _visible;
 	tkDrawReferenceList _referenceType;
-
+	BYTE _transparency;
+	OLE_COLOR _color;
+	float _lineWidth;
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(DrawingRectangle), CDrawingRectangle)

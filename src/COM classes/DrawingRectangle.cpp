@@ -105,3 +105,50 @@ STDMETHODIMP CDrawingRectangle::put_ReferenceType(tkDrawReferenceList newVal)
 	return S_OK;
 }
 
+// *****************************************************************
+//		FillTransparency
+// *****************************************************************
+STDMETHODIMP CDrawingRectangle::get_FillTransparency(BYTE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _transparency;
+	return S_OK;
+}
+STDMETHODIMP CDrawingRectangle::put_FillTransparency(BYTE newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_transparency = newVal;
+	return S_OK;
+}
+
+// *****************************************************************
+//		Color
+// *****************************************************************
+STDMETHODIMP CDrawingRectangle::get_Color(OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _color;
+	return S_OK;
+}
+STDMETHODIMP CDrawingRectangle::put_Color(OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_color = newVal;
+	return S_OK;
+}
+
+// *****************************************************************
+//		LineWidth
+// *****************************************************************
+STDMETHODIMP CDrawingRectangle::get_LineWidth(float* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _lineWidth;
+	return S_OK;
+}
+STDMETHODIMP CDrawingRectangle::put_LineWidth(float newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_lineWidth = newVal;
+	return S_OK;
+}

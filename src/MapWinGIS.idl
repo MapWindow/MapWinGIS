@@ -5834,6 +5834,12 @@ interface IDrawingRectangle : IDispatch{
 	[propput, id(5)] HRESULT Visible([in] VARIANT_BOOL newVal);
 	[propget, id(6)] HRESULT ReferenceType([out, retval] tkDrawReferenceList* pVal);
 	[propput, id(6)] HRESULT ReferenceType([in] tkDrawReferenceList newVal);
+	[propget, id(7)] HRESULT FillTransparency([out, retval] BYTE* pVal);
+	[propput, id(7)] HRESULT FillTransparency([in] BYTE newVal);
+	[propget, id(8)] HRESULT Color([out, retval] OLE_COLOR* pVal);
+	[propput, id(8)] HRESULT Color([in] OLE_COLOR newVal);
+	[propget, id(9)] HRESULT LineWidth([out, retval] float* pVal);
+	[propput, id(9)] HRESULT LineWidth([in] float newVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),

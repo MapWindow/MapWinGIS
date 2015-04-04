@@ -136,6 +136,7 @@ enum tkDrawingDataAvailable
 	ZoomBox = 9,
 	MovingShapes = 10,
 	IdentifiedShapes = 11,
+	FocusRect = 12,
 };
 
 enum SqliteOpenMode

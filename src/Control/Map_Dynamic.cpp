@@ -7,7 +7,7 @@
 #include "ShapefileDrawing.h"
 
 // ***************************************************************
-//		DrawMouseMoves()
+//		DrawDynamic()
 // ***************************************************************
 void CMapView::DrawDynamic(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, bool drawBackBuffer /*= false*/, float offsetX /*= 0.0f*/, float offsetY /*= 0.0f*/)
 {
@@ -283,16 +283,24 @@ void CMapView::DrawFocusRectangle(Gdiplus::Graphics* g)
 		return;
 	}
 
+	float lineWidth;
+	byte transparency;
+	OLE_COLOR color;
 	double x, y, width, height;
 	_focusRectangle->get_X(&x);
 	_focusRectangle->get_Y(&y);
 	_focusRectangle->get_Width(&width);
 	_focusRectangle->get_Height(&height);
+	
+	_focusRectangle->get_Color(&color);
+	_focusRectangle->get_FillTransparency(&transparency);
 
-	// TODO: add style properties and support of spatial referenced coordinates
-	Gdiplus::Pen pen(Gdiplus::Color(192, 255, 0, 0), 2.0f);
+	_focusRectangle->get_LineWidth(&lineWidth);
 
-	Gdiplus::SolidBrush brush(Gdiplus::Color(128, 255, 0, 0));
+	Gdiplus::Pen pen(Gdiplus::Color(192 << 24 | BGR_TO_RGB(color)), lineWidth);
+
+	long alpha = long(transparency) << 24;
+	Gdiplus::SolidBrush brush(Gdiplus::Color(alpha | BGR_TO_RGB(color)));
 
 	g->DrawRectangle(&pen, (int)x, (int)y, (int)width, (int)height);
 	g->FillRectangle(&brush, (int)x, (int)y, (int)width, (int)height);

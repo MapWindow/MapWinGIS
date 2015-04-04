@@ -50,7 +50,8 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 		bool hasMouseMoveData = HasDrawingData(tkDrawingDataAvailable::MeasuringData) || 
 								HasDrawingData(tkDrawingDataAvailable::Coordinates) ||
 								HasDrawingData(tkDrawingDataAvailable::ZoomBox) || 
-								HasDrawingData(tkDrawingDataAvailable::ShapeDigitizing);
+								HasDrawingData(tkDrawingDataAvailable::ShapeDigitizing) ||
+								HasDrawingData(tkDrawingDataAvailable::FocusRect);
 
 		// if there is no move data, draws to output canvas directly
 		this->HandleNewDrawing(pdc, rcBounds, rcInvalid, !hasMouseMoveData);
@@ -975,6 +976,12 @@ bool CMapView::HasDrawingData(tkDrawingDataAvailable type)
 {
 	switch(type) 
 	{
+		case FocusRect:
+			{
+				VARIANT_BOOL vb;
+				_focusRectangle->get_Visible(&vb);
+				return vb ? true : false;
+			}
 		case IdentifiedShapes:
 			{
 				return SelectionListHelper::GetCount(_identifiedShapes) > 0;
