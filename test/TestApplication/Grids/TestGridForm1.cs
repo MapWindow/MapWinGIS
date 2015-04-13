@@ -216,7 +216,7 @@ namespace TestApplication.Grids
         private void cboCoordinates_SelectedIndexChanged(object sender, EventArgs e)
         {
             axMap1.ShowCoordinates = (tkCoordinatesDisplay)cboCoordinates.SelectedIndex;
-            axMap1.Redraw2(tkRedrawType.RedrawDynamicTools);
+            axMap1.Redraw2(tkRedrawType.RedrawMinimal);
         }
 
         private void BtnTestProjectionClick(object sender, EventArgs e)

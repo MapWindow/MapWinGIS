@@ -117,6 +117,7 @@ namespace TestApplication
                     // Log projection:
                     theForm.Progress(string.Empty, 100, "Projection: " + grd.Header.GeoProjection.ExportToProj4());
                     theForm.Progress(string.Empty, 100, "Number of bands: " + grd.NumBands);
+                    theForm.Progress(string.Empty, 100, "NoData value: " + grd.Header.NodataValue);
 
                     hndl = Map.AddLayer(grd, true);
 
