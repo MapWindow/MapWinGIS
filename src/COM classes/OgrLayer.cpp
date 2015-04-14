@@ -1466,3 +1466,11 @@ STDMETHODIMP COgrLayer::get_DriverName(BSTR* pVal)
 	}
 	return S_OK;
 }
+
+// *************************************************************
+//		GetCompositeFilename()
+// *************************************************************
+CStringW COgrLayer::GetCompositeFilename()
+{
+	return L"OgrConnection|" + _connectionString + L"|" + _sourceQuery;
+}

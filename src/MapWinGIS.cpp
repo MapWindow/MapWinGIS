@@ -42,8 +42,8 @@ BOOL CMapWinGISApp::InitInstance()
 {
 	// let's generate floating point exceptions
 	#ifndef RELEASE_MODE
-		_clearfp();
-		_controlfp(0, EM_ZERODIVIDE);
+		//_clearfp();
+		//_controlfp(0, EM_ZERODIVIDE);
 	#endif
 
 	Debug::Init();
