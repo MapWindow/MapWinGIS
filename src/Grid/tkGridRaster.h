@@ -24,7 +24,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#pragma pack(push, gif2, 1)
+#ifdef RELEASE_MODE
+	#pragma pack(push, gif2, 1)
+#endif
 
 #include "grdTypes.h"
 #include "HashTable.h"
@@ -220,6 +222,8 @@ public:
 
 };
 
-#pragma pack(pop, gif2)
+#ifdef RELEASE_MODE
+	#pragma pack(pop, gif2)
+#endif
 
 #endif // !defined(tkJpg_H)

@@ -1,7 +1,10 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-# pragma pack(push,1)
+#ifdef RELEASE_MODE
+	# pragma pack(push,1)
+#endif
+
 class colour
 {
 public:
@@ -14,7 +17,10 @@ public:
 
 	bool operator==( const colour & c );
 };
-# pragma pack(pop)
+
+#ifdef RELEASE_MODE
+	# pragma pack(pop)
+#endif
 
 #define C_MAROON		colour(127,0,0);
 #define C_RED			colour(255,0,0);

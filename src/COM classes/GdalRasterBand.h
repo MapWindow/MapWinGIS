@@ -42,6 +42,17 @@ public:
 	STDMETHOD(get_OverviewCount)(LONG* pVal);
 	STDMETHOD(get_ColorInterpretation)(tkColorInterpretation* pVal);
 	STDMETHOD(put_ColorInterpretation)(tkColorInterpretation newVal);
+	STDMETHOD(get_DataType)(tkGdalDataType* pVal);
+	STDMETHOD(get_XSize)(LONG* pVal);
+	STDMETHOD(get_YSize)(LONG* pVal);
+	STDMETHOD(get_BlockSizeX)(LONG* pVal);
+	STDMETHOD(get_BlockSizeY)(LONG* pVal);
+	STDMETHOD(get_UnitType)(BSTR* pVal);
+	STDMETHOD(get_Scale)(DOUBLE* pVal);
+	STDMETHOD(get_Offset)(DOUBLE* pVal);
+	STDMETHOD(get_HasColorTable)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_MetadataCount)(LONG* pVal);
+	STDMETHOD(get_MetadataItem)(LONG itemIndex, BSTR* pVal);
 
 private:
 	GDALRasterBand* _band;

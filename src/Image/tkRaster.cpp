@@ -530,7 +530,7 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		// ----------------------------------------------------
 		//   Building a histogram
 		// ----------------------------------------------------
-		if ((_useHistogram) && (_allowHistogram))
+		if (_useHistogram && _allowHistogram)
 		{
 			//Check all the conditions are met for histogram equalization compute the histogram once
 			if (_nBands == 1 && !_hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
@@ -538,8 +538,10 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 				if (!_histogramComputed)
 				{
 					_nLUTBins = 256;
-					if(ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
+					if (ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
+					{
 						_histogramComputed = true;	
+					}
 					else 
 					{
 						_histogramComputed = false;	//Failed - don't try again 
@@ -547,8 +549,9 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 					}
 				}
 			}
-			else 
+			else {
 				_histogramComputed = false;
+			}
 		}
 		
 		// ---------------------------------------------------------
@@ -563,8 +566,9 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 			else
 				success =  ReadGridAsImage<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setRGBToGrey);
 		}
-		else
+		else {
 			success = ReadImage(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
+		}
 		
 		if ( success )
 		{
@@ -959,7 +963,8 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 // ****************************************************************
 // Is used for caching colours when color table exists
 // lsu:  are there all options should be considered here?
-void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result)
+void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, 
+					const GDALColorEntry * poCE, bool useHistogram, colour* result)
 {
 	bool colorEntryExists = (poCE != NULL)?true:false;
 	

@@ -59,6 +59,26 @@ interface IUndoList;
 interface IIdentifier;
 interface IGdalRasterBand;
 
+/************************** tkGdalDataType Enumeration **********************/
+typedef
+[
+	uuid(1963B9D4-929C-41B0-BFF4-476F05C72870),
+	helpstring("tkGdalDataType"),
+]
+enum tkGdalDataType {
+	gdtUnknown = 0,  /*! Unknown or unspecified type */
+	gdtByte = 1,	  /*! Eight bit unsigned integer */
+	gdtUInt16 = 2,   /*! Sixteen bit unsigned integer */
+	gdtInt16 = 3,	  /*! Sixteen bit signed integer */
+	gdtUInt32 = 4,	  /*! Thirty two bit unsigned integer */
+	gdtInt32 = 5,	  /*! Thirty two bit signed integer */
+	gdtFloat32 = 6,  /*! Thirty two bit floating point */
+	gdtFloat64 = 7,  /*! Sixty four bit floating point */
+	gdtCInt16 = 8,   /*! Complex Int16 */
+	gdtCInt32 = 9,   /*! Complex Int32 */
+	gdtCFloat32 = 10, /*! Complex Float32 */
+	gdtCFloat64 = 11, /*! Complex Float64 */
+} tkGdalDataType;
 
 /************************** tkPalletteInterpretation Enumeration **********************/
 typedef
@@ -5897,6 +5917,17 @@ interface IGdalRasterBand : IDispatch{
 	[propget, id(4)] HRESULT OverviewCount([out, retval] LONG* pVal);
 	[propget, id(5)] HRESULT ColorInterpretation([out, retval] tkColorInterpretation* pVal);
 	[propput, id(5)] HRESULT ColorInterpretation([in] tkColorInterpretation newVal);
+	[propget, id(6)] HRESULT DataType([out, retval] tkGdalDataType* pVal);
+	[propget, id(7)] HRESULT XSize([out, retval] LONG* pVal);
+	[propget, id(8)] HRESULT YSize([out, retval] LONG* pVal);
+	[propget, id(9)] HRESULT BlockSizeX([out, retval] LONG* pVal);
+	[propget, id(10)] HRESULT BlockSizeY([out, retval] LONG* pVal);
+	[propget, id(11)] HRESULT UnitType([out, retval] BSTR* pVal);
+	[propget, id(12)] HRESULT Scale([out, retval] DOUBLE* pVal);
+	[propget, id(13)] HRESULT Offset([out, retval] DOUBLE* pVal);
+	[propget, id(14)] HRESULT HasColorTable([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(15)] HRESULT MetadataCount([out, retval] LONG* pVal);
+	[propget, id(16)] HRESULT MetadataItem([in] LONG itemIndex, [out, retval] BSTR* pVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
