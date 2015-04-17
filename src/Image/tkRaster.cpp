@@ -52,14 +52,11 @@ bool tkRaster::SetActiveBandIndex(int bandIndex)
 }
 
 // *************************************************************
-//	  get_RasterBand()
+//	  GetBand()
 // *************************************************************
-GDALRasterBand* tkRaster::GetRasterBand(int BandIndex)
+GDALRasterBand* tkRaster::GetBand(int bandIndex)
 {
-	if (BandIndex == 1) return _poBandR;
-	else if (BandIndex == 1) return _poBandG;
-	else if (BandIndex == 1) return _poBandB;
-	else return NULL;
+	return _rasterDataset->GetRasterBand(bandIndex);
 }
 
 // *************************************************************

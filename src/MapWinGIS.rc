@@ -25,7 +25,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 //
 
 IDR_SHAPEFILELEGEND     REGISTRY                "COM Classes/ShapefileColorScheme.rgs"
-IDR_SHAPEFILELEGENDBREAK REGISTRY               "COM Classes/ShapefileColorBreak.rgs"
+IDR_SHAPEFILELEGENDBREAK REGISTRY                "COM Classes/ShapefileColorBreak.rgs"
 IDR_GRID                REGISTRY                "COM Classes/Grid.rgs"
 IDR_GRIDHEADER          REGISTRY                "COM Classes/GridHeader.rgs"
 IDR_ESRIGRIDMANAGER     REGISTRY                "COM Classes/ESRIGridManager.rgs"
@@ -70,6 +70,7 @@ IDR_UNDOLIST            REGISTRY                "COM Classes/UndoList.rgs"
 IDR_IDENTIFIER          REGISTRY                "COM Classes/Identifier.rgs"
 IDR_SELECTIONLIST       REGISTRY                "COM Classes/SelectionList.rgs"
 IDR_DRAWINGRECTANGLE    REGISTRY                "COM Classes/DrawingRectangle.rgs"
+IDR_GDALRASTERBAND      REGISTRY                "COM Classes/GdalRasterBand.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

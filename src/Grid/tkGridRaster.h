@@ -154,6 +154,8 @@ private:
 	}
 
 public: 	
+	GDALRasterBand* GetBand(int index);
+	
 	void SaveHeaderInfo();
 
 	double GetNoDataValue() { return _noDataValue; }

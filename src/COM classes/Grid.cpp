@@ -27,6 +27,7 @@
 #include "comutil.h"
 #include "Image.h"
 #include "GridHeader.h"
+#include "RasterBandHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -2677,7 +2678,7 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 			GdalHelper::BuildOverviewsIfNeeded(gridName, true, _globalCallback);
 		}
 		else {
-			ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+			ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		}
 	}
 }
@@ -3014,3 +3015,39 @@ IGridColorScheme* CGrid::BuildGradientColorSchemeCore(PredefinedColorScheme colo
 	return scheme;
 }
 #pragma endregion
+
+// ********************************************************
+//     get_Band
+// ********************************************************
+STDMETHODIMP CGrid::get_Band(long bandIndex, IGdalRasterBand** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+
+	if (!_trgrid)
+	{
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+		return S_OK;
+	}
+
+	//they are 1-based internally, let them remain so
+	if (bandIndex < 1 || bandIndex > _trgrid->getNumBands())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+
+	GDALRasterBand* band = _trgrid->GetBand(bandIndex);
+	if (!band)
+	{
+		CallbackHelper::AssertionFailed("CGrid::get_Band: not null band was expected at this point.");
+		return S_OK;
+	}
+
+	ComHelper::CreateInstance(idGdalRasterBand, (IDispatch**)retVal);
+
+	RasterBandHelper::Cast(*retVal)->InjectBand(band);
+
+	return S_OK;
+}

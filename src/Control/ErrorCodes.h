@@ -157,7 +157,7 @@ const char * ErrorMsg( long ErrorCode );
 # define tkINVALID_DY 603
 # define tkINVALID_DX 604
 # define tkCANT_CREATE_DDB_BITMAP 605
-# define tkNOT_APPLICABLE_TO_BITMAP 606
+# define tkAPPLICABLE_GDAL_ONLY 606
 # define tkNOT_APPLICABLE_TO_GDAL 607
 # define tkGDAL_DATASET_IS_READONLY 608
 # define tkIMAGE_BUFFER_IS_EMPTY 609

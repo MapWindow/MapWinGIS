@@ -1923,3 +1923,11 @@ bool tkGridRaster::IsRgb()
 { 
 	return GdalHelper::IsRgb(_rasterDataset);
 }
+
+// ***********************************************
+//	    GetBand
+// ***********************************************
+GDALRasterBand* tkGridRaster::GetBand(int index)
+{
+	return _rasterDataset->GetRasterBand(index);
+}

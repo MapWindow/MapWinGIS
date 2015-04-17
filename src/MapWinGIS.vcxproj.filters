@@ -825,6 +825,12 @@
     <ClInclude Include="COM classes\DrawingRectangle.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\GdalRasterBand.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="ComHelpers\RasterBandHelper.h">
+      <Filter>ComHelpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1755,6 +1761,12 @@
     <ClCompile Include="COM classes\DrawingRectangle.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\GdalRasterBand.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ComHelpers\RasterBandHelper.cpp">
+      <Filter>ComHelpers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1937,6 +1949,9 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\DrawingRectangle.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\GdalRasterBand.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

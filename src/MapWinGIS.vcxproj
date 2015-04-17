@@ -206,6 +206,7 @@
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\DrawingRectangle.h" />
+    <ClInclude Include="COM classes\GdalRasterBand.h" />
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
@@ -219,6 +220,7 @@
     <ClInclude Include="ComHelpers\ImageHelper.h" />
     <ClInclude Include="ComHelpers\LabelsHelper.h" />
     <ClInclude Include="ComHelpers\ProjectionHelper.h" />
+    <ClInclude Include="ComHelpers\RasterBandHelper.h" />
     <ClInclude Include="ComHelpers\SelectionHelper.h" />
     <ClInclude Include="ComHelpers\SelectionListHelper.h" />
     <ClInclude Include="ComHelpers\ShapefileHelper.h" />
@@ -455,6 +457,7 @@
   <!-- source -->
   <ItemGroup>
     <ClCompile Include="COM classes\DrawingRectangle.cpp" />
+    <ClCompile Include="COM classes\GdalRasterBand.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
@@ -468,6 +471,7 @@
     <ClCompile Include="ComHelpers\ImageHelper.cpp" />
     <ClCompile Include="ComHelpers\LabelsHelper.cpp" />
     <ClCompile Include="ComHelpers\ProjectionHelper.cpp" />
+    <ClCompile Include="ComHelpers\RasterBandHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionHelper.cpp" />
     <ClCompile Include="ComHelpers\SelectionListHelper.cpp" />
     <ClCompile Include="ComHelpers\ShapefileHelper.cpp" />
@@ -785,6 +789,7 @@
     <None Include="COM classes\Field.rgs" />
     <None Include="COM classes\FieldStatOperations.rgs" />
     <None Include="COM classes\FileManager.rgs" />
+    <None Include="COM classes\GdalRasterBand.rgs" />
     <None Include="COM classes\GeoProjection.rgs" />
     <None Include="COM classes\GlobalSettings.rgs" />
     <None Include="COM classes\Grid.rgs" />

@@ -305,8 +305,8 @@ const char * ErrorMsg( long ErrorCode )
 			return "dX must be greater than zero.";
 		case tkCANT_CREATE_DDB_BITMAP:
 			return "Couldn't create DDB bitmap. Not enough memory.";
-		case tkNOT_APPLICABLE_TO_BITMAP:
-			return "The method or property is applicable for GDAL-based images only.";
+		case tkAPPLICABLE_GDAL_ONLY:
+			return "The method or property is applicable to GDAL-based datasources only.";
 		case tkNOT_APPLICABLE_TO_GDAL:
 			return "The method or property isn't applicable to GDAL images.";
 		case tkGDAL_DATASET_IS_READONLY:

@@ -280,6 +280,7 @@ public:
 	STDMETHOD(get_GridProxyColorScheme)(IGridColorScheme** retVal);
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
 
 private:
 	tkImageSourceType _sourceType;

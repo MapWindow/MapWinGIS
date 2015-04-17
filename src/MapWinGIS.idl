@@ -57,6 +57,47 @@ interface IOgrDatasource;
 interface IOgrLayer;
 interface IUndoList;
 interface IIdentifier;
+interface IGdalRasterBand;
+
+
+/************************** tkPalletteInterpretation Enumeration **********************/
+typedef
+[
+	uuid(A385C6B7-D9B1-401C-B63C-7049CE216790),
+	helpstring("tkPalletteInterpretation"),
+]
+enum tkPalletteInterpretation {
+	piGray = 0,  /*! Grayscale (in GDALColorEntry.c1) */                      
+	piRGB = 1,  /*! Red, Green, Blue and Alpha in (in c1, c2, c3 and c4) */  
+	piCMYK = 2,  /*! Cyan, Magenta, Yellow and Black (in c1, c2, c3 and c4)*/ 
+	piHLS = 3   /*! Hue, Lightness and Saturation (in c1, c2, and c3) */     
+} tkPalletteInterpretation;
+
+/************************** tkColorInterpretation Enumeration **********************/
+typedef
+[
+	uuid(1009AFD4-40D9-4BED-A4EB-108FCF8F6C95),
+	helpstring("tkColorInterpretation"),
+]
+enum tkColorInterpretation {
+	ciUndefined = 0,
+	ciGrayIndex = 1,		/*! Greyscale */                                      
+	ciPaletteIndex = 2,		/*! Paletted (see associated color table) */          
+	ciRedBand = 3,			/*! Red band of RGBA image */                         
+	ciGreenBand = 4,		/*! Green band of RGBA image */                       
+	ciBlueBand = 5,			/*! Blue band of RGBA image */                        
+	ciAlphaBand = 6,		/*! Alpha (0=transparent, 255=opaque) */              
+	ciHueBand = 7,			/*! Hue band of HLS image */                          
+	ciSaturationBand = 8,	/*! Saturation band of HLS image */                   
+	ciLightnessBand = 9,	/*! Lightness band of HLS image */                    
+	ciCyanBand = 10,		/*! Cyan band of CMYK image */                        
+	ciMagentaBand = 11,		/*! Magenta band of CMYK image */                     
+	ciYellowBand = 12,		/*! Yellow band of CMYK image */                      
+	ciBlackBand = 13,		/*! Black band of CMLY image */                       
+	ciYCbCr_YBand = 14,		/*! Y Luminance */                                    
+	ciYCbCr_CbBand = 15,	/*! Cb Chroma */                                      
+	ciYCbCr_CrBand = 16,	/*! Cr Chroma */                                      
+} tkColorInterpretation;
 
 /************************** tkProxyAuthentication Enumeration **********************/
 typedef
@@ -994,6 +1035,7 @@ enum tkScalebarUnits
 		idIdentifier = 42,
 		idSelectionList = 43,
 		idDrawingRectangle = 44,
+		idGdalRasterBand = 45,
 	} tkInterface;	
 
 	typedef		
@@ -3365,8 +3407,7 @@ interface IGrid : IDispatch{
 		[id(43), helpstring("property PutFloatWindow2")] HRESULT PutFloatWindow2([in] long StartRow, [in] long EndRow, [in] long StartCol, [in] long EndCol, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
-
-		
+		[propget, id(46)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 };
 
 /****************************  GridHeader Interface ***********************/
@@ -3562,6 +3603,7 @@ interface IImage : IDispatch{
 	[propget, id(86), helpstring("property GridProxyColorScheme")] HRESULT GridProxyColorScheme([out, retval] IGridColorScheme** retVal);
 	[propget, id(87)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
 	[propget, id(88)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(89)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -5841,6 +5883,21 @@ interface IDrawingRectangle : IDispatch{
 	[propget, id(9)] HRESULT LineWidth([out, retval] float* pVal);
 	[propput, id(9)] HRESULT LineWidth([in] float newVal);
 };
+[
+	object,
+	uuid(8B3238D8-BB62-4C41-88C2-F0BDDAAD8D03),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IGdalRasterBand : IDispatch{
+	[propget, id(1)] HRESULT NoDataValue([out, retval] DOUBLE* pVal);
+	[propget, id(2)] HRESULT Minimum([out, retval] DOUBLE* pVal);
+	[propget, id(3)] HRESULT Maximum([out, retval] DOUBLE* pVal);
+	[propget, id(4)] HRESULT OverviewCount([out, retval] LONG* pVal);
+	[propget, id(5)] HRESULT ColorInterpretation([out, retval] tkColorInterpretation* pVal);
+	[propput, id(5)] HRESULT ColorInterpretation([in] tkColorInterpretation newVal);
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -6778,5 +6835,12 @@ library MapWinGIS
 	coclass DrawingRectangle
 	{
 		[default] interface IDrawingRectangle;
+	};
+	[
+		uuid(B451AA42-A353-4AB0-AF0E-88C5BCE3B2B6)		
+	]
+	coclass GdalRasterBand
+	{
+		[default] interface IGdalRasterBand;
 	};
 };

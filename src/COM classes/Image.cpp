@@ -30,6 +30,7 @@
 #include "GridColorScheme.h"
 #include "GridManager.h"
 #include <io.h>
+#include "RasterBandHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1500,7 +1501,7 @@ bool CImageClass::IsGdalImageAvailable()
 	}
 	else
 	{
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		return false;
 	}
 }
@@ -1904,7 +1905,7 @@ STDMETHODIMP CImageClass::put_AllowHillshade(VARIANT_BOOL newValue)
 	}
 	else
 	{
-		ErrorMsg(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMsg(tkAPPLICABLE_GDAL_ONLY);
 	}
 	return S_OK;
 }
@@ -1942,7 +1943,7 @@ STDMETHODIMP CImageClass::put_UseHistogram(VARIANT_BOOL newValue)
 	}
 	else
 	{
-		ErrorMsg(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMsg(tkAPPLICABLE_GDAL_ONLY);
 	}
 	return S_OK;
 }
@@ -2003,7 +2004,7 @@ STDMETHODIMP CImageClass::put_BufferSize(int newValue)
 	}
 	else
 	{
-		ErrorMsg(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMsg(tkAPPLICABLE_GDAL_ONLY);
 	}
 	return S_OK;
 }
@@ -2079,7 +2080,7 @@ STDMETHODIMP CImageClass::put_ClearGDALCache(VARIANT_BOOL newVal)
 		_rasterImage->SetClearGdalCache(newVal ? true : false);
 	}
 	else
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	return S_OK;
 }
 
@@ -2190,7 +2191,7 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 	}
 	else
 	{
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	}
 	return S_OK;
 }
@@ -2852,7 +2853,7 @@ STDMETHODIMP CImageClass::SetNoDataValue(double Value, VARIANT_BOOL* Result)
 		*Result = (VARIANT_BOOL)_rasterImage->SetNoDataValue(Value);
 	}
 	else
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	
 	return S_OK;
 }
@@ -2868,7 +2869,7 @@ STDMETHODIMP CImageClass::get_NumOverviews(int* retval)
 
 	if (_gdalImage)
 	{
-		GDALRasterBand* band = _rasterImage->GetRasterBand(1);
+		GDALRasterBand* band = _rasterImage->GetBand(1);
 		if (band)
 		{
 			 *retval = band->GetOverviewCount();
@@ -3431,7 +3432,7 @@ STDMETHODIMP CImageClass::put_AllowGridRendering(tkGridRendering newValue)
 	}
 	else
 	{
-		ErrorMsg(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMsg(tkAPPLICABLE_GDAL_ONLY);
 	}
 
 	return S_OK;
@@ -3458,7 +3459,7 @@ STDMETHODIMP CImageClass::_pushSchemetkRaster(IGridColorScheme * cScheme, VARIAN
 	}
 	else
 	{
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		*retval = VARIANT_FALSE;
 	}
 	return S_OK;
@@ -3505,7 +3506,7 @@ STDMETHODIMP CImageClass::get_CustomColorScheme(IGridColorScheme** retVal)
 	else
 	{
 		(*retVal) = NULL;
-		ErrorMessage(tkNOT_APPLICABLE_TO_BITMAP);
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	}
 
 	return S_OK;
@@ -3654,4 +3655,40 @@ int CImageClass::GetOriginalBufferHeight()
 	}
 	
 	return 0;
+}
+
+// ********************************************************
+//     get_Band
+// ********************************************************
+STDMETHODIMP CImageClass::get_Band(long bandIndex, IGdalRasterBand** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+
+	if (!_gdalImage)
+	{
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+		return S_OK;
+	}
+
+	//they are 1-based internally, let them remain so
+	if (bandIndex < 1 || bandIndex > _rasterImage->GetNoBands())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+
+	GDALRasterBand* band = _rasterImage->GetBand(bandIndex);
+	if (!band)
+	{
+		CallbackHelper::AssertionFailed("CImageClass::get_Band: not null band was expected at this point.");
+		return S_OK;
+	}
+
+	ComHelper::CreateInstance(idGdalRasterBand, (IDispatch**)retVal);
+	
+	RasterBandHelper::Cast(*retVal)->InjectBand(band);
+
+	return S_OK;
 }

@@ -183,7 +183,7 @@ private:
 public:
 	// properties
 	GDALDataset* GetDataset(){ return _rasterDataset; }
-	GDALRasterBand* GetRasterBand(int BandIndex);
+	GDALRasterBand* GetBand(int bandIndex);
 	IGridColorScheme* GetCustomColorScheme() { return _customColorScheme; }
 	GDALPaletteInterp GetPaletteInterpretation() { return _palleteInterpretation; }
 	PredefinedColorScheme GetDefaultColors() { return _predefinedColors; }
