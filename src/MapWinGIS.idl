@@ -86,12 +86,12 @@ typedef
 	uuid(A385C6B7-D9B1-401C-B63C-7049CE216790),
 	helpstring("tkPalletteInterpretation"),
 ]
-enum tkPalletteInterpretation {
+enum tkPaletteInterpretation {
 	piGray = 0,  /*! Grayscale (in GDALColorEntry.c1) */                      
 	piRGB = 1,  /*! Red, Green, Blue and Alpha in (in c1, c2, c3 and c4) */  
 	piCMYK = 2,  /*! Cyan, Magenta, Yellow and Black (in c1, c2, c3 and c4)*/ 
 	piHLS = 3   /*! Hue, Lightness and Saturation (in c1, c2, and c3) */     
-} tkPalletteInterpretation;
+} tkPaletteInterpretation;
 
 /************************** tkColorInterpretation Enumeration **********************/
 typedef
@@ -3624,6 +3624,7 @@ interface IImage : IDispatch{
 	[propget, id(87)] HRESULT GeoProjection([out, retval] IGeoProjection** pVal);
 	[propget, id(88)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(89)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
+	[propget, id(90)] HRESULT PaletteInterpretation2([out, retval] tkPaletteInterpretation* pVal);
 };
 
 /****************************  Shapefile Interface ***********************/

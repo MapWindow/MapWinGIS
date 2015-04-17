@@ -281,6 +281,7 @@ public:
 	STDMETHOD(get_GeoProjection)(IGeoProjection** pVal);
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
+	STDMETHOD(get_PaletteInterpretation2)(tkPaletteInterpretation* pVal);
 
 private:
 	tkImageSourceType _sourceType;

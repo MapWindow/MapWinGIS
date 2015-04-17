@@ -3692,3 +3692,22 @@ STDMETHODIMP CImageClass::get_Band(long bandIndex, IGdalRasterBand** retVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     get_PalleteInterpretation2
+// ********************************************************
+STDMETHODIMP CImageClass::get_PaletteInterpretation2(tkPaletteInterpretation* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_gdalImage)
+	{
+		*pVal = (tkPaletteInterpretation)_rasterImage->GetPaletteInterpretation();
+	}
+	else
+	{
+		*pVal = piRGB;
+	}
+
+	return S_OK;
+}
