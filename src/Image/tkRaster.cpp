@@ -41,10 +41,12 @@ void tkRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 bool tkRaster::SetActiveBandIndex(int bandIndex)
 {
 	if (_nBands < bandIndex || bandIndex < 1)
+	{
 		return false;
+	}
 	else
 	{
-		activeBandIndex = bandIndex;
+		_activeBandIndex = bandIndex;
 		return true;
 	}
 }
@@ -52,7 +54,7 @@ bool tkRaster::SetActiveBandIndex(int bandIndex)
 // *************************************************************
 //	  get_RasterBand()
 // *************************************************************
-GDALRasterBand* tkRaster::get_RasterBand(int BandIndex)
+GDALRasterBand* tkRaster::GetRasterBand(int BandIndex)
 {
 	if (BandIndex == 1) return _poBandR;
 	else if (BandIndex == 1) return _poBandG;
@@ -72,7 +74,7 @@ void tkRaster::ComputeBandMinMax()
 	//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
 	if( ! (bGotMin && bGotMax) )
 	{
-		if ((_dataType == GDT_Byte) &&  (_imgType != ADF_FILE) && (hasColorTable==false) && (_imgType != PNG_FILE))
+		if ((_dataType == GDT_Byte) &&  (_imgType != ADF_FILE) && (_hasColorTable==false) && (_imgType != PNG_FILE))
 			//Just guess the min and max
 			//For some reason GDAL does not seem to pick up the color table of a png binary image
 		{
@@ -123,7 +125,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 	// just doing nothing and leaving a blank map.
 	__try
 	{
-		warped = false;
+		_warped = false;
 		GDALAllRegister();
 		
 		//Rob JPEG2000 fails at this point with a nasty error if MapWinGIS is 
@@ -138,8 +140,8 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 			return retVal;
 		}
 
-		orig_Width = _rasterDataset->GetRasterXSize();
-		orig_Height = _rasterDataset->GetRasterYSize();			
+		_origWidth = _rasterDataset->GetRasterXSize();
+		_origHeight = _rasterDataset->GetRasterYSize();			
 		
 		m_globalSettings.SetGdalUtf8(true);		// otherwise there can be problems when reading world file
 												// as dataset filename is already stored as UTF8
@@ -151,16 +153,16 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		if( success )
 		{
-            orig_dX = adfGeoTransform[1];
-			orig_dY  = adfGeoTransform[5];
+            _origDx = adfGeoTransform[1];
+			_origDy  = adfGeoTransform[5];
 			// adfGeoTransform[0]&[3] refer to the corner (not the centre) of the left top pixel
-			orig_XllCenter = adfGeoTransform[0]+ orig_dX/2.0;
-			orig_YllCenter = adfGeoTransform[3] + orig_dY/2.0;
+			_origXllCenter = adfGeoTransform[0]+ _origDx/2.0;
+			_origYllCenter = adfGeoTransform[3] + _origDy/2.0;
 			
 			// we got top corner and now we'll get coordinates of the bottom left corner; 
 			// dy should be changed respectively as map coordinates will be increasing while moving from bottom to top
-			orig_YllCenter += orig_dY * (orig_Height - 1);
-			orig_dY *= -1;
+			_origYllCenter += _origDy * (_origHeight - 1);
+			_origDy *= -1;
 
 			// Check if we need a warped VRT for this file.
 			if ( adfGeoTransform[1] < 0.0 || adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0 || adfGeoTransform[5] > 0.0 )
@@ -171,33 +173,33 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 				{
 					_rasterDataset->Dereference();
 					_rasterDataset = mGdalDataset;
-					warped = true;
+					_warped = true;
 
 					if ( _rasterDataset->GetGeoTransform( adfGeoTransform )== CE_None)
 					{
-						orig_dX = adfGeoTransform[1];
-						orig_dY  = adfGeoTransform[5];
+						_origDx = adfGeoTransform[1];
+						_origDy  = adfGeoTransform[5];
 						// adfGeoTransform[0]&[3] refer to the corner (not the centre) of the left top pixel
-						orig_XllCenter = adfGeoTransform[0]+ orig_dX/2;
-						orig_YllCenter = adfGeoTransform[3] + orig_dY/2;
+						_origXllCenter = adfGeoTransform[0]+ _origDx/2;
+						_origYllCenter = adfGeoTransform[3] + _origDy/2;
 						
-						orig_Width = _rasterDataset->GetRasterXSize();
-						orig_Height = _rasterDataset->GetRasterYSize();			
+						_origWidth = _rasterDataset->GetRasterXSize();
+						_origHeight = _rasterDataset->GetRasterYSize();			
 
 						// we got top corner and now we'll get coordinates of the bottom left corner; 
 						// dy should be changed respectively as map coordinates will be increasing while moving from bottom to top
-						orig_YllCenter += orig_dY * (orig_Height - 1);
-						orig_dY *= -1;
+						_origYllCenter += _origDy * (_origHeight - 1);
+						_origDy *= -1;
 					}
 				}
 			}	
 		}
 		else
 		{	
-			orig_XllCenter = 0;
-			orig_YllCenter = 0;
-			orig_dX = 1;
-			orig_dY = 1;
+			_origXllCenter = 0;
+			_origYllCenter = 0;
+			_origDx = 1;
+			_origDy = 1;
 		}
 
 		/************************** GET THE NUMBER OF BANDS **********************/
@@ -236,7 +238,7 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 			return retVal;
 		}
 		
-		activeBandIndex = 1;
+		_activeBandIndex = 1;
 
 		/******************** GET THE DATA TYPE FROM THE FIRST BAND ***************/
 
@@ -262,25 +264,26 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 		
 		/******************** COLOR TABLE AND NUMBER OF BANDS ***************/
 
-		//Initialise
-		_cPI = GPI_Gray;
+		// Initialize
+		_palleteInterpretation = GPI_Gray;
 		_histogramComputed = false;
 		_allowHistogram = true;
 
 		//allowAsGrid = true;				// Allow the image to be read as grid (if appropriate)
-		imageQuality = 100;				// Image quality 10-100
+		_imageQuality = 100;				// Image quality 10-100
 		_predefinedColors = FallLeaves;	// Set the default color scheme if read as grid
-		useHistogram = false;			// Use histogram equalization
+		_useHistogram = false;			// Use histogram equalization
 
-		_poCT = _poBandR->GetColorTable();
-		if (_poCT != NULL)
+		_colorTable = _poBandR->GetColorTable();
+		if (_colorTable != NULL)
 		{
-			hasColorTable = true;
-			_cPI = _poCT->GetPaletteInterpretation();
-			_ciName = GDALGetPaletteInterpretationName(paletteInterp);
+			_hasColorTable = true;
+			_palleteInterpretation = _colorTable->GetPaletteInterpretation();
 		}
-		else 
-			hasColorTable=false;
+		else
+		{
+			_hasColorTable=false;
+		}
 
 		/************************** MIN/MAX AND RENDERING METHOD ***********************/
 		
@@ -292,22 +295,22 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 
 		/********************* SET TRANSPARENCY COLOR AND GET THE COLOR INTERPRETATION **********************/
 
-		hasTransparency = false;
+		_hasTransparency = false;
 		double nDV=0;
 		int pbSuccess = NULL;
 		nDV = _poBandR->GetNoDataValue(&pbSuccess);
 		
-		if ((pbSuccess != NULL) && hasColorTable)
+		if ((pbSuccess != NULL) && _hasColorTable)
 		{
-			const GDALColorEntry * poCE = GDALGetColorEntry (_poCT, (int) nDV);
+			const GDALColorEntry * poCE = GDALGetColorEntry (_colorTable, (int) nDV);
 			if (poCE)
-				transColor = RGB(poCE->c1,poCE->c2,poCE->c3);
+				_transColor = RGB(poCE->c1,poCE->c2,poCE->c3);
 			else
 			{
 				OLE_COLOR clr = (OLE_COLOR)nDV;
-				transColor = RGB(GetRValue(clr), GetGValue(clr), GetBValue(clr));
+				_transColor = RGB(GetRValue(clr), GetGValue(clr), GetBValue(clr));
 			}
-			hasTransparency = true;
+			_hasTransparency = true;
 		}
 		else if ((pbSuccess != NULL))
 		{
@@ -316,22 +319,22 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 			{
 				// nDVr = nDVg = 0;
 				// nDVb = (unsigned char) nDV;
-				transColor = RGB(255,255,255);
-				hasTransparency = true;
+				_transColor = RGB(255,255,255);
+				_hasTransparency = true;
 			}
 			else
 			{
 				if (_poBandR != NULL) nDVr = (unsigned char) _poBandR->GetNoDataValue();
 				if (_poBandG != NULL) nDVg = (unsigned char) _poBandG->GetNoDataValue();
 				if (_poBandB != NULL) nDVb = (unsigned char) _poBandB->GetNoDataValue();
-				transColor = RGB(nDVr,nDVg,nDVb);
-				hasTransparency = true;
+				_transColor = RGB(nDVr,nDVg,nDVb);
+				_hasTransparency = true;
 			}
 		}
 		else
 		{
-			transColor = RGB(0,0,0);
-			hasTransparency = false;
+			_transColor = RGB(0,0,0);
+			_hasTransparency = false;
 		}
 
 		// setting extents
@@ -360,10 +363,10 @@ bool tkRaster::LoadRasterCore(CStringA& filename, GDALAccess accessType)
 // change of orig_XllCenter, orig_YllCenter, orig_dX, orig_dY
 void tkRaster::RefreshExtents()
 {
-	_extents.left = orig_XllCenter - orig_dX * 0.5;
-	_extents.right = orig_XllCenter + (orig_dX * (orig_Width-1));
-	_extents.top = orig_YllCenter + (orig_dY * (orig_Height-1)); 
-	_extents.bottom = orig_YllCenter - orig_dY * 0.5;
+	_extents.left = _origXllCenter - _origDx * 0.5;
+	_extents.right = _origXllCenter + (_origDx * (_origWidth-1));
+	_extents.top = _origYllCenter + (_origDy * (_origHeight-1)); 
+	_extents.bottom = _origYllCenter - _origDy * 0.5;
 }
 
 // *********************************************************
@@ -403,9 +406,9 @@ void tkRaster::Close()
 		_customColorScheme = NULL;
 	}
 
-	allowAsGrid = grForGridsOnly;
-	activeBandIndex = 1;
-	warped = false;
+	_allowAsGrid = grForGridsOnly;
+	_activeBandIndex = 1;
+	_warped = false;
 }
 
 // *********************************************************
@@ -428,68 +431,68 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 			delete [] (*ImageData);
 		(*ImageData) = new colour[1];
 
-		dX = orig_dX;           
-		dY = orig_dY; 		
+		_dX = _origDx;           
+		_dY = _origDy; 		
 
-		width = height = 1;
+		_width = _height = 1;
 	}
     else
     {
 		int hiddenPixels;
 
 		_visibleExtents.left = _extents.left;
-		visibleRect.left = 0;
+		_visibleRect.left = 0;
 		if (_extents.left < MinX) 
 		{	
-			hiddenPixels = int((MinX - _extents.left - orig_dX/2.0)/orig_dX);		// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.left += hiddenPixels * orig_dX;
-			visibleRect.left += hiddenPixels;
+			hiddenPixels = int((MinX - _extents.left - _origDx/2.0)/_origDx);		// how many pixels are completely hidden: rounding in the lower side
+			_visibleExtents.left += hiddenPixels * _origDx;
+			_visibleRect.left += hiddenPixels;
 		}
 	    
 		_visibleExtents.bottom = _extents.bottom;
-		visibleRect.bottom = orig_Height - 1;
+		_visibleRect.bottom = _origHeight - 1;
 		if (_extents.bottom < MinY)
 		{	
-			hiddenPixels = int((MinY - _extents.bottom)/orig_dY);	// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.bottom +=  hiddenPixels * orig_dY;
-			visibleRect.bottom -= hiddenPixels;
+			hiddenPixels = int((MinY - _extents.bottom)/_origDy);	// how many pixels are completely hidden: rounding in the lower side
+			_visibleExtents.bottom +=  hiddenPixels * _origDy;
+			_visibleRect.bottom -= hiddenPixels;
 		}
 		
 		_visibleExtents.right = _extents.right;
-		visibleRect.right = orig_Width - 1;
+		_visibleRect.right = _origWidth - 1;
 		if (_extents.right > MaxX) 
 		{	
-			hiddenPixels = int((_extents.right - MaxX)/orig_dX);	// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.right -= hiddenPixels * orig_dX;
-			visibleRect.right -= hiddenPixels;
+			hiddenPixels = int((_extents.right - MaxX)/_origDx);	// how many pixels are completely hidden: rounding in the lower side
+			_visibleExtents.right -= hiddenPixels * _origDx;
+			_visibleRect.right -= hiddenPixels;
 		}
 
 		_visibleExtents.top = _extents.top;
-		visibleRect.top = 0;
+		_visibleRect.top = 0;
 		if (_extents.top > MaxY)
 		{	
-			hiddenPixels = int((_extents.top-MaxY)/orig_dY);		// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.top -=  hiddenPixels * orig_dY;
-			visibleRect.top += hiddenPixels;
+			hiddenPixels = int((_extents.top-MaxY)/_origDy);		// how many pixels are completely hidden: rounding in the lower side
+			_visibleExtents.top -=  hiddenPixels * _origDy;
+			_visibleRect.top += hiddenPixels;
 		}
 		
 		// size of image buffer without scaling
-		dX = orig_dX;	// map units per image pixel
-		dY = orig_dY;
-		XllCenter = _visibleExtents.left + dX * 0.5;
-		YllCenter = _visibleExtents.bottom + dY * 0.5;
-		width = visibleRect.right - visibleRect.left + 1;
-		height = visibleRect.bottom - visibleRect.top + 1;
+		_dX = _origDx;	// map units per image pixel
+		_dY = _origDy;
+		_xllCenter = _visibleExtents.left + _dX * 0.5;
+		_yllCenter = _visibleExtents.bottom + _dY * 0.5;
+		_width = _visibleRect.right - _visibleRect.left + 1;
+		_height = _visibleRect.bottom - _visibleRect.top + 1;
 		
-		int xBuff = width;
-		int yBuff = height;
+		int xBuff = _width;
+		int yBuff = _height;
 
 		for (int i = 0; ; i++)
 		{
 			// In case of large images and down sampling it makes sense to reduce the size of buffer,
 			// as additional details will be lost all the same but memory usage can be unacceptable.
 			
-			double mapUnitsPerImagePixel = (dX + dY);			// we intentionally don't divide by 2 here, as we'll check the possibility of decreasing buffer by 2
+			double mapUnitsPerImagePixel = (_dX + _dY);			// we intentionally don't divide by 2 here, as we'll check the possibility of decreasing buffer by 2
 			
 			if (downsamplingMode == imBicubic || downsamplingMode == imBilinear)		// In case of interpolation algorithm different form nearest neigbour is used 
 				mapUnitsPerImagePixel *= 2.0;											// the buffer should be noticeably bigger than screen dimensions to preserve details
@@ -501,39 +504,39 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 			{
 				int xTemp = xBuff/2;
 				int yTemp = yBuff/2;
-				dX = dX * double(xBuff)/double(xTemp);
-				dY = dY * double(yBuff)/double(yTemp);
+				_dX = _dX * double(xBuff)/double(xTemp);
+				_dY = _dY * double(yBuff)/double(yTemp);
 				xBuff = xTemp;
 				yBuff = yTemp;
 			}
 			else
 			{
-				XllCenter = _visibleExtents.left + dX * 0.5;
-				YllCenter = _visibleExtents.bottom + dY * 0.5;
+				_xllCenter = _visibleExtents.left + _dX * 0.5;
+				_yllCenter = _visibleExtents.bottom + _dY * 0.5;
 				break;
 			}
 		}
 		
 		// the image of reduced quality was requested
-		if ( imageQuality != 100 && width > 10 && height > 10)
+		if ( _imageQuality != 100 && _width > 10 && _height > 10)
 		{
-			int xTemp = int((double)xBuff * double(imageQuality)/100.0);
-			int yTemp = int((double)yBuff * double(imageQuality)/100.0);
-			dX = dX * double(xBuff)/double(xTemp);
-			dY = dY * double(yBuff)/double(yTemp);
+			int xTemp = int((double)xBuff * double(_imageQuality)/100.0);
+			int yTemp = int((double)yBuff * double(_imageQuality)/100.0);
+			_dX = _dX * double(xBuff)/double(xTemp);
+			_dY = _dY * double(yBuff)/double(yTemp);
 			xBuff = xTemp;
 			yBuff = yTemp;
-			XllCenter = _visibleExtents.left + dX * 0.5;
-			YllCenter = _visibleExtents.bottom + dY * 0.5;
+			_xllCenter = _visibleExtents.left + _dX * 0.5;
+			_yllCenter = _visibleExtents.bottom + _dY * 0.5;
 		}
 
 		// ----------------------------------------------------
 		//   Building a histogram
 		// ----------------------------------------------------
-		if ((useHistogram) && (_allowHistogram))
+		if ((_useHistogram) && (_allowHistogram))
 		{
 			//Check all the conditions are met for histogram equalization compute the histogram once
-			if (_nBands == 1 && !hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
+			if (_nBands == 1 && !_hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
 			{
 				if (!_histogramComputed)
 				{
@@ -559,17 +562,17 @@ bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double 
 		{
 			// if user passed a color scheme, image will be opened as grid using the first band
 			if (_genericType == GDT_Int32)
-				success =  ReadGridAsImage<_int32>(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
+				success =  ReadGridAsImage<_int32>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setRGBToGrey);
 			else
-				success =  ReadGridAsImage<float>(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff, setRGBToGrey);
+				success =  ReadGridAsImage<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setRGBToGrey);
 		}
 		else
-			success = ReadImage(ImageData, visibleRect.left, visibleRect.top, width, height, xBuff, yBuff);
+			success = ReadImage(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
 		
 		if ( success )
 		{
-			width = xBuff;
-			height = yBuff;
+			_width = xBuff;
+			_height = yBuff;
 		}
 		else
 		{
@@ -593,31 +596,28 @@ bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxB
 		return false;
 	
 	// size of image buffer without scaling
-	dX = orig_dX;	// map units per image pixel
-	dY = orig_dY;
-	XllCenter = orig_XllCenter;
-	YllCenter = orig_YllCenter;
-	width = orig_Width;
-	height = orig_Height;
+	_dX = _origDx;	// map units per image pixel
+	_dY = _origDy;
+	_xllCenter = _origXllCenter;
+	_yllCenter = _origYllCenter;
+	_width = _origWidth;
+	_height = _origHeight;
 
 	int screenX = GetSystemMetrics(SM_CXFULLSCREEN);
 	int screenY = GetSystemMetrics(SM_CYFULLSCREEN);
 	
 	double size = (maxBufferSize * (0x1 << 20)) / 3;  
 	
-	width = orig_Width;
-	height = orig_Height;
-	
 	if ( maxBufferSize > 0 )
 	{
 		for (int i = 0; ; i++)
 		{
-			if (width * height / 4 > size)
+			if (_width * _height / 4 > size)
 			{
-				width /= 2;
-				height /= 2;
-				dX *= 2.0;
-				dY *= 2.0;
+				_width /= 2;
+				_height /= 2;
+				_dX *= 2.0;
+				_dY *= 2.0;
 			}
 			else
 				break;
@@ -625,17 +625,17 @@ bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxB
 	}
 	
 	// setting rectangles for consistency
-	visibleRect.left = 0;
-	visibleRect.right = orig_Width - 1;
-	visibleRect.top = 0;
-	visibleRect.bottom = orig_Height - 1;
+	_visibleRect.left = 0;
+	_visibleRect.right = _origWidth - 1;
+	_visibleRect.top = 0;
+	_visibleRect.bottom = _origHeight - 1;
 
 	_visibleExtents.left = _extents.left;
 	_visibleExtents.right = _extents.right;
 	_visibleExtents.top = _extents.top;
 	_visibleExtents.bottom = _extents.bottom;
 
-	return ReadImage(ImageData, visibleRect.left, visibleRect.top, orig_Width, orig_Height, width, height);
+	return ReadImage(ImageData, _visibleRect.left, _visibleRect.top, _origWidth, _origHeight, _width, _height);
 }
 
 // *********************************************************
@@ -735,17 +735,17 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 		//   caching the color table; adding data to the second buffer
 		// -----------------------------------------------------------
 		int tableCount = 0;
-		if (hasColorTable)
-			tableCount = _poCT->GetColorEntryCount();
+		if (_hasColorTable)
+			tableCount = _colorTable->GetColorEntryCount();
 		
-		if (hasColorTable && tableCount > 0)
+		if (_hasColorTable && tableCount > 0)
 		{
 			// caching the table in the array for faster access
 			colour* colorTable = new colour[tableCount];
 			for (int i = 0; i < tableCount; i++ )
 			{
-				poCE = _poCT->GetColorEntry(i);
-				GDALColorEntry2Colour(band, i, shift, range, noDataValue, poCE, useHistogram, colorTable + i);	// possible to optimize further: no need to check all values
+				poCE = _colorTable->GetColorEntry(i);
+				GDALColorEntry2Colour(band, i, shift, range, noDataValue, poCE, _useHistogram, colorTable + i);	// possible to optimize further: no need to check all values
 			}
 			
 			// reading and decoding the bitmap values
@@ -772,12 +772,12 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 			if (_handleImage == asComplex)
 			{
 				if (_genericType == GDT_Int32)
-					AddToBufferAlt<_int32>(ImageData, srcDataInt, xBuff, yBuff, band, shift, range, noDataValue, poCE, useHistogram);	
+					AddToBufferAlt<_int32>(ImageData, srcDataInt, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);	
 				else
-					AddToBufferAlt<float>(ImageData, srcDataFloat, xBuff, yBuff, band, shift, range, noDataValue, poCE, useHistogram);
+					AddToBufferAlt<float>(ImageData, srcDataFloat, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);
 			}
 			else
-				AddToBufferAlt<unsigned char>(ImageData, srcDataChar, xBuff, yBuff, band, shift, range, noDataValue, poCE, useHistogram);
+				AddToBufferAlt<unsigned char>(ImageData, srcDataChar, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);
 		}
     }
 	
@@ -827,7 +827,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 	colour* dst;	// position in the resulting buffer
 
 	// histogram image
-	if (useHistogram && _nBands == 1 && !hasColorTable)
+	if (useHistogram && _nBands == 1 && !_hasColorTable)
 	{
 		for (int i = 0; i < yBuff; i++) {
 			for (int j = 0; j < xBuff; j++)	
@@ -837,9 +837,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				
 				if ((double)val == noDataValue)
 				{
-					dst->blue = transColor.b;
-					dst->green = transColor.g;
-					dst->red = transColor.r;
+					dst->blue = _transColor.b;
+					dst->green = _transColor.g;
+					dst->red = _transColor.r;
 					//memcpy(dst, &transColor, sizeof(colour));
 				}
 				else
@@ -880,9 +880,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						dst->blue = transColor.b;
-						dst->green = transColor.g;
-						dst->red = transColor.r;
+						dst->blue = _transColor.b;
+						dst->green = _transColor.g;
+						dst->red = _transColor.r;
 						//memcpy(dst, &transColor, sizeof(colour));
 					}
 					else
@@ -896,9 +896,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						if (band == 1)		dst->red = transColor.r;
-						else if (band == 2)	dst->green = transColor.g;
-						else if (band == 3)	dst->blue = transColor.b;
+						if (band == 1)		dst->red = _transColor.r;
+						else if (band == 2)	dst->green = _transColor.g;
+						else if (band == 3)	dst->blue = _transColor.b;
 					}
 					else
 					{
@@ -924,9 +924,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						dst->blue = transColor.b;
-						dst->green = transColor.g;
-						dst->red = transColor.r;
+						dst->blue = _transColor.b;
+						dst->green = _transColor.g;
+						dst->red = _transColor.r;
 						//memcpy(dst, &transColor, sizeof(colour));
 					}
 					else
@@ -940,9 +940,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 				{
 					if (val == noDataValue)
 					{
-						if (band == 1)		dst->red = transColor.r;
-						else if (band == 2)	dst->green = transColor.g;
-						else if (band == 3)	dst->blue = transColor.b;
+						if (band == 1)		dst->red = _transColor.r;
+						else if (band == 2)	dst->green = _transColor.g;
+						else if (band == 3)	dst->blue = _transColor.b;
 					}
 					else
 					{
@@ -977,12 +977,12 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 		}
 		else
 		{
-			if (band == 1)		result->red = transColor.r;
-			else if (band == 2)	result->green = transColor.g;
-			else if (band == 3)	result->blue = transColor.b;
+			if (band == 1)		result->red = _transColor.r;
+			else if (band == 2)	result->green = _transColor.g;
+			else if (band == 3)	result->blue = _transColor.b;
 		}
 	}
-	else if (useHistogram && _nBands == 1 && !hasColorTable)
+	else if (useHistogram && _nBands == 1 && !_hasColorTable)
 	{
 		double dfScale = _nLUTBins / (_padfScaleMax[band-1] - _padfScaleMin[band-1]);
 		int iBin = (int) ((colorValue - _padfScaleMin[band-1]) * dfScale);
@@ -1002,7 +1002,7 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 			result->blue = (unsigned char) iBin;
 		}
 	}
-	else if (hasColorTable && colorEntryExists)
+	else if (_hasColorTable && colorEntryExists)
 	{
 		if (_cInterp == GCI_AlphaBand)
 		{
@@ -1010,7 +1010,7 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 			result->green = (unsigned char)poCE->c4;
 			result->blue = (unsigned char)poCE->c4; 
 		}
-		else if ( (_cPI == GPI_Gray) || (_cInterp == GCI_GrayIndex) )
+		else if ( (_palleteInterpretation == GPI_Gray) || (_cInterp == GCI_GrayIndex) )
 		{
 			result->red = (unsigned char)poCE->c1;  
 			result->green = (unsigned char)poCE->c1;
@@ -1115,15 +1115,13 @@ namespace {
 template <typename DataType>
 bool tkRaster::ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
 {
-	for (int i = 0; i < 100; ++i)
-		ReadGridAsImage2<DataType>(ImageData, xOff, yOff, width, height, xBuff, yBuff, setRGBToGrey);
 	return ReadGridAsImage2<DataType>(ImageData, xOff, yOff, width, height, xBuff, yBuff, setRGBToGrey);
 }
 
 template <typename DataType>
 bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
 {
-	_poBandR = _rasterDataset->GetRasterBand(activeBandIndex);
+	_poBandR = _rasterDataset->GetRasterBand(_activeBandIndex);
 	if (_poBandR == NULL) return false;
 
 	float noDataValue = 0;
@@ -1157,8 +1155,8 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 
 	DataType* pafScanArea = (DataType*)CPLMalloc( sizeof(DataType)*xBuff*yBuff );
 
-	const float xll = static_cast<float>(XllCenter);
-	const float yll = static_cast<float>(YllCenter);
+	const float xll = static_cast<float>(_xllCenter);
+	const float yll = static_cast<float>(_yllCenter);
 
 	//Hard code csize, so that the vectors are normal
 	const float csize = 30;
@@ -1178,7 +1176,7 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 	}
 
 	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
-	gridColorScheme->put_NoDataColor(transColor);
+	gridColorScheme->put_NoDataColor(_transColor);
 
 	float ai = 0.0;
 	float li = 0.0;
@@ -1224,9 +1222,9 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 			
 			if (tmp == noDataValue)
 			{
-				(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
-				(*ImageData)[i * xBuff + j].green = (unsigned char) transColor.g;
-				(*ImageData)[i * xBuff + j].blue =  (unsigned char) transColor.b;			
+				(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
+				(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
+				(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;			
 			} 
 			else if ( setRGBToGrey == true )
 			//Use Matt Perry's Method
@@ -1236,9 +1234,9 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 				if (i == 0 || j == 0 || i == yBuff-1 || j == xBuff-1 ) 
 				{
 					// We are at the edge so write doDataValue and move on
-					(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char) transColor.g;
-					(*ImageData)[i * xBuff + j].blue =  (unsigned char) transColor.b;
+					(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
+					(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
+					(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
 					//shadeBuf[j] = noDataValue;
 					continue;
 				}
@@ -1267,9 +1265,9 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 				if (containsNull == 1) 
 				{
 					// We have nulls so write nullValue and move on
-					(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char) transColor.g;
-					(*ImageData)[i * xBuff + j].blue =  (unsigned char) transColor.b;
+					(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
+					(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
+					(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
 					//shadeBuf[j] = noDataValue;
 					continue;
 				} 
@@ -1279,11 +1277,11 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 					// First Slope ...
 					float x = (float)(((z*win[0] + z*win[3] + z*win[3] + z*win[6]) - 
 						(z*win[2] + z*win[5] + z*win[5] + z*win[8])) /
-						(8.0 * dX * scale));
+						(8.0 * _dX * scale));
 
 					float y = (float)(((z*win[6] + z*win[7] + z*win[7] + z*win[8]) - 
 						(z*win[0] + z*win[1] + z*win[1] + z*win[2])) /
-						(8.0 * dY * scale));
+						(8.0 * _dY * scale));
 
 					float slope = (float)(90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees);
 					
@@ -1314,13 +1312,13 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 			else
 			{ 
 				// Use the normal hillshade method				
-				auto colorBreak = findBreak( bvals, tmp );
+				auto colorBreak = FindBreak( bvals, tmp );
 
 				if (colorBreak == nullptr) //A break is not defined for this value
 				{
-					(*ImageData)[i * xBuff + j].red = (unsigned char)transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char)transColor.g;
-					(*ImageData)[i * xBuff + j].blue = (unsigned char)transColor.b;
+					(*ImageData)[i * xBuff + j].red = (unsigned char)_transColor.r;
+					(*ImageData)[i * xBuff + j].green = (unsigned char)_transColor.g;
+					(*ImageData)[i * xBuff + j].blue = (unsigned char)_transColor.b;
 					continue;
 				}
 
@@ -1336,7 +1334,7 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 				ColoringType colortype = colorBreak->colortype;
 				GradientModel gradmodel = colorBreak->gradmodel;
 				
-				if (!allowHillshade && colortype == Hillshade)
+				if (!_allowHillshade && colortype == Hillshade)
 					colortype = Gradient;
 
 				colort ct;
@@ -1382,9 +1380,9 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 					//check for nodata on triangle corners
 					if( yone == noDataValue || ytwo == noDataValue || ythree == noDataValue )
 					{	
-						(*ImageData)[i * xBuff + j].red =  (unsigned char) transColor.r;
-						(*ImageData)[i * xBuff + j].green = (unsigned char) transColor.g;
-						(*ImageData)[i * xBuff + j].blue =  (unsigned char) transColor.b;
+						(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
+						(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
+						(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
 						continue;
 					}
 					else
@@ -1457,7 +1455,7 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 // *************************************************************
 //	  findBreak
 // *************************************************************
-inline const tkRaster::BreakVal* tkRaster::findBreak(const std::vector<BreakVal> & bvals, double val) const
+inline const tkRaster::BreakVal* tkRaster::FindBreak(const std::vector<BreakVal> & bvals, double val) const
 {
 	register int sizeBVals = (int)bvals.size();
 	for(register int i = 0; i < sizeBVals; i++ )
@@ -1644,7 +1642,7 @@ bool tkRaster::CanUseExternalColorScheme()
 HandleImage tkRaster::ChooseRenderingMethod()
 {
 	HandleImage method;
-	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || hasColorTable )
+	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || _hasColorTable )
 	{
 		method = asComplex;
 	}
@@ -1672,8 +1670,8 @@ HandleImage tkRaster::ChooseRenderingMethod()
 // *************************************************************
 bool tkRaster::WillBeRenderedAsGrid()
 {
-	return (allowAsGrid == tkGridRendering::grForceForAllFormats ||
-		   (allowAsGrid == tkGridRendering::grForGridsOnly && _handleImage == asGrid));
+	return (_allowAsGrid == tkGridRendering::grForceForAllFormats ||
+		   (_allowAsGrid == tkGridRendering::grForGridsOnly && _handleImage == asGrid));
 }
 #pragma endregion
 
@@ -1682,5 +1680,13 @@ bool tkRaster::WillBeRenderedAsGrid()
 // *************************************************************
 bool tkRaster::IsRgb()
 {
-	return GdalHelper::IsRgb(this->get_Dataset());
+	return GdalHelper::IsRgb(this->GetDataset());
+}
+
+// *************************************************************
+//	  ApplyCustomColorScheme()
+// *************************************************************
+void tkRaster::ApplyCustomColorScheme(IGridColorScheme * scheme)
+{
+	ComHelper::SetRef((IDispatch*)scheme, (IDispatch**)&_customColorScheme, true);
 }

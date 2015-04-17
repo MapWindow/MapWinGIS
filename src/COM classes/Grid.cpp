@@ -126,14 +126,14 @@ STDMETHODIMP CGrid::get_Header(IGridHeader **pVal)
 		VARIANT ndv;
 		VariantInit(&ndv); 
 		ndv.vt = VT_R8;
-		ndv.dblVal = _trgrid->noDataValue;
+		ndv.dblVal = _trgrid->GetNoDataValue();
 		(*pVal)->put_NodataValue(ndv);
 		(*pVal)->put_Notes(m_globalSettings.emptyBstr);
 		(*pVal)->put_NumberCols(_trgrid->getWidth());
 		(*pVal)->put_NumberRows(_trgrid->getHeight());
 		(*pVal)->put_XllCenter(_trgrid->getXllCenter());
 		(*pVal)->put_YllCenter(_trgrid->getYllCenter());
-		(*pVal)->put_Projection(_trgrid->Projection.AllocSysString());
+		(*pVal)->put_Projection(_trgrid->GetProjection().AllocSysString());
 		
 		CComBSTR cTbl;
 		if (_trgrid->ColorTable2BSTR(&cTbl))
@@ -290,7 +290,7 @@ void CGrid::set_ProjectionIntoHeader(char * projection)
 
 	if ( _trgrid != NULL)
 	{
-		_trgrid->Projection = projection;
+		_trgrid->SetProjection(projection);
 	}
 	else if( _dgrid != NULL )
 	{	
@@ -635,7 +635,7 @@ STDMETHODIMP CGrid::get_Value(long Column, long Row, VARIANT *pVal)
 		{
 			_lastErrorCode = tkINDEX_OUT_OF_BOUNDS;
 			pVal->vt = VT_R8;
-			pVal->dblVal = _trgrid->noDataValue;
+			pVal->dblVal = _trgrid->GetNoDataValue();
 			return S_OK;
 		}
 
@@ -790,23 +790,28 @@ STDMETHODIMP CGrid::get_Minimum(VARIANT *pVal)
 
 		double bruteForceResult = _trgrid->GetMinimum();
 		float f1 = Utility::FloatRound(_trgrid->GetMinimum(), 4);
-		float f2 = Utility::FloatRound(_trgrid->noDataValue, 4);
-		float v1;
-		float ndv = Utility::FloatRound(_trgrid->noDataValue, 4);
-		if (Utility::FloatsEqual(f1, f2))
+		float ndv = Utility::FloatRound(_trgrid->GetNoDataValue(), 4);
+
+		if (Utility::FloatsEqual(f1, ndv))
 		{
 			double currentMin = 9999999;
+			
+			// TODO: should we limit width and height for large files?
 			long w = _trgrid->getWidth();
 			long h = _trgrid->getHeight();
+
 			for (register long i = 0; i < w; i++)
 			{
 				for (register long j = 0; j < h; j++)
 				{
 					if (_trgrid->getValue(j, i) < currentMin)
 					{
-						v1 = Utility::FloatRound(_trgrid->getValue(j, i), 4);
+						float v1 = Utility::FloatRound(_trgrid->getValue(j, i), 4);
+
 						if (!Utility::FloatsEqual(v1, ndv))
+						{
 							currentMin = _trgrid->getValue(j, i);
+						}
 					}
 				}
 			}
@@ -1740,9 +1745,9 @@ STDMETHODIMP CGrid::Save(BSTR Filename, GridFileType  FileType, ICallback * cBac
 			newDataType = DoubleDataType;
 
 		// This looks odd to create a grid with data from itself, but it will have been read in by ReadBGDHeader.
-		char * prj = new char[tempGrid->Projection.GetLength()+1];
-		strcpy(prj, tempGrid->Projection.GetBuffer());
-		bRetval = tempGrid->CreateNew(W2A(Filename), FileType, tempGrid->getDX(), tempGrid->getDY(), tempGrid->getXllCenter(), tempGrid->getYllCenter(), tempGrid->noDataValue, prj, tempGrid->getWidth(), tempGrid->getHeight(), newDataType, true, tempGrid->noDataValue, false);
+		char * prj = new char[tempGrid->GetProjection().GetLength()+1];
+		strcpy(prj, tempGrid->GetProjection().GetBuffer());
+		bRetval = tempGrid->CreateNew(W2A(Filename), FileType, tempGrid->getDX(), tempGrid->getDY(), tempGrid->getXllCenter(), tempGrid->getYllCenter(), tempGrid->GetNoDataValue(), prj, tempGrid->getWidth(), tempGrid->getHeight(), newDataType, true, tempGrid->GetNoDataValue(), false);
 		delete [] prj;
 		if (!bRetval) return S_OK;
 

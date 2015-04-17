@@ -116,10 +116,10 @@ void CGridHeader::AttemptSave()
 
 	if (_myowner_t != NULL)
 	{
-		_myowner_t->Projection = projection;
+		_myowner_t->SetProjection(projection);
 		_myowner_t->setDX(_dx);
 		_myowner_t->setDY(_dy);
-		_myowner_t->noDataValue = _nodatavalue;
+		_myowner_t->SetNoDataValue(_nodatavalue);
 		_myowner_t->setXllCenter(_xllcenter);
 		_myowner_t->setYllCenter(_yllcenter);
 		_myowner_t->SaveHeaderInfo();

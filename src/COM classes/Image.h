@@ -375,16 +375,9 @@ public:
 	void ClearNotNullPixels();
 	void OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval);
 	
-	int get_originalBufferWidth()
-	{
-		if (_gdalImage && _rasterImage)	return (_rasterImage->visibleRect.right - _rasterImage->visibleRect.left);
-		else							return 0;
-	}	
-	int get_originalBufferHeight()
-	{
-		if (_gdalImage && _rasterImage)	return (_rasterImage->visibleRect.right - _rasterImage->visibleRect.left);
-		else							return 0;
-	}
+	int GetOriginalBufferWidth();
+	int GetOriginalBufferHeight();
+
 	void ErrorMessage(long ErrorCode);
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
 	

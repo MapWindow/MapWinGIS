@@ -538,7 +538,7 @@ clear_bmp:
 					if (type == BITMAP_FILE || type == USE_FILE_EXTENSION)
 						downsampling = (double(dstR - dstL) * double(dstB - dstT) < (imgWidth * imgHeight));
 					else
-						downsampling = (double(dstR - dstL) * double(dstB - dstT) < double(img->get_originalBufferWidth() * img->get_originalBufferHeight()));
+						downsampling = (double(dstR - dstL) * double(dstB - dstT) < double(img->GetOriginalBufferWidth() * img->GetOriginalBufferHeight()));
 							
 					if ( downsampling )
 						gr->SetInterpolationMode((Gdiplus::InterpolationMode)downsamplingMode);	
