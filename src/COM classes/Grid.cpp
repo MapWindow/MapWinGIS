@@ -101,7 +101,8 @@ STDMETHODIMP CGrid::get_RasterColorTableColoringScheme(IGridColorScheme **pVal)
 	if (!_trgrid) {
 		return S_OK;
 	}
-	_trgrid->GetIntValueGridColorTable(pVal);
+
+	RasterBandHelper::ColorTableToColorScheme(_trgrid->GetActiveBand(), pVal);
 	return S_OK;
 }
 

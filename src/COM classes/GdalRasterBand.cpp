@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "GdalRasterBand.h"
+#include "RasterBandHelper.h"
 
 // *************************************************************
 //	  CheckBand()
@@ -304,6 +305,20 @@ STDMETHODIMP CGdalRasterBand::get_MetadataItem(LONG itemIndex, BSTR* pVal)
 		*pVal = A2BSTR(item);
 		return S_OK;
 	}
+
+	return S_OK;
+}
+
+// *************************************************************
+//	  get_ColorTable()
+// *************************************************************
+STDMETHODIMP CGdalRasterBand::get_ColorTable(IGridColorScheme** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!CheckBand()) return S_OK;
+
+	RasterBandHelper::ColorTableToColorScheme(_band, pVal);
 
 	return S_OK;
 }

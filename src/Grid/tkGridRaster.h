@@ -192,7 +192,6 @@ public:
 	bool SaveToBGD(CString filename, void(*callback)(int number, const char * message));
 	bool ReadFromBGD(CString filename, void(*callback)(int number, const char * message));
 	bool ReadBGDHeader(CString filename, DATA_TYPE &bgdDataType);
-	bool GetIntValueGridColorTable(IGridColorScheme ** newscheme);
 	bool isInRam() { return _inRam; }
 	bool IsRgb();
 
@@ -219,7 +218,7 @@ public:
 	int getNumBands();
 	int GetActiveBandIndex() { return _activeBandIndex; }
 	GridDataType GetDataType();
-
+	GDALRasterBand* GetActiveBand() { return _poBand; }
 };
 
 #ifdef RELEASE_MODE
