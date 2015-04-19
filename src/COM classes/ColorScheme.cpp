@@ -88,58 +88,81 @@ STDMETHODIMP CColorScheme::SetColors3 (short MinRed, short MinGreen, short MinBl
 // ***************************************************************
 STDMETHODIMP CColorScheme::SetColors4 (PredefinedColorScheme Scheme)
 {
-	OLE_COLOR colors[3];
+	vector<OLE_COLOR> colors;
 	
 	switch (Scheme)
 	{
 		case SummerMountains:
-				colors[0] = RGB( 10, 100, 10 );
-				colors[1] = RGB( 153, 125, 25 );
-				colors[2] = RGB( 255, 255, 255 );
-				break;				
+			colors.push_back(RGB(10, 100, 10));
+			colors.push_back(RGB(153, 125, 25));
+			colors.push_back(RGB(255, 255, 255));
+			break;
 		case FallLeaves:
-				colors[0] = RGB( 10, 100, 10 );
-				colors[1] = RGB( 199, 130, 61 );
-				colors[2] = RGB( 241, 220, 133 );
+			colors.push_back(RGB(10, 100, 10));
+			colors.push_back(RGB(199, 130, 61));
+			colors.push_back(RGB(241, 220, 133));
 				break;				
 		case Desert:
-				colors[0] = RGB( 211, 206, 97 );
-				colors[1] = RGB( 139, 120, 112 );
-				colors[2] = RGB( 255, 255, 255 );
+			colors.push_back(RGB(211, 206, 97));
+			colors.push_back(RGB(139, 120, 112));
+			colors.push_back(RGB(255, 255, 255));
 				break;				
 		case Glaciers:
-				colors[0] = RGB( 105, 171, 224 );
-				colors[1] = RGB( 162, 234, 240 );
-				colors[2] = RGB( 255, 255, 255 );
+			colors.push_back(RGB(105, 171, 224));
+			colors.push_back(RGB(162, 234, 240));
+			colors.push_back(RGB(255, 255, 255));
 				break;				
 		case Meadow:
-				colors[0] = RGB( 68, 128, 71 );
-				colors[1] = RGB( 43, 91, 30 );
-				colors[2] = RGB( 167, 220, 168 );
+			colors.push_back(RGB(68, 128, 71));
+			colors.push_back(RGB(43, 91, 30));
+			colors.push_back(RGB(167, 220, 168));
 				break;				
 		case ValleyFires:
-				colors[0] = RGB( 164, 0, 0 );
-				colors[1] = RGB( 255, 128, 64 );
-				colors[2] = RGB( 255, 255, 191 );
+			colors.push_back(RGB(164, 0, 0));
+			colors.push_back(RGB(255, 128, 64));
+			colors.push_back(RGB(255, 255, 191));
 				break;				
 		case DeadSea:
-				colors[0] = RGB( 51, 137, 208  );
-				colors[1] = RGB( 226, 227, 166 );
-				colors[2] = RGB( 151, 146, 117 );
+			colors.push_back(RGB(51, 137, 208));
+			colors.push_back(RGB(226, 227, 166));
+			colors.push_back(RGB(151, 146, 117));
 				break;				
 		case Highway1:
-				colors[0] = RGB( 51, 137, 208 );
-				colors[1] = RGB( 214, 207, 124 );
-				colors[2] = RGB( 54, 152, 69 );
-				break;				
+			colors.push_back(RGB(51, 137, 208));
+			colors.push_back(RGB(214, 207, 124));
+			colors.push_back(RGB(54, 152, 69));
+				break;		
+		case Rainbow:
+		case ReversedRainbow:
+				
+			tkMapColor colorNames[] = { tkMapColor::Red, 
+										tkMapColor::Orange, 
+										tkMapColor::Yellow,
+										tkMapColor::LightGreen, 
+										tkMapColor::LightBlue, 
+										tkMapColor::DodgerBlue, 
+										tkMapColor::DarkBlue };
+			for (int i = 0; i < 7; i++)
+			{
+				OLE_COLOR color;
+				GetUtils()->ColorByName(colorNames[i], &color);
+				colors.push_back(color);
+			}
+
+			if (Scheme == ReversedRainbow)
+			{
+				std::reverse(colors.begin(), colors.end());
+			}
 	}
 
 	_breaks.clear();
-	for (int i = 0; i < 3; i++)
+
+	int size = colors.size();
+	for (size_t i = 0; i < size; i++)
 	{
 		ColorBreak br;
 		br.color = colors[i];
-		br.value = (double)i * 0.5;
+		br.value = i  * 1.0 / (size - 1);
 		_breaks.push_back(br);
 	}
 	return S_OK;
