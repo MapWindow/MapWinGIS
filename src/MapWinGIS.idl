@@ -3428,6 +3428,7 @@ interface IGrid : IDispatch{
 		[id(44), helpstring("property PutRow")] HRESULT PutRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[id(45), helpstring("property GetRow")] HRESULT GetRow2([in] long Row, [in, out] double * Vals, [out, retval] VARIANT_BOOL * retval);
 		[propget, id(46)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
+		[propget, id(47)] HRESULT ActiveBand([out, retval] IGdalRasterBand** pVal);
 };
 
 /****************************  GridHeader Interface ***********************/
@@ -3625,6 +3626,7 @@ interface IImage : IDispatch{
 	[propget, id(88)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	[propget, id(89)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 	[propget, id(90)] HRESULT PaletteInterpretation2([out, retval] tkPaletteInterpretation* pVal);
+	[propget, id(91)] HRESULT ActiveBand([out, retval] IGdalRasterBand** pVal);
 };
 
 /****************************  Shapefile Interface ***********************/

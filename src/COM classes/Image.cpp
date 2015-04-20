@@ -3711,3 +3711,25 @@ STDMETHODIMP CImageClass::get_PaletteInterpretation2(tkPaletteInterpretation* pV
 
 	return S_OK;
 }
+
+// ********************************************************
+//     get_ActiveBand
+// ********************************************************
+STDMETHODIMP CImageClass::get_ActiveBand(IGdalRasterBand** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = NULL;
+
+	if (_rasterImage != NULL)
+	{
+		long bandIndex = _rasterImage->GetActiveBandIndex();
+		get_Band(bandIndex, pVal);
+	}
+	else
+	{
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+	}
+
+	return S_OK;
+}

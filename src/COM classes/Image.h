@@ -282,6 +282,7 @@ public:
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
 	STDMETHOD(get_PaletteInterpretation2)(tkPaletteInterpretation* pVal);
+	STDMETHOD(get_ActiveBand)(IGdalRasterBand** pVal);
 
 private:
 	tkImageSourceType _sourceType;

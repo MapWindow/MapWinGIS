@@ -3052,3 +3052,25 @@ STDMETHODIMP CGrid::get_Band(long bandIndex, IGdalRasterBand** retVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     get_ActiveBand
+// ********************************************************
+STDMETHODIMP CGrid::get_ActiveBand(IGdalRasterBand** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = NULL;
+
+	if (_trgrid != NULL)
+	{
+		long bandIndex = _trgrid->GetActiveBandIndex();
+		get_Band(bandIndex, pVal);
+	}
+	else
+	{
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+	}
+
+	return S_OK;
+}

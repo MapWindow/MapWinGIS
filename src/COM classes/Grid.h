@@ -114,6 +114,7 @@ public:
 	STDMETHOD(put_PreferedDisplayMode)( tkGridProxyMode newVal);
 	STDMETHOD(get_HasValidImageProxy)( VARIANT_BOOL *retVal);
 	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
+	STDMETHOD(get_ActiveBand)(IGdalRasterBand** pVal);
 
 private:
 	ICallback * _globalCallback;
