@@ -174,11 +174,13 @@ private:
 	const BreakVal* FindBreak(const std::vector<BreakVal> & bvals, double val) const;
 
 	template <typename T>
-	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram);
+	bool AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue /*, const GDALColorEntry * poCE*/, bool useHistogram);
 	template <typename DataType>
 	bool ReadGridAsImage(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
 	template <typename DataType>
 	bool ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
+	
+	bool ReadColorTableToBuffer(colour ** imageData, int* srcDataInt, int bandIndex, int xBuff, int yBuff, double noDataValue, double shift, double range);
 
 public:
 	// properties

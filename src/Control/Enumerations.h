@@ -93,9 +93,9 @@ enum CacheType
 
 enum HandleImage
 { 
-	asRGB=0,
-	asGrid=1,
-	asComplex=2
+	asRGB=0,      // byte; 3 bands
+	asGrid=1,     // single band with color scheme
+	asFloatOrInt=2   // int32 or float
 };
 
 enum ShapeValidityCheck

@@ -71,9 +71,9 @@ void tkRaster::ComputeBandMinMax()
 	//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
 	if( ! (bGotMin && bGotMax) )
 	{
+		//Just guess the min and max
+		//For some reason GDAL does not seem to pick up the color table of a png binary image		
 		if ((_dataType == GDT_Byte) &&  (_imgType != ADF_FILE) && (_hasColorTable==false) && (_imgType != PNG_FILE))
-			//Just guess the min and max
-			//For some reason GDAL does not seem to pick up the color table of a png binary image
 		{
 			_dfMin = 0.0;
 			_dfMax = 255.0;
@@ -83,15 +83,9 @@ void tkRaster::ComputeBandMinMax()
 			GDALComputeRasterMinMax((GDALRasterBandH)_poBandR, FALSE, _adfMinMax);
 		}
 	}
-	_dfMin = _adfMinMax[0];
 
-	if (_adfMinMax[1] > 0 )	{
-		_dfMax = _adfMinMax[1];
-	}
-	else {
-		// If GDALComputeRasterMinMax fails
-		_dfMax = 255.0;
-	}
+	_dfMin = _adfMinMax[0];
+	_dfMax = _adfMinMax[1] > 0 ? _adfMinMax[1] : 255.0;
 }
 
 // *************************************************************
@@ -642,32 +636,39 @@ bool tkRaster::LoadBufferFull(colour** ImageData, CStringW filename, double maxB
 // *********************************************************
 //		ReadImage()
 // *********************************************************
-bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)  //, bool useHistogram, bool clearGDALCache)
+bool tkRaster::ReadImage(colour ** imageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)
 {
     // -----------------------------------------------
-	//  allocating memory for initial buffer
+	//  allocating memory for first buffer (GDAL reading)
 	// -----------------------------------------------
 	unsigned char * srcDataChar = NULL;
 	_int32 * srcDataInt = NULL;
 	float * srcDataFloat = NULL;
 	
-	if (_handleImage == asComplex)
+	if (_handleImage == asFloatOrInt)
 	{
-		if (_genericType == GDT_Int32)
+		if (_genericType == GDT_Int32) {
 			srcDataInt =  (_int32 *) CPLMalloc( sizeof(_int32)*xBuff*yBuff );
-		else
+		}
+		else {
 			srcDataFloat =  (float *) CPLMalloc( sizeof(float)*xBuff*yBuff );
+		}
 	}
-	else
+	else {
 		srcDataChar =  (unsigned char *) CPLMalloc( sizeof(unsigned char)*xBuff*yBuff );
+	}
 	
 	// -----------------------------------------------
-	//  allocating memory for second buffer
+	//  allocating memory for second buffer (in-memory colour array)
 	// -----------------------------------------------
-	if(*ImageData != NULL) delete [] (*ImageData);
+	if (*imageData != NULL)
+	{
+		delete[](*imageData);
+	}
+		
     try
 	{
-		(*ImageData) = new colour[xBuff*yBuff];
+		(*imageData) = new colour[xBuff*yBuff];
 	}
 	catch(...)
 	{
@@ -678,11 +679,11 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	//    preparing to read
 	// -----------------------------------------------
 	GDALRasterBand* poBand = NULL;
-	const GDALColorEntry * poCE = NULL;	
 
 	double shift = 0, range = 0;
-	if (_handleImage == asComplex)
+	if (_handleImage == asFloatOrInt)
 	{
+		// TODO: why values for the first (Red) band are used for all bands?
 		double dfMin = _adfMinMax[0];
 		double dfMax = _adfMinMax[1];
 		range = dfMax - dfMin;		
@@ -690,32 +691,32 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	}
 	else
 	{
-		range=255;
-		shift=0;
+		range = 255;
+		shift = 0;
 	}
 
-    for (int band = 1; band <= _nBands; band++)
+    for (int bandIndex = 1; bandIndex <= _nBands; bandIndex++)
     {
 		// -----------------------------------------------
 		//   reading the band
 		// -----------------------------------------------
-		if (band == 1) poBand = _poBandR; 
-		else if (band == 2) poBand = _poBandG;
-		else if (band == 3) poBand = _poBandB;
+		if (bandIndex == 1) poBand = _poBandR; 
+		else if (bandIndex == 2) poBand = _poBandG;
+		else if (bandIndex == 3) poBand = _poBandB;
 		
 		if (poBand == NULL)
 		{
-			poBand = _rasterDataset->GetRasterBand(band);	// Keep it open until the dataset is destroyed
+			poBand = _rasterDataset->GetRasterBand(bandIndex);	// Keep it open until the dataset is destroyed
 		}
 		else
 		{
-			if (_handleImage == asComplex)
+			// images with color table are classified as complex with GDT_Int32 data type
+			if (_handleImage == asFloatOrInt)
 			{
 				if (_genericType == GDT_Int32)
 				{
 					poBand->AdviseRead ( xOffset, yOffset, width, height, xBuff, yBuff, GDT_Int32, NULL);
 					poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataInt, xBuff, yBuff, GDT_Int32, 0, 0 );
-					
 				}
 				else
 				{
@@ -729,59 +730,24 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 				poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataChar, xBuff, yBuff, GDT_Byte, 0, 0 );
 			}
 		}
+
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
 
-		// -----------------------------------------------------------
-		//   caching the color table; adding data to the second buffer
-		// -----------------------------------------------------------
-		int tableCount = 0;
-		if (_hasColorTable)
-			tableCount = _colorTable->GetColorEntryCount();
-		
-		if (_hasColorTable && tableCount > 0)
+		if (!ReadColorTableToBuffer(imageData, srcDataInt, bandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
-			// caching the table in the array for faster access
-			colour* colorTable = new colour[tableCount];
-			for (int i = 0; i < tableCount; i++ )
-			{
-				poCE = _colorTable->GetColorEntry(i);
-				GDALColorEntry2Colour(band, i, shift, range, noDataValue, poCE, _useHistogram, colorTable + i);	// possible to optimize further: no need to check all values
-			}
-			
-			// reading and decoding the bitmap values
-			colour* dstRow;	int* srcRow; int index;
-			for (int i = 0; i < yBuff; i++)
-			{
-				dstRow = (*ImageData) + i * xBuff;
-				srcRow = srcDataInt + (yBuff-i-1) * xBuff;		// lsu: I assume that color table is present for _int32 images only, isn't it?
-				for (int j = 0; j < xBuff; j++)
-				{
-					index =	*(srcRow + j);								
-					memcpy(dstRow + j, colorTable + index, sizeof(colour));
-				}
-			}
-
-			delete[] colorTable;
-		}
-		
-		// ------------------------------------------------------------
-		//   passing non-indexed data to the second buffer
-		// ------------------------------------------------------------
-		else
-		{
-			if (_handleImage == asComplex)
+			if (_handleImage == asFloatOrInt)
 			{
 				if (_genericType == GDT_Int32)
-					AddToBufferAlt<_int32>(ImageData, srcDataInt, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);	
+					AddToBufferAlt<_int32>(imageData, srcDataInt, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);	
 				else
-					AddToBufferAlt<float>(ImageData, srcDataFloat, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);
+					AddToBufferAlt<float>(imageData, srcDataFloat, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
 			}
 			else
-				AddToBufferAlt<unsigned char>(ImageData, srcDataChar, xBuff, yBuff, band, shift, range, noDataValue, poCE, _useHistogram);
+				AddToBufferAlt<unsigned char>(imageData, srcDataChar, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
 		}
     }
-	
+
 	// --------------------------------------------------------
 	//	  releasing GDAL cache
 	// --------------------------------------------------------
@@ -795,7 +761,7 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 	// --------------------------------------------------------
 	//		cleaning
 	// --------------------------------------------------------
-	if (_handleImage == asComplex)
+	if (_handleImage == asFloatOrInt)
 	{
 		if (_genericType == GDT_Int32) {
 			if( srcDataInt != NULL ) {
@@ -818,11 +784,55 @@ bool tkRaster::ReadImage(colour ** ImageData, int xOffset, int yOffset, int widt
 }
 
 // *************************************************************
+//	  ReadColorTableToBuffer
+// *************************************************************
+bool tkRaster::ReadColorTableToBuffer(colour ** imageData, int* srcDataInt, int bandIndex, int xBuff, int yBuff, 
+									double noDataValue, double shift, double range)
+{
+	// caching the color table; adding data to the second buffer	
+	if (!_hasColorTable) return false;
+	
+	int tableCount = _colorTable->GetColorEntryCount();
+	if (tableCount == 0)
+	{
+		return false;
+	}
+
+	// caching the table in the array for faster access
+	const GDALColorEntry * poCE = NULL;
+	colour* colorTable = new colour[tableCount];
+
+	for (int i = 0; i < tableCount; i++)
+	{
+		poCE = _colorTable->GetColorEntry(i);
+		
+		// possible to optimize further: no need to check all values		
+		GDALColorEntry2Colour(bandIndex, i, shift, range, noDataValue, poCE, _useHistogram, colorTable + i);	
+	}
+
+	// reading and decoding the bitmap values
+	colour* dstRow;	int* srcRow; int index;
+	for (int i = 0; i < yBuff; i++)
+	{
+		dstRow = (*imageData) + i * xBuff;
+		srcRow = srcDataInt + (yBuff - i - 1) * xBuff;
+
+		for (int j = 0; j < xBuff; j++)
+		{
+			index = *(srcRow + j);
+			memcpy(dstRow + j, colorTable + index, sizeof(colour));
+		}
+	}
+
+	delete[] colorTable;
+}
+
+// *************************************************************
 //	  AddToBufferAlt
 // *************************************************************
 template <typename T>
 bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff,
-					int band, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram)
+					int band, double shift, double range, double noDataValue, bool useHistogram)
 {
 	T val = 0;		// value from source buffer	(_int32, float, unsigned char)
 	colour* dst;	// position in the resulting buffer
@@ -867,7 +877,7 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 	}
 	
 	// complex image
-	else if(_handleImage == asComplex)
+	else if(_handleImage == asFloatOrInt)
 	{
 		double ratio = 255.0/(double)range;
 		
@@ -959,10 +969,9 @@ bool tkRaster::AddToBufferAlt(colour ** ImageData, T* data, int xBuff, int yBuff
 }
 
 // ****************************************************************
-//		Filling colour structure from the GDAL colour value
+//		GDALColorEntry2Colour()
 // ****************************************************************
-// Is used for caching colours when color table exists
-// lsu:  are there all options should be considered here?
+// Filling colour structure from the GDAL colour value
 void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, 
 					const GDALColorEntry * poCE, bool useHistogram, colour* result)
 {
@@ -1026,7 +1035,7 @@ void tkRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, 
 		}
 	} 
 
-	else if (_handleImage == asComplex)
+	else if (_handleImage == asFloatOrInt)
 	{
 		if (_nBands == 1)
 		{
@@ -1646,7 +1655,7 @@ HandleImage tkRaster::ChooseRenderingMethod()
 	HandleImage method;
 	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || _hasColorTable )
 	{
-		method = asComplex;
+		method = asFloatOrInt;
 	}
 	else if	( _dataType == GDT_Byte && _imgType != ADF_FILE && _dfMax > 15)
 	{
@@ -1662,7 +1671,7 @@ HandleImage tkRaster::ChooseRenderingMethod()
 	}
 	else
 	{
-		method = asComplex;
+		method = asFloatOrInt;
 	}
 	return method;
 }

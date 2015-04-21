@@ -637,7 +637,7 @@ STDMETHODIMP COgrLayer::SaveChanges(int* savedCount, tkOgrSaveType saveType, VAR
 	get_DataIsReprojected(&reprojected);
 	if (reprojected && saveType != tkOgrSaveType::ostAttributesOnly)
 	{
-		ErrorMessage(tkFID_COLUMN_NOT_FOUND);
+		ErrorMessage(tkCANT_SAVE_REPROJECTED_GEOMETRIES);
 		return S_OK;
 	}
 
