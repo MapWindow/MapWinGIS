@@ -163,7 +163,6 @@ public:
 	CStringW LoadStyleXML(CStringW name);
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
-	CStringW GetCompositeFilename();
 	
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

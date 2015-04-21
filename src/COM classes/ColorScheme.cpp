@@ -158,7 +158,7 @@ STDMETHODIMP CColorScheme::SetColors4 (PredefinedColorScheme Scheme)
 	_breaks.clear();
 
 	int size = colors.size();
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		ColorBreak br;
 		br.color = colors[i];

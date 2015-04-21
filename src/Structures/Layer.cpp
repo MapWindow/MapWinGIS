@@ -570,12 +570,7 @@ BSTR Layer::GetFilename()
 				if (OgrHelper::GetSourceType(ogr) == ogrFile)
 				{
 					ogr->GetConnectionString(&filename);
-					
-				}
-				else
-				{
-					CStringW compositeName = OgrHelper::Cast(ogr)->GetCompositeFilename();
-					return W2BSTR(compositeName);
+					return filename;
 				}
 			}
 			break;

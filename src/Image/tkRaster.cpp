@@ -825,6 +825,8 @@ bool tkRaster::ReadColorTableToBuffer(colour ** imageData, int* srcDataInt, int 
 	}
 
 	delete[] colorTable;
+
+	return true;
 }
 
 // *************************************************************
