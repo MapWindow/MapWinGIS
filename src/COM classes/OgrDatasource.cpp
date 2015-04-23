@@ -7,6 +7,7 @@
 #include "Shapefile.h"
 #include "OgrStyle.h"
 #include "Shape2Ogr.h"
+#include "Templates.h"
 
 //***********************************************************************
 //*		get/put_Key()
@@ -579,5 +580,79 @@ STDMETHODIMP COgrDatasource::get_GdalLastErrorMsg(BSTR* pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	CStringW s = OgrHelper::OgrString2Unicode(CPLGetLastErrorMsg());
 	*pVal = W2BSTR(s);
+	return S_OK;
+}
+
+// *************************************************************
+//		GetSchemas()
+// *************************************************************
+CStringW COgrDatasource::GetSchemaSql()
+{
+	CStringA driver = _dataset->GetDriverName();
+	if (driver.CompareNoCase("PostgreSQL") == 0)
+	{
+		return L"select * from pg_namespace; ";
+	}
+	else if (driver.CompareNoCase("MSSqlSpatial") == 0)
+	{
+		return L"SELECT name FROM sys.schemas";
+	}
+	
+	Debug::WriteError("Schema retrieval isn't supported for this driver.");
+	return L"";
+	
+}
+
+// *************************************************************
+//		GetSchemas()
+// *************************************************************
+STDMETHODIMP COgrDatasource::GetSchemas(VARIANT* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CStringW sql = GetSchemaSql();
+	if (sql.GetLength() == 0)
+	{
+		VariantInit(retVal);
+		retVal->vt = VT_NULL;
+		return S_OK;
+	}
+
+	OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
+	
+	if (!layer)
+	{
+		VariantInit(retVal);
+		retVal->vt = VT_NULL;
+		return S_OK;
+	}
+
+	vector<BSTR> schemas;
+	do 
+	{
+		OGRFeature* ft = layer->GetNextFeature();
+		if (ft) {
+			const char* s = ft->GetFieldAsString(0);
+			if (s) {
+				BSTR bstr = W2BSTR(OgrHelper::OgrString2Unicode(s));
+				schemas.push_back(bstr);
+			}
+			OGRFeature::DestroyFeature(ft);
+		}
+		else {
+			break;
+		}
+	} while (1);
+	
+
+	_dataset->ReleaseResultSet(layer);
+
+	Templates::Vector2SafeArray(&schemas, VT_BSTR, retVal);
+
+	//for (size_t i = 0; i < schemas.size(); i++)
+	//{
+	//	SysFreeString(schemas[i]);
+	//}
+
 	return S_OK;
 }

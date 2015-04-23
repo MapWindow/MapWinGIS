@@ -5757,6 +5757,7 @@ interface IOgrDatasource : IDispatch{
 	[propget, id(20)] HRESULT DriverMetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
 	[id(21)] HRESULT ExecuteSQL([in]BSTR sql, [out]BSTR* errorMessage, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(22)] HRESULT GdalLastErrorMsg([out, retval]BSTR* retVal);
+	[id(23)] HRESULT GetSchemas([out, retval] VARIANT* retVal);
 };
 [
 	object,

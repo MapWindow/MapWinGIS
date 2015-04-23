@@ -74,6 +74,7 @@ public:
 	STDMETHOD(get_DriverMetadataItem)(int metadataIndex, BSTR* retVal);
 	STDMETHOD(ExecuteSQL)(BSTR sql, BSTR* errorMessage, VARIANT_BOOL* retVal);
 	STDMETHOD(get_GdalLastErrorMsg)(BSTR* pVal);
+	STDMETHOD(GetSchemas)(VARIANT* retVal);
 
 private:
 	ICallback * _globalCallback;
@@ -89,9 +90,11 @@ private:
 	void ErrorMessage(long ErrorCode);
 	void GetMetaData(GDALDriver* driver);
 	char** ParseLayerCreationOptions(BSTR creationOptions);
+	CStringW GetSchemaSql();
 
 public:
 	GDALDataset* GetDataset() { return _dataset; }
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(OgrDatasource), COgrDatasource)
