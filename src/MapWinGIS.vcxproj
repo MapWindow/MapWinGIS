@@ -251,6 +251,7 @@
     <ClInclude Include="Editor\UndoListHelper.h" />
     <ClInclude Include="Editor\VertexEditor.h" />
     <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Image\QColorMatrix.h" />
     <ClInclude Include="Ogr\GeosConverter.h" />
     <ClInclude Include="Ogr\GeosHelper.h" />
     <ClInclude Include="Ogr\Ogr2RawData.h" />
@@ -320,7 +321,6 @@
     <ClInclude Include="COM classes\Utils.h" />
     <ClInclude Include="COM classes\Vector.h" />
     <ClInclude Include="Image\colour.h" />
-    <ClInclude Include="Image\ImageAttributes.h" />
     <ClInclude Include="Image\ImageGroup.h" />
     <ClInclude Include="Image\ImageResampling.h" />
     <ClInclude Include="Image\ImageStructs.h" />
@@ -554,6 +554,7 @@
     <ClCompile Include="Image\colour.cpp" />
     <ClCompile Include="Image\ImageGroup.cpp" />
     <ClCompile Include="Image\ImageResamling.cpp" />
+    <ClCompile Include="Image\QColorMatrix.cpp" />
     <ClCompile Include="Image\RasterMatrix.cpp" />
     <ClCompile Include="Image\tkBitmap.cpp" />
     <ClCompile Include="Image\tkGif.cpp" />

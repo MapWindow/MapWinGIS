@@ -3627,6 +3627,20 @@ interface IImage : IDispatch{
 	[propget, id(89)] HRESULT Band([in]long bandIndex, [out, retval]IGdalRasterBand** retVal);
 	[propget, id(90)] HRESULT PaletteInterpretation2([out, retval] tkPaletteInterpretation* pVal);
 	[propget, id(91)] HRESULT ActiveBand([out, retval] IGdalRasterBand** pVal);
+	[propget, id(92)] HRESULT Brightness([out, retval] FLOAT* pVal);
+	[propput, id(92)] HRESULT Brightness([in] FLOAT newVal);
+	[propget, id(93)] HRESULT Contrast([out, retval] FLOAT* pVal);
+	[propput, id(93)] HRESULT Contrast([in] FLOAT newVal);
+	[propget, id(94)] HRESULT Saturation([out, retval] FLOAT* pVal);
+	[propput, id(94)] HRESULT Saturation([in] FLOAT newVal);
+	[propget, id(95)] HRESULT Hue([out, retval] FLOAT* pVal);
+	[propput, id(95)] HRESULT Hue([in] FLOAT newVal);
+	[propget, id(96)] HRESULT Gamma([out, retval] FLOAT* pVal);
+	[propput, id(96)] HRESULT Gamma([in] FLOAT newVal);
+	[propget, id(97)] HRESULT ColorizeIntensity([out, retval] FLOAT* pVal);
+	[propput, id(97)] HRESULT ColorizeIntensity([in] FLOAT newVal);
+	[propget, id(98)] HRESULT ColorizeColor([out, retval] OLE_COLOR* pVal);
+	[propput, id(98)] HRESULT ColorizeColor([in] OLE_COLOR newVal);
 };
 
 /****************************  Shapefile Interface ***********************/

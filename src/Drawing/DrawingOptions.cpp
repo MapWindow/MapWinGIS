@@ -2,7 +2,7 @@
  * File name: DrawingOptions.cpp
  *
  * Project: MapWindow Open Source (MapWinGis ActiveX control) 
- * Description: Implentation of CDrawingOptionsEx
+ * Description: Implementation of CDrawingOptionsEx
  *
  **************************************************************************************
  * The contents of this file are subject to the Mozilla Public License Version 1.1
@@ -26,10 +26,10 @@
 #include "stdafx.h"
 #include "DrawingOptions.h"
 #include "Image.h"
-#include "ImageAttributes.h"
 #include "GeometryHelper.h"
 #include "PointSymbols.h"
 #include "macros.h"
+#include "ImageHelper.h"
 
 #pragma region Operators
 // ********************************************************
@@ -370,7 +370,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 			this->picture->get_TransparencyColor(&transpColor);
 			this->picture->get_TransparencyColor2(&transpColor2);
 			
-			CImageAttributesEx* imgAttr = new CImageAttributesEx(this->fillTransparency/255.0, false, useTransparency?true:false, transpColor, transpColor2);
+			Gdiplus::ImageAttributes* imgAttr = ImageHelper::GetImageAttributes(this->fillTransparency / 255.0, useTransparency ? true : false, transpColor, transpColor2);
 			Gdiplus::Rect rect(0,0, bmp->GetWidth(), bmp->GetHeight());
 			brushPlus = new TextureBrush(bmp, rect, imgAttr);
 			((TextureBrush*)brushPlus)->RotateTransform(-(float)this->fillGradientRotation);
@@ -626,7 +626,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 	this->picture->get_TransparencyColor2(&transpColor2);
 	
 	double alpha = fillTransparency/255.0;
-	imgAttributes = new CImageAttributesEx(alpha ,false, true, transpColor1, transpColor2);
+	imgAttributes = ImageHelper::GetImageAttributes(alpha, true, transpColor1, transpColor2);
 }
 
 // ***************************************************************

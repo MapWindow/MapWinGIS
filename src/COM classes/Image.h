@@ -21,6 +21,7 @@
 #include "ImageGroup.h"
 #include "InMemoryBitmap.h"
 
+
 struct DataPixels
 {
 public:
@@ -87,6 +88,14 @@ public:
 	
 	void CImageClass::SetDefaults()
 	{
+		_brightness = 0.0f;
+		_contrast = 1.0f;
+		_saturation = 1.0f;
+		_hue = 0.0f;
+		_gamma = 1.0f;
+		_colorizeIntensity = 0.0f;
+		_colorizeColor = RGB(255, 165, 0);
+
 		_downsamplingMode = m_globalSettings.imageDownsamplingMode;	// imNone
 		_upsamplingMode = m_globalSettings.imageUpsamplingMode;		// imBilinear
 
@@ -102,7 +111,6 @@ public:
 		_canUseGrouping = true;
 	}
 
-	// destructor
 	CImageClass::~CImageClass()
 	{	
 		VARIANT_BOOL rt;
@@ -283,6 +291,20 @@ public:
 	STDMETHOD(get_Band)(long bandIndex, IGdalRasterBand** retVal);
 	STDMETHOD(get_PaletteInterpretation2)(tkPaletteInterpretation* pVal);
 	STDMETHOD(get_ActiveBand)(IGdalRasterBand** pVal);
+	STDMETHOD(get_Brightness)(FLOAT* pVal);
+	STDMETHOD(put_Brightness)(FLOAT newVal);
+	STDMETHOD(get_Contrast)(FLOAT* pVal);
+	STDMETHOD(put_Contrast)(FLOAT newVal);
+	STDMETHOD(get_Saturation)(FLOAT* pVal);
+	STDMETHOD(put_Saturation)(FLOAT newVal);
+	STDMETHOD(get_Hue)(FLOAT* pVal);
+	STDMETHOD(put_Hue)(FLOAT newVal);
+	STDMETHOD(get_Gamma)(FLOAT* pVal);
+	STDMETHOD(put_Gamma)(FLOAT newVal);
+	STDMETHOD(get_ColorizeIntensity)(FLOAT* pVal);
+	STDMETHOD(put_ColorizeIntensity)(FLOAT newVal);
+	STDMETHOD(get_ColorizeColor)(OLE_COLOR* pVal);
+	STDMETHOD(put_ColorizeColor)(OLE_COLOR newVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -327,6 +349,13 @@ private:
 	ILabels* _labels;
 	IGeoProjection* _projection;
 
+	float _brightness;		// -1, 1
+	float _contrast;		// 0, 4
+	float _saturation;		// 0, 3
+	float _hue;				// -180, 180
+	float _gamma;			// 0, 4
+	float _colorizeIntensity;	// 0, 1
+	OLE_COLOR _colorizeColor;
 public:
 	int m_groupID;			// in case belong to the group of images which are to be treated as one
 	DataPixels* m_pixels;	// a structure to hold values of pixels with the value other than noDataValue
@@ -383,6 +412,8 @@ public:
 
 	void ErrorMessage(long ErrorCode);
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
+
+	Gdiplus::ColorMatrix GetColorMatrix();
 	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)

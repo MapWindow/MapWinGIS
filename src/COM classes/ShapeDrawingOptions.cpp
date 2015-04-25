@@ -26,7 +26,6 @@
 
 #include "stdafx.h"
 #include "ShapeDrawingOptions.h"
-#include "ImageAttributes.h"
 #include "macros.h"
 #include "PointSymbols.h"
 #include "Image.h"

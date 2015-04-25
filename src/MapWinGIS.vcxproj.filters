@@ -234,9 +234,6 @@
     <ClInclude Include="Image\colour.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Image\ImageAttributes.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Image\ImageGroup.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
@@ -830,6 +827,9 @@
     </ClInclude>
     <ClInclude Include="ComHelpers\RasterBandHelper.h">
       <Filter>ComHelpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\QColorMatrix.h">
+      <Filter>Image\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1766,6 +1766,9 @@
     </ClCompile>
     <ClCompile Include="ComHelpers\RasterBandHelper.cpp">
       <Filter>ComHelpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\QColorMatrix.cpp">
+      <Filter>Image\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

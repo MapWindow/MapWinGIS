@@ -22,7 +22,6 @@
 #include "stdafx.h"
 #include "TilesDrawer.h"
 #include "Tiles.h"
-#include "ImageAttributes.h"
 #include "AmersfoortProjection.h"
 #include "TileHelper.h"
 
@@ -42,7 +41,7 @@ void CTilesDrawer::DrawTiles( ITiles* itiles, double pixelsPerMapUnit, IGeoProje
 	// to support both GDI and GDI+ drawing
 	Graphics* g = m_graphics ? m_graphics : Graphics::FromHDC(_dc->m_hDC);		
 	
-	CImageAttributesEx attr(1.0, false, false, 0, 0);
+	Gdiplus::ImageAttributes attr;
 	attr.SetWrapMode(Gdiplus::WrapModeTileFlipXY);
 
 	// check perhaps map projection is the same as the one for tiles

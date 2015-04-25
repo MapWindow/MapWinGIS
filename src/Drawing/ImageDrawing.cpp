@@ -27,8 +27,8 @@
 #include <io.h>
 #include "Image.h"
 #include "ImageDrawing.h"
-#include "ImageAttributes.h"
 #include "macros.h"
+#include "ImageHelper.h"
 
 // ******************************************************************
 //		DrawImage()
@@ -142,9 +142,9 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* iimg, bool
 	}
 	else
 	{
-		gr = _graphics;	// new Gdiplus::Graphics(_dc->m_hDC);
+		gr = _graphics;
 		gr->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHighQuality);
-		imgAttr = new CImageAttributesEx(transpPercent, setToGray?true:false, useTransparencyColor?true:false, imageTransparencyColor, transpColor2);
+		imgAttr = ImageHelper::GetImageAttributes(iimg);
 	}
 	
 	// ----------------------------------------------------------------- //
@@ -588,7 +588,7 @@ clear_bmp:
 					{
 						SetDIBitsToDevice(subsetDC->m_hDC,0,0,imgWidth,numRead,0,0,0,numRead,bits,&bif,DIB_RGB_COLORS);
 					}
-					else	// we can make number of image buffer pixels in row divisable by 4 them we don't need this condition
+					else	// we can make number of image buffer pixels in row divisible by 4 then we don't need this condition
 					{
 						int nBytesInRow = imgWidth * 3 + pad;
 						unsigned char* bitsNew = new unsigned char[numRead * nBytesInRow]; //new unsigned char[bih.biSizeImage - 1];

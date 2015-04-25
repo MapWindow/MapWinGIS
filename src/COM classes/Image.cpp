@@ -3733,3 +3733,205 @@ STDMETHODIMP CImageClass::get_ActiveBand(IGdalRasterBand** pVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     Brightness
+// ********************************************************
+STDMETHODIMP CImageClass::get_Brightness(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _brightness;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_Brightness(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < -1.0f) newVal = -1.0f;
+	if (newVal > 1.0f) newVal = 1.0f;
+
+	_brightness = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Contrast
+// ********************************************************
+STDMETHODIMP CImageClass::get_Contrast(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _contrast;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_Contrast(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 4.0f) newVal = 4.0f;
+
+	_contrast = newVal;
+
+	return S_OK;
+}
+
+
+// ********************************************************
+//     Saturation
+// ********************************************************
+STDMETHODIMP CImageClass::get_Saturation(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _saturation;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_Saturation(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 3.0f) newVal = 3.0f;
+
+	_saturation = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Hue
+// ********************************************************
+STDMETHODIMP CImageClass::get_Hue(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _hue;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_Hue(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < -180.0f) newVal = -180.0f;
+	if (newVal > 180.0f) newVal = 180.0f;
+
+	_hue = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     Gamma
+// ********************************************************
+STDMETHODIMP CImageClass::get_Gamma(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _gamma;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_Gamma(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 4.0f) newVal = 4.0f;
+
+	_gamma = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     ColorizeIntensity
+// ********************************************************
+STDMETHODIMP CImageClass::get_ColorizeIntensity(FLOAT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _colorizeIntensity;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_ColorizeIntensity(FLOAT newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (newVal < 0.0f) newVal = 0.0f;
+	if (newVal > 1.0f) newVal = 1.0f;
+
+	_colorizeIntensity = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     ColorizeColor
+// ********************************************************
+STDMETHODIMP CImageClass::get_ColorizeColor(OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _colorizeColor;
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_ColorizeColor(OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_colorizeColor = newVal;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     GetColorMatrix
+// ********************************************************
+#include "QColorMatrix.h"
+Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
+{
+	QColorMatrix matrix;
+	matrix.m[3][3] = _transparencyPercent;
+
+	if (_contrast != 1.0f) {
+		matrix.ScaleColors(_contrast, MatrixOrderPrepend);
+	}
+
+	if (_brightness != 0.0f) {
+		matrix.TranslateColors(_brightness, MatrixOrderAppend);
+	}
+	
+	if (_saturation != 1.0f) {
+		matrix.SetSaturation(_saturation, MatrixOrderAppend);
+	}
+
+	if (_hue != 0.0f)  {
+		matrix.RotateHue(_hue);
+	}
+
+	if (_colorizeIntensity != 0.0) {
+		matrix.Colorize(_colorizeColor, _colorizeIntensity, MatrixOrderAppend);
+	}
+	
+	if (_setRGBToGrey) {
+		matrix.SetGreyscale(MatrixOrderAppend);
+	}
+
+	return matrix;
+}
