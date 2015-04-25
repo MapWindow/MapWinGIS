@@ -4,6 +4,7 @@
 #include "GdalRasterBand.h"
 #include "RasterBandHelper.h"
 #include "Templates.h"
+#include "Histogram.h"
 
 // *************************************************************
 //	  CheckBand()
@@ -332,6 +333,8 @@ STDMETHODIMP CGdalRasterBand::GetUniqueValues(LONG maxCount, VARIANT* arr, VARIA
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	*result = VARIANT_FALSE;
+	
+	if (!CheckBand()) return S_OK;
 
 	GDALDataType dataType = RasterBandHelper::GetSimpleDataType(_band);
 
@@ -366,6 +369,75 @@ STDMETHODIMP CGdalRasterBand::GetUniqueValues(LONG maxCount, VARIANT* arr, VARIA
 			break;
 		}
 	}
+
+	return S_OK;
+}
+
+// *************************************************************
+//	  GetDefaultHistogram()
+// *************************************************************
+STDMETHODIMP CGdalRasterBand::GetDefaultHistogram(VARIANT_BOOL forceCalculate, IHistogram** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+	if (!CheckBand()) return S_OK;
+
+	int* values = NULL;
+	double minValue, maxValue;
+	int numBuckets;
+
+	CallbackParams params;
+	CallbackHelper::FillGdalCallbackParams(params, NULL, "Retrieving default histogram");   // move it to CallbackParams constructor
+
+	CPLErr err = _band->GetDefaultHistogram(&minValue, &maxValue, &numBuckets, &values, forceCalculate ? 1 : 0, GDALProgressCallback, &params);
+
+	CallbackHelper::ProgressCompleted(NULL);
+
+	if (err != CPLErr::CE_None)
+	{
+		CallbackHelper::ErrorMsg("Failed to get default histogram.");
+		return S_OK;
+	}
+
+	ComHelper::CreateInstance(idHistogram, (IDispatch**)retVal);
+
+	((CHistogram*)*retVal)->Inject(numBuckets, minValue, maxValue, values, true);
+
+	return S_OK;
+}
+
+// *************************************************************
+//	  GetHistogram()
+// *************************************************************
+STDMETHODIMP CGdalRasterBand::GetHistogram(DOUBLE minValue, DOUBLE maxValue, LONG numBuckets, VARIANT_BOOL includeOutOfRange, 
+							VARIANT_BOOL allowApproximate, IHistogram** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
+	if (!CheckBand()) return S_OK;
+
+	if (numBuckets <= 0 || numBuckets > 65536)
+	{
+		ErrorMessage("Invalid number of buckets. Value between 1 and 65536 is expected.");
+		return S_OK;
+	}
+
+	int* values = new int[numBuckets];
+
+	CPLErr err = _band->GetHistogram(minValue, maxValue, numBuckets, values, includeOutOfRange ? 1: 0, allowApproximate ? 1 : 0, NULL, NULL);
+
+	if (err != CPLErr::CE_None)
+	{
+		delete[] values;
+		CallbackHelper::ErrorMsg("Failed to calculate histogram.");
+		return S_OK;
+	}
+
+	ComHelper::CreateInstance(idHistogram, (IDispatch**)retVal);
+
+	((CHistogram*)*retVal)->Inject(numBuckets, minValue, maxValue, values, false);
 
 	return S_OK;
 }

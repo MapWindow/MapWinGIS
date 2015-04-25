@@ -71,6 +71,7 @@ IDR_IDENTIFIER          REGISTRY                "COM Classes/Identifier.rgs"
 IDR_SELECTIONLIST       REGISTRY                "COM Classes/SelectionList.rgs"
 IDR_DRAWINGRECTANGLE    REGISTRY                "COM Classes/DrawingRectangle.rgs"
 IDR_GDALRASTERBAND      REGISTRY                "COM Classes/GdalRasterBand.rgs"
+IDR_HISTOGRAM           REGISTRY                "COM Classes/Histogram.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

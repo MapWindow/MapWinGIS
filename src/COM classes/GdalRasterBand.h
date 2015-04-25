@@ -55,6 +55,8 @@ public:
 	STDMETHOD(get_MetadataItem)(LONG itemIndex, BSTR* pVal);
 	STDMETHOD(get_ColorTable)(IGridColorScheme** pVal);
 	STDMETHOD(GetUniqueValues)(LONG maxCount, VARIANT* arr, VARIANT_BOOL* result);
+	STDMETHOD(GetDefaultHistogram)(VARIANT_BOOL forceCalculate, IHistogram** retVal);
+	STDMETHOD(GetHistogram)(DOUBLE minValue, DOUBLE maxValue, LONG numBuckets, VARIANT_BOOL includeOutOfRange, VARIANT_BOOL allowApproximate, IHistogram** retVal);
 
 private:
 	GDALRasterBand* _band;
@@ -65,7 +67,7 @@ private:
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }
 	void ErrorMessage(CString msg);
-
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalRasterBand), CGdalRasterBand)

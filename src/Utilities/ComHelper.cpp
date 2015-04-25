@@ -113,6 +113,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idGridHeader:
 			result = CoCreateInstance(CLSID_GridHeader, NULL, CLSCTX_INPROC_SERVER, IID_IGridHeader, (void**)&val);
 			break;
+		case tkInterface::idHistogram:
+			result = CoCreateInstance(CLSID_Histogram, NULL, CLSCTX_INPROC_SERVER, IID_IHistogram, (void**)&val);
+			break;
 		case tkInterface::idIdentifier:
 			result = CoCreateInstance(CLSID_Identifier, NULL, CLSCTX_INPROC_SERVER, IID_IIdentifier, (void**)&val);
 			break;

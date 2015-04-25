@@ -207,6 +207,7 @@
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\DrawingRectangle.h" />
     <ClInclude Include="COM classes\GdalRasterBand.h" />
+    <ClInclude Include="COM classes\Histogram.h" />
     <ClInclude Include="COM classes\Identifier.h" />
     <ClInclude Include="COM classes\OgrDatasource.h" />
     <ClInclude Include="COM classes\OgrLayer.h" />
@@ -458,6 +459,7 @@
   <ItemGroup>
     <ClCompile Include="COM classes\DrawingRectangle.cpp" />
     <ClCompile Include="COM classes\GdalRasterBand.cpp" />
+    <ClCompile Include="COM classes\Histogram.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
     <ClCompile Include="COM classes\OgrDatasource.cpp" />
     <ClCompile Include="COM classes\OgrLayer.cpp" />
@@ -797,6 +799,7 @@
     <None Include="COM classes\GridColorBreak.rgs" />
     <None Include="COM classes\GridColorScheme.rgs" />
     <None Include="COM classes\GridHeader.rgs" />
+    <None Include="COM classes\Histogram.rgs" />
     <None Include="COM classes\Identifier.rgs" />
     <None Include="COM classes\Image.rgs" />
     <None Include="COM classes\LabelCategory.rgs" />

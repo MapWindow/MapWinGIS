@@ -370,7 +370,7 @@ void CDrawingOptionsEx::InitGdiPlusBrush( Gdiplus::RectF* bounds )
 			this->picture->get_TransparencyColor(&transpColor);
 			this->picture->get_TransparencyColor2(&transpColor2);
 			
-			Gdiplus::ImageAttributes* imgAttr = ImageHelper::GetImageAttributes(this->fillTransparency / 255.0, useTransparency ? true : false, transpColor, transpColor2);
+			Gdiplus::ImageAttributes* imgAttr = ImageHelper::GetImageAttributes(this->fillTransparency / 255.0f, useTransparency ? true : false, transpColor, transpColor2);
 			Gdiplus::Rect rect(0,0, bmp->GetWidth(), bmp->GetHeight());
 			brushPlus = new TextureBrush(bmp, rect, imgAttr);
 			((TextureBrush*)brushPlus)->RotateTransform(-(float)this->fillGradientRotation);
@@ -626,7 +626,7 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 	this->picture->get_TransparencyColor2(&transpColor2);
 	
 	double alpha = fillTransparency/255.0;
-	imgAttributes = ImageHelper::GetImageAttributes(alpha, true, transpColor1, transpColor2);
+	imgAttributes = ImageHelper::GetImageAttributes(static_cast<float>(alpha), true, transpColor1, transpColor2);
 }
 
 // ***************************************************************
