@@ -119,3 +119,65 @@ bool RasterBandHelper::ColorTableToColorScheme(GDALRasterBand* _poBand, IGridCol
 
 	return true;
 }
+
+// ***************************************************************
+//		AllocateBuffer()
+// ***************************************************************
+bool RasterBandHelper::AllocateBuffer(GDALDataType dataType, int width, int height, void** buffer)
+{
+	if (width <= 1 || height != 1)
+	{
+		CallbackHelper::ErrorMsg("GdalRasterBand::AllocateBuffer: Width and height must be greater than zero");
+		return false;
+	}
+	
+	dataType = SimplifyDataType(dataType);
+	switch (dataType)
+	{
+		case GDT_Float64:
+			*buffer = new double[width * height];
+			break;
+		case GDT_Float32:
+			*buffer = new float[width * height];
+			break;
+		case GDT_Int32:
+			*buffer = new int[width * height];
+			break;
+		default: 
+			return false;
+	}
+
+	return true;
+}
+
+// ***************************************************************
+//		GetSimpleDataType()
+// ***************************************************************
+GDALDataType RasterBandHelper::GetSimpleDataType(GDALRasterBand* band)
+{
+	if (!band) return GDT_Unknown;
+	
+	GDALDataType dataType = band->GetRasterDataType();
+
+	return SimplifyDataType(dataType);
+}
+
+// ***************************************************************
+//		GetSimpleDataType()
+// ***************************************************************
+GDALDataType RasterBandHelper::SimplifyDataType(GDALDataType dataType)
+{
+	switch (dataType)
+	{
+		case GDT_Unknown:
+			return GDT_Unknown;
+		case GDT_CFloat64:
+		case GDT_Float64:
+			return GDT_Float64;
+		case GDT_CFloat32:
+		case GDT_Float32:
+			return GDT_Float32;
+		default:
+			return GDT_Int32;
+	}
+}

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "GdalRasterBand.h"
 #include "RasterBandHelper.h"
+#include "Templates.h"
 
 // *************************************************************
 //	  CheckBand()
@@ -319,6 +320,52 @@ STDMETHODIMP CGdalRasterBand::get_ColorTable(IGridColorScheme** pVal)
 	if (!CheckBand()) return S_OK;
 
 	RasterBandHelper::ColorTableToColorScheme(_band, pVal);
+
+	return S_OK;
+}
+
+// *************************************************************
+//	  GetUniqueValues()
+// *************************************************************
+STDMETHODIMP CGdalRasterBand::GetUniqueValues(LONG maxCount, VARIANT* arr, VARIANT_BOOL* result)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*result = VARIANT_FALSE;
+
+	GDALDataType dataType = RasterBandHelper::GetSimpleDataType(_band);
+
+	if (dataType == GDT_Unknown)
+	{
+		ErrorMessage("GdalRasterBand::GetUniqueValues: invalid data type.");
+		return S_OK;
+	}
+
+	VARIANT_BOOL clipped;
+	switch (dataType)
+	{
+		case GDT_Float64:
+		case GDT_Float32:
+		{
+			set<double> values;
+			if (RasterBandHelper::GetUniqueValues(_band, dataType, values, maxCount, &clipped))
+			{
+				Templates::Set2SafeArray(&values, VT_R8, arr);
+				*result = VARIANT_TRUE;
+			}
+			break;
+		}
+		case GDT_Int32:
+		{
+			set<int> values;
+			if (RasterBandHelper::GetUniqueValues(_band, dataType, values, maxCount, &clipped))
+			{
+				Templates::Set2SafeArray(&values, VT_I4, arr);
+				*result = VARIANT_TRUE;
+			}
+			break;
+		}
+	}
 
 	return S_OK;
 }

@@ -5947,6 +5947,7 @@ interface IGdalRasterBand : IDispatch{
 	[propget, id(15)] HRESULT MetadataCount([out, retval] LONG* pVal);
 	[propget, id(16)] HRESULT MetadataItem([in] LONG itemIndex, [out, retval] BSTR* pVal);
 	[propget, id(17)] HRESULT ColorTable([out, retval] IGridColorScheme** pVal);
+	[id(18)] HRESULT GetUniqueValues([in]LONG maxCount, [out]VARIANT* arr, [out, retval]VARIANT_BOOL* result);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),

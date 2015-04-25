@@ -3907,7 +3907,7 @@ STDMETHODIMP CImageClass::put_ColorizeColor(OLE_COLOR newVal)
 Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
 {
 	QColorMatrix matrix;
-	matrix.m[3][3] = _transparencyPercent;
+	matrix.m[3][3] = static_cast<float>(_transparencyPercent);
 
 	if (_contrast != 1.0f) {
 		matrix.ScaleColors(_contrast, MatrixOrderPrepend);

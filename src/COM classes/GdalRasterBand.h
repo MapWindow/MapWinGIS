@@ -54,6 +54,7 @@ public:
 	STDMETHOD(get_MetadataCount)(LONG* pVal);
 	STDMETHOD(get_MetadataItem)(LONG itemIndex, BSTR* pVal);
 	STDMETHOD(get_ColorTable)(IGridColorScheme** pVal);
+	STDMETHOD(GetUniqueValues)(LONG maxCount, VARIANT* arr, VARIANT_BOOL* result);
 
 private:
 	GDALRasterBand* _band;
@@ -64,7 +65,7 @@ private:
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }
 	void ErrorMessage(CString msg);
-	
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalRasterBand), CGdalRasterBand)
