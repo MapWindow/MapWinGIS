@@ -92,6 +92,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idFileManager:
 			result = CoCreateInstance(CLSID_FileManager, NULL, CLSCTX_INPROC_SERVER, IID_IFileManager, (void**)&val);
 			break;
+		case tkInterface::idGdalDataset:
+			result = CoCreateInstance(CLSID_GdalDataset, NULL, CLSCTX_INPROC_SERVER, IID_IGdalDataset, (void**)&val);
+			break;
 		case tkInterface::idGdalRasterBand:
 			result = CoCreateInstance(CLSID_GdalRasterBand, NULL, CLSCTX_INPROC_SERVER, IID_IGdalRasterBand, (void**)&val);
 			break;

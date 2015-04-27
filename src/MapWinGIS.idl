@@ -1058,6 +1058,7 @@ enum tkScalebarUnits
 		idDrawingRectangle = 44,
 		idGdalRasterBand = 45,
 		idHistogram = 46,
+		idGdalDataset = 47,
 	} tkInterface;	
 
 	typedef		
@@ -5969,6 +5970,15 @@ interface IHistogram : IDispatch{
 	[propget, id(4)] HRESULT Count([in] LONG bucketIndex, [out, retval] LONG* pVal);
 	[propget, id(5)] HRESULT Value([in] LONG bucketIndex, [out, retval] DOUBLE* pVal);
 };
+[
+	object,
+	uuid(8A42DE62-BC6F-4412-86A1-9CEA93E583F8),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IGdalDataset : IDispatch{
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -6920,5 +6930,12 @@ library MapWinGIS
 	coclass Histogram
 	{
 		[default] interface IHistogram;
+	};
+	[
+		uuid(3CD18F05-E70D-4846-81F8-98B14CAD8FA8)		
+	]
+	coclass GdalDataset
+	{
+		[default] interface IGdalDataset;
 	};
 };

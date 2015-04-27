@@ -3933,8 +3933,6 @@ Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
 		matrix.SetGreyscale(MatrixOrderAppend);
 	}
 
-	DumpMetadata();
-
 	return matrix;
 }
 
@@ -3958,17 +3956,3 @@ STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 	return S_OK;
 }
 
-void CImageClass::DumpMetadata()
-{
-	if (_gdalImage)
-	{
-		GDALDataset* ds = _rasterImage->GetDataset();
-		GDALDriver* driver = ds->GetDriver();
-		if (driver)
-		{
-			char** data = driver->GetMetadata();
-			int value = CSLCount(data);
-			Debug::WriteLine("Number of metadata items: %d", value);
-		}
-	}
-}
