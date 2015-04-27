@@ -3,6 +3,7 @@
 #include "ogrsf_frmts.h"
 #include "CallbackHelper.h"
 #include "windows.h"
+#include "GdalDriverHelper.h"
 
 // **************************************************************
 //		OpenOgrDatasetA
@@ -450,7 +451,7 @@ void GdalHelper::DumpDriverInfo()
 // **************************************************
 //		GetMetaData()
 // **************************************************
-void GdalHelper::GetMetaData(GDALDriver* driver)
+void GdalHelper::DumpMetadata(GDALDriver* driver)
 {
 	if (driver)
 	{
@@ -640,4 +641,33 @@ void GdalHelper::SetDefaultConfigPaths()
 		CStringW path = GetDefaultConfigPath(options[i]);
 		SetConfigPath(options[i], path);
 	}
+}
+
+// ****************************************************************
+//		GetDriverMetadata
+// ****************************************************************
+CString GdalHelper::GetDriverMetadata(GDALDataset* ds, tkGdalDriverMetadata metadata)
+{
+	if (!ds) return "";
+	return GdalDriverHelper::GetMetadata(ds->GetDriver(), metadata);
+}
+
+// ****************************************************************
+//		get_DriverMetadataCount
+// ****************************************************************
+int GdalHelper::get_DriverMetadataCount(GDALDataset* ds)
+{
+	if (!ds) return 0;
+
+	return GdalDriverHelper::get_MetadataCount(ds->GetDriver());
+}
+
+// *************************************************************
+//		get_DriverMetadataItem()
+// *************************************************************
+CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, int metadataIndex)
+{
+	if (!ds) return "";
+
+	return GdalDriverHelper::get_MetadataItem(ds->GetDriver(), metadataIndex);
 }

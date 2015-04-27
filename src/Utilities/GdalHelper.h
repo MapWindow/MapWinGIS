@@ -42,7 +42,7 @@ public:
 	static bool ClearOverviews(GDALDataset* dt, ICallback* cb = NULL);
 
 	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
-	static void GetMetaData(GDALDriver* driver);
+	static void DumpMetadata(GDALDriver* driver);
 	static void DumpDriverInfo();
 
 	static char** ReadFile(CStringW filename);
@@ -54,4 +54,8 @@ public:
 	static CStringW GetConfigPath(GdalPath option);
 	static void SetDefaultConfigPaths();
 	static void SetDirectory(CStringW path);
+
+	static CString GetDriverMetadata(GDALDataset* ds, tkGdalDriverMetadata metadata);
+	static int get_DriverMetadataCount(GDALDataset* ds);
+	static CString get_DriverMetadataItem(GDALDataset* ds, int metadataIndex);
 };

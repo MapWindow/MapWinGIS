@@ -505,18 +505,14 @@ char** COgrDatasource::ParseLayerCreationOptions(BSTR creationOptions)
 STDMETHODIMP COgrDatasource::get_DriverMetadata(tkGdalDriverMetadata metadata, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
-	
+		USES_CONVERSION;
+
 	if (CheckState())
 	{
-		GDALDriver* driver = _dataset->GetDriver();
-		if (driver)
-		{
-			char* val = const_cast<char*>(driver->GetMetadataItem(GdalHelper::GetMetadataNameString(metadata)));
-			*retVal = A2BSTR(val);		// no need to treat it as utf-8: it's in ASCII
-			return S_OK;
-		}
+		CString s = GdalHelper::GetDriverMetadata(_dataset, metadata);
+		*retVal = A2BSTR(s);		// no need to treat it as UTF-8: it's in ASCII
 	}
+
 	*retVal = A2BSTR("");
 	return S_OK;
 }
@@ -527,17 +523,9 @@ STDMETHODIMP COgrDatasource::get_DriverMetadata(tkGdalDriverMetadata metadata, B
 STDMETHODIMP COgrDatasource::get_DriverMetadataCount(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (CheckState())
-	{
-		GDALDriver* driver = _dataset->GetDriver();
-		if (driver)
-		{
-			char** data = driver->GetMetadata();
-			*retVal = CSLCount(data);
-			return S_OK;
-		}
-	}
-	*retVal = 0;
+
+	*retVal = CheckState() ? GdalHelper::get_DriverMetadataCount(_dataset) : 0;
+
 	return S_OK;
 }
 
@@ -547,27 +535,14 @@ STDMETHODIMP COgrDatasource::get_DriverMetadataCount(int* retVal)
 STDMETHODIMP COgrDatasource::get_DriverMetadataItem(int metadataIndex, BSTR* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	USES_CONVERSION;
+		USES_CONVERSION;
 
 	if (CheckState())
 	{
-		GDALDriver* driver = _dataset->GetDriver();
-		if (driver)
-		{
-			char** data = driver->GetMetadata();
-			if (metadataIndex < 0 || metadataIndex >= CSLCount(data))
-			{
-				ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-				return S_OK;
-			}
-			else
-			{
-				char* item = const_cast<char*>(CSLGetField(data, metadataIndex));
-				*retVal = A2BSTR(item);    // no need to treat it as utf-8: it's in ASCII
-				return S_OK;
-			}
-		}
+		CString s = GdalHelper::get_DriverMetadataItem(_dataset, metadataIndex);
+		*retVal = A2BSTR(s);
 	}
+
 	*retVal = A2BSTR("");
 	return S_OK;
 }

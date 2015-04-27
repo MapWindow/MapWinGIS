@@ -306,6 +306,7 @@ public:
 	STDMETHOD(get_ColorizeColor)(OLE_COLOR* pVal);
 	STDMETHOD(put_ColorizeColor)(OLE_COLOR newVal);
 	STDMETHOD(ClearOverviews)(VARIANT_BOOL* retVal);
+	STDMETHOD(get_GdalDriver)(IGdalDriver** pVal);
 
 private:
 	tkImageSourceType _sourceType;

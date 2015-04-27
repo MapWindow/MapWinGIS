@@ -837,6 +837,12 @@
     <ClInclude Include="COM classes\GdalDataset.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\GdalDriverHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\GdalDriver.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1785,6 +1791,12 @@
     <ClCompile Include="COM classes\GdalDataset.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Utilities\GdalDriverHelper.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\GdalDriver.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -1976,6 +1988,9 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\GdalDataset.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\GdalDriver.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

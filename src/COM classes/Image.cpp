@@ -31,6 +31,7 @@
 #include "GridManager.h"
 #include <io.h>
 #include "RasterBandHelper.h"
+#include "GdalDriver.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3956,3 +3957,28 @@ STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 	return S_OK;
 }
 
+// ********************************************************
+//     get_Dataset
+// ********************************************************
+STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = NULL;
+
+	if (!_gdalImage)
+	{
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+		return S_OK;
+	}
+
+	GDALDataset* ds = _rasterImage->GetDataset();
+	if (ds)
+	{
+		GDALDriver* driver = ds->GetDriver();
+		ComHelper::CreateInstance(idGdalDriver, (IDispatch**)pVal);
+		((CGdalDriver*)*pVal)->Inject(driver);
+	}
+
+	return S_OK;
+}

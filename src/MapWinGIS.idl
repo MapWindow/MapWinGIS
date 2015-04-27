@@ -59,6 +59,8 @@ interface IUndoList;
 interface IIdentifier;
 interface IGdalRasterBand;
 interface IHistogram;
+interface IGdalDataset;
+interface IGdalDriver;
 
 /************************** tkGdalDataType Enumeration **********************/
 typedef
@@ -1059,6 +1061,7 @@ enum tkScalebarUnits
 		idGdalRasterBand = 45,
 		idHistogram = 46,
 		idGdalDataset = 47,
+		idGdalDriver = 48,
 	} tkInterface;	
 
 	typedef		
@@ -3645,6 +3648,7 @@ interface IImage : IDispatch{
 	[propget, id(98)] HRESULT ColorizeColor([out, retval] OLE_COLOR* pVal);
 	[propput, id(98)] HRESULT ColorizeColor([in] OLE_COLOR newVal);
 	[id(99)] HRESULT ClearOverviews([out, retval] VARIANT_BOOL* retVal);
+	[propget, id(100)] HRESULT GdalDriver([out, retval] IGdalDriver** pVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -5977,8 +5981,24 @@ interface IHistogram : IDispatch{
 	nonextensible,
 	pointer_default(unique)
 ]
-interface IGdalDataset : IDispatch{
+interface IGdalDataset : IDispatch {
+	
+	[propget, id(1)] HRESULT Driver([out, retval] IGdalDriver** pVal);
 };
+
+[
+	object,
+	uuid(6685DBF0-87CA-4026-9FD6-AA228E86E74C),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IGdalDriver : IDispatch {
+	[propget, id(1)] HRESULT Metadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
+	[propget, id(2)] HRESULT MetadataCount([out, retval]int* retVal);
+	[propget, id(3)] HRESULT MetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
+};
+
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -6937,5 +6957,12 @@ library MapWinGIS
 	coclass GdalDataset
 	{
 		[default] interface IGdalDataset;
+	};
+	[
+		uuid(0FCBDC95-AC81-4902-90CC-D93B39D45928)		
+	]
+	coclass GdalDriver
+	{
+		[default] interface IGdalDriver;
 	};
 };
