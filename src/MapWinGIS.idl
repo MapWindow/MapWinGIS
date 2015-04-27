@@ -3643,6 +3643,7 @@ interface IImage : IDispatch{
 	[propput, id(97)] HRESULT ColorizeIntensity([in] FLOAT newVal);
 	[propget, id(98)] HRESULT ColorizeColor([out, retval] OLE_COLOR* pVal);
 	[propput, id(98)] HRESULT ColorizeColor([in] OLE_COLOR newVal);
+	[id(99)] HRESULT ClearOverviews([out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -5952,6 +5953,7 @@ interface IGdalRasterBand : IDispatch{
 	[id(18)] HRESULT GetUniqueValues([in]LONG maxCount, [out]VARIANT* arr, [out, retval]VARIANT_BOOL* result);
 	[id(19)] HRESULT GetDefaultHistogram([in] VARIANT_BOOL forceCalculate, [out, retval] IHistogram** retVal);
 	[id(20)] HRESULT GetHistogram([in] DOUBLE minValue, [in] DOUBLE maxValue, [in] LONG numBuckets, [in] VARIANT_BOOL includeOutOfRange, [in] VARIANT_BOOL allowApproximate, [out, retval] IHistogram** retVal);
+	[propget, id(21)] HRESULT Overview([in] LONG overviewIndex, [out, retval] IGdalRasterBand** pVal);
 };
 [
 	object,

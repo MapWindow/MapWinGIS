@@ -126,5 +126,9 @@ struct CallbackParams
 	const char *sMsg;
 
 	CallbackParams() : cBack(NULL), sMsg(NULL) {}
-	CallbackParams(ICallback* callback, const char * message) : cBack(callback), sMsg(message) {}
+	
+	CallbackParams(const char * message);
+	
+	CallbackParams(ICallback* localCallback, const char * message);
+
 };

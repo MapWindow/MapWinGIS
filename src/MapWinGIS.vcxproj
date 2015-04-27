@@ -610,6 +610,7 @@
     </ClCompile>
     <ClCompile Include="Control\ToolTipEx.cpp" />
     <ClCompile Include="Structures\Layer.cpp" />
+    <ClCompile Include="Structures\Structures.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Tiles\Providers\BingMapProvider.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />

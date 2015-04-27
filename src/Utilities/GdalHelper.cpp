@@ -205,13 +205,11 @@ bool GdalHelper::CanOpenAsGdalRaster(CStringW filename)
 // **************************************************************
 //		ClearOverviews
 // **************************************************************
-bool ClearOverviews(GDALDataset* dt, ICallback* cb, bool clear)
+bool GdalHelper::ClearOverviews(GDALDataset* dt, ICallback* cb)
 {
-	CallbackParams params;
-	CallbackHelper::FillGdalCallbackParams(params, cb, "Clearing overviews");
+	CallbackParams params(cb, "Clearing overviews");
 
-	int overviewList = clear ? 0 : 2;
-	bool success = dt->BuildOverviews("NONE", (clear ? 0 : 1), &overviewList, 0, NULL, 
+	bool success = dt->BuildOverviews("NONE", 0, 0, 0, NULL, 
 			(GDALProgressFunc)GDALProgressCallback, &params) == CPLErr::CE_None;
 	return success;
 }
@@ -228,7 +226,7 @@ bool GdalHelper::SupportsOverviews(CStringW filename, ICallback* callback)
 		supports = HasOverviews(dt);
 		if (!supports) {
 			// TODO: can we check just by running clear?
-			supports = ClearOverviews(dt, callback, true);
+			supports = ClearOverviews(dt, callback);
 			// otherwise it's seems that the only way to check is try to create them
 			// TODO: check driver to weed out formats which don't support overviews
 		}
@@ -277,7 +275,7 @@ bool GdalHelper::RemoveOverviews(CStringW filename)
 {
 	GDALDataset* dt = GdalHelper::OpenRasterDatasetW(filename, GDALAccess::GA_ReadOnly);
 	if (dt ) {
-		bool result = ClearOverviews(dt, NULL, true);
+		bool result = ClearOverviews(dt, NULL);
 		CloseDataset(dt);
 		return result;
 	}
@@ -387,8 +385,7 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 			pszResampling = "NONE";
 	}
 
-	CallbackParams params;
-	CallbackHelper::FillGdalCallbackParams(params, callback, "Building overviews");
+	CallbackParams params(callback, "Building overviews");
 
 	bool result = dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, 
 		(GDALProgressFunc)GDALProgressCallback, &params) == CE_None;
@@ -531,8 +528,7 @@ bool GdalHelper::CopyDataset(GDALDataset* dataset, CStringW newName, ICallback* 
 	GDALDriver* drv = dataset->GetDriver();
 	if (!drv) return false;
 
-	CallbackParams params;
-	CallbackHelper::FillGdalCallbackParams(params, localCallback, "Copying dataset");
+	CallbackParams params(localCallback, "Copying dataset");
 	
 	char **papszOptions = NULL;
 	papszOptions = SetCompressionRasterOptions(dataset, papszOptions);

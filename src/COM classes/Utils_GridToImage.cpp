@@ -175,7 +175,7 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 
 	if (imageFormat == gpfTiffProxy)
 	{
-		// TODO: perhaps the rotation parameters should also be copied; though currently it seems there is no API to do
+		// TODO: perhaps the rotation parameters should also be copied; though currently it seems there is no API to do it
 		double adfGeoTransform[6];
 		adfGeoTransform[GEOTRSFRM_TOPLEFT_X] = xll - dx /2.0;
 		adfGeoTransform[GEOTRSFRM_WE_RES] = dx;

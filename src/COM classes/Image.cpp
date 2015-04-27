@@ -2174,25 +2174,25 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 		ErrorMessage(tkINVALID_PARAMETER_VALUE);
 		return S_OK;
 	}
-	
-	int* overviewList = (int*)OverviewList->pvData;
-	if (_gdalImage)
-	{
-		GDALDataset* dataset = _rasterImage->GetDataset();
-		if (dataset)
-		{
-			if (GdalHelper::BuildOverviewsCore(dataset, ResamplingMethod, overviewList, numOverviews, _globalCallback)) {
-				*retval = VARIANT_TRUE;
-			}
-			else {
-				ErrorMessage(tkUNSUPPORTED_FORMAT);
-			}
-		}
-	}
-	else
+
+	if (!_gdalImage)
 	{
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+		return S_OK;
 	}
+
+	int* overviewList = (int*)OverviewList->pvData;
+	GDALDataset* dataset = _rasterImage->GetDataset();
+	if (dataset)
+	{
+		if (GdalHelper::BuildOverviewsCore(dataset, ResamplingMethod, overviewList, numOverviews, _globalCallback)) {
+			*retval = VARIANT_TRUE;
+		}
+		else {
+			ErrorMessage(tkUNSUPPORTED_FORMAT);
+		}
+	}
+	
 	return S_OK;
 }
 
@@ -3933,5 +3933,42 @@ Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
 		matrix.SetGreyscale(MatrixOrderAppend);
 	}
 
+	DumpMetadata();
+
 	return matrix;
+}
+
+// ********************************************************
+//     ClearOverviews
+// ********************************************************
+STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	if (!_gdalImage)
+	{
+		*retVal = VARIANT_TRUE;
+		return S_OK;
+	}
+	
+	bool result = GdalHelper::ClearOverviews(_rasterImage->GetDataset());
+
+	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
+	
+	return S_OK;
+}
+
+void CImageClass::DumpMetadata()
+{
+	if (_gdalImage)
+	{
+		GDALDataset* ds = _rasterImage->GetDataset();
+		GDALDriver* driver = ds->GetDriver();
+		if (driver)
+		{
+			char** data = driver->GetMetadata();
+			int value = CSLCount(data);
+			Debug::WriteLine("Number of metadata items: %d", value);
+		}
+	}
 }

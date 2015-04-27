@@ -39,6 +39,7 @@ public:
 	static bool BuildOverviewsIfNeeded(GDALDataset* dt, ICallback* callback);
 	static bool BuildOverviewsIfNeeded(CStringW filename, bool external = true, ICallback* callback = NULL);
 	static bool BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resamlingMethod, int* overviewList, int numOverviews, ICallback* callback);
+	static bool ClearOverviews(GDALDataset* dt, ICallback* cb = NULL);
 
 	static CStringA GetMetadataNameString(tkGdalDriverMetadata metadata);
 	static void GetMetaData(GDALDriver* driver);

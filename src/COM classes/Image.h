@@ -305,6 +305,7 @@ public:
 	STDMETHOD(put_ColorizeIntensity)(FLOAT newVal);
 	STDMETHOD(get_ColorizeColor)(OLE_COLOR* pVal);
 	STDMETHOD(put_ColorizeColor)(OLE_COLOR newVal);
+	STDMETHOD(ClearOverviews)(VARIANT_BOOL* retVal);
 
 private:
 	tkImageSourceType _sourceType;

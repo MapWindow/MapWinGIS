@@ -387,12 +387,11 @@ STDMETHODIMP CGdalRasterBand::GetDefaultHistogram(VARIANT_BOOL forceCalculate, I
 	double minValue, maxValue;
 	int numBuckets;
 
-	CallbackParams params;
-	CallbackHelper::FillGdalCallbackParams(params, NULL, "Retrieving default histogram");   // move it to CallbackParams constructor
+	CallbackParams params("Retrieving default histogram");
 
 	CPLErr err = _band->GetDefaultHistogram(&minValue, &maxValue, &numBuckets, &values, forceCalculate ? 1 : 0, GDALProgressCallback, &params);
 
-	CallbackHelper::ProgressCompleted(NULL);
+	CallbackHelper::ProgressCompleted();
 
 	if (err != CPLErr::CE_None)
 	{
@@ -426,7 +425,11 @@ STDMETHODIMP CGdalRasterBand::GetHistogram(DOUBLE minValue, DOUBLE maxValue, LON
 
 	int* values = new int[numBuckets];
 
+	CallbackParams params("Calculating histogram");
+
 	CPLErr err = _band->GetHistogram(minValue, maxValue, numBuckets, values, includeOutOfRange ? 1: 0, allowApproximate ? 1 : 0, NULL, NULL);
+
+	CallbackHelper::ProgressCompleted();
 
 	if (err != CPLErr::CE_None)
 	{
@@ -438,6 +441,35 @@ STDMETHODIMP CGdalRasterBand::GetHistogram(DOUBLE minValue, DOUBLE maxValue, LON
 	ComHelper::CreateInstance(idHistogram, (IDispatch**)retVal);
 
 	((CHistogram*)*retVal)->Inject(numBuckets, minValue, maxValue, values, false);
+
+	return S_OK;
+}
+
+// *************************************************************
+//	  get_Overview()
+// *************************************************************
+STDMETHODIMP CGdalRasterBand::get_Overview(LONG overviewIndex, IGdalRasterBand** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = NULL;
+	if (!CheckBand()) return S_OK;
+
+	int count = _band->GetOverviewCount();
+
+	// overview indices are 0 based
+	if (overviewIndex < 0 || overviewIndex >= count)
+	{
+		ErrorMessage("Overview index is out of bounds.");
+		return S_OK;
+	}
+
+	GDALRasterBand* overview = _band->GetOverview(overviewIndex);
+	if (overview)
+	{
+		ComHelper::CreateInstance(idGdalRasterBand, (IDispatch**)pVal);
+		RasterBandHelper::Cast(*pVal)->InjectBand(overview);
+	}
 
 	return S_OK;
 }
