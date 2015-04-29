@@ -55,7 +55,7 @@ BOOL CMapWinGISApp::InitInstance()
 	std::locale::global(std::locale("C"));
 
 	// http_://stackoverflow.com/questions/7659127/createex-causes-unhandled-exception-the-activation-context-being-deactivated-is
-	AfxSetAmbientActCtx(FALSE);
+	//AfxSetAmbientActCtx(FALSE);
 
 	// UTF8 string are expected by default; the enviroment variable shoud be set to restore older behavior
 	// see more details here: http_://trac.osgeo.org/gdal/wiki/ConfigOptions
@@ -162,9 +162,6 @@ STDAPI DllUnregisterServer(void)
 	return NOERROR;
 }
 
-// **************************************************************
-//		DllCanUnloadNow()
-// **************************************************************
 #if !defined(_WIN32_WCE) && !defined(_AMD64_) && !defined(_IA64_)
 #pragma comment(linker, "/EXPORT:DllCanUnloadNow=_DllCanUnloadNow@0,PRIVATE")
 #pragma comment(linker, "/EXPORT:DllGetClassObject=_DllGetClassObject@12,PRIVATE")
@@ -184,11 +181,16 @@ STDAPI DllUnregisterServer(void)
 #endif // (_X86_)||(_SHX_)
 #endif // !_WIN32_WCE && !_AMD64_ && !_IA64_ 
 
+// **************************************************************
+//		DllCanUnloadNow()
+// **************************************************************
 STDAPI DllCanUnloadNow(void)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	if (_AtlModule.GetLockCount() > 0)
 		return S_FALSE;
-	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
 	return (AfxDllCanUnloadNow()==S_OK && _Module.GetLockCount()==0) ? S_OK : S_FALSE;
 }
 

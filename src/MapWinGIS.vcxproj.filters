@@ -1993,6 +1993,7 @@
     <None Include="COM classes\GdalDriver.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
+    <None Include="MapWinGIS.def" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />

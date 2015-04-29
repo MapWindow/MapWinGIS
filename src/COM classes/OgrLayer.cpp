@@ -677,7 +677,7 @@ STDMETHODIMP COgrLayer::HasLocalChanges(VARIANT_BOOL* retVal)
 		CSingleLock lock(&_loader.ProviderLock);
 		if (_dynamicLoading) lock.Lock();
 
-		int featureCount = _layer->GetFeatureCount();
+		int featureCount = static_cast<int>(_layer->GetFeatureCount());
 		if (numShapes != featureCount)	   // i.e. deleted or inserted feature
 		{
 			*retVal = VARIANT_TRUE;
@@ -776,11 +776,17 @@ STDMETHODIMP COgrLayer::get_FeatureCount(VARIANT_BOOL forceLoading, int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = 0;
+	
 	if (!CheckState()) return S_OK;
+
 	CSingleLock lock(&_loader.ProviderLock);
-	if (_dynamicLoading) lock.Lock();
-	if (_featureCount == -1 || forceLoading) {
-		_featureCount = _layer->GetFeatureCount(forceLoading == VARIANT_TRUE);
+	if (_dynamicLoading)  {
+		lock.Lock();
+	}
+	
+	if (_featureCount == -1 || forceLoading) 
+	{
+		_featureCount = static_cast<int>(_layer->GetFeatureCount(forceLoading == VARIANT_TRUE));
 	}
 	*retVal = _featureCount;
 	return S_OK;
@@ -1354,14 +1360,14 @@ void COgrLayer::GetFieldValues(OGRFieldType fieldType, BSTR& fieldName, vector<V
 		OGRLayer* layer = _dataset->ExecuteSQL(OgrHelper::String2OgrString(sql), NULL, NULL);
 		if (layer)
 		{
-			OgrHelper::GetFieldValues(layer, _layer->GetFeatureCount(), fieldType, values, _globalCallback);
+			OgrHelper::GetFieldValues(layer, static_cast<int>( _layer->GetFeatureCount()), fieldType, values, _globalCallback);
 			_dataset->ReleaseResultSet(layer);
 		}
 	}
 	else
 	{
 		// the column can be a computed one, so have to load feature as a whole
-		OgrHelper::GetFieldValues(_layer, _layer->GetFeatureCount(), fieldType, values, _globalCallback);
+		OgrHelper::GetFieldValues(_layer, static_cast<int>(_layer->GetFeatureCount()), fieldType, values, _globalCallback);
 	}
 }
 

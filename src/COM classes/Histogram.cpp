@@ -6,7 +6,7 @@
 // ********************************************************
 //	  get_Count
 // ********************************************************
-void CHistogram::Inject(int numBuckets, double minValue, double maxValue, int* values, bool allocatedByGdal)
+void CHistogram::Inject(int numBuckets, double minValue, double maxValue, GUIntBig* values, bool allocatedByGdal)
 {
 	_numBuckets = numBuckets;
 	_values = values;
@@ -95,7 +95,7 @@ STDMETHODIMP CHistogram::get_Count(LONG bucketIndex, LONG* pVal)
 		return S_OK;
 	}
 	
-	*pVal = _values[bucketIndex];
+	*pVal = static_cast<long>(_values[bucketIndex]);
 	
 	return S_OK;
 }

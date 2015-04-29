@@ -284,7 +284,7 @@ class OGRSplitListFieldLayer : public OGRLayer
     virtual void                 ResetReading() { poSrcLayer->ResetReading(); }
     virtual int                  TestCapability(const char*) { return FALSE; }
 
-    virtual int                  GetFeatureCount( int bForce = TRUE )
+    virtual GIntBig                  GetFeatureCount( int bForce = TRUE )
     {
         return poSrcLayer->GetFeatureCount(bForce);
     }
@@ -394,7 +394,8 @@ int  OGRSplitListFieldLayer::BuildLayerDefn(GDALProgressFunc pfnProgress,
 
         int nFeatureCount = 0;
         if (poSrcLayer->TestCapability(OLCFastFeatureCount))
-            nFeatureCount = poSrcLayer->GetFeatureCount();
+            nFeatureCount = static_cast<int>(poSrcLayer->GetFeatureCount());
+
         int nFeatureIndex = 0;
 
         /* Scan the whole layer to compute the maximum number of */
@@ -2387,7 +2388,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				}
 				else
 				{
-					nCountLayerFeatures = poResultSet->GetFeatureCount();
+					nCountLayerFeatures = static_cast<long>(poResultSet->GetFeatureCount());
 					pfnProgress = GDALProgressCallback;
 				}
 			}
@@ -2780,7 +2781,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 				}
 				else
 				{
-					panLayerCountFeatures[iLayer] = poLayer->GetFeatureCount();
+					panLayerCountFeatures[iLayer] = static_cast<long>(poLayer->GetFeatureCount());
 					nCountLayersFeatures += panLayerCountFeatures[iLayer];
 				}
 			}

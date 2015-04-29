@@ -49,14 +49,14 @@ public:
 	STDMETHOD(get_Value)(LONG bucketIndex, DOUBLE* pVal);
 
 private:
-	int* _values;
+	GUIntBig* _values;
 	double _minValue;
 	double _maxValue;
 	int _numBuckets;	
 	bool _allocatedByGdal;	
 
 public:
-	void Inject(int numBuckets, double minValue, double maxValue, int* values, bool allocatedByGdal);
+	void Inject(int numBuckets, double minValue, double maxValue, GUIntBig* values, bool allocatedByGdal);
 	void ErrorMessage(CString msg);
 	bool ValidateBucketIndex(LONG bucketIndex);
 	void Clear();

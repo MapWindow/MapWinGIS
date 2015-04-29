@@ -528,26 +528,12 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 	_dbffileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"dbf";
 	_prjfileName = tmp_shpfileName.Left(tmp_shpfileName.GetLength() - 3) + L"prj";
 
-	// Chris Michaelis 12/19/2005 - Windows 98 doesn't support unicode and will thus crash and burn on _wfopen.
-	OSVERSIONINFO OSversion;
-	OSversion.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
-	::GetVersionEx(&OSversion);
+	// Running 2k, XP, NT, or other future versions
+	////Changes made to use _wfopen to support Asian character file names ---Lailin Chen 11/5/2005
+	_shpfile = _wfopen( _shpfileName, L"rb");
+	_shxfile = _wfopen(_shxfileName,L"rb");
 
-	if (OSversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-	{
-		// Running Windows 95, 98, ME
-		_shpfile = fopen(W2A(_shpfileName), "rb");
-		_shxfile = fopen(W2A(_shxfileName), "rb");
-	}
-	else
-	{
-		// Running 2k, XP, NT, or other future versions
-		////Changes made to use _wfopen to support Asian character file names ---Lailin Chen 11/5/2005
-		_shpfile = _wfopen( _shpfileName, L"rb");
-		_shxfile = _wfopen(_shxfileName,L"rb");
-	}
-	
-	// opening dbf
+	// opening DBF
 	//ASSERT(dbf == NULL);
 	if (!_table)
 	{

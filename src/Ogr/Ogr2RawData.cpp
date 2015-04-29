@@ -18,7 +18,7 @@ bool Ogr2RawData::Layer2RawData(OGRLayer* layer, Extent* extents, OgrDynamicLoad
 	layer->SetSpatialFilterRect(extents->left, extents->bottom, extents->right, extents->top);
 
 	loader->LockProvider(true);
-	int numFeatures = layer->GetFeatureCount();
+	int numFeatures = static_cast<int>(layer->GetFeatureCount());
 	loader->LockProvider(false);
 
 	callback->FeatureCount = numFeatures;
@@ -364,7 +364,7 @@ void Ogr2RawData::FieldsToShapeRecord(OGRFeatureDefn* poFields, OGRFeature* poFe
 		VARIANT* var = new VARIANT;
 		VariantInit(var);
 		var->vt = VT_I4;
-		var->lVal = poFeature->GetFID();
+		var->lVal = static_cast<long>(poFeature->GetFID());
 		data->Row->values.push_back(var);
 	}
 

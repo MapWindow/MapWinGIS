@@ -92,13 +92,4 @@ namespace Utility
 
 	// time
 	int GetCurrentYear();
-
-	// http_://stackoverflow.com/questions/1963992/check-windows-version
-	double GetWindowsVersion(){
-		OSVERSIONINFO osvi;
-		ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
-		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		GetVersionEx(&osvi);
-		return (double)osvi.dwMajorVersion + osvi.dwMinorVersion / 10.0;
-	}
 }

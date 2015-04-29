@@ -149,7 +149,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 
 	layer->ResetReading();
 
-	int numFeatures = layer->GetFeatureCount();
+	int numFeatures = static_cast<int>(layer->GetFeatureCount());
 
 	int count = 0;
 	long percent = 0;
@@ -210,7 +210,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		{
 			CComVariant var;
 			var.vt = VT_I4;
-			var.lVal = poFeature->GetFID();
+			var.lVal = static_cast<long>(poFeature->GetFID());
 			sf->EditCellValue(0, numShapes, var, &vbretval);
 		}
 

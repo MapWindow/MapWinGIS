@@ -383,7 +383,7 @@ STDMETHODIMP CGdalRasterBand::GetDefaultHistogram(VARIANT_BOOL forceCalculate, I
 	*retVal = NULL;
 	if (!CheckBand()) return S_OK;
 
-	int* values = NULL;
+	GUIntBig* values = NULL;
 	double minValue, maxValue;
 	int numBuckets;
 
@@ -423,7 +423,7 @@ STDMETHODIMP CGdalRasterBand::GetHistogram(DOUBLE minValue, DOUBLE maxValue, LON
 		return S_OK;
 	}
 
-	int* values = new int[numBuckets];
+	GUIntBig* values = new GUIntBig[numBuckets];
 
 	CallbackParams params("Calculating histogram");
 

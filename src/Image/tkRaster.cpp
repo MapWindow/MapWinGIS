@@ -1422,9 +1422,9 @@ bool tkRaster::ReadGridAsImage2(colour** ImageData, int xOff, int yOff, int widt
 							cppVector normal = two.crossProduct( one );
 
 							//Compute I
-							float I = ai + li * lightsource.dot(normal);
-							if( I > 1.0f )
-								I = 1.0f;
+							double I = ai + li * lightsource.dot(normal);
+							if( I > 1.0 )
+								I = 1.0;
 
 							GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
 
@@ -1495,7 +1495,7 @@ bool tkRaster::ComputeEqualizationLUTs( CStringW filename,
 {
 	int iBand;
     int nHistSize = 0;
-    int *panHistogram = NULL;
+	GUIntBig *panHistogram = NULL;
 	if (_rasterDataset == NULL) 
 		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 

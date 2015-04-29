@@ -216,7 +216,7 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 						// won't be later deleted as the one with id not present in the database
 						VARIANT_BOOL vb;
 						CComVariant var;
-						var.lVal = ft->GetFID();
+						var.lVal = static_cast<long>(ft->GetFID());
 						var.vt = VT_I4;
 						shapefile->EditCellValue(shapeCmnIndex, i, var, &vb);
 					}
@@ -269,7 +269,7 @@ int Shape2Ogr::RemoveDeletedFeatures(OGRLayer* layer, IShapefile* sf, long shape
 	layer->ResetReading();
 	while ((ft = layer->GetNextFeature()) != NULL)
 	{
-		long fid = ft->GetFID();
+		long fid = static_cast<long>(ft->GetFID());
 		std::multiset<long>::iterator it = fids.find(fid);
 		if (it == fids.end())
 		{

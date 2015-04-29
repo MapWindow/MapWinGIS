@@ -281,29 +281,15 @@ namespace Utility
 
 		USES_CONVERSION;
 
-		// Chris Michaelis 12/19/2005 - Windows 98 doesn't support unicode and will thus crash and burn on _wfopen.
-		FILE * file = NULL;
-		OSVERSIONINFO OSversion;
-		OSversion.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
-		::GetVersionEx(&OSversion);
-		if (OSversion.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-		{
-			file = fopen(W2A(filename), "rb");
-		}
-		else
-		{
-			// Running 2k, XP, NT, or other future versions
-			//Changed the following code to support Asian character file name 11/5/2005 --Lailin Chen.
-			file = _wfopen(filename, L"rb");
-		}
+		FILE* file = _wfopen(filename, L"rb");
 
-		if( file == NULL )
+		if (file == NULL) {
 			return false;
-		else
-		{	
-			fclose(file);
-			return true;
 		}
+		
+		fclose(file);
+		return true;
+		
 	}
 
 	// returns list paths for all parent folders for current file from inner most to top most
