@@ -132,7 +132,7 @@
       <ShowProgress>NotSet</ShowProgress>
       <OutputFile>$(OutDir)MapWinGIS.ocx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(ProjectDir)SupportingLibraries\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)SupportingLibraries\lib\$(PlatformToolset)\$(Platform);$(ProjectDir)SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\lib\$(Platform);$(ProjectDir)..\Support\lib\$(PlatformToolset)\$(Platform);$(ProjectDir)..\Support\ERDAS-ECW-JPEG-2000-SDK-5.0\lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBC.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>
