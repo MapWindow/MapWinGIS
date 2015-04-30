@@ -63,7 +63,7 @@
   <ItemDefinitionGroup>
     <PreBuildEvent>
       <Message>Copying executables...</Message>
-      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)SupportingLibraries\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
+      <Command>$(ProjectDir)CopyTamasFiles.bat $(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\bin\$(Platform) $(TargetDir)</Command>
     </PreBuildEvent>
     <CustomBuildStep>
       <Message>
@@ -92,7 +92,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>$(ProjectDir)\SupportingLibraries\include;$(ProjectDir)\SupportingLibraries\include\atlhttp;$(ProjectDir)\SupportingLibraries\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)\SupportingLibraries\GDAL_SDK\$(PlatformToolset)\include;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\Support\include;$(ProjectDir)..\Support\include\atlhttp;$(ProjectDir)..\Support\ERDAS-ECW-JPEG-2000-SDK-5.0\include;$(ProjectDir);$(ProjectDir)\COM classes;$(ProjectDir)\ComHelpers;$(ProjectDir)\Control;$(ProjectDir)\Drawing;$(ProjectDir)\Grid;$(ProjectDir)\Image;$(ProjectDir)\Processing;$(ProjectDir)\Shapefile;$(ProjectDir)\ShapeNetwork;$(ProjectDir)\Structures;$(ProjectDir)\Tin;$(ProjectDir)\Utilities;$(ProjectDir)\Grid\fip;$(ProjectDir)\Utilities\SpatialIndex;$(ProjectDir)\Tiles;$(ProjectDir)\Tiles\Providers;$(ProjectDir)\Utilities\SQLite;$(ProjectDir)\Tiles\Projections;$(ProjectDir)..\Support\GDAL_SDK\$(PlatformToolset)\include;$(ProjectDir)\Ogr;$(ProjectDir)\Editor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_NDBGSYMBOLS;_WINDOWS;_USRDLL;_AFXDLL;_CRT_SECURE_NO_WARNINGS;GEOS_NEW;_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
