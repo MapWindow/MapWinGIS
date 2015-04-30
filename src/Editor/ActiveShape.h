@@ -11,36 +11,41 @@ public:
 		_linePen(Gdiplus::Color::Orange, 2.0f), _fillBrush(Gdiplus::Color::Orange),
 		_redPen(Gdiplus::Color::Red, 1.0f), _redBrush(Gdiplus::Color::LightCoral)
 	{
+		RELATIVE_HORIZONTAL_PADDING = 1.3;
 		_font = Utility::GetGdiPlusFont("Times New Roman", 9);
-		_fontArea = Utility::GetGdiPlusFont("Arial", 12);
+		_fontArea = Utility::GetGdiPlusFont("Times New Roman", 11);
 		_format.SetAlignment(Gdiplus::StringAlignmentCenter);
 		_format.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 
 		_formatLeft.SetAlignment(Gdiplus::StringAlignmentNear);
 		_formatLeft.SetLineAlignment(Gdiplus::StringAlignmentCenter);
 
-		_verticesVisible = true;
-		//_drawLineForPoly = true;
-		_lengthRounding = 1;
-		_areaRounding = 1;
 		_drawLabelsOnly = false;
 		_selectedVertex = -1;
 		_highlightedVertex = -1;
-		_pointLabelsVisible = true;
-		_lengthDisplayMode = ldmMetric;
 		_selectedPart = -1;
 		_highlightedPart = -1;
 		_inputMode = simMeasuring;
-		OverlayTool = false;
-		FillTransparency = 100;
+
+		AnglePrecision = 1;
+		AngleFormat = afDegrees;
+		AreaDisplayMode = admMetric;
+		AreaPrecision = 1;
+		BearingType = btAbsolute;
 		FillColor = RGB(255, 165, 0);
+		FillTransparency = 100;
 		LineColor = RGB(255, 127, 0);
 		LineWidth = 2.0f;
-		AreaDisplayMode = admMetric;
-		AngleDisplayMode = Azimuth;
-		DisplayAngles = false;
-
-		
+		LengthUnits = ldmMetric;
+		LengthPrecision = 1;
+		LineStyle = dsSolid;
+		OverlayTool = false;
+		PointsVisible = true;
+		PointLabelsVisible = true;
+		ShowBearing = false;
+		ShowLength = true;
+		ShowTotalLength = true;
+		ShowArea = true;
 	};
 
 	virtual ~ActiveShape(void) {
@@ -58,6 +63,7 @@ private:
 	Gdiplus::SolidBrush _fillBrush;
 	Gdiplus::SolidBrush _blueBrush;
 	Gdiplus::SolidBrush _redBrush;
+	double RELATIVE_HORIZONTAL_PADDING;
 
 protected:
 	enum MixedShapePart
@@ -76,10 +82,6 @@ protected:
 
 public:
 	bool _drawLabelsOnly;
-	bool _pointLabelsVisible;
-	bool _verticesVisible;
-	
-	tkLengthDisplayMode _lengthDisplayMode;
 	
 	Gdiplus::SolidBrush _textBrush; // Black;
 	Gdiplus::SolidBrush _whiteBrush;// White;
@@ -89,19 +91,29 @@ public:
 	int _selectedPart;
 	int _highlightedPart;
 
-	int _lengthRounding;
-	int _areaRounding;
-
 public:
-	BYTE FillTransparency;
-	float LineWidth;
-	bool DisplayAngles;
+	
+	bool ShowBearing;
+	bool ShowArea;
+	bool ShowLength;
+	bool OverlayTool;
+	bool PointLabelsVisible;
+	bool PointsVisible;
+	bool ShowTotalLength;
+	int LengthPrecision;
+	int AreaPrecision;
+	int AnglePrecision;
+	tkLengthDisplayMode LengthUnits;
 	tkAreaDisplayMode AreaDisplayMode;
-	tkAngleDisplay AngleDisplayMode;
+	tkBearingType BearingType;
 	tkAngleFormat AngleFormat;
+
 	OLE_COLOR FillColor;
 	OLE_COLOR LineColor;
-	bool OverlayTool;
+	BYTE FillTransparency;
+	tkDashStyle LineStyle;
+	float LineWidth;
+
 protected:
 
 	// abstract methods
@@ -113,7 +125,15 @@ protected:
 	virtual bool SnapToPreviousVertex(int& vertexIndex, double screenX, double screenY) = 0;
 	virtual bool DrawAccumalatedLength() = 0;
 	virtual bool HasClosedPolygon() = 0;
-	
+	virtual bool GetShowArea() = 0;
+
+	bool VerticesAreVisible();
+	bool PointLabelsAreVisible();
+	bool PartIsSelected(int partIndex);
+	double GetAzimuth(MeasurePoint* pnt1, MeasurePoint* pnt2);
+	double GetInnerAngle(int vertexIndex, bool clockwise);
+	double GetRelativeBearing(int vertexIndex, bool clockwise);
+	bool IsRelativeBearing();
 public:	
 	
 	void SetMapCallback(IMapViewCallback* mapView, ShapeInputMode inputMode);
@@ -139,11 +159,14 @@ public:
 	int GetScreenPoints(int partIndex, MixedShapePart whichPoints, bool hasLastPoint, int lastX, int lastY, Gdiplus::PointF** data);
 	void DrawData(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOperation offsetType, int screenOffsetX = 0, int screenOffsetY = 0);
 	void DrawSegmentInfo(Gdiplus::Graphics* g, double xScr, double yScr, double xScr2, double yScr2, 
-		double length, double totalLength, int segmentIndex, bool rumbOnly);
-	void DrawMeasuringPolyArea(Gdiplus::Graphics* g, IPoint* pnt, double area);
+		double length, double totalLength, int segmentIndex);
 	void DrawPolygonArea(Gdiplus::Graphics* g, Gdiplus::PointF* data, int size, bool dynamicPoly);
+	void DrawPolygonArea(Gdiplus::Graphics* g, IPoint* pnt, double area);
 	void DrawLines(Gdiplus::Graphics* g, int size, Gdiplus::PointF* data, bool dynamicBuffer, int partIndex, CCollisionList& collisionList);
-	bool PartIsSelected(int partIndex);
-	bool VerticesAreVisible();
-	bool PointLabelsAreVisible();
+	void DrawRelativeBearing(Gdiplus::Graphics* g, int segmentIndex, double xScr, double yScr, Gdiplus::RectF r2, CStringW sBearing);
+	void PrepareSegmentLength(Gdiplus::Graphics* g, double length, double totalLength, double screenLength, int segmentIndex, CStringW& sLength, Gdiplus::RectF& rect);
+	CStringW FormatLength(double length, CStringW format, bool unknownUnits);
+	void PrepareSegmentBearing(Gdiplus::Graphics* g, int segmentIndex, double dx, double dy, CStringW& sBearing, Gdiplus::RectF& rect);
+	void DrawSegmentLabel(Gdiplus::Graphics* g, CStringW text, Gdiplus::RectF rect, double screenLength, bool aboveLine);
+	
 };

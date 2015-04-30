@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 
 namespace MWLite.Symbology.Forms
 {
@@ -139,19 +140,19 @@ namespace MWLite.Symbology.Forms
             this.btnSaveChanges = new System.Windows.Forms.Button();
             this.transpMain = new MWLite.Symbology.Controls.TransparencyControl();
             this.icbLineWidth = new MWLite.Symbology.Controls.ImageCombo();
-            this.clpDefaultOutline = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpDefaultOutline = new Office2007ColorPicker(this.components);
             this.udDefaultSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpPointFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpPointFill = new Office2007ColorPicker(this.components);
             this.icbFillStyle = new MWLite.Symbology.Controls.ImageCombo();
-            this.clpPolygonFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpPolygonFill = new Office2007ColorPicker(this.components);
             this.transpSelection = new MWLite.Symbology.Controls.TransparencyControl();
-            this.clpSelection = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpSelection = new Office2007ColorPicker(this.components);
             this.icbCategories = new MWLite.Symbology.Controls.ImageCombo();
             this.udMaxSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udMinSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udNumCategories = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udLabelFontSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpLabelFrame = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpLabelFrame = new Office2007ColorPicker(this.components);
             this.icbChartColorScheme = new MWLite.Symbology.Controls.ImageCombo();
             this.scaleLayer = new MWLite.Symbology.Controls.ScaleControl();
             this.udMinDrawingSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
@@ -1759,7 +1760,7 @@ namespace MWLite.Symbology.Forms
         private System.Windows.Forms.PictureBox pctLabelPreview;
         private System.Windows.Forms.Button btnLabelsAppearance;
         private System.Windows.Forms.CheckBox chkShowLabels;
-        private Owf.Controls.Office2007ColorPicker clpLabelFrame;
+        private Office2007ColorPicker clpLabelFrame;
         private System.Windows.Forms.CheckBox chkLabelFrame;
         private System.Windows.Forms.Label label15;
         private ImageCombo icbCategories;
@@ -1800,15 +1801,15 @@ namespace MWLite.Symbology.Forms
         private MWLite.Symbology.Controls.ScaleControl scaleControl2;
         private MWLite.Symbology.Controls.ScaleControl scaleControl1;
         private System.Windows.Forms.Button btnClearLayerExpression;
-        private Owf.Controls.Office2007ColorPicker clpPointFill;
+        private Office2007ColorPicker clpPointFill;
         private System.Windows.Forms.TabPage tabMode;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox chkInMemory;
         private System.Windows.Forms.CheckBox chkSpatialIndex;
         private System.Windows.Forms.CheckBox chkFastMode;
-        private Owf.Controls.Office2007ColorPicker clpDefaultOutline;
+        private Office2007ColorPicker clpDefaultOutline;
         private System.Windows.Forms.GroupBox groupModeDescription;
-        private Owf.Controls.Office2007ColorPicker clpSelection;
+        private Office2007ColorPicker clpSelection;
         private System.Windows.Forms.GroupBox groupBox19;
         private System.Windows.Forms.Label label12;
         private MWLite.Symbology.Controls.NumericUpDownExt udMinDrawingSize;
@@ -1831,7 +1832,7 @@ namespace MWLite.Symbology.Forms
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.GroupBox groupFill;
         private ImageCombo icbFillStyle;
-        private Owf.Controls.Office2007ColorPicker clpPolygonFill;
+        private Office2007ColorPicker clpPolygonFill;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label23;
         private ImageCombo icbLineWidth;

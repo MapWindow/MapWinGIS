@@ -1,4 +1,4 @@
-namespace Owf.Controls
+namespace MWLite.Symbology.Controls.ColorPicker
 {
 	partial class Office2007ColorPicker
 	{

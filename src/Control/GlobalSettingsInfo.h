@@ -153,17 +153,29 @@ struct GlobalSettingsInfo
 		commonCollisionListForCharts = true;
 		commonCollisionListForLabels = true;
 
-		shortUnitStrings[tkLocalizedStrings::lsHectars] = L"ha";
-		shortUnitStrings[tkLocalizedStrings::lsMeters] = L"m";
-		shortUnitStrings[tkLocalizedStrings::lsKilometers] = L"km";
-		shortUnitStrings[tkLocalizedStrings::lsSquareKilometers] = L"sq.km";
-		shortUnitStrings[tkLocalizedStrings::lsSquareMeters] = L"sq.m";
-		shortUnitStrings[tkLocalizedStrings::lsMapUnits] = L"mu";
-		shortUnitStrings[tkLocalizedStrings::lsSquareMapUnits] = L"sq.mu";
-		shortUnitStrings[tkLocalizedStrings::lsMiles] = L"miles";
-		shortUnitStrings[tkLocalizedStrings::lsFeet] = L"feet";
-		shortUnitStrings[tkLocalizedStrings::lsLatitude] = L"Lat";
-		shortUnitStrings[tkLocalizedStrings::lsLongitude] = L"Lng";
+		shortUnitStrings[lsHectars] = L"ha";
+		shortUnitStrings[lsMeters] = L"m";
+		shortUnitStrings[lsKilometers] = L"km";
+		shortUnitStrings[lsSquareKilometers] = L"sq.km";
+		shortUnitStrings[lsSquareMeters] = L"sq.m";
+		shortUnitStrings[lsMapUnits] = L"mu";
+		shortUnitStrings[lsSquareMapUnits] = L"sq.mu";
+		shortUnitStrings[lsMiles] = L"mi";
+		shortUnitStrings[lsFeet] = L"ft";
+		shortUnitStrings[lsLatitude] = L"Lat";
+		shortUnitStrings[lsLongitude] = L"Lng";
+		shortUnitStrings[lsRadians] = L"rad";
+		shortUnitStrings[lsNorthEast] = L"NE";
+		shortUnitStrings[lsSouthEast] = L"SE";
+		shortUnitStrings[lsSouthWest] = L"SW";
+		shortUnitStrings[lsNorthWest] = L"NW";
+		shortUnitStrings[lsNorth] = L"N";
+		shortUnitStrings[lsEast] = L"E";
+		shortUnitStrings[lsSouth] = L"S";
+		shortUnitStrings[lsWest] = L"W";
+		shortUnitStrings[lsSquareFeet] = L"sq.ft";
+		shortUnitStrings[lsAcres] = L"ac";
+		shortUnitStrings[lsSquareMiles] = L"sq.mi";
 	}
 	
 	// *******************************************************

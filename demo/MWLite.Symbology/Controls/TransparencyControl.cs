@@ -24,7 +24,7 @@ namespace MWLite.Symbology.Controls
     using System.Windows.Forms;
     using System.Drawing.Drawing2D;
 
-    [ToolboxItem(false)]
+    [ToolboxItem(true)]
     public partial class TransparencyControl : UserControl
     {
         // The backbuffer 

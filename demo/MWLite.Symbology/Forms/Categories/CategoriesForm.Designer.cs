@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 
 namespace MWLite.Symbology.Forms.Categories
 {
@@ -47,7 +48,7 @@ namespace MWLite.Symbology.Forms.Categories
             this.txtExpression = new System.Windows.Forms.TextBox();
             this.groupFill = new System.Windows.Forms.GroupBox();
             this.icbFillStyle = new MWLite.Symbology.Controls.ImageCombo();
-            this.clpPolygonFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpPolygonFill = new Office2007ColorPicker(this.components);
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.btnCategoryStyle = new System.Windows.Forms.Button();
@@ -64,9 +65,9 @@ namespace MWLite.Symbology.Forms.Categories
             this.btnLabelExpression = new System.Windows.Forms.Button();
             this.groupLabels = new System.Windows.Forms.GroupBox();
             this.chkFrameVisible = new System.Windows.Forms.CheckBox();
-            this.clpFrame = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFrame = new Office2007ColorPicker(this.components);
             this.udFontSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpFont = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFont = new Office2007ColorPicker(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -81,14 +82,14 @@ namespace MWLite.Symbology.Forms.Categories
             this.btnLabelsGenerate = new System.Windows.Forms.Button();
             this.btnLabelsMoveUp = new System.Windows.Forms.Button();
             this.groupLine = new System.Windows.Forms.GroupBox();
-            this.clpLine = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpLine = new Office2007ColorPicker(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.icbLineWidth = new MWLite.Symbology.Controls.ImageCombo();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.groupPoint = new System.Windows.Forms.GroupBox();
-            this.clpPointFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpPointFill = new Office2007ColorPicker(this.components);
             this.udPointSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnApply = new System.Windows.Forms.Button();
@@ -955,18 +956,18 @@ namespace MWLite.Symbology.Forms.Categories
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.GroupBox groupPoint;
         private System.Windows.Forms.GroupBox groupFill;
-        private Owf.Controls.Office2007ColorPicker clpLine;
-        private Owf.Controls.Office2007ColorPicker clpPointFill;
+        private Office2007ColorPicker clpLine;
+        private Office2007ColorPicker clpPointFill;
         private MWLite.Symbology.Controls.NumericUpDownExt udPointSize;
-        private Owf.Controls.Office2007ColorPicker clpPolygonFill;
+        private Office2007ColorPicker clpPolygonFill;
         private ImageCombo icbFillStyle;
         private System.Windows.Forms.GroupBox groupExpression;
         private System.Windows.Forms.TextBox txtExpression;
         private System.Windows.Forms.GroupBox groupLabelExpression;
         private System.Windows.Forms.TextBox txtLabelExpression;
         private MWLite.Symbology.Controls.NumericUpDownExt udFontSize;
-        private Owf.Controls.Office2007ColorPicker clpFont;
-        private Owf.Controls.Office2007ColorPicker clpFrame;
+        private Office2007ColorPicker clpFont;
+        private Office2007ColorPicker clpFrame;
         private System.Windows.Forms.CheckBox chkFrameVisible;
         private System.Windows.Forms.DataGridViewCheckBoxColumn dataGridViewCheckBoxColumn1;
         private System.Windows.Forms.DataGridViewImageColumn dataGridViewImageColumn1;

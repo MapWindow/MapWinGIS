@@ -41,7 +41,7 @@ namespace MWLite.Symbology.Classes
     /// <summary>
     /// This class is wrapper for a list of color schemes associated with layer, labels or charts
     /// </summary>
-    internal class ColorSchemes
+    public class ColorSchemes
     {
         // The list of color schemes used in image combos
         public List<ColorBlend> List;

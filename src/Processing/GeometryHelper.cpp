@@ -270,7 +270,7 @@ bool GeometryHelper::PointOnSegment(double x1, double y1, double x2, double y2, 
 }
 
 /****************************************************************************/
-/*		get_PointAngle()														*/
+/*		GetPointAngle()														*/
 /****************************************************************************/
 //	Returns directional angle to the point in radians
 double GeometryHelper::GetPointAngle(double &x, double &y)
@@ -288,4 +288,12 @@ double GeometryHelper::GetPointAngle(double &x, double &y)
 		else if(x < 0)	return 1.5 * pi_;
 		else			return 0.0;
 	}
+}
+
+/****************************************************************************/
+/*		GetPointAngleDeg()														*/
+/****************************************************************************/
+double GeometryHelper::GetPointAngleDeg(double x, double y)
+{
+	return GetPointAngle(x, y) * 180.0 / pi_;
 }

@@ -93,6 +93,15 @@
     <Compile Include="Forms\LoaderForm.Designer.cs">
       <DependentUpon>LoaderForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\MeasuringForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MeasuringForm.Designer.cs">
+      <DependentUpon>MeasuringForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\ComboBoxEnumItem.cs" />
+    <Compile Include="Helpers\ComboBoxHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="MapLegend\LegendCommand.cs" />
     <Compile Include="MapLegend\LegendDispatcher.cs" />
     <Compile Include="Forms\GeoLocationForm.cs">
@@ -153,6 +162,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\LoaderForm.resx">
       <DependentUpon>LoaderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MeasuringForm.resx">
+      <DependentUpon>MeasuringForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\SetProjectionForm.resx">
       <DependentUpon>SetProjectionForm.cs</DependentUpon>

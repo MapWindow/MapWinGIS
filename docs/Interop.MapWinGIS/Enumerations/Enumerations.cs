@@ -2444,12 +2444,19 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible ways to display length of segments for Shape Editor.
+    /// Possible ways to display length of segments for measuring tool and shape editor.
     /// </summary>
     public enum tkLengthDisplayMode
     {
-        ldmNone = 0,
+        /// <summary>
+        /// Depending on length either meters or kilometers will be used.
+        /// </summary>
         ldmMetric = 1,
+
+        /// <summary>
+        /// Depending on length either feet or miles will be used. These units are defined according to International yard and pound agreement (1959).
+        /// </summary>
+        ldmAmerican = 2,
     }
 
     /// <summary>
@@ -2538,25 +2545,77 @@ namespace MapWinGIS
     }
 
     /// <summary>
-    /// Possible mode / format for angles (bearings) displayed by the measuring tool and shape editor.
+    /// Possible ways to display bearing of lines.
     /// </summary>
-    public enum tkAngleDisplay
+    public enum tkBearingType
     {
-        Azimuth = 0,
-        RussianRhumb = 1,
-        ClockwiseBearing = 2,
-        CounterClockwiseBearing = 3,
-        AngleNone = 4,
+        /// <summary>
+        /// Absolute bearing (aka full circle bearing or azimuth). Calculated clockwise from the north direction. Range of values [0, 360] degrees.
+        /// </summary>
+        btAbsolute = 0,
+
+        /// <summary>
+        /// Reduced bearing (US army definition of bearing). Absolute bearing split into 4 quadrants (NE, SE, SW, NW). 
+        /// Calculated either from north (NE, NW quadrants) or south (SE, SW quadrants) direction. Range of values within quadrant is [0, 90] degrees.
+        /// Displayed like "N 45.0° E".
+        /// </summary>
+        btReducedNDE = 1,
+
+        /// <summary>
+        /// Same as btReducedNDE, apart from a bit different format: "NE: 45.0°".
+        /// </summary>
+        btReducedNED = 2,
+
+        /// <summary>
+        /// Relative bearing, represents clockwise angle between direction of the previous line and the next line. Range of values [-180, 180] degrees. 
+        /// If the next line turns to the left the value is negative, to the right - positive.
+        /// </summary>
+        btRelative = 3,
+
+        /// <summary>
+        /// Left inner angle formed by the previous line and next line. Range of values [0, 360] degrees. If the next line has the same direction
+        /// as the previous one, the value is 180°.
+        /// </summary>
+        btLeftAngle = 4,
+
+        /// <summary>
+        /// Right inner angle formed by the previous line and the next line. Range of values [0, 360] degrees. If the next line has the same direction
+        /// as the previous one, the value is 180°.
+        /// </summary>
+        btRightAngle = 4,
     }
 
     /// <summary>
-    /// Possible mode / format for area displayed by the measuring tool and shape editor.
+    /// Possible ways to display area.
     /// </summary>
     public enum tkAreaDisplayMode
     {
+        /// <summary>
+        /// Depending on area either square meters, hectares or square kilometers will be used.
+        /// </summary>
         admMetric = 0,
+
+        /// <summary>
+        /// Hectares only will be used.
+        /// </summary>
         admHectars = 1,
-        admNone = 2,
+
+        /// <summary>
+        /// Depending on area either square feet, acres or square miles will be used. 
+        /// These units are defined according to International yard and pound agreement (1959).
+        /// </summary>
+        admAmerican = 2,
+    }
+
+    /// <summary>
+    /// Possible formats to display angles.
+    /// </summary>
+    public enum tkAngleFormat
+    {
+        afDegrees = 0,
+        afMinutes = 1,
+        afSeconds = 2,
+        afRadians = 3,
     }
 
 #if nsp

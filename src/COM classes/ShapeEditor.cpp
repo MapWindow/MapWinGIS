@@ -9,6 +9,7 @@
 #include "GeosHelper.h"
 #include "EditorHelper.h"
 #include "ShapefileHelper.h"
+#include "MeasuringHelper.h"
 
 // *******************************************************
 //		GetShape
@@ -448,17 +449,17 @@ STDMETHODIMP CShapeEditor::put_AreaDisplayMode(tkAreaDisplayMode newVal)
 // *******************************************************
 //		AngleDisplayMode()
 // *******************************************************
-STDMETHODIMP CShapeEditor::get_AngleDisplayMode(tkAngleDisplay* retVal)
+STDMETHODIMP CShapeEditor::get_BearingType(tkBearingType* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _activeShape->AngleDisplayMode;
+	*retVal = _activeShape->BearingType;
 	return S_OK;
 }
 
-STDMETHODIMP CShapeEditor::put_AngleDisplayMode(tkAngleDisplay newVal)
+STDMETHODIMP CShapeEditor::put_BearingType(tkBearingType newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->AngleDisplayMode = newVal;
+	_activeShape->BearingType = newVal;
 	return S_OK;
 }
 
@@ -804,13 +805,13 @@ void CShapeEditor::Render(Gdiplus::Graphics* g, bool dynamicBuffer, DraggingOper
 STDMETHODIMP CShapeEditor::get_IndicesVisible(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _activeShape->_pointLabelsVisible ? VARIANT_TRUE: VARIANT_FALSE;
+	*pVal = _activeShape->PointLabelsVisible ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
 STDMETHODIMP CShapeEditor::put_IndicesVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->_pointLabelsVisible = newVal ? true: false;
+	_activeShape->PointLabelsVisible = newVal ? true: false;
 	return S_OK;
 }
 
@@ -820,13 +821,13 @@ STDMETHODIMP CShapeEditor::put_IndicesVisible(VARIANT_BOOL newVal)
 STDMETHODIMP CShapeEditor::get_LengthDisplayMode(tkLengthDisplayMode* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _activeShape->_lengthDisplayMode;
+	*pVal = _activeShape->LengthUnits;
 	return S_OK;
 }
 STDMETHODIMP CShapeEditor::put_LengthDisplayMode(tkLengthDisplayMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->_lengthDisplayMode = newVal;
+	_activeShape->LengthUnits = newVal;
 	return S_OK;
 }
 
@@ -904,17 +905,15 @@ STDMETHODIMP CShapeEditor::StartUnboundShape(ShpfileType shpType, VARIANT_BOOL* 
 STDMETHODIMP CShapeEditor::get_VerticesVisible(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _activeShape->_verticesVisible ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = _activeShape->PointsVisible ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
 STDMETHODIMP CShapeEditor::put_VerticesVisible(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_activeShape->_verticesVisible = newVal ? true: false;
+	_activeShape->PointsVisible = newVal ? true: false;
 	return S_OK;
 }
-
-
 
 // *******************************************************
 //		GetClosestPoint
@@ -1105,7 +1104,7 @@ bool CShapeEditor::ValidateWithGeos(IShape** shp)
 }
 
 // ************************************************************
-//		TryStop
+//		TryStopDigitizing
 // ************************************************************
 bool CShapeEditor::TryStop()
 {
@@ -1562,5 +1561,163 @@ STDMETHODIMP CShapeEditor::get_Length(DOUBLE* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*pVal = _activeShape->GetDistance();
+	return S_OK;
+}
+
+// ***************************************************************
+//		AreaVisible()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_ShowArea(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->ShowArea;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_ShowArea(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->ShowArea = newVal ? true : false;
+	return S_OK;
+}
+
+// ***************************************************************
+//		AreaPrecision()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_AreaPrecision(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->AreaPrecision;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_AreaPrecision(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->AreaPrecision = newVal;
+	return S_OK;
+}
+
+// ***************************************************************
+//		LengthPrecision()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_LengthPrecision(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->LengthPrecision;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_LengthPrecision(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->LengthPrecision = newVal;
+	return S_OK;
+}
+
+// ***************************************************************
+//		AngleFormat()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_AngleFormat(tkAngleFormat* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->AngleFormat;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_AngleFormat(tkAngleFormat newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->AngleFormat = newVal;
+	return S_OK;
+}
+
+// ***************************************************************
+//		AnglePrecision()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_AnglePrecision(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->AnglePrecision;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_AnglePrecision(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->AnglePrecision = newVal;
+	return S_OK;
+}
+
+// ***************************************************************
+//		ShowBearing()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_ShowBearing(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->ShowBearing;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_ShowBearing(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->ShowBearing = newVal ? true : false;
+	return S_OK;
+}
+
+// ***************************************************************
+//		ShowLength()
+// ***************************************************************
+STDMETHODIMP CShapeEditor::get_ShowLength(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _activeShape->ShowLength;
+	return S_OK;
+}
+
+STDMETHODIMP CShapeEditor::put_ShowLength(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_activeShape->ShowLength = newVal ? true : false;
+	return S_OK;
+}
+
+// *******************************************************
+//		Serialize()
+// *******************************************************
+STDMETHODIMP CShapeEditor::Serialize(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CPLXMLNode* node = MeasuringHelper::Serialize(_activeShape, "ShapeEditorClass");
+	Utility::SerializeAndDestroyXmlTree(node, retVal);
+
+	return S_OK;
+}
+
+// *******************************************************
+//		Deserialize()
+// *******************************************************
+STDMETHODIMP CShapeEditor::Deserialize(BSTR state, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*retVal = VARIANT_FALSE;
+
+	CString s = OLE2CA(state);
+	CPLXMLNode* node = CPLParseXMLString(s.GetString());
+	if (node)
+	{
+		CPLXMLNode* nodeEditor = CPLGetXMLNode(node, "=ShapeEditorClass");
+		if (nodeEditor)
+		{
+			MeasuringHelper::Deserialize(_activeShape, nodeEditor);
+			*retVal = VARIANT_TRUE;
+		}
+		CPLDestroyXMLNode(node);
+	}
+
 	return S_OK;
 }

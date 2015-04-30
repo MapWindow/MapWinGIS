@@ -813,6 +813,9 @@
     <ClInclude Include="ComHelpers\CallbackHelper.h">
       <Filter>ComHelpers</Filter>
     </ClInclude>
+    <ClInclude Include="Utilities\AngleHelper.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
     <ClInclude Include="COM classes\SelectionList.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
@@ -1796,6 +1799,9 @@
     </ClCompile>
     <ClCompile Include="COM classes\GdalDriver.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\AngleHelper.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

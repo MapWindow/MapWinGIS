@@ -21,13 +21,14 @@ namespace Utility
 	CStringW ConvertFromUtf8(CStringA utf8);
 	
 	// numbers
+	CStringW GetUnitsFormat(int precision);
 	CString FormatNumber(double val, CString& sFormat);
 	int Rint(double value);
 	int Factorial(int n);
 	double atof_custom(CString s);
 	double FloatRound(double doValue, int nPrecision);
-	CStringW FormatAngle(double angle, bool withDecimals = false);
 	bool FloatsEqual(const float &a, const float &b);
+	CStringW FormatArea(double area, bool unknownUnits, tkAreaDisplayMode units, int precision);
 
 	// files, !!! all parameters should be CStringW; we use Unicode !!!
 	bool FileExistsW(CStringW filename);
@@ -83,6 +84,7 @@ namespace Utility
 	tkLabelPositioning LabelPositionForShapeType(ShpfileType shpType);
 
 	// units conversions
+	CStringW GetLocalizedUnitsText(tkUnitsOfMeasure units);
 	double GetConversionFactor(tkUnitsOfMeasure Units);
 	bool ConvertDistance(tkUnitsOfMeasure source, tkUnitsOfMeasure target, double& value);
 	CString GetUnitOfMeasureText(tkUnitsOfMeasure units);

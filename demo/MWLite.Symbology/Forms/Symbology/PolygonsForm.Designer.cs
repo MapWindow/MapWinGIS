@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 using MWLite.Symbology.Controls.ListControls;
 
 namespace MWLite.Symbology.Forms.Symbology
@@ -52,8 +53,8 @@ namespace MWLite.Symbology.Forms.Symbology
             this.label26 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.cboGradientType = new System.Windows.Forms.ComboBox();
-            this.clpGradient2 = new Owf.Controls.Office2007ColorPicker(this.components);
-            this.clpFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpGradient2 = new Office2007ColorPicker(this.components);
+            this.clpFill = new Office2007ColorPicker(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.cboFillType = new System.Windows.Forms.ComboBox();
@@ -66,7 +67,7 @@ namespace MWLite.Symbology.Forms.Symbology
             this.transpOutline = new MWLite.Symbology.Controls.TransparencyControl();
             this.icbLineWidth = new ImageCombo();
             this.icbLineType = new ImageCombo();
-            this.clpOutline = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpOutline = new Office2007ColorPicker(this.components);
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.udVerticesSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
@@ -75,11 +76,11 @@ namespace MWLite.Symbology.Forms.Symbology
             this.cboVerticesType = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.label27 = new System.Windows.Forms.Label();
-            this.clpVerticesColor = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpVerticesColor = new Office2007ColorPicker(this.components);
             this.pnlFillHatch = new System.Windows.Forms.Panel();
             this.icbHatchStyle = new ImageCombo();
             this.chkFillBgTransparent = new System.Windows.Forms.CheckBox();
-            this.clpHatchBack = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpHatchBack = new Office2007ColorPicker(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.chkOutlineVisible = new System.Windows.Forms.CheckBox();
@@ -879,12 +880,12 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.Label label26;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox cboGradientType;
-        private Owf.Controls.Office2007ColorPicker clpGradient2;
+        private Office2007ColorPicker clpGradient2;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Panel pnlFillHatch;
         private ImageCombo icbHatchStyle;
         private System.Windows.Forms.CheckBox chkFillBgTransparent;
-        private Owf.Controls.Office2007ColorPicker clpHatchBack;
+        private Office2007ColorPicker clpHatchBack;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TabPage tabPage4;
@@ -895,14 +896,14 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.ComboBox cboVerticesType;
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label27;
-        private Owf.Controls.Office2007ColorPicker clpVerticesColor;
+        private Office2007ColorPicker clpVerticesColor;
         private System.Windows.Forms.CheckBox chkOutlineVisible;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label23;
         private ImageCombo icbLineWidth;
         private ImageCombo icbLineType;
-        private Owf.Controls.Office2007ColorPicker clpOutline;
+        private Office2007ColorPicker clpOutline;
         private System.Windows.Forms.CheckBox chkFillVisible;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox cboFillType;
@@ -910,7 +911,7 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOk;
         private IconControl iconControl1;
-        private Owf.Controls.Office2007ColorPicker clpFill;
+        private Office2007ColorPicker clpFill;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Panel pnlFillPicture;
         private MWLite.Symbology.Controls.NumericUpDownExt udScaleY;

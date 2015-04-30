@@ -17,6 +17,7 @@
 // ********************************************************************************************************
 
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -46,7 +47,7 @@ namespace MWLite.Symbology.Controls
     /// <summary>
     /// Image combo to store the icons for symbology plug-in
     /// </summary>
-    internal class ImageCombo : ComboBox
+    public class ImageCombo : ComboBox
     {
         #region Member variables
         // The list of icons 
@@ -167,6 +168,7 @@ namespace MWLite.Symbology.Controls
         /// <summary>
         /// Sets or gets the list of color schemes
         /// </summary>
+        [Browsable(false)]
         public ColorSchemes ColorSchemes
         {
             get { return _colorSchemes; }

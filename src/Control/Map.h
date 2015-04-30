@@ -1167,6 +1167,7 @@ private:
 	bool HandleOnCopyrightMouseMove(CPoint point);
 	void StartMouseTracking();
 	bool HandleOnCopyrighMouseDown(CPoint point);
+	void UndoMeasuringPoint();
 #pragma endregion
 
 public:

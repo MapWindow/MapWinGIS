@@ -17,6 +17,7 @@
 // ********************************************************************************************************
 
 using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 
 namespace MWLite.Symbology.Forms.Labels
 {
@@ -74,15 +75,15 @@ namespace MWLite.Symbology.Forms.Labels
             this.chkFontStrikeout = new System.Windows.Forms.CheckBox();
             this.chkFontUnderline = new System.Windows.Forms.CheckBox();
             this.chkFontItalic = new System.Windows.Forms.CheckBox();
-            this.clpFont1 = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFont1 = new Office2007ColorPicker(this.components);
             this.chkFontBold = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
             this.udShadowOffsetY = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udShadowOffsetX = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udHaloSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpShadow = new Owf.Controls.Office2007ColorPicker(this.components);
-            this.clpHalo = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpShadow = new Office2007ColorPicker(this.components);
+            this.clpHalo = new Office2007ColorPicker(this.components);
             this.label12 = new System.Windows.Forms.Label();
             this.chkShadowVisible = new System.Windows.Forms.CheckBox();
             this.label15 = new System.Windows.Forms.Label();
@@ -98,7 +99,7 @@ namespace MWLite.Symbology.Forms.Labels
             this.label1 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
             this.icbFrameType = new MWLite.Symbology.Controls.ImageCombo();
-            this.clpFrame1 = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFrame1 = new Office2007ColorPicker(this.components);
             this.chkUseFrame = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.label19 = new System.Windows.Forms.Label();
@@ -106,7 +107,7 @@ namespace MWLite.Symbology.Forms.Labels
             this.label23 = new System.Windows.Forms.Label();
             this.icbLineWidth = new MWLite.Symbology.Controls.ImageCombo();
             this.icbLineType = new MWLite.Symbology.Controls.ImageCombo();
-            this.clpFrameBorder = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFrameBorder = new Office2007ColorPicker(this.components);
             this.tabPosition = new System.Windows.Forms.TabPage();
             this.groupBox12 = new System.Windows.Forms.GroupBox();
             this.btnSetCurrent = new System.Windows.Forms.Button();
@@ -1773,8 +1774,8 @@ namespace MWLite.Symbology.Forms.Labels
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.PictureBox pctPreview;
-        private Owf.Controls.Office2007ColorPicker clpFont1;
-        private Owf.Controls.Office2007ColorPicker clpFrame1;
+        private Office2007ColorPicker clpFont1;
+        private Office2007ColorPicker clpFrame1;
         private ImageCombo icbFrameType;
         private System.Windows.Forms.CheckBox chkUseFrame;
         private System.Windows.Forms.Button btnSetFrameGradient;
@@ -1789,13 +1790,13 @@ namespace MWLite.Symbology.Forms.Labels
         private System.Windows.Forms.Label label23;
         private ImageCombo icbLineWidth;
         private ImageCombo icbLineType;
-        private Owf.Controls.Office2007ColorPicker clpFrameBorder;
+        private Office2007ColorPicker clpFrameBorder;
         private System.Windows.Forms.GroupBox groupBox3;
         private MWLite.Symbology.Controls.NumericUpDownExt udShadowOffsetY;
         private MWLite.Symbology.Controls.NumericUpDownExt udShadowOffsetX;
         private MWLite.Symbology.Controls.NumericUpDownExt udHaloSize;
-        private Owf.Controls.Office2007ColorPicker clpShadow;
-        private Owf.Controls.Office2007ColorPicker clpHalo;
+        private Office2007ColorPicker clpShadow;
+        private Office2007ColorPicker clpHalo;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.CheckBox chkShadowVisible;
         private System.Windows.Forms.Label label15;

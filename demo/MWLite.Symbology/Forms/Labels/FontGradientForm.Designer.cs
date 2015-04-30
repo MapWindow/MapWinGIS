@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 
 namespace MWLite.Symbology.Forms.Labels
 {
@@ -36,8 +37,8 @@ namespace MWLite.Symbology.Forms.Labels
             this.btnCancel = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.chkUseGradient = new System.Windows.Forms.CheckBox();
-            this.clpFont1 = new Owf.Controls.Office2007ColorPicker(this.components);
-            this.clpFont2 = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFont1 = new Office2007ColorPicker(this.components);
+            this.clpFont2 = new Office2007ColorPicker(this.components);
             this.icbFontGradient = new MWLite.Symbology.Controls.ImageCombo();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -170,8 +171,8 @@ namespace MWLite.Symbology.Forms.Labels
 
         private System.Windows.Forms.Label label8;
         private ImageCombo icbFontGradient;
-        private Owf.Controls.Office2007ColorPicker clpFont2;
-        private Owf.Controls.Office2007ColorPicker clpFont1;
+        private Office2007ColorPicker clpFont2;
+        private Office2007ColorPicker clpFont1;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.GroupBox groupBox1;

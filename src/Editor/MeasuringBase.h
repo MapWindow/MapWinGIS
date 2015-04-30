@@ -26,7 +26,7 @@ public:
 
 	int GetFirstPolyPointIndex() { return _firstPolyPointIndex == -1 ? 0 : _firstPolyPointIndex; }
 	bool GetMixedMode() { return _mixedLinePolyMode; }
-	bool DrawAccumalatedLength() { return true; }
+	bool DrawAccumalatedLength() { return ShowTotalLength; }
 	bool CloseOnPreviousVertex() { return _measuringType == MeasureDistance;}
 	tkMeasuringType GetMeasuringType() { return _measuringType; };
 	bool HasClosedPolygon() { return false; }
@@ -45,4 +45,5 @@ public:
 	void ClearIfStopped();
 	void Clear();
 	bool GetPartStartAndEnd(int partIndex, MixedShapePart whichPoints, int& startIndex, int& endIndex);
+	bool GetShowArea() { return true; }		// it's determined by measuring mode
 };

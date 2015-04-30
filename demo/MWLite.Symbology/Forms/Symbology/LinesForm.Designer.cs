@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 using MWLite.Symbology.Controls.ListControls;
 
 namespace MWLite.Symbology.Forms.Symbology
@@ -44,7 +45,7 @@ namespace MWLite.Symbology.Forms.Symbology
             this.groupLine = new System.Windows.Forms.GroupBox();
             this.icbLineWidth = new ImageCombo();
             this.label21 = new System.Windows.Forms.Label();
-            this.clpOutline = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpOutline = new Office2007ColorPicker(this.components);
             this.icbLineType = new ImageCombo();
             this.label22 = new System.Windows.Forms.Label();
             this.label23 = new System.Windows.Forms.Label();
@@ -58,7 +59,7 @@ namespace MWLite.Symbology.Forms.Symbology
             this.cboVerticesType = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.label27 = new System.Windows.Forms.Label();
-            this.clpVerticesColor = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpVerticesColor = new Office2007ColorPicker(this.components);
             this.chkVerticesVisible = new System.Windows.Forms.CheckBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.btnRemoveStyle = new System.Windows.Forms.Button();
@@ -73,12 +74,12 @@ namespace MWLite.Symbology.Forms.Symbology
             this.label7 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.udMarkerOffset = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpMarkerOutline = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpMarkerOutline = new Office2007ColorPicker(this.components);
             this.label6 = new System.Windows.Forms.Label();
             this.udMarkerSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.cboOrientation = new System.Windows.Forms.ComboBox();
             this.pointSymbolControl1 = new SymbolControl();
-            this.clpMarkerFill = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpMarkerFill = new Office2007ColorPicker(this.components);
             this.udMarkerInterval = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.chkMarkerFlipFirst = new System.Windows.Forms.CheckBox();
             this.btnApply = new System.Windows.Forms.Button();
@@ -776,7 +777,7 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.CheckBox chkVerticesVisible;
-        private Owf.Controls.Office2007ColorPicker clpVerticesColor;
+        private Office2007ColorPicker clpVerticesColor;
         private System.Windows.Forms.TabPage tabLine;
         private MWLite.Symbology.Controls.NumericUpDownExt udMarkerInterval;
         private System.Windows.Forms.Label label30;
@@ -787,7 +788,7 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Label label1;
-        private Owf.Controls.Office2007ColorPicker clpMarkerFill;
+        private Office2007ColorPicker clpMarkerFill;
         private SymbolControl pointSymbolControl1;
         private MWLite.Symbology.Controls.NumericUpDownExt udMarkerSize;
         private System.Windows.Forms.Label label2;
@@ -799,13 +800,13 @@ namespace MWLite.Symbology.Forms.Symbology
         private System.Windows.Forms.Label label23;
         private ImageCombo icbLineWidth;
         private ImageCombo icbLineType;
-        private Owf.Controls.Office2007ColorPicker clpOutline;
+        private Office2007ColorPicker clpOutline;
         private System.Windows.Forms.GroupBox groupLine;
         private System.Windows.Forms.GroupBox groupMarker;
         private System.Windows.Forms.DataGridViewImageColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.Label label4;
-        private Owf.Controls.Office2007ColorPicker clpMarkerOutline;
+        private Office2007ColorPicker clpMarkerOutline;
         private System.Windows.Forms.Label label7;
         private MWLite.Symbology.Controls.NumericUpDownExt udMarkerOffset;
         private System.Windows.Forms.Label label6;

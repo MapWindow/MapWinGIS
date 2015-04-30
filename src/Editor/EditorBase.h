@@ -11,7 +11,6 @@ public:
 	EditorBase(void) {
 		_shpType = SHP_NULLSHAPE;
 		_creationMode = false;
-		DisplayAngles = true;
 	};
 	virtual ~EditorBase(void) {};
 
@@ -57,4 +56,5 @@ public:
 	IShape* GetPartAsShape(int partIndex);
 	void SelectRelatedParts(int outerRing);
 	bool CanDeletePart(int partIndex);
+	bool GetShowArea() { return ShowArea; }
 };

@@ -1,11 +1,12 @@
 using System;
-using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
+using Owf.Controls;
 
-namespace Owf.Controls
+namespace MWLite.Symbology.Controls.ColorPicker
 {
-	internal partial class Office2007ColorPicker : ComboBox
+	public partial class Office2007ColorPicker : ComboBox
 	{
 		Office2007MenuHelper _colorPlate;
 

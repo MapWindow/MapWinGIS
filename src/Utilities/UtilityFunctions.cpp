@@ -581,6 +581,28 @@ namespace Utility
 #pragma endregion
 	
 #pragma region Unit conversion
+
+	// ****************************************************************
+	//		GetLocalizedUnitsText()
+	// ****************************************************************
+	CStringW Utility::GetLocalizedUnitsText(tkUnitsOfMeasure units)
+	{
+		switch (units)
+		{
+			case umMiles:
+				return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMiles);
+			case umFeets:
+				return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsFeet);
+			case umMeters:
+				return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMeters);
+			case umKilometers:
+				return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsKilometers);
+			default:
+				USES_CONVERSION;
+				return A2W(Utility::GetUnitOfMeasureText(units));
+		}
+	}
+
 	// ****************************************************************
 	//		GetUnitOfMeasureText
 	// ****************************************************************
@@ -655,33 +677,110 @@ namespace Utility
 			return false;
 		}
 	}
+
 #pragma endregion
 
 #pragma region Numbers
+
+	double SquareMetersPerSquareMile()
+	{
+		return 2589975.2356;
+	}
+
+	double SquareMetersPerAcre()
+	{
+		return 4046.8564224;		// according to International yard and pound agreement (1959)
+	}
+
+	double SquareMetersPerSquareFoot()
+	{
+		return 0.09290304;
+	}
+
+	// ****************************************************************
+	//		FormatArea()
+	// ****************************************************************
+	CStringW Utility::FormatArea(double area, bool unknownUnits, tkAreaDisplayMode units, int precision)
+	{
+		CStringW str;
+		area = abs(area);
+
+		CStringW format = GetUnitsFormat(precision);
+
+		if (!unknownUnits)
+		{
+			tkLocalizedStrings localizedUnits;
+
+			switch (units)
+			{
+				case admMetric:
+				{
+					if (area < 1000.0)
+					{
+						localizedUnits = lsSquareMeters;
+					}
+					else if (area < 10000000.0)
+					{
+						area /= 10000.0;
+						localizedUnits = lsHectars;
+					}
+					else
+					{
+						area /= 1000000.0;
+						localizedUnits = lsSquareKilometers;
+					}
+					break;
+				}
+				case admHectars:
+				{
+					area /= 10000.0;
+					localizedUnits = lsHectars;
+					break;
+				}
+				case admAmerican:
+				{
+					double area2 = area / SquareMetersPerSquareMile();
+					localizedUnits = lsSquareMiles;
+
+					if (area2 < 100.0)
+					{
+						area2 = area / SquareMetersPerAcre();
+						localizedUnits = lsAcres;
+
+						if (area2 < 1.0)
+						{
+							area2 = area / SquareMetersPerSquareFoot();
+							localizedUnits = lsSquareFeet;
+						}
+					}
+
+					area = area2;
+
+					break;
+				}
+				default:
+					return str;
+			}
+
+			str.Format(format, area, m_globalSettings.GetLocalizedString(localizedUnits));
+		}
+		else
+		{
+			str.Format(format, area, m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsSquareMapUnits));
+		}
+
+		return str;
+	}
+
 	// *********************************************************
-	//		FormatAngle()
-	// *********************************************************	
-	CStringW Utility::FormatAngle(double angle, bool withDecimals)
-    {
-        while (angle < -180.0)
-            angle += 360.0;
-
-        while (angle > 180.0)
-            angle -= 360.0;
-
-        int degrees = (int)floor(angle);
-        double delta = angle - degrees;
-
-        int minutes = (int)floor(60.0 * delta);
-        
-        delta = delta - minutes/60.0;
-        double seconds = delta*3600.0;
-
-        //CString dec = withDecimals ? ((int)((seconds % 1)*100.0 + 0.5)).ToString("D2") : "";
-        CStringW s;
-		s.Format(L"%d° %2d' %2d\"", degrees, minutes, (int)floor(seconds)); //, dec);
-		return s;
-    }
+	//		GetNumberFormat()
+	// *********************************************************
+	CStringW Utility::GetUnitsFormat(int precision)
+	{
+		CStringW temp;
+		temp.Format(L"%d", precision);
+		return L"%." + temp + L"f %s";
+	}
 
 	// *********************************************************
 	//		FormatNumber()

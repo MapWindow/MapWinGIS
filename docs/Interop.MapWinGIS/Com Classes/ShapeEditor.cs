@@ -125,15 +125,6 @@ namespace MapWinGIS
     #endif
     {
         /// <summary>
-        /// Gets or sets angle display mode. The default value is AngleNone.
-        /// </summary>
-        public tkAngleDisplay AngleDisplayMode
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
         /// Calculates the area of polygon being edited. 
         /// </summary>
         /// <remarks>Precise calculations on ellipsoid will be used if map projection is set and compatible
@@ -141,6 +132,16 @@ namespace MapWinGIS
         public double Area
         {
             get { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets type of the bearing to be display for line segments.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public tkBearingType BearingType
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
         }
 
         /// <summary>
@@ -238,6 +239,76 @@ namespace MapWinGIS
         public double Length { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether area will be displayed during creation or editing of polygons.
+        /// </summary>
+        public bool ShowArea
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of decimal degrees to be used to display area.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public int AreaPrecision
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of decimal degrees to be used to display length.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public int LengthPrecision
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets angle format to be used to display bearing.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public tkAngleFormat AngleFormat
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of decimal degrees to be used to display bearing.
+        /// </summary>
+        /// <remarks>This setting is not used when AngleFormat is set to minutes or seconds.</remarks>
+        /// \new493 Added in version 4.9.3
+        public int AnglePrecision
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether bearing of the line segments will be displayed.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool ShowBearing
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether length of the line segments will be displayed.
+        /// </summary>
+        /// \new493 Added in version 4.9.3
+        public bool ShowLength
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        /// <summary>
         /// Gets or sets value indicating whether vertices of shapes will be highlighted 
         /// on mouse move when interactive editing tools are used.
         /// </summary>
@@ -262,7 +333,7 @@ namespace MapWinGIS
         /// Returns true if the editor is empty.
         /// </summary>
         /// <remarks>Empty means that its underlying shape object has no points. However 
-        /// ShapeEditor.EditorState can be differnt from esNone.</remarks>
+        /// ShapeEditor.EditorState can be different from esNone.</remarks>
         public bool IsEmpty
         {
             get { throw new NotImplementedException(); }
@@ -357,6 +428,25 @@ namespace MapWinGIS
         /// <returns>True on success.</returns>
         /// \see AxMap.CursorMode, ShapeEditor.EditorState
         public bool SaveChanges()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Saves the state of the class to the string
+        /// </summary>
+        /// <returns>A string with the state or an empty string on failure.</returns>
+        public string Serialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Restores the state of object from the string.
+        /// </summary>
+        /// <param name="state">A string generated by ShapeEditor.Serialize() method</param>
+        /// <returns>True on success.</returns>
+        public bool Deserialize(string state)
         {
             throw new NotImplementedException();
         }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Map.h"
 #include "Tiles.h"
+#include "MeasuringHelper.h"
 
 // *********************************************************
 //		SaveMapState()
@@ -125,7 +126,9 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	CPLXMLNode* nodeState = CPLGetXMLNode(node, "MapState");
 	CPLXMLNode* nodeLayers = CPLGetXMLNode(node, "Layers");
 	CPLXMLNode* nodeTiles = CPLGetXMLNode(node, "Tiles");
-	 
+	CPLXMLNode* nodeMeasuring = CPLGetXMLNode(node, "Measuring");
+	CPLXMLNode* nodeEditor = CPLGetXMLNode(node, "ShapeEditor");
+
 	if (!nodeState || !nodeLayers)
 	{
 		ErrorMessage(tkINVALID_FILE);
@@ -261,6 +264,10 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 
 	// restoring tiles settings
 	((CTiles*)_tiles)->DeserializeCore(nodeTiles);
+	
+	MeasuringHelper::Deserialize(GetMeasuringBase(), nodeMeasuring);
+
+	MeasuringHelper::Deserialize(GetEditorBase(), nodeEditor);
 
 	// extents
 	s = CPLGetXMLValue( nodeState, "ExtentsLeft", NULL );
@@ -446,13 +453,27 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 					}
 				}
 				CPLAddXMLChild(psTree, psLayers);
+			}
 
-				// adding tiles
-				CPLXMLNode* nodeTiles = ((CTiles*)_tiles)->SerializeCore("Tiles");
-				if (nodeTiles)
-				{
-					CPLAddXMLChild(psTree, nodeTiles);
-				}
+			// adding tiles
+			CPLXMLNode* nodeTiles = ((CTiles*)_tiles)->SerializeCore("Tiles");
+			if (nodeTiles)
+			{
+				CPLAddXMLChild(psTree, nodeTiles);
+			}
+
+			// measuring
+			CPLXMLNode* nodeMeasuring = MeasuringHelper::Serialize(GetMeasuringBase(), "Measuring");
+			if (nodeMeasuring)
+			{
+				CPLAddXMLChild(psTree, nodeMeasuring);
+			}
+
+			// editor
+			CPLXMLNode* nodeEditor = MeasuringHelper::Serialize(GetEditorBase(), "ShapeEditor");
+			if (nodeEditor)
+			{
+				CPLAddXMLChild(psTree, nodeEditor);
 			}
 		}
 	}

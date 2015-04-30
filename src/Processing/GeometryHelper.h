@@ -14,4 +14,5 @@ public:
 	static tkExtentsRelation RelateExtents(CRect& r1, CRect& r2);
 	static double GetPointAngle(double &x, double &y);
 	static bool PointOnSegment(double x1, double y1, double x2, double y2, double pntX, double pntY);
+	static double GetPointAngleDeg(double x, double y);
 };

@@ -34,8 +34,11 @@
             this.lblProjection = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.axMap1 = new AxMapWinGIS.AxMap();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuMeasuringOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -73,6 +76,20 @@
             this.axMap1.TabIndex = 3;
             this.axMap1.FileDropped += new AxMapWinGIS._DMapEvents_FileDroppedEventHandler(this.AxMap1FileDropped);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuMeasuringOptions});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(153, 48);
+            // 
+            // mnuMeasuringOptions
+            // 
+            this.mnuMeasuringOptions.Name = "mnuMeasuringOptions";
+            this.mnuMeasuringOptions.Size = new System.Drawing.Size(152, 22);
+            this.mnuMeasuringOptions.Text = "Options";
+            this.mnuMeasuringOptions.Click += new System.EventHandler(this.mnuMeasuringOptions_Click);
+            // 
             // MapForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -87,6 +104,7 @@
             this.Text = "Map";
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.axMap1)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -97,6 +115,8 @@
         private System.Windows.Forms.Label lblProjection;
         private System.Windows.Forms.ToolTip toolTip1;
         private AxMapWinGIS.AxMap axMap1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem mnuMeasuringOptions;
 
 
     }

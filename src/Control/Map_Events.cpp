@@ -103,6 +103,17 @@ bool CMapView::UndoCore(bool shift)
 		}
 	}
 
+	if (m_cursorMode == cmMeasure)
+	{
+		tkUndoShortcut button;
+		_measuring->get_UndoButton(&button);
+		if (button == usCtrlZ)
+		{
+			UndoMeasuringPoint();
+			return true;
+		}
+	}
+
 	VARIANT_BOOL vb;
 	if (shift) {
 		_undoList->Redo(VARIANT_TRUE, &vb);
@@ -1281,6 +1292,20 @@ void CMapView::OnRButtonDblClk(UINT nFlags, CPoint point)
 }
 
 // ************************************************************
+//		UndoMeasringPoint
+// ************************************************************
+void CMapView::UndoMeasuringPoint()
+{
+	VARIANT_BOOL redraw = VARIANT_FALSE;
+	((CMeasuring*)_measuring)->UndoPoint(&redraw);
+	if (redraw)
+	{
+		FireMeasuringChanged(PointRemoved);
+		Redraw2(RedrawSkipDataLayers);
+	}
+}
+
+// ************************************************************
 //		OnRButtonDown
 // ************************************************************
 void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
@@ -1294,14 +1319,17 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 	if( m_sendMouseDown == TRUE )
 		this->FireMouseDown( MK_RBUTTON, (short)vbflags, point.x, point.y - 1 );
 
-	if (_doTrapRMouseDown == TRUE)
+	if (_doTrapRMouseDown)
 	{
-		VARIANT_BOOL redraw;
-		if( m_cursorMode == cmMeasure)
+		if (m_cursorMode == cmMeasure)
 		{
-			((CMeasuring*)_measuring)->UndoPoint(&redraw);
-			FireMeasuringChanged(tkMeasuringAction::PointRemoved);
-			_canUseMainBuffer = false;
+			tkUndoShortcut button;
+			_measuring->get_UndoButton(&button);
+			if (button == usRightMouseButton)
+			{
+				UndoMeasuringPoint();
+				return;
+			}
 		}
 
 		_reverseZooming = true;
@@ -1315,10 +1343,6 @@ void CMapView::OnRButtonDown(UINT nFlags, CPoint point)
 		{
 			ZoomToCursorPosition(false);
 			::SetCursor( _cursorZoomout );
-		}
-
-		if( redraw ) {
-			this->Refresh();
 		}
 	}
 }

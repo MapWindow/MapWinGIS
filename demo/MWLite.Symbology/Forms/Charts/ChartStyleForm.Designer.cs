@@ -1,4 +1,5 @@
 ﻿using MWLite.Symbology.Controls;
+using MWLite.Symbology.Controls.ColorPicker;
 
 namespace MWLite.Symbology.Forms.Charts
 {
@@ -114,9 +115,9 @@ namespace MWLite.Symbology.Forms.Charts
             this.udBarWidth = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udThickness = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udTilt = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpFrame = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFrame = new Office2007ColorPicker(this.components);
             this.udFontSize = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
-            this.clpFont = new Owf.Controls.Office2007ColorPicker(this.components);
+            this.clpFont = new Office2007ColorPicker(this.components);
             this.udChartsOffsetY = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udChartsOffsetX = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
             this.udChartsBuffer = new MWLite.Symbology.Controls.NumericUpDownExt(this.components);
@@ -1268,7 +1269,7 @@ namespace MWLite.Symbology.Forms.Charts
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.CheckBox chkValuesVisible;
         private System.Windows.Forms.Label label11;
-        private Owf.Controls.Office2007ColorPicker clpFrame;
+        private Office2007ColorPicker clpFrame;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.ComboBox cboValuesStyle;
         private MWLite.Symbology.Controls.NumericUpDownExt udFontSize;
@@ -1278,7 +1279,7 @@ namespace MWLite.Symbology.Forms.Charts
         private System.Windows.Forms.ComboBox cboFontName;
         private System.Windows.Forms.CheckBox chkFontItalic;
         private System.Windows.Forms.CheckBox chkFontBold;
-        private Owf.Controls.Office2007ColorPicker clpFont;
+        private Office2007ColorPicker clpFont;
         private System.Windows.Forms.CheckBox chkValuesFrame;
         private System.Windows.Forms.RadioButton optBarCharts;
         private System.Windows.Forms.RadioButton optPieCharts;

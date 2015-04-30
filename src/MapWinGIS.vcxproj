@@ -57,7 +57,7 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
-    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
@@ -349,6 +349,7 @@
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="Control\ToolTipEx.h" />
     <ClInclude Include="Tiles\LoadingTask.h" />
+    <ClInclude Include="Utilities\AngleHelper.h" />
     <ClInclude Include="Utilities\ColoringGraph.h" />
     <ClInclude Include="Utilities\ComHelper.h" />
     <ClInclude Include="Utilities\cppVector.h" />
@@ -620,6 +621,7 @@
     <ClCompile Include="Structures\Structures.cpp" />
     <ClCompile Include="Tiles\LoadingTask.cpp" />
     <ClCompile Include="Tiles\Providers\BingMapProvider.cpp" />
+    <ClCompile Include="Utilities\AngleHelper.cpp" />
     <ClCompile Include="Utilities\ColoringGraph.cpp" />
     <ClCompile Include="Utilities\ComHelper.cpp" />
     <ClCompile Include="Utilities\cppVector.cpp" />

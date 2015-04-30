@@ -93,27 +93,6 @@ void ChooseScalebarUnits(tkUnitsOfMeasure sourceUnits, tkUnitsOfMeasure& targetU
 }
 
 // ****************************************************************
-//		GetLocalizedUnitsText()
-// ****************************************************************
-CStringW GetLocalizedUnitsText(tkUnitsOfMeasure units)
-{
-	switch(units)
-	{
-		case umMiles:
-			return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMiles);
-		case umFeets:
-			return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsFeet);
-		case umMeters:
-			return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsMeters);
-		case umKilometers:
-			return m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsKilometers);
-		default:
-			USES_CONVERSION;
-			return A2W(Utility::GetUnitOfMeasureText(units));
-	}
-}
-
-// ****************************************************************
 //		DrawScaleBar()
 // ****************************************************************
 void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
@@ -314,7 +293,7 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 			
 		// units
-		s = GetLocalizedUnitsText(targetUnits);
+		s = Utility::GetLocalizedUnitsText(targetUnits);
 		point.X = (Gdiplus::REAL)(step * count/unitsPerPixel + xPadding + 3 + 1.0f);
 		point.Y = (Gdiplus::REAL)(barHeight - yPadding - 12 + 1.0f);
 		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
@@ -323,12 +302,12 @@ void CMapView::DrawScaleBar(Gdiplus::Graphics* g)
 	{
 		// metric
 		USES_CONVERSION;
-		s.Format(L"%s %s", FormatUnits(s, step, power, count), GetLocalizedUnitsText(targetUnits));
+		s.Format(L"%s %s", FormatUnits(s, step, power, count), Utility::GetLocalizedUnitsText(targetUnits));
 		Gdiplus::PointF point(xPadding + 8.0f, -10.0f);
 		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 			
 		// miles
-		s.Format(L"%s %s", FormatUnits(s, step2, power2, count2), GetLocalizedUnitsText(targetUnits2));
+		s.Format(L"%s %s", FormatUnits(s, step2, power2, count2), Utility::GetLocalizedUnitsText(targetUnits2));
 		point.Y = 8.0f;
 		DrawStringWithShade(g, s, &font, point, &_brushBlack, &_brushWhite);
 	}

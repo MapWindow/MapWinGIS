@@ -20,6 +20,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using MWLite.Symbology.Controls.ColorPicker;
 using Owf.Controls;
 
 namespace MWLite.Symbology.Forms.Utilities
