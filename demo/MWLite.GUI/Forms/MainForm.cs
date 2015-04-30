@@ -91,7 +91,6 @@ namespace MWLite.GUI.Forms
             Legend.LayerSelected += (handle) =>
             {
                 RefreshUI();
-                Map.Identifier.ActiveLayer = handle;
             };
         }
 
