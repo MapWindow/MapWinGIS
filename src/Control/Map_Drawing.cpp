@@ -117,12 +117,10 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 
 	RedrawVolatileData(g, pdc, rcBounds);
 
-	// passing main buffer to client for custom drawing
-	if (m_sendOnDrawBackBuffer && !_isSnapshot)
+	if (m_sendOnDrawBackBuffer)
 	{
-		HDC hdc = gBuffer->GetHDC();
-		this->FireOnDrawBackBuffer((long)hdc);
-		gBuffer->ReleaseHDC(hdc);
+		// passing main buffer to client for custom drawing		
+		FireOnDrawbackBufferCore(g, _isSnapshot ? NULL : _bufferBitmap);
 	}
 	
 	RedrawTools(g, rcBounds);
@@ -135,13 +133,8 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 	}
 	ShowRedrawTime(g, _lastRedrawTime, layersRedraw);
 
-	//CLSID clsid;
-	//Utility::GetEncoderClsid(L"image/png", &clsid);
-	//_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
-	////_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
-	//_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
-	//_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
-	//_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
+	// uncomment to save screen buffers to the disk
+	//DumpBuffers();
 
 	// passing the main buffer to the screen if no other drawing will be needed
 	if (!_isSnapshot)
@@ -166,6 +159,47 @@ void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rc
 		delete gPrinting;
 	}
 }
+
+// ***************************************************************
+//		DumpBuffers()
+// ***************************************************************
+void CMapView::DumpBuffers()
+{
+	#ifndef RELEASE_MODE
+		CLSID clsid;
+		Utility::GetEncoderClsid(L"image/png", &clsid);
+		_bufferBitmap->Save(L"D:\\buffer.png", &clsid, NULL);
+		_drawingBitmap->Save(L"D:\\drawing.png", &clsid, NULL);
+		_tilesBitmap->Save(L"D:\\tiles.png", &clsid, NULL);
+		_layerBitmap->Save(L"D:\\layers.png", &clsid, NULL);
+		_volatileBitmap->Save(L"D:\\volatile.png", &clsid, NULL);
+	#endif
+}
+
+// ***************************************************************
+//		FireOnDrawbackBufferCore()
+// ***************************************************************
+void CMapView::FireOnDrawbackBufferCore(Gdiplus::Graphics* g, Gdiplus::Bitmap* bitmap)
+{
+	// old way (doesn't support alpha channel)
+	if (g && (_customDrawingFlags & OnDrawBackBufferHdc))
+	{
+		HDC hdc = g->GetHDC();
+		FireOnDrawBackBuffer((long)hdc);
+		g->ReleaseHDC(hdc);
+	}
+
+	// new way (doesn't work for printing since there is no buffer bitmap in that case)
+	if (bitmap && (_customDrawingFlags & OnDrawBackBufferBitmapData))
+	{
+		Gdiplus::Rect r(0, 0, _bufferBitmap->GetWidth(), _bufferBitmap->GetHeight());
+		Gdiplus::BitmapData bmd;
+		_bufferBitmap->LockBits(&r, Gdiplus::ImageLockModeRead | Gdiplus::ImageLockModeWrite, _bufferBitmap->GetPixelFormat(), &bmd);
+		FireOnDrawBackBuffer2((long)bmd.Height, (long)bmd.Width, (long)bmd.Stride, (long)bmd.PixelFormat, (long)bmd.Scan0);
+		_bufferBitmap->UnlockBits(&bmd);
+	}
+}
+
 
 // ***************************************************************
 //		RedrawLayers()
@@ -282,25 +316,31 @@ void CMapView::RedrawVolatileData(Gdiplus::Graphics* g, CDC* dc, const CRect& rc
 			this->DrawLayers(rcBounds, gDrawing, false);
 
 		// fire external drawing
-		HDC hdc = g->GetHDC();
-		tkMwBoolean retVal = blnFalse;
-		this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
-		g->ReleaseHDC(hdc);
+		if (_customDrawingFlags & BeforeAfterDrawing)
+		{
+			HDC hdc = g->GetHDC();
+			tkMwBoolean retVal = blnFalse;
+			this->FireBeforeDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+			g->ReleaseHDC(hdc);
+		}
 
 		// temp objects
 		this->DrawLists(rcBounds, gDrawing, dlSpatiallyReferencedList);
 		this->DrawLists(rcBounds, gDrawing, dlScreenReferencedList);
 
-		// fire external drawing code
-		hdc = g->GetHDC();
-		retVal = blnFalse;
-		this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
-		g->ReleaseHDC(hdc);
-
 		// passing layers to the main buffer
 		g->DrawImage(_volatileBitmap, 0.0f, 0.0f);
+
 		delete gDrawing;
-		
+
+		// fire external drawing code
+		if (_customDrawingFlags & BeforeAfterDrawing)
+		{
+			HDC hdc = g->GetHDC();
+			tkMwBoolean retVal = blnFalse;
+			this->FireAfterDrawing((long)hdc, rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom, &retVal);
+			g->ReleaseHDC(hdc);
+		}
 	}
 }
 
