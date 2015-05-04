@@ -29,5 +29,6 @@ public:
 	static bool IsVolatile(IShapefile* sf);
 	static void InsertMwShapeIdField(IShapefile* sf);
 	static tkShapefileSourceType GetSourceType(IShapefile* sf);
+	static int GetModifiedCount(IShapefile* sf);
 };
 

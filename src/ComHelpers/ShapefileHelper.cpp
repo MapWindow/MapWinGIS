@@ -467,3 +467,26 @@ tkShapefileSourceType ShapefileHelper::GetSourceType(IShapefile* sf)
 	sf->get_SourceType(&type);
 	return type;
 }
+
+// ********************************************************************
+//		GetModifiedCount()
+// ********************************************************************
+int ShapefileHelper::GetModifiedCount(IShapefile* sf)
+{
+	if (!sf) return 0;
+
+	long numShapes = GetNumShapes(sf);
+	
+	int count = 0;
+	for (long i = 0; i < numShapes; i++)
+	{
+		VARIANT_BOOL modified;
+		sf->get_ShapeModified(i, &modified);
+
+		if (modified){
+			count++;
+		}
+	}
+	
+	return count;
+}

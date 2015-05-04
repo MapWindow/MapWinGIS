@@ -5,6 +5,7 @@
 #include "OgrHelper.h"
 #include "OgrLabels.h"
 #include "Shapefile.h"
+#include "ShapefileHelper.h"
 
 // *************************************************************
 //		Shapefile2OgrLayer()
@@ -177,15 +178,22 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 	long numShapes, featId;
 	shapefile->get_NumShapes(&numShapes);
 	VARIANT_BOOL modified;
-	int count = 0;
+	int count = 0, processedCount = 0;
 
 	OGRFeatureDefn* fields = poLayer->GetLayerDefn();
 
+	int modifiedCount = ShapefileHelper::GetModifiedCount(shapefile) + 1;
+	long lastPercent = 0;
+	
 	for (long i = 0; i < numShapes; i++)
 	{
+		CallbackHelper::Progress(NULL, processedCount, modifiedCount, "Saving changes...", lastPercent);
+
 		shapefile->get_ShapeModified(i, &modified);
 		if (modified)
 		{
+			processedCount++;
+
 			CComVariant var;
 			shapefile->get_CellValue(shapeCmnIndex, i, &var);
 
@@ -238,6 +246,8 @@ int Shape2Ogr::SaveShapefileChanges(OGRLayer* poLayer, IShapefile* shapefile, lo
 			}
 		}
 	}
+
+	CallbackHelper::ProgressCompleted();
 
 	count += RemoveDeletedFeatures(poLayer, shapefile, shapeCmnIndex);
 

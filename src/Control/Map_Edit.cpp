@@ -233,6 +233,12 @@ void CMapView::RegisterGroupOperation(DraggingOperation operation)
 		vector<int>* selection = ShapefileHelper::GetSelectedIndices(source);
 		if (!selection) return;
 
+		// mark them for OGR saving
+		for (size_t i = 0; i < selection->size(); i++)
+		{
+			source->put_ShapeModified((*selection)[i], VARIANT_TRUE);
+		}
+
 		bool added = false;
 		switch (operation) 
 		{
