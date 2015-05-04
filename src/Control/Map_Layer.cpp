@@ -1979,3 +1979,28 @@ void CMapView::SetLayerSkipOnSaving(LONG LayerHandle, VARIANT_BOOL newVal)
 		layer->skipOnSaving = newVal;
 	}
 }
+
+// *******************************************************
+//		GetLayerExtents
+// *******************************************************
+IExtents* CMapView::GetLayerExtents(LONG layerHandle)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!IsValidLayer(layerHandle))
+	{
+		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+		return NULL;
+	}
+
+	Layer* layer = _allLayers[layerHandle];
+	if (layer)
+	{
+		IExtents* box = NULL;
+		ComHelper::CreateExtents(&box);
+		box->SetBounds(layer->extents.left, layer->extents.bottom, 0.0, layer->extents.right, layer->extents.top, 0.0);
+		return box;
+	}
+
+	return NULL;
+}

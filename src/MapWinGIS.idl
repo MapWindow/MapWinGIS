@@ -6264,6 +6264,8 @@ library MapWinGIS
 			[id(236), propget] IOgrLayer* OgrLayer(LONG LayerHandle);
 			[id(48)] IDispatch* GetColorScheme(long LayerHandle);
 			[id(92)] VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
+
+			[id(253), propget] IExtents* LayerExtents(LONG LayerHandle);
 #endif 
 
 #define DRAWING_API

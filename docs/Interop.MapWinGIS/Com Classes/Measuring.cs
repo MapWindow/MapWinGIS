@@ -214,15 +214,6 @@ namespace MapWinGIS
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether directional angles should be displayed during distance measuring.
-        /// </summary>
-        public bool DisplayAngles
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        /// <summary>
         /// Gets a value indicating whether calculations are performed taking into account the shape of Earth 
         /// (when map projection is defined), or on 2D plane (Euclidean geometry).
         /// </summary>

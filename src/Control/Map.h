@@ -606,6 +606,7 @@ public:
 	afx_msg void OnMouseLeave();
 	afx_msg ISelectionList* GetIdentifiedShapes();
 	afx_msg IDrawingRectangle* GetFocusRectangle();
+	afx_msg IExtents* GetLayerExtents(LONG layerIndex);
 
 	#pragma endregion
 
