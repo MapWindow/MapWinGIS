@@ -287,8 +287,8 @@ typedef
 	helpstring("tkLengthDisplayMode"),
 ]
 enum tkLengthDisplayMode {
-	ldmMetric = 1,
-    ldmAmerican = 2,
+	ldmMetric = 0,
+    ldmAmerican = 1,
 }tkLengthDisplayMode;
 
 /************************** tkShapeEditorState Enumeration **********************/
