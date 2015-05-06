@@ -334,7 +334,7 @@
     <ClInclude Include="Image\tkBitmap.h" />
     <ClInclude Include="Image\tkGif.h" />
     <ClInclude Include="Image\tkJpg.h" />
-    <ClInclude Include="Image\tkRaster.h" />
+    <ClInclude Include="Image\GdalRaster.h" />
     <ClInclude Include="Control\DispIds.h" />
     <ClInclude Include="Control\Enumerations.h" />
     <ClInclude Include="Control\ErrorCodes.h" />
@@ -569,7 +569,7 @@
     <ClCompile Include="Image\tkBitmap.cpp" />
     <ClCompile Include="Image\tkGif.cpp" />
     <ClCompile Include="Image\tkJpg.cpp" />
-    <ClCompile Include="Image\tkRaster.cpp" />
+    <ClCompile Include="Image\GdalRaster.cpp" />
     <ClCompile Include="Control\ErrorCodes.cpp" />
     <ClCompile Include="Control\GlobalVars.cpp" />
     <ClCompile Include="Control\Map.cpp" />

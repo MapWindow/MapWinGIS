@@ -17,7 +17,7 @@
 //********************************************************************************************************
 #pragma once
 #include "tkBitmap.h"
-#include "tkRaster.h"
+#include "GdalRaster.h"
 #include "ImageGroup.h"
 #include "InMemoryBitmap.h"
 
@@ -335,7 +335,7 @@ private:
 
 	//Image Objects
 	tkBitmap* _bitmapImage;
-	tkRaster* _rasterImage;
+	GdalRaster* _rasterImage;
 
 	//Transparency
 	OLE_COLOR _transColor;
@@ -377,7 +377,7 @@ private:
 	bool ReadGIF(CString ImageFile);
 	bool ReadJPEG(CString ImageFile);
 	bool ReadBMP(const CStringW ImageFile, bool InRam);
-	bool ReadRaster(const CStringW ImageFile, GDALAccess accessMode);
+	bool OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode);
 
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
 	bool WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack);

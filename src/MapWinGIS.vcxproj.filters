@@ -258,9 +258,6 @@
     <ClInclude Include="Image\tkJpg.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Image\tkRaster.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Control\DispIds.h">
       <Filter>Control</Filter>
     </ClInclude>
@@ -846,6 +843,9 @@
     <ClInclude Include="COM classes\GdalDriver.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Image\GdalRaster.h">
+      <Filter>Image\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1014,9 +1014,6 @@
       <Filter>Image\Source</Filter>
     </ClCompile>
     <ClCompile Include="Image\tkJpg.cpp">
-      <Filter>Image\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Image\tkRaster.cpp">
       <Filter>Image\Source</Filter>
     </ClCompile>
     <ClCompile Include="Control\ErrorCodes.cpp">
@@ -1802,6 +1799,9 @@
     </ClCompile>
     <ClCompile Include="Utilities\AngleHelper.cpp">
       <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GdalRaster.cpp">
+      <Filter>Image\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -26,11 +26,6 @@
 #include "cpl_string.h"
 #include "projections.h"
 
-extern "C"
-{
-	#include "cq.h"
-}
-
 using namespace std;
 
 #define SWAP(a, b) { \

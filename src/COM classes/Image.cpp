@@ -22,7 +22,7 @@
 #include "ImageResampling.h"
 #include "tkGif.h"
 #include "tkJpg.h"
-#include "tkRaster.h"
+#include "GdalRaster.h"
 #include "projections.h"
 #include "Templates.h"
 #include "Base64.h"
@@ -212,12 +212,12 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 		// Try it with GDAL - it handles new formats more quickly than
 		// we can keep up with. If all of its drivers fail, retval will be false anyway.
 		
-		_rasterImage = new tkRaster();
+		_rasterImage = new GdalRaster();
 		if (!_globalCallback) this->put_GlobalCallback(cBack);
 		_rasterImage->SetCallback(_globalCallback);
 
 		_imgType = FileType;
-		*retval = ReadRaster(_fileName, accessMode)?VARIANT_TRUE:VARIANT_FALSE;
+		*retval = OpenGdalRaster(_fileName, accessMode)?VARIANT_TRUE:VARIANT_FALSE;
 		
 		if (*retval)
 		{
@@ -312,34 +312,34 @@ bool CImageClass::CheckForProxy()
 }
 
 // ********************************************************
-//		ReadRaster()
+//		OpenGdalRaster()
 // ********************************************************
-// Added by Rob Cairns 5 Nov 2005
-// Reading parameters of GDAL-based image; data isn't read here
-bool CImageClass::ReadRaster(const CStringW ImageFile, GDALAccess accessMode)
+bool CImageClass::OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode)
 {	
-	if (! _rasterImage)
+	if (!_rasterImage) {
 		return false;
+	}
 	
-	_inRam = true;	// inRam is always true for GDAL-based images
+	// inRam is always true for GDAL-based images	
+	_inRam = true;	
 	
-	if (! _rasterImage->LoadRaster(ImageFile, accessMode))
+	if (!_rasterImage->Open(ImageFile, accessMode))
 	{	
 		ErrorMessage(tkCANT_OPEN_FILE);
 		return false;
 	}
-	_fileName = ImageFile;
-	
-	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
-	
-	_transColor = (int)_rasterImage->GetTransparentColor();		// default is RGB(0,0,0) if no data value wasn't set
-	_transColor2 = (int)_rasterImage->GetTransparentColor();
 
-	// TODO: it's possible to add code to determine transparency by the prevailing color
+	_fileName = ImageFile;
+	_gdalImage = true;
+	_dataLoaded = false; //not yet loaded into ImageData	
+
+	// default is RGB(0,0,0) if no data value wasn't set	
+	_transColor = (int)_rasterImage->GetTransparentColor();		
+	_transColor2 = _transColor;
 	_useTransColor = _rasterImage->HasTransparency() ? VARIANT_TRUE : VARIANT_FALSE;
 
-	_gdalImage = true;
-	_dataLoaded = false; //not yet loaded into ImageData
+	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
+
 	return true;
 }
 
@@ -2732,11 +2732,11 @@ STDMETHODIMP CImageClass::GetUniqueColors (double MaxBufferSizeMB, VARIANT* Colo
 	colour* data = NULL;
 	if ( _gdalImage )
 	{
-		// TODO: try to use GDAL-based histogram if possible
+		// TODO: opening for the second time isn't good enough; reconsider
 		
-		// we'll open dataset second type, to keep an existing buffer untouched
-		tkRaster* raster = new tkRaster();
-		if ( raster->LoadRaster(_fileName) )
+		// we'll open dataset second time, to keep an existing buffer untouched
+		GdalRaster* raster = new GdalRaster();
+		if ( raster->Open(_fileName) )
 		{
 			if (raster->LoadBufferFull(&data, _fileName, MaxBufferSizeMB))
 			{
@@ -3546,7 +3546,7 @@ STDMETHODIMP CImageClass::get_IsRgb(VARIANT_BOOL* retVal)
 
 	if (_gdalImage)
 	{
-		*retVal = _rasterImage->IsRgb() ? VARIANT_TRUE: VARIANT_FALSE;
+		*retVal = GdalHelper::IsRgb(_rasterImage->GetDataset()) ? VARIANT_TRUE: VARIANT_FALSE;
 	}
 	else
 		*retVal = VARIANT_TRUE;
