@@ -1473,7 +1473,9 @@ STDMETHODIMP CImageClass::SetVisibleExtents(double newMinX, double newMinY,	doub
 	if (_gdalImage)
 	{
 		double mapUnitsPerScreenPixel = sqrt((newMaxX - newMinX) * (newMaxY - newMinY) / pixInView);
-		if (_rasterImage->LoadBuffer(&_imageData, newMinX, newMinY, newMaxX, newMaxY, _fileName, _downsamplingMode, _setRGBToGrey, mapUnitsPerScreenPixel))
+		Extent screenExtents = Extent(newMinX, newMaxX, newMinY, newMaxY);
+
+		if (_rasterImage->LoadBuffer(&_imageData, screenExtents, _fileName, _downsamplingMode, _setRGBToGrey, mapUnitsPerScreenPixel))
 		{
 			//Repeated here because _rasterImage->LoadImageBuffer changes width and height
 			_height = _rasterImage->GetHeight();

@@ -246,8 +246,8 @@ public:
 	void ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme);
 
 	bool LoadRaster(CStringW filename, GDALAccess accessType = GA_ReadOnly); 
-	bool LoadBuffer(colour** ImageData, double MinX, double MinY, double MaxX, double MaxY, CStringW filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel);
-    bool LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize = 50);
+	bool LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW filename, tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel);
+	bool LoadBufferFull(colour** ImageData, CStringW filename, double maxBufferSize = 50);
 	
 	bool CanUseExternalColorScheme();
 	bool WillBeRenderedAsGrid();
@@ -255,5 +255,12 @@ public:
 	int Dereference();
 	void Close();
 	bool IsRgb();
+	void UpdateVisibleExtents(double minX, double minY, double maxX, double maxY);
+	void TryDecreaseBufferSize(tkInterpolationMode downsamplingMode, double mapUnitsPerScreenPixel, int& xBuff, int& yBuff);
+	void SetEmptyBuffer(colour ** ImageData);
+	void ReopenDatasetIfNeeded(CStringW filename);
+	void ApplyBufferQuality(int& xBuff, int& yBuff);
+	void CompuateHistogram(CStringW filename);
+	bool ReadData(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey);
 };
 

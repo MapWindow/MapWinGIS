@@ -403,179 +403,236 @@ void tkRaster::Close()
 }
 
 // *********************************************************
-//		LoadImageBuffer()
+//		LoadBuffer()
 // *********************************************************
-bool tkRaster::LoadBuffer(colour ** ImageData, double MinX, double MinY, double MaxX, double MaxY, CStringW filename,
+bool tkRaster::LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW filename,
 							   tkInterpolationMode downsamplingMode, bool setRGBToGrey, double mapUnitsPerScreenPixel)
 {
-	if (! _rasterDataset ) 
-		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
-	
+	ReopenDatasetIfNeeded(filename);	// TODO: why filename is needed
+
 	if (! _rasterDataset ) 
 		return false;
 
-	if ((_extents.left > MaxX) || (_extents.right < MinX) || (_extents.top < MinY) || (_extents.bottom > MaxY))
+	if (_extents.left > screenExtents.right || 
+		_extents.right < screenExtents.left || 
+		_extents.top < screenExtents.bottom || 
+		_extents.bottom > screenExtents.top)
     {	
-		//If the image is not in the view area don't waste time drawing it but don't
-		//set the height & width to 0 because that would cause a bug in MapWindow - IntegerToColor
-		if(*ImageData)
-			delete [] (*ImageData);
-		(*ImageData) = new colour[1];
-
-		_dX = _origDx;           
-		_dY = _origDy; 		
-
-		_width = _height = 1;
+		// If the image is not in the view area don't waste time drawing it but don't
+		// set the height & width to 0 because that would cause a bug in MapWindow - IntegerToColor
+		SetEmptyBuffer(ImageData);
+		return true;
 	}
-    else
-    {
-		int hiddenPixels;
 
-		_visibleExtents.left = _extents.left;
-		_visibleRect.left = 0;
-		if (_extents.left < MinX) 
-		{	
-			hiddenPixels = int((MinX - _extents.left - _origDx/2.0)/_origDx);		// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.left += hiddenPixels * _origDx;
-			_visibleRect.left += hiddenPixels;
-		}
-	    
-		_visibleExtents.bottom = _extents.bottom;
-		_visibleRect.bottom = _origHeight - 1;
-		if (_extents.bottom < MinY)
-		{	
-			hiddenPixels = int((MinY - _extents.bottom)/_origDy);	// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.bottom +=  hiddenPixels * _origDy;
-			_visibleRect.bottom -= hiddenPixels;
-		}
-		
-		_visibleExtents.right = _extents.right;
-		_visibleRect.right = _origWidth - 1;
-		if (_extents.right > MaxX) 
-		{	
-			hiddenPixels = int((_extents.right - MaxX)/_origDx);	// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.right -= hiddenPixels * _origDx;
-			_visibleRect.right -= hiddenPixels;
-		}
+	UpdateVisibleExtents(screenExtents.left, screenExtents.bottom, screenExtents.right, screenExtents.top);
 
-		_visibleExtents.top = _extents.top;
-		_visibleRect.top = 0;
-		if (_extents.top > MaxY)
-		{	
-			hiddenPixels = int((_extents.top-MaxY)/_origDy);		// how many pixels are completely hidden: rounding in the lower side
-			_visibleExtents.top -=  hiddenPixels * _origDy;
-			_visibleRect.top += hiddenPixels;
-		}
+	int xBuff = _width;
+	int yBuff = _height;
+
+	TryDecreaseBufferSize(downsamplingMode, mapUnitsPerScreenPixel, xBuff, yBuff);
 		
-		// size of image buffer without scaling
-		_dX = _origDx;	// map units per image pixel
-		_dY = _origDy;
+	ApplyBufferQuality(xBuff, yBuff);
+
+	CompuateHistogram(filename);
+
+	// actual reading		
+	if ( ReadData(ImageData, xBuff, yBuff, setRGBToGrey) )   
+	{
+		_width = xBuff;
+		_height = yBuff;
+	}
+	else
+	{
+		// TODO: clear the buffer and parameters
+	}
+
+	return true;	
+}
+
+// *********************************************************
+//		ReopenDatasetIfNeeded()
+// *********************************************************
+void tkRaster::ReopenDatasetIfNeeded(CStringW filename)
+{
+	if (!_rasterDataset)
+		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
+}
+
+// *********************************************************
+//		ApplyBufferQuality()
+// *********************************************************
+void tkRaster::ApplyBufferQuality(int& xBuff, int& yBuff)
+{
+	// the image of reduced quality was requested
+	if (_imageQuality != 100 && _width > 10 && _height > 10)
+	{
+		int xTemp = int((double)xBuff * double(_imageQuality) / 100.0);
+		int yTemp = int((double)yBuff * double(_imageQuality) / 100.0);
+		_dX = _dX * double(xBuff) / double(xTemp);
+		_dY = _dY * double(yBuff) / double(yTemp);
+		xBuff = xTemp;
+		yBuff = yTemp;
 		_xllCenter = _visibleExtents.left + _dX * 0.5;
 		_yllCenter = _visibleExtents.bottom + _dY * 0.5;
-		_width = _visibleRect.right - _visibleRect.left + 1;
-		_height = _visibleRect.bottom - _visibleRect.top + 1;
+	}
+}
+
+// *********************************************************
+//		ReadData()
+// *********************************************************
+bool tkRaster::ReadData(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey)
+{
+	if (!WillBeRenderedAsGrid())
+	{
+		return ReadImage(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
+	}
+	
+	if (_genericType == GDT_Int32) 
+	{
+		// if user passed a color scheme, image will be opened as grid using the first band			
+		return ReadGridAsImage<_int32>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setToGrey);
+	}
 		
-		int xBuff = _width;
-		int yBuff = _height;
+	return ReadGridAsImage<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setToGrey);
+}
 
-		for (int i = 0; ; i++)
+// *********************************************************
+//		CompuateHistogram()
+// *********************************************************
+void tkRaster::CompuateHistogram(CStringW filename)
+{
+	if (_useHistogram && _allowHistogram)
+	{
+		// check all the conditions are met for histogram equalization compute the histogram once
+		if (_nBands == 1 && !_hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
 		{
-			// In case of large images and down sampling it makes sense to reduce the size of buffer,
-			// as additional details will be lost all the same but memory usage can be unacceptable.
-			
-			double mapUnitsPerImagePixel = (_dX + _dY);			// we intentionally don't divide by 2 here, as we'll check the possibility of decreasing buffer by 2
-			
-			if (downsamplingMode == imBicubic || downsamplingMode == imBilinear)		// In case of interpolation algorithm different form nearest neigbour is used 
-				mapUnitsPerImagePixel *= 2.0;											// the buffer should be noticeably bigger than screen dimensions to preserve details
-			
-			if (downsamplingMode == imHighQualityBicubic || downsamplingMode == imHighQualityBilinear)
-				mapUnitsPerImagePixel *= 3.0;
-
-			if ( mapUnitsPerImagePixel < mapUnitsPerScreenPixel )		// it's down sampling
+			if (!_histogramComputed)
 			{
-				int xTemp = xBuff/2;
-				int yTemp = yBuff/2;
-				_dX = _dX * double(xBuff)/double(xTemp);
-				_dY = _dY * double(yBuff)/double(yTemp);
-				xBuff = xTemp;
-				yBuff = yTemp;
-			}
-			else
-			{
-				_xllCenter = _visibleExtents.left + _dX * 0.5;
-				_yllCenter = _visibleExtents.bottom + _dY * 0.5;
-				break;
-			}
-		}
-		
-		// the image of reduced quality was requested
-		if ( _imageQuality != 100 && _width > 10 && _height > 10)
-		{
-			int xTemp = int((double)xBuff * double(_imageQuality)/100.0);
-			int yTemp = int((double)yBuff * double(_imageQuality)/100.0);
-			_dX = _dX * double(xBuff)/double(xTemp);
-			_dY = _dY * double(yBuff)/double(yTemp);
-			xBuff = xTemp;
-			yBuff = yTemp;
-			_xllCenter = _visibleExtents.left + _dX * 0.5;
-			_yllCenter = _visibleExtents.bottom + _dY * 0.5;
-		}
-
-		// ----------------------------------------------------
-		//   Building a histogram
-		// ----------------------------------------------------
-		if (_useHistogram && _allowHistogram)
-		{
-			//Check all the conditions are met for histogram equalization compute the histogram once
-			if (_nBands == 1 && !_hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
-			{
-				if (!_histogramComputed)
+				_nLUTBins = 256;
+				if (ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
 				{
-					_nLUTBins = 256;
-					if (ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
-					{
-						_histogramComputed = true;	
-					}
-					else 
-					{
-						_histogramComputed = false;	//Failed - don't try again 
-						_allowHistogram = false;
-					}
+					_histogramComputed = true;
+				}
+				else
+				{
+					_histogramComputed = false;	//Failed - don't try again 
+					_allowHistogram = false;
 				}
 			}
-			else {
-				_histogramComputed = false;
-			}
-		}
-		
-		// ---------------------------------------------------------
-		//		Reading data to the buffer
-		// ---------------------------------------------------------
-		bool success;
-		if ( this->WillBeRenderedAsGrid() )
-		{
-			// if user passed a color scheme, image will be opened as grid using the first band
-			if (_genericType == GDT_Int32)
-				success =  ReadGridAsImage<_int32>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setRGBToGrey);
-			else
-				success =  ReadGridAsImage<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setRGBToGrey);
 		}
 		else {
-			success = ReadImage(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
+			_histogramComputed = false;
 		}
-		
-		if ( success )
+	}
+}
+
+
+// *********************************************************
+//		SetEmptyBuffer()
+// *********************************************************
+void tkRaster::SetEmptyBuffer(colour ** ImageData)
+{
+	if (*ImageData) {
+		delete[](*ImageData);
+	}
+
+	(*ImageData) = new colour[1];
+
+	_dX = _origDx;
+	_dY = _origDy;
+
+	_width = _height = 1;
+}
+
+// *********************************************************
+//		TryDecreaseBufferSize()
+// *********************************************************
+// In case of large images and down sampling it makes sense to reduce the size of buffer,
+// as additional details will be lost all the same but memory usage can be unacceptable.
+void tkRaster::TryDecreaseBufferSize(tkInterpolationMode downsamplingMode, double mapUnitsPerScreenPixel, int& xBuff, int& yBuff)
+{
+	for (int i = 0;; i++)
+	{
+		double mapUnitsPerImagePixel = (_dX + _dY);			// we intentionally don't divide by 2 here, as we'll check the possibility of decreasing buffer by 2
+
+		if (downsamplingMode == imBicubic || downsamplingMode == imBilinear)		// In case of interpolation algorithm different form nearest neighbor is used 
+			mapUnitsPerImagePixel *= 2.0;											// the buffer should be noticeably bigger than screen dimensions to preserve details
+
+		if (downsamplingMode == imHighQualityBicubic || downsamplingMode == imHighQualityBilinear)
+			mapUnitsPerImagePixel *= 3.0;
+
+		if (mapUnitsPerImagePixel < mapUnitsPerScreenPixel)		// it's down sampling
 		{
-			_width = xBuff;
-			_height = yBuff;
+			int xTemp = xBuff / 2;
+			int yTemp = yBuff / 2;
+			_dX = _dX * double(xBuff) / double(xTemp);
+			_dY = _dY * double(yBuff) / double(yTemp);
+			xBuff = xTemp;
+			yBuff = yTemp;
 		}
 		else
 		{
-			// TODO: clear the buffer and parameters
+			_xllCenter = _visibleExtents.left + _dX * 0.5;
+			_yllCenter = _visibleExtents.bottom + _dY * 0.5;
+			break;
 		}
 	}
-	return true;
 }
+
+// *********************************************************
+//		UpdateVisibleExtents()
+// *********************************************************
+void tkRaster::UpdateVisibleExtents(double minX, double minY, double maxX, double maxY)
+{
+	_visibleExtents.left = _extents.left;
+	_visibleRect.left = 0;
+	if (_extents.left < minX)
+	{
+		// how many pixels are completely hidden: rounding in the lower side		
+		int hiddenPixels = int((minX - _extents.left - _origDx / 2.0) / _origDx);
+		_visibleExtents.left += hiddenPixels * _origDx;
+		_visibleRect.left += hiddenPixels;
+	}
+
+	_visibleExtents.bottom = _extents.bottom;
+	_visibleRect.bottom = _origHeight - 1;
+	if (_extents.bottom < minY)
+	{
+		// how many pixels are completely hidden: rounding in the lower side		
+		int hiddenPixels = int((minY - _extents.bottom) / _origDy);
+		_visibleExtents.bottom += hiddenPixels * _origDy;
+		_visibleRect.bottom -= hiddenPixels;
+	}
+
+	_visibleExtents.right = _extents.right;
+	_visibleRect.right = _origWidth - 1;
+	if (_extents.right > maxX)
+	{
+		// how many pixels are completely hidden: rounding in the lower side		
+		int hiddenPixels = int((_extents.right - maxX) / _origDx);
+		_visibleExtents.right -= hiddenPixels * _origDx;
+		_visibleRect.right -= hiddenPixels;
+	}
+
+	_visibleExtents.top = _extents.top;
+	_visibleRect.top = 0;
+	if (_extents.top > maxY)
+	{
+		// how many pixels are completely hidden: rounding in the lower side		
+		int hiddenPixels = int((_extents.top - maxY) / _origDy);
+		_visibleExtents.top -= hiddenPixels * _origDy;
+		_visibleRect.top += hiddenPixels;
+	}
+
+	// size of image buffer without scaling
+	_dX = _origDx;	// map units per image pixel
+	_dY = _origDy;
+	_xllCenter = _visibleExtents.left + _dX * 0.5;
+	_yllCenter = _visibleExtents.bottom + _dY * 0.5;
+	_width = _visibleRect.right - _visibleRect.left + 1;
+	_height = _visibleRect.bottom - _visibleRect.top + 1;
+}
+
 
 // *********************************************************
 //		LoadBufferFull()
