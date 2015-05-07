@@ -71,7 +71,6 @@ public:
 		m_pixelsCount = 0;
 		_pixelsSaved = false;
 		_bufferReloadIsNeeded = true;
-		_imageChanged = false;
 		_screenBitmap = NULL;
 
 		_sourceType = istUninitialized;
@@ -375,7 +374,6 @@ public:
 	bool _canUseGrouping;
 	bool _pixelsSaved;
 	bool _bufferReloadIsNeeded;
-	bool _imageChanged;
 	ScreenBitmap* _screenBitmap;	// GDI+ bitmap on the screen
 	CStringW sourceGridName;
 	bool isGridProxy;
@@ -429,6 +427,9 @@ public:
 
 	int GetRgbBandIndex(BandChannel channel);
 	void SetRgbBandIndex(BandChannel channel, int bandIndex);
+
+	bool GetBufferReloadIsNeeded();
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

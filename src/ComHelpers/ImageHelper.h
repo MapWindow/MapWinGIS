@@ -11,5 +11,10 @@ public:
 	static Gdiplus::ColorMatrix GetColorMatrix(IImage* img);
 	static Gdiplus::ImageAttributes* GetImageAttributes(IImage* img);
 	static Gdiplus::ImageAttributes* GetImageAttributes(float alpha, bool useTransparency, OLE_COLOR clr1, OLE_COLOR clr2);
+	static Gdiplus::InterpolationMode GetInterpolationMode(IImage* image, bool upsampling);
+	static ImageType GetImageType(IImage* img);
+	static bool GetIsInRam(IImage* img);
+	static unsigned char* GetImageData(IImage* img);
+	static void PutImageData(IImage* img, colour* data);
 };
 

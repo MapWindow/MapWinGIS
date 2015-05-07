@@ -974,7 +974,14 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 {
 	// caching the color table; adding data to the second buffer	
 	if (!_hasColorTable) return false;
+
 	
+	if (!srcDataInt) {
+		// TODO: make sure that we've read int buffer if we want to handle built-in color table
+		CallbackHelper::ErrorMsg("Integer buffer must be used to display built-in color table");
+		return false;
+	}
+
 	int tableCount = _colorTable->GetColorEntryCount();
 	if (tableCount == 0)
 	{

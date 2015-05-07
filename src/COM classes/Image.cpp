@@ -799,7 +799,7 @@ STDMETHODIMP CImageClass::put_TransparencyColor(OLE_COLOR newVal)
 	{
 		_pixelsSaved = false;	// pixels saved for grouping will be invalid
 		_canUseGrouping = true;
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	_transColor = newVal;
 	return S_OK;
@@ -821,7 +821,7 @@ STDMETHODIMP CImageClass::put_TransparencyColor2(OLE_COLOR newVal)
 	{
 		_pixelsSaved = false;	// pixels saved for grouping will be invalid
 		_canUseGrouping = true;
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	_transColor2 = newVal;
 	return S_OK;
@@ -841,7 +841,7 @@ STDMETHODIMP CImageClass::put_UseTransparencyColor(VARIANT_BOOL newVal)
 	{
 		_pixelsSaved = false;	// pixels saved for grouping will be invalid
 		_canUseGrouping = true;
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	_useTransColor = newVal;
 	return S_OK;
@@ -1489,7 +1489,7 @@ STDMETHODIMP CImageClass::SetVisibleExtents(double newMinX, double newMinY,	doub
 		}
 	}
 	_bufferReloadIsNeeded = false;
-	_imageChanged = false;
+	_bufferReloadIsNeeded = false;
 	return S_OK;
 }
 
@@ -1904,7 +1904,7 @@ STDMETHODIMP CImageClass::put_AllowHillshade(VARIANT_BOOL newValue)
 	if (_gdal)
 	{
 		_raster->SetAllowHillshade(newValue == VARIANT_TRUE);
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	else
 	{
@@ -1924,7 +1924,7 @@ STDMETHODIMP CImageClass::put_SetToGrey(VARIANT_BOOL newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	_setRGBToGrey = (newValue == VARIANT_TRUE);
-	_imageChanged = true;
+	_bufferReloadIsNeeded = true;
 	
 	return S_OK;
 }
@@ -1942,7 +1942,7 @@ STDMETHODIMP CImageClass::put_UseHistogram(VARIANT_BOOL newValue)
 	if (_gdal)
 	{
 		_raster->SetUseHistogram(newValue == VARIANT_TRUE);
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	else
 	{
@@ -2003,7 +2003,7 @@ STDMETHODIMP CImageClass::put_BufferSize(int newValue)
 	if (_gdal)
 	{
 		_raster->SetImageQuality(newValue);
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	else
 	{
@@ -2103,7 +2103,7 @@ STDMETHODIMP CImageClass::put_TransparencyPercent(double newVal)
 	if (newVal < 0.0)	newVal = 0.0;
 	if (newVal > 1.0)	newVal = 1.0;
 	_transparencyPercent = newVal;
-	_imageChanged = true;
+	_bufferReloadIsNeeded = true;
 	return S_OK;
 }
 
@@ -2120,7 +2120,7 @@ STDMETHODIMP CImageClass::put_DownsamplingMode(tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_downsamplingMode = newVal;
-	_imageChanged = true;
+	_bufferReloadIsNeeded = true;
 	return S_OK;
 }
 
@@ -2137,7 +2137,7 @@ STDMETHODIMP CImageClass::put_UpsamplingMode(tkInterpolationMode newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_upsamplingMode = newVal;
-	_imageChanged = true;
+	_bufferReloadIsNeeded = true;
 	return S_OK;
 }
 
@@ -2154,7 +2154,7 @@ STDMETHODIMP CImageClass::put_DrawingMethod(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	_drawingMethod = newVal;
-	_imageChanged = true;
+	_bufferReloadIsNeeded = true;
 	return S_OK;
 }
 
@@ -3430,7 +3430,7 @@ STDMETHODIMP CImageClass::put_AllowGridRendering(tkGridRendering newValue)
 		if (_raster->GetAllowAsGrid() != newValue)
 		{
 			_raster->SetAllowAsGrid(newValue);
-			_imageChanged = true;
+			_bufferReloadIsNeeded = true;
 		}
 	}
 	else
@@ -3451,7 +3451,7 @@ STDMETHODIMP CImageClass::_pushSchemetkRaster(IGridColorScheme * cScheme, VARIAN
 		if ( cScheme )
 		{
 			_raster->ApplyCustomColorScheme(cScheme);
-			_imageChanged = true;
+			_bufferReloadIsNeeded = true;
 			*retval = VARIANT_TRUE;
 		}
 		else
@@ -3487,7 +3487,7 @@ STDMETHODIMP CImageClass::put_ImageColorScheme(PredefinedColorScheme newValue)
 	if (_gdal)
 	{
 		_raster->ApplyPredefinedColorScheme(newValue);
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 
 	return S_OK;
@@ -3604,7 +3604,7 @@ STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 	}
 	else 
 	{
-		_imageChanged = true;
+		_bufferReloadIsNeeded = true;
 	}
 	
 	return S_OK;
@@ -4137,4 +4137,21 @@ STDMETHODIMP CImageClass::put_ForceSingleBandRendering(VARIANT_BOOL newVal)
 	}
 
 	return S_OK;
+}
+
+// ********************************************************
+//     GetBufferReloadIsNeeded
+// ********************************************************
+bool CImageClass::GetBufferReloadIsNeeded()
+{
+	if (_bufferReloadIsNeeded)  {
+		return true;
+	}
+
+	if (_imgType != BITMAP_FILE && (_width == 0 || _height == 0))
+	{
+		CallbackHelper::AssertionFailed("Buffer width or height is 0 after buffer reload.");
+	}
+
+	return false;
 }

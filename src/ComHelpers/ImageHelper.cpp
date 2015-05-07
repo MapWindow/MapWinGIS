@@ -102,3 +102,66 @@ void ImageHelper::SetTransparency(Gdiplus::ImageAttributes& attributes, bool use
 		attributes.SetColorKey(color1, color2);
 	}
 }
+
+// *************************************************************
+//		GetInterpolationMode()
+// *************************************************************
+Gdiplus::InterpolationMode ImageHelper::GetInterpolationMode(IImage* image, bool upsampling)
+{
+	if (!image) return Gdiplus::InterpolationModeDefault;
+
+	tkInterpolationMode mode;
+
+	if (upsampling) {
+		image->get_UpsamplingMode(&mode);
+	}
+	else
+	{
+		image->get_DownsamplingMode(&mode);
+	}
+
+	return (Gdiplus::InterpolationMode)mode;
+}
+
+// *************************************************************
+//		GetImageType()
+// *************************************************************
+ImageType ImageHelper::GetImageType(IImage* img)
+{
+	if (!img) return USE_FILE_EXTENSION;
+
+	ImageType imageType;
+	img->get_ImageType(&imageType);
+
+	return imageType;
+}
+
+// *************************************************************
+//		GetIsInRam()
+// *************************************************************
+bool ImageHelper::GetIsInRam(IImage* img)
+{
+	if (!img) return false;
+	
+	VARIANT_BOOL inram;
+	img->get_IsInRam(&inram);
+
+	return inram ? true : false;
+}
+
+// *************************************************************
+//		GetImageData()
+// *************************************************************
+unsigned char* ImageHelper::GetImageData(IImage* img)
+{
+	unsigned char* pData = Cast(img)->get_ImageData();
+	return pData;
+}
+
+// *************************************************************
+//		PutImageData()
+// *************************************************************
+void ImageHelper::PutImageData(IImage* img, colour* data)
+{
+	Cast(img)->put_ImageData(data);
+}

@@ -132,3 +132,21 @@ struct CallbackParams
 	CallbackParams(ICallback* localCallback, const char * message);
 
 };
+
+struct ImageSpecs
+{
+	double dx;
+	double dy;
+	double xllCorner;
+	double yllCorner;
+	int width;
+	int height;
+
+	double GetXtrCorner() {
+		return xllCorner + (double)width * dx;
+	}
+
+	double GetYtrCorner() {
+		return yllCorner + (double)height * dy;
+	}
+};

@@ -816,7 +816,7 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 					bmp->pixelPerProjectionX == _pixelPerProjectionX &&
 					bmp->pixelPerProjectionY == _pixelPerProjectionY &&
 					bmp->viewWidth == _viewWidth &&
-					bmp->viewHeight == _viewHeight && !((CImageClass*)iimg)->_imageChanged)
+					bmp->viewHeight == _viewHeight && !((CImageClass*)iimg)->_bufferReloadIsNeeded)
 				{
 					// TODO: choose interpolation mode more precisely
 					// TODO: set image attributes
