@@ -2,9 +2,10 @@
 #include "colour.h"
 
 colour::colour()
-{	red = 255;
-	green = 255;
-	blue = 255;
+{	
+	red = 0;
+	green = 0;
+	blue = 0;
 }
 
 colour::colour(unsigned char r, unsigned char g, unsigned char b) :red(r),green(g),blue(b)
