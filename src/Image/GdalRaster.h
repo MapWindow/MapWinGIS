@@ -52,8 +52,14 @@ public:
 		_allowAsGrid = grForGridsOnly;
 		_activeBandIndex = 1;
 		_predefinedColors = FallLeaves;
+		_redBandIndex = 1;
+		_greenBandIndex = 2;
+		_blueBandIndex = 3;
+		_useRgbBandMapping = false;
+		_forceSingleBandRendering = false;
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
+
 	~GdalRaster()
 	{
 		Close();
@@ -96,19 +102,28 @@ private:
 	GDALRasterBand * _poBandB;
 	GDALRasterBand * _poBandG;
 
-	HandleImage _handleImage;
+	bool _useRgbBandMapping;
+	int _redBandIndex;
+	int _greenBandIndex;
+	int _blueBandIndex;
+
+	//HandleImage _handleImage;
 	GDALColorTable * _colorTable;
 	GDALPaletteInterp _palleteInterpretation;
-	GDALColorInterp _cInterp;
+	GDALColorInterp _cInterp;		// temporary storage during reading of built-in color table
 	GDALDataType _genericType;
 
-	//Histogram variables
+	// Histogram variables
+	// TODO: wrap in class
 	bool	_histogramComputed;	// Has the histogram been computed
 	bool	_allowHistogram;		// It the computation fails don't allow again
-	int		_nLUTBins;
-    double  *_padfScaleMin;
-    double  *_padfScaleMax;
-    int     **_papanLUTs;
+	int		_numBuckets;
+    
+	// TODO: where is this memory being freed?
+	double  *_padfHistogramMin;		// minimum histogram value for each band
+    double  *_padfHistogramMax;		// maximum histogram value for each band
+	int     **_papanLUTs;			// histogram lookout table for each band
+	
 	int _nBands;					// No of bands in the image
 
 	int _buffSize;
@@ -157,6 +172,7 @@ private:
 	tkGridRendering _allowAsGrid;		// Allow the image to be read as grid (if appropriate)
 
 	int _activeBandIndex;
+	bool _forceSingleBandRendering;
 
 	bool clearGDALCache;
 	colort _transColor;		// transparent color
@@ -165,8 +181,7 @@ private:
 
 private:
 	bool OpenCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly);
-	bool ReadGdalData(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
-	HandleImage ChooseRenderingMethod();
+	bool ReadBandData(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
 	IGridColorScheme* GetColorSchemeForRendering();		// returns either of the 2 available
 	void ComputeBandMinMax();
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
@@ -240,6 +255,15 @@ public:
 	
 	void SetCallback(ICallback* value) { _callback = value;}
 
+	int GetRgbBandIndex(BandChannel color);
+	void SetRgbBandIndex(BandChannel color, int bandIndex);
+
+	bool GetUseRgbBandMapping() { return _useRgbBandMapping; }
+	void SetUseRgbBandMapping(bool value) {_useRgbBandMapping = value; }
+
+	bool GetForceSingleBandRendering() { return _forceSingleBandRendering; }
+	void SetForceSingleBandRendering(bool value) { _forceSingleBandRendering = value; }
+
 	// methods
 	bool SetNoDataValue(double Value);
 	void ApplyCustomColorScheme(IGridColorScheme * scheme) ;
@@ -255,17 +279,22 @@ public:
 	int Dereference();
 	void Close();
 	bool IsRgb();
+
 	void UpdateVisibleExtents(double minX, double minY, double maxX, double maxY);
 	void TryDecreaseBufferSize(tkInterpolationMode downsamplingMode, double mapUnitsPerScreenPixel, int& xBuff, int& yBuff);
 	void SetEmptyBuffer(colour ** ImageData);
 	bool ReopenDatasetIfNeeded(CStringW filename);
 	void ApplyBufferQuality(int& xBuff, int& yBuff);
 	void CompuateHistogram(CStringW filename);
-	bool ReadData(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey);
+	bool ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey);
 	bool ReadGeoTransform();
 	void OpenDefaultBands();
 	void InitNoDataValue();
 	bool InitDataType();
-	void InitRenderingSettings();
+	void InitSettings();
+	GDALRasterBand* GetDefaultRgbBand(int bandIndex);
+	GDALRasterBand* GetMappedRgbBand(int bandIndex);
+	GDALDataType GetSimplifiedDataType(GDALRasterBand* band);
+	bool NeedsGridRendering();
 };
 

@@ -2444,6 +2444,7 @@ enum tkScalebarUnits
 	{
 		grForceForAllFormats = 0,
 		grForGridsOnly = 1,
+		grNever = 2,
 	} tkGridRendering;
 
 	typedef
@@ -3690,6 +3691,16 @@ interface IImage : IDispatch{
 	[propput, id(98)] HRESULT ColorizeColor([in] OLE_COLOR newVal);
 	[id(99)] HRESULT ClearOverviews([out, retval] VARIANT_BOOL* retVal);
 	[propget, id(100)] HRESULT GdalDriver([out, retval] IGdalDriver** pVal);
+	[propget, id(101)] HRESULT RedBandIndex([out, retval] LONG* pVal);
+	[propput, id(101)] HRESULT RedBandIndex([in] LONG newVal);
+	[propget, id(102)] HRESULT GreenBandIndex([out, retval] LONG* pVal);
+	[propput, id(102)] HRESULT GreenBandIndex([in] LONG newVal);
+	[propget, id(103)] HRESULT BlueBandIndex([out, retval] LONG* pVal);
+	[propput, id(103)] HRESULT BlueBandIndex([in] LONG newVal);
+	[propget, id(104)] HRESULT UseRgbBandMapping([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(104)] HRESULT UseRgbBandMapping([in] VARIANT_BOOL newVal);
+	[propget, id(105)] HRESULT ForceSingleBandRendering([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(105)] HRESULT ForceSingleBandRendering([in] VARIANT_BOOL newVal);
 };
 
 /****************************  Shapefile Interface ***********************/

@@ -3960,7 +3960,7 @@ STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 }
 
 // ********************************************************
-//     get_Dataset
+//     get_GdalDriver
 // ********************************************************
 STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
 {
@@ -3980,6 +3980,160 @@ STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
 		GDALDriver* driver = ds->GetDriver();
 		ComHelper::CreateInstance(idGdalDriver, (IDispatch**)pVal);
 		((CGdalDriver*)*pVal)->Inject(driver);
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     RedBandIndex
+// ********************************************************
+STDMETHODIMP CImageClass::get_RedBandIndex(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelRed));
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_RedBandIndex(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SetRgbBandIndex(BandChannelRed, newVal);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     GreenBandIndex
+// ********************************************************
+STDMETHODIMP CImageClass::get_GreenBandIndex(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelGreen));
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_GreenBandIndex(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SetRgbBandIndex(BandChannelGreen, newVal);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     BlueBandIndex
+// ********************************************************
+STDMETHODIMP CImageClass::get_BlueBandIndex(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelBlue));
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_BlueBandIndex(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SetRgbBandIndex(BandChannelBlue, newVal);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     UseRgbBandMapping
+// ********************************************************
+STDMETHODIMP CImageClass::get_UseRgbBandMapping(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_rasterImage)
+	{
+		*pVal = _rasterImage->GetUseRgbBandMapping() ? VARIANT_TRUE : VARIANT_FALSE;;
+	}
+	else
+	{
+		*pVal = VARIANT_FALSE;
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_UseRgbBandMapping(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_rasterImage)
+	{
+		_rasterImage->SetUseRgbBandMapping(newVal ? true : false);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("CImageClass::put_UseRgbBandMapping is applicable for GDAL images only.");
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     GetRgbBandIndex
+// ********************************************************
+int CImageClass::GetRgbBandIndex(BandChannel channel)
+{
+	if (_rasterImage)
+	{
+		int index = _rasterImage->GetRgbBandIndex(channel);
+		return static_cast<long>(index);
+	}
+
+	return (int)channel;
+}
+
+// ********************************************************
+//     GetRgbBandIndex
+// ********************************************************
+void CImageClass::SetRgbBandIndex(BandChannel channel, int bandIndex)
+{
+	if (_rasterImage)
+	{
+		_rasterImage->SetRgbBandIndex(channel, bandIndex);
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("SetRgbBandIndex is applicable for GDAL images only.");
+	}
+}
+
+// ********************************************************
+//     ForceSingleBandRendering
+// ********************************************************
+STDMETHODIMP CImageClass::get_ForceSingleBandRendering(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_rasterImage)
+	{
+		*pVal = _rasterImage->GetForceSingleBandRendering();
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_ForceSingleBandRendering(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_rasterImage)
+	{
+		_rasterImage->SetForceSingleBandRendering(newVal ? true : false);
 	}
 
 	return S_OK;

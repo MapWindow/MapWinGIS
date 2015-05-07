@@ -307,6 +307,16 @@ public:
 	STDMETHOD(put_ColorizeColor)(OLE_COLOR newVal);
 	STDMETHOD(ClearOverviews)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_GdalDriver)(IGdalDriver** pVal);
+	STDMETHOD(get_RedBandIndex)(LONG* pVal);
+	STDMETHOD(put_RedBandIndex)(LONG newVal);
+	STDMETHOD(get_GreenBandIndex)(LONG* pVal);
+	STDMETHOD(put_GreenBandIndex)(LONG newVal);
+	STDMETHOD(get_BlueBandIndex)(LONG* pVal);
+	STDMETHOD(put_BlueBandIndex)(LONG newVal);
+	STDMETHOD(get_UseRgbBandMapping)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseRgbBandMapping)(VARIANT_BOOL newVal);
+	STDMETHOD(get_ForceSingleBandRendering)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_ForceSingleBandRendering)(VARIANT_BOOL newVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -416,7 +426,9 @@ public:
 	void LoadImageAttributesFromGridColorScheme(IGridColorScheme* scheme);
 
 	Gdiplus::ColorMatrix GetColorMatrix();
-	
+
+	int GetRgbBandIndex(BandChannel channel);
+	void SetRgbBandIndex(BandChannel channel, int bandIndex);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

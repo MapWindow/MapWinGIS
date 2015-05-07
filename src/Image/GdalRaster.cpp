@@ -1,4 +1,4 @@
-// tkRaster.cpp: implementation of the tkRaster class. Replaces tkECW.cpp
+// tkRaster.cpp: implementation of the tkRaster class.
 //http://www.mozilla.org/MPL/ 
 //Software distributed under the License is distributed on an "AS IS" basis, WITHOUT WARRANTY OF 
 //ANY KIND, either express or implied. See the License for the specific language governing rights and 
@@ -81,15 +81,13 @@ bool GdalRaster::OpenCore(CStringA& filename, GDALAccess accessType)
 			return false;
 		}
 		
-		_activeBandIndex = 1;
+		
 
 		InitDataType();
 
-		InitRenderingSettings();
+		InitSettings();
 
 		ComputeBandMinMax();
-
-		_handleImage = ChooseRenderingMethod();
 
 		InitNoDataValue();
 
@@ -105,6 +103,8 @@ bool GdalRaster::OpenCore(CStringA& filename, GDALAccess accessType)
 
 	return false;
 }
+
+
 
 // *************************************************************
 //	  ApplyCustomColorScheme()
@@ -163,6 +163,7 @@ void GdalRaster::ComputeBandMinMax()
 		//For some reason GDAL does not seem to pick up the color table of a png binary image		
 		if ((_dataType == GDT_Byte) && (_imgType != ADF_FILE) && (_hasColorTable == false) && (_imgType != PNG_FILE))
 		{
+			// TODO: is it really needed?
 			_dfMin = 0.0;
 			_dfMax = 255.0;
 		}
@@ -244,21 +245,7 @@ bool GdalRaster::InitDataType()
 		return false;
 	}
 
-	switch (_dataType)
-	{
-		case GDT_Float32:
-		case GDT_Float64:
-			_genericType = GDT_Float32;
-			break;
-		case GDT_Byte:
-		case GDT_Int16:
-		case GDT_UInt16:
-			_genericType = GDT_Int32;
-			break;
-		default:
-			_genericType = GDT_Int32;
-			break;
-	}
+	_genericType = GetSimplifiedDataType(_poBandR);
 
 	return true;
 }
@@ -266,8 +253,38 @@ bool GdalRaster::InitDataType()
 // *************************************************************
 //	  InitSettings()
 // *************************************************************
-void GdalRaster::InitRenderingSettings()
+GDALDataType GdalRaster::GetSimplifiedDataType(GDALRasterBand* band)
 {
+	if (!band) return GDT_Unknown;
+
+	GDALDataType dataType = band->GetRasterDataType();
+	switch (dataType)
+	{
+		case GDT_Byte:
+			return GDT_Byte;
+		case GDT_Float32:
+		case GDT_Float64:
+		case GDT_CFloat32:
+		case GDT_CFloat64:
+			return GDT_Float32;
+		case GDT_CInt16:
+		case GDT_CInt32:
+		case GDT_Int16:
+		case GDT_Int32:
+		case GDT_UInt16:
+		case GDT_UInt32:
+			return GDT_Int32;
+	}
+	
+	return GDT_Unknown;
+}
+
+// *************************************************************
+//	  InitSettings()
+// *************************************************************
+void GdalRaster::InitSettings()
+{
+	_activeBandIndex = 1;
 	_histogramComputed = false;
 	_allowHistogram = true;
 	_useHistogram = false;
@@ -480,7 +497,7 @@ bool GdalRaster::LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW
 	CompuateHistogram(filename);
 
 	// actual reading		
-	if ( ReadData(ImageData, xBuff, yBuff, setToGrey) )   
+	if ( ReadDataGeneric(ImageData, xBuff, yBuff, setToGrey) )   
 	{
 		_width = xBuff;
 		_height = yBuff;
@@ -527,11 +544,11 @@ void GdalRaster::ApplyBufferQuality(int& xBuff, int& yBuff)
 // *********************************************************
 //		ReadData()
 // *********************************************************
-bool GdalRaster::ReadData(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey)
+bool GdalRaster::ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey)
 {
 	if (!WillBeRenderedAsGrid())
 	{
-		return ReadGdalData(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
+		return ReadBandData(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
 	}
 	
 	if (_genericType == GDT_Int32) 
@@ -557,8 +574,8 @@ void GdalRaster::CompuateHistogram(CStringW filename)
 	{
 		if (!_histogramComputed)
 		{
-			_nLUTBins = 256;
-			if (ComputeEqualizationLUTs(filename, &_padfScaleMin, &_padfScaleMax, &_papanLUTs))
+			_numBuckets = 256;
+			if (ComputeEqualizationLUTs(filename, &_padfHistogramMin, &_padfHistogramMax, &_papanLUTs))
 			{
 				_histogramComputed = true;
 			}
@@ -735,13 +752,48 @@ bool GdalRaster::LoadBufferFull(colour** ImageData, CStringW filename, double ma
 	_visibleExtents.top = _extents.top;
 	_visibleExtents.bottom = _extents.bottom;
 
-	return ReadGdalData(ImageData, _visibleRect.left, _visibleRect.top, _origWidth, _origHeight, _width, _height);
+	return ReadBandData(ImageData, _visibleRect.left, _visibleRect.top, _origWidth, _origHeight, _width, _height);
+}
+
+// *********************************************************
+//		GetMappedRgbBand()
+// *********************************************************
+GDALRasterBand* GdalRaster::GetMappedRgbBand(int bandIndex)
+{
+	if (_useRgbBandMapping)
+	{
+		if (bandIndex == 1)
+		{
+			return _rasterDataset->GetRasterBand(_redBandIndex);
+		}
+
+		if (bandIndex == 2)
+		{
+			return _rasterDataset->GetRasterBand(_greenBandIndex);
+		}
+
+		if (bandIndex == 3)
+		{
+			return _rasterDataset->GetRasterBand(_blueBandIndex);
+		}
+
+		return NULL;
+	}
+	
+	if (_nBands == 1 || _forceSingleBandRendering)
+	{
+		return _rasterDataset->GetRasterBand(_activeBandIndex);
+	}
+	else
+	{
+		return GetDefaultRgbBand(bandIndex);
+	}
 }
 
 // *********************************************************
 //		ReadBandData()
 // *********************************************************
-bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)
+bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff)
 {
     // -----------------------------------------------
 	//  allocating memory for first buffer (GDAL reading)
@@ -749,18 +801,18 @@ bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int
 	unsigned char * srcDataChar = NULL;
 	_int32 * srcDataInt = NULL;
 	float * srcDataFloat = NULL;
-	
-	if (_handleImage == asFloatOrInt)
+
+	if (_genericType == GDT_Byte)
 	{
-		if (_genericType == GDT_Int32) {
-			srcDataInt =  (_int32 *) CPLMalloc( sizeof(_int32)*xBuff*yBuff );
-		}
-		else {
-			srcDataFloat =  (float *) CPLMalloc( sizeof(float)*xBuff*yBuff );
-		}
+		srcDataChar = (unsigned char *)CPLMalloc(sizeof(unsigned char)*xBuff*yBuff);
 	}
-	else {
-		srcDataChar =  (unsigned char *) CPLMalloc( sizeof(unsigned char)*xBuff*yBuff );
+	else if (_genericType == GDT_Int32)
+	{
+		srcDataInt = (_int32 *)CPLMalloc(sizeof(_int32)*xBuff*yBuff);
+	}
+	else
+	{
+		srcDataFloat = (float *)CPLMalloc(sizeof(float)*xBuff*yBuff);
 	}
 	
 	// -----------------------------------------------
@@ -782,12 +834,10 @@ bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int
 	}
 	
 	// -----------------------------------------------
-	//    preparing to read
+	//    preparing min / max equalization
 	// -----------------------------------------------
-	GDALRasterBand* poBand = NULL;
-
 	double shift = 0, range = 0;
-	if (_handleImage == asFloatOrInt)
+	if (_genericType != GDT_Byte)
 	{
 		// TODO: why values for the first (Red) band are used for all bands?
 		double dfMin = _adfMinMax[0];
@@ -801,44 +851,35 @@ bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int
 		shift = 0;
 	}
 
+	// -----------------------------------------------
+	//    reading data
+	// -----------------------------------------------
     for (int bandIndex = 1; bandIndex <= _nBands; bandIndex++)
     {
-		// -----------------------------------------------
-		//   reading the band
-		// -----------------------------------------------
-		if (bandIndex == 1) poBand = _poBandR; 
-		else if (bandIndex == 2) poBand = _poBandG;
-		else if (bandIndex == 3) poBand = _poBandB;
-		
-		if (poBand == NULL)
+		GDALRasterBand* poBand = GetMappedRgbBand(bandIndex);
+		 
+		if (!poBand)
 		{
-			poBand = _rasterDataset->GetRasterBand(bandIndex);	// Keep it open until the dataset is destroyed
+			// TODO: what if we are missing some band?
+			// does the appropriate color component will be initialized with 0?
+			continue;
+		}
+
+		// images with color table are classified as complex with GDT_Int32 data type
+		if (_genericType == GDT_Byte)
+		{
+			poBand->AdviseRead(xOffset, yOffset, width, height, xBuff, yBuff, GDT_Byte, NULL);
+			poBand->RasterIO(GF_Read, xOffset, yOffset, width, height, srcDataChar, xBuff, yBuff, GDT_Byte, 0, 0);
+		}
+		else if (_genericType == GDT_Int32)
+		{
+			poBand->AdviseRead(xOffset, yOffset, width, height, xBuff, yBuff, GDT_Int32, NULL);
+			poBand->RasterIO(GF_Read, xOffset, yOffset, width, height, srcDataInt, xBuff, yBuff, GDT_Int32, 0, 0);
 		}
 		else
 		{
-			// images with color table are classified as complex with GDT_Int32 data type
-			if (_handleImage == asFloatOrInt)
-			{
-				if (_genericType == GDT_Int32)
-				{
-					poBand->AdviseRead ( xOffset, yOffset, width, height, xBuff, yBuff, GDT_Int32, NULL);
-					poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataInt, xBuff, yBuff, GDT_Int32, 0, 0 );
-				}
-				else
-				{
-					poBand->AdviseRead ( xOffset, yOffset, width, height, xBuff, height, GDT_Float32, NULL);
-					poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataFloat, xBuff, yBuff, GDT_Float32, 0, 0 );
-				}
-			}
-			else
-			{
-				poBand->AdviseRead ( xOffset, yOffset, width, height, xBuff, yBuff, GDT_Byte, NULL);
-				poBand->RasterIO( GF_Read, xOffset, yOffset, width, height, srcDataChar, xBuff, yBuff, GDT_Byte, 0, 0 );
-			}
-		}
-
-		if (!poBand) {
-			continue;
+			poBand->AdviseRead(xOffset, yOffset, width, height, xBuff, height, GDT_Float32, NULL);
+			poBand->RasterIO(GF_Read, xOffset, yOffset, width, height, srcDataFloat, xBuff, yBuff, GDT_Float32, 0, 0);
 		}
 
 		double noDataValue = poBand->GetNoDataValue();
@@ -846,15 +887,22 @@ bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int
 
 		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, bandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
-			if (_handleImage == asFloatOrInt)
+			if (_genericType == GDT_Byte)
 			{
-				if (_genericType == GDT_Int32)
-					GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);	
-				else
-					GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+			}
+			else if (_genericType == GDT_Int32)
+			{
+				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
 			}
 			else
-				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+			{
+				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+			}
+		}
+
+		if (_forceSingleBandRendering) {
+			break;
 		}
     }
 
@@ -871,26 +919,47 @@ bool GdalRaster::ReadGdalData(colour ** imageData, int xOffset, int yOffset, int
 	// --------------------------------------------------------
 	//		cleaning
 	// --------------------------------------------------------
-	if (_handleImage == asFloatOrInt)
+	if (_genericType == GDT_Byte)
 	{
-		if (_genericType == GDT_Int32) {
-			if( srcDataInt != NULL ) {
-				CPLFree( srcDataInt );
-				srcDataInt = NULL;
-			}
-		}
-		else {
-			if( srcDataFloat != NULL ) {
-				CPLFree( srcDataFloat );
-				srcDataFloat = NULL;
-			} 
+		if (srcDataChar != NULL) 
+		{
+			CPLFree(srcDataChar);
+			srcDataChar = NULL;
 		}
 	}
-	if( srcDataChar != NULL ) {
-		CPLFree( srcDataChar );
-		srcDataChar = NULL;
+	else if (_genericType == GDT_Int32)
+	{
+		if (srcDataInt != NULL) {
+			CPLFree(srcDataInt);
+			srcDataInt = NULL;
+		}
+	}
+	else 
+	{
+		if (srcDataFloat != NULL) {
+			CPLFree(srcDataFloat);
+			srcDataFloat = NULL;
+		}
 	}
 	return true;
+}
+
+// *********************************************************
+//		GetRgbBand()
+// *********************************************************
+GDALRasterBand* GdalRaster::GetDefaultRgbBand(int bandIndex)
+{
+	if (bandIndex == 1)  {
+		return _poBandR;
+	}
+	if (bandIndex == 2) {
+		return _poBandG;
+	}
+	if (bandIndex == 3)  {
+		return _poBandB;
+	}
+
+	return NULL;
 }
 
 // *************************************************************
@@ -947,7 +1016,9 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 					int band, double shift, double range, double noDataValue, bool useHistogram)
 {
 	T val = 0;		// value from source buffer	(_int32, float, unsigned char)
-	colour* dst;	// position in the resulting buffer
+	colour* color;	// position in the resulting buffer
+
+	bool singleBand = _nBands == 1 || _forceSingleBandRendering;
 
 	// histogram
 	if (useHistogram && _nBands == 1 && !_hasColorTable)
@@ -957,31 +1028,31 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 			for (int j = 0; j < xBuff; j++)	
 			{
 				val = src[(yBuff-i-1) * xBuff + j];	
-				dst = (*dst) + i * xBuff + j;
+				color = (*dst) + i * xBuff + j;
 				
 				if ((double)val == noDataValue)
 				{
-					dst->blue = _transColor.b;
-					dst->green = _transColor.g;
-					dst->red = _transColor.r;
+					color->blue = _transColor.b;
+					color->green = _transColor.g;
+					color->red = _transColor.r;
 				}
 				else
 				{
-					double dfScale = _nLUTBins / (_padfScaleMax[band-1] - _padfScaleMin[band-1]);
-					int iBin = (int) (((double)val - _padfScaleMin[band-1]) * dfScale);
-					iBin = MAX(0,MIN(_nLUTBins-1,iBin));
+					double dfScale = _numBuckets / (_padfHistogramMax[band-1] - _padfHistogramMin[band-1]);
+					int iBin = (int) (((double)val - _padfHistogramMin[band-1]) * dfScale);
+					iBin = MAX(0,MIN(_numBuckets-1,iBin));
 					const int * panLUT = _papanLUTs[band-1];
 					if( panLUT )
 					{
-						dst->red = (unsigned char) panLUT[iBin];
-						dst->green = (unsigned char) panLUT[iBin];
-						dst->blue = (unsigned char) panLUT[iBin];
+						color->red = (unsigned char)panLUT[iBin];
+						color->green = (unsigned char)panLUT[iBin];
+						color->blue = (unsigned char)panLUT[iBin];
 					}
 					else
 					{
-						dst->red = (unsigned char) iBin;
-						dst->green = (unsigned char) iBin;
-						dst->blue = (unsigned char) iBin;
+						color->red = (unsigned char)iBin;
+						color->green = (unsigned char)iBin;
+						color->blue = (unsigned char)iBin;
 					}
 				}
 			}
@@ -990,7 +1061,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 		return true;
 	}
 	
-	if(_handleImage == asFloatOrInt)
+	if(_genericType == GDT_Float32 || _genericType == GDT_Int32)
 	{
 		double ratio = 255.0/(double)range;
 		
@@ -998,37 +1069,38 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 			for (int j = 0; j < xBuff; j++)	
 			{
 				val = src[(yBuff-i-1) * xBuff + j];	
-				dst = (*dst) + i * xBuff + j;
+				color = (*dst) + i * xBuff + j;
 				
-				if (_nBands == 1)
+				if (singleBand)
 				{
+					// gray scale
 					if (val == noDataValue)
 					{
-						dst->blue = _transColor.b;
-						dst->green = _transColor.g;
-						dst->red = _transColor.r;
-						//memcpy(dst, &transColor, sizeof(colour));
+						color->blue = _transColor.b;
+						color->green = _transColor.g;
+						color->red = _transColor.r;
 					}
 					else
 					{
-						dst->red = static_cast<unsigned char>(double(val + shift) * ratio);
-						dst->green = static_cast<unsigned char>(double(val + shift) * ratio);
-						dst->blue = static_cast<unsigned char>(double(val + shift) * ratio);				
+						color->red = static_cast<unsigned char>(double(val + shift) * ratio);
+						color->green = static_cast<unsigned char>(double(val + shift) * ratio);
+						color->blue = static_cast<unsigned char>(double(val + shift) * ratio);
 					}
 				}
 				else
 				{
+					// RGB
 					if (val == noDataValue)
 					{
-						if (band == 1)		dst->red = _transColor.r;
-						else if (band == 2)	dst->green = _transColor.g;
-						else if (band == 3)	dst->blue = _transColor.b;
+						if (band == 1)		color->red = _transColor.r;
+						else if (band == 2)	color->green = _transColor.g;
+						else if (band == 3)	color->blue = _transColor.b;
 					}
 					else
 					{
-						if (band == 1)      dst->red = static_cast<unsigned char>(double(val + shift)  * ratio);
-						else if (band == 2) dst->green = static_cast<unsigned char>(double(val + shift) * ratio);
-						else if (band == 3) dst->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
+						if (band == 1)      color->red = static_cast<unsigned char>(double(val + shift)  * ratio);
+						else if (band == 2) color->green = static_cast<unsigned char>(double(val + shift) * ratio);
+						else if (band == 3) color->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
 					}
 				}
 			}
@@ -1036,43 +1108,44 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 		return true;
 	}
 	
-	
+	// single byte per pixel
 	for (int i = 0; i < yBuff; i++) 
 	{
 		for (int j = 0; j < xBuff; j++)	
 		{
 			val = (unsigned char)src[(yBuff-i-1) * xBuff + j];	
-			dst = (*dst) + i * xBuff + j;
+			color = (*dst) + i * xBuff + j;
 				
-			if (_nBands == 1)
+			if (singleBand)
 			{
+				// gray scale
 				if (val == noDataValue)
 				{
-					dst->blue = _transColor.b;
-					dst->green = _transColor.g;
-					dst->red = _transColor.r;
-					//memcpy(dst, &transColor, sizeof(colour));
+					color->blue = _transColor.b;
+					color->green = _transColor.g;
+					color->red = _transColor.r;
 				}
 				else
 				{
-					dst->red = static_cast<unsigned char>(val);
-					dst->green = static_cast<unsigned char>(val);
-					dst->blue = static_cast<unsigned char>(val);
+					color->red = static_cast<unsigned char>(val);
+					color->green = static_cast<unsigned char>(val);
+					color->blue = static_cast<unsigned char>(val);
 				}
 			}
 			else
 			{
+				// RGB
 				if (val == noDataValue)
 				{
-					if (band == 1)		dst->red = _transColor.r;
-					else if (band == 2)	dst->green = _transColor.g;
-					else if (band == 3)	dst->blue = _transColor.b;
+					if (band == 1)		color->red = _transColor.r;
+					else if (band == 2)	color->green = _transColor.g;
+					else if (band == 3)	color->blue = _transColor.b;
 				}
 				else
 				{
-					if (band == 1)      dst->red = static_cast<unsigned char>(val);
-					else if (band == 2) dst->green = static_cast<unsigned char>(val);
-					else if (band == 3) dst->blue = static_cast<unsigned char>(val);
+					if (band == 1)      color->red = static_cast<unsigned char>(val);
+					else if (band == 2) color->green = static_cast<unsigned char>(val);
+					else if (band == 3) color->blue = static_cast<unsigned char>(val);
 				}
 			}
 		}
@@ -1084,13 +1157,15 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 // ****************************************************************
 //		GDALColorEntry2Colour()
 // ****************************************************************
-// Filling colour structure from the GDAL colour value
+// Filling colour structure from the GDAL colour value.
+// Only when built-in color table is specified for datasource.
 void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, 
 					const GDALColorEntry * poCE, bool useHistogram, colour* result)
 {
 	bool colorEntryExists = (poCE != NULL)?true:false;
 	
-	// transparent color
+	// TODO: should we use _forceSingleBandRendering here?
+
 	if (colorValue == noDataValue)
 	{
 		if (_nBands == 1)
@@ -1105,12 +1180,15 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 			else if (band == 2)	result->green = _transColor.g;
 			else if (band == 3)	result->blue = _transColor.b;
 		}
+		
+		return;
 	}
-	else if (useHistogram && _nBands == 1 && !_hasColorTable)
+	
+	if (useHistogram && _nBands == 1 && !_hasColorTable)
 	{
-		double dfScale = _nLUTBins / (_padfScaleMax[band-1] - _padfScaleMin[band-1]);
-		int iBin = (int) ((colorValue - _padfScaleMin[band-1]) * dfScale);
-		iBin = MAX(0,MIN(_nLUTBins-1,iBin));
+		double dfScale = _numBuckets / (_padfHistogramMax[band-1] - _padfHistogramMin[band-1]);
+		int iBin = (int) ((colorValue - _padfHistogramMin[band-1]) * dfScale);
+		iBin = MAX(0,MIN(_numBuckets-1,iBin));
 		const int * panLUT = _papanLUTs[band-1];
 		
 		if( panLUT )
@@ -1125,8 +1203,11 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 			result->green = (unsigned char) iBin;
 			result->blue = (unsigned char) iBin;
 		}
+
+		return;
 	}
-	else if (_hasColorTable && colorEntryExists)
+
+	if (_hasColorTable && colorEntryExists)
 	{
 		if (_cInterp == GCI_AlphaBand)
 		{
@@ -1146,9 +1227,11 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 			result->green = (unsigned char)poCE->c2;
 			result->blue = (unsigned char)poCE->c3;
 		}
+		
+		return;
 	} 
 
-	else if (_handleImage == asFloatOrInt)
+	if (_genericType == GDT_Float32 || _genericType == GDT_Int32)
 	{
 		if (_nBands == 1)
 		{
@@ -1162,8 +1245,11 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 			else if (band == 2) result->green = (unsigned char) ((colorValue + shift) * 255/range);
 			else if (band == 3) result->blue = (unsigned char) ((colorValue + shift)  * 255/range);
 		}
+
+		return;
 	}
-	else if (_nBands == 1)
+	
+	if (_nBands == 1)
 	{
 		result->red = (unsigned char)(colorValue);
 		result->green = (unsigned char)(colorValue);
@@ -1175,7 +1261,6 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 		else if (band == 2) result->green = (unsigned char)(colorValue);
 		else if (band == 3) result->blue = (unsigned char)(colorValue);
 	}
-	return;
 }
 
 // *********************************************************
@@ -1670,14 +1755,14 @@ bool GdalRaster::ComputeEqualizationLUTs( CStringW filename,
 /* -------------------------------------------------------------------- */
 /*      Now compute a LUT from the cumulative histogram.                */
 /* -------------------------------------------------------------------- */
-        int *panLUT = (int *) CPLCalloc(sizeof(int),_nLUTBins);
+        int *panLUT = (int *) CPLCalloc(sizeof(int),_numBuckets);
         int iLUT;
 
-        for( iLUT = 0; iLUT < _nLUTBins; iLUT++ )
+        for( iLUT = 0; iLUT < _numBuckets; iLUT++ )
         {
-            iHist = (iLUT * nHistSize) / _nLUTBins;
-            int nValue = (int) ((panCumHist[iHist] * _nLUTBins) / nTotal);
-            panLUT[iLUT] = MAX(0,MIN(_nLUTBins-1,nValue));
+            iHist = (iLUT * nHistSize) / _numBuckets;
+            int nValue = (int) ((panCumHist[iHist] * _numBuckets) / nTotal);
+            panLUT[iLUT] = MAX(0,MIN(_numBuckets-1,nValue));
         } 
 		(*ppapanLUTs)[iBand] = panLUT;
     }
@@ -1721,8 +1806,6 @@ bool GdalRaster::SetNoDataValue(double Value)
 	return true;
 }
 
-#pragma region Choose rendering
-
 // *********************************************************
 //		GetColorScheme()
 // *********************************************************
@@ -1763,32 +1846,30 @@ bool GdalRaster::CanUseExternalColorScheme()
 }
 
 // *************************************************************
-//	  ChooseRenderingMethod()
+//	  NeedsGridRendering()
 // *************************************************************
-HandleImage GdalRaster::ChooseRenderingMethod()
+bool GdalRaster::NeedsGridRendering()
 {
-	HandleImage method;
-	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || _hasColorTable )
+	if (_imgType == IMG_FILE || _imgType == KAP_FILE || (_imgType == TIFF_FILE && _dataType == GDT_UInt16) || _hasColorTable)
 	{
-		method = asFloatOrInt;
+		return false;
 	}
-	else if	( _dataType == GDT_Byte && _imgType != ADF_FILE && _dfMax > 15)
+	else if (_dataType == GDT_Byte && _imgType != ADF_FILE && _dfMax > 15)
 	{
-		method = asRGB;
+		return false;
 	}
-	else if (_dfMax > 1 &&( _nBands == 1 || _imgType == ADF_FILE || _imgType == ASC_FILE || _imgType == DEM_FILE)) 
+	else if (_dfMax > 1 && (_nBands == 1 || _imgType == ADF_FILE || _imgType == ASC_FILE || _imgType == DEM_FILE))
 	{
-		method = asGrid;
+		return true;
 	}
 	else if (!IsRgb())
 	{
-		method = asGrid;
+		return true;
 	}
 	else
 	{
-		method = asFloatOrInt;
+		return false;
 	}
-	return method;
 }
 
 // *************************************************************
@@ -1796,9 +1877,55 @@ HandleImage GdalRaster::ChooseRenderingMethod()
 // *************************************************************
 bool GdalRaster::WillBeRenderedAsGrid()
 {
-	return (_allowAsGrid == tkGridRendering::grForceForAllFormats ||
-		   (_allowAsGrid == tkGridRendering::grForGridsOnly && _handleImage == asGrid));
+	return _allowAsGrid == grForceForAllFormats || (_allowAsGrid == grForGridsOnly && NeedsGridRendering());
 }
 
-#pragma endregion
+// *************************************************************
+//	  IsRgb()
+// *************************************************************
+bool GdalRaster::IsRgb()
+{
+	return GdalHelper::IsRgb(_rasterDataset);
+}
+
+// *************************************************************
+//	  GetRgbBandIndex()
+// *************************************************************
+int GdalRaster::GetRgbBandIndex(BandChannel color)
+{
+	switch (color)
+	{
+		case BandChannelRed:
+			return _redBandIndex;
+		case BandChannelGreen:
+			return _greenBandIndex;	
+		case BandChannelBlue:
+			return _blueBandIndex;
+	}
+
+	return 0;
+}
+
+// *************************************************************
+//	  SetRgbBandIndex()
+// *************************************************************
+void GdalRaster::SetRgbBandIndex(BandChannel color, int bandIndex)
+{
+	switch (color)
+	{
+		case BandChannelRed:
+			_redBandIndex = bandIndex;
+			return;
+		case BandChannelGreen:
+			_greenBandIndex = bandIndex;
+			return;
+		case BandChannelBlue:
+			_blueBandIndex = bandIndex;
+			return;
+	}
+
+	CallbackHelper::ErrorMsg("Invalid band index passed to GdalRaster::SetRgbBandIndex");
+}
+
+
 
