@@ -60,11 +60,11 @@ public:
 		ComHelper::CreateInstance(idGeoProjection, (IDispatch**)&_projection);
 		
 		_bitmapImage = NULL;
-		_rasterImage = NULL;
+		_raster = NULL;
 		
 		_imgType = USE_FILE_EXTENSION;
 		
-		_gdalImage = false;
+		_gdal = false;
 
 		m_groupID = -1;
 		m_pixels = NULL;
@@ -332,7 +332,7 @@ private:
 	double _yllCenter;	//Y coordinate of lower left corner of image (world coordinate)
 	double _xllCenter;	//X coordinate of lower left corner of image (world coordinate)
 
-	bool _gdalImage;
+	bool _gdal;
 	bool _dataLoaded;
 	bool _setRGBToGrey;			//Set a color RGB image or hillshade to gray
 	CStringW _fileName;			//For GDALOpen
@@ -345,7 +345,7 @@ private:
 
 	//Image Objects
 	tkBitmap* _bitmapImage;
-	GdalRaster* _rasterImage;
+	GdalRaster* _raster;
 
 	//Transparency
 	OLE_COLOR _transColor;

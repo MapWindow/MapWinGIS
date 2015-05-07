@@ -212,9 +212,9 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 		// Try it with GDAL - it handles new formats more quickly than
 		// we can keep up with. If all of its drivers fail, retval will be false anyway.
 		
-		_rasterImage = new GdalRaster();
+		_raster = new GdalRaster();
 		if (!_globalCallback) this->put_GlobalCallback(cBack);
-		_rasterImage->SetCallback(_globalCallback);
+		_raster->SetCallback(_globalCallback);
 
 		_imgType = FileType;
 		*retval = OpenGdalRaster(_fileName, accessMode)?VARIANT_TRUE:VARIANT_FALSE;
@@ -316,27 +316,27 @@ bool CImageClass::CheckForProxy()
 // ********************************************************
 bool CImageClass::OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode)
 {	
-	if (!_rasterImage) {
+	if (!_raster) {
 		return false;
 	}
 	
 	// inRam is always true for GDAL-based images	
 	_inRam = true;	
 	
-	if (!_rasterImage->Open(ImageFile, accessMode))
+	if (!_raster->Open(ImageFile, accessMode))
 	{	
 		ErrorMessage(tkCANT_OPEN_FILE);
 		return false;
 	}
 
 	_fileName = ImageFile;
-	_gdalImage = true;
+	_gdal = true;
 	_dataLoaded = false; //not yet loaded into ImageData	
 
 	// default is RGB(0,0,0) if no data value wasn't set	
-	_transColor = (int)_rasterImage->GetTransparentColor();		
+	_transColor = (int)_raster->GetTransparentColor();		
 	_transColor2 = _transColor;
-	_useTransColor = _rasterImage->HasTransparency() ? VARIANT_TRUE : VARIANT_FALSE;
+	_useTransColor = _raster->HasTransparency() ? VARIANT_TRUE : VARIANT_FALSE;
 
 	// buffer wasn't loaded yet, so we will not set width, height, dx, etc properties; default values will be used
 
@@ -405,7 +405,7 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 // ************************************************
 bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bool writeWorldFile)
 {
-	if (!_rasterImage) return false;
+	if (!_raster) return false;
 	
 	// report but don't abort the operations
 	if (fileType != _imgType)
@@ -418,7 +418,7 @@ bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bo
 		return false;
 	}
 
-	GDALDataset* dataset = _rasterImage->GetDataset();
+	GDALDataset* dataset = _raster->GetDataset();
 	if (!dataset) return false;
 
 	bool result = GdalHelper::CopyDataset(dataset, imageFilename, _globalCallback, writeWorldFile);
@@ -486,18 +486,18 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 	//close the current file, making sure that memory is cleaned up correctly
 	//This function assumes that the file has already been saved
 	//all new data will be lost if not saved prior to calling this function
-	if ( _gdalImage )
+	if ( _gdal )
 	{
-		if (_rasterImage)
+		if (_raster)
 		{
-			int ref = _rasterImage->Dereference();
+			int ref = _raster->Dereference();
 			
 			// Call _rasterImage->Close only if reference count exactly equals zero
 			if (ref == 0)
 			{
-				_rasterImage->Close();
-				delete _rasterImage;
-				_rasterImage = NULL;
+				_raster->Close();
+				delete _raster;
+				_raster = NULL;
 			}
 			else
 			{
@@ -534,7 +534,7 @@ STDMETHODIMP CImageClass::Close(VARIANT_BOOL *retval)
 
 	// set default properties
 	_imgType = USE_FILE_EXTENSION;
-	_gdalImage = false;
+	_gdal = false;
 	_dX = _dY = 1.0;
 	_xllCenter = _yllCenter = 0.0;
 	_width = _height = 0;
@@ -618,7 +618,7 @@ STDMETHODIMP CImageClass::GetRow(long Row, long *Vals, VARIANT_BOOL *retval)
 		// then it's reasonable thing to receive nothing from GetRow or GetValue calls
 		// Reload buffer with SetVisibleExtents and use the values then.
 		// By default it's expected to have buffer of visible pixels in place after each redraw
-		if ( _gdalImage && !_dataLoaded )
+		if ( _gdal && !_dataLoaded )
 		{
 			ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 		}
@@ -689,7 +689,7 @@ STDMETHODIMP CImageClass::get_Value(long row, long col, long *pVal)
 	// then it's reasonable thing to receive nothing from GetRow or GetValue calls
 	// Reload buffer with SetVisibleExtents and use the values then.
 	// By default it's expected to have buffer of visible pixels in place after each redraw
-	if ( _gdalImage && !_dataLoaded )
+	if ( _gdal && !_dataLoaded )
 	{
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 	}
@@ -754,7 +754,7 @@ STDMETHODIMP CImageClass::put_Value(long row, long col, long newVal)
 					ErrorMessage(tkUNRECOVERABLE_ERROR);
 				}
 			}
-			else if (_gdalImage) 
+			else if (_gdal) 
 			{
 				CallbackHelper::ErrorMsg("Writing of GDAL formats is not yet supported.");
 			}	
@@ -1470,20 +1470,20 @@ STDMETHODIMP CImageClass::SetVisibleExtents(double newMinX, double newMinY,	doub
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 		
-	if (_gdalImage)
+	if (_gdal)
 	{
 		double mapUnitsPerScreenPixel = sqrt((newMaxX - newMinX) * (newMaxY - newMinY) / pixInView);
 		Extent screenExtents = Extent(newMinX, newMaxX, newMinY, newMaxY);
 
-		if (_rasterImage->LoadBuffer(&_imageData, screenExtents, _fileName, _downsamplingMode, _setRGBToGrey, mapUnitsPerScreenPixel))
+		if (_raster->LoadBuffer(&_imageData, screenExtents, _fileName, _downsamplingMode, _setRGBToGrey, mapUnitsPerScreenPixel))
 		{
 			//Repeated here because _rasterImage->LoadImageBuffer changes width and height
-			_height = _rasterImage->GetHeight();
-			_width = _rasterImage->GetWidth();
-			_dX = _rasterImage->GetDX();
-			_dY = _rasterImage->GetDY();
-			_xllCenter = _rasterImage->GetXllCenter();
-			_yllCenter = _rasterImage->GetYllCenter();
+			_height = _raster->GetHeight();
+			_width = _raster->GetWidth();
+			_dX = _raster->GetDX();
+			_dY = _raster->GetDY();
+			_xllCenter = _raster->GetXllCenter();
+			_yllCenter = _raster->GetYllCenter();
 
 			_dataLoaded = true;
 		}
@@ -1498,7 +1498,7 @@ STDMETHODIMP CImageClass::SetVisibleExtents(double newMinX, double newMinY,	doub
 // ************************************************************
 bool CImageClass::IsGdalImageAvailable()
 {
-	if ( _gdalImage && _rasterImage)
+	if ( _gdal && _raster)
 	{
 		return true;
 	}
@@ -1605,7 +1605,7 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if (_gdalImage && !_dataLoaded)
+	if (_gdal && !_dataLoaded)
 	{
 		// excluded the code for loading the buffer; I prefer to separate
 		// the operations of loading buffer and subsequent calls
@@ -1880,30 +1880,30 @@ STDMETHODIMP CImageClass::GetProjection(BSTR * Proj4)
 STDMETHODIMP CImageClass::get_OriginalWidth(LONG* OriginalWidth)
 {   
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*OriginalWidth = _gdalImage ? _rasterImage->GetOrigWidth() : _width;
+	*OriginalWidth = _gdal ? _raster->GetOrigWidth() : _width;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::get_OriginalHeight(LONG* OriginalHeight)
 {  
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*OriginalHeight = _gdalImage ? _rasterImage->GetOrigHeight() : _height;
+	*OriginalHeight = _gdal ? _raster->GetOrigHeight() : _height;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::get_AllowHillshade(VARIANT_BOOL * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage ? _rasterImage->GetAllowHillshade() : VARIANT_FALSE;
+	*pVal = _gdal ? _raster->GetAllowHillshade() : VARIANT_FALSE;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_AllowHillshade(VARIANT_BOOL newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
-		_rasterImage->SetAllowHillshade(newValue == VARIANT_TRUE);
+		_raster->SetAllowHillshade(newValue == VARIANT_TRUE);
 		_imageChanged = true;
 	}
 	else
@@ -1932,16 +1932,16 @@ STDMETHODIMP CImageClass::put_SetToGrey(VARIANT_BOOL newValue)
 STDMETHODIMP CImageClass::get_UseHistogram(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage ? _rasterImage->GetUseHistogram(): VARIANT_FALSE;
+	*pVal = _gdal ? _raster->GetUseHistogram(): VARIANT_FALSE;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_UseHistogram(VARIANT_BOOL newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
-		_rasterImage->SetUseHistogram(newValue == VARIANT_TRUE);
+		_raster->SetUseHistogram(newValue == VARIANT_TRUE);
 		_imageChanged = true;
 	}
 	else
@@ -1954,9 +1954,9 @@ STDMETHODIMP CImageClass::put_UseHistogram(VARIANT_BOOL newValue)
 STDMETHODIMP CImageClass::get_HasColorTable(VARIANT_BOOL *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
-		*pVal = _rasterImage->GetHasColorTable() ? VARIANT_TRUE : VARIANT_FALSE;
+		*pVal = _raster->GetHasColorTable() ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	else
 		*pVal = VARIANT_FALSE;
@@ -1968,9 +1968,9 @@ STDMETHODIMP CImageClass::get_PaletteInterpretation(BSTR *pVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		switch (_rasterImage->GetPaletteInterpretation())
+		switch (_raster->GetPaletteInterpretation())
 		{
 			case GPI_Gray:
 				*pVal = A2BSTR("Grayscale"); break;
@@ -1993,16 +1993,16 @@ STDMETHODIMP CImageClass::get_PaletteInterpretation(BSTR *pVal)
 STDMETHODIMP CImageClass::get_BufferSize(int *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage ? _rasterImage->GetImageQuality() : 100;
+	*pVal = _gdal ? _raster->GetImageQuality() : 100;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_BufferSize(int newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
-		_rasterImage->SetImageQuality(newValue);
+		_raster->SetImageQuality(newValue);
 		_imageChanged = true;
 	}
 	else
@@ -2015,7 +2015,7 @@ STDMETHODIMP CImageClass::put_BufferSize(int newValue)
 STDMETHODIMP CImageClass::get_NoBands(int *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage ? _rasterImage->GetNoBands() : NULL;
+	*pVal = _gdal ? _raster->GetNoBands() : NULL;
 	return S_OK;
 }
 
@@ -2055,10 +2055,10 @@ void CImageClass::ClearBuffer()
 	_height = 1;
 	_width = 1;
 
-	if (_rasterImage)
+	if (_raster)
 	{
-		_dX = _rasterImage->GetOrigDx();
-		_dY = _rasterImage->GetOrigDy();
+		_dX = _raster->GetOrigDx();
+		_dY = _raster->GetOrigDy();
 	}
 	else
 	{
@@ -2072,15 +2072,15 @@ void CImageClass::ClearBuffer()
 STDMETHODIMP CImageClass::get_ClearGDALCache(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = _gdalImage ? _rasterImage->GetClearGdalCache() : VARIANT_FALSE;
+	*retVal = _gdal ? _raster->GetClearGdalCache() : VARIANT_FALSE;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_ClearGDALCache(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_gdalImage)
+	if (_gdal)
 	{
-		_rasterImage->SetClearGdalCache(newVal ? true : false);
+		_raster->SetClearGdalCache(newVal ? true : false);
 	}
 	else
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
@@ -2178,14 +2178,14 @@ STDMETHODIMP CImageClass::BuildOverviews (tkGDALResamplingMethod ResamplingMetho
 		return S_OK;
 	}
 
-	if (!_gdalImage)
+	if (!_gdal)
 	{
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		return S_OK;
 	}
 
 	int* overviewList = (int*)OverviewList->pvData;
-	GDALDataset* dataset = _rasterImage->GetDataset();
+	GDALDataset* dataset = _raster->GetDataset();
 	if (dataset)
 	{
 		if (GdalHelper::BuildOverviewsCore(dataset, ResamplingMethod, overviewList, numOverviews, _globalCallback)) {
@@ -2236,12 +2236,12 @@ STDMETHODIMP CImageClass::get_Extents(IExtents** pVal)
 	ComHelper::CreateExtents(&bBox);
 	
 	double minX, minY, maxX, maxY;
-	if( _gdalImage )
+	if( _gdal )
 	{
-		minX = _rasterImage->GetOrigXllCenter() - _rasterImage->GetOrigDx()/2;
-		minY = _rasterImage->GetOrigYllCenter() - _rasterImage->GetOrigDy()/2;
-		maxX = _rasterImage->GetOrigXllCenter() + _rasterImage->GetOrigDx() * _rasterImage->GetOrigWidth();
-		maxY = _rasterImage->GetOrigYllCenter() + _rasterImage->GetOrigDy() * _rasterImage->GetOrigHeight();
+		minX = _raster->GetOrigXllCenter() - _raster->GetOrigDx()/2;
+		minY = _raster->GetOrigYllCenter() - _raster->GetOrigDy()/2;
+		maxX = _raster->GetOrigXllCenter() + _raster->GetOrigDx() * _raster->GetOrigWidth();
+		maxY = _raster->GetOrigYllCenter() + _raster->GetOrigDy() * _raster->GetOrigHeight();
 	}
 	else
 	{
@@ -2284,10 +2284,10 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 	if (_imgType == BITMAP_FILE || _imgType == USE_FILE_EXTENSION)
 		return false;
 	
-	if (!_rasterImage) return false;
+	if (!_raster) return false;
 
-	_width = _rasterImage->GetOrigWidth();
-	_height = _rasterImage->GetOrigHeight();
+	_width = _raster->GetOrigWidth();
+	_height = _raster->GetOrigHeight();
 
 	if (_width <= 0 || _height <= 0 || (_width * _height > 1048576.0 * 100.0 / 3.0 ))	// 100 MB
 		return false;
@@ -2302,7 +2302,7 @@ bool CImageClass::SaveNotNullPixels(bool forceSaving)
 	bool result = false;
 
 	// perhaps it makes sense to limit the size of buffer
-	if (_rasterImage->LoadBufferFull(&_imageData, _fileName, 0))
+	if (_raster->LoadBufferFull(&_imageData, _fileName, 0))
 	{
 		unsigned char red = GetRValue(_transColor);
 		unsigned char green = GetGValue(_transColor);
@@ -2414,10 +2414,10 @@ void CImageClass::ErrorMessage(long ErrorCode)
 STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* ImageX, long* ImageY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_gdalImage)
+	if (_gdal)
 	{
-		*ImageX = Utility::Rint((ProjX - _rasterImage->GetOrigXllCenter())/_rasterImage->GetOrigDx());
-		*ImageY = Utility::Rint((double)_rasterImage->GetOrigHeight() - 1 - (((ProjY - _rasterImage->GetOrigYllCenter())/_rasterImage->GetOrigDy())));
+		*ImageX = Utility::Rint((ProjX - _raster->GetOrigXllCenter())/_raster->GetOrigDx());
+		*ImageY = Utility::Rint((double)_raster->GetOrigHeight() - 1 - (((ProjY - _raster->GetOrigYllCenter())/_raster->GetOrigDy())));
 	}
 	else
 	{
@@ -2435,10 +2435,10 @@ STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* Pr
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (_gdalImage)
+	if (_gdal)
 	{
-		*ProjX = _rasterImage->GetOrigXllCenter() + (ImageX - 0.5) * _rasterImage->GetOrigDx();
-		*ProjY = _rasterImage->GetOrigYllCenter() + (_rasterImage->GetOrigHeight() - 1 - ImageY + 0.5) * _rasterImage->GetOrigDy();
+		*ProjX = _raster->GetOrigXllCenter() + (ImageX - 0.5) * _raster->GetOrigDx();
+		*ProjY = _raster->GetOrigYllCenter() + (_raster->GetOrigHeight() - 1 - ImageY + 0.5) * _raster->GetOrigDy();
 	}
 	else
 	{
@@ -2517,17 +2517,17 @@ STDMETHODIMP CImageClass::put_CanUseGrouping(VARIANT_BOOL newVal)
 STDMETHODIMP CImageClass::get_OriginalXllCenter( double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigXllCenter() : _xllCenter;
+	*pVal = _gdal && _raster ? _raster->GetOrigXllCenter() : _xllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_OriginalXllCenter( double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_gdalImage && _rasterImage)
+	if (_gdal && _raster)
 	{
-		_rasterImage->SetOrigXllCenter(newVal);
-		_rasterImage->RefreshExtents();
+		_raster->SetOrigXllCenter(newVal);
+		_raster->RefreshExtents();
 	}
 	else
 		_xllCenter = newVal;	// for bitmaps we'll use common values
@@ -2540,17 +2540,17 @@ STDMETHODIMP CImageClass::put_OriginalXllCenter( double newVal)
 STDMETHODIMP CImageClass::get_OriginalYllCenter( double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigYllCenter() : _yllCenter;
+	*pVal = _gdal && _raster ? _raster->GetOrigYllCenter() : _yllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::put_OriginalYllCenter( double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (_gdalImage && _rasterImage)
+	if (_gdal && _raster)
 	{		
-		_rasterImage->SetOrigYllCenter(newVal);
-		_rasterImage->RefreshExtents();
+		_raster->SetOrigYllCenter(newVal);
+		_raster->RefreshExtents();
 	}
 	else
 		_yllCenter = newVal;	// for bitmaps we'll use common values
@@ -2563,7 +2563,7 @@ STDMETHODIMP CImageClass::put_OriginalYllCenter( double newVal)
 STDMETHODIMP CImageClass::get_OriginalDX( double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigDx() : _dX;
+	*pVal = _gdal && _raster ? _raster->GetOrigDx() : _dX;
 	return S_OK;
 }
 
@@ -2572,10 +2572,10 @@ STDMETHODIMP CImageClass::put_OriginalDX( double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if ( newVal > 0.0)
 	{
-		if (_gdalImage && _rasterImage)
+		if (_gdal && _raster)
 		{
-			_rasterImage->SetOrigDx(newVal);
-			_rasterImage->RefreshExtents();
+			_raster->SetOrigDx(newVal);
+			_raster->RefreshExtents();
 		}
 		else
 			_dX = newVal;	// for bitmaps we'll use common values
@@ -2591,7 +2591,7 @@ STDMETHODIMP CImageClass::put_OriginalDX( double newVal)
 STDMETHODIMP CImageClass::get_OriginalDY( double *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigDy() : _dY;
+	*pVal = _gdal && _raster ? _raster->GetOrigDy() : _dY;
 	return S_OK;
 }
 
@@ -2600,10 +2600,10 @@ STDMETHODIMP CImageClass::put_OriginalDY( double newVal)
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	if ( newVal > 0.0)
 	{
-		if (_gdalImage && _rasterImage)
+		if (_gdal && _raster)
 		{
-			_rasterImage->SetOrigDy(newVal);
-			_rasterImage->RefreshExtents();
+			_raster->SetOrigDy(newVal);
+			_raster->RefreshExtents();
 		}
 		else
 			_dY = newVal;	// for bitmaps we'll use common values
@@ -2629,7 +2629,7 @@ STDMETHODIMP CImageClass::get_YllCenter(double *pVal)
 STDMETHODIMP CImageClass::put_YllCenter(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
 		// do nothing: it doesn't make sense to change parameters of buffer
 		ErrorMessage(tkNOT_APPLICABLE_TO_GDAL);
@@ -2652,7 +2652,7 @@ STDMETHODIMP CImageClass::get_XllCenter(double *pVal)
 STDMETHODIMP CImageClass::put_XllCenter(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
 		// do nothing: it doesn't make sense to change parameters of buffer
 		ErrorMessage(tkNOT_APPLICABLE_TO_GDAL);
@@ -2675,7 +2675,7 @@ STDMETHODIMP CImageClass::get_dY(double *pVal)
 STDMETHODIMP CImageClass::put_dY(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
 		// do nothing: it doesn't make sense to change parameters of buffer
 		ErrorMessage(tkNOT_APPLICABLE_TO_GDAL);
@@ -2705,7 +2705,7 @@ STDMETHODIMP CImageClass::get_dX(double *pVal)
 STDMETHODIMP CImageClass::put_dX(double newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	if (_gdalImage)
+	if (_gdal)
 	{
 		// do nothing: it doesn't make sense to change parameters of buffer
 		ErrorMessage(tkNOT_APPLICABLE_TO_GDAL);
@@ -2730,7 +2730,7 @@ STDMETHODIMP CImageClass::GetUniqueColors (double MaxBufferSizeMB, VARIANT* Colo
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
 	colour* data = NULL;
-	if ( _gdalImage )
+	if ( _gdal )
 	{
 		// TODO: opening for the second time isn't good enough; reconsider
 		
@@ -2850,10 +2850,10 @@ bool CImageClass::BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT
 STDMETHODIMP CImageClass::SetNoDataValue(double Value, VARIANT_BOOL* Result)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())	
-	if (_gdalImage && _rasterImage)
+	if (_gdal && _raster)
 	{
-		GDALDataset* dataset = _rasterImage->GetDataset();
-		*Result = (VARIANT_BOOL)_rasterImage->SetNoDataValue(Value);
+		GDALDataset* dataset = _raster->GetDataset();
+		*Result = (VARIANT_BOOL)_raster->SetNoDataValue(Value);
 	}
 	else
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
@@ -2870,9 +2870,9 @@ STDMETHODIMP CImageClass::get_NumOverviews(int* retval)
 
 	*retval = 0;
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		GDALRasterBand* band = _rasterImage->GetBand(1);
+		GDALRasterBand* band = _raster->GetBand(1);
 		if (band)
 		{
 			 *retval = band->GetOverviewCount();
@@ -2921,9 +2921,9 @@ STDMETHODIMP CImageClass::LoadBuffer(double maxBufferSize, VARIANT_BOOL* retVal)
 	{
 		if (this->IsGdalImageAvailable())
 		{
-			*retVal = _rasterImage->LoadBufferFull(&(_imageData), _fileName, maxBufferSize);
-			_height = _rasterImage->GetWidth();
-			_width = _rasterImage->GetHeight();
+			*retVal = _raster->LoadBufferFull(&(_imageData), _fileName, maxBufferSize);
+			_height = _raster->GetWidth();
+			_width = _raster->GetHeight();
 			_dataLoaded = true;
 		}
 	}
@@ -2949,41 +2949,41 @@ STDMETHODIMP CImageClass::get_SourceType (tkImageSourceType* retVal)
 STDMETHODIMP CImageClass::GetOriginalXllCenter(double *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigXllCenter() : *pVal = _xllCenter;
+	*pVal = _gdal && _raster ? _raster->GetOrigXllCenter() : *pVal = _xllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginalYllCenter(double *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState()) 
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigYllCenter() : _yllCenter;
+	*pVal = _gdal && _raster ? _raster->GetOrigYllCenter() : _yllCenter;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginal_dX(double *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigDx() : *pVal = _dX;
+	*pVal = _gdal && _raster ? _raster->GetOrigDx() : *pVal = _dX;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginal_dY(double *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigDy() : *pVal = _dY;
+	*pVal = _gdal && _raster ? _raster->GetOrigDy() : *pVal = _dY;
 	return S_OK;
 }
 
 STDMETHODIMP CImageClass::GetOriginalHeight(long *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage && _rasterImage ? _rasterImage->GetOrigHeight() : _height;
+	*pVal = _gdal && _raster ? _raster->GetOrigHeight() : _height;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::GetOriginalWidth(long *pVal)
 {	
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*pVal = _gdalImage ? _rasterImage->GetOrigWidth() : _width;
+	*pVal = _gdal ? _raster->GetOrigWidth() : _width;
 	return S_OK;
 }
 
@@ -2993,7 +2993,7 @@ STDMETHODIMP CImageClass::GetOriginalWidth(long *pVal)
 STDMETHODIMP CImageClass::get_Warped(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	*retVal = _gdalImage ? _rasterImage->IsWarped() : VARIANT_FALSE;
+	*retVal = _gdal ? _raster->IsWarped() : VARIANT_FALSE;
 	return S_OK;
 }
 #pragma endregion
@@ -3052,7 +3052,7 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	if ( colors != FallLeaves)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "ImageColorScheme", CPLString().Printf("%d", (int)colors));
 
-	if (_gdalImage)
+	if (_gdal)
 	{
 		// GDAL only properties
 		tkGridRendering allowExtScheme;
@@ -3134,7 +3134,7 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 				// only buffer will be serialized
 				long bufferWidth, bufferHeight;
 				
-				if (_gdalImage)
+				if (_gdal)
 				{
 					this->get_Width(&bufferWidth);
 					this->get_Height(&bufferHeight);
@@ -3270,7 +3270,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 	}
 
 	// GridColorScheme
-	if (_gdalImage)
+	if (_gdal)
 	{
 		tkGridRendering allowColorScheme;
 		s = CPLGetXMLValue( node, "AllowGridRendering", "1" );		// 1 = grForGridsOnly
@@ -3305,7 +3305,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 		PredefinedColorScheme colors;
 		s = CPLGetXMLValue( node, "ImageColorScheme", "0" );
 		if (s != "") colors = (PredefinedColorScheme)atoi(s);
-		_rasterImage->ApplyPredefinedColorScheme(colors);
+		_raster->ApplyPredefinedColorScheme(colors);
 	}
 	return true;
 }
@@ -3404,7 +3404,7 @@ STDMETHODIMP CImageClass::get_GridRendering(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = _gdalImage ? _rasterImage->WillBeRenderedAsGrid() : VARIANT_FALSE;
+	*retVal = _gdal ? _raster->WillBeRenderedAsGrid() : VARIANT_FALSE;
 
 	return S_OK;
 }
@@ -3416,7 +3416,7 @@ STDMETHODIMP CImageClass::get_AllowGridRendering(tkGridRendering * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _gdalImage ? _rasterImage->GetAllowAsGrid() : tkGridRendering::grForGridsOnly;
+	*pVal = _gdal ? _raster->GetAllowAsGrid() : tkGridRendering::grForGridsOnly;
 
 	return S_OK;
 }
@@ -3425,11 +3425,11 @@ STDMETHODIMP CImageClass::put_AllowGridRendering(tkGridRendering newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		if (_rasterImage->GetAllowAsGrid() != newValue)
+		if (_raster->GetAllowAsGrid() != newValue)
 		{
-			_rasterImage->SetAllowAsGrid(newValue);
+			_raster->SetAllowAsGrid(newValue);
 			_imageChanged = true;
 		}
 	}
@@ -3446,11 +3446,11 @@ STDMETHODIMP CImageClass::put_AllowGridRendering(tkGridRendering newValue)
 // *********************************************************
 STDMETHODIMP CImageClass::_pushSchemetkRaster(IGridColorScheme * cScheme, VARIANT_BOOL * retval)
 {
-	if (_gdalImage && _rasterImage )
+	if (_gdal && _raster )
 	{
 		if ( cScheme )
 		{
-			_rasterImage->ApplyCustomColorScheme(cScheme);
+			_raster->ApplyCustomColorScheme(cScheme);
 			_imageChanged = true;
 			*retval = VARIANT_TRUE;
 		}
@@ -3475,7 +3475,7 @@ STDMETHODIMP CImageClass::get_ImageColorScheme(PredefinedColorScheme * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _gdalImage ? _rasterImage->GetDefaultColors() : FallLeaves;
+	*pVal = _gdal ? _raster->GetDefaultColors() : FallLeaves;
 
 	return S_OK;
 }
@@ -3484,9 +3484,9 @@ STDMETHODIMP CImageClass::put_ImageColorScheme(PredefinedColorScheme newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		_rasterImage->ApplyPredefinedColorScheme(newValue);
+		_raster->ApplyPredefinedColorScheme(newValue);
 		_imageChanged = true;
 	}
 
@@ -3500,9 +3500,9 @@ STDMETHODIMP CImageClass::get_CustomColorScheme(IGridColorScheme** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_gdalImage && _rasterImage )
+	if (_gdal && _raster )
 	{
-		IGridColorScheme* scheme = _rasterImage->GetCustomColorScheme();
+		IGridColorScheme* scheme = _raster->GetCustomColorScheme();
 		if (scheme)	scheme->AddRef();
 		(*retVal) = scheme;
 	}
@@ -3544,9 +3544,9 @@ STDMETHODIMP CImageClass::get_IsRgb(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		*retVal = GdalHelper::IsRgb(_rasterImage->GetDataset()) ? VARIANT_TRUE: VARIANT_FALSE;
+		*retVal = GdalHelper::IsRgb(_raster->GetDataset()) ? VARIANT_TRUE: VARIANT_FALSE;
 	}
 	else
 		*retVal = VARIANT_TRUE;
@@ -3587,7 +3587,7 @@ STDMETHODIMP CImageClass::get_SourceGridBandIndex(int * pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	*pVal = _gdalImage ? _rasterImage->GetActiveBandIndex() : -1;
+	*pVal = _gdal ? _raster->GetActiveBandIndex() : -1;
 
 	return S_OK;
 }
@@ -3596,9 +3596,9 @@ STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	if (!_gdalImage) return S_OK;
+	if (!_gdal) return S_OK;
 	
-	if (!_rasterImage->SetActiveBandIndex(newValue)) 
+	if (!_raster->SetActiveBandIndex(newValue)) 
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
@@ -3639,9 +3639,9 @@ STDMETHODIMP CImageClass::get_IsEmpty(VARIANT_BOOL* pVal)
 // ********************************************************
 int CImageClass::GetOriginalBufferWidth()
 {
-	if (_gdalImage && _rasterImage) 
+	if (_gdal && _raster) 
 	{
-		return (_rasterImage->GetVisibleRect().right - _rasterImage->GetVisibleRect().left);
+		return (_raster->GetVisibleRect().right - _raster->GetVisibleRect().left);
 	}
 
 	return 0;
@@ -3652,9 +3652,9 @@ int CImageClass::GetOriginalBufferWidth()
 // ********************************************************
 int CImageClass::GetOriginalBufferHeight()
 {
-	if (_gdalImage && _rasterImage)	 
+	if (_gdal && _raster)	 
 	{
-		return (_rasterImage->GetVisibleRect().right - _rasterImage->GetVisibleRect().left);
+		return (_raster->GetVisibleRect().right - _raster->GetVisibleRect().left);
 	}
 	
 	return 0;
@@ -3669,20 +3669,20 @@ STDMETHODIMP CImageClass::get_Band(long bandIndex, IGdalRasterBand** retVal)
 
 	*retVal = NULL;
 
-	if (!_gdalImage)
+	if (!_gdal)
 	{
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		return S_OK;
 	}
 
 	//they are 1-based internally, let them remain so
-	if (bandIndex < 1 || bandIndex > _rasterImage->GetNoBands())
+	if (bandIndex < 1 || bandIndex > _raster->GetNoBands())
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 		return S_OK;
 	}
 
-	GDALRasterBand* band = _rasterImage->GetBand(bandIndex);
+	GDALRasterBand* band = _raster->GetBand(bandIndex);
 	if (!band)
 	{
 		CallbackHelper::AssertionFailed("CImageClass::get_Band: not null band was expected at this point.");
@@ -3703,9 +3703,9 @@ STDMETHODIMP CImageClass::get_PaletteInterpretation2(tkPaletteInterpretation* pV
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (_gdalImage)
+	if (_gdal)
 	{
-		*pVal = (tkPaletteInterpretation)_rasterImage->GetPaletteInterpretation();
+		*pVal = (tkPaletteInterpretation)_raster->GetPaletteInterpretation();
 	}
 	else
 	{
@@ -3724,9 +3724,9 @@ STDMETHODIMP CImageClass::get_ActiveBand(IGdalRasterBand** pVal)
 
 	*pVal = NULL;
 
-	if (_rasterImage != NULL)
+	if (_raster != NULL)
 	{
-		long bandIndex = _rasterImage->GetActiveBandIndex();
+		long bandIndex = _raster->GetActiveBandIndex();
 		get_Band(bandIndex, pVal);
 	}
 	else
@@ -3946,13 +3946,13 @@ STDMETHODIMP CImageClass::ClearOverviews(VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	if (!_gdalImage)
+	if (!_gdal)
 	{
 		*retVal = VARIANT_TRUE;
 		return S_OK;
 	}
 	
-	bool result = GdalHelper::ClearOverviews(_rasterImage->GetDataset());
+	bool result = GdalHelper::ClearOverviews(_raster->GetDataset());
 
 	*retVal = result ? VARIANT_TRUE : VARIANT_FALSE;
 	
@@ -3968,13 +3968,13 @@ STDMETHODIMP CImageClass::get_GdalDriver(IGdalDriver** pVal)
 
 	*pVal = NULL;
 
-	if (!_gdalImage)
+	if (!_gdal)
 	{
 		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 		return S_OK;
 	}
 
-	GDALDataset* ds = _rasterImage->GetDataset();
+	GDALDataset* ds = _raster->GetDataset();
 	if (ds)
 	{
 		GDALDriver* driver = ds->GetDriver();
@@ -4055,9 +4055,9 @@ STDMETHODIMP CImageClass::get_UseRgbBandMapping(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (_rasterImage)
+	if (_raster)
 	{
-		*pVal = _rasterImage->GetUseRgbBandMapping() ? VARIANT_TRUE : VARIANT_FALSE;;
+		*pVal = _raster->GetUseRgbBandMapping() ? VARIANT_TRUE : VARIANT_FALSE;;
 	}
 	else
 	{
@@ -4071,9 +4071,9 @@ STDMETHODIMP CImageClass::put_UseRgbBandMapping(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (_rasterImage)
+	if (_raster)
 	{
-		_rasterImage->SetUseRgbBandMapping(newVal ? true : false);
+		_raster->SetUseRgbBandMapping(newVal ? true : false);
 	}
 	else
 	{
@@ -4088,9 +4088,9 @@ STDMETHODIMP CImageClass::put_UseRgbBandMapping(VARIANT_BOOL newVal)
 // ********************************************************
 int CImageClass::GetRgbBandIndex(BandChannel channel)
 {
-	if (_rasterImage)
+	if (_raster)
 	{
-		int index = _rasterImage->GetRgbBandIndex(channel);
+		int index = _raster->GetRgbBandIndex(channel);
 		return static_cast<long>(index);
 	}
 
@@ -4102,9 +4102,9 @@ int CImageClass::GetRgbBandIndex(BandChannel channel)
 // ********************************************************
 void CImageClass::SetRgbBandIndex(BandChannel channel, int bandIndex)
 {
-	if (_rasterImage)
+	if (_raster)
 	{
-		_rasterImage->SetRgbBandIndex(channel, bandIndex);
+		_raster->SetRgbBandIndex(channel, bandIndex);
 	}
 	else
 	{
@@ -4119,9 +4119,9 @@ STDMETHODIMP CImageClass::get_ForceSingleBandRendering(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (_rasterImage)
+	if (_raster)
 	{
-		*pVal = _rasterImage->GetForceSingleBandRendering();
+		*pVal = _raster->GetForceSingleBandRendering();
 	}
 
 	return S_OK;
@@ -4131,9 +4131,9 @@ STDMETHODIMP CImageClass::put_ForceSingleBandRendering(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if (_rasterImage)
+	if (_raster)
 	{
-		_rasterImage->SetForceSingleBandRendering(newVal ? true : false);
+		_raster->SetForceSingleBandRendering(newVal ? true : false);
 	}
 
 	return S_OK;

@@ -24,7 +24,7 @@ public:
     GdalRaster()
 		: _transColor(RGB(0,0,0))
 	{	
-		_rasterDataset=NULL;
+		_dataset=NULL;
 		_predefinedColorScheme = NULL;
 		_customColorScheme = NULL;
 		_poBandR = NULL;
@@ -97,7 +97,7 @@ private:
 	double _adfMinMax[2];	// holds the min and max values for grid images
 	
 	GDALDataType _dataType;
-	GDALDataset * _rasterDataset;
+	GDALDataset * _dataset;
 	GDALRasterBand * _poBandR;
 	GDALRasterBand * _poBandB;
 	GDALRasterBand * _poBandG;
@@ -199,7 +199,7 @@ private:
 
 public:
 	// properties
-	GDALDataset* GetDataset(){ return _rasterDataset; }
+	GDALDataset* GetDataset(){ return _dataset; }
 	GDALRasterBand* GetBand(int bandIndex);
 	IGridColorScheme* GetCustomColorScheme() { return _customColorScheme; }
 	GDALPaletteInterp GetPaletteInterpretation() { return _palleteInterpretation; }

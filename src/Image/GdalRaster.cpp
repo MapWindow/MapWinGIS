@@ -55,16 +55,16 @@ bool GdalRaster::OpenCore(CStringA& filename, GDALAccess accessType)
 	{
 		GDALAllRegister();
 		
-		if (_rasterDataset == NULL)
-			_rasterDataset = GdalHelper::OpenRasterDatasetA(filename, accessType);
+		if (_dataset == NULL)
+			_dataset = GdalHelper::OpenRasterDatasetA(filename, accessType);
 	
-		if( _rasterDataset == NULL ) 
+		if( _dataset == NULL ) 
 		{
 			return false;
 		}
 
-		_origWidth = _rasterDataset->GetRasterXSize();
-		_origHeight = _rasterDataset->GetRasterYSize();			
+		_origWidth = _dataset->GetRasterXSize();
+		_origHeight = _dataset->GetRasterYSize();			
 		
 		if(!ReadGeoTransform())
 		{ 
@@ -144,7 +144,7 @@ bool GdalRaster::SetActiveBandIndex(int bandIndex)
 // *************************************************************
 GDALRasterBand* GdalRaster::GetBand(int bandIndex)
 {
-	return _rasterDataset->GetRasterBand(bandIndex);
+	return _dataset->GetRasterBand(bandIndex);
 }
 
 // *************************************************************
@@ -310,7 +310,7 @@ void GdalRaster::InitSettings()
 // *************************************************************
 void GdalRaster::OpenDefaultBands()
 {
-	_nBands = _rasterDataset->GetRasterCount();
+	_nBands = _dataset->GetRasterCount();
 
 	for (int band = 1; band <= _nBands; band++)
 	{
@@ -320,7 +320,7 @@ void GdalRaster::OpenDefaultBands()
 				CallbackHelper::AssertionFailed("Red band is supposed to NULL.");
 			}
 			else {
-				_poBandR = _rasterDataset->GetRasterBand(band);
+				_poBandR = _dataset->GetRasterBand(band);
 			}
 		}
 
@@ -330,7 +330,7 @@ void GdalRaster::OpenDefaultBands()
 				CallbackHelper::AssertionFailed("Green band is supposed to NULL.");
 			}
 			else {
-				_poBandG = _rasterDataset->GetRasterBand(band);
+				_poBandG = _dataset->GetRasterBand(band);
 			}
 		}
 
@@ -340,7 +340,7 @@ void GdalRaster::OpenDefaultBands()
 				CallbackHelper::AssertionFailed("Blue band is supposed to NULL.");
 			}
 			else {
-				_poBandB = _rasterDataset->GetRasterBand(band);
+				_poBandB = _dataset->GetRasterBand(band);
 			}
 		}
 	}
@@ -355,7 +355,7 @@ bool GdalRaster::ReadGeoTransform()
 	// as dataset filename is already stored as UTF8
 
 	double adfGeoTransform[6];
-	bool success = _rasterDataset->GetGeoTransform(adfGeoTransform) == CE_None;
+	bool success = _dataset->GetGeoTransform(adfGeoTransform) == CE_None;
 
 	m_globalSettings.SetGdalUtf8(false);
 
@@ -377,14 +377,14 @@ bool GdalRaster::ReadGeoTransform()
 	if (adfGeoTransform[1] < 0.0 || adfGeoTransform[2] != 0.0 || adfGeoTransform[4] != 0.0 || adfGeoTransform[5] > 0.0)
 	{
 		GDALDataset* mGdalDataset = NULL;
-		mGdalDataset = (GDALDataset *)GDALAutoCreateWarpedVRT(_rasterDataset, NULL, NULL, GRA_NearestNeighbour, 0.2, NULL);
+		mGdalDataset = (GDALDataset *)GDALAutoCreateWarpedVRT(_dataset, NULL, NULL, GRA_NearestNeighbour, 0.2, NULL);
 		if (mGdalDataset)
 		{
-			_rasterDataset->Dereference();
-			_rasterDataset = mGdalDataset;
+			_dataset->Dereference();
+			_dataset = mGdalDataset;
 			_warped = true;
 
-			if (_rasterDataset->GetGeoTransform(adfGeoTransform) == CE_None)
+			if (_dataset->GetGeoTransform(adfGeoTransform) == CE_None)
 			{
 				_origDx = adfGeoTransform[1];
 				_origDy = adfGeoTransform[5];
@@ -393,8 +393,8 @@ bool GdalRaster::ReadGeoTransform()
 				_origXllCenter = adfGeoTransform[0] + _origDx / 2;
 				_origYllCenter = adfGeoTransform[3] + _origDy / 2;
 
-				_origWidth = _rasterDataset->GetRasterXSize();
-				_origHeight = _rasterDataset->GetRasterYSize();
+				_origWidth = _dataset->GetRasterXSize();
+				_origHeight = _dataset->GetRasterYSize();
 
 				// we got top corner and now we'll get coordinates of the bottom left corner; 
 				// dy should be changed respectively as map coordinates will be increasing while moving from bottom to top
@@ -425,8 +425,8 @@ void GdalRaster::RefreshExtents()
 // *********************************************************
 int GdalRaster::Dereference()
 {
-	if (_rasterDataset != NULL)
-		return _rasterDataset->Dereference();
+	if (_dataset != NULL)
+		return _dataset->Dereference();
 	else
 		return -1;
 }
@@ -436,11 +436,11 @@ int GdalRaster::Dereference()
 // *********************************************************
 void GdalRaster::Close()
 {
-	if (_rasterDataset != NULL)
+	if (_dataset != NULL)
 	{
-		_rasterDataset->Dereference();
-		delete _rasterDataset;
-		_rasterDataset = NULL;
+		_dataset->Dereference();
+		delete _dataset;
+		_dataset = NULL;
 		_poBandR = NULL;
 		_poBandG = NULL;
 		_poBandB = NULL;
@@ -515,11 +515,11 @@ bool GdalRaster::LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW
 // *********************************************************
 bool GdalRaster::ReopenDatasetIfNeeded(CStringW filename)
 {
-	if (!_rasterDataset) {
-		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
+	if (!_dataset) {
+		_dataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 	}
 
-	return _rasterDataset != NULL;
+	return _dataset != NULL;
 }
 
 // *********************************************************
@@ -764,17 +764,17 @@ GDALRasterBand* GdalRaster::GetMappedRgbBand(int bandIndex)
 	{
 		if (bandIndex == 1)
 		{
-			return _rasterDataset->GetRasterBand(_redBandIndex);
+			return _dataset->GetRasterBand(_redBandIndex);
 		}
 
 		if (bandIndex == 2)
 		{
-			return _rasterDataset->GetRasterBand(_greenBandIndex);
+			return _dataset->GetRasterBand(_greenBandIndex);
 		}
 
 		if (bandIndex == 3)
 		{
-			return _rasterDataset->GetRasterBand(_blueBandIndex);
+			return _dataset->GetRasterBand(_blueBandIndex);
 		}
 
 		return NULL;
@@ -782,7 +782,7 @@ GDALRasterBand* GdalRaster::GetMappedRgbBand(int bandIndex)
 	
 	if (_nBands == 1 || _forceSingleBandRendering)
 	{
-		return _rasterDataset->GetRasterBand(_activeBandIndex);
+		return _dataset->GetRasterBand(_activeBandIndex);
 	}
 	else
 	{
@@ -1336,7 +1336,7 @@ bool GdalRaster::ReadBandDataAsGrid(colour** ImageData, int xOff, int yOff, int 
 template <typename DataType>
 bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
 {
-	_poBandR = _rasterDataset->GetRasterBand(_activeBandIndex);
+	_poBandR = _dataset->GetRasterBand(_activeBandIndex);
 	if (_poBandR == NULL) return false;
 
 	float noDataValue = 0;
@@ -1697,8 +1697,8 @@ bool GdalRaster::ComputeEqualizationLUTs( CStringW filename,
 	int iBand;
     int nHistSize = 0;
 	GUIntBig *panHistogram = NULL;
-	if (_rasterDataset == NULL) 
-		_rasterDataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
+	if (_dataset == NULL) 
+		_dataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
 
 	GDALRasterBand * poBand;
     
@@ -1714,7 +1714,7 @@ bool GdalRaster::ComputeEqualizationLUTs( CStringW filename,
     for( iBand = 0; iBand < _nBands; iBand++ )
     {
 		GDALColorInterp cInt; 
-		poBand = _rasterDataset->GetRasterBand(iBand+1);
+		poBand = _dataset->GetRasterBand(iBand+1);
 		cInt = poBand->GetColorInterpretation();
         CPLErr eErr;
 
@@ -1774,7 +1774,7 @@ bool GdalRaster::ComputeEqualizationLUTs( CStringW filename,
 // ***********************************************************
 bool GdalRaster::SetNoDataValue(double Value)
 {
-	if (!_rasterDataset) return false;
+	if (!_dataset) return false;
 	
 	if (_nBands == 3 && _genericType == GDT_Int32)
 	{
@@ -1885,7 +1885,7 @@ bool GdalRaster::WillBeRenderedAsGrid()
 // *************************************************************
 bool GdalRaster::IsRgb()
 {
-	return GdalHelper::IsRgb(_rasterDataset);
+	return GdalHelper::IsRgb(_dataset);
 }
 
 // *************************************************************
