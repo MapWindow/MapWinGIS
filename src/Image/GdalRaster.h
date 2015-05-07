@@ -17,6 +17,7 @@
 #include <cassert>
 #include "colour.h"
 #include "ImageStructs.h"
+#include "HistogramData.h"
 
 class GdalRaster
 {
@@ -46,7 +47,7 @@ public:
 		_origDy = 1.0;
 		_origWidth = 0;
 		_origHeight = 0;
-		clearGDALCache = false;
+		_clearGDALCache = false;
 		_warped = false;
 		_allowHillshade = true;
 		_allowAsGrid = grForGridsOnly;
@@ -57,6 +58,7 @@ public:
 		_blueBandIndex = 3;
 		_useRgbBandMapping = false;
 		_forceSingleBandRendering = false;
+		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
 
@@ -113,17 +115,8 @@ private:
 	GDALColorInterp _cInterp;		// temporary storage during reading of built-in color table
 	GDALDataType _genericType;
 
-	// Histogram variables
-	// TODO: wrap in class
-	bool	_histogramComputed;	// Has the histogram been computed
-	bool	_allowHistogram;		// It the computation fails don't allow again
-	int		_numBuckets;
-    
-	// TODO: where is this memory being freed?
-	double  *_padfHistogramMin;		// minimum histogram value for each band
-    double  *_padfHistogramMax;		// maximum histogram value for each band
-	int     **_papanLUTs;			// histogram lookout table for each band
-	
+	HistogramData _histogram;
+
 	int _nBands;					// No of bands in the image
 
 	int _buffSize;
@@ -174,7 +167,7 @@ private:
 	int _activeBandIndex;
 	bool _forceSingleBandRendering;
 
-	bool clearGDALCache;
+	bool _clearGDALCache;
 	colort _transColor;		// transparent color
 	CRect _visibleRect;		// indices of pixels of image that are visible at least partially
 	ICallback * _callback;
@@ -185,11 +178,11 @@ private:
 	IGridColorScheme* GetColorSchemeForRendering();		// returns either of the 2 available
 	void ComputeBandMinMax();
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
-	bool ComputeEqualizationLUTs(CStringW filename, double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
+	bool ComputeHistogramCore(double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
 	const BreakVal* FindBreak(const std::vector<BreakVal> & bvals, double val) const;
 
 	template <typename T>
-	bool GdalBufferToMemoryBuffer(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue /*, const GDALColorEntry * poCE*/, bool useHistogram);
+	bool GdalBufferToMemoryBuffer(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue);
 	template <typename DataType>
 	bool ReadBandDataAsGrid(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
 	template <typename DataType>
@@ -237,7 +230,8 @@ public:
 	int GetNoBands(){ return _nBands; };
 	bool GetHasColorTable() { return _hasColorTable; }
 	bool GetUseHistogram() { return _useHistogram; }
-	void SetUseHistogram(bool value) { _useHistogram = value; }
+	void SetUseHistogram(bool value) ;
+	
 	bool HasTransparency() { return _hasTransparency; }
 	bool IsWarped() { return _warped; }
 
@@ -250,8 +244,8 @@ public:
 	bool GetAllowHillshade() { return _allowHillshade; }
 	void SetAllowHillshade(bool value) { _allowHillshade = value; }
 
-	bool GetClearGdalCache() { return clearGDALCache; }
-	void SetClearGdalCache(bool value) { clearGDALCache = value; }
+	bool GetClearGdalCache() { return _clearGDALCache; }
+	void SetClearGdalCache(bool value) { _clearGDALCache = value; }
 	
 	void SetCallback(ICallback* value) { _callback = value;}
 
@@ -285,7 +279,7 @@ public:
 	void SetEmptyBuffer(colour ** ImageData);
 	bool ReopenDatasetIfNeeded(CStringW filename);
 	void ApplyBufferQuality(int& xBuff, int& yBuff);
-	void CompuateHistogram(CStringW filename);
+	void CompuateHistogram();
 	bool ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bool setToGrey);
 	bool ReadGeoTransform();
 	void OpenDefaultBands();
@@ -293,8 +287,9 @@ public:
 	bool InitDataType();
 	void InitSettings();
 	GDALRasterBand* GetDefaultRgbBand(int bandIndex);
-	GDALRasterBand* GetMappedRgbBand(int bandIndex);
+	GDALRasterBand* GetMappedBand(int bandIndex);
 	GDALDataType GetSimplifiedDataType(GDALRasterBand* band);
 	bool NeedsGridRendering();
+	int GetMappedBandIndex(int bandIndex);
 };
 

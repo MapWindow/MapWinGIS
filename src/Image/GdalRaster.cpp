@@ -104,8 +104,6 @@ bool GdalRaster::OpenCore(CStringA& filename, GDALAccess accessType)
 	return false;
 }
 
-
-
 // *************************************************************
 //	  ApplyCustomColorScheme()
 // *************************************************************
@@ -285,8 +283,7 @@ GDALDataType GdalRaster::GetSimplifiedDataType(GDALRasterBand* band)
 void GdalRaster::InitSettings()
 {
 	_activeBandIndex = 1;
-	_histogramComputed = false;
-	_allowHistogram = true;
+	_histogram.Clear();
 	_useHistogram = false;
 	_palleteInterpretation = GPI_Gray;
 	_imageQuality = 100;
@@ -459,6 +456,8 @@ void GdalRaster::Close()
 		_customColorScheme = NULL;
 	}
 
+	_histogram.Clear();
+
 	_allowAsGrid = grForGridsOnly;
 	_activeBandIndex = 1;
 	_warped = false;
@@ -493,8 +492,6 @@ bool GdalRaster::LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW
 	TryDecreaseBufferSize(downsamplingMode, mapUnitsPerPixel, xBuff, yBuff);
 		
 	ApplyBufferQuality(xBuff, yBuff);
-
-	CompuateHistogram(filename);
 
 	// actual reading		
 	if ( ReadDataGeneric(ImageData, xBuff, yBuff, setToGrey) )   
@@ -560,36 +557,7 @@ bool GdalRaster::ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bo
 	return ReadBandDataAsGrid<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setToGrey);
 }
 
-// *********************************************************
-//		CompuateHistogram()
-// *********************************************************
-void GdalRaster::CompuateHistogram(CStringW filename)
-{
-	if (!_useHistogram || !_allowHistogram) {
-		return;
-	}
-	
-	// check all the conditions are met for histogram equalization compute the histogram once
-	if (_nBands == 1 && !_hasColorTable && !(WillBeRenderedAsGrid()))    // handleImage == asGrid && allowAsGrid
-	{
-		if (!_histogramComputed)
-		{
-			_numBuckets = 256;
-			if (ComputeEqualizationLUTs(filename, &_padfHistogramMin, &_padfHistogramMax, &_papanLUTs))
-			{
-				_histogramComputed = true;
-			}
-			else
-			{
-				_histogramComputed = false;	//Failed - don't try again 
-				_allowHistogram = false;
-			}
-		}
-	}
-	else {
-		_histogramComputed = false;
-	}
-}
+
 
 // *********************************************************
 //		SetEmptyBuffer()
@@ -756,9 +724,44 @@ bool GdalRaster::LoadBufferFull(colour** ImageData, CStringW filename, double ma
 }
 
 // *********************************************************
-//		GetMappedRgbBand()
+//		GetMappedBandIndex()
 // *********************************************************
-GDALRasterBand* GdalRaster::GetMappedRgbBand(int bandIndex)
+int GdalRaster::GetMappedBandIndex(int bandIndex)
+{
+	if (_useRgbBandMapping)
+	{
+		if (bandIndex == 1)
+		{
+			return _redBandIndex;
+		}
+
+		if (bandIndex == 2)
+		{
+			return _greenBandIndex;
+		}
+
+		if (bandIndex == 3)
+		{
+			return _blueBandIndex;
+		}
+
+		return NULL;
+	}
+
+	if (_nBands == 1 || _forceSingleBandRendering)
+	{
+		return _activeBandIndex;
+	}
+	else
+	{
+		return bandIndex;
+	}
+}
+
+// *********************************************************
+//		GetMappedBand()
+// *********************************************************
+GDALRasterBand* GdalRaster::GetMappedBand(int bandIndex)
 {
 	if (_useRgbBandMapping)
 	{
@@ -854,10 +857,11 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	// -----------------------------------------------
 	//    reading data
 	// -----------------------------------------------
-    for (int bandIndex = 1; bandIndex <= _nBands; bandIndex++)
+    for (int bandIndex = 1; bandIndex <= MAX(_nBands, 3); bandIndex++)
     {
-		GDALRasterBand* poBand = GetMappedRgbBand(bandIndex);
-		 
+		int realBandIndex = GetMappedBandIndex(bandIndex);
+		GDALRasterBand* poBand = _dataset->GetRasterBand(realBandIndex);
+
 		if (!poBand)
 		{
 			// TODO: what if we are missing some band?
@@ -885,19 +889,19 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
 
-		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, bandIndex, xBuff, yBuff, noDataValue, shift, range))
+		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, realBandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
 			if (_genericType == GDT_Byte)
 			{
-				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
 			}
 			else if (_genericType == GDT_Int32)
 			{
-				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
 			}
 			else
 			{
-				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, bandIndex, shift, range, noDataValue, _useHistogram);
+				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
 			}
 		}
 
@@ -909,7 +913,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	// --------------------------------------------------------
 	//	  releasing GDAL cache
 	// --------------------------------------------------------
-	if (clearGDALCache)
+	if (_clearGDALCache)
 	{
 		if (_poBandR != NULL) _poBandR->FlushCache();	
 		if (_poBandG != NULL) _poBandG->FlushCache();	
@@ -1013,15 +1017,14 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 // *************************************************************
 template <typename T>
 bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff,
-					int band, double shift, double range, double noDataValue, bool useHistogram)
+					int band, double shift, double range, double noDataValue)
 {
 	T val = 0;		// value from source buffer	(_int32, float, unsigned char)
 	colour* color;	// position in the resulting buffer
 
 	bool singleBand = _nBands == 1 || _forceSingleBandRendering;
 
-	// histogram
-	if (useHistogram && _nBands == 1 && !_hasColorTable)
+	if (singleBand && _useHistogram && _histogram.CanUse())
 	{
 		for (int i = 0; i < yBuff; i++) 
 		{
@@ -1038,22 +1041,11 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 				}
 				else
 				{
-					double dfScale = _numBuckets / (_padfHistogramMax[band-1] - _padfHistogramMin[band-1]);
-					int iBin = (int) (((double)val - _padfHistogramMin[band-1]) * dfScale);
-					iBin = MAX(0,MIN(_numBuckets-1,iBin));
-					const int * panLUT = _papanLUTs[band-1];
-					if( panLUT )
-					{
-						color->red = (unsigned char)panLUT[iBin];
-						color->green = (unsigned char)panLUT[iBin];
-						color->blue = (unsigned char)panLUT[iBin];
-					}
-					else
-					{
-						color->red = (unsigned char)iBin;
-						color->green = (unsigned char)iBin;
-						color->blue = (unsigned char)iBin;
-					}
+					unsigned char b = _histogram.GetColorValue(band, static_cast<double>(val));
+
+					color->red = b;
+					color->green = b;
+					color->blue = b;
 				}
 			}
 		}
@@ -1186,23 +1178,11 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 	
 	if (useHistogram && _nBands == 1 && !_hasColorTable)
 	{
-		double dfScale = _numBuckets / (_padfHistogramMax[band-1] - _padfHistogramMin[band-1]);
-		int iBin = (int) ((colorValue - _padfHistogramMin[band-1]) * dfScale);
-		iBin = MAX(0,MIN(_numBuckets-1,iBin));
-		const int * panLUT = _papanLUTs[band-1];
-		
-		if( panLUT )
-		{
-			result->red = (unsigned char) panLUT[iBin];
-			result->green = (unsigned char) panLUT[iBin];
-			result->blue = (unsigned char) panLUT[iBin];
-		}
-		else
-		{
-			result->red = (unsigned char) iBin;
-			result->green = (unsigned char) iBin;
-			result->blue = (unsigned char) iBin;
-		}
+		unsigned char b = _histogram.GetColorValue(band, colorValue);
+	
+		result->red = b;
+		result->green = b;
+		result->blue = b;
 
 		return;
 	}
@@ -1659,7 +1639,7 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 		} 
 	}
 	
-	if (clearGDALCache)
+	if (_clearGDALCache)
 		_poBandR->FlushCache();		 
 	
 	CPLFree( pafScanArea );
@@ -1682,91 +1662,16 @@ inline const GdalRaster::BreakVal* GdalRaster::FindBreak(const std::vector<Break
 	return nullptr;
 }
 
-/************************************************************************/
-/*                      ComputeEqualizationLUTs()                       */
-/*                                                                      */
-/*      Get an image histogram, and compute equalization luts from      */
-/*      it.                                                             */
-/************************************************************************/
-
-bool GdalRaster::ComputeEqualizationLUTs( CStringW filename,
-                         double **ppadfScaleMin, double **ppadfScaleMax, 
-                         int ***ppapanLUTs)
-
+// *********************************************************
+//		CompuateHistogram()
+// *********************************************************
+void GdalRaster::CompuateHistogram()
 {
-	int iBand;
-    int nHistSize = 0;
-	GUIntBig *panHistogram = NULL;
-	if (_dataset == NULL) 
-		_dataset = GdalHelper::OpenRasterDatasetW(filename, GA_ReadOnly);
+	if (_histogram.GetState() != HistogramNotComputed) {
+		return;		// we've tried once
+	}
 
-	GDALRasterBand * poBand;
-    
-	// For now we always compute min/max
-    *ppadfScaleMin = (double *) CPLCalloc(sizeof(double),_nBands);
-    *ppadfScaleMax = (double *) CPLCalloc(sizeof(double),_nBands);
-
-    *ppapanLUTs = (int **) CPLCalloc(sizeof(int *),_nBands);
-
-/* ==================================================================== */
-/*      Process all bands.                                              */
-/* ==================================================================== */
-    for( iBand = 0; iBand < _nBands; iBand++ )
-    {
-		GDALColorInterp cInt; 
-		poBand = _dataset->GetRasterBand(iBand+1);
-		cInt = poBand->GetColorInterpretation();
-        CPLErr eErr;
-
-/* -------------------------------------------------------------------- */
-/*      Get a reasonable histogram.                                     */
-/* -------------------------------------------------------------------- */
-        eErr =
-            poBand->GetDefaultHistogram( *ppadfScaleMin + iBand,
-                                     *ppadfScaleMax + iBand,
-                                     &nHistSize, &panHistogram, 
-                                     TRUE, NULL, NULL );
-
-        if( eErr != CE_None )
-            return false;
-
-        panHistogram[0] = 0; // zero out extremes (nodata, etc)
-        panHistogram[nHistSize-1] = 0;
-
-/* -------------------------------------------------------------------- */
-/*      Total histogram count, and build cumulative histogram.          */
-/*      We take care to use big integers as there may be more than 4    */
-/*      Gigapixels.                                                     */
-/* -------------------------------------------------------------------- */
-        GIntBig *panCumHist = (GIntBig *) CPLCalloc(sizeof(GIntBig),nHistSize);
-        GIntBig nTotal = 0;
-        int iHist;
-
-        for( iHist = 0; iHist < nHistSize; iHist++ )
-        {
-            panCumHist[iHist] = nTotal + panHistogram[iHist]/2;
-            nTotal += panHistogram[iHist];
-        }
-
-        CPLFree( panHistogram );
-
-        if( nTotal == 0 ) nTotal = 1;
-
-/* -------------------------------------------------------------------- */
-/*      Now compute a LUT from the cumulative histogram.                */
-/* -------------------------------------------------------------------- */
-        int *panLUT = (int *) CPLCalloc(sizeof(int),_numBuckets);
-        int iLUT;
-
-        for( iLUT = 0; iLUT < _numBuckets; iLUT++ )
-        {
-            iHist = (iLUT * nHistSize) / _numBuckets;
-            int nValue = (int) ((panCumHist[iHist] * _numBuckets) / nTotal);
-            panLUT[iLUT] = MAX(0,MIN(_numBuckets-1,nValue));
-        } 
-		(*ppapanLUTs)[iBand] = panLUT;
-    }
-    return true;
+	_histogram.ComputeHistogram(_dataset, 256);
 }
 
 // ***********************************************************
@@ -1925,6 +1830,18 @@ void GdalRaster::SetRgbBandIndex(BandChannel color, int bandIndex)
 	}
 
 	CallbackHelper::ErrorMsg("Invalid band index passed to GdalRaster::SetRgbBandIndex");
+}
+
+// *************************************************************
+//	  SetUseHistogram()
+// *************************************************************
+void GdalRaster::SetUseHistogram(bool value)
+{
+	_useHistogram = value;
+	if (_useHistogram && _histogram.GetState() == HistogramNotComputed)
+	{
+		this->CompuateHistogram();
+	}
 }
 
 

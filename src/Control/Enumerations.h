@@ -262,4 +262,11 @@ enum BandChannel
 	BandChannelBlue = 3,
 };
 
+enum HistogramState
+{
+	HistogramNotComputed = 0,
+	HistogramFailed = 1,
+	HistogramSuccess = 2,
+};
+
 # endif

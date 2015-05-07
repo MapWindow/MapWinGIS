@@ -846,6 +846,9 @@
     <ClInclude Include="Image\GdalRaster.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Image\HistogramData.h">
+      <Filter>Image\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1801,6 +1804,9 @@
       <Filter>Utilities</Filter>
     </ClCompile>
     <ClCompile Include="Image\GdalRaster.cpp">
+      <Filter>Image\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\HistogramData.cpp">
       <Filter>Image\Source</Filter>
     </ClCompile>
   </ItemGroup>

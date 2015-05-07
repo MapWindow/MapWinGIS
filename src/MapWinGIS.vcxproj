@@ -256,6 +256,7 @@
     <ClInclude Include="Editor\UndoListHelper.h" />
     <ClInclude Include="Editor\VertexEditor.h" />
     <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Image\HistogramData.h" />
     <ClInclude Include="Image\QColorMatrix.h" />
     <ClInclude Include="Ogr\GeosConverter.h" />
     <ClInclude Include="Ogr\GeosHelper.h" />
@@ -562,6 +563,7 @@
     <ClCompile Include="Editor\UndoListHelper.cpp" />
     <ClCompile Include="Editor\VertexEditor.cpp" />
     <ClCompile Include="Image\colour.cpp" />
+    <ClCompile Include="Image\HistogramData.cpp" />
     <ClCompile Include="Image\ImageGroup.cpp" />
     <ClCompile Include="Image\ImageResamling.cpp" />
     <ClCompile Include="Image\QColorMatrix.cpp" />
