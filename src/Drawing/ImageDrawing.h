@@ -59,15 +59,20 @@ private:
 	bool CalculateImageBlockSize(Extent extents, double MinX, double MinY, double MaxX, double MaxY,
 										   const double dX, const double dY, const int height, const int width);
 	void DrawBmpNative(IImage* iimg, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds);
-	ScreenBitmap* DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds, bool returnBitmap);
+	ScreenBitmap* DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds, int bitsPerPixel, bool returnBitmap);
 	long GetPixelsInView();
 	bool WithinVisibleExtents(double xMin, double xMax, double yMin, double yMax);
 	bool ReadImageSpecs(IImage* iimg, ImageSpecs& specs);
-	IImage* CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage* img, CRect rcBounds);
-	int GetRowBytePad(int width);
-	void InitBitmapInfo(int width, int height, int pad, BITMAPINFO& bif);
+	IImage* CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage* img, CRect rcBounds, int bytesPerPixel);
+	int GetRowBytePad(int width, int bitsPerPixel);
+	void InitBitmapHeader(int width, int bitsPerPixel, int height, int pad, BITMAPINFO& bif);
+	ScreenBitmap* CreateScreenBitmap(double dstL, double dstT, double dstW, double dstH);
+	unsigned char* ReadGdalBufferBlock(unsigned char* buffer, int row, int width, int bytesPerPixel, int pad, int numRead);
+	void DrawGdalImage(Gdiplus::Graphics* g, Gdiplus::Image* img, Gdiplus::ImageAttributes* imgAttr, double dstL, double dstT, double dstW, double dstH, int imgX, int imgY, int imgH, int imgW, bool atOrigin);
+	int GetBmpRowLength(int width, int bitsPerPixel);
 
 public:
 	ScreenBitmap* DrawImage(const CRect & rcBounds, IImage* iimg, bool returnBitmap = false);	
+	
 };
 

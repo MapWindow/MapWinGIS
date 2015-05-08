@@ -64,9 +64,11 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* img, bool 
 	}
     else
 	{	
-		IImage* imgTemp = CreateSmallerProxyForGdalRaster(specs, img, rcBounds);
+		int bitsPerPixel = 24;		
 
-		DrawGdalRaster(imgTemp != NULL ? imgTemp : img, specs, imgAttr, rcBounds, returnBitmap);
+		IImage* imgTemp = CreateSmallerProxyForGdalRaster(specs, img, rcBounds, bitsPerPixel / 8);
+
+		DrawGdalRaster(imgTemp != NULL ? imgTemp : img, specs, imgAttr, rcBounds, bitsPerPixel, returnBitmap);
 
 		if (imgTemp) {
 			imgTemp->Release();
@@ -79,197 +81,32 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* img, bool 
 }
 
 // ******************************************************************
-//		DrawBmpNative()
-// ******************************************************************
-void CImageDrawer::DrawBmpNative(IImage* img, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds)
-{
-	long blockSize = 4096;	//blockSize = 1024; there is better performance the first time read @ 1024
-
-	FILE * imgfile = NULL;
-	long fileHandle = -1;
-	img->get_FileHandle(&fileHandle);
-	if (fileHandle >= 0)
-	{
-		USES_CONVERSION;
-		CComBSTR fname;
-		img->get_Filename(&fname);
-		imgfile = ::_wfopen(OLE2CW(fname), L"rb");
-	}
-
-	unsigned char * data = NULL;
-	BITMAPFILEHEADER bmfh;
-	BITMAPINFOHEADER bmif;
-	RGBQUAD * bmiColors = NULL;
-	BITMAPINFO * bi = NULL;
-
-	if (!imgfile)
-		goto clear_bmp;
-
-	//read in BITMAPFILEHEADER
-	fread(&bmfh, sizeof(BITMAPFILEHEADER), 1, imgfile);
-
-	//if not a valid bitmap file, fail to load
-	if (bmfh.bfType != 19778)
-	{
-		CallbackHelper::ErrorMsg("Invalid BMP file. bmfh.bfType = 19778 was expected.");
-		goto clear_bmp;
-	}
-
-	//read in BITMAPINFOHEADER
-	fread(&bmif, sizeof(BITMAPINFOHEADER), 1, imgfile);
-	bmif.biClrUsed = (bmfh.bfOffBits - 54) / 4;
-	if (bmif.biClrUsed != 0)
-	{
-		bmiColors = new RGBQUAD[bmif.biClrUsed];
-		fread(bmiColors, sizeof(RGBQUAD), bmif.biClrUsed, imgfile);
-	}
-
-	//Read to the beginning of the data
-	int sizeof_header = 54;
-	int n = bmfh.bfOffBits - (54 + bmif.biClrUsed * 4);
-	if (n > 0)
-		fseek(imgfile, n, SEEK_CUR);
-
-	// Read the specific bit count type and Create a Palette
-	long rowLength = specs.width;
-	if (bmif.biBitCount == 24)		rowLength *= 3;
-	else if (bmif.biBitCount == 8)	{}
-	else if (bmif.biBitCount == 1)	rowLength = (long)ceil(((double)specs.width) / 8);
-	else if (bmif.biBitCount == 4)
-	{
-		rowLength = int((double)rowLength * .5);
-		if (specs.width % 2) rowLength++;
-	}
-
-	//Compute the pad
-	int	pad = bmif.biWidth * bmif.biBitCount;
-	pad %= 32;
-	if (pad != 0)
-	{
-		pad = 32 - pad;
-		pad /= 8;
-	}
-
-	// ------------------------------------------------------
-	//	 Preparing variables
-	// ------------------------------------------------------
-	data = new unsigned char[(rowLength + pad)*blockSize];
-	long numRead;				// number of rows read
-
-	double mapL, mapT, mapR, mapB;	// map units w/o clipping (world coordinates to place the image)
-	double scrL, scrT, scrR, scrB;	// screen units  after projection w/o clipping (area needed to draw all the image)
-	int dstL, dstR, dstT, dstB;	// screen units with clipping (area needed to draw visible part)
-	int imgX, imgY, imgW, imgH;	// image units with clipping (part of image to draw)
-
-	bi = new BITMAPINFO;		//SetDIBits variable
-	bi = (BITMAPINFO*)realloc(bi, sizeof(BITMAPINFO) + sizeof(RGBQUAD)* bmif.biClrUsed);	//This adjusts the bi.bmiColors to the right size of array
-
-	// -----------------------------------------------
-	//    Start drawing
-	// -----------------------------------------------
-	for (int row = 0; row < specs.height;)
-	{
-		numRead = blockSize;
-		if (row + blockSize >= specs.height)
-			numRead = specs.height - row;
-
-		// part to draw in map units
-		mapL = specs.xllCorner;
-		mapB = specs.yllCorner + row * specs.dy;
-		mapT = mapB + numRead * specs.dy;
-		mapR = mapL + specs.width * specs.dx;
-
-		ProjectionToPixel(mapL, mapT, scrL, scrT);
-		ProjectionToPixel(mapR, mapB, scrR, scrB);
-
-		if (row != 0) scrB++;
-
-		fread(data, sizeof(unsigned char), (rowLength + pad)*numRead, imgfile);
-		bi->bmiHeader = bmif;
-		bi->bmiHeader.biHeight = numRead;
-		bi->bmiHeader.biSizeImage = (rowLength + pad)*numRead;
-		memcpy(bi->bmiColors, bmiColors, sizeof(RGBQUAD)*bmif.biClrUsed);
-
-		if (WithinVisibleExtents(mapL, mapR, mapB, mapT))
-		{
-			dstL = (int)scrL; 
-			dstT = (int)scrT; 
-			dstR = (int)scrR; 
-			dstB = (int)scrB;
-
-			imgX = 0; 
-			imgY = 0; 
-			imgW = specs.width; 
-			imgH = numRead;
-
-			CalculateImageBlockSize(dstL, dstT, dstR, dstB, imgX, imgY, imgW, imgH, mapL, mapT, mapR, mapB, specs.dx, specs.dy, rcBounds);
-
-			double destSize = double(dstR - dstL) * double(dstB - dstT);
-		
-			Gdiplus::InterpolationMode mode = ImageHelper::GetInterpolationMode(img, destSize > (imgW * imgH));
-			_graphics->SetInterpolationMode(mode);
-
-			Gdiplus::Bitmap imgPlus(bi, (void*)data);
-			Gdiplus::RectF rect((Gdiplus::REAL)dstL, (Gdiplus::REAL)dstT, (Gdiplus::REAL)dstR - dstL, (Gdiplus::REAL)dstB - dstT);
-			_graphics->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX /*- 0.5*/), (Gdiplus::REAL)(imgY /*-0.5*/),
-				(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
-		}
-		row += numRead;
-	}
-
-	// --------------------------------------------------
-	//	   Cleaning
-	// --------------------------------------------------
-clear_bmp:
-	if (bi) {
-		delete bi;
-	}
-
-	if (bmiColors) {
-		delete[] bmiColors;
-	}
-
-	if (data) {
-		delete[] data;
-	}
-
-	if (imgfile) {
-		fclose(imgfile);
-	}
-
-	if (fileHandle > 0)	{
-		_close(fileHandle);
-	}
-}
-
-// ******************************************************************
 //		DrawGdalRaster()
 // ******************************************************************
-ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* img, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds, bool returnBitmap)
+ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds, int bitsPerPixel, bool returnBitmap)
 {
 	ScreenBitmap* screenBitmap = NULL;
 
-	ImageType type = ImageHelper::GetImageType(img);
+	ImageType type = ImageHelper::GetImageType(iimg);
 	
 	double mapL, mapT, mapR, mapB;	// map units w/o clipping (world coordinates to place the image)
 	double dstL, dstR, dstT, dstB;	// screen units with clipping (area needed to draw visible part)
 	int imgX, imgY, imgW, imgH;	// image units with clipping (part of image to draw)
-
 	
 	//  accessing data from the buffer
-	unsigned char* pData = ImageHelper::GetImageData(img);
+	unsigned char* pData = ImageHelper::GetImageData(iimg);
 	colour* pNewData = NULL;
 
 	// try to load the buffer, as we could fail to load it because of unsuccessful image grouping
 	if (!pData && (type != BITMAP_FILE && type != USE_FILE_EXTENSION))
 	{
-		img->SetVisibleExtents(_extents->left, _extents->bottom, _extents->right, _extents->top, GetPixelsInView(), 0.0);
+		iimg->SetVisibleExtents(_extents->left, _extents->bottom, _extents->right, _extents->top, GetPixelsInView(), 0.0);
 		CallbackHelper::AssertionFailed("DrawGdalRaster: no buffer was populated.");
 	}
 
 	if (!pData) return NULL;
 
-	int pad = GetRowBytePad(specs.width);
+	int pad = GetRowBytePad(specs.width, bitsPerPixel);
 
 	// ------------------------------------------------------------
 	//    Drawing blocks of the bitmap
@@ -310,74 +147,40 @@ ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* img, ImageSpecs& specs, Gdipl
 			//  preparing structure to receive the data
 			// -------------------------------------------------------
 			BITMAPINFO bif;
-			InitBitmapInfo(specs.width, numRead, pad, bif);
+			InitBitmapHeader(specs.width, bitsPerPixel, numRead, pad, bif);
 
-			unsigned char* bits = (unsigned char*)(&pData[row * specs.width * 3]);
-			int nBytesInRow = specs.width * 3 + pad;
+			unsigned char* bits = ReadGdalBufferBlock(pData, row, specs.width, bitsPerPixel / 8, pad, numRead);
 
-			unsigned char* bitsNew = NULL;
-			if (pad == 0)
-			{
-				bitsNew = bits;
-			}
-			else
-			{
-				// we can make number of image buffer pixels in row dividable by 4 them we don't need this condition
-				bitsNew = new unsigned char[nBytesInRow * numRead];
-				for (int i = 0; i < numRead; i++) {
-					memcpy(&bitsNew[i * nBytesInRow], &bits[i * specs.width * 3], specs.width * 3);
-				}
-			}
+			// choosing sampling method		
+			int bmp = type == BITMAP_FILE || type == USE_FILE_EXTENSION;
+			int w = bmp ? specs.width : ImageHelper::Cast(iimg)->GetOriginalBufferWidth();
+			int h = bmp ? specs.height : ImageHelper::Cast(iimg)->GetOriginalBufferHeight();
+			bool downsampling = double(dstR - dstL) * double(dstB - dstT) < (double)(w * h);
+			_graphics->SetInterpolationMode(ImageHelper::GetInterpolationMode(iimg, !downsampling));
 
-			// choosing sampling method						
-			bool downsampling;
-			if (type == BITMAP_FILE || type == USE_FILE_EXTENSION) 
-			{
-				downsampling = double(dstR - dstL) * double(dstB - dstT) < specs.width * specs.height;
-			}
-			else 
-			{
-				int origWidth = ImageHelper::Cast(img)->GetOriginalBufferWidth();
-				int origHeight = ImageHelper::Cast(img)->GetOriginalBufferHeight();
-				downsampling = (double(dstR - dstL) * double(dstB - dstT) < double(origWidth * origHeight));
-			}
-
-			_graphics->SetInterpolationMode(ImageHelper::GetInterpolationMode(img, !downsampling));
-
-			Gdiplus::Bitmap imgPlus(&bif, (void*)bitsNew);
+			Gdiplus::Bitmap imgPlus(&bif, (void*)bits);
 
 			if (returnBitmap)
 			{
-				screenBitmap = new ScreenBitmap();		// TODO: where is it released?
-				screenBitmap->left = int(dstL);
-				screenBitmap->top = int(dstT);
-				screenBitmap->pixelPerProjectionX = _pixelPerProjectionX;
-				screenBitmap->pixelPerProjectionY = _pixelPerProjectionY;
-				screenBitmap->viewHeight = _viewHeight;
-				screenBitmap->viewWidth = _viewWidth;
-				screenBitmap->extents = *_extents;
-				screenBitmap->bitmap = new Gdiplus::Bitmap((INT)(dstW + 1.0), (INT)(dstH + 1.0));
+				screenBitmap = CreateScreenBitmap(dstL, dstT, dstW, dstH);
 
 				Gdiplus::Graphics g(screenBitmap->bitmap);
 				g.SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
+				g.SetInterpolationMode(ImageHelper::GetInterpolationMode(iimg, !downsampling));
 
-				g.SetInterpolationMode(ImageHelper::GetInterpolationMode(img, !downsampling));
-
-				Gdiplus::RectF rect(0.0f, 0.0f, (Gdiplus::REAL)int(dstW + 1.0), (Gdiplus::REAL)int(dstH + 1.0));
-				g.DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX), (Gdiplus::REAL)(imgY),
-					(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
+				DrawGdalImage(&g, &imgPlus, imgAttr, dstL, dstT, dstW, dstH, imgX, imgY, imgH, imgW, true);
 
 				_graphics->DrawImage(screenBitmap->bitmap, (Gdiplus::REAL)screenBitmap->left, (Gdiplus::REAL)screenBitmap->top);
 			}
 			else
 			{
-				Gdiplus::RectF rect((Gdiplus::REAL)int(dstL), (Gdiplus::REAL)int(dstT), (Gdiplus::REAL)int(dstW + 1.0), (Gdiplus::REAL)int(dstH + 1.0));
-				_graphics->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX), (Gdiplus::REAL)(imgY),
-					(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
+				DrawGdalImage(_graphics, &imgPlus, imgAttr, dstL, dstT, dstW, dstH, imgX, imgY, imgH, imgW, false);
 			}
 
-			if (pad != 0)
-				delete[] bitsNew;
+			if (pad != 0)	// otherwise we were using the buffer directly
+			{
+				delete[] bits;		
+			}
 		}
 		
 		// going to the next block
@@ -388,12 +191,80 @@ ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* img, ImageSpecs& specs, Gdipl
 }
 
 // ******************************************************************
+//		DrawGdalImage()
+// ******************************************************************
+void CImageDrawer::DrawGdalImage(Gdiplus::Graphics* g, Gdiplus::Image* img, Gdiplus::ImageAttributes* imgAttr,
+								double dstL, double dstT, double dstW, double dstH, 
+								int imgX, int imgY, int imgH, int imgW, bool atOrigin)
+{
+	if (atOrigin)
+	{
+		dstL = 0;
+		dstT = 0;
+	}
+
+	Gdiplus::RectF rect((Gdiplus::REAL)int(dstL),
+					    (Gdiplus::REAL)int(dstT), 
+						(Gdiplus::REAL)int(dstW + 1.0), 
+						(Gdiplus::REAL)int(dstH + 1.0));
+
+	g->DrawImage(img, rect, 
+				(Gdiplus::REAL)(imgX), 
+				(Gdiplus::REAL)(imgY),
+				(Gdiplus::REAL)imgW, 
+				(Gdiplus::REAL)imgH, 
+				Gdiplus::UnitPixel, 
+				imgAttr);
+}
+
+// ******************************************************************
+//		CreateScreenBitmap()
+// ******************************************************************
+ScreenBitmap* CImageDrawer::CreateScreenBitmap(double dstL, double dstT, double dstW, double dstH)
+{
+	ScreenBitmap* screenBitmap = new ScreenBitmap();		// TODO: where is it released?
+	screenBitmap->left = int(dstL);
+	screenBitmap->top = int(dstT);
+	screenBitmap->pixelPerProjectionX = _pixelPerProjectionX;
+	screenBitmap->pixelPerProjectionY = _pixelPerProjectionY;
+	screenBitmap->viewHeight = _viewHeight;
+	screenBitmap->viewWidth = _viewWidth;
+	screenBitmap->extents = *_extents;
+	screenBitmap->bitmap = new Gdiplus::Bitmap((INT)(dstW + 1.0), (INT)(dstH + 1.0));
+	return screenBitmap;
+}
+
+// ******************************************************************
+//		ReadGdalBlock()
+// ******************************************************************
+// allocated new buffer in case padding isn't 0
+unsigned char* CImageDrawer::ReadGdalBufferBlock(unsigned char* buffer, int row, int width, int bytesPerPixel, int pad, int numRead)
+{
+	unsigned char* bits = (unsigned char*)(&buffer[row * width * bytesPerPixel]);
+
+	if (pad == 0) {
+		return bits;
+	}
+	
+	// we can make number of image buffer pixels in row dividable by 4 them we don't need this condition
+	int nBytesInRow = width * bytesPerPixel + pad;
+	
+	unsigned char* bitsNew = new unsigned char[nBytesInRow * numRead];
+	for (int i = 0; i < numRead; i++) 
+	{
+		memcpy(&bitsNew[i * nBytesInRow], &bits[i * width * bytesPerPixel], width * bytesPerPixel);
+	}
+
+	return bitsNew;
+}
+
+// ******************************************************************
 //		GetWidthPad()
 // ******************************************************************
 // width in bits must be divisible by 32
-int CImageDrawer::GetRowBytePad(int width)
+int CImageDrawer::GetRowBytePad(int width, int bitsPerPixel)
 {
-	int pad = (width * 24) % 32;
+	int pad = (width * bitsPerPixel) % 32;
 	if (pad != 0)
 	{
 		pad = 32 - pad;
@@ -406,7 +277,7 @@ int CImageDrawer::GetRowBytePad(int width)
 // ******************************************************************
 //		InitBitmapInfo()
 // ******************************************************************
-void CImageDrawer::InitBitmapInfo(int width, int height, int pad, BITMAPINFO& bif)
+void CImageDrawer::InitBitmapHeader(int width, int bitsPerPixel, int height, int pad, BITMAPINFO& bif)
 {
 	BITMAPINFOHEADER bih;
 	bih.biCompression = 0;
@@ -417,10 +288,10 @@ void CImageDrawer::InitBitmapInfo(int width, int height, int pad, BITMAPINFO& bi
 	bih.biPlanes = 1;
 	bih.biSize = sizeof(BITMAPINFOHEADER);
 
-	bih.biBitCount = 24;
+	bih.biBitCount = bitsPerPixel;
 	bih.biWidth = width;
 	bih.biHeight = height;
-	bih.biSizeImage = (width * 3 + pad) * height;
+	bih.biSizeImage = (width * bitsPerPixel / 8 + pad) * height;
 
 	bif.bmiHeader = bih;
 }
@@ -431,7 +302,7 @@ void CImageDrawer::InitBitmapInfo(int width, int height, int pad, BITMAPINFO& bi
 //	Creating temporary instance of image class holding 
 //	the area to display. Don't forget to release it after!!!
 //  Is used for grouped images first of all
-IImage* CImageDrawer::CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage* img, CRect rcBounds)
+IImage* CImageDrawer::CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage* img, CRect rcBounds, int bytesPerPixel)
 {
 	double mapL, mapT, mapR, mapB;	// map units w/o clipping (world coordinates to place the image)
 	double scrL, scrT, scrR, scrB;	// screen units  after projection w/o clipping (area needed to draw all the image)
@@ -486,26 +357,28 @@ IImage* CImageDrawer::CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage*
 	pDataTemp = reinterpret_cast<unsigned char*>(pColours);
 	for (int n = 0; n < imgH; n++)
 	{
-		memcpy(pDataTemp + (imgH - 1 - n) * imgW * 3, pData + (specs.height - n - 1 - imgY) * specs.width * 3 + imgX * 3, imgW * 3);
+		memcpy(pDataTemp + (imgH - 1 - n) * imgW * bytesPerPixel, 
+			   pData + (specs.height - n - 1 - imgY) * specs.width * bytesPerPixel + imgX * bytesPerPixel, 
+			   imgW * bytesPerPixel);
 	}
 
 	// ---------------------------------------------------------
 	//	  preparing new class to save results
 	// ---------------------------------------------------------
-	IImage* iimgNew = NULL;
-	CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&iimgNew);
+	IImage* imgNew = NULL;
+	CoCreateInstance(CLSID_Image, NULL, CLSCTX_INPROC_SERVER, IID_IImage, (void**)&imgNew);
 
 	VARIANT_BOOL vb;
-	iimgNew->CreateNew(imgW, imgH, &vb);
+	imgNew->CreateNew(imgW, imgH, &vb);
 	if (!vb)
 	{
-		iimgNew->Release();
+		imgNew->Release();
 		delete[] pColours;
 		return NULL;
 	}
 
 	// passing the data to image class
-	ImageHelper::PutImageData(iimgNew, pColours);
+	ImageHelper::PutImageData(imgNew, pColours);
 
 	// setting the properties of the new bitmap
 	double projX, projY;
@@ -514,13 +387,13 @@ IImage* CImageDrawer::CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage*
 	specs.xllCorner = projX;
 	specs.yllCorner = projY;
 
-	iimgNew->put_XllCenter(specs.xllCorner);
-	iimgNew->put_YllCenter(specs.yllCorner);
+	imgNew->put_XllCenter(specs.xllCorner);
+	imgNew->put_YllCenter(specs.yllCorner);
 
 	specs.width = imgW;
 	specs.height = imgH;
 
-	return iimgNew;
+	return imgNew;
 }
 
 // ******************************************************************
@@ -680,4 +553,185 @@ bool CImageDrawer::ReadImageSpecs(IImage* img, ImageSpecs& specs)
 	specs.height = height;
 
 	return true;
+}
+
+// ******************************************************************
+//		DrawBmpNative()
+// ******************************************************************
+void CImageDrawer::DrawBmpNative(IImage* img, ImageSpecs& specs, Gdiplus::ImageAttributes* imgAttr, CRect rcBounds)
+{
+	long blockSize = 4096;	//blockSize = 1024; there is better performance the first time read @ 1024
+
+	FILE * imgfile = NULL;
+	long fileHandle = -1;
+	img->get_FileHandle(&fileHandle);
+	if (fileHandle >= 0)
+	{
+		USES_CONVERSION;
+		CComBSTR fname;
+		img->get_Filename(&fname);
+		imgfile = ::_wfopen(OLE2CW(fname), L"rb");
+	}
+
+	unsigned char * data = NULL;
+	BITMAPFILEHEADER bmfh;
+	BITMAPINFOHEADER bmif;
+	RGBQUAD * bmiColors = NULL;
+	BITMAPINFO * bi = NULL;
+
+	if (!imgfile)
+		goto clear_bmp;
+
+	//read in BITMAPFILEHEADER
+	fread(&bmfh, sizeof(BITMAPFILEHEADER), 1, imgfile);
+
+	//if not a valid bitmap file, fail to load
+	if (bmfh.bfType != 19778)
+	{
+		CallbackHelper::ErrorMsg("Invalid BMP file. bmfh.bfType = 19778 was expected.");
+		goto clear_bmp;
+	}
+
+	//read in BITMAPINFOHEADER
+	fread(&bmif, sizeof(BITMAPINFOHEADER), 1, imgfile);
+	bmif.biClrUsed = (bmfh.bfOffBits - 54) / 4;
+	if (bmif.biClrUsed != 0)
+	{
+		bmiColors = new RGBQUAD[bmif.biClrUsed];
+		fread(bmiColors, sizeof(RGBQUAD), bmif.biClrUsed, imgfile);
+	}
+
+	//Read to the beginning of the data
+	int sizeof_header = 54;
+	int n = bmfh.bfOffBits - (54 + bmif.biClrUsed * 4);
+	if (n > 0) {
+		fseek(imgfile, n, SEEK_CUR);
+	}
+
+	// Read the specific bit count type
+	long rowLength = GetBmpRowLength(specs.width, bmif.biBitCount);
+	
+	//Compute the pad
+	int pad = GetRowBytePad(bmif.biWidth, bmif.biBitCount);
+
+	// ------------------------------------------------------
+	//	 Preparing variables
+	// ------------------------------------------------------
+	data = new unsigned char[(rowLength + pad)*blockSize];
+	long numRead;				// number of rows read
+
+	double mapL, mapT, mapR, mapB;	// map units w/o clipping (world coordinates to place the image)
+	double scrL, scrT, scrR, scrB;	// screen units  after projection w/o clipping (area needed to draw all the image)
+	int dstL, dstR, dstT, dstB;	// screen units with clipping (area needed to draw visible part)
+	int imgX, imgY, imgW, imgH;	// image units with clipping (part of image to draw)
+
+	bi = new BITMAPINFO;		//SetDIBits variable
+	bi = (BITMAPINFO*)realloc(bi, sizeof(BITMAPINFO) + sizeof(RGBQUAD)* bmif.biClrUsed);	//This adjusts the bi.bmiColors to the right size of array
+
+	// -----------------------------------------------
+	//    Start drawing
+	// -----------------------------------------------
+	for (int row = 0; row < specs.height;)
+	{
+		numRead = blockSize;
+		if (row + blockSize >= specs.height)
+			numRead = specs.height - row;
+
+		// part to draw in map units
+		mapL = specs.xllCorner;
+		mapB = specs.yllCorner + row * specs.dy;
+		mapT = mapB + numRead * specs.dy;
+		mapR = mapL + specs.width * specs.dx;
+
+		ProjectionToPixel(mapL, mapT, scrL, scrT);
+		ProjectionToPixel(mapR, mapB, scrR, scrB);
+
+		if (row != 0) scrB++;
+
+		fread(data, sizeof(unsigned char), (rowLength + pad)*numRead, imgfile);
+		bi->bmiHeader = bmif;
+		bi->bmiHeader.biHeight = numRead;
+		bi->bmiHeader.biSizeImage = (rowLength + pad)*numRead;
+		memcpy(bi->bmiColors, bmiColors, sizeof(RGBQUAD)*bmif.biClrUsed);
+
+		if (WithinVisibleExtents(mapL, mapR, mapB, mapT))
+		{
+			dstL = (int)scrL;
+			dstT = (int)scrT;
+			dstR = (int)scrR;
+			dstB = (int)scrB;
+
+			imgX = 0;
+			imgY = 0;
+			imgW = specs.width;
+			imgH = numRead;
+
+			CalculateImageBlockSize(dstL, dstT, dstR, dstB, imgX, imgY, imgW, imgH, mapL, mapT, mapR, mapB, specs.dx, specs.dy, rcBounds);
+
+			double destSize = double(dstR - dstL) * double(dstB - dstT);
+
+			Gdiplus::InterpolationMode mode = ImageHelper::GetInterpolationMode(img, destSize > (imgW * imgH));
+			_graphics->SetInterpolationMode(mode);
+
+			Gdiplus::Bitmap imgPlus(bi, (void*)data);
+			Gdiplus::RectF rect((Gdiplus::REAL)dstL, (Gdiplus::REAL)dstT, (Gdiplus::REAL)dstR - dstL, (Gdiplus::REAL)dstB - dstT);
+			_graphics->DrawImage((Gdiplus::Image*)&imgPlus, rect, (Gdiplus::REAL)(imgX /*- 0.5*/), (Gdiplus::REAL)(imgY /*-0.5*/),
+				(Gdiplus::REAL)imgW, (Gdiplus::REAL)imgH, Gdiplus::UnitPixel, imgAttr);
+		}
+		row += numRead;
+	}
+
+	// --------------------------------------------------
+	//	   Cleaning
+	// --------------------------------------------------
+clear_bmp:
+	if (bi) {
+		delete bi;
+	}
+
+	if (bmiColors) {
+		delete[] bmiColors;
+	}
+
+	if (data) {
+		delete[] data;
+	}
+
+	if (imgfile) {
+		fclose(imgfile);
+	}
+
+	if (fileHandle > 0)	{
+		_close(fileHandle);
+	}
+}
+
+// ******************************************************************
+//		GetBmpRowLength()
+// ******************************************************************
+int CImageDrawer::GetBmpRowLength(int width, int bitsPerPixel)
+{
+	long rowLength = width;
+	
+	if (bitsPerPixel == 24)	
+	{
+		rowLength *= 3;
+	}
+	else if (bitsPerPixel == 8)	
+	{
+		// do nothing
+	}
+	else if (bitsPerPixel == 1)	
+	{
+		rowLength = (long)ceil(((double)width) / 8);
+	}
+	else if (bitsPerPixel == 4)
+	{
+		rowLength = int((double)rowLength * .5);
+		if (width % 2) {
+			rowLength++;
+		}
+	}
+	
+	return rowLength;
 }
