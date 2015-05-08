@@ -1005,7 +1005,7 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 	for (int i = 0; i < yBuff; i++)
 	{
 		dstRow = (*imageData) + i * xBuff;
-		srcRow = srcDataInt + (yBuff - i - 1) * xBuff;
+		srcRow = srcDataInt + i * xBuff;
 
 		for (int j = 0; j < xBuff; j++)
 		{
@@ -1037,7 +1037,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 		{
 			for (int j = 0; j < xBuff; j++)	
 			{
-				val = src[(yBuff-i-1) * xBuff + j];	
+				val = src[i * xBuff + j];	
 				color = (*dst) + i * xBuff + j;
 				
 				if ((double)val == noDataValue)
@@ -1067,7 +1067,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 		for (int i = 0; i < yBuff; i++) {
 			for (int j = 0; j < xBuff; j++)	
 			{
-				val = src[(yBuff-i-1) * xBuff + j];	
+				val = src[i * xBuff + j];	
 				color = (*dst) + i * xBuff + j;
 				
 				if (singleBand)
@@ -1112,7 +1112,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 	{
 		for (int j = 0; j < xBuff; j++)	
 		{
-			val = (unsigned char)src[(yBuff-i-1) * xBuff + j];	
+			val = (unsigned char)src[i * xBuff + j];	
 			color = (*dst) + i * xBuff + j;
 				
 			if (singleBand)
@@ -1422,7 +1422,7 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 	{
 		for (int j = 0; j < xBuff; j++)
 		{
-			float tmp = (float)pafScanArea[(yBuff-i-1) * xBuff + j];
+			float tmp = (float)pafScanArea[i * xBuff + j];
 			
 			if (tmp == noDataValue)
 			{
@@ -1447,15 +1447,15 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 
 				float win[9];
 				// Read in 3x3 window
-				win[0] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
-				win[1] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
-				win[2] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
-				win[3] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
-				win[4] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
-				win[5] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
-				win[6] = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j-1]);
-				win[7] = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j  ]);
-				win[8] = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j+1]);
+				win[0] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
+				win[1] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
+				win[2] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
+				win[3] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
+				win[4] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
+				win[5] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
+				win[6] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
+				win[7] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
+				win[8] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
 				
 				// Check if window has null value
 				for (int n = 0; n <= 8; n++) 
@@ -1555,25 +1555,25 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 					else if( j >= xBuff - 1 )
 					{	
 	
-						yone =   (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j-1]);
-						ytwo =   (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j  ]);
-						ythree = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j-1]);
+						yone =   (float)( pafScanArea[(i  ) * xBuff + j-1]);
+						ytwo =   (float)( pafScanArea[(i-1) * xBuff + j  ]);
+						ythree = (float)( pafScanArea[(i  ) * xBuff + j-1]);
 					}
 					else if( i >= yBuff-1 )
 					{	
 
-						yone = (float)( pafScanArea[(yBuff-i-1+1) * xBuff + j  ]);
-						ytwo = (float)( pafScanArea[(yBuff-i-1  ) * xBuff + j+1]);	
+						yone = (float)( pafScanArea[(i+1) * xBuff + j  ]);
+						ytwo = (float)( pafScanArea[(i  ) * xBuff + j+1]);	
 						ythree = tmp;
 					}
 					else
 					{	
 						yone = tmp;
-						ytwo =   (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j+1]);
-						ythree = (float)( pafScanArea[(yBuff-i-1-1) * xBuff + j  ]);			
+						ytwo =   (float)( pafScanArea[(i-1) * xBuff + j+1]);
+						ythree = (float)( pafScanArea[(i-1) * xBuff + j  ]);			
 					}
 				
-					float xone = xll + csize * (yBuff-i-1);
+					float xone = xll + csize * (i);
 					float xtwo = xone + csize;
 					float xthree = xone;
 					

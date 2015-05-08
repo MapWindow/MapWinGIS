@@ -600,53 +600,40 @@ STDMETHODIMP CImageClass::GetRow(long Row, long *Vals, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if(!( Row >= 0 && Row < _height ))
+	if( Row < 0 && Row >= _height )
 	{
 		*retval = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
 	}
-	else
+	
+	if ( _gdal && !_dataLoaded )
 	{
-		// lsu 18-07-2010: excluded the code for loading the buffer; it can be confusing I guess 
-		// as reloading buffer can change values of Width and Height, and this call
-		// can be incorporate in cycle with old values of height.
-		// What is needed is to ensure the the consistency of buffer with 
-		// properties like width, height, etc. If Height is equal to 0 (no buffer loaded)
-		// then it's reasonable thing to receive nothing from GetRow or GetValue calls
-		// Reload buffer with SetVisibleExtents and use the values then.
-		// By default it's expected to have buffer of visible pixels in place after each redraw
-		if ( _gdal && !_dataLoaded )
+		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
+		return S_OK;
+	}
+		
+	long element = Row * _width;
+	for (int col = 0; col < _width; col++)
+	{
+		colour currentPixel;
+		if (_inRam)
 		{
-			ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
+			currentPixel = _imageData[element];
+			Vals[col] = RGB(currentPixel.red, currentPixel.green, currentPixel.blue);
 		}
 		else
 		{
-			Row = _height -1 - Row;	//reverse the position of 0,0 (the origin) so that
-								//it is at the top left of the image
-		
-			long element = Row * _width;
-			for( int col = 0; col < _width; col++ )
+			if (_imgType == BITMAP_FILE)
 			{
-				colour currentPixel;
-				if( _inRam )
-				{
-					currentPixel = _imageData[element];
-					Vals[col] = RGB(currentPixel.red ,currentPixel.green, currentPixel.blue);
-				}
-				else
-				{	
-					if ( _imgType == BITMAP_FILE )
-					{	
-						colour tmp;
-						tmp = _bitmapImage->getValue(Row,col);
-						Vals[col] = RGB(tmp.red,tmp.green,tmp.blue);
-					}
-					else
-						Vals[col] = -1;
-				}
-				element++;
+				colour tmp;
+				tmp = _bitmapImage->getValue(Row, col);
+				Vals[col] = RGB(tmp.red, tmp.green, tmp.blue);
 			}
+			else
+				Vals[col] = -1;
 		}
+		element++;
 	}
 
 	*retval =  VARIANT_TRUE;
@@ -684,9 +671,6 @@ STDMETHODIMP CImageClass::get_Value(long row, long col, long *pVal)
 		return S_OK;
 	}
 
-	row = _height - 1 - row;	//reverse the position of 0,0 (the origin) so that it is at the top left of the image
-	
-
 	if (row < 0 || row >= _height || col < 0 || col >= _width)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -719,9 +703,6 @@ STDMETHODIMP CImageClass::get_Value(long row, long col, long *pVal)
 STDMETHODIMP CImageClass::put_Value(long row, long col, long newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
-	row = _height -1 - row;	//reverse the position of 0,0 (the origin) so that
-							//it is at the top left of the image
 
 	if (row < 0 || row >= _height || col < 0 || col >= _width)
 	{
