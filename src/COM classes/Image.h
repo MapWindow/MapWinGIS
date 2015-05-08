@@ -36,18 +36,11 @@ class ATL_NO_VTABLE CImageClass :
 	public IDispatchImpl<IImage, &IID_IImage, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
-	
-	// constructor
-	CImageClass::CImageClass()
+	CImageClass::CImageClass() : _bitsPerPixel(32)
 	{
 		_globalCallback = NULL;
 		_imageData = NULL;
 		
-		_drawingMethod = 0;
-		_drawingMethod |= idmNewWithResampling;
-		_drawingMethod |= idmGDIPlusDrawing;
-		_drawingMethod |= idmGDIPlusResampling;
-
 		_dX = _dY = 1.0;
 		_xllCenter = _yllCenter = 0.0;
 		_width = _height = 0;
@@ -354,7 +347,6 @@ private:
 	double _transparencyPercent;
 	tkInterpolationMode _downsamplingMode;
 	tkInterpolationMode _upsamplingMode;
-	short _drawingMethod;
 	bool _downSampling;	// the image in the buffer was produced by downsampling
 
 	ILabels* _labels;
@@ -367,6 +359,8 @@ private:
 	float _gamma;			// 0, 4
 	float _colorizeIntensity;	// 0, 1
 	OLE_COLOR _colorizeColor;
+
+	int _bitsPerPixel;
 public:
 	int m_groupID;			// in case belong to the group of images which are to be treated as one
 	DataPixels* m_pixels;	// a structure to hold values of pixels with the value other than noDataValue

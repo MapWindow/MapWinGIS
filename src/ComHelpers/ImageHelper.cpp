@@ -203,3 +203,19 @@ Gdiplus::ColorMatrix ImageHelper::CreateMatrix(float contrast, float brightness,
 
 	return matrix;
 }
+
+// ******************************************************************
+//		GetRowBytePad()
+// ******************************************************************
+// width in bits must be divisible by 32
+int ImageHelper::GetRowBytePad(int width, int bitsPerPixel)
+{
+	int pad = (width * bitsPerPixel) % 32;
+	if (pad != 0)
+	{
+		pad = 32 - pad;
+		pad /= 8;
+	}
+
+	return pad;
+}

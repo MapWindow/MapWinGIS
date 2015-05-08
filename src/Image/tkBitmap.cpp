@@ -664,29 +664,27 @@ bool tkBitmap::setValue( long Row, long Column, colour Value )
 	}
 
 	if( bmpfile == NULL )
-	{	return false;
-	}
-	else
 	{	
-		//long lval = RGB( Value.red, Value.green, Value.blue );
-		if( Row == currentRow - 1 )
-			rowOne[Column] = Value;
-		else if( Row == currentRow )
-			rowTwo[Column] = Value;
-		else if( Row == currentRow + 1 )
-			rowThree[Column] = Value;
-
-		long offset = begOfData + ( cols*3 + pad )*Row + Column*3;
-		fseek( bmpfile, offset, SEEK_SET );
-		fwrite( &Value.blue, sizeof(BYTE), 1, bmpfile );
-		fwrite( &Value.green, sizeof(BYTE), 1, bmpfile );
-		fwrite( &Value.red, sizeof(BYTE), 1, bmpfile );
-
-		return true;
+		return false;
 	}
 	
-	return false;
+	//long lval = RGB( Value.red, Value.green, Value.blue );
+	if( Row == currentRow - 1 )
+		rowOne[Column] = Value;
+	else if( Row == currentRow )
+		rowTwo[Column] = Value;
+	else if( Row == currentRow + 1 )
+		rowThree[Column] = Value;
+
+	long offset = begOfData + ( cols*3 + pad )*Row + Column*3;
+	fseek( bmpfile, offset, SEEK_SET );
+	fwrite( &Value.blue, sizeof(BYTE), 1, bmpfile );
+	fwrite( &Value.green, sizeof(BYTE), 1, bmpfile );
+	fwrite( &Value.red, sizeof(BYTE), 1, bmpfile );
+
+	return true;
 }
+
 void tkBitmap::getRow( long Row, long * result )
 {
 	if( bmpfile != NULL )

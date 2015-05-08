@@ -857,7 +857,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	// -----------------------------------------------
 	//    reading data
 	// -----------------------------------------------
-    for (int bandIndex = 1; bandIndex <= MAX(_nBands, 3); bandIndex++)
+    for (int bandIndex = 1; bandIndex <= MAX(_nBands, 4); bandIndex++)
     {
 		int realBandIndex = GetMappedBandIndex(bandIndex);
 		GDALRasterBand* poBand = _dataset->GetRasterBand(realBandIndex);
@@ -1139,12 +1139,14 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 					if (band == 1)		color->red = _transColor.r;
 					else if (band == 2)	color->green = _transColor.g;
 					else if (band == 3)	color->blue = _transColor.b;
+					// TODO: add alpha
 				}
 				else
 				{
 					if (band == 1)      color->red = static_cast<unsigned char>(val);
 					else if (band == 2) color->green = static_cast<unsigned char>(val);
 					else if (band == 3) color->blue = static_cast<unsigned char>(val);
+					else if (band == 4) color->alpha = static_cast<unsigned char>(val);
 				}
 			}
 		}

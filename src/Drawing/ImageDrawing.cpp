@@ -106,7 +106,7 @@ ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdip
 
 	if (!pData) return NULL;
 
-	int pad = GetRowBytePad(specs.width, bitsPerPixel);
+	int pad = ImageHelper::GetRowBytePad(specs.width, bitsPerPixel);
 
 	// ------------------------------------------------------------
 	//    Drawing blocks of the bitmap
@@ -143,12 +143,6 @@ ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdip
 
 			_graphics->SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
 
-			// -------------------------------------------------------
-			//  preparing structure to receive the data
-			// -------------------------------------------------------
-			BITMAPINFO bif;
-			InitBitmapHeader(specs.width, bitsPerPixel, numRead, pad, bif);
-
 			unsigned char* bits = ReadGdalBufferBlock(pData, row, specs.width, bitsPerPixel / 8, pad, numRead);
 
 			// choosing sampling method		
@@ -158,7 +152,9 @@ ScreenBitmap* CImageDrawer::DrawGdalRaster(IImage* iimg, ImageSpecs& specs, Gdip
 			bool downsampling = double(dstR - dstL) * double(dstB - dstT) < (double)(w * h);
 			_graphics->SetInterpolationMode(ImageHelper::GetInterpolationMode(iimg, !downsampling));
 
-			Gdiplus::Bitmap imgPlus(&bif, (void*)bits);
+			int stride = specs.width * bitsPerPixel / 8 + pad;
+
+			Gdiplus::Bitmap imgPlus(specs.width, numRead, stride, PixelFormat32bppARGB, reinterpret_cast<BYTE*>(bits));
 
 			if (returnBitmap)
 			{
@@ -256,44 +252,6 @@ unsigned char* CImageDrawer::ReadGdalBufferBlock(unsigned char* buffer, int row,
 	}
 
 	return bitsNew;
-}
-
-// ******************************************************************
-//		GetWidthPad()
-// ******************************************************************
-// width in bits must be divisible by 32
-int CImageDrawer::GetRowBytePad(int width, int bitsPerPixel)
-{
-	int pad = (width * bitsPerPixel) % 32;
-	if (pad != 0)
-	{
-		pad = 32 - pad;
-		pad /= 8;
-	}
-
-	return pad;
-}
-
-// ******************************************************************
-//		InitBitmapInfo()
-// ******************************************************************
-void CImageDrawer::InitBitmapHeader(int width, int bitsPerPixel, int height, int pad, BITMAPINFO& bif)
-{
-	BITMAPINFOHEADER bih;
-	bih.biCompression = 0;
-	bih.biXPelsPerMeter = 0;
-	bih.biYPelsPerMeter = 0;
-	bih.biClrUsed = 0;
-	bih.biClrImportant = 0;
-	bih.biPlanes = 1;
-	bih.biSize = sizeof(BITMAPINFOHEADER);
-
-	bih.biBitCount = bitsPerPixel;
-	bih.biWidth = width;
-	bih.biHeight = height;
-	bih.biSizeImage = (width * bitsPerPixel / 8 + pad) * height;
-
-	bif.bmiHeader = bih;
 }
 
 // ******************************************************************
@@ -612,7 +570,7 @@ void CImageDrawer::DrawBmpNative(IImage* img, ImageSpecs& specs, Gdiplus::ImageA
 	long rowLength = GetBmpRowLength(specs.width, bmif.biBitCount);
 	
 	//Compute the pad
-	int pad = GetRowBytePad(bmif.biWidth, bmif.biBitCount);
+	int pad = ImageHelper::GetRowBytePad(bmif.biWidth, bmif.biBitCount);
 
 	// ------------------------------------------------------
 	//	 Preparing variables

@@ -33,14 +33,14 @@
 
 //MACROS
 	
-	# define SWAP(c,d,ctmp)(ctmp=c,\
+	# define SWAP_LOCAL(c,d,ctmp)(ctmp=c,\
 							c=d,\
 							d=ctmp)	
 	# define SWAP_ENDIAN_INT(c)\
 	{\
 		char ctmp;\
-		SWAP(c[0],c[3],ctmp);\
-		SWAP(c[1],c[2],ctmp);\
+		SWAP_LOCAL(c[0],c[3],ctmp);\
+		SWAP_LOCAL(c[1],c[2],ctmp);\
 	}
 	
 	//Shade1974 - to help eliminate 1 pixel deviation in y direction for smo
@@ -66,8 +66,8 @@
 	
 	# define PROJX_TO_PIXELX(prX,piX,_extents,ppx)(piX=(prX - _extents.left)*ppx)
 	# define PROJY_TO_PIXELY(prY,piY)(piY=(prY - _extents.bottom)*ppy)
-	#define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
-	
+	# define BGR_TO_RGB(color)((color & 0x00FF0000)>>16) | ((color & 0x0000FF00)) | ((color & 0x000000FF)<<16)
+	# define GET_ALPHA(color)((color & 0xFF000000) >> 24)
 	
 	// lsu 27 aug 2009 for DrawShapefileAlt function
 	# define PROJECTION_TO_PIXEL_INT(prX,prY,pxX,pxY)\

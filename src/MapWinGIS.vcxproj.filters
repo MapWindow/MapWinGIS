@@ -252,12 +252,6 @@
     <ClInclude Include="Image\tkBitmap.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Image\tkGif.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Image\tkJpg.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Control\DispIds.h">
       <Filter>Control</Filter>
     </ClInclude>
@@ -849,6 +843,12 @@
     <ClInclude Include="Image\HistogramData.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Image\tkJpg.h">
+      <Filter>Image\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\tkGif.h">
+      <Filter>Image\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1011,12 +1011,6 @@
       <Filter>Image\Source</Filter>
     </ClCompile>
     <ClCompile Include="Image\tkBitmap.cpp">
-      <Filter>Image\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Image\tkGif.cpp">
-      <Filter>Image\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Image\tkJpg.cpp">
       <Filter>Image\Source</Filter>
     </ClCompile>
     <ClCompile Include="Control\ErrorCodes.cpp">
@@ -1807,6 +1801,12 @@
       <Filter>Image\Source</Filter>
     </ClCompile>
     <ClCompile Include="Image\HistogramData.cpp">
+      <Filter>Image\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\tkJpg.cpp">
+      <Filter>Image\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\tkGif.cpp">
       <Filter>Image\Source</Filter>
     </ClCompile>
   </ItemGroup>

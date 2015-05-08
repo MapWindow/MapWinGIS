@@ -65,7 +65,6 @@ private:
 	bool ReadImageSpecs(IImage* iimg, ImageSpecs& specs);
 	IImage* CreateSmallerProxyForGdalRaster(ImageSpecs& specs, IImage* img, CRect rcBounds, int bytesPerPixel);
 	int GetRowBytePad(int width, int bitsPerPixel);
-	void InitBitmapHeader(int width, int bitsPerPixel, int height, int pad, BITMAPINFO& bif);
 	ScreenBitmap* CreateScreenBitmap(double dstL, double dstT, double dstW, double dstH);
 	unsigned char* ReadGdalBufferBlock(unsigned char* buffer, int row, int width, int bytesPerPixel, int pad, int numRead);
 	void DrawGdalImage(Gdiplus::Graphics* g, Gdiplus::Image* img, Gdiplus::ImageAttributes* imgAttr, double dstL, double dstT, double dstW, double dstH, int imgX, int imgY, int imgH, int imgW, bool atOrigin);

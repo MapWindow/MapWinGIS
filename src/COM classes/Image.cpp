@@ -20,8 +20,8 @@
 #include "Image.h"
 #include "colour.h"
 #include "ImageResampling.h"
-#include "tkGif.h"
 #include "tkJpg.h"
+#include "tkGif.h"
 #include "GdalRaster.h"
 #include "projections.h"
 #include "Templates.h"
@@ -436,44 +436,40 @@ bool CImageClass::CopyGdalDataset(CStringW imageFilename, ImageType fileType, bo
 // **********************************************************
 //	  CreateNew()
 // **********************************************************
-STDMETHODIMP CImageClass::CreateNew(long NewWidth, long NewHeight, VARIANT_BOOL *retval)
+STDMETHODIMP CImageClass::CreateNew(long newWidth, long newHeight, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	//This function creates a new image data array
-	//Check the NewWidth and NewHeight to see if they are valid numbers
-	//Note that any information stored in ImageData will be lost unless 
-	//it is written to a file first.
 	*retval = VARIANT_FALSE;
 
-	if (NewWidth > 0 && NewHeight > 0)
+	if (newWidth <= 0 || newHeight <= 0)
 	{
-		this->Close(retval);
-		
-		if (!retval)
-			return S_OK;
-		
-		try
-		{
-			_imageData = new colour[NewWidth*NewHeight];
-		}
-		catch(...)
-		{
-			ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
-			return S_OK;
-		}
-		
-		_height = NewHeight;
-		_width = NewWidth;
-		_inRam = true;
-		_sourceType = istInMemory;
-		*retval = VARIANT_TRUE;
-	}
-	else
-	{
-		//can't create an array with Width <= 0 or Height <= 0
 		ErrorMessage(tkINVALID_WIDTH_OR_HEIGHT);
+		return S_OK;
 	}
+
+	this->Close(retval);
+
+	if (!retval) {
+		return S_OK;
+	}
+
+	try
+	{
+		_imageData = new colour[newWidth*newHeight];
+	}
+	catch (...)
+	{
+		ErrorMessage(tkFAILED_TO_ALLOCATE_MEMORY);
+		return S_OK;
+	}
+
+	_height = newHeight;
+	_width = newWidth;
+	_inRam = true;
+	_sourceType = istInMemory;
+	*retval = VARIANT_TRUE;
+	
 	return S_OK;
 }
 
@@ -682,48 +678,38 @@ STDMETHODIMP CImageClass::get_Value(long row, long col, long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-	// lsu 18-07-2010: excluded the code for loading the buffer; it can be confusing I guess 
-	// as reloading buffer can change values of Width and Height, and this call
-	// can be incorporate in cycle with old values of height.
-	// What is needed is to ensure the the consistency of buffer with 
-	// properties like width, height, etc. If Height is equal to 0 (no buffer loaded)
-	// then it's reasonable thing to receive nothing from GetRow or GetValue calls
-	// Reload buffer with SetVisibleExtents and use the values then.
-	// By default it's expected to have buffer of visible pixels in place after each redraw
 	if ( _gdal && !_dataLoaded )
 	{
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
+		return S_OK;
 	}
-	else
-	{
 
-		row = _height -1 - row;	//reverse the position of 0,0 (the origin) so that it is at the top left of the image
-		colour currentPixel;
-		
-		if (( row >= 0 && row < _height ) && (col >=0 && col < _width ))
-		{
-			if( _inRam )
-			{
-				currentPixel = _imageData[row * _width + col];
-				*pVal = RGB(currentPixel.red ,currentPixel.green, currentPixel.blue);
-			}
-			else
-			{	
-				if ( _imgType == BITMAP_FILE )
-				{	
-					colour tmp = _bitmapImage->getValue(row,col);
-					*pVal = RGB(tmp.red,tmp.green,tmp.blue);
-				}
-				else
-					*pVal = -1;
-			}
-		}
-		else
-		{	
-			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-			*pVal = -1;
-		}
+	row = _height - 1 - row;	//reverse the position of 0,0 (the origin) so that it is at the top left of the image
+	
+
+	if (row < 0 || row >= _height || col < 0 || col >= _width)
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*pVal = -1;
+		return S_OK;
 	}
+
+	if (_inRam)
+	{
+		colour currentPixel = _imageData[row * _width + col];
+		*pVal = currentPixel.ToOleColor();
+		return S_OK;
+	}
+	
+	if (_imgType == BITMAP_FILE)
+	{
+		colour tmp = _bitmapImage->getValue(row, col);
+		*pVal = tmp.ToOleColor();
+		return S_OK;
+	}
+	
+	*pVal = -1;
+	
 	return S_OK;
 }
 
@@ -737,37 +723,35 @@ STDMETHODIMP CImageClass::put_Value(long row, long col, long newVal)
 	row = _height -1 - row;	//reverse the position of 0,0 (the origin) so that
 							//it is at the top left of the image
 
-	if (( row >= 0 && row < _height ) && (col >=0 && col < _width ))
+	if (row < 0 || row >= _height || col < 0 || col >= _width)
 	{
-		if( _inRam )
-		{
-			_imageData[row * _width + col].blue = GetBValue(newVal);
-			_imageData[row * _width + col].red = GetRValue(newVal);
-			_imageData[row * _width + col].green = GetGValue(newVal);
-		}
-		else
-		{	
-			if( _imgType == BITMAP_FILE )
-			{
-				bool setval = _bitmapImage->setValue( row, col, colour(GetRValue(newVal), GetGValue(newVal),GetBValue(newVal)));
-				if ( ! setval == false )
-				{	
-					ErrorMessage(tkUNRECOVERABLE_ERROR);
-				}
-			}
-			else if (_gdal) 
-			{
-				CallbackHelper::ErrorMsg("Writing of GDAL formats is not yet supported.");
-			}	
-			else
-			{	
-				//only BMP files can set values disk-based
-				ErrorMessage(tkUNAVAILABLE_IN_DISK_MODE);
-			}
-		}
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+	
+	if( _inRam )
+	{
+		_imageData[row * _width + col].FromOleColor(newVal);
 	}
 	else
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+	{	
+		if( _imgType == BITMAP_FILE )
+		{
+			if (!_bitmapImage->setValue(row, col, colour(newVal)))
+			{
+				ErrorMessage(tkUNRECOVERABLE_ERROR);
+			}
+		}
+		else if (_gdal) 
+		{
+			CallbackHelper::ErrorMsg("Writing of GDAL formats is not yet supported.");
+		}	
+		else
+		{	
+			//only BMP files can set values disk-based
+			ErrorMessage(tkUNAVAILABLE_IN_DISK_MODE);
+		}
+	}
 
 	return S_OK;
 }
@@ -1436,86 +1420,85 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 		// the operations of loading buffer and subsequent calls
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
 		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+	
+	HBITMAP hBMP;
+	hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
+		
+	if( hBMP == NULL )
+	{	
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+
+	BITMAP bm;
+	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
+	{	
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+
+	if( bm.bmWidth != _width || bm.bmHeight != _height )
+	{	
+		*retval = VARIANT_FALSE;
+		return S_OK;
+	}
+
+	int pad = ImageHelper::GetRowBytePad(_width, _bitsPerPixel);
+
+	int bytesPerPixel = _bitsPerPixel / 8;		
+
+	unsigned char * bits = new unsigned char[(_width * bytesPerPixel + pad) * _height];
+
+	if( _inRam )
+	{	
+		long rowLength = _width * bytesPerPixel + pad;
+		long loc = 0;
+		for(int i = 0; i < _height; i++ )
+		{	
+			memcpy(&(bits[loc]),&(_imageData[i*_width]),_width*sizeof(colour));
+			loc += rowLength;
+		}
 	}
 	else
 	{
-		HBITMAP hBMP;
-		hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
-		
-		if( hBMP == NULL )
-		{	*retval = VARIANT_FALSE;
-			return S_OK;
-		}
+		long clr = RGB(0,0,0);
+		long rowLength = _width * bytesPerPixel + pad;
 
-		//Get the BITMAP Structure
-		//Get the dimensions
-		BITMAP bm;
-		if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
-		{	*retval = VARIANT_FALSE;
-			return S_OK;
-		}
-
-		if( bm.bmWidth != _width || bm.bmHeight != _height )
-		{	*retval = VARIANT_FALSE;
-			return S_OK;
-		}
-
-		long pad = _width*24;
-		pad %= 32;
-		if(pad != 0)
-		{	pad = 32 - pad;
-			pad /= 8;
-		}
-		
-		unsigned char * bits = new unsigned char[(_width*3 + pad)*_height];	
-
-		if( _inRam )
+		for(int j = 0; j < _height; j++ )
 		{	
-			long rowLength = _width*3 + pad;
-			long loc = 0;
-			for(int i=0; i < _height; i++ )
+			for(int i = 0; i < _width; i++ )
 			{	
-				memcpy(&(bits[loc]),&(_imageData[i*_width]),_width*sizeof(colour));
-				loc += rowLength;
+				// can be optimize; why doing it per-byte
+				get_Value(_height-j-1, i, &clr);
+				bits[j*rowLength + i * 3] = GetBValue(clr);					
+				bits[j*rowLength + i * 3 + 1] = GetGValue(clr);
+				bits[j*rowLength + i * 3 + 2] = GetRValue(clr);				
+				bits[j*rowLength + i * 3 + 3] = GET_ALPHA(clr);
 			}
 		}
-		else
-		{
-			long clr = RGB(0,0,0);
-			long rowLength = _width*3 + pad;
-			for(int j = 0; j < _height; j++ )
-			{	
-				for(int i = 0; i < _width; i++ )
-				{	
-					get_Value(_height-j-1,i,&clr);
-					bits[j*rowLength + i*3] = GetBValue(clr);					
-					bits[j*rowLength + i*3 + 1] = GetGValue(clr);
-					bits[j*rowLength + i*3 + 2] = GetRValue(clr);				
-				}
-			}
-		}
-		
-		BITMAPINFO bif;
-		BITMAPINFOHEADER bih;
-		bih.biBitCount = 24;
-		bih.biWidth = _width;
-		bih.biHeight = _height;
-		bih.biPlanes = 1;
-		bih.biSize = sizeof(BITMAPINFOHEADER);
-		bih.biCompression = 0;
-		bih.biXPelsPerMeter = 0;
-		bih.biYPelsPerMeter = 0;
-		bih.biClrUsed = 0;
-		bih.biClrImportant = 0;
-		bih.biSizeImage = (_width*3 + pad)*_height;
-		bif.bmiHeader = bih;
-
-		SetDIBitsToDevice((HDC)hDC,0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
-			
-		*retval = VARIANT_TRUE;
-		delete [] bits; //--Lailin Chen 2006/4/12, Fixed a piece of memory leak.
-		bits = NULL;
 	}
+		
+	BITMAPINFO bif;
+	BITMAPINFOHEADER bih;
+	bih.biBitCount = _bitsPerPixel;
+	bih.biWidth = _width;
+	bih.biHeight = _height;
+	bih.biPlanes = 1;
+	bih.biSize = sizeof(BITMAPINFOHEADER);
+	bih.biCompression = 0;
+	bih.biXPelsPerMeter = 0;
+	bih.biYPelsPerMeter = 0;
+	bih.biClrUsed = 0;
+	bih.biClrImportant = 0;
+	bih.biSizeImage = (_width * bytesPerPixel + pad) * _height;
+	bif.bmiHeader = bih;
+
+	SetDIBitsToDevice((HDC)hDC,0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
+			
+	*retval = VARIANT_TRUE;
+	delete [] bits; 
 
 	return S_OK;
 }
@@ -1524,60 +1507,63 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 //		SetDCBitsToImage
 // ****************************************************************
 // Used with DIBSection bits in Map::Snapshot3.
-bool CImageClass::SetDCBitsToImage(long hDC,BYTE* bits)
+bool CImageClass::SetDCBitsToImage(long hDC, BYTE* bits)
 {
-	HBITMAP hBMP;
-	hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
-	if( hBMP == NULL )
+	HBITMAP hBMP = (HBITMAP)GetCurrentObject((HDC)hDC, OBJ_BITMAP);
+	if (hBMP == NULL) {
 		return false;
+	}
 
 	BITMAP bm;
-	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
+	if (!GetObject(hBMP, sizeof(BITMAP), (void*)&bm)) {
 		return false;
-	long paddedWidth = bm.bmWidthBytes;
-	
-	// creating resulting image
-	VARIANT_BOOL vbretval;
-	Close(&vbretval);
-	CreateNew(bm.bmWidth,bm.bmHeight,&vbretval);
-	if (!vbretval)
-		return false;
-	
+	}
+
+	// creating resulting image	
+	VARIANT_BOOL vb;
+	CreateNew(bm.bmWidth, bm.bmHeight, &vb);
+	if (!vb) return false;
+		
 	// copying the bytes
 	long loc = 0;
-	//for(int i=Height-1;i>=0;i--)
-	for(int i=0;i < _height;i++)
+	long paddedWidth = bm.bmWidthBytes;
+
+	// TODO: alpha byte should be inserted for each pixel
+	for(int i = 0; i < _height; i++)
 	{	
-		memcpy(&(_imageData[i*_width]),&(bits[loc]),bm.bmWidth*3);
+		memcpy(&(_imageData[i*_width]), &(bits[loc]), bm.bmWidth * 3);
 		loc += paddedWidth;
 	}
+
 	return true;
 }
 
+// ****************************************************************
+//		SetImageBitsDCCore
+// ****************************************************************
 bool CImageClass::SetImageBitsDCCore(HDC hDC)
 {
 	HBITMAP hBMP = (HBITMAP)GetCurrentObject(hDC,OBJ_BITMAP);
 	if( hBMP == NULL ) return false;
 
-	//Get the BITMAP Structure
-	//Get the dimensions
 	BITMAP bm;
-	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
+	if (!GetObject(hBMP, sizeof(BITMAP), (void*)&bm)) {
 		return false;
+	}
 	
-	//Clean up the old tkImage and Create a new tkImage
-	VARIANT_BOOL vbretval;
-	Close(&vbretval);
-	CreateNew(bm.bmWidth,bm.bmHeight,&vbretval);
-	if (!vbretval)
+	VARIANT_BOOL vb;
+	CreateNew(bm.bmWidth,bm.bmHeight,&vb);
+	if (!vb) {
 		return false;
+	}
 
-	long sizeBMP = bm.bmWidthBytes*bm.bmHeight;
+	long sizeBMP = bm.bmWidthBytes * bm.bmHeight;
 	BYTE * bits = new BYTE[sizeBMP];
-	GetBitmapBits(hBMP,sizeBMP,bits);
+	GetBitmapBits(hBMP, sizeBMP, bits);
 
 	long paddedWidth = bm.bmWidthBytes;
 
+	// TODO: add bits per pixel as a parameter
 	register int i;	
 	long loc=0;
 	bool forward = false;
@@ -1659,6 +1645,8 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 {
 	USES_CONVERSION;
+
+	// TODO: use GeoProjection class
 
 	char * projection = W2A(Proj4);
 
@@ -1972,14 +1960,12 @@ STDMETHODIMP CImageClass::put_UpsamplingMode(tkInterpolationMode newVal)
 STDMETHODIMP CImageClass::get_DrawingMethod(int* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal =_drawingMethod;
+	*retVal = 0;
 	return S_OK;
 }
 STDMETHODIMP CImageClass::put_DrawingMethod(int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_drawingMethod = newVal;
-	_bufferReloadIsNeeded = true;
 	return S_OK;
 }
 

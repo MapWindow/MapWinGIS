@@ -21,6 +21,7 @@
 #include "MapViewCallback.h"
 #include "DebugHelper.h"
 #include "CallbackHelper.h"
+#include "macros.h"
 
 #pragma warning(disable:4482)	// non-standard extension used - for names of enumerations
 #pragma warning(disable:4099)	// missing program database

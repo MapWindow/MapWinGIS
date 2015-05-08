@@ -258,6 +258,8 @@
     <ClInclude Include="Image\cq.h" />
     <ClInclude Include="Image\HistogramData.h" />
     <ClInclude Include="Image\QColorMatrix.h" />
+    <ClInclude Include="Image\tkGif.h" />
+    <ClInclude Include="Image\tkJpg.h" />
     <ClInclude Include="Ogr\GeosConverter.h" />
     <ClInclude Include="Ogr\GeosHelper.h" />
     <ClInclude Include="Ogr\Ogr2RawData.h" />
@@ -333,8 +335,6 @@
     <ClInclude Include="Image\InMemoryBitmap.h" />
     <ClInclude Include="Image\RasterMatrix.h" />
     <ClInclude Include="Image\tkBitmap.h" />
-    <ClInclude Include="Image\tkGif.h" />
-    <ClInclude Include="Image\tkJpg.h" />
     <ClInclude Include="Image\GdalRaster.h" />
     <ClInclude Include="Control\DispIds.h" />
     <ClInclude Include="Control\Enumerations.h" />
@@ -569,8 +569,6 @@
     <ClCompile Include="Image\QColorMatrix.cpp" />
     <ClCompile Include="Image\RasterMatrix.cpp" />
     <ClCompile Include="Image\tkBitmap.cpp" />
-    <ClCompile Include="Image\tkGif.cpp" />
-    <ClCompile Include="Image\tkJpg.cpp" />
     <ClCompile Include="Image\GdalRaster.cpp" />
     <ClCompile Include="Control\ErrorCodes.cpp" />
     <ClCompile Include="Control\GlobalVars.cpp" />
@@ -593,6 +591,8 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
+    <ClCompile Include="Image\tkGif.cpp" />
+    <ClCompile Include="Image\tkJpg.cpp" />
     <ClCompile Include="Ogr\GeosConverter.cpp" />
     <ClCompile Include="Ogr\GeosHelper.cpp" />
     <ClCompile Include="Ogr\Ogr2RawData.cpp" />

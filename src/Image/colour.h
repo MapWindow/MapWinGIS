@@ -9,14 +9,18 @@ class colour
 {
 public:
 	colour();
+	colour(long oleColor);
 	colour(unsigned char r, unsigned char g, unsigned char b);
-	
+
 	unsigned char	blue;
 	unsigned char	green;
 	unsigned char	red;	
 	unsigned char   alpha;
 
 	bool operator==( const colour & c );
+
+	OLE_COLOR ToOleColor();
+	void FromOleColor(long color);
 };
 
 #ifdef RELEASE_MODE

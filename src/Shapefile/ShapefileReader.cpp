@@ -49,8 +49,8 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 void SwapEndian(char* c)
 {
 	char ctmp;
-	SWAP(c[0],c[3],ctmp);
-	SWAP(c[1],c[2],ctmp);
+	SWAP_LOCAL(c[0],c[3],ctmp);
+	SWAP_LOCAL(c[1], c[2], ctmp);
 }
 
 // ****************************************************************
