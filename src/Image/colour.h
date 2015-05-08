@@ -14,6 +14,7 @@ public:
 	unsigned char	blue;
 	unsigned char	green;
 	unsigned char	red;	
+	unsigned char   alpha;
 
 	bool operator==( const colour & c );
 };

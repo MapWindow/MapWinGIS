@@ -64,7 +64,7 @@ ScreenBitmap* CImageDrawer::DrawImage(const CRect & rcBounds, IImage* img, bool 
 	}
     else
 	{	
-		int bitsPerPixel = 24;		
+		int bitsPerPixel = 32;		
 
 		IImage* imgTemp = CreateSmallerProxyForGdalRaster(specs, img, rcBounds, bitsPerPixel / 8);
 
