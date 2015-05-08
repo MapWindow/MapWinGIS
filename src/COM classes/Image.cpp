@@ -32,6 +32,7 @@
 #include <io.h>
 #include "RasterBandHelper.h"
 #include "GdalDriver.h"
+#include "ImageHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1025,36 +1026,7 @@ bool CImageClass::WriteBMP(CStringW ImageFile, bool WorldFile, ICallback *cBack)
 }
 
 // **********************************************************
-//	  WriteGIF()
-// **********************************************************
-bool CImageClass::WriteGIF(CString ImageFile, bool WorldFile, ICallback *cBack)
-{
-	bool result;
-	tkGif gif;
-	gif.key = _key;
-	gif.cBack = cBack;
-	
-	gif.InitSize(_width, _height);
-	memcpy(gif.buffer, _imageData, _height*_width*3);
-
-	result = gif.WriteGif((LPCTSTR)ImageFile);
-
-	if(WorldFile)
-	{
-		CStringW WorldFileName = Utility::ChangeExtension(_fileName, L".gpw");
-		result = WriteWorldFile(WorldFileName) == VARIANT_TRUE;
-		if(!result)
-		{
-			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
-			return result;
-		}
-	}
-
-	return result;
-}
-
-// **********************************************************
-//	  WriteJPEG()
+//	  WriteGDIPlus()
 // **********************************************************
 bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack)
 {
@@ -1314,152 +1286,6 @@ bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
 	return true;
 }
 
-// **********************************************************
-//	  ReadGIF()
-// **********************************************************
-bool CImageClass::ReadGIF(CString ImageFile)
-{
-	bool result;
-	_inRam = true;
-
-	if(_imageData)
-		delete [] _imageData;
-
-	tkGif gif;
-	result = gif.ReadGif((LPCTSTR)ImageFile);
-
-	if(!result)
-	{
-		ErrorMessage(tkCANT_OPEN_FILE);
-		return false;
-	}
-
-	_height = gif.getHeight();
-	_width = gif.getWidth();
-	_imgType = GIF_FILE;
-	USES_CONVERSION;
-	_fileName = A2W(ImageFile);
-
-	_imageData = new colour[_width*_height];
-	memcpy(_imageData, gif.buffer, _width*_height*3);
-	
-	int LocationOfPeriod = ImageFile.ReverseFind('.');
-	CString WorldFileName = ImageFile.Left(LocationOfPeriod);
-	WorldFileName += ".gfw";
-	ReadWorldFile(A2W(WorldFileName));				// TODO: use Unicode
-
-	if(gif.hasTransparency)
-	{
-		_transColor = (int)gif.transColor;
-		_useTransColor = VARIANT_TRUE;
-	}
-	else
-	{
-		long val;
-		get_Value( 0, 0, &val );					
-		_transColor = val;
-	}
-
-	return true;
-}
-
-// **********************************************************
-//	  ReadPPM()
-// **********************************************************
-bool CImageClass::ReadPPM(CString ImageFile, bool InRam)
-{
-	bool result;
-	_inRam = InRam;
-
-	if(_imageData)
-		delete [] _imageData;
-
-	tkGif ppm;
-	result = ppm.ReadPPM((LPCTSTR)ImageFile);
-
-	if(!result)
-	{
-		ErrorMessage(tkCANT_OPEN_FILE);
-		return false;
-	}
-
-	_height = ppm.getHeight();
-	_width = ppm.getWidth();
-	_imgType = PPM_FILE;
-	USES_CONVERSION;
-	_fileName = A2W(ImageFile);
-
-	_imageData = new colour[_width*_height];
-	memcpy(_imageData, ppm.buffer, _width*_height*3);
-	
-	int LocationOfPeriod = ImageFile.ReverseFind('.');
-	CString WorldFileName = ImageFile.Left(LocationOfPeriod);
-	WorldFileName += ".pmw";
-	ReadWorldFile(A2W(WorldFileName));		// TODO: use Unicode
-
-	long val;
-	get_Value( 0, 0, &val );					
-	_transColor = val;
-	return true;
-}
-
-// **********************************************************
-//	  ReadJPEG()
-// **********************************************************
-bool CImageClass::ReadJPEG(CString ImageFile)
-{
-	bool result;
-	_inRam = true;
-
-	if(_imageData)
-		delete [] _imageData;
-
-	tkJpg jpg;
-	result = jpg.ReadJpg((LPCTSTR)ImageFile);
-
-	if(!result)
-	{
-		ErrorMessage(tkCANT_OPEN_FILE);
-		return false;
-	}
-
-	_height = jpg.getHeight();
-	_width = jpg.getWidth();
-	_imgType = JPEG_FILE;
-	USES_CONVERSION;
-	_fileName = A2W(ImageFile);
-	_imageData = new colour[_width*_height];
-	memcpy(_imageData, jpg.buffer, _width*_height*3);
-	
-	int LocationOfPeriod = ImageFile.ReverseFind('.');
-	CString WorldFileName = ImageFile.Left(LocationOfPeriod);
-	
-	WorldFileName += ".jpgw";
-	ReadWorldFile(A2W(WorldFileName));				// TODO: use Unicode
-	
-	//{
-	//	dX = jpg.getDX();
-	//	dY = jpg.getDY();
-	//	XllCenter = jpg.getXllCenter();
-	//	YllCenter = jpg.getYllCenter();
-	//
-	//	}
-
-	if(jpg.hasTransparency)
-	{
-		_transColor = (int)jpg.transColor;
-		_useTransColor = VARIANT_TRUE;
-	}
-	else
-	{
-		long val;
-		get_Value( 0, 0, &val );					
-		_transColor = val;
-	}
-
-	return true;
-}
-
 // ***********************************************************************
 //		SetVisibleExtents()
 // ***********************************************************************
@@ -1488,7 +1314,6 @@ STDMETHODIMP CImageClass::SetVisibleExtents(double newMinX, double newMinY,	doub
 			_dataLoaded = true;
 		}
 	}
-	_bufferReloadIsNeeded = false;
 	_bufferReloadIsNeeded = false;
 	return S_OK;
 }
@@ -3906,37 +3731,11 @@ STDMETHODIMP CImageClass::put_ColorizeColor(OLE_COLOR newVal)
 // ********************************************************
 //     GetColorMatrix
 // ********************************************************
-#include "QColorMatrix.h"
 Gdiplus::ColorMatrix CImageClass::GetColorMatrix()
 {
-	QColorMatrix matrix;
-	matrix.m[3][3] = static_cast<float>(_transparencyPercent);
-
-	if (_contrast != 1.0f) {
-		matrix.ScaleColors(_contrast, MatrixOrderPrepend);
-	}
-
-	if (_brightness != 0.0f) {
-		matrix.TranslateColors(_brightness, MatrixOrderAppend);
-	}
-	
-	if (_saturation != 1.0f) {
-		matrix.SetSaturation(_saturation, MatrixOrderAppend);
-	}
-
-	if (_hue != 0.0f)  {
-		matrix.RotateHue(_hue);
-	}
-
-	if (_colorizeIntensity != 0.0) {
-		matrix.Colorize(_colorizeColor, _colorizeIntensity, MatrixOrderAppend);
-	}
-	
-	if (_setRGBToGrey) {
-		matrix.SetGreyscale(MatrixOrderAppend);
-	}
-
-	return matrix;
+	Gdiplus::ColorMatrix m = ImageHelper::CreateMatrix(_contrast, _brightness, _saturation, 
+				_hue, _colorizeIntensity, _colorizeColor, _setRGBToGrey, _transparencyPercent);
+	return m;
 }
 
 // ********************************************************

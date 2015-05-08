@@ -381,15 +381,11 @@ public:
 
 private:
 	bool Resample();
-	bool ReadPPM(CString ImageFile, bool InRam = true);
-	bool ReadGIF(CString ImageFile);
-	bool ReadJPEG(CString ImageFile);
 	bool ReadBMP(const CStringW ImageFile, bool InRam);
 	bool OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode);
 
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
 	bool WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack);
-	bool WriteGIF(CString ImageFile, bool WorldFile, ICallback * cBack);
 	bool WriteBMP(CStringW FileName, bool WriteWorldFile, ICallback *cBack);
 	bool WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
 

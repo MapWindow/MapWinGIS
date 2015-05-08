@@ -1227,7 +1227,7 @@ STDMETHODIMP CGrid::Open(BSTR Filename, GridDataType DataType, VARIANT_BOOL InRa
 		return S_OK;
 	}
 
-	_filename = OLE2BSTR(Filename);
+	_filename = OLE2W(Filename);
 	ICallback * tmpCallback = _globalCallback;
 	if( cBack != NULL )	_globalCallback = cBack;
 	bool inRam = InRam == VARIANT_TRUE ? true: false;
