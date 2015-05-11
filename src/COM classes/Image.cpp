@@ -1306,28 +1306,29 @@ STDMETHODIMP CImageClass::get_Picture(IPictureDisp **pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( _width > 0 && _height > 0 )
-	{	
-		HDC desktop = GetDC(GetDesktopWindow());
-		HDC compatdc = CreateCompatibleDC(desktop);
-		HBITMAP bmp = CreateCompatibleBitmap(desktop,_width,_height);
-		HGDIOBJ oldobj = SelectObject(compatdc,bmp);
-		VARIANT_BOOL vbretval;
-		GetImageBitsDC((long)compatdc,&vbretval);
-		DeleteDC(compatdc);
-		ReleaseDC(GetDesktopWindow(),desktop);
-
-		PICTDESC pd;
-		pd.cbSizeofstruct = sizeof(PICTDESC);
-		pd.picType = PICTYPE_BITMAP;
-		pd.bmp.hbitmap = bmp;
-		pd.bmp.hpal = NULL;
-
-		OleCreatePictureIndirect(&pd,IID_IPictureDisp,TRUE,(void**)pVal);
-	}
-	else
+	if (_width <= 0 || _height <= 0)
+	{
 		*pVal = NULL;
-	
+		return S_OK;
+	}
+
+	HDC desktop = GetDC(GetDesktopWindow());
+	HDC compatdc = CreateCompatibleDC(desktop);
+	HBITMAP bmp = CreateCompatibleBitmap(desktop, _width, _height);
+	HGDIOBJ oldobj = SelectObject(compatdc, bmp);
+	VARIANT_BOOL vbretval;
+	GetImageBitsDC((long)compatdc, &vbretval);
+	DeleteDC(compatdc);
+	ReleaseDC(GetDesktopWindow(), desktop);
+
+	PICTDESC pd;
+	pd.cbSizeofstruct = sizeof(PICTDESC);
+	pd.picType = PICTYPE_BITMAP;
+	pd.bmp.hbitmap = bmp;
+	pd.bmp.hpal = NULL;
+
+	OleCreatePictureIndirect(&pd, IID_IPictureDisp, TRUE, (void**)pVal);
+
 	return S_OK;
 }
 
@@ -1436,7 +1437,7 @@ STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 	{	
 		long rowLength = _width * bytesPerPixel + pad;
 		long loc = 0;
-		for(int i = 0; i < _height; i++ )
+		for(int i = _height; i >= 0; i-- )
 		{	
 			memcpy(&(bits[loc]),&(_imageData[i*_width]),_width*sizeof(colour));
 			loc += rowLength;
@@ -1520,9 +1521,9 @@ bool CImageClass::SetDCBitsToImage(long hDC, BYTE* bits)
 }
 
 // ****************************************************************
-//		SetImageBitsDCCore
+//		DCBitsToImageBuffer
 // ****************************************************************
-bool CImageClass::SetImageBitsDCCore(HDC hDC)
+bool CImageClass::DCBitsToImageBuffer(HDC hDC)
 {
 	HBITMAP hBMP = (HBITMAP)GetCurrentObject(hDC,OBJ_BITMAP);
 	if( hBMP == NULL ) return false;
@@ -1537,73 +1538,80 @@ bool CImageClass::SetImageBitsDCCore(HDC hDC)
 	if (!vb) {
 		return false;
 	}
+	
+	int bitsPerPixel = 32;
+	int bytesPerPixel = bitsPerPixel / 8;
+	
+	if (bm.bmBitsPixel == bitsPerPixel)
+	{
+		DCBitsToImageBuffer32(hBMP, bm, bytesPerPixel);
+	}
+	else
+	{
+		DCBitsToImageBufferWithPadding(hDC, hBMP, bitsPerPixel);
+	}
+	
+	return true;
+}
 
+// ****************************************************************
+//		DCBitsToImageBufferWithPadding
+// ****************************************************************
+void CImageClass::DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bitsPerPixel)
+{
+	int bytesPerPixel = bitsPerPixel * 8;
+
+	int pad = ImageHelper::GetRowBytePad(_width, bitsPerPixel);
+	long sizeBMP = (_width* bytesPerPixel + pad)*_height;
+
+	BITMAPINFO bif;
+	BITMAPINFOHEADER bih;
+	bih.biBitCount = bitsPerPixel;
+	bih.biWidth = _width;
+	bih.biHeight = _height;
+	bih.biPlanes = 1;
+	bih.biSize = sizeof(BITMAPINFOHEADER);
+	bih.biCompression = 0;
+	bih.biXPelsPerMeter = 0;
+	bih.biYPelsPerMeter = 0;
+	bih.biClrUsed = 0;
+	bih.biClrImportant = 0;
+	bih.biSizeImage = sizeBMP;
+	bif.bmiHeader = bih;
+
+	BYTE * bits = new BYTE[sizeBMP];
+
+	GetDIBits((HDC)hdc, hBMP, 0, _height, bits, &bif, DIB_RGB_COLORS);
+
+	long paddedWidth = _width * bytesPerPixel + pad;
+
+	long loc = 0;
+	for (int i = 0; i < _height; i++)
+	{
+		memcpy(&(_imageData[i*_width]), &(bits[loc]), _width * bytesPerPixel);
+		loc += paddedWidth;
+	}
+
+	delete[] bits;
+}
+
+// ****************************************************************
+//		DCBitsToImageBuffer32
+// ****************************************************************
+void CImageClass::DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPixel)
+{
 	long sizeBMP = bm.bmWidthBytes * bm.bmHeight;
 	BYTE * bits = new BYTE[sizeBMP];
 	GetBitmapBits(hBMP, sizeBMP, bits);
 
+	long loc = 0;
 	long paddedWidth = bm.bmWidthBytes;
 
-	// TODO: add bits per pixel as a parameter
-	register int i;	
-	long loc=0;
-	bool forward = false;
-	if( bm.bmBitsPixel != 24 )
-	{	
-		long pad=(_width*24)%32;
-		if(pad!=0)
-		{	pad=32-pad;
-			pad/=8;
-		}
-
-		BITMAPINFO bif;
-		BITMAPINFOHEADER bih;
-		bih.biBitCount=24;
-		bih.biWidth=_width;
-		bih.biHeight=_height;
-		bih.biPlanes=1;
-		bih.biSize=sizeof(BITMAPINFOHEADER);
-		bih.biCompression=0;
-		bih.biXPelsPerMeter=0;
-		bih.biYPelsPerMeter=0;
-		bih.biClrUsed=0;
-		bih.biClrImportant=0;
-		bih.biSizeImage=(_width*3+pad)*_height;
-		bif.bmiHeader = bih;
-
-		sizeBMP = (_width*3+pad)*_height;
-		BYTE * diBits = new BYTE[sizeBMP];
-
-		GetDIBits((HDC)hDC,hBMP,0,_height,diBits,&bif,DIB_RGB_COLORS);
-
-		delete [] bits;
-		bits = new BYTE[sizeBMP];
-		memcpy(bits,diBits,sizeBMP);
-		paddedWidth = (_width*3+pad);
-
-		forward = true;
-		delete[] diBits; //--2006/4/11 by Lailin Chen, Fixed the memory leak in snapshot function reported by Evan http://www.mapwindow.org/phorum/read.php?3,3031,3067#msg-3067   
-	}
-
-	if( forward )
-	{	
-		//Get Rid of the pad			
-		for(i=0;i<_height;i++)
-		{	memcpy(&(_imageData[i*_width]),&(bits[loc]),bm.bmWidth*3);
-			loc += paddedWidth;
-		}
-	}
-	else
+	for (int i = 0; i <= _height; i++)
 	{
-		//Get Rid of the pad			
-		for(i=_height-1;i>=0;i--)
-		{	memcpy(&(_imageData[i*_width]),&(bits[loc]),bm.bmWidth*3);
-			loc += paddedWidth;
-		}
+		memcpy(&(_imageData[i * _width]), &(bits[loc]), bm.bmWidth * bytesPerPixel);
+		loc += paddedWidth;
 	}
-	delete [] bits;
-	bits = NULL;
-	return true;
 }
 
 // ****************************************************************
@@ -1614,7 +1622,7 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
-	bool result = SetImageBitsDCCore((HDC)hDC);
+	bool result = DCBitsToImageBuffer((HDC)hDC);
 	*retval = result ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }

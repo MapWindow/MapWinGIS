@@ -388,11 +388,12 @@ private:
 
 	bool IsGdalImageAvailable();
 	bool BuildColorMap(colour* data, int size, VARIANT* Colors, VARIANT* Frequencies, long* count);
-	bool SetImageBitsDCCore(HDC hdc);
+	bool DCBitsToImageBuffer(HDC hdc);
 	bool CheckForProxy();
 	void ReadProjection();
 	bool CopyGdalDataset(CStringW imageFilename, ImageType fileType, bool writeWorldFile);
-
+	void DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPixel);
+	void DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bitsPerPixel);
 public:
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SerializePixels, CString ElementName);
@@ -419,6 +420,7 @@ public:
 	void SetRgbBandIndex(BandChannel channel, int bandIndex);
 
 	bool GetBufferReloadIsNeeded();
+	
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
