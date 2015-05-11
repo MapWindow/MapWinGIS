@@ -394,11 +394,12 @@ private:
 	bool CopyGdalDataset(CStringW imageFilename, ImageType fileType, bool writeWorldFile);
 	void DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPixel);
 	void DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bitsPerPixel);
+	void ImageBufferToBits(unsigned char * bits, int rowLength);
 public:
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SerializePixels, CString ElementName);
 
-	bool SetDCBitsToImage(long hDC,BYTE* bits);
+	//bool SetDCBitsToImage(long hDC,BYTE* bits);
 	unsigned char* get_ImageData();
 	void put_ImageData(colour* data);
 	bool get_BufferIsDownsampled();
@@ -420,7 +421,6 @@ public:
 	void SetRgbBandIndex(BandChannel channel, int bandIndex);
 
 	bool GetBufferReloadIsNeeded();
-	
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)

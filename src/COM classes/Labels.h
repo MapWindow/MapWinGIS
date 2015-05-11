@@ -79,11 +79,15 @@ public:
 	}
 	~CLabels()
 	{
-		this->Clear();
-		this->ClearCategories();
+		Clear();
+		ClearCategories();
 		::SysFreeString(_key);
 		::SysFreeString(_expression);
-		
+
+		if (_category) {
+			_category->Release();
+		}
+
 		_shapefile = NULL;
 
 		gReferenceCounter.Release(tkInterface::idLabels);

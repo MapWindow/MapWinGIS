@@ -219,3 +219,26 @@ int ImageHelper::GetRowBytePad(int width, int bitsPerPixel)
 
 	return pad;
 }
+
+// ******************************************************************
+//		GetBitmapHeader()
+// ******************************************************************
+BITMAPINFO ImageHelper::GetBitmapHeader(int bitsPerPixel, int width, int height, int pad)
+{
+	BITMAPINFO bif;
+	BITMAPINFOHEADER bih;
+	bih.biBitCount = bitsPerPixel;
+	bih.biWidth = width;
+	bih.biHeight = height;
+	bih.biPlanes = 1;
+	bih.biSize = sizeof(BITMAPINFOHEADER);
+	bih.biCompression = 0;
+	bih.biXPelsPerMeter = 0;
+	bih.biYPelsPerMeter = 0;
+	bih.biClrUsed = 0;
+	bih.biClrImportant = 0;
+	bih.biSizeImage = (width * bitsPerPixel / 8 + pad) * height;
+	bif.bmiHeader = bih;
+
+	return bif;
+}

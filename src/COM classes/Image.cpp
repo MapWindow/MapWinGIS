@@ -1395,129 +1395,77 @@ STDMETHODIMP CImageClass::putref_Picture(IPictureDisp *newVal)
 STDMETHODIMP CImageClass::GetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+		
+	*retval = VARIANT_FALSE;
 	
 	if (_gdal && !_dataLoaded)
 	{
-		// excluded the code for loading the buffer; I prefer to separate
-		// the operations of loading buffer and subsequent calls
 		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
-		*retval = VARIANT_FALSE;
 		return S_OK;
 	}
 	
 	HBITMAP hBMP;
 	hBMP = (HBITMAP)GetCurrentObject((HDC)hDC,OBJ_BITMAP);
-		
-	if( hBMP == NULL )
-	{	
-		*retval = VARIANT_FALSE;
+	if (hBMP == NULL)  {
 		return S_OK;
 	}
 
 	BITMAP bm;
-	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) )
-	{	
-		*retval = VARIANT_FALSE;
+	if(! GetObject(hBMP,sizeof(BITMAP),(void*)&bm) ) {	
 		return S_OK;
 	}
 
-	if( bm.bmWidth != _width || bm.bmHeight != _height )
-	{	
-		*retval = VARIANT_FALSE;
+	if( bm.bmWidth != _width || bm.bmHeight != _height ) {	
 		return S_OK;
 	}
 
 	int pad = ImageHelper::GetRowBytePad(_width, _bitsPerPixel);
 
-	int bytesPerPixel = _bitsPerPixel / 8;		
+	BITMAPINFO bif = ImageHelper::GetBitmapHeader(_bitsPerPixel, _width, _height, pad);
+	
+	long rowLength = _width * _bitsPerPixel / 8 + pad;
+	unsigned char * bits = new unsigned char[rowLength * _height];
 
-	unsigned char * bits = new unsigned char[(_width * bytesPerPixel + pad) * _height];
+	ImageBufferToBits(bits, rowLength);
 
-	if( _inRam )
-	{	
-		long rowLength = _width * bytesPerPixel + pad;
+	SetDIBitsToDevice((HDC)hDC,0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
+
+	delete [] bits; 
+
+	*retval = VARIANT_TRUE;
+	return S_OK;
+}
+
+// ****************************************************************
+//		ImageBufferToBits
+// ****************************************************************
+void CImageClass::ImageBufferToBits(unsigned char * bits, int rowLength)
+{
+	if (_inRam)
+	{
 		long loc = 0;
-		for(int i = _height; i >= 0; i-- )
-		{	
-			memcpy(&(bits[loc]),&(_imageData[i*_width]),_width*sizeof(colour));
+		for (int i = _height; i >= 0; i--)
+		{
+			memcpy(&(bits[loc]), &(_imageData[i*_width]), _width*sizeof(colour));
 			loc += rowLength;
 		}
 	}
 	else
 	{
-		long clr = RGB(0,0,0);
-		long rowLength = _width * bytesPerPixel + pad;
+		long clr = RGB(0, 0, 0);
 
-		for(int j = 0; j < _height; j++ )
-		{	
-			for(int i = 0; i < _width; i++ )
-			{	
-				// can be optimize; why doing it per-byte
-				get_Value(_height-j-1, i, &clr);
-				bits[j*rowLength + i * 3] = GetBValue(clr);					
+		for (int j = 0; j < _height; j++)
+		{
+			for (int i = 0; i < _width; i++)
+			{
+				get_Value(_height - j - 1, i, &clr);
+				bits[j*rowLength + i * 3] = GetBValue(clr);
 				bits[j*rowLength + i * 3 + 1] = GetGValue(clr);
-				bits[j*rowLength + i * 3 + 2] = GetRValue(clr);				
+				bits[j*rowLength + i * 3 + 2] = GetRValue(clr);
 				bits[j*rowLength + i * 3 + 3] = GET_ALPHA(clr);
 			}
 		}
 	}
-		
-	BITMAPINFO bif;
-	BITMAPINFOHEADER bih;
-	bih.biBitCount = _bitsPerPixel;
-	bih.biWidth = _width;
-	bih.biHeight = _height;
-	bih.biPlanes = 1;
-	bih.biSize = sizeof(BITMAPINFOHEADER);
-	bih.biCompression = 0;
-	bih.biXPelsPerMeter = 0;
-	bih.biYPelsPerMeter = 0;
-	bih.biClrUsed = 0;
-	bih.biClrImportant = 0;
-	bih.biSizeImage = (_width * bytesPerPixel + pad) * _height;
-	bif.bmiHeader = bih;
-
-	SetDIBitsToDevice((HDC)hDC,0,0,_width,_height,0,0,0,_height,bits,&bif,DIB_RGB_COLORS);
-			
-	*retval = VARIANT_TRUE;
-	delete [] bits; 
-
-	return S_OK;
-}
-
-// ****************************************************************
-//		SetDCBitsToImage
-// ****************************************************************
-// Used with DIBSection bits in Map::Snapshot3.
-bool CImageClass::SetDCBitsToImage(long hDC, BYTE* bits)
-{
-	HBITMAP hBMP = (HBITMAP)GetCurrentObject((HDC)hDC, OBJ_BITMAP);
-	if (hBMP == NULL) {
-		return false;
-	}
-
-	BITMAP bm;
-	if (!GetObject(hBMP, sizeof(BITMAP), (void*)&bm)) {
-		return false;
-	}
-
-	// creating resulting image	
-	VARIANT_BOOL vb;
-	CreateNew(bm.bmWidth, bm.bmHeight, &vb);
-	if (!vb) return false;
-		
-	// copying the bytes
-	long loc = 0;
-	long paddedWidth = bm.bmWidthBytes;
-
-	// TODO: alpha byte should be inserted for each pixel
-	for(int i = 0; i < _height; i++)
-	{	
-		memcpy(&(_imageData[i*_width]), &(bits[loc]), bm.bmWidth * 3);
-		loc += paddedWidth;
-	}
-
-	return true;
 }
 
 // ****************************************************************
@@ -1615,7 +1563,7 @@ void CImageClass::DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPi
 }
 
 // ****************************************************************
-//		SetDCBitsToImage
+//		SetImageBitsDC
 // ****************************************************************
 // Copies bits form the device context to image buffer
 STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)

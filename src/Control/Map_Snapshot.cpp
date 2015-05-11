@@ -288,7 +288,7 @@ void CMapView::RestoreExtents()
 // *********************************************************
 //		SnapShotCore()
 // *********************************************************
-// first 4 paramters - extents in map units; last 2 - the size of bitmap to draw this extents on
+// first 4 parameters - extents in map units; last 2 - the size of bitmap to draw this extents on
 IDispatch* CMapView::SnapShotCore(double left, double right, double top, double bottom, long Width, long Height, CDC* snapDC,
 								  float offsetX, float offsetY, float clipX, float clipY, float clipWidth, float clipHeight)
 {
