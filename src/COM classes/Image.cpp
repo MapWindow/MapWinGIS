@@ -1578,40 +1578,16 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 // ****************************************************************
 //		SetProjection
 // ****************************************************************
-// Chris Michaelis June 27 2006 for Ted Dunsford
 STDMETHODIMP CImageClass::SetProjection(BSTR Proj4, VARIANT_BOOL * retval)
 {
-	USES_CONVERSION;
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// TODO: use GeoProjection class
-
-	char * projection = W2A(Proj4);
-
-	// Attempt to write it to the .prj file
-	*retval = VARIANT_FALSE;
-	try
+	_projection->ImportFromProj4(Proj4, retval);
+	if (retval)
 	{
 		CStringW projectionFilename = Utility::GetProjectionFilename(_fileName);
-		if (projectionFilename != "")
-		{
-			FILE * prjFile = NULL;
-			prjFile = _wfopen(projectionFilename, L"wb");
-			if (prjFile)
-			{
-				char * wkt;
-				ProjectionTools * p = new ProjectionTools();
-				p->ToESRIWKTFromProj4(&wkt, projection);
-
-				fprintf(prjFile, "%s", wkt);
-				fclose(prjFile);
-				prjFile = NULL;
-				delete p; //added by Lailin Chen 12/30/2005
-				*retval = VARIANT_TRUE;
-			}
-		}
-	}
-	catch(...)
-	{
+		CComBSTR bstrFilename(projectionFilename);
+		_projection->WriteToFile(bstrFilename, retval);
 	}
 
 	return S_OK;

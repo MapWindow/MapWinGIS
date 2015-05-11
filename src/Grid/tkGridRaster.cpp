@@ -1628,6 +1628,7 @@ void tkGridRaster::ReadBGDHeader( CString filename, FILE * in, DATA_TYPE &bgdDat
 		char * projection = new char[MAX_STRING_LENGTH + 1];
 		fread( projection, sizeof(char), MAX_STRING_LENGTH,in);
 
+		// TODO: rewrite using GeoProjection class
 		// a .prj file will override what's in the header
 		try
 		{
@@ -1683,10 +1684,10 @@ void tkGridRaster::ReadBGDHeader( CString filename, FILE * in, DATA_TYPE &bgdDat
 		catch(...)
 		{}
 
+		// Don't do anything with the notes
 		char * notes = new char[MAX_STRING_LENGTH + 1];
 		fread( notes, sizeof(char), MAX_STRING_LENGTH, in);
 		delete[] notes;
-		// Don't do anything with the notes
 }
 
 bool tkGridRaster::contains(char * haystack, char needle) const
