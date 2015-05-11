@@ -557,8 +557,6 @@ bool GdalRaster::ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bo
 	return ReadBandDataAsGrid<float>(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff, setToGrey);
 }
 
-
-
 // *********************************************************
 //		SetEmptyBuffer()
 // *********************************************************
@@ -728,6 +726,11 @@ bool GdalRaster::LoadBufferFull(colour** ImageData, CStringW filename, double ma
 // *********************************************************
 int GdalRaster::GetMappedBandIndex(int bandIndex)
 {
+	if (_alphaRendering)
+	{
+		return _activeBandIndex;
+	}
+
 	if (_useRgbBandMapping)
 	{
 		if (bandIndex == 1)
@@ -743,6 +746,11 @@ int GdalRaster::GetMappedBandIndex(int bandIndex)
 		if (bandIndex == 3)
 		{
 			return _blueBandIndex;
+		}
+
+		if (bandIndex == 4)
+		{
+			return _alphaBandIndex;
 		}
 
 		return NULL;
@@ -860,6 +868,11 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
     for (int bandIndex = 1; bandIndex <= MAX(_nBands, 4); bandIndex++)
     {
 		int realBandIndex = GetMappedBandIndex(bandIndex);
+		if (realBandIndex == 0)
+		{
+			continue;
+		}
+
 		GDALRasterBand* poBand = _dataset->GetRasterBand(realBandIndex);
 
 		if (!poBand)
@@ -888,24 +901,26 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
-
+		
 		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, realBandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
+			int effectiveBandIndex = _alphaRendering ? 4 : bandIndex;
+
 			if (_genericType == GDT_Byte)
 			{
-				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
 			}
 			else if (_genericType == GDT_Int32)
 			{
-				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
 			}
 			else
 			{
-				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
 			}
 		}
 
-		if (_forceSingleBandRendering) {
+		if (_forceSingleBandRendering || _alphaRendering) {
 			break;
 		}
     }
@@ -1069,8 +1084,19 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 			{
 				val = src[i * xBuff + j];	
 				color = (*dst) + i * xBuff + j;
-				
-				if (singleBand)
+
+				if (_alphaRendering)
+				{
+					if (val == noDataValue)
+					{
+						color->alpha = 0;
+					}
+					else
+					{
+						color->alpha = static_cast<unsigned char>(double(val + shift) * ratio);
+					}
+				}
+				else if (singleBand)
 				{
 					// gray scale
 					if (val == noDataValue)
@@ -1094,12 +1120,14 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 						if (band == 1)		color->red = _transColor.r;
 						else if (band == 2)	color->green = _transColor.g;
 						else if (band == 3)	color->blue = _transColor.b;
+						else if (band == 4)	color->alpha = 255;				// TODO: use the exact value
 					}
 					else
 					{
 						if (band == 1)      color->red = static_cast<unsigned char>(double(val + shift)  * ratio);
 						else if (band == 2) color->green = static_cast<unsigned char>(double(val + shift) * ratio);
 						else if (band == 3) color->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
+						else if (band == 4) color->alpha = static_cast<unsigned char>(double(val + shift)  * ratio);
 					}
 				}
 			}
@@ -1115,6 +1143,17 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 			val = (unsigned char)src[i * xBuff + j];	
 			color = (*dst) + i * xBuff + j;
 				
+			if (_alphaRendering)
+			{
+				if (val == noDataValue)
+				{
+					color->alpha = 0;
+				}
+				else
+				{
+					color->alpha = static_cast<unsigned char>(val);
+				}
+			}
 			if (singleBand)
 			{
 				// gray scale
@@ -1429,222 +1468,130 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 				(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
 				(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
 				(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;			
+				continue;
 			} 
-			else if ( setRGBToGrey == true )
-			//Use Matt Perry's Method
+
+
+
+
+			// Use the normal hillshade method				
+			auto colorBreak = FindBreak( bvals, tmp );
+
+			if (colorBreak == nullptr) //A break is not defined for this value
 			{
-				int containsNull = 0;
+				(*ImageData)[i * xBuff + j].red = (unsigned char)_transColor.r;
+				(*ImageData)[i * xBuff + j].green = (unsigned char)_transColor.g;
+				(*ImageData)[i * xBuff + j].blue = (unsigned char)_transColor.b;
+				continue;
+			}
+
+ 			OLE_COLOR hiColor = colorBreak->hiColor;
+			OLE_COLOR lowColor = colorBreak->lowColor;
+
+			float hiVal = colorBreak->highVal;
+			float lowVal = colorBreak->lowVal;
+			float biRange = hiVal - lowVal;
+			if( biRange <= 0.0 )
+				biRange = 1.0;
+
+			ColoringType colortype = colorBreak->colortype;
+			GradientModel gradmodel = colorBreak->gradmodel;
+				
+			if (!_allowHillshade && colortype == Hillshade)
+				colortype = Gradient;
+
+			colort ct;
+			if( colortype == Hillshade )
+			{
+				float yone = 0, ytwo = 0, ythree = 0;
+
 				// Exclude the edges 
-				if (i == 0 || j == 0 || i == yBuff-1 || j == xBuff-1 ) 
+				if (i == 0 || j == 0 || i == yBuff - 1 || j == xBuff - 1)
 				{
 					// We are at the edge so write doDataValue and move on
+					yone = tmp;
+					ytwo = tmp;
+					ythree = tmp;
+				}
+				else
+				{
+					yone = tmp;
+					ytwo = (float)(pafScanArea[(i - 1) * xBuff + j + 1]);
+					ythree = (float)(pafScanArea[(i - 1) * xBuff + j]);
+				}
+
+				
+				
+				float xone = xll + csize * (i);
+				float xtwo = xone + csize;
+				float xthree = xone;
+					
+				float zone = yll + csize * j;
+				float ztwo = zone;
+				float zthree = zone - csize;
+
+				//check for nodata on triangle corners
+				if( yone == noDataValue || ytwo == noDataValue || ythree == noDataValue )
+				{	
 					(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
 					(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
 					(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
-					//shadeBuf[j] = noDataValue;
 					continue;
 				}
-
-				float win[9];
-				// Read in 3x3 window
-				win[0] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
-				win[1] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
-				win[2] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
-				win[3] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
-				win[4] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
-				win[5] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
-				win[6] = (float)( pafScanArea[(i-1) * xBuff + j-1]);
-				win[7] = (float)( pafScanArea[(i  ) * xBuff + j  ]);
-				win[8] = (float)( pafScanArea[(i+1) * xBuff + j+1]);
-				
-				// Check if window has null value
-				for (int n = 0; n <= 8; n++) 
+				else
 				{
-					if(win[n] == noDataValue) 
+					if (lowColor == hiColor)
 					{
-						containsNull = 1;
-						break;
-					}
-				}
-				if (containsNull == 1) 
-				{
-					// We have nulls so write nullValue and move on
-					(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
-					(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
-					//shadeBuf[j] = noDataValue;
-					continue;
-				} 
-				else 
-				{
-					// We have a valid 3x3 window. Compute Hillshade
-					// First Slope ...
-					float x = (float)(((z*win[0] + z*win[3] + z*win[3] + z*win[6]) - 
-						(z*win[2] + z*win[5] + z*win[5] + z*win[8])) /
-						(8.0 * _dX * scale));
-
-					float y = (float)(((z*win[6] + z*win[7] + z*win[7] + z*win[8]) - 
-						(z*win[0] + z*win[1] + z*win[1] + z*win[2])) /
-						(8.0 * _dY * scale));
-
-					float slope = (float)(90.0 - atan(sqrt(x*x + y*y))*radiansToDegrees);
-					
-					// ... then aspect...
-					float aspect = atan2(x,y);			
-					
-					// ... then the shade value
-					float cang = (float)(sin(alt*degreesToRadians) * sin(slope*degreesToRadians) + 
-						cos(alt*degreesToRadians) * cos(slope*degreesToRadians) * 
-						cos((az-90.0)*degreesToRadians - aspect));
-
-					if (cang <= 0.0) 
-					{
-						(*ImageData)[i * xBuff + j].red = (unsigned char) (1);
-						(*ImageData)[i * xBuff + j].green = (unsigned char) (0);
-						(*ImageData)[i * xBuff + j].blue = (unsigned char) (0);					
-						//cang = noDataValue;
+						(*ImageData)[i * xBuff + j].red = (unsigned char)(GetRValue(lowColor) % 256);
+						(*ImageData)[i * xBuff + j].green = (unsigned char)(GetGValue(lowColor) % 256);
+						(*ImageData)[i * xBuff + j].blue = (unsigned char)(GetBValue(lowColor) % 256);
 					}
 					else
 					{
-						cang = (float)(255.0 * cang);
-						(*ImageData)[i * xBuff + j].red = (unsigned char) (cang);
-						(*ImageData)[i * xBuff + j].green = (unsigned char) (cang);
-						(*ImageData)[i * xBuff + j].blue = (unsigned char) (cang);
-					}
-				}
-			}
-			else
-			{ 
-				// Use the normal hillshade method				
-				auto colorBreak = FindBreak( bvals, tmp );
-
-				if (colorBreak == nullptr) //A break is not defined for this value
-				{
-					(*ImageData)[i * xBuff + j].red = (unsigned char)_transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char)_transColor.g;
-					(*ImageData)[i * xBuff + j].blue = (unsigned char)_transColor.b;
-					continue;
-				}
-
- 				OLE_COLOR hiColor = colorBreak->hiColor;
-				OLE_COLOR lowColor = colorBreak->lowColor;
-
-				float hiVal = colorBreak->highVal;
-				float lowVal = colorBreak->lowVal;
-				float biRange = hiVal - lowVal;
-				if( biRange <= 0.0 )
-					biRange = 1.0;
-
-				ColoringType colortype = colorBreak->colortype;
-				GradientModel gradmodel = colorBreak->gradmodel;
-				
-				if (!_allowHillshade && colortype == Hillshade)
-					colortype = Gradient;
-
-				colort ct;
-				if( colortype == Hillshade )
-				{
-					float yone = 0, ytwo = 0, ythree = 0;
-					//Cannot Compute Polygon ... Make the best guess
-					if( j >= xBuff - 1 && i >= yBuff-1)
-					{	
-						yone = tmp;
-						ytwo = tmp;
-						ythree = tmp;
-					}
-					else if( j >= xBuff - 1 )
-					{	
-	
-						yone =   (float)( pafScanArea[(i  ) * xBuff + j-1]);
-						ytwo =   (float)( pafScanArea[(i-1) * xBuff + j  ]);
-						ythree = (float)( pafScanArea[(i  ) * xBuff + j-1]);
-					}
-					else if( i >= yBuff-1 )
-					{	
-
-						yone = (float)( pafScanArea[(i+1) * xBuff + j  ]);
-						ytwo = (float)( pafScanArea[(i  ) * xBuff + j+1]);	
-						ythree = tmp;
-					}
-					else
-					{	
-						yone = tmp;
-						ytwo =   (float)( pafScanArea[(i-1) * xBuff + j+1]);
-						ythree = (float)( pafScanArea[(i-1) * xBuff + j  ]);			
-					}
-				
-					float xone = xll + csize * (i);
-					float xtwo = xone + csize;
-					float xthree = xone;
-					
-					float zone = yll + csize * j;
-					float ztwo = zone;
-					float zthree = zone - csize;
-
-					//check for nodata on triangle corners
-					if( yone == noDataValue || ytwo == noDataValue || ythree == noDataValue )
-					{	
-						(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
-						(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
-						(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
-						continue;
-					}
-					else
-					{
-						if (lowColor == hiColor)
-						{
-							(*ImageData)[i * xBuff + j].red = (unsigned char)(GetRValue(lowColor) % 256);
-							(*ImageData)[i * xBuff + j].green = (unsigned char)(GetGValue(lowColor) % 256);
-							(*ImageData)[i * xBuff + j].blue = (unsigned char)(GetBValue(lowColor) % 256);
-						}
-						else
-						{
-							//Make Two Vectors
-							cppVector one(
-								xone - xtwo,
-								yone - ytwo,
-								zone - ztwo );
-							cppVector two(
-								xone - xthree,
-								yone - ythree,
-								zone - zthree );
+						//Make Two Vectors
+						cppVector one(
+							xone - xtwo,
+							yone - ytwo,
+							zone - ztwo );
+						cppVector two(
+							xone - xthree,
+							yone - ythree,
+							zone - zthree );
 						
-							//Compute Normal
-							cppVector normal = two.crossProduct( one );
+						//Compute Normal
+						cppVector normal = two.crossProduct( one );
 
-							//Compute I
-							double I = ai + li * lightsource.dot(normal);
-							if( I > 1.0 )
-								I = 1.0;
+						//Compute I
+						double I = ai + li * lightsource.dot(normal);
+						if( I > 1.0 )
+							I = 1.0;
 
-							GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
+						GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
 
-							(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*gradient.left + (double)GetRValue(hiColor)*gradient.right )*I) %256;
-							(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*gradient.left + (double)GetGValue(hiColor)*gradient.right )*I) %256;
-							(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*gradient.left + (double)GetBValue(hiColor)*gradient.right )*I) %256;
-						}
-						continue;
+						(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*gradient.left + (double)GetRValue(hiColor)*gradient.right )*I) %256;
+						(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*gradient.left + (double)GetGValue(hiColor)*gradient.right )*I) %256;
+						(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*gradient.left + (double)GetBValue(hiColor)*gradient.right )*I) %256;
 					}
+					continue;
 				}
-				else if( colortype == Gradient )
-				{
-					GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
+			}
+			else if( colortype == Gradient )
+			{
+				GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
 
-					ct = RGB(
-						(int)((float)GetRValue(lowColor)*gradient.left + (float)GetRValue(hiColor)*gradient.right ) %256,
-						(int)((float)GetGValue(lowColor)*gradient.left + (float)GetGValue(hiColor)*gradient.right ) %256,
-						(int)((float)GetBValue(lowColor)*gradient.left + (float)GetBValue(hiColor)*gradient.right ) %256);
-				}
-				else if( colortype == Random )
-				{
-					ct = RGB(GetRValue(lowColor), GetGValue(lowColor), GetBValue(lowColor));
-				}
-
-				(*ImageData)[i * xBuff + j].red =  (unsigned char) (ct.r);
-				(*ImageData)[i * xBuff + j].green = (unsigned char) (ct.g);
-				(*ImageData)[i * xBuff + j].blue =  (unsigned char) (ct.b);				
+				ct = RGB(
+					(int)((float)GetRValue(lowColor)*gradient.left + (float)GetRValue(hiColor)*gradient.right ) %256,
+					(int)((float)GetGValue(lowColor)*gradient.left + (float)GetGValue(hiColor)*gradient.right ) %256,
+					(int)((float)GetBValue(lowColor)*gradient.left + (float)GetBValue(hiColor)*gradient.right ) %256);
+			}
+			else if( colortype == Random )
+			{
+				ct = RGB(GetRValue(lowColor), GetGValue(lowColor), GetBValue(lowColor));
 			}
 
+			(*ImageData)[i * xBuff + j].red =  (unsigned char) (ct.r);
+			(*ImageData)[i * xBuff + j].green = (unsigned char) (ct.g);
+			(*ImageData)[i * xBuff + j].blue =  (unsigned char) (ct.b);				
 		} 
 	}
 	
@@ -1791,6 +1738,10 @@ bool GdalRaster::NeedsGridRendering()
 // *************************************************************
 bool GdalRaster::WillBeRenderedAsGrid()
 {
+	if (_allowAsGrid == grNever)  {
+		return false;
+	}
+	
 	return _allowAsGrid == grForceForAllFormats || (_allowAsGrid == grForGridsOnly && NeedsGridRendering());
 }
 
@@ -1815,6 +1766,8 @@ int GdalRaster::GetRgbBandIndex(BandChannel color)
 			return _greenBandIndex;	
 		case BandChannelBlue:
 			return _blueBandIndex;
+		case BandChannelAlpha:
+			return _alphaBandIndex;
 	}
 
 	return 0;
@@ -1836,6 +1789,8 @@ void GdalRaster::SetRgbBandIndex(BandChannel color, int bandIndex)
 		case BandChannelBlue:
 			_blueBandIndex = bandIndex;
 			return;
+		case BandChannelAlpha:
+			_alphaBandIndex = bandIndex;
 	}
 
 	CallbackHelper::ErrorMsg("Invalid band index passed to GdalRaster::SetRgbBandIndex");

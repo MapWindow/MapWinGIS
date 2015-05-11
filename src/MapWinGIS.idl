@@ -3701,6 +3701,11 @@ interface IImage : IDispatch{
 	[propput, id(104)] HRESULT UseRgbBandMapping([in] VARIANT_BOOL newVal);
 	[propget, id(105)] HRESULT ForceSingleBandRendering([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(105)] HRESULT ForceSingleBandRendering([in] VARIANT_BOOL newVal);
+	[propget, id(106)] HRESULT AlphaBandIndex([out, retval] LONG* pVal);
+	[propput, id(106)] HRESULT AlphaBandIndex([in] LONG newVal);
+	[propget, id(107)] HRESULT AlphaRendering([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(107)] HRESULT AlphaRendering([in] VARIANT_BOOL newVal);
+	
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -6047,6 +6052,7 @@ interface IGdalRasterBand : IDispatch{
 	[id(19)] HRESULT GetDefaultHistogram([in] VARIANT_BOOL forceCalculate, [out, retval] IHistogram** retVal);
 	[id(20)] HRESULT GetHistogram([in] DOUBLE minValue, [in] DOUBLE maxValue, [in] LONG numBuckets, [in] VARIANT_BOOL includeOutOfRange, [in] VARIANT_BOOL allowApproximate, [out, retval] IHistogram** retVal);
 	[propget, id(21)] HRESULT Overview([in] LONG overviewIndex, [out, retval] IGdalRasterBand** pVal);
+	[id(22)] HRESULT GetStatistics([in] VARIANT_BOOL allowApproximate, [in] VARIANT_BOOL forceCalculation, [out] DOUBLE* minimum, [out] DOUBLE* maximum, [out] DOUBLE* mean, [out] DOUBLE* stdDev, [out, retval] VARIANT_BOOL* retVal);
 };
 [
 	object,

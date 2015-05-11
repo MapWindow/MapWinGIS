@@ -260,6 +260,7 @@ enum BandChannel
 	BandChannelRed = 1,
 	BandChannelGreen = 2,
 	BandChannelBlue = 3,
+	BandChannelAlpha = 4,
 };
 
 enum HistogramState

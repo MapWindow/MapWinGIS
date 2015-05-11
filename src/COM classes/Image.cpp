@@ -3810,6 +3810,12 @@ void CImageClass::SetRgbBandIndex(BandChannel channel, int bandIndex)
 {
 	if (_raster)
 	{
+		if (bandIndex < 0 && bandIndex > _raster->GetNoBands())
+		{
+			CallbackHelper::ErrorMsg("Invalid band index.");
+			return;
+		}
+
 		_raster->SetRgbBandIndex(channel, bandIndex);
 	}
 	else
@@ -3861,3 +3867,52 @@ bool CImageClass::GetBufferReloadIsNeeded()
 
 	return false;
 }
+
+// ********************************************************
+//     AlphaBandIndex
+// ********************************************************
+STDMETHODIMP CImageClass::get_AlphaBandIndex(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = static_cast<long>(GetRgbBandIndex(BandChannelAlpha));
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_AlphaBandIndex(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SetRgbBandIndex(BandChannelAlpha, newVal);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     AlphaRendering
+// ********************************************************
+STDMETHODIMP CImageClass::get_AlphaRendering(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_raster)
+	{
+		*pVal = _raster->GetAlphaBandRendering();
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_AlphaRendering(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_raster)
+	{
+		_raster->SetAlphaBandRendering(newVal ? true : false);
+	}
+
+	return S_OK;
+}
+

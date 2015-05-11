@@ -56,8 +56,10 @@ public:
 		_redBandIndex = 1;
 		_greenBandIndex = 2;
 		_blueBandIndex = 3;
+		_alphaBandIndex = 4;
 		_useRgbBandMapping = false;
 		_forceSingleBandRendering = false;
+		_alphaRendering = false;
 		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
@@ -104,10 +106,12 @@ private:
 	GDALRasterBand * _poBandB;
 	GDALRasterBand * _poBandG;
 
+	bool _alphaRendering;
 	bool _useRgbBandMapping;
 	int _redBandIndex;
 	int _greenBandIndex;
 	int _blueBandIndex;
+	int _alphaBandIndex;
 
 	//HandleImage _handleImage;
 	GDALColorTable * _colorTable;
@@ -246,6 +250,9 @@ public:
 
 	bool GetClearGdalCache() { return _clearGDALCache; }
 	void SetClearGdalCache(bool value) { _clearGDALCache = value; }
+
+	bool GetAlphaBandRendering() { return _alphaRendering; }
+	void SetAlphaBandRendering(bool value) { _alphaRendering = value; }
 	
 	void SetCallback(ICallback* value) { _callback = value;}
 
@@ -291,5 +298,7 @@ public:
 	GDALDataType GetSimplifiedDataType(GDALRasterBand* band);
 	bool NeedsGridRendering();
 	int GetMappedBandIndex(int bandIndex);
+
+	
 };
 

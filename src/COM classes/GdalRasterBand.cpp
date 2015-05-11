@@ -473,3 +473,22 @@ STDMETHODIMP CGdalRasterBand::get_Overview(LONG overviewIndex, IGdalRasterBand**
 
 	return S_OK;
 }
+
+// ********************************************************
+//     GetStatistics
+// ********************************************************
+STDMETHODIMP CGdalRasterBand::GetStatistics(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, 
+		DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	if (!CheckBand()) return S_OK;
+
+	CPLErr err = _band->GetStatistics(allowApproximate ? 1 : 0, forceCalculation ? 1: 0, minimum, maximum, mean, stdDev);
+
+	*retVal = err == CPLErr::CE_None;
+
+	return S_OK;
+}

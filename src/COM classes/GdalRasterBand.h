@@ -58,6 +58,7 @@ public:
 	STDMETHOD(GetDefaultHistogram)(VARIANT_BOOL forceCalculate, IHistogram** retVal);
 	STDMETHOD(GetHistogram)(DOUBLE minValue, DOUBLE maxValue, LONG numBuckets, VARIANT_BOOL includeOutOfRange, VARIANT_BOOL allowApproximate, IHistogram** retVal);
 	STDMETHOD(get_Overview)(LONG bandIndex, IGdalRasterBand** pVal);
+	STDMETHOD(GetStatistics)(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal);
 
 private:
 	GDALRasterBand* _band;

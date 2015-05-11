@@ -309,6 +309,10 @@ public:
 	STDMETHOD(put_UseRgbBandMapping)(VARIANT_BOOL newVal);
 	STDMETHOD(get_ForceSingleBandRendering)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ForceSingleBandRendering)(VARIANT_BOOL newVal);
+	STDMETHOD(get_AlphaBandIndex)(LONG* pVal);
+	STDMETHOD(put_AlphaBandIndex)(LONG newVal);
+	STDMETHOD(get_AlphaRendering)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_AlphaRendering)(VARIANT_BOOL newVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -423,6 +427,8 @@ public:
 	bool GetBufferReloadIsNeeded();
 	void SetImageTypeCore(ImageType fileType);
 
+	
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 
