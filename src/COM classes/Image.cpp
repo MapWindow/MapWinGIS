@@ -124,7 +124,7 @@ STDMETHODIMP CImageClass::Resource(BSTR newImgPath, VARIANT_BOOL *retval)
 STDMETHODIMP CImageClass::Open(BSTR ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-
+		
 	USES_CONVERSION;
 	OpenImage(OLE2W(ImageFileName), FileType, InRam, cBack, GA_ReadOnly, true, retval);
 
@@ -176,8 +176,8 @@ void CImageClass::LoadImageAttributesFromGridColorScheme(IGridColorScheme* schem
 void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_BOOL InRam, ICallback *cBack, GDALAccess accessMode, bool checkForProxy, VARIANT_BOOL *retval)
 {
 	_fileName = ImageFileName;	
-	_inRam = (InRam == VARIANT_TRUE)?true:false;
-	
+	_inRam = InRam == VARIANT_TRUE;
+
 	// child classes will be deleted here
 	Close(retval);
 
@@ -194,10 +194,11 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 		}
 	}
 
+	if (!_globalCallback) this->put_GlobalCallback(cBack);
+
 	if (FileType == BITMAP_FILE)
 	{
 		_bitmapImage = new tkBitmap();
-		if (!_globalCallback) this->put_GlobalCallback(cBack);
 		_bitmapImage->globalCallback = _globalCallback;
 
 		_imgType = BITMAP_FILE;
@@ -214,7 +215,6 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 		// we can keep up with. If all of its drivers fail, retval will be false anyway.
 		
 		_raster = new GdalRaster();
-		if (!_globalCallback) this->put_GlobalCallback(cBack);
 		_raster->SetCallback(_globalCallback);
 
 		_imgType = FileType;
@@ -222,24 +222,7 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 		
 		if (*retval)
 		{
-			// setting the type (file extention); for information only?
-			switch(FileType)
-			{
-				case GIF_FILE:	case TIFF_FILE:		case JPEG_FILE: case PPM_FILE:			
-				case ECW_FILE:  case JPEG2000_FILE:	case SID_FILE:	case PNG_FILE:   
-				case PNM_FILE:	case PGM_FILE:		case BIL_FILE:	case ADF_FILE:
-				case GRD_FILE:	case IMG_FILE:		case ASC_FILE:	case BT_FILE:
-				case MAP_FILE:	case LF2_FILE:		case KAP_FILE:	case DEM_FILE:
-				{
-					_imgType = FileType;
-					break;
-				}
-				default:
-				{
-					_imgType = IMG_FILE;		// Use IMG_FILE as a flag (not technically accurate)
-					break;
-				}
-			}
+			SetImageTypeCore(FileType);
 			_sourceType = istGDALBased;
 		}
 	}
@@ -253,6 +236,31 @@ void CImageClass::OpenImage(CStringW ImageFileName, ImageType FileType, VARIANT_
 	if (*retval && checkForProxy)
 	{
 		CheckForProxy();
+	}
+}
+
+// ********************************************************
+//		SetImageTypeCore()
+// ********************************************************
+void CImageClass::SetImageTypeCore(ImageType fileType)
+{
+	// setting the type (file extention); for information only?
+	switch (fileType)
+	{
+		case GIF_FILE:	case TIFF_FILE:		case JPEG_FILE: case PPM_FILE:
+		case ECW_FILE:  case JPEG2000_FILE:	case SID_FILE:	case PNG_FILE:
+		case PNM_FILE:	case PGM_FILE:		case BIL_FILE:	case ADF_FILE:
+		case GRD_FILE:	case IMG_FILE:		case ASC_FILE:	case BT_FILE:
+		case MAP_FILE:	case LF2_FILE:		case KAP_FILE:	case DEM_FILE:
+		{
+			_imgType = fileType;
+			break;
+		}
+		default:
+		{
+			_imgType = IMG_FILE;		// Use IMG_FILE as a flag (not technically accurate)
+			break;
+		}
 	}
 }
 

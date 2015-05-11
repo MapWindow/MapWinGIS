@@ -421,6 +421,7 @@ public:
 	void SetRgbBandIndex(BandChannel channel, int bandIndex);
 
 	bool GetBufferReloadIsNeeded();
+	void SetImageTypeCore(ImageType fileType);
 
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
