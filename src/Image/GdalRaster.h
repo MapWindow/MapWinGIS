@@ -18,6 +18,7 @@
 #include "colour.h"
 #include "ImageStructs.h"
 #include "HistogramData.h"
+#include "cppVector.h"
 
 class GdalRaster
 {
@@ -95,11 +96,23 @@ private:
 		}
 	};
 
+	struct BandMinMax
+	{
+		BandMinMax() {
+			Calculated = false;
+		}
+
+		double Min;
+		double Max;
+		bool Calculated;
+	};
+
 private:
-	double _dfMin;
-	double _dfMax;
-	double _adfMinMax[2];	// holds the min and max values for grid images
-	
+	//double _dfMin;
+	//double _dfMax;
+	//double _adfMinMax[2];	// holds the min and max values for grid images
+	std::vector<BandMinMax> _bandMinMax;
+
 	GDALDataType _dataType;
 	GDALDataset * _dataset;
 	GDALRasterBand * _poBandR;
@@ -180,13 +193,13 @@ private:
 	bool OpenCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly);
 	bool ReadBandData(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
 	IGridColorScheme* GetColorSchemeForRendering();		// returns either of the 2 available
-	void ComputeBandMinMax();
+	void ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax);
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
 	bool ComputeHistogramCore(double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
 	const BreakVal* FindBreak(const std::vector<BreakVal> & bvals, double val) const;
 
-	template <typename T>
-	bool GdalBufferToMemoryBuffer(colour ** ImageData, T* data, int xBuff, int yBuff, int band, double shift, double range, double noDataValue);
+	template <typename T> 
+	bool GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff, int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue);
 	template <typename DataType>
 	bool ReadBandDataAsGrid(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
 	template <typename DataType>
@@ -291,14 +304,18 @@ public:
 	bool ReadGeoTransform();
 	void OpenDefaultBands();
 	void InitNoDataValue();
-	bool InitDataType();
-	void InitSettings();
+	void InitSettings(GDALRasterBand* band);
+	bool InitDataType(GDALRasterBand* band);
 	GDALRasterBand* GetDefaultRgbBand(int bandIndex);
 	GDALRasterBand* GetMappedBand(int bandIndex);
 	GDALDataType GetSimplifiedDataType(GDALRasterBand* band);
 	bool NeedsGridRendering();
 	int GetMappedBandIndex(int bandIndex);
-
-	
+	inline void SetTransparentColor(colour* ImageData);
+	void GetLightSource(IGridColorScheme* gridColorScheme, cppVector& result);
+	void ReadColorScheme(std::vector<BreakVal>& bvals, float& ai, float& li, cppVector& lightSource);
+	bool AllocateImageData(colour ** imageData, int size);
+	void UpdatePredefinedColorScheme();
+	GDALRasterBand* GetActiveBand();
 };
 

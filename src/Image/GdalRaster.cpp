@@ -73,28 +73,26 @@ bool GdalRaster::OpenCore(CStringA& filename, GDALAccess accessType)
 			_origDx = 1;
 			_origDy = 1;
 		}
-		
+
+		_bandMinMax.clear();
+		_bandMinMax.resize(_dataset->GetRasterCount());
+
 		OpenDefaultBands();
 
-		if (_poBandR == NULL)
-		{
+		GDALRasterBand* band = _dataset->GetRasterBand(1);
+		if (!band) {
 			return false;
 		}
-		
-		
 
-		InitDataType();
+		InitDataType(band);
 
-		InitSettings();
-
-		ComputeBandMinMax();
+		InitSettings(band);
 
 		InitNoDataValue();
 
 		RefreshExtents();
 
 		return true;
-
 	}
 	__except(1)
 	{
@@ -118,7 +116,7 @@ void GdalRaster::ApplyCustomColorScheme(IGridColorScheme * scheme)
 void GdalRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 {
 	_predefinedColors = colorScheme;
-	_predefinedColorScheme->UsePredefined(_dfMin, _dfMax, colorScheme);
+	UpdatePredefinedColorScheme();
 }
 
 // *************************************************************
@@ -126,15 +124,14 @@ void GdalRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 // *************************************************************
 bool GdalRaster::SetActiveBandIndex(int bandIndex)
 {
-	if (_nBands < bandIndex || bandIndex < 1)
+	if (bandIndex > _nBands || bandIndex < 1)
 	{
 		return false;
 	}
-	else
-	{
-		_activeBandIndex = bandIndex;
-		return true;
-	}
+	
+	_activeBandIndex = bandIndex;
+	UpdatePredefinedColorScheme();
+	return true;
 }
 
 // *************************************************************
@@ -146,36 +143,36 @@ GDALRasterBand* GdalRaster::GetBand(int bandIndex)
 }
 
 // *************************************************************
-//	  ComputeMinMax()
+//	  ComputeBandMinMax()
 // *************************************************************
-void GdalRaster::ComputeBandMinMax()
+void GdalRaster::ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax)
 {
-	int bGotMin = false, bGotMax = false;
-	_adfMinMax[0] = _poBandR->GetMinimum(&bGotMin);
-	_adfMinMax[1] = _poBandR->GetMaximum(&bGotMax);
+	if (minMax.Calculated || !band) return;
 
-	//GDALComputeRasterMinMax is potentially very slow so only do it once and if needed
-	if (!(bGotMin && bGotMax))
+	int gotMin = false;
+	int gotMax = false;
+	minMax.Min = band->GetMinimum(&gotMin);
+	minMax.Max = band->GetMaximum(&gotMax);
+
+	if (!gotMin || !gotMax)
 	{
-		//Just guess the min and max
-		//For some reason GDAL does not seem to pick up the color table of a png binary image		
-		if ((_dataType == GDT_Byte) && (_imgType != ADF_FILE) && (_hasColorTable == false) && (_imgType != PNG_FILE))
+		if (_dataType == GDT_Byte && _imgType != PNG_FILE && _imgType != ADF_FILE && !_hasColorTable == false)
 		{
-			// TODO: is it really needed?
-			_dfMin = 0.0;
-			_dfMax = 255.0;
+			//For some reason GDAL does not seem to pick up the color table of a PNG binary image		
+			minMax.Min = 0;
+			minMax.Max = 255;
+			CallbackHelper::AssertionFailed("Default min max values for the band are used.");
 		}
 		else
 		{
-			GDALComputeRasterMinMax((GDALRasterBandH)_poBandR, FALSE, _adfMinMax);
+			double adfMinMax[2];
+			CPLErr result = band->ComputeRasterMinMax(FALSE, adfMinMax);
+			minMax.Min = adfMinMax[0];
+			minMax.Max = adfMinMax[1];
 		}
 	}
 
-	_dfMin = _adfMinMax[0];
-	_dfMax = _adfMinMax[1] > 0 ? _adfMinMax[1] : 255.0;
-
-	_adfMinMax[0] = _dfMin;
-	_adfMinMax[1] = _dfMax;
+	minMax.Calculated = true;	
 }
 
 // *************************************************************
@@ -191,8 +188,9 @@ void GdalRaster::InitNoDataValue()
 	if ((pbSuccess != NULL) && _hasColorTable)
 	{
 		const GDALColorEntry * poCE = GDALGetColorEntry(_colorTable, (int)nDV);
-		if (poCE)
+		if (poCE) {
 			_transColor = RGB(poCE->c1, poCE->c2, poCE->c3);
+		}
 		else
 		{
 			OLE_COLOR clr = (OLE_COLOR)nDV;
@@ -205,8 +203,6 @@ void GdalRaster::InitNoDataValue()
 		unsigned char nDVr = 0, nDVg = 0, nDVb = 0;
 		if (_nBands == 1)
 		{
-			// nDVr = nDVg = 0;
-			// nDVb = (unsigned char) nDV;
 			_transColor = RGB(255, 255, 255);
 			_hasTransparency = true;
 		}
@@ -229,9 +225,12 @@ void GdalRaster::InitNoDataValue()
 // *************************************************************
 //	  InitDataType()
 // *************************************************************
-bool GdalRaster::InitDataType()
+bool GdalRaster::InitDataType(GDALRasterBand* band)
 {
-	_dataType = _poBandR->GetRasterDataType();
+	if (!band) return false;
+	
+
+	_dataType = band->GetRasterDataType();
 
 	if (!((_dataType == GDT_Byte) || (_dataType == GDT_UInt16) ||
 		(_dataType == GDT_Int16) || (_dataType == GDT_UInt32) ||
@@ -243,7 +242,7 @@ bool GdalRaster::InitDataType()
 		return false;
 	}
 
-	_genericType = GetSimplifiedDataType(_poBandR);
+	_genericType = GetSimplifiedDataType(band);
 
 	return true;
 }
@@ -280,7 +279,7 @@ GDALDataType GdalRaster::GetSimplifiedDataType(GDALRasterBand* band)
 // *************************************************************
 //	  InitSettings()
 // *************************************************************
-void GdalRaster::InitSettings()
+void GdalRaster::InitSettings(GDALRasterBand* band)
 {
 	_activeBandIndex = 1;
 	_histogram.Clear();
@@ -289,7 +288,7 @@ void GdalRaster::InitSettings()
 	_imageQuality = 100;
 	_predefinedColors = FallLeaves;
 
-	_colorTable = _poBandR->GetColorTable();
+	_colorTable = band->GetColorTable();
 
 	if (_colorTable != NULL)
 	{
@@ -498,13 +497,10 @@ bool GdalRaster::LoadBuffer(colour ** ImageData, Extent& screenExtents, CStringW
 	{
 		_width = xBuff;
 		_height = yBuff;
-	}
-	else
-	{
-		// TODO: clear the buffer and parameters
+		return true;
 	}
 
-	return true;	
+	return false;
 }
 
 // *********************************************************
@@ -558,15 +554,34 @@ bool GdalRaster::ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bo
 }
 
 // *********************************************************
+//		AllocateImageData()
+// *********************************************************
+bool GdalRaster::AllocateImageData(colour ** imageData, int size)
+{
+	if (*imageData)
+	{
+		delete[](*imageData);
+	}
+
+	try
+	{
+		(*imageData) = new colour[size];
+		return true;
+	}
+	catch (...)
+	{
+		CallbackHelper::ErrorMsg("Failed to allocated memory for image buffer.");
+	}
+
+	return false;
+}
+
+// *********************************************************
 //		SetEmptyBuffer()
 // *********************************************************
 void GdalRaster::SetEmptyBuffer(colour ** ImageData)
 {
-	if (*ImageData) {
-		delete[](*ImageData);
-	}
-
-	(*ImageData) = new colour[1];
+	AllocateImageData(ImageData, 1);
 
 	_dX = _origDx;
 	_dY = _origDy;
@@ -829,37 +844,8 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	// -----------------------------------------------
 	//  allocating memory for second buffer (in-memory colour array)
 	// -----------------------------------------------
-	if (*imageData != NULL)
-	{
-		delete[](*imageData);
-	}
-		
-    try
-	{
-		(*imageData) = new colour[xBuff*yBuff];
-	}
-	catch(...)
-	{
-		CallbackHelper::ErrorMsg("Failed to allocated memory for image buffer.");
+	if (!AllocateImageData(imageData, xBuff * yBuff)) {
 		return false;
-	}
-	
-	// -----------------------------------------------
-	//    preparing min / max equalization
-	// -----------------------------------------------
-	double shift = 0, range = 0;
-	if (_genericType != GDT_Byte)
-	{
-		// TODO: why values for the first (Red) band are used for all bands?
-		double dfMin = _adfMinMax[0];
-		double dfMax = _adfMinMax[1];
-		range = dfMax - dfMin;		
-		shift = 0 - dfMin;
-	}
-	else
-	{
-		range = 255;
-		shift = 0;
 	}
 
 	// -----------------------------------------------
@@ -882,6 +868,11 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 			continue;
 		}
 
+		BandMinMax bandMinMax = _bandMinMax[realBandIndex];
+		ComputeBandMinMax(poBand, bandMinMax);
+		double range = bandMinMax.Max - bandMinMax.Min;
+		double shift = 0 - bandMinMax.Min;
+
 		// images with color table are classified as complex with GDT_Int32 data type
 		if (_genericType == GDT_Byte)
 		{
@@ -902,38 +893,33 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
 		
+		// TODO: make sure that we've read int buffer if we want to handle built-in color table		
 		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, realBandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
-			int effectiveBandIndex = _alphaRendering ? 4 : bandIndex;
+			int rgbBandIndex = _alphaRendering ? 4 : bandIndex;
 
 			if (_genericType == GDT_Byte)
 			{
-				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
 			}
 			else if (_genericType == GDT_Int32)
 			{
-				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
 			}
 			else
 			{
-				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, effectiveBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
 			}
+		}
+
+		if (_clearGDALCache) {
+			poBand->FlushCache();
 		}
 
 		if (_forceSingleBandRendering || _alphaRendering) {
 			break;
 		}
     }
-
-	// --------------------------------------------------------
-	//	  releasing GDAL cache
-	// --------------------------------------------------------
-	if (_clearGDALCache)
-	{
-		if (_poBandR != NULL) _poBandR->FlushCache();	
-		if (_poBandG != NULL) _poBandG->FlushCache();	
-		if (_poBandB != NULL) _poBandB->FlushCache();	
-	}
 
 	// --------------------------------------------------------
 	//		cleaning
@@ -992,7 +978,7 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 
 	
 	if (!srcDataInt) {
-		// TODO: make sure that we've read int buffer if we want to handle built-in color table
+		
 		CallbackHelper::ErrorMsg("Integer buffer must be used to display built-in color table");
 		return false;
 	}
@@ -1039,7 +1025,7 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 // *************************************************************
 template <typename T>
 bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff,
-					int band, double shift, double range, double noDataValue)
+					int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue)
 {
 	T val = 0;		// value from source buffer	(_int32, float, unsigned char)
 	colour* color;	// position in the resulting buffer
@@ -1063,7 +1049,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 				}
 				else
 				{
-					unsigned char b = _histogram.GetColorValue(band, static_cast<double>(val));
+					unsigned char b = _histogram.GetColorValue(realBandIndex, static_cast<double>(val));
 
 					color->red = b;
 					color->green = b;
@@ -1117,17 +1103,17 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 					// RGB
 					if (val == noDataValue)
 					{
-						if (band == 1)		color->red = _transColor.r;
-						else if (band == 2)	color->green = _transColor.g;
-						else if (band == 3)	color->blue = _transColor.b;
-						else if (band == 4)	color->alpha = 255;				// TODO: use the exact value
+						if (nominalRgbBand == 1)		color->red = _transColor.r;
+						else if (nominalRgbBand == 2)	color->green = _transColor.g;
+						else if (nominalRgbBand == 3)	color->blue = _transColor.b;
+						else if (nominalRgbBand == 4)	color->alpha = 255;				// TODO: use the exact value
 					}
 					else
 					{
-						if (band == 1)      color->red = static_cast<unsigned char>(double(val + shift)  * ratio);
-						else if (band == 2) color->green = static_cast<unsigned char>(double(val + shift) * ratio);
-						else if (band == 3) color->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
-						else if (band == 4) color->alpha = static_cast<unsigned char>(double(val + shift)  * ratio);
+						if (nominalRgbBand == 1)      color->red = static_cast<unsigned char>(double(val + shift)  * ratio);
+						else if (nominalRgbBand == 2) color->green = static_cast<unsigned char>(double(val + shift) * ratio);
+						else if (nominalRgbBand == 3) color->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
+						else if (nominalRgbBand == 4) color->alpha = static_cast<unsigned char>(double(val + shift)  * ratio);
 					}
 				}
 			}
@@ -1175,17 +1161,17 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 				// RGB
 				if (val == noDataValue)
 				{
-					if (band == 1)		color->red = _transColor.r;
-					else if (band == 2)	color->green = _transColor.g;
-					else if (band == 3)	color->blue = _transColor.b;
+					if (nominalRgbBand == 1)		color->red = _transColor.r;
+					else if (nominalRgbBand == 2)	color->green = _transColor.g;
+					else if (nominalRgbBand == 3)	color->blue = _transColor.b;
 					// TODO: add alpha
 				}
 				else
 				{
-					if (band == 1)      color->red = static_cast<unsigned char>(val);
-					else if (band == 2) color->green = static_cast<unsigned char>(val);
-					else if (band == 3) color->blue = static_cast<unsigned char>(val);
-					else if (band == 4) color->alpha = static_cast<unsigned char>(val);
+					if (nominalRgbBand == 1)      color->red = static_cast<unsigned char>(val);
+					else if (nominalRgbBand == 2) color->green = static_cast<unsigned char>(val);
+					else if (nominalRgbBand == 3) color->blue = static_cast<unsigned char>(val);
+					else if (nominalRgbBand == 4) color->alpha = static_cast<unsigned char>(val);
 				}
 			}
 		}
@@ -1350,6 +1336,16 @@ namespace {
 }
 
 // *********************************************************
+//		SetTransparentColor()
+// *********************************************************
+inline void GdalRaster::SetTransparentColor(colour* ImageData)
+{
+	ImageData->red = (unsigned char)_transColor.r;
+	ImageData->green = (unsigned char)_transColor.g;
+	ImageData->blue = (unsigned char)_transColor.b;
+}
+
+// *********************************************************
 //		ReadGridAsImage()
 // *********************************************************
 template <typename DataType>
@@ -1359,129 +1355,110 @@ bool GdalRaster::ReadBandDataAsGrid(colour** ImageData, int xOff, int yOff, int 
 }
 
 // *********************************************************
-//		ReadGridAsImage2()
+//		GetLightSource()
 // *********************************************************
-template <typename DataType>
-bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
+void GdalRaster::GetLightSource(IGridColorScheme* gridColorScheme, cppVector& result)
 {
-	_poBandR = _dataset->GetRasterBand(_activeBandIndex);
-	if (_poBandR == NULL) return false;
-
-	float noDataValue = 0;
-	try
-	{
-		// Some IMG files have no nodata value -- no way to tell except
-		// to try. A non-SEH exception is thrown if nodata isn't available
-		noDataValue = static_cast<float>(_poBandR->GetNoDataValue());
-	}
-	catch(...)
-	{
-	}	
-
-	const float dfMin = static_cast<float>(_adfMinMax[0]);
-    const float dfMax = static_cast<float>(_adfMinMax[1]);
-	const float range = static_cast<float>(dfMax - dfMin);
-	const float shift = static_cast<float>(0 - dfMin);	
-
-	const float radiansToDegrees = (float)(180.0 / 3.14159);  
-	const float degreesToRadians = (float)(3.14159 / 180.0); 
-
-	const float z = 1.0; 
-	const float scale = 1.0;
-	const float az = 315.0;
-	const float alt = 45.0;
-	
-	if(*ImageData)
-		delete[] (*ImageData);
-    (*ImageData) = new colour[xBuff*yBuff];
-
-
-	DataType* pafScanArea = (DataType*)CPLMalloc( sizeof(DataType)*xBuff*yBuff );
-
-	const float xll = static_cast<float>(_xllCenter);
-	const float yll = static_cast<float>(_yllCenter);
-
-	//Hard code csize, so that the vectors are normal
-	const float csize = 30;
-
-	IGridColorScheme* gridColorScheme = GetColorSchemeForRendering();
-	long numBreaks = 0;
-	gridColorScheme->get_NumBreaks(&numBreaks);
-	
-	std::vector<BreakVal> bvals;	
-	for(int i = 0; i < numBreaks; i++ )
-	{	
-		IGridColorBreak * bi = NULL;
-		gridColorScheme->get_Break(i, &bi);
-		BreakVal bv(bi);
-
-		bvals.push_back( bv );
-	}
-
-	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
-	gridColorScheme->put_NoDataColor(_transColor);
-
-	float ai = 0.0;
-	float li = 0.0;
-	{
-		const double ka = .7;
-		const double kd = .8;
-
-		double val;
-		gridColorScheme->get_AmbientIntensity(&val);
-		ai = static_cast<float>(val * ka);
-
-		gridColorScheme->get_LightSourceIntensity(&val);
-		li = static_cast<float>(val * kd);
-	}
-
-	double lsi, lsj, lsk;					
+	double lsi, lsj, lsk;
 	IVector * v = NULL;
 	gridColorScheme->GetLightSource(&v);
 	v->get_i(&lsi);
 	v->get_j(&lsj);
 	v->get_k(&lsk);
 	v->Release();
-	cppVector lightsource(lsi,lsj,lsk);
 
-	const float total = static_cast<float>(yBuff * xBuff);
+	result.seti(lsi);
+	result.setj(lsj);
+	result.setk(lsk);
+}
+
+// *********************************************************
+//		ReadColorScheme()
+// *********************************************************
+void GdalRaster::ReadColorScheme(std::vector<BreakVal>& bvals, float& ai, float& li, cppVector& lightSource)
+{
+	IGridColorScheme* gridColorScheme = GetColorSchemeForRendering();
+	long numBreaks = 0;
+	gridColorScheme->get_NumBreaks(&numBreaks);
+
+	for (int i = 0; i < numBreaks; i++)
+	{
+		IGridColorBreak * bi = NULL;
+		gridColorScheme->get_Break(i, &bi);
+		BreakVal bv(bi);
+
+		bvals.push_back(bv);
+	}
+
+	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color
+	gridColorScheme->put_NoDataColor(_transColor);
+
+	const double ka = .7;
+	const double kd = .8;
+
+	double val;
+	gridColorScheme->get_AmbientIntensity(&val);
+	ai = static_cast<float>(val * ka);
+
+	gridColorScheme->get_LightSourceIntensity(&val);
+	li = static_cast<float>(val * kd);
+
+	GetLightSource(gridColorScheme, lightSource);
+}
+
+// *********************************************************
+//		ReadGridAsImage2()
+// *********************************************************
+template <typename DataType>
+bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey) 
+{
+	GDALRasterBand* band = _dataset->GetRasterBand(_activeBandIndex);
+	if (band == NULL) return false;
+
+	float noDataValue = static_cast<float>(band->GetNoDataValue());
+
+	AllocateImageData(ImageData, xBuff * yBuff);
+
+	DataType* pafScanArea = (DataType*)CPLMalloc( sizeof(DataType)*xBuff*yBuff );
 
 	if (_genericType == GDT_Int32)
 	{
-		_poBandR->AdviseRead ( xOff, yOff,width, height, xBuff, yBuff, GDT_Int32, NULL);
-		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanArea, xBuff, yBuff, GDT_Int32,0, 0 );
+		band->AdviseRead(xOff, yOff, width, height, xBuff, yBuff, GDT_Int32, NULL);
+		band->RasterIO(GF_Read, xOff, yOff, width, height, pafScanArea, xBuff, yBuff, GDT_Int32, 0, 0);
 	}
 	else
 	{
-		_poBandR->AdviseRead ( xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
-		_poBandR->RasterIO( GF_Read, xOff, yOff,width, height, pafScanArea, xBuff, yBuff, GDT_Float32,0, 0 );
+		band->AdviseRead(xOff, yOff, width, height, xBuff, yBuff, GDT_Float32, NULL);
+		band->RasterIO(GF_Read, xOff, yOff, width, height, pafScanArea, xBuff, yBuff, GDT_Float32, 0, 0);
 	}
+
+	const float total = static_cast<float>(yBuff * xBuff);
+	const float xll = static_cast<float>(_xllCenter);
+	const float yll = static_cast<float>(_yllCenter);
+
+	const float csize = 30;	  // hard code csize, so that the vectors are normal
+	std::vector<BreakVal> bvals;
+	float ai = 0.0f, li = 0.0f;
+	cppVector lightSource;
+	ReadColorScheme(bvals, ai, li, lightSource);
 
 	for (int i = 0; i < yBuff; i++)
 	{
 		for (int j = 0; j < xBuff; j++)
 		{
 			float tmp = (float)pafScanArea[i * xBuff + j];
-			
+
 			if (tmp == noDataValue)
 			{
-				(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
-				(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
-				(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;			
+				SetTransparentColor((*ImageData) + i * xBuff + j);
 				continue;
 			} 
 
-
-
-
-			// Use the normal hillshade method				
 			auto colorBreak = FindBreak( bvals, tmp );
 
 			if (colorBreak == nullptr) //A break is not defined for this value
 			{
-				(*ImageData)[i * xBuff + j].red = (unsigned char)_transColor.r;
-				(*ImageData)[i * xBuff + j].green = (unsigned char)_transColor.g;
-				(*ImageData)[i * xBuff + j].blue = (unsigned char)_transColor.b;
+				SetTransparentColor((*ImageData) + i * xBuff + j);
 				continue;
 			}
 
@@ -1519,8 +1496,6 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 					ytwo = (float)(pafScanArea[(i - 1) * xBuff + j + 1]);
 					ythree = (float)(pafScanArea[(i - 1) * xBuff + j]);
 				}
-
-				
 				
 				float xone = xll + csize * (i);
 				float xtwo = xone + csize;
@@ -1533,46 +1508,41 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 				//check for nodata on triangle corners
 				if( yone == noDataValue || ytwo == noDataValue || ythree == noDataValue )
 				{	
-					(*ImageData)[i * xBuff + j].red =  (unsigned char) _transColor.r;
-					(*ImageData)[i * xBuff + j].green = (unsigned char) _transColor.g;
-					(*ImageData)[i * xBuff + j].blue =  (unsigned char) _transColor.b;
+					SetTransparentColor((*ImageData) + i * xBuff + j);
 					continue;
+				}
+				
+				if (lowColor == hiColor)
+				{
+					(*ImageData)[i * xBuff + j].red = (unsigned char)(GetRValue(lowColor) % 256);
+					(*ImageData)[i * xBuff + j].green = (unsigned char)(GetGValue(lowColor) % 256);
+					(*ImageData)[i * xBuff + j].blue = (unsigned char)(GetBValue(lowColor) % 256);
 				}
 				else
 				{
-					if (lowColor == hiColor)
-					{
-						(*ImageData)[i * xBuff + j].red = (unsigned char)(GetRValue(lowColor) % 256);
-						(*ImageData)[i * xBuff + j].green = (unsigned char)(GetGValue(lowColor) % 256);
-						(*ImageData)[i * xBuff + j].blue = (unsigned char)(GetBValue(lowColor) % 256);
-					}
-					else
-					{
-						//Make Two Vectors
-						cppVector one(
-							xone - xtwo,
-							yone - ytwo,
-							zone - ztwo );
-						cppVector two(
-							xone - xthree,
-							yone - ythree,
-							zone - zthree );
+					//Make Two Vectors
+					cppVector one(
+						xone - xtwo,
+						yone - ytwo,
+						zone - ztwo );
+					cppVector two(
+						xone - xthree,
+						yone - ythree,
+						zone - zthree );
 						
-						//Compute Normal
-						cppVector normal = two.crossProduct( one );
+					//Compute Normal
+					cppVector normal = two.crossProduct( one );
 
-						//Compute I
-						double I = ai + li * lightsource.dot(normal);
-						if( I > 1.0 )
-							I = 1.0;
+					//Compute I
+					double I = ai + li * lightSource.dot(normal);
+					if( I > 1.0 )
+						I = 1.0;
 
-						GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
+					GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
 
-						(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*gradient.left + (double)GetRValue(hiColor)*gradient.right )*I) %256;
-						(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*gradient.left + (double)GetGValue(hiColor)*gradient.right )*I) %256;
-						(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*gradient.left + (double)GetBValue(hiColor)*gradient.right )*I) %256;
-					}
-					continue;
+					(*ImageData)[i * xBuff + j].red =  (unsigned char) (((double)GetRValue(lowColor)*gradient.left + (double)GetRValue(hiColor)*gradient.right )*I) %256;
+					(*ImageData)[i * xBuff + j].green = (unsigned char) (((double)GetGValue(lowColor)*gradient.left + (double)GetGValue(hiColor)*gradient.right )*I) %256;
+					(*ImageData)[i * xBuff + j].blue =  (unsigned char) (((double)GetBValue(lowColor)*gradient.left + (double)GetBValue(hiColor)*gradient.right )*I) %256;
 				}
 			}
 			else if( colortype == Gradient )
@@ -1596,11 +1566,12 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 	}
 	
 	if (_clearGDALCache)
-		_poBandR->FlushCache();		 
+		band->FlushCache();
 	
 	CPLFree( pafScanArea );
 	return true;
 }
+
 
 // *************************************************************
 //	  findBreak
@@ -1674,26 +1645,39 @@ bool GdalRaster::SetNoDataValue(double Value)
 IGridColorScheme* GdalRaster::GetColorSchemeForRendering()
 {
 	long numBreaks;	
-	bool hasCustomScheme = false;
-	if (_customColorScheme) {
+
+	if (_customColorScheme)
+	{
 		_customColorScheme->get_NumBreaks(&numBreaks);
 		if (numBreaks > 0) {
-			hasCustomScheme = true;
+			return _customColorScheme;
 		}
 	}
 	
-	if (hasCustomScheme) {
-		return _customColorScheme;
-	}
-	else
+	return _predefinedColorScheme;		// TODO: make sure that it's updated
+}
+
+// *************************************************************
+//	  GetActiveBand()
+// *************************************************************
+GDALRasterBand* GdalRaster::GetActiveBand()
+{
+	return _dataset->GetRasterBand(_activeBandIndex);
+}
+
+// *************************************************************
+//	  UpdatePredefinedColorScheme()
+// *************************************************************
+void GdalRaster::UpdatePredefinedColorScheme()
+{
+	BandMinMax minMax = _bandMinMax[_activeBandIndex];
+	if (!minMax.Calculated)
 	{
-		// make sure that at least everything is all right with predefined one
-		_predefinedColorScheme->get_NumBreaks(&numBreaks);
-		if (numBreaks == 0) {
-			_predefinedColorScheme->UsePredefined(_dfMin, _dfMax, _predefinedColors);
-		}
-		return _predefinedColorScheme;
+		GDALRasterBand* band = GetActiveBand();
+		ComputeBandMinMax(band, minMax);
 	}
+
+	_predefinedColorScheme->UsePredefined(minMax.Min, minMax.Max, _predefinedColors);
 }
 
 // *************************************************************
@@ -1715,11 +1699,11 @@ bool GdalRaster::NeedsGridRendering()
 	{
 		return false;
 	}
-	else if (_dataType == GDT_Byte && _imgType != ADF_FILE && _dfMax > 15)
+	else if (_dataType == GDT_Byte && _imgType != ADF_FILE /*&& _dfMax > 15*/)
 	{
 		return false;
 	}
-	else if (_dfMax > 1 && (_nBands == 1 || _imgType == ADF_FILE || _imgType == ASC_FILE || _imgType == DEM_FILE))
+	else if (/*_dfMax > 1 &&*/ _nBands == 1 || _imgType == ADF_FILE || _imgType == ASC_FILE || _imgType == DEM_FILE)
 	{
 		return true;
 	}
@@ -1807,6 +1791,3 @@ void GdalRaster::SetUseHistogram(bool value)
 		this->CompuateHistogram();
 	}
 }
-
-
-
