@@ -63,6 +63,7 @@ public:
 		_alphaRendering = false;
 		_reverseGreyscale = false;
 		_ignoreColorTable = false;
+		_rendering = rrUnknown;
 		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
@@ -129,6 +130,7 @@ private:
 	int _greenBandIndex;
 	int _blueBandIndex;
 	int _alphaBandIndex;
+	tkRasterRendering _rendering;	// rendering that was used de facto
 
 	//HandleImage _handleImage;
 	GDALColorTable * _colorTable;
@@ -288,6 +290,8 @@ public:
 
 	bool GetIgnoreColorTable() { return _ignoreColorTable; }
 	void SetIgnoreColorTable(bool value) { _ignoreColorTable = value; }
+
+	tkRasterRendering GetRenderingMode() {return _rendering; }
 
 	// methods
 	bool SetNoDataValue(double Value);

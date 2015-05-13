@@ -549,7 +549,9 @@ bool GdalRaster::ReadDataGeneric(colour ** ImageData, int& xBuff, int& yBuff, bo
 	{
 		return ReadBandData(ImageData, _visibleRect.left, _visibleRect.top, _width, _height, xBuff, yBuff);
 	}
-	
+
+	_rendering = rrColorScheme;
+
 	if (_genericType == GDT_Int32) 
 	{
 		// if user passed a color scheme, image will be opened as grid using the first band			
@@ -855,6 +857,9 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 		return false;
 	}
 
+	bool singleBand = _nBands == 1 || _forceSingleBandRendering;
+	_rendering = singleBand ? rrSingleBand : rrRGB;
+
 	// -----------------------------------------------
 	//    reading data
 	// -----------------------------------------------
@@ -899,7 +904,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
-		
+
 		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, realBandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
 			int rgbBandIndex = bandIndex;
@@ -919,6 +924,10 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
 					noDataValue, min, max);
 			}
+		}
+		else
+		{
+			_rendering = rrBuiltInColorTable;
 		}
 
 		if (_clearGDALCache) {

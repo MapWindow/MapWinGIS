@@ -311,8 +311,8 @@ public:
 	STDMETHOD(put_ForceSingleBandRendering)(VARIANT_BOOL newVal);
 	STDMETHOD(get_AlphaBandIndex)(LONG* pVal);
 	STDMETHOD(put_AlphaBandIndex)(LONG newVal);
-	STDMETHOD(get_AlphaRendering)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_AlphaRendering)(VARIANT_BOOL newVal);
+	STDMETHOD(get_UseActiveBandAsAlpha)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseActiveBandAsAlpha)(VARIANT_BOOL newVal);
 	STDMETHOD(get_BandMinimum)(LONG bandIndex, DOUBLE* pVal);
 	STDMETHOD(get_BandMaximum)(LONG bandIndex, DOUBLE* pVal);
 	STDMETHOD(SetBandMinMax)(LONG bandIndex, DOUBLE min, DOUBLE max, VARIANT_BOOL* retVal);
@@ -437,6 +437,7 @@ public:
 	
 	STDMETHOD(get_IgnoreColorTable)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_IgnoreColorTable)(VARIANT_BOOL newVal);
+	STDMETHOD(get_RenderingMode)(tkRasterRendering* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

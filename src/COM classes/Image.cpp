@@ -3886,7 +3886,7 @@ STDMETHODIMP CImageClass::put_AlphaBandIndex(LONG newVal)
 // ********************************************************
 //     AlphaRendering
 // ********************************************************
-STDMETHODIMP CImageClass::get_AlphaRendering(VARIANT_BOOL* pVal)
+STDMETHODIMP CImageClass::get_UseActiveBandAsAlpha(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -3898,7 +3898,7 @@ STDMETHODIMP CImageClass::get_AlphaRendering(VARIANT_BOOL* pVal)
 	return S_OK;
 }
 
-STDMETHODIMP CImageClass::put_AlphaRendering(VARIANT_BOOL newVal)
+STDMETHODIMP CImageClass::put_UseActiveBandAsAlpha(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -4046,6 +4046,18 @@ STDMETHODIMP CImageClass::put_IgnoreColorTable(VARIANT_BOOL newVal)
 	{
 		_raster->SetIgnoreColorTable(newVal ? true : false);
 	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     RenderingMode
+// ********************************************************
+STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _raster ? _raster->GetRenderingMode() : rrRGB;
 
 	return S_OK;
 }

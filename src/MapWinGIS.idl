@@ -62,6 +62,20 @@ interface IHistogram;
 interface IGdalDataset;
 interface IGdalDriver;
 
+/************************** tkRasterRendering Enumeration **********************/
+typedef
+[
+	uuid(26C06431-8701-4A63-8DE7-DE3D32B19369),
+	helpstring("tkRasterRendering"),
+]
+enum tkRasterRendering {
+	rrUnknown = 0,
+	rrSingleBand = 1,
+	rrRGB = 2,
+	rrColorScheme = 3,
+	rrBuiltInColorTable = 4,
+} tkRasterRendering;
+
 /************************** tkCustomDrawingFlags Enumeration **********************/
 typedef
 [
@@ -74,6 +88,7 @@ enum tkCustomDrawingFlags {
 	OnDrawBackBufferBitmapData = 2,
 	BeforeAfterDrawing = 4,
 }tkCustomDrawingFlags;
+
 /************************** tkGdalDataType Enumeration **********************/
 typedef
 [
@@ -3703,8 +3718,8 @@ interface IImage : IDispatch{
 	[propput, id(105)] HRESULT ForceSingleBandRendering([in] VARIANT_BOOL newVal);
 	[propget, id(106)] HRESULT AlphaBandIndex([out, retval] LONG* pVal);
 	[propput, id(106)] HRESULT AlphaBandIndex([in] LONG newVal);
-	[propget, id(107)] HRESULT AlphaRendering([out, retval] VARIANT_BOOL* pVal);
-	[propput, id(107)] HRESULT AlphaRendering([in] VARIANT_BOOL newVal);
+	[propget, id(107)] HRESULT UseActiveBandAsAlpha([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(107)] HRESULT UseActiveBandAsAlpha([in] VARIANT_BOOL newVal);
 	[propget, id(108)] HRESULT BandMinimum([in] LONG bandIndex, [out, retval] DOUBLE* pVal);
 	[propget, id(109)] HRESULT BandMaximum([in] LONG bandIndex, [out, retval] DOUBLE* pVal);
 	[id(110)] HRESULT SetBandMinMax([in] LONG bandIndex, [in] DOUBLE min, [in]DOUBLE max, [out, retval]VARIANT_BOOL* retVal);
@@ -3713,6 +3728,7 @@ interface IImage : IDispatch{
 	[propput, id(112)] HRESULT ReverseGreyscale([in] VARIANT_BOOL newVal);
 	[propget, id(113)] HRESULT IgnoreColorTable([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(113)] HRESULT IgnoreColorTable([in] VARIANT_BOOL newVal);
+	[propget, id(114)] HRESULT RenderingMode([out, retval] tkRasterRendering* pVal);
 };
 
 /****************************  Shapefile Interface ***********************/
