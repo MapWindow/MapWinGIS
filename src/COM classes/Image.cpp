@@ -1300,11 +1300,9 @@ bool CImageClass::IsGdalImageAvailable()
 	{
 		return true;
 	}
-	else
-	{
-		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
-		return false;
-	}
+	
+	ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
+	return false;
 }
 
 // ***********************************************************************
@@ -3327,16 +3325,12 @@ STDMETHODIMP CImageClass::get_SourceGridBandIndex(int * pVal)
 STDMETHODIMP CImageClass::put_SourceGridBandIndex(int newValue)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if (!_gdal) return S_OK;
-	
-	if (!_raster->SetActiveBandIndex(newValue)) 
+
+	if (ValidateBandIndex(newValue))
 	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-	}
-	else 
-	{
-		_bufferReloadIsNeeded = true;
+		if (_raster->SetActiveBandIndex(newValue)) {
+			_bufferReloadIsNeeded = true;
+		}
 	}
 	
 	return S_OK;
@@ -3916,3 +3910,115 @@ STDMETHODIMP CImageClass::put_AlphaRendering(VARIANT_BOOL newVal)
 	return S_OK;
 }
 
+// ********************************************************
+//     ValidateBandIndex
+// ********************************************************
+bool CImageClass::ValidateBandIndex(int bandIndex)
+{
+	if (IsGdalImageAvailable())
+	{
+		if (!_raster->ValidateBandIndex(bandIndex))
+		{
+			CallbackHelper::ErrorMsg("Invalid band index");
+			ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+			return false;
+		}
+		
+		return true;
+	}
+
+	return false;
+}
+
+// ********************************************************
+//     BandMinimum
+// ********************************************************
+STDMETHODIMP CImageClass::get_BandMinimum(LONG bandIndex, DOUBLE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (ValidateBandIndex(bandIndex))
+	{
+		*pVal = _raster->GetBandMinMax(bandIndex, true);
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     BandMaximum
+// ********************************************************
+STDMETHODIMP CImageClass::get_BandMaximum(LONG bandIndex, DOUBLE* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (ValidateBandIndex(bandIndex))
+	{
+		*pVal = _raster->GetBandMinMax(bandIndex, false);
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     SetBandMinMax
+// ********************************************************
+STDMETHODIMP CImageClass::SetBandMinMax(LONG bandIndex, DOUBLE min, DOUBLE max, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!ValidateBandIndex(bandIndex)) {
+		*retVal = VARIANT_FALSE;
+		return S_OK;
+	}
+
+	_raster->SetBandMinMax(bandIndex, min, max);
+	
+	*retVal = VARIANT_TRUE;
+	return S_OK;
+}
+
+// ********************************************************
+//     SetDefaultMinMax
+// ********************************************************
+STDMETHODIMP CImageClass::SetDefaultMinMax(LONG bandIndex, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!ValidateBandIndex(bandIndex)) {
+		*retVal = VARIANT_FALSE;
+		return S_OK;
+	}
+	
+	_raster->SetDefaultMinMax(bandIndex);
+	
+	*retVal = VARIANT_TRUE;
+	return S_OK;
+}
+
+// ********************************************************
+//     ReverseGreyscale
+// ********************************************************
+STDMETHODIMP CImageClass::get_ReverseGreyscale(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (IsGdalImageAvailable())
+	{
+		*pVal = _raster->GetReverseGreyscale() ? VARIANT_TRUE : VARIANT_FALSE;
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_ReverseGreyscale(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (IsGdalImageAvailable())
+	{
+		_raster->SetReverseGreyscale(newVal ? true : false);
+	}
+
+	return S_OK;
+}

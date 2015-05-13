@@ -124,14 +124,20 @@ void GdalRaster::ApplyPredefinedColorScheme(PredefinedColorScheme colorScheme)
 // *************************************************************
 bool GdalRaster::SetActiveBandIndex(int bandIndex)
 {
-	if (bandIndex > _nBands || bandIndex < 1)
-	{
+	if (!ValidateBandIndex(bandIndex))
 		return false;
-	}
 	
 	_activeBandIndex = bandIndex;
 	UpdatePredefinedColorScheme();
 	return true;
+}
+
+// *************************************************************
+//	  ValidateBandIndex()
+// *************************************************************
+bool GdalRaster::ValidateBandIndex(int bandIndex)
+{
+	return bandIndex <= _nBands && bandIndex > 0;
 }
 
 // *************************************************************
@@ -145,9 +151,9 @@ GDALRasterBand* GdalRaster::GetBand(int bandIndex)
 // *************************************************************
 //	  ComputeBandMinMax()
 // *************************************************************
-void GdalRaster::ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax)
+void GdalRaster::ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax, bool force)
 {
-	if (minMax.Calculated || !band) return;
+	if ((minMax.Calculated && !force) || !band) return;
 
 	int gotMin = false;
 	int gotMax = false;
@@ -868,10 +874,10 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 			continue;
 		}
 
-		BandMinMax bandMinMax = _bandMinMax[realBandIndex];
-		ComputeBandMinMax(poBand, bandMinMax);
-		double range = bandMinMax.Max - bandMinMax.Min;
-		double shift = 0 - bandMinMax.Min;
+		double min = GetBandMinMax(realBandIndex, true);
+		double max = GetBandMinMax(realBandIndex, false);
+		double range = max - min;
+		double shift = 0 - min;
 
 		// images with color table are classified as complex with GDT_Int32 data type
 		if (_genericType == GDT_Byte)
@@ -900,15 +906,18 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 
 			if (_genericType == GDT_Byte)
 			{
-				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
+					noDataValue, min, max);
 			}
 			else if (_genericType == GDT_Int32)
 			{
-				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
+					noDataValue, min, max);
 			}
 			else
 			{
-				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, noDataValue);
+				GdalBufferToMemoryBuffer<float>(imageData, srcDataFloat, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
+					noDataValue, min, max);
 			}
 		}
 
@@ -1025,154 +1034,69 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 // *************************************************************
 template <typename T>
 bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff,
-					int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue)
+	int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue, double min, double max)
 {
 	T val = 0;		// value from source buffer	(_int32, float, unsigned char)
 	colour* color;	// position in the resulting buffer
 
 	bool singleBand = _nBands == 1 || _forceSingleBandRendering;
 
-	if (singleBand && _useHistogram && _histogram.CanUse())
-	{
-		for (int i = 0; i < yBuff; i++) 
-		{
-			for (int j = 0; j < xBuff; j++)	
-			{
-				val = src[i * xBuff + j];	
-				color = (*dst) + i * xBuff + j;
-				
-				if ((double)val == noDataValue)
-				{
-					color->blue = _transColor.b;
-					color->green = _transColor.g;
-					color->red = _transColor.r;
-				}
-				else
-				{
-					unsigned char b = _histogram.GetColorValue(realBandIndex, static_cast<double>(val));
+	bool histogram = singleBand && _useHistogram && _histogram.CanUse();
+	bool floatOrInt = _genericType == GDT_Float32 || _genericType == GDT_Int32;
+	double ratio = 255.0 / (double)range;
 
-					color->red = b;
-					color->green = b;
-					color->blue = b;
-				}
-			}
-		}
-
-		return true;
-	}
-	
-	if(_genericType == GDT_Float32 || _genericType == GDT_Int32)
-	{
-		double ratio = 255.0/(double)range;
-		
-		for (int i = 0; i < yBuff; i++) {
-			for (int j = 0; j < xBuff; j++)	
-			{
-				val = src[i * xBuff + j];	
-				color = (*dst) + i * xBuff + j;
-
-				if (_alphaRendering)
-				{
-					if (val == noDataValue)
-					{
-						color->alpha = 0;
-					}
-					else
-					{
-						color->alpha = static_cast<unsigned char>(double(val + shift) * ratio);
-					}
-				}
-				else if (singleBand)
-				{
-					// gray scale
-					if (val == noDataValue)
-					{
-						color->blue = _transColor.b;
-						color->green = _transColor.g;
-						color->red = _transColor.r;
-					}
-					else
-					{
-						color->red = static_cast<unsigned char>(double(val + shift) * ratio);
-						color->green = static_cast<unsigned char>(double(val + shift) * ratio);
-						color->blue = static_cast<unsigned char>(double(val + shift) * ratio);
-					}
-				}
-				else
-				{
-					// RGB
-					if (val == noDataValue)
-					{
-						if (nominalRgbBand == 1)		color->red = _transColor.r;
-						else if (nominalRgbBand == 2)	color->green = _transColor.g;
-						else if (nominalRgbBand == 3)	color->blue = _transColor.b;
-						else if (nominalRgbBand == 4)	color->alpha = 255;				// TODO: use the exact value
-					}
-					else
-					{
-						if (nominalRgbBand == 1)      color->red = static_cast<unsigned char>(double(val + shift)  * ratio);
-						else if (nominalRgbBand == 2) color->green = static_cast<unsigned char>(double(val + shift) * ratio);
-						else if (nominalRgbBand == 3) color->blue = static_cast<unsigned char>(double(val + shift)  * ratio);
-						else if (nominalRgbBand == 4) color->alpha = static_cast<unsigned char>(double(val + shift)  * ratio);
-					}
-				}
-			}
-		}
-		return true;
-	}
-	
-	// single byte per pixel
+	unsigned char b;
 	for (int i = 0; i < yBuff; i++) 
 	{
 		for (int j = 0; j < xBuff; j++)	
 		{
-			val = (unsigned char)src[i * xBuff + j];	
+			val = src[i * xBuff + j];	
 			color = (*dst) + i * xBuff + j;
 				
-			if (_alphaRendering)
+			if (val == noDataValue || val < min || val > max)
 			{
-				if (val == noDataValue)
-				{
-					color->alpha = 0;
-				}
-				else
-				{
-					color->alpha = static_cast<unsigned char>(val);
-				}
+				color->blue = _transColor.b;
+				color->green = _transColor.g;
+				color->red = _transColor.r;
+				color->alpha = 0;		// in fact the rest isn't much needed
+				continue;
 			}
+
+			if (histogram)
+			{
+				b = static_cast<unsigned char>(_histogram.GetColorValue(realBandIndex, static_cast<double>(val)));
+			}
+			else if (floatOrInt)
+			{
+				b = static_cast<unsigned char>(double(val + shift) * ratio);
+			}
+			else
+			{
+				b = static_cast<unsigned char>(val);
+			}
+
+			if (_reverseGreyscale) 
+			{
+				b = 255 - b;
+			}
+
 			if (singleBand)
 			{
-				// gray scale
-				if (val == noDataValue)
+				color->red = b;
+				color->green = b;
+				color->blue = b;
+
+				if (_alphaRendering) 
 				{
-					color->blue = _transColor.b;
-					color->green = _transColor.g;
-					color->red = _transColor.r;
-				}
-				else
-				{
-					color->red = static_cast<unsigned char>(val);
-					color->green = static_cast<unsigned char>(val);
-					color->blue = static_cast<unsigned char>(val);
+					color->alpha = b;
 				}
 			}
 			else
 			{
-				// RGB
-				if (val == noDataValue)
-				{
-					if (nominalRgbBand == 1)		color->red = _transColor.r;
-					else if (nominalRgbBand == 2)	color->green = _transColor.g;
-					else if (nominalRgbBand == 3)	color->blue = _transColor.b;
-					// TODO: add alpha
-				}
-				else
-				{
-					if (nominalRgbBand == 1)      color->red = static_cast<unsigned char>(val);
-					else if (nominalRgbBand == 2) color->green = static_cast<unsigned char>(val);
-					else if (nominalRgbBand == 3) color->blue = static_cast<unsigned char>(val);
-					else if (nominalRgbBand == 4) color->alpha = static_cast<unsigned char>(val);
-				}
+				if (nominalRgbBand == 1)      color->red = b;
+				else if (nominalRgbBand == 2) color->green = b;
+				else if (nominalRgbBand == 3) color->blue = b;
+				else if (nominalRgbBand == 4) color->alpha = b;
 			}
 		}
 	}
@@ -1206,7 +1130,9 @@ void GdalRaster::GDALColorEntry2Colour(int band, double colorValue, double shift
 			else if (band == 2)	result->green = _transColor.g;
 			else if (band == 3)	result->blue = _transColor.b;
 		}
-		
+
+		result->alpha = 0;
+
 		return;
 	}
 	
@@ -1343,6 +1269,7 @@ inline void GdalRaster::SetTransparentColor(colour* ImageData)
 	ImageData->red = (unsigned char)_transColor.r;
 	ImageData->green = (unsigned char)_transColor.g;
 	ImageData->blue = (unsigned char)_transColor.b;
+	ImageData->alpha = 0;
 }
 
 // *********************************************************
@@ -1670,14 +1597,9 @@ GDALRasterBand* GdalRaster::GetActiveBand()
 // *************************************************************
 void GdalRaster::UpdatePredefinedColorScheme()
 {
-	BandMinMax minMax = _bandMinMax[_activeBandIndex];
-	if (!minMax.Calculated)
-	{
-		GDALRasterBand* band = GetActiveBand();
-		ComputeBandMinMax(band, minMax);
-	}
-
-	_predefinedColorScheme->UsePredefined(minMax.Min, minMax.Max, _predefinedColors);
+	double min = GetBandMinMax(_activeBandIndex, true);
+	double max = GetBandMinMax(_activeBandIndex, false);
+	_predefinedColorScheme->UsePredefined(min, max, _predefinedColors);
 }
 
 // *************************************************************
@@ -1791,3 +1713,43 @@ void GdalRaster::SetUseHistogram(bool value)
 		this->CompuateHistogram();
 	}
 }
+
+// *************************************************************
+//	  GetBandMinMax()
+// *************************************************************
+double GdalRaster::GetBandMinMax(int bandIndex, bool min)
+{
+	if (!ValidateBandIndex(bandIndex)) {
+		return 0.0;
+	}
+
+	if (!_bandMinMax[bandIndex - 1].Calculated)
+	{
+		ComputeBandMinMax(_dataset->GetRasterBand(bandIndex), _bandMinMax[bandIndex - 1], false);
+	}
+
+	return min ? _bandMinMax[bandIndex - 1].Min : _bandMinMax[bandIndex - 1].Max;
+}
+
+// *************************************************************
+//	  GetBandMinMax()
+// *************************************************************
+void GdalRaster::SetBandMinMax(int bandIndex, double min, double max)
+{
+	if (!ValidateBandIndex(bandIndex)) return;
+
+	bandIndex--;		
+
+	_bandMinMax[bandIndex].Min = min;
+	_bandMinMax[bandIndex].Max = max;
+	_bandMinMax[bandIndex].Calculated = true;
+}
+
+// *************************************************************
+//	  SetDefaultMinMax()
+// *************************************************************
+void GdalRaster::SetDefaultMinMax(int bandIndex)
+{
+	ComputeBandMinMax(_dataset->GetRasterBand(bandIndex), _bandMinMax[bandIndex - 1], true);
+}
+

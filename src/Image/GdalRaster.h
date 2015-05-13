@@ -61,6 +61,7 @@ public:
 		_useRgbBandMapping = false;
 		_forceSingleBandRendering = false;
 		_alphaRendering = false;
+		_reverseGreyscale = false;
 		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
@@ -119,6 +120,7 @@ private:
 	GDALRasterBand * _poBandB;
 	GDALRasterBand * _poBandG;
 
+	bool _reverseGreyscale;
 	bool _alphaRendering;
 	bool _useRgbBandMapping;
 	int _redBandIndex;
@@ -193,13 +195,14 @@ private:
 	bool OpenCore(CStringA& filename, GDALAccess accessType = GA_ReadOnly);
 	bool ReadBandData(colour ** ImageData, int xOffset, int yOffset, int width, int height, int xBuff, int yBuff);
 	IGridColorScheme* GetColorSchemeForRendering();		// returns either of the 2 available
-	void ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax);
+	void ComputeBandMinMax(GDALRasterBand* band, BandMinMax& minMax, bool force);
 	void GDALColorEntry2Colour(int band, double colorValue, double shift, double range, double noDataValue, const GDALColorEntry * poCE, bool useHistogram, colour* result);
 	bool ComputeHistogramCore(double **ppadfScaleMin, double **ppadfScaleMax, int ***ppapanLUTs);
 	const BreakVal* FindBreak(const std::vector<BreakVal> & bvals, double val) const;
 
 	template <typename T> 
-	bool GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff, int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue);
+	bool GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int yBuff, 
+		int nominalRgbBand, int realBandIndex, double shift, double range, double noDataValue, double min, double max);
 	template <typename DataType>
 	bool ReadBandDataAsGrid(colour** ImageData, int xOff, int yOff, int width, int height, int xBuff, int yBuff, bool setRGBToGrey); 
 	template <typename DataType>
@@ -278,6 +281,9 @@ public:
 	bool GetForceSingleBandRendering() { return _forceSingleBandRendering; }
 	void SetForceSingleBandRendering(bool value) { _forceSingleBandRendering = value; }
 
+	bool GetReverseGreyscale() { return _reverseGreyscale; }
+	void SetReverseGreyscale(bool value) { _reverseGreyscale = value; }
+
 	// methods
 	bool SetNoDataValue(double Value);
 	void ApplyCustomColorScheme(IGridColorScheme * scheme) ;
@@ -308,6 +314,7 @@ public:
 	bool InitDataType(GDALRasterBand* band);
 	GDALRasterBand* GetDefaultRgbBand(int bandIndex);
 	GDALRasterBand* GetMappedBand(int bandIndex);
+	GDALRasterBand* GetActiveBand();
 	GDALDataType GetSimplifiedDataType(GDALRasterBand* band);
 	bool NeedsGridRendering();
 	int GetMappedBandIndex(int bandIndex);
@@ -316,6 +323,10 @@ public:
 	void ReadColorScheme(std::vector<BreakVal>& bvals, float& ai, float& li, cppVector& lightSource);
 	bool AllocateImageData(colour ** imageData, int size);
 	void UpdatePredefinedColorScheme();
-	GDALRasterBand* GetActiveBand();
+	
+	bool ValidateBandIndex(int bandIndex);
+	void SetDefaultMinMax(int bandIndex);
+	double GetBandMinMax(int bandIndex, bool min);
+	void SetBandMinMax(int bandIndex, double min, double max);
 };
 

@@ -313,6 +313,12 @@ public:
 	STDMETHOD(put_AlphaBandIndex)(LONG newVal);
 	STDMETHOD(get_AlphaRendering)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_AlphaRendering)(VARIANT_BOOL newVal);
+	STDMETHOD(get_BandMinimum)(LONG bandIndex, DOUBLE* pVal);
+	STDMETHOD(get_BandMaximum)(LONG bandIndex, DOUBLE* pVal);
+	STDMETHOD(SetBandMinMax)(LONG bandIndex, DOUBLE min, DOUBLE max, VARIANT_BOOL* retVal);
+	STDMETHOD(SetDefaultMinMax)(LONG bandIndex, VARIANT_BOOL* retVal);
+	STDMETHOD(get_ReverseGreyscale)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_ReverseGreyscale)(VARIANT_BOOL newVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -426,8 +432,8 @@ public:
 
 	bool GetBufferReloadIsNeeded();
 	void SetImageTypeCore(ImageType fileType);
+	bool ValidateBandIndex(int bandIndex);
 
-	
 	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
