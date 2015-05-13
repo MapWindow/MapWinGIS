@@ -4022,3 +4022,30 @@ STDMETHODIMP CImageClass::put_ReverseGreyscale(VARIANT_BOOL newVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     IgnoreColorTable
+// ********************************************************
+STDMETHODIMP CImageClass::get_IgnoreColorTable(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (IsGdalImageAvailable())
+	{
+		*pVal = _raster->GetIgnoreColorTable() ? VARIANT_TRUE : VARIANT_FALSE;
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CImageClass::put_IgnoreColorTable(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (IsGdalImageAvailable())
+	{
+		_raster->SetIgnoreColorTable(newVal ? true : false);
+	}
+
+	return S_OK;
+}

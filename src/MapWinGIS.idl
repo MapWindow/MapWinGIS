@@ -3711,6 +3711,8 @@ interface IImage : IDispatch{
 	[id(111)] HRESULT SetDefaultMinMax([in] LONG bandIndex, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(112)] HRESULT ReverseGreyscale([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(112)] HRESULT ReverseGreyscale([in] VARIANT_BOOL newVal);
+	[propget, id(113)] HRESULT IgnoreColorTable([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(113)] HRESULT IgnoreColorTable([in] VARIANT_BOOL newVal);
 };
 
 /****************************  Shapefile Interface ***********************/

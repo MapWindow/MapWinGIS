@@ -435,6 +435,8 @@ public:
 	bool ValidateBandIndex(int bandIndex);
 
 	
+	STDMETHOD(get_IgnoreColorTable)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_IgnoreColorTable)(VARIANT_BOOL newVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

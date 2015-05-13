@@ -62,6 +62,7 @@ public:
 		_forceSingleBandRendering = false;
 		_alphaRendering = false;
 		_reverseGreyscale = false;
+		_ignoreColorTable = false;
 		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
@@ -120,6 +121,7 @@ private:
 	GDALRasterBand * _poBandB;
 	GDALRasterBand * _poBandG;
 
+	bool _ignoreColorTable;
 	bool _reverseGreyscale;
 	bool _alphaRendering;
 	bool _useRgbBandMapping;
@@ -283,6 +285,9 @@ public:
 
 	bool GetReverseGreyscale() { return _reverseGreyscale; }
 	void SetReverseGreyscale(bool value) { _reverseGreyscale = value; }
+
+	bool GetIgnoreColorTable() { return _ignoreColorTable; }
+	void SetIgnoreColorTable(bool value) { _ignoreColorTable = value; }
 
 	// methods
 	bool SetNoDataValue(double Value);

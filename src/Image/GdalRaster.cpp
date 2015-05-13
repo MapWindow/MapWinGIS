@@ -747,11 +747,6 @@ bool GdalRaster::LoadBufferFull(colour** ImageData, CStringW filename, double ma
 // *********************************************************
 int GdalRaster::GetMappedBandIndex(int bandIndex)
 {
-	if (_alphaRendering)
-	{
-		return _activeBandIndex;
-	}
-
 	if (_useRgbBandMapping)
 	{
 		if (bandIndex == 1)
@@ -834,11 +829,17 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	_int32 * srcDataInt = NULL;
 	float * srcDataFloat = NULL;
 
-	if (_genericType == GDT_Byte)
+	GDALDataType dataType = _genericType;
+	if (_hasColorTable)
+	{
+		dataType = GDT_Int32;
+	}
+
+	if (dataType == GDT_Byte)
 	{
 		srcDataChar = (unsigned char *)CPLMalloc(sizeof(unsigned char)*xBuff*yBuff);
 	}
-	else if (_genericType == GDT_Int32)
+	else if (dataType == GDT_Int32)
 	{
 		srcDataInt = (_int32 *)CPLMalloc(sizeof(_int32)*xBuff*yBuff);
 	}
@@ -880,12 +881,12 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 		double shift = 0 - min;
 
 		// images with color table are classified as complex with GDT_Int32 data type
-		if (_genericType == GDT_Byte)
+		if (dataType == GDT_Byte)
 		{
 			poBand->AdviseRead(xOffset, yOffset, width, height, xBuff, yBuff, GDT_Byte, NULL);
 			poBand->RasterIO(GF_Read, xOffset, yOffset, width, height, srcDataChar, xBuff, yBuff, GDT_Byte, 0, 0);
 		}
-		else if (_genericType == GDT_Int32)
+		else if (dataType == GDT_Int32)
 		{
 			poBand->AdviseRead(xOffset, yOffset, width, height, xBuff, yBuff, GDT_Int32, NULL);
 			poBand->RasterIO(GF_Read, xOffset, yOffset, width, height, srcDataInt, xBuff, yBuff, GDT_Int32, 0, 0);
@@ -899,17 +900,16 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 		double noDataValue = poBand->GetNoDataValue();
 		_cInterp = poBand->GetColorInterpretation();
 		
-		// TODO: make sure that we've read int buffer if we want to handle built-in color table		
 		if (!ReadColorTableToMemoryBuffer(imageData, srcDataInt, realBandIndex, xBuff, yBuff, noDataValue, shift, range))
 		{
-			int rgbBandIndex = _alphaRendering ? 4 : bandIndex;
+			int rgbBandIndex = bandIndex;
 
-			if (_genericType == GDT_Byte)
+			if (dataType == GDT_Byte)
 			{
 				GdalBufferToMemoryBuffer<unsigned char>(imageData, srcDataChar, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
 					noDataValue, min, max);
 			}
-			else if (_genericType == GDT_Int32)
+			else if (dataType == GDT_Int32)
 			{
 				GdalBufferToMemoryBuffer<_int32>(imageData, srcDataInt, xBuff, yBuff, rgbBandIndex, realBandIndex, shift, range, 
 					noDataValue, min, max);
@@ -925,7 +925,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 			poBand->FlushCache();
 		}
 
-		if (_forceSingleBandRendering || _alphaRendering) {
+		if (_forceSingleBandRendering) {
 			break;
 		}
     }
@@ -933,7 +933,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 	// --------------------------------------------------------
 	//		cleaning
 	// --------------------------------------------------------
-	if (_genericType == GDT_Byte)
+	if (dataType == GDT_Byte)
 	{
 		if (srcDataChar != NULL) 
 		{
@@ -941,7 +941,7 @@ bool GdalRaster::ReadBandData(colour ** imageData, int xOffset, int yOffset, int
 			srcDataChar = NULL;
 		}
 	}
-	else if (_genericType == GDT_Int32)
+	else if (dataType == GDT_Int32)
 	{
 		if (srcDataInt != NULL) {
 			CPLFree(srcDataInt);
@@ -983,11 +983,10 @@ bool GdalRaster::ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataI
 									double noDataValue, double shift, double range)
 {
 	// caching the color table; adding data to the second buffer	
-	if (!_hasColorTable) return false;
-
+	if (!_hasColorTable || _ignoreColorTable) return false;
 	
-	if (!srcDataInt) {
-		
+	if (!srcDataInt) 
+	{
 		CallbackHelper::ErrorMsg("Integer buffer must be used to display built-in color table");
 		return false;
 	}
@@ -1041,7 +1040,7 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 
 	bool singleBand = _nBands == 1 || _forceSingleBandRendering;
 
-	bool histogram = singleBand && _useHistogram && _histogram.CanUse();
+	bool histogram = /*singleBand &&*/ _useHistogram && _histogram.CanUse();
 	bool floatOrInt = _genericType == GDT_Float32 || _genericType == GDT_Int32;
 	double ratio = 255.0 / (double)range;
 
@@ -1088,6 +1087,9 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 
 				if (_alphaRendering) 
 				{
+					if (_reverseGreyscale) {
+						b = 255 - b;		// alpha band must not be reversed
+					}
 					color->alpha = b;
 				}
 			}
@@ -1096,7 +1098,13 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 				if (nominalRgbBand == 1)      color->red = b;
 				else if (nominalRgbBand == 2) color->green = b;
 				else if (nominalRgbBand == 3) color->blue = b;
-				else if (nominalRgbBand == 4) color->alpha = b;
+				else if (nominalRgbBand == 4) 
+				{
+					if (_reverseGreyscale) {
+						b = 255 - b;		// alpha band must not be reversed
+					}
+					color->alpha = b;
+				}
 			}
 		}
 	}
@@ -1476,19 +1484,16 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 			{
 				GradientPercent gradient = computeGradient(tmp, lowVal, biRange, gradmodel);
 
-				ct = RGB(
-					(int)((float)GetRValue(lowColor)*gradient.left + (float)GetRValue(hiColor)*gradient.right ) %256,
-					(int)((float)GetGValue(lowColor)*gradient.left + (float)GetGValue(hiColor)*gradient.right ) %256,
-					(int)((float)GetBValue(lowColor)*gradient.left + (float)GetBValue(hiColor)*gradient.right ) %256);
+				(*ImageData)[i * xBuff + j].red = (int)((float)GetRValue(lowColor)*gradient.left + (float)GetRValue(hiColor)*gradient.right) % 256;
+				(*ImageData)[i * xBuff + j].green = (int)((float)GetGValue(lowColor)*gradient.left + (float)GetGValue(hiColor)*gradient.right) % 256;
+				(*ImageData)[i * xBuff + j].blue = (int)((float)GetBValue(lowColor)*gradient.left + (float)GetBValue(hiColor)*gradient.right) % 256;
 			}
 			else if( colortype == Random )
 			{
-				ct = RGB(GetRValue(lowColor), GetGValue(lowColor), GetBValue(lowColor));
+				(*ImageData)[i * xBuff + j].red = GetRValue(lowColor);
+				(*ImageData)[i * xBuff + j].green = GetGValue(lowColor);
+				(*ImageData)[i * xBuff + j].blue = GetBValue(lowColor);
 			}
-
-			(*ImageData)[i * xBuff + j].red =  (unsigned char) (ct.r);
-			(*ImageData)[i * xBuff + j].green = (unsigned char) (ct.g);
-			(*ImageData)[i * xBuff + j].blue =  (unsigned char) (ct.b);				
 		} 
 	}
 	
