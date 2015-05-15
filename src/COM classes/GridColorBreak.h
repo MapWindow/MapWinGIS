@@ -38,6 +38,7 @@ public:
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
 		_key = SysAllocString(L"");
+		_visible = VARIANT_TRUE;
 	}
 	~CGridColorBreak()
 	{
@@ -87,6 +88,8 @@ public:
 	STDMETHOD(put_HighColor)(/*[in]*/ OLE_COLOR newVal);
 	STDMETHOD(get_Caption)(BSTR* pVal);
 	STDMETHOD(put_Caption)(BSTR newVal);
+	STDMETHOD(get_Visible)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
 	
 private:
 	long _lastErrorCode;
@@ -99,6 +102,8 @@ private:
 	CString _caption;
 	ColoringType _colorType;
 	GradientModel _gradModel;
+	VARIANT_BOOL _visible;
+	
 };
 
 

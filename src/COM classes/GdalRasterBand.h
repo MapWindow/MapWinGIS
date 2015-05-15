@@ -59,7 +59,7 @@ public:
 	STDMETHOD(GetHistogram)(DOUBLE minValue, DOUBLE maxValue, LONG numBuckets, VARIANT_BOOL includeOutOfRange, VARIANT_BOOL allowApproximate, IHistogram** retVal);
 	STDMETHOD(get_Overview)(LONG bandIndex, IGdalRasterBand** pVal);
 	STDMETHOD(GetStatistics)(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal);
-	STDMETHOD(GenerateColorScheme)(tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
+	STDMETHOD(Classify)(double minValue, double maxValue, tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
 
 private:
 	GDALRasterBand* _band;
@@ -69,6 +69,7 @@ private:
 
 	template <typename T>
 	IGridColorScheme* GenerateUniqueValuesColorScheme(GDALDataType dataType);
+	IGridColorScheme* GenerateEqualIntervalColorScheme(double minValue, double maxValue, int numBreaks);
 
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }

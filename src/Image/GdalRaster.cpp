@@ -1327,11 +1327,16 @@ void GdalRaster::ReadColorScheme(std::vector<BreakVal>& bvals, float& ai, float&
 
 	for (int i = 0; i < numBreaks; i++)
 	{
-		IGridColorBreak * bi = NULL;
+		CComPtr<IGridColorBreak> bi = NULL;
 		gridColorScheme->get_Break(i, &bi);
-		BreakVal bv(bi);
-
-		bvals.push_back(bv);
+		VARIANT_BOOL visible;
+		bi->get_Visible(&visible);
+		
+		if (visible)
+		{
+			BreakVal bv(bi);
+			bvals.push_back(bv);
+		}
 	}
 
 	//Bug 1389 Make sure the incoming gridColorScheme from _pushSchemetkRaster has the same no-data color

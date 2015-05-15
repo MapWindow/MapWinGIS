@@ -496,7 +496,7 @@ STDMETHODIMP CGdalRasterBand::GetStatistics(VARIANT_BOOL allowApproximate, VARIA
 // ********************************************************
 //     GenerateColorScheme
 // ********************************************************
-STDMETHODIMP CGdalRasterBand::GenerateColorScheme(tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal)
+STDMETHODIMP CGdalRasterBand::Classify(double minValue, double maxValue, tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
@@ -524,7 +524,7 @@ STDMETHODIMP CGdalRasterBand::GenerateColorScheme(tkClassificationType classific
 		case ctEqualCount:
 			{
 				CComPtr<IHistogram> histogram = NULL;
-				this->GetHistogram(_band->GetMinimum(), _band->GetMaximum(), 512, VARIANT_FALSE, VARIANT_FALSE, &histogram);
+				this->GetHistogram(minValue, maxValue, 512, VARIANT_FALSE, VARIANT_FALSE, &histogram);
 				if (histogram)
 				{
 					histogram->GenerateColorScheme(numBreaks, retVal);
@@ -532,11 +532,32 @@ STDMETHODIMP CGdalRasterBand::GenerateColorScheme(tkClassificationType classific
 			}
 			break;
 		case ctEqualIntervals:
-			// TODO: implement
+			*retVal = GenerateEqualIntervalColorScheme(minValue, maxValue, numBreaks);
 			break;
 	}
 
 	return S_OK;
+}
+
+// ********************************************************
+//     GenerateEqualIntervalColorScheme
+// ********************************************************
+IGridColorScheme* CGdalRasterBand::GenerateEqualIntervalColorScheme(double minValue, double maxValue, int numBreaks)
+{
+	IGridColorScheme* scheme = NULL;
+	ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
+
+	double step = (maxValue - minValue) / numBreaks;
+	for (int i = 0; i < numBreaks; i++)
+	{
+		IGridColorBreak* br = NULL;
+		ComHelper::CreateInstance(idGridColorBreak, (IDispatch**)&br);
+		br->put_LowValue(minValue + i * step);
+		br->put_HighValue(minValue + (i + 1) * step);
+		scheme->InsertBreak(br);
+	}
+
+	return scheme;
 }
 
 // ********************************************************

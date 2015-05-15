@@ -227,3 +227,22 @@ STDMETHODIMP CGridColorBreak::put_Caption(BSTR newVal)
 
 	return S_OK;
 }
+
+STDMETHODIMP CGridColorBreak::get_Visible(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _visible;
+
+	return S_OK;
+}
+
+
+STDMETHODIMP CGridColorBreak::put_Visible(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_visible = newVal;
+
+	return S_OK;
+}

@@ -620,6 +620,10 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 				GradientModel gradient;
 				_breaks[i]->get_GradientModel(&gradient);
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", (int)gradient);
+
+				VARIANT_BOOL visible;
+				_breaks[i]->get_Visible(&visible);
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Visible", (int)visible);
 				
 				BSTR key;
 				_breaks[i]->get_Key(&key);
@@ -721,6 +725,11 @@ bool CGridColorScheme::DeserializeCore(CPLXMLNode* node)
 					s = CPLGetXMLValue( node, "GradientModel", NULL );
 					if (s != "") model = (GradientModel)atoi( s );
 					br->put_GradientModel(model);
+
+					VARIANT_BOOL visible = VARIANT_TRUE;
+					s = CPLGetXMLValue(node, "Visible", NULL);
+					if (s != "") visible = (VARIANT_BOOL)atoi(s);
+					br->put_Visible(visible);
 
 					this->InsertBreak(br);
 					br->Release();
