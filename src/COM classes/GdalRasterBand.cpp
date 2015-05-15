@@ -492,3 +492,82 @@ STDMETHODIMP CGdalRasterBand::GetStatistics(VARIANT_BOOL allowApproximate, VARIA
 
 	return S_OK;
 }
+
+// ********************************************************
+//     GenerateColorScheme
+// ********************************************************
+STDMETHODIMP CGdalRasterBand::GenerateColorScheme(tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = NULL;
+	
+	switch (classification)
+	{
+		case ctStandardDeviation:
+		case ctEqualSumOfValues:
+		case ctNaturalBreaks:
+			ErrorMessage("ctStandardDeviation and ctEqualSumOfValues aren't supported for raster classification.");
+			return S_OK;	
+		case ctUniqueValues:
+			{
+				GDALDataType dataType = RasterBandHelper::GetSimpleDataType(_band);
+				if (dataType == GDT_CFloat32 || dataType == GDT_CFloat64)
+				{
+					*retVal = GenerateUniqueValuesColorScheme<double>(dataType);
+				}
+				else if (dataType == GDT_Int32)
+				{
+					*retVal = GenerateUniqueValuesColorScheme<int>(dataType);
+				}
+			}
+			break;
+		case ctEqualCount:
+			{
+				CComPtr<IHistogram> histogram = NULL;
+				this->GetHistogram(_band->GetMinimum(), _band->GetMaximum(), 512, VARIANT_FALSE, VARIANT_FALSE, &histogram);
+				if (histogram)
+				{
+					histogram->GenerateColorScheme(numBreaks, retVal);
+				}
+			}
+			break;
+		case ctEqualIntervals:
+			break;
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     GenerateUniqueValuesColorScheme
+// ********************************************************
+template <typename T>
+IGridColorScheme* CGdalRasterBand::GenerateUniqueValuesColorScheme(GDALDataType dataType)
+{
+	VARIANT_BOOL clipped = VARIANT_FALSE;
+
+	set<T> values;
+	RasterBandHelper::GetUniqueValues(_band, dataType, values, 256, &clipped);
+	
+	if (clipped) {
+		ErrorMessage("Unique value classification is possible for less than 256 values only.");
+		return NULL;
+	}
+
+	IGridColorScheme* scheme = NULL;
+	ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&scheme);
+
+	set<T>::iterator it = values.begin();
+	while (it != values.end())
+	{
+		IGridColorBreak* br = NULL;
+		ComHelper::CreateInstance(idGridColorBreak, (IDispatch**)&br);
+		double val = static_cast<double>(*it);
+		br->put_LowValue(val);
+		br->put_HighValue(val);
+		scheme->InsertBreak(br);
+		it++;
+	}
+
+	return scheme;
+}

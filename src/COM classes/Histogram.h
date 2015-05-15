@@ -47,6 +47,8 @@ public:
 	STDMETHOD(get_MaxValue)(DOUBLE* pVal);
 	STDMETHOD(get_Count)(LONG bucketIndex, LONG* pVal);
 	STDMETHOD(get_Value)(LONG bucketIndex, DOUBLE* pVal);
+	STDMETHOD(get_TotalCount)(LONG* pVal);
+	STDMETHOD(GenerateColorScheme)(LONG numClasses, IGridColorScheme** retVal);
 
 private:
 	GUIntBig* _values;
@@ -60,6 +62,7 @@ public:
 	void ErrorMessage(CString msg);
 	bool ValidateBucketIndex(LONG bucketIndex);
 	void Clear();
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Histogram), CHistogram)

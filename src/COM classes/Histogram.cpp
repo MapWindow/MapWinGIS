@@ -131,3 +131,74 @@ bool CHistogram::ValidateBucketIndex(LONG bucketIndex)
 
 	return true;
 }
+
+// ********************************************************
+//	  get_TotalCount
+// ********************************************************
+STDMETHODIMP CHistogram::get_TotalCount(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	long totalCount = 0;
+	for (int i = 0; i < _numBuckets; i++)
+	{
+		long count = 0;
+		get_Count(i, &count);
+		totalCount += count;
+	}
+
+	*pVal = totalCount;
+	return S_OK;
+}
+
+// ********************************************************
+//	  GenerateColorScheme
+// ********************************************************
+STDMETHODIMP CHistogram::GenerateColorScheme(LONG numClasses, IGridColorScheme** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)retVal);
+
+	long totalCount;
+	get_TotalCount(&totalCount);
+
+	long valuesPerCategory = static_cast<long>(ceil(totalCount / (double)numClasses));
+	long targetCount = valuesPerCategory;
+	long accCount = 0;
+
+	int firstIndex = 0;
+	double value;
+
+	for (long i = 0; i < _numBuckets; i++)
+	{
+		long count = 0;
+		get_Count(i, &count);
+		accCount += count;
+
+		if (accCount >= targetCount || i == _numBuckets - 1)
+		{
+			IGridColorBreak* br = NULL;
+			ComHelper::CreateInstance(idGridColorBreak, (IDispatch**)&br);
+			
+			get_Value(firstIndex, &value);
+			br->put_LowValue(value);
+
+			if (i < _numBuckets - 1)
+			{
+				get_Value(i + 1, &value);
+				br->put_HighValue(value);
+				targetCount += valuesPerCategory;
+				firstIndex = i + 1;
+			}
+			else
+			{
+				br->put_HighValue(_maxValue);
+			}
+
+			(*retVal)->InsertBreak(br);
+		}
+	}
+
+	return S_OK;
+}

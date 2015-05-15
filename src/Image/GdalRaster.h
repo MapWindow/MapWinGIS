@@ -111,9 +111,6 @@ private:
 	};
 
 private:
-	//double _dfMin;
-	//double _dfMax;
-	//double _adfMinMax[2];	// holds the min and max values for grid images
 	std::vector<BandMinMax> _bandMinMax;
 
 	GDALDataType _dataType;

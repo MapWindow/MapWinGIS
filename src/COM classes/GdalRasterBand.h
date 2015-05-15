@@ -59,6 +59,7 @@ public:
 	STDMETHOD(GetHistogram)(DOUBLE minValue, DOUBLE maxValue, LONG numBuckets, VARIANT_BOOL includeOutOfRange, VARIANT_BOOL allowApproximate, IHistogram** retVal);
 	STDMETHOD(get_Overview)(LONG bandIndex, IGdalRasterBand** pVal);
 	STDMETHOD(GetStatistics)(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal);
+	STDMETHOD(GenerateColorScheme)(tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
 
 private:
 	GDALRasterBand* _band;
@@ -66,10 +67,12 @@ private:
 private:
 	bool CheckBand();
 
+	template <typename T>
+	IGridColorScheme* GenerateUniqueValuesColorScheme(GDALDataType dataType);
+
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }
 	void ErrorMessage(CString msg);
-	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalRasterBand), CGdalRasterBand)

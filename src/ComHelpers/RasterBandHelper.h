@@ -30,8 +30,12 @@ public:
 
 		bool result = false;
 
+		long lastPercent = 0;
+
 		for (int row = 0; row < height; row++)
 		{
+			CallbackHelper::Progress(NULL, row, height, "Building list of unique values", lastPercent);
+
 			CPLErr err = band->RasterIO(GF_Read, 0, row, width, 1, buffer, width, 1, dataType, 0, 0);
 			if (err != CPLErr::CE_None)
 			{
@@ -60,6 +64,7 @@ public:
 		result = true;
 
 cleaning:
+		CallbackHelper::ProgressCompleted(NULL);
 		delete[] buffer;
 		return true;
 	}
