@@ -836,3 +836,57 @@ STDMETHODIMP CGridColorScheme::ApplyGradientModel(GradientModel gradientModel)
 	}
 	return S_OK;
 }
+
+// ********************************************************
+//     ApplyColors()
+// ********************************************************
+STDMETHODIMP CGridColorScheme::ApplyColors(tkColorSchemeType type, IColorScheme* colorScheme, VARIANT_BOOL gradientWithinCategories, 
+					VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	if (_breaks.size() < 2)
+	{
+		CallbackHelper::ErrorMsg("Color scheme must have at least 2 breaks.");
+		return S_OK;
+	}
+
+	for (size_t i = 0; i < _breaks.size(); i++)
+	{
+		OLE_COLOR color;
+		double value;
+		if (type == ctSchemeRandom)
+		{
+			value = double(rand() / double(RAND_MAX));
+			colorScheme->get_RandomColor(value, &color);
+
+			_breaks[i]->put_LowColor(color);
+			_breaks[i]->put_HighColor(color);
+		}
+		else if (type == ctSchemeGraduated)
+		{
+			if (gradientWithinCategories)
+			{
+				value = i / static_cast<double>(_breaks.size());
+				colorScheme->get_GraduatedColor(value, &color);
+				_breaks[i]->put_LowColor(color);
+
+				value = (i + 1) / static_cast<double>(_breaks.size());
+				colorScheme->get_GraduatedColor(value, &color);
+				_breaks[i]->put_HighColor(color);
+			}
+			else
+			{
+				value = i / static_cast<double>(_breaks.size() - 1);
+				colorScheme->get_GraduatedColor(value, &color);
+				_breaks[i]->put_LowColor(color);
+				_breaks[i]->put_HighColor(color);
+			}
+		}
+	}
+
+	*retVal = VARIANT_TRUE;
+
+	return S_OK;
+}

@@ -4376,6 +4376,8 @@ interface IGridColorScheme : IDispatch{
 	[id(22), helpstring("property WriteToFile")] HRESULT WriteToFile([in]BSTR mwlegFilename, [in, defaultvalue("")]BSTR gridName, [in, defaultvalue(1)]int bandIndex, [out, retval]VARIANT_BOOL* retVal);
 	[id(23), helpstring("property ApplyColoringType")] HRESULT ApplyColoringType([in]ColoringType coloringType);
 	[id(24), helpstring("property ApplyGradientModel")] HRESULT ApplyGradientModel([in]GradientModel gradientModel);
+	[id(25)] HRESULT ApplyColors([in] tkColorSchemeType schemeType, [in] IColorScheme* scheme, 
+			[in] VARIANT_BOOL gradientWithinCategories, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /************************************  GridColorBreak Interface  ********************************/

@@ -106,6 +106,7 @@ public:
 	STDMETHOD(WriteToFile)(BSTR mwlegFilename, BSTR gridName, int bandIndex, VARIANT_BOOL* retVal);
 	STDMETHOD(ApplyColoringType)(ColoringType coloringType);
 	STDMETHOD(ApplyGradientModel)(GradientModel gradientModel);
+	STDMETHOD(ApplyColors)(tkColorSchemeType type, IColorScheme* colorScheme, VARIANT_BOOL gradientWithinCategories, VARIANT_BOOL* retVal);
 
 public:
 	CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName);
@@ -126,6 +127,8 @@ private:
 										//valid values between 0 and 1, inclusive.
 	double _lightSourceAzimuth;
 	double _lightSourceElevation;
+public:
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GridColorScheme), CGridColorScheme)

@@ -532,6 +532,7 @@ STDMETHODIMP CGdalRasterBand::GenerateColorScheme(tkClassificationType classific
 			}
 			break;
 		case ctEqualIntervals:
+			// TODO: implement
 			break;
 	}
 
