@@ -2764,143 +2764,66 @@ CPLXMLNode* CImageClass::SerializeCore(VARIANT_BOOL SerializePixels, CString Ele
 	// properties
 	if (_setRGBToGrey != false)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "SetToGrey", CPLString().Printf("%d", (int)_setRGBToGrey));
+
 	if (_transColor != RGB(0,0,0))
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor", CPLString().Printf("%d", _transColor));
+
 	if (_transColor != _transColor2)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyColor2", CPLString().Printf("%d", _transColor2));
+
 	if (_useTransColor != VARIANT_FALSE)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseTransparencyColor", CPLString().Printf("%d", (int)_useTransColor));
+
 	if (_transparencyPercent != 1.0)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "TransparencyPercent", CPLString().Printf("%f", _transparencyPercent));
+
 	if (_downsamplingMode != imNone)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "DownsamplingMode", CPLString().Printf("%d", (int)_downsamplingMode));
+
 	if (_upsamplingMode != imBilinear)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "UpsamplingMode", CPLString().Printf("%d", (int)_upsamplingMode));
 	
-	PredefinedColorScheme colors;
-	get_ImageColorScheme(&colors);
-	if ( colors != FallLeaves)
-		Utility::CPLCreateXMLAttributeAndValue(psTree, "ImageColorScheme", CPLString().Printf("%d", (int)colors));
+	if (_brightness != 0.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Brightness", CPLString().Printf("%f", _brightness));
 
-	if (_gdal)
+	if (_contrast != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Contrast", CPLString().Printf("%f", _contrast));
+
+	if (_saturation != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Saturation", CPLString().Printf("%f", _saturation));
+
+	if (_hue != 0.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Hue", CPLString().Printf("%f", _hue));
+
+	if (_gamma != 1.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "Gamma", CPLString().Printf("%f", _gamma));
+
+	if (_colorizeIntensity != 0.0f)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ColorizeIntensity", CPLString().Printf("%f", _colorizeIntensity));
+
+	if (_colorizeColor != RGB(255, 165, 0))
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ColorizeColor", CPLString().Printf("%d", _colorizeColor));
+
+	if (_gdal && _raster)
 	{
-		// GDAL only properties
-		tkGridRendering allowExtScheme;
-		this->get_AllowGridRendering(&allowExtScheme);
-		if (allowExtScheme != tkGridRendering::grForGridsOnly)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowGridRendering", CPLString().Printf("%d", (int)allowExtScheme));
-
-		VARIANT_BOOL allowHillshade;
-		this->get_AllowHillshade(&allowHillshade);
-		if (allowHillshade != VARIANT_FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowHillshade", CPLString().Printf("%d", (int)allowHillshade));
-
-		int bufferSize;
-		this->get_BufferSize(&bufferSize);
-		if (bufferSize != 100.0)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "BufferSize", CPLString().Printf("%d", bufferSize));
-
-		VARIANT_BOOL clearCache;
-		this->get_ClearGDALCache(&clearCache);
-		if (clearCache != VARIANT_FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "ClearGdalCache", CPLString().Printf("%d", (int)clearCache));
-
-		int bandIndex;
-		this->get_SourceGridBandIndex(&bandIndex);
-		if (bandIndex != -1)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceGridBandIndex", CPLString().Printf("%d", bandIndex));
-		
-		VARIANT_BOOL useHistogram;
-		this->get_UseHistogram(&useHistogram);
-		if (useHistogram != VARIANT_FALSE)
-			Utility::CPLCreateXMLAttributeAndValue(psTree, "UseHistogram", CPLString().Printf("%d", (int)useHistogram));
+		_raster->Serialize(psTree);
 	}
 
-	if (SerializePixels)	// check if the buffer is loaded
+	if (SerializePixels)
 	{
-		if (_sourceType == istGDIPlus)
-		{
-			// it's in-memory bitmap
-			std::string s = _iconGdiPlus->SerializeToBase64String();
-			CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
-			Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)true));
-		}
-		else
-		{
-			bool useGDIPlus = false;
-			if (_imgType == JPEG_FILE || _imgType == PNG_FILE || _imgType == GIF_FILE)
-			{
-				CComBSTR filename;
-				this->get_Filename(&filename);
-				USES_CONVERSION;
-				long size = Utility::GetFileSize(OLE2CA(filename));
-				if (size < (long)(0x1 << 20))
-				{
-					useGDIPlus = true;
-				}
-			}
-			
-			if (useGDIPlus)
-			{
-				// it will be serialized as GdiPlus and loaded as in-memory bitmap the next time
-				CComBSTR filename;
-				this->get_Filename(&filename);
-				USES_CONVERSION;
-				
-				unsigned char* buffer = NULL;
-				int size = Utility::ReadFileToBuffer(OLE2W(filename), &buffer);
-
-				if (size > 0)
-				{
-					std::string s = base64_encode(buffer, size);
-					
-					CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
-					Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)true));
-					delete[] buffer;
-				}
-			}
-			else
-			{
-				// only buffer will be serialized
-				long bufferWidth, bufferHeight;
-				
-				if (_gdal)
-				{
-					this->get_Width(&bufferWidth);
-					this->get_Height(&bufferHeight);
-
-					if (bufferWidth != fullWidth || 
-						bufferHeight != fullHeight)
-					{
-						VARIANT_BOOL vbretval;
-						this->LoadBuffer(1, &vbretval);
-					}
-				}
-
-				this->get_Width(&bufferWidth);
-				this->get_Height(&bufferHeight);
-				
-				unsigned char* data = reinterpret_cast<unsigned char*>(_imageData);
-				std::string s = base64_encode(data, bufferWidth * bufferHeight * 3);
-				CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
-
-				Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)false));
-				Utility::CPLCreateXMLAttributeAndValue(psBuffer, "Width", CPLString().Printf("%d", bufferWidth));
-				Utility::CPLCreateXMLAttributeAndValue(psBuffer, "Height", CPLString().Printf("%d", bufferHeight));
-			}
-		}
+		SerializePixelsCore(psTree, fullWidth, fullHeight);
 	}
-
-	// labels
-	if (!SerializePixels)	// if pixels are serialized, then it's icon or a texture;
-							// it's obvious that no labels can be there
+	else
 	{
+		// if pixels are serialized, then it's icon or a texture;		
+		// it's obvious that no labels can be there
 		CPLXMLNode* psLabels = ((CLabels*)_labels)->SerializeCore("LabelsClass");
 		if (psLabels)
 		{
 			CPLAddXMLChild(psTree, psLabels);
 		}
 	}
+
 	return psTree;
 }
 
@@ -2911,14 +2834,155 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 {
 	SetDefaults();
 	
+	DeserializePixels(node);
+
+	CString s = CPLGetXMLValue( node, "SetToGrey", "0" );
+	if (s != "") _setRGBToGrey = atoi(s) == 0 ? false : true;
+
+	s = CPLGetXMLValue( node, "TransparencyColor", NULL );
+	if (s != "") _transColor = (OLE_COLOR)atoi(s);
+
+	s = CPLGetXMLValue( node, "TransparencyColor2", NULL );
+	_transColor2 = s != "" ? (OLE_COLOR)atoi(s) : _transColor ;
+
+	s = CPLGetXMLValue( node, "UseTransparencyColor", NULL );
+	if (s != "") _useTransColor = (VARIANT_BOOL)atoi(s);
+
+	s = CPLGetXMLValue( node, "TransparencyPercent", NULL );
+	if (s != "") _transparencyPercent = Utility::atof_custom(s);
+
+	s = CPLGetXMLValue( node, "DownsamplingMode", NULL );
+	if (s != "") _downsamplingMode = (tkInterpolationMode)atoi(s);
+
+	s = CPLGetXMLValue( node, "UpsamplingMode", NULL );
+	if (s != "") _upsamplingMode = (tkInterpolationMode)atoi(s);
+
+	s = CPLGetXMLValue(node, "Brightness", NULL);
+	if (s != "") put_Brightness(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Contrast", NULL);
+	if (s != "") put_Contrast(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Saturation", NULL);
+	if (s != "") put_Saturation(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Hue", NULL);
+	if (s != "") put_Hue(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "Gamma", NULL);
+	if (s != "") put_Gamma(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "ColorizeIntensity", NULL);
+	if (s != "") put_ColorizeIntensity(static_cast<float>(Utility::atof_custom(s)));
+
+	s = CPLGetXMLValue(node, "ColorizeColor", NULL);
+	if (s != "") put_ColorizeColor((OLE_COLOR)atoi(s));
+
+	// labels
+	CPLXMLNode* psChild = CPLGetXMLNode(node, "LabelsClass");
+	if (psChild)
+	{
+		((CLabels*)_labels)->DeserializeCore(psChild);
+	}
+
+	if (_gdal && _raster)
+	{
+		_raster->Deserialize(node);
+	}
+	return true;
+}
+
+// ********************************************************
+//     SerializePixels()
+// ********************************************************
+void CImageClass::SerializePixelsCore(CPLXMLNode* psTree, long fullWidth, long fullHeight)
+{
+	if (_sourceType == istGDIPlus)
+	{
+		// it's in-memory bitmap
+		std::string s = _iconGdiPlus->SerializeToBase64String();
+		CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
+		Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)true));
+	}
+	else
+	{
+		bool useGDIPlus = false;
+		if (_imgType == JPEG_FILE || _imgType == PNG_FILE || _imgType == GIF_FILE)
+		{
+			CComBSTR filename;
+			this->get_Filename(&filename);
+			USES_CONVERSION;
+			long size = Utility::GetFileSize(OLE2CA(filename));
+			if (size < (long)(0x1 << 20))
+			{
+				useGDIPlus = true;
+			}
+		}
+
+		if (useGDIPlus)
+		{
+			// it will be serialized as GdiPlus and loaded as in-memory bitmap the next time
+			CComBSTR filename;
+			this->get_Filename(&filename);
+			USES_CONVERSION;
+
+			unsigned char* buffer = NULL;
+			int size = Utility::ReadFileToBuffer(OLE2W(filename), &buffer);
+
+			if (size > 0)
+			{
+				std::string s = base64_encode(buffer, size);
+
+				CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
+				Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)true));
+				delete[] buffer;
+			}
+		}
+		else
+		{
+			// only buffer will be serialized
+			long bufferWidth, bufferHeight;
+
+			if (_gdal)
+			{
+				this->get_Width(&bufferWidth);
+				this->get_Height(&bufferHeight);
+
+				if (bufferWidth != fullWidth ||
+					bufferHeight != fullHeight)
+				{
+					VARIANT_BOOL vbretval;
+					this->LoadBuffer(1, &vbretval);
+				}
+			}
+
+			this->get_Width(&bufferWidth);
+			this->get_Height(&bufferHeight);
+
+			unsigned char* data = reinterpret_cast<unsigned char*>(_imageData);
+			std::string s = base64_encode(data, bufferWidth * bufferHeight * 3);
+			CPLXMLNode* psBuffer = CPLCreateXMLElementAndValue(psTree, "ImageBuffer", s.c_str());
+
+			Utility::CPLCreateXMLAttributeAndValue(psBuffer, "GdiPlusBitmap", CPLString().Printf("%d", (int)false));
+			Utility::CPLCreateXMLAttributeAndValue(psBuffer, "Width", CPLString().Printf("%d", bufferWidth));
+			Utility::CPLCreateXMLAttributeAndValue(psBuffer, "Height", CPLString().Printf("%d", bufferHeight));
+		}
+	}
+}
+
+// ********************************************************
+//     DeserializePixels()
+// ********************************************************
+void CImageClass::DeserializePixels(CPLXMLNode* node)
+{
 	CString s;
 	CPLXMLNode* nodeBuffer = CPLGetXMLNode(node, "ImageBuffer");
 	if (nodeBuffer)
 	{
 		bool gdiPlus = false;
-		s = CPLGetXMLValue( nodeBuffer, "GdiPlusBitmap", NULL );
+		s = CPLGetXMLValue(nodeBuffer, "GdiPlusBitmap", NULL);
 		if (s != "") gdiPlus = atoi(s) == 0 ? false : true;
-		
+
 		if (gdiPlus)
 		{
 			std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", NULL);
@@ -2944,13 +3008,13 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 		else
 		{
 			long width = 0, height = 0;
-			s = CPLGetXMLValue( nodeBuffer, "Width", NULL );
+			s = CPLGetXMLValue(nodeBuffer, "Width", NULL);
 			if (s != "") width = atoi(s);
 
-			s = CPLGetXMLValue( nodeBuffer, "Height", NULL );
+			s = CPLGetXMLValue(nodeBuffer, "Height", NULL);
 			if (s != "") height = atoi(s);
-			
-			if (width > 0 && height > 0 && 
+
+			if (width > 0 && height > 0 &&
 				width * height < 200000)
 			{
 				std::string str = CPLGetXMLValue(nodeBuffer, "=ImageBuffer", NULL);
@@ -2959,7 +3023,7 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 					// restoring buffer
 					VARIANT_BOOL vbretval;
 					this->Close(&vbretval);
-					
+
 					this->CreateNew(width, height, &vbretval);
 					_sourceType = istGDIPlus;
 					str = base64_decode(str);
@@ -2970,74 +3034,6 @@ bool CImageClass::DeserializeCore(CPLXMLNode* node)
 			}
 		}
 	}
-
-	s = CPLGetXMLValue( node, "SetToGrey", "0" );
-	if (s != "") _setRGBToGrey = atoi(s) == 0 ? false : true;
-
-	s = CPLGetXMLValue( node, "TransparencyColor", NULL );
-	if (s != "") _transColor = (OLE_COLOR)atoi(s);
-
-	s = CPLGetXMLValue( node, "TransparencyColor2", NULL );
-	_transColor2 = s != "" ? (OLE_COLOR)atoi(s) : _transColor ;
-
-	s = CPLGetXMLValue( node, "UseTransparencyColor", NULL );
-	if (s != "") _useTransColor = (VARIANT_BOOL)atoi(s);
-
-	s = CPLGetXMLValue( node, "TransparencyPercent", NULL );
-	if (s != "") _transparencyPercent = Utility::atof_custom(s);
-
-	s = CPLGetXMLValue( node, "DownsamplingMode", NULL );
-	if (s != "") _downsamplingMode = (tkInterpolationMode)atoi(s);
-
-	s = CPLGetXMLValue( node, "UpsamplingMode", NULL );
-	if (s != "") _upsamplingMode = (tkInterpolationMode)atoi(s);
-
-	// Labels
-	CPLXMLNode* psChild = CPLGetXMLNode(node, "LabelsClass");
-	if (psChild)
-	{
-		((CLabels*)_labels)->DeserializeCore(psChild);
-	}
-
-	// GridColorScheme
-	if (_gdal)
-	{
-		tkGridRendering allowColorScheme;
-		s = CPLGetXMLValue( node, "AllowGridRendering", "1" );		// 1 = grForGridsOnly
-		if (s != "") allowColorScheme = (tkGridRendering)atoi(s);
-		this->put_AllowGridRendering(allowColorScheme);
-
-		VARIANT_BOOL allowHillshade;
-		s = CPLGetXMLValue( node, "AllowHillshade", "1" );
-		if (s != "") allowHillshade = (VARIANT_BOOL)atoi(s);
-		this->put_AllowHillshade(allowHillshade);
-
-		int bufferSize;
-		s = CPLGetXMLValue( node, "BufferSize", "100" );
-		if (s != "") bufferSize = atoi(s);
-		this->put_BufferSize(bufferSize);
-
-		VARIANT_BOOL clearCache;
-		s = CPLGetXMLValue( node, "ClearGdalCache", "1" );
-		if (s != "") clearCache = (VARIANT_BOOL)atoi(s);
-		this->put_ClearGDALCache(clearCache);
-
-		int bandIndex;
-		s = CPLGetXMLValue( node, "SourceGridBandIndex", "1" );
-		if (s != "") bandIndex = atoi(s);
-		this->put_SourceGridBandIndex(bandIndex);
-
-		VARIANT_BOOL useHistogram;
-		s = CPLGetXMLValue( node, "UseHistogram", "1" );
-		if (s != "") useHistogram = (VARIANT_BOOL)atoi(s);
-		this->put_UseHistogram(useHistogram);
-
-		PredefinedColorScheme colors;
-		s = CPLGetXMLValue( node, "ImageColorScheme", "0" );
-		if (s != "") colors = (PredefinedColorScheme)atoi(s);
-		_raster->ApplyPredefinedColorScheme(colors);
-	}
-	return true;
 }
 
 // ********************************************************

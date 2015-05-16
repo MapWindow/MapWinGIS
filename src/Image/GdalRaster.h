@@ -64,6 +64,7 @@ public:
 		_reverseGreyscale = false;
 		_ignoreColorTable = false;
 		_rendering = rrUnknown;
+		_useHistogram = false;
 		
 		ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_predefinedColorScheme);
 	};
@@ -211,6 +212,11 @@ private:
 	
 	bool ReadColorTableToMemoryBuffer(colour ** imageData, int* srcDataInt, int bandIndex, int xBuff, int yBuff, double noDataValue, double shift, double range);
 
+	void SaveBandsMinMax(CPLXMLNode* psTree);
+	void SerializeCore(CPLXMLNode* psTree);
+	void DeserializeCore(CPLXMLNode* node);
+	void DeserializeBandMinMax(CPLXMLNode* node);
+
 public:
 	// properties
 	GDALDataset* GetDataset(){ return _dataset; }
@@ -335,5 +341,9 @@ public:
 	void SetDefaultMinMax(int bandIndex);
 	double GetBandMinMax(int bandIndex, bool min);
 	void SetBandMinMax(int bandIndex, double min, double max);
+	void Serialize(CPLXMLNode* psTree);
+	void Deserialize(CPLXMLNode* node);
+	
+
 };
 

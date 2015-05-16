@@ -1070,6 +1070,7 @@ namespace Utility
 #pragma endregion
 
 #pragma region Gdal
+
 	// ********************************************************
 	//     CPLCreateXMLAttributeAndValue()
 	// ********************************************************
@@ -1101,6 +1102,27 @@ namespace Utility
 		temp.Format ("%f", rValue);
 		return CPLCreateXMLAttributeAndValue(psParent, pszName, temp);
 	}
+
+	// ********************************************************
+	//     CPLXMLChildrentCount()
+	// ********************************************************
+	int Utility::CPLXMLChildrentCount(CPLXMLNode *psParent)
+	{
+		if (!psParent) {
+			return 0;
+		}
+
+		int count = 0;
+		CPLXMLNode* node = psParent->psChild;
+		while (node)
+		{
+			count++;
+			node = node->psNext;
+		}
+		
+		return count;
+	}
+
 #pragma endregion
 
 	// ********************************************************

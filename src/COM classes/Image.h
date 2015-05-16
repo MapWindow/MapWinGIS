@@ -375,6 +375,8 @@ private:
 
 	int _bitsPerPixel;
 public:
+
+	// TODO: encapsulate
 	int m_groupID;			// in case belong to the group of images which are to be treated as one
 	DataPixels* m_pixels;	// a structure to hold values of pixels with the value other than noDataValue
 	int m_pixelsCount;
@@ -408,6 +410,9 @@ private:
 	void DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPixel);
 	void DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bitsPerPixel);
 	void ImageBufferToBits(unsigned char * bits, int rowLength);
+	void SerializePixelsCore(CPLXMLNode* psTree, long fullWidth, long fullHeight);
+	void DeserializePixels(CPLXMLNode* node);
+
 public:
 	bool DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(VARIANT_BOOL SerializePixels, CString ElementName);

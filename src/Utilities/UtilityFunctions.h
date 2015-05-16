@@ -59,6 +59,8 @@ namespace Utility
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, const char *pszValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, int nValue);
 	CPLXMLNode* CPLCreateXMLAttributeAndValue(CPLXMLNode *psParent, const char *pszName, double rValue);
+	int CPLXMLChildrentCount(CPLXMLNode *psParent);
+
 	void SerializeVariant(CPLXMLNode* node, CString elementName, VARIANT* val);
 	void DeserializeVariant(CString sValue, FieldType fieldType, VARIANT* var);
 	void WriteXmlHeaderAttributes(CPLXMLNode* psTree, CString fileType);

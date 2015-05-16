@@ -1795,3 +1795,190 @@ tkRasterRendering GdalRaster::GuessRenderingMode()
 	return rrRGB;
 }
 
+// *************************************************************
+//	  Serialize()
+// *************************************************************
+void GdalRaster::Serialize(CPLXMLNode* psTree)
+{
+	SerializeCore(psTree);
+
+	SaveBandsMinMax(psTree);
+}
+
+// *************************************************************
+//	  SerializeCore()
+// *************************************************************
+void GdalRaster::SerializeCore(CPLXMLNode* psTree)
+{
+	if (_predefinedColors != FallLeaves)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ImageColorScheme", CPLString().Printf("%d", (int)_predefinedColors));
+
+	if (_allowAsGrid != tkGridRendering::grForGridsOnly)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowGridRendering", CPLString().Printf("%d", (int)_allowAsGrid));
+
+	if (_allowHillshade != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "AllowHillshade", CPLString().Printf("%d", (int)_allowHillshade));
+
+	if (_buffSize != 100.0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "BufferSize", CPLString().Printf("%d", _buffSize));
+
+	if (_clearGDALCache != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ClearGdalCache", CPLString().Printf("%d", (int)_clearGDALCache));
+
+	if (_activeBandIndex != -1)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SourceGridBandIndex", CPLString().Printf("%d", _activeBandIndex));
+
+	if (_useHistogram != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseHistogram", CPLString().Printf("%d", (int)_useHistogram));
+
+	if (_redBandIndex != 1)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "RedBandIndex", CPLString().Printf("%d", (int)_redBandIndex));
+
+	if (_greenBandIndex != 2)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "GreenBandIndex", CPLString().Printf("%d", (int)_greenBandIndex));
+
+	if (_blueBandIndex != 3)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "BlueBandIndex", CPLString().Printf("%d", (int)_blueBandIndex));
+
+	if (_alphaBandIndex != 4)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "AlphaBandIndex", CPLString().Printf("%d", (int)_alphaBandIndex));
+
+	if (_useRgbBandMapping != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseRgbBandMapping", CPLString().Printf("%d", (int)_useRgbBandMapping));
+
+	if (_forceSingleBandRendering != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ForceSingleBandRendering", CPLString().Printf("%d", (int)_forceSingleBandRendering));
+
+	if (_reverseGreyscale != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "ReverseGreyscale", CPLString().Printf("%d", (int)_reverseGreyscale));
+
+	if (_ignoreColorTable != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "IgnoreColorTable", CPLString().Printf("%d", (int)_ignoreColorTable));
+
+	if (_alphaRendering != false)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseActiveBandAsAlpha", CPLString().Printf("%d", (int)_alphaRendering));
+
+}
+
+// *************************************************************
+//	  SaveBandsMinMax()
+// *************************************************************
+void GdalRaster::SaveBandsMinMax(CPLXMLNode* psTree)
+{
+	CPLXMLNode* nodeBands = CPLCreateXMLNode(psTree, CPLXMLNodeType::CXT_Element, "Bands");
+
+	for (size_t i = 0; i < _bandMinMax.size(); i++)
+	{
+		CPLXMLNode* nodeBand = CPLCreateXMLNode(nodeBands, CPLXMLNodeType::CXT_Element, "Band");
+
+		Utility::CPLCreateXMLAttributeAndValue(nodeBand, "Min", _bandMinMax[i].Min);
+		Utility::CPLCreateXMLAttributeAndValue(nodeBand, "Max", _bandMinMax[i].Max);
+		Utility::CPLCreateXMLAttributeAndValue(nodeBand, "Valid", _bandMinMax[i].Calculated);
+	}
+}
+
+// *************************************************************
+//	  Deserialize()
+// *************************************************************
+void GdalRaster::Deserialize(CPLXMLNode* node)
+{
+	DeserializeCore(node);
+
+	DeserializeBandMinMax(node);
+}
+
+// *************************************************************
+//	  DeserializeBandMinMax()
+// *************************************************************
+void GdalRaster::DeserializeBandMinMax(CPLXMLNode* node)
+{
+	if (!node) return;
+
+	node = CPLGetXMLNode(node, "Bands");
+	if (!node) return;
+	
+	int count = Utility::CPLXMLChildrentCount(node);
+	if (count != _bandMinMax.size()) {
+		return;
+	}
+
+	CString s;
+	int i = 0;
+
+	node = node->psChild;
+	while (node)
+	{
+		if (_strcmpi(node->pszValue, "Band") == 0)
+		{
+			s = CPLGetXMLValue(node, "Valid", "0");
+			bool valid = atoi(s) != 0;
+
+			if (valid)
+			{
+				s = CPLGetXMLValue(node, "Min", "");
+				if (s != "") _bandMinMax[i].Min = Utility::atof_custom(s);
+
+				s = CPLGetXMLValue(node, "Max", "");
+				if (s != "") _bandMinMax[i].Max = Utility::atof_custom(s);
+			}
+
+			i++;
+		}
+
+		node = node->psNext;
+	}
+}
+
+// *************************************************************
+//	  DeserializeCore()
+// *************************************************************
+void GdalRaster::DeserializeCore(CPLXMLNode* node)
+{
+	CString s = CPLGetXMLValue(node, "AllowGridRendering", "1");		// 1 = grForGridsOnly
+	if (s != "") SetAllowAsGrid((tkGridRendering)atoi(s));
+
+	s = CPLGetXMLValue(node, "AllowHillshade", "1");
+	if (s != "") SetAllowHillshade((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "BufferSize", "100");
+	if (s != "") _buffSize = atoi(s);
+
+	s = CPLGetXMLValue(node, "ClearGdalCache", "1");
+	if (s != "") SetClearGdalCache((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "SourceGridBandIndex", "1");
+	if (s != "") SetActiveBandIndex(atoi(s));
+
+	s = CPLGetXMLValue(node, "UseHistogram", "0");
+	if (s != "") SetUseHistogram((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "ImageColorScheme", "0");
+	if (s != "") ApplyPredefinedColorScheme((PredefinedColorScheme)atoi(s));
+
+	s = CPLGetXMLValue(node, "RedBandIndex", "1");
+	if (s != "") SetRgbBandIndex(BandChannelRed, atoi(s));
+
+	s = CPLGetXMLValue(node, "GreenBandIndex", "2");
+	if (s != "") SetRgbBandIndex(BandChannelGreen, atoi(s));
+
+	s = CPLGetXMLValue(node, "BlueBandIndex", "3");
+	if (s != "") SetRgbBandIndex(BandChannelBlue, atoi(s));
+
+	s = CPLGetXMLValue(node, "AlphaBandIndex", "4");
+	if (s != "") SetRgbBandIndex(BandChannelAlpha, atoi(s));
+
+	s = CPLGetXMLValue(node, "UseRgbBandMapping", "0");
+	if (s != "") SetUseRgbBandMapping((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "ForceSingleBandRendering", "0");
+	if (s != "") SetForceSingleBandRendering((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "ReverseGreyscale", "0");
+	if (s != "") SetReverseGreyscale((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "IgnoreColorTable", "0");
+	if (s != "") SetIgnoreColorTable((bool)(atoi(s) != 0));
+
+	s = CPLGetXMLValue(node, "UseActiveBandAsAlpha", "0");
+	if (s != "") SetAlphaBandRendering((bool)(atoi(s) != 0));
+}
