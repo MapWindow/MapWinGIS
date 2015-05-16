@@ -4057,7 +4057,7 @@ STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = _raster ? _raster->GetRenderingMode() : rrRGB;
+	*pVal = _raster ? _raster->GuessRenderingMode() : rrRGB;
 
 	return S_OK;
 }

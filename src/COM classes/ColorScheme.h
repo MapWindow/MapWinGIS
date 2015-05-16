@@ -88,7 +88,8 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	
+	STDMETHOD(Reverse)();
+
 private:
 	struct ColorBreak
 	{
@@ -105,6 +106,7 @@ private:
 
 public:
 	void ErrorMessage(long ErrorCode);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(ColorScheme), CColorScheme)

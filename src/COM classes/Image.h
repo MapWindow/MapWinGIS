@@ -319,6 +319,9 @@ public:
 	STDMETHOD(SetDefaultMinMax)(LONG bandIndex, VARIANT_BOOL* retVal);
 	STDMETHOD(get_ReverseGreyscale)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_ReverseGreyscale)(VARIANT_BOOL newVal);
+	STDMETHOD(get_IgnoreColorTable)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_IgnoreColorTable)(VARIANT_BOOL newVal);
+	STDMETHOD(get_RenderingMode)(tkRasterRendering* pVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -433,11 +436,7 @@ public:
 	bool GetBufferReloadIsNeeded();
 	void SetImageTypeCore(ImageType fileType);
 	bool ValidateBandIndex(int bandIndex);
-
 	
-	STDMETHOD(get_IgnoreColorTable)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_IgnoreColorTable)(VARIANT_BOOL newVal);
-	STDMETHOD(get_RenderingMode)(tkRasterRendering* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

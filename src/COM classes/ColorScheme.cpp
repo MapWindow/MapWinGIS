@@ -469,3 +469,20 @@ STDMETHODIMP CColorScheme::put_GlobalCallback(ICallback *newVal)
 	ComHelper::SetRef(newVal, (IDispatch**)&_globalCallback);
 	return S_OK;
 }
+
+// ***********************************************************************
+// *		Reverse()
+// ***********************************************************************
+STDMETHODIMP CColorScheme::Reverse()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	std::reverse(_breaks.begin(), _breaks.end());
+
+	for (size_t i = 0; i < _breaks.size(); i++)
+	{
+		_breaks[i].value = 1.0 - _breaks[i].value;
+	}
+
+	return S_OK;
+}

@@ -1772,3 +1772,26 @@ void GdalRaster::SetDefaultMinMax(int bandIndex)
 	ComputeBandMinMax(_dataset->GetRasterBand(bandIndex), _bandMinMax[bandIndex - 1], true);
 }
 
+// *************************************************************
+//	  GuessRenderingMode()
+// *************************************************************
+tkRasterRendering GdalRaster::GuessRenderingMode()
+{
+	if (WillBeRenderedAsGrid())
+	{
+		return rrColorScheme;
+	}
+
+	if (_hasColorTable && !_ignoreColorTable)
+	{
+		return rrBuiltInColorTable;
+	}
+
+	if (_nBands == 1 || _forceSingleBandRendering)
+	{
+		return rrSingleBand;
+	}
+
+	return rrRGB;
+}
+

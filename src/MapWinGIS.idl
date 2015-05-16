@@ -5287,6 +5287,7 @@ interface IColorScheme : IDispatch{
 	[propget, id(16), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(16), helpstring("property Key")] HRESULT Key([in] BSTR newVal);	
 
+	[id(17)] HRESULT Reverse();
 };
 
 /***************************  ChartField Interface  ********************************/

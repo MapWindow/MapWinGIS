@@ -289,6 +289,7 @@ public:
 	void SetIgnoreColorTable(bool value) { _ignoreColorTable = value; }
 
 	tkRasterRendering GetRenderingMode() {return _rendering; }
+	tkRasterRendering GuessRenderingMode();
 
 	// methods
 	bool SetNoDataValue(double Value);
