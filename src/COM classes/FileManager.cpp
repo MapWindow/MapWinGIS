@@ -467,36 +467,54 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 			ErrorMessage(tkUNSUPPORTED_FORMAT);
 			break;
 		case fosRgbImage:
+		case fosDirectGrid:
 			{
 				IImage* img = NULL;
 				ComHelper::CreateInstance(idImage, (IDispatch**)&img);
-				if (img)
+				
+				img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb );
+				if (!vb)
 				{
-					img->Open( Filename, ImageType::USE_FILE_EXTENSION, VARIANT_FALSE, _globalCallback, &vb );
-					if (!vb)
+					img->get_LastErrorCode(&_lastErrorCode);
+					ErrorMessage(_lastErrorCode);
+					img->Release();
+				}
+				else
+				{
+					// check that is is actually RGB image
+					if (openStrategy == fosRgbImage) 
 					{
-						img->get_LastErrorCode(&_lastErrorCode);
-						ErrorMessage(_lastErrorCode);
-						img->Release();
-						img = NULL;
-					}
-					else
-					{
-						// check that is is actually RGB image
 						img->get_IsRgb(&vb);
 						if (!vb) {
 							ErrorMessage(tkINVALID_OPEN_STRATEGY);
 							img->Close(&vb);
 							img->Release();
-							img = NULL;
+							return S_OK;
 						}
-						_lastOpenIsSuccess = true;
-						*retVal = img;
 					}
+					else
+					{
+						// we want grid; however there are couple of ways to open it
+						// let's make a choice based on whether we already have color scheme
+						CComPtr<IGridColorScheme> scheme = NULL;
+						img->get_CustomColorScheme(&scheme);
+						if (scheme) 
+						{
+							img->put_ForceSingleBandRendering(VARIANT_FALSE);
+							img->put_AllowGridRendering(tkGridRendering::grForceForAllFormats);
+						}
+						else 
+						{
+							img->put_ForceSingleBandRendering(VARIANT_TRUE);
+							img->put_AllowGridRendering(grNever);
+						}
+					}
+
+					_lastOpenIsSuccess = true;
+					*retVal = img;
 				}
 			}
 			break;
-		case fosDirectGrid:
 		case fosProxyForGrid:
 			{
 				CComPtr<IGrid> grid = NULL;
@@ -522,7 +540,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						grid->RetrieveOrGenerateColorScheme(tkGridSchemeRetrieval::gsrAuto, 
 															tkGridSchemeGeneration::gsgGradient, coloring, &scheme);
 						
-						tkGridProxyMode mode = openStrategy == fosDirectGrid ? gpmNoProxy : gpmUseProxy;
+						tkGridProxyMode mode = gpmUseProxy; //openStrategy == fosDirectGrid ? gpmNoProxy : gpmUseProxy;
 						
 						IImage* img = NULL;
 						grid->OpenAsImage(scheme, mode, _globalCallback, &img);

@@ -19,6 +19,7 @@
 #include "GdalRaster.h"
 #include "Vector.h"
 #include "gdalwarper.h"
+#include "GridColorScheme.h"
 
 using namespace std;
 
@@ -1803,6 +1804,15 @@ void GdalRaster::Serialize(CPLXMLNode* psTree)
 	SerializeCore(psTree);
 
 	SaveBandsMinMax(psTree);
+
+	if (_customColorScheme)
+	{
+		CPLXMLNode* node = ((CGridColorScheme*)_customColorScheme)->SerializeCore("GridColorScheme");
+		if (node) 
+		{
+			CPLAddXMLChild(psTree, node);
+		}
+	}
 }
 
 // *************************************************************
@@ -1882,9 +1892,22 @@ void GdalRaster::SaveBandsMinMax(CPLXMLNode* psTree)
 // *************************************************************
 void GdalRaster::Deserialize(CPLXMLNode* node)
 {
+	if (!node) return;
+
 	DeserializeCore(node);
 
 	DeserializeBandMinMax(node);
+
+	CPLXMLNode* nodeScheme = CPLGetXMLNode(node, "GridColorScheme");
+	if (nodeScheme)
+	{
+		if (!_customColorScheme) 
+		{
+			ComHelper::CreateInstance(idGridColorScheme, (IDispatch**)&_customColorScheme);
+		}
+
+		((CGridColorScheme*)_customColorScheme)->DeserializeCore(nodeScheme);
+	}
 }
 
 // *************************************************************
@@ -1908,7 +1931,7 @@ void GdalRaster::DeserializeBandMinMax(CPLXMLNode* node)
 	node = node->psChild;
 	while (node)
 	{
-		if (_strcmpi(node->pszValue, "Band") == 0)
+		if (_stricmp(node->pszValue, "Band") == 0)
 		{
 			s = CPLGetXMLValue(node, "Valid", "0");
 			bool valid = atoi(s) != 0;
