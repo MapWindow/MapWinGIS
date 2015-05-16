@@ -1113,7 +1113,13 @@ bool GdalRaster::GdalBufferToMemoryBuffer(colour ** dst, T* src, int xBuff, int 
 					if (_reverseGreyscale) {
 						b = 255 - b;		// alpha band must not be reversed
 					}
-					color->alpha = b;
+
+					// to honor no data values previously set
+					// TODO: in fact better to process the alpha band first
+					if (color->alpha != 0)
+					{
+						color->alpha = b;
+					}
 				}
 			}
 		}

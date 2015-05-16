@@ -593,3 +593,21 @@ IGridColorScheme* CGdalRasterBand::GenerateUniqueValuesColorScheme(GDALDataType 
 
 	return scheme;
 }
+
+// ********************************************************
+//     ComputeMinMax
+// ********************************************************
+STDMETHODIMP CGdalRasterBand::ComputeMinMax(VARIANT_BOOL allowApproximate, DOUBLE* minimum, DOUBLE* maximum, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retVal = VARIANT_FALSE;
+
+	double values[2];
+	CPLErr result = _band->ComputeRasterMinMax(allowApproximate ? 1 : 0, values);
+	*minimum = values[0];
+	*maximum = values[1];
+
+	*retVal = result == CE_None ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}

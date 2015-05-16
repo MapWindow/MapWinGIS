@@ -60,6 +60,7 @@ public:
 	STDMETHOD(get_Overview)(LONG bandIndex, IGdalRasterBand** pVal);
 	STDMETHOD(GetStatistics)(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal);
 	STDMETHOD(Classify)(double minValue, double maxValue, tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
+	STDMETHOD(ComputeMinMax)(VARIANT_BOOL allowApproximate, DOUBLE* minimum, DOUBLE* maximum, VARIANT_BOOL* retVal);
 
 private:
 	GDALRasterBand* _band;
@@ -74,6 +75,7 @@ private:
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }
 	void ErrorMessage(CString msg);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GdalRasterBand), CGdalRasterBand)
