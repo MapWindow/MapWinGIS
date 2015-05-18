@@ -610,24 +610,39 @@ CPLXMLNode* CGridColorScheme::SerializeCore(CString ElementName)
 
 				BSTR caption;
 				_breaks[i]->get_Caption(&caption);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Caption", OLE2CA(caption));
+				if (SysStringLen(caption) > 0)
+				{
+					Utility::CPLCreateXMLAttributeAndValue(psNode, "Caption", OLE2CA(caption));
+				}
 				SysFreeString(caption);
-				
+
 				ColoringType colorType;
 				_breaks[i]->get_ColoringType(&colorType);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "ColoringType", (int)colorType);
+				if (colorType != Hillshade)
+				{
+					Utility::CPLCreateXMLAttributeAndValue(psNode, "ColoringType", (int)colorType);
+				}
 
 				GradientModel gradient;
 				_breaks[i]->get_GradientModel(&gradient);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", (int)gradient);
+				if (gradient != Linear)
+				{
+					Utility::CPLCreateXMLAttributeAndValue(psNode, "GradientModel", (int)gradient);
+				}
 
 				VARIANT_BOOL visible;
 				_breaks[i]->get_Visible(&visible);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Visible", (int)visible);
+				if (!visible)
+				{
+					Utility::CPLCreateXMLAttributeAndValue(psNode, "Visible", (int)visible);
+				}
 				
 				BSTR key;
 				_breaks[i]->get_Key(&key);
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Key", OLE2CA(key));
+				if (SysStringLen(key) > 0)
+				{
+					Utility::CPLCreateXMLAttributeAndValue(psNode, "Key", OLE2CA(key));
+				}
 				SysFreeString(key);
 			}
 		}
