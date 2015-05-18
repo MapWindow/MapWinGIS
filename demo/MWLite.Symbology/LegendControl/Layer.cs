@@ -498,12 +498,16 @@ namespace MWLite.Symbology.LegendControl
             {
                 return Constants.CS_ITEM_HEIGHT + 2;
             }
-            else if (this.Type == eLayerType.PointShapefile)
+            
+            if (this.Type == eLayerType.PointShapefile)
             {
+                if (options.PointType == tkPointSymbolType.ptSymbolPicture && options.Picture != null)
+                {
+                    return options.Picture.Height * options.PictureScaleY + 2 <= Constants.CS_ITEM_HEIGHT || options.Picture == null ? Constants.CS_ITEM_HEIGHT + 2 : (int)(options.Picture.Height * options.PictureScaleY + 2);
+                }
+                
                 switch(options.PointType)
                 {
-                    case tkPointSymbolType.ptSymbolPicture:
-                        return options.Picture.Height * options.PictureScaleY + 2 <= Constants.CS_ITEM_HEIGHT || options.Picture == null ? Constants.CS_ITEM_HEIGHT + 2 : (int)(options.Picture.Height * options.PictureScaleY + 2);
                     case tkPointSymbolType.ptSymbolFontCharacter:
                         double ratio = options.FrameVisible ? 1.4 : 0.9;
                         return (options.PointSize * ratio) + 2 <= Constants.CS_ITEM_HEIGHT ? Constants.CS_ITEM_HEIGHT : (int)(options.PointSize * ratio);
@@ -511,8 +515,8 @@ namespace MWLite.Symbology.LegendControl
                         return options.PointSize + 2 <= Constants.CS_ITEM_HEIGHT ? Constants.CS_ITEM_HEIGHT + 2: (int)options.PointSize + 2;
                 }
             }
-            else
-                return 0;
+
+            return 0;
         }
 
         /// <summary>
@@ -528,11 +532,14 @@ namespace MWLite.Symbology.LegendControl
             else if (this.Type == eLayerType.PointShapefile)
             {
                 int width = 0;
+
+                if (options.PointType == tkPointSymbolType.ptSymbolPicture && options.Picture != null)
+                {
+                    width = (options.Picture.Width * options.PictureScaleX <= Constants.ICON_WIDTH) ? Constants.ICON_WIDTH : (int)(options.Picture.Width * options.PictureScaleX);
+                }
+                
                 switch (options.PointType)
                 {
-                    case tkPointSymbolType.ptSymbolPicture:
-                        width = options.Picture.Width*options.PictureScaleX <= Constants.ICON_WIDTH || options.Picture == null ? Constants.ICON_WIDTH: (int) (options.Picture.Width*options.PictureScaleX);
-                        break;
                     case tkPointSymbolType.ptSymbolFontCharacter:
                         double ratio = options.FrameVisible ? 1.4 : 1.0;
                         width = options.PointSize * ratio <= Constants.ICON_WIDTH ? Constants.ICON_WIDTH : (int)(options.PointSize * ratio);
