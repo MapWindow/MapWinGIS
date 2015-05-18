@@ -4057,3 +4057,11 @@ STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     GetIcon
+// ********************************************************
+Gdiplus::Bitmap* CImageClass::GetIcon()
+{
+	return _iconGdiPlus ? _iconGdiPlus->m_bitmap : NULL;
+}

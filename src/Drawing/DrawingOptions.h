@@ -105,7 +105,7 @@ public:
 	Gdiplus::Pen* penPlus;
 	Gdiplus::Bitmap* bitmapPlus;
 	Gdiplus::ImageAttributes* imgAttributes;
-	bool m_needDeleteBitmapPlus;
+	bool _needDeleteBitmapPlus;
 
 	bool dynamicVisibility;
 	double minVisibleScale;
@@ -120,7 +120,7 @@ public:
 	// constructor
 	CDrawingOptionsEx(void)
 	{
-		m_needDeleteBitmapPlus = false;
+		_needDeleteBitmapPlus = false;
 		//selectionColor = RGB(255, 255, 0);
 		//selectionTransparency = 180;
 
@@ -279,5 +279,6 @@ public:
 	Gdiplus::GraphicsPath* get_FontCharacterPath(CDC* dc, bool previewDrawing);
 
 	void DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics, Gdiplus::GraphicsPath* path, Gdiplus::REAL width);
-	#pragma endregion
+	void LoadIcon();
+#pragma endregion
 };

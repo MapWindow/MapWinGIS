@@ -752,9 +752,9 @@ VARIANT_BOOL CCharts::DrawChartCore(CDC* dc, float x, float y, VARIANT_BOOL hide
 	Gdiplus::Graphics g(dc->GetSafeHdc());
 
 	long alpha =_options.transparency << 24;
-	Gdiplus::Pen pen(Gdiplus::Color(alpha|BGR_TO_RGB(_options.lineColor)));
+	Gdiplus::Pen pen(Utility::OleColor2GdiPlus(_options.lineColor, (BYTE)_options.transparency));
 
-	Gdiplus::Color clr(255 << 24 | BGR_TO_RGB(backColor));
+	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, 255);
 	Gdiplus::SolidBrush brushBackground(clr);
 	Gdiplus::Pen penBackground(clr);
 	

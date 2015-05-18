@@ -2651,8 +2651,8 @@ void CGrid::OpenAsDirectImage(IGridColorScheme* scheme, ICallback* cBack, IImage
 			if (cimg)
 			{
 				
-				cimg->sourceGridName = gridName;
-				cimg->isGridProxy = false;
+				cimg->SetSourceGridName(gridName);
+				cimg->SetIsGridProxy(false);
 				
 				// grab transparent color from image and save in color scheme
 				cimg->get_UseTransparencyColor(&vb);

@@ -29,6 +29,9 @@ namespace Examples
         public TestForm()
         {
             InitializeComponent();
+
+            
+
             MapEvents.AttachMap(axMap1);
             m_examples = new MapExamples();
             m_examples.axMap1 = axMap1;

@@ -314,7 +314,7 @@ VARIANT_BOOL CLinePattern::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	Gdiplus::Bitmap bmp(clipWidth, clipHeight, PixelFormat32bppARGB);
 	Gdiplus::Graphics g(&bmp);
 
-	Gdiplus::Color clr(255 << 24 | BGR_TO_RGB(backColor));
+	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor);
 	Gdiplus::SolidBrush brushBackground(clr);
 	g.Clear(clr);
 	

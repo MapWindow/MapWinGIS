@@ -1067,6 +1067,12 @@ namespace Utility
 		return clr;
 	}
 
+	Gdiplus::Color Utility::OleColor2GdiPlus(OLE_COLOR color)
+	{
+		Gdiplus::Color clr(255 << 24 | BGR_TO_RGB(color));
+		return clr;
+	}
+
 #pragma endregion
 
 #pragma region Gdal

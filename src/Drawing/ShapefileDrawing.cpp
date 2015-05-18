@@ -963,7 +963,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 					
 				if (drawSelection)				
 				{
-					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+					SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 					_graphics->FillRectangle(&brush, rect);
 				}
 
@@ -1032,7 +1032,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 						
 					_graphics->TranslateTransform(Gdiplus::REAL(xInt), Gdiplus::REAL(yInt));
 					
-					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+					SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 					_graphics->FillPath(&brush, path);
 
 					_graphics->SetTransform(&mtxInit);	
@@ -1110,7 +1110,7 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 	double delta = MIN(minDrawingSize/_dx, minDrawingSize/_dy);
 
 	OLE_COLOR pointColor = options->linesVisible?options->lineColor:options->fillColor;
-	_bmpPixel->SetPixel(0,0, Gdiplus::Color(255 << 24 | BGR_TO_RGB(pointColor)));
+	_bmpPixel->SetPixel(0, 0, Utility::OleColor2GdiPlus(pointColor));
 	
 	VARIANT_BOOL fastMode;
 	_shapefile->get_FastMode(&fastMode);
@@ -1154,7 +1154,7 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 
 				if (drawSelection && m_selectionTransparency > 0)
 				{
-					SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+					SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 					_graphics->FillPath(&brush, &pathFill);
 				}
 			}
@@ -1227,12 +1227,12 @@ void CShapefileDrawer::DrawPolyCategory( CDrawingOptionsEx* options, std::vector
 		{
 			if (_shptype == SHP_POLYGON)
 			{
-				SolidBrush brush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+				SolidBrush brush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 				_graphics->FillPath(&brush, path);
 			}
 			else
 			{
-				Pen pen(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+				Pen pen(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 				pen.SetLineJoin(Gdiplus::LineJoinRound);
 				_graphics->DrawPath(&pen, path);
 			}
@@ -1405,7 +1405,7 @@ void CShapefileDrawer::DrawLineCategoryGDI(CDrawingOptionsEx* options, std::vect
 	double delta = MIN(minDrawingSize/_dx, minDrawingSize/_dy);
 	
 	OLE_COLOR pointColor = options->linesVisible?options->lineColor:options->fillColor;
-	_bmpPixel->SetPixel(0,0, Gdiplus::Color(255 << 24 | BGR_TO_RGB(pointColor)));
+	_bmpPixel->SetPixel(0, 0, Utility::OleColor2GdiPlus(pointColor));
 
 	for (int j = 0; j < (int)indices->size(); j++)
 	{
@@ -1605,7 +1605,7 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 	double delta = MIN(minDrawingSize/_dx, minDrawingSize/_dy);
 
 	OLE_COLOR pointColor = options->linesVisible?options->lineColor:options->fillColor;
-	_bmpPixel->SetPixel(0,0, Gdiplus::Color(255 << 24 | BGR_TO_RGB(pointColor)));
+	_bmpPixel->SetPixel(0, 0, Utility::OleColor2GdiPlus(pointColor));
 
 	// constructing a path
 	for (int j = 0; j < (int)indices->size(); j++)
@@ -1641,7 +1641,7 @@ void CShapefileDrawer::DrawLinePatternCategory(CDrawingOptionsEx* options, std::
 		
 		if (maxWidth > 0.0f)
 		{
-			Gdiplus::Pen penSelection(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)), maxWidth);
+			Gdiplus::Pen penSelection(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency), maxWidth);
 			penSelection.SetLineJoin(Gdiplus::LineJoinRound);
 			_graphics->DrawPath(&penSelection, path);
 		}
@@ -1691,7 +1691,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 
 	if (drawSelection)
 	{
-		brushSelection = new Gdiplus::SolidBrush(Gdiplus::Color(m_selectionTransparency << 24 | BGR_TO_RGB(m_selectionColor)));
+		brushSelection = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(m_selectionColor, (BYTE)m_selectionTransparency));
 	}
 
 	Gdiplus::SmoothingMode mode = _graphics->GetSmoothingMode();
@@ -1713,7 +1713,7 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 			line->get_LineWidth(&width);
 			line->get_LineStyle(&style);
 			
-			Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(color)), width);
+			Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(color, transparency), width);
 			pen->SetLineJoin(Gdiplus::LineJoinRound);
 			switch (style)
 			{
@@ -1763,8 +1763,8 @@ void CShapefileDrawer::DrawPolylinePath(Gdiplus::GraphicsPath* path, CDrawingOpt
 				
 				if (numPoints > 0)
 				{
-					Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(color)));
-					Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(lineColor)));
+					Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(color, transparency));
+					Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(lineColor, transparency));
 					pen->SetAlignment(Gdiplus::PenAlignmentInset);
 				
 					int n = 0;

@@ -275,8 +275,7 @@ void CDrawingOptionsEx::InitGdiPlusPen()
 	
 	if(this->linesVisible && this->lineWidth != 0) 
 	{
-		long alpha = ((long)this->lineTransparency)<<24;
-		penPlus = new Gdiplus::Pen(Gdiplus::Color(alpha | BGR_TO_RGB(this->lineColor)), this->lineWidth);
+		penPlus = new Gdiplus::Pen(Utility::OleColor2GdiPlus(this->lineColor, (BYTE)this->lineTransparency), this->lineWidth);
 		
 		switch (this->lineStipple)
 		{
@@ -549,7 +548,7 @@ Gdiplus::Bitmap* CDrawingOptionsEx::ImageToGdiPlusBitmap(IImage* img)
 	}
 	else
 	{
-		// we can make number of image buffer pixels in row divisable by 4 them we don't need this condition
+		// we can make number of image buffer pixels in row dividable by 4 them we don't need this condition
 		bitsNew = new unsigned char[nBytesInRow * height];
 		for(int i = 0; i < height; i++)		
 			memcpy(&bitsNew[i * nBytesInRow], &data[i * width * 3], width * 3);
@@ -570,63 +569,79 @@ void CDrawingOptionsEx::InitGdiPlusPicture()
 {
 	this->ReleaseGdiPlusBitmap();
 
-	if ( imgAttributes )
-	{
-		delete imgAttributes; imgAttributes = NULL;
-	}
-	
 	if (this->picture == NULL) 
 	{
 		return;
 	}
 	
-	tkImageSourceType type;
-	this->picture->get_SourceType(&type);
-	
-	if (type == istGDIPlus && ((CImageClass*)this->picture)->_iconGdiPlus)
-	{
-		// first let's check whether it is in-memory GDI+ icon after deserialization
-		bitmapPlus = ((CImageClass*)this->picture)->_iconGdiPlus->m_bitmap;
-		m_needDeleteBitmapPlus = false;
-	}
-	
-	// let's try to load it from buffer
-	if (!bitmapPlus)
-	{
-		ImageType type;
-		bool useGDIPlusReading = false;
-		this->picture->get_ImageType(&type);
-		if (type == JPEG_FILE || type == PNG_FILE || type == GIF_FILE)
-		{
-			CComBSTR filename;
-			this->picture->get_Filename(&filename);
-			USES_CONVERSION;
-			long size = Utility::GetFileSize(OLE2CA(filename));
-			if (size < (long)(0x1 << 20))
-			{
-				useGDIPlusReading = true;
-			}
-		}
-		
-		if (useGDIPlusReading)
-		{
-			CComBSTR filename;
-			this->picture->get_Filename(&filename);
-			bitmapPlus = new Gdiplus::Bitmap(OLE2W(filename));
-		}
-		else
-		{
-			bitmapPlus = ImageToGdiPlusBitmap(this->picture);
-		}
-		m_needDeleteBitmapPlus = true;
+	if (!bitmapPlus) {
+		LoadIcon();
 	}
 
 	OLE_COLOR transpColor1, transpColor2;
 	this->picture->get_TransparencyColor(&transpColor1);
 	this->picture->get_TransparencyColor2(&transpColor2);
-	
+
+	if (imgAttributes)
+	{
+		delete imgAttributes;
+		imgAttributes = NULL;
+	}
+
 	double alpha = fillTransparency/255.0;
 	imgAttributes = ImageHelper::GetImageAttributes(static_cast<float>(alpha), true, transpColor1, transpColor2);
+}
+
+// ***************************************************************
+//		LoadIcon()
+// ***************************************************************
+void CDrawingOptionsEx::LoadIcon()
+{
+	// let's try to load it
+	if (bitmapPlus) return;
+
+	tkImageSourceType type;
+	this->picture->get_SourceType(&type);
+
+	// first let's check whether it is in-memory GDI+ icon after deserialization
+	if (type == istGDIPlus)
+	{
+
+		bitmapPlus = ImageHelper::GetGdiPlusIcon(this->picture);
+		_needDeleteBitmapPlus = false;
+		return;
+	}
+	
+	bool useGDIPlusReading = false;
+
+	ImageType imageType;
+	this->picture->get_ImageType(&imageType);
+	if (imageType == JPEG_FILE || imageType == PNG_FILE || imageType == GIF_FILE)
+	{
+		CComBSTR filename;
+		this->picture->get_Filename(&filename);
+
+		USES_CONVERSION;
+		long size = Utility::GetFileSize(OLE2W(filename));
+
+		if (size < (long)(0x1 << 20))
+		{
+			useGDIPlusReading = true;
+		}
+	}
+
+	if (useGDIPlusReading)		// TODO: do we need both methods?
+	{
+		CComBSTR filename;
+		this->picture->get_Filename(&filename);
+		bitmapPlus = new Gdiplus::Bitmap(OLE2W(filename));
+	}
+	else
+	{
+		bitmapPlus = ImageToGdiPlusBitmap(this->picture);
+	}
+
+	_needDeleteBitmapPlus = true;
 }
 
 // ***************************************************************
@@ -678,7 +693,7 @@ void CDrawingOptionsEx::ReleaseGdiPlusBrush()
 // **************************************************************
 void CDrawingOptionsEx::ReleaseGdiPlusBitmap()
 {
-	if (bitmapPlus && m_needDeleteBitmapPlus)
+	if (bitmapPlus && _needDeleteBitmapPlus)
 	{
 		// deleting only in case it's not in-memory bitmap
 		delete bitmapPlus; 
@@ -1006,8 +1021,7 @@ void CDrawingOptionsEx::DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics
 	
 	if(this->fillVisible) 
 	{
-		long alpha = ((long)this->fillTransparency)<<24;
-		penPlus = new Gdiplus::Pen(Gdiplus::Color(alpha | BGR_TO_RGB(this->fillColor)), width);
+		penPlus = new Gdiplus::Pen(Utility::OleColor2GdiPlus(this->fillColor, (BYTE)this->fillTransparency), width);
 		if (this->penPlus)
 		{
 			this->penPlus->SetLineJoin(Gdiplus::LineJoinRound);
@@ -1016,6 +1030,7 @@ void CDrawingOptionsEx::DrawGraphicPathWithFillColor(Gdiplus::Graphics* graphics
 		}
 	}
 }
+
 #pragma endregion
 
 // *****************************************************

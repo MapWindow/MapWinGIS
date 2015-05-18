@@ -28,9 +28,13 @@ CImageClass* ImageHelper::Cast(IImage* img)
 Gdiplus::ColorMatrix ImageHelper::GetColorMatrix(IImage* img)
 {
 	if (!img) {
-		Gdiplus::ColorMatrix m;
-		m.m[3][3] = 1.0f;
-		return m;
+		Gdiplus::ColorMatrix matrix;
+
+		ZeroMemory((void*)&matrix.m, 25 * sizeof(REAL));
+		for (int i = 0; i < 5; i++) matrix.m[i][i] = 1.0f;
+
+		matrix.m[3][3] = 1.0f;
+		return matrix;
 	}
 
 	return Cast(img)->GetColorMatrix();
@@ -76,6 +80,10 @@ Gdiplus::ImageAttributes* ImageHelper::GetImageAttributes(float alpha, bool useT
 	attr->SetWrapMode(Gdiplus::WrapModeTileFlipXY);
 
 	Gdiplus::ColorMatrix matrix;
+
+	ZeroMemory((void*)&matrix.m, 25 * sizeof(REAL));
+	for (int i = 0; i < 5; i++) matrix.m[i][i] = 1.0f;
+
 	matrix.m[3][3] = alpha;
 	attr->SetColorMatrix(&matrix);
 
@@ -241,4 +249,14 @@ BITMAPINFO ImageHelper::GetBitmapHeader(int bitsPerPixel, int width, int height,
 	bif.bmiHeader = bih;
 
 	return bif;
+}
+
+// ******************************************************************
+//		GetGdiPlusIcon()
+// ******************************************************************
+Gdiplus::Bitmap* ImageHelper::GetGdiPlusIcon(IImage* img)
+{
+	if (!img) return NULL;
+
+	return (Cast(img))->GetIcon();
 }

@@ -77,8 +77,7 @@ void CMapView::OnDraw(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid)
 void CMapView::HandleNewDrawing(CDC* pdc, const CRect& rcBounds, const CRect& rcInvalid, 
 								bool drawToOutputCanvas, float offsetX, float offsetY)
 {
-	long alpha = (255)<<24;
-	Gdiplus::Color backColor = Gdiplus::Color(alpha | BGR_TO_RGB(m_backColor));
+	Gdiplus::Color backColor = Utility::OleColor2GdiPlus(m_backColor);
 
 	Gdiplus::Graphics* gBuffer = NULL;		// for control rendering
 	Gdiplus::Graphics* gPrinting = NULL;	// for snapshot drawing
@@ -507,7 +506,7 @@ void CMapView::DrawZoomingAnimation( Extent match, Gdiplus::Graphics* gTemp, CDC
 		HDC hdc = dc->GetSafeHdc();
 		Gdiplus::Graphics* g = Gdiplus::Graphics::FromHDC(hdc);
 		g->SetCompositingMode(Gdiplus::CompositingModeSourceCopy);
-		Gdiplus::Color backColor = Gdiplus::Color((255)<<24 | BGR_TO_RGB(m_backColor));
+		Gdiplus::Color backColor = Utility::OleColor2GdiPlus(m_backColor);
 		Gdiplus::ImageAttributes attr;
 		gTemp->Clear(backColor);
 
@@ -806,7 +805,7 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 
 		if (saveBitmap)
 		{
-			ScreenBitmap* bmp = img->_screenBitmap;
+			ScreenBitmap* bmp = img->GetScreenBitmap();
 			bool wasDrawn = false;
 
 			// in case we have saved bitmap and map position is the same we shall draw it
@@ -816,7 +815,7 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 					bmp->pixelPerProjectionX == _pixelPerProjectionX &&
 					bmp->pixelPerProjectionY == _pixelPerProjectionY &&
 					bmp->viewWidth == _viewWidth &&
-					bmp->viewHeight == _viewHeight && !((CImageClass*)iimg)->_bufferReloadIsNeeded)
+					bmp->viewHeight == _viewHeight && !((CImageClass*)iimg)->GetBufferReloadIsNeeded())
 				{
 					// TODO: choose interpolation mode more precisely
 					// TODO: set image attributes
@@ -858,13 +857,12 @@ void CMapView::DrawImageLayer(const CRect& rcBounds, Layer* l, Gdiplus::Graphics
 					// image hasn't been saved so far
 					bmp = imgDrawer.DrawImage(rcBounds, iimg, true);
 
-					if (img->_screenBitmap)
+					if (img->GetScreenBitmap())
 					{
-						delete img->_screenBitmap;
-						img->_screenBitmap = NULL;
+						delete img->GetScreenBitmap();
 					}
 
-					img->_screenBitmap = bmp;
+					img->SetScreenBitmap(bmp);
 				}
 			}
 		}

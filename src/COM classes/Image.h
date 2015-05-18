@@ -374,6 +374,13 @@ private:
 	OLE_COLOR _colorizeColor;
 
 	int _bitsPerPixel;
+
+	CMemoryBitmap* _iconGdiPlus;	// in-memory state of GDI+ image file (after deserialization)
+	bool _bufferReloadIsNeeded;
+	ScreenBitmap* _screenBitmap;	// GDI+ bitmap on the screen
+	CStringW sourceGridName;
+	bool isGridProxy;
+
 public:
 
 	// TODO: encapsulate
@@ -382,11 +389,6 @@ public:
 	int m_pixelsCount;
 	bool _canUseGrouping;
 	bool _pixelsSaved;
-	bool _bufferReloadIsNeeded;
-	ScreenBitmap* _screenBitmap;	// GDI+ bitmap on the screen
-	CStringW sourceGridName;
-	bool isGridProxy;
-	CMemoryBitmap* _iconGdiPlus;	// in-memory state of GDI+ image file (after deserialization)
 
 private:
 	bool Resample();
@@ -439,9 +441,21 @@ public:
 	void SetRgbBandIndex(BandChannel channel, int bandIndex);
 
 	bool GetBufferReloadIsNeeded();
+	void SetBufferReloadIsNeeded() { _bufferReloadIsNeeded = true; }
+
 	void SetImageTypeCore(ImageType fileType);
 	bool ValidateBandIndex(int bandIndex);
-	
+
+	Gdiplus::Bitmap* GetIcon() ;
+
+	CStringW GetSourceGridName() { return sourceGridName; }
+	void SetSourceGridName(CStringW value) { sourceGridName = value; }
+
+	bool GetIsGridProxy() { return isGridProxy; }
+	void SetIsGridProxy(bool value) { isGridProxy = value; }
+
+	ScreenBitmap* GetScreenBitmap() { return _screenBitmap; }
+	void SetScreenBitmap(ScreenBitmap* value) { _screenBitmap = value; }
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

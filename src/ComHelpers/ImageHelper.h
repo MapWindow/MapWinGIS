@@ -19,5 +19,6 @@ public:
 	static Gdiplus::ColorMatrix CreateMatrix(float contrast, float brightness, float saturation, float hue, float colorizeIntensity, OLE_COLOR _colorizeColor, bool setToGrey, double transparencyPercent);
 	static int GetRowBytePad(int width, int bitsPerPixel);
 	static BITMAPINFO GetBitmapHeader(int bitsPerPixel, int width, int height, int pad);
+	static Gdiplus::Bitmap* GetGdiPlusIcon(IImage* img);
 };
 

@@ -199,7 +199,7 @@ void CMapView::SetLayerVisible(long LayerHandle, BOOL bNewValue)
 				IImage * iimg = NULL;
 				if (_allLayers[LayerHandle]->QueryImage(&iimg))
 				{
-					((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
+					((CImageClass*)iimg)->SetBufferReloadIsNeeded();
 					iimg->Release();	
 				}
 			}

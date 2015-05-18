@@ -364,7 +364,7 @@ void CMapView::SetGridFileName(LONG LayerHandle, LPCTSTR newVal)
 		if (img != NULL)
 		{
 			USES_CONVERSION;
-			((CImageClass*)img)->sourceGridName = A2W(newVal);		// TODO: use Unicode
+			((CImageClass*)img)->SetSourceGridName(A2W(newVal));		// TODO: use Unicode
 			img->Release();
 		}
 		else
@@ -396,7 +396,7 @@ void CMapView::ReloadBuffers()
 		{
 			if (l->QueryImage(&iimg))
 			{	
-				((CImageClass*)iimg)->_bufferReloadIsNeeded = true;
+				((CImageClass*)iimg)->SetBufferReloadIsNeeded();
 				iimg->Release();
 			}
 		}

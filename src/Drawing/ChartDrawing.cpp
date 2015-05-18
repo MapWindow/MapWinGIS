@@ -171,9 +171,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	_dc = CDC::FromHandle(hdc);
 	_graphics->ReleaseHDC(hdc);
 
-	long transp = _options->transparency ;
-	long alpha = long(transp) << 24;
-	Gdiplus::Pen pen(Gdiplus::Color(alpha|BGR_TO_RGB(_options->lineColor)));
+	Gdiplus::Pen pen(Utility::OleColor2GdiPlus(_options->lineColor, (BYTE)_options->transparency));
 	std::vector<Gdiplus::Brush*> brushes;
 	std::vector<Gdiplus::Brush*> brushesDimmed;
 
@@ -185,14 +183,14 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 		OLE_COLOR color;
 		chartField->get_Color(&color);
 
-		Gdiplus::Brush* br = new Gdiplus::SolidBrush(Gdiplus::Color(alpha|BGR_TO_RGB(color)));
+		Gdiplus::Brush* br = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(color, (BYTE)_options->transparency));
 		brushes.push_back(br);
 		
 		short r = GetRValue(color) - 100;	if (r< 0) r = 0;
 		short g = GetGValue(color) - 100;	if (g< 0) g = 0;
 		short b = GetBValue(color) - 100;	if (b< 0) b = 0;
 
-		Gdiplus::Brush* brDimmed = new Gdiplus::SolidBrush(Gdiplus::Color(alpha|BGR_TO_RGB(RGB(r,g,b))));
+		Gdiplus::Brush* brDimmed = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(RGB(r, g, b), (BYTE)_options->transparency));
 		brushesDimmed.push_back(brDimmed);
 	}
 	

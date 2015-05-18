@@ -262,7 +262,7 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	Gdiplus::GraphicsPath path;
 	path.AddLines(&(points[0]), 2);
 
-	Gdiplus::Color clr(255 << 24 | BGR_TO_RGB(backColor));
+	Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor, 255);  
 	Gdiplus::SolidBrush brushBackground(clr);
 	g.Clear(clr);
 
@@ -270,7 +270,7 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 	{
 		if (_lineType == lltSimple)
 		{
-			Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(255 << 24 | BGR_TO_RGB(_lineColor)), _lineWidth);
+			Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_lineColor), _lineWidth);
 			switch (_lineStyle)
 			{
 				case dsSolid:		pen->SetDashStyle(Gdiplus::DashStyleSolid);		break;
@@ -292,8 +292,8 @@ VARIANT_BOOL CLineSegment::DrawCore(CDC* dc, float x, float y, int clipWidth, in
 
 			if (numPoints > 0)
 			{
-				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Gdiplus::Color(255 << 24 | BGR_TO_RGB(_lineColor)));
-				Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(255 << 24 | BGR_TO_RGB(_markerOutlineColor)));
+				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor));
+				Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor));
 				pen->SetAlignment(Gdiplus::PenAlignmentInset);
 
 				g.TranslateTransform(offset, clipHeight/2.0f);
@@ -339,7 +339,7 @@ STDMETHODIMP CLineSegment::Draw(Gdiplus::Graphics& g, BYTE transparency, int Ima
 	{
 		if (_lineType == lltSimple)
 		{
-			Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(_lineColor)), _lineWidth);
+			Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_lineColor, transparency), _lineWidth);
 			switch (_lineStyle)
 			{
 				case dsSolid:		pen->SetDashStyle(Gdiplus::DashStyleSolid);		break;
@@ -361,8 +361,8 @@ STDMETHODIMP CLineSegment::Draw(Gdiplus::Graphics& g, BYTE transparency, int Ima
 
 			if (numPoints > 0)
 			{
-				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(_lineColor)));
-				Gdiplus::Pen* pen = new Gdiplus::Pen(Gdiplus::Color(transparency << 24 | BGR_TO_RGB(_markerOutlineColor)));
+				Gdiplus::SolidBrush* brush = new Gdiplus::SolidBrush(Utility::OleColor2GdiPlus(_lineColor, transparency));
+				Gdiplus::Pen* pen = new Gdiplus::Pen(Utility::OleColor2GdiPlus(_markerOutlineColor));
 				pen->SetAlignment(Gdiplus::PenAlignmentInset);
 
 				g.TranslateTransform(offset, ImageHeight/2.0f);

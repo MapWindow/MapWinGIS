@@ -199,8 +199,8 @@ HRESULT CUtils::RunGridToImage(IGrid * Grid, IGridColorScheme * ci, tkGridProxyF
 		// marking that it's a proxy
 		CStringW gridName = ((CGrid*)Grid)->GetFilename();
 		CImageClass* img = ((CImageClass*)(*retval));
-		img->sourceGridName = gridName;
-		img->isGridProxy = true;
+		img->SetSourceGridName(gridName);
+		img->SetIsGridProxy(true);
 	}
 	else
 	{

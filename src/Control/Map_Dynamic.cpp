@@ -297,10 +297,9 @@ void CMapView::DrawFocusRectangle(Gdiplus::Graphics* g)
 
 	_focusRectangle->get_LineWidth(&lineWidth);
 
-	Gdiplus::Pen pen(Gdiplus::Color(192 << 24 | BGR_TO_RGB(color)), lineWidth);
+	Gdiplus::Pen pen(Utility::OleColor2GdiPlus(color, 192), lineWidth);
 
-	long alpha = long(transparency) << 24;
-	Gdiplus::SolidBrush brush(Gdiplus::Color(alpha | BGR_TO_RGB(color)));
+	Gdiplus::SolidBrush brush(Utility::OleColor2GdiPlus(color, transparency));
 
 	g->DrawRectangle(&pen, (int)x, (int)y, (int)width, (int)height);
 	g->FillRectangle(&brush, (int)x, (int)y, (int)width, (int)height);

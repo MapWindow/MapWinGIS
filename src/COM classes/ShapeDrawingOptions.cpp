@@ -541,7 +541,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 	}
 	else
 	{
-		Gdiplus::Color clr(255 << 24 | BGR_TO_RGB(backColor));
+		Gdiplus::Color clr = Utility::OleColor2GdiPlus(backColor);
 		Gdiplus::SolidBrush brushBackground(clr);
 		
 		g.Clear(clr);
@@ -625,8 +625,8 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 			CPoint* square = _options.GetVertex();
 			int size = _options.verticesSize/2;
 			
-			Gdiplus::SolidBrush brush(255<<24 | BGR_TO_RGB(_options.verticesColor));
-			Gdiplus::Pen pen(255<<24 | BGR_TO_RGB(_options.verticesColor));
+			Gdiplus::SolidBrush brush(Utility::OleColor2GdiPlus(_options.verticesColor));
+			Gdiplus::Pen pen(Utility::OleColor2GdiPlus(_options.verticesColor));
 
 			for (int i = 0; i < numPoints; i++)
 			{
@@ -673,6 +673,7 @@ VARIANT_BOOL CShapeDrawingOptions::DrawShapeCore(CDC* dc, float x, float y, ISha
 
 	return VARIANT_TRUE;
 }
+
 #pragma endregion
 
 // *********************************************************
