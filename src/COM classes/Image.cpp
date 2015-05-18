@@ -1450,7 +1450,7 @@ void CImageClass::ImageBufferToBits(unsigned char * bits, int rowLength)
 	if (_inRam)
 	{
 		long loc = 0;
-		for (int i = _height; i >= 0; i--)
+		for (int i = _height - 1; i >= 0; i--)
 		{
 			memcpy(&(bits[loc]), &(_imageData[i*_width]), _width*sizeof(colour));
 			loc += rowLength;
@@ -1561,7 +1561,7 @@ void CImageClass::DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPi
 	long loc = 0;
 	long paddedWidth = bm.bmWidthBytes;
 
-	for (int i = 0; i <= _height; i++)
+	for (int i = 0; i < _height; i++)
 	{
 		memcpy(&(_imageData[i * _width]), &(bits[loc]), bm.bmWidth * bytesPerPixel);
 		loc += paddedWidth;
