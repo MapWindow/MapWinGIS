@@ -671,3 +671,66 @@ CString GdalHelper::get_DriverMetadataItem(GDALDataset* ds, int metadataIndex)
 
 	return GdalDriverHelper::get_MetadataItem(ds->GetDriver(), metadataIndex);
 }
+
+// *************************************************************
+//		ParseTiffCompression()
+// *************************************************************
+tkTiffCompression GdalHelper::ParseTiffCompression(CString option)
+{
+	if (_stricmp(option, "LZW") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "PACKBITS") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "DEFLATE") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "CCITTRLE") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "CCITTFAX3") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "CCITTFAX4") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "LZW") == 0)
+		return tkmLZW;
+
+	if (_stricmp(option, "AUTO") == 0)
+		return tkmAUTO;
+
+	if (_stricmp(option, "JPEG") == 0)
+		return tkmJPEG;
+
+	return tkmAUTO;
+}
+
+// *************************************************************
+//		TiffCompressionToString()
+// *************************************************************
+CString GdalHelper::TiffCompressionToString(tkTiffCompression compression)
+{
+	switch (compression) 
+	{
+		case tkmLZW:
+			return "LZW";
+		case tkmPACKBITS:
+			return "PACKBITS";
+		case tkmDEFLATE:
+			return "DEFLATE";
+		case tkmCCITTRLE:
+			return "CCITTRLE";
+		case tkmCCITTFAX3:
+			return "CCITTFAX3";
+		case tkmCCITTFAX4:
+			return "CCITTFAX4";
+		case tkmNONE:
+			return "NONE";
+		case tkmAUTO:
+		case tkmJPEG:
+		default:
+			return "JPEG";
+	}
+}

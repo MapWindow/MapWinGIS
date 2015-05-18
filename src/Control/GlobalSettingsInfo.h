@@ -183,27 +183,7 @@ struct GlobalSettingsInfo
 	// *******************************************************
 	CString GetTiffCompression()
 	{
-		switch(tiffCompression) {
-			
-			case tkmLZW:
-				return "LZW";
-			case tkmPACKBITS:
-				return "PACKBITS";
-			case tkmDEFLATE:
-				return "DEFLATE";
-			case tkmCCITTRLE:
-				return "CCITTRLE";
-			case tkmCCITTFAX3:
-				return "CCITTFAX3";
-			case tkmCCITTFAX4:
-				return "CCITTFAX4";
-			case tkmNONE:
-				return "NONE";
-			case tkmAUTO:
-			case tkmJPEG:
-			default:
-				return "JPEG";
-		}
+		return GdalHelper::TiffCompressionToString(tiffCompression);
 	}
 
 	PredefinedColorScheme GetGridColorScheme()

@@ -58,4 +58,8 @@ public:
 	static CString GetDriverMetadata(GDALDataset* ds, tkGdalDriverMetadata metadata);
 	static int get_DriverMetadataCount(GDALDataset* ds);
 	static CString get_DriverMetadataItem(GDALDataset* ds, int metadataIndex);
+
+	static CString TiffCompressionToString(tkTiffCompression compression);
+	static tkTiffCompression ParseTiffCompression(CString option);
+
 };

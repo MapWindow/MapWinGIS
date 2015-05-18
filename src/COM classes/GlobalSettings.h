@@ -168,6 +168,8 @@ public:
 	STDMETHOD(put_BingApiKey)(BSTR newVal);
 	STDMETHOD(TestBingApiKey)(BSTR key, VARIANT_BOOL* retVal);
 	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
+	STDMETHOD(get_CompressOverviews)(tkTiffCompression* pVal);
+	STDMETHOD(put_CompressOverviews)(tkTiffCompression newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

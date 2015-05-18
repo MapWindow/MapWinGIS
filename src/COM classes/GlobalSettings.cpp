@@ -988,3 +988,28 @@ STDMETHODIMP CGlobalSettings::SetHereMapsApiKey(BSTR appId, BSTR appCode)
 	m_globalSettings.hereAppId = OLE2A(appId);
 	return S_OK;
 }
+
+// ***************************************************************
+//		CompressOverviews
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_CompressOverviews(tkTiffCompression* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CString s = "";
+	CPLGetConfigOption("COMPRESS_OVERVIEW", s);
+	*pVal = GdalHelper::ParseTiffCompression(s);
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_CompressOverviews(tkTiffCompression newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	CString s= GdalHelper::TiffCompressionToString(newVal);
+
+	CPLSetConfigOption("COMPRESS_OVERVIEW", s);
+
+	return S_OK;
+}

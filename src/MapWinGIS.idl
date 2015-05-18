@@ -5556,6 +5556,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(53)] HRESULT BingApiKey([in] BSTR newVal);
 	[id(54)] HRESULT TestBingApiKey([in] BSTR key, [out, retval] VARIANT_BOOL* retVal);
 	[id(55)] HRESULT SetHereMapsApiKey([in] BSTR appId, [in] BSTR appCode);
+	[propget, id(56)] HRESULT CompressOverviews([out, retval] tkTiffCompression* pVal);
+	[propput, id(56)] HRESULT CompressOverviews([in] tkTiffCompression newVal);
 };
 
 [
