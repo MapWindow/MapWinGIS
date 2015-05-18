@@ -516,11 +516,9 @@ Gdiplus::Bitmap* CDrawingOptionsEx::ImageToGdiPlusBitmap(IImage* img)
 	img->get_Width(&width);
 	img->get_Height(&height);
 	
-	int pad = (width * 24) % 32;
-	if(pad != 0)
-	{	pad = 32 - pad;
-		pad /= 8;
-	}
+	int bitsPerPixel = 32;
+	int bytesPerPixel = bitsPerPixel / 8;
+	int pad = ImageHelper::GetRowBytePad(width, bitsPerPixel);
 
 	BITMAPINFOHEADER bih;
 	bih.biCompression=0;
@@ -531,16 +529,16 @@ Gdiplus::Bitmap* CDrawingOptionsEx::ImageToGdiPlusBitmap(IImage* img)
 	bih.biPlanes=1;
 	bih.biSize=sizeof(BITMAPINFOHEADER);
 
-	bih.biBitCount=24;
+	bih.biBitCount = bitsPerPixel;
 	bih.biWidth= width;
 	bih.biHeight= height;
-	bih.biSizeImage= (width * 3 + pad) * height;
+	bih.biSizeImage = (width * bytesPerPixel + pad) * height;
 	
 	BITMAPINFO bif;
 	bif.bmiHeader = bih;
 	
 	unsigned char* bitsNew;
-	int nBytesInRow = width * 3 + pad;
+	int nBytesInRow = bytesPerPixel + pad;
 
 	if (pad == 0)
 	{
@@ -550,14 +548,18 @@ Gdiplus::Bitmap* CDrawingOptionsEx::ImageToGdiPlusBitmap(IImage* img)
 	{
 		// we can make number of image buffer pixels in row dividable by 4 them we don't need this condition
 		bitsNew = new unsigned char[nBytesInRow * height];
-		for(int i = 0; i < height; i++)		
-			memcpy(&bitsNew[i * nBytesInRow], &data[i * width * 3], width * 3);
+
+		for (int i = 0; i < height; i++)		
+		{
+			memcpy(&bitsNew[i * nBytesInRow], &data[i * width * bytesPerPixel], width * bytesPerPixel);
+		}
 	}
 
 	Gdiplus::Bitmap* bmp = new Gdiplus::Bitmap(&bif, (void*)bitsNew); 
 
-	if (pad != 0)
+	if (pad != 0) {
 		delete[] bitsNew;
+	}
 
 	return bmp;
 }
