@@ -130,5 +130,7 @@ public:
 	bool IsDiskBased();
 	void GrabLayerNameFromDatasource();
 	BSTR GetFilename();
+	bool PointWithinExtents(double projX, double projY);
+	
 };
 # endif

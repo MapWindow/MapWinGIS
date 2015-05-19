@@ -61,6 +61,7 @@ public:
 	STDMETHOD(GetStatistics)(VARIANT_BOOL allowApproximate, VARIANT_BOOL forceCalculation, DOUBLE* minimum, DOUBLE* maximum, DOUBLE* mean, DOUBLE* stdDev, VARIANT_BOOL* retVal);
 	STDMETHOD(Classify)(double minValue, double maxValue, tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
 	STDMETHOD(ComputeMinMax)(VARIANT_BOOL allowApproximate, DOUBLE* minimum, DOUBLE* maximum, VARIANT_BOOL* retVal);
+	STDMETHOD(get_Value)(LONG column, LONG row, double* pVal, VARIANT_BOOL* vb);
 
 private:
 	GDALRasterBand* _band;

@@ -500,7 +500,9 @@ STDMETHODIMP CGdalRasterBand::Classify(double minValue, double maxValue, tkClass
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = NULL;
-	
+
+	if (!CheckBand()) return S_OK;
+
 	switch (classification)
 	{
 		case ctStandardDeviation:
@@ -602,12 +604,43 @@ STDMETHODIMP CGdalRasterBand::ComputeMinMax(VARIANT_BOOL allowApproximate, DOUBL
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
+	if (!CheckBand()) return S_OK;
+
 	double values[2];
 	CPLErr result = _band->ComputeRasterMinMax(allowApproximate ? 1 : 0, values);
 	*minimum = values[0];
 	*maximum = values[1];
 
 	*retVal = result == CE_None ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+// ********************************************************
+//     get_Value
+// ********************************************************
+STDMETHODIMP CGdalRasterBand::get_Value(LONG column, LONG row, double* pVal, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	if (!CheckBand()) return S_OK;
+
+	int width = _band->GetXSize();
+	int height = _band->GetYSize();
+
+	if (column < 0 || row < 0 || column >= width || row >= height)
+	{
+		ErrorMessage("CGdalRasterBand::get_Value: invalid row or column index.");
+		return S_OK;
+	}
+
+	double val;
+	CPLErr err = _band->RasterIO(GF_Read, column, row, 1, 1, &val, 1, 1, GDT_CFloat64, 0, 0);
+	*pVal = val;
+
+	*retVal = err == CE_None;
 
 	return S_OK;
 }

@@ -3010,3 +3010,15 @@ STDMETHODIMP CShape::get_IsEmpty(VARIANT_BOOL* pVal)
 	*pVal = _shp->get_PointCount() == 0? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }
+
+//*****************************************************************
+//*		Clear()
+//*****************************************************************
+STDMETHODIMP CShape::Clear()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_shp->Clear();
+
+	return S_OK;
+}

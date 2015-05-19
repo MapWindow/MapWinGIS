@@ -288,6 +288,7 @@
     <ClInclude Include="Structures\ImageLayerInfo.h" />
     <ClInclude Include="Structures\Label.h" />
     <ClInclude Include="Structures\Layer.h" />
+    <ClInclude Include="Structures\SelectedItem.h" />
     <ClInclude Include="Structures\ShapeLayerInfo.h" />
     <ClInclude Include="Structures\Structures.h" />
     <ClInclude Include="COM classes\Chart.h" />
@@ -540,6 +541,7 @@
     <ClCompile Include="COM classes\Utils_GridToImage.cpp" />
     <ClCompile Include="COM classes\Utils_OGR.cpp" />
     <ClCompile Include="COM classes\Vector.cpp" />
+    <ClCompile Include="Control\Map_Identifier.cpp" />
     <ClCompile Include="Drawing\BaseDrawer.cpp" />
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />

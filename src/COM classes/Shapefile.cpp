@@ -2929,7 +2929,7 @@ void CShapefile::GetRelatedShapeCore(IShape* referenceShape, long referenceIndex
 }
 
 // ***************************************************
-//		get_HotTracking
+//		get_Identifiable
 // ***************************************************
 STDMETHODIMP CShapefile::get_Identifiable(VARIANT_BOOL* retVal)
 {

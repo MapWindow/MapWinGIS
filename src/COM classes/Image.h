@@ -174,8 +174,8 @@ public:
 	STDMETHOD(get_TransparencyColor)(/*[out, retval]*/ OLE_COLOR *pVal);
 	STDMETHOD(put_TransparencyColor)(/*[in]*/ OLE_COLOR newVal);
 	STDMETHOD(get_IsInRam)(/*[out, retval]*/ VARIANT_BOOL *pVal);
-	STDMETHOD(get_Value)(/*[in]*/long row, /*[in]*/long col, /*[out, retval]*/ long *pVal);
-	STDMETHOD(put_Value)(/*[in]*/long row, /*[in]*/long col, /*[in]*/ long newVal);
+	STDMETHOD(get_Value)(/*[in]*/long row, /*[in]*/long col, /*[out, retval]*/ int *pVal);
+	STDMETHOD(put_Value)(/*[in]*/long row, /*[in]*/long col, /*[in]*/ int newVal);
 	STDMETHOD(get_dX)(/*[out, retval]*/ double *pVal);
 	STDMETHOD(put_dX)(/*[in]*/ double newVal);
 	STDMETHOD(get_dY)(/*[out, retval]*/ double *pVal);
@@ -322,6 +322,8 @@ public:
 	STDMETHOD(get_IgnoreColorTable)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_IgnoreColorTable)(VARIANT_BOOL newVal);
 	STDMETHOD(get_RenderingMode)(tkRasterRendering* pVal);
+	STDMETHOD(get_ValueWithAlpha)(LONG row, LONG col, OLE_COLOR* pVal);
+	STDMETHOD(put_ValueWithAlpha)(LONG row, LONG col, OLE_COLOR newVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -414,6 +416,9 @@ private:
 	void ImageBufferToBits(unsigned char * bits, int rowLength);
 	void SerializePixelsCore(CPLXMLNode* psTree, long fullWidth, long fullHeight);
 	void DeserializePixels(CPLXMLNode* node);
+	bool ValidateRowCol(long row, long col);
+	bool GetValueCore(long row, long col, bool withAlpha, long* value);
+	void put_ValueCore(long row, long col, long newVal, bool withAlpha);
 
 public:
 	bool DeserializeCore(CPLXMLNode* node);
@@ -456,6 +461,12 @@ public:
 
 	ScreenBitmap* GetScreenBitmap() { return _screenBitmap; }
 	void SetScreenBitmap(ScreenBitmap* value) { _screenBitmap = value; }
+	
+
+
+
+	STDMETHOD(get_BufferOffsetX)(LONG* pVal);
+	STDMETHOD(get_BufferOffsetY)(LONG* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

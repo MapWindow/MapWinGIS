@@ -19,8 +19,10 @@ public:
 
 	bool operator==( const colour & c );
 
+	OLE_COLOR ToOleColorNoAlpha();
 	OLE_COLOR ToOleColor();
 	void FromOleColor(long color);
+	void FromOleColorNoAlpha(long color);
 };
 
 #ifdef RELEASE_MODE

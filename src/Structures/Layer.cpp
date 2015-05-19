@@ -244,7 +244,7 @@ bool Layer::UpdateExtentsFromDatasource()
 		iimg->get_OriginalDY(&dy);
 		iimg->get_OriginalWidth(&width);
 		iimg->get_OriginalHeight(&height);
-		this->extents = Extent(xllCenter, xllCenter + dx*width, yllCenter, yllCenter + dy*height);
+		this->extents = Extent(xllCenter - dx / 2, xllCenter - dx / 2 + dx*width, yllCenter - dy /2, yllCenter - dy / 2 + dy*height);
 		iimg->Release();
 		iimg = NULL;
 		return TRUE;
@@ -577,5 +577,13 @@ BSTR Layer::GetFilename()
 		}
 	}
 	return SysAllocString(L"");
+}
+
+//****************************************************
+//*		PointWithinExtents()
+//****************************************************
+bool Layer::PointWithinExtents(double projX, double projY)
+{
+	return !(projX < extents.left || projX > extents.right || projY < extents.bottom || projY > extents.top);
 }
 

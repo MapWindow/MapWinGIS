@@ -2,6 +2,7 @@
 #include "SelectionListHelper.h"
 #include <set>
 #include "ShapefileHelper.h"
+#include "SelectionList.h"
 
 /***********************************************************************/
 /*		GetCount()
@@ -28,11 +29,13 @@ bool SelectionListHelper::GetUniqueLayers(ISelectionList* list, vector<long>& re
 	for (long i = 0; i < count; i++)
 	{
 		list->get_LayerHandle(i, &layerHandle);
+
 		if (handles.find(layerHandle) == handles.end())
 		{
 			handles.insert(layerHandle);
 		}
 	}
+
 	result.assign(handles.begin(), handles.end());
 	return true;
 }
@@ -70,3 +73,61 @@ void SelectionListHelper::PopulateShapefile(ISelectionList* list, IShapefile* so
 		}
 	}
 }
+
+/***********************************************************************/
+/*		AddSelectedRasterPixels()
+/***********************************************************************/
+void SelectionListHelper::AddSelectedRasterPixels(ISelectionList* list, IShapefile* target, set<long>& layerHandles)
+{
+	if (!target || !list) return;
+
+	VARIANT_BOOL vb;
+	target->EditClear(&vb);
+	target->CreateNew(m_globalSettings.emptyBstr, SHP_POLYGON, &vb);
+
+	long count = SelectionListHelper::GetCount(list);
+	for (long i = 0; i < count; i++)
+	{
+		long layerHandle;
+		list->get_LayerHandle(i, &layerHandle);
+		if (layerHandles.find(layerHandle) == layerHandles.end())
+		{
+			continue;
+		}
+
+		tkLayerType layerType;
+		list->get_LayerType(i, &layerType);
+		if (layerType == ltRaster)
+		{
+			SelectedItem* item = ((CSelectionList*)list)->GetItem(i);
+			if (item && item->ShapePixel)
+			{
+				long shapeIndex;
+				target->EditAddShape(item->ShapePixel, &shapeIndex);
+			}
+		}
+	}
+}
+
+/***********************************************************************/
+/*		HasLayers()
+/***********************************************************************/
+bool SelectionListHelper::HasLayers(ISelectionList* list, tkLayerType layerTypeToSearch)
+{
+	long count = GetCount(list);
+
+	for (long j = 0; j < count; j++)
+	{
+		tkLayerType layerType;
+		list->get_LayerType(j, &layerType);
+
+		if (layerType == layerTypeToSearch || layerTypeToSearch == UndefinedLayer)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+

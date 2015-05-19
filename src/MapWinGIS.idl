@@ -62,6 +62,18 @@ interface IHistogram;
 interface IGdalDataset;
 interface IGdalDriver;
 
+/************************** tkLayerType Enumeration **********************/
+typedef
+[
+	uuid(A2E93C9D-B196-4C82-A646-7C5910E44F6A),
+	helpstring("tkLayerType"),
+]
+enum tkLayerType {
+	ltUndefined = 0,
+	ltVector = 1,
+	ltRaster = 2,
+} tkLayerType;
+
 /************************** tkRasterRendering Enumeration **********************/
 typedef
 [
@@ -3582,8 +3594,8 @@ interface IImage : IDispatch{
 	[propput, id(11), helpstring("property dY")] HRESULT dY([in] double newVal);
 	[propget, id(12), helpstring("property dX")] HRESULT dX([out, retval] double *pVal);
 	[propput, id(12), helpstring("property dX")] HRESULT dX([in] double newVal);
-	[propget, id(13), helpstring("property Value")] HRESULT Value([in]long row, [in]long col, [out, retval] long *pVal);
-	[propput, id(13), helpstring("property Value")] HRESULT Value([in]long row, [in]long col, [in] long newVal);
+	[propget, id(13), helpstring("property Value")] HRESULT Value([in]long row, [in]long col, [out, retval] int *pVal);
+	[propput, id(13), helpstring("property Value")] HRESULT Value([in]long row, [in]long col, [in] int newVal);
 	[propget, id(14), helpstring("property IsInRam")] HRESULT IsInRam([out, retval] VARIANT_BOOL *pVal);
 	[propget, id(15), helpstring("property TransparencyColor")] HRESULT TransparencyColor([out, retval] OLE_COLOR *pVal);
 	[propput, id(15), helpstring("property TransparencyColor")] HRESULT TransparencyColor([in] OLE_COLOR newVal);
@@ -3729,6 +3741,10 @@ interface IImage : IDispatch{
 	[propget, id(113)] HRESULT IgnoreColorTable([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(113)] HRESULT IgnoreColorTable([in] VARIANT_BOOL newVal);
 	[propget, id(114)] HRESULT RenderingMode([out, retval] tkRasterRendering* pVal);
+	[propget, id(115)] HRESULT ValueWithAlpha([in] LONG row, [in] LONG col, [out, retval] OLE_COLOR* pVal);
+	[propput, id(115)] HRESULT ValueWithAlpha([in] LONG row, [in] LONG col, [in] OLE_COLOR newVal);
+	[propget, id(116)] HRESULT BufferOffsetX([out, retval] LONG* pVal);
+	[propget, id(117)] HRESULT BufferOffsetY([out, retval] LONG* pVal);
 };
 
 /****************************  Shapefile Interface ***********************/
@@ -4006,6 +4022,7 @@ interface IShape : IDispatch{
 	[id(66)] HRESULT SplitByPolyline([in] IShape* polyline, [in,out]VARIANT* results, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(67)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	
+	[id(68)] HRESULT Clear();
 };
 
 /****************************  Extents Interface ***********************/
@@ -6017,12 +6034,16 @@ interface IIdentifier : IDispatch{
 	pointer_default(unique)
 ]
 interface ISelectionList : IDispatch{
-	[id(1)] HRESULT Add([in] LONG layerHandle, [in] LONG shapeIndex);
+	[id(1)] HRESULT AddShape([in] LONG layerHandle, [in] LONG shapeIndex);
 	[propget, id(2)] HRESULT Count([out, retval] LONG* pVal);
 	[propget, id(3)] HRESULT LayerHandle([in] LONG index, [out, retval] LONG* pVal);
 	[propget, id(4)] HRESULT ShapeIndex([in] LONG index, [out, retval] LONG* pVal);
 	[id(5)] HRESULT Clear();
 	[id(6)] HRESULT RemoveByLayerHandle([in]LONG layerHandle);
+	[id(7)] HRESULT AddPixel([in] LONG layerHandle, [in] LONG rasterPixelX, [in] LONG rasterPixelY);
+	[propget, id(8)] HRESULT LayerType([in] LONG index, [out, retval] tkLayerType* pVal);
+	[propget, id(9)] HRESULT RasterX([in] LONG index, [out, retval] LONG* pVal);
+	[propget, id(10)] HRESULT RasterY([in] LONG index, [out, retval] LONG* pVal);
 };
 
 [
@@ -6085,6 +6106,8 @@ interface IGdalRasterBand : IDispatch{
 	[id(22)] HRESULT GetStatistics([in] VARIANT_BOOL allowApproximate, [in] VARIANT_BOOL forceCalculation, [out] DOUBLE* minimum, [out] DOUBLE* maximum, [out] DOUBLE* mean, [out] DOUBLE* stdDev, [out, retval] VARIANT_BOOL* retVal);
 	[id(23)] HRESULT Classify(double minValue, double maxValue, [in] tkClassificationType classification, [in] LONG numCategories, [out, retval] IGridColorScheme** retVal);
 	[id(24)] HRESULT ComputeMinMax([in] VARIANT_BOOL allowApproximate, [out] DOUBLE* minimum, [out] DOUBLE* maximum, [out, retval]VARIANT_BOOL* retVal);
+	[propget, id(25)] HRESULT Value([in] LONG column, [in] LONG row, [out] double* pVal, [out, retval]VARIANT_BOOL* retVal);
+	
 };
 [
 	object,

@@ -1,5 +1,6 @@
 // SelectionList.h : Declaration of the CSelectionList
 #pragma once
+#include "SelectedItem.h"
 using namespace std;
 
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
@@ -15,6 +16,7 @@ class ATL_NO_VTABLE CSelectionList :
 public:
 	CSelectionList()
 	{
+	
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SELECTIONLIST)
@@ -37,24 +39,22 @@ public:
 	}
 
 public:
-	STDMETHOD(Add)(LONG layerHandle, LONG shapeIndex);
+	STDMETHOD(AddShape)(LONG layerHandle, LONG shapeIndex);
 	STDMETHOD(get_Count)(LONG* pVal);
 	STDMETHOD(get_LayerHandle)(LONG index, LONG* pVal);
 	STDMETHOD(get_ShapeIndex)(LONG index, LONG* pVal);
 	STDMETHOD(Clear)();
 	STDMETHOD(RemoveByLayerHandle)(LONG layerHandle);
-
+	STDMETHOD(AddPixel)(LONG layerHandle, LONG rasterX, LONG rasterY);
+	STDMETHOD(get_LayerType)(LONG index, tkLayerType* pVal);
+	STDMETHOD(get_RasterX)(LONG index, LONG* pVal);
+	STDMETHOD(get_RasterY)(LONG index, LONG* pVal);
+	
 private:
-	struct SelectedItem {
-		long LayerHandle;
-		long ShapeIndex;
-		
-		SelectedItem(long layerHandle, long shapeIndex) {
-			LayerHandle = layerHandle;
-			ShapeIndex = shapeIndex;
-		}
-	};
+	vector<SelectedItem> _items;
 
-	vector<SelectedItem> _shapes;
+public:
+	void UpdatePixelBounds(long layerHandle, IImage* source);
+	SelectedItem* GetItem(int index);
 };
 OBJECT_ENTRY_AUTO(__uuidof(SelectionList), CSelectionList)

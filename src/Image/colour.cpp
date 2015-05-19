@@ -15,9 +15,14 @@ bool colour::operator==( const colour & c )
 	return red == c.red && green == c.green && blue == c.blue && alpha == c.alpha;
 }
 
-COLORREF colour::ToOleColor()
+OLE_COLOR colour::ToOleColor()
 {
 	return red | green << 8 | blue << 16 | alpha << 24;
+}
+
+OLE_COLOR colour::ToOleColorNoAlpha()
+{
+	return red | green << 8 | blue << 16;
 }
 
 void colour::FromOleColor(long color)
@@ -26,4 +31,12 @@ void colour::FromOleColor(long color)
 	green = GetGValue(color);
 	blue = GetBValue(color);
 	alpha = GET_ALPHA(color);
+}
+
+void colour::FromOleColorNoAlpha(long color)
+{
+	red = GetRValue(color);
+	green = GetGValue(color);
+	blue = GetBValue(color);
+	alpha = 255;
 }

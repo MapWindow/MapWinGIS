@@ -849,6 +849,9 @@
     <ClInclude Include="Image\tkGif.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Structures\SelectedItem.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1808,6 +1811,9 @@
     </ClCompile>
     <ClCompile Include="Image\tkGif.cpp">
       <Filter>Image\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Map_Identifier.cpp">
+      <Filter>Control</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

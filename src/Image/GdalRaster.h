@@ -344,6 +344,8 @@ public:
 	void Serialize(CPLXMLNode* psTree);
 	void Deserialize(CPLXMLNode* node);
 	
+	int GetBufferOffsetX() { return _visibleRect.left; }
+	int GetBufferOffsetY() { return _visibleRect.top; }
 
 };
 

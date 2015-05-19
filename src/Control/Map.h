@@ -33,6 +33,7 @@
 #include "HotTrackingInfo.h"
 #include "DraggingState.h"
 #include "ImageDrawing.h"
+#include "ShapefileDrawing.h"
 
 # define SHOWTEXT 450
 # define HIDETEXT 451
@@ -1175,6 +1176,11 @@ private:
 	void UndoMeasuringPoint();
 	void FireOnDrawbackBufferCore(Gdiplus::Graphics* g, Gdiplus::Bitmap* bitmap);
 	void DumpBuffers();
+	bool CheckShapefileLayer(LayerSelector selector, int layerHandle, IShapefile* sf);
+	void DrawIdentified(Gdiplus::Graphics* g, const CRect& rcBounds);
+	void RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
+	void RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
+	void UpdateSelectedPixels(vector<long>& handles);
 #pragma endregion
 
 public:
@@ -1204,9 +1210,8 @@ public:
 	virtual void _FireBackgroundLoadingStarted(long taskId, long layerHandle) { FireBackgroundLoadingStarted(taskId, layerHandle); };
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
-protected:
 	
-
+protected:
 
 };
 

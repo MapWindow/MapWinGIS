@@ -7,6 +7,7 @@
 #include "IndexSearching.h"
 #include "LabelCategory.h"
 #include "Labels.h"
+#include "Shapefile.h"
 
 // *************************************************************
 //		LineSeparationFactor()
@@ -433,3 +434,63 @@ void CMapView::ClearLabels(long LayerHandle)
 	}
 }
 
+// **********************************************************
+//			ClearDrawingLabelFrames()
+// **********************************************************
+void CMapView::ClearDrawingLabelFrames()
+{
+	// clear frames for drawing labels
+	for (size_t j = 0; j < _activeDrawLists.size(); j++)
+	{
+		bool isSkip = false;
+		for (size_t i = 0; i < _drawingLayerInvisilbe.size(); i++)
+		{
+			if (_drawingLayerInvisilbe[i] == j)
+			{
+				isSkip = true;	// skip if this layer is set invisible
+				break;
+			}
+		}
+		if (isSkip)
+			continue;
+
+		DrawList * dlist = _allDrawLists[_activeDrawLists[j]];
+		if (IS_VALID_PTR(dlist))
+		{
+			CLabels* coLabels = static_cast<CLabels*>(dlist->m_labels);
+			coLabels->ClearLabelFrames();
+		}
+	}
+}
+
+// **********************************************************
+//			ClearLabelFrames()
+// **********************************************************
+void CMapView::ClearLabelFrames()
+{
+	// clear frames for regular labels
+	for (int i = 0; i < (int)_activeLayers.size(); i++)
+	{
+		Layer * l = _allLayers[_activeLayers[i]];
+		if (l != NULL)
+		{
+			if (l->IsShapefile())
+			{
+				IShapefile * sf = NULL;
+				if (l->QueryShapefile(&sf))
+				{
+					((CShapefile*)sf)->ClearChartFrames();
+					sf->Release();
+				}
+			}
+
+			// labels
+			ILabels* LabelsClass = l->get_Labels();
+			if (LabelsClass == NULL) continue;
+
+			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
+			coLabels->ClearLabelFrames();
+			LabelsClass->Release(); LabelsClass = NULL;
+		}
+	}
+}

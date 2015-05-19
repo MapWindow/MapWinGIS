@@ -14,6 +14,7 @@
 #include "ShapefileHelper.h"
 #include "SelectionListHelper.h"
 #include "ShapeStyleHelper.h"
+#include "SelectionList.h"
 
 // ***************************************************************
 //		OnDraw()
@@ -363,48 +364,125 @@ void CMapView::RedrawTools(Gdiplus::Graphics* g, const CRect& rcBounds)
 		GetMeasuringBase()->DrawData(g, false, DragNone);
 	}
 
+	DrawIdentified(g, rcBounds);
+}
+
+// ***************************************************************
+//		DrawIdentified()
+// ***************************************************************
+void CMapView::DrawIdentified(Gdiplus::Graphics* g, const CRect& rcBounds)
+{
 	bool hotTracking = HasDrawingData(tkDrawingDataAvailable::HotTracking);
 	bool identified = HasDrawingData(tkDrawingDataAvailable::IdentifiedShapes);
-	
-	if (hotTracking || identified)
-	{
-		CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), true);
-		
-		if (hotTracking)
-		{
-			drawer.Draw(rcBounds, _hotTracking.Shapefile);
-		}
-		
-		if (identified)
-		{
-			VARIANT_BOOL vb;
-			vector<long> handles;
-			if (SelectionListHelper::GetUniqueLayers(_identifiedShapes, handles))
-			{
-				for (size_t i = 0; i < handles.size(); i++)
-				{
-					Layer* layer = GetLayer(handles[i]);
-					if (!layer->wasRendered) continue;
-					
-					IShapefile* sf = GetShapefile(handles[i]);
-					if (!sf) continue;
-					
-					// Shapefile.Create is called to change the ShapeType
-					SelectionListHelper::PopulateShapefile(_identifiedShapes, sf, _identifiedShapefile, handles[i]);
-					sf->Release();
 
-					// Shapefile.Create was called which cleared the style settings
-					ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
-					drawer.Draw(rcBounds, _identifiedShapefile);
-					_identifiedShapefile->EditClear(&vb);
+	if (!hotTracking && !identified)
+		return;
+
+	CShapefileDrawer drawer(g, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, &_collisionList, this->GetCurrentScale(), true);
+
+	if (hotTracking)
+	{
+		drawer.Draw(rcBounds, _hotTracking.Shapefile);
+	}
+
+	if (identified)
+	{
+		vector<long> handles;
+		if (SelectionListHelper::GetUniqueLayers(_identifiedShapes, handles))
+		{
+			vector<long> activeHandles;
+			for (size_t i = 0; i < handles.size(); i++)
+			{
+				Layer* layer = GetLayer(handles[i]);
+				if (layer && layer->wasRendered)
+				{
+					activeHandles.push_back(handles[i]);
 				}
+			}
+			
+			if (activeHandles.size() > 0)
+			{
+				RenderSelectedPixels(activeHandles, drawer, rcBounds);
+
+				RenderIdentifiedShapes(activeHandles, drawer, rcBounds);
 			}
 		}
 	}
 }
 
 // ***************************************************************
-//	UpdateTileBuffer
+//		RenderIdentifiedShapes()
+// ***************************************************************
+void CMapView::RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds)
+{
+	VARIANT_BOOL vb;	
+
+	for (size_t i = 0; i < handles.size(); i++)
+	{
+		Layer* layer = GetLayer(handles[i]);
+		if (!layer->wasRendered) continue;
+
+		if (layer->IsShapefile())
+		{
+			IShapefile* sf = GetShapefile(handles[i]);
+			if (!sf) continue;
+
+			// Shapefile.Create is called to change the ShapeType
+			SelectionListHelper::PopulateShapefile(_identifiedShapes, sf, _identifiedShapefile, handles[i]);
+			sf->Release();
+
+			// Shapefile.Create was called which cleared the style settings
+			ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
+			drawer.Draw(rcBounds, _identifiedShapefile);
+			_identifiedShapefile->EditClear(&vb);
+		}
+	}
+}
+
+// ***************************************************************
+//		UpdateSelectedPixels()
+// ***************************************************************
+void CMapView::UpdateSelectedPixels(vector<long>& handles)
+{
+	for (size_t i = 0; i < handles.size(); i++)
+	{
+		Layer* layer = GetLayer(handles[i]);
+		if (!layer->wasRendered) continue;
+
+		if (layer->IsImage())
+		{
+			CComPtr<IImage> img = NULL;
+			img.Attach(GetImage(handles[i]));
+			if (!img) continue;
+
+			((CSelectionList*)_identifiedShapes)->UpdatePixelBounds(handles[i], img);
+		}
+	}
+}
+
+// ***************************************************************
+//		RenderSelectedPixels()
+// ***************************************************************
+void CMapView::RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds)
+{
+	if (!SelectionListHelper::HasLayers(_identifiedShapes, ltRaster)) {
+		return;
+	}
+
+	UpdateSelectedPixels(handles);
+
+	std::set<long> handlesSet(handles.begin(), handles.end());
+	SelectionListHelper::AddSelectedRasterPixels(_identifiedShapes, _identifiedShapefile, handlesSet);
+
+	ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
+	drawer.Draw(rcBounds, _identifiedShapefile);
+	
+	VARIANT_BOOL vb;
+	_identifiedShapefile->EditClear(&vb);
+}
+
+// ***************************************************************
+//		UpdateTileBuffer
 // ***************************************************************
 void CMapView::UpdateTileBuffer( CDC* dc, bool zoomingAnimation )
 {

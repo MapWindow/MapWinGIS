@@ -667,82 +667,156 @@ STDMETHODIMP CImageClass::get_Height(long *pVal)
 }
 
 // *****************************************************************
-//		get_Value()
+//		ValidateRowCol()
 // *****************************************************************
-STDMETHODIMP CImageClass::get_Value(long row, long col, long *pVal)
+bool CImageClass::ValidateRowCol(long row, long col)
 {
-	AFX_MANAGE_STATE(AfxGetStaticModuleState())
-	
-	if ( _gdal && !_dataLoaded )
-	{
-		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
-		return S_OK;
-	}
-
 	if (row < 0 || row >= _height || col < 0 || col >= _width)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return false;
+	}
+
+	return true;
+}
+
+// *****************************************************************
+//		get_Value()
+// *****************************************************************
+STDMETHODIMP CImageClass::get_Value(long row, long col, int *pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+	
+	if (!GetValueCore(row, col, true, (long*)pVal))
+	{
 		*pVal = -1;
-		return S_OK;
+	}
+	
+	return S_OK;
+}
+
+// ********************************************************
+//     ValueWithAlpha
+// ********************************************************
+STDMETHODIMP CImageClass::get_ValueWithAlpha(LONG row, LONG col, OLE_COLOR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	
+	if (!GetValueCore(row, col, true, (long*)pVal))
+	{
+		*pVal = 0x00000000;
+	}
+
+	return S_OK;
+}
+
+// *****************************************************************
+//		get_ValueCore()
+// *****************************************************************
+bool CImageClass::GetValueCore(long row, long col, bool withAlpha, long* value)
+{
+	if (_gdal && !_dataLoaded)
+	{
+		ErrorMessage(tkIMAGE_BUFFER_IS_EMPTY);
+		return false;
+	}
+
+	if (!ValidateRowCol(row, col))
+	{
+		return false;
 	}
 
 	if (_inRam)
 	{
 		colour currentPixel = _imageData[row * _width + col];
-		*pVal = currentPixel.ToOleColor();
-		return S_OK;
+		*value = withAlpha ? currentPixel.ToOleColor() : currentPixel.ToOleColorNoAlpha();
+		return true;
 	}
-	
+
 	if (_imgType == BITMAP_FILE)
 	{
 		colour tmp = _bitmapImage->getValue(row, col);
-		*pVal = tmp.ToOleColor();
-		return S_OK;
+		*value = withAlpha ? tmp.ToOleColor() : tmp.ToOleColorNoAlpha();
+		return true;
 	}
-	
-	*pVal = -1;
-	
-	return S_OK;
+
+	return false;
 }
 
 // *****************************************************************
 //		put_Value()
 // *****************************************************************
-STDMETHODIMP CImageClass::put_Value(long row, long col, long newVal)
+STDMETHODIMP CImageClass::put_Value(long row, long col, int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (row < 0 || row >= _height || col < 0 || col >= _width)
-	{
-		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
-		return S_OK;
-	}
-	
-	if( _inRam )
-	{
-		_imageData[row * _width + col].FromOleColor(newVal);
-	}
-	else
-	{	
-		if( _imgType == BITMAP_FILE )
-		{
-			if (!_bitmapImage->setValue(row, col, colour(newVal)))
-			{
-				ErrorMessage(tkUNRECOVERABLE_ERROR);
-			}
-		}
-		else if (_gdal) 
-		{
-			CallbackHelper::ErrorMsg("Writing of GDAL formats is not yet supported.");
-		}	
-		else
-		{	
-			//only BMP files can set values disk-based
-			ErrorMessage(tkUNAVAILABLE_IN_DISK_MODE);
-		}
-	}
+	put_ValueCore(row, col, newVal, false);
 
 	return S_OK;
+}
+
+// *****************************************************************
+//		ValueWithAlpha()
+// *****************************************************************
+STDMETHODIMP CImageClass::put_ValueWithAlpha(LONG row, LONG col, OLE_COLOR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	put_ValueCore(row, col, newVal, true);
+
+	return S_OK;
+}
+
+// *****************************************************************
+//		put_ValueCore()
+// *****************************************************************
+void CImageClass::put_ValueCore(long row, long col, long newVal, bool withAlpha)
+{
+	if (!ValidateRowCol(row, col)) {
+		return;
+	}
+
+	if (_gdal)
+	{
+		CallbackHelper::ErrorMsg("Image class can't change underlying values of GDAL formats.");
+		return;
+	}
+
+	if (_inRam)
+	{
+		if (withAlpha)
+		{
+			_imageData[row * _width + col].FromOleColor(newVal);
+		}
+		else
+		{
+			_imageData[row * _width + col].FromOleColorNoAlpha(newVal);
+		}
+		return;
+	}
+	
+	if (_imgType == BITMAP_FILE)
+	{
+		colour clr;
+		if (withAlpha)
+		{
+			clr.FromOleColor(newVal);
+		}
+		else
+		{
+			clr.FromOleColorNoAlpha(newVal);
+		}
+
+		if (!_bitmapImage->setValue(row, col, clr))
+		{
+			ErrorMessage(tkUNRECOVERABLE_ERROR);
+		}
+
+		return;
+	}
+	
+	//only BMP files can set values disk-based
+	ErrorMessage(tkUNAVAILABLE_IN_DISK_MODE);
 }
 
 // **************************************************************
@@ -1252,7 +1326,7 @@ bool CImageClass::ReadBMP(const CStringW ImageFile, bool InRam)
 		}
 	} 
 
-	long val;
+	int val;
 	get_Value( 0, 0, &val );					
 	_transColor = val;
 	_transColor2 = val;
@@ -1458,13 +1532,13 @@ void CImageClass::ImageBufferToBits(unsigned char * bits, int rowLength)
 	}
 	else
 	{
-		long clr = RGB(0, 0, 0);
+		OLE_COLOR clr = RGB(0, 0, 0);
 
 		for (int j = 0; j < _height; j++)
 		{
 			for (int i = 0; i < _width; i++)
 			{
-				get_Value(_height - j - 1, i, &clr);
+				get_ValueWithAlpha(_height - j - 1, i, &clr);
 				bits[j*rowLength + i * 3] = GetBValue(clr);
 				bits[j*rowLength + i * 3 + 1] = GetGValue(clr);
 				bits[j*rowLength + i * 3 + 2] = GetRValue(clr);
@@ -2160,7 +2234,8 @@ STDMETHODIMP CImageClass::ProjectionToImage(double ProjX, double ProjY, long* Im
 // **************************************************************
 //		ImageToProjection
 // **************************************************************
-// Returns map coordinates to the given image coordinates
+// Returns map coordinates of the given image pixel (top left corner)
+// !!! Don't check that input pixel is within width / height bounds !!!
 STDMETHODIMP CImageClass::ImageToProjection(long ImageX, long ImageY, double* ProjX, double* ProjY)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -4064,4 +4139,42 @@ STDMETHODIMP CImageClass::get_RenderingMode(tkRasterRendering* pVal)
 Gdiplus::Bitmap* CImageClass::GetIcon()
 {
 	return _iconGdiPlus ? _iconGdiPlus->m_bitmap : NULL;
+}
+
+// ********************************************************
+//     get_BufferOffsetX
+// ********************************************************
+STDMETHODIMP CImageClass::get_BufferOffsetX(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_raster)
+	{
+		*pVal = _raster->GetBufferOffsetX();
+	}
+	else
+	{
+		*pVal = 0;
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     get_BufferOffsetY
+// ********************************************************
+STDMETHODIMP CImageClass::get_BufferOffsetY(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_raster)
+	{
+		*pVal = _raster->GetBufferOffsetY();
+	}
+	else
+	{
+		*pVal = 0;
+	}
+
+	return S_OK;
 }
