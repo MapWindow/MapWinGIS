@@ -51,7 +51,7 @@ public:
 	STDMETHOD(get_RasterY)(LONG index, LONG* pVal);
 	
 private:
-	vector<SelectedItem> _items;
+	vector<SelectedItem*> _items;
 
 public:
 	void UpdatePixelBounds(long layerHandle, IImage* source);

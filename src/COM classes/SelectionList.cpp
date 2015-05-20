@@ -9,7 +9,7 @@
 STDMETHODIMP CSelectionList::AddShape(LONG layerHandle, LONG shapeIndex)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	_items.push_back(SelectedItem(layerHandle, shapeIndex));
+	_items.push_back(new SelectedItem(layerHandle, shapeIndex));
 	return S_OK;
 }
 
@@ -36,7 +36,7 @@ STDMETHODIMP CSelectionList::get_LayerHandle(LONG index, LONG* retVal)
 		return S_OK;
 	}
 
-	*retVal = _items[index].LayerHandle;
+	*retVal = _items[index]->LayerHandle;
 
 	return S_OK;
 }
@@ -52,7 +52,7 @@ STDMETHODIMP CSelectionList::get_ShapeIndex(LONG index, LONG* retVal)
 		*retVal = -1;
 		return S_OK;
 	}
-	*retVal = _items[index].ShapeIndex;
+	*retVal = _items[index]->ShapeIndex;
 	return S_OK;
 }
 
@@ -62,7 +62,15 @@ STDMETHODIMP CSelectionList::get_ShapeIndex(LONG index, LONG* retVal)
 STDMETHODIMP CSelectionList::Clear()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	for (size_t i = 0; i < _items.size(); i++)
+	{
+		delete _items[i];
+		_items[i] = NULL;
+	}
+
 	_items.clear();
+
 	return S_OK;
 }
 
@@ -75,8 +83,9 @@ STDMETHODIMP CSelectionList::RemoveByLayerHandle(LONG layerHandle)
 	
 	for (long i = (long)_items.size() - 1; i >= 0; i--) 
 	{
-		if (_items[i].LayerHandle == layerHandle) 
+		if (_items[i]->LayerHandle == layerHandle) 
 		{
+			delete _items[i];
 			_items.erase(_items.begin() + i);
 		}
 	}
@@ -91,7 +100,7 @@ STDMETHODIMP CSelectionList::AddPixel(LONG layerHandle, LONG rasterX, LONG raste
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	_items.push_back(SelectedItem(layerHandle, rasterX, rasterY));
+	_items.push_back(new SelectedItem(layerHandle, rasterX, rasterY));
 
 	return S_OK;
 }
@@ -109,7 +118,7 @@ STDMETHODIMP CSelectionList::get_LayerType(LONG index, tkLayerType* pVal)
 		return S_OK;
 	}
 
-	*pVal = _items[index].LayerType;
+	*pVal = _items[index]->LayerType;
 
 	return S_OK;
 }
@@ -127,7 +136,7 @@ STDMETHODIMP CSelectionList::get_RasterX(LONG index, LONG* pVal)
 		return S_OK;
 	}
 
-	*pVal = _items[index].RasterX;
+	*pVal = _items[index]->RasterX;
 
 	return S_OK;
 }
@@ -145,7 +154,7 @@ STDMETHODIMP CSelectionList::get_RasterY(LONG index, LONG* pVal)
 		return S_OK;
 	}
 
-	*pVal = _items[index].RasterY;
+	*pVal = _items[index]->RasterY;
 
 	return S_OK;
 }
@@ -162,10 +171,10 @@ void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source)
 	
 	for (size_t i = 0; i < _items.size(); i++)
 	{
-		if (_items[i].LayerHandle == layerHandle && !_items[i].Calculated)
+		if (_items[i]->LayerHandle == layerHandle && !_items[i]->Calculated)
 		{
-			long rasterX = _items[i].RasterX;
-			long rasterY = _items[i].RasterY;
+			long rasterX = _items[i]->RasterX;
+			long rasterY = _items[i]->RasterY;
 
 			double x, y;
 			source->ImageToProjection(rasterX, rasterY, &x, &y);
@@ -173,9 +182,9 @@ void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source)
 			double x2, y2;
 			source->ImageToProjection(rasterX + 1, rasterY + 1, &x2, &y2);
 
-			_items[i].AssignShapePixel(x, y, x2, y2);
+			_items[i]->AssignShapePixel(x, y, x2, y2);
 
-			_items[i].Calculated = true;
+			_items[i]->Calculated = true;
 		}
 	}
 }
@@ -190,5 +199,5 @@ SelectedItem* CSelectionList::GetItem(int index)
 		return NULL;
 	}
 
-	return &_items[index];
+	return _items[index];
 }

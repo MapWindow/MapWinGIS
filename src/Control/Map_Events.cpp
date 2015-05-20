@@ -577,7 +577,10 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				long layerHandle = -1;
 				long shapeIndex = -1;
 				bool needRedraw = SelectionListHelper::GetCount(_identifiedShapes) > 0;
-				_identifiedShapes->Clear();
+
+				if (!ctrl) {
+					_identifiedShapes->Clear();
+				}
 
 				tkIdentifierMode mode;
 				_identifier->get_IdentifierMode(&mode);
