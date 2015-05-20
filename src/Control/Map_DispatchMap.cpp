@@ -281,5 +281,6 @@ BEGIN_DISPATCH_MAP(CMapView, COleControl)
 	DISP_PROPERTY_EX_ID(CMapView, "FocusRectangle", dispidFocusRectangle, GetFocusRectangle, SetNotSupported, VT_DISPATCH)
 	DISP_PROPERTY_ID(CMapView, "CustomDrawingFlags", dispidCustomDrawingFlags, _customDrawingFlags, VT_I4)
 	DISP_PROPERTY_PARAM_ID(CMapView, "LayerExtents", dispidLayerExtents, GetLayerExtents, SetNotSupported, VT_DISPATCH, VTS_I4)
+	DISP_PROPERTY_NOTIFY_ID(CMapView, "ShowCoordinatesFormat", dispidShowCoordinatesFormat, _showCoordinatesFormat, OnShowCoordinatesFormatChanged, VT_I4)
 END_DISPATCH_MAP()
 //}}AFX_DISPATCH_MAP

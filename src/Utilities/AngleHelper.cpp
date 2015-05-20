@@ -58,6 +58,17 @@ CStringW AngleHelper::FormatAngle(double angle, tkAngleFormat angleType, int pre
 
 		double fSeconds = (angle - degrees - minutes / 60.0) * 3600.0;
 		int seconds = Utility::Rint(fSeconds);
+		if (seconds == 60)
+		{
+			seconds = 0;
+			minutes += 1;
+
+			if (minutes == 60)
+			{
+				minutes = 0;
+				degrees += 1;
+			}
+		}
 
 		s.Format(degreeFormat + "%02d' " + format + "\"", degrees, minutes, seconds);
 		return s;

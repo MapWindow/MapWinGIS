@@ -5,6 +5,7 @@
 #include "GeometryHelper.h"
 #include "ShapeEditor.h"
 #include "ShapefileDrawing.h"
+#include "AngleHelper.h"
 
 // ***************************************************************
 //		DrawDynamic()
@@ -249,9 +250,13 @@ void CMapView::DrawCoordinates(Gdiplus::Graphics* g)
 			}
 			else {
 				CStringW s;
-				if (canUseDegrees) {
-					s.Format(L"%s: %.3f; %s: %.3f", m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLatitude), prY, 
-													m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLongitude), prX);
+				if (canUseDegrees) 
+				{
+					CStringW lat = AngleHelper::FormatAngle(prY, _showCoordinatesFormat, 3, false);
+					CStringW lng = AngleHelper::FormatAngle(prX, _showCoordinatesFormat, 3, false);
+
+					s.Format(L"%s: %s; %s: %s", m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLatitude), lat,
+						m_globalSettings.GetLocalizedString(tkLocalizedStrings::lsLongitude), lng);
 				}
 				else
 				{

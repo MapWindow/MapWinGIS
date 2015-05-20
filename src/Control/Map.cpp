@@ -376,7 +376,7 @@ void CMapView::SetDefaults()
 	_identifierMode = imAllLayers;
 	_zoomBarMinZoom = -1;
 	_zoomBarMaxZoom = -1;
-	
+	_showCoordinatesFormat = afDegrees;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -648,6 +648,10 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 
 		PX_Long( pPX, "ZoombarMinZoom", _zoomBarMinZoom, -1 );
 		PX_Long( pPX, "ZoombarMaxZoom", _zoomBarMaxZoom, -1 );
+
+		temp = (long)_showCoordinatesFormat;
+		PX_Long(pPX, "ShowCoordinatesFormat", temp, 0);			// afDegrees
+		_showCoordinatesFormat = (tkAngleFormat)temp;
 	}
 	catch(...)
 	{

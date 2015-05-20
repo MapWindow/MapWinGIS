@@ -1489,7 +1489,8 @@ void CMapView::OnSendMouseUpChanged(){}
 void CMapView::OnSendMouseMoveChanged(){}
 void CMapView::OnSendSelectBoxDragChanged(){}
 void CMapView::OnSendSelectBoxFinalChanged(){}
-void CMapView::OnIdentifierModeChanged() {};
+void CMapView::OnIdentifierModeChanged() {}
+void CMapView::OnShowCoordinatesFormatChanged() {}
 #pragma endregion
 
 // *************************************************************

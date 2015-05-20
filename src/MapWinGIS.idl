@@ -6216,6 +6216,7 @@ library MapWinGIS
 			[id(250), readonly] ISelectionList* IdentifiedShapes;
 			[id(251), readonly] IDrawingRectangle* FocusRectangle;
 			[id(252)] tkCustomDrawingFlags CustomDrawingFlags;
+			[id(254)] tkAngleFormat ShowCoordinatesFormat;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;

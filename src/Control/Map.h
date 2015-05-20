@@ -148,6 +148,9 @@ public:
 	BOOL m_sendOnDrawBackBuffer;
 	afx_msg void OnSendOnDrawBackBufferChanged();
 
+	void OnShowCoordinatesFormatChanged();
+	tkAngleFormat _showCoordinatesFormat;
+
 	#pragma endregion
 
 	//Read-only properties
