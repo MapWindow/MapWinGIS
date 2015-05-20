@@ -54,7 +54,7 @@ private:
 	vector<SelectedItem*> _items;
 
 public:
-	void UpdatePixelBounds(long layerHandle, IImage* source);
+	void UpdatePixelBounds(long layerHandle, IImage* source, bool polygon);
 	SelectedItem* GetItem(int index);
 };
 OBJECT_ENTRY_AUTO(__uuidof(SelectionList), CSelectionList)

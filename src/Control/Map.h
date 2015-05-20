@@ -1183,7 +1183,7 @@ private:
 	void DrawIdentified(Gdiplus::Graphics* g, const CRect& rcBounds);
 	void RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
 	void RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
-	void UpdateSelectedPixels(vector<long>& handles);
+	void UpdateSelectedPixels(vector<long>& handles, bool& hasPolygons, bool& hasPoints);
 #pragma endregion
 
 public:

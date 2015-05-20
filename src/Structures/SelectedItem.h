@@ -9,6 +9,7 @@ struct SelectedItem
 	long RasterX;
 	long RasterY;
 	bool Calculated;
+	bool Polygon;
 	IShape* ShapePixel;
 
 	SelectedItem(long layerHandle, long shapeIndex)
@@ -63,6 +64,7 @@ struct SelectedItem
 		ShapeIndex = -1;
 		RasterX = -1;
 		RasterY = -1;
+		Polygon = true;
 	}
 };
 

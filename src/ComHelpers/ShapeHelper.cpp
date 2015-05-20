@@ -389,3 +389,24 @@ void ShapeHelper::AddLabelToShape(IShape* shp, ILabels* labels, BSTR text, tkLab
 	((CShape*)shp)->get_LabelPosition(method, x, y, rotation, orientation);
 	labels->AddLabel(text, x, y, rotation);
 }
+
+// *************************************************************
+//		CenterAsShape()
+// *************************************************************
+IShape* ShapeHelper::CenterAsShape(IShape* shp)
+{
+	if (!shp) return NULL;
+
+	CComPtr<IPoint> pnt = NULL;
+	shp->get_Center(&pnt);
+
+	VARIANT_BOOL vb;
+	IShape* shpNew = NULL;
+	ComHelper::CreateShape(&shp);
+	shp->Create(SHP_POINT, &vb);
+	
+	long pointIndex = 0;
+	shp->InsertPoint(pnt, &pointIndex, &vb);
+
+	return shp;
+}

@@ -8,6 +8,6 @@ public:
 	static bool GetUniqueLayers(ISelectionList* list, vector<long>& layerHandles);
 	static void PopulateShapefile(ISelectionList* list, IShapefile* source, IShapefile* target, long layerHandle);
 	static bool HasLayers(ISelectionList* list, tkLayerType layerTypeToSearch);
-	static void AddSelectedRasterPixels(ISelectionList* list, IShapefile* target, set<long>& layerHandles);
+	static void AddSelectedPixelsToShapefile(ISelectionList* list, IShapefile* target, set<long>& layerHandles, bool polygon);
 };
 

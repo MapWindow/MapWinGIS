@@ -162,7 +162,7 @@ STDMETHODIMP CSelectionList::get_RasterY(LONG index, LONG* pVal)
 // ****************************************************************
 //				UpdatePixelBounds()						         
 // ****************************************************************
-void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source)
+void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source, bool polygon)
 {
 	if (!source) {
 		CallbackHelper::AssertionFailed("Unexpected NULL parameter in CSelectionList::UpdatePixelBounds.");
@@ -171,6 +171,8 @@ void CSelectionList::UpdatePixelBounds(long layerHandle, IImage* source)
 	
 	for (size_t i = 0; i < _items.size(); i++)
 	{
+		_items[i]->Polygon = polygon;
+
 		if (_items[i]->LayerHandle == layerHandle && !_items[i]->Calculated)
 		{
 			long rasterX = _items[i]->RasterX;

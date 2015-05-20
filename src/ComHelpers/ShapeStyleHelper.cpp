@@ -226,7 +226,7 @@ CStringW ShapeStyleHelper::GetSymbologyFileAsXml(IShapefile* sf)
 // *****************************************************
 //		ApplyIdentifiedShapesStyle()
 // *****************************************************
-void ShapeStyleHelper::ApplyIdentifiedShapesStyle(IIdentifier* identifier, IShapefile* sf)
+void ShapeStyleHelper::ApplyIdentifiedShapesStyle(IIdentifier* identifier, IShapefile* sf, bool polygon)
 {
 	OLE_COLOR outlineColor;
 	identifier->get_OutlineColor(&outlineColor);
@@ -235,7 +235,14 @@ void ShapeStyleHelper::ApplyIdentifiedShapesStyle(IIdentifier* identifier, IShap
 	sf->get_DefaultDrawingOptions(&options);
 	options->put_FillColor(outlineColor);
 	options->put_LineColor(outlineColor);
-	options->put_FillTransparency(100.0f);
-	options->put_LineTransparency(100.0f);
-	options->put_LineWidth(4.0f);
+	options->put_FillTransparency(polygon ? 100.0f : 255.0f);
+	options->put_LineTransparency(polygon ? 100.0f : 255.0f);
+	
+	if (!polygon)
+	{
+		options->put_PointSize(10.0f);
+		options->put_PointShape(tkPointShapeType::ptShapeCircle);
+	}
+	
+	options->put_LineWidth(polygon ?  4.0f : 1.0f);
 }

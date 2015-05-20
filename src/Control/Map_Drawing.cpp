@@ -432,7 +432,7 @@ void CMapView::RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& d
 			sf->Release();
 
 			// Shapefile.Create was called which cleared the style settings
-			ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
+			ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile, true);
 			drawer.Draw(rcBounds, _identifiedShapefile);
 			_identifiedShapefile->EditClear(&vb);
 		}
@@ -442,8 +442,11 @@ void CMapView::RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& d
 // ***************************************************************
 //		UpdateSelectedPixels()
 // ***************************************************************
-void CMapView::UpdateSelectedPixels(vector<long>& handles)
+void CMapView::UpdateSelectedPixels(vector<long>& handles, bool& hasPolygons, bool& hasPoints)
 {
+	hasPolygons = false;
+	hasPoints = false;
+	
 	for (size_t i = 0; i < handles.size(); i++)
 	{
 		Layer* layer = GetLayer(handles[i]);
@@ -455,7 +458,24 @@ void CMapView::UpdateSelectedPixels(vector<long>& handles)
 			img.Attach(GetImage(handles[i]));
 			if (!img) continue;
 
-			((CSelectionList*)_identifiedShapes)->UpdatePixelBounds(handles[i], img);
+			// do we need polygon or point shapefile at this scale?
+			double dx, dy;
+			img->get_dX(&dx);
+			img->get_dY(&dy);
+
+			double size = (_pixelPerProjectionX * dx  + _pixelPerProjectionY * dy) / 2.0;
+			bool polygon = size > 10;
+
+			if (polygon) {
+				hasPolygons = true;
+			}
+
+			if (!polygon) {
+				hasPoints = true;
+			}
+
+			// calculating bounds of pixels
+			((CSelectionList*)_identifiedShapes)->UpdatePixelBounds(handles[i], img, polygon);
 		}
 	}
 }
@@ -469,13 +489,25 @@ void CMapView::RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& dra
 		return;
 	}
 
-	UpdateSelectedPixels(handles);
+	bool hasPolygons, hasPoints;
+	UpdateSelectedPixels(handles, hasPolygons, hasPoints);
 
 	std::set<long> handlesSet(handles.begin(), handles.end());
-	SelectionListHelper::AddSelectedRasterPixels(_identifiedShapes, _identifiedShapefile, handlesSet);
 
-	ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile);
-	drawer.Draw(rcBounds, _identifiedShapefile);
+	if (hasPolygons)
+	{
+		SelectionListHelper::AddSelectedPixelsToShapefile(_identifiedShapes, _identifiedShapefile, handlesSet, true);
+		ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile, true);
+		drawer.Draw(rcBounds, _identifiedShapefile);
+	}
+
+	if (hasPoints)
+	{
+		SelectionListHelper::AddSelectedPixelsToShapefile(_identifiedShapes, _identifiedShapefile, handlesSet, false);
+		ShapeStyleHelper::ApplyIdentifiedShapesStyle(_identifier, _identifiedShapefile, false);
+		_identifiedShapefile->put_CollisionMode(tkCollisionMode::AllowCollisions);
+		drawer.Draw(rcBounds, _identifiedShapefile);
+	}
 	
 	VARIANT_BOOL vb;
 	_identifiedShapefile->EditClear(&vb);

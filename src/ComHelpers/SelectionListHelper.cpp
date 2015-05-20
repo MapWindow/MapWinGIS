@@ -3,6 +3,7 @@
 #include <set>
 #include "ShapefileHelper.h"
 #include "SelectionList.h"
+#include "ShapeHelper.h"
 
 /***********************************************************************/
 /*		GetCount()
@@ -75,15 +76,15 @@ void SelectionListHelper::PopulateShapefile(ISelectionList* list, IShapefile* so
 }
 
 /***********************************************************************/
-/*		AddSelectedRasterPixels()
+/*		AddSelectedPixelsToShapefile()
 /***********************************************************************/
-void SelectionListHelper::AddSelectedRasterPixels(ISelectionList* list, IShapefile* target, set<long>& layerHandles)
+void SelectionListHelper::AddSelectedPixelsToShapefile(ISelectionList* list, IShapefile* target, set<long>& layerHandles, bool polygon)
 {
 	if (!target || !list) return;
 
 	VARIANT_BOOL vb;
 	target->EditClear(&vb);
-	target->CreateNew(m_globalSettings.emptyBstr, SHP_POLYGON, &vb);
+	target->CreateNew(m_globalSettings.emptyBstr, polygon ? SHP_POLYGON : SHP_POINT, &vb);
 
 	long count = SelectionListHelper::GetCount(list);
 	for (long i = 0; i < count; i++)
@@ -100,10 +101,25 @@ void SelectionListHelper::AddSelectedRasterPixels(ISelectionList* list, IShapefi
 		if (layerType == ltRaster)
 		{
 			SelectedItem* item = ((CSelectionList*)list)->GetItem(i);
-			if (item && item->ShapePixel)
+			if (item)
 			{
-				long shapeIndex;
-				target->EditAddShape(item->ShapePixel, &shapeIndex);
+				if (item->Polygon && polygon && item->ShapePixel)
+				{
+					long shapeIndex;
+					target->EditAddShape(item->ShapePixel, &shapeIndex);
+				}
+			
+				if (!item->Polygon && !polygon && item->ShapePixel)
+				{
+					IShape* center = ShapeHelper::CenterAsShape(item->ShapePixel);
+					
+					if (center) 
+					{
+						long shapeIndex;
+						target->EditAddShape(center, &shapeIndex);
+						center->Release();
+					}
+				}
 			}
 		}
 	}

@@ -709,52 +709,53 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 
 	if (_table == NULL || _sourceType == sstUninitialized)
 	{
-		ErrorMessage(tkSHAPEFILE_UNINITIALIZED);
+		return S_OK;
 	}
-	else if( _isEditingShapes == FALSE )
+
+	if( _isEditingShapes == FALSE )
 	{	
 		ErrorMessage(tkSHPFILE_NOT_IN_EDIT_MODE);
+		return S_OK;
+	}
+	
+	VARIANT_BOOL isEditingTable;
+	_table->get_EditingTable(&isEditingTable);
+	
+	if( isEditingTable == FALSE )
+	{	
+		ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
 	}
 	else
-	{
-		VARIANT_BOOL isEditingTable;
-		_table->get_EditingTable(&isEditingTable);
-	
-		if( isEditingTable == FALSE )
+	{	
+		_table->EditClear(retval);
+		if( *retval == VARIANT_FALSE )
 		{	
-			ErrorMessage(tkDBF_NOT_IN_EDIT_MODE);
+			_table->get_LastErrorCode(&_lastErrorCode);
+			ErrorMessage(_lastErrorCode);
 		}
-		else
-		{	
-			_table->EditClear(retval);
-			if( *retval == VARIANT_FALSE )
-			{	
-				_table->get_LastErrorCode(&_lastErrorCode);
-				ErrorMessage(_lastErrorCode);
-			}
 			
-			for (unsigned int i = 0; i < _shapeData.size(); i++)
-			{
-				delete _shapeData[i];	// all the releasing done in the destructor
-			}
-			_shapeData.clear();
+		for (unsigned int i = 0; i < _shapeData.size(); i++)
+		{
+			delete _shapeData[i];	// all the releasing done in the destructor
+		}
+		_shapeData.clear();
 			
-			if(_useQTree == VARIANT_TRUE)
-			{
-				delete _qtree;
-				_qtree = NULL;
-			}
+		if(_useQTree == VARIANT_TRUE)
+		{
+			delete _qtree;
+			_qtree = NULL;
+		}
 
-			// deleting the labels
-			VARIANT_BOOL bSynchronized;
-			_labels->get_Synchronized(&bSynchronized);
-			if (bSynchronized)
-			{
-				_labels->Clear();
-			}
-			*retval = VARIANT_TRUE;
+		// deleting the labels
+		VARIANT_BOOL bSynchronized;
+		_labels->get_Synchronized(&bSynchronized);
+		if (bSynchronized)
+		{
+			_labels->Clear();
 		}
+		*retval = VARIANT_TRUE;
 	}
+	
 	return S_OK;
 }
 #pragma endregion

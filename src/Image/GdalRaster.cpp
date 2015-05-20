@@ -1723,6 +1723,7 @@ void GdalRaster::SetRgbBandIndex(BandChannel color, int bandIndex)
 			return;
 		case BandChannelAlpha:
 			_alphaBandIndex = bandIndex;
+			return;
 	}
 
 	CallbackHelper::ErrorMsg("Invalid band index passed to GdalRaster::SetRgbBandIndex");
