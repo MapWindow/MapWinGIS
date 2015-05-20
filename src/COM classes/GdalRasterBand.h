@@ -62,6 +62,7 @@ public:
 	STDMETHOD(Classify)(double minValue, double maxValue, tkClassificationType classification, LONG numBreaks, IGridColorScheme** retVal);
 	STDMETHOD(ComputeMinMax)(VARIANT_BOOL allowApproximate, DOUBLE* minimum, DOUBLE* maximum, VARIANT_BOOL* retVal);
 	STDMETHOD(get_Value)(LONG column, LONG row, double* pVal, VARIANT_BOOL* vb);
+	STDMETHOD(ComputeLocalStatistics)(LONG column, LONG row, LONG range, double* minimum, double* maximum, double* mean, double* stdDev, LONG* count, VARIANT_BOOL* vb);
 
 private:
 	GDALRasterBand* _band;
@@ -72,6 +73,8 @@ private:
 	template <typename T>
 	IGridColorScheme* GenerateUniqueValuesColorScheme(GDALDataType dataType);
 	IGridColorScheme* GenerateEqualIntervalColorScheme(double minValue, double maxValue, int numBreaks);
+	bool ValidateRowCol(LONG column, LONG row);
+	bool CalculateStats(double* values, int size, double& min, double& max, double& mean, double& stdDev, LONG& count);
 
 public:
 	void InjectBand(GDALRasterBand* band) { _band = band; }

@@ -6107,7 +6107,7 @@ interface IGdalRasterBand : IDispatch{
 	[id(23)] HRESULT Classify(double minValue, double maxValue, [in] tkClassificationType classification, [in] LONG numCategories, [out, retval] IGridColorScheme** retVal);
 	[id(24)] HRESULT ComputeMinMax([in] VARIANT_BOOL allowApproximate, [out] DOUBLE* minimum, [out] DOUBLE* maximum, [out, retval]VARIANT_BOOL* retVal);
 	[propget, id(25)] HRESULT Value([in] LONG column, [in] LONG row, [out] double* pVal, [out, retval]VARIANT_BOOL* retVal);
-	
+	[id(26)] HRESULT ComputeLocalStatistics([in]LONG column, [in]LONG row, [in]LONG range, [out]double* minimum, [out]double* maximum, [out]double* mean, [out]double* stdDev, [out]LONG* count, [out, retval]VARIANT_BOOL* vb);
 };
 [
 	object,

@@ -619,6 +619,23 @@ STDMETHODIMP CGdalRasterBand::ComputeMinMax(VARIANT_BOOL allowApproximate, DOUBL
 // ********************************************************
 //     get_Value
 // ********************************************************
+bool CGdalRasterBand::ValidateRowCol(LONG column, LONG row)
+{
+	int width = _band->GetXSize();
+	int height = _band->GetYSize();
+
+	if (column < 0 || row < 0 || column >= width || row >= height)
+	{
+		ErrorMessage("CGdalRasterBand::get_Value: invalid row or column index.");
+		return false;
+	}
+
+	return true;
+}
+
+// ********************************************************
+//     get_Value
+// ********************************************************
 STDMETHODIMP CGdalRasterBand::get_Value(LONG column, LONG row, double* pVal, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -627,20 +644,103 @@ STDMETHODIMP CGdalRasterBand::get_Value(LONG column, LONG row, double* pVal, VAR
 
 	if (!CheckBand()) return S_OK;
 
-	int width = _band->GetXSize();
-	int height = _band->GetYSize();
-
-	if (column < 0 || row < 0 || column >= width || row >= height)
-	{
-		ErrorMessage("CGdalRasterBand::get_Value: invalid row or column index.");
-		return S_OK;
-	}
+	if (!ValidateRowCol(column, row)) return S_OK;
 
 	double val;
-	CPLErr err = _band->RasterIO(GF_Read, column, row, 1, 1, &val, 1, 1, GDT_CFloat64, 0, 0);
+	CPLErr err = _band->RasterIO(GF_Read, column, row, 1, 1, &val, 1, 1, GDT_Float64, 0, 0);
 	*pVal = val;
 
 	*retVal = err == CE_None;
 
 	return S_OK;
+}
+
+// ********************************************************
+//     GetLocalStatistics
+// ********************************************************
+STDMETHODIMP CGdalRasterBand::ComputeLocalStatistics(LONG column, LONG row, LONG range, 
+		double* minimum, double* maximum, double* mean, double* stdDev, LONG* count, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = VARIANT_FALSE;
+
+	// validation
+	if (!CheckBand()) return S_OK;
+
+	if (!ValidateRowCol(column, row)) return S_OK;
+
+	if (range < 1 || range > 100)
+	{
+		ErrorMessage("GdalRasterBand.GetLocalStatistics: invalid range. Expected range is in [1; 100].");
+		return S_OK;
+	}
+
+	// find the bounds of the region to be read
+	long x = column - range;
+	long y = row - range;
+	long x2 = column + range;
+	long y2 = row + range;
+
+	long width = _band->GetXSize();
+	long height = _band->GetYSize();
+
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+	if (x2 >= width) x2 = width - 1;
+	if (y2 >= height) y2 = height - 1;
+
+	width = x2 - x + 1;
+	height = y2 - y + 1;
+
+	// reading values
+	double* values = new double[width * height];
+	CPLErr err = _band->RasterIO(GF_Read, x, y, width, height, (void*)values, width, height, GDT_Float64, 0, 0);
+	
+	if (err != CE_None)	{
+		goto cleaning;
+	}
+
+	*retVal = CalculateStats(values, width * height, *minimum, *maximum, *mean, *stdDev, *count) ? VARIANT_TRUE : VARIANT_FALSE;
+
+cleaning:
+
+	delete[] values;
+	return S_OK;
+}
+
+// ********************************************************
+//     CalculateStats
+// ********************************************************
+bool CGdalRasterBand::CalculateStats(double* values, int size, double& min, double& max, double& mean, double& stdDev, long& count)
+{
+	if (size <= 1) return false;
+
+	min = DBL_MAX;
+	max = DBL_MIN;
+
+	double noDataValue = _band->GetNoDataValue();
+
+	double squares = 0.0;
+	double sum = 0.0;
+	count = 0;
+
+	for (int i = 0; i < size; i++)
+	{
+		if (values[i] == noDataValue) {
+			continue;
+		}
+	
+		if (values[i] > max) max = values[i];
+		if (values[i] < min) min = values[i];
+
+		sum += values[i];
+		squares += values[i] * values[i];
+		count++;
+	}
+
+	mean = sum / count;
+	stdDev = sqrt(squares / count - pow(sum / count, 2));
+
+	return count > 0;
 }
