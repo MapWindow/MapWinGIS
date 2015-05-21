@@ -313,7 +313,7 @@ bool CMapView::DrillDownSelect(double projX, double projY, ISelectionList* list,
 
 	for (int i = handles.size() - 1; i >= 0; i--)
 	{
-		Layer* layer = GetLayer(i);
+		Layer* layer = GetLayer(handles[i]);
 
 		if (!layer)
 		{
