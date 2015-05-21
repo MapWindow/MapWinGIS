@@ -121,7 +121,7 @@ protected:
 
 	std::vector<VertexPath> _vertexPathes;
 public:
-	int Draw(const CRect & rcBounds, IShapefile* sf);
+	bool Draw(const CRect & rcBounds, IShapefile* sf);
 	int GetShapeCount() { return _shapeCount; }
 private:	
 	std::vector<long>* SelectShapesFromSpatialIndex(char* sFilename, Extent* extents);

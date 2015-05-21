@@ -59,9 +59,9 @@ enum tkDrawingShape
 //*******************************************************************
 //	Draw()				          
 //*******************************************************************
-int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
+bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 {
-	if (!sf) return 0;
+	if (!sf) return false;
 	
 	_shapefile = reinterpret_cast<CShapefile*>(sf);
 
@@ -71,9 +71,6 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	CTimer tmr;
 	tmr.Init("c:\\mw_output.txt");
 	tmr.Start();
-	#endif
-
-	#ifdef USE_TIMER
 	tmr.PrintTime("Before bounds");
 	#endif
 	// -------------------------------------------------------
@@ -87,7 +84,7 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 	box=NULL;
 
 	if ( _xMin>_extents->right || _xMax<_extents->left || _yMin>_extents->top || _yMax<_extents->bottom )
-		return 0;
+		return false;
 
 	#ifdef USE_TIMER
 	tmr.PrintTime("After bounds");
@@ -177,41 +174,38 @@ int CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		if (file == NULL )
 		{
 			CallbackHelper::AssertionFailed("Shapefile rendering: file doesn't exist.");
-			return 0;
+			return false;
 		}
-		else
-		{
-			// retrieving the name
-			CComBSTR fname;
-			sf->get_Filename(&fname);
+		
+		CComBSTR fname;
+		sf->get_Filename(&fname);
 			
-			// reading index
-			USES_CONVERSION;
-			_sfReader = new CShapefileReader();
-			if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
-			{
-				delete _sfReader; 
-				_sfReader = NULL;
-				CString error;
-				error.Format("Failed to read shape index: %s", OLE2A(fname));
-				CallbackHelper::ErrorMsg(error);
-			}
+		// reading index
+		USES_CONVERSION;
+		_sfReader = new CShapefileReader();
 
-			// ---------------------------------------------------------
-			//	extracting shapes from spatial index
-			// ---------------------------------------------------------
-			if (_useSpatialIndex)
+		if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
+		{
+			delete _sfReader; 
+			_sfReader = NULL;
+
+			return false;
+		}
+
+		// ---------------------------------------------------------
+		//	extracting shapes from spatial index
+		// ---------------------------------------------------------
+		if (_useSpatialIndex)
+		{
+			selectResult = SelectShapesFromSpatialIndex(OLE2A(fname), _extents);		// TODO: use Unicode
+			if (!selectResult)
 			{
-				selectResult = SelectShapesFromSpatialIndex(OLE2A(fname), _extents);		// TODO: use Unicode
-				if (!selectResult)
-				{
-					_useSpatialIndex = VARIANT_FALSE;
-				}
-				else
-				{
-					numShapes = selectResult->size();
-					sort(selectResult->begin(), selectResult->end());
-				}
+				_useSpatialIndex = VARIANT_FALSE;
+			}
+			else
+			{
+				numShapes = selectResult->size();
+				sort(selectResult->begin(), selectResult->end());
 			}
 		}
 	}
@@ -532,7 +526,7 @@ cleaning:
 			selectResult = NULL;
 		}
 	}
-	return 1;
+	return true;
 }
 
 // ********************************************************

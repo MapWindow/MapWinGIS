@@ -21,29 +21,30 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 
 	if (!shxfile )
 	{
-		// TODO: report error
 		_shpfile = NULL;
 		_indexData = NULL;
+
+		USES_CONVERSION;
+		CallbackHelper::ErrorMsg(Debug::Format("Failed to open SHX file: %s", OLE2A(sFilename)));
+
 		return false;
 	}
-	else
-	{
-		fseek (shxfile, 0, SEEK_END);
-		int indexFileSize = ftell(shxfile);
-		rewind(shxfile);
+	
+	fseek (shxfile, 0, SEEK_END);
+	int indexFileSize = ftell(shxfile);
+	rewind(shxfile);
 		
-		// 100 is for header
-		fseek(shxfile, 100, SEEK_SET);
-		_indexData = new char[indexFileSize - 100];
-		long result = fread(_indexData, sizeof(char), indexFileSize - 100, shxfile);
-		fclose(shxfile);
+	// 100 is for header
+	fseek(shxfile, 100, SEEK_SET);
+	_indexData = new char[indexFileSize - 100];
+	long result = fread(_indexData, sizeof(char), indexFileSize - 100, shxfile);
+	fclose(shxfile);
 
-		//_shpHeader.numShapes = (indexFileSize - 100)/8;	// 2 int on record
+	//_shpHeader.numShapes = (indexFileSize - 100)/8;	// 2 int on record
 
-		_shpfile = shpFile;
-		rewind(shpFile);
-		return true;
-	}
+	_shpfile = shpFile;
+	rewind(shpFile);
+	return true;
 }
 
 void SwapEndian(char* c)
