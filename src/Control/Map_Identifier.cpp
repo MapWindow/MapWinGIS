@@ -231,7 +231,7 @@ bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 	{
 		if (layer->QueryShapefile(&sf))
 		{
-			CheckShapefileLayer(selector, layerHandle, sf);
+			return CheckShapefileLayer(selector, layerHandle, sf);
 		}
 	}
 	else if (layer->IsImage())
