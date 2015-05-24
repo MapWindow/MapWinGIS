@@ -377,6 +377,7 @@ void CMapView::SetDefaults()
 	_zoomBarMinZoom = -1;
 	_zoomBarMaxZoom = -1;
 	_showCoordinatesFormat = afDegrees;
+	_panningExtentsChanged = false;
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -609,13 +610,14 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 				SetProjection(projection);
 			}
 			
-			PX_Double( pPX, "xMin", _extents.left, .3 );
-			PX_Double( pPX, "xMax", _extents.right, .3 );
-			PX_Double( pPX, "yMin", _extents.bottom, .3 );
-			PX_Double( pPX, "yMax", _extents.top, .3 );
+			Extent extents;
+			PX_Double(pPX, "xMin", extents.left, .3);
+			PX_Double(pPX, "xMax", extents.right, .3);
+			PX_Double(pPX, "yMin", extents.bottom, .3);
+			PX_Double(pPX, "yMax", extents.top, .3);
 
 			if (loading) {
-				SetExtentsCore(_extents, false);
+				SetExtentsCore(extents, false);
 			}
 		}
 		catch(...) {

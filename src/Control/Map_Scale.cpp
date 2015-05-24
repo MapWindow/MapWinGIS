@@ -13,9 +13,17 @@
 // ****************************************************
 VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 {
+	return ZoomToTileLevelCore(zoom, true);
+}
+
+// ****************************************************
+//	   ZoomToTileLevelCore()
+// ****************************************************
+VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
+{
 	if (_transformationMode == tmNotDefined)
 		return VARIANT_FALSE;
-	
+
 	if (_viewWidth == 0 || _viewHeight == 0)
 		return VARIANT_FALSE;
 
@@ -24,16 +32,16 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 	// we shall make all the calculations in server projection (either GMercator or custom)
 	// and then transform bounds to the current coordinate system
-	double xCentOld = (_extents.left + _extents.right)/2.0;
-	double yCentOld = (_extents.bottom + _extents.top)/2.0;
+	double xCentOld = (_extents.left + _extents.right) / 2.0;
+	double yCentOld = (_extents.bottom + _extents.top) / 2.0;
 
 	double minX, maxX, minY, maxY;	// size of control in pixels
 	PROJECTION_TO_PIXEL(_extents.left, _extents.bottom, minX, minY);
 	PROJECTION_TO_PIXEL(_extents.right, _extents.top, maxX, maxY);
 
 	// getting screen size
-	double screenHeight = abs(maxY - minY); 
-	double screenWidth =  abs(maxX - minX);
+	double screenHeight = abs(maxY - minY);
+	double screenWidth = abs(maxX - minX);
 
 	// multiplication ratio, to make texts more legible when projection-related scaling is underway
 	double ratio;
@@ -51,11 +59,11 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 
 	if (_tileProjectionState == ProjectionMatch)
 	{
-		minX = xCentOld - w/2.0;
-		maxX = xCentOld + w/2.0;
-		minY = yCentOld - h/2.0;
-		maxY = yCentOld + h/2.0;
-		this->SetExtentsCore(Extent( minX, maxX, minY, maxY ), true, false, false);
+		minX = xCentOld - w / 2.0;
+		maxX = xCentOld + w / 2.0;
+		minY = yCentOld - h / 2.0;
+		maxY = yCentOld + h / 2.0;
+		this->SetExtentsCore(Extent(minX, maxX, minY, maxY), logPrevious, false, false);
 		_currentZoom = zoom;
 		return VARIANT_TRUE;
 	}
@@ -67,10 +75,10 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 		{
 			double xCent = xCentOld, yCent = yCentOld;
 			GetMapToTilesTransform()->Transform(&xCent, &yCent, &vb);
-			minX = xCent - w/2.0;
-			maxX = xCent + w/2.0;
-			minY = yCent - h/2.0;
-			maxY = yCent + h/2.0;
+			minX = xCent - w / 2.0;
+			maxX = xCent + w / 2.0;
+			minY = yCent - h / 2.0;
+			maxY = yCent + h / 2.0;
 
 			bool extrapolation = tileProjection == SphericalMercator && _transformationMode == tmWgs84Complied;
 			double minLng = 0.0, maxLng = 0.0, minLat = 0.0, maxLat = 0.0;
@@ -82,13 +90,13 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 				// depend on latitude or longitude, which is not true.
 				// TODO: do transformation in several points within world bounds for better extrapolation.
 				double MAX_VAL = MERCATOR_MAX_VAL;
-				if (minX < - MAX_VAL)
+				if (minX < -MAX_VAL)
 					minLng = -MAX_LONGITUDE - abs(minX + MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
 
 				if (maxX > MAX_VAL)
 					maxLng = MAX_LONGITUDE + abs(maxX - MAX_VAL) / MAX_VAL * MAX_LONGITUDE;
 
-				if (minY < - MAX_VAL)
+				if (minY < -MAX_VAL)
 					minLat = -MAX_LATITUDE - abs(minY + MAX_VAL) / MAX_VAL * MAX_LATITUDE;
 
 				if (maxY > MAX_VAL)
@@ -114,10 +122,10 @@ VARIANT_BOOL CMapView::ZoomToTileLevel(int zoom)
 			else
 			{
 				// finally adjust the center to it's initial position
-				Extent ext = Extent( minX, maxX, minY, maxY );
+				Extent ext = Extent(minX, maxX, minY, maxY);
 				ext.MoveTo(xCentOld, yCentOld);
 
-				this->SetExtentsCore(ext, true, false, false);
+				this->SetExtentsCore(ext, logPrevious, false, false);
 				_currentZoom = zoom;
 				AdjustZoom(zoom);
 				return VARIANT_TRUE;
@@ -181,7 +189,7 @@ void CMapView::AdjustZoom(int zoom)
 		_extents.right = xTemp + w / 2.0;
 		_extents.top = yTemp - h / 2.0;
 		_extents.bottom = yTemp + h / 2.0;
-		this->SetExtentsCore(_extents, true, false, false);
+		this->SetExtentsCore(_extents, false, false, false);
 	}
 	
 	size = GetCurrentTileSize(zoom);
@@ -238,12 +246,17 @@ void CMapView::SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn )
 // ****************************************************
 // adjustZoom - when we use discrete zoom levels the extents should be adjusted
 // unless the call is from ZoomToTileLevel, so it's already done
-void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool mapSizeChanged /*= false*/, bool adjustZoom /*= true*/ )
+void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapSizeChanged /*= false*/, bool adjustZoom /*= true*/ )
 {
 	_knownExtents = keNone;
 	_lastRedrawTime = 0.0f;
 
-	this->CalculateVisibleExtents(ext, logExtents, mapSizeChanged);
+	if (logExtents)
+	{
+		LogPrevExtent();
+	}
+
+	this->CalculateVisibleExtents(ext, mapSizeChanged);
 
 	if (ForceDiscreteZoom() && adjustZoom )
 	{
@@ -253,7 +266,7 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= false*/, bool map
 		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
 		int zoom;
 		_tiles->get_CurrentZoom(&zoom);
-		this->ZoomToTileLevel(zoom);
+		this->ZoomToTileLevelCore(zoom, false);
 		_tiles->get_CurrentZoom(&zoom);
 		return;
 	}
@@ -751,9 +764,6 @@ void CMapView::ZoomToMaxExtents()
 {
 	bool extentsSet = false;
 
-	if( _activeLayers.size() > 0 )
-		LogPrevExtent();
-
 	long endcondition = _activeLayers.size();
 	for(int i = 0; i < endcondition; i++ )
 	{
@@ -806,13 +816,9 @@ void CMapView::ZoomToMaxExtents()
 // ****************************************************************
 //		ZoomToMaxVisibleExtents()
 // ****************************************************************
-//Rob Cairns - this is a suggested fix for gdal images
 void CMapView::ZoomToMaxVisibleExtents(void)
 {
 	bool extentsSet = false;
-
-	if( _activeLayers.size() > 0 )
-		LogPrevExtent();
 
 	register int i;
 	long endcondition = _activeLayers.size();
@@ -872,7 +878,6 @@ void CMapView::ZoomToLayer(long LayerHandle)
 	{	
 		this->AdjustLayerExtents(LayerHandle);
 		
-		this->LogPrevExtent();
 		Layer * l = _allLayers[LayerHandle];
 		SetExtentsWithPadding(l->extents);
 	}
@@ -932,7 +937,6 @@ VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_B
 		return VARIANT_FALSE;
 	}
 
-	this->LogPrevExtent();
 	SetExtentsWithPadding(extNew);
 	return VARIANT_TRUE;
 }
@@ -943,11 +947,8 @@ VARIANT_BOOL CMapView::ZoomToShape2(long LayerHandle, long ShapeIndex, VARIANT_B
 // ***************************************************************
 //		CalculateVisibleExtents()
 // ***************************************************************
-void CMapView::CalculateVisibleExtents( Extent e, bool LogPrev, bool MapSizeChanged )
+void CMapView::CalculateVisibleExtents( Extent e, bool MapSizeChanged )
 {
-	if( LogPrev == true )
-		LogPrevExtent();
-
 	double left = MIN( e.left, e.right );
 	double right = MAX( e.left, e.right );
 	double bottom = MIN( e.bottom, e.top );
@@ -1243,8 +1244,6 @@ long CMapView::ZoomToPrev()
 	}
 	return _prevExtents.size();
 }
-
-
 
 // ****************************************************************
 //		ZoomToWorld()

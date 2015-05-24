@@ -83,7 +83,7 @@ void CMapView::TurnOffPanning()
 			_dragging.Start = CPoint(0,0);
 			_dragging.Move = CPoint(0,0);
 
-			this->SetExtentsCore(this->_extents, false);
+			this->SetExtentsCore(_extents, false);
 		}
 	}
 }
@@ -629,7 +629,10 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 		case cmPan:
 			{
-				this->LogPrevExtent();
+				// User since can just release button without moving but extents are changed during dragging. 
+				// So we have to capture them here, and remove from list on MouseUp if no panning was made.
+				LogPrevExtent();		
+
 				this->SetCapture();
 				_dragging.Operation = DragPanning;
 			}
@@ -754,7 +757,14 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 				if (!_spacePressed)
 					DisplayPanningInertia(point);
 
-				this->SetExtentsCore(this->_extents, false);
+				SetExtentsCore(_extents, false);
+
+				if (!_panningExtentsChanged && _prevExtents.size() > 0)
+				{
+					_prevExtents.pop_back();		// no panning took place, but we had to log initial extents
+				}
+
+				_panningExtentsChanged = false;
 
 				ClearPanningList();
 
@@ -1268,6 +1278,8 @@ void CMapView::DoPanning(CPoint point)
 	_extents.bottom = _clickDownExtents.bottom + yAmount;
 	_extents.top = _clickDownExtents.top + yAmount;
 	
+	_panningExtentsChanged = true;
+	
 	if (_useSeamlessPan)
 	{
 		// complete redraw; bad for performance, especially for large layers
@@ -1380,12 +1392,13 @@ void CMapView::OnMButtonUp(UINT nFlags, CPoint point)
 	double halfxRange = (_extents.right - _extents.left)*.5;
 	double halfyRange = (_extents.top - _extents.bottom)*.5;
 
-	_extents.left = zx - halfxRange;
-	_extents.right = zx + halfxRange;
-	_extents.bottom = zy - halfyRange;
-	_extents.top = zy + halfyRange;
+	Extent extents;
+	extents.left = zx - halfxRange;
+	extents.right = zx + halfxRange;
+	extents.bottom = zy - halfyRange;
+	extents.top = zy + halfyRange;
 
-	this->SetExtentsCore(_extents);
+	this->SetExtentsCore(extents);
 }
 #pragma endregion
 

@@ -270,22 +270,23 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	MeasuringHelper::Deserialize(GetEditorBase(), nodeEditor);
 
 	// extents
+	Extent extents;
 	s = CPLGetXMLValue( nodeState, "ExtentsLeft", NULL );
-	if (s != "") _extents.left = Utility::atof_custom(s);
+	if (s != "") extents.left = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsRight", NULL );
-	if (s != "") _extents.right = Utility::atof_custom(s);
+	if (s != "") extents.right = Utility::atof_custom(s);
 	
 	s = CPLGetXMLValue( nodeState, "ExtentsBottom", NULL );
-	if (s != "") _extents.bottom = Utility::atof_custom(s);
+	if (s != "") extents.bottom = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsTop", NULL );
-	if (s != "") _extents.top = Utility::atof_custom(s);
+	if (s != "") extents.top = Utility::atof_custom(s);
 
 	s = CPLGetXMLValue( nodeState, "ExtentsPad", NULL );
 	if (s != "") m_extentPad = Utility::atof_custom(s);
 
-	this->SetExtentsCore(_extents);
+	this->SetExtentsCore(extents);
 
 	return true;
 }

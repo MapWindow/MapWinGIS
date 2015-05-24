@@ -772,6 +772,7 @@ public:
 	TileBuffer _tileBuffer;
 	Extent _extents;
 	std::deque<Extent> _prevExtents;
+	bool _panningExtentsChanged;
 
 	// window properties
 	long _viewWidth;
@@ -1024,8 +1025,8 @@ private:
 	// -------------------------------------------
 	//	Extents and projection
 	// -------------------------------------------
-	void CalculateVisibleExtents( Extent e, bool LogPrev = true, bool MapSizeChanged = false);
-	void SetExtentsCore(Extent ext, bool logExtents = false, bool mapSizeChanged = false, bool adjustZoom = true);
+	void CalculateVisibleExtents( Extent e, bool MapSizeChanged = false);
+	void SetExtentsCore(Extent ext, bool logExtents = true, bool mapSizeChanged = false, bool adjustZoom = true);
 	void SetTempExtents(double left, double right, double top, double bottom, long Width, long Height);
 	void RestoreExtents();
 	void SetNewExtentsWithForcedZooming( Extent ext, bool zoomIn );
@@ -1184,6 +1185,7 @@ private:
 	void RenderSelectedPixels(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
 	void RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
 	void UpdateSelectedPixels(vector<long>& handles, bool& hasPolygons, bool& hasPoints);
+	VARIANT_BOOL ZoomToTileLevelCore(int zoom, bool logPrevious);
 #pragma endregion
 
 public:
@@ -1214,6 +1216,7 @@ public:
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
 	
+
 protected:
 
 };
