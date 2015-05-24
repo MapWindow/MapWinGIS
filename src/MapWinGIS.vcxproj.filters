@@ -852,6 +852,9 @@
     <ClInclude Include="Structures\SelectedItem.h">
       <Filter>Structures</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\GdalDriverManager.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1815,6 +1818,9 @@
     <ClCompile Include="Control\Map_Identifier.cpp">
       <Filter>Control</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\GdalDriverManager.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -2012,6 +2018,9 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="MapWinGIS.def" />
+    <None Include="COM classes\GdalDriverManager.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapWinGIS.rc" />

@@ -74,3 +74,22 @@ STDMETHODIMP CGdalDriver::get_MetadataItem(int metadataIndex, BSTR* retVal)
 	*retVal = A2BSTR("");
 	return S_OK;
 }
+
+// *************************************************************
+//		get_Description()
+// *************************************************************
+STDMETHODIMP CGdalDriver::get_Description(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	USES_CONVERSION;
+
+	if (CheckState())
+	{
+		CString s =_driver->GetDescription();
+		*pVal = A2BSTR(s);
+		return S_OK;
+	}
+
+	*pVal = A2BSTR("");
+	return S_OK;
+}

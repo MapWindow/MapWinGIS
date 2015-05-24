@@ -98,6 +98,9 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idGdalDriver:
 			result = CoCreateInstance(CLSID_GdalDriver, NULL, CLSCTX_INPROC_SERVER, IID_IGdalDriver, (void**)&val);
 			break;
+		case tkInterface::idGdalDriverManager:
+			result = CoCreateInstance(CLSID_GdalDriverManager, NULL, CLSCTX_INPROC_SERVER, IID_IGdalDriverManager, (void**)&val);
+			break;
 		case tkInterface::idGdalRasterBand:
 			result = CoCreateInstance(CLSID_GdalRasterBand, NULL, CLSCTX_INPROC_SERVER, IID_IGdalRasterBand, (void**)&val);
 			break;

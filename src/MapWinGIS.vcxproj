@@ -210,6 +210,7 @@
     <ClInclude Include="COM classes\DrawingRectangle.h" />
     <ClInclude Include="COM classes\GdalDataset.h" />
     <ClInclude Include="COM classes\GdalDriver.h" />
+    <ClInclude Include="COM classes\GdalDriverManager.h" />
     <ClInclude Include="COM classes\GdalRasterBand.h" />
     <ClInclude Include="COM classes\Histogram.h" />
     <ClInclude Include="COM classes\Identifier.h" />
@@ -468,6 +469,7 @@
     <ClCompile Include="COM classes\DrawingRectangle.cpp" />
     <ClCompile Include="COM classes\GdalDataset.cpp" />
     <ClCompile Include="COM classes\GdalDriver.cpp" />
+    <ClCompile Include="COM classes\GdalDriverManager.cpp" />
     <ClCompile Include="COM classes\GdalRasterBand.cpp" />
     <ClCompile Include="COM classes\Histogram.cpp" />
     <ClCompile Include="COM classes\Identifier.cpp" />
@@ -809,6 +811,7 @@
     <None Include="COM classes\FileManager.rgs" />
     <None Include="COM classes\GdalDataset.rgs" />
     <None Include="COM classes\GdalDriver.rgs" />
+    <None Include="COM classes\GdalDriverManager.rgs" />
     <None Include="COM classes\GdalRasterBand.rgs" />
     <None Include="COM classes\GeoProjection.rgs" />
     <None Include="COM classes\GlobalSettings.rgs" />

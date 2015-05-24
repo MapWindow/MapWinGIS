@@ -74,6 +74,7 @@ IDR_GDALRASTERBAND      REGISTRY                "COM Classes/GdalRasterBand.rgs"
 IDR_HISTOGRAM           REGISTRY                "COM Classes/Histogram.rgs"
 IDR_GDALDATASET         REGISTRY                "COM Classes/GdalDataset.rgs"
 IDR_GDALDRIVER          REGISTRY                "COM Classes/GdalDriver.rgs"
+IDR_GDALDRIVERMANAGER   REGISTRY                "COM Classes/GdalDriverManager.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

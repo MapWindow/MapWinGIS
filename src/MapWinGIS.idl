@@ -61,6 +61,7 @@ interface IGdalRasterBand;
 interface IHistogram;
 interface IGdalDataset;
 interface IGdalDriver;
+interface IGdalDriverManager;
 
 /************************** tkLayerType Enumeration **********************/
 typedef
@@ -1102,6 +1103,7 @@ enum tkScalebarUnits
 		idHistogram = 46,
 		idGdalDataset = 47,
 		idGdalDriver = 48,
+		idGdalDriverManager = 49,
 	} tkInterface;	
 
 	typedef		
@@ -6148,8 +6150,21 @@ interface IGdalDriver : IDispatch {
 	[propget, id(1)] HRESULT Metadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
 	[propget, id(2)] HRESULT MetadataCount([out, retval]int* retVal);
 	[propget, id(3)] HRESULT MetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
+	[propget, id(4)] HRESULT Description([out, retval] BSTR* pVal);
 };
 
+[
+	object,
+	uuid(E486B8F1-400F-4790-8574-7427906C664B),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IGdalDriverManager : IDispatch{
+	[propget, id(1)] HRESULT DriverCount([out, retval] LONG* pVal);
+	[propget, id(2)] HRESULT Driver([in] long driverIndex, [out, retval] IGdalDriver** pVal);
+	[propget, id(3)] HRESULT DriverByName([in] BSTR driverName, [out, retval] IGdalDriver** pVal);
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -7121,5 +7136,12 @@ library MapWinGIS
 	coclass GdalDriver
 	{
 		[default] interface IGdalDriver;
+	};
+	[
+		uuid(660E3B2D-D844-4BB3-9050-1D29EE9527B6)		
+	]
+	coclass GdalDriverManager
+	{
+		[default] interface IGdalDriverManager;
 	};
 };
