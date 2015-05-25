@@ -418,8 +418,47 @@ CStringA GdalHelper::GetMetadataNameString(tkGdalDriverMetadata metadata)
 		case dmdVIRTUALIO: return  "DCAP_VIRTUALIO";
 		case dmdLAYER_CREATIONOPTIONLIST: return  "DS_LAYER_CREATIONOPTIONLIST";
 		case dmdOGR_DRIVER: return  "OGR_DRIVER";
+		case dmdRaster: return  "DCAP_RASTER";
+		case dmdVector: return  "DCAP_VECTOR";
+		case dmdNotNullFields: return  "DCAP_NOTNULL_FIELDS";
+		case dmdDefaultFields: return  "DCAP_DEFAULT_FIELDS";
+		case dmdNotNullGeometries: return  "DCAP_NOTNULL_GEOMFIELDS";
+		case dmCreationFieldDataTypes: return  "DMD_CREATIONFIELDDATATYPES";
 	}
+
 	return "";
+}
+
+// *******************************************************
+//		GetMetadataType()
+// *******************************************************
+tkGdalDriverMetadata GdalHelper::GetMetadataType(CStringA tag)
+{
+	tag = tag.MakeUpper();
+	
+	if (tag.Compare("DMD_LONGNAME") == 0) return dmdLONGNAME;
+	if (tag.Compare("DMD_HELPTOPIC") == 0) return dmdHELPTOPIC;
+	if (tag.Compare("DMD_MIMETYPE") == 0) return dmdMIMETYPE;
+	if (tag.Compare("DMD_EXTENSION") == 0) return dmdEXTENSION;
+	if (tag.Compare("DMD_EXTENSIONS") == 0) return dmdEXTENSIONS;
+	if (tag.Compare("DMD_CREATIONOPTIONLIST") == 0) return dmdCREATIONOPTIONLIST;
+	if (tag.Compare("DMD_OPENOPTIONLIST") == 0) return dmdOPENOPTIONLIST;
+	if (tag.Compare("DMD_CREATIONDATATYPES") == 0) return dmdCREATIONDATATYPES;
+	if (tag.Compare("DMD_SUBDATASETS") == 0) return dmdSUBDATASETS;
+	if (tag.Compare("DCAP_OPEN") == 0) return dmdOPEN;
+	if (tag.Compare("DCAP_CREATE") == 0) return dmdCREATE;
+	if (tag.Compare("DCAP_CREATECOPY") == 0) return dmdCREATECOPY;
+	if (tag.Compare("DCAP_VIRTUALIO") == 0) return dmdVIRTUALIO;
+	if (tag.Compare("DS_LAYER_CREATIONOPTIONLIST") == 0) return dmdLAYER_CREATIONOPTIONLIST;
+	if (tag.Compare("OGR_DRIVER") == 0) return dmdOGR_DRIVER;
+	if (tag.Compare("DCAP_RASTER") == 0) return dmdRaster;
+	if (tag.Compare("DCAP_VECTOR") == 0) return dmdVector;
+	if (tag.Compare("DCAP_NOTNULL_FIELDS") == 0) return dmdNotNullFields;
+	if (tag.Compare("DCAP_DEFAULT_FIELDS") == 0) return dmdDefaultFields;
+	if (tag.Compare("DCAP_NOTNULL_GEOMFIELDS") == 0) return dmdNotNullGeometries;
+	if (tag.Compare("DMD_CREATIONFIELDDATATYPES") == 0) return dmCreationFieldDataTypes;
+
+	return dmdUnknown;
 }
 
 // ******************************************************

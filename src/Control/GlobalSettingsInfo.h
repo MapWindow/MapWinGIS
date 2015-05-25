@@ -177,7 +177,13 @@ struct GlobalSettingsInfo
 		shortUnitStrings[lsAcres] = L"ac";
 		shortUnitStrings[lsSquareMiles] = L"sq.mi";
 	}
-	
+
+	BSTR CreateEmptyBSTR()
+	{
+		USES_CONVERSION;
+		return A2BSTR("");
+	}
+
 	// *******************************************************
 	//		GetTiffCompression()
 	// *******************************************************

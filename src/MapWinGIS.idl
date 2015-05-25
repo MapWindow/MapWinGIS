@@ -444,6 +444,7 @@ typedef
 ]
 enum tkGdalDriverMetadata
 {
+	dmdUnknown = -1,
 	dmdLONGNAME = 0,
 	dmdHELPTOPIC = 1,
 	dmdMIMETYPE = 2,
@@ -459,6 +460,12 @@ enum tkGdalDriverMetadata
 	dmdVIRTUALIO  = 12,
 	dmdLAYER_CREATIONOPTIONLIST = 13,
 	dmdOGR_DRIVER = 14,
+	dmdRaster = 15,
+	dmdVector = 16,
+	dmdNotNullFields = 17,
+	dmdDefaultFields = 18,
+	dmdNotNullGeometries = 19,
+	dmCreationFieldDataTypes = 20,
 } tkGdalDriverMetadata;
 
 /************************** tkOgrSourceType Enumeration **********************/
@@ -6150,7 +6157,12 @@ interface IGdalDriver : IDispatch {
 	[propget, id(1)] HRESULT Metadata([in]tkGdalDriverMetadata metadata, [out, retval]BSTR* retVal);
 	[propget, id(2)] HRESULT MetadataCount([out, retval]int* retVal);
 	[propget, id(3)] HRESULT MetadataItem([in]int metadataIndex, [out, retval]BSTR* retVal);
-	[propget, id(4)] HRESULT Description([out, retval] BSTR* pVal);
+	[propget, id(4)] HRESULT Name([out, retval] BSTR* pVal);
+	[propget, id(5)] HRESULT IsVector([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(6)] HRESULT IsRaster([out, retval] VARIANT_BOOL* pVal);
+	[propget, id(7)] HRESULT MetadataItemType([in] int metadataIndex, [out, retval] tkGdalDriverMetadata* pVal);
+	[propget, id(8)] HRESULT MetadataItemValue([in] int metadataIndex, [out, retval] BSTR* pVal);
+	[propget, id(9)] HRESULT MetadataItemKey([in] int metadataIndex, [out, retval] BSTR* pVal);
 };
 
 [
