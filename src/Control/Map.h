@@ -540,8 +540,8 @@ public:
 	afx_msg void DrawPolygonEx(LONG LayerHandle, VARIANT* xPoints, VARIANT* yPoints, LONG numPoints, OLE_COLOR color, VARIANT_BOOL fill);
 	afx_msg void DrawWideCircleEx(LONG LayerHandle, double x, double y, double radius, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
 	afx_msg void DrawWidePolygonEx(LONG LayerHandle, VARIANT *xPoints, VARIANT *yPoints, long numPoints, OLE_COLOR color, VARIANT_BOOL fill, short OutlineWidth);
-	afx_msg BSTR SerializeLayerOptions(LONG LayerHandle);
-	afx_msg VARIANT_BOOL DeserializeLayerOptions(LONG LayerHandle, LPCTSTR newVal);
+	afx_msg BSTR SerializeLayer(LONG LayerHandle);
+	afx_msg VARIANT_BOOL DeserializeLayer(LONG LayerHandle, LPCTSTR newVal);
 	afx_msg IDispatch* SnapShot2(LONG ClippingLayerNbr, DOUBLE Zoom, long pWidth);
 	afx_msg IDispatch* SnapShot3(double left, double right, double top, double bottom, long Width);
 	afx_msg VARIANT_BOOL SetImageLayerColorScheme(LONG LayerHandle, IDispatch* ColorScheme);
