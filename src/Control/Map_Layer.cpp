@@ -1405,7 +1405,7 @@ int CMapView::DeserializeLayerCore(CPLXMLNode* node, CStringW ProjectName, bool 
 //		SerializeLayer()
 // ********************************************************
 // Filename isn't saved
-BSTR CMapView::SerializeLayerOptions(LONG LayerHandle)
+BSTR CMapView::SerializeLayer(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
@@ -1540,10 +1540,10 @@ CPLXMLNode* CMapView::SerializeLayerCore(LONG LayerHandle, CStringW Filename)
 }
 
 // ********************************************************
-//		DeserializeLayerOptions()
+//		DeserializeLayer()
 // ********************************************************
 // Restores options, but doesn't add layer
-VARIANT_BOOL CMapView::DeserializeLayerOptions(LONG LayerHandle, LPCTSTR newVal)
+VARIANT_BOOL CMapView::DeserializeLayer(LONG LayerHandle, LPCTSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	USES_CONVERSION;
