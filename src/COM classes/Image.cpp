@@ -2675,12 +2675,12 @@ STDMETHODIMP CImageClass::get_NumOverviews(int* retval)
 
 	*retval = 0;
 
-	if (_gdal)
+	if (_raster)
 	{
 		GDALRasterBand* band = _raster->GetBand(1);
 		if (band)
 		{
-			 *retval = band->GetOverviewCount();
+			*retval = RasterBandHelper::GetOverviewCount(band);
 		}
 	}
 

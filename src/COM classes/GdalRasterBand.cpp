@@ -104,7 +104,7 @@ STDMETHODIMP CGdalRasterBand::get_OverviewCount(LONG* pVal)
 
 	if (!CheckBand()) return S_OK;
 
-	*pVal = _band->GetOverviewCount();
+	*pVal = RasterBandHelper::GetOverviewCount(_band);
 
 	return S_OK;
 }
@@ -455,7 +455,7 @@ STDMETHODIMP CGdalRasterBand::get_Overview(LONG overviewIndex, IGdalRasterBand**
 	*pVal = NULL;
 	if (!CheckBand()) return S_OK;
 
-	int count = _band->GetOverviewCount();
+	int count = RasterBandHelper::GetOverviewCount(_band);
 
 	// overview indices are 0 based
 	if (overviewIndex < 0 || overviewIndex >= count)
@@ -464,7 +464,10 @@ STDMETHODIMP CGdalRasterBand::get_Overview(LONG overviewIndex, IGdalRasterBand**
 		return S_OK;
 	}
 
+	m_globalSettings.SetGdalUtf8(true);
 	GDALRasterBand* overview = _band->GetOverview(overviewIndex);
+	m_globalSettings.SetGdalUtf8(false);
+
 	if (overview)
 	{
 		ComHelper::CreateInstance(idGdalRasterBand, (IDispatch**)pVal);

@@ -181,3 +181,18 @@ GDALDataType RasterBandHelper::SimplifyDataType(GDALDataType dataType)
 			return GDT_Int32;
 	}
 }
+
+// ***************************************************************
+//		GetOverviewCount()
+// ***************************************************************
+int RasterBandHelper::GetOverviewCount(GDALRasterBand* band)
+{
+	if (!band) return 0;
+
+	m_globalSettings.SetGdalUtf8(true);
+	int count = band->GetOverviewCount();
+	m_globalSettings.SetGdalUtf8(false);
+
+	return count;
+}
+

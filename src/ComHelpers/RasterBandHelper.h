@@ -12,6 +12,7 @@ public:
 	static GDALDataType GetSimpleDataType(GDALRasterBand* band);
 	static GDALDataType SimplifyDataType(GDALDataType dataType);
 	static bool AllocateBuffer(GDALDataType dataType, int width, int height, void** buffer);
+	static int GetOverviewCount(GDALRasterBand* band);
 
 	template <typename T>
 	static bool GetUniqueValues(GDALRasterBand* band, GDALDataType dataType, set<T>& values, int maxCount, VARIANT_BOOL* clipped)

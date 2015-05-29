@@ -4,6 +4,7 @@
 #include "CallbackHelper.h"
 #include "windows.h"
 #include "GdalDriverHelper.h"
+#include "RasterBandHelper.h"
 
 // **************************************************************
 //		OpenOgrDatasetA
@@ -210,8 +211,13 @@ bool GdalHelper::ClearOverviews(GDALDataset* dt, ICallback* cb)
 {
 	CallbackParams params(cb, "Clearing overviews");
 
+	m_globalSettings.SetGdalUtf8(true);
+
 	bool success = dt->BuildOverviews("NONE", 0, 0, 0, NULL, 
 			(GDALProgressFunc)GDALProgressCallback, &params) == CPLErr::CE_None;
+
+	m_globalSettings.SetGdalUtf8(false);
+
 	return success;
 }
 
@@ -258,12 +264,13 @@ GdalSupport GdalHelper::TryOpenWithGdal(CStringW filename)
 // *******************************************************
 bool GdalHelper::HasOverviews(GDALDataset* dt) 
 {
+	
 	if (dt) {
 		GDALRasterBand* band = dt->GetRasterBand(1);
 		if (band)
 		{
-			int numOverviews = band->GetOverviewCount();
-			return numOverviews > 0;
+			int count = RasterBandHelper::GetOverviewCount(band);
+			return count > 0;
 		}
 	}
 	return false;
@@ -388,9 +395,13 @@ bool GdalHelper::BuildOverviewsCore(GDALDataset* dt, tkGDALResamplingMethod resa
 
 	CallbackParams params(callback, "Building overviews");
 
+	m_globalSettings.SetGdalUtf8(true);
+
 	bool result = dt->BuildOverviews(pszResampling, numOverviews, overviewList, 0, NULL, 
 		(GDALProgressFunc)GDALProgressCallback, &params) == CE_None;
-		
+
+	m_globalSettings.SetGdalUtf8(false);
+
 	CallbackHelper::ProgressCompleted(callback);
 
 	return result;
