@@ -2266,8 +2266,10 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		// ----------------------------------------------------
 		// serialization of category indices
 		// ----------------------------------------------------
-		bool serializeCategories;
-		for(size_t i = 0; i < _shapeData.size(); i++) {
+		bool serializeCategories = false;
+
+		for(size_t i = 0; i < _shapeData.size(); i++) 
+		{
 			if (_shapeData[i]->category != -1) {
 				serializeCategories = true;
 			}
@@ -2282,13 +2284,13 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 				temp.Format("%d,", _shapeData[i]->category);
 				s +=  temp;
 			}
-		}
-		
-		// when there are no indices assigned, write an empty node with Count = 0;
-		// to signal, that categories must not be applied automatically (behavior for older versions)
-		CPLXMLNode* nodeCats = CPLCreateXMLElementAndValue(psTree, "CategoryIndices", s.GetBuffer());
-		if (nodeCats) {
-			Utility::CPLCreateXMLAttributeAndValue(nodeCats, "Count", CPLString().Printf("%d", serializeCategories ? _shapeData.size() : 0));
+
+			// when there are no indices assigned, write an empty node with Count = 0;
+			// to signal, that categories must not be applied automatically (behavior for older versions)
+			CPLXMLNode* nodeCats = CPLCreateXMLElementAndValue(psTree, "CategoryIndices", s.GetBuffer());
+			if (nodeCats) {
+				Utility::CPLCreateXMLAttributeAndValue(nodeCats, "Count", CPLString().Printf("%d", serializeCategories ? _shapeData.size() : 0));
+			}
 		}
 
 		// ----------------------------------------------------
