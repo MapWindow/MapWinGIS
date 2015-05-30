@@ -34,6 +34,7 @@ public:
 	{
 		_key = SysAllocString(L"");
 		_name = SysAllocString(L"");
+		_alias = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_width = 10;
@@ -41,6 +42,7 @@ public:
 		_type = STRING_FIELD;
 		_isUpdated = false;
 		_table = NULL;
+		_visible = VARIANT_TRUE;
 		gReferenceCounter.AddRef(tkInterface::idField);
 	}
 
@@ -48,6 +50,7 @@ public:
 	{
 		::SysFreeString(_key);
 		::SysFreeString(_name);
+		::SysFreeString(_alias);
 
 		if( _globalCallback )
 			_globalCallback->Release();
@@ -93,7 +96,11 @@ public:
 	STDMETHOD(get_Name)(/*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(put_Name)(/*[in]*/ BSTR newVal);
 	STDMETHOD(Clone)(/*[out, retval]*/ IField** retVal);
-	
+	STDMETHOD(get_Visible)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
+	STDMETHOD(get_Alias)(BSTR* pVal);
+	STDMETHOD(put_Alias)(BSTR newVal);
+
 	void ErrorMessage(long ErrorCode);
 	ITable* GetTable() { return _table; }
 	void SetTable(ITable* table) { _table = table; }
@@ -106,13 +113,16 @@ private:
 	FieldType _type;
 	BSTR _key;
 	BSTR _name;
+	BSTR _alias;
 	long _lastErrorCode;
 	long _precision;
 	long _width;
 	bool _isUpdated;
+	VARIANT_BOOL _visible;
 
 private:
 	bool CheckTableEditingState();
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Field), CField)

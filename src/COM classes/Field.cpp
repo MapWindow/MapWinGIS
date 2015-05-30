@@ -241,3 +241,47 @@ STDMETHODIMP CField::Clone(/*[out, retval]*/ IField** retVal)
 	*retVal = fld;
 	return S_OK;
 }
+
+// **************************************************************
+//		Visible()
+// **************************************************************
+STDMETHODIMP CField::get_Visible(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _visible;
+
+	return S_OK;
+}
+
+STDMETHODIMP CField::put_Visible(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_visible = newVal;
+
+	return S_OK;
+}
+
+// **************************************************************
+//		Alias()
+// **************************************************************
+STDMETHODIMP CField::get_Alias(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_alias);
+
+	return S_OK;
+}
+
+STDMETHODIMP CField::put_Alias(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SysFreeString(_alias);
+	_alias = OLE2BSTR(newVal);
+
+	return S_OK;
+}

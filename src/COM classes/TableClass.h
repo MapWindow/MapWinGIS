@@ -208,9 +208,12 @@ private:
 	long GetFieldPrecision(long fieldIndex);
 	inline void ErrorMessage(long ErrorCode);
 	std::vector<CString>* get_FieldNames();
+	void RestoreJoins(CPLXMLNode* node);
+	void RestoreFields(CPLXMLNode* node);
+	void ClearFieldCustomizations();
 
 public:	
-	bool DeserializeCore(CPLXMLNode* node);
+	void DeserializeCore(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
 	void CloseUnderlyingFile(); 
 	TableRow* CloneTableRow(int rowIndex);
@@ -248,7 +251,7 @@ public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
-	
+
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

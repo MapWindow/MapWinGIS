@@ -27,6 +27,7 @@
 #include "JenksBreaks.h"
 #include "Field.h"
 #include "TableHelper.h"
+#include "FieldHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -3159,10 +3160,38 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	USES_CONVERSION;
+	
+	CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
+
+	CPLXMLNode* psFields = CPLCreateXMLNode(psTree, CXT_Element, "Fields");
+	if (psFields)
+	{
+		for (size_t i = 0; i < _fields.size(); i++)
+		{
+			IField* fld = _fields[i]->field;
+			if (fld && FieldHelper::NeedsSerialization(fld))
+			{
+				CPLXMLNode* nodeField = CPLCreateXMLNode(psFields, CXT_Element, "Field");
+
+				VARIANT_BOOL visible;
+				CComBSTR name, alias;
+				fld->get_Name(&name);
+				fld->get_Alias(&alias);
+				fld->get_Visible(&visible);
+
+				CStringA utf8Name = Utility::ConvertToUtf8(OLE2W(name));
+				CStringA utf8Alias = Utility::ConvertToUtf8(OLE2W(alias));
+
+				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Name", CPLString().Printf(utf8Name));
+				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Alias", CPLString().Printf(utf8Alias));
+				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Visible", CPLString().Printf("%d", (int)visible));
+				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Index", CPLString().Printf("%d", i));
+			}
+		}
+	}
+
 	if (_joins.size() > 0)
 	{
-		CPLXMLNode* psTree = CPLCreateXMLNode( NULL, CXT_Element, ElementName);
-
 		CPLXMLNode* psJoins = CPLCreateXMLNode(psTree, CXT_Element, "Joins");
 		if (psJoins)
 		{
@@ -3171,112 +3200,193 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				CStringW name = _joins[i]->filename;
 				if (this->_filename.GetLength() > 0)
 				{
-					
 					name = Utility::GetRelativePath(this->_filename, name);
 				}
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO!!!: use utf-8
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO: use utf-8
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Options", CPLString().Printf(_joins[i]->options));
 			}
 		}
-		return psTree;
 	}
-	return NULL;
+
+	return psTree;
 }
 
 // ********************************************************
 //     DeserializeCore()
 // ********************************************************
-bool CTableClass::DeserializeCore(CPLXMLNode* node)
+void CTableClass::DeserializeCore(CPLXMLNode* node)
 {
-	if (!node)
-		return false;
+	if (!node) return;
+
+	ClearFieldCustomizations();
+
+	CPLXMLNode* nodeFields = CPLGetXMLNode(node, "Fields");
+	if (nodeFields)
+	{
+		RestoreFields(nodeFields);
+	}
 
 	this->StopAllJoins();	// joins are stored in the serialized state, so they would be replicated here
 
-	node = CPLGetXMLNode(node, "Joins");
-	if (node)
+	CPLXMLNode* nodeJoins = CPLGetXMLNode(node, "Joins");
+	if (nodeJoins)
 	{
-		CStringW folderName = "";
-		wchar_t* cwd = NULL;
-		if (this->_filename != "")
+		RestoreJoins(nodeJoins);
+	}
+}
+
+// ********************************************************
+//     ClearFieldCustomizations()
+// ********************************************************
+void CTableClass::ClearFieldCustomizations()
+{
+	for (size_t i = 0; i < _fields.size(); i++)
+	{
+		IField* fld = _fields[i]->field;
+		fld->put_Visible(VARIANT_TRUE);
+		fld->put_Alias(m_globalSettings.emptyBstr);
+	}
+}
+
+// ********************************************************
+//     RestoreFields()
+// ********************************************************
+void CTableClass::RestoreFields(CPLXMLNode* node)
+{
+	node = node->psChild;
+	while (node)
+	{
+		if (strcmp(node->pszValue, "Field") == 0)
 		{
-			cwd = new wchar_t[4096];
-			_wgetcwd(cwd,4096);
-			
-			folderName = Utility::GetFolderFromPath(this->_filename);
-			_wchdir(folderName);
-		}
-		
-		node = node->psChild;
-		while (node)
-		{
-			if (strcmp(node->pszValue, "Join") == 0)
+			long index = -1;
+
+			CString s = CPLGetXMLValue(node, "Index", "");
+			if(s != "") index = atoi(s);
+
+			if (index >= 0 && index < (long)_fields.size())
 			{
-				CString filename = CPLGetXMLValue( node, "Filename", NULL );		// TODO!!!: use utf-8
-				CString fieldTo = CPLGetXMLValue( node, "FieldTo", NULL );
-				CString fieldFrom = CPLGetXMLValue( node, "FieldFrom", NULL );
-				CString fields = CPLGetXMLValue( node, "Fields", NULL );
-				CString options = CPLGetXMLValue( node, "Options", NULL );
-				
-				if (filename.GetLength() > 0 && fieldTo.GetLength() > 0 && fieldFrom.GetLength() > 0)
+				s = CPLGetXMLValue(node, "Name", "");
+				if (s != "") 
 				{
-					// ask client to provide the data once more
-					VARIANT_BOOL vb;
-					CComPtr<ITable> tableToFill = NULL;
-					ComHelper::CreateInstance(idTable, (IDispatch**)&tableToFill);
-					
-					CComBSTR bstrFilename(filename);
-					if (filename.GetLength() > 4 && filename.Right(4) == ".dbf")
-					{
-						tableToFill->Open(bstrFilename, NULL, &vb);
-					}
-					else
-					{
-						// let the client handle all the rest formats
-						tableToFill->CreateNew(m_globalSettings.emptyBstr, &vb);
-						
-						CComBSTR bstrFields(fields);
-						CComBSTR bstrOptions(options);
-						Fire_OnUpdateJoin(bstrFilename, bstrFields, bstrOptions, tableToFill);
-					}
-					
-					long numRows, numCols;
-					tableToFill->get_NumRows(&numRows);
-					tableToFill->get_NumFields(&numCols);
+					CStringW name = Utility::ConvertFromUtf8(s);
+					CComBSTR bstrName(name);
 
-					if (numRows > 0 && numCols > 0)
+					long index2;
+					this->get_FieldIndexByName(bstrName, &index2);
+
+					if (index == index2)
 					{
-						set<CString> fieldList;
-						int pos = 0;
-						CString field = fields.Tokenize(",", pos);
-						while (field.GetLength() != 0)
+						CComPtr<IField> fld = NULL;
+						get_Field(index, &fld);
+
+						if (fld)
 						{
-							fieldList.insert(field);
-							field = fields.Tokenize(",", pos);
-						}
+							s = CPLGetXMLValue(node, "Alias", "");
+							if (s != "")
+							{
+								CStringW alias = Utility::ConvertFromUtf8(s);
+								CComBSTR bstrAlias(alias);
+								fld->put_Alias(bstrAlias);
+							}
 
-						USES_CONVERSION;
-						this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), A2W(filename), options, fieldList);
+							CString s = CPLGetXMLValue(node, "Visible", "-1");
+							if (s != "")
+							{
+								VARIANT_BOOL visible = (VARIANT_BOOL)atoi(s);
+								fld->put_Visible(visible);
+							}
+						}
 					}
-					tableToFill->Close(&vb);
 				}
 			}
-			node = node->psNext;
 		}
-
-		if (this->_filename != "")
-		{
-			_wchdir(cwd);
-		}
-
-		return true;
+		
+		node = node->psNext;
 	}
-	return false;
+}
+
+// ********************************************************
+//     RestoreJoins()
+// ********************************************************
+void CTableClass::RestoreJoins(CPLXMLNode* node)
+{
+	CStringW folderName = "";
+	wchar_t* cwd = NULL;
+	if (this->_filename != "")
+	{
+		cwd = new wchar_t[4096];
+		_wgetcwd(cwd, 4096);
+
+		folderName = Utility::GetFolderFromPath(this->_filename);
+		_wchdir(folderName);
+	}
+
+	node = node->psChild;
+	while (node)
+	{
+		if (strcmp(node->pszValue, "Join") == 0)
+		{
+			CString filename = CPLGetXMLValue(node, "Filename", NULL);		// TODO!!!: use utf-8
+			CString fieldTo = CPLGetXMLValue(node, "FieldTo", NULL);
+			CString fieldFrom = CPLGetXMLValue(node, "FieldFrom", NULL);
+			CString fields = CPLGetXMLValue(node, "Fields", NULL);
+			CString options = CPLGetXMLValue(node, "Options", NULL);
+
+			if (filename.GetLength() > 0 && fieldTo.GetLength() > 0 && fieldFrom.GetLength() > 0)
+			{
+				// ask client to provide the data once more
+				VARIANT_BOOL vb;
+				CComPtr<ITable> tableToFill = NULL;
+				ComHelper::CreateInstance(idTable, (IDispatch**)&tableToFill);
+
+				CComBSTR bstrFilename(filename);
+				if (filename.GetLength() > 4 && filename.Right(4) == ".dbf")
+				{
+					tableToFill->Open(bstrFilename, NULL, &vb);
+				}
+				else
+				{
+					// let the client handle all the rest formats
+					tableToFill->CreateNew(m_globalSettings.emptyBstr, &vb);
+
+					CComBSTR bstrFields(fields);
+					CComBSTR bstrOptions(options);
+					Fire_OnUpdateJoin(bstrFilename, bstrFields, bstrOptions, tableToFill);
+				}
+
+				long numRows, numCols;
+				tableToFill->get_NumRows(&numRows);
+				tableToFill->get_NumFields(&numCols);
+
+				if (numRows > 0 && numCols > 0)
+				{
+					set<CString> fieldList;
+					int pos = 0;
+					CString field = fields.Tokenize(",", pos);
+					while (field.GetLength() != 0)
+					{
+						fieldList.insert(field);
+						field = fields.Tokenize(",", pos);
+					}
+
+					USES_CONVERSION;
+					this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), A2W(filename), options, fieldList);
+				}
+				tableToFill->Close(&vb);
+			}
+		}
+		node = node->psNext;
+	}
+
+	if (this->_filename != "")
+	{
+		_wchdir(cwd);
+	}
 }
 
 // ********************************************************

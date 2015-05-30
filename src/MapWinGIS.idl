@@ -4194,6 +4194,10 @@ interface IField : IDispatch{
 	[propget, id(8), helpstring("property Key")] HRESULT Key([out, retval] BSTR *pVal);
 	[propput, id(8), helpstring("property Key")] HRESULT Key([in] BSTR newVal);
 	[id(9), helpstring("method Clone")] HRESULT Clone([out, retval] IField** retVal);
+	[propget, id(10)] HRESULT Visible([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(10)] HRESULT Visible([in] VARIANT_BOOL newVal);
+	[propget, id(11)] HRESULT Alias([out, retval] BSTR* pVal);
+	[propput, id(11)] HRESULT Alias([in] BSTR newVal);
 };
 
 /****************************  ShapeNetwork Interface ***********************/

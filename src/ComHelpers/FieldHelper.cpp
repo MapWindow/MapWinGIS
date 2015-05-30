@@ -99,3 +99,24 @@ bool FieldHelper::FieldsAreEqual(IField* field1, IField* field2)
 		}
 	}
 }
+
+// ****************************************************************
+//		NeedsSerialization()
+// ****************************************************************
+bool FieldHelper::NeedsSerialization(IField* fld)
+{
+	if (!fld) return false;
+
+	VARIANT_BOOL visible;
+	fld->get_Visible(&visible);
+	if (!visible) return true;
+	
+	CComBSTR alias;
+	fld->get_Alias(&alias);
+	if (alias.Length() > 0)
+	{
+		return true;
+	}
+
+	return false;	
+}
