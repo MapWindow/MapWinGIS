@@ -5588,6 +5588,8 @@ interface IGlobalSettings : IDispatch{
 	[id(55)] HRESULT SetHereMapsApiKey([in] BSTR appId, [in] BSTR appCode);
 	[propget, id(56)] HRESULT CompressOverviews([out, retval] tkTiffCompression* pVal);
 	[propput, id(56)] HRESULT CompressOverviews([in] tkTiffCompression newVal);
+	[propget, id(57)] HRESULT GridFavorGreyscale([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(57)] HRESULT GridFavorGreyscale([in] VARIANT_BOOL newVal);
 };
 
 [

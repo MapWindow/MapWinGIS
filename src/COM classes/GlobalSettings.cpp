@@ -1013,3 +1013,24 @@ STDMETHODIMP CGlobalSettings::put_CompressOverviews(tkTiffCompression newVal)
 
 	return S_OK;
 }
+
+// ***************************************************************
+//		GridFavorGreyscale
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_GridFavorGreyscale(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.favorGreyScale ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_GridFavorGreyscale(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.favorGreyScale = newVal ? true : false;
+
+	return S_OK;
+}

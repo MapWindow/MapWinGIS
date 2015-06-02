@@ -170,6 +170,8 @@ public:
 	STDMETHOD(SetHereMapsApiKey)(BSTR appId, BSTR appCode);
 	STDMETHOD(get_CompressOverviews)(tkTiffCompression* pVal);
 	STDMETHOD(put_CompressOverviews)(tkTiffCompression newVal);
+	STDMETHOD(get_GridFavorGreyscale)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_GridFavorGreyscale)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

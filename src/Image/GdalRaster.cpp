@@ -1606,8 +1606,14 @@ IGridColorScheme* GdalRaster::GetColorSchemeForRendering()
 			return _customColorScheme;
 		}
 	}
-	
-	return _predefinedColorScheme;		// TODO: make sure that it's updated
+
+	_predefinedColorScheme->get_NumBreaks(&numBreaks);
+	if (numBreaks == 0)
+	{
+		UpdatePredefinedColorScheme();
+	}
+
+	return _predefinedColorScheme;
 }
 
 // *************************************************************

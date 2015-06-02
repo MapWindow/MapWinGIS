@@ -498,13 +498,17 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						// let's make a choice based on whether we already have color scheme
 						CComPtr<IGridColorScheme> scheme = NULL;
 						img->get_CustomColorScheme(&scheme);
-						if (scheme) 
+
+						if (scheme || !m_globalSettings.favorGreyScale)
 						{
+							PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
+							img->put_ImageColorScheme(coloring);
 							img->put_ForceSingleBandRendering(VARIANT_FALSE);
 							img->put_AllowGridRendering(tkGridRendering::grForceForAllFormats);
 						}
 						else 
 						{
+							
 							img->put_ForceSingleBandRendering(VARIANT_TRUE);
 							img->put_AllowGridRendering(grNever);
 						}
