@@ -172,7 +172,6 @@ CMapView::CMapView()
 	_moveBitmap(NULL),
 	_volatileBitmap(NULL)
 {
-	//this->GdiplusStartup();	       // commented intentionally; moved to ExitInstance; see comments below
 	Startup();
 	SetDefaults();
 }
@@ -191,8 +190,6 @@ CMapView::~CMapView()
 	ReleaseTempObjects();
 	
 	this->Shutdown();
-
-	//this->GdiplusShutdown();      // commented intentionally; moved to ExitInstance; see comments below
 }
 
 // **********************************************************************
@@ -341,7 +338,7 @@ void CMapView::SetDefaults()
 	m_sendSelectBoxDrag = FALSE;
 	m_sendSelectBoxFinal = FALSE;
 	m_sendOnDrawBackBuffer = FALSE;
-	m_extentHistory = 20;
+	_extentHistoryCount = 20;
 	m_doubleBuffer = TRUE;
 	m_zoomPercent = 0.3;
 	m_cursorMode = tkCursorMode::cmZoomIn;
@@ -378,6 +375,8 @@ void CMapView::SetDefaults()
 	_zoomBarMaxZoom = -1;
 	_showCoordinatesFormat = afDegrees;
 	_panningExtentsChanged = false;
+	_prevExtentsIndex = 0;
+	
 
 	// TODO: perhaps it's better to grab those from property exchanged (i.e. reverting only runtime changes)
 	// perhaps this call can do this:
@@ -547,7 +546,7 @@ void CMapView::DoPropExchange(CPropExchange* pPX)
 		PX_Bool( pPX, "SendMouseUp", m_sendMouseUp, FALSE );
 		PX_Bool( pPX, "SendSelectBoxDrag", m_sendSelectBoxDrag, FALSE );
 		PX_Bool( pPX, "SendSelectBoxFinal", m_sendSelectBoxFinal, FALSE );
-		PX_Long( pPX, "ExtentHistory", m_extentHistory, 20 );
+		PX_Long( pPX, "ExtentHistory", _extentHistoryCount, 20 );
 		PX_Bool( pPX, "DoubleBuffer", m_doubleBuffer, TRUE );
 		PX_Bool( pPX, "SendOnDrawBackBuffer", m_sendOnDrawBackBuffer, FALSE);
 		PX_Bool( pPX, "ShowRedrawTime", _showRedrawTime, FALSE);

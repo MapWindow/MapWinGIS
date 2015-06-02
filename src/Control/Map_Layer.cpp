@@ -910,6 +910,8 @@ void CMapView::RemoveAllLayers()
 
 	LockWindow( lmUnlock );
 
+	ClearExtentHistory();
+
 	_activeLayerPosition = 0;
 
 	Redraw();

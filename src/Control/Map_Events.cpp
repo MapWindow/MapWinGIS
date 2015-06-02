@@ -629,10 +629,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			}
 		case cmPan:
 			{
-				// User since can just release button without moving but extents are changed during dragging. 
-				// So we have to capture them here, and remove from list on MouseUp if no panning was made.
-				LogPrevExtent();		
-
 				this->SetCapture();
 				_dragging.Operation = DragPanning;
 			}
@@ -759,12 +755,7 @@ void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 
 				SetExtentsCore(_extents, false);
 
-				if (!_panningExtentsChanged && _prevExtents.size() > 0)
-				{
-					_prevExtents.pop_back();		// no panning took place, but we had to log initial extents
-				}
-
-				_panningExtentsChanged = false;
+				LogPrevExtent();
 
 				ClearPanningList();
 
@@ -1435,8 +1426,8 @@ void CMapView::OnSize(UINT nType, int cx, int cy)
 		_viewHeight = cy;
 		_aspectRatio = (double)_viewWidth/(double)_viewHeight;
 		_isSizing = false;
-		
-		this->SetExtentsCore(_extents, false, true);
+
+		SetExtentsCore(_extents, false, true);
 	}
 	else
 	{

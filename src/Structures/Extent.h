@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "stdafx.h"
+#include "DebugHelper.h"
 
 class Extent  
 {
@@ -129,6 +130,11 @@ public:
 	bool OutsideWorldBounds()
 	{
 		return left < -180.0 || right > 180.0 || top > 90.0 || bottom < -90.0;
+	}
+
+	CString ToString()
+	{
+		return Debug::Format("x: %f; y: %f; w: %f; h: %f", left, top, Width(), Height());
 	}
 	
 };

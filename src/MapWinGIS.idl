@@ -6248,6 +6248,8 @@ library MapWinGIS
 			[id(251), readonly] IDrawingRectangle* FocusRectangle;
 			[id(252)] tkCustomDrawingFlags CustomDrawingFlags;
 			[id(254)] tkAngleFormat ShowCoordinatesFormat;
+			[id(256), readonly]long ExtentHistoryUndoCount;
+			[id(257), readonly]long ExtentHistoryRedoCount;
 
 #ifdef OLD_API
 			[id(14)] VARIANT_BOOL DoubleBuffer;
@@ -6312,14 +6314,14 @@ library MapWinGIS
 			[id(33)] void ZoomIn(double Percent);
 			[id(34)] void ZoomOut(double Percent);
 			[id(35)] long ZoomToPrev();
+			[id(255)] long ZoomToNext();
+			[id(258)]void ClearExtentHistory();
 			[id(190)] VARIANT_BOOL ZoomToSelected(LONG LayerHandle);
 			[id(200)] VARIANT_BOOL ZoomToWorld();
 			[id(193), propget] IExtents* GeographicExtents();
 			[id(194)] VARIANT_BOOL SetGeographicExtents(IExtents* pVal);
 			[id(107)] void ZoomToMaxVisibleExtents(void);
 			[id(197)] VARIANT_BOOL ZoomToTileLevel(int zoom);
-
-			
 
 			[id(214), propput] void CurrentZoom(int nNewValue);
 			[id(214), propget] int CurrentZoom();

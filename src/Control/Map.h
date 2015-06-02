@@ -136,7 +136,7 @@ public:
 	double m_extentPad;
 	afx_msg void OnExtentPadChanged();
 
-	long m_extentHistory;
+	long _extentHistoryCount;
 	afx_msg void OnExtentHistoryChanged();
 
 	CString m_key;
@@ -481,6 +481,7 @@ public:
 	afx_msg void ZoomIn(double Percent);
 	afx_msg void ZoomOut(double Percent);
 	afx_msg long ZoomToPrev();
+	afx_msg long ZoomToNext();
 	
 	afx_msg void ClearDrawing(long DrawHandle);
 	afx_msg void ClearDrawings();
@@ -611,7 +612,9 @@ public:
 	afx_msg ISelectionList* GetIdentifiedShapes();
 	afx_msg IDrawingRectangle* GetFocusRectangle();
 	afx_msg IExtents* GetLayerExtents(LONG layerIndex);
-
+	afx_msg void ClearExtentHistory();
+	afx_msg long GetExtentHistoryUndoCount();
+	afx_msg long GetExtentHistoryRedoCount();
 	#pragma endregion
 
 	//}}AFX_DISPATCH
@@ -771,7 +774,8 @@ public:
 	// --------------------------------------------
 	TileBuffer _tileBuffer;
 	Extent _extents;
-	std::deque<Extent> _prevExtents;
+	vector<Extent> _prevExtents;
+	int _prevExtentsIndex;
 	bool _panningExtentsChanged;
 
 	// window properties
@@ -1186,6 +1190,10 @@ private:
 	void RenderIdentifiedShapes(vector<long>& handles, CShapefileDrawer& drawer, const CRect& rcBounds);
 	void UpdateSelectedPixels(vector<long>& handles, bool& hasPolygons, bool& hasPoints);
 	VARIANT_BOOL ZoomToTileLevelCore(int zoom, bool logPrevious);
+	bool ValidatePreviousExtent();
+	bool MapIsEmpty();
+	
+	void UpdateMapTranformation();
 #pragma endregion
 
 public:
@@ -1216,6 +1224,10 @@ public:
 	virtual void _FireBackgroundLoadingFinished(long taskId, long layerHandle, long numFeatures, long numLoaded) 
 	{		FireBackgroundLoadingFinished(taskId, layerHandle, numFeatures, numLoaded);	};
 	
+
+
+
+
 
 protected:
 

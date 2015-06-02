@@ -33,3 +33,22 @@ bool ProjectionHelper::IsSame(IGeoProjection* gp1, IGeoProjection* gp2, IExtents
 	gp1->get_IsSameExt(gp2, bounds, sampleSize, &vb);
 	return vb ? true: false;
 }
+
+// ***************************************************************
+//		ToString()
+// ***************************************************************
+CString ProjectionHelper::ToString(IGeoProjection* gp)
+{
+	if (!gp) return "";
+
+	CComBSTR str;
+	if (!ProjectionHelper::IsEmpty(gp)) {
+		gp->ExportToProj4(&str);
+	}
+	else {
+		str = L"";
+	}
+
+	USES_CONVERSION;
+	return str.Length() > 0 ? OLE2A(str) : "<empty>";
+}

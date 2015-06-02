@@ -125,7 +125,7 @@ VARIANT_BOOL CMapView::ZoomToTileLevelCore(int zoom, bool logPrevious)
 				Extent ext = Extent(minX, maxX, minY, maxY);
 				ext.MoveTo(xCentOld, yCentOld);
 
-				this->SetExtentsCore(ext, logPrevious, false, false);
+				SetExtentsCore(ext, logPrevious, false, false);
 				_currentZoom = zoom;
 				AdjustZoom(zoom);
 				return VARIANT_TRUE;
@@ -251,12 +251,7 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapS
 	_knownExtents = keNone;
 	_lastRedrawTime = 0.0f;
 
-	if (logExtents)
-	{
-		LogPrevExtent();
-	}
-
-	this->CalculateVisibleExtents(ext, mapSizeChanged);
+	CalculateVisibleExtents(ext, mapSizeChanged);
 
 	if (ForceDiscreteZoom() && adjustZoom )
 	{
@@ -266,7 +261,7 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapS
 		// (i.e. tiles size is always > 256 (original) and the same size in chosen in ZoomToTileLevel)
 		int zoom;
 		_tiles->get_CurrentZoom(&zoom);
-		this->ZoomToTileLevelCore(zoom, false);
+		ZoomToTileLevelCore(zoom, logExtents);
 		_tiles->get_CurrentZoom(&zoom);
 		return;
 	}
@@ -278,15 +273,21 @@ void CMapView::SetExtentsCore( Extent ext, bool logExtents /*= true*/, bool mapS
 
 	ScheduleLayerRedraw();
 
-	this->FireExtentsChanged();
-	this->ReloadBuffers();
+	if (logExtents)
+	{
+		LogPrevExtent();
+	}
+
+	FireExtentsChanged();
+
+	ReloadBuffers();
 	
 	_lastWidthMeters = 0.0;	// extents has changed it must be recalculated
 
 	if( !_lockCount ) 
 	{
 		DoUpdateTiles();
-		this->InvalidateControl();
+		InvalidateControl();
 	}
 }
 
@@ -1223,13 +1224,63 @@ void CMapView::ZoomOut(double Percent)
 }
 
 // ***************************************************
+//		ValidatePreviousExtent()
+// ***************************************************
+bool CMapView::ValidatePreviousExtent()
+{
+	bool result = _prevExtentsIndex >= 0 && _prevExtentsIndex < (int)_prevExtents.size();
+
+	if (!result && _prevExtents.size() > 0)
+	{
+		CallbackHelper::AssertionFailed("Previous extent index out of bounds");
+	}
+
+	return result;
+}
+
+// ***************************************************
+//		MapIsEmpty()
+// ***************************************************
+bool CMapView::MapIsEmpty()
+{
+	return (_transformationMode == tmNotDefined || GetTileProvider() == tkTileProvider::ProviderNone) && GetNumLayers() == 0;
+}
+
+// ***************************************************
 //		LogPrevExtent()
 // ***************************************************
 void CMapView::LogPrevExtent()
 {
+	if (MapIsEmpty()) return;
+
+	// may they are the same extents
+	if (ValidatePreviousExtent())
+	{
+		if (_extents == _prevExtents[_prevExtentsIndex]) return;
+	}
+
+	// let's discard part of the history that was reverted with ZoomToPrev
+	int removeCount = _prevExtents.size() - 1 - _prevExtentsIndex;
+	if (removeCount > 0)
+	{
+		int count = 0;
+		do
+		{
+			_prevExtents.pop_back();
+			count++;
+		} 
+		while (count < removeCount);
+	}
+
+	// add new extent
 	_prevExtents.push_back( _extents );
-	if( _prevExtents.size() > (size_t)m_extentHistory )
-		_prevExtents.pop_front();
+	_prevExtentsIndex = _prevExtents.size() - 1;
+
+	// make sure that it's no longer than expected
+	if (_extentHistoryCount > 0 && (long)_prevExtents.size() > _extentHistoryCount)
+	{
+		_prevExtents.erase(_prevExtents.begin());
+	}
 }
 
 // ***************************************************
@@ -1237,12 +1288,79 @@ void CMapView::LogPrevExtent()
 // ***************************************************
 long CMapView::ZoomToPrev()
 {
-	if( _prevExtents.size() > 0 )
+	if( _prevExtents.size() > 0 && _prevExtentsIndex > 0)
 	{	
-		this->SetExtentsCore(_prevExtents[_prevExtents.size() - 1], false);
-		_prevExtents.pop_back();
+		_prevExtentsIndex--;
+		
+		if (!ValidatePreviousExtent()) 
+		{
+			return 0;
+		}
+
+		Extent ext = _prevExtents[_prevExtentsIndex];
+		SetExtentsCore(ext, false);
+
+		//CallbackHelper::ErrorMsg("Zoom prev: " + ext.ToString());
 	}
-	return _prevExtents.size();
+
+	return GetExtentHistoryUndoCount();
+}
+
+// ***************************************************
+//		ZoomToNext()
+// ***************************************************
+long CMapView::ZoomToNext()
+{
+	if (_prevExtents.size() == 0)
+	{
+		return 0;
+	}
+
+	if (_prevExtentsIndex < (int)(_prevExtents.size() - 1))
+	{
+		_prevExtentsIndex++;
+		Extent ext = _prevExtents[_prevExtentsIndex];
+
+		if (!ValidatePreviousExtent())
+		{
+			return 0;
+		}
+
+		SetExtentsCore(ext, false);
+		//CallbackHelper::ErrorMsg("Zoom next: " + ext.ToString());
+	}
+
+	return GetExtentHistoryRedoCount();
+}
+
+// ***************************************************
+//		GetExtentHistoryUndoCount()
+// ***************************************************
+long CMapView::GetExtentHistoryUndoCount()
+{
+	return _prevExtentsIndex;
+}
+
+// ***************************************************
+//		GetExtentHistoryRedoCount()
+// ***************************************************
+long CMapView::GetExtentHistoryRedoCount()
+{
+	if (_prevExtents.size() == 0)
+	{
+		return 0;
+	}
+
+	return (_prevExtents.size() - 1) - _prevExtentsIndex;
+}
+
+// ***************************************************
+//		ClearExtentsHistory()
+// ***************************************************
+void CMapView::ClearExtentHistory()
+{
+	_prevExtents.clear();
+	_prevExtentsIndex = 0;
 }
 
 // ****************************************************************

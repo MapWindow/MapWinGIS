@@ -86,45 +86,66 @@ void CMapView::InitProjections()
 void CMapView::SetGeoProjection(IGeoProjection* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (!pVal || pVal == _projection)
+	if (!pVal || pVal == _projection) {
 		return;
+	}
 
 	bool preserveExtents = _activeLayers.size() == 0;
-	IExtents* ext = GetGeographicExtents();	// try to preserve extents
+	IExtents* ext = preserveExtents ? GetGeographicExtents() : NULL;	// try to preserve extents
 
 	((CGeoProjection*)_projection)->SetIsFrozen(false);
 	_projection->StopTransform();
 
 	ComHelper::SetRef(pVal, (IDispatch**)&_projection);
-	VARIANT_BOOL isEmpty;
-	_projection->get_IsEmpty(&isEmpty);
 
 #ifndef RELEASE_MODE
-
-	CComBSTR str;
-	if (!isEmpty) {
-		_projection->ExportToProj4(&str);
-	}
-	else {
-		str = L"";
-	}
-	USES_CONVERSION;
-	CString s = str.Length() > 0 ? OLE2A(str) : "<empty>";
+	CString s = ProjectionHelper::ToString(_projection);
 	Debug::WriteLine("MAP PROJECTION SET: %s", s);
-
 #endif
 
 	_projectionChangeCount++;
+	
+	UpdateMapTranformation();
+	
+	((CGeoProjection*)_projection)->SetIsFrozen(true);
+	
+	_unitsOfMeasure = ProjectionHelper::IsGeographic(_projection) ? umDecimalDegrees : umMeters;
+
+	ClearExtentHistory();
+
+	((CTiles*)_tiles)->UpdateProjection();
+
+	// restore extents
+	if (ext) 
+	{
+		if (preserveExtents) {
+			SetGeographicExtents(ext);
+		}
+
+		ext->Release();
+	}
+	
+	FireProjectionChanged();
+}
+
+// *****************************************************
+//		UpdateMapTranformation()
+// *****************************************************
+void CMapView::UpdateMapTranformation()
+{
+	bool isEmpty = ProjectionHelper::IsEmpty(_projection);
+
 	IGeoProjection* gp = NULL;
-	
+
 	_wgsProjection->StopTransform();
-	
+
 	if (!isEmpty)
 	{
 		VARIANT_BOOL isSame, vb;
 		CComPtr<IExtents> box = NULL;
 		box.Attach(ExtentsHelper::GetWorldBounds());
 		_wgsProjection->get_IsSameExt(_projection, box, 20, &isSame);
+
 		if (isSame)
 		{
 			_transformationMode = tmWgs84Complied;
@@ -145,28 +166,8 @@ void CMapView::SetGeoProjection(IGeoProjection* pVal)
 	}
 	else
 	{
-		_transformationMode= tmNotDefined;
+		_transformationMode = tmNotDefined;
 	}
-
-	if (_projection)
-	{
-		((CGeoProjection*)_projection)->SetIsFrozen(true);
-	}
-
-	VARIANT_BOOL geographic;
-	_projection->get_IsGeographic(&geographic);
-	_unitsOfMeasure = geographic ? umDecimalDegrees : umMeters;
-
-	((CTiles*)_tiles)->UpdateProjection();
-
-	if (ext) {
-		if (preserveExtents)
-			SetGeographicExtents(ext);
-		ext->Release();
-	}
-
-	if (_projection == pVal)
-		FireProjectionChanged();
 }
 
 // *****************************************************

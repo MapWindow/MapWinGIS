@@ -148,7 +148,7 @@ bool CMapView::DeserializeMapStateCore(CPLXMLNode* node, CStringW ProjectName, V
 	m_extentPad = (s != "") ? atoi(s) : 0.02;
 
 	s = CPLGetXMLValue( nodeState, "ExtentHistory", NULL );
-	m_extentHistory = (s != "") ? atoi(s) : 20;
+	_extentHistoryCount = (s != "") ? atoi(s) : 20;
 
 	s = CPLGetXMLValue( nodeState, "DoubleBuffer", NULL );
 	m_doubleBuffer = (s != "") ? (BOOL)atoi(s) : TRUE;
@@ -323,8 +323,8 @@ CPLXMLNode* CMapView::SerializeMapStateCore(VARIANT_BOOL RelativePaths, CStringW
 			if (m_extentPad != 0.02) 
 				Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentPad", CPLString().Printf("%f", m_extentPad));
 
-			if (m_extentHistory != 20) 
-				Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentHistory", CPLString().Printf("%d", m_extentHistory));
+			if (_extentHistoryCount != 20) 
+				Utility::CPLCreateXMLAttributeAndValue(psState, "ExtentHistory", CPLString().Printf("%d", _extentHistoryCount));
 			
 			if (m_doubleBuffer != TRUE) 
 				Utility::CPLCreateXMLAttributeAndValue(psState, "DoubleBuffer", CPLString().Printf("%d", m_doubleBuffer));
