@@ -499,7 +499,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						CComPtr<IGridColorScheme> scheme = NULL;
 						img->get_CustomColorScheme(&scheme);
 
-						if (scheme || !m_globalSettings.favorGreyScale)
+						if (scheme || !m_globalSettings.gridFavorGreyScale)
 						{
 							PredefinedColorScheme coloring = m_globalSettings.GetGridColorScheme();
 							img->put_ImageColorScheme(coloring);
@@ -508,7 +508,7 @@ STDMETHODIMP CFileManager::OpenRaster(BSTR Filename, tkFileOpenStrategy openStra
 						}
 						else 
 						{
-							
+							img->put_UseHistogram(m_globalSettings.gridUseHistogram ? VARIANT_TRUE : VARIANT_FALSE);
 							img->put_ForceSingleBandRendering(VARIANT_TRUE);
 							img->put_AllowGridRendering(grNever);
 						}

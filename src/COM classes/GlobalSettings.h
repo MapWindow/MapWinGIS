@@ -172,6 +172,8 @@ public:
 	STDMETHOD(put_CompressOverviews)(tkTiffCompression newVal);
 	STDMETHOD(get_GridFavorGreyscale)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_GridFavorGreyscale)(VARIANT_BOOL newVal);
+	STDMETHOD(get_GridUseHistogram)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_GridUseHistogram)(VARIANT_BOOL newVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(GlobalSettings), CGlobalSettings)

@@ -76,7 +76,8 @@ struct GlobalSettingsInfo
 	CString bingApiKey;
 	CString hereAppId;
 	CString hereAppCode;
-	bool favorGreyScale;
+	bool gridFavorGreyScale;
+	bool gridUseHistogram;
 
 	~GlobalSettingsInfo()
 	{
@@ -153,7 +154,8 @@ struct GlobalSettingsInfo
 		tilesMaxZoomOnProjectionMismatch = 6;
 		commonCollisionListForCharts = true;
 		commonCollisionListForLabels = true;
-		favorGreyScale = true;
+		gridFavorGreyScale = true;
+		gridUseHistogram = true;
 
 		shortUnitStrings[lsHectars] = L"ha";
 		shortUnitStrings[lsMeters] = L"m";

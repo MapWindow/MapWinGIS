@@ -1021,7 +1021,7 @@ STDMETHODIMP CGlobalSettings::get_GridFavorGreyscale(VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*pVal = m_globalSettings.favorGreyScale ? VARIANT_TRUE : VARIANT_FALSE;
+	*pVal = m_globalSettings.gridFavorGreyScale ? VARIANT_TRUE : VARIANT_FALSE;
 
 	return S_OK;
 }
@@ -1030,7 +1030,28 @@ STDMETHODIMP CGlobalSettings::put_GridFavorGreyscale(VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	m_globalSettings.favorGreyScale = newVal ? true : false;
+	m_globalSettings.gridFavorGreyScale = newVal ? true : false;
+
+	return S_OK;
+}
+
+// ***************************************************************
+//		GridUseHistogram
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_GridUseHistogram(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.gridUseHistogram ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+STDMETHODIMP CGlobalSettings::put_GridUseHistogram(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.gridUseHistogram = newVal ? true : false;
 
 	return S_OK;
 }

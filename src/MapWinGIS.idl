@@ -5590,6 +5590,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(56)] HRESULT CompressOverviews([in] tkTiffCompression newVal);
 	[propget, id(57)] HRESULT GridFavorGreyscale([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(57)] HRESULT GridFavorGreyscale([in] VARIANT_BOOL newVal);
+	[propget, id(58)] HRESULT GridUseHistogram([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(58)] HRESULT GridUseHistogram([in] VARIANT_BOOL newVal);
 };
 
 [
