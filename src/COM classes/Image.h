@@ -324,6 +324,9 @@ public:
 	STDMETHOD(get_RenderingMode)(tkRasterRendering* pVal);
 	STDMETHOD(get_ValueWithAlpha)(LONG row, LONG col, OLE_COLOR* pVal);
 	STDMETHOD(put_ValueWithAlpha)(LONG row, LONG col, OLE_COLOR newVal);
+	STDMETHOD(get_BufferOffsetX)(LONG* pVal);
+	STDMETHOD(get_BufferOffsetY)(LONG* pVal);
+	STDMETHOD(get_ActiveColorScheme)(IGridColorScheme** pVal);
 
 private:
 	tkImageSourceType _sourceType;
@@ -462,11 +465,6 @@ public:
 	ScreenBitmap* GetScreenBitmap() { return _screenBitmap; }
 	void SetScreenBitmap(ScreenBitmap* value) { _screenBitmap = value; }
 	
-
-
-
-	STDMETHOD(get_BufferOffsetX)(LONG* pVal);
-	STDMETHOD(get_BufferOffsetY)(LONG* pVal);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

@@ -3301,7 +3301,7 @@ STDMETHODIMP CImageClass::get_CustomColorScheme(IGridColorScheme** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if (_gdal && _raster )
+	if (_raster )
 	{
 		IGridColorScheme* scheme = _raster->GetCustomColorScheme();
 		if (scheme)	scheme->AddRef();
@@ -4174,6 +4174,28 @@ STDMETHODIMP CImageClass::get_BufferOffsetY(LONG* pVal)
 	else
 	{
 		*pVal = 0;
+	}
+
+	return S_OK;
+}
+
+// ********************************************************
+//     ActiveColorScheme
+// ********************************************************
+STDMETHODIMP CImageClass::get_ActiveColorScheme(IGridColorScheme** pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (_raster)
+	{
+		IGridColorScheme* scheme = _raster->GetActiveColorScheme();
+		if (scheme)	scheme->AddRef();
+		(*pVal) = scheme;
+	}
+	else
+	{
+		(*pVal) = NULL;
+		ErrorMessage(tkAPPLICABLE_GDAL_ONLY);
 	}
 
 	return S_OK;

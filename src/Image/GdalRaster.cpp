@@ -2020,9 +2020,9 @@ void GdalRaster::DeserializeCore(CPLXMLNode* node)
 }
 
 // *************************************************************
-//	  GetCustomColorScheme()
+//	  GetActiveColorScheme()
 // *************************************************************
-IGridColorScheme* GdalRaster::GetCustomColorScheme()
+IGridColorScheme* GdalRaster::GetActiveColorScheme()
 { 
 	// caller won't be able to distinguish whether it's predefined or custom color scheme;
 	// however if there is need to force:

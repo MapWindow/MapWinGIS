@@ -93,6 +93,8 @@ bool RasterBandHelper::ColorTableToColorScheme(GDALRasterBand* _poBand, IGridCol
 			newbreak->put_HighValue(boundB);
 			newbreak->put_LowColor(lastColor);
 			newbreak->put_HighColor(lastColor);
+			newbreak->put_ColoringType(ColoringType::Random);
+
 			(*newscheme)->InsertBreak(newbreak);
 			newbreak->Release();
 

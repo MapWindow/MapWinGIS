@@ -3754,6 +3754,7 @@ interface IImage : IDispatch{
 	[propput, id(115)] HRESULT ValueWithAlpha([in] LONG row, [in] LONG col, [in] OLE_COLOR newVal);
 	[propget, id(116)] HRESULT BufferOffsetX([out, retval] LONG* pVal);
 	[propget, id(117)] HRESULT BufferOffsetY([out, retval] LONG* pVal);
+	[propget, id(118)] HRESULT ActiveColorScheme([out, retval] IGridColorScheme** pVal);
 };
 
 /****************************  Shapefile Interface ***********************/
