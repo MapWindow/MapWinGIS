@@ -2018,3 +2018,18 @@ void GdalRaster::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "UseActiveBandAsAlpha", "0");
 	if (s != "") SetAlphaBandRendering((bool)(atoi(s) != 0));
 }
+
+// *************************************************************
+//	  GetCustomColorScheme()
+// *************************************************************
+IGridColorScheme* GdalRaster::GetCustomColorScheme()
+{ 
+	// caller won't be able to distinguish whether it's predefined or custom color scheme;
+	// however if there is need to force:
+	// a) predefined color scheme
+	// -set Image.CustomColorScheme to NULL,
+	// -set new value of Image.ImageColorScheme (predefined colors enumeration; _predefinedColorScheme will be generated on the next redraw)
+	// b) custom color scheme:
+	// - just set Image.CustomColorScheme
+	return _customColorScheme != NULL ? _customColorScheme : _predefinedColorScheme; 
+}

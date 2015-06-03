@@ -221,7 +221,8 @@ public:
 	// properties
 	GDALDataset* GetDataset(){ return _dataset; }
 	GDALRasterBand* GetBand(int bandIndex);
-	IGridColorScheme* GetCustomColorScheme() { return _customColorScheme; }
+	
+	IGridColorScheme* GdalRaster::GetCustomColorScheme();
 	GDALPaletteInterp GetPaletteInterpretation() { return _palleteInterpretation; }
 	PredefinedColorScheme GetDefaultColors() { return _predefinedColors; }
 
