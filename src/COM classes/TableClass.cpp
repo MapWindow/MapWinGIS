@@ -3120,6 +3120,27 @@ STDMETHODIMP CTableClass::get_JoinToField(int joinIndex, BSTR* retVal)
 	return S_OK;
 }
 
+// ********************************************************
+//     get_JoinFields()
+// ********************************************************
+STDMETHODIMP CTableClass::get_JoinFields(LONG joinIndex, BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*pVal = A2BSTR("");
+	}
+	else
+	{
+		*pVal = A2BSTR(_joins[joinIndex]->fields);
+	}
+
+	return S_OK;
+}
+
+
 // *****************************************************
 //		Serialize()
 // *****************************************************
@@ -3424,3 +3445,4 @@ bool CTableClass::GetUids(long fieldIndex, map<long, long>& results)
 	}
 	return true;
 }
+

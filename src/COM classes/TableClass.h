@@ -160,6 +160,7 @@ public:
 	STDMETHOD(Join3)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, SAFEARRAY* filedList, VARIANT_BOOL* retVal);
 
 	STDMETHOD(Dump)(/*[in]*/ BSTR dbfFilename, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+	STDMETHOD(get_JoinFields)(LONG joinIndex, BSTR* pVal);
 
 private:
 	struct JoinInfo
@@ -251,7 +252,7 @@ public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
-
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

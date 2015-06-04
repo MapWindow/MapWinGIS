@@ -59,7 +59,7 @@ struct FieldWrapper
 		return joinId >= 0;
 	}
 
-	FieldWrapper()		// do we need to add destructor here?
+	FieldWrapper()
 	{
 		field = NULL;
 		joinId = -1;

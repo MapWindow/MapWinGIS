@@ -4167,6 +4167,7 @@ interface ITable : IDispatch{
 	[id(49), helpstring("")] HRESULT Join3([in]ITable* table2, [in]BSTR field1, [in]BSTR field2, [in]BSTR filenameToReopen, [in]BSTR joinOptions, [in]SAFEARRAY(BSTR) fieldList, [out, retval]VARIANT_BOOL* retVal);	
 
 	[id(50), helpstring("")] HRESULT Dump([in] BSTR dbfFilename, [in, optional] ICallback * cBack, [out, retval] VARIANT_BOOL * retval);	
+	[propget, id(51)] HRESULT JoinFields([in] LONG joinIndex, [out, retval] BSTR* pVal);
 };
 
 
