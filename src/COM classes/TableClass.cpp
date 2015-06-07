@@ -3140,7 +3140,6 @@ STDMETHODIMP CTableClass::get_JoinFields(LONG joinIndex, BSTR* pVal)
 	return S_OK;
 }
 
-
 // *****************************************************
 //		Serialize()
 // *****************************************************
@@ -3225,7 +3224,7 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				}
 				
 				CPLXMLNode* psNode = CPLCreateXMLNode(psJoins, CXT_Element, "Join");
-				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(W2A(name)));		// TODO: use utf-8
+				Utility::CPLCreateXMLAttributeAndValue(psNode, "Filename", CPLString().Printf(Utility::ConvertToUtf8(name)));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldTo", CPLString().Printf(_joins[i]->fieldTo));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "FieldFrom", CPLString().Printf(_joins[i]->fieldFrom));
 				Utility::CPLCreateXMLAttributeAndValue(psNode, "Fields", CPLString().Printf(_joins[i]->fields));
@@ -3352,7 +3351,7 @@ void CTableClass::RestoreJoins(CPLXMLNode* node)
 	{
 		if (strcmp(node->pszValue, "Join") == 0)
 		{
-			CString filename = CPLGetXMLValue(node, "Filename", NULL);		// TODO!!!: use utf-8
+			CStringW filename = Utility::ConvertFromUtf8(CPLGetXMLValue(node, "Filename", NULL)).MakeLower();
 			CString fieldTo = CPLGetXMLValue(node, "FieldTo", NULL);
 			CString fieldFrom = CPLGetXMLValue(node, "FieldFrom", NULL);
 			CString fields = CPLGetXMLValue(node, "Fields", NULL);
@@ -3396,7 +3395,7 @@ void CTableClass::RestoreJoins(CPLXMLNode* node)
 					}
 
 					USES_CONVERSION;
-					this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), A2W(filename), options, fieldList);
+					this->JoinInternal(tableToFill, A2W(fieldTo), A2W(fieldFrom), filename, options, fieldList);
 				}
 				tableToFill->Close(&vb);
 			}
@@ -3446,3 +3445,35 @@ bool CTableClass::GetUids(long fieldIndex, map<long, long>& results)
 	return true;
 }
 
+// ********************************************************
+//     get_Filename()
+// ********************************************************
+STDMETHODIMP CTableClass::get_Filename(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_filename);
+
+	return S_OK;
+}
+
+// ********************************************************
+//     get_JoinOptions()
+// ********************************************************
+STDMETHODIMP CTableClass::get_JoinOptions(LONG joinIndex, BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (joinIndex < 0 || joinIndex >= (int)_joins.size())
+	{
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		*pVal = A2BSTR("");
+	}
+	else
+	{
+		*pVal = A2BSTR(_joins[joinIndex]->options);
+	}
+
+	return S_OK;
+}

@@ -161,6 +161,7 @@ public:
 
 	STDMETHOD(Dump)(/*[in]*/ BSTR dbfFilename, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
 	STDMETHOD(get_JoinFields)(LONG joinIndex, BSTR* pVal);
+	STDMETHOD(get_Filename)(BSTR* pVal);
 
 private:
 	struct JoinInfo
@@ -253,6 +254,8 @@ public:
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
 	
+	
+	STDMETHOD(get_JoinOptions)(LONG joinIndex, BSTR* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)
