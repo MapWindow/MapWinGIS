@@ -51,13 +51,15 @@ IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)
 IShapefile* CMapView::GetShapefile(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer * layer = _allLayers[LayerHandle];
-		IShapefile* sf = NULL;
-		if (layer->QueryShapefile(&sf))
-			return sf;
+	
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) return NULL;
+
+	IShapefile* sf = NULL;
+	if (layer->QueryShapefile(&sf)) {
+		return sf;
 	}
+	
 	return NULL;
 }
 
