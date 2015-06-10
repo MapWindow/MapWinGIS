@@ -31,17 +31,15 @@ long CMapView::GetLineSeparationFactor(void)
 IOgrLayer* CMapView::GetOgrLayer(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer * layer = _allLayers[LayerHandle];
-		IOgrLayer* ogr = NULL;
-		if (layer->QueryOgrLayer(&ogr))
-			return ogr;
+	
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) return NULL;
+		
+	IOgrLayer* ogr = NULL;
+	if (layer->QueryOgrLayer(&ogr))	{
+		return ogr;
 	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}
+	
 	return NULL;
 }
 
@@ -75,19 +73,16 @@ void CMapView::SetShapefile(LONG LayerHandle, IShapefile* pVal)
 IImage* CMapView::GetImage(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
+
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) return NULL;
+
+	IImage* img = NULL;
+	if (layer->QueryImage(&img))
 	{
-		Layer * layer = _allLayers[LayerHandle];
-		IImage* img = NULL;
-		if (layer->QueryImage(&img))
-		{
-			return img;
-		}
+		return img;
 	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}
+	
 	return NULL;
 }
 void CMapView::SetImage(LONG LayerHandle, IImage* pVal)
@@ -101,16 +96,10 @@ void CMapView::SetImage(LONG LayerHandle, IImage* pVal)
 // *************************************************************
 ILabels* CMapView::GetLayerLabels(LONG LayerHandle)
 {
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer * layer = _allLayers[LayerHandle];
-		return layer->get_Labels();
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}
-	return NULL;
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) return NULL;
+	
+	return layer->get_Labels();
 }
 
 // *************************************************************

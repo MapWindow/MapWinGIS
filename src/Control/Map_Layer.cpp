@@ -64,16 +64,13 @@ BSTR CMapView::GetLayerDescription(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	if( IsValidLayer(LayerHandle) )
-	{	
-		return A2BSTR( _allLayers[LayerHandle]->description );
-	}
-	else
-	{	
-		ErrorMessage(tkINVALID_LAYER_HANDLE);
+	Layer * layer = GetLayer(LayerHandle);
+	if (!layer) {
 		CString result;
 		return result.AllocSysString();
 	}
+
+	return A2BSTR( layer->description );
 }
 
 // ****************************************************
@@ -82,14 +79,10 @@ BSTR CMapView::GetLayerDescription(LONG LayerHandle)
 void CMapView::SetLayerDescription(LONG LayerHandle, LPCTSTR newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
+	Layer * layer = GetLayer(LayerHandle);
+	if (layer)
 	{
-		Layer* layer = _allLayers[LayerHandle];
 		layer->description = newVal;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
 }
 
@@ -1097,30 +1090,17 @@ void CMapView::ReSourceLayer(long LayerHandle, LPCTSTR newSrcPath)
 DOUBLE CMapView::GetLayerMaxVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
-		return layer->maxVisibleScale;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return 0.0;
-	}
+	Layer* layer = GetLayer(LayerHandle);
+	return layer ? layer->maxVisibleScale : 0.0;
 }
 
 void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
+	Layer* layer = GetLayer(LayerHandle);
+	if (layer) 	{
 		layer->maxVisibleScale = newVal;
 	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}	
 }
 
 // ****************************************************************** 
@@ -1129,29 +1109,16 @@ void CMapView::SetLayerMaxVisibleScale(LONG LayerHandle, DOUBLE newVal)
 DOUBLE CMapView::GetLayerMinVisibleScale(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
-		return layer->minVisibleScale;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return 0.0;
-	}
+	Layer* layer = GetLayer(LayerHandle);
+	return layer ? layer->minVisibleScale : 0.0;
 }
 
 void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
+	Layer* layer = GetLayer(LayerHandle);
+	if (layer) 	{
 		layer->minVisibleScale = newVal;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
 }
 
@@ -1161,31 +1128,18 @@ void CMapView::SetLayerMinVisibleScale(LONG LayerHandle, DOUBLE newVal)
 int CMapView::GetLayerMinVisibleZoom(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
-		return layer->minVisibleZoom;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return -1;
-	}
+	Layer* layer = GetLayer(LayerHandle);
+	return layer ? layer->minVisibleZoom : -1;
 }
 
 void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
+	Layer* layer = GetLayer(LayerHandle);
+	if (layer) {
 		if (newVal < 0) newVal = 0;
 		if (newVal > 18) newVal = 18;
 		layer->minVisibleZoom = newVal;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
 	}
 }
 
@@ -1195,32 +1149,20 @@ void CMapView::SetLayerMinVisibleZoom(LONG LayerHandle, int newVal)
 int CMapView::GetLayerMaxVisibleZoom(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
-		return layer->maxVisibleZoom;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return -1;
-	}
+	Layer* layer = GetLayer(LayerHandle);
+	return layer ? layer->maxVisibleZoom : -1;
 }
 
 void CMapView::SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
+	Layer* layer = GetLayer(LayerHandle);
+	if (layer)
 	{
-		Layer* layer = _allLayers[LayerHandle];
 		if (newVal < 0) newVal = 0;
 		if (newVal > 100) newVal = 100;
 		layer->maxVisibleZoom = newVal;
 	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-	}	
 }
 
 // ****************************************************************** 
@@ -1229,29 +1171,17 @@ void CMapView::SetLayerMaxVisibleZoom(LONG LayerHandle, int newVal)
 VARIANT_BOOL CMapView::GetLayerDynamicVisibility(LONG LayerHandle)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
-	{
-		Layer* layer = _allLayers[LayerHandle];
-		return layer->dynamicVisibility;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
-		return VARIANT_FALSE;
-	}
+	Layer* layer = GetLayer(LayerHandle);
+	return layer ? layer->dynamicVisibility : VARIANT_FALSE;
 }
 
 void CMapView::SetLayerDynamicVisibility(LONG LayerHandle, VARIANT_BOOL newVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	if (LayerHandle >= 0 && LayerHandle < (long)_allLayers.size())
+	Layer* layer = GetLayer(LayerHandle);
+	if (layer)
 	{
-		Layer* layer = _allLayers[LayerHandle];
-		layer->dynamicVisibility = newVal?true:false;
-	}
-	else
-	{
-		this->ErrorMessage(tkINVALID_LAYER_HANDLE);
+		layer->dynamicVisibility = newVal ? true : false;
 	}
 }
 

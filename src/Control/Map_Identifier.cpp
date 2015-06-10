@@ -223,9 +223,9 @@ bool CMapView::CheckShapefileLayer(LayerSelector selector, int layerHandle, ISha
 bool CMapView::CheckLayer(LayerSelector selector, int layerHandle)
 {
 	CComPtr<IShapefile> sf = NULL;
-	Layer* layer = _allLayers[layerHandle];
+	Layer* layer = GetLayer(layerHandle);
 
-	if (!layer->wasRendered) return false;
+	if (!layer || !layer->wasRendered) return false;
 
 	if (layer->IsShapefile())
 	{
