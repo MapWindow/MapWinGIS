@@ -21,11 +21,64 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 25 june 2010 - created the file.
-
+ 
 #include "stdafx.h"
 #include "Expression.h"
 #include <map>
+
+// *****************************************************************
+//		Clear()
+// *****************************************************************
+void CExpression::Clear()
+{
+	ReleaseMemory();
+
+	for (size_t i = 0; i < _parts.size(); i++)
+	{
+		for (size_t j = 0; j < _parts[i]->elements.size(); j++)
+		{
+			delete _parts[i]->elements[j];
+		}
+		delete _parts[i];
+	}
+	for (size_t i = 0; i < _operations.size(); i++)
+	{
+		delete _operations[i];
+	}
+	_variables.clear();
+	_parts.clear();
+	_operations.clear();
+	_strings.clear();
+}
+
+// *****************************************************************
+//		ReleaseMemory()
+// *****************************************************************
+void CExpression::ReleaseMemory()
+{
+	for (size_t i = 0; i < _parts.size(); i++)
+	{
+		for (size_t j = 0; j < _parts[i]->elements.size(); j++)
+		{
+			if (_parts[i]->elements[j]->type == etValue || _parts[i]->elements[j]->type == etPart)
+			{
+				CExpressionValue* v = _parts[i]->elements[j]->calcVal;
+				if (v->matrix)
+				{
+					delete v->matrix;
+					v->matrix = NULL;
+				}
+
+				v = _parts[i]->elements[j]->val;
+				if (v->matrix)
+				{
+					delete v->matrix;
+					v->matrix = NULL;
+				}
+			}
+		}
+	}
+}
 
 // *****************************************************************
 //		ParseExpression()
@@ -36,14 +89,83 @@ bool CExpression::ParseExpression(CString s, bool useFields, CString& ErrorMessa
 {
 	_saveOperations = true;
 	_useFields = useFields;
+
     Clear();
     
     int count = 0;
-	bool found = true;
 	
-	if (s.GetLength() == 0)  return false;
+	if (s.GetLength() == 0)  
+	{
+		return false;
+	}
 
-	// replacing string constants
+	if (!ReplaceStringConstants(s, count, ErrorMessage))
+	{
+		return false;
+	}
+
+	if (!ReplaceFieldNames(s, count, ErrorMessage))
+	{
+		return false;
+	}
+
+	if (!ParseBrackets(s, ErrorMessage))
+	{
+		return false;
+	}
+	
+	_strings.clear();
+
+	BuildFieldList();
+	
+    return true;
+}
+
+// *****************************************************************
+//		ParseBrackets()
+// *****************************************************************
+bool CExpression::ParseBrackets(CString s, CString& ErrorMessage)
+{
+	int count = 0;
+	bool found = true;
+
+	while (found)
+	{
+		// seeking brackets
+		int begin, end;
+		found = GetBrackets(s, begin, end);
+
+		CString expression;
+
+		if (found)	expression = s.Mid(begin + 1, end - begin - 1);
+		else			expression = s;
+
+		if (!ParseExpressionPart(expression))
+		{
+			ErrorMessage = _errorMessage;
+			return false;
+		}
+
+		if (found)
+		{
+			CString strReplace;
+			strReplace.Format("#%i", count);
+			ReplaceSubString(s, begin, end - begin + 1, strReplace);
+			count++;
+		}
+	}
+
+	return true;
+}
+
+
+// *****************************************************************
+//		ReplaceStringConstants()
+// *****************************************************************
+bool CExpression::ReplaceStringConstants(CString s, int& count, CString& ErrorMessage)
+{
+	bool found = true;
+
 	while (found)
 	{
 		int begin = -1;
@@ -84,9 +206,17 @@ bool CExpression::ParseExpression(CString s, bool useFields, CString& ErrorMessa
 			return false;
 		}
 	}
-	
-	// replacing field names
-	found = true;
+
+	return true;
+}
+
+// *****************************************************************
+//		ReplaceFieldNames()
+// *****************************************************************
+bool CExpression::ReplaceFieldNames(CString s, int& count, CString& ErrorMessage)
+{
+	bool found = true;
+
 	while (found)
 	{
 		int begin = -1;
@@ -142,49 +272,7 @@ bool CExpression::ParseExpression(CString s, bool useFields, CString& ErrorMessa
 		}
 	}
 
-	count = 0;
-	found = true;
-	while ( found )
-	{
-		// seeking brackets
-		int begin, end;
-		found = GetBrackets(s, begin, end);
-		
-		CString expression;
-		
-		if ( found )	expression = s.Mid(begin + 1, end - begin -1);
-		else			expression = s;
-	      
-		if (!ParseExpressionPart( expression )) 
-		{
-			ErrorMessage = _errorMessage;
-			return false;
-		}
-	      
-		if ( found )
-		{
-			CString strReplace;
-			strReplace.Format("#%i", count);
-			ReplaceSubString(s, begin, end - begin + 1, strReplace);
-			count++;
-		}
-	}
-	
-	_strings.clear();
-
-	// building field list for faster access
-	for (unsigned int i = 0; i < _parts.size(); i++)
-	{
-		CExpressionPart* part = _parts[i];
-		for (unsigned long j = 0; j < part->elements.size(); j++)
-		{
-			if ( part->elements[j]->isField )
-			{
-				_variables.push_back(part->elements[j]);
-			}
-		}
-	}
-    return true;
+	return true;
 }
 
 // *****************************************************************
@@ -1387,3 +1475,30 @@ void CExpression::SetFields(vector<CString>& fields)
 	_fields.clear();
 	_fields.insert(_fields.end(), fields.begin(), fields.end());
 }
+
+// *****************************************************************
+//		BuildFieldList()
+// *****************************************************************
+void CExpression::BuildFieldList()
+{
+	for (unsigned int i = 0; i < _parts.size(); i++)
+	{
+		CExpressionPart* part = _parts[i];
+		for (unsigned long j = 0; j < part->elements.size(); j++)
+		{
+			if (part->elements[j]->isField)
+			{
+				_variables.push_back(part->elements[j]);
+			}
+		}
+	}
+}
+
+// ************************************************************
+//	 ReplaceFunctions()
+//************************************************************
+void CExpression::ReplaceFunctions(CString expression)
+{
+	
+}
+

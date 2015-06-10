@@ -21,8 +21,7 @@
  ************************************************************************************** 
  * Contributor(s): 
  * (Open source contributors should list themselves and their modifications here). */
- // Sergei Leschinski (lsu) 25 june 2010 - created the file.
-
+ 
 #pragma once
 #include "RasterMatrix.h"
 
@@ -165,7 +164,6 @@ public:
 class CExpressionPart
 {
 public:		
-	//int number;						// порядоквый номер
 	std::vector<CElement*> elements; // fields, operators, constants
 	CString expression;	            // for debugging
 	CExpressionValue* val;
@@ -192,52 +190,7 @@ public:
 	{
 		Clear();
 	}
-	void Clear()
-	{
-		ReleaseMemory();
 
-		for(size_t i = 0; i < _parts.size(); i++)
-		{
-			for(size_t j = 0; j < _parts[i]->elements.size(); j++)
-			{
-				delete _parts[i]->elements[j];
-			}
-			delete _parts[i];
-		}
-		for(size_t i = 0; i < _operations.size(); i++)
-		{
-			delete _operations[i];
-		}
-		_variables.clear();
-		_parts.clear();
-		_operations.clear();
-		_strings.clear();
-	}
-	void ReleaseMemory()
-	{
-		for(size_t i = 0; i < _parts.size(); i++)
-		{
-			for(size_t j = 0; j < _parts[i]->elements.size(); j++)
-			{
-				if (_parts[i]->elements[j]->type == etValue || _parts[i]->elements[j]->type == etPart)
-				{
-					CExpressionValue* v = _parts[i]->elements[j]->calcVal;
-					if (v->matrix)
-					{
-						delete v->matrix;
-						v->matrix = NULL;
-					}
-
-					v = _parts[i]->elements[j]->val;
-					if (v->matrix)
-					{
-						delete v->matrix;
-						v->matrix = NULL;
-					}
-				}
-			}
-		}
-	}
 
 private:
 	std::vector<CExpressionPart*> _parts;
@@ -253,6 +206,8 @@ private:
 	CString _floatFormat;
 	
 public:
+	void Clear();
+	void ReleaseMemory();
 	CString GetFloatFormat() {	return _floatFormat;	}
 	void SetFloatFormat(CString value) { _floatFormat = value; }
 	CExpressionValue* Calculate(CString& errorMessage);
@@ -309,8 +264,8 @@ private:
 	bool GetBrackets(CString expression, int& begin, int& end, CString open = "(", CString close = ")");
 
 	// calculation of expression
-	bool FindOperation(CExpressionPart* part, COperation& operation); //int& operation, int& left, int& right);
-	bool CalculateOperation(CExpressionPart* part,  COperation& operation); //int left, int operation, int right);
+	bool FindOperation(CExpressionPart* part, COperation& operation); 
+	bool CalculateOperation(CExpressionPart* part,  COperation& operation); 
 	inline CExpressionValue* GetValue(CExpressionPart* part, int elementId);
 
 	// utility functions
@@ -323,9 +278,14 @@ private:
 
 	// interaction with table
 	void SetFieldValues(ITable* tbl);
-	TwoArgOperator CExpression::GetMatrixOperation(tkOperation op);
-	CString CExpression::Test();
+	TwoArgOperator GetMatrixOperation(tkOperation op);
+	CString Test();
 	
+	void ReplaceFunctions(CString expression);
+	bool ReplaceFieldNames(CString s, int& count, CString& ErrorMessage);
+	bool ReplaceStringConstants(CString s, int& count, CString& ErrorMessage);
+	void BuildFieldList();
+	bool ParseBrackets(CString s, CString& ErrorMessage);
 };
 
 
