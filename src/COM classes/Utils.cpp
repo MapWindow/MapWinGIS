@@ -5290,10 +5290,9 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 			if (band)
 			{
 				CExpressionValue* val = expr.get_FieldValue(i);
-				val->band = band;
-				val->type = vtFloatArray;
+				val->band(band);
 				double nodv = band->GetNoDataValue();
-				val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
+				val->matrix(new RasterMatrix(xSize, 1, new float[xSize * 1], nodv));
 			}
 			else
 			{
@@ -5325,18 +5324,17 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 		for(int j = 0; j < numFields; j++)
 		{
 			CExpressionValue* val = expr.get_FieldValue(j);
-			GDALRasterBand* band = ((GDALRasterBand*)val->band);
+			GDALRasterBand* band = val->band();
 			double nodv = band->GetNoDataValue();
-			if (val->matrix) delete val->matrix;
-			val->matrix = new RasterMatrix(xSize, 1, new float[xSize * 1], nodv);
-			band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
+			val->matrix(new RasterMatrix(xSize, 1, new float[xSize * 1], nodv));
+			band->RasterIO(GF_Read, 0, i, numColumns, 1, val->matrix()->data(), numColumns, 1, GDALDataType::GDT_Float32, 0, 0);
 		}
 
 		CString errorMsg;
 		CExpressionValue* resultVal = expr.Calculate(errorMsg);
 		if (resultVal)
 		{
-			RasterMatrix* resultMatrix = resultVal->matrix;
+			RasterMatrix* resultMatrix = resultVal->matrix();
 
 			bool resultIsNumber = resultMatrix->isNumber();
 			

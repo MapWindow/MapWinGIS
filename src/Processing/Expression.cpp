@@ -27,6 +27,74 @@
 #include <map>
 
 // *****************************************************************
+//		ParseBrackets()
+// *****************************************************************
+bool CExpression::ParseBrackets(CString s, CString& ErrorMessage)
+{
+	int count = 0;
+	bool found = true;
+	CString temp;
+
+	while (found)
+	{
+		// seeking brackets
+		int begin, end;
+		found = GetBrackets(s, begin, end);
+
+		if (found)
+		{
+			int fnId = TryParseFunction(s, begin, end);
+
+			if (fnId != -1)
+			{
+				if (!ParseArgumentList(s.Mid(begin + 1, end - begin - 1), fnId))
+				{
+					return false;
+				}
+
+				temp.Format("%d", fnId);
+				begin -= temp.GetLength() + 2;		// replacing function id as well (!1!)
+
+				ReplacePart(s, begin, end, count);
+
+				continue;
+			}
+		}
+
+		CString expression = found ? s.Mid(begin + 1, end - begin - 1) : s;
+
+		CExpressionPart* part = ParseExpressionPart(expression);
+		if (part)
+		{
+			_parts.push_back(part);
+		}
+		else
+		{
+			ErrorMessage = _errorMessage;
+			return false;
+		}
+	
+		if (found)
+		{
+			ReplacePart(s, begin, end, count);
+		}
+	}
+
+	return true;
+}
+
+// *****************************************************************
+//		ReplacePart()
+// *****************************************************************
+void CExpression::ReplacePart(CString& s, int begin, int end, int& count)
+{
+	CString strReplace;
+	strReplace.Format("#%i", count);
+	ReplaceSubString(s, begin, end - begin + 1, strReplace);
+	count++;
+}
+
+// *****************************************************************
 //		Clear()
 // *****************************************************************
 void CExpression::Clear()
@@ -63,18 +131,10 @@ void CExpression::ReleaseMemory()
 			if (_parts[i]->elements[j]->type == etValue || _parts[i]->elements[j]->type == etPart)
 			{
 				CExpressionValue* v = _parts[i]->elements[j]->calcVal;
-				if (v->matrix)
-				{
-					delete v->matrix;
-					v->matrix = NULL;
-				}
+				v->clearMatrix();
 
 				v = _parts[i]->elements[j]->val;
-				if (v->matrix)
-				{
-					delete v->matrix;
-					v->matrix = NULL;
-				}
+				v->clearMatrix();
 			}
 		}
 	}
@@ -109,6 +169,8 @@ bool CExpression::ParseExpression(CString s, bool useFields, CString& ErrorMessa
 		return false;
 	}
 
+	ReplaceFunctions(s);
+	
 	if (!ParseBrackets(s, ErrorMessage))
 	{
 		return false;
@@ -120,44 +182,6 @@ bool CExpression::ParseExpression(CString s, bool useFields, CString& ErrorMessa
 	
     return true;
 }
-
-// *****************************************************************
-//		ParseBrackets()
-// *****************************************************************
-bool CExpression::ParseBrackets(CString s, CString& ErrorMessage)
-{
-	int count = 0;
-	bool found = true;
-
-	while (found)
-	{
-		// seeking brackets
-		int begin, end;
-		found = GetBrackets(s, begin, end);
-
-		CString expression;
-
-		if (found)	expression = s.Mid(begin + 1, end - begin - 1);
-		else			expression = s;
-
-		if (!ParseExpressionPart(expression))
-		{
-			ErrorMessage = _errorMessage;
-			return false;
-		}
-
-		if (found)
-		{
-			CString strReplace;
-			strReplace.Format("#%i", count);
-			ReplaceSubString(s, begin, end - begin + 1, strReplace);
-			count++;
-		}
-	}
-
-	return true;
-}
-
 
 // *****************************************************************
 //		ReplaceStringConstants()
@@ -279,48 +303,46 @@ bool CExpression::ReplaceFieldNames(CString s, int& count, CString& ErrorMessage
 //		ParseExpressionPart
 // *****************************************************************
 // Creates elements from the part of expression in the brackets
-bool CExpression::ParseExpressionPart(CString s)
+CExpressionPart* CExpression::ParseExpressionPart(CString s)
 {
 	bool readVal = true;	// true - reading values and unary operations; false - reading binary operations
 
 	// adding a part
 	CExpressionPart* part = new CExpressionPart();
 	part->expression = s;
-    
+
 	for (int i = 0; i < s.GetLength(); i++)
 	{
 		SkipSpaces(s, i);
 		if (i >= s.GetLength())
 			break;
-      
+
 		// reading element
 		CElement* element = new CElement();
 		bool result = readVal ? ReadValue(s, i, element) : ReadOperation(s, i, *element);
 		if (!result) {
 			delete element;
 			delete part;
-			return false;
+			return NULL;
 		}
-	
+
 		// saving element
 		part->elements.push_back(element);
-		
+
 		//in case operation was unary the next element should be value as well
-		if  (element->operation != operNOT && element->operation != operChangeSign)
+		if (element->operation != operNOT && element->operation != operChangeSign)
 		{
 			readVal = !readVal;
 		}
 	}
 
-	if (part->elements.size() > 0)
+	if (part->elements.size() == 0)
 	{
-		_parts.push_back(part);
-		return true;	
+		delete part;
+		return NULL;
 	}
-	else
-	{
-		return false;
-	}
+
+	return part;
 }
 
 // *******************************************************************
@@ -424,8 +446,7 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
 						chr = s[position];
 					}
 					element->type = etValue;
-					element->val->type = vtString;
-					element->val->str = sub;
+					element->val->str(sub);
 					break;
 				}
 		
@@ -456,16 +477,14 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
 					if ( val != 0.0 )
 					{
 						element->type = etValue;
-						element->val->type = vtDouble;
-						element->val->dbl = val;
+						element->val->dbl(val);
 					}
 					else // if (val == 0.0)			// funñtion returns 0.0 in case string can't be represented as number
 					{
 						if (IsDecimalZero(sub))
 						{
 							element->type = etValue;
-							element->val->type = vtDouble;
-							element->val->dbl = val;
+							element->val->dbl(val);
 						}
 						else
 						{
@@ -479,8 +498,7 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
                     if (s.Mid(position, 4).MakeLower() == "true")
 					{
 						position += 3;
-						element->val->type = vtBoolean;	
-						element->val->bln = true;
+						element->val->bln(true);
 						element->type = etValue;
 					}
 					break;
@@ -489,8 +507,7 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
 					if (s.Mid(position, 5).MakeLower() == "false")
 					{
 						position += 4;
-						element->val->type = vtBoolean;	
-						element->val->bln = false;
+						element->val->bln(false);
 						element->type = etValue;
 					}
 					break;
@@ -528,12 +545,8 @@ bool CExpression::ReadValue(CString s, int& position, CElement* element)
 					if ( IsInteger(sub) )
 					{
 						element->type = etValue;
-						element->val->type = vtString;
 						unsigned int index = atoi(LPCTSTR(sub));
-						if ( index < _strings.size())
-							element->val->str = _strings.at(index);
-						else
-							element->val->str = "";
+						element->val->str(index < _strings.size() ? _strings.at(index) : "");
 					}
 					else
 					{
@@ -849,119 +862,238 @@ bool CExpression::IsInteger( CString& str )
 //	 Calculate()
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 // /////////////////////////////////////////////////////////////////////
-
 // Calculates the whole expression
 CExpressionValue* CExpression::Calculate(CString& errorMessage)
 {
-    // initializing in case of repeating calculations
-	for (unsigned int i = 0; i < _parts.size(); i++ )
+	Reset();
+    
+	bool success = false;
+	
+	// if the operations should be cached we'll ensure that there is no obsolete data in vector
+	if (_saveOperations)
+	{
+		_operations.clear();
+	}
+
+	ResetActiveCountForParts();
+
+	int operationCount = 0;			// in case we got cached operations
+	unsigned int partIndex = 0;		// we begin from the inner most bracket
+
+	do
+	{
+		CExpressionPart* part = _parts[partIndex];
+		
+		if (!EvaluatePart(part, errorMessage, operationCount))
+		{
+			return false;
+		}
+
+		partIndex++;
+
+		if (partIndex >= _parts.size())
+		{
+			// we closed the last part
+			success = true;
+			break;
+		}
+	}
+	while (true);
+    
+	// operation was saved - no need to cache any more
+	if (_saveOperations)
+	{
+		//delete operation;
+		_saveOperations = false;
+	}
+
+	return success ? _parts[_parts.size() - 1]->val : NULL;
+}
+
+// *******************************************************************
+//		EvaluatePart()
+// *******************************************************************
+bool CExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+{
+	do
+	{
+		if (part->isFunction)
+		{
+			if (!EvaluateFunction(part))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			if (!CalculateNextOperationWithinPart(part, errorMessage, operationCount))
+			{
+				return false;
+			}
+		}
+
+		if (FinishPart(part))
+		{
+			return true;
+		}
+	} 
+	while (true);
+}
+
+// *******************************************************************
+//		EvaluateFunction()
+// *******************************************************************
+bool CExpression::EvaluateFunction(CExpressionPart* part)
+{
+	if (!part->isFunction) return false;
+
+	CString errorMessage;
+	int operationCount = 0;
+
+	// first lets evaluate arguments
+	for (size_t i = 0; i < part->arguments.size(); i++)
+	{
+		CExpressionPart* arg = part->arguments[i];
+		arg->activeCount = arg->elements.size();
+
+		if (!EvaluatePart(arg, errorMessage, operationCount))
+		{
+			return false;
+		}
+	}
+
+	CExpressionValue* value = part->arguments[0]->val;
+	if (!value->IsDouble())
+	{
+		Debug::WriteError("Double value is expected");
+		return false;
+	}
+
+	//part->val = new CExpressionValue();
+	//part->val->type = vtDouble;
+
+	//// call the function
+	//switch (part->functionId)
+	//{
+	//	case fnCos:
+	//		part->val->dbl = cos(value->dbl);
+	//		break;
+	//	case fnSin:
+	//		part->val->dbl = sin(value->dbl);
+	//		break;	
+	//	case fnTan:
+	//		part->val->dbl = tan(value->dbl);
+	//		break;
+	//	case fnCtan:
+	//		part->val->dbl = 1 / tan(value->dbl);
+	//		break;
+	//}
+
+	return true;
+}
+
+// *******************************************************************
+//		CalculateNextOperationWithinPart()
+// *******************************************************************
+bool CExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+{
+	COperation* operation = NULL;;
+
+	// if there is more then one element, then definitely some operation must be present
+	if (part->elements.size() > 1)
+	{
+		// reading caching operation
+		bool found = false;
+		if (!_saveOperations)
+		{
+			operation = _operations[operationCount];
+			operationCount++;
+			found = true;
+		}
+		else
+		{
+			if (!operation)
+				operation = new COperation();
+			found = FindOperation(part, *operation);
+		}
+
+		if (found)
+		{
+			if (!CalculateOperation(part, *operation))
+			{
+				errorMessage = _errorMessage;
+				return false;
+			}
+		}
+		else
+		{
+			errorMessage = _errorMessage;
+			return false;
+		}
+
+		part->activeCount -= operation->binaryOperation ? 2 : 1;
+	}
+
+	return true;
+}
+
+// *******************************************************************
+//		FinishPart()
+// *******************************************************************
+// if there is only one element left, we'll finalize the part
+bool CExpression::FinishPart(CExpressionPart* part)
+{
+	if (part->isFunction)
+	{
+		// part->val is already set
+		return true;
+	}
+
+	if (part->activeCount == 1)
+	{
+		int size = part->elements.size();
+		for (int i = 0; i < size; i++)
+		{
+			if (!part->elements[i]->turnedOff)
+			{
+				part->val = GetValue(part, i);
+				part->elements[i]->turnedOff = true;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+// *******************************************************************
+//		ResetActiveCount()
+// *******************************************************************
+void CExpression::ResetActiveCountForParts()
+{
+	for (unsigned int i = 0; i < _parts.size(); i++)
+	{
+		_parts[i]->activeCount = _parts[i]->elements.size();
+	}
+}
+
+// *******************************************************************
+//		Reset()
+// *******************************************************************
+// initializing in case of repeating calculations
+void CExpression::Reset()
+{
+	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
 		CExpressionPart* part = _parts[i];
 		int size = part->elements.size();
-		for ( int j = 0; j < size; j++ )
+		for (int j = 0; j < size; j++)
 		{
 			CElement* el = part->elements[j];
 			el->wasCalculated = false;
 			el->turnedOff = false;
 		}
 	}
-    
-	//int operation, left, right;
-	COperation* operation = NULL;;
-	unsigned int partIndex = 0;		// we begin from the inner most bracket
-	bool success = false;
-	
-	// if the operations should be cached we'll ensure that there is no obsolete data in vector
-	if (_saveOperations)
-		_operations.clear();
-	
-	// in case we got cached operations
-	int operationCount = 0;
-	for (unsigned int i = 0; i < _parts.size(); i++)
-		_parts[i]->activeCount = _parts[i]->elements.size();
-
-    do
-	{
-		CExpressionPart* part = _parts[partIndex];
-
-		// if there is more then one element, then definitely some operation must be present
-		if ( part->elements.size() > 1 )
-		{
-			// reading caching operation
-			bool found = false;
-			if (!_saveOperations)
-			{
-				operation = _operations[operationCount];
-				operationCount++;
-				found = true;
-			}
-			else
-			{
-				if ( !operation )
-					operation = new COperation();
-				found = FindOperation(part, *operation);
-			}
-
-			if ( found )
-			{
-				if (!CalculateOperation(part, *operation))
-				{
-					errorMessage = _errorMessage;
-					return NULL;
-				}
-			}
-			else
-			{
-				errorMessage = _errorMessage;
-				return NULL;
-			}
-
-			if ( operation->binaryOperation )
-				part->activeCount -= 2;
-			else
-				part->activeCount -= 1;
-		}
-		
-		// if there is only one element left, we'll finalize the part
-		if ( part->activeCount == 1 )
-		{
-			int size = part->elements.size();
-			for (int i = 0; i < size; i++)
-			{
-				if ( !part->elements[i]->turnedOff )
-				{
-					part->val = GetValue(part, i);
-					part->elements[i]->turnedOff = true;
-					partIndex++;
-					break;
-				}
-			}
-			
-			if ( partIndex >= _parts.size() )
-			{
-				// we closed the last part
-				success = true;
-				break;
-			}
-			else
-			{
-				// we are shifting to the next part				
-				part = _parts[partIndex];
-			}
-		}
-	} while ( true );
-    
-	// operation were saved - no need to cache any more
-	if (_saveOperations)
-	{
-		delete operation;
-		_saveOperations = false;
-	}
-
-	if ( success )
-		return _parts[_parts.size() - 1]->val;
-	else
-		return NULL;
 }
 
 // *******************************************************************
@@ -1125,22 +1257,24 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 		case operXOR:
 		case operCONSEQ:
 			{
-				if ( valLeft->type == vtBoolean && valRight->type == vtBoolean )
+				if ( valLeft->isBoolean() && valRight->isBoolean() )
 				{
-					if (oper == operOR )			elLeft->calcVal->bln = valLeft->bln || valRight->bln;
-					else if ( oper == operAND )		elLeft->calcVal->bln = valLeft->bln && valRight->bln;
-					else if ( oper == operXOR )		elLeft->calcVal->bln = (valLeft->bln || valRight->bln) && !(valLeft->bln && valRight->bln);
-					else if ( oper == operCONSEQ )	elLeft->calcVal->bln = (!valLeft->bln || valLeft->bln && valRight->bln);
-					elLeft->calcVal->type = vtBoolean;
+					if (oper == operOR )			elLeft->calcVal->bln(valLeft->bln() || valRight->bln());
+					else if ( oper == operAND )		elLeft->calcVal->bln(valLeft->bln() && valRight->bln());
+					else if ( oper == operXOR )		elLeft->calcVal->bln((valLeft->bln() || valRight->bln()) && !(valLeft->bln() && valRight->bln()));
+					else if ( oper == operCONSEQ )	elLeft->calcVal->bln((!valLeft->bln() || valLeft->bln() && valRight->bln()));
 				}
-				else if (valLeft->type == vtFloatArray && valRight->type == vtFloatArray)
+				else if (valLeft->IsFloatArray() && valRight->IsFloatArray())
 				{
 					if (oper == operOR || oper == operAND)			
 					{
-						if (elLeft->calcVal != valLeft)
-							elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
-						RasterMatrix* matrix = elLeft->calcVal->matrix;
-						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix );
+						if (elLeft->calcVal != valLeft) 
+						{
+							elLeft->calcVal->matrix(new RasterMatrix(*valLeft->matrix()));
+						}
+
+						RasterMatrix* matrix = elLeft->calcVal->matrix();
+						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix() );
 					}
 				}
 				else
@@ -1152,10 +1286,9 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 			}
 		case operNOT:
 			{
-				if ( valRight->type == vtBoolean )
+				if ( valRight->isBoolean() )
 				{
-					elRight->calcVal->bln = !(valRight->bln);
-					elRight->calcVal->type = vtBoolean;
+					elRight->calcVal->bln(!(valRight->bln()));
 				}
 				else
 				{
@@ -1173,71 +1306,79 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 		case operNotEqual:
 			{
 				
-				if ( valLeft->type == valRight->type )
+				if ( valLeft->type() == valRight->type() )
 				{
-					if (valLeft->type == vtFloatArray)
+					if (valLeft->IsFloatArray())
 					{
 						if (elLeft->calcVal != valLeft)
-							elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
-						RasterMatrix* matrix = elLeft->calcVal->matrix;
-						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix );
+						{
+							elLeft->calcVal->matrix(new RasterMatrix(*valLeft->matrix()));
+						}
+
+						RasterMatrix* matrix = elLeft->calcVal->matrix();
+						matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix() );
 					}
 					else
 					{
-						if ( valLeft->type == vtBoolean)
+						if ( valLeft->isBoolean())
 						{
-							if		( oper == operLess )			elLeft->calcVal->bln = valLeft->bln < valRight->bln;
-							else if ( oper == operLessEqual )		elLeft->calcVal->bln = valLeft->bln <= valRight->bln;
-							else if ( oper == operGreater )			elLeft->calcVal->bln = valLeft->bln > valRight->bln;
-							else if ( oper == operGrEqual )			elLeft->calcVal->bln = valLeft->bln >= valRight->bln;
-							else if ( oper == operEqual	)			elLeft->calcVal->bln = valLeft->bln == valRight->bln;
-							else if ( oper == operNotEqual )		elLeft->calcVal->bln = valLeft->bln != valRight->bln;
+							if (oper == operLess)				elLeft->calcVal->bln(valLeft->bln() < valRight->bln());
+							else if (oper == operLessEqual)		elLeft->calcVal->bln(valLeft->bln() <= valRight->bln());
+							else if (oper == operGreater)		elLeft->calcVal->bln(valLeft->bln() > valRight->bln());
+							else if (oper == operGrEqual)		elLeft->calcVal->bln(valLeft->bln() >= valRight->bln());
+							else if (oper == operEqual)			elLeft->calcVal->bln(valLeft->bln() == valRight->bln());
+							else if (oper == operNotEqual)		elLeft->calcVal->bln(valLeft->bln() != valRight->bln());
 						}
-						else if ( valLeft->type == vtDouble )
+						else if ( valLeft->IsDouble() )
 						{
-							if		( oper == operLess )			elLeft->calcVal->bln = valLeft->dbl < valRight->dbl;
-							else if ( oper == operLessEqual )		elLeft->calcVal->bln = valLeft->dbl <= valRight->dbl;
-							else if ( oper == operGreater )			elLeft->calcVal->bln = valLeft->dbl > valRight->dbl;
-							else if ( oper == operGrEqual )			elLeft->calcVal->bln = valLeft->dbl >= valRight->dbl;
-							else if ( oper == operEqual	)			elLeft->calcVal->bln = valLeft->dbl == valRight->dbl;
-							else if ( oper == operNotEqual )		elLeft->calcVal->bln = valLeft->dbl != valRight->dbl;
+							if (oper == operLess)				elLeft->calcVal->bln(valLeft->dbl() < valRight->dbl());
+							else if (oper == operLessEqual)		elLeft->calcVal->bln(valLeft->dbl() <= valRight->dbl());
+							else if (oper == operGreater)		elLeft->calcVal->bln(valLeft->dbl() > valRight->dbl());
+							else if (oper == operGrEqual)		elLeft->calcVal->bln(valLeft->dbl() >= valRight->dbl());
+							else if (oper == operEqual)			elLeft->calcVal->bln(valLeft->dbl() == valRight->dbl());
+							else if (oper == operNotEqual)		elLeft->calcVal->bln(valLeft->dbl() != valRight->dbl());
 						}
-						else if ( valLeft->type == vtString )
+						else if ( valLeft->isString() )
 						{
-							int res = valLeft->str.MakeLower().Compare(valRight->str.MakeLower());
+							int res = valLeft->str().MakeLower().Compare(valRight->str().MakeLower());
 
-							if		( oper == operLess && res < 0 )			elLeft->calcVal->bln = true;
-							else if ( oper == operLessEqual && res <= 0)	elLeft->calcVal->bln = true;
-							else if ( oper == operGreater && res > 0)		elLeft->calcVal->bln = true;
-							else if ( oper == operGrEqual && res >= 0)		elLeft->calcVal->bln = true;
-							else if ( oper == operEqual	&& res == 0)		elLeft->calcVal->bln = true;
-							else if ( oper == operNotEqual && res != 0)		elLeft->calcVal->bln = true;
-							else											elLeft->calcVal->bln = false;
+							if		( oper == operLess && res < 0 )			elLeft->calcVal->bln(true);
+							else if (oper == operLessEqual && res <= 0)		elLeft->calcVal->bln(true);
+							else if (oper == operGreater && res > 0)		elLeft->calcVal->bln(true);
+							else if (oper == operGrEqual && res >= 0)		elLeft->calcVal->bln(true);
+							else if (oper == operEqual	&& res == 0)		elLeft->calcVal->bln(true);
+							else if (oper == operNotEqual && res != 0)		elLeft->calcVal->bln(true);
+							else											elLeft->calcVal->bln(true);
 						}
-						elLeft->calcVal->type = vtBoolean;
 					}
 				}
-				else if(valLeft->type == vtFloatArray && valRight->type == vtDouble)
+				else if(valLeft->IsFloatArray() && valRight->IsDouble())
 				{
 					if (elLeft->calcVal != valLeft)
-						elLeft->calcVal->SetMatrix(new RasterMatrix(*valLeft->matrix));
-					RasterMatrix* matrix = elLeft->calcVal->matrix;
+					{
+						elLeft->calcVal->matrix(new RasterMatrix(*valLeft->matrix()));
+					}
+
+					RasterMatrix* matrix = elLeft->calcVal->matrix();
 					
 					float* data = new float[1];
-					data[0] = (float)valRight->dbl;
+					data[0] = (float)valRight->dbl();
+
 					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
 					delete right;
 				}
-				else if(valLeft->type == vtDouble && valRight->type == vtFloatArray)
+				else if(valLeft->IsDouble() && valRight->IsFloatArray())
 				{
-					RasterMatrix* matrix = new RasterMatrix(*valRight->matrix);
-					elLeft->calcVal->SetMatrix(matrix);
+					RasterMatrix* matrix = new RasterMatrix(*valRight->matrix());
+					elLeft->calcVal->matrix(matrix);
 
 					float* data = new float[1];
-					data[0] = (float)valLeft->dbl;
+					data[0] = (float)valLeft->dbl();
+
 					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
+
 					delete left;
 				}
 				else
@@ -1249,16 +1390,18 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 			}
 		case operChangeSign:
 			{
-				if ( valRight->type == vtDouble )
+				if ( valRight->IsDouble() )
 				{
-					elRight->calcVal->dbl = - valRight->dbl;
-					elRight->calcVal->type = vtDouble;
+					elRight->calcVal->dbl(- valRight->dbl());
 				}
-				else if (valRight->type == vtFloatArray)
+				else if (valRight->IsFloatArray())
 				{
 					if (elRight->calcVal != valRight)
-						elRight->calcVal->SetMatrix(valRight->matrix->Clone(true));
-					elRight->calcVal->matrix->changeSign();
+					{
+						elRight->calcVal->matrix(valRight->matrix()->Clone(true));
+					}
+
+					elRight->calcVal->matrix()->changeSign();
 				}
 				else
 				{
@@ -1277,32 +1420,28 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 		case operDivInt:
 		case operPlus:
 			{
-				if (valLeft->type != vtFloatArray && valRight->type != vtFloatArray && oper == operPlus)
+				if (!valLeft->IsFloatArray() && !valRight->IsFloatArray() && oper == operPlus)
 				{
 					// in case of strings we'll use concatenation here, therefore plus is treated separetely;
-					if ( valLeft->type == vtDouble && valRight->type == vtDouble )
+					if ( valLeft->IsDouble() && valRight->IsDouble() )
 					{
-						elLeft->calcVal->type = vtDouble;
-						elLeft->calcVal->dbl = valLeft->dbl + valRight->dbl;
+						elLeft->calcVal->dbl(valLeft->dbl() + valRight->dbl());
 					}
-					else if ( valLeft->type == vtDouble && valRight->type == vtString)
+					else if ( valLeft->IsDouble() && valRight->isString())
 					{
 						CString s;
-						s.Format(_floatFormat, valLeft->dbl);
-						elLeft->calcVal->type = vtString;
-						elLeft->calcVal->str = s + valRight->str;
+						s.Format(_floatFormat, valLeft->dbl());
+						elLeft->calcVal->str(s + valRight->str());
 					}
-					else if ( valLeft->type == vtString && valRight->type == vtDouble)
+					else if ( valLeft->isString() && valRight->IsDouble())
 					{
 						CString s;
-						s.Format(_floatFormat, valRight->dbl);
-						elLeft->calcVal->type = vtString;
-						elLeft->calcVal->str = valLeft->str + s;
+						s.Format(_floatFormat, valRight->dbl());
+						elLeft->calcVal->str(valLeft->str() + s);
 					}
-					else if ( valLeft->type == vtString && valRight->type == vtString)
+					else if ( valLeft->isString() && valRight->isString())
 					{
-						elLeft->calcVal->type = vtString;
-						elLeft->calcVal->str = valLeft->str + valRight->str;
+						elLeft->calcVal->str(valLeft->str() + valRight->str());
 					}
 					else
 					{
@@ -1312,61 +1451,61 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 					break;
 				}
 				
-				if ( valLeft->type == vtDouble && valRight->type == vtDouble )
+				if ( valLeft->IsDouble() && valRight->IsDouble() )
 				{
-					if		( oper == operMinus )	elLeft->calcVal->dbl = valLeft->dbl - valRight->dbl;
+					if		( oper == operMinus )	elLeft->calcVal->dbl(valLeft->dbl() - valRight->dbl());
 					else if ( oper == operDiv )		
 					{
-						if (valRight->dbl == 0.0)
+						if (valRight->dbl() == 0.0)
 						{
 							_errorMessage = "Division by zero";
 						}
 						else
 						{
-							elLeft->calcVal->dbl = valLeft->dbl / valRight->dbl;
+							elLeft->calcVal->dbl(valLeft->dbl() / valRight->dbl());
 						}
 					}
-					else if ( oper == operMult )	elLeft->calcVal->dbl = valLeft->dbl * valRight->dbl;
-					else if ( oper == operExpon )	elLeft->calcVal->dbl = pow(valLeft->dbl, valRight->dbl);
+					else if ( oper == operMult )	elLeft->calcVal->dbl(valLeft->dbl() * valRight->dbl());
+					else if ( oper == operExpon )	elLeft->calcVal->dbl(pow(valLeft->dbl(), valRight->dbl()));
 					else if ( oper == operDivInt )	
-						if (valRight->dbl == 0.0)
+						if (valRight->dbl() == 0.0)
 						{
 							_errorMessage = "Division by zero";
 						}
 						else
 						{
-							elLeft->calcVal->dbl = double((int)valLeft->dbl / (int)valRight->dbl);
+							elLeft->calcVal->dbl(double((int)valLeft->dbl() / (int)valRight->dbl()));
 						}
-					else if ( oper == operMOD )		elLeft->calcVal->dbl = double((int)valLeft->dbl % (int)valRight->dbl);
-					elLeft->calcVal->type = vtDouble;
+					else if ( oper == operMOD )		elLeft->calcVal->dbl(double((int)valLeft->dbl() % (int)valRight->dbl()));
 				}
-				else if (valLeft->type == vtFloatArray && valRight->type == vtFloatArray )
+				else if (valLeft->IsFloatArray() && valRight->IsFloatArray() )
 				{
-					if (elLeft->calcVal != valLeft)
-						elLeft->calcVal->SetMatrix(valLeft->matrix->Clone(true));
-					RasterMatrix* matrix = elLeft->calcVal->matrix;
+					if (elLeft->calcVal != valLeft) {
+						elLeft->calcVal->matrix(valLeft->matrix()->Clone(true));
+					}
+					RasterMatrix* matrix = elLeft->calcVal->matrix();
 					
-					matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix);
+					matrix->twoArgumentOperation(GetMatrixOperation(oper), *valRight->matrix());
 				}
-				else if (valLeft->type == vtFloatArray && valRight->type == vtDouble )
+				else if (valLeft->IsFloatArray() && valRight->IsDouble() )
 				{
 					if (elLeft->calcVal != valLeft)
-						elLeft->calcVal->SetMatrix(valLeft->matrix->Clone(true));
-					RasterMatrix* matrix = elLeft->calcVal->matrix;
+						elLeft->calcVal->matrix(valLeft->matrix()->Clone(true));
+					RasterMatrix* matrix = elLeft->calcVal->matrix();
 
 					float* data = new float[1];
-					data[0] = (float)valRight->dbl;
+					data[0] = (float)valRight->dbl();
 					RasterMatrix* right = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *right);
 					delete right;
 				}
-				else if (valLeft->type == vtDouble && valRight->type == vtFloatArray )
+				else if (valLeft->IsDouble() && valRight->IsFloatArray() )
 				{
-					RasterMatrix* matrix = valRight->matrix->Clone(true);
-					elLeft->calcVal->SetMatrix(matrix);
+					RasterMatrix* matrix = valRight->matrix()->Clone(true);
+					elLeft->calcVal->matrix(matrix);
 
 					float* data = new float[1];
-					data[0] = (float)valLeft->dbl;
+					data[0] = (float)valLeft->dbl();
 					RasterMatrix* left = new RasterMatrix(1, 1, data, matrix->nodataValue() );
 					matrix->twoArgumentOperation(GetMatrixOperation(oper), *left);
 					delete left;
@@ -1495,10 +1634,122 @@ void CExpression::BuildFieldList()
 }
 
 // ************************************************************
-//	 ReplaceFunctions()
+//	 TryParseFunction()
 //************************************************************
-void CExpression::ReplaceFunctions(CString expression)
+// begin, end - position of brackets
+// name of the function is already substituted, like !1!
+// any white spaces are removed
+int CExpression::TryParseFunction(CString& s, int begin, int end)
 {
-	
+	if (begin < 3) return -1;   // !1!(1) - first bracket must be at least a third position
+
+	if (s[begin - 1] != '!') return -1;
+
+	int tempBegin = begin - 2;
+
+	return ParseFunctionId(s, tempBegin);
 }
 
+// ************************************************************
+//	 ParseFunctionId()
+//************************************************************
+// Starts to read function id from its back, for example !15 starting from "5"
+int CExpression::ParseFunctionId(CString s, int begin)
+{
+	int i = begin;
+	while (i >= 0)
+	{
+		if (s[i] == '!')
+		{
+			s = s.Mid(i + 1, begin - i);
+			if (IsInteger(s))
+			{
+				return atoi(s);
+			}
+		}
+
+		if (s[i] < '0' && s[i] > '9') return -1;
+
+		i--;
+	}
+
+	return -1;
+}
+
+// ************************************************************
+//	 ParseArgumentList()
+//************************************************************
+bool CExpression::ParseArgumentList(CString s, int functionId)
+{
+	CExpressionPart* part = new CExpressionPart();
+	part->expression = s;
+	part->isFunction = true;
+	part->functionId = (tkFunction)functionId;
+
+	int pos = 0;
+	CString ct;
+
+	ct = s.Tokenize(";", pos);
+
+	while (ct.GetLength() != 0)
+	{
+		CExpressionPart* arg = ParseExpressionPart(ct);
+
+		if (arg)
+		{
+			part->arguments.push_back(arg);
+		}
+		else
+		{
+			// TODO: delete previous arguments
+			delete part;
+			return false;
+		}
+
+		ct = s.Tokenize(";", pos);
+	};
+
+	int paramCount = GetParameterCount(functionId);
+	if (part->arguments.size() != paramCount)
+	{
+		// TODO: report invalid number of parameters
+		// TODO: delete arguments
+		delete part;
+		return false;
+	}
+
+	_parts.push_back(part);
+	return true;	
+}
+
+// ************************************************************
+//	 ReplaceFunctions()
+//************************************************************
+void CExpression::ReplaceFunctions(CString& expression)
+{
+	vector<CString> list{ "sin", "cos", "tan", "ctan" };
+
+	CString replace;
+	for (size_t i = 0; i < list.size(); i++)
+	{
+		replace.Format("!%d!", i);
+		expression.Replace(list[i], replace);
+	}
+
+	expression.Replace(" ", "");
+
+	Debug::WriteLine("After fn substitute: %s", expression);
+}
+
+// ************************************************************
+//	 GetArgumentCount()
+//************************************************************
+int CExpression::GetParameterCount(int functionId)
+{
+	switch (functionId)
+	{
+		// TODO: list functions with different number of parameters
+		default:
+			return 1;
+	}
+}

@@ -9,6 +9,7 @@
 #include "SQLiteCache.h"
 #include "RamCache.h"
 #include "map.h"
+#include "Functions.h"
 
 #ifdef _DEBUG
 #include "gdal.h"
@@ -62,6 +63,8 @@ BOOL CMapWinGISApp::InitInstance()
 	m_globalSettings.SetGdalUtf8(false);
 	
 	GdalHelper::SetDefaultConfigPaths();
+
+	parser::InitializeFunctions();
 
 	// initialize all static variables, to keep our memory leaking report clean from them
 #ifdef _DEBUG

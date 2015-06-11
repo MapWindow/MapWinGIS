@@ -69,7 +69,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 	CExpressionValue* result = expr.Calculate(errorString);
 	if ( result )
 	{
-		if (result->type != returnType )
+		if (result->type() != returnType )
 		{
 			if (returnType == vtString)
 			{
@@ -81,7 +81,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 				errorString = "Invalid resulting type";
 			}
 		}
-		else if (result->type)
+		else if (result->type())
 		{
 			*retVal = VARIANT_TRUE;
 		}
@@ -197,20 +197,20 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 			CExpressionValue* val = expr.Calculate(err);
 			if (val)
 			{
-				if (val->type == vtBoolean)
+				if (val->isBoolean())
 				{
 					Result->vt = VT_BOOL;
-					Result->boolVal = val->bln;
+					Result->boolVal = val->bln();
 				}
-				else if (val->type == vtDouble)
+				else if (val->IsDouble())
 				{
 					Result->vt = VT_R8;
-					Result->dblVal = val->dbl;
+					Result->dblVal = val->dbl();
 				}
-				else if (val->type == vtString)
+				else if (val->isString())
 				{
 					Result->vt = VT_BSTR;
-					Result->bstrVal = A2BSTR(val->str);
+					Result->bstrVal = A2BSTR(val->str());
 				}
 				*retVal = VARIANT_TRUE;
 			}
@@ -249,9 +249,9 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 				CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
 				if ( result )
 				{
-					if (result->type == vtBoolean)
+					if (result->isBoolean())
 					{
-						if (result->bln)
+						if (result->bln())
 						{
 							indices.push_back(i);
 						}
@@ -320,19 +320,19 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 		CExpressionValue* result = expr.Calculate(err);
 		if ( result )
 		{
-			if (result->type == vtString)
+			if (result->isString())
 			{
-				str = result->str;
+				str = result->str();
 				results.push_back(str);
 			}
-			else if (result->type == vtBoolean)
+			else if (result->isBoolean())
 			{
-				str = result->bln ? "true" : "false";
+				str = result->bln() ? "true" : "false";
 				results.push_back(str);
 			}
 			else
 			{
-				str.Format(floatFormat, result->dbl);
+				str.Format(floatFormat, result->dbl());
 				results.push_back(str);
 			}
 		}
@@ -378,7 +378,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 							CExpressionValue* result = expr.Calculate(err);
 							if ( result )
 							{
-								if (result->type == vtBoolean && result->bln)
+								if (result->isBoolean() && result->bln())
 								{
 									results[i] = categoryId;
 								}

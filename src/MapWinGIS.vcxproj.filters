@@ -855,6 +855,9 @@
     <ClInclude Include="COM classes\GdalDriverManager.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Processing\Functions.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1629,9 +1632,6 @@
     <ClCompile Include="Processing\ClipperConverter.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\Expression.cpp">
-      <Filter>Processing</Filter>
-    </ClCompile>
     <ClCompile Include="Processing\GeometryHelper.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
@@ -1820,6 +1820,10 @@
     </ClCompile>
     <ClCompile Include="COM classes\GdalDriverManager.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Expression.cpp" />
+    <ClCompile Include="Processing\Functions.cpp">
+      <Filter>Processing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

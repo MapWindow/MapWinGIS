@@ -60,6 +60,15 @@ enum tkOperation
 	operNone = 19,
 };
 
+enum tkFunction
+{
+	fnNone = -1,
+	fnSin = 0,
+	fnCos = 1,
+	fnTan = 2,
+	fnCtan = 3,
+    fnSubString = 4,
+};
 
 class COperation
 {
@@ -73,47 +82,89 @@ public:
 // A single value within expression, either double, boolean, string or matrix
 class CExpressionValue
 {
+	RasterMatrix* _matrix;
+	GDALRasterBand* _band;
+	tkValueType _type;
+	CString _str;
+	double _dbl;
+	bool _bln;
 public:	
-	RasterMatrix* matrix;
-	GDALRasterBand* band;
-	tkValueType type;
-	CString str;
-	double dbl;
-	bool bln;
 
 	CExpressionValue(void)
 	{
-		dbl = 0.0;
-		bln = false;
-		type = vtDouble;
-		matrix = NULL;
-		band = NULL;
+		_dbl = 0.0;
+		_bln = false;
+		_type = vtDouble;
+		_matrix = NULL;
+		_band = NULL;
 	}
 
 	~CExpressionValue()
 	{
-		if (matrix)
-			delete matrix;
+		clearMatrix();
 	}
 
-	CExpressionValue& operator=(const CExpressionValue& val)
+	CExpressionValue& operator=(CExpressionValue& val)
 	{
 		if (this == &val)
 			return *this;
 
-		this->bln = val.bln;
-		this->dbl = val.dbl;
-		this->str = val.str;
-		this->type = val.type;
+		_bln = val.bln();
+		_dbl = val.dbl();
+		_str = val.str();
+		_type = val.type();
 		return *this;
 	}	
 
-	void SetMatrix(RasterMatrix* m)
+	bool bln() {return _bln; }
+	CString str() { return _str; }
+	double dbl() { return _dbl; }
+	tkValueType type() { return _type; }
+	RasterMatrix* matrix() { return _matrix; }
+	GDALRasterBand* band() { return _band; }
+
+	bool IsDouble() { return _type == vtDouble; }
+	bool isBoolean() { return _type == vtBoolean; }
+	bool isString() { return _type == vtString; }
+	bool IsFloatArray() { return _type == vtFloatArray; }
+
+	void bln(bool value) 
+	{ 
+		_bln = value; 
+		_type = vtBoolean;
+	}
+	
+	void str(CString s)
 	{
-		if (matrix)
-			delete matrix;
-		matrix = m;
-		type = vtFloatArray;
+		_str = s;
+		_type = vtString;
+	}
+	
+	void dbl(double dbl)
+	{
+		_dbl = dbl;
+		_type = vtDouble;
+	}
+
+	void band(GDALRasterBand* band) 
+	{ 
+		_band = band; 
+	}
+
+	void matrix(RasterMatrix* m)
+	{
+		clearMatrix();
+		
+		_matrix = m;
+		_type = vtFloatArray;
+	}
+
+	void clearMatrix()
+	{
+		if (_matrix) {
+			delete _matrix;
+			_matrix = NULL;
+		}
 	}
 };
 
@@ -168,11 +219,48 @@ public:
 	CString expression;	            // for debugging
 	CExpressionValue* val;
 	int activeCount;
+	tkFunction functionId;
+	bool isFunction;
+	vector<CExpressionPart*> arguments;
 
 	CExpressionPart()
 	{
+		functionId = fnNone;
+		isFunction = false;
 		activeCount = 0;
 		val = NULL;
+	}
+};
+
+typedef bool(*ExpressionFunction)(const vector<CExpressionValue*>& arguments, IShape* shape, CExpressionValue& result);
+
+class CFunction
+{
+private:
+	CString _name;
+	int _numParams;
+	bool _useGeometry;
+	CString _group;
+	ExpressionFunction _fn;
+
+public:
+	CFunction(CString name, int numParams, ExpressionFunction function, CString group, bool useGeometry = false)
+		: _name(name), _numParams(numParams), _useGeometry(useGeometry), _group(group), _fn(function)
+	{
+
+	}
+
+	CString name() { return _name; }
+
+	int numParams() { return _numParams; }
+
+	bool usesgeometry() { return _useGeometry; }
+
+	CString group() { return _group; }
+
+	bool fn(vector<CExpressionValue*>& arguments, IShape* shape, CExpressionValue& result)
+	{
+		return _fn(arguments, shape, result);
 	}
 };
 
@@ -236,29 +324,25 @@ public:
 	}
 	void put_FieldValue(int FieldId, double newVal)
 	{
-		_variables[FieldId]->val->type = vtDouble;
-		_variables[FieldId]->val->dbl = newVal;
+		_variables[FieldId]->val->dbl(newVal);
 	}
 	void put_FieldValue(int FieldId, BSTR newVal)
 	{
 		USES_CONVERSION;
-		_variables[FieldId]->val->type = vtString;
-		_variables[FieldId]->val->str = OLE2CA(newVal);
+		_variables[FieldId]->val->str(OLE2CA(newVal));
 	}
 	void put_FieldValue(int FieldId, CString newVal)
 	{
-		_variables[FieldId]->val->type = vtString;
-		_variables[FieldId]->val->str = newVal;
+		_variables[FieldId]->val->str(newVal);
 	}
 	void put_FieldValue(int FieldId, bool newVal)
 	{
-		_variables[FieldId]->val->type = vtBoolean;
-		_variables[FieldId]->val->bln = newVal;
+		_variables[FieldId]->val->bln(newVal);
 	}
 
 private:
 	// parsing the expression
-	bool ParseExpressionPart(CString s);
+	CExpressionPart* ParseExpressionPart(CString s);
 	bool ReadValue(CString s, int& position, CElement* element);
 	bool ReadOperation(CString s, int& position, CElement& element);
 	bool GetBrackets(CString expression, int& begin, int& end, CString open = "(", CString close = ")");
@@ -280,12 +364,22 @@ private:
 	void SetFieldValues(ITable* tbl);
 	TwoArgOperator GetMatrixOperation(tkOperation op);
 	CString Test();
+	void Reset();
 	
-	void ReplaceFunctions(CString expression);
+	void ReplaceFunctions(CString& expression);
 	bool ReplaceFieldNames(CString s, int& count, CString& ErrorMessage);
 	bool ReplaceStringConstants(CString s, int& count, CString& ErrorMessage);
 	void BuildFieldList();
 	bool ParseBrackets(CString s, CString& ErrorMessage);
+	int TryParseFunction(CString& s, int begin, int end);
+	void ReplacePart(CString& s, int begin, int end, int& count);
+	int ParseFunctionId(CString s, int begin);
+	bool ParseArgumentList(CString s, int functionId);
+	int GetParameterCount(int functionId);
+	void ResetActiveCountForParts();
+	bool CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount);
+	bool FinishPart(CExpressionPart* part);
+	bool EvaluateFunction(CExpressionPart* part);
+	void EvaluatePart();
+	bool EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount);
 };
-
-

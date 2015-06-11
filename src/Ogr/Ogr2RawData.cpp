@@ -221,8 +221,9 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 						CExpressionValue* result = expr.Calculate(error);
 						if (result)
 						{
-							if (result->type == vtBoolean && result->bln)
+							if (result->isBoolean() && result->bln()) {
 								data[j]->CategoryIndex = i;
+							}							
 						}
 					}
 					break;
@@ -333,18 +334,18 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 			CExpressionValue* val = expr.Calculate(err);
 			if (val)
 			{
-				if (val->type == vtBoolean)
+				if (val->isBoolean())
 				{
-					data[i]->LabelText = val->bln ? L"true" : L"false";
+					data[i]->LabelText = val->bln() ? L"true" : L"false";
 				}
-				else if (val->type == vtDouble)
+				else if (val->IsDouble())
 				{
-					data[i]->LabelText = Utility::FormatNumber(val->dbl, format);
+					data[i]->LabelText = Utility::FormatNumber(val->dbl(), format);
 					
 				}
-				else if (val->type == vtString)
+				else if (val->isString())
 				{
-					data[i]->LabelText = A2W(val->str);
+					data[i]->LabelText = A2W(val->str());
 				}
 			}
 		}
