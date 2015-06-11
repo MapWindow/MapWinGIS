@@ -1,12 +1,143 @@
 #include "stdafx.h"
 #include "ExpressionParser.h"
+#include "Functions.h"
+
+// *******************************************************************
+//		IsDecimal()
+// *******************************************************************
+bool ExpressionParser::IsDecimal(char chr, bool& exponential)
+{
+	if (chr >= '0' && chr <= '9')
+		return true;
+
+	if ((chr == '.') || (chr == ','))	// specify decimal separator explicitly
+	{
+		return true;
+	}
+
+	if ((chr == 'e') || (chr == 'E'))
+	{
+		exponential = true;
+		return true;
+	}
+
+	if (exponential && (chr == '+' || chr == '-'))
+	{
+		exponential = false;
+		return true;
+	}
+
+	exponential = false;	// +, - can be in the next position after e only
+	return false;
+}
+
+// *******************************************************************
+//		IsDecimal()
+// *******************************************************************
+bool ExpressionParser::IsDecimal(CString& str)
+{
+	for (int i = 0; i < str.GetLength(); i++)
+	{
+		if ((str[i] >= '0') && (str[i] < '9'))
+			continue;
+
+		if ((str[i] == '.') || (str[i] == ',') || (str[i] == 'e') || (str[i] == 'E'))	// specify decimal separator explicitly
+			continue;
+
+		return false;
+	}
+
+	return true;
+}
+
+// *******************************************************************
+//		IsDecimalZero()
+// *******************************************************************
+bool ExpressionParser::IsDecimalZero(CString& str)
+{
+	for (int i = 0; i < str.GetLength(); i++)
+	{
+		if ((str[i] != '0') && (str[i] != '.') && (str[i] != ','))		// TODO: check decimal separator in more general way
+			return false;
+	}
+	return true;
+}
+
+// *******************************************************************
+//		IsInteger()
+// *******************************************************************
+bool ExpressionParser::IsInteger(CString& str)
+{
+	for (int i = 0; i < str.GetLength(); i++)
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return false;
+	}
+	return true;
+}
+
+// *******************************************************************
+//		IsOperator()
+// *******************************************************************
+bool ExpressionParser::IsOperator(char s)
+{
+	switch (s)
+	{
+		case '<':
+		case '>' :
+		case '=' :
+		case '+' :
+		case '-' :
+		case '*' :
+		case '/' :
+		case '\\':
+		case '^':
+		case ':':
+			return true;
+	}
+
+	return false;
+}
+
+// *******************************************************************
+//		IsFunctionName()
+// *******************************************************************
+bool ExpressionParser::IsFunctionName(char s)
+{
+	return isalnum(s) || s == '$';
+}
+
+// *******************************************************************
+//		IsOperator()
+// *******************************************************************
+bool ExpressionParser::IsOperator(CString s)
+{
+	if (s.GetLength() == 0)
+	{
+		return IsOperator(s[0]);
+	}
+	else
+	{
+		s = s.MakeUpper();
+
+		if (s.Compare("AND") == 0 ||
+			s.Compare("OR") == 0 ||
+			s.Compare("XOR") == 0 ||
+			s.Compare("MOD") == 0)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+}
 
 // *****************************************************************
-//		ParseExpression()
+//		Parse()
 // *****************************************************************
 // building list of operation; UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool ExpressionParser::ParseExpression(CExpression* expression, CString s, bool useFields)
+bool ExpressionParser::Parse(CExpression* expression, CString s, bool useFields)
 {
 	_expression = expression;
 
@@ -17,7 +148,7 @@ bool ExpressionParser::ParseExpression(CExpression* expression, CString s, bool 
 		return false;
 	}
 
-	if (!ReplaceStringConstants(s, count))
+	if (!ReplaceStringLiterals(s, count))
 	{
 		return false;
 	}
@@ -27,9 +158,9 @@ bool ExpressionParser::ParseExpression(CExpression* expression, CString s, bool 
 		return false;
 	}
 
-	ReplaceFunctions(s);
+	s.Replace(" ", "");
 
-	if (!ParseBrackets(s))
+	if (!ParseTree(s))
 	{
 		return false;
 	}
@@ -38,11 +169,11 @@ bool ExpressionParser::ParseExpression(CExpression* expression, CString s, bool 
 }
 
 // *****************************************************************
-//		ParseBrackets()
+//		ParseTree()
 // *****************************************************************
-bool ExpressionParser::ParseBrackets(CString s)
+bool ExpressionParser::ParseTree(CString s)
 {
-	int count = 0;
+	int partCount = 0;
 	bool found = true;
 	CString temp;
 
@@ -54,27 +185,26 @@ bool ExpressionParser::ParseBrackets(CString s)
 
 		if (found)
 		{
-			int fnId = TryParseFunction(s, begin, end);
+			int fnBegin;
+			CFunction* fn = ParseFunction(s, begin - 1, fnBegin);
 
-			if (fnId != -1)
+			if (fn)
 			{
-				if (!ParseArgumentList(s.Mid(begin + 1, end - begin - 1), fnId))
+				if (!ParseArgumentList(GetInnerString(s, begin, end), fn))
 				{
 					return false;
 				}
 
-				temp.Format("%d", fnId);
-				begin -= temp.GetLength() + 2;		// replacing function id as well (!1!)
-
-				ReplacePart(s, begin, end, count);
+				ReplacePart(s, fnBegin, end, partCount);
 
 				continue;
 			}
 		}
 
-		CString expression = found ? s.Mid(begin + 1, end - begin - 1) : s;
+		CString expression = found ? GetInnerString(s, begin, end) : s;
 
 		CExpressionPart* part = ParseExpressionPart(expression);
+
 		if (part)
 		{
 			_expression->AddPart(part);
@@ -86,138 +216,130 @@ bool ExpressionParser::ParseBrackets(CString s)
 
 		if (found)
 		{
-			ReplacePart(s, begin, end, count);
+			ReplacePart(s, begin, end, partCount);
 		}
 	}
 
 	return true;
 }
 
-
-// *****************************************************************
-//		ReplacePart()
-// *****************************************************************
-void ExpressionParser::ReplacePart(CString& s, int begin, int end, int& count)
+// *******************************************************************
+//		GetInnerString()
+// *******************************************************************
+CString ExpressionParser::GetInnerString(CString& s, int begin, int end)
 {
-	CString strReplace;
-	strReplace.Format("#%i", count);
-	ReplaceSubString(s, begin, end - begin + 1, strReplace);
-	count++;
+	return s.Mid(begin + 1, end - begin - 1);
 }
 
-// *****************************************************************
-//		ReplaceStringConstants()
-// *****************************************************************
-bool ExpressionParser::ReplaceStringConstants(CString s, int& count)
+// *******************************************************************
+//		GetBrackets()
+// *******************************************************************
+// Returns positions of the first inner brackets
+bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CString openingSymbol, CString closingSymbol)
 {
-	bool found = true;
-
-	while (found)
+	// closing bracket
+	end = -1;
+	for (int i = 0; i < expression.GetLength(); i++)
 	{
-		int begin = -1;
-		found = false;
-		for (long i = 0; i < s.GetLength(); i++)
+		if (expression.Mid(i, 1) == closingSymbol)
 		{
-			if (s.Mid(i, 1) == '\"')
-			{
-				if (begin == -1)
-				{
-					begin = i;    // it's an opening quotes
-				}
-				else
-				{
-					// it's closing quotes
-					if (i > begin + 1)   // at least one character
-					{
-						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
-						CString strReplace;
-						strReplace.Format("&%i", count);
-						ReplaceSubString(s, begin, i - begin + 1, strReplace);
-						count++;
-						begin = -1;
-						found = true;
-						break;
-					}
-					else
-					{
-						begin = -1;
-					}
-				}
-			}
-		}
-
-		if (begin != -1)
-		{
-			SetErrorMessage("Unpaired text quotes");
-			return false;
+			end = i;
+			break;
 		}
 	}
 
-	return true;
-}
-
-// *****************************************************************
-//		ReplaceFieldNames()
-// *****************************************************************
-bool ExpressionParser::ReplaceFieldNames(CString s, int& count)
-{
-	bool found = true;
-
-	while (found)
-	{
-		int begin = -1;
-		found = false;
-		for (long i = 0; i < s.GetLength(); i++)
-		{
-			if (s.Mid(i, 1) == '[')
-			{
-				if (begin == -1)
-				{
-					begin = i;
-				}
-				else
-				{
-					SetErrorMessage("\"[\" character inside field name");
-					return false;
-				}
-			}
-
-			if (s.Mid(i, 1) == ']')
-			{
-				if (begin == -1)
-				{
-					SetErrorMessage("\"]\" character without opening bracket");
-					return false;
-				}
-				else
-				{
-					if (i > begin + 1)   // at least one character
-					{
-						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
-						CString strReplace;
-						strReplace.Format("{%i}", count);
-						ReplaceSubString(s, begin, i - begin + 1, strReplace);
-						count++;
-						begin = -1;
-						found = true;
-						break;
-					}
-					else
-					{
-						SetErrorMessage("Empty field name: []");
-						return false;
-					}
-				}
-			}
-		}
-
-		if (begin != -1)
-		{
-			SetErrorMessage("Unpaired text quotes");
-			return false;
-		}
+	if (end == -1) {
+		return false;
 	}
 
+	// opening bracket
+	for (int i = end; i >= 0; i--)
+	{
+		if (expression.Mid(i, 1) == openingSymbol)
+		{
+			begin = i;
+			return true;
+		}
+	}
+	return false;
+}
+
+// ************************************************************
+//	 ParseFunction()
+//************************************************************
+// Tries to parse function name from the position of the opening bracket going backwards
+CFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
+{
+	int i = begin;
+
+	CString sub;
+
+	while (i >= 0)
+	{
+		if (!IsFunctionName(s[i]))
+		{
+			return false;
+		}
+
+		sub = s[i] + sub;
+
+		CFunction* fn = parser::GetFunction(sub);
+
+		if (fn) 
+		{
+			fnBegin = i;
+			return fn;
+		}
+	
+		i--;
+	}
+
+	return NULL;
+}
+
+// ************************************************************
+//	 ParseArgumentList()
+//************************************************************
+bool ExpressionParser::ParseArgumentList(CString s, CFunction* fn)
+{
+	if (!fn) return false;
+
+	CExpressionPart* part = new CExpressionPart();
+	part->expression = s;
+	part->function = fn;
+
+	int pos = 0;
+	CString ct;
+
+	ct = s.Tokenize(";", pos);
+
+	while (ct.GetLength() != 0)
+	{
+		CExpressionPart* arg = ParseExpressionPart(ct);
+
+		if (arg)
+		{
+			part->arguments.push_back(arg);
+		}
+		else
+		{
+			// error message is set above			
+			delete part;
+			return false;
+		}
+
+		ct = s.Tokenize(";", pos);
+	};
+
+	if (part->arguments.size() != fn->numParams())
+	{
+		CString s = Debug::Format("Invalid number of parameters: %s: %d; expected %d", fn->name(), part->arguments.size(), fn->numParams());
+		SetErrorMessage(s);
+		delete part;
+		return false;
+	}
+
+	_expression->AddPart(part);
 	return true;
 }
 
@@ -235,7 +357,6 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 
 	for (int i = 0; i < s.GetLength(); i++)
 	{
-		SkipSpaces(s, i);
 		if (i >= s.GetLength())
 			break;
 
@@ -673,223 +794,131 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 	return true;
 }
 
-// *******************************************************************
-//		GetBrackets()
-// *******************************************************************
-// Returns positions of the first inner brackets
-bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CString openingSymbol, CString closingSymbol)
+// *****************************************************************
+//		ReplaceStringConstants()
+// *****************************************************************
+bool ExpressionParser::ReplaceStringLiterals(CString s, int& count)
 {
-	// closing bracket
-	end = -1;
-	for (int i = 0; i < expression.GetLength(); i++)
+	bool found = true;
+
+	while (found)
 	{
-		if (expression.Mid(i, 1) == closingSymbol)
+		int begin = -1;
+		found = false;
+		for (long i = 0; i < s.GetLength(); i++)
 		{
-			end = i;
-			break;
-		}
-	}
-	if (end == -1)
-		return false;
-
-	// opening bracket
-	for (int i = end; i >= 0; i--)
-	{
-		if (expression.Mid(i, 1) == openingSymbol)
-		{
-			begin = i;
-			return true;
-		}
-	}
-	return false;
-}
-
-// ************************************************************
-//		SkipSpaces()
-// ************************************************************
-void ExpressionParser::SkipSpaces(CString s, int& position)
-{
-	while (position < s.GetLength() && s.Mid(position, 1) == " ")
-	{
-		position++;
-	}
-}
-
-// *******************************************************************
-//		IsDecimal()
-// *******************************************************************
-bool ExpressionParser::IsDecimal(CString& str)
-{
-	for (int i = 0; i < str.GetLength(); i++)
-	{
-		if ((str[i] >= '0') && (str[i] < '9'))
-			continue;
-		if ((str[i] == '.') || (str[i] == ',') || (str[i] == 'e') || (str[i] == 'E'))	// specify decimal separator explicitly
-			continue;
-
-		return false;
-	}
-	return true;
-}
-
-bool ExpressionParser::IsDecimal(char chr, bool& exponential)
-{
-	if (chr >= '0' && chr <= '9')
-		return true;
-
-	if ((chr == '.') || (chr == ','))	// specify decimal separator explicitly
-	{
-		return true;
-	}
-
-	if ((chr == 'e') || (chr == 'E'))
-	{
-		exponential = true;
-		return true;
-	}
-
-	if (exponential && (chr == '+' || chr == '-'))
-	{
-		exponential = false;
-		return true;
-	}
-
-	exponential = false;	// +, - can be in the next position after e only
-	return false;
-}
-
-// *******************************************************************
-//		IsDecimalZero()
-// *******************************************************************
-bool ExpressionParser::IsDecimalZero(CString& str)
-{
-	for (int i = 0; i < str.GetLength(); i++)
-	{
-		if ((str[i] != '0') && (str[i] != '.') && (str[i] != ','))		// TODO: check decimal separator in more general way
-			return false;
-	}
-	return true;
-}
-
-// *******************************************************************
-//		IsInteger()
-// *******************************************************************
-bool ExpressionParser::IsInteger(CString& str)
-{
-	for (int i = 0; i < str.GetLength(); i++)
-	{
-		if (str[i] < '0' || str[i] > '9')
-			return false;
-	}
-	return true;
-}
-
-// ************************************************************
-//	 TryParseFunction()
-//************************************************************
-// begin, end - position of brackets
-// name of the function is already substituted, like !1!
-// any white spaces are removed
-int ExpressionParser::TryParseFunction(CString& s, int begin, int end)
-{
-	if (begin < 3) return -1;   // !1!(1) - first bracket must be at least a third position
-
-	if (s[begin - 1] != '!') return -1;
-
-	int tempBegin = begin - 2;
-
-	return ParseFunctionId(s, tempBegin);
-}
-
-// ************************************************************
-//	 ParseFunctionId()
-//************************************************************
-// Starts to read function id from its back, for example !15 starting from "5"
-int ExpressionParser::ParseFunctionId(CString s, int begin)
-{
-	int i = begin;
-	while (i >= 0)
-	{
-		if (s[i] == '!')
-		{
-			s = s.Mid(i + 1, begin - i);
-			if (IsInteger(s))
+			if (s.Mid(i, 1) == '\"')
 			{
-				return atoi(s);
+				if (begin == -1)
+				{
+					begin = i;    // it's an opening quotes
+				}
+				else
+				{
+					// it's closing quotes
+					if (i > begin + 1)   // at least one character
+					{
+						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
+						CString strReplace;
+						strReplace.Format("&%i", count);
+						ReplaceSubString(s, begin, i - begin + 1, strReplace);
+						count++;
+						begin = -1;
+						found = true;
+						break;
+					}
+					else
+					{
+						begin = -1;
+					}
+				}
 			}
 		}
 
-		if (s[i] < '0' && s[i] > '9') return -1;
-
-		i--;
-	}
-
-	return -1;
-}
-
-// ************************************************************
-//	 ParseArgumentList()
-//************************************************************
-bool ExpressionParser::ParseArgumentList(CString s, int functionId)
-{
-	CExpressionPart* part = new CExpressionPart();
-	part->expression = s;
-	part->isFunction = true;
-	part->functionId = (tkFunction)functionId;
-
-	int pos = 0;
-	CString ct;
-
-	ct = s.Tokenize(";", pos);
-
-	while (ct.GetLength() != 0)
-	{
-		CExpressionPart* arg = ParseExpressionPart(ct);
-
-		if (arg)
+		if (begin != -1)
 		{
-			part->arguments.push_back(arg);
-		}
-		else
-		{
-			// TODO: delete previous arguments
-			delete part;
+			SetErrorMessage("Unpaired text quotes");
 			return false;
 		}
+	}
 
-		ct = s.Tokenize(";", pos);
-	};
-
-	//int paramCount = GetParameterCount(functionId);
-	//if (part->arguments.size() != paramCount)
-	//{
-	//	// TODO: report invalid number of parameters
-	//	// TODO: delete arguments
-	//	delete part;
-	//	return false;
-	//}
-
-	//_parts.push_back(part);
 	return true;
 }
 
-// ************************************************************
-//	 ReplaceFunctions()
-//************************************************************
-void ExpressionParser::ReplaceFunctions(CString& expression)
+// *****************************************************************
+//		ReplaceFieldNames()
+// *****************************************************************
+bool ExpressionParser::ReplaceFieldNames(CString s, int& count)
 {
-	vector<CString> list{ "sin", "cos", "tan", "ctan" };
+	bool found = true;
 
-	CString replace;
-	for (size_t i = 0; i < list.size(); i++)
+	while (found)
 	{
-		replace.Format("!%d!", i);
-		expression.Replace(list[i], replace);
+		int begin = -1;
+		found = false;
+		for (long i = 0; i < s.GetLength(); i++)
+		{
+			if (s.Mid(i, 1) == '[')
+			{
+				if (begin == -1)
+				{
+					begin = i;
+				}
+				else
+				{
+					SetErrorMessage("\"[\" character inside field name");
+					return false;
+				}
+			}
+
+			if (s.Mid(i, 1) == ']')
+			{
+				if (begin == -1)
+				{
+					SetErrorMessage("\"]\" character without opening bracket");
+					return false;
+				}
+				else
+				{
+					if (i > begin + 1)   // at least one character
+					{
+						_expression->GetStrings()->push_back(s.Mid(begin + 1, i - begin - 1));
+						CString strReplace;
+						strReplace.Format("{%i}", count);
+						ReplaceSubString(s, begin, i - begin + 1, strReplace);
+						count++;
+						begin = -1;
+						found = true;
+						break;
+					}
+					else
+					{
+						SetErrorMessage("Empty field name: []");
+						return false;
+					}
+				}
+			}
+		}
+
+		if (begin != -1)
+		{
+			SetErrorMessage("Unpaired text quotes");
+			return false;
+		}
 	}
 
-	expression.Replace(" ", "");
+	return true;
+}
 
-	Debug::WriteLine("After fn substitute: %s", expression);
+// *****************************************************************
+//		ReplacePart()
+// *****************************************************************
+void ExpressionParser::ReplacePart(CString& s, int begin, int end, int& count)
+{
+	CString strReplace;
+	strReplace.Format("#%i", count);
+	ReplaceSubString(s, begin, end - begin + 1, strReplace);
+	count++;
 }
 
 // ************************************************************

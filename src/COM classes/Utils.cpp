@@ -5365,7 +5365,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 			if (bandOutput->RasterIO( GF_Write, 0, i, numColumns, 1, calcData, numColumns, 1, GDT_Float32, 0, 0 ) != CE_None )
 				goto cleaning;
 			
-			expr.ReleaseMemory();
+			expr.ReleaseArrays();
 		}
 	}
 	*retVal = VARIANT_TRUE;

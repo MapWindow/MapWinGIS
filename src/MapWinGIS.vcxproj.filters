@@ -861,6 +861,9 @@
     <ClInclude Include="Processing\ExpressionParser.h">
       <Filter>Processing</Filter>
     </ClInclude>
+    <ClInclude Include="Processing\ExpressionParts.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1831,6 +1834,9 @@
       <Filter>Processing</Filter>
     </ClCompile>
     <ClCompile Include="Processing\ExpressionParser.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ExpressionParts.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
   </ItemGroup>

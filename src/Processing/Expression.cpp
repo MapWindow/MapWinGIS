@@ -84,7 +84,7 @@ bool CExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int
 {
 	do
 	{
-		if (part->isFunction)
+		if (part->isFunction())
 		{
 			if (!EvaluateFunction(part))
 			{
@@ -112,12 +112,12 @@ bool CExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int
 // *******************************************************************
 bool CExpression::EvaluateFunction(CExpressionPart* part)
 {
-	if (!part->isFunction) return false;
+	if (!part->isFunction()) return false;
 
 	CString errorMessage;
 	int operationCount = 0;
 
-	// first lets evaluate arguments
+	// first let's evaluate arguments
 	for (size_t i = 0; i < part->arguments.size(); i++)
 	{
 		CExpressionPart* arg = part->arguments[i];
@@ -129,34 +129,22 @@ bool CExpression::EvaluateFunction(CExpressionPart* part)
 		}
 	}
 
-	CExpressionValue* value = part->arguments[0]->val;
-	if (!value->IsDouble())
+	// preparing values
+	vector<CExpressionValue*> args;
+	for (size_t i = 0; i < part->arguments.size(); i++)
 	{
-		Debug::WriteError("Double value is expected");
-		return false;
+		args.push_back(part->arguments[i]->val);
 	}
 
-	//part->val = new CExpressionValue();
-	//part->val->type = vtDouble;
+	// TODO: evaluate type of arguments depending on function
 
-	//// call the function
-	//switch (part->functionId)
-	//{
-	//	case fnCos:
-	//		part->val->dbl = cos(value->dbl);
-	//		break;
-	//	case fnSin:
-	//		part->val->dbl = sin(value->dbl);
-	//		break;	
-	//	case fnTan:
-	//		part->val->dbl = tan(value->dbl);
-	//		break;
-	//	case fnCtan:
-	//		part->val->dbl = 1 / tan(value->dbl);
-	//		break;
-	//}
-
-	return true;
+	// calculating
+	
+	// TODO: this value must be deleted;
+	// in other cases val holds reference to element value, therefore it's deleted along with its parent element
+	part->val = new CExpressionValue();	
+	
+	return part->function->call(args, NULL, *(part->val));
 }
 
 // *******************************************************************
@@ -164,12 +152,12 @@ bool CExpression::EvaluateFunction(CExpressionPart* part)
 // *******************************************************************
 bool CExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
 {
-	COperation* operation = NULL;;
+	COperation* operation = NULL;
 
 	// if there is more then one element, then definitely some operation must be present
 	if (part->elements.size() > 1)
 	{
-		// reading caching operation
+		// reading cached operation
 		bool found = false;
 		if (!_saveOperations)
 		{
@@ -210,7 +198,7 @@ bool CExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CStrin
 // if there is only one element left, we'll finalize the part
 bool CExpression::FinishPart(CExpressionPart* part)
 {
-	if (part->isFunction)
+	if (part->isFunction())
 	{
 		// part->val is already set
 		return true;
@@ -266,8 +254,8 @@ void CExpression::Reset()
 // *******************************************************************
 //		FindOperation()
 // *******************************************************************
-// Seeks operation with the highest priority and operands. Operation, left, right - indices of elements
-bool CExpression::FindOperation(CExpressionPart* part, COperation& operation) // int& operation, int& left, int& right)
+// Seeks operation with the highest priority and operands.
+bool CExpression::FindOperation(CExpressionPart* part, COperation& operation)
 {
 	// seeking operation
 	bool found = false;
@@ -291,6 +279,7 @@ bool CExpression::FindOperation(CExpressionPart* part, COperation& operation) //
 			}
 		}
 	}
+
     if ( !found )
 	{
 		_errorMessage = "Failed to find operation";
@@ -319,6 +308,7 @@ bool CExpression::FindOperation(CExpressionPart* part, COperation& operation) //
 			}
 		}
 	}
+
 	if ( operation.right == -1 )
 	{
 		_errorMessage = "No right operand was found";
@@ -357,6 +347,7 @@ bool CExpression::FindOperation(CExpressionPart* part, COperation& operation) //
 		op->binaryOperation = operation.binaryOperation;
 		_operations.push_back(op);
 	}
+
     return true;
 }
 
@@ -723,8 +714,6 @@ inline CExpressionValue* CExpression::GetValue(CExpressionPart* part, int elemen
 	return val;
 }
 
-
-
 // ************************************************************
 //	 ReadFieldNames()
 //************************************************************
@@ -732,31 +721,28 @@ bool CExpression::ReadFieldNames(ITable* tbl)
 {
 	_fields.clear();
 	
-	if ( !tbl )
+	if (!tbl) return false;
+	
+	long numFields;
+	tbl->get_NumFields(&numFields);
+
+	for (int i = 0; i < numFields; i++)
 	{
-		return false;
-	}
-	else
-	{
-		long numFields;
-		tbl->get_NumFields(&numFields);
-		
-		for ( int i = 0; i < numFields; i++ )
+		// TODO: wrap
+		IField* fld = NULL;
+		tbl->get_Field(i, &fld);
+		if (fld)
 		{
-			IField* fld = NULL;
-			tbl->get_Field(i, &fld);
-			if ( fld )
-			{
-				USES_CONVERSION;
-				CComBSTR bstr;
-				fld->get_Name(&bstr);
-				CString str = OLE2CA(bstr);
-				_fields.push_back(str.MakeLower());
-				fld->Release();
-			}
+			USES_CONVERSION;
+			CComBSTR bstr;
+			fld->get_Name(&bstr);
+			CString str = OLE2CA(bstr);
+			_fields.push_back(str.MakeLower());
+			fld->Release();
 		}
-		return true;
 	}
+	
+	return true;
 }
 
 // ************************************************************
@@ -786,38 +772,24 @@ void CExpression::BuildFieldList()
 	}
 }
 
-// ************************************************************
-//	 GetArgumentCount()
-//************************************************************
-int CExpression::GetParameterCount(int functionId)
-{
-	switch (functionId)
-	{
-		// TODO: list functions with different number of parameters
-		default:
-			return 1;
-	}
-}
-
 // *****************************************************************
 //		Clear()
 // *****************************************************************
 void CExpression::Clear()
 {
-	ReleaseMemory();
+	ReleaseArrays();
 
 	for (size_t i = 0; i < _parts.size(); i++)
 	{
-		for (size_t j = 0; j < _parts[i]->elements.size(); j++)
-		{
-			delete _parts[i]->elements[j];
-		}
+		
 		delete _parts[i];
 	}
+
 	for (size_t i = 0; i < _operations.size(); i++)
 	{
 		delete _operations[i];
 	}
+
 	_variables.clear();
 	_parts.clear();
 	_operations.clear();
@@ -825,31 +797,33 @@ void CExpression::Clear()
 }
 
 // *****************************************************************
-//		ReleaseMemory()
+//		ReleaseArrays()
 // *****************************************************************
-void CExpression::ReleaseMemory()
+void CExpression::ReleaseArrays()
 {
 	for (size_t i = 0; i < _parts.size(); i++)
 	{
 		for (size_t j = 0; j < _parts[i]->elements.size(); j++)
 		{
-			if (_parts[i]->elements[j]->type == etValue || _parts[i]->elements[j]->type == etPart)
+			CElement* el = _parts[i]->elements[j];
+
+			if (el->type == etValue || el->type == etPart)
 			{
-				CExpressionValue* v = _parts[i]->elements[j]->calcVal;
+				CExpressionValue* v = el->calcVal;
 				v->clearMatrix();
 
-				v = _parts[i]->elements[j]->val;
+				v = el->val;
 				v->clearMatrix();
 			}
 		}
 	}
 }
 
-
 // *****************************************************************
 //		Parse()
 // *****************************************************************
-// building list of operation; UseFields: true - only fields form attribute table; 
+// building list of operation; 
+// UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
 bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
 {
@@ -857,7 +831,7 @@ bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
 	_useFields = useFields;
 
 	ExpressionParser parser;
-	parser.ParseExpression(this, s, useFields);
+	parser.Parse(this, s, useFields);
 
 	_strings.clear();
 
@@ -865,3 +839,4 @@ bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
 
 	return true;
 }
+
