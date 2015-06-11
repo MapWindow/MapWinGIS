@@ -831,12 +831,15 @@ bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
 	_useFields = useFields;
 
 	ExpressionParser parser;
-	parser.Parse(this, s, useFields);
+	bool result = parser.Parse(this, s, useFields);
 
 	_strings.clear();
 
-	BuildFieldList();
+	if (result)
+	{
+		BuildFieldList();
+	}
 
-	return true;
+	return result;
 }
 

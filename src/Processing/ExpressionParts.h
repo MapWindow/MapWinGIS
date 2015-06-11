@@ -236,7 +236,7 @@ public:
 		CString part = name.Tokenize(";", position);
 		while (part.GetLength() > 0)
 		{
-			_aliases.push_back(name);
+			_aliases.push_back(part);
 			part = name.Tokenize(";", position);
 		}
 

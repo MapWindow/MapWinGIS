@@ -278,7 +278,7 @@ CFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 	{
 		if (!IsFunctionName(s[i]))
 		{
-			return false;
+			return NULL;
 		}
 
 		sub = s[i] + sub;
