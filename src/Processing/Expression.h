@@ -279,7 +279,6 @@ public:
 		Clear();
 	}
 
-
 private:
 	std::vector<CExpressionPart*> _parts;
 	std::vector<CElement*> _variables;
@@ -292,53 +291,6 @@ private:
 	int _errorPosition;		// the position of error
 	int _errorLength;		// the length sub string with error
 	CString _floatFormat;
-	
-public:
-	void Clear();
-	void ReleaseMemory();
-	CString GetFloatFormat() {	return _floatFormat;	}
-	void SetFloatFormat(CString value) { _floatFormat = value; }
-	CExpressionValue* Calculate(CString& errorMessage);
-	bool ParseExpression(CString s, bool useFields, CString& error);
-	bool ReadFieldNames(ITable* tbl);
-	void SetFields(vector<CString>& fields);
-
-	// variable fields
-	int get_NumFields()								
-	{
-		return _variables.size();
-	}
-	CString get_FieldName(int FieldId)
-	{
-		CString s = _variables[FieldId]->fieldName;
-		return s;
-	}
-	int get_FieldIndex(int FieldId)
-	{
-		return _variables[FieldId]->fieldIndex;
-	}
-	
-	CExpressionValue* get_FieldValue(int FieldId)
-	{
-		return _variables[FieldId]->val;
-	}
-	void put_FieldValue(int FieldId, double newVal)
-	{
-		_variables[FieldId]->val->dbl(newVal);
-	}
-	void put_FieldValue(int FieldId, BSTR newVal)
-	{
-		USES_CONVERSION;
-		_variables[FieldId]->val->str(OLE2CA(newVal));
-	}
-	void put_FieldValue(int FieldId, CString newVal)
-	{
-		_variables[FieldId]->val->str(newVal);
-	}
-	void put_FieldValue(int FieldId, bool newVal)
-	{
-		_variables[FieldId]->val->bln(newVal);
-	}
 
 private:
 	// parsing the expression
@@ -363,18 +315,8 @@ private:
 	// interaction with table
 	void SetFieldValues(ITable* tbl);
 	TwoArgOperator GetMatrixOperation(tkOperation op);
-	CString Test();
 	void Reset();
-	
-	void ReplaceFunctions(CString& expression);
-	bool ReplaceFieldNames(CString s, int& count, CString& ErrorMessage);
-	bool ReplaceStringConstants(CString s, int& count, CString& ErrorMessage);
 	void BuildFieldList();
-	bool ParseBrackets(CString s, CString& ErrorMessage);
-	int TryParseFunction(CString& s, int begin, int end);
-	void ReplacePart(CString& s, int begin, int end, int& count);
-	int ParseFunctionId(CString s, int begin);
-	bool ParseArgumentList(CString s, int functionId);
 	int GetParameterCount(int functionId);
 	void ResetActiveCountForParts();
 	bool CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount);
@@ -382,4 +324,63 @@ private:
 	bool EvaluateFunction(CExpressionPart* part);
 	void EvaluatePart();
 	bool EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount);
+
+	
+
+public:
+	void Clear();
+	void ReleaseMemory();
+	CString GetFloatFormat() { return _floatFormat; }
+	void SetFloatFormat(CString value) { _floatFormat = value; }
+
+	CExpressionValue* Calculate(CString& errorMessage);
+
+	bool Parse(CString s, bool useFields, CString& error);
+	bool ReadFieldNames(ITable* tbl);
+	void SetFields(vector<CString>& fields);
+	void AddPart(CExpressionPart* part) { _parts.push_back(part); }
+	
+	vector<CString>* GetStrings() { return &_strings; }
+	vector<CString>* GetFields() { return &_fields; }
+	bool GetUseFields() { return _useFields; }
+
+	// variable fields
+	int get_NumFields()
+	{
+		return _variables.size();
+	}
+	CString get_FieldName(int FieldId)
+	{
+		CString s = _variables[FieldId]->fieldName;
+		return s;
+	}
+	int get_FieldIndex(int FieldId)
+	{
+		return _variables[FieldId]->fieldIndex;
+	}
+
+	CExpressionValue* get_FieldValue(int FieldId)
+	{
+		return _variables[FieldId]->val;
+	}
+	void put_FieldValue(int FieldId, double newVal)
+	{
+		_variables[FieldId]->val->dbl(newVal);
+	}
+	void put_FieldValue(int FieldId, BSTR newVal)
+	{
+		USES_CONVERSION;
+		_variables[FieldId]->val->str(OLE2CA(newVal));
+	}
+	void put_FieldValue(int FieldId, CString newVal)
+	{
+		_variables[FieldId]->val->str(newVal);
+	}
+	void put_FieldValue(int FieldId, bool newVal)
+	{
+		_variables[FieldId]->val->bln(newVal);
+	}
+
+	void SetErrorMessage(CString msg) { _errorMessage = msg; }
+	void SetErrorPosition(int position){ _errorPosition = position; }
 };

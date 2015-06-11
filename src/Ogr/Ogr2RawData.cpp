@@ -181,7 +181,7 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 		if (valueType == cvExpression)
 		{
 			expr.SetFields(fields);
-			if (!expr.ParseExpression(categories[i]->expression, true, error))
+			if (!expr.Parse(categories[i]->expression, true, error))
 				continue;
 		}
 
@@ -321,7 +321,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 
 	CString err;
 	
-	if (expr.ParseExpression(W2A(expression), true, error))
+	if (expr.Parse(W2A(expression), true, error))
 	{
 		for (size_t i = 0; i < data.size(); i++)
 		{

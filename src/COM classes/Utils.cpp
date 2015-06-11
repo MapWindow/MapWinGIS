@@ -5258,7 +5258,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	GDALRasterBand* bandOutput = dtOutput->GetRasterBand(1);
 	bandOutput->SetNoDataValue(outputNodataValue);
 
-	if (!expr.ParseExpression(OLE2A(expression), false, err))
+	if (!expr.Parse(OLE2A(expression), false, err))
 	{
 		ErrorMessage(tkINVALID_EXPRESSION);
 		*errorMsg = A2BSTR(err);

@@ -55,7 +55,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 	}
 		
 
-	if (!expr.ParseExpression(str, true, errorString))
+	if (!expr.Parse(str, true, errorString))
 	{
 		return;
 	}
@@ -103,7 +103,7 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
-		if (expr.ParseExpression(str, true, err))
+		if (expr.Parse(str, true, err))
 		{
 			*retVal = VARIANT_TRUE;
 		}
@@ -189,7 +189,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
-		if (expr.ParseExpression(Expression, true, err))
+		if (expr.Parse(Expression, true, err))
 		{
 			TableHelper::SetFieldValue(this, RowIndex, expr);
 				
@@ -238,7 +238,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
-		if (expr.ParseExpression(Expression, true, err))
+		if (expr.Parse(Expression, true, err))
 		{
 			bool error = false;
 			for (unsigned int i = 0; i < _rows.size(); i++)
@@ -300,7 +300,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 	}
 
 	CString err;
-	if (!expr.ParseExpression(Expression, true, err))
+	if (!expr.Parse(Expression, true, err))
 	{
 		ErrorString = err;
 		return false;
@@ -366,7 +366,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 			if (expressions[categoryId] != "")
 			{
 				CString err;
-				if (expr.ParseExpression(expressions[categoryId], true, err))
+				if (expr.Parse(expressions[categoryId], true, err))
 				{
 					for (unsigned int i = 0; i < _rows.size(); i++)
 					{

@@ -858,6 +858,9 @@
     <ClInclude Include="Processing\Functions.h">
       <Filter>Processing</Filter>
     </ClInclude>
+    <ClInclude Include="Processing\ExpressionParser.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1821,8 +1824,13 @@
     <ClCompile Include="COM classes\GdalDriverManager.cpp">
       <Filter>COM classes\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\Expression.cpp" />
     <ClCompile Include="Processing\Functions.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\Expression.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\ExpressionParser.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
   </ItemGroup>

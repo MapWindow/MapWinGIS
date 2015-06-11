@@ -275,6 +275,7 @@
     <ClInclude Include="Processing\clipper.h" />
     <ClInclude Include="Processing\ClipperConverter.h" />
     <ClInclude Include="Processing\Expression.h" />
+    <ClInclude Include="Processing\ExpressionParser.h" />
     <ClInclude Include="Processing\Functions.h" />
     <ClInclude Include="Processing\GeometryHelper.h" />
     <ClInclude Include="Processing\JenksBreaks.h" />
@@ -612,6 +613,7 @@
     <ClCompile Include="Processing\clipper.cpp" />
     <ClCompile Include="Processing\ClipperConverter.cpp" />
     <ClCompile Include="Processing\Expression.cpp" />
+    <ClCompile Include="Processing\ExpressionParser.cpp" />
     <ClCompile Include="Processing\Functions.cpp" />
     <ClCompile Include="Processing\GeometryHelper.cpp" />
     <ClCompile Include="Processing\JenksBreaks.cpp" />
