@@ -53,7 +53,7 @@ class CExpressionValue;
 class COperation;
 class CElement;
 class CExpressionPart;
-class CFunction;
+class Function;
 
 typedef bool(*ExpressionFunction)(const vector<CExpressionValue*>& arguments, IShape* shape, CExpressionValue& result);
 
@@ -231,7 +231,7 @@ public:
 //     CFunction
 // ********************************************************
 // Statically defined function (treated as expression part)
-class CFunction
+class Function
 {
 private:
 	CString _name;
@@ -242,7 +242,7 @@ private:
 	vector<CString> _aliases;
 
 public:
-	CFunction(CString name, int numParams, ExpressionFunction function, CString group, bool useGeometry = false)
+	Function(CString name, int numParams, ExpressionFunction function, CString group, bool useGeometry = false)
 		: _numParams(numParams), _useGeometry(useGeometry), _group(group), _fn(function)
 	{
 		ParseName(name);
@@ -293,7 +293,7 @@ public:
 	CString expression;					// for debugging only
 	vector<CElement*> elements;			// fields, operators, literals
 	vector<CExpressionPart*> arguments;
-	CFunction* function;
+	Function* function;
 	CExpressionValue* val;				// resulting value
 	int activeCount;					// number of unprocessed elements
 

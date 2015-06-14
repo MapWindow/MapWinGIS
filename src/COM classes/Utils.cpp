@@ -37,7 +37,7 @@
 #include "Extents.h"
 #include "Shape.h"
 #include "Vector.h"
-#include "Expression.h"
+#include "CustomExpression.h"
 #include "OgrConverter.h"
 #include "TableHelper.h"
 #include "xtiffio.h"
@@ -5144,7 +5144,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	Expression expr;	
+	CustomExpression expr;	
 	CString err;
 
 	// --------------------------------------------------------

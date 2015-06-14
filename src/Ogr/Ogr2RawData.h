@@ -3,7 +3,7 @@
 #include "ogr_feature.h"
 #include "OgrLoader.h"
 #include "OgrLabels.h"
-#include "Expression.h"
+#include "CustomExpression.h"
 
 class Ogr2RawData
 {
@@ -15,6 +15,6 @@ private:
 	static void UpdateLabelsAndCategories(vector<ShapeRecordData*>&data, OgrDynamicLoader* loader, bool hasLabels);
 	static int GetLabelFieldIndex(CString expression, vector<CString>& fields);
 	static void ApplyCategories(vector<ShapeRecordData*>& data, vector<CString>& fields, vector<CategoriesData*>& categories, OgrDynamicLoader* loader);
-	static bool PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, Expression& expr);
+	static bool PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, CustomExpression& expr);
 };
 

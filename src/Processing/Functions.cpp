@@ -6,8 +6,8 @@
 
 namespace parser
 {
-	std::vector<CFunction*> functions;
-	map<CString, CFunction*> fnMap;
+	std::vector<Function*> functions;
+	map<CString, Function*> fnMap;
 
 #pragma region Math functions
 
@@ -552,42 +552,42 @@ namespace parser
 	{
 		functions.clear();
 
-		functions.push_back(new CFunction("sqrt", 1, fcnSqrt, "Math"));
-		functions.push_back(new CFunction("abs", 1, fcnAbs, "Math"));
-		functions.push_back(new CFunction("cos", 1, fcnCos, "Math"));
-		functions.push_back(new CFunction("sin", 1, fcnSin, "Math"));
-		functions.push_back(new CFunction("tan", 1, fcnTan, "Math"));
-		functions.push_back(new CFunction("asin", 1, fcnAsin, "Math"));
-		functions.push_back(new CFunction("acos", 1, fcnAcos, "Math"));
-		functions.push_back(new CFunction("atan", 1, fcnAtan, "Math"));
-		functions.push_back(new CFunction("atan2", 2, fcnAtan2, "Math"));
-		functions.push_back(new CFunction("exp", 1, fcnExp, "Math"));
-		functions.push_back(new CFunction("ln", 1, fcnLn, "Math"));
-		functions.push_back(new CFunction("log10", 1, fcnLog10, "Math"));
-		functions.push_back(new CFunction("log", 2, fcnLog, "Math"));
-		functions.push_back(new CFunction("round", -1, fcnRound, "Math"));
-		functions.push_back(new CFunction("rand", 2, fcnRand, "Math"));
-		functions.push_back(new CFunction("randf", 2, fcnRandF, "Math"));
-		functions.push_back(new CFunction("max", -1, fcnMax, "Math"));
-		functions.push_back(new CFunction("min", -1, fcnMin, "Math"));
-		functions.push_back(new CFunction("clamp", 3, fcnClamp, "Math"));
-		functions.push_back(new CFunction("floor", 1, fcnFloor, "Math"));
-		functions.push_back(new CFunction("ceil", 1, fcnCeil, "Math"));
-		functions.push_back(new CFunction("pi;$pi", 0, fcnPi, "Math"));
+		functions.push_back(new Function("sqrt", 1, fcnSqrt, "Math"));
+		functions.push_back(new Function("abs", 1, fcnAbs, "Math"));
+		functions.push_back(new Function("cos", 1, fcnCos, "Math"));
+		functions.push_back(new Function("sin", 1, fcnSin, "Math"));
+		functions.push_back(new Function("tan", 1, fcnTan, "Math"));
+		functions.push_back(new Function("asin", 1, fcnAsin, "Math"));
+		functions.push_back(new Function("acos", 1, fcnAcos, "Math"));
+		functions.push_back(new Function("atan", 1, fcnAtan, "Math"));
+		functions.push_back(new Function("atan2", 2, fcnAtan2, "Math"));
+		functions.push_back(new Function("exp", 1, fcnExp, "Math"));
+		functions.push_back(new Function("ln", 1, fcnLn, "Math"));
+		functions.push_back(new Function("log10", 1, fcnLog10, "Math"));
+		functions.push_back(new Function("log", 2, fcnLog, "Math"));
+		functions.push_back(new Function("round", -1, fcnRound, "Math"));
+		functions.push_back(new Function("rand", 2, fcnRand, "Math"));
+		functions.push_back(new Function("randf", 2, fcnRandF, "Math"));
+		functions.push_back(new Function("max", -1, fcnMax, "Math"));
+		functions.push_back(new Function("min", -1, fcnMin, "Math"));
+		functions.push_back(new Function("clamp", 3, fcnClamp, "Math"));
+		functions.push_back(new Function("floor", 1, fcnFloor, "Math"));
+		functions.push_back(new Function("ceil", 1, fcnCeil, "Math"));
+		functions.push_back(new Function("pi;$pi", 0, fcnPi, "Math"));
 		/*functions.push_back(new CFunction("scale_linear", 5, fcnLinearScale, "Math"));
 		functions.push_back(new CFunction("scale_exp", 6, fcnExpScale, "Math")); */
 
-		functions.push_back(new CFunction("lower", 1, fcnLower, "String"));
-		functions.push_back(new CFunction("upper", 1, fcnUpper, "String"));
-		functions.push_back(new CFunction("title", 1, fcnTitle, "String"));
-		functions.push_back(new CFunction("trim", 1, fcnTrim, "String"));
-		functions.push_back(new CFunction("len", 1, fcnLength, "String"));
-		functions.push_back(new CFunction("replace", 3, fcnReplace, "String"));
-		functions.push_back(new CFunction("substr", 3, fcnSubstr, "String"));
-		functions.push_back(new CFunction("concat", -1, fcnConcat, "String"));
-		functions.push_back(new CFunction("strpos", 2, fcnStrpos, "String"));
-		functions.push_back(new CFunction("left", 2, fcnLeft, "String"));
-		functions.push_back(new CFunction("right", 2, fcnRight, "String"));
+		functions.push_back(new Function("lower", 1, fcnLower, "String"));
+		functions.push_back(new Function("upper", 1, fcnUpper, "String"));
+		functions.push_back(new Function("title", 1, fcnTitle, "String"));
+		functions.push_back(new Function("trim", 1, fcnTrim, "String"));
+		functions.push_back(new Function("len", 1, fcnLength, "String"));
+		functions.push_back(new Function("replace", 3, fcnReplace, "String"));
+		functions.push_back(new Function("substr", 3, fcnSubstr, "String"));
+		functions.push_back(new Function("concat", -1, fcnConcat, "String"));
+		functions.push_back(new Function("strpos", 2, fcnStrpos, "String"));
+		functions.push_back(new Function("left", 2, fcnLeft, "String"));
+		functions.push_back(new Function("right", 2, fcnRight, "String"));
 		/*functions.push_back(new CFunction("regexp_replace", 3, fcnRegexpReplace, "String"));
 		functions.push_back(new CFunction("wordwrap", -1, fcnWordwrap, "String"));
 		functions.push_back(new CFunction("regexp_substr", 2, fcnRegexpSubstr, "String"));
@@ -597,16 +597,16 @@ namespace parser
 		functions.push_back(new CFunction("rpad", 3, fcnRPad, "String"));
 		functions.push_back(new CFunction("lpad", 3, fcnLPad, "String"));*/
 
-		functions.push_back(new CFunction("to_int;toint", 1, fcnToInt, "Conversions"));
-		functions.push_back(new CFunction("to_real;toreal", 1, fcnToReal, "Conversions"));
-		functions.push_back(new CFunction("to_string;tostring", 1, fcnToString, "Conversions"));
+		functions.push_back(new Function("to_int;toint", 1, fcnToInt, "Conversions"));
+		functions.push_back(new Function("to_real;toreal", 1, fcnToReal, "Conversions"));
+		functions.push_back(new Function("to_string;tostring", 1, fcnToString, "Conversions"));
 		/* functions.push_back(new CFunction("to_datetime;todatetime", 1, fcnToDateTime, "Conversions"));
 		functions.push_back(new CFunction("to_date;todate", 1, fcnToDate, "Conversions"));
 		functions.push_back(new CFunction("to_time;totime", 1, fcnToTime, "Conversions"));
 		functions.push_back(new CFunction("to_interval;tointerval", 1, fcnToInterval, "Conversions")); */
 
 		
-		functions.push_back(new CFunction("if;iif", 3, fcnIf, "Conditionals"));
+		functions.push_back(new Function("if;iif", 3, fcnIf, "Conditionals"));
 
 		/*
 		functions.push_back(new CFunction("coalesce", -1, fcnCoalesce, "Conditions"));
@@ -633,14 +633,14 @@ namespace parser
 		functions.push_back(new CFunction("color_cmyk", 4, fcnColorCmyk, "Color"));
 		functions.push_back(new CFunction("color_cmyka", 5, fncColorCmyka, "Color"));*/
 
-		functions.push_back(new CFunction("$geometry", 0, fcnGeometry, "Geometry", true));
-		functions.push_back(new CFunction("$area", 0, fcnGeometryArea, "Geometry", true));
-		functions.push_back(new CFunction("$length", 0, fcnGeometryLength, "Geometry", true));
-		functions.push_back(new CFunction("$perimeter", 0, fcnGeometryPerimeter, "Geometry", true));
-		functions.push_back(new CFunction("$x", 0, fcnX, "Geometry", true));
-		functions.push_back(new CFunction("$y", 0, fcnY, "Geometry", true));
-		functions.push_back(new CFunction("x_at;xat", 1, fcnXat, "Geometry", true));
-		functions.push_back(new CFunction("y_at;yat", 1, fcnYat, "Geometry", true));
+		functions.push_back(new Function("$geometry", 0, fcnGeometry, "Geometry", true));
+		functions.push_back(new Function("$area", 0, fcnGeometryArea, "Geometry", true));
+		functions.push_back(new Function("$length", 0, fcnGeometryLength, "Geometry", true));
+		functions.push_back(new Function("$perimeter", 0, fcnGeometryPerimeter, "Geometry", true));
+		functions.push_back(new Function("$x", 0, fcnX, "Geometry", true));
+		functions.push_back(new Function("$y", 0, fcnY, "Geometry", true));
+		functions.push_back(new Function("x_at;xat", 1, fcnXat, "Geometry", true));
+		functions.push_back(new Function("y_at;yat", 1, fcnYat, "Geometry", true));
 
 		/*
 		functions.push_back(new CFunction("x_min;xmin", 1, fcnXMin, "Geometry", true));
@@ -690,7 +690,7 @@ namespace parser
 
 		for (size_t i = 0; i < functions.size(); i++)
 		{
-			CFunction* fn = functions[i];
+			Function* fn = functions[i];
 			vector<CString>* aliases = fn->GetAliases();
 
 			for (size_t j = 0; j < aliases->size(); j++)
@@ -728,9 +728,9 @@ namespace parser
 		BuildMap();
 	}
 
-	CFunction* GetFunction(CString name)
+	Function* GetFunction(CString name)
 	{
-		map<CString, CFunction*>::iterator it = fnMap.find(name.MakeLower());
+		map<CString, Function*>::iterator it = fnMap.find(name.MakeLower());
 		return it != fnMap.end() ? it->second : NULL; 
 	}
 }

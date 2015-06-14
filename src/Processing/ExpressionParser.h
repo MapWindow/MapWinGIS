@@ -1,5 +1,5 @@
 #pragma once
-#include "Expression.h"
+#include "CustomExpression.h"
 
 class ExpressionParser
 {
@@ -12,7 +12,7 @@ public:
 	}
 	
 private:
-	Expression* _expression;
+	CustomExpression* _expression;
 
 private:
 	bool IsDecimal(CString& str);
@@ -24,8 +24,8 @@ private:
 	bool IsFunctionName(char s);
 
 	bool ParseTree(CString s, int partCount);
-	CFunction* ParseFunction(CString& s, int begin, int& fnBegin);
-	bool ParseArgumentList(CString s, CFunction* fn);
+	Function* ParseFunction(CString& s, int begin, int& fnBegin);
+	bool ParseArgumentList(CString s, Function* fn);
 
 	bool GetBrackets(CString expression, int& begin, int& end, CString openingSymbol = "(", CString closingSymbol = ")");
 	CString GetInnerString(CString& s, int begin, int end);
@@ -42,7 +42,7 @@ private:
 	void SetErrorMessage(CString msg) { _expression->SetErrorMessage(msg); }
 	void SetErrorPosition(int position) { _expression->SetErrorPosition(position); }
 public:
-	bool Parse(Expression* expression, CString s, bool useFields);
+	bool Parse(CustomExpression* expression, CString s, bool useFields);
 	bool ReplaceParameterlessFunctions(CString& s, int& partCount);
 
 };

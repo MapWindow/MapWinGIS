@@ -46,7 +46,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 
 	USES_CONVERSION;
 	CString str = OLE2A(Expression);
-	Expression expr;	
+	CustomExpression expr;	
 	
 	if (!expr.ReadFieldNames(this))
 	{
@@ -98,7 +98,7 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	SysFreeString(*ErrorString);	// do we need it here?
 	USES_CONVERSION;
 	CString str = OLE2CA(Expression);
-	Expression expr;	
+	CustomExpression expr;	
 	
 	if (expr.ReadFieldNames(this))
 	{
@@ -185,7 +185,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 	USES_CONVERSION;
 	CString str = OLE2A(Expression);
 
-	Expression expr;	
+	CustomExpression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
@@ -234,7 +234,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 {
 	indices.clear();
 	
-	Expression expr;	
+	CustomExpression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
@@ -291,7 +291,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 {
 	results.clear();
 	
-	Expression expr;	
+	CustomExpression expr;	
 	expr.SetFloatFormat(floatFormat);
 	if (!expr.ReadFieldNames(this))
 	{
@@ -358,7 +358,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 	//std::vector<int>* results = new std::vector<int>;
 	//results->resize(_rows.size(), -1);
 	
-	Expression expr;	
+	CustomExpression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)

@@ -6189,6 +6189,15 @@ interface IGdalDriverManager : IDispatch{
 	[propget, id(2)] HRESULT Driver([in] long driverIndex, [out, retval] IGdalDriver** pVal);
 	[propget, id(3)] HRESULT DriverByName([in] BSTR driverName, [out, retval] IGdalDriver** pVal);
 };
+[
+	object,
+	uuid(9CEFAEB1-4A3B-40A6-B9E7-A23E08B291C0),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IFunction : IDispatch{
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -7169,5 +7178,12 @@ library MapWinGIS
 	coclass GdalDriverManager
 	{
 		[default] interface IGdalDriverManager;
+	};
+	[
+		uuid(CA6176E3-B589-437A-920B-99E65B23BD3B)		
+	]
+	coclass Function
+	{
+		[default] interface IFunction;
 	};
 };

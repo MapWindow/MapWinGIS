@@ -208,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\DrawingRectangle.h" />
+    <ClInclude Include="COM classes\Function.h" />
     <ClInclude Include="COM classes\GdalDataset.h" />
     <ClInclude Include="COM classes\GdalDriver.h" />
     <ClInclude Include="COM classes\GdalDriverManager.h" />
@@ -274,7 +275,7 @@
     <ClInclude Include="Processing\Base64.h" />
     <ClInclude Include="Processing\clipper.h" />
     <ClInclude Include="Processing\ClipperConverter.h" />
-    <ClInclude Include="Processing\Expression.h" />
+    <ClInclude Include="Processing\CustomExpression.h" />
     <ClInclude Include="Processing\ExpressionParser.h" />
     <ClInclude Include="Processing\ExpressionParts.h" />
     <ClInclude Include="Processing\Functions.h" />
@@ -470,6 +471,7 @@
   <!-- source -->
   <ItemGroup>
     <ClCompile Include="COM classes\DrawingRectangle.cpp" />
+    <ClCompile Include="COM classes\Function.cpp" />
     <ClCompile Include="COM classes\GdalDataset.cpp" />
     <ClCompile Include="COM classes\GdalDriver.cpp" />
     <ClCompile Include="COM classes\GdalDriverManager.cpp" />
@@ -613,7 +615,7 @@
     <ClCompile Include="Processing\Base64.cpp" />
     <ClCompile Include="Processing\clipper.cpp" />
     <ClCompile Include="Processing\ClipperConverter.cpp" />
-    <ClCompile Include="Processing\Expression.cpp" />
+    <ClCompile Include="Processing\CustomExpression.cpp" />
     <ClCompile Include="Processing\ExpressionParser.cpp" />
     <ClCompile Include="Processing\ExpressionParts.cpp" />
     <ClCompile Include="Processing\Functions.cpp" />
@@ -815,6 +817,7 @@
     <None Include="COM classes\Field.rgs" />
     <None Include="COM classes\FieldStatOperations.rgs" />
     <None Include="COM classes\FileManager.rgs" />
+    <None Include="COM classes\Function.rgs" />
     <None Include="COM classes\GdalDataset.rgs" />
     <None Include="COM classes\GdalDriver.rgs" />
     <None Include="COM classes\GdalDriverManager.rgs" />

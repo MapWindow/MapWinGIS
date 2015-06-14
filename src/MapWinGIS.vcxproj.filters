@@ -663,9 +663,6 @@
     <ClInclude Include="Processing\ClipperConverter.h">
       <Filter>Processing</Filter>
     </ClInclude>
-    <ClInclude Include="Processing\Expression.h">
-      <Filter>Processing</Filter>
-    </ClInclude>
     <ClInclude Include="Processing\GeometryHelper.h">
       <Filter>Processing</Filter>
     </ClInclude>
@@ -862,6 +859,12 @@
       <Filter>Processing</Filter>
     </ClInclude>
     <ClInclude Include="Processing\ExpressionParts.h">
+      <Filter>Processing</Filter>
+    </ClInclude>
+    <ClInclude Include="COM classes\Function.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Processing\CustomExpression.h">
       <Filter>Processing</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1830,13 +1833,16 @@
     <ClCompile Include="Processing\Functions.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
-    <ClCompile Include="Processing\Expression.cpp">
-      <Filter>Processing</Filter>
-    </ClCompile>
     <ClCompile Include="Processing\ExpressionParser.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
     <ClCompile Include="Processing\ExpressionParts.cpp">
+      <Filter>Processing</Filter>
+    </ClCompile>
+    <ClCompile Include="COM classes\Function.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Processing\CustomExpression.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2037,6 +2043,9 @@
     </None>
     <None Include="MapWinGIS.def" />
     <None Include="COM classes\GdalDriverManager.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\Function.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>

@@ -26,7 +26,7 @@
 
 #include "stdafx.h"
 #include "ShapefileCategory.h"
-#include "Expression.h"
+#include "CustomExpression.h"
 #include "Shapefile.h"
 #include "TableClass.h"
 

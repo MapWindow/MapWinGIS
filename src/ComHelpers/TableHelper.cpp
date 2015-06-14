@@ -23,7 +23,7 @@ long TableHelper::GetNumRows(ITable* table)
 // **************************************************
 //		SetFieldValues()
 // **************************************************
-void TableHelper::SetFieldValues(ITable* table, int rowIndex, Expression& expr )
+void TableHelper::SetFieldValues(ITable* table, int rowIndex, CustomExpression& expr )
 {
 	if (!table) return;
 	

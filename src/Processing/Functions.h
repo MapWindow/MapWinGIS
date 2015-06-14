@@ -1,11 +1,11 @@
 #pragma once
-#include "Expression.h"
+#include "CustomExpression.h"
 
 namespace parser
 {
-	extern std::vector<CFunction*> functions;
+	extern std::vector<Function*> functions;
 	void InitializeFunctions();
-	CFunction* GetFunction(CString name);
+	Function* GetFunction(CString name);
 };
 
 

@@ -26,7 +26,7 @@
 #include <set>
 #include "TableRow.h"
 #include "dbf.h"
-#include "Expression.h"
+#include "CustomExpression.h"
 #include "_ITableEvents_CP.H"
 
 class ATL_NO_VTABLE CTableClass : 

@@ -137,7 +137,7 @@ bool ExpressionParser::IsOperator(CString s)
 // *****************************************************************
 // building list of operation; UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool ExpressionParser::Parse(Expression* expression, CString s, bool useFields)
+bool ExpressionParser::Parse(CustomExpression* expression, CString s, bool useFields)
 {
 	_expression = expression;
 
@@ -191,7 +191,7 @@ bool ExpressionParser::ParseTree(CString s, int partCount)
 		if (found)
 		{
 			int fnBegin;
-			CFunction* fn = ParseFunction(s, begin - 1, fnBegin);
+			Function* fn = ParseFunction(s, begin - 1, fnBegin);
 
 			if (fn)
 			{
@@ -280,7 +280,7 @@ bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CSt
 //	 ParseFunction()
 //************************************************************
 // Tries to parse function name from the position of the opening bracket going backwards
-CFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
+Function* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 {
 	int i = begin;
 
@@ -295,7 +295,7 @@ CFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 
 		sub = s[i] + sub;
 
-		CFunction* fn = parser::GetFunction(sub);
+		Function* fn = parser::GetFunction(sub);
 
 		if (fn) 
 		{
@@ -312,7 +312,7 @@ CFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 // ************************************************************
 //	 ParseArgumentList()
 //************************************************************
-bool ExpressionParser::ParseArgumentList(CString s, CFunction* fn)
+bool ExpressionParser::ParseArgumentList(CString s, Function* fn)
 {
 	if (!fn) return false;
 
@@ -982,7 +982,7 @@ bool ExpressionParser::ReplaceParameterlessFunctions(CString& s, int& partCount)
 			}
 		}
 
-		CFunction* fn = parser::GetFunction(sub);
+		Function* fn = parser::GetFunction(sub);
 
 		if (fn)
 		{

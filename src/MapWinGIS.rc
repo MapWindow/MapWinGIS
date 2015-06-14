@@ -75,6 +75,7 @@ IDR_HISTOGRAM           REGISTRY                "COM Classes/Histogram.rgs"
 IDR_GDALDATASET         REGISTRY                "COM Classes/GdalDataset.rgs"
 IDR_GDALDRIVER          REGISTRY                "COM Classes/GdalDriver.rgs"
 IDR_GDALDRIVERMANAGER   REGISTRY                "COM Classes/GdalDriverManager.rgs"
+IDR_FUNCTION            REGISTRY                "COM Classes/Function.rgs"
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////

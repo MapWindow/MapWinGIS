@@ -3,7 +3,7 @@
 #include "OgrHelper.h"
 #include "OgrConverter.h"
 #include "Shape.h"
-#include "Expression.h"
+#include "CustomExpression.h"
 
 // *************************************************************
 //		Layer2RawData()
@@ -176,7 +176,7 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 			return;
 		}
 
-		Expression expr;
+		CustomExpression expr;
 		CString error;
 		if (valueType == cvExpression)
 		{
@@ -253,7 +253,7 @@ int Ogr2RawData::GetLabelFieldIndex(CString expression, vector<CString>& fields)
 // *************************************************************
 //		PopulateExpressionFields()
 // *************************************************************
-bool Ogr2RawData::PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, Expression& expr)
+bool Ogr2RawData::PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, CustomExpression& expr)
 {
 	bool success = false;
 
@@ -316,7 +316,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 		return true;
 	}
 
-	Expression expr;
+	CustomExpression expr;
 	expr.SetFields(fields);
 
 	CString err;
