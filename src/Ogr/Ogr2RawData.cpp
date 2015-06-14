@@ -176,7 +176,7 @@ void Ogr2RawData::ApplyCategories(vector<ShapeRecordData*>& data, vector<CString
 			return;
 		}
 
-		CExpression expr;
+		Expression expr;
 		CString error;
 		if (valueType == cvExpression)
 		{
@@ -253,7 +253,7 @@ int Ogr2RawData::GetLabelFieldIndex(CString expression, vector<CString>& fields)
 // *************************************************************
 //		PopulateExpressionFields()
 // *************************************************************
-bool Ogr2RawData::PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, CExpression& expr)
+bool Ogr2RawData::PopulateExpressionFields(vector<ShapeRecordData*>& data, int rowIndex, Expression& expr)
 {
 	bool success = false;
 
@@ -316,7 +316,7 @@ bool Ogr2RawData::GenerateLabels(vector<ShapeRecordData*>& data, vector<CString>
 		return true;
 	}
 
-	CExpression expr;
+	Expression expr;
 	expr.SetFields(fields);
 
 	CString err;

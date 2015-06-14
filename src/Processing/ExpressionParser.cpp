@@ -137,7 +137,7 @@ bool ExpressionParser::IsOperator(CString s)
 // *****************************************************************
 // building list of operation; UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool ExpressionParser::Parse(CExpression* expression, CString s, bool useFields)
+bool ExpressionParser::Parse(Expression* expression, CString s, bool useFields)
 {
 	_expression = expression;
 
@@ -158,9 +158,15 @@ bool ExpressionParser::Parse(CExpression* expression, CString s, bool useFields)
 		return false;
 	}
 
+	int partCount = 0;
+	if (!ReplaceParameterlessFunctions(s, partCount))
+	{
+		return false;
+	}
+
 	s.Replace(" ", "");
 
-	if (!ParseTree(s))
+	if (!ParseTree(s, partCount))
 	{
 		return false;
 	}
@@ -171,9 +177,8 @@ bool ExpressionParser::Parse(CExpression* expression, CString s, bool useFields)
 // *****************************************************************
 //		ParseTree()
 // *****************************************************************
-bool ExpressionParser::ParseTree(CString s)
+bool ExpressionParser::ParseTree(CString s, int partCount)
 {
-	int partCount = 0;
 	bool found = true;
 	CString temp;
 
@@ -195,7 +200,14 @@ bool ExpressionParser::ParseTree(CString s)
 					return false;
 				}
 
+				bool finish = fnBegin == 0 && end == s.GetLength() - 1;      // there is nothing but function left
+
 				ReplacePart(s, fnBegin, end, partCount);
+
+				if (finish)
+				{
+					break;
+				}
 
 				continue;
 			}
@@ -744,6 +756,16 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 			element.operation = operCONSEQ;
 			break;
 		}
+		case 'l':
+		case 'L':
+			if (s.Mid(position, 4).MakeUpper() == "LIKE")
+			{
+				element.type = etOperation;
+				element.priority = 3;
+				element.operation = operLike;
+				position += 3;
+			}
+			break;
 		case 'm':
 		case 'M':
 			if (s.Mid(position, 3).MakeUpper() == "MOD")
@@ -797,7 +819,7 @@ bool ExpressionParser::ReadOperation(CString s, int& position, CElement& element
 // *****************************************************************
 //		ReplaceStringConstants()
 // *****************************************************************
-bool ExpressionParser::ReplaceStringLiterals(CString s, int& count)
+bool ExpressionParser::ReplaceStringLiterals(CString& s, int& count)
 {
 	bool found = true;
 
@@ -848,7 +870,7 @@ bool ExpressionParser::ReplaceStringLiterals(CString s, int& count)
 // *****************************************************************
 //		ReplaceFieldNames()
 // *****************************************************************
-bool ExpressionParser::ReplaceFieldNames(CString s, int& count)
+bool ExpressionParser::ReplaceFieldNames(CString& s, int& count)
 {
 	bool found = true;
 
@@ -936,3 +958,51 @@ void ExpressionParser::ReplaceSubString(CString& s, int begin, int length, CStri
 
 	s = part1 + replacement + part2;
 }
+
+// ************************************************************
+//	 ReplaceParameterlessFunctions()
+//************************************************************
+bool ExpressionParser::ReplaceParameterlessFunctions(CString& s, int& partCount)
+{
+	int pos = s.Find("$");
+	
+	while (pos != -1)
+	{
+		CString sub;
+		int i;
+		for (i = pos; i < s.GetLength(); i++)
+		{
+			if (IsFunctionName(s[i]))
+			{
+				sub += s[i];
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		CFunction* fn = parser::GetFunction(sub);
+
+		if (fn)
+		{
+			CExpressionPart* part = new CExpressionPart();
+			part->expression = s;
+			part->function = fn;
+
+			_expression->AddPart(part); 
+
+			ReplacePart(s, pos, i - 1, partCount);
+		}
+		else
+		{
+			SetErrorMessage(Debug::Format("Invalid function name: %s", sub));
+			return false;
+		}
+
+		pos = s.Find("$");
+	}
+
+	return true;
+}
+

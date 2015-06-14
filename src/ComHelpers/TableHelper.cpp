@@ -21,9 +21,9 @@ long TableHelper::GetNumRows(ITable* table)
 }
 
 // **************************************************
-//		SetFieldValue()
+//		SetFieldValues()
 // **************************************************
-void TableHelper::SetFieldValue(ITable* table, int rowIndex, CExpression& expr )
+void TableHelper::SetFieldValues(ITable* table, int rowIndex, Expression& expr )
 {
 	if (!table) return;
 	
@@ -37,6 +37,17 @@ void TableHelper::SetFieldValue(ITable* table, int rowIndex, CExpression& expr )
 			case VT_BSTR: expr.put_FieldValue(j, var.bstrVal); break;
 			case VT_I4:	  expr.put_FieldValue(j, (double)var.lVal); break;
 			case VT_R8:	  expr.put_FieldValue(j, (double)var.dblVal); break;
+		}
+	}
+
+	IShapefile* sf = ((CTableClass*)table)->GetParentShapefile();	 // doesn't add reference
+	if (sf)
+	{
+		CComPtr<IShape> shp = NULL;
+		sf->get_Shape(rowIndex, &shp);
+		if (shp)
+		{
+			expr.put_Shape(shp);
 		}
 	}
 }

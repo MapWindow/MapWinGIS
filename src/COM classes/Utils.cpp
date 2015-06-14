@@ -5144,7 +5144,7 @@ STDMETHODIMP CUtils::CalculateRaster(SAFEARRAY* InputNames, BSTR expression, BST
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	*retVal = VARIANT_FALSE;
 
-	CExpression expr;	
+	Expression expr;	
 	CString err;
 
 	// --------------------------------------------------------

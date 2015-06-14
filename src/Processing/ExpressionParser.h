@@ -12,7 +12,7 @@ public:
 	}
 	
 private:
-	CExpression* _expression;
+	Expression* _expression;
 
 private:
 	bool IsDecimal(CString& str);
@@ -23,7 +23,7 @@ private:
 	bool IsOperator(CString s);
 	bool IsFunctionName(char s);
 
-	bool ParseTree(CString s);
+	bool ParseTree(CString s, int partCount);
 	CFunction* ParseFunction(CString& s, int begin, int& fnBegin);
 	bool ParseArgumentList(CString s, CFunction* fn);
 
@@ -35,14 +35,15 @@ private:
 	bool ReadOperation(CString s, int& position, CElement& element);
 	
 	void ReplacePart(CString& s, int begin, int end, int& count);
-	bool ReplaceStringLiterals(CString s, int& count);
-	bool ReplaceFieldNames(CString s, int& count);
+	bool ReplaceStringLiterals(CString& s, int& count);
+	bool ReplaceFieldNames(CString& s, int& count);
 	void ReplaceSubString(CString& s, int begin, int length, CString replacement);
 
 	void SetErrorMessage(CString msg) { _expression->SetErrorMessage(msg); }
 	void SetErrorPosition(int position) { _expression->SetErrorPosition(position); }
 public:
-	bool Parse(CExpression* expression, CString s, bool useFields);
-	
+	bool Parse(Expression* expression, CString s, bool useFields);
+	bool ReplaceParameterlessFunctions(CString& s, int& partCount);
+
 };
 

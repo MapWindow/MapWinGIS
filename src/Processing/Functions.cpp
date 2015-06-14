@@ -2,11 +2,14 @@
 
 #include "stdafx.h"
 #include "Functions.h"
+#include "ShapeHelper.h"
 
 namespace parser
 {
 	std::vector<CFunction*> functions;
 	map<CString, CFunction*> fnMap;
+
+#pragma region Math functions
 
 	bool fcnSqrt(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
@@ -218,6 +221,10 @@ namespace parser
 		return true;
 	}
 
+#pragma endregion
+
+#pragma region String functions
+
 	bool fcnLower(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
 		result.str(args[0]->str().MakeLower());
@@ -333,6 +340,214 @@ namespace parser
 		return true;
 	}
 
+#pragma endregion
+
+#pragma region Common implementations
+
+	bool GetXYCore(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result, bool isX)
+	{
+		if (!shape) return false;
+
+		double x, y;
+		VARIANT_BOOL vb;
+		shape->get_XY(0, &x, &y, &vb);
+
+		if (vb)
+		{
+			result.dbl(isX ? x : y);
+			return true;
+		}
+
+		return false;
+	}
+
+	bool GetXYatCore(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result, bool isX)
+	{
+		if (!shape) return false;
+
+		long index = static_cast<long>(args[0]->dbl());
+
+		double x, y;
+		VARIANT_BOOL vb;
+		shape->get_XY(index, &x, &y, &vb);
+
+		if (vb)
+		{
+			result.dbl(isX ? x : y);
+			return true;
+		}
+
+		return false;
+	}
+
+#pragma endregion	
+
+#pragma region Geometry functions
+
+	bool fcnGeometry(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		if (!shape) return false;
+		return false;
+	}
+
+	bool fcnGeometryArea(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		if (!shape) return false;
+
+		ShpfileType shpType = ShapeHelper::GetShapeType2D(shape);
+		if (shpType != SHP_POLYGON)
+		{
+			result.dbl(0.0);
+			return true;
+		}
+
+		double area;
+		shape->get_Area(&area);
+		result.dbl(area);
+
+		return true;
+	}
+
+	bool fcnGeometryLength(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		if (!shape) return false;
+
+		ShpfileType shpType = ShapeHelper::GetShapeType2D(shape);
+		if (shpType == SHP_POLYLINE )
+		{
+			double length;
+			shape->get_Length(&length);
+			result.dbl(length);
+			return true;
+		}
+	
+		result.dbl(0.0);
+		return true;
+	}
+
+	bool fcnGeometryPerimeter(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		if (!shape) return false;
+
+		ShpfileType shpType = ShapeHelper::GetShapeType2D(shape);
+		if (shpType == SHP_POLYGON)
+		{
+			double area;
+			shape->get_Perimeter(&area);
+			result.dbl(area);
+			return true;
+		}
+
+		result.dbl(0.0);
+		return true;
+	}
+
+	bool fcnX(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return GetXYCore(args, shape, result, true);
+	}
+
+	bool fcnY(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return GetXYCore(args, shape, result, false);
+	}
+
+	bool fcnXat(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return GetXYatCore(args, shape, result, true);
+	}
+
+	bool fcnYat(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		return GetXYatCore(args, shape, result, false);
+	}
+
+#pragma endregion
+
+#pragma region Conversion
+	
+	bool fcnToInt(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		switch (args[0]->type())
+		{
+			case tkValueType::vtDouble:
+				result.dbl(round(args[0]->dbl()));
+				break;
+			case tkValueType::vtBoolean:
+				result.dbl(args[0]->bln() ? 1.0 : 0.0);
+				break;
+			case tkValueType::vtString:
+				result.dbl(atoi(args[0]->str()));		// if it's not valid string, return 0
+				break;
+			case tkValueType::vtFloatArray:
+				return false;
+		}
+		
+		return true;
+	}
+
+	bool fcnToReal(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		switch (args[0]->type())
+		{
+			case tkValueType::vtDouble:
+				result.dbl(args[0]->dbl());
+				break;
+			case tkValueType::vtBoolean:
+				result.dbl(args[0]->bln() ? 1.0 : 0.0);
+				break;
+			case tkValueType::vtString:
+				result.dbl(Utility::atof_custom(args[0]->str()));
+				break;
+			case tkValueType::vtFloatArray:
+				return false;
+		}
+
+		return true;
+	}
+
+	bool fcnToString(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		switch (args[0]->type())
+		{
+			case tkValueType::vtDouble:
+				{
+					CString s;
+					s.Format("%g", args[0]->dbl());					// set format as a parameter
+					result.str(s);
+				}
+				break;
+			case tkValueType::vtBoolean:
+				result.str(args[0]->bln() ? "True" : "False");      // TODO: should they be localized ?
+				break;
+			case tkValueType::vtString:
+				result.str(args[0]->str());
+				break;
+			case tkValueType::vtFloatArray:
+				return false;
+		}
+
+		return true;
+	}
+
+	bool fcnIf(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	{
+		if (args.size() != 3) return false;
+
+		if (args[0]->bln())
+		{
+			result.copyFrom(*args[1]);
+		}
+		else
+		{
+			result.copyFrom(*args[2]);
+		}
+
+		return true;
+	}
+
+#pragma endregion
+
 	void CreateFunctions()
 	{
 		functions.clear();
@@ -366,7 +581,7 @@ namespace parser
 		functions.push_back(new CFunction("upper", 1, fcnUpper, "String"));
 		functions.push_back(new CFunction("title", 1, fcnTitle, "String"));
 		functions.push_back(new CFunction("trim", 1, fcnTrim, "String"));
-		functions.push_back(new CFunction("length", 1, fcnLength, "String"));
+		functions.push_back(new CFunction("len", 1, fcnLength, "String"));
 		functions.push_back(new CFunction("replace", 3, fcnReplace, "String"));
 		functions.push_back(new CFunction("substr", 3, fcnSubstr, "String"));
 		functions.push_back(new CFunction("concat", -1, fcnConcat, "String"));
@@ -382,18 +597,22 @@ namespace parser
 		functions.push_back(new CFunction("rpad", 3, fcnRPad, "String"));
 		functions.push_back(new CFunction("lpad", 3, fcnLPad, "String"));*/
 
-		/*functions.push_back(new CFunction("to_int;toint", 1, fcnToInt, "Conversions"));
+		functions.push_back(new CFunction("to_int;toint", 1, fcnToInt, "Conversions"));
 		functions.push_back(new CFunction("to_real;toreal", 1, fcnToReal, "Conversions"));
 		functions.push_back(new CFunction("to_string;tostring", 1, fcnToString, "Conversions"));
-		functions.push_back(new CFunction("to_datetime;todatetime", 1, fcnToDateTime, "Conversions"));
+		/* functions.push_back(new CFunction("to_datetime;todatetime", 1, fcnToDateTime, "Conversions"));
 		functions.push_back(new CFunction("to_date;todate", 1, fcnToDate, "Conversions"));
 		functions.push_back(new CFunction("to_time;totime", 1, fcnToTime, "Conversions"));
-		functions.push_back(new CFunction("to_interval;tointerval", 1, fcnToInterval, "Conversions"));
+		functions.push_back(new CFunction("to_interval;tointerval", 1, fcnToInterval, "Conversions")); */
 
-		functions.push_back(new CFunction("coalesce", -1, fcnCoalesce, "Conditionals"));
-		functions.push_back(new CFunction("if", 3, fcnIf, "Conditionals"));
-		functions.push_back(new CFunction("regexp_match", 2, fcnRegexpMatch, "Conditionals"));
+		
+		functions.push_back(new CFunction("if;iif", 3, fcnIf, "Conditionals"));
 
+		/*
+		functions.push_back(new CFunction("coalesce", -1, fcnCoalesce, "Conditions"));
+		functions.push_back(new CFunction("regexp_match", 2, fcnRegexpMatch, "Conditions")); */
+
+		/*
 		functions.push_back(new CFunction("now;$now", 0, fcnNow, "Date and Time"));
 		functions.push_back(new CFunction("age", 2, fcnAge, "Date and Time"));
 		functions.push_back(new CFunction("year", 1, fcnYear, "Date and Time"));
@@ -412,16 +631,18 @@ namespace parser
 		functions.push_back(new CFunction("color_hsv", 3, fcnColorHsv, "Color"));
 		functions.push_back(new CFunction("color_hsva", 4, fncColorHsva, "Color"));
 		functions.push_back(new CFunction("color_cmyk", 4, fcnColorCmyk, "Color"));
-		functions.push_back(new CFunction("color_cmyka", 5, fncColorCmyka, "Color"));
+		functions.push_back(new CFunction("color_cmyka", 5, fncColorCmyka, "Color"));*/
 
 		functions.push_back(new CFunction("$geometry", 0, fcnGeometry, "Geometry", true));
-		functions.push_back(new CFunction("$area", 0, fcnGeomArea, "Geometry", true));
-		functions.push_back(new CFunction("$length", 0, fcnGeomLength, "Geometry", true));
-		functions.push_back(new CFunction("$perimeter", 0, fcnGeomPerimeter, "Geometry", true));
+		functions.push_back(new CFunction("$area", 0, fcnGeometryArea, "Geometry", true));
+		functions.push_back(new CFunction("$length", 0, fcnGeometryLength, "Geometry", true));
+		functions.push_back(new CFunction("$perimeter", 0, fcnGeometryPerimeter, "Geometry", true));
 		functions.push_back(new CFunction("$x", 0, fcnX, "Geometry", true));
 		functions.push_back(new CFunction("$y", 0, fcnY, "Geometry", true));
 		functions.push_back(new CFunction("x_at;xat", 1, fcnXat, "Geometry", true));
 		functions.push_back(new CFunction("y_at;yat", 1, fcnYat, "Geometry", true));
+
+		/*
 		functions.push_back(new CFunction("x_min;xmin", 1, fcnXMin, "Geometry", true));
 		functions.push_back(new CFunction("x_max;xmax", 1, fcnXMax, "Geometry", true));
 		functions.push_back(new CFunction("y_min;ymin", 1, fcnYMin, "Geometry", true));
@@ -450,8 +671,9 @@ namespace parser
 		functions.push_back(new CFunction("union", 2, fcnCombine, "Geometry"));
 		functions.push_back(new CFunction("geom_to_wkt;geomToWKT", -1, fcnGeomToWKT, "Geometry"));
 		functions.push_back(new CFunction("geometry", 1, fcnGetGeometry, "Geometry"));
-		functions.push_back(new CFunction("transform", 3, fcnTransformGeometry, "Geometry"));
+		functions.push_back(new CFunction("transform", 3, fcnTransformGeometry, "Geometry"));*/
 
+		/*
 		functions.push_back(new CFunction("$rownum", 0, fcnRowNumber, "Record"));
 		functions.push_back(new CFunction("$id", 0, fcnFeatureId, "Record"));
 		functions.push_back(new CFunction("$currentfeature", 0, fcnFeature, "Record"));

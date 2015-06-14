@@ -35,6 +35,8 @@ enum tkOperation
 	operChangeSign = 18, // - (unary)
 
 	operNone = 19,
+
+	operLike = 20,
 };
 
 enum tkFunction
@@ -155,6 +157,25 @@ public:
 		if (_matrix) {
 			delete _matrix;
 			_matrix = NULL;
+		}
+	}
+
+	void copyFrom(CExpressionValue& value)
+	{
+		switch (value.type())
+		{
+			case vtBoolean:
+				bln(value.bln());
+				break;
+			case vtString:
+				str(value.str());
+				break;
+			case vtDouble:
+				dbl(value.dbl());
+				break;
+			case vtFloatArray:
+			// TODO: implement for geometry
+				break;
 		}
 	}
 };

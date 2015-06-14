@@ -46,7 +46,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 
 	USES_CONVERSION;
 	CString str = OLE2A(Expression);
-	CExpression expr;	
+	Expression expr;	
 	
 	if (!expr.ReadFieldNames(this))
 	{
@@ -63,7 +63,7 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 	// testing with values of the first row; there can be inconsistent data types for example
 	int i = 0;
 
-	TableHelper::SetFieldValue(this, i, expr);
+	TableHelper::SetFieldValues(this, i, expr);
 			
 	// if expression returns true for the given record we'll save the index 
 	CExpressionValue* result = expr.Calculate(errorString);
@@ -98,7 +98,7 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	SysFreeString(*ErrorString);	// do we need it here?
 	USES_CONVERSION;
 	CString str = OLE2CA(Expression);
-	CExpression expr;	
+	Expression expr;	
 	
 	if (expr.ReadFieldNames(this))
 	{
@@ -185,13 +185,13 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 	USES_CONVERSION;
 	CString str = OLE2A(Expression);
 
-	CExpression expr;	
+	Expression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
 		if (expr.Parse(Expression, true, err))
 		{
-			TableHelper::SetFieldValue(this, RowIndex, expr);
+			TableHelper::SetFieldValues(this, RowIndex, expr);
 				
 			// no need to delete the result
 			CExpressionValue* val = expr.Calculate(err);
@@ -234,7 +234,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 {
 	indices.clear();
 	
-	CExpression expr;	
+	Expression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		CString err;
@@ -243,7 +243,7 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 			bool error = false;
 			for (unsigned int i = 0; i < _rows.size(); i++)
 			{
-				TableHelper::SetFieldValue(this, i, expr);
+				TableHelper::SetFieldValues(this, i, expr);
 				
 				// if expression returns true for the given record we'll save the index 
 				CExpressionValue* result = expr.Calculate(err);	//new CExpressionValue();
@@ -291,7 +291,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 {
 	results.clear();
 	
-	CExpression expr;	
+	Expression expr;	
 	expr.SetFloatFormat(floatFormat);
 	if (!expr.ReadFieldNames(this))
 	{
@@ -314,7 +314,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 
 	for (int i = start; i < end; i++)
 	{
-		TableHelper::SetFieldValue(this, i, expr);
+		TableHelper::SetFieldValues(this, i, expr);
 				
 		// if expression returns true for the given record we'll save the index 
 		CExpressionValue* result = expr.Calculate(err);
@@ -358,7 +358,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 	//std::vector<int>* results = new std::vector<int>;
 	//results->resize(_rows.size(), -1);
 	
-	CExpression expr;	
+	Expression expr;	
 	if (expr.ReadFieldNames(this))
 	{
 		for (unsigned int categoryId = 0; categoryId < expressions.size(); categoryId++)
@@ -372,7 +372,7 @@ void CTableClass::AnalyzeExpressions(std::vector<CString>& expressions, std::vec
 					{
 						if (results[i] == -1)
 						{
-							TableHelper::SetFieldValue(this, i, expr);
+							TableHelper::SetFieldValues(this, i, expr);
 						
 							// if expression returns true for the given record we'll save the index 
 							CExpressionValue* result = expr.Calculate(err);
@@ -3477,3 +3477,26 @@ STDMETHODIMP CTableClass::get_JoinOptions(LONG joinIndex, BSTR* pVal)
 
 	return S_OK;
 }
+
+// ********************************************************
+//     RemoveTempFiles()
+// ********************************************************
+void CTableClass::RemoveTempFiles()
+{
+	for (int i = 0; i < (int)_tempFiles.size(); i++)
+	{
+		try
+		{
+			CString * a = _tempFiles[i];
+			_unlink(a->GetBuffer());
+			delete a;
+		}
+		catch (...)
+		{
+			ASSERT(FALSE);
+		}
+	}
+	_tempFiles.clear();
+}
+
+

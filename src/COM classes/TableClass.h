@@ -38,40 +38,25 @@ class ATL_NO_VTABLE CTableClass :
 {
 public:
 	CTableClass()
+		:_shapefile(NULL), _globalCallback(NULL), _lastErrorCode(tkNO_ERROR),
+		_isEditingTable(FALSE), _dbfHandle(NULL), m_maxRowId(-1)
 	{
 		_key = SysAllocString(L"");
-		_globalCallback = NULL;
-		_lastErrorCode = tkNO_ERROR;
-		_isEditingTable = FALSE;
-		_dbfHandle = NULL;
-		m_maxRowId = -1;
 		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
+
 	~CTableClass()
 	{
 		VARIANT_BOOL vbretval;
 		this->Close(&vbretval);
 
-		for (int i = 0; i < (int)_tempFiles.size(); i++ )
-		{
-			try
-			{
-				CString * a = _tempFiles[i];
-				_unlink(a->GetBuffer());
-				delete a;
-			}
-			catch(...)
-			{
-				ASSERT(FALSE);
-			}
-		}
-		_tempFiles.clear();
+		RemoveTempFiles();
 
 		::SysFreeString(_key);
 
 		if( _globalCallback )
 			_globalCallback->Release();
-		_globalCallback = NULL;
+		
 		gReferenceCounter.Release(tkInterface::idTable);
 	}
 
@@ -160,8 +145,10 @@ public:
 	STDMETHOD(Join3)(ITable* table2, BSTR fieldTo, BSTR fieldFrom, BSTR filenameToReopen, BSTR joinOptions, SAFEARRAY* filedList, VARIANT_BOOL* retVal);
 
 	STDMETHOD(Dump)(/*[in]*/ BSTR dbfFilename, /*[in, optional]*/ ICallback * cBack, /*[out, retval]*/ VARIANT_BOOL * retval);
+
 	STDMETHOD(get_JoinFields)(LONG joinIndex, BSTR* pVal);
 	STDMETHOD(get_Filename)(BSTR* pVal);
+	STDMETHOD(get_JoinOptions)(LONG joinIndex, BSTR* pVal);
 
 private:
 	struct JoinInfo
@@ -192,6 +179,7 @@ private:
 	CStringW _filename;
 	vector<JoinInfo*> _joins;
 	int _lastJoinId;
+	IShapefile* _shapefile;
 
 public:
 	bool m_needToSaveAsNewFile;
@@ -213,6 +201,7 @@ private:
 	void RestoreJoins(CPLXMLNode* node);
 	void RestoreFields(CPLXMLNode* node);
 	void ClearFieldCustomizations();
+	void RemoveTempFiles();
 
 public:	
 	void DeserializeCore(CPLXMLNode* node);
@@ -248,14 +237,13 @@ public:
 	void RemoveJoinedFields();
 	bool HasFieldChanges();
 	void MarkFieldsAsUnchanged();
+	void InjectShapefile(IShapefile* sf) { _shapefile = sf;	}
+	IShapefile* GetParentShapefile() { return _shapefile; }
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)
 		CONNECTION_POINT_ENTRY(__uuidof(_ITableEvents))
 	END_CONNECTION_POINT_MAP()
-	
-	
-	STDMETHOD(get_JoinOptions)(LONG joinIndex, BSTR* pVal);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Table), CTableClass)

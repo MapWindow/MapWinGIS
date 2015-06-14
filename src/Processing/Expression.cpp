@@ -25,12 +25,13 @@
 #include "stdafx.h"
 #include "Expression.h"
 #include <map>
+#include <regex>
 #include "ExpressionParser.h"
 
 // *******************************************************************
 //	 Calculate()
 // *******************************************************************
-CExpressionValue* CExpression::Calculate(CString& errorMessage)
+CExpressionValue* Expression::Calculate(CString& errorMessage)
 {
 	Reset();
     
@@ -80,7 +81,7 @@ CExpressionValue* CExpression::Calculate(CString& errorMessage)
 // *******************************************************************
 //		EvaluatePart()
 // *******************************************************************
-bool CExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+bool Expression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int& operationCount)
 {
 	do
 	{
@@ -110,7 +111,7 @@ bool CExpression::EvaluatePart(CExpressionPart* part, CString& errorMessage, int
 // *******************************************************************
 //		EvaluateFunction()
 // *******************************************************************
-bool CExpression::EvaluateFunction(CExpressionPart* part)
+bool Expression::EvaluateFunction(CExpressionPart* part)
 {
 	if (!part->isFunction()) return false;
 
@@ -136,7 +137,7 @@ bool CExpression::EvaluateFunction(CExpressionPart* part)
 		args.push_back(part->arguments[i]->val);
 	}
 
-	// TODO: evaluate type of arguments depending on function
+	// TODO: validate type of arguments depending on function
 
 	// calculating
 	
@@ -144,13 +145,13 @@ bool CExpression::EvaluateFunction(CExpressionPart* part)
 	// in other cases val holds reference to element value, therefore it's deleted along with its parent element
 	part->val = new CExpressionValue();	
 	
-	return part->function->call(args, NULL, *(part->val));
+	return part->function->call(args, _shape, *(part->val));
 }
 
 // *******************************************************************
 //		CalculateNextOperationWithinPart()
 // *******************************************************************
-bool CExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
+bool Expression::CalculateNextOperationWithinPart(CExpressionPart* part, CString& errorMessage, int& operationCount)
 {
 	COperation* operation = NULL;
 
@@ -196,7 +197,7 @@ bool CExpression::CalculateNextOperationWithinPart(CExpressionPart* part, CStrin
 //		FinishPart()
 // *******************************************************************
 // if there is only one element left, we'll finalize the part
-bool CExpression::FinishPart(CExpressionPart* part)
+bool Expression::FinishPart(CExpressionPart* part)
 {
 	if (part->isFunction())
 	{
@@ -224,7 +225,7 @@ bool CExpression::FinishPart(CExpressionPart* part)
 // *******************************************************************
 //		ResetActiveCount()
 // *******************************************************************
-void CExpression::ResetActiveCountForParts()
+void Expression::ResetActiveCountForParts()
 {
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
@@ -236,7 +237,7 @@ void CExpression::ResetActiveCountForParts()
 //		Reset()
 // *******************************************************************
 // initializing in case of repeating calculations
-void CExpression::Reset()
+void Expression::Reset()
 {
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
@@ -255,7 +256,7 @@ void CExpression::Reset()
 //		FindOperation()
 // *******************************************************************
 // Seeks operation with the highest priority and operands.
-bool CExpression::FindOperation(CExpressionPart* part, COperation& operation)
+bool Expression::FindOperation(CExpressionPart* part, COperation& operation)
 {
 	// seeking operation
 	bool found = false;
@@ -354,7 +355,7 @@ bool CExpression::FindOperation(CExpressionPart* part, COperation& operation)
 // *************************************************************
 //	 GetMatrixOperation()
 // *************************************************************
-TwoArgOperator CExpression::GetMatrixOperation(tkOperation op)
+TwoArgOperator Expression::GetMatrixOperation(tkOperation op)
 {
 	switch(op)
 	{
@@ -386,7 +387,7 @@ TwoArgOperator CExpression::GetMatrixOperation(tkOperation op)
 // *************************************************************
 //	 CalculateOperation()
 // *************************************************************
-bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operation) //int left, int operation, int right )
+bool Expression::CalculateOperation( CExpressionPart* part, COperation& operation) //int left, int operation, int right )
 {
 	CExpressionValue* valLeft = NULL; 
 	CExpressionValue* valRight = NULL; 
@@ -455,6 +456,20 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 				}
 				break;
 			}
+		case operLike:
+			if (valLeft->isString() && valRight->isString())
+			{
+				CString pattern = valRight->str();
+				pattern.Replace("%", ".*");
+				pattern.Replace("_", ".");
+				std::regex reg(pattern);
+
+				const char* s = (LPCTSTR)valLeft->str();
+				bool result = std::regex_match(s, reg);
+				elLeft->calcVal->bln(result);
+				break;
+			}
+			break;
 		// comparison operators
 		case operLess:
 		case operLessEqual:
@@ -702,7 +717,7 @@ bool CExpression::CalculateOperation( CExpressionPart* part, COperation& operati
 // ************************************************************
 //	 GetValue()
 //************************************************************
-inline CExpressionValue* CExpression::GetValue(CExpressionPart* part, int elementId )
+inline CExpressionValue* Expression::GetValue(CExpressionPart* part, int elementId )
 {
 	CElement* element = part->elements[elementId];
 	CExpressionValue* val = NULL;
@@ -717,7 +732,7 @@ inline CExpressionValue* CExpression::GetValue(CExpressionPart* part, int elemen
 // ************************************************************
 //	 ReadFieldNames()
 //************************************************************
-bool CExpression::ReadFieldNames(ITable* tbl)
+bool Expression::ReadFieldNames(ITable* tbl)
 {
 	_fields.clear();
 	
@@ -748,7 +763,7 @@ bool CExpression::ReadFieldNames(ITable* tbl)
 // ************************************************************
 //	 SetFields()
 //************************************************************
-void CExpression::SetFields(vector<CString>& fields)
+void Expression::SetFields(vector<CString>& fields)
 {
 	_fields.clear();
 	_fields.insert(_fields.end(), fields.begin(), fields.end());
@@ -757,7 +772,7 @@ void CExpression::SetFields(vector<CString>& fields)
 // *****************************************************************
 //		BuildFieldList()
 // *****************************************************************
-void CExpression::BuildFieldList()
+void Expression::BuildFieldList()
 {
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
@@ -775,7 +790,7 @@ void CExpression::BuildFieldList()
 // *****************************************************************
 //		Clear()
 // *****************************************************************
-void CExpression::Clear()
+void Expression::Clear()
 {
 	ReleaseArrays();
 
@@ -794,12 +809,18 @@ void CExpression::Clear()
 	_parts.clear();
 	_operations.clear();
 	_strings.clear();
+
+	if (_shape)
+	{
+		_shape->Release();
+		_shape = NULL;
+	}
 }
 
 // *****************************************************************
 //		ReleaseArrays()
 // *****************************************************************
-void CExpression::ReleaseArrays()
+void Expression::ReleaseArrays()
 {
 	for (size_t i = 0; i < _parts.size(); i++)
 	{
@@ -825,7 +846,7 @@ void CExpression::ReleaseArrays()
 // building list of operation; 
 // UseFields: true - only fields form attribute table; 
 // false - variables, the values of which must be set
-bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
+bool Expression::Parse(CString s, bool useFields, CString& errorMessage)
 {
 	_saveOperations = true;
 	_useFields = useFields;
@@ -841,5 +862,21 @@ bool CExpression::Parse(CString s, bool useFields, CString& errorMessage)
 	}
 
 	return result;
+}
+
+// *****************************************************************
+//		get_Shape()
+// *****************************************************************
+IShape* Expression::get_Shape()
+{
+	return _shape;
+}
+
+// *****************************************************************
+//		put_Shape()
+// *****************************************************************
+void Expression::put_Shape(IShape* shape)
+{
+	ComHelper::SetRef(shape, (IDispatch**)&_shape, true);
 }
 

@@ -25,15 +25,19 @@
 #pragma once
 #include "ExpressionParts.h"
 
-class CExpression
+class Expression
 {
 private:
 	
 public:
-	CExpression() {
-		_floatFormat = m_globalSettings.floatNumberFormat;
+	Expression() 
+		: _useFields(true), _saveOperations(true), _floatFormat(m_globalSettings.floatNumberFormat),
+		_shape(NULL)
+	{
+		
 	}
-	~CExpression()
+
+	~Expression()
 	{
 		Clear();
 	}
@@ -48,8 +52,9 @@ private:
 	bool _saveOperations;
 	CString _errorMessage;	// the description of error
 	int _errorPosition;		// the position of error
-	int _errorLength;		// the length sub string with error
+	//int _errorLength;		// the length sub string with error
 	CString _floatFormat;
+	IShape* _shape;
 
 private:
 	
@@ -98,6 +103,9 @@ public:
 	void put_FieldValue(int FieldId, BSTR newVal) { USES_CONVERSION; _variables[FieldId]->val->str(OLE2CA(newVal));	}
 	void put_FieldValue(int FieldId, CString newVal) { _variables[FieldId]->val->str(newVal); }
 	void put_FieldValue(int FieldId, bool newVal) {	_variables[FieldId]->val->bln(newVal);}
+
+	IShape* get_Shape();
+	void put_Shape(IShape* shape);
 
 	void SetErrorMessage(CString msg) { _errorMessage = msg; }
 	void SetErrorPosition(int position){ _errorPosition = position; }

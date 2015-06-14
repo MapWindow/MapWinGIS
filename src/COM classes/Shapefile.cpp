@@ -461,7 +461,7 @@ STDMETHODIMP CShapefile::get_SourceType(tkShapefileSourceType* pVal)
 // ************************************************************
 //		LoadDataFrom()
 // ************************************************************
-// Loads shape and dbf data from disk file into in-memory mode
+// Loads shape and DBF data from disk file into in-memory mode
 STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
@@ -482,7 +482,7 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 			_isEditingShapes = false;
 			StartEditingShapes(VARIANT_TRUE, cBack, &vb);
 			
-			// this will trigger loading of all dbf values into the memory
+			// this will trigger loading of all DBF values into the memory
 			long numFields;
 			this->get_NumFields(&numFields);
 			if (numFields > 0)
@@ -516,6 +516,9 @@ STDMETHODIMP CShapefile::LoadDataFrom(BSTR ShapefileName, ICallback *cBack, VARI
 	return S_OK;
 }
 
+// ************************************************************
+//		OpenCore()
+// ************************************************************
 bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 {
 	USES_CONVERSION;
@@ -544,7 +547,10 @@ bool CShapefile::OpenCore(CStringW tmp_shpfileName, ICallback* cBack)
 		VARIANT_BOOL vb;
 		_table->Close(&vb);
 	}
+
 	_table->put_GlobalCallback(_globalCallback);
+	((CTableClass*)_table)->InjectShapefile(this);
+	
 	CComBSTR bstrDbf(_dbffileName);
 	_table->Open(bstrDbf, cBack, &vbretval);
 
