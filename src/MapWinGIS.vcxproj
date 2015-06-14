@@ -208,6 +208,7 @@
   <ItemGroup>
     <ClInclude Include="COM classes\Callback.h" />
     <ClInclude Include="COM classes\DrawingRectangle.h" />
+    <ClInclude Include="COM classes\Expression.h" />
     <ClInclude Include="COM classes\Function.h" />
     <ClInclude Include="COM classes\GdalDataset.h" />
     <ClInclude Include="COM classes\GdalDriver.h" />
@@ -471,6 +472,7 @@
   <!-- source -->
   <ItemGroup>
     <ClCompile Include="COM classes\DrawingRectangle.cpp" />
+    <ClCompile Include="COM classes\Expression.cpp" />
     <ClCompile Include="COM classes\Function.cpp" />
     <ClCompile Include="COM classes\GdalDataset.cpp" />
     <ClCompile Include="COM classes\GdalDriver.cpp" />
@@ -813,6 +815,7 @@
     <None Include="COM classes\ColorScheme.rgs" />
     <None Include="COM classes\DrawingRectangle.rgs" />
     <None Include="COM classes\ESRIGridManager.rgs" />
+    <None Include="COM classes\Expression.rgs" />
     <None Include="COM classes\Extents.rgs" />
     <None Include="COM classes\Field.rgs" />
     <None Include="COM classes\FieldStatOperations.rgs" />

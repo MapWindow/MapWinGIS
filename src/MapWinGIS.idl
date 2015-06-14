@@ -6198,6 +6198,15 @@ interface IGdalDriverManager : IDispatch{
 ]
 interface IFunction : IDispatch{
 };
+[
+	object,
+	uuid(9E78E6B9-D5FA-478D-83E8-1715C697A7DC),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IExpression : IDispatch{
+};
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),
 	helpfile("MapWinGIS.chm"),
@@ -7185,5 +7194,12 @@ library MapWinGIS
 	coclass Function
 	{
 		[default] interface IFunction;
+	};
+	[
+		uuid(2DD50E56-B81B-4456-9B32-6B763CB304E2)		
+	]
+	coclass Expression
+	{
+		[default] interface IExpression;
 	};
 };

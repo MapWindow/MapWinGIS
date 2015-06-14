@@ -867,6 +867,9 @@
     <ClInclude Include="Processing\CustomExpression.h">
       <Filter>Processing</Filter>
     </ClInclude>
+    <ClInclude Include="COM classes\Expression.h">
+      <Filter>COM classes\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1845,6 +1848,9 @@
     <ClCompile Include="Processing\CustomExpression.cpp">
       <Filter>Processing</Filter>
     </ClCompile>
+    <ClCompile Include="COM classes\Expression.cpp">
+      <Filter>COM classes\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="COM classes\Chart.rgs">
@@ -2046,6 +2052,9 @@
       <Filter>COM classes\Resources</Filter>
     </None>
     <None Include="COM classes\Function.rgs">
+      <Filter>COM classes\Resources</Filter>
+    </None>
+    <None Include="COM classes\Expression.rgs">
       <Filter>COM classes\Resources</Filter>
     </None>
   </ItemGroup>
