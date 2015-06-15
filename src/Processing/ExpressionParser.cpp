@@ -191,7 +191,7 @@ bool ExpressionParser::ParseTree(CString s, int partCount)
 		if (found)
 		{
 			int fnBegin;
-			Function* fn = ParseFunction(s, begin - 1, fnBegin);
+			CustomFunction* fn = ParseFunction(s, begin - 1, fnBegin);
 
 			if (fn)
 			{
@@ -280,7 +280,7 @@ bool ExpressionParser::GetBrackets(CString expression, int& begin, int& end, CSt
 //	 ParseFunction()
 //************************************************************
 // Tries to parse function name from the position of the opening bracket going backwards
-Function* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
+CustomFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 {
 	int i = begin;
 
@@ -295,7 +295,7 @@ Function* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 
 		sub = s[i] + sub;
 
-		Function* fn = parser::GetFunction(sub);
+		CustomFunction* fn = parser::GetFunction(sub);
 
 		if (fn) 
 		{
@@ -312,7 +312,7 @@ Function* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBegin)
 // ************************************************************
 //	 ParseArgumentList()
 //************************************************************
-bool ExpressionParser::ParseArgumentList(CString s, Function* fn)
+bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 {
 	if (!fn) return false;
 
@@ -982,7 +982,7 @@ bool ExpressionParser::ReplaceParameterlessFunctions(CString& s, int& partCount)
 			}
 		}
 
-		Function* fn = parser::GetFunction(sub);
+		CustomFunction* fn = parser::GetFunction(sub);
 
 		if (fn)
 		{

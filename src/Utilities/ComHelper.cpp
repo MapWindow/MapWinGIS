@@ -86,11 +86,17 @@ HRESULT ComHelper::CreateInstance(tkInterface interfaceId, IDispatch** retVal)
 		case tkInterface::idESRIGridManager:
 			result = CoCreateInstance(CLSID_ESRIGridManager, NULL, CLSCTX_INPROC_SERVER, IID_IESRIGridManager, (void**)&val);
 			break;
+		case tkInterface::idExpression:
+			result = CoCreateInstance(CLSID_Expression, NULL, CLSCTX_INPROC_SERVER, IID_IExpression, (void**)&val);
+			break;
 		case tkInterface::idFieldStatOperations:
 			result = CoCreateInstance(CLSID_FieldStatOperations, NULL, CLSCTX_INPROC_SERVER, IID_IFieldStatOperations, (void**)&val);
 			break;
 		case tkInterface::idFileManager:
 			result = CoCreateInstance(CLSID_FileManager, NULL, CLSCTX_INPROC_SERVER, IID_IFileManager, (void**)&val);
+			break;
+		case tkInterface::idFunction:
+			result = CoCreateInstance(CLSID_Function, NULL, CLSCTX_INPROC_SERVER, IID_IFunction, (void**)&val);
 			break;
 		case tkInterface::idGdalDataset:
 			result = CoCreateInstance(CLSID_GdalDataset, NULL, CLSCTX_INPROC_SERVER, IID_IGdalDataset, (void**)&val);

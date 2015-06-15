@@ -62,6 +62,22 @@ interface IHistogram;
 interface IGdalDataset;
 interface IGdalDriver;
 interface IGdalDriverManager;
+interface IFunction;
+interface IExpression;
+
+/************************** tkFunctionGroup Enumeration **********************/
+typedef
+[
+	uuid(E6FC6622-8DCE-4A1A-9E14-451EC15B0EA4),
+	helpstring("tkFunctionGroup"),
+]
+enum tkFunctionGroup {
+	fgMath = 0,
+	fgStrings = 1,
+	fgGeometry = 2,
+	fgBranching = 3,
+	fgConversion = 4,
+} tkFunctionGroup;
 
 /************************** tkLayerType Enumeration **********************/
 typedef
@@ -1111,6 +1127,8 @@ enum tkScalebarUnits
 		idGdalDataset = 47,
 		idGdalDriver = 48,
 		idGdalDriverManager = 49,
+		idFunction = 50,
+		idExpression = 51,
 	} tkInterface;	
 
 	typedef		
@@ -6197,6 +6215,11 @@ interface IGdalDriverManager : IDispatch{
 	pointer_default(unique)
 ]
 interface IFunction : IDispatch{
+	[propget, id(1)] HRESULT Name([out, retval] BSTR* pVal);
+	[propget, id(2)] HRESULT Alias([in] long aliasIndex, [out, retval] BSTR* pVal);
+	[propget, id(3)] HRESULT NumAliases([out, retval] long* pVal);
+	[propget, id(4)] HRESULT NumParameters([out, retval] long* pVal);
+	[propget, id(5)] HRESULT Group([out, retval] tkFunctionGroup* pVal);
 };
 [
 	object,
@@ -6206,6 +6229,12 @@ interface IFunction : IDispatch{
 	pointer_default(unique)
 ]
 interface IExpression : IDispatch{
+	[id(1)] HRESULT Parse([in] BSTR expr, [out, retval] VARIANT_BOOL* retVal);
+	[id(2)] HRESULT Evaluate([out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(3)] HRESULT LastErrorMessage([out, retval] BSTR* pVal);
+	[propget, id(4)] HRESULT LastErrorPosition([out, retval] LONG* pVal);
+	[propget, id(5)] HRESULT NumSupportedFunctions([out, retval] LONG* pVal);
+	[propget, id(6)] HRESULT SupportedFunction([in] LONG functionIndex, [out, retval] IFunction** pVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),

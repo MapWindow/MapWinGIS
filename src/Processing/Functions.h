@@ -3,9 +3,9 @@
 
 namespace parser
 {
-	extern std::vector<Function*> functions;
+	extern std::vector<CustomFunction*> functions;
 	void InitializeFunctions();
-	Function* GetFunction(CString name);
+	CustomFunction* GetFunction(CString name);
 };
 
 

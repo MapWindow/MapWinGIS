@@ -24,8 +24,8 @@ private:
 	bool IsFunctionName(char s);
 
 	bool ParseTree(CString s, int partCount);
-	Function* ParseFunction(CString& s, int begin, int& fnBegin);
-	bool ParseArgumentList(CString s, Function* fn);
+	CustomFunction* ParseFunction(CString& s, int begin, int& fnBegin);
+	bool ParseArgumentList(CString s, CustomFunction* fn);
 
 	bool GetBrackets(CString expression, int& begin, int& end, CString openingSymbol = "(", CString closingSymbol = ")");
 	CString GetInnerString(CString& s, int begin, int end);
