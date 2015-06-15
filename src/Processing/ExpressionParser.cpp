@@ -375,7 +375,9 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 		// reading element
 		CElement* element = new CElement();
 		bool result = readVal ? ReadValue(s, i, element) : ReadOperation(s, i, *element);
-		if (!result) {
+
+		if (!result) 
+		{
 			delete element;
 			delete part;
 			return NULL;
@@ -393,6 +395,14 @@ CExpressionPart* ExpressionParser::ParseExpressionPart(CString s)
 
 	if (part->elements.size() == 0)
 	{
+		SetErrorMessage("Expression part is empty");
+		delete part;
+		return NULL;
+	}
+
+	if (part->elements[part->elements.size() - 1]->type == etOperation)
+	{
+		SetErrorMessage("Operator doesn't have right operand.");
 		delete part;
 		return NULL;
 	}

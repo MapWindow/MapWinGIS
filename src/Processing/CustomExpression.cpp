@@ -854,6 +854,8 @@ bool CustomExpression::Parse(CString s, bool useFields, CString& errorMessage)
 	ExpressionParser parser;
 	bool result = parser.Parse(this, s, useFields);
 
+	errorMessage = _errorMessage;
+
 	_strings.clear();
 
 	if (result)

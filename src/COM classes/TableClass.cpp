@@ -81,10 +81,8 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 				errorString = "Invalid resulting type";
 			}
 		}
-		else if (result->type())
-		{
-			*retVal = VARIANT_TRUE;
-		}
+		
+		*retVal = VARIANT_TRUE;
 	}
 }
 
@@ -94,10 +92,13 @@ void CTableClass::ParseExpressionCore(BSTR Expression, tkValueType returnType, C
 //  Checks the correctness of the expression syntax, but doesn't check the validity of data types
 STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	*retVal = VARIANT_FALSE;
-	SysFreeString(*ErrorString);	// do we need it here?
+	
 	USES_CONVERSION;
 	CString str = OLE2CA(Expression);
+	
 	CustomExpression expr;	
 	
 	if (expr.ReadFieldNames(this))
@@ -116,6 +117,7 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 	{
 		*ErrorString = SysAllocString(L"Failed to read field names");
 	}
+
 	return S_OK;
 }
 
@@ -126,12 +128,13 @@ STDMETHODIMP CTableClass::ParseExpression(BSTR Expression, BSTR* ErrorString, VA
 STDMETHODIMP CTableClass::TestExpression(BSTR Expression, tkValueType ReturnType, BSTR* ErrorString, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
 	CString err;
 	ParseExpressionCore(Expression, ReturnType, err, retVal);
+
 	*ErrorString = A2BSTR(err);
 	return S_OK;
 }
-
 
 // *****************************************************************
 //		Query()
