@@ -47,7 +47,7 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 
 		vector<CString>* aliases = _function->GetAliases();
 
-		if (aliasIndex <= 0 || aliasIndex >= aliases->size())
+		if (aliasIndex <= 0 || aliasIndex >= (long)aliases->size())
 		{
 			CallbackHelper::ErrorMsg("Function::get_Alias: index out of bounds.");
 		}

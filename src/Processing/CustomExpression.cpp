@@ -242,12 +242,28 @@ void CustomExpression::Reset()
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
 		CExpressionPart* part = _parts[i];
-		int size = part->elements.size();
-		for (int j = 0; j < size; j++)
+		if (part->isFunction())
 		{
-			CElement* el = part->elements[j];
-			el->wasCalculated = false;
-			el->turnedOff = false;
+			for (size_t j = 0; j < part->arguments.size(); j++)
+			{
+				for (size_t k = 0; k < part->arguments[j]->elements.size(); k++)
+				{
+					// TODO: it won't work in case of brackets within function argument
+					// TODO: do we need both turned off and was calculated
+					part->arguments[j]->elements[k]->turnedOff = false;
+					part->arguments[j]->elements[k]->wasCalculated = false;
+				}
+			}
+		}
+		else
+		{
+			int size = part->elements.size();
+			for (int j = 0; j < size; j++)
+			{
+				CElement* el = part->elements[j];
+				el->wasCalculated = false;
+				el->turnedOff = false;
+			}
 		}
 	}
 }

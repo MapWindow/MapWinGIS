@@ -6230,11 +6230,15 @@ interface IFunction : IDispatch{
 ]
 interface IExpression : IDispatch{
 	[id(1)] HRESULT Parse([in] BSTR expr, [out, retval] VARIANT_BOOL* retVal);
-	[id(2)] HRESULT Evaluate([out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
+	[id(2)] HRESULT Calculate([out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
 	[propget, id(3)] HRESULT LastErrorMessage([out, retval] BSTR* pVal);
 	[propget, id(4)] HRESULT LastErrorPosition([out, retval] LONG* pVal);
 	[propget, id(5)] HRESULT NumSupportedFunctions([out, retval] LONG* pVal);
 	[propget, id(6)] HRESULT SupportedFunction([in] LONG functionIndex, [out, retval] IFunction** pVal);
+	[id(7)] HRESULT ParseForTable([in] BSTR expr, [in] ITable* tbl, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(8)] HRESULT Table([out, retval] ITable** pVal);
+	[id(9)] HRESULT CalculateForTableRow([in] LONG rowIndex, [in] LONG targetFieldIndex, [out, retval] VARIANT_BOOL* retVal);
+	[id(10)] HRESULT CalculateForTableRow2([in] LONG rowIndex, [out] VARIANT* result, [out, retval] VARIANT_BOOL* retVal);
 };
 [ 
 	uuid(C368D713-CC5F-40ED-9F53-F84FE197B96A), version(4.9),

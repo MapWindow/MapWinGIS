@@ -21,6 +21,17 @@ long TableHelper::GetNumRows(ITable* table)
 }
 
 // **************************************************
+//		GetNumFields()
+// **************************************************
+long TableHelper::GetNumFields(ITable* table)
+{
+	if (!table) return 0;
+	long numFields;
+	table->get_NumFields(&numFields);
+	return numFields;
+}
+
+// **************************************************
 //		SetFieldValues()
 // **************************************************
 void TableHelper::SetFieldValues(ITable* table, int rowIndex, CustomExpression& expr )

@@ -78,6 +78,7 @@ private:
 	TwoArgOperator GetMatrixOperation(tkOperation op);
 
 public:
+	bool IsEmpty() { return _parts.size() == 0; }
 	bool Parse(CString s, bool useFields, CString& error);
 	CExpressionValue* Calculate(CString& errorMessage);
 	void Clear();
