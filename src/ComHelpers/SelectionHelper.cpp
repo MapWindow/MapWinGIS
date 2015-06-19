@@ -217,10 +217,10 @@ bool SelectionHelper::SelectSingleShape(IShapefile* sf, Extent& box, SelectMode 
 		for (int i = results.size() - 1; i >= 0; i--) 
 		{
 			VARIANT_BOOL visible;
-			sf->get_ShapeVisible(results[i], &visible);
+			sf->get_ShapeRendered(results[i], &visible);
 			if (visible) 
 			{
-				shapeIndex = results[results.size() - 1];
+				shapeIndex = results[i];
 				return true;
 			}
 		}
