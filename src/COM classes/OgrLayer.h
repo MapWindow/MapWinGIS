@@ -29,6 +29,7 @@ public:
 		_dynamicLoading = VARIANT_FALSE;
 		_envelope = NULL;
 		_featureCount = -1;
+		_activeShapeType = SHP_NULLSHAPE;
 		_loader.SetMaxCacheCount(m_globalSettings.ogrLayerMaxFeatureCount);
 		gReferenceCounter.AddRef(tkInterface::idOgrLayer);
 	}
@@ -116,6 +117,9 @@ public:
 	STDMETHOD(get_ShapeType2D)(ShpfileType* pVal);
 	STDMETHOD(get_DriverName)(BSTR* pVal);
 	STDMETHOD(OpenFromFile)(BSTR Filename, VARIANT_BOOL forUpdate, VARIANT_BOOL* retVal);
+	STDMETHOD(get_AvailableShapeTypes)(VARIANT* pVal);
+	STDMETHOD(get_ActiveShapeType)(ShpfileType* pVal);
+	STDMETHOD(put_ActiveShapeType)(ShpfileType newVal);
 
 private:
 	VARIANT_BOOL _dynamicLoading;
@@ -134,6 +138,7 @@ private:
 	OGREnvelope* _envelope;
 	int _featureCount;
 	OgrDynamicLoader _loader;
+	ShpfileType _activeShapeType;		// this type will be used in case layer holds geometries of various types
 	
 private:
 	bool CheckState();
@@ -163,6 +168,6 @@ public:
 	CStringW LoadStyleXML(CStringW name);
 	GDALDataset* GetDataset() { return _dataset; }
 	bool DeserializeOptions(CPLXMLNode* node);
-	
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(OgrLayer), COgrLayer)

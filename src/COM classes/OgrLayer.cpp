@@ -10,6 +10,7 @@
 #include "Ogr2Shape.h"
 #include "FieldClassification.h"
 #include "ShapefileCategories.h"
+#include "Templates.h"
 
 // *************************************************************
 //		InjectShapefile()
@@ -60,8 +61,10 @@ void COgrLayer::ClearCachedValues()
 		delete _envelope;
 		_envelope = NULL;
 	}
-	if (_featureCount != -1) 
+
+	if (_featureCount != -1) {
 		_featureCount = -1;
+	}
 }
 
 //***********************************************************************
@@ -80,7 +83,7 @@ void COgrLayer::StopBackgroundLoading()
 IShapefile* COgrLayer::LoadShapefile()
 { 
 	bool isTrimmed = false;	
-	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback); 
+	IShapefile* sf = Ogr2Shape::Layer2Shapefile(_layer, _activeShapeType, _loader.GetMaxCacheCount(), isTrimmed, &_loader, _globalCallback); 
 	if (isTrimmed) {
 		ErrorMessage(tkOGR_LAYER_TRIMMED);
 	}
@@ -178,23 +181,28 @@ STDMETHODIMP COgrLayer::get_SourceType(tkOgrSourceType* retVal)
 STDMETHODIMP COgrLayer::Close()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
+
 	StopBackgroundLoading();
+
 	if (_dataset)
 	{
-		if (_sourceType == ogrQuery && _layer)
+		if (_sourceType == ogrQuery && _layer) {
 			_dataset->ReleaseResultSet(_layer);
+		}
 	
 		// this will release memory for table layer as well
 		GDALClose(_dataset);
 		_dataset = NULL;
 		_layer = NULL;
 	}
+
 	CloseShapefile();
 	_updateErrors.clear();
 	_sourceType = ogrUninitialized;
 	_connectionString = L"";
 	_sourceQuery = L"";
 	_forUpdate = false;
+	_activeShapeType = SHP_NULLSHAPE;
 	return S_OK;
 }
 
@@ -391,7 +399,7 @@ STDMETHODIMP COgrLayer::get_Name(BSTR* retVal)
 }
 
 // *************************************************************
-//		get_Data()
+//		GetBuffer()
 // *************************************************************
 STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 {
@@ -405,10 +413,11 @@ STDMETHODIMP COgrLayer::GetBuffer(IShapefile** retVal)
 	
 	if (!_shapefile)
 	{
-		if (_dynamicLoading) {
+		if (_dynamicLoading) 
+		{
 			CSingleLock lock(&_loader.ProviderLock);
 			lock.Lock();
-			_shapefile = Ogr2Shape::CreateShapefile(_layer);
+			_shapefile = Ogr2Shape::CreateShapefile(_layer, _activeShapeType);
 		}
 		else {
 			_shapefile = LoadShapefile();
@@ -800,10 +809,12 @@ void COgrLayer::ForceCreateShapefile()
 {
 	tkOgrSourceType sourceType;
 	get_SourceType(&sourceType);
-	if (_dynamicLoading && (!_shapefile) && (sourceType != ogrUninitialized)) {
+
+	if (_dynamicLoading && !_shapefile && sourceType != ogrUninitialized) 
+	{
 		CSingleLock lock(&_loader.ProviderLock);
 		lock.Lock();
-		_shapefile = Ogr2Shape::CreateShapefile(_layer);
+		_shapefile = Ogr2Shape::CreateShapefile(_layer, _activeShapeType);
 	}
 }
 
@@ -1470,5 +1481,81 @@ STDMETHODIMP COgrLayer::get_DriverName(BSTR* pVal)
 		*pVal = A2BSTR(_dataset->GetDriverName());   // no need to convert from UTF-8: it's in ASCII
 		return S_OK;
 	}
+	return S_OK;
+}
+
+// *************************************************************
+//		AvailableShapeTypes()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_AvailableShapeTypes(VARIANT* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	vector<int> shpTypes;
+	if (!CheckState()) 
+	{
+		// return empty array
+	}
+	else
+	{
+		ShpfileType shpType = OgrConverter::GeometryType2ShapeType(_layer->GetGeomType());
+		if (shpType != SHP_NULLSHAPE)
+		{
+			// return a single type
+			shpTypes.push_back(shpType);
+			return S_OK;
+		}
+		else
+		{
+			// read and return all the types
+			set<OGRwkbGeometryType> types;
+			Ogr2Shape::ReadGeometryTypes(_layer, types);
+
+			set<OGRwkbGeometryType>::iterator it = types.begin();
+			while (it != types.end())
+			{
+				shpType = OgrConverter::GeometryType2ShapeType(*it);
+				shpTypes.push_back(shpType);
+				it++;
+			}
+		}
+	}
+
+	Templates::Vector2SafeArray(&shpTypes, VT_I4, pVal);
+
+	return S_OK;
+}
+
+// *************************************************************
+//		ActiveShapeType()
+// *************************************************************
+STDMETHODIMP COgrLayer::get_ActiveShapeType(ShpfileType* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ShpfileType shpType;
+	get_ShapeType(&shpType);
+	
+	*pVal = shpType != SHP_NULLSHAPE ? shpType : _activeShapeType;
+
+	return S_OK;
+}
+
+STDMETHODIMP COgrLayer::put_ActiveShapeType(ShpfileType newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	ShpfileType shpType;
+	get_ShapeType(&shpType);
+
+	if (shpType == SHP_NULLSHAPE)
+	{
+		_activeShapeType = newVal;
+	}
+	else
+	{
+		CallbackHelper::ErrorMsg("OGR layer has single geometry type. ActiveShapeType provided will be ignored.");
+	}
+
 	return S_OK;
 }

@@ -659,7 +659,7 @@ IShapefile* OgrConverter::ReadOgrLayer(BSTR Filename, ICallback* callback)
 	OGRLayer* layer = ds->GetLayer(0);
 	if (layer)
 	{
-		sf = Ogr2Shape::CreateShapefile(layer);
+		sf = Ogr2Shape::CreateShapefile(layer, SHP_NULLSHAPE);
 		if (sf) {
 			bool isTrimmed = false;
 			Ogr2Shape::FillShapefile(layer, sf, m_globalSettings.ogrLayerMaxFeatureCount, false, callback, isTrimmed);

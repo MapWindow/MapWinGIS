@@ -1,12 +1,14 @@
 #pragma once
 #include "ogr_feature.h"
 #include "OgrHelper.h"
+#include <set>
 
 class Ogr2Shape
 {
 public:
-	static IShapefile* CreateShapefile(OGRLayer* layer);
-	static IShapefile* Layer2Shapefile(OGRLayer* layer, int maxFeatureCount, bool& isTrimmed, OgrDynamicLoader* loader, ICallback* callback = NULL);
+	static IShapefile* CreateShapefile(OGRLayer* layer, ShpfileType activeShapeType);
+	static IShapefile* Layer2Shapefile(OGRLayer* layer, ShpfileType activeShapeType, int maxFeatureCount, bool& isTrimmed, OgrDynamicLoader* loader, ICallback* callback = NULL);
 	static bool FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCount, bool loadLabels, ICallback* callback, bool& isTrimmed);
+	static void ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types);
 };
 

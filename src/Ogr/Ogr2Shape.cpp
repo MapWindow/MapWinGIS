@@ -8,12 +8,12 @@
 // *************************************************************
 //		Layer2Shapefile()
 // *************************************************************
-IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, int maxFeatureCount, bool& isTrimmed, 
+IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, ShpfileType activeShapeType, int maxFeatureCount, bool& isTrimmed, 
 	OgrDynamicLoader* loader, ICallback* callback /*= NULL*/)
 {
 	if (!layer)	return NULL;
 
-	IShapefile* sf = CreateShapefile(layer);
+	IShapefile* sf = CreateShapefile(layer, activeShapeType);
 
 	if (sf) 
 	{
@@ -41,7 +41,7 @@ IShapefile* Ogr2Shape::Layer2Shapefile(OGRLayer* layer, int maxFeatureCount, boo
 // *************************************************************
 //		CreateShapefile()
 // *************************************************************
-IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
+IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer, ShpfileType activeShapeType)
 {
 	layer->ResetReading();
 
@@ -52,14 +52,18 @@ IShapefile* Ogr2Shape::CreateShapefile(OGRLayer* layer)
 
 	ShpfileType shpType = OgrConverter::GeometryType2ShapeType(layer->GetGeomType());
 
-	// in case of queries or generic (untyped) geometry columns, type isn't defined
-	// as quick fix let's fetch it from the first shape
+	// in case it's not strongly typed, let's check if use specified the type
+	if (shpType == SHP_NULLSHAPE)
+	{
+		shpType = activeShapeType;
+	}
+
+	// if not grab the type from the first feature
 	if (shpType == SHP_NULLSHAPE)
 	{
 		OGRFeatureDefn* defn = layer->GetLayerDefn();
 		while ((poFeature = layer->GetNextFeature()) != NULL)
 		{
-			// TODO: perhaps loop through all features and find out the most frequent type
 			OGRGeometry* geom = poFeature->GetGeometryRef();
 			if (geom)
 			{
@@ -176,6 +180,8 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			loadLabels = false;
 	}
 
+	ShpfileType targetType = ShapefileHelper::GetShapeType(sf);
+
 	while ((poFeature = layer->GetNextFeature()) != NULL)
 	{
 		CallbackHelper::Progress(callback, count, numFeatures, "Converting geometries...", key.m_str, percent);
@@ -187,11 +193,19 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			break;
 		}
 
+		CStringW text;
+
 		OGRGeometry *oGeom = poFeature->GetGeometryRef();
 
 		IShape* shp = NULL;
 		if (oGeom)
 		{
+			shpType = OgrConverter::GeometryType2ShapeType(oGeom->getGeometryType());
+			if (shpType != targetType)
+			{
+				goto next_feature;
+			}
+
 			shp = OgrConverter::GeometryToShape(oGeom, Utility::ShapeTypeIsM(shpType));
 		}
 
@@ -215,7 +229,6 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 		}
 
 		double x = 0.0, y = 0.0, rotation = 0;
-		CStringW text;
 
 		for (int iFld = 0; iFld < poFields->GetFieldCount(); iFld++)
 		{
@@ -254,6 +267,7 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 			labels->AddLabel(bstr, x, y, rotation);
 		}
 
+next_feature:
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	CallbackHelper::ProgressCompleted(callback);
@@ -261,4 +275,33 @@ bool Ogr2Shape::FillShapefile(OGRLayer* layer, IShapefile* sf, int maxFeatureCou
 	sf->RefreshExtents(&vbretval);
 	Utility::ClearShapefileModifiedFlag(sf);		// inserted shapes were marked as modified, correct this
 	return true;
+}
+
+// *************************************************************
+//		ReadGeometryTypes()
+// *************************************************************
+void Ogr2Shape::ReadGeometryTypes(OGRLayer* layer, set<OGRwkbGeometryType>& types)
+{
+	types.clear();	
+
+	layer->ResetReading();
+
+	OGRFeature *poFeature;
+
+	GIntBig count = layer->GetFeatureCount();
+
+	OGRFeatureDefn* defn = layer->GetLayerDefn();
+	while ((poFeature = layer->GetNextFeature()) != NULL)
+	{
+		OGRGeometry* geom = poFeature->GetGeometryRef();
+		if (geom)
+		{
+			OGRwkbGeometryType type = geom->getGeometryType();
+			if (types.find(type) == types.end())
+			{
+				types.insert(type);
+			}
+		}
+		OGRFeature::DestroyFeature(poFeature);
+	}
 }

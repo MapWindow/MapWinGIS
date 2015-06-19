@@ -6023,6 +6023,9 @@ interface IOgrLayer : IDispatch{
 	[propget, id(45)] HRESULT ShapeType2D([out, retval] ShpfileType* pVal);
 	[propget, id(46)] HRESULT DriverName([out, retval] BSTR* pVal);
 	[id(47)] HRESULT OpenFromFile([in] BSTR Filename, [in] VARIANT_BOOL forUpdate, [out, retval] VARIANT_BOOL* retVal);
+	[propget, id(48)] HRESULT AvailableShapeTypes([out, retval] VARIANT* pVal);
+	[propget, id(49)] HRESULT ActiveShapeType([out, retval] ShpfileType* pVal);
+	[propput, id(49)] HRESULT ActiveShapeType([in] ShpfileType newVal);
 };
 
 [
