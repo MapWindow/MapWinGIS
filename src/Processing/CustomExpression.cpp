@@ -537,7 +537,7 @@ bool CustomExpression::CalculateOperation( CExpressionPart* part, COperation& op
 							else if (oper == operGrEqual && res >= 0)		elLeft->calcVal->bln(true);
 							else if (oper == operEqual	&& res == 0)		elLeft->calcVal->bln(true);
 							else if (oper == operNotEqual && res != 0)		elLeft->calcVal->bln(true);
-							else											elLeft->calcVal->bln(true);
+							else											elLeft->calcVal->bln(false);
 						}
 					}
 				}
