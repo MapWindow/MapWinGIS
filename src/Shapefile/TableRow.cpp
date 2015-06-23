@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TableRow.h"
+#include "Field.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -32,3 +33,19 @@ TableRow::~TableRow()
 	}
 	values.clear();
 }	
+
+// ************************************************
+//   GetJoinId
+// ************************************************
+int FieldWrapper::GetJoinId()
+{	
+	return field != NULL ? ((CField*)field)->GetJoinId() : -1;
+}
+
+// ************************************************
+//   SetJoinId
+// ************************************************
+void FieldWrapper::SetJoinId(int value)
+{
+	((CField*)field)->SetJoinId(value);
+}

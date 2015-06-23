@@ -2665,7 +2665,7 @@ bool CTableClass::JoinFields(ITable* table2, std::vector<FieldMapping*>& mapping
 			VARIANT_BOOL vbretval;
 			this->get_NumFields(&index);
 			this->EditInsertField(fldNew, &index, NULL, &vbretval);
-			_fields[index]->joinId = _lastJoinId;
+			_fields[index]->SetJoinId(_lastJoinId);
 			fldNew->Release();
 
 			FieldMapping* fm = new FieldMapping();
@@ -2982,7 +2982,7 @@ STDMETHODIMP CTableClass::StopJoin(int joinIndex, VARIANT_BOOL* retVal)
 		VARIANT_BOOL vb;
 		for (int i =_fields.size() - 1; i >= 0 ; i-- )
 		{
-			if (_fields[i]->joinId == id)
+			if (_fields[i]->GetJoinId() == id)
 				this->EditDeleteField(i, NULL, &vb);
 		}
 
@@ -3055,7 +3055,7 @@ STDMETHODIMP CTableClass::get_FieldJoinIndex(int fieldIndex, int* retVal)
 	}
 	else 
 	{
-		int id = _fields[fieldIndex]->joinId;
+		int id = _fields[fieldIndex]->GetJoinId();
 		for (size_t i = 0; i < _joins.size(); i++) 
 		{
 			if (_joins[i]->joinId == id)

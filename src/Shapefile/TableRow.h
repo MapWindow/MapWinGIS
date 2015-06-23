@@ -51,18 +51,16 @@ private:
 
 struct FieldWrapper
 {
+private:
+	long joinId;		// from which join operation a field originates	
+
+public:
 	IField* field;
 	long oldIndex;
-	long joinId;		// from which join operation a field originates
-
-	bool Joined() {
-		return joinId >= 0;
-	}
 
 	FieldWrapper()
 	{
 		field = NULL;
-		joinId = -1;
 		oldIndex = -1;
 	}
 
@@ -73,6 +71,12 @@ struct FieldWrapper
 			field = NULL;
 		}
 	}
+	bool Joined() {
+		return GetJoinId() >= 0;
+	}
+
+	int GetJoinId();
+	void SetJoinId(int value);
 };
 
 struct RecordWrapper

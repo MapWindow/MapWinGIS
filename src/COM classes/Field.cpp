@@ -285,3 +285,13 @@ STDMETHODIMP CField::put_Alias(BSTR newVal)
 
 	return S_OK;
 }
+
+// **************************************************************
+//		Joined()
+// **************************************************************
+STDMETHODIMP CField::get_Joined(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = _joinId >= 0;
+	return S_OK;
+}

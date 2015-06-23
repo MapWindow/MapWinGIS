@@ -43,6 +43,7 @@ public:
 		_isUpdated = false;
 		_table = NULL;
 		_visible = VARIANT_TRUE;
+		_joinId = -1;
 		gReferenceCounter.AddRef(tkInterface::idField);
 	}
 
@@ -100,6 +101,7 @@ public:
 	STDMETHOD(put_Visible)(VARIANT_BOOL newVal);
 	STDMETHOD(get_Alias)(BSTR* pVal);
 	STDMETHOD(put_Alias)(BSTR newVal);
+	STDMETHOD(get_Joined)(VARIANT_BOOL* pVal);
 
 	void ErrorMessage(long ErrorCode);
 	ITable* GetTable() { return _table; }
@@ -117,12 +119,16 @@ private:
 	long _lastErrorCode;
 	long _precision;
 	long _width;
+	int _joinId;
 	bool _isUpdated;
 	VARIANT_BOOL _visible;
 
 private:
 	bool CheckTableEditingState();
 
+public:
+	int GetJoinId() {return _joinId; }
+	void SetJoinId(int value) { _joinId = value; }
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Field), CField)
