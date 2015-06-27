@@ -3295,6 +3295,9 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 		return ResetConfigOptions(tkGDAL_ERROR);
 	}
 
+	papszSrcFiles = CSLAddString(papszSrcFiles, OLE2A(bstrSrcFilename));
+	papszSrcFiles = CSLAddString(papszSrcFiles, OLE2A(bstrDstFilename));
+
 /* -------------------------------------------------------------------- */
 /*      Parse arguments.                                                */
 /* -------------------------------------------------------------------- */
@@ -3347,7 +3350,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if (pszSRS == NULL)
 			{
-				// TODO: set error code?
+				CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to read target projection argument (-t_srs).");
 				return ResetConfigOptions();
 			}
 
@@ -3360,7 +3363,7 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if (pszSRS == NULL)
 			{
-				// TODO: set error code?
+				CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to read source projection argument (-s_srs).");
 				return ResetConfigOptions();
 			}
 
@@ -3598,7 +3601,8 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
     if( pszDstFilename == NULL )
 	{
-		// TODO: set error code?
+		CPLError(CE_Warning, CPLE_AppDefined, "GdalWarp: failed to find destination file name.");
+		return ResetConfigOptions();
 	}
         
     if( bVRT && CSLCount(papszSrcFiles) > 1 )
@@ -3621,7 +3625,6 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
          strcmp(papszSrcFiles[0], pszDstFilename) == 0 && bOverwrite)
     {
         CPLError( CE_Failure, CPLE_AppDefined, "Source and destination datasets must be different.\n");
-        // TODO: clean up memory?
 		return ResetConfigOptions(tkGDAL_ERROR);
     }
 
