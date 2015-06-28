@@ -99,6 +99,7 @@ namespace parser
 
 	bool fcnRound(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
+		// TODO: split into separate functions
 		if (args.size() == 2)
 		{
 			double number = args[0]->dbl();
@@ -289,6 +290,7 @@ namespace parser
 	{
 		CString s = args[0]->str();
 
+		// TODO: split into separate functions
 		if (args.size() == 2)
 		{
 			result.str(s.Mid(static_cast<int>(args[1]->dbl())));
@@ -384,10 +386,17 @@ namespace parser
 
 #pragma region Geometry functions
 
-	bool fcnGeometry(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
+	bool fcnGeometryToWkt(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
 	{
 		if (!shape) return false;
-		return false;
+
+		CComBSTR bstr;
+		shape->ExportToWKT(&bstr);
+
+		USES_CONVERSION;
+		result.str(OLE2A(bstr));
+
+		return true;
 	}
 
 	bool fcnGeometryArea(const vector<CExpressionValue*>& args, IShape* shape, CExpressionValue& result)
@@ -555,42 +564,42 @@ namespace parser
 	{
 		functions.clear();
 
-		functions.push_back(new CustomFunction("sqrt", 1, fcnSqrt, fgMath));
-		functions.push_back(new CustomFunction("abs", 1, fcnAbs, fgMath));
-		functions.push_back(new CustomFunction("cos", 1, fcnCos, fgMath));
-		functions.push_back(new CustomFunction("sin", 1, fcnSin, fgMath));
-		functions.push_back(new CustomFunction("tan", 1, fcnTan, fgMath));
-		functions.push_back(new CustomFunction("asin", 1, fcnAsin, fgMath));
-		functions.push_back(new CustomFunction("acos", 1, fcnAcos, fgMath));
-		functions.push_back(new CustomFunction("atan", 1, fcnAtan, fgMath));
-		functions.push_back(new CustomFunction("atan2", 2, fcnAtan2, fgMath));
-		functions.push_back(new CustomFunction("exp", 1, fcnExp, fgMath));
-		functions.push_back(new CustomFunction("ln", 1, fcnLn, fgMath));
-		functions.push_back(new CustomFunction("log10", 1, fcnLog10, fgMath));
-		functions.push_back(new CustomFunction("log", 2, fcnLog, fgMath));
-		functions.push_back(new CustomFunction("round", -1, fcnRound, fgMath));
-		functions.push_back(new CustomFunction("rand", 2, fcnRand, fgMath));
-		functions.push_back(new CustomFunction("randf", 2, fcnRandF, fgMath));
-		functions.push_back(new CustomFunction("max", -1, fcnMax, fgMath));
-		functions.push_back(new CustomFunction("min", -1, fcnMin, fgMath));
-		functions.push_back(new CustomFunction("clamp", 3, fcnClamp, fgMath));
-		functions.push_back(new CustomFunction("floor", 1, fcnFloor, fgMath));
-		functions.push_back(new CustomFunction("ceil", 1, fcnCeil, fgMath));
-		functions.push_back(new CustomFunction("pi;$pi", 0, fcnPi, fgMath));
+		functions.push_back(new CustomFunction(fnSqrt, "sqrt", 1, fcnSqrt, fgMath));
+		functions.push_back(new CustomFunction(fnAbs, "abs", 1, fcnAbs, fgMath));
+		functions.push_back(new CustomFunction(fnCos, "cos", 1, fcnCos, fgMath));
+		functions.push_back(new CustomFunction(fnSin, "sin", 1, fcnSin, fgMath));
+		functions.push_back(new CustomFunction(fnTan, "tan", 1, fcnTan, fgMath));
+		functions.push_back(new CustomFunction(fnAsin, "asin", 1, fcnAsin, fgMath));
+		functions.push_back(new CustomFunction(fnAcos, "acos", 1, fcnAcos, fgMath));
+		functions.push_back(new CustomFunction(fnAtan, "atan", 1, fcnAtan, fgMath));
+		functions.push_back(new CustomFunction(fnAtan2, "atan2", 2, fcnAtan2, fgMath));
+		functions.push_back(new CustomFunction(fnExp, "exp", 1, fcnExp, fgMath));
+		functions.push_back(new CustomFunction(fnLn, "ln", 1, fcnLn, fgMath));
+		functions.push_back(new CustomFunction(fnLog10, "log10", 1, fcnLog10, fgMath));
+		functions.push_back(new CustomFunction(fnLog, "log", 2, fcnLog, fgMath));
+		functions.push_back(new CustomFunction(fnRound, "round", -1, fcnRound, fgMath));
+		functions.push_back(new CustomFunction(fnRand, "rand", 2, fcnRand, fgMath));
+		functions.push_back(new CustomFunction(fnRandf, "randf", 2, fcnRandF, fgMath));
+		functions.push_back(new CustomFunction(fnMax, "max", -1, fcnMax, fgMath));
+		functions.push_back(new CustomFunction(fnMin, "min", -1, fcnMin, fgMath));
+		functions.push_back(new CustomFunction(fnClamp, "clamp", 3, fcnClamp, fgMath));
+		functions.push_back(new CustomFunction(fnFloor, "floor", 1, fcnFloor, fgMath));
+		functions.push_back(new CustomFunction(fnCeil, "ceil", 1, fcnCeil, fgMath));
+		functions.push_back(new CustomFunction(fnPi, "pi;$pi", 0, fcnPi, fgMath));
 		/*functions.push_back(new CFunction("scale_linear", 5, fcnLinearScale, fgMath));
 		functions.push_back(new CFunction("scale_exp", 6, fcnExpScale, fgMath)); */
 
-		functions.push_back(new CustomFunction("lower", 1, fcnLower, fgStrings));
-		functions.push_back(new CustomFunction("upper", 1, fcnUpper, fgStrings));
-		functions.push_back(new CustomFunction("title", 1, fcnTitle, fgStrings));
-		functions.push_back(new CustomFunction("trim", 1, fcnTrim, fgStrings));
-		functions.push_back(new CustomFunction("len", 1, fcnLength, fgStrings));
-		functions.push_back(new CustomFunction("replace", 3, fcnReplace, fgStrings));
-		functions.push_back(new CustomFunction("substr", 3, fcnSubstr, fgStrings));
-		functions.push_back(new CustomFunction("concat", -1, fcnConcat, fgStrings));
-		functions.push_back(new CustomFunction("strpos", 2, fcnStrpos, fgStrings));
-		functions.push_back(new CustomFunction("left", 2, fcnLeft, fgStrings));
-		functions.push_back(new CustomFunction("right", 2, fcnRight, fgStrings));
+		functions.push_back(new CustomFunction(fnLower, "lower", 1, fcnLower, fgStrings));
+		functions.push_back(new CustomFunction(fnUpper, "upper", 1, fcnUpper, fgStrings));
+		functions.push_back(new CustomFunction(fnTitleCase, "title", 1, fcnTitle, fgStrings));
+		functions.push_back(new CustomFunction(fnTrim, "trim", 1, fcnTrim, fgStrings));
+		functions.push_back(new CustomFunction(fnLen,"length", 1, fcnLength, fgStrings));
+		functions.push_back(new CustomFunction(fnReplace, "replace", 3, fcnReplace, fgStrings));
+		functions.push_back(new CustomFunction(fnSubstr, "substr", 3, fcnSubstr, fgStrings));
+		functions.push_back(new CustomFunction(fnConcat, "concat", -1, fcnConcat, fgStrings));
+		functions.push_back(new CustomFunction(fnStrpos, "strpos", 2, fcnStrpos, fgStrings));
+		functions.push_back(new CustomFunction(fnLeft, "left", 2, fcnLeft, fgStrings));
+		functions.push_back(new CustomFunction(fnRight, "right", 2, fcnRight, fgStrings));
 		/*functions.push_back(new CFunction("regexp_replace", 3, fcnRegexpReplace, fgStrings));
 		functions.push_back(new CFunction("wordwrap", -1, fcnWordwrap, fgStrings));
 		functions.push_back(new CFunction("regexp_substr", 2, fcnRegexpSubstr, fgStrings));
@@ -600,16 +609,16 @@ namespace parser
 		functions.push_back(new CFunction("rpad", 3, fcnRPad, fgStrings));
 		functions.push_back(new CFunction("lpad", 3, fcnLPad, fgStrings));*/
 
-		functions.push_back(new CustomFunction("to_int;toint", 1, fcnToInt, fgConversion));
-		functions.push_back(new CustomFunction("to_real;toreal", 1, fcnToReal, fgConversion));
-		functions.push_back(new CustomFunction("to_string;tostring", 1, fcnToString, fgConversion));
+		functions.push_back(new CustomFunction(fnToInt, "to_int;toint", 1, fcnToInt, fgConversion));
+		functions.push_back(new CustomFunction(fnToReal, "to_real;toreal", 1, fcnToReal, fgConversion));
+		functions.push_back(new CustomFunction(fnToString, "to_string;tostring", 1, fcnToString, fgConversion));
 		/* functions.push_back(new CFunction("to_datetime;todatetime", 1, fcnToDateTime, fgConversion));
 		functions.push_back(new CFunction("to_date;todate", 1, fcnToDate, fgConversion));
 		functions.push_back(new CFunction("to_time;totime", 1, fcnToTime, fgConversion));
 		functions.push_back(new CFunction("to_interval;tointerval", 1, fcnToInterval, fgConversion)); */
 
 		
-		functions.push_back(new CustomFunction("if;iif", 3, fcnIf, fgBranching));
+		functions.push_back(new CustomFunction(fnIf, "if;iif", 3, fcnIf, fgBranching));
 
 		/*
 		functions.push_back(new CFunction("coalesce", -1, fcnCoalesce, "Conditions"));
@@ -636,14 +645,14 @@ namespace parser
 		functions.push_back(new CFunction("color_cmyk", 4, fcnColorCmyk, "Color"));
 		functions.push_back(new CFunction("color_cmyka", 5, fncColorCmyka, "Color"));*/
 
-		functions.push_back(new CustomFunction("$geometry", 0, fcnGeometry, fgGeometry, true));
-		functions.push_back(new CustomFunction("$area", 0, fcnGeometryArea, fgGeometry, true));
-		functions.push_back(new CustomFunction("$length", 0, fcnGeometryLength, fgGeometry, true));
-		functions.push_back(new CustomFunction("$perimeter", 0, fcnGeometryPerimeter, fgGeometry, true));
-		functions.push_back(new CustomFunction("$x", 0, fcnX, fgGeometry, true));
-		functions.push_back(new CustomFunction("$y", 0, fcnY, fgGeometry, true));
-		functions.push_back(new CustomFunction("x_at;xat", 1, fcnXat, fgGeometry, true));
-		functions.push_back(new CustomFunction("y_at;yat", 1, fcnYat, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnGeometryToWkt, "$geomToWkt", 0, fcnGeometryToWkt, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnArea, "$area", 0, fcnGeometryArea, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnLength, "$length", 0, fcnGeometryLength, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnPerimeter, "$perimeter", 0, fcnGeometryPerimeter, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnX, "$x", 0, fcnX, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnY, "$y", 0, fcnY, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnXat, "x_at;xat", 1, fcnXat, fgGeometry, true));
+		functions.push_back(new CustomFunction(fnYat, "y_at;yat", 1, fcnYat, fgGeometry, true));
 
 		/*
 		functions.push_back(new CFunction("x_min;xmin", 1, fcnXMin, fgGeometry, true));
@@ -697,7 +706,7 @@ namespace parser
 		for (size_t i = 0; i < functions.size(); i++)
 		{
 			CustomFunction* fn = functions[i];
-			vector<CString>* aliases = fn->GetAliases();
+			vector<CString>* aliases = fn->getAliases();
 
 			for (size_t j = 0; j < aliases->size(); j++)
 			{

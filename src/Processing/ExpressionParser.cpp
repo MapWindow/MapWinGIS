@@ -286,24 +286,23 @@ CustomFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBe
 
 	CString sub;
 
+	// reading function name from the end
 	while (i >= 0)
 	{
 		if (!IsFunctionName(s[i]))
 		{
-			return NULL;
+			break;
 		}
 
 		sub = s[i] + sub;
-
-		CustomFunction* fn = parser::GetFunction(sub);
-
-		if (fn) 
-		{
-			fnBegin = i;
-			return fn;
-		}
-	
 		i--;
+	}
+
+	CustomFunction* fn = parser::GetFunction(sub);
+	if (fn)
+	{
+		fnBegin = i;
+		return fn;
 	}
 
 	return NULL;
@@ -345,7 +344,7 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 
 	if (part->arguments.size() != fn->numParams())
 	{
-		CString s = Debug::Format("Invalid number of parameters: %s: %d; expected %d", fn->name(), part->arguments.size(), fn->numParams());
+		CString s = Debug::Format("Invalid number of parameters: %s: %d; expected %d", fn->GetName(), part->arguments.size(), fn->numParams());
 		SetErrorMessage(s);
 		delete part;
 		return false;

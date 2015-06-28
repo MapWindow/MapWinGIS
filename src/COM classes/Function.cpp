@@ -29,7 +29,7 @@ STDMETHODIMP CFunction::get_Name(BSTR* pVal)
 	}
 
 	USES_CONVERSION;
-	*pVal = A2BSTR(_function->name());
+	*pVal = A2BSTR(_function->GetName());
 
 	return S_OK;
 }
@@ -45,7 +45,7 @@ STDMETHODIMP CFunction::get_Alias(long aliasIndex, BSTR* pVal)
 	{
 		aliasIndex++;    // the first alias is name
 
-		vector<CString>* aliases = _function->GetAliases();
+		vector<CString>* aliases = _function->getAliases();
 
 		if (aliasIndex <= 0 || aliasIndex >= (long)aliases->size())
 		{
@@ -75,7 +75,7 @@ STDMETHODIMP CFunction::get_NumAliases(long* pVal)
 		return S_OK;
 	}
 
-	vector<CString>* aliases = _function->GetAliases();
+	vector<CString>* aliases = _function->getAliases();
 
 	*pVal = aliases->size() - 1;
 	
@@ -122,3 +122,130 @@ STDMETHODIMP CFunction::get_Group(tkFunctionGroup* pVal)
 	return S_OK;
 }
 
+// **********************************************************
+//		Description
+// **********************************************************
+STDMETHODIMP CFunction::get_Description(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (Validate())
+	{
+		*pVal = OLE2BSTR(_function->description());
+	}
+	else
+	{
+		*pVal = m_globalSettings.CreateEmptyBSTR();
+	}
+
+	return S_OK;
+}
+
+STDMETHODIMP CFunction::put_Description(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// may be useful for localization, currently not exposed to API
+
+	return S_OK;
+}
+
+// **********************************************************
+//		ParameterName
+// **********************************************************
+STDMETHODIMP CFunction::get_ParameterName(LONG parameterIndex, BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!Validate())
+	{
+		return S_OK;
+	}
+
+	if (parameterIndex < 0 || parameterIndex >= _function->numParams())
+	{
+		CallbackHelper::ErrorMsg("CFunction::get_ParameterName: parameter index out of bounds.");
+		return S_OK;
+	}
+
+	FunctionParameter* p = _function->getParameter(parameterIndex);
+	if (p)
+	{
+		USES_CONVERSION;
+		*pVal = OLE2BSTR(p->name);
+		return S_OK;
+	}
+
+	*pVal = m_globalSettings.CreateEmptyBSTR();
+
+	return S_OK;
+}
+
+STDMETHODIMP CFunction::put_ParameterName(LONG parameterIndex, BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// may be useful for localization, currently not exposed to API
+
+	return S_OK;
+}
+
+// **********************************************************
+//		ParameterDescription
+// **********************************************************
+STDMETHODIMP CFunction::get_ParameterDescription(LONG parameterIndex, BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!Validate())
+	{
+		return S_OK;
+	}
+
+	if (parameterIndex < 0 || parameterIndex >= _function->numParams())
+	{
+		CallbackHelper::ErrorMsg("CFunction::get_ParameterDescription: parameter index out of bounds.");
+		return S_OK;
+	}
+
+	FunctionParameter* p = _function->getParameter(parameterIndex);
+	if (p)
+	{
+		USES_CONVERSION;
+		*pVal = OLE2BSTR(p->description);
+		return S_OK;
+	}
+
+	*pVal = m_globalSettings.CreateEmptyBSTR();
+
+	return S_OK;
+}
+
+STDMETHODIMP CFunction::put_ParameterDescription(LONG parameterIndex, BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// may be useful for localization, currently not exposed to API
+
+	return S_OK;
+}
+
+// **********************************************************
+//		get_Signature
+// **********************************************************
+STDMETHODIMP CFunction::get_Signature(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (Validate())
+	{
+		USES_CONVERSION;
+		*pVal = OLE2BSTR(_function->GetSignature());
+	}
+	else
+	{
+		*pVal = m_globalSettings.CreateEmptyBSTR();
+	}
+
+	return S_OK;
+}

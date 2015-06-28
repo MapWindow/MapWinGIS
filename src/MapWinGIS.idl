@@ -6224,6 +6224,13 @@ interface IFunction : IDispatch{
 	[propget, id(3)] HRESULT NumAliases([out, retval] long* pVal);
 	[propget, id(4)] HRESULT NumParameters([out, retval] long* pVal);
 	[propget, id(5)] HRESULT Group([out, retval] tkFunctionGroup* pVal);
+	[propget, id(6)] HRESULT Description([out, retval] BSTR* pVal);
+	//[propput, id(6)] HRESULT Description([in] BSTR newVal);
+	[propget, id(7)] HRESULT ParameterName([in] LONG parameterIndex, [out, retval] BSTR* pVal);
+	//[propput, id(7)] HRESULT ParameterName([in] LONG parameterIndex, [in] BSTR newVal);
+	[propget, id(8)] HRESULT ParameterDescription([in] LONG parameterIndex, [out, retval] BSTR* pVal);
+	//[propput, id(8)] HRESULT ParameterDescription([in] LONG parameterIndex, [in] BSTR newVal);
+	[propget, id(9)] HRESULT Signature([out, retval] BSTR* pVal);
 };
 [
 	object,

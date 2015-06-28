@@ -39,16 +39,6 @@ enum tkOperation
 	operLike = 20,
 };
 
-enum tkFunction
-{
-	fnNone = -1,
-	fnSin = 0,
-	fnCos = 1,
-	fnTan = 2,
-	fnCtan = 3,
-	fnSubString = 4,
-};
-
 class CExpressionValue;
 class COperation;
 class CElement;
@@ -228,54 +218,88 @@ public:
 };
 
 // ********************************************************
+//     FunctionParameter
+// ********************************************************
+class FunctionParameter
+{
+public:
+	CStringW description;
+	CStringW name;	
+
+	FunctionParameter(CStringW name, CStringW description)
+		:name(name), description(description)
+	{
+		
+	}
+};
+
+// ********************************************************
 //     Function
 // ********************************************************
 // Statically defined function (treated as expression part)
 class CustomFunction
 {
 private:
-	CString _name;
-	int _numParams;
 	bool _useGeometry;
 	tkFunctionGroup _group;
 	ExpressionFunction _fn;
 	vector<CString> _aliases;
+	CStringW _description;
+	FunctionId _fnId;
+	vector<FunctionParameter*> _params;
 
 public:
-	CustomFunction(CString name, int numParams, ExpressionFunction function, tkFunctionGroup group, bool useGeometry = false)
-		: _numParams(numParams), _useGeometry(useGeometry), _group(group), _fn(function)
+	CustomFunction(FunctionId fnId, CString name, int numParams, ExpressionFunction function, tkFunctionGroup group, bool useGeometry = false)
+		: _fnId(fnId), _useGeometry(useGeometry), _group(group), _fn(function)
 	{
 		ParseName(name);
+
+		InitOverloads();
 	}
 
-	void ParseName(CString name)
+	~CustomFunction()
 	{
-		_aliases.clear();
-
-		int position = 0;
-
-		CString part = name.Tokenize(";", position);
-		while (part.GetLength() > 0)
-		{
-			_aliases.push_back(part);
-			part = name.Tokenize(";", position);
-		}
-
-		if (_aliases.size() == 0)
-		{
-			_aliases.push_back(name);
-		}
+		Clear();
 	}
 
-	vector<CString>* GetAliases() { return &_aliases; }
+	void Clear();
 
-	CString name() { return _aliases[0]; }
+	void InitOverloads();
 
-	int numParams() { return _numParams; }
+	void ParseName(CString name);
+
+	vector<CString>* getAliases() { return &_aliases; }
+
+	CString GetName()  { return _aliases[0]; }
+
+	int numParams() { return _params.size(); }
 
 	bool useGeometry() { return _useGeometry; }
 
 	tkFunctionGroup group() { return _group; }
+
+	CStringW description() { return _description; }
+	void description(CStringW value) { _description = value; }
+
+	FunctionId FunctionId() { return _fnId;	}
+
+	CStringW GetSignature();
+
+	void AddParameter(CStringW name, CStringW description) 
+	{
+		FunctionParameter* p = new FunctionParameter(name, description);
+		_params.push_back(p);
+	}
+
+	FunctionParameter* getParameter(int parameterIndex)
+	{
+		if (parameterIndex < 0 || parameterIndex >= static_cast<int>(_params.size()))
+		{
+			return NULL;
+		}
+
+		return _params[parameterIndex];
+	}
 
 	bool call(vector<CExpressionValue*>& arguments, IShape* shape, CExpressionValue& result)
 	{
