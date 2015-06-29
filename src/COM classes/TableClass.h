@@ -187,8 +187,8 @@ public:
 
 private:
 	bool SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace, ICallback* cBack);
-	void LoadDefault_fields();
-	void LoadDefault_rows();
+	void LoadDefaultFields();
+	void LoadDefaultRows();
 	long RowCount();
 	long FieldCount();
 	bool ReadRecord(long RowIndex);

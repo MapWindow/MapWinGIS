@@ -617,8 +617,8 @@ STDMETHODIMP CTableClass::Open(BSTR dbfFilename, ICallback *cBack, VARIANT_BOOL 
 	
 		//After open the dbf file, load all _fields info and create spatial row indices 
 		//with FieldWrapper and RecordWrapper help classes.
-		this->LoadDefault_fields();
-		this->LoadDefault_rows();
+		LoadDefaultFields();
+		LoadDefaultRows();
 	}
 	return S_OK;
 }
@@ -759,9 +759,19 @@ bool CTableClass::SaveToFile(const CStringW& dbfFilename, bool updateFileInPlace
 					precision = 1;
 			}
 			else
+			{
 				precision = 0;
+			}
 
-			DBFAddField(newdbfHandle,OLE2CA(fname),(DBFFieldType)type,width,precision);
+			if (type == INTEGER_FIELD)
+			{
+				if (width > 9)
+				{
+					width = 9;  // otherwise it will be reopened as double
+				}
+			}
+
+			DBFAddField(newdbfHandle, OLE2CA(fname), (DBFFieldType)type, width, precision);
 			field->Release(); 
 		}
 	}
@@ -878,9 +888,9 @@ STDMETHODIMP CTableClass::Close(VARIANT_BOOL *retval)
 }
 
 // **************************************************************
-//	  LoadDefault_fields()
+//	  LoadDefaultFields()
 // **************************************************************
-void CTableClass::LoadDefault_fields()
+void CTableClass::LoadDefaultFields()
 {
     USES_CONVERSION;
 
@@ -920,10 +930,10 @@ void CTableClass::LoadDefault_fields()
 }
 
 // **************************************************************
-//	  LoadDefault_rows()
+//	  LoadDefaultRows()
 // **************************************************************
 //Initialize RecordWrapper array and set the TableRow pointer to NULL
-void CTableClass::LoadDefault_rows()
+void CTableClass::LoadDefaultRows()
 {	
     if (!_rows.empty())
     {
@@ -953,8 +963,8 @@ STDMETHODIMP CTableClass::EditClear(VARIANT_BOOL *retval)
     //Reset all editing bits and reload original _fields info and reinitialize the RowWrapper array
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-    this->LoadDefault_fields();
-    this->LoadDefault_rows();
+    LoadDefaultFields();
+    LoadDefaultRows();
 
     m_needToSaveAsNewFile = false;
 	*retval = VARIANT_TRUE;
