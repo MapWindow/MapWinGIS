@@ -295,3 +295,26 @@ STDMETHODIMP CField::get_Joined(VARIANT_BOOL* pVal)
 	*pVal = _joinId >= 0;
 	return S_OK;
 }
+
+// **************************************************************
+//		Expression()
+// **************************************************************
+STDMETHODIMP CField::get_Expression(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_expression);
+
+	return S_OK;
+}
+
+STDMETHODIMP CField::put_Expression(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	SysFreeString(_expression);
+	_expression = OLE2BSTR(newVal);
+
+	return S_OK;
+}

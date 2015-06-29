@@ -118,5 +118,12 @@ bool FieldHelper::NeedsSerialization(IField* fld)
 		return true;
 	}
 
+	CComBSTR expr;
+	fld->get_Expression(&expr);
+	if (expr.Length() > 0)
+	{
+		return true;
+	}
+
 	return false;	
 }

@@ -35,6 +35,7 @@ public:
 		_key = SysAllocString(L"");
 		_name = SysAllocString(L"");
 		_alias = SysAllocString(L"");
+		_expression = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_width = 10;
@@ -52,6 +53,7 @@ public:
 		::SysFreeString(_key);
 		::SysFreeString(_name);
 		::SysFreeString(_alias);
+		::SysFreeString(_expression);
 
 		if( _globalCallback )
 			_globalCallback->Release();
@@ -70,14 +72,14 @@ public:
 	{
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_FIELD)
+	DECLARE_REGISTRY_RESOURCEID(IDR_FIELD)
 
-DECLARE_NOT_AGGREGATABLE(CField)
+	DECLARE_NOT_AGGREGATABLE(CField)
 
-BEGIN_COM_MAP(CField)
-	COM_INTERFACE_ENTRY(IField)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CField)
+		COM_INTERFACE_ENTRY(IField)
+		COM_INTERFACE_ENTRY(IDispatch)
+	END_COM_MAP()
 
 
 // IField
@@ -102,6 +104,8 @@ public:
 	STDMETHOD(get_Alias)(BSTR* pVal);
 	STDMETHOD(put_Alias)(BSTR newVal);
 	STDMETHOD(get_Joined)(VARIANT_BOOL* pVal);
+	STDMETHOD(get_Expression)(BSTR* pVal);
+	STDMETHOD(put_Expression)(BSTR newVal);
 
 	void ErrorMessage(long ErrorCode);
 	ITable* GetTable() { return _table; }
@@ -116,6 +120,7 @@ private:
 	BSTR _key;
 	BSTR _name;
 	BSTR _alias;
+	BSTR _expression;
 	long _lastErrorCode;
 	long _precision;
 	long _width;
@@ -129,6 +134,7 @@ private:
 public:
 	int GetJoinId() {return _joinId; }
 	void SetJoinId(int value) { _joinId = value; }
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Field), CField)

@@ -3197,16 +3197,19 @@ CPLXMLNode* CTableClass::SerializeCore(CString ElementName)
 				CPLXMLNode* nodeField = CPLCreateXMLNode(psFields, CXT_Element, "Field");
 
 				VARIANT_BOOL visible;
-				CComBSTR name, alias;
+				CComBSTR name, alias, expression;
 				fld->get_Name(&name);
 				fld->get_Alias(&alias);
+				fld->get_Expression(&expression);
 				fld->get_Visible(&visible);
 
 				CStringA utf8Name = Utility::ConvertToUtf8(OLE2W(name));
 				CStringA utf8Alias = Utility::ConvertToUtf8(OLE2W(alias));
+				CStringA utf8Expression = Utility::ConvertToUtf8(OLE2W(expression));
 
 				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Name", CPLString().Printf(utf8Name));
 				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Alias", CPLString().Printf(utf8Alias));
+				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Expression", CPLString().Printf(utf8Expression));
 				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Visible", CPLString().Printf("%d", (int)visible));
 				Utility::CPLCreateXMLAttributeAndValue(nodeField, "Index", CPLString().Printf("%d", i));
 			}
@@ -3315,6 +3318,14 @@ void CTableClass::RestoreFields(CPLXMLNode* node)
 								CStringW alias = Utility::ConvertFromUtf8(s);
 								CComBSTR bstrAlias(alias);
 								fld->put_Alias(bstrAlias);
+							}
+
+							s = CPLGetXMLValue(node, "Expression", "");
+							if (s != "")
+							{
+								CStringW expr = Utility::ConvertFromUtf8(s);
+								CComBSTR bstrExpression(expr);
+								fld->put_Expression(bstrExpression);
 							}
 
 							CString s = CPLGetXMLValue(node, "Visible", "-1");
