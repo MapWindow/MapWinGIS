@@ -301,7 +301,7 @@ CustomFunction* ExpressionParser::ParseFunction(CString& s, int begin, int& fnBe
 	CustomFunction* fn = parser::GetFunction(sub);
 	if (fn)
 	{
-		fnBegin = i;
+		fnBegin = i + 1;
 		return fn;
 	}
 
@@ -327,9 +327,14 @@ bool ExpressionParser::ParseArgumentList(CString s, CustomFunction* fn)
 	while (ct.GetLength() != 0)
 	{
 		CExpressionPart* arg = ParseExpressionPart(ct);
-
+		
 		if (arg)
 		{
+			arg->isArgument = true; 
+			_expression->AddPart(arg);
+			
+            // argument list holds references to parts which are calculated before function
+			// there is no need to delete arguments, as they will be deleted when parts list is cleared
 			part->arguments.push_back(arg);
 		}
 		else

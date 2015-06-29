@@ -156,7 +156,7 @@ STDMETHODIMP CExpression::Calculate(VARIANT* result, VARIANT_BOOL* retVal)
 }
 
 // **********************************************************
-//		CalculateForTableRow
+//		CalculateForTableRow2
 // **********************************************************
 STDMETHODIMP CExpression::CalculateForTableRow2(LONG rowIndex, VARIANT* result, VARIANT_BOOL* retVal)
 {
@@ -183,7 +183,7 @@ STDMETHODIMP CExpression::CalculateForTableRow2(LONG rowIndex, VARIANT* result, 
 }
 
 // **********************************************************
-//		CalculateForTableRow2
+//		CalculateForTableRow
 // **********************************************************
 STDMETHODIMP CExpression::CalculateForTableRow(LONG rowIndex, LONG targetFieldIndex, VARIANT_BOOL* retVal)
 {

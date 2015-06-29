@@ -115,17 +115,13 @@ bool CustomExpression::EvaluateFunction(CExpressionPart* part)
 {
 	if (!part->isFunction()) return false;
 
-	CString errorMessage;
-	int operationCount = 0;
-
-	// first let's evaluate arguments
+	// make sure that arguments are calculated
 	for (size_t i = 0; i < part->arguments.size(); i++)
 	{
 		CExpressionPart* arg = part->arguments[i];
-		arg->activeCount = arg->elements.size();
-
-		if (!EvaluatePart(arg, errorMessage, operationCount))
+		if (arg->activeCount != 1)
 		{
+			_errorMessage = "Argument isn't evalulated: " + arg->expression;
 			return false;
 		}
 	}
@@ -242,28 +238,13 @@ void CustomExpression::Reset()
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
 		CExpressionPart* part = _parts[i];
-		if (part->isFunction())
+	
+		int size = part->elements.size();
+		for (int j = 0; j < size; j++)
 		{
-			for (size_t j = 0; j < part->arguments.size(); j++)
-			{
-				for (size_t k = 0; k < part->arguments[j]->elements.size(); k++)
-				{
-					// TODO: it won't work in case of brackets within function argument
-					// TODO: do we need both turned off and was calculated
-					part->arguments[j]->elements[k]->turnedOff = false;
-					part->arguments[j]->elements[k]->wasCalculated = false;
-				}
-			}
-		}
-		else
-		{
-			int size = part->elements.size();
-			for (int j = 0; j < size; j++)
-			{
-				CElement* el = part->elements[j];
-				el->wasCalculated = false;
-				el->turnedOff = false;
-			}
+			CElement* el = part->elements[j];
+			el->wasCalculated = false;
+			el->turnedOff = false;
 		}
 	}
 }
@@ -793,6 +774,8 @@ void CustomExpression::BuildFieldList()
 	for (unsigned int i = 0; i < _parts.size(); i++)
 	{
 		CExpressionPart* part = _parts[i];
+	
+	
 		for (unsigned long j = 0; j < part->elements.size(); j++)
 		{
 			if (part->elements[j]->isField)
@@ -812,7 +795,9 @@ void CustomExpression::Clear()
 
 	for (size_t i = 0; i < _parts.size(); i++)
 	{
-		
+		// arguments are references to parts present in the list
+		// therefore there is no need to delete them
+		_parts[i]->arguments.clear();		
 		delete _parts[i];
 	}
 

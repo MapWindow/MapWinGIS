@@ -314,15 +314,17 @@ public:
 class CExpressionPart
 {
 public:
-	CString expression;					// for debugging only
-	vector<CElement*> elements;			// fields, operators, literals
-	vector<CExpressionPart*> arguments;
+	CString expression;					 // for debugging only
+	bool isArgument;					 // for debugging only
+	vector<CElement*> elements;			 // fields, operators, literals
+	vector<CExpressionPart*> arguments;  // references to other parts
 	CustomFunction* function;
-	CExpressionValue* val;				// resulting value
-	int activeCount;					// number of unprocessed elements
+	CExpressionValue* val;				 // resulting value
+	int activeCount;					 // number of unprocessed elements
 
 	CExpressionPart()
 	{
+		isArgument = false;
 		activeCount = 0;
 		function = NULL;
 		val = NULL;
@@ -331,20 +333,11 @@ public:
 	~CExpressionPart()
 	{
 		ClearElements();
-		ClearArguments();
 	}
 
 	bool isFunction() { return function != NULL; }
 
 private:
-	void ClearArguments()
-	{
-		for (size_t i = 0; i < arguments.size(); i++) {
-			delete arguments[i];
-		}
-
-		arguments.clear();
-	}
 	void ClearElements()
 	{
 		for (size_t i = 0; i < elements.size(); i++) {
