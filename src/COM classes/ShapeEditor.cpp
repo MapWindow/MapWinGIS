@@ -1164,8 +1164,8 @@ bool CShapeEditor::TrySaveShape(IShape* shp)
 	{
 		long numShapes = ShapefileHelper::GetNumShapes(sf);
 		IUndoList* undoList = _mapCallback->_GetUndoList();
-		undoList->Add(uoAddShape, (long)_layerHandle, (long)numShapes, &vb);
 		sf->EditInsertShape(shp, &numShapes, &vb);
+		undoList->Add(uoAddShape, (long)_layerHandle, (long)numShapes, &vb);
 		shapeIndex = numShapes;
 	}
 	else 

@@ -853,6 +853,15 @@ namespace Utility
 		double val = _atof_l(s, m_locale);
 		return val;
 	}
+	double wtof_custom(CStringW s)
+	{
+		// as long as global locale set to std::locale("C") in MapWinGIS.cpp
+		// it's enough just to replace , by .
+		// if user defined locale would be used std::locale("") the logic should be more complex
+		s.Replace(',', '.');
+		double val = _wtof_l(s, m_locale);
+		return val;
+	}
 
 	double FloatRound(double doValue, int nPrecision)
 	{

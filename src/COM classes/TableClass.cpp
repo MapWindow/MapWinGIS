@@ -213,7 +213,7 @@ STDMETHODIMP CTableClass::Calculate(BSTR Expression, LONG RowIndex, VARIANT* Res
 				else if (val->isString())
 				{
 					Result->vt = VT_BSTR;
-					Result->bstrVal = A2BSTR(val->str());
+					Result->bstrVal = W2BSTR(val->str());
 				}
 				*retVal = VARIANT_TRUE;
 			}
@@ -289,9 +289,10 @@ bool CTableClass::QueryCore(CString Expression, std::vector<long>& indices, CStr
 // ********************************************************************
 //			CalculateCore()
 // ********************************************************************
-bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& results, CString& ErrorString, 
+bool CTableClass::CalculateCore(CString Expression, std::vector<CStringW>& results, CString& ErrorString, 
 								CString floatFormat, int rowIndex /*= -1*/)
 {
+	USES_CONVERSION;
 	results.clear();
 	
 	CustomExpression expr;	
@@ -310,7 +311,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 	}
 
 	bool error = false;
-	CString str;
+	CStringW str;
 
 	int start = (rowIndex == -1) ? 0 : rowIndex;
 	int end = (rowIndex == -1) ? int(_rows.size()) : rowIndex + 1;
@@ -335,7 +336,7 @@ bool CTableClass::CalculateCore(CString Expression, std::vector<CString>& result
 			}
 			else
 			{
-				str.Format(floatFormat, result->dbl());
+				str.Format(A2W(floatFormat), result->dbl());
 				results.push_back(str);
 			}
 		}

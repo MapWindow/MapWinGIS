@@ -78,7 +78,7 @@ class CExpressionValue
 	RasterMatrix* _matrix;
 	GDALRasterBand* _band;
 	tkValueType _type;
-	CString _str;
+	CStringW _str;
 	double _dbl;
 	bool _bln;
 public:
@@ -110,7 +110,7 @@ public:
 	}
 
 	bool bln() { return _bln; }
-	CString str() { return _str; }
+	CStringW str() { return _str; }
 	double dbl() { return _dbl; }
 	tkValueType type() { return _type; }
 	RasterMatrix* matrix() { return _matrix; }
@@ -127,7 +127,7 @@ public:
 		_type = vtBoolean;
 	}
 
-	void str(CString s)
+	void str(CStringW s)
 	{
 		_str = s;
 		_type = vtString;

@@ -26,6 +26,7 @@ namespace Utility
 	int Rint(double value);
 	int Factorial(int n);
 	double atof_custom(CString s);
+	double wtof_custom(CStringW s);
 	double FloatRound(double doValue, int nPrecision);
 	bool FloatsEqual(const float &a, const float &b);
 	CStringW FormatArea(double area, bool unknownUnits, tkAreaDisplayMode units, int precision);

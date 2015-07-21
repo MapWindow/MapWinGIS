@@ -308,7 +308,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	}
 
 	// removing duplicates
-	std::set<CString> uniqueValues;
+	std::set<CStringW> uniqueValues;
 
 	Gdiplus::CompositingQuality compositingQualityInit = Gdiplus::CompositingQualityDefault;
 	Gdiplus::SmoothingMode smoothingModeInit = Gdiplus::SmoothingModeDefault;
@@ -512,7 +512,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				// -------------------------------------------------------
 				if (!useGdiPlus)
 				{
-					_dc->DrawText(lbl->text, rect, DT_CALCRECT);
+					//_dc->DrawText(lbl->text, rect, DT_CALCRECT); // MZ: removed
+					DrawTextW(_dc->m_hDC, lbl->text, -1, rect, DT_CALCRECT);
 					// frame for GDI is very narrow; so we'll enlarge it a bit					
 					rect.left -= rect.Height()/6;
 					rect.right += rect.Height()/6;
@@ -520,7 +521,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				else
 				{
 					USES_CONVERSION;
-					wText = A2W(lbl->text);
+					wText = lbl->text; //MZ: A2W removed
 					_graphics->MeasureString(wText, wText.GetLength(), gpFont, PointF(0.0f, 0.0f), &gpRect);
 					
 					// in some case we lose the last letter by clipping; 
@@ -695,7 +696,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					{
 						_dc->SetWindowOrg(-m_options->shadowOffsetX , -m_options->shadowOffsetY);
 						_dc->SetTextColor(m_options->shadowColor);
-						_dc->DrawText(lbl->text, rect, gdiAlignment);
+						//_dc->DrawText(lbl->text, rect, gdiAlignment);// MZ: removed
+						DrawTextW(_dc->m_hDC, lbl->text, -1, rect, gdiAlignment);
 						_dc->SetTextColor(m_options->fontColor);
 						_dc->SetWindowOrg(0,0);
 					}
@@ -703,7 +705,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					if  (m_options->haloVisible)
 					{
 						_dc->BeginPath();
-						_dc->DrawText(lbl->text,rect, gdiAlignment);
+						//_dc->DrawText(lbl->text,rect, gdiAlignment);
+						DrawTextW(_dc->m_hDC, lbl->text, -1, rect, gdiAlignment);
 						_dc->EndPath();					
 						oldPen = _dc->SelectObject(&penHalo);
 						_dc->StrokePath();
@@ -713,14 +716,16 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					if(m_options->fontOutlineVisible)
 					{
 						_dc->BeginPath();
-						_dc->DrawText(lbl->text,rect, gdiAlignment);
+						//_dc->DrawText(lbl->text,rect, gdiAlignment);
+						DrawTextW(_dc->m_hDC, lbl->text, -1, rect, gdiAlignment);
 						_dc->EndPath();					
 						oldPen = _dc->SelectObject(&penFontOutline);
 						_dc->StrokePath();
 						_dc->SelectObject(oldPen);
 					}
 
-					_dc->DrawText(lbl->text, rect, gdiAlignment);	// TODO: make a property (left/center/right)
+					//_dc->DrawText(lbl->text, rect, gdiAlignment);	// TODO: make a property (left/center/right)
+					DrawTextW(_dc->m_hDC, lbl->text, -1, rect, gdiAlignment);
 				}
 				else
 				{

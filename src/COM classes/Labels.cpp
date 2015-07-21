@@ -1734,7 +1734,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 	{
 		// analyzes expression
 		CString strError;
-		std::vector<CString> results;
+		std::vector<CStringW> results;
 		if (TableHelper::Cast(table)->CalculateCore(str, results, strError, floatFormat))
 		{
 			// updating labels
@@ -1752,7 +1752,7 @@ STDMETHODIMP CLabels::put_Expression(BSTR newVal)
 			{
 				for (unsigned int i = 0; i < _labels.size(); i++)
 				{
-					(*_labels[i])[0]->text = "";
+					(*_labels[i])[0]->text = L"";
 				}
 			}
 			else
@@ -2183,7 +2183,7 @@ STDMETHODIMP CLabels::SaveToDbf2(BSTR xField, BSTR yField, BSTR angleField, BSTR
 		if (saveText)
 		{
 			var.vt = VT_BSTR;
-			var.bstrVal = A2BSTR(info->text);
+			var.bstrVal = W2BSTR(info->text);
 			dbf->EditCellValue(indices[3], i, var, &vbretval);
 		}
 
