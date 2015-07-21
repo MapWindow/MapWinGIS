@@ -156,9 +156,9 @@ STDMETHODIMP CUndoList::Add(tkUndoOperation operation, LONG LayerHandle, LONG Sh
 
 	_position = _list.size() - 1;
 
-	if (!item->WithinBatch) {
+	//if (!item->WithinBatch) {
 		FireUndoListChanged();
-	}
+	//}
 
 	return S_OK;
 }
@@ -656,3 +656,29 @@ STDMETHODIMP CUndoList::ClearForLayer(LONG LayerHandle)
 	return S_OK;
 }
 
+STDMETHODIMP CUndoList::GetUndoItem(LONG index, LONG *BatchId, tkUndoOperation *operationType, LONG *LayerHandle, LONG *ShapeIndex)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	if (index >= _list.size())
+	{
+		*LayerHandle = -1;
+		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
+		return S_OK;
+	}
+	UndoListItem *undo = _list[index];
+
+	//IShapefile *sf = GetShapefile(undo->LayerHandle);
+	//sf->get_Shape
+	//SelectionHelper::SelectWithShapeBounds(undo->Shape, shp, indices))
+
+	*BatchId = undo->BatchId;
+	*operationType = undo->Operation;
+	*LayerHandle = undo->LayerHandle;
+	*ShapeIndex = undo->ShapeIndex;
+	return S_OK;
+}
+STDMETHODIMP CUndoList::get_UndoItemCount(LONG *count)
+{
+	*count = _list.size();
+	return S_OK;
+}

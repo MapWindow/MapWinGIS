@@ -6051,6 +6051,9 @@ interface IUndoList : IDispatch{
 	[id(11)] HRESULT Add([in] tkUndoOperation operationType, [in] LONG LayerHandle, [in] LONG ShapeIndex, [out, retval] VARIANT_BOOL* retVal);
 	[id(12)] HRESULT Clear();
 	[id(13)] HRESULT ClearForLayer([in] LONG LayerHandle);
+	[id(14)] HRESULT GetLastId([out, retval] LONG *pVal);
+	[id(15)] HRESULT GetUndoItem([in] LONG index, [out] LONG *BatchId, [out] tkUndoOperation *operationType, [out] LONG* LayerHandle, [out] LONG* ShapeIndex);
+	[propget, id(16)] HRESULT UndoItemCount([out, retval] LONG* pVal);
 };
 [
 	object,
@@ -6066,8 +6069,8 @@ interface IIdentifier : IDispatch{
 	[propput, id(2)] HRESULT IdentifierMode([in] tkIdentifierMode newVal);
 	[propget, id(3)] HRESULT OutlineColor([out, retval] OLE_COLOR* pVal);
 	[propput, id(3)] HRESULT OutlineColor([in] OLE_COLOR newVal);
-	//[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
-	//[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
+	[propget, id(4)] HRESULT ActiveLayer([out, retval] LONG* pVal);
+	[propput, id(4)] HRESULT ActiveLayer([in] LONG newVal);
 };
 [
 	object,

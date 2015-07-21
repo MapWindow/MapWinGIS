@@ -68,6 +68,8 @@ public:
 	STDMETHOD(get_ShortcutKey)(tkUndoShortcut* pVal);
 	STDMETHOD(put_ShortcutKey)(tkUndoShortcut newVal);
 	STDMETHOD(ClearForLayer)(LONG LayerHandle);
+	STDMETHOD(GetUndoItem)(/* [in] */ LONG index, LONG *batchId,/* [out] */ tkUndoOperation *operationType,/* [out] */ LONG *LayerHandle,/* [out] */ LONG *ShapeIndex);
+	STDMETHOD(get_UndoItemCount)(LONG* pVal);
 
 private:
 	struct UndoListItem
