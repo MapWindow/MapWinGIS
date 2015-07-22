@@ -589,7 +589,7 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 				if (DrillDownSelect(projX, projY, _identifiedShapes, stopOnFirst))
 				{
 					long numShapes = SelectionListHelper::GetCount(_identifiedShapes);
-					if (numShapes == 1)
+					if (numShapes >= 1)
 					{
 						_identifiedShapes->get_LayerHandle(0, &layerHandle);
 						_identifiedShapes->get_ShapeIndex(0, &shapeIndex);

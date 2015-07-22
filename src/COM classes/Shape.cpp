@@ -2744,7 +2744,7 @@ STDMETHODIMP CShape::ImportFromWKT(BSTR Serialized, VARIANT_BOOL *retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retVal = VARIANT_FALSE;
-
+	// This has been changed to dynamic allocation because of stack overflow here!
 	//USES_CONVERSION;
 	//CString ser = OLE2A(Serialized);
 	CString ser = Serialized;

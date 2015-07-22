@@ -1279,7 +1279,10 @@ bool CTableClass::ReadRecord(long RowIndex)
 			    else
 			    {	
 					val->vt = VT_BSTR;
-				    val->bstrVal = A2BSTR( DBFReadStringAttribute(_dbfHandle,_rows[RowIndex].oldIndex,_fields[i]->oldIndex) );
+					const char* v = DBFReadStringAttribute(_dbfHandle, _rows[RowIndex].oldIndex, _fields[i]->oldIndex);
+					WCHAR *buffer = Utility::StringToWideChar(v);
+					val->bstrVal = W2BSTR(buffer);
+					delete[] buffer;				    
 			    }
 		    }
 		    else if( type == INTEGER_FIELD )
