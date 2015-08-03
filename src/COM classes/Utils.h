@@ -41,13 +41,14 @@ struct BreakVal
 
 // CUtils
 class ATL_NO_VTABLE CUtils : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CUtils, &CLSID_Utils>,
 	public IDispatchImpl<IUtils, &IID_IUtils, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CUtils()
 	{
+		_pUnkMarshaler = NULL;
 		_pip_left = 0;
 		_pip_right = 0;
 		_pip_top = 0;
@@ -84,17 +85,6 @@ public:
 		::SysFreeString(_key);
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_UTILS)
 
 	DECLARE_NOT_AGGREGATABLE(CUtils)
@@ -102,7 +92,24 @@ public:
 	BEGIN_COM_MAP(CUtils)
 		COM_INTERFACE_ENTRY(IUtils)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
+
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 
 // IUtils

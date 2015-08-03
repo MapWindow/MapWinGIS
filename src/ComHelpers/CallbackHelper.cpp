@@ -30,11 +30,26 @@ void CallbackHelper::Progress(ICallback* localCback, int index, int count, const
 }
 
 // ********************************************************************
+//		GetCurrent()
+// ********************************************************************
+ICallback* CallbackHelper::GetCurrent(ICallback* localCback)
+{
+	if (m_globalSettings.overrideLocalCallback)
+	{
+		return m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	}
+	else
+	{
+		return localCback ? localCback : m_globalSettings.callback;
+	}
+}
+
+// ********************************************************************
 //		DisplayProgress()
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int index, double count, const char* message, BSTR& key, long& lastPercent)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	long newpercent = (long)(((double)(index + 1) / count) * 100);
@@ -51,7 +66,7 @@ void CallbackHelper::Progress(ICallback* localCback, int index, double count, co
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int percent, const char* message, BSTR& key)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	CComBSTR bstrMsg(message);
@@ -63,7 +78,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 // ********************************************************************
 void CallbackHelper::Progress(ICallback* localCback, int percent, const char* message)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	if (!message) message = "";
@@ -76,7 +91,7 @@ void CallbackHelper::Progress(ICallback* localCback, int percent, const char* me
 // ********************************************************************
 void CallbackHelper::ProgressCompleted(ICallback* localCback, BSTR& key)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	ICallback* callback = GetCurrent(localCback);
 	if (!callback) return;
 
 	CComBSTR bstrMsg("Completed");
@@ -97,7 +112,7 @@ void CallbackHelper::ProgressCompleted(ICallback* localCback)
 // ********************************************************************
 void CallbackHelper::ErrorMsg(CString className, ICallback* localCback, BSTR& key, const char* message, ...)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCback;
+	ICallback* callback = GetCurrent(localCback);
 
 	if (callback || Debug::IsDebugMode())
 	{

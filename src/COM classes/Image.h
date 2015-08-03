@@ -31,13 +31,14 @@ public:
 
 // CImageClass
 class ATL_NO_VTABLE CImageClass : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CImageClass, &CLSID_Image>,
 	public IDispatchImpl<IImage, &IID_IImage, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CImageClass::CImageClass() : _bitsPerPixel(32)
 	{
+		_pUnkMarshaler = NULL;
 		_globalCallback = NULL;
 		_imageData = NULL;
 		
@@ -134,16 +135,6 @@ public:
 	}
 
 public:
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_IMAGE)
 
 	DECLARE_NOT_AGGREGATABLE(CImageClass)
@@ -151,7 +142,24 @@ public:
 	BEGIN_COM_MAP(CImageClass)
 		COM_INTERFACE_ENTRY(IImage)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
+
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // IImage
 public:

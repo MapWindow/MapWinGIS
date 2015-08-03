@@ -36,6 +36,7 @@ static char THIS_FILE[] = __FILE__;
 
 CShape::CShape()
 {	
+	_pUnkMarshaler = NULL;
 	USES_CONVERSION;
 	_key = A2BSTR("");
 	_globalCallback = NULL;

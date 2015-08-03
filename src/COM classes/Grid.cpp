@@ -60,6 +60,7 @@ void CGrid::CallBack(long percent,const char * message)
 // ***************************************************
 CGrid::CGrid()
 {	
+	_pUnkMarshaler = NULL;
 	_dgrid = NULL;
 	_fgrid = NULL;
 	_lgrid = NULL;

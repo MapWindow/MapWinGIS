@@ -1627,7 +1627,7 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 	}
 	else
 	{
-		// check if the return type is valid (intersetion operation is the only one where type can specified explicitly)
+		// check if the return type is valid (intersection operation is the only one where type can specified explicitly)
 		if (returnType == SHP_POLYGON && (type1 != SHP_POLYGON || type2 != SHP_POLYGON))
 		{
 			// both must be polys to return a poly

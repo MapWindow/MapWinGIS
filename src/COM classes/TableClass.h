@@ -30,7 +30,7 @@
 #include "_ITableEvents_CP.H"
 
 class ATL_NO_VTABLE CTableClass : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CTableClass, &CLSID_Table>,
 	public IDispatchImpl<ITable, &IID_ITable, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>,
 	public IConnectionPointContainerImpl<CTableClass>,
@@ -41,6 +41,7 @@ public:
 		:_shapefile(NULL), _globalCallback(NULL), _lastErrorCode(tkNO_ERROR),
 		_isEditingTable(FALSE), _dbfHandle(NULL), m_maxRowId(-1)
 	{
+		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		gReferenceCounter.AddRef(tkInterface::idTable);
 	}
@@ -60,17 +61,6 @@ public:
 		gReferenceCounter.Release(tkInterface::idTable);
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_TABLE)
 
 	DECLARE_NOT_AGGREGATABLE(CTableClass)
@@ -79,8 +69,24 @@ public:
 		COM_INTERFACE_ENTRY(ITable)
 		COM_INTERFACE_ENTRY(IDispatch)
 		COM_INTERFACE_ENTRY(IConnectionPointContainer)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // ITable
 public:

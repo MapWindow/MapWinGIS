@@ -34,13 +34,14 @@
 //    CShapeDrawingOptions
 // **************************************************************
 class ATL_NO_VTABLE CShapeDrawingOptions :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CShapeDrawingOptions, &CLSID_ShapeDrawingOptions>,
 	public IDispatchImpl<IShapeDrawingOptions, &IID_IShapeDrawingOptions, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CShapeDrawingOptions()
 	{	
+		_pUnkMarshaler = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_isLineDecoration = false;
 		gReferenceCounter.AddRef(tkInterface::idShapeDrawingOptions);
@@ -50,17 +51,6 @@ public:
 		gReferenceCounter.Release(tkInterface::idShapeDrawingOptions);
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-
-	void FinalRelease()
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEDRAWINGOPTIONS)
 
 	DECLARE_NOT_AGGREGATABLE(CShapeDrawingOptions)
@@ -68,7 +58,25 @@ public:
 	BEGIN_COM_MAP(CShapeDrawingOptions)
 		COM_INTERFACE_ENTRY(IShapeDrawingOptions)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
+
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Visible)(VARIANT_BOOL *pVal);

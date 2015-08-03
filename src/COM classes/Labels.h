@@ -33,13 +33,14 @@
 
 // CLabels
 class ATL_NO_VTABLE CLabels :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CLabels, &CLSID_Labels>,
 	public IDispatchImpl<ILabels, &IID_ILabels, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CLabels()
 	{
+		_pUnkMarshaler = NULL;
 		_floatNumberFormat = m_globalSettings.floatNumberFormat;
 		_shapefile = NULL;
 		_synchronized = VARIANT_FALSE;
@@ -98,18 +99,25 @@ public:
 	BEGIN_COM_MAP(CLabels)
 		COM_INTERFACE_ENTRY(ILabels)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *pVal);

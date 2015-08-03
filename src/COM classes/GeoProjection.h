@@ -31,13 +31,14 @@
 
 // CGeoProjection
 class ATL_NO_VTABLE CGeoProjection :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CGeoProjection, &CLSID_GeoProjection>,
 	public IDispatchImpl<IGeoProjection, &IID_IGeoProjection, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CGeoProjection()
 	{
+		_pUnkMarshaler = NULL;
 		USES_CONVERSION;
 		_key = A2BSTR("");
 		_globalCallback = NULL;
@@ -65,16 +66,25 @@ public:
 	BEGIN_COM_MAP(CGeoProjection)
 		COM_INTERFACE_ENTRY(IGeoProjection)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
-	void FinalRelease() { }
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);

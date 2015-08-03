@@ -32,13 +32,14 @@
 
 // CLabelClass
 class ATL_NO_VTABLE CLabelClass :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CLabelClass, &CLSID_Label>,
 	public IDispatchImpl<ILabel, &IID_ILabel, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CLabelClass()
 	{
+		_pUnkMarshaler = NULL;
 		_canDelete = true;
 		_label = new CLabelInfo();
 		gReferenceCounter.AddRef(tkInterface::idLabel);
@@ -52,23 +53,28 @@ public:
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_LABELCLASS)
 
-
 	BEGIN_COM_MAP(CLabelClass)
 		COM_INTERFACE_ENTRY(ILabel)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
-
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Visible)(VARIANT_BOOL* retval)			{*retval = _label->visible ? VARIANT_TRUE : VARIANT_FALSE;	return S_OK;};

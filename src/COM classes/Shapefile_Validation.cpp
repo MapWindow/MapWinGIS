@@ -103,7 +103,7 @@ IShapeValidationInfo* CShapefile::ValidateOutput(IShapefile** isf, CString metho
 
 clear_result:		
 		// TODO: actually I don't see much sense in it; GlobalCallback, if there is any, must have been passed 
-		// to output shapefile as; so in case there was an error it was already reported
+		// to output shapefile as well; so in case there was an error it was already reported
 		long errorCode = 0;
 		(*isf)->get_LastErrorCode(&errorCode);
 		if (errorCode != 0)

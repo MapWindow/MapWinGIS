@@ -15,6 +15,7 @@ class ATL_NO_VTABLE CDrawingRectangle :
 public:
 	CDrawingRectangle()
 	{
+		_pUnkMarshaler = NULL;
 		_x = _y = _width = _height = 0.0;
 		_visible = VARIANT_TRUE;
 		_referenceType = dlScreenReferencedList;
@@ -29,18 +30,25 @@ public:
 	BEGIN_COM_MAP(CDrawingRectangle)
 		COM_INTERFACE_ENTRY(IDrawingRectangle)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_X)(DOUBLE* pVal);

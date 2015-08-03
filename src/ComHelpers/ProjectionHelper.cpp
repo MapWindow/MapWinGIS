@@ -52,3 +52,18 @@ CString ProjectionHelper::ToString(IGeoProjection* gp)
 	USES_CONVERSION;
 	return str.Length() > 0 ? OLE2A(str) : "<empty>";
 }
+
+// ***************************************************************
+//		GetSpatialReference()
+// ***************************************************************
+void ProjectionHelper::GetSpatialReference(IGeoProjection* gp, OGRSpatialReference& result)
+{
+	if (!gp) return;
+
+	CComBSTR bstr;
+	gp->ExportToProj4(&bstr);
+
+	USES_CONVERSION;
+	CString s = OLE2A(bstr);
+	result.importFromProj4(s);
+}

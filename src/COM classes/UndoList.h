@@ -10,13 +10,14 @@ using namespace ATL;
 
 // CUndoList
 class ATL_NO_VTABLE CUndoList :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CUndoList, &CLSID_UndoList>,
 	public IDispatchImpl<IUndoList, &IID_IUndoList, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CUndoList()
 	{
+		_pUnkMarshaler = NULL;
 		_mapCallback = NULL;
 		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
@@ -37,18 +38,24 @@ public:
 	BEGIN_COM_MAP(CUndoList)
 		COM_INTERFACE_ENTRY(IUndoList)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
 
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 	
 public:
 	STDMETHOD(Undo)(VARIANT_BOOL zoomToShape, VARIANT_BOOL* retVal);

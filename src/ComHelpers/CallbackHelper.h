@@ -13,6 +13,7 @@ namespace CallbackHelper
 	void ErrorMsg(CString message);
 	void ErrorMsg(const char* message);
 	void AssertionFailed(CString message);
+	ICallback* GetCurrent(ICallback* localCallback);
 };
 
 int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, void *pData);

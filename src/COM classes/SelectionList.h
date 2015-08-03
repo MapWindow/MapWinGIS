@@ -9,14 +9,14 @@ using namespace std;
 
 
 class ATL_NO_VTABLE CSelectionList :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CSelectionList, &CLSID_SelectionList>,
 	public IDispatchImpl<ISelectionList, &IID_ISelectionList, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CSelectionList()
 	{
-	
+		_pUnkMarshaler = NULL;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SELECTIONLIST)
@@ -25,18 +25,25 @@ public:
 	BEGIN_COM_MAP(CSelectionList)
 		COM_INTERFACE_ENTRY(ISelectionList)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(AddShape)(LONG layerHandle, LONG shapeIndex);

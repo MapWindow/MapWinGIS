@@ -78,6 +78,7 @@ struct GlobalSettingsInfo
 	CString hereAppCode;
 	bool gridFavorGreyScale;
 	bool gridUseHistogram;
+	bool overrideLocalCallback;
 
 	~GlobalSettingsInfo()
 	{
@@ -89,6 +90,7 @@ struct GlobalSettingsInfo
 
 	GlobalSettingsInfo::GlobalSettingsInfo()
 	{
+		overrideLocalCallback = true;
 		proxyAuthentication = asBasic;
 		hereAppId = "";
 		hereAppCode = "";

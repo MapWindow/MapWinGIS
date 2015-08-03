@@ -27,13 +27,14 @@
 
 // CGridColorScheme
 class ATL_NO_VTABLE CGridColorScheme : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CGridColorScheme, &CLSID_GridColorScheme>,
 	public IDispatchImpl<IGridColorScheme, &IID_IGridColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CGridColorScheme()
 	{
+		_pUnkMarshaler = NULL;
 		_globalCallback = NULL;
 		_ambientIntensity = 0.7;
 		_lightSourceIntensity = 0.7;		
@@ -54,17 +55,6 @@ public:
 		gReferenceCounter.Release(tkInterface::idGridColorScheme);
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_GRIDCOLORSCHEME)
 
 	DECLARE_NOT_AGGREGATABLE(CGridColorScheme)
@@ -72,8 +62,24 @@ public:
 	BEGIN_COM_MAP(CGridColorScheme)
 		COM_INTERFACE_ENTRY(IGridColorScheme)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // IGridColorScheme
 public:

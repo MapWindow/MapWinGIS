@@ -33,7 +33,7 @@
 #define TILE_PROVIDER_COUNT 23
 
 class ATL_NO_VTABLE CTileProviders :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CTileProviders, &CLSID_TileProviders>,
 	public IDispatchImpl<ITileProviders, &IID_ITileProviders, &LIBID_MapWinGIS, VERSION_MAJOR, VERSION_MINOR>
 {
@@ -41,6 +41,7 @@ public:
 	CTileProviders()
 		: _tiles(NULL)
 	{
+		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
@@ -65,18 +66,25 @@ public:
 	BEGIN_COM_MAP(CTileProviders)
 		COM_INTERFACE_ENTRY(ITileProviders)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);

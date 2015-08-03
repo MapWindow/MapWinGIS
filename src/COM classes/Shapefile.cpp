@@ -42,6 +42,7 @@
 
 CShapefile::CShapefile()
 {	
+	_pUnkMarshaler = NULL;
 	_snappable = VARIANT_TRUE;
 	_interactiveEditing = VARIANT_FALSE;
 	_hotTracking = VARIANT_TRUE;
@@ -3152,3 +3153,4 @@ void CShapefile::MarkUndrawn()
 	for (size_t i = 0; i < _shapeData.size(); i++)
 		_shapeData[i]->wasRendered = false;
 }
+

@@ -38,7 +38,7 @@
 // CShapefile declaration
 // *********************************************************************
 class ATL_NO_VTABLE CShapefile : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CShapefile, &CLSID_Shapefile>,
 	public IDispatchImpl<IShapefile, &IID_IShapefile, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -47,17 +47,6 @@ public:
 	CShapefile();
 	~CShapefile();
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILE)
 
 	DECLARE_NOT_AGGREGATABLE(CShapefile)
@@ -65,7 +54,25 @@ public:
 	BEGIN_COM_MAP(CShapefile)
 		COM_INTERFACE_ENTRY(IShapefile)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
+
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 
 // *********************************************************************
@@ -443,6 +450,5 @@ public:
 	// drawing 
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
-
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

@@ -44,13 +44,14 @@ struct FieldOperation
 
 // CFieldStatOperations
 class ATL_NO_VTABLE CFieldStatOperations :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CFieldStatOperations, &CLSID_FieldStatOperations>,
 	public IDispatchImpl<IFieldStatOperations, &IID_IFieldStatOperations, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CFieldStatOperations()
 	{
+		_pUnkMarshaler = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_key = SysAllocString(L"");
 	}
@@ -65,18 +66,25 @@ public:
 	BEGIN_COM_MAP(CFieldStatOperations)
 		COM_INTERFACE_ENTRY(IFieldStatOperations)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(AddFieldIndex)(int fieldIndex, tkFieldStatOperation operation);

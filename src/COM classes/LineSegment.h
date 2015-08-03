@@ -34,7 +34,7 @@
 // CLineSegment interface
 // -------------------------------------------------------
 class ATL_NO_VTABLE CLineSegment :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CLineSegment, &CLSID_LineSegment>,
 	public IDispatchImpl<ILineSegment, &IID_ILineSegment, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -42,6 +42,7 @@ public:
 	
 	CLineSegment()
 	{
+		_pUnkMarshaler = NULL;
 		_lineType = lltSimple;
 		_lineColor = RGB(0,0,0);
 		_markerOutlineColor = RGB(120, 120, 120);
@@ -66,18 +67,25 @@ public:
 	BEGIN_COM_MAP(CLineSegment)
 		COM_INTERFACE_ENTRY(ILineSegment)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_LineType)(tkLineType* retVal);

@@ -5617,6 +5617,8 @@ interface IGlobalSettings : IDispatch{
 	[propput, id(57)] HRESULT GridFavorGreyscale([in] VARIANT_BOOL newVal);
 	[propget, id(58)] HRESULT GridUseHistogram([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(58)] HRESULT GridUseHistogram([in] VARIANT_BOOL newVal);
+	[propget, id(59)] HRESULT OverrideLocalCallback([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(59)] HRESULT OverrideLocalCallback([in] VARIANT_BOOL newVal);
 };
 
 [

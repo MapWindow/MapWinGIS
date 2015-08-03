@@ -31,13 +31,15 @@
 
 // CGridHeader
 class ATL_NO_VTABLE CGridHeader : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CGridHeader, &CLSID_GridHeader>,
 	public IDispatchImpl<IGridHeader, &IID_IGridHeader, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CGridHeader()
-	{	USES_CONVERSION;
+	{	
+		_pUnkMarshaler = NULL;
+		USES_CONVERSION;
 		_dx = 1.0;
 		_dy = 1.0;	
 		_key = SysAllocString(L"");
@@ -74,17 +76,6 @@ public:
 		_projection->Release();
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_GRIDHEADER)
 
 	DECLARE_NOT_AGGREGATABLE(CGridHeader)
@@ -92,8 +83,25 @@ public:
 	BEGIN_COM_MAP(CGridHeader)
 		COM_INTERFACE_ENTRY(IGridHeader)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // IGridHeader
 public:

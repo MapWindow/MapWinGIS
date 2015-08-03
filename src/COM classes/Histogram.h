@@ -12,6 +12,7 @@ class ATL_NO_VTABLE CHistogram :
 public:
 	CHistogram()
 	{
+		_pUnkMarshaler = NULL;
 		_values = NULL;
 		_minValue = 0.0;
 		_maxValue = 0.0;
@@ -28,18 +29,25 @@ public:
 	BEGIN_COM_MAP(CHistogram)
 		COM_INTERFACE_ENTRY(IHistogram)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_NumBuckets)(LONG* pVal);

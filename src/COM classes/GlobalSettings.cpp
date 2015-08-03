@@ -1055,3 +1055,23 @@ STDMETHODIMP CGlobalSettings::put_GridUseHistogram(VARIANT_BOOL newVal)
 
 	return S_OK;
 }
+
+// ***************************************************************
+//		OverrideLocalCallback
+// ***************************************************************
+STDMETHODIMP CGlobalSettings::get_OverrideLocalCallback(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = m_globalSettings.overrideLocalCallback ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+STDMETHODIMP CGlobalSettings::put_OverrideLocalCallback(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	m_globalSettings.overrideLocalCallback = newVal ? true : false;
+
+	return S_OK;
+}

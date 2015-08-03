@@ -3,13 +3,14 @@
 
 // CFileManager
 class ATL_NO_VTABLE CFileManager :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CFileManager, &CLSID_FileManager>,
 	public IDispatchImpl<IFileManager, &IID_IFileManager, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CFileManager()
 	{
+		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
 		_globalCallback = NULL;
@@ -29,18 +30,25 @@ public:
 	BEGIN_COM_MAP(CFileManager)
 		COM_INTERFACE_ENTRY(IFileManager)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_IsSupportedBy)(BSTR Filename, tkSupportType supportType, VARIANT_BOOL* retVal);

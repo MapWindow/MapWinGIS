@@ -150,7 +150,7 @@ struct ValueRectangle
 //	  CCharts
 // -----------------------------------------
 class ATL_NO_VTABLE CCharts :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CCharts, &CLSID_Charts>,
 	public IDispatchImpl<ICharts, &IID_ICharts, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
@@ -158,6 +158,8 @@ public:
 	// constructor
 	CCharts()
 	{
+		_pUnkMarshaler = NULL;
+
 		_key = SysAllocString(L"");
 		_caption = SysAllocString(L"");
 		_expression = SysAllocString(L"");
@@ -197,18 +199,25 @@ public:
 	BEGIN_COM_MAP(CCharts)
 		COM_INTERFACE_ENTRY(ICharts)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Key)(/*[out, retval]*/ BSTR *retVal);

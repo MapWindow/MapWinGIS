@@ -31,13 +31,14 @@
 
 // CColorScheme
 class ATL_NO_VTABLE CColorScheme :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CColorScheme, &CLSID_ColorScheme>,
 	public IDispatchImpl<IColorScheme, &IID_IColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CColorScheme()
 	{
+		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
@@ -54,18 +55,25 @@ public:
 	BEGIN_COM_MAP(CColorScheme)
 		COM_INTERFACE_ENTRY(IColorScheme)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(SetColors)(OLE_COLOR Color1, OLE_COLOR Color2);

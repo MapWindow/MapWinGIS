@@ -13,6 +13,7 @@ class ATL_NO_VTABLE CGdalDriver :
 public:
 	CGdalDriver() : _driver(NULL)
 	{
+		_pUnkMarshaler = NULL;
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GDALDRIVER)
@@ -20,18 +21,24 @@ public:
 	BEGIN_COM_MAP(CGdalDriver)
 		COM_INTERFACE_ENTRY(IGdalDriver)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
 
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Metadata)(tkGdalDriverMetadata metadata, BSTR* retVal);

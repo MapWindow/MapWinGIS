@@ -27,34 +27,41 @@
 
 // CESRIGridManager
 class ATL_NO_VTABLE CESRIGridManager : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CESRIGridManager, &CLSID_ESRIGridManager>,
 	public IDispatchImpl<IESRIGridManager, &IID_IESRIGridManager, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CESRIGridManager()
 	{	_globalCallback = NULL;
+		_pUnkMarshaler = NULL;
 	}
 
+	DECLARE_REGISTRY_RESOURCEID(IDR_ESRIGRIDMANAGER)
+
+	DECLARE_NOT_AGGREGATABLE(CESRIGridManager)
+
+	BEGIN_COM_MAP(CESRIGridManager)
+		COM_INTERFACE_ENTRY(IESRIGridManager)
+		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
+	END_COM_MAP()
+
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
 
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
-	
-	void FinalRelease() 
+
+	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_ESRIGRIDMANAGER)
-
-DECLARE_NOT_AGGREGATABLE(CESRIGridManager)
-
-BEGIN_COM_MAP(CESRIGridManager)
-	COM_INTERFACE_ENTRY(IESRIGridManager)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 
 // IESRIGridManager

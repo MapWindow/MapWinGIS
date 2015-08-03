@@ -30,19 +30,22 @@
 /////////////////////////////////////////////////////////////////////////////
 // CShapefileColorScheme
 class ATL_NO_VTABLE CShapefileColorScheme : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CShapefileColorScheme, &CLSID_ShapefileColorScheme>,
 	public IDispatchImpl<IShapefileColorScheme, &IID_IShapefileColorScheme, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CShapefileColorScheme()
-	{	_globalCallback = NULL;
+	{	
+		_pUnkMarshaler = NULL;
+		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_layerHandle = -1;
 		_key = SysAllocString(L"");
 	}
 	~CShapefileColorScheme()
-	{	for( int i = 0; i < (int)_allBreaks.size(); i++ )
+	{	
+		for( int i = 0; i < (int)_allBreaks.size(); i++ )
 		{	if( _allBreaks[i] != NULL )
 				_allBreaks[i]->Release();
 			_allBreaks[i] = NULL;
@@ -55,12 +58,28 @@ public:
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_SHAPEFILELEGEND)
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
 	BEGIN_COM_MAP(CShapefileColorScheme)
 		COM_INTERFACE_ENTRY(IShapefileColorScheme)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
+
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // IShapefileColorScheme
 public:

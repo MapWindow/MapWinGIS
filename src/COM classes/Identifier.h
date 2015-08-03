@@ -9,13 +9,14 @@ using namespace ATL;
 
 // CIdentifier
 class ATL_NO_VTABLE CIdentifier :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CIdentifier, &CLSID_Identifier>,
 	public IDispatchImpl<IIdentifier, &IID_IIdentifier, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CIdentifier()
 	{
+		_pUnkMarshaler = NULL;
 		_hotTracking = VARIANT_TRUE;
 		_mode = imAllLayers;
 		_color = RGB(255, 0, 0); //RGB(30, 144, 255);
@@ -27,18 +28,25 @@ public:
 	BEGIN_COM_MAP(CIdentifier)
 		COM_INTERFACE_ENTRY(IIdentifier)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_HotTracking)(VARIANT_BOOL* pVal);

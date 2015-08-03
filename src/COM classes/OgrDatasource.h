@@ -7,13 +7,14 @@
 
 // COgrDatasource
 class ATL_NO_VTABLE COgrDatasource :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<COgrDatasource, &CLSID_OgrDatasource>,
 	public IDispatchImpl<IOgrDatasource, &IID_IOgrDatasource, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	COgrDatasource()
 	{
+		_pUnkMarshaler = NULL;
 		_dataset = NULL;
 		_key = SysAllocString(L"");
 		_lastErrorCode = tkNO_ERROR;
@@ -35,18 +36,24 @@ public:
 	BEGIN_COM_MAP(COgrDatasource)
 		COM_INTERFACE_ENTRY(IOgrDatasource)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
 
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);

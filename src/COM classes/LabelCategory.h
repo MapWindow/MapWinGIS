@@ -32,13 +32,14 @@
 
 // CLabelCategory
 class ATL_NO_VTABLE CLabelCategory :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CLabelCategory, &CLSID_LabelCategory>,
 	public IDispatchImpl<ILabelCategory, &IID_ILabelCategory, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CLabelCategory()
 	{
+		_pUnkMarshaler = NULL;
 		_name = SysAllocString(L"");
 		_expression = SysAllocString(L"");
 		VariantInit(&_minValue);
@@ -58,24 +59,29 @@ public:
 		gReferenceCounter.Release(tkInterface::idLabelCategory);
 	}
 
-DECLARE_REGISTRY_RESOURCEID(IDR_LABELCATEGORY)
+	DECLARE_REGISTRY_RESOURCEID(IDR_LABELCATEGORY)
 
-
-BEGIN_COM_MAP(CLabelCategory)
-	COM_INTERFACE_ENTRY(ILabelCategory)
-	COM_INTERFACE_ENTRY(IDispatch)
-END_COM_MAP()
+	BEGIN_COM_MAP(CLabelCategory)
+		COM_INTERFACE_ENTRY(ILabelCategory)
+		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
+	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
 
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_Name)(BSTR* retval);

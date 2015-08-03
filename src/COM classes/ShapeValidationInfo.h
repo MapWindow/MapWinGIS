@@ -8,13 +8,14 @@
 
 // CShapeValidationInfo
 class ATL_NO_VTABLE CShapeValidationInfo :
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CShapeValidationInfo, &CLSID_ShapeValidationInfo>,
 	public IDispatchImpl<IShapeValidationInfo, &IID_IShapeValidationInfo, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CShapeValidationInfo()
 	{
+		_pUnkMarshaler = NULL;
 		validationType = tkShapeValidationType::svtInput;
 		validationMode = tkShapeValidationMode::NoValidation;
 		validationStatus = tkShapeValidationStatus::WasntValidated;
@@ -34,18 +35,25 @@ public:
 	BEGIN_COM_MAP(CShapeValidationInfo)
 		COM_INTERFACE_ENTRY(IShapeValidationInfo)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
 	HRESULT FinalConstruct()
 	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
 		return S_OK;
 	}
 
 	void FinalRelease()
 	{
+		_pUnkMarshaler.Release();
 	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 public:
 	STDMETHOD(get_ClassName)( BSTR* retVal);

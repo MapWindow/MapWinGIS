@@ -35,7 +35,9 @@ static char THIS_FILE[] = __FILE__;
 
 // CTin
 CTin::CTin()
-{	_globalCallback = NULL;
+{	
+	_pUnkMarshaler = NULL;
+	_globalCallback = NULL;
 	_lastErrorCode = tkNO_ERROR;
 	USES_CONVERSION;
 	_key = SysAllocString(L"");

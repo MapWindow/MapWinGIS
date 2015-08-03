@@ -25,13 +25,14 @@
 
 // CField
 class ATL_NO_VTABLE CField : 
-	public CComObjectRootEx<CComSingleThreadModel>,
+	public CComObjectRootEx<CComMultiThreadModel>,
 	public CComCoClass<CField, &CLSID_Field>,
 	public IDispatchImpl<IField, &IID_IField, &LIBID_MapWinGIS, /*wMajor =*/ VERSION_MAJOR, /*wMinor =*/ VERSION_MINOR>
 {
 public:
 	CField()
 	{
+		_pUnkMarshaler = NULL;
 		_key = SysAllocString(L"");
 		_name = SysAllocString(L"");
 		_alias = SysAllocString(L"");
@@ -61,17 +62,6 @@ public:
 		gReferenceCounter.Release(tkInterface::idField);
 	}
 
-	DECLARE_PROTECT_FINAL_CONSTRUCT()
-
-	HRESULT FinalConstruct()
-	{
-		return S_OK;
-	}
-	
-	void FinalRelease() 
-	{
-	}
-
 	DECLARE_REGISTRY_RESOURCEID(IDR_FIELD)
 
 	DECLARE_NOT_AGGREGATABLE(CField)
@@ -79,8 +69,24 @@ public:
 	BEGIN_COM_MAP(CField)
 		COM_INTERFACE_ENTRY(IField)
 		COM_INTERFACE_ENTRY(IDispatch)
+		COM_INTERFACE_ENTRY_AGGREGATE(IID_IMarshal, _pUnkMarshaler.p)
 	END_COM_MAP()
 
+	DECLARE_PROTECT_FINAL_CONSTRUCT()
+	DECLARE_GET_CONTROLLING_UNKNOWN()
+
+	HRESULT FinalConstruct()
+	{
+		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
+		return S_OK;
+	}
+
+	void FinalRelease()
+	{
+		_pUnkMarshaler.Release();
+	}
+
+	CComPtr<IUnknown> _pUnkMarshaler;
 
 // IField
 public:
