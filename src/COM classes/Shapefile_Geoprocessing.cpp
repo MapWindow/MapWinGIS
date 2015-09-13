@@ -1552,6 +1552,10 @@ ShpfileType GetClipOperationReturnType(ShpfileType type1, ShpfileType type2, tkC
 				// TODO: should we return multipoints type? 
 				return SHP_POINT;
 			}
+			else if (type1 == SHP_POLYLINE && type2 == SHP_POLYLINE)
+			{
+				return SHP_POINT;
+			}
 			else if (type1 == SHP_POLYLINE || type2 == SHP_POLYLINE)
 			{
 				return SHP_POLYLINE;
@@ -2057,7 +2061,7 @@ void CShapefile::IntersectionGEOS(VARIANT_BOOL SelectedOnlySubject, IShapefile* 
 				// iterating through clip geometries
 				for (int j = 0; j < (int)shapeIds.size(); j++)
 				{
-					// user can abort the operation in any time
+					// user can abort the operation at any time
 					if (_stopExecution)
 					{
 						VARIANT_BOOL stop;

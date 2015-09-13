@@ -6,8 +6,7 @@
 // ****************************************************************
 CallbackParams::CallbackParams(ICallback* localCallback, const char * message) : sMsg(message)
 {
-	ICallback* callback = m_globalSettings.callback ? m_globalSettings.callback : localCallback;
-	cBack = callback;
+	cBack = localCallback;
 }
 
 CallbackParams::CallbackParams(const char * message) : sMsg(message)

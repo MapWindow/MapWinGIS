@@ -174,6 +174,7 @@ public:
 	STDMETHOD(ReclassifyRaster)(BSTR Filename, int bandIndex, BSTR outputName, SAFEARRAY* LowerBounds, 
 		SAFEARRAY* UpperBounds, SAFEARRAY* NewValues, 
 		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
+	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 
 private:
 	struct RasterPoint
@@ -288,13 +289,13 @@ private:
 	void Parse(CString sOrig, int * opts);
 	BOOL ProcessGeneralOptions(int * opts);
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
-	ICallback* GetCallback() { return m_globalSettings.callback ? m_globalSettings.callback : _globalCallback; }
+	ICallback* GetCallback()  { 
+		return _globalCallback ? _globalCallback : m_globalSettings.callback;
+	}
 	BOOL IsTIFFGrid(LPCTSTR Filename);
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
-	
-	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);
