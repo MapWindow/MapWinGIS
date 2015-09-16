@@ -2076,13 +2076,13 @@ STDMETHODIMP CUtils::TranslateRaster(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 
 			if (bClamped)
 			{
-				printf( "for band %d, nodata value has been clamped "
+				CPLError(CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been clamped "
                        "to %.0f, the original value being out of range.",
 					i + 1, dfVal);
 			}
 			else if(bRounded)
 			{
-				printf("for band %d, nodata value has been rounded "
+				CPLError(CE_Warning, CPLE_AppDefined, "for band %d, nodata value has been rounded "
                        "to %.0f, %s being an integer datatype.",
 					i + 1, dfVal,
 					GDALGetDataTypeName(eBandType));
@@ -3039,26 +3039,8 @@ STDMETHODIMP CUtils::GDALRasterize(BSTR bstrSrcFilename, BSTR bstrDstFilename,
         if( hDriver == NULL 
             || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) == NULL )
         {
-            int	iDr;
 
-            printf( "Output driver `%s' not recognised or does not support\n", 
-                    pszFormat );
-            printf( "direct output file creation.  The following format drivers are configured\n"
-                    "and support direct output:\n" );
-
-            for( iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
-            {
-                GDALDriverH hDriver = GDALGetDriver(iDr);
-
-                if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL) != NULL )
-                {
-                    printf( "  %s: %s\n",
-                            GDALGetDriverShortName( hDriver  ),
-                            GDALGetDriverLongName( hDriver ) );
-                }
-            }
-            printf( "\n" );
-			// TODO: clean up memory...set error code?
+			CPLError(CE_Failure, CPLE_AppDefined, "Output driver `%s' not recognised or does not support direct output file creation", pszFormat);
 			return ResetConfigOptions();
         }
 
@@ -4101,13 +4083,13 @@ STDMETHODIMP CUtils::GDALWarp(BSTR bstrSrcFilename, BSTR bstrDstFilename,
                     
                 if (bClamped)
                 {
-                    printf( "for band %d, destination nodata value has been clamped "
+					CPLError(CE_Warning, CPLE_AppDefined, "for band %d, destination nodata value has been clamped "
                            "to %.0f, the original value being out of range.\n",
                            i + 1, psWO->padfDstNoDataReal[i]);
                 }
                 else if(bRounded)
                 {
-                    printf("for band %d, destination nodata value has been rounded "
+					CPLError(CE_Warning, CPLE_AppDefined, "for band %d, destination nodata value has been rounded "
                            "to %.0f, %s being an integer datatype.\n",
                            i + 1, psWO->padfDstNoDataReal[i],
                            GDALGetDataTypeName(GDALGetRasterDataType(hBand)));
@@ -4273,25 +4255,8 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
     if( hDriver == NULL 
         || GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL ) == NULL )
     {
-        int	iDr;
+		CPLError(CE_Failure, CPLE_AppDefined, "Output driver `%s' not recognised or does not support direct output file creation.", pszFormat);
         
-        printf( "Output driver `%s' not recognised or does not support\n", 
-                pszFormat );
-        printf( "direct output file creation.  The following format drivers are configured\n"
-                "and support direct output:\n" );
-
-        for( iDr = 0; iDr < GDALGetDriverCount(); iDr++ )
-        {
-            GDALDriverH hDriver = GDALGetDriver(iDr);
-
-            if( GDALGetMetadataItem( hDriver, GDAL_DCAP_CREATE, NULL) != NULL )
-            {
-                printf( "  %s: %s\n",
-                        GDALGetDriverShortName( hDriver  ),
-                        GDALGetDriverLongName( hDriver ) );
-            }
-        }
-        printf( "\n" );
         // TODO: free up memory...set error code?
 		return NULL;
     }
@@ -4328,7 +4293,7 @@ GDALWarpCreateOutput( char **papszSrcFiles, const char *pszFilename,
 /* -------------------------------------------------------------------- */
         if ( GDALGetRasterCount(hSrcDS) == 0 )
         {
-            fprintf(stderr, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc] );
+			CPLError(CE_Failure, CPLE_AppDefined, "Input file %s has no raster bands.\n", papszSrcFiles[iSrc]);
             // TODO: free up memory...set error code?
 			return NULL;
         }
