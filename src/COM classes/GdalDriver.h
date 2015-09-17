@@ -14,6 +14,12 @@ public:
 	CGdalDriver() : _driver(NULL)
 	{
 		_pUnkMarshaler = NULL;
+		gReferenceCounter.AddRef(tkInterface::idGdalDriver);
+	}
+
+	~CGdalDriver()
+	{
+		gReferenceCounter.Release(tkInterface::idGdalDriver);
 	}
 
 	DECLARE_REGISTRY_RESOURCEID(IDR_GDALDRIVER)
@@ -30,7 +36,6 @@ public:
 	HRESULT FinalConstruct()
 	{
 		return CoCreateFreeThreadedMarshaler(GetControllingUnknown(), &_pUnkMarshaler.p);
-		return S_OK;
 	}
 
 	void FinalRelease()

@@ -12,7 +12,7 @@ bool CGdalDriver::CheckState()
 {
 	if (!_driver)
 	{
-		ErrorMessage("GdalDataset object isn't initialized.");
+		ErrorMessage("GdalDriver object isn't initialized.");
 		return false;
 	}
 	return true;

@@ -289,9 +289,7 @@ private:
 	void Parse(CString sOrig, int * opts);
 	BOOL ProcessGeneralOptions(int * opts);
 	HRESULT ResetConfigOptions(long ErrorCode = 0);
-	ICallback* GetCallback()  { 
-		return _globalCallback ? _globalCallback : m_globalSettings.callback;
-	}
+	ICallback* GetCallback()  { return _globalCallback;	}
 	BOOL IsTIFFGrid(LPCTSTR Filename);
 
 public:

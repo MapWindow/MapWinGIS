@@ -2916,12 +2916,21 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	/* -------------------------------------------------------------------- */
 	if (bCloseODS)
 		GDALClose((GDALDatasetH)poODS);
+	
 	GDALClose((GDALDatasetH)poDS);
-	OGRGeometryFactory::destroyGeometry(poSpatialFilter);
-	OGRGeometryFactory::destroyGeometry(poClipSrc);
-	OGRGeometryFactory::destroyGeometry(poClipDst);
+	
+	if (poSpatialFilter)
+		OGRGeometryFactory::destroyGeometry(poSpatialFilter);
 
-	delete poGCPCoordTrans;
+	if (poClipSrc)
+		OGRGeometryFactory::destroyGeometry(poClipSrc);
+
+	if (poClipDst)
+		OGRGeometryFactory::destroyGeometry(poClipDst);
+
+	if (poGCPCoordTrans)
+		delete poGCPCoordTrans;
+
 	if (pasGCPs != NULL)
 	{
 		GDALDeinitGCPs(nGCPCount, pasGCPs);
@@ -2929,8 +2938,11 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	}
 
 	/* Destroy them after the last potential user */
-	OGRSpatialReference::DestroySpatialReference(poOutputSRS);
-	OGRSpatialReference::DestroySpatialReference(poSourceSRS);
+	if (poOutputSRS)
+		OGRSpatialReference::DestroySpatialReference(poOutputSRS);
+
+	if (poSourceSRS)
+		OGRSpatialReference::DestroySpatialReference(poSourceSRS);
 
 	CSLDestroy(papszSelFields);
 	CSLDestroy(papszFieldMap);
@@ -2943,7 +2955,7 @@ STDMETHODIMP CUtils::OGR2OGR(BSTR bstrSrcFilename, BSTR bstrDstFilename,
 	CSLDestroy(papszFieldTypesToString);
 	CPLFree(pszNewLayerName);
 
-	OGRCleanupAll();
+	//OGRCleanupAll();
 
 #ifdef DBMALLOC
 	malloc_dump(1);
