@@ -2724,6 +2724,8 @@ STDMETHODIMP CShapefile::PointInShape(LONG ShapeIndex, DOUBLE x, DOUBLE y, VARIA
 	}	
 	else
 	{
+		CSingleLock lock(&_readLock, TRUE);
+
 		int shpType;
 		fseek(_shpfile, _shpOffsets[ShapeIndex] + sizeof(int)*2, SEEK_SET);
 		fread(&shpType, sizeof(int), 1, _shpfile);
@@ -2904,9 +2906,12 @@ STDMETHODIMP CShapefile::BeginPointInShapefile(VARIANT_BOOL* retval)
 		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
 		return S_OK;
 	}
-	
+
+	CSingleLock lock(&_readLock, TRUE);
+
 	int size = _shapeData.size();
 	_polySf.resize(size);
+
 	for(int nShape = 0; nShape < size; nShape++)
 	{
 		fseek(_shpfile, _shpOffsets[nShape]+sizeof(int)*2, SEEK_SET);

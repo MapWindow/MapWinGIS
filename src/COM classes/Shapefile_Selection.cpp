@@ -389,6 +389,8 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 	}
 	else		// not editing
 	{	
+		CSingleLock lock(&_readLock, TRUE);
+
 		//Get the Info from the disk
 		fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
@@ -416,6 +418,8 @@ BOOL CShapefile::DefineShapePoints(long ShapeIndex, ShpfileType & ShapeType, std
 			int * intdata = (int*)cdata;						
 			ShpfileType shapetype = (ShpfileType)intdata[0];
 			double * pntdata;
+
+			lock.Unlock();
 
 			if( shapetype == SHP_NULLSHAPE )
 			{	

@@ -179,12 +179,14 @@ bool CShapefileDrawer::Draw(const CRect & rcBounds, IShapefile* sf)
 		
 		CComBSTR fname;
 		sf->get_Filename(&fname);
-			
+
+		CCriticalSection* readLock = ((CShapefile*)sf)->get_ReadLock();
+	
 		// reading index
 		USES_CONVERSION;
 		_sfReader = new CShapefileReader();
 
-		if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file))
+		if (!_sfReader->ReadShapefileIndex(OLE2W(fname), file, readLock))
 		{
 			delete _sfReader; 
 			_sfReader = NULL;

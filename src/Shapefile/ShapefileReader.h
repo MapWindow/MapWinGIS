@@ -1,5 +1,6 @@
 #pragma once
 #include "ShapeWrapper.h"
+#include "afxmt.h"
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -45,10 +46,11 @@ private:
 	bool _dataLoaded;
 	char * _indexData;			// content of shx file
 	FILE * _shpfile;
+	::CCriticalSection* _readLock;
 
 public:
 	// functions
-	bool ReadShapefileIndex(CStringW filename, FILE* shpFile);
+	bool ReadShapefileIndex(CStringW filename, FILE* shpFile, ::CCriticalSection* readLock);
 	char* ReadShapeData(int& offset);
 	PolygonData* ReadPolygonData(char* data);
 	PolygonData* ReadMultiPointData(char* data);

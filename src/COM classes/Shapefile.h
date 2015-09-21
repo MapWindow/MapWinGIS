@@ -23,6 +23,7 @@
 #include "ClipperConverter.h"
 #include "ShapeInfo.h"
 #include "ColoringGraph.h"
+#include <afxmt.h>
 
 //Shapefile File Info
 #define HEADER_BYTES_16 50
@@ -263,7 +264,7 @@ private:
 	};
 
 private:
-
+	::CCriticalSection _readLock;
 	std::vector<PolygonShapefile> _polySf;
 	
 	tkShapefileSourceType _sourceType;		// is it disk-based or in-memory?
@@ -416,6 +417,7 @@ public:
 	IShapeWrapper* get_ShapeWrapper(int ShapeIndex);
 	IShapeData* get_ShapeData(int ShapeIndex);
 	FILE* get_File(){ return _shpfile; }
+	::CCriticalSection* get_ReadLock(){ return &_readLock; }
 	
 	// serialization
 	bool DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node);

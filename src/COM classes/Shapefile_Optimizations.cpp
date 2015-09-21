@@ -73,7 +73,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 			int numShapes = _shapeData.size();
 			long percent = 0;
 
-			if (reader->ReadShapefileIndex(_shpfileName, _shpfile))
+			if (reader->ReadShapefileIndex(_shpfileName, _shpfile, &_readLock))
 			{
 				for (int i = 0; i < numShapes; i++)
 				{
@@ -138,7 +138,7 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) //_numShapes )
+	if( ShapeIndex < 0 || ShapeIndex >= (long)_shapeData.size()) 
 	{	
 		*pVal = NULL;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
@@ -149,9 +149,11 @@ STDMETHODIMP CShapefile::get_NumPoints(long ShapeIndex, long *pVal)
 	if( _isEditingShapes == TRUE)
 	{
 		_shapeData[ShapeIndex]->shape->get_NumPoints(pVal);
-		//memShapes[ShapeIndex]->get_NumPoints(pVal);
 		return S_OK;
 	}
+
+	CSingleLock lock(&_readLock, TRUE);
+
 	// get the Info from the disk
 	fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 	int intbuf;
@@ -216,6 +218,8 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 		}
 		else
 		{	
+			CSingleLock lock(&_readLock, TRUE);
+
 			//Get the Info from the disk
 			fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
@@ -247,6 +251,8 @@ STDMETHODIMP CShapefile::QuickPoint(long ShapeIndex, long PointIndex, IPoint **r
 				int * intdata = (int*)cdata;						
 				ShpfileType shapetype = (ShpfileType)intdata[0];
 				double * pntdata;
+
+				lock.Unlock();
 
 				if( shapetype == SHP_NULLSHAPE )
 				{
@@ -651,6 +657,8 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 			}
 			else
 			{
+				CSingleLock lock(&_readLock, TRUE);
+
 				//Get the Info from the disk
 				fseek(_shpfile,_shpOffsets[ShapeIndex],SEEK_SET);
 
@@ -679,6 +687,8 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 					ShpfileType shapetype = (ShpfileType)intdata[0];
 					double * bnds;
 
+					lock.Unlock();
+	
 					if( shapetype == SHP_NULLSHAPE )
 					{
 						return false;

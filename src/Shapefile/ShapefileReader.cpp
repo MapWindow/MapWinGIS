@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "Macros.h"
 #include "ShapefileReader.h"
+#include <afxmt.h>
 
 // ****************************************************************
 //		ReadShapefileIndex()
 // ****************************************************************
 // Fast reading for drawing procedure without bounds, file code, etc
-bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
+bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile, CCriticalSection* readLock)
 {
 	if (filename.GetLength() < 4)
 	{
@@ -42,6 +43,7 @@ bool CShapefileReader::ReadShapefileIndex(CStringW filename, FILE* shpFile)
 
 	//_shpHeader.numShapes = (indexFileSize - 100)/8;	// 2 int on record
 
+	_readLock = readLock;
 	_shpfile = shpFile;
 	rewind(shpFile);
 	return true;
@@ -71,6 +73,9 @@ char* CShapefileReader::ReadShapeData(int& offset)
 	
 	if (contentLength > 0)
 	{
+		CSingleLock lock(_readLock);
+		lock.Lock();
+
 		int ret = fseek(_shpfile, (long)readOffset + 2 * sizeof(int), SEEK_SET);
 		if (ret != 0) return NULL;
 		
@@ -82,10 +87,8 @@ char* CShapefileReader::ReadShapeData(int& offset)
 		int count = (int)fread(shapeData, sizeof(char), length, _shpfile);
 		return shapeData;
 	}
-	else
-	{
-		return NULL;
-	}
+	
+	return NULL;
 }
 
 // ****************************************************************

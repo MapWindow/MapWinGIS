@@ -49,6 +49,8 @@ STDMETHODIMP CShapefile::get_Shape(long ShapeIndex, IShape **pVal)
 		return S_OK;
 	}
 
+	CSingleLock lock(&_readLock, TRUE);
+
 	// using fast mode?
 	if (_fastMode)
 	{
