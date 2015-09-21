@@ -2988,7 +2988,7 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	long percent = 0;
 	
 	LONG numShapes;
-	this->get_NumFields(&numShapes);
+	this->get_NumShapes(&numShapes);
 
 	LONG numFields;
 	this->get_NumFields(&numFields);
