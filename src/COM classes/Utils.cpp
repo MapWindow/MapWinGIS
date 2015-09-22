@@ -41,6 +41,7 @@
 #include "OgrConverter.h"
 #include "TableHelper.h"
 #include "xtiffio.h"
+#include "ShapeHelper.h"
 
 #pragma warning(disable:4996)
 
@@ -4357,15 +4358,61 @@ STDMETHODIMP CUtils::GeodesicDistance(double lat1, double lng1, double lat2, dou
 	return S_OK;
 }
 
+// ********************************************************
+//		GeodesicArea()
+// ********************************************************
+STDMETHODIMP CUtils::GeodesicArea(IShape* shapeWgs84, DOUBLE* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	if (!shapeWgs84)
+	{
+		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
+		return S_OK;
+	}
+
+	ShpfileType shpType = ShapeHelper::GetShapeType2D(shapeWgs84);
+	if (shpType != SHP_POLYGON)
+	{
+		ErrorMessage(tkUNEXPECTED_SHAPE_TYPE);
+		return S_OK;
+	}	
+
+	long numPoints;
+	shapeWgs84->get_NumPoints(&numPoints);
+
+	if (numPoints < 3)
+	{
+		ErrorMessage(tkNOT_ENOUGH_POINTS_FOR_SHAPE_TYPE);
+		return S_OK;
+	}
+
+	VARIANT_BOOL vb;
+
+	vector<Point2D> points(numPoints);
+	for (long i = 0; i < numPoints; i++)
+	{
+		double x, y;
+		shapeWgs84->get_XY(i, &x, &y, &vb);
+		points.push_back(Point2D(x, y));
+	}
+
+	*retVal = CalcPolyGeodesicArea(points);
+
+	return S_OK;
+}
+
 #include "..\Processing\GeograpicLib\PolygonArea.hpp"
 double CalcPolyGeodesicArea(std::vector<Point2D>& points)
 {
 	GeographicLib::Geodesic geod(GeographicLib::Constants::WGS84_a(), GeographicLib::Constants::WGS84_f());
 	GeographicLib::PolygonArea poly(geod);
+
 	for(size_t i = 0; i < points.size(); i++)
 	{
 		poly.AddPoint(points[i].y, points[i].x);
 	}
+
 	double area = 0.0, perimeter = 0.0;
 	unsigned int r = poly.Compute(true, true, perimeter, area);
 	return area;

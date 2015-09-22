@@ -4364,6 +4364,7 @@ interface IUtils : IDispatch{
 		[in]SAFEARRAY(double) LowerBounds, [in]SAFEARRAY(double) UpperBounds, 
 		[in]SAFEARRAY(double) NewValues, [in]BSTR gdalOutputFormat, [in]ICallback* cBack, [out, retval]VARIANT_BOOL* retVal);
 	[id(53)] HRESULT IsTiffGrid([in] BSTR Filename, [out, retval] VARIANT_BOOL* retVal);
+	[id(54)] HRESULT GeodesicArea([in] IShape* shapeWgs84, [out, retval] DOUBLE* retVal);
 };
 
 /****************************  Vector Interface ***********************/

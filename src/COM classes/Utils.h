@@ -175,6 +175,7 @@ public:
 		SAFEARRAY* UpperBounds, SAFEARRAY* NewValues, 
 		BSTR gdalOutputFormat, ICallback* cBack, VARIANT_BOOL* retVal);
 	STDMETHOD(IsTiffGrid)(BSTR Filename, VARIANT_BOOL* retVal);
+	STDMETHOD(GeodesicArea)(IShape* shapeWgs84, DOUBLE* retVal);
 
 private:
 	struct RasterPoint
@@ -294,6 +295,7 @@ private:
 
 public:
 	HRESULT TileProjectionToGeoProjectionCore(tkTileProjection projection, VARIANT_BOOL useCache, IGeoProjection** retVal);
+	
 };
 
 double CalcPolyGeodesicArea(std::vector<Point2D>& points);
