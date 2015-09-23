@@ -8,7 +8,10 @@ int CPL_STDCALL GDALProgressCallback(double dfComplete, const char* pszMessage, 
 {
 	CallbackParams* params = (CallbackParams*)pData;
 
-	if (params != NULL && params->cBack != NULL)
+	// No need to check the presence of local callback, 
+	// global application callback can be used as a fallback.
+	// There is no need to pass it as a parameter from each method.
+	if (params != NULL)
 	{
 		long percent = long(dfComplete * 100.0);
 		CallbackHelper::Progress(params->cBack, percent, params->sMsg);
