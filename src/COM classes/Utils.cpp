@@ -3844,6 +3844,17 @@ bool GridStatsForPoly(IGrid* grid, IGridHeader* header, IShape* poly, Extent& bo
 	long minRow = MIN(firstRow, lastRow);
 	long maxRow = MAX(firstRow, lastRow);
 
+	long gridRowCount;
+	header->get_NumberRows(&gridRowCount);
+
+	// Bounds returned by grid->get_Extents call return borders of outer most pixels,
+	// one of which because of rounding may be shifted to one pixel.
+	// So let's make sure that we are inside bounds.
+	// Another way to fix it is to return extents defined by centers of outer most pixels,
+	// which will eliminate possible rounding problems.
+	minRow = MAX(minRow, 0);
+	maxRow = MIN(maxRow, gridRowCount);
+
 	int cmnCount = lastCol - firstCol + 1;
 	int rowCount = maxRow - minRow + 1;
 
@@ -3852,9 +3863,6 @@ bool GridStatsForPoly(IGrid* grid, IGridHeader* header, IShape* poly, Extent& bo
 	header->get_dY(&dy);
 	header->get_XllCenter(&xll);
 	header->get_YllCenter(&yll);
-
-	long gridRowCount;
-	header->get_NumberRows(&gridRowCount);
 
 	double yllWindow = yll + ((gridRowCount - 1) - maxRow) * dy;
 	double xllWindow = xll + firstCol * dx;
@@ -4102,9 +4110,17 @@ STDMETHODIMP CUtils::GridStatisticsToShapefile(IGrid* grid,  IShapefile* sf, VAR
 				long firstCol, firstRow, lastCol, lastRow;
 				grid->ProjToCell(xMin, yMin, &firstCol, &firstRow);
 				grid->ProjToCell(xMax, yMax, &lastCol, &lastRow);
-				
+
 				long minRow = MIN(firstRow, lastRow);
 				long maxRow = MAX(firstRow, lastRow);
+
+				// Bounds returned by grid->get_Extents call return borders of outer most pixels,
+				// one of which because of rounding may be shifted to one pixel.
+				// So let's make sure that we are inside bounds.
+				// Another way to fix it is to return extents defined by centers of outer most pixels,
+				// which will eliminate possible rounding problems.
+				minRow = MAX(minRow, 0);
+				maxRow = MIN(maxRow, gridRowCount);
 
 				int cmnCount = lastCol - firstCol + 1;
 				int rowCount = maxRow - minRow + 1;
