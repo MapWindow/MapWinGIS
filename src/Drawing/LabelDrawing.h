@@ -58,4 +58,7 @@ private:
 	inline UINT AlignmentToGDI(tkLabelAlignment alignment);
 	inline void AlignmentToGDIPlus(tkLabelAlignment alignment, Gdiplus::StringFormat& format);
 	void CalcRotation(CLabelInfo* lbl, double& angle);
+	CFont* CreateGdiFont(CLabelOptions* options, long fontSize, double scaleFactor);
+	Gdiplus::Font* CreateGdiPlusFont(CLabelOptions* options, double fontSize, double scaleFactor);
+	void* CreateLabelFont(bool gdiPlus, CLabelOptions* options, long fontSize, double scaleFactor);
 };

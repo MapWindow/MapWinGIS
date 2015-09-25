@@ -1261,8 +1261,8 @@ void CMapView::DoPanning(CPoint point)
 	double xAmount = (_dragging.Start.x - _dragging.Move.x) * _inversePixelPerProjectionX;
 	double yAmount = (_dragging.Move.y - _dragging.Start.y) * _inversePixelPerProjectionY;
 
-	Debug::WriteWithTime(Debug::Format("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y), DebugPanning);
-	Debug::WriteWithTime(Debug::Format("Clicked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top), DebugPanning);
+	/*Debug::WriteWithTime(Debug::Format("Panning amount: x=%d; y=%d", _dragging.Start.x - _dragging.Move.x, _dragging.Move.y - _dragging.Start.y), DebugPanning);
+	Debug::WriteWithTime(Debug::Format("Clicked down extents: %f %f %f %f", _clickDownExtents.left, _clickDownExtents.right, _clickDownExtents.bottom, _clickDownExtents.top), DebugPanning);*/
 
 	_extents.left = _clickDownExtents.left + xAmount;
 	_extents.right = _clickDownExtents.right + xAmount;

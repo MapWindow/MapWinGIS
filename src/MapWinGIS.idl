@@ -4965,6 +4965,17 @@ interface ILabels : IDispatch{
 	[propget, id(98)] HRESULT FloatNumberFormat([out, retval] BSTR* pVal);
 	[propput, id(98)] HRESULT FloatNumberFormat([in] BSTR newVal);
 	[id(99)] HRESULT ForceRecalculateExpression();
+	[propget, id(100)] HRESULT SortField([out, retval] BSTR* pVal);
+	[propput, id(100)] HRESULT SortField([in] BSTR newVal);
+	[propget, id(101)] HRESULT SizeField([out, retval] BSTR* pVal);
+	[propput, id(101)] HRESULT SizeField([in] BSTR newVal);
+	[propget, id(102)] HRESULT SortAscending([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(102)] HRESULT SortAscending([in] VARIANT_BOOL newVal);
+	[propget, id(103)] HRESULT FontSize2([out, retval] LONG* pVal);
+	[propput, id(103)] HRESULT FontSize2([in] LONG newVal);
+	[id(104)] HRESULT UpdateSorting();
+	[propget, id(105)] HRESULT UseVariableSize([out, retval] VARIANT_BOOL* pVal);
+	[propput, id(105)] HRESULT UseVariableSize([in] VARIANT_BOOL newVal);
 };
 
 // *******************************  LabelCategory Interface  *****************************
@@ -5086,6 +5097,8 @@ interface ILabelCategory : IDispatch{
 
 	[id(44), helpstring("property Serialize")] HRESULT Serialize([out, retval]BSTR* retVal);
 	[id(45), helpstring("property Deserialize")] HRESULT Deserialize([in]BSTR newVal);
+	[propget, id(46)] HRESULT FontSize2([out, retval] LONG* pVal);
+	[propput, id(46)] HRESULT FontSize2([in] LONG newVal);
 };
 
 // **************************  ShapefileCategories Interface  *****************************/

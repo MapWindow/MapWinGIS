@@ -46,6 +46,7 @@ public:
 		USES_CONVERSION;
 		fontName = A2BSTR("Arial");
 		fontSize = 10;
+		fontSize2 = 10;
 		fontStyle = fstRegular;
 		fontColor = 0;
 		fontColor2 = 0;
@@ -103,6 +104,7 @@ public:
 		fontName = SysAllocString(lbl.fontName);
 
 		fontSize = lbl.fontSize;
+		fontSize2 = lbl.fontSize2;
 		fontStyle = lbl.fontStyle;
 		fontColor = lbl.fontColor;
 		fontColor2 = lbl.fontColor2;
@@ -149,6 +151,7 @@ public:
 	// font
 	BSTR fontName;
 	int fontSize;
+	int fontSize2;
 	long fontStyle;
 	OLE_COLOR fontColor;
 	OLE_COLOR fontColor2;
@@ -195,6 +198,7 @@ struct CLabelInfo
 public:
 	CLabelInfo()
 	{
+		fontSize = 0;
 		visible	= true;
 		x = y = 0.0;
 		rotation = 0.0;
@@ -221,5 +225,6 @@ public:
 	CString text;
 	long category;
 	VARIANT_BOOL isDrawn;
+	short fontSize;
 };
 

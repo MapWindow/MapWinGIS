@@ -3523,4 +3523,89 @@ void CTableClass::RemoveTempFiles()
 	_tempFiles.clear();
 }
 
+// ********************************************************
+//     GetSorting()
+// ********************************************************
+bool CTableClass::GetSorting(long fieldIndex, vector<long>& indices)
+{
+	if (fieldIndex < 0 || fieldIndex >= (long)_fields.size())
+	{
+		CallbackHelper::ErrorMsg("Invalid field index for sorting");
+		return false;
+	}
+	
+	multimap <CComVariant, long> map;
+	CComVariant val;
+
+	long percent = 0;
+	for (size_t i = 0; i < _rows.size(); i++)
+	{
+		this->get_CellValue(fieldIndex, i, &val);
+		pair<CComVariant, long> myPair(val, (long)i);
+		map.insert(myPair);
+	}
+
+	multimap <CComVariant, long>::iterator p;
+	p = map.begin();
+
+	indices.clear();
+	indices.reserve(map.size());
+
+	while (p != map.end())
+	{
+		indices.push_back(p->second);
+		++p;
+	}
+
+	return true;
+}
+
+// ********************************************************
+//     GetRelativeValues()
+// ********************************************************
+bool CTableClass::GetRelativeValues(long fieldIndex, vector<double>& values)
+{
+	values.clear();
+	
+	if (fieldIndex < 0 || fieldIndex >= (long)_fields.size())
+	{
+		CallbackHelper::ErrorMsg("Invalid field index for sorting.");
+		return false;
+	}
+
+	IField* fld = _fields[fieldIndex]->field;
+	FieldType fldType;
+	fld->get_Type(&fldType);
+
+	if (fldType != DOUBLE_FIELD && fldType != INTEGER_FIELD) {
+		CallbackHelper::ErrorMsg("Invalid field type for sorting.");
+		return false;
+	}
+
+	CComVariant min, max;
+	get_MinValue(fieldIndex, &min);
+	get_MaxValue(fieldIndex, &max);
+	
+	double dmin, dmax;
+	dVal(min, dmin);
+	dVal(max, dmax);
+
+	CComVariant value;
+	double dval;
+
+	values.reserve(_rows.size());
+
+	for (size_t i = 0; i < _rows.size(); i++)
+	{
+		get_CellValue(fieldIndex, (long)i, &value);
+		dVal(value, dval);
+
+		values.push_back((dval - dmin) / (dmax - dmin));
+	}
+
+	return true;
+}
+
+
+
 

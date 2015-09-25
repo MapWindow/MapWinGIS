@@ -1152,9 +1152,9 @@ bool CLabels::LabelsSynchronized()
 	
 	long numShapes;
 	_shapefile->get_NumShapes(&numShapes);
-	if (numShapes != (long)_labels.size())	return false;
-	return true;
+	return numShapes == (long)_labels.size();
 }
+
 // *****************************************************************
 //			OptionsAsCategory()
 // *****************************************************************
@@ -1162,18 +1162,8 @@ STDMETHODIMP CLabels::get_Options(ILabelCategory** retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	
-		/**retVal = NULL;
-		ILabelCategory* cat = NULL;
-		CoCreateInstance( CLSID_LabelCategory, NULL, CLSCTX_INPROC_SERVER, IID_ILabelCategory, (void**)&cat);
-		if (cat == NULL) return S_OK;
-
-		((CLabelCategory*)cat)->put_LabelOptions(&_options);
-
-		CComBSTR bstr("Default");
-		cat->put_Name(bstr);
-		*retVal = cat;*/
-
 	*retVal = _category;
+
 	if (_category)
 		_category->AddRef();
 
@@ -1470,6 +1460,21 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	if (_floatNumberFormat != m_globalSettings.floatNumberFormat)
 		Utility::CPLCreateXMLAttributeAndValue(psTree, "FloatNumberFormat", _floatNumberFormat);
 
+	str = OLE2CA(_sortField);
+	if (str != "")
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SortField", str);
+
+	str = OLE2CA(_sizeField);
+	if (str != "")
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SizeField", str);
+
+	if (_sortAscending != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "SortAscending", CPLString().Printf("%d", (int)_sortAscending));
+
+	if (_useVariableSize != VARIANT_FALSE)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "UseVariableSize", CPLString().Printf("%d", (int)_useVariableSize));
+	
+
 	return psTree;
 }
 
@@ -1658,6 +1663,20 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 	s = CPLGetXMLValue(node, "FloatNumberFormat", NULL);
 	CComBSTR bstrFormat(s);
 	put_FloatNumberFormat(bstrFormat);
+
+	s = CPLGetXMLValue(node, "SortField", NULL);
+	CComBSTR bstrSortField = A2W(s);
+	this->put_SortField(bstrSortField);
+
+	s = CPLGetXMLValue(node, "SizeField", NULL);
+	CComBSTR bstrSizeField = A2W(s);
+	this->put_SizeField(bstrSizeField);
+
+	s = CPLGetXMLValue(node, "SortAscending", NULL);
+	_sortAscending = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+
+	s = CPLGetXMLValue(node, "UseVariableSize", NULL);
+	_useVariableSize = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
 
 	// applying the expressions
 	if (_categories.size() > 0)
@@ -1879,6 +1898,9 @@ void CLabels::LoadLblOptions(CPLXMLNode* node)
 
 		s = CPLGetXMLValue( node, "Size", NULL );
 		if (s != "") _options->fontSize = (int)Utility::atof_custom(s);
+
+		s = CPLGetXMLValue(node, "Size2", NULL);
+		if (s != "") _options->fontSize2 = (int)Utility::atof_custom(s);
 
 		s = CPLGetXMLValue( node, "Color", NULL );
 		if (s != "") _options->fontColor = (OLE_COLOR)(atoi(s) + pow(2.0, 24.0));
@@ -2581,7 +2603,7 @@ STDMETHODIMP CLabels::put_FloatNumberFormat(BSTR newVal)
 }
 
 // *************************************************************
-//		ReapplyExpression()
+//		ForceRecalculateExpression()
 // *************************************************************
 STDMETHODIMP CLabels::ForceRecalculateExpression()
 {
@@ -2591,3 +2613,262 @@ STDMETHODIMP CLabels::ForceRecalculateExpression()
 	put_Expression(expr);
 	return S_OK;
 }
+
+// *************************************************************
+//		SortField()
+// *************************************************************
+STDMETHODIMP CLabels::get_SortField(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_sortField);
+
+	return S_OK;
+}
+STDMETHODIMP CLabels::put_SortField(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	::SysFreeString(_sortField);
+	USES_CONVERSION;
+	_sortField = OLE2BSTR(newVal);
+	_sortingChanged = true;
+	_fontSizeChanged = true;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		SizeField()
+// *************************************************************
+STDMETHODIMP CLabels::get_SizeField(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_sizeField);
+
+	return S_OK;
+}
+STDMETHODIMP CLabels::put_SizeField(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	::SysFreeString(_sizeField);
+	USES_CONVERSION;
+	_sizeField = OLE2BSTR(newVal);
+	
+
+	return S_OK;
+}
+
+// *************************************************************
+//		SortAscending()
+// *************************************************************
+STDMETHODIMP CLabels::get_SortAscending(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _sortAscending;
+
+	return S_OK;
+}
+STDMETHODIMP CLabels::put_SortAscending(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_sortAscending = newVal;
+	_sortingChanged = true;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		FontSize()
+// *************************************************************
+STDMETHODIMP CLabels::get_FontSize(LONG* retval)							
+{ 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*retval = _options->fontSize;			
+	return S_OK; 
+}
+STDMETHODIMP CLabels::put_FontSize(LONG newVal)							
+{ 
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	_options->fontSize = newVal;			
+
+	if (_options->fontSize > MAX_LABEL_SIZE) {
+		_options->fontSize = MAX_LABEL_SIZE;
+	}
+
+	return S_OK; 
+}
+
+// *************************************************************
+//		FontSize2()
+// *************************************************************
+STDMETHODIMP CLabels::get_FontSize2(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _options->fontSize2;
+
+	return S_OK;
+}
+STDMETHODIMP CLabels::put_FontSize2(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_options->fontSize2 = newVal;
+
+	if (_options->fontSize2 > MAX_LABEL_SIZE) {
+		_options->fontSize2 = MAX_LABEL_SIZE;
+	}
+
+	return S_OK;
+}
+
+// *************************************************************
+//		UpdateSorting()
+// *************************************************************
+STDMETHODIMP CLabels::UpdateSorting()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// this will trigger rereading of the table on next redraw
+	_sortingChanged = true;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		UseVariableSize()
+// *************************************************************
+STDMETHODIMP CLabels::get_UseVariableSize(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _useVariableSize;
+
+	return S_OK;
+}
+STDMETHODIMP CLabels::put_UseVariableSize(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_useVariableSize = newVal;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		GetSorting()
+// *************************************************************
+bool CLabels::GetSorting(vector<long>** indices)
+{
+	*indices = NULL;
+
+	if (!_shapefile) {
+		return false;
+	}
+
+	if (!_sortingChanged) {
+		*indices = &_sorting;
+		return true;
+	}
+
+	long fieldIndex;
+	_shapefile->get_FieldIndexByName(_sortField, &fieldIndex);
+
+	if (fieldIndex == -1) {
+		return false;
+	}
+
+	CComPtr<ITable> tbl;
+	_shapefile->get_Table(&tbl);
+	if (!tbl) {
+		return false;
+	}
+
+	_sortingChanged = false;
+
+	if (TableHelper::Cast(tbl)->GetSorting(fieldIndex, _sorting))
+	{
+		if (!_sortAscending)
+		{
+			std::reverse(_sorting.begin(), _sorting.end());
+		}
+
+		*indices = &_sorting;
+		return true;
+	}
+	else {
+		CallbackHelper::ErrorMsg("Failed to sort labels");
+	}
+
+	return false;
+}
+
+// *************************************************************
+//		UpdateFontSize()
+// *************************************************************
+bool CLabels::UpdateFontSize()
+{
+	if (!_fontSizeChanged && LabelsSynchronized()) {
+		return true;
+	}
+
+	if (!_shapefile) {
+		return false;
+	}
+
+	// TODO: restore
+	if (/*!_useVariableSize || */ _options->fontSize == _options->fontSize2) {
+		return false;
+	}	
+
+	long fieldIndex;
+	_shapefile->get_FieldIndexByName(_sortField, &fieldIndex);
+
+	if (fieldIndex == -1) {
+		return false;
+	}
+
+	if (!LabelsSynchronized()) {
+		return false;
+	}
+
+	CComPtr<ITable> tbl = NULL;
+	_shapefile->get_Table(&tbl);
+
+	vector<double> values;
+	if (!TableHelper::Cast(tbl)->GetRelativeValues(fieldIndex, values)) {
+		return false;
+	}
+
+	if (values.size() != _labels.size()) {
+		return false;
+	}
+
+	double delta = _options->fontSize2 - _options->fontSize;
+	
+	if (_options->fontSize > MAX_LABEL_SIZE) _options->fontSize = MAX_LABEL_SIZE;
+	if (_options->fontSize2 > MAX_LABEL_SIZE) _options->fontSize2 = MAX_LABEL_SIZE;
+
+	for (size_t i = 0; i < _labels.size(); i++)
+	{
+		for (size_t j = 0; j < _labels[i]->size(); j++) 
+		{
+			CLabelInfo* info = (*_labels[i])[j];
+			info->fontSize = Utility::Rint(_options->fontSize + values[i] * delta);
+		}
+	}
+
+	_fontSizeChanged = false;	
+
+	return true;
+}
+
+
+

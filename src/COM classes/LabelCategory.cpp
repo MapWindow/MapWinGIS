@@ -302,3 +302,22 @@ void CLabelCategory::DeserializeFromNode(CPLXMLNode* node)
 	if (s != "") _enabled = (VARIANT_BOOL)atoi(s.GetString());
 }
 
+// ********************************************************
+//     FontSize2()
+// ********************************************************
+STDMETHODIMP CLabelCategory::get_FontSize2(LONG* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _options.fontSize2;
+
+	return S_OK;
+}
+STDMETHODIMP CLabelCategory::put_FontSize2(LONG newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_options.fontSize2 = newVal;
+
+	return S_OK;
+}

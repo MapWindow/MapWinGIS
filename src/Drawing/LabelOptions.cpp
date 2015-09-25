@@ -70,6 +70,9 @@ void CLabelOptions::DeserializeFromNode(CPLXMLNode* node)
 		s = CPLGetXMLValue( node, "FontSize", NULL );
 		if (s != "") this->fontSize = atoi(s.GetString());
 
+		s = CPLGetXMLValue(node, "FontSize2", NULL);
+		if (s != "") this->fontSize2 = atoi(s.GetString());
+
 		s = CPLGetXMLValue( node, "FontStyle", NULL );
 		if (s != "") this->fontStyle = atoi(s.GetString());
 
@@ -194,6 +197,9 @@ CPLXMLNode* CLabelOptions::SerializeToTree(CString elementName )
 	
 	if (opt->fontSize != this->fontSize)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "FontSize", CPLString().Printf("%d", this->fontSize ));
+
+	if (opt->fontSize2 != this->fontSize2)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "FontSize2", CPLString().Printf("%d", this->fontSize2));
 	
 	if (opt->fontStyle != this->fontStyle)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "FontStyle", CPLString().Printf("%d", this->fontStyle ));

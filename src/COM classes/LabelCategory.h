@@ -214,6 +214,8 @@ public:
 	STDMETHOD(Serialize)(BSTR* retVal);
 	STDMETHOD(Deserialize)(BSTR newVal);
 
+	STDMETHOD(get_FontSize2)(LONG* pVal);
+	STDMETHOD(put_FontSize2)(LONG newVal);
 private:
 	BSTR _name;
 	BSTR _expression;
@@ -229,6 +231,7 @@ public:
 	CComVariant m_value;
 	void DeserializeFromNode(CPLXMLNode* node);
 	CPLXMLNode* SerializeCore(CString ElementName);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(LabelCategory), CLabelCategory)

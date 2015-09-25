@@ -41,12 +41,18 @@ public:
 	CLabels()
 	{
 		_pUnkMarshaler = NULL;
+		_sortAscending = VARIANT_FALSE;
+		_useVariableSize = VARIANT_FALSE;
+		_sortingChanged = true;
+		_fontSizeChanged = true;
 		_floatNumberFormat = m_globalSettings.floatNumberFormat;
 		_shapefile = NULL;
 		_synchronized = VARIANT_FALSE;
 		USES_CONVERSION;
 		_key = SysAllocString(L"");
 		_expression = SysAllocString(L"");
+		_sortField = SysAllocString(L"");
+		_sizeField = SysAllocString(L"");
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_scale = false;
@@ -82,8 +88,11 @@ public:
 	{
 		Clear();
 		ClearCategories();
+
 		::SysFreeString(_key);
 		::SysFreeString(_expression);
+		::SysFreeString(_sortField);
+		::SysFreeString(_sizeField);
 
 		if (_category) {
 			_category->Release();
@@ -224,8 +233,8 @@ public:
 	// font
 	STDMETHOD(get_FontName)(BSTR* retval);
 	STDMETHOD(put_FontName)(BSTR newVal);
-	STDMETHOD(get_FontSize)(LONG* retval)							{*retval = _options->fontSize;			return S_OK;};
-	STDMETHOD(put_FontSize)(LONG newVal)							{_options->fontSize = newVal;			return S_OK;};
+	STDMETHOD(get_FontSize)(LONG* retval);
+	STDMETHOD(put_FontSize)(LONG newVal);
 	
 	STDMETHOD(get_FontItalic)(VARIANT_BOOL* retval);
 	STDMETHOD(put_FontItalic)(VARIANT_BOOL newVal);
@@ -365,6 +374,19 @@ public:
 
 	STDMETHOD(ForceRecalculateExpression)();
 
+	STDMETHOD(get_SortField)(BSTR* pVal);
+	STDMETHOD(put_SortField)(BSTR newVal);
+	STDMETHOD(get_SizeField)(BSTR* pVal);
+	STDMETHOD(put_SizeField)(BSTR newVal);
+	STDMETHOD(get_SortAscending)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_SortAscending)(VARIANT_BOOL newVal);
+	STDMETHOD(get_FontSize2)(LONG* pVal);
+	STDMETHOD(put_FontSize2)(LONG newVal);
+	
+	STDMETHOD(UpdateSorting)();
+	STDMETHOD(get_UseVariableSize)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_UseVariableSize)(VARIANT_BOOL newVal);
+
 private:
 	int _sourceField;
 
@@ -381,6 +403,13 @@ private:
 	
 	// visibility expression
 	BSTR _expression;
+	
+	BSTR _sizeField;
+	BSTR _sortField;
+	VARIANT_BOOL _sortAscending;
+
+	bool _sortingChanged;
+	bool _fontSizeChanged;
 
 	long _classificationField;
 
@@ -389,6 +418,8 @@ private:
 	// inner vector for a given index should exist even if there are no actual labels (parts) in it
 	std::vector<std::vector<CLabelInfo*>*> _labels;
 	std::vector<ILabelCategory*> _categories;
+	
+	std::vector<long> _sorting;    // indices of labels
 
 	ILabelCategory* _category;
 	CLabelOptions* _options;
@@ -411,6 +442,7 @@ private:
 	VARIANT_BOOL _useWidthLimits;
 	VARIANT_BOOL _removeDuplicates;
 	VARIANT_BOOL _gdiPlus;
+	VARIANT_BOOL _useVariableSize;
 
 	tkTextRenderingHint _textRenderingHint;
 	VARIANT_BOOL _synchronized;
@@ -444,6 +476,9 @@ public:
 	void AddEmptyLabel();
 
 	void LoadLblOptions(CPLXMLNode* node);
+
+	bool GetSorting(vector<long>** indices);
+	bool UpdateFontSize();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

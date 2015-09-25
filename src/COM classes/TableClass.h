@@ -245,6 +245,8 @@ public:
 	void MarkFieldsAsUnchanged();
 	void InjectShapefile(IShapefile* sf) { _shapefile = sf;	}
 	IShapefile* GetParentShapefile() { return _shapefile; }
+	bool GetSorting(long fieldIndex, vector<long>& indices);
+	bool GetRelativeValues(long fieldIndex, vector<double>& values);
 
 public:
 	BEGIN_CONNECTION_POINT_MAP(CTableClass)

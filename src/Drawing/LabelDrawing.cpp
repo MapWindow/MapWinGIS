@@ -74,6 +74,79 @@ CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollis
 }
 
 // *********************************************************************
+// 					CreateFont()										
+// *********************************************************************
+CFont* CLabelDrawer::CreateGdiFont(CLabelOptions* options, long fontSize, double scaleFactor) 
+{
+	CFont* fnt = new CFont();
+
+	CString s(options->fontName);
+	fnt->CreatePointFont(fontSize * 10, s);
+
+	LOGFONT lf;
+	fnt->GetLogFont(&lf);
+
+	if (scaleFactor != 1.0)
+	{
+		lf.lfWidth = long((double)lf.lfWidth * scaleFactor);
+		lf.lfHeight = long((double)lf.lfHeight * scaleFactor);
+	}
+	if (abs(lf.lfHeight) < 4)	// changed 1 to 4; there is no way to read labels smaller than 4, but they slow down the performance
+	{
+		fnt->DeleteObject();
+		delete fnt;
+		return NULL;
+	}
+
+	lf.lfItalic = options->fontStyle & fstItalic;
+	lf.lfUnderline = options->fontStyle & fstUnderline;
+	lf.lfStrikeOut = options->fontStyle & fstStrikeout;
+	lf.lfWeight = options->fontStyle & fstBold ? FW_BOLD : 0;
+
+	fnt->DeleteObject();
+	fnt->CreateFontIndirectA(&lf);
+
+	return fnt;
+}
+
+// *********************************************************************
+// 					CreateGdiPlusFont()										
+// *********************************************************************
+Gdiplus::Font* CLabelDrawer::CreateGdiPlusFont(CLabelOptions* options, double fontSize, double scaleFactor)
+{
+	CStringW fontName = OLE2W(options->fontName);
+
+	if (scaleFactor != 1.0) {
+		fontSize = fontSize * scaleFactor;
+	}
+	
+	if (fontSize < 4)  {
+		return NULL;
+	}
+
+	int style = FontStyleRegular;
+	if (options->fontStyle & fstItalic) style = style | FontStyleItalic;
+	if (options->fontStyle & fstBold) style = style | FontStyleBold;
+	if (options->fontStyle & fstStrikeout) style = style | FontStyleStrikeout;
+	if (options->fontStyle & fstUnderline) style = style | FontStyleUnderline;
+
+	return new Gdiplus::Font(fontName, (Gdiplus::REAL)fontSize, style);
+}
+
+// *********************************************************************
+// 					CreateLabelFont()										
+// *********************************************************************
+void* CLabelDrawer::CreateLabelFont(bool gdiPlus, CLabelOptions* options, long fontSize, double scaleFactor)
+{
+	if (gdiPlus) {
+		return CreateGdiPlusFont(options, fontSize, scaleFactor);
+	}
+	else {
+		return CreateGdiFont(options, fontSize, scaleFactor);
+	}
+}
+
+// *********************************************************************
 // 					DrawLabels()										
 // *********************************************************************
 void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
@@ -115,7 +188,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	VARIANT_BOOL bScale;
 	double scaleFactor = 1.0;
 	LabelsClass->get_ScaleLabels(&bScale);
-	if (bScale && _spatiallyReferenced)		// lsu: I see no reason to scale screen referenced labels
+	if (bScale && _spatiallyReferenced)
 	{	
 		double scale = _currentScale;
 		if (scale == 0)
@@ -140,8 +213,9 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	long numCategories;
 	LabelsClass->get_NumCategories(&numCategories);
 
-	VARIANT_BOOL useGdiPlus;
+	VARIANT_BOOL useGdiPlus = VARIANT_FALSE;
 	LabelsClass->get_UseGdiPlus(&useGdiPlus);
+	useGdiPlus = VARIANT_TRUE;
 	
 	if (!useGdiPlus)
 	{
@@ -174,7 +248,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	// ------------------------------------------------------------
 	//		GDI objects
 	// ------------------------------------------------------------
-	CFont fnt;
 	CPen penFontOutline;
 	CPen penHalo;
 	CPen penFrameOutline;
@@ -215,7 +288,6 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	Gdiplus::LinearGradientBrush* gpBrushFrameGrad = NULL;
 	
 	CStringW wText;
-	Font* gpFont = NULL;
 
 	RectF gpRect(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -227,7 +299,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	CComBSTR expr;
 	LabelsClass->get_VisibilityExpression(&expr);
 
-	std::vector<long> arrInit;
+	std::vector<long> filter;
 	CString err;
 	bool useAll = true;
 	
@@ -240,24 +312,12 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			sf->get_Table(&tbl);
 			
 			USES_CONVERSION;
-			if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), arrInit, err))
+			if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), filter, err))
 			{
 				useAll = false;
 			}
 		}			
 	}
-	
-	// in case there is no expression or it has syntax error, all the labels will be drawn
-	if (useAll)
-	{
-		for (long i = 0; i < numLabels; i++)
-		{
-			arrInit.push_back(i);
-		}
-	}
-	
-	// comparing with the visibility expression of the shapefile
-	std::vector<long> arr;
 	
 	IShapefile* sf = lbs->get_ParentShapefile();
 	
@@ -284,18 +344,20 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		shapeData = ((CShapefile*)sf)->get_ShapeVector();
 	}
 
+	std::vector<bool> visibilityMask(numLabels, false);
+
 	if (synchronized && sf)
 	{
 		long minSize;
 		LabelsClass->get_MinDrawingSize(&minSize);
-		
-		for (unsigned int i = 0; i < arrInit.size(); i++)
+		long size = useAll ? numLabels : (long)filter.size();
+
+		for (long i = 0; i < size; i++)
 		{
-			int index = arrInit[i];
-			if ((*shapeData)[index]->size >= minSize)
-			{
-				arr.push_back(index);
-			}
+			long index = useAll ? i : filter[i];
+			visibilityMask[index] = true; // (*shapeData)[index]->size >= minSize;
+
+			// TODO: restore
 		}
 	}
 	else
@@ -303,7 +365,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		// for images all the labels will do
 		for (int i = 0; i < numLabels; i++)
 		{
-			arr.push_back(i);
+			visibilityMask[i] = true;
 		}
 	}
 
@@ -339,11 +401,18 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		_graphics->SetTextContrast(0u);
 	}
 
-	// we'll start form the categories with the higher priority, therefore we'll start with the end of mmap
-	//for ( multimap<long, int>::reverse_iterator p = mmap.rbegin() ; p != mmap.rend(); p++)
+	// sort them if sort field is specified
+	vector<long>* indices = NULL;
+	lbs->GetSorting(&indices);
+	if (indices && indices->size() != numLabels) {
+		indices = NULL;
+	}
+
+	bool useVariableFontSize = lbs->UpdateFontSize();
+
+	// we'll start from the categories with the higher priority, therefore reverse order
 	for (int iCategory = numCategories - 1; iCategory >= -1; iCategory--)
 	{
-		LOGFONT lf;	
 		if (iCategory != -1)
 		{
 			// Drawing with category settings
@@ -365,59 +434,12 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		// skip the category if it is not visible		
 		if (!m_options->visible) continue;
 
-		// ---------------------------------------------------------------
-		//	 Standard or category settings
-		// ---------------------------------------------------------------
-		CString s(m_options->fontName);
-		fnt.CreatePointFont(m_options->fontSize * 10, s);
-		fnt.GetLogFont(&lf);
-		
-		if (bScale)
-		{
-			lf.lfWidth = long((double)lf.lfWidth * scaleFactor);
-			lf.lfHeight = long ((double)lf.lfHeight * scaleFactor);
-		}
-		if(abs(lf.lfHeight) < 4)	// changed 1 to 4; there is no way to read labels smaller than 4, but they slow down the performance
-		{
-			fnt.DeleteObject();
-			continue;
-		}
-		
 		if (!useGdiPlus)
 			_dc->SetTextColor(m_options->fontColor);
-
-		lf.lfItalic = m_options->fontStyle & fstItalic;
-		lf.lfUnderline = m_options->fontStyle & fstUnderline;
-		lf.lfStrikeOut = m_options->fontStyle & fstStrikeout;
-
-		if (m_options->fontStyle & fstBold) 
-		{
-			lf.lfWeight = FW_BOLD;
-		}
-		else
-		{
-			lf.lfWeight = 0;
-		}
-		
-		fnt.DeleteObject();
-		fnt.CreateFontIndirectA(&lf);
-		
-		HDC hdc = NULL;
-		if (useGdiPlus)
-		{
-			hdc = _graphics->GetHDC();
-			_dc = CDC::FromHandle(hdc);
-		}
-		
-		oldFont = _dc->SelectObject(&fnt);
 
 		// we create separate pens/brushes for each drawing method
 		if (useGdiPlus)
 		{
-			gpFont = new Gdiplus::Font(_dc->m_hDC);
-			_graphics->ReleaseHDC(hdc);
-			_dc = NULL;
-			
 			long alphaFont = (m_options->fontTransparency<<24);
 			long alphaFrame = (m_options->frameTransparency<<24);
 			
@@ -429,7 +451,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			gpPenFontOutline = new Pen(Color(alphaFont | BGR_TO_RGB(m_options->fontOutlineColor)), (Gdiplus::REAL)m_options->fontOutlineWidth);
 			gpPenFontOutline->SetLineJoin(Gdiplus::LineJoinRound);
 
-			double haloWidth = fabs(lf.lfHeight/16.0 * m_options->haloSize);
+			double haloWidth = fabs(m_options->fontSize/ 16.0 * m_options->haloSize);
 			gpPenHalo = new Pen(Color(alphaFont | BGR_TO_RGB(m_options->haloColor)), (Gdiplus::REAL)haloWidth);
 			gpPenHalo->SetLineJoin(Gdiplus::LineJoinRound);
 
@@ -466,7 +488,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			penFontOutline.CreatePen(PS_SOLID, m_options->fontOutlineWidth, m_options->fontOutlineColor);
 			penFrameOutline.CreatePen(m_options->frameOutlineStyle, m_options->frameOutlineWidth, m_options->frameOutlineColor);
 		
-			double haloWidth = fabs(lf.lfHeight/16.0 * m_options->haloSize);
+			double haloWidth = fabs(m_options->fontSize/ 16.0 * m_options->haloSize);
 			penHalo.CreatePen(PS_SOLID, (int)haloWidth, m_options->haloColor);
 
 			// we can select brush at once because it's the only one to use
@@ -475,14 +497,33 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			
 			gdiAlignment = AlignmentToGDI(m_options->inboxAlignment);
 		}
-		
-		// ---------------------------------------------------------------
-		//	 drawing of single labels
-		// ---------------------------------------------------------------
-		unsigned int size = arr.size();
-		for (unsigned int k = 0; k < size; k++ )
+
+		// each different font size must its own font instance
+		void* fonts[MAX_LABEL_SIZE + 1] = {};
+		CFont* font = NULL;
+		Gdiplus::Font* gpFont = NULL;
+
+		if (!useVariableFontSize) 
 		{
-			int i = arr[k];	// index of label
+			if (useGdiPlus) {
+				gpFont = CreateGdiPlusFont(m_options, m_options->fontSize, scaleFactor);
+			}
+			else {
+				font = CreateGdiFont(m_options, m_options->fontSize, scaleFactor);
+				oldFont = _dc->SelectObject(font);
+			}
+		}
+
+		// ---------------------------------------------------------------
+		//	 drawing labels within category
+		// ---------------------------------------------------------------
+		for (long k = 0; k < numLabels; k++ )
+		{
+			long i = indices ? (*indices)[k] : k;
+
+			if (!visibilityMask[i])	{
+				continue;
+			}
 
 			vector<CLabelInfo*>* parts = (*labels)[i];
 			for (int j =0; j < (int)parts->size(); j++ )
@@ -505,6 +546,34 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						continue;
 					else
 						uniqueValues.insert(lbl->text);
+				}
+
+				//Debug::WriteLine("%d: %s", k, lbl->text);
+
+				// -------------------------------------------------------
+				//	Choosing appropriate font
+				// -------------------------------------------------------
+				if (useVariableFontSize) 
+				{
+					void* fontPtr = NULL;
+					if (!fonts[lbl->fontSize]) {
+						fontPtr = CreateLabelFont(useGdiPlus, m_options, lbl->fontSize, scaleFactor);
+						fonts[lbl->fontSize] = fontPtr;
+					}
+					else {
+						fontPtr = fonts[lbl->fontSize];
+					}
+
+					if (useGdiPlus) {
+						gpFont = (Gdiplus::Font*)fontPtr;
+					}
+					else {
+						font = (CFont*)fontPtr;
+						CFont* tempFont = _dc->SelectObject(font);
+						if (!oldFont) {
+							oldFont = tempFont;
+						}
+					}
 				}
 
 				// -------------------------------------------------------
@@ -809,22 +878,46 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				}
 			}
 		} // label
-		
-		if (useGdiPlus)
-		{
-			HDC hdc = _graphics->GetHDC();
-			_dc = CDC::FromHandle(hdc);
+
+		// cleaning fonts
+		if (!useGdiPlus)  {
+			_dc->SelectObject(oldFont);
 		}
 
-		_dc->SelectObject(oldFont);
-		fnt.DeleteObject();
-
-		if (useGdiPlus)
+		if (useVariableFontSize) 
 		{
-			_graphics->ReleaseHDC(hdc);
-			_dc = NULL;
+			for (int i = 0; i <= MAX_LABEL_SIZE; i++) 
+			{
+				if (fonts[i]) {
+					if (!useGdiPlus) {
+						CFont * f = (CFont*)fonts[i];
+						f->DeleteObject();
+						delete f;
+					}
+					else {
+						Gdiplus::Font * f = (Gdiplus::Font*)fonts[i];
+						delete f;
+					}
+					
+					fonts[i] = NULL;
+				}
+			}
+		}
+		else {
+			if (font) {
+				font->DeleteObject();
+				delete font;
+				font = NULL;
+			}
+			
+			if (gpFont)
+			{
+				delete gpFont;
+				gpFont = NULL;
+			}
 		}
 
+		// cleaning objects
 		if (!useGdiPlus)
 		{
 			_dc->SelectObject(oldBrush);
@@ -835,16 +928,9 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		}
 		else
 		{
-			if (gpFont != NULL)
-			{
-				delete gpFont;
-				gpFont = NULL;
-			}
-
 			delete gpPenFontOutline;
 			delete gpPenHalo;
 			delete gpPenFrameOutline;
-			
 			delete gpBrushFont;
 			delete gpBrushFrame;
 			delete gpBrushShadow;
