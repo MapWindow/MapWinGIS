@@ -63,7 +63,7 @@ void CLabelDrawer::InitSettings(LabelSettings& settings, ILabels* labels, IShape
 
 	settings.hasRotation = lbs->HasRotation();
 
-	settings.useVariableFontSize = lbs->UpdateFontSize();
+	settings.useVariableFontSize = lbs->RecalculateFontSize();
 }
 
 // *********************************************************************
@@ -98,7 +98,9 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 
 	// sort them if sort field is specified
 	vector<long>* indices = NULL;
-	lbs->GetSorting(&indices);
+	if (sf) {
+		((CShapefile*)sf)->GetSorting(&indices);
+	}
 
 	if (indices && indices->size() != settings.numLabels) {
 		indices = NULL;
@@ -220,7 +222,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 					gdi.DrawLabel(options, lbl, rect, angleRad, piX, piY);
 				}
 				else {
-					gdiPlus.DrawLabel(options, rect, gdiPlus.text, piX, piY, angle);
+					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
 				}
 			}
 		} // label
@@ -532,11 +534,19 @@ bool CLabelDrawer::GetUseGdiPlus(ILabels* labels)
 	VARIANT_BOOL useGdiPlus = VARIANT_FALSE;
 	labels->get_UseGdiPlus(&useGdiPlus);
 
+	CLabelOptions* options = ((CLabels*)labels)->get_LabelOptions();
+
+	if (useGdiPlus && options->frameVisible) {
+		// GDI generally looks better, however it can't be used without frame / background
+		// since we are using transparent GDI+ buffer (GDI doesn't have alpha blending)
+		useGdiPlus = VARIANT_FALSE;		
+	}
+
 	if (!useGdiPlus)
 	{
-		// let's check whether it's possible to draw everything by GDI
-		CLabelOptions* options = ((CLabels*)labels)->get_LabelOptions();
-		if (options->fontGradientMode != gmNone || options->fontTransparency != 255 ||
+		// when there is some form of alpha blending is used, 
+		// we have to stick with GDI+
+		if ((options->fontGradientMode != gmNone || options->fontTransparency != 255) ||
 			((options->frameGradientMode != gmNone || options->frameTransparency != 255) && options->frameVisible))
 		{
 			useGdiPlus = true;

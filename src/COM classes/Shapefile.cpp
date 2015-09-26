@@ -33,6 +33,7 @@
 #include "LabelsHelper.h"
 #include "ShapeStyleHelper.h"
 #include "TableClass.h"
+#include "TableHelper.h"
 
 #ifdef _DEBUG
 	#define new DEBUG_NEW
@@ -43,6 +44,11 @@
 CShapefile::CShapefile()
 {	
 	_pUnkMarshaler = NULL;
+
+	_sortingChanged = true;
+	_sortAscending = VARIANT_FALSE;
+	_sortField = SysAllocString(L"");
+
 	_snappable = VARIANT_TRUE;
 	_interactiveEditing = VARIANT_FALSE;
 	_hotTracking = VARIANT_TRUE;
@@ -134,6 +140,7 @@ CShapefile::~CShapefile()
 	
 	::SysFreeString(_key);
 	::SysFreeString(_expression);
+	::SysFreeString(_sortField);
 
 	if (_selectDrawOpt != NULL)
 		_selectDrawOpt->Release();
@@ -2209,6 +2216,13 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 		if (_sourceType == sstInMemory)
 			Utility::CPLCreateXMLAttributeAndValue(psTree, "ShpType", CPLString().Printf("%d", (int)this->_shpfiletype));
 
+		s = OLE2CA(_sortField);
+		if (s != "")
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "SortField", s);
+
+		if (_sortAscending != VARIANT_FALSE)
+			Utility::CPLCreateXMLAttributeAndValue(psTree, "SortAscending", CPLString().Printf("%d", (int)_sortAscending));
+
 		// drawing options
 		CPLXMLNode* node = ((CShapeDrawingOptions*)_defaultDrawOpt)->SerializeCore("DefaultDrawingOptions");
 		if (node)
@@ -2371,6 +2385,14 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "MinDrawingSize", NULL );
 	_minDrawingSize = (s != "") ? atoi(s.GetString()) : 1;
+
+	s = CPLGetXMLValue(node, "SortField", NULL);
+	CComBSTR bstrSortField = A2W(s);
+	this->put_SortField(bstrSortField);
+
+	s = CPLGetXMLValue(node, "SortAscending", NULL);
+	VARIANT_BOOL sortAsc = (s != "") ? (VARIANT_BOOL)atoi(s.GetString()) : VARIANT_FALSE;
+	this->put_SortAscending(sortAsc);
 
 	if (_sourceType == sstInMemory)
 	{
@@ -3154,3 +3176,107 @@ void CShapefile::MarkUndrawn()
 		_shapeData[i]->wasRendered = false;
 }
 
+// *************************************************************
+//		SortField()
+// *************************************************************
+STDMETHODIMP CShapefile::get_SortField(BSTR* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	*pVal = OLE2BSTR(_sortField);
+
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_SortField(BSTR newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	::SysFreeString(_sortField);
+	USES_CONVERSION;
+	_sortField = OLE2BSTR(newVal);
+
+	_sortingChanged = true;
+
+	if (_labels) {
+		_labels->UpdateSizeField();
+	}
+
+	return S_OK;
+}
+
+// *************************************************************
+//		SortAscending()
+// *************************************************************
+STDMETHODIMP CShapefile::get_SortAscending(VARIANT_BOOL* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*pVal = _sortAscending;
+
+	return S_OK;
+}
+STDMETHODIMP CShapefile::put_SortAscending(VARIANT_BOOL newVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	_sortAscending = newVal;
+	_sortingChanged = true;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		UpdateSorting()
+// *************************************************************
+STDMETHODIMP CShapefile::UpdateSortField()
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	// this will trigger rereading of the table on next redraw
+	_sortingChanged = true;
+
+	return S_OK;
+}
+
+// *************************************************************
+//		GetSorting()
+// *************************************************************
+bool CShapefile::GetSorting(vector<long>** indices)
+{
+	*indices = NULL;
+
+	if (!_sortingChanged) {
+		*indices = &_sorting;
+		return true;
+	}
+
+	long fieldIndex;
+	get_FieldIndexByName(_sortField, &fieldIndex);
+
+	if (fieldIndex == -1) {
+		return false;
+	}
+
+	if (!_table) {
+		return false;
+	}
+
+	_sortingChanged = false;
+
+	if (((CTableClass*)_table)->GetSorting(fieldIndex, _sorting))
+	{
+		if (!_sortAscending)
+		{
+			std::reverse(_sorting.begin(), _sorting.end());
+		}
+
+		*indices = &_sorting;
+		return true;
+	}
+	else {
+		CallbackHelper::ErrorMsg("Failed to sort labels");
+	}
+
+	return false;
+}

@@ -245,7 +245,11 @@ public:
 	STDMETHOD(Move)(DOUBLE xProjOffset, DOUBLE yProjOffset, VARIANT_BOOL* retVal);
 	STDMETHOD(RemoveSpatialIndex)(VARIANT_BOOL* retVal);
 	STDMETHOD(get_ShapeRendered)(LONG ShapeIndex, VARIANT_BOOL* pVal);
-
+	STDMETHOD(get_SortField)(BSTR* pVal);
+	STDMETHOD(put_SortField)(BSTR newVal);
+	STDMETHOD(get_SortAscending)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_SortAscending)(VARIANT_BOOL newVal);
+	STDMETHOD(UpdateSortField)();
 private:
 
 	// data for point in shapefile test
@@ -352,6 +356,11 @@ private:
 	
 	bool _useValidationList;
 
+	BSTR _sortField;
+	VARIANT_BOOL _sortAscending;
+	bool _sortingChanged;
+	std::vector<long> _sorting;    // indices of labels
+
 private:
 	// memory shapes
 	BOOL ReleaseMemoryShapes();
@@ -452,5 +461,6 @@ public:
 	// drawing 
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
+	bool GetSorting(vector<long>** indices);
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

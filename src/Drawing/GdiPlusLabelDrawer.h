@@ -81,7 +81,7 @@ private:
 	}
 
 public:
-	void DrawLabel(CLabelOptions* options, CRect& r, CStringW wText, double piX, double piY, double angle);
+	void DrawLabel(CLabelOptions* options, CRect& r, double piX, double piY, double angle);
 
 	void InitFromCategory(CLabelOptions* m_options, bool hasRotation);
 

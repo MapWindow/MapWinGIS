@@ -103,7 +103,7 @@ void GdiPlusLabelDrawer::TryAutoSetRenderingHint(CLabelOptions* options, bool ha
 // *********************************************************************
 // 					DrawLabel()										
 // *********************************************************************
-void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, CStringW wText, double piX, double piY, double angle)
+void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX, double piY, double angle)
 {
 	rect.X = (Gdiplus::REAL)r.left;
 	rect.Y = (Gdiplus::REAL)r.top;
@@ -146,7 +146,7 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, CStringW wT
 			gp->StartFigure();
 			FontFamily fam;
 			font->GetFamily(&fam);
-			gp->AddString(wText, wText.GetLength(), &fam, font->GetStyle(), font->GetSize(), rect, &stringFormat);
+			gp->AddString(text, text.GetLength(), &fam, font->GetStyle(), font->GetSize(), rect, &stringFormat);
 			gp->CloseFigure();
 		}
 
@@ -170,12 +170,12 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, CStringW wT
 		if (options->fontGradientMode != gmNone)
 		{
 			_brushFontGrad = new LinearGradientBrush(rect, _clFont1, _clFont2, (LinearGradientMode)options->fontGradientMode);
-			_graphics->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, _brushFontGrad);	// TODO: we need speed test here to choose the function
+			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFontGrad);
 			delete _brushFontGrad;
 		}
 		else
 		{
-			_graphics->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, _brushFont);
+			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFont);
 		}
 		if (pathNeeded) {
 			delete gp;

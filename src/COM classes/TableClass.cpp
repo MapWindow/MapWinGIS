@@ -3563,7 +3563,7 @@ bool CTableClass::GetSorting(long fieldIndex, vector<long>& indices)
 // ********************************************************
 //     GetRelativeValues()
 // ********************************************************
-bool CTableClass::GetRelativeValues(long fieldIndex, vector<double>& values)
+bool CTableClass::GetRelativeValues(long fieldIndex, bool logScale, vector<double>& values)
 {
 	values.clear();
 	
@@ -3595,12 +3595,35 @@ bool CTableClass::GetRelativeValues(long fieldIndex, vector<double>& values)
 
 	values.reserve(_rows.size());
 
+	if (dmin == dmax)
+	{
+		for (size_t i = 0; i < _rows.size(); i++) {
+			values.push_back(0.0);
+		}
+		return true;
+	}
+
+	if (logScale) {
+		// if minimum is below 1.0, move it there;
+		// get rid of unused part of the scale for other values
+		dmax = dmin < 1.0 ? dmax + 1.0 - dmin : dmax / dmin;
+	}
+
+	double range = logScale ? log10(dmax) : dmax - dmin;
+
 	for (size_t i = 0; i < _rows.size(); i++)
 	{
 		get_CellValue(fieldIndex, (long)i, &value);
 		dVal(value, dval);
 
-		values.push_back((dval - dmin) / (dmax - dmin));
+		if (logScale) 
+		{
+			dval = dmin < 1.0 ? dval + 1.0 - dmin : dval / dmin;
+			values.push_back(log10(dval) / range);
+		}
+		else {
+			values.push_back((dval - dmin) / (dmax - dmin));
+		}
 	}
 
 	return true;

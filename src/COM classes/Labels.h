@@ -41,9 +41,9 @@ public:
 	CLabels()
 	{
 		_pUnkMarshaler = NULL;
-		_sortAscending = VARIANT_FALSE;
-		_useVariableSize = VARIANT_FALSE;
-		_sortingChanged = true;
+		
+		_useVariableSize = VARIANT_TRUE;
+		_logScaleForSize = VARIANT_FALSE;
 		_fontSizeChanged = true;
 		_floatNumberFormat = m_globalSettings.floatNumberFormat;
 		_shapefile = NULL;
@@ -51,8 +51,7 @@ public:
 		USES_CONVERSION;
 		_key = SysAllocString(L"");
 		_expression = SysAllocString(L"");
-		_sortField = SysAllocString(L"");
-		_sizeField = SysAllocString(L"");
+		
 		_globalCallback = NULL;
 		_lastErrorCode = tkNO_ERROR;
 		_scale = false;
@@ -91,8 +90,6 @@ public:
 
 		::SysFreeString(_key);
 		::SysFreeString(_expression);
-		::SysFreeString(_sortField);
-		::SysFreeString(_sizeField);
 
 		if (_category) {
 			_category->Release();
@@ -135,7 +132,6 @@ public:
 	STDMETHOD(put_GlobalCallback)(/*[in]*/ ICallback * newVal);
 	STDMETHOD(get_ErrorMsg)(/*[in]*/ long ErrorCode, /*[out, retval]*/ BSTR *pVal);
 	STDMETHOD(get_LastErrorCode)(/*[out, retval]*/ long *pVal);
-	
 	
 	STDMETHOD(AddLabel)(BSTR Text, double x, double y, double Rotation, long Category = -1);
 	STDMETHOD(InsertLabel)(long Index, BSTR Text, double x, double y, double Rotation, long Category, VARIANT_BOOL* retVal);
@@ -374,19 +370,14 @@ public:
 
 	STDMETHOD(ForceRecalculateExpression)();
 
-	STDMETHOD(get_SortField)(BSTR* pVal);
-	STDMETHOD(put_SortField)(BSTR newVal);
-	STDMETHOD(get_SizeField)(BSTR* pVal);
-	STDMETHOD(put_SizeField)(BSTR newVal);
-	STDMETHOD(get_SortAscending)(VARIANT_BOOL* pVal);
-	STDMETHOD(put_SortAscending)(VARIANT_BOOL newVal);
 	STDMETHOD(get_FontSize2)(LONG* pVal);
 	STDMETHOD(put_FontSize2)(LONG newVal);
-	
-	STDMETHOD(UpdateSorting)();
 	STDMETHOD(get_UseVariableSize)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_UseVariableSize)(VARIANT_BOOL newVal);
+	STDMETHOD(get_LogScaleForSize)(VARIANT_BOOL* pVal);
+	STDMETHOD(put_LogScaleForSize)(VARIANT_BOOL newVal);
 
+	STDMETHOD(UpdateSizeField)();
 private:
 	int _sourceField;
 
@@ -403,12 +394,7 @@ private:
 	
 	// visibility expression
 	BSTR _expression;
-	
-	BSTR _sizeField;
-	BSTR _sortField;
-	VARIANT_BOOL _sortAscending;
 
-	bool _sortingChanged;
 	bool _fontSizeChanged;
 
 	long _classificationField;
@@ -419,8 +405,6 @@ private:
 	std::vector<std::vector<CLabelInfo*>*> _labels;
 	std::vector<ILabelCategory*> _categories;
 	
-	std::vector<long> _sorting;    // indices of labels
-
 	ILabelCategory* _category;
 	CLabelOptions* _options;
 	
@@ -443,6 +427,7 @@ private:
 	VARIANT_BOOL _removeDuplicates;
 	VARIANT_BOOL _gdiPlus;
 	VARIANT_BOOL _useVariableSize;
+	VARIANT_BOOL _logScaleForSize;
 
 	tkTextRenderingHint _textRenderingHint;
 	VARIANT_BOOL _synchronized;
@@ -477,8 +462,7 @@ public:
 
 	void LoadLblOptions(CPLXMLNode* node);
 
-	bool GetSorting(vector<long>** indices);
-	bool UpdateFontSize();
+	bool RecalculateFontSize();
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

@@ -46,7 +46,7 @@ public:
 		USES_CONVERSION;
 		fontName = A2BSTR("Arial");
 		fontSize = 10;
-		fontSize2 = 10;
+		fontSize2 = 14;
 		fontStyle = fstRegular;
 		fontColor = 0;
 		fontColor2 = 0;
