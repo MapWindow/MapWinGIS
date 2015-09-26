@@ -31,38 +31,80 @@
 class CLabelDrawer: public CBaseDrawer
 {
 public:
-	// constructor for spatially referenced labels
-	CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, 
-										double currentScale, CCollisionList* collisionList, double mapRotation, bool printing);
+	// spatially referenced labels
+	CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, double currentScale,
+		CCollisionList* collisionList, double mapRotation, bool printing)
+	{
+		_currentScale = 0;
+		_printing = false;
+		_hdc = NULL;
+		_extents = extents;
+		_pixelPerProjectionX = pixelPerProjectionX;
+		_pixelPerProjectionY = pixelPerProjectionY;
+		_currentScale = currentScale;
+		_collisionList = collisionList;
+		_mapRotation = mapRotation;
+		_spatiallyReferenced = true;
+		_dc = NULL;
+		_graphics = graphics;
+		_printing = printing;
+	}
 
-	// constructor for screen referenced labels
-	CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollisionList* collisionList, double mapRotation);
+	// screen referenced labels
+	CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollisionList* collisionList, double mapRotation)
+	{
+		_currentScale = 0;
+		_printing = false;
+		_hdc = NULL;
+		_extents = extents;
+		_pixelPerProjectionX = 0.0;
+		_pixelPerProjectionY = 0.0;
+		_collisionList = collisionList;
+		_mapRotation = mapRotation;
+		_spatiallyReferenced = false;
+		_dc = NULL;
+		_graphics = graphics;
+	}
+
 	~CLabelDrawer(void){};
 
+private:
+	struct LabelSettings {
+		VARIANT_BOOL avoidCollisions;
+		VARIANT_BOOL removeDuplicates;
+		double scaleFactor;
+		long numCategories;
+		long buffer;
+		bool autoOffset;
+		bool hasRotation;
+		long numLabels;
+		bool useVariableFontSize;
+	};
+
 private:	
-	HDC m_hdc;
+	HDC _hdc;
 	double _currentScale;
 	double _mapRotation;
 	CCollisionList* _collisionList;
 	bool _spatiallyReferenced;
 	bool _printing;
-public:
-	void DrawLabels( ILabels* LabelsClass);
 	
 private:
-	inline void AlignRectangle(CRect& rect, tkLabelAlignment alignment);
+	void InitSettings(LabelSettings& settings, ILabels* labels, IShapefile* sf);
 	bool HaveCollision(CRotatedRectangle& rect);
 	bool HaveCollision(CRect& rect);
-	void DrawLabelFrameGdiPlus(Gdiplus::Graphics& graphics, Gdiplus::Brush* brush, Gdiplus::Pen& pen, Gdiplus::RectF& rect, CLabelOptions* m_options);
-	void DrawLabelFrameGdi(CDC* dc,  CRect* rect, CLabelOptions* m_options );
-	inline UINT AlignmentToGDI(tkLabelAlignment alignment);
-	inline void AlignmentToGDIPlus(tkLabelAlignment alignment, Gdiplus::StringFormat& format);
-	void CalcRotation(CLabelInfo* lbl, double& angle);
-	void* CreateLabelFont(bool gdiPlus, CLabelOptions* options, long fontSize, double scaleFactor);
-	void GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask);
+	CLabelOptions* GetCategoryOptions(ILabels* labels, int categoryIndex);
 	double GetScaleFactor(ILabels* labels);
+	void GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask);
 	bool CheckDynamicVisibility(ILabels* labels);
 	bool GetUseGdiPlus(ILabels* labels);
 	bool GetAutoOffset(ILabels* labels, IShapefile* sf);
 	bool GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<long>& filter);
+	void CalcScreenRectangle(CLabelOptions* options, CLabelInfo* lbl, bool autoOffset, int offset, CRect& rect, double& piX, double& piY);
+	bool TryAvoidCollisions(CLabelInfo* lbl, VARIANT_BOOL avoidCollisions, CRect& rect, double piX, double piY, long buffer, double angleRad);
+	bool CheckVisibility(ILabels* labels);
+
+public:
+	void DrawLabels(ILabels* LabelsClass);
+
 };

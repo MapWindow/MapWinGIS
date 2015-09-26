@@ -4,14 +4,15 @@
 using namespace Gdiplus;
 
 // *********************************************************************
-// 			InitializeGdiPlusGraphics()										
+// 			InitGraphics()										
 // *********************************************************************
-void GdiPlusLabelDrawer::InitializeGraphics(Gdiplus::Graphics* g, ILabels* labels)
+void GdiPlusLabelDrawer::InitGraphics(Gdiplus::Graphics* g, ILabels* labels)
 {
-	// saving initial state
-	compositingQuality = g->GetCompositingQuality();
-	smoothingMode = g->GetSmoothingMode();
-	textRenderingHint = g->GetTextRenderingHint();
+	_graphics = g;
+	
+	_compositingQuality = _graphics->GetCompositingQuality();
+	_smoothingMode = _graphics->GetSmoothingMode();
+	_textRenderingHint = _graphics->GetTextRenderingHint();
 
 	tkTextRenderingHint textRenderingHint;
 	labels->get_TextRenderingHint(&textRenderingHint);
@@ -19,53 +20,69 @@ void GdiPlusLabelDrawer::InitializeGraphics(Gdiplus::Graphics* g, ILabels* label
 	tkSmoothingMode smoothingMode = m_globalSettings.labelsSmoothingMode;
 	tkCompositingQuality compositingQuality = m_globalSettings.labelsCompositingQuality;
 
-	g->SetCompositingQuality((CompositingQuality)compositingQuality);
-	g->SetSmoothingMode((SmoothingMode)smoothingMode);
-	g->SetTextRenderingHint((TextRenderingHint)textRenderingHint);
-	g->SetTextContrast(0u);
+	_graphics->SetCompositingQuality((CompositingQuality)compositingQuality);
+	_graphics->SetSmoothingMode((SmoothingMode)smoothingMode);
+	_graphics->SetTextRenderingHint((TextRenderingHint)textRenderingHint);
+	_graphics->SetTextContrast(0u);
 }
 
 // *********************************************************************
 // 			RestoreGraphics()										
 // *********************************************************************
-void GdiPlusLabelDrawer::RestoreGraphics(Gdiplus::Graphics* g)
+void GdiPlusLabelDrawer::RestoreGraphics()
 {
-	g->SetCompositingQuality(compositingQuality);
-	g->SetSmoothingMode(smoothingMode);
-	g->SetTextRenderingHint(textRenderingHint);
+	_graphics->SetCompositingQuality(_compositingQuality);
+	_graphics->SetSmoothingMode(_smoothingMode);
+	_graphics->SetTextRenderingHint(_textRenderingHint);
 }
 
 // *********************************************************************
-// 					InitializeGdiPlusCategory()										
+// 					InitFromCategory()										
 // *********************************************************************
-void GdiPlusLabelDrawer::InitCategory(Gdiplus::Graphics* g, CLabelOptions* options, bool hasRotation)
+void GdiPlusLabelDrawer::InitFromCategory(CLabelOptions* options, bool hasRotation)
+{
+	InitPensAndBrushes(options, hasRotation);
+
+	TryAutoSetRenderingHint(options, hasRotation);
+}
+
+// *********************************************************************
+// 					InitPensAndBrushes()										
+// *********************************************************************
+void GdiPlusLabelDrawer::InitPensAndBrushes(CLabelOptions* options, bool hasRotation)
 {
 	long alphaFont = (options->fontTransparency << 24);
 	long alphaFrame = (options->frameTransparency << 24);
 
-	clFont1.SetValue(alphaFont | BGR_TO_RGB(options->fontColor));
-	clFont2.SetValue(alphaFont | BGR_TO_RGB(options->fontColor2));
-	clFrameBack1.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor));
-	clFrameBack2.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor2));
+	_clFont1.SetValue(alphaFont | BGR_TO_RGB(options->fontColor));
+	_clFont2.SetValue(alphaFont | BGR_TO_RGB(options->fontColor2));
+	_clFrameBack1.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor));
+	_clFrameBack2.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor2));
 
-	penFontOutline = new Pen(Color(alphaFont | BGR_TO_RGB(options->fontOutlineColor)), (Gdiplus::REAL)options->fontOutlineWidth);
-	penFontOutline->SetLineJoin(LineJoinRound);
+	_penFontOutline = new Pen(Color(alphaFont | BGR_TO_RGB(options->fontOutlineColor)), (Gdiplus::REAL)options->fontOutlineWidth);
+	_penFontOutline->SetLineJoin(LineJoinRound);
 
 	double haloWidth = fabs(options->fontSize / 16.0 * options->haloSize);
-	penHalo = new Pen(Color(alphaFont | BGR_TO_RGB(options->haloColor)), (Gdiplus::REAL)haloWidth);
-	penHalo->SetLineJoin(LineJoinRound);
+	_penHalo = new Pen(Color(alphaFont | BGR_TO_RGB(options->haloColor)), (Gdiplus::REAL)haloWidth);
+	_penHalo->SetLineJoin(LineJoinRound);
 
-	penFrameOutline = new Pen(Color(alphaFrame | BGR_TO_RGB(options->frameOutlineColor)), (Gdiplus::REAL)options->frameOutlineWidth);
-	penFrameOutline->SetDashStyle(DashStyle(options->frameOutlineStyle));
+	_penFrameOutline = new Pen(Color(alphaFrame | BGR_TO_RGB(options->frameOutlineColor)), (Gdiplus::REAL)options->frameOutlineWidth);
+	_penFrameOutline->SetDashStyle(DashStyle(options->frameOutlineStyle));
 
-	brushFont = new SolidBrush(clFont1);
-	brushFrame = new SolidBrush(clFrameBack1);
-	brushShadow = new SolidBrush(Color(alphaFont | BGR_TO_RGB(options->shadowColor)));
+	_brushFont = new SolidBrush(_clFont1);
+	_brushFrame = new SolidBrush(_clFrameBack1);
+	_brushShadow = new SolidBrush(Color(alphaFont | BGR_TO_RGB(options->shadowColor)));
 
 	ConvertAlignment(options->inboxAlignment, stringFormat);
 
 	stringFormat.SetFormatFlags(StringFormatFlagsNoClip);	// doesn't work?
+}
 
+// *********************************************************************
+// 					TryAutoSetRenderingHint()										
+// *********************************************************************
+void GdiPlusLabelDrawer::TryAutoSetRenderingHint(CLabelOptions* options, bool hasRotation)
+{
 	if (m_globalSettings.autoChooseRenderingHintForLabels)
 	{
 		Gdiplus::TextRenderingHint hint = TextRenderingHintSingleBitPerPixelGridFit;
@@ -79,14 +96,14 @@ void GdiPlusLabelDrawer::InitCategory(Gdiplus::Graphics* g, CLabelOptions* optio
 			}
 
 		}
-		g->SetTextRenderingHint(hint);
+		_graphics->SetTextRenderingHint(hint);
 	}
 }
 
 // *********************************************************************
-// 					DrawLabelGdiPlus()										
+// 					DrawLabel()										
 // *********************************************************************
-void GdiPlusLabelDrawer::DrawLabel(Graphics* g, CLabelOptions* options, Font* font, CRect& r, CStringW wText, double piX, double piY, double angle)
+void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, CStringW wText, double piX, double piY, double angle)
 {
 	rect.X = (Gdiplus::REAL)r.left;
 	rect.Y = (Gdiplus::REAL)r.top;
@@ -94,28 +111,28 @@ void GdiPlusLabelDrawer::DrawLabel(Graphics* g, CLabelOptions* options, Font* fo
 	rect.Height = (Gdiplus::REAL)r.Height();
 
 	Gdiplus::Matrix mtxInit;
-	g->GetTransform(&mtxInit);
+	_graphics->GetTransform(&mtxInit);
 
 	//Gdiplus::Matrix mtx;
 	//mtx.Translate((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
 	//mtx.Rotate((Gdiplus::REAL)angle);
 	//_graphics->SetTransform(&mtx);
 
-	g->TranslateTransform((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
-	g->RotateTransform((Gdiplus::REAL)angle);
+	_graphics->TranslateTransform((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
+	_graphics->RotateTransform((Gdiplus::REAL)angle);
 
 	// drawing frame
 	if (options->frameTransparency != 0 && options->frameVisible)
 	{
 		if (options->frameGradientMode != gmNone)
 		{
-			brushFrameGrad = new LinearGradientBrush(rect, clFrameBack1, clFrameBack2, (LinearGradientMode)options->frameGradientMode);
-			DrawLabelFrame(g, brushFrameGrad, *penFrameOutline, options);
-			delete brushFrameGrad;
+			_brushFrameGrad = new LinearGradientBrush(rect, _clFrameBack1, _clFrameBack2, (LinearGradientMode)options->frameGradientMode);
+			DrawLabelFrame(_brushFrameGrad, *_penFrameOutline, options);
+			delete _brushFrameGrad;
 		}
 		else
 		{
-			DrawLabelFrame(g, brushFrame, *penFrameOutline, options);
+			DrawLabelFrame(_brushFrame, *_penFrameOutline, options);
 		}
 	}
 
@@ -139,33 +156,33 @@ void GdiPlusLabelDrawer::DrawLabel(Graphics* g, CLabelOptions* options, Font* fo
 			Gdiplus::Matrix mtx1;
 			mtx1.Translate((Gdiplus::REAL)options->shadowOffsetX, (Gdiplus::REAL)options->shadowOffsetY);
 			gp->Transform(&mtx1);
-			g->FillPath(brushShadow, gp);
+			_graphics->FillPath(_brushShadow, gp);
 			mtx1.Translate(Gdiplus::REAL(-2 * options->shadowOffsetX), Gdiplus::REAL(-2 * options->shadowOffsetY));
 			gp->Transform(&mtx1);
 		}
 
 		if (options && options->haloVisible)
-			g->DrawPath(penHalo, gp);
+			_graphics->DrawPath(_penHalo, gp);
 
 		if (options->fontOutlineVisible)
-			g->DrawPath(penFontOutline, gp);
+			_graphics->DrawPath(_penFontOutline, gp);
 
 		if (options->fontGradientMode != gmNone)
 		{
-			brushFontGrad = new LinearGradientBrush(rect, clFont1, clFont2, (LinearGradientMode)options->fontGradientMode);
-			g->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, brushFontGrad);	// TODO: we need speed test here to choose the function
-			delete brushFontGrad;
+			_brushFontGrad = new LinearGradientBrush(rect, _clFont1, _clFont2, (LinearGradientMode)options->fontGradientMode);
+			_graphics->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, _brushFontGrad);	// TODO: we need speed test here to choose the function
+			delete _brushFontGrad;
 		}
 		else
 		{
-			g->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, brushFont);
+			_graphics->DrawString(wText, wText.GetLength(), font, rect, &stringFormat, _brushFont);
 		}
 		if (pathNeeded) {
 			delete gp;
 		}
 	}
 
-	g->SetTransform(&mtxInit);
+	_graphics->SetTransform(&mtxInit);
 }
 
 // *****************************************************************
@@ -188,15 +205,15 @@ inline void GdiPlusLabelDrawer::ConvertAlignment(tkLabelAlignment alignment, Gdi
 }
 
 // ********************************************************************
-//		DrawLabelFrameGdiPlus
+//		DrawLabelFrame
 // ********************************************************************
-void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Graphics* graphics, Gdiplus::Brush* brush, Gdiplus::Pen& pen, CLabelOptions* options)
+void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Brush* brush, Gdiplus::Pen& pen, CLabelOptions* options)
 {
 	switch (options->frameType)
 	{
 		case lfRectangle:
-			graphics->FillRectangle(brush, rect);
-			graphics->DrawRectangle(&pen, rect);
+			_graphics->FillRectangle(brush, rect);
+			_graphics->DrawRectangle(&pen, rect);
 			break;
 		case lfRoundedRectangle:
 		{
@@ -213,8 +230,8 @@ void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Graphics* graphics, Gdiplus::Br
 			path->AddLine(right - rect.Height, bottom, left + rect.Height, bottom);
 			path->AddArc(left, top, rect.Height, rect.Height, 90.0, 180.0);
 			path->CloseFigure();
-			graphics->FillPath(brush, path);
-			graphics->DrawPath(&pen, path);
+			_graphics->FillPath(brush, path);
+			_graphics->DrawPath(&pen, path);
 			delete path;
 			break;
 		}
@@ -238,8 +255,8 @@ void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Graphics* graphics, Gdiplus::Br
 			path->AddLine(left, (top + bottom) / 2, left + rect.Height / 4, top);
 
 			path->CloseFigure();
-			graphics->FillPath(brush, path);
-			graphics->DrawPath(&pen, path);
+			_graphics->FillPath(brush, path);
+			_graphics->DrawPath(&pen, path);
 			delete path;
 			break;
 		}
@@ -248,7 +265,7 @@ void GdiPlusLabelDrawer::DrawLabelFrame(Gdiplus::Graphics* graphics, Gdiplus::Br
 }
 
 // *********************************************************************
-// 					CreateGdiPlusFont()										
+// 					CreateFont()										
 // *********************************************************************
 Gdiplus::Font* GdiPlusLabelDrawer::CreateFont(CLabelOptions* options, double fontSize, double scaleFactor)
 {
@@ -269,4 +286,73 @@ Gdiplus::Font* GdiPlusLabelDrawer::CreateFont(CLabelOptions* options, double fon
 	if (options->fontStyle & fstUnderline) style = style | FontStyleUnderline;
 
 	return new Gdiplus::Font(fontName, (Gdiplus::REAL)fontSize, style);
+}
+
+// *********************************************************************
+// 					MeasureString()										
+// *********************************************************************
+void GdiPlusLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& r)
+{
+	USES_CONVERSION;
+	text = A2W(lbl->text);
+	_graphics->MeasureString(text, text.GetLength(), font, PointF(0.0f, 0.0f), &rect);
+
+	// in some case we lose the last letter by clipping; 
+	rect.Width += 1;
+	rect.Height += 1;
+
+	// converting to CRect to prevent duplication in the code below
+	r.left = static_cast<LONG>(rect.X);
+	r.top = static_cast<LONG>(rect.Y);
+	r.right = static_cast<LONG>(rect.X + rect.Width);
+	r.bottom = static_cast<LONG>(rect.Y + rect.Height);
+}
+
+// *********************************************************************
+// 		SelectFont()										
+// *********************************************************************
+void GdiPlusLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize)
+{
+	if (!_fonts[lbl->fontSize])
+	{
+		this->font = CreateFont(options, lbl->fontSize, scaleFactor);
+		_fonts[lbl->fontSize] = this->font;
+	}
+	else {
+		this->font = _fonts[lbl->fontSize];
+	}
+}
+
+// *********************************************************************
+// 		SelectFont()										
+// *********************************************************************
+void GdiPlusLabelDrawer::SelectFont(CLabelOptions* options, double fontSize, double scaleFactor)
+{
+	this->font = CreateFont(options, fontSize, scaleFactor);
+}
+
+// *********************************************************************
+// 		ReleaseFonts()										
+// *********************************************************************
+void GdiPlusLabelDrawer::ReleaseFonts(bool useVariableFontSize)
+{
+	if (useVariableFontSize)
+	{
+		for (int i = 0; i <= MAX_LABEL_SIZE; i++)
+		{
+			if (_fonts[i])
+			{
+				Gdiplus::Font * f = _fonts[i];
+				delete f;
+				_fonts[i] = NULL;
+			}
+		}
+	}
+	else {
+		if (font)
+		{
+			delete font;
+			font = NULL;
+		}
+	}
 }

@@ -1,70 +1,103 @@
 #pragma once
 #include "LabelOptions.h"
+using namespace Gdiplus;
 
 class GdiPlusLabelDrawer {
 public:
 	GdiPlusLabelDrawer()
-		: clFont1(0, 0, 0),
-		clFont2(0, 0, 0),
-		clFrameBack1(0, 0, 0),
-		clFrameBack2(0, 0, 0),
-		rect(0.0f, 0.0f, 0.0f, 0.0f)
+		: _clFont1(0, 0, 0),
+		_clFont2(0, 0, 0),
+		_clFrameBack1(0, 0, 0),
+		_clFrameBack2(0, 0, 0),
+		rect(0.0f, 0.0f, 0.0f, 0.0f),
+		_graphics(NULL)
 	{
-		compositingQuality = Gdiplus::CompositingQualityDefault;
-		smoothingMode = Gdiplus::SmoothingModeDefault;
-		textRenderingHint = Gdiplus::TextRenderingHintSingleBitPerPixelGridFit;
+		_compositingQuality = CompositingQualityDefault;
+		_smoothingMode = SmoothingModeDefault;
+		_textRenderingHint = TextRenderingHintSingleBitPerPixelGridFit;
+		
+		for (long i = 0; i <= MAX_LABEL_SIZE; i++ ) {
+			_fonts[i] = NULL;
+		}
 	}
 
-public:
+private:
+	Font* _fonts[MAX_LABEL_SIZE + 1];
+	Graphics* _graphics;
+	StringFormat stringFormat;
+
+	// initial values
+	TextRenderingHint _textRenderingHint;
+	SmoothingMode _smoothingMode;
+	CompositingQuality _compositingQuality;
+
+	// colors
+	Color _clFont1;
+	Color _clFont2;
+	Color _clFrameBack1;
+	Color _clFrameBack2;
+
 	// pens
-	Gdiplus::Pen* penFontOutline = NULL;
-	Gdiplus::Pen* penHalo = NULL;
-	Gdiplus::Pen* penFrameOutline = NULL;
+	Pen* _penFontOutline = NULL;
+	Pen* _penHalo = NULL;
+	Pen* _penFrameOutline = NULL;
 
 	// simple brushes in case no gradient is used
-	Gdiplus::SolidBrush* brushFont = NULL;
-	Gdiplus::SolidBrush* brushFrame = NULL;
-	Gdiplus::SolidBrush* brushShadow = NULL;
-
-	Gdiplus::Color clFont1;
-	Gdiplus::Color clFont2;
-	Gdiplus::Color clFrameBack1;
-	Gdiplus::Color clFrameBack2;
+	SolidBrush* _brushFont = NULL;
+	SolidBrush* _brushFrame = NULL;
+	SolidBrush* _brushShadow = NULL;
 
 	// gradient brushes will be allocated dynamically as it's impossible 
 	// to change properties of the created brush
-	Gdiplus::LinearGradientBrush* brushFontGrad = NULL;
-	Gdiplus::LinearGradientBrush* brushFrameGrad = NULL;
+	LinearGradientBrush* _brushFontGrad = NULL;
+	LinearGradientBrush* _brushFrameGrad = NULL;
+public:
+	RectF rect;
 
-	Gdiplus::RectF rect;
+	Font* font;
 
-	Gdiplus::StringFormat stringFormat;
-
-	Gdiplus::TextRenderingHint textRenderingHint;
-	Gdiplus::SmoothingMode smoothingMode;
-	Gdiplus::CompositingQuality compositingQuality;
+	CStringW text;
 
 private:
-	void ConvertAlignment(tkLabelAlignment alignment, Gdiplus::StringFormat& format);
-	void DrawLabelFrame(Gdiplus::Graphics* graphics, Gdiplus::Brush* brush, Gdiplus::Pen& pen, CLabelOptions* m_options);
+	void ConvertAlignment(tkLabelAlignment alignment, StringFormat& format);
+
+	Font* CreateFont(CLabelOptions* options, double fontSize, double scaleFactor);
+
+	void DrawLabelFrame(Brush* brush, Pen& pen, CLabelOptions* m_options);
+
+	void InitPensAndBrushes(CLabelOptions* options, bool hasRotation);
+
+	void TryAutoSetRenderingHint(CLabelOptions* options, bool hasRotation);
+
+	void ReleaseFonts(bool useVariableFontSize);
+
+	void ReleaseObjects() {
+		delete _penFontOutline;
+		delete _penHalo;
+		delete _penFrameOutline;
+		delete _brushFont;
+		delete _brushFrame;
+		delete _brushShadow;
+	}
 
 public:
-	void DrawLabel(Gdiplus::Graphics* g, CLabelOptions* m_options, Gdiplus::Font* font, CRect& r, CStringW wText, double piX, double piY, double angle);
+	void DrawLabel(CLabelOptions* options, CRect& r, CStringW wText, double piX, double piY, double angle);
 
-	void InitCategory(Gdiplus::Graphics* g, CLabelOptions* m_options, bool hasRotation);
+	void InitFromCategory(CLabelOptions* m_options, bool hasRotation);
 
-	void InitializeGraphics(Gdiplus::Graphics* g, ILabels* labels);
+	void InitGraphics(Graphics* g, ILabels* labels);
+	
+	void MeasureString(CLabelInfo* lbl, CRect& r);
 
-	void RestoreGraphics(Gdiplus::Graphics* g);
+	void RestoreGraphics();
 
-	Gdiplus::Font* CreateFont(CLabelOptions* options, double fontSize, double scaleFactor);
+	void SelectFont(CLabelOptions* options, double fontSize, double scaleFactor);
 
-	void Release() {
-		delete penFontOutline;
-		delete penHalo;
-		delete penFrameOutline;
-		delete brushFont;
-		delete brushFrame;
-		delete brushShadow;
+	void SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize);
+
+	void ReleaseForCategory(bool useVariableFontSize) {
+		ReleaseObjects();
+
+		ReleaseFonts(useVariableFontSize);
 	}
 };

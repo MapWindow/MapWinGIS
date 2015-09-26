@@ -151,3 +151,11 @@ CStringW AngleHelper::GetReducedBearing(double azimuth, tkBearingType bearing, t
 
 	return L"";
 }
+
+// ***************************************************************
+//		ToRad()
+// ***************************************************************
+double AngleHelper::ToRad(double angleDegree)
+{
+	return angleDegree / 180.0 * pi_;
+}

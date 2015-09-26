@@ -2,21 +2,23 @@
 #include "GdiLabelDrawer.h"
 
 // *********************************************************************
-// 					InitializeGdiCategory()										
+// 					InitFromCategory()										
 // *********************************************************************
-void GdiLabelDrawer::InitCategory(CDC* dc, CLabelOptions* options)
+void GdiLabelDrawer::InitFromCategory(CLabelOptions* options)
 {
-	penFontOutline.CreatePen(PS_SOLID, options->fontOutlineWidth, options->fontOutlineColor);
-	penFrameOutline.CreatePen(options->frameOutlineStyle, options->frameOutlineWidth, options->frameOutlineColor);
+	_penFontOutline.CreatePen(PS_SOLID, options->fontOutlineWidth, options->fontOutlineColor);
+	_penFrameOutline.CreatePen(options->frameOutlineStyle, options->frameOutlineWidth, options->frameOutlineColor);
 
 	double haloWidth = fabs(options->fontSize / 16.0 * options->haloSize);
-	penHalo.CreatePen(PS_SOLID, (int)haloWidth, options->haloColor);
+	_penHalo.CreatePen(PS_SOLID, (int)haloWidth, options->haloColor);
 
 	// we can select brush at once because it's the only one to use
-	brushFrameBack.CreateSolidBrush(options->frameBackColor);
-	oldBrush = dc->SelectObject(&brushFrameBack);
+	_brushFrameBack.CreateSolidBrush(options->frameBackColor);
+	_oldBrush = _dc->SelectObject(&_brushFrameBack);
 
-	gdiAlignment = ConvertAlignment(options->inboxAlignment);
+	_alignment = ConvertAlignment(options->inboxAlignment);
+
+	_dc->SetTextColor(options->fontColor);
 }
 
 // *****************************************************************
@@ -40,9 +42,9 @@ inline UINT GdiLabelDrawer::ConvertAlignment(tkLabelAlignment alignment)
 }
 
 // *********************************************************************
-// 					GdiResources::DrawLabelGdi()										
+// 					DrawLabel()										
 // *********************************************************************
-void GdiLabelDrawer::DrawLabel(CDC* _dc, CLabelOptions* options, CLabelInfo* lbl, CRect& rect, double angleRad, double piX, double piY)
+void GdiLabelDrawer::DrawLabel(CLabelOptions* options, CLabelInfo* lbl, CRect& rect, double angleRad, double piX, double piY)
 {
 	// ------------------------------------------------------
 	//	GDI drawing w/o transparency, gradients, etc
@@ -56,11 +58,13 @@ void GdiLabelDrawer::DrawLabel(CDC* _dc, CLabelOptions* options, CLabelInfo* lbl
 	xForm.eDy = (FLOAT)piY;
 	_dc->SetWorldTransform(&xForm);
 
+	CPen* oldPen = NULL;
+
 	// drawing frame
 	if (options->frameVisible)
 	{
-		oldPen = _dc->SelectObject(&penFrameOutline);
-		DrawLabelFrame(_dc, &rect, options);
+		oldPen = _dc->SelectObject(&_penFrameOutline);
+		DrawFrame(&rect, options);
 		_dc->SelectObject(oldPen);
 	}
 
@@ -69,7 +73,7 @@ void GdiLabelDrawer::DrawLabel(CDC* _dc, CLabelOptions* options, CLabelInfo* lbl
 	{
 		_dc->SetWindowOrg(-options->shadowOffsetX, -options->shadowOffsetY);
 		_dc->SetTextColor(options->shadowColor);
-		_dc->DrawText(lbl->text, rect, gdiAlignment);
+		_dc->DrawText(lbl->text, rect, _alignment);
 		_dc->SetTextColor(options->fontColor);
 		_dc->SetWindowOrg(0, 0);
 	}
@@ -77,9 +81,9 @@ void GdiLabelDrawer::DrawLabel(CDC* _dc, CLabelOptions* options, CLabelInfo* lbl
 	if (options->haloVisible)
 	{
 		_dc->BeginPath();
-		_dc->DrawText(lbl->text, rect, gdiAlignment);
+		_dc->DrawText(lbl->text, rect, _alignment);
 		_dc->EndPath();
-		oldPen = _dc->SelectObject(&penHalo);
+		oldPen = _dc->SelectObject(&_penHalo);
 		_dc->StrokePath();
 		_dc->SelectObject(oldPen);
 	}
@@ -87,40 +91,40 @@ void GdiLabelDrawer::DrawLabel(CDC* _dc, CLabelOptions* options, CLabelInfo* lbl
 	if (options->fontOutlineVisible)
 	{
 		_dc->BeginPath();
-		_dc->DrawText(lbl->text, rect, gdiAlignment);
+		_dc->DrawText(lbl->text, rect, _alignment);
 		_dc->EndPath();
-		oldPen = _dc->SelectObject(&penFontOutline);
+		oldPen = _dc->SelectObject(&_penFontOutline);
 		_dc->StrokePath();
 		_dc->SelectObject(oldPen);
 	}
 
-	_dc->DrawText(lbl->text, rect, gdiAlignment);	// TODO: make a property (left/center/right)
+	_dc->DrawText(lbl->text, rect, _alignment);	// TODO: make a property (left/center/right)
 }
 
 // ********************************************************************
-//		DrawLabelFrameGdi
+//		DrawFrame
 // ********************************************************************
-void GdiLabelDrawer::DrawLabelFrame(CDC* dc, CRect* rect, CLabelOptions* m_options)
+void GdiLabelDrawer::DrawFrame(CRect* rect, CLabelOptions* m_options)
 {
 	switch (m_options->frameType)
 	{
 		case lfRectangle:
-			dc->Rectangle(rect->left, rect->top, rect->right, rect->bottom);
+			_dc->Rectangle(rect->left, rect->top, rect->right, rect->bottom);
 			break;
 		case lfRoundedRectangle:
-			dc->RoundRect(rect->left, rect->top, rect->right, rect->bottom, rect->Height(), rect->Height());
+			_dc->RoundRect(rect->left, rect->top, rect->right, rect->bottom, rect->Height(), rect->Height());
 			break;
 		case lfPointedRectangle:
-			dc->BeginPath();
-			dc->MoveTo(rect->left, rect->top);
-			dc->LineTo(rect->right, rect->top);
-			dc->LineTo(rect->right + rect->Height() / 4, (rect->top + rect->bottom) / 2);
-			dc->LineTo(rect->right, rect->bottom);
-			dc->LineTo(rect->left, rect->bottom);
-			dc->LineTo(rect->left - rect->Height() / 4, (rect->top + rect->bottom) / 2);
-			dc->LineTo(rect->left, rect->top);
-			dc->EndPath();
-			dc->StrokeAndFillPath();
+			_dc->BeginPath();
+			_dc->MoveTo(rect->left, rect->top);
+			_dc->LineTo(rect->right, rect->top);
+			_dc->LineTo(rect->right + rect->Height() / 4, (rect->top + rect->bottom) / 2);
+			_dc->LineTo(rect->right, rect->bottom);
+			_dc->LineTo(rect->left, rect->bottom);
+			_dc->LineTo(rect->left - rect->Height() / 4, (rect->top + rect->bottom) / 2);
+			_dc->LineTo(rect->left, rect->top);
+			_dc->EndPath();
+			_dc->StrokeAndFillPath();
 			break;
 	}
 	return;
@@ -160,4 +164,76 @@ CFont* GdiLabelDrawer::CreateFont(CLabelOptions* options, long fontSize, double 
 	fnt->CreateFontIndirectA(&lf);
 
 	return fnt;
+}
+
+// *********************************************************************
+// 					MeasureString()										
+// *********************************************************************
+void GdiLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& rect)
+{
+	_dc->DrawText(lbl->text, rect, DT_CALCRECT);
+
+	// frame for GDI is very narrow; so we'll enlarge it a bit					
+	rect.left -= rect.Height() / 6;
+	rect.right += rect.Height() / 6;
+}
+
+// *********************************************************************
+// 					SelectFont()										
+// *********************************************************************
+void GdiLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize)
+{
+	CFont* fontNew = NULL;
+
+	if (!_fonts[lbl->fontSize])
+	{
+		CFont* font = CreateFont(options, lbl->fontSize, scaleFactor);
+		fontNew = _fonts[lbl->fontSize] = font;
+		
+	}
+	else {
+		fontNew = _fonts[lbl->fontSize];
+	}
+
+	CFont* tempFont = _dc->SelectObject(fontNew);
+	if (!_oldFont) {
+		_oldFont = tempFont;
+	}
+}
+
+// *********************************************************************
+// 					SelectFont()										
+// *********************************************************************
+void GdiLabelDrawer::SelectFont(CLabelOptions* options, long fontSize, double scaleFactor)
+{
+	this->_font = CreateFont(options, fontSize, scaleFactor);
+	_oldFont = _dc->SelectObject(this->_font);
+}
+
+// *********************************************************************
+// 					ReleaseFonts()										
+// *********************************************************************
+void GdiLabelDrawer::ReleaseFonts(bool useVariableFontSize)
+{
+	if (useVariableFontSize)
+	{
+		for (int i = 0; i <= MAX_LABEL_SIZE; i++)
+		{
+			if (_fonts[i])
+			{
+				CFont * f = _fonts[i];
+				f->DeleteObject();
+				delete f;
+				_fonts[i] = NULL;
+			}
+		}
+	}
+	else {
+		if (_font)
+		{
+			_font->DeleteObject();
+			delete _font;
+			_font = NULL;
+		}
+	}
 }

@@ -246,6 +246,7 @@
     <ClInclude Include="Drawing\GdiPlusLabelDrawer.h" />
     <ClInclude Include="Drawing\ImageDrawing.h" />
     <ClInclude Include="Drawing\LabelDrawing.h" />
+    <ClInclude Include="Drawing\LabelDrawingHelper.h" />
     <ClInclude Include="Drawing\LabelOptions.h" />
     <ClInclude Include="Drawing\LayerDrawer.h" />
     <ClInclude Include="Drawing\PointSymbols.h" />
@@ -563,6 +564,7 @@
     <ClCompile Include="Drawing\GdiPlusLabelDrawer.cpp" />
     <ClCompile Include="Drawing\ImageDrawing.cpp" />
     <ClCompile Include="Drawing\LabelDrawing.cpp" />
+    <ClCompile Include="Drawing\LabelDrawingHelper.cpp" />
     <ClCompile Include="Drawing\LabelOptions.cpp" />
     <ClCompile Include="Drawing\LayerDrawer.cpp" />
     <ClCompile Include="Drawing\PointSymbols.cpp" />
