@@ -32,6 +32,8 @@
 #include "Shapefile.h"
 #include "macros.h"
 #include "TableHelper.h"
+#include "GdiPlusLabelDrawer.h"
+#include "GdiLabelDrawer.h"
 
 using namespace std;
 using namespace Gdiplus;
@@ -74,289 +76,57 @@ CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, CCollis
 }
 
 // *********************************************************************
-// 					CreateFont()										
+// 					GetExpressionFilter()										
 // *********************************************************************
-CFont* CLabelDrawer::CreateGdiFont(CLabelOptions* options, long fontSize, double scaleFactor) 
+bool CLabelDrawer::GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<long>& filter)
 {
-	CFont* fnt = new CFont();
-
-	CString s(options->fontName);
-	fnt->CreatePointFont(fontSize * 10, s);
-
-	LOGFONT lf;
-	fnt->GetLogFont(&lf);
-
-	if (scaleFactor != 1.0)
-	{
-		lf.lfWidth = long((double)lf.lfWidth * scaleFactor);
-		lf.lfHeight = long((double)lf.lfHeight * scaleFactor);
-	}
-	if (abs(lf.lfHeight) < 4)	// changed 1 to 4; there is no way to read labels smaller than 4, but they slow down the performance
-	{
-		fnt->DeleteObject();
-		delete fnt;
-		return NULL;
-	}
-
-	lf.lfItalic = options->fontStyle & fstItalic;
-	lf.lfUnderline = options->fontStyle & fstUnderline;
-	lf.lfStrikeOut = options->fontStyle & fstStrikeout;
-	lf.lfWeight = options->fontStyle & fstBold ? FW_BOLD : 0;
-
-	fnt->DeleteObject();
-	fnt->CreateFontIndirectA(&lf);
-
-	return fnt;
-}
-
-// *********************************************************************
-// 					CreateGdiPlusFont()										
-// *********************************************************************
-Gdiplus::Font* CLabelDrawer::CreateGdiPlusFont(CLabelOptions* options, double fontSize, double scaleFactor)
-{
-	CStringW fontName = OLE2W(options->fontName);
-
-	if (scaleFactor != 1.0) {
-		fontSize = fontSize * scaleFactor;
-	}
-	
-	if (fontSize < 4)  {
-		return NULL;
-	}
-
-	int style = FontStyleRegular;
-	if (options->fontStyle & fstItalic) style = style | FontStyleItalic;
-	if (options->fontStyle & fstBold) style = style | FontStyleBold;
-	if (options->fontStyle & fstStrikeout) style = style | FontStyleStrikeout;
-	if (options->fontStyle & fstUnderline) style = style | FontStyleUnderline;
-
-	return new Gdiplus::Font(fontName, (Gdiplus::REAL)fontSize, style);
-}
-
-// *********************************************************************
-// 					CreateLabelFont()										
-// *********************************************************************
-void* CLabelDrawer::CreateLabelFont(bool gdiPlus, CLabelOptions* options, long fontSize, double scaleFactor)
-{
-	if (gdiPlus) {
-		return CreateGdiPlusFont(options, fontSize, scaleFactor);
-	}
-	else {
-		return CreateGdiFont(options, fontSize, scaleFactor);
-	}
-}
-
-// *********************************************************************
-// 					DrawLabels()										
-// *********************************************************************
-void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
-{
-	if (m_globalSettings.forceHideLabels)
-		return;
-
-	long numLabels;
-	LabelsClass->get_Count(&numLabels);
-	if (numLabels == 0)
-		return;
-	
-	VARIANT_BOOL visible;
-	LabelsClass->get_Visible(&visible);
-	if (!visible) return;
-	
-	// checking scale for dynamic visibility
-	VARIANT_BOOL dynVisibility;
-	LabelsClass->get_DynamicVisibility(&dynVisibility);
-	if (dynVisibility)
-	{		
-		double minScale, maxScale;
-		LabelsClass->get_MinVisibleScale(&minScale);
-		LabelsClass->get_MaxVisibleScale(&maxScale);
-		double scale = _currentScale;
-		if (scale < minScale || scale > maxScale) 
-			return;
-	}
-	
-	VARIANT_BOOL avoidCollisions;
-	LabelsClass->get_AvoidCollisions(&avoidCollisions);
-	
-	tkVerticalPosition vp;
-	LabelsClass->get_VerticalPosition(&vp);
-
-	// ---------------------------------------------------------------
-	//	 Scaling of labels
-	// ---------------------------------------------------------------
-	VARIANT_BOOL bScale;
-	double scaleFactor = 1.0;
-	LabelsClass->get_ScaleLabels(&bScale);
-	if (bScale && _spatiallyReferenced)
-	{	
-		double scale = _currentScale;
-		if (scale == 0)
-			return;
-		
-		double basicScale;
-		LabelsClass->get_BasicScale(&basicScale);
-		if (basicScale == 0.0)
-		{
-			basicScale = scale;
-			LabelsClass->put_BasicScale(scale);
-		}
-		scaleFactor = basicScale/scale;
-	}
-
-	// ---------------------------------------------------------------
-	//	 Extracting data
-	// ---------------------------------------------------------------
-	CLabels* lbs = static_cast<CLabels*>(LabelsClass);
-	vector<vector<CLabelInfo*>*>* labels = lbs->get_LabelData();
-	
-	long numCategories;
-	LabelsClass->get_NumCategories(&numCategories);
-
-	VARIANT_BOOL useGdiPlus = VARIANT_FALSE;
-	LabelsClass->get_UseGdiPlus(&useGdiPlus);
-	useGdiPlus = VARIANT_TRUE;
-	
-	if (!useGdiPlus)
-	{
-		// let's check whether it's possible to draw everything by GDI
-		CLabelOptions* options = ((CLabels*)LabelsClass)->get_LabelOptions();
-		if (options->fontGradientMode != gmNone || options->fontTransparency != 255 || 
-		  ((options->frameGradientMode != gmNone || options->frameTransparency != 255) && options->frameVisible))
-		{
-			useGdiPlus = true;
-		}
-	}
-	
-	if (_printing)
-		useGdiPlus = VARIANT_TRUE;
-
-	if (!useGdiPlus)
-	{
-		m_hdc = _graphics->GetHDC();
-		_dc = CDC::FromHandle(m_hdc);
-		_dc->SetBkMode(TRANSPARENT);
-		_dc->SetGraphicsMode(GM_ADVANCED);
-	}
-
-	VARIANT_BOOL bRemoveDuplicates;
-	LabelsClass->get_RemoveDuplicates(&bRemoveDuplicates);
-
-	long m_buffer = 0;
-	LabelsClass->get_CollisionBuffer(&m_buffer);
-
-	// ------------------------------------------------------------
-	//		GDI objects
-	// ------------------------------------------------------------
-	CPen penFontOutline;
-	CPen penHalo;
-	CPen penFrameOutline;
-	CBrush brushFrameBack;
-	CBrush* oldBrush = NULL;
-	CPen* oldPen = NULL;
-	
-	CFont* oldFont = NULL;
-	CLabelOptions* m_options = NULL;
-	
-	CRect rect(0,0,0,0);	// bounding box for drawing
-	UINT gdiAlignment;
-	
-	// ------------------------------------------------------------
-	//		GDI+ objects
-	// ------------------------------------------------------------
-	// We create GDI+ objects even if no GDI+ mode is used as variables won't be visible through the code otherwise.
-	// Create them inside loop for each category is a waste of time
-
-	// pens
-	Gdiplus::Pen* gpPenFontOutline = NULL;
-	Gdiplus::Pen* gpPenHalo = NULL;
-	Gdiplus::Pen* gpPenFrameOutline = NULL;
-
-	// simple brushes in case no gradient is used
-	Gdiplus::SolidBrush* gpBrushFont = NULL;
-	Gdiplus::SolidBrush* gpBrushFrame = NULL;
-	Gdiplus::SolidBrush* gpBrushShadow = NULL;
-	
-	Color clFont1(0,0,0);
-	Color clFont2(0,0,0);
-	Color clFrameBack1(0,0,0);
-	Color clFrameBack2(0,0,0);
-
-	// gradient brushes will be allocated dynamically as it's impossible 
-	// to change properties of the created brush
-	Gdiplus::LinearGradientBrush* gpBrushFontGrad = NULL;
-	Gdiplus::LinearGradientBrush* gpBrushFrameGrad = NULL;
-	
-	CStringW wText;
-
-	RectF gpRect(0.0f, 0.0f, 0.0f, 0.0f);
-
-	StringFormat gpStringFormat;
-	
-	// -----------------------------------------
-	// analyzing query expression
-	// -----------------------------------------
 	CComBSTR expr;
-	LabelsClass->get_VisibilityExpression(&expr);
+	labels->get_VisibilityExpression(&expr);
 
-	std::vector<long> filter;
 	CString err;
-	bool useAll = true;
-	
+
 	if (SysStringLen(expr) > 0)
 	{
-		IShapefile* sf = lbs->get_ParentShapefile();
 		if (sf)
 		{
 			CComPtr<ITable> tbl = NULL;
 			sf->get_Table(&tbl);
-			
+
 			USES_CONVERSION;
 			if (TableHelper::Cast(tbl)->QueryCore(OLE2CA(expr), filter, err))
 			{
-				useAll = false;
+				return true;
 			}
-		}			
+		}
 	}
-	
-	IShapefile* sf = lbs->get_ParentShapefile();
-	
+
+	return false;
+}
+
+// *********************************************************************
+// 					GetVisibilityMask()										
+// *********************************************************************
+void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask)
+{
+	vector<long> filter;
+	bool hasFilter = GetExpressionFilter(labels, sf, filter);
+
+	long numLabels;
+	labels->get_Count(&numLabels);
+
 	VARIANT_BOOL synchronized;
-	LabelsClass->get_Synchronized(&synchronized);
-
-	// do we need to enable auto offset? shapefile type must be point and labels must be synchronized
-	VARIANT_BOOL autoOffset;
-	LabelsClass->get_AutoOffset(&autoOffset);
-	if (autoOffset && sf != NULL)
-	{
-		ShpfileType shpType;
-		sf->get_ShapefileType2D(&shpType);
-		autoOffset = shpType == SHP_POINT || shpType == SHP_MULTIPOINT ? synchronized : VARIANT_FALSE;
-	}
-	else
-	{
-		autoOffset = VARIANT_FALSE;
-	}
-	
-	std::vector<ShapeData*>* shapeData = NULL;
-	if (sf)
-	{
-		shapeData = ((CShapefile*)sf)->get_ShapeVector();
-	}
-
-	std::vector<bool> visibilityMask(numLabels, false);
+	labels->get_Synchronized(&synchronized);
 
 	if (synchronized && sf)
 	{
 		long minSize;
-		LabelsClass->get_MinDrawingSize(&minSize);
-		long size = useAll ? numLabels : (long)filter.size();
+		labels->get_MinDrawingSize(&minSize);
+		long size = hasFilter ? (long)filter.size() : numLabels;
 
 		for (long i = 0; i < size; i++)
 		{
-			long index = useAll ? i : filter[i];
+			long index = hasFilter ? filter[i] : i;
 			visibilityMask[index] = true; // (*shapeData)[index]->size >= minSize;
-
 			// TODO: restore
 		}
 	}
@@ -368,37 +138,191 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 			visibilityMask[i] = true;
 		}
 	}
+}
+
+// *********************************************************************
+// 					GetScaleFactor()										
+// *********************************************************************
+double CLabelDrawer::GetScaleFactor(ILabels* labels)
+{
+	VARIANT_BOOL bScale;
+	double scaleFactor = 1.0;
+	labels->get_ScaleLabels(&bScale);
+
+	if (bScale && _spatiallyReferenced)
+	{
+		double scale = _currentScale;
+		if (scale == 0) {
+			return scaleFactor;
+		}
+
+		double basicScale;
+		labels->get_BasicScale(&basicScale);
+		if (basicScale == 0.0)
+		{
+			basicScale = scale;
+			labels->put_BasicScale(scale);
+		}
+		scaleFactor = basicScale / scale;
+	}
+
+	return scaleFactor;
+}
+
+// *********************************************************************
+// 					CheckDynamicVisibility()										
+// *********************************************************************
+bool CLabelDrawer::CheckDynamicVisibility(ILabels* labels)
+{
+	VARIANT_BOOL dynVisibility;
+	labels->get_DynamicVisibility(&dynVisibility);
+
+	if (dynVisibility)
+	{
+		double minScale, maxScale;
+		labels->get_MinVisibleScale(&minScale);
+		labels->get_MaxVisibleScale(&maxScale);
+		double scale = _currentScale;
+		if (scale < minScale || scale > maxScale) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+// *********************************************************************
+// 					GetUseGdiPlus()										
+// *********************************************************************
+bool CLabelDrawer::GetUseGdiPlus(ILabels* labels) 
+{
+	VARIANT_BOOL useGdiPlus = VARIANT_FALSE;
+	labels->get_UseGdiPlus(&useGdiPlus);
+
+	if (!useGdiPlus)
+	{
+		// let's check whether it's possible to draw everything by GDI
+		CLabelOptions* options = ((CLabels*)labels)->get_LabelOptions();
+		if (options->fontGradientMode != gmNone || options->fontTransparency != 255 ||
+			((options->frameGradientMode != gmNone || options->frameTransparency != 255) && options->frameVisible))
+		{
+			useGdiPlus = true;
+		}
+	}
+
+	if (_printing) {
+		useGdiPlus = VARIANT_TRUE;
+	}
+
+	return useGdiPlus ? true: false;
+}
+
+// *********************************************************************
+// 					GetAutoOffset()										
+// *********************************************************************
+bool CLabelDrawer::GetAutoOffset(ILabels* labels, IShapefile* sf)
+{
+	// do we need to enable auto offset? shapefile type must be point and labels must be synchronized
+	VARIANT_BOOL autoOffset;
+	labels->get_AutoOffset(&autoOffset);
+	if (autoOffset && sf != NULL)
+	{
+		VARIANT_BOOL synchronized;
+		labels->get_Synchronized(&synchronized);
+
+		ShpfileType shpType;
+		sf->get_ShapefileType2D(&shpType);
+		autoOffset = shpType == SHP_POINT || shpType == SHP_MULTIPOINT ? synchronized : VARIANT_FALSE;
+	}
+	else
+	{
+		autoOffset = VARIANT_FALSE;
+	}
+
+	return autoOffset ? true : false;
+}
+
+// *********************************************************************
+// 					DrawLabels()										
+// *********************************************************************
+void CLabelDrawer::DrawLabels( ILabels* labels )
+{
+	if (m_globalSettings.forceHideLabels)
+		return;
+
+	long numLabels;
+	labels->get_Count(&numLabels);
+	if (numLabels == 0)
+		return;
+	
+	VARIANT_BOOL visible;
+	labels->get_Visible(&visible);
+	if (!visible) return;
+	
+	if (!CheckDynamicVisibility(labels)) {
+		return;
+	}
+	
+	VARIANT_BOOL avoidCollisions;
+	labels->get_AvoidCollisions(&avoidCollisions);
+	
+	tkVerticalPosition vp;
+	labels->get_VerticalPosition(&vp);
+
+	double scaleFactor = GetScaleFactor(labels);
+
+	// ---------------------------------------------------------------
+	//	 Extracting data
+	// ---------------------------------------------------------------
+	CLabels* lbs = static_cast<CLabels*>(labels);
+	vector<vector<CLabelInfo*>*>* labelData = lbs->get_LabelData();
+	
+	long numCategories;
+	labels->get_NumCategories(&numCategories);
+
+	VARIANT_BOOL bRemoveDuplicates;
+	labels->get_RemoveDuplicates(&bRemoveDuplicates);
+
+	long m_buffer = 0;
+	labels->get_CollisionBuffer(&m_buffer);
+
+	GdiLabelDrawer gdi;
+	GdiPlusLabelDrawer gdiPlus;
+	CRect rect(0, 0, 0, 0);
+	
+	CLabelOptions* m_options = NULL;
+	CStringW wText;
+	
+	IShapefile* sf = lbs->get_ParentShapefile();
+	
+	bool autoOffset = GetAutoOffset(labels, sf);
+	
+	std::vector<ShapeData*>* shapeData = NULL;
+	if (sf)
+	{
+		shapeData = ((CShapefile*)sf)->get_ShapeVector();
+	}
+
+	vector<bool> visibilityMask(numLabels, false);
+	GetVisibilityMask(labels, sf, visibilityMask);
 
 	// removing duplicates
 	std::set<CString> uniqueValues;
 
-	Gdiplus::CompositingQuality compositingQualityInit = Gdiplus::CompositingQualityDefault;
-	Gdiplus::SmoothingMode smoothingModeInit = Gdiplus::SmoothingModeDefault;
-	Gdiplus::TextRenderingHint textRenderingHintInit = Gdiplus::TextRenderingHintSingleBitPerPixelGridFit;
-
 	bool hasRotation = lbs->HasRotation();
 
+	bool useGdiPlus = GetUseGdiPlus(labels);
 	if (!useGdiPlus)
 	{
+		m_hdc = _graphics->GetHDC();
+		_dc = CDC::FromHandle(m_hdc);
 		_dc->SaveDC();
+		_dc->SetBkMode(TRANSPARENT);
+		_dc->SetGraphicsMode(GM_ADVANCED);
 	}
 	else
 	{
-		// applying rendering options
-		compositingQualityInit = _graphics->GetCompositingQuality();
-		smoothingModeInit = _graphics->GetSmoothingMode();
-		textRenderingHintInit = _graphics->GetTextRenderingHint();
-		
-		tkTextRenderingHint textRenderingHint;
-		LabelsClass->get_TextRenderingHint(&textRenderingHint);
-
-		tkSmoothingMode smoothingMode = m_globalSettings.labelsSmoothingMode;
-		tkCompositingQuality compositingQuality = m_globalSettings.labelsCompositingQuality;
-
-		_graphics->SetCompositingQuality((CompositingQuality)compositingQuality);
-		_graphics->SetSmoothingMode((SmoothingMode)smoothingMode);
-		_graphics->SetTextRenderingHint((TextRenderingHint)textRenderingHint);
-		_graphics->SetTextContrast(0u);
+		gdiPlus.InitializeGraphics(_graphics, labels);
 	}
 
 	// sort them if sort field is specified
@@ -417,7 +341,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		{
 			// Drawing with category settings
 			ILabelCategory* cat;
-			LabelsClass->get_Category(iCategory, &cat);
+			labels->get_Category(iCategory, &cat);
 			if (cat == NULL) continue;
 			
 			CLabelCategory* coCat = static_cast<CLabelCategory*>(cat);
@@ -427,7 +351,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		else
 		{
 			// Drawing with standard settings
-			CLabels* coLabels = static_cast<CLabels*>(LabelsClass);
+			CLabels* coLabels = static_cast<CLabels*>(labels);
 			m_options = coLabels->get_LabelOptions();
 		}
 		
@@ -440,62 +364,11 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		// we create separate pens/brushes for each drawing method
 		if (useGdiPlus)
 		{
-			long alphaFont = (m_options->fontTransparency<<24);
-			long alphaFrame = (m_options->frameTransparency<<24);
-			
-			clFont1.SetValue(alphaFont | BGR_TO_RGB(m_options->fontColor));
-			clFont2.SetValue(alphaFont | BGR_TO_RGB(m_options->fontColor2));
-			clFrameBack1.SetValue(alphaFrame | BGR_TO_RGB(m_options->frameBackColor));
-			clFrameBack2.SetValue(alphaFrame | BGR_TO_RGB(m_options->frameBackColor2));
-			
-			gpPenFontOutline = new Pen(Color(alphaFont | BGR_TO_RGB(m_options->fontOutlineColor)), (Gdiplus::REAL)m_options->fontOutlineWidth);
-			gpPenFontOutline->SetLineJoin(Gdiplus::LineJoinRound);
-
-			double haloWidth = fabs(m_options->fontSize/ 16.0 * m_options->haloSize);
-			gpPenHalo = new Pen(Color(alphaFont | BGR_TO_RGB(m_options->haloColor)), (Gdiplus::REAL)haloWidth);
-			gpPenHalo->SetLineJoin(Gdiplus::LineJoinRound);
-
-			gpPenFrameOutline = new Pen(Color(alphaFrame | BGR_TO_RGB(m_options->frameOutlineColor)), (Gdiplus::REAL)m_options->frameOutlineWidth);
-			gpPenFrameOutline->SetDashStyle(DashStyle(m_options->frameOutlineStyle));
-
-			gpBrushFont = new SolidBrush(clFont1);
-			gpBrushFrame = new SolidBrush(clFrameBack1);
-			gpBrushShadow = new SolidBrush(Color(alphaFont | BGR_TO_RGB(m_options->shadowColor)));
-			
-			this->AlignmentToGDIPlus(m_options->inboxAlignment, gpStringFormat);
-
-			gpStringFormat.SetFormatFlags(StringFormatFlagsNoClip);	// doesn't work?
-
-			if (m_globalSettings.autoChooseRenderingHintForLabels)
-			{
-				TextRenderingHint hint = TextRenderingHintSingleBitPerPixelGridFit;
-				if (hasRotation)
-				{
-					if (m_options->frameVisible && m_options->frameTransparency == 255) {
-						hint = TextRenderingHintClearTypeGridFit;
-					}
-					else {
-						hint = TextRenderingHintAntiAlias;
-					}
-					
-				}
-				_graphics->SetTextRenderingHint(hint);
-			}
+			gdiPlus.InitCategory(_graphics, m_options, hasRotation);
 		}
 		else
 		{
-			// TODO: limit options of tkLineStipples maybe part standard penStyles enumeration
-			penFontOutline.CreatePen(PS_SOLID, m_options->fontOutlineWidth, m_options->fontOutlineColor);
-			penFrameOutline.CreatePen(m_options->frameOutlineStyle, m_options->frameOutlineWidth, m_options->frameOutlineColor);
-		
-			double haloWidth = fabs(m_options->fontSize/ 16.0 * m_options->haloSize);
-			penHalo.CreatePen(PS_SOLID, (int)haloWidth, m_options->haloColor);
-
-			// we can select brush at once because it's the only one to use
-			brushFrameBack.CreateSolidBrush(m_options->frameBackColor);
-			oldBrush = _dc->SelectObject(&brushFrameBack);
-			
-			gdiAlignment = AlignmentToGDI(m_options->inboxAlignment);
+			gdi.InitCategory(_dc, m_options);
 		}
 
 		// each different font size must its own font instance
@@ -506,11 +379,11 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		if (!useVariableFontSize) 
 		{
 			if (useGdiPlus) {
-				gpFont = CreateGdiPlusFont(m_options, m_options->fontSize, scaleFactor);
+				gpFont = gdiPlus.CreateFont(m_options, m_options->fontSize, scaleFactor);
 			}
 			else {
-				font = CreateGdiFont(m_options, m_options->fontSize, scaleFactor);
-				oldFont = _dc->SelectObject(font);
+				font = gdi.CreateFont(m_options, m_options->fontSize, scaleFactor);
+				gdi.oldFont = _dc->SelectObject(font);
 			}
 		}
 
@@ -525,7 +398,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				continue;
 			}
 
-			vector<CLabelInfo*>* parts = (*labels)[i];
+			vector<CLabelInfo*>* parts = (*labelData)[i];
 			for (int j =0; j < (int)parts->size(); j++ )
 			{
 				CLabelInfo* lbl = (*parts)[j];
@@ -548,16 +421,21 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 						uniqueValues.insert(lbl->text);
 				}
 
-				//Debug::WriteLine("%d: %s", k, lbl->text);
-
 				// -------------------------------------------------------
 				//	Choosing appropriate font
 				// -------------------------------------------------------
 				if (useVariableFontSize) 
 				{
 					void* fontPtr = NULL;
-					if (!fonts[lbl->fontSize]) {
-						fontPtr = CreateLabelFont(useGdiPlus, m_options, lbl->fontSize, scaleFactor);
+					if (!fonts[lbl->fontSize]) 
+					{
+						if (useGdiPlus) {
+							fontPtr = gdiPlus.CreateFont(m_options, lbl->fontSize, scaleFactor);
+						}
+						else {
+							fontPtr = gdi.CreateFont(m_options, lbl->fontSize, scaleFactor);
+						}
+						
 						fonts[lbl->fontSize] = fontPtr;
 					}
 					else {
@@ -570,8 +448,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 					else {
 						font = (CFont*)fontPtr;
 						CFont* tempFont = _dc->SelectObject(font);
-						if (!oldFont) {
-							oldFont = tempFont;
+						if (!gdi.oldFont) {
+							gdi.oldFont = tempFont;
 						}
 					}
 				}
@@ -588,19 +466,21 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				}
 				else
 				{
+					Gdiplus::RectF* gpRect = &gdiPlus.rect;
+
 					USES_CONVERSION;
 					wText = A2W(lbl->text);
-					_graphics->MeasureString(wText, wText.GetLength(), gpFont, PointF(0.0f, 0.0f), &gpRect);
+					_graphics->MeasureString(wText, wText.GetLength(), gpFont, PointF(0.0f, 0.0f), gpRect);
 					
 					// in some case we lose the last letter by clipping; 
-					gpRect.Width += 1;
-					gpRect.Height +=1;
+					gpRect->Width += 1;
+					gpRect->Height += 1;
 
 					// converting to CRect to prevent duplication in the code below
-					rect.left = static_cast<LONG>(gpRect.X);
-					rect.top = static_cast<LONG>(gpRect.Y);
-					rect.right = static_cast<LONG>(gpRect.X + gpRect.Width);
-					rect.bottom = static_cast<LONG>(gpRect.Y + gpRect.Height);
+					rect.left = static_cast<LONG>(gpRect->X);
+					rect.top = static_cast<LONG>(gpRect->Y);
+					rect.right = static_cast<LONG>(gpRect->X + gpRect->Width);
+					rect.bottom = static_cast<LONG>(gpRect->Y + gpRect->Height);
 				}
 				
 				// laCenter alignment isn't allowed for auto mode
@@ -702,8 +582,8 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 							delete rectNew;	continue;
 						}
 					}
+					
 					// memory must be cleared at this point
-
 					lbl->rotatedFrame = rectNew;
 					lbl->isDrawn = VARIANT_TRUE;
 					if (_collisionList != NULL)
@@ -739,149 +619,18 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 				
 				if (!useGdiPlus)
 				{
-					// ------------------------------------------------------
-					//	GDI drawing w/o transparency, gradients, etc
-					// ------------------------------------------------------
-					XFORM xForm;
-					xForm.eM11 = (FLOAT)cos(angleRad);
-					xForm.eM12 = (FLOAT)sin(angleRad);
-					xForm.eM21 = (FLOAT)-sin(angleRad);
-					xForm.eM22 = (FLOAT)cos(angleRad);
-					xForm.eDx =	(FLOAT)piX;
-					xForm.eDy =	(FLOAT)piY;
-					_dc->SetWorldTransform(&xForm);
-
-					// drawing frame
-					if (m_options->frameVisible)
-					{
-						oldPen = _dc->SelectObject(&penFrameOutline);
-						DrawLabelFrameGdi(_dc, &rect, m_options);
-						_dc->SelectObject(oldPen);
-					}
-
-					// drawing outlines
-					if (m_options->shadowVisible)
-					{
-						_dc->SetWindowOrg(-m_options->shadowOffsetX , -m_options->shadowOffsetY);
-						_dc->SetTextColor(m_options->shadowColor);
-						_dc->DrawText(lbl->text, rect, gdiAlignment);
-						_dc->SetTextColor(m_options->fontColor);
-						_dc->SetWindowOrg(0,0);
-					}
-
-					if  (m_options->haloVisible)
-					{
-						_dc->BeginPath();
-						_dc->DrawText(lbl->text,rect, gdiAlignment);
-						_dc->EndPath();					
-						oldPen = _dc->SelectObject(&penHalo);
-						_dc->StrokePath();
-						_dc->SelectObject(oldPen);
-					}
-
-					if(m_options->fontOutlineVisible)
-					{
-						_dc->BeginPath();
-						_dc->DrawText(lbl->text,rect, gdiAlignment);
-						_dc->EndPath();					
-						oldPen = _dc->SelectObject(&penFontOutline);
-						_dc->StrokePath();
-						_dc->SelectObject(oldPen);
-					}
-
-					_dc->DrawText(lbl->text, rect, gdiAlignment);	// TODO: make a property (left/center/right)
+					gdi.DrawLabel(_dc, m_options, lbl, rect, angleRad, piX, piY);
 				}
 				else
 				{
-					// ------------------------------------------------------
-					//	GDI+ drawing with transparency, gradients, etc
-					// ------------------------------------------------------
-					gpRect.X = (Gdiplus::REAL)rect.left;
-					gpRect.Y = (Gdiplus::REAL)rect.top;
-					gpRect.Width = (Gdiplus::REAL)rect.Width();
-					gpRect.Height = (Gdiplus::REAL)rect.Height();
-
-
-					Gdiplus::Matrix mtxInit;
-					_graphics->GetTransform(&mtxInit);
-					
-
-					//Gdiplus::Matrix mtx;
-					//mtx.Translate((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
-					//mtx.Rotate((Gdiplus::REAL)angle);
-					//_graphics->SetTransform(&mtx);
-					
-					_graphics->TranslateTransform((Gdiplus::REAL)piX, (Gdiplus::REAL)piY);
-					_graphics->RotateTransform((Gdiplus::REAL)angle);
-					
-					// drawing frame
-					if (m_options->frameTransparency != 0 && m_options->frameVisible)
-					{
-						if (m_options->frameGradientMode != gmNone)
-						{
-							gpBrushFrameGrad = new LinearGradientBrush(gpRect, clFrameBack1, clFrameBack2, (LinearGradientMode)m_options->frameGradientMode);
-							this->DrawLabelFrameGdiPlus(*_graphics, gpBrushFrameGrad, *gpPenFrameOutline, gpRect, m_options);
-							delete gpBrushFrameGrad;
-						}
-						else
-						{
-							this->DrawLabelFrameGdiPlus(*_graphics, gpBrushFrame, *gpPenFrameOutline, gpRect, m_options);
-						}
-					}
-					
-					if (m_options->fontTransparency != 0)
-					{
-						bool pathNeeded = m_options && (m_options->shadowVisible || m_options->haloVisible || m_options->fontOutlineVisible);
-						GraphicsPath* gp = NULL;
-						if (pathNeeded)
-						{
-							gp = new GraphicsPath();
-							gp->StartFigure();
-							FontFamily fam; 
-							gpFont->GetFamily(&fam);
-							gp->AddString(wText, wText.GetLength(), &fam, gpFont->GetStyle(), gpFont->GetSize(), gpRect, &gpStringFormat);
-							gp->CloseFigure();
-						}
-
-						// drawing outlines
-						if (m_options->shadowVisible)
-						{
-							Gdiplus::Matrix mtx1;
-							mtx1.Translate((Gdiplus::REAL)m_options->shadowOffsetX, (Gdiplus::REAL)m_options->shadowOffsetY);
-							gp->Transform(&mtx1);
-							_graphics->FillPath(gpBrushShadow, gp);
-							mtx1.Translate(Gdiplus::REAL(-2* m_options->shadowOffsetX), Gdiplus::REAL(-2 * m_options->shadowOffsetY));
-							gp->Transform(&mtx1);
-						}
-
-						if  (m_options && m_options->haloVisible)
-							_graphics->DrawPath(gpPenHalo, gp);
-
-						if(m_options->fontOutlineVisible)
-							_graphics->DrawPath(gpPenFontOutline, gp);
-
-						if (m_options->fontGradientMode != gmNone)
-						{
-							gpBrushFontGrad = new LinearGradientBrush(gpRect, clFont1, clFont2, (LinearGradientMode)m_options->fontGradientMode);
-							_graphics->DrawString(wText, wText.GetLength(), gpFont, gpRect, &gpStringFormat, gpBrushFontGrad);	// TODO: we need speed test here to choose the function
-							delete gpBrushFontGrad;
-						}
-						else
-						{
-							_graphics->DrawString(wText, wText.GetLength(), gpFont, gpRect, &gpStringFormat, gpBrushFont);
-						}
-						if (pathNeeded) {
-							delete gp;
-						}
-					}
-					_graphics->SetTransform(&mtxInit);
+					gdiPlus.DrawLabel(_graphics, m_options, gpFont, rect, wText, piX, piY, angle);
 				}
 			}
 		} // label
 
 		// cleaning fonts
 		if (!useGdiPlus)  {
-			_dc->SelectObject(oldFont);
+			_dc->SelectObject(gdi.oldFont);
 		}
 
 		if (useVariableFontSize) 
@@ -920,20 +669,12 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 		// cleaning objects
 		if (!useGdiPlus)
 		{
-			_dc->SelectObject(oldBrush);
-			brushFrameBack.DeleteObject();
-			penFontOutline.DeleteObject();
-			penFrameOutline.DeleteObject();
-			penHalo.DeleteObject();
+			_dc->SelectObject(gdi.oldBrush);
+			gdi.Release();
 		}
 		else
 		{
-			delete gpPenFontOutline;
-			delete gpPenHalo;
-			delete gpPenFrameOutline;
-			delete gpBrushFont;
-			delete gpBrushFrame;
-			delete gpBrushShadow;
+			gdiPlus.Release();
 		}
 	} // category
 	
@@ -941,9 +682,7 @@ void CLabelDrawer::DrawLabels( ILabels* LabelsClass )
 	// restoring rendering options
 	if (useGdiPlus)
 	{
-		_graphics->SetCompositingQuality(compositingQualityInit);
-		_graphics->SetSmoothingMode(smoothingModeInit);
-		_graphics->SetTextRenderingHint(textRenderingHintInit);
+		gdiPlus.RestoreGraphics(_graphics);
 	}
 	else
 	{
@@ -1003,95 +742,6 @@ void CLabelDrawer::CalcRotation(CLabelInfo* lbl, double& angle )
 	}
 }
 
-// ********************************************************************
-//		DrawLabelFrameGdiPlus
-// ********************************************************************
-void CLabelDrawer::DrawLabelFrameGdi(CDC* dc,  CRect* rect, CLabelOptions* m_options )
-{
-	switch (m_options->frameType)
-	{
-		case lfRectangle:
-			dc->Rectangle(rect->left, rect->top, rect->right, rect->bottom);
-			break;
-		case lfRoundedRectangle:
-			dc->RoundRect(rect->left, rect->top, rect->right, rect->bottom, rect->Height(), rect->Height());
-			break;
-		case lfPointedRectangle:
-			dc->BeginPath();
-			dc->MoveTo(rect->left, rect->top);
-			dc->LineTo(rect->right, rect->top);
-			dc->LineTo(rect->right + rect->Height()/4, (rect->top + rect->bottom)/2);
-			dc->LineTo(rect->right, rect->bottom);
-			dc->LineTo(rect->left, rect->bottom);
-			dc->LineTo(rect->left - rect->Height()/4, (rect->top + rect->bottom)/2);
-			dc->LineTo(rect->left, rect->top);
-			dc->EndPath();
-			dc->StrokeAndFillPath();
-			break;
-	}
-	return;
-}
-
-// ********************************************************************
-//		DrawLabelFrameGdiPlus
-// ********************************************************************
-void CLabelDrawer::DrawLabelFrameGdiPlus(Gdiplus::Graphics& graphics, Gdiplus::Brush* brush, Gdiplus::Pen& pen, Gdiplus::RectF& rect, CLabelOptions* m_options)
-{
-	switch (m_options->frameType)
-	{
-		case lfRectangle:
-			_graphics->FillRectangle(brush, rect);
-			_graphics->DrawRectangle(&pen, rect);
-			break;
-		case lfRoundedRectangle:
-		{						
-			float left = rect.X;
-			float right = rect.X + rect.Width;
-			float top = rect.Y;
-			float bottom = rect.Y + rect.Height;
-
-			Gdiplus::GraphicsPath* path = new Gdiplus::GraphicsPath();
-			path->StartFigure();
-			
-			path->AddLine(left + rect.Height, top, right - rect.Height, top);
-			path->AddArc(right - rect.Height, top, rect.Height, rect.Height, -90.0, 180.0);
-			path->AddLine(right - rect.Height, bottom, left + rect.Height, bottom);
-			path->AddArc(left, top, rect.Height, rect.Height, 90.0, 180.0);
-			path->CloseFigure();
-			_graphics->FillPath(brush, path);
-			_graphics->DrawPath(&pen, path);
-			delete path;
-			break;
-		}
-		case lfPointedRectangle:
-		{
-			float left = rect.X;
-			float right = rect.X + rect.Width;
-			float top = rect.Y;
-			float bottom = rect.Y + rect.Height;
-			
-			Gdiplus::GraphicsPath* path = new Gdiplus::GraphicsPath();
-			path->StartFigure();
-			path->AddLine(left + rect.Height/4, top, right - rect.Height/4, top);
-
-			path->AddLine(right - rect.Height/4, top, right, (top + bottom)/2);
-			path->AddLine(right, (top + bottom)/2, right - rect.Height/4, bottom);
-
-			path->AddLine(right - rect.Height/4, bottom, left + rect.Height/4, bottom);
-			
-			path->AddLine(left + rect.Height/4, bottom, left, (top + bottom)/2);
-			path->AddLine(left, (top + bottom)/2, left + rect.Height/4, top);
-			
-			path->CloseFigure();
-			_graphics->FillPath(brush, path);
-			_graphics->DrawPath(&pen, path);
-			delete path;
-			break;
-		}
-	}
-	return;
-}
-
 // ****************************************************************
 //		AlignRectangle
 // ****************************************************************
@@ -1132,43 +782,3 @@ inline void CLabelDrawer::AlignRectangle(CRect& rect, tkLabelAlignment alignment
 	}
 	return;
 }
-
-// *****************************************************************
-//		Converts label alignment to GDI constants
-// *****************************************************************
-inline UINT CLabelDrawer::AlignmentToGDI(tkLabelAlignment alignment)
-{
-	switch (alignment)
-	{
-		case laCenter:			return DT_VCENTER | DT_CENTER | DT_NOCLIP;
-		case laCenterLeft:		return DT_VCENTER | DT_LEFT | DT_NOCLIP;
-		case laCenterRight:		return DT_VCENTER | DT_RIGHT | DT_NOCLIP;
-		case laBottomCenter:	return DT_BOTTOM | DT_CENTER | DT_NOCLIP;
-		case laBottomLeft:		return DT_BOTTOM | DT_LEFT | DT_NOCLIP;
-		case laBottomRight:		return DT_BOTTOM | DT_RIGHT | DT_NOCLIP;
-		case laTopCenter:		return DT_TOP | DT_CENTER | DT_NOCLIP;
-		case laTopLeft:			return DT_TOP | DT_LEFT | DT_NOCLIP;
-		case laTopRight:		return DT_TOP | DT_RIGHT | DT_NOCLIP;
-		default:				return DT_VCENTER | DT_RIGHT | DT_NOCLIP;
-	}
-}
-
-// *****************************************************************
-//		Converts label alignment to GDI+ constants
-// *****************************************************************
-inline void CLabelDrawer::AlignmentToGDIPlus(tkLabelAlignment alignment, Gdiplus::StringFormat& format)
-{
-	switch (alignment)
-	{
-		case laCenter:			format.SetAlignment(StringAlignmentCenter);		format.SetLineAlignment(StringAlignmentCenter); break;
-		case laCenterLeft:		format.SetAlignment(StringAlignmentNear);		format.SetLineAlignment(StringAlignmentCenter); break;
-		case laCenterRight:		format.SetAlignment(StringAlignmentFar);		format.SetLineAlignment(StringAlignmentCenter); break;
-		case laBottomCenter:	format.SetAlignment(StringAlignmentCenter);		format.SetLineAlignment(StringAlignmentFar); break;
-		case laBottomLeft:		format.SetAlignment(StringAlignmentNear);		format.SetLineAlignment(StringAlignmentFar); break;
-		case laBottomRight:		format.SetAlignment(StringAlignmentFar);		format.SetLineAlignment(StringAlignmentFar); break;
-		case laTopCenter:		format.SetAlignment(StringAlignmentCenter);		format.SetLineAlignment(StringAlignmentNear); break;
-		case laTopLeft:			format.SetAlignment(StringAlignmentNear);		format.SetLineAlignment(StringAlignmentNear); break;
-		case laTopRight:		format.SetAlignment(StringAlignmentFar);		format.SetLineAlignment(StringAlignmentNear); break;
-	}
-}
-

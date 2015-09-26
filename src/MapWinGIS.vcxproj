@@ -57,7 +57,10 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <TargetExt>.ocx</TargetExt>
-    <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <!-- Common properties for all configurations and platforms -->
   <ItemDefinitionGroup>
@@ -239,6 +242,8 @@
     <ClInclude Include="Drawing\ChartDrawing.h" />
     <ClInclude Include="Drawing\CollisionList.h" />
     <ClInclude Include="Drawing\DrawingOptions.h" />
+    <ClInclude Include="Drawing\GdiLabelDrawer.h" />
+    <ClInclude Include="Drawing\GdiPlusLabelDrawer.h" />
     <ClInclude Include="Drawing\ImageDrawing.h" />
     <ClInclude Include="Drawing\LabelDrawing.h" />
     <ClInclude Include="Drawing\LabelOptions.h" />
@@ -554,6 +559,8 @@
     <ClCompile Include="Drawing\ChartDrawing.cpp" />
     <ClCompile Include="Drawing\CollisionList.cpp" />
     <ClCompile Include="Drawing\DrawingOptions.cpp" />
+    <ClCompile Include="Drawing\GdiLabelDrawer.cpp" />
+    <ClCompile Include="Drawing\GdiPlusLabelDrawer.cpp" />
     <ClCompile Include="Drawing\ImageDrawing.cpp" />
     <ClCompile Include="Drawing\LabelDrawing.cpp" />
     <ClCompile Include="Drawing\LabelOptions.cpp" />

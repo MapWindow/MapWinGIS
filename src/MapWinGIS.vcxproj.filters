@@ -870,6 +870,12 @@
     <ClInclude Include="COM classes\Expression.h">
       <Filter>COM classes\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="Drawing\GdiLabelDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawing\GdiPlusLabelDrawer.h">
+      <Filter>Drawing</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COM classes\Chart.cpp">
@@ -1850,6 +1856,12 @@
     </ClCompile>
     <ClCompile Include="COM classes\Expression.cpp">
       <Filter>COM classes\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\GdiLabelDrawer.cpp">
+      <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawing\GdiPlusLabelDrawer.cpp">
+      <Filter>Drawing</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

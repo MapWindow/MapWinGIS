@@ -58,7 +58,11 @@ private:
 	inline UINT AlignmentToGDI(tkLabelAlignment alignment);
 	inline void AlignmentToGDIPlus(tkLabelAlignment alignment, Gdiplus::StringFormat& format);
 	void CalcRotation(CLabelInfo* lbl, double& angle);
-	CFont* CreateGdiFont(CLabelOptions* options, long fontSize, double scaleFactor);
-	Gdiplus::Font* CreateGdiPlusFont(CLabelOptions* options, double fontSize, double scaleFactor);
 	void* CreateLabelFont(bool gdiPlus, CLabelOptions* options, long fontSize, double scaleFactor);
+	void GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask);
+	double GetScaleFactor(ILabels* labels);
+	bool CheckDynamicVisibility(ILabels* labels);
+	bool GetUseGdiPlus(ILabels* labels);
+	bool GetAutoOffset(ILabels* labels, IShapefile* sf);
+	bool GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<long>& filter);
 };
