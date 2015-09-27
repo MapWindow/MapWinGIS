@@ -311,7 +311,7 @@ void GdiPlusLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& r)
 // *********************************************************************
 // 		SelectFont()										
 // *********************************************************************
-void GdiPlusLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize)
+void GdiPlusLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor)
 {
 	if (!_fonts[lbl->fontSize])
 	{

@@ -93,7 +93,7 @@ public:
 
 	void SelectFont(CLabelOptions* options, double fontSize, double scaleFactor);
 
-	void SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize);
+	void SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor);
 
 	void ReleaseForCategory(bool useVariableFontSize) {
 		ReleaseObjects();

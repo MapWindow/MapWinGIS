@@ -94,7 +94,7 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 	InitSettings(settings, labels, sf);
 	
 	vector<bool> visibilityMask(settings.numLabels, false);
-	GetVisibilityMask(labels, sf, visibilityMask);
+	GetVisibilityMask(labels, sf, shapeData, visibilityMask);
 
 	// sort them if sort field is specified
 	vector<long>* indices = NULL;
@@ -188,10 +188,10 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 				if (settings.useVariableFontSize)
 				{
 					if (useGdiPlus) {
-						gdiPlus.SelectFont(options, lbl, settings.scaleFactor, lbl->fontSize);
+						gdiPlus.SelectFont(options, lbl, settings.scaleFactor);
 					}
 					else {
-						gdi.SelectFont(options, lbl, settings.scaleFactor, lbl->fontSize);
+						gdi.SelectFont(options, lbl, settings.scaleFactor);
 					}
 				}
 
@@ -417,7 +417,7 @@ bool CLabelDrawer::GetExpressionFilter(ILabels* labels, IShapefile* sf, vector<l
 // *********************************************************************
 // 					GetVisibilityMask()										
 // *********************************************************************
-void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask)
+void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<ShapeData*>* shapeData, std::vector<bool>& visibilityMask)
 {
 	vector<long> filter;
 	bool hasFilter = GetExpressionFilter(labels, sf, filter);
@@ -437,8 +437,7 @@ void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vecto
 		for (long i = 0; i < size; i++)
 		{
 			long index = hasFilter ? filter[i] : i;
-			visibilityMask[index] = true; // (*shapeData)[index]->size >= minSize;
-			// TODO: restore
+			visibilityMask[index] = (*shapeData)[index]->wasRendered && (*shapeData)[index]->size >= minSize;
 		}
 	}
 	else

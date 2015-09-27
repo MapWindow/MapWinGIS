@@ -631,6 +631,22 @@ void CShapefileDrawer::DrawCategory(CDrawingOptionsEx* options, std::vector<int>
 
 #pragma region DrawPointCategory
 
+// *************************************************************
+//		GetVisibilityMask()
+// *************************************************************
+void CShapefileDrawer::GetVisibilityMask(std::vector<int>& indices, vector<bool>& visibilityMask) 
+{
+	long numShapes;
+	_shapefile->get_NumShapes(&numShapes);
+
+	visibilityMask.clear();
+	visibilityMask.resize(numShapes, false);
+
+	for (size_t i = 0; i < indices.size(); i++)
+	{
+		visibilityMask[indices[i]] = true;
+	}
+}
 
 // *************************************************************
 //		DrawPointsCategory()
@@ -746,7 +762,7 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 		pntShape = pshPolygon;
 	}
 
-	// frame for s symbol
+	// frame for a symbol
 	if (path && options->drawFrame)
 	{
 		path2 = options->GetFrameForPath(*path);
@@ -762,10 +778,29 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	tkCollisionMode collisionMode;
 	_shapefile->get_CollisionMode(&collisionMode);
 
-	
-	for (int j = 0; j < (int)indices->size(); j++)
+	// sorting
+	vector<long>* sorting;
+	((CShapefile*)_shapefile)->GetSorting(&sorting);
+	bool hasSorting = sorting != NULL && sorting->size() > 0;
+
+	vector<bool> visibilityMask;
+	if (hasSorting)  {
+		GetVisibilityMask(*indices, visibilityMask);
+	}
+
+	size_t numShapes = hasSorting ? visibilityMask.size() : indices->size();
+
+	for (int j = 0; j < (int)numShapes; j++)
 	{
-		shapeIndex = (*indices)[j];
+		if (hasSorting){
+			if (!visibilityMask[j]) {
+				continue;
+			}
+			shapeIndex = (*sorting)[j];
+		}
+		else {
+			shapeIndex = (*indices)[j];
+		}
 		
 		// ------------------------------------------------------
 		//	 Reading point data

@@ -181,15 +181,15 @@ void GdiLabelDrawer::MeasureString(CLabelInfo* lbl, CRect& rect)
 // *********************************************************************
 // 					SelectFont()										
 // *********************************************************************
-void GdiLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize)
+void GdiLabelDrawer::SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor)
 {
 	CFont* fontNew = NULL;
 
 	if (!_fonts[lbl->fontSize])
 	{
-		CFont* font = CreateFont(options, lbl->fontSize, scaleFactor);
-		fontNew = _fonts[lbl->fontSize] = font;
-		
+		CFont* font = CreateFont(options, lbl->fontSize, scaleFactor); 
+		_fonts[lbl->fontSize] = font;
+		fontNew = font;
 	}
 	else {
 		fontNew = _fonts[lbl->fontSize];

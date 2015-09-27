@@ -44,7 +44,7 @@ public:
 
 	void SelectFont(CLabelOptions* options, long fontSize, double scaleFactor);
 
-	void SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor, long fontSize);
+	void SelectFont(CLabelOptions* options, CLabelInfo* lbl, double scaleFactor);
 
 	void InitDc(Gdiplus::Graphics* g)
 	{

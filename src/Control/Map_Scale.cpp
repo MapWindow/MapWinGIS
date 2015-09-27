@@ -1253,7 +1253,7 @@ void CMapView::LogPrevExtent()
 {
 	if (MapIsEmpty()) return;
 
-	// may they are the same extents
+	// maybe they are the same extents
 	if (ValidatePreviousExtent())
 	{
 		if (_extents == _prevExtents[_prevExtentsIndex]) return;
@@ -1274,13 +1274,14 @@ void CMapView::LogPrevExtent()
 
 	// add new extent
 	_prevExtents.push_back( _extents );
-	_prevExtentsIndex = _prevExtents.size() - 1;
 
 	// make sure that it's no longer than expected
 	if (_extentHistoryCount > 0 && (long)_prevExtents.size() > _extentHistoryCount)
 	{
 		_prevExtents.erase(_prevExtents.begin());
 	}
+
+	_prevExtentsIndex = _prevExtents.size() - 1;
 }
 
 // ***************************************************

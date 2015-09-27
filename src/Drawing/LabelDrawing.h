@@ -27,6 +27,7 @@
 #include "LabelOptions.h"
 #include "CollisionList.h"
 #include "BaseDrawer.h"
+#include "ShapeInfo.h"
 
 class CLabelDrawer: public CBaseDrawer
 {
@@ -95,7 +96,7 @@ private:
 	bool HaveCollision(CRect& rect);
 	CLabelOptions* GetCategoryOptions(ILabels* labels, int categoryIndex);
 	double GetScaleFactor(ILabels* labels);
-	void GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<bool>& visibilityMask);
+	void GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vector<ShapeData*>* shapeData, std::vector<bool>& visibilityMask);
 	bool CheckDynamicVisibility(ILabels* labels);
 	bool GetUseGdiPlus(ILabels* labels);
 	bool GetAutoOffset(ILabels* labels, IShapefile* sf);

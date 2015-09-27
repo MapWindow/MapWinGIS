@@ -404,7 +404,9 @@ void CShapefile::RegisterNewShape(IShape* Shape, long ShapeIndex)
 			}
 		}
 	}
-	
+
+	_sortingChanged = true;
+
 	// extending the bounds of the shapefile we don't care if the bounds became less
 	// it's necessary to call RefreshExtents in this case, for zoom to layer working right
 	if (!ShapeHelper::IsEmpty(Shape))
@@ -684,9 +686,10 @@ STDMETHODIMP CShapefile::EditDeleteShape(long ShapeIndex, VARIANT_BOOL *retval)
 				
 				delete _shapeData[ShapeIndex];
 				_shapeData.erase( _shapeData.begin() + ShapeIndex );
-				
-				// TODO: why haven't we updated QTree?
 
+				_sortingChanged = true;
+
+				// TODO: why haven't we updated QTree?
 				*retval = VARIANT_TRUE;
 			}
 		}
@@ -753,6 +756,9 @@ STDMETHODIMP CShapefile::EditClear(VARIANT_BOOL *retval)
 		{
 			_labels->Clear();
 		}
+
+		_sortingChanged = true;
+
 		*retval = VARIANT_TRUE;
 	}
 	

@@ -2025,7 +2025,9 @@ bool CLabels::DeserializeLabelData(CPLXMLNode* node, bool loadRotation, bool loa
 		
 	// let's try to sync
 	this->put_Synchronized(VARIANT_TRUE);
-		
+
+	_fontSizeChanged = true;		
+
 	return true;
 }
 

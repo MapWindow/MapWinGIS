@@ -152,6 +152,8 @@ private:
 
 	void DrawCategory(CDrawingOptionsEx* options, std::vector<int>* indices, bool drawSelection);
 
+	void GetVisibilityMask(std::vector<int>& indices, vector<bool>& visibilityMask);
+
 	bool WithinVisibleExtents(double xMin, double xMax, double yMin, double yMax)
 	{
 		bool result = !(xMin > _extents->right || xMax < _extents->left || yMin > _extents->top || yMax < _extents->bottom);
@@ -175,5 +177,5 @@ private:
 			_dc = NULL;
 		}
 	}
-	//bool HavePointCollision(CRect* rect);
+	
 };
