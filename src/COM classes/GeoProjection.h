@@ -132,6 +132,8 @@ public:
 	STDMETHOD(Clone)(IGeoProjection** retVal);
 	STDMETHOD(get_IsFrozen)(VARIANT_BOOL* retVal);
 	STDMETHOD(TryAutoDetectEpsg)(int* epsgCode, VARIANT_BOOL* retVal);
+	STDMETHOD(WriteToFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
+	STDMETHOD(ReadFromFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
 
 private:
 	OGRSpatialReference* _projection;
@@ -144,6 +146,9 @@ private:
 private:
 	void ErrorMessage(long ErrorCode);
 	bool IsSameProjection(OGRCoordinateTransformation* transf, double x, double y, bool projected);
+	bool ReadFromFileCore(CStringW filename, bool esri);
+	bool WriteToFileCore(CStringW filename, bool esri);
+	void ReportOgrError(long ErrorCode);
 
 public:
 	OGRSpatialReference* get_SpatialReference() { return _projection; }

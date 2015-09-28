@@ -838,7 +838,7 @@ STDMETHODIMP CTableClass::SaveAs(BSTR dbfFilename, ICallback *cBack, VARIANT_BOO
 		return S_OK;
 	}
 	
-	BSTR state;
+	CComBSTR state;
 	this->Serialize(&state);
 	this->Open(dbfFilename,cBack,retval);		
 	this->Deserialize(state);

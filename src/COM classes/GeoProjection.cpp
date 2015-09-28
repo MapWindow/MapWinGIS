@@ -96,43 +96,51 @@ STDMETHODIMP CGeoProjection::get_LastErrorCode(long *pVal)
 }
 
 // **************************************************************
+//		ReportOgrError()
+// **************************************************************
+void CGeoProjection::ReportOgrError(long ErrorCode)
+{
+	// converting OGRErr code to MapWinGIS error code
+	long code = tkNO_ERROR;
+	switch (ErrorCode)
+	{
+		case OGRERR_CORRUPT_DATA:
+			code = tkOGR_CORRUPT_DATA;
+			break;
+		case OGRERR_NOT_ENOUGH_MEMORY:
+			code = tkOGR_NOT_ENOUGH_MEMORY;
+			break;
+		case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
+			code = tkOGR_UNSUPPORTED_GEOMETRY_TYPE;
+			break;
+		case OGRERR_UNSUPPORTED_OPERATION:
+			code = tkOGR_UNSUPPORTED_OPERATION;
+			break;
+		case OGRERR_FAILURE:
+			code = tkOGR_FAILURE;
+			break;
+		case OGRERR_UNSUPPORTED_SRS:
+			code = tkOGR_UNSUPPORTED_SRS;
+			break;
+		case OGRERR_INVALID_HANDLE:
+			code = tkOGR_INVALID_HANDLE;
+			break;
+	}
+
+	if (code != tkNO_ERROR)
+	{
+		ErrorMessage(code);
+	}
+}
+
+// **************************************************************
 //		ErrorMessage()
 // **************************************************************
 void CGeoProjection::ErrorMessage(long ErrorCode)
 {
-	// converting OGRErr code to MapWinGIS error code
-	long code = tkNO_ERROR;
-	switch(ErrorCode)
-	{
-		case OGRERR_CORRUPT_DATA:
-			code = tkOGR_CORRUPT_DATA;
-         break;
-		case OGRERR_NOT_ENOUGH_MEMORY:
-			code = tkOGR_NOT_ENOUGH_MEMORY;
-         break;
-		case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
-			code = tkOGR_UNSUPPORTED_GEOMETRY_TYPE;
-         break;
-		case OGRERR_UNSUPPORTED_OPERATION:
-			code = tkOGR_UNSUPPORTED_OPERATION;
-         break;
-		case OGRERR_FAILURE:
-			code = tkOGR_FAILURE;
-         break;
-		case OGRERR_UNSUPPORTED_SRS:
-			code = tkOGR_UNSUPPORTED_SRS;
-         break;
-		case OGRERR_INVALID_HANDLE:
-			code = tkOGR_INVALID_HANDLE;
-         break;
-	}
-	
-	_lastErrorCode = code;
-	if (code != tkNO_ERROR) 
-	{
-		CString msg = ErrorMsg(_lastErrorCode);
-		CallbackHelper::ErrorMsg("GeoProjection", _globalCallback, _key, msg);
-	}
+	_lastErrorCode = ErrorCode;
+	CString msg = ErrorMsg(_lastErrorCode);
+	CallbackHelper::ErrorMsg("GeoProjection", _globalCallback, _key, msg);
 }
 
 // ************************************************************
@@ -178,7 +186,7 @@ STDMETHODIMP CGeoProjection::ExportToProj4(BSTR* retVal)
 	}
 	else
 	{
-		ErrorMessage(err);
+		ReportOgrError(err);
 		*retVal = A2BSTR("");
 	}
 	if (proj)
@@ -206,7 +214,7 @@ STDMETHODIMP CGeoProjection::ImportFromProj4(BSTR proj, VARIANT_BOOL* retVal)
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
 		{
-			ErrorMessage(err);
+			ReportOgrError(err);
 		}
 	}
 	return S_OK;
@@ -271,7 +279,7 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
 		{
-			ErrorMessage(err);
+			ReportOgrError(err);
 		}
 	}
 	return S_OK;
@@ -305,7 +313,7 @@ STDMETHODIMP CGeoProjection::ImportFromEPSG(LONG projCode, VARIANT_BOOL* retVal)
 		*retVal = (err == OGRERR_NONE) ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
 		{
-			ErrorMessage(err);
+			ReportOgrError(err);
 		}
 	}
 	return S_OK;
@@ -332,7 +340,7 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 	}
 	else
 	{
-		ErrorMessage(err);
+		ReportOgrError(err);
 		*retVal = A2BSTR("");
 	}
 	if (proj)
@@ -360,7 +368,7 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
 		{
-			ErrorMessage(err);
+			ReportOgrError(err);
 		}
 	}
 	return S_OK;
@@ -762,41 +770,64 @@ STDMETHODIMP CGeoProjection::CopyFrom(IGeoProjection* sourceProj, VARIANT_BOOL* 
 STDMETHODIMP CGeoProjection::ReadFromFile(BSTR filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retVal = VARIANT_FALSE;
 
-	if (_isFrozen)
-	{
-		ErrorMessage(tkPROJECTION_IS_FROZEN);
-		return S_OK;
-	}
-	
 	USES_CONVERSION;
 	CStringW filenameW = OLE2W(filename);
 
-	if (!Utility::FileExistsW(filenameW))
-		return S_OK;
+	*retVal = ReadFromFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
 	
-	char** papszPrj = GdalHelper::ReadFile(filenameW);
+	return S_OK;
+}
 
-	if (!papszPrj) return S_OK;
+// ************************************************************
+//		ReadFromFileEx
+// ************************************************************
+STDMETHODIMP CGeoProjection::ReadFromFileEx(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	USES_CONVERSION;
+	CStringW filenameW = OLE2W(filename);
+
+	*retVal = ReadFromFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
+
+	return S_OK;
+}
+
+// ************************************************************
+//		ReadFromFileCore
+// ************************************************************
+bool CGeoProjection::ReadFromFileCore(CStringW filename, bool esri)
+{
+	if (_isFrozen)
+	{
+		ErrorMessage(tkPROJECTION_IS_FROZEN);
+		return false;
+	}
+
+	if (!Utility::FileExistsW(filename))
+		return false;
+
+	char** papszPrj = GdalHelper::ReadFile(filename);
+
+	if (!papszPrj) return false;
 
 	// passing the first string only
 	// to keep safe the initial pointer to array
 	char* pszWKT = CPLStrdup(papszPrj[0]);
 
-	OGRErr err = _projection->SetFromUserInput(pszWKT);
-		
+	OGRErr err = esri ? _projection->importFromESRI(papszPrj) : _projection->SetFromUserInput(pszWKT);
+
 	CSLDestroy(papszPrj);
 	CPLFree(pszWKT);
 
 	if (err != OGRERR_NONE)
 	{
-		ErrorMessage(err);
-		return S_OK;
+		ReportOgrError(err);
+		return false;
 	}
 
-	*retVal  = VARIANT_TRUE;
-	return S_OK;
+	return true;
 }
 
 // *******************************************************
@@ -806,31 +837,62 @@ STDMETHODIMP CGeoProjection::WriteToFile(BSTR filename, VARIANT_BOOL* retVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	*retVal = VARIANT_FALSE;
+	USES_CONVERSION;
+	CStringW filenameW = OLE2W(filename);
+
+	*retVal = WriteToFileCore(filenameW, false) ? VARIANT_TRUE : VARIANT_FALSE;
+	
+	return S_OK;
+}
+
+// ************************************************************
+//		WriteToFileEx
+// ************************************************************
+STDMETHODIMP CGeoProjection::WriteToFileEx(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	USES_CONVERSION;
-	CString name = OLE2CA(filename);
+	CStringW filenameW = OLE2W(filename);
 
-	if (name.CompareNoCase("") == 0)
-		return S_OK;
-	
-	FILE * prjFile = fopen(name, "wb");
-	if (prjFile)
-	{
-		char* proj = NULL;
-		_projection->exportToWkt(&proj);
-		if (proj != NULL && strlen(proj) > 0)
-		{
-			fprintf(prjFile, "%s", proj);
-			CPLFree(proj);
-		}
+	*retVal = WriteToFileCore(filenameW, esri ? true : false) ? VARIANT_TRUE : VARIANT_FALSE;
 
-		fclose(prjFile);
-		prjFile = NULL;
-		
-		*retVal  = VARIANT_TRUE;
-	}
 	return S_OK;
+}
+
+// ************************************************************
+//		WriteToFileCore
+// ************************************************************
+bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
+{
+	if (filename.CompareNoCase(L"") == 0)
+		return false;
+
+	FILE * prjFile = _wfopen(filename, L"wb");
+	if (!prjFile) {
+		return false;
+	}
+
+	char* proj = NULL;
+	if (esri) {
+		_projection->morphToESRI();
+		_projection->exportToWkt(&proj);
+		_projection->morphFromESRI();
+	}
+	else {
+		_projection->exportToWkt(&proj);
+	}
+
+	if (proj != NULL && strlen(proj) > 0)
+	{
+		fprintf(prjFile, "%s", proj);
+		CPLFree(proj);
+	}
+
+	fclose(prjFile);
+	prjFile = NULL;
+
+	return true;
 }
 
 // *******************************************************
@@ -1135,3 +1197,5 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	*retVal = *epsgCode != -1 ? VARIANT_TRUE: VARIANT_FALSE;
 	return S_OK;
 }
+
+

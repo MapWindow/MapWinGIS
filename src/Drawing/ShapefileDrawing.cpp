@@ -793,10 +793,12 @@ void CShapefileDrawer::DrawPointCategory( CDrawingOptionsEx* options, std::vecto
 	for (int j = 0; j < (int)numShapes; j++)
 	{
 		if (hasSorting){
-			if (!visibilityMask[j]) {
+
+			shapeIndex = (*sorting)[j];
+
+			if (!visibilityMask[shapeIndex]) {
 				continue;
 			}
-			shapeIndex = (*sorting)[j];
 		}
 		else {
 			shapeIndex = (*indices)[j];

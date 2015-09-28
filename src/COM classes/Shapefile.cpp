@@ -669,7 +669,7 @@ STDMETHODIMP CShapefile::Open(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 
 			// reading projection
 			CComBSTR bstrPrj(_prjfileName);
-			_geoProjection->ReadFromFile(bstrPrj, &vbretval);
+			_geoProjection->ReadFromFileEx(bstrPrj, VARIANT_TRUE, &vbretval);
 
 			ShapeStyleHelper::ApplyRandomDrawingOptions(this);
 			LabelsHelper::UpdateLabelsPositioning(this);
@@ -1088,7 +1088,7 @@ STDMETHODIMP CShapefile::Dump(BSTR ShapefileName, ICallback *cBack, VARIANT_BOOL
 		VARIANT_BOOL vbretval;
 		CStringW prjfileName = sa_shpfileName.Left(sa_shpfileName.GetLength() - 3) + L"prj";
 		CComBSTR bstr(prjfileName);
-		_geoProjection->WriteToFile(bstr, &vbretval);
+		_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
 
 		*retval = VARIANT_TRUE;
 	}
@@ -1253,7 +1253,7 @@ STDMETHODIMP CShapefile::SaveAs(BSTR ShapefileName, ICallback *cBack, VARIANT_BO
 		_geoProjection->get_IsEmpty(&isEmpty);
 		if (!isEmpty) {
 			CComBSTR bstr(_prjfileName);
-			_geoProjection->WriteToFile(bstr, &vbretval);
+			_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
 		}
 
 		if (_useQTree)
@@ -1384,7 +1384,7 @@ STDMETHODIMP CShapefile::Save(ICallback *cBack, VARIANT_BOOL *retval)
 			// saving projection in new format
 			VARIANT_BOOL vbretval;
 			CComBSTR bstr(_prjfileName);
-			_geoProjection->WriteToFile(bstr, &vbretval);
+			_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
 
 			*retval = VARIANT_TRUE;
 		}
@@ -2540,7 +2540,7 @@ STDMETHODIMP CShapefile::put_Projection(BSTR proj4Projection)
 	if (vbretval)
 	{
 		CComBSTR bstrFilename(_prjfileName);
-		_geoProjection->WriteToFile(bstrFilename, &vbretval);
+		_geoProjection->WriteToFileEx(bstrFilename, VARIANT_TRUE, &vbretval);
 	}
 	return S_OK;
 }
@@ -2569,7 +2569,7 @@ STDMETHODIMP CShapefile::put_GeoProjection(IGeoProjection* pVal)
 	{
 		VARIANT_BOOL vbretval;
 		CComBSTR bstr(_prjfileName);
-		_geoProjection->WriteToFile(bstr, &vbretval);
+		_geoProjection->WriteToFileEx(bstr, VARIANT_TRUE, &vbretval);
 	}
 	return S_OK;
 }
@@ -2825,7 +2825,8 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 
 			VARIANT_BOOL vbretval = VARIANT_FALSE;
 			(*retVal)->EditInsertShape(shpNew, &shapeIndex, &vbretval);
-			
+			shpNew->Release();			
+
 			if (vbretval)
 			{
 				// copy attributes

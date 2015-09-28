@@ -5509,6 +5509,8 @@ interface IGeoProjection : IDispatch{
 	[id(41), helpstring("method SetWgs84")] HRESULT SetWgs84([out,retval]VARIANT_BOOL* retVal);
 	[propget, id(42), helpstring("property IsFrozen")] HRESULT IsFrozen([out, retval] VARIANT_BOOL* retVal);
 	[id(43), helpstring("method TryAutoDetectEpsg")] HRESULT TryAutoDetectEpsg([out]int* epsgCode, [out,retval]VARIANT_BOOL* retVal);
+	[id(44)] HRESULT WriteToFileEx([in] BSTR filename, [in] VARIANT_BOOL esri, [out, retval] VARIANT_BOOL* retVal);
+	[id(45)] HRESULT ReadFromFileEx([in] BSTR filename, [in] VARIANT_BOOL esri, [out, retval] VARIANT_BOOL* retVal);
 };
 
 [

@@ -105,6 +105,8 @@ int CMapWinGISApp::ExitInstance()
 	RamCache::Close();
 	SQLiteCache::Close();
 
+	parser::ReleaseFunctions();
+
 	CMapView::GdiplusShutdown();
 
 	_Module.Term();

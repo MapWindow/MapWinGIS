@@ -39,6 +39,7 @@ public:
 
 	~CustomExpression()
 	{
+		// TODO: operations are leaking!
 		Clear();
 	}
 
@@ -52,7 +53,6 @@ private:
 	bool _saveOperations;
 	CString _errorMessage;	// the description of error
 	int _errorPosition;		// the position of error
-	//int _errorLength;		// the length sub string with error
 	CString _floatFormat;
 	IShape* _shape;
 
