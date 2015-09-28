@@ -25,6 +25,7 @@
 
 #include "stdafx.h"
 #include "GeoProjection.h"
+#include "ProjectionHelper.h"
 
 // ************************************************************
 //		InjectSpatialReference()
@@ -272,9 +273,8 @@ STDMETHODIMP CGeoProjection::ImportFromESRI(BSTR proj, VARIANT_BOOL* retVal)
 	else
 	{
 		USES_CONVERSION;
-		char* str = OLE2A(proj);
 
-		OGRErr err = _projection->importFromESRI(&str);
+		OGRErr err = ProjectionHelper::ImportFromEsri(_projection, OLE2A(proj));
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -332,8 +332,9 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 		return S_OK;
 	}
 
-	char* proj = NULL;
-	OGRErr err = _projection->exportToWkt(&proj);
+	CString proj;
+	OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	
 	if (err == OGRERR_NONE)
 	{
 		*retVal = A2BSTR(proj);
@@ -341,10 +342,9 @@ STDMETHODIMP CGeoProjection::ExportToWKT(BSTR* retVal)
 	else
 	{
 		ReportOgrError(err);
-		*retVal = A2BSTR("");
+		*retVal = m_globalSettings.CreateEmptyBSTR();
 	}
-	if (proj)
-		CPLFree(proj);
+
 	return S_OK;
 }
 
@@ -362,8 +362,9 @@ STDMETHODIMP CGeoProjection::ImportFromWKT(BSTR proj, VARIANT_BOOL* retVal)
 	else
 	{
 		USES_CONVERSION;
-		char* str = OLE2A(proj);
-		OGRErr err = _projection->importFromWkt((char**)&str);
+		
+		CString s = OLE2A(proj);
+		OGRErr err = ProjectionHelper::ImportFromWkt(_projection, s);
 
 		*retVal = err == OGRERR_NONE ? VARIANT_TRUE : VARIANT_FALSE;
 		if (err != OGRERR_NONE)
@@ -453,28 +454,52 @@ STDMETHODIMP CGeoProjection::get_IsLocal(VARIANT_BOOL* pVal)
 STDMETHODIMP CGeoProjection::get_IsSame(IGeoProjection* proj, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = VARIANT_FALSE;
+
 	if (!proj)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		*pVal = VARIANT_FALSE;
 	}
 	else
 	{
+		VARIANT_BOOL vb, vb2;
+		this->get_IsEmpty(&vb);
+		proj->get_IsEmpty(&vb2);
+		if (vb || vb2) {
+			return S_OK;
+		}
+
 		OGRSpatialReference* ref = ((CGeoProjection*)proj)->get_SpatialReference();
-
 		OGRSpatialReference ref1, ref2;
-		
+
 		char* s1 = NULL;
-		ref->exportToProj4(&s1);
-		ref1.importFromProj4(s1);
+		OGRErr err = ref->exportToProj4(&s1);
 
-		char* s2 = NULL;
-		_projection->exportToProj4(&s2);
-		ref2.importFromProj4(s2);
+		if (err == OGRERR_NONE) {
+			err = ref1.importFromProj4(s1);
 
-		*pVal = ref1.IsSame(&ref2) ? VARIANT_TRUE : VARIANT_FALSE;
-		CPLFree(s1);
-		CPLFree(s2);
+			if (err == OGRERR_NONE) {
+				char* s2 = NULL;
+				err = _projection->exportToProj4(&s2);
+
+				if (err == OGRERR_NONE) {
+					ref2.importFromProj4(s2);
+					*pVal = ref1.IsSame(&ref2) ? VARIANT_TRUE : VARIANT_FALSE;
+				}
+
+				if (s2) {
+					CPLFree(s2);
+				}
+			}
+		}
+
+		if (s1) {
+			CPLFree(s1);
+		}
+		
+		if (err != OGRERR_NONE) {
+			ReportOgrError(err);
+		}
 	}
 	return S_OK;
 }
@@ -512,13 +537,22 @@ bool CGeoProjection::IsSameProjection(OGRCoordinateTransformation* transf, doubl
 STDMETHODIMP CGeoProjection::get_IsSameExt(IGeoProjection* proj, IExtents* bounds, int numSamplingPoints, VARIANT_BOOL* pVal)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	*pVal = VARIANT_FALSE;
+
 	if (!proj || !bounds)
 	{
 		ErrorMessage(tkUNEXPECTED_NULL_PARAMETER);
-		*pVal = VARIANT_FALSE;
 		return S_OK;
 	}
-	
+
+	VARIANT_BOOL vb, vb2;
+	this->get_IsEmpty(&vb);
+	proj->get_IsEmpty(&vb2);
+
+	if (vb || vb2) {
+		return S_OK;
+	}
+
 	// first let's try standard approach
 	this->get_IsSame(proj, pVal);
 	if (*pVal == VARIANT_TRUE)
@@ -875,9 +909,10 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 
 	char* proj = NULL;
 	if (esri) {
-		_projection->morphToESRI();
-		_projection->exportToWkt(&proj);
-		_projection->morphFromESRI();
+		CComBSTR bstr;
+		this->ExportToEsri(&bstr);
+		USES_CONVERSION;
+		proj = OLE2A(bstr);
 	}
 	else {
 		_projection->exportToWkt(&proj);
@@ -1198,4 +1233,46 @@ STDMETHODIMP CGeoProjection::TryAutoDetectEpsg(int* epsgCode, VARIANT_BOOL* retV
 	return S_OK;
 }
 
+// ************************************************************
+//		ExportToEsri
+// ************************************************************
+STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	OGR_SRSNode* node = _projection->GetRoot();
+	if (!node) {
+		*retVal = m_globalSettings.CreateEmptyBSTR();
+		return S_OK;
+	}
+
+	OGRSpatialReference projTemp;
+
+	// we can't morph the initial instance, 
+	// since the reverse operation doesn't return the exact same projection;
+	// let's create a copy instead
+	CString proj;
+	OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
+	if (err == OGRERR_NONE) 
+	{
+		ProjectionHelper::ImportFromWkt(&projTemp, proj);
+
+		if (err == OGRERR_NONE)
+		{
+			projTemp.morphToESRI();
+			OGRErr err = ProjectionHelper::ExportToWkt(&projTemp, proj);
+
+			if (err == OGRERR_NONE)
+			{
+				*retVal = A2BSTR(proj);
+			}
+			else
+			{
+				ReportOgrError(err);
+				*retVal = m_globalSettings.CreateEmptyBSTR();
+			}
+		}
+	}
+
+	return S_OK;
+}

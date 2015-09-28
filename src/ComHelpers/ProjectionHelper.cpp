@@ -67,3 +67,54 @@ void ProjectionHelper::GetSpatialReference(IGeoProjection* gp, OGRSpatialReferen
 	CString s = OLE2A(bstr);
 	result.importFromProj4(s);
 }
+
+// ***************************************************************
+//		ImportFromEsri()
+// ***************************************************************
+OGRErr ProjectionHelper::ImportFromEsri(OGRSpatialReference* sr, CString proj)
+{
+	if (!sr) {
+		return false;
+	}
+
+	char* s = proj.GetBuffer();
+
+	return sr->importFromESRI(&s);
+}
+
+// ***************************************************************
+//		ImportFromWkt()
+// ***************************************************************
+OGRErr ProjectionHelper::ImportFromWkt(OGRSpatialReference* sr, CString proj)
+{
+	if (!sr) {
+		return false;
+	}
+
+	char* s = proj.GetBuffer();
+
+	return sr->importFromWkt(&s);
+}
+
+// ***************************************************************
+//		ExportFromWkt()
+// ***************************************************************
+OGRErr ProjectionHelper::ExportToWkt(OGRSpatialReference* sr, CString& proj)
+{
+	if (!sr) {
+		return false;
+	}
+
+	char* s = NULL;
+	OGRErr err = sr->exportToWkt(&s);
+
+	proj = s;
+	
+	if (s) {
+		CPLFree(s);
+	}
+
+	return err;
+}
+
+

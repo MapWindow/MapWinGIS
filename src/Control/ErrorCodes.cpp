@@ -424,7 +424,7 @@ const char * ErrorMsg( long ErrorCode )
 		case tkMAP_MAPSTATE_LAYER_LOAD_FAILED:
 			return "Layer specified in MapState string failed to load";
 		case tkMAP_PROJECTION_NOT_SET:
-			return "Map projection isn't set. See Map.SetGeoProjection method.";
+			return "Can't perform the requested action, map projection isn't set.";
 		case tkINVALID_GEOGRAPHIC_COORDINATES:
 			return "Invalid geographic coordinates.";
 		case tkNO_INTERACTIVE_SHAPEFILES:

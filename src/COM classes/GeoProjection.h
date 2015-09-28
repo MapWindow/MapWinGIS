@@ -134,6 +134,7 @@ public:
 	STDMETHOD(TryAutoDetectEpsg)(int* epsgCode, VARIANT_BOOL* retVal);
 	STDMETHOD(WriteToFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
 	STDMETHOD(ReadFromFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
+	STDMETHOD(ExportToEsri)(BSTR* retVal);
 
 private:
 	OGRSpatialReference* _projection;
