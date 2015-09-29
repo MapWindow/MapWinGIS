@@ -143,6 +143,7 @@ public:
 	STDMETHOD(SplitByPolyline)(IShape* polyline, VARIANT* results, VARIANT_BOOL* retVal);
 	STDMETHOD(get_IsEmpty)(VARIANT_BOOL* pVal);
 	STDMETHOD(Clear)();
+	STDMETHOD(FixUp2)(tkUnitsOfMeasure units, IShape** retVal);
 
 private:
 	BSTR _key;
@@ -184,7 +185,7 @@ public:
 	bool ValidateBasics(ShapeValidityCheck& failedCheck, CString& err);
 	void get_LabelPositionAutoChooseMethod(tkLabelPositioning method, double& x, double& y, double& rotation, tkLineLabelOrientation orientation);
 	bool SplitByPolylineCore(IShape* polyline, vector<IShape*>& results);
-	
+	IShape* FixupByBuffer(tkUnitsOfMeasure units);
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Shape), CShape)

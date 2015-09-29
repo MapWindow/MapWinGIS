@@ -135,6 +135,7 @@ public:
 	STDMETHOD(WriteToFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
 	STDMETHOD(ReadFromFileEx)(BSTR filename, VARIANT_BOOL esri, VARIANT_BOOL* retVal);
 	STDMETHOD(ExportToEsri)(BSTR* retVal);
+	STDMETHOD(get_LinearUnits)(tkUnitsOfMeasure* pVal);
 
 private:
 	OGRSpatialReference* _projection;
@@ -150,6 +151,7 @@ private:
 	bool ReadFromFileCore(CStringW filename, bool esri);
 	bool WriteToFileCore(CStringW filename, bool esri);
 	void ReportOgrError(long ErrorCode);
+	bool ParseLinearUnits(CString s, tkUnitsOfMeasure& units);
 
 public:
 	OGRSpatialReference* get_SpatialReference() { return _projection; }

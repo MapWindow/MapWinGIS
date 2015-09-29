@@ -32,7 +32,9 @@ bool GeosConverter::GeomToShapes(GEOSGeom gsGeom, vector<IShape*>* vShapes, bool
 		// during buffer operation shape looses its Z coordinate, but during conversion back to 
 		// shape it should be restored or shape type check won't be passed 
 		has25D = GeosHelper::HasZ(gsGeom);
-		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.invalidShapesBufferDistance, 30, gsGeom);
+	
+		// would be better to pass units explicitly
+		GEOSGeometry* gsNew = DoBuffer(m_globalSettings.GetInvalidShapeBufferDistance(umMeters) / 1000.0, 30, gsGeom);
 		if (gsNew && GeosHelper::IsValid(gsNew))
 		{
 			gsGeom = gsNew;

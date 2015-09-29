@@ -2795,6 +2795,9 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 	*fixed = VARIANT_FALSE;
 	this->Clone(retVal);
 	
+	tkUnitsOfMeasure units;
+	_geoProjection->get_LinearUnits(&units);
+
 	if (*retVal)
 	{
 		long numFields;
@@ -2813,7 +2816,7 @@ STDMETHODIMP CShapefile::FixUpShapes(IShapefile** retVal, VARIANT_BOOL* fixed)
 				continue;
 
 			IShape* shpNew = NULL;
-			shp->FixUp(&shpNew);
+			shp->FixUp2(units, &shpNew);
 			shp->Release();
 
 			// failed to fix the shape? skip it.

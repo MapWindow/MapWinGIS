@@ -907,7 +907,7 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 		return false;
 	}
 
-	char* proj = NULL;
+	CString proj;
 	if (esri) {
 		CComBSTR bstr;
 		this->ExportToEsri(&bstr);
@@ -915,13 +915,12 @@ bool CGeoProjection::WriteToFileCore(CStringW filename, bool esri)
 		proj = OLE2A(bstr);
 	}
 	else {
-		_projection->exportToWkt(&proj);
+		OGRErr err = ProjectionHelper::ExportToWkt(_projection, proj);
 	}
 
-	if (proj != NULL && strlen(proj) > 0)
+	if (proj.GetLength() != 0)
 	{
 		fprintf(prjFile, "%s", proj);
-		CPLFree(proj);
 	}
 
 	fclose(prjFile);
@@ -1275,4 +1274,55 @@ STDMETHODIMP CGeoProjection::ExportToEsri(BSTR* retVal)
 	}
 
 	return S_OK;
+}
+
+// ************************************************************
+//		get_LinearUnits
+// ************************************************************
+STDMETHODIMP CGeoProjection::get_LinearUnits(tkUnitsOfMeasure* pVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	char* s = NULL;
+	double ratio = _projection->GetLinearUnits(&s);	  // don't free the memory, the string was already allocated
+
+	CString units = s;
+
+	if (!ParseLinearUnits(units, *pVal))
+	{
+		*pVal = _projection->IsGeographic() ? umDecimalDegrees : umMeters;
+	}
+
+	return S_OK;
+}
+
+// ************************************************************
+//		ParseLinearUnits
+// ************************************************************
+bool CGeoProjection::ParseLinearUnits(CString s, tkUnitsOfMeasure& units)
+{
+	if (s.GetLength() == 0) return false;
+	
+	if (s.CompareNoCase("unknown") == 0)
+	{
+		return false;
+	}
+	else if (s.CompareNoCase("meters") == 0)
+	{
+		units = umMeters;
+		return true;
+	}
+	else if (s.CompareNoCase("degrees") == 0)
+	{
+		units = umDecimalDegrees;
+		return true;
+	}
+	else if (s.CompareNoCase("feet") == 0)
+	{
+		units = umFeets;
+		return true;
+	}
+	
+	Debug::WriteLine("Unrecognized linear units: %s", units);
+	return false;
 }

@@ -8,6 +8,7 @@
 
 struct GlobalSettingsInfo
 {
+	const double METERS_PER_DEGREE = 110899.999942;
 	tkProxyAuthentication proxyAuthentication;
 	bool forceHideLabels;
 	bool ogrLayerForceUpdateMode;
@@ -229,7 +230,7 @@ struct GlobalSettingsInfo
 	{
 		if (isGeographic)
 		{
-			return minPolygonArea/ pow(110899.999942, 2.0);	 // degrees to meters
+			return minPolygonArea / pow(METERS_PER_DEGREE, 2.0);	 // degrees to meters
 		}
 		else
 		{
@@ -246,5 +247,16 @@ struct GlobalSettingsInfo
 	{
 		int size = tilesThreadPoolSize > 20 ? 20 : tilesThreadPoolSize;
 		return size;
+	}
+
+	double GetInvalidShapeBufferDistance(tkUnitsOfMeasure units) 
+	{
+		double val = invalidShapesBufferDistance;
+		if (Utility::ConvertDistance(units, umMeters, val)) {
+			return invalidShapesBufferDistance / val;
+		}
+		else {
+			return invalidShapesBufferDistance;
+		}
 	}
 };

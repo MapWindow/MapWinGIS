@@ -4056,6 +4056,7 @@ interface IShape : IDispatch{
 	[propget, id(67)] HRESULT IsEmpty([out, retval] VARIANT_BOOL* pVal);
 	
 	[id(68)] HRESULT Clear();
+	[id(69)] HRESULT FixUp2([in] tkUnitsOfMeasure units, [out, retval] IShape** retVal);
 };
 
 /****************************  Extents Interface ***********************/
@@ -5512,6 +5513,7 @@ interface IGeoProjection : IDispatch{
 	[id(44)] HRESULT WriteToFileEx([in] BSTR filename, [in] VARIANT_BOOL esri, [out, retval] VARIANT_BOOL* retVal);
 	[id(45)] HRESULT ReadFromFileEx([in] BSTR filename, [in] VARIANT_BOOL esri, [out, retval] VARIANT_BOOL* retVal);
 	[id(46)] HRESULT ExportToEsri([out, retval] BSTR* retVal);
+	[propget, id(47)] HRESULT LinearUnits([out, retval] tkUnitsOfMeasure* pVal);
 };
 
 [

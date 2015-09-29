@@ -2491,8 +2491,21 @@ STDMETHODIMP CShape::ImportFromBinary(VARIANT bytesArray, VARIANT_BOOL* retVal)
 //*****************************************************************
 bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 {
+	VARIANT_BOOL vb;
+
 	switch(validityCheck)	
 	{
+		case NoParts:
+		{
+			long PartIndex = 0;
+			InsertPart(0, &PartIndex, &vb);
+			return vb ? true : false;
+		}
+		case DirectionOfPolyRings:
+		{
+			ReversePointsOrder(0, &vb);
+			return vb ? true : false;
+		}
 		case FirstAndLastPointOfPartMatch:
 			{
 				bool hasM = _shp->get_ShapeType() == SHP_POLYGONM || _shp->get_ShapeType() == SHP_POLYGONZ;
@@ -2547,57 +2560,85 @@ bool CShape::FixupShapeCore(ShapeValidityCheck validityCheck)
 STDMETHODIMP CShape::FixUp(IShape** retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
-	*retval = NULL;
-	VARIANT_BOOL vbretval = VARIANT_FALSE;
+	
+	FixUp2(umMeters, retval);
+	
+	return S_OK;
+}
+
+//*****************************************************************
+//*		FixUp2()
+//*****************************************************************
+STDMETHODIMP CShape::FixUp2(tkUnitsOfMeasure units, IShape** retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	*retVal = NULL;
 
 	// no points? nothing we can do.
-	if (this->_shp->get_PointCount() <= 0)
+	if (_shp->get_PointCount() <= 0)
 	{
 		return S_OK;
 	}
 
-	// polygon or polyline?
-	ShpfileType ShapeType = this->_shp->get_ShapeType2D();
-	if (ShapeType == SHP_POLYGON || ShapeType == SHP_POLYLINE)
+	CString errMessage;
+	ShapeValidityCheck validityCheck;
+	if (!this->ValidateBasics(validityCheck, errMessage))
 	{
-		// no parts? add one part.
-		if (this->_shp->get_PartCount() <= 0)
+		switch (validityCheck)
 		{
-			IShape* TempShape = NULL;
-			this->Clone(&TempShape);
+			case FirstAndLastPointOfPartMatch:
+			case DirectionOfPolyRings:
+			case NoParts:
+				IShape* shp = NULL;
+				this->Clone(&shp);
 
-			long PartIndex = 0;
-			TempShape->InsertPart(0, &PartIndex, &vbretval);
+				// try some basic fixing
+				((CShape*)shp)->FixupShapeCore(validityCheck);
 
-            // ensure the new shape is completed fixed.
-			TempShape->FixUp(retval);
-			TempShape->Release();
-			return S_OK;
+				// run the core routine
+				*retVal = ((CShape*)shp)->FixupByBuffer(units);
+
+				shp->Release();
+				return S_OK;
 		}
 	}
 
+	*retVal = FixupByBuffer(units);
+
+	return S_OK;
+}
+
+//*****************************************************************
+//*		FixupByBuffer()
+//*****************************************************************
+IShape* CShape::FixupByBuffer(tkUnitsOfMeasure units)
+{
+	VARIANT_BOOL vb = VARIANT_FALSE;
+
+	IShape* result = NULL;
+
 	// valid shape? just copy it.
-	this->get_IsValid(&vbretval);
-	if (vbretval)
+	this->get_IsValid(&vb);
+	if (vb)
 	{
-		this->Clone(retval);
+		Clone(&result);
 	}
 	else
 	{
-		this->Buffer(m_globalSettings.invalidShapesBufferDistance, 30, retval);
+		Buffer(m_globalSettings.GetInvalidShapeBufferDistance(units), 30, &result);
 	}
 
-    // did we allocate memory for the fixed shape?
-	if (*retval)
+	// did we allocate memory for the fixed shape?
+	if (result)
 	{
-		(*retval)->get_IsValid(&vbretval);
-		if (!vbretval)
-		{
-			(*retval)->Release();
-			(*retval) = NULL;
+		result->get_IsValid(&vb);
+		if (!vb) {
+			result->Release();
 		}
 	}
-	return S_OK;
+
+	return result;
 }
 
 //*****************************************************************
