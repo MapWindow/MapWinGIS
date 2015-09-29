@@ -20,8 +20,6 @@
 #include "Image.h"
 #include "colour.h"
 #include "ImageResampling.h"
-#include "tkJpg.h"
-#include "tkGif.h"
 #include "GdalRaster.h"
 #include "projections.h"
 #include "Templates.h"
@@ -33,6 +31,7 @@
 #include "RasterBandHelper.h"
 #include "GdalDriver.h"
 #include "ImageHelper.h"
+#include "GdiPlusHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -377,9 +376,6 @@ STDMETHODIMP CImageClass::Save(BSTR ImageFileName, VARIANT_BOOL WriteWorldFile, 
 		case BITMAP_FILE:
 			*retval = WriteBMP(newName, bWriteWorldFile, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
 			break;
-		case PPM_FILE:
-			*retval = WritePPM(newName, bWriteWorldFile, cBack) ? VARIANT_TRUE : VARIANT_FALSE;
-			break;	
 		case JPEG_FILE: 
 		case PNG_FILE:
 		case GIF_FILE:
@@ -1073,6 +1069,30 @@ bool CImageClass::WriteBMP(CStringW ImageFile, bool WorldFile, ICallback *cBack)
 }
 
 // **********************************************************
+//	  GetGdiPlusFormat()
+// **********************************************************
+CStringW GetGdiPlusFormat(ImageType type, CStringW& ext)
+{
+	switch (type)
+	{
+		case PNG_FILE:
+			ext = L"pngw";
+			return L"image/png";
+		case JPEG_FILE:
+			ext = L"jpgw";
+			return "image/jpeg";
+		case TIFF_FILE:
+			ext = L"tifw";
+			return L"image/tiff";
+		case GIF_FILE:
+			ext = L"gifw";
+			return L"image/gif";
+		default:
+			return L"";
+	}
+}
+
+// **********************************************************
 //	  WriteGDIPlus()
 // **********************************************************
 bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack)
@@ -1089,35 +1109,10 @@ bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType typ
 		return false;
 	}
 
-	tkJpg jpg;
-	jpg.cBack = cBack;
+	CStringW ext;
+	CStringW format = GetGdiPlusFormat(type, ext);
 
-	jpg.InitSize(_width, _height);
-	memcpy(jpg.buffer, _imageData, _height*_width*3);
-
-	Gdiplus::Status status;
-	CString ext;
-	switch (type)
-	{
-		case PNG_FILE:
-			status = jpg.SaveByGdiPlus(ImageFile, L"image/png");
-			ext = "pngw";
-			break;
-		case JPEG_FILE:
-			status = jpg.SaveByGdiPlus(ImageFile, L"image/jpeg");
-			ext = "jpgw";
-			break;
-		case TIFF_FILE:
-			status = jpg.SaveByGdiPlus(ImageFile, L"image/tiff");
-			ext = "tifw";
-			break;
-		case GIF_FILE:
-			status = jpg.SaveByGdiPlus(ImageFile, L"image/gif");
-			ext = "gifw";
-			break;
-		default:
-			return false;
-	}
+	Gdiplus::Status status = GdiPlusHelper::SaveBitmap(ImageFile, _width, _height, _imageData, format);
 
 	if (status != Gdiplus::Ok) 
 	{
@@ -1127,37 +1122,14 @@ bool CImageClass::WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType typ
 
 	if(WorldFile)
 	{
-		USES_CONVERSION;
-		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, A2W(ext));
-		if (!this->WriteWorldFile(WorldFileName))
+		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, ext);
+
+		if (!this->WriteWorldFile(WorldFileName)) {
 			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
+		}
 	}
+
 	return true;
-}
-
-// **********************************************************
-//	  WritePPM()
-// **********************************************************
-bool CImageClass::WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack)
-{
-	tkGif ppm;
-	
-	ppm.InitSize(_width, _height);
-	memcpy(ppm.buffer, _imageData, _height*_width*3);
-
-	if (!ppm.WritePPM(ImageFile))
-		return false;
-	
-	_fileName = ImageFile;
-
-	if(WorldFile)
-	{
-		CStringW WorldFileName = Utility::ChangeExtension(ImageFile, L".ppw");
-		if (!WriteWorldFile(WorldFileName))
-			ErrorMessage(tkCANT_WRITE_WORLD_FILE);
-	}
-	return true;
-	
 }
 
 // **********************************************************
@@ -1578,7 +1550,7 @@ bool CImageClass::DCBitsToImageBuffer(HDC hDC)
 	{
 		DCBitsToImageBufferWithPadding(hDC, hBMP, bitsPerPixel);
 	}
-	
+
 	return true;
 }
 
@@ -1624,6 +1596,17 @@ void CImageClass::DCBitsToImageBufferWithPadding(HDC hdc, HBITMAP hBMP, int bits
 }
 
 // ****************************************************************
+//		ClearAlpha
+// ****************************************************************
+void CImageClass::ClearAlpha()
+{
+	int size = _width * _height;
+	for (int i = 0; i < size; i++) {
+		_imageData[i].alpha = 255;
+	}
+}
+
+// ****************************************************************
 //		DCBitsToImageBuffer32
 // ****************************************************************
 void CImageClass::DCBitsToImageBuffer32(HBITMAP hBMP, BITMAP& bm, int bytesPerPixel)
@@ -1650,7 +1633,15 @@ STDMETHODIMP CImageClass::SetImageBitsDC(long hDC, VARIANT_BOOL * retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 	*retval = VARIANT_FALSE;
+
 	bool result = DCBitsToImageBuffer((HDC)hDC);
+
+	// GDI methods when drawing to bitmap with alpha component set alpha values to 0,
+	// i.e. creating fully transparent pixels (this is true for fonts);
+	// so let's just clear those values; crude but I found no better solution,
+	// apart from rewriting all snapshot functionality in pure GDI+ which is complicated
+	ClearAlpha();
+
 	*retval = result ? VARIANT_TRUE : VARIANT_FALSE;
 	return S_OK;
 }

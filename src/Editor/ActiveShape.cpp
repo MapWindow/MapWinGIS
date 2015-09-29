@@ -5,6 +5,7 @@
 #include "GdiPlusHelper.h"
 #include "CollisionList.h"
 #include "AngleHelper.h"
+#include "GraphicsStateHelper.h"
 
 // *******************************************************
 //		SetMapCallback()

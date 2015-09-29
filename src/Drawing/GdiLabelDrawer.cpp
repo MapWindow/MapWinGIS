@@ -17,7 +17,6 @@ void GdiLabelDrawer::InitFromCategory(CLabelOptions* options)
 	_oldBrush = _dc->SelectObject(&_brushFrameBack);
 
 	_alignment = ConvertAlignment(options->inboxAlignment);
-
 	_dc->SetTextColor(options->fontColor);
 }
 

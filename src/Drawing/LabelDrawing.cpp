@@ -115,11 +115,11 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 	std::set<CString> uniqueValues;
 
 	bool useGdiPlus = GetUseGdiPlus(labels);
-	if (!useGdiPlus) {
-		gdi.InitDc(_graphics);
+	if (useGdiPlus) {
+		gdiPlus.InitGraphics(_graphics, labels);
 	}
 	else {
-		gdiPlus.InitGraphics(_graphics, labels);
+		gdi.InitDc(_graphics);
 	}
 
 	// ---------------------------------------------------------------
@@ -218,20 +218,20 @@ void CLabelDrawer::DrawLabels(ILabels* labels)
 				}
 
 				// actual drawing
-				if (!useGdiPlus) {
-					gdi.DrawLabel(options, lbl, rect, angleRad, piX, piY);
+				if (useGdiPlus) {
+					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
 				}
 				else {
-					gdiPlus.DrawLabel(options, rect, piX, piY, angle);
+					gdi.DrawLabel(options, lbl, rect, angleRad, piX, piY);
 				}
 			}
 		} // label
 
-		if (!useGdiPlus) {
-			gdi.ReleaseForCategory(settings.useVariableFontSize);
+		if (useGdiPlus) {
+			gdiPlus.ReleaseForCategory(settings.useVariableFontSize);
 		}
 		else {
-			gdiPlus.ReleaseForCategory(settings.useVariableFontSize);
+			gdi.ReleaseForCategory(settings.useVariableFontSize);
 		}
 	} // category
 
@@ -548,7 +548,7 @@ bool CLabelDrawer::GetUseGdiPlus(ILabels* labels)
 		if ((options->fontGradientMode != gmNone || options->fontTransparency != 255) ||
 			((options->frameGradientMode != gmNone || options->frameTransparency != 255) && options->frameVisible))
 		{
-			useGdiPlus = true;
+			useGdiPlus = VARIANT_TRUE;
 		}
 	}
 

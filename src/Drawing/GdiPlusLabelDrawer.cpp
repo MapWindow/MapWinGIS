@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GdiPlusLabelDrawer.h"
+#include "UtilityFunctions.h"
 
 using namespace Gdiplus;
 
@@ -54,8 +55,9 @@ void GdiPlusLabelDrawer::InitPensAndBrushes(CLabelOptions* options, bool hasRota
 	long alphaFont = (options->fontTransparency << 24);
 	long alphaFrame = (options->frameTransparency << 24);
 
-	_clFont1.SetValue(alphaFont | BGR_TO_RGB(options->fontColor));
-	_clFont2.SetValue(alphaFont | BGR_TO_RGB(options->fontColor2));
+	_clFont1 = Utility::OleColor2GdiPlus(options->fontColor, options->fontTransparency);
+	_clFont2 = Utility::OleColor2GdiPlus(options->fontColor2, options->fontTransparency);
+
 	_clFrameBack1.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor));
 	_clFrameBack2.SetValue(alphaFrame | BGR_TO_RGB(options->frameBackColor2));
 
@@ -167,16 +169,19 @@ void GdiPlusLabelDrawer::DrawLabel(CLabelOptions* options, CRect& r, double piX,
 		if (options->fontOutlineVisible)
 			_graphics->DrawPath(_penFontOutline, gp);
 
+		Gdiplus::Status status;
+
 		if (options->fontGradientMode != gmNone)
 		{
 			_brushFontGrad = new LinearGradientBrush(rect, _clFont1, _clFont2, (LinearGradientMode)options->fontGradientMode);
-			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFontGrad);
+			status = _graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFontGrad);
 			delete _brushFontGrad;
 		}
 		else
 		{
-			_graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFont);
+			status = _graphics->DrawString(text, text.GetLength(), font, rect, &stringFormat, _brushFont);
 		}
+
 		if (pathNeeded) {
 			delete gp;
 		}

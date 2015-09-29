@@ -265,10 +265,9 @@
     <ClInclude Include="Editor\UndoListHelper.h" />
     <ClInclude Include="Editor\VertexEditor.h" />
     <ClInclude Include="Image\cq.h" />
+    <ClInclude Include="Image\GdiPlusHelper.h" />
     <ClInclude Include="Image\HistogramData.h" />
     <ClInclude Include="Image\QColorMatrix.h" />
-    <ClInclude Include="Image\tkGif.h" />
-    <ClInclude Include="Image\tkJpg.h" />
     <ClInclude Include="Ogr\GeosConverter.h" />
     <ClInclude Include="Ogr\GeosHelper.h" />
     <ClInclude Include="Ogr\Ogr2RawData.h" />
@@ -371,9 +370,9 @@
     <ClInclude Include="Utilities\FieldClassification.h" />
     <ClInclude Include="Utilities\GdalDriverHelper.h" />
     <ClInclude Include="Utilities\GdalHelper.h" />
-    <ClInclude Include="Utilities\GdiPlusHelper.h" />
     <ClInclude Include="Utilities\GeographLibHelper.h" />
     <ClInclude Include="Utilities\GlobalClassFactory.h" />
+    <ClInclude Include="Utilities\GraphicsStateHelper.h" />
     <ClInclude Include="Utilities\HashTable.h" />
     <ClInclude Include="Utilities\LineBresenham.h" />
     <ClInclude Include="Utilities\Logger.h" />
@@ -583,6 +582,7 @@
     <ClCompile Include="Editor\UndoListHelper.cpp" />
     <ClCompile Include="Editor\VertexEditor.cpp" />
     <ClCompile Include="Image\colour.cpp" />
+    <ClCompile Include="Image\GdiPlusHelper.cpp" />
     <ClCompile Include="Image\HistogramData.cpp" />
     <ClCompile Include="Image\ImageGroup.cpp" />
     <ClCompile Include="Image\ImageResamling.cpp" />
@@ -611,8 +611,6 @@
     <ClCompile Include="Control\Map_Shapefile.cpp" />
     <ClCompile Include="Control\Map_Snapshot.cpp" />
     <ClCompile Include="Control\MapPpg.cpp" />
-    <ClCompile Include="Image\tkGif.cpp" />
-    <ClCompile Include="Image\tkJpg.cpp" />
     <ClCompile Include="Ogr\GeosConverter.cpp" />
     <ClCompile Include="Ogr\GeosHelper.cpp" />
     <ClCompile Include="Ogr\Ogr2RawData.cpp" />
@@ -654,8 +652,8 @@
     <ClCompile Include="Utilities\FieldClassification.cpp" />
     <ClCompile Include="Utilities\GdalDriverHelper.cpp" />
     <ClCompile Include="Utilities\GdalHelper.cpp" />
-    <ClCompile Include="Utilities\GdiPlusHelper.cpp" />
     <ClCompile Include="Utilities\GeographLibHelper.cpp" />
+    <ClCompile Include="Utilities\GraphicsStateHelper.cpp" />
     <ClCompile Include="Utilities\LineBresenham.cpp" />
     <ClCompile Include="Utilities\Logger.cpp" />
     <ClCompile Include="Utilities\Matrix.cpp" />

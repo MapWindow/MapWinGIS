@@ -2,6 +2,7 @@
 #include "map.h"
 #include "TileProviders.h"
 #include "GdiPlusHelper.h"
+#include "GraphicsStateHelper.h"
 
 // ****************************************************************
 //		DrawStringWithShade()

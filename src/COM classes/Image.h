@@ -409,7 +409,6 @@ private:
 	bool OpenGdalRaster(const CStringW ImageFile, GDALAccess accessMode);
 
 	bool getFileType(const CStringW ImageFile, ImageType &ft);
-	bool WritePPM(CStringW ImageFile, bool WorldFile, ICallback *cBack);
 	bool WriteBMP(CStringW FileName, bool WriteWorldFile, ICallback *cBack);
 	bool WriteGDIPlus(CStringW ImageFile, bool WorldFile, ImageType type, ICallback *cBack);
 
@@ -430,6 +429,7 @@ private:
 	bool ValidateRowCol(long row, long col);
 	bool GetValueCore(long row, long col, bool withAlpha, long* value);
 	void put_ValueCore(long row, long col, long newVal, bool withAlpha);
+	void ClearAlpha();
 
 public:
 	bool DeserializeCore(CPLXMLNode* node);
@@ -472,7 +472,7 @@ public:
 
 	ScreenBitmap* GetScreenBitmap() { return _screenBitmap; }
 	void SetScreenBitmap(ScreenBitmap* value) { _screenBitmap = value; }
-	
+
 };
 OBJECT_ENTRY_AUTO(__uuidof(Image), CImageClass)
 

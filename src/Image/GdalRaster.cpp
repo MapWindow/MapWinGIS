@@ -1433,7 +1433,6 @@ bool GdalRaster::ReadBandDataAsGridCore(colour** ImageData, int xOff, int yOff, 
 			if (!_allowHillshade && colortype == Hillshade)
 				colortype = Gradient;
 
-			colort ct;
 			if( colortype == Hillshade )
 			{
 				float yone = 0, ytwo = 0, ythree = 0;

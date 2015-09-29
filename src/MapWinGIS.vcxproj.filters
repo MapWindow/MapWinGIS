@@ -592,9 +592,6 @@
       <Filter>Tiles\Projections</Filter>
     </ClInclude>
     <ClInclude Include="_ITableEvents_CP.H" />
-    <ClInclude Include="Utilities\GdiPlusHelper.h">
-      <Filter>Utilities</Filter>
-    </ClInclude>
     <ClInclude Include="Utilities\GeographLibHelper.h">
       <Filter>Utilities</Filter>
     </ClInclude>
@@ -840,12 +837,6 @@
     <ClInclude Include="Image\HistogramData.h">
       <Filter>Image\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Image\tkJpg.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="Image\tkGif.h">
-      <Filter>Image\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="Structures\SelectedItem.h">
       <Filter>Structures</Filter>
     </ClInclude>
@@ -878,6 +869,12 @@
     </ClInclude>
     <ClInclude Include="Drawing\LabelDrawingHelper.h">
       <Filter>Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\GdiPlusHelper.h">
+      <Filter>Image\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\GraphicsStateHelper.h">
+      <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1583,9 +1580,6 @@
     <ClCompile Include="Tiles\Projections\CustomProjection.cpp">
       <Filter>Tiles\Projections</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\GdiPlusHelper.cpp">
-      <Filter>Utilities</Filter>
-    </ClCompile>
     <ClCompile Include="Utilities\GeographLibHelper.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
@@ -1830,12 +1824,6 @@
     <ClCompile Include="Image\HistogramData.cpp">
       <Filter>Image\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Image\tkJpg.cpp">
-      <Filter>Image\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Image\tkGif.cpp">
-      <Filter>Image\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Control\Map_Identifier.cpp">
       <Filter>Control</Filter>
     </ClCompile>
@@ -1868,6 +1856,12 @@
     </ClCompile>
     <ClCompile Include="Drawing\LabelDrawingHelper.cpp">
       <Filter>Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\GdiPlusHelper.cpp">
+      <Filter>Image\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities\GraphicsStateHelper.cpp">
+      <Filter>Utilities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
