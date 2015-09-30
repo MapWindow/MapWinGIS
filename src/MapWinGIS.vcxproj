@@ -157,7 +157,8 @@
       <OutputFile>$(IntDir)$(ProjectName).bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>setx  MapWinGISBin32 $(OutputPath)</Command>
+      <Command>if $(PlatformName) == Win32 setx  MapWinGISBin32 $(OutputPath)
+if $(PlatformName) == x64 setx  MapWinGISBin64 $(OutputPath)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Win32 platform definitions -->

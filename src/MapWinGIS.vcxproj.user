@@ -4,7 +4,7 @@
     <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup>
-    <LocalDebuggerCommand>d:\mw\mw5\src\bin\Debug\Mapwindow.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommand>d:\mw\mw5\bin\x86\Debug\Mapwindow.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
