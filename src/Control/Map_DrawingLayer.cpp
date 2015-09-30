@@ -258,7 +258,7 @@ void CMapView::DrawLists(const CRect & rcBounds, Gdiplus::Graphics* graphics, tk
 
 	// label drawer for spatially referenced list
 	CLabelDrawer lblDrawer(graphics, &_extents, _pixelPerProjectionX, _pixelPerProjectionY, 
-		this->GetCurrentScale(), &collisionList, _rotateAngle, _isSnapshot );
+		this->GetCurrentScale(), _currentZoom, &collisionList, _rotateAngle, _isSnapshot );
 	
 	// label drawer for screen referenced list
 	Extent ext(rcBounds.left, rcBounds.right, rcBounds.top, rcBounds.bottom);

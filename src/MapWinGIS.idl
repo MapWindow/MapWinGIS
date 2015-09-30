@@ -4974,6 +4974,10 @@ interface ILabels : IDispatch{
 	[propget, id(102)] HRESULT LogScaleForSize([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(102)] HRESULT LogScaleForSize([in] VARIANT_BOOL newVal);
 	[id(103)] HRESULT UpdateSizeField();
+	[propget, id(104)] HRESULT MinVisibleZoom([out, retval] LONG* pVal);
+	[propput, id(104)] HRESULT MinVisibleZoom([in] LONG newVal);
+	[propget, id(105)] HRESULT MaxVisibleZoom([out, retval] LONG* pVal);
+	[propput, id(105)] HRESULT MaxVisibleZoom([in] LONG newVal);
 };
 
 // *******************************  LabelCategory Interface  *****************************

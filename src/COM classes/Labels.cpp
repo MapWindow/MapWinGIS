@@ -1418,6 +1418,12 @@ STDMETHODIMP CLabels::put_AutoOffset(VARIANT_BOOL newVal)
 	if (_minVisibleScale != 0.0)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "MinVisibleScale", CPLString().Printf("%f", _minVisibleScale));
 
+	if (_minVisibleZoom != 0)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MinVisibleZoom", CPLString().Printf("%d", _minVisibleZoom));
+
+	if (_maxVisibleZoom != 25)
+		Utility::CPLCreateXMLAttributeAndValue(psTree, "MaxVisibleZoom", CPLString().Printf("%d", _maxVisibleZoom));
+
 	if (_collisionBuffer != 0)
 		Utility::CPLCreateXMLAttributeAndValue( psTree, "CollisionBuffer", CPLString().Printf("%d", _collisionBuffer));
 
@@ -1624,6 +1630,12 @@ bool CLabels::DeserializeCore(CPLXMLNode* node)
 
 	s = CPLGetXMLValue( node, "MinVisibleScale", NULL );
 	_minVisibleScale = (s != "") ? Utility::atof_custom(s) : 0.0;
+
+	s = CPLGetXMLValue(node, "MaxVisibleZoom", NULL);
+	_maxVisibleZoom = (s != "") ? atoi(s) : 25;
+
+	s = CPLGetXMLValue(node, "MinVisibleZoom", NULL);
+	_minVisibleZoom = (s != "") ? atoi(s) : 0;
 
 	s = CPLGetXMLValue( node, "CollisionBuffer", NULL );
 	_collisionBuffer = (s != "") ? atoi(s.GetString()) : 0;
@@ -2768,3 +2780,4 @@ STDMETHODIMP CLabels::UpdateSizeField()
 
 	return S_OK;
 }
+

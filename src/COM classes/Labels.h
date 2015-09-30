@@ -59,6 +59,8 @@ public:
 		_basicScale = 0.0;
 		_maxVisibleScale = 100000000.0;
 		_minVisibleScale = 0.0;
+		_minVisibleZoom = 0;
+		_maxVisibleZoom = 25;
 		_collisionBuffer = 0;
 
 		_dynamicVisibility = VARIANT_FALSE;
@@ -182,9 +184,13 @@ public:
 
 	STDMETHOD(get_MaxVisibleScale)(double* retval)						{*retval = _maxVisibleScale;		return S_OK;};		
 	STDMETHOD(put_MaxVisibleScale)(double newVal)						{_maxVisibleScale = newVal;		return S_OK;};
-	
 	STDMETHOD(get_MinVisibleScale)(double* retval)						{*retval = _minVisibleScale;		return S_OK;};		
 	STDMETHOD(put_MinVisibleScale)(double newVal)						{_minVisibleScale = newVal;		return S_OK;};
+
+	STDMETHOD(get_MinVisibleZoom)(LONG* pVal) 							{ *pVal = _minVisibleZoom;		return S_OK; };
+	STDMETHOD(put_MinVisibleZoom)(LONG newVal)							{ _minVisibleZoom = newVal;		return S_OK; };
+	STDMETHOD(get_MaxVisibleZoom)(LONG* pVal)							{ *pVal = _maxVisibleZoom;		return S_OK; };
+	STDMETHOD(put_MaxVisibleZoom)(LONG newVal)							{ _maxVisibleZoom = newVal;		return S_OK; };
 
 	STDMETHOD(get_DynamicVisibility)(VARIANT_BOOL* retval)				{*retval = _dynamicVisibility;		return S_OK;};		
 	STDMETHOD(put_DynamicVisibility)(VARIANT_BOOL newVal)				{_dynamicVisibility = newVal;		return S_OK;};
@@ -376,8 +382,8 @@ public:
 	STDMETHOD(put_UseVariableSize)(VARIANT_BOOL newVal);
 	STDMETHOD(get_LogScaleForSize)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_LogScaleForSize)(VARIANT_BOOL newVal);
-
 	STDMETHOD(UpdateSizeField)();
+	
 private:
 	int _sourceField;
 
@@ -417,6 +423,8 @@ private:
 	double		_basicScale;
 	double		_maxVisibleScale;
 	double		_minVisibleScale;
+	int _minVisibleZoom;
+	int _maxVisibleZoom;
 	long		_collisionBuffer;
 	bool		_scale;
 	
@@ -463,6 +471,7 @@ public:
 	void LoadLblOptions(CPLXMLNode* node);
 
 	bool RecalculateFontSize();
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Labels), CLabels)

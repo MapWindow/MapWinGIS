@@ -516,8 +516,13 @@ bool CLabelDrawer::CheckDynamicVisibility(ILabels* labels)
 		double minScale, maxScale;
 		labels->get_MinVisibleScale(&minScale);
 		labels->get_MaxVisibleScale(&maxScale);
-		double scale = _currentScale;
-		if (scale < minScale || scale > maxScale) {
+
+		long minZoom, maxZoom;
+		labels->get_MinVisibleZoom(&minZoom);
+		labels->get_MaxVisibleZoom(&maxZoom);
+		
+		if (_currentScale < minScale || _currentScale > maxScale ||
+			_currentZoom < minZoom || _currentZoom > maxZoom) {
 			return false;
 		}
 	}

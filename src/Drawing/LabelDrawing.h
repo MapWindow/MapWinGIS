@@ -34,15 +34,15 @@ class CLabelDrawer: public CBaseDrawer
 public:
 	// spatially referenced labels
 	CLabelDrawer::CLabelDrawer(Gdiplus::Graphics* graphics, Extent* extents, double pixelPerProjectionX, double pixelPerProjectionY, double currentScale,
-		CCollisionList* collisionList, double mapRotation, bool printing)
+		int currentZoom, CCollisionList* collisionList, double mapRotation, bool printing)
 	{
-		_currentScale = 0;
 		_printing = false;
 		_hdc = NULL;
 		_extents = extents;
 		_pixelPerProjectionX = pixelPerProjectionX;
 		_pixelPerProjectionY = pixelPerProjectionY;
 		_currentScale = currentScale;
+		_currentZoom = currentZoom;
 		_collisionList = collisionList;
 		_mapRotation = mapRotation;
 		_spatiallyReferenced = true;
@@ -85,6 +85,7 @@ private:
 private:	
 	HDC _hdc;
 	double _currentScale;
+	int _currentZoom;
 	double _mapRotation;
 	CCollisionList* _collisionList;
 	bool _spatiallyReferenced;
