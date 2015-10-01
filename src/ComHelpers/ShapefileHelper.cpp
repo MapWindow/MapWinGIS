@@ -52,19 +52,27 @@ void ShapefileHelper::CloneNoFields(IShapefile* sfSource, IShapefile** retVal, S
 	CoCreateInstance(CLSID_Shapefile, NULL, CLSCTX_INPROC_SERVER, IID_IShapefile, (void**)&sf);
 
 	VARIANT_BOOL vb;
-	if (addShapeId)
-	{
+	if (addShapeId)	{
 		sf->CreateNewWithShapeID(m_globalSettings.emptyBstr, targetShapeType, &vb);
 	}
 	else {
 		sf->CreateNew(m_globalSettings.emptyBstr, targetShapeType, &vb);
 	}
 
-	// copying the projection string
-	CComBSTR pVal;
-	sfSource->get_Projection(&pVal);
-	if (pVal != NULL)
-		sf->put_Projection(pVal);
+	CComPtr<IGeoProjection> gpSource = NULL;
+	CComPtr<IGeoProjection> gpTarget = NULL;
+	sfSource->get_GeoProjection(&gpSource);
+	sf->get_GeoProjection(&gpTarget);
+	
+	if (gpSource && gpTarget) {
+		gpTarget->CopyFrom(gpSource, &vb);
+
+		// older proj4 version - intentionally commented
+		/*CComBSTR pVal;
+		sfSource->get_Projection(&pVal);
+		if (pVal != NULL)
+		sf->put_Projection(pVal);*/
+	}
 
 	ICallback* callback = NULL;
 	sfSource->get_GlobalCallback(&callback);
