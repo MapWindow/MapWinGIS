@@ -1080,4 +1080,23 @@ long CMapView::GetShapePointFontCharListID(long LayerHandle, long Shape)
 }
 #pragma endregion
 
+// *************************************************************
+//		SaveAsEx()
+// *************************************************************
+STDMETHODIMP CShapefile::SaveAsEx(BSTR newFilename, VARIANT_BOOL stopEditing, VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal)
+{
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+	if (unboundFile) {
+		Save(NULL, retVal);
+		return S_OK;
+	}
+
+	SaveAs(newFilename, NULL, retVal);
+
+	if (retVal && stopEditing) {
+		StopEditingShapes(VARIANT_FALSE, VARIANT_TRUE, NULL, retVal);
+	}
+
+	return S_OK;
+}

@@ -250,6 +250,7 @@ public:
 	STDMETHOD(get_SortAscending)(VARIANT_BOOL* pVal);
 	STDMETHOD(put_SortAscending)(VARIANT_BOOL newVal);
 	STDMETHOD(UpdateSortField)();
+	STDMETHOD(SaveAsEx)(BSTR newFilename, VARIANT_BOOL stopEditing, VARIANT_BOOL unboundFile, VARIANT_BOOL* retVal);
 private:
 
 	// data for point in shapefile test
@@ -405,7 +406,6 @@ private:
 	void InsertShapesVector(IShapefile* sf, vector<IShape* >& vShapes, IShapefile* sfSubject, long subjectId, std::map<long, long>* fieldMapSubject = NULL,	IShapefile* sfClip = NULL, long clipId = -1, std::map<long, long>* fieldMapClip = NULL);
 	void GetRelatedShapeCore(IShape* referenceShape, long referenceIndex, tkSpatialRelation relation, VARIANT* resultArray, VARIANT_BOOL* retval);
 	
-	
 public:
 	// accessing shapes
 	bool ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly);
@@ -462,5 +462,6 @@ public:
 	void MarkUndrawn();
 	void GetLabelString(long fieldIndex, long shapeIndex, BSTR* text, CString floatNumberFormat);
 	bool GetSorting(vector<long>** indices);
+	
 };
 OBJECT_ENTRY_AUTO(__uuidof(Shapefile), CShapefile)

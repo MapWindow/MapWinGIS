@@ -3959,6 +3959,7 @@ interface IShapefile : IDispatch{
 	[propget, id(135)] HRESULT SortAscending([out, retval] VARIANT_BOOL* pVal);
 	[propput, id(135)] HRESULT SortAscending([in] VARIANT_BOOL newVal);
 	[id(136)] HRESULT UpdateSortField();
+	[id(137)] HRESULT SaveAsEx([in] BSTR newFilename, [in] VARIANT_BOOL stopEditing, [in] VARIANT_BOOL unboundFile, [out, retval] VARIANT_BOOL* retVal);
 };
 
 /****************************  Shape Interface ***********************/
