@@ -319,4 +319,14 @@ enum FunctionId
 	fnPi
 };
 
+enum tkShapeRecordFlags
+{
+	shpSelected = 1,
+	shpVisible = 2,			// because of the visibility expression 		
+	shpHidden = 4,			// set per shape explicitly	
+	shpModified = 8,		// for saving of OGR layers
+	shpWasRendered = 16,
+};
+
+
 # endif

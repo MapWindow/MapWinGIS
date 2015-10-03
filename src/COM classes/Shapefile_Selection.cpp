@@ -190,7 +190,7 @@ bool CShapefile::SelectShapesCore(Extent& extents, double Tolerance, SelectMode 
 
 			if (shapeVal < 0 || shapeVal >= (int)_shapeData.size()) continue;
 
-			if (renderedOnly && !_shapeData[shapeVal]->wasRendered)
+			if (renderedOnly && !_shapeData[shapeVal]->wasRendered())
 				continue;
 
 			// bounds
@@ -292,8 +292,10 @@ STDMETHODIMP CShapefile::get_ShapeSelected(long ShapeIndex, VARIANT_BOOL* pVal)
 		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-		*pVal = _shapeData[ShapeIndex]->selected; 
+	else {
+		*pVal = _shapeData[ShapeIndex]->selected(); 
+	}
+
 	return S_OK;
 }
 STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
@@ -303,9 +305,8 @@ STDMETHODIMP CShapefile::put_ShapeSelected(long ShapeIndex, VARIANT_BOOL newVal)
 	{	
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-	{
-		_shapeData[ShapeIndex]->selected = newVal == VARIANT_TRUE?true:false;
+	else {
+		_shapeData[ShapeIndex]->selected(newVal == VARIANT_TRUE?true:false);
 	}
 	return S_OK;
 }
@@ -321,7 +322,7 @@ STDMETHODIMP CShapefile::get_NumSelected(long *pVal)
 	long count = 0;
 	for(int i =0; i < (int)_shapeData.size(); i++)
 	{
-		if ( _shapeData[i]->selected )
+		if ( _shapeData[i]->selected() )
 			count++;
 	}
 	*pVal = count;	
@@ -335,8 +336,9 @@ STDMETHODIMP CShapefile::SelectAll()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	for(int i =0; i < (int)_shapeData.size(); i++)
-		_shapeData[i]->selected = true;
+	for (int i = 0; i < (int)_shapeData.size(); i++) {
+		_shapeData[i]->selected(true);
+	}
 
 	return S_OK;
 }
@@ -348,8 +350,9 @@ STDMETHODIMP CShapefile::SelectNone()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	for(int i =0; i < (int)_shapeData.size(); i++)
-		_shapeData[i]->selected = false;
+	for (int i = 0; i < (int)_shapeData.size(); i++) {
+		_shapeData[i]->selected(false);
+	}
 
 	return S_OK;
 }
@@ -361,8 +364,9 @@ STDMETHODIMP CShapefile::InvertSelection()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	for(int i =0; i < (int)_shapeData.size(); i++)
-		_shapeData[i]->selected = !_shapeData[i]->selected;
+	for (int i = 0; i < (int)_shapeData.size(); i++) {
+		_shapeData[i]->selected(!_shapeData[i]->selected());
+	}
 
 	return S_OK;
 }

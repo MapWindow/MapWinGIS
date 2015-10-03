@@ -1783,7 +1783,7 @@ STDMETHODIMP CShapefile::get_ShapeVisible(long ShapeIndex, VARIANT_BOOL* pVal)
 	}
 	else {
 		// this particular shape was not hidden explicitly or via visibility expression
-		if (!_shapeData[ShapeIndex]->hidden && _shapeData[ShapeIndex]->isVisible) 
+		if (!_shapeData[ShapeIndex]->hidden() && _shapeData[ShapeIndex]->isVisible()) 
 		{
 			long ctIndex = -1;
 			get_ShapeCategory(ShapeIndex, &ctIndex);
@@ -1822,8 +1822,9 @@ STDMETHODIMP CShapefile::get_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL* pVal)
 		*pVal = VARIANT_FALSE;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-		*pVal = _shapeData[shapeIndex]->hidden ? VARIANT_TRUE : VARIANT_FALSE;
+	else {
+		*pVal = _shapeData[shapeIndex]->hidden() ? VARIANT_TRUE : VARIANT_FALSE;
+	}
 	return S_OK;
 }
 
@@ -1835,7 +1836,7 @@ STDMETHODIMP CShapefile::put_ShapeIsHidden(LONG shapeIndex, VARIANT_BOOL newVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else
-		_shapeData[shapeIndex]->hidden = newVal ? true : false;
+		_shapeData[shapeIndex]->hidden(newVal ? true : false);
 
 	return S_OK;
 }
@@ -1851,8 +1852,10 @@ STDMETHODIMP CShapefile::get_ShapeModified(long ShapeIndex, VARIANT_BOOL* retVal
 		*retVal = -1;
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-		*retVal = _shapeData[ShapeIndex]->modified ? VARIANT_TRUE : VARIANT_FALSE;
+	else {
+		*retVal = _shapeData[ShapeIndex]->modified() ? VARIANT_TRUE : VARIANT_FALSE;
+	}
+
 	return S_OK;
 }
 
@@ -1863,8 +1866,9 @@ STDMETHODIMP CShapefile::put_ShapeModified(long ShapeIndex, VARIANT_BOOL newVal)
 	{
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
-	else
-		_shapeData[ShapeIndex]->modified = newVal ? true : false;
+	else {
+		_shapeData[ShapeIndex]->modified(newVal ? true : false);
+	}
 
 	return S_OK;
 }
@@ -2272,7 +2276,7 @@ STDMETHODIMP CShapefile::Serialize2(VARIANT_BOOL SaveSelection, VARIANT_BOOL Ser
 			selection[_shapeData.size()] = '\0';
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{
-				selection[i] = _shapeData[i]->selected ? '1' : '0';
+				selection[i] = _shapeData[i]->selected() ? '1' : '0';
 			}
 		
 			CPLXMLNode* nodeSelection = CPLCreateXMLElementAndValue(psTree, "Selection", selection);
@@ -2494,7 +2498,7 @@ bool CShapefile::DeserializeCore(VARIANT_BOOL LoadSelection, CPLXMLNode* node)
 			{
 				if (selection[i] == '1')
 				{
-					_shapeData[i]->selected =  true;
+					_shapeData[i]->selected(true);
 				}
 			}
 		}
@@ -3166,7 +3170,7 @@ STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else {
-		*pVal = _shapeData[ShapeIndex]->wasRendered ? VARIANT_TRUE : VARIANT_FALSE;
+		*pVal = _shapeData[ShapeIndex]->wasRendered() ? VARIANT_TRUE : VARIANT_FALSE;
 	}
 	return S_OK;
 }
@@ -3176,8 +3180,9 @@ STDMETHODIMP CShapefile::get_ShapeRendered(LONG ShapeIndex, VARIANT_BOOL* pVal)
 // *****************************************************************
 void CShapefile::MarkUndrawn()
 {
-	for (size_t i = 0; i < _shapeData.size(); i++)
-		_shapeData[i]->wasRendered = false;
+	for (size_t i = 0; i < _shapeData.size(); i++) {
+		_shapeData[i]->wasRendered(false);
+	}
 }
 
 // *************************************************************

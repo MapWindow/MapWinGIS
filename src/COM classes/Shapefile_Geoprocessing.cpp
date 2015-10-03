@@ -323,7 +323,7 @@ STDMETHODIMP CShapefile::SelectByShapefile(IShapefile* sf, tkSpatialRelation Rel
 	{
 		CallbackHelper::Progress(_globalCallback, shapeid2, _numShapes2, "Calculating...", _key, percent);
 		
-		if (SelectedOnly && !(*data)[shapeid2]->selected)
+		if (SelectedOnly && !(*data)[shapeid2]->selected())
 			continue;
 
 		vector<int> shapeIds;
@@ -3074,7 +3074,7 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	{
 		CallbackHelper::Progress(_globalCallback, i, numShapes, "Exporting...", _key, percent);
 
-		if (!_shapeData[i]->selected)
+		if (!_shapeData[i]->selected())
 			continue;
 
 		IShape* shp = NULL;

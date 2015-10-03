@@ -130,7 +130,7 @@ void CChartDrawer::DrawCharts(IShapefile* sf)
 	for (unsigned int i = 0; i < arrInit.size(); i++)
 	{
 		int index = arrInit[i];
-		if ((*positions)[index]->isVisible)
+		if ((*positions)[index]->isVisible())
 		{
 			arr.push_back(index);
 		}

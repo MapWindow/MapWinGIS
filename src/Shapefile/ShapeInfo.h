@@ -44,50 +44,41 @@ struct ShapeData
 		category = -1;
 		originalIndex = -1;
 		size = 0;
-		
-		modified = false;
-		selected = false;
-		isVisible = false;
-		hidden = false;
-		wasRendered = false;
+
 		rotation = 0.0;
+
+		_flags = 0;
 
 		status = ShapeValidationStatus::Original;
 	}
 
 	~ShapeData()
 	{
-		if (shape)
-		{
+		if (shape) {
 			shape->Release();
-			shape = NULL;
 		}
 
-		if (chart)
-		{
+		if (chart) {
 			delete chart;
-			chart = NULL;
 		}
 
-		if (fastData)
-		{
+		if (fastData){
 			delete fastData;
-			fastData = NULL;
 		}
 
-		if (geosGeom)
-		{
+		if (geosGeom) {
 			GEOSGeom_destroy(geosGeom);
-			geosGeom = NULL;
 		}
 
-		if (fixedShape)
-		{
+		if (fixedShape) {
 			fixedShape->Release();
-			fixedShape = NULL;
 		}
 	}
 	
+private:
+	BYTE _flags;
+
+public:
 	IShape* shape;
 	CChartInfo* chart;
 	GEOSGeom geosGeom;		// caches geometry
@@ -103,11 +94,28 @@ struct ShapeData
 	
 	float rotation;         // for point icons only;
 
-	// TODO: use bit mask
-	bool selected;
-	bool isVisible;			// because of the visibility expression 		
-	bool hidden;			// set per shape explicitly	
-	bool modified;			// for saving of OGR layers
-	bool wasRendered;
+private:
+	void setVisibilityFlag(tkShapeRecordFlags flag, bool value) {
+		if (value) 
+			_flags |= flag;
+		else    
+			_flags &= (0xFF ^ flag);
+	}
+
+public:
+	bool selected() { return _flags & shpSelected ? true : false; }
+	void selected(bool value) { setVisibilityFlag(shpSelected, value); }
+
+	bool isVisible() { return _flags & shpVisible ? true : false ; }
+	void isVisible(bool value) { setVisibilityFlag(shpVisible, value); }
+
+	bool hidden() { return _flags & shpHidden ? true : false; }
+	void hidden(bool value) { setVisibilityFlag(shpHidden, value); }
+
+	bool modified() { return _flags & shpModified ? true : false; }
+	void modified(bool value) { setVisibilityFlag(shpModified, value); }
+
+	bool wasRendered() { return _flags & shpWasRendered? true : false; }
+	void wasRendered(bool value) { setVisibilityFlag(shpWasRendered, value); }
 };
 

@@ -480,7 +480,7 @@ STDMETHODIMP CShapefile::EditUpdateShape(long shapeIndex, IShape* shpNew, VARIAN
 
 	ComHelper::SetRef(shpNew, (IDispatch**)&_shapeData[shapeIndex]->shape, false);
 	ReregisterShape(shapeIndex);
-	_shapeData[shapeIndex]->modified = true;
+	_shapeData[shapeIndex]->modified(true);
 
 	*retval = VARIANT_TRUE;
 	return S_OK;
@@ -616,7 +616,7 @@ STDMETHODIMP CShapefile::EditInsertShape(IShape *Shape, long *ShapeIndex, VARIAN
 						ShapeData* data = new ShapeData();
 						Shape->AddRef();
 						data->shape = Shape;
-						data->modified = true;
+						data->modified(true);
 						_shapeData.insert(_shapeData.begin() + *ShapeIndex, data);
 						
 						RegisterNewShape(Shape, *ShapeIndex);

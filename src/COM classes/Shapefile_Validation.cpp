@@ -152,7 +152,7 @@ void CShapefile::CreateValidationList(bool selectedOnly)
 		size_t size = _shapeData.size();
 		for(size_t i = 0; i < size; i++)
 		{
-			if (selectedOnly && !_shapeData[i]->selected)
+			if (selectedOnly && !_shapeData[i]->selected())
 			{
 				_shapeData[i]->status = ShapeValidationStatus::Skip;
 			}
@@ -248,12 +248,18 @@ HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal)
 // *********************************************************
 bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly)
 {
-	if (shapeIndex < 0 || shapeIndex >= (int)_shapeData.size())
+	if (shapeIndex < 0 || shapeIndex >= (int)_shapeData.size()) {
 		return false;
-	if (!_shapeData[shapeIndex]->selected && selectedOnly)
+	}
+
+	if (!_shapeData[shapeIndex]->selected() && selectedOnly) {
 		return false;
-	if (_useValidationList && _shapeData[shapeIndex]->status == ShapeValidationStatus::Skip)
+	}
+
+	if (_useValidationList && _shapeData[shapeIndex]->status == ShapeValidationStatus::Skip) {
 		return false;
+	}
+
 	return true;
 }
 

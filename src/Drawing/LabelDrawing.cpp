@@ -437,7 +437,7 @@ void CLabelDrawer::GetVisibilityMask(ILabels* labels, IShapefile* sf, std::vecto
 		for (long i = 0; i < size; i++)
 		{
 			long index = hasFilter ? filter[i] : i;
-			visibilityMask[index] = (*shapeData)[index]->wasRendered && (*shapeData)[index]->size >= minSize;
+			visibilityMask[index] = (*shapeData)[index]->wasRendered() && (*shapeData)[index]->size >= minSize;
 		}
 	}
 	else
