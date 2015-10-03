@@ -89,21 +89,24 @@ struct ShapeData
 	}
 	
 	IShape* shape;
-	CShapeData* fastData;	// fast non-edit mode
 	CChartInfo* chart;
 	GEOSGeom geosGeom;		// caches geometry
-	
 	IShape* fixedShape;				// will be used as substitute of original in input shapefile
+	
+	// TODO: remove
+	CShapeData* fastData;	// fast non-edit mode	
 	ShapeValidationStatus status;
 	
-	int originalIndex;				// the unique handle of shape, assigned in the increasing order
-	int category;			// the ShapefileCategory to which the shape belongs: < 0 - default options
-	int size;				// size in pixels at current scale; the shape will be labeled or not considering this size
+	int originalIndex;		// the unique handle of shape, assigned in the increasing order
+	long category;			// the ShapefileCategory to which the shape belongs: < 0 - default options
+	short size;				// size in pixels at current scale; the shape will be labeled or not considering this size
 	
+	float rotation;         // for point icons only;
+
+	// TODO: use bit mask
 	bool selected;
 	bool isVisible;			// because of the visibility expression 		
-	bool hidden;			// set per shape explicitly
-	double rotation;        // for point icons only; TODO: quite a waste of 8 bytes
+	bool hidden;			// set per shape explicitly	
 	bool modified;			// for saving of OGR layers
 	bool wasRendered;
 };

@@ -2449,6 +2449,7 @@ bool CTableClass::get_FieldValuesInteger(int FieldIndex, std::vector<int>& value
 	{
 		if (_rows[i].row)
 		{
+			// TODO: use getValue
 			VARIANT* var = _rows[i].row->values[FieldIndex];
 			if (var && var->vt != VT_NULL)
 			{

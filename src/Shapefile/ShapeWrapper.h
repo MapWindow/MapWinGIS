@@ -141,24 +141,28 @@ private:
 	// -----------
 	// type
 	ShpfileType _ShapeType;
-	ShpfileType _ShapeType2D;
+	ShpfileType _ShapeType2D;    // TODO: remove
 	// bounds
 	double _xMin;
 	double _yMin;
 	double _xMax;
 	double _yMax;
 
+	// TODO: move to derived class
 	double _zMin;
 	double _mMin;
 	double _zMax;
 	double _mMax;
+
 	bool _boundsChanged;
-	int _lastErrorCode;
+	short _lastErrorCode;
 	
 public:
 	// Actually this breaks encapsulation, but in many cases we want faster access
 	std::vector<int> _parts;
 	std::vector<pointEx> _points;
+
+	// TODO: move to derived class
 	std::vector<double> _pointsZ;			// We could merge points with Z and M in one structure, 
 	std::vector<double> _pointsM;			// but it'll be impossible to copy all points at once to/from vector through memcopy
 	

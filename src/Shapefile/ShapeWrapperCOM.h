@@ -60,12 +60,12 @@ private:
 	double _zMax;
 	double _mMax;
 	bool _boundsChanged;
-	int _lastErrorCode;
+	short _lastErrorCode;
 	
 public:
 	// Actually this breaks encapsulation, but in many cases we want faster access
-	std::deque<IPoint *> _allPoints;
-	std::deque<long> _allParts;
+	std::vector<IPoint *> _allPoints;
+	std::vector<long> _allParts;
 
 public:
 	int get_PointCount(){return _allPoints.size();}

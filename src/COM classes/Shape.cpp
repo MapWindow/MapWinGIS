@@ -111,8 +111,8 @@ CShapeWrapper* CShape::InitShapeWrapper(CShapeWrapperCOM* shpOld)
 	double x, y, z, m;
 
 	// referencing the old one
-	std::deque<IPoint*>* allPoints = &(shpOld->_allPoints);
-	std::deque<long>* allParts = &(shpOld->_allParts);
+	std::vector<IPoint*>* allPoints = &(shpOld->_allPoints);
+	std::vector<long>* allParts = &(shpOld->_allParts);
 	
 	// creating new wrapper
 	CShapeWrapper* shpNew = new CShapeWrapper(type);
@@ -162,8 +162,8 @@ CShapeWrapperCOM* CShape::InitComWrapper(CShapeWrapper* shpOld)
 	
 	// creating the new wrapper
 	CShapeWrapperCOM* shpNew = new CShapeWrapperCOM(type);
-	std::deque<IPoint*>* allPoints = &(shpNew->_allPoints);
-	std::deque<long>* allParts = &(shpNew->_allParts);
+	std::vector<IPoint*>* allPoints = &(shpNew->_allPoints);
+	std::vector<long>* allParts = &(shpNew->_allParts);
 	
 	// passing points
 	IPoint* pnt = NULL;
@@ -700,9 +700,9 @@ STDMETHODIMP CShape::ReversePointsOrder(long PartIndex, VARIANT_BOOL* retval)
 	else
 	{
 		CShapeWrapperCOM* shp = (CShapeWrapperCOM*) _shp;
-		std::deque<IPoint* >* allPoints = &shp->_allPoints;
-		deque<IPoint *>::iterator iter1 = allPoints->begin();
-		deque<IPoint *>::iterator iter2 = allPoints->begin();
+		std::vector<IPoint* >* allPoints = &shp->_allPoints;
+		vector<IPoint *>::iterator iter1 = allPoints->begin();
+		vector<IPoint *>::iterator iter2 = allPoints->begin();
 		iter1 +=beg_part;
 		iter2 +=end_part;
 		reverse( iter1, iter2);

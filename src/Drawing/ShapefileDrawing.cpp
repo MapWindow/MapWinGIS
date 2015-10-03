@@ -1964,8 +1964,8 @@ void CShapefileDrawer::AddPolygonToPath(Gdiplus::GraphicsPath* pathFill, Polygon
 void CShapefileDrawer::AddPolygonToPath( Gdiplus::GraphicsPath* pathFill, CShapeWrapperCOM* shp, tkVectorDrawingMode drawingMode)
 {
 	// fast access to points
-	std::deque<IPoint*>	allPoints = shp->_allPoints;
-	std::deque<long> allParts = shp->_allParts;
+	std::vector<IPoint*>	allPoints = shp->_allPoints;
+	std::vector<long> allParts = shp->_allParts;
 	
 	int partCount =  allParts.size();
 	for(int i = 0; i < partCount; i++)
@@ -2145,8 +2145,8 @@ void CShapefileDrawer::DrawPolyGDI( PolygonData* shapeData, CDrawingOptionsEx* o
 void CShapefileDrawer::DrawPolyGDI( CShapeWrapperCOM* shp, CDrawingOptionsEx* options, Gdiplus::GraphicsPath& path, bool pathIsNeeded )
 {
 	// fast access to points
-	std::deque<IPoint*>	allPoints = shp->_allPoints;
-	std::deque<long> allParts = shp->_allParts;
+	std::vector<IPoint*>	allPoints = shp->_allPoints;
+	std::vector<long> allParts = shp->_allParts;
 
 	if (allParts.size() == 0 || allPoints.size() == 0)
 		return;

@@ -1765,7 +1765,7 @@ STDMETHODIMP CShapefile::put_ShapeRotation(long ShapeIndex, double newVal)
 		ErrorMessage(tkINDEX_OUT_OF_BOUNDS);
 	}
 	else
-		_shapeData[ShapeIndex]->rotation = newVal;
+		_shapeData[ShapeIndex]->rotation = static_cast<float>(newVal);
 
 	return S_OK;
 }
