@@ -499,10 +499,13 @@ STDMETHODIMP CUtils::RemoveColinearPoints(IShapefile * Shapes, double LinearTole
 	//	 Validating output
 	// ---------------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	((CShapefile*)Shapes)->ClearValidationList();
+	
 	((CShapefile*)Shapes)->ValidateOutput(&Shapes, "RemoveColinearPoints", "Utils");
-	if (Shapes)
+
+	if (Shapes) {
 		Shapes->StopEditingShapes(TRUE,FALSE,cBack,&vbretval);
+	}
+
 	return S_OK;
 }
 
@@ -2821,7 +2824,6 @@ STDMETHODIMP CUtils::ShapefileToGrid(IShapefile * Shpfile, VARIANT_BOOL UseShape
 cleaning:
 	VariantClear(&vndv); 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	((CShapefile*)Shpfile)->ClearValidationList();
 	return S_OK;
 }
 
@@ -3579,7 +3581,6 @@ STDMETHODIMP CUtils::ReprojectShapefile(IShapefile* sf, IGeoProjection* source, 
 	//    Validating output
 	// --------------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	((CShapefile*)sf)->ClearValidationList();
 	((CShapefile*)sf)->ValidateOutput(&sf, "ReprojectShapefile", "Utils");
 	
 	return S_OK;

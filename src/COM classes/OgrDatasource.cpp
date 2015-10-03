@@ -452,7 +452,6 @@ STDMETHODIMP COgrDatasource::ImportShapefile(IShapefile* shapefile, BSTR newLaye
 	}
 
 cleaning:
-	((CShapefile*)shapefile)->ClearValidationList();
 	return S_OK;
 }
 

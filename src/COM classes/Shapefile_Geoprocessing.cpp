@@ -583,7 +583,6 @@ void CShapefile::DissolveCore(long FieldIndex, VARIANT_BOOL SelectedOnly, IField
 	// output validation
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
 	ValidateOutput(sf, "Dissolve");
 	return;
 }
@@ -1338,7 +1337,6 @@ void CShapefile::AggregateShapesCore(VARIANT_BOOL SelectedOnly, LONG FieldIndex,
 	// ----------------------------------------------
 	//   Validating output
 	// ----------------------------------------------
-	this->ClearValidationList();
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "AggregateShapes");
 	return;
@@ -1477,7 +1475,6 @@ STDMETHODIMP CShapefile::BufferByDistance(double Distance, LONG nSegments, VARIA
 	// output validation
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
 	ValidateOutput(sf, "BufferByDistance");
 	return S_OK;
 }
@@ -1657,7 +1654,6 @@ void CShapefile::DoClipOperation(VARIANT_BOOL SelectedOnlySubject, IShapefile* s
 
 	if (!ValidateInput(sfOverlay, GetClipOperationName(operation), "sfOverlay", SelectedOnlyOverlay))
 	{
-		this->ClearValidationList();
 		return;
 	}
 		
@@ -1773,11 +1769,9 @@ cleaning:
 
 	// clearing spatial index for the operation
 	((CShapefile*)sfOverlay)->ClearTempQTree();
-	if (operation == clSymDifference || operation == clUnion)
+	if (operation == clSymDifference || operation == clUnion) {
 		this->ClearTempQTree();
-
-	this->ClearValidationList();
-	((CShapefile*)sfOverlay)->ClearValidationList();
+	}
 
 	// -------------------------------------------
 	// output validation
@@ -3030,7 +3024,6 @@ STDMETHODIMP CShapefile::ExplodeShapes(VARIANT_BOOL SelectedOnly, IShapefile** r
 	//   Output validation
 	// ----------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
 	ValidateOutput(retval, "ExplodeShapes");
 	return S_OK;
 }
@@ -3112,7 +3105,6 @@ STDMETHODIMP CShapefile::ExportSelection(IShapefile** retval)
 	//   Validating output
 	// ----------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
 	ValidateOutput(retval, "ExportSelection");
 	return S_OK;
 }
@@ -3205,7 +3197,6 @@ STDMETHODIMP CShapefile::Sort(LONG FieldIndex, VARIANT_BOOL Ascending, IShapefil
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
 	ValidateOutput(retval, "Sort");
-	this->ClearValidationList();
 	return S_OK;
 }
 
@@ -3243,7 +3234,6 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 
 	if (!ValidateInput(sf, "Merge", "sf", SelectedOnly))
 	{
-		this->ClearValidationList();
 		return S_OK;
 	}
 
@@ -3359,8 +3349,6 @@ STDMETHODIMP CShapefile::Merge(VARIANT_BOOL SelectedOnlyThis, IShapefile* sf, VA
 	// output validation
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
-	((CShapefile*)sf)->ClearValidationList();
 	ValidateOutput(retval, "Merge");
 	return S_OK;
 }
@@ -3466,7 +3454,6 @@ STDMETHODIMP CShapefile::SimplifyLines(DOUBLE Tolerance, VARIANT_BOOL SelectedOn
 	// output validation
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearValidationList();
 	ValidateOutput(retVal, "SimplifyLines");
 	return S_OK;
 }
@@ -3567,9 +3554,8 @@ STDMETHODIMP CShapefile::Segmentize(IShapefile** retVal)
 	// output validation
 	// -------------------------------------------
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	this->ClearTempQTree();
-	this->ClearCachedGeometries();
-	this->ClearValidationList();
+	ClearTempQTree();
+	ClearCachedGeometries();
 	ValidateOutput(retVal, "Segmentize");
 	return S_OK;
 

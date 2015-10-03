@@ -449,9 +449,6 @@ public:
 
 	// validation
 	void SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType);
-	void CreateValidationList(bool selectedOnly);
-	void ClearValidationList();
-	void SetValidatedShape(int shapeIndex, ShapeValidationStatus status, IShape* shape = NULL);
 	bool ValidateInput(IShapefile* isf, CString methodName, CString parameterName, VARIANT_BOOL selectedOnly, CString className = "Shapefile");
 	IShapeValidationInfo* ValidateInputCore(IShapefile* isf, CString methodName, CString parameterName,	VARIANT_BOOL selectedOnly, tkShapeValidationMode validationMode, CString className = "Shapefile", bool reportOnly = false);
 	IShapeValidationInfo* ValidateOutput(IShapefile** isf, CString methodName, CString className = "Shapefile", bool abortIfEmpty = true);

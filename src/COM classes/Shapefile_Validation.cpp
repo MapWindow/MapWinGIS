@@ -38,6 +38,12 @@ STDMETHODIMP CShapefile::Validate(tkShapeValidationMode validationMode, VARIANT_
 bool CShapefile::ValidateInput(IShapefile* isf, CString methodName, 
 	CString parameterName, VARIANT_BOOL selectedOnly, CString className /*= "Shapefile"*/)
 {
+	if (m_globalSettings.inputValidation != AbortOnErrors) {
+		// this the only mode where shall be doing it before hand
+		// in all other cases validation & fixing will be done in get_ValidateShape call directly
+		return true;
+	}
+
 	IShapeValidationInfo* info = ValidateInputCore(isf, methodName, parameterName, selectedOnly, m_globalSettings.inputValidation, className);
 	bool result = info != NULL;
 	if (info) info->Release();
@@ -117,14 +123,18 @@ clear_result:
 	}
 	else
 	{
-		IShapeValidationInfo* iinfo = ShapeValidator::Validate(*isf, m_globalSettings.outputValidation, svtOutput, 
-									className, methodName, "", _globalCallback, _key, false);
+		IShapeValidationInfo* iinfo = ShapeValidator::Validate(*isf, m_globalSettings.outputValidation, svtOutput, className, methodName, "", _globalCallback, _key, false);
+
 		CShapefile* sf = (CShapefile*)this;		// writing validation into this shapefile
 		sf->SetValidationInfo(iinfo, svtOutput);
 		iinfo->Release();
+
 		CShapeValidationInfo* info = (CShapeValidationInfo*)iinfo;
-		if (info->validationStatus == tkShapeValidationStatus::OperationAborted)
+
+		if (info->validationStatus == tkShapeValidationStatus::OperationAborted) {
 			goto clear_result;
+		}
+
 		return info;
 	}
 }
@@ -134,95 +144,11 @@ clear_result:
 // **************************************************************
 bool CShapefile::ValidateOutput(IShapefile* sf, CString methodName, CString className, bool abortIfEmpty)
 {
-	if (!_isEditingShapes)
-		return true;		// TODO: implement for disk-based shapefile
-	return ValidateOutput(&sf, methodName, className, abortIfEmpty) != NULL;
-}
-
-// *********************************************************
-//		CreateValidationList
-// *********************************************************
-void CShapefile::CreateValidationList(bool selectedOnly)
-{
-	if (_useValidationList)
-		CallbackHelper::AssertionFailed("Attempting to create validation list which exists.");
-	
-	if (!_useValidationList)
-	{
-		size_t size = _shapeData.size();
-		for(size_t i = 0; i < size; i++)
-		{
-			if (selectedOnly && !_shapeData[i]->selected())
-			{
-				_shapeData[i]->status = ShapeValidationStatus::Skip;
-			}
-			else
-			{
-				IShape* shp = NULL;
-				this->get_Shape(i, &shp);
-				_shapeData[i]->fixedShape = shp;
-				_shapeData[i]->status = ShapeValidationStatus::Original; 
-			}
-		}
-		_useValidationList = true;
-	}
-}
-
-// *********************************************************
-//		ClearValidationList
-// *********************************************************
-void CShapefile::ClearValidationList()
-{
-	_useValidationList = false;
-	for(size_t i = 0; i < _shapeData.size(); i++)
-	{
-		if (_shapeData[i]->fixedShape)
-		{
-			_shapeData[i]->fixedShape->Release();
-			_shapeData[i]->fixedShape = NULL;
-		}
-		_shapeData[i]->status = Original;
-	}
-}
-
-// *********************************************************
-//		SetValidatedShape
-// *********************************************************
-void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status, IShape* shape)
-{
-	if (status == Original)
-	{
-		CallbackHelper::AssertionFailed("Can't set Original status in SetValidatedShape.");
-		return;
+	if (!_isEditingShapes) {
+		return true;
 	}
 
-	if (shapeIndex > (int)_shapeData.size())
-	{
-		CallbackHelper::AssertionFailed(Debug::Format("Invalid index for validated shape: %d.", shapeIndex));
-		return;
-	}
-
-	if (_useValidationList)
-	{
-		if (_shapeData[shapeIndex]->fixedShape) {
-			_shapeData[shapeIndex]->fixedShape->Release();
-			_shapeData[shapeIndex]->fixedShape = NULL;
-		}
-		_shapeData[shapeIndex]->status = status;
-		_shapeData[shapeIndex]->fixedShape = shape;
-	}
-	else
-	{
-		// edit in place
-		if (!_isEditingShapes)
-		{
-			CallbackHelper::AssertionFailed("Attempt to update shape while not in edit mode.");
-			return;
-		}
-		if (_shapeData[shapeIndex]->shape) _shapeData[shapeIndex]->shape->Release();
-		_shapeData[shapeIndex]->shape = shape;
-		this->RegisterNewShape(shape, shapeIndex);
-	}
+	return ValidateOutput(&sf, methodName, className, abortIfEmpty) != NULL;		// validationInfo instance is referenced by shapefile
 }
 
 // *********************************************************
@@ -230,16 +156,54 @@ void CShapefile::SetValidatedShape(int shapeIndex, ShapeValidationStatus status,
 // *********************************************************
 HRESULT CShapefile::GetValidatedShape(int shapeIndex, IShape** retVal)
 {
-	if (_useValidationList)
-	{
-		IShape* shp = _shapeData[shapeIndex]->fixedShape;
-		if (shp) shp->AddRef();
-		*retVal = shp;
+	IShape* shp = NULL;
+	get_Shape(shapeIndex, &shp);
+
+	if (!shp) {
+		return S_OK;
 	}
-	else
+
+	switch (m_globalSettings.inputValidation)
 	{
-		this->get_Shape(shapeIndex, retVal);
+		case NoValidation:
+		case AbortOnErrors:
+			// for abort on errors validation must be run before the execution of the method,
+			// the fact that we are processing further means that it has been passed
+			*retVal = shp;
+			return S_OK;
+		case TryFixProceedOnFailure:
+		case TryFixSkipOnFailure:
+			VARIANT_BOOL vb;
+			(*retVal)->get_IsValid(&vb);
+
+			if (vb) {
+				// everything is good
+				*retVal = shp;
+				return S_OK;
+			}
+
+			IShape* shpNew = NULL;
+			(*retVal)->FixUp(&shpNew);
+
+			if (shpNew) {
+				// fixed, no problems
+				shp->Release();
+				*retVal = shpNew;
+				return S_OK;
+			}
+
+
+			if (m_globalSettings.inputValidation == TryFixProceedOnFailure) {
+				// can't be fixed? we don't care :)
+				*retVal = shp;
+			}
+			else {
+				// TryFixSkipOnFailure
+				// well, we should cope somehow without it :(
+				*retVal = NULL;
+			}
 	}
+	
 	return S_OK;
 }
 
@@ -256,12 +220,12 @@ bool CShapefile::ShapeAvailable(int shapeIndex, VARIANT_BOOL selectedOnly)
 		return false;
 	}
 
-	if (_useValidationList && _shapeData[shapeIndex]->status == ShapeValidationStatus::Skip) {
-		return false;
-	}
-
 	return true;
 }
+
+#pragma endregion 
+
+#pragma region Caching GEOS geometries
 
 // *********************************************************
 //		GetGeosGeometry
@@ -270,9 +234,7 @@ GEOSGeometry* CShapefile::GetGeosGeometry(int shapeIndex)
 {
 	return _shapeData[shapeIndex]->geosGeom;
 }
-#pragma endregion 
 
-#pragma region Caching GEOS geometries
 // *********************************************************
 //		ClearCachedGeometries()
 // *********************************************************
@@ -331,4 +293,5 @@ void CShapefile::ReadGeosGeometries(VARIANT_BOOL selectedOnly)
 	}
 	_geosGeometriesRead = true;
 }
+
 #pragma endregion

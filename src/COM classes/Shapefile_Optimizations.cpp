@@ -61,10 +61,10 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 			// make sure that memory is released
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{
-				if (_shapeData[i]->fastData)
+				if (_shapeData[i]->renderData)
 				{
-					delete _shapeData[i]->fastData;
-					_shapeData[i]->fastData = NULL;
+					delete _shapeData[i]->renderData;
+					_shapeData[i]->renderData = NULL;
 				}
 			}
 			
@@ -80,7 +80,7 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 					char* data = reader->ReadShapeData(i);
 					if (data)
 					{
-						_shapeData[i]->fastData = new CShapeData(data);
+						_shapeData[i]->renderData = new CShapeData(data);
 						delete[] data;
 					}
 
@@ -114,10 +114,10 @@ STDMETHODIMP CShapefile::put_FastMode (VARIANT_BOOL newVal)
 				// delete the in-memory data
 				for (unsigned int i = 0; i < _shapeData.size(); i++)
 				{
-					if (_shapeData[i]->fastData)
+					if (_shapeData[i]->renderData)
 					{
-						delete _shapeData[i]->fastData;
-						_shapeData[i]->fastData = NULL;
+						delete _shapeData[i]->renderData;
+						_shapeData[i]->renderData = NULL;
 					}
 				}
 				_fastMode = FALSE;
@@ -650,9 +650,9 @@ bool CShapefile::QuickExtentsCore(long ShapeIndex, Extent& result)
 		{				
 			if (_fastMode)
 			{
-				if (_shapeData[ShapeIndex]->fastData)
+				if (_shapeData[ShapeIndex]->renderData)
 				{
-					_shapeData[ShapeIndex]->fastData->get_BoundsXY(result.left, result.right, result.bottom, result.top);
+					_shapeData[ShapeIndex]->renderData->get_BoundsXY(result.left, result.right, result.bottom, result.top);
 				}
 			}
 			else

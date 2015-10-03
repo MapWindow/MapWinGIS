@@ -49,11 +49,17 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 
 		VARIANT_BOOL canEdit;
 		isf->get_EditingShapes(&canEdit);
-		if (validationType == svtInput)
+		if (validationType == svtInput) {
 			canEdit = VARIANT_FALSE;
-		if (!canEdit)
-		{
-			sf->CreateValidationList(selectedOnly);
+		}
+
+		if (!canEdit && validationMode == TryFixProceedOnFailure || 
+						validationMode== TryFixProceedOnFailure) {
+			
+			Debug::WriteError("Validation mode demands fixing of invalid shapes, but shapefile isn't in edit mode. "
+							  "Validation without fixing will be performed.");
+
+			reportOnly = true;
 		}
 
 		long numShapes;
@@ -98,7 +104,7 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 					if (fixedShape)
 					{
 						info->fixedCount++;
-						sf->SetValidatedShape(i, ShapeValidationStatus::Fixed, fixedShape);
+						sf->EditUpdateShape(i, fixedShape, &vb);
 					}
 					else
 					{
@@ -109,16 +115,8 @@ IShapeValidationInfo* ShapeValidator::Validate(IShapefile* isf, tkShapeValidatio
 								// do nothing
 								break;
 							case TryFixSkipOnFailure:
-								if (canEdit) {
-									sf->EditDeleteShape(i, &vb);
-								}
-								else {
-									sf->SetValidatedShape(i, ShapeValidationStatus::Skip);
-								}
+								sf->EditDeleteShape(i, &vb);
 								break;
-							case TryFixAbortOnFailure:
-								info->validationStatus = tkShapeValidationStatus::OperationAborted;
-								goto stop_operation;
 						}
 					}
 				}
@@ -131,7 +129,6 @@ stop_operation:
 	{
 		info->stillInvalidCount = 1;
 		info->wereInvalidCount = 1;
-		sf->ClearValidationList();
 	}
 	else
 	{

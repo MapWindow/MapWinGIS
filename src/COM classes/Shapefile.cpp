@@ -188,7 +188,7 @@ IShapeWrapper* CShapefile::get_ShapeWrapper(int ShapeIndex)
 }
 IShapeData* CShapefile::get_ShapeData(int ShapeIndex)
 {
-	return (_shapeData[ShapeIndex])->fastData;
+	return (_shapeData[ShapeIndex])->renderData;
 }
 void CShapefile::SetValidationInfo(IShapeValidationInfo* info, tkShapeValidationType validationType)
 {
@@ -871,7 +871,6 @@ STDMETHODIMP CShapefile::Close(VARIANT_BOOL *retval)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState())
 
-	ClearValidationList();
 	ClearCachedGeometries();
 
 	if( _isEditingShapes )
@@ -2775,13 +2774,11 @@ bool CShapefile::ReprojectCore(IGeoProjection* newProjection, LONG* reprojectedC
 	//	  Output validation
 	// -------------------------------------- 
 	CallbackHelper::ProgressCompleted(_globalCallback, _key);
-	ClearValidationList();
-	if (!reprojectInPlace)
-	{
+	
+	if (!reprojectInPlace) {
 		this->ValidateOutput(retVal, "Reproject/ReprojectInPlace", "Shapefile", false);
 	}
-	else
-	{
+	else {
 		this->ValidateOutput(this, "Reproject/ReprojectInPlace", "Shapefile", false);
 	}
 

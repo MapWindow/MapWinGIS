@@ -121,10 +121,10 @@ STDMETHODIMP CShapefile::StartEditingShapes(VARIANT_BOOL StartEditTable, ICallba
 			for (unsigned int i = 0; i < _shapeData.size(); i++)
 			{
 				//ASSERT(_shapeData[i]->fastData);
-				if (_shapeData[i]->fastData)
+				if (_shapeData[i]->renderData)
 				{
-					delete _shapeData[i]->fastData;
-					_shapeData[i]->fastData = NULL;
+					delete _shapeData[i]->renderData;
+					_shapeData[i]->renderData = NULL;
 				}
 			}
 		}
@@ -499,7 +499,7 @@ void CShapefile::ReregisterShape(int shapeIndex)
 		return;
 
 	IShape* shp = _shapeData[shapeIndex]->shape;
-	_shapeData[shapeIndex]->fastData;
+	_shapeData[shapeIndex]->renderData;
 	
 	bool fastMode = _fastMode ? true : false;
 	if (fastMode != ((CShape*)shp)->get_fastMode())
